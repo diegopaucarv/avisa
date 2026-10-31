@@ -1,0 +1,991 @@
+config|a2_transiciones|1|id|uuid|NO
+config|a2_transiciones|2|estado_desde|character varying|NO
+config|a2_transiciones|3|estado_hasta|character varying|NO
+config|a2_transiciones|4|evento|character varying|NO
+config|a2_transiciones|5|guard_sql|text|YES
+config|a2_transiciones|6|severidad|character varying|NO
+config|aplicacion|1|id|uuid|NO
+config|aplicacion|2|codigo|character varying|NO
+config|aplicacion|3|nombre|character varying|NO
+config|aplicacion|4|tipo|character varying|NO
+config|aplicacion|5|modelo_card_id|uuid|YES
+config|aplicacion|6|libreria_ids|ARRAY|NO
+config|aplicacion|7|config|jsonb|NO
+config|aplicacion|8|estado|character varying|NO
+config|aplicacion|9|created_at|timestamp with time zone|NO
+config|guardrail_contract|1|id|uuid|NO
+config|guardrail_contract|2|guardrail|character varying|NO
+config|guardrail_contract|3|input_dispara|jsonb|NO
+config|guardrail_contract|4|input_no_dispara|jsonb|NO
+config|guardrail_contract|5|output_esperado_dispara|jsonb|NO
+config|guardrail_contract|6|output_esperado_no_dispara|jsonb|NO
+config|guardrail_contract|7|severidad|character varying|NO
+config|libreria|1|id|uuid|NO
+config|libreria|2|codigo|character varying|NO
+config|libreria|3|nombre|character varying|NO
+config|libreria|4|version|character varying|NO
+config|libreria|5|tipo|character varying|NO
+config|libreria|6|licencia|character varying|YES
+config|libreria|7|hardware_requerido|character varying|YES
+config|libreria|8|dependencias|jsonb|NO
+config|libreria|9|parametros_default|jsonb|NO
+config|libreria|10|estado|character varying|NO
+config|libreria|11|created_at|timestamp with time zone|NO
+config|parametro|1|id|uuid|NO
+config|parametro|2|codigo|character varying|NO
+config|parametro|3|valor|jsonb|NO
+config|parametro|4|tipo|character varying|NO
+config|parametro|5|unidad|character varying|YES
+config|parametro|6|descripcion|text|YES
+config|parametro|7|fuente_normativa_id|uuid|YES
+config|parametro|8|valid_from|timestamp with time zone|NO
+config|parametro|9|valid_to|timestamp with time zone|YES
+config|parametro|10|supersedes_id|uuid|YES
+config|parametro|11|aprobado_por|uuid|YES
+config|parametro|12|aprobado_en|timestamp with time zone|YES
+config|schema_registry|1|id|uuid|NO
+config|schema_registry|2|codigo|character varying|NO
+config|schema_registry|3|version|character varying|NO
+config|schema_registry|4|esquema_json|jsonb|NO
+config|schema_registry|5|vigente_desde|date|NO
+config|schema_registry|6|vigente_hasta|date|YES
+core|actor_datos_personales|1|actor_uid|uuid|NO
+core|actor_datos_personales|2|telefono_contacto|character varying|YES
+core|actor_datos_personales|3|genero|character varying|YES
+core|actor_datos_personales|4|autoidentificacion_etnica|character varying|YES
+core|actor_datos_personales|5|base_legal|character varying|YES
+core|actor_datos_personales|6|fecha_consentimiento|date|YES
+core|actor_datos_personales|7|nivel_clasificacion|smallint|NO
+core|actor_datos_personales|8|updated_at|timestamp with time zone|NO
+core|actor_datos_personales|9|dni|character varying|YES
+core|actor_datos_personales|10|email|character varying|YES
+core|actor_datos_personales|11|telefono_alt|character varying|YES
+core|actor_datos_personales|12|telefono_raw|character varying|YES
+core|actor_membresia|1|id|uuid|NO
+core|actor_membresia|2|persona_uid|uuid|NO
+core|actor_membresia|3|organizacion_uid|uuid|NO
+core|actor_membresia|4|cargo|character varying|YES
+core|actor_membresia|5|valid_from|date|YES
+core|actor_membresia|6|valid_to|date|YES
+core|actores|1|actor_uid|uuid|NO
+core|actores|2|nombre_actual|character varying|NO
+core|actores|3|fecha_ultimo_cambio_nombre|date|YES
+core|actores|4|naturaleza|character varying|NO
+core|actores|5|tipo_actor_id|integer|NO
+core|actores|6|rol_actor_id|integer|NO
+core|actores|7|created_at|timestamp with time zone|NO
+core|actores|8|updated_at|timestamp with time zone|NO
+core|actores|9|created_by|uuid|YES
+core|actores|10|updated_by|uuid|YES
+core|actores|11|origen_dato|character varying|NO
+core|actores|12|confidence|numeric|YES
+core|actores|13|es_validado_humano|boolean|NO
+core|actores|14|nivel_clasificacion|smallint|NO
+core|actores|15|email_contacto|character varying|YES
+core|actores|16|cargo_actual|character varying|YES
+core|actores|17|nivel_gobierno|character varying|YES
+core|actores|18|categoria|character varying|YES
+core|actores|19|perfil_id|smallint|YES
+core|actores|20|rol_funcional_id|smallint|YES
+core|actores|21|distrito_id|integer|YES
+core|actores|22|foto_url|character varying|YES
+core|actores|23|activo|boolean|NO
+core|actores|24|perfil_descripcion|text|YES
+core|actores|25|abreviatura|character varying|YES
+core|actores|26|codigo_legado|character varying|YES
+core|acuerdo_ospa_sni|1|id|uuid|NO
+core|acuerdo_ospa_sni|2|ospa_actor_uid|uuid|NO
+core|acuerdo_ospa_sni|3|planta_actor_uid|uuid|NO
+core|acuerdo_ospa_sni|4|caso_id|uuid|YES
+core|acuerdo_ospa_sni|5|fecha_suscripcion|date|NO
+core|acuerdo_ospa_sni|6|vigencia_hasta|date|YES
+core|acuerdo_ospa_sni|7|volumen_comprometido_tn|numeric|YES
+core|acuerdo_ospa_sni|8|volumen_entregado_tn|numeric|YES
+core|acuerdo_ospa_sni|9|precio_acordado_sol_kg|numeric|YES
+core|acuerdo_ospa_sni|10|precio_efectivo_sol_kg|numeric|YES
+core|acuerdo_ospa_sni|11|estado|character varying|NO
+core|acuerdo_ospa_sni|12|fuente_documento_id|uuid|YES
+core|acuerdo_ospa_sni|13|denominador_conocido|boolean|NO
+core|acuerdo_ospa_sni|14|nivel_clasificacion|smallint|NO
+core|acuerdo_ospa_sni|15|notas|text|YES
+core|alerta_especies|1|alerta_id|uuid|NO
+core|alerta_especies|2|especie_id|smallint|NO
+core|alertas_actores|1|alerta_id|uuid|NO
+core|alertas_actores|2|actor_id|uuid|NO
+core|alertas_tempranas|1|id|uuid|NO
+core|alertas_tempranas|2|codigo_alerta|character varying|NO
+core|alertas_tempranas|3|caso_id|uuid|YES
+core|alertas_tempranas|4|prioridad_id|smallint|YES
+core|alertas_tempranas|5|fecha_reporte|date|NO
+core|alertas_tempranas|6|situacion_actual|text|YES
+core|alertas_tempranas|7|riesgos_json|jsonb|YES
+core|alertas_tempranas|8|acciones_sugeridas_json|jsonb|YES
+core|alertas_tempranas|9|created_at|timestamp with time zone|NO
+core|alertas_tempranas|10|updated_at|timestamp with time zone|NO
+core|alertas_tempranas|11|created_by|uuid|YES
+core|alertas_tempranas|12|updated_by|uuid|YES
+core|alertas_tempranas|13|origen_dato|character varying|NO
+core|alertas_tempranas|14|confidence|numeric|YES
+core|alertas_tempranas|15|es_validado_humano|boolean|NO
+core|alertas_tempranas|16|nivel_clasificacion|smallint|NO
+core|alertas_tempranas|17|titulo|character varying|YES
+core|alertas_tempranas|18|nivel_alerta_id|smallint|YES
+core|alertas_tempranas|19|descripcion_riesgo|text|YES
+core|alertas_tempranas|20|hechos_recientes|text|YES
+core|alertas_tempranas|21|acciones_oaipcs|text|YES
+core|alertas_tempranas|22|paso_actual|smallint|YES
+core|alertas_tempranas|23|fecha_validacion|date|YES
+core|alertas_tempranas|24|fecha_remision|date|YES
+core|alertas_tempranas|25|estado_legado|character varying|YES
+core|alertas_tempranas|26|fuente_tipo|character varying|YES
+core|alertas_tempranas|27|fuente_descripcion|text|YES
+core|alertas_tempranas|28|fuente_url|character varying|YES
+core|alertas_tempranas|29|distrito_id|integer|YES
+core|alertas_tempranas|30|sectorista_usuario_id|uuid|YES
+core|alertas_tempranas|31|mesa_id|uuid|YES
+core|alertas_tempranas|32|codigo_legado|character varying|YES
+core|alertas_tempranas|33|subsector_id|integer|YES
+core|cambio_normativo|1|id|uuid|NO
+core|cambio_normativo|2|tabla_objetivo|character varying|NO
+core|cambio_normativo|3|accion|character varying|NO
+core|cambio_normativo|4|fila_id|smallint|YES
+core|cambio_normativo|5|payload_antes|jsonb|YES
+core|cambio_normativo|6|payload_despues|jsonb|NO
+core|cambio_normativo|7|norma_referencia|character varying|NO
+core|cambio_normativo|8|solicitado_por|uuid|NO
+core|cambio_normativo|9|aprobado_por|uuid|YES
+core|cambio_normativo|10|aprobado_en|timestamp with time zone|YES
+core|cambio_normativo|11|aplicado_en|timestamp with time zone|YES
+core|cambio_normativo|12|revertido_en|timestamp with time zone|YES
+core|cambio_normativo|13|revertido_por|uuid|YES
+core|cambio_normativo|14|created_at|timestamp with time zone|NO
+core|capacidad_campo|1|usuario_id|uuid|NO
+core|capacidad_campo|2|mes|date|NO
+core|capacidad_campo|3|horas_disponibles|numeric|NO
+core|capacitacion_participantes|1|capacitacion_id|uuid|NO
+core|capacitacion_participantes|2|actor_uid|uuid|NO
+core|capacitacion_participantes|3|inscrito|boolean|NO
+core|capacitacion_participantes|4|culmino|boolean|NO
+core|capacitaciones|1|id|uuid|NO
+core|capacitaciones|2|codigo|character varying|NO
+core|capacitaciones|3|tipo_id|smallint|YES
+core|capacitaciones|4|titulo|character varying|NO
+core|capacitaciones|5|objetivo|text|YES
+core|capacitaciones|6|lugar|character varying|YES
+core|capacitaciones|7|distrito_id|integer|YES
+core|capacitaciones|8|modalidad|character varying|YES
+core|capacitaciones|9|fecha_inicio|date|YES
+core|capacitaciones|10|fecha_fin|date|YES
+core|capacitaciones|11|duracion|character varying|YES
+core|capacitaciones|12|url_documento|character varying|YES
+core|capacitaciones|13|estado|character varying|YES
+core|capacitaciones|14|created_at|timestamp with time zone|NO
+core|capacitaciones|15|origen_dato|character varying|NO
+core|capacitaciones|16|nivel_clasificacion|smallint|NO
+core|caso_cronologia|1|id|uuid|NO
+core|caso_cronologia|2|caso_id|uuid|NO
+core|caso_cronologia|3|fecha_evento|date|NO
+core|caso_cronologia|4|descripcion_hecho|text|NO
+core|caso_cronologia|5|es_hecho_verificable|boolean|NO
+core|caso_cronologia|6|actor_uid|uuid|YES
+core|caso_cronologia|7|created_at|timestamp with time zone|NO
+core|caso_cronologia|8|updated_at|timestamp with time zone|NO
+core|caso_cronologia|9|created_by|uuid|YES
+core|caso_cronologia|10|updated_by|uuid|YES
+core|caso_cronologia|11|origen_dato|character varying|NO
+core|caso_cronologia|12|confidence|numeric|YES
+core|caso_cronologia|13|es_validado_humano|boolean|NO
+core|caso_cronologia|14|nivel_clasificacion|smallint|NO
+core|caso_cronologia|15|tipo_hecho_id|smallint|YES
+core|caso_cronologia|16|es_hecho_critico|boolean|NO
+core|caso_cronologia|17|sectorista_usuario_id|uuid|YES
+core|caso_cronologia|18|link_evidencia|character varying|YES
+core|caso_cronologia|19|tipo_evidencia_legado|character varying|YES
+core|caso_cronologia|20|codigo_legado|character varying|YES
+core|caso_distritos|1|caso_id|uuid|NO
+core|caso_distritos|2|distrito_id|integer|NO
+core|caso_estado_historial|1|id|uuid|NO
+core|caso_estado_historial|2|caso_id|uuid|NO
+core|caso_estado_historial|3|nivel_conflicto_id|smallint|YES
+core|caso_estado_historial|4|nivel_riesgo_id|smallint|NO
+core|caso_estado_historial|5|estado_id|smallint|NO
+core|caso_estado_historial|6|desde|timestamp with time zone|NO
+core|caso_estado_historial|7|hasta|timestamp with time zone|YES
+core|caso_estado_historial|8|motivo|text|YES
+core|caso_estado_historial|9|usuario_id|uuid|YES
+core|caso_estado_historial|10|tipo_cambio_id|smallint|YES
+core|caso_estado_historial|11|codigo_legado|character varying|YES
+core|caso_factores|1|caso_id|uuid|NO
+core|caso_factores|2|factor_id|smallint|NO
+core|caso_factores|3|desde|date|NO
+core|caso_factores|4|hasta|date|YES
+core|caso_lugares|1|caso_id|uuid|NO
+core|caso_lugares|2|lugar_id|uuid|NO
+core|caso_regiones|1|caso_id|uuid|NO
+core|caso_regiones|2|region_id|integer|NO
+core|caso_regiones|3|es_principal|boolean|NO
+core|casos|1|id|uuid|NO
+core|casos|2|entidad_id|smallint|NO
+core|casos|3|codigo_caso|character varying|NO
+core|casos|4|nombre_caso|character varying|NO
+core|casos|5|distrito_principal_id|integer|YES
+core|casos|6|alcance_id|smallint|YES
+core|casos|7|subsector_id|integer|NO
+core|casos|8|tematica_id|integer|NO
+core|casos|9|unidad_responsable_id|integer|NO
+core|casos|10|punto_focal_usuario_id|uuid|YES
+core|casos|11|nivel_conflicto_id|smallint|YES
+core|casos|12|nivel_riesgo_id|smallint|NO
+core|casos|13|prioridad_id|smallint|YES
+core|casos|14|estado_id|smallint|NO
+core|casos|15|descripcion_riesgo|text|YES
+core|casos|16|latitud|numeric|YES
+core|casos|17|longitud|numeric|YES
+core|casos|18|fecha_inicio|date|YES
+core|casos|19|fecha_cierre|date|YES
+core|casos|20|fecha_ultima_actualizacion|timestamp with time zone|NO
+core|casos|21|fuente_original|character varying|YES
+core|casos|22|es_seed_historico|boolean|NO
+core|casos|23|created_at|timestamp with time zone|NO
+core|casos|24|updated_at|timestamp with time zone|NO
+core|casos|25|created_by|uuid|YES
+core|casos|26|updated_by|uuid|YES
+core|casos|27|origen_dato|character varying|NO
+core|casos|28|confidence|numeric|YES
+core|casos|29|es_validado_humano|boolean|NO
+core|casos|30|nivel_clasificacion|smallint|NO
+core|casos|31|ciclo_intervencion_id|smallint|YES
+core|casos|32|pct_avance|numeric|YES
+core|casos|33|resumen_ejecutivo|text|YES
+core|casos|34|region_principal_id|integer|YES
+core|casos|35|provincia_principal_id|integer|YES
+core|casos|36|fecha_reapertura|date|YES
+core|casos|37|n_reaperturas|smallint|NO
+core|casos|38|motivo_cierre|text|YES
+core|casos|39|link_reporte_pdf|character varying|YES
+core|casos|40|codigo_legado|character varying|YES
+core|casos_actores|1|caso_id|uuid|NO
+core|casos_actores|2|actor_id|uuid|NO
+core|casos_actores|3|nivel_influencia|smallint|NO
+core|casos_actores|4|posicion|character varying|NO
+core|cat_alcances_geograficos|1|id|smallint|NO
+core|cat_alcances_geograficos|2|codigo|character varying|NO
+core|cat_ciclos_intervencion|1|id|smallint|NO
+core|cat_ciclos_intervencion|2|nombre|character varying|NO
+core|cat_ciclos_intervencion|3|codigo_legado|character varying|YES
+core|cat_clasificacion|1|nivel|smallint|NO
+core|cat_clasificacion|2|nombre|character varying|NO
+core|cat_especies|1|id|smallint|NO
+core|cat_especies|2|nombre_comun|character varying|NO
+core|cat_especies|3|nombre_cientifico|character varying|YES
+core|cat_especies|4|familia|character varying|YES
+core|cat_especies|5|grupo_biologico|character varying|YES
+core|cat_especies|6|ambito|character varying|YES
+core|cat_especies|7|codigo_legado|character varying|YES
+core|cat_especies|8|nombre_cientifico_legado|character varying|YES
+core|cat_estados_caso|1|id|smallint|NO
+core|cat_estados_caso|2|codigo|character varying|NO
+core|cat_estados_caso|3|es_activo|boolean|NO
+core|cat_estados_compromiso|1|id|smallint|NO
+core|cat_estados_compromiso|2|codigo|character varying|NO
+core|cat_estados_compromiso|3|categoria|character varying|NO
+core|cat_estados_compromiso|4|es_terminal|boolean|NO
+core|cat_estados_hito|1|id|smallint|NO
+core|cat_estados_hito|2|codigo|character varying|NO
+core|cat_estados_hito|3|es_terminal|boolean|NO
+core|cat_estados_integracion|1|id|smallint|NO
+core|cat_estados_integracion|2|codigo|character varying|NO
+core|cat_estados_integracion|3|es_terminal|boolean|NO
+core|cat_factores_contexto|1|id|smallint|NO
+core|cat_factores_contexto|2|codigo|character varying|NO
+core|cat_factores_contexto|3|nombre|character varying|NO
+core|cat_mapeo_estado_externo|1|id|smallint|NO
+core|cat_mapeo_estado_externo|2|sistema_destino|character varying|NO
+core|cat_mapeo_estado_externo|3|estado_local|character varying|NO
+core|cat_mapeo_estado_externo|4|estado_externo|character varying|NO
+core|cat_niveles_alerta|1|id|smallint|NO
+core|cat_niveles_alerta|2|nombre|character varying|NO
+core|cat_niveles_alerta|3|descripcion|text|YES
+core|cat_niveles_alerta|4|categoria|character varying|YES
+core|cat_niveles_alerta|5|sla_horas|smallint|YES
+core|cat_niveles_alerta|6|codigo_legado|character varying|YES
+core|cat_niveles_conflicto|1|id|smallint|NO
+core|cat_niveles_conflicto|2|codigo|character varying|NO
+core|cat_niveles_conflicto|3|nombre|character varying|NO
+core|cat_niveles_conflicto|4|orden|smallint|NO
+core|cat_niveles_riesgo|1|id|smallint|NO
+core|cat_niveles_riesgo|2|codigo|character varying|NO
+core|cat_niveles_riesgo|3|orden|smallint|NO
+core|cat_perfiles_actor|1|id|smallint|NO
+core|cat_perfiles_actor|2|nombre|character varying|NO
+core|cat_perfiles_actor|3|codigo_legado|character varying|YES
+core|cat_pip_etapas|1|id|smallint|NO
+core|cat_pip_etapas|2|fase_id|smallint|NO
+core|cat_pip_etapas|3|numero|smallint|NO
+core|cat_pip_etapas|4|nombre|character varying|NO
+core|cat_pip_fases|1|id|smallint|NO
+core|cat_pip_fases|2|nombre|character varying|NO
+core|cat_pip_fases|3|orden|smallint|NO
+core|cat_prioridades_alerta|1|id|smallint|NO
+core|cat_prioridades_alerta|2|codigo|character varying|NO
+core|cat_prioridades_alerta|3|sla_horas|smallint|YES
+core|cat_prioridades_atencion|1|id|smallint|NO
+core|cat_prioridades_atencion|2|codigo|character varying|NO
+core|cat_prioridades_atencion|3|orden|smallint|NO
+core|cat_roles_actor|1|id|integer|NO
+core|cat_roles_actor|2|nombre|character varying|NO
+core|cat_roles_actor|3|codigo_legado|character varying|YES
+core|cat_roles_funcionales|1|id|smallint|NO
+core|cat_roles_funcionales|2|nombre|character varying|NO
+core|cat_roles_funcionales|3|descripcion|text|YES
+core|cat_roles_funcionales|4|codigo_legado|character varying|YES
+core|cat_subsectores|1|id|integer|NO
+core|cat_subsectores|2|nombre|character varying|NO
+core|cat_subsectores|3|codigo_legado|character varying|YES
+core|cat_subsectores|4|id_area_legado|character varying|YES
+core|cat_tematicas|1|id|integer|NO
+core|cat_tematicas|2|nombre|character varying|NO
+core|cat_tematicas|3|descripcion|text|YES
+core|cat_tematicas|4|descripcion_legado|text|YES
+core|cat_tematicas|5|codigo_legado|character varying|YES
+core|cat_tematicas|6|nota_calidad|text|YES
+core|cat_tipos_actor|1|id|integer|NO
+core|cat_tipos_actor|2|nombre|character varying|NO
+core|cat_tipos_actor|3|codigo_legado|character varying|YES
+core|cat_tipos_cambio_caso|1|id|smallint|NO
+core|cat_tipos_cambio_caso|2|nombre|character varying|NO
+core|cat_tipos_cambio_caso|3|descripcion|text|YES
+core|cat_tipos_cambio_caso|4|codigo_legado|character varying|YES
+core|cat_tipos_capacitacion|1|id|smallint|NO
+core|cat_tipos_capacitacion|2|nombre|character varying|NO
+core|cat_tipos_documento|1|id|smallint|NO
+core|cat_tipos_documento|2|codigo|character varying|NO
+core|cat_tipos_documento|3|nombre|character varying|NO
+core|cat_tipos_documento|4|anexo_numero|smallint|YES
+core|cat_tipos_documento|5|esquema_json|jsonb|YES
+core|cat_tipos_espacio_dialogo|1|id|smallint|NO
+core|cat_tipos_espacio_dialogo|2|nombre|character varying|NO
+core|cat_tipos_fuente_integracion|1|id|smallint|NO
+core|cat_tipos_fuente_integracion|2|codigo|character varying|NO
+core|cat_tipos_fuente_integracion|3|nombre|character varying|NO
+core|cat_tipos_hecho|1|id|smallint|NO
+core|cat_tipos_hecho|2|nombre|character varying|NO
+core|cat_tipos_organizacion|1|id|smallint|NO
+core|cat_tipos_organizacion|2|nombre|character varying|NO
+core|cat_tipos_organizacion|3|codigo_legado|character varying|YES
+core|cat_tipos_reunion|1|id|smallint|NO
+core|cat_tipos_reunion|2|codigo|character varying|NO
+core|cat_unidades_organicas|1|id|integer|NO
+core|cat_unidades_organicas|2|entidad_id|smallint|NO
+core|cat_unidades_organicas|3|siglas|character varying|NO
+core|cat_unidades_organicas|4|nombre_completo|character varying|NO
+core|cat_unidades_organicas|5|padre_id|integer|YES
+core|cat_unidades_organicas|6|codigo_legado_area|character varying|YES
+core|cat_unidades_organicas|7|codigo_legado_unidad|character varying|YES
+core|cat_unidades_organicas|8|estado|character varying|YES
+core|compromiso_colaboradores|1|compromiso_id|uuid|NO
+core|compromiso_colaboradores|2|actor_uid|uuid|NO
+core|compromiso_distritos|1|compromiso_id|uuid|NO
+core|compromiso_distritos|2|distrito_id|integer|NO
+core|compromiso_pip|1|compromiso_id|uuid|NO
+core|compromiso_pip|2|codigo_snip|character varying|YES
+core|compromiso_pip|3|codigo_unificado|character varying|YES
+core|compromiso_pip|4|denominacion|text|YES
+core|compromiso_pip|5|unidad_formuladora|character varying|YES
+core|compromiso_pip|6|unidad_ejecutora|character varying|YES
+core|compromiso_pip|7|etapa_id|smallint|YES
+core|compromiso_pip|8|monto_total|numeric|YES
+core|compromiso_pip|9|pim|numeric|YES
+core|compromiso_pip|10|devengado|numeric|YES
+core|compromiso_pip|11|devengado_acumulado|numeric|YES
+core|compromisos|1|id|uuid|NO
+core|compromisos|2|codigo_compromiso|character varying|NO
+core|compromisos|3|caso_id|uuid|NO
+core|compromisos|4|reunion_id|uuid|YES
+core|compromisos|5|documento_origen_id|uuid|YES
+core|compromisos|6|unidad_responsable_id|integer|NO
+core|compromisos|7|alcance_id|smallint|YES
+core|compromisos|8|tematica_id|integer|YES
+core|compromisos|9|fecha_inicio|date|NO
+core|compromisos|10|accion_compromiso|text|NO
+core|compromisos|11|tipo_compromiso|character varying|NO
+core|compromisos|12|nivel_gobierno|character varying|YES
+core|compromisos|13|estado_id|smallint|NO
+core|compromisos|14|redefinido_de_id|uuid|YES
+core|compromisos|15|evidencia_cumplimiento_uri|character varying|YES
+core|compromisos|16|atiende_brecha_genero|boolean|NO
+core|compromisos|17|criterios_smart|jsonb|YES
+core|compromisos|18|created_at|timestamp with time zone|NO
+core|compromisos|19|updated_at|timestamp with time zone|NO
+core|compromisos|20|created_by|uuid|YES
+core|compromisos|21|updated_by|uuid|YES
+core|compromisos|22|origen_dato|character varying|NO
+core|compromisos|23|confidence|numeric|YES
+core|compromisos|24|es_validado_humano|boolean|NO
+core|compromisos|25|nivel_clasificacion|smallint|NO
+core|cronologia_vinculos|1|cronologia_id|uuid|NO
+core|cronologia_vinculos|2|alerta_id|uuid|YES
+core|cronologia_vinculos|3|documento_id|uuid|YES
+core|demandas|1|id|uuid|NO
+core|demandas|2|caso_id|uuid|YES
+core|demandas|3|problema_3p|text|YES
+core|demandas|4|propuesta_3p|text|YES
+core|demandas|5|pedido_3p|text|YES
+core|demandas|6|estado_atencion|character varying|NO
+core|demandas|7|motivo_no_atencion|text|YES
+core|demandas|8|fecha_vencimiento_respuesta|date|YES
+core|demandas|9|afecta_diferenciadamente_mujeres|boolean|NO
+core|demandas|10|created_at|timestamp with time zone|NO
+core|demandas|11|updated_at|timestamp with time zone|NO
+core|demandas|12|created_by|uuid|YES
+core|demandas|13|updated_by|uuid|YES
+core|demandas|14|origen_dato|character varying|NO
+core|demandas|15|confidence|numeric|YES
+core|demandas|16|es_validado_humano|boolean|NO
+core|demandas|17|nivel_clasificacion|smallint|NO
+core|demandas|18|descripcion_demanda|text|YES
+core|demandas|19|alerta_id|uuid|YES
+core|demandas|20|tematica_id|integer|YES
+core|demandas|21|fecha_registro|date|YES
+core|demandas|22|tipo_evidencia_legado|character varying|YES
+core|demandas|23|referencia_evidencia_legado|character varying|YES
+core|demandas|24|codigo_legado|character varying|YES
+core|demandas|25|documento_origen_id|uuid|YES
+core|demandas|26|codigo_padre_legado|character varying|YES
+core|demandas_actores|1|demanda_id|uuid|NO
+core|demandas_actores|2|actor_id|uuid|NO
+core|demandas_actores|3|rol_en_demanda|character varying|NO
+core|demandas_evidencias|1|id|uuid|NO
+core|demandas_evidencias|2|demanda_id|uuid|NO
+core|demandas_evidencias|3|fuente_tipo|character varying|NO
+core|demandas_evidencias|4|url_referencia|character varying|YES
+core|demandas_evidencias|5|archivo_adjunto_url|character varying|YES
+core|demandas_evidencias|6|fecha_incorporacion|date|NO
+core|derivaciones_alerta|1|id|uuid|NO
+core|derivaciones_alerta|2|alerta_id|uuid|NO
+core|derivaciones_alerta|3|area_destino_id|integer|NO
+core|derivaciones_alerta|4|fecha_derivacion|timestamp with time zone|NO
+core|derivaciones_alerta|5|fecha_limite|timestamp with time zone|YES
+core|derivaciones_alerta|6|fecha_atencion|timestamp with time zone|YES
+core|derivaciones_alerta|7|estado_atencion|character varying|NO
+core|distritos|1|id|integer|NO
+core|distritos|2|provincia_id|integer|NO
+core|distritos|3|ubigeo|character|NO
+core|distritos|4|nombre|character varying|NO
+core|documento_actores|1|documento_id|uuid|NO
+core|documento_actores|2|actor_uid|uuid|NO
+core|documento_actores|3|rol|character varying|YES
+core|documento_actores|4|es_principal|boolean|NO
+core|documentos|1|id|uuid|NO
+core|documentos|2|tipo_id|smallint|NO
+core|documentos|3|codigo|character varying|YES
+core|documentos|4|caso_id|uuid|YES
+core|documentos|5|reunion_id|uuid|YES
+core|documentos|6|titulo|character varying|NO
+core|documentos|7|fecha|date|NO
+core|documentos|8|resumen_ejecutivo|text|YES
+core|documentos|9|contenido_json|jsonb|NO
+core|documentos|10|url_pdf|character varying|YES
+core|documentos|11|responsable_usuario_id|uuid|YES
+core|documentos|12|created_at|timestamp with time zone|NO
+core|documentos|13|updated_at|timestamp with time zone|NO
+core|documentos|14|created_by|uuid|YES
+core|documentos|15|updated_by|uuid|YES
+core|documentos|16|origen_dato|character varying|NO
+core|documentos|17|confidence|numeric|YES
+core|documentos|18|es_validado_humano|boolean|NO
+core|documentos|19|nivel_clasificacion|smallint|NO
+core|documentos|20|codigo_legado|character varying|YES
+core|documentos|21|estado|character varying|YES
+core|documentos|22|distrito_id|integer|YES
+core|documentos|23|url_lista|character varying|YES
+core|documentos|24|url_foto|character varying|YES
+core|entidades|1|id|smallint|NO
+core|entidades|2|siglas|character varying|NO
+core|entidades|3|nombre|character varying|NO
+core|entidades|4|codigo_legado|character varying|YES
+core|entidades|5|nivel|character varying|YES
+core|entidades|6|estado|character varying|YES
+core|envios_comunicacion|1|id|uuid|NO
+core|envios_comunicacion|2|codigo|character varying|YES
+core|envios_comunicacion|3|fecha_envio|timestamp with time zone|NO
+core|envios_comunicacion|4|canal|character varying|NO
+core|envios_comunicacion|5|entidad_tipo|character varying|YES
+core|envios_comunicacion|6|entidad_id|uuid|YES
+core|envios_comunicacion|7|remitente_usuario_id|uuid|YES
+core|envios_comunicacion|8|rol_remitente|character varying|YES
+core|envios_comunicacion|9|destinatario_texto|text|YES
+core|envios_comunicacion|10|url_pdf|character varying|YES
+core|envios_comunicacion|11|resultado|character varying|YES
+core|envios_comunicacion|12|observacion|text|YES
+core|feature_flags|1|codigo|character varying|NO
+core|feature_flags|2|descripcion|text|NO
+core|feature_flags|3|activo|boolean|NO
+core|feature_flags|4|activado_en|timestamp with time zone|YES
+core|feature_flags|5|activado_por|uuid|YES
+core|feature_flags|6|metadata_json|jsonb|YES
+core|fuentes_evidencia|1|id|uuid|NO
+core|fuentes_evidencia|2|cronologia_id|uuid|NO
+core|fuentes_evidencia|3|tipo_fuente|character varying|NO
+core|fuentes_evidencia|4|url_referencia|character varying|YES
+core|fuentes_evidencia|5|nivel_confiabilidad|character varying|NO
+core|hitos_compromiso|1|id|uuid|NO
+core|hitos_compromiso|2|compromiso_id|uuid|NO
+core|hitos_compromiso|3|codigo_hito|character varying|NO
+core|hitos_compromiso|4|descripcion_hito|text|NO
+core|hitos_compromiso|5|fecha_vencimiento|date|YES
+core|hitos_compromiso|6|estado_id|smallint|NO
+core|hitos_compromiso|7|fecha_real|date|YES
+core|hitos_compromiso|8|validacion|character varying|YES
+core|hitos_compromiso|9|descripcion_evidencia|text|YES
+core|hitos_compromiso|10|link_evidencia|character varying|YES
+core|hitos_compromiso|11|origen_dato|character varying|NO
+core|hitos_compromiso|12|nivel_clasificacion|smallint|NO
+core|hitos_compromiso_estado_historico|1|id|uuid|NO
+core|hitos_compromiso_estado_historico|2|hito_id|uuid|NO
+core|hitos_compromiso_estado_historico|3|fecha_corte|date|NO
+core|hitos_compromiso_estado_historico|4|estado_id|smallint|NO
+core|hitos_compromiso_estado_historico|5|observacion|text|YES
+core|hitos_compromiso_estado_historico|6|registrado_por|uuid|YES
+core|hitos_compromiso_estado_historico|7|registrado_en|timestamp with time zone|NO
+core|integraciones|1|id|uuid|NO
+core|integraciones|2|sistema_origen|character varying|NO
+core|integraciones|3|sistema_destino|character varying|NO
+core|integraciones|4|entidad_origen_tipo|character varying|NO
+core|integraciones|5|entidad_origen_id|uuid|NO
+core|integraciones|6|entidad_destino_ref|character varying|YES
+core|integraciones|7|tipo_sync|character varying|NO
+core|integraciones|8|estado|character varying|NO
+core|integraciones|9|workflow_state|character varying|YES
+core|integraciones|10|ultima_sincronizacion|timestamp with time zone|YES
+core|integraciones|11|metadata_json|jsonb|YES
+core|integraciones|12|tipo_fuente_id|smallint|YES
+core|integraciones|13|protocolo_sincronizacion|character varying|YES
+core|locales|1|id|uuid|NO
+core|locales|2|codigo|character varying|NO
+core|locales|3|nombre|character varying|NO
+core|locales|4|distrito_id|integer|YES
+core|locales|5|direccion|character varying|YES
+core|locales|6|ubicacion_ref|character varying|YES
+core|locales|7|foto_url|character varying|YES
+core|locales|8|aforo|integer|YES
+core|locales|9|ingresos|character varying|YES
+core|locales|10|tiene_proyector|boolean|YES
+core|locales|11|tiene_equipos_computo|boolean|YES
+core|locales|12|tiene_audio_micro|boolean|YES
+core|locales|13|contacto_nombre|character varying|YES
+core|locales|14|contacto_celular|character varying|YES
+core|locales|15|contacto_email|character varying|YES
+core|locales|16|recomendacion|text|YES
+core|locales|17|activo|boolean|NO
+core|log_accesos|1|id|bigint|NO
+core|log_accesos|2|fecha|timestamp with time zone|NO
+core|log_accesos|3|dni|character varying|YES
+core|log_accesos|4|nombre|character varying|YES
+core|log_accesos|5|rol_declarado|character varying|YES
+core|log_accesos|6|resultado|character varying|NO
+core|log_accesos|7|usuario_id|uuid|YES
+core|log_accesos|8|origen|character varying|NO
+core|log_accesos|9|nivel_clasificacion|smallint|NO
+core|mesa_miembros|1|id|uuid|NO
+core|mesa_miembros|2|mesa_id|uuid|NO
+core|mesa_miembros|3|rol|character varying|NO
+core|mesa_miembros|4|actor_uid|uuid|YES
+core|mesa_miembros|5|nombre_texto|character varying|YES
+core|mesa_miembros|6|doc_designacion|character varying|YES
+core|mesa_miembros|7|valid_from|date|YES
+core|mesa_miembros|8|valid_to|date|YES
+core|mesas_dialogo|1|id|uuid|NO
+core|mesas_dialogo|2|codigo|character varying|NO
+core|mesas_dialogo|3|tipo_espacio_id|smallint|YES
+core|mesas_dialogo|4|linea_oaipcs|character varying|YES
+core|mesas_dialogo|5|titulo|character varying|NO
+core|mesas_dialogo|6|tipo_instrumento|character varying|YES
+core|mesas_dialogo|7|base_legal|character varying|YES
+core|mesas_dialogo|8|fecha_norma|date|YES
+core|mesas_dialogo|9|prorrogas_modificatorias|text|YES
+core|mesas_dialogo|10|fecha_instalacion|date|YES
+core|mesas_dialogo|11|naturaleza|character varying|YES
+core|mesas_dialogo|12|fecha_fin_vigencia|date|YES
+core|mesas_dialogo|13|estado_vigencia|character varying|YES
+core|mesas_dialogo|14|objetivo|text|YES
+core|mesas_dialogo|15|rol_produce|character varying|YES
+core|mesas_dialogo|16|ambito_departamento|text|YES
+core|mesas_dialogo|17|doc_designacion|text|YES
+core|mesas_dialogo|18|link_evidencia|character varying|YES
+core|mesas_dialogo|19|sectorista_usuario_id|uuid|YES
+core|mesas_dialogo|20|created_at|timestamp with time zone|NO
+core|mesas_dialogo|21|updated_at|timestamp with time zone|NO
+core|mesas_dialogo|22|origen_dato|character varying|NO
+core|mesas_dialogo|23|nivel_clasificacion|smallint|NO
+core|mesas_dialogo|24|tiene_norma|boolean|YES
+core|migracion_conflicto|1|id|bigint|NO
+core|migracion_conflicto|2|fase|smallint|NO
+core|migracion_conflicto|3|categoria|character varying|NO
+core|migracion_conflicto|4|hoja_legado|character varying|YES
+core|migracion_conflicto|5|fila_legado|integer|YES
+core|migracion_conflicto|6|codigo_legado|character varying|YES
+core|migracion_conflicto|7|detalle|jsonb|NO
+core|migracion_conflicto|8|resuelto|boolean|NO
+core|migracion_conflicto|9|resuelto_por|uuid|YES
+core|migracion_conflicto|10|resuelto_at|timestamp with time zone|YES
+core|migracion_conflicto|11|created_at|timestamp with time zone|NO
+core|notificaciones|1|id|uuid|NO
+core|notificaciones|2|usuario_id|uuid|NO
+core|notificaciones|3|tipo|character varying|NO
+core|notificaciones|4|entidad_tipo|character varying|YES
+core|notificaciones|5|entidad_id|uuid|YES
+core|notificaciones|6|vence_en|timestamp with time zone|YES
+core|notificaciones|7|estado|character varying|NO
+core|notificaciones|8|created_at|timestamp with time zone|NO
+core|organizaciones|1|actor_uid|uuid|NO
+core|organizaciones|2|ruc|character|YES
+core|organizaciones|3|razon_social|character varying|YES
+core|organizaciones|4|representante_uid|uuid|YES
+core|organizaciones|5|numero_integrantes|integer|YES
+core|organizaciones|6|expediente_ospa|character varying|YES
+core|organizaciones|7|estado_ospa|character varying|YES
+core|organizaciones|8|vigencia_desde|date|YES
+core|organizaciones|9|vigencia_hasta|date|YES
+core|organizaciones|10|fuente_sync|character varying|YES
+core|organizaciones|11|ultima_sync|timestamp with time zone|YES
+core|organizaciones|12|direccion|character varying|YES
+core|organizaciones|13|fecha_constitucion|date|YES
+core|organizaciones|14|tipo_organizacion_id|smallint|YES
+core|organizaciones|15|inscripcion_sunarp|character varying|YES
+core|organizaciones|16|n_embarcaciones|integer|YES
+core|organizaciones|17|n_armadores|integer|YES
+core|organizaciones|18|foto_url|character varying|YES
+core|organizaciones|19|perfil|text|YES
+core|organizaciones|20|abreviatura|character varying|YES
+core|organizaciones|21|facebook_url|character varying|YES
+core|outbox_integracion|1|id|uuid|NO
+core|outbox_integracion|2|integracion_id|uuid|NO
+core|outbox_integracion|3|payload_local|jsonb|NO
+core|outbox_integracion|4|payload_transformado|jsonb|YES
+core|outbox_integracion|5|estado_id|smallint|NO
+core|outbox_integracion|6|intentos|integer|NO
+core|outbox_integracion|7|ultimo_error|text|YES
+core|outbox_integracion|8|proximo_intento_en|timestamp with time zone|YES
+core|outbox_integracion|9|aprobado_por|uuid|YES
+core|outbox_integracion|10|aprobado_en|timestamp with time zone|YES
+core|outbox_integracion|11|ticket_externo|character varying|YES
+core|outbox_integracion|12|created_at|timestamp with time zone|NO
+core|output_contracts|1|id|uuid|NO
+core|output_contracts|2|query_id|uuid|NO
+core|output_contracts|3|usuario_id|uuid|NO
+core|output_contracts|4|formato|character varying|NO
+core|output_contracts|5|caso_id|uuid|YES
+core|output_contracts|6|response_json|jsonb|YES
+core|output_contracts|7|response_uri|character varying|YES
+core|output_contracts|8|snapshot_id|uuid|YES
+core|output_contracts|9|nivel_clasificacion|smallint|NO
+core|output_contracts|10|created_at|timestamp with time zone|NO
+core|output_contracts|11|policy_snapshot_id|uuid|YES
+core|output_contracts|12|chat_commit_id|uuid|YES
+core|permiso_aprobacion|1|id|uuid|NO
+core|permiso_aprobacion|2|usuario_id|uuid|NO
+core|permiso_aprobacion|3|objeto|character varying|NO
+core|permiso_aprobacion|4|vigente_desde|date|NO
+core|permiso_aprobacion|5|vigente_hasta|date|YES
+core|permiso_aprobacion|6|otorgado_por|uuid|YES
+core|plan_acciones|1|id|uuid|NO
+core|plan_acciones|2|plan_id|uuid|NO
+core|plan_acciones|3|descripcion|text|NO
+core|plan_acciones|4|responsable_uid|uuid|YES
+core|plan_acciones|5|responsable_texto|character varying|YES
+core|plan_acciones|6|plazo_codigo|character varying|YES
+core|plan_acciones|7|plazo_limite|timestamp with time zone|YES
+core|plan_acciones|8|criterio_contencion|text|YES
+core|plan_acciones|9|estado|character varying|NO
+core|planes_accion|1|documento_id|uuid|NO
+core|planes_accion|2|monto_presupuestal|numeric|YES
+core|planes_accion|3|plazo_limite|timestamp with time zone|YES
+core|planes_accion|4|estado_aprobacion|character varying|NO
+core|provincias|1|id|integer|NO
+core|provincias|2|region_id|integer|NO
+core|provincias|3|ubigeo|character|NO
+core|provincias|4|nombre|character varying|NO
+core|query_cache|1|clave_hash|character|NO
+core|query_cache|2|clasificacion_max|smallint|NO
+core|query_cache|3|respuesta|jsonb|NO
+core|query_cache|4|creado|timestamp with time zone|NO
+core|query_cache|5|expira|timestamp with time zone|NO
+core|query_cache|6|policy_hash|character|NO
+core|regiones|1|id|integer|NO
+core|regiones|2|ubigeo|character|NO
+core|regiones|3|nombre|character varying|NO
+core|reunion_participantes|1|reunion_id|uuid|NO
+core|reunion_participantes|2|actor_uid|uuid|NO
+core|reunion_participantes|3|institucion_uid|uuid|YES
+core|reunion_participantes|4|cargo|character varying|YES
+core|reunion_participantes|5|asistio|boolean|NO
+core|reuniones_dialogo|1|id|uuid|NO
+core|reuniones_dialogo|2|codigo_reunion|character varying|YES
+core|reuniones_dialogo|3|caso_id|uuid|NO
+core|reuniones_dialogo|4|convocante_unidad_id|integer|NO
+core|reuniones_dialogo|5|tipo_id|smallint|YES
+core|reuniones_dialogo|6|programada|boolean|NO
+core|reuniones_dialogo|7|titulo|character varying|YES
+core|reuniones_dialogo|8|fecha|timestamp with time zone|NO
+core|reuniones_dialogo|9|lugar|character varying|YES
+core|reuniones_dialogo|10|responsable_usuario_id|uuid|YES
+core|reuniones_dialogo|11|nota_publicacion_url|character varying|YES
+core|reuniones_dialogo|12|created_at|timestamp with time zone|NO
+core|reuniones_dialogo|13|updated_at|timestamp with time zone|NO
+core|reuniones_dialogo|14|created_by|uuid|YES
+core|reuniones_dialogo|15|updated_by|uuid|YES
+core|reuniones_dialogo|16|origen_dato|character varying|NO
+core|reuniones_dialogo|17|confidence|numeric|YES
+core|reuniones_dialogo|18|es_validado_humano|boolean|NO
+core|reuniones_dialogo|19|nivel_clasificacion|smallint|NO
+core|riesgo_social_ordinal|1|id|uuid|NO
+core|riesgo_social_ordinal|2|lugar_id|uuid|NO
+core|riesgo_social_ordinal|3|fecha|date|NO
+core|riesgo_social_ordinal|4|nivel|character varying|NO
+core|riesgo_social_ordinal|5|eventos_count|integer|NO
+core|riesgo_social_ordinal|6|convocatorias_count|integer|NO
+core|riesgo_social_ordinal|7|fuente|character varying|NO
+core|riesgo_social_ordinal|8|justificacion|text|YES
+core|riesgo_social_ordinal|9|es_validado_humano|boolean|NO
+core|riesgo_social_ordinal|10|nivel_clasificacion|smallint|NO
+core|roles|1|id|smallint|NO
+core|roles|2|codigo|character varying|NO
+core|roles|3|max_clasificacion|smallint|NO
+core|suscripcion_notificacion|1|id|uuid|NO
+core|suscripcion_notificacion|2|unidad_id|integer|YES
+core|suscripcion_notificacion|3|recibe_alerta|boolean|NO
+core|suscripcion_notificacion|4|recibe_clima_social|boolean|NO
+core|suscripcion_notificacion|5|recibe_reporte_rapido|boolean|NO
+core|suscripcion_notificacion|6|canal_preferido|character varying|YES
+core|suscripcion_notificacion|7|activo|boolean|NO
+core|suscripcion_notificacion|8|codigo_legado|character varying|YES
+core|usuario_roles|1|usuario_id|uuid|NO
+core|usuario_roles|2|rol_id|smallint|NO
+core|usuario_roles|3|desde|date|NO
+core|usuario_roles|4|hasta|date|YES
+core|usuario_territorio|1|usuario_id|uuid|NO
+core|usuario_territorio|2|region_id|integer|NO
+core|usuarios|1|id|uuid|NO
+core|usuarios|2|sso_subject|character varying|YES
+core|usuarios|3|nombre|character varying|NO
+core|usuarios|4|email|character varying|YES
+core|usuarios|5|unidad_id|integer|YES
+core|usuarios|6|activo|boolean|NO
+core|usuarios|7|created_at|timestamp with time zone|NO
+core|usuarios|8|dni|character varying|YES
+core|usuarios|9|telefono|character varying|YES
+core|usuarios|10|cargo|character varying|YES
+core|usuarios|11|foto_url|character varying|YES
+core|usuarios|12|clave_hash|text|YES
+core|usuarios|13|codigo_legado|character varying|YES
+core|vw_agregacion_compromiso_externo|1|sistema_destino|character varying|YES
+core|vw_agregacion_compromiso_externo|2|entidad_destino_ref|character varying|YES
+core|vw_agregacion_compromiso_externo|3|hitos_locales_asociados|bigint|YES
+core|vw_agregacion_compromiso_externo|4|tipos_origen|ARRAY|YES
+core|vw_agregacion_compromiso_externo|5|primera_sincronizacion|timestamp with time zone|YES
+core|vw_agregacion_compromiso_externo|6|ultima_sincronizacion|timestamp with time zone|YES
+core|vw_agregacion_compromiso_externo|7|todos_activos|boolean|YES
+kag|actor_name_history|1|id|uuid|NO
+kag|actor_name_history|2|actor_uid|uuid|NO
+kag|actor_name_history|3|nombre|character varying|NO
+kag|actor_name_history|4|valid_from|date|NO
+kag|actor_name_history|5|valid_to|date|YES
+kag|actor_name_history|6|fuente|character varying|YES
+kag|actor_name_history|7|confidence|numeric|YES
+kag|actor_profile|1|actor_uid|uuid|NO
+kag|actor_profile|2|resumen|text|YES
+kag|actor_profile|3|formas_trabajo|text|YES
+kag|actor_profile|4|updated_at|timestamp with time zone|NO
+kag|actor_profile_attribute|1|id|uuid|NO
+kag|actor_profile_attribute|2|actor_uid|uuid|NO
+kag|actor_profile_attribute|3|attribute_type|character varying|NO
+kag|actor_profile_attribute|4|value|text|NO
+kag|actor_profile_attribute|5|severity|smallint|YES
+kag|actor_profile_attribute|6|valid_from|timestamp with time zone|NO
+kag|actor_profile_attribute|7|valid_to|timestamp with time zone|YES
+kag|actor_profile_attribute|8|recorded_at|timestamp with time zone|NO
+kag|actor_profile_attribute|9|superseded_at|timestamp with time zone|YES
+kag|actor_profile_attribute|10|supersedes_id|uuid|YES
+kag|actor_profile_attribute|11|confidence|numeric|YES
+kag|actor_profile_attribute|12|origen_dato|character varying|NO
+kag|actor_profile_attribute|13|es_validado_humano|boolean|NO
+kag|actor_profile_attribute|14|nivel_clasificacion|smallint|NO
+kag|anomalia_contextual|1|id|uuid|NO
+kag|anomalia_contextual|2|caso_id|uuid|NO
+kag|anomalia_contextual|3|descripcion|text|NO
+kag|anomalia_contextual|4|origen|character varying|YES
+kag|anomalia_contextual|5|estado|character varying|NO
+kag|anomalia_contextual|6|explicacion|text|YES
+kag|anomalia_contextual|7|fecha|date|NO
+kag|arista_evidencia|1|arista_id|uuid|NO
+kag|arista_evidencia|2|fragmento_id|uuid|NO
+kag|arista_evidencia|3|cita_textual|text|YES
+kag|arista_evidencia|4|confidence|numeric|YES
+kag|aristas|1|id|uuid|NO
+kag|aristas|2|origen_id|uuid|NO
+kag|aristas|3|destino_id|uuid|NO
+kag|aristas|4|tipo_id|smallint|NO
+kag|aristas|5|caso_id|uuid|YES
+kag|aristas|6|intensidad|smallint|YES
+kag|aristas|7|justificacion|text|YES
+kag|aristas|8|valid_from|timestamp with time zone|NO
+kag|aristas|9|valid_to|timestamp with time zone|YES
+kag|aristas|10|recorded_at|timestamp with time zone|NO
+kag|aristas|11|superseded_at|timestamp with time zone|YES
+kag|aristas|12|supersedes_id|uuid|YES
+kag|aristas|13|split_from_id|uuid|YES
+kag|aristas|14|confidence|numeric|YES
+kag|aristas|15|origen_dato|character varying|NO
+kag|aristas|16|es_validado_humano|boolean|NO
+kag|aristas|17|nivel_clasificacion|smallint|NO
+kag|atributo_evidencia|1|atributo_id|uuid|NO
+kag|atributo_evidencia|2|fragmento_id|uuid|NO
+kag|atributo_evidencia|3|cita_textual|text|YES
+kag|atributo_evidencia|4|confidence|numeric|YES
+kag|cat_clases_arista|1|codigo|character varying|NO
+kag|cat_clases_arista|2|nombre|character varying|NO
+kag|cat_corpus|1|id|smallint|NO
+kag|cat_corpus|2|codigo|character varying|NO
+kag|cat_corpus|3|nombre|character varying|NO
+kag|cat_tipos_arista|1|id|smallint|NO
+kag|cat_tipos_arista|2|codigo|character varying|NO
+kag|cat_tipos_arista|3|clase|character varying|NO
+kag|cat_tipos_arista|4|dirigida|boolean|NO
+kag|cat_tipos_arista|5|origen_tipo|character varying|YES
+kag|cat_tipos_arista|6|destino_tipo|character varying|YES
+kag|cat_tipos_nodo|1|codigo|character varying|NO
+kag|cat_tipos_nodo|2|nombre|character varying|NO
+kag|comunidad|1|id|uuid|NO
+kag|comunidad|2|corrida_id|uuid|NO
+kag|comunidad|3|num|integer|NO
+kag|comunidad|4|nivel_jerarquico|smallint|NO
+kag|comunidad|5|padre_id|uuid|YES
+kag|comunidad|6|nivel_clasificacion|smallint|NO
+kag|comunidad_corrida|1|id|uuid|NO
+kag|comunidad_corrida|2|valido_en|timestamp with time zone|NO
+kag|comunidad_corrida|3|conocido_en|timestamp with time zone|NO
+kag|comunidad_corrida|4|nivel_max|smallint|NO
+kag|comunidad_corrida|5|algoritmo|character varying|NO
+kag|comunidad_corrida|6|resolucion|numeric|NO
+kag|comunidad_corrida|7|semilla|bigint|NO
+kag|comunidad_corrida|8|n_aristas|integer|NO
+kag|comunidad_corrida|9|nivel_clasificacion|smallint|NO
+kag|comunidad_corrida|10|created_at|timestamp with time zone|NO
+kag|comunidad_miembro|1|comunidad_id|uuid|NO
+kag|comunidad_miembro|2|nodo_id|uuid|NO
+kag|comunidad_miembro|3|nivel_clasificacion|smallint|NO
+kag|comunidad_resumen|1|comunidad_id|uuid|NO
+kag|comunidad_resumen|2|texto|text|NO
+kag|comunidad_resumen|3|modelo|character varying|NO
+kag|comunidad_resumen|4|version_modelo|character varying|NO
+kag|comunidad_resumen|5|es_validado_humano|boolean|NO
+kag|comunidad_resumen|6|nivel_clasificacion|smallint|NO
+kag|contraste|1|id|uuid|NO
+kag|contraste|2|caso_id|uuid|NO
+kag|contraste|3|afirmacion_a|text|NO
+kag|contraste|4|fragmento_a_id|uuid|YES
+kag|contraste|5|escala_a|character varying|NO
+kag|contraste|6|afirmacion_b|text|YES
+kag|contraste|7|fragmento_b_id|uuid|YES
+kag|contraste|8|escala_b|character varying|YES
+kag|contraste|9|tipo|character varying|NO
+kag|contraste|10|estado|character varying|NO
+kag|contraste|11|explicacion|text|YES
+kag|contraste|12|propuesto_por|character varying|NO
+kag|contraste|13|calificado_por|uuid|YES
+kag|contraste|14|valid_from|timestamp with time zone|NO
+kag|contraste|15|valid_to|timestamp with time zone|YES
+kag|contraste|16|recorded_at|timestamp with time zone|NO
+kag|contraste|17|superseded_at|timestamp with time zone|YES
+kag|contraste|18|supersedes_id|uuid|YES
+kag|contraste|19|es_validado_humano|boolean|NO
+kag|contraste|20|nivel_clasificacion|smallint|NO
+kag|documento_fragmento|1|id|uuid|NO
+kag|documento_fragmento|2|documento_id|uuid|NO
+kag|documento_fragmento|3|orden|integer|NO
+kag|documento_fragmento|4|pagina_o_minuto|integer|YES
+kag|documento_fragmento|5|texto|text|NO
+kag|documento_fragmento|6|nivel_clasificacion|smallint|NO
+kag|documento_fragmento|7|inicio_char|integer|YES
+kag|documento_fragmento|8|fin_char|integer|YES
+kag|documento_fragmento|9|texto_version|integer|NO
+kag|documento_fuente|1|id|uuid|NO
+kag|documento_fuente|2|core_documento_id|uuid|YES
+kag|documento_fuente|3|titulo|character varying|NO
+kag|documento_fuente|4|tipo|character varying|NO
+kag|documento_fuente|5|url|character varying|YES
+kag|documento_fuente|6|hash_contenido|character|YES
+kag|documento_fuente|7|fecha_ingesta|timestamp with time zone|NO
+kag|documento_fuente|8|nivel_clasificacion|smallint|NO
+kag|documento_fuente|9|texto_version|integer|NO
+kag|documento_fuente|10|corpus_id|smallint|YES
+kag|embedding|1|id|uuid|NO
+kag|embedding|2|fragmento_id|uuid|YES
+kag|embedding|3|atributo_id|uuid|YES
+kag|embedding|4|modelo|character varying|NO
+kag|embedding|5|version_modelo|character varying|NO
+kag|embedding|6|embedding|USER-DEFINED|NO
+kag|embedding|7|nivel_clasificacion|smallint|NO
+kag|embedding|8|created_at|timestamp with time zone|NO
+kag|entity_merge_log|1|id|uuid|NO
+kag|entity_merge_log|2|tipo_operacion|character varying|NO
+kag|entity_merge_log|3|resultante_uid|uuid|NO
+kag|entity_merge_log|4|usuario_id|uuid|NO
+kag|entity_merge_log|5|fecha|timestamp with time zone|NO
+kag|entity_merge_log|6|justificacion|text|NO
+kag|entity_merge_log|7|reversible|boolean|NO
+kag|entity_merge_members|1|merge_log_id|uuid|NO
+kag|entity_merge_members|2|actor_uid|uuid|NO
+kag|entity_merge_members|3|rol|character varying|NO
+kag|hipotesis|1|id|uuid|NO
+kag|hipotesis|2|enunciado|text|NO
+kag|hipotesis|3|caso_id|uuid|YES
+kag|hipotesis|4|origen|character varying|NO
+kag|hipotesis|5|estado|character varying|NO
+kag|hipotesis|6|nivel_confianza|character varying|YES
+kag|hipotesis|7|created_at|timestamp with time zone|NO
+kag|hipotesis|8|created_by|uuid|YES
+kag|hipotesis|9|nivel_clasificacion|smallint|NO
+kag|hipotesis_en_salida|1|output_id|uuid|NO
+kag|hipotesis_en_salida|2|hipotesis_id|uuid|NO
+kag|hipotesis_en_salida|3|rotulo|character varying|NO
+kag|hipotesis_evidencia|1|hipotesis_id|uuid|NO
+kag|hipotesis_evidencia|2|fragmento_id|uuid|NO
+kag|hipotesis_evidencia|3|sentido|character varying|NO
+kag|metrica_nodo|1|nodo_id|uuid|NO
+kag|metrica_nodo|2|periodo|date|NO
+kag|metrica_nodo|3|metrica|character varying|NO
+kag|metrica_nodo|4|valor|numeric|NO
+kag|metrica_nodo|5|es_critico|boolean|NO
+kag|nodos|1|id|uuid|NO
+kag|nodos|2|tipo|character varying|NO
+kag|nodos|3|ref_id|uuid|NO
+kag|nodos|4|etiqueta|character varying|YES
+kag|objetivo|1|id|uuid|NO
+kag|objetivo|2|caso_id|uuid|NO
+kag|objetivo|3|descripcion|text|NO
+kag|objetivo|4|tipo|character varying|YES
+kag|objetivo|5|valid_from|timestamp with time zone|NO
+kag|objetivo|6|valid_to|timestamp with time zone|YES
+kag|saturacion|1|id|uuid|NO
+kag|saturacion|2|caso_id|uuid|NO
+kag|saturacion|3|iteracion|integer|NO
+kag|saturacion|4|nuevas_afirmaciones|integer|NO
+kag|saturacion|5|cambia_comprension|boolean|NO
+kag|saturacion|6|decidido_por|uuid|YES
+kag|saturacion|7|fecha|date|NO
+kag|vacio_informacion|1|id|uuid|NO
+kag|vacio_informacion|2|descripcion|text|NO
+kag|vacio_informacion|3|indicador_id|uuid|YES
+kag|vacio_informacion|4|brecha_id|uuid|YES
+kag|vacio_informacion|5|razon|text|YES
+kag|vacio_informacion|6|propuesta|text|YES
+kag|vacio_informacion|7|estado|character varying|NO
+kag|validacion_hallazgo|1|id|uuid|NO
+kag|validacion_hallazgo|2|caso_id|uuid|NO
+kag|validacion_hallazgo|3|hallazgo_ref|character varying|NO
+kag|validacion_hallazgo|4|nivel_confianza|character varying|NO
+kag|validacion_hallazgo|5|justificacion|text|NO
+kag|validacion_hallazgo|6|decidido_por|uuid|YES
+kag|validacion_hallazgo|7|fecha|date|NO

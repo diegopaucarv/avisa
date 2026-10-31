@@ -1,0 +1,845 @@
+
+## Respuestas de formulario 1 :: 1 filas x 23 cols
+   1. 'Marca temporal'  nn=1 d=1 len=26
+   2. 'Departamento'  nn=1 d=1 len=6
+   3. 'Provincia'  nn=1 d=1 len=5
+   4. 'Ambito_Geografico'  nn=1 d=1 len=10
+   5. 'ID_Caso_Vinculado'  nn=1 d=1 len=17
+   6. 'Titulo_Alerta'  nn=1 d=1 len=33
+   7. 'Situación_Actual'  nn=1 d=1 len=53
+   8. 'Hechos_Recientes'  nn=1 d=1 len=71
+   9. 'Demandas'  nn=1 d=1 len=86
+  10. 'Riesgos'  nn=1 d=1 len=57
+  11. 'Recomendaciones'  nn=1 d=1 len=31
+  12. 'IDs_Actores_Existentes'  nn=1 d=1 len=7
+  13. 'Sectorista'  nn=1 d=1 len=21
+  14. 'Nivel_Riesgo'  nn=1 d=1 len=4
+  15. 'Estado'  nn=1 d=1 len=6
+  16. 'Actor_Nuevo'  nn=1 d=1 len=2
+  17. 'Actor_Nombre'  nn=1 d=1 len=15
+  18. 'Actor_Cargo'  nn=1 d=1 len=24
+  19. 'Actor_Institucion'  nn=1 d=1 len=16
+  20. 'Actor_Tipo'  nn=1 d=1 len=16
+  21. 'Actor_Nivel_Gobierno'  nn=1 d=1 len=8
+  22. 'Actor_Departamento'  nn=1 d=1 len=4
+  23. 'Actor_Rol_Alerta'  nn=1 d=1 len=9
+
+## BRIDGE_Capacitacion_Participant :: 9 filas x 5 cols
+   1. 'ID_Relacion'  nn=9 d=9 len=8
+   2. 'ID_Capacitacion'  nn=1 d=1 len=12
+   3. 'ID_Actor_Estado'  nn=9 d=9 len=11
+   4. 'Inscrito'  nn=9 d=1 len=2
+   5. 'Culmino'  nn=9 d=2 len=2
+
+## DIM_Capacitaciones :: 1 filas x 20 cols
+   1. 'ID_Capacitacion'  nn=1 d=1 len=12
+   2. 'Tipo_Capacitacion'  nn=1 d=1 len=6
+   3. 'Titulo'  nn=1 d=1 len=166
+   4. 'Objetivo'  nn=0 d=0 len=0
+   5. 'Lugar'  nn=1 d=1 len=8
+   6. 'ID_Ubigeo'  nn=1 d=1 len=6
+   7. 'Modalidad'  nn=1 d=1 len=10
+   8. 'Fecha_Inicio'  nn=1 d=1 len=19
+   9. 'Fecha_Fin'  nn=1 d=1 len=19
+  10. 'Duracion'  nn=1 d=1 len=16
+  11. 'Link_Documento'  nn=0 d=0 len=0
+  12. 'Estado'  nn=1 d=1 len=6
+  13. '<sin nombre>'  nn=0 d=0 len=0
+  14. '<sin nombre>'  nn=0 d=0 len=0
+  15. '<sin nombre>'  nn=0 d=0 len=0
+  16. '<sin nombre>'  nn=0 d=0 len=0
+  17. '<sin nombre>'  nn=0 d=0 len=0
+  18. '<sin nombre>'  nn=0 d=0 len=0
+  19. '<sin nombre>'  nn=0 d=0 len=0
+  20. '<sin nombre>'  nn=0 d=0 len=0
+
+## FACT_Analisis_Casos :: 1 filas x 26 cols
+   1. 'ID_Analisis'  nn=1 d=1 len=17
+   2. 'Codigo_Caso'  nn=1 d=1 len=19
+   3. 'Nombre_Caso'  nn=1 d=1 len=59
+   4. 'Resumen_Ejecutivo'  nn=1 d=1 len=1015
+   5. 'ID_Departamento'  nn=0 d=0 len=0
+   6. 'ID_Riesgos'  nn=1 d=1 len=7
+   7. 'ID_Sector'  nn=0 d=0 len=0
+   8. 'ID_Tematica'  nn=0 d=0 len=0
+   9. 'Fecha'  nn=1 d=1 len=19
+  10. 'Elaborado_Por'  nn=1 d=1 len=21
+  11. 'Manifestaciones'  nn=1 d=1 len=49
+  12. 'Desencadenantes'  nn=1 d=1 len=182
+  13. 'Impulsores'  nn=1 d=1 len=515
+  14. 'Causas'  nn=1 d=1 len=470
+  15. 'Medios'  nn=1 d=1 len=604
+  16. 'Geografia_Conflicto'  nn=0 d=0 len=0
+  17. 'Grupos_Posiciones'  nn=1 d=1 len=1067
+  18. 'Intereses_Comunes'  nn=1 d=1 len=2
+  19. 'Acciones_Visibles'  nn=1 d=1 len=2
+  20. 'Factores_Agravantes'  nn=1 d=1 len=2
+  21. 'Problema_Estructural'  nn=0 d=0 len=0
+  22. 'Recomendaciones'  nn=1 d=1 len=2
+  23. 'Link_Word'  nn=1 d=1 len=70
+  24. 'Posicion_Produce'  nn=1 d=1 len=18
+  25. 'Intereses_Produce'  nn=0 d=0 len=0
+  26. 'Necesidades_Produce'  nn=0 d=0 len=0
+
+## BRIDGE_Alerta_Recurso :: 32 filas x 3 cols
+   1. 'ID_Relacion'  nn=32 d=32 len=18
+   2. 'ID_Recurso'  nn=32 d=12 len=8
+   3. 'ID_Alerta'  nn=32 d=26 len=10
+
+## BRIDGE_Caso_ActorEstado :: 1 filas x 3 cols
+   1. 'ID_Relacion'  nn=1 d=1 len=27
+   2. 'ID_Actor_Estado'  nn=1 d=1 len=11
+   3. 'ID_Caso'  nn=1 d=1 len=19
+
+## LOG_Accesos :: 857 filas x 5 cols
+   1. 'Fecha'  nn=857 d=856 len=26
+   2. 'DNI'  nn=857 d=12 len=8
+   3. 'Nombre'  nn=811 d=10 len=30
+   4. 'Rol'  nn=857 d=4 len=11
+   5. 'Resultado'  nn=857 d=2 len=7
+
+## FACT_Casos :: 35 filas x 29 cols
+   1. 'ID_Caso'  nn=35 d=35 len=19
+   2. 'ID_Tipo'  nn=34 d=3 len=5
+   3. 'Nombre_Caso'  nn=35 d=35 len=100
+   4. 'ID_Sector'  nn=35 d=2 len=9
+   5. 'ID_Tematica'  nn=35 d=7 len=7
+   6. 'Fecha_Inicio'  nn=32 d=25 len=19
+   7. 'ID_Ubigeo'  nn=35 d=13 len=6
+   8. 'ID_Provincia'  nn=25 d=13 len=7
+   9. 'ID_Distrito'  nn=23 d=17 len=8
+  10. 'ID_Sectorista'  nn=35 d=4 len=6
+  11. 'Prioridad'  nn=35 d=3 len=8
+  12. 'ID_Intervencion'  nn=34 d=3 len=9
+  13. 'Pct_Avance'  nn=35 d=4 len=3
+  14. 'ID_Riesgos'  nn=34 d=3 len=7
+  15. 'Descripcion_Riesgo'  nn=34 d=34 len=444
+  16. 'Resumen_Ejecutivo'  nn=35 d=35 len=1405
+  17. 'N_Acciones'  nn=35 d=1 len=1
+  18. 'N_Hitos_Total'  nn=35 d=1 len=1
+  19. 'N_Hitos_Cumplidos'  nn=35 d=1 len=1
+  20. 'Fecha_Cierre'  nn=0 d=0 len=0
+  21. 'Fecha_Reapertura'  nn=0 d=0 len=0
+  22. 'N_Reaperturas'  nn=35 d=1 len=1
+  23. 'Motivo_Cierre'  nn=0 d=0 len=0
+  24. 'Link_PDF_Drive'  nn=0 d=0 len=0
+  25. 'Fecha_Envio_Correo'  nn=0 d=0 len=0
+  26. 'Destinatarios_Correo'  nn=0 d=0 len=0
+  27. 'Fecha_Envio_WhatsApp'  nn=0 d=0 len=0
+  28. 'Destinatarios_WhatsApp'  nn=0 d=0 len=0
+  29. '<sin nombre>'  nn=0 d=0 len=0
+
+## FACT_Proceso_Caso :: 36 filas x 10 cols
+   1. 'ID_Proceso_Caso'  nn=36 d=36 len=7
+   2. 'ID_Caso'  nn=36 d=35 len=19
+   3. 'Paso_caso'  nn=36 d=1 len=1
+   4. 'ID_Responsable'  nn=36 d=4 len=6
+   5. 'Fecha_inicio'  nn=36 d=36 len=26
+   6. 'Fecha_Fin'  nn=0 d=0 len=0
+   7. 'Dias_Demora'  nn=36 d=1 len=1
+   8. 'Paso_caso'  nn=36 d=1 len=1
+   9. 'Observaciones'  nn=36 d=1 len=20
+  10. 'Motivo'  nn=0 d=0 len=0
+
+## FACT_RED_RADAR :: 1 filas x 6 cols
+   1. 'ID_Radar'  nn=1 d=1 len=7
+   2. 'Nombre_RADAR'  nn=1 d=1 len=15
+   3. 'ID_Ubigeo'  nn=1 d=1 len=6
+   4. 'Nivel'  nn=1 d=1 len=8
+   5. 'Fecha_Instalación'  nn=1 d=1 len=19
+   6. 'Descripción'  nn=1 d=1 len=19
+
+## FACT_NODO :: 1 filas x 9 cols
+   1. 'ID_Nodo'  nn=1 d=1 len=8
+   2. 'ID_Radar'  nn=1 d=1 len=7
+   3. 'Nombre_Nodo'  nn=1 d=1 len=16
+   4. 'ID_Ubigeo'  nn=1 d=1 len=6
+   5. 'ID_Provincia'  nn=1 d=1 len=7
+   6. 'ID_Distrito'  nn=0 d=0 len=0
+   7. 'Nivel'  nn=1 d=1 len=10
+   8. 'Fecha_Instalación'  nn=1 d=1 len=19
+   9. 'Descripción'  nn=1 d=1 len=15
+
+## FACT_Proceso_Reporte :: 99 filas x 8 cols
+   1. 'ID_Proceso'  nn=99 d=98 len=10
+   2. 'ID_Tipo_Reporte'  nn=99 d=66 len=15
+   3. 'Paso_Num'  nn=99 d=6 len=1
+   4. 'ID_Responsable'  nn=99 d=8 len=7
+   5. 'Fecha_Inicio'  nn=98 d=86 len=26
+   6. 'Fecha_Fin'  nn=16 d=5 len=19
+   7. 'Dias_Demora'  nn=97 d=3 len=1
+   8. 'Observaciones'  nn=92 d=12 len=48
+
+## DIM_Paso_Proceso_Caso :: 4 filas x 6 cols
+   1. 'Paso_caso'  nn=4 d=4 len=1
+   2. 'Nombre_caso'  nn=4 d=4 len=11
+   3. 'Estado_caso'  nn=4 d=4 len=12
+   4. 'Tipo_Responsable_caso'  nn=4 d=2 len=20
+   5. 'Dias_Plazo_Max'  nn=4 d=2 len=1
+   6. 'Descripción'  nn=4 d=4 len=163
+
+## DIM_Paso_Proceso :: 3 filas x 5 cols
+   1. 'Paso_Num'  nn=3 d=3 len=1
+   2. 'Nombre_Paso'  nn=3 d=3 len=11
+   3. 'Estado_Resultado'  nn=3 d=3 len=8
+   4. 'Tipo_Responsable'  nn=3 d=1 len=10
+   5. 'Dias_Plazo_Max'  nn=3 d=1 len=1
+
+## FACT_Historial_Estado :: 27 filas x 10 cols
+   1. 'ID_Historial'  nn=27 d=27 len=2
+   2. 'ID_Caso'  nn=27 d=27 len=17
+   3. 'Fecha_cambio'  nn=27 d=6 len=7
+   4. 'ID_Estado_Nuevo'  nn=27 d=12 len=19
+   5. 'ID_Riesgos'  nn=27 d=10 len=4
+   6. 'ID_Fase_Nueva'  nn=27 d=10 len=15
+   7. 'ID_Tipo_Cambio'  nn=0 d=0 len=0
+   8. 'Motivo_Cambio'  nn=0 d=0 len=0
+   9. 'ID_Responsable'  nn=0 d=0 len=0
+  10. 'ID_Alerta_Vinculada'  nn=0 d=0 len=0
+
+## DIM_Tipo_Cambio :: 6 filas x 3 cols
+   1. 'ID_Tipo_Cambio'  nn=6 d=6 len=5
+   2. 'Nombre'  nn=6 d=6 len=14
+   3. 'Descripción'  nn=6 d=6 len=43
+
+## LOG_Envios :: 17 filas x 13 cols
+   1. 'ID_Envio'  nn=17 d=17 len=8
+   2. 'Fecha_Envio'  nn=17 d=17 len=26
+   3. 'Canal'  nn=17 d=3 len=8
+   4. 'ID_Tipo_Reporte'  nn=17 d=6 len=19
+   5. 'ID_Documento'  nn=17 d=4 len=1
+   6. 'Paso_Num'  nn=7 d=2 len=6
+   7. 'ID_Remitente'  nn=15 d=2 len=7
+   8. 'Rol_Remitente'  nn=5 d=5 len=28
+   9. 'ID_Destinatario'  nn=17 d=4 len=28
+  10. 'Link_PDF_Drive'  nn=7 d=3 len=12
+  11. 'Resultado'  nn=17 d=6 len=199
+  12. 'Observacion'  nn=17 d=3 len=7
+  13. '<sin nombre>'  nn=7 d=1 len=2
+
+## DIM_Alertas :: 83 filas x 31 cols
+   1. 'ID_Alerta'  nn=83 d=81 len=10
+   2. 'ID_Caso_Vinculado'  nn=50 d=17 len=19
+   3. 'Sectorista'  nn=83 d=9 len=6
+   4. 'Fecha'  nn=83 d=79 len=19
+   5. 'Fecha_Actualización'  nn=83 d=83 len=19
+   6. 'ID_Ubigeo'  nn=79 d=15 len=6
+   7. 'ID_Provincia'  nn=44 d=14 len=7
+   8. 'ID_Distrito'  nn=41 d=17 len=8
+   9. 'Fotografía'  nn=0 d=0 len=0
+  10. 'Titulo_Alerta'  nn=83 d=83 len=470
+  11. 'ID_Sector'  nn=83 d=2 len=6
+  12. 'Situacion_Actual'  nn=83 d=81 len=2212
+  13. 'Hechos_Recientes'  nn=71 d=71 len=4525
+  14. 'ID_NIVEL_ALERTA'  nn=81 d=4 len=6
+  15. 'ID_Riesgos'  nn=81 d=3 len=7
+  16. 'Descripcion_Riesgo_Alerta'  nn=82 d=81 len=1126
+  17. 'Acciones_sugeridas'  nn=81 d=81 len=2014
+  18. 'Acciones_OAIPCS'  nn=49 d=37 len=461
+  19. 'Paso_Actual'  nn=83 d=1 len=1
+  20. 'Fecha_Validacion'  nn=0 d=0 len=0
+  21. 'Fecha_Remision'  nn=0 d=0 len=0
+  22. 'Link_PDF_Drive'  nn=83 d=83 len=96
+  23. 'Fecha_Envio_Correo'  nn=0 d=0 len=0
+  24. 'Destinatarios_Correo'  nn=0 d=0 len=0
+  25. 'Fecha_Envio_WhatsApp'  nn=0 d=0 len=0
+  26. 'Destinatarios_WhatsApp'  nn=0 d=0 len=0
+  27. 'Estado'  nn=83 d=1 len=9
+  28. 'Tipo_Fuente'  nn=20 d=3 len=94
+  29. 'Descripción_Fuente'  nn=18 d=13 len=507
+  30. 'Link_fuente'  nn=5 d=5 len=70
+  31. 'ID_MESA_GRUPO'  nn=0 d=0 len=0
+
+## DIM_Reporte_Rapido :: 1 filas x 25 cols
+   1. 'ID_RR'  nn=1 d=1 len=10
+   2. 'ID_Caso_Vinculado'  nn=0 d=0 len=0
+   3. 'Sectorista'  nn=1 d=1 len=6
+   4. 'Fecha'  nn=1 d=1 len=19
+   5. 'Fecha_Actualización'  nn=0 d=0 len=0
+   6. 'ID_Ubigeo'  nn=1 d=1 len=6
+   7. 'ID_Provincia'  nn=1 d=1 len=7
+   8. 'ID_Distrito'  nn=1 d=1 len=6
+   9. 'Lugar'  nn=1 d=1 len=38
+  10. 'Ubicación_georeferenciado'  nn=0 d=0 len=0
+  11. 'Fotografía'  nn=0 d=0 len=0
+  12. 'Titulo_Reporte_Rapido'  nn=1 d=1 len=73
+  13. 'ID_Sector'  nn=0 d=0 len=0
+  14. 'Resumen_Rapido'  nn=1 d=1 len=299
+  15. 'Desarrollo_Intervención'  nn=1 d=1 len=625
+  16. 'Anuncios_acuerdos'  nn=1 d=1 len=340
+  17. 'Seguimiento'  nn=1 d=1 len=235
+  18. 'Link_PDF_Drive'  nn=1 d=1 len=84
+  19. 'Fecha_Envio_Correo'  nn=0 d=0 len=0
+  20. 'Destinatarios_Correo'  nn=1 d=1 len=8
+  21. 'Fecha_Envio_WhatsApp'  nn=0 d=0 len=0
+  22. 'Destinatarios_WhatsApp'  nn=0 d=0 len=0
+  23. 'Estado'  nn=0 d=0 len=0
+  24. '<sin nombre>'  nn=1 d=1 len=1
+  25. '<sin nombre>'  nn=1 d=1 len=1
+
+## DIM_ClimaSocial :: 7 filas x 28 cols
+   1. 'ID_Clima'  nn=7 d=7 len=10
+   2. 'ID_Caso_Vinculado'  nn=1 d=1 len=19
+   3. 'Sectorista'  nn=7 d=2 len=6
+   4. 'Fecha'  nn=7 d=7 len=19
+   5. 'Fecha_Actualización'  nn=6 d=3 len=6
+   6. 'ID_Ubigeo'  nn=6 d=4 len=7
+   7. 'ID_Provincia'  nn=6 d=1 len=6
+   8. 'ID_Distrito'  nn=0 d=0 len=0
+   9. 'Lugar'  nn=1 d=1 len=5
+  10. 'Ubicación_georeferenciado'  nn=0 d=0 len=0
+  11. 'Titulo_Clima'  nn=1 d=1 len=62
+  12. 'ID_Sector'  nn=1 d=1 len=6
+  13. 'Situación_Actual_Clima'  nn=7 d=7 len=832
+  14. 'Focos_Tension_Clima'  nn=7 d=7 len=2173
+  15. 'Oportunidades_intervención_Clima'  nn=7 d=7 len=908
+  16. 'ID_Riesgos'  nn=7 d=2 len=7
+  17. 'Descripción_Riesgo_Clima'  nn=5 d=5 len=460
+  18. 'Recomedaciones_estratégicas_Clima'  nn=1 d=1 len=19
+  19. 'Acciones_OAIPCS_Clima'  nn=0 d=0 len=0
+  20. 'Link_PDF_Drive'  nn=6 d=6 len=84
+  21. 'Fecha_Envio_Correo'  nn=0 d=0 len=0
+  22. 'Destinatarios_Correo'  nn=6 d=1 len=1
+  23. 'Fecha_Envio_WhatsApp'  nn=6 d=1 len=1
+  24. 'Destinatarios_WhatsApp'  nn=0 d=0 len=0
+  25. 'Estado'  nn=1 d=1 len=8
+  26. 'ID_MesaGrupo'  nn=0 d=0 len=0
+  27. 'Demandas_Clima'  nn=1 d=1 len=92
+  28. 'Riesgos_inmediatos_Clima'  nn=1 d=1 len=984
+
+## DIM_ClimaSocial_Focalizado :: 6 filas x 26 cols
+   1. 'ID_Clima2'  nn=6 d=6 len=10
+   2. 'ID_Caso_Vinculado'  nn=0 d=0 len=0
+   3. 'Sectorista'  nn=6 d=1 len=6
+   4. 'Fecha'  nn=6 d=6 len=19
+   5. 'Fecha_Actualización'  nn=6 d=3 len=6
+   6. 'ID_Ubigeo'  nn=6 d=4 len=7
+   7. 'ID_Provincia'  nn=6 d=1 len=6
+   8. 'ID_Distrito'  nn=0 d=0 len=0
+   9. 'Lugar'  nn=0 d=0 len=0
+  10. 'Ubicación_georeferenciado'  nn=0 d=0 len=0
+  11. 'Titulo_Clima'  nn=0 d=0 len=0
+  12. 'ID_Sector'  nn=0 d=0 len=0
+  13. 'Situación_Actual_Clima'  nn=6 d=6 len=832
+  14. 'Alerta_Clave'  nn=0 d=0 len=0
+  15. 'Focos_Tension_Clima'  nn=6 d=6 len=2173
+  16. 'recomendación2_Clima'  nn=6 d=6 len=908
+  17. 'ID_Riesgos'  nn=6 d=1 len=1
+  18. 'Descripción_Riesgo_Clima'  nn=5 d=5 len=460
+  19. 'Recomedaciones_estratégicas_Clima'  nn=0 d=0 len=0
+  20. 'Acciones_OAIPCS_Clima'  nn=0 d=0 len=0
+  21. 'Link_PDF_Drive'  nn=6 d=6 len=84
+  22. 'Fecha_Envio_Correo'  nn=0 d=0 len=0
+  23. 'Destinatarios_Correo'  nn=6 d=1 len=1
+  24. 'Fecha_Envio_WhatsApp'  nn=6 d=1 len=1
+  25. 'Destinatarios_WhatsApp'  nn=0 d=0 len=0
+  26. 'Estado'  nn=0 d=0 len=0
+
+## DIM_Riesgos :: 3 filas x 2 cols
+   1. 'ID_Riesgos'  nn=3 d=3 len=7
+   2. 'Tipo_Riesgo'  nn=3 d=3 len=8
+
+## DIM_Locales :: 27 filas x 15 cols
+   1. 'ID_Local'  nn=27 d=27 len=7
+   2. 'ID_Ubigeo'  nn=27 d=9 len=6
+   3. 'Nombre_Local'  nn=27 d=27 len=87
+   4. 'Dirección'  nn=26 d=26 len=78
+   5. 'Ubicación'  nn=5 d=5 len=52
+   6. 'Fotografia'  nn=27 d=27 len=69
+   7. 'Aforo'  nn=23 d=15 len=3
+   8. 'Ingresos'  nn=24 d=3 len=14
+   9. 'Proyector'  nn=18 d=2 len=2
+  10. 'Equipos_Computo'  nn=10 d=2 len=2
+  11. 'Audio_Micro'  nn=22 d=2 len=2
+  12. 'Nombre_Contacto'  nn=7 d=6 len=100
+  13. 'Celular_Contacto'  nn=6 d=5 len=11
+  14. 'Correo_contacto'  nn=4 d=3 len=23
+  15. 'Recomendacion'  nn=5 d=4 len=132
+
+## DIM_Destinatarios_Fijos :: 4 filas x 7 cols
+   1. 'ID_Destinatario'  nn=4 d=4 len=7
+   2. 'ID_AREA'  nn=4 d=3 len=6
+   3. 'Recibe_Alerta'  nn=4 d=2 len=2
+   4. 'Recibe_Clima'  nn=4 d=2 len=2
+   5. 'Recibe_RR'  nn=4 d=1 len=2
+   6. 'Canal_Preferido'  nn=4 d=3 len=16
+   7. 'Activo'  nn=4 d=1 len=2
+
+## DIM_Recurso_Pesca :: 37 filas x 6 cols
+   1. '<sin nombre>'  nn=37 d=37 len=8
+   2. 'Nombre_común_Recurso'  nn=37 d=37 len=18
+   3. 'Nombre_oficial_Recurso'  nn=37 d=37 len=42
+   4. 'Familia'  nn=37 d=30 len=16
+   5. 'Grupo biológico'  nn=37 d=11 len=21
+   6. 'Ámbito_Recurso'  nn=35 d=3 len=11
+
+## DIM_Estado_Proceso :: 5 filas x 4 cols
+   1. 'ID_Estado'  nn=5 d=5 len=6
+   2. 'Nombre_Proceso'  nn=5 d=5 len=10
+   3. 'Color_PBI'  nn=5 d=5 len=7
+   4. 'Es_Terminal'  nn=5 d=2 len=2
+
+## BRIDGE_Caso_Recurso :: 0 filas (VACIA)
+
+## BRIDGE_Caso_Demandas :: 12 filas x 5 cols
+   1. 'ID_RELA_DEMANDA'  nn=12 d=12 len=17
+   2. 'ID_Caso'  nn=12 d=4 len=10
+   3. 'ID_Tematica'  nn=12 d=5 len=7
+   4. 'ID_DEMANDA'  nn=12 d=12 len=13
+   5. 'Descripcion_Demanda'  nn=12 d=12 len=149
+
+## BRIDGE_Alerta_Demandas :: 231 filas x 5 cols
+   1. 'ID_RELA_DEMANDA'  nn=231 d=207 len=17
+   2. 'ID_Tipo_Reporte'  nn=231 d=1 len=5
+   3. 'ID_ALERTA'  nn=231 d=75 len=10
+   4. 'ID_Tematica'  nn=216 d=7 len=7
+   5. 'ID_DEMANDA'  nn=231 d=231 len=13
+
+## BRIDGE_Alerta_ActorEstado :: 5 filas x 3 cols
+   1. 'ID_Relacion'  nn=5 d=5 len=18
+   2. 'ID_Alerta'  nn=5 d=3 len=10
+   3. 'ID_Actor_Estado'  nn=5 d=3 len=11
+
+## DIM_Tipo_Tematica :: 7 filas x 3 cols
+   1. 'ID_Tematica'  nn=7 d=7 len=7
+   2. 'Tipo_Tematica'  nn=7 d=7 len=35
+   3. 'Descripcion'  nn=7 d=7 len=336
+
+## DIM_Demandas :: 325 filas x 9 cols
+   1. 'ID_DEMANDA'  nn=325 d=325 len=13
+   2. 'Descripcion_Demanda'  nn=325 d=305 len=523
+   3. 'ID_ORGANIZACION'  nn=98 d=20 len=7
+   4. 'ID_CASO'  nn=100 d=4 len=19
+   5. 'ID_ALERTA'  nn=248 d=82 len=10
+   6. 'ID_TEMATICA'  nn=277 d=8 len=19
+   7. 'Fecha'  nn=324 d=271 len=19
+   8. 'Tipo_Evidencia_Registro'  nn=77 d=2 len=30
+   9. 'Link_Evidencia_Registro'  nn=77 d=12 len=81
+
+## DIM_anuncios_acuerdos :: 0 filas (VACIA)
+
+## DIM_Nivel_Alertas :: 4 filas x 4 cols
+   1. 'ID_NIVEL_ALERTA'  nn=4 d=4 len=6
+   2. 'Nivel'  nn=4 d=4 len=22
+   3. 'Descripción_Nivel'  nn=4 d=4 len=82
+   4. 'Categoria'  nn=4 d=2 len=10
+
+## BRIDGE_Caso_Descencadenantes :: 1 filas x 4 cols
+   1. 'ID_RELA_ID_DESCENCADENANTES'  nn=1 d=1 len=36
+   2. 'ID_Analisis'  nn=1 d=1 len=17
+   3. 'ID_Caso'  nn=1 d=1 len=19
+   4. 'Descripcion_Descencadenantes'  nn=1 d=1 len=178
+
+## BRIDGE_Caso_Impulsores :: 5 filas x 4 cols
+   1. 'ID_RELA_ID_Impulsores'  nn=5 d=5 len=30
+   2. 'ID_Analisis'  nn=5 d=1 len=17
+   3. 'ID_Caso'  nn=5 d=1 len=19
+   4. 'Descripcion_Impulsores'  nn=5 d=5 len=201
+
+## BRIDGE_Caso_Causas :: 4 filas x 4 cols
+   1. 'ID_RELA_ID_Causas'  nn=4 d=4 len=26
+   2. 'ID_Analisis'  nn=4 d=1 len=17
+   3. 'ID_Caso'  nn=4 d=1 len=19
+   4. 'Descripcion_Causas'  nn=4 d=4 len=153
+
+## BRIDGE_Caso_Medios :: 4 filas x 7 cols
+   1. 'ID_RELA_ID_Medios'  nn=4 d=4 len=23
+   2. 'ID_Analisis'  nn=4 d=1 len=17
+   3. 'ID_Caso'  nn=4 d=1 len=19
+   4. 'Descripcion_Medios'  nn=4 d=4 len=54
+   5. 'Tipo_Medios'  nn=4 d=2 len=14
+   6. 'Link'  nn=4 d=4 len=96
+   7. '<sin nombre>'  nn=4 d=1 len=2
+
+## BRIDGE_ACTOR_GRUPO :: 0 filas (VACIA)
+
+## BRIDGE_Caso_POSICIONES :: 0 filas (VACIA)
+
+## BRIDGE_Caso_INTERESES :: 0 filas (VACIA)
+
+## BRIDGE_Caso_NECESIDADES :: 0 filas (VACIA)
+
+## BRIDGE_Caso_INETERES_COMUNES :: 0 filas (VACIA)
+
+## DIM_Descencadenantes :: 0 filas (VACIA)
+
+## DIM_Impulsores :: 0 filas (VACIA)
+
+## DIM_Causas :: 0 filas (VACIA)
+
+## DIM_Medios :: 0 filas (VACIA)
+
+## DIM_Tipo_Proceso :: 4 filas x 6 cols
+   1. 'ID_Tipo_Reporte'  nn=4 d=4 len=5
+   2. 'Nombre_Tipo'  nn=4 d=4 len=30
+   3. 'Sigla'  nn=4 d=4 len=3
+   4. 'Prefijo_ID'  nn=4 d=4 len=5
+   5. 'Tiene_Flujo'  nn=4 d=1 len=2
+   6. 'Activo'  nn=4 d=1 len=2
+
+## DIM_Acciones_Hitos :: 8 filas x 13 cols
+   1. 'ID_Accion'  nn=8 d=8 len=8
+   2. 'ID_Caso'  nn=8 d=3 len=19
+   3. 'N_Accion'  nn=8 d=5 len=1
+   4. 'Descripcion_Accion'  nn=8 d=8 len=175
+   5. 'ID_Area'  nn=4 d=3 len=6
+   6. 'ID_PF'  nn=5 d=2 len=6
+   7. 'ID_Hito'  nn=0 d=0 len=0
+   8. 'Tipo_evidencia'  nn=1 d=1 len=70
+   9. 'ID_REDACCION'  nn=0 d=0 len=0
+  10. 'ID_Clima'  nn=0 d=0 len=0
+  11. 'ID_Alerta'  nn=0 d=0 len=0
+  12. 'ID_RR'  nn=0 d=0 len=0
+  13. 'Link_Evidencia'  nn=0 d=0 len=0
+
+## DIM_Hitos :: 12 filas x 13 cols
+   1. 'ID_Hitos'  nn=12 d=12 len=8
+   2. 'ID_Caso'  nn=12 d=2 len=19
+   3. 'N_Hito'  nn=12 d=3 len=1
+   4. 'Descripcion_Hito'  nn=12 d=12 len=179
+   5. 'Responsable_Hito'  nn=3 d=1 len=6
+   6. 'Validacion_Hito'  nn=12 d=1 len=8
+   7. 'Fecha_Planificada'  nn=1 d=1 len=19
+   8. 'Fecha_Real'  nn=5 d=5 len=19
+   9. 'Estado_Hito'  nn=12 d=3 len=11
+  10. 'Link_Evidencia'  nn=0 d=0 len=0
+  11. 'ID_Accion'  nn=12 d=7 len=8
+  12. 'ID_Area'  nn=9 d=3 len=6
+  13. 'Descripcion_Evidencia'  nn=3 d=2 len=105
+
+## DIM_REDACCION :: 51 filas x 13 cols
+   1. 'ID_Redaccion'  nn=51 d=50 len=12
+   2. 'ID_Caso'  nn=29 d=6 len=19
+   3. 'Fecha'  nn=51 d=39 len=19
+   4. 'Titulo_Redaccion'  nn=51 d=49 len=87
+   5. 'Tipo_Documento'  nn=51 d=3 len=13
+   6. 'Descripcion'  nn=14 d=11 len=925
+   7. 'Sectorista'  nn=0 d=0 len=0
+   8. 'Link_Archivo'  nn=14 d=14 len=70
+   9. 'Link_Lista'  nn=14 d=14 len=70
+  10. 'Link_foto'  nn=1 d=1 len=70
+  11. 'Estado'  nn=51 d=1 len=6
+  12. 'ID_Ubigeo'  nn=46 d=9 len=6
+  13. 'ID_Sectorista'  nn=45 d=6 len=6
+
+## DIM_COORDINACION_TECNICA :: 4 filas x 13 cols
+   1. 'ID_CT'  nn=4 d=4 len=11
+   2. 'ID_Caso'  nn=2 d=2 len=19
+   3. 'Fecha'  nn=4 d=4 len=19
+   4. 'Titulo_Redaccion'  nn=4 d=4 len=119
+   5. 'Tipo_Documento'  nn=4 d=2 len=13
+   6. 'Descripcion'  nn=2 d=2 len=381
+   7. 'Sectorista'  nn=0 d=0 len=0
+   8. 'Link_Archivo'  nn=1 d=1 len=70
+   9. 'Link_Lista'  nn=0 d=0 len=0
+  10. 'Link_foto'  nn=1 d=1 len=70
+  11. 'Estado'  nn=4 d=1 len=6
+  12. 'ID_Ubigeo'  nn=4 d=1 len=6
+  13. 'ID_Sectorista'  nn=4 d=3 len=6
+
+## DIM_MESAS_GRUPOS :: 21 filas x 23 cols
+   1. 'ID_MESA_GRUPO'  nn=21 d=21 len=10
+   2. 'TIPO_ESPACIO'  nn=21 d=7 len=34
+   3. 'CON_NORMA'  nn=21 d=2 len=2
+   4. 'LINEA_OAIPCS'  nn=21 d=4 len=22
+   5. 'TITULO_MESA'  nn=21 d=21 len=218
+   6. 'TIPO_INSTRUMENTO'  nn=21 d=5 len=30
+   7. 'BASE_LEGAL'  nn=21 d=19 len=66
+   8. 'FECHA_NORMA'  nn=15 d=15 len=19
+   9. 'PRORROGAS_MODIFICATORIAS'  nn=9 d=9 len=191
+  10. 'FECHA_INSTALACION'  nn=3 d=3 len=19
+  11. 'NATURALEZA'  nn=21 d=3 len=11
+  12. 'FECHA_FIN_VIGENCIA'  nn=13 d=12 len=19
+  13. 'ESTADO_VIGENCIA'  nn=21 d=5 len=10
+  14. 'OBJETIVO'  nn=21 d=19 len=191
+  15. 'PRESIDENTE'  nn=21 d=10 len=68
+  16. 'SECRETARIO_TECNICO'  nn=12 d=8 len=46
+  17. 'ROL_PRODUCE'  nn=21 d=4 len=18
+  18. 'AMBITO_DEPARTAMENTO'  nn=18 d=13 len=256
+  19. 'TITULAR'  nn=15 d=10 len=100
+  20. 'ALTERNO'  nn=14 d=10 len=64
+  21. 'DOC_DESIGNACION'  nn=10 d=10 len=109
+  22. 'ID_SECTORISTA'  nn=16 d=5 len=6
+  23. 'Link_Evidencia'  nn=2 d=2 len=70
+
+## DIM_ORGANIZACION :: 224 filas x 16 cols
+   1. 'ID_ORGANIZACION'  nn=224 d=224 len=7
+   2. 'NOMBRE_ORGANIZACIÓN'  nn=224 d=222 len=139
+   3. 'ID_Ubigeo'  nn=121 d=12 len=6
+   4. 'Dirección'  nn=28 d=28 len=74
+   5. 'Fecha_constitución'  nn=28 d=28 len=19
+   6. 'ID_TIPO_ORG'  nn=212 d=7 len=26
+   7. 'Inscripción_sunarp'  nn=22 d=22 len=8
+   8. 'Cod_Actor'  nn=220 d=207 len=7
+   9. 'Integrantes'  nn=24 d=23 len=3
+  10. 'Embarcaciones'  nn=24 d=17 len=3
+  11. 'Armadores'  nn=24 d=5 len=2
+  12. 'Fotografía'  nn=20 d=20 len=69
+  13. 'Perfil_Organizacion'  nn=1 d=1 len=434
+  14. 'RUC'  nn=5 d=5 len=11
+  15. 'link_facebook'  nn=0 d=0 len=0
+  16. 'Abreviatura'  nn=11 d=11 len=29
+
+## DIM_TIPO_ORG :: 4 filas x 2 cols
+   1. 'ID_TIPO_ORG'  nn=4 d=4 len=12
+   2. 'NOMBRE_TIPO'  nn=4 d=4 len=26
+
+## DIM_Actores :: 828 filas x 16 cols
+   1. 'ID_Actor'  nn=828 d=826 len=7
+   2. 'Nombre_Actor'  nn=828 d=819 len=153
+   3. 'DNI'  nn=642 d=587 len=9
+   4. 'Telefono'  nn=508 d=460 len=33
+   5. 'Email'  nn=41 d=38 len=34
+   6. 'Cargo'  nn=675 d=140 len=50
+   7. 'Id_organizacion'  nn=660 d=368 len=139
+   8. 'Abreviatura'  nn=132 d=110 len=115
+   9. 'ID_Tipo_Actor'  nn=253 d=4 len=11
+  10. 'Nivel_Gobierno'  nn=244 d=5 len=9
+  11. 'Categoria'  nn=239 d=5 len=16
+  12. 'ID_Perfil'  nn=233 d=4 len=9
+  13. 'ID_Ubigeo'  nn=240 d=13 len=6
+  14. 'Fotografía'  nn=95 d=95 len=69
+  15. 'Activo'  nn=298 d=2 len=2
+  16. 'Descripcion_Perfil'  nn=74 d=73 len=1243
+
+## DIM_Actores_Estado :: 108 filas x 16 cols
+   1. 'ID_Actor_Estado'  nn=108 d=108 len=11
+   2. 'Nombre_Actor'  nn=108 d=86 len=37
+   3. 'DNI'  nn=108 d=1 len=3
+   4. 'Telefono'  nn=108 d=74 len=31
+   5. 'Email'  nn=108 d=77 len=36
+   6. 'Cargo'  nn=108 d=92 len=65
+   7. 'ID_Entidad'  nn=0 d=0 len=0
+   8. 'ID_Area'  nn=0 d=0 len=0
+   9. 'ID_Unidad'  nn=0 d=0 len=0
+  10. 'ID_Tipo_Actor'  nn=0 d=0 len=0
+  11. 'Nivel_Gobierno'  nn=0 d=0 len=0
+  12. 'Categoria'  nn=0 d=0 len=0
+  13. 'ID_Ubigeo'  nn=0 d=0 len=0
+  14. 'Fotografia'  nn=0 d=0 len=0
+  15. 'Activo'  nn=9 d=1 len=2
+  16. '<sin nombre>'  nn=0 d=0 len=0
+
+## FACT_Hechos_Casos :: 80 filas x 13 cols
+   1. 'ID_Hecho'  nn=80 d=78 len=9
+   2. 'ID_Caso'  nn=80 d=5 len=19
+   3. 'Fecha'  nn=80 d=74 len=19
+   4. 'Tipo_Hecho'  nn=80 d=9 len=26
+   5. 'Hecho_Crítico'  nn=80 d=2 len=2
+   6. 'Descripcion'  nn=80 d=80 len=467
+   7. 'ID_Sectorista'  nn=80 d=2 len=6
+   8. 'Tipo_evidencia_hecho'  nn=77 d=2 len=30
+   9. 'ID_Clima'  nn=0 d=0 len=0
+  10. 'ID_Alerta'  nn=5 d=5 len=70
+  11. 'ID_RR'  nn=0 d=0 len=0
+  12. 'Link_Evidencia'  nn=63 d=63 len=70
+  13. 'ID_Redaccion'  nn=2 d=2 len=12
+
+## BRIDGE_Caso_Depto :: 87 filas x 6 cols
+   1. 'ID_Relacion'  nn=87 d=87 len=26
+   2. 'ID_Caso'  nn=87 d=34 len=19
+   3. 'ID_Ubigeo'  nn=87 d=34 len=19
+   4. 'Departamento'  nn=87 d=14 len=6
+   5. 'Es_Principal'  nn=87 d=14 len=15
+   6. '<sin nombre>'  nn=87 d=2 len=2
+
+## BRIDGE_Caso_Actor :: 80 filas x 3 cols
+   1. 'ID_Relacion'  nn=80 d=68 len=27
+   2. 'ID_Actor'  nn=80 d=47 len=7
+   3. 'ID_Caso'  nn=80 d=36 len=19
+
+## BRIDGE_RADAR_Actor :: 1 filas x 4 cols
+   1. 'ID_Relacion'  nn=1 d=1 len=14
+   2. 'ID_Actor_Estado'  nn=1 d=1 len=11
+   3. 'ID_Radar'  nn=1 d=1 len=7
+   4. 'ID_Actor_Radar'  nn=1 d=1 len=7
+
+## BRIDGE_Nodo_Actor :: 3 filas x 4 cols
+   1. 'ID_Relacion'  nn=3 d=3 len=15
+   2. 'ID_Actor_Estado'  nn=3 d=3 len=11
+   3. 'ID_Nodo'  nn=3 d=1 len=8
+   4. 'ID_Actor_Radar'  nn=3 d=3 len=26
+
+## BRIDGE_Caso_Actor_Estado :: 61 filas x 3 cols
+   1. 'ID_Relacion'  nn=61 d=49 len=26
+   2. 'ID_Actor_Estado'  nn=61 d=36 len=7
+   3. 'ID_Caso'  nn=61 d=31 len=19
+
+## BRIDGE_Alerta_Actor :: 162 filas x 6 cols
+   1. 'ID_RAA'  nn=67 d=58 len=18
+   2. 'ID_Alerta'  nn=162 d=74 len=11
+   3. 'ID_Actor'  nn=162 d=88 len=10
+   4. 'Rol_en_Alerta'  nn=0 d=0 len=0
+   5. 'Es_Principal'  nn=0 d=0 len=0
+   6. 'ID_Relacion'  nn=95 d=92 len=18
+
+## BRIDGE_Reporte_Actor :: 1 filas x 5 cols
+   1. 'ID_RRA'  nn=1 d=1 len=7
+   2. 'ID_RR'  nn=1 d=1 len=10
+   3. 'ID_Actor'  nn=1 d=1 len=7
+   4. 'Rol_en_Alerta'  nn=0 d=0 len=0
+   5. 'Es_Principal'  nn=0 d=0 len=0
+
+## BRIDGE_Reporte_Actor_Estado :: 1 filas x 5 cols
+   1. 'ID_RRA'  nn=1 d=1 len=7
+   2. 'ID_RR'  nn=1 d=1 len=10
+   3. 'ID_Actor_Estado'  nn=1 d=1 len=7
+   4. 'Rol_en_Alerta'  nn=0 d=0 len=0
+   5. 'Es_Principal'  nn=0 d=0 len=0
+
+## BRIDGE_Clima_Actor :: 1 filas x 5 cols
+   1. 'ID_Clima'  nn=1 d=1 len=7
+   2. 'ID_RR'  nn=1 d=1 len=10
+   3. 'ID_Actor'  nn=1 d=1 len=7
+   4. 'Rol_en_Alerta'  nn=0 d=0 len=0
+   5. 'Es_Principal'  nn=0 d=0 len=0
+
+## BRIDGE_Clima_Actor_Estado :: 1 filas x 5 cols
+   1. 'ID_Clima'  nn=1 d=1 len=7
+   2. 'ID_RR'  nn=1 d=1 len=10
+   3. 'ID_Actor_Estado'  nn=1 d=1 len=7
+   4. 'Rol_en_Alerta'  nn=0 d=0 len=0
+   5. 'Es_Principal'  nn=0 d=0 len=0
+
+## BRIDGE_Sectorista_Departamento :: 27 filas x 3 cols
+   1. 'ID_RSC'  nn=27 d=27 len=7
+   2. 'ID_Sectorista'  nn=27 d=5 len=6
+   3. 'ID_Departamento'  nn=27 d=27 len=6
+
+## DIM_Departamentos :: 27 filas x 11 cols
+   1. 'ID_Ubigeo'  nn=27 d=27 len=6
+   2. 'Departamento'  nn=27 d=27 len=15
+   3. 'Codigo_Depto'  nn=27 d=27 len=2
+   4. 'Region_Natural'  nn=27 d=11 len=13
+   5. 'Alcance'  nn=27 d=5 len=8
+   6. 'Latitud'  nn=27 d=27 len=8
+   7. 'Longitud'  nn=27 d=27 len=8
+   8. 'Capital'  nn=27 d=26 len=16
+   9. '<sin nombre>'  nn=0 d=0 len=0
+  10. '<sin nombre>'  nn=0 d=0 len=0
+  11. '<sin nombre>'  nn=0 d=0 len=0
+
+## DIM_Provincias :: 70 filas x 8 cols
+   1. 'ID_Provincia'  nn=70 d=70 len=7
+   2. 'Cod_INEI'  nn=70 d=70 len=4
+   3. 'Nombre_Provincia'  nn=70 d=70 len=25
+   4. 'ID_Ubigeo'  nn=70 d=26 len=6
+   5. 'Nombre_Departamento'  nn=70 d=25 len=13
+   6. '<sin nombre>'  nn=0 d=0 len=0
+   7. '<sin nombre>'  nn=0 d=0 len=0
+   8. '<sin nombre>'  nn=0 d=0 len=0
+
+## DIM_Distritos :: 698 filas x 11 cols
+   1. 'ID_Distrito'  nn=698 d=698 len=8
+   2. 'Cod_INEI'  nn=698 d=698 len=6
+   3. 'Nombre_Distrito'  nn=698 d=667 len=36
+   4. 'ID_Provincia'  nn=698 d=70 len=7
+   5. 'Nombre_Provincia'  nn=698 d=70 len=25
+   6. 'ID_Ubigeo'  nn=698 d=26 len=6
+   7. 'Nombre_Departamento'  nn=698 d=25 len=13
+   8. 'Estado'  nn=698 d=1 len=6
+   9. '<sin nombre>'  nn=0 d=0 len=0
+  10. '<sin nombre>'  nn=0 d=0 len=0
+  11. '<sin nombre>'  nn=0 d=0 len=0
+
+## DIM_Tipo_Caso :: 4 filas x 3 cols
+   1. 'ID_Tipo'  nn=4 d=4 len=5
+   2. 'Tipo_Caso'  nn=4 d=4 len=16
+   3. 'Descripcion'  nn=4 d=4 len=96
+
+## DIM_Rol_Actor :: 4 filas x 3 cols
+   1. 'ID_Rol'  nn=4 d=4 len=6
+   2. 'Tipo_Rol'  nn=4 d=4 len=23
+   3. 'Descripcion'  nn=0 d=0 len=0
+
+## DIM_Tipo_Sector :: 3 filas x 3 cols
+   1. 'ID_Sector'  nn=3 d=3 len=9
+   2. 'Tipo_Sector'  nn=3 d=3 len=34
+   3. 'ID_Area'  nn=3 d=3 len=6
+
+## DIM_Tipo_Actor :: 3 filas x 2 cols
+   1. 'ID_Tipo_Actor'  nn=3 d=3 len=11
+   2. 'Tipo_Actor'  nn=3 d=3 len=20
+
+## DIM_Tipo_Actor_Radar :: 3 filas x 2 cols
+   1. 'ID_Actor_Radar'  nn=3 d=3 len=7
+   2. 'Tipo_Actor'  nn=3 d=3 len=26
+
+## DIM_Perfil :: 3 filas x 2 cols
+   1. 'ID_perfil'  nn=3 d=3 len=9
+   2. 'Tipo_Perfil'  nn=3 d=3 len=11
+
+## DIM_Intervencion :: 4 filas x 2 cols
+   1. 'ID_Intervencion'  nn=4 d=4 len=9
+   2. 'Tipo_Intervencion'  nn=4 d=4 len=26
+
+## DIM_Sectoristas :: 15 filas x 13 cols
+   1. 'ID_Sectorista'  nn=15 d=15 len=6
+   2. 'Nombre_Sectorista'  nn=15 d=15 len=30
+   3. 'DNI'  nn=10 d=10 len=8
+   4. 'clave_Sectorista'  nn=10 d=10 len=8
+   5. 'N_Casos'  nn=5 d=4 len=2
+   6. 'Cargo'  nn=4 d=4 len=28
+   7. 'ID_Entidad'  nn=0 d=0 len=0
+   8. 'ID_Area'  nn=0 d=0 len=0
+   9. 'ID_Unidad'  nn=0 d=0 len=0
+  10. 'Email'  nn=4 d=4 len=28
+  11. 'Telefono'  nn=3 d=3 len=9
+  12. 'Fotografia'  nn=0 d=0 len=0
+  13. 'Estado'  nn=14 d=2 len=9
+
+## DIM_Punto_Focal :: 17 filas x 12 cols
+   1. 'ID_PF'  nn=17 d=17 len=6
+   2. 'Nombre_PF'  nn=17 d=17 len=33
+   3. 'DNI'  nn=0 d=0 len=0
+   4. 'clave_PF'  nn=0 d=0 len=0
+   5. 'Cargo'  nn=17 d=15 len=33
+   6. 'ID_Entidad'  nn=2 d=1 len=5
+   7. 'ID_Area'  nn=17 d=3 len=6
+   8. 'ID_Unidad'  nn=0 d=0 len=0
+   9. 'Email'  nn=1 d=1 len=23
+  10. 'Telefono'  nn=1 d=1 len=9
+  11. 'Fotografia'  nn=0 d=0 len=0
+  12. 'Estado'  nn=17 d=1 len=6
+
+## DIM_Autoridades :: 2 filas x 12 cols
+   1. 'ID_AUTORIDADES'  nn=2 d=2 len=7
+   2. 'Nombre_Autoridades'  nn=2 d=2 len=19
+   3. 'DNI'  nn=2 d=2 len=8
+   4. 'clave_Autoridades'  nn=2 d=2 len=8
+   5. 'Cargo'  nn=2 d=2 len=13
+   6. 'ID_Entidad'  nn=0 d=0 len=0
+   7. 'ID_Area'  nn=2 d=1 len=6
+   8. 'ID_Unidad'  nn=0 d=0 len=0
+   9. 'Email'  nn=1 d=1 len=24
+  10. 'Fotografia'  nn=0 d=0 len=0
+  11. 'Telefono'  nn=0 d=0 len=0
+  12. 'Estado'  nn=2 d=1 len=6
+
+## DIM_Responsable :: 3 filas x 4 cols
+   1. 'ID_Responsable'  nn=3 d=3 len=7
+   2. 'ID_Origen'  nn=3 d=3 len=6
+   3. 'Tipo_Responsable'  nn=3 d=3 len=11
+   4. 'Tabla_Origen'  nn=3 d=3 len=15
+
+## DIM_Entidad_Responsable :: 23 filas x 5 cols
+   1. 'ID_Entidad'  nn=23 d=23 len=5
+   2. 'Nombre_Entidad'  nn=23 d=23 len=49
+   3. 'Abreviatura'  nn=23 d=23 len=8
+   4. 'Nivel'  nn=23 d=1 len=8
+   5. 'Estado'  nn=23 d=1 len=6
+
+## DIM_Area_Responsable :: 66 filas x 5 cols
+   1. 'ID_Area'  nn=66 d=66 len=6
+   2. 'Nombre_Area'  nn=66 d=65 len=86
+   3. 'Abreviatura'  nn=66 d=66 len=15
+   4. 'Id_Entidad'  nn=66 d=1 len=5
+   5. 'Estado'  nn=66 d=1 len=6
+
+## DIM_Unidades_Organicas_Responsa :: 27 filas x 6 cols
+   1. 'ID_Unidad'  nn=27 d=27 len=5
+   2. 'Nombre_Unidad'  nn=27 d=26 len=66
+   3. 'Abreviatura'  nn=27 d=27 len=7
+   4. 'Id_Area'  nn=27 d=10 len=6
+   5. 'Id_Entidad'  nn=27 d=1 len=5
+   6. 'Estado'  nn=27 d=1 len=6

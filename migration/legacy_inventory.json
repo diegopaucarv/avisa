@@ -1,0 +1,8344 @@
+{
+ "Respuestas de formulario 1": {
+  "rows": 1,
+  "cols": 23,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "Marca temporal",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 26,
+    "samples": [
+     "2026-05-18 10:35:25.065000"
+    ]
+   },
+   {
+    "pos": 2,
+    "header": "Departamento",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 6,
+    "samples": [
+     "Ancash"
+    ]
+   },
+   {
+    "pos": 3,
+    "header": "Provincia",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 5,
+    "samples": [
+     "Santa"
+    ]
+   },
+   {
+    "pos": 4,
+    "header": "Ambito_Geografico",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 10,
+    "samples": [
+     "Provincial"
+    ]
+   },
+   {
+    "pos": 5,
+    "header": "ID_Caso_Vinculado",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 17,
+    "samples": [
+     "CS-PA-REG-2024-01"
+    ]
+   },
+   {
+    "pos": 6,
+    "header": "Titulo_Alerta",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 33,
+    "samples": [
+     "Confrontación en mar grau peruano"
+    ]
+   },
+   {
+    "pos": 7,
+    "header": "Situación_Actual",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 53,
+    "samples": [
+     "Pescadores se enfrentas por pesca entre las 5 millas."
+    ]
+   },
+   {
+    "pos": 8,
+    "header": "Hechos_Recientes",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 71,
+    "samples": [
+     "23.04.2026 Reunión con Cabo Blanco, 07.05.2026 Reunión con los Organos."
+    ]
+   },
+   {
+    "pos": 9,
+    "header": "Demandas",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 86,
+    "samples": [
+     "1. Reunión con SM (Cabo Blanco), 2. Documento de aclaración por 5 Millas (Los Organos)"
+    ]
+   },
+   {
+    "pos": 10,
+    "header": "Riesgos",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 57,
+    "samples": [
+     "Posible violencia entre pescadores afectado la integridad"
+    ]
+   },
+   {
+    "pos": 11,
+    "header": "Recomendaciones",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 31,
+    "samples": [
+     "Dialogo con OSPAS involucradas."
+    ]
+   },
+   {
+    "pos": 12,
+    "header": "IDs_Actores_Existentes",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 7,
+    "samples": [
+     "ACT-001"
+    ]
+   },
+   {
+    "pos": 13,
+    "header": "Sectorista",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 21,
+    "samples": [
+     "André Jiménez Agapito"
+    ]
+   },
+   {
+    "pos": 14,
+    "header": "Nivel_Riesgo",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 4,
+    "samples": [
+     "Alto"
+    ]
+   },
+   {
+    "pos": 15,
+    "header": "Estado",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 6,
+    "samples": [
+     "Activo"
+    ]
+   },
+   {
+    "pos": 16,
+    "header": "Actor_Nuevo",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 2,
+    "samples": [
+     "Si"
+    ]
+   },
+   {
+    "pos": 17,
+    "header": "Actor_Nombre",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 15,
+    "samples": [
+     "Karen B, Patrik"
+    ]
+   },
+   {
+    "pos": 18,
+    "header": "Actor_Cargo",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 24,
+    "samples": [
+     "Comunicaciones, Analista"
+    ]
+   },
+   {
+    "pos": 19,
+    "header": "Actor_Institucion",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 16,
+    "samples": [
+     "PRODUCE, PRODUCE"
+    ]
+   },
+   {
+    "pos": 20,
+    "header": "Actor_Tipo",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 16,
+    "samples": [
+     "Actor del Estado"
+    ]
+   },
+   {
+    "pos": 21,
+    "header": "Actor_Nivel_Gobierno",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 8,
+    "samples": [
+     "Nacional"
+    ]
+   },
+   {
+    "pos": 22,
+    "header": "Actor_Departamento",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 4,
+    "samples": [
+     "Lima"
+    ]
+   },
+   {
+    "pos": 23,
+    "header": "Actor_Rol_Alerta",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 9,
+    "samples": [
+     "Autoridad"
+    ]
+   }
+  ]
+ },
+ "BRIDGE_Capacitacion_Participant": {
+  "rows": 9,
+  "cols": 5,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_Relacion",
+    "non_null": 9,
+    "distinct": 9,
+    "maxlen": 8,
+    "samples": [
+     "BCP-2",
+     "BCP-3",
+     "BCP-4",
+     "BCP-5"
+    ]
+   },
+   {
+    "pos": 2,
+    "header": "ID_Capacitacion",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 12,
+    "samples": [
+     "CAP-2026-001"
+    ]
+   },
+   {
+    "pos": 3,
+    "header": "ID_Actor_Estado",
+    "non_null": 9,
+    "distinct": 9,
+    "maxlen": 11,
+    "samples": [
+     "ACT-EST-029",
+     "ACT-EST-030",
+     "ACT-EST-031",
+     "ACT-EST-032"
+    ]
+   },
+   {
+    "pos": 4,
+    "header": "Inscrito",
+    "non_null": 9,
+    "distinct": 1,
+    "maxlen": 2,
+    "samples": [
+     "Si"
+    ]
+   },
+   {
+    "pos": 5,
+    "header": "Culmino",
+    "non_null": 9,
+    "distinct": 2,
+    "maxlen": 2,
+    "samples": [
+     "Si",
+     "No"
+    ]
+   }
+  ]
+ },
+ "DIM_Capacitaciones": {
+  "rows": 1,
+  "cols": 20,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_Capacitacion",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 12,
+    "samples": [
+     "CAP-2026-001"
+    ]
+   },
+   {
+    "pos": 2,
+    "header": "Tipo_Capacitacion",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 6,
+    "samples": [
+     "Taller"
+    ]
+   },
+   {
+    "pos": 3,
+    "header": "Titulo",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 166,
+    "samples": [
+     "1er Taller Macrorregional del Programa de Capacitación \"Prevención y Gestión de los Confli"
+    ]
+   },
+   {
+    "pos": 4,
+    "header": "Objetivo",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 5,
+    "header": "Lugar",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 8,
+    "samples": [
+     "FONDEPES"
+    ]
+   },
+   {
+    "pos": 6,
+    "header": "ID_Ubigeo",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 6,
+    "samples": [
+     "DEP-15"
+    ]
+   },
+   {
+    "pos": 7,
+    "header": "Modalidad",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 10,
+    "samples": [
+     "Presencial"
+    ]
+   },
+   {
+    "pos": 8,
+    "header": "Fecha_Inicio",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 19,
+    "samples": [
+     "2026-07-15 22:00:00"
+    ]
+   },
+   {
+    "pos": 9,
+    "header": "Fecha_Fin",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 19,
+    "samples": [
+     "2026-07-16 22:00:00"
+    ]
+   },
+   {
+    "pos": 10,
+    "header": "Duracion",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 16,
+    "samples": [
+     "16 horas, 2 días"
+    ]
+   },
+   {
+    "pos": 11,
+    "header": "Link_Documento",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 12,
+    "header": "Estado",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 6,
+    "samples": [
+     "Activo"
+    ]
+   },
+   {
+    "pos": 13,
+    "header": null,
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 14,
+    "header": null,
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 15,
+    "header": null,
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 16,
+    "header": null,
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 17,
+    "header": null,
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 18,
+    "header": null,
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 19,
+    "header": null,
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 20,
+    "header": null,
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   }
+  ]
+ },
+ "FACT_Analisis_Casos": {
+  "rows": 1,
+  "cols": 26,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_Analisis",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 17,
+    "samples": [
+     "ANA-1789079399963"
+    ]
+   },
+   {
+    "pos": 2,
+    "header": "Codigo_Caso",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 19,
+    "samples": [
+     "CS-PRODUCE-2026-001"
+    ]
+   },
+   {
+    "pos": 3,
+    "header": "Nombre_Caso",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 59,
+    "samples": [
+     "Uso de red de cortina de fondo en Cabo Blanco y Los Órganos"
+    ]
+   },
+   {
+    "pos": 4,
+    "header": "Resumen_Ejecutivo",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 1015,
+    "samples": [
+     "Los pescadores de Cabo Blanco denuncian que pescadores de Los Órganos extraen recursos hid"
+    ]
+   },
+   {
+    "pos": 5,
+    "header": "ID_Departamento",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 6,
+    "header": "ID_Riesgos",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 7,
+    "samples": [
+     "RIE-003"
+    ]
+   },
+   {
+    "pos": 7,
+    "header": "ID_Sector",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 8,
+    "header": "ID_Tematica",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 9,
+    "header": "Fecha",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 19,
+    "samples": [
+     "2026-09-23 00:00:00"
+    ]
+   },
+   {
+    "pos": 10,
+    "header": "Elaborado_Por",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 21,
+    "samples": [
+     "André Jiménez Agapito"
+    ]
+   },
+   {
+    "pos": 11,
+    "header": "Manifestaciones",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 49,
+    "samples": [
+     "[\"HECHO-002\",\"HECHO-004\",\"HECHO-005\",\"HECHO-022\"]"
+    ]
+   },
+   {
+    "pos": 12,
+    "header": "Desencadenantes",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 182,
+    "samples": [
+     "[\"Pescadores de Los Órganos continúan realizando faenas de pesca en las áreas de reserva d"
+    ]
+   },
+   {
+    "pos": 13,
+    "header": "Impulsores",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 515,
+    "samples": [
+     "[\"Falta de alineamiento técnico para el estudio técnico: “Evaluación y monitoreo de los ef"
+    ]
+   },
+   {
+    "pos": 14,
+    "header": "Causas",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 470,
+    "samples": [
+     "[\"Precariedad de los medios de vida: Falta de diversificación económica que vuelve a las c"
+    ]
+   },
+   {
+    "pos": 15,
+    "header": "Medios",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 604,
+    "samples": [
+     "[{\"tipo\":\"Redes Sociales\",\"enlace\":\"https://www.facebook.com/ChaterosPeruanos\",\"nombre\":\"C"
+    ]
+   },
+   {
+    "pos": 16,
+    "header": "Geografia_Conflicto",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 17,
+    "header": "Grupos_Posiciones",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 1067,
+    "samples": [
+     "[{\"capacidades\":{\"nivel_organizacion\":70,\"liderazgo\":60,\"legal_normativa\":40,\"movilizacion"
+    ]
+   },
+   {
+    "pos": 18,
+    "header": "Intereses_Comunes",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 2,
+    "samples": [
+     "[]"
+    ]
+   },
+   {
+    "pos": 19,
+    "header": "Acciones_Visibles",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 2,
+    "samples": [
+     "[]"
+    ]
+   },
+   {
+    "pos": 20,
+    "header": "Factores_Agravantes",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 2,
+    "samples": [
+     "[]"
+    ]
+   },
+   {
+    "pos": 21,
+    "header": "Problema_Estructural",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 22,
+    "header": "Recomendaciones",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 2,
+    "samples": [
+     "[]"
+    ]
+   },
+   {
+    "pos": 23,
+    "header": "Link_Word",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 70,
+    "samples": [
+     "https://drive.google.com/file/d/1aWGdgAeID3_3Hbt8ezBdvFNt2gjAOZuM/view"
+    ]
+   },
+   {
+    "pos": 24,
+    "header": "Posicion_Produce",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 18,
+    "samples": [
+     "necesidades prueba"
+    ]
+   },
+   {
+    "pos": 25,
+    "header": "Intereses_Produce",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 26,
+    "header": "Necesidades_Produce",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   }
+  ]
+ },
+ "BRIDGE_Alerta_Recurso": {
+  "rows": 32,
+  "cols": 3,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_Relacion",
+    "non_null": 32,
+    "distinct": 32,
+    "maxlen": 18,
+    "samples": [
+     "BAR-AT-2026-26-001",
+     "BAR-AT-2026-28-002",
+     "BAR-AT-2026-30-003",
+     "BAR-AT-2026-32-004"
+    ]
+   },
+   {
+    "pos": 2,
+    "header": "ID_Recurso",
+    "non_null": 32,
+    "distinct": 12,
+    "maxlen": 8,
+    "samples": [
+     "RECU-005",
+     "RECU-025",
+     "RECU-001",
+     "RECU-007"
+    ]
+   },
+   {
+    "pos": 3,
+    "header": "ID_Alerta",
+    "non_null": 32,
+    "distinct": 26,
+    "maxlen": 10,
+    "samples": [
+     "AT-2026-26",
+     "AT-2026-28",
+     "AT-2026-30",
+     "AT-2026-32"
+    ]
+   }
+  ]
+ },
+ "BRIDGE_Caso_ActorEstado": {
+  "rows": 1,
+  "cols": 3,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_Relacion",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 27,
+    "samples": [
+     "BCAE-CS-PRODUCE-2026-037-01"
+    ]
+   },
+   {
+    "pos": 2,
+    "header": "ID_Actor_Estado",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 11,
+    "samples": [
+     "ACT-EST-145"
+    ]
+   },
+   {
+    "pos": 3,
+    "header": "ID_Caso",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 19,
+    "samples": [
+     "CS-PRODUCE-2026-037"
+    ]
+   }
+  ]
+ },
+ "LOG_Accesos": {
+  "rows": 857,
+  "cols": 5,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "Fecha",
+    "non_null": 857,
+    "distinct": 856,
+    "maxlen": 26,
+    "samples": [
+     "2026-05-28 13:02:12.149000",
+     "2026-05-28 13:26:32.486000",
+     "2026-05-28 13:28:12.966000",
+     "2026-05-28 13:38:16.765000"
+    ]
+   },
+   {
+    "pos": 2,
+    "header": "DNI",
+    "non_null": 857,
+    "distinct": 12,
+    "maxlen": 8,
+    "samples": [
+     "41907320",
+     "46078289",
+     "7626563",
+     "47261150"
+    ]
+   },
+   {
+    "pos": 3,
+    "header": "Nombre",
+    "non_null": 811,
+    "distinct": 10,
+    "maxlen": 30,
+    "samples": [
+     "Edith Bautista León",
+     "André Jiménez Agapito",
+     "Karen",
+     "Patrick"
+    ]
+   },
+   {
+    "pos": 4,
+    "header": "Rol",
+    "non_null": 857,
+    "distinct": 4,
+    "maxlen": 11,
+    "samples": [
+     "Directora",
+     "Desconocido",
+     "Sectorista",
+     "Admin"
+    ]
+   },
+   {
+    "pos": 5,
+    "header": "Resultado",
+    "non_null": 857,
+    "distinct": 2,
+    "maxlen": 7,
+    "samples": [
+     "OK",
+     "FALLIDO"
+    ]
+   }
+  ]
+ },
+ "FACT_Casos": {
+  "rows": 35,
+  "cols": 29,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_Caso",
+    "non_null": 35,
+    "distinct": 35,
+    "maxlen": 19,
+    "samples": [
+     "CS-PRODUCE-2026-001",
+     "CS-PRODUCE-2026-002",
+     "CS-PRODUCE-2026-003",
+     "CS-PRODUCE-2026-004"
+    ]
+   },
+   {
+    "pos": 2,
+    "header": "ID_Tipo",
+    "non_null": 34,
+    "distinct": 3,
+    "maxlen": 5,
+    "samples": [
+     "TC-03",
+     "TC-02",
+     "TC-01"
+    ]
+   },
+   {
+    "pos": 3,
+    "header": "Nombre_Caso",
+    "non_null": 35,
+    "distinct": 35,
+    "maxlen": 100,
+    "samples": [
+     "Uso de red de cortina de fondo en Cabo Blanco y Los Órganos",
+     "Rehabilitación del Desembarcadero Pesquero Artesanal de Los Órganos",
+     "Reubicación de embarcaciones del Muelle 5E - Terminal Norte Multipropósito del Callao",
+     "Disputa por la administración de la Infraestructura Pesquera Artesanal de Chorrillos"
+    ]
+   },
+   {
+    "pos": 4,
+    "header": "ID_Sector",
+    "non_null": 35,
+    "distinct": 2,
+    "maxlen": 9,
+    "samples": [
+     "Sector-01",
+     "Sector-02"
+    ]
+   },
+   {
+    "pos": 5,
+    "header": "ID_Tematica",
+    "non_null": 35,
+    "distinct": 7,
+    "maxlen": 7,
+    "samples": [
+     "TEMA-02",
+     "TEMA-01",
+     "TEMA-06",
+     "TEMA-03"
+    ]
+   },
+   {
+    "pos": 6,
+    "header": "Fecha_Inicio",
+    "non_null": 32,
+    "distinct": 25,
+    "maxlen": 19,
+    "samples": [
+     "2024-10-15 00:00:00",
+     "2024-12-01 00:00:00",
+     "2012-08-01 00:00:00",
+     "2024-12-04 00:00:00"
+    ]
+   },
+   {
+    "pos": 7,
+    "header": "ID_Ubigeo",
+    "non_null": 35,
+    "distinct": 13,
+    "maxlen": 6,
+    "samples": [
+     "DEP-22",
+     "DEP-07",
+     "DEP-15",
+     "DEP-11"
+    ]
+   },
+   {
+    "pos": 8,
+    "header": "ID_Provincia",
+    "non_null": 25,
+    "distinct": 13,
+    "maxlen": 7,
+    "samples": [
+     "PRO-057",
+     "PRO-025",
+     "PRO-037",
+     "PRO-030"
+    ]
+   },
+   {
+    "pos": 9,
+    "header": "ID_Distrito",
+    "non_null": 23,
+    "distinct": 17,
+    "maxlen": 8,
+    "samples": [
+     "DIS-0615",
+     "DIS-0618",
+     "DIS-0267",
+     "DIS-0431"
+    ]
+   },
+   {
+    "pos": 10,
+    "header": "ID_Sectorista",
+    "non_null": 35,
+    "distinct": 4,
+    "maxlen": 6,
+    "samples": [
+     "SEC-01",
+     "SEC-02",
+     "SEC-03",
+     "SEC-04"
+    ]
+   },
+   {
+    "pos": 11,
+    "header": "Prioridad",
+    "non_null": 35,
+    "distinct": 3,
+    "maxlen": 8,
+    "samples": [
+     "Urgente",
+     "Moderado",
+     "Bajo"
+    ]
+   },
+   {
+    "pos": 12,
+    "header": "ID_Intervencion",
+    "non_null": 34,
+    "distinct": 3,
+    "maxlen": 9,
+    "samples": [
+     "Ciclo-003",
+     "Ciclo-001",
+     "Ciclo-002"
+    ]
+   },
+   {
+    "pos": 13,
+    "header": "Pct_Avance",
+    "non_null": 35,
+    "distinct": 4,
+    "maxlen": 3,
+    "samples": [
+     "0.9",
+     "0",
+     "0.7",
+     "0.8"
+    ]
+   },
+   {
+    "pos": 14,
+    "header": "ID_Riesgos",
+    "non_null": 34,
+    "distinct": 3,
+    "maxlen": 7,
+    "samples": [
+     "RIE-003",
+     "RIE-002",
+     "RIE-001"
+    ]
+   },
+   {
+    "pos": 15,
+    "header": "Descripcion_Riesgo",
+    "non_null": 34,
+    "distinct": 34,
+    "maxlen": 444,
+    "samples": [
+     "Bloqueo de Panamericana Norte (altura Cabo Blanco) por plazo vencido del estudio técnico.",
+     "Riesgo de nuevas medidas de fuerza de los pescadores artesanales si se prolonga la suscrip",
+     "Riesgo de descontento social por la falta de consenso sobre el monto de las compensaciones",
+     "Riesgo de nuevos episodios de violencia entre organizaciones de pescadores, dado el antece"
+    ]
+   },
+   {
+    "pos": 16,
+    "header": "Resumen_Ejecutivo",
+    "non_null": 35,
+    "distinct": 35,
+    "maxlen": 1405,
+    "samples": [
+     "Los pescadores de Cabo Blanco denuncian que pescadores de Los Órganos extraen recursos hid",
+     "Pescadores artesanales del DPA Los Órganos demandan la rehabilitación de la infraestructur",
+     "Los pescadores artesanales del Callao demandan una solución integral a la reubicación de l",
+     "La OSPA José Olaya Balandra (JOB) permanece en la administración de la IPA Chorrillos pese"
+    ]
+   },
+   {
+    "pos": 17,
+    "header": "N_Acciones",
+    "non_null": 35,
+    "distinct": 1,
+    "maxlen": 1,
+    "samples": [
+     "0"
+    ]
+   },
+   {
+    "pos": 18,
+    "header": "N_Hitos_Total",
+    "non_null": 35,
+    "distinct": 1,
+    "maxlen": 1,
+    "samples": [
+     "0"
+    ]
+   },
+   {
+    "pos": 19,
+    "header": "N_Hitos_Cumplidos",
+    "non_null": 35,
+    "distinct": 1,
+    "maxlen": 1,
+    "samples": [
+     "0"
+    ]
+   },
+   {
+    "pos": 20,
+    "header": "Fecha_Cierre",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 21,
+    "header": "Fecha_Reapertura",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 22,
+    "header": "N_Reaperturas",
+    "non_null": 35,
+    "distinct": 1,
+    "maxlen": 1,
+    "samples": [
+     "0"
+    ]
+   },
+   {
+    "pos": 23,
+    "header": "Motivo_Cierre",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 24,
+    "header": "Link_PDF_Drive",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 25,
+    "header": "Fecha_Envio_Correo",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 26,
+    "header": "Destinatarios_Correo",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 27,
+    "header": "Fecha_Envio_WhatsApp",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 28,
+    "header": "Destinatarios_WhatsApp",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 29,
+    "header": null,
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   }
+  ]
+ },
+ "FACT_Proceso_Caso": {
+  "rows": 36,
+  "cols": 10,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_Proceso_Caso",
+    "non_null": 36,
+    "distinct": 36,
+    "maxlen": 7,
+    "samples": [
+     "PC-0001",
+     "PC-0002",
+     "PC-0003",
+     "PC-0004"
+    ]
+   },
+   {
+    "pos": 2,
+    "header": "ID_Caso",
+    "non_null": 36,
+    "distinct": 35,
+    "maxlen": 19,
+    "samples": [
+     "CS-PRODUCE-2026-037",
+     "CS-PRODUCE-2026-038",
+     "CS-PRODUCE-2026-003",
+     "CS-PRODUCE-2026-004"
+    ]
+   },
+   {
+    "pos": 3,
+    "header": "Paso_caso",
+    "non_null": 36,
+    "distinct": 1,
+    "maxlen": 1,
+    "samples": [
+     "1"
+    ]
+   },
+   {
+    "pos": 4,
+    "header": "ID_Responsable",
+    "non_null": 36,
+    "distinct": 4,
+    "maxlen": 6,
+    "samples": [
+     "SEC-01",
+     "SEC-03",
+     "SEC-02",
+     "SEC-04"
+    ]
+   },
+   {
+    "pos": 5,
+    "header": "Fecha_inicio",
+    "non_null": 36,
+    "distinct": 36,
+    "maxlen": 26,
+    "samples": [
+     "2026-08-31 06:55:38.814000",
+     "2026-08-31 06:59:09.260000",
+     "2026-08-31 07:20:03.531000",
+     "2026-08-31 07:23:07.923000"
+    ]
+   },
+   {
+    "pos": 6,
+    "header": "Fecha_Fin",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 7,
+    "header": "Dias_Demora",
+    "non_null": 36,
+    "distinct": 1,
+    "maxlen": 1,
+    "samples": [
+     "0"
+    ]
+   },
+   {
+    "pos": 8,
+    "header": "Paso_caso",
+    "non_null": 36,
+    "distinct": 1,
+    "maxlen": 1,
+    "samples": [
+     "1"
+    ]
+   },
+   {
+    "pos": 9,
+    "header": "Observaciones",
+    "non_null": 36,
+    "distinct": 1,
+    "maxlen": 20,
+    "samples": [
+     "Elaboración del caso"
+    ]
+   },
+   {
+    "pos": 10,
+    "header": "Motivo",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   }
+  ]
+ },
+ "FACT_RED_RADAR": {
+  "rows": 1,
+  "cols": 6,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_Radar",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 7,
+    "samples": [
+     "RED-001"
+    ]
+   },
+   {
+    "pos": 2,
+    "header": "Nombre_RADAR",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 15,
+    "samples": [
+     "Red Radar Piura"
+    ]
+   },
+   {
+    "pos": 3,
+    "header": "ID_Ubigeo",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 6,
+    "samples": [
+     "DEP-22"
+    ]
+   },
+   {
+    "pos": 4,
+    "header": "Nivel",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 8,
+    "samples": [
+     "Regional"
+    ]
+   },
+   {
+    "pos": 5,
+    "header": "Fecha_Instalación",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 19,
+    "samples": [
+     "2026-07-01 00:00:00"
+    ]
+   },
+   {
+    "pos": 6,
+    "header": "Descripción",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 19,
+    "samples": [
+     "dfjf d n jhkv  dffd"
+    ]
+   }
+  ]
+ },
+ "FACT_NODO": {
+  "rows": 1,
+  "cols": 9,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_Nodo",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 8,
+    "samples": [
+     "NODO-001"
+    ]
+   },
+   {
+    "pos": 2,
+    "header": "ID_Radar",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 7,
+    "samples": [
+     "RED-001"
+    ]
+   },
+   {
+    "pos": 3,
+    "header": "Nombre_Nodo",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 16,
+    "samples": [
+     "Red Radar Talara"
+    ]
+   },
+   {
+    "pos": 4,
+    "header": "ID_Ubigeo",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 6,
+    "samples": [
+     "DEP-22"
+    ]
+   },
+   {
+    "pos": 5,
+    "header": "ID_Provincia",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 7,
+    "samples": [
+     "PRO-057"
+    ]
+   },
+   {
+    "pos": 6,
+    "header": "ID_Distrito",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 7,
+    "header": "Nivel",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 10,
+    "samples": [
+     "Provincial"
+    ]
+   },
+   {
+    "pos": 8,
+    "header": "Fecha_Instalación",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 19,
+    "samples": [
+     "2026-07-01 00:00:00"
+    ]
+   },
+   {
+    "pos": 9,
+    "header": "Descripción",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 15,
+    "samples": [
+     "Nodo provincial"
+    ]
+   }
+  ]
+ },
+ "FACT_Proceso_Reporte": {
+  "rows": 99,
+  "cols": 8,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_Proceso",
+    "non_null": 99,
+    "distinct": 98,
+    "maxlen": 10,
+    "samples": [
+     "PR-001",
+     "PR-002",
+     "PR-003",
+     "PR-004"
+    ]
+   },
+   {
+    "pos": 2,
+    "header": "ID_Tipo_Reporte",
+    "non_null": 99,
+    "distinct": 66,
+    "maxlen": 15,
+    "samples": [
+     "Alerta Temprana",
+     "AT-2026-17",
+     "AT-2026-18",
+     "AT-2026-19"
+    ]
+   },
+   {
+    "pos": 3,
+    "header": "Paso_Num",
+    "non_null": 99,
+    "distinct": 6,
+    "maxlen": 1,
+    "samples": [
+     "1",
+     "2",
+     "3",
+     "4"
+    ]
+   },
+   {
+    "pos": 4,
+    "header": "ID_Responsable",
+    "non_null": 99,
+    "distinct": 8,
+    "maxlen": 7,
+    "samples": [
+     "SEC-01",
+     "SEC-04",
+     "DEST-01",
+     "SEC-02"
+    ]
+   },
+   {
+    "pos": 5,
+    "header": "Fecha_Inicio",
+    "non_null": 98,
+    "distinct": 86,
+    "maxlen": 26,
+    "samples": [
+     "2026-02-16 00:00:00",
+     "2026-02-17 00:00:00",
+     "2026-02-19 00:00:00",
+     "2026-02-12 00:00:00"
+    ]
+   },
+   {
+    "pos": 6,
+    "header": "Fecha_Fin",
+    "non_null": 16,
+    "distinct": 5,
+    "maxlen": 19,
+    "samples": [
+     "2026-02-16 00:00:00",
+     "2026-02-17 00:00:00",
+     "2026-02-19 00:00:00",
+     "2026-02-12 00:00:00"
+    ]
+   },
+   {
+    "pos": 7,
+    "header": "Dias_Demora",
+    "non_null": 97,
+    "distinct": 3,
+    "maxlen": 1,
+    "samples": [
+     "0",
+     "1",
+     "3"
+    ]
+   },
+   {
+    "pos": 8,
+    "header": "Observaciones",
+    "non_null": 92,
+    "distinct": 12,
+    "maxlen": 48,
+    "samples": [
+     "Elaborado durante la toma del puente Reque",
+     "Remitido a DVPA, Gabinete y Puntos Focales",
+     "Mesa de diálogo convocada por DVPA",
+     "Caso cerrado tras desbloqueo del puente"
+    ]
+   }
+  ]
+ },
+ "DIM_Paso_Proceso_Caso": {
+  "rows": 4,
+  "cols": 6,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "Paso_caso",
+    "non_null": 4,
+    "distinct": 4,
+    "maxlen": 1,
+    "samples": [
+     "1",
+     "2",
+     "3",
+     "4"
+    ]
+   },
+   {
+    "pos": 2,
+    "header": "Nombre_caso",
+    "non_null": 4,
+    "distinct": 4,
+    "maxlen": 11,
+    "samples": [
+     "Elaboración",
+     "Remisión",
+     "Cierre",
+     "Reapertura"
+    ]
+   },
+   {
+    "pos": 3,
+    "header": "Estado_caso",
+    "non_null": 4,
+    "distinct": 4,
+    "maxlen": 12,
+    "samples": [
+     "Registrado",
+     "Remitido",
+     "Cerrado",
+     "Reaperturado"
+    ]
+   },
+   {
+    "pos": 4,
+    "header": "Tipo_Responsable_caso",
+    "non_null": 4,
+    "distinct": 2,
+    "maxlen": 20,
+    "samples": [
+     "Sectorista",
+     "Sectorista/Directora"
+    ]
+   },
+   {
+    "pos": 5,
+    "header": "Dias_Plazo_Max",
+    "non_null": 4,
+    "distinct": 2,
+    "maxlen": 1,
+    "samples": [
+     "2",
+     "1"
+    ]
+   },
+   {
+    "pos": 6,
+    "header": "Descripción",
+    "non_null": 4,
+    "distinct": 4,
+    "maxlen": 163,
+    "samples": [
+     "El sectorista registra el caso.",
+     "El caso codificado es remitido formalmente al Punto Focal",
+     "El caso se cierra formalmente al cumplirse todos los hitos, resolverse el conflicto o alca",
+     "Un caso cerrado o desestimado se reactiva por incumplimiento de acuerdos, nueva tensión o "
+    ]
+   }
+  ]
+ },
+ "DIM_Paso_Proceso": {
+  "rows": 3,
+  "cols": 5,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "Paso_Num",
+    "non_null": 3,
+    "distinct": 3,
+    "maxlen": 1,
+    "samples": [
+     "1",
+     "2",
+     "3"
+    ]
+   },
+   {
+    "pos": 2,
+    "header": "Nombre_Paso",
+    "non_null": 3,
+    "distinct": 3,
+    "maxlen": 11,
+    "samples": [
+     "Elaboración",
+     "Remisión",
+     "Archivo"
+    ]
+   },
+   {
+    "pos": 3,
+    "header": "Estado_Resultado",
+    "non_null": 3,
+    "distinct": 3,
+    "maxlen": 8,
+    "samples": [
+     "Activo",
+     "Remitido",
+     "Atendido"
+    ]
+   },
+   {
+    "pos": 4,
+    "header": "Tipo_Responsable",
+    "non_null": 3,
+    "distinct": 1,
+    "maxlen": 10,
+    "samples": [
+     "Sectorista"
+    ]
+   },
+   {
+    "pos": 5,
+    "header": "Dias_Plazo_Max",
+    "non_null": 3,
+    "distinct": 1,
+    "maxlen": 1,
+    "samples": [
+     "1"
+    ]
+   }
+  ]
+ },
+ "FACT_Historial_Estado": {
+  "rows": 27,
+  "cols": 10,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_Historial",
+    "non_null": 27,
+    "distinct": 27,
+    "maxlen": 2,
+    "samples": [
+     "2",
+     "3",
+     "4",
+     "5"
+    ]
+   },
+   {
+    "pos": 2,
+    "header": "ID_Caso",
+    "non_null": 27,
+    "distinct": 27,
+    "maxlen": 17,
+    "samples": [
+     "CS-PA-INF-2025-02",
+     "CS-PA-INF-2020-03",
+     "CS-PA-REG-2025-04",
+     "CS-PA-INF-2025-05"
+    ]
+   },
+   {
+    "pos": 3,
+    "header": "Fecha_cambio",
+    "non_null": 27,
+    "distinct": 6,
+    "maxlen": 7,
+    "samples": [
+     "TEMA-02",
+     "TEMA-03",
+     "TEMA-04",
+     "TEMA-05"
+    ]
+   },
+   {
+    "pos": 4,
+    "header": "ID_Estado_Nuevo",
+    "non_null": 27,
+    "distinct": 12,
+    "maxlen": 19,
+    "samples": [
+     "2025-03-17 00:00:00",
+     "2020-01-01 00:00:00",
+     "2024-12-31 00:00:00",
+     "2025-12-31 00:00:00"
+    ]
+   },
+   {
+    "pos": 5,
+    "header": "ID_Riesgos",
+    "non_null": 27,
+    "distinct": 10,
+    "maxlen": 4,
+    "samples": [
+     "2025",
+     "2020",
+     "2026",
+     "2019"
+    ]
+   },
+   {
+    "pos": 6,
+    "header": "ID_Fase_Nueva",
+    "non_null": 27,
+    "distinct": 10,
+    "maxlen": 15,
+    "samples": [
+     "DEP-22",
+     "Callao",
+     "Lima",
+     "Arequipa"
+    ]
+   },
+   {
+    "pos": 7,
+    "header": "ID_Tipo_Cambio",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 8,
+    "header": "Motivo_Cambio",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 9,
+    "header": "ID_Responsable",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 10,
+    "header": "ID_Alerta_Vinculada",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   }
+  ]
+ },
+ "DIM_Tipo_Cambio": {
+  "rows": 6,
+  "cols": 3,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_Tipo_Cambio",
+    "non_null": 6,
+    "distinct": 6,
+    "maxlen": 5,
+    "samples": [
+     "TC-01",
+     "TC-02",
+     "TC-03",
+     "TC-04"
+    ]
+   },
+   {
+    "pos": 2,
+    "header": "Nombre",
+    "non_null": 6,
+    "distinct": 6,
+    "maxlen": 14,
+    "samples": [
+     "Escalada",
+     "Desescalada",
+     "Cierre",
+     "Reapertura"
+    ]
+   },
+   {
+    "pos": 3,
+    "header": "Descripción",
+    "non_null": 6,
+    "distinct": 6,
+    "maxlen": 43,
+    "samples": [
+     "El caso sube de nivel de riesgo",
+     "El caso baja de nivel de riesgo",
+     "El caso se cierra formalmente",
+     "El caso se reactiva"
+    ]
+   }
+  ]
+ },
+ "LOG_Envios": {
+  "rows": 17,
+  "cols": 13,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_Envio",
+    "non_null": 17,
+    "distinct": 17,
+    "maxlen": 8,
+    "samples": [
+     "ENV-0001",
+     "ENV-0002",
+     "ENV-0003",
+     "ENV-0004"
+    ]
+   },
+   {
+    "pos": 2,
+    "header": "Fecha_Envio",
+    "non_null": 17,
+    "distinct": 17,
+    "maxlen": 26,
+    "samples": [
+     "2026-06-01 21:39:37.046000",
+     "2026-06-02 06:33:39.409000",
+     "2026-06-03 13:25:49.257000",
+     "2026-06-03 13:28:06.990000"
+    ]
+   },
+   {
+    "pos": 3,
+    "header": "Canal",
+    "non_null": 17,
+    "distinct": 3,
+    "maxlen": 8,
+    "samples": [
+     "Caso",
+     "WhatsApp",
+     "Correo"
+    ]
+   },
+   {
+    "pos": 4,
+    "header": "ID_Tipo_Reporte",
+    "non_null": 17,
+    "distinct": 6,
+    "maxlen": 19,
+    "samples": [
+     "CS-PRODUCE-2026-02",
+     "CS-PRODUCE-2026-010",
+     "CS-PRODUCE-2026-013",
+     "CS-PRODUCE-2026-016"
+    ]
+   },
+   {
+    "pos": 5,
+    "header": "ID_Documento",
+    "non_null": 17,
+    "distinct": 4,
+    "maxlen": 1,
+    "samples": [
+     "4",
+     "5",
+     "3",
+     "2"
+    ]
+   },
+   {
+    "pos": 6,
+    "header": "Paso_Num",
+    "non_null": 7,
+    "distinct": 2,
+    "maxlen": 6,
+    "samples": [
+     "PF-002",
+     "PF-001"
+    ]
+   },
+   {
+    "pos": 7,
+    "header": "ID_Remitente",
+    "non_null": 15,
+    "distinct": 2,
+    "maxlen": 7,
+    "samples": [
+     "Correo",
+     "Sistema"
+    ]
+   },
+   {
+    "pos": 8,
+    "header": "Rol_Remitente",
+    "non_null": 5,
+    "distinct": 5,
+    "maxlen": 28,
+    "samples": [
+     "oaipcs_Temp39@produce.gob.pe",
+     "oaipcs_temp39@produce.gob.pe",
+     "aoipcs_temp39@produce.gob.pe",
+     "jsalinas@produce.gob.pe"
+    ]
+   },
+   {
+    "pos": 9,
+    "header": "ID_Destinatario",
+    "non_null": 17,
+    "distinct": 4,
+    "maxlen": 28,
+    "samples": [
+     "WhatsApp",
+     "51987579361",
+     "oaipcs_temp39@produce.gob.pe",
+     "51942089895"
+    ]
+   },
+   {
+    "pos": 10,
+    "header": "Link_PDF_Drive",
+    "non_null": 7,
+    "distinct": 3,
+    "maxlen": 12,
+    "samples": [
+     "987579361",
+     "511987579361",
+     "987654321"
+    ]
+   },
+   {
+    "pos": 11,
+    "header": "Resultado",
+    "non_null": 17,
+    "distinct": 6,
+    "maxlen": 199,
+    "samples": [
+     "Estimado/a Punto Focal,\n\nSe remite el caso CS-PRODUCE-2026-02 — DDSFSF para su atención y ",
+     "Estimado/a Punto Focal,\n\nSe remite el caso CS-PRODUCE-2026-02 — DDSFSF para su atención y ",
+     "Estimado/a Punto Focal,\n\nSe remite el caso CS-PRODUCE-2026-010 — Prueba con tematica para ",
+     "Estimado/a Punto Focal,\n\nSe remite el caso CS-PRODUCE-2026-010 — Prueba con tematica para "
+    ]
+   },
+   {
+    "pos": 12,
+    "header": "Observacion",
+    "non_null": 17,
+    "distinct": 3,
+    "maxlen": 7,
+    "samples": [
+     "AUT-001",
+     "SEC-02",
+     "OK"
+    ]
+   },
+   {
+    "pos": 13,
+    "header": null,
+    "non_null": 7,
+    "distinct": 1,
+    "maxlen": 2,
+    "samples": [
+     "OK"
+    ]
+   }
+  ]
+ },
+ "DIM_Alertas": {
+  "rows": 83,
+  "cols": 31,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_Alerta",
+    "non_null": 83,
+    "distinct": 81,
+    "maxlen": 10,
+    "samples": [
+     "AT-2026-75",
+     "AT-2026-76",
+     "AT-2026-77",
+     "AT-2026-78"
+    ]
+   },
+   {
+    "pos": 2,
+    "header": "ID_Caso_Vinculado",
+    "non_null": 50,
+    "distinct": 17,
+    "maxlen": 19,
+    "samples": [
+     "CS-PRODUCE-2026-014",
+     "CS-PRODUCE-2026-016",
+     "CS-PRODUCE-2026-020",
+     "CS-PRODUCE-2026-004"
+    ]
+   },
+   {
+    "pos": 3,
+    "header": "Sectorista",
+    "non_null": 83,
+    "distinct": 9,
+    "maxlen": 6,
+    "samples": [
+     "SEC-10",
+     "SEC-12",
+     "SEC-14",
+     "SEC-02"
+    ]
+   },
+   {
+    "pos": 4,
+    "header": "Fecha",
+    "non_null": 83,
+    "distinct": 79,
+    "maxlen": 19,
+    "samples": [
+     "2022-05-26 00:00:00",
+     "2022-06-06 00:00:00",
+     "2022-07-06 00:00:00",
+     "2022-07-07 00:00:00"
+    ]
+   },
+   {
+    "pos": 5,
+    "header": "Fecha_Actualización",
+    "non_null": 83,
+    "distinct": 83,
+    "maxlen": 19,
+    "samples": [
+     "2026-09-17 14:18:18",
+     "2026-09-17 15:30:06",
+     "2026-09-17 15:38:49",
+     "2026-09-17 15:59:31"
+    ]
+   },
+   {
+    "pos": 6,
+    "header": "ID_Ubigeo",
+    "non_null": 79,
+    "distinct": 15,
+    "maxlen": 6,
+    "samples": [
+     "DEP-25",
+     "DEP-15",
+     "DEP-11",
+     "DEP-22"
+    ]
+   },
+   {
+    "pos": 7,
+    "header": "ID_Provincia",
+    "non_null": 44,
+    "distinct": 14,
+    "maxlen": 7,
+    "samples": [
+     "PRO-037",
+     "PRO-049",
+     "PRO-030",
+     "PRO-058"
+    ]
+   },
+   {
+    "pos": 8,
+    "header": "ID_Distrito",
+    "non_null": 41,
+    "distinct": 17,
+    "maxlen": 8,
+    "samples": [
+     "DIS-0431",
+     "DIS-0545",
+     "DIS-0424",
+     "DIS-0321"
+    ]
+   },
+   {
+    "pos": 9,
+    "header": "Fotografía",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 10,
+    "header": "Titulo_Alerta",
+    "non_null": 83,
+    "distinct": 83,
+    "maxlen": 470,
+    "samples": [
+     "Asociación de Productores y Exportadores Pesqueros solicitan audiencia con SM y Viceminist",
+     "Asociación Paseo Turístico Perla del Pacífico demanda hacer uso del muelle de Chorrillos p",
+     "OSPAS de Pisco (Ica) alertan posibles manifestaciones por la suspensión de la emisión de l",
+     "Pescadores se agrupan en contra de Proyecto de Ley 0828/2021 CR que propone texto sustitor"
+    ]
+   },
+   {
+    "pos": 11,
+    "header": "ID_Sector",
+    "non_null": 83,
+    "distinct": 2,
+    "maxlen": 6,
+    "samples": [
+     "AR-001",
+     "AR-002"
+    ]
+   },
+   {
+    "pos": 12,
+    "header": "Situacion_Actual",
+    "non_null": 83,
+    "distinct": 81,
+    "maxlen": 2212,
+    "samples": [
+     "Según la Carta S/N (Exp. N° 00023457-2021) la Asociación de Productores y exportadores Pes",
+     "La Asociación de Paseo Turístico Perla del Pacífico demanda hacer uso de las instalaciones",
+     "El 06.07.2022, el sr. Hilton Guerrero, dirigente de la Asociación de Pescadores Artesanale",
+     "El lunes 4 de julio, la Comisión de Producción del Congreso de la República, presidida por"
+    ]
+   },
+   {
+    "pos": 13,
+    "header": "Hechos_Recientes",
+    "non_null": 71,
+    "distinct": 71,
+    "maxlen": 4525,
+    "samples": [
+     "- Según el representante de la Asociación (Hugo Vera del Rio), entre los años 2016 y 2020,",
+     "Además, el 07.07.2022, el sr. Hilton Guerrero nuevamente se comunicó telefónicamente para ",
+     "El miércoles 6 de julio, un grupo de pescadores de la Asociación Nacional de Armadores y P",
+     "Posteriormente, con fecha 07.07.2022, mediante ALERTA No 008-2022, se alertó sobre convoca"
+    ]
+   },
+   {
+    "pos": 14,
+    "header": "ID_NIVEL_ALERTA",
+    "non_null": 81,
+    "distinct": 4,
+    "maxlen": 6,
+    "samples": [
+     "NA-004",
+     "NA-002",
+     "NA-003",
+     "NA-001"
+    ]
+   },
+   {
+    "pos": 15,
+    "header": "ID_Riesgos",
+    "non_null": 81,
+    "distinct": 3,
+    "maxlen": 7,
+    "samples": [
+     "RIE-001",
+     "RIE-002",
+     "RIE-003"
+    ]
+   },
+   {
+    "pos": 16,
+    "header": "Descripcion_Riesgo_Alerta",
+    "non_null": 82,
+    "distinct": 81,
+    "maxlen": 1126,
+    "samples": [
+     "- Paralización indefinida de actividades a nivel nacional.\n- Posible manifestación frente ",
+     "- Posibles conflictos dentro y fuera del muelle artesanal de Chorrillos.\n- Críticas al sec",
+     "1. Posibles conflictos en el frontis del Ministerio de la Producción, por pescadores\nde Pi",
+     "• Interferencia y bloqueo en el desarrollo del tránsito urbano local y nacional.\n• Moviliz"
+    ]
+   },
+   {
+    "pos": 17,
+    "header": "Acciones_sugeridas",
+    "non_null": 81,
+    "distinct": 81,
+    "maxlen": 2014,
+    "samples": [
+     "1. Se sugiere que el Despacho Viceministerial de Pesca y Acuicultura pueda convocar una\nre",
+     "Se sugiere que el Despacho Viceministerial de Pesca y Acuicultura pueda convocar una\nreuni",
+     "1. Se sugiere que el DVPA pueda convocar una reunión próximamente con los gremios de Pisco",
+     "La Dirección General de Pesca Artesanal puede atender a todos los colectivos de la pesca q"
+    ]
+   },
+   {
+    "pos": 18,
+    "header": "Acciones_OAIPCS",
+    "non_null": 49,
+    "distinct": 37,
+    "maxlen": 461,
+    "samples": [
+     "OAIPCS - PRODUCE mantiene monitoreo permanente del escenario social en el puerto de San Ju",
+     "OAIPCS mantiene monitoreo activo. Se emitirán actualizaciones conforme se disponga de nuev",
+     "OAIPCS continuará el seguimiento.",
+     "OAIPCS mantiene coordinación activa con actores sindicales y continuará reportando actuali"
+    ]
+   },
+   {
+    "pos": 19,
+    "header": "Paso_Actual",
+    "non_null": 83,
+    "distinct": 1,
+    "maxlen": 1,
+    "samples": [
+     "1"
+    ]
+   },
+   {
+    "pos": 20,
+    "header": "Fecha_Validacion",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 21,
+    "header": "Fecha_Remision",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 22,
+    "header": "Link_PDF_Drive",
+    "non_null": 83,
+    "distinct": 83,
+    "maxlen": 96,
+    "samples": [
+     "https://docs.google.com/document/d/1DGEZw5PS5uo3JiXfIMzHz0TAMkbTKmr2Te-vuXeXIhQ/edit?usp=s",
+     "https://docs.google.com/document/d/13Xi_egxNHlPtQZbVyaH1axKcvm28VGuCVeRO7u-SSIc/edit?usp=s",
+     "https://docs.google.com/document/d/1IajCvpObYBdDz7sGovSWLAekC73zTkKylksoO5Hflg4/edit?usp=s",
+     "https://docs.google.com/document/d/18yVYR8h4y82OB5KRbUjRFzDJ3-qTZTd6g5idcUD1Yvg/edit?usp=s"
+    ]
+   },
+   {
+    "pos": 23,
+    "header": "Fecha_Envio_Correo",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 24,
+    "header": "Destinatarios_Correo",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 25,
+    "header": "Fecha_Envio_WhatsApp",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 26,
+    "header": "Destinatarios_WhatsApp",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 27,
+    "header": "Estado",
+    "non_null": 83,
+    "distinct": 1,
+    "maxlen": 9,
+    "samples": [
+     "Archivado"
+    ]
+   },
+   {
+    "pos": 28,
+    "header": "Tipo_Fuente",
+    "non_null": 20,
+    "distinct": 3,
+    "maxlen": 94,
+    "samples": [
+     "Fuente primaria de relacionamiento",
+     "[{\"tipo\":\"Fuente primaria de relacionamiento\",\"descripcion\":\"Información de OSPAS.\",\"url\":",
+     "Fuente primaria institucional"
+    ]
+   },
+   {
+    "pos": 29,
+    "header": "Descripción_Fuente",
+    "non_null": 18,
+    "distinct": 13,
+    "maxlen": 507,
+    "samples": [
+     "Triangulación de información, entre vecinos y Municipalidad.",
+     "Triangulación de información.",
+     "Triangulación de información",
+     "Triangulación de información con OSPAS."
+    ]
+   },
+   {
+    "pos": 30,
+    "header": "Link_fuente",
+    "non_null": 5,
+    "distinct": 5,
+    "maxlen": 70,
+    "samples": [
+     "https://drive.google.com/file/d/11HZ7s9ZaOlOXrSmUHiDAuPetKTfkuXus/view",
+     "https://drive.google.com/file/d/1huZWFHz4MUenwxfh1OoW6MOfP0aW5D8s/view",
+     "https://drive.google.com/file/d/1pQ5e_lF-9jzvqsNkw_J6RyiQCcA77kcQ/view",
+     "https://drive.google.com/file/d/199sYECviG2kNo4Ea860GklBEFjO6EjZR/view"
+    ]
+   },
+   {
+    "pos": 31,
+    "header": "ID_MESA_GRUPO",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   }
+  ]
+ },
+ "DIM_Reporte_Rapido": {
+  "rows": 1,
+  "cols": 25,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_RR",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 10,
+    "samples": [
+     "RR-2026-01"
+    ]
+   },
+   {
+    "pos": 2,
+    "header": "ID_Caso_Vinculado",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 3,
+    "header": "Sectorista",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 6,
+    "samples": [
+     "SEC-02"
+    ]
+   },
+   {
+    "pos": 4,
+    "header": "Fecha",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 19,
+    "samples": [
+     "2025-10-28 00:00:00"
+    ]
+   },
+   {
+    "pos": 5,
+    "header": "Fecha_Actualización",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 6,
+    "header": "ID_Ubigeo",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 6,
+    "samples": [
+     "DEP-22"
+    ]
+   },
+   {
+    "pos": 7,
+    "header": "ID_Provincia",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 7,
+    "samples": [
+     "PRO-055"
+    ]
+   },
+   {
+    "pos": 8,
+    "header": "ID_Distrito",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 6,
+    "samples": [
+     "AR-001"
+    ]
+   },
+   {
+    "pos": 9,
+    "header": "Lugar",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 38,
+    "samples": [
+     "La Islilla y La Tortuga, Paita – Piura"
+    ]
+   },
+   {
+    "pos": 10,
+    "header": "Ubicación_georeferenciado",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 11,
+    "header": "Fotografía",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 12,
+    "header": "Titulo_Reporte_Rapido",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 73,
+    "samples": [
+     "📍 REPORTE DE AVANZADA | Creación del Servicio del DPA La Islilla | OAIPCS"
+    ]
+   },
+   {
+    "pos": 13,
+    "header": "ID_Sector",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 14,
+    "header": "Resumen_Rapido",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 299,
+    "samples": [
+     "El 29.10.2025 a las 10 am  el SM visitará La Islilla (Paita, Piura) para participar en la "
+    ]
+   },
+   {
+    "pos": 15,
+    "header": "Desarrollo_Intervención",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 625,
+    "samples": [
+     "* En La Islilla, clima tranquilo y expectativa positiva por el nuevo DPA.\n* En La Tortuga,"
+    ]
+   },
+   {
+    "pos": 16,
+    "header": "Anuncios_acuerdos",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 340,
+    "samples": [
+     "Culminar con el otorgamiento de 123 permisos de pesca definitivos (DGPA prevé publicación "
+    ]
+   },
+   {
+    "pos": 17,
+    "header": "Seguimiento",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 235,
+    "samples": [
+     "* Posicionar avances en formalización y proyectos de infraestructura pesquera.\n* Reforzar "
+    ]
+   },
+   {
+    "pos": 18,
+    "header": "Link_PDF_Drive",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 84,
+    "samples": [
+     "https://docs.google.com/document/d/1iuU-9vP3FlNsBjVUd1A5zCeGgLAmzJrQUsv4MUP-z-4/edit"
+    ]
+   },
+   {
+    "pos": 19,
+    "header": "Fecha_Envio_Correo",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 20,
+    "header": "Destinatarios_Correo",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 8,
+    "samples": [
+     "Borrador"
+    ]
+   },
+   {
+    "pos": 21,
+    "header": "Fecha_Envio_WhatsApp",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 22,
+    "header": "Destinatarios_WhatsApp",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 23,
+    "header": "Estado",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 24,
+    "header": null,
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 1,
+    "samples": [
+     "0"
+    ]
+   },
+   {
+    "pos": 25,
+    "header": null,
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 1,
+    "samples": [
+     "0"
+    ]
+   }
+  ]
+ },
+ "DIM_ClimaSocial": {
+  "rows": 7,
+  "cols": 28,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_Clima",
+    "non_null": 7,
+    "distinct": 7,
+    "maxlen": 10,
+    "samples": [
+     "CS-2026-01",
+     "CS-2026-02",
+     "CS-2026-03",
+     "CS-2026-04"
+    ]
+   },
+   {
+    "pos": 2,
+    "header": "ID_Caso_Vinculado",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 19,
+    "samples": [
+     "CS-PRODUCE-2026-006"
+    ]
+   },
+   {
+    "pos": 3,
+    "header": "Sectorista",
+    "non_null": 7,
+    "distinct": 2,
+    "maxlen": 6,
+    "samples": [
+     "SEC-01",
+     "SEC-04"
+    ]
+   },
+   {
+    "pos": 4,
+    "header": "Fecha",
+    "non_null": 7,
+    "distinct": 7,
+    "maxlen": 19,
+    "samples": [
+     "2025-11-07 00:00:00",
+     "2025-11-20 00:00:00",
+     "2025-11-28 00:00:00",
+     "2026-01-28 00:00:00"
+    ]
+   },
+   {
+    "pos": 5,
+    "header": "Fecha_Actualización",
+    "non_null": 6,
+    "distinct": 3,
+    "maxlen": 6,
+    "samples": [
+     "DEP-11",
+     "DEP-16",
+     "DEP-22"
+    ]
+   },
+   {
+    "pos": 6,
+    "header": "ID_Ubigeo",
+    "non_null": 6,
+    "distinct": 4,
+    "maxlen": 7,
+    "samples": [
+     "PRO-030",
+     "PRO-041",
+     "PRO-051",
+     "PRO-058"
+    ]
+   },
+   {
+    "pos": 7,
+    "header": "ID_Provincia",
+    "non_null": 6,
+    "distinct": 1,
+    "maxlen": 6,
+    "samples": [
+     "AR-001"
+    ]
+   },
+   {
+    "pos": 8,
+    "header": "ID_Distrito",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 9,
+    "header": "Lugar",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 5,
+    "samples": [
+     "Tacna"
+    ]
+   },
+   {
+    "pos": 10,
+    "header": "Ubicación_georeferenciado",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 11,
+    "header": "Titulo_Clima",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 62,
+    "samples": [
+     "🔔REPORTE DE CLIMA SOCIAL – REUNIÓN CON OSPAs DE TACNA | OAIPCS"
+    ]
+   },
+   {
+    "pos": 12,
+    "header": "ID_Sector",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 6,
+    "samples": [
+     "AR-001"
+    ]
+   },
+   {
+    "pos": 13,
+    "header": "Situación_Actual_Clima",
+    "non_null": 7,
+    "distinct": 7,
+    "maxlen": 832,
+    "samples": [
+     "El 14 de noviembre de 2025 se realizará en Pisco la II Audiencia Pública Descentralizada d",
+     "Inauguración del Desembarcadero Pesquero Artesanal (DPA) Chancay con presencia del Preside",
+     "La región Piura mantiene un nivel de conflictividad social moderado a alto, con ocho confl",
+     "* La región Piura, particularmente la provincia de Sechura, presenta un nivel de conflicti"
+    ]
+   },
+   {
+    "pos": 14,
+    "header": "Focos_Tension_Clima",
+    "non_null": 7,
+    "distinct": 7,
+    "maxlen": 2173,
+    "samples": [
+     "* Aunque el clima social se mantiene estable, con canales de diálogo abiertos entre autori",
+     "Se identificó que 32 fileteras operan en una loza contigua al DPA de Chancay sin condicion",
+     "Piura presenta cuatro principales focos de tensión social con el sector PRODUCE: \n\n1. Cuot",
+     "Piura presenta focos activos de tensión social vinculados al subsector pesca, siendo los p"
+    ]
+   },
+   {
+    "pos": 15,
+    "header": "Oportunidades_intervención_Clima",
+    "non_null": 7,
+    "distinct": 7,
+    "maxlen": 908,
+    "samples": [
+     "* La II Audiencia Pública Descentralizada representa una oportunidad para fortalecer el ví",
+     "* Reafirmar carácter pesquero del DPA (respuesta directa al conflicto por uso turístico). ",
+     "* Reforzar criterios de RM que fija la cuota del bonito para diciembre, reforzando su legi",
+     "* Anunciar una revisión técnica participativa de la RM N.º 018-2026-PRODUCE.\n* Comunicar u"
+    ]
+   },
+   {
+    "pos": 16,
+    "header": "ID_Riesgos",
+    "non_null": 7,
+    "distinct": 2,
+    "maxlen": 7,
+    "samples": [
+     "1",
+     "RIE-002"
+    ]
+   },
+   {
+    "pos": 17,
+    "header": "Descripción_Riesgo_Clima",
+    "non_null": 5,
+    "distinct": 5,
+    "maxlen": 460,
+    "samples": [
+     "El clima social en Ica se mantiene controlado, con disposición al diálogo y coordinación c",
+     "Con el equipo de Gestión Social de FONDEPES, monitorear la participación del dirigente Joh",
+     "El escenario actual implica un riesgo alto de posible reclamos públicos no orgánicos duran",
+     "Temas de tensión social, sobre los cuales responsabiliza de manera directa a produce, haci"
+    ]
+   },
+   {
+    "pos": 18,
+    "header": "Recomedaciones_estratégicas_Clima",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 19,
+    "samples": [
+     "Sin recomendaciones"
+    ]
+   },
+   {
+    "pos": 19,
+    "header": "Acciones_OAIPCS_Clima",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 20,
+    "header": "Link_PDF_Drive",
+    "non_null": 6,
+    "distinct": 6,
+    "maxlen": 84,
+    "samples": [
+     "https://docs.google.com/document/d/1B-W27mG0oYBic7ID0SFca-7YzNF0mUTK5gxcpNgO1mg/edit",
+     "https://docs.google.com/document/d/1jIK1Gn04fVJqXkbhilCIj4K_03XuRqzsDFctrQwCaSw/edit",
+     "https://docs.google.com/document/d/1c3IpfhZ_c7qzOeSY9kxtdh_wB2WmbP48S3n66axDedE/edit",
+     "https://docs.google.com/document/d/1j3Yn4IcKJBAPFwilKs0zlzMsIjmFOgblvfaWfd4B0ao/edit"
+    ]
+   },
+   {
+    "pos": 21,
+    "header": "Fecha_Envio_Correo",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 22,
+    "header": "Destinatarios_Correo",
+    "non_null": 6,
+    "distinct": 1,
+    "maxlen": 1,
+    "samples": [
+     "0"
+    ]
+   },
+   {
+    "pos": 23,
+    "header": "Fecha_Envio_WhatsApp",
+    "non_null": 6,
+    "distinct": 1,
+    "maxlen": 1,
+    "samples": [
+     "0"
+    ]
+   },
+   {
+    "pos": 24,
+    "header": "Destinatarios_WhatsApp",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 25,
+    "header": "Estado",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 8,
+    "samples": [
+     "Borrador"
+    ]
+   },
+   {
+    "pos": 26,
+    "header": "ID_MesaGrupo",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 27,
+    "header": "Demandas_Clima",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 92,
+    "samples": [
+     "Pesqueros de cerco plantean la oposición a la Ley N.° 31749 y solicitud de una mesa técnic"
+    ]
+   },
+   {
+    "pos": 28,
+    "header": "Riesgos_inmediatos_Clima",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 984,
+    "samples": [
+     "⚠️ 5. ANÁLISIS DE RIESGO\n\n🟠 LOGÍSTICO Y SOCIAL — NIVEL MODERADO\n\nEscenario: Reclamos y act"
+    ]
+   }
+  ]
+ },
+ "DIM_ClimaSocial_Focalizado": {
+  "rows": 6,
+  "cols": 26,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_Clima2",
+    "non_null": 6,
+    "distinct": 6,
+    "maxlen": 10,
+    "samples": [
+     "CS-2026-01",
+     "CS-2026-02",
+     "CS-2026-03",
+     "CS-2026-04"
+    ]
+   },
+   {
+    "pos": 2,
+    "header": "ID_Caso_Vinculado",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 3,
+    "header": "Sectorista",
+    "non_null": 6,
+    "distinct": 1,
+    "maxlen": 6,
+    "samples": [
+     "SEC-01"
+    ]
+   },
+   {
+    "pos": 4,
+    "header": "Fecha",
+    "non_null": 6,
+    "distinct": 6,
+    "maxlen": 19,
+    "samples": [
+     "2025-11-07 00:00:00",
+     "2025-11-20 00:00:00",
+     "2025-11-28 00:00:00",
+     "2026-01-28 00:00:00"
+    ]
+   },
+   {
+    "pos": 5,
+    "header": "Fecha_Actualización",
+    "non_null": 6,
+    "distinct": 3,
+    "maxlen": 6,
+    "samples": [
+     "DEP-11",
+     "DEP-16",
+     "DEP-22"
+    ]
+   },
+   {
+    "pos": 6,
+    "header": "ID_Ubigeo",
+    "non_null": 6,
+    "distinct": 4,
+    "maxlen": 7,
+    "samples": [
+     "PRO-030",
+     "PRO-041",
+     "PRO-051",
+     "PRO-058"
+    ]
+   },
+   {
+    "pos": 7,
+    "header": "ID_Provincia",
+    "non_null": 6,
+    "distinct": 1,
+    "maxlen": 6,
+    "samples": [
+     "AR-001"
+    ]
+   },
+   {
+    "pos": 8,
+    "header": "ID_Distrito",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 9,
+    "header": "Lugar",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 10,
+    "header": "Ubicación_georeferenciado",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 11,
+    "header": "Titulo_Clima",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 12,
+    "header": "ID_Sector",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 13,
+    "header": "Situación_Actual_Clima",
+    "non_null": 6,
+    "distinct": 6,
+    "maxlen": 832,
+    "samples": [
+     "El 14 de noviembre de 2025 se realizará en Pisco la II Audiencia Pública Descentralizada d",
+     "Inauguración del Desembarcadero Pesquero Artesanal (DPA) Chancay con presencia del Preside",
+     "La región Piura mantiene un nivel de conflictividad social moderado a alto, con ocho confl",
+     "* La región Piura, particularmente la provincia de Sechura, presenta un nivel de conflicti"
+    ]
+   },
+   {
+    "pos": 14,
+    "header": "Alerta_Clave",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 15,
+    "header": "Focos_Tension_Clima",
+    "non_null": 6,
+    "distinct": 6,
+    "maxlen": 2173,
+    "samples": [
+     "* Aunque el clima social se mantiene estable, con canales de diálogo abiertos entre autori",
+     "Se identificó que 32 fileteras operan en una loza contigua al DPA de Chancay sin condicion",
+     "Piura presenta cuatro principales focos de tensión social con el sector PRODUCE: \n\n1. Cuot",
+     "Piura presenta focos activos de tensión social vinculados al subsector pesca, siendo los p"
+    ]
+   },
+   {
+    "pos": 16,
+    "header": "recomendación2_Clima",
+    "non_null": 6,
+    "distinct": 6,
+    "maxlen": 908,
+    "samples": [
+     "* La II Audiencia Pública Descentralizada representa una oportunidad para fortalecer el ví",
+     "* Reafirmar carácter pesquero del DPA (respuesta directa al conflicto por uso turístico). ",
+     "* Reforzar criterios de RM que fija la cuota del bonito para diciembre, reforzando su legi",
+     "* Anunciar una revisión técnica participativa de la RM N.º 018-2026-PRODUCE.\n* Comunicar u"
+    ]
+   },
+   {
+    "pos": 17,
+    "header": "ID_Riesgos",
+    "non_null": 6,
+    "distinct": 1,
+    "maxlen": 1,
+    "samples": [
+     "1"
+    ]
+   },
+   {
+    "pos": 18,
+    "header": "Descripción_Riesgo_Clima",
+    "non_null": 5,
+    "distinct": 5,
+    "maxlen": 460,
+    "samples": [
+     "El clima social en Ica se mantiene controlado, con disposición al diálogo y coordinación c",
+     "Con el equipo de Gestión Social de FONDEPES, monitorear la participación del dirigente Joh",
+     "El escenario actual implica un riesgo alto de posible reclamos públicos no orgánicos duran",
+     "Temas de tensión social, sobre los cuales responsabiliza de manera directa a produce, haci"
+    ]
+   },
+   {
+    "pos": 19,
+    "header": "Recomedaciones_estratégicas_Clima",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 20,
+    "header": "Acciones_OAIPCS_Clima",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 21,
+    "header": "Link_PDF_Drive",
+    "non_null": 6,
+    "distinct": 6,
+    "maxlen": 84,
+    "samples": [
+     "https://docs.google.com/document/d/1B-W27mG0oYBic7ID0SFca-7YzNF0mUTK5gxcpNgO1mg/edit",
+     "https://docs.google.com/document/d/1jIK1Gn04fVJqXkbhilCIj4K_03XuRqzsDFctrQwCaSw/edit",
+     "https://docs.google.com/document/d/1c3IpfhZ_c7qzOeSY9kxtdh_wB2WmbP48S3n66axDedE/edit",
+     "https://docs.google.com/document/d/1j3Yn4IcKJBAPFwilKs0zlzMsIjmFOgblvfaWfd4B0ao/edit"
+    ]
+   },
+   {
+    "pos": 22,
+    "header": "Fecha_Envio_Correo",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 23,
+    "header": "Destinatarios_Correo",
+    "non_null": 6,
+    "distinct": 1,
+    "maxlen": 1,
+    "samples": [
+     "0"
+    ]
+   },
+   {
+    "pos": 24,
+    "header": "Fecha_Envio_WhatsApp",
+    "non_null": 6,
+    "distinct": 1,
+    "maxlen": 1,
+    "samples": [
+     "0"
+    ]
+   },
+   {
+    "pos": 25,
+    "header": "Destinatarios_WhatsApp",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 26,
+    "header": "Estado",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   }
+  ]
+ },
+ "DIM_Riesgos": {
+  "rows": 3,
+  "cols": 2,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_Riesgos",
+    "non_null": 3,
+    "distinct": 3,
+    "maxlen": 7,
+    "samples": [
+     "RIE-001",
+     "RIE-002",
+     "RIE-003"
+    ]
+   },
+   {
+    "pos": 2,
+    "header": "Tipo_Riesgo",
+    "non_null": 3,
+    "distinct": 3,
+    "maxlen": 8,
+    "samples": [
+     "Alto",
+     "Moderado",
+     "Bajo"
+    ]
+   }
+  ]
+ },
+ "DIM_Locales": {
+  "rows": 27,
+  "cols": 15,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_Local",
+    "non_null": 27,
+    "distinct": 27,
+    "maxlen": 7,
+    "samples": [
+     "LOC-001",
+     "LOC-002",
+     "LOC-003",
+     "LOC-004"
+    ]
+   },
+   {
+    "pos": 2,
+    "header": "ID_Ubigeo",
+    "non_null": 27,
+    "distinct": 9,
+    "maxlen": 6,
+    "samples": [
+     "DEP-19",
+     "DEP-22",
+     "DEP-11",
+     "DEP-15"
+    ]
+   },
+   {
+    "pos": 3,
+    "header": "Nombre_Local",
+    "non_null": 27,
+    "distinct": 27,
+    "maxlen": 87,
+    "samples": [
+     "SALÓN DE CEP ILO",
+     "Auditorio de CEP PAITA",
+     "Auditorio Municipalidad Provincial de Pisco",
+     "Local del Gremio de Pescadores de Pucusana"
+    ]
+   },
+   {
+    "pos": 4,
+    "header": "Dirección",
+    "non_null": 26,
+    "distinct": 26,
+    "maxlen": 78,
+    "samples": [
+     "Carretera Costanera Sur Km. 3.5, Puerto de Ilo, Moquegua.",
+     "Av. Playa Hermosa Nro. 1501 Tierra Colorada Piura",
+     "Calle Ramón Aspillaga Nro. 901 Provincia de Pisco",
+     "Local del Gremio de Pescadores de Pucusana"
+    ]
+   },
+   {
+    "pos": 5,
+    "header": "Ubicación",
+    "non_null": 5,
+    "distinct": 5,
+    "maxlen": 52,
+    "samples": [
+     "https://maps.app.goo.gl/gYqwJSFFqNPBoFbR9",
+     "https://maps.app.goo.gl/FG7Rn6SJcVGSVRKSA?g_st=ic",
+     "https://maps.app.goo.gl/uratJz4a2KaAehvRA",
+     "Ubicado a una cuadra y media de la Plaza de Arequipa"
+    ]
+   },
+   {
+    "pos": 6,
+    "header": "Fotografia",
+    "non_null": 27,
+    "distinct": 27,
+    "maxlen": 69,
+    "samples": [
+     "https://lh3.googleusercontent.com/d/1DvowG-FX3LDEjBNgASO3JjnyK-zPta-C",
+     "https://lh3.googleusercontent.com/d/1v3LxpUtmBXwih2AnIaR5wtRX1nQQeDWL",
+     "https://lh3.googleusercontent.com/d/17goAIAa8050trQpiI1vDf9mq23SwuwZV",
+     "https://lh3.googleusercontent.com/d/18NpAdyEhaObUVpdz3REKyFzOoY-9w3fP"
+    ]
+   },
+   {
+    "pos": 7,
+    "header": "Aforo",
+    "non_null": 23,
+    "distinct": 15,
+    "maxlen": 3,
+    "samples": [
+     "80",
+     "50",
+     "100",
+     "200"
+    ]
+   },
+   {
+    "pos": 8,
+    "header": "Ingresos",
+    "non_null": 24,
+    "distinct": 3,
+    "maxlen": 14,
+    "samples": [
+     "2",
+     "1",
+     "1 y emergencia"
+    ]
+   },
+   {
+    "pos": 9,
+    "header": "Proyector",
+    "non_null": 18,
+    "distinct": 2,
+    "maxlen": 2,
+    "samples": [
+     "Si",
+     "No"
+    ]
+   },
+   {
+    "pos": 10,
+    "header": "Equipos_Computo",
+    "non_null": 10,
+    "distinct": 2,
+    "maxlen": 2,
+    "samples": [
+     "Si",
+     "No"
+    ]
+   },
+   {
+    "pos": 11,
+    "header": "Audio_Micro",
+    "non_null": 22,
+    "distinct": 2,
+    "maxlen": 2,
+    "samples": [
+     "Si",
+     "No"
+    ]
+   },
+   {
+    "pos": 12,
+    "header": "Nombre_Contacto",
+    "non_null": 7,
+    "distinct": 6,
+    "maxlen": 100,
+    "samples": [
+     "Director Elmer Jesús Nieves Valle - DIGENIPAA - FONDEPES",
+     "Humberto Horacio Romero Villacorta - Coordinador de la Unidad Funcional de Gestión Social",
+     "Joshua Reyes",
+     "Rolando Paiva  Chulle - Pdte. de la Asociación Gremio de Pescadores Artesanales de la Cale"
+    ]
+   },
+   {
+    "pos": 13,
+    "header": "Celular_Contacto",
+    "non_null": 6,
+    "distinct": 5,
+    "maxlen": 11,
+    "samples": [
+     "952 286 156",
+     "987792878",
+     "914456660",
+     "957803983"
+    ]
+   },
+   {
+    "pos": 14,
+    "header": "Correo_contacto",
+    "non_null": 4,
+    "distinct": 3,
+    "maxlen": 23,
+    "samples": [
+     "enieves@fondepes.gob.pe",
+     "hromero@fondepes.gob.pe",
+     "chapiromulo@gmail.com"
+    ]
+   },
+   {
+    "pos": 15,
+    "header": "Recomendacion",
+    "non_null": 5,
+    "distinct": 4,
+    "maxlen": 132,
+    "samples": [
+     "Se recomienda remitir por correo electrónico al contacto el oficio solicitando el préstamo",
+     "Se recomienda remitir por correo electrónico al contacto el oficio solicitando el préstamo",
+     "Remitir correo electrónico a Administración (creymundo@fondepes.gob.pe) y Seguridad (Raul ",
+     "Llevar 2 pilas duracel doble A y el personal de limpieza con sus implementos y el personal"
+    ]
+   }
+  ]
+ },
+ "DIM_Destinatarios_Fijos": {
+  "rows": 4,
+  "cols": 7,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_Destinatario",
+    "non_null": 4,
+    "distinct": 4,
+    "maxlen": 7,
+    "samples": [
+     "DEST-01",
+     "DEST-02",
+     "DEST-03",
+     "DEST-04"
+    ]
+   },
+   {
+    "pos": 2,
+    "header": "ID_AREA",
+    "non_null": 4,
+    "distinct": 3,
+    "maxlen": 6,
+    "samples": [
+     "AR-001",
+     "AR-002",
+     "AR-000"
+    ]
+   },
+   {
+    "pos": 3,
+    "header": "Recibe_Alerta",
+    "non_null": 4,
+    "distinct": 2,
+    "maxlen": 2,
+    "samples": [
+     "Sí",
+     "No"
+    ]
+   },
+   {
+    "pos": 4,
+    "header": "Recibe_Clima",
+    "non_null": 4,
+    "distinct": 2,
+    "maxlen": 2,
+    "samples": [
+     "Sí",
+     "No"
+    ]
+   },
+   {
+    "pos": 5,
+    "header": "Recibe_RR",
+    "non_null": 4,
+    "distinct": 1,
+    "maxlen": 2,
+    "samples": [
+     "Sí"
+    ]
+   },
+   {
+    "pos": 6,
+    "header": "Canal_Preferido",
+    "non_null": 4,
+    "distinct": 3,
+    "maxlen": 16,
+    "samples": [
+     "Email / WhatsApp",
+     "Email",
+     "WhatsApp"
+    ]
+   },
+   {
+    "pos": 7,
+    "header": "Activo",
+    "non_null": 4,
+    "distinct": 1,
+    "maxlen": 2,
+    "samples": [
+     "Sí"
+    ]
+   }
+  ]
+ },
+ "DIM_Recurso_Pesca": {
+  "rows": 37,
+  "cols": 6,
+  "columns": [
+   {
+    "pos": 1,
+    "header": null,
+    "non_null": 37,
+    "distinct": 37,
+    "maxlen": 8,
+    "samples": [
+     "RECU-001",
+     "RECU-002",
+     "RECU-003",
+     "RECU-004"
+    ]
+   },
+   {
+    "pos": 2,
+    "header": "Nombre_común_Recurso",
+    "non_null": 37,
+    "distinct": 37,
+    "maxlen": 18,
+    "samples": [
+     "Anchoveta",
+     "Merluza",
+     "Jurel",
+     "Caballa"
+    ]
+   },
+   {
+    "pos": 3,
+    "header": "Nombre_oficial_Recurso",
+    "non_null": 37,
+    "distinct": 37,
+    "maxlen": 42,
+    "samples": [
+     "Engraulis ringens",
+     "Merluccius gayi peruanus",
+     "Trachurus murphyi",
+     "Scomber japonicus"
+    ]
+   },
+   {
+    "pos": 4,
+    "header": "Familia",
+    "non_null": 37,
+    "distinct": 30,
+    "maxlen": 16,
+    "samples": [
+     "Engraulidae",
+     "Merlucciidae",
+     "Carangidae",
+     "Scombridae"
+    ]
+   },
+   {
+    "pos": 5,
+    "header": "Grupo biológico",
+    "non_null": 37,
+    "distinct": 11,
+    "maxlen": 21,
+    "samples": [
+     "Peces pelágicos",
+     "Peces demersales",
+     "Moluscos cefalÃ³podos",
+     "Elasmobranquios"
+    ]
+   },
+   {
+    "pos": 6,
+    "header": "Ámbito_Recurso",
+    "non_null": 35,
+    "distinct": 3,
+    "maxlen": 11,
+    "samples": [
+     "Pesca",
+     "Ambos",
+     "Acuicultura"
+    ]
+   }
+  ]
+ },
+ "DIM_Estado_Proceso": {
+  "rows": 5,
+  "cols": 4,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_Estado",
+    "non_null": 5,
+    "distinct": 5,
+    "maxlen": 6,
+    "samples": [
+     "EST-01",
+     "EST-02",
+     "EST-03",
+     "EST-04"
+    ]
+   },
+   {
+    "pos": 2,
+    "header": "Nombre_Proceso",
+    "non_null": 5,
+    "distinct": 5,
+    "maxlen": 10,
+    "samples": [
+     "Pendiente",
+     "Completado",
+     "Observado",
+     "Devuelto"
+    ]
+   },
+   {
+    "pos": 3,
+    "header": "Color_PBI",
+    "non_null": 5,
+    "distinct": 5,
+    "maxlen": 7,
+    "samples": [
+     "#EF9F27",
+     "#1D9E75",
+     "#E24B4A",
+     "#7F77DD"
+    ]
+   },
+   {
+    "pos": 4,
+    "header": "Es_Terminal",
+    "non_null": 5,
+    "distinct": 2,
+    "maxlen": 2,
+    "samples": [
+     "No",
+     "Si"
+    ]
+   }
+  ]
+ },
+ "BRIDGE_Caso_Recurso": {
+  "rows": 0,
+  "cols": 3,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_CR",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 2,
+    "header": "ID_Recurso",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 3,
+    "header": "ID_Caso",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   }
+  ]
+ },
+ "BRIDGE_Caso_Demandas": {
+  "rows": 12,
+  "cols": 5,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_RELA_DEMANDA",
+    "non_null": 12,
+    "distinct": 12,
+    "maxlen": 17,
+    "samples": [
+     "BCD-RR-2026-01-01",
+     "BCD-RR-2026-01-02",
+     "BCD-RR-2026-01-03",
+     "BCD-RR-2026-01-04"
+    ]
+   },
+   {
+    "pos": 2,
+    "header": "ID_Caso",
+    "non_null": 12,
+    "distinct": 4,
+    "maxlen": 10,
+    "samples": [
+     "RR-2026-01",
+     "CS-2026-01",
+     "CS-2026-02",
+     "CS-2026-07"
+    ]
+   },
+   {
+    "pos": 3,
+    "header": "ID_Tematica",
+    "non_null": 12,
+    "distinct": 5,
+    "maxlen": 7,
+    "samples": [
+     "TEMA-01",
+     "TEMA-04",
+     "TEMA-05",
+     "TEMA-03"
+    ]
+   },
+   {
+    "pos": 4,
+    "header": "ID_DEMANDA",
+    "non_null": 12,
+    "distinct": 12,
+    "maxlen": 13,
+    "samples": [
+     "DEM-2026-0052",
+     "DEM-2026-0053",
+     "DEM-2026-0054",
+     "DEM-2026-0055"
+    ]
+   },
+   {
+    "pos": 5,
+    "header": "Descripcion_Demanda",
+    "non_null": 12,
+    "distinct": 12,
+    "maxlen": 149,
+    "samples": [
+     "Culminar con el otorgamiento de 123 permisos de pesca definitivos (DGPA prevé publicación ",
+     "Información sobre avances del nuevo DPA.",
+     "Acceso a créditos de FONDEPES.",
+     "Gestión ante MTC para vías de acceso, necesarias para el nuevo DPA."
+    ]
+   }
+  ]
+ },
+ "BRIDGE_Alerta_Demandas": {
+  "rows": 231,
+  "cols": 5,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_RELA_DEMANDA",
+    "non_null": 231,
+    "distinct": 207,
+    "maxlen": 17,
+    "samples": [
+     "BAD-AT-2026-01-01",
+     "BAD-AT-2026-01-02",
+     "BAD-AT-2026-01-03",
+     "BAD-AT-2026-02-01"
+    ]
+   },
+   {
+    "pos": 2,
+    "header": "ID_Tipo_Reporte",
+    "non_null": 231,
+    "distinct": 1,
+    "maxlen": 5,
+    "samples": [
+     "TR-01"
+    ]
+   },
+   {
+    "pos": 3,
+    "header": "ID_ALERTA",
+    "non_null": 231,
+    "distinct": 75,
+    "maxlen": 10,
+    "samples": [
+     "AT-2026-01",
+     "AT-2026-02",
+     "AT-2026-03",
+     "AT-2026-04"
+    ]
+   },
+   {
+    "pos": 4,
+    "header": "ID_Tematica",
+    "non_null": 216,
+    "distinct": 7,
+    "maxlen": 7,
+    "samples": [
+     "TEMA-05",
+     "TEMA-02",
+     "TEMA-07",
+     "TEMA-03"
+    ]
+   },
+   {
+    "pos": 5,
+    "header": "ID_DEMANDA",
+    "non_null": 231,
+    "distinct": 231,
+    "maxlen": 13,
+    "samples": [
+     "DEM-2026-0001",
+     "DEM-2026-0002",
+     "DEM-2026-0003",
+     "DEM-2026-0004"
+    ]
+   }
+  ]
+ },
+ "BRIDGE_Alerta_ActorEstado": {
+  "rows": 5,
+  "cols": 3,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_Relacion",
+    "non_null": 5,
+    "distinct": 5,
+    "maxlen": 18,
+    "samples": [
+     "BAAE-AT-2026-40-01",
+     "BAAE-AT-2026-42-01",
+     "BAAE-AT-2026-42-02",
+     "BAAE-AT-2026-44-01"
+    ]
+   },
+   {
+    "pos": 2,
+    "header": "ID_Alerta",
+    "non_null": 5,
+    "distinct": 3,
+    "maxlen": 10,
+    "samples": [
+     "AT-2026-40",
+     "AT-2026-42",
+     "AT-2026-44"
+    ]
+   },
+   {
+    "pos": 3,
+    "header": "ID_Actor_Estado",
+    "non_null": 5,
+    "distinct": 3,
+    "maxlen": 11,
+    "samples": [
+     "ACT-EST-022",
+     "ACT-EST-043",
+     "ACT-EST-047"
+    ]
+   }
+  ]
+ },
+ "DIM_Tipo_Tematica": {
+  "rows": 7,
+  "cols": 3,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_Tematica",
+    "non_null": 7,
+    "distinct": 7,
+    "maxlen": 7,
+    "samples": [
+     "TEMA-01",
+     "TEMA-02",
+     "TEMA-03",
+     "TEMA-04"
+    ]
+   },
+   {
+    "pos": 2,
+    "header": "Tipo_Tematica",
+    "non_null": 7,
+    "distinct": 7,
+    "maxlen": 35,
+    "samples": [
+     "Infraestructura",
+     "Ordenanamiento y acceso territorial",
+     "Normatividad",
+     "Distribución de beneficios"
+    ]
+   },
+   {
+    "pos": 3,
+    "header": "Descripcion",
+    "non_null": 7,
+    "distinct": 7,
+    "maxlen": 336,
+    "samples": [
+     "Conflictos derivados de las limitaciones o brechas en la provisión estatal de bienes públi",
+     "Conflictos originados por la superposición de actividades o actores en zonas de pesca o te",
+     "Conflictos vinculados a la forma en que se distribuyen los beneficios económicos y sociale",
+     "Ruptura institucional, violencia generalizada e ingobernabilidad que exige intervención ur"
+    ]
+   }
+  ]
+ },
+ "DIM_Demandas": {
+  "rows": 325,
+  "cols": 9,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_DEMANDA",
+    "non_null": 325,
+    "distinct": 325,
+    "maxlen": 13,
+    "samples": [
+     "DEM-2026-0001",
+     "DEM-2026-0002",
+     "DEM-2026-0003",
+     "DEM-2026-0004"
+    ]
+   },
+   {
+    "pos": 2,
+    "header": "Descripcion_Demanda",
+    "non_null": 325,
+    "distinct": 305,
+    "maxlen": 523,
+    "samples": [
+     "Presencia inmediata del Ministro y Viceministro de PRODUCE en la zona del conflicto para e",
+     "Prohibición definitiva del uso de redes de fondo dentro de las 5 millas náuticas y mayor f",
+     "Rechazo a la espera de los resultados del estudio del IMARPE y solicitud de acciones inmed",
+     "Emisión inmediata de una resolución que prohíba o restrinja el uso del aparejo \"red cortin"
+    ]
+   },
+   {
+    "pos": 3,
+    "header": "ID_ORGANIZACION",
+    "non_null": 98,
+    "distinct": 20,
+    "maxlen": 7,
+    "samples": [
+     "ORG-180",
+     "ORG-183",
+     "ORG-121",
+     "ORG-119"
+    ]
+   },
+   {
+    "pos": 4,
+    "header": "ID_CASO",
+    "non_null": 100,
+    "distinct": 4,
+    "maxlen": 19,
+    "samples": [
+     "CS-PRODUCE-2026-020",
+     "CS-PRODUCE-2026-002",
+     "CS-2026-07",
+     "CS-PRODUCE-2026-007"
+    ]
+   },
+   {
+    "pos": 5,
+    "header": "ID_ALERTA",
+    "non_null": 248,
+    "distinct": 82,
+    "maxlen": 10,
+    "samples": [
+     "AT-2026-01",
+     "AT-2026-02",
+     "AT-2026-03",
+     "AT-2026-04"
+    ]
+   },
+   {
+    "pos": 6,
+    "header": "ID_TEMATICA",
+    "non_null": 277,
+    "distinct": 8,
+    "maxlen": 19,
+    "samples": [
+     "TEMA-05",
+     "TEMA-02",
+     "TEMA-07",
+     "TEMA-03"
+    ]
+   },
+   {
+    "pos": 7,
+    "header": "Fecha",
+    "non_null": 324,
+    "distinct": 271,
+    "maxlen": 19,
+    "samples": [
+     "2026-08-31 14:15:19",
+     "2026-08-31 14:15:20",
+     "2026-09-02 12:14:24",
+     "2026-09-02 12:14:25"
+    ]
+   },
+   {
+    "pos": 8,
+    "header": "Tipo_Evidencia_Registro",
+    "non_null": 77,
+    "distinct": 2,
+    "maxlen": 30,
+    "samples": [
+     "Hecho Ocurrido",
+     "Publicaciones o Redes Sociales"
+    ]
+   },
+   {
+    "pos": 9,
+    "header": "Link_Evidencia_Registro",
+    "non_null": 77,
+    "distinct": 12,
+    "maxlen": 81,
+    "samples": [
+     "HECHO-037",
+     "HECHO-038",
+     "HECHO-047",
+     "HECHO-072"
+    ]
+   }
+  ]
+ },
+ "DIM_anuncios_acuerdos": {
+  "rows": 0,
+  "cols": 7,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_acuerdos",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 2,
+    "header": "acuerdo",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 3,
+    "header": "Descripcion_acuerdos",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 4,
+    "header": "ID_Area",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 5,
+    "header": "ID_CASO",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 6,
+    "header": "ID_RR",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 7,
+    "header": "Fecha",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   }
+  ]
+ },
+ "DIM_Nivel_Alertas": {
+  "rows": 4,
+  "cols": 4,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_NIVEL_ALERTA",
+    "non_null": 4,
+    "distinct": 4,
+    "maxlen": 6,
+    "samples": [
+     "NA-001",
+     "NA-002",
+     "NA-003",
+     "NA-004"
+    ]
+   },
+   {
+    "pos": 2,
+    "header": "Nivel",
+    "non_null": 4,
+    "distinct": 4,
+    "maxlen": 22,
+    "samples": [
+     "Inmediato (24h)",
+     "Táctico (24 h - 48h)",
+     "Preventivo (48h - 72h)",
+     "Monitoreo"
+    ]
+   },
+   {
+    "pos": 3,
+    "header": "Descripción_Nivel",
+    "non_null": 4,
+    "distinct": 4,
+    "maxlen": 82,
+    "samples": [
+     "Requiere despliegue de campo o enlace urgente orden público o seguirdad ciudadana.",
+     "Requiere elaboración de estrategia de contingencia y comunicados.",
+     "Permite diálogo y/o desactivar el medidas de fuerza o acciones de riesgo.",
+     "Seguimiento de indicadores de alertas de posibles riesgos."
+    ]
+   },
+   {
+    "pos": 4,
+    "header": "Categoria",
+    "non_null": 4,
+    "distinct": 2,
+    "maxlen": 10,
+    "samples": [
+     "Reactivo",
+     "Preventivo"
+    ]
+   }
+  ]
+ },
+ "BRIDGE_Caso_Descencadenantes": {
+  "rows": 1,
+  "cols": 4,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_RELA_ID_DESCENCADENANTES",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 36,
+    "samples": [
+     "Descencadenantes-ANA-1789079399963-1"
+    ]
+   },
+   {
+    "pos": 2,
+    "header": "ID_Analisis",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 17,
+    "samples": [
+     "ANA-1789079399963"
+    ]
+   },
+   {
+    "pos": 3,
+    "header": "ID_Caso",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 19,
+    "samples": [
+     "CS-PRODUCE-2026-001"
+    ]
+   },
+   {
+    "pos": 4,
+    "header": "Descripcion_Descencadenantes",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 178,
+    "samples": [
+     "Pescadores de Los Órganos continúan realizando faenas de pesca en las áreas de reserva de "
+    ]
+   }
+  ]
+ },
+ "BRIDGE_Caso_Impulsores": {
+  "rows": 5,
+  "cols": 4,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_RELA_ID_Impulsores",
+    "non_null": 5,
+    "distinct": 5,
+    "maxlen": 30,
+    "samples": [
+     "Impulsores-ANA-1789079399963-1",
+     "Impulsores-ANA-1789079399963-2",
+     "Impulsores-ANA-1789079399963-3",
+     "Impulsores-ANA-1789079399963-4"
+    ]
+   },
+   {
+    "pos": 2,
+    "header": "ID_Analisis",
+    "non_null": 5,
+    "distinct": 1,
+    "maxlen": 17,
+    "samples": [
+     "ANA-1789079399963"
+    ]
+   },
+   {
+    "pos": 3,
+    "header": "ID_Caso",
+    "non_null": 5,
+    "distinct": 1,
+    "maxlen": 19,
+    "samples": [
+     "CS-PRODUCE-2026-001"
+    ]
+   },
+   {
+    "pos": 4,
+    "header": "Descripcion_Impulsores",
+    "non_null": 5,
+    "distinct": 5,
+    "maxlen": 201,
+    "samples": [
+     "Falta de alineamiento técnico para el estudio técnico: “Evaluación y monitoreo de los efec",
+     "Cancelación de la reunión del 15/04/2026 sin reprogramación inmediata.",
+     "Sustento técnico que fortalezca o indique el cuidado de las áreas de reserva de pesca.",
+     "Escaso conocimiento sobre el tipo de arte de pesca que se debe de usar en estas áreas."
+    ]
+   }
+  ]
+ },
+ "BRIDGE_Caso_Causas": {
+  "rows": 4,
+  "cols": 4,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_RELA_ID_Causas",
+    "non_null": 4,
+    "distinct": 4,
+    "maxlen": 26,
+    "samples": [
+     "Causas-ANA-1789079399963-1",
+     "Causas-ANA-1789079399963-2",
+     "Causas-ANA-1789079399963-3",
+     "Causas-ANA-1789079399963-4"
+    ]
+   },
+   {
+    "pos": 2,
+    "header": "ID_Analisis",
+    "non_null": 4,
+    "distinct": 1,
+    "maxlen": 17,
+    "samples": [
+     "ANA-1789079399963"
+    ]
+   },
+   {
+    "pos": 3,
+    "header": "ID_Caso",
+    "non_null": 4,
+    "distinct": 1,
+    "maxlen": 19,
+    "samples": [
+     "CS-PRODUCE-2026-001"
+    ]
+   },
+   {
+    "pos": 4,
+    "header": "Descripcion_Causas",
+    "non_null": 4,
+    "distinct": 4,
+    "maxlen": 153,
+    "samples": [
+     "Precariedad de los medios de vida: Falta de diversificación económica que vuelve a las com",
+     "Debilidad en la gobernanza y fragmentación institucional entre PRODUCE, SERNANP, IMARPE y ",
+     "Déficit de enforcement para la supervisión, fiscalización y sanción.",
+     "Competencia territorial por recursos hidrobiológicos (pesca con red de cortina de fondo)."
+    ]
+   }
+  ]
+ },
+ "BRIDGE_Caso_Medios": {
+  "rows": 4,
+  "cols": 7,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_RELA_ID_Medios",
+    "non_null": 4,
+    "distinct": 4,
+    "maxlen": 23,
+    "samples": [
+     "MED-ANA-1789079399963-1",
+     "MED-ANA-1789079399963-2",
+     "MED-ANA-1789079399963-3",
+     "MED-ANA-1789079399963-4"
+    ]
+   },
+   {
+    "pos": 2,
+    "header": "ID_Analisis",
+    "non_null": 4,
+    "distinct": 1,
+    "maxlen": 17,
+    "samples": [
+     "ANA-1789079399963"
+    ]
+   },
+   {
+    "pos": 3,
+    "header": "ID_Caso",
+    "non_null": 4,
+    "distinct": 1,
+    "maxlen": 19,
+    "samples": [
+     "CS-PRODUCE-2026-001"
+    ]
+   },
+   {
+    "pos": 4,
+    "header": "Descripcion_Medios",
+    "non_null": 4,
+    "distinct": 4,
+    "maxlen": 54,
+    "samples": [
+     "Chateros Peruanos",
+     "ankanahui.pe",
+     "Gremio de Pescadores Artesanales Cabo Blanco - El Alto",
+     "Gremio de Pescadores Artesanales de Los Órganos"
+    ]
+   },
+   {
+    "pos": 5,
+    "header": "Tipo_Medios",
+    "non_null": 4,
+    "distinct": 2,
+    "maxlen": 14,
+    "samples": [
+     "Redes Sociales",
+     "Prensa"
+    ]
+   },
+   {
+    "pos": 6,
+    "header": "Link",
+    "non_null": 4,
+    "distinct": 4,
+    "maxlen": 96,
+    "samples": [
+     "https://www.facebook.com/ChaterosPeruanos",
+     "https://ankanahui.pe/",
+     "https://www.facebook.com/p/Gremio-de-Pescadores-Artesanales-Cabo-Blanco-El-Alto-1000947276",
+     "https://www.facebook.com/gremiorganos/?locale=es_LA"
+    ]
+   },
+   {
+    "pos": 7,
+    "header": null,
+    "non_null": 4,
+    "distinct": 1,
+    "maxlen": 2,
+    "samples": [
+     "No"
+    ]
+   }
+  ]
+ },
+ "BRIDGE_ACTOR_GRUPO": {
+  "rows": 0,
+  "cols": 3,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_RELA_ID_GRUPO_ACTOR",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 2,
+    "header": "ID_Caso",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 3,
+    "header": "ID_ORGANIZACIÓN",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   }
+  ]
+ },
+ "BRIDGE_Caso_POSICIONES": {
+  "rows": 0,
+  "cols": 5,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_RELA_ID_POSICIONES",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 2,
+    "header": "ID_Caso",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 3,
+    "header": "ID_ORGANIZACIÓN",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 4,
+    "header": "ID_POSICION",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 5,
+    "header": "DESCRIPCION_POSICION",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   }
+  ]
+ },
+ "BRIDGE_Caso_INTERESES": {
+  "rows": 0,
+  "cols": 5,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_RELA_ID_INTERESES",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 2,
+    "header": "ID_Caso",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 3,
+    "header": "ID_ORGANIZACIÓN",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 4,
+    "header": "ID_INTERES",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 5,
+    "header": "DESCRIPCION_INTERES",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   }
+  ]
+ },
+ "BRIDGE_Caso_NECESIDADES": {
+  "rows": 0,
+  "cols": 5,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_RELA_ID_NECESIDADES",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 2,
+    "header": "ID_Caso",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 3,
+    "header": "ID_ORGANIZACIÓN",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 4,
+    "header": "ID_NECESIDADES",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 5,
+    "header": "DESCRIPCION_NECESIDADES",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   }
+  ]
+ },
+ "BRIDGE_Caso_INETERES_COMUNES": {
+  "rows": 0,
+  "cols": 4,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_RELA_ID_INTERES_COMUNES",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 2,
+    "header": "ID_Caso",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 3,
+    "header": "ID_INTERES_COMUNES",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 4,
+    "header": "DESCRIPCION_INTERES_COMUNES",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   }
+  ]
+ },
+ "DIM_Descencadenantes": {
+  "rows": 0,
+  "cols": 2,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_DESCENCADENANTES",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 2,
+    "header": "Descripción_Descencadenates",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   }
+  ]
+ },
+ "DIM_Impulsores": {
+  "rows": 0,
+  "cols": 2,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_Impulsores",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 2,
+    "header": "Descripción_Impulsores",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   }
+  ]
+ },
+ "DIM_Causas": {
+  "rows": 0,
+  "cols": 2,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_Causas",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 2,
+    "header": "Descripción_Causas",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   }
+  ]
+ },
+ "DIM_Medios": {
+  "rows": 0,
+  "cols": 5,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_Medios",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 2,
+    "header": "Nombre",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 3,
+    "header": "Tipo_Medio",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 4,
+    "header": "Enlace",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 5,
+    "header": "Pincipal",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   }
+  ]
+ },
+ "DIM_Tipo_Proceso": {
+  "rows": 4,
+  "cols": 6,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_Tipo_Reporte",
+    "non_null": 4,
+    "distinct": 4,
+    "maxlen": 5,
+    "samples": [
+     "TR-01",
+     "TR-02",
+     "TR-03",
+     "TR-04"
+    ]
+   },
+   {
+    "pos": 2,
+    "header": "Nombre_Tipo",
+    "non_null": 4,
+    "distinct": 4,
+    "maxlen": 30,
+    "samples": [
+     "Reporte de Alerta Temprana",
+     "Reporte de Clima Social",
+     "Reporte Rápido de Intervención",
+     "Reporte de Caso"
+    ]
+   },
+   {
+    "pos": 3,
+    "header": "Sigla",
+    "non_null": 4,
+    "distinct": 4,
+    "maxlen": 3,
+    "samples": [
+     "AT",
+     "CS",
+     "RR",
+     "CAS"
+    ]
+   },
+   {
+    "pos": 4,
+    "header": "Prefijo_ID",
+    "non_null": 4,
+    "distinct": 4,
+    "maxlen": 5,
+    "samples": [
+     "AL-",
+     "CS-",
+     "RR-",
+     "CASO-"
+    ]
+   },
+   {
+    "pos": 5,
+    "header": "Tiene_Flujo",
+    "non_null": 4,
+    "distinct": 1,
+    "maxlen": 2,
+    "samples": [
+     "Si"
+    ]
+   },
+   {
+    "pos": 6,
+    "header": "Activo",
+    "non_null": 4,
+    "distinct": 1,
+    "maxlen": 2,
+    "samples": [
+     "Si"
+    ]
+   }
+  ]
+ },
+ "DIM_Acciones_Hitos": {
+  "rows": 8,
+  "cols": 13,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_Accion",
+    "non_null": 8,
+    "distinct": 8,
+    "maxlen": 8,
+    "samples": [
+     "ACC-0001",
+     "ACC-0002",
+     "ACC-0003",
+     "ACC-0004"
+    ]
+   },
+   {
+    "pos": 2,
+    "header": "ID_Caso",
+    "non_null": 8,
+    "distinct": 3,
+    "maxlen": 19,
+    "samples": [
+     "CS-PRODUCE-2026-001",
+     "CS-PRODUCE-2026-002",
+     "CS-PRODUCE-2026-003"
+    ]
+   },
+   {
+    "pos": 3,
+    "header": "N_Accion",
+    "non_null": 8,
+    "distinct": 5,
+    "maxlen": 1,
+    "samples": [
+     "1",
+     "2",
+     "3",
+     "4"
+    ]
+   },
+   {
+    "pos": 4,
+    "header": "Descripcion_Accion",
+    "non_null": 8,
+    "distinct": 8,
+    "maxlen": 175,
+    "samples": [
+     "Desarrollar estudio denominado “Evaluación y monitoreo de los efectos de la pesquería arte",
+     "Ratificación de la Resolución Directoral Regional N* 366-2018-GOBIERNO REGIONAL PIURA-DRP-",
+     "Conformación y acreditación de los COREVIPA (Comités de Vigilancia y Control Pesquero Arte",
+     "Aplicar medidas de corto plazo: fiscalización reforzada, registro obligatorio y control de"
+    ]
+   },
+   {
+    "pos": 5,
+    "header": "ID_Area",
+    "non_null": 4,
+    "distinct": 3,
+    "maxlen": 6,
+    "samples": [
+     "AR-047",
+     "AR-042",
+     "AR-066"
+    ]
+   },
+   {
+    "pos": 6,
+    "header": "ID_PF",
+    "non_null": 5,
+    "distinct": 2,
+    "maxlen": 6,
+    "samples": [
+     "PF-001",
+     "PF-013"
+    ]
+   },
+   {
+    "pos": 7,
+    "header": "ID_Hito",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 8,
+    "header": "Tipo_evidencia",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 70,
+    "samples": [
+     "https://drive.google.com/file/d/1rQHxZiYSFYyamLhYgWw3PTHoqWCJ1PP8/view"
+    ]
+   },
+   {
+    "pos": 9,
+    "header": "ID_REDACCION",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 10,
+    "header": "ID_Clima",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 11,
+    "header": "ID_Alerta",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 12,
+    "header": "ID_RR",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 13,
+    "header": "Link_Evidencia",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   }
+  ]
+ },
+ "DIM_Hitos": {
+  "rows": 12,
+  "cols": 13,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_Hitos",
+    "non_null": 12,
+    "distinct": 12,
+    "maxlen": 8,
+    "samples": [
+     "HIT-0001",
+     "HIT-0002",
+     "HIT-0003",
+     "HIT-0004"
+    ]
+   },
+   {
+    "pos": 2,
+    "header": "ID_Caso",
+    "non_null": 12,
+    "distinct": 2,
+    "maxlen": 19,
+    "samples": [
+     "CS-PRODUCE-2026-001",
+     "CS-PRODUCE-2026-002"
+    ]
+   },
+   {
+    "pos": 3,
+    "header": "N_Hito",
+    "non_null": 12,
+    "distinct": 3,
+    "maxlen": 1,
+    "samples": [
+     "1",
+     "2",
+     "3"
+    ]
+   },
+   {
+    "pos": 4,
+    "header": "Descripcion_Hito",
+    "non_null": 12,
+    "distinct": 12,
+    "maxlen": 179,
+    "samples": [
+     "Aprobación de términos de referencia.",
+     "Ejecución de evaluación in situ y recolección de datos, de los 5 entregables de dicha cons",
+     "Análisis de datos y presentación de informe final.",
+     "Reunión de trabajo entre PRODUCE, DIREPRO Piura y Dirigentes y presidentes de pescadores l"
+    ]
+   },
+   {
+    "pos": 5,
+    "header": "Responsable_Hito",
+    "non_null": 3,
+    "distinct": 1,
+    "maxlen": 6,
+    "samples": [
+     "PF-001"
+    ]
+   },
+   {
+    "pos": 6,
+    "header": "Validacion_Hito",
+    "non_null": 12,
+    "distinct": 1,
+    "maxlen": 8,
+    "samples": [
+     "Validado"
+    ]
+   },
+   {
+    "pos": 7,
+    "header": "Fecha_Planificada",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 19,
+    "samples": [
+     "2025-04-04 00:00:00"
+    ]
+   },
+   {
+    "pos": 8,
+    "header": "Fecha_Real",
+    "non_null": 5,
+    "distinct": 5,
+    "maxlen": 19,
+    "samples": [
+     "2025-12-02 00:00:00",
+     "2025-12-05 00:00:00",
+     "2026-04-27 00:00:00",
+     "2026-05-26 00:00:00"
+    ]
+   },
+   {
+    "pos": 9,
+    "header": "Estado_Hito",
+    "non_null": 12,
+    "distinct": 3,
+    "maxlen": 11,
+    "samples": [
+     "Cumplido",
+     "En curso",
+     "No Cumplido"
+    ]
+   },
+   {
+    "pos": 10,
+    "header": "Link_Evidencia",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 11,
+    "header": "ID_Accion",
+    "non_null": 12,
+    "distinct": 7,
+    "maxlen": 8,
+    "samples": [
+     "ACC-0001",
+     "ACC-0002",
+     "ACC-0003",
+     "ACC-0004"
+    ]
+   },
+   {
+    "pos": 12,
+    "header": "ID_Area",
+    "non_null": 9,
+    "distinct": 3,
+    "maxlen": 6,
+    "samples": [
+     "AR-036",
+     "AR-047",
+     "AR-042"
+    ]
+   },
+   {
+    "pos": 13,
+    "header": "Descripcion_Evidencia",
+    "non_null": 3,
+    "distinct": 2,
+    "maxlen": 105,
+    "samples": [
+     "- TDR fue elaborado por SERNAP, quien remitió a IMARPE para su opinión.\n- IMARPE remitió p",
+     "Pendiente"
+    ]
+   }
+  ]
+ },
+ "DIM_REDACCION": {
+  "rows": 51,
+  "cols": 13,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_Redaccion",
+    "non_null": 51,
+    "distinct": 50,
+    "maxlen": 12,
+    "samples": [
+     "RED-2026-040",
+     "RED-2026-031",
+     "RED-2026-032",
+     "RED-2026-026"
+    ]
+   },
+   {
+    "pos": 2,
+    "header": "ID_Caso",
+    "non_null": 29,
+    "distinct": 6,
+    "maxlen": 19,
+    "samples": [
+     "CS-PRODUCE-2026-016",
+     "CS-PRODUCE-2026-007",
+     "CS-PRODUCE-2026-031",
+     "CS-PRODUCE-2026-020"
+    ]
+   },
+   {
+    "pos": 3,
+    "header": "Fecha",
+    "non_null": 51,
+    "distinct": 39,
+    "maxlen": 19,
+    "samples": [
+     "2026-10-07 00:00:00",
+     "2026-09-28 00:00:00",
+     "2026-09-24 00:00:00",
+     "2026-09-23 00:00:00"
+    ]
+   },
+   {
+    "pos": 4,
+    "header": "Titulo_Redaccion",
+    "non_null": 51,
+    "distinct": 49,
+    "maxlen": 87,
+    "samples": [
+     "Reunión con MYPE, en marco del Plantón del 07.10.2026",
+     "DPA Morrin - La Libertad",
+     "DPA SALAVERRY",
+     "REUNIÓN CON ASOCIACIONES DE CAMARONEROS EN COCACHACRA"
+    ]
+   },
+   {
+    "pos": 5,
+    "header": "Tipo_Documento",
+    "non_null": 51,
+    "distinct": 3,
+    "maxlen": 13,
+    "samples": [
+     "Otro",
+     "Ayuda Memoria",
+     "Relatoria"
+    ]
+   },
+   {
+    "pos": 6,
+    "header": "Descripcion",
+    "non_null": 14,
+    "distinct": 11,
+    "maxlen": 925,
+    "samples": [
+     "Atender las principales preocupaciones planteadas por la Asociación de Pescadores Artesana",
+     "La presente relatoría ha sido elaborada a partir de la revisión y reconstrucción directa d",
+     "Atender las principales preocupaciones planteadas por la Asociación de Armadores Artesanal",
+     "Recoger información de primera mano sobre las principales necesidades, demandas y situacio"
+    ]
+   },
+   {
+    "pos": 7,
+    "header": "Sectorista",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 8,
+    "header": "Link_Archivo",
+    "non_null": 14,
+    "distinct": 14,
+    "maxlen": 70,
+    "samples": [
+     "https://drive.google.com/file/d/164jpWesPCgNIRpWXwlxKF4r0pc1I0Xsq/view",
+     "https://drive.google.com/file/d/14r_5bU7ZSSctBkQzG0X5f5gRPf-6QzpU/view",
+     "https://drive.google.com/file/d/1KvE5AgxrFDbBuufAOkf6ay4sXCUgcuR7/view",
+     "https://drive.google.com/file/d/1AGGIotCZlZNRq05304efATXcJpkQhH7G/view"
+    ]
+   },
+   {
+    "pos": 9,
+    "header": "Link_Lista",
+    "non_null": 14,
+    "distinct": 14,
+    "maxlen": 70,
+    "samples": [
+     "https://drive.google.com/file/d/1KKCQFw-ugNN4wMUYBjNcPX6hkpIxPkLB/view",
+     "https://drive.google.com/file/d/1gYW1OIytmtUXAgVrHN5Awhg46BwfD-A_/view",
+     "https://drive.google.com/file/d/1-hE7LvFuuOwdtrcIG1BT2MjLgkCogeO2/view",
+     "https://drive.google.com/file/d/1G0Y-j5sh5-9Vh9VA2L7GwTlbxzlpxya0/view"
+    ]
+   },
+   {
+    "pos": 10,
+    "header": "Link_foto",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 70,
+    "samples": [
+     "https://drive.google.com/file/d/1Ei37Fy3qYTcYAUW4Vir1Cea9_5rqoIzZ/view"
+    ]
+   },
+   {
+    "pos": 11,
+    "header": "Estado",
+    "non_null": 51,
+    "distinct": 1,
+    "maxlen": 6,
+    "samples": [
+     "Activo"
+    ]
+   },
+   {
+    "pos": 12,
+    "header": "ID_Ubigeo",
+    "non_null": 46,
+    "distinct": 9,
+    "maxlen": 6,
+    "samples": [
+     "DEP-15",
+     "DEP-13",
+     "DEP-04",
+     "DEP-22"
+    ]
+   },
+   {
+    "pos": 13,
+    "header": "ID_Sectorista",
+    "non_null": 45,
+    "distinct": 6,
+    "maxlen": 6,
+    "samples": [
+     "SEC-03",
+     "SEC-04",
+     "SEC-02",
+     "SEC-10"
+    ]
+   }
+  ]
+ },
+ "DIM_COORDINACION_TECNICA": {
+  "rows": 4,
+  "cols": 13,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_CT",
+    "non_null": 4,
+    "distinct": 4,
+    "maxlen": 11,
+    "samples": [
+     "CT-2026-001",
+     "CT-2026-002",
+     "CT-2026-003",
+     "CT-2026-004"
+    ]
+   },
+   {
+    "pos": 2,
+    "header": "ID_Caso",
+    "non_null": 2,
+    "distinct": 2,
+    "maxlen": 19,
+    "samples": [
+     "CS-PRODUCE-2026-035",
+     "CS-PRODUCE-2026-031"
+    ]
+   },
+   {
+    "pos": 3,
+    "header": "Fecha",
+    "non_null": 4,
+    "distinct": 4,
+    "maxlen": 19,
+    "samples": [
+     "2026-09-16 00:00:00",
+     "2026-06-22 00:00:00",
+     "2026-09-07 00:00:00",
+     "2026-07-22 00:00:00"
+    ]
+   },
+   {
+    "pos": 4,
+    "header": "Titulo_Redaccion",
+    "non_null": 4,
+    "distinct": 4,
+    "maxlen": 119,
+    "samples": [
+     "REUNIÓN DE FORTALECIMIENTO DE LA PREVENCIÓN Y GESTIÓN DE CONFLICTOS SOCIALES EN EL SECTOR ",
+     "Proyecto de infraestructura pesquería en la región La Libertad",
+     "Propuestas de acción para pescadores R.N PARACAS ante el Fenómeno del Niño",
+     "Residentes de 15 de enero"
+    ]
+   },
+   {
+    "pos": 5,
+    "header": "Tipo_Documento",
+    "non_null": 4,
+    "distinct": 2,
+    "maxlen": 13,
+    "samples": [
+     "Ayuda Memoria",
+     "Otro"
+    ]
+   },
+   {
+    "pos": 6,
+    "header": "Descripcion",
+    "non_null": 2,
+    "distinct": 2,
+    "maxlen": 381,
+    "samples": [
+     "Fortalecer la articulación entre la Oficina de Articulación Intergubernamental y Prevenció",
+     "Reunión sobre el estado actual de los proyectos de modernización de los DPA de Puerto Mala"
+    ]
+   },
+   {
+    "pos": 7,
+    "header": "Sectorista",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 8,
+    "header": "Link_Archivo",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 70,
+    "samples": [
+     "https://drive.google.com/file/d/1RZUhckITDobNgAIHt4cNbUi9vaeQBp2H/view"
+    ]
+   },
+   {
+    "pos": 9,
+    "header": "Link_Lista",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 10,
+    "header": "Link_foto",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 70,
+    "samples": [
+     "https://drive.google.com/file/d/1D5Rx4w9BeCtvwIs_8_ZaJLpTtUCgPPbn/view"
+    ]
+   },
+   {
+    "pos": 11,
+    "header": "Estado",
+    "non_null": 4,
+    "distinct": 1,
+    "maxlen": 6,
+    "samples": [
+     "Activo"
+    ]
+   },
+   {
+    "pos": 12,
+    "header": "ID_Ubigeo",
+    "non_null": 4,
+    "distinct": 1,
+    "maxlen": 6,
+    "samples": [
+     "DEP-15"
+    ]
+   },
+   {
+    "pos": 13,
+    "header": "ID_Sectorista",
+    "non_null": 4,
+    "distinct": 3,
+    "maxlen": 6,
+    "samples": [
+     "SEC-01",
+     "SEC-04",
+     "SEC-03"
+    ]
+   }
+  ]
+ },
+ "DIM_MESAS_GRUPOS": {
+  "rows": 21,
+  "cols": 23,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_MESA_GRUPO",
+    "non_null": 21,
+    "distinct": 21,
+    "maxlen": 10,
+    "samples": [
+     "OAIPCS-001",
+     "OAIPCS-002",
+     "OAIPCS-003",
+     "OAIPCS-004"
+    ]
+   },
+   {
+    "pos": 2,
+    "header": "TIPO_ESPACIO",
+    "non_null": 21,
+    "distinct": 7,
+    "maxlen": 34,
+    "samples": [
+     "Comisión Intergubernamental",
+     "Comisión Sectorial",
+     "Grupo de Trabajo Multisectorial",
+     "Mesa de Diálogo formalizada"
+    ]
+   },
+   {
+    "pos": 3,
+    "header": "CON_NORMA",
+    "non_null": 21,
+    "distinct": 2,
+    "maxlen": 2,
+    "samples": [
+     "Sí",
+     "No"
+    ]
+   },
+   {
+    "pos": 4,
+    "header": "LINEA_OAIPCS",
+    "non_null": 21,
+    "distinct": 4,
+    "maxlen": 22,
+    "samples": [
+     "Descentralización",
+     "Conflictos sociales",
+     "Desarrollo territorial",
+     "Desarrollo productivo"
+    ]
+   },
+   {
+    "pos": 5,
+    "header": "TITULO_MESA",
+    "non_null": 21,
+    "distinct": 21,
+    "maxlen": 218,
+    "samples": [
+     "Comisión Intergubernamental del Sector Producción en materia de MYPE e Industria",
+     "Comisión Intergubernamental del Sector Producción en materia de Pesca y Acuicultura",
+     "Comisión Sectorial de Transferencia del Ministerio de la Producción, en materia de Pesca y",
+     "Comisión Sectorial de Transferencia del Ministerio de la Producción, en materia de MYPE e "
+    ]
+   },
+   {
+    "pos": 6,
+    "header": "TIPO_INSTRUMENTO",
+    "non_null": 21,
+    "distinct": 5,
+    "maxlen": 30,
+    "samples": [
+     "Decreto Supremo",
+     "Resolución Ministerial",
+     "Resolución de Secretaría (PCM)",
+     "Acta de instalación"
+    ]
+   },
+   {
+    "pos": 7,
+    "header": "BASE_LEGAL",
+    "non_null": 21,
+    "distinct": 19,
+    "maxlen": 66,
+    "samples": [
+     "DS N° 019-2024-PRODUCE",
+     "RM N° 159-2017-PRODUCE",
+     "RM N° 120-2022-PCM",
+     "RM N° 268-2020-PCM (en el marco del DS N° 145-2020-PCM)"
+    ]
+   },
+   {
+    "pos": 8,
+    "header": "FECHA_NORMA",
+    "non_null": 15,
+    "distinct": 15,
+    "maxlen": 19,
+    "samples": [
+     "2024-12-31 09:00:00",
+     "2022-04-16 10:00:00",
+     "2020-09-20 00:00:00",
+     "2022-05-24 10:00:00"
+    ]
+   },
+   {
+    "pos": 9,
+    "header": "PRORROGAS_MODIFICATORIAS",
+    "non_null": 9,
+    "distinct": 9,
+    "maxlen": 191,
+    "samples": [
+     "RM N° 036-2023-PCM (16.02.2023); RM N° 0121-2024-PCM (16.04.2024); RM N° 373-2024-PCM (27.",
+     "RM N° 253-2022-PCM (amplía vigencia hasta 20.09.2023)",
+     "RM N° 319-2022-PCM; RM N° 083-2023-PCM; RM N° 158-2023-PCM; RM N° 152-2024-PCM; RM N° 375-",
+     "RM N° 046-2024-MINEM/DM (14.02.2024); RM N° 315-2024-MINEM/DM (14.08.2024); RM N° 179-2025"
+    ]
+   },
+   {
+    "pos": 10,
+    "header": "FECHA_INSTALACION",
+    "non_null": 3,
+    "distinct": 3,
+    "maxlen": 19,
+    "samples": [
+     "2022-05-24 10:00:00",
+     "2013-06-11 00:00:00",
+     "2025-07-18 00:00:00"
+    ]
+   },
+   {
+    "pos": 11,
+    "header": "NATURALEZA",
+    "non_null": 21,
+    "distinct": 3,
+    "maxlen": 11,
+    "samples": [
+     "Permanente",
+     "Temporal",
+     "No definida"
+    ]
+   },
+   {
+    "pos": 12,
+    "header": "FECHA_FIN_VIGENCIA",
+    "non_null": 13,
+    "distinct": 12,
+    "maxlen": 19,
+    "samples": [
+     "2025-07-31 10:00:00",
+     "2023-09-20 00:00:00",
+     "2026-12-31 09:00:00",
+     "2026-11-16 00:00:00"
+    ]
+   },
+   {
+    "pos": 13,
+    "header": "ESTADO_VIGENCIA",
+    "non_null": 21,
+    "distinct": 5,
+    "maxlen": 10,
+    "samples": [
+     "Permanente",
+     "Vencido",
+     "Vigente",
+     "Por vencer"
+    ]
+   },
+   {
+    "pos": 14,
+    "header": "OBJETIVO",
+    "non_null": 21,
+    "distinct": 19,
+    "maxlen": 191,
+    "samples": [
+     "Implementar la gestión descentralizada en el proceso de descentralización, así como atende",
+     "Implementar la gestión descentralizada en el proceso de descentralización, así como atende",
+     "Asegurar que el proceso de transferencia de competencias, funciones, activos y recursos as",
+     "Asegurar que el proceso de transferencia de competencias, funciones, activos y recursos as"
+    ]
+   },
+   {
+    "pos": 15,
+    "header": "PRESIDENTE",
+    "non_null": 21,
+    "distinct": 10,
+    "maxlen": 68,
+    "samples": [
+     "Viceministro/a de MYPE e Industria (PRODUCE)",
+     "Viceministro/a de Pesca y Acuicultura (PRODUCE)",
+     "Secretaría de Descentralización - PCM",
+     "Presidencia del Consejo de Ministros"
+    ]
+   },
+   {
+    "pos": 16,
+    "header": "SECRETARIO_TECNICO",
+    "non_null": 12,
+    "distinct": 8,
+    "maxlen": 46,
+    "samples": [
+     "OAIPCS (PRODUCE)",
+     "Director/a de la OAIPCS",
+     "Secretaría de Descentralización - PCM",
+     "Viceministerio de Gobernanza Territorial - PCM"
+    ]
+   },
+   {
+    "pos": 17,
+    "header": "ROL_PRODUCE",
+    "non_null": 21,
+    "distinct": 4,
+    "maxlen": 18,
+    "samples": [
+     "Secretaría Técnica",
+     "Integrante",
+     "Invitado",
+     "Preside"
+    ]
+   },
+   {
+    "pos": 18,
+    "header": "AMBITO_DEPARTAMENTO",
+    "non_null": 18,
+    "distinct": 13,
+    "maxlen": 256,
+    "samples": [
+     "Amazonas, Ancash, Apurimac, Arequipa, Ayacucho, Cajamarca, Callao, Cusco, Huancavelica, Hu",
+     "Amazonas, Ancash, Apurimac, Arequipa, Ayacucho, Cajamarca, Callao, Cusco, Huancavelica, Hu",
+     "Amazonas, Ancash, Apurimac, Arequipa, Ayacucho, Cajamarca, Callao, Cusco, Huancavelica, Hu",
+     "Loreto"
+    ]
+   },
+   {
+    "pos": 19,
+    "header": "TITULAR",
+    "non_null": 15,
+    "distinct": 10,
+    "maxlen": 100,
+    "samples": [
+     "Director/a de la OAIPCS",
+     "Director de Promoción y Desarrollo Acuícola",
+     "Cintia Jori Rondón Cunyas - Responsable de la Unidad de Monitoreo y Evaluación",
+     "Juan Carlos Requejo Alemán - Viceministro de MYPE e Industria"
+    ]
+   },
+   {
+    "pos": 20,
+    "header": "ALTERNO",
+    "non_null": 14,
+    "distinct": 10,
+    "maxlen": 64,
+    "samples": [
+     "Javier Alegre Paredes - Especialista de Descentralización OAIPCS",
+     "Especialista OAIPCS (precisar nombre)",
+     "Director/a de la OAIPCS",
+     "Carlos Salazar García - Asesor de la Dirección Ejecutiva del ITP"
+    ]
+   },
+   {
+    "pos": 21,
+    "header": "DOC_DESIGNACION",
+    "non_null": 10,
+    "distinct": 10,
+    "maxlen": 109,
+    "samples": [
+     "Oficio N° 001017-2024-PRODUCE/SG",
+     "Oficio N° 00000742-2022-PRODUCE/SG",
+     "Oficio N° 00001022-2025-PRODUCE/SG",
+     "Oficio N° 00000938-2023-PRODUCE/SG"
+    ]
+   },
+   {
+    "pos": 22,
+    "header": "ID_SECTORISTA",
+    "non_null": 16,
+    "distinct": 5,
+    "maxlen": 6,
+    "samples": [
+     "SEC-15",
+     "SEC-02",
+     "SEC-01",
+     "SEC-04"
+    ]
+   },
+   {
+    "pos": 23,
+    "header": "Link_Evidencia",
+    "non_null": 2,
+    "distinct": 2,
+    "maxlen": 70,
+    "samples": [
+     "https://drive.google.com/file/d/1JBQepXNo7hhxuaUIXYTUH90hyyvOj3XT/view",
+     "https://drive.google.com/file/d/1Mt3lI2zd8JWdwuIT7ubXhymCLJDs032j/view"
+    ]
+   }
+  ]
+ },
+ "DIM_ORGANIZACION": {
+  "rows": 224,
+  "cols": 16,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_ORGANIZACION",
+    "non_null": 224,
+    "distinct": 224,
+    "maxlen": 7,
+    "samples": [
+     "ORG-001",
+     "ORG-002",
+     "ORG-003",
+     "ORG-004"
+    ]
+   },
+   {
+    "pos": 2,
+    "header": "NOMBRE_ORGANIZACIÓN",
+    "non_null": 224,
+    "distinct": 222,
+    "maxlen": 139,
+    "samples": [
+     "ASOCIACION DE PESCADORES ARTESANALES DEDICADOS A LA EXTRACCION DE POTA PERICO Y OTROS PARA",
+     "ASOCIACION DE PESCADORES ARTESANALES DE CALETA CONSTANTE - SECHURA",
+     "ASOCIACION MUTUALISTA DE PESCADORES ARTESANALES DE PUERTO NUEVO PAITA",
+     "ASOCIACION GREMIO DE PESCADORES ARTESANALES DE CALETA ACAPULCO"
+    ]
+   },
+   {
+    "pos": 3,
+    "header": "ID_Ubigeo",
+    "non_null": 121,
+    "distinct": 12,
+    "maxlen": 6,
+    "samples": [
+     "DEP-22",
+     "DEP-26",
+     "DEP-04",
+     "DEP-15"
+    ]
+   },
+   {
+    "pos": 4,
+    "header": "Dirección",
+    "non_null": 28,
+    "distinct": 28,
+    "maxlen": 74,
+    "samples": [
+     "CLLE JOSE OLAYA N° 207 PARACHIQUE - SECHURA - PIURA.",
+     "CONSTANTE",
+     "CALLE CENTRAL MZ. C LOTE 11 PUERTO NUEVO - PAITA",
+     "PANAMERICANA NORTE S/N CALETA ACAPULCO"
+    ]
+   },
+   {
+    "pos": 5,
+    "header": "Fecha_constitución",
+    "non_null": 28,
+    "distinct": 28,
+    "maxlen": 19,
+    "samples": [
+     "2015-05-15 00:00:00",
+     "2002-06-12 00:00:00",
+     "1999-09-13 00:00:00",
+     "1998-04-11 00:00:00"
+    ]
+   },
+   {
+    "pos": 6,
+    "header": "ID_TIPO_ORG",
+    "non_null": 212,
+    "distinct": 7,
+    "maxlen": 26,
+    "samples": [
+     "ASOCIACIÓN",
+     "TIPO_ORG_001",
+     "GREMIO (no formalizado)",
+     "SINDICATO"
+    ]
+   },
+   {
+    "pos": 7,
+    "header": "Inscripción_sunarp",
+    "non_null": 22,
+    "distinct": 22,
+    "maxlen": 8,
+    "samples": [
+     "11147796",
+     "11007522",
+     "115959",
+     "2013944"
+    ]
+   },
+   {
+    "pos": 8,
+    "header": "Cod_Actor",
+    "non_null": 220,
+    "distinct": 207,
+    "maxlen": 7,
+    "samples": [
+     "ACT-006",
+     "ACT-677",
+     "ACT-644",
+     "ACT-660"
+    ]
+   },
+   {
+    "pos": 9,
+    "header": "Integrantes",
+    "non_null": 24,
+    "distinct": 23,
+    "maxlen": 3,
+    "samples": [
+     "9",
+     "50",
+     "59",
+     "22"
+    ]
+   },
+   {
+    "pos": 10,
+    "header": "Embarcaciones",
+    "non_null": 24,
+    "distinct": 17,
+    "maxlen": 3,
+    "samples": [
+     "8",
+     "32",
+     "59",
+     "21"
+    ]
+   },
+   {
+    "pos": 11,
+    "header": "Armadores",
+    "non_null": 24,
+    "distinct": 5,
+    "maxlen": 2,
+    "samples": [
+     "0",
+     "63",
+     "53",
+     "58"
+    ]
+   },
+   {
+    "pos": 12,
+    "header": "Fotografía",
+    "non_null": 20,
+    "distinct": 20,
+    "maxlen": 69,
+    "samples": [
+     "https://lh3.googleusercontent.com/d/1aXIpJGMF34lz6f9qKpkPt_jslkdKadNc",
+     "https://lh3.googleusercontent.com/d/145vtXFSA1eMMa-HnDRYQPVrXWiGVDzXH",
+     "https://lh3.googleusercontent.com/d/1otdOsJLukOF6QG2UWqW5-jklh8y0-L6C",
+     "https://lh3.googleusercontent.com/d/10u6HI8Dc4vDWghTY9SV3NP3XiOM8RgD2"
+    ]
+   },
+   {
+    "pos": 13,
+    "header": "Perfil_Organizacion",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 434,
+    "samples": [
+     "Es una organización gremial clave en el norte del Perú que agrupa y representa a los propi"
+    ]
+   },
+   {
+    "pos": 14,
+    "header": "RUC",
+    "non_null": 5,
+    "distinct": 5,
+    "maxlen": 11,
+    "samples": [
+     "20367044978",
+     "20484268836",
+     "20409484221",
+     "20613611577"
+    ]
+   },
+   {
+    "pos": 15,
+    "header": "link_facebook",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 16,
+    "header": "Abreviatura",
+    "non_null": 11,
+    "distinct": 11,
+    "maxlen": 29,
+    "samples": [
+     "APAPAC-SE",
+     "AAARCUDIPA",
+     "APAMARPA PAITA",
+     "APROPESAV"
+    ]
+   }
+  ]
+ },
+ "DIM_TIPO_ORG": {
+  "rows": 4,
+  "cols": 2,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_TIPO_ORG",
+    "non_null": 4,
+    "distinct": 4,
+    "maxlen": 12,
+    "samples": [
+     "TIPO_ORG_001",
+     "TIPO_ORG_002",
+     "TIPO_ORG_003",
+     "TIPO_ORG_004"
+    ]
+   },
+   {
+    "pos": 2,
+    "header": "NOMBRE_TIPO",
+    "non_null": 4,
+    "distinct": 4,
+    "maxlen": 26,
+    "samples": [
+     "ASOCIACIÓN",
+     "ASOCIACIÓN DE ASOCIACIONES",
+     "SINDICATO",
+     "COOPERATIVA"
+    ]
+   }
+  ]
+ },
+ "DIM_Actores": {
+  "rows": 828,
+  "cols": 16,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_Actor",
+    "non_null": 828,
+    "distinct": 826,
+    "maxlen": 7,
+    "samples": [
+     "ACT-001",
+     "ACT-002",
+     "ACT-004",
+     "ACT-005"
+    ]
+   },
+   {
+    "pos": 2,
+    "header": "Nombre_Actor",
+    "non_null": 828,
+    "distinct": 819,
+    "maxlen": 153,
+    "samples": [
+     "Adonay Olaya Marchan",
+     "Carlos Chapilliquen",
+     "Diego Armando Paiva Jacinto",
+     "Edgar Jiménez Caipa"
+    ]
+   },
+   {
+    "pos": 3,
+    "header": "DNI",
+    "non_null": 642,
+    "distinct": 587,
+    "maxlen": 9,
+    "samples": [
+     "74558302",
+     "46901273",
+     "04649859",
+     "44557328"
+    ]
+   },
+   {
+    "pos": 4,
+    "header": "Telefono",
+    "non_null": 508,
+    "distinct": 460,
+    "maxlen": 33,
+    "samples": [
+     "939773280",
+     "942086889",
+     "980874725",
+     "930445426"
+    ]
+   },
+   {
+    "pos": 5,
+    "header": "Email",
+    "non_null": 41,
+    "distinct": 38,
+    "maxlen": 34,
+    "samples": [
+     "paivajacintodiegoarmando@gmail.com",
+     "gredepesarpa2025@gmail.com",
+     "fiupapperu@hotmail.com",
+     "asociaciongamarraperu@gmail.com"
+    ]
+   },
+   {
+    "pos": 6,
+    "header": "Cargo",
+    "non_null": 675,
+    "distinct": 140,
+    "maxlen": 50,
+    "samples": [
+     "Pescador",
+     "Ex presidente",
+     "Presidente",
+     "Secretario General"
+    ]
+   },
+   {
+    "pos": 7,
+    "header": "Id_organizacion",
+    "non_null": 660,
+    "distinct": 368,
+    "maxlen": 139,
+    "samples": [
+     "Gremio Los Órganos",
+     "Gremio Cabo Blanco",
+     "Federación Macrosur",
+     "ORG-023"
+    ]
+   },
+   {
+    "pos": 8,
+    "header": "Abreviatura",
+    "non_null": 132,
+    "distinct": 110,
+    "maxlen": 115,
+    "samples": [
+     "ASUPAPS",
+     "MACRO SUR",
+     "GREDEPESARPA",
+     "FIUPAP"
+    ]
+   },
+   {
+    "pos": 9,
+    "header": "ID_Tipo_Actor",
+    "non_null": 253,
+    "distinct": 4,
+    "maxlen": 11,
+    "samples": [
+     "Tipo-Act-02",
+     "Sí",
+     "Regional",
+     "Tipo-Act-03"
+    ]
+   },
+   {
+    "pos": 10,
+    "header": "Nivel_Gobierno",
+    "non_null": 244,
+    "distinct": 5,
+    "maxlen": 9,
+    "samples": [
+     "Local",
+     "Regional",
+     "Perfil-01",
+     "Nacional"
+    ]
+   },
+   {
+    "pos": 11,
+    "header": "Categoria",
+    "non_null": 239,
+    "distinct": 5,
+    "maxlen": 16,
+    "samples": [
+     "Actor Secundario",
+     "Actor Primario",
+     "ROL-01",
+     "Perfil-01"
+    ]
+   },
+   {
+    "pos": 12,
+    "header": "ID_Perfil",
+    "non_null": 233,
+    "distinct": 4,
+    "maxlen": 9,
+    "samples": [
+     "Perfil-02",
+     "Perfil-03",
+     "Perfil-01",
+     "ROL-01"
+    ]
+   },
+   {
+    "pos": 13,
+    "header": "ID_Ubigeo",
+    "non_null": 240,
+    "distinct": 13,
+    "maxlen": 6,
+    "samples": [
+     "DEP-22",
+     "DEP-04",
+     "DEP-11",
+     "DEP-07"
+    ]
+   },
+   {
+    "pos": 14,
+    "header": "Fotografía",
+    "non_null": 95,
+    "distinct": 95,
+    "maxlen": 69,
+    "samples": [
+     "https://lh3.googleusercontent.com/d/1XxQVKdGaGtDO5imc7_qQX6klXWbqrgym",
+     "https://lh3.googleusercontent.com/d/158MS7HDPb_m9E2uaSyupGT0HNOOVDHbJ",
+     "https://lh3.googleusercontent.com/d/1vhn_Q2ps2ZJMgrAvy6oAIx4-hTc4RbOn",
+     "https://lh3.googleusercontent.com/d/1SJzBF2nGKCeFZlhIV372VvJ42RA25y5Y"
+    ]
+   },
+   {
+    "pos": 15,
+    "header": "Activo",
+    "non_null": 298,
+    "distinct": 2,
+    "maxlen": 2,
+    "samples": [
+     "No",
+     "Sí"
+    ]
+   },
+   {
+    "pos": 16,
+    "header": "Descripcion_Perfil",
+    "non_null": 74,
+    "distinct": 73,
+    "maxlen": 1243,
+    "samples": [
+     "Presidente de ASUPAPS (Asociación Unificada de Pescadores Artesanales de la Provincia de S",
+     "Es ingeniero pesquero egresado de la Universidad Nacional de Piura (UNP) y cuenta con expe",
+     "Armador, pescador artesanal y dirigente pesquero del norte peruano, quien ejerce un rol fu",
+     "Presidente – ASPACHD (Asociación Sindicato Pescadores Artesanales C.H.D. Yacila). Alcalde "
+    ]
+   }
+  ]
+ },
+ "DIM_Actores_Estado": {
+  "rows": 108,
+  "cols": 16,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_Actor_Estado",
+    "non_null": 108,
+    "distinct": 108,
+    "maxlen": 11,
+    "samples": [
+     "ACT-EST-001",
+     "ACT-EST-002",
+     "ACT-EST-003",
+     "ACT-EST-004"
+    ]
+   },
+   {
+    "pos": 2,
+    "header": "Nombre_Actor",
+    "non_null": 108,
+    "distinct": 86,
+    "maxlen": 37,
+    "samples": [
+     "Juan Carlos Requejo Alemán",
+     "Fernando Alarcón Díaz",
+     "Manuel Jesús Farfán Acuña",
+     "Jesús Barrientos Ruíz"
+    ]
+   },
+   {
+    "pos": 3,
+    "header": "DNI",
+    "non_null": 108,
+    "distinct": 1,
+    "maxlen": 3,
+    "samples": [
+     "N/D"
+    ]
+   },
+   {
+    "pos": 4,
+    "header": "Telefono",
+    "non_null": 108,
+    "distinct": 74,
+    "maxlen": 31,
+    "samples": [
+     "N/D",
+     "914-736-007",
+     "985-705-650",
+     "993-211-966"
+    ]
+   },
+   {
+    "pos": 5,
+    "header": "Email",
+    "non_null": 108,
+    "distinct": 77,
+    "maxlen": 36,
+    "samples": [
+     "N/D",
+     "falarcon@produce.gob.pe",
+     "mfarfan@produce.gob.pe",
+     "jbarrientosr@produce.gob.pe"
+    ]
+   },
+   {
+    "pos": 6,
+    "header": "Cargo",
+    "non_null": 108,
+    "distinct": 92,
+    "maxlen": 65,
+    "samples": [
+     "Titular del Despacho",
+     "Secretario General",
+     "Jefe OCI",
+     "Viceministro de Pesca y Acuicultura"
+    ]
+   },
+   {
+    "pos": 7,
+    "header": "ID_Entidad",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 8,
+    "header": "ID_Area",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 9,
+    "header": "ID_Unidad",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 10,
+    "header": "ID_Tipo_Actor",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 11,
+    "header": "Nivel_Gobierno",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 12,
+    "header": "Categoria",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 13,
+    "header": "ID_Ubigeo",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 14,
+    "header": "Fotografia",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 15,
+    "header": "Activo",
+    "non_null": 9,
+    "distinct": 1,
+    "maxlen": 2,
+    "samples": [
+     "Sí"
+    ]
+   },
+   {
+    "pos": 16,
+    "header": null,
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   }
+  ]
+ },
+ "FACT_Hechos_Casos": {
+  "rows": 80,
+  "cols": 13,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_Hecho",
+    "non_null": 80,
+    "distinct": 78,
+    "maxlen": 9,
+    "samples": [
+     "HECHO-002",
+     "HECHO-003",
+     "HECHO-013",
+     "HECHO-014"
+    ]
+   },
+   {
+    "pos": 2,
+    "header": "ID_Caso",
+    "non_null": 80,
+    "distinct": 5,
+    "maxlen": 19,
+    "samples": [
+     "CS-PRODUCE-2026-001",
+     "CS-PRODUCE-2026-007",
+     "CS-PRODUCE-2026-002",
+     "CS-PRODUCE-2026-003"
+    ]
+   },
+   {
+    "pos": 3,
+    "header": "Fecha",
+    "non_null": 80,
+    "distinct": 74,
+    "maxlen": 19,
+    "samples": [
+     "2024-10-15 00:00:00",
+     "2024-10-18 00:00:00",
+     "2025-07-03 00:00:00",
+     "2025-11-06 00:00:00"
+    ]
+   },
+   {
+    "pos": 4,
+    "header": "Tipo_Hecho",
+    "non_null": 80,
+    "distinct": 9,
+    "maxlen": 26,
+    "samples": [
+     "Bloqueo",
+     "Reunión Técnica",
+     "Comunicado o documento",
+     "Aprobación de Normatividad"
+    ]
+   },
+   {
+    "pos": 5,
+    "header": "Hecho_Crítico",
+    "non_null": 80,
+    "distinct": 2,
+    "maxlen": 2,
+    "samples": [
+     "Si",
+     "No"
+    ]
+   },
+   {
+    "pos": 6,
+    "header": "Descripcion",
+    "non_null": 80,
+    "distinct": 80,
+    "maxlen": 467,
+    "samples": [
+     "Bloqueo de la Panamericana Norte Los gremios de pescadores artesanales de Cabo Blanco y El",
+     "Espacio de diálogo entre pescadores y PRODUCE, donde se establece tres compromisos central",
+     "IMARPE realiza el envío del Plan de Trabajo de Estudio Técnico a SERNANP",
+     "SENANP inicia consultoría para el estudio de evaluación del impacto biológico, pesquero y "
+    ]
+   },
+   {
+    "pos": 7,
+    "header": "ID_Sectorista",
+    "non_null": 80,
+    "distinct": 2,
+    "maxlen": 6,
+    "samples": [
+     "SEC-01",
+     "SEC-02"
+    ]
+   },
+   {
+    "pos": 8,
+    "header": "Tipo_evidencia_hecho",
+    "non_null": 77,
+    "distinct": 2,
+    "maxlen": 30,
+    "samples": [
+     "Evidencia Institucional u otra",
+     "Evidencia de Alerta o Reporte"
+    ]
+   },
+   {
+    "pos": 9,
+    "header": "ID_Clima",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 10,
+    "header": "ID_Alerta",
+    "non_null": 5,
+    "distinct": 5,
+    "maxlen": 70,
+    "samples": [
+     "https://drive.google.com/file/d/1GiU3mqK-9mu4ah5Jn6x8_uulBEne9UGB/view",
+     "AT-2026-02",
+     "AT-2026-01",
+     "https://drive.google.com/file/d/11peDupkSbwdxc4W4e_xHsPR4RzvJKYd9/view"
+    ]
+   },
+   {
+    "pos": 11,
+    "header": "ID_RR",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 12,
+    "header": "Link_Evidencia",
+    "non_null": 63,
+    "distinct": 63,
+    "maxlen": 70,
+    "samples": [
+     "https://drive.google.com/file/d/1-4jh_6tJyqfX98M9-LhdJpPZ562bmAit/view",
+     "https://drive.google.com/file/d/1KvATKE58CNDY7atlPg7cT80Q4MyIngz0/view",
+     "https://drive.google.com/file/d/19GXd-61fPHJfQAZ0MS-9wiIrVtSQnkyl/view",
+     "https://drive.google.com/file/d/1gunH-Ka1w142uzHJuCMlrK9z5Jd4R-Fu/view"
+    ]
+   },
+   {
+    "pos": 13,
+    "header": "ID_Redaccion",
+    "non_null": 2,
+    "distinct": 2,
+    "maxlen": 12,
+    "samples": [
+     "RED-2026-007",
+     "RED-2026-023"
+    ]
+   }
+  ]
+ },
+ "BRIDGE_Caso_Depto": {
+  "rows": 87,
+  "cols": 6,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_Relacion",
+    "non_null": 87,
+    "distinct": 87,
+    "maxlen": 26,
+    "samples": [
+     "BCD-CS-PRODUCE-2026-002-01",
+     "BCD-CS-PRODUCE-2026-037-01",
+     "BCD-CS-PRODUCE-2026-038-01",
+     "BCD-CS-PRODUCE-2026-003-01"
+    ]
+   },
+   {
+    "pos": 2,
+    "header": "ID_Caso",
+    "non_null": 87,
+    "distinct": 34,
+    "maxlen": 19,
+    "samples": [
+     "CS-PRODUCE-2026-002",
+     "CS-PRODUCE-2026-037",
+     "CS-PRODUCE-2026-038",
+     "CS-PRODUCE-2026-003"
+    ]
+   },
+   {
+    "pos": 3,
+    "header": "ID_Ubigeo",
+    "non_null": 87,
+    "distinct": 34,
+    "maxlen": 19,
+    "samples": [
+     "CS-PRODUCE-2026-002",
+     "CS-PRODUCE-2026-037",
+     "CS-PRODUCE-2026-038",
+     "CS-PRODUCE-2026-003"
+    ]
+   },
+   {
+    "pos": 4,
+    "header": "Departamento",
+    "non_null": 87,
+    "distinct": 14,
+    "maxlen": 6,
+    "samples": [
+     "DEP-22",
+     "DEP-07",
+     "DEP-11",
+     "DEP-02"
+    ]
+   },
+   {
+    "pos": 5,
+    "header": "Es_Principal",
+    "non_null": 87,
+    "distinct": 14,
+    "maxlen": 15,
+    "samples": [
+     "Piura",
+     "Callao",
+     "Ica",
+     "Ancash"
+    ]
+   },
+   {
+    "pos": 6,
+    "header": null,
+    "non_null": 87,
+    "distinct": 2,
+    "maxlen": 2,
+    "samples": [
+     "Sí",
+     "No"
+    ]
+   }
+  ]
+ },
+ "BRIDGE_Caso_Actor": {
+  "rows": 80,
+  "cols": 3,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_Relacion",
+    "non_null": 80,
+    "distinct": 68,
+    "maxlen": 27,
+    "samples": [
+     "RA-001",
+     "RA-002",
+     "RA-003",
+     "RA-004"
+    ]
+   },
+   {
+    "pos": 2,
+    "header": "ID_Actor",
+    "non_null": 80,
+    "distinct": 47,
+    "maxlen": 7,
+    "samples": [
+     "ACT-001",
+     "ACT-002",
+     "ACT-003",
+     "ACT-004"
+    ]
+   },
+   {
+    "pos": 3,
+    "header": "ID_Caso",
+    "non_null": 80,
+    "distinct": 36,
+    "maxlen": 19,
+    "samples": [
+     "1",
+     "2",
+     "4",
+     "5"
+    ]
+   }
+  ]
+ },
+ "BRIDGE_RADAR_Actor": {
+  "rows": 1,
+  "cols": 4,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_Relacion",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 14,
+    "samples": [
+     "BRA-RED-001-01"
+    ]
+   },
+   {
+    "pos": 2,
+    "header": "ID_Actor_Estado",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 11,
+    "samples": [
+     "ACT-EST-141"
+    ]
+   },
+   {
+    "pos": 3,
+    "header": "ID_Radar",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 7,
+    "samples": [
+     "RED-001"
+    ]
+   },
+   {
+    "pos": 4,
+    "header": "ID_Actor_Radar",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 7,
+    "samples": [
+     "Titular"
+    ]
+   }
+  ]
+ },
+ "BRIDGE_Nodo_Actor": {
+  "rows": 3,
+  "cols": 4,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_Relacion",
+    "non_null": 3,
+    "distinct": 3,
+    "maxlen": 15,
+    "samples": [
+     "BNA-NODO-001-01",
+     "BNA-NODO-001-02",
+     "BNA-NODO-001-03"
+    ]
+   },
+   {
+    "pos": 2,
+    "header": "ID_Actor_Estado",
+    "non_null": 3,
+    "distinct": 3,
+    "maxlen": 11,
+    "samples": [
+     "ACT-EST-142",
+     "ACT-EST-145",
+     "ACT-EST-150"
+    ]
+   },
+   {
+    "pos": 3,
+    "header": "ID_Nodo",
+    "non_null": 3,
+    "distinct": 1,
+    "maxlen": 8,
+    "samples": [
+     "NODO-001"
+    ]
+   },
+   {
+    "pos": 4,
+    "header": "ID_Actor_Radar",
+    "non_null": 3,
+    "distinct": 3,
+    "maxlen": 26,
+    "samples": [
+     "Titular",
+     "Alterno",
+     "Participante Institucional"
+    ]
+   }
+  ]
+ },
+ "BRIDGE_Caso_Actor_Estado": {
+  "rows": 61,
+  "cols": 3,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_Relacion",
+    "non_null": 61,
+    "distinct": 49,
+    "maxlen": 26,
+    "samples": [
+     "RA-001",
+     "RA-002",
+     "RA-003",
+     "RA-004"
+    ]
+   },
+   {
+    "pos": 2,
+    "header": "ID_Actor_Estado",
+    "non_null": 61,
+    "distinct": 36,
+    "maxlen": 7,
+    "samples": [
+     "ACT-001",
+     "ACT-002",
+     "ACT-003",
+     "ACT-004"
+    ]
+   },
+   {
+    "pos": 3,
+    "header": "ID_Caso",
+    "non_null": 61,
+    "distinct": 31,
+    "maxlen": 19,
+    "samples": [
+     "1",
+     "2",
+     "4",
+     "5"
+    ]
+   }
+  ]
+ },
+ "BRIDGE_Alerta_Actor": {
+  "rows": 162,
+  "cols": 6,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_RAA",
+    "non_null": 67,
+    "distinct": 58,
+    "maxlen": 18,
+    "samples": [
+     "BAA-AT-2026-001-01",
+     "BAA-AT-2026-002-01",
+     "BAA-AT-2026-002-02",
+     "BAA-AT-2026-003-01"
+    ]
+   },
+   {
+    "pos": 2,
+    "header": "ID_Alerta",
+    "non_null": 162,
+    "distinct": 74,
+    "maxlen": 11,
+    "samples": [
+     "AT-2026-001",
+     "AT-2026-002",
+     "AT-2026-003",
+     "AT-2026-004"
+    ]
+   },
+   {
+    "pos": 3,
+    "header": "ID_Actor",
+    "non_null": 162,
+    "distinct": 88,
+    "maxlen": 10,
+    "samples": [
+     "ACT-001",
+     "ACT-099",
+     "ACT-098",
+     "ACT-004"
+    ]
+   },
+   {
+    "pos": 4,
+    "header": "Rol_en_Alerta",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 5,
+    "header": "Es_Principal",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 6,
+    "header": "ID_Relacion",
+    "non_null": 95,
+    "distinct": 92,
+    "maxlen": 18,
+    "samples": [
+     "BAA-AT-2026-42-01",
+     "BAA-AT-2026-40-01",
+     "BAA-AT-2026-40-02",
+     "BAA-AT-2026-42-02"
+    ]
+   }
+  ]
+ },
+ "BRIDGE_Reporte_Actor": {
+  "rows": 1,
+  "cols": 5,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_RRA",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 7,
+    "samples": [
+     "RRA-001"
+    ]
+   },
+   {
+    "pos": 2,
+    "header": "ID_RR",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 10,
+    "samples": [
+     "RR-2026-01"
+    ]
+   },
+   {
+    "pos": 3,
+    "header": "ID_Actor",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 7,
+    "samples": [
+     "ACT-001"
+    ]
+   },
+   {
+    "pos": 4,
+    "header": "Rol_en_Alerta",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 5,
+    "header": "Es_Principal",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   }
+  ]
+ },
+ "BRIDGE_Reporte_Actor_Estado": {
+  "rows": 1,
+  "cols": 5,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_RRA",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 7,
+    "samples": [
+     "RRA-001"
+    ]
+   },
+   {
+    "pos": 2,
+    "header": "ID_RR",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 10,
+    "samples": [
+     "RR-2026-01"
+    ]
+   },
+   {
+    "pos": 3,
+    "header": "ID_Actor_Estado",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 7,
+    "samples": [
+     "ACT-001"
+    ]
+   },
+   {
+    "pos": 4,
+    "header": "Rol_en_Alerta",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 5,
+    "header": "Es_Principal",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   }
+  ]
+ },
+ "BRIDGE_Clima_Actor": {
+  "rows": 1,
+  "cols": 5,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_Clima",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 7,
+    "samples": [
+     "RCA-001"
+    ]
+   },
+   {
+    "pos": 2,
+    "header": "ID_RR",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 10,
+    "samples": [
+     "CS-2026-01"
+    ]
+   },
+   {
+    "pos": 3,
+    "header": "ID_Actor",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 7,
+    "samples": [
+     "ACT-001"
+    ]
+   },
+   {
+    "pos": 4,
+    "header": "Rol_en_Alerta",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 5,
+    "header": "Es_Principal",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   }
+  ]
+ },
+ "BRIDGE_Clima_Actor_Estado": {
+  "rows": 1,
+  "cols": 5,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_Clima",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 7,
+    "samples": [
+     "RCA-001"
+    ]
+   },
+   {
+    "pos": 2,
+    "header": "ID_RR",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 10,
+    "samples": [
+     "CS-2026-01"
+    ]
+   },
+   {
+    "pos": 3,
+    "header": "ID_Actor_Estado",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 7,
+    "samples": [
+     "ACT-001"
+    ]
+   },
+   {
+    "pos": 4,
+    "header": "Rol_en_Alerta",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 5,
+    "header": "Es_Principal",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   }
+  ]
+ },
+ "BRIDGE_Sectorista_Departamento": {
+  "rows": 27,
+  "cols": 3,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_RSC",
+    "non_null": 27,
+    "distinct": 27,
+    "maxlen": 7,
+    "samples": [
+     "RSC-001",
+     "RSC-002",
+     "RSC-003",
+     "RSC-004"
+    ]
+   },
+   {
+    "pos": 2,
+    "header": "ID_Sectorista",
+    "non_null": 27,
+    "distinct": 5,
+    "maxlen": 6,
+    "samples": [
+     "SEC-01",
+     "SEC-02",
+     "SEC-03",
+     "SEC-04"
+    ]
+   },
+   {
+    "pos": 3,
+    "header": "ID_Departamento",
+    "non_null": 27,
+    "distinct": 27,
+    "maxlen": 6,
+    "samples": [
+     "DEP-01",
+     "DEP-06",
+     "DEP-13",
+     "DEP-14"
+    ]
+   }
+  ]
+ },
+ "DIM_Departamentos": {
+  "rows": 27,
+  "cols": 11,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_Ubigeo",
+    "non_null": 27,
+    "distinct": 27,
+    "maxlen": 6,
+    "samples": [
+     "DEP-01",
+     "DEP-02",
+     "DEP-03",
+     "DEP-04"
+    ]
+   },
+   {
+    "pos": 2,
+    "header": "Departamento",
+    "non_null": 27,
+    "distinct": 27,
+    "maxlen": 15,
+    "samples": [
+     "Amazonas",
+     "Ancash",
+     "Apurimac",
+     "Arequipa"
+    ]
+   },
+   {
+    "pos": 3,
+    "header": "Codigo_Depto",
+    "non_null": 27,
+    "distinct": 27,
+    "maxlen": 2,
+    "samples": [
+     "01",
+     "02",
+     "03",
+     "04"
+    ]
+   },
+   {
+    "pos": 4,
+    "header": "Region_Natural",
+    "non_null": 27,
+    "distinct": 11,
+    "maxlen": 13,
+    "samples": [
+     "Selva Norte",
+     "Costa Centro",
+     "Sierra Sur",
+     "Costa Sur"
+    ]
+   },
+   {
+    "pos": 5,
+    "header": "Alcance",
+    "non_null": 27,
+    "distinct": 5,
+    "maxlen": 8,
+    "samples": [
+     "Oriente",
+     "Centro",
+     "Sur",
+     "Norte"
+    ]
+   },
+   {
+    "pos": 6,
+    "header": "Latitud",
+    "non_null": 27,
+    "distinct": 27,
+    "maxlen": 8,
+    "samples": [
+     "-6.2313",
+     "-9.5299",
+     "-13.639",
+     "-16.3989"
+    ]
+   },
+   {
+    "pos": 7,
+    "header": "Longitud",
+    "non_null": 27,
+    "distinct": 27,
+    "maxlen": 8,
+    "samples": [
+     "-77.8687",
+     "-77.5282",
+     "-72.8814",
+     "-71.535"
+    ]
+   },
+   {
+    "pos": 8,
+    "header": "Capital",
+    "non_null": 27,
+    "distinct": 26,
+    "maxlen": 16,
+    "samples": [
+     "Chachapoyas",
+     "Huaraz",
+     "Abancay",
+     "Arequipa"
+    ]
+   },
+   {
+    "pos": 9,
+    "header": null,
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 10,
+    "header": null,
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 11,
+    "header": null,
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   }
+  ]
+ },
+ "DIM_Provincias": {
+  "rows": 70,
+  "cols": 8,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_Provincia",
+    "non_null": 70,
+    "distinct": 70,
+    "maxlen": 7,
+    "samples": [
+     "PRO-001",
+     "PRO-002",
+     "PRO-003",
+     "PRO-004"
+    ]
+   },
+   {
+    "pos": 2,
+    "header": "Cod_INEI",
+    "non_null": 70,
+    "distinct": 70,
+    "maxlen": 4,
+    "samples": [
+     "101",
+     "102",
+     "103",
+     "104"
+    ]
+   },
+   {
+    "pos": 3,
+    "header": "Nombre_Provincia",
+    "non_null": 70,
+    "distinct": 70,
+    "maxlen": 25,
+    "samples": [
+     "Chachapoyas",
+     "Bagua",
+     "Bongara",
+     "Condorcanqui"
+    ]
+   },
+   {
+    "pos": 4,
+    "header": "ID_Ubigeo",
+    "non_null": 70,
+    "distinct": 26,
+    "maxlen": 6,
+    "samples": [
+     "DEP-01",
+     "DEP-02",
+     "DEP-03",
+     "DEP-04"
+    ]
+   },
+   {
+    "pos": 5,
+    "header": "Nombre_Departamento",
+    "non_null": 70,
+    "distinct": 25,
+    "maxlen": 13,
+    "samples": [
+     "Amazonas",
+     "Ancash",
+     "Apurimac",
+     "Arequipa"
+    ]
+   },
+   {
+    "pos": 6,
+    "header": null,
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 7,
+    "header": null,
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 8,
+    "header": null,
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   }
+  ]
+ },
+ "DIM_Distritos": {
+  "rows": 698,
+  "cols": 11,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_Distrito",
+    "non_null": 698,
+    "distinct": 698,
+    "maxlen": 8,
+    "samples": [
+     "DIS-0001",
+     "DIS-0002",
+     "DIS-0003",
+     "DIS-0004"
+    ]
+   },
+   {
+    "pos": 2,
+    "header": "Cod_INEI",
+    "non_null": 698,
+    "distinct": 698,
+    "maxlen": 6,
+    "samples": [
+     "10101",
+     "10102",
+     "10103",
+     "10104"
+    ]
+   },
+   {
+    "pos": 3,
+    "header": "Nombre_Distrito",
+    "non_null": 698,
+    "distinct": 667,
+    "maxlen": 36,
+    "samples": [
+     "Chachapoyas",
+     "Asuncion",
+     "Balsas",
+     "Cheto"
+    ]
+   },
+   {
+    "pos": 4,
+    "header": "ID_Provincia",
+    "non_null": 698,
+    "distinct": 70,
+    "maxlen": 7,
+    "samples": [
+     "PRO-001",
+     "PRO-002",
+     "PRO-003",
+     "PRO-004"
+    ]
+   },
+   {
+    "pos": 5,
+    "header": "Nombre_Provincia",
+    "non_null": 698,
+    "distinct": 70,
+    "maxlen": 25,
+    "samples": [
+     "Chachapoyas",
+     "Bagua",
+     "Bongara",
+     "Condorcanqui"
+    ]
+   },
+   {
+    "pos": 6,
+    "header": "ID_Ubigeo",
+    "non_null": 698,
+    "distinct": 26,
+    "maxlen": 6,
+    "samples": [
+     "DEP-01",
+     "DEP-02",
+     "DEP-03",
+     "DEP-04"
+    ]
+   },
+   {
+    "pos": 7,
+    "header": "Nombre_Departamento",
+    "non_null": 698,
+    "distinct": 25,
+    "maxlen": 13,
+    "samples": [
+     "Amazonas",
+     "Ancash",
+     "Apurimac",
+     "Arequipa"
+    ]
+   },
+   {
+    "pos": 8,
+    "header": "Estado",
+    "non_null": 698,
+    "distinct": 1,
+    "maxlen": 6,
+    "samples": [
+     "Activo"
+    ]
+   },
+   {
+    "pos": 9,
+    "header": null,
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 10,
+    "header": null,
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 11,
+    "header": null,
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   }
+  ]
+ },
+ "DIM_Tipo_Caso": {
+  "rows": 4,
+  "cols": 3,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_Tipo",
+    "non_null": 4,
+    "distinct": 4,
+    "maxlen": 5,
+    "samples": [
+     "TC-01",
+     "TC-02",
+     "TC-03",
+     "TC-04"
+    ]
+   },
+   {
+    "pos": 2,
+    "header": "Tipo_Caso",
+    "non_null": 4,
+    "distinct": 4,
+    "maxlen": 16,
+    "samples": [
+     "Diferencias",
+     "Controversias",
+     "Conflicto Activo",
+     "Crísis"
+    ]
+   },
+   {
+    "pos": 3,
+    "header": "Descripcion",
+    "non_null": 4,
+    "distinct": 4,
+    "maxlen": 96,
+    "samples": [
+     "Posiciones distintas entre actores sobre un tema, sin acciones de protesta activas",
+     "Disputas formales que requieren atención institucional pero sin escalamiento",
+     "Situación que involucra acciones colectivas, protestas o riesgo de violencia",
+     "Ruptura institucional, violencia generalizada e ingobernabilidad que exige intervención ur"
+    ]
+   }
+  ]
+ },
+ "DIM_Rol_Actor": {
+  "rows": 4,
+  "cols": 3,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_Rol",
+    "non_null": 4,
+    "distinct": 4,
+    "maxlen": 6,
+    "samples": [
+     "ROL-01",
+     "ROL-02",
+     "ROL-03",
+     "ROL-04"
+    ]
+   },
+   {
+    "pos": 2,
+    "header": "Tipo_Rol",
+    "non_null": 4,
+    "distinct": 4,
+    "maxlen": 23,
+    "samples": [
+     "Decisor Principal",
+     "Proveedor evidencia",
+     "Implementador",
+     "Articulador territorial"
+    ]
+   },
+   {
+    "pos": 3,
+    "header": "Descripcion",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   }
+  ]
+ },
+ "DIM_Tipo_Sector": {
+  "rows": 3,
+  "cols": 3,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_Sector",
+    "non_null": 3,
+    "distinct": 3,
+    "maxlen": 9,
+    "samples": [
+     "Sector-01",
+     "Sector-02",
+     "Sector-03"
+    ]
+   },
+   {
+    "pos": 2,
+    "header": "Tipo_Sector",
+    "non_null": 3,
+    "distinct": 3,
+    "maxlen": 34,
+    "samples": [
+     "Pesca y Acuicultura",
+     "Mype e Industria",
+     "Gestión y Prevención de Conflictos"
+    ]
+   },
+   {
+    "pos": 3,
+    "header": "ID_Area",
+    "non_null": 3,
+    "distinct": 3,
+    "maxlen": 6,
+    "samples": [
+     "AR-001",
+     "AR-002",
+     "AR-047"
+    ]
+   }
+  ]
+ },
+ "DIM_Tipo_Actor": {
+  "rows": 3,
+  "cols": 2,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_Tipo_Actor",
+    "non_null": 3,
+    "distinct": 3,
+    "maxlen": 11,
+    "samples": [
+     "Tipo-Act-01",
+     "Tipo-Act-02",
+     "Tipo-Act-03"
+    ]
+   },
+   {
+    "pos": 2,
+    "header": "Tipo_Actor",
+    "non_null": 3,
+    "distinct": 3,
+    "maxlen": 20,
+    "samples": [
+     "Actor del Estado",
+     "Actor Sociedad Civil",
+     "Actor Privado"
+    ]
+   }
+  ]
+ },
+ "DIM_Tipo_Actor_Radar": {
+  "rows": 3,
+  "cols": 2,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_Actor_Radar",
+    "non_null": 3,
+    "distinct": 3,
+    "maxlen": 7,
+    "samples": [
+     "ACRA-01",
+     "ACRA-02",
+     "ACRA-03"
+    ]
+   },
+   {
+    "pos": 2,
+    "header": "Tipo_Actor",
+    "non_null": 3,
+    "distinct": 3,
+    "maxlen": 26,
+    "samples": [
+     "Titular",
+     "Alterno",
+     "Participante Institucional"
+    ]
+   }
+  ]
+ },
+ "DIM_Perfil": {
+  "rows": 3,
+  "cols": 2,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_perfil",
+    "non_null": 3,
+    "distinct": 3,
+    "maxlen": 9,
+    "samples": [
+     "Perfil-01",
+     "Perfil-02",
+     "Perfil-03"
+    ]
+   },
+   {
+    "pos": 2,
+    "header": "Tipo_Perfil",
+    "non_null": 3,
+    "distinct": 3,
+    "maxlen": 11,
+    "samples": [
+     "Dialogante",
+     "Legitimante",
+     "Disruptivo"
+    ]
+   }
+  ]
+ },
+ "DIM_Intervencion": {
+  "rows": 4,
+  "cols": 2,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_Intervencion",
+    "non_null": 4,
+    "distinct": 4,
+    "maxlen": 9,
+    "samples": [
+     "Ciclo-001",
+     "Ciclo-002",
+     "Ciclo-003",
+     "Ciclo-004"
+    ]
+   },
+   {
+    "pos": 2,
+    "header": "Tipo_Intervencion",
+    "non_null": 4,
+    "distinct": 4,
+    "maxlen": 26,
+    "samples": [
+     "Prevención",
+     "Intervención y tratamiento",
+     "Seguimiento",
+     "Gestión del Conocimiento"
+    ]
+   }
+  ]
+ },
+ "DIM_Sectoristas": {
+  "rows": 15,
+  "cols": 13,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_Sectorista",
+    "non_null": 15,
+    "distinct": 15,
+    "maxlen": 6,
+    "samples": [
+     "SEC-01",
+     "SEC-02",
+     "SEC-03",
+     "SEC-04"
+    ]
+   },
+   {
+    "pos": 2,
+    "header": "Nombre_Sectorista",
+    "non_null": 15,
+    "distinct": 15,
+    "maxlen": 30,
+    "samples": [
+     "André Jiménez Agapito",
+     "Peggy Contreras Montes",
+     "Ivan Enrique Ascurra Santillan",
+     "Esteban Vidal Saldarriaga"
+    ]
+   },
+   {
+    "pos": 3,
+    "header": "DNI",
+    "non_null": 10,
+    "distinct": 10,
+    "maxlen": 8,
+    "samples": [
+     "46078289",
+     "10654038",
+     "72022099",
+     "72898083"
+    ]
+   },
+   {
+    "pos": 4,
+    "header": "clave_Sectorista",
+    "non_null": 10,
+    "distinct": 10,
+    "maxlen": 8,
+    "samples": [
+     "46078289",
+     "10654038",
+     "72022099",
+     "72898083"
+    ]
+   },
+   {
+    "pos": 5,
+    "header": "N_Casos",
+    "non_null": 5,
+    "distinct": 4,
+    "maxlen": 2,
+    "samples": [
+     "13",
+     "11",
+     "7",
+     "2"
+    ]
+   },
+   {
+    "pos": 6,
+    "header": "Cargo",
+    "non_null": 4,
+    "distinct": 4,
+    "maxlen": 28,
+    "samples": [
+     "Coordinador de OAIPCS",
+     "Especialista - Sector Centro",
+     "Especialista - Sector Sur",
+     "Especialista"
+    ]
+   },
+   {
+    "pos": 7,
+    "header": "ID_Entidad",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 8,
+    "header": "ID_Area",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 9,
+    "header": "ID_Unidad",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 10,
+    "header": "Email",
+    "non_null": 4,
+    "distinct": 4,
+    "maxlen": 28,
+    "samples": [
+     "oaipcs_temp34@produce.gbo.pe",
+     "oaipcs_temp37@produce.gbo.pe",
+     "fredyrafael241066@gmail.com",
+     "ebautista@produce.gob.pe"
+    ]
+   },
+   {
+    "pos": 11,
+    "header": "Telefono",
+    "non_null": 3,
+    "distinct": 3,
+    "maxlen": 9,
+    "samples": [
+     "945712360",
+     "920756323",
+     "900361057"
+    ]
+   },
+   {
+    "pos": 12,
+    "header": "Fotografia",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 13,
+    "header": "Estado",
+    "non_null": 14,
+    "distinct": 2,
+    "maxlen": 9,
+    "samples": [
+     "Activo",
+     "No Activo"
+    ]
+   }
+  ]
+ },
+ "DIM_Punto_Focal": {
+  "rows": 17,
+  "cols": 12,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_PF",
+    "non_null": 17,
+    "distinct": 17,
+    "maxlen": 6,
+    "samples": [
+     "PF-001",
+     "PF-002",
+     "PF-003",
+     "PF-004"
+    ]
+   },
+   {
+    "pos": 2,
+    "header": "Nombre_PF",
+    "non_null": 17,
+    "distinct": 17,
+    "maxlen": 33,
+    "samples": [
+     "Juan Salinas Casana",
+     "Carlos Escobar Medina",
+     "Juan Carlos Cordova Calle",
+     "Milagros Regina Huachua Quintana"
+    ]
+   },
+   {
+    "pos": 3,
+    "header": "DNI",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 4,
+    "header": "clave_PF",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 5,
+    "header": "Cargo",
+    "non_null": 17,
+    "distinct": 15,
+    "maxlen": 33,
+    "samples": [
+     "Especialista",
+     "Especialista FONDEPES",
+     "Especialista DGPA",
+     "Especialista DGSFS-PA"
+    ]
+   },
+   {
+    "pos": 6,
+    "header": "ID_Entidad",
+    "non_null": 2,
+    "distinct": 1,
+    "maxlen": 5,
+    "samples": [
+     "E-014"
+    ]
+   },
+   {
+    "pos": 7,
+    "header": "ID_Area",
+    "non_null": 17,
+    "distinct": 3,
+    "maxlen": 6,
+    "samples": [
+     "AR-001",
+     "AR-002",
+     "AR-047"
+    ]
+   },
+   {
+    "pos": 8,
+    "header": "ID_Unidad",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 9,
+    "header": "Email",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 23,
+    "samples": [
+     "jsalinas@produce.gob.pe"
+    ]
+   },
+   {
+    "pos": 10,
+    "header": "Telefono",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 9,
+    "samples": [
+     "987654321"
+    ]
+   },
+   {
+    "pos": 11,
+    "header": "Fotografia",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 12,
+    "header": "Estado",
+    "non_null": 17,
+    "distinct": 1,
+    "maxlen": 6,
+    "samples": [
+     "Activo"
+    ]
+   }
+  ]
+ },
+ "DIM_Autoridades": {
+  "rows": 2,
+  "cols": 12,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_AUTORIDADES",
+    "non_null": 2,
+    "distinct": 2,
+    "maxlen": 7,
+    "samples": [
+     "AUT-001",
+     "AUT-002"
+    ]
+   },
+   {
+    "pos": 2,
+    "header": "Nombre_Autoridades",
+    "non_null": 2,
+    "distinct": 2,
+    "maxlen": 19,
+    "samples": [
+     "Edith Bautista León",
+     "Admin"
+    ]
+   },
+   {
+    "pos": 3,
+    "header": "DNI",
+    "non_null": 2,
+    "distinct": 2,
+    "maxlen": 8,
+    "samples": [
+     "41907320",
+     "11111111"
+    ]
+   },
+   {
+    "pos": 4,
+    "header": "clave_Autoridades",
+    "non_null": 2,
+    "distinct": 2,
+    "maxlen": 8,
+    "samples": [
+     "41907320",
+     "11111111"
+    ]
+   },
+   {
+    "pos": 5,
+    "header": "Cargo",
+    "non_null": 2,
+    "distinct": 2,
+    "maxlen": 13,
+    "samples": [
+     "Directora",
+     "Administrador"
+    ]
+   },
+   {
+    "pos": 6,
+    "header": "ID_Entidad",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 7,
+    "header": "ID_Area",
+    "non_null": 2,
+    "distinct": 1,
+    "maxlen": 6,
+    "samples": [
+     "AR-003"
+    ]
+   },
+   {
+    "pos": 8,
+    "header": "ID_Unidad",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 9,
+    "header": "Email",
+    "non_null": 1,
+    "distinct": 1,
+    "maxlen": 24,
+    "samples": [
+     "ebautista@produce.gob.pe"
+    ]
+   },
+   {
+    "pos": 10,
+    "header": "Fotografia",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 11,
+    "header": "Telefono",
+    "non_null": 0,
+    "distinct": 0,
+    "maxlen": 0,
+    "samples": []
+   },
+   {
+    "pos": 12,
+    "header": "Estado",
+    "non_null": 2,
+    "distinct": 1,
+    "maxlen": 6,
+    "samples": [
+     "Activo"
+    ]
+   }
+  ]
+ },
+ "DIM_Responsable": {
+  "rows": 3,
+  "cols": 4,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_Responsable",
+    "non_null": 3,
+    "distinct": 3,
+    "maxlen": 7,
+    "samples": [
+     "RES-001",
+     "RES-002",
+     "RES-003"
+    ]
+   },
+   {
+    "pos": 2,
+    "header": "ID_Origen",
+    "non_null": 3,
+    "distinct": 3,
+    "maxlen": 6,
+    "samples": [
+     "SEC-01",
+     "PF-001",
+     "AUT-01"
+    ]
+   },
+   {
+    "pos": 3,
+    "header": "Tipo_Responsable",
+    "non_null": 3,
+    "distinct": 3,
+    "maxlen": 11,
+    "samples": [
+     "Sectorista",
+     "Punto Focal",
+     "Autoridad"
+    ]
+   },
+   {
+    "pos": 4,
+    "header": "Tabla_Origen",
+    "non_null": 3,
+    "distinct": 3,
+    "maxlen": 15,
+    "samples": [
+     "DIM_Sectoristas",
+     "DIM_Punto_Focal",
+     "DIM_Autoridades"
+    ]
+   }
+  ]
+ },
+ "DIM_Entidad_Responsable": {
+  "rows": 23,
+  "cols": 5,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_Entidad",
+    "non_null": 23,
+    "distinct": 23,
+    "maxlen": 5,
+    "samples": [
+     "E-001",
+     "E-002",
+     "E-003",
+     "E-004"
+    ]
+   },
+   {
+    "pos": 2,
+    "header": "Nombre_Entidad",
+    "non_null": 23,
+    "distinct": 23,
+    "maxlen": 49,
+    "samples": [
+     "PRESIDENCIA DE CONSEJO DE MINISTROS",
+     "MINISTERIO DE AMBIENTE",
+     "MINISERIO DE CULTURA",
+     "MINISTERIO DE COMERCIO EXTERIOR Y TURISMO"
+    ]
+   },
+   {
+    "pos": 3,
+    "header": "Abreviatura",
+    "non_null": 23,
+    "distinct": 23,
+    "maxlen": 8,
+    "samples": [
+     "PCM",
+     "MINAM",
+     "MINCUL",
+     "MINCETUR"
+    ]
+   },
+   {
+    "pos": 4,
+    "header": "Nivel",
+    "non_null": 23,
+    "distinct": 1,
+    "maxlen": 8,
+    "samples": [
+     "Nacional"
+    ]
+   },
+   {
+    "pos": 5,
+    "header": "Estado",
+    "non_null": 23,
+    "distinct": 1,
+    "maxlen": 6,
+    "samples": [
+     "Activo"
+    ]
+   }
+  ]
+ },
+ "DIM_Area_Responsable": {
+  "rows": 66,
+  "cols": 5,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_Area",
+    "non_null": 66,
+    "distinct": 66,
+    "maxlen": 6,
+    "samples": [
+     "AR-001",
+     "AR-002",
+     "AR-003",
+     "AR-004"
+    ]
+   },
+   {
+    "pos": 2,
+    "header": "Nombre_Area",
+    "non_null": 66,
+    "distinct": 65,
+    "maxlen": 86,
+    "samples": [
+     "AUTORIDAD NACIONAL DE SANIDAD E INOCUIDAD EN PESCA Y ACUICULTURA",
+     "CONSEJO DE APELACIÓN DE SANCIONES",
+     "DESPACHO MINISTERIAL",
+     "DIRECCIÓN DE ARTICULACIÓN DE MERCADOS"
+    ]
+   },
+   {
+    "pos": 3,
+    "header": "Abreviatura",
+    "non_null": 66,
+    "distinct": 66,
+    "maxlen": 15,
+    "samples": [
+     "SANIPES",
+     "CONAS",
+     "DM",
+     "DAM"
+    ]
+   },
+   {
+    "pos": 4,
+    "header": "Id_Entidad",
+    "non_null": 66,
+    "distinct": 1,
+    "maxlen": 5,
+    "samples": [
+     "E-014"
+    ]
+   },
+   {
+    "pos": 5,
+    "header": "Estado",
+    "non_null": 66,
+    "distinct": 1,
+    "maxlen": 6,
+    "samples": [
+     "Activo"
+    ]
+   }
+  ]
+ },
+ "DIM_Unidades_Organicas_Responsa": {
+  "rows": 27,
+  "cols": 6,
+  "columns": [
+   {
+    "pos": 1,
+    "header": "ID_Unidad",
+    "non_null": 27,
+    "distinct": 27,
+    "maxlen": 5,
+    "samples": [
+     "U-001",
+     "U-002",
+     "U-003",
+     "U-004"
+    ]
+   },
+   {
+    "pos": 2,
+    "header": "Nombre_Unidad",
+    "non_null": 27,
+    "distinct": 26,
+    "maxlen": 66,
+    "samples": [
+     "DIRECCIÓN DE GESTIÓN PESQUERA ARTESANAL",
+     "DIRECCIÓN DE PROMOCIÓN Y FORMALIZACIÓN PESQUERA ARTESANAL",
+     "DIRECCIÓN DE NORMATIVIDAD",
+     "DIRECCIÓN DE ORDENAMIENTO DE PRODUCTOS INDUSTRIALES Y FISCALIZADOS"
+    ]
+   },
+   {
+    "pos": 3,
+    "header": "Abreviatura",
+    "non_null": 27,
+    "distinct": 27,
+    "maxlen": 7,
+    "samples": [
+     "DIGPA",
+     "DPFORPA",
+     "DN",
+     "DOPIF"
+    ]
+   },
+   {
+    "pos": 4,
+    "header": "Id_Area",
+    "non_null": 27,
+    "distinct": 10,
+    "maxlen": 6,
+    "samples": [
+     "AR-001",
+     "AR-008",
+     "AR-009",
+     "AR-017"
+    ]
+   },
+   {
+    "pos": 5,
+    "header": "Id_Entidad",
+    "non_null": 27,
+    "distinct": 1,
+    "maxlen": 5,
+    "samples": [
+     "E-014"
+    ]
+   },
+   {
+    "pos": 6,
+    "header": "Estado",
+    "non_null": 27,
+    "distinct": 1,
+    "maxlen": 6,
+    "samples": [
+     "Activo"
+    ]
+   }
+  ]
+ }
+}

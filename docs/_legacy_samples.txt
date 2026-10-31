@@ -1,0 +1,621 @@
+
+====================================================================================================
+## DIM_Departamentos  (27 filas)
+====================================================================================================
+ID_Ubigeo | Departamento | Codigo_Depto | Region_Natural | Alcance | Latitud | Longitud | Capital | <c9> | <c10> | <c11>
+DEP-01 | Amazonas | 01 | Selva Norte | Oriente | -6.2313 | -77.8687 | Chachapoyas |  |  | 
+DEP-02 | Ancash | 02 | Costa Centro | Centro | -9.5299 | -77.5282 | Huaraz |  |  | 
+DEP-03 | Apurimac | 03 | Sierra Sur | Sur | -13.639 | -72.8814 | Abancay |  |  | 
+DEP-04 | Arequipa | 04 | Costa Sur | Sur | -16.3989 | -71.535 | Arequipa |  |  | 
+DEP-05 | Ayacucho | 05 | Sierra Sur | Sur | -13.1588 | -74.2236 | Ayacucho |  |  | 
+DEP-06 | Cajamarca | 06 | Sierra Norte | Norte | -7.1628 | -78.5003 | Cajamarca |  |  | 
+DEP-07 | Callao | 07 | Costa Centro | Centro | -12.0566 | -77.1181 | Callao |  |  | 
+DEP-08 | Cusco | 08 | Sierra Sur | Sur | -13.5319 | -71.9675 | Cusco |  |  | 
+DEP-09 | Huancavelica | 09 | Sierra Centro | Centro | -12.7878 | -74.9735 | Huancavelica |  |  | 
+DEP-10 | Huanuco | 10 | Sierra Centro | Centro | -9.9306 | -76.2422 | Huánuco |  |  | 
+DEP-11 | Ica | 11 | Costa Centro | Centro | -14.0678 | -75.7286 | Ica |  |  | 
+DEP-12 | Junin | 12 | Sierra Centro | Centro | -11.9929 | -75.2089 | Huancayo |  |  | 
+DEP-13 | La Libertad | 13 | Costa Norte | Norte | -8.1119 | -79.0288 | Trujillo |  |  | 
+DEP-14 | Lambayeque | 14 | Costa Norte | Norte | -6.7011 | -79.9069 | Chiclayo |  |  | 
+DEP-15 | Lima | 15 | Costa Centro | Centro | -12.0464 | -77.0428 | Lima |  |  | 
+DEP-16 | Lima Provincias | 16 | Costa Centro | Centro | -11.1075 | -77.6105 | Huacho |  |  | 
+DEP-17 | Loreto | 17 | Selva Norte | Oriente | -3.7491 | -73.2538 | Iquitos |  |  | 
+DEP-18 | Madre de Dios | 18 | Selva Sur | Oriente | -12.5933 | -69.1891 | Puerto Maldonado |  |  | 
+DEP-19 | Moquegua | 19 | Costa Sur | Sur | -17.194 | -70.9312 | Moquegua |  |  | 
+DEP-20 | Más de Uno | 20 | Nacional | Nacional | -9.19 | -75.0152 | Lima |  |  | 
+DEP-21 | Pasco | 21 | Sierra Centro | Centro | -10.6725 | -76.2565 | Cerro de Pasco |  |  | 
+DEP-22 | Piura | 22 | Costa Norte | Norte | -51.945 | -80.6328 | Piura |  |  | 
+DEP-23 | Puno | 23 | Sierra Sur | Sur | -15.8402 | -70.0219 | Puno |  |  | 
+DEP-24 | San Martín | 24 | Selva Alta | Oriente | -6.4847 | -76.361 | Tarapoto |  |  | 
+DEP-25 | Tacna | 25 | Costa Sur | Sur | -18.0066 | -70.2461 | Tacna |  |  | 
+DEP-26 | Tumbes | 26 | Costa Norte | Norte | -3.5667 | -80.45 | Tumbes |  |  | 
+DEP-27 | Ucayali | 27 | Selva Centro | Oriente | -8.3793 | -74.5539 | Pucallpa |  |  | 
+
+====================================================================================================
+## DIM_Provincias  (70 filas)
+====================================================================================================
+ID_Provincia | Cod_INEI | Nombre_Provincia | ID_Ubigeo | Nombre_Departamento | <c6> | <c7> | <c8>
+PRO-001 | 101 | Chachapoyas | DEP-01 | Amazonas |  |  | 
+PRO-002 | 102 | Bagua | DEP-01 | Amazonas |  |  | 
+PRO-003 | 103 | Bongara | DEP-01 | Amazonas |  |  | 
+
+====================================================================================================
+## DIM_Distritos  (698 filas)
+====================================================================================================
+ID_Distrito | Cod_INEI | Nombre_Distrito | ID_Provincia | Nombre_Provincia | ID_Ubigeo | Nombre_Departamento | Estado | <c9> | <c10> | <c11>
+DIS-0001 | 10101 | Chachapoyas | PRO-001 | Chachapoyas | DEP-01 | Amazonas | Activo |  |  | 
+DIS-0002 | 10102 | Asuncion | PRO-001 | Chachapoyas | DEP-01 | Amazonas | Activo |  |  | 
+DIS-0003 | 10103 | Balsas | PRO-001 | Chachapoyas | DEP-01 | Amazonas | Activo |  |  | 
+
+====================================================================================================
+## DIM_Tipo_Caso  (4 filas)
+====================================================================================================
+ID_Tipo | Tipo_Caso | Descripcion
+TC-01 | Diferencias | Posiciones distintas entre actores sobre un tema, sin acciones de protesta activas
+TC-02 | Controversias | Disputas formales que requieren atención institucional pero sin escalamiento
+TC-03 | Conflicto Activo | Situación que involucra acciones colectivas, protestas o riesgo de violencia
+TC-04 | Crísis | Ruptura institucional, violencia generalizada e ingobernabilidad que exige intervención urgente.
+
+====================================================================================================
+## DIM_Riesgos  (3 filas)
+====================================================================================================
+ID_Riesgos | Tipo_Riesgo
+RIE-001 | Alto
+RIE-002 | Moderado
+RIE-003 | Bajo
+
+====================================================================================================
+## DIM_Nivel_Alertas  (4 filas)
+====================================================================================================
+ID_NIVEL_ALERTA | Nivel | Descripción_Nivel | Categoria
+NA-001 | Inmediato (24h) | Requiere despliegue de campo o enlace urgente orden público o seguirdad ciudadana. | Reactivo
+NA-002 | Táctico (24 h - 48h) | Requiere elaboración de estrategia de contingencia y comunicados. | Preventivo
+NA-003 | Preventivo (48h - 72h) | Permite diálogo y/o desactivar el medidas de fuerza o acciones de riesgo. | Preventivo
+NA-004 | Monitoreo | Seguimiento de indicadores de alertas de posibles riesgos. | Preventivo
+
+====================================================================================================
+## DIM_Estado_Proceso  (5 filas)
+====================================================================================================
+ID_Estado | Nombre_Proceso | Color_PBI | Es_Terminal
+EST-01 | Pendiente | #EF9F27 | No
+EST-02 | Completado | #1D9E75 | Si
+EST-03 | Observado | #E24B4A | No
+EST-04 | Devuelto | #7F77DD | No
+EST-05 | Omitido | #888780 | Si
+
+====================================================================================================
+## DIM_Intervencion  (4 filas)
+====================================================================================================
+ID_Intervencion | Tipo_Intervencion
+Ciclo-001 | Prevención
+Ciclo-002 | Intervención y tratamiento
+Ciclo-003 | Seguimiento
+Ciclo-004 | Gestión del Conocimiento
+
+====================================================================================================
+## DIM_Perfil  (3 filas)
+====================================================================================================
+ID_perfil | Tipo_Perfil
+Perfil-01 | Dialogante
+Perfil-02 | Legitimante
+Perfil-03 | Disruptivo
+
+====================================================================================================
+## DIM_TIPO_ORG  (4 filas)
+====================================================================================================
+ID_TIPO_ORG | NOMBRE_TIPO
+TIPO_ORG_001 | ASOCIACIÓN
+TIPO_ORG_002 | ASOCIACIÓN DE ASOCIACIONES
+TIPO_ORG_003 | SINDICATO
+TIPO_ORG_004 | COOPERATIVA
+
+====================================================================================================
+## DIM_Tipo_Cambio  (6 filas)
+====================================================================================================
+ID_Tipo_Cambio | Nombre | Descripción
+TC-01 | Escalada | El caso sube de nivel de riesgo
+TC-02 | Desescalada | El caso baja de nivel de riesgo
+TC-03 | Cierre | El caso se cierra formalmente
+TC-04 | Reapertura | El caso se reactiva
+TC-05 | Desestimación | El caso se cierra sin intervención
+TC-06 | Cambio de fase | El caso cambia de fase sin cambio de riesgo
+
+====================================================================================================
+## DIM_Tipo_Actor_Radar  (3 filas)
+====================================================================================================
+ID_Actor_Radar | Tipo_Actor
+ACRA-01 | Titular
+ACRA-02 | Alterno
+ACRA-03 | Participante Institucional
+
+====================================================================================================
+## DIM_Tipo_Proceso  (4 filas)
+====================================================================================================
+ID_Tipo_Reporte | Nombre_Tipo | Sigla | Prefijo_ID | Tiene_Flujo | Activo
+TR-01 | Reporte de Alerta Temprana | AT | AL- | Si | Si
+TR-02 | Reporte de Clima Social | CS | CS- | Si | Si
+TR-03 | Reporte Rápido de Intervención | RR | RR- | Si | Si
+TR-04 | Reporte de Caso | CAS | CASO- | Si | Si
+
+====================================================================================================
+## DIM_Rol_Actor  (4 filas)
+====================================================================================================
+ID_Rol | Tipo_Rol | Descripcion
+ROL-01 | Decisor Principal | 
+ROL-02 | Proveedor evidencia | 
+ROL-03 | Implementador | 
+ROL-04 | Articulador territorial | 
+
+====================================================================================================
+## DIM_Tipo_Sector  (3 filas)
+====================================================================================================
+ID_Sector | Tipo_Sector | ID_Area
+Sector-01 | Pesca y Acuicultura | AR-001
+Sector-02 | Mype e Industria | AR-002
+Sector-03 | Gestión y Prevención de Conflictos | AR-047
+
+====================================================================================================
+## DIM_Tipo_Actor  (3 filas)
+====================================================================================================
+ID_Tipo_Actor | Tipo_Actor
+Tipo-Act-01 | Actor del Estado
+Tipo-Act-02 | Actor Sociedad Civil
+Tipo-Act-03 | Actor Privado
+
+====================================================================================================
+## DIM_Tipo_Tematica  (7 filas)
+====================================================================================================
+ID_Tematica | Tipo_Tematica | Descripcion
+TEMA-01 | Infraestructura | Conflictos derivados de las limitaciones o brechas en la provisión estatal de bienes públicos físicos, infraestructura p
+TEMA-02 | Ordenanamiento y acceso territorial | Conflictos originados por la superposición de actividades o actores en zonas de pesca o territorios productivos vinculad
+TEMA-03 | Normatividad | Conflictos vinculados a la forma en que se distribuyen los beneficios económicos y sociales derivados de las actividades
+TEMA-04 | Distribución de beneficios | Ruptura institucional, violencia generalizada e ingobernabilidad que exige intervención urgente.
+TEMA-05 | Gobernanza | Conflictos relacionados con los procesos de toma de decisiones, la legitimidad de las autoridades y las reglas instituci
+TEMA-06 | Impactos de terceros | Conflictos vinculados con impactos negativos, amenazas o perturbaciones cuyo origen es externo a la cadena productiva: o
+TEMA-07 | Otros | Otros
+
+====================================================================================================
+## DIM_Recurso_Pesca  (37 filas)
+====================================================================================================
+ | Nombre_común_Recurso | Nombre_oficial_Recurso | Familia | Grupo biológico | Ámbito_Recurso
+RECU-001 | Anchoveta | Engraulis ringens | Engraulidae | Peces pelágicos | Pesca
+RECU-002 | Merluza | Merluccius gayi peruanus | Merlucciidae | Peces demersales | Pesca
+RECU-003 | Jurel | Trachurus murphyi | Carangidae | Peces pelágicos | Pesca
+RECU-004 | Caballa | Scomber japonicus | Scombridae | Peces pelágicos | Pesca
+RECU-005 | Bonito | Sarda chiliensis | Scombridae | Peces pelágicos | Pesca
+RECU-006 | Perico | Coryphaena hippurus | Coryphaenidae | Peces pelágicos | Pesca
+RECU-007 | Pota | Dosidicus gigas | Ommastrephidae | Moluscos cefalÃ³podos | Pesca
+RECU-008 | Tiburón azul | Prionace glauca | Carcharhinidae | Elasmobranquios | Pesca
+RECU-009 | Tiburón martillo | Sphyrna zygaena | Sphyrnidae | Elasmobranquios | Pesca
+RECU-010 | Toyo común | Mustelus whitneyi | Triakidae | Elasmobranquios | Pesca
+RECU-011 | Pez espada | Xiphias gladius | Xiphiidae | Peces pelágicos | Pesca
+RECU-012 | Pejerrey | Odontesthes regia | Atherinopsidae | Peces costeros | Pesca
+RECU-013 | Cabrilla | Paralabrax humeralis | Serranidae | Peces demersales | Pesca
+RECU-014 | Lenguado | Paralichthys adspersus | Paralichthyidae | Peces demersales | Ambos
+RECU-015 | Manta birostris | Manta birostris | Mobulidae | Elasmobranquios | Pesca
+RECU-016 | Mobula tarapacana | Mobula tarapacana | Mobulidae | Elasmobranquios | Pesca
+RECU-017 | Mobula mobular | Mobula mobular | Mobulidae | Elasmobranquios | Pesca
+RECU-018 | Mobula thurstoni | Mobula thurstoni | Mobulidae | Elasmobranquios | Pesca
+RECU-019 | Mobula munkiana | Mobula munkiana | Mobulidae | Elasmobranquios | Pesca
+RECU-020 | Concha de abanico | Argopecten purpuratus | Pectinidae | Moluscos bivalvos | Ambos
+RECU-021 | Ostra del Pacífico | Crassostrea gigas | Ostreidae | Moluscos bivalvos | Acuicultura
+RECU-022 | Langostino | Litopenaeus vannamei | Penaeidae | Crustáceos | Acuicultura
+RECU-023 | Camarón de río | Cryphiops caementarius | Palaemonidae | Crustáceos | Ambos
+RECU-024 | Camarón de Malasia | Macrobrachium rosenbergii | Palaemonidae | Crustáceos | Acuicultura
+RECU-025 | Trucha | Oncorhynchus mykiss | Salmonidae | Peces de agua dulce | Acuicultura
+RECU-026 | Tilapia | Oreochromis niloticus | Cichlidae | Peces de agua dulce | Acuicultura
+RECU-027 | Paiche | Arapaima gigas | Arapaimidae | Peces de agua dulce | Acuicultura
+RECU-028 | Gamitana | Colossoma macropomum | Serrasalmidae | Peces de agua dulce | Acuicultura
+RECU-029 | Paco | Piaractus brachypomus | Serrasalmidae | Peces de agua dulce | Acuicultura
+RECU-030 | Boquichico | Prochilodus nigricans | Prochilodontidae | Peces de agua dulce | Acuicultura
+RECU-031 | Doncella | Pseudoplatystoma fasciatum | Pimelodidae | Peces de agua dulce | Acuicultura
+RECU-032 | Sábalo cola roja | Brycon erythropterum | Bryconidae | Peces de agua dulce | Acuicultura
+RECU-033 | Carpa | Cyprinus carpio | Cyprinidae | Peces de agua dulce | Acuicultura
+RECU-034 | Yuyo | Chondracanthus chamissoi | Gigartinaceae | Algas | Acuicultura
+RECU-035 | Sargazo | Macrocystis pyrifera | Laminariaceae | Algas | Acuicultura
+RECU-036 | Huiro Palo | Lessonia trabeculata o Lessonia nigrescens | Lessoniaceae | Macroalgas Pardas | 
+RECU-037 | Erizo Rojo | Loxechinus albus | Echinidae | Equinodermos | 
+
+====================================================================================================
+## DIM_Destinatarios_Fijos  (4 filas)
+====================================================================================================
+ID_Destinatario | ID_AREA | Recibe_Alerta | Recibe_Clima | Recibe_RR | Canal_Preferido | Activo
+DEST-01 | AR-001 | Sí | Sí | Sí | Email / WhatsApp | Sí
+DEST-02 | AR-002 | No | No | Sí | Email | Sí
+DEST-03 | AR-000 | Sí | Sí | Sí | WhatsApp | Sí
+DEST-04 | AR-000 | Sí | Sí | Sí | Email | Sí
+
+====================================================================================================
+## DIM_Entidad_Responsable  (23 filas)
+====================================================================================================
+ID_Entidad | Nombre_Entidad | Abreviatura | Nivel | Estado
+E-001 | PRESIDENCIA DE CONSEJO DE MINISTROS | PCM | Nacional | Activo
+E-002 | MINISTERIO DE AMBIENTE | MINAM | Nacional | Activo
+E-003 | MINISERIO DE CULTURA | MINCUL | Nacional | Activo
+E-004 | MINISTERIO DE COMERCIO EXTERIOR Y TURISMO | MINCETUR | Nacional | Activo
+E-005 | MINISTERIO DE DEFENSA | MINDEF | Nacional | Activo
+E-006 | MINISTERIO DE DESARROLLO AGRARIO Y RIEGO | MIDAGRI | Nacional | Activo
+E-007 | MINISTERIO DE DESARROLLO E INCLUSIÓN SOCIAL | MIDIS | Nacional | Activo
+E-008 | MINISTERIO DE ECONÓMIA | MEF | Nacional | Activo
+E-009 | MINISTERIO DE EDUCACIÓN | MINEDU | Nacional | Activo
+E-010 | MINISTERIO DE ENERGÍA Y MINAS | MINEM | Nacional | Activo
+E-011 | MINISTERIO DEL INTERIOR | MININTER | Nacional | Activo
+E-012 | MINISTERIO DE JUSTICIA Y DERECHOS HUMANOS | MINJUSDH | Nacional | Activo
+E-013 | MINISTERIO DE LA MUJER Y POBLACIONES VULNERABLES. | MIMP | Nacional | Activo
+E-014 | MINISTERIO DE LA PRODUCCIÓN | PRODUCE | Nacional | Activo
+E-015 | MINISTERIO DE RELACIONES EXTERIORES | RREE | Nacional | Activo
+E-016 | MINISTERIO DE SALUD | MINSA | Nacional | Activo
+E-017 | MINISTERIO DE TRABAJO Y PROMOCIÓN DE EMPLEO | MTPE | Nacional | Activo
+E-018 | MINISTERIO DE TRANSPORTES Y COMUNICACIONES | MTC | Nacional | Activo
+E-019 | MINISTERIO DE VIVIENDA, CONTRUCIÓN Y SANEAMIENTO | MVCS | Nacional | Activo
+E-020 | INSTITUTO DEL MAR DEL PERÚ | IMARPE | Nacional | Activo
+E-021 | FONDO NACIOAL DE DESARROLLO PESQUERO | FONDEPES | Nacional | Activo
+E-022 | ORGANISMO NACIONAL DE SANIDAD PESQUERA | SANIPES | Nacional | Activo
+E-023 | INSTITUTO TECNOLÓGICO DE LA PRODUCCIÓN | ITP | Nacional | Activo
+
+====================================================================================================
+## DIM_Unidades_Organicas_Responsa  (27 filas)
+====================================================================================================
+ID_Unidad | Nombre_Unidad | Abreviatura | Id_Area | Id_Entidad | Estado
+U-001 | DIRECCIÓN DE GESTIÓN PESQUERA ARTESANAL | DIGPA | AR-001 | E-014 | Activo
+U-002 | DIRECCIÓN DE PROMOCIÓN Y FORMALIZACIÓN PESQUERA ARTESANAL | DPFORPA | AR-001 | E-014 | Activo
+U-003 | DIRECCIÓN DE NORMATIVIDAD | DN | AR-008 | E-014 | Activo
+U-004 | DIRECCIÓN DE ORDENAMIENTO DE PRODUCTOS INDUSTRIALES Y FISCALIZADOS | DOPIF | AR-008 | E-014 | Activo
+U-005 | DIRECCIÓN DE POLÍTICAS | DP | AR-008 | E-014 | Activo
+U-006 | DIRECCIÓN DE ARTICULACIÓN DE MERCADOS | DAM | AR-009 | E-014 | Activo
+U-007 | DIRECCIÓN DE COOPERATIVAS E INSTITUCIONALIDAD | DCI | AR-009 | E-014 | Activo
+U-008 | DIRECCIÓN DE DESARROLLO PRODUCTIVO | DDP | AR-009 | E-014 | Activo
+U-009 | DIRECCIÓN DE INSTRUMENTOS FINANCIEROS | DIF | AR-009 | E-014 | Activo
+U-010 | DIRECCIÓN DE DIGITALIZACIÓN Y FORMALIZACIÓN | DDF | AR-017 | E-014 | Activo
+U-011 | DIRECCIÓN DE INNOVACIÓN | DIN | AR-017 | E-014 | Activo
+U-012 | DIRECCIÓN DE TECNOLOGÍA | DT | AR-017 | E-014 | Activo
+U-013 | DIRECCIÓN DE EVALUACIÓN AMBIENTAL | DEAM | AR-021 | E-014 | Activo
+U-014 | DIRECCIÓN DE GESTIÓN AMBIENTAL | DIGAMI | AR-021 | E-014 | Activo
+U-015 | DIRECCIÓN DE SANCIONES | DS | AR-024 | E-014 | Activo
+U-016 | DIRECCIÓN DE SUPERVISIÓN Y FISCALIZACIÓN | DSF | AR-024 | E-014 | Activo
+U-017 | DIRECCIÓN DE POLÍTICAS Y ORDENAMIENTO | DPO | AR-027 | E-014 | Activo
+U-018 | DIRECCIÓN DE SEGUIMIENTO Y EVALUACIÓN | DSE | AR-027 | E-014 | Activo
+U-019 | DIRECCIÓN DE EXTRACCIÓN PARA CONSUMO HUMANO DIRECTO E INDIRECTO | DECHDI | AR-030 | E-014 | Activo
+U-020 | DIRECCIÓN DE PROCESAMIENTO PARA CONSUMO HUMANO DIRECTO E INDIRECTO | DPCHDI | AR-030 | E-014 | Activo
+U-021 | DIRECCIÓN DE GESTIÓN ACUÍCOLA | DGAC | AR-033 | E-014 | Activo
+U-022 | DIRECCIÓN DE PROMOCIÓN Y DESARROLLO ACUÍCOLA | DPDA | AR-033 | E-014 | Activo
+U-023 | DIRECCIÓN DE CAMBIO CLIMÁTICO Y BIODIVERSIDAD PESQUERA Y ACUÍCOLA | DCCBPA | AR-034 | E-014 | Activo
+U-024 | DIRECCIÓN DE GESTIÓN AMBIENTAL | DIGAM | AR-034 | E-014 | Activo
+U-025 | DIRECCIÓN DE SANCIONES DE PESCA Y ACUICULTURA | DS -PA | AR-034 | E-014 | Activo
+U-026 | DIRECCIÓN DE SUPERVISIÓN Y FISCALIZACIÓN DE PESCA Y ACUICULTURA | DSF -PA | AR-034 | E-014 | Activo
+U-027 | DIRECCIÓN DE VIGILANCIA Y CONTROL | DVC | AR-034 | E-014 | Activo
+
+====================================================================================================
+## DIM_MESAS_GRUPOS  (21 filas)
+====================================================================================================
+ID_MESA_GRUPO | TIPO_ESPACIO | CON_NORMA | LINEA_OAIPCS | TITULO_MESA | TIPO_INSTRUMENTO | BASE_LEGAL | FECHA_NORMA | PRORROGAS_MODIFICATORIAS | FECHA_INSTALACION | NATURALEZA | FECHA_FIN_VIGENCIA | ESTADO_VIGENCIA | OBJETIVO | PRESIDENTE | SECRETARIO_TECNICO | ROL_PRODUCE | AMBITO_DEPARTAMENTO | TITULAR | ALTERNO | DOC_DESIGNACION | ID_SECTORISTA | Link_Evidencia
+OAIPCS-001 | Comisión Intergubernamental | Sí | Descentralización | Comisión Intergubernamental del Sector Producción en materia de MYPE e Industria | Decreto Supremo | DS N° 019-2024-PRODUCE | 2024-12-31 09:00:00 |  |  | Permanente |  | Permanente | Implementar la gestión descentralizada en el proceso de descentralización, así como atender aspectos del proceso de tran | Viceministro/a de MYPE e Industria (PRODUCE) | OAIPCS (PRODUCE) | Secretaría Técnica | Amazonas, Ancash, Apurimac, Arequipa, Ayacucho, Cajamarca, Callao, Cusco, Huancavelica, Huanuco, Ica, Junin, La Libertad | Director/a de la OAIPCS | Javier Alegre Paredes - Especialista de Descentralización OAIPCS |  | SEC-15 | https://drive.google.com/file/d/1JBQepXNo7hhxuaUIXYTUH90hyyvOj3XT/view
+OAIPCS-002 | Comisión Intergubernamental | Sí | Descentralización | Comisión Intergubernamental del Sector Producción en materia de Pesca y Acuicultura | Decreto Supremo | DS N° 019-2024-PRODUCE |  |  |  | Permanente |  | Permanente | Implementar la gestión descentralizada en el proceso de descentralización, así como atender aspectos del proceso de tran | Viceministro/a de Pesca y Acuicultura (PRODUCE) | OAIPCS (PRODUCE) | Secretaría Técnica | Amazonas, Ancash, Apurimac, Arequipa, Ayacucho, Cajamarca, Callao, Cusco, Huancavelica, Huanuco, Ica, Junin, La Libertad | Director/a de la OAIPCS | Javier Alegre Paredes - Especialista de Descentralización OAIPCS |  | SEC-15 | 
+OAIPCS-003 | Comisión Sectorial | Sí | Descentralización | Comisión Sectorial de Transferencia del Ministerio de la Producción, en materia de Pesca y Acuicultura | Resolución Ministerial | RM N° 159-2017-PRODUCE |  |  |  | Permanente |  | Permanente | Asegurar que el proceso de transferencia de competencias, funciones, activos y recursos asociados se realice de manera p | Viceministro/a de Pesca y Acuicultura (PRODUCE) | Director/a de la OAIPCS | Secretaría Técnica | Amazonas, Ancash, Apurimac, Arequipa, Ayacucho, Cajamarca, Callao, Cusco, Huancavelica, Huanuco, Ica, Junin, La Libertad |  |  |  | SEC-15 | 
+OAIPCS-004 | Comisión Sectorial | Sí | Descentralización | Comisión Sectorial de Transferencia del Ministerio de la Producción, en materia de MYPE e Industria | Resolución Ministerial | RM N° 159-2017-PRODUCE |  |  |  | Permanente |  | Permanente | Asegurar que el proceso de transferencia de competencias, funciones, activos y recursos asociados se realice de manera p | Viceministro/a de MYPE e Industria (PRODUCE) | Director/a de la OAIPCS | Secretaría Técnica |  |  |  |  | SEC-15 | 
+OAIPCS-005 | Grupo de Trabajo Multisectorial | Sí | Descentralización | Grupo de Trabajo Multisectorial - Política de Descentralización | Resolución Ministerial | RM N° 120-2022-PCM | 2022-04-16 10:00:00 | RM N° 036-2023-PCM (16.02.2023); RM N° 0121-2024-PCM (16.04.2024); RM N° 373-2024-PCM (27.12.2024) |  | Temporal | 2025-07-31 10:00:00 | Vencido | Elaborar la propuesta de la Política Nacional Multisectorial de Descentralización. | Secretaría de Descentralización - PCM | Secretaría de Descentralización - PCM | Integrante |  | Director/a de la OAIPCS | Javier Alegre Paredes - Especialista de Descentralización OAIPCS | Oficio N° 001017-2024-PRODUCE/SG | SEC-15 | 
+OAIPCS-006 | Grupo de Trabajo Multisectorial | Sí | Conflictos sociales | Plan de Cierre de Brechas - Loreto | Resolución Ministerial | RM N° 268-2020-PCM (en el marco del DS N° 145-2020-PCM) | 2020-09-20 00:00:00 | RM N° 253-2022-PCM (amplía vigencia hasta 20.09.2023) |  | Temporal | 2023-09-20 00:00:00 | Vencido | Implementación del Plan de Cierre de Brechas en el ámbito petrolero de Loreto, con participación del GORE Loreto, gobier | Presidencia del Consejo de Ministros | Viceministerio de Gobernanza Territorial - PCM | Integrante | Loreto | Director/a de la OAIPCS | Especialista OAIPCS (precisar nombre) | Oficio N° 00000742-2022-PRODUCE/SG | SEC-02 | 
+OAIPCS-007 | Grupo de Trabajo Multisectorial | Sí | Conflictos sociales | Grupo de Trabajo de naturaleza temporal denominado "Mesa Técnica para el Desarrollo de la Provincia de Condorcanqui del  | Resolución Ministerial | RM N° 161-2022-PCM | 2022-05-24 10:00:00 | RM N° 319-2022-PCM; RM N° 083-2023-PCM; RM N° 158-2023-PCM; RM N° 152-2024-PCM; RM N° 375-2024-PCM; RM N° 358-2025-PCM ( | 2022-05-24 10:00:00 | Temporal | 2026-12-31 09:00:00 | Vigente | Plantear soluciones para la atención de las principales demandas de la población y revisar la priorización de la inversi | Presidencia del Consejo de Ministros | Secretaría de Descentralización - PCM | Integrante | Amazonas | Director de Promoción y Desarrollo Acuícola | Director/a de la OAIPCS | Oficio N° 00001022-2025-PRODUCE/SG | SEC-01 | https://drive.google.com/file/d/1Mt3lI2zd8JWdwuIT7ubXhymCLJDs032j/view
+OAIPCS-008 | Grupo de Trabajo Multisectorial | Sí | Conflictos sociales | Grupo de Trabajo para el desarrollo sostenible de la provincia de Carabaya, departamento de Puno | Resolución Ministerial | RM N° 259-2023-MINEM/DM | 2023-06-28 00:00:00 | RM N° 046-2024-MINEM/DM (14.02.2024); RM N° 315-2024-MINEM/DM (14.08.2024); RM N° 179-2025-MINEM/DM |  | Temporal | 2026-11-16 00:00:00 | Por vencer | Coordinar, evaluar y proponer un Plan de Acción para atender las principales demandas y brechas sociales de la provincia | Ministerio de Energía y Minas / Municipalidad Provincial de Carabaya | Secretaría de Gestión Social y Diálogo - PCM | Integrante | Puno | Director/a de la OAIPCS | Carlos Salazar García - Asesor de la Dirección Ejecutiva del ITP | Oficio N° 00000938-2023-PRODUCE/SG | SEC-04 | 
+OAIPCS-009 | Grupo de Trabajo Multisectorial | Sí | Conflictos sociales | Grupo de Trabajo de naturaleza temporal denominado "Espacio de diálogo para el desarrollo de la provincia de Cotabambas  | Resolución Ministerial | RM N° 264-2021-PCM | 2021-11-12 09:00:00 | RM N° 015-2022-PCM; RM N° 118-2022-PCM; RM N° 215-2022-PCM; RM N° 242-2022-PCM; RM N° 371-2022-PCM; RM N° 109-2023-PCM;  |  | Temporal | 2026-11-13 09:00:00 | Por vencer | Promover el desarrollo de la zona de influencia del proyecto minero Las Bambas mediante un proceso de diálogo con objeti | Presidencia del Consejo de Ministros | Secretaría de Gestión Social y Diálogo - PCM | Integrante | Apurimac | Cintia Jori Rondón Cunyas - Responsable de la Unidad de Monitoreo y Evaluación | Edith Bautista León - Directora de la OAIPCS | Oficio N° 00000248-2026-PRODUCE/SG | SEC-13 | 
+OAIPCS-010 | Grupo de Trabajo Multisectorial | Sí | Conflictos sociales | Grupo de Trabajo Multisectorial de naturaleza temporal denominado "Mesa de Desarrollo Integral de la provincia de Pataz, | Resolución Ministerial | RM N° 119-2025-PCM | 2025-05-28 10:00:00 | RM N° 356-2025-PCM (24.12.2025) |  | Temporal | 2026-06-30 10:00:00 | Vencido | Formular un plan de intervención territorial para impulsar el desarrollo económico y social en la provincia de Pataz. | Presidencia del Consejo de Ministros | Oficina General de Gestión Social - MINEM | Integrante | La Libertad | Juan Carlos Requejo Alemán - Viceministro de MYPE e Industria | Edith Bautista León - Directora de la OAIPCS | Oficio N° 00000550-2025-PRODUCE/SG (titular); Oficio N° 687-2025-PRODUCE/SG (alterno) | SEC-04 | 
+OAIPCS-011 | Mesa de Diálogo formalizada | Sí | Conflictos sociales | Mesa de Diálogo para atender la problemática de la cuenca del río Coralaque mediante el Plan de Acción Integrado | Resolución de Secretaría (PCM) | RSGSD N° 0010-2025-PCM/SGSD | 2025-10-02 00:00:00 |  |  | Temporal | 2026-04-30 00:00:00 | Vencido | Impulsar el diálogo sobre la problemática de la cuenca del río Coralaque (Moquegua) y dar seguimiento al Plan de Acción  | Secretaría de Gestión Social y Diálogo - PCM | Ministerio de Energía y Minas | Integrante | Moquegua | José Edgardo Allemant Sayán - Director General de Acuicultura | Edith Bautista León - Directora de la OAIPCS | Oficio N° 00001391-2025-PRODUCE/SG | SEC-04 | 
+OAIPCS-012 | Comisión Multisectorial Permanente | Sí | Desarrollo territorial | Comisión Multisectorial de naturaleza permanente denominada "VRAEM Productivo" | Decreto Supremo | DS N° 006-2023-PCM | 2023-01-13 09:00:00 |  |  | Permanente |  | Permanente | Realizar el seguimiento a las actividades de los diversos actores que participan en el proceso de desarrollo y pacificac | Presidencia del Consejo de Ministros |  | Integrante |  | Ministro/a de la Producción (por DS) | Juan Carlos Requejo Alemán - Viceministro de MYPE e Industria | Oficio N° 588-2025-PRODUCE/SG | SEC-13 | 
+OAIPCS-013 | Comisión Multisectorial Permanente | Sí | Conflictos sociales | Comisión Multisectorial para proponer y fiscalizar la implementación de medidas y acciones estratégicas para el desarrol | Decreto Supremo | DS N° 040-2023-PCM | 2023-03-23 00:00:00 |  |  | Permanente |  | Permanente | Proponer y fiscalizar la implementación de medidas y acciones estratégicas para el desarrollo de los pueblos indígenas a | Presidencia del Consejo de Ministros |  | Invitado | Junín, Pasco, Huánuco, Cusco, Ayacucho |  |  |  |  | 
+OAIPCS-014 | Grupo de Trabajo Multisectorial | Sí | Conflictos sociales | Grupo de trabajo para atender la problemática de las comunidades que forman parte del proceso de Consulta Previa del Lot | Resolución Ministerial | RM N° 242-2024-MINEM/DM | 2024-06-11 00:00:00 | RM N° 009-2025-MINEM/DM (11.01.2025); RM N° 224-2025-MINEM/DM (03.07.2025) |  | Temporal | 2025-12-31 00:00:00 | Vencido | Abordar los acuerdos de las Actas de Consulta del proceso de consulta previa del Lote 8, proponer respuestas a los pedid | Ministerio de Energía y Minas |  | Invitado | Loreto |  |  |  | SEC-02 | 
+OAIPCS-015 | Grupo de Trabajo Multisectorial | Sí | Desarrollo productivo | Grupo de Trabajo Multisectorial de naturaleza temporal denominado "Mesa Nacional del Bambú" | Resolución Ministerial | RM N° 0348-2025-MIDAGRI | 2025-09-12 00:00:00 |  |  | Temporal | 2025-12-12 00:00:00 | Vencido | Elaborar una agenda de trabajo multisectorial que contribuya al desarrollo integral de la cadena productiva del bambú co | Ministerio de Desarrollo Agrario y Riego |  | Integrante | Nacional | Gino Catturini Ruiz - Director del CITEmadera y del Mueble (ITP) | Jaime Narváez de la Fuente - Especialista DEDFC (ITP) |  |  | 
+OAIPCS-016 | Grupo de Trabajo Multisectorial | Sí | Desarrollo territorial | Grupo de Trabajo Multisectorial de naturaleza temporal denominado "Mesa de Trabajo para promover el desarrollo del distr | Resolución Ministerial | RM N° 190-2025-PCM | 2025-08-16 00:00:00 | RM N° 075-2026-PCM (13.03.2026, incorpora a MIDAGRI) |  | Temporal | 2026-02-12 00:00:00 | Vencido | Formular una estrategia de intervención territorial para el desarrollo del distrito de Santa Rosa de Loreto. | Secretaría de Descentralización - PCM |  | Integrante | Loreto | Juan Carlos Requejo Alemán - Viceministro de MYPE e Industria | Marybel Vidal Matos - Directora Ejecutiva del PNDP | Oficio N° 844-2025-PRODUCE/SG (titular); Oficio N° 00001171-2025-PRODUCE/SG (alterno) | SEC-02 | 
+OAIPCS-017 | Grupo de Trabajo Multisectorial | Sí | Conflictos sociales | Grupo de Trabajo Multisectorial de naturaleza temporal denominado "Espacio de diálogo para atender las demandas plantead | Resolución Ministerial | RM N° 315-2021-PCM | 2021-12-29 09:00:00 | RM N° 111-2022-PCM; RM N° 217-2022-PCM; RM N° 320-2022-PCM; RM N° 124-2023-PCM; RM N° 320-2023-PCM; RM N° 377-2024-PCM;  |  | Temporal | 2026-12-31 09:00:00 | Vigente | Promover el desarrollo territorial de la cuenca del río Moche mediante un proceso de diálogo con objetivos, acciones, cr | Presidencia del Consejo de Ministros |  | Integrante | La Libertad |  |  |  | SEC-01 | 
+OAIPCS-018 | Grupo de Trabajo Multisectorial | Sí | Desarrollo territorial | Grupo de Trabajo para el desarrollo integral de la provincia de Purús, departamento de Ucayali | Resolución Ministerial | RM N° 050-2026-PCM | 2026-02-13 00:00:00 |  |  | Temporal | 2026-09-11 00:00:00 | Vencido | Formular un plan de intervención territorial para el desarrollo integral de la provincia de Purús (conectividad, salud,  | Presidencia del Consejo de Ministros |  | Integrante | Ucayali | Hernán Oblitas Rodríguez - Director de Gestión de Intervenciones Estratégicas para la Red CITE (ITP) | Edgard Fabricio Flores Ysla - Director de Gestión Acuícola (DGA) | Oficio N° 00000263-2026-PRODUCE/SG; Memorandos N° 00000194-2026-PRODUCE/DVMYPE-I y 00000344-2026-PRODUCE/DVPA |  | 
+OAIPCS-019 | Espacio sin norma | No | Conflictos sociales | Mesa de Diálogo para el Desarrollo de Marcona | Acta de instalación | Sin norma de creación (instalada el 11.06.2013) |  |  | 2013-06-11 00:00:00 | No definida |  | Sin fecha | Abordar temas de desarrollo urbano, social sostenible, pesquero y acuícola en Marcona. | PCM (instalada por la ex ONDS) | PCM (ex ONDS) | Invitado | Ica | Héctor Zanabria (FONDEPES) |  |  | SEC-02 | 
+OAIPCS-020 | Espacio sin norma | No | Conflictos sociales | Mesa de Trabajo "Atención Integral a la Crisis Acuícola de la Laguna Punrun" | Convocatoria / oficio | Sin norma de creación (convocada por el congresista Pasión Dávila) |  |  | 2025-07-18 00:00:00 | No definida |  | Sin fecha | Atender la emergencia por mortandad masiva de truchas en la laguna Punrun (Pasco). | Congreso de la República (convocante) |  | Integrante | Pasco | Oscar Del Valle Ayala | Edgard Fabricio Flores Ysla |  |  | 
+OAIPCS-034 | Grupo de Trabajo Sectorial | Sí | Desarrollo productivo | Grupo de Trabajo para impulsar los encadenamientos productivos de la industria manufacturera en la industria naval en el | Resolución Ministerial | RM N° 000217-2024-PRODUCE |  |  |  | Temporal | 2024-11-30 00:00:00 | Vencido | Potenciar los encadenamientos productivos de la industria manufacturera en la industria naval y en la zona de influencia | Viceministro/a de MYPE e Industria (PRODUCE) |  | Preside | Lima (Chancay) / Nacional |  |  |  |  | 
+
+====================================================================================================
+## FACT_Casos  (35 filas)
+====================================================================================================
+ID_Caso | ID_Tipo | Nombre_Caso | ID_Sector | ID_Tematica | Fecha_Inicio | ID_Ubigeo | ID_Provincia | ID_Distrito | ID_Sectorista | Prioridad | ID_Intervencion | Pct_Avance | ID_Riesgos | Descripcion_Riesgo | Resumen_Ejecutivo | N_Acciones | N_Hitos_Total | N_Hitos_Cumplidos | Fecha_Cierre | Fecha_Reapertura | N_Reaperturas | Motivo_Cierre | Link_PDF_Drive | Fecha_Envio_Correo | Destinatarios_Correo | Fecha_Envio_WhatsApp | Destinatarios_WhatsApp | <c29>
+CS-PRODUCE-2026-001 | TC-03 | Uso de red de cortina de fondo en Cabo Blanco y Los Órganos | Sector-01 | TEMA-02 | 2024-10-15 00:00:00 | DEP-22 | PRO-057 | DIS-0615 | SEC-01 | Urgente | Ciclo-003 | 0.9 | RIE-003 | Bloqueo de Panamericana Norte (altura Cabo Blanco) por plazo vencido del estudio técnico. | Los pescadores de Cabo Blanco denuncian que pescadores de Los Órganos extraen recursos hidrobiológicos dentro de sus áre | 0 | 0 | 0 |  |  | 0 |  |  |  |  |  |  | 
+CS-PRODUCE-2026-002 | TC-03 | Rehabilitación del Desembarcadero Pesquero Artesanal de Los Órganos | Sector-01 | TEMA-01 | 2024-12-01 00:00:00 | DEP-22 | PRO-057 | DIS-0618 | SEC-01 | Moderado | Ciclo-003 | 0.9 | RIE-003 | Riesgo de nuevas medidas de fuerza de los pescadores artesanales si se prolonga la suscripción del convenio de gestión,  | Pescadores artesanales del DPA Los Órganos demandan la rehabilitación de la infraestructura del desembarcadero, tras la  | 0 | 0 | 0 |  |  | 0 |  |  |  |  |  |  | 
+CS-PRODUCE-2026-003 | TC-03 | Reubicación de embarcaciones del Muelle 5E - Terminal Norte Multipropósito del Callao | Sector-01 | TEMA-01 | 2012-08-01 00:00:00 | DEP-07 | PRO-025 | DIS-0267 | SEC-02 | Urgente | Ciclo-001 | 0 | RIE-003 | Riesgo de descontento social por la falta de consenso sobre el monto de las compensaciones económicas, que ya provocó la | Los pescadores artesanales del Callao demandan una solución integral a la reubicación de las embarcaciones fondeadas en  | 0 | 0 | 0 |  |  | 0 |  |  |  |  |  |  | 
+CS-PRODUCE-2026-004 | TC-03 | Disputa por la administración de la Infraestructura Pesquera Artesanal de Chorrillos | Sector-01 | TEMA-01 | 2024-12-04 00:00:00 | DEP-15 | PRO-037 | DIS-0431 | SEC-03 | Moderado | Ciclo-003 | 0 | RIE-002 | Riesgo de nuevos episodios de violencia entre organizaciones de pescadores, dado el antecedente de ingreso violento de u | La OSPA José Olaya Balandra (JOB) permanece en la administración de la IPA Chorrillos pese a que el convenio de administ | 0 | 0 | 0 |  |  | 0 |  |  |  |  |  |  | 
+CS-PRODUCE-2026-005 | TC-02 | Extracción de erizo rojo y alga palo en San Juan de Marcona | Sector-01 | TEMA-06 |  | DEP-11 | PRO-030 | DIS-0321 | SEC-02 | Moderado | Ciclo-003 | 0 | RIE-003 | Riesgo de tensión entre organizaciones pesqueras de Marcona y Lomas por discrepancias sobre jurisdicción y alcances norm | La Comunidad Pesquera Artesanal de San Juan de Marcona (COPMAR) denuncia extracción ilegal de erizo rojo por embarcacion | 0 | 0 | 0 |  |  | 0 |  |  |  |  |  |  | 
+CS-PRODUCE-2026-006 | TC-03 | Implementación de la Ley N.° 31749 de pesca artesanal y tradicional | Sector-01 | TEMA-03 | 2025-02-27 00:00:00 | DEP-20 |  |  | SEC-01 | Urgente | Ciclo-003 | 0.7 | RIE-002 | Riesgo de conflictividad latente por la persistencia de posiciones contrapuestas entre gremios de pesca tradicional/sele | Existen posiciones contrapuestas entre organizaciones de pescadores artesanales sobre la implementación de la Ley N.° 31 | 0 | 0 | 0 |  |  | 0 |  |  |  |  |  |  | 
+CS-PRODUCE-2026-007 | TC-03 | Ordenamiento de la pesquería del calamar gigante (pota) | Sector-01 | TEMA-02 | 2026-02-20 00:00:00 | DEP-20 |  |  | SEC-01 | Urgente | Ciclo-003 | 0.8 | RIE-002 | Riesgo de paralización de puertos del litoral sur y norte por demandas no resueltas de distribución equitativa de cuota, | Las OSPAS del litoral demandan modificaciones a las medidas de ordenamiento y acceso al recurso pota. Ante la caída del  | 0 | 0 | 0 |  |  | 0 |  |  |  |  |  |  | 
+CS-PRODUCE-2026-008 | TC-02 | Afectación a la pesca artesanal por dragado en la Isla San Lorenzo - Callao | Sector-01 | TEMA-06 | 2026-01-01 00:00:00 | DEP-07 | PRO-025 | DIS-0267 | SEC-02 | Moderado | Ciclo-003 | 0 | RIE-003 | Las actividades de dragado que originaron la denuncia ya concluyeron y no se registran nuevas afectaciones reportadas po | Organizaciones de pescadores artesanales del Callao (ARAAPESCA, ASAPECH, ARUPACC, ARAEMM) denunciaron afectación a la pe | 0 | 0 | 0 |  |  | 0 |  |  |  |  |  |  | 
+CS-PRODUCE-2026-009 | TC-02 | Seguridad y fiscalización pesquera en el litoral de Tumbes | Sector-01 | TEMA-07 |  | DEP-26 | PRO-064 | DIS-0669 | SEC-02 | Moderado | Ciclo-003 | 0 | RIE-002 | Riesgo de depredación de recursos y de afectación a la seguridad de los pescadores por actividad de embarcaciones de arr | Pescadores artesanales de Tumbes solicitan mayor control, fiscalización y seguridad dentro de las 5 millas ante la presu | 0 | 0 | 0 |  |  | 0 |  |  |  |  |  |  | 
+CS-PRODUCE-2026-010 | TC-02 | Ampliación del proceso de formalización pesquera en Piura y Lambayeque | Sector-01 | TEMA-05 |  | DEP-20 |  |  | SEC-01 | Moderado | Ciclo-003 | 0.8 | RIE-003 | Riesgo de conflictividad latente sostenida mediante pronunciamientos en redes sociales, ante la falta de un mecanismo no | Pescadores y armadores artesanales de Piura y Lambayeque demandan ampliar el proceso de formalización pesquera. El marco | 0 | 0 | 0 |  |  | 0 |  |  |  |  |  |  | 
+CS-PRODUCE-2026-011 | TC-02 | Habilitación de áreas acuáticas y fortalecimiento de la maricultura en Sechura | Sector-01 | TEMA-04 | 2025-01-01 00:00:00 | DEP-22 | PRO-058 | DIS-0620 | SEC-01 | Moderado | Ciclo-003 | 0.9 | RIE-002 | Riesgo de tensión entre los propios maricultores por la habilitación excepcional de un área acuática en enero de 2026, y | Maricultores de Sechura demandan la habilitación de nuevas áreas acuáticas para concha de abanico, el fortalecimiento de | 0 | 0 | 0 |  |  | 0 |  |  |  |  |  |  | 
+CS-PRODUCE-2026-012 | TC-02 | Rechazo al proyecto de exploración de hidrocarburos de ANADARKO (lotes Z-61, Z-62, Z-63) | Sector-01 | TEMA-02 | 2024-07-01 00:00:00 | DEP-22 | PRO-051 | DIS-0561 | SEC-01 | Moderado | Ciclo-003 | 0.8 | RIE-002 | Riesgo de conflictividad si el EIA-d del Lote Z-62 es aprobado sin que se atiendan las preocupaciones de los pescadores  | Organizaciones de pescadores artesanales de Lambayeque y La Libertad rechazan el proyecto de exploración y eventual expl | 0 | 0 | 0 |  |  | 0 |  |  |  |  |  |  | 
+CS-PRODUCE-2026-013 | TC-02 | Mejoramiento de infraestructura del Desembarcadero Pesquero Artesanal de Chimbote | Sector-01 | TEMA-01 | 2025-02-01 00:00:00 | DEP-02 |  |  | SEC-03 | Bajo | Ciclo-003 | 0 | RIE-003 | Riesgo de descontento de los pescadores por la persistencia de obras paralizadas y del abandono de la PTAR, denunciado d | Pescadores artesanales del DPA Chimbote demandan el mejoramiento de la infraestructura para cumplir la Norma Sanitaria v | 0 | 0 | 0 |  |  | 0 |  |  |  |  |  |  | 
+CS-PRODUCE-2026-014 | TC-02 | Atención a pescadores artesanales afectados por el derrame de petróleo de la Refinería La Pampilla | Sector-01 | TEMA-06 | 2022-01-15 00:00:00 | DEP-15 | PRO-037 |  | SEC-03 | Moderado | Ciclo-003 | 0 | RIE-003 | Riesgo de reactivación de reclamos si los fondos de compensación (Acuerdo de Principio de Oportunidad) no cubren los pro | Pescadores artesanales de la zona marino costera de Lima (Ventanilla, Santa Rosa, Ancón, Aucallama y Chancay) demandan a | 0 | 0 | 0 |  |  | 0 |  |  |  |  |  |  | 
+CS-PRODUCE-2026-015 | TC-02 | Ocupación informal de terreno del Parque Industrial de Ancón (AAMEC) | Sector-02 | TEMA-01 | 2025-07-01 00:00:00 | DEP-15 | PRO-037 | DIS-0425 | SEC-03 | Moderado | Ciclo-003 | 0 | RIE-001 | Riesgo de nuevos episodios de fuerza e invasión, y de afectación al contrato suscrito con el desarrollador Junefield, an | La Asociación AAMEC se atribuye la posesión de 450 hectáreas dentro del Parque Industrial de Ancón (PIA), transferido po | 0 | 0 | 0 |  |  | 0 |  |  |  |  |  |  | 
+CS-PRODUCE-2026-016 | TC-03 | Descontento de MYPES por retrasos y presuntos actos de corrupción en Compras a MYPErú | Sector-02 | TEMA-06 | 2026-01-16 00:00:00 | DEP-16 | PRO-041 | DIS-0488 | SEC-03 | Urgente |  | 0 |  | Riesgo de paralización nacional de MYPES y de daño reputacional por la cobertura mediática de las denuncias de corrupció | Las MYPE manifiestan descontento por presuntos actos de corrupción y por el retraso del Programa Compras a MYPErú. Ante  | 0 | 0 | 0 |  |  | 0 |  |  |  |  |  |  | 
+CS-PRODUCE-2026-017 | TC-02 | Mejoramiento de infraestructura del Desembarcadero Pesquero Artesanal de Huacho | Sector-01 | TEMA-01 | 2025-10-01 00:00:00 | DEP-16 | PRO-038 |  | SEC-03 | Bajo | Ciclo-003 | 0 | RIE-003 | Riesgo de nuevo malestar gremial por cobros del tarifario si la OSPA administradora no subsana las observaciones formula | Pescadores artesanales del DPA Huacho demandan el mejoramiento de la infraestructura pesquera conforme a la normativa sa | 0 | 0 | 0 |  |  | 0 |  |  |  |  |  |  | 
+CS-PRODUCE-2026-018 | TC-02 | Mejoramiento de infraestructura del Desembarcadero Pesquero Artesanal de Supe | Sector-01 | TEMA-01 | 2017-01-01 00:00:00 | DEP-16 | PRO-038 | DIS-0470 | SEC-03 | Bajo | Ciclo-003 | 0 | RIE-003 | Obra fue inaugurada oficialmente el 29.06.2026; queda pendiente solo el levantamiento de observaciones para la recepción | Pescadores artesanales del DPA Supe demandan el mejoramiento de la infraestructura pesquera conforme a la normativa sani | 0 | 0 | 0 |  |  | 0 |  |  |  |  |  |  | 
+CS-PRODUCE-2026-019 | TC-02 | Mejoramiento de infraestructura del Desembarcadero Pesquero Artesanal de San Juan de Marcona | Sector-01 | TEMA-01 | 2025-11-01 00:00:00 | DEP-11 | PRO-030 | DIS-0321 | SEC-02 | Bajo | Ciclo-003 | 0 | RIE-003 | Riesgo de nuevo malestar de los pescadores por la demora en la culminación de la obra, tras la resolución del contrato c | Pescadores artesanales señalan que el DPA San Juan de Marcona no cuenta con infraestructura culminada conforme a la norm | 0 | 0 | 0 |  |  | 0 |  |  |  |  |  |  | 
+CS-PRODUCE-2026-020 | TC-03 | Medidas de ordenamiento del recurso bonito y demandas de pescadores artesanales | Sector-01 | TEMA-02 | 2026-02-25 00:00:00 | DEP-20 |  |  | SEC-01 | Urgente | Ciclo-003 | 0.9 | RIE-002 | Riesgo de nuevas movilizaciones de la FIUPAP, que ya se manifestó los días 10 y 15.06.2026 al considerar que la R.M. N.° | Organizaciones de pescadores artesanales muestran disconformidad con las medidas de ordenamiento del recurso bonito y de | 0 | 0 | 0 |  |  | 0 |  |  |  |  |  |  | 
+CS-PRODUCE-2026-021 | TC-02 | Disconformidad de OSPAS de artes pasivas por cuotas de jurel y caballa asignadas a la flota de cerco | Sector-01 | TEMA-02 | 2024-12-30 00:00:00 | DEP-20 |  |  | SEC-01 | Moderado | Ciclo-003 | 0.9 | RIE-003 | Riesgo de nueva movilización de la FIUPAP si las medidas de ordenamiento vigentes no atienden su demanda de mayor cuota  | Los OSPAS de artes pasivas de la Macro Sur muestran disconformidad por la asignación de cuotas de jurel y caballa a favo | 0 | 0 | 0 |  |  | 0 |  |  |  |  |  |  | 
+CS-PRODUCE-2026-022 | TC-02 | Mejoramiento de infraestructura del Desembarcadero Pesquero Artesanal Faro Matarani | Sector-01 | TEMA-01 | 2025-08-01 00:00:00 | DEP-04 | PRO-020 | DIS-0198 | SEC-04 | Bajo | Ciclo-003 | 0 | RIE-003 | Riesgo bajo de conflictividad social; el principal riesgo identificado es el atraso de obra atribuible al contratista, g | Pescadores artesanales del DPA Faro Matarani (Arequipa) demandan el mejoramiento y adecuación de la infraestructura a la | 0 | 0 | 0 |  |  | 0 |  |  |  |  |  |  | 
+CS-PRODUCE-2026-023 | TC-02 | Culminación de infraestructura del Desembarcadero Pesquero Artesanal de Atico | Sector-01 | TEMA-01 | 2025-11-01 00:00:00 | DEP-04 | PRO-020 | DIS-0198 | SEC-04 | Bajo | Ciclo-003 | 0 | RIE-003 | Falta de habilitación presupuestal 2026 para ejecutar el saldo de obra del rompeolas y el emisor submarino. | Pescadores artesanales del DPA Atico (Arequipa) demandan la culminación y habilitación de la infraestructura conforme a  | 0 | 0 | 0 |  |  | 0 |  |  |  |  |  |  | 
+CS-PRODUCE-2026-024 |  | Mejoramiento integral del Desembarcadero Pesquero Artesanal La Punchana | Sector-01 | TEMA-01 | 2025-01-01 00:00:00 | DEP-17 | PRO-042 | DIS-0507 | SEC-02 | Bajo | Ciclo-003 | 0 | RIE-003 | Escenario de estabilidad y normal desarrollo de actividades en el DPA mientras se tramita el expediente técnico. | Pescadores artesanales del DPA La Punchana (Iquitos) demandan el mejoramiento integral de la infraestructura conforme a  | 0 | 0 | 0 |  |  | 0 |  |  |  |  |  |  | 
+CS-PRODUCE-2026-025 | TC-01 | Culminación del Gran Mercado de Belén - Iquitos | Sector-02 | TEMA-06 | 2025-01-01 00:00:00 | DEP-17 | PRO-042 | DIS-0509 | SEC-02 | Bajo | Ciclo-003 | 0 | RIE-003 | Se registran demandas ni protestas de comerciantes; el principal riesgo es la insuficiencia presupuestal del MEF para fi | Existe demora en la culminación del proyecto de mejoramiento del servicio de comercialización del Gran Mercado de Belén- | 0 | 0 | 0 |  |  | 0 |  |  |  |  |  |  | 
+CS-PRODUCE-2026-026 | TC-02 | Convocatoria de nuevo administrador para el DPA San José (Lambayeque) | Sector-01 | TEMA-01 | 2026-01-01 00:00:00 | DEP-14 | PRO-036 | DIS-0422 | SEC-01 | Moderado | Ciclo-003 | 0.9 | RIE-002 | Riesgo de nueva conflictividad si no se define oportunamente el cronograma de selección del nuevo administrador, tras la | La Asociación de Armadores y Pescadores Artesanales de San José (ASARPAR) demanda la convocatoria de un nuevo administra | 0 | 0 | 0 |  |  | 0 |  |  |  |  |  |  | 
+CS-PRODUCE-2026-027 | TC-03 | Presunta contaminación por plomo de la empresa Baterías ETNA (Mi Perú, Callao) | Sector-02 | TEMA-06 | 2025-08-01 00:00:00 | DEP-15 | PRO-037 | DIS-0424 | SEC-02 | Moderado | Ciclo-003 | 0 | RIE-002 | Riesgo de afectación a la salud de la población y de escalamiento social, evidenciado por el rechazo expresado en la aud | La población del distrito de Mi Perú denuncia que la empresa Baterías ETNA generaría contaminación ambiental por emision | 0 | 0 | 0 |  |  | 0 |  |  |  |  |  |  | 
+CS-PRODUCE-2026-028 | TC-03 | Oposición al proyecto de planta de cal de CALCESUR (AA.HH. Márquez, Callao) | Sector-02 | TEMA-06 | 2026-01-01 00:00:00 | DEP-07 | PRO-025 | DIS-0267 | SEC-02 | Bajo | Ciclo-003 | 0 | RIE-003 | Declaración de Impacto Ambiental fue desaprobada y quedó consentida; persiste un riesgo residual si la empresa presenta  | Vecinos del AA.HH. Márquez (Callao) se oponen al proyecto de planta de cal de 2000 TMPD de la empresa CALCESUR, por su p | 0 | 0 | 0 |  |  | 0 |  |  |  |  |  |  | 
+CS-PRODUCE-2026-029 | TC-02 | Rehabilitación del Muelle N.° 2 del Desembarcadero Pesquero Artesanal de Ilo | Sector-01 | TEMA-01 | 2026-01-01 00:00:00 | DEP-19 | PRO-049 | DIS-0545 | SEC-04 | Bajo | Ciclo-003 | 0 | RIE-003 | Riesgo de colapso de la infraestructura por su estado crítico de deterioro; se registraron protestas espontáneas por aba | Pescadores artesanales del DPA Ilo (Moquegua) demandan la rehabilitación del Muelle N.° 2, en estado crítico de deterior | 0 | 0 | 0 |  |  | 0 |  |  |  |  |  |  | 
+CS-PRODUCE-2026-030 | TC-02 | Demanda de cancelación de la temporada de pesca de anchoveta por captura juvenil | Sector-01 | TEMA-02 | 2026-04-28 00:00:00 | DEP-20 |  |  | SEC-01 | Moderado | Ciclo-003 | 0.8 | RIE-002 |  | Diversos gremios del sector pesquero (SUMOPP, SUPNEP) exigen la cancelación inmediata de la temporada de pesca de anchov | 0 | 0 | 0 |  |  | 0 |  |  |  |  |  |  | 
+CS-PRODUCE-2026-031 | TC-03 | Participación ciudadana en el EIA-d del proyecto Aceros Americanos (Chilca) | Sector-02 | TEMA-06 | 2026-05-01 00:00:00 | DEP-16 | PRO-041 | DIS-0488 | SEC-03 | Moderado | Ciclo-003 | 0 | RIE-003 | Riesgo de tensión social por percepciones locales sobre olores y por la extensión del proceso de levantamiento de observ | Vecinos y organizaciones sociales de Chilca manifiestan disconformidad con los horarios previstos para los mecanismos de | 0 | 0 | 0 |  |  | 0 |  |  |  |  |  |  | 
+CS-PRODUCE-2026-032 | TC-03 | Continuidad de la pesquería de tiburón y emisión de DENP y permisos CITES | Sector-01 | TEMA-02 | 2026-04-25 00:00:00 | DEP-20 |  |  | SEC-01 | Moderado | Ciclo-003 | 0.8 | RIE-002 | Riesgo de nuevas protestas de gremios pesqueros y exportadores por la incorporación de cinco especies de tiburón al Apén | Gremios pesqueros y exportadores demandan medidas para garantizar la continuidad de la pesquería de tiburón y la emisión | 0 | 0 | 0 |  |  | 0 |  |  |  |  |  |  | 
+CS-PRODUCE-2026-033 | TC-02 | Mortandad masiva de truchas en piscigranjas de Pariahuanca (Junín) | Sector-01 | TEMA-07 | 2026-04-27 00:00:00 | DEP-12 |  |  | SEC-03 | Bajo | Ciclo-003 | 0 | RIE-003 | Riesgo de afectación económica sostenida a los productores acuícolas ante la pérdida de sus piscigranjas, con productore | Productores acuícolas de Pariahuanca (Junín) resultan afectados por la mortandad masiva y súbita de alrededor de 2 millo | 0 | 0 | 0 |  |  | 0 |  |  |  |  |  |  | 
+CS-PRODUCE-2026-034 | TC-03 | Ocupación informal del predio destinado al PIP de SANIPES en Sechura ('La Paradita') | Sector-01 | TEMA-01 | 2022-01-01 00:00:00 | DEP-22 | PRO-058 | DIS-0620 | SEC-01 | Moderado | Ciclo-003 | 0.7 | RIE-002 | Riesgo de escalamiento del conflicto si se opta por una recuperación forzosa del predio sin una estrategia social consen | Comerciantes del mercado informal 'La Paradita' ocupan desde 2022 el predio del AA.HH. Nueva Esperanza (Sechura, Piura), | 0 | 0 | 0 |  |  | 0 |  |  |  |  |  |  | 
+CS-PRODUCE-2026-035 | TC-02 | Impacto Fenómeno El Niño (FEN) | Sector-01 | TEMA-06 | 2026-02-01 00:00:00 | DEP-20 |  |  | SEC-01 | Urgente | Ciclo-002 | 0.7 | RIE-002 | Riesgo en la coyuntura radica en el escalamiento de la presión socio-gremial por parte de las OSPAs, motivado por las al | Frente al impacto del evento El Niño Costero —cuya alerta se mantendrá vigente hasta febrero de 2027 con intensidades de | 0 | 0 | 0 |  |  | 0 |  |  |  |  |  |  | 
+
+====================================================================================================
+## BRIDGE_Caso_Depto  (87 filas)
+====================================================================================================
+ID_Relacion | ID_Caso | ID_Ubigeo | Departamento | Es_Principal | <c6>
+BCD-CS-PRODUCE-2026-002-01 | CS-PRODUCE-2026-002 | CS-PRODUCE-2026-002 | DEP-22 | Piura | Sí
+BCD-CS-PRODUCE-2026-037-01 | CS-PRODUCE-2026-037 | CS-PRODUCE-2026-037 | DEP-22 | Piura | Sí
+BCD-CS-PRODUCE-2026-038-01 | CS-PRODUCE-2026-038 | CS-PRODUCE-2026-038 | DEP-22 | Piura | Sí
+
+====================================================================================================
+## DIM_Sectoristas  (15 filas)
+====================================================================================================
+ID_Sectorista | Nombre_Sectorista | DNI | clave_Sectorista | N_Casos | Cargo | ID_Entidad | ID_Area | ID_Unidad | Email | Telefono | Fotografia | Estado
+SEC-01 | André Jiménez Agapito | 46078289 | 46078289 | 13 | Coordinador de OAIPCS |  |  |  |  |  |  | Activo
+SEC-02 | Peggy Contreras Montes | 10654038 | 10654038 | 11 | Especialista - Sector Centro |  |  |  | oaipcs_temp34@produce.gbo.pe | 945712360 |  | Activo
+SEC-03 | Ivan Enrique Ascurra Santillan | 72022099 | 72022099 | 7 |  |  |  |  |  |  |  | Activo
+SEC-04 | Esteban Vidal Saldarriaga | 72898083 | 72898083 | 2 | Especialista - Sector Sur |  |  |  | oaipcs_temp37@produce.gbo.pe | 920756323 |  | Activo
+SEC-05 | Luis |  |  | 2 |  |  |  |  |  |  |  | No Activo
+SEC-06 | Angeles Arenas | 1234567 | 1234567 |  |  |  |  |  |  |  |  | No Activo
+SEC-07 | Mariella La Torre Tassara | 9881451 | 9881451 |  |  |  |  |  |  |  |  | Activo
+SEC-08 | Fredy Rafael Llanos Gonzales | 29565247 | 29565247 |  | Especialista |  |  |  | fredyrafael241066@gmail.com | 900361057 |  | Activo
+SEC-09 | Hilda Barreto | 9336736 | 9336736 |  |  |  |  |  |  |  |  | Activo
+SEC-10 | Karen Benito | 47261150 | 47261150 |  |  |  |  |  |  |  |  | Activo
+SEC-11 | Edith Bautista León | 41907320 | 41907320 |  |  |  |  |  | ebautista@produce.gob.pe |  |  | Activo
+SEC-12 | Mercedes Ubillus |  |  |  |  |  |  |  |  |  |  | No Activo
+SEC-13 | Ayli Medina |  |  |  |  |  |  |  |  |  |  | Activo
+SEC-14 | Lesli Risco |  |  |  |  |  |  |  |  |  |  | No Activo
+SEC-15 | Javier Alegre Paredes |  |  |  |  |  |  |  |  |  |  | 
+
+====================================================================================================
+## DIM_Punto_Focal  (17 filas)
+====================================================================================================
+ID_PF | Nombre_PF | DNI | clave_PF | Cargo | ID_Entidad | ID_Area | ID_Unidad | Email | Telefono | Fotografia | Estado
+PF-001 | Juan Salinas Casana |  |  | Especialista |  | AR-001 |  | jsalinas@produce.gob.pe | 987654321 |  | Activo
+PF-002 | Carlos Escobar Medina |  |  | Especialista FONDEPES |  | AR-001 |  |  |  |  | Activo
+PF-003 | Juan Carlos Cordova Calle |  |  | Especialista DGPA |  | AR-001 |  |  |  |  | Activo
+PF-004 | Milagros Regina Huachua Quintana |  |  | Especialista DGSFS-PA |  | AR-001 |  |  |  |  | Activo
+PF-005 | Yuliana Katherin Mora Espinoza |  |  | Especialista DGPARPA |  | AR-001 |  |  |  |  | Activo
+PF-006 | Betsy del Carmen Buitrón Díaz |  |  | Especialista IMARPE |  | AR-001 |  |  |  |  | Activo
+PF-007 | Jocabed Canchari Soto |  |  | Especialista DGAAMPA |  | AR-001 |  |  |  |  | Activo
+PF-008 | Evelyn Tovalino León |  |  | Especialista DGA |  | AR-001 |  |  |  |  | Activo
+PF-009 | Ivan Vassallo Olano |  |  | Especialista PNDP |  | AR-002 |  |  |  |  | Activo
+PF-010 | Angela Torecilla Ampuero |  |  | Especialista PNCMP |  | AR-002 |  |  |  |  | Activo
+PF-011 | Jaime Antonio De la Torre Obregon |  |  | Especialista DGPCHDI |  | AR-001 |  |  |  |  | Activo
+PF-012 | Jorge Alva Pasapera |  |  | Especialista DGAAMI |  | AR-002 |  |  |  |  | Activo
+PF-013 | Karina Flores |  |  | Especialista DVPA |  | AR-001 |  |  |  |  | Activo
+PF-014 | Frank Llordy Escalante Cardenas |  |  | Especialista FONDEPES |  | AR-001 |  |  |  |  | Activo
+PF-015 | Jorge Luis Pérez |  |  | Especialista FONDEPES DPA Marcona |  | AR-001 |  |  |  |  | Activo
+PF-016 | Javier Juan Alegre Paredes |  |  | Especialista OAIPCS | E-014 | AR-047 |  |  |  |  | Activo
+PF-017 | André Jiménez Agapito |  |  | Especialista OAIPCS | E-014 | AR-047 |  |  |  |  | Activo
+
+====================================================================================================
+## DIM_Autoridades  (2 filas)
+====================================================================================================
+ID_AUTORIDADES | Nombre_Autoridades | DNI | clave_Autoridades | Cargo | ID_Entidad | ID_Area | ID_Unidad | Email | Fotografia | Telefono | Estado
+AUT-001 | Edith Bautista León | 41907320 | 41907320 | Directora |  | AR-003 |  | ebautista@produce.gob.pe |  |  | Activo
+AUT-002 | Admin | 11111111 | 11111111 | Administrador |  | AR-003 |  |  |  |  | Activo
+
+====================================================================================================
+## DIM_Capacitaciones  (1 filas)
+====================================================================================================
+ID_Capacitacion | Tipo_Capacitacion | Titulo | Objetivo | Lugar | ID_Ubigeo | Modalidad | Fecha_Inicio | Fecha_Fin | Duracion | Link_Documento | Estado | <c13> | <c14> | <c15> | <c16> | <c17> | <c18> | <c19> | <c20>
+CAP-2026-001 | Taller | 1er Taller Macrorregional del Programa de Capacitación "Prevención y Gestión de los Conflictos Sociales en la Pesca Arte |  | FONDEPES | DEP-15 | Presencial | 2026-07-15 22:00:00 | 2026-07-16 22:00:00 | 16 horas, 2 días |  | Activo |  |  |  |  |  |  |  | 
+
+====================================================================================================
+## DIM_Hitos  (12 filas)
+====================================================================================================
+ID_Hitos | ID_Caso | N_Hito | Descripcion_Hito | Responsable_Hito | Validacion_Hito | Fecha_Planificada | Fecha_Real | Estado_Hito | Link_Evidencia | ID_Accion | ID_Area | Descripcion_Evidencia
+HIT-0001 | CS-PRODUCE-2026-001 | 1 | Aprobación de términos de referencia. | PF-001 | Validado | 2025-04-04 00:00:00 |  | Cumplido |  | ACC-0001 | AR-036 | - TDR fue elaborado por SERNAP, quien remitió a IMARPE para su opinión. - IMARPE remitió plan de trabajo.
+HIT-0002 | CS-PRODUCE-2026-001 | 2 | Ejecución de evaluación in situ y recolección de datos, de los 5 entregables de dicha consultoría, según la información  | PF-001 | Validado |  |  | En curso |  | ACC-0001 | AR-036 | Pendiente
+HIT-0003 | CS-PRODUCE-2026-001 | 3 | Análisis de datos y presentación de informe final. | PF-001 | Validado |  |  | No Cumplido |  | ACC-0001 |  | Pendiente
+HIT-0004 | CS-PRODUCE-2026-001 | 1 | Reunión de trabajo entre PRODUCE, DIREPRO Piura y Dirigentes y presidentes de pescadores locales, sobre Ratificación de  |  | Validado |  | 2025-12-02 00:00:00 | Cumplido |  | ACC-0002 | AR-047 | 
+HIT-0005 | CS-PRODUCE-2026-001 | 2 | Emisión y publicación de resolución ratificatoria |  | Validado |  | 2025-12-05 00:00:00 | Cumplido |  | ACC-0002 | AR-047 | 
+HIT-0006 | CS-PRODUCE-2026-001 | 1 | Seguimiento en la presentación de documentación por OSPA ante la DIREPRO para conformación de COREVIPA. |  | Validado |  | 2026-04-27 00:00:00 | Cumplido |  | ACC-0003 | AR-047 | 
+HIT-0007 | CS-PRODUCE-2026-001 | 2 | Seguimiento sobre evaluación técnica y emisión de acreditaciones por parte de la DIREPRO. |  | Validado |  | 2026-05-26 00:00:00 | Cumplido |  | ACC-0003 |  | 
+HIT-0008 | CS-PRODUCE-2026-001 | 1 | Intervención de la Dirección General de Supervisión, Fiscalización y Sanción del Ministerio de la Producción |  | Validado |  | 2026-02-20 00:00:00 | Cumplido |  | ACC-0004 |  | 
+HIT-0009 | CS-PRODUCE-2026-002 | 1 | Evaluación Técnica y autorización de reapertura condicionada por DICAPI |  | Validado |  |  | Cumplido |  | ACC-0005 | AR-036 | 
+HIT-0010 | CS-PRODUCE-2026-002 | 1 | Coordinación FONDEPES - DIREPRO para remodelación del DPA Los Órganos |  | Validado |  |  | Cumplido |  | ACC-0006 | AR-042 | 
+HIT-0011 | CS-PRODUCE-2026-002 | 1 | Seguimiento de habilitación de saneamiento físico legal del DPA Los Órganos |  | Validado |  |  | Cumplido |  | ACC-0007 | AR-047 | 
+HIT-0012 | CS-PRODUCE-2026-002 | 2 | Seguimiento a suscripción de firma del Convenio de Gestión del DPA de los Órganos por el GORE Piura. |  | Validado |  |  | Cumplido |  | ACC-0007 | AR-047 | 
+
+====================================================================================================
+## DIM_Acciones_Hitos  (8 filas)
+====================================================================================================
+ID_Accion | ID_Caso | N_Accion | Descripcion_Accion | ID_Area | ID_PF | ID_Hito | Tipo_evidencia | ID_REDACCION | ID_Clima | ID_Alerta | ID_RR | Link_Evidencia
+ACC-0001 | CS-PRODUCE-2026-001 | 1 | Desarrollar estudio denominado “Evaluación y monitoreo de los efectos de la pesquería artesanal de la merluza peruana co |  | PF-001 |  |  |  |  |  |  | 
+ACC-0002 | CS-PRODUCE-2026-001 | 2 | Ratificación de la Resolución Directoral Regional N* 366-2018-GOBIERNO REGIONAL PIURA-DRP-DR con la incorporación de nue |  | PF-001 |  |  |  |  |  |  | 
+ACC-0003 | CS-PRODUCE-2026-001 | 3 | Conformación y acreditación de los COREVIPA (Comités de Vigilancia y Control Pesquero Artesanal) |  | PF-001 |  |  |  |  |  |  | 
+ACC-0004 | CS-PRODUCE-2026-001 | 4 | Aplicar medidas de corto plazo: fiscalización reforzada, registro obligatorio y control de desembarques. |  | PF-001 |  |  |  |  |  |  | 
+ACC-0005 | CS-PRODUCE-2026-002 | 1 | Seguimiento de reapertura de DPA Los Órganos por DICAPI | AR-047 |  |  |  |  |  |  |  | 
+ACC-0006 | CS-PRODUCE-2026-002 | 2 | Gestionar y coordinar remodelaciones del DPA Los Órganos entre FONDEPES y DIREPRO Piura. | AR-042 |  |  |  |  |  |  |  | 
+ACC-0007 | CS-PRODUCE-2026-002 | 3 | Gestionar y coordinar el avance de suscripción de Convenio de Gestión del DPA Los Órganos con el GORE Piura. | AR-047 |  |  |  |  |  |  |  | 
+ACC-0008 | CS-PRODUCE-2026-003 | 5 | En el marco del DU 004-2025, corresponde a PRODUCE brindar a MTC información sobre permisos de pesca y esfuerzo pesquero | AR-066 | PF-013 |  | https://drive.google.com/file/d/1rQHxZiYSFYyamLhYgWw3PTHoqWCJ1PP8/view |  |  |  |  | 
+
+====================================================================================================
+## DIM_REDACCION  (51 filas)
+====================================================================================================
+ID_Redaccion | ID_Caso | Fecha | Titulo_Redaccion | Tipo_Documento | Descripcion | Sectorista | Link_Archivo | Link_Lista | Link_foto | Estado | ID_Ubigeo | ID_Sectorista
+RED-2026-040 | CS-PRODUCE-2026-016 | 2026-10-07 00:00:00 | Reunión con MYPE, en marco del Plantón del 07.10.2026 | Otro |  |  |  |  |  | Activo | DEP-15 | SEC-03
+RED-2026-031 |  | 2026-09-28 00:00:00 | DPA Morrin - La Libertad | Otro |  |  |  |  |  | Activo | DEP-13 | SEC-04
+RED-2026-032 |  | 2026-09-28 00:00:00 | DPA SALAVERRY | Otro |  |  |  |  |  | Activo | DEP-13 | SEC-02
+
+====================================================================================================
+## DIM_COORDINACION_TECNICA  (4 filas)
+====================================================================================================
+ID_CT | ID_Caso | Fecha | Titulo_Redaccion | Tipo_Documento | Descripcion | Sectorista | Link_Archivo | Link_Lista | Link_foto | Estado | ID_Ubigeo | ID_Sectorista
+CT-2026-001 |  | 2026-09-16 00:00:00 | REUNIÓN DE FORTALECIMIENTO DE LA PREVENCIÓN Y GESTIÓN DE CONFLICTOS SOCIALES EN EL SECTOR PRODUCCIÓN – APLICATIVO AVISA | Ayuda Memoria | Fortalecer la articulación entre la Oficina de Articulación Intergubernamental y Prevención de Conflictos Sociales (OAIP |  | https://drive.google.com/file/d/1RZUhckITDobNgAIHt4cNbUi9vaeQBp2H/view |  | https://drive.google.com/file/d/1D5Rx4w9BeCtvwIs_8_ZaJLpTtUCgPPbn/view | Activo | DEP-15 | SEC-01
+CT-2026-002 |  | 2026-06-22 00:00:00 | Proyecto de infraestructura pesquería en la región La Libertad | Otro | Reunión sobre el estado actual de los proyectos de modernización de los DPA de Puerto Malabrigo, y Salaverry, de la regi |  |  |  |  | Activo | DEP-15 | SEC-01
+CT-2026-003 | CS-PRODUCE-2026-035 | 2026-09-07 00:00:00 | Propuestas de acción para pescadores R.N PARACAS ante el Fenómeno del Niño | Otro |  |  |  |  |  | Activo | DEP-15 | SEC-04
+CT-2026-004 | CS-PRODUCE-2026-031 | 2026-07-22 00:00:00 | Residentes de 15 de enero | Otro |  |  |  |  |  | Activo | DEP-15 | SEC-03
+
+====================================================================================================
+## DIM_Locales  (27 filas)
+====================================================================================================
+ID_Local | ID_Ubigeo | Nombre_Local | Dirección | Ubicación | Fotografia | Aforo | Ingresos | Proyector | Equipos_Computo | Audio_Micro | Nombre_Contacto | Celular_Contacto | Correo_contacto | Recomendacion
+LOC-001 | DEP-19 | SALÓN DE CEP ILO | Carretera Costanera Sur Km. 3.5, Puerto de Ilo, Moquegua. | https://maps.app.goo.gl/gYqwJSFFqNPBoFbR9 | https://lh3.googleusercontent.com/d/1DvowG-FX3LDEjBNgASO3JjnyK-zPta-C | 80 | 2 | Si | Si | Si | Director Elmer Jesús Nieves Valle - DIGENIPAA - FONDEPES | 952 286 156 | enieves@fondepes.gob.pe | Se recomienda remitir por correo electrónico al contacto el oficio solicitando el préstamo del local al Gerente General 
+LOC-002 | DEP-22 | Auditorio de CEP PAITA | Av. Playa Hermosa Nro. 1501 Tierra Colorada Piura |  | https://lh3.googleusercontent.com/d/1v3LxpUtmBXwih2AnIaR5wtRX1nQQeDWL | 50 | 2 | Si | Si | Si | Director Elmer Jesús Nieves Valle - DIGENIPAA - FONDEPES | 952 286 156 | enieves@fondepes.gob.pe | Se recomienda remitir por correo electrónico al contacto el oficio solicitando el préstamo del local al Gerente General 
+LOC-003 | DEP-11 | Auditorio Municipalidad Provincial de Pisco | Calle Ramón Aspillaga Nro. 901 Provincia de Pisco |  | https://lh3.googleusercontent.com/d/17goAIAa8050trQpiI1vDf9mq23SwuwZV | 100 | 1 | No | No | No |  |  |  | 
+LOC-004 | DEP-15 | Local del Gremio de Pescadores de Pucusana | Local del Gremio de Pescadores de Pucusana | https://maps.app.goo.gl/FG7Rn6SJcVGSVRKSA?g_st=ic | https://lh3.googleusercontent.com/d/18NpAdyEhaObUVpdz3REKyFzOoY-9w3fP | 200 | 1 |  |  | Si |  |  |  | 
+LOC-006 | DEP-15 | Auditorio de FONDEPES | Av Petit Thouars Nro. 115 Cercado de Lima |  | https://lh3.googleusercontent.com/d/1VoW8BlYS6qb882GI1o0UFsY9Wlri90gW | 80 | 1 | Si | Si | Si | Humberto Horacio Romero Villacorta - Coordinador de la Unidad Funcional de Gestión Social | 987792878 | hromero@fondepes.gob.pe | Remitir correo electrónico a Administración (creymundo@fondepes.gob.pe) y Seguridad (Raul Veliz)
+LOC-007 | DEP-14 | Auditorio del Centro del Colegio de Arquitectos de Lambayeque | Calle Juan Cuglievan Nro. 140  Chiclayo |  | https://lh3.googleusercontent.com/d/1f_jkAldFQnBkVmy1aksUuqgoMgTtvPrT | 80 | 2 | Si | Si | Si |  |  |  | 
+LOC-008 | DEP-14 | Auditorio del Colegio de Contadores Públicos de Lambayeque | Av. Los Rosales 196 Ubr. Santa Victoria Chiclayo |  | https://lh3.googleusercontent.com/d/1DIoDiR9-KFvEtYr3DdtEFQWjybzlVhka | 80 | 2 | Si | Si | Si |  |  |  | 
+LOC-010 | DEP-14 | Local de la Asociación Sociedad Marítima Unión de Pescadores | Av. Augusto B. Leguía Nro. 930 San José |  | https://lh3.googleusercontent.com/d/1Nr_4KksizrULzYu0JMY4ZuZTjutmzcn6 | 150 | 2 |  | Si | Si |  |  |  | 
+LOC-011 | DEP-19 | Sala Principal Centro Cultural de Mollendo |  | https://maps.app.goo.gl/uratJz4a2KaAehvRA | https://lh3.googleusercontent.com/d/1sY8sOge5MHa0sfat18JI8WlUYaASCg42 | 90 | 2 | Si |  | Si |  |  |  | 
+LOC-012 | DEP-02 | Sala de Colegio de Ingenieros Nuevo Chimbote | Av. Pacifico Mz C1 Lt. 11 Urb. Las Casuarinas 2da. Etapa Nuevo Chimbote Ancash |  | https://lh3.googleusercontent.com/d/1zEcrYXWiiTajU478yLSO0l53D0w4W1Yd | 50 | 1 | Si | Si | Si |  |  |  | 
+LOC-013 | DEP-13 | Local Gerencia Regional La Libertad- Sala de Reuniones | Jr. Junín 324 Trujillo - La Libertad |  | https://lh3.googleusercontent.com/d/11FeMyVpnDOUQijur8KHhsoCy-ZFwF64I | 10 | 2 | Si |  |  |  |  |  | 
+LOC-014 | DEP-11 | Auditorio Gobierno Regional de Ica | Av. Cutervo Nro. 920 Ica |  | https://lh3.googleusercontent.com/d/14w7xfttZg16mW5IZYGfKE5rZJxnJOsam | 50 | 1 | Si |  | Si |  |  |  | 
+LOC-015 | DEP-11 | Auditorio DIREPRO Ica | Av. San Martin 240 Pisco |  | https://lh3.googleusercontent.com/d/1zcV4prrh03jITK9ok9OaM3UEKq4S9vLA | 80 | 1 |  |  |  |  |  |  | 
+LOC-016 | DEP-02 | Sala de Reuniones - Dirección Regional de Producción de Ancash | Av. Pardo 347 Chimbote |  | https://lh3.googleusercontent.com/d/1IoXIJxrfXa7b7j6SLS-R4B0sAnw4VhqI | 50 | 1 | Si |  | Si |  |  |  | 
+LOC-017 | DEP-11 | Auditorio Centro de Operaciones de Emergencias Ica | Av Tupac Amarú s/n Ica |  | https://lh3.googleusercontent.com/d/140kD0JEJrPc9wNNmsfUWfKdPfp2lF_Vg | 70 | 1 | Si |  | Si |  |  |  | 
+LOC-018 | DEP-04 | Sala de Reuniones de Consejo - Arequipa | Calle Bolívar Nro. 206 Arequipa | Ubicado a una cuadra y media de la Plaza de Arequipa | https://lh3.googleusercontent.com/d/1Nw4Wxc_xUh0If8ruTFBkwJwrkGgtjv1b | 25 |  | Si |  |  |  |  |  | 
+LOC-019 | DEP-22 | Auditorio de la Municipalidad Provincial de Piura | Jr. Ayacucho Nro. 377 en el Centro Cívico de Piura | Cerca de la Plaza de Armas | https://lh3.googleusercontent.com/d/1DMnzfxtYGbR55CmAEBL1kMszfuj_Xf-3 | 70 | 1 |  |  | Si |  |  |  | 
+LOC-020 | DEP-15 | Sala de Reuniones - Piso 11 | Calle Uno Oeste Nro. 60 Urb Corpac San Isidro |  | https://lh3.googleusercontent.com/d/1dGqiwyoUvPorMcy3jIqwAba5gWx3bbHl | 15 | 1 | Si | No | No |  |  |  | 
+LOC-021 | DEP-15 | Sala 1 - Sotáno Auditorio de Produce | Calle Uno Oeste Nro. 60 Urb, Corpac San Isidro |  | https://lh3.googleusercontent.com/d/1udNNgHQ1KJ3jGdAi46tk_YtH8SNSFhqT | 30 | 1 | Si | Si | Si |  |  |  | 
+LOC-022 | DEP-22 | Cámara de Comercio y Producción de Piura - Sala de Directorio | Urbanización San Eduardo Mz A lote 02 - Piura |  | https://lh3.googleusercontent.com/d/14BY5SNwdszeX5FO8Ezrp9mWmRRE48F2l | 20 | 2 |  |  | Si |  |  |  | 
+LOC-023 | DEP-22 | Auditorio de Cámara de Comercio de Piura | Av. Fortunato Chirichigno Mz A Lote 2A Urb. San Eduardo |  | https://lh3.googleusercontent.com/d/12b8smSA0tlpd17Y-MkUgQ7jmxxVtoQAK |  |  |  |  |  |  |  |  | 
+LOC-024 | DEP-22 | Auditorio del Gobierno Regional de Piura | Av. San Ramón 525 Urb. San Eduardo |  | https://lh3.googleusercontent.com/d/1HaIHK2G6BSNnku9m0nZg4tMs4yXH_ToG |  |  |  |  |  | Joshua Reyes | 914456660 |  | 
+LOC-025 | DEP-22 | Local San Pedro de Gremio de Pescadores | Calle San Pedro frente al Parque San Pedro en Los Organos Talara - Piura |  | https://lh3.googleusercontent.com/d/1lraIgbmGiY-8_pxb_Ev6mp2MxQHBv1Gq | 60 | 1 |  |  | Si |  |  |  | 
+LOC-026 | DEP-22 | Comunal Gremio de Pescadores del Ñuro | Calle Miguel Grau s/n frente a la plazuela principal del Ñuro - Talara |  | https://lh3.googleusercontent.com/d/1ikOmbdT9_AVEnPGFdcTflsIPW2YKQ7dj | 600 | 1 y emergencia |  |  | Si | Rolando Paiva  Chulle - Pdte. de la Asociación Gremio de Pescadores Artesanales de la Calera el Ñuro |  |  | 
+LOC-027 | DEP-25 | Sala de Usos Múltiples Tarta del Centro de Convenciones Jorge Basadre Grohmann de Tacna | Blondell 114 a la espalda de la Catedral |  | https://lh3.googleusercontent.com/d/14ZYbYMZ7wEFXnwZ6zeFQYlo2OksoUKdy | 224 | 2 | Si |  | Si | Veronica | 957803983 |  | Llevar 2 pilas duracel doble A y el personal de limpieza con sus implementos y el personal de seguridad tambien
+LOC-029 | DEP-25 | Local Colegio de Ingenieros de Tacna | Av. Manuel a. Odría Nro. 1562 |  | https://lh3.googleusercontent.com/d/1igc6BOG7urXD4JBX32L2LtBVeJ-zRwqq |  | 1 | Si |  | Si | Ing.CIP. Romulo Chapi Riquelme | 952991455 | chapiromulo@gmail.com | 972271967 - Secretaria CIP Tacna - +51 52411577 secretaria@ciptacna.org.pe
+LOC-031 | DEP-25 | Local Gobierno Regional de Tacna -Auditorio | Av. Manul A. Odría Nro. 1245 (Villa Panamericana) |  | https://lh3.googleusercontent.com/d/1VTf0fWU_W5-xXeecTGQ-PDWuDOJZoxDE |  | 2 | Si |  | Si |  |  |  | 
+
+====================================================================================================
+## DIM_Actores  (828 filas)
+====================================================================================================
+ID_Actor | Nombre_Actor | DNI | Telefono | Email | Cargo | Id_organizacion | Abreviatura | ID_Tipo_Actor | Nivel_Gobierno | Categoria | ID_Perfil | ID_Ubigeo | Fotografía | Activo | Descripcion_Perfil
+ACT-001 | Adonay Olaya Marchan | 74558302 |  |  | Pescador | Gremio Los Órganos |  |  |  |  |  |  |  |  | 
+ACT-002 | Carlos Chapilliquen |  | 939773280 |  | Ex presidente | Gremio Cabo Blanco |  | Tipo-Act-02 | Local | Actor Secundario | Perfil-02 |  |  | No | 
+ACT-004 | Diego Armando Paiva Jacinto | 46901273 | 942086889 | paivajacintodiegoarmando@gmail.com | Presidente |  | ASUPAPS | Tipo-Act-02 | Regional | Actor Primario | Perfil-03 | DEP-22 | https://lh3.googleusercontent.com/d/1XxQVKdGaGtDO5imc7_qQX6klXWbqrgym | Sí | Presidente de ASUPAPS (Asociación Unificada de Pescadores Artesanales de la Provincia de Sechura), que encabeza una coal
+
+====================================================================================================
+## DIM_Actores_Estado  (108 filas)
+====================================================================================================
+ID_Actor_Estado | Nombre_Actor | DNI | Telefono | Email | Cargo | ID_Entidad | ID_Area | ID_Unidad | ID_Tipo_Actor | Nivel_Gobierno | Categoria | ID_Ubigeo | Fotografia | Activo | <c16>
+ACT-EST-001 | Juan Carlos Requejo Alemán | N/D | N/D | N/D | Titular del Despacho |  |  |  |  |  |  |  |  | Sí | 
+ACT-EST-002 | Fernando Alarcón Díaz | N/D | 914-736-007 | falarcon@produce.gob.pe | Secretario General |  |  |  |  |  |  |  |  |  | 
+ACT-EST-003 | Manuel Jesús Farfán Acuña | N/D | 985-705-650 | mfarfan@produce.gob.pe | Jefe OCI |  |  |  |  |  |  |  |  |  | 
+
+====================================================================================================
+## DIM_ORGANIZACION  (224 filas)
+====================================================================================================
+ID_ORGANIZACION | NOMBRE_ORGANIZACIÓN | ID_Ubigeo | Dirección | Fecha_constitución | ID_TIPO_ORG | Inscripción_sunarp | Cod_Actor | Integrantes | Embarcaciones | Armadores | Fotografía | Perfil_Organizacion | RUC | link_facebook | Abreviatura
+ORG-001 | ASOCIACION DE PESCADORES ARTESANALES DEDICADOS A LA EXTRACCION DE POTA PERICO Y OTROS PARACHIQUE LA BOCANA | DEP-22 | CLLE JOSE OLAYA N° 207 PARACHIQUE - SECHURA - PIURA. | 2015-05-15 00:00:00 | ASOCIACIÓN | 11147796 | ACT-006 | 9 | 8 | 0 | https://lh3.googleusercontent.com/d/1aXIpJGMF34lz6f9qKpkPt_jslkdKadNc |  |  |  | 
+ORG-002 | ASOCIACION DE PESCADORES ARTESANALES DE CALETA CONSTANTE - SECHURA | DEP-22 | CONSTANTE | 2002-06-12 00:00:00 | TIPO_ORG_001 | 11007522 | ACT-677 | 50 | 32 | 0 | https://lh3.googleusercontent.com/d/145vtXFSA1eMMa-HnDRYQPVrXWiGVDzXH |  |  |  | APAPAC-SE
+ORG-003 | ASOCIACION MUTUALISTA DE PESCADORES ARTESANALES DE PUERTO NUEVO PAITA | DEP-22 | CALLE CENTRAL MZ. C LOTE 11 PUERTO NUEVO - PAITA | 1999-09-13 00:00:00 | ASOCIACIÓN | 115959 | ACT-644 | 59 | 59 | 0 |  |  |  |  | 
+
+====================================================================================================
+## DIM_Demandas  (325 filas)
+====================================================================================================
+ID_DEMANDA | Descripcion_Demanda | ID_ORGANIZACION | ID_CASO | ID_ALERTA | ID_TEMATICA | Fecha | Tipo_Evidencia_Registro | Link_Evidencia_Registro
+DEM-2026-0001 | Presencia inmediata del Ministro y Viceministro de PRODUCE en la zona del conflicto para establecer diálogo. |  |  | AT-2026-01 | TEMA-05 | 2026-08-31 14:15:19 |  | 
+DEM-2026-0002 | Prohibición definitiva del uso de redes de fondo dentro de las 5 millas náuticas y mayor fiscalización. |  |  | AT-2026-01 | TEMA-02 | 2026-08-31 14:15:19 |  | 
+DEM-2026-0003 | Rechazo a la espera de los resultados del estudio del IMARPE y solicitud de acciones inmediatas. |  |  | AT-2026-01 | TEMA-07 | 2026-08-31 14:15:20 |  | 
+
+====================================================================================================
+## DIM_Alertas  (83 filas)
+====================================================================================================
+ID_Alerta | ID_Caso_Vinculado | Sectorista | Fecha | Fecha_Actualización | ID_Ubigeo | ID_Provincia | ID_Distrito | Fotografía | Titulo_Alerta | ID_Sector | Situacion_Actual | Hechos_Recientes | ID_NIVEL_ALERTA | ID_Riesgos | Descripcion_Riesgo_Alerta | Acciones_sugeridas | Acciones_OAIPCS | Paso_Actual | Fecha_Validacion | Fecha_Remision | Link_PDF_Drive | Fecha_Envio_Correo | Destinatarios_Correo | Fecha_Envio_WhatsApp | Destinatarios_WhatsApp | Estado | Tipo_Fuente | Descripción_Fuente | Link_fuente | ID_MESA_GRUPO
+AT-2026-75 |  | SEC-10 | 2022-05-26 00:00:00 | 2026-09-17 14:18:18 | DEP-25 |  |  |  | Asociación de Productores y Exportadores Pesqueros solicitan audiencia con SM y Viceministro del DVPA | AR-001 | Según la Carta S/N (Exp. N° 00023457-2021) la Asociación de Productores y exportadores Pesqueros (APROEXSUR) refieren qu | - Según el representante de la Asociación (Hugo Vera del Rio), entre los años 2016 y 2020, la Dirección de Supervisión,  | NA-004 | RIE-001 | - Paralización indefinida de actividades a nivel nacional. - Posible manifestación frente al Ministerio de la Producción | 1. Se sugiere que el Despacho Viceministerial de Pesca y Acuicultura pueda convocar una reunión próximamente con el grem |  | 1 |  |  | https://docs.google.com/document/d/1DGEZw5PS5uo3JiXfIMzHz0TAMkbTKmr2Te-vuXeXIhQ/edit?usp=sharing |  |  |  |  | Archivado |  |  |  | 
+AT-2026-76 |  | SEC-10 | 2022-06-06 00:00:00 | 2026-09-17 15:30:06 | DEP-15 | PRO-037 | DIS-0431 |  | Asociación Paseo Turístico Perla del Pacífico demanda hacer uso del muelle de Chorrillos para sus actividades. | AR-001 | La Asociación de Paseo Turístico Perla del Pacífico demanda hacer uso de las instalaciones del muelle artesanal de Chorr |  | NA-004 | RIE-002 | - Posibles conflictos dentro y fuera del muelle artesanal de Chorrillos. - Críticas al sector ante diversos medios de co | Se sugiere que el Despacho Viceministerial de Pesca y Acuicultura pueda convocar una reunión próximamente con las Asocia |  | 1 |  |  | https://docs.google.com/document/d/13Xi_egxNHlPtQZbVyaH1axKcvm28VGuCVeRO7u-SSIc/edit?usp=sharing |  |  |  |  | Archivado |  |  |  | 
+AT-2026-77 |  | SEC-12 | 2022-07-06 00:00:00 | 2026-09-17 15:38:49 | DEP-11 |  |  |  | OSPAS de Pisco (Ica) alertan posibles manifestaciones por la suspensión de la emisión de la DER, en acuerdo asumido con  | AR-001 | El 06.07.2022, el sr. Hilton Guerrero, dirigente de la Asociación de Pescadores Artesanales defensores del Mar de San An | Además, el 07.07.2022, el sr. Hilton Guerrero nuevamente se comunicó telefónicamente para manifestarse en contra de la p | NA-002 |  | 1. Posibles conflictos en el frontis del Ministerio de la Producción, por pescadores de Pisco.  2. Posibles movilizacion | 1. Se sugiere que el DVPA pueda convocar una reunión próximamente con los gremios de Pisco y Lomas, a fin de escuchar su |  | 1 |  |  | https://docs.google.com/document/d/1IajCvpObYBdDz7sGovSWLAekC73zTkKylksoO5Hflg4/edit?usp=sharing |  |  |  |  | Archivado |  |  |  | 
+
+====================================================================================================
+## FACT_Hechos_Casos  (80 filas)
+====================================================================================================
+ID_Hecho | ID_Caso | Fecha | Tipo_Hecho | Hecho_Crítico | Descripcion | ID_Sectorista | Tipo_evidencia_hecho | ID_Clima | ID_Alerta | ID_RR | Link_Evidencia | ID_Redaccion
+HECHO-002 | CS-PRODUCE-2026-001 | 2024-10-15 00:00:00 | Bloqueo | Si | Bloqueo de la Panamericana Norte Los gremios de pescadores artesanales de Cabo Blanco y El Ñuro bloquean la carretera Pa | SEC-01 |  |  | https://drive.google.com/file/d/1GiU3mqK-9mu4ah5Jn6x8_uulBEne9UGB/view |  |  | 
+HECHO-003 | CS-PRODUCE-2026-001 | 2024-10-18 00:00:00 | Reunión Técnica | No | Espacio de diálogo entre pescadores y PRODUCE, donde se establece tres compromisos centrales con los pescadores | SEC-01 |  |  |  |  |  | 
+HECHO-013 | CS-PRODUCE-2026-001 | 2025-07-03 00:00:00 | Comunicado o documento | No | IMARPE realiza el envío del Plan de Trabajo de Estudio Técnico a SERNANP | SEC-01 | Evidencia Institucional u otra |  |  |  |  | 
+
+====================================================================================================
+## BRIDGE_Alerta_Actor  (162 filas)
+====================================================================================================
+ID_RAA | ID_Alerta | ID_Actor | Rol_en_Alerta | Es_Principal | ID_Relacion
+BAA-AT-2026-001-01 | AT-2026-001 | ACT-001 |  |  | 
+BAA-AT-2026-002-01 | AT-2026-002 | ACT-099 |  |  | 
+BAA-AT-2026-002-02 | AT-2026-002 | ACT-098 |  |  | 
+
+====================================================================================================
+## BRIDGE_Caso_Actor  (80 filas)
+====================================================================================================
+ID_Relacion | ID_Actor | ID_Caso
+RA-001 | ACT-001 | 1
+RA-002 | ACT-002 | 1
+RA-003 | ACT-003 | 1
+
+====================================================================================================
+## BRIDGE_Caso_Actor_Estado  (61 filas)
+====================================================================================================
+ID_Relacion | ID_Actor_Estado | ID_Caso
+RA-001 | ACT-001 | 1
+RA-002 | ACT-002 | 1
+RA-003 | ACT-003 | 1
+
+====================================================================================================
+## BRIDGE_Alerta_Demandas  (231 filas)
+====================================================================================================
+ID_RELA_DEMANDA | ID_Tipo_Reporte | ID_ALERTA | ID_Tematica | ID_DEMANDA
+BAD-AT-2026-01-01 | TR-01 | AT-2026-01 | TEMA-05 | DEM-2026-0001
+BAD-AT-2026-01-02 | TR-01 | AT-2026-01 | TEMA-02 | DEM-2026-0002
+BAD-AT-2026-01-03 | TR-01 | AT-2026-01 | TEMA-07 | DEM-2026-0003
+
+====================================================================================================
+## BRIDGE_Caso_Demandas  (12 filas)
+====================================================================================================
+ID_RELA_DEMANDA | ID_Caso | ID_Tematica | ID_DEMANDA | Descripcion_Demanda
+BCD-RR-2026-01-01 | RR-2026-01 | TEMA-01 | DEM-2026-0052 | Culminar con el otorgamiento de 123 permisos de pesca definitivos (DGPA prevé publicación del DS en los próximos días).
+BCD-RR-2026-01-02 | RR-2026-01 | TEMA-01 | DEM-2026-0053 | Información sobre avances del nuevo DPA.
+BCD-RR-2026-01-03 | RR-2026-01 | TEMA-04 | DEM-2026-0054 | Acceso a créditos de FONDEPES.
+BCD-RR-2026-01-04 | RR-2026-01 | TEMA-05 | DEM-2026-0055 | Gestión ante MTC para vías de acceso, necesarias para el nuevo DPA.
+BCD-RR-2026-01-05 | RR-2026-01 | TEMA-01 | DEM-2026-0056 | Solicitan la construcción de un nuevo DPA y mejoras en el muelle actual.
+BCD-CS-2026-01-01 | CS-2026-01 | TEMA-03 | DEM-2026-0057 | COPMAR: derogación de la RM 343 y 344-2025-PRODUCE (recursos palo y erizo rojo).
+BCD-CS-2026-01-02 | CS-2026-01 | TEMA-02 | DEM-2026-0058 | Atención a la problemática del PPD, taller de socialización del ROP de Bentónicos y publicación del ROP de Macroalgas.
+BCD-CS-2026-02-01 | CS-2026-02 | TEMA-02 | DEM-2026-0059 | Sobre uso turístico, Garantizar uso exclusivo del DPA para actividades pesqueras.
+BCD-CS-2026-02-02 | CS-2026-02 | TEMA-03 | DEM-2026-0060 | Sobre fileteras, asignación de espacio formal con condiciones sanitarias y proceso de formalización y obtención de carne
+BCD-CS-2026-02-03 | CS-2026-02 | TEMA-03 | DEM-2026-0061 | Sobre administración del DPA Chancay, proceso transparente y participativo y publicación de criterios OSPA ganadora dent
+BCD-CS-2026-02-04 | CS-2026-02 | TEMA-05 | DEM-2026-0062 | Controversia entre OSPAS del DPA Huacho, revisión de la administración y cumplimiento del tarifario vigente.
+BCD-CS-2026-07-01 | CS-2026-07 | TEMA-03 | DEM-2026-0251 | Pesqueros de cerco plantean la oposición a la Ley N.° 31749 y solicitud de una mesa técnica.
+
+====================================================================================================
+## LOG_Envios  (17 filas)
+====================================================================================================
+ID_Envio | Fecha_Envio | Canal | ID_Tipo_Reporte | ID_Documento | Paso_Num | ID_Remitente | Rol_Remitente | ID_Destinatario | Link_PDF_Drive | Resultado | Observacion | <c13>
+ENV-0001 | 2026-06-01 21:39:37.046000 | Caso | CS-PRODUCE-2026-02 | 4 | PF-002 | Correo | oaipcs_Temp39@produce.gob.pe | WhatsApp | 987579361 | Estimado/a Punto Focal,  Se remite el caso CS-PRODUCE-2026-02 — DDSFSF para su atención y seguimiento.  Quedo atento/a a | AUT-001 | OK
+ENV-0002 | 2026-06-02 06:33:39.409000 | Caso | CS-PRODUCE-2026-02 | 5 | PF-002 | Correo | oaipcs_temp39@produce.gob.pe | WhatsApp | 511987579361 | Estimado/a Punto Focal,  Se remite el caso CS-PRODUCE-2026-02 — DDSFSF para su atención y seguimiento.  Quedo atento/a a | SEC-02 | OK
+ENV-0003 | 2026-06-03 13:25:49.257000 | Caso | CS-PRODUCE-2026-010 | 3 | PF-001 | Correo | aoipcs_temp39@produce.gob.pe | WhatsApp | 987579361 | Estimado/a Punto Focal,  Se remite el caso CS-PRODUCE-2026-010 — Prueba con tematica para su atención y seguimiento.  Qu | AUT-001 | OK
+ENV-0004 | 2026-06-03 13:28:06.990000 | Caso | CS-PRODUCE-2026-010 | 4 | PF-001 | Correo | jsalinas@produce.gob.pe | WhatsApp | 987654321 | Estimado/a Punto Focal,  Se remite el caso CS-PRODUCE-2026-010 — Prueba con tematica para su atención y seguimiento.  Qu | AUT-001 | OK
+ENV-0005 | 2026-06-03 14:42:14.187000 | Caso | CS-PRODUCE-2026-013 | 2 | PF-001 | Correo | oapcs_temp39@produce.gob.pe | WhatsApp | 987579361 | Estimado/a Punto Focal,  Se remite el caso CS-PRODUCE-2026-013 — PRUEBA CON NUEVO PROCESO para su atención y seguimiento | AUT-001 | OK
+ENV-0006 | 2026-06-03 14:42:56.352000 | Caso | CS-PRODUCE-2026-013 | 3 | PF-002 |  |  | WhatsApp | 987579361 | Estimado/a Punto Focal,  Se remite el caso CS-PRODUCE-2026-013 — PRUEBA CON NUEVO PROCESO para su atención y seguimiento | AUT-001 | OK
+ENV-0007 | 2026-06-03 14:43:21.826000 | Caso | CS-PRODUCE-2026-013 | 4 | PF-002 |  |  | WhatsApp | 987579361 | Estimado/a Punto Focal,  Se remite el caso CS-PRODUCE-2026-013 — PRUEBA CON NUEVO PROCESO para su atención y seguimiento | AUT-001 | OK
+ENV-0008 | 2026-06-09 07:32:55.284000 | WhatsApp | CS-PRODUCE-2026-016 | 2 |  | Sistema |  | 51987579361 |  | Caso remitido por WhatsApp | OK | 
+ENV-0009 | 2026-06-09 07:54:12.538000 | Correo | CS-PRODUCE-2026-016 | 2 |  | Sistema |  | oaipcs_temp39@produce.gob.pe |  | Caso remitido por correo | OK | 
+ENV-0010 | 2026-06-16 14:20:44.974000 | WhatsApp | CS-PRODUCE-2026-020 | 2 |  | Sistema |  | 51987579361 |  | Caso remitido por WhatsApp | OK | 
+ENV-0011 | 2026-06-16 14:22:16.278000 | WhatsApp | CS-PRODUCE-2026-020 | 2 |  | Sistema |  | 51987579361 |  | Caso remitido por WhatsApp | OK | 
+ENV-0012 | 2026-06-17 07:42:20.188000 | WhatsApp | CS-PRODUCE-2026-020 | 2 |  | Sistema |  | 51942089895 |  | Caso remitido por WhatsApp | OK | 
+ENV-0013 | 2026-07-31 16:37:08.435000 | Correo | CS-PRODUCE-2026-020 | 2 |  | Sistema |  | oaipcs_temp39@produce.gob.pe |  | Caso remitido por correo | OK | 
+ENV-0014 | 2026-09-10 14:14:22.078000 | Correo | CS-PRODUCE-2026-001 | 2 |  | Sistema |  | oaipcs_temp39@produce.gob.pe |  | Caso remitido por correo | OK | 
+ENV-0015 | 2026-09-10 14:15:13.266000 | WhatsApp | CS-PRODUCE-2026-001 | 2 |  | Sistema |  | 51987579361 |  | Caso remitido por WhatsApp | OK | 
+ENV-0016 | 2026-09-23 13:02:01.806000 | Correo | CS-PRODUCE-2026-001 | 2 |  | Sistema |  | oaipcs_temp39@produce.gob.pe |  | Caso remitido por correo | OK | 
+ENV-0017 | 2026-10-21 09:36:56.242000 | Correo | CS-PRODUCE-2026-001 | 2 |  | Sistema |  | oaipcs_temp39@produce.gob.pe |  | Caso remitido por correo | OK | 
+
+====================================================================================================
+## LOG_Accesos  (857 filas)
+====================================================================================================
+Fecha | DNI | Nombre | Rol | Resultado
+2026-05-28 13:02:12.149000 | 41907320 | Edith Bautista León | Directora | OK
+2026-05-28 13:26:32.486000 | 41907320 | Edith Bautista León | Directora | OK
+2026-05-28 13:28:12.966000 | 41907320 | Edith Bautista León | Directora | OK

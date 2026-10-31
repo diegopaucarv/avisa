@@ -1,0 +1,100 @@
+# =============================================================================
+#  AVISA / OAIPCS · PostgreSQL 16 (pgvector + PostGIS)
+#
+#  Uso:
+#    cp .env.example .env        # y ajustar POSTGRES_PASSWORD
+#    ./scripts/db.sh up          # build + arranque + verificación
+#
+#  El esquema NO se monta como volumen de datos: el volumen `avisa_pgdata`
+#  guarda el cluster. Los scripts de inicialización sólo corren cuando el
+#  volumen está vacío (primer arranque o `./scripts/db.sh reset`).
+# =============================================================================
+name: avisa
+
+services:
+  db:
+    build:
+      context: ./docker/postgres
+      dockerfile: Dockerfile
+    image: avisa/postgres:16
+    container_name: avisa-db
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-avisa}
+      POSTGRES_USER: ${POSTGRES_USER:-avisa}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?define POSTGRES_PASSWORD en .env}
+      # Colación determinista: los textos del legado son español con acentos y
+      # el cargador no debe depender del locale del host.
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C.UTF-8"
+      TZ: ${TZ:-America/Lima}
+      PGTZ: ${TZ:-America/Lima}
+
+    ports:
+      # 55433 en el host: 5432 puede estar ocupado por un PostgreSQL local y
+      # 55432 ya lo usa el contenedor de pruebas `avisa-v9-test`.
+      - "${POSTGRES_PORT:-55433}:5432"
+
+    volumes:
+      - avisa_pgdata:/var/lib/postgresql/data
+
+      # Scripts de inicialización (00 extensiones, 10 esquema, 20 verificación).
+      - type: bind
+        source: ./docker/postgres/initdb
+        target: /docker-entrypoint-initdb.d
+        read_only: true
+
+      # DDL y parches: se montan con nombres limpios para que la aplicación del
+      # esquema no dependa de rutas con espacios ni paréntesis. Siempre es la
+      # copia del repositorio, nunca una copia divergente.
+      - type: bind
+        source: "./backend/PRODUCE_OAIPCS_AVISA_v9_ddl(1).sql"
+        target: /opt/avisa/sql/90_ddl_v9.sql
+        read_only: true
+      - type: bind
+        source: ./docs/PREPARACION_V9_CARGA_LEGADO.sql
+        target: /opt/avisa/sql/91_patch_01.sql
+        read_only: true
+      - type: bind
+        source: ./docs/PREPARACION_V9_CARGA_LEGADO_2.sql
+        target: /opt/avisa/sql/92_patch_02.sql
+        read_only: true
+      - type: bind
+        source: ./docs/PREPARACION_V9_CARGA_LEGADO_3.sql
+        target: /opt/avisa/sql/93_patch_03.sql
+        read_only: true
+      - type: bind
+        source: ./docs/PREPARACION_V9_CARGA_LEGADO_4.sql
+        target: /opt/avisa/sql/94_patch_04.sql
+        read_only: true
+      - type: bind
+        source: ./docs/PREPARACION_V9_CARGA_LEGADO_5.sql
+        target: /opt/avisa/sql/95_patch_05.sql
+        read_only: true
+
+    healthcheck:
+      # -h 127.0.0.1 es imprescindible: sin host, pg_isready usa el socket Unix,
+      # y el servidor temporal del initdb TAMBIÉN escucha por ese socket. Con el
+      # socket el contenedor se declara healthy mientras el esquema aún se está
+      # aplicando. El initdb arranca el servidor temporal con listen_addresses
+      # vacío, así que el sondeo por TCP sólo responde cuando el esquema terminó.
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 60
+      start_period: 60s
+
+    shm_size: 256mb
+
+    command:
+      - postgres
+      - -c
+      - work_mem=16MB
+      - -c
+      - maintenance_work_mem=256MB
+      - -c
+      - log_min_duration_statement=1000
+
+volumes:
+  avisa_pgdata:
+    name: avisa_pgdata
