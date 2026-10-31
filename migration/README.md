@@ -28,22 +28,18 @@ python migration/decisions.py
 python migration/test_decisions.py
 ```
 
-## Volcados del esquema v9
+## Volcado del esquema v9
 
-`out_v9_columns.txt` y `out_v9_target_schema.txt` se generaron contra una instancia
-con la DDL v9 + parche 1 + parche 2 aplicados:
-
-> ⚠ Se generaron **antes** del parche 3, así que no incluyen sus columnas
-> (`demandas.documento_origen_id`, `demandas.codigo_padre_legado`,
-> `cat_unidades_organicas.codigo_legado_area`, `cat_especies.nombre_cientifico_legado`, …).
-> Para regenerarlos, usar el contenedor `avisa-db` (ver más abajo).
+`out_v9_columns.txt` es el inventario de columnas de `core`, `kag`, `config` y
+`ops` del entorno definitivo (DDL v9 + parches 1–5). Para regenerarlo:
 
 ```sh
-docker exec avisa-v9-test psql -U postgres -d avisa_clean -At -F "|" -c \
+docker exec avisa-db psql -U avisa -d avisa -At -F "|" -c \
   "select table_schema,table_name,ordinal_position,column_name,data_type,is_nullable
      from information_schema.columns
     where table_schema in ('core','kag','config','ops')
     order by 1,2,3;" > migration/out_v9_columns.txt
+
 ```
 
 ## Orden de preparación de la base

@@ -534,8 +534,7 @@ modelar workflow/RADAR; hoy no existe tabla de destino.
       WHERE documento_id IS NOT NULL;
     ```
 14. **Incorporar la suite de pruebas del documento.** Hoy existen
-    `backend/test_v9_seccion_0_6.py`, `backend/test_v9_edicion_sesigue.py`,
-    `migration/test_decisions.py` y 14 pruebas de migración. **No existen**
+`backend/test_v9_edicion_sesigue.py` (requiere `AVISA_TEST_DSN`),    `migration/test_decisions.py` y 14 pruebas de migración. **No existen**
     `test_ddl_v8_3.sql` ni `test_ddl_v8.2.py`, y por tanto no es reproducible
     la afirmación de 75 pruebas T1–T75 ni el contrato T76–T90.
 15. **Revisar los 160/162 remanentes del legado** (D17/D18) si se exige
