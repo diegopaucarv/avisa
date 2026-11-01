@@ -1,0 +1,1765 @@
+@startuml AVISA_SIPRECS_Full_System
+' ==================================================================
+' SISTEMA AVISA / SIPRECS — OAIPCS · Ministerio de la Producción
+' Diagrama de Paquetes + Clases (atributos + métodos) UNIFICADO
+' Cobertura: Code.gs 244 · AppJs 158 · AppFixes 292 · 86 tablas SQL
+' ==================================================================
+
+!theme plain
+skinparam packageStyle rectangle
+skinparam classAttributeIconSize 0
+skinparam classFontSize 11
+skinparam classFontStyle bold
+skinparam packageFontSize 12
+skinparam shadowing false
+skinparam defaultTextAlignment left
+skinparam roundcorner 6
+hide empty members
+allowmixing
+
+title AVISA
+
+' ==================================================================
+' P1 · FRONTEND SPA
+' ==================================================================
+package "P1 ·Frontend" as P1 {
+
+  package "P1.1 Auth & Shell" as P1_1 {
+    class LoginUI {
+      + doLogin()
+      + «override» doLogin()  ' AppFixes · ln145
+      + doLogout()
+      + «override» doLogout()  ' AppFixes · ln211
+      + limpiarErr()
+      + mostrarError(msg)
+    }
+    class AppInitUI {
+      + iniciarApp()
+      + aplicarPermisosPorRol()
+      + aplicarPermisoBotones(contenedor)
+      + puedeDescargar() : bool
+      + puedeCrear() : bool
+      + puedeValidar(tipo) : bool
+      + mostrarBienvenida(usuario)
+      + «override» mostrarBienvenida(usuario)
+      + cerrarBienvenida()
+      + «override» cerrarBienvenida()
+    }
+    class NavigationUI {
+      + goM(id, el)
+      + «override» goM(id, el)
+      + irAModulo(id)
+      + toggleSB()
+      + sTab(prefix, id, btn)
+      + sTabModal(prefix, id, btn)
+      + xTab(btn, contentId, paneId)
+      + xTabReset(contentId, paneId, tabsSelector)
+      + xTabD(btn)
+      + xTabResetD(btn)
+      + cerrarModal()
+    }
+    class HelpersUI {
+      + rBadge(r) : string
+      + pBadge(p) : string
+      + sBadge(s) : string
+      + sLabel(id) : string
+      + fmtFecha(f) : string
+      + fmtDate(f) : string
+      + esc2(s) : string
+      + toast(msg, tipo)
+      + tip(msg, required)
+      + lbl(texto, msg, req)
+      + exportCSV(tableId, filename)
+      + buscarGlobal(q)
+      + _driveImg(u) : string
+      + optArr(arr, valKey, lblKey)
+      + optCacheArr(...)
+    }
+    LoginUI ..> AppInitUI : onSuccess
+    AppInitUI ..> NavigationUI : after login
+    HelpersUI <.. LoginUI
+    HelpersUI <.. NavigationUI
+  }
+
+  package "P1.2 Casos" as P1_2 {
+    class CasosUI {
+      + cargarCasos()
+      + renderCasosModule()
+      + filtrarCasos()
+      + abrirDetalleCaso(caso)
+      + guardarNuevoCaso(tipo)
+      + actualizarPendientesBorradores()
+      + avanzarPasoCaso(idCaso, codigoCaso, pasoActual, accion)
+      + generarPDFCaso(idCaso, codigoCaso)
+      + enviarCorreoCaso(idCaso, codigoCaso)
+      + obtenerDestinatariosCaso(idCaso)
+      + eliminarCasoConf(codigoCaso)
+      + generarCodigoCaso()
+      + verFichaCaso(tipo, id)
+      + editarFichaCaso(tipo, id)
+      + guardarEdicionCaso(id)
+      + verLineaTiempo(codigoCaso)
+      + renderLineaTiempo(hechos, codigoCaso)
+      + verAccionesHitosCaso(codigoCaso)
+      + renderAccionesHitos(acciones, codigoCaso)
+      + verRecorridoCaso(codigoCaso, nombreCaso)
+      + abrirWhatsAppCasoTabla(codigoCaso)
+      + enviarCorreoCasoTabla(codigoCaso)
+      + modalEnviarCaso(...)
+      + confirmarEnvio(...)
+      + actualizarContactoPF()
+      + enviarNotificacionValidacion(codigo, nombre, idSec)
+    }
+    class CasoDemandasFormUI {
+      + agregarDemandaForm()
+      + eliminarDemandaForm(id)
+      + renderDemandasForm()
+      + llenarDemandaTipos()
+      + abrirModalDemandas(codigoCaso)
+      + renderListaDemandas(...)
+      + agregarDemanda(codigoCaso)
+      + guardarDemanda(codigoCaso)
+      + cargarDemandasCaso(codigoCaso)
+      + eliminarDemanda(id, codigoCaso)
+    }
+    class CasoBridgesUI {
+      + agregarDepto()
+      + eliminarDepto(id)
+      + agregarActor()
+      + eliminarActor(id)
+      + agregarRecurso()
+      + eliminarRecurso(id)
+      + renderBridgeLista(containerId, items, keyField, labelField, extraField, removeFn)
+    }
+    CasosUI *-- CasoDemandasFormUI
+    CasosUI *-- CasoBridgesUI
+  }
+
+  package "P1.3 Alertas" as P1_3 {
+    class AlertasUI {
+      + cargarAlertas()
+      + renderAlertasModule()
+      + filtrarAlertas()
+      + abrirDetalleAlerta(alerta)
+      + guardarNuevaAlerta(tipo)
+      + editarAlerta(idAlerta)
+      + avanzarPasoReporte(tipo, idDoc, pasoActual, accion)
+      + generarPDFReporte(tipo, idDoc)
+      + enviarCorreoReporte(tipo, idDoc)
+      + agregarDemandaAlerta()
+      + modalAvanzarPaso(tipo, id, titulo, pasoActual)
+      + confirmarAvance(tipo, id, pasoActual, aprobar)
+    }
+    class AlertasWAUI {
+      + generarMensajeWA(tipo, doc)
+      + abrirWhatsAppAlerta(idAlerta)
+      + registrarEnvioWA(tipo, idDoc)
+    }
+    AlertasUI *-- AlertasWAUI
+  }
+
+  package "P1.4 Reporte Rápido" as P1_4 {
+    class ReporteRapidoUI {
+      + cargarRR()
+      + renderRRModule()
+      + filtrarRR()
+      + abrirDetalleRR(rr)
+      + guardarRR(tipo)
+      + abrirWhatsAppRR_btn(btn)
+    }
+  }
+
+  package "P1.5 Clima Social" as P1_5 {
+    class ClimaSocialUI {
+      + cargarClima()
+      + renderClimaModule()
+      + filtrarClima()
+      + abrirDetalleClima(c)
+      + abrirWhatsAppClima(idClima)
+      + guardarClima(tipo)
+    }
+  }
+
+  package "P1.6 Hechos" as P1_6 {
+    class HechosUI {
+      + cargarHechos()
+      + renderHechosModule()
+      + «override» renderHechosModulo()
+      + renderTablaHechos(hechos)
+      + filtrarHechos()
+      + sincronizarCodigo(selId, inputId)
+      + abrirNuevoHecho(codigoCasoPresel)
+      + abrirFormHecho()
+      + guardarHecho()
+      + guardarNuevoHecho()
+      + abrirDetalleHecho(h)
+      + verDetalleHecho(id)
+      + editarHecho(h/id)
+      + eliminarHecho(id)
+      + eliminarHechoConf(id)
+    }
+  }
+
+  package "P1.7 Acciones & Hitos" as P1_7 {
+    class AccionesUI {
+      + cargarAcciones()
+      + renderAccionesModule()
+      + «override» renderAccionesModulo()
+      + renderTablaAcciones(acciones)
+      + filtrarAcciones()
+      + abrirNuevaAccion(...)
+      + abrirFormAccion()
+      + guardarAccion(tipo)
+      + guardarNuevaAccion()
+      + abrirDetalleAccion(a)
+      + editarAccion(a)
+      + eliminarAccion(id)
+      + enviarNotifPF(datos)
+    }
+    class HitosUI {
+      + cargarHitos()
+      + _renderHitosLista()
+      + filtrarHitosLista()
+      + renderTablaHitos(hitos)
+      + abrirNuevoHito(...)
+      + nuevoHito()
+      + cargarAccionesCaso(...)
+      + guardarHito()
+      + verDetalleHito(id)
+      + enviarCorreoHito(id)
+      + editarHito(id)
+      + eliminarHito(id)
+    }
+  }
+
+  package "P1.8 Actores Sociales" as P1_8 {
+    class ActoresUI {
+      + cargarActores()
+      + renderActoresModule()
+      + «override» renderActoresModulo()
+      + renderActoresLista(actores)
+      + renderActoresTbody(...)
+      + renderTablaActores(actores)
+      + filtrarActores()
+      + editarActorInline(id)
+      + renderFormActorInline(idEditar)
+      + verPerfilActor(id)
+      + abrirFormActor(idEditar)
+      + editarActorForm(id)
+      + guardarActorForm(idEditar)
+      + guardarActor()
+      + guardarActorEnSheets(datos)
+      + eliminarActorConf(id)
+      + prevFoto(input, previewId)
+      + previsualizarFoto(input, prevId, dropId)
+      + buildActoresSelect(elId, tipoFiltro)
+    }
+  }
+
+  package "P1.9 Actores del Estado" as P1_9 {
+    class ActoresEstadoUI {
+      + cargarActoresEstado()
+      + renderActoresEstadoMod(actores)
+      + renderFormActorEstado()
+      + guardarActorEstado()
+      + eliminarActorEstadoConf(id)
+      + llenarSelectActoresEstadoCaso()
+      + agregarActorEstadoGen(pref)
+      + quitarActorEstado(btn)
+    }
+  }
+
+  package "P1.10 Personal" as P1_10 {
+    class PersonalUI {
+      + cargarSectoristas()
+      + «override» cargarSectoristas()
+      + renderSectoristasMod()
+      + «override» renderSectoristasMod()
+      + secTab(btn, paneId)
+      + guardarNuevoSectorista()
+      + «override» guardarNuevoSectorista()
+      + editarSectorista(idx)
+      + cargarPF()
+      + cargarPF2()
+      + renderPFMod()
+      + «override» renderPFMod()
+      + pfTab(btn, paneId)
+      + guardarNuevoPF()
+      + «override» guardarNuevoPF()
+      + editarPF(idx)
+      + cargarAutoridades()
+      + renderAutMod()
+      + «override» renderAutMod()
+      + autTab(btn, paneId)
+      + guardarNuevaAutoridad()
+      + «override» guardarNuevaAutoridad()
+      + editarAutoridad(idx)
+      + _guardarPersonaFinal(datos, fnName, callback)
+      + verPersonaByIdx(btn)
+      + «override» verPersonaByIdx(btn)
+      + verPersona(persona, tipo)
+    }
+  }
+
+  package "P1.11 Maestros · Log · Pendientes" as P1_11 {
+    class MaestrosUI {
+      + cargarMaestros()
+      + renderMaestroCard(key, data, cols, lbl)
+    }
+    class LogUI {
+      + cargarLog()
+      + renderLogModule(log)
+      + filtrarLog()
+    }
+    class PendientesUI {
+      + cargarPendientes()
+      + «override» renderPendientes(lista)
+      + exportarPendientes()
+      + irADocumento(tipo, id)
+    }
+  }
+
+  package "P1.12 Bridges genéricos" as P1_12 {
+    class BridgesGenUI {
+      + iniciarBridgesGen(prefix)
+      + llenarSelectConCache(selId, cacheKey, valKey, lblKey, fn)
+      + llenarSelectConCacheRecurso(selId)
+      + detectarColRecurso(data)
+      + detectarColRecursoID(data)
+      + agregarDeptoGen(prefix)
+      + agregarActorGen(prefix)
+      + agregarRecursoGen(prefix)
+      + llenarSelect(id, data, valCol, txtCol)
+      + llenarSelectDeptos(id)
+      + cargarProvincias(selId, deptoId)
+      + cargarDistritos(selId, provId)
+      + «override» cargarDistritos(selId, provId)
+      + _asegurarDeptos(selectId, valorActual)
+      + _llenarDeptos(...)
+      + _asegurarAreas(selectId, valorActual)
+      + _llenarAreas(...)
+      + confirmarEliminar(tipo, id, codigo)
+    }
+  }
+
+  package "P1.13 Análisis" as P1_13 {
+    class AnalisisUI {
+      + cargarAnalisis()
+      + _renderAnalisisLista()
+      + _filtrarAnalisis()
+      + _renderTablaAnalisis(listado)
+      + abrirFormAnalisisRegNuevo()
+      + _cargarCasosParaRegional(depto)
+      + _guardarAnalisisRegional()
+      + abrirFormAnalisisNuevo()
+      + abrirFormAnalisisEditar(idOrIdx)
+      + _abrirFormAnalisis(id, datosPrev)
+      + _renderInfoRelacionada(...)
+      + _cargarDatosCasoAnalisis(codigoCaso)
+      + _buildListaRegistro(...)
+      + _agregarItem(id)
+      + _renderMediosLista(medios)
+      + _agregarMedio()
+      + _guardarAnalisisForm(idPrev)
+      + exportarAnalisisPDF(idAnalisis)
+      + eliminarAnalisisServer(id)
+      + iniciarNuevoAnalisis()
+      + editarAnalisis(i)
+      + eliminarAnalisis(i)
+      + renderAnalisisLista(l)
+    }
+    class AnalisisRegionalUI {
+      + cargarAnalisisRegional()
+      + _renderAnalisisRegional()
+      + _filtrarRegional()
+      + _renderResumenRegional(casos)
+      + _generarReporteRegional()
+      + _verReporteDepto(depto)
+    }
+  }
+
+  package "P1.14 Red Radar" as P1_14 {
+    class RedRadarUI {
+      + cargarRedRadar()
+      + _renderRedesTabla(redes)
+      + _renderNodosTabla(nodos)
+      + verNodosDeRed(codigoRed)
+      + abrirFormRedNueva()
+      + _guardarRedRadar(idEditar)
+      + abrirFormNodoNuevo(idEditar)
+      + _guardarNodoRadar()
+      + editarRedRadar(codigo)
+      + editarNodoRadar(codigo)
+      + eliminarRedConf(codigo)
+      + eliminarNodoConf(codigo)
+      + nuevoRadar()
+      + guardarRadar()
+    }
+  }
+
+  package "P1.15 Demandas (sidebar)" as P1_15 {
+    class DemandasUI {
+      + cargarDemandas()
+      + renderFormNuevaDemanda()
+      + guardarDemanda()
+    }
+  }
+
+  package "P1.16 Helpers & Resolvers" as P1_16 {
+    class NameResolverUI {
+      + _areaNm(id)
+      + _deptNm(id)
+      + _provNm(id)
+      + _distNm(id)
+      + _intervNm(id)
+    }
+    class PolyfillsBabel {
+      + _toConsumableArray()
+      + _nonIterableSpread()
+      + _iterableToArray()
+      + _arrayWithoutHoles()
+      + _slicedToArray()
+      + _nonIterableRest()
+      + _unsupportedIterableToArray()
+      + _arrayLikeToArray()
+      + _iterableToArrayLimit()
+      + _arrayWithHoles()
+    }
+  }
+}
+
+' ==================================================================
+' P2 · BACKEND Code.gs
+' ==================================================================
+package "P2 · Backend Code.gs (Apps Script)" as P2 {
+
+  package "P2.1 Bootstrap / HtmlServe" as P2_1 {
+    class HtmlBootstrap {
+      + doGet(e) : HtmlOutput
+      + include(filename) : string
+      + getJs1()
+      + getJs2()
+      + getJs3()
+      + getJs4()
+      + getJs5()
+      + getJs6()
+      + getJs7()
+    }
+  }
+
+  package "P2.2 Auth" as P2_2 {
+    class AuthService {
+      + verificarLogin(dni, clave) : {ok, rol, nombre, id}
+      + registrarAcceso(dni, nombre, rol, resultado)
+    }
+  }
+
+  package "P2.3 Lectura & Cascada Geo" as P2_3 {
+    class SheetReader {
+      + leerHoja(nombre) : Object[]
+      + getAreasResponsables() : Area[]
+      + getDepartamentos() : Dept[]
+      + getProvincias() : Prov[]
+      + getDistritos() : Dist[]
+    }
+    class GeoCascade {
+      + getEntidadesResponsables()
+      + getAreasPorEntidad(idEntidad)
+      + getUnidadesPorArea(idArea)
+      + getDepartamentosReporte()
+    }
+  }
+
+  package "P2.4 Casos & Ficha" as P2_4 {
+    class CasoQueryService {
+      + getFichaCasoCompleta(codigoCaso) : FichaCaso
+      + getCasos() : Caso[]
+      + getHechosCaso(codigoCaso) : Hecho[]
+      + getProcesoCaso(codigoCaso) : Paso[]
+      + getHechosPorCaso(codigoCaso)
+      + getHitosPorAccion(idAccion)
+      + getHitos()
+      + getHechos()
+    }
+    class CasoWriteService {
+      + guardarCaso(datos) : {ok}
+      + actualizarCaso(datos) : {ok}
+      + avanzarPasoCaso(...) : {ok}
+      + iniciarProcesoCaso(idCaso, idSectorista)
+      + iniciarProcesoReporte(...)
+      + avanzarPasoSimple(...)
+    }
+    class CasoBridgeService {
+      + guardarBridgeDemandas(codigoCaso, demandas)
+      + guardarBridgeDeptos(codigoCaso, deptos)
+      + guardarBridgeActores(codigoCaso, actores)
+      + guardarBridgeRecursos(codigoCaso, recursos)
+      + guardarBridgeCasoActorEstado(codigoCaso, actores)
+      + guardarBridgeAnalisis(idAnalisis, codigoCaso, datos)
+    }
+    CasoQueryService ..> CasoBridgeService : reads
+    CasoWriteService ..> CasoBridgeService : writes
+  }
+
+  package "P2.5 Alertas" as P2_5 {
+    class AlertaService {
+      + getAlertas() : Alerta[]
+      + guardarAlerta(datos) : {ok}
+      + actualizarAlerta(datos) : {ok}
+      + _asegurarColumnasRR(hoja)
+      + _asegurarColumnasClima(hoja)
+      + _asegurarColumnasClimaFocalizado(hoja)
+      + _asegurarColumnasHecho(hoja)
+      + _asegurarColumnasHito(hoja)
+    }
+    class AlertaDemandasService {
+      + guardarDemandasAlerta(idAlerta, demandas)
+      + guardarDemandaDirecta(datos)
+      + actualizarDemandaDirecta(datos)
+      + eliminarDemandaDirecta(idDemanda)
+      + getDemandasAlerta(idAlerta)
+      + eliminarDemandaAlerta(idDemanda)
+      + subirEvidenciaDemanda(datos)
+      + _asegurarColumnasDemanda(hDem)
+    }
+    class AlertaActoresService {
+      + agregarActorAAlerta(...)
+      + quitarActorDeAlerta(...)
+      + agregarActorEstadoAAlerta(...)
+      + quitarActorEstadoDeAlerta(...)
+      + guardarBridgeAlertaActor(idAlerta, actores)
+      + guardarBridgeAlertaActorEstado(idAlerta, actores)
+      + getBridgeAlertaActor()
+      + getBridgeAlertaActorEstado()
+      + _asegurarColumnasBridgeAlertaActor(hoja)
+      + _asegurarColumnasBridgeAlertaActorEstado(hoja)
+    }
+    class AlertaRecursoService {
+      + guardarBridgeAlertaRecurso(idAlerta, recursos)
+      + getRecursosAlerta(idAlerta)
+      + quitarRecursoDeAlerta(...)
+    }
+    AlertaService *-- AlertaDemandasService
+    AlertaService *-- AlertaActoresService
+    AlertaService *-- AlertaRecursoService
+  }
+
+  package "P2.6 Reporte Rápido" as P2_6 {
+    class ReporteRapidoService {
+      + guardarReporteRapido(datos)
+      + actualizarReporteRapido(datos)
+      + getReportesRapidos()
+      + guardarBridgeAnunciosAcuerdos(idRR, anuncios)
+      + getAnunciosAcuerdos()
+    }
+  }
+
+  package "P2.7 Clima Social" as P2_7 {
+    class ClimaSocialService {
+      + guardarClimaSocial(datos)
+      + actualizarClimaSocial(datos)
+      + getClimaSocial()
+      + guardarClimaSocialFocalizado(datos)
+      + getClimaSocialFocalizado()
+    }
+  }
+
+  package "P2.8 Hechos / Acciones / Hitos" as P2_8 {
+    class HechoService {
+      + guardarHecho(datos)
+      + actualizarHecho(datos)
+      + getHechos()
+      + getHechosPorCaso(codigoCaso)
+      + subirEvidenciaAlerta(datos)
+      + subirEvidenciaCaso(a, b, c, d)
+    }
+    class AccionHitoService {
+      + guardarAccion(datos)
+      + guardarHito(datos)
+      + actualizarAvanceHito(idHito, datos)
+      + actualizarHito(datos)
+      + getHitos()
+      + getHitosPorAccion(idAccion)
+    }
+  }
+
+  package "P2.9 Actores Sociales & Estado" as P2_9 {
+    class ActorSocialService {
+      + guardarActor(datos)
+      + actualizarActor(datos)
+      + eliminarActor(idActor)
+      + crearActorRapido(nombreCompleto)
+      + getActores()
+      + getActoresSociales()
+      + getActoresTodos()
+      + getActoresParaReportePDF()
+      + agregarActorACaso(codigoCaso, idActor)
+      + quitarActorDeCaso(...)
+      + _resolverOrgIdBackend(ss, nombreOId)
+      + _mapaActores(ss)
+      + _mapaOrganizaciones(ss)
+    }
+    class ActorEstadoService {
+      + guardarActorEstado(datos)
+      + actualizarActorEstado(datos)
+      + eliminarActorEstado(idActor)
+      + getActoresEstado()  ' «override» ln5044 · sobrescribe ln4623
+      + getActorEstadoDetalle(idActor)
+      + agregarActorEstadoACaso(codigoCaso, idActorEstado)
+      + quitarActorEstadoDeCaso(...)
+      + guardarBridgeCasoActorEstado(codigoCaso, actores)
+    }
+    class FotoActorHelper {
+      + procesarFoto(base64Data, mimeType, modulo, idRegistro, nombrePersona)
+      + _carpetaDe(tipo, id)
+      + abrirCarpetaCasoUrl(codigoCaso)
+      + obtenerCarpetaCaso(codigoCaso)
+      + _obtenerBlobFoto(ref) : Blob
+    }
+    ActorSocialService ..> FotoActorHelper
+    ActorEstadoService ..> FotoActorHelper
+  }
+
+  package "P2.10 Personal" as P2_10 {
+    class PersonalService {
+      + guardarSectorista(datos)
+      + guardarPuntoFocal(datos)
+      + guardarAutoridad(datos)
+      + getSectoristas()
+      + getPuntosFocales()
+      + getAutoridades()
+    }
+  }
+
+  package "P2.11 Catálogos / Maestros" as P2_11 {
+    class CatalogsFacade {
+      + getSectores()
+      + getTematica()
+      + getTematicas()
+      + getNivelesAlerta()
+      + getRiesgos()
+      + getTipoCaso()
+      + getIntervencion()
+      + getPasosAlerta()
+      + getRecursos()
+      + getOrganizaciones()
+      + getLocales()
+    }
+  }
+
+  package "P2.12 Análisis" as P2_12 {
+    class AnalisisService {
+      + guardarAnalisisCaso(datos)
+      + getAnalisisCasos()
+      + guardarBridgeAnalisis(idAnalisis, codigoCaso, datos)
+      + guardarAnalisisRegional(datos)
+      + _fichaCasoParaAnalisis(ss, cod)
+      + _actoresDelCaso(ss, cod)
+      + generarPDFAnalisis(idAnalisis, codigoCaso)
+    }
+  }
+
+  package "P2.13 Demandas" as P2_13 {
+    class DemandaReadService {
+      + getDemandas(codigoCaso)
+      + getTodasLasDemandas()
+      + getBridgeAlertaDemandas()
+      + getDemandasAlerta(idAlerta)
+    }
+  }
+
+  package "P2.14 Red Radar" as P2_14 {
+    class RedRadarService {
+      + guardarRedRadar(datos)
+      + guardarNodoRadar(datos)
+      + eliminarRedRadar(idRadar)
+      + eliminarNodoRadar(idNodo)
+      + getIntegrantesRadar(idRadar)
+      + getIntegrantesNodo(idNodo)
+      + «dead» subirEvidenciaRadar(...)  ' ln3975
+      + «dead» getEvidenciasRadar(...)   ' ln3991
+      + subirEvidenciaRadar(...)          ' ln4004
+      + getEvidenciasRadar(...)           ' ln4031
+      + _carpetaDe(tipo, id)
+    }
+  }
+
+  package "P2.15 Organizaciones & Locales" as P2_15 {
+    class OrganizacionService {
+      + getOrganizaciones()
+      + guardarOrganizacion(datos)
+      + actualizarOrganizacion(datos)
+      + eliminarOrganizacion(idOrg)
+    }
+    class LocalService {
+      + getLocales()
+      + guardarLocal(datos)
+      + actualizarLocal(datos)
+      + eliminarLocal(idLocal)
+    }
+  }
+
+  package "P2.16 KPIs & Pendientes" as P2_16 {
+    class KPIService {
+      + getReporteActoresSociales(filtros)
+      + getReporteEjecutivoAnual(filtros)
+      + getKPIsReporte(filtros)
+      + getDepartamentosReporte()
+      + getPendientes(idUsuario, rol)
+    }
+  }
+
+  package "P2.17 Generadores PDF / Word" as P2_17 {
+    class ReportGenerator {
+      + generarPDFAnalisis(idAnalisis, codigoCaso)
+      + generarReporteAlerta(datos, hojaAlertas, filaAlerta)
+      + generarReporteActoresPDF(idsActores, formato)
+      + generarWordAnalisis(idAnalisis, codigoCaso)
+      + generarReporteDatosActores(idsActores, formato)
+      + generarReporteOrganizaciones(idsOrgs, formato)
+      + generarReporteLocales(idsLocales, formato)
+      + enviarDocumento(tipoKey, idDoc, htmlContenido, destinatarios)
+      + _exportarReporte(docId, nombreDoc, formato, carpetaId)
+    }
+    class DocumentHelpers {
+      + _generarDocSimpleYGuardarLink(nombreDoc, titulo, campos, hoja, filaNum)
+      + _resolverNombreDim(ss, hoja, colId, colNom, val)
+      + _bridgeActoresDoc(ss, idA, hBrg, hAct, pk)
+      + _actoresConFotoDoc(ss, idA, hBrg, hAct, pk)
+      + _demandasPorTematica(ss, idA)
+      + _bridgeDemandas(ss, idA)
+      + _mapaDepartamentos(ss)
+    }
+    ReportGenerator ..> DocumentHelpers
+  }
+
+  package "P2.18 Notificaciones" as P2_18 {
+    class NotificationService {
+      + enviarCorreoCasoDirecto(...)
+      + registrarEnvio(datos)
+      + registrarEnvioWA(codigoCaso, telefono)
+    }
+  }
+
+  package "P2.19 Mantenimiento & Utils" as P2_19 {
+    class MaintenanceService {
+      + repararAlertasDuplicadas(modoSimulacion)
+      + diagnosticarAlertasDuplicadas()
+      + migrarLlavesUnificadas()
+    }
+    class GenericCRUD {
+      + eliminarFila(nombreHoja, columnaId, valor)
+      + eliminarRegistro(nombreHoja, colId, valorId)
+    }
+    class Utils {
+      + _normTexto(s)
+      + _normDNI(dni)
+      + _fechaLocalTxt(valor, tz, formato)
+    }
+  }
+}
+
+' ==================================================================
+' P3 · DATA LAYER (Sheets / SQL)
+' ==================================================================
+package "P3 · Data Layer (Sheets · 86 tablas)" as P3 {
+
+  package "P3.1 Geografía" as P3_1 {
+    class dim_departamentos <<dim>> {
+      + id_ubigeo : VARCHAR «PK»
+      + departamento : VARCHAR
+      + codigo_depto : INT
+      + region_natural : VARCHAR
+      + alcance : VARCHAR
+      + latitud : DECIMAL
+      + longitud : DECIMAL
+      + capital : VARCHAR
+    }
+    class dim_provincias <<dim>> {
+      + id_provincia : VARCHAR «PK»
+      + cod_inei : INT
+      + nombre_provincia : VARCHAR
+      + id_ubigeo : VARCHAR «FK»
+      + nombre_departamento : VARCHAR
+    }
+    class dim_distritos <<dim>> {
+      + id_distrito : VARCHAR «PK»
+      + cod_inei : INT
+      + nombre_distrito : VARCHAR
+      + id_provincia : VARCHAR «FK»
+      + nombre_provincia : VARCHAR
+      + id_ubigeo : VARCHAR «FK»
+      + nombre_departamento : VARCHAR
+      + estado : VARCHAR
+    }
+    dim_departamentos "1" --> "*" dim_provincias
+    dim_provincias "1" --> "*" dim_distritos
+  }
+
+  package "P3.2 Catálogos" as P3_2 {
+    class dim_tipo_caso <<dim>> {
+      + id_tipo : VARCHAR «PK»
+      + tipo_caso : VARCHAR
+      + descripcion : VARCHAR
+    }
+    class dim_tipo_sector <<dim>> {
+      + id_sector : VARCHAR «PK»
+      + tipo_sector : VARCHAR
+      + id_area : VARCHAR
+    }
+    class dim_tipo_actor <<dim>> {
+      + id_tipo_actor : VARCHAR «PK»
+      + tipo_actor : VARCHAR
+    }
+    class dim_tipo_actor_radar <<dim>> {
+      + id_actor_radar : VARCHAR
+      + tipo_actor : VARCHAR
+    }
+    class dim_tipo_org <<dim>> {
+      + id_tipo_org : VARCHAR «PK»
+      + nombre_tipo : VARCHAR
+    }
+    class dim_tipo_tematica <<dim>> {
+      + id_tematica : VARCHAR
+      + tipo_tematica : VARCHAR
+      + descripcion : TEXT
+    }
+    class dim_tipo_proceso <<dim>> {
+      + id_tipo_reporte : VARCHAR «PK»
+      + nombre_tipo : VARCHAR
+      + sigla : VARCHAR
+      + prefijo_id : VARCHAR
+      + tiene_flujo : VARCHAR
+      + activo : VARCHAR
+    }
+    class dim_tipo_cambio <<dim>> {
+      + id_tipo_cambio : VARCHAR «PK»
+      + nombre : VARCHAR
+      + descripcin : VARCHAR
+    }
+    class dim_perfil <<dim>> {
+      + id_perfil : VARCHAR «PK»
+      + tipo_perfil : VARCHAR
+    }
+    class dim_intervencion <<dim>> {
+      + id_intervencion : VARCHAR «PK»
+      + tipo_intervencion : VARCHAR
+    }
+    class dim_rol_actor <<dim>> {
+      + id_rol : VARCHAR «PK»
+      + tipo_rol : VARCHAR
+      + descripcion : VARCHAR
+    }
+    class dim_riesgos <<dim>> {
+      + id_riesgos : VARCHAR
+      + tipo_riesgo : VARCHAR
+    }
+    class dim_nivel_alertas <<dim>> {
+      + id_nivel_alerta : VARCHAR «PK»
+      + nivel : VARCHAR
+      + descripcin_nivel : VARCHAR
+      + categoria : VARCHAR
+    }
+    class dim_estado_proceso <<dim>> {
+      + id_estado : VARCHAR
+      + nombre_proceso : VARCHAR
+      + color_pbi : VARCHAR
+      + es_terminal : VARCHAR
+    }
+    class dim_paso_proceso <<dim>> {
+      + paso_num : INT
+      + nombre_paso : VARCHAR
+      + estado_resultado : VARCHAR
+      + tipo_responsable : VARCHAR
+      + dias_plazo_max : INT
+    }
+    class dim_paso_proceso_caso <<dim>> {
+      + paso_caso : INT
+      + nombre_caso : VARCHAR
+      + estado_caso : VARCHAR
+      + tipo_responsable_caso : VARCHAR
+      + dias_plazo_max : INT
+      + descripcin : VARCHAR
+    }
+    class dim_descencadenantes <<dim>> {
+      + id_descencadenantes : VARCHAR
+      + descripcin_descencadenates : VARCHAR
+    }
+    class dim_impulsores <<dim>> {
+      + id_impulsores : VARCHAR
+      + descripcin_impulsores : VARCHAR
+    }
+    class dim_causas <<dim>> {
+      + id_causas : VARCHAR
+      + descripcin_causas : VARCHAR
+    }
+    class dim_medios <<dim>> {
+      + id_medios : VARCHAR
+      + nombre : VARCHAR
+      + tipo_medio : VARCHAR
+      + enlace : VARCHAR
+      + pincipal : VARCHAR
+    }
+    class dim_recurso_pesca <<dim>> {
+      + nombre_comn_recurso : VARCHAR
+      + nombre_oficial_recurso : VARCHAR
+      + familia : VARCHAR
+      + grupo_biolgico : VARCHAR
+      + mbito_recurso : VARCHAR
+    }
+  }
+
+  package "P3.3 Personal & Entidades" as P3_3 {
+    class dim_entidad_responsable <<dim>> {
+      + id_entidad : VARCHAR «PK»
+      + nombre_entidad : VARCHAR
+      + abreviatura : VARCHAR
+      + nivel : VARCHAR
+      + estado : VARCHAR
+    }
+    class dim_area_responsable <<dim>> {
+      + id_area : VARCHAR «PK»
+      + nombre_area : VARCHAR
+      + abreviatura : VARCHAR
+      + id_entidad : VARCHAR «FK»
+      + estado : VARCHAR
+    }
+    class dim_unidades_organicas_responsa <<dim>> {
+      + id_unidad : VARCHAR «PK»
+      + nombre_unidad : VARCHAR
+      + abreviatura : VARCHAR
+      + id_area : VARCHAR «FK»
+      + id_entidad : VARCHAR «FK»
+      + estado : VARCHAR
+    }
+    class dim_sectoristas <<dim>> {
+      + id_sectorista : VARCHAR «PK»
+      + nombre_sectorista : VARCHAR
+      + dni : INT
+      + clave_sectorista : INT
+      + n_casos : INT
+      + cargo : VARCHAR
+      + id_entidad : DECIMAL «FK»
+      + id_area : DECIMAL «FK»
+      + id_unidad : DECIMAL «FK»
+      + email : VARCHAR
+      + telefono : INT
+      + fotografia : DECIMAL
+      + estado : VARCHAR
+    }
+    class dim_punto_focal <<dim>> {
+      + id_pf : VARCHAR «PK»
+      + nombre_pf : VARCHAR
+      + dni : DECIMAL
+      + clave_pf : DECIMAL
+      + cargo : VARCHAR
+      + id_entidad : VARCHAR «FK»
+      + id_area : VARCHAR «FK»
+      + id_unidad : DECIMAL «FK»
+      + email : VARCHAR
+      + telefono : INT
+      + fotografia : DECIMAL
+      + estado : VARCHAR
+    }
+    class dim_autoridades <<dim>> {
+      + id_autoridades : VARCHAR «PK»
+      + nombre_autoridades : VARCHAR
+      + dni : INT
+      + clave_autoridades : INT
+      + cargo : VARCHAR
+      + id_entidad : DECIMAL «FK»
+      + id_area : VARCHAR «FK»
+      + id_unidad : DECIMAL «FK»
+      + email : VARCHAR
+      + fotografia : DECIMAL
+      + telefono : DECIMAL
+      + estado : VARCHAR
+    }
+    class dim_responsable <<dim>> {
+      + id_responsable : VARCHAR «PK»
+      + id_origen : VARCHAR
+      + tipo_responsable : VARCHAR
+      + tabla_origen : VARCHAR
+    }
+    class bridge_sectorista_departamento <<bridge>> {
+      + id_rsc : VARCHAR
+      + id_sectorista : VARCHAR «FK»
+      + id_departamento : VARCHAR «FK»
+    }
+    dim_entidad_responsable "1" --> "*" dim_area_responsable
+    dim_area_responsable "1" --> "*" dim_unidades_organicas_responsa
+    dim_area_responsable "1" --> "*" dim_sectoristas
+    dim_area_responsable "1" --> "*" dim_punto_focal
+    dim_area_responsable "1" --> "*" dim_autoridades
+    dim_sectoristas "1" --> "*" bridge_sectorista_departamento
+  }
+
+  package "P3.4 Actores & Organizaciones" as P3_4 {
+    class dim_organizacion <<dim>> {
+      + id_organizacion : VARCHAR «PK»
+      + nombre_organizacin : VARCHAR
+      + id_ubigeo : VARCHAR «FK»
+      + direccin : VARCHAR
+      + fecha_constitucin : DATETIME
+      + id_tipo_org : VARCHAR «FK»
+      + inscripcin_sunarp : INT
+      + cod_actor : VARCHAR
+      + integrantes : INT
+      + embarcaciones : INT
+      + armadores : INT
+      + fotografa : VARCHAR
+      + perfil_organizacion : TEXT
+      + ruc : BIGINT
+      + link_facebook : DECIMAL
+      + abreviatura : VARCHAR
+    }
+    class dim_actores <<dim>> {
+      + id_actor : VARCHAR «PK»
+      + nombre_actor : VARCHAR
+      + dni : INT
+      + telefono : VARCHAR
+      + email : VARCHAR
+      + cargo : VARCHAR
+      + id_organizacion : VARCHAR «FK»
+      + abreviatura : VARCHAR
+      + id_tipo_actor : VARCHAR «FK»
+      + nivel_gobierno : VARCHAR
+      + categoria : VARCHAR
+      + id_perfil : VARCHAR «FK»
+      + id_ubigeo : VARCHAR «FK»
+      + fotografa : VARCHAR
+      + activo : VARCHAR
+      + descripcion_perfil : TEXT
+    }
+    class dim_actores_estado <<dim>> {
+      + id_actor_estado : VARCHAR «PK»
+      + nombre_actor : VARCHAR
+      + dni : VARCHAR
+      + telefono : VARCHAR
+      + email : VARCHAR
+      + cargo : VARCHAR
+      + id_entidad : DECIMAL «FK»
+      + id_area : DECIMAL «FK»
+      + id_unidad : DECIMAL «FK»
+      + id_tipo_actor : DECIMAL «FK»
+      + nivel_gobierno : DECIMAL
+      + categoria : DECIMAL
+      + id_ubigeo : DECIMAL «FK»
+      + fotografia : DECIMAL
+      + activo : VARCHAR
+    }
+    dim_organizacion "1" --> "*" dim_actores
+    dim_entidad_responsable "1" --> "*" dim_actores_estado
+  }
+
+  package "P3.5 Casos & Procesos" as P3_5 {
+    class fact_casos <<fact>> {
+      + id_caso : VARCHAR «PK»
+      + id_tipo : VARCHAR «FK»
+      + nombre_caso : VARCHAR
+      + id_sector : VARCHAR «FK»
+      + id_tematica : VARCHAR «FK»
+      + fecha_inicio : DATETIME
+      + id_ubigeo : VARCHAR «FK»
+      + id_provincia : VARCHAR «FK»
+      + id_distrito : VARCHAR «FK»
+      + id_sectorista : VARCHAR «FK»
+      + prioridad : VARCHAR
+      + id_intervencion : VARCHAR «FK»
+      + pct_avance : DECIMAL
+      + id_riesgos : VARCHAR «FK»
+      + descripcion_riesgo : TEXT
+      + resumen_ejecutivo : TEXT
+      + n_acciones : INT
+      + n_hitos_total : INT
+      + n_hitos_cumplidos : INT
+      + fecha_cierre : DECIMAL
+      + fecha_reapertura : DECIMAL
+      + n_reaperturas : INT
+      + motivo_cierre : DECIMAL
+      + link_pdf_drive : DECIMAL
+      + fecha_envio_correo : DECIMAL
+      + destinatarios_correo : DECIMAL
+      + fecha_envio_whatsapp : DECIMAL
+      + destinatarios_whatsapp : DECIMAL
+    }
+    class fact_proceso_caso <<fact>> {
+      + id_proceso_caso : VARCHAR «PK»
+      + id_caso : VARCHAR «FK»
+      + paso_caso : INT
+      + id_responsable : VARCHAR «FK»
+      + fecha_inicio : DATETIME
+      + fecha_fin : DECIMAL
+      + dias_demora : INT
+      + paso_caso_1 : INT
+      + observaciones : VARCHAR
+      + motivo : DECIMAL
+    }
+    class fact_historial_estado <<fact>> {
+      + id_historial : INT «PK»
+      + id_caso : VARCHAR «FK»
+      + fecha_cambio : VARCHAR
+      + id_estado_nuevo : DATETIME «FK»
+      + id_riesgos : INT «FK»
+      + id_fase_nueva : VARCHAR «FK»
+      + id_tipo_cambio : DECIMAL «FK»
+      + motivo_cambio : DECIMAL
+      + id_responsable : DECIMAL «FK»
+      + id_alerta_vinculada : DECIMAL «FK»
+    }
+    class fact_hechos_casos <<fact>> {
+      + id_hecho : VARCHAR «PK»
+      + id_caso : VARCHAR «FK»
+      + fecha : DATETIME
+      + tipo_hecho : VARCHAR
+      + hecho_crtico : VARCHAR
+      + descripcion : TEXT
+      + id_sectorista : VARCHAR «FK»
+      + tipo_evidencia_hecho : VARCHAR
+      + id_clima : DECIMAL «FK»
+      + id_alerta : VARCHAR «FK»
+      + id_rr : DECIMAL «FK»
+      + link_evidencia : VARCHAR
+      + id_redaccion : VARCHAR «FK»
+    }
+    class fact_analisis_casos <<fact>> {
+      + id_analisis : VARCHAR «PK»
+      + codigo_caso : VARCHAR «FK»
+      + nombre_caso : VARCHAR
+      + resumen_ejecutivo : TEXT
+      + id_departamento : DECIMAL «FK»
+      + id_riesgos : VARCHAR «FK»
+      + id_sector : DECIMAL «FK»
+      + id_tematica : DECIMAL «FK»
+      + fecha : DATETIME
+      + elaborado_por : VARCHAR
+      + manifestaciones : JSON
+      + desencadenantes : JSON
+      + impulsores : JSON
+      + causas : JSON
+      + medios : JSON
+      + geografia_conflicto : DECIMAL
+      + grupos_posiciones : JSON
+      + intereses_comunes : JSON
+      + acciones_visibles : JSON
+      + factores_agravantes : JSON
+      + problema_estructural : DECIMAL
+      + recomendaciones : JSON
+      + link_word : VARCHAR
+      + posicion_produce : VARCHAR
+      + intereses_produce : DECIMAL
+      + necesidades_produce : DECIMAL
+    }
+    fact_casos "1" --> "*" fact_proceso_caso
+    fact_casos "1" --> "*" fact_historial_estado
+    fact_casos "1" --> "*" fact_hechos_casos
+    fact_casos "1" --> "*" fact_analisis_casos
+  }
+
+  package "P3.6 Alertas / RR / Clima / Demandas" as P3_6 {
+    class dim_alertas <<dim>> {
+      + id_alerta : VARCHAR «PK»
+      + id_caso_vinculado : VARCHAR «FK»
+      + sectorista : VARCHAR
+      + fecha : DATETIME
+      + fecha_actualizacin : DATETIME
+      + id_ubigeo : VARCHAR «FK»
+      + id_provincia : VARCHAR «FK»
+      + id_distrito : VARCHAR «FK»
+      + fotografa : DECIMAL
+      + titulo_alerta : TEXT
+      + id_sector : VARCHAR «FK»
+      + situacion_actual : TEXT
+      + hechos_recientes : TEXT
+      + id_nivel_alerta : VARCHAR «FK»
+      + id_riesgos : VARCHAR «FK»
+      + descripcion_riesgo_alerta : TEXT
+      + acciones_sugeridas : TEXT
+      + acciones_oaipcs : TEXT
+      + paso_actual : INT
+      + fecha_validacion : DECIMAL
+      + fecha_remision : DECIMAL
+      + link_pdf_drive : VARCHAR
+      + fecha_envio_correo : DECIMAL
+      + destinatarios_correo : DECIMAL
+      + fecha_envio_whatsapp : DECIMAL
+      + destinatarios_whatsapp : DECIMAL
+      + estado : VARCHAR
+      + tipo_fuente : VARCHAR
+      + descripcin_fuente : TEXT
+      + link_fuente : VARCHAR
+      + id_mesa_grupo : DECIMAL «FK»
+    }
+    class dim_reporte_rapido <<dim>> {
+      + id_rr : VARCHAR «PK»
+      + id_caso_vinculado : DECIMAL «FK»
+      + sectorista : VARCHAR
+      + fecha : DATETIME
+      + fecha_actualizacin : DECIMAL
+      + id_ubigeo : VARCHAR «FK»
+      + id_provincia : VARCHAR «FK»
+      + id_distrito : VARCHAR «FK»
+      + lugar : VARCHAR
+      + ubicacin_georeferenciado : DECIMAL
+      + fotografa : DECIMAL
+      + titulo_reporte_rapido : VARCHAR
+      + id_sector : DECIMAL «FK»
+      + resumen_rapido : TEXT
+      + desarrollo_intervencin : TEXT
+      + anuncios_acuerdos : TEXT
+      + seguimiento : VARCHAR
+      + link_pdf_drive : VARCHAR
+      + fecha_envio_correo : DECIMAL
+      + destinatarios_correo : VARCHAR
+      + fecha_envio_whatsapp : DECIMAL
+      + destinatarios_whatsapp : DECIMAL
+      + estado : DECIMAL
+      + unnamed__23 : INT
+      + unnamed__24 : INT
+    }
+    class dim_climasocial <<dim>> {
+      + id_clima : VARCHAR «PK»
+      + id_caso_vinculado : VARCHAR «FK»
+      + sectorista : VARCHAR
+      + fecha : DATETIME
+      + fecha_actualizacin : VARCHAR
+      + id_ubigeo : VARCHAR «FK»
+      + id_provincia : VARCHAR «FK»
+      + id_distrito : DECIMAL «FK»
+      + lugar : VARCHAR
+      + ubicacin_georeferenciado : DECIMAL
+      + titulo_clima : VARCHAR
+      + id_sector : VARCHAR «FK»
+      + situacin_actual_clima : TEXT
+      + focos_tension_clima : TEXT
+      + oportunidades_intervencin_clima : TEXT
+      + id_riesgos : VARCHAR «FK»
+      + descripcin_riesgo_clima : TEXT
+      + recomedaciones_estratgicas_clima : VARCHAR
+      + acciones_oaipcs_clima : DECIMAL
+      + link_pdf_drive : VARCHAR
+      + fecha_envio_correo : DECIMAL
+      + destinatarios_correo : INT
+      + fecha_envio_whatsapp : INT
+      + destinatarios_whatsapp : DECIMAL
+      + estado : VARCHAR
+      + id_mesagrupo : DECIMAL «FK»
+      + demandas_clima : VARCHAR
+      + riesgos_inmediatos_clima : TEXT
+    }
+    class dim_climasocial_focalizado <<dim>> {
+      + id_clima2 : VARCHAR «PK»
+      + id_caso_vinculado : DECIMAL «FK»
+      + sectorista : VARCHAR
+      + fecha : DATETIME
+      + fecha_actualizacin : VARCHAR
+      + id_ubigeo : VARCHAR «FK»
+      + id_provincia : VARCHAR «FK»
+      + id_distrito : DECIMAL «FK»
+      + lugar : DECIMAL
+      + ubicacin_georeferenciado : DECIMAL
+      + titulo_clima : DECIMAL
+      + id_sector : DECIMAL «FK»
+      + situacin_actual_clima : TEXT
+      + alerta_clave : DECIMAL
+      + focos_tension_clima : TEXT
+      + recomendacin2_clima : TEXT
+      + id_riesgos : INT «FK»
+      + descripcin_riesgo_clima : TEXT
+      + recomedaciones_estratgicas_clima : DECIMAL
+      + acciones_oaipcs_clima : DECIMAL
+      + link_pdf_drive : VARCHAR
+      + fecha_envio_correo : DECIMAL
+      + destinatarios_correo : INT
+      + fecha_envio_whatsapp : INT
+      + destinatarios_whatsapp : DECIMAL
+      + estado : DECIMAL
+    }
+    class dim_destinatarios_fijos <<dim>> {
+      + id_destinatario : VARCHAR «PK»
+      + id_area : VARCHAR «FK»
+      + recibe_alerta : VARCHAR
+      + recibe_clima : VARCHAR
+      + recibe_rr : VARCHAR
+      + canal_preferido : VARCHAR
+      + activo : VARCHAR
+    }
+    class fact_proceso_reporte <<fact>> {
+      + id_proceso : VARCHAR «PK»
+      + id_tipo_reporte : VARCHAR «FK»
+      + paso_num : INT
+      + id_responsable : VARCHAR «FK»
+      + fecha_inicio : DATETIME
+      + fecha_fin : DATETIME
+      + dias_demora : INT
+      + observaciones : VARCHAR
+    }
+    class dim_anuncios_acuerdos <<dim>> {
+      + id_acuerdos : VARCHAR «PK»
+      + acuerdo : VARCHAR
+      + descripcion_acuerdos : VARCHAR
+      + id_area : VARCHAR «FK»
+      + id_caso : VARCHAR «FK»
+      + id_rr : VARCHAR «FK»
+      + fecha : VARCHAR
+    }
+    class dim_demandas <<dim>> {
+      + id_demanda : VARCHAR «PK»
+      + descripcion_demanda : TEXT
+      + id_organizacion : VARCHAR «FK»
+      + id_caso : VARCHAR «FK»
+      + id_alerta : VARCHAR «FK»
+      + id_tematica : VARCHAR «FK»
+      + fecha : DATETIME
+      + tipo_evidencia_registro : VARCHAR
+      + link_evidencia_registro : VARCHAR
+    }
+    fact_casos "1" --> "*" dim_alertas
+    fact_casos "1" --> "*" dim_reporte_rapido
+    fact_casos "1" --> "*" dim_climasocial
+    fact_casos "1" --> "*" dim_climasocial_focalizado
+    fact_casos "1" --> "*" dim_demandas
+    dim_alertas "1" --> "*" dim_demandas
+  }
+
+  package "P3.7 Análisis · Bridges causales" as P3_7 {
+    class bridge_caso_descencadenantes <<bridge>> {
+      + id_rela_id_descencadenantes : VARCHAR
+      + id_analisis : VARCHAR «FK»
+      + id_caso : VARCHAR «FK»
+      + descripcion_descencadenantes : VARCHAR
+    }
+    class bridge_caso_impulsores <<bridge>> {
+      + id_rela_id_impulsores : VARCHAR
+      + id_analisis : VARCHAR «FK»
+      + id_caso : VARCHAR «FK»
+      + descripcion_impulsores : VARCHAR
+    }
+    class bridge_caso_causas <<bridge>> {
+      + id_rela_id_causas : VARCHAR
+      + id_analisis : VARCHAR «FK»
+      + id_caso : VARCHAR «FK»
+      + descripcion_causas : VARCHAR
+    }
+    class bridge_caso_medios <<bridge>> {
+      + id_rela_id_medios : VARCHAR
+      + id_analisis : VARCHAR «FK»
+      + id_caso : VARCHAR «FK»
+      + descripcion_medios : VARCHAR
+      + tipo_medios : VARCHAR
+      + link : VARCHAR
+      + unnamed__6 : VARCHAR
+    }
+    class bridge_actor_grupo <<bridge>> {
+      + id_rela_id_grupo_actor : VARCHAR
+      + id_caso : VARCHAR «FK»
+      + id_organizacin : VARCHAR «FK»
+    }
+    class bridge_caso_posiciones <<bridge>> {
+      + id_rela_id_posiciones : VARCHAR
+      + id_caso : VARCHAR «FK»
+      + id_organizacin : VARCHAR «FK»
+      + id_posicion : VARCHAR
+      + descripcion_posicion : VARCHAR
+    }
+    class bridge_caso_intereses <<bridge>> {
+      + id_rela_id_intereses : VARCHAR
+      + id_caso : VARCHAR «FK»
+      + id_organizacin : VARCHAR «FK»
+      + id_interes : VARCHAR
+      + descripcion_interes : VARCHAR
+    }
+    class bridge_caso_necesidades <<bridge>> {
+      + id_rela_id_necesidades : VARCHAR
+      + id_caso : VARCHAR «FK»
+      + id_organizacin : VARCHAR «FK»
+      + id_necesidades : VARCHAR
+      + descripcion_necesidades : VARCHAR
+    }
+    class bridge_caso_ineteres_comunes <<bridge>> {
+      + id_rela_id_interes_comunes : VARCHAR
+      + id_caso : VARCHAR «FK»
+      + id_interes_comunes : VARCHAR
+      + descripcion_interes_comunes : VARCHAR
+    }
+    fact_analisis_casos "1" --> "*" bridge_caso_descencadenantes
+    fact_analisis_casos "1" --> "*" bridge_caso_impulsores
+    fact_analisis_casos "1" --> "*" bridge_caso_causas
+    fact_analisis_casos "1" --> "*" bridge_caso_medios
+  }
+
+  package "P3.8 Acciones / Hitos / Redacción" as P3_8 {
+    class dim_acciones_hitos <<dim>> {
+      + id_accion : VARCHAR «PK»
+      + id_caso : VARCHAR «FK»
+      + n_accion : INT
+      + descripcion_accion : VARCHAR
+      + id_area : VARCHAR «FK»
+      + id_pf : VARCHAR «FK»
+      + id_hito : DECIMAL «FK»
+      + tipo_evidencia : VARCHAR
+      + id_redaccion : DECIMAL «FK»
+      + id_clima : DECIMAL «FK»
+      + id_alerta : DECIMAL «FK»
+      + id_rr : DECIMAL «FK»
+      + link_evidencia : DECIMAL
+    }
+    class dim_hitos <<dim>> {
+      + id_hitos : VARCHAR «PK»
+      + id_caso : VARCHAR «FK»
+      + n_hito : INT
+      + descripcion_hito : VARCHAR
+      + responsable_hito : VARCHAR
+      + validacion_hito : VARCHAR
+      + fecha_planificada : DATETIME
+      + fecha_real : DATETIME
+      + estado_hito : VARCHAR
+      + link_evidencia : DECIMAL
+      + id_accion : VARCHAR «FK»
+      + id_area : VARCHAR «FK»
+      + descripcion_evidencia : VARCHAR
+    }
+    class dim_redaccion <<dim>> {
+      + id_redaccion : VARCHAR «PK»
+      + id_caso : VARCHAR «FK»
+      + fecha : DATETIME
+      + titulo_redaccion : VARCHAR
+      + tipo_documento : VARCHAR
+      + descripcion : TEXT
+      + sectorista : DECIMAL
+      + link_archivo : VARCHAR
+      + link_lista : VARCHAR
+      + link_foto : VARCHAR
+      + estado : VARCHAR
+      + id_ubigeo : VARCHAR «FK»
+      + id_sectorista : VARCHAR «FK»
+    }
+    class dim_coordinacion_tecnica <<dim>> {
+      + id_ct : VARCHAR «PK»
+      + id_caso : VARCHAR «FK»
+      + fecha : DATETIME
+      + titulo_redaccion : VARCHAR
+      + tipo_documento : VARCHAR
+      + descripcion : TEXT
+      + sectorista : DECIMAL
+      + link_archivo : VARCHAR
+      + link_lista : DECIMAL
+      + link_foto : VARCHAR
+      + estado : VARCHAR
+      + id_ubigeo : VARCHAR «FK»
+      + id_sectorista : VARCHAR «FK»
+    }
+    fact_casos "1" --> "*" dim_acciones_hitos
+    fact_casos "1" --> "*" dim_hitos
+    fact_casos "1" --> "*" dim_redaccion
+    fact_casos "1" --> "*" dim_coordinacion_tecnica
+    dim_acciones_hitos "1" --> "*" dim_hitos
+  }
+
+  package "P3.9 Mesas · Locales · Capacitaciones" as P3_9 {
+    class dim_mesas_grupos <<dim>> {
+      + id_mesa_grupo : VARCHAR «PK»
+      + tipo_espacio : VARCHAR
+      + con_norma : VARCHAR
+      + linea_oaipcs : VARCHAR
+      + titulo_mesa : VARCHAR
+      + tipo_instrumento : VARCHAR
+      + base_legal : VARCHAR
+      + fecha_norma : DATETIME
+      + prorrogas_modificatorias : VARCHAR
+      + fecha_instalacion : DATETIME
+      + naturaleza : VARCHAR
+      + fecha_fin_vigencia : DATETIME
+      + estado_vigencia : VARCHAR
+      + objetivo : VARCHAR
+      + presidente : VARCHAR
+      + secretario_tecnico : VARCHAR
+      + rol_produce : VARCHAR
+      + ambito_departamento : TEXT
+      + titular : VARCHAR
+      + alterno : VARCHAR
+      + doc_designacion : VARCHAR
+      + id_sectorista : VARCHAR «FK»
+      + link_evidencia : VARCHAR
+    }
+    class dim_locales <<dim>> {
+      + id_local : VARCHAR «PK»
+      + id_ubigeo : VARCHAR «FK»
+      + nombre_local : VARCHAR
+      + direccin : VARCHAR
+      + ubicacin : VARCHAR
+      + fotografia : VARCHAR
+      + aforo : INT
+      + ingresos : VARCHAR
+      + proyector : VARCHAR
+      + equipos_computo : VARCHAR
+      + audio_micro : VARCHAR
+      + nombre_contacto : VARCHAR
+      + celular_contacto : VARCHAR
+      + correo_contacto : VARCHAR
+      + recomendacion : VARCHAR
+    }
+    class dim_capacitaciones <<dim>> {
+      + id_capacitacion : VARCHAR «PK»
+      + tipo_capacitacion : VARCHAR
+      + titulo : VARCHAR
+      + objetivo : DECIMAL
+      + lugar : VARCHAR
+      + id_ubigeo : VARCHAR «FK»
+      + modalidad : VARCHAR
+      + fecha_inicio : DATETIME
+      + fecha_fin : DATETIME
+      + duracion : VARCHAR
+      + link_documento : DECIMAL
+      + estado : VARCHAR
+    }
+    class bridge_capacitacion_participant <<bridge>> {
+      + id_relacion : VARCHAR «PK»
+      + id_capacitacion : VARCHAR «FK»
+      + id_actor_estado : VARCHAR «FK»
+      + inscrito : VARCHAR
+      + culmino : VARCHAR
+    }
+    dim_capacitaciones "1" --> "*" bridge_capacitacion_participant
+    dim_actores_estado "1" --> "*" bridge_capacitacion_participant
+  }
+
+  package "P3.10 Radar" as P3_10 {
+    class fact_red_radar <<fact>> {
+      + id_radar : VARCHAR «PK»
+      + nombre_radar : VARCHAR
+      + id_ubigeo : VARCHAR «FK»
+      + nivel : VARCHAR
+      + fecha_instalacin : DATETIME
+      + descripcin : VARCHAR
+    }
+    class fact_nodo <<fact>> {
+      + id_nodo : VARCHAR «PK»
+      + id_radar : VARCHAR «FK»
+      + nombre_nodo : VARCHAR
+      + id_ubigeo : VARCHAR «FK»
+      + id_provincia : VARCHAR «FK»
+      + id_distrito : DECIMAL «FK»
+      + nivel : VARCHAR
+      + fecha_instalacin : DATETIME
+      + descripcin : VARCHAR
+    }
+    class bridge_radar_actor <<bridge>> {
+      + id_relacion : VARCHAR «PK»
+      + id_actor_estado : VARCHAR «FK»
+      + id_radar : VARCHAR «FK»
+      + id_actor_radar : VARCHAR «FK»
+    }
+    class bridge_nodo_actor <<bridge>> {
+      + id_relacion : VARCHAR «PK»
+      + id_actor_estado : VARCHAR «FK»
+      + id_nodo : VARCHAR «FK»
+      + id_actor_radar : VARCHAR «FK»
+    }
+    fact_red_radar "1" --> "*" fact_nodo
+    fact_red_radar "1" --> "*" bridge_radar_actor
+    fact_nodo "1" --> "*" bridge_nodo_actor
+    dim_actores_estado "1" --> "*" bridge_radar_actor
+    dim_actores_estado "1" --> "*" bridge_nodo_actor
+  }
+
+  package "P3.11 BRIDGEs (Caso · Alerta · Reporte · Clima)" as P3_11 {
+    class bridge_caso_actor <<bridge>> {
+      + id_relacion : VARCHAR «PK»
+      + id_actor : VARCHAR «FK»
+      + id_caso : VARCHAR «FK»
+    }
+    class bridge_caso_actorestado <<bridge>> {
+      + id_relacion : VARCHAR «PK»
+      + id_actor_estado : VARCHAR «FK»
+      + id_caso : VARCHAR «FK»
+    }
+    class bridge_caso_actor_estado <<bridge>> {
+      + id_relacion : VARCHAR «PK»
+      + id_actor_estado : VARCHAR «FK»
+      + id_caso : VARCHAR «FK»
+    }
+    class bridge_caso_depto <<bridge>> {
+      + id_relacion : VARCHAR «PK»
+      + id_caso : VARCHAR «FK»
+      + id_ubigeo : VARCHAR «FK»
+      + departamento : VARCHAR
+      + es_principal : VARCHAR
+      + unnamed__5 : VARCHAR
+    }
+    class bridge_caso_demandas <<bridge>> {
+      + id_rela_demanda : VARCHAR
+      + id_caso : VARCHAR «FK»
+      + id_tematica : VARCHAR «FK»
+      + id_demanda : VARCHAR «FK»
+      + descripcion_demanda : VARCHAR
+    }
+    class bridge_caso_recurso <<bridge>> {
+      + id_cr : VARCHAR
+      + id_recurso : VARCHAR «FK»
+      + id_caso : VARCHAR «FK»
+    }
+    class bridge_alerta_actor <<bridge>> {
+      + id_raa : VARCHAR
+      + id_alerta : VARCHAR «FK»
+      + id_actor : VARCHAR «FK»
+      + rol_en_alerta : DECIMAL
+      + es_principal : DECIMAL
+      + id_relacion : VARCHAR
+    }
+    class bridge_alerta_actorestado <<bridge>> {
+      + id_relacion : VARCHAR «PK»
+      + id_alerta : VARCHAR «FK»
+      + id_actor_estado : VARCHAR «FK»
+    }
+    class bridge_alerta_demandas <<bridge>> {
+      + id_rela_demanda : VARCHAR
+      + id_tipo_reporte : VARCHAR «FK»
+      + id_alerta : VARCHAR «FK»
+      + id_tematica : VARCHAR «FK»
+      + id_demanda : VARCHAR «FK»
+    }
+    class bridge_alerta_recurso <<bridge>> {
+      + id_relacion : VARCHAR «PK»
+      + id_recurso : VARCHAR «FK»
+      + id_alerta : VARCHAR «FK»
+    }
+    class bridge_reporte_actor <<bridge>> {
+      + id_rra : VARCHAR
+      + id_rr : VARCHAR «FK»
+      + id_actor : VARCHAR «FK»
+      + rol_en_alerta : DECIMAL
+      + es_principal : DECIMAL
+    }
+    class bridge_reporte_actor_estado <<bridge>> {
+      + id_rra : VARCHAR
+      + id_rr : VARCHAR «FK»
+      + id_actor_estado : VARCHAR «FK»
+      + rol_en_alerta : DECIMAL
+      + es_principal : DECIMAL
+    }
+    class bridge_clima_actor <<bridge>> {
+      + id_clima : VARCHAR «PK»
+      + id_rr : VARCHAR «FK»
+      + id_actor : VARCHAR «FK»
+      + rol_en_alerta : DECIMAL
+      + es_principal : DECIMAL
+    }
+    class bridge_clima_actor_estado <<bridge>> {
+      + id_clima : VARCHAR «PK»
+      + id_rr : VARCHAR «FK»
+      + id_actor_estado : VARCHAR «FK»
+      + rol_en_alerta : DECIMAL
+      + es_principal : DECIMAL
+    }
+    fact_casos "1" --> "*" bridge_caso_actor
+    fact_casos "1" --> "*" bridge_caso_actorestado
+    fact_casos "1" --> "*" bridge_caso_actor_estado
+    fact_casos "1" --> "*" bridge_caso_depto
+    fact_casos "1" --> "*" bridge_caso_demandas
+    fact_casos "1" --> "*" bridge_caso_recurso
+    dim_demandas "1" --> "*" bridge_caso_demandas
+    dim_demandas "1" --> "*" bridge_alerta_demandas
+    dim_alertas "1" --> "*" bridge_alerta_actor
+    dim_alertas "1" --> "*" bridge_alerta_actorestado
+    dim_alertas "1" --> "*" bridge_alerta_demandas
+    dim_alertas "1" --> "*" bridge_alerta_recurso
+    dim_reporte_rapido "1" --> "*" bridge_reporte_actor
+    dim_reporte_rapido "1" --> "*" bridge_reporte_actor_estado
+    dim_climasocial "1" --> "*" bridge_clima_actor
+    dim_climasocial "1" --> "*" bridge_clima_actor_estado
+  }
+
+  package "P3.12 LOGs & Formulario" as P3_12 {
+    class log_accesos <<log>> {
+      + fecha : DATETIME
+      + dni : INT
+      + nombre : VARCHAR
+      + rol : VARCHAR
+      + resultado : VARCHAR
+    }
+    class log_envios <<log>> {
+      + id_envio : VARCHAR «PK»
+      + fecha_envio : DATETIME
+      + canal : VARCHAR
+      + id_tipo_reporte : VARCHAR «FK»
+      + id_documento : INT
+      + paso_num : VARCHAR
+      + id_remitente : VARCHAR «FK»
+      + rol_remitente : VARCHAR
+      + id_destinatario : VARCHAR «FK»
+      + link_pdf_drive : BIGINT
+      + resultado : VARCHAR
+      + observacion : VARCHAR
+      + unnamed__12 : VARCHAR
+    }
+    class respuestas_de_formulario_1 <<form>> {
+      + marca_temporal : DATETIME
+      + departamento : VARCHAR
+      + provincia : VARCHAR
+      + ambito_geografico : VARCHAR
+      + id_caso_vinculado : VARCHAR
+      + titulo_alerta : VARCHAR
+      + situacin_actual : VARCHAR
+      + hechos_recientes : VARCHAR
+      + demandas : VARCHAR
+      + riesgos : VARCHAR
+      + recomendaciones : VARCHAR
+      + ids_actores_existentes : VARCHAR
+      + sectorista : VARCHAR
+      + nivel_riesgo : VARCHAR
+      + estado : VARCHAR
+      + actor_nuevo : VARCHAR
+      + actor_nombre : VARCHAR
+      + actor_cargo : VARCHAR
+      + actor_institucion : VARCHAR
+      + actor_tipo : VARCHAR
+      + actor_nivel_gobierno : VARCHAR
+      + actor_departamento : VARCHAR
+      + actor_rol_alerta : VARCHAR
+    }
+  }
+}
+
+' ==================================================================
+' RELACIONES TRANSVERSALES ENTRE CAPAS
+' ==================================================================
+P1_1 ..> P2_2 : «RPC» google.script.run
+P1_2 ..> P2_4 : «RPC» casos
+P1_3 ..> P2_5 : «RPC» alertas
+P1_4 ..> P2_6 : «RPC» rr
+P1_5 ..> P2_7 : «RPC» clima
+P1_6 ..> P2_8 : «RPC» hechos
+P1_7 ..> P2_8 : «RPC» acciones/hitos
+P1_8 ..> P2_9 : «RPC» actores
+P1_9 ..> P2_9 : «RPC» actores estado
+P1_10 ..> P2_10 : «RPC» personal
+P1_11 ..> P2_16 : «RPC» log/pendientes
+P1_11 ..> P2_11 : «RPC» maestros
+P1_12 ..> P2_5 : «RPC» bridges genéricos
+P1_13 ..> P2_12 : «RPC» análisis
+P1_14 ..> P2_14 : «RPC» radar
+P1_15 ..> P2_13 : «RPC» demandas
+
+P2_2 ..> P3_3 : read «dim_sectoristas / dim_punto_focal / dim_autoridades»
+P2_3 ..> P3_1 : read «geo»
+P2_3 ..> P3_3 : read «entidades/áreas/unidades»
+P2_4 ..> P3_5 : «fact_casos + proceso + hechos»
+P2_5 ..> P3_6 : «dim_alertas + bridges»
+P2_6 ..> P3_6 : «dim_reporte_rapido»
+P2_7 ..> P3_6 : «clima social»
+P2_8 ..> P3_8 : «dim_acciones_hitos / dim_hitos»
+P2_9 ..> P3_4 : «actores + organizaciones»
+P2_10 ..> P3_3 : «personal»
+P2_11 ..> P3_2 : «catálogos»
+P2_12 ..> P3_5 : «fact_analisis_casos»
+P2_13 ..> P3_6 : «dim_demandas»
+P2_14 ..> P3_10 : «radar»
+P2_15 ..> P3_4 : «dim_organizacion»
+P2_15 ..> P3_9 : «dim_locales»
+P2_16 ..> P3_5 : «fact_casos (KPIs)»
+P2_17 ..> P3_5 : «documentos»
+P2_18 ..> P3_12 : «log_envios»
+P2_19 ..> P3_12 : «mantenimiento»
+
+@enduml
