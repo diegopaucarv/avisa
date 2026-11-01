@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>AVISA — Ministerio de Producción</title>
+<style>
+:root{
+  --bp:#1A56A0; --bps:#13427D; --bd:#0E2A4A;
+  --g50:#F8FAFC; --g100:#F1F4F8; --g200:#E4E9F0; --g300:#D2D9E3;
+  --g400:#A6AFBC; --g500:#7C8896; --g600:#5B6677; --g700:#404A5A;
+  --g800:#27303F; --g900:#15191F;
+  --red:#D14343; --red-bg:#FBEAEA; --red-tx:#B23B3B;
+  --grn:#1F9D71; --grn-bg:#E7F6EF; --grn-tx:#1B7D5B;
+  --org:#D98C2B; --org-bg:#FCF1E0; --org-tx:#B5701C;
+  --blu-bg:#E8F0FA; --blu-tx:#1A56A0;
+  --pur:#6E62C9; --pur-bg:#EEEBFB; --pur-tx:#5B4FB8;
+  --sbw:230px;
+  --radius:10px; --radius-lg:14px; --radius-sm:7px;
+  --shadow-sm:0 1px 2px rgba(15,23,42,.06), 0 1px 1px rgba(15,23,42,.04);
+  --shadow-md:0 4px 16px rgba(15,23,42,.08);
+  --shadow-lg:0 10px 25px rgba(0,0,0,.08);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,'Segoe UI',Roboto,system-ui,sans-serif;background:var(--g100);color:var(--g800);font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased}
+
+/* ===== LOGIN ===== */
+#loginScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(150deg,var(--bd) 0%,var(--bps) 60%,var(--bp) 100%)}
+.login-card{background:#fff;border-radius:var(--radius-lg);padding:44px 40px;width:100%;max-width:408px;box-shadow:0 24px 64px rgba(15,23,42,.22)}
+.login-logo{text-align:center;margin-bottom:28px}
+.login-logo .logo-title{font-size:27px;font-weight:800;color:var(--bd);letter-spacing:-.5px}
+.login-logo .logo-sub{font-size:11.5px;color:var(--g500);margin-top:6px;line-height:1.5}
+
+/* ===== APP SHELL ===== */
+#app{display:none;height:100vh;flex-direction:column}
+.hdr{background:var(--bd);color:#fff;height:56px;padding:0 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;z-index:100}
+.hdr-logo{font-weight:800;font-size:15px;letter-spacing:-.3px}
+.hdr-logo span{color:#7CB3F2}
+
+/* ===== LAYOUT FLUIDO: sidebar fijo + contenido flexible ===== */
+.main-wrap{display:flex;flex:1;overflow:hidden;width:100%}
+#sidebar{flex:0 0 var(--sbw);width:var(--sbw);background:var(--bd);color:#fff;display:flex;flex-direction:column;overflow-y:auto;transition:flex-basis .2s,width .2s}
+#sidebar.collapsed{flex-basis:64px;width:64px}
+#sidebar.collapsed .sb-sec-title,
+#sidebar.collapsed .nav span:not(.nav-icon),
+#sidebar.collapsed .sb-brand-t{display:none}
+#content{flex:1 1 auto;min-width:0;width:auto;overflow-y:auto}
+
+.sb-brand{padding:18px 18px 12px;border-bottom:1px solid rgba(255,255,255,.08)}
+.sb-brand-t{font-size:10px;font-weight:700;color:#7CB3F2;letter-spacing:1.2px;text-transform:uppercase}
+.sb-sec{padding:10px 0 6px}
+.sb-sec-title{font-size:9.5px;font-weight:700;color:#6B85A8;letter-spacing:1.5px;text-transform:uppercase;padding:8px 18px 4px}
+.nav{display:flex;align-items:center;gap:10px;padding:9px 18px;cursor:pointer;font-size:12.5px;color:rgba(255,255,255,.72);transition:background .15s,color .15s;border:none;background:none;width:100%;text-align:left}
+.nav:hover{background:rgba(255,255,255,.06);color:#fff}
+.nav.on{background:rgba(255,255,255,.12);color:#fff;font-weight:600;box-shadow:inset 3px 0 0 var(--bp)}
+.nav-icon{width:18px;text-align:center;font-size:14px;opacity:.9}
+.sb-div{height:1px;background:rgba(255,255,255,.07);margin:6px 18px}
+
+/* ===== CONTENT AREA ===== */
+.mod{display:none;min-height:100%}
+.mod.on{display:block}
+.phd{background:#fff;border-bottom:1px solid var(--g200);padding:18px 28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;position:sticky;top:0;z-index:10}
+.phd h1{font-size:18px;font-weight:700;color:var(--bd);letter-spacing:-.2px}
+
+/* ===== BUTTONS ===== */
+.btn{border:none;border-radius:8px;padding:9px 18px;cursor:pointer;font-size:13px;font-weight:600;display:inline-flex;align-items:center;gap:6px;transition:all .15s;letter-spacing:.1px}
+.btn:hover{transform:translateY(-1px);box-shadow:var(--shadow-sm)}
+.btn:active{transform:translateY(0)}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
+.bp{background:var(--bp);color:#fff}
+.bp:hover{background:var(--bps)}
+.bs{background:#fff;color:var(--g700);border:1.5px solid var(--g300)}
+.bs:hover{background:var(--g50);border-color:var(--g400)}
+.bgrn{background:var(--grn);color:#fff}
+.bred{background:var(--red);color:#fff}
+.bwa{background:#fff;color:var(--g700);border:1.5px solid var(--g300)}
+.btn-logout{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);color:#fff;padding:6px 14px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;transition:background .15s}
+.btn-logout:hover{background:rgba(255,255,255,.16)}
+
+/* ===== TABLES ===== */
+.tbl{width:100%;border-collapse:separate;border-spacing:0;font-size:12.5px;background:#fff;border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow-sm)}
+.tbl th{background:var(--g50);border-bottom:1px solid var(--g200);padding:12px 16px;text-align:left;font-weight:700;color:var(--g600);font-size:10.5px;text-transform:uppercase;letter-spacing:.5px;position:sticky;top:0;white-space:nowrap}
+.tbl td{border-bottom:1px solid var(--g100);padding:13px 16px;vertical-align:middle;color:var(--g800)}
+.tbl tbody tr{transition:background .1s}
+.tbl tbody tr:last-child td{border-bottom:none}
+.tbl tbody tr:hover{background:var(--g50)}
+.t-act{display:flex;gap:2px;flex-wrap:nowrap;align-items:center}
+.btn-ico{border:none;background:none;padding:6px 8px;cursor:pointer;border-radius:6px;font-size:13px;color:var(--g500);transition:background .12s,color .12s;line-height:1}
+.btn-ico:hover{background:var(--g100);color:var(--g800)}
+.btn-ico.del:hover{background:var(--red-bg);color:var(--red-tx)}
+
+/* ===== .fc — usado en LOGIN y dentro de MODALES (#modalDetalle) ===== */
+.fc{display:flex;flex-direction:column;gap:6px}
+.fc label{font-size:11px;font-weight:700;color:var(--g600);text-transform:uppercase;letter-spacing:.4px}
+.fc input,.fc select,.fc textarea{
+  border:1px solid #E2E8F0;border-radius:var(--radius-sm);
+  padding:10px 14px;font-size:13.5px;color:var(--g800);
+  width:100%;height:42px;line-height:1.3;
+  transition:border .15s,box-shadow .15s;background:#fff
+}
+.fc textarea{height:auto;min-height:100px;resize:vertical}
+.fc input:focus,.fc select:focus,.fc textarea:focus{outline:none;border-color:var(--bp);box-shadow:0 0 0 3px rgba(26,86,160,.12)}
+.fc select{
+  appearance:none;-webkit-appearance:none;-moz-appearance:none;
+  padding-right:32px;cursor:pointer;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%237C8896' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 12px center;
+}
+.fc input[type=date],.fc input[type=datetime-local],.fc input[type=time]{
+  appearance:none;-webkit-appearance:none;background:#fff;color:var(--g800);cursor:pointer
+}
+.fc input[type=date]::-webkit-calendar-picker-indicator,
+.fc input[type=datetime-local]::-webkit-calendar-picker-indicator,
+.fc input[type=time]::-webkit-calendar-picker-indicator{
+  filter:invert(.45) sepia(1) saturate(3) hue-rotate(180deg);cursor:pointer;opacity:.7;transition:opacity .15s
+}
+.fc input[type=date]:hover::-webkit-calendar-picker-indicator,
+.fc input[type=datetime-local]:hover::-webkit-calendar-picker-indicator,
+.fc input[type=time]:hover::-webkit-calendar-picker-indicator{opacity:1}
+
+/* ============================================================
+   FORMULARIOS DE REGISTRO — estructura real: .fcard > .fc-title + .fg > .f / .f.s2 / .f.s3
+   .f sin sufijo  = campo corto (48%, 2 columnas)
+   .f.s2 / .f.s3  = bloques de descripción (100% del ancho)
+   ============================================================ */
+
+/* 1) .fcard como ventana Pop-up flotante centrada */
+.fcard{
+  max-width:1150px;margin:30px auto;background:#ffffff;padding:30px;
+  border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,0.06);border:1px solid #E2E8F0;
+}
+.fc-title{
+  font-size:16px;font-weight:700;color:var(--bd);
+  margin-bottom:20px;padding-bottom:12px;border-bottom:1px solid #E2E8F0;
+}
+
+/* 2) .fg como contenedor flexible de 2 columnas */
+.fg{display:flex;flex-wrap:wrap;gap:16px 24px}
+
+/* Campos cortos .f -> 3 columnas (~31%) */
+.fg > .f{flex:1 1 31%;min-width:250px;display:flex;flex-direction:column}
+
+/* .s2 / .s3 -> bloques de descripción a ancho completo */
+.fg > .f.s2,
+.fg > .f.s3{flex:1 1 100%}
+
+/* 3) Etiquetas siempre arriba del campo */
+.f > label,.f > span,.f > strong{
+  display:block;margin-bottom:6px;font-weight:500;font-size:12.5px;color:#334155
+}
+
+/* 4) Inputs / selects / fechas dentro de .f */
+.f select,
+.f input[type="text"],.f input[type="date"],.f input[type="number"],
+.f input[type="email"],.f input[type="tel"],.f input[type="password"],
+.f input[type="datetime-local"],.f input[type="time"],.f input:not([type]){
+  width:100%;height:40px;padding:8px 12px;border:1px solid #CBD5E1;
+  border-radius:6px;font-size:14px;background-color:#FFFFFF;color:#27303F;
+  appearance:none;-webkit-appearance:none;-moz-appearance:none;
+  transition:border-color .2s,box-shadow .2s
+}
+.f select:hover,.f input:hover{border-color:#A6AFBC}
+.f select:focus,.f input:focus,.f textarea:focus{
+  outline:none;border-color:var(--bp);box-shadow:0 0 0 3px rgba(26,86,160,.12)
+}
+.f select{
+  padding-right:32px;cursor:pointer;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%237C8896' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 12px center;
+}
+.f input[type="date"]::-webkit-calendar-picker-indicator,
+.f input[type="datetime-local"]::-webkit-calendar-picker-indicator,
+.f input[type="time"]::-webkit-calendar-picker-indicator{
+  filter:invert(.45) sepia(1) saturate(3) hue-rotate(180deg);cursor:pointer;opacity:.7;transition:opacity .15s
+}
+.f input[type="date"]:hover::-webkit-calendar-picker-indicator,
+.f input[type="datetime-local"]:hover::-webkit-calendar-picker-indicator,
+.f input[type="time"]:hover::-webkit-calendar-picker-indicator{opacity:1}
+
+/* 5) Textareas dentro de .f.s2 / .f.s3 — ancho completo, altura cómoda */
+.f textarea{
+  width:100%;min-height:100px;padding:10px 12px;border:1px solid #CBD5E1;
+  border-radius:6px;font-size:14px;font-family:inherit;line-height:1.5;
+  background-color:#FFFFFF;color:#27303F;resize:vertical;
+  appearance:none;-webkit-appearance:none;transition:border-color .2s,box-shadow .2s
+}
+
+@media (max-width:1000px){
+  .fg > .f{flex:1 1 45%}
+}
+@media (max-width:760px){
+  .fcard{margin:16px;max-width:none;padding:20px}
+  .fg > .f,.fg > .f.s2,.fg > .f.s3{flex:1 1 100%}
+}
+
+/* FILTROS (barras de filtro sobre tablas) */
+.filtros{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:18px;padding:14px 16px;background:#fff;border-radius:var(--radius);border:1px solid var(--g200);box-shadow:var(--shadow-sm)}
+.filtros select,.filtros input{height:38px;min-width:140px;width:auto;flex:0 1 auto}
+
+/* Dropzone elegante para input[type=file] */
+input[type=file]{
+  appearance:none;height:auto;
+  border:1.5px dashed var(--g300);border-radius:var(--radius);
+  padding:22px 16px;width:100%;background:var(--g50);
+  color:var(--g500);font-size:12.5px;cursor:pointer;
+  transition:border-color .15s,background .15s;text-align:center
+}
+input[type=file]:hover{border-color:var(--bp);background:var(--blu-bg)}
+input[type=file]::file-selector-button{
+  border:1.5px solid var(--g300);border-radius:7px;background:#fff;
+  color:var(--g700);font-size:12px;font-weight:600;padding:7px 14px;
+  margin-right:12px;cursor:pointer;transition:all .15s
+}
+input[type=file]::file-selector-button:hover{background:var(--g50);border-color:var(--bp);color:var(--bp)}
+
+/* ===== TARJETAS / FORM AREAS genéricas (no formularios) ===== */
+.fa{background:#fff;padding:24px;border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);border:1px solid var(--g100)}
+
+/* ===== BADGES ===== */
+.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:6px;font-size:10.5px;font-weight:700;letter-spacing:.2px}
+.b-alto{background:var(--red-bg);color:var(--red-tx)}
+.b-medio{background:var(--org-bg);color:var(--org-tx)}
+.b-bajo{background:var(--grn-bg);color:var(--grn-tx)}
+.b-rem{background:var(--blu-bg);color:var(--blu-tx)}
+.b-elab{background:var(--pur-bg);color:var(--pur-tx)}
+.b-cerr{background:var(--g100);color:var(--g600)}
+.b-blu{background:var(--blu-bg);color:var(--blu-tx)}
+
+/* ===== MODALES ===== */
+#modalDetalle{position:fixed;inset:0;background:rgba(14,42,74,.45);backdrop-filter:blur(2px);z-index:999;display:flex;align-items:center;justify-content:center;padding:20px}
+#modalDetalle.hidden{display:none}
+#modalDetalleInner{background:#fff;border-radius:var(--radius-lg);width:100%;max-width:760px;max-height:92vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 24px 64px rgba(15,23,42,.22)}
+.modal-hd{padding:20px 24px;border-bottom:1px solid var(--g200);display:flex;justify-content:space-between;align-items:flex-start;flex-shrink:0}
+.modal-hd h2{font-size:16.5px;color:var(--bd);font-weight:700;letter-spacing:-.2px}
+.modal-bd{overflow-y:auto;flex:1;padding:24px}
+.modal-ft{padding:14px 24px;border-top:1px solid var(--g200);display:flex;gap:10px;justify-content:flex-end;flex-shrink:0;background:var(--g50);border-radius:0 0 var(--radius-lg) var(--radius-lg)}
+.mclose{border:none;background:none;font-size:18px;cursor:pointer;color:var(--g500);padding:4px 8px;border-radius:6px;transition:background .12s}
+.mclose:hover{background:var(--g100);color:var(--g800)}
+
+/* Dentro de modales, los formularios también van en 2 columnas */
+.modal-bd > .fc, .modal-bd .fc{flex:1 1 45%;min-width:220px}
+.modal-bd{display:flex;flex-wrap:wrap;gap:16px 24px;align-content:flex-start}
+.modal-bd .fc:has(textarea){flex:1 1 100%}
+.modal-bd > *:not(.fc):not([class*="fc"]){flex:1 1 100%}
+
+/* ===== AVATARES / FOTOS ===== */
+.avatar,.avatar-img,#hAv img,img.foto,img.foto-circular,.kcard .ico img{
+  width:100%;height:100%;object-fit:cover;object-position:center;
+  border-radius:50%;display:block;background:var(--g100)
+}
+#hAv{overflow:hidden}
+
+/* ===== ESTADOS / LOADING / TOAST ===== */
+.err-msg{color:var(--red);font-size:12px;margin-top:8px;display:none}
+.spinner-wrap{text-align:center;padding:40px}
+.spinner{width:32px;height:32px;border:3px solid var(--g200);border-top-color:var(--bp);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.toast-c{position:fixed;bottom:24px;right:24px;z-index:9999}
+.toast{background:var(--g800);color:#fff;padding:11px 18px;border-radius:8px;font-size:13px;margin-top:8px;box-shadow:var(--shadow-md);opacity:0;transform:translateY(10px);transition:.25s}
+.toast.show{opacity:1;transform:none}
+.toast.err{background:var(--red)}.toast.info{background:var(--bp)}
+
+/* ===== TABS ===== */
+.tabs{display:flex;gap:4px;padding:0 24px;border-bottom:1px solid var(--g200);background:#fff}
+.tb{border:none;background:none;padding:13px 16px;cursor:pointer;font-size:12.5px;color:var(--g500);border-bottom:2px solid transparent;font-weight:600;transition:color .12s,border-color .12s}
+.tb.on,.tb:hover{color:var(--bp);border-bottom-color:var(--bp)}
+.tpane{display:none}
+.tpane.on{display:block}
+.sc{padding:0 28px 28px}
+.sc-head{display:flex;align-items:center;justify-content:space-between;padding:18px 0 12px;gap:10px;flex-wrap:wrap}
+.sc-head h3{font-size:14.5px;font-weight:700;color:var(--bd);letter-spacing:-.2px}
+
+/* ===== KPI CARDS ===== */
+.kcard{background:#fff;border-radius:var(--radius);padding:20px;display:flex;flex-direction:column;gap:8px;box-shadow:var(--shadow-sm);border:1px solid var(--g100)}
+.kcard .ico{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:19px;margin-bottom:4px;background:var(--blu-bg)}
+.kcard .num{font-size:30px;font-weight:800;color:var(--bd);line-height:1;letter-spacing:-.5px}
+.kcard .lbl{font-size:11px;color:var(--g500);font-weight:600;text-transform:uppercase;letter-spacing:.4px}
+
+/* ===== ALERT/ACTION CARDS ===== */
+.ac{background:#fff;border-radius:var(--radius-sm);padding:14px 16px;margin-bottom:10px;border-left:3px solid var(--red);box-shadow:var(--shadow-sm)}
+.ac.med{border-left-color:var(--org)}.ac.low{border-left-color:var(--grn)}
+.ac-title{font-weight:700;font-size:12.5px;color:var(--g800);margin-bottom:5px}
+.ac-meta{font-size:11px;color:var(--g500);margin-bottom:8px}
+.ac-foot{display:flex;align-items:center;gap:8px}
+
+.trunc{max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tl-desc{font-size:12px;color:var(--g600);margin-top:4px}
+.lbl-w{display:flex;flex-direction:column;gap:3px}
+.lbl-w .lk{font-size:10px;font-weight:700;color:var(--g500);text-transform:uppercase;letter-spacing:.4px}
+.lbl-w .lv{font-size:13px;color:var(--g800)}
+.lbl-w .lv2{font-size:12px;color:var(--g700)}
+
+/* ============================================================
+   PART 1 — Módulos Actor, Autoridad, Sectorista, PF
+   Ya usan .fcard / .fg / .f — heredan automáticamente el
+   Pop-up y 2 columnas. Solo agregamos el avatar/foto circular.
+   ============================================================ */
+
+/* Avatar de foto en formularios (prevFoto) */
+.foto-preview{
+  width:88px;height:88px;border-radius:50%;object-fit:cover;
+  object-position:center;border:2.5px solid var(--g200);
+  background:var(--g100);display:block;
+}
+
+/* Dropzone de foto — cuadro elegante arrastratable */
+.file-drop{
+  border:1.5px dashed #CBD5E1;border-radius:10px;
+  background:#F8FAFC;padding:14px 10px;text-align:center;
+  cursor:pointer;transition:border-color .15s,background .15s;
+  min-width:100px;
+}
+.file-drop:hover{border-color:var(--bp);background:var(--blu-bg)}
+.file-drop input[type=file]{
+  position:absolute;inset:0;opacity:0;cursor:pointer;
+  border:none;height:auto;background:none;padding:0;
+}
+.file-drop{position:relative}
+.file-drop .di{font-size:22px;line-height:1;margin-bottom:4px}
+.file-drop p{font-size:10px;color:var(--g500);margin:0}
+
+/* ============================================================
+   PART 4 — Reset global de todos los inputs/selects/fechas
+   Aplica a TODOS los contextos, no solo .f
+   ============================================================ */
+
+/* Reseteo base: quitar apariencia nativa del OS */
+input[type="text"],
+input[type="number"],
+input[type="email"],
+input[type="tel"],
+input[type="password"],
+input[type="date"],
+input[type="datetime-local"],
+input[type="time"],
+input:not([type]),
+select{
+  appearance:none;
+  -webkit-appearance:none;
+  -moz-appearance:none;
+  background-color:#ffffff;
+  border:1px solid #CBD5E1;
+  border-radius:6px;
+  height:40px;
+  padding:8px 12px;
+  font-size:14px;
+  color:var(--g800);
+  width:100%;
+  box-shadow:0 1px 2px rgba(0,0,0,0.05);
+  transition:border-color .2s,box-shadow .2s;
+  font-family:inherit;
+}
+input[type="text"]:focus,
+input[type="number"]:focus,
+input[type="email"]:focus,
+input[type="tel"]:focus,
+input[type="password"]:focus,
+input[type="date"]:focus,
+input[type="datetime-local"]:focus,
+input[type="time"]:focus,
+input:not([type]):focus,
+select:focus{
+  outline:none;
+  border-color:var(--bp);
+  box-shadow:0 0 0 3px rgba(26,86,160,.12);
+}
+input::placeholder{color:var(--g400)}
+
+/* Select: flecha SVG ejecutiva */
+select{
+  padding-right:32px;cursor:pointer;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%237C8896' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;
+  background-position:right 12px center;
+}
+select::-ms-expand{display:none}
+
+/* Input date: recolorear el icono de calendario */
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="datetime-local"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator{
+  filter:invert(.4) sepia(1) saturate(4) hue-rotate(185deg);
+  opacity:.75;cursor:pointer;transition:opacity .15s;
+}
+input[type="date"]:hover::-webkit-calendar-picker-indicator,
+input[type="datetime-local"]:hover::-webkit-calendar-picker-indicator,
+input[type="time"]:hover::-webkit-calendar-picker-indicator{opacity:1}
+
+/* Textarea NO hereda el height:40px del reset global */
+textarea{
+  appearance:none;-webkit-appearance:none;
+  background-color:#ffffff;
+  border:1px solid #CBD5E1;
+  border-radius:6px;
+  height:auto !important;
+  min-height:100px;
+  padding:10px 12px;
+  font-size:14px;
+  color:var(--g800);
+  width:100%;
+  resize:vertical;
+  font-family:inherit;
+  line-height:1.5;
+  box-shadow:0 1px 2px rgba(0,0,0,0.05);
+  transition:border-color .2s,box-shadow .2s;
+}
+textarea:focus{
+  outline:none;border-color:var(--bp);
+  box-shadow:0 0 0 3px rgba(26,86,160,.12);
+}
+
+/* Excepciones: inputs que NO deben tener width:100% */
+.filtros select,.filtros input{
+  width:auto;min-width:130px;flex:0 1 auto;height:38px;
+}
+
+/* Override para input[type=file] — no hereda el estilo de input */
+input[type=file]{
+  appearance:none;-webkit-appearance:none;
+  height:auto;background:#F8FAFC;border:1.5px dashed #CBD5E1;
+  border-radius:var(--radius);padding:20px 14px;
+  color:var(--g500);font-size:12.5px;cursor:pointer;
+  box-shadow:none;text-align:center;
+  transition:border-color .15s,background .15s;
+}
+input[type=file]:hover{border-color:var(--bp);background:var(--blu-bg)}
+input[type=file]::file-selector-button{
+  appearance:none;border:1px solid var(--g300);border-radius:7px;
+  background:#fff;color:var(--g700);font-size:12px;font-weight:600;
+  padding:6px 13px;margin-right:12px;cursor:pointer;transition:all .15s;
+}
+input[type=file]::file-selector-button:hover{
+  background:var(--g50);border-color:var(--bp);color:var(--bp)
+}
+
+/* ============================================================
+   FIX 1 — Filtros encima de tablas: ancho acotado, inline
+   ============================================================ */
+.fbar{
+  display:flex;flex-wrap:wrap;gap:8px;align-items:center;
+  padding:12px 16px;background:#fff;border-radius:var(--radius);
+  border:1px solid var(--g200);margin-bottom:14px;box-shadow:var(--shadow-sm);
+}
+.fbar select,.fbar input{
+  width:auto !important;max-width:200px;min-width:110px;
+  flex:0 1 auto;height:36px;padding:6px 10px;font-size:12.5px;
+}
+.fbar select{padding-right:28px}
+
+/* FIX 1 — Los filtros de módulo también (clase .filtros) */
+.filtros select,.filtros input{
+  width:auto !important;max-width:200px;min-width:110px;
+  flex:0 1 auto;height:36px;padding:6px 10px;font-size:12.5px;
+}
+.filtros select{padding-right:28px}
+
+/* ============================================================
+   FIX 5 — Tablas premium: más padding, borde derecho suave
+   ============================================================ */
+.tbl th{
+  background:#F8FAFC !important;
+  color:#334155 !important;
+  font-weight:700;
+  padding:12px 16px !important;
+  border-bottom:2px solid #CBD5E1 !important;
+  border-right:1px solid #E2E8F0;
+}
+.tbl th:last-child{border-right:none}
+.tbl td{
+  padding:12px 16px !important;
+  border-bottom:1px solid #F1F5F9;
+  border-right:1px solid #E2E8F0;
+  color:var(--g800);
+}
+.tbl td:last-child{border-right:none}
+.tbl tbody tr:hover{background:#F8FAFC}
+
+/* Tablas sin clase .tbl (generadas dinámicamente con id) */
+table:not(.tbl) th{
+  background:#F8FAFC;color:#334155;font-weight:700;
+  padding:12px 16px;border-bottom:2px solid #CBD5E1;
+  border-right:1px solid #E2E8F0;font-size:11px;
+  text-transform:uppercase;letter-spacing:.4px;
+}
+table:not(.tbl) th:last-child{border-right:none}
+table:not(.tbl) td{
+  padding:12px 16px;border-bottom:1px solid #F1F5F9;
+  border-right:1px solid #E2E8F0;
+}
+table:not(.tbl) td:last-child{border-right:none}
+table:not(.tbl) tbody tr:hover{background:#F8FAFC}
+
+/* ============================================================
+   FIX 4 — Módulo Autoridades: asegurar el nav item es flex
+   (lo activa el JS con sbNavPF / sbNavAut — estos quedan
+    ocultos por CSS por defecto; el JS los muestra según rol)
+   ============================================================ */
+#sbNavPF, #sbNavAut{display:none}
+
+/* ============================================================
+   FIX 3 — Avatar/foto en formularios Sectorista y PF
+   (ya existe .foto-preview y .file-drop del EJECUTIVO7,
+    solo aseguramos que se apliquen también dentro de .fg)
+   ============================================================ */
+.fg .file-drop{width:auto;min-width:100px}
+</style>
+</head>
+<body>
+
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="logo-title">AVISA</div>
+      <div class="logo-sub">Aplicativo de Vigilancia y Sistematización de Alertas en Prevención y Gestión de Conflictos Sociales</div>
+      <div style="font-size:10px;color:#94a3b8;margin-top:2px">Ministerio de Producción &mdash; OAIPCS</div>
+    </div>
+    <div class="fc" style="margin-bottom:12px">
+      <label>DNI</label>
+      <input id="lDNI" type="text" maxlength="12" placeholder="Ingrese su DNI">
+    </div>
+    <div class="fc" style="margin-bottom:16px">
+      <label>Contraseña</label>
+      <input id="lClave" type="password" placeholder="Ingrese su contraseña">
+    </div>
+    <div id="lerr" class="err-msg"></div>
+    <button id="btnLogin" class="btn bp" style="width:100%;margin-top:8px;padding:10px;font-size:14px">Ingresar al Aplicativo</button>
+    <div id="lload" style="display:none;text-align:center;margin-top:12px">
+      <div class="spinner" style="width:24px;height:24px;border-width:2px;margin:0 auto"></div>
+    </div>
+    <div id="jsStatus" style="text-align:center;font-size:10px;color:#94a3b8;margin-top:10px">Cargando aplicativo...</div>
+  </div>
+</div>
+
+<div id="app">
+  <div class="hdr">
+    <div style="display:flex;align-items:center;gap:12px">
+      <button onclick="toggleSB()" style="background:none;border:none;color:#fff;font-size:18px;cursor:pointer;padding:4px 6px">☰</button>
+      <div class="hdr-logo">AVI<span>SA</span></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <div style="text-align:right">
+        <div id="hName" style="font-size:13px;font-weight:600;color:#fff"></div>
+        <div style="display:flex;gap:6px;align-items:center;justify-content:flex-end">
+          <span id="hRole" style="font-size:10px;color:#5bb7ff;text-transform:uppercase"></span>
+          <span id="hDate" style="font-size:11px;color:#94a3b8"></span>
+        </div>
+      </div>
+      <div id="hAv" style="width:32px;height:32px;border-radius:50%;background:var(--bp);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:#fff"></div>
+      <button class="btn-logout" onclick="doLogout()">Salir</button>
+    </div>
+  </div>
+  <div class="main-wrap">
+    <div id="sidebar">
+      <div class="sb-brand"><div class="sb-brand-t">Navegación</div></div>
+      <div class="sb-sec">
+        <div class="sb-sec-title">INICIO</div>
+        <button class="nav on" onclick="navClick('dashboard',this)"><span class="nav-icon">🏠</span> Dashboard <span id="nbPendientes" style="margin-left:auto;background:var(--red);color:#fff;border-radius:10px;padding:1px 6px;font-size:10px;display:none"></span></button>
+      </div>
+      <div class="sb-div"></div>
+      <div class="sb-sec">
+        <div class="sb-sec-title">Gestión de Casos</div>
+        <button class="nav" onclick="navClick('casos',this)"><span class="nav-icon">📁</span> Casos de Conflictividad</button>
+        <button class="nav" onclick="navClick('mesasgrupos',this)"><span class="nav-icon">🧑‍🤝‍🧑</span> Mesas y Grupos de Trabajo</button>
+        <button class="nav" onclick="navClick('redaccion',this)"><span class="nav-icon">📝</span> Sistematización de Espacios de Diálogo</button>
+        <button class="nav" onclick="navClick('hechos',this)"><span class="nav-icon">📋</span> Hechos Ocurridos</button>
+        <button class="nav" onclick="navClick('acciones',this)"><span class="nav-icon">✅</span> Compromisos y/o Acuerdos PRODUCE</button>
+        <button class="nav" onclick="navClick('hitos',this)"><span class="nav-icon">🎯</span> Hitos PRODUCE</button>
+        <button class="nav" onclick="navClick('analisis',this)"><span class="nav-icon">🔍</span> Análisis de Casos</button>
+        <button class="nav" onclick="navClick('analisisregional',this)"><span class="nav-icon">🗺️</span> Análisis Regional</button>
+        <button class="nav" onclick="navClick('organizaciones',this)"><span class="nav-icon">🏢</span> Organizaciones</button>
+        <button class="nav" onclick="navClick('actores',this)"><span class="nav-icon">👥</span> Actores Sociales</button>
+        <button class="nav" onclick="navClick('actoresestado',this)"><span class="nav-icon">🏛️</span> Actores del Estado</button>
+        <button class="nav" onclick="navClick('locales',this)"><span class="nav-icon">🏬</span> Locales</button>
+        <button class="nav" onclick="navClick('consultasia',this)"><span class="nav-icon">📝</span> Consultas Rápidas</button>
+      </div>
+      <div class="sb-div"></div>
+      <div class="sb-sec">
+        <div class="sb-sec-title">Gestión de Intervención</div>
+        <button class="nav" onclick="navClick('alertas',this)"><span class="nav-icon">🚨</span> Alertas Tempranas</button>
+        <button class="nav" onclick="navClick('rr',this)"><span class="nav-icon">📝</span> Reporte de Intervención</button>
+        <button class="nav" onclick="navClick('clima',this)"><span class="nav-icon">🌡️</span> Reporte de Clima Social</button>
+        <button class="nav" onclick="navClick('demandas',this)"><span class="nav-icon">📣</span> Demandas</button>
+        <button class="nav" id="sbNavPF" onclick="navClick('pf',this)"><span class="nav-icon">🎯</span> Puntos Focales</button>
+        <button class="nav" id="sbNavAut" onclick="navClick('autoridades',this)"><span class="nav-icon">⚖️</span> Autoridades</button>
+      </div>
+      <div class="sb-div"></div>
+      <div class="sb-sec">
+        <div class="sb-sec-title">Gestión Red Radar</div>
+        <button class="nav" onclick="navClick('redradar',this)"><span class="nav-icon">📡</span> Red Radar PRODUCE</button>
+      </div>
+      <div class="sb-div"></div>
+      <div class="sb-sec">
+        <div class="sb-sec-title">Gestión del Conocimiento</div>
+        <button class="nav" onclick="navClick('capacitaciones',this)"><span class="nav-icon">🎓</span> Capacitaciones</button>
+      </div>
+     
+      <div class="sb-div"></div>
+      <div class="sb-sec">
+        <div class="sb-sec-title">Gestión de Reportes</div>
+        <button class="nav" onclick="navClick('reportes',this)"><span class="nav-icon">📊</span> Casos</button>
+        <button class="nav" onclick="navClick('reportes',this)"><span class="nav-icon">📊</span> Intervención</button>
+        <button class="nav" onclick="navClick('reportes',this)"><span class="nav-icon">📊</span> Demandas</button>
+        <button class="nav" onclick="navClick('rep-actores',this)"><span class="nav-icon">📊</span> Actores con Perfil</button>
+        <button class="nav" onclick="navClick('rep-contacto',this)"><span class="nav-icon">📊</span> Contacto de Actores</button>
+        <button class="nav" onclick="navClick('rep-orgs',this)"><span class="nav-icon">📊</span> Lista de Organizaciones Sociales</button>
+        <button class="nav" onclick="navClick('rep-locales',this)"><span class="nav-icon">📊</span> Lista de Locales</button>
+      </div>
+      <div class="sb-div"></div>
+      <div class="sb-sec" id="sbAdminSec" style="display:none">
+        <div class="sb-sec-title">Administración</div>
+        <button class="nav" onclick="navClick('sectoristas',this)"><span class="nav-icon">👤</span> Sectoristas</button>
+        <button class="nav role-admin-only" id="sbLog" onclick="navClick('log',this)" style="display:none"><span class="nav-icon">🔐</span> Log de Accesos</button>
+      </div>
+    </div>
+    <div id="content">
+      <div id="mod-dashboard" class="mod on">
+        <div class="phd"><h1>🏠 Dashboard</h1></div>
+        <div style="padding:20px">
+          <div id="dashBienvenida" style="font-size:16px;color:var(--g600);margin-bottom:20px"></div>
+          <div id="dashLoading" style="text-align:center;padding:40px"><div class="spinner"></div></div>
+          <div id="dashContent" style="display:none">
+            <div id="kpiGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px;margin-bottom:24px"></div>
+            <div style="margin-bottom:20px">
+              <div style="font-weight:700;font-size:13px;color:var(--bd);margin-bottom:10px">📁 Casos Críticos <span id="nbCasos" style="background:var(--red);color:#fff;border-radius:10px;padding:1px 7px;font-size:11px;margin-left:6px"></span></div>
+              <div style="overflow-x:auto"><table class="tbl" id="tblDashCasos"><thead><tr><th>Código</th><th>Nombre</th><th>Sector</th><th>Departamento</th><th>Prioridad</th><th>Riesgo</th><th>Avance</th></tr></thead><tbody></tbody></table></div>
+            </div>
+            <div>
+              <div style="font-weight:700;font-size:13px;color:var(--bd);margin-bottom:10px">🚨 Alertas Activas <span id="nbAlertas" style="background:var(--red);color:#fff;border-radius:10px;padding:1px 7px;font-size:11px;margin-left:6px"></span></div>
+              <div id="dashAlertas"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="mod-pendientes" class="mod"><div id="pendientesLoading" style="display:none;text-align:center;padding:40px"><div class="spinner"></div></div><div id="pendientesContent"></div></div>
+      <div id="mod-casos" class="mod"><div id="casosLoading" style="display:none;text-align:center;padding:40px"><div class="spinner"></div></div><div id="casosContent"></div></div>
+      <div id="mod-hechos" class="mod"><div id="hechosContent"></div></div>
+      <div id="mod-acciones" class="mod"><div id="accionesContent"></div></div>
+      <div id="mod-accionesHitos" class="mod"><div id="accionesHitosContent"></div></div>
+      <div id="mod-hitos" class="mod"><div id="hitosContent"></div></div>
+      <div id="mod-analisis" class="mod"><div id="analisisContent"></div></div>
+      <div id="mod-analisisregional" class="mod"><div id="analisisregionalContent"></div></div>
+      <div id="mod-actores" class="mod"><div id="actoresContent"></div></div>
+      <div id="mod-actoresestado" class="mod"><div id="actoresEstadoContent"></div></div>
+      <div id="mod-demandas" class="mod"><div id="demandasContent"></div></div>
+      <div id="mod-alertas" class="mod"><div id="alertasLoading" style="display:none;text-align:center;padding:40px"><div class="spinner"></div></div><div id="alertasContent"></div></div>
+      <div id="mod-rr" class="mod"><div id="rrLoading" style="display:none;text-align:center;padding:40px"><div class="spinner"></div></div><div id="rrContent"></div></div>
+      <div id="mod-clima" class="mod"><div id="climaLoading" style="display:none;text-align:center;padding:40px"><div class="spinner"></div></div><div id="climaContent"></div></div>
+      <div id="mod-redradar" class="mod"><div id="redradarContent"></div></div>
+      <div id="mod-reportes" class="mod"><div id="reportesContent"></div></div>
+      <div id="mod-maestros" class="mod"><div id="maestrosContent"></div></div>
+      <div id="mod-lineaTiempo" class="mod"><div id="lineaTiempoContent"></div></div>
+      <div id="mod-recorrido" class="mod"><div id="recorridoContent"></div></div>
+      <div id="mod-sectoristas" class="mod"><div id="sectoristasContent"></div></div>
+      <div id="mod-pf" class="mod"><div id="pfContent"></div></div>
+      <div id="mod-autoridades" class="mod"><div id="autoridadesContent"></div></div>
+      <div id="mod-log" class="mod"><div id="logContent"></div></div>
+    </div>
+  </div>
+</div>
+
+<div id="modalDetalle" class="hidden"><div id="modalDetalleInner"></div></div>
+<div class="toast-c" id="toastC"></div>
+
+<script>
+function cerrarBienvenida(){var ov=document.getElementById('wov');if(ov){ov.style.opacity='0';ov.style.transition='opacity .3s';setTimeout(function(){ov.remove();},300);}try{if(window.SESSION&&SESSION.dni)localStorage.setItem('sipok_'+SESSION.dni,'1');}catch(e){}}
+var _navQueue=[];
+function navClick(modulo, el) {
+  if (modulo === 'redaccion') { _abrirModuloRedaccion(); return; }
+  if (modulo === 'mesasgrupos') { _abrirModuloMesasGrupos(); return; }
+  if (modulo === 'capacitaciones') {
+    document.querySelectorAll('.nav').forEach(function(n){ n.classList.remove('on'); });
+    if (el) el.classList.add('on');
+    if (window.innerWidth <= 768) document.getElementById('sidebar').classList.remove('open');
+    if (typeof _abrirModuloCapacitaciones === 'function') { _abrirModuloCapacitaciones(); }
+    else { alert('El módulo aún se está cargando. Intente en unos segundos.'); }
+    return;
+  }
+  if (modulo === 'consultasia') { _abrirModuloConsultasIA(); return; }
+  if (typeof goM === 'function') {
+    goM(modulo, el);
+  } else {
+    _navQueue.push({ id: modulo, el: el });
+  }
+}
+
+(function(){
+  var parts=new Array(7).fill(''),loaded=0;
+  var fns=['getJs1','getJs2','getJs3','getJs4','getJs5','getJs6','getJs7'];
+  function onAllLoaded(){
+    try{
+      var __ge = eval;
+__ge(parts.join(''));
+      var st=document.getElementById('jsStatus');if(st)st.style.display='none';
+      var dni=document.getElementById('lDNI'),cla=document.getElementById('lClave'),btn=document.getElementById('btnLogin');
+      if(dni){dni.addEventListener('input',function(){limpiarErr();});dni.addEventListener('keydown',function(e){if(e.key==='Enter'&&cla)cla.focus();});}
+      if(cla){cla.addEventListener('input',function(){limpiarErr();});cla.addEventListener('keydown',function(e){if(e.key==='Enter')doLogin();});}
+      if(btn){btn.addEventListener('click',function(){doLogin();});}
+      _navQueue.forEach(function(q){goM(q.id,q.el);});_navQueue=[];
+    }catch(e){
+      console.error('AVISA error:',e.message,e.stack);
+      var s=document.getElementById('jsStatus');if(s){s.textContent='Error: '+e.message;s.style.color='#E24B4A';}
+    }
+  }
+  fns.forEach(function(fn,idx){
+    google.script.run
+      .withSuccessHandler(function(b64){try{parts[idx]=atob(b64);}catch(e){parts[idx]='';}if(++loaded===7)onAllLoaded();})
+      .withFailureHandler(function(e){parts[idx]='';if(++loaded===7)onAllLoaded();})[fn]();
+  });
+})();
+</script>
+</body>
+</html>
