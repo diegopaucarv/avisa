@@ -125,14 +125,11 @@ Las cifras de esta sección se cuentan por tabla y no por línea del inventario 
 
 | Clase | Qué significa | Tablas v10 | Columnas | Filas |
 | --- | --- | --: | --: | --: |
-| **I · Entrada** | Donde aterriza el dato del mundo. | 32 | 417 | 3 977 |
+| **I · Entrada** | Donde aterriza el dato del mundo. | 33 | 420 | 3 982 |
 | **P · Proceso** | Intermedios de extracción, pauta y síntesis, con su trazabilidad. | 102 | 790 | 3 406 |
 | **O · Salida** | Se deriva de datos ya presentes; reproducible con la misma base. | 14 | 132 | 914 |
-| **INF · Transversal** | No es contenido: catálogos, parámetros, geografía, integraciones. | 104 | 677 | 3 434 |
-| **Sin clasificar** | No aparece en BRECHA §12 y no es vista derivada | 3 | 20 | 526 |
+| **INF · Transversal** | No es contenido: catálogos, parámetros, geografía, integraciones. | 106 | 694 | 3 955 |
 | **X · Archivo** | Sistema anterior completo | 87 | 807 | 4 729 |
-
-Tablas sin clasificar: `core.cronologia_vinculos`, `core.entidades`, `core.migracion_conflicto`. Ninguna aparece en el inventario del BRECHA §12: `core.entidades` recibe claves ajenas desde dos tablas de entrada y `core.migracion_conflicto` es una tabla de control de la propia migración.
 
 ### 4.3 Vistas y vistas materializadas
 
@@ -238,8 +235,8 @@ Vínculo entre una llamada al modelo y los fragmentos documentales que recuperó
 
 | # | Columna | Tipo | Nulo | Clave | Descripción |
 | --: | --- | --- | :--: | --- | --- |
-| 1 | `call_id` | uuid | no | PK, FK → agent.llm_call_202611(id), agent.llm_call_default(id), agent.llm_call_202703(id), agent.llm_call_202702(id), agent.llm_call_202701(id), agent.llm_call_202612(id), agent.llm_call(id) | Llamada al modelo que recuperó el fragmento documental |
-| 2 | `call_ts` | timestamp with time zone | no | PK, FK → agent.llm_call_202611(ts), agent.llm_call_default(ts), agent.llm_call_202703(ts), agent.llm_call_202702(ts), agent.llm_call_202701(ts), agent.llm_call_202612(ts), agent.llm_call(ts) | Momento de la llamada, que con su identificador completa la clave del vínculo |
+| 1 | `call_id` | uuid | no | PK, FK → agent.llm_call(id), agent.llm_call_default(id), agent.llm_call_202703(id), agent.llm_call_202702(id), agent.llm_call_202701(id), agent.llm_call_202612(id), agent.llm_call_202611(id) | Llamada al modelo que recuperó el fragmento documental |
+| 2 | `call_ts` | timestamp with time zone | no | PK, FK → agent.llm_call(ts), agent.llm_call_default(ts), agent.llm_call_202703(ts), agent.llm_call_202702(ts), agent.llm_call_202701(ts), agent.llm_call_202612(ts), agent.llm_call_202611(ts) | Momento de la llamada, que con su identificador completa la clave del vínculo |
 | 3 | `fragmento_id` | uuid | no | PK, FK → kag.documento_fragmento(id) | Fragmento documental recuperado como insumo de la llamada |
 | 4 | `rank_rrf` | integer | sí | — | Posición que el fragmento ocupó tras fusionar los resultados de búsqueda |
 | 5 | `score_rrf` | numeric | sí | — | Puntaje de fusión del fragmento, que pondera sus apariciones en cada búsqueda |
@@ -489,8 +486,8 @@ Mensaje crudo descartado por el canal de ingesta, con el error que motivó el re
 | # | Columna | Tipo | Nulo | Clave | Descripción |
 | --: | --- | --- | :--: | --- | --- |
 | 1 | `id` | uuid | no | PK | Identificador interno de la fila |
-| 2 | `raw_id` | uuid | no | FK → avisa.raw_ingest_202703(id), avisa.raw_ingest_202611(id), avisa.raw_ingest_default(id), avisa.raw_ingest(id), avisa.raw_ingest_202612(id), avisa.raw_ingest_202702(id), avisa.raw_ingest_202701(id) | Mensaje crudo descartado, buscado en la partición donde ingresó |
-| 3 | `raw_received_at` | timestamp with time zone | no | FK → avisa.raw_ingest_202703(received_at), avisa.raw_ingest_202611(received_at), avisa.raw_ingest_default(received_at), avisa.raw_ingest(received_at), avisa.raw_ingest_202612(received_at), avisa.raw_ingest_202702(received_at), avisa.raw_ingest_202701(received_at) | Momento en que se recibió el mensaje descartado, junto con su identificador |
+| 2 | `raw_id` | uuid | no | FK → avisa.raw_ingest_202612(id), avisa.raw_ingest_202702(id), avisa.raw_ingest_202703(id), avisa.raw_ingest_202611(id), avisa.raw_ingest_default(id), avisa.raw_ingest(id), avisa.raw_ingest_202701(id) | Mensaje crudo descartado, buscado en la partición donde ingresó |
+| 3 | `raw_received_at` | timestamp with time zone | no | FK → avisa.raw_ingest_202612(received_at), avisa.raw_ingest_202702(received_at), avisa.raw_ingest_202703(received_at), avisa.raw_ingest_202611(received_at), avisa.raw_ingest_default(received_at), avisa.raw_ingest(received_at), avisa.raw_ingest_202701(received_at) | Momento en que se recibió el mensaje descartado, junto con su identificador |
 | 4 | `error_json` | jsonb | no | — | Detalle estructurado del error que motivó el rechazo del mensaje |
 | 5 | `created_at` | timestamp with time zone | no | — | Momento en que se creó el registro |
 
@@ -964,7 +961,7 @@ Etapa de un proceso de consulta previa, con sus fechas de inicio y fin, el docum
 
 #### `consultation.procesos`
 
-**Clasificación:** INF · Transversal (§12.4) · **Filas:** 0 · **Columnas:** 10 · **Clave primaria:** `id` · **Relaciones:** 1 · **Índices:** 1
+**Clasificación:** INF · Transversal (§12.4) · **Filas:** 0 · **Columnas:** 10 · **Clave primaria:** `id` · **Relaciones:** 2 · **Índices:** 1
 
 Proceso de consulta previa asociado a un caso, con el pueblo indígena involucrado, su fase actual y su estado.
 
@@ -979,7 +976,7 @@ Proceso de consulta previa asociado a un caso, con el pueblo indígena involucra
 | 7 | `estado` | character varying(30) | no | — | Situación administrativa del proceso, como abierto o concluido |
 | 8 | `created_at` | timestamp with time zone | no | — | Momento en que se creó el registro |
 | 9 | `updated_at` | timestamp with time zone | no | — | Momento de la última modificación del registro |
-| 10 | `nivel_clasificacion` | character varying(20) | no | — | Nivel de clasificación de la consulta, expresado como etiqueta: Público, Reservado o Confidencial |
+| 10 | `nivel_clasificacion` | smallint | no | FK → core.cat_clasificacion(nivel) | Nivel de acceso al dato: 1 público, 2 reservado, 3 confidencial |
 
 #### `consultation.resultados`
 
@@ -1883,7 +1880,7 @@ Acuerdo asumido en una reunión de diálogo, con su acción, responsable, plazo,
 
 #### `core.cronologia_vinculos`
 
-**Clasificación:** Sin clasificar · **Filas:** 5 · **Columnas:** 3 · **Clave primaria:** — · **Relaciones:** 3 · **Índices:** 3
+**Clasificación:** I · Entrada (criterio: vínculo de `core.caso_cronologia`) · **Filas:** 5 · **Columnas:** 3 · **Clave primaria:** — · **Relaciones:** 3 · **Índices:** 3
 
 Cruce de un hecho de la cronología con la alerta o el documento que lo respalda o lo origina.
 
@@ -2034,7 +2031,7 @@ Documento del expediente —reporte, acta, informe, argumentario o relatoría—
 
 #### `core.entidades`
 
-**Clasificación:** Sin clasificar · **Filas:** 23 · **Columnas:** 6 · **Clave primaria:** `id` · **Relaciones:** 0 · **Índices:** 3
+**Clasificación:** INF · Transversal (criterio: tabla de inquilino (parámetro)) · **Filas:** 23 · **Columnas:** 6 · **Clave primaria:** `id` · **Relaciones:** 0 · **Índices:** 3
 
 Entidad del Estado con la que se relaciona el sistema, con sus siglas, su nivel y su estado.
 
@@ -2288,12 +2285,12 @@ Espacio de diálogo formalizado, con su tipo de instrumento, base legal, vigenci
 | 20 | `created_at` | timestamp with time zone | no | — | Momento en que se creó el registro |
 | 21 | `updated_at` | timestamp with time zone | no | — | Momento de la última modificación del registro |
 | 22 | `origen_dato` | character varying(20) | no | — | Vía por la que llegó el registro: manual, agente, flujo, legado histórico o mensajería |
-| 23 | `nivel_clasificacion` | smallint | no | FK → core.cat_clasificacion(nivel) | Nivel de clasificación de la información: 1 público, 2 interno, 3 sensible |
+| 23 | `nivel_clasificacion` | smallint | no | FK → core.cat_clasificacion(nivel) | Nivel de acceso al dato: 1 público, 2 reservado, 3 confidencial |
 | 24 | `tiene_norma` | boolean | sí | — | Indica si la mesa cuenta con una norma formal de creación |
 
 #### `core.migracion_conflicto`
 
-**Clasificación:** Sin clasificar · **Filas:** 498 · **Columnas:** 11 · **Clave primaria:** `id` · **Relaciones:** 1 · **Índices:** 2
+**Clasificación:** INF · Transversal (criterio: soporte de la carga (§1.2)) · **Filas:** 498 · **Columnas:** 11 · **Clave primaria:** `id` · **Relaciones:** 1 · **Índices:** 2
 
 Conflicto detectado al cargar los datos del sistema anterior, con su hoja y fila de origen y el estado de resolución.
 
@@ -2395,7 +2392,7 @@ Contrato de cada salida generada, con su formato, la consulta que la originó y 
 | 6 | `response_json` | jsonb | sí | — | Contenido de la respuesta generada, guardado como documento JSON |
 | 7 | `response_uri` | character varying(500) | sí | — | Ubicación del archivo de la salida, alojado fuera de la base |
 | 8 | `snapshot_id` | uuid | sí | FK → ctx.snapshot(id) | Instantánea de la base sobre la que se generó la salida |
-| 9 | `nivel_clasificacion` | smallint | no | FK → core.cat_clasificacion(nivel) | Nivel de clasificación de la información: 1 público, 2 interno, 3 sensible |
+| 9 | `nivel_clasificacion` | smallint | no | FK → core.cat_clasificacion(nivel) | Nivel de acceso al dato: 1 público, 2 reservado, 3 confidencial |
 | 10 | `created_at` | timestamp with time zone | no | — | Momento en que se creó el registro |
 | 11 | `policy_snapshot_id` | uuid | sí | FK → policy.snapshot(id) | Instantánea de las reglas de política usadas para decidir qué mostrar |
 | 12 | `chat_commit_id` | uuid | sí | FK → chat.commit(id) | Confirmación de la conversación que originó la salida |
@@ -2474,7 +2471,7 @@ Paso ejecutado del flujo operativo sobre un caso o un reporte, con su estado, re
 | 18 | `updated_at` | timestamp with time zone | no | — | Momento de la última modificación del registro |
 | 19 | `created_by` | uuid | sí | FK → core.usuarios(id) | Usuario que registró la fila en el sistema |
 | 20 | `updated_by` | uuid | sí | FK → core.usuarios(id) | Usuario de la última modificación |
-| 21 | `nivel_clasificacion` | smallint | no | FK → core.cat_clasificacion(nivel) | Nivel de clasificación de la información: 1 público, 2 interno, 3 sensible |
+| 21 | `nivel_clasificacion` | smallint | no | FK → core.cat_clasificacion(nivel) | Nivel de acceso al dato: 1 público, 2 reservado, 3 confidencial |
 
 Claves únicas compuestas: `tipo_origen`, `fila_legado`.
 
@@ -2560,7 +2557,7 @@ Reunión de diálogo vinculada a un caso, con su tipo, fecha, lugar y unidad org
 | 16 | `origen_dato` | character varying(20) | no | — | Vía por la que llegó el registro: manual, agente, flujo, legado histórico o mensajería |
 | 17 | `confidence` | numeric(3,2) | sí | — | Grado de confianza del dato registrado, entre 0 y 1 |
 | 18 | `es_validado_humano` | boolean | no | — | Indica si una persona revisó y confirmó los datos de la reunión |
-| 19 | `nivel_clasificacion` | smallint | no | FK → core.cat_clasificacion(nivel) | Nivel de clasificación de la información: 1 público, 2 interno, 3 sensible |
+| 19 | `nivel_clasificacion` | smallint | no | FK → core.cat_clasificacion(nivel) | Nivel de acceso al dato: 1 público, 2 reservado, 3 confidencial |
 
 #### `core.riesgo_social_ordinal`
 
@@ -2579,7 +2576,7 @@ Nivel de riesgo social estimado para un lugar y una fecha, con el conteo de even
 | 7 | `fuente` | character varying(60) | no | — | Fuente de la que proviene la estimación, como defensoria o prensa |
 | 8 | `justificacion` | text | sí | — | Explicación de por qué se asignó ese nivel de riesgo |
 | 9 | `es_validado_humano` | boolean | no | — | Indica si una persona revisó y confirmó la estimación |
-| 10 | `nivel_clasificacion` | smallint | no | FK → core.cat_clasificacion(nivel) | Nivel de clasificación de la información: 1 público, 2 interno, 3 sensible |
+| 10 | `nivel_clasificacion` | smallint | no | FK → core.cat_clasificacion(nivel) | Nivel de acceso al dato: 1 público, 2 reservado, 3 confidencial |
 
 Claves únicas compuestas: `lugar_id`, `fecha`, `fuente`.
 

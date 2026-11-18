@@ -13,7 +13,7 @@ Estructura del archivo generado:
 
     Sección A · esquema      extensiones + DDL (dos pases) + parches 1-5
                              aplicable sobre una base vacía.
-    Sección B · post-carga   parches 6-12
+    Sección B · post-carga   parches 6-13
                              exige el legado ya cargado.
 
 El script solo lee el repositorio. No abre conexión a ninguna base.
@@ -177,8 +177,19 @@ SECCION_B = (
         "docs/PARCHE_12_COMENTARIOS_COLUMNAS.sql",
         tolera_errores=False,
         nota=(
-            "No se recorta: cubre 255 tablas lógicas y 2 007 columnas. Es el "
-            "bloque que hace que el archivo pese ~760 KB."
+            "No se recorta: cubre 255 tablas lógicas y 2 036 columnas. Es el "
+            "bloque que hace que el archivo pese ~970 KB."
+        ),
+    ),
+    bloque(
+        "B.8",
+        "Parche 13 · nivel de clasificación en un solo formato",
+        "docs/PARCHE_13_CLASIFICACION.sql",
+        tolera_errores=False,
+        nota=(
+            "Convierte `consultation.procesos.nivel_clasificacion` de texto a "
+            "`smallint` con clave ajena al catálogo y alinea el nombre "
+            "`Público`. Idempotente: repetirlo no tiene efecto."
         ),
     ),
 )
@@ -255,7 +266,7 @@ def encabezado(solo: str | None) -> list[str]:
         "--  Sección A · esquema    extensiones + DDL v9 (dos pases) + parches 1-5.",
         "--                          Autosuficiente: se puede aplicar sobre una",
         "--                          base VACÍA, sin instalar extensiones aparte.",
-        "--  Sección B · post-carga parches 6-12. NO se puede aplicar sobre una",
+        "--  Sección B · post-carga parches 6-13. NO se puede aplicar sobre una",
         "--                          base vacía: exige el legado ya cargado por",
         "--                          migration/loader (filas en core.*, ind.*,",
         "--                          kag.*). Sobre una base recién creada falla en",
@@ -304,6 +315,9 @@ def encabezado(solo: str | None) -> list[str]:
         "--    · parche 10 · las tablas `core.flujo_definicion`, `core.flujo_estado`",
         "--                 y `core.proceso_instancia` (46 columnas y 8 claves ajenas);",
         "--    · parche 11 · las columnas `created_at` y `updated_at` de `kag.nodos`.",
+        "--    · parche 13 · ningún objeto nuevo: cambia el tipo de",
+        "--                 `consultation.procesos.nivel_clasificacion` y alinea el",
+        "--                 nombre `Público` del catálogo.",
         "--  Por eso la sección A termina en 275 tablas y no en 279: las cuatro",
         "--  tablas que faltan no son parte del esquema base, se crean después de",
         "--  cargar el legado. Si la sección A se queda corta en algo distinto, el",

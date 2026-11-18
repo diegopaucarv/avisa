@@ -227,20 +227,23 @@ arranque.
 
 ---
 
-## 9. Aplicación de los parches 6–12 (post-carga)
+## 9. Aplicación de los parches 6–13 (post-carga)
 
-El `initdb` aplica el DDL y los parches 1–5, y se detiene ahí. Los parches 6–12 no
+El `initdb` aplica el DDL y los parches 1–5, y se detiene ahí. Los parches 6–13 no
 pueden correr en ese momento: el 6 reclasifica documentos `RED-%` que todavía no
 existen; el 9 y el 10 leen `legacy.dim_actores`, `legacy.dim_paso_proceso` y
 `legacy.fact_proceso_*`; y el 11 rellena el grafo con las filas ya cargadas. En un
 arranque limpio afectarían **0 filas sin dar error**. Por eso:
 
 - solo se aplican **después** de cargar el legado, en orden 6 → 7 → 8 → 9 → 10 →
-  11 → 12;
+  11 → 12 → 13;
 - el 12 comenta tablas y columnas y comenta también las columnas que añade el 11,
-  así que va al final;
-- los siete SQL están montados de solo lectura en `/opt/avisa/sql/96..102`
-  (`96_patch_06.sql` … `102_patch_12.sql`), pero ningún script del `initdb` los
+  así que va justo antes del 13;
+- el 13 cambia el tipo de `consultation.procesos.nivel_clasificacion` y alinea el
+  nombre `Público` del catálogo; no añade ni quita columnas, y repetirlo no tiene
+  efecto;
+- los ocho SQL están montados de solo lectura en `/opt/avisa/sql/96..103`
+  (`96_patch_06.sql` … `103_patch_13.sql`), pero ningún script del `initdb` los
   invoca;
 - ni `./scripts/db.sh apply` ni `fresh` los tocan: esos comandos re-aplican el DDL
   y los parches 1–5 (§7).
@@ -299,4 +302,5 @@ docs/PARCHE_9_SEGURIDAD_NIVEL_ALTO.sql   parche 9 (post-carga, §9)
 docs/PARCHE_10_FLUJO_PROCESO_D17.sql     parche 10 (post-carga, §9)
 docs/PARCHE_11_GRAFO_KAG.sql             parche 11 (post-carga, §9)
 docs/PARCHE_12_COMENTARIOS_COLUMNAS.sql  parche 12 (post-carga, §9)
+docs/PARCHE_13_CLASIFICACION.sql         parche 13 (post-carga, §9)
 ```

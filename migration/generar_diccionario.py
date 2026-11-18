@@ -119,6 +119,12 @@ CLASIFICACION_EXPLICITA = {
     "core.proceso_instancia": ("P", "§12 (encabezado)"),
     "audit.datos_personales_acceso": ("INF", "§12 (encabezado)"),
     "core.capacitacion_participantes": ("I", "§12.1 (fila de capacitaciones)"),
+    # Las tres siguientes no aparecen en §12: son objetos de soporte que el BRECHA
+    # nombra en §1.2 (tablas de la carga) pero no clasifica. Se les da la clase que
+    # se deduce de su función y de la tabla a la que acompañan, y se deja constancia.
+    "core.cronologia_vinculos": ("I", "criterio: vínculo de `core.caso_cronologia`"),
+    "core.entidades": ("INF", "criterio: tabla de inquilino (parámetro)"),
+    "core.migracion_conflicto": ("INF", "criterio: soporte de la carga (§1.2)"),
 }
 
 # El BRECHA nombra `_rejected` dentro de la fila de `avisa.raw_ingest`.
@@ -813,11 +819,12 @@ def panorama(datos: dict, lineas: list[str]) -> None:
             f"| {num(sum(v['filas'] or 0 for v in grupo))} |"
         )
     sin_clase = [v for v in modelo.values() if not v["clase"]]
-    lineas.append(
-        f"| **Sin clasificar** | No aparece en BRECHA §12 y no es vista derivada "
-        f"| {len(sin_clase)} | {num(sum(len(v['columnas']) for v in sin_clase))} "
-        f"| {num(sum(v['filas'] or 0 for v in sin_clase))} |"
-    )
+    if sin_clase:
+        lineas.append(
+            f"| **Sin clasificar** | No aparece en BRECHA §12 y no es vista derivada "
+            f"| {len(sin_clase)} | {num(sum(len(v['columnas']) for v in sin_clase))} "
+            f"| {num(sum(v['filas'] or 0 for v in sin_clase))} |"
+        )
     lineas.append(
         f"| **X · Archivo** | Sistema anterior completo | {len(legado)} "
         f"| {num(columnas_legado)} | {num(filas_legado)} |"
@@ -830,9 +837,8 @@ def panorama(datos: dict, lineas: list[str]) -> None:
         )
         lineas.append(
             f"Tablas sin clasificar: {nombres}. Ninguna aparece en el inventario del "
-            "BRECHA §12: `core.entidades` recibe claves ajenas desde dos tablas de "
-            "entrada y `core.migracion_conflicto` es una tabla de control de la propia "
-            "migración."
+            "BRECHA §12; las tres son objetos de soporte y su clase se deduce de su "
+            "función (ver `CLASIFICACION_EXPLICITA` en el generador)."
         )
         lineas.append("")
 

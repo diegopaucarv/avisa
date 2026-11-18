@@ -66,7 +66,7 @@ memorizarlos: están aquí para consultarlos cuando aparezcan.
 
 | Aspecto                     | Sistema anterior (2026)                                                                                                                 | v10                                                                                                          |
 | --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| **Plataforma**              | Google Sheets y Apps Script: 244 funciones en el servidor y 450 nombres en el navegador (158 escritos una vez y 292 redefinidos encima) | PostgreSQL 16 con dos extensiones (mapas y vectores): 279 tablas físicas, 255 lógicas y 589 llaves foráneas  |
+| **Plataforma**              | Google Sheets y Apps Script: 244 funciones en el servidor y 450 nombres en el navegador (158 escritos una vez y 292 redefinidos encima) | PostgreSQL 16 con dos extensiones (mapas y vectores): 279 tablas físicas, 255 lógicas y 590 llaves foráneas  |
 | **Modelo de datos**         | 86 hojas planas (75 con datos), sin llaves foráneas ni reglas de unicidad; el tipo de cada valor se adivina al leerlo                   | 255 tablas lógicas con llaves foráneas, reglas de validación, catálogos cerrados y seguridad por fila        |
 | **Nivel de detalle**        | Una fila por fila de hoja: el mismo conflicto se escribe hasta cuatro veces con distinto detalle                                        | Un concepto por tabla: caso, alerta, demanda, hecho, actor y compromiso son cosas distintas                  |
 | **Identidad**               | Códigos de texto (`ID_*`); el DNI hace de identificador de persona                                                                      | Identificador interno + el código original conservado + un identificador único generado cuando no hay código |
@@ -375,7 +375,7 @@ gráficos de esta sección y escribe la tabla de §11.5.
 | Filas                          | 4 729                              | 12 257                                                                                |
 | Con datos / vacías             | 76 / 11                            | 103 / 176 físicas (152 lógicas)                                                       |
 | Llaves primarias               | 87                                 | 278                                                                                   |
-| Llaves foráneas                | **0**                              | **589**                                                                               |
+| Llaves foráneas                | **0**                              | **590**                                                                               |
 | Reglas de unicidad (UNIQUE)    | **0**                              | 137                                                                                   |
 | Reglas de validación (CHECK)   | **0**                              | 330                                                                                   |
 | Índices                        | 87                                 | 733 (sin contar los 294 internos de PostgreSQL ni los 6 de vistas materializadas)     |
@@ -397,8 +397,8 @@ son hojas que nunca se usaron (§4).
 
 **Dos detalles que la tabla deja ver.** Hay 278 llaves primarias para 279 tablas
 físicas: la única sin llave primaria es `core.cronologia_vinculos`, que es una
-tabla de vínculos entre registros. Y las 589 llaves foráneas se reparten en 192 en
-`core`, 67 en `ctx`, 61 en `kag`, 48 en `chat`, 31 en `agent`, 25 en `qda` y 165
+tabla de vínculos entre registros. Y las 590 llaves foráneas se reparten en 192 en
+`core`, 67 en `ctx`, 61 en `kag`, 48 en `chat`, 31 en `agent`, 25 en `qda` y 166
 en el resto.
 
 **De dónde salen los números de la v10.** Las 12 257 filas se reparten así: `core`
@@ -616,7 +616,7 @@ por primera vez.
 **Qué significa todo esto.** El problema del sistema anterior no era el volumen
 (4 643 filas) sino la ausencia de reglas: el software no impedía escribir el mismo
 DNI 45 veces ni dejar 186 actores sin DNI. La v10 lleva esa validación al esquema
-—**589 llaves foráneas, 137 reglas de unicidad y 330 reglas de validación**— y la
+—**590 llaves foráneas, 137 reglas de unicidad y 330 reglas de validación**— y la
 cola de revisión de DNI es la consecuencia directa de esas 45 repeticiones: lo que
 el sistema anterior aceptaba, la v10 lo detecta y lo pone en cola para revisión.
 
@@ -787,6 +787,7 @@ Todos están en `docs/` salvo donde se indica otra ruta.
 | [12] | `ENTORNO_DOCKER_POSTGRES.md`                                          | Cómo levantar la base en Docker, con sus credenciales, y cómo conectarse.                                                                                                                                                        |
 | [13] | `DICCIONARIO_DATOS.md` y `diccionario_datos.csv`                      | El diccionario de las dos capas: propósito de cada tabla, significado de cada columna, claves, relaciones y la correspondencia entre el sistema anterior y la v10. El CSV es la versión máquina, una fila por columna.           |
 | [14] | `REVISION_DICCIONARIO_Y_V10.md`                                       | La auditoría del diccionario y del modelo: qué estaba sin describir, cómo conviven dos significados del nivel de clasificación y qué le falta al documento de diseño.                                                            |
+| [15] | `PRIORIZACION_MVP_v10.md`                                             | Qué parte de la v10 se construye primero: cinco capas medidas sobre la base viva (31 tablas con datos, 11 vacías del MVP, 72 vivas fuera del MVP, 22 enganchadas y 119 dormidas) y el puente de las 55 tablas del MVP.           |
 
 **Los seis gráficos** citados en §11 están en `docs/img/` y los genera el script
 [11]: `delta_estructura.svg`, `delta_clases_legacy.svg`, `delta_atributos.svg`,

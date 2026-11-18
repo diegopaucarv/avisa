@@ -109,7 +109,7 @@ advierte en §3.3 es que su recuento “no está verificado en corrida completa�
 que se obtuvo por aritmética de deltas. La medición real es la que manda:
 **253 objetos del DDL + 22 de los parches 1–4 + 1 del parche 9 + 3 del parche 10
 = 279 de modelo**, más 87 de `legacy` y 1 de PostGIS = **367 tablas `r`/`p` en el
-clúster** (de las cuales **589 claves foráneas** son el grafo de relaciones; no
+clúster** (de las cuales **590 claves foráneas** son el grafo de relaciones; no
 confundir ambas cifras).
 
 Las 22 tablas de soporte de la carga son:
@@ -164,8 +164,8 @@ diferencia es de conteo/documentación, no de objetos. Las 6 matviews son:
 | ------------------------------ | --------: |
 | Funciones del modelo           |    **50** |
 | De ellas, funciones de trigger |    **34** |
-| Triggers no internos           |    **52** |
-| Claves foráneas                |   **589** |
+| Triggers no internos           |    **60** |
+| Claves foráneas                |   **590** |
 | Restricciones `CHECK`          |   **330** |
 | Claves primarias               |   **278** |
 | Restricciones `UNIQUE`         |   **137** |
@@ -1219,7 +1219,7 @@ función de cálculo que no persiste nada.
 **Cifras de cabecera.** Tras los parches 6–12 el modelo tiene **26 esquemas** de
 producto (el último es `audit`), **279 tablas físicas** (255 lógicas + 24
 particiones), **2 366 columnas**, **12 257 filas** (core 6 664 · kag 3 187 · audit
-2 241 · config 64 · otros 22 esquemas 101), **103 con datos y 152 vacías**, **589
+2 241 · config 64 · otros 22 esquemas 101), **103 con datos y 152 vacías**, **590
 FK**, 48 tablas con RLS forzada (todas en `FORCE`; una es particionada), **173
 políticas** y **60 triggers**. `legacy` no
 cambia: 87 tablas, 807 columnas, 4 729 filas. Las cabeceras de §1 y §2 ya están

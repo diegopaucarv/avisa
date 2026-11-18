@@ -25,7 +25,7 @@
 --  Sección A · esquema    extensiones + DDL v9 (dos pases) + parches 1-5.
 --                          Autosuficiente: se puede aplicar sobre una
 --                          base VACÍA, sin instalar extensiones aparte.
---  Sección B · post-carga parches 6-12. NO se puede aplicar sobre una
+--  Sección B · post-carga parches 6-13. NO se puede aplicar sobre una
 --                          base vacía: exige el legado ya cargado por
 --                          migration/loader (filas en core.*, ind.*,
 --                          kag.*). Sobre una base recién creada falla en
@@ -74,6 +74,9 @@
 --    · parche 10 · las tablas `core.flujo_definicion`, `core.flujo_estado`
 --                 y `core.proceso_instancia` (46 columnas y 8 claves ajenas);
 --    · parche 11 · las columnas `created_at` y `updated_at` de `kag.nodos`.
+--    · parche 13 · ningún objeto nuevo: cambia el tipo de
+--                 `consultation.procesos.nivel_clasificacion` y alinea el
+--                 nombre `Público` del catálogo.
 --  Por eso la sección A termina en 275 tablas y no en 279: las cuatro
 --  tablas que faltan no son parte del esquema base, se crean después de
 --  cargar el legado. Si la sección A se queda corta en algo distinto, el
@@ -12612,8 +12615,8 @@ COMMIT;
 --  BLOQUE B.7 · Parche 12 · comentarios de tablas y columnas
 --  Fuente: docs/PARCHE_12_COMENTARIOS_COLUMNAS.sql (2318 líneas)
 --  Errores: abortan la ejecución (ON_ERROR_STOP on)
---    No se recorta: cubre 255 tablas lógicas y 2 007 columnas. Es el
---    bloque que hace que el archivo pese ~760 KB.
+--    No se recorta: cubre 255 tablas lógicas y 2 036 columnas. Es el
+--    bloque que hace que el archivo pese ~970 KB.
 -- ---------------------------------------------------------------------
 -- ==================================================================
 -- PARCHE 12 - COMENTARIOS DE TABLAS Y COLUMNAS DEL MODELO v10
@@ -13273,7 +13276,7 @@ COMMENT ON COLUMN consultation.procesos.fase_actual IS 'Fase del proceso de cons
 COMMENT ON COLUMN consultation.procesos.fecha_estimada_cierre IS 'Fecha prevista para cerrar el proceso de consulta previa';
 COMMENT ON COLUMN consultation.procesos.fecha_inicio IS 'Fecha en que se inició formalmente el proceso de consulta';
 COMMENT ON COLUMN consultation.procesos.id IS 'Identificador interno de la fila';
-COMMENT ON COLUMN consultation.procesos.nivel_clasificacion IS 'Nivel de clasificación de la consulta, expresado como etiqueta: Público, Reservado o Confidencial';
+COMMENT ON COLUMN consultation.procesos.nivel_clasificacion IS 'Nivel de acceso al dato: 1 público, 2 reservado, 3 confidencial';
 COMMENT ON COLUMN consultation.procesos.pueblo_indigena IS 'Pueblo indígena involucrado y consultado en el proceso';
 COMMENT ON COLUMN consultation.procesos.updated_at IS 'Momento de la última modificación del registro';
 COMMENT ON COLUMN consultation.resultados.descripcion IS 'Detalle del acuerdo o resultado alcanzado en la consulta';
@@ -13862,7 +13865,7 @@ COMMENT ON COLUMN core.mesas_dialogo.id IS 'Identificador interno de la fila';
 COMMENT ON COLUMN core.mesas_dialogo.linea_oaipcs IS 'Línea de acción de la oficina bajo la cual se agrupa la mesa';
 COMMENT ON COLUMN core.mesas_dialogo.link_evidencia IS 'Enlace al archivo de evidencia de la mesa, alojado fuera del sistema';
 COMMENT ON COLUMN core.mesas_dialogo.naturaleza IS 'Carácter declarado de la mesa, conservado como texto libre del legado';
-COMMENT ON COLUMN core.mesas_dialogo.nivel_clasificacion IS 'Nivel de clasificación de la información: 1 público, 2 interno, 3 sensible';
+COMMENT ON COLUMN core.mesas_dialogo.nivel_clasificacion IS 'Nivel de acceso al dato: 1 público, 2 reservado, 3 confidencial';
 COMMENT ON COLUMN core.mesas_dialogo.objetivo IS 'Propósito que la mesa debe cumplir según su norma de creación';
 COMMENT ON COLUMN core.mesas_dialogo.origen_dato IS 'Vía por la que llegó el registro: manual, agente, flujo, legado histórico o mensajería';
 COMMENT ON COLUMN core.mesas_dialogo.prorrogas_modificatorias IS 'Prorrogas o modificaciones posteriores de la norma que crea la mesa';
@@ -13930,7 +13933,7 @@ COMMENT ON COLUMN core.output_contracts.chat_commit_id IS 'Confirmación de la c
 COMMENT ON COLUMN core.output_contracts.created_at IS 'Momento en que se creó el registro';
 COMMENT ON COLUMN core.output_contracts.formato IS 'Formato de la salida generada: office o minister';
 COMMENT ON COLUMN core.output_contracts.id IS 'Identificador interno de la fila';
-COMMENT ON COLUMN core.output_contracts.nivel_clasificacion IS 'Nivel de clasificación de la información: 1 público, 2 interno, 3 sensible';
+COMMENT ON COLUMN core.output_contracts.nivel_clasificacion IS 'Nivel de acceso al dato: 1 público, 2 reservado, 3 confidencial';
 COMMENT ON COLUMN core.output_contracts.policy_snapshot_id IS 'Instantánea de las reglas de política usadas para decidir qué mostrar';
 COMMENT ON COLUMN core.output_contracts.query_id IS 'Identificador de la consulta que originó la salida, sin clave ajena en el esquema';
 COMMENT ON COLUMN core.output_contracts.response_json IS 'Contenido de la respuesta generada, guardado como documento JSON';
@@ -13969,7 +13972,7 @@ COMMENT ON COLUMN core.proceso_instancia.fila_legado IS 'Número de fila de la t
 COMMENT ON COLUMN core.proceso_instancia.finalizado_en IS 'Fecha y hora de fin del paso, cuando el sistema anterior la trae';
 COMMENT ON COLUMN core.proceso_instancia.flujo_definicion_id IS 'Paso del catálogo, resuelto por tipo de flujo y número de orden. Está vacío en las instancias de reporte cuyo paso no existe en el sistema anterior, porque allí solo hay tres pasos definidos';
 COMMENT ON COLUMN core.proceso_instancia.id IS 'Identificador interno de la fila';
-COMMENT ON COLUMN core.proceso_instancia.nivel_clasificacion IS 'Nivel de clasificación de la información: 1 público, 2 interno, 3 sensible';
+COMMENT ON COLUMN core.proceso_instancia.nivel_clasificacion IS 'Nivel de acceso al dato: 1 público, 2 reservado, 3 confidencial';
 COMMENT ON COLUMN core.proceso_instancia.nota IS 'Texto libre del paso; en caso viene de la columna c09 y en reporte de la c08, porque las dos tablas de origen no comparten el significado de sus columnas';
 COMMENT ON COLUMN core.proceso_instancia.ocurrido_en IS 'Fecha y hora del paso, interpretada en hora de Lima. Está vacía en la fila que viene sin fecha de inicio';
 COMMENT ON COLUMN core.proceso_instancia.orden IS 'Número de paso tal como viene en el sistema anterior; se conserva aunque no exista una definición para ese paso';
@@ -14005,7 +14008,7 @@ COMMENT ON COLUMN core.reuniones_dialogo.es_validado_humano IS 'Indica si una pe
 COMMENT ON COLUMN core.reuniones_dialogo.fecha IS 'Fecha y hora en que se realizó o se realizará la reunión';
 COMMENT ON COLUMN core.reuniones_dialogo.id IS 'Identificador interno de la fila';
 COMMENT ON COLUMN core.reuniones_dialogo.lugar IS 'Lugar donde se lleva a cabo la reunión';
-COMMENT ON COLUMN core.reuniones_dialogo.nivel_clasificacion IS 'Nivel de clasificación de la información: 1 público, 2 interno, 3 sensible';
+COMMENT ON COLUMN core.reuniones_dialogo.nivel_clasificacion IS 'Nivel de acceso al dato: 1 público, 2 reservado, 3 confidencial';
 COMMENT ON COLUMN core.reuniones_dialogo.nota_publicacion_url IS 'Enlace a la nota o publicación difundida sobre la reunión';
 COMMENT ON COLUMN core.reuniones_dialogo.origen_dato IS 'Vía por la que llegó el registro: manual, agente, flujo, legado histórico o mensajería';
 COMMENT ON COLUMN core.reuniones_dialogo.programada IS 'Indica si la reunión quedó programada o se registró como no programada';
@@ -14023,7 +14026,7 @@ COMMENT ON COLUMN core.riesgo_social_ordinal.id IS 'Identificador interno de la 
 COMMENT ON COLUMN core.riesgo_social_ordinal.justificacion IS 'Explicación de por qué se asignó ese nivel de riesgo';
 COMMENT ON COLUMN core.riesgo_social_ordinal.lugar_id IS 'Lugar del territorio al que se refiere la estimación';
 COMMENT ON COLUMN core.riesgo_social_ordinal.nivel IS 'Nivel de riesgo asignado al lugar en esa fecha: verde, ámbar o rojo';
-COMMENT ON COLUMN core.riesgo_social_ordinal.nivel_clasificacion IS 'Nivel de clasificación de la información: 1 público, 2 interno, 3 sensible';
+COMMENT ON COLUMN core.riesgo_social_ordinal.nivel_clasificacion IS 'Nivel de acceso al dato: 1 público, 2 reservado, 3 confidencial';
 COMMENT ON COLUMN core.roles.codigo IS 'Código corto del rol, usado en la asignación de permisos';
 COMMENT ON COLUMN core.roles.id IS 'Identificador interno del rol de acceso';
 COMMENT ON COLUMN core.roles.max_clasificacion IS 'Nivel máximo de clasificación que el rol puede consultar';
@@ -14933,3 +14936,312 @@ COMMENT ON COLUMN territorio.zona_pesca.poligono IS 'Polígono que delimita la z
 COMMENT ON COLUMN territorio.zona_pesca.tipo IS 'Tipo al que corresponde la zona de pesca';
 COMMENT ON COLUMN territorio.zona_pesca.valid_from IS 'Fecha desde la cual rige la delimitación de la zona';
 COMMENT ON COLUMN territorio.zona_pesca.valid_to IS 'Fecha hasta la cual rige la delimitación de la zona';
+
+-- ---------------------------------------------------------------------
+--  BLOQUE B.8 · Parche 13 · nivel de clasificación en un solo formato
+--  Fuente: docs/PARCHE_13_CLASIFICACION.sql (300 líneas)
+--  Errores: abortan la ejecución (ON_ERROR_STOP on)
+--    Convierte `consultation.procesos.nivel_clasificacion` de texto a
+--    `smallint` con clave ajena al catálogo y alinea el nombre `Público`.
+--    Idempotente: repetirlo no tiene efecto.
+-- ---------------------------------------------------------------------
+-- =============================================================================
+-- PARCHE 13 - NIVEL DE CLASIFICACION: UNA SOLA FORMA DE ESCRIBIRLO
+-- AVISA / SIPRECS - OAIPCS, Ministerio de la Produccion del Peru
+-- =============================================================================
+--
+-- QUE HACE
+--
+-- Cierra el ultimo hueco del modelo en el campo `nivel_clasificacion`. El campo
+-- ya era numerico con clave ajena al catalogo en 58 de las 59 columnas que lo
+-- usan; sobraba una excepcion y sobraba una redaccion distinta en cinco
+-- comentarios.
+--
+--   1. consultation.procesos.nivel_clasificacion pasa de varchar(20) a smallint
+--      y gana la clave ajena a core.cat_clasificacion, como las otras 58.
+--   2. Los cinco comentarios que decian "público / interno / sensible" pasan a
+--      decir "público / reservado / confidencial", que es el vocabulario del
+--      catalogo y el de los otros 47 comentarios.
+--   3. core.cat_clasificacion deja de escribir "Publico" sin tilde.
+--
+-- POR QUE
+--
+-- Un campo de tres valores no puede tener dos vocabularios. "Interno" y
+-- "sensible" no existen en core.cat_clasificacion: quien leyera el diccionario
+-- habria supuesto dos niveles que la base no tiene. Y una columna de texto
+-- obliga a comparar cadenas donde las otras 58 comparan enteros con clave ajena.
+--
+-- LO QUE NO SE HACE, Y POR QUE
+--
+-- No se añade un CHECK (nivel_clasificacion BETWEEN 1 AND 3) a las 53 tablas.
+-- La clave ajena ya limita el valor a los tres que existen en el catalogo, y
+-- ese catalogo no admite borrados mientras haya filas que lo referencien. Un
+-- CHECK repetido 53 veces no añadiria ninguna garantia: añadiria 53 objetos al
+-- esquema y engordaria el inventario sin cambiar el comportamiento. La regla
+-- queda escrita en el comentario de cada columna.
+--
+--   Regla canonica: nivel_clasificacion es smallint NOT NULL con clave ajena a
+--   core.cat_clasificacion; 1 = publico, 2 = reservado, 3 = confidencial.
+--
+-- HECHOS VERIFICADOS ANTES DE ESCRIBIR EL PARCHE
+--
+-- a) 59 columnas se llaman nivel_clasificacion: 53 tablas logicas y 6
+--    particiones de agent.llm_call. Las 59 son NOT NULL.
+-- b) 58 son smallint con clave ajena `*_nivel_clasificacion_fkey`. La unica de
+--    texto es consultation.procesos, varchar(20) NOT NULL DEFAULT 'Reservado'.
+-- c) consultation.procesos tiene 0 filas. Por eso el cambio de tipo no necesita
+--    mapear datos: se conserva el valor por defecto, traducido a 2.
+-- d) Los valores almacenados son solo 1, 2 y 3 (1 -> 10 filas, 2 -> 2 184,
+--    3 -> 1 996). No hay ningun valor fuera del catalogo.
+-- e) La redaccion "interno/sensible" aparece en 5 comentarios y "etiqueta" en 1.
+--    Vive en la curaduria, no en este archivo: se corrige en
+--    migration/curacion_v10_columnas.py y el parche 12 la reescribe.
+-- f) Nada en el codigo compara contra la cadena 'Publico': la clave ajena es
+--    por numero. La tilde del catalogo es solo el nombre visible.
+--
+-- EJECUCION
+--
+--   docker exec -i avisa-db psql -U avisa -d avisa -v ON_ERROR_STOP=1 \
+--       -f /tmp/PARCHE_13_CLASIFICACION.sql
+--
+-- Es idempotente: si la columna ya es smallint, no hace nada; si la clave ajena
+-- ya existe, no la duplica. Se puede repetir sin efecto.
+-- =============================================================================
+
+
+\set ON_ERROR_STOP on
+
+BEGIN;
+
+
+-- =============================================================================
+-- 1. VERIFICACION PREVIA
+--    Aborta antes de tocar nada si el estado no es el esperado. Es preferible
+--    fallar aqui que dejar media migracion aplicada.
+-- =============================================================================
+
+DO $$
+DECLARE
+    v_tipo  text;
+    v_filas bigint;
+BEGIN
+    SELECT data_type INTO v_tipo
+    FROM information_schema.columns
+    WHERE table_schema = 'consultation'
+      AND table_name   = 'procesos'
+      AND column_name  = 'nivel_clasificacion';
+
+    IF v_tipo IS NULL THEN
+        RAISE EXCEPTION 'no existe consultation.procesos.nivel_clasificacion';
+    END IF;
+
+    IF v_tipo NOT IN ('smallint', 'character varying') THEN
+        RAISE EXCEPTION 'tipo inesperado en consultation.procesos.nivel_clasificacion: %', v_tipo;
+    END IF;
+
+    SELECT count(*) INTO v_filas FROM consultation.procesos;
+    IF v_tipo <> 'smallint' AND v_filas > 0 THEN
+        RAISE EXCEPTION
+            'consultation.procesos tiene % filas con etiquetas de texto: hay que mapearlas antes de migrar',
+            v_filas;
+    END IF;
+
+    IF NOT EXISTS (SELECT 1 FROM core.cat_clasificacion WHERE nivel = 1)
+       OR NOT EXISTS (SELECT 1 FROM core.cat_clasificacion WHERE nivel = 2)
+       OR NOT EXISTS (SELECT 1 FROM core.cat_clasificacion WHERE nivel = 3) THEN
+        RAISE EXCEPTION 'core.cat_clasificacion no tiene los tres niveles: la clave ajena fallaria';
+    END IF;
+
+    RAISE NOTICE 'verificacion previa correcta: tipo=% filas=%', v_tipo, v_filas;
+END $$;
+
+
+-- =============================================================================
+-- 2. consultation.procesos: DE TEXTO A NUMERO CON CLAVE AJENA
+--    El USING traduce las etiquetas del catalogo por si la tabla tuviera filas
+--    en algun entorno anterior a este parche. Hoy tiene cero, pero el mapeo
+--    deja el archivo utilizable en una copia con datos.
+-- =============================================================================
+
+DO $$
+DECLARE
+    v_tipo text;
+BEGIN
+    SELECT data_type INTO v_tipo
+    FROM information_schema.columns
+    WHERE table_schema = 'consultation'
+      AND table_name   = 'procesos'
+      AND column_name  = 'nivel_clasificacion';
+
+    IF v_tipo = 'smallint' THEN
+        RAISE NOTICE 'consultation.procesos.nivel_clasificacion ya es smallint: nada que convertir';
+    ELSE
+        -- El valor por defecto era 'Reservado' (nivel 2). Se retira para poder
+        -- cambiar el tipo y se vuelve a poner al final, ya como numero.
+        ALTER TABLE consultation.procesos
+            ALTER COLUMN nivel_clasificacion DROP DEFAULT;
+
+        ALTER TABLE consultation.procesos
+            ALTER COLUMN nivel_clasificacion TYPE smallint
+            USING (
+                CASE upper(trim(nivel_clasificacion))
+                    WHEN 'PÚBLICO'     THEN 1
+                    WHEN 'PUBLICO'     THEN 1
+                    WHEN 'RESERVADO'   THEN 2
+                    WHEN 'CONFIDENCIAL' THEN 3
+                    ELSE NULL
+                END
+            );
+
+        ALTER TABLE consultation.procesos
+            ALTER COLUMN nivel_clasificacion SET DEFAULT 2;
+
+        RAISE NOTICE 'consultation.procesos.nivel_clasificacion convertida a smallint';
+    END IF;
+END $$;
+
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint
+        WHERE conrelid = 'consultation.procesos'::regclass
+          AND conname  = 'procesos_nivel_clasificacion_fkey'
+    ) THEN
+        ALTER TABLE consultation.procesos
+            ADD CONSTRAINT procesos_nivel_clasificacion_fkey
+            FOREIGN KEY (nivel_clasificacion)
+            REFERENCES core.cat_clasificacion (nivel);
+        RAISE NOTICE 'clave ajena procesos_nivel_clasificacion_fkey creada';
+    ELSE
+        RAISE NOTICE 'la clave ajena ya existia';
+    END IF;
+END $$;
+
+
+-- =============================================================================
+-- 3. EL CATALOGO, SIN FALTA DE TILDE
+--    "Publico" era la unica entrada del catalogo escrita sin tilde. No se
+--    compara por nombre en ningun sitio (la clave ajena es por numero), asi que
+--    alinearla no rompe nada y evita que el nombre visible salga mal escrito.
+-- =============================================================================
+
+UPDATE core.cat_clasificacion
+   SET nombre = 'Público'
+ WHERE nivel = 1
+   AND nombre = 'Publico';
+
+
+-- =============================================================================
+-- 4. VERIFICACION
+--    Cada consulta dice lo que se espera. Si algo no cuadra, la seccion 5
+--    explica como volver atras.
+-- =============================================================================
+
+-- 4.1 Tipo y nulabilidad de la columna migrada. Esperado: smallint | NO | 2.
+SELECT data_type,
+       is_nullable,
+       column_default
+FROM information_schema.columns
+WHERE table_schema = 'consultation'
+  AND table_name   = 'procesos'
+  AND column_name  = 'nivel_clasificacion';
+
+-- 4.2 La clave ajena existe y apunta al catalogo. Esperado: 1 fila.
+SELECT con.conname,
+       pg_get_constraintdef(con.oid) AS definicion
+FROM pg_constraint con
+WHERE con.conrelid = 'consultation.procesos'::regclass
+  AND con.contype  = 'f';
+
+-- 4.3 Ninguna columna nivel_clasificacion queda en texto. Esperado: 0.
+SELECT count(*) AS columnas_de_texto
+FROM information_schema.columns
+WHERE table_schema NOT IN ('pg_catalog', 'information_schema', 'public', 'legacy')
+  AND column_name = 'nivel_clasificacion'
+  AND data_type <> 'smallint';
+
+-- 4.4 Todas las columnas del campo tienen clave ajena al catalogo.
+--     Esperado: 59 columnas y 59 con clave ajena.
+SELECT count(*) AS columnas,
+       count(*) FILTER (WHERE EXISTS (
+           SELECT 1
+           FROM pg_constraint con
+           WHERE con.conrelid = c.oid
+             AND con.contype  = 'f'
+             AND pg_get_constraintdef(con.oid) LIKE '%cat_clasificacion%'
+       )) AS con_clave_ajena
+FROM pg_class c
+JOIN pg_namespace n ON n.oid = c.relnamespace
+JOIN pg_attribute a ON a.attrelid = c.oid AND a.attnum > 0 AND NOT a.attisdropped
+WHERE c.relkind IN ('r', 'p')
+  AND n.nspname NOT IN ('pg_catalog', 'information_schema', 'public', 'legacy')
+  AND a.attname = 'nivel_clasificacion';
+
+-- 4.5 Ningun comentario conserva el vocabulario "interno/sensible".
+--     Esperado: 0.
+SELECT count(*) AS comentarios_con_vocabulario_viejo
+FROM pg_class c
+JOIN pg_namespace n ON n.oid = c.relnamespace
+JOIN pg_attribute a ON a.attrelid = c.oid AND a.attnum > 0 AND NOT a.attisdropped
+WHERE c.relkind IN ('r', 'p')
+  AND n.nspname NOT IN ('pg_catalog', 'information_schema', 'public', 'legacy')
+  AND a.attname = 'nivel_clasificacion'
+  AND (col_description(c.oid, a.attnum) ILIKE '%interno%'
+       OR col_description(c.oid, a.attnum) ILIKE '%sensible%');
+
+-- 4.6 Ningun valor fuera del catalogo. Esperado: 0 en las tres columnas
+--     (una consulta por tabla quedaria en 53; se comprueba el agregado con las
+--     tres que tienen datos).
+SELECT
+    (SELECT count(*) FROM core.casos  WHERE nivel_clasificacion NOT BETWEEN 1 AND 3) AS casos,
+    (SELECT count(*) FROM core.documentos WHERE nivel_clasificacion NOT BETWEEN 1 AND 3) AS documentos,
+    (SELECT count(*) FROM core.actores WHERE nivel_clasificacion NOT BETWEEN 1 AND 3) AS actores;
+
+-- 4.7 El catalogo ya dice "Público". Esperado: 1 | Público.
+SELECT nivel, nombre FROM core.cat_clasificacion ORDER BY nivel;
+
+
+COMMIT;
+
+
+-- =============================================================================
+-- 5. ROLLBACK (ejecutar solo si la seccion 4 no cuadra)
+-- =============================================================================
+--
+-- BEGIN;
+--   ALTER TABLE consultation.procesos
+--       DROP CONSTRAINT IF EXISTS procesos_nivel_clasificacion_fkey;
+--   ALTER TABLE consultation.procesos
+--       ALTER COLUMN nivel_clasificacion DROP DEFAULT;
+--   ALTER TABLE consultation.procesos
+--       ALTER COLUMN nivel_clasificacion TYPE varchar(20)
+--       USING (CASE nivel_clasificacion
+--                WHEN 1 THEN 'Público'
+--                WHEN 2 THEN 'Reservado'
+--                WHEN 3 THEN 'Confidencial'
+--              END);
+--   ALTER TABLE consultation.procesos
+--       ALTER COLUMN nivel_clasificacion SET DEFAULT 'Reservado';
+--   UPDATE core.cat_clasificacion SET nombre = 'Publico' WHERE nivel = 1;
+-- COMMIT;
+--
+-- Es reversible sin perdida: la tabla estaba vacia antes del parche, y el
+-- catalogo solo cambia el nombre visible, nunca el numero que usan las claves
+-- ajenas.
+-- =============================================================================
+
+
+-- =============================================================================
+-- 6. LO QUE ESTE PARCHE DEJA PENDIENTE (a proposito)
+-- =============================================================================
+--
+-- a) consultation.procesos sigue sin datos y sin tabla de origen en el legado.
+--    El parche la alinea con el resto del modelo, pero no la rellena: decidir
+--    de donde sale cada consulta es materia de otro analisis.
+-- b) Las otras columnas de texto de esa tabla (fase_actual, estado,
+--    pueblo_indigena) siguen siendo texto libre. No son niveles cerrados y no
+--    hay catalogo al que apuntarlas; forzarlas seria inventar el vocabulario.
+-- c) El diseno de docs/AVISA_PRODUCE_v10.md se corrige en el mismo commit: el
+--    diagrama de kag.nodos gana created_at y updated_at, y esta tabla deja de
+--    figurar con el nivel en texto.
+-- =============================================================================

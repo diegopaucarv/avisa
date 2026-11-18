@@ -18,7 +18,7 @@
 
 0. Resumen ejecutivo y reglas de aterrizaje (incluye el glosario de lenguaje claro, §0.6)
 1. Re-definición del TDR (§7.1, §7.5, §7.9, §11 y §12)
-2. Modelo de datos lógico (DER para SQL Server) y solución al problema del DNI
+2. Modelo de datos lógico (DER para SQL Server) y solución al problema del DNI; §2.6 remite al orden de construcción (`PRIORIZACION_MVP_v10.md`)
 3. Arquitectura de software, seguridad por perfil y automatización
 4. Especificación del dashboard interactivo (KPIs, Office View, Minister View, simulador What-If, mapa MACTOR)
 5. Estrategia de ingesta de IA (Python → API .NET, fuentes y etapas de procesamiento)
@@ -755,6 +755,16 @@ Cinco tablas _append-only_. La inmutabilidad se impone con `DENY UPDATE, DELETE`
 | `audit.incidente_seguridad` | reloj de las 48 h: `detectado_en`, `notificado_anpdp_en`, `notificado_cnsd_en`, `alcance`                            |
 
 El schema `audit` es exclusivo del MVP-45 sobre SQL Server. En v10 no existe como schema separado: la bitácora es `agent.run_log` (§10.4). Es la decisión **DC-09** y resuelve una contradicción que ambos documentos tenían sin declarar.
+
+### 2.6 En qué orden se construyen las 55 tablas
+
+Este §2 dice **qué** tablas necesita el MVP; no dice en cuál orden construirlas. Ese orden está medido en **`docs/PRIORIZACION_MVP_v10.md`**, que cruza las 55 tablas del MVP con las 255 de la v10 y las reparte en cinco capas: 31 ya tienen datos, 11 están vacías, 72 están vivas pero fuera del MVP y 141 no tienen una sola fila.
+
+Lo que hay que retener antes de leer el plan día por día:
+
+- **26 de las 55** tablas del MVP ya existen con el mismo nombre y el mismo propósito; **17** existen de forma aproximada (Anexo D.2); **12 no existen** y hay que crearlas. Nueve de esas doce son de cumplimiento o de seguridad: sin ellas el MVP funciona y no cumple la ley.
+- **El MVP no se construye en paralelo a la v10, se construye encima.** 3 720 filas de historia viven en tablas que el MVP no pidió; borrarlas para «dejar solo lo del MVP» es la forma más rápida de perder el expediente.
+- **El grafo no es futuro.** `kag.aristas` ya tiene 450 filas y `kag.documento_fuente` 10, escritas por el cargador de legado.
 
 ---
 

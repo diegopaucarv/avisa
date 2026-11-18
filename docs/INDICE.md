@@ -2,7 +2,7 @@
 
 Este archivo es el **punto de entrada único**. Si un documento contradice a otro, manda el que esta tabla marca como autoridad. No se crea ningún documento nuevo sin registrarlo aquí primero.
 
-Última revisión: **2026-11-18** (consolidación del documento padre; estadística absorbida en §11; diccionario de datos unificado y generado; grafo KAG con nodos y aristas; comentarios de tabla y columna escritos en la base).
+Última revisión: **2026-11-18** (consolidación del documento padre; estadística absorbida en §11; diccionario de datos unificado y generado; grafo KAG con nodos y aristas; comentarios de tabla y columna escritos en la base; priorización del modelo para el MVP; y un solo formato para el nivel de clasificación de los datos).
 
 ---
 
@@ -12,6 +12,8 @@ Este archivo es el **punto de entrada único**. Si un documento contradice a otr
 AVISA_PRODUCE_v10.md  ── autoridad arquitectónica (v10 ⊇ v9)
         │
         ├── mvp.md ──────────── autoridad de ejecución (45 días, SQL Server)
+        │        └── PRIORIZACION_MVP_v10.md ── orden de construcción: capas de la v10 y puente de las 55 tablas del MVP
+        │                └── mvp_prioridad_tablas.csv · se regenera con migration/prioridad_mvp.py
         │
         ├── DECISIONES_CARGA_LEGADO_V9.md ── autoridad de migración (MIG D1–D51)
         │        └── Anexos A (clases), B y C (absorben `MAPA_CARGA`)
@@ -44,7 +46,7 @@ AVISA_PRODUCE_v10.md  ── autoridad arquitectónica (v10 ⊇ v9)
 | `diccionario_datos.csv`                              | **vigente · generado**            | versión máquina del diccionario: una fila por columna física (3 173)                                                                                               | se regenera con el mismo script                                     |
 | `migration/generar_diccionario.py`                   | **vigente**                       | genera el diccionario y el CSV leyendo el catálogo de la base; las particiones heredan la descripción de su padre; sólo lee                                        | se ejecuta                                                          |
 | `migration/curacion_v10.py`                          | **vigente**                       | propósito de las 255 tablas lógicas                                                                                                                                | se edita a mano                                                     |
-| `migration/curacion_v10_columnas.py`                 | **vigente**                       | descripción de las 2 007 columnas lógicas del modelo v10                                                                                                           | se edita a mano                                                     |
+| `migration/curacion_v10_columnas.py`                 | **vigente**                       | descripción de las 2 036 columnas lógicas del modelo v10                                                                                                           | se edita a mano                                                     |
 | `migration/generar_comentarios_sql.py`               | **vigente**                       | escribe el parche 12 desde la curaduría y verifica cada tabla y columna contra el catálogo; sólo lee                                                               | se ejecuta                                                          |
 | `migration/curacion_vistas.py`                       | **vigente**                       | propósito, tipo y tablas que lee cada vista y matview                                                                                                              | se edita a mano                                                     |
 | `migration/curacion_legacy.py`                       | **vigente**                       | propósito de las 87 tablas del sistema anterior y significado de sus columnas documentadas                                                                         | se edita a mano                                                     |
@@ -59,16 +61,21 @@ AVISA_PRODUCE_v10.md  ── autoridad arquitectónica (v10 ⊇ v9)
 | `PARCHE_9_SEGURIDAD_NIVEL_ALTO.sql`                  | **vigente · aplicado 2026-11-18** | AES-256 de PII, `audit` append-only, vista segura y descifrado auditado                                                                                            | aplicado en la base viva                                            |
 | `PARCHE_10_FLUJO_PROCESO_D17.sql`                    | **vigente · aplicado 2026-11-18** | D17: `flujo_definicion` 7, `flujo_estado` 5, `proceso_instancia` 135                                                                                               | aplicado en la base viva                                            |
 | `PARCHE_11_GRAFO_KAG.sql`                            | **vigente · aplicado 2026-11-18** | grafo KAG: nodos de caso y demanda, aristas mínimas, tipo `MIEMBRO_DE`, marcas de tiempo y triggers de sincronía                                                   | aplicado en la base viva                                            |
-| `PARCHE_12_COMENTARIOS_COLUMNAS.sql`                 | **vigente · aplicado 2026-11-18** | comentario de las 255 tablas lógicas y de 2 007 columnas del modelo v10                                                                                            | aplicado en la base viva                                            |
+| `PARCHE_12_COMENTARIOS_COLUMNAS.sql`                 | **vigente · aplicado 2026-11-18** | comentario de las 255 tablas lógicas y de 2 036 columnas del modelo v10                                                                                            | aplicado en la base viva                                            |
+| `PARCHE_13_CLASIFICACION.sql`                        | **vigente · aplicado 2026-11-18** | nivel de clasificación único: `consultation.procesos` a `smallint`, FK al catálogo y 5 comentarios                                                                 | aplicado en la base viva                                            |
 | `AVISA_V10_ESQUEMA_UNIFICADO.sql`                    | **vigente · generado**            | todo el esquema v10 en un solo archivo, sin `\i` externos: sección A (sobre base vacía) y sección B (post-carga)                                                   | se regenera con `migration/consolidar_esquema.py`                   |
-| `migration/consolidar_esquema.py`                    | **vigente**                       | compone el archivo unificado con el texto literal del DDL base y de los 12 parches; sólo lee                                                                       | se ejecuta                                                          |
-| `REVISION_DICCIONARIO_Y_V10.md`                      | **vigente**                       | auditoría del diccionario y del modelo: cobertura de la curaduría, `nivel_clasificacion`, huecos del diseño                                                        | se conserva; sus propuestas se aplican aparte                       |
+| `migration/consolidar_esquema.py`                    | **vigente**                       | compone el archivo unificado con el texto literal del DDL base y de los 13 parches; sólo lee                                                                       | se ejecuta                                                          |
+| `REVISION_DICCIONARIO_Y_V10.md`                      | **vigente**                       | auditoría del diccionario y del modelo: cobertura de la curaduría, `nivel_clasificacion`, huecos del diseño                                                        | se conserva; todas sus propuestas quedaron aplicadas                |
 | `parches/P7_G19_G25.md`                              | **vigente · aplicado 2026-11-18** | informe: guardrail → reason code, casos negativos y verificación                                                                                                   | se conserva                                                         |
 | `parches/P8_ICD_Q40.md`                              | **vigente · aplicado 2026-11-18** | informe: parámetro, función, reglas de fallo y verificación                                                                                                        | se conserva                                                         |
 | `parches/P9_SEGURIDAD.md`                            | **vigente · aplicado 2026-11-18** | informe: cifras, clave, verificaciones y lo que no resuelve                                                                                                        | se conserva                                                         |
 | `parches/P10_FLUJO_D17.md`                           | **vigente · aplicado 2026-11-18** | informe: las tres tablas, RLS y los pendientes de D17                                                                                                              | se conserva                                                         |
 | `parches/P11_GRAFO_KAG.md`                           | **vigente · aplicado 2026-11-18** | informe: los seis defectos del grafo, disparadores, aristas mínimas y hallazgos de datos                                                                           | se conserva                                                         |
-| `parches/P12_COMENTARIOS.md`                         | **vigente · aplicado 2026-11-18** | informe: el desglose de las 2 947 columnas sin descripción y el efecto en el diccionario                                                                           | se conserva                                                         |
+| `parches/P12_COMENTARIOS.md`                         | **vigente · aplicado 2026-11-18** | informe: cobertura de los comentarios (2 036 de 2 036 columnas lógicas) y efecto en el diccionario                                                                 | se conserva                                                         |
+| `parches/P13_CLASIFICACION.md`                       | **vigente · aplicado 2026-11-18** | informe: el catálogo único de clasificación, la conversión de `consultation.procesos` y las 7 comprobaciones                                                       | se conserva                                                         |
+| `PRIORIZACION_MVP_v10.md`                            | **vigente · medido**              | orden de construcción: cinco capas de la v10 (31 / 11 / 72 / 22 / 119 tablas) y puente de las 55 tablas del MVP (26 exactas, 17 parciales, 12 a crear)             | se regenera con `migration/prioridad_mvp.py`                        |
+| `mvp_prioridad_tablas.csv`                           | **vigente · generado**            | una fila por tabla lógica con capa, filas, dependencias, cargador y causa                                                                                          | se regenera con el mismo script                                     |
+| `migration/prioridad_mvp.py`                         | **vigente**                       | mide filas, cargador, dependencias y consumidores, y aplica el contrato del MVP; sólo lee                                                                          | se ejecuta                                                          |
 | `avisa_actual/CLASIFICACION_INPUT_PROCESO_OUTPUT.md` | **vigente**                       | clasificación por flujo (entrada / proceso / salida)                                                                                                               | se conserva                                                         |
 | `avisa_actual/LEEME.md`                              | **vigente**                       | qué es cada artefacto del sistema en producción                                                                                                                    | se conserva                                                         |
 | `ANALISIS_PORTABILIDAD_AVISA_2026_A_V9.md`           | **absorbido en parte**            | clases A/B/C/D/X; su **§3 (columna a columna) sigue aquí** como fuente única                                                                                       | → `DECISIONES` Anexo A (totales) + `PLAN` Anexo E (mapa de fuentes) |
@@ -99,8 +106,8 @@ Retirados del árbol de trabajo el 2026-11-18: `migration/_tmp_cols.py` y
 (foto obsoleta del esquema, regenerable con la receta de `migration/README.md`) y
 `migration/__pycache__` (que ahora ignora `.gitignore`).
 
-**Parches SQL.** Son doce y se aplican en orden. Los cinco primeros forman parte del
-`initdb`; los siete últimos se aplican **a mano, después de cargar el legado**.
+**Parches SQL.** Son trece y se aplican en orden. Los cinco primeros forman parte del
+`initdb`; los ocho últimos se aplican **a mano, después de cargar el legado**.
 
 | #   | Archivo                              | Qué cierra                                                                   | Se aplica en       |
 | --- | ------------------------------------ | ---------------------------------------------------------------------------- | ------------------ |
@@ -115,9 +122,10 @@ Retirados del árbol de trabajo el 2026-11-18: `migration/_tmp_cols.py` y
 | 9   | `PARCHE_9_SEGURIDAD_NIVEL_ALTO.sql`  | cifrado AES-256 de datos personales, `audit` append-only, vista y descifrado | post-carga · `99`  |
 | 10  | `PARCHE_10_FLUJO_PROCESO_D17.sql`    | D17: `flujo_definicion` 7, `flujo_estado` 5, `proceso_instancia` 135         | post-carga · `100` |
 | 11  | `PARCHE_11_GRAFO_KAG.sql`            | grafo KAG: nodos de caso y demanda, aristas mínimas y `MIEMBRO_DE`           | post-carga · `101` |
-| 12  | `PARCHE_12_COMENTARIOS_COLUMNAS.sql` | comentario de 255 tablas lógicas y 2 007 columnas del modelo v10             | post-carga · `102` |
+| 12  | `PARCHE_12_COMENTARIOS_COLUMNAS.sql` | comentario de 255 tablas lógicas y 2 036 columnas del modelo v10             | post-carga · `102` |
+| 13  | `PARCHE_13_CLASIFICACION.sql`        | nivel de clasificación único: tipo, FK y comentarios                         | post-carga · `103` |
 
-**Por qué los parches 6–12 no van en el `initdb`.** Los parches 6, 9, 10 y 11
+**Por qué los parches 6–13 no van en el `initdb`.** Los parches 6, 9, 10 y 11
 dependen de datos que sólo existen después de la carga: el 6 reclasifica documentos
 `RED-%`; el 9 y el 10 leen `legacy.dim_actores`, `legacy.dim_paso_proceso` y
 `legacy.fact_proceso_*`; y el 11 rellena el grafo con las filas ya cargadas, de modo
@@ -128,10 +136,11 @@ procedimiento manual está en `ENTORNO_DOCKER_POSTGRES.md` **§9**.
 Verificación del parche 6: 34/34 filas movidas, 0 `RED-` restantes en tipo 15, y la
 instantánea `core.patch6_documentos_snapshot` retirada tras validar. El parche 7 dejó
 el contrato de `config.guardrail_contract` en 25 filas (G1–G25): 22 `block` y 3 `warn`.
-Los parches 7–12 también quedaron ejecutados y verificados el 2026-11-18; sus cifras
+Los parches 7–13 también quedaron ejecutados y verificados el 2026-11-18; sus cifras
 están en los informes de `docs/parches/`. El parche 11 dejó el grafo con 1 520 nodos
-y 450 aristas, y el 12 con 2 036 columnas comentadas: todas las lógicas del modelo,
-porque las 24 particiones heredan la descripción en el diccionario.
+y 450 aristas, el 12 con 2 036 columnas comentadas (todas las lógicas del modelo,
+porque las 24 particiones heredan la descripción en el diccionario) y el 13 con
+59 de 59 columnas de nivel validadas contra un catálogo único.
 
 ---
 
@@ -158,9 +167,9 @@ miden.** Se obtienen con `count(*)` tabla por tabla sobre la base viva y quedan 
 conjunto que no cuadra con la réplica es `fact_historial_estado` (33 declaradas /
 27 medidas); la nota que manda está en `DECISIONES` **A.3**.
 
-**Medición del 2026-11-18**, tras los parches 6–12: 26 esquemas AVISA, 279 tablas
+**Medición del 2026-11-18**, tras los parches 6–13: 26 esquemas AVISA, 279 tablas
 físicas (24 particiones, 255 lógicas), 2 366 columnas, 12 257 filas (103 tablas con
-datos y 152 vacías), 589 FK, 48 tablas con RLS (todas `FORCE`, contando como una la
+datos y 152 vacías), 590 FK, 48 tablas con RLS (todas `FORCE`, contando como una la
 particionada `agent.llm_call`), 173 políticas y 60 triggers. `legacy`: 87 tablas,
 807 columnas y 4 729 filas. De las 2 366 columnas del modelo, 2 036 tienen comentario
 (todas las lógicas) y las 330 restantes son copias de partición que heredan la
@@ -245,7 +254,7 @@ no figura aquí.
    `python migration/generar_diccionario.py` cada vez que cambie el esquema o la carga.
 6. `AVISA_V10_ESQUEMA_UNIFICADO.sql` tampoco se edita a mano: se recompone con
    `python migration/consolidar_esquema.py` cada vez que cambie el DDL base o cualquiera de
-   los doce parches. `PARCHE_12_COMENTARIOS_COLUMNAS.sql` se regenera con
+   los trece parches. `PARCHE_12_COMENTARIOS_COLUMNAS.sql` se regenera con
    `python migration/generar_comentarios_sql.py` cuando cambie la curaduría de columnas.
 
 ---

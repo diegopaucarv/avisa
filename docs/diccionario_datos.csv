@@ -125,8 +125,8 @@ agent,llm_call_default,1,P,tokens_out,12,integer,sí,,0,0,,Cantidad de tokens pr
 agent,llm_call_default,1,P,latencia_ms,13,integer,sí,,0,0,,"Tiempo de respuesta de la llamada al modelo, medido en milisegundos",heredado_padre
 agent,llm_call_default,1,P,veredicto_guardrails,14,jsonb,sí,,0,0,,Resultado de los filtros de seguridad aplicados al prompt y a la respuesta,heredado_padre
 agent,llm_call_default,1,P,nivel_clasificacion,15,smallint,no,,0,0,core.cat_clasificacion(nivel),"Nivel de acceso al dato: 1 público, 2 reservado, 3 confidencial",heredado_padre
-agent,llm_call_fragmento,0,P,call_id,1,uuid,no,,1,0,agent.llm_call_202611(id);agent.llm_call_default(id);agent.llm_call_202703(id);agent.llm_call_202702(id);agent.llm_call_202701(id);agent.llm_call_202612(id);agent.llm_call(id),Llamada al modelo que recuperó el fragmento documental,comentario_bd
-agent,llm_call_fragmento,0,P,call_ts,2,timestamp with time zone,no,,1,0,agent.llm_call_202611(ts);agent.llm_call_default(ts);agent.llm_call_202703(ts);agent.llm_call_202702(ts);agent.llm_call_202701(ts);agent.llm_call_202612(ts);agent.llm_call(ts),"Momento de la llamada, que con su identificador completa la clave del vínculo",comentario_bd
+agent,llm_call_fragmento,0,P,call_id,1,uuid,no,,1,0,agent.llm_call(id);agent.llm_call_default(id);agent.llm_call_202703(id);agent.llm_call_202702(id);agent.llm_call_202701(id);agent.llm_call_202612(id);agent.llm_call_202611(id),Llamada al modelo que recuperó el fragmento documental,comentario_bd
+agent,llm_call_fragmento,0,P,call_ts,2,timestamp with time zone,no,,1,0,agent.llm_call(ts);agent.llm_call_default(ts);agent.llm_call_202703(ts);agent.llm_call_202702(ts);agent.llm_call_202701(ts);agent.llm_call_202612(ts);agent.llm_call_202611(ts),"Momento de la llamada, que con su identificador completa la clave del vínculo",comentario_bd
 agent,llm_call_fragmento,0,P,fragmento_id,3,uuid,no,,1,0,kag.documento_fragmento(id),Fragmento documental recuperado como insumo de la llamada,comentario_bd
 agent,llm_call_fragmento,0,P,rank_rrf,4,integer,sí,,0,0,,Posición que el fragmento ocupó tras fusionar los resultados de búsqueda,comentario_bd
 agent,llm_call_fragmento,0,P,score_rrf,5,numeric,sí,,0,0,,"Puntaje de fusión del fragmento, que pondera sus apariciones en cada búsqueda",comentario_bd
@@ -397,8 +397,8 @@ avisa,raw_ingest_default,1,I,caso_id,12,uuid,sí,,0,0,core.casos(id),"Caso al qu
 avisa,raw_ingest_default,1,I,tipo_registro,13,character varying(20),no,'evento'::character varying,0,0,,"Clase de registro que el mensaje representa, por defecto evento",heredado_padre
 avisa,raw_ingest_default,1,I,policy_snapshot_id,14,uuid,sí,,0,0,policy.snapshot(id),Foto de las políticas vigentes al momento de recibir el mensaje,heredado_padre
 avisa,raw_ingest_rejected,0,I,id,1,uuid,no,gen_random_uuid(),1,0,,Identificador interno de la fila,comentario_bd
-avisa,raw_ingest_rejected,0,I,raw_id,2,uuid,no,,0,0,avisa.raw_ingest_202703(id);avisa.raw_ingest_202611(id);avisa.raw_ingest_default(id);avisa.raw_ingest(id);avisa.raw_ingest_202612(id);avisa.raw_ingest_202702(id);avisa.raw_ingest_202701(id),"Mensaje crudo descartado, buscado en la partición donde ingresó",comentario_bd
-avisa,raw_ingest_rejected,0,I,raw_received_at,3,timestamp with time zone,no,,0,0,avisa.raw_ingest_202703(received_at);avisa.raw_ingest_202611(received_at);avisa.raw_ingest_default(received_at);avisa.raw_ingest(received_at);avisa.raw_ingest_202612(received_at);avisa.raw_ingest_202702(received_at);avisa.raw_ingest_202701(received_at),"Momento en que se recibió el mensaje descartado, junto con su identificador",comentario_bd
+avisa,raw_ingest_rejected,0,I,raw_id,2,uuid,no,,0,0,avisa.raw_ingest_202612(id);avisa.raw_ingest_202702(id);avisa.raw_ingest_202703(id);avisa.raw_ingest_202611(id);avisa.raw_ingest_default(id);avisa.raw_ingest(id);avisa.raw_ingest_202701(id),"Mensaje crudo descartado, buscado en la partición donde ingresó",comentario_bd
+avisa,raw_ingest_rejected,0,I,raw_received_at,3,timestamp with time zone,no,,0,0,avisa.raw_ingest_202612(received_at);avisa.raw_ingest_202702(received_at);avisa.raw_ingest_202703(received_at);avisa.raw_ingest_202611(received_at);avisa.raw_ingest_default(received_at);avisa.raw_ingest(received_at);avisa.raw_ingest_202701(received_at),"Momento en que se recibió el mensaje descartado, junto con su identificador",comentario_bd
 avisa,raw_ingest_rejected,0,I,error_json,4,jsonb,no,,0,0,,Detalle estructurado del error que motivó el rechazo del mensaje,comentario_bd
 avisa,raw_ingest_rejected,0,I,created_at,5,timestamp with time zone,no,now(),0,0,,Momento en que se creó el registro,comentario_bd
 chat,blame,0,P,id,1,uuid,no,gen_random_uuid(),1,0,,Identificador interno de la fila,comentario_bd
@@ -629,7 +629,7 @@ consultation,procesos,0,INF,fecha_estimada_cierre,6,date,sí,,0,0,,Fecha previst
 consultation,procesos,0,INF,estado,7,character varying(30),no,,0,0,,"Situación administrativa del proceso, como abierto o concluido",comentario_bd
 consultation,procesos,0,INF,created_at,8,timestamp with time zone,no,now(),0,0,,Momento en que se creó el registro,comentario_bd
 consultation,procesos,0,INF,updated_at,9,timestamp with time zone,no,now(),0,0,,Momento de la última modificación del registro,comentario_bd
-consultation,procesos,0,INF,nivel_clasificacion,10,character varying(20),no,'Reservado'::character varying,0,0,,"Nivel de clasificación de la consulta, expresado como etiqueta: Público, Reservado o Confidencial",comentario_bd
+consultation,procesos,0,INF,nivel_clasificacion,10,smallint,no,2,0,0,core.cat_clasificacion(nivel),"Nivel de acceso al dato: 1 público, 2 reservado, 3 confidencial",comentario_bd
 consultation,resultados,0,INF,id,1,uuid,no,gen_random_uuid(),1,0,,Identificador interno de la fila,comentario_bd
 consultation,resultados,0,INF,proceso_id,2,uuid,no,,0,0,consultation.procesos(id),Proceso de consulta previa en el que se alcanzó el resultado,comentario_bd
 consultation,resultados,0,INF,tipo_resultado,3,character varying(50),no,,0,0,,"Naturaleza del resultado, como acuerdo, desacuerdo o acta",comentario_bd
@@ -1014,9 +1014,9 @@ core,compromisos,0,I,origen_dato,22,character varying(20),no,'MANUAL'::character
 core,compromisos,0,I,confidence,23,"numeric(3,2)",sí,,0,0,,"Grado de certeza del dato, entre 0 y 1",comentario_bd
 core,compromisos,0,I,es_validado_humano,24,boolean,no,false,0,0,,Indica si un analista revisó y avaló el registro,comentario_bd
 core,compromisos,0,I,nivel_clasificacion,25,smallint,no,2,0,0,core.cat_clasificacion(nivel),"Nivel de acceso al dato: 1 público, 2 reservado, 3 confidencial",comentario_bd
-core,cronologia_vinculos,0,,cronologia_id,1,uuid,no,,0,0,core.caso_cronologia(id),Hecho de la cronología que se vincula con otros registros,comentario_bd
-core,cronologia_vinculos,0,,alerta_id,2,uuid,sí,,0,0,core.alertas_tempranas(id),Alerta temprana relacionada con el hecho,comentario_bd
-core,cronologia_vinculos,0,,documento_id,3,uuid,sí,,0,0,core.documentos(id),Documento que respalda o da origen al hecho,comentario_bd
+core,cronologia_vinculos,0,I,cronologia_id,1,uuid,no,,0,0,core.caso_cronologia(id),Hecho de la cronología que se vincula con otros registros,comentario_bd
+core,cronologia_vinculos,0,I,alerta_id,2,uuid,sí,,0,0,core.alertas_tempranas(id),Alerta temprana relacionada con el hecho,comentario_bd
+core,cronologia_vinculos,0,I,documento_id,3,uuid,sí,,0,0,core.documentos(id),Documento que respalda o da origen al hecho,comentario_bd
 core,demandas,0,I,id,1,uuid,no,gen_random_uuid(),1,0,,Identificador interno de la fila,comentario_bd
 core,demandas,0,I,caso_id,2,uuid,sí,,0,0,core.casos(id),Caso en el que se plantea la demanda,comentario_bd
 core,demandas,0,I,problema_3p,3,text,sí,,0,0,,Problema que los actores identifican como origen de la demanda,comentario_bd
@@ -1091,12 +1091,12 @@ core,documentos,0,I,estado,21,character varying(40),sí,,0,0,,"Situación del do
 core,documentos,0,I,distrito_id,22,integer,sí,,0,0,core.distritos(id),Distrito al que se refiere el documento,comentario_bd
 core,documentos,0,I,url_lista,23,character varying(500),sí,,0,0,,Enlace al listado o índice asociado al documento,comentario_bd
 core,documentos,0,I,url_foto,24,character varying(500),sí,,0,0,,Enlace a la fotografía vinculada al documento,comentario_bd
-core,entidades,0,,id,1,smallint,no,,1,0,,Identificador interno de la fila,comentario_bd
-core,entidades,0,,siglas,2,character varying(20),no,,0,1,,Siglas con las que se identifica la entidad del Estado,comentario_bd
-core,entidades,0,,nombre,3,character varying(255),no,,0,0,,Denominación completa y oficial de la entidad,comentario_bd
-core,entidades,0,,codigo_legado,4,character varying(20),sí,,0,0,,Código de la entidad en el sistema anterior,comentario_bd
-core,entidades,0,,nivel,5,character varying(15),sí,,0,0,,"Nivel de gobierno de la entidad: nacional, regional o local",comentario_bd
-core,entidades,0,,estado,6,character varying(20),sí,,0,0,,"Situación de la entidad, por ejemplo vigente o inactiva",comentario_bd
+core,entidades,0,INF,id,1,smallint,no,,1,0,,Identificador interno de la fila,comentario_bd
+core,entidades,0,INF,siglas,2,character varying(20),no,,0,1,,Siglas con las que se identifica la entidad del Estado,comentario_bd
+core,entidades,0,INF,nombre,3,character varying(255),no,,0,0,,Denominación completa y oficial de la entidad,comentario_bd
+core,entidades,0,INF,codigo_legado,4,character varying(20),sí,,0,0,,Código de la entidad en el sistema anterior,comentario_bd
+core,entidades,0,INF,nivel,5,character varying(15),sí,,0,0,,"Nivel de gobierno de la entidad: nacional, regional o local",comentario_bd
+core,entidades,0,INF,estado,6,character varying(20),sí,,0,0,,"Situación de la entidad, por ejemplo vigente o inactiva",comentario_bd
 core,envios_comunicacion,0,I,id,1,uuid,no,gen_random_uuid(),1,0,,Identificador interno de la fila,comentario_bd
 core,envios_comunicacion,0,I,codigo,2,character varying(50),sí,,0,1,,Código único con el que se identifica el envío,comentario_bd
 core,envios_comunicacion,0,I,fecha_envio,3,timestamp with time zone,no,,0,0,,Momento en que se realizó el envío,comentario_bd
@@ -1225,19 +1225,19 @@ core,mesas_dialogo,0,I,sectorista_usuario_id,19,uuid,sí,,0,0,core.usuarios(id),
 core,mesas_dialogo,0,I,created_at,20,timestamp with time zone,no,now(),0,0,,Momento en que se creó el registro,comentario_bd
 core,mesas_dialogo,0,I,updated_at,21,timestamp with time zone,no,now(),0,0,,Momento de la última modificación del registro,comentario_bd
 core,mesas_dialogo,0,I,origen_dato,22,character varying(20),no,'AVISA_HISTORICO'::character varying,0,0,,"Vía por la que llegó el registro: manual, agente, flujo, legado histórico o mensajería",comentario_bd
-core,mesas_dialogo,0,I,nivel_clasificacion,23,smallint,no,2,0,0,core.cat_clasificacion(nivel),"Nivel de clasificación de la información: 1 público, 2 interno, 3 sensible",comentario_bd
+core,mesas_dialogo,0,I,nivel_clasificacion,23,smallint,no,2,0,0,core.cat_clasificacion(nivel),"Nivel de acceso al dato: 1 público, 2 reservado, 3 confidencial",comentario_bd
 core,mesas_dialogo,0,I,tiene_norma,24,boolean,sí,,0,0,,Indica si la mesa cuenta con una norma formal de creación,comentario_bd
-core,migracion_conflicto,0,,id,1,bigint,no,,1,0,,Identificador interno de la fila,comentario_bd
-core,migracion_conflicto,0,,fase,2,smallint,no,,0,0,,Número de la fase del cargador en la que se detectó el conflicto,comentario_bd
-core,migracion_conflicto,0,,categoria,3,character varying(40),no,,0,0,,"Tipo de conflicto detectado, como DNI duplicado o membresía sin coincidencia",comentario_bd
-core,migracion_conflicto,0,,hoja_legado,4,character varying(60),sí,,0,0,,Hoja del libro original donde se originó el conflicto,comentario_bd
-core,migracion_conflicto,0,,fila_legado,5,integer,sí,,0,0,,Número de fila dentro de la hoja de origen del conflicto,comentario_bd
-core,migracion_conflicto,0,,codigo_legado,6,character varying(80),sí,,0,0,,"Código del registro de origen, conservado para poder rastrearlo",comentario_bd
-core,migracion_conflicto,0,,detalle,7,jsonb,no,'{}'::jsonb,0,0,,"Datos del conflicto en formato libre, con los valores que no se pudieron conciliar",comentario_bd
-core,migracion_conflicto,0,,resuelto,8,boolean,no,false,0,0,,Indica si el conflicto ya fue revisado y dado por resuelto,comentario_bd
-core,migracion_conflicto,0,,resuelto_por,9,uuid,sí,,0,0,core.usuarios(id),Usuario que dio por resuelto el conflicto,comentario_bd
-core,migracion_conflicto,0,,resuelto_at,10,timestamp with time zone,sí,,0,0,,Momento en que se resolvió el conflicto,comentario_bd
-core,migracion_conflicto,0,,created_at,11,timestamp with time zone,no,now(),0,0,,Momento en que se creó el registro,comentario_bd
+core,migracion_conflicto,0,INF,id,1,bigint,no,,1,0,,Identificador interno de la fila,comentario_bd
+core,migracion_conflicto,0,INF,fase,2,smallint,no,,0,0,,Número de la fase del cargador en la que se detectó el conflicto,comentario_bd
+core,migracion_conflicto,0,INF,categoria,3,character varying(40),no,,0,0,,"Tipo de conflicto detectado, como DNI duplicado o membresía sin coincidencia",comentario_bd
+core,migracion_conflicto,0,INF,hoja_legado,4,character varying(60),sí,,0,0,,Hoja del libro original donde se originó el conflicto,comentario_bd
+core,migracion_conflicto,0,INF,fila_legado,5,integer,sí,,0,0,,Número de fila dentro de la hoja de origen del conflicto,comentario_bd
+core,migracion_conflicto,0,INF,codigo_legado,6,character varying(80),sí,,0,0,,"Código del registro de origen, conservado para poder rastrearlo",comentario_bd
+core,migracion_conflicto,0,INF,detalle,7,jsonb,no,'{}'::jsonb,0,0,,"Datos del conflicto en formato libre, con los valores que no se pudieron conciliar",comentario_bd
+core,migracion_conflicto,0,INF,resuelto,8,boolean,no,false,0,0,,Indica si el conflicto ya fue revisado y dado por resuelto,comentario_bd
+core,migracion_conflicto,0,INF,resuelto_por,9,uuid,sí,,0,0,core.usuarios(id),Usuario que dio por resuelto el conflicto,comentario_bd
+core,migracion_conflicto,0,INF,resuelto_at,10,timestamp with time zone,sí,,0,0,,Momento en que se resolvió el conflicto,comentario_bd
+core,migracion_conflicto,0,INF,created_at,11,timestamp with time zone,no,now(),0,0,,Momento en que se creó el registro,comentario_bd
 core,notificaciones,0,P,id,1,uuid,no,gen_random_uuid(),1,0,,Identificador interno de la fila,comentario_bd
 core,notificaciones,0,P,usuario_id,2,uuid,no,,0,0,core.usuarios(id),Usuario al que se dirige el aviso y que debe leerlo,comentario_bd
 core,notificaciones,0,P,tipo,3,character varying(30),no,,0,0,,"Clase de aviso emitido, según el catálogo interno de tipos",comentario_bd
@@ -1287,7 +1287,7 @@ core,output_contracts,0,O,caso_id,5,uuid,sí,,0,0,core.casos(id),"Caso al que co
 core,output_contracts,0,O,response_json,6,jsonb,sí,,0,0,,"Contenido de la respuesta generada, guardado como documento JSON",comentario_bd
 core,output_contracts,0,O,response_uri,7,character varying(500),sí,,0,0,,"Ubicación del archivo de la salida, alojado fuera de la base",comentario_bd
 core,output_contracts,0,O,snapshot_id,8,uuid,sí,,0,0,ctx.snapshot(id),Instantánea de la base sobre la que se generó la salida,comentario_bd
-core,output_contracts,0,O,nivel_clasificacion,9,smallint,no,,0,0,core.cat_clasificacion(nivel),"Nivel de clasificación de la información: 1 público, 2 interno, 3 sensible",comentario_bd
+core,output_contracts,0,O,nivel_clasificacion,9,smallint,no,,0,0,core.cat_clasificacion(nivel),"Nivel de acceso al dato: 1 público, 2 reservado, 3 confidencial",comentario_bd
 core,output_contracts,0,O,created_at,10,timestamp with time zone,no,now(),0,0,,Momento en que se creó el registro,comentario_bd
 core,output_contracts,0,O,policy_snapshot_id,11,uuid,sí,,0,0,policy.snapshot(id),Instantánea de las reglas de política usadas para decidir qué mostrar,comentario_bd
 core,output_contracts,0,O,chat_commit_id,12,uuid,sí,,0,0,chat.commit(id),Confirmación de la conversación que originó la salida,comentario_bd
@@ -1330,7 +1330,7 @@ core,proceso_instancia,0,P,created_at,17,timestamp with time zone,no,now(),0,0,,
 core,proceso_instancia,0,P,updated_at,18,timestamp with time zone,no,now(),0,0,,Momento de la última modificación del registro,comentario_bd
 core,proceso_instancia,0,P,created_by,19,uuid,sí,,0,0,core.usuarios(id),Usuario que registró la fila en el sistema,comentario_bd
 core,proceso_instancia,0,P,updated_by,20,uuid,sí,,0,0,core.usuarios(id),Usuario de la última modificación,comentario_bd
-core,proceso_instancia,0,P,nivel_clasificacion,21,smallint,no,2,0,0,core.cat_clasificacion(nivel),"Nivel de clasificación de la información: 1 público, 2 interno, 3 sensible",comentario_bd
+core,proceso_instancia,0,P,nivel_clasificacion,21,smallint,no,2,0,0,core.cat_clasificacion(nivel),"Nivel de acceso al dato: 1 público, 2 reservado, 3 confidencial",comentario_bd
 core,provincias,0,INF,id,1,integer,no,nextval('core.provincias_id_seq'::regclass),1,0,,Identificador interno de la provincia,comentario_bd
 core,provincias,0,INF,region_id,2,integer,no,,0,0,core.regiones(id),Región a la que pertenece la provincia,comentario_bd
 core,provincias,0,INF,ubigeo,3,character(4),no,,0,1,,Código de ubigeo de cuatro dígitos asignado por el INEI,comentario_bd
@@ -1367,7 +1367,7 @@ core,reuniones_dialogo,0,P,updated_by,15,uuid,sí,,0,0,core.usuarios(id),Usuario
 core,reuniones_dialogo,0,P,origen_dato,16,character varying(20),no,'MANUAL'::character varying,0,0,,"Vía por la que llegó el registro: manual, agente, flujo, legado histórico o mensajería",comentario_bd
 core,reuniones_dialogo,0,P,confidence,17,"numeric(3,2)",sí,,0,0,,"Grado de confianza del dato registrado, entre 0 y 1",comentario_bd
 core,reuniones_dialogo,0,P,es_validado_humano,18,boolean,no,false,0,0,,Indica si una persona revisó y confirmó los datos de la reunión,comentario_bd
-core,reuniones_dialogo,0,P,nivel_clasificacion,19,smallint,no,2,0,0,core.cat_clasificacion(nivel),"Nivel de clasificación de la información: 1 público, 2 interno, 3 sensible",comentario_bd
+core,reuniones_dialogo,0,P,nivel_clasificacion,19,smallint,no,2,0,0,core.cat_clasificacion(nivel),"Nivel de acceso al dato: 1 público, 2 reservado, 3 confidencial",comentario_bd
 core,riesgo_social_ordinal,0,P,id,1,uuid,no,gen_random_uuid(),1,0,,Identificador interno de la fila,comentario_bd
 core,riesgo_social_ordinal,0,P,lugar_id,2,uuid,no,,0,0,territorio.lugares(id),Lugar del territorio al que se refiere la estimación,comentario_bd
 core,riesgo_social_ordinal,0,P,fecha,3,date,no,,0,0,,Fecha a la que corresponde la estimación de riesgo,comentario_bd
@@ -1377,7 +1377,7 @@ core,riesgo_social_ordinal,0,P,convocatorias_count,6,integer,no,0,0,0,,Cantidad 
 core,riesgo_social_ordinal,0,P,fuente,7,character varying(60),no,,0,0,,"Fuente de la que proviene la estimación, como defensoria o prensa",comentario_bd
 core,riesgo_social_ordinal,0,P,justificacion,8,text,sí,,0,0,,Explicación de por qué se asignó ese nivel de riesgo,comentario_bd
 core,riesgo_social_ordinal,0,P,es_validado_humano,9,boolean,no,false,0,0,,Indica si una persona revisó y confirmó la estimación,comentario_bd
-core,riesgo_social_ordinal,0,P,nivel_clasificacion,10,smallint,no,2,0,0,core.cat_clasificacion(nivel),"Nivel de clasificación de la información: 1 público, 2 interno, 3 sensible",comentario_bd
+core,riesgo_social_ordinal,0,P,nivel_clasificacion,10,smallint,no,2,0,0,core.cat_clasificacion(nivel),"Nivel de acceso al dato: 1 público, 2 reservado, 3 confidencial",comentario_bd
 core,roles,0,INF,id,1,smallint,no,,1,0,,Identificador interno del rol de acceso,comentario_bd
 core,roles,0,INF,codigo,2,character varying(30),no,,0,1,,"Código corto del rol, usado en la asignación de permisos",comentario_bd
 core,roles,0,INF,max_clasificacion,3,smallint,no,,0,0,core.cat_clasificacion(nivel),Nivel máximo de clasificación que el rol puede consultar,comentario_bd

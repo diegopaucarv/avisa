@@ -11,23 +11,26 @@ del motor**, que es donde debe vivir.
 
 ---
 
-## 1. El problema de las 2 947 columnas «sin descripción»
+## 1. El problema de las columnas «sin descripción»
 
-Al medir el diccionario aparecieron 2 947 columnas sin descripción. El número
+Al medir el diccionario aparecieron miles de columnas sin descripción. El número
 parecía excesivo y se desglosó:
 
-| Grupo | Columnas | Qué era |
-| --- | ---: | --- |
-| `legacy` | 610 | sistema anterior: 519 columnas posicionales `cNN` y 91 con nombre propio |
-| modelo v10, tablas lógicas | 2 007 | columnas reales del diseño, sin comentario en la base |
-| modelo v10, particiones | 330 | copias de columnas del padre en las 24 particiones |
+| Grupo                      | Columnas | Qué era                                                                  |
+| -------------------------- | -------: | ------------------------------------------------------------------------ |
+| `legacy`                   |      610 | sistema anterior: 519 columnas posicionales `cNN` y 91 con nombre propio |
+| modelo v10, tablas lógicas |    2 036 | columnas reales del diseño, sin comentario en la base                    |
+| modelo v10, particiones    |      330 | copias de columnas del padre en las 24 particiones                       |
 
 Las 330 de partición no son columnas nuevas: son la misma columna repetida por
 partición. Y las 610 del sistema anterior se explican porque el legado es un
 archivo, no un modelo: sus columnas `c01..cNN` solo tienen sentido en el contexto
 de su hoja.
 
-De ahí que el trabajo real fuera de 2 007 columnas, no de 2 947.
+De ahí que el trabajo real fuera de **2 036** columnas lógicas, no de todo lo
+anterior. De esas 2 036, 29 solo tenían descripción dentro de los parches 9 a 11 y
+no en la curaduría; este trabajo las promovió a `curacion_v10_columnas.py` para que
+una futura regeneración no las perdiera.
 
 ---
 
@@ -39,7 +42,7 @@ COMMENT ON COLUMN esquema.tabla.col    IS '...';
 ```
 
 - **255 tablas lógicas** del modelo v10 reciben su propósito.
-- **2 007 columnas lógicas** reciben su descripción.
+- **2 036 columnas lógicas** reciben su descripción.
 - Las **24 particiones** quedan fuera a propósito: PostgreSQL no propaga
   comentarios a las particiones, así que el diccionario copia la descripción de la
   tabla padre al generarse.
@@ -51,10 +54,10 @@ Es idempotente: `COMMENT ON` reemplaza el comentario anterior, nunca lo duplica.
 
 ## 3. De dónde salen los textos
 
-| Fuente | Qué aporta | Archivo |
-| --- | --- | --- |
-| Curaduría de tablas | propósito de las 255 tablas lógicas | `migration/curacion_v10.py` |
-| Curaduría de columnas | descripción de las 2 007 columnas lógicas | `migration/curacion_v10_columnas.py` |
+| Fuente                | Qué aporta                                | Archivo                              |
+| --------------------- | ----------------------------------------- | ------------------------------------ |
+| Curaduría de tablas   | propósito de las 255 tablas lógicas       | `migration/curacion_v10.py`          |
+| Curaduría de columnas | descripción de las 2 036 columnas lógicas | `migration/curacion_v10_columnas.py` |
 
 Cada texto se redactó leyendo la columna, sus claves ajenas y su tabla, no
 deduciéndolo del nombre. El generador **verifica contra el catálogo** que cada
@@ -65,12 +68,12 @@ base no calzan, se detiene y lo lista.
 
 ## 4. Resultado medido
 
-| Métrica | Antes | Después |
-| --- | ---: | ---: |
-| Tablas v10 con comentario | 0 | **255** |
-| Columnas v10 con comentario | 27 | **2 036** |
-| Columnas lógicas con comentario | 27 | **2 036** (todas) |
-| Columnas de partición | 0 | 0 (heredan en el diccionario) |
+| Métrica                         | Antes |                       Después |
+| ------------------------------- | ----: | ----------------------------: |
+| Tablas v10 con comentario       |     0 |                       **255** |
+| Columnas v10 con comentario     |    27 |                     **2 036** |
+| Columnas lógicas con comentario |    27 |             **2 036** (todas) |
+| Columnas de partición           |     0 | 0 (heredan en el diccionario) |
 
 Las 27 columnas que ya tenían comentario eran las 25 de `core` que dejó el parche 9
 y 2 de `audit`. Se conservaron y, donde la curaduría tenía un texto mejor, se
@@ -89,14 +92,14 @@ reemplazaron.
 
 `origen_descripcion` queda así:
 
-| Origen | Filas del CSV | Qué significa |
-| --- | ---: | --- |
-| `comentario_bd` | 2 036 | texto escrito en la base por este parche o anterior |
-| `heredado_padre` | 330 | copia de la descripción del padre en una partición |
-| `curaduria` | 197 | columnas del legado documentadas en `curacion_legacy.py` |
-| `sin_descripcion` | 610 | columnas del legado sin documentar |
+| Origen            | Filas del CSV | Qué significa                                            |
+| ----------------- | ------------: | -------------------------------------------------------- |
+| `comentario_bd`   |         2 036 | texto escrito en la base por este parche o anterior      |
+| `heredado_padre`  |           330 | copia de la descripción del padre en una partición       |
+| `curaduria`       |           197 | columnas del legado documentadas en `curacion_legacy.py` |
+| `sin_descripcion` |           610 | columnas del legado sin documentar                       |
 
-El CSV pasa de 3 171 a **3 173** filas de columna.
+El CSV queda en **3 173** filas de columna.
 
 ---
 

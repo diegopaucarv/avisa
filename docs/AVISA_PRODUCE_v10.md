@@ -1563,6 +1563,8 @@ classDiagram
         +varchar tipo
         +uuid ref_id
         +varchar etiqueta NULL
+        +timestamptz created_at
+        +timestamptz updated_at
     }
     class `kag.cat_tipos_arista` {
         +smallint id PK
@@ -2062,7 +2064,7 @@ classDiagram
         +varchar estado
         +timestamptz created_at
         +timestamptz updated_at
-        +varchar nivel_clasificacion
+        +smallint nivel_clasificacion FK
     }
     class `consultation.resultados` {
         +uuid id PK
