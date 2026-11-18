@@ -72,6 +72,38 @@ services:
         target: /opt/avisa/sql/95_patch_05.sql
         read_only: true
 
+      # Parches 6–12: se montan pero NO los aplica el initdb. Dependen de datos que
+      # sólo existen después de la carga (documentos `RED-%`, tablas `legacy.*`), así
+      # que se ejecutan a mano: ver docs/ENTORNO_DOCKER_POSTGRES.md §9.
+      - type: bind
+        source: ./docs/PARCHE_6_CIERRE_CUMPLIMIENTO.sql
+        target: /opt/avisa/sql/96_patch_06.sql
+        read_only: true
+      - type: bind
+        source: ./docs/PARCHE_7_GUARDRAILS_G19_G25.sql
+        target: /opt/avisa/sql/97_patch_07.sql
+        read_only: true
+      - type: bind
+        source: ./docs/PARCHE_8_ICD_TOPE_Q40.sql
+        target: /opt/avisa/sql/98_patch_08.sql
+        read_only: true
+      - type: bind
+        source: ./docs/PARCHE_9_SEGURIDAD_NIVEL_ALTO.sql
+        target: /opt/avisa/sql/99_patch_09.sql
+        read_only: true
+      - type: bind
+        source: ./docs/PARCHE_10_FLUJO_PROCESO_D17.sql
+        target: /opt/avisa/sql/100_patch_10.sql
+        read_only: true
+      - type: bind
+        source: ./docs/PARCHE_11_GRAFO_KAG.sql
+        target: /opt/avisa/sql/101_patch_11.sql
+        read_only: true
+      - type: bind
+        source: ./docs/PARCHE_12_COMENTARIOS_COLUMNAS.sql
+        target: /opt/avisa/sql/102_patch_12.sql
+        read_only: true
+
     healthcheck:
       # -h 127.0.0.1 es imprescindible: sin host, pg_isready usa el socket Unix,
       # y el servidor temporal del initdb TAMBIÉN escucha por ese socket. Con el

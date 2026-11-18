@@ -1,0 +1,82 @@
+{
+  "_formato": {
+    "provincias": "corrección global de nombres de provincia: {escrito: correcto}",
+    "distritos": "correcciones por provincia: {provincia: {escrito: correcto}}. Usa '*' como provincia para reglas globales.",
+    "equivalencias_provincia": "solo para CRUZAR contra el otro archivo: {nombre_en_el_otro: nombre_en_este}. No cambia la salida."
+  },
+  "_nota": "Las claves se comparan sin mayúsculas, sin tildes ni puntuación. Edita libremente: el script lee este archivo en cada ejecución. Si un nombre no está aquí, se deja tal como viene en el documento.",
+  "provincias": {
+    "Bolgnesi": "Bolognesi",
+    "Asuncion": "Asunción",
+    "Mariscal de Luzuriaga": "Mariscal Luzuriaga",
+    "Carlos Fermin Fitzcarrald": "Carlos Fermín Fitzcarrald",
+    "Carlos Fermin Fitzca": "Carlos Fermín Fitzcarrald",
+    "Chimbote": "Santa"
+  },
+  "distritos": {
+    "Bolognesi": {
+      "Abelardo Pardo Lazameta": "Abelardo Pardo Lezameta",
+      "Paccllon": "Pacllón",
+      "Pacllon": "Pacllón",
+      "Chiquian": "Chiquián",
+      "Huayllacayan": "Huayllacayán"
+    },
+    "Pallasca": {
+      "Conchudos": "Conchucos"
+    },
+    "Huarmey": {
+      "Huayllan": "Huayán",
+      "Huayan": "Huayán"
+    },
+    "Huaraz": {
+      "Pampas": "Pampas Grande"
+    },
+    "Pomabamba": {
+      "Huayllan": "Huayllán"
+    },
+    "Huaylas": {
+      "Yuramarca": "Yuracmarca"
+    },
+    "Santa": {
+      "Coisco": "Coishco",
+      "Caceres del Peru": "Cáceres del Perú"
+    },
+    "Ocros": {
+      "Antiago de Chilca": "Santiago de Chilcas",
+      "San Cristobal de Rajan": "San Cristóbal de Raján"
+    },
+    "Aija": {
+      "Huacllan": "Huacllán"
+    },
+    "Antonio Raymondi": {
+      "Llamellin": "Llamellín"
+    },
+    "Huari": {
+      "Chavin de Huantar": "Chavín de Huántar",
+      "Rapayan": "Rapayán"
+    },
+    "Recuay": {
+      "Llacllin": "Llacllín",
+      "Pararin": "Pararín"
+    },
+    "Carhuaz": {
+      "Marcara": "Marcará"
+    },
+    "Carlos Fermín Fitzcarrald": {
+      "San Nicolas": "San Nicolás"
+    },
+    "Casma": {
+      "Yautan": "Yaután"
+    },
+    "Sihuas": {
+      "Alfonzo Ugarte": "Alfonso Ugarte"
+    },
+    "Mariscal Luzuriaga": {
+      "Eleazar Guzman Baron": "Eleazar Guzmán Barrón",
+      "Eleazar Guzman Barron": "Eleazar Guzmán Barrón"
+    }
+  },
+  "equivalencias_provincia": {
+    "Santa": "Chimbote"
+  }
+}

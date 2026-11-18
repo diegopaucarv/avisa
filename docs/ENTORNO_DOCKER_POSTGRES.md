@@ -69,6 +69,9 @@ está vacío, en este orden:
 | `10_apply_v9.sql`   | DDL v9 **dos pasadas**, luego parches 1 → 2 → 3 → 4 → 5                |
 | `20_verify.sql`     | informa y **aborta la inicialización** si el esquema no quedó completo |
 
+El `initdb` se detiene en el parche 5. Los parches 6–10 **no** se aplican aquí:
+necesitan el legado ya cargado y se ejecutan a mano (§9).
+
 El DDL y los parches **no se copian**: se montan como bind mounts desde
 `backend/` y `docs/` con nombres limpios (`/opt/avisa/sql/90_ddl_v9.sql`, etc.).
 Así no existen dos versiones del esquema que puedan divergir.
@@ -170,6 +173,12 @@ La verificación es un `DO` con `RAISE EXCEPTION` si algo no cuadra: si el
 esquema queda a medias, el contenedor **no** arranca. Preferimos un fallo ruidoso
 a un entorno que parece sano y no lo está.
 
+Las cifras de la tabla son el mínimo que exige `20_verify.sql`. Tras los parches
+6–10 el modelo tiene 279 tablas físicas (24 particiones, 255 lógicas), 26 esquemas
+propios y 48 tablas con RLS `FORCE` en todo el modelo —la fila de `core` cuenta solo
+las 11 de ese esquema, y la particionada `agent.llm_call` cuenta como una—; la
+medición completa del 2026-11-18 está en `docs/INDICE.md` §3.
+
 ---
 
 ## 7. Operación
@@ -218,7 +227,60 @@ arranque.
 
 ---
 
-## 9. Archivos
+## 9. Aplicación de los parches 6–12 (post-carga)
+
+El `initdb` aplica el DDL y los parches 1–5, y se detiene ahí. Los parches 6–12 no
+pueden correr en ese momento: el 6 reclasifica documentos `RED-%` que todavía no
+existen; el 9 y el 10 leen `legacy.dim_actores`, `legacy.dim_paso_proceso` y
+`legacy.fact_proceso_*`; y el 11 rellena el grafo con las filas ya cargadas. En un
+arranque limpio afectarían **0 filas sin dar error**. Por eso:
+
+- solo se aplican **después** de cargar el legado, en orden 6 → 7 → 8 → 9 → 10 →
+  11 → 12;
+- el 12 comenta tablas y columnas y comenta también las columnas que añade el 11,
+  así que va al final;
+- los siete SQL están montados de solo lectura en `/opt/avisa/sql/96..102`
+  (`96_patch_06.sql` … `102_patch_12.sql`), pero ningún script del `initdb` los
+  invoca;
+- ni `./scripts/db.sh apply` ni `fresh` los tocan: esos comandos re-aplican el DDL
+  y los parches 1–5 (§7).
+
+### Comando
+
+```sh
+MSYS_NO_PATHCONV=1 docker exec -i avisa-db psql -U avisa -d avisa \
+  -v ON_ERROR_STOP=1 -f - < docs/PARCHE_7_GUARDRAILS_G19_G25.sql
+```
+
+Se cambia el nombre del archivo por el del parche que toca. El archivo se pasa por
+**entrada estándar** (`-f -`): no se copia al contenedor ni se usa `-f /tmp/...`,
+porque MSYS reescribe las rutas que empiezan por `/` y `psql` termina buscando
+`C:/Program Files/Git/tmp/...`. `MSYS_NO_PATHCONV=1` evita esa conversión; es lo
+mismo que hace `scripts/db.sh` (§8).
+
+### El parche 9 necesita `APP_CRYPTO_KEY`
+
+La clave vive en `.env` como `APP_CRYPTO_KEY` y se pasa a `psql` como variable:
+
+```sh
+MSYS_NO_PATHCONV=1 docker exec -i avisa-db psql -U avisa -d avisa \
+  -v ON_ERROR_STOP=1 -v crypto_key="$APP_CRYPTO_KEY" -f - \
+  < docs/PARCHE_9_SEGURIDAD_NIVEL_ALTO.sql
+```
+
+Sin `-v crypto_key`, el script aborta con salida 3. Todo corre en una sola
+transacción: un fallo de verificación no deja purga, ni copia, ni columnas a medio
+cifrar. La tabla de destino tiene RLS `FORCE`, así que hay que ejecutarlo con un
+rol con `BYPASSRLS` (aquí `avisa`) o afectará 0 filas en silencio.
+
+**La clave no tiene `clave_version`.** Se cifró con una sola versión de clave, de
+modo que **rotarla obliga a re-cifrar todo**; no hay convivencia entre clave vieja
+y nueva. Esa rotación y la custodia de la clave siguen abiertas (`docs/INDICE.md`
+§5).
+
+---
+
+## 10. Archivos
 
 ```
 compose.yaml                        servicio db (puerto, volúmenes, healthcheck)
@@ -230,4 +292,11 @@ docker/postgres/initdb/
     20_verify.sql                   verificación con aborto
 scripts/db.sh                       operación
 docs/PREPARACION_V9_CARGA_LEGADO_5.sql   parche 5 (seeds de cierre)
+docs/PARCHE_6_CIERRE_CUMPLIMIENTO.sql    parche 6 (post-carga, §9)
+docs/PARCHE_7_GUARDRAILS_G19_G25.sql     parche 7 (post-carga, §9)
+docs/PARCHE_8_ICD_TOPE_Q40.sql           parche 8 (post-carga, §9)
+docs/PARCHE_9_SEGURIDAD_NIVEL_ALTO.sql   parche 9 (post-carga, §9)
+docs/PARCHE_10_FLUJO_PROCESO_D17.sql     parche 10 (post-carga, §9)
+docs/PARCHE_11_GRAFO_KAG.sql             parche 11 (post-carga, §9)
+docs/PARCHE_12_COMENTARIOS_COLUMNAS.sql  parche 12 (post-carga, §9)
 ```

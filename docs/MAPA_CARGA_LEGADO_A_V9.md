@@ -1,3 +1,7 @@
+> **Estado documental:** superado. No editar.
+> El mapa de carga vigente es `docs/PLAN_PORTE_LEGADO_V9.md` **§2**, que corrige esta tabla. Sus advertencias viven en `docs/DECISIONES_CARGA_LEGADO_V9.md` (Anexos B y C).
+> Se conserva por trazabilidad histórica. Índice: `docs/INDICE.md`.
+
 # Mapa de carga: legado 2026 → v9
 
 **Fecha:** 2026-10-30
@@ -245,9 +249,9 @@ análisis) · `fact_proceso_caso` 36 + `fact_proceso_reporte` 99 +
    `N_Hitos_Total`, `N_Hitos_Cumplidos` valen `0` en los 35 casos, pese a que
    existen 12 hitos en otra hoja. Cualquier tablero que muestre progreso desde
    estos campos mostrará cero para todos. No cargarlos como verdad.
-2. **`core.entidadess`** (con doble `s`) existe en el DDL v9 y es un **error
-   tipográfico del propio DDL**, distinto de `core.entidades` (L102). Revisar
-   antes de construir nada encima.
+2. **`core.entidadess`** (con doble `s`) **no existe** en la DDL v9: el único
+   objeto es `core.entidades` (L102). Si alguna copia del archivo muestra el
+   typo, es una variante no versionada; no construir nada encima.
 3. **Orden de ejecución:** DDL v9 → `PREPARACION_V9_CARGA_LEGADO.sql` →
    geografía (§3.1) → catálogos → actores → usuarios → casos → documentos →
    cronología → demandas → alertas → compromisos sintéticos → notificaciones.

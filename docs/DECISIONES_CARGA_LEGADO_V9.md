@@ -32,14 +32,14 @@ Todos están cerrados:
 
 Y las correcciones a los documentos anteriores:
 
-| #   | Antes se decía                                                | La realidad                                                                                                                                    | Origen                         |
-| --- | ------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------ |
-| C1  | 27 "unidades orgánicas" ≠ 66 "áreas" (dos niveles)            | Son **las mismas 27** con la misma sigla                                                                                                       | Inspección 1:1                 |
-| C2  | `entidades` = 1 fila                                          | **23** (`E-001`..`E-023`)                                                                                                                      | `DIM_Entidad_Responsable`      |
-| C3  | `cat_especies` tiene 10 filas sembradas                       | **5** (ids 11–15)                                                                                                                              | Semilla v9                     |
-| C4  | `cat_tipos_actor` está vacía                                  | 7 filas: 1–3 del legado + NEC/CITES/CITE/SANIPES                                                                                               | Semilla v9                     |
-| C5  | 9 tablas con `FORCE ROW LEVEL SECURITY`                       | **11**, con nombres                                                                                                                            | `pg_class.relforcerowsecurity` |
-| C6  | `DIM_Provincias.Cod_INEI` "ya son 4 dígitos" (y distritos, 6) | Vienen **sin ceros a la izquierda**: 28 de 70 provincias tienen 3 dígitos y 307 de 698 distritos tienen 5 → hace falta `zfill(4)` / `zfill(6)` | Datos reales                   |
+| #   | Antes se decía                                                | La realidad                                                                                                                                                                                                    | Origen                         |
+| --- | ------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------ |
+| C1  | 27 "unidades orgánicas" ≠ 66 "áreas" (dos niveles)            | Son **las mismas 27** con la misma sigla                                                                                                                                                                       | Inspección 1:1                 |
+| C2  | `entidades` = 1 fila                                          | **23** (`E-001`..`E-023`)                                                                                                                                                                                      | `DIM_Entidad_Responsable`      |
+| C3  | `cat_especies` tiene 10 filas sembradas                       | **5** (ids 11–15)                                                                                                                                                                                              | Semilla v9                     |
+| C4  | `cat_tipos_actor` está vacía                                  | 7 filas: 1–3 del legado + NEC/CITES/CITE/SANIPES                                                                                                                                                               | Semilla v9                     |
+| C5  | 9 tablas con `FORCE ROW LEVEL SECURITY`                       | **11**, con nombres. Medición de hoy (2026-11-18, v10 + parches 7–10): **48**, todas `FORCE` — 47 con `relkind='r'` + `agent.llm_call`, que es particionada (`relkind='p'`) y también cuenta como tabla lógica | `pg_class.relforcerowsecurity` |
+| C6  | `DIM_Provincias.Cod_INEI` "ya son 4 dígitos" (y distritos, 6) | Vienen **sin ceros a la izquierda**: 28 de 70 provincias tienen 3 dígitos y 307 de 698 distritos tienen 5 → hace falta `zfill(4)` / `zfill(6)`                                                                 | Datos reales                   |
 
 > **C6 es el hallazgo más peligroso del cierre.** Sin el padding, `provincias.ubigeo`
 > (`'101'`) y el prefijo de `distritos.ubigeo` (`'0101'`) no coinciden, y las 698
@@ -62,7 +62,7 @@ Hay cuatro niveles, y **siempre se usa el más alto posible**:
 **Lo que nunca se hace:** inventar un valor para satisfacer un `NOT NULL`. Si el
 esquema no tolera NULL y no hay fuente, se **relaja el esquema** (parches 1 y 3),
 salvo que exista una fuente autoritativa externa (única excepción: D26, la unidad
-OAIPCS, documentada en `docs/AVISA_PRODUCE_v9(1).md`).
+OAIPCS, documentada en `docs/AVISA_PRODUCE_v10.md` (contiene v9 íntegro)).
 
 **Corolario operativo:** todo lo que no resuelve va a `core.migracion_conflicto`
 (parche 3), no a un log perdido. El dato entra marcado y con puntero para revisión
@@ -210,30 +210,30 @@ compatibilidad: **el dato normativo se lee, no se estima.**
 
 ## 3. D1–D22 — estado final
 
-| #   | Decisión                                       | Estado final                                                                                                   |
-| --- | ---------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| D1  | 33/83 alertas sin caso                         | ✅ `caso_id` NULL. No se inventan casos                                                                        |
-| D2  | 225/325 demandas sin caso                      | ✅ `caso_id` NULL + `alerta_id`. Ahora **226** (1 caso es de la serie anterior, D44)                           |
-| D3  | 12/35 casos sin distrito                       | ✅ NULL + `region_principal_id` siempre                                                                        |
-| D4  | Sin fuente de `unidad_responsable_id`          | ✅ **D26**: unidad OAIPCS real                                                                                 |
-| D5  | 1 caso sin `id_riesgos`                        | ⚠ **Sustituida por D48**: se deriva de las alertas, no de `Prioridad`                                          |
-| D6  | Escala de `Pct_Avance`                         | ✅ 0.0–0.9 → ×100. Verificado: `{0,70,80,90}`                                                                  |
-| D7  | `FACT_Historial_Estado` huérfano               | ✅ No se carga; el trigger `caso_historial()` genera las 35 filas                                              |
-| D8  | Qué bridge actor↔caso manda                    | ✅ Ambos son el mismo conjunto: **unión deduplicada** (62 y 45 filas)                                          |
-| D9  | Fusionar los dos censos de personas            | ❌ **ANULADA**: son disjuntos. 0 nombres en común y `DNI='N/D'` en 108/108                                     |
-| D10 | `Id_organizacion` guarda nombres               | ✅ match por id (11) → nombre exacto (271) → sin vínculo (**378**, a `migracion_conflicto`)                    |
-| D11 | Credenciales en claro                          | ✅ No se trasladan. `clave_hash` aleatorio + reseteo forzado                                                   |
-| D12 | `nivel_gobierno` basura                        | ✅ NULL (`'Perfil-01'`, `'Sí'`)                                                                                |
-| D13 | Hitos sin compromisos                          | ✅ 8 compromisos sintéticos, 12 hitos (todos con `ACC-xxxx` válido)                                            |
-| D14 | Titular/alterno en texto libre                 | ✅ `mesa_miembros.nombre_texto`, sin fuzzy                                                                     |
-| D15 | Descripciones TEMA-03/04 cruzadas              | ✅ Bruto en `descripcion_legado`, `descripcion` NULL, `nota_calidad`                                           |
-| D16 | `tipo_documento='Otro'`                        | ✅ tipo 15 `otro`                                                                                              |
-| D17 | `FACT_Proceso_*` sin workflow                  | ✅ Sólo `legacy.*` (135 filas)                                                                                 |
-| D18 | RADAR / NODO                                   | ✅ Sólo `legacy.*` (6 filas)                                                                                   |
-| D19 | Formatos `CS-2026-07` vs `CS-PRODUCE-2026-007` | ✅ **Confirmada y reforzada**: se comprobó por contenido que NO son el mismo caso. Los cortos se aparcan (D44) |
-| D20 | Columna vs bridge de alertas                   | ⚠ **INVERTIDA por D31**: el bridge NO es la única verdad; la columna aporta 16 pares propios                   |
-| D21 | ¿Se conserva `legacy.*`?                       | ✅ Sí, es la única fuente reproducible                                                                         |
-| D22 | `cat_especies` 37 vs sembradas                 | ⚠ Era 5, no 10. Total final **39** (D25)                                                                       |
+| #   | Decisión                                       | Estado final                                                                                                                                                                                                                          |
+| --- | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| D1  | 33/83 alertas sin caso                         | ✅ `caso_id` NULL. No se inventan casos                                                                                                                                                                                               |
+| D2  | 225/325 demandas sin caso                      | ✅ `caso_id` NULL + `alerta_id`. Ahora **226** (1 caso es de la serie anterior, D44)                                                                                                                                                  |
+| D3  | 12/35 casos sin distrito                       | ✅ NULL + `region_principal_id` siempre                                                                                                                                                                                               |
+| D4  | Sin fuente de `unidad_responsable_id`          | ✅ **D26**: unidad OAIPCS real                                                                                                                                                                                                        |
+| D5  | 1 caso sin `id_riesgos`                        | ⚠ **Sustituida por D48**: se deriva de las alertas, no de `Prioridad`                                                                                                                                                                 |
+| D6  | Escala de `Pct_Avance`                         | ✅ 0.0–0.9 → ×100. Verificado: `{0,70,80,90}`                                                                                                                                                                                         |
+| D7  | `FACT_Historial_Estado` huérfano               | ✅ No se carga; el trigger `caso_historial()` genera las 35 filas                                                                                                                                                                     |
+| D8  | Qué bridge actor↔caso manda                    | ✅ Ambos son el mismo conjunto: **unión deduplicada** (62 y 45 filas)                                                                                                                                                                 |
+| D9  | Fusionar los dos censos de personas            | ❌ **ANULADA**: son disjuntos. 0 nombres en común y `DNI='N/D'` en 108/108                                                                                                                                                            |
+| D10 | `Id_organizacion` guarda nombres               | ✅ match por id (11) → nombre exacto (271) → sin vínculo (**378**, a `migracion_conflicto`)                                                                                                                                           |
+| D11 | Credenciales en claro                          | ✅ No se trasladan. `clave_hash` aleatorio + reseteo forzado                                                                                                                                                                          |
+| D12 | `nivel_gobierno` basura                        | ✅ NULL (`'Perfil-01'`, `'Sí'`)                                                                                                                                                                                                       |
+| D13 | Hitos sin compromisos                          | ✅ 8 compromisos sintéticos, 12 hitos (todos con `ACC-xxxx` válido)                                                                                                                                                                   |
+| D14 | Titular/alterno en texto libre                 | ✅ `mesa_miembros.nombre_texto`, sin fuzzy                                                                                                                                                                                            |
+| D15 | Descripciones TEMA-03/04 cruzadas              | ✅ Bruto en `descripcion_legado`, `descripcion` NULL, `nota_calidad`                                                                                                                                                                  |
+| D16 | `tipo_documento='Otro'`                        | ✅ tipo 15 `otro`                                                                                                                                                                                                                     |
+| D17 | `FACT_Proceso_*` sin workflow                  | ✅ **RESUELTA (2026-11-18)**. Parche `PARCHE_10_FLUJO_PROCESO_D17.sql`, informe `docs/parches/P10_FLUJO_D17.md`: `core.flujo_definicion` 7 · `core.flujo_estado` 5 · `core.proceso_instancia` 135. Ver Anexo A.2 · D18 sigue diferida |
+| D18 | RADAR / NODO                                   | ⚠ **Diferida, no cargada**: `territorio.*` (4 tablas / 6 filas). Las 6 filas siguen en `legacy.*`; ver Anexo A.2                                                                                                                      |
+| D19 | Formatos `CS-2026-07` vs `CS-PRODUCE-2026-007` | ✅ **Confirmada y reforzada**: se comprobó por contenido que NO son el mismo caso. Los cortos se aparcan (D44)                                                                                                                        |
+| D20 | Columna vs bridge de alertas                   | ⚠ **INVERTIDA por D31**: el bridge NO es la única verdad; la columna aporta 16 pares propios                                                                                                                                          |
+| D21 | ¿Se conserva `legacy.*`?                       | ✅ Sí, es la única fuente reproducible                                                                                                                                                                                                |
+| D22 | `cat_especies` 37 vs sembradas                 | ⚠ Era 5, no 10. Total final **39** (D25)                                                                                                                                                                                              |
 
 ---
 
@@ -493,15 +493,19 @@ Todas verificadas contra el workbook (no estimadas):
 
 ## 8. Lo que queda fuera de la carga (y por qué)
 
-| Concepto                                                                         | Filas | Razón                                                        | Dónde queda  |
-| -------------------------------------------------------------------------------- | ----: | ------------------------------------------------------------ | ------------ |
-| `FACT_Proceso_Caso`, `FACT_Proceso_Reporte`, `DIM_Paso_Proceso*`                 |   135 | v9 no tiene workflow                                         | `legacy.*`   |
-| `FACT_RED_RADAR`, `FACT_NODO`, `BRIDGE_RADAR/Nodo_Actor`, `DIM_Tipo_Actor_Radar` |    10 | RADAR diferido                                               | `legacy.*`   |
-| `FACT_Historial_Estado`                                                          |    27 | 27/27 huérfanos + columnas cruzadas; el trigger lo sustituye | `legacy.*`   |
-| `BRIDGE_Caso_{Descencadenantes,Impulsores,Causas,Medios}`                        |    10 | van a `documentos.contenido_json`                            | `documentos` |
-| `Respuestas de formulario 1`                                                     |     1 | intake bruto; duplica una alerta                             | `legacy.*`   |
-| `DIM_Responsable`                                                                |     3 | puntero polimórfico sin valor                                | descartado   |
-| `DIM_Estado_Proceso`, `DIM_Tipo_Proceso`                                         |     9 | workflow inexistente                                         | `legacy.*`   |
+| Concepto                                                                         | Filas | Razón                                                                                       | Dónde queda  |
+| -------------------------------------------------------------------------------- | ----: | ------------------------------------------------------------------------------------------- | ------------ |
+| `DIM_Tipo_Proceso`                                                               |     4 | `TR-01..TR-04` sin catálogo destino; el discriminante vive en `flujo_definicion.tipo_flujo` | `legacy.*`   |
+| `FACT_RED_RADAR`, `FACT_NODO`, `BRIDGE_RADAR/Nodo_Actor`, `DIM_Tipo_Actor_Radar` |    10 | RADAR diferido                                                                              | `legacy.*`   |
+| `FACT_Historial_Estado`                                                          |    27 | 27/27 huérfanos + columnas cruzadas; el trigger lo sustituye                                | `legacy.*`   |
+| `BRIDGE_Caso_{Descencadenantes,Impulsores,Causas,Medios}`                        |    10 | van a `documentos.contenido_json`                                                           | `documentos` |
+| `Respuestas de formulario 1`                                                     |     1 | intake bruto; duplica una alerta                                                            | `legacy.*`   |
+| `DIM_Responsable`                                                                |     3 | puntero polimórfico sin valor                                                               | descartado   |
+
+Las hojas de flujo **ya no están fuera**: el parche 10 (D17) cargó
+`FACT_Proceso_Caso` (36) + `FACT_Proceso_Reporte` (99) en `core.proceso_instancia`,
+`DIM_Paso_Proceso*` (7) en `core.flujo_definicion` y `DIM_Estado_Proceso` (5) en
+`core.flujo_estado`. Ver Anexo A.2 y `docs/parches/P10_FLUJO_D17.md`.
 
 Nada de esto se borra: el staging es la garantía de que la decisión es reversible.
 
@@ -570,6 +574,151 @@ incógnitas:
    ejecutar dos veces tolerando errores la primera.
 2. **PostGIS obligatorio.**
 3. El seed de `cat_variables` (L3007) viola `cat_variables_dominio_id_fkey`.
-4. Existe `core.entidadess` (doble `s`): typo de la DDL.
-5. `core.plan_acciones` (acciones) y `core.planes_accion` (plan) coexisten con
+4. `core.entidadess` (doble `s`) **no existe** en la DDL v9: el único objeto es `core.entidades` (L102). Si alguna copia del archivo muestra el typo, es una variante no versionada: no construir nada encima y no citarla como si fuera la DDL vigente.
+5. **`core.plan_acciones`** (acciones) y **`core.planes_accion`** (plan) coexisten con
    nombres casi iguales y PKs distintas. Trampa para cualquier cargador.
+
+---
+
+## Anexo A — Clases de portabilidad y su ajuste a v10
+
+Absorbe `docs/ANALISIS_PORTABILIDAD_AVISA_2026_A_V9.md` §1.1 y §5. El detalle
+columna a columna de ese documento (§3) **sigue siendo fuente única allí**: no se
+duplica aquí porque crear una segunda copia de una tabla de mapeo es exactamente
+el defecto que el índice documental está corrigiendo.
+
+### A.1 Base certificada: las 86 hojas contra la DDL v9
+
+| Clase | Significado                                                                                               | Tablas | Filas | % filas |
+| ----- | --------------------------------------------------------------------------------------------------------- | -----: | ----: | ------: |
+| **A** | Destino directo: mismo concepto, cambian tipos de id y alguna columna                                     |     14 | 1 342 |  28,9 % |
+| **B** | Transformación estructural: cambia el padre o la granularidad, o hay que sintetizar columnas obligatorias |     27 | 2 077 |  44,7 % |
+| **C** | Se absorbe en JSON o en un valor derivado                                                                 |     11 |    90 |   1,9 % |
+| **D** | **Sin destino en v9**: el concepto no existe en el modelo                                                 |     23 | 1 140 |  24,5 % |
+| **X** | Vacía (0 filas): se descarta sin trabajo                                                                  |     11 |     0 |     0 % |
+
+Lectura original: 73 % de las filas y 52 de 86 tablas eran portables con trabajo
+(A+B+C); 24,5 % de las filas no tenían casa.
+
+### A.2 Lo que cambia al pasar a v10
+
+La clase D medía la distancia contra **v9**. v10 y el parche 2 de migración crearon
+**22 tablas de soporte**; el parche 10 añadió 3 más (`core.flujo_definicion`,
+`core.flujo_estado`, `core.proceso_instancia`). Con eso, **21 de las 23 tablas de
+clase D pasan a B** (16 del parche 2, 4 de D17 y 1 de la corrección de hoy):
+
+| Grupo                                         | Tablas | Filas | Destino creado                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| --------------------------------------------- | -----: | ----: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Cargado en v9**                             |      8 |   978 | `log_accesos` 857 → `core.log_accesos` (857) · `bridge_alerta_recurso` 32 → `core.alerta_especies` (30) · `dim_locales` 27 → `core.locales` (27) · `bridge_sectorista_departamento` 27 → `core.usuario_territorio` (25; se pierden `DEP-20` y un colapso de PK) · `dim_mesas_grupos` 21 → `core.mesas_dialogo` (21) + `mesa_miembros` (62) · `bridge_capacitacion_participant` 9 → `core.capacitacion_participantes` (9) · `dim_destinatarios_fijos` 4 → `core.suscripcion_notificacion` (4) · `dim_capacitaciones` 1 → `core.capacitaciones` (1) |
+| **Destino creado, sin uso**                   |      4 |     4 | `bridge_clima_actor`, `bridge_clima_actor_estado`, `bridge_reporte_actor`, `bridge_reporte_actor_estado` → `core.documento_actores` (0 filas: la tabla existe, el vínculo documento↔actor aún no se escribe)                                                                                                                                                                                                                                                                                                                                      |
+| **Diferido por decisión D18**                 |      4 |     6 | `fact_red_radar` 1, `fact_nodo` 1, `bridge_radar_actor` 1, `bridge_nodo_actor` 3 → `territorio.*` (RADAR reclasificado como diferido, no como inexistente)                                                                                                                                                                                                                                                                                                                                                                                        |
+| **Cargado por D17** (parche 10)               |      4 |   142 | `fact_proceso_reporte` 99 + `fact_proceso_caso` 36 → `core.proceso_instancia` (135, discriminado por `tipo_origen`) · `dim_paso_proceso_caso` 4 + `dim_paso_proceso` 3 → `core.flujo_definicion` (7, discriminado por `tipo_flujo`)                                                                                                                                                                                                                                                                                                               |
+| **Reclasificado por corrección** (2026-11-18) |      1 |     4 | `dim_intervencion` 4 → `core.cat_ciclos_intervencion` (4, `Ciclo-001..004`). El Anexo A la daba por D porque **v9 no tenía ese catálogo**; el cargador ya la escribía (`p02_catalogos.py`, fase 2)                                                                                                                                                                                                                                                                                                                                                |
+
+### A.3 Totales vigentes
+
+| Clase     | Tablas |     Filas |   % filas |
+| --------- | -----: | --------: | --------: |
+| A         |     14 |     1 342 |    28,9 % |
+| B         | **48** | **3 211** |    69,1 % |
+| C         |     11 |        90 |     1,9 % |
+| **D**     |  **2** |     **6** | **0,1 %** |
+| X         |     11 |         0 |       0 % |
+| **Total** | **86** | **4 649** |     100 % |
+
+**Corrección de una cifra anterior.** El índice declaró «B 40 / 3 063 · D 10 / 154».
+Ese reparto dejaba fuera el grupo D18 (4 tablas / 6 filas), que sí tiene destino
+creado, luego el grupo D17 (4 tablas / 142 filas), cargado el 2026-11-18, y por
+último `dim_intervencion` (1 tabla / 4 filas), que ya estaba cargada y seguía contada
+como D. Los totales cuadran ahora uno a uno con las 86 hojas y las 4 649 filas, y
+cada fila de A.2 es verificable contra `count(*)` de la base.
+
+> **Nota de medición (2026-11-18): 4 649 declaradas, 4 643 medidas.** La única
+> discrepancia entre este anexo y la réplica viva es `fact_historial_estado` (#15 del
+> Anexo A de `ANALISIS_PORTABILIDAD`): aquí figuran **33** filas y el manifiesto
+> `legacy._hojas` y `count(*)` dan **27**. Las otras 85 hojas cuadran una a una. Por
+> eso los totales de esta tabla dicen 4 649 y la medición de la base dice **4 643**,
+> y la clase B sería **3 205** en lugar de 3 211. **No cambia ninguna decisión de
+> carga**: la hoja se migra igual, solo con 6 filas menos. Se conserva 4 649 en todo
+> el conjunto documental para no romper las citas; manda esta nota. La medición es
+> reproducible con `migration/reporte_estadistica.py`.
+
+### A.4 Las 2 hojas que siguen sin destino (6 filas)
+
+| Tabla                  | Filas | Por qué sigue sin casa                                                                  | Qué se decidió                                                             |
+| ---------------------- | ----: | --------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| `dim_tipo_actor_radar` |     3 | Roles de participación en RED/NODO (`Titular`, `Alterno`, `Participante Institucional`) | **Diferida**: irá a `territorio.*` con D18; aún no hay tabla para RED/NODO |
+| `dim_responsable`      |     3 | Puntero polimórfico (`tabla_origen`); v10 usa FK explícitas                             | **Descartada**: la asignación de usuarios ya cubre esos vínculos           |
+
+`dim_tipo_actor_radar` no cabe en ningún catálogo existente: no son tipos de actor
+(`core.cat_tipos_actor`: Actor del Estado, Sociedad Civil, Privado, NEC, CITES, CITE,
+SANIPES), ni roles de actor (`core.cat_roles_actor`: Principal, Secundario, Tercero,
+Proveedor MYPE…), ni roles funcionales (`core.cat_roles_funcionales`: Decisor
+Principal, Proveedor de evidencia, Implementador, Articulador territorial). Describen
+la posición de un actor **dentro de una RED o NODO**, y ese modelo es justamente el
+que está diferido en D18. `territorio.*` ya existe (17 tablas: `lugares`, caletas,
+plantas, certificaciones…), pero ninguna modela RED ni NODO; por eso la hoja sigue en
+D y no se cuenta como B. Se queda en `legacy.*` hasta entonces: inventarle un
+catálogo ahora sería fijar un eje que todavía no existe.
+
+`dim_responsable` se descarta sin costo: es un puntero polimórfico (`tabla_origen`)
+que la asignación de usuarios (`core.usuarios` + unidad/rol) ya sustituye con FK
+explícitas.
+
+**No queda ninguna hoja de clase D esperando decisión de OAIPCS.**
+`dim_intervencion` salió de esta lista al comprobarse que ya está cargada (A.2 y
+Anexo C, fila 8), y las 142 filas del flujo las cargó el parche 10. Las 6 filas
+restantes no son trabajo de carga: son el precio de tener RADAR diferido.
+
+### A.5 Pendientes abiertos de D17 (no bloquean la carga)
+
+El parche 10 escribió las 135 instancias y los 12 registros de catálogo; lo que falta
+son los **padres**. Ninguno de estos huecos impide la carga: la instancia existe y se
+verifica, sólo queda sin enlace.
+
+| #   | Pendiente                                                                     | Filas | Qué no se resuelve                                   | Se resuelve en                                       |
+| --- | ----------------------------------------------------------------------------- | ----: | ---------------------------------------------------- | ---------------------------------------------------- |
+| 1   | `CS-PRODUCE-2026-037` y `038` no existen en `core.casos`                      |     2 | `caso_id`; el código queda en `codigo_caso_legado`   | Decidir si se crean los casos o se descartan         |
+| 2   | Bloque `PR-001..PR-018` sin maestro de reporte                                |    18 | no hay padre: sólo queda `codigo_reporte` como texto | Definir maestro de reportes o aceptar enlace blando  |
+| 3   | `DEST-01` no es usuario de `core.usuarios`                                    |     6 | `usuario_id`; queda `codigo_responsable_legado`      | Confirmar si es buzón colectivo y modelarlo como tal |
+| 4   | Pasos 4–6 sin definición en `core.flujo_definicion`                           |     9 | `flujo_definicion_id`; se conserva `orden`           | OAIPCS dicta nombre, estado resultante y responsable |
+| 5   | `AT-2026-19, 27, 29, 31, 33, 34, 35, 39` no están en `core.alertas_tempranas` |     9 | `alerta_id`                                          | Confirmar que no existen o crearlas                  |
+
+Los cinco son dato maestro ausente, no defecto de carga: 72 instancias sí resolvieron
+`alerta_id` contra `core.alertas_tempranas` y 126 tienen `flujo_definicion_id`.
+Detalle fila a fila en `docs/parches/P10_FLUJO_D17.md` §5 y §7.
+
+---
+
+## Anexo B — Qué se conservó de `MAPA_CARGA_LEGADO_A_V9.md` y dónde
+
+`MAPA_CARGA` está **superado** por `PLAN_PORTE_LEGADO_V9.md` §2. No se elimina
+porque conserva valores literales del origen que ningún otro documento transcribe.
+
+| Sección del mapa                    | Destino vigente                      | Estado                                   |
+| ----------------------------------- | ------------------------------------ | ---------------------------------------- |
+| §1 — decisión (h) `nivel_conflicto` | este documento §2 (h)                | absorbido                                |
+| §2 — correcciones a (a)–(g)         | `PLAN_PORTE_LEGADO_V9.md` §2         | superado por el plan                     |
+| §3.1–§3.11 — mapa por dominio       | `PLAN_PORTE_LEGADO_V9.md` §4.1–§4.12 | superado; **el plan es la fuente única** |
+| §4 — D1–D22                         | este documento §3                    | absorbido                                |
+| §5 — advertencias                   | Anexo C de este documento            | absorbido                                |
+
+Lo que **solo** existe en el mapa y por eso no se borra: la descripción literal de
+cada hoja del legado (nombres de columna, formatos de código, casos de ejemplo) que
+el plan cita sin volver a transcribir. Si alguna vez se discute qué decía una hoja,
+se consulta ahí.
+
+---
+
+## Anexo C — Advertencias del mapa, con su estado
+
+| #   | Advertencia (§5 del mapa)                                                                                                        | Estado                                                                                                                                                                                                                                                                                                                                                               |
+| --- | -------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Todos los contadores de avance del legado están en cero (`N_Acciones`, `N_Hitos_Total`, `N_Hitos_Cumplidos` = 0 en los 35 casos) | **Vigente.** Ningún KPI de avance puede salir del legado. Ver `PLAN` §8.3                                                                                                                                                                                                                                                                                            |
+| 2   | `core.entidadess` (doble `s`) no existe                                                                                          | **Vigente y era la corrección.** El único objeto es `core.entidades` (DDL L102). No reintroducir el typo                                                                                                                                                                                                                                                             |
+| 3   | Orden de ejecución del cargador                                                                                                  | **Sustituido** por `PLAN` §3 (orden por dependencias reales)                                                                                                                                                                                                                                                                                                         |
+| 4   | Sin `app.user_id` y `app.clasificacion_max` los `INSERT` no fallan: desaparecen                                                  | **Vigente y ampliado**: `DECISIONES` §11 y `mvp.md` §3.3                                                                                                                                                                                                                                                                                                             |
+| 5   | D17 describía `fact_proceso_*` como «135 filas»                                                                                  | **Resuelta: eran 142** (36 + 99 + 4 + 3) y **están cargadas desde el 2026-11-18** por el parche 10 en `core.proceso_instancia` (135) y `core.flujo_definicion` (7). El total de §3.11 sigue siendo **165** = 142 + 6 (RADAR) + 14 (JSON) + 3 (`dim_responsable`); el acta cita 160 y el desglose sin `dim_responsable` da 162. Ver `PLAN` §4.11 y `P10_FLUJO_D17.md` |
+| 6   | D16 contaba «55 documentos» con `tipo_documento='Otro'`                                                                          | **Corregido por medición.** Antes del parche 6 eran **37** (34 `RED-` + 3 `CT-2026-00x`); después, **3** (solo los `CT-`). El total de `core.documentos` no cambió: **153**. El 55 era una estimación, no un conteo. Ver `LEGADO_A_V10…` §11.5                                                                                                                       |
+| 7   | `DIM_Estado_Proceso` figuraba en el Anexo A de `ANALISIS_PORTABILIDAD` (#26) con destino `core.cat_estados_caso`                 | **Corregido: el destino es `core.flujo_estado`** (5 filas, `EST-01..EST-05`). `core.cat_estados_caso` son estados del **caso** (`Activo`, `En_seguimiento`, `Resuelto`, `Archivado`, 4 filas), no del paso: el mapeo anterior era ficticio (5 filas a una tabla de 4). Ver `P10_FLUJO_D17.md` §3.1                                                                   |
+| 8   | `DIM_Intervencion` figuraba como clase D «sin catálogo de tipos de intervención»                                                 | **Corregido: es clase B → `core.cat_ciclos_intervencion`.** La hoja tiene 4 filas (`Ciclo-001..004`) idénticas a las 4 del catálogo, que el parche 1 creó y `migration/loader/phases/p02_catalogos.py` ya carga. El Anexo A la daba por D porque **v9 no tenía el catálogo**; v10 sí. Nuevo reparto: **B 48 / 3 211 · D 2 / 6**                                      |

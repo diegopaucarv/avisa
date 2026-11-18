@@ -28,18 +28,19 @@ python migration/decisions.py
 python migration/test_decisions.py
 ```
 
-## Volcado del esquema v9
+## Volcado del esquema
 
-`out_v9_columns.txt` es el inventario de columnas de `core`, `kag`, `config` y
-`ops` del entorno definitivo (DDL v9 + parches 1–5). Para regenerarlo:
+El inventario de columnas de `core`, `kag`, `config` y `ops` **no se conserva en el
+repositorio**: es una foto que queda obsoleta en cuanto se aplica un parche. Se genera
+bajo demanda, en cualquier momento, con el comando de abajo. `out_legacy_columns.txt` sí
+se conserva, porque `docs/PLAN_PORTE_LEGADO_V9.md:36` lo cita como fuente.
 
 ```sh
-docker exec avisa-db psql -U avisa -d avisa -At -F "|" -c \
-  "select table_schema,table_name,ordinal_position,column_name,data_type,is_nullable
-     from information_schema.columns
-    where table_schema in ('core','kag','config','ops')
-    order by 1,2,3;" > migration/out_v9_columns.txt
-
+docker exec avisa-db psql -U avisa -d avisa -At -F '|' \
+  -c "select table_schema, table_name, ordinal_position, column_name, data_type, is_nullable
+        from information_schema.columns
+       where table_schema in ('core','kag','config','ops')
+       order by 1,2,3;"  > /tmp/columnas_esquema.txt
 ```
 
 ## Orden de preparación de la base

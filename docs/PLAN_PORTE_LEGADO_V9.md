@@ -672,7 +672,13 @@ reparte `DEP-15` + `DEP-16`, que colapsan en la región `15` y chocan contra
 `PRIMARY KEY (usuario_id, region_id)`. Ambas se registran en
 `core.migracion_conflicto`.
 
-### 4.11 Sin destino en v9 — 160 filas
+### 4.11 Sin destino en v9 — 165 filas (142 de workflow + 6 de RADAR + 14 absorbidas en JSON + 3 descartadas)
+
+> **Aritmética, porque hay tres cifras circulando.** Este desglose suma **165**.
+> El acta y el mapa citan **160**; el desglose sin `DIM_Responsable` suma **162**.
+> La diferencia no altera ninguna carga —las 14 de JSON se absorben en
+> `documentos.contenido_json` y las 3 de `DIM_Responsable` se descartan—, pero la
+> cifra que cuadra con las hojas es **165** y es la que debe citarse.
 
 | Hoja                                                                     |         Filas | Tratamiento                                             |
 | ------------------------------------------------------------------------ | ------------: | ------------------------------------------------------- |
@@ -723,7 +729,7 @@ no esta carga):
 not exist`), y por eso tampoco se crean los triggers de L138/169/190.
 2. PostGIS **es obligatorio**: hay `GEOGRAPHY` en L2566, L2581, L2596.
 3. El seed de `cat_variables` (L3007) viola `cat_variables_dominio_id_fkey`.
-4. `core.entidadess` (doble `s`) existe como tabla — error tipográfico del DDL.
+4. `core.entidadess` (doble `s`) **no existe** en la DDL v9: el único objeto es `core.entidades` (L102). Si alguna copia lo muestra, es una variante no versionada.
 5. `core.plan_acciones` (acciones) y `core.planes_accion` (plan) coexisten con
    nombres casi idénticos y PKs distintas (`id` vs `documento_id`). Trampa para
    cualquier cargador.
@@ -857,3 +863,27 @@ Cifras objetivo por tabla (para el acta de cierre):
    orden de `FACT_Casos`.
 5. **No ejecutar sin `app.clasificacion_max`**: los INSERT pasan y las filas
    desaparecen de toda lectura posterior. Es el fallo más silencioso de todos.
+
+---
+
+## Anexo E — Mapa de fuentes: qué documento responde qué
+
+Este plan no repite el detalle columna a columna del análisis de portabilidad.
+Ese detalle **sigue siendo fuente única en su archivo**, y duplicarlo aquí sería
+crear la segunda copia que después diverge.
+
+| Pregunta                                                       | Documento que la responde                                                                                                       |
+| -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| ¿Qué columna del legado alimenta qué columna de v9, y por qué? | `ANALISIS_PORTABILIDAD_AVISA_2026_A_V9.md` **§3** (mapa por dominio, columna a columna) y **§4** (mapeo de valores de catálogo) |
+| ¿Qué se ejecuta, en qué orden, con qué correcciones?           | **este plan** §3 (orden) y §4 (especificación por tabla)                                                                        |
+| ¿Qué se decidió cuando había ambigüedad?                       | `DECISIONES_CARGA_LEGADO_V9.md` (MIG D1–D51)                                                                                    |
+| ¿Cuántas filas y tablas hay por clase A/B/C/D/X?               | `DECISIONES` **Anexo A**                                                                                                        |
+| ¿Qué quedó sin destino y por qué?                              | `DECISIONES` **Anexo A.4**; desglose de filas en la §4.11 de este plan                                                          |
+
+**Precedencia**: ante discrepancia, manda este plan para la **ejecución** (sus §2
+corrigen el mapa anterior) y el análisis de portabilidad para la **evidencia** de
+por qué cada columna va donde va. No son lo mismo y no deben fusionarse: uno es
+especificación, el otro es justificación.
+
+Ninguno de los dos contiene la clasificación funcional de las tablas vivas
+(entrada / proceso / salida): esa vive en `BRECHA_CAPA_DATOS_V9.md` §12.

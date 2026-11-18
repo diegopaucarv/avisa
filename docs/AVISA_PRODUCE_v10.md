@@ -1,12 +1,22 @@
 # SISTEMA DE INTELIGENCIA SECTORIAL PRODUCE — OAIPCS
 
-## Arquitectura v9 (versión definitiva, consolidada) y Plan de Expansión 2027–2031
+<!-- v10:P00a begin -->
+
+## Arquitectura v10 (v9 + puente a la ejecución MVP-45) y Plan de Expansión 2027–2031
+
+<!-- v10:P00a end -->
 
 ### Documento Técnico Integral — v8.3 + el pivote de dominio genérico (v8.4) + la reconciliación C4–C6,
 
 ### probado de punta a punta contra PostgreSQL 16 real (254 tablas, 21 vistas, 25 schemas, 0 errores)
 
 ### Bitácora de Evolución y Justificación de Decisiones
+
+<!-- v10:P00b begin -->
+
+### v10 — ediciones quirúrgicas sobre v9: ningún párrafo de v9 se reescribe; lo nuevo lleva el sufijo `.v10` y la marca _(v10)_. Mapa en §0.7.
+
+<!-- v10:P00b end -->
 
 ---
 
@@ -86,6 +96,8 @@ _(El índice original de v8.3 sigue abajo sin tocar. Lo nuevo en v9 son las subs
 - 22. Vistas analíticas, triggers y pruebas
 - 23. Catálogo completo de diagramas
 - 24. Casos de uso de referencia con las reglas del gobierno vigente
+  - 24.ter Casos de uso UC-10 a UC-14 (v10): vocero sin DNI, de la noticia al Ministro, gremio en Perfil C, What-if, migración desde AVISA
+- Anexo D — Puente v9 ↔ MVP-45 (v10): mapa de referencias, correspondencia de nombres y trazabilidad de brechas
 
 ---
 
@@ -146,6 +158,47 @@ Los hallazgos 7 y 8 no son una reinterpretación del criterio: son casos donde v
 - **Segundo caso real del mismo patrón: el gate HITL de `core.outbox_integracion` (edición del 30 de octubre, §15.6).** Ningún mensaje sale hacia un sistema externo sin que una persona con autoridad lo haya aprobado, y la base lo impone — no la aplicación: el trigger `core.chk_outbox_aprobacion()` rechaza los estados `aprobado_para_envio`, `enviado` y `confirmado` si `aprobado_por` es nulo, exactamente como `core.bloquear_escritura_directa()` rechaza un `INSERT` directo en `core.cat_niveles_conflicto`. La gramática es la misma de `core.cambio_normativo` (registrar → aprobar con nombre y respaldo → recién entonces aplicar); lo que cambia es el objeto sobre el que se ejerce, no el mecanismo. Que este sea el segundo uso —y no un diseño paralelo— es justamente el argumento de esta sección: **una arquitectura generaliza sus patrones de gobernanza, no los reinventa por cada integración.**
 
 Esta sección existe porque la tensión es real y queda documentada aquí en vez de resolverse en silencio: **v9 no es "domain.artefacto todo"; es domain.artefacto por defecto, con dos excepciones nombradas cuando el volumen de consulta lo justifica de verdad — no ocho.**
+
+<!-- v10:P01 begin -->
+
+### 0.7 Cómo leer v10 — _añade (v10)_
+
+**En una línea.** v10 es v9 intacto más seis bloques (B11–B16) insertados donde les corresponde. Su propósito es cerrar la distancia entre la arquitectura de cinco años y un MVP de 45 días que debe correr en la infraestructura de OGTI (SQL Server, un solo profesional, plazos del TDR).
+
+**Qué se agregó a cada tema.** Cada bloque nuevo trae tres cosas que v9 no tenía de forma sistemática:
+
+1. un **Ejemplo** (un caso concreto, con cifras rotuladas «ILUSTRATIVO — no son datos del sistema», igual que en §24);
+2. un **Caso de uso** (UC-10 a UC-14 en §24.ter) que recorre el flujo de punta a punta;
+3. una **Prueba** (T91–T105 en §22.3.ter) que dice cómo se comprueba que funciona.
+
+| Bloque | Qué resuelve (en una frase)                                                                  | Dónde está                                                                                        | Lo cita el MVP-45 en      |
+| ------ | -------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- | ------------------------- |
+| B11    | Registrar actores sin DNI y ascenderlos sin perder historial                                 | §3.1 (principio 11), **§3.6.v10**, §9.2 (Resolver), §16.1.quater (G19), UC-10, UC-14, T91–T96     | MVP §2.3, §1.6 (1.2, 1.7) |
+| B12    | Desplegar el mismo modelo en SQL Server y aislar los perfiles A, B y C                       | §3.17.2 (S12–S14), **§3.17.2.v10**, **§11.8.v10**, UC-12, T97–T99                                 | MVP §2.1, §3.3            |
+| B13    | Fórmulas de los cinco KPIs, con ejemplo numérico, y la proyección socioeconómica             | **§8.4.ter**                                                                                      | MVP §4.1                  |
+| B14    | Simulador What-if inicial (matriz E1–E4) dentro de M5a                                       | **§13.5.v10**, UC-13, T103                                                                        | MVP §4.4                  |
+| B15    | Qué significa «tiempo real», alertas con aprobación humana, citas literales y redes sociales | §3.1 (principio 12), §7.5.v10, §9.2.v10, **§10.2.v10**, §16.1.quater (G20–G22), UC-11, T100, T104 | MVP §0.5, §3.4, §5.1–5.3  |
+| B16    | Puente: correspondencia de nombres, decisiones, preguntas abiertas, glosario                 | §0.7.1, §18.ter, glosario v10 (antes de §20), **Anexo D**                                         | todo el MVP               |
+
+**Convención de referencias.** Desde el MVP-45 se cita así: `[v10 §3.6.v10]`. Desde v10 hacia el MVP: `[MVP §2.3]`. Si una regla aparece en ambos, **manda v10** y el MVP la resume.
+
+**Reglas de lenguaje que siguen los bloques nuevos.** Una idea por oración; cada término técnico nuevo está en el glosario v10; cada regla trae un «por qué importa» y un ejemplo; las cifras ilustrativas se rotulan.
+
+### 0.7.1 Lo que el MVP-45 adelanta respecto de v9 — _añade (v10)_
+
+v9 sitúa algunas piezas en el año 2 (Nivel 2). El TDR exige versiones iniciales dentro de 45 días. Para no contradecir a v9, cada adelanto tiene una condición.
+
+| Pieza              | Dónde la pone v9                             | Qué hace el MVP-45                                                                                              | Condición para no contradecir a v9                                                                 |
+| ------------------ | -------------------------------------------- | --------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| Simulador What-if  | M5a, año 2, Nivel 2 (§13.5)                  | **M5a-lite**: motor de reglas determinista con matriz E1–E4 (§13.5.v10)                                         | Se mantiene el rótulo «ESCENARIO — no vigente» y la prueba T42; no alimenta `forecast.predictions` |
+| Minister View      | «Minister View completa» en Nivel 2 (§17.13) | Versión con **5 KPIs** (§8.4.ter)                                                                               | Solo entran indicadores validados por una persona y con incertidumbre no «alta» (G14)              |
+| KAG bitemporal     | Capa 3 (§5)                                  | **Diferida.** El MVP guarda `valid_from`/`valid_to` en relaciones y membresías; no guarda tiempo de transacción | Se pierde solo la pregunta «¿qué sabía el sistema el día X?»; no se pierde ningún dato             |
+| RAG-MACTOR         | §6                                           | Casos análogos + citas literales verificadas                                                                    | Las ramas completas se activan al reactivar KAG                                                    |
+| Tres agentes A1–A3 | §9.2                                         | Un pipeline Python (hace el trabajo de A1) + un Sintetizador (A3)                                               | A2 queda apagado, como permite §3.20                                                               |
+| Portal Perfil C    | Rol `externo_publico` (§11.5, §11.8)         | Piloto o ambiente de pruebas (MVP §0.3)                                                                         | Perfil C **no** es el portal público de M9: es una vista autenticada por sujeto (§11.8.v10)        |
+
+**Perfil de despliegue.** v9 está escrito para PostgreSQL. La ejecución con OGTI usa SQL Server. El modelo lógico, los nombres de tabla y las reglas de negocio no cambian; solo cambian los tipos y el mecanismo de seguridad por fila. Equivalencias en §3.17.2.v10.
+<!-- v10:P01 end -->
 
 ## 1. Contexto institucional y normativo
 
@@ -445,7 +498,7 @@ El sistema perfila actores y territorios y sugiere niveles de riesgo de conflict
 
 ### 1.4.bis Model cards obligatorias — _añade_
 
-Todo modelo registrado en `model.model_card` (ver §3.quater) debe tener, antes de poder pasar a `estado = 'activo'`: `proposito`, `tipo_modelo`, `libreria_id`, y — si gobierna un agente — `aplicacion_id`; además `reviewer` y `proximo_review`. El DS N.° 115-2025-PCM exige evaluación de impacto y supervisión humana sobre modelos de IA; sin estos campos, la Minister View no puede rotular el grado de evidencia de una predicción, y el Model Reviewer trimestral no tiene contra qué revisar. Las 12 model cards iniciales (8 de pronóstico/alerta + 4 que gobiernan a A1/A2/A3/Critic) están en §20.21.bis y sembradas en el DDL unificado.
+Todo modelo registrado en `model.model_card` (ver §3.quater) debe tener, antes de poder pasar a `estado = 'activo'`: `proposito`, `tipo_modelo`, `libreria_id`, y — si gobierna un agente — `aplicacion_id`; además `reviewer` y `proximo_review`. El DS N.° 115-2025-PCM exige evaluación de impacto y supervisión humana sobre modelos de IA; sin estos campos, la Minister View no puede rotular el grado de evidencia de una predicción, y el Model Reviewer trimestral no tiene contra qué revisar. Las 12 model cards iniciales (8 de pronóstico/alerta + 4 que gobiernan a A1/A2/A3/Critic) están en `model.model_card` (§3.quater) y sembradas en el DDL unificado.
 
 ### 1.5 Contexto de gobierno y agenda sectorial vigente
 
@@ -601,6 +654,9 @@ Cada sub-capa tiene su propio `ctx.cat_dominios` y TTL de frescura (§8.6). Un c
 8. **Una política documental:** todo anexo documental es un `core.documentos` tipado; solo se crea un subtipo con columnas cuando hay consultas relacionales reales (`planes_accion`).
 9. **Geografía con clave natural UBIGEO** y relaciones N:M donde la Guía lo exige (un caso o compromiso puede abarcar varios distritos).
 10. **La seguridad vive en la base:** RLS por nivel de clasificación, historial inmutable de agentes, validaciones de negocio en triggers (p. ej. "Cumplido" exige evidencia).
+11. **(v10) Ningún actor queda fuera por no tener documento.** La identidad se registra por niveles (§3.6.v10). El DNI es un dato opcional y aislado; no es la llave del actor. _Por qué importa:_ si el DNI es obligatorio, la matriz de actores se sesga hacia quienes ya están formalizados y deja fuera a voceros, colectivos y dirigentes que desconfían de la institución.
+12. **(v10) Toda promesa de latencia lleva un número y dice qué tramo mide.** «Tiempo real» sin número no es verificable. v10 fija tres tramos medibles en §10.2.v10.
+13. **(v10) Un modelo lógico, dos motores.** El modelo de v9 es la referencia. Cuando OGTI exige SQL Server se aplica el perfil de §3.17.2.v10 sin cambiar nombres de tabla ni reglas de negocio.
 
 ### 3.2 Bloque estándar de auditoría (reemplaza al "base_entity abstracto")
 
@@ -987,6 +1043,154 @@ classDiagram
     `core.casos` "1" <-- "0..*" `core.casos_actores` : caso_id
     `core.actores` "1" <-- "0..*" `core.casos_actores` : actor_id
 ```
+
+<!-- v10:P03 begin -->
+
+### 3.6.v10 Identificación gradual del actor (resuelve el bloqueo por DNI) — _extiende 3.6 (D2)_ — V10-01
+
+**El problema, con un ejemplo.** Un sistema que exige DNI para crear un actor deja afuera a quienes más pesan en un conflicto: el vocero que habla en la radio local pero no firma actas, el colectivo que bloquea un muelle, el dirigente que desconfía de dar su documento a una oficina del Estado.
+
+> **Ejemplo (ILUSTRATIVO).** El 12 de noviembre un medio regional cita al «dirigente de los pescadores de la caleta X». Con DNI obligatorio, el analista tiene dos malas opciones: no registrarlo (la matriz queda sesgada) o inventar un número (un dato falso con apariencia de verdad). v10 elimina el dilema.
+
+**Qué dice v9 hoy.** D2 no tiene campo de documento: `core.actor_datos_personales` guarda teléfono, género y autoidentificación, y `core.actores.naturaleza` solo distingue persona de organización. No hay forma de representar un alias sin identidad, un colectivo anónimo ni un ascenso de nivel. El bloqueo existe en el aplicativo vigente y reaparecería al migrar desde AVISA (supuesto de §3.17.1: 931 actores) si no se diseña aquí.
+
+**Diseño: cinco niveles de identificación.** El actor existe desde el primer día; lo que cambia es cuánto se sabe de él.
+
+| Nivel | Código                  | Qué se sabe                                        | ¿Tiene DNI?         | Ejemplo (ILUSTRATIVO)                                                            |
+| ----- | ----------------------- | -------------------------------------------------- | ------------------- | -------------------------------------------------------------------------------- |
+| 1     | `IDENTIFICADO_DNI`      | Persona plenamente identificada                    | Sí                  | Dirigente con documento verificado                                               |
+| 2     | `IDENTIFICADO_OTRO_DOC` | Documento alterno (CE, pasaporte) o RUC            | No (otro documento) | Representante legal de una empresa extranjera                                    |
+| 3     | `IDENTIFICADO_SIN_DOC`  | Nombre confirmado por 2 o más fuentes              | No                  | Vocero citado en un acta y en la prensa                                          |
+| 4     | `SEUDONIMO`             | Alias o cargo; identidad no registrada a propósito | No                  | «Dirigente de pescadores de la caleta X (no identificado)», código `ANI-SEC-014` |
+| 5     | `COLECTIVO_ANONIMO`     | Grupo sin individuos registrables                  | No                  | «Manifestantes del bloqueo del 12/11»                                            |
+
+**Cambios al diagrama D2.** Solo se agregan miembros; no se quita ninguno.
+
+```mermaid
+classDiagram
+    direction LR
+    class `core.cat_nivel_identificacion` {
+        +smallint id PK
+        +varchar codigo
+        +text descripcion
+    }
+    class `core.actores` {
+        +uuid actor_uid PK
+        +varchar naturaleza
+        +smallint nivel_identificacion_id FK
+        +uuid caso_ancla_id FK NULL
+        +uuid organizacion_ancla_uid FK NULL
+        +numeric confianza NULL
+        +bool validado_humano
+    }
+    class `core.actor_datos_personales` {
+        +uuid actor_uid PK FK
+        +varchar tipo_documento NULL
+        +bytea documento_cifrado NULL
+        +bytea documento_hmac NULL
+    }
+    class `core.actor_alias` {
+        +uuid id PK
+        +uuid actor_uid FK
+        +varchar alias
+        +varchar tipo_alias
+        +date vigente_desde
+        +date vigente_hasta NULL
+    }
+    class `core.actor_fusion` {
+        +uuid id PK
+        +uuid actor_absorbido_uid
+        +uuid actor_sobreviviente_uid FK
+        +uuid fusionado_por FK
+        +timestamptz fusionado_en
+        +text motivo
+    }
+    `core.cat_nivel_identificacion` "1" <-- "0..*" `core.actores` : nivel_identificacion_id
+    `core.actores` "1" <-- "0..*" `core.actor_alias` : actor_uid
+    `core.actores` "1" <-- "0..1" `core.actor_datos_personales` : actor_uid
+    `core.actores` "1" <-- "0..*" `core.actor_fusion` : actor_sobreviviente_uid
+```
+
+**Reglas de integridad (con su «por qué»).**
+
+| #   | Regla                                                                                                                                                                                                                                                                                          | Por qué importa                                                              |
+| --- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| R1  | El DNI es opcional y vive fuera del actor, en `core.actor_datos_personales`, cifrado. Junto al cifrado se guarda un **HMAC** del número (una huella irreversible) para detectar duplicados sin exponerlo                                                                                       | Se detecta que «dos fichas son la misma persona» sin que nadie vea el número |
+| R2  | **Anclaje obligatorio:** un actor de nivel 4 o 5 debe estar vinculado a un caso o a una organización                                                                                                                                                                                           | Nunca queda «flotando»; siempre aparece en la matriz de su caso              |
+| R3  | Los alias (apodos, cargos, códigos `ANI-*`) se guardan en `core.actor_alias` con vigencia                                                                                                                                                                                                      | Fuentes distintas llaman al mismo actor de maneras distintas                 |
+| R4  | **Promoción sin pérdida:** al identificar a la persona cambia el nivel y se crea la fila de datos personales; el `actor_uid` **no cambia**                                                                                                                                                     | Se conservan posiciones, relaciones, citas e historial                       |
+| R5  | **Fusión con rastro:** si dos fichas son la misma persona, se fusionan y queda una fila en `core.actor_fusion`                                                                                                                                                                                 | Se puede reconstruir qué se unió, quién lo hizo y por qué                    |
+| R6  | **Sin reidentificación automática:** la IA no intenta identificar actores de nivel 4 o 5 ni cruzarlos con registros personales; solo los asocia a un alias u organización ya existentes (G19, §16.1.quater)                                                                                    | Evita que el sistema haga vigilancia por cuenta propia                       |
+| R7  | **Exposición mínima:** los perfiles B y C nunca ven datos personales; los niveles 4 y 5 se muestran agregados («Colectivo no identificado — caleta X») y sin ubicación fina. Rige además el guardrail de Privacidad Comunitaria (§16.1: caletas con menos de 20 actores se agregan a distrito) | Protege a quien no quiso ser identificado                                    |
+
+> **Ejemplo completo (ILUSTRATIVO): una persona, cuatro momentos, un solo `actor_uid`.**
+>
+> | Fecha | Qué ocurre                                                                                                                                                               | Nivel | Qué se conserva                                                                                                               |
+> | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----- | ----------------------------------------------------------------------------------------------------------------------------- |
+> | 12/11 | La prensa cita al «dirigente de pescadores de la caleta X». El pipeline crea el actor con alias `Dirigente de pescadores — caleta X` y lo ancla al caso `CS-EJEMPLO-001` | 4     | Una cita literal, una posición («oposición»), una relación «tensa» con la empresa                                             |
+> | 14/11 | Un acta de reunión y una segunda nota de prensa lo nombran como «A. Q.». El analista confirma con dos fuentes                                                            | 3     | El alias anterior sigue vigente; se agrega el nombre                                                                          |
+> | 20/11 | A. Q. entrega su DNI voluntariamente en una reunión. El analista lo registra                                                                                             | 1     | Se crea `actor_datos_personales` (documento cifrado + HMAC). **Mismo `actor_uid`**: las 3 relaciones y las 5 citas siguen ahí |
+> | 25/11 | Se descubre que «A. Quispe, vocero» (otra ficha) es la misma persona                                                                                                     | 1     | Se fusiona: queda una fila en `core.actor_fusion`; el HMAC idéntico fue lo que hizo saltar la alerta de duplicado             |
+
+**DDL (PostgreSQL, perfil de referencia).** El equivalente para SQL Server está en MVP §2.3 y sus diferencias de tipos en §3.17.2.v10.
+
+```sql
+CREATE TABLE core.cat_nivel_identificacion (
+    id          smallint PRIMARY KEY,
+    codigo      varchar(30) NOT NULL UNIQUE,
+    descripcion text NOT NULL
+);
+INSERT INTO core.cat_nivel_identificacion VALUES
+ (1,'IDENTIFICADO_DNI','Persona identificada con DNI'),
+ (2,'IDENTIFICADO_OTRO_DOC','Identificada con otro documento o RUC'),
+ (3,'IDENTIFICADO_SIN_DOC','Nombre confirmado, sin documento'),
+ (4,'SEUDONIMO','Alias o cargo; identidad no registrada'),
+ (5,'COLECTIVO_ANONIMO','Grupo sin individuos registrables');
+
+-- Los actores heredados de AVISA que no traigan documento entran en nivel 3 (default).
+ALTER TABLE core.actores
+  ADD COLUMN nivel_identificacion_id smallint NOT NULL DEFAULT 3
+        REFERENCES core.cat_nivel_identificacion(id),
+  ADD COLUMN caso_ancla_id           uuid NULL REFERENCES core.casos(id),
+  ADD COLUMN organizacion_ancla_uid  uuid NULL REFERENCES core.organizaciones(actor_uid),
+  ADD COLUMN confianza               numeric(3,2) NULL CHECK (confianza BETWEEN 0 AND 1),
+  ADD COLUMN validado_humano         boolean NOT NULL DEFAULT false,
+  ADD CONSTRAINT ck_actor_anclaje CHECK (
+        nivel_identificacion_id <= 3
+        OR caso_ancla_id IS NOT NULL
+        OR organizacion_ancla_uid IS NOT NULL);
+-- naturaleza admite además el valor 'colectivo' (nivel 5).
+
+ALTER TABLE core.actor_datos_personales
+  ADD COLUMN tipo_documento   varchar(10) NULL,   -- DNI, CE, PAS, RUC
+  ADD COLUMN documento_cifrado bytea NULL,        -- cifrado con clave que custodia OGTI
+  ADD COLUMN documento_hmac    bytea NULL;        -- HMAC-SHA256 calculado en la API
+CREATE UNIQUE INDEX ux_actor_pii_documento
+    ON core.actor_datos_personales(documento_hmac) WHERE documento_hmac IS NOT NULL;
+-- Unicidad solo cuando hay documento: ya no se bloquea a quien no lo tiene.
+
+CREATE TABLE core.actor_alias (
+    id            uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    actor_uid     uuid NOT NULL REFERENCES core.actores(actor_uid),
+    alias         varchar(150) NOT NULL,
+    tipo_alias    varchar(20) NOT NULL CHECK (tipo_alias IN ('apodo','cargo','codigo_ani','otro')),
+    vigente_desde date NOT NULL DEFAULT current_date,
+    vigente_hasta date NULL
+);
+CREATE TABLE core.actor_fusion (
+    id                      uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    actor_absorbido_uid     uuid NOT NULL,
+    actor_sobreviviente_uid uuid NOT NULL REFERENCES core.actores(actor_uid),
+    fusionado_por           uuid NOT NULL REFERENCES core.usuarios(id),
+    fusionado_en            timestamptz NOT NULL DEFAULT now(),
+    motivo                  text NOT NULL
+);
+```
+
+> **Nota de custodia.** La clave que descifra el documento y la clave del HMAC las custodia OGTI (bóveda de secretos). El proveedor no las recibe.
+
+**Clasificación.** La fila de `core.actores` hereda la clasificación del caso. `core.actor_alias` y `core.actor_datos_personales` van en nivel 3 (Confidencial).
+<!-- v10:P03 end -->
 
 ### 3.7 Diagrama D3 — Alertas, reuniones, documentos, cronología y demandas
 
@@ -2985,39 +3189,39 @@ una consulta al catálogo). La **validez semántica** con datos reales de AVISA 
 Resultado: **6 cubiertos en el modelo, 17 parciales, 8 sin diseño.** "Cubierto" se refiere al diseño de datos; ninguna
 implementación operativa existe aún. Los ocho sin diseño dependen mayormente de decisiones de OGTI.
 
-| Req.   | Resumen                                                                                                                | Estado         | Elemento del modelo / brecha                                                                                     |
-| ------ | ---------------------------------------------------------------------------------------------------------------------- | -------------- | ---------------------------------------------------------------------------------------------------------------- |
-| RF-01  | SSO institucional                                                                                                      | Parcial        | `usuarios.sso_subject`; integración con el IdP pendiente (OGTI)                                                  |
-| RF-02  | Publicación en el portal de aplicaciones de SITRADOC                                                                   | **Sin diseño** | Depende de criterios de OGTI                                                                                     |
-| RF-03  | Perfiles: sectorista, administrador, consulta/lectura, Alta Dirección                                                  | Cubierto       | `core.roles` (los 4 + 5 técnicos y funcionales)                                                                  |
-| RF-04  | Registro de auditoría de accesos y operaciones                                                                         | Parcial        | Auditoría de escritura sí (`set_audit`, `run_log`); **faltan accesos de lectura** (pgaudit o capa de aplicación) |
-| RF-05  | Preservar funcionalidades de AVISA (casos, alertas, actores, demandas, compromisos, hitos, mesas, diálogo, documentos) | Parcial        | Cubiertas salvo "mesas de trabajo", sin entidad propia (hoy son `reuniones_dialogo`)                             |
-| RF-06  | Migrar histórico de Google Sheets                                                                                      | Parcial        | `fuente_original`, `es_seed_historico`; falta especificar el ETL y su reconciliación                             |
-| RF-07  | Reportes y tableros Word/PDF                                                                                           | Parcial        | `documentos`, `output_contracts`, vistas; falta el generador (con rótulo de contenido generado por IA, 1.4)      |
-| RF-08  | Integración con OSPA                                                                                                   | Cubierto       | `core.organizaciones` (todos los campos listados); la integración requiere autorización de la fuente             |
-| RF-09  | Sincronización periódica con la fuente oficial                                                                         | Parcial        | `fuente_sync`, `ultima_sync`, `core.integraciones`; falta el job                                                 |
-| RF-10  | Bases de gremios y organizaciones empresariales                                                                        | Parcial        | Modelo genérico; fuente por identificar                                                                          |
-| RF-11  | Alertas por vencimiento de vigencia                                                                                    | Cubierto       | `analytics.vw_organizaciones_vigencia`, `core.notificaciones`                                                    |
-| RF-12  | Vigencia visible en la ficha del actor                                                                                 | Cubierto       | Vista anterior                                                                                                   |
-| RS-01  | Autenticación institucional, sin cuentas compartidas                                                                   | Parcial        | `usuarios`; implementación en F1 (D7)                                                                            |
-| RS-02  | RBAC                                                                                                                   | Parcial        | Roles + RLS por nivel; matriz permiso × objeto definida para las capas incorporadas (11.8); falta la del núcleo  |
-| RS-03  | Protección en tránsito y reposo                                                                                        | Parcial        | Delegado a la infraestructura OGTI; no especificado                                                              |
-| RS-04  | Ley 29733                                                                                                              | Parcial        | `actor_datos_personales` (base legal, consentimiento); faltan procedimientos y registro del banco de datos       |
-| RS-05  | Auditoría de operaciones con usuario y hora                                                                            | Parcial        | Igual que RF-04: falta historial de cambios y de borrados                                                        |
-| RS-06  | Respaldo y recuperación                                                                                                | **Sin diseño** | Propuesta de RPO/RTO en 3.17, sujeta a OGTI                                                                      |
-| RS-07  | Integraciones solo por servicios aprobados                                                                             | Cubierto       | `core.integraciones`; `postgres_fdw` eliminado                                                                   |
-| RS-08  | Gestión formal de usuarios                                                                                             | Parcial        | `usuario_roles(desde, hasta)`; falta el procedimiento                                                            |
-| RS-09  | Clasificación de la información                                                                                        | Parcial        | Tres niveles **propuestos**; deben alinearse con la política institucional                                       |
-| RNF-01 | Disponibilidad ≥ 99 %                                                                                                  | **Sin diseño** | Una instancia; la alta disponibilidad depende de OGTI                                                            |
-| RNF-02 | Tiempos de respuesta adecuados                                                                                         | Parcial        | Índices e índices parciales; sin objetivos medidos                                                               |
-| RNF-03 | Móviles y tablets                                                                                                      | **Sin diseño** | UI no especificada                                                                                               |
-| RNF-04 | Escalabilidad                                                                                                          | Cubierto       | Sección 3.17 (volumetría y umbrales)                                                                             |
-| RNF-05 | Interoperabilidad (API REST)                                                                                           | **Sin diseño** | Sin endpoints definidos                                                                                          |
-| RNF-06 | Documentación técnica y funcional                                                                                      | Parcial        | Este documento, DDL y pruebas; faltan manuales                                                                   |
-| RNF-07 | Capacitación previa                                                                                                    | Parcial        | Mencionada en el plan; sin contenido                                                                             |
-| RNF-08 | Soporte e incidencias                                                                                                  | **Sin diseño** | Proceso institucional de OGTI                                                                                    |
-| RNF-09 | Usabilidad conforme a estándares institucionales                                                                       | **Sin diseño** | UI no especificada                                                                                               |
-| RNF-10 | Infraestructura institucional, sin cuentas personales                                                                  | **Sin diseño** | Corrige a v8.1 (Mac Mini con datos reales): ver C7                                                               |
+| Req.   | Resumen                                                                                                                | Estado         | Elemento del modelo / brecha                                                                                                                                                   |
+| ------ | ---------------------------------------------------------------------------------------------------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| RF-01  | SSO institucional                                                                                                      | Parcial        | `usuarios.sso_subject`; integración con el IdP pendiente (OGTI)                                                                                                                |
+| RF-02  | Publicación en el portal de aplicaciones de SITRADOC                                                                   | **Sin diseño** | Depende de criterios de OGTI                                                                                                                                                   |
+| RF-03  | Perfiles: sectorista, administrador, consulta/lectura, Alta Dirección                                                  | Cubierto       | `core.roles` (los 4 + 5 técnicos y funcionales)                                                                                                                                |
+| RF-04  | Registro de auditoría de accesos y operaciones                                                                         | Parcial        | Escritura auditada (`set_audit`, `run_log`); lecturas descifradas en `audit.datos_personales_acceso` (§13.6.ter.v10); **faltan las lecturas directas** (pgaudit, no instalado) |
+| RF-05  | Preservar funcionalidades de AVISA (casos, alertas, actores, demandas, compromisos, hitos, mesas, diálogo, documentos) | Parcial        | Cubiertas salvo "mesas de trabajo", sin entidad propia (hoy son `reuniones_dialogo`)                                                                                           |
+| RF-06  | Migrar histórico de Google Sheets                                                                                      | Parcial        | `fuente_original`, `es_seed_historico`; falta especificar el ETL y su reconciliación                                                                                           |
+| RF-07  | Reportes y tableros Word/PDF                                                                                           | Parcial        | `documentos`, `output_contracts`, vistas; falta el generador (con rótulo de contenido generado por IA, 1.4)                                                                    |
+| RF-08  | Integración con OSPA                                                                                                   | Cubierto       | `core.organizaciones` (todos los campos listados); la integración requiere autorización de la fuente                                                                           |
+| RF-09  | Sincronización periódica con la fuente oficial                                                                         | Parcial        | `fuente_sync`, `ultima_sync`, `core.integraciones`; falta el job                                                                                                               |
+| RF-10  | Bases de gremios y organizaciones empresariales                                                                        | Parcial        | Modelo genérico; fuente por identificar                                                                                                                                        |
+| RF-11  | Alertas por vencimiento de vigencia                                                                                    | Cubierto       | `analytics.vw_organizaciones_vigencia`, `core.notificaciones`                                                                                                                  |
+| RF-12  | Vigencia visible en la ficha del actor                                                                                 | Cubierto       | Vista anterior                                                                                                                                                                 |
+| RS-01  | Autenticación institucional, sin cuentas compartidas                                                                   | Parcial        | `usuarios`; implementación en F1 (D7)                                                                                                                                          |
+| RS-02  | RBAC                                                                                                                   | Parcial        | Roles + RLS por nivel; matriz permiso × objeto definida para las capas incorporadas (11.8); falta la del núcleo                                                                |
+| RS-03  | Protección en tránsito y reposo                                                                                        | Parcial        | Reposo ejecutado: AES-256 + HMAC en `core.actor_datos_personales` (§13.6.ter.v10); tránsito pendiente (`ssl = off`, `pg_hba` local en `trust`); TDE es requisito de OGTI       |
+| RS-04  | Ley 29733                                                                                                              | Parcial        | PII cifrada y acceso auditado (§13.6.ter.v10); faltan catálogo de bases legales, consentimiento, registro del banco (DC-03/04/05) y procedimiento de incidentes                |
+| RS-05  | Auditoría de operaciones con usuario y hora                                                                            | Parcial        | Igual que RF-04: falta historial de cambios y de borrados                                                                                                                      |
+| RS-06  | Respaldo y recuperación                                                                                                | **Sin diseño** | Propuesta de RPO/RTO en 3.17, sujeta a OGTI                                                                                                                                    |
+| RS-07  | Integraciones solo por servicios aprobados                                                                             | Cubierto       | `core.integraciones`; `postgres_fdw` eliminado                                                                                                                                 |
+| RS-08  | Gestión formal de usuarios                                                                                             | Parcial        | `usuario_roles(desde, hasta)`; falta el procedimiento                                                                                                                          |
+| RS-09  | Clasificación de la información                                                                                        | Parcial        | Tres niveles **propuestos**; deben alinearse con la política institucional                                                                                                     |
+| RNF-01 | Disponibilidad ≥ 99 %                                                                                                  | **Sin diseño** | Una instancia; la alta disponibilidad depende de OGTI                                                                                                                          |
+| RNF-02 | Tiempos de respuesta adecuados                                                                                         | Parcial        | Índices e índices parciales; sin objetivos medidos                                                                                                                             |
+| RNF-03 | Móviles y tablets                                                                                                      | **Sin diseño** | UI no especificada                                                                                                                                                             |
+| RNF-04 | Escalabilidad                                                                                                          | Cubierto       | Sección 3.17 (volumetría y umbrales)                                                                                                                                           |
+| RNF-05 | Interoperabilidad (API REST)                                                                                           | **Sin diseño** | Sin endpoints definidos                                                                                                                                                        |
+| RNF-06 | Documentación técnica y funcional                                                                                      | Parcial        | Este documento, DDL y pruebas; faltan manuales                                                                                                                                 |
+| RNF-07 | Capacitación previa                                                                                                    | Parcial        | Mencionada en el plan; sin contenido                                                                                                                                           |
+| RNF-08 | Soporte e incidencias                                                                                                  | **Sin diseño** | Proceso institucional de OGTI                                                                                                                                                  |
+| RNF-09 | Usabilidad conforme a estándares institucionales                                                                       | **Sin diseño** | UI no especificada                                                                                                                                                             |
+| RNF-10 | Infraestructura institucional, sin cuentas personales                                                                  | **Sin diseño** | Corrige a v8.1 (Mac Mini con datos reales): ver C7                                                                                                                             |
 
 ### 3.15 Máquina de estados del caso (corregida)
 
@@ -3132,19 +3336,86 @@ de 16 GB de RAM mantiene el índice vectorial y los datos calientes en memoria d
 
 #### 3.17.2 Decisiones de escala
 
-| ID  | Decisión                                                                                                                                                                                                                | Justificación                                                                                                                                                  |
-| --- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| S1  | **Una instancia primaria + réplica de lectura para Power BI**                                                                                                                                                           | Aísla las consultas de BI de las escrituras sin complejidad adicional                                                                                          |
-| S2  | **Recorrido de grafo en SQL** (`kag.subgrafo`, CTE recursiva acotada a ≤ 3 saltos) con las mismas políticas RLS del usuario; **NetworkX/NumPy solo en lote** para matrices MACTOR (MDI/MIDI) cuyo resultado se persiste | Elimina el cuello del GIL, los datos desactualizados y la evasión de RLS (C10)                                                                                 |
-| S3  | **Búsqueda vectorial HNSW** con la clasificación en la misma fila; subir `hnsw.ef_search` y, si la versión de pgvector lo permite, usar escaneo iterativo para no perder recall por el filtro de seguridad              | Evita respuestas incompletas para roles con acceso restringido. La recuperación suma una tercera señal (código cualitativo) y, en el Nivel 2, re-ranking (6.4) |
-| S4  | **Particionado:** `raw_ingest` y `run_log` por mes; `observaciones` por año; función `core.crear_particion` programable con `pg_cron`                                                                                   | Mantener y archivar sin bloquear; retención fijada por OGTI (D9)                                                                                               |
-| S5  | **Caché de respuestas por (hash de consulta, nivel de acceso, hash de política)**; no usar caché semántica para contenido Reservado o Confidencial                                                                      | Evita fuga entre roles (E6)                                                                                                                                    |
-| S6  | **Regla R-LLM:** Confidencial → solo LLM local; Reservado → local por defecto, nube solo con anonimización y contrato; Público → nube permitida. La complejidad decide el modelo _dentro_ del destino permitido         | Ley 29733 y datos de comunidades (E7). Para el Generador de Pautas se aplica en dos etapas (1.4)                                                               |
-| S7  | **Cadena de hash serializada con bloqueo asesor** en `run_log`                                                                                                                                                          | Garantiza integridad con cientos de inserciones/s; si fuera cuello, encadenar por día                                                                          |
-| S8  | **`entidad_id` en `casos` y unidades orgánicas** desde ya; RLS por entidad al incorporar un segundo ministerio                                                                                                          | Evita bifurcar la base (E8)                                                                                                                                    |
-| S9  | **Observabilidad:** `pg_stat_statements`, `auto_explain` > 500 ms, alertas de lag de réplica                                                                                                                            | Base de RNF-01/02                                                                                                                                              |
-| S10 | **Respaldo propuesto:** copia lógica diaria + archivado continuo (PITR); RPO ≤ 15 min, RTO ≤ 4 h; SLO 99 % en horario laboral                                                                                           | Valores **propuestos**, sujetos a la política de OGTI (RS-06, RNF-01)                                                                                          |
-| S11 | **Migraciones versionadas** (Flyway/Alembic) y las 75 pruebas como CI del esquema                                                                                                                                       | RNF-06                                                                                                                                                         |
+| ID  | Decisión                                                                                                                                                                                                                                              | Justificación                                                                                                                                                  |
+| --- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| S1  | **Una instancia primaria + réplica de lectura para Power BI**                                                                                                                                                                                         | Aísla las consultas de BI de las escrituras sin complejidad adicional                                                                                          |
+| S2  | **Recorrido de grafo en SQL** (`kag.subgrafo`, CTE recursiva acotada a ≤ 3 saltos) con las mismas políticas RLS del usuario; **NetworkX/NumPy solo en lote** para matrices MACTOR (MDI/MIDI) cuyo resultado se persiste                               | Elimina el cuello del GIL, los datos desactualizados y la evasión de RLS (C10)                                                                                 |
+| S3  | **Búsqueda vectorial HNSW** con la clasificación en la misma fila; subir `hnsw.ef_search` y, si la versión de pgvector lo permite, usar escaneo iterativo para no perder recall por el filtro de seguridad                                            | Evita respuestas incompletas para roles con acceso restringido. La recuperación suma una tercera señal (código cualitativo) y, en el Nivel 2, re-ranking (6.4) |
+| S4  | **Particionado:** `raw_ingest` y `run_log` por mes; `observaciones` por año; función `core.crear_particion` programable con `pg_cron`                                                                                                                 | Mantener y archivar sin bloquear; retención fijada por OGTI (D9)                                                                                               |
+| S5  | **Caché de respuestas por (hash de consulta, nivel de acceso, hash de política)**; no usar caché semántica para contenido Reservado o Confidencial                                                                                                    | Evita fuga entre roles (E6)                                                                                                                                    |
+| S6  | **Regla R-LLM:** Confidencial → solo LLM local; Reservado → local por defecto, nube solo con anonimización y contrato; Público → nube permitida. La complejidad decide el modelo _dentro_ del destino permitido                                       | Ley 29733 y datos de comunidades (E7). Para el Generador de Pautas se aplica en dos etapas (1.4)                                                               |
+| S7  | **Cadena de hash serializada con bloqueo asesor** en `run_log`                                                                                                                                                                                        | Garantiza integridad con cientos de inserciones/s; si fuera cuello, encadenar por día                                                                          |
+| S8  | **`entidad_id` en `casos` y unidades orgánicas** desde ya; RLS por entidad al incorporar un segundo ministerio                                                                                                                                        | Evita bifurcar la base (E8)                                                                                                                                    |
+| S9  | **Observabilidad:** `pg_stat_statements`, `auto_explain` > 500 ms, alertas de lag de réplica                                                                                                                                                          | Base de RNF-01/02                                                                                                                                              |
+| S10 | **Respaldo propuesto:** copia lógica diaria + archivado continuo (PITR); RPO ≤ 15 min, RTO ≤ 4 h; SLO 99 % en horario laboral                                                                                                                         | Valores **propuestos**, sujetos a la política de OGTI (RS-06, RNF-01)                                                                                          |
+| S11 | **Migraciones versionadas** (Flyway/Alembic) y las 75 pruebas como CI del esquema                                                                                                                                                                     | RNF-06                                                                                                                                                         |
+| S12 | **(v10) Perfil de despliegue dual.** PostgreSQL 16 es el perfil de referencia; **SQL Server ≥ 2019** es el perfil que exige OGTI para el MVP-45. Mismos nombres de tabla y mismas reglas de negocio; cambian tipos y seguridad por fila (§3.17.2.v10) | Evita mantener dos modelos. Restricción de plataforma de OGTI (D-1 del MVP §0.4)                                                                               |
+| S13 | **(v10) Un solo predicado de seguridad por tabla**, escrito como función en línea, con contexto de sesión de solo lectura que la API fija **en cada apertura de conexión**                                                                            | Con _pooling_ de conexiones, un contexto fijado solo al inicio se filtra al siguiente usuario                                                                  |
+| S14 | **(v10) Embeddings y búsqueda vectorial fuera de la base en el MVP** (servicio Python). Si OGTI confirma una versión de SQL Server con tipo vectorial nativo, se evalúa en F2 (**a verificar con OGTI**, Q34)                                         | No se promete en 45 días una capacidad que depende de la versión instalada                                                                                     |
+
+<!-- v10:P06b begin -->
+
+#### 3.17.2.v10 Perfil de despliegue SQL Server: equivalencias y seguridad por fila — _añade a 3.17.2 (v10)_ — V10-02
+
+**Para quién es.** Para quien implementa el MVP-45 sobre SQL Server. Cada fila dice qué se usa en lugar de lo que v9 escribe para PostgreSQL.
+
+| Tema                  | v9 (PostgreSQL)                              | Perfil SQL Server                                                                                                                   | Atención                                                                                                   |
+| --------------------- | -------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| Identificador         | `uuid`, `gen_random_uuid()`                  | `UNIQUEIDENTIFIER`, `NEWSEQUENTIALID()` (solo como valor por defecto)                                                               | `NEWSEQUENTIALID()` no se puede llamar en una consulta; usar `NEWID()` si hace falta generar uno en código |
+| JSON                  | `jsonb`                                      | `NVARCHAR(MAX)` con `CHECK (ISJSON(col)=1)`; consulta con `JSON_VALUE` / `OPENJSON`                                                 | Sin índice GIN: indexar columnas calculadas de las claves que se consultan                                 |
+| Fecha y hora          | `timestamptz`                                | `DATETIME2` en UTC (o `DATETIMEOFFSET`)                                                                                             | Fijar UTC como convención y convertir en la API                                                            |
+| Geografía             | PostGIS `geography`                          | Tipo `geography` nativo (`STDistance`, `STIntersects`)                                                                              | Los nombres de función cambian; SRID 4326                                                                  |
+| Búsqueda vectorial    | pgvector + HNSW                              | Fuera de la base (servicio Python)                                                                                                  | Ver S14 y Q34                                                                                              |
+| Similitud de texto    | `pg_trgm` (Resolver)                         | Se calcula en el servicio Python (trigramas o `rapidfuzz`) y se envía el resultado                                                  | Evita depender de extensiones                                                                              |
+| Índice único parcial  | `CREATE UNIQUE INDEX … WHERE`                | Índice **filtrado** (`CREATE UNIQUE INDEX … WHERE … IS NOT NULL`)                                                                   | Equivalente directo; lo usa `documento_hmac`                                                               |
+| Columnas generadas    | `GENERATED ALWAYS AS`                        | Columnas **calculadas** (`AS (…) PERSISTED`)                                                                                        | Ej.: `dias_mora`                                                                                           |
+| Vigencias sin solape  | `EXCLUDE USING gist` (prueba T83)            | **No existe equivalente directo**: usar _trigger_ que rechace solapes, o índice único sobre (clave, `valid_to`) con fecha centinela | Reescribir T83 para este perfil                                                                            |
+| Vistas materializadas | `MATERIALIZED VIEW`                          | **Vista indexada** (con restricciones) o tabla recalculada por un trabajo programado                                                | Para `mv_dashboard_alta_direccion` conviene la tabla + trabajo                                             |
+| Tareas programadas    | `pg_cron`                                    | Hangfire o Quartz en la API (o SQL Agent)                                                                                           | Ya previstos en MVP §3.6                                                                                   |
+| Arreglos (`text[]`)   | tipos arreglo                                | Tabla puente o JSON                                                                                                                 | Evitar arreglos en el modelo del MVP                                                                       |
+| Particionado          | declarativo                                  | Función y esquema de partición                                                                                                      | No es necesario en el volumen del MVP (§3.17.1: ≈ 1 GB/año)                                                |
+| Texto completo        | `tsvector`                                   | _Full-Text Search_ (requiere el componente instalado)                                                                               | Confirmar con OGTI                                                                                         |
+| Seguridad por fila    | `CREATE POLICY` + `current_setting('app.*')` | `CREATE SECURITY POLICY` + función en línea + `SESSION_CONTEXT`                                                                     | Siguiente apartado                                                                                         |
+| Recorrido de grafo    | CTE recursiva (`kag.subgrafo`)               | CTE recursiva (con `OPTION (MAXRECURSION n)`)                                                                                       | Solo si se reactiva KAG                                                                                    |
+
+> **Ejemplo de traducción (una tabla).** `core.actor_alias` en v9 (§3.6.v10) usa `uuid` y `current_date`. En SQL Server queda: `id UNIQUEIDENTIFIER NOT NULL DEFAULT NEWSEQUENTIALID() PRIMARY KEY`, `vigente_desde DATE NOT NULL DEFAULT CAST(SYSUTCDATETIME() AS DATE)`. El resto —columnas, nombres, `CHECK` de `tipo_alias`— es idéntico.
+
+**Seguridad por fila en SQL Server.** La API .NET abre la conexión y fija el contexto **a partir de los claims del token** (nunca desde datos que envíe el cliente). La traducción del mecanismo de v9 (`SET app.clasificacion_max`, `app.actor_uid`, §11.10.bis) es esta:
+
+| v9 (PostgreSQL)                  | Perfil SQL Server                                                                                          |
+| -------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `SET app.clasificacion_max = n`  | `sp_set_session_context N'clasificacion_max', n, @read_only = 1`                                           |
+| `app.actor_uid` (sujeto externo) | `sp_set_session_context N'actor_uid', @aid, @read_only = 1`                                                |
+| `app.staff_bypass_subject_rls`   | `sp_set_session_context N'staff', 1, @read_only = 1`                                                       |
+| Política `RESTRICTIVE` por tabla | Un **único** predicado de filtro y bloqueo por tabla, con todas las condiciones dentro de la misma función |
+
+```sql
+-- La API fija el contexto al abrir CADA conexión (interceptor de EF Core):
+--   EXEC sp_set_session_context N'perfil',           N'A', @read_only = 1;
+--   EXEC sp_set_session_context N'clasificacion_max', 3,   @read_only = 1;
+--   EXEC sp_set_session_context N'actor_uid',         @aid, @read_only = 1;  -- solo perfil C
+CREATE FUNCTION seg.fn_acceso_caso(@clasificacion TINYINT)
+RETURNS TABLE WITH SCHEMABINDING
+AS RETURN
+SELECT 1 AS permitido
+WHERE @clasificacion <= TRY_CAST(SESSION_CONTEXT(N'clasificacion_max') AS TINYINT)
+  AND CAST(SESSION_CONTEXT(N'perfil') AS NCHAR(1)) IN (N'A', N'B');   -- el perfil C no ve casos
+GO
+CREATE SECURITY POLICY seg.pol_caso
+    ADD FILTER PREDICATE seg.fn_acceso_caso(nivel_clasificacion) ON core.casos,
+    ADD BLOCK  PREDICATE seg.fn_acceso_caso(nivel_clasificacion) ON core.casos AFTER INSERT,
+    ADD BLOCK  PREDICATE seg.fn_acceso_caso(nivel_clasificacion) ON core.casos AFTER UPDATE
+WITH (STATE = ON);
+```
+
+**Cuatro advertencias para OGTI.**
+
+1. La seguridad por fila **no protege** frente a quien tenga permiso para alterar la política o sea administrador de la base: se audita el DDL de seguridad.
+2. Con _pooling_, el contexto se fija en **cada apertura** de conexión. Si no, un usuario hereda el contexto del anterior (prueba T98).
+3. Los predicados con subconsultas cuestan rendimiento: se indexan las columnas que consultan y se mide en la prueba de carga.
+4. Para el Perfil C, el filtro se escribe sobre la tabla puente `core.compromiso_colaboradores` (≈ `compromiso_actor` del MVP), con índice por (`actor_uid`, `compromiso_id`).
+
+<!-- v10:P06b end -->
 
 #### 3.17.3 Umbrales para reconsiderar la arquitectura
 
@@ -3244,7 +3515,7 @@ flowchart LR
 
 El diagnóstico de brechas de v8.3 (comparado contra el inventario de 54 indicadores, no los 40 originales) identificó que 8 de los 54 no podían alojarse sin: un grafo de dependencia entre indicadores, cobertura/denominador en `ind.resultado`, una escala ordinal, y cuatro tablas espaciales. Eso es DM-1..4:
 
-- **`ind.relacion_dependencia`** — qué indicador depende de qué variable o de qué otro indicador, con tipo de dependencia (`componente`, `insumo`, `control`, `validacion`, `agregacion`) y peso. Sin esto, si TEA queda obsoleta, IECP la sigue usando en silencio. La vista `analytics.vw_indicadores_obsoletos` (DDL §20.21.bis) propaga obsolescencia de forma recursiva.
+- **`ind.relacion_dependencia`** — qué indicador depende de qué variable o de qué otro indicador, con tipo de dependencia (`componente`, `insumo`, `control`, `validacion`, `agregacion`) y peso. Sin esto, si TEA queda obsoleta, IECP la sigue usando en silencio. La vista `analytics.vw_indicadores_obsoletos` (prevista en §20.21; aún no creada en el DDL) propaga obsolescencia de forma recursiva.
 - **`ind.resultado`** gana `valor_categoria` (verde/ámbar/rojo/sin_dato), `denominador`, `cobertura_pct`, `requiere_censo`, `censo_referencia`, y pasa a ser bitemporal (`valid_from/superseded_at`) — antes solo `ind.seleccion` lo era.
 - **PostGIS** habilitado (ya requerido también por `chat.*` y por las tablas espaciales de C4–C6).
 - **`territorio.parque_industrial`, `territorio.cuadricula_sismica`, `territorio.zona_pesca`, `territorio.expansion_informal`** — las cuatro entidades espaciales que TIPI, ISER, BZ, VCPUE, IVSEC, VEAI e IATT necesitan para existir como algo más que una línea en `ind.brecha`.
@@ -3483,6 +3754,8 @@ El sistema arranca con la profundidad histórica de las cronologías de los 35 c
 - `qda.segmento_fragmento`: cruce entre segmentos y fragmentos; **no coinciden**, se relacionan por solape.
 - `qda.memo`, `qda.mapeo_pseudonimo` (nivel 3, legible solo por la función de importación), `qda.perdida_roundtrip` (lo que no sobrevive al viaje de ida y vuelta) y `qda.exportacion` (registro de cada salida del perímetro).
 
+**Extensión de `qda.exportacion` (DC-12).** Cada salida del perímetro registra `motivo`, `autorizado_por` y `destinatario_externo`, además de `usuario_id` y `excepcion_aprobada_por`. El `.qdpx` sale siempre con actores pseudonimizados vía `qda.mapeo_pseudonimo`; el registro de exportación es lo que permite responder «quién sacó qué y con qué autorización» dentro del plazo de 48 horas de notificación de incidentes. El plazo es una obligación legal vigente; el procedimiento operativo de notificación no está implementado (Anexo E).
+
 **Flujo.** _Exportar:_ se elige un corpus, `qda.exportar()` genera el `.qdpx` con actores **pseudonimizados** y registra quién, qué y el hash. La persona codifica en su software. _Importar:_ `.qdpx` o `.qdc` → `staging.lote` → validación de GUID y de desplazamientos contra `hash_texto_exportado` → promoción (4.3).
 
 **Efectos en el resto de la arquitectura.**
@@ -3655,6 +3928,27 @@ fuentes públicas se describen en 7.5.
 
 **Efectos.** La cola HITL crece (capacidad: 17.13). El volumen de `ctx.captura` va a almacenamiento de objetos, no a la base (3.17). `core.integraciones` registra cada fuente con su autenticación aprobada. M1 consume `ctx.captura` en vez de tener su propio _scraper_. La autonomía (que el agente decida qué buscar) queda para el Nivel 3, con presupuesto de búsquedas y aprobación.
 
+<!-- v10:P10 begin -->
+
+### 7.5.v10 Redes sociales en el MVP-45: solo por vías autorizadas — _añade a 7.5 (v10)_ — V10-07
+
+**Qué resuelve.** El TDR (numeral 12) pide integrar «noticias, redes, relatorías». Recolectar redes sociales tiene riesgos legales (términos de uso de cada plataforma, Ley N.° 29733). Esta sección fija qué se hace y qué no.
+
+| Fuente                                                               | Cómo entra                                                                     | Condición                                                                           | Quién la autoriza                     |
+| -------------------------------------------------------------------- | ------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------- | ------------------------------------- |
+| Medios digitales                                                     | RSS, mapas de sitio, páginas públicas                                          | Respeto de `robots.txt` y términos de uso; solo el texto necesario                  | OAIPCS                                |
+| Portales oficiales (gob.pe, notas de prensa, reportes de conflictos) | Páginas públicas o RSS                                                         | Alta confianza                                                                      | OAIPCS                                |
+| **Redes sociales**                                                   | **Solo** API oficial de la plataforma o proveedor licenciado de escucha social | Solo cuentas y páginas **públicas** de organizaciones, autoridades y medios locales | OAIPCS y Legal (dictamen D-6 del MVP) |
+| Relatorías, actas, ayudas memoria                                    | Carga manual del analista                                                      | Mismo flujo de entidades y citas                                                    | Analista                              |
+| Mensajería de campo (WhatsApp)                                       | **Sigue manual** (§4.1: el sistema es invisible para el personal de campo)     | No se automatiza                                                                    | —                                     |
+
+**Lo que no se hace:** no se entra a grupos privados; no se siguen perfiles de personas particulares; no se usa _scraping_ de plataformas que lo prohíban.
+
+> **Ejemplo (ILUSTRATIVO) de lista blanca (`config.parametro`, clave `fuentes.lista_blanca`):** `{"tipo":"red_social","plataforma":"X","cuenta":"@gremio_ejemplo","via":"api_oficial","aprobada_por":"OAIPCS","fecha":"2026-11-20"}`. Una cuenta que no está en la lista **no se consulta**; ampliar la lista exige la misma aprobación (G22).
+
+**Verificar antes de prometer.** La disponibilidad, el costo y las cuotas de las API de cada plataforma cambian con frecuencia. El MVP debe confirmarlos antes del Día 25 (Q39). Si una API no está disponible, esa fuente queda como interfaz simulada y se declara en el acta, **sin sustituirla por _scraping_**.
+<!-- v10:P10 end -->
+
 ### 7.6 Rama Cuenca (C5) — _añade a §7.3_
 
 Por cuenca hidrográfica: estaciones, series de calidad, piscigranjas, casos AVISA, normativa ECA.
@@ -3771,6 +4065,70 @@ Se reconstruye a partir de las selecciones vigentes de indicadores (8.4) y no de
 
 `ind.relacion_dependencia` (§3.bis) alimenta `analytics.vw_indicadores_obsoletos`, una vista recursiva (hasta 4 niveles) que marca un indicador como `variable_obsoleta = true` si cualquier variable de la que depende, directa o transitivamente, superó su `ttl_frescura_dias`. Antes de v9, si ICEN quedaba desactualizado, GDP, COIB, IECP e IVSEC lo usaban en silencio — ahora la Minister View puede rotular "cadena de insumos con datos vencidos" en vez de mostrar un número con falsa precisión.
 
+<!-- v10:P08 begin -->
+
+### 8.4.ter Semilla de indicadores del MVP-45: K1 a K5 y la proyección — _añade a 8.4 (v10)_ — V10-04
+
+**Qué resuelve.** §8.4 explica cómo se elige un indicador entre cuatro alternativas, pero no trae fórmulas. Aquí están las semillas iniciales de `ind.indicador` / `ind.variante`, con su clase v9.
+
+**Aviso.** Son **índices de gestión, no probabilidades**. Los pesos y umbrales viven en `config.parametro` (con versión) y se calibran con las y los analistas contra casos históricos. Mientras no estén calibrados, el semáforo se rotula «PROVISIONAL».
+
+| Código     | Nombre                                    | Clase v9   | Qué responde                                               | Incertidumbre           | ¿Entra a Minister View?                                       |
+| ---------- | ----------------------------------------- | ---------- | ---------------------------------------------------------- | ----------------------- | ------------------------------------------------------------- |
+| `K1_IRE`   | Índice de Riesgo de Escalamiento (0–100)  | `proxy`    | ¿Qué casos tienen más probabilidad de escalar?             | media                   | Sí, validado (G14)                                            |
+| `K2_ICC`   | Índice de Cumplimiento de Compromisos     | `factible` | ¿El Estado cumple lo que prometió?                         | baja                    | Sí                                                            |
+| `K3_TAA`   | Tiempo de Atención de Alertas             | `factible` | ¿Reaccionamos a tiempo?                                    | baja                    | Sí                                                            |
+| `K4_IPA`   | Índice de Polarización de Actores (0–100) | `factible` | ¿Qué tan fracturada está la red?                           | media                   | Sí                                                            |
+| `K5_ICD`   | Índice de Condiciones de Diálogo (0–100)  | `factible` | ¿Hay condiciones para dialogar? (OE2)                      | media                   | Sí. Su ajuste automático se muestra aparte y rotulado «PROXY» |
+| `P1_IPS30` | Exposición socioeconómica a 30 días       | `proxy`    | ¿Cuánto empleo local está expuesto si el caso se paraliza? | **alta** hasta calibrar | **No** hasta calibrar (G14); sí en Office View                |
+
+**Fórmulas (versión inicial) y un ejemplo numérico de cada una.** Todas las cifras de los ejemplos son **ILUSTRATIVAS**.
+
+**K1 — IRE.** Suma ponderada de seis dimensiones, cada una normalizada de 0 a 1.
+
+| Dimensión                             | Peso | Cómo se normaliza                                                                                     | Valor del ejemplo | Aporte              |
+| ------------------------------------- | ---- | ----------------------------------------------------------------------------------------------------- | ----------------- | ------------------- |
+| Nivel de conflicto                    | 0,20 | Diferencia 0 · Controversia 0,33 · Conflicto social 0,67 · Crisis 1 (de `core.cat_niveles_conflicto`) | 0,67              | 0,134               |
+| Intensidad de hechos, últimos 14 días | 0,20 | Suma de pesos por tipo de hecho, con decaimiento exponencial; tope en 1                               | 0,60              | 0,120               |
+| Polarización (K4 ÷ 100)               | 0,20 | Directo                                                                                               | 0,58              | 0,116               |
+| Compromisos vencidos                  | 0,15 | Vencidos ÷ exigibles                                                                                  | 0,40              | 0,060               |
+| Señales de IA **aprobadas**           | 0,15 | Alertas aprobadas en 14 días ÷ tope configurable                                                      | 0,50              | 0,075               |
+| No dialogantes con influencia ≥ 60    | 0,10 | Nº de actores ÷ 2 (tope 1)                                                                            | 0,50              | 0,050               |
+| **IRE**                               |      | **Σ aportes × 100**                                                                                   |                   | **55,5 → amarillo** |
+
+Semáforo: < 30 verde · 30–59 amarillo · 60–79 naranja · ≥ 80 rojo.
+
+**K2 — ICC.** Compromisos exigibles cumplidos en plazo ÷ compromisos exigibles (fecha límite ≤ hoy). _Ejemplo:_ 12 exigibles, 9 cumplidos en plazo → **75 % (amarillo)**. Se informan además los vencidos y los que vencen en 15 días. Semáforo: ≥ 85 % verde · 60–84 % amarillo · < 60 % rojo.
+
+**K3 — TAA.** Mediana de horas entre el ingreso del candidato de alerta y la decisión del analista, y % de alertas críticas atendidas dentro de su SLA. _Ejemplo:_ cinco decisiones en 0,5 / 1 / 2 / 3 / 20 horas → **mediana 2 h**; 4 de 5 críticas dentro de SLA → 80 % (bajo el 95 % esperado).
+
+**K4 — IPA.** `50 × (influencia de actores en oposición o no dialogantes ÷ influencia total) + 50 × (intensidad de relaciones tensas o de conflicto ÷ intensidad de todas las relaciones)`.
+
+> **Decisión v10:** el texto del MVP decía «relaciones tensas o de conflicto ponderadas por intensidad ÷ relaciones totales», que admite dos lecturas. Se fija: **suma de intensidades de las tensas y de conflicto ÷ suma de intensidades de todas las relaciones.**
+
+_Ejemplo:_ cuatro actores con influencia 80 (oposición), 60 (apoyo), 40 (neutral), 70 (no dialogante) → 150 ÷ 250 = 0,60 → 30 puntos. Cinco relaciones con intensidades densa 4, tensa 3, conflicto 5, tensa 2, densa 2 → (3+5+2) ÷ 16 = 0,625 → 31,25 puntos. **IPA = 61,25 → amarillo** (< 35 verde · 35–64 amarillo · ≥ 65 rojo).
+
+**K5 — ICD.** Seis condiciones, cada una puntuada de 0 a 4 **con evidencia obligatoria**: interlocutores legítimos · agenda definida · confianza y cumplimiento previo · canal institucional abierto · ausencia de violencia reciente · mediación disponible. `ICD = (suma de puntajes ÷ 24) × 100`. _Ejemplo:_ 2+2+1+2+3+1 = 11 → **45,8 → incierto**. Umbrales: ≥ 60 favorable · 40–59 incierto · < 40 desfavorable.
+
+> **Decisión v10:** el «ajuste automático por señales» del MVP queda **acotado a ±10 puntos** y se muestra como una línea aparte («ICD del analista» y «ajuste automático»), nunca mezclado. _Por qué:_ la evaluación humana con evidencia no debe quedar oculta bajo una corrección de la máquina. Q40 pide validar el tope: mientras no haya confirmación formal de la Dirección, se aplica el valor por defecto de 10 puntos, que vive en `config.parametro` (`ICD.ajuste_tope_puntos`) y lo acota `core.icd_aplicar_ajuste` (§18.ter, Q40).
+
+**Proyecciones socioeconómicas (cómo se cumple el TDR sin un modelo econométrico).** El TDR pide «proyecciones socioeconómicas». El modelo completo (M2, §13.2) necesita su Anexo Metodológico y no cabe en 45 días. El MVP entrega dos cosas, siempre rotuladas **«TENDENCIA / PROXY — no es una predicción»**:
+
+1. **Tendencia del IRE a 30 días**, por caso y agregada: suavizamiento exponencial simple (α inicial 0,3) con banda del 80 % calculada con los residuos de los últimos 30 días.
+2. **`P1_IPS30` — exposición socioeconómica a 30 días.** `IPS30 = EJ × FP(escenario)`, donde **EJ** son los empleos directos e indirectos vinculados a la actividad (dato del caso; si falta, mediana de casos análogos del mismo subsector, marcado «estimado») y **FP** es la fracción expuesta según el cuadrante de §13.5.v10. Se informa como **rango**, no como cifra única.
+
+| Cuadrante (§13.5.v10) | FP semilla (hipótesis de trabajo) |
+| --------------------- | --------------------------------- |
+| E1                    | 0 – 0,05                          |
+| E2                    | 0,10 – 0,30                       |
+| E3                    | 0,30 – 0,60                       |
+| E4                    | 0,70 – 1,00                       |
+
+_Ejemplo (ILUSTRATIVO):_ caso con 120 empleos vinculados en cuadrante E3 → **36 a 72 empleos expuestos**. Los valores de FP son **hipótesis a calibrar con al menos cinco casos AVISA**; hasta entonces la incertidumbre es «alta» y, por G14, `P1_IPS30` solo se ve en la Office View. Al calibrarse y pasar a «media», puede entrar a la Minister View. Esto **cumple la letra del TDR** (hay proyección en el tablero) **sin prometer más de lo que se sabe**.
+
+**Cómo se reproduce un KPI.** Cada KPI se calcula desde tablas con una vista (`analytics.vw_k1_ire`, etc.); la prueba T101 y T102 recalculan los ejemplos de arriba y deben dar 55,5 y 61,25.
+<!-- v10:P08 end -->
+
 ### 8.5 Contrato de seed por tipo de indicador/artefacto — _añade_
 
 El gap señalado por el segundo diagnóstico de v8.3 ("el documento especifica la tabla, no la regla") se cierra con un contrato explícito por cada `ind.variante` y cada `domain.tipo_artefacto`: qué campos debe poblar el seed, con qué validación, y con qué fuente. No es una tabla nueva — es una disciplina que se aplica al llenar `ind.variante.especificacion` y `domain.tipo_artefacto.esquema_json`: ambos deben declarar, como mínimo, valores válidos, fuente de cada valor, y una justificación de proxy cuando `clase != 'estandar'` (`ind.proxy_justificacion`, ya existente en v8.3).
@@ -3789,6 +4147,10 @@ El hallazgo más importante del diagnóstico de brechas de v8.3 fue este: **el d
 4. **Políticas** — retención, versionado, aprobación, auditoría.
 
 En `domain.regla_negocio` esto se expresa como filas (una por regla, con `tipo_regla` ∈ {transicion, invariante, validacion, calculo, alerta}); en las ocho tablas reales de C4–C6 se expresa como `CHECK`, triggers y columnas `GENERATED` — misma idea, distinto almacenamiento físico, documentada en un único lugar.
+
+### 8.7.bis Reglas de negocio por tabla — _añade_
+
+Las reglas de cada tabla se documentan en cuatro partes: **valores válidos**, **transiciones**, **invariantes** y **políticas**. Los dos ejemplos aplicados que siguen cubren un caso de negocio (`mype.ejecucion_nec`) y uno territorial (`territorio.monitoreo_hidrico`); el mismo formato se aplica a las tablas de cumplimiento de §2.3.bis y §2.3.ter del MVP.
 
 ### 8.7.bis.1 Ejemplo aplicado: `mype.ejecucion_nec` — _añade_
 
@@ -3846,11 +4208,68 @@ especializados y escala a HITL solo cuando hay discrepancia.
 | Learning            | Proceso curado por personas (`agent.lessons_learned`)                                                                            | 2                           |
 | Synthetic Test      | Trabajo de integración continua semanal                                                                                          | 1                           |
 
-**Resolver (umbral).** > 0,85 fusiona, < 0,6 nuevo actor, entre 0,6 y 0,85 va a HITL.
+<!-- v10:P04 begin -->
+
+**Resolver (umbral).** > 0,85 fusiona, < 0,6 nuevo actor, entre 0,6 y 0,85 va a HITL. _(v10)_ **Excepción:** si cualquiera de los dos candidatos es de nivel de identificación 4 o 5 (§3.6.v10), **nunca se fusiona automáticamente**, aunque la similitud supere 0,85: va siempre a HITL. _Por qué:_ dos «dirigentes de pescadores no identificados» de caletas distintas pueden compartir el cargo sin ser la misma persona; fusionarlos en silencio crearía un actor que no existe.
+<!-- v10:P04 end -->
 
 **Critic.** Usa un modelo distinto al del Sintetizador para evitar colusión; detecta alucinaciones, contradicciones, falta de cita, causalidad no respaldada y fallos SMART.
 
 **Synthetic Test.** Genera de cinco a diez variaciones sintéticas por cada caso AVISA cada semana (fechas, actor, demanda, territorio, rol) y registra métricas en `agent.synthetic_test_cases`.
+
+<!-- v10:P05 begin -->
+
+### 9.2.v10 Qué se enciende en el MVP-45 y cómo habla el pipeline con la API — _añade (v10)_ — V10-05
+
+**Qué se enciende.** v9 dice que el Nivel 1 opera con tres agentes. El MVP-45 usa menos, y lo declara.
+
+| Componente v9              | En el MVP-45                                                                            | Quién lo hace                                               | Control humano                                                                    |
+| -------------------------- | --------------------------------------------------------------------------------------- | ----------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| A1 Extractor-Estructurador | **Encendido**, como pipeline Python (recolección, deduplicación, NLP, citas candidatas) | Servicio Python; no accede a la base, solo habla con la API | El analista aprueba cada alerta (G21)                                             |
+| A2 Generador de Pautas     | **Apagado** (permitido por §3.20)                                                       | —                                                           | —                                                                                 |
+| A3 Sintetizador            | **Encendido** para el informe OE1–OE3 y el resumen de una página                        | API .NET con el modelo de lenguaje                          | Sale como «BORRADOR IA — requiere validación»; solo lo validado llega al Perfil B |
+| Resolver                   | **Determinista** (trigramas, umbrales 0,85 y 0,6) con la excepción de nivel 4–5         | Servicio                                                    | Cola de revisión del analista                                                     |
+| Critic                     | Reemplazado por la **validación del analista** (100 % de lo que ve el Perfil B)         | Persona                                                     | —                                                                                 |
+| Guardrails                 | G14, G15 y los nuevos G19–G22                                                           | Reglas deterministas                                        | Rechazan, no solo advierten                                                       |
+
+**Ejemplo del mensaje que envía el pipeline (ILUSTRATIVO).** Se envía por `POST /ingesta/alertas`, con firma HMAC en el encabezado y una clave de idempotencia (si el mismo mensaje llega dos veces, la API lo ignora la segunda vez).
+
+```json
+{
+  "idempotency_key": "web-2026-11-12-0915-5f3a9c",
+  "fuente": {
+    "tipo": "noticia",
+    "url": "https://ejemplo.pe/nota-123",
+    "fecha_publicacion": "2026-11-12T09:02:00-05:00",
+    "hash_texto": "9b1c…"
+  },
+  "caso_candidato": "CS-EJEMPLO-001",
+  "tipo_hecho": "bloqueo_de_acceso",
+  "ubigeo": "130000",
+  "actores_mencionados": [
+    {
+      "texto": "dirigente de pescadores de la caleta X",
+      "actor_uid": null,
+      "nivel_sugerido": 4
+    }
+  ],
+  "citas": [
+    {
+      "texto_literal": "Dejen trabajar a la gente",
+      "offset_inicio": 412,
+      "offset_fin": 437,
+      "tema": "empleo",
+      "sentimiento": "favorable"
+    }
+  ],
+  "score_riesgo": 0.71,
+  "explicacion": "Bloqueo reportado en caleta con compromisos vencidos y actor no dialogante.",
+  "modelo": { "nombre": "clasificador-v1", "version": "2026.11.1" }
+}
+```
+
+**Qué hace la API con ese mensaje:** valida la firma, comprueba que cada cita exista literalmente en el texto (G20), inserta un candidato en estado «pendiente» y no hace nada más. Hasta que una persona la apruebe, la alerta **no existe** para el Perfil B ni para el Perfil C (G21).
+<!-- v10:P05 end -->
 
 ### 9.3 Diagrama del patrón
 
@@ -3938,7 +4357,7 @@ Registradas en `agent.plantilla_prompt`: system prompt, few-shot, output schema,
 
 ### 9.9 Contrato de test sintético por guardrail — _añade_ — cierra GR-5 y AB-6
 
-Registrado en `config.guardrail_contract`: para cada uno de los 18 guardrails (§16), qué input lo dispara, qué output se espera, y qué input _no_ lo dispara (caso negativo). T48 (§3.16) decía "cada guardrail tiene un caso de prueba" sin especificarlo — este contrato es esa especificación, legible por una suite de pruebas automatizada.
+Registrado en `config.guardrail_contract`: para cada uno de los 25 guardrails (§16) —18 de G1–G18 y 7 de G19–G25, sembradas el 18 de noviembre de 2026—, qué input lo dispara, qué output se espera, y qué input _no_ lo dispara (caso negativo). T48 (§3.16) decía "cada guardrail tiene un caso de prueba" sin especificarlo — este contrato es esa especificación, legible por una suite de pruebas automatizada.
 
 ### 9.10 Especialización de A1 por dominio — _añade_
 
@@ -4004,6 +4423,41 @@ flowchart TB
 El clasificador detecta `simple_factual`: retrieval directo + Sintetizador +
 motor de guardrails. Latencia objetivo < 2s. El clasificador detecta `complejo_analitico`:
 pipeline completo. Latencia objetivo < 8s.
+
+<!-- v10:P11 begin -->
+
+### 10.2.v10 Qué significa «tiempo real»: tres tramos medibles — _añade a 10.2 (v10)_ — V10-05
+
+**El problema.** v9 promete salidas en menos de 2 y 8 segundos (arriba), pero eso mide **consultas**, no la **llegada de una noticia** al tablero. El TDR pide un tablero «en tiempo real». Sin un número y un tramo, la promesa no se puede comprobar ni defender ante una observación.
+
+| Tramo                             | Qué mide                                                        | Objetivo       | Cómo se logra                                | Prueba |
+| --------------------------------- | --------------------------------------------------------------- | -------------- | -------------------------------------------- | ------ |
+| **T-ingesta**                     | Publicación en la fuente → candidato en la bandeja del analista | ≤ 30 min (p95) | Recolección cada 15 min + NLP                | T104   |
+| **T-tablero**                     | Cambio aprobado en la base → cambio visible en el tablero       | ≤ 60 s         | La aplicación consulta cada 60 s (_polling_) | T104   |
+| **T-crisis**                      | Confirmación de crisis → SMS o correo a la Alta Dirección       | ≤ 10 min       | Notificador con cola                         | T104   |
+| Consulta factual / analítica (v9) | Pregunta del usuario → respuesta                                | < 2 s / < 8 s  | Fast path (arriba)                           | v9     |
+
+**Decisión v10 (D26):** _polling_ de 60 segundos en lugar de WebSockets. _Por qué:_ funciona con el alojamiento habitual de OGTI sin configuración especial y cumple el objetivo; WebSockets queda como mejora opcional.
+
+> **Ejemplo (ILUSTRATIVO): el recorrido de una alerta, con quién gasta el tiempo.**
+>
+> | Hora  | Qué ocurre                                                                 | Quién       |
+> | ----- | -------------------------------------------------------------------------- | ----------- |
+> | 09:02 | Un medio regional publica una nota sobre un bloqueo                        | Fuente      |
+> | 09:15 | Ciclo de recolección: baja la nota y la deduplica                          | Máquina     |
+> | 09:17 | NLP, resolución de actores, citas, puntaje de riesgo                       | Máquina     |
+> | 09:18 | `POST /ingesta/alertas`; aparece en la bandeja                             | Máquina     |
+> | 09:41 | El analista revisa, edita la explicación y **aprueba**                     | **Persona** |
+> | 09:42 | La alerta aparece en los KPIs y el mapa del Perfil B (≤ 60 s)              | Máquina     |
+> | 09:43 | La Dirección de la OAIPCS **confirma la crisis**                           | **Persona** |
+> | 09:45 | Llega el SMS al despacho del Ministro, con enlace al resumen de una página | Máquina     |
+>
+> De publicación a bandeja pasaron **16 minutos**; de la bandeja a la aprobación, 23 minutos de **decisión humana**, que es el cuello de botella deseado.
+
+**Fast path del Sintetizador (resumen de una página).** Para el resumen de una página el Sintetizador usa una plantilla cerrada (_Situación · Qué cambió en 7 días · Riesgo y tendencia · Decisión requerida y plazo · Próximos hitos_, máximo 350 palabras) y un paquete de datos cerrado: las cifras salen de las tablas, no del modelo de lenguaje. No pasa por el Critic en línea; pasa por la **validación del analista** antes de llegar al Perfil B (§9.2.v10).
+
+**Texto sugerido para el informe o la propuesta.** _«En la gestión de conflictos sociales, “tiempo real” se entiende como: toda publicación relevante de las fuentes autorizadas llega a la bandeja del analista en un máximo de 30 minutos; el tablero refleja cualquier cambio aprobado en un máximo de 60 segundos; y las crisis confirmadas se notifican en un máximo de 10 minutos. La aprobación humana es un paso deliberado y no cuenta como retraso del sistema.»_
+<!-- v10:P11 end -->
 
 ### 10.3 Cache semántico
 
@@ -4185,6 +4639,25 @@ RS-08 (altas, bajas y cambios de permisos) cubre los roles nuevos. Cada exportac
 
 **Rol Exportador CITES (C6).** Requisito político: acceso a sus permisos y cuotas. Requisito técnico: RLS por `exportador_actor_uid` en `pesca.licencia_cites_denp`.
 
+<!-- v10:P07 begin -->
+
+### 11.8.v10 Perfiles A, B y C del MVP-45 frente a las personas y roles de v9 — _añade (v10)_ — V10-03
+
+**Por qué hace falta.** El TDR y el MVP hablan de Perfil A, B y C. v9 habla de personas (Field, Analyst, Director, Executive, External) y de roles de sistema. Esta tabla las une, para que nadie cree dos modelos de permisos.
+
+| Perfil MVP                      | Persona v9 (§11.1–11.5) | Rol de sistema (`core.roles`) | Nivel máx. de clasificación | Qué lo limita                                                                                                                                                                           |
+| ------------------------------- | ----------------------- | ----------------------------- | --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **A — Office View**             | Analyst, Director       | `sectorista`                  | 3                           | Casos asignados; datos personales solo con permiso específico y auditoría                                                                                                               |
+| **B — Minister View**           | Executive               | `alta_direccion`              | **2** (v9 le da 3)          | **Decisión v10 (D25):** en el MVP queda en 2 y solo ve vistas agregadas; no ve datos personales, alertas pendientes ni texto de fuentes. Puede subirse a 3 por decisión de la Dirección |
+| **C — Portal de Transparencia** | External                | `externo_publico`             | 1                           | **Seguridad por sujeto** (`actor_uid` de §11.10.bis): solo ve **sus** compromisos y las alertas sectoriales donde es destinatario                                                       |
+
+**Aclaración importante.** El Perfil C **no es** el portal público de transparencia del módulo M9 (§13, F6): M9 publica vistas agregadas con k-anonimato para cualquiera; el Perfil C es una vista **autenticada** para un actor externo concreto. Pueden coexistir.
+
+> **Ejemplo (ILUSTRATIVO).** Un gremio de pescadores artesanales entra con su credencial. Ve tres compromisos del Estado hacia él (uno vencido, dos en plazo) y ninguna otra cosa: ni el resto de los casos, ni los otros actores, ni los análisis. Si cambia en la URL el identificador de un compromiso ajeno, recibe una respuesta vacía, no un error que confirme que existe.
+
+**Qué pasa con las aprobaciones.** Se mantiene la regla de v9: las aprobaciones no se dan por rol sino por permiso (`core.permiso_aprobacion`). En el MVP, «aprobar alerta» lo tiene el analista y «confirmar crisis» lo tiene la Dirección de la OAIPCS (ciclo de vida de la alerta, MVP §3.4).
+<!-- v10:P07 end -->
+
 ### 11.9 IdP y `app.clasificacion_max` — _añade_ — cierra SE-1, SE-2
 
 El informe OGTI no confirma PIDE vs. SAML vs. OAuth2; v9 no decide por PRODUCE — documenta el contrato: el IdP que se elija debe mapear sus atributos de sesión a `app.clasificacion_max` y `app.actor_uid` (ambas variables de sesión Postgres, ya consumidas por toda la RLS del sistema desde v8.3) y a `app.staff_bypass_subject_rls` (booleana, solo para roles no acotados a un actor — ver §11.10.bis). `core.clasificacion_max()` (función ya existente en v8.3) las lee; nada más del sistema necesita saber qué IdP hay detrás.
@@ -4364,9 +4837,9 @@ core.integraciones (extendida)
 > `tipo_sync` y `estado` como `ENUM`. No es lo que el DDL ejecutado tiene (y no debe serlo): son
 > `VARCHAR` con `CHECK`, porque un tipo `ENUM` obliga a una migración con `ALTER TYPE` para
 > añadir un valor, mientras que un `CHECK` se cambia en una migración ordinaria. Es el mismo
-> criterio de "catálogos por lookup, no por `ENUM`" de §20.1. `tipo_fuente_id` la añade §4.5
+> criterio de "catálogos por lookup, no por `ENUM`" de §20.1. `tipo_fuente_id` la añade `DDL §4.5`
 > (`core.cat_tipos_fuente_integracion`, §20.27.bis); `protocolo_sincronizacion` la añade la
-> edición del 30 de octubre (§4.5.bis, §15.5), y distingue API REST, lote por SFTP y oficio manual.
+> (`DDL §4.5.bis`, §15.5), y distingue API REST, lote por SFTP y oficio manual.
 
 - **Workflow inter-ministerial sobre `core.integraciones`.** Los estados "Solicitado → En revisión MEF → Aprobado → Ejecutado" se registran en `core.integraciones.workflow_state`, no en tabla nueva. `workflow_state` es texto libre **a propósito**: describe el trámite del lado del sistema externo, que el sistema local no gobierna. No se confunde con `core.outbox_integracion.estado_id` (§15.6), que es el ciclo de vida del mensaje de transporte y sí es un catálogo cerrado — son dos granularidades distintas, y por eso ninguna de las dos reemplaza a la otra.
 
@@ -4420,6 +4893,48 @@ infraestructura de cómputo elástico.
 
 Un escenario se construye con reglas de tipo `hipotesis_analitica` (2.bis): nunca pueden estar vigentes ni inyectarse como contexto.
 
+<!-- v10:P09 begin -->
+
+### 13.5.v10 M5a-lite: matriz E1–E4 y palancas — _añade a 13.5 (v10)_ — V10-06
+
+**Qué es.** La versión inicial del What-if que el MVP-45 entrega antes de que exista el M5a completo. Responde una pregunta práctica: **dada la situación de un caso, ¿la obra avanza o se paraliza, y qué palanca cambia el resultado?**
+
+|                         | M5a (v9, año 2)                                                                              | M5a-lite (MVP-45)                                                                                                                                                                                          |
+| ----------------------- | -------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Datos de entrada        | KAG + modelo económico                                                                       | Tablas del núcleo (K4, K5, compromisos, lista de control del predio)                                                                                                                                       |
+| Método                  | What-if determinista con escenarios base, optimista y pesimista                              | Motor de reglas versionado (`analisis.simulacion` + `analisis.escenario_regla` en el MVP-45; `forecast.whatif_scenarios` + `policy.escenario_regla` en v9/v10 año 2) basado en juicio experto estructurado |
+| Casos análogos          | Rama Análogo con 5 casos                                                                     | Los mismos 5, con similitud 60 % estructurada y 40 % semántica                                                                                                                                             |
+| Reglas que se mantienen | «ESCENARIO — no vigente»; prueba T42; nunca alimenta `forecast.predictions` sin marca humana | Idénticas                                                                                                                                                                                                  |
+
+**Los dos ejes.**
+
+- **Viabilidad social (Sí/No).** Sí cuando el ICD (K5) ≥ umbral configurable (60 por defecto) **y** no hay actores no dialogantes con influencia ≥ 70. El analista puede sobrescribir, con justificación registrada.
+- **Control del predio (Sí/No).** Lista de verificación fechada y con evidencia: titularidad o derecho de uso · posesión efectiva · acceso físico sin impedimento · ausencia de medidas judiciales o de hecho que lo bloqueen. Es «Sí» solo si se cumplen las cuatro.
+
+**Matriz.** _Mapeo propuesto: debe contrastarse con el informe del caso SANIPES Sechura antes del Día 20 del plazo (Q35)._
+
+|                           | **Control del predio: Sí**                                                                                                                 | **Control del predio: No**                                                                     |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------- |
+| **Viabilidad social: Sí** | **E1 — Avanza.** Mantener monitoreo y cumplimiento de compromisos                                                                          | **E2 — Avanza condicionada.** No hay barrera social, pero depende del saneamiento físico-legal |
+| **Viabilidad social: No** | **E3 — Avanza con alto riesgo de paralización.** Puede iniciar, pero el rechazo probablemente la detenga; prioridad: diálogo y compromisos | **E4 — Paralizada.** Falta lo social y lo físico; requiere intervención integral               |
+
+> **No confundir siglas.** Aquí `E1–E4` son los **cuadrantes de un caso**. No son los escenarios de política `E-A` y `E-B` de §13.5 (arriba), ni las decisiones de escala `E6–E8` de §3.17.2. En tablas y código el MVP usa el prefijo `caso.` (p. ej. `caso.E3`) para evitar la colisión.
+
+**Palancas.** Cada una cambia insumos y recalcula ICD, IPA e IRE.
+
+| Palanca                                        | Efecto simulado                                                     | Insumo que cambia                          |
+| ---------------------------------------------- | ------------------------------------------------------------------- | ------------------------------------------ |
+| Cumplir el compromiso X                        | Sube «confianza y cumplimiento previo» en el ICD; baja los vencidos | Condición 3 del ICD; estado del compromiso |
+| Mover al actor Y de oposición a neutral        | Cambia posición e influencias en la red; recalcula IPA y viabilidad | `core.casos_actores.posicion`              |
+| Abrir una mesa de diálogo o designar mediación | Mejora canal institucional y mediación                              | Condiciones 4 y 6 del ICD                  |
+| Resolver un impedimento del predio             | Cambia un ítem de la lista de control                               | Lista del predio                           |
+| Incidente adverso (violencia, bloqueo)         | Empeora «ausencia de violencia reciente» y sube el IRE              | Condición 5 del ICD; hechos                |
+
+**Qué devuelve.** Cuadrante resultante, banda de riesgo **Baja / Media / Alta** (no una probabilidad), indicadores **antes y después**, acciones del banco de intervención (OE3), **disparadores a vigilar** y supuestos usados. Cada simulación se guarda con insumos, resultado, usuario y versión de reglas (T103). El recorrido completo con números está en **UC-13** (§24.ter).
+
+**Calibración.** Los efectos de cada palanca se calibran con al menos cinco casos históricos y con el caso SANIPES Sechura antes de la demostración integral (Día 36 del plazo, MVP §1.5).
+<!-- v10:P09 end -->
+
 ### 13.6 M6 — Seguridad (Rediseñado)
 
 **Alcance adoptado.** Solo monitoreo AIS de flota extranjera. Patrones
@@ -4447,6 +4962,46 @@ MININTER. Duplicarla sería invasión de competencias y riesgo legal bajo
 Ley N.° 29733. PRODUCE recibe información agregada de MININTER y usa
 esa información para adecuar la respuesta institucional, no para
 criminalizar.
+
+### 13.6.bis.v10 Repositorio restringido de situación judicial — _añade a 13.6 (v10)_
+
+El rediseño de M6 dejó, con razón, fuera de alcance `security.actores_antecedentes`. Queda un hueco operativo: cuando la PIDE entrega un cotejo de requisitorias, ¿dónde se guarda? Se resuelve con una sola tabla en `core` —`core.situacion_judicial_restricta`, definida en el bloque §2.3.bis del MVP— bajo cuatro reglas no negociables:
+
+1. **Dos valores y nada más:** `bajo_investigacion` o `sentencia_firme`. No hay «criminal», «saboteador», «radical» ni puntajes de peligrosidad. Un `CHECK` de dos valores es el guardrail más barato que existe.
+2. **Repositorio restringido.** Solo lectura mediante `core.permiso_aprobacion` con vigencia; sin vista en `bi`, sin acceso del portal y sin `SELECT` para los perfiles B y C.
+3. **Escritura con evidencia.** `sentencia_firme` exige `documento_uri`; `bajo_investigacion` exige `fuente` y la fecha del hecho.
+4. **Inoponibilidad.** Una fila de esta tabla no puede ser condición de ningún `core.compromisos`, ni de acceso a mesa de diálogo, ni de servicio del sector. Se verifica por prueba: ninguna consulta de negocio referencia la tabla (T110).
+
+Cumple el D.S. N.° 115-2025-PCM (prohibición de _social scoring_) precisamente porque el modelo de IA **no** consume esta tabla: es registro documental humano, no una señal de entrada a ningún agente. Es la decisión **DC-07**.
+
+### 13.6.ter.v10 Seguridad de Nivel Alto sobre datos personales: lo implementado — _añade a 13.6 (v10)_
+
+**Estado.** La mitad «reposo» de DC-01 (`mvp.md` §3.3.bis) está implementada en la base y verificada el 18 de noviembre de 2026. Lo que sigue describe objetos que existen, con sus cifras medidas; lo que falta se enumera al final con el motivo, sin presentarlo como hecho.
+
+**Cifrado y búsqueda.** `core.actor_datos_personales` guarda los identificadores solo como `bytea`: `dni_cifrado` (642 filas), `email_cifrado` (141) y `telefono_cifrado` (606), con `pgp_sym_encrypt` y `cipher-algo=aes256`. Los nombres reales son estos, no los `documento_cifrado`/`documento_hmac` que propone el DDL de §3.6.v10: conviene alinear el DDL con la base. Los 606 teléfonos no son 556: 50 filas solo tenían `telefono_raw`, y el formato no es homogéneo —556 normalizados a `+51…` y 50 con los nueve dígitos crudos—, así que el aplicativo debe normalizar al leer.
+
+`dni_hmac` (642 filas, 587 valores distintos) es un HMAC-SHA256 del DNI: es lo que permite buscar por igualdad y detectar duplicados **sin descifrar**. El índice `ix_actor_datos_personales_dni_hmac` es no único a propósito, porque hay 45 DNI repetidos (55 filas sobrantes) y declararlos únicos habría decidido por OAIPCS una política de identidad que no está tomada.
+
+Las columnas en claro (`dni`, `email`, `telefono_contacto`, `telefono_alt`, `telefono_raw`) están en `NULL` en las 847 filas y `core.ix_actor_dni` se eliminó. Las columnas siguen existiendo y son escribibles: nada impide que un `INSERT` futuro vuelva a guardar plano.
+
+**Lectura controlada.** `core.v_actor_datos_personales_seguro` (`security_invoker = true`) expone `actor_uid`, `nivel_clasificacion` y los cuatro blobs, nunca el plano: es la superficie que pueden leer los perfiles que no descifran. `core.actor_datos_personales_descifrar(uid uuid, motivo text)` es `SECURITY DEFINER`, con `EXECUTE` revocado de `PUBLIC`, y es el único camino soportado para ver un dato en claro: exige `clasificacion_max() >= 3`, un `motivo` no vacío, deja el acceso registrado y devuelve DNI, correo y teléfono.
+
+**Bitácora.** `audit.datos_personales_acceso` registra `ocurrido_en`, `usuario` (`session_user`), `operacion` (`select_descifrado`, `insert`, `update`, `delete`, `export`), `actor_uid`, `motivo`, `filas_afectadas` y un `contexto` con las columnas modificadas y el origen. Tres triggers rechazan `UPDATE`, `DELETE` y `TRUNCATE`; al cierre de este corte tiene 2 241 filas. El trigger de escritura se instaló antes del backfill: la propia migración quedó trazada, sin ventana ciega.
+
+**La clave.** `APP_CRYPTO_KEY` vive en `.env` (fuera de git) y llega a la base por sesión mediante `set_config('app.crypto_key', …)`; ninguna rutina funciona sin ella. No hay `clave_version`: rotar exige una ventana de mantenimiento que descifre y recifre en una sola transacción. Custodiarla en el gestor de secretos institucional, con rotación e inyección por conexión, es trabajo de OGTI y sigue pendiente.
+
+**Lo que el cifrado no tapa.**
+
+- `base_legal` tiene un único valor, `LEGADO_AVISA_2026`, en las 847 filas: es una etiqueta de migración, no el catálogo del art. 14 (DC-03). `fecha_consentimiento` está vacía en las 847. Con ese insumo, G23 (§16.1.quinquies) rechazaría toda escritura si su trigger existiera; hoy no existe.
+- El rol `avisa` es superusuario con `rolbypassrls`: las cuatro políticas de RLS de la tabla están, pero no lo limitan (DC-02). `app.clasificacion_max` y `app.crypto_key` son parámetros de sesión, no credenciales: cualquier conexión puede fijarlos. El nivel 3 evita descifrados accidentales, no a un atacante con acceso directo.
+- Los intentos denegados no dejan fila: la excepción revierte la transacción y con ella el `INSERT` en la bitácora.
+- La bitácora no identifica a la persona: sin `SET ROLE` por funcionario, `session_user` es siempre `avisa`.
+
+**Pendiente, y por qué no está hecho.**
+
+- **TLS en tránsito.** `SHOW ssl` devuelve `off` y `pg_hba.conf` autentica en `trust` el tráfico local. El puerto publicado viaja sin cifrar, así que el cifrado en reposo se anula en ese tramo. Activarlo exige certificado, `ssl = on`, `hostssl` y `sslmode=verify-full`, y en la práctica recrear el contenedor: es un cambio de imagen y de `compose.yaml`, no de base de datos.
+- **`pgaudit`.** No aparece en `pg_available_extensions` (0 filas): el paquete `postgresql-16-pgaudit` no está en la imagen y `CREATE EXTENSION` fallaría. Requiere reconstruir la imagen y reiniciar con `shared_preload_libraries = 'pgaudit'`. Mientras no esté, la trazabilidad es **de fila y de aplicación** —triggers y descifrado a través de la función—, no de sentencia: no cubre lecturas directas a los blobs ni el SQL que ejecuta el motor.
+- **Procedimiento de incidentes.** El plazo de 48 horas para notificar un incidente ante la ANPDP es una obligación legal vigente; el procedimiento operativo —responsable nombrado, runbook, registro de incidentes— no está implementado. Lo que existe es la evidencia de acceso y exportación que lo alimentaría (§5.5, DC-12).
 
 ### 13.7 M7 — Trazabilidad (Reducido)
 
@@ -4996,7 +5551,7 @@ aplicó a `pesca.cuota_cites_especie` y `mype.inspeccion_cite`: **no complejizar
 generalizar antes que nombrar por caso.** Una tabla `core.relacion_sesigue` habría sido una tabla
 física nombrada por un sistema externo, exactamente el anti-patrón que esa sección descarta.
 
-La agregación es una vista, y su definición es la misma que el DDL ejecuta (§4.5.bis):
+La agregación es una vista, y su definición es la misma que el DDL ejecuta (`DDL §4.5.bis`):
 
 ```sql
 CREATE VIEW core.vw_agregacion_compromiso_externo AS
@@ -5307,6 +5862,33 @@ flowchart TB
 ### 16.1.ter Reason codes de G16–G18 — _añade_
 
 `G16_CONCENTRACION`, `G17_ECA`, `G18_PERMISO` — siguen el mismo patrón de los 15 reason codes existentes de v8.3 (§16.1), y están en el contrato de test de §9.9.
+
+<!-- v10:P12 begin -->
+
+### 16.1.quater Guardrails G19–G22 — _añade a §16.1 (v10)_ — V10-08
+
+**G19 — No reidentificación.** Ninguna salida, agente ni proceso puede asociar a un actor de nivel de identificación 4 o 5 con un documento, un nombre civil o un registro personal que no esté ya validado por una persona. _Ejemplo:_ el pipeline lee «el dirigente de la caleta X» y un perfil público con nombre y foto; **no** los vincula: propone un alias y envía el caso a HITL. Reason code: `G19_REIDENTIFICACION`.
+
+**G20 — Cita literal.** Una cita solo se muestra si el servidor comprueba, de forma determinista, que el fragmento existe **literalmente** en el texto de la fuente (tras normalizar espacios y codificación) y que `offset_inicio`/`offset_fin` caen dentro del texto. Si no coincide, se descarta. _Ejemplo:_ la fuente dice «Dejen trabajar a la gente»; el modelo propone «Dejen trabajar a la gente de la caleta»; la cita se **descarta** porque la segunda versión no está en la fuente. Reason code: `G20_CITA_NO_LITERAL`.
+
+**G21 — Aprobación humana antes de visibilidad.** Ninguna alerta es visible para los perfiles B o C si no tiene aprobación humana registrada (`aprobada_por`, `aprobada_en`). Es el mismo principio del gate HITL de `core.outbox_integracion` (§15.6) aplicado a alertas, y lo impone la base, no la aplicación: un _trigger_ rechaza `visibilidad ≠ 'interna'` si `aprobada_por` es nulo (el trigger es el diseño; aún no existe, §16.1.quinquies). Reason code: `G21_SIN_APROBACION`.
+
+**G22 — Fuente permitida.** Solo se recolecta de fuentes en la lista blanca (§7.5.v10). Una fuente fuera de la lista, o una red social sin API oficial o proveedor licenciado, se rechaza y se registra. Reason code: `G22_FUENTE_NO_PERMITIDA`.
+
+Los cuatro códigos siguen el patrón de los 18 anteriores y sus filas están sembradas en `config.guardrail_contract` —G19–G22, todas `block`, con `input_dispara`, `input_no_dispara` y los dos `output_esperado_*`— desde el 18 de noviembre de 2026; forman parte del contrato de test de §9.9 y de §22.3.ter.
+<!-- v10:P12 end -->
+
+### 16.1.quinquies Guardrails G23–G25 — _añade a §16.1 (v10)_ — DC
+
+**G23 — Nivel Alto antes que dato.** Ningún campo identificable (documento, nombre civil, teléfono) se escribe en `core.actor_datos_personales` ni en el padrón de asistencia si no existe un consentimiento vigente o una base legal registrada. Sin base legal ni consentimiento, la escritura se rechaza y el caso va a HITL. Reason code: `G23_SIN_BASE_LEGAL`.
+
+**G24 — Identidad sintética por defecto.** Toda vista, API o reporte destinado a un perfil distinto del analista habilitado devuelve el identificador sintético del actor, nunca el nombre ni el documento. La comprobación es de base: la vista no proyecta la tabla de datos personales (la verificación aún no está automatizada, §16.1.quinquies). Reason code: `G24_REIDENTIFICACION_EN_SALIDA`.
+
+**G25 — Sin etiqueta penal sin sentencia.** Ninguna salida puede clasificar a un actor con una categoría penal si no hay fila en `core.situacion_judicial_restricta` con `tipo = 'sentencia_firme'` y `documento_uri` poblado. `bajo_investigacion` **no** puede aparecer en el portal ni en el tablero de la Alta Dirección. Reason code: `G25_ETIQUETA_SIN_SENTENCIA`.
+
+Los tres códigos están sembrados en `config.guardrail_contract` —G23–G25, todas `block`— y entran al contrato de test de §9.9 y a §22.3.ter, junto a G16–G22. El `CHECK` de la columna `guardrail` admite G1–G25 desde el parche 6 de cumplimiento, y desde el 18 de noviembre de 2026 la tabla tiene **25 filas**: las 18 de G1–G18 más las siete de G19–G25, con reparto 22 `block` y 3 `warn`. Cada fila trae `input_dispara`, `input_no_dispara`, `output_esperado_dispara` (con su `reason_code`), `output_esperado_no_dispara` y `severidad`.
+
+Lo sembrado es el contrato, no la implementación. No existen todavía: el trigger de visibilidad de G21 (`core.alertas_tempranas` no tiene `visibilidad`, `aprobada_por` ni `aprobada_en`), la verificación determinista de offsets de G20, el rechazo de escritura de G23 sobre `core.actor_datos_personales`, la comprobación automática de que ninguna vista de perfil B o C proyecte nombre o documento para G24, y `core.situacion_judicial_restricta` para G25. Mientras esos objetos no existan, la fila del contrato dice qué debe rechazarse, no que ya se rechace.
 
 ### 16.4.bis Umbrales de drift (C4–C6) — _añade a §16.2_
 
@@ -5695,6 +6277,53 @@ Se suman a las decisiones D1 a D9 de 0.6.6.
 **D20.** Ampliación de `core.cat_especies` con tiburones CITES — requiere coordinación con IMARPE.
 **D21.** `core.cat_mapeo_estado_externo` se siembra con tres filas **ilustrativas** (`En_Contratación`, `En_Elaboración_TDR`, `Vencido_Sin_Sustento` → `En_Cumplimiento_En_Plazo`/`En_Cumplimiento_Vencido`) porque el encargo de la edición del 30 de octubre las pide como demostración del mecanismo. No son la taxonomía real: los estados locales de este sistema son los cinco de `core.cat_estados_compromiso` (Por_iniciar, En_proceso, Cumplido, Redefinido, Desestimado), y la taxonomía del destino no está confirmada. Hasta que la Mesa Técnica Institucional (Fase 3, §15.7) la confirme, el worker **no debe usarlas en producción** — la tabla queda como hipótesis trazada en Q33, no como configuración vigente.
 
+<!-- v10:P15 begin -->
+
+### 18.ter Preguntas Q34–Q40 y decisiones D22–D29 — _añade a §18.bis (v10)_
+
+**Decisiones** (marcadas _propuesta_ hasta que la Dirección y OGTI las acepten).
+
+| ID  | Decisión                                                                                                                                                                                                                                                                                               | Dónde se aplica     |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------- |
+| D22 | **El MVP usa los nombres de tabla de v9** (`core.actores`, `core.casos`, …). Los esquemas `seg`, `ia`, `audit` y `ref` del MVP se absorben en los de v9. _Por qué:_ evita una deuda de renombrado al migrar al modelo completo. _Costo:_ una pasada mecánica sobre el DDL del MVP (tabla en Anexo D.2) | Anexo D.2           |
+| D23 | SQL Server ≥ 2019 es el perfil de despliegue del MVP; PostgreSQL sigue siendo la referencia                                                                                                                                                                                                            | §3.17.2.v10         |
+| D24 | El simulador de 45 días es **M5a-lite**, una excepción de nivel declarada, con las reglas de v9 intactas                                                                                                                                                                                               | §0.7.1, §13.5.v10   |
+| D25 | Los cinco KPIs entran como semillas de `ind` (IRE e IPS30 como `proxy`); el Perfil B queda en clasificación ≤ 2                                                                                                                                                                                        | §8.4.ter, §11.8.v10 |
+| D26 | «Tiempo real» = tres tramos medibles; _polling_ de 60 s                                                                                                                                                                                                                                                | §10.2.v10           |
+| D27 | AVISA: copia congelada, carga por `staging`, delta semanal hasta el _cutover_                                                                                                                                                                                                                          | UC-14               |
+| D28 | Redes sociales solo por API oficial o proveedor licenciado, con lista blanca                                                                                                                                                                                                                           | §7.5.v10, G22       |
+| D29 | «Proyección socioeconómica» = tendencia del IRE + `P1_IPS30` (proxy, rango, rotulado)                                                                                                                                                                                                                  | §8.4.ter            |
+
+**Preguntas abiertas.**
+
+| ID  | Pregunta                                                                                                                                                                                                                                         | Quién responde   | Antes de                                |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------- | --------------------------------------- |
+| Q34 | ¿Qué versión de SQL Server tiene OGTI y ofrece tipo vectorial, _Full-Text Search_ y SQL Agent?                                                                                                                                                   | OGTI             | Día 2                                   |
+| Q35 | Contrastar la matriz E1–E4 y los pesos del IRE con el informe del caso SANIPES Sechura                                                                                                                                                           | OAIPCS           | Día 20                                  |
+| Q36 | ¿En qué formato y dónde reside hoy la matriz de AVISA (hojas, columnas, quién la edita)?                                                                                                                                                         | OAIPCS           | Día 3                                   |
+| Q37 | ¿Legal autoriza enviar texto público a un proveedor de LLM externo? (D-6 del MVP)                                                                                                                                                                | Legal / OGTI     | Día 12                                  |
+| Q38 | ¿Cuántos casos históricos hay para calibrar pesos y los factores FP? (mínimo cinco)                                                                                                                                                              | OAIPCS           | Día 30                                  |
+| Q39 | ¿Qué proveedor de escucha social o qué API se contrata, con qué costo y cuota?                                                                                                                                                                   | OAIPCS / OGTI    | Día 25                                  |
+| Q40 | **Aplicada el 2026-11-18.** ¿Se acepta el tope de ±10 puntos para el ajuste automático del ICD? El tope corre como parámetro (`ICD.ajuste_tope_puntos = 10`) y `core.icd_aplicar_ajuste` lo aplica; falta la confirmación formal de la Dirección | Dirección OAIPCS | Aplicada; confirmación formal pendiente |
+
+**Q40 — decisión aplicada.** El tope dejó de ser prosa. `config.parametro` tiene la fila vigente `ICD.ajuste_tope_puntos` (`valor` 10, `tipo` numero, `unidad` puntos, `valid_to` nulo) y `core.icd_aplicar_ajuste(p_base numeric, p_ajuste numeric)` devuelve `(icd_analista, ajuste_propuesto, ajuste_aplicado, ajuste_recortado, icd_final)`. La función **lee el tope de `config.parametro` en cada llamada**: no lo incrusta. Si la Dirección aprueba otro valor se sustituye la fila del parámetro con nueva vigencia y la función no se toca. `aprobado_por` y `aprobado_en` del parámetro siguen nulos: eso, y no el valor, es lo que mantiene abierta la confirmación formal.
+
+Bordes verificados: `p_base` nulo lanza `22004` (no se inventa un ICD), la falta del parámetro `P0002`, un tope negativo `22023`, y un `p_ajuste` nulo cuenta como 0 sin recorte. La función no persiste nada: el ICD se calcula, no se almacena.
+
+Casos ejecutados contra la base el 18 de noviembre de 2026:
+
+| Caso                   | `icd_analista` | `ajuste_propuesto` | `ajuste_aplicado` | `ajuste_recortado` | `icd_final` |
+| ---------------------- | -------------: | -----------------: | ----------------: | :----------------: | ----------: |
+| +15 se recorta a +10   |             70 |                +15 |           **+10** |        true        |          80 |
+| −3 queda tal cual      |             70 |                 −3 |                −3 |       false        |          67 |
+| 95 + 10, tope superior |             95 |                +10 |               +10 |       false        |     **100** |
+| 5 − 10, tope inferior  |              5 |                −10 |               −10 |       false        |       **0** |
+| ajuste nulo cuenta 0   |             70 |               NULL |             **0** |       false        |          70 |
+
+Con el ejemplo de K5 (ICD del analista 45,8) y un ajuste propuesto de +12, la llamada devuelve `45.8 | 12 | 10 | true | 55.8`: la interfaz muestra «ICD del analista 45,8», «ajuste automático +10 (PROXY, recortado de +12)» y «ICD final 55,8». Los dos números nunca se mezclan, que es lo que la decisión exige.
+
+<!-- v10:P15 end -->
+
 ## 19. Glosario completo
 
 **3P (Filtro 3P).** Problema, Propuesta, Pedido. Estructura obligatoria
@@ -5829,6 +6458,37 @@ tiempo.
 **Transactional Outbox.** Patrón por el cual el hecho local y el mensaje hacia el sistema externo se escriben en la misma transacción, y un worker fuera de la base hace el envío — ver §15.5.
 **Circuit Breaker.** Corte temporal de los reintentos hacia un destino que falla de forma sostenida, para no degradar al emisor; en este diseño lo implementa el worker, no la base.
 **Gate HITL.** Aprobación humana obligatoria antes de un efecto irreversible: aquí, nadie pasa un mensaje a `aprobado_para_envio` sin `aprobado_por`, y lo impone el trigger `core.chk_outbox_aprobacion()` — ver §15.6.
+
+<!-- v10:P16 begin -->
+
+### 19.v10 Términos nuevos — _añade al glosario (v10)_
+
+Si un término ya existe arriba, prevalece la definición más antigua y esta la complementa.
+
+**Actor seudónimo (nivel 4).** Actor registrado con un alias o cargo, sin identidad civil, a propósito.
+
+**Anclaje.** Vínculo obligatorio de un actor de nivel 4 o 5 con un caso o una organización.
+
+**Candidato de alerta.** Alerta propuesta por el pipeline que aún no aprobó una persona. No existe para los perfiles B y C.
+
+**Cita literal.** Fragmento que el servidor comprobó que aparece palabra por palabra en la fuente (G20).
+
+**Cuasi tiempo real.** Cumplimiento de tres tramos con número: 30 minutos, 60 segundos y 10 minutos (§10.2.v10).
+
+**ICC, ICD, IPA, IRE, TAA, IPS30.** Los indicadores de §8.4.ter.
+
+**HMAC.** Huella irreversible de un número (por ejemplo, un DNI) calculada con una clave secreta; permite saber que dos números son iguales sin mostrarlos.
+
+**M5a-lite.** Versión inicial del What-if del MVP-45 (§13.5.v10).
+
+**Nivel de identificación.** Qué tanto se sabe de un actor, de 1 (DNI) a 5 (colectivo anónimo) (§3.6.v10).
+
+**Perfil A, B, C.** Los tres accesos del MVP: analista, alta dirección, actor externo (§11.8.v10).
+
+**Promoción.** Subir el nivel de identificación de un actor sin cambiar su `actor_uid`.
+
+**Seguridad por fila (RLS).** Regla de la base de datos que decide qué filas puede ver cada usuario.
+<!-- v10:P16 end -->
 
 ## 20. DDL consolidado v8.3 (validado)
 
@@ -7738,13 +8398,13 @@ A partir de v9 el DDL deja de crecer dentro de este documento (las Partes 1–28
 
 Probado de punta a punta contra PostgreSQL 16.15 + PostGIS 3.4 + pgvector el 28 de octubre de 2026: **254 tablas, 21 vistas, 25 schemas, 0 errores.**
 
-**Nota sobre la edición del 30 de octubre (integración externa genérica, §15.4–15.7):** el bloque §4.5.bis del archivo —`core.cat_estados_integracion`, `core.outbox_integracion` y su trigger, `core.vw_agregacion_compromiso_externo`, la columna `core.integraciones.protocolo_sincronizacion` y `core.cat_mapeo_estado_externo`— vive dentro de **`PRODUCE_OAIPCS_AVISA_v9_ddl.sql`**, y se entrega también aislado, en **`v9_seccion_sesigue_ddl.sql`**, para que el script de pruebas lo cargue sin ejecutar el archivo completo. Las pruebas de comportamiento de esta edición están en `test_v9_edicion_sesigue.py`. Igual que la del 29 de octubre, se valida contra el núcleo ya probado y no contra una corrida completa de punta a punta (el entorno de prueba sigue sin PostGIS); el recuento de 254 tablas / 26 vistas de §0.5 es aritmética sobre los deltas documentados, **no** un recuento verificado.
+**Nota sobre la edición del 30 de octubre (integración externa genérica, §15.4–15.7):** el bloque `DDL §4.5.bis` del archivo —`core.cat_estados_integracion`, `core.outbox_integracion` y su trigger, `core.vw_agregacion_compromiso_externo`, la columna `core.integraciones.protocolo_sincronizacion` y `core.cat_mapeo_estado_externo`— vive dentro de **`PRODUCE_OAIPCS_AVISA_v9_ddl.sql`**, y se entrega también aislado, en **`v9_seccion_sesigue_ddl.sql`**, para que el script de pruebas lo cargue sin ejecutar el archivo completo. Las pruebas de comportamiento de esta edición están en `test_v9_edicion_sesigue.py`. Igual que la del 29 de octubre, se valida contra el núcleo ya probado y no contra una corrida completa de punta a punta (el entorno de prueba sigue sin PostGIS); el recuento de 254 tablas / 26 vistas de §0.5 es aritmética sobre los deltas documentados, **no** un recuento verificado.
 
 ### 20.27.bis `core.cat_tipos_fuente_integracion` y `core.feature_flags` — _añade_
 
 El primero cataloga el tipo de cada fuente externa (`dgsfs_pa`, `imarpe`, `senace`, `sunat`, `vuce`, `ana_siagua`, `sanipes`, `citered`, `sesigue`, `gfw`, …) para que `core.integraciones.tipo_fuente_id` no sea texto libre. El segundo (`core.feature_flags`) permite activar M11, M12, M13, el seguimiento externo de SESIGUE (M4) y las demás piezas de forma independiente, sin tocar código — `M11_mype`, `M12_acuicultura`, `M13_cites`, `M4_sesigue`, `qda_import`, `lex_import`, `communities`.
 
-En el mismo bloque del DDL (§4.5.bis) viven los tres objetos y la vista de la edición del 30 de octubre: `core.cat_estados_integracion` (8 estados del envío), `core.outbox_integracion` (el buzón transaccional con su gate HITL), `core.cat_mapeo_estado_externo` (traducción local→externa) y `core.vw_agregacion_compromiso_externo` (la agregación N:1). No hay ningún objeto con "sesigue" en el nombre de tabla: esa fila del catálogo es toda la huella de SESIGUE en el esquema. Ver §15.4–15.7.
+En el mismo bloque del DDL (`DDL §4.5.bis`) viven los tres objetos y la vista de la edición del 30 de octubre: `core.cat_estados_integracion` (8 estados del envío), `core.outbox_integracion` (el buzón transaccional con su gate HITL), `core.cat_mapeo_estado_externo` (traducción local→externa) y `core.vw_agregacion_compromiso_externo` (la agregación N:1). No hay ningún objeto con "sesigue" en el nombre de tabla: esa fila del catálogo es toda la huella de SESIGUE en el esquema. Ver §15.4–15.7.
 
 ## 21. DDL de los nuevos schemas
 
@@ -7795,6 +8455,33 @@ Extiende la numeración de tests de v8.3 (T1–T75, §3.16 y anexos) con los tes
 | T88 | `chat.rama`/`chat.ref` heredan visibilidad de su `chat.repositorio` vía `EXISTS`, no vía columna propia                                                                     |
 | T89 | Reconstrucción Contraloría (T74 extendido): desde una salida, llegar a su `chat_commit_id`, su model card, sus parámetros y el snapshot de política vigentes en ese momento |
 | T90 | El script unificado (`PRODUCE_OAIPCS_AVISA_v9_ddl.sql`) corre de punta a punta sin errores en una base nueva — **ejecutado el 28 de octubre de 2026, resultado: 0 errores** |
+
+<!-- v10:P14 begin -->
+
+### 22.3.ter Contrato de tests T91–T105 — _añade (v10)_
+
+Extiende la numeración de §22.3.bis. Las pruebas T97–T99 se ejecutan **en cada despliegue** (canal de integración continua).
+
+| ID   | Prueba                                                                                                                                                                                | Bloque   |
+| ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| T91  | Insertar un actor de nivel 4 con `caso_ancla_id` y sin ningún documento: se acepta                                                                                                    | B11      |
+| T92  | Insertar un actor de nivel 4 o 5 sin caso ni organización ancla: se rechaza (`ck_actor_anclaje`)                                                                                      | B11      |
+| T93  | Promover un actor de nivel 4 a nivel 1: el `actor_uid` no cambia y el número de relaciones, citas y alias es el mismo antes y después                                                 | B11      |
+| T94  | Dos actores con el mismo `documento_hmac`: el segundo se rechaza; muchos actores sin documento: se aceptan                                                                            | B11      |
+| T95  | El Resolver con similitud 0,92 entre un actor de nivel 4 y otro candidato **no fusiona**: crea una tarea HITL                                                                         | B11      |
+| T96  | Con contexto de Perfil B o C, `SELECT` sobre `core.actor_datos_personales` devuelve 0 filas o niega el permiso                                                                        | B11      |
+| T97  | Batería de aislamiento: 20 actores externos con compromisos cruzados; ninguna consulta del Perfil C devuelve filas de otro actor                                                      | B12      |
+| T98  | Una conexión reutilizada del _pool_ con otro usuario **no hereda** el contexto de sesión anterior                                                                                     | B12      |
+| T99  | El Perfil B no ve alertas en estado «pendiente»; el Perfil C no ve alertas cuyo destinatario no es su actor (G21)                                                                     | B12, B15 |
+| T100 | Una cita alterada en un solo carácter respecto de la fuente queda con `verificada_literal = false` y no aparece en ningún informe (G20)                                               | B15      |
+| T101 | El IRE del ejemplo de §8.4.ter se recalcula desde tablas y da **55,5**                                                                                                                | B13      |
+| T102 | El IPA del ejemplo de §8.4.ter da **61,25**                                                                                                                                           | B13      |
+| T103 | Las cuatro combinaciones de los dos ejes devuelven E1–E4; toda simulación guarda insumos, resultado, usuario y versión de reglas, y lleva el rótulo «ESCENARIO — no vigente»          | B14      |
+| T104 | Con una fuente simulada, una noticia llega a la bandeja en ≤ 30 min; un cambio aprobado se ve en el tablero en ≤ 60 s; una crisis confirmada dispara el envío en ≤ 10 min (§10.2.v10) | B15      |
+| T105 | Reconciliación de la migración: origen = cargados + fusionados + descartados + pendientes                                                                                             | B11, B16 |
+
+**Para SQL Server.** T83 (`EXCLUDE USING gist`) se reescribe como prueba del _trigger_ de vigencias sin solape (§3.17.2.v10).
+<!-- v10:P14 end -->
 
 ## 23. Catálogo de diagramas (v8.3)
 
@@ -7987,6 +8674,101 @@ Dado un `output_contract` de una alerta de nivel Crítico, el sistema debe recon
 
 **UC-9 · Prueba transversal del pivote de dominio.** Un caso C101 hipotético (no planeado) se añade sin `CREATE TABLE`: `INSERT` en `domain.tipo_artefacto`, `domain.regla_negocio`, `config.parametro`; opcionalmente `model.model_card`/`config.aplicacion`. Prueba de robustez de §3.quater, ejercitada por T76–T79.
 
+<!-- v10:P13 begin -->
+
+### 24.ter Casos de uso UC-10 a UC-14 — _añade a §24 (v10)_
+
+Todas las cifras son **ILUSTRATIVAS — no son datos del sistema**, salvo el supuesto de 931 actores tomado de §3.17.1. Cada caso indica la prueba de §22.3.ter que lo comprueba.
+
+### UC-10 · Registrar a un vocero sin DNI (B11)
+
+**Situación.** La prensa cita a un dirigente sin nombre. El analista de la OAIPCS quiere que entre a la matriz de actores hoy, no cuando consiga el documento.
+
+**Paso a paso (Office View, Perfil A).**
+
+1. Botón «Nuevo actor» → naturaleza `persona` → nivel **4 · Seudónimo**.
+2. Alias: «Dirigente de pescadores — caleta X» (tipo `cargo`). Anclaje: caso `CS-EJEMPLO-001` (obligatorio, R2).
+3. Posición «oposición», influencia 60, fuente = la nota de prensa. El actor aparece en la matriz con borde punteado y la etiqueta «no identificado».
+4. El Perfil B ve, en su lugar, una línea agregada «Colectivo no identificado — caleta X». No ve el alias ni las citas.
+5. Semanas después, con el DNI, el analista usa «Promover». El `actor_uid` no cambia y todo el historial sigue (R4).
+
+**Falla que se previene.** Intentar crear un actor de nivel 4 sin caso ni organización → el sistema lo rechaza (`ck_actor_anclaje`). **Pruebas:** T91, T92, T93.
+
+### UC-11 · De la noticia al despacho del Ministro (B15)
+
+**Situación.** Un medio regional publica una nota sobre un bloqueo en una caleta con compromisos vencidos.
+
+**Recorrido.** Es el de §10.2.v10 (cuadro de las 09:02 a las 09:45). Lo que se verifica en el camino:
+
+| Punto de control | Qué ocurre                                                                                               | Guardrail         |
+| ---------------- | -------------------------------------------------------------------------------------------------------- | ----------------- |
+| Entrada          | La fuente está en la lista blanca; se deduplica por URL canónica y huella de texto                       | G22               |
+| Citas            | El modelo propone dos citas; una no es literal y se descarta                                             | G20               |
+| Actores          | «El dirigente de la caleta X» se asocia al alias existente; **no** se le asigna nombre                   | G19               |
+| Visibilidad      | Hasta las 09:41 la alerta es invisible para el Perfil B; el analista la aprueba con un motivo registrado | G21               |
+| Crisis           | La Dirección confirma; recién entonces se envía el SMS                                                   | gate HITL (§15.6) |
+| Resumen          | El Sintetizador produce el resumen de una página como «BORRADOR IA»; el analista lo valida               | §9.2.v10          |
+
+**Qué no pasa:** el Ministro no recibe nunca una alerta sin aprobación humana. **Pruebas:** T99, T100, T104.
+
+### UC-12 · Un gremio consulta sus compromisos (Perfil C) (B12)
+
+**Situación.** Un gremio de pescadores artesanales debe poder ver el estado de **sus** compromisos sin ver nada más.
+
+1. El gremio entra con credencial externa y código de un solo uso (OTP). El token lleva el `actor_uid` del gremio.
+2. La API abre la conexión y fija el contexto de sesión con ese `actor_uid` (§3.17.2.v10).
+3. `GET /portal/compromisos` devuelve tres compromisos: 1 vencido, 2 en plazo (más el ICC de **sus** compromisos).
+4. Si el gremio cambia el identificador por el de un compromiso ajeno: respuesta **vacía**, sin confirmar que existe.
+
+**Batería de aislamiento (en cada despliegue).** Se crean 20 actores externos de prueba con compromisos cruzados; para cada uno se ejecuta una consulta por cada tabla expuesta y se comprueba que **ninguna fila** pertenece a otro actor. **Pruebas:** T97, T98.
+
+### UC-13 · What-if: de «paralizada» a «avanza» (B14)
+
+**Situación (ILUSTRATIVA).** Una planta de tratamiento en una caleta. Hoy: ICD con puntajes 2, 2, 1, 2, 3, 1 (suma 11 → **45,8**); lista del predio con 3 de 4 ítems cumplidos (falta el levantamiento de un bloqueo de hecho en el acceso); el actor no dialogante de mayor influencia pesa 55.
+
+| Paso | Palanca                            | Cambio de insumo             | ICD  | Viabilidad social              | Control del predio | Cuadrante | Banda |
+| ---- | ---------------------------------- | ---------------------------- | ---- | ------------------------------ | ------------------ | --------- | ----- |
+| 0    | (hoy)                              | —                            | 45,8 | No                             | No                 | **E4**    | Alta  |
+| 1    | Designar mediación                 | Condición 6: 1 → 3 (suma 13) | 54,2 | No                             | No                 | **E4**    | Alta  |
+| 2    | Cumplir el compromiso X            | Condición 3: 1 → 3 (suma 15) | 62,5 | **Sí** (≥ 60 y sin actor ≥ 70) | No                 | **E2**    | Media |
+| 3    | Resolver el impedimento del predio | Ítem de acceso: no → sí      | 62,5 | Sí                             | **Sí**             | **E1**    | Baja  |
+
+**Lectura para el Ministro.** «La mediación sola no basta. Cumplir el compromiso X es lo que abre la viabilidad social; el acceso físico es lo último que falta.» La salida rotula «ESCENARIO — no vigente», lista los disparadores a vigilar (p. ej., un nuevo hecho de violencia vuelve a bajar la condición 5) y guarda esto:
+
+```json
+{
+  "caso": "CS-EJEMPLO-001",
+  "escenario_resultante": "caso.E1",
+  "banda": "Baja",
+  "insumos": {
+    "icd_puntajes": [2, 2, 3, 2, 3, 3],
+    "predio": [true, true, true, true],
+    "max_influencia_no_dialogante": 55
+  },
+  "version_regla": "whatif-2026.11.1",
+  "ejecutada_por": "analista_01",
+  "rotulo": "ESCENARIO — no vigente"
+}
+```
+
+**Pruebas:** T103 (cuatro combinaciones → cuatro cuadrantes; registro completo).
+
+### UC-14 · Migrar la matriz actual de AVISA al núcleo (B11, B16)
+
+**Situación.** AVISA hoy es Google Sheets con cuenta compartida (Capa 0, §2). El Producto 1 del MVP exige cargar los casos históricos con un reporte de reconciliación. El supuesto de §3.17.1 es de 931 actores y 35 casos.
+
+1. **Congelar** una copia del origen (exportación con hash) en la fecha de corte; el Sheets sigue siendo de solo lectura para el analista hasta el _cutover_ (D27).
+2. **Cargar** a `staging.lote` (Ruta B, §4.3), nunca directo al núcleo.
+3. **Mapear** con reglas fijas: con DNI válido → nivel 1 (documento cifrado + HMAC); sin DNI → nivel 3; organizaciones por RUC. Los duplicados (mismo HMAC o similitud 0,6–0,85) van a HITL; los de nivel 4–5 nunca se fusionan solos (§9.2).
+4. **Reconciliar:** el reporte debe cerrar la cuenta.
+
+> **Ejemplo de reporte (ILUSTRATIVO).** Origen 931 = 760 cargados + 48 fusionados + 9 descartados (vacíos) + 114 pendientes de validación humana. Si la suma no da el origen, **la carga no se acepta.**
+
+5. **Delta:** hasta el _cutover_ se carga una vez por semana lo nuevo del Sheets, con el mismo procedimiento.
+
+**Pruebas:** T105 (reconciliación), T94 (duplicados por HMAC).
+<!-- v10:P13 end -->
+
 ## Anexo B — Matriz de trazabilidad: gaps de v8.3 → dónde se cierran en v9
 
 | Tema (código de la auditoría v8.3→v8.4)                               | Ítems                                     | Dónde se cierra en v9                               |
@@ -8106,6 +8888,78 @@ El DDL completo de este documento (Secciones 14 y 20) se entrega como
 `test_ddl_v8_3.sql`.
 
 ---
+
+<!-- v10:P17 begin -->
+
+## Anexo D — Puente v9 ↔ MVP-45 — _añade (v10)_
+
+### D.1 Mapa de referencias: del MVP-45 a v10
+
+| Sección del MVP-45                                     | Dónde la respalda v10                                   |
+| ------------------------------------------------------ | ------------------------------------------------------- |
+| §0.2 Qué se hereda y qué se difiere                    | §0.7.1                                                  |
+| §0.4 Dependencias de OGTI (D-1 a D-7)                  | §3.17.2.v10 (D-1), §11.8.v10 (D-4), §7.5.v10 (D-5, D-6) |
+| §0.5 Supuestos («tiempo real»)                         | §10.2.v10                                               |
+| §1.2 Funciones 1 y 5 (actores sin documento; perfiles) | §3.6.v10; §11.8.v10                                     |
+| §1.6 Entregable 1 (1.1–1.8)                            | §3.6.v10, §3.17.2.v10, §22.3.ter (T91–T98), UC-14       |
+| §2.2 DER y §2.3 DNI                                    | §3.6.v10                                                |
+| §2.4 Tablas por schema                                 | Anexo D.2                                               |
+| §3.2–3.3 Componentes y seguridad por perfil            | §3.17.2.v10, §11.8.v10                                  |
+| §3.4 Ciclo de vida de una alerta                       | §10.2.v10, §16.1.quater, UC-11                          |
+| §4.1 KPIs y proyecciones                               | §8.4.ter                                                |
+| §4.3 Mapa de afinidad MACTOR                           | §6 (RAG-MACTOR), §8.4.ter (K4)                          |
+| §4.4 Simulador What-if                                 | §13.5.v10, UC-13                                        |
+| §4.5 Casos análogos y citas                            | §13.5.v10, G20                                          |
+| §5.1–5.3 Pipeline de ingesta                           | §9.2.v10, §7.5.v10                                      |
+
+### D.2 Correspondencia de nombres: MVP-45 → v9 (decisión D22)
+
+Las marcas «≈» indican equivalencia aproximada: **confirmar contra el DDL de v9** al hacer la pasada de renombrado.
+
+| MVP-45                                                         | v9 / v10                                                                                                                     |
+| -------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `core.actor`                                                   | `core.actores`                                                                                                               |
+| `core.actor_pii`                                               | `core.actor_datos_personales`                                                                                                |
+| `core.actor_alias`, `core.actor_fusion` (`audit.actor_fusion`) | nuevas en v10 (§3.6.v10), en `core` — sin schema `audit`                                                                     |
+| `core.organizacion`, `core.membresia`                          | `core.organizaciones`, `core.actor_membresia`                                                                                |
+| `core.caso`, `core.caso_actor`                                 | `core.casos`, `core.casos_actores`                                                                                           |
+| `core.actor_relacion`                                          | `kag.aristas` ≈ (el MVP la materializa en `core` mientras KAG está diferida; conserva `valid_from`/`valid_to`)               |
+| `core.hecho`, `core.hecho_actor`                               | `core.caso_cronologia`, `core.cronologia_vinculos` ≈                                                                         |
+| `core.fuente`, `core.cita`                                     | `kag.documento_fuente`, `kag.documento_fragmento` ≈ (la cita agrega `offset_inicio`/`offset_fin`)                            |
+| `core.compromiso`, `core.hito_compromiso`                      | `core.compromisos`, `core.hitos_compromiso`                                                                                  |
+| `core.compromiso_actor`                                        | `core.compromiso_colaboradores` (idéntico; el MVP agrega rol responsable/beneficiario)                                       |
+| `core.alerta`, `core.alerta_destinatario`                      | `core.alertas_tempranas`, `core.alertas_actores` ≈                                                                           |
+| `ia.corrida_ingesta`, `ia.candidato_alerta`                    | `agent.run_log`, `avisa.raw_ingest` + `staging.lote` ≈                                                                       |
+| `seg.usuario`, `seg.perfil`, `seg.usuario_perfil`              | `core.usuarios`, `core.roles`, `core.usuario_roles`                                                                          |
+| `seg.usuario_actor_externo`, `seg.usuario_caso`                | nuevas (v9 resuelve el sujeto con `app.actor_uid` de sesión, §11.10.bis; el MVP necesita la tabla que lo vincula al usuario) |
+| `analisis.escenario_regla`, `analisis.simulacion`              | `policy.escenario_regla`, `forecast.whatif_scenarios` (prevista, M5 año 2; no creada aún en el DDL)                          |
+| `analisis.evaluacion_riesgo`                                   | `ind.resultado` (valores de K1 y K5)                                                                                         |
+| `analisis.caso_analogo`                                        | Rama Análogo (`forecast.whatif_scenarios.analog_cases_json`)                                                                 |
+| `analisis.informe`                                             | `core.output_contracts` ≈                                                                                                    |
+| `audit.bitacora_*`                                             | `agent.run_log` y el bloque estándar de auditoría (§3.2)                                                                     |
+| `ref.*`                                                        | `core.cat_*` (p. ej. `ref.nivel_conflicto` → `core.cat_niveles_conflicto`)                                                   |
+
+### D.3 Trazabilidad de las brechas detectadas
+
+| Brecha | Qué faltaba                                                          | Dónde se cierra                           |
+| ------ | -------------------------------------------------------------------- | ----------------------------------------- |
+| A1     | Registrar actores sin DNI y promoverlos sin perder historial         | §3.6.v10, R1–R7, G19, UC-10, T91–T96      |
+| A2     | Desplegar en SQL Server y aislar perfiles sin depender de PostgreSQL | §3.17.2.v10, §11.8.v10, UC-12, T97–T99    |
+| A3     | Fórmulas de los KPIs y semilla del simulador                         | §8.4.ter, §13.5.v10, UC-13, T101–T103     |
+| A4     | Límites de la IA: «tiempo real», fast path y aprobación humana       | §10.2.v10, §9.2.v10, G20–G22, UC-11, T104 |
+| R1     | «Proyecciones socioeconómicas» del TDR                               | §8.4.ter (tendencia + `P1_IPS30`), D29    |
+| R2     | «Tiempo real» del TDR                                                | §10.2.v10 (texto sugerido), D26           |
+| R3     | Redes sociales del TDR                                               | §7.5.v10, G22, D28, Q39                   |
+| R4     | Integración con AVISA                                                | UC-14, D27, Q36                           |
+
+### D.4 Ruta de lectura para quien implementa
+
+- **Días 1–15 (Producto 1):** §0.7 → §3.6.v10 → §3.17.2.v10 → §11.8.v10 → §22.3.ter (T91–T98) → UC-10, UC-12, UC-14.
+- **Días 16–45 (Producto 2):** §9.2.v10 → §10.2.v10 → §7.5.v10 → §16.1.quater → §8.4.ter → §13.5.v10 → UC-11, UC-13 → T99–T104.
+
+---
+
+<!-- v10:P17 end -->
 
 # ANÁLISIS DE OPORTUNIDADES DE AUTOMATIZACIÓN
 
@@ -8490,3 +9344,51 @@ Implementar en paralelo con F5/F6/F7:
 **Ahorro total estimado:** de 2-8h/semana del DS en fases críticas a 1-2h/semana en régimen estable, y de 30-60min/día del Director a 10min/día.
 
 **Advertencia final.** La sobre-automatización es un riesgo real en sistemas que manejan conflictos sociales. El sistema propuesto debe automatizar **procesos mecánicos** y dejar al humano **juicios políticos, éticos e interpretativos**. La regla es: automatizar lo repetitivo, no lo reflexivo.
+
+---
+
+<!-- v10:DC begin -->
+
+## Anexo E — Decisiones de cumplimiento (DC-01 … DC-12) — _añade (v10)_
+
+Serie independiente de `MIG D1–D51` y de `D22–D29`: estas decisiones nacen de la Ley N.° 29733 y su Reglamento, del D.U. N.° 007-2020, del D.S. N.° 029-2021-PCM y del D.S. N.° 115-2025-PCM. Ninguna reescribe una decisión anterior; DC-01 acota el alcance de D-3 y DC-09 resuelve una contradicción que ambos documentos mantenían sin declarar.
+
+**Decisión y estado son cosas distintas.** La tabla de decisiones fija el diseño; la de estado mide qué existe hoy en la base y qué falta. Una decisión adoptada puede no estar implementada, y decirlo es parte del registro. Lo ejecutado hasta hoy es el cifrado en reposo de los datos personales y la bitácora append-only que lo acompaña (§13.6.ter.v10); el resto sigue en diseño o a medias.
+
+| ID    | Decisión                                                                        | Frente legal              | Dónde se aplica  |
+| ----- | ------------------------------------------------------------------------------- | ------------------------- | ---------------- |
+| DC-01 | TLS 1.3 obligatorio; un SQL Server 2019 exige proxy inverso o excepción firmada | Nivel Alto, tránsito      | MVP §3.3.bis     |
+| DC-02 | Identificador sintético por contexto y política por sujeto                      | Nivel Alto, acceso        | MVP §3.3.ter     |
+| DC-03 | Catálogo de bases legales, no texto libre en la columna                         | Finalidad y base legal    | MVP §2.3.bis     |
+| DC-04 | Registro del banco de datos con `fecha_inscripcion_anpdp` declarada             | Inscripción ANPDP         | MVP §2.3.bis     |
+| DC-05 | Consentimiento con revocatoria y evidencia                                      | Consentimiento            | MVP §2.3.bis     |
+| DC-06 | Padrón de asistencia cifrado con el mismo par que los datos personales          | Dato sensible de padrón   | MVP §2.3.bis     |
+| DC-07 | Situación judicial restricta: dos valores, sin etiqueta penal, inoponible       | Presunción de inocencia   | §13.6.bis.v10    |
+| DC-08 | Evaluación de calidad por fuente con los cinco criterios del Marco Situacional  | Calidad de la información | MVP §2.3.ter     |
+| DC-09 | El schema `audit` existe en el MVP; en v10 la bitácora es `agent.run_log`       | Trazabilidad inalterable  | MVP §2.5 / §10.4 |
+| DC-10 | Triangulación efectiva: tres tipos de fuente distintos, no tres filas           | Control de sesgos         | MVP §2.3.ter     |
+| DC-11 | Bitácoras append-only por `DENY UPDATE, DELETE`, no por triggers                | Trazabilidad inalterable  | MVP §2.5         |
+| DC-12 | Cada exportación registra motivo, autorizante y destinatario externo            | Salidas del perímetro     | §5.5             |
+
+**Estado de implementación al 18 de noviembre de 2026.** Medido contra la base viva, no contra la intención.
+
+| ID    | Estado                      | Evidencia y qué falta                                                                                                                                                                                                                                                                                                                                      |
+| ----- | --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| DC-01 | **Parcial**                 | Reposo ejecutado: `core.actor_datos_personales` con AES-256 y HMAC (§13.6.ter.v10). En tránsito, `SHOW ssl = off` y `pg_hba` local en `trust`: faltan certificado, `hostssl` y `verify-full`, y recrear el contenedor. La variante SQL Server (`D23`, Q34) sigue sin banco de pruebas.                                                                     |
+| DC-02 | **Pendiente**               | El rol `avisa` es superusuario con `rolbypassrls`: las cuatro políticas de RLS existen y no lo limitan. No hay `core.actor_seudonimo` ni roles por perfil.                                                                                                                                                                                                 |
+| DC-03 | **Pendiente**               | `base_legal` tiene un solo valor, `LEGADO_AVISA_2026`, en las 847 filas: no hay catálogo de bases legales.                                                                                                                                                                                                                                                 |
+| DC-04 | **Pendiente**               | La inscripción del banco ante la ANPDP es acto administrativo de PRODUCE; no hay `fecha_inscripcion_anpdp` poblada.                                                                                                                                                                                                                                        |
+| DC-05 | **Pendiente**               | `fecha_consentimiento` vacía en las 847 filas: no hay consentimiento ni evidencia de revocatoria.                                                                                                                                                                                                                                                          |
+| DC-06 | **No implementado**         | No existe tabla de padrón de asistencia en la base. El par de cifrado ya está disponible para cuando se cree.                                                                                                                                                                                                                                              |
+| DC-07 | **Pendiente**               | `core.situacion_judicial_restricta` no existe. G25 tiene contrato sembrado (§16.1.quinquies) y ninguna tabla que lo respalde.                                                                                                                                                                                                                              |
+| DC-08 | **No medido en este corte** | Sin verificación contra la base.                                                                                                                                                                                                                                                                                                                           |
+| DC-09 | **Ejecutado, con salvedad** | Para datos personales: `audit.datos_personales_acceso` registra accesos descifrados y escrituras de PII (2 241 filas, append-only). Es auditoría **de fila y de aplicación**, no de sentencia: `pgaudit` no está instalado ni disponible (`pg_available_extensions` = 0). La bitácora de ejecución de agentes (`agent.run_log`) no se midió en este corte. |
+| DC-10 | **No medido en este corte** | Sin verificación contra la base.                                                                                                                                                                                                                                                                                                                           |
+| DC-11 | **Ejecutado por otra vía**  | La bitácora rechaza `UPDATE`, `DELETE` y `TRUNCATE` con tres triggers, no con `DENY` (que no existe en PostgreSQL). La inmutabilidad es relativa: el propietario puede desactivar los triggers y la evidencia no está fuera del servidor.                                                                                                                  |
+| DC-12 | **Parcial**                 | §5.5 declara `motivo`, `autorizado_por` y `destinatario_externo` en `qda.exportacion`; no se midió en este corte. Sin ese registro no hay evidencia para la notificación de incidentes.                                                                                                                                                                    |
+
+**Contrato de pruebas (T106–T110).** T106: un `INSERT` en datos personales sin base legal ni consentimiento se rechaza (G23). T107: una vista de Perfil B o C no proyecta nombre ni documento (G24). T108: una salida no puede rotular «criminal» sin `sentencia_firme` con documento (G25). T109: una exportación sin `motivo` ni `autorizado_por` se rechaza. T110: ninguna consulta de negocio referencia `core.situacion_judicial_restricta`. Estas cinco pruebas son especificación, no resultados: ninguna está automatizada, y T106 y T108 no pueden pasar mientras no existan el trigger de G23 y la tabla de DC-07.
+
+**Lo que estas decisiones no resuelven.** La inscripción del banco ante la ANPDP es un acto administrativo de PRODUCE, no un cambio de esquema: DC-04 solo crea el lugar donde se registra, y sigue pendiente. La notificación de un incidente en 48 horas es un procedimiento con responsable nombrado, no una tabla: **el plazo legal existe y es exigible, pero el procedimiento operativo no está implementado** (no hay responsable nombrado, runbook ni registro de incidentes). Lo que sí existe es la evidencia de acceso y exportación con la que ese procedimiento se alimentaría (`audit.datos_personales_acceso`, §5.5). Ninguna decisión de esta serie sustituye al Oficial de Datos Personales.
+
+<!-- v10:DC end -->

@@ -8,7 +8,7 @@ Análisis derivado de:
 
 El objetivo es responder a la pregunta operativa: **¿qué de lo que hoy se hace a mano es entrada irreductible, qué es salida automatizable y qué es proceso que puede delegarse a un agente?**
 
-Como marco de destino se usa la arquitectura v9 (`docs/AVISA_PRODUCE_v9(1).md` §9.2 y
+Como marco de destino se usa la arquitectura v9 (`docs/AVISA_PRODUCE_v10.md` §9.2 y
 `backend/PRODUCE_OAIPCS_AVISA_v9_ddl(1).sql`), que distingue **agentes LLM** (A1, A2, A3) de
 **servicios deterministas**, y que ya contiene las tablas donde aterrizan estas clases:
 `avisa.raw_ingest` (entrada), `agent.*` (proceso), `ind.plantilla` + `core.cat_tipos_documento`

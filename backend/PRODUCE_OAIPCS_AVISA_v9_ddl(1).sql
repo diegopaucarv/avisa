@@ -3729,7 +3729,8 @@ CREATE TABLE config.guardrail_contract (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     guardrail VARCHAR(10) NOT NULL CHECK (guardrail IN
         ('G1','G2','G3','G4','G5','G6','G7','G8','G9','G10',
-         'G11','G12','G13','G14','G15','G16','G17','G18')),
+         'G11','G12','G13','G14','G15','G16','G17','G18',
+         'G19','G20','G21','G22','G23','G24','G25')),
     input_dispara JSONB NOT NULL,
     input_no_dispara JSONB NOT NULL,
     output_esperado_dispara JSONB NOT NULL,
@@ -3848,6 +3849,12 @@ VALUES
   '{"ok":false,"code":"G18_CITES","msg":"permiso CITES no emitido o QR no validado","fix":{"rotular":"permiso pendiente"}}',
   '{"ok":true,"code":null,"msg":null}',
   'block');
+
+-- NOTA (parche DC): el CHECK admite ya hasta G25, pero las filas de contrato de
+-- G19–G25 NO están sembradas arriba: sus reason codes están definidos en
+-- v10 §16.1.quater (G19–G22) y §16.1.quinquies (G23–G25) y su seed queda pendiente.
+-- Ampliar el dominio del CHECK sin sembrar las filas es seguro (no valida nada por sí solo),
+-- pero ningún guardrail nuevo se ejecuta hasta que su fila exista.
 
 -- =====================================================================
 -- §8. Seeds consolidados (representativos; full en scripts/seed_v9_full.sql)
