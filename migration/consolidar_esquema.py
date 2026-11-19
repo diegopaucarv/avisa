@@ -13,7 +13,7 @@ Estructura del archivo generado:
 
     Sección A · esquema      extensiones + DDL (dos pases) + parches 1-5
                              aplicable sobre una base vacía.
-    Sección B · post-carga   parches 6-13
+    Sección B · post-carga   parches 6-15
                              exige el legado ya cargado.
 
 El script solo lee el repositorio. No abre conexión a ninguna base.
@@ -192,6 +192,35 @@ SECCION_B = (
             "`Público`. Idempotente: repetirlo no tiene efecto."
         ),
     ),
+    bloque(
+        "B.9",
+        "Parche 14 · cierre de brechas del ERS",
+        "docs/PARCHE_14_CIERRE_ERS.sql",
+        tolera_errores=False,
+        nota=(
+            "Cuatro brechas entre el esquema y el ERS: un rol de aplicación "
+            "que sí respete la seguridad por fila, la alerta dentro del motor "
+            "de proceso, los cinco niveles de identificación y el enlace "
+            "territorial. Añade el catálogo de bases legales ligado al corpus "
+            "del KAG. Rellena datos: una fila de proceso por alerta y el "
+            "departamento de cada actor."
+        ),
+    ),
+    bloque(
+        "B.10",
+        "Parche 15 · el rol manda: nivel y capacidades",
+        "docs/PARCHE_15_ROLES_Y_BORRADO.sql",
+        tolera_errores=False,
+        nota=(
+            "Cierra el bug rol→nivel: `core.clasificacion_max()` deja de leer "
+            "`app.clasificacion_max` (lo declaraba el cliente) y lo deduce de "
+            "`core.roles`. Añade tres capacidades explícitas —crear, editar, "
+            "eliminar— y las impone con políticas RLS restrictivas, porque el "
+            "nivel no distingue leer de escribir. `avisa_api` pasa a ser el rol "
+            "de login que hereda de `avisa_app`, que hasta ahora no tenía ningún "
+            "miembro y por tanto nunca aplicaba RLS."
+        ),
+    ),
 )
 
 # Ancla para detectar un include de psql (`\i`, `\ir`, `\include`, `\include_relative`).
@@ -266,7 +295,7 @@ def encabezado(solo: str | None) -> list[str]:
         "--  Sección A · esquema    extensiones + DDL v9 (dos pases) + parches 1-5.",
         "--                          Autosuficiente: se puede aplicar sobre una",
         "--                          base VACÍA, sin instalar extensiones aparte.",
-        "--  Sección B · post-carga parches 6-13. NO se puede aplicar sobre una",
+        "--  Sección B · post-carga parches 6-15. NO se puede aplicar sobre una",
         "--                          base vacía: exige el legado ya cargado por",
         "--                          migration/loader (filas en core.*, ind.*,",
         "--                          kag.*). Sobre una base recién creada falla en",
@@ -304,12 +333,13 @@ def encabezado(solo: str | None) -> list[str]:
         "--  TABLE ... PARTITION OF. El esquema `audit` todavía no existe: lo crea",
         "--  el parche 9.",
         "--",
-        "--  Con la sección B aplicada sobre el legado ya cargado: 26 esquemas,",
-        "--  279 tablas físicas (255 lógicas + 24 particiones), 2 366 columnas y",
-        "--  589 claves ajenas.",
+        "--  Con la sección B aplicada sobre el legado ya cargado, y sin contar",
+        "--  los esquemas `legacy` y `staging` que crea el cargador: 27 esquemas,",
+        "--  278 tablas físicas (254 lógicas + 24 particiones), 2 641 columnas y",
+        "--  592 claves ajenas.",
         "--",
-        "--  La diferencia entre ambos estados son 4 tablas y 52 columnas, todas",
-        "--  de los parches 9, 10 y 11:",
+        "--  La diferencia entre ambos estados son 8 tablas y 84 columnas, todas",
+        "--  de los parches 9, 10, 11 y 14:",
         "--    · parche  9 · la tabla `audit.datos_personales_acceso` y",
         "--                 4 columnas cifradas en `core.actor_datos_personales`;",
         "--    · parche 10 · las tablas `core.flujo_definicion`, `core.flujo_estado`",
@@ -318,10 +348,15 @@ def encabezado(solo: str | None) -> list[str]:
         "--    · parche 13 · ningún objeto nuevo: cambia el tipo de",
         "--                 `consultation.procesos.nivel_clasificacion` y alinea el",
         "--                 nombre `Público` del catálogo.",
-        "--  Por eso la sección A termina en 275 tablas y no en 279: las cuatro",
-        "--  tablas que faltan no son parte del esquema base, se crean después de",
-        "--  cargar el legado. Si la sección A se queda corta en algo distinto, el",
-        "--  defecto no está en este archivo: falta una fuente o cambió el DDL.",
+        "--    · parche 14 · las tablas `core.cat_nivel_identificacion`,",
+        "--                 `core.actor_alias`, `ref.base_legal_tratamiento` y",
+        "--                 `ref.base_legal_evidencia`; 5 columnas en `core.actores`",
+        "--                 y 1 en `core.actor_datos_personales`; 8 claves ajenas;",
+        "--                 el esquema `ref`, 4 vistas y el rol `avisa_app`.",
+        "--  Por eso la sección A termina en 275 tablas y no en 278: las tablas",
+        "--  que faltan no son parte del esquema base, se crean después de cargar",
+        "--  el legado. Si la sección A se queda corta en algo distinto, el defecto",
+        "--  no está en este archivo: falta una fuente o cambió el DDL.",
         "-- =====================================================================",
         "",
     ]
@@ -404,7 +439,7 @@ def componer(secciones: list[str], solo: str | None) -> tuple[list[str], list[di
             "B",
             "Post-carga (exige el legado cargado)",
             [
-                "Parches 6-12. Requiere el legado cargado por migration/loader;",
+                "Parches 6-14. Requiere el legado cargado por migration/loader;",
                 "sobre una base vacía aborta en el primer parche que lee datos.",
             ],
             SECCION_B,

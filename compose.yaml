@@ -107,6 +107,14 @@ services:
         source: ./docs/PARCHE_13_CLASIFICACION.sql
         target: /opt/avisa/sql/103_patch_13.sql
         read_only: true
+      - type: bind
+        source: ./docs/PARCHE_14_CIERRE_ERS.sql
+        target: /opt/avisa/sql/104_patch_14.sql
+        read_only: true
+      - type: bind
+        source: ./docs/PARCHE_15_ROLES_Y_BORRADO.sql
+        target: /opt/avisa/sql/105_patch_15.sql
+        read_only: true
 
     healthcheck:
       # -h 127.0.0.1 es imprescindible: sin host, pg_isready usa el socket Unix,

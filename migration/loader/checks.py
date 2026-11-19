@@ -4,7 +4,7 @@
 medidas contra la carga real en PostgreSQL 16; cuando el plan §7 decía otra cosa,
 manda lo verificado (y la corrección quedó anotada en `docs/`).
 
-Se ejecuta dentro de `db.session`, así que `app.clasificacion_max='3'` y
+Se ejecuta dentro de `db.session`, así que `app.rol_codigo='administrador'` y
 `app.user_id` ya están fijados: las tablas con FORCE ROW LEVEL SECURITY son
 visibles y un `SELECT` que devolviera 0 filas aquí sería un fallo real.
 
