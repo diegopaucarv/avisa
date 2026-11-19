@@ -18,6 +18,7 @@ node_modules
 .next/
 .DS_Store
 
-# Python (scripts de migration/)
+# Python
 __pycache__/
 *.pyc
+.venv/
