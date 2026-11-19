@@ -17,7 +17,7 @@ app = FastAPI(title='AVISA API', version='1.0.0')
 app.add_middleware(CORSMiddleware, allow_origins=['http://localhost:3000'], allow_credentials=True, allow_methods=['*'], allow_headers=['*'])
 
 # Repository boundary: replace these fixtures with parameterized asyncpg/SQLAlchemy queries.
-USERS = {'12345678': {'password': 'demo', 'nombre': 'María García', 'rol': 'Directora', 'id': 'USR-001', 'area': 'OAIPCS', 'email': 'maria@produce.gob.pe', 'cargo': 'Directora'}}
+USERS = {'12345678': {'password': 'demo', 'nombre': 'Edith Bautista', 'rol': 'Directora', 'id': 'USR-001', 'area': 'OAIPCS', 'email': 'maria@produce.gob.pe', 'cargo': 'Directora'}}
 CASES = [
     {'code': 'CS-PES-2026-002', 'name': 'Ordenamiento pesquero artesanal', 'sector': 'Pesca y Acuicultura', 'department': 'Piura', 'priority': 'Urgente', 'risk': 'Alto', 'progress': 68, 'status': 'En atención'},
     {'code': 'CS-MYP-2026-014', 'name': 'Mesa productiva regional', 'sector': 'MYPE e Industria', 'department': 'Arequipa', 'priority': 'Moderado', 'risk': 'Moderado', 'progress': 42, 'status': 'Activo'},
