@@ -48,13 +48,29 @@ def _read_dotenv(path: Path) -> dict[str, str]:
     return values
 
 
+def _dotenv() -> dict[str, str]:
+    """Lee el `.env` del repositorio.
+
+    Este módulo vivía en `backend/db.py`, donde `REPO_ROOT` era la raíz del
+    repositorio. Hoy vive en `backups/backend/db.py`, un nivel más abajo, así
+    que la raíz se busca subiendo: primero junto al paquete, después en el
+    directorio que lo contiene. Sin esto el cargador no encontraba el DSN y
+    abortaba aunque `.env` existiera.
+    """
+    for base in (REPO_ROOT, REPO_ROOT.parent):
+        values = _read_dotenv(base / ".env")
+        if values:
+            return values
+    return {}
+
+
 def resolve_dsn(explicit: str | None = None) -> str:
     """DSN por precedencia: argumento > entorno > .env > error explícito."""
     if explicit:
         return explicit
     if os.environ.get("DATABASE_URL"):
         return os.environ["DATABASE_URL"]
-    env = _read_dotenv(REPO_ROOT / ".env")
+    env = _dotenv()
     if env.get("DATABASE_URL"):
         return env["DATABASE_URL"]
 

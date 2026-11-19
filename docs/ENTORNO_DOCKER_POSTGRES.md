@@ -227,24 +227,33 @@ arranque.
 
 ---
 
-## 9. Aplicación de los parches 6–13 (post-carga)
+## 9. Aplicación de los parches 6–16 (post-carga)
 
-El `initdb` aplica el DDL y los parches 1–5, y se detiene ahí. Los parches 6–13 no
+El `initdb` aplica el DDL y los parches 1–5, y se detiene ahí. Los parches 6–16 no
 pueden correr en ese momento: el 6 reclasifica documentos `RED-%` que todavía no
 existen; el 9 y el 10 leen `legacy.dim_actores`, `legacy.dim_paso_proceso` y
 `legacy.fact_proceso_*`; y el 11 rellena el grafo con las filas ya cargadas. En un
 arranque limpio afectarían **0 filas sin dar error**. Por eso:
 
 - solo se aplican **después** de cargar el legado, en orden 6 → 7 → 8 → 9 → 10 →
-  11 → 12 → 13;
+  11 → 12 → 13 → 14 → 15 → 16;
 - el 12 comenta tablas y columnas y comenta también las columnas que añade el 11,
   así que va justo antes del 13;
 - el 13 cambia el tipo de `consultation.procesos.nivel_clasificacion` y alinea el
   nombre `Público` del catálogo; no añade ni quita columnas, y repetirlo no tiene
   efecto;
-- los ocho SQL están montados de solo lectura en `/opt/avisa/sql/96..103`
-  (`96_patch_06.sql` … `103_patch_13.sql`), pero ningún script del `initdb` los
-  invoca;
+- el 14 cierra brechas del ERS (rol de aplicación, alerta dentro del motor de
+  proceso, niveles de identificación, enlace territorial y catálogo de bases
+  legales); crea `avisa_app`, que el 15 necesita;
+- el 15 hace que el nivel y las capacidades salgan de `core.roles` y no de un
+  parámetro que declare el cliente;
+- el 16 completa la seguridad por fila de `core` y registra el banco de datos
+  personales (DC-04). Depende del 15: usa `core.clasificacion_max()` y
+  `core.puede_crear()`, `core.puede_editar()`, `core.puede_eliminar()`;
+- los ocho SQL del 6 al 13 están montados de solo lectura en
+  `/opt/avisa/sql/96..103` (`96_patch_06.sql` … `103_patch_13.sql`), pero ningún
+  script del `initdb` los invoca. El 14, el 15 y el 16 no están montados: se
+  pasan por entrada estándar, como se explica abajo;
 - ni `./scripts/db.sh apply` ni `fresh` los tocan: esos comandos re-aplican el DDL
   y los parches 1–5 (§7).
 

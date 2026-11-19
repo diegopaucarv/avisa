@@ -170,12 +170,12 @@ La correspondencia no se inventó aquí: sigue el **Anexo D.2** de `AVISA_PRODUC
 ```mermaid
 pie showData
     title "Las 55 tablas del MVP-45 frente a la v10"
-    "Ya existe y hace lo mismo" : 26
+    "Ya existe y hace lo mismo" : 27
     "Existe algo parecido" : 17
-    "No existe: hay que crearla" : 12
+    "No existe: hay que crearla" : 11
 ```
 
-**26 exactas.** El MVP puede usar la tabla tal cual (por ejemplo `core.actores`, `core.casos`, `core.actor_datos_personales`, los nueve catálogos, `core.usuarios`, `core.roles`, `core.usuario_roles`, `audit.datos_personales_acceso`).
+**27 exactas.** El MVP puede usar la tabla tal cual (por ejemplo `core.actores`, `core.casos`, `core.actor_datos_personales`, los nueve catálogos, `core.usuarios`, `core.roles`, `core.usuario_roles`, `audit.datos_personales_acceso`). La última en sumarse es `core.banco_datos_tratamiento`, creada por el parche 16.
 
 **17 parciales.** Existe algo que cubre parte, o con otro nombre de esquema. Los cuatro que más van a doler:
 
@@ -186,7 +186,7 @@ pie showData
 | `core.padron_asistencia`   | `core.reunion_participantes` | el padrón de una asamblea, no solo de reunión    |
 | `core.alerta_destinatario` | `core.alertas_actores`       | el destinatario externo (no solo el actor)       |
 
-**12 a crear.** Estas no existen en ninguna forma y **bloquean entregables**:
+**11 a crear.** Estas no existen en ninguna forma y **bloquean entregables**:
 
 | Objeto del MVP                      | Por qué existe en el MVP                                           |
 | ----------------------------------- | ------------------------------------------------------------------ |
@@ -195,7 +195,6 @@ pie showData
 | `core.alerta_fuente`                | vínculo alerta → fuente que la disparó                             |
 | `core.actor_consentimiento`         | consentimiento por finalidad (§2.3.bis)                            |
 | `core.situacion_judicial_restricta` | presunción de inocencia, repositorio restringido                   |
-| `core.banco_datos_tratamiento`      | inscripción del banco en la ANPDP                                  |
 | `analisis.caso_analogo`             | `forecast.whatif_scenarios`, prevista y no creada                  |
 | `analisis.calidad_fuente`           | indicador de calidad de la información (vacíos, sesgos, caducidad) |
 | `seg.usuario_actor_externo`         | qué usuario externo ve qué actor (perfil C)                        |
@@ -203,7 +202,9 @@ pie showData
 | `audit.exportacion`                 | cada salida del perímetro, con hash                                |
 | `audit.incidente_seguridad`         | reloj de las 48 horas ante incidentes                              |
 
-Nueve de las doce son de cumplimiento o de seguridad, no de funcionalidad. Es decir: **si el MVP se construye solo con lo que ya existe, no cumple la ley.**
+`core.banco_datos_tratamiento` salió de esta lista: la creó el parche 16 con el banco `BD-GSCS` en estado `pendiente`. El trámite ante la ANPDP sigue siendo externo al sistema, así que DC-04 queda registrado, no cumplido.
+
+Ocho de las once son de cumplimiento o de seguridad, no de funcionalidad. Es decir: **si el MVP se construye solo con lo que ya existe, no cumple la ley.**
 
 ---
 
@@ -230,7 +231,7 @@ flowchart TD
 
 **Relaciones primero:** las 60 claves foráneas que apuntan a `core.cat_clasificacion` y las 80 que apuntan a `core.usuarios`. Son las que hacen que todo lo demás pueda existir.
 
-**Cierra cuando:** dos perfiles distintos consultan la misma tabla y ven cosas distintas (RLS probado), y cada catálogo tiene sus filas semilla.
+**Cierra cuando:** dos perfiles distintos consultan la misma tabla y ven cosas distintas (RLS probado), y cada catálogo tiene sus filas semilla. El esquema ya cumple su parte: el parche 16 dejó `core` con 44 de 99 tablas con RLS (eran 12) y 301 políticas.
 
 ### Bloque 2 — Identidad del actor (días 8–15)
 
@@ -304,7 +305,7 @@ python migration/prioridad_mvp.py
 
 Lee la base, escribe `docs/mvp_prioridad_tablas.csv` (una fila por tabla, con capa y causa) e imprime el resumen. **Solo lee**: no crea, no borra, no comenta.
 
-Si se añade una tabla a la v10 o se cambia el contrato del MVP, se edita el diccionario `MVP` del script y se vuelve a ejecutar. Las cifras de este documento salen de esa ejecución, no de una estimación.
+Si se añade una tabla a la v10 o se cambia el contrato del MVP, se edita el diccionario `MVP` del script y se vuelve a ejecutar. Las cifras de este documento salen de esa ejecución, no de una estimación. La corrida actual es anterior al parche 16: `core.banco_datos_tratamiento` ya existe con una fila y `core` pasó de 12 a 44 tablas con RLS, así que las capas de §1 y sus totales son los de la medición previa. El puente de §7 ya cuenta esa tabla como creada; para refrescar las capas, vuelva a ejecutar el script.
 
 ---
 

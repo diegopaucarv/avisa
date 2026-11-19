@@ -205,10 +205,14 @@ ALTER TABLE core.proceso_instancia
     ADD CONSTRAINT proceso_instancia_tipo_origen_check
     CHECK (tipo_origen IN ('caso', 'reporte', 'alerta'));
 
--- La restricción de coherencia entre origen y claves se recrea en el
--- bloque 2.6, después de normalizar los datos heredados: si se recreara
--- aquí, las 72 filas que hoy figuran como 'reporte' y son alertas la
--- incumplirían y el parche abortaría.
+-- La restricción de coherencia entre origen y claves se retira aquí y se
+-- recrea en el bloque 2.6, después de normalizar los datos heredados. Hay que
+-- retirarla ANTES del bloque 2.4: esa conversión escribe tipo_origen='alerta'
+-- y la definición antigua (sólo 'caso' y 'reporte') la rechaza. Sin este DROP,
+-- el parche aborta al reconstruir la base desde cero; en la base original no
+-- se notó porque la restricción ya estaba relajada de una aplicación previa.
+ALTER TABLE core.proceso_instancia
+    DROP CONSTRAINT IF EXISTS proceso_instancia_origen_coherente_check;
 
 -- ---------------------------------------------------------------------
 -- 2.2 · El catálogo de pasos admite el flujo de alerta
@@ -476,6 +480,11 @@ INSERT INTO core.cat_nivel_identificacion (id, codigo, descripcion) VALUES
     (5, 'COLECTIVO_ANONIMO',     'Grupo sin individuos registrables')
 ON CONFLICT (id) DO NOTHING;
 
+-- El GRANT general del bloque 1 corre antes de que esta tabla exista, así que
+-- `GRANT ... ON ALL TABLES` no la alcanza. Sin este permiso explícito, el rol de
+-- aplicación no puede leer el catálogo en una base reconstruida desde cero.
+GRANT SELECT ON core.cat_nivel_identificacion TO avisa_app;
+
 -- 3.2 · Columnas de identificación en el actor
 ALTER TABLE core.actores
     ADD COLUMN IF NOT EXISTS nivel_identificacion_id smallint NOT NULL DEFAULT 3;
@@ -566,6 +575,13 @@ COMMENT ON TABLE core.actor_alias IS
     'cargo. Permite buscar y cruzar sin duplicar la ficha del actor.';
 
 CREATE INDEX IF NOT EXISTS ix_actor_alias_actor ON core.actor_alias (actor_uid);
+
+-- El GRANT general del bloque 1 corre antes de que esta tabla exista, así que
+-- `GRANT ... ON ALL TABLES` no la alcanza. Sin este permiso explícito, el rol de
+-- aplicación recibe «permission denied» al leer alias en una base reconstruida
+-- desde cero (en la base original no se notó porque el parche se aplicó dos
+-- veces). El control fino de filas lo sigue poniendo la política RLS.
+GRANT SELECT, INSERT, UPDATE, DELETE ON core.actor_alias TO avisa_app;
 
 -- 3.5 · Relleno con la abreviatura que ya traía el legado
 INSERT INTO core.actor_alias (actor_uid, alias, tipo, fuente, confianza)

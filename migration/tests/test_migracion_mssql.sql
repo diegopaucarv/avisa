@@ -6,7 +6,7 @@
 --  aborta con el número de la comprobación.
 --
 --  Cubre los pasos 1, 2 y 3 del plan:
---    1 · alcance aislado y cerrado por dependencias (73 tablas) + legacy
+--    1 · alcance aislado y cerrado por dependencias (74 tablas) + legacy
 --    2 · rol de migración con BYPASSRLS
 --    3 · tipos incompatibles normalizados
 --
@@ -69,7 +69,7 @@ BEGIN
     SELECT count(*) INTO v_legacy FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace
       WHERE c.relkind IN ('r','p') AND n.nspname='legacy';
 
-    IF v_core <> 53 THEN RAISE EXCEPTION '1a: core tiene % tablas (esperado 53)', v_core; END IF;
+    IF v_core <> 54 THEN RAISE EXCEPTION '1a: core tiene % tablas (esperado 54)', v_core; END IF;
     IF v_audit <> 1 THEN RAISE EXCEPTION '1a: audit tiene % (esperado 1)', v_audit; END IF;
     IF v_ind <> 3   THEN RAISE EXCEPTION '1a: ind tiene % (esperado 3)', v_ind; END IF;
     IF v_policy <> 7 THEN RAISE EXCEPTION '1a: policy tiene % (esperado 7)', v_policy; END IF;
@@ -80,7 +80,7 @@ BEGIN
     IF v_kag <> 3   THEN RAISE EXCEPTION '1a: kag tiene % (esperado 3)', v_kag; END IF;
     IF v_legacy <> 87 THEN RAISE EXCEPTION '1a: legacy tiene % (esperado 87)', v_legacy; END IF;
 
-    RAISE NOTICE 'OK 1a · 73 tablas del alcance + ref(2) + kag(3) + legacy(87)';
+    RAISE NOTICE 'OK 1a · 74 tablas del alcance + ref(2) + kag(3) + legacy(87)';
 
     -- Ningún esquema diferido sobrevive.
     SELECT string_agg(nspname, ', ') INTO v_fuera
@@ -103,19 +103,19 @@ BEGIN
     END IF;
     RAISE NOTICE 'OK 1c · sin tablas particionadas (agent.run_log aplanada)';
 
-    -- Total: 161 (73 del alcance + 87 legacy + 1 PostGIS).
+    -- Total: 162 (74 del alcance + 87 legacy + 1 PostGIS).
     SELECT count(*) INTO v_total
       FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace
      WHERE c.relkind IN ('r','p') AND n.nspname NOT LIKE 'pg\_%'
        AND n.nspname <> 'information_schema';
-    IF v_total <> 161 THEN
-        RAISE EXCEPTION '1d: la base tiene % tablas (esperado 161)', v_total;
+    IF v_total <> 162 THEN
+        RAISE EXCEPTION '1d: la base tiene % tablas (esperado 162)', v_total;
     END IF;
-    RAISE NOTICE 'OK 1d · 161 tablas en total (eran 371)';
+    RAISE NOTICE 'OK 1d · 162 tablas en total (eran 372)';
 
     -- 1e · Guardia contra el defecto de recorte sin dependencias.
     --      El esquema del alcance debe conservar TODAS las claves ajenas que
-    --      sus tablas tenían entre sí (153). Si alguien vuelve a borrar un
+    --      sus tablas tenían entre sí (156). Si alguien vuelve a borrar un
     --      padre, el CASCADE se lleva la FK, este número baja y el test
     --      falla: así no pasan inadvertidas las columnas huérfanas.
     SELECT count(*) INTO v_huerfanas
@@ -124,8 +124,8 @@ BEGIN
       JOIN pg_namespace n1 ON n1.oid = c1.relnamespace
      WHERE k.contype = 'f'
        AND n1.nspname NOT LIKE 'pg\_%';
-    IF v_huerfanas <> 153 THEN
-        RAISE EXCEPTION '1e: el alcance conserva % claves ajenas (esperado 153)',
+    IF v_huerfanas <> 156 THEN
+        RAISE EXCEPTION '1e: el alcance conserva % claves ajenas (esperado 156)',
                         v_huerfanas;
     END IF;
 
@@ -142,7 +142,7 @@ BEGIN
     IF v_huerfanas <> 0 THEN
         RAISE EXCEPTION '1e: % claves ajenas apuntan a tablas inexistentes', v_huerfanas;
     END IF;
-    RAISE NOTICE 'OK 1e · 153 claves ajenas conservadas, ninguna huérfana';
+    RAISE NOTICE 'OK 1e · 156 claves ajenas conservadas, ninguna huérfana';
 END $$;
 
 -- ---------------------------------------------------------------------
@@ -257,15 +257,15 @@ BEGIN
     SELECT count(*) INTO v_n
       FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace
      WHERE c.relrowsecurity AND c.relkind='r';
-    IF v_n <> 15 THEN
-        RAISE EXCEPTION '4b: hay % tablas con RLS (esperado 15)', v_n;
+    IF v_n <> 28 THEN
+        RAISE EXCEPTION '4b: hay % tablas con RLS (esperado 28)', v_n;
     END IF;
 
     SELECT count(*) INTO v_n FROM pg_policies;
-    IF v_n <> 97 THEN
-        RAISE EXCEPTION '4c: hay % políticas RLS (esperado 97)', v_n;
+    IF v_n <> 189 THEN
+        RAISE EXCEPTION '4c: hay % políticas RLS (esperado 189)', v_n;
     END IF;
-    RAISE NOTICE 'OK 4b · RLS intacta en origen: 15 tablas, 97 políticas';
+    RAISE NOTICE 'OK 4b · RLS intacta en origen: 28 tablas, 189 políticas';
 
     SELECT count(*) INTO v_n
       FROM pg_trigger t JOIN pg_class c ON c.oid=t.tgrelid

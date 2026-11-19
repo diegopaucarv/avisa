@@ -2,9 +2,9 @@
 
 Medición hecha el **2026-11-19** sobre la base `avisa_mssql` (PostgreSQL 16.14,
 contenedor `avisa-db`, puerto host `55433`), con el alcance del MVP **cerrado por
-dependencias**: **73 tablas** —las 37 declaradas en `00_alcance_mvp.sql` más 36
-incorporadas para que ninguna clave ajena quede sin destino— y `legacy` con sus
-87 tablas.
+dependencias**: **74 tablas** —las 37 declaradas en `00_alcance_mvp.sql`, las 36
+incorporadas para que ninguna clave ajena quede sin destino y `core.banco_datos_tratamiento`,
+creada por el parche 16— y `legacy` con sus 87 tablas.
 
 Todas las cifras de este informe salen del catálogo de PostgreSQL y de
 `count(*)` sobre las tablas; ninguna es estimada.
@@ -23,7 +23,7 @@ docker compose exec -T db psql -U avisa -d avisa_mssql -c "SELECT ..."
 
 ---
 
-## 0. Por qué el alcance pasó de 37 a 73 tablas
+## 0. Por qué el alcance pasó de 37 a 74 tablas
 
 El paso 1 recortaba el MVP a 37 tablas elegidas por prioridad, tabla por tabla.
 Ese criterio deja columnas que apuntan a tablas que ya no existen: el esquema no
@@ -54,14 +54,15 @@ en los esquemas diferidos a 2027 (`chat`, `ctx`, `analisis`, `territorio`, `lex`
 `proteccion`, `domain`, `model`, `config`, `avisa`), para no arrastrar medio
 producto del año que viene a una migración de diciembre.
 
-Resultado: **73 tablas** = 37 declaradas + 36 incorporadas. De esas 36, dos son
-las de `ref` (se siembran enteras porque sostienen la base legal) y 34 son
+Resultado: **74 tablas** = 37 declaradas + 36 incorporadas + la tabla nueva
+`core.banco_datos_tratamiento` (parche 16). De esas 36, dos son las de `ref`
+(se siembran enteras porque sostienen la base legal) y 34 son
 padres alcanzados por el cierre, algunos de segundo salto —por ejemplo
 `core.cat_tipos_documento`, que entra porque `core.documentos` la necesita— y
 tres de `kag`, que cuelgan de `ref.base_legal_evidencia`.
 
 Qué se evitó, en una frase: un esquema que SSMA migra sin protestar y que la
-aplicación no puede usar. Hoy **las 153 claves ajenas del alcance tienen destino
+aplicación no puede usar. Hoy **las 156 claves ajenas del alcance tienen destino
 dentro del alcance**. Las únicas columnas sin padre son 6 que apuntan a esquemas
 de 2027 y que se listan en §2.10.
 
@@ -71,18 +72,18 @@ de 2027 y que se listan en §2.10.
 
 | Categoría                                                                                              |                       Cifra medida |
 | ------------------------------------------------------------------------------------------------------ | ---------------------------------: |
-| Tablas en `avisa_mssql` (antes del paso 1: 371)                                                        |                            **161** |
-| Tablas del alcance (37 declaradas + 36 por dependencias)                                               |                             **73** |
+| Tablas en `avisa_mssql` (antes del paso 1: 371)                                                        |                            **162** |
+| Tablas del alcance (37 declaradas + 36 por dependencias + parche 16)                                   |                             **74** |
 | Tablas de `legacy`                                                                                     |                             **87** |
-| Columnas en las 73 tablas del alcance                                                                  |                            **632** |
+| Columnas en las 74 tablas del alcance                                                                  |                            **651** |
 | Columnas en `legacy`                                                                                   |                            **807** |
-| Columnas `uuid` en el alcance                                                                          |                            **114** |
+| Columnas `uuid` en el alcance                                                                          |                            **115** |
 | Columnas `uuid` con `DEFAULT` (antes del paso 3; hoy **0**)                                            | **25** (todas `gen_random_uuid()`) |
 | Columnas `uuid` con `DEFAULT uuid_generate_v4()`                                                       |                              **0** |
 | Columnas `json` / `jsonb`                                                                              |                         **0 / 12** |
 | Columnas de tipo array                                                                                 |                              **0** |
-| Columnas `timestamptz` (alcance; `legacy` aporta 1 más)                                                |                             **44** |
-| Columnas `timestamptz` con `DEFAULT now()`                                                             |                             **34** |
+| Columnas `timestamptz` (alcance; `legacy` aporta 1 más)                                                |                             **46** |
+| Columnas `timestamptz` con `DEFAULT now()`                                                             |                             **36** |
 | Columnas `timestamp without time zone`                                                                 |                              **0** |
 | Enums / dominios / tipos compuestos reales                                                             |                      **0 / 0 / 0** |
 | Columnas `bytea`                                                                                       |                              **4** |
@@ -90,54 +91,54 @@ de 2027 y que se listan en §2.10.
 | Columnas generadas (`GENERATED ALWAYS AS ... STORED`)                                                  |                              **0** |
 | Columnas `IDENTITY`                                                                                    |                              **3** |
 | Columnas `serial` (restos de secuencia)                                                                |                              **8** |
-| Claves ajenas (todas con destino dentro del alcance)                                                   |                            **153** |
-| Tablas con RLS activa **y** forzada                                                                    |                             **15** |
-| Políticas RLS                                                                                          |                             **97** |
+| Claves ajenas (todas con destino dentro del alcance)                                                   |                            **156** |
+| Tablas con RLS activa **y** forzada                                                                    |                             **28** |
+| Políticas RLS                                                                                          |                            **189** |
 | Triggers (no internos)                                                                                 |                             **25** |
 | Índices parciales                                                                                      |                             **10** |
-| Comentarios de objeto + de columna                                                                     |                            **691** |
-| Filas en las 73 tablas del alcance                                                                     |                          **8 242** |
+| Comentarios de objeto + de columna                                                                     |                            **704** |
+| Filas en las 74 tablas del alcance                                                                     |                          **8 244** |
 | Filas en `legacy` (87 tablas)                                                                          |                          **4 729** |
 
-Reparto de los 632 tipos de columna del alcance:
+Reparto de los 651 tipos de columna del alcance:
 
 | Tipo                       | Columnas |
 | -------------------------- | -------: |
-| `character varying`        |  **198** |
-| `uuid`                     |  **114** |
-| `smallint`                 |   **94** |
-| `timestamp with time zone` |   **44** |
+| `character varying`        |  **202** |
+| `uuid`                     |  **115** |
+| `smallint`                 |   **99** |
+| `timestamp with time zone` |   **46** |
 | `integer`                  |   **39** |
-| `text`                     |   **38** |
-| `date`                     |   **32** |
-| `boolean`                  |   **27** |
+| `text`                     |   **42** |
+| `date`                     |   **33** |
+| `boolean`                  |   **29** |
 | `numeric`                  |   **16** |
 | `jsonb`                    |   **12** |
 | `character`                |   **12** |
 | `bytea`                    |    **4** |
 | `bigint`                   |    **2** |
-| **Total**                  |  **632** |
+| **Total**                  |  **651** |
 
 Aclaración sobre el reparto: si se cuenta con `information_schema.columns` en
-lugar de con `pg_attribute`, salen 653 columnas porque se cuela la vista
-`core.v_actor_datos_personales_seguro` (21 columnas). Los tipos de arriba son
-los de las 73 tablas y suman 632, que es el número correcto.
+lugar de con `pg_attribute`, salen 672 columnas porque se cuelan las 3 vistas del
+alcance (21 columnas en total). Los tipos de arriba son
+los de las 74 tablas y suman 651, que es el número correcto.
 
-Composición por esquema (161 tablas):
+Composición por esquema (162 tablas):
 
-| Esquema   | Tablas | Nota                                 |
-| --------- | -----: | ------------------------------------ |
-| `core`    |     53 | 31 declaradas + 22 padres            |
-| `legacy`  |     87 | fuera del MVP, se conserva           |
-| `policy`  |      7 | 1 declarada + 6 padres               |
-| `ind`     |      3 | 1 declarada + 2 padres               |
-| `kag`     |      3 | padres de `ref.base_legal_evidencia` |
-| `qda`     |      2 | 1 declarada + `proyecto`             |
-| `ref`     |      2 | se conserva entero                   |
-| `agent`   |      1 |                                      |
-| `audit`   |      1 |                                      |
-| `staging` |      1 |                                      |
-| `public`  |      1 | `spatial_ref_sys`, de PostGIS        |
+| Esquema   | Tablas | Nota                                  |
+| --------- | -----: | ------------------------------------- |
+| `core`    |     54 | 31 declaradas + 22 padres + parche 16 |
+| `legacy`  |     87 | fuera del MVP, se conserva            |
+| `policy`  |      7 | 1 declarada + 6 padres                |
+| `ind`     |      3 | 1 declarada + 2 padres                |
+| `kag`     |      3 | padres de `ref.base_legal_evidencia`  |
+| `qda`     |      2 | 1 declarada + `proyecto`              |
+| `ref`     |      2 | se conserva entero                    |
+| `agent`   |      1 |                                       |
+| `audit`   |      1 |                                       |
+| `staging` |      1 |                                       |
+| `public`  |      1 | `spatial_ref_sys`, de PostGIS         |
 
 ---
 
@@ -145,9 +146,12 @@ Composición por esquema (161 tablas):
 
 ### 2.1 · `uuid` y su `DEFAULT`
 
-114 columnas `uuid` en el alcance (0 en `legacy`, que es todo texto y entero).
+115 columnas `uuid` en el alcance (0 en `legacy`, que es todo texto y entero).
 De ellas **25 tenían `DEFAULT`**, todas con `gen_random_uuid()`. Hoy **ninguna
-lo conserva**: lo retiró el paso 3.
+lo conserva**: lo retiró el paso 3. La columna 115 es
+`ref.base_legal_tratamiento.banco_datos_id`, que nació sin `DEFAULT` y apunta al
+único banco de datos: las 5 bases legales existentes quedaron con
+`banco_datos_id = 1`.
 
 `uuid_generate_v4()` **no aparece** en ninguna parte: la extensión `uuid-ossp`
 no está instalada. `gen_random_uuid()` es nativa desde PostgreSQL 13, así que
@@ -190,7 +194,7 @@ particionada que el paso 1 aplanó (de ahí que su PK se llame
 `run_log_simple_pkey`). En SQL Server el `DEFAULT` recomendado sigue siendo
 `NEWSEQUENTIALID()` en las 25.
 
-El resto de columnas `uuid` (89) nunca tuvo `DEFAULT`: o las rellena la
+El resto de columnas `uuid` (90) nunca tuvo `DEFAULT`: o las rellena la
 aplicación, o heredan el valor de la clave de otra tabla (por ejemplo
 `core.actor_datos_personales.actor_uid`, `core.reunion_participantes.actor_uid`,
 `core.organizaciones.actor_uid`). Ponerles un `DEFAULT` en SQL Server rompería
@@ -223,7 +227,7 @@ Cuatro de las doce llevan `DEFAULT '{}'::jsonb`:
 
 **No hay columnas de tipo array en el alcance.** Quedaba una, y el paso 3 la
 convirtió: `policy.cat_tipos_regla.claves_requeridas` pasó de `text[]` a `text`
-con JSON dentro. El recuento es 0 tanto en las 73 tablas como en las 87 de
+con JSON dentro. El recuento es 0 tanto en las 74 tablas como en las 87 de
 `legacy`. La única función del esquema que devuelve arrays (`ARRAY[...]` en
 `prosrc`) es código PL/pgSQL, no una columna.
 
@@ -234,10 +238,10 @@ por I/O), pero conviene dejarlo explícito con `SET DEFAULT '{}'` o quitarlo.
 
 ### 2.4 · `timestamptz` frente a `timestamp without time zone`
 
-**44 columnas `timestamptz`** en 26 tablas del alcance.
+**46 columnas `timestamptz`** en 27 tablas del alcance.
 **0 columnas `timestamp without time zone`**: todo el esquema guarda instantes
-con huso. `legacy` aporta 1 columna `timestamptz` más (45 en total).
-34 de las 44 tienen `DEFAULT now()`.
+con huso. `legacy` aporta 1 columna `timestamptz` más (47 en total).
+36 de las 46 tienen `DEFAULT now()`.
 
 | Esquema.Tabla                   | Columnas `timestamptz` | Con `now()` |                                                                 Filas |
 | ------------------------------- | ---------------------: | ----------: | --------------------------------------------------------------------: |
@@ -246,6 +250,7 @@ con huso. `legacy` aporta 1 columna `timestamptz` más (45 en total).
 | `core.actor_datos_personales`   |                      1 |           1 |                                                                   847 |
 | `core.actores`                  |                      2 |           2 |                                                                 1 160 |
 | `core.alertas_tempranas`        |                      2 |           2 |                                                                    83 |
+| `core.banco_datos_tratamiento`  |                      2 |           2 |                                                                     1 |
 | `core.caso_cronologia`          |                      2 |           2 |                                                                    80 |
 | `core.caso_estado_historial`    |                      2 |           1 |                                                                    35 |
 | `core.casos`                    |                      3 |           3 |                                                                    35 |
@@ -267,7 +272,7 @@ con huso. `legacy` aporta 1 columna `timestamptz` más (45 en total).
 | `ref.base_legal_evidencia`      |                      1 |           1 |                                                                     0 |
 | `ref.base_legal_tratamiento`    |                      1 |           1 |                                                                     5 |
 | `staging.lote`                  |                      1 |           1 |                                                                     0 |
-| **Total**                       |                 **44** |      **34** | **6 648** (filas de las tablas afectadas, cada tabla contada una vez) |
+| **Total**                       |                 **46** |      **36** | **6 649** (filas de las tablas afectadas, cada tabla contada una vez) |
 
 ### 2.5 · Tipos definidos por el usuario
 
@@ -335,7 +340,7 @@ tabla con `IDENTITY` (`policy.titular`); de ahí que ahora sean 8 y 3, y no 2 y 
 | `postgis`    | 3.7.0   | **No**: 0 columnas `geometry`/`geography`                                         |
 | `vector`     | 0.8.3   | **No**: 0 columnas `vector`                                                       |
 | `btree_gist` | 1.7     | **No**: 0 constraints de exclusión                                                |
-| `pg_trgm`    | 1.6     | **No**: los 220 índices son btree, ninguno usa `gin_trgm_ops`                     |
+| `pg_trgm`    | 1.6     | **No**: los 222 índices son btree, ninguno usa `gin_trgm_ops`                     |
 
 Medición: **0 columnas** tienen un tipo propiedad de una extensión. Es decir,
 ningún tipo de PostGIS ni de pgvector llega a SQL Server; `pgcrypto` sólo
@@ -345,8 +350,8 @@ aparece dentro del cuerpo de una función.
 
 | Objeto                                  |                                        Cifra medida |
 | --------------------------------------- | --------------------------------------------------: |
-| Tablas con RLS activa **y** forzada     |                                              **15** |
-| Políticas RLS                           |                                              **97** |
+| Tablas con RLS activa **y** forzada     |                                              **28** |
+| Políticas RLS                           |                                             **189** |
 | Triggers (no internos)                  |                                              **25** |
 | Funciones                               |                             **52** (42 en PL/pgSQL) |
 | Vistas                                  | **13** (1 en `core`, 2 en `ref`, 10 en `analytics`) |
@@ -354,21 +359,36 @@ aparece dentro del cuerpo de una función.
 | — de ellos, parciales (`WHERE`)         |                                              **10** |
 | — de ellos, por expresión               |                                               **0** |
 | Constraints de exclusión (`EXCLUDE`)    |                                               **0** |
-| Comentarios de objeto (tablas y vistas) |                                              **75** |
-| Comentarios de columna                  |                                             **616** |
+| Comentarios de objeto (tablas y vistas) |                                              **76** |
+| Comentarios de columna                  |                                             **628** |
 
-Detalle de RLS (15 tablas, 97 políticas). Trece tablas llevan 7 políticas:
+Detalle de RLS (28 tablas, 189 políticas). Veintitrés tablas llevan 7 políticas,
+dos llevan 8 (`core.hitos_compromiso` y `core.output_contracts`), `core.log_accesos`
+lleva 6, `staging.lote` 4 y `audit.datos_personales_acceso` 2:
 
 | Tabla                           | Políticas |
 | ------------------------------- | --------: |
 | `audit.datos_personales_acceso` |         2 |
 | `core.actor_datos_personales`   |         7 |
+| `core.actor_membresia`          |         7 |
 | `core.actores`                  |         7 |
+| `core.alertas_actores`          |         7 |
 | `core.alertas_tempranas`        |         7 |
+| `core.banco_datos_tratamiento`  |         7 |
 | `core.caso_cronologia`          |         7 |
+| `core.caso_estado_historial`    |         7 |
 | `core.casos`                    |         7 |
+| `core.casos_actores`            |         7 |
+| `core.compromiso_colaboradores` |         7 |
 | `core.compromisos`              |         7 |
+| `core.cronologia_vinculos`      |         7 |
 | `core.documentos`               |         7 |
+| `core.hitos_compromiso`         |         8 |
+| `core.log_accesos`              |         6 |
+| `core.mesas_dialogo`            |         7 |
+| `core.organizaciones`           |         7 |
+| `core.output_contracts`         |         8 |
+| `core.reunion_participantes`    |         7 |
 | `core.reuniones_dialogo`        |         7 |
 | `kag.documento_fragmento`       |         7 |
 | `kag.documento_fuente`          |         7 |
@@ -376,12 +396,12 @@ Detalle de RLS (15 tablas, 97 políticas). Trece tablas llevan 7 políticas:
 | `qda.mapeo_pseudonimo`          |         7 |
 | `qda.proyecto`                  |         7 |
 | `staging.lote`                  |         4 |
-| **Total**                       |    **97** |
+| **Total**                       |   **189** |
 
-Respecto al alcance anterior, RLS se extendió a `core.documentos`,
-`core.reuniones_dialogo`, `policy.regla`, `qda.proyecto`,
-`kag.documento_fragmento` y `kag.documento_fuente`: son padres que entraron por
-el cierre y que ya venían con sus políticas puestas.
+El parche 16 (bloque B.11) completó la cobertura de `core`: añadió RLS a las
+tablas de detalle que heredan el nivel de su padre y a la tabla nueva
+`core.banco_datos_tratamiento`. Por eso el alcance pasa de 15 a 28 tablas con RLS
+y de 97 a 189 políticas.
 
 Detalle de los 10 índices parciales — todos expresan reglas de negocio, no sólo
 rendimiento:
@@ -425,13 +445,22 @@ que están en el alcance.
 Medidas con `count(*)`, tabla por tabla (no con `pg_stat_user_tables`, cuyo
 `n_live_tup` puede quedarse corto):
 
-| Conjunto            | Tablas |      Filas |
-| ------------------- | -----: | ---------: |
-| Alcance (73 tablas) |     73 |  **8 242** |
-| `legacy`            |     87 |  **4 729** |
-| **Total**           |    160 | **12 971** |
+| Conjunto                | Tablas |      Filas |
+| ----------------------- | -----: | ---------: |
+| Alcance (74 tablas)     |     74 |  **8 244** |
+| `legacy`                |     87 |  **4 729** |
+| **Total** (sin PostGIS) |    161 | **12 973** |
 
-Por esquema: `core` 5 118, `audit` 3 088, `ref` 5, `kag` 16, `policy` 15,
+Las 8 244 filas salen de sumar el `count(*)` real de las 74 tablas del alcance
+**sin** `public`: `public.spatial_ref_sys` es de PostGIS, tiene 8 500 filas y no
+es dato de negocio, por eso no entra ni en la fila del alcance ni en el total.
+Por eso el total de tablas de esta tabla es 161 (74 + 87) y no 162, que es el
+recuento físico con PostGIS (§1). El incremento de 8 242 a 8 244 no viene sólo
+de la tabla nueva: son la fila sembrada de `core.banco_datos_tratamiento` y una
+fila nueva en `core.usuario_roles` (el rol `administrador` asignado a la
+Oficial de Datos Personales).
+
+Por esquema: `core` 5 120, `audit` 3 088, `ref` 5, `kag` 16, `policy` 15,
 `ind` 0, `qda` 0, `agent` 0, `staging` 0, `legacy` 4 729.
 
 Las tablas con volumen son `core.actores` (1 160), `audit.datos_personales_acceso`
@@ -518,7 +547,7 @@ timestamp with time zone  →  datetimeoffset(7)
 Existe un bloque opcional, **desactivado por defecto**, que convierte a
 `timestamp without time zone`. Sólo se ejecuta si la sesión activa
 `avisa.convertir_timestamptz = 'on'`. **No se ha ejecutado nunca** sobre
-`avisa_mssql`, a propósito: convertiría las 44 columnas y no habría vuelta
+`avisa_mssql`, a propósito: convertiría las 46 columnas y no habría vuelta
 atrás sin recargar. El compromiso está explicado en el propio script: se
 conserva la hora local de Lima (`AT TIME ZONE 'America/Lima'`, no el huso de
 la sesión) pero **se pierde el offset**, y un instante de verano y otro de
@@ -535,7 +564,7 @@ invierno quedan indistinguibles. Úsese sólo si el destino no admite
   `char(4)`, un `char(2)` y un `char(1)`): mapeo a `char(n)`.
 - Todos los `CHECK`, `FK` y `PK`: estructura, aunque SSMA los recrea con otro
   nombre.
-- Los 34 `DEFAULT now()` de las columnas `timestamptz`: se dejan como están.
+- Los 36 `DEFAULT now()` de las columnas `timestamptz`: se dejan como están.
 
 ---
 
@@ -559,12 +588,12 @@ invierno quedan indistinguibles. Úsese sólo si el destino no admite
    Si SSMA mapea `timestamptz` a `datetime2`, el desplazamiento desaparece. Un
    hecho ocurrido a las 09:00 en Lima (14:00 UTC) se guarda como `14:00` y el
    informe lo muestra como si hubiera ocurrido a las 14:00 de Lima. Afecta a
-   las 44 columnas de la tabla 2.4, incluidas `audit.datos_personales_acceso`
+   las 46 columnas de la tabla 2.4, incluidas `audit.datos_personales_acceso`
    (3 088 filas) y `core.log_accesos` (857). **Usar `datetimeoffset(7)`**; en
    .NET se lee como `System.DateTimeOffset` sin conversiones manuales.
 
 3. **Las protecciones de la PII no llegan a SQL Server.**
-   SSMA no migra las 97 políticas RLS ni los 25 triggers. La migración de
+   SSMA no migra las 189 políticas RLS ni los 25 triggers. La migración de
    datos funciona porque `ssql_migrator` tiene `BYPASSRLS`, pero la aplicación
    .NET se conectará a un esquema **sin** seguridad por fila y **sin** los
    triggers de auditoría y de sólo-adición
@@ -645,7 +674,7 @@ invierno quedan indistinguibles. Úsese sólo si el destino no admite
     ellas, y cuando lleguen esos esquemas habrá que recrear las constraints.
 
 11. **Pérdida de comentarios.**
-    Hay 75 comentarios de objeto y 616 de columna (691 en total). SSMA los
+    Hay 76 comentarios de objeto y 628 de columna (704 en total). SSMA los
     descarta, y en este esquema documentan la semántica de la PII y de las
     reglas de clasificación. Si el equipo .NET va a leer el esquema desde SQL
     Server, conviene reinyectarlos como `sp_addextendedproperty`.
@@ -656,20 +685,20 @@ invierno quedan indistinguibles. Úsese sólo si el destino no admite
 
 | #   | Objeto                                                               |                                 Cuántos | Dónde                                                                                | Prioridad                            |
 | --- | -------------------------------------------------------------------- | --------------------------------------: | ------------------------------------------------------------------------------------ | ------------------------------------ |
-| 1   | Políticas RLS                                                        |                                  **97** | 15 tablas (`audit`, `core`, `kag`, `policy`, `qda`, `staging`)                       | **Crítica** — protege la PII         |
+| 1   | Políticas RLS                                                        |                                 **189** | 28 tablas (`audit`, `core`, `kag`, `policy`, `qda`, `staging`)                       | **Crítica** — protege la PII         |
 | 2   | Triggers                                                             |                                  **25** | 14 tablas; incluye auditoría, sólo-adición y validaciones                            | **Crítica**                          |
 | 3   | Funciones                                                            |                    **52** (42 PL/pgSQL) | `core` 22, `kag` 16, `policy` 6, `ind` 3, `qda` 2, `agent` 1, `audit` 1, `staging` 1 | Alta                                 |
 | 4   | Vistas                                                               |                                  **13** | `core` 1, `ref` 2 y 10 en `analytics` (9 vistas + 1 materializada)                   | Alta                                 |
 | 5   | Índices parciales                                                    |                                  **10** | ver tabla en §2.8                                                                    | **Crítica** — son reglas de unicidad |
 | 6   | Índices por expresión                                                |                                   **0** | —                                                                                    | —                                    |
 | 7   | Constraints de exclusión                                             |                                   **0** | —                                                                                    | —                                    |
-| 8   | Comentarios                                                          | **691** (75 de objeto + 616 de columna) | todo el alcance                                                                      | Media                                |
+| 8   | Comentarios                                                          | **704** (76 de objeto + 628 de columna) | todo el alcance                                                                      | Media                                |
 | 9   | Secuencias (`serial`)                                                |                                   **8** | los ocho catálogos de §2.7                                                           | Baja — `IDENTITY` las cubre          |
 | 10  | Extensiones `postgis`, `vector`, `pgcrypto`, `btree_gist`, `pg_trgm` |                                   **5** | ninguna columna las usa, salvo `pgcrypto` en 1 función                               | Media (sólo `pgcrypto`)              |
 
-Lo que **sí** migra SSMA sin intervención: las 73 tablas del alcance, sus 632
-columnas, las 153 `FK`, los `PK`, `CHECK`, los `DEFAULT` no-uuid y los índices
-btree "normales" (220 índices, de los que 79 no cuelgan de una constraint).
+Lo que **sí** migra SSMA sin intervención: las 74 tablas del alcance, sus 651
+columnas, las 156 `FK`, los `PK`, `CHECK`, los `DEFAULT` no-uuid y los índices
+btree "normales" (222 índices, de los que 79 no cuelgan de una constraint).
 
 ---
 
@@ -694,13 +723,13 @@ docker compose exec -T db psql -U avisa -d avisa_mssql -c \
       AND n.nspname IN ('core','audit','ind','policy','qda','staging','agent','ref','kag');"
 # esperado: 0
 
-# comprobación: el alcance tiene 73 tablas y 632 columnas
+# comprobación: el alcance tiene 74 tablas y 651 columnas
 docker compose exec -T db psql -U avisa -d avisa_mssql -c \
   "SELECT count(*) AS tablas FROM pg_class c
      JOIN pg_namespace n ON n.oid = c.relnamespace
     WHERE c.relkind = 'r'
       AND n.nspname IN ('core','audit','ind','policy','qda','staging','agent','ref','kag');"
-# esperado: 73
+# esperado: 74
 ```
 
 **Estado actual e idempotencia.** La base `avisa_mssql` reconstruida ya tiene

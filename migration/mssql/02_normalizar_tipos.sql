@@ -224,7 +224,7 @@ END $$;
 --  Medido: 44 columnas timestamptz en el alcance (45 contando legacy) y
 --  Medido: 44 columnas timestamptz en el alcance (45 contando legacy)
 --  y CERO columnas timestamp without time zone. Es decir: todo el esquema
---  guarda instantes con huso, y 35 de esas columnas tienen DEFAULT now().
+--  guarda instantes con huso, y 34 de esas columnas tienen DEFAULT now().
 --
 --  Qué hace SSMA por defecto: propone datetime2. datetime2 NO guarda el
 --  desplazamiento. Con datos de Lima (UTC-5) eso significa que un hecho
@@ -400,14 +400,14 @@ SELECT n.nspname || '.' || c.relname AS tabla, a.attname AS columna
 
 \echo ''
 \echo '--- 5.5 · Columnas timestamptz del alcance (se conservan) ---'
-SELECT count(*) AS timestamptz_mvp_ref
+SELECT count(*) AS timestamptz_alcance
   FROM pg_attribute a
   JOIN pg_class     c ON c.oid = a.attrelid
   JOIN pg_namespace n ON n.oid = c.relnamespace
  WHERE a.attnum > 0 AND NOT a.attisdropped AND c.relkind IN ('r', 'p')
    AND a.atttypid = 'timestamptz'::regtype
    AND n.nspname IN ('core', 'audit', 'ind', 'policy', 'qda', 'staging',
-                     'agent', 'ref');
+                     'agent', 'ref', 'kag');
 
 \echo ''
 \echo '--- 5.6 · Columnas con DEFAULT nextval (restos de serial) ---'

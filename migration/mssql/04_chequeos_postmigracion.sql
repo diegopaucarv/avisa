@@ -20,15 +20,15 @@
    corresponda.
 
    ALCANCE Y SUPUESTOS
-   · El alcance del staging son 73 tablas de dominio (agent, audit, core,
+   · El alcance del staging son 74 tablas de dominio (agent, audit, core,
      ind, kag, policy, qda, ref, staging), 87 de `legacy` y 1 de PostGIS
-     (`public.spatial_ref_sys`): 161 tablas en total.
+     (`public.spatial_ref_sys`): 162 tablas en total.
    · Se asume que SSMA creó los esquemas con el mismo nombre que en
      origen: agent, audit, core, ind, kag, policy, qda, ref, staging
      (más legacy y public).
      Si los renombró, ajustar las listas de §1 y las llamadas de §5/§6.
    · Se asume SQL Server 2016 SP1 o superior (CREATE OR ALTER).
-   · Las secciones §1 a §4 y §7 son de LECTURA (no cambian nada).
+   · Las secciones §1 a §4, §7, §8 y §9 son de LECTURA (no cambian nada).
      Las secciones §5 y §6 CREAN objetos (funciones, política de
      seguridad, índices). Ejecutar primero en una base de pruebas.
    · §5 y §6 son idempotentes: se pueden volver a ejecutar.
@@ -38,7 +38,9 @@
      2) §2 JSON, §3 DEFAULT, §4 fechas.
      3) §6 índices  (antes de §5: el índice único de DNI debe existir).
      4) §5 seguridad por fila y sus pruebas.
-     5) §7 comentarios (opcional).
+     5) §8 claves ajenas (que el cierre de dependencias sea completo).
+     6) §7 comentarios (opcional).
+     7) §9 triggers (informativo).
    ===================================================================== */
 
 SET NOCOUNT ON;
@@ -68,7 +70,8 @@ GO
      VALUES ('agent','run_log'),('audit','datos_personales_acceso'),
             ('core','actor_datos_personales'),('core','actor_membresia'),
             ('core','actores'),('core','alertas_actores'),
-            ('core','alertas_tempranas'),('core','caso_cronologia'),
+            ('core','alertas_tempranas'),('core','banco_datos_tratamiento'),
+            ('core','caso_cronologia'),
             ('core','caso_estado_historial'),('core','casos'),
             ('core','casos_actores'),('core','cat_alcances_geograficos'),
             ('core','cat_ciclos_intervencion'),('core','cat_clasificacion'),
@@ -112,7 +115,7 @@ GO
      FROM alcance a
     ORDER BY 1;
 
-   Suma de control: 8 242 filas en las 73 tablas.
+   Suma de control: 8 244 filas en las 74 tablas.
    (Con un rol sujeto a RLS y sin contexto, varias darían 0 sin error.)
    --------------------------------------------------------------------- */
 
@@ -133,6 +136,7 @@ INSERT INTO #esperado (esquema, tabla, filas) VALUES
     ('core',    'actores',                    1160),
     ('core',    'alertas_actores',             161),
     ('core',    'alertas_tempranas',            83),
+    ('core',    'banco_datos_tratamiento',       1),
     ('core',    'caso_cronologia',              80),
     ('core',    'caso_estado_historial',        35),
     ('core',    'casos',                        35),
@@ -156,7 +160,7 @@ INSERT INTO #esperado (esquema, tabla, filas) VALUES
     ('core',    'cat_tematicas',                 7),
     ('core',    'cat_tipos_actor',               7),
     ('core',    'cat_tipos_cambio_caso',         6),
-    ('core',    'cat_tipos_documento',           15),
+    ('core',    'cat_tipos_documento',          15),
     ('core',    'cat_tipos_espacio_dialogo',     7),
     ('core',    'cat_tipos_hecho',               9),
     ('core',    'cat_tipos_organizacion',        7),
@@ -179,13 +183,13 @@ INSERT INTO #esperado (esquema, tabla, filas) VALUES
     ('core',    'reunion_participantes',         0),
     ('core',    'reuniones_dialogo',             0),
     ('core',    'roles',                         9),
-    ('core',    'usuario_roles',                34),
+    ('core',    'usuario_roles',                35),
     ('core',    'usuarios',                     32),
     ('ind',     'indicador',                     0),
     ('ind',     'resultado',                     0),
     ('ind',     'variante',                      0),
     ('kag',     'cat_corpus',                    6),
-    ('kag',     'documento_fragmento',            0),
+    ('kag',     'documento_fragmento',           0),
     ('kag',     'documento_fuente',             10),
     ('policy',  'cat_tipos_regla',               5),
     ('policy',  'escenario',                     0),
@@ -200,7 +204,7 @@ INSERT INTO #esperado (esquema, tabla, filas) VALUES
     ('ref',     'base_legal_tratamiento',        5),
     ('staging', 'lote',                          0);
 
-/* Suma de control de los valores esperados: debe dar 8242. */
+/* Suma de control de los valores esperados: debe dar 8244. */
 SELECT SUM(filas) AS filas_esperadas_totales,
        COUNT(*)    AS tablas_esperadas
   FROM #esperado;
@@ -614,7 +618,7 @@ SELECT OBJECT_SCHEMA_NAME(parent_object_id) AS esquema,
    =====================================================================
    En origen había 25 columnas `uuid` con DEFAULT gen_random_uuid()
    (el paso 3 les retiró el DEFAULT a propósito). Deben recuperarlo en
-   SQL Server. Las otras 89 columnas `uuid` NO llevan DEFAULT: heredan
+   SQL Server. Las otras 90 columnas `uuid` NO llevan DEFAULT: heredan
    el valor de la clave de otra tabla o lo genera la API.
    ===================================================================== */
 
@@ -690,7 +694,7 @@ SELECT s.name AS esquema, t.name AS tabla, c.name AS columna, d.definition
                       AND e.columna = c.name)
  ORDER BY 1, 2, 3;
 
-/* 3.3 · Conteo: 114 columnas uniqueidentifier en las 73 tablas. */
+/* 3.3 · Conteo: 115 columnas uniqueidentifier en las 74 tablas. */
 SELECT COUNT(*) AS columnas_uniqueidentifier
   FROM sys.columns c
   JOIN sys.tables  t ON t.object_id = c.object_id
@@ -698,14 +702,14 @@ SELECT COUNT(*) AS columnas_uniqueidentifier
   JOIN sys.types   ty ON ty.user_type_id = c.user_type_id
  WHERE ty.name = N'uniqueidentifier'
    AND s.name IN ('agent','audit','core','ind','kag','policy','qda','ref','staging');
-/* Esperado: 114. */
+/* Esperado: 115. */
 
 
 /* =====================================================================
    §4 · FECHAS: que ninguna columna haya perdido la zona
    =====================================================================
-   En origen hay 44 columnas `timestamptz` (34 con DEFAULT `now()`)
-   y 0 `timestamp` sin zona. El destino debe tener 44 `datetimeoffset(7)`
+   En origen hay 46 columnas `timestamptz` (36 con DEFAULT `now()`)
+   y 0 `timestamp` sin zona. El destino debe tener 46 `datetimeoffset(7)`
    y 0 `datetime`, `datetime2` o `smalldatetime`.
 
    Si OGTI decide DATETIME2 en UTC (v10 §3.17.2.v10), §4.1 y §4.2
@@ -723,7 +727,7 @@ SELECT s.name AS esquema, t.name AS tabla, c.name AS columna, ty.name AS tipo
    AND s.name IN ('agent','audit','core','ind','kag','policy','qda','ref','staging')
  ORDER BY 1, 2, 3;
 
-/* 4.2 · Las 44 columnas medidas en origen, una por una. */
+/* 4.2 · Las 46 columnas medidas en origen, una por una. */
 IF OBJECT_ID('tempdb..#fechas_esperado') IS NOT NULL DROP TABLE #fechas_esperado;
 CREATE TABLE #fechas_esperado
 (
@@ -741,6 +745,8 @@ INSERT INTO #fechas_esperado (esquema, tabla, columna) VALUES
     ('core',    'actores',                  'updated_at'),
     ('core',    'alertas_tempranas',        'created_at'),
     ('core',    'alertas_tempranas',        'updated_at'),
+    ('core',    'banco_datos_tratamiento',  'created_at'),
+    ('core',    'banco_datos_tratamiento',  'updated_at'),
     ('core',    'caso_cronologia',          'created_at'),
     ('core',    'caso_cronologia',          'updated_at'),
     ('core',    'caso_estado_historial',    'desde'),
@@ -794,7 +800,7 @@ SELECT  f.esquema, f.tabla, f.columna,
  ORDER BY f.esquema, f.tabla, f.columna;
 /* Esperado: 0 filas. */
 
-/* 4.3 · Conteo por tipo. Esperado: datetimeoffset 44, date 32. */
+/* 4.3 · Conteo por tipo. Esperado: datetimeoffset 46, date 33. */
 SELECT ty.name AS tipo, COUNT(*) AS columnas
   FROM sys.columns c
   JOIN sys.tables  t ON t.object_id = c.object_id
@@ -951,7 +957,13 @@ RETURN
 GO
 
 /* ---- 5.2 · Política de seguridad ----------------------------------
-   Una sola política para las 15 tablas protegidas en origen.
+   En origen hay 28 tablas con RLS y 189 políticas: 23 tablas x 7 (= 161),
+   core.hitos_compromiso y core.output_contracts con 8 cada una (16),
+   core.log_accesos 6, staging.lote 4 y audit.datos_personales_acceso 2.
+   Esta política traduce las 15 tablas del alcance anterior en los 71
+   predicados de abajo. El parche 16 añadió RLS a 13 tablas más de `core`
+   (las de detalle heredan el nivel de su padre) que aún no están aquí:
+   incorporarlas con el mismo patrón antes de usar esto en producción.
    FILTER      → SELECT (y visibilidad de las filas para UPDATE/DELETE)
    BLOCK AFTER INSERT   → WITH CHECK del INSERT
    BLOCK BEFORE UPDATE  → USING del UPDATE (fila anterior)
@@ -1122,7 +1134,9 @@ CREATE SECURITY POLICY seg.pol_avisa
 WITH (STATE = ON);
 GO
 
-/* 5.3 · Verificación de la política: 15 tablas, 71 predicados. */
+/* 5.3 · Verificación de la política: 15 tablas, 71 predicados.
+         (Las 13 tablas de `core` que el parche 16 añadió con RLS todavía
+         no están en esta política; ver la nota de §5.2.) */
 SELECT OBJECT_SCHEMA_NAME(p.target_object_id) AS esquema,
        OBJECT_NAME(p.target_object_id)        AS tabla,
        p.predicate_type_desc                  AS predicado,
@@ -1262,14 +1276,18 @@ GO
       salvo que el predicado use IN / NOT IN, que no se admite.
 
    B) Índices ÚNICOS sobre columnas nulables: PostgreSQL admite muchos
-      NULL; SQL Server, UNO SOLO. Medido en origen, seis índices únicos
-      fallarían tal cual:
-          core.organizaciones.ruc                   219 NULL de 224
-          core.usuarios.email                        27 NULL de 32
-          core.usuarios.sso_subject                  32 NULL de 32
-          core.caso_estado_historial.codigo_legado   35 NULL de 35
-          core.cat_tipos_actor.codigo_legado          4 de 7
-          core.compromisos.redefinido_de_id           8 de 8
+      NULL; SQL Server, UNO SOLO. En el alcance hay 25 UNIQUE sobre
+      columnas nulables: 9 tienen NULL hoy y 16 tienen 0 NULL. Los 9 que
+      fallarían tal cual están medidos en origen:
+          core.organizaciones.ruc                         219 NULL de 224
+          core.usuarios.email                              27 NULL de 32
+          core.usuarios.sso_subject                        32 NULL de 32
+          core.caso_estado_historial.codigo_legado         35 NULL de 35
+          core.cat_tipos_actor.codigo_legado                4 de 7
+          core.compromisos.redefinido_de_id                 8 de 8
+          core.cat_roles_actor.codigo_legado                6 de 7
+          core.cat_tipos_organizacion.codigo_legado         3 de 7
+          core.cat_unidades_organicas.codigo_legado_unidad 39 de 66
       Solución: índice único FILTRADO con `WHERE col IS NOT NULL`.
    ===================================================================== */
 
@@ -1294,6 +1312,18 @@ SELECT 'core.cat_tipos_actor', 'codigo_legado',
        COUNT_BIG(*), COUNT_BIG(*) - COUNT(codigo_legado)
   FROM core.cat_tipos_actor
 UNION ALL
+SELECT 'core.cat_roles_actor', 'codigo_legado',
+       COUNT_BIG(*), COUNT_BIG(*) - COUNT(codigo_legado)
+  FROM core.cat_roles_actor
+UNION ALL
+SELECT 'core.cat_tipos_organizacion', 'codigo_legado',
+       COUNT_BIG(*), COUNT_BIG(*) - COUNT(codigo_legado)
+  FROM core.cat_tipos_organizacion
+UNION ALL
+SELECT 'core.cat_unidades_organicas', 'codigo_legado_unidad',
+       COUNT_BIG(*), COUNT_BIG(*) - COUNT(codigo_legado_unidad)
+  FROM core.cat_unidades_organicas
+UNION ALL
 SELECT 'core.compromisos', 'redefinido_de_id',
        COUNT_BIG(*), COUNT_BIG(*) - COUNT(redefinido_de_id)
   FROM core.compromisos
@@ -1307,7 +1337,7 @@ ORDER BY nulos DESC;
    6.2 · Restricciones UNIQUE de origen que hay que convertir en
          índice único FILTRADO.
 
-   Dos pasos, en este orden y para cada columna:
+   Tres pasos, en este orden y para cada columna:
      1) si existe una UNIQUE CONSTRAINT con ese nombre, se elimina;
      2) si existe un índice con ese nombre pero SIN filtro, se elimina
         (SSMA pudo crearlo como índice normal: dejaría pasar un solo NULL);
@@ -1411,6 +1441,67 @@ IF NOT EXISTS (SELECT 1 FROM sys.indexes
     CREATE UNIQUE INDEX cat_tipos_actor_codigo_legado_key
         ON core.cat_tipos_actor(codigo_legado) WHERE codigo_legado IS NOT NULL;
 
+/* --- core.cat_roles_actor.codigo_legado (6 NULL de 7) --- */
+IF EXISTS (SELECT 1 FROM sys.key_constraints
+            WHERE name = N'cat_roles_actor_codigo_legado_key'
+              AND parent_object_id = OBJECT_ID(N'core.cat_roles_actor'))
+    ALTER TABLE core.cat_roles_actor
+        DROP CONSTRAINT cat_roles_actor_codigo_legado_key;
+
+IF EXISTS (SELECT 1 FROM sys.indexes
+            WHERE name = N'cat_roles_actor_codigo_legado_key'
+              AND object_id = OBJECT_ID(N'core.cat_roles_actor')
+              AND has_filter = 0)
+    DROP INDEX cat_roles_actor_codigo_legado_key ON core.cat_roles_actor;
+
+IF NOT EXISTS (SELECT 1 FROM sys.indexes
+                WHERE name = N'cat_roles_actor_codigo_legado_key'
+                  AND object_id = OBJECT_ID(N'core.cat_roles_actor'))
+    CREATE UNIQUE INDEX cat_roles_actor_codigo_legado_key
+        ON core.cat_roles_actor(codigo_legado) WHERE codigo_legado IS NOT NULL;
+
+/* --- core.cat_tipos_organizacion.codigo_legado (3 NULL de 7) --- */
+IF EXISTS (SELECT 1 FROM sys.key_constraints
+            WHERE name = N'cat_tipos_organizacion_codigo_legado_key'
+              AND parent_object_id = OBJECT_ID(N'core.cat_tipos_organizacion'))
+    ALTER TABLE core.cat_tipos_organizacion
+        DROP CONSTRAINT cat_tipos_organizacion_codigo_legado_key;
+
+IF EXISTS (SELECT 1 FROM sys.indexes
+            WHERE name = N'cat_tipos_organizacion_codigo_legado_key'
+              AND object_id = OBJECT_ID(N'core.cat_tipos_organizacion')
+              AND has_filter = 0)
+    DROP INDEX cat_tipos_organizacion_codigo_legado_key
+        ON core.cat_tipos_organizacion;
+
+IF NOT EXISTS (SELECT 1 FROM sys.indexes
+                WHERE name = N'cat_tipos_organizacion_codigo_legado_key'
+                  AND object_id = OBJECT_ID(N'core.cat_tipos_organizacion'))
+    CREATE UNIQUE INDEX cat_tipos_organizacion_codigo_legado_key
+        ON core.cat_tipos_organizacion(codigo_legado)
+        WHERE codigo_legado IS NOT NULL;
+
+/* --- core.cat_unidades_organicas.codigo_legado_unidad (39 NULL de 66) --- */
+IF EXISTS (SELECT 1 FROM sys.key_constraints
+            WHERE name = N'cat_unidades_organicas_codigo_legado_unidad_key'
+              AND parent_object_id = OBJECT_ID(N'core.cat_unidades_organicas'))
+    ALTER TABLE core.cat_unidades_organicas
+        DROP CONSTRAINT cat_unidades_organicas_codigo_legado_unidad_key;
+
+IF EXISTS (SELECT 1 FROM sys.indexes
+            WHERE name = N'cat_unidades_organicas_codigo_legado_unidad_key'
+              AND object_id = OBJECT_ID(N'core.cat_unidades_organicas')
+              AND has_filter = 0)
+    DROP INDEX cat_unidades_organicas_codigo_legado_unidad_key
+        ON core.cat_unidades_organicas;
+
+IF NOT EXISTS (SELECT 1 FROM sys.indexes
+                WHERE name = N'cat_unidades_organicas_codigo_legado_unidad_key'
+                  AND object_id = OBJECT_ID(N'core.cat_unidades_organicas'))
+    CREATE UNIQUE INDEX cat_unidades_organicas_codigo_legado_unidad_key
+        ON core.cat_unidades_organicas(codigo_legado_unidad)
+        WHERE codigo_legado_unidad IS NOT NULL;
+
 /* --- core.compromisos.redefinido_de_id (8 NULL de 8) --- */
 IF EXISTS (SELECT 1 FROM sys.key_constraints
             WHERE name = N'compromisos_redefinido_de_id_key'
@@ -1431,9 +1522,9 @@ IF NOT EXISTS (SELECT 1 FROM sys.indexes
         WHERE redefinido_de_id IS NOT NULL;
 
 /* ---------------------------------------------------------------------
-   6.2b · Los 5 UNIQUE que HOY no fallan pero fallarían mañana
+   6.2b · Los 16 UNIQUE que HOY no fallan pero fallarían mañana
    ---------------------------------------------------------------------
-   Estos 5 índices tienen una columna nulable pero hoy 0 NULL (medido).
+   Estos 16 índices tienen una columna nulable pero hoy 0 NULL (medido).
    Un índice único NO filtrado de SQL Server acepta un solo NULL; el
    segundo rechazaría el alta. En PostgreSQL se admiten muchos, así que
    para conservar el comportamiento de origen también se filtran.
@@ -1517,8 +1608,190 @@ IF NOT EXISTS (SELECT 1 FROM sys.indexes
     CREATE UNIQUE INDEX usuarios_codigo_legado_key
         ON core.usuarios(codigo_legado) WHERE codigo_legado IS NOT NULL;
 
+/* --- core.cat_ciclos_intervencion.codigo_legado --- */
+IF EXISTS (SELECT 1 FROM sys.key_constraints
+            WHERE name = N'cat_ciclos_intervencion_codigo_legado_key'
+              AND parent_object_id = OBJECT_ID(N'core.cat_ciclos_intervencion'))
+    ALTER TABLE core.cat_ciclos_intervencion
+        DROP CONSTRAINT cat_ciclos_intervencion_codigo_legado_key;
+IF EXISTS (SELECT 1 FROM sys.indexes
+            WHERE name = N'cat_ciclos_intervencion_codigo_legado_key'
+              AND object_id = OBJECT_ID(N'core.cat_ciclos_intervencion') AND has_filter = 0)
+    DROP INDEX cat_ciclos_intervencion_codigo_legado_key
+        ON core.cat_ciclos_intervencion;
+IF NOT EXISTS (SELECT 1 FROM sys.indexes
+                WHERE name = N'cat_ciclos_intervencion_codigo_legado_key'
+                  AND object_id = OBJECT_ID(N'core.cat_ciclos_intervencion'))
+    CREATE UNIQUE INDEX cat_ciclos_intervencion_codigo_legado_key
+        ON core.cat_ciclos_intervencion(codigo_legado)
+        WHERE codigo_legado IS NOT NULL;
+
+/* --- core.cat_niveles_alerta.codigo_legado --- */
+IF EXISTS (SELECT 1 FROM sys.key_constraints
+            WHERE name = N'cat_niveles_alerta_codigo_legado_key'
+              AND parent_object_id = OBJECT_ID(N'core.cat_niveles_alerta'))
+    ALTER TABLE core.cat_niveles_alerta
+        DROP CONSTRAINT cat_niveles_alerta_codigo_legado_key;
+IF EXISTS (SELECT 1 FROM sys.indexes
+            WHERE name = N'cat_niveles_alerta_codigo_legado_key'
+              AND object_id = OBJECT_ID(N'core.cat_niveles_alerta') AND has_filter = 0)
+    DROP INDEX cat_niveles_alerta_codigo_legado_key ON core.cat_niveles_alerta;
+IF NOT EXISTS (SELECT 1 FROM sys.indexes
+                WHERE name = N'cat_niveles_alerta_codigo_legado_key'
+                  AND object_id = OBJECT_ID(N'core.cat_niveles_alerta'))
+    CREATE UNIQUE INDEX cat_niveles_alerta_codigo_legado_key
+        ON core.cat_niveles_alerta(codigo_legado) WHERE codigo_legado IS NOT NULL;
+
+/* --- core.cat_perfiles_actor.codigo_legado --- */
+IF EXISTS (SELECT 1 FROM sys.key_constraints
+            WHERE name = N'cat_perfiles_actor_codigo_legado_key'
+              AND parent_object_id = OBJECT_ID(N'core.cat_perfiles_actor'))
+    ALTER TABLE core.cat_perfiles_actor
+        DROP CONSTRAINT cat_perfiles_actor_codigo_legado_key;
+IF EXISTS (SELECT 1 FROM sys.indexes
+            WHERE name = N'cat_perfiles_actor_codigo_legado_key'
+              AND object_id = OBJECT_ID(N'core.cat_perfiles_actor') AND has_filter = 0)
+    DROP INDEX cat_perfiles_actor_codigo_legado_key ON core.cat_perfiles_actor;
+IF NOT EXISTS (SELECT 1 FROM sys.indexes
+                WHERE name = N'cat_perfiles_actor_codigo_legado_key'
+                  AND object_id = OBJECT_ID(N'core.cat_perfiles_actor'))
+    CREATE UNIQUE INDEX cat_perfiles_actor_codigo_legado_key
+        ON core.cat_perfiles_actor(codigo_legado) WHERE codigo_legado IS NOT NULL;
+
+/* --- core.cat_roles_funcionales.codigo_legado --- */
+IF EXISTS (SELECT 1 FROM sys.key_constraints
+            WHERE name = N'cat_roles_funcionales_codigo_legado_key'
+              AND parent_object_id = OBJECT_ID(N'core.cat_roles_funcionales'))
+    ALTER TABLE core.cat_roles_funcionales
+        DROP CONSTRAINT cat_roles_funcionales_codigo_legado_key;
+IF EXISTS (SELECT 1 FROM sys.indexes
+            WHERE name = N'cat_roles_funcionales_codigo_legado_key'
+              AND object_id = OBJECT_ID(N'core.cat_roles_funcionales') AND has_filter = 0)
+    DROP INDEX cat_roles_funcionales_codigo_legado_key
+        ON core.cat_roles_funcionales;
+IF NOT EXISTS (SELECT 1 FROM sys.indexes
+                WHERE name = N'cat_roles_funcionales_codigo_legado_key'
+                  AND object_id = OBJECT_ID(N'core.cat_roles_funcionales'))
+    CREATE UNIQUE INDEX cat_roles_funcionales_codigo_legado_key
+        ON core.cat_roles_funcionales(codigo_legado)
+        WHERE codigo_legado IS NOT NULL;
+
+/* --- core.cat_subsectores.codigo_legado --- */
+IF EXISTS (SELECT 1 FROM sys.key_constraints
+            WHERE name = N'cat_subsectores_codigo_legado_key'
+              AND parent_object_id = OBJECT_ID(N'core.cat_subsectores'))
+    ALTER TABLE core.cat_subsectores
+        DROP CONSTRAINT cat_subsectores_codigo_legado_key;
+IF EXISTS (SELECT 1 FROM sys.indexes
+            WHERE name = N'cat_subsectores_codigo_legado_key'
+              AND object_id = OBJECT_ID(N'core.cat_subsectores') AND has_filter = 0)
+    DROP INDEX cat_subsectores_codigo_legado_key ON core.cat_subsectores;
+IF NOT EXISTS (SELECT 1 FROM sys.indexes
+                WHERE name = N'cat_subsectores_codigo_legado_key'
+                  AND object_id = OBJECT_ID(N'core.cat_subsectores'))
+    CREATE UNIQUE INDEX cat_subsectores_codigo_legado_key
+        ON core.cat_subsectores(codigo_legado) WHERE codigo_legado IS NOT NULL;
+
+/* --- core.cat_tematicas.codigo_legado --- */
+IF EXISTS (SELECT 1 FROM sys.key_constraints
+            WHERE name = N'cat_tematicas_codigo_legado_key'
+              AND parent_object_id = OBJECT_ID(N'core.cat_tematicas'))
+    ALTER TABLE core.cat_tematicas
+        DROP CONSTRAINT cat_tematicas_codigo_legado_key;
+IF EXISTS (SELECT 1 FROM sys.indexes
+            WHERE name = N'cat_tematicas_codigo_legado_key'
+              AND object_id = OBJECT_ID(N'core.cat_tematicas') AND has_filter = 0)
+    DROP INDEX cat_tematicas_codigo_legado_key ON core.cat_tematicas;
+IF NOT EXISTS (SELECT 1 FROM sys.indexes
+                WHERE name = N'cat_tematicas_codigo_legado_key'
+                  AND object_id = OBJECT_ID(N'core.cat_tematicas'))
+    CREATE UNIQUE INDEX cat_tematicas_codigo_legado_key
+        ON core.cat_tematicas(codigo_legado) WHERE codigo_legado IS NOT NULL;
+
+/* --- core.cat_tipos_cambio_caso.codigo_legado --- */
+IF EXISTS (SELECT 1 FROM sys.key_constraints
+            WHERE name = N'cat_tipos_cambio_caso_codigo_legado_key'
+              AND parent_object_id = OBJECT_ID(N'core.cat_tipos_cambio_caso'))
+    ALTER TABLE core.cat_tipos_cambio_caso
+        DROP CONSTRAINT cat_tipos_cambio_caso_codigo_legado_key;
+IF EXISTS (SELECT 1 FROM sys.indexes
+            WHERE name = N'cat_tipos_cambio_caso_codigo_legado_key'
+              AND object_id = OBJECT_ID(N'core.cat_tipos_cambio_caso') AND has_filter = 0)
+    DROP INDEX cat_tipos_cambio_caso_codigo_legado_key
+        ON core.cat_tipos_cambio_caso;
+IF NOT EXISTS (SELECT 1 FROM sys.indexes
+                WHERE name = N'cat_tipos_cambio_caso_codigo_legado_key'
+                  AND object_id = OBJECT_ID(N'core.cat_tipos_cambio_caso'))
+    CREATE UNIQUE INDEX cat_tipos_cambio_caso_codigo_legado_key
+        ON core.cat_tipos_cambio_caso(codigo_legado)
+        WHERE codigo_legado IS NOT NULL;
+
+/* --- core.cat_unidades_organicas.codigo_legado_area --- */
+IF EXISTS (SELECT 1 FROM sys.key_constraints
+            WHERE name = N'cat_unidades_organicas_codigo_legado_area_key'
+              AND parent_object_id = OBJECT_ID(N'core.cat_unidades_organicas'))
+    ALTER TABLE core.cat_unidades_organicas
+        DROP CONSTRAINT cat_unidades_organicas_codigo_legado_area_key;
+IF EXISTS (SELECT 1 FROM sys.indexes
+            WHERE name = N'cat_unidades_organicas_codigo_legado_area_key'
+              AND object_id = OBJECT_ID(N'core.cat_unidades_organicas') AND has_filter = 0)
+    DROP INDEX cat_unidades_organicas_codigo_legado_area_key
+        ON core.cat_unidades_organicas;
+IF NOT EXISTS (SELECT 1 FROM sys.indexes
+                WHERE name = N'cat_unidades_organicas_codigo_legado_area_key'
+                  AND object_id = OBJECT_ID(N'core.cat_unidades_organicas'))
+    CREATE UNIQUE INDEX cat_unidades_organicas_codigo_legado_area_key
+        ON core.cat_unidades_organicas(codigo_legado_area)
+        WHERE codigo_legado_area IS NOT NULL;
+
+/* --- core.documentos.codigo --- */
+IF EXISTS (SELECT 1 FROM sys.key_constraints
+            WHERE name = N'documentos_codigo_key'
+              AND parent_object_id = OBJECT_ID(N'core.documentos'))
+    ALTER TABLE core.documentos DROP CONSTRAINT documentos_codigo_key;
+IF EXISTS (SELECT 1 FROM sys.indexes
+            WHERE name = N'documentos_codigo_key'
+              AND object_id = OBJECT_ID(N'core.documentos') AND has_filter = 0)
+    DROP INDEX documentos_codigo_key ON core.documentos;
+IF NOT EXISTS (SELECT 1 FROM sys.indexes
+                WHERE name = N'documentos_codigo_key'
+                  AND object_id = OBJECT_ID(N'core.documentos'))
+    CREATE UNIQUE INDEX documentos_codigo_key
+        ON core.documentos(codigo) WHERE codigo IS NOT NULL;
+
+/* --- core.documentos.codigo_legado --- */
+IF EXISTS (SELECT 1 FROM sys.key_constraints
+            WHERE name = N'documentos_codigo_legado_key'
+              AND parent_object_id = OBJECT_ID(N'core.documentos'))
+    ALTER TABLE core.documentos DROP CONSTRAINT documentos_codigo_legado_key;
+IF EXISTS (SELECT 1 FROM sys.indexes
+            WHERE name = N'documentos_codigo_legado_key'
+              AND object_id = OBJECT_ID(N'core.documentos') AND has_filter = 0)
+    DROP INDEX documentos_codigo_legado_key ON core.documentos;
+IF NOT EXISTS (SELECT 1 FROM sys.indexes
+                WHERE name = N'documentos_codigo_legado_key'
+                  AND object_id = OBJECT_ID(N'core.documentos'))
+    CREATE UNIQUE INDEX documentos_codigo_legado_key
+        ON core.documentos(codigo_legado) WHERE codigo_legado IS NOT NULL;
+
+/* --- core.reuniones_dialogo.codigo_reunion --- */
+IF EXISTS (SELECT 1 FROM sys.key_constraints
+            WHERE name = N'reuniones_dialogo_codigo_reunion_key'
+              AND parent_object_id = OBJECT_ID(N'core.reuniones_dialogo'))
+    ALTER TABLE core.reuniones_dialogo
+        DROP CONSTRAINT reuniones_dialogo_codigo_reunion_key;
+IF EXISTS (SELECT 1 FROM sys.indexes
+            WHERE name = N'reuniones_dialogo_codigo_reunion_key'
+              AND object_id = OBJECT_ID(N'core.reuniones_dialogo') AND has_filter = 0)
+    DROP INDEX reuniones_dialogo_codigo_reunion_key ON core.reuniones_dialogo;
+IF NOT EXISTS (SELECT 1 FROM sys.indexes
+                WHERE name = N'reuniones_dialogo_codigo_reunion_key'
+                  AND object_id = OBJECT_ID(N'core.reuniones_dialogo'))
+    CREATE UNIQUE INDEX reuniones_dialogo_codigo_reunion_key
+        ON core.reuniones_dialogo(codigo_reunion) WHERE codigo_reunion IS NOT NULL;
+
 /* ---------------------------------------------------------------------
-   6.3 · Los 3 índices únicos parciales del origen (traducción directa).
+   6.3 · Los 5 índices únicos parciales del origen (traducción directa).
    --------------------------------------------------------------------- */
 IF NOT EXISTS (SELECT 1 FROM sys.indexes
                 WHERE name = N'ux_usuarios_dni' AND object_id = OBJECT_ID(N'core.usuarios'))
@@ -1541,6 +1814,20 @@ IF NOT EXISTS (SELECT 1 FROM sys.indexes
    existir UNA fila con distrito_id NULL por (variante_id, periodo).
    Hoy ind.resultado tiene 0 filas. */
 
+IF NOT EXISTS (SELECT 1 FROM sys.indexes
+                WHERE name = N'entidades_codigo_legado_key'
+                  AND object_id = OBJECT_ID(N'core.entidades'))
+    CREATE UNIQUE INDEX entidades_codigo_legado_key
+        ON core.entidades(codigo_legado) WHERE codigo_legado IS NOT NULL;
+/* core.entidades: 23 filas, 0 NULL en codigo_legado. */
+
+IF NOT EXISTS (SELECT 1 FROM sys.indexes
+                WHERE name = N'ux_regla_codigo_vigente'
+                  AND object_id = OBJECT_ID(N'policy.regla'))
+    CREATE UNIQUE INDEX ux_regla_codigo_vigente
+        ON policy.regla(codigo) WHERE superseded_at IS NULL;
+/* policy.regla: 10 filas, 0 NULL en codigo. */
+
 /* ---------------------------------------------------------------------
    6.4 · Índices parciales NO únicos de traducción directa.
    --------------------------------------------------------------------- */
@@ -1555,6 +1842,14 @@ IF NOT EXISTS (SELECT 1 FROM sys.indexes
                   AND object_id = OBJECT_ID(N'core.output_contracts'))
     CREATE INDEX ix_output_chat_commit
         ON core.output_contracts(chat_commit_id) WHERE chat_commit_id IS NOT NULL;
+
+IF NOT EXISTS (SELECT 1 FROM sys.indexes
+                WHERE name = N'ix_documentos_reunion'
+                  AND object_id = OBJECT_ID(N'core.documentos'))
+    CREATE INDEX ix_documentos_reunion
+        ON core.documentos(reunion_id) WHERE reunion_id IS NOT NULL;
+/* core.documentos: 153 filas y hoy 153 NULL en reunion_id, pero el
+   índice debe existir igual que en origen para cuando se enlacen. */
 
 /* ---------------------------------------------------------------------
    6.5 · Los 2 que NO se pueden traducir literalmente
@@ -1592,8 +1887,10 @@ IF NOT EXISTS (SELECT 1 FROM sys.indexes
         ON core.hitos_compromiso(fecha_vencimiento);
 
 /* 6.6 · Verificación: índices filtrados creados.
-         Esperado: 16 (5 parciales directos de origen + 6 únicos con NULL
-         que fallaban + 5 únicos con NULL que aún no fallaban). */
+         Esperado: 33 (9 únicos con NULL que fallaban + 16 únicos con
+         NULL que aún no fallaban + 5 únicos parciales de origen + 3
+         parciales no únicos traducidos). Los 2 de §6.5 quedan como
+         índice plano y NO cuentan. */
 SELECT OBJECT_SCHEMA_NAME(i.object_id) AS esquema,
        OBJECT_NAME(i.object_id)        AS tabla,
        i.name,
@@ -1607,12 +1904,14 @@ SELECT OBJECT_SCHEMA_NAME(i.object_id) AS esquema,
 /* =====================================================================
    §7 · OPCIONAL · comentarios (propiedades extendidas)
    =====================================================================
-   En la base fuente `avisa` hay 411 comentarios en tablas y columnas del
-   alcance (39 de tabla + 372 de columna) más 10 de función. En la copia de
-   staging `avisa_mssql` son 410: `agent.run_log` tiene comentario de tabla en
-   `avisa` pero lo perdió al aplanarse en el paso 1. SSMA no los trae.
-   Se reconstruyen con sp_addextendedproperty; aquí sólo se comprueba
-   cuántos hay.
+   En la base fuente `avisa` hay 702 comentarios en tablas y columnas del
+   alcance (74 de tabla + 628 de columna) más 10 de función. En la copia de
+   staging `avisa_mssql` son 701 (73 de tabla + 628): `agent.run_log` tiene
+   comentario de tabla en `avisa` pero lo perdió al aplanarse en el paso 1.
+   El parche 16 sumó 12 comentarios de columna (11 en
+   `core.banco_datos_tratamiento` y 1 en `ref.base_legal_tratamiento`).
+   SSMA no los trae. Se reconstruyen con sp_addextendedproperty; aquí sólo
+   se comprueba cuántos hay.
    ===================================================================== */
 SELECT COUNT(*) AS propiedades_extendidas
   FROM sys.extended_properties ep
@@ -1620,9 +1919,102 @@ SELECT COUNT(*) AS propiedades_extendidas
         SELECT t.object_id
           FROM sys.tables t
           JOIN sys.schemas s ON s.schema_id = t.schema_id
-         WHERE s.name IN ('agent','audit','core','ind','policy','qda','ref','staging'));
-/* Esperado: 410 si se restaura desde `avisa_mssql`; 411 si se restaura
+         WHERE s.name IN ('agent','audit','core','ind','kag','policy','qda','ref','staging'));
+/* Esperado: 701 si se restaura desde `avisa_mssql`; 702 si se restaura
    desde la base fuente `avisa` (allí `agent.run_log` sí tiene el suyo). */
+
+/* =====================================================================
+   §8 · CLAVES AJENAS: integridad del alcance
+   =====================================================================
+   El defecto que se corrigió en el alcance fue recortar tablas sin
+   cerrar sus dependencias: quedaban claves ajenas apuntando a tablas
+   que no se migraban. Aquí se vigila que el cierre sea completo.
+
+   8.1 · Total de claves ajenas del dominio: 156.
+   8.2 · Ninguna FK del dominio apunta fuera del dominio ni a una tabla
+         ausente. Esperado: 0 filas.
+   8.3 · Reparto por esquema de la tabla que declara la FK.
+   ===================================================================== */
+
+/* 8.1 · Total. Esperado: 156. */
+SELECT COUNT(*) AS claves_ajenas
+  FROM sys.foreign_keys fk
+  JOIN sys.tables  t ON t.object_id = fk.parent_object_id
+  JOIN sys.schemas s ON s.schema_id = t.schema_id
+ WHERE s.name IN ('agent','audit','core','ind','kag','policy','qda','ref','staging');
+
+/* 8.2 · Huérfanas: la tabla referenciada no existe o queda fuera del
+         alcance. Esperado: 0 filas. */
+SELECT s.name AS esquema_origen,
+       t.name AS tabla_origen,
+       fk.name AS clave_ajena,
+       OBJECT_SCHEMA_NAME(fk.referenced_object_id) AS esquema_destino,
+       OBJECT_NAME(fk.referenced_object_id)        AS tabla_destino
+  FROM sys.foreign_keys fk
+  JOIN sys.tables  t ON t.object_id = fk.parent_object_id
+  JOIN sys.schemas s ON s.schema_id = t.schema_id
+ WHERE s.name IN ('agent','audit','core','ind','kag','policy','qda','ref','staging')
+   AND (OBJECT_NAME(fk.referenced_object_id) IS NULL
+        OR OBJECT_SCHEMA_NAME(fk.referenced_object_id)
+           NOT IN ('agent','audit','core','ind','kag','policy','qda','ref','staging'))
+ ORDER BY 1, 2, 3;
+
+/* 8.3 · Reparto por esquema. Esperado:
+         core 122, policy 14, kag 5, qda 5, ind 4, ref 3, staging 3. */
+SELECT s.name AS esquema, COUNT(*) AS claves_ajenas
+  FROM sys.foreign_keys fk
+  JOIN sys.tables  t ON t.object_id = fk.parent_object_id
+  JOIN sys.schemas s ON s.schema_id = t.schema_id
+ WHERE s.name IN ('agent','audit','core','ind','kag','policy','qda','ref','staging')
+ GROUP BY s.name
+ ORDER BY s.name;
+
+
+/* =====================================================================
+   §9 · TRIGGERS heredados del modelo de origen
+   =====================================================================
+   En origen hay 25 triggers NO internos repartidos en 14 tablas del
+   alcance, y no son cosméticos:
+     · bitácora de PII append-only y auditoría de sus cambios
+       (audit.datos_personales_acceso, core.actor_datos_personales);
+     · `set_audit`: rellena created_by / updated_by / updated_at;
+     · historial de estados del caso (core.casos -> caso_estado_historial);
+     · propagación a kag: nodos y nombres de actores, casos, membresías;
+     · bloqueo de escritura directa en core.cat_niveles_conflicto;
+     · checks de negocio: evidencia al cumplir un compromiso, claves
+       requeridas de una regla, justificación de variantes proxy y
+       aviso de vencimiento de reglas.
+
+   SSMA no los migra. Este bloque NO los reconstruye: sólo informa de
+   cuántos hay en el destino para que su ausencia no pase inadvertida.
+
+   Reparto medido en origen (25 en total):
+       audit.datos_personales_acceso 3    core.actores 3   core.casos 4
+       core.actor_datos_personales 2      core.alertas_tempranas 2
+       core.compromisos 2                 policy.regla 2
+       core.actor_membresia 1             core.caso_cronologia 1
+       core.casos_actores 1               core.cat_niveles_conflicto 1
+       core.documentos 1                  core.reuniones_dialogo 1
+       ind.variante 1
+
+   Esperado: 25 si se recrean en T-SQL. Si OGTI decide mover esa lógica
+   a la API, dejar constancia de la decisión y ajustar la expectativa:
+   el script no debe fallar en silencio.
+   ===================================================================== */
+
+SELECT s.name              AS esquema,
+       t.name              AS tabla,
+       COUNT(*)            AS triggers,
+       SUM(COUNT(*)) OVER () AS total
+  FROM sys.triggers tg
+  JOIN sys.tables  t ON t.object_id = tg.parent_id
+  JOIN sys.schemas s ON s.schema_id = t.schema_id
+ WHERE tg.is_internal  = 0
+   AND tg.is_ms_shipped = 0
+   AND s.name IN ('agent','audit','core','ind','kag','policy','qda','ref','staging')
+ GROUP BY s.name, t.name
+ ORDER BY 1, 2;
+/* Esperado: 25 triggers sobre 14 tablas (la columna `total` debe dar 25). */
 
 PRINT '=== AVISA · chequeos post-migración · fin ===';
 GO
