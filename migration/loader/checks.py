@@ -4,7 +4,7 @@
 medidas contra la carga real en PostgreSQL 16; cuando el plan §7 decía otra cosa,
 manda lo verificado (y la corrección quedó anotada en `docs/`).
 
-Se ejecuta dentro de `db.session`, así que `app.clasificacion_max='3'` y
+Se ejecuta dentro de `db.session`, así que `app.rol_codigo='administrador'` y
 `app.user_id` ya están fijados: las tablas con FORCE ROW LEVEL SECURITY son
 visibles y un `SELECT` que devolviera 0 filas aquí sería un fallo real.
 
@@ -16,7 +16,11 @@ from __future__ import annotations
 import asyncpg
 
 # (etiqueta, SQL que devuelve un escalar, valor esperado)
-CONTEO: tuple[tuple[str, str, int], ...] = (
+# El valor esperado puede ser un rango (mínimo, máximo) cuando el número depende
+# del momento de la comprobación: el cargador escribe 34 filas en
+# `core.usuario_roles` y el parche 16 añade 1 (el rol de administrador y oficial
+# de datos personales). Verificar antes o después del parche 16 es legítimo.
+CONTEO: tuple[tuple[str, str, int | tuple[int, int]], ...] = (
     ("regiones", "SELECT count(*) FROM core.regiones", 25),
     ("provincias", "SELECT count(*) FROM core.provincias", 70),
     ("distritos", "SELECT count(*) FROM core.distritos", 698),
@@ -24,7 +28,7 @@ CONTEO: tuple[tuple[str, str, int], ...] = (
     ("entidades", "SELECT count(*) FROM core.entidades", 23),
     ("cat_unidades_organicas", "SELECT count(*) FROM core.cat_unidades_organicas", 66),
     ("usuarios (31 + admin)", "SELECT count(*) FROM core.usuarios", 32),
-    ("usuario_roles", "SELECT count(*) FROM core.usuario_roles", 34),
+    ("usuario_roles", "SELECT count(*) FROM core.usuario_roles", (34, 35)),
     ("usuario_territorio", "SELECT count(*) FROM core.usuario_territorio", 25),
     ("actores", "SELECT count(*) FROM core.actores", 1160),
     ("actor_datos_personales", "SELECT count(*) FROM core.actor_datos_personales", 847),
@@ -218,11 +222,17 @@ async def run(conn: asyncpg.Connection) -> int:
     print("=== verificación de la carga =======================================")
     for etiqueta, sql, esperado in CONTEO:
         obtenido = await _escalar(conn, sql)
-        if obtenido == esperado:
+        if isinstance(esperado, tuple):
+            conforme = esperado[0] <= obtenido <= esperado[1]
+            detalle = f"{esperado[0]}–{esperado[1]}"
+        else:
+            conforme = obtenido == esperado
+            detalle = str(esperado)
+        if conforme:
             print(f"  ok   {etiqueta:<34} {obtenido:>7}")
         else:
             fallos += 1
-            print(f"  FALLA {etiqueta:<34} {obtenido:>7} (esperado {esperado})")
+            print(f"  FALLA {etiqueta:<34} {obtenido:>7} (esperado {detalle})")
 
     print()
     print("--- integridad ------------------------------------------------------")

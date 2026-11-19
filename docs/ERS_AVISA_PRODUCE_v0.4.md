@@ -1,0 +1,1927 @@
+# Especificación de Requisitos de Software (ERS)
+
+## Sistema de inteligencia para la prevención de conflictos sociales — AVISA-PRODUCE / SIPRECS
+
+|                   |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Versión**       | 0.5 (reordenada por OAIPCS; renumeración completa, H-18/H-01/H-02/H-53 cerrados, PIDE-RENIEC integrado en toda la arquitectura, roles homologados y marco normativo incorporado)                                                                                                                                                                                                                                                                                                                                                                  |
+| **Fecha**         | 2026-11-19                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| **Dirigido a**    | OAIPCS (usuarios y Dirección) y OGTI (equipo que construirá el sistema) — Ministerio de la Producción                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| **Elaborado por** | Diego — OAIPCS                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| **Estado**        | Borrador para validación. Las secciones marcadas **[EN BLANCO]** no se pueden responder todavía con la información disponible                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| **Base**          | Conversaciones del proyecto (reunión con OGTI y entrevistas a usuarios) · `mvp_md` (MVP-45, 12-nov-2026) · `DICCIONARIO_DATOS_md` (18-nov-2026) · `LEGADO_A_V10_SIMILITUDES_Y_DIFERENCIAS_md` · `mvp_prioridad_tablas_csv` · Diagnóstico y plan de diciembre tras la reunión con OGTI (R6) · Decisiones de OAIPCS posteriores a la versión 0.2 (R7) · Confirmaciones técnicas de OGTI: Angular/.NET, SQL Server, ~4 desarrolladores, inicio 24-nov-2026 (R8) · Notas sobre gravedad de alertas y marco normativo de protección de datos e IA (R9) |
+
+---
+
+## Índice
+
+> **El orden de las secciones sigue el que definió OAIPCS**, pensado para presentarse tal como se lee: primero el problema y las personas, luego lo que el sistema debe hacer, luego cómo se usa día a día, y al final lo técnico y lo administrativo.
+
+0. Cómo leer este documento, contradicciones y qué se lleva a la reunión
+1. Introducción
+2. Contexto y objetivos de negocio
+3. Actores e interesados
+4. Requisitos funcionales
+5. **Circuito funcional y paridad con el AVISA actual**
+6. **Roles y permisos**
+7. **Pantallas y tableros prioritarios**
+8. **Datos maestros mínimos a precargar**
+9. Requisitos no funcionales
+10. Historias de usuario con criterios de aceptación
+11. Reglas de negocio
+12. Requisitos de datos
+13. Interfaces externas (ficha por servicio) — _material interno_
+14. Arquitectura del sistema (modelo C4) y servicios por integrar — _material interno_
+15. Estados de error y casos límite
+16. Verificación y criterios de aceptación
+17. Matriz de trazabilidad
+18. Plan de 20 días, dependencias, decisiones pendientes y riesgos
+19. Acuerdo de alcance (borrador para firma)
+20. Visión posterior
+21. Catálogo de vistas y tableros del sistema futuro
+22. Anexos: A glosario · B cambios respecto de versiones anteriores · C registro de secciones en blanco · **D marco normativo y cumplimiento**
+
+---
+
+# 0. CÓMO LEER ESTE DOCUMENTO Y QUÉ HACER CON LAS CONTRADICCIONES
+
+## 0.1 Cómo se marcan los vacíos
+
+Cuando falta información para responder una sección, no se inventa: se deja una marca como esta.
+
+> **[EN BLANCO · H-00]** Falta: _qué dato falta._ Responde: _quién puede dar el dato._
+
+Todos los vacíos están numerados (H-01, H-02…) y reunidos en el Anexo C, para poder resolverlos en las próximas reuniones.
+
+Los servicios que hay que conectar con el sistema aparecen <u>subrayados</u> y llevan un código **SVC-nn**. Su ficha completa está en la sección 13.
+
+## 0.2 Regla de prelación entre fuentes
+
+Cuando dos fuentes dicen cosas distintas, manda el siguiente orden:
+
+1. **El plan de diciembre acordado tras la reunión con OGTI (R6)**: es lo más reciente y prevalece sobre todo lo demás.
+2. **Lo conversado antes de compartir los documentos** (reunión con OGTI y entrevistas a los usuarios).
+3. **La versión 10 (proyecto madre)**, en las reglas que también aparecen en el MVP (el propio MVP-45 dice que en ese caso manda v10).
+4. **El MVP-45.**
+
+## 0.3 Contradicciones detectadas y cómo se resolvieron
+
+| N.°  | Tema                                                 | Lo conversado (prevalece)                                                                                                                                                                                                                | Lo que dicen los documentos                                                                                                                                                     | Cómo queda en este ERS                                                                                                                                                                                                                                               |
+| ---- | ---------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| C-01 | Motor de base de datos                               | La base se **diseñó y probó en PostgreSQL**, y OGTI podría modificarla                                                                                                                                                                   | El MVP-45 la traduce a **SQL Server** («stack OGTI»); el diccionario y la v10 están en PostgreSQL 16                                                                            | **Resuelto (H-01):** OGTI **solo aloja SQL Server**. Se activa la alternativa de traducción que ya preveía el MVP-45. Ver 12.1 para los tres puntos de incompatibilidad y la sección 18.2 para el plan de migración                                                  |
+| C-02 | Quién construye y hasta dónde llega este equipo      | Este equipo entrega la **base de datos, el ERS y el mockup**; **OGTI construye** a partir de ellos                                                                                                                                       | El MVP-45 supone un único proveedor que entrega todo el sistema en 45 días                                                                                                      | OGTI construye. El MVP-45 se usa como **fuente de funciones y reglas**, no como plan de trabajo. El plazo real es de **20 días** (ver C-13) **[EN BLANCO · H-02: cuántos desarrolladores y con qué dedicación]**                                                     |
+| C-03 | Lenguaje para el mantenimiento                       | OGTI **solo tiene especialistas en .NET**                                                                                                                                                                                                | El MVP-45 pone la inteligencia artificial en un servicio **Python** externo (Modal / Hetzner)                                                                                   | El procesamiento se **describe sin depender del lenguaje**. Python se conserva solo como demostración. Dónde y cómo se ejecuta en producción lo decide OGTI **[EN BLANCO · H-03]**. No se adoptan servicios de terceros como Modal ni Hetzner                        |
+| C-04 | Modelo de lenguaje (IA)                              | OGTI ya ejecuta DeepSeek con Ollama, pero **prefiere Google** porque nadie sabe mantener Python                                                                                                                                          | El MVP-45 usa modelos autoalojados como respaldo y exige dictamen legal para modelos externos                                                                                   | **Google (Gemini)** como proveedor preferente, detrás de una conexión intercambiable. El modelo local queda como posible respaldo. El dictamen legal sigue pendiente **[EN BLANCO · H-04]**                                                                          |
+| C-05 | Tablero y diagramas                                  | OGTI tiene **licencia de Power BI**. Se necesitan, además, **diagramas interactivos**                                                                                                                                                    | El MVP-45 usa React como pantalla principal y Power BI solo como complemento                                                                                                    | **Power BI** para indicadores, tablas y mapas. Los **diagramas interactivos** (red de actores, línea de tiempo, simulador) se piden como vistas web aparte que se incrustan; con qué tecnología lo decide OGTI **[EN BLANCO · H-05]**                                |
+| C-06 | Canales de aviso                                     | **Correo con borrador en Drive**; alertas tempranas por **WhatsApp**, cuyo costo asumirá la oficina y **aún no se conoce**                                                                                                               | El MVP-45 propone SMS y correo; el comparativo dice que el sistema actual ya tiene un módulo de WhatsApp y correo                                                               | MVP: **correo + borrador en Drive.** WhatsApp queda previsto, sujeto a costo **[EN BLANCO · H-06]**. SMS no se incluye **[EN BLANCO · H-07]**                                                                                                                        |
+| C-07 | Usuarios                                             | Notas de **Edith, Iván y Esteban**                                                                                                                                                                                                       | El MVP-45 usa tres perfiles de acceso (A analistas, B alta dirección, C actores externos)                                                                                       | Los tres perfiles se conservan como **roles de seguridad**. Las necesidades de los tres usuarios mandan para el caso ancla. El Perfil C (actores externos) pasa a la fase siguiente                                                                                  |
+| C-08 | Tamaño del primer alcance                            | Un **caso ancla** (ficha de actor y territorio con alertas escalonadas), 1 o 2 fuentes, pocos indicadores; el análisis de la pota va después                                                                                             | El MVP-45 pide como obligatorio: método OE1–OE3, mapa de afinidad, simulador, GIS, informes y portal externo                                                                    | Solo el caso ancla es **obligatorio**. Lo demás del MVP-45 se reclasifica como **deseable** o **fase siguiente** **[EN BLANCO · H-08: confirmar con la Dirección de OAIPCS]**                                                                                        |
+| C-09 | Quién recibe cada alerta                             | Si es **grave**, directo al ministro; si no, a viceministros, secretario general y jefes de gabinete, para no saturar al ministro                                                                                                        | El MVP-45 exige que un analista apruebe y que la Dirección confirme la crisis antes de avisar                                                                                   | Se combinan: la **gravedad** decide los destinatarios y la **revisión humana** se conserva. Qué es «grave» queda **[EN BLANCO · H-09]**                                                                                                                              |
+| C-10 | Redes sociales                                       | Esteban indica que cerca del **70 % de las acciones** de las organizaciones pesqueras llegan por redes sociales                                                                                                                          | El MVP-45 solo admite API oficial o proveedor licenciado, nunca extracción masiva; falta decidir el proveedor                                                                   | Se mantiene la regla del MVP. Entra en la fase siguiente **[EN BLANCO · H-10]**                                                                                                                                                                                      |
+| C-11 | Número de tablas del MVP                             | —                                                                                                                                                                                                                                        | El MVP-45 dice «≈ 38», «50» y «55» tablas en distintos apartados; el inventario generado de la base viva da **42** (31 con datos + 11 vacías)                                   | Se usa **42**                                                                                                                                                                                                                                                        |
+| C-12 | Carga de datos históricos                            | —                                                                                                                                                                                                                                        | El MVP-45 planifica migrar la matriz actual en los primeros 10 días; el diccionario muestra que **la carga ya está hecha** (p. ej. 35 casos, 83 alertas, 1 160 actores)         | La migración histórica **ya existe**. Falta repetir la **reconciliación** en el entorno de OGTI                                                                                                                                                                      |
+| C-13 | Alcance de diciembre                                 | Un **módulo mínimo en producción** según el uso actual de AVISA, con **login institucional, datos maestros precargados y tableros**. La **IA y el procesamiento automático pasan a 2027**, igual que todo lo que no quepa en **20 días** | La versión 0.1 de este ERS y el MVP-45 incluían procesamiento con IA, Gemini, diagrama interactivo de la red de actores y candidatos de alerta automáticos en el primer alcance | El primer alcance es el **módulo de diciembre**. Todo requisito de procesamiento automático, IA, red de actores interactiva y WhatsApp pasa al horizonte **2027** (ver Anexo B)                                                                                      |
+| C-14 | Cómo se aprueba el alcance                           | Idea → **prototipo en Figma** (para verlo en conjunto) → **documento de análisis** con reglas y roles → **acuerdo firmado** entre ambas partes sobre el alcance definitivo → recién entonces la parte técnica                            | La versión 0.1 suponía que OGTI construiría directamente desde el ERS y el mockup                                                                                               | Este documento hace de **documento de análisis**; la sección 19 es el borrador del **acuerdo de alcance**. El prototipo lo **diseña OAIPCS** (Diego), a partir de las secciones 5 a 8 y de la metodología 7.4                                                        |
+| C-15 | Expectativa de OGTI frente al rediseño               | OGTI esperaba recibir la **aplicación actual** para levantarla tal cual; OAIPCS llegó con un **rediseño** (de Excel a modelo relacional)                                                                                                 | R3 y R4 describen el modelo v10 completo (255 tablas)                                                                                                                           | La sección 5 muestra la **paridad con el AVISA actual**. **Decidido:** el módulo se levanta sobre el **modelo relacional (v10)**, traducido a **SQL Server** (H-01), sujeto a optimizaciones de OGTI; primero se presenta la necesidad y después el modelo (ver 5.4) |
+| C-16 | Nivel de la conversación                             | Hablar de LLM, WhatsApp, Python, servidores y Extranet **no corresponde a esta etapa**                                                                                                                                                   | Las secciones 14 y 13 de este ERS las describen                                                                                                                                 | Se conservan como **material interno** y **no se llevan** a la reunión (ver 0.4)                                                                                                                                                                                     |
+| C-17 | Necesidades de los tres usuarios                     | Notas de Edith, Iván y Esteban                                                                                                                                                                                                           | El plan de diciembre habla del «uso actual de AVISA»                                                                                                                            | En diciembre entra lo que AVISA ya hace hoy; lo demás se reclasifica a 2027 **[EN BLANCO · H-45]**                                                                                                                                                                   |
+| C-18 | Costo de los servicios externos                      | **Minimizar** las dependencias externas para reducir los costos que asumirá OAIPCS                                                                                                                                                       | El MVP-45 prevé servicios de terceros (Modal, Hetzner, modelos externos, SMS, redes, mapas, Extranet)                                                                           | Presupuesto y requisitos de cada actor externo en 13.3 y 13.4; reglas de minimización en 13.5. En diciembre solo se usan servicios que la institución ya tiene                                                                                                       |
+| C-19 | Orden de construcción                                | Falta determinar **qué capas se programan primero**                                                                                                                                                                                      | R2 propone un orden por días para un solo proveedor                                                                                                                             | Capas y orden propuesto en 5.5 **[EN BLANCO · H-63]**                                                                                                                                                                                                                |
+| C-20 | Consulta de datos sensibles (requisitorias, delitos) | **Edith** realiza pedidos a **PIDE-RENIEC**; **solo ella**, como actor con privilegios, puede hacerlo                                                                                                                                    | Ningún documento previo menciona este servicio                                                                                                                                  | **Nuevo:** <u>SVC-16</u> en 13.1, acceso exclusivo en RA-07 y requisito RF-D13                                                                                                                                                                                       |
+
+## 0.4 Qué se lleva a la reunión y qué es material interno
+
+> **Uso interno: retirar este apartado antes de compartir el documento.**
+
+Lo que pidió Luis para el martes: **circuito funcional, pantallas y tableros prioritarios, datos mínimos, reglas y roles**. Lo demás de este documento es respaldo.
+
+| Sección                                                  | ¿Se lleva?                  | Nota                                                              |
+| -------------------------------------------------------- | --------------------------- | ----------------------------------------------------------------- |
+| 0 Contradicciones                                        | Interno                     | Sirve para que OAIPCS hable con una sola voz                      |
+| 2.3 y 2.4 Caso de uso y objetivos                        | Una página                  | Para encuadrar                                                    |
+| 3.1 Actores                                              | Sí                          |                                                                   |
+| 4 Arquitectura y 14 Interfaces                           | **No**                      | Es el nivel técnico que no corresponde esta vez                   |
+| 13.3 a 13.5 Presupuesto y requisitos de actores externos | **Interno**                 | Sirve para decidir con OAIPCS qué se contrata                     |
+| 7.4 a 7.7 Metodología y sistema de diseño                | Interno (método de trabajo) | Se muestra el resultado, no el método                             |
+| 5 a 8 Requisitos, historias, reglas, datos               | Respaldo                    | Solo si preguntan                                                 |
+| **9 Circuito funcional y paridad** (incluye 5.4 y 5.5)   | **Sí**                      | Responde a la expectativa de OGTI de recibir lo que AVISA ya hace |
+| **10 Roles y permisos**                                  | **Sí**                      | Pedido por Luis                                                   |
+| **11 Pantallas y tableros prioritarios**                 | **Sí**                      | Pedido por Luis                                                   |
+| **12 Datos mínimos**                                     | **Sí**                      | Pedido por Luis                                                   |
+| 18 Plan y 19 Acuerdo de alcance                          | Sí (borrador)               | El acuerdo es el paso que sigue al documento de análisis          |
+| **20 Visión posterior**                                  | **Una línea**               | Se conversa en 2027                                               |
+
+**Antes del martes:** enviar un avance a Dilayda y acordar dentro de OAIPCS la postura única **[EN BLANCO · H-57: rol de Luis y de Dilayda en la aprobación]**.
+
+---
+
+# 1. INTRODUCCIÓN
+
+## 1.1 Propósito
+
+Este documento dice **qué debe hacer el sistema**, para quién y con qué condiciones, de modo que OGTI pueda construirlo sin tener que interpretar. Describe lo que se necesita, no cómo programarlo.
+
+## 1.2 Alcance
+
+**Qué es el sistema.** Una plataforma que reúne en un solo lugar la información sobre conflictos sociales del sector producción (con énfasis en pesca artesanal, acuicultura y MYPE): actores, casos, hechos, compromisos, alertas y documentos. Ayuda al personal de la OAIPCS a **preparar reuniones, validar alertas, informar a la Alta Dirección y dar seguimiento a los compromisos**.
+
+**Cuatro horizontes.** Este ERS convive con documentos más grandes y por eso cada requisito indica a qué horizonte pertenece.
+
+| Horizonte                | Qué es                                                                                                                                              | Dónde se describe                              |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| **ENTREGA**              | Lo que prepara este equipo: base de datos, este documento de análisis e información para el prototipo                                               | Este documento                                 |
+| **MVP (diciembre 2026)** | **Módulo mínimo en producción en 20 días**: el uso actual de AVISA, con login institucional, datos maestros precargados y tableros                  | Secciones 5 a 8 y requisitos con horizonte MVP |
+| **2027**                 | Inteligencia artificial, procesamiento automático de documentos y todo lo que no quepa en 20 días                                                   | Requisitos con horizonte 2027                  |
+| **MADRE**                | El proyecto completo (v10): 255 tablas, grafo de conocimiento, análisis cualitativo, agentes, indicadores y módulos de expansión; mucho más extenso | Documentos de la v10                           |
+
+**Dentro del alcance del MVP (diciembre):** el circuito de lo que AVISA ya hace hoy —casos, hechos, alertas tempranas, demandas, actores y organizaciones, compromisos, documentos y envíos—, con **login institucional**, **datos maestros precargados**, **tableros prioritarios** y reglas y roles definidos.
+
+**Fuera del alcance del MVP (pasa a 2027 o después):** procesamiento automático y IA, lectura de fuentes públicas y redes sociales, diagrama interactivo de la red de actores, WhatsApp, simulador de escenarios, mapa con línea de tiempo, portal para actores externos (Extranet), integración con SESIGUE, análisis de la pota y de los perfiles de pescadores, y el grafo de conocimiento completo.
+
+## 1.3 Definiciones en lenguaje claro
+
+| Término                       | Qué significa aquí                                                                                                                                                         |
+| ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Caso**                      | Un conflicto social con código propio (p. ej. `CS-PRODUCE-2026-007`)                                                                                                       |
+| **Alerta temprana**           | Aviso de que algo puede escalar; en el sistema siempre es una propuesta hasta que una persona la aprueba                                                                   |
+| **Actor**                     | Persona u organización que participa en un caso (autoridad, dirigente, empresa, organización pesquera, etc.); puede estar **identificado** (con DNI) o **sin identificar** |
+| **Compromiso**                | Acuerdo asumido en una mesa o reunión, con hitos y estados                                                                                                                 |
+| **Relatoría / ayuda memoria** | Documento que resume lo conversado y acordado en una reunión                                                                                                               |
+| **OSPA**                      | Organización pesquera artesanal                                                                                                                                            |
+| **Revisión humana (HITL)**    | Una persona revisa y aprueba lo que propone la inteligencia artificial antes de que se use                                                                                 |
+| **Seguridad por fila (RLS)**  | La base decide qué filas ve cada usuario, sin copiar datos                                                                                                                 |
+| **MACTOR**                    | Método para medir quién influye sobre quién entre los actores de un caso                                                                                                   |
+| **Caso ancla**                | El primer flujo completo que se construye: ficha de actor y territorio con alertas escalonadas                                                                             |
+| **Sistema anterior (legado)** | Hojas de Google Sheets con código Apps Script que hoy están en producción                                                                                                  |
+
+El glosario completo está en el Anexo A.
+
+## 1.4 Referencias
+
+| Código | Documento                                                               | Para qué se usa                                                        |
+| ------ | ----------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| R1     | Conversaciones del proyecto (reunión con OGTI y entrevistas a usuarios) | Fuente que **prevalece**                                               |
+| R2     | `mvp_md` — AVISA-PRODUCE MVP-45                                         | Funciones, perfiles, indicadores, ciclo de la alerta                   |
+| R3     | `DICCIONARIO_DATOS_md`                                                  | Qué existe hoy en la base (255 tablas lógicas, 26 esquemas, 30 vistas) |
+| R4     | `LEGADO_A_V10_SIMILITUDES_Y_DIFERENCIAS_md`                             | Qué cambia del sistema anterior a la v10                               |
+| R5     | `mvp_prioridad_tablas_csv`                                              | Qué tablas son del MVP (T0 y T1) y cuáles quedan para después          |
+
+## 1.5 Visión general del documento
+
+Las secciones 2 y 3 explican el negocio y las personas; la 4 muestra la arquitectura en tres niveles (material interno); de la 5 a la 8 están los requisitos completos; de la 9 a la 12 está lo que se lleva a la reunión (circuito, roles, pantallas, tableros y datos); de la 13 a la 17 están los requisitos no funcionales, las interfaces, la verificación y la trazabilidad; la 18 y la 19 contienen el plan, los riesgos y el borrador del acuerdo de alcance; la 20 da la visión posterior en una línea.
+
+---
+
+# 2. CONTEXTO Y OBJETIVOS DE NEGOCIO
+
+> Esta sección es una **inferencia** a partir de las notas de la reunión, de las entrevistas y de los documentos. Debe validarse con la Dirección de la OAIPCS **[EN BLANCO · H-11]**.
+
+## 2.1 Situación actual
+
+Según R4, el sistema que hoy está en producción tiene estas características:
+
+- **86 hojas de Google Sheets** (75 con datos, 11 vacías) con **244 funciones** en el servidor y **450 nombres** en el navegador; cerca de un cuarto del código ya no se usa.
+- Las hojas **no tienen llaves entre sí ni reglas de unicidad**: el mismo conflicto puede escribirse hasta cuatro veces con distinto detalle y el DNI hace de identificador de persona.
+- Los permisos se aplican en la pantalla, con una clave numérica guardada en una hoja.
+- El sistema **captura, guarda e imprime**: 12 funciones `generar*` rearman documentos que alguien escribió a mano y se archivan **153 PDF en Drive**. **No existe ningún proceso** que convierta texto libre en datos ordenados.
+- Datos relevantes hoy: **35 casos, 83 alertas tempranas, 325 demandas, 1 160 actores, 153 documentos, 21 mesas de diálogo, 27 locales, 31 usuarios y 17 envíos**.
+
+Según R3, esos datos ya fueron cargados a la base PostgreSQL (modelo v10), que además contiene un grafo de conocimiento inicial (1 520 nodos, 450 relaciones).
+
+## 2.2 Problema que se quiere resolver
+
+1. **No existe control de acceso por rol.** Los permisos se aplican en la pantalla, con una clave guardada en una hoja; cualquiera con el enlace puede ver datos de actores, incluidos teléfonos y DNI, sin que quede registro de quién los consultó. Esto no cumple con el estándar de **Nivel Alto de seguridad** que exige la Ley N.° 29733 para datos personales vinculados a la afiliación sindical o gremial de una persona en conflicto (ver el marco normativo del Anexo D).
+2. **Las alertas no tienen una fuente única ni trazabilidad.** Se cargan y validan a mano, sin una regla clara de a quién informar según su gravedad, y sin que quede registrado el origen de cada dato ni quién lo aprobó.
+3. **Los tableros no son confiables.** El sistema no tiene de dónde sacar indicadores (la tabla de resultados está vacía) y lo poco que se calcula no se puede verificar contra un registro auditable; la Alta Dirección no puede apoyar decisiones en esas cifras.
+4. Los **documentos (relatorías, reportes, noticias) no se convierten en datos consultables**; solo se guardan como PDF.
+5. El modelo actual (86 hojas sin llaves ni reglas de unicidad) hace que un mismo conflicto pueda escribirse varias veces con distinto detalle, lo que añade trabajo de digitación y dificulta precisamente el control de acceso, la trazabilidad y la confiabilidad de los tableros de los puntos 1 a 3.
+6. Quien mantendrá el sistema (OGTI) **solo cuenta con especialistas en .NET**.
+
+## 2.3 Caso de uso de negocio (inferido)
+
+**CAS-01 — Prepararse, alertar y dar seguimiento con información confiable.**
+La OAIPCS necesita, ante cada zona o caso, **saber rápidamente quiénes actúan, qué ha pasado, qué se acordó y a quién avisar según la gravedad**, con la certeza de que lo que ve fue revisado por una persona y se puede rastrear hasta su fuente.
+
+| Sub-caso                                                                | Quién lo pide            | Qué resuelve                                                                                                                                              | Horizonte              |
+| ----------------------------------------------------------------------- | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- |
+| **CAS-01a** Ficha de actor y territorio                                 | Edith, Iván, Esteban     | Antes de una reunión: perfil de actores, directorios de autoridades, contactos, OSPA a la que pertenecen, últimos reportes remitidos y locales apropiados | MVP                    |
+| **CAS-01b** Alertas tempranas con envío escalonado                      | Edith, Iván              | Cargar, validar y enviar alertas, decidiendo destinatarios según la gravedad                                                                              | MVP                    |
+| **CAS-01c** Compromisos y relatorías                                    | Edith, Iván              | Registrar y consultar compromisos de ayudas memoria y transcripciones de reuniones                                                                        | MVP                    |
+| **CAS-02** Análisis de controversias (la pota) y perfiles de pescadores | Esteban                  | Ver a través del tiempo conflictos, capa normativa y acciones de las OSPA, y la diversidad de perfiles de pescadores y sus alineamientos                  | MADRE (fase siguiente) |
+| **CAS-03** Riesgos, condiciones de diálogo y escenarios                 | Dirección (según MVP-45) | Evaluar riesgo y probar escenarios («¿qué pasa si…?»)                                                                                                     | MADRE                  |
+
+> Con el plan de diciembre, CAS-01a, CAS-01b y CAS-01c entran **solo en lo que AVISA ya hace hoy**; la carga asistida por IA, el procesamiento de relatorías y el envío por WhatsApp pasan a 2027 **[EN BLANCO · H-45]**.
+
+## 2.4 Objetivos de negocio
+
+| ID     | Objetivo                                                                                | Origen                         |
+| ------ | --------------------------------------------------------------------------------------- | ------------------------------ |
+| OBJ-01 | Reducir el tiempo de preparar una reunión o una ficha de actor                          | Notas de Edith, Iván y Esteban |
+| OBJ-02 | Validar y enviar alertas tempranas con reglas claras de gravedad y destinatarios        | Notas de Iván y Edith; R2      |
+| OBJ-03 | Informar a la Alta Dirección sin saturar al ministro                                    | Notas de Iván                  |
+| OBJ-04 | Dar cuenta de los compromisos asumidos en reuniones y mesas                             | Notas de Edith; R2             |
+| OBJ-05 | Tener **una sola fuente de verdad** con trazabilidad de cada dato, en lugar de 86 hojas | R4                             |
+| OBJ-06 | Proteger los datos personales (Ley N.° 29733)                                           | R2, R3                         |
+| OBJ-07 | Que OGTI pueda **mantener y modificar** el sistema con sus propios especialistas        | Reunión con OGTI               |
+| OBJ-08 | Entender conflictos y alineamientos a través del tiempo (pota, perfiles de pescadores)  | Notas de Esteban               |
+
+## 2.5 Cómo se sabrá que funcionó
+
+| ID    | Indicador de éxito                                                                          | Línea base                                             | Meta                                    | Estado                                                |
+| ----- | ------------------------------------------------------------------------------------------- | ------------------------------------------------------ | --------------------------------------- | ----------------------------------------------------- |
+| IE-01 | Tiempo para armar una ficha de actor y territorio                                           | **[EN BLANCO · H-12]**                                 | **[EN BLANCO · H-12]**                  | Falta medir cómo se hace hoy                          |
+| IE-02 | Tiempo desde que una noticia o reporte se publica hasta que está en la bandeja del analista | No existe                                              | ≤ 30 minutos _(referencia del MVP-45)_  | 2027: depende del procesamiento automático **[H-13]** |
+| IE-03 | Tiempo desde que se aprueba un cambio hasta que se ve en el tablero                         | No existe                                              | ≤ 60 segundos _(referencia del MVP-45)_ | 2027: depende del procesamiento automático **[H-13]** |
+| IE-04 | Alertas críticas atendidas dentro de su plazo                                               | **[EN BLANCO · H-14]**                                 | ≥ 95 % _(referencia del MVP-45)_        | Falta definir los plazos por prioridad                |
+| IE-05 | Compromisos exigibles cumplidos en plazo                                                    | Calculable con los 8 compromisos y 12 hitos existentes | ≥ 85 % _(referencia del MVP-45)_        | Muestra muy pequeña                                   |
+| IE-06 | Alertas enviadas sin aprobación humana                                                      | —                                                      | 0                                       | Regla fija                                            |
+| IE-07 | Actores con datos personales visibles a quien no corresponde                                | —                                                      | 0                                       | Regla fija                                            |
+
+## 2.6 Supuestos y restricciones
+
+| ID     | Tipo        | Descripción                                                                                                                                              | Origen                 |
+| ------ | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- |
+| RES-01 | Restricción | El mantenimiento lo hará OGTI y **solo cuenta con especialistas en .NET**                                                                                | Reunión con OGTI       |
+| RES-02 | Restricción | OGTI tiene **licencia de Power BI**                                                                                                                      | Reunión con OGTI       |
+| RES-03 | Restricción | Para 2027, la inteligencia artificial preferida es la de **Google**                                                                                      | Reunión con OGTI       |
+| RES-04 | Restricción | **WhatsApp** tiene costo; lo asumirá la oficina; el monto real no se conoce                                                                              | Reunión con OGTI       |
+| RES-05 | Restricción | **Resuelto (H-01):** OGTI solo aloja **SQL Server**; la base de producción se migra desde PostgreSQL (`AVISA_V10_ESQUEMA_UNIFICADO.sql` adaptado)        | Conversación, R8       |
+| RES-06 | Restricción | La IA **no decide ni publica**: toda alerta, cita o borrador pasa por revisión humana                                                                    | R2                     |
+| RES-07 | Restricción | Las redes sociales solo se consultan por API oficial o proveedor licenciado; sin extracción masiva                                                       | R2                     |
+| RES-08 | Restricción | El tratamiento de datos personales se rige por la Ley N.° 29733                                                                                          | R2, R3                 |
+| RES-09 | Restricción | El módulo de diciembre debe estar en producción en **20 días**                                                                                           | Plan de diciembre (R6) |
+| RES-10 | Restricción | Las decisiones técnicas (plataforma, servidores y desarrolladores) las toma OGTI; los desarrolladores disponibles tienen presupuesto **hasta diciembre** | R6                     |
+| RES-11 | Restricción | El alcance definitivo se cierra con un **acuerdo firmado** entre OAIPCS y OGTI **antes** de la parte técnica                                             | R6                     |
+| RES-12 | Restricción | La IA y el procesamiento automático de datos quedan para **2027**                                                                                        | R6                     |
+| SUP-01 | Supuesto    | Las notas de Edith, Iván y Esteban representan al grupo de usuarios del caso ancla                                                                       | Conversación           |
+| SUP-02 | Supuesto    | La carga histórica del sistema anterior es completa y fiable                                                                                             | R3, R4                 |
+| SUP-03 | Supuesto    | OGTI construirá a partir del ERS y del mockup en una reunión posterior                                                                                   | Conversación           |
+
+---
+
+# 3. ACTORES E INTERESADOS
+
+## 3.1 Personas que usan o deciden sobre el sistema
+
+| ID     | Quién                                                                                                                | Qué hace con el sistema                                                                                             | Perfil de acceso                  | Horizonte |
+| ------ | -------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | --------------------------------- | --------- |
+| INT-01 | **Analistas y sectoristas de la OAIPCS** (entre ellos Edith, Iván y Esteban; su cargo exacto **[EN BLANCO · H-15]**) | Cargan y validan alertas, preparan reuniones, consultan actores, registran relatorías y compromisos                 | **A** (analista)                  | MVP       |
+| INT-02 | **Dirección de la OAIPCS**                                                                                           | Confirma las crisis, valida productos antes de que lleguen a la Alta Dirección                                      | A (con permiso de confirmación)   | MVP       |
+| INT-03 | **Alta Dirección**: ministro, viceministros, secretaría general, jefaturas de gabinete                               | Reciben alertas y resúmenes según la gravedad; ven indicadores                                                      | **B** (alta dirección)            | MVP       |
+| INT-04 | **Actores externos y gremios**                                                                                       | Consultan el estado de **sus** compromisos y las alertas sectoriales aprobadas                                      | **C** (externo)                   | MADRE     |
+| INT-05 | **OGTI** (infraestructura, seguridad, desarrollo y mantenimiento en .NET)                                            | Construye, aloja, opera y mantiene el sistema                                                                       | Administración técnica            | MVP       |
+| INT-06 | **Legal / protección de datos**                                                                                      | Emite el dictamen sobre datos personales y uso de IA externa                                                        | —                                 | MVP       |
+| INT-07 | **Personal de campo** (sectoristas y puntos focales)                                                                 | Aportan información; el sistema debe ser **invisible** para ellos: el analista registra lo que llega por mensajería | Sin acceso directo                | MVP       |
+| INT-08 | **Administrador del sistema** (catálogos, usuarios, parámetros)                                                      | Mantiene catálogos y permisos                                                                                       | **[EN BLANCO · H-16]** quién será | MVP       |
+| INT-09 | **Quienes aprueban el alcance** (Luis; Dilayda recibe el avance previo)                                              | Revisan el prototipo y firman el acuerdo de alcance                                                                 | —                                 | MVP       |
+
+> Su cargo y su papel en la aprobación: **[EN BLANCO · H-57]**.
+
+| INT-10 | **Diseñador del prototipo** (OAIPCS: Diego) | Diseña el prototipo en Figma y entrega los documentos del modelo relacional | — | MVP |
+| INT-11 | **Analista con privilegio de consulta a RENIEC** (hoy, Edith) | Única persona autorizada para pedir datos de requisitorias y antecedentes a <u>PIDE-RENIEC (SVC-16)</u> | A + privilegio especial | MVP (si se activa) |
+
+## 3.2 Actores que no son personas (servicios por integrar)
+
+Se detallan en la sección 13.5 y en la sección 13: <u>SVC-01 a SVC-15</u>.
+
+## 3.3 Qué pidió cada usuario y dónde se atiende
+
+Las frases son las de las notas de las entrevistas.
+
+| N.°  | Usuario | Lo que pidió                                                                                                                                                                | Requisito      | Horizonte                             |
+| ---- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- | ------------------------------------- |
+| N-01 | Edith   | Averiguar perfiles de actores (quiénes son) para reuniones                                                                                                                  | RF-F01, RF-F02 | MVP                                   |
+| N-02 | Edith   | Reportes ya remitidos (qué ha habido lo último en Áncash)                                                                                                                   | RF-F05         | MVP                                   |
+| N-03 | Edith   | Compromisos de ayuda memoria (relatorías)                                                                                                                                   | RF-C01, RF-C02 | MVP                                   |
+| N-04 | Edith   | Locales apropiados para las reuniones                                                                                                                                       | RF-F06         | MVP                                   |
+| N-05 | Edith   | Directorios de alcaldes                                                                                                                                                     | RF-F03         | MVP                                   |
+| N-06 | Edith   | Prefectos, subprefectos, comisarios, capitanes de puerto, sargento                                                                                                          | RF-F03         | MVP                                   |
+| N-07 | Edith   | Análisis de casos o secciones de análisis de casos                                                                                                                          | RF-G05         | MADRE                                 |
+| N-08 | Edith   | Validar alertas tempranas, clima social (todo lo que sale para alta dirección) e informes                                                                                   | RF-D04, RF-G01 | MVP                                   |
+| N-09 | Iván    | Buscar teléfonos para listas de asistencia y mapa de actores; contactos importantes (directores); saber a qué OSPA pertenecen                                               | RF-F04         | MVP                                   |
+| N-10 | Iván    | Cargar alertas tempranas                                                                                                                                                    | RF-D01         | MVP                                   |
+| N-11 | Iván    | Plantilla con selección múltiple de todos los productos (informe a Edith); si es grave, directo al ministro; si no, a viceministros, secretario y jefes de gabinete         | RF-G03, RN-02  | MVP                                   |
+| N-12 | Iván    | Relatorías: transcripciones de reunión                                                                                                                                      | RF-E01, RF-C02 | MVP (registro) / 2027 (procesamiento) |
+| N-13 | Iván    | Envíos a correo con borrador en Drive; alertas tempranas por WhatsApp                                                                                                       | RF-D07, RF-D08 | MVP / WhatsApp en fase siguiente      |
+| N-14 | Iván    | Riesgos basados en la clasificación de acciones y eventos (por ejemplo, bloqueo de carreteras)                                                                              | RF-D05, RN-01  | MVP                                   |
+| N-15 | Esteban | Sacar información estructurada, como quiénes actúan en una zona                                                                                                             | RF-F01         | MVP                                   |
+| N-16 | Esteban | Análisis de la pota: controversias nacionales a través del tiempo, capa normativa, acciones de OSPA (70 % por redes sociales) que llegan a la DGPA, conflictos relacionados | RF-H03, RF-N01 | MADRE                                 |
+| N-17 | Esteban | Diversidad de perfiles de pescadores y sus capitales, y sus alineamientos cambiantes                                                                                        | RF-H03, RF-N02 | MADRE                                 |
+
+---
+
+# 4. REQUISITOS FUNCIONALES
+
+**Cómo leer las tablas.** _Prioridad:_ **Must** (sin esto no hay MVP), **Should** (importante, entra si el tiempo alcanza), **Could** (deseable), **Won't** (fuera de esta versión). _Horizonte:_ **MVP** (módulo de diciembre, 20 días), **2027** o **MADRE**. La prioridad se lee dentro de cada horizonte; algunos requisitos MVP podrían pasar a 2027 según H-44 y H-45. _Verificación:_ P = prueba, I = inspección, D = demostración con usuarios. Un servicio externo <u>subrayado</u> indica que el requisito depende de una integración.
+
+## 4.1 Acceso y seguridad (RF-A)
+
+| ID     | Requisito                                                                                                                                                               | Origen | Prior. | Hor.  | Ver. |
+| ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ | ------ | ----- | ---- |
+| RF-A01 | El sistema deberá identificar a cada usuario mediante el <u>servicio de identidad institucional (SVC-09)</u> **[EN BLANCO · H-20]**                                     | R2     | Must   | MVP   | P    |
+| RF-A02 | El sistema deberá asignar a cada usuario un perfil (A analista, B alta dirección, C externo) y mostrar solo lo que ese perfil puede ver                                 | R2     | Must   | MVP   | P    |
+| RF-A03 | La base de datos deberá aplicar la seguridad por fila de modo que ninguna consulta devuelva filas fuera del alcance del perfil, aunque el código de la aplicación falle | R2, R3 | Must   | MVP   | P    |
+| RF-A04 | El sistema deberá impedir que el Perfil B vea datos personales o alertas sin aprobar                                                                                    | R2     | Must   | MVP   | P    |
+| RF-A05 | El sistema deberá permitir que un actor externo (Perfil C) vea únicamente el estado de **sus** compromisos y las alertas sectoriales aprobadas                          | R2     | Could  | MADRE | P    |
+| RF-A06 | El sistema deberá guardar los datos personales **cifrados** y registrar cada lectura                                                                                    | R2, R3 | Must   | MVP   | P    |
+| RF-A07 | El sistema deberá exigir un segundo factor de autenticación al Perfil B **[EN BLANCO · H-23: depende de lo que ofrezca SVC-09]**                                        | R2     | Should | 2027  | P    |
+
+## 4.2 Actores y organizaciones (RF-B)
+
+| ID     | Requisito                                                                                                                                                                                     | Origen     | Prior. | Hor. | Ver. |
+| ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- | ------ | ---- | ---- |
+| RF-B01 | El sistema deberá permitir registrar un actor **sin DNI**, con alias y vinculado a una organización o a un caso                                                                               | R2, R3     | Must   | MVP  | P    |
+| RF-B02 | El sistema deberá permitir **promover** un actor sin identificar a identificado sin perder su historial                                                                                       | R2         | Must   | MVP  | P    |
+| RF-B03 | El sistema deberá detectar duplicados mediante una huella irreversible del documento de identidad, sin mostrar el número                                                                      | R2, R3     | Must   | MVP  | P    |
+| RF-B04 | El sistema deberá permitir **fusionar** actores duplicados dejando registro de quién lo hizo y por qué                                                                                        | R2         | Should | MVP  | P    |
+| RF-B05 | El sistema deberá registrar organizaciones (tipo, vigencia, miembros) y la **OSPA** a la que pertenece cada actor                                                                             | N-09       | Must   | MVP  | P    |
+| RF-B06 | El sistema deberá registrar, por cada actor de un caso, su posición (apoyo, oposición, neutral, no dialogante), su influencia y sus relaciones con otros actores (densa, tensa, de conflicto) | R2         | Must   | 2027 | P    |
+| RF-B07 | El sistema deberá registrar contactos (teléfono, correo, cargo) de los actores, protegidos según el perfil                                                                                    | N-09       | Must   | MVP  | P    |
+| RF-B08 | El sistema deberá registrar el cargo y el ámbito territorial de cada autoridad                                                                                                                | N-05, N-06 | Must   | MVP  | P    |
+
+## 4.3 Compromisos, relatorías y mesas (RF-C)
+
+| ID     | Requisito                                                                                                                         | Origen     | Prior. | Hor.  | Ver. |
+| ------ | --------------------------------------------------------------------------------------------------------------------------------- | ---------- | ------ | ----- | ---- |
+| RF-C01 | El sistema deberá registrar compromisos con hitos, estados, responsables y fecha límite                                           | N-03, R2   | Must   | MVP   | P    |
+| RF-C02 | El sistema deberá registrar relatorías y ayudas memoria y vincular a cada una los compromisos que contiene                        | N-03, N-12 | Must   | MVP   | P    |
+| RF-C03 | El sistema deberá avisar de los compromisos que vencen (revisión diaria) **[EN BLANCO · H-31: con cuántos días de anticipación]** | R2         | Should | 2027  | P    |
+| RF-C04 | El sistema deberá registrar mesas de diálogo con sus miembros, instrumento y vigencia                                             | R3         | Should | MVP   | P    |
+| RF-C05 | El sistema deberá mostrar, por caso, los compromisos con su estado actual                                                         | N-03       | Must   | MVP   | D    |
+| RF-C06 | El sistema deberá traducir el estado local de cada compromiso al que espera <u>SESIGUE (SVC-12)</u>                               | R2, R3     | Won't  | MADRE | P    |
+
+## 4.4 Alertas tempranas (RF-D)
+
+| ID     | Requisito                                                                                                                                                                                         | Origen | Prior. | Hor.               | Ver. |
+| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ | ------ | ------------------ | ---- |
+| RF-D01 | El sistema deberá permitir **cargar alertas tempranas** mediante un formulario                                                                                                                    | N-10   | Must   | MVP                | D    |
+| RF-D02 | El sistema deberá recibir **candidatos de alerta** del procesamiento de documentos sin duplicarlos si llegan dos veces                                                                            | R2     | Must   | 2027               | P    |
+| RF-D03 | El sistema deberá ofrecer una **bandeja de revisión** donde el analista apruebe, edite o descarte cada candidato, con motivo                                                                      | R2     | Must   | MVP                | D    |
+| RF-D04 | El sistema deberá permitir **validar** alertas tempranas y el clima social antes de que salgan a la Alta Dirección                                                                                | N-08   | Must   | MVP                | D    |
+| RF-D05 | El sistema deberá **clasificar** acciones y eventos (por ejemplo, bloqueo de carreteras) según un catálogo y asignarles prioridad **[EN BLANCO · H-24: catálogo y criterios]**                    | N-14   | Must   | MVP                | P    |
+| RF-D06 | El sistema deberá determinar los **destinatarios** de cada alerta según su gravedad (RN-02)                                                                                                       | N-11   | Must   | MVP                | P    |
+| RF-D07 | El sistema deberá enviar la alerta por <u>correo institucional (SVC-06)</u> con un enlace y dejar el **borrador en** <u>Google Drive (SVC-05)</u>                                                 | N-13   | Must   | MVP                | P    |
+| RF-D08 | El sistema deberá enviar alertas tempranas por <u>WhatsApp (SVC-07)</u> **[EN BLANCO · H-06: costo y proveedor]**                                                                                 | N-13   | Could  | 2027               | P    |
+| RF-D09 | El sistema deberá pedir confirmación de la Dirección de la OAIPCS antes de avisar una **crisis** a la Alta Dirección **[EN BLANCO · H-25: ¿aplica a toda alerta grave?]**                         | R2     | Must   | MVP                | P    |
+| RF-D10 | El sistema deberá registrar cada envío: canal, destinatario, documento adjunto y resultado de la entrega                                                                                          | R3     | Must   | MVP                | P    |
+| RF-D11 | El sistema deberá medir el plazo de atención de cada alerta según su prioridad y escalar las que no se atiendan **[EN BLANCO · H-14: plazos por prioridad]**                                      | R2     | Should | 2027               | P    |
+| RF-D12 | El sistema no deberá mostrar a los Perfiles B y C ninguna alerta que no tenga aprobación humana registrada                                                                                        | R2     | Must   | MVP                | P    |
+| RF-D13 | El sistema deberá permitir que **solo el analista con privilegio RENIEC** registre el resultado de una consulta a <u>PIDE-RENIEC (SVC-16)</u> sobre un actor, con el motivo del pedido y la fecha | R7     | Must   | MVP (si se activa) | P    |
+
+## 4.5 Procesamiento de documentos (RF-E)
+
+> **Toda esta sección pasa a 2027** (plan de diciembre).
+
+| ID     | Requisito                                                                                                                                                                                                               | Origen   | Prior. | Hor. | Ver. |
+| ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ------ | ---- | ---- |
+| RF-E01 | El sistema deberá procesar relatorías, reportes y transcripciones cargados por el analista y **proponer** actores, eventos y compromisos                                                                                | N-12, R2 | Must   | 2027 | P    |
+| RF-E02 | El sistema deberá recolectar noticias y reportes de una **lista blanca** de <u>fuentes públicas (SVC-01)</u> **[EN BLANCO · H-32: la lista de fuentes]**                                                                | R2       | Should | 2027 | P    |
+| RF-E03 | El sistema deberá detectar noticias repetidas y conservar una sola, con las fuentes que la replican                                                                                                                     | R2       | Must   | 2027 | P    |
+| RF-E04 | El sistema deberá comparar los actores encontrados contra el catálogo y abrir una **tarea de revisión humana** cuando la similitud sea intermedia (referencia del MVP: entre 0,85 y 0,95), sin fusionar automáticamente | R2       | Must   | 2027 | P    |
+| RF-E05 | El sistema deberá aceptar una cita textual solo si aparece **literalmente** en la fuente                                                                                                                                | R2       | Must   | 2027 | P    |
+| RF-E06 | El sistema deberá proponer un puntaje de riesgo con la explicación de sus factores                                                                                                                                      | R2       | Should | 2027 | P    |
+| RF-E07 | El sistema deberá reintentar los envíos fallidos y guardar los que no se logren en una cola, con aviso técnico                                                                                                          | R2       | Should | 2027 | P    |
+| RF-E08 | El sistema deberá registrar cada corrida: fuentes consultadas, elementos descartados con su motivo, costo y duración                                                                                                    | R2, R3   | Must   | 2027 | I    |
+| RF-E09 | El sistema deberá conectarse al <u>modelo de lenguaje de Google (SVC-02)</u> mediante una conexión **intercambiable**, de modo que pueda cambiarse de proveedor sin reescribir el sistema                               | R1       | Must   | 2027 | I    |
+| RF-E10 | El sistema no deberá enviar datos personales ni documentos internos al modelo externo **[EN BLANCO · H-04: depende del dictamen legal]**                                                                                | R2       | Must   | 2027 | P    |
+| RF-E11 | El sistema deberá poder medir la calidad de la extracción contra un **conjunto de referencia** anotado a mano (aciertos, omisiones y errores)                                                                           | R1       | Must   | 2027 | P    |
+
+## 4.6 Fichas y consultas (RF-F)
+
+| ID     | Requisito                                                                                                                                  | Origen     | Prior. | Hor. | Ver. |
+| ------ | ------------------------------------------------------------------------------------------------------------------------------------------ | ---------- | ------ | ---- | ---- |
+| RF-F01 | El sistema deberá mostrar, para una zona, **quiénes actúan** (actores, organizaciones y autoridades)                                       | N-01, N-15 | Must   | MVP  | D    |
+| RF-F02 | El sistema deberá mostrar el **perfil de un actor**: quién es, organizaciones, casos, posición y reuniones                                 | N-01       | Must   | MVP  | D    |
+| RF-F03 | El sistema deberá ofrecer **directorios** de alcaldes, prefectos, subprefectos, comisarios, capitanes de puerto y sargentos por territorio | N-05, N-06 | Must   | MVP  | D    |
+| RF-F04 | El sistema deberá buscar **contactos** (incluidos directores) y mostrar a qué OSPA pertenecen                                              | N-09       | Must   | MVP  | D    |
+| RF-F05 | El sistema deberá listar los **reportes remitidos** por zona, del más reciente al más antiguo                                              | N-02       | Must   | MVP  | D    |
+| RF-F06 | El sistema deberá mostrar los **locales** apropiados para reuniones por zona                                                               | N-04       | Should | MVP  | D    |
+| RF-F07 | El sistema deberá ofrecer una búsqueda global por nombre, organización, zona o caso                                                        | R4         | Should | MVP  | D    |
+| RF-F08 | El sistema deberá exportar listas de asistencia y el mapa de actores                                                                       | N-09       | Should | MVP  | D    |
+
+## 4.7 Productos e informes (RF-G)
+
+| ID     | Requisito                                                                                                                                                                                              | Origen     | Prior. | Hor.  | Ver. |
+| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------- | ------ | ----- | ---- |
+| RF-G01 | El sistema deberá ofrecer una **plantilla con selección múltiple** de los productos que se informan **[EN BLANCO · H-26: lista de productos]**                                                         | N-08, N-11 | Must   | MVP   | D    |
+| RF-G02 | El sistema deberá generar borradores de informes con la IA, marcados «borrador por validar» hasta que una persona los valide                                                                           | R2         | Should | 2027  | D    |
+| RF-G03 | El sistema deberá enviar los productos seleccionados a los destinatarios que corresponda según la gravedad                                                                                             | N-11       | Must   | MVP   | D    |
+| RF-G04 | El sistema deberá generar un **resumen de una página** con estructura fija (situación, qué cambió, riesgo y tendencia, decisión requerida, próximos hitos) **[EN BLANCO · H-33: extensión y formato]** | R2         | Should | 2027  | D    |
+| RF-G05 | El sistema deberá producir las secciones del análisis de casos **[EN BLANCO · H-27: formato oficial; el sistema anterior usa el «formato Anexo 8»]**                                                   | N-07       | Could  | MADRE | D    |
+| RF-G06 | El sistema deberá guardar cada producto con su fuente, versión y responsable de validación                                                                                                             | R2         | Must   | MVP   | I    |
+
+## 4.8 Tablero y diagramas interactivos (RF-H)
+
+| ID     | Requisito                                                                                                                                                                                    | Origen | Prior. | Hor.  | Ver. |
+| ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ | ------ | ----- | ---- |
+| RF-H01 | El sistema deberá mostrar un **diagrama interactivo de la red de actores** de un caso o zona: nodos = actores, vínculos = relaciones; con filtros, selección de un actor y acceso a su ficha | R1, R2 | Must   | 2027  | D    |
+| RF-H02 | El sistema deberá ofrecer un **tablero en** <u>Power BI (SVC-10)</u> con entre 4 y 6 indicadores del caso ancla **[EN BLANCO · H-28: cuáles indicadores]**                                   | R1     | Must   | MVP   | D    |
+| RF-H03 | El sistema deberá mostrar una **línea de tiempo** de hechos y de normas por tema o conflicto                                                                                                 | N-16   | Could  | MADRE | D    |
+| RF-H04 | El sistema deberá mostrar un **mapa** con capas de casos, hechos, actores georreferenciados y territorio, usando un <u>servicio de mapas (SVC-11)</u>                                        | R2     | Could  | MADRE | D    |
+| RF-H05 | El sistema deberá ofrecer una vista ejecutiva para la Alta Dirección con indicadores explicados y sin datos personales                                                                       | R2     | Should | MVP   | D    |
+| RF-H06 | El sistema deberá explicar cada semáforo con los factores que lo producen                                                                                                                    | R2     | Should | 2027  | D    |
+
+## 4.9 Indicadores avanzados y simulador (RF-J)
+
+> Fórmulas de referencia en R2 §4.1. **Son propuestas «PROVISIONALES»**: el propio MVP-45 indica que deben contrastarse con el informe del caso SANIPES Sechura **[EN BLANCO · H-34]**.
+
+| ID     | Requisito                                                                                                                                    | Origen | Prior. | Hor.  | Ver. |
+| ------ | -------------------------------------------------------------------------------------------------------------------------------------------- | ------ | ------ | ----- | ---- |
+| RF-J01 | El sistema deberá calcular el Índice de Riesgo de Escalamiento (IRE) por caso con fórmula documentada y reproducible                         | R2     | Could  | MADRE | P    |
+| RF-J02 | El sistema deberá calcular el Índice de Cumplimiento de Compromisos, el Tiempo de Atención de Alertas y el Índice de Polarización de Actores | R2     | Should | 2027  | P    |
+| RF-J03 | El sistema deberá calcular el Índice de Condiciones de Diálogo con evidencia obligatoria por condición                                       | R2     | Could  | MADRE | P    |
+| RF-J04 | El sistema deberá ofrecer un simulador de escenarios («¿qué pasa si…?») rotulado «ESCENARIO — no vigente»                                    | R2     | Won't  | MADRE | P    |
+| RF-J05 | El sistema deberá mostrar la tendencia de riesgo a 30 días rotulada «TENDENCIA / PROXY — no es una predicción»                               | R2     | Won't  | MADRE | P    |
+
+## 4.10 Migración y calidad de datos (RF-M)
+
+| ID     | Requisito                                                                                                                                                                           | Origen | Prior. | Hor. | Ver. |
+| ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ | ------ | ---- | ---- |
+| RF-M01 | El sistema deberá demostrar que la carga del <u>sistema anterior (SVC-04)</u> cuadra: filas de origen = cargadas + fusionadas + descartadas + pendientes, **en el entorno de OGTI** | R2, R4 | Must   | MVP  | P    |
+| RF-M02 | El sistema deberá entregar un reporte de calidad: completitud, duplicados y registros pendientes de validación                                                                      | R2     | Should | MVP  | I    |
+| RF-M03 | El sistema deberá cargar los cambios del sistema anterior hasta el día de cambio **[EN BLANCO · H-29: fecha de cambio y frecuencia]**                                               | R2     | Should | MVP  | P    |
+
+## 4.11 Análisis temático (fase siguiente) (RF-N)
+
+| ID     | Requisito                                                                                                                                                                                                                                                                  | Origen | Prior. | Hor.  | Ver. |
+| ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ | ------ | ----- | ---- |
+| RF-N01 | El sistema deberá permitir analizar la **pota** a través del tiempo: controversias o conflictos nacionales, capa normativa, acciones de las OSPA que llegan a la DGPA y conflictos específicos relacionados **[EN BLANCO · H-35: definición de «controversia» y fuentes]** | N-16   | Could  | MADRE | D    |
+| RF-N02 | El sistema deberá describir la **diversidad de perfiles de pescadores**, sus capitales y sus alineamientos cambiantes **[EN BLANCO · H-36: qué son los «capitales» y cómo se miden]**                                                                                      | N-17   | Could  | MADRE | D    |
+
+## 4.12 Auditoría y administración (RF-X)
+
+| ID     | Requisito                                                                                                                     | Origen | Prior. | Hor. | Ver. |
+| ------ | ----------------------------------------------------------------------------------------------------------------------------- | ------ | ------ | ---- | ---- |
+| RF-X01 | El sistema deberá guardar un registro de accesos y operaciones sobre datos personales que **no se pueda modificar ni borrar** | R2, R3 | Must   | MVP  | P    |
+| RF-X02 | El sistema deberá permitir administrar catálogos, usuarios y roles                                                            | R3     | Must   | MVP  | D    |
+| RF-X03 | El sistema deberá permitir cambiar parámetros (pesos, umbrales, plazos) con historial de versiones                            | R2     | Should | 2027 | I    |
+| RF-X04 | El sistema deberá contar con copias de seguridad y recuperación **[EN BLANCO · H-30: frecuencia y plazo de recuperación]**    | —      | Must   | MVP  | I    |
+
+---
+
+# 5. CIRCUITO FUNCIONAL Y PARIDAD CON EL AVISA ACTUAL
+
+> **Se lleva a la reunión.** Esta sección responde a la expectativa de OGTI de recibir **lo que AVISA ya hace hoy**: muestra que el módulo de diciembre cubre ese uso, aunque por debajo cambie de hojas de Excel a una base de datos relacional.
+
+## 5.1 Circuito funcional del módulo de diciembre
+
+> Propuesta construida a partir de los módulos del AVISA actual (R4, §12.1). Debe confirmarse con el **uso real** que hoy se le da **[EN BLANCO · H-47]**.
+
+```mermaid
+flowchart LR
+  classDef paso fill:#e6fffa,stroke:#0f766e,stroke-width:1.5px;
+  classDef decision fill:#fffbeb,stroke:#b45309,stroke-width:1.5px;
+  classDef salida fill:#eef2ff,stroke:#4f46e5,stroke-width:1.5px;
+
+  L["1. Ingreso con<br/>usuario institucional"]:::paso --> M["2. Menú según rol"]:::paso
+  M --> C["3. Registrar o consultar<br/>un caso"]:::paso
+  C --> H["Hechos y cronología"]:::paso
+  C --> D["Demandas"]:::paso
+  C --> A["Actores y organizaciones"]:::paso
+  C --> K["Compromisos e hitos"]:::paso
+  M --> AL["4. Cargar alerta<br/>temprana"]:::paso --> V{"5. Validación<br/>por el analista"}:::decision
+  V -->|aprobada| EN["6. Envío o comunicación<br/>(según gravedad)"]:::salida
+  V -->|descartada, con motivo| X["Queda registrada"]:::paso
+  EN --> R["Registro de envíos"]:::salida
+  K --> S["7. Seguimiento y<br/>vencimientos"]:::paso
+  H & AL & S --> T["8. Tableros prioritarios"]:::salida
+```
+
+## 5.2 Qué hace hoy el AVISA y qué pasa en diciembre
+
+Los 28 módulos del sistema actual (431 funciones con lógica real) y la propuesta para el módulo de diciembre.
+
+| Módulo del AVISA actual                      | Funciones | Propuesta para diciembre                                                                          | Estado                 |
+| -------------------------------------------- | --------: | ------------------------------------------------------------------------------------------------- | ---------------------- |
+| Casos                                        |        37 | **Entra**                                                                                         | Por confirmar con Luis |
+| Alertas tempranas                            |        26 | **Entra** (carga manual y validación)                                                             | Por confirmar          |
+| Demandas                                     |        21 | **Entra**                                                                                         | Por confirmar          |
+| Hechos ocurridos                             |        12 | **Entra**                                                                                         | Por confirmar          |
+| Registro de envíos                           |         6 | **Entra**                                                                                         | Por confirmar          |
+| Navegación, permisos y pantallas de relación |        43 | **Entra** como login institucional y roles (sección 6)                                            | Por confirmar          |
+| Análisis de casos (formato Anexo 8)          |        33 | **Por confirmar** **[EN BLANCO · H-27]**                                                          | —                      |
+| Sectoristas, puntos focales y autoridades    |        29 | **Entra** (usuarios y directorio de autoridades)                                                  | Por confirmar          |
+| Catálogos y datos de referencia              |        27 | **Entra** (datos maestros, sección 8)                                                             | Por confirmar          |
+| Documentos y reportes                        |        20 | **Entra** el registro y la consulta; la generación automática de PDF queda **[EN BLANCO · H-59]** | —                      |
+| Actores sociales                             |        16 | **Entra**                                                                                         | Por confirmar          |
+| Acciones e hitos                             |        14 | **Entra** (compromisos)                                                                           | Por confirmar          |
+| Proceso por pasos                            |        14 | **Por confirmar**                                                                                 | —                      |
+| Capacitaciones                               |        14 | **Por confirmar**                                                                                 | —                      |
+| Búsqueda, exportación y utilidades           |        13 | **Entra** simplificado (búsqueda y exportación básica)                                            | Por confirmar          |
+| Clima social                                 |        12 | **Por confirmar** (Edith lo menciona)                                                             | —                      |
+| Reporte rápido                               |        11 | **Por confirmar**                                                                                 | —                      |
+| Actores del Estado                           |        10 | **Entra** como tipo de actor                                                                      | Por confirmar          |
+| Inicio de sesión                             |         9 | **Entra** como **login institucional**                                                            | Por confirmar          |
+| WhatsApp y correo                            |         7 | Correo **por confirmar**; WhatsApp pasa a **2027** **[EN BLANCO · H-06]**                         | —                      |
+| Análisis regional                            |         7 | **Tablero** (por confirmar)                                                                       | —                      |
+| Tablero de mando (21 indicadores)            |         6 | **Tableros prioritarios**, no los 21 (sección 7)                                                  | —                      |
+| Organizaciones sociales                      |         5 | **Entra**                                                                                         | Por confirmar          |
+| Distritos y geografía                        |         4 | **Entra**                                                                                         | Por confirmar          |
+| Locales y sedes                              |         3 | **Entra**                                                                                         | Por confirmar          |
+| Mesas de diálogo                             |       n/d | **Entra**                                                                                         | Por confirmar          |
+| Arranque y servido de la interfaz            |         9 | **No se traslada** (código generado)                                                              | Definido en R4         |
+| RADAR y red de actores                       |        23 | **No entra** (diferido)                                                                           | Definido en R4         |
+
+**Cómo se lee.** «Entra» significa que el módulo de diciembre debe permitir hacer lo mismo que hoy. «Por confirmar» significa que OAIPCS debe decir si ese uso es real y si es indispensable en diciembre.
+
+## 5.3 Qué cambia por debajo (en palabras simples)
+
+| Hoy (hojas de Excel con Apps Script)                                    | En el módulo de diciembre                                                                                       | Qué gana el usuario                                                                             |
+| ----------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| Los permisos se aplican en la pantalla, con una clave en una hoja       | **Login institucional, roles y seguridad por fila en la base de datos** (control de acceso real, no decorativo) | Cada uno ve solo lo que le corresponde; se cumple el estándar de Nivel Alto de la Ley N.° 29733 |
+| Nada queda registrado al consultar o cambiar un dato personal           | **Toda lectura y cambio queda en un registro de auditoría inmutable**                                           | Trazabilidad única de cada alerta y de cada dato personal consultado                            |
+| El tablero no tiene de dónde salir (la tabla de indicadores está vacía) | Los tableros leen **datos ya relacionados**, con origen verificable                                             | Tableros confiables para la Alta Dirección                                                      |
+| El DNI hace de identificador de la persona                              | Cada persona tiene un identificador interno; el DNI es un dato más, cifrado                                     | Se pueden registrar actores sin DNI                                                             |
+| Un mismo conflicto se escribe hasta cuatro veces con distinto detalle   | Un caso se escribe **una vez** y se relaciona con sus hechos, demandas, actores y compromisos                   | Menos digitación y menos contradicciones (efecto secundario, no el objetivo principal)          |
+| El PDF archivado en Drive es el dato                                    | El dato queda en la base y el PDF es un archivo aparte                                                          | Se puede consultar y filtrar                                                                    |
+
+> **Decidido:** el módulo de diciembre se levanta sobre el **modelo relacional (v10)**. Lo que OGTI esperaba (la aplicación actual tal cual) se atiende mostrando la **paridad** de arriba y presentando primero la necesidad (ver 5.4).
+
+## 5.4 Cómo se presenta: primero la necesidad, después el modelo
+
+El módulo de diciembre se levanta sobre el **modelo relacional (v10)**, pero OGTI debe entender **primero la necesidad de OAIPCS**; el modelo es la respuesta a esa necesidad, no el punto de partida.
+
+| Orden | Qué se muestra                                                              | Para qué                                               |
+| ----- | --------------------------------------------------------------------------- | ------------------------------------------------------ |
+| 1     | **La necesidad**: circuito funcional (5.1), reglas y roles (sección 6)      | Que OGTI vea qué se necesita hacer y quién lo hace     |
+| 2     | **La paridad** con el AVISA actual (5.2)                                    | Que vea que no se pierde nada de lo que hoy se usa     |
+| 3     | **Pantallas y tableros prioritarios** (sección 7)                           | Que vea cómo se usa                                    |
+| 4     | **El modelo relacional** como respuesta: los documentos que OGTI se apropia | Que entienda por qué los datos se guardan de esa forma |
+| 5     | **El acuerdo de alcance** (sección 19)                                      | Cerrar qué se construye                                |
+
+### Documentos del modelo que pasan a OGTI
+
+| Documento                                                       | Qué contiene                                   | Estado                                                                                                         |
+| --------------------------------------------------------------- | ---------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| Diccionario de datos (R3)                                       | Cada tabla y columna que existe hoy en la base | Existe                                                                                                         |
+| Comparativo sistema anterior – v10 (R4)                         | Qué se conserva, qué cambia y qué desaparece   | Existe                                                                                                         |
+| Guía del modelo v10 (`AVISA_PRODUCE_v10.md`)                    | Diseño completo del modelo relacional deseado  | Existe (citado en R2)                                                                                          |
+| Priorización de tablas (R5 y `PRIORIZACION_MVP_v10.md`)         | Qué tablas se construyen primero               | Existe                                                                                                         |
+| Scripts de la base: esquema, catálogos, vistas, datos de prueba | Para reconstruir la base                       | **[EN BLANCO · H-61: lista exacta]**; deben entregarse en su versión **SQL Server** (H-01), no solo PostgreSQL |
+
+### Qué puede optimizar OGTI y qué debe conservar (propuesta)
+
+El modelo queda **sujeto a optimizaciones** de OGTI. Para que optimizar no cambie el negocio, se propone separar:
+
+| OGTI puede ajustar                                                | OGTI debe conservar                                                                                                   |
+| ----------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| Tipos de datos, índices, particiones y vistas materializadas      | Los conceptos de negocio: caso, alerta, demanda, hecho, actor, organización y compromiso, cada uno como cosa distinta |
+| Orden de construcción de las tablas                               | Los códigos legibles (`CS-PRODUCE-2026-007`, `AT-2026-01`)                                                            |
+| Nombres internos que no se muestran al usuario                    | Las reglas de negocio de la sección 11                                                                                |
+| Mecanismos de seguridad por fila (si cambia el motor)             | La separación y el cifrado de datos personales, y el registro de lecturas                                             |
+| Tablas del horizonte 2027 y MADRE (se pueden dejar sin construir) | La trazabilidad de cada dato a su origen                                                                              |
+
+> Lo que se puede y no se puede cambiar: **[EN BLANCO · H-62]**, a validar con OGTI.
+
+## 5.5 Capas del sistema y qué se programa primero
+
+Una **capa** es un conjunto de funciones que depende de las anteriores. Programar por capas permite entregar algo que funcione al terminar cada una.
+
+```mermaid
+flowchart BT
+  classDef mvp fill:#e6fffa,stroke:#0f766e,stroke-width:2px;
+  classDef f2027 fill:#f3f4f6,stroke:#6b7280,stroke-width:1.5px,stroke-dasharray:5 3,color:#4b5563;
+
+  L0["L0 Base de datos y datos maestros"]:::mvp --> L1["L1 Acceso y seguridad"]:::mvp
+  L1 --> L2["L2 Registro: casos, hechos, actores,<br/>compromisos y alertas"]:::mvp
+  L2 --> L3["L3 Flujo y reglas: validación, gravedad, envíos"]:::mvp
+  L2 --> L4["L4 Consulta y tableros prioritarios"]:::mvp
+  L3 --> L5["L5 Productos: plantillas e informes"]:::mvp
+  L4 --> L5
+  L5 --> L6["L6 Inteligencia: procesamiento con IA (2027)"]:::f2027
+  L4 --> L7["L7 Visualización avanzada:<br/>red de actores, mapa, simulador (2027)"]:::f2027
+  L3 --> L8["L8 Apertura externa:<br/>WhatsApp, Extranet, SESIGUE (2027+)"]:::f2027
+```
+
+| Capa                                  | Qué contiene                                                                           | Depende de | Horizonte                             | Servicios externos                | Orden propuesto |
+| ------------------------------------- | -------------------------------------------------------------------------------------- | ---------- | ------------------------------------- | --------------------------------- | --------------- |
+| **L0** Base de datos y datos maestros | Esquema de las 42 tablas del MVP, catálogos, geografía, precarga y vistas              | —          | MVP                                   | Sistema anterior (SVC-04)         | **1**           |
+| **L1** Acceso y seguridad             | Login institucional, roles, seguridad por fila, registro de accesos                    | L0         | MVP                                   | Identidad (SVC-09)                | **2**           |
+| **L2** Registro                       | Formularios de casos, hechos, demandas, actores, organizaciones, compromisos y alertas | L0, L1     | MVP                                   | Ninguno                           | **3**           |
+| **L3** Flujo y reglas                 | Validación de alertas, regla de gravedad y destinatarios, registro de envíos           | L2         | MVP                                   | Correo (SVC-06), por confirmar    | **4**           |
+| **L4** Consulta y tableros            | Fichas de actor, zona y caso; directorios; búsqueda; tableros prioritarios             | L0, L1, L2 | MVP                                   | Power BI (SVC-10)                 | **5**           |
+| **L5** Productos                      | Plantilla de selección múltiple, borradores e informes                                 | L3, L4     | MVP parcial; redacción con IA en 2027 | Drive (SVC-05), por confirmar     | **6**           |
+| **L6** Inteligencia                   | Procesamiento de documentos, extracción, conjunto de referencia                        | L2, L3     | 2027                                  | Gemini (SVC-02), fuentes (SVC-01) | —               |
+| **L7** Visualización avanzada         | Red interactiva de actores, mapa, línea de tiempo, simulador                           | L4         | 2027 / MADRE                          | Mapas (SVC-11)                    | —               |
+| **L8** Apertura externa               | WhatsApp, Extranet, SESIGUE, otros ministerios                                         | L3         | 2027 / MADRE                          | SVC-07, SVC-12, SVC-14            | —               |
+
+**Criterios usados para ordenar:** (1) _dependencia_: nada funciona sin L0 y L1; (2) _valor inmediato_: lo que ya se usa hoy en AVISA va antes; (3) _riesgo_: lo que depende de decisiones aún abiertas va después; (4) _costo externo_: lo que no cuesta nada o ya existe va antes.
+
+**Primer corte vertical (lo que se debe poder demostrar primero):** _caso → hecho y actor → alerta cargada → aprobada → envío registrado → aparece en un tablero_. Recorre L0 a L4 con el mínimo de pantallas.
+
+**Punto de control al terminar cada capa:**
+
+| Capa | Qué se demuestra                                        |
+| ---- | ------------------------------------------------------- |
+| L0   | La precarga cuadra con el origen (AC-05)                |
+| L1   | Cada rol ve solo lo suyo (AC-01, AC-02)                 |
+| L2   | Se registran los datos del circuito sin errores (AC-04) |
+| L3   | La alerta recorre el flujo completo (AC-03)             |
+| L4   | Los tableros coinciden con los registros (AC-06)        |
+
+> Orden definitivo y qué parte de L5 entra en diciembre: **[EN BLANCO · H-63]**, a acordar con OGTI.
+
+---
+
+# 6. ROLES Y PERMISOS
+
+> **Se lleva a la reunión.** Es una de las cuatro cosas que pidió Luis: _reglas y roles_. Es una **propuesta** para validar.
+
+## 6.1 Roles propuestos
+
+| Rol                                | Quién                                                              | Qué puede hacer en general                                                                                | Perfil (R2)      |
+| ---------------------------------- | ------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------- | ---------------- |
+| **Analista / sectorista**          | Personal de OAIPCS que carga y valida                              | Registrar, consultar y validar; ver datos personales solo con permiso específico                          | A                |
+| **Dirección de OAIPCS**            | Jefatura                                                           | Todo lo del analista, más aprobar lo que sale hacia la Alta Dirección                                     | A con aprobación |
+| **Alta Dirección**                 | Ministro, viceministros, secretaría general, jefaturas de gabinete | Solo **lectura** de lo aprobado y de tableros; sin datos personales                                       | B                |
+| **Administrador**                  | **[EN BLANCO · H-16]**                                             | Administrar usuarios, roles y catálogos                                                                   | Técnico          |
+| **Analista con privilegio RENIEC** | Un analista nombrado (hoy, Edith)                                  | Todo lo del analista, más pedir datos de requisitorias y antecedentes a RENIEC para un actor identificado | A + privilegio   |
+
+> El sistema actual ya tiene una tabla de **9 roles** y **34 asignaciones** de rol a usuarios. Su correspondencia con los roles propuestos: **[EN BLANCO · H-48]**.
+
+## 6.2 Matriz de permisos propuesta
+
+**L** = leer · **E** = crear y editar · **A** = aprobar · **—** = sin acceso · **[?]** = por definir
+
+| Información                                         | Analista                        | Dirección | Alta Dirección                | Administrador |
+| --------------------------------------------------- | ------------------------------- | --------- | ----------------------------- | ------------- |
+| Casos                                               | L, E                            | L, E, A   | L (agregado)                  | L             |
+| Hechos y cronología                                 | L, E                            | L, E      | L (agregado)                  | L             |
+| Alertas tempranas                                   | L, E                            | L, E, A   | L solo si están **aprobadas** | L             |
+| Demandas                                            | L, E                            | L, E      | L (agregado)                  | L             |
+| Actores y organizaciones (datos generales)          | L, E                            | L, E      | L (agregado)                  | L             |
+| Datos personales de actores (DNI, teléfono, correo) | **[?]** con permiso específico  | **[?]**   | **—**                         | **—**         |
+| Compromisos e hitos                                 | L, E                            | L, E, A   | L                             | L             |
+| Documentos y reportes                               | L, E                            | L, E, A   | L solo los validados          | L             |
+| Envíos y comunicaciones                             | L, E                            | L, E, A   | L                             | L             |
+| Catálogos y datos maestros                          | L                               | L         | —                             | **E**         |
+| Datos de requisitorias y antecedentes (RENIEC)      | **—** salvo privilegio nombrado | —         | —                             | —             |
+| Usuarios y roles                                    | —                               | —         | —                             | **E**         |
+| Tableros                                            | L                               | L         | L (vista ejecutiva)           | L             |
+
+## 6.3 Reglas de acceso
+
+| ID    | Regla                                                                                                                                                                                      | Origen |
+| ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------ |
+| RA-01 | Se ingresa solo con **usuario institucional** (login institucional); no hay claves guardadas en hojas                                                                                      | R6, R4 |
+| RA-02 | La Alta Dirección **nunca** ve datos personales ni alertas sin aprobar                                                                                                                     | R2     |
+| RA-03 | Cada analista ve los casos que tiene asignados o los de su unidad **[EN BLANCO · H-48: cómo se asignan]**                                                                                  | R2     |
+| RA-04 | Toda lectura de datos personales queda registrada y no se puede borrar                                                                                                                     | R2, R3 |
+| RA-05 | Quién puede ver teléfonos y correos de actores: **[EN BLANCO · H-39]**                                                                                                                     | R2     |
+| RA-06 | Los permisos los hace cumplir la **base de datos**, no solo la pantalla                                                                                                                    | R2, R3 |
+| RA-07 | Solo el **analista nombrado con privilegio RENIEC** (hoy, Edith) puede iniciar una consulta a <u>PIDE-RENIEC (SVC-16)</u>; nadie más, ni siquiera la Dirección, puede pedirla directamente | R7     |
+| RA-08 | El resultado de una consulta a RENIEC se guarda **cifrado**, vinculado al actor consultado y a la persona que lo consultó, y **no se muestra en tableros ni en exportaciones masivas**     | R7     |
+
+## 6.4 Login institucional
+
+El sistema deberá permitir ingresar con el usuario institucional, y el rol de cada persona deberá obtenerse de su pertenencia a un grupo **[EN BLANCO · H-52: servicio de identidad que usa OGTI, grupos disponibles y plazo para habilitarlo]**.
+
+---
+
+# 7. PANTALLAS Y TABLEROS PRIORITARIOS
+
+> **Se lleva a la reunión.** Es la base para que el prototipo se diseñe en Figma. Aquí se dice **qué** pantalla y **para qué**; no cómo se ve ni con qué tecnología se construye.
+
+## 7.1 Pantallas
+
+> **Alcance recortado y cerrado (RIE-13):** para que los 4 desarrolladores lleguen a los objetivos en 20 días, el **núcleo** de diciembre es _login institucional + flujo central (casos, actores, alertas, validación y envío por correo)_. Todo lo demás es **secundario**: se anota en paralelo (18.1) y entra solo si el tiempo alcanza.
+
+| ID     | Pantalla                                  | Para qué                                                                      | Roles               | Circuito (5.1) | Alcance                                                      |
+| ------ | ----------------------------------------- | ----------------------------------------------------------------------------- | ------------------- | -------------- | ------------------------------------------------------------ |
+| PAN-01 | Ingreso                                   | Entrar con usuario institucional                                              | Todos               | 1              | **Núcleo**                                                   |
+| PAN-02 | Inicio                                    | Menú y accesos según el rol                                                   | Todos               | 2              | **Núcleo**                                                   |
+| PAN-03 | Lista y búsqueda de casos                 | Encontrar un caso por código, zona o estado                                   | Analista, Dirección | 3              | **Núcleo**                                                   |
+| PAN-04 | Ficha de caso                             | Ver y editar hechos, demandas, actores, compromisos y documentos de un caso   | Analista, Dirección | 3              | **Núcleo**                                                   |
+| PAN-05 | Registro de alerta temprana               | Cargar una alerta                                                             | Analista            | 4              | **Núcleo**                                                   |
+| PAN-06 | Revisión de alertas                       | Aprobar, editar o descartar con motivo                                        | Analista, Dirección | 5              | **Núcleo**                                                   |
+| PAN-07 | Actores y organizaciones                  | Lista, ficha y contactos (según permiso)                                      | Analista, Dirección | 3              | **Núcleo**                                                   |
+| PAN-08 | Compromisos e hitos                       | Seguimiento por caso y vencimientos (registro **manual**, ver HU-08)          | Analista, Dirección | 7              | **Núcleo**                                                   |
+| PAN-09 | Envíos y comunicaciones                   | Preparar y registrar envíos según gravedad, **por correo**                    | Analista, Dirección | 6              | **Núcleo**                                                   |
+| PAN-10 | Administración                            | Usuarios, roles y catálogos                                                   | Administrador       | —              | Secundaria: se anota en paralelo, entra si alcanza el tiempo |
+| PAN-11 | Ficha de zona y directorio de autoridades | Quiénes actúan y a quién llamar en una zona (pedido de Edith, Iván y Esteban) | Analista            | 3              | **Fuera de los 20 días** — 2027 o según H-45                 |
+
+> **9 pantallas núcleo**, no 11. PAN-10 y PAN-11 quedan fuera de la cuenta de los 20 días; se diseñan si el tiempo lo permite, sin bloquear L0-L1. Las pantallas que **Luis** considera prioritarias dentro de este núcleo: **[EN BLANCO · H-49]**.
+
+## 7.2 Tableros
+
+Hoy la tabla de indicadores está **vacía**, pero ya existen **vistas** que calculan datos a partir de los registros. Los candidatos salen de ahí.
+
+> **Alcance recortado y cerrado (RIE-13):** **2 a 3 tableros**, todos sobre **vistas que ya existen** — no se construye ninguna vista nueva en diciembre.
+
+| ID     | Tablero (candidato)            | Pregunta que responde                                       | Quién lo usa                        | Origen existente                      | Alcance                                                                                             |
+| ------ | ------------------------------ | ----------------------------------------------------------- | ----------------------------------- | ------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| TAB-02 | Seguimiento de compromisos     | ¿Qué compromisos están vigentes, cumplidos o vencidos?      | Analista, Dirección, Alta Dirección | `vw_anexo_14_seguimiento_compromisos` | **Núcleo**                                                                                          |
+| TAB-04 | Foto para la Alta Dirección    | Casos activos, riesgo alto, compromisos vencidos por región | Alta Dirección                      | `mv_dashboard_alta_direccion`         | **Núcleo**                                                                                          |
+| TAB-03 | Casos estancados               | ¿Qué casos llevan tiempo sin avance?                        | Analista, Dirección                 | `vw_casos_estancados`                 | **Núcleo si el tiempo alcanza** (el 3.º)                                                            |
+| TAB-01 | Panorama regional              | ¿Cómo está cada región?                                     | Analista, Dirección                 | `vw_anexo_02_panorama_regional`       | Fuera de los 20 días                                                                                |
+| TAB-05 | Alertas por estado y prioridad | ¿Cuántas alertas hay y cuántas esperan revisión?            | Analista, Dirección                 | La vista **no existe aún**            | **Fuera de los 20 días**: exige construir una vista nueva, lo que contradice el criterio de recorte |
+
+> Herramienta: **Power BI** (licencia ya existente de OGTI, H-50 parcialmente resuelto por este recorte; falta solo confirmar licencias de lectura, H-64).
+
+## 7.3 Cómo se pasa al prototipo
+
+El prototipo en Figma lo **diseña OAIPCS (Diego)** a partir de esta sección y de la sección 5, siguiendo la metodología de 7.4. OAIPCS aporta: circuito funcional, pantallas y tableros prioritarios, datos mínimos, reglas y roles.
+
+## 7.4 Metodología de diseño de pantallas y tableros
+
+Esta metodología sirve para **decidir qué pantallas y tableros son prioritarios** (H-49) y para estimar la **duración de la fase de diseño** (H-53). Parte de cuatro preguntas que toda pantalla debe responder:
+
+| Lente            | Pregunta                                                                   | Qué evita                                    |
+| ---------------- | -------------------------------------------------------------------------- | -------------------------------------------- |
+| **Público**      | ¿Quién la mira, para decidir qué y cada cuánto?                            | Pantallas «para todos» que no sirven a nadie |
+| **Protagonista** | ¿De quién o de qué trata? (un caso, una región, un compromiso, una alerta) | Tableros con diez asuntos mezclados          |
+| **Narrativa**    | ¿Qué historia cuenta, en qué orden, hasta qué decisión?                    | Cifras sueltas sin conclusión                |
+| **Estilo**       | ¿Cómo se ve y se dice para que se entienda y se parezca a todo lo demás?   | Pantallas distintas que obligan a reaprender |
+
+### Los diez pasos
+
+| N.° | Paso                                             | Qué se hace                                                                                                                                                    | Producto                               | Se terminó cuando…                                                      | Días de referencia* |
+| --- | ------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- | ----------------------------------------------------------------------- | ------------------: |
+| 1   | **Definir el público**                           | Por cada rol (sección 6), describir qué decisión toma, cada cuánto, con qué dispositivo y cuánto tiempo tiene                                                  | Ficha de público (7.5-A)               | Cada pantalla tiene un público principal único                          |                 0,5 |
+| 2   | **Elegir el protagonista y la pregunta central** | Por cada pantalla o tablero, fijar **un** protagonista y **una** pregunta que responde                                                                         | Ficha de protagonista (7.5-B)          | La pregunta cabe en una frase y no lleva «y»                            |                 0,5 |
+| 3   | **Escribir la narrativa**                        | Ordenar el recorrido en cinco tiempos: **situación → qué cambió → riesgo → decisión requerida → próximos pasos**                                               | Guion narrativo (7.5-C)                | Cada título es una conclusión, no un rótulo                             |                   1 |
+| 4   | **Verificar los datos**                          | Para cada elemento, indicar la vista y la columna de donde sale; descartar lo que no tiene dato                                                                | Tabla de origen de datos               | Ningún elemento del guion queda sin dato                                |                   1 |
+| 5   | **Elegir la forma de mostrar**                   | Según la pregunta: _comparar_ (barras), _evolución_ (línea), _composición_ (apilado), _relación_ (red; 2027), _lugar_ (mapa; 2027), _lista de trabajo_ (tabla) | Tabla de formas                        | Cada forma responde a la pregunta, no al gusto                          |                 0,5 |
+| 6   | **Fijar el estilo común**                        | Definir una sola hoja de estilo para todo el sistema (7.6)                                                                                                     | Hoja de estilo (7.5-D)                 | Todas las pantallas se arman con los mismos componentes                 |                   1 |
+| 7   | **Bocetar en baja fidelidad**                    | Dibujar estructura y jerarquía, sin color ni detalle                                                                                                           | Bocetos en Figma                       | Se entiende qué es lo principal en 5 segundos                           |                   1 |
+| 8   | **Probar con un usuario**                        | Mostrar 5 segundos y preguntar qué entendió; pedir una tarea                                                                                                   | Registro de prueba                     | El usuario identifica el protagonista y la conclusión                   |                 0,5 |
+| 9   | **Diseñar en fidelidad media**                   | Pantallas con datos de ejemplo realistas (sin datos personales reales) y todos los estados (normal, cargando, vacío, error, sin permiso)                       | Prototipo navegable                    | Cubre el circuito completo de la sección 5.1                            |                   2 |
+| 10  | **Anotar y validar**                             | Anotar el origen de cada dato, las reglas y los permisos; validar con cada rol y con OGTI                                                                      | Prototipo anotado y acta de validación | Cada pantalla tiene sus fichas completas y un usuario por rol la validó |                 1,5 |
+|     | **Total de referencia**                          |                                                                                                                                                                |                                        |                                                                         |           **≈ 9,5** |
+
+\* _Propuesta de referencia. La fecha real y la distribución dentro de los 20 días: **[EN BLANCO · H-53]**._
+
+### Cómo decidir qué pantallas y tableros son prioritarios (H-49)
+
+Se puntúa cada candidato de 1 a 3 en cada criterio y se ordenan de mayor a menor:
+
+| Criterio                     | 3 puntos                                        | 1 punto                    |
+| ---------------------------- | ----------------------------------------------- | -------------------------- |
+| **Uso actual**               | Ya se hace hoy en AVISA (sección 5.2)           | No existe hoy              |
+| **Decisión que habilita**    | Una persona toma una decisión concreta con ella | Solo informa               |
+| **Datos disponibles**        | La vista ya existe y tiene filas                | No hay dato                |
+| **Dependencias externas**    | Ninguna                                         | Requiere un servicio nuevo |
+| **Esfuerzo de construcción** | Bajo                                            | Alto                       |
+
+> Los candidatos que salgan arriba y que Luis confirme son las pantallas y tableros prioritarios: **[EN BLANCO · H-49]**.
+
+### Ficha rápida de los tableros candidatos
+
+| Tablero                               | Público              | Protagonista                           | Pregunta central                                  | Narrativa (verbo) | Estilo           |
+| ------------------------------------- | -------------------- | -------------------------------------- | ------------------------------------------------- | ----------------- | ---------------- |
+| TAB-04 Foto para la Alta Dirección    | Alta Dirección       | La región (y sus casos de riesgo alto) | ¿Qué requiere mi decisión y cuándo?               | **Decidir**       | Ejecutivo        |
+| TAB-02 Seguimiento de compromisos     | Analista y Dirección | El compromiso y su responsable         | ¿Qué vence y qué se incumplió?                    | **Exigir**        | Operativo        |
+| TAB-03 Casos estancados               | Dirección            | El caso sin avance                     | ¿Qué caso lleva tiempo sin moverse y quién actúa? | **Reactivar**     | Lista priorizada |
+| TAB-01 Panorama regional              | Analista             | La región                              | ¿Cómo se comparan las regiones?                   | **Comparar**      | Operativo        |
+| TAB-05 Alertas por estado y prioridad | Analista y Dirección | La alerta pendiente                    | ¿Cuántas esperan revisión y desde cuándo?         | **Atender**       | Operativo        |
+
+## 7.5 Plantillas
+
+### A. Ficha de público
+
+| Campo                   | Contenido                                     |
+| ----------------------- | --------------------------------------------- |
+| Rol                     | [Analista / Dirección / Alta Dirección]       |
+| Decisión que toma       |                                               |
+| Frecuencia con que mira | [diaria / semanal / ante una alerta]          |
+| Tiempo disponible       | [2 minutos / 15 minutos / trabajo prolongado] |
+| Dispositivo             | [escritorio / celular]                        |
+| Lenguaje                | [técnico / político-estratégico]              |
+| Qué no debe ver         | [datos personales / alertas sin aprobar]      |
+
+### B. Ficha de protagonista y pregunta central
+
+| Campo                                | Contenido               |
+| ------------------------------------ | ----------------------- |
+| Pantalla o tablero                   | [ID]                    |
+| Protagonista                         | [un solo sujeto]        |
+| Pregunta central                     | [una frase sin «y»]     |
+| Cifra o dato principal               | [lo primero que se lee] |
+| Conclusión que debe sacar el público |                         |
+| Acción posible desde aquí            |                         |
+
+### C. Guion narrativo (cinco tiempos)
+
+| Tiempo                | Pregunta                           | Elemento en la pantalla | Origen del dato (vista.columna) |
+| --------------------- | ---------------------------------- | ----------------------- | ------------------------------- |
+| 1. Situación          | ¿Dónde estamos?                    |                         |                                 |
+| 2. Qué cambió         | ¿Qué es nuevo desde la última vez? |                         |                                 |
+| 3. Riesgo             | ¿Qué podría empeorar?              |                         |                                 |
+| 4. Decisión requerida | ¿Qué se necesita y de quién?       |                         |                                 |
+| 5. Próximos pasos     | ¿Qué sigue y cuándo?               |                         |                                 |
+
+### D. Hoja de estilo (se llena una sola vez)
+
+| Elemento                | Definición                                                                     |
+| ----------------------- | ------------------------------------------------------------------------------ |
+| Colores institucionales | **[EN BLANCO · H-60]**                                                         |
+| Colores de semáforo     | Ligados a los catálogos de nivel de conflicto y de riesgo (7.6)                |
+| Tipografía              | [una familia; tres tamaños: título, cuerpo, nota]                              |
+| Componentes             | Tarjeta de indicador · tabla · ficha · filtro · mensaje de estado · formulario |
+| Iconografía             | [conjunto único]                                                               |
+| Tono de los textos      | [claro, sin siglas sin explicar]                                               |
+
+## 7.6 Sistema de diseño unificado
+
+**Una sola identidad para todo**: las pantallas de trabajo, las fichas y los tableros comparten componentes, vocabulario y reglas. Quien aprende una pantalla entiende las demás.
+
+### Principios
+
+| ID  | Principio                                                                                               |
+| --- | ------------------------------------------------------------------------------------------------------- |
+| P-1 | **Un protagonista y una pregunta por pantalla**                                                         |
+| P-2 | **Cada título es una conclusión** («Tres compromisos vencen esta semana»), no un rótulo («Compromisos») |
+| P-3 | **Cada número responde «¿y qué hago con esto?»**                                                        |
+| P-4 | **Todo semáforo se explica**: se puede ver por qué está en ese color                                    |
+| P-5 | **Nada sin dato**: si la vista está vacía, la pantalla lo dice                                          |
+| P-6 | **Lo mismo se ve igual**: un caso, una alerta o un compromiso tienen siempre la misma tarjeta           |
+| P-7 | **Se entiende sin explicación técnica**                                                                 |
+
+### Dos modos, un solo sistema
+
+| Dimensión        | Modo trabajo (analista y Dirección)   | Modo ejecutivo (Alta Dirección)                             |
+| ---------------- | ------------------------------------- | ----------------------------------------------------------- |
+| Pregunta         | ¿Qué está pasando y cómo lo sustento? | ¿Qué requiere mi decisión y cuándo?                         |
+| Densidad         | Alta, hasta cuatro paneles            | Baja: **≤ 7 elementos** y **≤ 3 clics** a cualquier dato    |
+| Lenguaje         | Técnico del dominio                   | Político-estratégico (riesgo, decisión, plazo, responsable) |
+| Alertas          | Todas, con su estado de revisión      | Solo las aprobadas                                          |
+| Datos personales | Según permiso                         | Nunca                                                       |
+
+### Vocabulario único
+
+Los nombres que ve el usuario salen de los **catálogos de la base** (niveles de conflicto, de riesgo, estados de caso y de compromiso, prioridades de alerta). Una misma palabra significa lo mismo en todas las pantallas **[EN BLANCO · H-43: catálogo de estados de caso por validar]**.
+
+### Reglas de coherencia
+
+| ID    | Regla                                                                                                   |
+| ----- | ------------------------------------------------------------------------------------------------------- |
+| RD-01 | Los colores de semáforo se asignan **una vez por catálogo** y se usan en todo el sistema                |
+| RD-02 | Nunca se usa solo el color: siempre va acompañado de texto o ícono (accesibilidad)                      |
+| RD-03 | Toda pantalla tiene sus cinco estados: normal, cargando, sin datos, error y sin permiso                 |
+| RD-04 | Las fichas (caso, actor, compromiso) tienen la misma estructura en todo el sistema                      |
+| RD-05 | Los filtros están siempre en el mismo lugar y se comportan igual                                        |
+| RD-06 | El Power BI, las pantallas de captura y el diagrama de 2027 usan la misma hoja de estilo                |
+| RD-07 | Las pantallas de trabajo y los tableros se revisan con la lista de verificación 7.7 antes de congelarse |
+
+## 7.7 Lista de verificación de coherencia
+
+| Pregunta                                                        | Sí/No |
+| --------------------------------------------------------------- | ----- |
+| ¿La pantalla tiene un solo protagonista y una pregunta central? |       |
+| ¿El título es una conclusión?                                   |       |
+| ¿El público principal es único y está identificado?             |       |
+| ¿Cada elemento tiene su vista y su columna de origen?           |       |
+| ¿Respeta el límite de elementos y de clics de su modo?          |       |
+| ¿Usa los componentes y los colores de la hoja de estilo?        |       |
+| ¿Muestra los cinco estados?                                     |       |
+| ¿No muestra datos personales a quien no corresponde?            |       |
+| ¿Un usuario de ese rol entendió la conclusión en 5 segundos?    |       |
+
+---
+
+# 8. DATOS MAESTROS MÍNIMOS A PRECARGAR
+
+> **Se lleva a la reunión.** «Datos maestros precargados» es parte del módulo de diciembre. Las cifras son las de la base actual (R3).
+
+## 8.1 Qué se precarga
+
+| Nivel                           | Conjunto            | Contenido                                                                                                                                             |                        Filas hoy | Propuesta                                         |
+| ------------------------------- | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------: | ------------------------------------------------- |
+| **1. Base común**               | Geografía           | Regiones, provincias y distritos (código oficial de ubicación)                                                                                        |                    698 distritos | **Precargar**                                     |
+|                                 | Catálogos           | Estados de caso, de compromiso y de hito; niveles de conflicto y de riesgo; prioridades de alerta; tipos de actor y de hecho; clasificación (unos 38) |            ≈ 5 a 12 por catálogo | **Precargar** (validar estados de caso, **H-43**) |
+|                                 | Roles y usuarios    | 9 roles y 31–32 usuarios                                                                                                                              |                        9 / 31–32 | **Precargar**                                     |
+|                                 | Organizaciones      | Organizaciones sociales y pesqueras                                                                                                                   |                              224 | **Precargar**                                     |
+| **2. Registros del uso actual** | Actores             | Personas y organizaciones vinculadas a casos                                                                                                          | 1 160 (847 con datos personales) | **[EN BLANCO · H-51]**                            |
+|                                 | Casos y cronología  | Casos con sus hechos                                                                                                                                  |                          35 / 80 | **[EN BLANCO · H-51]**                            |
+|                                 | Alertas tempranas   | Histórico                                                                                                                                             |                               83 | **[EN BLANCO · H-51]**                            |
+|                                 | Demandas            | Histórico                                                                                                                                             |                              325 | **[EN BLANCO · H-51]**                            |
+|                                 | Compromisos e hitos | Histórico                                                                                                                                             |                           8 / 12 | **[EN BLANCO · H-51]**                            |
+|                                 | Documentos          | Registro de documentos (los PDF quedan en Drive)                                                                                                      |                              153 | **[EN BLANCO · H-51]**                            |
+|                                 | Locales y mesas     | Sedes y mesas de diálogo con sus miembros                                                                                                             |                     27 / 21 y 62 | **[EN BLANCO · H-51]**                            |
+
+## 8.2 Reglas de la precarga
+
+| ID    | Regla                                                                                                                  |
+| ----- | ---------------------------------------------------------------------------------------------------------------------- |
+| RP-01 | La precarga se hace desde la **copia ya cargada** del sistema anterior, no desde cero                                  |
+| RP-02 | La precarga se **reconcilia**: origen = cargados + fusionados + descartados + pendientes (RF-M01)                      |
+| RP-03 | Los datos de **prueba y del prototipo** no llevan teléfonos ni DNI reales                                              |
+| RP-04 | Los datos personales precargados se guardan **cifrados** y su lectura se registra                                      |
+| RP-05 | Qué datos personales se precargan y cuáles se dejan fuera: **[EN BLANCO · H-51]**, con el dictamen de Legal **[H-04]** |
+| RP-06 | Quién ejecuta la precarga y quién la valida: **[EN BLANCO · H-51]**                                                    |
+
+---
+
+# 9. REQUISITOS NO FUNCIONALES
+
+Los volúmenes actuales son pequeños (≈ 12 mil filas en el modelo y ≈ 31 usuarios), de modo que la exigencia de capacidad es moderada. Las medidas en blanco deben acordarse con OGTI.
+
+| ID     | Característica (ISO/IEC 25010) | Requisito                                                                                                            | Medida                                                                         | Estado                                                  |
+| ------ | ------------------------------ | -------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ | ------------------------------------------------------- |
+| RNF-01 | Seguridad — acceso             | El sistema deberá exigir login institucional y aplicar los permisos por rol de la sección 6                          | 100 % de los accesos con identidad                                             | Definido                                                |
+| RNF-02 | Seguridad — aislamiento        | Ninguna consulta de un rol deberá devolver filas fuera de su alcance                                                 | Pruebas de aislamiento sin fallas                                              | Definido                                                |
+| RNF-03 | Seguridad — datos personales   | Los datos personales deberán guardarse cifrados y cada lectura quedar registrada                                     | 100 % de lecturas registradas                                                  | Definido                                                |
+| RNF-04 | Mantenibilidad                 | El sistema deberá poder mantenerse con las competencias de OGTI (.NET) y estar documentado                           | Documentación y guía de reconstrucción entregadas                              | **[EN BLANCO · H-03]** hasta saber qué se usará         |
+| RNF-05 | Portabilidad                   | El modelo de datos deberá migrarse de PostgreSQL a **SQL Server** sin perder reglas de negocio ni seguridad por fila | Reconciliación exitosa (RF-M01) sobre SQL Server                               | **Resuelto (H-01):** destino fijado; migración en curso |
+| RNF-06 | Eficiencia                     | Las consultas de lectura deberán responder en un tiempo acordado                                                     | **[EN BLANCO · H-58]** (referencia del MVP-45: percentil 95 menor a 1 segundo) | Por acordar                                             |
+| RNF-07 | Fiabilidad                     | Ningún dato registrado deberá perderse ante una falla; deberán existir copias de seguridad                           | **[EN BLANCO · H-30]**                                                         | Por acordar                                             |
+| RNF-08 | Disponibilidad                 | El sistema deberá estar disponible en horario laboral                                                                | **[EN BLANCO · H-56]**: horario y ventanas de mantenimiento                    | Por acordar                                             |
+| RNF-09 | Usabilidad                     | Un usuario del sistema actual deberá poder realizar las tareas del circuito (5.1) con una capacitación breve         | **[EN BLANCO · H-37]**: tiempo y capacitación                                  | Por acordar                                             |
+| RNF-10 | Compatibilidad                 | La interfaz deberá funcionar en los navegadores institucionales                                                      | **[EN BLANCO · H-22]**: cuáles                                                 | Por acordar                                             |
+| RNF-11 | Trazabilidad                   | Todo dato deberá poder rastrearse a su origen (carga, usuario, fecha)                                                | 100 % de registros con origen                                                  | Definido                                                |
+| RNF-13 | Control de costos (2027)       | El sistema deberá registrar el consumo de cada servicio externo y permitir un tope de gasto con aviso                | Consumo y costo por servicio y por mes                                         | **[EN BLANCO · H-65]**                                  |
+| RNF-12 | Capacidad                      | El sistema deberá soportar el volumen actual con holgura                                                             | Volumen actual y crecimiento esperado **[EN BLANCO · H-58]**                   | Por acordar                                             |
+
+---
+
+# 10. HISTORIAS DE USUARIO CON CRITERIOS DE ACEPTACIÓN
+
+Formato: _Como [quién] quiero [qué] para [para qué]_. Criterios en formato Dado / Cuando / Entonces. Los valores en blanco dependen de decisiones pendientes.
+
+### HU-01 — Ficha de actor y territorio
+
+**Como** analista **quiero** ver, para una zona, quiénes actúan y los reportes y compromisos recientes **para** preparar una reunión sin buscar en varios archivos. _(N-01, N-02, N-15 · RF-F01, RF-F02, RF-F05)_
+
+- **Dado** una zona con actores y reportes cargados, **cuando** abro la ficha de la zona, **entonces** veo actores, organizaciones, autoridades, últimos reportes remitidos y compromisos vigentes.
+- **Dado** una zona sin reportes recientes, **cuando** abro la ficha, **entonces** veo un mensaje que lo indica y no una pantalla vacía.
+- **Dado** que mi perfil no permite ver datos personales de nivel alto, **cuando** abro la ficha, **entonces** esos campos aparecen ocultos.
+- La ficha debe cargar en **[EN BLANCO · H-37: tiempo objetivo]**.
+
+### HU-02 — Contactos y organización de pertenencia
+
+**Como** analista **quiero** buscar el teléfono de una persona y saber a qué OSPA pertenece **para** llenar listas de asistencia y el mapa de actores. _(N-09 · RF-F04, RF-F08)_
+
+- **Dado** un actor con teléfono registrado, **cuando** lo busco por nombre, **entonces** veo su contacto, cargo y organización.
+- **Dado** un actor sin teléfono, **cuando** lo busco, **entonces** el sistema dice «sin contacto registrado».
+- **Dado** una selección de actores, **cuando** pido la lista de asistencia, **entonces** obtengo un archivo con nombre, cargo, organización y contacto autorizado.
+
+### HU-03 — Cargar una alerta temprana
+
+**Como** analista **quiero** cargar una alerta con un formulario **para** que quede registrada y lista para revisión. _(N-10 · RF-D01)_
+
+- **Dado** un formulario completo, **cuando** lo guardo, **entonces** la alerta queda en estado «pendiente de revisión» y no es visible para la Alta Dirección.
+- **Dado** un formulario con campos obligatorios vacíos, **cuando** intento guardar, **entonces** el sistema indica cuáles faltan.
+
+### HU-04 — Validar una alerta antes de que salga
+
+**Como** analista **quiero** aprobar, editar o descartar una alerta con su motivo **para** que solo salgan alertas revisadas. _(N-08 · RF-D03, RF-D04, RF-D12)_
+
+- **Dado** una alerta pendiente, **cuando** la apruebo, **entonces** queda registrado quién y cuándo, y recién entonces puede enviarse.
+- **Dado** una alerta descartada, **cuando** la descarto, **entonces** debo indicar el motivo y queda registrada.
+- **Dado** un usuario del Perfil B, **cuando** consulta alertas, **entonces** solo ve las aprobadas.
+
+### HU-05 — Enviar una alerta según su gravedad
+
+**Como** analista **quiero** que el sistema proponga los destinatarios según la gravedad **para** informar al ministro solo cuando corresponde. _(N-11 · RF-D06, RF-D07, RF-D09, RN-02)_
+
+- **Dado** una alerta aprobada y clasificada como **grave**, **cuando** preparo el envío, **entonces** el destinatario propuesto es el ministro y el sistema pide la confirmación definida en RN-04.
+- **Dado** una alerta aprobada **no grave**, **cuando** preparo el envío, **entonces** los destinatarios propuestos son viceministros, secretaría general y jefaturas de gabinete.
+- **Dado** un envío realizado, **cuando** reviso el registro, **entonces** veo canal, destinatarios, documento y resultado.
+- El criterio para que una alerta sea «grave» es **[EN BLANCO · H-09]**.
+
+### HU-06 — Plantilla de productos
+
+**Como** analista **quiero** elegir, en una plantilla de selección múltiple, qué productos informo **para** no armar cada envío a mano. _(N-11 · RF-G01, RF-G03)_
+
+- **Dado** una lista de productos disponibles, **cuando** marco varios, **entonces** el envío incluye todos los marcados.
+- **Dado** que no marqué ninguno, **cuando** intento enviar, **entonces** el sistema me avisa.
+- La lista de productos es **[EN BLANCO · H-26]**.
+
+### HU-07 — Reportes remitidos por zona
+
+**Como** analista **quiero** ver qué se ha remitido últimamente en una zona (por ejemplo, Áncash) **para** no repetir ni contradecir lo ya informado. _(N-02 · RF-F05)_
+
+- **Dado** una zona, **cuando** consulto los reportes, **entonces** veo fecha, tipo, destinatarios y enlace al documento, del más reciente al más antiguo.
+
+### HU-08 — Compromisos y relatorías
+
+**Como** analista **quiero** registrar la relatoría de una reunión y sus compromisos **para** dar seguimiento a lo acordado. _(N-03, N-12 · RF-C01, RF-C02, RF-E01)_
+
+- **Dado** una relatoría cargada, **cuando** el sistema propone compromisos, **entonces** quedan «pendientes de validación» hasta que yo los confirme.
+- **Dado** un compromiso confirmado, **cuando** reviso el caso, **entonces** veo su estado, hitos y fecha límite.
+
+### HU-09 — Registrar un actor sin DNI
+
+**Como** analista **quiero** registrar a una persona sin conocer su DNI **para** no frenar el análisis. _(RF-B01, RF-B02)_
+
+- **Dado** un actor sin DNI vinculado a una organización o caso, **cuando** lo guardo, **entonces** no hay error de validación.
+- **Dado** que luego obtengo su DNI, **cuando** lo promuevo a identificado, **entonces** conserva su historial.
+
+### HU-10 — Ver la red de actores _(2027)_
+
+**Como** analista **quiero** ver un diagrama interactivo de quién se relaciona con quién **para** entender posiciones y alineamientos. _(N-01, N-17 · RF-H01, RF-B06)_
+
+- **Dado** un caso con actores y relaciones, **cuando** abro el diagrama, **entonces** veo nodos y vínculos con su tipo (densa, tensa, de conflicto).
+- **Dado** que selecciono un actor, **cuando** hago clic, **entonces** se resaltan sus relaciones y puedo abrir su ficha.
+- **Dado** un caso con más actores de los que caben en pantalla (límite **[EN BLANCO · H-38]**), **cuando** abro el diagrama, **entonces** el sistema permite filtrar antes de dibujarlo.
+
+### HU-11 — Procesar una relatoría con IA _(2027)_
+
+**Como** analista **quiero** que el sistema lea una relatoría y proponga actores, hechos y compromisos **para** ahorrar digitación. _(N-12 · RF-E01, RF-E04, RF-E05)_
+
+- **Dado** una relatoría cargada, **cuando** se procesa, **entonces** cada dato propuesto indica el fragmento del texto del que salió.
+- **Dado** una cita propuesta que no aparece literalmente en el texto, **cuando** se verifica, **entonces** se descarta y queda registrada.
+- **Dado** un actor con nombre parecido a uno existente, **cuando** la similitud es intermedia, **entonces** se abre una tarea de revisión humana en lugar de fusionarlos.
+
+### HU-12 — Resumen para la Alta Dirección _(tablero en MVP; resumen redactado con IA en 2027)_
+
+**Como** miembro de la Alta Dirección **quiero** un resumen corto y explicado **para** decidir rápido. _(RF-G04, RF-H05)_
+
+- **Dado** un caso con alertas aprobadas, **cuando** abro el resumen, **entonces** veo situación, cambios recientes, riesgo, decisión requerida y plazo, sin datos personales ni texto de las fuentes.
+- **Dado** un indicador en semáforo, **cuando** pregunto por qué, **entonces** veo los factores que lo producen.
+
+### HU-13 — Analizar la pota a través del tiempo _(fase siguiente)_
+
+**Como** analista **quiero** ver controversias, normas y acciones de las OSPA sobre la pota en el tiempo **para** entender cómo evolucionó el conflicto. _(N-16 · RF-N01, RF-H03)_
+
+- **[EN BLANCO · H-35]** Los criterios de aceptación no pueden escribirse hasta definir qué es una «controversia» y qué fuentes se usarán.
+
+---
+
+# 11. REGLAS DE NEGOCIO
+
+| ID    | Regla                                                                                                                                                                                                          | Origen | Parametrizable |
+| ----- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ | -------------- |
+| RN-01 | Cada evento o acción se clasifica según un catálogo (por ejemplo, bloqueo de carreteras) y esa clasificación determina su prioridad. Catálogo y criterios: **[EN BLANCO · H-24]**                              | N-14   | Sí             |
+| RN-02 | Si una alerta es **grave**, se envía directamente al **ministro**; si no, a **viceministros, secretaría general y jefaturas de gabinete**, para no saturar al ministro. Qué es «grave»: **[EN BLANCO · H-09]** | N-11   | Sí             |
+| RN-03 | Una alerta no es visible para los Perfiles B y C hasta que un analista la aprueba                                                                                                                              | R2     | No             |
+| RN-04 | Para avisar una **crisis** se exige: (a) aprobación del analista, (b) prioridad crítica y (c) confirmación de la Dirección de la OAIPCS. Si esto aplica también a toda alerta «grave»: **[EN BLANCO · H-25]**  | R2     | Sí             |
+| RN-05 | La inteligencia artificial **propone**; una persona **decide**. Nada generado por IA llega a la Alta Dirección o a un actor externo sin revisión humana                                                        | R2     | No             |
+| RN-06 | Una cita solo se acepta si aparece **literalmente** en la fuente                                                                                                                                               | R2     | No             |
+| RN-07 | Un actor sin identificar **no se reidentifica** automáticamente cruzándolo con registros personales                                                                                                            | R2     | No             |
+| RN-08 | Actores con similitud intermedia se resuelven por **tarea humana**, nunca por fusión automática (referencia del MVP: 0,85 a 0,95)                                                                              | R2     | Sí             |
+| RN-09 | El DNI se guarda **cifrado** y con una huella para detectar duplicados; toda lectura queda registrada                                                                                                          | R2, R3 | No             |
+| RN-10 | Las redes sociales solo se consultan por API oficial o proveedor licenciado, con **lista blanca** de cuentas públicas aprobada por la OAIPCS y Legal                                                           | R2     | Sí             |
+| RN-11 | Los índices (riesgo, polarización, diálogo) son **índices de gestión, no probabilidades** y se rotulan «PROVISIONAL» o «PROXY» hasta calibrarse                                                                | R2     | No             |
+| RN-12 | Un compromiso es **exigible** cuando su fecha límite es menor o igual a hoy; el cumplimiento se mide sobre los exigibles                                                                                       | R2     | No             |
+| RN-13 | Cada prioridad de alerta tiene un plazo máximo de atención **[EN BLANCO · H-14]**                                                                                                                              | R2     | Sí             |
+| RN-14 | Los códigos de casos y alertas conservan su formato legible (por ejemplo, `CS-PRODUCE-2026-007`, `AT-2026-01`) para que se puedan seguir buscando igual                                                        | R4     | No             |
+| RN-15 | Qué roles pueden ver teléfonos y correos de los actores: **[EN BLANCO · H-39]**                                                                                                                                | R2     | Sí             |
+| RN-16 | La información de campo recibida por mensajería **se registra manualmente** por el analista; el sistema no la automatiza                                                                                       | R2     | No             |
+| RN-17 | La consulta a PIDE-RENIEC se hace **una persona a la vez** y **solo** cuando hay un motivo de caso que la justifique; nunca de forma masiva ni automática                                                      | R7     | No             |
+
+---
+
+# 12. REQUISITOS DE DATOS
+
+## 12.1 Modelo de datos
+
+El modelo de datos **ya existe y está probado** en PostgreSQL, y está descrito, tabla por tabla y columna por columna, en `DICCIONARIO_DATOS_md` (R3). Este ERS no lo repite: lo toma como parte de la entrega.
+
+> **Resuelto (H-01): el destino de producción es SQL Server**, no PostgreSQL. OAIPCS entrega los scripts DDL/DML **ya traducidos** (existentes en el MVP-45, por confirmar su vigencia frente al modelo v10 **[EN BLANCO · H-69]**), y OGTI debe verificar tres puntos de incompatibilidad:
+
+| #   | Incompatibilidad         | PostgreSQL                                                                 | SQL Server                                                                                       | Responsable de verificar                    |
+| --- | ------------------------ | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ | ------------------------------------------- |
+| 1   | Tipos de datos           | `UUID`                                                                     | `UNIQUEIDENTIFIER`                                                                               | OGTI                                        |
+|     |                          | `JSONB`                                                                    | `NVARCHAR(MAX)` con restricción `ISJSON`                                                         | OGTI                                        |
+| 2   | Seguridad por fila (RLS) | Políticas de PostgreSQL (173 políticas en 48 tablas)                       | Predicados y `SECURITY POLICY` de SQL Server                                                     | OGTI, con apoyo de OAIPCS                   |
+| 3   | Reconciliación (RF-M01)  | Cuadratura ya hecha sobre PostgreSQL (35 casos, 83 alertas, 1 160 actores) | **Debe repetirse** sobre SQL Server para garantizar que no se pierdan registros en la conversión | OAIPCS y OGTI, antes del 23-dic-2026 (H-29) |
+
+| Dato                                     | Valor                                                              |
+| ---------------------------------------- | ------------------------------------------------------------------ |
+| Tablas lógicas del modelo completo (v10) | 255, en 25 esquemas más uno de vistas                              |
+| Tablas del MVP (capas T0 y T1)           | **42** (31 con datos, 11 vacías)                                   |
+| Objetos derivados                        | 30 (24 vistas y 6 vistas materializadas)                           |
+| Filas hoy                                | 12 257 en el modelo v10 y 4 729 en el archivo del sistema anterior |
+| Llaves foráneas                          | 590                                                                |
+| Seguridad por fila                       | 48 tablas con 173 políticas                                        |
+
+## 12.2 Datos principales y su volumen actual
+
+| Concepto                               | Tabla                                   |   Filas hoy | Horizonte     |
+| -------------------------------------- | --------------------------------------- | ----------: | ------------- |
+| Casos                                  | `core.casos`                            |          35 | MVP           |
+| Cronología de hechos                   | `core.caso_cronologia`                  |          80 | MVP           |
+| Alertas tempranas                      | `core.alertas_tempranas`                |          83 | MVP           |
+| Demandas                               | `core.demandas`                         |         325 | MVP           |
+| Actores                                | `core.actores`                          |       1 160 | MVP           |
+| Datos personales de actores            | `core.actor_datos_personales`           |         847 | MVP           |
+| Organizaciones                         | `core.organizaciones`                   |         224 | MVP           |
+| Pertenencia a organizaciones           | `core.actor_membresia`                  |         292 | MVP           |
+| Documentos                             | `core.documentos`                       |         153 | MVP           |
+| Compromisos / hitos                    | `core.compromisos` / `hitos_compromiso` |      8 / 12 | MVP           |
+| Mesas de diálogo / miembros            | `core.mesas_dialogo` / `mesa_miembros`  |     21 / 62 | MVP           |
+| Locales                                | `core.locales`                          |          27 | MVP           |
+| Envíos de comunicación                 | `core.envios_comunicacion`              |          17 | MVP           |
+| Usuarios y roles                       | `core.usuarios` / `usuario_roles`       |  31–32 / 34 | MVP           |
+| Distritos                              | `core.distritos`                        |         698 | MVP           |
+| Grafo de conocimiento                  | `kag.nodos` / `kag.aristas`             | 1 520 / 450 | MVP (parcial) |
+| Registro de accesos a datos personales | `audit.datos_personales_acceso`         |       2 241 | MVP           |
+
+> Observaciones: los **compromisos (8) y la cantidad de reuniones** son muy pocos para calcular indicadores confiables; y la tabla de indicadores está **vacía** (`ind.resultado`, 0 filas), por lo que el tablero hoy «no tiene de dónde salir».
+
+## 12.3 Vistas que alimentan tableros e informes
+
+Ya existen en el esquema `analytics`. Las más relevantes para el MVP:
+
+| Vista                                 | Qué responde                                                      | Uso en el MVP                              |
+| ------------------------------------- | ----------------------------------------------------------------- | ------------------------------------------ |
+| `vw_anexo_02_panorama_regional`       | Panorama por región                                               | Tablero                                    |
+| `vw_anexo_14_seguimiento_compromisos` | Seguimiento de compromisos                                        | RF-C05                                     |
+| `vw_anexo_15_matriz_conflictividad`   | Matriz de conflictividad                                          | MADRE (análisis de casos)                  |
+| `vw_anexo_16_registro_reuniones`      | Registro de reuniones                                             | Ficha de zona                              |
+| `vw_anexo_17_registro_reportes`       | Registro de reportes                                              | RF-F05                                     |
+| `vw_casos_estancados`                 | Casos sin avance                                                  | Tablero                                    |
+| `vw_mactor_red_actores`               | Red de actores (quién influye sobre quién)                        | RF-H01                                     |
+| `vw_indicadores_minister`             | Indicadores para el ministro                                      | RF-H05                                     |
+| `mv_dashboard_alta_direccion`         | Foto por región: casos activos, riesgo alto, compromisos vencidos | RF-H05                                     |
+| `vw_carga_campo`                      | Carga de trabajo de campo                                         | **[EN BLANCO · H-40: ¿se usa en el MVP?]** |
+
+Las vistas necesarias para la **ficha de actor y territorio** y para las **listas de contactos** **[EN BLANCO · H-41: no figuran en el inventario actual; hay que definirlas]**.
+
+## 12.4 Datos personales
+
+- Niveles de identificación de actores del 1 al 5: los niveles 4 y 5 (sin identificar) **nunca** se georreferencian ni se cruzan con registros personales.
+- Los datos personales viven en tablas separadas, cifrados, con registro de cada lectura.
+- Dictamen de Legal y OGTI sobre datos personales y sobre envío de texto público a un modelo externo: **[EN BLANCO · H-04]**.
+
+## 12.5 Calidad, retención y datos de prueba
+
+| Aspecto                 | Requisito                                                                                             |
+| ----------------------- | ----------------------------------------------------------------------------------------------------- |
+| Calidad                 | Reporte de completitud, duplicados y pendientes (RF-M02)                                              |
+| Reconciliación          | Origen = cargados + fusionados + descartados + pendientes (RF-M01)                                    |
+| Retención de datos      | **[EN BLANCO · H-42: cuánto tiempo se conserva cada tipo de dato]**                                   |
+| Datos de prueba         | Datos de ejemplo **anonimizados**; sin teléfonos ni DNI reales en el paquete que recibe OGTI          |
+| Validación de catálogos | El catálogo de estados de caso figura como «a validar con OAIPCS» en el MVP-45 **[EN BLANCO · H-43]** |
+
+---
+
+# 13. INTERFACES EXTERNAS (FICHA POR SERVICIO)
+
+> **Material interno.** No se lleva a la reunión. Solo los servicios del horizonte MVP condicionan diciembre.
+
+## 13.1 Servicios que condicionan diciembre
+
+| ID            | <u>Servicio</u>                                              | Qué se intercambia                                                                               | Quién lo provee  | Cómo se accede                                                                                        | Costo                                                                                | Decisión pendiente                                     |
+| ------------- | ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------ | ---------------- | ----------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ | ------------------------------------------------------ |
+| <u>SVC-04</u> | Sistema anterior (Google Sheets + Apps Script)               | Copia de los registros para la precarga y, si hace falta, los cambios hasta el cambio de sistema | OAIPCS           | Copia ya cargada en la base (`legacy`)                                                                | Sin costo                                                                            | Fecha de cambio y frecuencia **[H-29]**                |
+| <u>SVC-09</u> | Identidad institucional                                      | Identidad y grupo de cada usuario                                                                | OGTI             | **[EN BLANCO · H-52]**                                                                                | **[EN BLANCO]**                                                                      | Servicio, grupos y plazo **[H-52]**                    |
+| <u>SVC-10</u> | Power BI (licencia de OGTI)                                  | Lectura de las vistas de la base de datos                                                        | OGTI             | Conexión a la base de datos                                                                           | Licencia ya existente                                                                | Si los tableros se hacen aquí **[H-50]**               |
+| <u>SVC-16</u> | **PIDE-RENIEC** (Plataforma de Interoperabilidad del Estado) | Consulta de requisitorias y antecedentes de una persona identificada                             | RENIEC, vía PIDE | Convenio institucional de OAIPCS/Ministerio con RENIEC; acceso nominal al **analista con privilegio** | Convenio sin costo por consulta en el Estado; trámite de alta **[EN BLANCO · H-68]** | Convenio vigente, quién lo gestiona y plazo **[H-68]** |
+| <u>SVC-05</u> | Google Drive                                                 | PDF y borradores                                                                                 | OAIPCS / Google  | **[EN BLANCO]**                                                                                       | **[EN BLANCO]**                                                                      | ¿Entra en diciembre? **[H-59]**                        |
+| <u>SVC-06</u> | Correo institucional                                         | Envíos con enlace                                                                                | OGTI             | **[EN BLANCO]**                                                                                       | **[EN BLANCO]**                                                                      | ¿Entra en diciembre? **[H-59]**                        |
+
+## 13.2 Servicios de 2027 en adelante
+
+| ID            | <u>Servicio</u>                          | Para qué                            | Costo                                  | Decisión pendiente                              |
+| ------------- | ---------------------------------------- | ----------------------------------- | -------------------------------------- | ----------------------------------------------- |
+| <u>SVC-01</u> | Medios digitales y portales oficiales    | Leer noticias y reportes            | Sin costo conocido                     | Lista blanca **[H-32]**                         |
+| <u>SVC-02</u> | Modelo de lenguaje de Google (Gemini)    | Extraer datos y redactar borradores | **[EN BLANCO]**                        | Dictamen legal **[H-04]**                       |
+| <u>SVC-03</u> | Redes sociales (API oficial o proveedor) | Acciones de las OSPA                | **[EN BLANCO]**                        | Proveedor **[H-10]**                            |
+| <u>SVC-07</u> | WhatsApp                                 | Alertas tempranas                   | Lo asume la oficina; monto desconocido | **[H-06]**                                      |
+| <u>SVC-08</u> | SMS                                      | Avisos de crisis                    | **[EN BLANCO]**                        | **[H-07]**                                      |
+| <u>SVC-11</u> | Mapas base                               | Mapas                               | **[EN BLANCO]**                        | Los mosaicos públicos no sirven para producción |
+| <u>SVC-12</u> | SESIGUE                                  | Estados de compromisos              | —                                      | Solo contrato de interfaz                       |
+| <u>SVC-13</u> | IMARPE, OEFA, SUNAT, VUCE                | Contexto del entorno                | —                                      | Fase siguiente                                  |
+| <u>SVC-14</u> | MEF, MINAM, MINCETUR, MININTER, RREE     | Compromisos interministeriales      | —                                      | Fase siguiente                                  |
+| <u>SVC-15</u> | Transcripción de audio a texto           | Relatorías                          | **[EN BLANCO]**                        | **[H-21]**                                      |
+| Extranet      | Acceso de actores externos (Perfil C)    | Consulta de compromisos propios     | **[EN BLANCO]**                        | **[H-54]**: pasa a 2027                         |
+
+## 13.3 Presupuesto de servicios externos
+
+> **Intención:** reducir al mínimo los costos que asumirá OAIPCS. Por eso el presupuesto separa lo que **ya existe y paga la institución** de lo que **se paga por uso** y de lo que **exige un contrato fijo**. Los precios son **de referencia** (consultados en noviembre de 2026) y deben verificarse con cada proveedor **[EN BLANCO · H-66]**. Montos en dólares estadounidenses.
+
+### 13.3.1 Quién paga qué
+
+| Tipo                                               | Qué es                                                             | Servicios                                                                                                     |
+| -------------------------------------------------- | ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------- |
+| **A. Ya existe** (costo adicional para OAIPCS ≈ 0) | Infraestructura o licencias de la institución                      | SVC-09 identidad, SVC-10 Power BI, SVC-06 correo, SVC-04 sistema anterior, base de datos y servidores de OGTI |
+| **B. Pago por uso**                                | Se cobra según lo que se consume                                   | SVC-02 Gemini, SVC-07 WhatsApp, SVC-08 SMS, SVC-15 transcripción                                              |
+| **C. Contrato fijo**                               | Cuota mensual o anual                                              | Proveedor de WhatsApp (si no se usa el acceso directo), escucha de redes (SVC-03), servicio de mapas (SVC-11) |
+| **D. Costo de apertura externa**                   | Seguridad, soporte y mantenimiento de lo que ven personas de fuera | Extranet para actores externos                                                                                |
+| **E. Esfuerzo (no es dinero, pero cuesta)**        | Trámites y decisiones                                              | Dictamen legal, verificación de cuenta de WhatsApp, registro de bancos de datos personales si corresponde     |
+
+### 13.3.2 Presupuesto por servicio
+
+| ID            | <u>Servicio</u>                          | Horizonte           | Tipo                   | Referencia de precio                                                                                                                                                                                                                                 | Costo mensual de ejemplo                                                                          | Quién paga             | Estado                          |
+| ------------- | ---------------------------------------- | ------------------- | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- | ---------------------- | ------------------------------- |
+| <u>SVC-09</u> | Identidad institucional                  | MVP                 | A                      | Sin cobro adicional previsto                                                                                                                                                                                                                         | 0                                                                                                 | OGTI                   | **[EN BLANCO · H-52]**          |
+| <u>SVC-10</u> | Power BI                                 | MVP                 | A                      | Licencia ya existente. **Ojo:** quien ve los informes puede necesitar licencia propia, salvo que el contenido esté en una capacidad dedicada                                                                                                         | 0 si las licencias cubren a los lectores                                                          | OGTI                   | **[EN BLANCO · H-64]**          |
+| <u>SVC-04</u> | Sistema anterior                         | MVP                 | A                      | Sin cobro                                                                                                                                                                                                                                            | 0                                                                                                 | OAIPCS                 | Definido                        |
+| <u>SVC-06</u> | Correo institucional                     | MVP (por confirmar) | A                      | Sin cobro adicional previsto                                                                                                                                                                                                                         | 0                                                                                                 | OGTI                   | **[EN BLANCO · H-59]**          |
+| <u>SVC-05</u> | Google Drive                             | MVP (por confirmar) | A                      | Sin cobro adicional si ya se usa la cuenta institucional                                                                                                                                                                                             | 0                                                                                                 | **[EN BLANCO · H-65]** | **[EN BLANCO · H-59]**          |
+| <u>SVC-02</u> | Gemini (modelo de lenguaje de Google)    | 2027                | B                      | Modelos Flash: **US$ 0,75 por millón de tokens de entrada y 3,75 de salida hasta el 31-dic-2026; desde el 1-ene-2027, 1,50 y 7,50**. Hay descuento de 50 % si el procesamiento es por lotes                                                          | **≈ 3** con 150 documentos al mes; **≈ 30** con diez veces más (ver ejemplo abajo)                | **[EN BLANCO · H-65]** | Falta dictamen legal **[H-04]** |
+| <u>SVC-07</u> | WhatsApp                                 | 2027                | B + C                  | Cobro **por mensaje entregado**, según categoría y país; desde el 1-oct-2026 los mensajes de utilidad dentro de la ventana de 24 horas vuelven a cobrarse. Referencias de utilidad: Brasil 0,0078 y Argentina 0,0299 por mensaje. **Perú: sin dato** | **≈ 2 a 9** con 300 mensajes al mes (ver ejemplo abajo), más la cuota del proveedor si se usa uno | **[EN BLANCO · H-65]** | **[EN BLANCO · H-06, H-66]**    |
+| <u>SVC-08</u> | SMS                                      | MADRE               | B                      | Por mensaje; sin tarifa verificada                                                                                                                                                                                                                   | **[EN BLANCO]**                                                                                   | **[EN BLANCO]**        | No se incluye **[H-07]**        |
+| <u>SVC-03</u> | Redes sociales (API oficial o proveedor) | MADRE               | C                      | Suscripción o cuota; sin tarifa verificada                                                                                                                                                                                                           | **[EN BLANCO]**                                                                                   | **[EN BLANCO]**        | **[H-10]**                      |
+| <u>SVC-11</u> | Mapas base                               | 2027 / MADRE        | C                      | Servidor propio o proveedor con acuerdo de servicio; los mosaicos públicos no sirven para producción                                                                                                                                                 | **[EN BLANCO]**                                                                                   | OGTI                   | **[H-22]**                      |
+| <u>SVC-15</u> | Transcripción de audio                   | 2027                | B                      | Por minuto de audio; sin tarifa verificada                                                                                                                                                                                                           | **[EN BLANCO]**                                                                                   | **[EN BLANCO]**        | **[H-21]**                      |
+| <u>SVC-16</u> | PIDE-RENIEC                              | MVP (si se activa)  | A (convenio de Estado) | Interoperabilidad entre entidades públicas; habitualmente sin cobro por consulta                                                                                                                                                                     | 0 por consulta; costo de alta y mantenimiento del convenio                                        | **[EN BLANCO]**        |
+| Extranet      | Acceso de actores externos               | 2027 / MADRE        | D                      | Seguridad, hosting expuesto, soporte                                                                                                                                                                                                                 | **[EN BLANCO]**                                                                                   | **[EN BLANCO]**        | **[H-54]**                      |
+
+### 13.3.3 Ejemplos de cálculo (ilustrativos)
+
+Los volúmenes son **supuestos**; el dato real se pide en H-67.
+
+| Cálculo      | Supuestos                                                                                                     | Resultado                                                                                                                     |
+| ------------ | ------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| **Gemini**   | 150 documentos al mes; 6 000 tokens de entrada y 1 500 de salida por documento; precios de 2027 (1,50 y 7,50) | Entrada 0,9 millones × 1,50 = 1,35; salida 0,225 millones × 7,50 = 1,69; **≈ US$ 3 al mes**. Con diez veces más: **≈ US$ 30** |
+| **WhatsApp** | 30 alertas al mes × 10 destinatarios = 300 mensajes de utilidad; tarifa entre 0,0078 y 0,0299                 | **≈ US$ 2,35 a 9 al mes**                                                                                                     |
+
+### 13.3.4 Resumen
+
+| Concepto                            | Diciembre 2026                                                             | 2027                                                                 |
+| ----------------------------------- | -------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| Costo por uso adicional para OAIPCS | **≈ 0**, si OGTI cubre identidad, Power BI y correo **[H-64, H-59, H-65]** | Del orden de **US$ 5 a 40 al mes** en el ejemplo (Gemini y WhatsApp) |
+| Contratos fijos                     | Ninguno                                                                    | **[EN BLANCO]** según WhatsApp, redes y mapas                        |
+| Extranet                            | No existe                                                                  | **[EN BLANCO · H-54]**: es el costo más probable de ser alto         |
+| Esfuerzo legal y de trámites        | Dictamen sobre datos personales **[H-04]**                                 | Verificación de WhatsApp, dictamen sobre IA                          |
+| **Tope de gasto de OAIPCS**         | **[EN BLANCO · H-65]**                                                     | **[EN BLANCO · H-65]**                                               |
+
+> **Lectura:** con los volúmenes actuales (35 casos, 83 alertas, 153 documentos), el **consumo** de los servicios es pequeño. Lo que puede encarecer el proyecto no es el uso, sino los **contratos fijos**, las **licencias de lectura** y la **apertura a actores externos**.
+
+**Fuentes de referencia:** páginas de precios de Gemini en Google Cloud y en Google AI for Developers; documentación de precios de WhatsApp Business Platform de Meta; tablas de tarifas publicadas por proveedores autorizados de WhatsApp. Las tarifas se actualizan con frecuencia (las de WhatsApp, normalmente cada trimestre).
+
+## 13.4 Qué exige cada actor externo al sistema
+
+Aquí se listan los **requisitos exactos** que cada actor externo impone, para poder decidir si vale la pena abrir esa puerta. «Actor externo» incluye **servicios y proveedores**, **instituciones** y **personas de fuera de OAIPCS**.
+
+| Actor externo                                                          | Qué exige al sistema (requisito exacto)                                                                                                                                                                                                                             | Qué hay que tramitar o contratar                                                                                           | Costo                                                         | Mínimo propuesto                                                                                                                         |
+| ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| <u>SVC-09</u> Identidad institucional                                  | Aceptar el inicio de sesión que ofrezca OGTI; leer el grupo del usuario para asignar su rol; registrar la aplicación ante el servicio                                                                                                                               | Alta de la aplicación y de los grupos por rol                                                                              | Sin cobro adicional previsto                                  | **Solo ingreso interno.** Sin login para externos                                                                                        |
+| <u>SVC-10</u> Power BI                                                 | Una cuenta de **solo lectura** a las vistas; refresco programado; licencias para quienes ven los informes                                                                                                                                                           | Cuenta de lectura, licencias de lectores, puerta de enlace si la base no es accesible desde la nube **[EN BLANCO · H-64]** | Licencias existentes                                          | **Entre 4 y 6 tableros**, todos sobre vistas ya existentes                                                                               |
+| <u>SVC-04</u> Sistema anterior                                         | Lectura de la hoja o de su exportación; formato estable de columnas                                                                                                                                                                                                 | Autorización de acceso de OAIPCS                                                                                           | Sin cobro                                                     | **Una carga congelada**; cambios semanales solo hasta el día de cambio **[H-29]**                                                        |
+| <u>SVC-06</u> Correo                                                   | Un remitente autorizado y un servidor de envío; plantillas de mensaje; **enlace, no adjunto**                                                                                                                                                                       | Autorización del remitente                                                                                                 | Sin cobro adicional previsto                                  | Mensaje con enlace desde el correo institucional                                                                                         |
+| <u>SVC-05</u> Google Drive                                             | Permiso de acceso a carpetas; consentimiento de la aplicación; estructura de carpetas                                                                                                                                                                               | Cuenta de servicio o permisos de carpeta                                                                                   | Sin cobro si ya existe la cuenta                              | **No integrar en diciembre**: se guarda el enlace manualmente                                                                            |
+| <u>SVC-02</u> Gemini                                                   | Una cuenta con facturación; una clave guardada en un gestor de secretos; límites de uso configurados; **nunca texto con datos personales**; revisar la política de uso de datos del nivel gratuito frente al de pago                                                | Dictamen legal **[H-04]**; cuenta y tope de gasto                                                                          | Por uso                                                       | **2027.** Solo texto público; procesamiento por lotes                                                                                    |
+| <u>SVC-07</u> WhatsApp                                                 | Una cuenta de empresa de Meta **verificada**; un número de teléfono dedicado; **plantillas aprobadas por Meta**; **consentimiento previo** de cada destinatario; una dirección web pública segura para recibir respuestas; un proveedor autorizado o acceso directo | Verificación de la empresa, número, plantillas, consentimientos, contrato con proveedor                                    | Por mensaje + cuota                                           | **No usar en diciembre**; correo                                                                                                         |
+| <u>SVC-08</u> SMS                                                      | Pasarela de envío; remitente registrado                                                                                                                                                                                                                             | Contrato con proveedor                                                                                                     | Por mensaje                                                   | **No usar**                                                                                                                              |
+| <u>SVC-03</u> Redes sociales                                           | Acceso por API oficial o proveedor licenciado; lista blanca de cuentas públicas; revisión legal                                                                                                                                                                     | Contrato, cuota y dictamen                                                                                                 | Suscripción                                                   | **No integrar**: el analista registra a mano las acciones relevantes                                                                     |
+| <u>SVC-11</u> Mapas                                                    | Servidor de mapas o proveedor con acuerdo de servicio; atribución visible                                                                                                                                                                                           | Contrato o servidor propio                                                                                                 | **[EN BLANCO]**                                               | **Sin mapa en diciembre**; ubicación como texto y código                                                                                 |
+| <u>SVC-12</u> SESIGUE                                                  | Formato de estados y credenciales de la otra entidad                                                                                                                                                                                                                | Convenio o acuerdo de interfaz                                                                                             | **[EN BLANCO]**                                               | **No integrar**; exportación manual si se pide                                                                                           |
+| <u>SVC-16</u> PIDE-RENIEC                                              | Convenio institucional vigente; usuario nominal (no genérico) con el privilegio asignado por OGTI o por el ente rector; cada consulta debe declarar el motivo; sin consultas masivas; auditoría obligatoria                                                         | Gestión del convenio y del usuario nominal; dictamen legal sobre uso del dato                                              | Sin costo por consulta (convenio de Estado); esfuerzo de alta | **Un solo usuario nominal** (hoy, Edith); nunca un rol compartido; resultado nunca en tableros                                           |
+| <u>SVC-14</u> Otros ministerios                                        | Convenios de intercambio y formatos acordados                                                                                                                                                                                                                       | Convenios                                                                                                                  | **[EN BLANCO]**                                               | **No integrar**                                                                                                                          |
+| **Actores externos humanos** (gremios, organizaciones con compromisos) | Un portal accesible desde internet; identidad externa con segundo factor por código; separación estricta de sus datos; soporte a usuarios; términos de uso                                                                                                          | Hosting expuesto, seguridad reforzada, mesa de ayuda **[H-54]**                                                            | **Alto**                                                      | **No abrir Extranet.** Si hace falta informar a un actor externo, se le envía **manualmente** un resumen aprobado de **sus** compromisos |
+| **Legal / protección de datos**                                        | Dictamen sobre datos personales y uso de IA externa; si corresponde, registro de bancos de datos personales                                                                                                                                                         | Dictamen e inscripción **[H-04]**                                                                                          | Esfuerzo                                                      | **Dictamen antes de cualquier servicio que reciba texto o contactos**                                                                    |
+
+## 13.5 Reglas para minimizar la dependencia y el costo
+
+| ID    | Regla                                                                                                       |
+| ----- | ----------------------------------------------------------------------------------------------------------- |
+| RM-01 | En diciembre se usan **solo servicios que la institución ya tiene** (identidad, Power BI, correo)           |
+| RM-02 | **Ninguna integración nueva** sin una persona o área que se haga cargo de su pago                           |
+| RM-03 | Toda integración va detrás de un **adaptador** que permita cambiar de proveedor sin reescribir el sistema   |
+| RM-04 | Se prefiere el **pago por uso con tope de gasto** y alerta de consumo a las cuotas fijas                    |
+| RM-05 | Si la respuesta no es urgente, se usa el procesamiento **por lotes** (más barato) en lugar de tiempo real   |
+| RM-06 | Se envían **enlaces**, no adjuntos ni contenido sensible                                                    |
+| RM-07 | **No se abre Extranet** hasta que se demuestre su valor y se defina quién la sostiene                       |
+| RM-08 | **Ningún dato personal** sale a servicios externos sin dictamen legal                                       |
+| RM-09 | Cada servicio se evalúa con una pregunta: _¿qué decisión habilita y cuánto cuesta por cada vez que se usa?_ |
+| RM-10 | Cada integración registra su **consumo** (llamadas, tokens, mensajes y costo)                               |
+
+---
+
+# 14. ARQUITECTURA DEL SISTEMA (MODELO C4)
+
+El modelo C4 describe el sistema en tres niveles de acercamiento: **C1** (qué es y con quién se relaciona), **C2** (de qué grandes piezas se compone) y **C3** (qué hay dentro de las piezas más importantes). Todo lo que hay que **conectar con servicios externos** se marca con un recuadro de borde discontinuo y un código **SVC-nn**.
+
+> **Cómo leer los diagramas.** Borde discontinuo naranja = servicio que hay que integrar. Borde sólido = pieza que se construye. Gris = **2027** o fase siguiente (no entra en el módulo de diciembre).
+
+> **Importante.** Este capítulo es **material interno** y no se lleva a la reunión. Con el plan de diciembre solo se integran <u>SVC-04</u> (sistema anterior), <u>SVC-09</u> (login institucional) y <u>SVC-10</u> (Power BI, si OGTI lo usa para los tableros **[EN BLANCO · H-50]**); <u>SVC-05</u> y <u>SVC-06</u> quedan por confirmar. Todo lo demás pasa a 2027.
+
+## 13.1 Nivel 1 — Contexto del sistema
+
+```mermaid
+flowchart TB
+  classDef persona fill:#eef2ff,stroke:#4f46e5,stroke-width:1px;
+  classDef sistema fill:#e6fffa,stroke:#0f766e,stroke-width:2px;
+  classDef integra fill:#fff7ed,stroke:#c2410c,stroke-width:2px,stroke-dasharray:5 3;
+  classDef futuro fill:#f3f4f6,stroke:#6b7280,stroke-width:1.5px,stroke-dasharray:5 3,color:#4b5563;
+
+  AN["Analistas y sectoristas<br/>OAIPCS (Perfil A)"]:::persona
+  DIR["Dirección de la OAIPCS"]:::persona
+  ALTA["Alta Dirección: ministro, viceministros,<br/>secretaría general, jefaturas de gabinete (Perfil B)"]:::persona
+  EXT["Actores externos y gremios<br/>(Perfil C, fase siguiente)"]:::futuro
+  OGTI["OGTI: construye,<br/>opera y mantiene (.NET)"]:::persona
+
+  SIS["SISTEMA AVISA-PRODUCE<br/>Reúne casos, actores, compromisos y alertas;<br/>muestra fichas y tableros"]:::sistema
+
+  S01["SVC-01 Medios digitales y<br/>portales oficiales (2027)"]:::futuro
+  S02["SVC-02 Modelo de lenguaje<br/>de Google (2027)"]:::futuro
+  S03["SVC-03 Redes sociales<br/>(API oficial o proveedor)"]:::futuro
+  S04["SVC-04 Sistema anterior<br/>(Google Sheets + Apps Script)"]:::integra
+  S05["SVC-05 Google Drive"]:::integra
+  S06["SVC-06 Correo institucional"]:::integra
+  S07["SVC-07 WhatsApp"]:::futuro
+  S09["SVC-09 Identidad institucional<br/>(inicio de sesión)"]:::integra
+  S10["SVC-10 Power BI"]:::integra
+  S11["SVC-11 Mapas base (2027)"]:::futuro
+  S12["SVC-12 SESIGUE y otros<br/>sistemas del Estado"]:::futuro
+
+  AN -->|"carga, valida, consulta"| SIS
+  DIR -->|"confirma y valida"| SIS
+  SIS -->|"alertas, resúmenes, indicadores"| ALTA
+  EXT -.->|"consulta lo propio"| SIS
+  OGTI -->|"aloja y mantiene"| SIS
+
+  S01 -->|"noticias y reportes"| SIS
+  S03 -.->|"publicaciones públicas"| SIS
+  S04 -->|"carga histórica y cambios"| SIS
+  SIS <-->|"texto a analizar / datos extraídos"| S02
+  SIS <-->|"borradores y documentos"| S05
+  SIS -->|"envíos"| S06
+  SIS -.->|"alertas"| S07
+  S09 -->|"quién es el usuario"| SIS
+  SIS -->|"vistas de datos"| S10
+  S11 -->|"mapa base"| SIS
+  SIS -.->|"estados de compromisos"| S12
+```
+
+## 13.2 Nivel 2 — Contenedores (las grandes piezas)
+
+Un **contenedor** es una pieza que se ejecuta y se puede desplegar por separado (no es necesariamente un contenedor de Docker).
+
+```mermaid
+flowchart LR
+  classDef pieza fill:#e6fffa,stroke:#0f766e,stroke-width:2px;
+  classDef integra fill:#fff7ed,stroke:#c2410c,stroke-width:2px,stroke-dasharray:5 3;
+  classDef pendiente fill:#fef2f2,stroke:#b91c1c,stroke-width:1.5px,stroke-dasharray:2 2;
+  classDef futuro fill:#f3f4f6,stroke:#6b7280,stroke-width:1.5px,stroke-dasharray:5 3,color:#4b5563;
+  classDef persona fill:#eef2ff,stroke:#4f46e5,stroke-width:1px;
+
+  AN["Analista (A)"]:::persona
+  ALTA["Alta Dirección (B)"]:::persona
+
+  subgraph SIS["Sistema AVISA-PRODUCE"]
+    CT05["CT-05 Pantallas de trabajo<br/>carga de alertas, bandeja de revisión,<br/>fichas, plantillas de envío"]:::pendiente
+    CT06["CT-06 Paneles de indicadores<br/>(Power BI)"]:::pieza
+    CT07["CT-07 Vista de diagramas interactivos<br/>red de actores (2027)"]:::futuro
+    CT03["CT-03 Servicio de aplicación (API)<br/>reglas de negocio, permisos,<br/>aprobaciones, envíos"]:::pieza
+    CT02["CT-02 Servicio de procesamiento<br/>de documentos (2027)"]:::futuro
+    CT04["CT-04 Programador de tareas"]:::pieza
+    CT08["CT-08 Notificador"]:::pieza
+    BD[("CT-01 Base de datos PostgreSQL<br/>core · ref · analisis · ia · kag ·<br/>audit · staging · vistas para Power BI<br/>+ archivo legacy")]:::pieza
+  end
+
+  S01["SVC-01 Medios y<br/>portales oficiales (2027)"]:::futuro
+  S02["SVC-02 Gemini (2027)"]:::futuro
+  S04["SVC-04 Sistema anterior"]:::integra
+  S05["SVC-05 Google Drive"]:::integra
+  S06["SVC-06 Correo"]:::integra
+  S09["SVC-09 Identidad"]:::integra
+  S10["SVC-10 Power BI (licencia OGTI)"]:::integra
+  S11["SVC-11 Mapas base"]:::integra
+
+  AN --> CT05
+  ALTA --> CT06
+  ALTA -->|"mensajes"| S06
+  CT05 --> CT03
+  CT03 <--> BD
+  CT04 --> CT03
+  CT04 --> CT02
+  S01 --> CT02
+  CT02 <--> S02
+  CT02 -->|"candidatos de alerta"| CT03
+  S04 --> BD
+  CT03 --> CT08
+  CT08 --> S06
+  CT03 <--> S05
+  S09 --> CT03
+  BD -->|"vistas"| S10
+  S10 --> CT06
+  CT03 --> CT07
+  S11 --> CT07
+```
+
+**Estado de cada contenedor**
+
+| ID    | Contenedor                              | Qué hace                                                                                   | Tecnología                                                           | Estado           |
+| ----- | --------------------------------------- | ------------------------------------------------------------------------------------------ | -------------------------------------------------------------------- | ---------------- |
+| CT-01 | Base de datos PostgreSQL                | Guarda todo; aplica seguridad por fila, cifrado de datos personales y auditoría            | PostgreSQL (ya probada)                                              | **Existe** (v10) |
+| CT-02 | Servicio de procesamiento de documentos | Lee fuentes y documentos, extrae actores, eventos y citas, propone puntaje de riesgo       | **[EN BLANCO · H-03]** (hoy existe solo como demostración en Python) | **2027**         |
+| CT-03 | Servicio de aplicación (API)            | Reglas de negocio, permisos por perfil, aprobación de alertas, informes, envíos            | **.NET** (confirmado por OGTI)                                       | **Resuelto**     |
+| CT-04 | Programador de tareas                   | Lanza recolecciones, recálculos de indicadores, vencimiento de compromisos y escalamientos | **[EN BLANCO · H-17]** (el MVP-45 propone Hangfire o Quartz)         | Por construir    |
+| CT-05 | Pantallas de trabajo                    | Cargar alertas, revisar y aprobar, ver fichas, armar plantillas de envío                   | **Angular** (confirmado por OGTI)                                    | **Resuelto**     |
+| CT-06 | Paneles de indicadores                  | Indicadores, tablas y mapas para los usuarios y la Alta Dirección                          | **Power BI**                                                         | Por construir    |
+| CT-07 | Vista de diagramas interactivos         | Red de actores y relaciones; línea de tiempo (fase siguiente)                              | **[EN BLANCO · H-05]**                                               | **2027**         |
+| CT-08 | Notificador                             | Envía correos con enlace y borrador; deja registro de cada envío                           | **[EN BLANCO · H-19]**                                               | Por construir    |
+
+## 13.3 Nivel 3 — Componentes (qué hay dentro de las piezas clave)
+
+### 14.3.1 Dentro del Servicio de procesamiento de documentos (CT-02) — horizonte 2027
+
+> Este servicio **no entra en diciembre**. Se conserva como referencia para 2027.
+
+```mermaid
+flowchart TD
+  classDef comp fill:#e6fffa,stroke:#0f766e,stroke-width:1.5px;
+  classDef integra fill:#fff7ed,stroke:#c2410c,stroke-width:2px,stroke-dasharray:5 3;
+  classDef humano fill:#eef2ff,stroke:#4f46e5,stroke-width:1px;
+
+  P0["CP-01 Programación<br/>(cada 15–30 min, valor por confirmar)"]:::comp
+  P1["CP-02 Recolector de fuentes"]:::comp
+  P2["CP-03 Normalizador y detector<br/>de duplicados"]:::comp
+  P3["CP-04 Filtro de relevancia<br/>(sector, territorio, casos activos)"]:::comp
+  P4["CP-05 Extractor de datos<br/>(personas, organizaciones, lugar,<br/>tipo de hecho, postura)"]:::comp
+  P5["CP-06 Resolutor de actores<br/>(compara contra el catálogo)"]:::comp
+  P6["CP-07 Verificador de citas<br/>(la cita debe estar literal en la fuente)"]:::comp
+  P7["CP-08 Clasificador de eventos<br/>y puntaje de riesgo con explicación"]:::comp
+  P8["CP-09 Empaquetador y reintentos<br/>(cola de fallidos)"]:::comp
+  REV["Tarea de revisión humana<br/>(similitud intermedia entre actores)"]:::humano
+  S01["SVC-01 Fuentes públicas"]:::integra
+  S02["SVC-02 Gemini"]:::integra
+  S05["SVC-05 Drive (relatorías)"]:::integra
+  API["CT-03 Servicio de aplicación"]:::comp
+
+  P0 --> P1
+  S01 --> P1
+  S05 --> P1
+  P1 --> P2 --> P3
+  P3 -->|"irrelevante: se descarta y se registra"| X["Descartes registrados"]:::comp
+  P3 --> P4
+  P4 <--> S02
+  P4 --> P5
+  P5 -->|"dudoso"| REV
+  P5 --> P6
+  P6 <--> S02
+  P6 --> P7 --> P8
+  P8 -->|"candidatos de alerta"| API
+```
+
+**Lo que este servicio no hace:** no aprueba ni publica nada, no fusiona actores por su cuenta, no recibe datos personales y no escribe directamente en las tablas de negocio (solo entrega **candidatos** al servicio de aplicación).
+
+### 14.3.2 Dentro del Servicio de aplicación (CT-03)
+
+> En diciembre **no se construye CA-10** (conector del modelo de lenguaje) y **CA-05** funciona solo con alertas cargadas a mano.
+
+```mermaid
+flowchart TD
+  classDef comp fill:#e6fffa,stroke:#0f766e,stroke-width:1.5px;
+  classDef integra fill:#fff7ed,stroke:#c2410c,stroke-width:2px,stroke-dasharray:5 3;
+
+  A1["CA-01 Acceso y perfiles<br/>(A, B, C)"]:::comp
+  A2["CA-02 Gestor de actores y organizaciones<br/>(incluye actores sin DNI)"]:::comp
+  A3["CA-03 Gestor de casos, hechos y cronología"]:::comp
+  A4["CA-04 Gestor de compromisos,<br/>relatorías y mesas"]:::comp
+  A5["CA-05 Recepción de candidatos<br/>y bandeja de revisión"]:::comp
+  A6["CA-06 Motor de reglas de gravedad<br/>y destinatarios"]:::comp
+  A7["CA-07 Generador de productos<br/>(plantillas de informe y resumen)"]:::comp
+  A8["CA-08 Servicio de envíos<br/>(correo, borrador en Drive)"]:::comp
+  A9["CA-09 Cálculo de indicadores"]:::comp
+  A10["CA-10 Conector de modelo de lenguaje<br/>(intercambiable)"]:::comp
+  A11["CA-11 Auditoría y registro de accesos"]:::comp
+  A12["CA-12 Carga y reconciliación<br/>del sistema anterior"]:::comp
+  S02["SVC-02 Gemini"]:::integra
+  S05["SVC-05 Google Drive"]:::integra
+  S06["SVC-06 Correo"]:::integra
+  S09["SVC-09 Identidad"]:::integra
+  S04["SVC-04 Sistema anterior"]:::integra
+  BD[("CT-01 Base de datos")]:::comp
+
+  S09 --> A1
+  A1 --> A2 & A3 & A4 & A5 & A7 & A9
+  A5 --> A6 --> A8
+  A7 --> A8
+  A7 <--> A10 <--> S02
+  A8 --> S06
+  A8 <--> S05
+  S04 --> A12 --> BD
+  A2 & A3 & A4 & A5 & A9 --> BD
+  A1 & A2 & A5 & A8 --> A11 --> BD
+```
+
+### 14.3.3 Dentro de la base de datos (CT-01): qué trae el MVP
+
+Del inventario R5, **42 tablas** son del MVP (31 ya tienen datos y 11 están todavía vacías). Las otras 213 quedan para la fase siguiente o no se usan aún.
+
+| Esquema     | Qué guarda                                                                                               | Tablas del MVP | Observación                               |
+| ----------- | -------------------------------------------------------------------------------------------------------- | -------------: | ----------------------------------------- |
+| `core`      | Casos, hechos, actores, organizaciones, compromisos, alertas, documentos, usuarios, catálogos, geografía |             31 | Núcleo del MVP                            |
+| `kag`       | Grafo de conocimiento (nodos, aristas, fuentes)                                                          |              5 | Solo lo que ya alimenta la red de actores |
+| `audit`     | Registro inmutable de acceso a datos personales                                                          |              1 | Obligatorio                               |
+| `agent`     | Registro de ejecuciones de agentes de IA                                                                 |              1 | Trazabilidad                              |
+| `ind`       | Indicadores y resultados                                                                                 |              1 | Hoy sin filas                             |
+| `policy`    | Reglas de control                                                                                        |              1 |                                           |
+| `qda`       | Equivalencia de seudónimos (análisis cualitativo)                                                        |              1 |                                           |
+| `staging`   | Aterrizaje temporal de cargas                                                                            |              1 |                                           |
+| `legacy`    | Copia exacta del sistema anterior (87 tablas)                                                            |              — | Se conserva como archivo                  |
+| `analytics` | 22 vistas para tableros e informes                                                                       |              — | Alimenta Power BI                         |
+
+> Si OGTI decide otro motor de base de datos, las diferencias de tipos (`UUID`, `JSONB`) y de seguridad por fila deben revisarse **[EN BLANCO · H-01]**.
+
+## 13.4 Flujo de una alerta (de la fuente al destinatario)
+
+```mermaid
+sequenceDiagram
+  autonumber
+  participant F as SVC-01 Fuentes públicas
+  participant P as CT-02 Procesamiento
+  participant G as SVC-02 Gemini
+  participant A as CT-03 Servicio de aplicación
+  participant D as CT-01 Base de datos
+  participant AN as Analista
+  participant DIR as Dirección OAIPCS
+  participant C as SVC-06 Correo
+  participant R as SVC-05 Drive
+  participant AD as Alta Dirección
+
+  F->>P: Nueva publicación
+  P->>G: Texto a analizar
+  G-->>P: Entidades, tipo de hecho, postura
+  P->>A: Candidato de alerta (firmado, sin duplicar)
+  A->>D: Guarda candidato en estado pendiente
+  A-->>AN: Aparece en la bandeja de revisión
+  AN->>A: Aprueba, edita o descarta (con motivo)
+  A->>D: Registra la alerta y la auditoría
+  A->>A: Aplica regla de gravedad y destinatarios
+  alt Grave
+    A-->>DIR: Pide confirmación
+    DIR->>A: Confirma
+    A->>R: Crea borrador del documento
+    A->>C: Envía al ministro con enlace
+    C-->>AD: Correo
+  else No grave
+    A->>R: Crea borrador del documento
+    A->>C: Envía a viceministros, secretaría general y jefaturas de gabinete
+    C-->>AD: Correo
+  end
+```
+
+> **En diciembre** los pasos 1 a 5 (fuente → procesamiento → candidato) se reemplazan por la **carga manual de la alerta** (RF-D01); aprobación, regla de gravedad y envío se mantienen **[EN BLANCO · H-45]**.
+
+> Las alertas tempranas por **WhatsApp** que pidió Iván se agregarían como un paso más de envío cuando se conozca el costo (<u>SVC-07</u>) **[EN BLANCO · H-06]**.
+
+## 13.5 Catálogo de servicios por integrar
+
+Aquí están reunidos todos los servicios que el sistema necesita conectar. La ficha detallada de cada uno está en la sección 13.
+
+| ID            | <u>Servicio</u>                                                        | Para qué                                                                                              | Sentido      | Horizonte                   | Estado                                                          |
+| ------------- | ---------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- | ------------ | --------------------------- | --------------------------------------------------------------- |
+| <u>SVC-01</u> | Medios digitales, portales oficiales y gob.pe (RSS y páginas públicas) | Recibir noticias y reportes para generar candidatos de alerta                                         | Entra        | 2027                        | Por definir lista blanca de fuentes                             |
+| <u>SVC-02</u> | **Modelo de lenguaje de Google (Gemini)**                              | Extraer datos de textos y redactar borradores                                                         | Entra y sale | 2027                        | Preferencia de OGTI; falta dictamen legal                       |
+| <u>SVC-03</u> | Redes sociales (API oficial o proveedor licenciado de escucha social)  | Recibir las acciones de las OSPA que hoy llegan por redes                                             | Entra        | MADRE                       | Sin proveedor ni costo                                          |
+| <u>SVC-04</u> | Sistema anterior (Google Sheets + Apps Script)                         | Fuente de la carga histórica y de los cambios hasta el cambio de sistema                              | Entra        | MVP                         | Carga histórica hecha; falta reconciliar                        |
+| <u>SVC-05</u> | **Google Drive**                                                       | Guardar borradores, relatorías y PDF                                                                  | Entra y sale | MVP (por confirmar)         | Por definir estructura de carpetas                              |
+| <u>SVC-06</u> | **Correo institucional**                                               | Enviar alertas, informes y resúmenes con enlace                                                       | Sale         | MVP (por confirmar)         | Por confirmar pasarela                                          |
+| <u>SVC-07</u> | **WhatsApp**                                                           | Enviar alertas tempranas                                                                              | Sale         | 2027                        | Costo por definir; lo asume la oficina                          |
+| <u>SVC-08</u> | SMS                                                                    | Avisar crisis confirmadas                                                                             | Sale         | MADRE                       | No incluido en el MVP **[H-07]**                                |
+| <u>SVC-09</u> | Identidad institucional (inicio de sesión con grupos por perfil)       | Saber quién es el usuario y qué perfil tiene                                                          | Entra        | MVP                         | **[EN BLANCO · H-20]** qué servicio usa OGTI                    |
+| <u>SVC-10</u> | **Power BI** (licencia de OGTI)                                        | Tableros, tablas y mapas                                                                              | Sale         | MVP                         | Licencia confirmada                                             |
+| <u>SVC-11</u> | Servicio de mapas base (mosaicos)                                      | Mostrar mapas en diagramas y tableros                                                                 | Entra        | 2027                        | Los públicos no sirven para producción                          |
+| <u>SVC-12</u> | SESIGUE                                                                | Enviar estados de compromisos                                                                         | Sale         | MADRE                       | Solo contrato de interfaz                                       |
+| <u>SVC-13</u> | Fuentes oficiales previstas en la v10: IMARPE, OEFA, SUNAT, VUCE       | Contexto del entorno y de la actividad pesquera                                                       | Entra        | MADRE                       | Catálogo ya existe en la base                                   |
+| <u>SVC-14</u> | Sistemas de otros ministerios: MEF, MINAM, MINCETUR, MININTER, RREE    | Seguimiento interministerial de compromisos                                                           | Sale         | MADRE                       | Vista ya prevista en la base                                    |
+| <u>SVC-15</u> | Transcripción de audio a texto                                         | Obtener las transcripciones de reuniones que pidió Iván                                               | Entra        | 2027 **[EN BLANCO · H-21]** | No se sabe si hoy se transcribe a mano o hace falta un servicio |
+| <u>SVC-16</u> | **PIDE-RENIEC**                                                        | Consultar requisitorias y antecedentes de un actor, **solo** para el analista con privilegio nombrado | Entra        | MVP (si se activa)          | Convenio con RENIEC; acceso nominal, nunca por rol genérico     |
+
+## 14.6 Despliegue y ambientes
+
+**[EN BLANCO · H-22]** Falta: dónde se aloja cada pieza (servidores de OGTI o nube), cuántos ambientes (desarrollo, pruebas, producción), cómo se accede (red privada), certificados y copias de seguridad. Responde: OGTI.
+
+---
+
+# 15. ESTADOS DE ERROR Y CASOS LÍMITE
+
+| ID     | Situación                                          | Comportamiento requerido                                                                                 |
+| ------ | -------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| ERR-01 | El usuario ingresa bien pero no tiene rol asignado | Se informa que no tiene acceso y se avisa al administrador                                               |
+| ERR-02 | Falla el servicio de login institucional           | Se muestra un mensaje claro; no se permite ingreso alternativo con claves locales **[EN BLANCO · H-52]** |
+| ERR-03 | Un usuario intenta ver algo fuera de su rol        | No se muestra; queda registrado el intento                                                               |
+| ERR-04 | Un caso no tiene actores o compromisos             | La ficha lo indica en lugar de mostrarse vacía                                                           |
+| ERR-05 | Un actor no tiene DNI                              | Se permite el registro (RF-B01)                                                                          |
+| ERR-06 | Se detecta un posible actor duplicado              | Se avisa y se ofrece revisar; no se fusiona solo                                                         |
+| ERR-07 | Una alerta pendiente no se atiende                 | Aparece en la lista de pendientes; el escalamiento automático queda para 2027 **[H-14]**                 |
+| ERR-08 | Falla un envío (correo)                            | Queda registrado con su motivo y se puede reintentar                                                     |
+| ERR-09 | Un tablero no tiene datos                          | Se indica «sin datos» con el motivo, no una pantalla en blanco                                           |
+| ERR-10 | La precarga encuentra registros inconsistentes     | Se separan, se reportan y no se cargan hasta validarlos                                                  |
+| ERR-11 | Un documento registrado no tiene archivo           | Se muestra el aviso y se permite adjuntarlo después                                                      |
+
+---
+
+# 16. VERIFICACIÓN Y CRITERIOS DE ACEPTACIÓN
+
+Criterios de aceptación **propuestos** para el módulo de diciembre. Las pruebas T91 a T105 del MVP-45 se reutilizan **solo en lo que corresponda al alcance de diciembre**.
+
+| ID    | Criterio                                                                                                                                          | Cómo se verifica                    | Requisitos             |
+| ----- | ------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- | ---------------------- |
+| AC-01 | Un usuario ingresa con su usuario institucional y ve el menú de su rol                                                                            | Prueba con usuarios de cada rol     | RF-A01, RF-A02         |
+| AC-02 | Ninguna consulta de un rol devuelve filas de otro alcance; la Alta Dirección no ve datos personales ni alertas sin aprobar                        | Batería de pruebas de aislamiento   | RF-A03, RF-A04, RF-D12 |
+| AC-03 | Se completa el circuito de punta a punta con datos de prueba: crear caso → registrar hecho, actor y compromiso → cargar alerta → aprobar → enviar | Demostración con usuarios de OAIPCS | RF-D01, RF-D03, RF-D07 |
+| AC-04 | Se registra un actor sin DNI y luego se promueve sin perder historial                                                                             | Prueba                              | RF-B01, RF-B02         |
+| AC-05 | Los datos maestros precargados cuadran con el origen (cargados + fusionados + descartados + pendientes)                                           | Reporte de reconciliación           | RF-M01                 |
+| AC-06 | Los tableros prioritarios muestran cifras que coinciden con los registros                                                                         | Contraste con las tablas            | RF-H02                 |
+| AC-07 | Toda lectura de datos personales queda registrada y no se puede borrar                                                                            | Prueba                              | RF-X01                 |
+| AC-08 | OGTI reconstruye el módulo en un entorno limpio con la guía entregada                                                                             | Prueba por OGTI                     | RNF-04                 |
+| AC-09 | Cada servicio integrado funciona y falla de forma controlada                                                                                      | Prueba por servicio                 | Sección 13.1           |
+
+**Regla de cierre:** el módulo se acepta cuando pasan todos los AC _Must_ y los defectos abiertos son de gravedad **[EN BLANCO · H-55: definir con OGTI y firmar en el acuerdo de alcance]**.
+
+---
+
+# 17. MATRIZ DE TRAZABILIDAD
+
+| Necesidad                                 | Historia     | Requisito              | Pantalla        | Origen de datos                       | Criterio        |
+| ----------------------------------------- | ------------ | ---------------------- | --------------- | ------------------------------------- | --------------- |
+| N-01, N-15 Quiénes actúan en una zona     | HU-01        | RF-F01, RF-F02         | PAN-11          | Vistas por definir **[H-41]**         | AC-03           |
+| N-02 Reportes remitidos                   | HU-07        | RF-F05                 | PAN-04, PAN-11  | `vw_anexo_17_registro_reportes`       | AC-03           |
+| N-03 Compromisos de ayudas memoria        | HU-08        | RF-C01, RF-C02, RF-C05 | PAN-08          | `vw_anexo_14_seguimiento_compromisos` | AC-03, AC-06    |
+| N-05, N-06 Directorios de autoridades     | HU-01        | RF-F03                 | PAN-11          | Vistas por definir **[H-41]**         | AC-03           |
+| N-08 Validar alertas                      | HU-04        | RF-D03, RF-D04, RF-D12 | PAN-06          | `core.alertas_tempranas`              | AC-02, AC-03    |
+| N-09 Teléfonos y OSPA                     | HU-02        | RF-B05, RF-B07, RF-F04 | PAN-07          | Vistas por definir **[H-41]**         | AC-02           |
+| N-10 Cargar alertas                       | HU-03        | RF-D01                 | PAN-05          | `core.alertas_tempranas`              | AC-03           |
+| N-11 Envío según gravedad                 | HU-05, HU-06 | RF-D06, RF-G01, RF-G03 | PAN-09          | `core.envios_comunicacion`            | AC-03           |
+| N-14 Riesgos por clasificación de eventos | HU-05        | RF-D05, RN-01          | PAN-05, PAN-06  | Catálogo por definir **[H-24]**       | **[EN BLANCO]** |
+| Login institucional                       | —            | RF-A01, RF-A02         | PAN-01          | Identidad **[H-52]**                  | AC-01           |
+| Datos maestros                            | —            | RF-M01                 | —               | `legacy` → `core`                     | AC-05           |
+| Tableros                                  | —            | RF-H02                 | TAB-01 a TAB-05 | Vistas `analytics`                    | AC-06           |
+
+---
+
+# 18. PLAN DE 20 DÍAS, DEPENDENCIAS, DECISIONES PENDIENTES Y RIESGOS
+
+## 18.1 El proceso acordado
+
+> **Resuelto, pero invalida el plan secuencial (H-53):** OGTI fija el inicio de los **20 días técnicos** el **martes 24 de noviembre de 2026**. El documento preveía diseñar el prototipo (≈ 9,5 días, 7.4) **antes** de firmar el acuerdo y arrancar la parte técnica (18.1 original); con esta fecha **no hay margen previo**. El reparto que corresponde ahora:
+
+| Cuándo                           | Qué se hace                                                                                                                                                                     |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Hoy (19-nov) al lunes 23-nov** | OAIPCS entrega: (a) los **wireframes del flujo principal** (circuito de 5.1, sin pulir las pantallas secundarias) y (b) los **scripts SQL Server** del modelo relacional (H-01) |
+| **Martes 24-nov (día 1)**        | Los 4 desarrolladores arrancan **L0** (base de datos) y **L1** (login institucional) con lo entregado                                                                           |
+| **Miércoles/jueves (días 2–3)**  | Mientras L0 y L1 avanzan, OAIPCS termina de **anotar las pantallas secundarias** (fichas 7.5) en paralelo, sin bloquear a OGTI                                                  |
+| **Resto de los 20 días**         | Firma del acuerdo de alcance (sección 19) en paralelo a las primeras capas, no antes; se firma sobre lo ya construido en L0-L1 si hace falta ajustar                            |
+
+> Esto reduce de **9,5 a ≈ 3 días hábiles** el tiempo de diseño previo. La metodología completa de 7.4 (los diez pasos) sigue siendo la referencia, pero se **comprime**: los pasos 1 a 6 (público, protagonista, narrativa, datos, forma, estilo) se hacen antes del martes; los pasos 7 a 10 (boceto, prueba, fidelidad media, anotación) se hacen **en paralelo** a L0 y L1, no antes.
+
+> **Resuelto (H-02):** OGTI confirma **≈ 4 desarrolladores**. Propuesta de reparto por frente, siguiendo las capas de 5.5:
+
+| Frente                                 | Capas                | Desarrollador(es) sugeridos |
+| -------------------------------------- | -------------------- | --------------------------- |
+| Base de datos y migración a SQL Server | L0                   | 1                           |
+| API .NET, seguridad e identidad        | L1, L3               | 1 a 2                       |
+| Frontend Angular y Power BI            | L2, L4, L5 (parcial) | 1 a 2                       |
+
+> Dedicación exclusiva: **[EN BLANCO · H-70]**.
+
+| Paso | Qué ocurre                                          | Entregable                        | Quién          | Cuándo                                             |
+| ---- | --------------------------------------------------- | --------------------------------- | -------------- | -------------------------------------------------- |
+| 1    | Wireframes del flujo principal y scripts SQL Server | Prototipo mínimo (no el completo) | OAIPCS (Diego) | Entre hoy y el lunes 23-nov                        |
+| 2    | **Documento de análisis** con reglas y roles        | Este documento (secciones 4 a 8)  | OAIPCS         | Avance a Dilayda **antes del martes**              |
+| 3    | **Parte técnica inicia** (L0 y L1)                  | Base de datos y login en marcha   | OGTI           | **Resuelto: martes 24-nov-2026**                   |
+| 4    | **Acuerdo firmado** sobre el alcance definitivo     | Sección 19 firmada                | OAIPCS y OGTI  | En paralelo a L0-L1, primera semana                |
+| 5    | **Resto de la parte técnica**                       | Módulo de diciembre en producción | OGTI           | 20 días desde el 24-nov → **cierre ≈ 13-dic-2026** |
+
+> **Calendario:** 20 días corridos desde el **martes 24 de noviembre de 2026** hasta aproximadamente el **13 de diciembre de 2026**. La migración de datos (RF-M01) debe estar lista **al menos para el 23 de diciembre** (H-29), lo que deja un margen corto entre el cierre técnico y la reconciliación final — ver riesgo RIE-13 en 18.4.
+
+## 18.2 Dependencias de OGTI
+
+| ID  | Dependencia                                                                                                                                           | Fecha límite                                                                                                                               | Si no llega                                                  |
+| --- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------ |
+| D-1 | Entorno de base de datos (versión, extensiones y permisos)                                                                                            | **[EN BLANCO]**                                                                                                                            | Ver H-01                                                     |
+| D-2 | Servicio de identidad institucional y grupos por rol                                                                                                  | **[EN BLANCO]**                                                                                                                            | Ver H-52                                                     |
+| D-3 | Entorno de aplicación (servidor, certificados, acceso por red privada)                                                                                | **[EN BLANCO]**                                                                                                                            | Ver H-22                                                     |
+| D-4 | Desarrolladores asignados y su dedicación                                                                                                             | **Resuelto (H-02): ≈ 4 desarrolladores** (propuesta de reparto en 18.1); falta confirmar si es dedicación exclusiva **[EN BLANCO · H-70]** | Se repite el cuello de botella de un solo recurso por frente |
+| D-5 | Revisión del prototipo por OGTI                                                                                                                       | **[EN BLANCO]**                                                                                                                            | Se cierra el acuerdo sin la revisión técnica                 |
+| D-6 | Diseñar el prototipo en Figma **pensando en componentes estándar de Angular**: tablas paginadas, formularios reactivos, modales y etiquetas de estado | Antes de iniciar L2                                                                                                                        | Recodificación de componentes por OGTI                       |
+| D-6 | Validación del catálogo de estados de caso por OAIPCS                                                                                                 | **[EN BLANCO]**                                                                                                                            | Se usa el catálogo del MVP-45 y se registra como supuesto    |
+
+## 18.3 Decisiones pendientes
+
+**Para cerrar en la reunión del martes** (de ellas depende el resto): **H-45** (qué necesidades caben en diciembre), **H-47** (uso real del AVISA actual), **H-49** y **H-50** (pantallas y tableros prioritarios), **H-51** (datos maestros), **H-52** (login institucional), ~~H-53~~ (calendario, **resuelto: inicia 24-nov-2026**), **H-57** (quién aprueba), **H-63** (orden de las capas), **H-64** (licencias de Power BI) y **H-65** (quién paga los servicios) y **H-68** (convenio con RENIEC y quién asigna el privilegio). Ya resueltos: **H-44** (modelo relacional) y **H-46** (OAIPCS diseña el prototipo).
+
+**Para después:** el resto, registrado en el Anexo C.
+
+## 18.4 Riesgos
+
+| ID         | Riesgo                                                                                                                                                                                                                                                                                              | Prob.    | Impacto  | Mitigación                                                                                                                                                                                                                                                                                                                                        | Señal temprana                                                                        |
+| ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| RIE-01     | Expectativas desalineadas: se espera recibir la aplicación actual tal cual                                                                                                                                                                                                                          | Alta     | Alto     | Mostrar primero la **paridad** (sección 5) y dejar el rediseño como mejora interna                                                                                                                                                                                                                                                                | Preguntas por pantallas que ya existen                                                |
+| RIE-02     | La conversación vuelve al nivel técnico (LLM, WhatsApp, servidores)                                                                                                                                                                                                                                 | Media    | Alto     | Llevar solo lo que se pidió; el resto, material interno                                                                                                                                                                                                                                                                                           | Se abre un tema de la sección 13                                                      |
+| RIE-03     | Postura no unificada de OAIPCS                                                                                                                                                                                                                                                                      | Media    | Alto     | Acordar una sola voz y enviar avance previo                                                                                                                                                                                                                                                                                                       | Mensajes distintos antes del martes                                                   |
+| RIE-04     | 20 días no alcanzan                                                                                                                                                                                                                                                                                 | Alta     | Alto     | Alcance mínimo y reclasificación a 2027 **[H-45]**                                                                                                                                                                                                                                                                                                | Pantallas sin priorizar                                                               |
+| RIE-05     | Los desarrolladores solo tienen presupuesto hasta diciembre                                                                                                                                                                                                                                         | Media    | Alto     | Documentar y entregar de modo que el módulo sea mantenible                                                                                                                                                                                                                                                                                        | Sin asignación confirmada **[H-02]**                                                  |
+| RIE-06     | La traducción PostgreSQL → SQL Server pierde reglas de seguridad por fila o datos en la conversión                                                                                                                                                                                                  | Media    | Alto     | Los tres puntos de incompatibilidad de 12.1; reconciliación obligatoria antes del 23-dic (H-29)                                                                                                                                                                                                                                                   | Diferencias en el conteo de filas tras la carga                                       |
+| RIE-07     | Exposición de datos personales en la precarga o el prototipo                                                                                                                                                                                                                                        | Baja     | Alto     | Datos de prueba sin teléfonos ni DNI reales; cifrado y registro de lecturas                                                                                                                                                                                                                                                                       | Datos reales en archivos del prototipo                                                |
+| RIE-08     | Pocos datos para calcular indicadores (8 compromisos, 0 resultados)                                                                                                                                                                                                                                 | Alta     | Medio    | Tableros sobre las vistas existentes; indicadores como índices de gestión                                                                                                                                                                                                                                                                         | Tablero «sin datos»                                                                   |
+| RIE-09     | El alcance se amplía después de la firma                                                                                                                                                                                                                                                            | Media    | Alto     | Control de cambios del acuerdo                                                                                                                                                                                                                                                                                                                    | Peticiones fuera del acuerdo                                                          |
+| RIE-10     | Costos de servicios externos asumidos por OAIPCS sin presupuesto definido                                                                                                                                                                                                                           | Media    | Alto     | Reglas RM-01 a RM-10; solo servicios existentes en diciembre; tope de gasto                                                                                                                                                                                                                                                                       | Pedido de contratar un servicio sin responsable de pago                               |
+| RIE-11     | Las licencias de Power BI no cubren a quienes ven los tableros                                                                                                                                                                                                                                      | Media    | Medio    | Verificar licencias y capacidad **[H-64]**; alternativa: resumen aprobado enviado a la Alta Dirección                                                                                                                                                                                                                                             | Lectores sin acceso                                                                   |
+| RIE-12     | El privilegio de RENIEC se usa fuera de un caso, o se comparte entre varias personas                                                                                                                                                                                                                | Baja     | Alto     | Usuario nominal único, motivo obligatorio, auditoría inmutable (RA-07, RA-08)                                                                                                                                                                                                                                                                     | Consultas sin caso asociado                                                           |
+| **RIE-13** | **Sobrecarga de alcance: el documento deja abiertas 11 pantallas (7.1), 5 tableros (7.2), seguridad por fila en 48 tablas (12.1) y conexiones externas condicionadas (PIDE-RENIEC, Drive). Mantener todo eso a la vez pone en riesgo que los 4 desarrolladores lleguen a los objetivos en 20 días** | **Alta** | **Alto** | **Recortar antes del martes** a lo estrictamente necesario: login institucional + flujo central (casos, actores, alertas, validación y envío por correo) + 2 o 3 tableros sobre vistas ya existentes (ver 7.1-A, 7.2-A y 19). PIDE-RENIEC y Drive quedan fuera de los 20 días; las pantallas secundarias se anotan en paralelo sin bloquear L0-L1 | Más de 6 pantallas o más de 3 tableros aún «por confirmar» al cierre del lunes 23-nov |
+| RIE-14     | El cierre técnico (≈ 13-dic) deja poco margen hasta el plazo legal de migración (23-dic, H-29) para resolver hallazgos de la reconciliación                                                                                                                                                         | Media    | Medio    | Correr la reconciliación (RF-M01) sobre SQL Server **durante** los 20 días, no después                                                                                                                                                                                                                                                            | Reconciliación programada solo para después del 13-dic                                |
+
+---
+
+# 19. ACUERDO DE ALCANCE (BORRADOR PARA FIRMA)
+
+> **Borrador.** Se firma después del prototipo y del documento de análisis, y antes de la parte técnica.
+
+| Campo                                                         | Contenido                                                                                                                                                                                                                                                                                                                                                                                          |
+| ------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Partes**                                                    | OAIPCS y OGTI — Ministerio de la Producción                                                                                                                                                                                                                                                                                                                                                        |
+| **Objeto**                                                    | Módulo mínimo en producción en diciembre de 2026: **login institucional + flujo central** (casos, actores, alertas, validación y envío por correo) + **2 o 3 tableros en Power BI sobre vistas ya existentes**                                                                                                                                                                                     |
+| **Plazo**                                                     | 20 días: **24-nov-2026 a ≈ 13-dic-2026**                                                                                                                                                                                                                                                                                                                                                           |
+| **Dentro del alcance (núcleo, recortado y cerrado — RIE-13)** | Circuito funcional (sección 5) · login institucional, roles y permisos (sección 6) · pantallas núcleo PAN-01 a PAN-09 (7.1) · tableros TAB-02 y TAB-04 (y TAB-03 si el tiempo alcanza) (7.2) · datos maestros precargados (sección 8)                                                                                                                                                              |
+| **Fuera del alcance de los 20 días**                          | **PIDE-RENIEC (SVC-16)** · **Google Drive (SVC-05)** · pantallas secundarias PAN-10 y PAN-11 · tableros TAB-01 y TAB-05 · inteligencia artificial y procesamiento automático · fuentes públicas y redes sociales · diagrama interactivo de la red de actores · WhatsApp · simulador · portal para actores externos · integración con SESIGUE · análisis de la pota y de los perfiles de pescadores |
+| **Plataforma y base de datos**                                | **Resuelto:** Angular (frontend) + .NET (API) + **SQL Server** (destino de producción), migrado desde el modelo relacional v10 · orden de capas **[EN BLANCO · H-63]**                                                                                                                                                                                                                             |
+| **Entregables**                                               | Módulo en producción · guía de reconstrucción · documentación de reglas y roles · reporte de reconciliación de la precarga (antes del 23-dic-2026, H-29)                                                                                                                                                                                                                                           |
+| **Criterios de aceptación**                                   | Sección 16 · gravedad de defectos aceptable para el cierre: **[EN BLANCO · H-55]**                                                                                                                                                                                                                                                                                                                 |
+| **Responsabilidades de OAIPCS**                               | Diseñar el prototipo · entregar los documentos del modelo relacional, ya traducidos a SQL Server (5.4) · priorizar pantallas y tableros dentro del núcleo · validar catálogos · validar la precarga · designar punto focal                                                                                                                                                                         |
+| **Responsabilidades de OGTI**                                 | Plataforma (Angular, .NET, SQL Server) · login institucional · 4 desarrolladores · puesta en producción · revisar y optimizar el modelo relacional · cubrir los servicios existentes (identidad, Power BI, correo)                                                                                                                                                                                 |
+| **Cambios al alcance**                                        | Solo por acuerdo escrito de ambas partes; PIDE-RENIEC y Drive solo se incorporan en una adenda posterior, no dentro de los 20 días                                                                                                                                                                                                                                                                 |
+| **Supuestos**                                                 | RES-01 a RES-12 (sección 2.6)                                                                                                                                                                                                                                                                                                                                                                      |
+
+| Firma  | Nombre                                                               | Cargo | Fecha |
+| ------ | -------------------------------------------------------------------- | ----- | ----- |
+| OAIPCS | **[EN BLANCO · H-57: quién de OAIPCS firma — Luis, Dilayda u otro]** |       |       |
+| OGTI   | **[EN BLANCO · H-57]**                                               |       |       |
+
+---
+
+# 20. VISIÓN POSTERIOR
+
+> **Se lleva a la reunión en una sola línea; se conversa en 2027.**
+
+_Más adelante, el sistema podrá incorporar el procesamiento automático de documentos con revisión humana, la red interactiva de actores y el análisis de conflictos a través del tiempo._
+
+---
+
+---
+
+# 21. CATÁLOGO DE VISTAS Y TABLEROS DEL SISTEMA FUTURO
+
+> Lista de referencia construida a partir de las vistas ya existentes en la base (R3, esquema `analytics`), las necesidades de Edith, Iván y Esteban (sección 3.3), los indicadores del MVP-45 (R2) y la metodología de diseño (7.4). Ordenada por **cuándo entra**: módulo de diciembre, 2027 y MADRE. Dentro de cada horizonte, por importancia (1 = más importante).
+
+## 21.1 Diciembre 2026 (módulo mínimo)
+
+Ya detallados en 7.2; aquí con su protagonista para dar coherencia a toda la lista.
+
+| #   | Vista o tablero                    | Protagonista       | Pregunta que responde                     | Público                             | Vista existente                         |
+| --- | ---------------------------------- | ------------------ | ----------------------------------------- | ----------------------------------- | --------------------------------------- |
+| 1   | **Seguimiento de compromisos**     | El compromiso      | ¿Qué está vigente, cumplido o vencido?    | Analista, Dirección, Alta Dirección | `vw_anexo_14_seguimiento_compromisos`   |
+| 2   | **Alertas por estado y prioridad** | La alerta          | ¿Cuántas esperan revisión y desde cuándo? | Analista, Dirección                 | **[EN BLANCO · H-50]**: vista por crear |
+| 3   | **Foto para la Alta Dirección**    | La región          | ¿Qué requiere decisión y cuándo?          | Alta Dirección                      | `mv_dashboard_alta_direccion`           |
+| 4   | **Casos estancados**               | El caso sin avance | ¿Qué caso lleva tiempo sin moverse?       | Dirección                           | `vw_casos_estancados`                   |
+| 5   | **Panorama regional**              | La región          | ¿Cómo se comparan las regiones?           | Analista                            | `vw_anexo_02_panorama_regional`         |
+
+## 21.2 2027 (con procesamiento automático e IA)
+
+| #   | Vista o tablero                                      | Protagonista                  | Pregunta que responde                            | Público                   | Por qué entra aquí                                                                                        |
+| --- | ---------------------------------------------------- | ----------------------------- | ------------------------------------------------ | ------------------------- | --------------------------------------------------------------------------------------------------------- |
+| 6   | **Red de actores de un caso** (diagrama interactivo) | El actor y sus relaciones     | ¿Quién influye sobre quién y cómo se alinea?     | Analista                  | Pedido directo de los tres usuarios (N-01, N-17); depende de RF-H01 y de MACTOR (`vw_mactor_red_actores`) |
+| 7   | **Bandeja de candidatos de alerta**                  | El candidato propuesto por IA | ¿Qué propuso el sistema y qué decido?            | Analista                  | Es la puerta de entrada de todo el procesamiento automático (RF-E04)                                      |
+| 8   | **Clima social por zona**                            | La zona                       | ¿Cómo está el ambiente social hoy?               | Dirección, Alta Dirección | Pedido explícito de Edith (N-08); requiere agregación automática                                          |
+| 9   | **Mapa de casos y actores**                          | El territorio                 | ¿Dónde están ocurriendo los casos?               | Analista, Dirección       | RF-H04; requiere servicio de mapas (SVC-11)                                                               |
+| 10  | **Calidad de la extracción** (panel técnico)         | La corrida de procesamiento   | ¿Qué tan bien está funcionando la IA?            | Administrador             | RF-E11; necesario para confiar en los candidatos                                                          |
+| 11  | **Explicación de riesgo** (detalle del semáforo)     | El caso                       | ¿Por qué este caso está en este nivel?           | Dirección                 | RF-H06; requiere el puntaje de riesgo con factores (RF-E06)                                               |
+| 12  | **Resumen ejecutivo de una página**                  | El caso o la zona             | ¿Qué cambió y qué decisión se requiere?          | Alta Dirección            | RF-G04; es el resumen redactado con apoyo de IA                                                           |
+| 13  | **Tiempo de atención de alertas**                    | La alerta                     | ¿Se está cumpliendo el plazo según su prioridad? | Dirección                 | RF-J02, RN-13                                                                                             |
+| 14  | **Cumplimiento de compromisos** (índice)             | El conjunto de compromisos    | ¿Qué proporción de lo exigible se cumplió?       | Dirección                 | RF-J02, RN-12                                                                                             |
+| 15  | **Polarización de actores** (índice)                 | El caso                       | ¿Qué tan enfrentados están los actores?          | Analista                  | RF-J02; depende de la red de actores (#6)                                                                 |
+
+## 21.3 MADRE (proyecto completo v10)
+
+| #   | Vista o tablero                                             | Protagonista                                  | Pregunta que responde                                                       | Público                            | Por qué entra aquí                                                       |
+| --- | ----------------------------------------------------------- | --------------------------------------------- | --------------------------------------------------------------------------- | ---------------------------------- | ------------------------------------------------------------------------ |
+| 16  | **Análisis de la pota a través del tiempo**                 | La controversia                               | ¿Cómo evolucionó este conflicto, con qué normas y qué acciones de las OSPA? | Esteban y analistas especializados | Pedido directo (N-16); requiere redes sociales (SVC-03) y capa normativa |
+| 17  | **Perfiles y alineamientos de pescadores**                  | El pescador o la OSPA                         | ¿Qué diversidad de posiciones hay y cómo cambian?                           | Esteban                            | Pedido directo (N-17); requiere los «capitales» definidos (H-36)         |
+| 18  | **Matriz de conflictividad**                                | El conjunto de casos                          | ¿Qué patrones se repiten entre casos?                                       | Dirección                          | `vw_anexo_15_matriz_conflictividad`, ya existe                           |
+| 19  | **Análisis de casos (formato Anexo 8)**                     | El caso                                       | ¿Cuál es el análisis oficial completo de este caso?                         | Dirección, Alta Dirección          | Pedido de Edith (N-07); formato institucional (H-27)                     |
+| 20  | **Simulador de escenarios** («¿qué pasa si…?»)              | El escenario hipotético                       | ¿Qué podría pasar si cambia una condición?                                  | Dirección                          | RF-J04; explícitamente rotulado como no vigente                          |
+| 21  | **Tendencia de riesgo a 30 días**                           | El caso                                       | ¿Hacia dónde va el riesgo?                                                  | Dirección                          | RF-J05; rotulado como proxy, no predicción                               |
+| 22  | **Condiciones de diálogo** (índice)                         | El caso                                       | ¿Existen las condiciones para dialogar?                                     | Dirección                          | RF-J03; exige evidencia por condición                                    |
+| 23  | **Seguimiento interministerial**                            | El compromiso que involucra a otro ministerio | ¿En qué estado está ante MEF, MINAM, MININTER, etc.?                        | Dirección                          | <u>SVC-14</u>; requiere convenios                                        |
+| 24  | **Panel de un actor externo** (Extranet)                    | El gremio o la organización                   | ¿Cómo está el compromiso que me corresponde?                                | Actor externo (Perfil C)           | RF-A05; solo si se abre la Extranet (H-54)                               |
+| 25  | **Consultas a RENIEC** (panel de auditoría, nunca de datos) | El uso del privilegio                         | ¿Quién consultó, cuándo y con qué motivo?                                   | Administrador / Legal              | RA-08; **nunca** muestra el resultado de la consulta, solo su registro   |
+
+## 21.4 Cómo se usa esta lista
+
+- **Para diciembre:** los 5 primeros son la base de la sección 7.2; se eligen entre ellos los que confirme Luis (H-49, H-50).
+- **Para 2027:** los números 6 a 15 son los primeros candidatos al abrir el procesamiento automático; el n.º 6 (red de actores) es el que más piden los tres usuarios.
+- **Para MADRE:** los números 16 a 25 dependen de servicios externos o de convenios que aún no existen; se retoman cuando esas condiciones estén dadas.
+- **Regla transversal:** ningún tablero muestra datos personales ni resultados de RENIEC; estos quedan siempre en fichas con permiso específico (sección 6) o en paneles de auditoría (n.º 25), nunca en un tablero de indicadores.
+
+# 22. ANEXOS
+
+## Anexo A — Glosario
+
+| Término             | Definición                                                                                                                               |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| ALERTA TEMPRANA     | Aviso de que algo puede escalar; siempre se revisa por una persona antes de salir                                                        |
+| ACUERDO DE ALCANCE  | Documento firmado por OAIPCS y OGTI que fija qué se construye                                                                            |
+| DATOS MAESTROS      | Datos base que el sistema necesita para funcionar: geografía, catálogos, usuarios, roles, organizaciones                                 |
+| DGPA                | Dirección General de Pesca Artesanal (PRODUCE)                                                                                           |
+| LOGIN INSTITUCIONAL | Ingreso con el usuario y la clave de la institución                                                                                      |
+| MACTOR              | Método para medir quién influye sobre quién entre los actores de un caso                                                                 |
+| MADRE               | El proyecto completo (v10)                                                                                                               |
+| MVP                 | En este documento, el módulo de diciembre de 2026; no confundir con el documento «MVP-45»                                                |
+| OAIPCS              | Oficina de Articulación Intergubernamental y Prevención de Conflictos Sociales, de la Secretaría General del Ministerio de la Producción |
+| OGTI                | Oficina General de Tecnologías de la Información, del Ministerio de la Producción                                                        |
+| OSPA                | Organización pesquera artesanal                                                                                                          |
+| PARIDAD             | Que el sistema nuevo permita hacer lo mismo que el actual                                                                                |
+| PIDE                | Plataforma de Interoperabilidad del Estado Peruano, por la que las entidades públicas intercambian datos                                 |
+| RLS                 | Seguridad por fila: la base decide qué filas ve cada usuario                                                                             |
+| SESIGUE             | Sistema externo de seguimiento de compromisos                                                                                            |
+
+## Anexo B — Qué cambia respecto de la versión 0.1
+
+### B.1 Requisitos que pasan al horizonte 2027
+
+| Requisito              | Qué es                                                           | Motivo                                               |
+| ---------------------- | ---------------------------------------------------------------- | ---------------------------------------------------- |
+| RF-E01 a RF-E11        | Todo el procesamiento de documentos con IA                       | La IA y el procesamiento automático quedan para 2027 |
+| RF-D02                 | Recepción de candidatos de alerta automáticos                    | Depende del procesamiento                            |
+| RF-D08                 | Alertas por WhatsApp                                             | Costo por definir                                    |
+| RF-D11                 | Plazos y escalamiento automático de alertas                      | Depende de candidatos automáticos                    |
+| RF-G02, RF-G04         | Borradores y resúmenes redactados con IA                         | Depende de IA                                        |
+| RF-H01                 | Diagrama interactivo de la red de actores                        | No es parte del uso actual de AVISA                  |
+| RF-B06                 | Posición, influencia y relaciones entre actores                  | Insumo del diagrama                                  |
+| RF-H06                 | Explicación de los factores de cada semáforo                     | Depende de indicadores avanzados                     |
+| RF-J02                 | Índices de cumplimiento, atención y polarización                 | Pocos datos y depende de lo anterior                 |
+| RF-A07, RF-C03, RF-X03 | Segundo factor, avisos de vencimiento y parámetros con historial | Fuera de los 20 días                                 |
+
+### B.2 Secciones nuevas o reescritas
+
+| Sección                     | Qué cambia                                                                                                            |
+| --------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| 0.2, 0.3 (C-13 a C-17), 0.4 | Nueva regla de prelación, nuevas contradicciones y guía de qué se lleva                                               |
+| 1.2                         | Cuatro horizontes (ENTREGA, MVP de diciembre, 2027, MADRE)                                                            |
+| 2.6                         | Nuevas restricciones RES-09 a RES-12                                                                                  |
+| 3.1                         | Nuevo interesado INT-09                                                                                               |
+| 4                           | Marcada como material interno; diagramas actualizados (C1, C2 y C3)                                                   |
+| **9**                       | **Nueva:** circuito funcional y paridad con el AVISA actual                                                           |
+| **10**                      | **Nueva:** roles y permisos                                                                                           |
+| **11**                      | **Nueva:** pantallas y tableros prioritarios                                                                          |
+| **12**                      | **Nueva:** datos maestros mínimos                                                                                     |
+| 13 a 17                     | Completadas (no funcionales, interfaces, errores, verificación y trazabilidad)                                        |
+| **18**                      | **Nueva:** plan de 20 días, dependencias, decisiones y riesgos                                                        |
+| **19**                      | **Nueva:** borrador del acuerdo de alcance                                                                            |
+| **20**                      | **Nueva:** visión posterior en una línea                                                                              |
+| **5.4, 5.5** (v0.3)         | Primero la necesidad y después el modelo; capas y orden de construcción                                               |
+| **7.4 a 7.7** (v0.3)        | Metodología de diseño (público, protagonista, narrativa, estilo), plantillas, sistema unificado y lista de coherencia |
+| **13.3 a 13.5** (v0.3)      | Presupuesto de servicios externos, requisitos exactos de cada actor externo y reglas de minimización                  |
+
+## Anexo C — Registro de secciones en blanco
+
+**Martes** = conviene cerrarlo en la reunión.
+
+| ID       | Qué falta                                                                                                  | Quién responde        | Martes     |
+| -------- | ---------------------------------------------------------------------------------------------------------- | --------------------- | ---------- |
+| ~~H-01~~ | ~~¿OGTI puede alojar y mantener PostgreSQL?~~ **Resuelto:** no; el destino es **SQL Server**. Ver 12.1     | —                     |            |
+| ~~H-02~~ | ~~Cuántos desarrolladores~~ **Resuelto: ≈ 4**, dedicación exclusiva por confirmar                          | —                     | **[H-70]** |
+| H-03     | Dónde y cómo se ejecuta el procesamiento (2027)                                                            | OGTI                  |            |
+| H-04     | Dictamen legal sobre datos personales y uso de IA externa                                                  | Legal / OGTI          |            |
+| H-05     | Tecnología de los diagramas interactivos (2027)                                                            | OGTI                  |            |
+| H-06     | Costo y proveedor de WhatsApp                                                                              | OGTI                  |            |
+| H-07     | Si se necesita SMS                                                                                         | OAIPCS                |            |
+| H-08     | Confirmar la reclasificación del alcance con la Dirección                                                  | OAIPCS                | Sí         |
+| H-09     | Qué hace que una alerta sea «grave»                                                                        | OAIPCS                |            |
+| H-10     | Proveedor de redes sociales                                                                                | OAIPCS / OGTI         |            |
+| H-11     | Validar la inferencia de negocio (sección 2)                                                               | OAIPCS                |            |
+| H-12     | Línea base y meta del tiempo para armar una ficha                                                          | OAIPCS                |            |
+| H-13     | Tiempos objetivo de ingesta y de tablero (2027)                                                            | OGTI                  |            |
+| H-14     | Plazos de atención por prioridad de alerta                                                                 | OAIPCS                |            |
+| H-15     | Cargo exacto de Edith, Iván y Esteban                                                                      | OAIPCS                |            |
+| H-16     | Quién será el administrador del sistema                                                                    | OAIPCS / OGTI         |            |
+| H-17     | Programador de tareas                                                                                      | OGTI                  |            |
+| ~~H-18~~ | ~~Herramienta para las pantallas de captura y revisión~~ **Resuelto: Angular (frontend) + .NET (API)**     | —                     |            |
+| H-19     | Tecnología del notificador                                                                                 | OGTI                  |            |
+| H-20     | Servicio de identidad institucional                                                                        | OGTI                  | Sí         |
+| H-21     | Si hace falta un servicio de transcripción de audio                                                        | OAIPCS                |            |
+| H-22     | Dónde se aloja cada pieza, ambientes, acceso y navegadores                                                 | OGTI                  |            |
+| H-23     | Segundo factor de autenticación                                                                            | OGTI                  |            |
+| H-24     | Catálogo y criterios de clasificación de eventos                                                           | OAIPCS                |            |
+| H-25     | Si toda alerta grave necesita confirmación de la Dirección                                                 | OAIPCS                |            |
+| H-26     | Lista de productos de la plantilla de selección múltiple                                                   | OAIPCS                |            |
+| H-27     | Formato oficial del análisis de casos (Anexo 8)                                                            | OAIPCS                |            |
+| H-28     | Indicadores del tablero                                                                                    | OAIPCS                |            |
+| H-29     | Fecha de cambio y frecuencia de carga del sistema anterior                                                 | OAIPCS                |            |
+| H-30     | Copias de seguridad: frecuencia y plazo de recuperación                                                    | OGTI                  |            |
+| H-31     | Anticipación de los avisos de vencimiento                                                                  | OAIPCS                |            |
+| H-32     | Lista blanca de fuentes públicas                                                                           | OAIPCS / Legal        |            |
+| H-33     | Extensión y formato del resumen de una página                                                              | OAIPCS                |            |
+| H-34     | Contraste de las fórmulas con el informe del caso SANIPES Sechura                                          | OAIPCS                |            |
+| H-35     | Definición de «controversia» y fuentes para la pota                                                        | OAIPCS                |            |
+| H-36     | Qué son los «capitales» de los pescadores y cómo se miden                                                  | OAIPCS                |            |
+| H-37     | Tiempos objetivo de ficha y capacitación necesaria                                                         | OAIPCS                |            |
+| H-38     | Límite de actores que el diagrama puede dibujar                                                            | OGTI                  |            |
+| H-39     | Roles que pueden ver teléfonos y correos                                                                   | OAIPCS / Legal        |            |
+| H-40     | Si la vista de carga de campo se usa                                                                       | OAIPCS                |            |
+| H-41     | Vistas para la ficha de actor y territorio y para contactos                                                | Este equipo           | Sí         |
+| H-42     | Retención de cada tipo de dato                                                                             | OAIPCS / Legal        |            |
+| H-43     | Validación del catálogo de estados de caso                                                                 | OAIPCS                |            |
+| ~~H-44~~ | ~~¿Modelo relacional o aplicación actual?~~ **Resuelto:** modelo relacional (v10), sujeto a optimizaciones | —                     |            |
+| **H-45** | **Qué necesidades de Edith, Iván y Esteban caben en diciembre**                                            | OAIPCS                | **Sí**     |
+| ~~H-46~~ | ~~Quién diseña el prototipo~~ **Resuelto:** lo diseña OAIPCS (Diego)                                       | —                     |            |
+| **H-47** | **Uso real del AVISA actual (qué módulos se usan)**                                                        | OAIPCS                | **Sí**     |
+| H-48     | Roles actuales (9) y su correspondencia; cómo se asignan los casos                                         | OAIPCS                |            |
+| **H-49** | **Pantallas prioritarias confirmadas** (método de priorización en 7.4)                                     | OAIPCS / Luis         | **Sí**     |
+| **H-50** | **Tableros prioritarios: cuáles, cuántos y con qué herramienta**                                           | OAIPCS / OGTI         | **Sí**     |
+| **H-51** | **Datos maestros: cuáles, quién los carga y cómo se tratan los datos personales**                          | OAIPCS / OGTI         | **Sí**     |
+| **H-52** | **Login institucional: servicio, grupos y plazo**                                                          | OGTI                  | **Sí**     |
+| ~~H-53~~ | ~~Calendario~~ **Resuelto: los 20 días inician el martes 24-nov-2026** y cierran ≈ el 13-dic-2026          | —                     |            |
+| H-54     | Extranet para actores externos (2027)                                                                      | OGTI                  |            |
+| H-55     | Qué gravedad de defectos se acepta para cerrar el módulo                                                   | OAIPCS / OGTI         |            |
+| H-56     | Horario de disponibilidad y ventanas de mantenimiento                                                      | OGTI                  |            |
+| **H-57** | **Rol de Luis y de Dilayda en la aprobación**                                                              | OAIPCS                | **Sí**     |
+| H-58     | Tiempos de respuesta y capacidad esperados                                                                 | OGTI                  |            |
+| H-59     | Si Drive, correo y generación de PDF entran en diciembre                                                   | OAIPCS / OGTI         | Sí         |
+| H-60     | Identidad visual institucional (colores, tipografía, manual de marca)                                      | OAIPCS / OGTI         |            |
+| H-61     | Lista exacta de documentos y scripts del modelo relacional que se entregan a OGTI                          | Este equipo           | Sí         |
+| H-62     | Qué puede optimizar OGTI del modelo y qué debe conservar                                                   | OGTI / OAIPCS         | Sí         |
+| H-63     | Orden definitivo de las capas y qué parte de L5 entra en diciembre                                         | OGTI / OAIPCS         | Sí         |
+| H-64     | Licencias de Power BI: cuántas y si cubren a los lectores de la Alta Dirección                             | OGTI                  | Sí         |
+| H-65     | Quién paga cada servicio y tope de gasto de OAIPCS                                                         | OAIPCS                | Sí         |
+| H-66     | Verificar tarifas vigentes (Gemini, WhatsApp en Perú, SMS) con los proveedores                             | Este equipo           |            |
+| H-67     | Volumen real de uso: usuarios, alertas y documentos por mes, destinatarios por alerta                      | OAIPCS                |            |
+| H-68     | Convenio con RENIEC: si ya existe, quién lo gestiona y quién asigna el privilegio nominal                  | OAIPCS / OGTI / Legal | Sí         |

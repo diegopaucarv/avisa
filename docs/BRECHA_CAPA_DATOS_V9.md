@@ -876,7 +876,7 @@ vocabulario (**INF**), `core.proceso_instancia` es proceso (**P**) y
 **presente** (`core`); lo que falta es el **proceso** (`agent`, `avisa`, `staging`,
 `ind` están vacíos). La base es hoy un sistema de registro, no de inteligencia.
 
-### 12.1 Entrada (I) — 31 tablas
+### 12.1 Entrada (I) — 32 tablas
 
 **I-a · Captura cruda (vacía, y es el diseño correcto)**
 
@@ -891,6 +891,7 @@ vocabulario (**INF**), `core.proceso_instancia` es proceso (**P**) y
 | Tabla                                                               |        Filas | Procedencia                                                           |
 | ------------------------------------------------------------------- | -----------: | --------------------------------------------------------------------- |
 | `core.actores`                                                      |        1 160 | `dim_actores` 828 + `dim_actores_estado` 108 + `dim_organizacion` 224 |
+| `core.actor_alias`                                                  |          143 | `dim_actores.abreviatura` (abreviatura validada como alias)           |
 | `core.organizaciones`                                               |          224 | `dim_organizacion` (la misma entidad vista como organización)         |
 | `core.demandas`                                                     |          325 | `legacy.dim_demandas` + `bridge_alerta_demandas`                      |
 | `core.documentos`                                                   |          153 | `dim_redaccion` 51 + `dim_coordinacion_tecnica` 4 + PDFs de 8 tipos   |
@@ -968,7 +969,7 @@ heredadas del legado (§14). No entra en el recuento de 78 porque éste es del
 > para re-empaquetar lo que una persona ya escribió. En v10 la salida pasa a
 > plantilla + vista; el texto que no se puede derivar lo redacta A3.
 
-### 12.4 Transversal (INF) — 54 tablas
+### 12.4 Transversal (INF) — 56 tablas
 
 | Grupo                 | Tablas                                                                                                                                                                                          | Filas | Comentario                                                                                                                                                               |
 | --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -976,6 +977,7 @@ heredadas del legado (§14). No entra en el recuento de 78 porque éste es del
 | Geografía             | `core.regiones` (25), `provincias` (70), `distritos` (698)                                                                                                                                      |   793 | Ubigeo cargado y consistente                                                                                                                                             |
 | Gobierno transversal  | `config.parametro` (17), `aplicacion` (4), `libreria` (6); `policy.regla` (10), `cat_tipos_regla` (5); `model.model_card` (12); `core.feature_flags` (9), `roles` (9), `cat_clasificacion` (3)  |    70 | **Sin bitácora de uso**: nada registra qué regla se aplicó                                                                                                               |
 | Integraciones         | `core.integraciones` (20), `cat_tipos_fuente_integracion` (21), `cat_estados_integracion` (8), `cat_mapeo_estado_externo` (3), `outbox_integracion` (0)                                         |    52 | Adapter SESIGUE declarado, nunca ejercitado                                                                                                                              |
+| Cumplimiento legal    | `core.banco_datos_tratamiento` (1), `ref.base_legal_tratamiento` (5), `ref.base_legal_evidencia` (0)                                                                                            |     6 | Registro del banco de datos personales (DC-04) y las bases legales que lo autorizan; la evidencia documental se poblará desde el KAG                                     |
 | Expansión sin uso     | `territorio.*` (16), `pesca.*` (2), `mype.*` (1), `proteccion.*` (1), `impact.*` (5), `economic.*` (3), `forecast.*` (3), `consultation.*` (4), `community.*` (1), `domain.*` (4), `lex.*` (11) |   ≈12 | Solo catálogos sembrados                                                                                                                                                 |
 
 ### 12.5 Vacías que son de proceso (no son expansión)

@@ -12,7 +12,7 @@ Reglas comunes a todas las fases:
 * No inventar datos: lo que no se pueda resolver va a `ctx.conflicto(...)`.
 * No abrir transacciones propias: la maneja `run.py` (una sola para toda la carga
   o una por fase con `--per-phase-commit`).
-* Toda escritura ocurre ya con `app.user_id` y `app.clasificacion_max` fijados.
+* Toda escritura ocurre ya con `app.user_id` y `app.rol_codigo` fijados.
 """
 
 __all__ = ["legacy", "registry", "context", "bootstrap", "run"]

@@ -58,6 +58,7 @@ PROPOSITO: dict[str, str] = {
     "consultation.procesos": "Proceso de consulta previa asociado a un caso, con el pueblo indígena involucrado, su fase actual y su estado.",
     "consultation.resultados": "Resultado o acuerdo alcanzado en un proceso de consulta, con su tipo, descripción, fecha y documento de respaldo.",
     # --- core: núcleo operativo ---
+    "core.actor_alias": "Otros nombres con los que se conoce a un actor —alias, abreviatura, cargo o nombre histórico—, con su fuente y si un analista lo validó.",
     "core.actor_datos_personales": "Datos personales del actor cifrados con AES-256 y su HMAC de búsqueda, con base legal y consentimiento, separados del padrón por privacidad.",
     "core.actor_membresia": "Pertenencia de una persona a una organización, con el cargo que ejerce y el período de vigencia del vínculo.",
     "core.actores": "Sujeto individual o colectivo que participa en la conflictividad —dirigente, gremio, autoridad o empresa— con su tipo, rol, perfil y distrito de referencia.",
@@ -65,6 +66,7 @@ PROPOSITO: dict[str, str] = {
     "core.alerta_especies": "Especies involucradas en una alerta temprana, como vínculo entre la alerta y el catálogo de especies del sector.",
     "core.alertas_actores": "Actores implicados en una alerta temprana, como vínculo entre la alerta y el padrón de actores.",
     "core.alertas_tempranas": "Alerta temprana sobre un caso: situación actual, riesgos, acciones sugeridas, nivel, prioridad y plazos de atención y remisión.",
+    "core.banco_datos_tratamiento": "Registro del banco de datos personales que exige la Ley 29733: finalidad, categorías tratadas, plazo de conservación, nivel de seguridad, oficial responsable, flujo transfronterizo y estado de inscripción ante la autoridad.",
     "core.cambio_normativo": "Solicitud de cambio sobre datos normativos, con el antes y el después de la fila, la norma que lo respalda y su aprobación o reversión.",
     "core.capacidad_campo": "Horas de campo disponibles de cada usuario en un mes, para planificar la recolección y estimar el esfuerzo de cerrar brechas de información.",
     "core.capacitacion_participantes": "Inscripción y culminación de un actor en una capacitación, como vínculo entre la actividad formativa y el padrón de actores.",
@@ -286,4 +288,7 @@ PROPOSITO: dict[str, str] = {
     "territorio.planta_detalle": "Datos de una planta procesadora: razón social, tipo de procesamiento, capacidad instalada y empleo directo.",
     "territorio.terminal_detalle": "Datos propios del terminal pesquero, con su capacidad de procesamiento diario expresada en toneladas.",
     "territorio.zona_pesca": "Zona de pesca delimitada por un polígono, con su tipo, su especie asociada y su período de vigencia.",
+    # --- ref: bases legales y su respaldo documental ---
+    "ref.base_legal_evidencia": "Fragmento del banco de conocimiento que respalda una base legal, con su página, su similitud y la confianza de la correspondencia, para poder citar la fuente exacta.",
+    "ref.base_legal_tratamiento": "Base legal que autoriza el tratamiento de datos personales —norma, artículo, finalidad y condiciones—, ligada al banco de datos que la invoca.",
 }

@@ -1,0 +1,963 @@
+{
+  "fuente": "C:\\Users\\Julia\\Downloads\\avisa\\backend\\BASE_CONFLICTOS_SOCIALES_2026.xlsx",
+  "hojas": {
+    "Respuestas de formulario 1": {
+      "filas": 2,
+      "columnas": 23,
+      "celdas": 46,
+      "caracteres": 837,
+      "tok_valores": 266,
+      "tok_csv": 300,
+      "tok_csv_o200k": 291,
+      "caracteres_csv": 882
+    },
+    "BRIDGE_Capacitacion_Participant": {
+      "filas": 10,
+      "columnas": 5,
+      "celdas": 42,
+      "caracteres": 251,
+      "tok_valores": 126,
+      "tok_csv": 163,
+      "tok_csv_o200k": 166,
+      "caracteres_csv": 300
+    },
+    "DIM_Capacitaciones": {
+      "filas": 2,
+      "columnas": 20,
+      "celdas": 22,
+      "caracteres": 386,
+      "tok_valores": 140,
+      "tok_csv": 154,
+      "tok_csv_o200k": 143,
+      "caracteres_csv": 417
+    },
+    "FACT_Analisis_Casos": {
+      "filas": 2,
+      "columnas": 26,
+      "celdas": 45,
+      "caracteres": 4490,
+      "tok_valores": 1331,
+      "tok_csv": 1363,
+      "tok_csv_o200k": 1223,
+      "caracteres_csv": 4540
+    },
+    "BRIDGE_Alerta_Recurso": {
+      "filas": 33,
+      "columnas": 3,
+      "celdas": 99,
+      "caracteres": 1182,
+      "tok_valores": 649,
+      "tok_csv": 745,
+      "tok_csv_o200k": 749,
+      "caracteres_csv": 1280
+    },
+    "BRIDGE_Caso_ActorEstado": {
+      "filas": 2,
+      "columnas": 3,
+      "celdas": 6,
+      "caracteres": 90,
+      "tok_valores": 42,
+      "tok_csv": 44,
+      "tok_csv_o200k": 47,
+      "caracteres_csv": 95
+    },
+    "LOG_Accesos": {
+      "filas": 858,
+      "columnas": 5,
+      "celdas": 4244,
+      "caracteres": 56410,
+      "tok_valores": 25282,
+      "tok_csv": 28449,
+      "tok_csv_o200k": 27606,
+      "caracteres_csv": 60699
+    },
+    "FACT_Casos": {
+      "filas": 36,
+      "columnas": 29,
+      "celdas": 699,
+      "caracteres": 38998,
+      "tok_valores": 12634,
+      "tok_csv": 13070,
+      "tok_csv_o200k": 11524,
+      "caracteres_csv": 40041
+    },
+    "FACT_Proceso_Caso": {
+      "filas": 37,
+      "columnas": 10,
+      "celdas": 298,
+      "caracteres": 3021,
+      "tok_valores": 1615,
+      "tok_csv": 1767,
+      "tok_csv_o200k": 1769,
+      "caracteres_csv": 3390
+    },
+    "FACT_RED_RADAR": {
+      "filas": 2,
+      "columnas": 6,
+      "celdas": 12,
+      "caracteres": 136,
+      "tok_valores": 56,
+      "tok_csv": 63,
+      "tok_csv_o200k": 62,
+      "caracteres_csv": 147
+    },
+    "FACT_NODO": {
+      "filas": 2,
+      "columnas": 9,
+      "celdas": 17,
+      "caracteres": 179,
+      "tok_valores": 65,
+      "tok_csv": 75,
+      "tok_csv_o200k": 78,
+      "caracteres_csv": 196
+    },
+    "FACT_Proceso_Reporte": {
+      "filas": 100,
+      "columnas": 8,
+      "celdas": 707,
+      "caracteres": 7640,
+      "tok_valores": 4163,
+      "tok_csv": 4557,
+      "tok_csv_o200k": 4539,
+      "caracteres_csv": 8439
+    },
+    "DIM_Paso_Proceso_Caso": {
+      "filas": 5,
+      "columnas": 6,
+      "celdas": 30,
+      "caracteres": 639,
+      "tok_valores": 189,
+      "tok_csv": 205,
+      "tok_csv_o200k": 185,
+      "caracteres_csv": 668
+    },
+    "DIM_Paso_Proceso": {
+      "filas": 4,
+      "columnas": 5,
+      "celdas": 20,
+      "caracteres": 149,
+      "tok_valores": 50,
+      "tok_csv": 62,
+      "tok_csv_o200k": 59,
+      "caracteres_csv": 168
+    },
+    "FACT_Historial_Estado": {
+      "filas": 28,
+      "columnas": 10,
+      "celdas": 172,
+      "caracteres": 1645,
+      "tok_valores": 967,
+      "tok_csv": 1072,
+      "tok_csv_o200k": 1051,
+      "caracteres_csv": 1924
+    },
+    "DIM_Tipo_Cambio": {
+      "filas": 7,
+      "columnas": 3,
+      "celdas": 21,
+      "caracteres": 310,
+      "tok_valores": 95,
+      "tok_csv": 112,
+      "tok_csv_o200k": 104,
+      "caracteres_csv": 330
+    },
+    "LOG_Envios": {
+      "filas": 18,
+      "columnas": 13,
+      "celdas": 189,
+      "caracteres": 3420,
+      "tok_valores": 1356,
+      "tok_csv": 1487,
+      "tok_csv_o200k": 1408,
+      "caracteres_csv": 3653
+    },
+    "DIM_Alertas": {
+      "filas": 84,
+      "columnas": 31,
+      "celdas": 1563,
+      "caracteres": 227673,
+      "tok_valores": 68246,
+      "tok_csv": 69348,
+      "tok_csv_o200k": 60417,
+      "caracteres_csv": 230276
+    },
+    "DIM_Reporte_Rapido": {
+      "filas": 2,
+      "columnas": 25,
+      "celdas": 39,
+      "caracteres": 2082,
+      "tok_valores": 660,
+      "tok_csv": 685,
+      "tok_csv_o200k": 619,
+      "caracteres_csv": 2131
+    },
+    "DIM_ClimaSocial": {
+      "filas": 8,
+      "columnas": 28,
+      "celdas": 126,
+      "caracteres": 17617,
+      "tok_valores": 5091,
+      "tok_csv": 5171,
+      "tok_csv_o200k": 4441,
+      "caracteres_csv": 17840
+    },
+    "DIM_ClimaSocial_Focalizado": {
+      "filas": 7,
+      "columnas": 26,
+      "celdas": 109,
+      "caracteres": 15236,
+      "tok_valores": 4413,
+      "tok_csv": 4485,
+      "tok_csv_o200k": 3856,
+      "caracteres_csv": 15417
+    },
+    "DIM_Riesgos": {
+      "filas": 4,
+      "columnas": 2,
+      "celdas": 8,
+      "caracteres": 59,
+      "tok_valores": 26,
+      "tok_csv": 32,
+      "tok_csv_o200k": 32,
+      "caracteres_csv": 66
+    },
+    "DIM_Locales": {
+      "filas": 28,
+      "columnas": 15,
+      "celdas": 273,
+      "caracteres": 6146,
+      "tok_valores": 2446,
+      "tok_csv": 2622,
+      "tok_csv_o200k": 2460,
+      "caracteres_csv": 6468
+    },
+    "DIM_Destinatarios_Fijos": {
+      "filas": 5,
+      "columnas": 7,
+      "celdas": 35,
+      "caracteres": 195,
+      "tok_valores": 87,
+      "tok_csv": 105,
+      "tok_csv_o200k": 109,
+      "caracteres_csv": 229
+    },
+    "DIM_Recurso_Pesca": {
+      "filas": 38,
+      "columnas": 6,
+      "celdas": 226,
+      "caracteres": 2693,
+      "tok_valores": 1049,
+      "tok_csv": 1213,
+      "tok_csv_o200k": 1107,
+      "caracteres_csv": 2920
+    },
+    "DIM_Estado_Proceso": {
+      "filas": 6,
+      "columnas": 4,
+      "celdas": 24,
+      "caracteres": 164,
+      "tok_valores": 75,
+      "tok_csv": 87,
+      "tok_csv_o200k": 89,
+      "caracteres_csv": 187
+    },
+    "BRIDGE_Caso_Recurso": {
+      "filas": 1,
+      "columnas": 3,
+      "celdas": 3,
+      "caracteres": 22,
+      "tok_valores": 8,
+      "tok_csv": 8,
+      "tok_csv_o200k": 10,
+      "caracteres_csv": 24
+    },
+    "BRIDGE_Caso_Demandas": {
+      "filas": 13,
+      "columnas": 5,
+      "celdas": 65,
+      "caracteres": 1714,
+      "tok_valores": 656,
+      "tok_csv": 702,
+      "tok_csv_o200k": 642,
+      "caracteres_csv": 1778
+    },
+    "BRIDGE_Alerta_Demandas": {
+      "filas": 232,
+      "columnas": 5,
+      "celdas": 1145,
+      "caracteres": 11967,
+      "tok_valores": 6892,
+      "tok_csv": 8032,
+      "tok_csv_o200k": 7820,
+      "caracteres_csv": 13126
+    },
+    "BRIDGE_Alerta_ActorEstado": {
+      "filas": 6,
+      "columnas": 3,
+      "celdas": 18,
+      "caracteres": 230,
+      "tok_valores": 127,
+      "tok_csv": 142,
+      "tok_csv_o200k": 141,
+      "caracteres_csv": 247
+    },
+    "DIM_Tipo_Tematica": {
+      "filas": 8,
+      "columnas": 3,
+      "celdas": 24,
+      "caracteres": 1769,
+      "tok_valores": 436,
+      "tok_csv": 450,
+      "tok_csv_o200k": 377,
+      "caracteres_csv": 1792
+    },
+    "DIM_Demandas": {
+      "filas": 326,
+      "columnas": 9,
+      "celdas": 1860,
+      "caracteres": 59141,
+      "tok_valores": 21886,
+      "tok_csv": 23473,
+      "tok_csv_o200k": 21641,
+      "caracteres_csv": 62061
+    },
+    "DIM_anuncios_acuerdos": {
+      "filas": 1,
+      "columnas": 7,
+      "celdas": 7,
+      "caracteres": 62,
+      "tok_valores": 21,
+      "tok_csv": 24,
+      "tok_csv_o200k": 27,
+      "caracteres_csv": 68
+    },
+    "DIM_Nivel_Alertas": {
+      "filas": 5,
+      "columnas": 4,
+      "celdas": 20,
+      "caracteres": 453,
+      "tok_valores": 142,
+      "tok_csv": 154,
+      "tok_csv_o200k": 133,
+      "caracteres_csv": 472
+    },
+    "BRIDGE_Caso_Descencadenantes": {
+      "filas": 2,
+      "columnas": 4,
+      "celdas": 8,
+      "caracteres": 323,
+      "tok_valores": 104,
+      "tok_csv": 106,
+      "tok_csv_o200k": 101,
+      "caracteres_csv": 330
+    },
+    "BRIDGE_Caso_Impulsores": {
+      "filas": 6,
+      "columnas": 4,
+      "celdas": 24,
+      "caracteres": 889,
+      "tok_valores": 322,
+      "tok_csv": 331,
+      "tok_csv_o200k": 309,
+      "caracteres_csv": 912
+    },
+    "BRIDGE_Caso_Causas": {
+      "filas": 5,
+      "columnas": 4,
+      "celdas": 20,
+      "caracteres": 758,
+      "tok_valores": 261,
+      "tok_csv": 270,
+      "tok_csv_o200k": 256,
+      "caracteres_csv": 777
+    },
+    "BRIDGE_Caso_Medios": {
+      "filas": 5,
+      "columnas": 7,
+      "celdas": 34,
+      "caracteres": 699,
+      "tok_valores": 272,
+      "tok_csv": 290,
+      "tok_csv_o200k": 279,
+      "caracteres_csv": 732
+    },
+    "BRIDGE_ACTOR_GRUPO": {
+      "filas": 1,
+      "columnas": 3,
+      "celdas": 3,
+      "caracteres": 44,
+      "tok_valores": 17,
+      "tok_csv": 17,
+      "tok_csv_o200k": 19,
+      "caracteres_csv": 46
+    },
+    "BRIDGE_Caso_POSICIONES": {
+      "filas": 1,
+      "columnas": 5,
+      "celdas": 5,
+      "caracteres": 74,
+      "tok_valores": 27,
+      "tok_csv": 28,
+      "tok_csv_o200k": 30,
+      "caracteres_csv": 78
+    },
+    "BRIDGE_Caso_INTERESES": {
+      "filas": 1,
+      "columnas": 5,
+      "celdas": 5,
+      "caracteres": 71,
+      "tok_valores": 24,
+      "tok_csv": 25,
+      "tok_csv_o200k": 28,
+      "caracteres_csv": 75
+    },
+    "BRIDGE_Caso_NECESIDADES": {
+      "filas": 1,
+      "columnas": 5,
+      "celdas": 5,
+      "caracteres": 81,
+      "tok_valores": 32,
+      "tok_csv": 33,
+      "tok_csv_o200k": 33,
+      "caracteres_csv": 85
+    },
+    "BRIDGE_Caso_INETERES_COMUNES": {
+      "filas": 1,
+      "columnas": 4,
+      "celdas": 4,
+      "caracteres": 78,
+      "tok_valores": 27,
+      "tok_csv": 28,
+      "tok_csv_o200k": 30,
+      "caracteres_csv": 81
+    },
+    "DIM_Descencadenantes": {
+      "filas": 1,
+      "columnas": 2,
+      "celdas": 2,
+      "caracteres": 46,
+      "tok_valores": 14,
+      "tok_csv": 14,
+      "tok_csv_o200k": 13,
+      "caracteres_csv": 47
+    },
+    "DIM_Impulsores": {
+      "filas": 1,
+      "columnas": 2,
+      "celdas": 2,
+      "caracteres": 35,
+      "tok_valores": 14,
+      "tok_csv": 14,
+      "tok_csv_o200k": 13,
+      "caracteres_csv": 36
+    },
+    "DIM_Causas": {
+      "filas": 1,
+      "columnas": 2,
+      "celdas": 2,
+      "caracteres": 27,
+      "tok_valores": 10,
+      "tok_csv": 10,
+      "tok_csv_o200k": 9,
+      "caracteres_csv": 28
+    },
+    "DIM_Medios": {
+      "filas": 1,
+      "columnas": 5,
+      "celdas": 5,
+      "caracteres": 39,
+      "tok_valores": 12,
+      "tok_csv": 15,
+      "tok_csv_o200k": 15,
+      "caracteres_csv": 43
+    },
+    "DIM_Tipo_Proceso": {
+      "filas": 5,
+      "columnas": 6,
+      "celdas": 30,
+      "caracteres": 212,
+      "tok_valores": 83,
+      "tok_csv": 106,
+      "tok_csv_o200k": 99,
+      "caracteres_csv": 241
+    },
+    "DIM_Acciones_Hitos": {
+      "filas": 9,
+      "columnas": 13,
+      "celdas": 55,
+      "caracteres": 1389,
+      "tok_valores": 511,
+      "tok_csv": 546,
+      "tok_csv_o200k": 515,
+      "caracteres_csv": 1458
+    },
+    "DIM_Hitos": {
+      "filas": 13,
+      "columnas": 13,
+      "celdas": 118,
+      "caracteres": 2158,
+      "tok_valores": 795,
+      "tok_csv": 897,
+      "tok_csv_o200k": 853,
+      "caracteres_csv": 2326
+    },
+    "DIM_REDACCION": {
+      "filas": 52,
+      "columnas": 13,
+      "celdas": 431,
+      "caracteres": 14009,
+      "tok_valores": 5197,
+      "tok_csv": 5556,
+      "tok_csv_o200k": 5058,
+      "caracteres_csv": 14684
+    },
+    "DIM_COORDINACION_TECNICA": {
+      "filas": 5,
+      "columnas": 13,
+      "celdas": 47,
+      "caracteres": 1318,
+      "tok_valores": 462,
+      "tok_csv": 499,
+      "tok_csv_o200k": 459,
+      "caracteres_csv": 1382
+    },
+    "DIM_MESAS_GRUPOS": {
+      "filas": 22,
+      "columnas": 23,
+      "celdas": 402,
+      "caracteres": 14275,
+      "tok_valores": 4732,
+      "tok_csv": 5029,
+      "tok_csv_o200k": 4646,
+      "caracteres_csv": 14780
+    },
+    "DIM_ORGANIZACION": {
+      "filas": 225,
+      "columnas": 16,
+      "celdas": 1204,
+      "caracteres": 19651,
+      "tok_valores": 7748,
+      "tok_csv": 8941,
+      "tok_csv_o200k": 8438,
+      "caracteres_csv": 23233
+    },
+    "DIM_TIPO_ORG": {
+      "filas": 5,
+      "columnas": 2,
+      "celdas": 10,
+      "caracteres": 126,
+      "tok_valores": 52,
+      "tok_csv": 59,
+      "tok_csv_o200k": 58,
+      "caracteres_csv": 135
+    },
+    "DIM_Actores": {
+      "filas": 829,
+      "columnas": 16,
+      "celdas": 6006,
+      "caracteres": 108932,
+      "tok_valores": 37864,
+      "tok_csv": 42922,
+      "tok_csv_o200k": 40382,
+      "caracteres_csv": 122195
+    },
+    "DIM_Actores_Estado": {
+      "filas": 109,
+      "columnas": 16,
+      "celdas": 672,
+      "caracteres": 9963,
+      "tok_valores": 3760,
+      "tok_csv": 4171,
+      "tok_csv_o200k": 3905,
+      "caracteres_csv": 10781
+    },
+    "FACT_Hechos_Casos": {
+      "filas": 81,
+      "columnas": 13,
+      "celdas": 720,
+      "caracteres": 31089,
+      "tok_valores": 11449,
+      "tok_csv": 11840,
+      "tok_csv_o200k": 11063,
+      "caracteres_csv": 32048
+    },
+    "BRIDGE_Caso_Depto": {
+      "filas": 88,
+      "columnas": 6,
+      "celdas": 527,
+      "caracteres": 6947,
+      "tok_valores": 3658,
+      "tok_csv": 4078,
+      "tok_csv_o200k": 3957,
+      "caracteres_csv": 7473
+    },
+    "BRIDGE_Caso_Actor": {
+      "filas": 81,
+      "columnas": 3,
+      "celdas": 243,
+      "caracteres": 2866,
+      "tok_valores": 1523,
+      "tok_csv": 1729,
+      "tok_csv_o200k": 1732,
+      "caracteres_csv": 3108
+    },
+    "BRIDGE_RADAR_Actor": {
+      "filas": 2,
+      "columnas": 4,
+      "celdas": 8,
+      "caracteres": 87,
+      "tok_valores": 34,
+      "tok_csv": 39,
+      "tok_csv_o200k": 42,
+      "caracteres_csv": 94
+    },
+    "BRIDGE_Nodo_Actor": {
+      "filas": 4,
+      "columnas": 4,
+      "celdas": 16,
+      "caracteres": 189,
+      "tok_valores": 77,
+      "tok_csv": 87,
+      "tok_csv_o200k": 89,
+      "caracteres_csv": 204
+    },
+    "BRIDGE_Caso_Actor_Estado": {
+      "filas": 62,
+      "columnas": 3,
+      "celdas": 186,
+      "caracteres": 1868,
+      "tok_valores": 1013,
+      "tok_csv": 1162,
+      "tok_csv_o200k": 1165,
+      "caracteres_csv": 2053
+    },
+    "BRIDGE_Alerta_Actor": {
+      "filas": 163,
+      "columnas": 6,
+      "celdas": 492,
+      "caracteres": 5604,
+      "tok_valores": 3259,
+      "tok_csv": 3909,
+      "tok_csv_o200k": 3915,
+      "caracteres_csv": 6514
+    },
+    "BRIDGE_Reporte_Actor": {
+      "filas": 2,
+      "columnas": 5,
+      "celdas": 8,
+      "caracteres": 68,
+      "tok_valores": 29,
+      "tok_csv": 35,
+      "tok_csv_o200k": 38,
+      "caracteres_csv": 77
+    },
+    "BRIDGE_Reporte_Actor_Estado": {
+      "filas": 2,
+      "columnas": 5,
+      "celdas": 8,
+      "caracteres": 75,
+      "tok_valores": 32,
+      "tok_csv": 38,
+      "tok_csv_o200k": 41,
+      "caracteres_csv": 84
+    },
+    "BRIDGE_Clima_Actor": {
+      "filas": 2,
+      "columnas": 5,
+      "celdas": 8,
+      "caracteres": 70,
+      "tok_valores": 29,
+      "tok_csv": 36,
+      "tok_csv_o200k": 39,
+      "caracteres_csv": 79
+    },
+    "BRIDGE_Clima_Actor_Estado": {
+      "filas": 2,
+      "columnas": 5,
+      "celdas": 8,
+      "caracteres": 77,
+      "tok_valores": 32,
+      "tok_csv": 39,
+      "tok_csv_o200k": 42,
+      "caracteres_csv": 86
+    },
+    "BRIDGE_Sectorista_Departamento": {
+      "filas": 28,
+      "columnas": 3,
+      "celdas": 84,
+      "caracteres": 547,
+      "tok_valores": 308,
+      "tok_csv": 389,
+      "tok_csv_o200k": 364,
+      "caracteres_csv": 630
+    },
+    "DIM_Departamentos": {
+      "filas": 28,
+      "columnas": 11,
+      "celdas": 224,
+      "caracteres": 1548,
+      "tok_valores": 693,
+      "tok_csv": 839,
+      "tok_csv_o200k": 784,
+      "caracteres_csv": 1774
+    },
+    "DIM_Provincias": {
+      "filas": 71,
+      "columnas": 8,
+      "celdas": 355,
+      "caracteres": 2298,
+      "tok_valores": 1075,
+      "tok_csv": 1325,
+      "tok_csv_o200k": 1243,
+      "caracteres_csv": 2655
+    },
+    "DIM_Distritos": {
+      "filas": 699,
+      "columnas": 11,
+      "celdas": 5592,
+      "caracteres": 39660,
+      "tok_valores": 17120,
+      "tok_csv": 21529,
+      "tok_csv_o200k": 20021,
+      "caracteres_csv": 45254
+    },
+    "DIM_Tipo_Caso": {
+      "filas": 5,
+      "columnas": 3,
+      "celdas": 15,
+      "caracteres": 423,
+      "tok_valores": 113,
+      "tok_csv": 123,
+      "tok_csv_o200k": 107,
+      "caracteres_csv": 437
+    },
+    "DIM_Rol_Actor": {
+      "filas": 5,
+      "columnas": 3,
+      "celdas": 11,
+      "caracteres": 121,
+      "tok_valores": 38,
+      "tok_csv": 43,
+      "tok_csv_o200k": 41,
+      "caracteres_csv": 135
+    },
+    "DIM_Tipo_Sector": {
+      "filas": 4,
+      "columnas": 3,
+      "celdas": 12,
+      "caracteres": 142,
+      "tok_valores": 48,
+      "tok_csv": 56,
+      "tok_csv_o200k": 57,
+      "caracteres_csv": 153
+    },
+    "DIM_Tipo_Actor": {
+      "filas": 4,
+      "columnas": 2,
+      "celdas": 8,
+      "caracteres": 105,
+      "tok_valores": 33,
+      "tok_csv": 40,
+      "tok_csv_o200k": 39,
+      "caracteres_csv": 112
+    },
+    "DIM_Tipo_Actor_Radar": {
+      "filas": 4,
+      "columnas": 2,
+      "celdas": 8,
+      "caracteres": 85,
+      "tok_valores": 29,
+      "tok_csv": 37,
+      "tok_csv_o200k": 35,
+      "caracteres_csv": 92
+    },
+    "DIM_Perfil": {
+      "filas": 4,
+      "columnas": 2,
+      "celdas": 8,
+      "caracteres": 78,
+      "tok_valores": 27,
+      "tok_csv": 31,
+      "tok_csv_o200k": 30,
+      "caracteres_csv": 85
+    },
+    "DIM_Intervencion": {
+      "filas": 5,
+      "columnas": 2,
+      "celdas": 10,
+      "caracteres": 139,
+      "tok_valores": 40,
+      "tok_csv": 53,
+      "tok_csv_o200k": 49,
+      "caracteres_csv": 148
+    },
+    "DIM_Sectoristas": {
+      "filas": 16,
+      "columnas": 13,
+      "celdas": 93,
+      "caracteres": 957,
+      "tok_valores": 356,
+      "tok_csv": 425,
+      "tok_csv_o200k": 407,
+      "caracteres_csv": 1156
+    },
+    "DIM_Punto_Focal": {
+      "filas": 18,
+      "columnas": 12,
+      "celdas": 101,
+      "caracteres": 1161,
+      "tok_valores": 407,
+      "tok_csv": 516,
+      "tok_csv_o200k": 471,
+      "caracteres_csv": 1376
+    },
+    "DIM_Autoridades": {
+      "filas": 3,
+      "columnas": 12,
+      "celdas": 27,
+      "caracteres": 252,
+      "tok_valores": 83,
+      "tok_csv": 101,
+      "tok_csv_o200k": 97,
+      "caracteres_csv": 287
+    },
+    "DIM_Responsable": {
+      "filas": 4,
+      "columnas": 4,
+      "celdas": 16,
+      "caracteres": 165,
+      "tok_valores": 56,
+      "tok_csv": 68,
+      "tok_csv_o200k": 67,
+      "caracteres_csv": 180
+    },
+    "DIM_Entidad_Responsable": {
+      "filas": 24,
+      "columnas": 5,
+      "celdas": 120,
+      "caracteres": 1369,
+      "tok_valores": 480,
+      "tok_csv": 593,
+      "tok_csv_o200k": 543,
+      "caracteres_csv": 1488
+    },
+    "DIM_Area_Responsable": {
+      "filas": 67,
+      "columnas": 5,
+      "celdas": 335,
+      "caracteres": 4342,
+      "tok_valores": 1750,
+      "tok_csv": 1954,
+      "tok_csv_o200k": 1767,
+      "caracteres_csv": 4676
+    },
+    "DIM_Unidades_Organicas_Responsa": {
+      "filas": 28,
+      "columnas": 6,
+      "celdas": 168,
+      "caracteres": 1847,
+      "tok_valores": 787,
+      "tok_csv": 894,
+      "tok_csv_o200k": 809,
+      "caracteres_csv": 2014
+    }
+  },
+  "totales": {
+    "filas": 4729,
+    "celdas": 30719,
+    "caracteres": 746382,
+    "caracteres_csv": 791228,
+    "tokens_valores_cl100k": 268205,
+    "tokens_csv_cl100k": 292336,
+    "tokens_csv_o200k": 269527
+  },
+  "pipeline": {
+    "entrada": 599286,
+    "salida": 278447,
+    "total": 877733,
+    "multiplicador": 3.0
+  },
+  "insumos_complementarios": [
+    {
+      "insumo": "alcaldes.xlsx",
+      "estado": "ok",
+      "tamano_mb": 0.04,
+      "caracteres": 41206,
+      "tokens_cl100k": 16062,
+      "tokens_o200k": 15611
+    },
+    {
+      "insumo": "PROVINCIALES ELECTOS - ANCASH.xlsx",
+      "estado": "ok",
+      "tamano_mb": 0.02,
+      "caracteres": 12610,
+      "tokens_cl100k": 5014,
+      "tokens_o200k": 4731
+    },
+    {
+      "insumo": "directorio municipalidades 2026.xlsx",
+      "estado": "ok",
+      "tamano_mb": 0.23,
+      "caracteres": 326909,
+      "tokens_cl100k": 128450,
+      "tokens_o200k": 122118
+    },
+    {
+      "insumo": "DIRECTORIO_ALCALDES_ANCASH_2026.csv",
+      "estado": "ok",
+      "tamano_mb": 0.03,
+      "caracteres": 29078,
+      "tokens_cl100k": 12726,
+      "tokens_o200k": 12322
+    },
+    {
+      "insumo": "geodir-ubigeo-reniec.csv",
+      "estado": "ok",
+      "tamano_mb": 0.12,
+      "caracteres": 118686,
+      "tokens_cl100k": 58446,
+      "tokens_o200k": 57871
+    },
+    {
+      "insumo": "toponimos.json",
+      "estado": "ok",
+      "tamano_mb": 0.0,
+      "caracteres": 2339,
+      "tokens_cl100k": 814,
+      "tokens_o200k": 786
+    },
+    {
+      "insumo": "ALCALDES 2027-2030.docx",
+      "estado": "ok",
+      "tamano_mb": 0.03,
+      "caracteres": 8896,
+      "tokens_cl100k": 3668,
+      "tokens_o200k": 3458
+    },
+    {
+      "insumo": "TDR locador (docx)",
+      "estado": "ok",
+      "tamano_mb": 0.03,
+      "caracteres": 23317,
+      "tokens_cl100k": 6002,
+      "tokens_o200k": 5072
+    },
+    {
+      "insumo": "TDR locador (pdf)",
+      "estado": "ok",
+      "tamano_mb": 0.21,
+      "caracteres": 22389,
+      "tokens_cl100k": 6077,
+      "tokens_o200k": 5216
+    },
+    {
+      "insumo": "esquema v10 unificado (DDL)",
+      "estado": "ok",
+      "tamano_mb": 0.96,
+      "caracteres": 1003545,
+      "tokens_cl100k": 265327,
+      "tokens_o200k": 253726
+    }
+  ],
+  "tokens_insumos_complementarios": 502586
+}
