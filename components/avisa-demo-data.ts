@@ -1,4 +1,4 @@
-export type WorkspaceView = 'overview' | 'inbox' | 'cases' | 'case-detail' | 'alerts' | 'commitments' | 'map' | 'directory' | 'executive'
+export type WorkspaceView = 'overview' | 'inbox' | 'cases' | 'case-detail' | 'alerts' | 'commitments' | 'map' | 'directory-actors' | 'directory-organizations' | 'directory-institutions' | 'directory-locals' | 'executive'
 
 export type DemoCase = {
   code: string

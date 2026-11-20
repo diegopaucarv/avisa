@@ -12,8 +12,8 @@ const AvisaMap = dynamic(() => import('./avisa-map'), { ssr: false, loading: () 
 
 type WorkspaceProps = { view: WorkspaceView; onNavigate: (view: WorkspaceView) => void; selectedCase: DemoCase; onSelectCase: (item: DemoCase) => void; alerts: DemoAlert[]; onAlertUpdate: (id: string, status: DemoAlert['status'], note?: string) => void; onAlertEdit: (id: string, quote: string) => void; regionScope: RegionScope; timeScope: TimeScope }
 
-function SectionTitle({ eyebrow, title, description, action }: { eyebrow: string; title: string; description: string; action?: React.ReactNode }) {
-  return <div className="section-title-row"><div><p className="section-eyebrow">{eyebrow}</p><h2>{title}</h2><p>{description}</p></div>{action}</div>
+function SectionTitle({ title, description, action }: { eyebrow: string; title: string; description: string; action?: React.ReactNode }) {
+  return <div className="section-title-row"><div><h2>{title}</h2><p>{description}</p></div>{action}</div>
 }
 function RiskBadge({ level }: { level: string }) { return <span className={`status-badge risk-${level.toLowerCase()}`}><span className="status-dot" />{level}</span> }
 function DemoNotice() { return <div className="demo-notice" role="status"><Info size={15} /><span><strong>Prototipo · Datos simulados</strong> — no usar para decisiones institucionales ni asociar a personas reales.</span></div> }
@@ -62,7 +62,10 @@ export function WorkspaceViewContent({ view, onNavigate, selectedCase, onSelectC
     <div className="case-grid">{filteredCases.map((item) => <button key={item.code} className="case-card" onClick={() => { onSelectCase(item); onNavigate('case-detail') }}><div className="case-card-top"><span className="case-code">{item.code}</span><RiskBadge level={item.risk} /></div><h3>{item.title}</h3><div className="case-location"><MapPin size={14} />{item.region} <span>·</span> {item.subject}</div><p>{item.summary}</p><div className="case-card-bottom"><span>{item.stage}</span><span>{item.updated} <ChevronRight size={14} /></span></div></button>)}</div>
   </>
   if (view === 'case-detail') return <CaseDetail item={selectedCase} onNavigate={onNavigate} />
-  if (view === 'directory') return <AvisaDirectory regionScope={regionScope} />
+  if (view === 'directory-actors') return <AvisaDirectory regionScope={regionScope} kind="Actor" />
+  if (view === 'directory-organizations') return <AvisaDirectory regionScope={regionScope} kind="Organización" />
+  if (view === 'directory-institutions') return <AvisaDirectory regionScope={regionScope} kind="Institución" />
+  if (view === 'directory-locals') return <AvisaDirectory regionScope={regionScope} kind="Local" />
   if (view === 'map') return <AvisaMap regionScope={regionScope} timeScope={timeScope} onSelectCase={(code) => { const item = demoCases.find((row) => row.code === code); if (item) { onSelectCase(item); onNavigate('case-detail') } }} />
   if (view === 'alerts') return <>
     <SectionTitle eyebrow="CONTROL HUMANO · G20 / G21" title="Revisión de alertas" description="Comprueba la fuente y la cita antes de aprobar la visibilidad." action={<span className="review-count">{activeAlerts.length} pendientes</span>} />
