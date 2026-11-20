@@ -9,7 +9,7 @@
 --    docs/PREPARACION_V9_CARGA_LEGADO_4.sql   (parche 4)
 --
 --  Idempotente: puede ejecutarse varias veces sin duplicar ni sobrescribir.
---  Justificación y estado de cada hueco: docs/BRECHA_CAPA_DATOS_V9.md §3 y §7
+--  Justificación y estado de cada hueco: docs/05_datos/BRECHA_CAPA_DATOS_V9.md §3 y §7
 --  (acciones P0 1–4 y P0 7).
 --
 --  ---------------------------------------------------------------------------
@@ -206,7 +206,7 @@ SELECT
             to_jsonb(('Extiende v1 con las rutas C-G (§4.bis): fuentes nuevas, '
                       'tipo_registro y policy_snapshot_id. Los $defs por valor de '
                       'tipo_registro NO estan definidos en el repositorio y quedan '
-                      'pendientes; ver docs/BRECHA_CAPA_DATOS_V9.md.' )::text), true),
+                      'pendientes; ver docs/05_datos/BRECHA_CAPA_DATOS_V9.md.' )::text), true),
           '{properties,source}',
           '{"enum":["whatsapp","acta_pdf","audio","email","sunat_comprobante","vuce_permiso","ana_siagua","sanipes_pcr","citered_acta","dgsfs_tiburon"]}'::jsonb,
           true),

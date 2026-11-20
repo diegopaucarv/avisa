@@ -4,7 +4,7 @@
 --
 --  Se ejecuta DESPUÉS de docs/PREPARACION_V9_CARGA_LEGADO.sql (parche 1).
 --  Contiene únicamente los huecos de esquema detectados al especificar la carga
---  columna por columna (ver docs/PLAN_PORTE_LEGADO_V9.md §5).
+--  columna por columna (ver docs/04_migracion/PLAN_PORTE_LEGADO_V9.md §5).
 --
 --  Idempotente: puede ejecutarse varias veces.
 --  Todo va dentro de una transacción porque el cargador necesita SET LOCAL.

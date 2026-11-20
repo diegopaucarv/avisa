@@ -758,7 +758,7 @@ El schema `audit` es exclusivo del MVP-45 sobre SQL Server. En v10 no existe com
 
 ### 2.6 En qué orden se construyen las 55 tablas
 
-Este §2 dice **qué** tablas necesita el MVP; no dice en cuál orden construirlas. Ese orden está medido en **`docs/PRIORIZACION_MVP_v10.md`**, que cruza las 55 tablas del MVP con las 255 de la v10 y las reparte en cinco capas: 31 ya tienen datos, 11 están vacías, 72 están vivas pero fuera del MVP y 141 no tienen una sola fila.
+Este §2 dice **qué** tablas necesita el MVP; no dice en cuál orden construirlas. Ese orden está medido en **`docs/03_ejecucion/PRIORIZACION_MVP_v10.md`**, que cruza las 55 tablas del MVP con las 255 de la v10 y las reparte en cinco capas: 31 ya tienen datos, 11 están vacías, 72 están vivas pero fuera del MVP y 141 no tienen una sola fila.
 
 Lo que hay que retener antes de leer el plan día por día:
 

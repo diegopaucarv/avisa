@@ -199,7 +199,7 @@ total que deja la carga más el parche 16 con su rol de administrador y oficial 
 datos personales. Si se verifica antes de ese parche, la línea avisa de la fila
 que falta y no es un problema de la carga.
 
-### 5.4 Aplicar los parches 6 a 18
+### 5.4 Aplicar los parches 6 a 19
 
 Los parches vienen **después** de la carga, siempre en orden, y nunca antes.
 Cada uno hace algo que necesita datos reales: reclasificar documentos, cifrar
@@ -293,6 +293,32 @@ MSYS_NO_PATHCONV=1 docker exec -i avisa-db psql -U avisa -d avisa \
 Los dos terminan con un mensaje de cierre y **no** deben mostrar la palabra
 `FALLO` en ninguna línea (el texto del banner final sí la menciona; eso no
 cuenta).
+
+### 5.6 Regenerar los artefactos derivados
+
+Los documentos que se generan **no se editan a mano**: se regeneran cuando cambia su fuente. Este es
+el orden, porque cada uno puede alimentar al siguiente (la razón de cada flecha está en `INDICE.md`
+**§6.e**):
+
+```sh
+python migration/generar_comentarios_sql.py   # 1. PARCHE_12 (comentarios de tablas y columnas)
+python migration/consolidar_esquema.py        # 2. AVISA_V10_ESQUEMA_UNIFICADO.sql
+python migration/generar_diccionario.py       # 3. DICCIONARIO_DATOS.md + diccionario_datos.csv
+python migration/reporte_estadistica.py       # 4. img/delta_*.svg + §11.5 de LEGADO_A_V10
+python migration/prioridad_mvp.py             # 5. 03_ejecucion/mvp_prioridad_tablas.csv
+python migration/extraer_fks.py               # 6. sql_server/*.sql + INFORME_FKS.md
+```
+
+**Cuáles necesitan la base encendida y cuáles no.** Los pasos 1, 3, 4 y 5 leen el catálogo vivo
+(`pg_class`, `pg_attribute`, `pg_constraint`) y fallan sin base: miden filas y columnas reales, no
+heredan cifras. Los pasos 2 y 6 trabajan sobre archivos —el 2 lee el DDL y los 19 SQL, el 6 lee el
+unificado del paso 2— y por eso son los únicos que corren con la base apagada.
+
+**Comprobación de que quedaron coherentes.** Después del paso 3, las «Cifras de esta edición» del
+encabezado de `05_datos/DICCIONARIO_DATOS.md` deben coincidir con la medición del 2026-11-20 de
+`INDICE.md` §3; si no coinciden, el desactualizado es el diccionario. Después del paso 5, el CSV
+debe tener **265** filas de datos y sumar **2 145** columnas y **13 352** filas, que es lo que dice
+`03_ejecucion/PRIORIZACION_MVP_v10.md` §1.
 
 ---
 
@@ -529,18 +555,18 @@ MSYS_NO_PATHCONV=1 docker exec -i avisa-db psql -U avisa -d avisa_mssql \
 
 Los documentos citados en este texto, con lo que aporta cada uno:
 
-1. `docs/ENTORNO_DOCKER_POSTGRES.md` — el contenedor, las credenciales, el
-   arranque y la aplicación de los parches 6 a 18 (§9).
+1. `docs/06_operacion/ENTORNO_DOCKER_POSTGRES.md` — el contenedor, las credenciales, el
+   arranque y la aplicación de los parches 6 a 19 (§9).
 2. `docs/AVISA_V10_ESQUEMA_UNIFICADO.sql` — todo el esquema en un archivo, en dos
    secciones, con el detalle de qué produce cada una. Generado: no se edita a mano.
 3. `migration/consolidar_esquema.py` — el programa que arma ese archivo unificado.
-4. `docs/PRIORIZACION_MVP_v10.md` — qué tablas forman el MVP y en qué orden se
+4. `docs/03_ejecucion/PRIORIZACION_MVP_v10.md` — qué tablas forman el MVP y en qué orden se
    construyen.
-5. `docs/DECISIONES_CARGA_LEGADO_V9.md` — las decisiones de la carga (MIG D1–D51)
+5. `docs/04_migracion/DECISIONES_CARGA_LEGADO_V9.md` — las decisiones de la carga (MIG D1–D51)
    y por qué se tomó cada una.
-6. `docs/PLAN_PORTE_LEGADO_V9.md` — la especificación de la carga y el mapa de
+6. `docs/04_migracion/PLAN_PORTE_LEGADO_V9.md` — la especificación de la carga y el mapa de
    fuentes.
-7. `docs/ACTA_CIERRE_CARGA_V9.md` — las cifras certificadas de la carga.
+7. `docs/04_migracion/ACTA_CIERRE_CARGA_V9.md` — las cifras certificadas de la carga.
 8. `migration/mssql/INFORME_TIPOS.md` — qué tipos cambian al pasar a SQL Server y
    qué queda pendiente.
 9. `migration/mssql/03_mapa_tipos_ssma.md` — la tabla de correspondencias para el
@@ -554,7 +580,7 @@ Los documentos citados en este texto, con lo que aporta cada uno:
 13. `docs/PARCHE_17_RENIEC_Y_COSTOS.sql` — la consulta PIDE-RENIEC cifrada e
     inmutable, el privilegio nominal y las columnas de costo de Gemini y de
     WhatsApp.
-14. `docs/LEGADO_A_V10_SIMILITUDES_Y_DIFERENCIAS.md` — qué es igual y qué cambia
+14. `docs/05_datos/LEGADO_A_V10_SIMILITUDES_Y_DIFERENCIAS.md` — qué es igual y qué cambia
     entre el sistema anterior y la v10, con las cifras comparadas.
 15. `docs/PARCHE_18_COSTOS_Y_RLS_ADMIN.sql` — el tope de gasto de RNF-13 (aviso
     al acercarse, bloqueo al excederse) y la seguridad por fila del catálogo de

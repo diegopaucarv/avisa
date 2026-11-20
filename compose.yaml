@@ -78,7 +78,7 @@ services:
 
       # Parches 6–19: se montan pero NO los aplica el initdb. Dependen de datos que
       # sólo existen después de la carga (documentos `RED-%`, tablas `legacy.*`), así
-      # que se ejecutan a mano: ver docs/ENTORNO_DOCKER_POSTGRES.md §9.
+      # que se ejecutan a mano: ver docs/06_operacion/ENTORNO_DOCKER_POSTGRES.md §9.
       - type: bind
         source: ./docs/PARCHE_6_CIERRE_CUMPLIMIENTO.sql
         target: /opt/avisa/sql/96_patch_06.sql

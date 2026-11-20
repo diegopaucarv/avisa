@@ -321,41 +321,46 @@ flowchart TD
 python migration/prioridad_mvp.py
 ```
 
-Lee la base, escribe `docs/mvp_prioridad_tablas.csv` (una fila por tabla, con capa y causa) e imprime el resumen. **Solo lee**: no crea, no borra, no comenta.
+Lee la base, escribe `docs/03_ejecucion/mvp_prioridad_tablas.csv` (una fila por tabla, con capa y causa) e imprime el resumen. **Solo lee**: no crea, no borra, no comenta.
 
 Si se añade una tabla a la v10 o se cambia el contrato del MVP, se edita el diccionario `MVP` del script y se vuelve a ejecutar. Las cifras de este documento salen de esa ejecución, no de una estimación. La corrida corresponde a la medición del **2026-11-20** e incluye los parches 14 a 19: `core.banco_datos_tratamiento` ya existe con una fila, y `core` tiene 48 de sus 102 tablas con RLS y 315 políticas. El parche 19 no mueve la medición —sólo añade comentarios de columna—, así que las cifras son las mismas con él aplicado.
 
-**Este documento no se regenera.** `migration/prioridad_mvp.py` sólo escribe `docs/mvp_prioridad_tablas.csv` y el resumen por consola; el `.md` se edita a mano a partir de esas dos salidas. Volver a ejecutar el script refresca la medición, no el texto.
+**Este documento no se regenera.** `migration/prioridad_mvp.py` sólo escribe `docs/03_ejecucion/mvp_prioridad_tablas.csv` y el resumen por consola; el `.md` se edita a mano a partir de esas dos salidas. Volver a ejecutar el script refresca la medición, no el texto.
 
 **Los bloques también viven en SQL.** `docs/AVISA_V10_PRIORIZACION.sql` materializa esta
 medición y este cuadro en un esquema propio (`priorizacion`), de manera que la asignación de
-cada tabla a su bloque sea una consulta y no una lectura. Carga `docs/mvp_prioridad_tablas.csv`,
+cada tabla a su bloque sea una consulta y no una lectura. Carga `docs/03_ejecucion/mvp_prioridad_tablas.csv`,
 crea las cinco capas, los seis bloques y las 51 tablas con bloque (46 del contrato y 5
 heredadas), y termina verificando 265 tablas, 2 145 columnas y 13 352 filas, y que ninguna
 tabla T0 quede sin bloque (si faltara una T1, el script lo avisa sin abortar). Se ejecuta a mano y es idempotente:
 
 ```
-docker cp docs/mvp_prioridad_tablas.csv avisa-db:/tmp/docs/
+docker cp docs/03_ejecucion/mvp_prioridad_tablas.csv avisa-db:/tmp/docs/03_ejecucion/
 docker cp docs/AVISA_V10_PRIORIZACION.sql avisa-db:/tmp/
 docker exec -i -w /tmp avisa-db psql -U avisa -d avisa \
     -v ON_ERROR_STOP=1 -f /tmp/AVISA_V10_PRIORIZACION.sql
 ```
 
-No toca nada fuera de `priorizacion` ni lleva ningún `DROP`: el único esquema que vacía es el
-suyo, y esa es la razón por la que se puede repetir sin consecuencias. Tampoco se aplica por
+La segunda ruta del `docker cp` tiene que conservar `docs/03_ejecucion/`: el `\copy` del script lee
+esa ruta relativa a la carpeta desde la que corre `psql` (`-w /tmp`), no la del propio archivo.
+
+No toca nada fuera de `priorizacion` y no lleva ningún `DROP` ni `TRUNCATE`: reemplaza su tabla de
+medición desde el CSV y sus semillas, y se puede repetir sin consecuencias. Si una versión anterior
+dejó tablas con otra forma, borrar el esquema es una decisión humana (`DROP SCHEMA priorizacion
+CASCADE`), no algo que el archivo haga solo. Tampoco se aplica por
 defecto: es un **artefacto de consulta**, no una capa del sistema. No lo monta `compose.yaml` ni
-lo ejecuta el `initdb`, y por eso no aparece en `DICCIONARIO_DATOS.md`, que se genera desde la
+lo ejecuta el `initdb`, y por eso no aparece en `docs/05_datos/DICCIONARIO_DATOS.md`, que se genera desde la
 base viva.
 
 ---
 
 ## 11. Referencias
 
-1. `docs/AVISA_PRODUCE_v10.md` — arquitectura objetivo; **Anexo D.2** (correspondencia de nombres MVP → v10) y **Anexo D.3** (brechas A1–R4).
-2. `docs/mvp.md` — contrato del MVP-45: §2.4 y §2.5 (las 55 tablas), §3.5 (endpoints), §6 (plan día por día).
-3. `docs/LEGADO_A_V10_SIMILITUDES_Y_DIFERENCIAS.md` — puente sistema anterior ↔ v10, con la estadística en §11 y los componentes en §12.
-4. `docs/DICCIONARIO_DATOS.md` — significado de cada tabla y columna; versión máquina en `docs/diccionario_datos.csv`.
-5. `docs/mvp_prioridad_tablas.csv` — la medición completa, una fila por tabla.
+1. `docs/02_arquitectura/AVISA_PRODUCE_v10.md` — arquitectura objetivo; **Anexo D.2** (correspondencia de nombres MVP → v10) y **Anexo D.3** (brechas A1–R4).
+2. `docs/03_ejecucion/mvp.md` — contrato del MVP-45: §2.4 y §2.5 (las 55 tablas), §3.5 (endpoints), §6 (plan día por día).
+3. `docs/05_datos/LEGADO_A_V10_SIMILITUDES_Y_DIFERENCIAS.md` — puente sistema anterior ↔ v10, con la estadística en §11 y los componentes en §12.
+4. `docs/05_datos/DICCIONARIO_DATOS.md` — significado de cada tabla y columna; versión máquina en `docs/05_datos/diccionario_datos.csv`.
+5. `docs/03_ejecucion/mvp_prioridad_tablas.csv` — la medición completa, una fila por tabla.
 6. `docs/AVISA_V10_PRIORIZACION.sql` — la misma priorización en SQL: medición, seis bloques, asignación de tablas a bloque y verificación, en un esquema propio (`priorizacion`).
 7. `migration/prioridad_mvp.py` — el medidor.
 8. `migration/loader/phases/` — las 14 fases del cargador de legado.

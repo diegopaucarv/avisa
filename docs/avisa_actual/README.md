@@ -27,7 +27,7 @@ porque es la única copia del sistema que v10 reemplaza.
    decodificaron y concatenaron en `legacy_bundle.js`; el contenido es idéntico y
    ahora es legible y `grep`-eable. Ningún documento los citaba.
 2. **`CLASIFICACION_BASE_V9_EN_VIVO.md`.** Estaba marcado como «absorbido» y su
-   contenido vivía ya en `docs/BRECHA_CAPA_DATOS_V9.md` §12 (clasificación
+   contenido vivía ya en `docs/05_datos/BRECHA_CAPA_DATOS_V9.md` §12 (clasificación
    funcional) y §13 (defecto de migración y cobertura). Se eliminó para no
    mantener dos copias de los mismos conteos.
 

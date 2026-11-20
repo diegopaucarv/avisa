@@ -1,7 +1,7 @@
 -- =============================================================================
 --  10 · Aplicación del esquema v9 + parches de preparación
 --
---  Orden obligatorio (docs/DECISIONES_CARGA_LEGADO_V9.md §11 y README de
+--  Orden obligatorio (docs/04_migracion/DECISIONES_CARGA_LEGADO_V9.md §11 y README de
 --  migration/):
 --
 --    1. DDL v9 .................... dos pasadas

@@ -2,16 +2,16 @@
 --  AVISA · PRIORIZACIÓN DEL MVP SOBRE EL MODELO v10
 -- =====================================================================
 --  QUÉ ES
---  El documento `docs/PRIORIZACION_MVP_v10.md` convertido en tablas. No
+--  El documento `docs/03_ejecucion/PRIORIZACION_MVP_v10.md` convertido en tablas. No
 --  crea ni altera ninguna tabla del modelo: vive entero en el esquema
 --  `priorizacion` y se limita a registrar la medición, las capas y el
 --  orden de construcción, para que el orden del backend sea consultable
 --  y se pueda comprobar que no se desvía.
 --
 --  DE DÓNDE SALE
---  · docs/mvp_prioridad_tablas.csv   la medición, una fila por tabla
---  · docs/PRIORIZACION_MVP_v10.md    las capas (§3-§6) y los bloques (§8)
---  · docs/ERS_AVISA_PRODUCE_v0.6.md  el horizonte de cada requisito
+--  · docs/03_ejecucion/mvp_prioridad_tablas.csv   la medición, una fila por tabla
+--  · docs/03_ejecucion/PRIORIZACION_MVP_v10.md    las capas (§3-§6) y los bloques (§8)
+--  · docs/01_requisitos/ERS_AVISA_PRODUCE_v0.6.md  el horizonte de cada requisito
 --  El CSV manda sobre el texto: si se regenera la medición, se vuelve a
 --  ejecutar este archivo y las cifras quedan al día sin tocar el .md.
 --
@@ -41,7 +41,7 @@
 --  POR QUÉ NO ESTÁ EN LA BASE
 --  Es un artefacto de consulta, no una capa del sistema: no lo monta
 --  `compose.yaml`, no lo aplica el `initdb` y no se ejecuta por defecto.
---  Por eso tampoco aparece en `docs/DICCIONARIO_DATOS.md`, que se genera
+--  Por eso tampoco aparece en `docs/05_datos/DICCIONARIO_DATOS.md`, que se genera
 --  desde la base viva: su ausencia ahí es correcta, no un olvido.
 --
 --  PROPIEDADES
@@ -64,7 +64,7 @@ CREATE SCHEMA IF NOT EXISTS priorizacion;
 
 COMMENT ON SCHEMA priorizacion IS
     'Plan de construcción del MVP sobre la v10: capas, bloques y medición. '
-    'Se genera desde docs/mvp_prioridad_tablas.csv y docs/PRIORIZACION_MVP_v10.md. '
+    'Se genera desde docs/03_ejecucion/mvp_prioridad_tablas.csv y docs/03_ejecucion/PRIORIZACION_MVP_v10.md. '
     'No contiene datos del sistema.';
 
 -- ---------------------------------------------------------------------
@@ -198,7 +198,7 @@ ON CONFLICT (bloque, ruta) DO UPDATE SET
 -- ---------------------------------------------------------------------
 -- 4 · La medición (§2)
 -- ---------------------------------------------------------------------
---  Copia literal de docs/mvp_prioridad_tablas.csv. Se recarga entera en
+--  Copia literal de docs/03_ejecucion/mvp_prioridad_tablas.csv. Se recarga entera en
 --  cada ejecución: el CSV es la fuente, esta tabla es su reflejo.
 CREATE TABLE IF NOT EXISTS priorizacion.medicion (
     capa                varchar(2) NOT NULL REFERENCES priorizacion.capa(codigo),
@@ -221,7 +221,7 @@ CREATE TABLE IF NOT EXISTS priorizacion.medicion (
 
 COMMENT ON TABLE priorizacion.medicion IS
     'Una fila por tabla de la v10, con la capa y la causa que la clasifican. '
-    'Copia de docs/mvp_prioridad_tablas.csv (265 filas).';
+    'Copia de docs/03_ejecucion/mvp_prioridad_tablas.csv (265 filas).';
 COMMENT ON COLUMN priorizacion.medicion.causa IS
     'Qué señal decidió la capa: referencia_viva, referencia_viva+trigger, trigger, codigo o nada.';
 COMMENT ON COLUMN priorizacion.medicion.fk_entrantes_vivas IS
@@ -339,7 +339,7 @@ ON CONFLICT (orden) DO UPDATE SET
 TRUNCATE priorizacion.medicion, priorizacion.bloque_tabla,
          priorizacion.objeto_parcial;
 
-\copy priorizacion.medicion (capa, esquema, tabla, columnas, filas, fk_entrantes, fk_entrantes_vivas, fk_salientes, rls, triggers, codigo_legado, cargador, refs_codigo, motivo, causa) FROM 'docs/mvp_prioridad_tablas.csv' WITH (FORMAT csv, HEADER true, ENCODING 'UTF8');
+\copy priorizacion.medicion (capa, esquema, tabla, columnas, filas, fk_entrantes, fk_entrantes_vivas, fk_salientes, rls, triggers, codigo_legado, cargador, refs_codigo, motivo, causa) FROM 'docs/03_ejecucion/mvp_prioridad_tablas.csv' WITH (FORMAT csv, HEADER true, ENCODING 'UTF8');
 
 -- Verificación temprana: si el CSV y las capas declaradas no cuadran,
 -- conviene saberlo antes de sembrar el reparto por bloques (que apunta a
@@ -352,11 +352,11 @@ BEGIN
     SELECT count(*) INTO v FROM priorizacion.medicion;
     SELECT coalesce(sum(tablas_esperadas), 0) INTO e FROM priorizacion.capa;
     IF v = 0 THEN
-        RAISE EXCEPTION 'priorización: el CSV no cargó ninguna fila. Ejecutar psql desde la raíz del repositorio: la ruta docs/mvp_prioridad_tablas.csv es relativa al directorio actual.';
+        RAISE EXCEPTION 'priorización: el CSV no cargó ninguna fila. Ejecutar psql desde la raíz del repositorio: la ruta docs/03_ejecucion/mvp_prioridad_tablas.csv es relativa al directorio actual.';
     END IF;
     IF v <> e THEN
         RAISE EXCEPTION
-        'priorización: el CSV trae % tablas y las capas declaran %. Regenerar docs/mvp_prioridad_tablas.csv y actualizar priorizacion.capa.',
+        'priorización: el CSV trae % tablas y las capas declaran %. Regenerar docs/03_ejecucion/mvp_prioridad_tablas.csv y actualizar priorizacion.capa.',
             v, e;
     END IF;
 END $guard$;
@@ -610,7 +610,7 @@ BEGIN
       FROM priorizacion.capa;
 
     IF v_tablas <> v_e_tablas THEN
-        RAISE EXCEPTION 'priorización: se midieron % tablas y las capas declaran %. Regenerar docs/mvp_prioridad_tablas.csv y actualizar priorizacion.capa.',
+        RAISE EXCEPTION 'priorización: se midieron % tablas y las capas declaran %. Regenerar docs/03_ejecucion/mvp_prioridad_tablas.csv y actualizar priorizacion.capa.',
             v_tablas, v_e_tablas;
     END IF;
 

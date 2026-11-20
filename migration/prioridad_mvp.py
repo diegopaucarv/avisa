@@ -6,14 +6,14 @@ Cruza cinco señales por tabla lógica:
     2. cargador     -> alguna fase de `migration/loader` escribe en ella
     3. dependencia  -> cuántas tablas vivas la referencian (FK entrantes)
     4. consumidores -> aparece nombrada en el código de la aplicación
-    5. contrato     -> el MVP-45 la exige (`docs/mvp.md` §2.4 y §2.5)
+    5. contrato     -> el MVP-45 la exige (`docs/03_ejecucion/mvp.md` §2.4 y §2.5)
 
 La correspondencia MVP -> v10 no se inventa aquí: sigue el **Anexo D.2** de
-`docs/AVISA_PRODUCE_v10.md`, que es la fuente de verdad de la decisión D22.
+`docs/02_arquitectura/AVISA_PRODUCE_v10.md`, que es la fuente de verdad de la decisión D22.
 
 Salidas:
 
-    docs/mvp_prioridad_tablas.csv   una fila por tabla, con capa asignada
+    docs/03_ejecucion/mvp_prioridad_tablas.csv   una fila por tabla, con capa asignada
     stdout                          resumen para redactar el informe
 
 Solo lee. No escribe en la base.
@@ -33,7 +33,7 @@ import psycopg
 
 RAIZ = Path(__file__).resolve().parents[1]
 DOCS = RAIZ / "docs"
-SALIDA_CSV = DOCS / "mvp_prioridad_tablas.csv"
+SALIDA_CSV = DOCS / "03_ejecucion" / "mvp_prioridad_tablas.csv"
 
 MODELO = (
     "n.nspname NOT LIKE 'pg\\_%' AND "
@@ -41,7 +41,7 @@ MODELO = (
 )
 
 # --------------------------------------------------------------------------
-# Contrato del MVP-45: `docs/mvp.md` §2.4 (50) + §2.5 (5).
+# Contrato del MVP-45: `docs/03_ejecucion/mvp.md` §2.4 (50) + §2.5 (5).
 #
 # Cada entrada es (tabla que lo cumple hoy | None, estado, nota).
 #   exacta  -> la tabla existe y hace lo mismo

@@ -2,7 +2,7 @@
 
 Este documento describe el entorno de base de datos donde se carga el legado
 AVISA y sobre el que correrá la aplicación. Es el paso 1 de
-`docs/DECISIONES_CARGA_LEGADO_V9.md` §11.
+`docs/04_migracion/DECISIONES_CARGA_LEGADO_V9.md` §11.
 
 ---
 
@@ -282,8 +282,8 @@ arranque limpio afectarían **0 filas sin dar error**. Por eso:
   `core.usuario_roles`, `config.servicio_externo` y `config.tope_gasto`. Depende
   del 17: suma sus columnas de costo y usa `core.rol_actual()` y
   `core.clasificacion_max()`;
-- los **trece** SQL del 6 al 18 están montados de solo lectura en
-  `/opt/avisa/sql/96..108` (`96_patch_06.sql` … `108_patch_18.sql`), pero ningún
+- los **catorce** SQL del 6 al 19 están montados de solo lectura en
+  `/opt/avisa/sql/96..109` (`96_patch_06.sql` … `109_patch_19.sql`), pero ningún
   script del `initdb` los invoca: se pasan por entrada estándar, como se explica
   abajo;
 - ni `./scripts/db.sh apply` ni `fresh` los tocan: esos comandos re-aplican el DDL
@@ -300,9 +300,9 @@ Se cambia el nombre del archivo por el del parche que toca. El archivo se pasa p
 **entrada estándar** (`-f -`): no se copia al contenedor ni se usa `-f /tmp/...`,
 porque MSYS reescribe las rutas que empiezan por `/` y `psql` termina buscando
 `C:/Program Files/Git/tmp/...`. `MSYS_NO_PATHCONV=1` evita esa conversión; es lo
-mismo que hace `scripts/db.sh` (§8). Como los trece parches están montados, en
+mismo que hace `scripts/db.sh` (§8). Como los catorce parches están montados, en
 lugar de pasar el archivo también vale ejecutarlos por su ruta dentro del
-contenedor: `-f /opt/avisa/sql/108_patch_18.sql` (con `MSYS_NO_PATHCONV=1`).
+contenedor: `-f /opt/avisa/sql/109_patch_19.sql` (con `MSYS_NO_PATHCONV=1`).
 
 ### El parche 9 necesita `APP_CRYPTO_KEY`
 

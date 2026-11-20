@@ -8,7 +8,7 @@
 --    docs/PREPARACION_V9_CARGA_LEGADO_3.sql   (parche 3)
 --
 --  Idempotente: puede ejecutarse varias veces.
---  Justificación completa: docs/DECISIONES_CARGA_LEGADO_V9.md, decisiones D50 y D51.
+--  Justificación completa: docs/04_migracion/DECISIONES_CARGA_LEGADO_V9.md, decisiones D50 y D51.
 -- =============================================================================
 
 BEGIN;

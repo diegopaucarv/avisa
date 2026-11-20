@@ -22,7 +22,7 @@
 -- - `core.caso_estado_historial` registra el estado del caso (35 filas, todas con
 --   codigo_legado nulo), no el avance por pasos. No se toca.
 --
--- HECHOS VERIFICADOS SOBRE LOS DATOS (detalle en docs/parches/P10_FLUJO_D17.md)
+-- HECHOS VERIFICADOS SOBRE LOS DATOS (detalle en docs/04_migracion/parches/P10_FLUJO_D17.md)
 --
 -- 1. Los codigos de caso resuelven por core.casos.codigo_caso. Son 35 codigos y
 --    35 filas en core.casos; 34 de las 36 filas de fact_proceso_caso resuelven.

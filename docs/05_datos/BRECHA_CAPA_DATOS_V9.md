@@ -38,10 +38,10 @@ se re-ejecutó.
 Medición: **2026-10-31** sobre `avisa-db` (`localhost:55433`, base `avisa`),
 PostgreSQL 16.14 + PostGIS 3.7 + pgvector 0.8.3. La carga del legado
 (`BASE_CONFLICTOS_SOCIALES_2026.xlsx`, 86 hojas, 4 643 filas de datos) está
-cerrada y verificada según `docs/ACTA_CIERRE_CARGA_V9.md`.
+cerrada y verificada según `docs/04_migracion/ACTA_CIERRE_CARGA_V9.md`.
 
 Este informe responde a una pregunta concreta: **¿qué falta para que la base
-real cumpla la capa de datos descrita en `docs/AVISA_PRODUCE_v10.md` y
+real cumpla la capa de datos descrita en `docs/02_arquitectura/AVISA_PRODUCE_v10.md` y
 `backups/backend/PRODUCE_OAIPCS_AVISA_v9_ddl(1).sql`?**
 
 La respuesta corta es:
@@ -367,7 +367,7 @@ Funcionamiento. La fase 6 (`Desactivado`) no tiene etapas en la Guía.
 
 ## 4. El grafo KAG: de almacén de entidades a red de vínculos
 
-**Estado al 2026-11-18.** El parche 11 (`docs/parches/P11_GRAFO_KAG.md`) creó los
+**Estado al 2026-11-18.** El parche 11 (`docs/04_migracion/parches/P11_GRAFO_KAG.md`) creó los
 nodos de demanda y las aristas que la propia base ya declaraba en sus tablas puente.
 `kag.nodos` tiene **1 520 filas**: 1 160 actores, 325 demandas y 35 casos.
 `kag.aristas` tiene **450 filas**:
@@ -1176,7 +1176,7 @@ Cuatro parches aplicados y verificados sobre la base viva el **2026-11-18**,
 después de la medición que sostiene §1–§13. El SQL vive en
 `docs/PARCHE_7_GUARDRAILS_G19_G25.sql`, `docs/PARCHE_8_ICD_TOPE_Q40.sql`,
 `docs/PARCHE_9_SEGURIDAD_NIVEL_ALTO.sql` y `docs/PARCHE_10_FLUJO_PROCESO_D17.sql`;
-el detalle y las verificaciones, en `docs/parches/`. Tres tocan estructura y
+el detalle y las verificaciones, en `docs/04_migracion/parches/`. Tres tocan estructura y
 contenido; el 7 solo contenido.
 
 | Parche | Objeto                                                                   | Antes                                 | Después                                                                                                                                                           |

@@ -3,8 +3,8 @@
 
 Lee el catálogo del motor y la curaduría del proyecto, y escribe dos artefactos:
 
-    docs/DICCIONARIO_DATOS.md   documento legible (una ficha por tabla)
-    docs/diccionario_datos.csv  versión máquina (una fila por columna)
+    docs/05_datos/DICCIONARIO_DATOS.md   documento legible (una ficha por tabla)
+    docs/05_datos/diccionario_datos.csv  versión máquina (una fila por columna)
 
 Fuentes de cada dato:
 
@@ -42,10 +42,10 @@ import psycopg
 
 RAIZ = Path(__file__).resolve().parents[1]
 DOCS = RAIZ / "docs"
-DESTINO_MD = DOCS / "DICCIONARIO_DATOS.md"
-DESTINO_CSV = DOCS / "diccionario_datos.csv"
-BRECHA = DOCS / "BRECHA_CAPA_DATOS_V9.md"
-ANEXO_A = DOCS / "ANALISIS_PORTABILIDAD_AVISA_2026_A_V9.md"
+DESTINO_MD = DOCS / "05_datos" / "DICCIONARIO_DATOS.md"
+DESTINO_CSV = DOCS / "05_datos" / "diccionario_datos.csv"
+BRECHA = DOCS / "05_datos" / "BRECHA_CAPA_DATOS_V9.md"
+ANEXO_A = DOCS / "05_datos" / "ANALISIS_PORTABILIDAD_AVISA_2026_A_V9.md"
 REPORTE = RAIZ / "migration" / "reporte_estadistica.py"
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -1161,8 +1161,8 @@ def generar_markdown(datos: dict) -> str:
     lineas.append("```")
     lineas.append("")
     lineas.append(
-        "El script lee la base, escribe `docs/DICCIONARIO_DATOS.md` y "
-        "`docs/diccionario_datos.csv`, y no modifica nada en la base. Necesita la "
+        "El script lee la base, escribe `docs/05_datos/DICCIONARIO_DATOS.md` y "
+        "`docs/05_datos/diccionario_datos.csv`, y no modifica nada en la base. Necesita la "
         "base local levantada; cómo hacerlo y con qué credenciales está en el "
         "manual de entorno [8]."
     )
@@ -1360,14 +1360,14 @@ def generar_markdown(datos: dict) -> str:
     lineas.append(
         referencia(
             1,
-            "`docs/BRECHA_CAPA_DATOS_V9.md` — diagnóstico de la base viva. Su §12.1–12.6 "
+            "`docs/05_datos/BRECHA_CAPA_DATOS_V9.md` — diagnóstico de la base viva. Su §12.1–12.6 "
             "es el origen de la clasificación entrada / proceso / salida / transversal / archivo.",
         )
     )
     lineas.append(
         referencia(
             2,
-            "`docs/ANALISIS_PORTABILIDAD_AVISA_2026_A_V9.md` — análisis de portabilidad. "
+            "`docs/05_datos/ANALISIS_PORTABILIDAD_AVISA_2026_A_V9.md` — análisis de portabilidad. "
             "Su Anexo A declara clase y destino de las 87 tablas del sistema anterior, y su §3 "
             "es el mapa columna a columna.",
         )
@@ -1375,27 +1375,27 @@ def generar_markdown(datos: dict) -> str:
     lineas.append(
         referencia(
             3,
-            "`docs/DECISIONES_CARGA_LEGADO_V9.md` — decisiones de migración D1–D51. Su "
+            "`docs/04_migracion/DECISIONES_CARGA_LEGADO_V9.md` — decisiones de migración D1–D51. Su "
             "Anexo A.2 fija las reclasificaciones que quedaron vigentes en v10.",
         )
     )
     lineas.append(
         referencia(
             4,
-            "`docs/LEGADO_A_V10_SIMILITUDES_Y_DIFERENCIAS.md` — documento padre: qué se "
+            "`docs/05_datos/LEGADO_A_V10_SIMILITUDES_Y_DIFERENCIAS.md` — documento padre: qué se "
             "conserva y qué cambia entre el sistema anterior y v10, con la estadística comparada.",
         )
     )
     lineas.append(
         referencia(
             5,
-            "`docs/AVISA_PRODUCE_v10.md` — arquitectura objetivo del modelo v10.",
+            "`docs/02_arquitectura/AVISA_PRODUCE_v10.md` — arquitectura objetivo del modelo v10.",
         )
     )
     lineas.append(
         referencia(
             6,
-            "`docs/mvp.md` — plan de ejecución del producto mínimo; su §1.1 pide este "
+            "`docs/03_ejecucion/mvp.md` — plan de ejecución del producto mínimo; su §1.1 pide este "
             "diccionario como entregable.",
         )
     )
@@ -1409,7 +1409,7 @@ def generar_markdown(datos: dict) -> str:
     lineas.append(
         referencia(
             8,
-            "`docs/ENTORNO_DOCKER_POSTGRES.md` — cómo levantar la base y qué credenciales usa.",
+            "`docs/06_operacion/ENTORNO_DOCKER_POSTGRES.md` — cómo levantar la base y qué credenciales usa.",
         )
     )
     lineas.append(

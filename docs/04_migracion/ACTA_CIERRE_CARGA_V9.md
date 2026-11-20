@@ -175,7 +175,7 @@ exige y que no proviene del legado. Se aplicó
 `ind.indicador` sigue en 0 a propósito: la Tabla 3 de la Guía y el inventario de
 54 indicadores no están en el repositorio, y el legado no trae catálogo de
 indicadores. Sembrarlos sería inventar el contenido que alimenta toda la capa
-`ind`. Detalle y decisiones abiertas: `docs/BRECHA_CAPA_DATOS_V9.md` §10.
+`ind`. Detalle y decisiones abiertas: `docs/05_datos/BRECHA_CAPA_DATOS_V9.md` §10.
 
 Además, `docker/postgres/initdb/20_verify.sql` dejó de comparar los catálogos
 contra valores exactos (comparaba `cat_especies = 5` y fallaba con el legado

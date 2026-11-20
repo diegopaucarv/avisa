@@ -332,7 +332,7 @@ Esta es la vista que faltaba: **qué puede hacer cada actor con el sistema**. Lo
 
 ### Página 1 — el día del analista (MVP)
 
-![Casos de uso del MVP, página 1: el día del analista](img/AVISA_CU_MVP_DIA.svg)
+![Casos de uso del MVP, página 1: el día del analista](../img/AVISA_CU_MVP_DIA.svg)
 
 | Caso                                                  | Quién lo usa                                    | Requisitos                           | Horizonte                   |
 | ----------------------------------------------------- | ----------------------------------------------- | ------------------------------------ | --------------------------- |
@@ -352,7 +352,7 @@ Esta es la vista que faltaba: **qué puede hacer cada actor con el sistema**. Lo
 
 ### Página 2 — lo que se valida, se envía y se administra
 
-![Casos de uso del MVP, página 2: validar, enviar y administrar](img/AVISA_CU_MVP_SALIDA.svg)
+![Casos de uso del MVP, página 2: validar, enviar y administrar](../img/AVISA_CU_MVP_SALIDA.svg)
 
 | Caso                                                                   | Quién lo usa                                                                    | Requisitos                 | Horizonte              |
 | ---------------------------------------------------------------------- | ------------------------------------------------------------------------------- | -------------------------- | ---------------------- |
@@ -369,7 +369,7 @@ Esta es la vista que faltaba: **qué puede hacer cada actor con el sistema**. Lo
 
 ### Página 3 — 2027 y fase MADRE
 
-![Casos de uso de 2027 y la fase MADRE](img/AVISA_CU_2027.svg)
+![Casos de uso de 2027 y la fase MADRE](../img/AVISA_CU_2027.svg)
 
 | Caso                                                    | Quién lo usa                      | Requisitos       | Horizonte    |
 | ------------------------------------------------------- | --------------------------------- | ---------------- | ------------ |
@@ -405,7 +405,7 @@ La frase de arriba —«los controles no se dibujan como casos, van anotados en 
 
 ### Página 4 — del actor y el objetivo al caso y a la pieza
 
-![Actores, objetivos, casos de uso y vistas](img/AVISA_CU_MAPA_VISTAS.svg)
+![Actores, objetivos, casos de uso y vistas](../img/AVISA_CU_MAPA_VISTAS.svg)
 
 Esta lámina no es un diagrama de casos de uso: es el **puente** entre las pantallas y tableros de la sección 7, los casos de esta sección y los objetivos de 2.4. Se lee de izquierda a derecha —quién impulsa el objetivo, qué caso lo realiza y qué pieza lo resuelve— y resume visualmente la matriz de la sección 17.
 

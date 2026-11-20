@@ -1,6 +1,6 @@
 """Reglas ejecutables del cierre de decisiones legado AVISA 2026 -> v9.
 
-Este módulo es la forma *ejecutable* de `docs/DECISIONES_CARGA_LEGADO_V9.md`: cada
+Este módulo es la forma *ejecutable* de `docs/04_migracion/DECISIONES_CARGA_LEGADO_V9.md`: cada
 función implementa una decisión cerrada, sin acceder a la base. El cargador
 importa estas funciones; `migration/test_decisions.py` las verifica contra el
 workbook real.

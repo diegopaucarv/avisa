@@ -9339,7 +9339,7 @@ COMMIT;
 --
 --  Se ejecuta DESPUÉS de docs/PREPARACION_V9_CARGA_LEGADO.sql (parche 1).
 --  Contiene únicamente los huecos de esquema detectados al especificar la carga
---  columna por columna (ver docs/PLAN_PORTE_LEGADO_V9.md §5).
+--  columna por columna (ver docs/04_migracion/PLAN_PORTE_LEGADO_V9.md §5).
 --
 --  Idempotente: puede ejecutarse varias veces.
 --  Todo va dentro de una transacción porque el cargador necesita SET LOCAL.
@@ -9473,7 +9473,7 @@ COMMIT;
 --    docs/PREPARACION_V9_CARGA_LEGADO_2.sql   (parche 2)
 --
 --  Este parche contiene SÓLO lo que faltaba para que el cargador no tenga que
---  inventar un solo dato. Justificación completa: docs/DECISIONES_CARGA_LEGADO_V9.md
+--  inventar un solo dato. Justificación completa: docs/04_migracion/DECISIONES_CARGA_LEGADO_V9.md
 --
 --  Idempotente: puede ejecutarse varias veces.
 --  Todo va dentro de una transacción porque el cargador necesita SET LOCAL.
@@ -9561,7 +9561,7 @@ ALTER TABLE core.cat_especies
 --    responsable_id es NOT NULL -> sin unidad no entra ningún caso.
 --
 --    No es un dato inventado: la unidad existe y está documentada en
---    docs/AVISA_PRODUCE_v10.md §1 y glosario:
+--    docs/02_arquitectura/AVISA_PRODUCE_v10.md §1 y glosario:
 --        "OAIPCS. Oficina de Articulación Intergubernamental y Prevención de
 --         Conflictos Sociales."
 --    entidad_id = 1 es PRODUCE (única entidad tenant).
@@ -9687,7 +9687,7 @@ COMMIT;
 --    docs/PREPARACION_V9_CARGA_LEGADO_3.sql   (parche 3)
 --
 --  Idempotente: puede ejecutarse varias veces.
---  Justificación completa: docs/DECISIONES_CARGA_LEGADO_V9.md, decisiones D50 y D51.
+--  Justificación completa: docs/04_migracion/DECISIONES_CARGA_LEGADO_V9.md, decisiones D50 y D51.
 -- =============================================================================
 
 BEGIN;
@@ -9778,7 +9778,7 @@ COMMIT;
 --    docs/PREPARACION_V9_CARGA_LEGADO_4.sql   (parche 4)
 --
 --  Idempotente: puede ejecutarse varias veces sin duplicar ni sobrescribir.
---  Justificación y estado de cada hueco: docs/BRECHA_CAPA_DATOS_V9.md §3 y §7
+--  Justificación y estado de cada hueco: docs/05_datos/BRECHA_CAPA_DATOS_V9.md §3 y §7
 --  (acciones P0 1–4 y P0 7).
 --
 --  ---------------------------------------------------------------------------
@@ -9975,7 +9975,7 @@ SELECT
             to_jsonb(('Extiende v1 con las rutas C-G (§4.bis): fuentes nuevas, '
                       'tipo_registro y policy_snapshot_id. Los $defs por valor de '
                       'tipo_registro NO estan definidos en el repositorio y quedan '
-                      'pendientes; ver docs/BRECHA_CAPA_DATOS_V9.md.' )::text), true),
+                      'pendientes; ver docs/05_datos/BRECHA_CAPA_DATOS_V9.md.' )::text), true),
           '{properties,source}',
           '{"enum":["whatsapp","acta_pdf","audio","email","sunat_comprobante","vuce_permiso","ana_siagua","sanipes_pcr","citered_acta","dgsfs_tiburon"]}'::jsonb,
           true),
@@ -10646,7 +10646,7 @@ WHERE (substring(guardrail FROM 2))::int BETWEEN 1 AND 18;
 --
 -- Competencia del parámetro. El tope NO se codifica en la función: se lee de
 -- `config.parametro` en cada llamada. Si la Dirección OAIPCS confirma otro valor
--- (Q40 sigue abierta en `docs/INDICE.md` §5), basta con sustituir la fila del
+-- (Q40 sigue abierta en `docs/README.md` §5), basta con sustituir la fila del
 -- parámetro; la función no se reescribe.
 --
 -- Idempotencia. El INSERT usa `ON CONFLICT (codigo) WHERE valid_to IS NULL`
@@ -11002,7 +11002,7 @@ WHERE codigo = 'ICD.ajuste_tope_puntos'
 --     -v crypto_key="$APP_CRYPTO_KEY" -f - \
 --     < docs/PARCHE_9_SEGURIDAD_NIVEL_ALTO.sql
 --
---   (La clave sale de `.env` → `APP_CRYPTO_KEY`. Ver docs/parches/P9_SEGURIDAD.md.)
+--   (La clave sale de `.env` → `APP_CRYPTO_KEY`. Ver docs/04_migracion/parches/P9_SEGURIDAD.md.)
 --
 -- IDEMPOTENCIA
 --   Todo el DDL usa IF NOT EXISTS / CREATE OR REPLACE / DROP TRIGGER IF EXISTS.
@@ -11028,7 +11028,7 @@ WHERE codigo = 'ICD.ajuste_tope_puntos'
 \if :{?crypto_key}
 \else
 \echo 'ERROR: falta la clave. Ejecutar con: -v crypto_key=<clave de 32 bytes>'
-\echo '       La clave está en .env como APP_CRYPTO_KEY; ver docs/parches/P9_SEGURIDAD.md'
+\echo '       La clave está en .env como APP_CRYPTO_KEY; ver docs/04_migracion/parches/P9_SEGURIDAD.md'
 DO $$ BEGIN
     RAISE EXCEPTION 'Parámetro psql crypto_key ausente: no se ejecuta el parche 9';
 END $$;
@@ -11679,7 +11679,7 @@ SELECT string_agg(column_name, ', ' ORDER BY ordinal_position) AS columnas_vista
 -- - `core.caso_estado_historial` registra el estado del caso (35 filas, todas con
 --   codigo_legado nulo), no el avance por pasos. No se toca.
 --
--- HECHOS VERIFICADOS SOBRE LOS DATOS (detalle en docs/parches/P10_FLUJO_D17.md)
+-- HECHOS VERIFICADOS SOBRE LOS DATOS (detalle en docs/04_migracion/parches/P10_FLUJO_D17.md)
 --
 -- 1. Los codigos de caso resuelven por core.casos.codigo_caso. Son 35 codigos y
 --    35 filas en core.casos; 34 de las 36 filas de fact_proceso_caso resuelven.
@@ -12980,7 +12980,7 @@ COMMIT;
 -- b) Las otras columnas de texto de esa tabla (fase_actual, estado,
 --    pueblo_indigena) siguen siendo texto libre. No son niveles cerrados y no
 --    hay catalogo al que apuntarlas; forzarlas seria inventar el vocabulario.
--- c) El diseno de docs/AVISA_PRODUCE_v10.md se corrige en el mismo commit: el
+-- c) El diseno de docs/02_arquitectura/AVISA_PRODUCE_v10.md se corrige en el mismo commit: el
 --    diagrama de kag.nodos gana created_at y updated_at, y esta tabla deja de
 --    figurar con el nivel en texto.
 -- =============================================================================

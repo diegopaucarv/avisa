@@ -294,7 +294,7 @@ COMMIT;
 -- b) Las otras columnas de texto de esa tabla (fase_actual, estado,
 --    pueblo_indigena) siguen siendo texto libre. No son niveles cerrados y no
 --    hay catalogo al que apuntarlas; forzarlas seria inventar el vocabulario.
--- c) El diseno de docs/AVISA_PRODUCE_v10.md se corrige en el mismo commit: el
+-- c) El diseno de docs/02_arquitectura/AVISA_PRODUCE_v10.md se corrige en el mismo commit: el
 --    diagrama de kag.nodos gana created_at y updated_at, y esta tabla deja de
 --    figurar con el nivel en texto.
 -- =============================================================================

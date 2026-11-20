@@ -68,7 +68,7 @@ from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parent.parent
 UNIFICADO = RAIZ / "docs" / "AVISA_V10_ESQUEMA_UNIFICADO.sql"
-CSV_PRIORIDAD = RAIZ / "docs" / "mvp_prioridad_tablas.csv"
+CSV_PRIORIDAD = RAIZ / "docs" / "03_ejecucion" / "mvp_prioridad_tablas.csv"
 DIR_SALIDA = RAIZ / "docs" / "sql_server"
 
 IDENT = r'(?:"(?:[^"]|"")*"|[A-Za-z_][\w$]*)'
@@ -877,7 +877,7 @@ def escribir_informe(
     if capas:
         lineas += [
             f"`{len(cruzan)}` claves ajenas salen de una tabla del MVP (capas T0 y T1 de",
-            "`docs/mvp_prioridad_tablas.csv`) y apuntan a una tabla que no lo es. Son las",
+            "`docs/03_ejecucion/mvp_prioridad_tablas.csv`) y apuntan a una tabla que no lo es. Son las",
             f"que obligan a arrastrar **{len(padres_fuera)} tablas padre** al alcance de la migración:",
             "sin ellas la columna quedaría apuntando a una tabla inexistente.",
             "",
@@ -888,7 +888,7 @@ def escribir_informe(
         for padre in sorted(padres_fuera):
             lineas.append(f"| `{padre}` | {capas.get(padre, '—')} | {cuenta[padre]} |")
     else:
-        lineas.append("No se encontró `docs/mvp_prioridad_tablas.csv`.")
+        lineas.append("No se encontró `docs/03_ejecucion/mvp_prioridad_tablas.csv`.")
 
     lineas += ["", "## Comprobaciones", ""]
     if huerfanas:

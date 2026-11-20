@@ -1,6 +1,6 @@
 > **Estado documental:** absorbido en parte. §3 no se edita desde otros documentos.
-> §1.1 y §5 quedaron como **Anexo A** de `docs/DECISIONES_CARGA_LEGADO_V9.md` (con los totales ajustados a v10).
-> **§3 (mapa columna a columna) permanece aquí como fuente única**: no se traslada ni se duplica. Ver `docs/PLAN_PORTE_LEGADO_V9.md` Anexo E.
+> §1.1 y §5 quedaron como **Anexo A** de `docs/04_migracion/DECISIONES_CARGA_LEGADO_V9.md` (con los totales ajustados a v10).
+> **§3 (mapa columna a columna) permanece aquí como fuente única**: no se traslada ni se duplica. Ver `docs/04_migracion/PLAN_PORTE_LEGADO_V9.md` Anexo E.
 > Se conserva por trazabilidad histórica. Índice: `docs/INDICE.md`.
 
 # Análisis de portabilidad: `BASE_CONFLICTOS_SOCIALES_2026` (86 tablas MySQL) → DDL v9 (PostgreSQL)
@@ -14,7 +14,7 @@ transformación, y qué impide cargarlo tal cual.
 | ------------------------------------ | -------------------------------------------------- | ------------------------------------------------- |
 | Modelo legado (derivado del `.xlsx`) | `backend/BASE_CONFLICTOS_SOCIALES_2026_SCHEMA.sql` | 86 tablas, 1.275 líneas, MySQL `InnoDB`/`utf8mb4` |
 | Modelo destino                       | `backend/PRODUCE_OAIPCS_AVISA_v9_ddl(1).sql`       | 254 tablas, 25 schemas, 21 vistas, 4.058 líneas   |
-| Contexto de arquitectura             | `docs/AVISA_PRODUCE_v10.md`                        | —                                                 |
+| Contexto de arquitectura             | `docs/02_arquitectura/AVISA_PRODUCE_v10.md`                        | —                                                 |
 
 **Método:** lectura completa del esquema legado (tabla por tabla, con sus recuentos de filas
 declarados en el generador) y lectura dirigida de las 40 tablas de v9 que son candidatas a

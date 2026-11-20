@@ -1,7 +1,7 @@
 # Plan de porte de datos: legado AVISA 2026 → v9
 
 **Fecha:** 2026-10-31
-**Compañía de:** `docs/ANALISIS_PORTABILIDAD_AVISA_2026_A_V9.md` (diagnóstico de las 86 hojas),
+**Compañía de:** `docs/05_datos/ANALISIS_PORTABILIDAD_AVISA_2026_A_V9.md` (diagnóstico de las 86 hojas),
 `docs/_archivo/MAPA_CARGA_LEGADO_A_V9.md` (mapa por dominio y decisiones D1–D22),
 `docs/PREPARACION_V9_CARGA_LEGADO.sql` (parche 1) y
 `docs/PREPARACION_V9_CARGA_LEGADO_2.sql` (parche 2, nuevos huecos).
@@ -740,7 +740,7 @@ not exist`), y por eso tampoco se crean los triggers de L138/169/190.
 
 > ⚠ **SUPERSEDIDO.** Este registro se conserva como historia del análisis, pero las
 > respuestas definitivas —y los bloqueos D43–D49 que aquí no aparecen— están en
-> **`docs/DECISIONES_CARGA_LEGADO_V9.md`**. En caso de conflicto manda ese documento.
+> **`docs/04_migracion/DECISIONES_CARGA_LEGADO_V9.md`**. En caso de conflicto manda ese documento.
 > Cambios respecto de las recomendaciones de abajo: **D27 → D48** (el riesgo se
 > deriva de las alertas del caso, no de `Prioridad`), **D30 → D47** (la prioridad
 > de alerta se relaja a NULL en lugar de rellenarla), **D37 corregida** (el literal

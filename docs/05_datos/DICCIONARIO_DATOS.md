@@ -36,7 +36,7 @@ El total de columnas que recorre este diccionario es 3 318: 2 511 del modelo v10
 python migration/generar_diccionario.py
 ```
 
-El script lee la base, escribe `docs/DICCIONARIO_DATOS.md` y `docs/diccionario_datos.csv`, y no modifica nada en la base. Necesita la base local levantada; cómo hacerlo y con qué credenciales está en el manual de entorno [8].
+El script lee la base, escribe `docs/05_datos/DICCIONARIO_DATOS.md` y `docs/05_datos/diccionario_datos.csv`, y no modifica nada en la base. Necesita la base local levantada; cómo hacerlo y con qué credenciales está en el manual de entorno [8].
 
 De dónde sale cada dato:
 
@@ -6740,14 +6740,14 @@ Ordenado por nombre de objeto, para encontrar una tabla cuando se conoce el nomb
 
 Cada referencia dice qué documento es y qué parte de este diccionario sostiene.
 
-1. `docs/BRECHA_CAPA_DATOS_V9.md` — diagnóstico de la base viva. Su §12.1–12.6 es el origen de la clasificación entrada / proceso / salida / transversal / archivo.
-2. `docs/ANALISIS_PORTABILIDAD_AVISA_2026_A_V9.md` — análisis de portabilidad. Su Anexo A declara clase y destino de las 87 tablas del sistema anterior, y su §3 es el mapa columna a columna.
-3. `docs/DECISIONES_CARGA_LEGADO_V9.md` — decisiones de migración D1–D51. Su Anexo A.2 fija las reclasificaciones que quedaron vigentes en v10.
-4. `docs/LEGADO_A_V10_SIMILITUDES_Y_DIFERENCIAS.md` — documento padre: qué se conserva y qué cambia entre el sistema anterior y v10, con la estadística comparada.
-5. `docs/AVISA_PRODUCE_v10.md` — arquitectura objetivo del modelo v10.
-6. `docs/mvp.md` — plan de ejecución del producto mínimo; su §1.1 pide este diccionario como entregable.
+1. `docs/05_datos/BRECHA_CAPA_DATOS_V9.md` — diagnóstico de la base viva. Su §12.1–12.6 es el origen de la clasificación entrada / proceso / salida / transversal / archivo.
+2. `docs/05_datos/ANALISIS_PORTABILIDAD_AVISA_2026_A_V9.md` — análisis de portabilidad. Su Anexo A declara clase y destino de las 87 tablas del sistema anterior, y su §3 es el mapa columna a columna.
+3. `docs/04_migracion/DECISIONES_CARGA_LEGADO_V9.md` — decisiones de migración D1–D51. Su Anexo A.2 fija las reclasificaciones que quedaron vigentes en v10.
+4. `docs/05_datos/LEGADO_A_V10_SIMILITUDES_Y_DIFERENCIAS.md` — documento padre: qué se conserva y qué cambia entre el sistema anterior y v10, con la estadística comparada.
+5. `docs/02_arquitectura/AVISA_PRODUCE_v10.md` — arquitectura objetivo del modelo v10.
+6. `docs/03_ejecucion/mvp.md` — plan de ejecución del producto mínimo; su §1.1 pide este diccionario como entregable.
 7. `docs/PARCHE_9_SEGURIDAD_NIVEL_ALTO.sql` — cifrado AES-256 de los datos personales y registro de auditoría; explica las columnas `*_cifrado` y `*_hmac`.
-8. `docs/ENTORNO_DOCKER_POSTGRES.md` — cómo levantar la base y qué credenciales usa.
+8. `docs/06_operacion/ENTORNO_DOCKER_POSTGRES.md` — cómo levantar la base y qué credenciales usa.
 9. `migration/generar_diccionario.py` — el generador de este documento y del CSV.
 10. `migration/curacion_v10.py`, `migration/curacion_vistas.py` y `migration/curacion_legacy.py` — la curaduría de propósitos y de significados de columna.
 11. `docs/PARCHE_11_GRAFO_KAG.sql` — nodos y aristas del grafo KAG: de dónde salen las filas de `kag.nodos` y `kag.aristas` y qué las mantiene al día.

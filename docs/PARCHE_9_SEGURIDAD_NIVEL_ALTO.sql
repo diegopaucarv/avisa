@@ -43,7 +43,7 @@
 --     -v crypto_key="$APP_CRYPTO_KEY" -f - \
 --     < docs/PARCHE_9_SEGURIDAD_NIVEL_ALTO.sql
 --
---   (La clave sale de `.env` → `APP_CRYPTO_KEY`. Ver docs/parches/P9_SEGURIDAD.md.)
+--   (La clave sale de `.env` → `APP_CRYPTO_KEY`. Ver docs/04_migracion/parches/P9_SEGURIDAD.md.)
 --
 -- IDEMPOTENCIA
 --   Todo el DDL usa IF NOT EXISTS / CREATE OR REPLACE / DROP TRIGGER IF EXISTS.
@@ -69,7 +69,7 @@
 \if :{?crypto_key}
 \else
 \echo 'ERROR: falta la clave. Ejecutar con: -v crypto_key=<clave de 32 bytes>'
-\echo '       La clave está en .env como APP_CRYPTO_KEY; ver docs/parches/P9_SEGURIDAD.md'
+\echo '       La clave está en .env como APP_CRYPTO_KEY; ver docs/04_migracion/parches/P9_SEGURIDAD.md'
 DO $$ BEGIN
     RAISE EXCEPTION 'Parámetro psql crypto_key ausente: no se ejecuta el parche 9';
 END $$;

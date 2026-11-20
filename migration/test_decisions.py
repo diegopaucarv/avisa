@@ -1,7 +1,7 @@
 """Verifica cada decisión cerrada contra el workbook real del legado.
 
 No toca la base: comprueba que las reglas de `migration/decisions.py` producen
-exactamente las cifras del acta de cierre de `docs/DECISIONES_CARGA_LEGADO_V9.md`.
+exactamente las cifras del acta de cierre de `docs/04_migracion/DECISIONES_CARGA_LEGADO_V9.md`.
 Si algo cambia en el origen, este archivo es el que avisa.
 
 Uso: python migration/test_decisions.py          (o pytest migration/)

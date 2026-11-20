@@ -15,7 +15,7 @@
 --  Si se ejecuta sobre otra base, aborta (bloque 0).
 --
 --  QUÉ CONSERVA
---  Las 46 tablas de las capas T0 y T1 de docs/mvp_prioridad_tablas.csv
+--  Las 46 tablas de las capas T0 y T1 de docs/03_ejecucion/mvp_prioridad_tablas.csv
 --  (42 si se descuentan las 4 de kag), MÁS todas las tablas padre que
 --  esas 42 necesitan para que sus claves ajenas tengan destino (bloque
 --  1.2). El resultado son 78 tablas.

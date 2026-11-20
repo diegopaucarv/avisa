@@ -4,9 +4,9 @@
 **Estado:** todos los bloqueos cerrados. **No queda ningún TBD.**
 **Compañía de:**
 
-- `docs/ANALISIS_PORTABILIDAD_AVISA_2026_A_V9.md` — diagnóstico de las 86 hojas
+- `docs/05_datos/ANALISIS_PORTABILIDAD_AVISA_2026_A_V9.md` — diagnóstico de las 86 hojas
 - `docs/_archivo/MAPA_CARGA_LEGADO_A_V9.md` — mapa por dominio, decisiones D1–D22
-- `docs/PLAN_PORTE_LEGADO_V9.md` — especificación de carga, D23–D42
+- `docs/04_migracion/PLAN_PORTE_LEGADO_V9.md` — especificación de carga, D23–D42
 - `docs/PREPARACION_V9_CARGA_LEGADO.sql` (parche 1) · `…_2.sql` (parche 2) · `…_3.sql` (parche 3, nuevo)
 - `migration/decisions.py` (reglas ejecutables) · `migration/test_decisions.py` (**122 comprobaciones, 0 fallos**)
 
@@ -62,7 +62,7 @@ Hay cuatro niveles, y **siempre se usa el más alto posible**:
 **Lo que nunca se hace:** inventar un valor para satisfacer un `NOT NULL`. Si el
 esquema no tolera NULL y no hay fuente, se **relaja el esquema** (parches 1 y 3),
 salvo que exista una fuente autoritativa externa (única excepción: D26, la unidad
-OAIPCS, documentada en `docs/AVISA_PRODUCE_v10.md` (contiene v9 íntegro)).
+OAIPCS, documentada en `docs/02_arquitectura/AVISA_PRODUCE_v10.md` (contiene v9 íntegro)).
 
 **Corolario operativo:** todo lo que no resuelve va a `core.migracion_conflicto`
 (parche 3), no a un log perdido. El dato entra marcado y con puntero para revisión
@@ -241,7 +241,7 @@ tabla, sin resumir:
 | D14 | Titular/alterno en texto libre                 | ✅ `mesa_miembros.nombre_texto`, sin fuzzy                                                                                                                                                                                            |
 | D15 | Descripciones TEMA-03/04 cruzadas              | ✅ Bruto en `descripcion_legado`, `descripcion` NULL, `nota_calidad`                                                                                                                                                                  |
 | D16 | `tipo_documento='Otro'`                        | ✅ tipo 15 `otro`                                                                                                                                                                                                                     |
-| D17 | `FACT_Proceso_*` sin workflow                  | ✅ **RESUELTA (2026-11-18)**. Parche `PARCHE_10_FLUJO_PROCESO_D17.sql`, informe `docs/parches/P10_FLUJO_D17.md`: `core.flujo_definicion` 7 · `core.flujo_estado` 5 · `core.proceso_instancia` 135. Ver Anexo A.2 · D18 sigue diferida |
+| D17 | `FACT_Proceso_*` sin workflow                  | ✅ **RESUELTA (2026-11-18)**. Parche `PARCHE_10_FLUJO_PROCESO_D17.sql`, informe `docs/04_migracion/parches/P10_FLUJO_D17.md`: `core.flujo_definicion` 7 · `core.flujo_estado` 5 · `core.proceso_instancia` 135. Ver Anexo A.2 · D18 sigue diferida |
 | D18 | RADAR / NODO                                   | ⚠ **Diferida, no cargada**: `territorio.*` (4 tablas / 6 filas). Las 6 filas siguen en `legacy.*`; ver Anexo A.2                                                                                                                      |
 | D19 | Formatos `CS-2026-07` vs `CS-PRODUCE-2026-007` | ✅ **Confirmada y reforzada**: se comprobó por contenido que NO son el mismo caso. Los cortos se aparcan (D44)                                                                                                                        |
 | D20 | Columna vs bridge de alertas                   | ⚠ **INVERTIDA por D31**: el bridge NO es la única verdad; la columna aporta 16 pares propios                                                                                                                                          |
@@ -518,7 +518,7 @@ Todas verificadas contra el workbook (no estimadas):
 Las hojas de flujo **ya no están fuera**: el parche 10 (D17) cargó
 `FACT_Proceso_Caso` (36) + `FACT_Proceso_Reporte` (99) en `core.proceso_instancia`,
 `DIM_Paso_Proceso*` (7) en `core.flujo_definicion` y `DIM_Estado_Proceso` (5) en
-`core.flujo_estado`. Ver Anexo A.2 y `docs/parches/P10_FLUJO_D17.md`.
+`core.flujo_estado`. Ver Anexo A.2 y `docs/04_migracion/parches/P10_FLUJO_D17.md`.
 
 Nada de esto se borra: el staging es la garantía de que la decisión es reversible.
 
@@ -595,7 +595,7 @@ incógnitas:
 
 ## Anexo A — Clases de portabilidad y su ajuste a v10
 
-Absorbe `docs/ANALISIS_PORTABILIDAD_AVISA_2026_A_V9.md` §1.1 y §5. El detalle
+Absorbe `docs/05_datos/ANALISIS_PORTABILIDAD_AVISA_2026_A_V9.md` §1.1 y §5. El detalle
 columna a columna de ese documento (§3) **sigue siendo fuente única allí**: no se
 duplica aquí porque crear una segunda copia de una tabla de mapeo es exactamente
 el defecto que el índice documental está corrigiendo.
@@ -701,7 +701,7 @@ verifica, sólo queda sin enlace.
 Los cinco son dato maestro ausente, no defecto de carga: 155 instancias tienen
 `alerta_id` (72 las resolvió el parche 10 y 83 las cerró el parche 14) y 209
 tienen `flujo_definicion_id`.
-Detalle fila a fila en `docs/parches/P10_FLUJO_D17.md` §5 y §7.
+Detalle fila a fila en `docs/04_migracion/parches/P10_FLUJO_D17.md` §5 y §7.
 
 ---
 

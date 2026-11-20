@@ -7,7 +7,7 @@
 --    docs/PREPARACION_V9_CARGA_LEGADO_2.sql   (parche 2)
 --
 --  Este parche contiene SÓLO lo que faltaba para que el cargador no tenga que
---  inventar un solo dato. Justificación completa: docs/DECISIONES_CARGA_LEGADO_V9.md
+--  inventar un solo dato. Justificación completa: docs/04_migracion/DECISIONES_CARGA_LEGADO_V9.md
 --
 --  Idempotente: puede ejecutarse varias veces.
 --  Todo va dentro de una transacción porque el cargador necesita SET LOCAL.
@@ -95,7 +95,7 @@ ALTER TABLE core.cat_especies
 --    responsable_id es NOT NULL -> sin unidad no entra ningún caso.
 --
 --    No es un dato inventado: la unidad existe y está documentada en
---    docs/AVISA_PRODUCE_v10.md §1 y glosario:
+--    docs/02_arquitectura/AVISA_PRODUCE_v10.md §1 y glosario:
 --        "OAIPCS. Oficina de Articulación Intergubernamental y Prevención de
 --         Conflictos Sociales."
 --    entidad_id = 1 es PRODUCE (única entidad tenant).

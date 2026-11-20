@@ -1,6 +1,6 @@
 """Registro de fases del cargador, en el orden no negociable del plan.
 
-El orden es el de `docs/PLAN_PORTE_LEGADO_V9.md` §3: cada fase sólo depende de
+El orden es el de `docs/04_migracion/PLAN_PORTE_LEGADO_V9.md` §3: cada fase sólo depende de
 las anteriores (geografía antes de casos, casos antes de alertas, etc.).
 """
 

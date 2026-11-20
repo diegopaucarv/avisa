@@ -26,7 +26,7 @@
 --
 -- Competencia del parámetro. El tope NO se codifica en la función: se lee de
 -- `config.parametro` en cada llamada. Si la Dirección OAIPCS confirma otro valor
--- (Q40 sigue abierta en `docs/INDICE.md` §5), basta con sustituir la fila del
+-- (Q40 sigue abierta en `docs/README.md` §5), basta con sustituir la fila del
 -- parámetro; la función no se reescribe.
 --
 -- Idempotencia. El INSERT usa `ON CONFLICT (codigo) WHERE valid_to IS NULL`
