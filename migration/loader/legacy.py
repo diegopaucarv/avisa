@@ -24,14 +24,7 @@ from pathlib import Path
 import openpyxl
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
-# El paquete `backend` (y con él el workbook del legado) vivía en la raíz y hoy
-# está en `backups/backend`. Se prueban las dos ubicaciones para que el cargador
-# funcione sin argumentos en cualquiera de los dos arreglos del repositorio.
-XLSX_CANDIDATOS = (
-    REPO_ROOT / "backend" / "BASE_CONFLICTOS_SOCIALES_2026.xlsx",
-    REPO_ROOT / "backups" / "backend" / "BASE_CONFLICTOS_SOCIALES_2026.xlsx",
-)
-DEFAULT_XLSX = next((p for p in XLSX_CANDIDATOS if p.is_file()), XLSX_CANDIDATOS[0])
+DEFAULT_XLSX = REPO_ROOT / "backend" / "BASE_CONFLICTOS_SOCIALES_2026.xlsx"
 
 
 def cell_text(value) -> str | None:

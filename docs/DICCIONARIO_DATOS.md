@@ -1,10 +1,10 @@
 # Diccionario de datos — AVISA / SIPRECS
 
-Generado el 2026-11-19 desde la base viva con `migration/generar_diccionario.py` [9]. No se edita a mano: se regenera.
+Generado el 2026-11-18 desde la base viva con `migration/generar_diccionario.py` [9]. No se edita a mano: se regenera.
 
 ## 1. Qué es este documento
 
-Es el diccionario único del sistema. Describe, con el mismo formato, las dos capas que hoy conviven en la base: el **sistema anterior** (87 tablas con columnas posicionales) y el **modelo v10** (260 tablas lógicas en 27 esquemas, de los cuales uno solo contiene vistas, más 34 objetos derivados).
+Es el diccionario único del sistema. Describe, con el mismo formato, las dos capas que hoy conviven en la base: el **sistema anterior** (87 tablas con columnas posicionales) y el **modelo v10** (255 tablas lógicas en 26 esquemas, de los cuales uno solo contiene vistas, más 30 objetos derivados).
 
 Para cada tabla dice qué guarda, cuántas filas y columnas tiene, cuáles son sus claves y relaciones, y qué significa cada columna. Para el sistema anterior añade el destino que tiene en v10, de modo que un mismo documento sirve para leer el pasado y el presente.
 
@@ -20,15 +20,15 @@ Tres cosas que este documento **no** es:
 
 | Dimensión | Sistema anterior | Modelo v10 |
 | --- | --: | --: |
-| Tablas lógicas | 87 | 260 |
+| Tablas lógicas | 87 | 255 |
 | Particiones de tabla | 0 | 24 |
-| Tablas físicas | 87 | 284 |
-| Columnas (sin particiones) | 807 | 2 091 |
-| Columnas (con particiones) | 807 | 2 421 |
-| Filas | 4 729 | 13 346 |
-| Objetos derivados (vistas y matviews) | 0 | 34 |
+| Tablas físicas | 87 | 279 |
+| Columnas (sin particiones) | 807 | 2 036 |
+| Columnas (con particiones) | 807 | 2 366 |
+| Filas | 4 729 | 12 257 |
+| Objetos derivados (vistas y matviews) | 0 | 30 |
 
-El total de columnas que recorre este diccionario es 3 228: 2 421 del modelo v10 contando sus particiones, más 807 del sistema anterior. De ellas, 2 060 tienen comentario en la propia base y 197 tienen significado documentado por curaduría; el resto aparece con `—`.
+El total de columnas que recorre este diccionario es 3 173: 2 366 del modelo v10 contando sus particiones, más 807 del sistema anterior. De ellas, 2 036 tienen comentario en la propia base y 197 tienen significado documentado por curaduría; el resto aparece con `—`.
 
 ## 2. Cómo se generó y cómo se regenera
 
@@ -43,8 +43,8 @@ De dónde sale cada dato:
 - **Estructura**: tablas, columnas, tipos, nulabilidad, valores por defecto, claves primarias, ajenas, únicas e índices salen del catálogo del motor (`pg_class`, `pg_attribute`, `pg_constraint`, `pg_index`).
 - **Filas**: se cuentan con `count(*)` al generar. No se usan estimaciones, porque la base las tenía desactualizadas.
 - **Clasificación**: entrada, proceso, salida o transversal sale de BRECHA §12.1–12.6 [1]; las tablas que no aparecen allí se marcan como sin clasificar, y las vistas se marcan como salida por una regla explícita.
-- **Propósito**: 260 de las 260 tablas del modelo v10 tienen comentario de tabla en la base, escrito por el parche de comentarios [12]; las del sistema anterior y las vistas vienen de tres módulos de curaduría escritos a partir de las columnas y las claves de cada tabla [10].
-- **Descripciones de columna**: 2 060 columnas del modelo v10 llevan comentario propio en la base [12]. Las particiones heredan la descripción de su tabla padre (330 columnas), porque PostgreSQL no propaga los comentarios a las particiones. Del sistema anterior se documentan las columnas que la migración consume de forma directa; las otras 641 celdas quedan en `—`.
+- **Propósito**: 255 de las 255 tablas del modelo v10 tienen comentario de tabla en la base, escrito por el parche de comentarios [12]; las del sistema anterior y las vistas vienen de tres módulos de curaduría escritos a partir de las columnas y las claves de cada tabla [10].
+- **Descripciones de columna**: 2 036 columnas del modelo v10 llevan comentario propio en la base [12]. Las particiones heredan la descripción de su tabla padre (330 columnas), porque PostgreSQL no propaga los comentarios a las particiones. Del sistema anterior se documentan las columnas que la migración consume de forma directa; las otras 610 celdas quedan en `—`.
 
 **Regla de honestidad**: ningún texto se deduce del nombre de la columna. `—` significa «sin descripción documentada», no «sin significado». Se prefiere un hueco visible a una glosa inventada.
 
@@ -91,13 +91,13 @@ Las cifras de esta sección salen de la base en el momento de generar el documen
 | --- | --- | --: | --: | --: | --- |
 | `agent` | Trazas de los agentes de IA: sesiones, pauta, llamadas al modelo, prompts y retroalimentación. | 11 | 94 | 5 | P |
 | `analisis` | Planes de análisis y sus pasos: el puente entre el dato crudo y la pauta que se ejecuta. | 4 | 29 | 14 | P |
-| `audit` | Registro inmutable de accesos y operaciones sobre datos personales. | 1 | 8 | 3 088 | INF |
+| `audit` | Registro inmutable de accesos y operaciones sobre datos personales. | 1 | 8 | 2 241 | INF |
 | `avisa` | Entrada cruda: mensajes y adjuntos recibidos antes de validarse, más la cola de rechazos. | 2 | 19 | 0 | I |
 | `chat` | Historial de conversación con el asistente, versionado por ramas y confirmaciones. | 14 | 148 | 0 | P |
 | `community` | Módulo de expansión sobre organización comunitaria; hoy solo catálogos. | 1 | 10 | 0 | INF |
 | `config` | Parámetros, aplicaciones, librerías, registro de esquemas y transiciones de estado. | 6 | 51 | 64 | INF, P |
 | `consultation` | Módulo de expansión para consultas a actores; sin uso todavía. | 4 | 26 | 0 | INF |
-| `core` | El dominio: casos, alertas, demandas, actores, documentos, compromisos y territorio. | 99 | 810 | 6 901 | I, INF, O, P |
+| `core` | El dominio: casos, alertas, demandas, actores, documentos, compromisos y territorio. | 96 | 772 | 6 664 | I, INF, O, P |
 | `ctx` | Contexto sistémico: variables externas, dominios y observaciones que condicionan el análisis. | 10 | 61 | 28 | I, P |
 | `domain` | Módulo de expansión con artefactos de dominio; sin uso todavía. | 4 | 47 | 15 | INF |
 | `economic` | Módulo de expansión económica; sin uso todavía. | 3 | 25 | 0 | INF |
@@ -112,13 +112,12 @@ Las cifras de esta sección salen de la base en el momento de generar el documen
 | `policy` | Reglas de negocio y tipos de regla, con su vigencia. | 8 | 55 | 15 | INF |
 | `proteccion` | Módulo de expansión de protección social; sin uso todavía. | 1 | 11 | 0 | INF |
 | `qda` | Codificación cualitativa: proyectos, códigos, segmentos y libro de códigos. | 10 | 79 | 0 | P |
-| `ref` | — | 2 | 17 | 5 | INF |
 | `staging` | Aterrizaje temporal de importaciones externas antes de validarlas. | 2 | 18 | 0 | I |
 | `territorio` | Módulo de expansión territorial; sin uso todavía. | 16 | 100 | 9 | INF |
-| **Total modelo** | 26 esquemas | **260** | **2 091** | **13 346** | — |
+| **Total modelo** | 25 esquemas | **255** | **2 036** | **12 257** | — |
 | `legacy` | Sistema anterior, conservado como archivo | 87 | 807 | 4 729 | X |
 
-El modelo tiene 284 tablas físicas: 260 lógicas y 24 particiones que reparten cuatro tablas del dominio: `agent.llm_call` (6), `agent.run_log` (6), `avisa.raw_ingest` (6), `ctx.observaciones` (6). Las fichas son de la tabla lógica, porque la partición repite su estructura; el CSV sí las incluye fila a fila.
+El modelo tiene 279 tablas físicas: 255 lógicas y 24 particiones que reparten cuatro tablas del dominio: `agent.llm_call` (6), `agent.run_log` (6), `avisa.raw_ingest` (6), `ctx.observaciones` (6). Las fichas son de la tabla lógica, porque la partición repite su estructura; el CSV sí las incluye fila a fila.
 
 Las cifras de esta sección se cuentan por tabla y no por línea del inventario del BRECHA §12: allí se agrupan filas («`core.cat_*` (38 distintas, 41 tablas)», «y 10 más») y se suman las vistas a la salida. Por eso los totales difieren de los 31 / 78 / 24 / 54 que declara ese capítulo, aunque la clase de cada tabla sea la misma.
 
@@ -126,10 +125,10 @@ Las cifras de esta sección se cuentan por tabla y no por línea del inventario 
 
 | Clase | Qué significa | Tablas v10 | Columnas | Filas |
 | --- | --- | --: | --: | --: |
-| **I · Entrada** | Donde aterriza el dato del mundo. | 34 | 434 | 4 126 |
-| **P · Proceso** | Intermedios de extracción, pauta y síntesis, con su trazabilidad. | 102 | 790 | 3 489 |
+| **I · Entrada** | Donde aterriza el dato del mundo. | 33 | 420 | 3 982 |
+| **P · Proceso** | Intermedios de extracción, pauta y síntesis, con su trazabilidad. | 102 | 790 | 3 406 |
 | **O · Salida** | Se deriva de datos ya presentes; reproducible con la misma base. | 14 | 132 | 914 |
-| **INF · Transversal** | No es contenido: catálogos, parámetros, geografía, integraciones. | 110 | 735 | 4 817 |
+| **INF · Transversal** | No es contenido: catálogos, parámetros, geografía, integraciones. | 106 | 694 | 3 955 |
 | **X · Archivo** | Sistema anterior completo | 87 | 807 | 4 729 |
 
 ### 4.3 Vistas y vistas materializadas
@@ -139,13 +138,12 @@ Resumen por esquema; las fichas de cada objeto están en §6.
 | Esquema | Objetos | Vistas | Matviews | Columnas | Filas |
 | --- | --: | --: | --: | --: | --: |
 | `analytics` | 22 | 17 | 5 | 172 | 1 459 |
-| `core` | 4 | 4 | 0 | 40 | 2 090 |
+| `core` | 2 | 2 | 0 | 13 | 847 |
 | `lex` | 1 | 1 | 0 | 6 | 0 |
 | `mype` | 3 | 2 | 1 | 32 | 0 |
 | `pesca` | 1 | 1 | 0 | 7 | 0 |
-| `ref` | 2 | 2 | 0 | 15 | 5 |
 | `territorio` | 1 | 1 | 0 | 6 | 0 |
-| **Total** | **34** | **28** | **6** | **278** | **3 554** |
+| **Total** | **30** | **24** | **6** | **236** | **2 306** |
 
 ## 5. Modelo v10
 
@@ -237,8 +235,8 @@ Vínculo entre una llamada al modelo y los fragmentos documentales que recuperó
 
 | # | Columna | Tipo | Nulo | Clave | Descripción |
 | --: | --- | --- | :--: | --- | --- |
-| 1 | `call_id` | uuid | no | PK, FK → agent.llm_call_default(id), agent.llm_call(id), agent.llm_call_202611(id), agent.llm_call_202612(id), agent.llm_call_202701(id), agent.llm_call_202702(id), agent.llm_call_202703(id) | Llamada al modelo que recuperó el fragmento documental |
-| 2 | `call_ts` | timestamp with time zone | no | PK, FK → agent.llm_call_default(ts), agent.llm_call(ts), agent.llm_call_202611(ts), agent.llm_call_202612(ts), agent.llm_call_202701(ts), agent.llm_call_202702(ts), agent.llm_call_202703(ts) | Momento de la llamada, que con su identificador completa la clave del vínculo |
+| 1 | `call_id` | uuid | no | PK, FK → agent.llm_call(id), agent.llm_call_default(id), agent.llm_call_202703(id), agent.llm_call_202702(id), agent.llm_call_202701(id), agent.llm_call_202612(id), agent.llm_call_202611(id) | Llamada al modelo que recuperó el fragmento documental |
+| 2 | `call_ts` | timestamp with time zone | no | PK, FK → agent.llm_call(ts), agent.llm_call_default(ts), agent.llm_call_202703(ts), agent.llm_call_202702(ts), agent.llm_call_202701(ts), agent.llm_call_202612(ts), agent.llm_call_202611(ts) | Momento de la llamada, que con su identificador completa la clave del vínculo |
 | 3 | `fragmento_id` | uuid | no | PK, FK → kag.documento_fragmento(id) | Fragmento documental recuperado como insumo de la llamada |
 | 4 | `rank_rrf` | integer | sí | — | Posición que el fragmento ocupó tras fusionar los resultados de búsqueda |
 | 5 | `score_rrf` | numeric | sí | — | Puntaje de fusión del fragmento, que pondera sus apariciones en cada búsqueda |
@@ -431,11 +429,11 @@ Catálogo de puntos de ingreso manual de datos, con su esquema de validación y 
 
 Registro inmutable de accesos y operaciones sobre datos personales.
 
-1 tabla · 8 columnas · 3 088 filas.
+1 tabla · 8 columnas · 2 241 filas.
 
 #### `audit.datos_personales_acceso`
 
-**Clasificación:** INF · Transversal (§12 (encabezado)) · **Filas:** 3 088 · **Columnas:** 8 · **Clave primaria:** `id` · **Relaciones:** 0 · **Índices:** 4
+**Clasificación:** INF · Transversal (§12 (encabezado)) · **Filas:** 2 241 · **Columnas:** 8 · **Clave primaria:** `id` · **Relaciones:** 0 · **Índices:** 4
 
 Bitácora inmutable de acceso y escritura sobre datos personales de actores, exigida por la Ley 29733: no se corrige, se amplía con una fila nueva.
 
@@ -488,8 +486,8 @@ Mensaje crudo descartado por el canal de ingesta, con el error que motivó el re
 | # | Columna | Tipo | Nulo | Clave | Descripción |
 | --: | --- | --- | :--: | --- | --- |
 | 1 | `id` | uuid | no | PK | Identificador interno de la fila |
-| 2 | `raw_id` | uuid | no | FK → avisa.raw_ingest_202702(id), avisa.raw_ingest_default(id), avisa.raw_ingest_202611(id), avisa.raw_ingest_202612(id), avisa.raw_ingest_202701(id), avisa.raw_ingest_202703(id), avisa.raw_ingest(id) | Mensaje crudo descartado, buscado en la partición donde ingresó |
-| 3 | `raw_received_at` | timestamp with time zone | no | FK → avisa.raw_ingest_202702(received_at), avisa.raw_ingest_default(received_at), avisa.raw_ingest_202611(received_at), avisa.raw_ingest_202612(received_at), avisa.raw_ingest_202701(received_at), avisa.raw_ingest_202703(received_at), avisa.raw_ingest(received_at) | Momento en que se recibió el mensaje descartado, junto con su identificador |
+| 2 | `raw_id` | uuid | no | FK → avisa.raw_ingest_202612(id), avisa.raw_ingest_202702(id), avisa.raw_ingest_202703(id), avisa.raw_ingest_202611(id), avisa.raw_ingest_default(id), avisa.raw_ingest(id), avisa.raw_ingest_202701(id) | Mensaje crudo descartado, buscado en la partición donde ingresó |
+| 3 | `raw_received_at` | timestamp with time zone | no | FK → avisa.raw_ingest_202612(received_at), avisa.raw_ingest_202702(received_at), avisa.raw_ingest_202703(received_at), avisa.raw_ingest_202611(received_at), avisa.raw_ingest_default(received_at), avisa.raw_ingest(received_at), avisa.raw_ingest_202701(received_at) | Momento en que se recibió el mensaje descartado, junto con su identificador |
 | 4 | `error_json` | jsonb | no | — | Detalle estructurado del error que motivó el rechazo del mensaje |
 | 5 | `created_at` | timestamp with time zone | no | — | Momento en que se creó el registro |
 
@@ -999,30 +997,11 @@ Resultado o acuerdo alcanzado en un proceso de consulta, con su tipo, descripci�
 
 El dominio: casos, alertas, demandas, actores, documentos, compromisos y territorio.
 
-99 tablas · 810 columnas · 6 901 filas.
-
-#### `core.actor_alias`
-
-**Clasificación:** I · Entrada (§12.1) · **Filas:** 143 · **Columnas:** 8 · **Clave primaria:** `id` · **Relaciones:** 1 · **Índices:** 3
-
-Otros nombres con los que se conoce a un actor —alias, abreviatura, cargo o nombre histórico—, con su fuente y si un analista lo validó.
-
-| # | Columna | Tipo | Nulo | Clave | Descripción |
-| --: | --- | --- | :--: | --- | --- |
-| 1 | `id` | uuid | no | PK | — |
-| 2 | `actor_uid` | uuid | no | FK → core.actores | — |
-| 3 | `alias` | character varying(200) | no | — | — |
-| 4 | `tipo` | character varying(30) | no | — | — |
-| 5 | `fuente` | character varying(200) | sí | — | — |
-| 6 | `confianza` | numeric(3,2) | sí | — | — |
-| 7 | `es_validado_humano` | boolean | no | — | — |
-| 8 | `created_at` | timestamp with time zone | no | — | — |
-
-Claves únicas compuestas: `actor_uid`, `alias`.
+96 tablas · 772 columnas · 6 664 filas.
 
 #### `core.actor_datos_personales`
 
-**Clasificación:** I · Entrada (§12.1) · **Filas:** 847 · **Columnas:** 17 · **Clave primaria:** `actor_uid` · **Relaciones:** 3 · **Índices:** 2
+**Clasificación:** I · Entrada (§12.1) · **Filas:** 847 · **Columnas:** 16 · **Clave primaria:** `actor_uid` · **Relaciones:** 2 · **Índices:** 2
 
 Datos personales del actor cifrados con AES-256 y su HMAC de búsqueda, con base legal y consentimiento, separados del padrón por privacidad.
 
@@ -1032,7 +1011,7 @@ Datos personales del actor cifrados con AES-256 y su HMAC de búsqueda, con base
 | 2 | `telefono_contacto` | character varying(50) | sí | — | Teléfono de contacto del actor, guardado cifrado para proteger su identidad |
 | 3 | `genero` | character varying(30) | sí | — | Género declarado por el actor, usado para desagregar el análisis por sexo |
 | 4 | `autoidentificacion_etnica` | character varying(100) | sí | — | Pertenencia étnica autodeclarada por el actor para el enfoque intercultural |
-| 5 | `base_legal` | character varying(100) | sí | — | Texto heredado del prototipo. Se conserva como evidencia de la migración; el valor vigente se lee en base_legal_id. |
+| 5 | `base_legal` | character varying(100) | sí | — | Fundamento legal que autoriza el tratamiento y conservación de estos datos |
 | 6 | `fecha_consentimiento` | date | sí | — | Fecha en que el actor otorgó su consentimiento para el uso de sus datos |
 | 7 | `nivel_clasificacion` | smallint | no | FK → core.cat_clasificacion(nivel) | Nivel de acceso al dato: 1 público, 2 reservado, 3 confidencial |
 | 8 | `updated_at` | timestamp with time zone | no | — | Momento de la última modificación del registro |
@@ -1044,7 +1023,6 @@ Datos personales del actor cifrados con AES-256 y su HMAC de búsqueda, con base
 | 14 | `email_cifrado` | bytea | sí | — | Correo electrónico cifrado con AES-256 mediante pgp_sym_encrypt; la clave se guarda fuera de la base |
 | 15 | `telefono_cifrado` | bytea | sí | — | Teléfono cifrado con AES-256; guarda el número normalizado cuando existe y, si la fila solo traía el texto original, ese valor |
 | 16 | `dni_hmac` | bytea | sí | — | Huella HMAC-SHA256 del DNI con la misma clave: permite buscar y detectar duplicados sin descifrar nada. No es única a propósito, porque la fuente repite DNI |
-| 17 | `base_legal_id` | smallint | sí | FK → ref.base_legal_tratamiento(id) | Base legal que autoriza el tratamiento, tomada de ref.base_legal_tratamiento. Reemplaza al texto libre de base_legal. |
 
 #### `core.actor_membresia`
 
@@ -1063,7 +1041,7 @@ Pertenencia de una persona a una organización, con el cargo que ejerce y el per
 
 #### `core.actores`
 
-**Clasificación:** I · Entrada (§12.1) · **Filas:** 1 160 · **Columnas:** 31 · **Clave primaria:** `actor_uid` · **Relaciones:** 12 · **Índices:** 4
+**Clasificación:** I · Entrada (§12.1) · **Filas:** 1 160 · **Columnas:** 26 · **Clave primaria:** `actor_uid` · **Relaciones:** 8 · **Índices:** 2
 
 Sujeto individual o colectivo que participa en la conflictividad —dirigente, gremio, autoridad o empresa— con su tipo, rol, perfil y distrito de referencia.
 
@@ -1089,17 +1067,12 @@ Sujeto individual o colectivo que participa en la conflictividad —dirigente, g
 | 18 | `categoria` | character varying(40) | sí | — | Campo conservado del legado que agrupa actores por categoría, sin uso definido |
 | 19 | `perfil_id` | smallint | sí | FK → core.cat_perfiles_actor(id) | Perfil de comportamiento del actor según su disposición al diálogo |
 | 20 | `rol_funcional_id` | smallint | sí | FK → core.cat_roles_funcionales(id) | Rol funcional del actor en el análisis: decisor, proveedor de evidencia u otro |
-| 21 | `distrito_id` | integer | sí | FK → core.distritos(id) | Distrito del actor. Nulo en toda la carga heredada: el origen no registra distrito, sólo departamento. Se llena cuando el dato exista, desde el alta o desde territorio.lugar_actores. |
+| 21 | `distrito_id` | integer | sí | FK → core.distritos(id) | Distrito de referencia del actor para la desagregación territorial |
 | 22 | `foto_url` | character varying(500) | sí | — | Enlace a la fotografía o logotipo con que se identifica al actor |
 | 23 | `activo` | boolean | no | — | Indica si el actor sigue vigente en el padrón y puede asociarse a casos |
 | 24 | `perfil_descripcion` | text | sí | — | Texto libre que amplía o justifica el perfil asignado al actor |
 | 25 | `abreviatura` | character varying(150) | sí | — | Forma corta del nombre usada en listados y etiquetas de la interfaz |
 | 26 | `codigo_legado` | character varying(50) | sí | UQ | Código con el que el actor se identificaba en el sistema anterior |
-| 27 | `nivel_identificacion_id` | smallint | no | FK → core.cat_nivel_identificacion(id) | Cuánto se sabe de la identidad: 1 con DNI, 2 con otro documento, 3 nombre sin documento, 4 alias, 5 colectivo sin individuos. |
-| 28 | `caso_ancla_id` | uuid | sí | FK → core.casos(id) | Caso al que se ata un actor de nivel 4 o 5. Obligatorio si no hay organización ancla (ver ck_actor_anclaje). |
-| 29 | `organizacion_ancla_uid` | uuid | sí | FK → core.actores(actor_uid) | Organización a la que se ata un actor de nivel 4 o 5. |
-| 30 | `confianza` | numeric(3,2) | sí | — | Seguridad de la identificación, de 0 a 1. Por debajo de 0.7 la aplicación debe exigir revisión humana (HITL). |
-| 31 | `region_id` | integer | sí | FK → core.regiones(id) | Departamento del actor (core.regiones). Es el único nivel geográfico que trae el sistema anterior. |
 
 #### `core.acuerdo_ospa_sni`
 
@@ -1179,7 +1152,7 @@ Alerta temprana sobre un caso: situación actual, riesgos, acciones sugeridas, n
 | 22 | `paso_actual` | smallint | sí | — | Número del paso del flujo operativo en que se encuentra la alerta |
 | 23 | `fecha_validacion` | date | sí | — | Fecha en que un analista validó la alerta |
 | 24 | `fecha_remision` | date | sí | — | Fecha en que la alerta se remitió al área competente |
-| 25 | `estado_legado` | character varying(40) | sí | — | Estado tal como venía del sistema anterior. Se conserva como evidencia de la migración; el estado vigente se lee en core.vw_alerta_estado. |
+| 25 | `estado_legado` | character varying(40) | sí | — | Estado de la alerta tal como figuraba en el sistema anterior |
 | 26 | `fuente_tipo` | character varying(120) | sí | — | Clase de fuente que originó la alerta, por ejemplo un reporte o una nota |
 | 27 | `fuente_descripcion` | text | sí | — | Detalle de la fuente que originó la alerta |
 | 28 | `fuente_url` | character varying(500) | sí | — | Enlace a la fuente externa o al documento que sustenta la alerta |
@@ -1188,33 +1161,6 @@ Alerta temprana sobre un caso: situación actual, riesgos, acciones sugeridas, n
 | 31 | `mesa_id` | uuid | sí | FK → core.mesas_dialogo(id) | Mesa de diálogo vinculada a la alerta, si existe |
 | 32 | `codigo_legado` | character varying(50) | sí | UQ | Código de la alerta en el sistema anterior, conservado para trazabilidad |
 | 33 | `subsector_id` | integer | sí | FK → core.cat_subsectores(id) | Subsector al que pertenece la alerta registrada |
-
-#### `core.banco_datos_tratamiento`
-
-**Clasificación:** INF · Transversal (§12.4) · **Filas:** 1 · **Columnas:** 18 · **Clave primaria:** `id` · **Relaciones:** 2 · **Índices:** 2
-
-Registro del banco de datos personales que exige la Ley 29733: finalidad, categorías tratadas, plazo de conservación, nivel de seguridad, oficial responsable, flujo transfronterizo y estado de inscripción ante la autoridad.
-
-| # | Columna | Tipo | Nulo | Clave | Descripción |
-| --: | --- | --- | :--: | --- | --- |
-| 1 | `id` | smallint | no | PK | — |
-| 2 | `codigo` | character varying(40) | no | UQ | Identificador corto del banco, usado en la documentación y en el expediente. |
-| 3 | `nombre` | character varying(200) | no | — | — |
-| 4 | `finalidad` | text | no | — | Para qué se tratan los datos. Debe coincidir con la declaración inscrita: tratar para un fin no declarado es infracción. |
-| 5 | `categorias_datos` | text | no | — | Qué categorías se recogen (DNI, nombres, gremio de pertenencia, etc.). |
-| 6 | `colectivos_afectados` | text | sí | — | A quiénes se refieren los datos: dirigentes, socios, participantes de mesas. |
-| 7 | `tiempo_conservacion_meses` | smallint | no | — | Plazo declarado de conservación, en meses. Pasado el plazo, el dato se elimina o se anonimiza. |
-| 8 | `nivel_seguridad` | smallint | no | — | Nivel de seguridad exigido (1 básico, 2 medio, 3 alto). Los datos de afiliación sindical o gremial son sensibles: nivel alto. |
-| 9 | `medidas_seguridad` | text | sí | — | Resumen de las medidas técnicas y organizativas aplicadas: TLS en tránsito, AES-256 en reposo, RLS por rol, bitácora inmutable. |
-| 10 | `flujo_transfronterizo` | boolean | no | — | Si los datos salen del país. Debe declararse aunque sea negativo. |
-| 11 | `oficial_datos_usuario_id` | uuid | sí | FK → core.usuarios(id) | Oficial de Datos Personales (ODP) designado ante la ANPDP. |
-| 12 | `fecha_inscripcion_anpdp` | date | sí | — | Fecha de inscripción en el Registro Nacional. NULL = trámite pendiente. |
-| 13 | `codigo_registro_anpdp` | character varying(40) | sí | — | — |
-| 14 | `estado` | character varying(25) | no | — | pendiente \| inscrito \| actualizacion_pendiente \| baja. |
-| 15 | `nivel_clasificacion` | smallint | no | FK → core.cat_clasificacion(nivel) | — |
-| 16 | `activo` | boolean | no | — | — |
-| 17 | `created_at` | timestamp with time zone | no | — | — |
-| 18 | `updated_at` | timestamp with time zone | no | — | — |
 
 #### `core.cambio_normativo`
 
@@ -1573,18 +1519,6 @@ Equivalencia entre el estado local de un compromiso y el estado que espera un si
 | 4 | `estado_externo` | character varying(60) | no | — | Estado equivalente que espera el sistema externo |
 
 Claves únicas compuestas: `sistema_destino`, `estado_local`.
-
-#### `core.cat_nivel_identificacion`
-
-**Clasificación:** INF · Transversal (§12.4) · **Filas:** 5 · **Columnas:** 3 · **Clave primaria:** `id` · **Relaciones:** 0 · **Índices:** 2
-
-Cuánto se sabe de la identidad de un actor. Es la escala que permite registrar a alguien sin documento sin inventarle uno.
-
-| # | Columna | Tipo | Nulo | Clave | Descripción |
-| --: | --- | --- | :--: | --- | --- |
-| 1 | `id` | smallint | no | PK | — |
-| 2 | `codigo` | character varying(30) | no | UQ | — |
-| 3 | `descripcion` | character varying(200) | no | — | — |
 
 #### `core.cat_niveles_alerta`
 
@@ -2148,7 +2082,7 @@ Interruptor de funcionalidad del sistema, con su estado, quién lo activó y met
 
 #### `core.flujo_definicion`
 
-**Clasificación:** INF · Transversal (§12 (encabezado)) · **Filas:** 11 · **Columnas:** 10 · **Clave primaria:** `id` · **Relaciones:** 0 · **Índices:** 3
+**Clasificación:** INF · Transversal (§12 (encabezado)) · **Filas:** 7 · **Columnas:** 10 · **Clave primaria:** `id` · **Relaciones:** 0 · **Índices:** 3
 
 Paso del flujo operativo por tipo de trámite —caso o reporte—, con su orden, estado resultante y rol responsable.
 
@@ -2511,7 +2445,7 @@ Plan de acción con su monto presupuestal, plazo límite y estado de aprobación
 
 #### `core.proceso_instancia`
 
-**Clasificación:** P · Proceso (§12 (encabezado)) · **Filas:** 218 · **Columnas:** 21 · **Clave primaria:** `id` · **Relaciones:** 8 · **Índices:** 5
+**Clasificación:** P · Proceso (§12 (encabezado)) · **Filas:** 135 · **Columnas:** 21 · **Clave primaria:** `id` · **Relaciones:** 8 · **Índices:** 5
 
 Paso ejecutado del flujo operativo sobre un caso o un reporte, con su estado, responsable y fechas de ocurrencia.
 
@@ -2648,7 +2582,7 @@ Claves únicas compuestas: `lugar_id`, `fecha`, `fuente`.
 
 #### `core.roles`
 
-**Clasificación:** INF · Transversal (§12.4) · **Filas:** 9 · **Columnas:** 6 · **Clave primaria:** `id` · **Relaciones:** 1 · **Índices:** 2
+**Clasificación:** INF · Transversal (§12.4) · **Filas:** 9 · **Columnas:** 3 · **Clave primaria:** `id` · **Relaciones:** 1 · **Índices:** 2
 
 Rol de acceso del sistema con su nivel máximo de clasificación, base del control de permisos por perfil.
 
@@ -2657,9 +2591,6 @@ Rol de acceso del sistema con su nivel máximo de clasificación, base del contr
 | 1 | `id` | smallint | no | PK | Identificador interno del rol de acceso |
 | 2 | `codigo` | character varying(30) | no | UQ | Código corto del rol, usado en la asignación de permisos |
 | 3 | `max_clasificacion` | smallint | no | FK → core.cat_clasificacion(nivel) | Nivel máximo de clasificación que el rol puede consultar |
-| 4 | `puede_crear` | boolean | no | — | Autoriza INSERT en las tablas con RLS por clasificación. El nivel máximo sigue limitando qué filas (max_clasificacion). |
-| 5 | `puede_editar` | boolean | no | — | Autoriza UPDATE en las tablas con RLS por clasificación. |
-| 6 | `puede_eliminar` | boolean | no | — | Autoriza DELETE. Nunca se concede sin puede_editar (ver ck_roles_capacidades). El borrado de registros de conflictividad es destructivo y queda reservado a los roles que administran el dato. |
 
 #### `core.suscripcion_notificacion`
 
@@ -2680,7 +2611,7 @@ Suscripción de una unidad orgánica a los avisos de alerta, clima social y repo
 
 #### `core.usuario_roles`
 
-**Clasificación:** I · Entrada (§12.1) · **Filas:** 35 · **Columnas:** 4 · **Clave primaria:** `usuario_id`, `rol_id`, `desde` · **Relaciones:** 2 · **Índices:** 1
+**Clasificación:** I · Entrada (§12.1) · **Filas:** 34 · **Columnas:** 4 · **Clave primaria:** `usuario_id`, `rol_id`, `desde` · **Relaciones:** 2 · **Índices:** 1
 
 Asignación de un rol a un usuario, con el período durante el cual esa asignación está vigente.
 
@@ -3255,7 +3186,7 @@ Casillero de una plantilla que reserva un lugar para un indicador determinado, c
 | 4 | `codigo` | character varying(40) | no | — | Código del casillero usado para referenciarlo en el documento |
 | 5 | `indicador_id` | uuid | no | FK → ind.indicador(id) | Indicador que ocupa el casillero de la plantilla |
 
-Claves únicas compuestas: `plantilla_id`, `orden`; `plantilla_id`, `codigo`.
+Claves únicas compuestas: `plantilla_id`, `codigo`; `plantilla_id`, `orden`.
 
 #### `ind.proxy_justificacion`
 
@@ -4481,48 +4412,7 @@ Solape entre un segmento codificado y un fragmento del grafo, con el número de 
 | 2 | `fragmento_id` | uuid | no | PK, FK → kag.documento_fragmento(id) | Fragmento del grafo documental que solapa con el segmento |
 | 3 | `solape_chars` | integer | no | — | Cantidad de caracteres que el segmento y el fragmento comparten |
 
-### 5.24 `ref`
-
-Sin propósito documentado.
-
-2 tablas · 17 columnas · 5 filas.
-
-#### `ref.base_legal_evidencia`
-
-**Clasificación:** INF · Transversal (§12.4) · **Filas:** 0 · **Columnas:** 5 · **Clave primaria:** `base_legal_id`, `fragmento_id` · **Relaciones:** 2 · **Índices:** 2
-
-Fragmento del banco de conocimiento que respalda una base legal, con su página, su similitud y la confianza de la correspondencia, para poder citar la fuente exacta.
-
-| # | Columna | Tipo | Nulo | Clave | Descripción |
-| --: | --- | --- | :--: | --- | --- |
-| 1 | `base_legal_id` | smallint | no | PK, FK → ref.base_legal_tratamiento(id) | — |
-| 2 | `fragmento_id` | uuid | no | PK, FK → kag.documento_fragmento(id) | — |
-| 3 | `rol` | character varying(20) | no | — | Papel del fragmento: SUSTENTO (autoriza), CONDICION (limita), PLAZO (fija conservación) o EXCEPCION (excepción al consentimiento). |
-| 4 | `nota` | text | sí | — | — |
-| 5 | `created_at` | timestamp with time zone | no | — | — |
-
-#### `ref.base_legal_tratamiento`
-
-**Clasificación:** INF · Transversal (§12.4) · **Filas:** 5 · **Columnas:** 12 · **Clave primaria:** `id` · **Relaciones:** 1 · **Índices:** 2
-
-Base legal que autoriza el tratamiento de datos personales —norma, artículo, finalidad y condiciones—, ligada al banco de datos que la invoca.
-
-| # | Columna | Tipo | Nulo | Clave | Descripción |
-| --: | --- | --- | :--: | --- | --- |
-| 1 | `id` | smallint | no | PK | — |
-| 2 | `codigo` | character varying(30) | no | UQ | — |
-| 3 | `finalidad` | character varying(200) | no | — | — |
-| 4 | `plazo_conservacion_meses` | smallint | no | — | — |
-| 5 | `flujo_transfronterizo` | boolean | no | — | Si el tratamiento envía datos fuera del país. Es una de las declaraciones obligatorias ante la Autoridad Nacional de Protección de Datos Personales. |
-| 6 | `norma` | character varying(200) | sí | — | — |
-| 7 | `articulo` | character varying(60) | sí | — | — |
-| 8 | `sustento` | text | sí | — | Texto que explica por qué esta base autoriza el tratamiento. Los números de inciso se dejan a la revisión de la OGTI y de Asesoría Jurídica (H-04); no se citan como definitivos. |
-| 9 | `vigente_desde` | date | sí | — | — |
-| 10 | `vigente_hasta` | date | sí | — | — |
-| 11 | `created_at` | timestamp with time zone | no | — | — |
-| 12 | `banco_datos_id` | smallint | sí | FK → core.banco_datos_tratamiento(id) | Banco de datos personales al que pertenece esta base legal. |
-
-### 5.25 `staging`
+### 5.24 `staging`
 
 Aterrizaje temporal de importaciones externas antes de validarlas.
 
@@ -4564,7 +4454,7 @@ Fila de un lote de aterrizaje temporal, con su carga útil y los errores de vali
 | 4 | `payload` | jsonb | no | — | Contenido crudo de la fila tal como llegó del archivo |
 | 5 | `errores` | jsonb | sí | — | Errores de validación detectados en la fila |
 
-### 5.26 `territorio`
+### 5.25 `territorio`
 
 Módulo de expansión territorial; sin uso todavía.
 
@@ -4709,7 +4599,7 @@ Evaluación del impacto de un caso sobre una planta, con las certificaciones en 
 
 #### `territorio.lugar_actores`
 
-**Clasificación:** INF · Transversal (§12.4) · **Filas:** 0 · **Columnas:** 5 · **Clave primaria:** `lugar_id`, `actor_uid`, `valid_from` · **Relaciones:** 2 · **Índices:** 4
+**Clasificación:** INF · Transversal (§12.4) · **Filas:** 0 · **Columnas:** 5 · **Clave primaria:** `lugar_id`, `actor_uid`, `valid_from` · **Relaciones:** 2 · **Índices:** 2
 
 Actor vinculado a un lugar del territorio, con el tipo de vínculo y su período de vigencia.
 
@@ -5004,7 +4894,7 @@ Lee: `ind.indicador, ind.plantilla, ind.plantilla_slot, ind.proxy_justificacion,
 
 ### 6.2 `core`
 
-4 objetos · 40 columnas · 2 090 filas.
+2 objetos · 13 columnas · 847 filas.
 
 #### `core.v_actor_datos_personales_seguro`
 
@@ -5014,12 +4904,6 @@ Exposición de identificadores y contactos cifrados de actores, sin valores en c
 
 Lee: `core.actor_datos_personales`.
 
-#### `core.vw_actor_territorio`
-
-**Clasificación:** O · Salida · **Tipo:** vista · **Filas:** 1 160 · **Columnas:** 10
-
-Sin propósito documentado.
-
 #### `core.vw_agregacion_compromiso_externo`
 
 **Clasificación:** O · Salida · **Tipo:** vista · **Filas:** 0 · **Columnas:** 7
@@ -5027,12 +4911,6 @@ Sin propósito documentado.
 Aglomeración por sistema y entidad de destino de las integraciones de compromisos, con hitos asociados y fechas de sincronización.
 
 Lee: `core.integraciones`.
-
-#### `core.vw_alerta_estado`
-
-**Clasificación:** O · Salida · **Tipo:** vista · **Filas:** 83 · **Columnas:** 17
-
-Sin propósito documentado.
 
 ### 6.3 `lex`
 
@@ -5086,23 +4964,7 @@ Cuotas CITES por especie y año, con monto consumido y estado, para el control d
 
 Lee: `domain.artefacto, domain.tipo_artefacto`.
 
-### 6.6 `ref`
-
-2 objetos · 15 columnas · 5 filas.
-
-#### `ref.nivel_identificacion`
-
-**Clasificación:** O · Salida · **Tipo:** vista · **Filas:** 5 · **Columnas:** 3
-
-Sin propósito documentado.
-
-#### `ref.vw_base_legal_fuente`
-
-**Clasificación:** O · Salida · **Tipo:** vista · **Filas:** 0 · **Columnas:** 12
-
-Sin propósito documentado.
-
-### 6.7 `territorio`
+### 6.6 `territorio`
 
 1 objeto · 6 columnas · 0 filas.
 
@@ -6168,7 +6030,6 @@ Ordenado por nombre de objeto, para encontrar una tabla cuando se conoce el nomb
 **A**
 
 - `config.a2_transiciones`
-- `core.actor_alias`
 - `core.actor_datos_personales`
 - `core.actor_membresia`
 - `kag.actor_name_history`
@@ -6192,9 +6053,6 @@ Ordenado por nombre de objeto, para encontrar una tabla cuando se conoce el nomb
 
 **B**
 
-- `core.banco_datos_tratamiento`
-- `ref.base_legal_evidencia`
-- `ref.base_legal_tratamiento`
 - `chat.blame`
 - `chat.blob`
 - `ind.brecha`
@@ -6259,7 +6117,6 @@ Ordenado por nombre de objeto, para encontrar una tabla cuando se conoce el nomb
 - `ctx.cat_fuentes`
 - `analisis.cat_herramientas`
 - `core.cat_mapeo_estado_externo`
-- `core.cat_nivel_identificacion`
 - `core.cat_niveles_alerta`
 - `core.cat_niveles_conflicto`
 - `core.cat_niveles_riesgo`
@@ -6584,18 +6441,14 @@ Ordenado por nombre de objeto, para encontrar una tabla cuando se conoce el nomb
 - `analytics.mv_drift_embeddings`
 - `analytics.mv_drift_grafo`
 - `analytics.mv_tablero_decisional`
-- `ref.nivel_identificacion`
 - `core.v_actor_datos_personales_seguro`
 - `mype.v_ejecucion_nec_mora_vigente`
-- `core.vw_actor_territorio`
 - `core.vw_agregacion_compromiso_externo`
-- `core.vw_alerta_estado`
 - `analytics.vw_anexo_02_panorama_regional`
 - `analytics.vw_anexo_14_seguimiento_compromisos`
 - `analytics.vw_anexo_15_matriz_conflictividad`
 - `analytics.vw_anexo_16_registro_reuniones`
 - `analytics.vw_anexo_17_registro_reportes`
-- `ref.vw_base_legal_fuente`
 - `analytics.vw_carga_campo`
 - `analytics.vw_casos_estancados`
 - `lex.vw_clases_publicables`

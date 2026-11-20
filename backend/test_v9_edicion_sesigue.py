@@ -170,12 +170,9 @@ ejecuta(
 enlace = q(
     "insert into core.usuarios(nombre,email) values ('Enlace','enlace@x.pe') returning id"
 )[0][0]
-# El documento exige que la aplicación fije el contexto de seguridad (RLS por
-# clasificación, §20.16). Desde el parche 15 se fija el rol, no el nivel: el
-# nivel y las capacidades se deducen de core.roles.
-# Un superusuario la saltaría; fijarlo hace que la prueba también valga con un
-# DSN no privilegiado.
-ejecuta("select set_config('app.rol_codigo','administrador',false)")
+# El documento exige que la aplicación fije app.clasificacion_max (RLS por clasificación, §20.16).
+# Un superusuario la saltaría; fijarla hace que la prueba también valga con un DSN no privilegiado.
+ejecuta("select set_config('app.clasificacion_max','3',false)")
 ejecuta("select set_config('app.user_id',%s,false)", (str(enlace),))
 
 

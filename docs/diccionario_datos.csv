@@ -125,8 +125,8 @@ agent,llm_call_default,1,P,tokens_out,12,integer,sí,,0,0,,Cantidad de tokens pr
 agent,llm_call_default,1,P,latencia_ms,13,integer,sí,,0,0,,"Tiempo de respuesta de la llamada al modelo, medido en milisegundos",heredado_padre
 agent,llm_call_default,1,P,veredicto_guardrails,14,jsonb,sí,,0,0,,Resultado de los filtros de seguridad aplicados al prompt y a la respuesta,heredado_padre
 agent,llm_call_default,1,P,nivel_clasificacion,15,smallint,no,,0,0,core.cat_clasificacion(nivel),"Nivel de acceso al dato: 1 público, 2 reservado, 3 confidencial",heredado_padre
-agent,llm_call_fragmento,0,P,call_id,1,uuid,no,,1,0,agent.llm_call_default(id);agent.llm_call(id);agent.llm_call_202611(id);agent.llm_call_202612(id);agent.llm_call_202701(id);agent.llm_call_202702(id);agent.llm_call_202703(id),Llamada al modelo que recuperó el fragmento documental,comentario_bd
-agent,llm_call_fragmento,0,P,call_ts,2,timestamp with time zone,no,,1,0,agent.llm_call_default(ts);agent.llm_call(ts);agent.llm_call_202611(ts);agent.llm_call_202612(ts);agent.llm_call_202701(ts);agent.llm_call_202702(ts);agent.llm_call_202703(ts),"Momento de la llamada, que con su identificador completa la clave del vínculo",comentario_bd
+agent,llm_call_fragmento,0,P,call_id,1,uuid,no,,1,0,agent.llm_call(id);agent.llm_call_default(id);agent.llm_call_202703(id);agent.llm_call_202702(id);agent.llm_call_202701(id);agent.llm_call_202612(id);agent.llm_call_202611(id),Llamada al modelo que recuperó el fragmento documental,comentario_bd
+agent,llm_call_fragmento,0,P,call_ts,2,timestamp with time zone,no,,1,0,agent.llm_call(ts);agent.llm_call_default(ts);agent.llm_call_202703(ts);agent.llm_call_202702(ts);agent.llm_call_202701(ts);agent.llm_call_202612(ts);agent.llm_call_202611(ts),"Momento de la llamada, que con su identificador completa la clave del vínculo",comentario_bd
 agent,llm_call_fragmento,0,P,fragmento_id,3,uuid,no,,1,0,kag.documento_fragmento(id),Fragmento documental recuperado como insumo de la llamada,comentario_bd
 agent,llm_call_fragmento,0,P,rank_rrf,4,integer,sí,,0,0,,Posición que el fragmento ocupó tras fusionar los resultados de búsqueda,comentario_bd
 agent,llm_call_fragmento,0,P,score_rrf,5,numeric,sí,,0,0,,"Puntaje de fusión del fragmento, que pondera sus apariciones en cada búsqueda",comentario_bd
@@ -397,8 +397,8 @@ avisa,raw_ingest_default,1,I,caso_id,12,uuid,sí,,0,0,core.casos(id),"Caso al qu
 avisa,raw_ingest_default,1,I,tipo_registro,13,character varying(20),no,'evento'::character varying,0,0,,"Clase de registro que el mensaje representa, por defecto evento",heredado_padre
 avisa,raw_ingest_default,1,I,policy_snapshot_id,14,uuid,sí,,0,0,policy.snapshot(id),Foto de las políticas vigentes al momento de recibir el mensaje,heredado_padre
 avisa,raw_ingest_rejected,0,I,id,1,uuid,no,gen_random_uuid(),1,0,,Identificador interno de la fila,comentario_bd
-avisa,raw_ingest_rejected,0,I,raw_id,2,uuid,no,,0,0,avisa.raw_ingest_202702(id);avisa.raw_ingest_default(id);avisa.raw_ingest_202611(id);avisa.raw_ingest_202612(id);avisa.raw_ingest_202701(id);avisa.raw_ingest_202703(id);avisa.raw_ingest(id),"Mensaje crudo descartado, buscado en la partición donde ingresó",comentario_bd
-avisa,raw_ingest_rejected,0,I,raw_received_at,3,timestamp with time zone,no,,0,0,avisa.raw_ingest_202702(received_at);avisa.raw_ingest_default(received_at);avisa.raw_ingest_202611(received_at);avisa.raw_ingest_202612(received_at);avisa.raw_ingest_202701(received_at);avisa.raw_ingest_202703(received_at);avisa.raw_ingest(received_at),"Momento en que se recibió el mensaje descartado, junto con su identificador",comentario_bd
+avisa,raw_ingest_rejected,0,I,raw_id,2,uuid,no,,0,0,avisa.raw_ingest_202612(id);avisa.raw_ingest_202702(id);avisa.raw_ingest_202703(id);avisa.raw_ingest_202611(id);avisa.raw_ingest_default(id);avisa.raw_ingest(id);avisa.raw_ingest_202701(id),"Mensaje crudo descartado, buscado en la partición donde ingresó",comentario_bd
+avisa,raw_ingest_rejected,0,I,raw_received_at,3,timestamp with time zone,no,,0,0,avisa.raw_ingest_202612(received_at);avisa.raw_ingest_202702(received_at);avisa.raw_ingest_202703(received_at);avisa.raw_ingest_202611(received_at);avisa.raw_ingest_default(received_at);avisa.raw_ingest(received_at);avisa.raw_ingest_202701(received_at),"Momento en que se recibió el mensaje descartado, junto con su identificador",comentario_bd
 avisa,raw_ingest_rejected,0,I,error_json,4,jsonb,no,,0,0,,Detalle estructurado del error que motivó el rechazo del mensaje,comentario_bd
 avisa,raw_ingest_rejected,0,I,created_at,5,timestamp with time zone,no,now(),0,0,,Momento en que se creó el registro,comentario_bd
 chat,blame,0,P,id,1,uuid,no,gen_random_uuid(),1,0,,Identificador interno de la fila,comentario_bd
@@ -636,19 +636,11 @@ consultation,resultados,0,INF,tipo_resultado,3,character varying(50),no,,0,0,,"N
 consultation,resultados,0,INF,descripcion,4,text,no,,0,0,,Detalle del acuerdo o resultado alcanzado en la consulta,comentario_bd
 consultation,resultados,0,INF,documento_url,5,character varying(500),sí,,0,0,,Enlace al documento que respalda el resultado registrado,comentario_bd
 consultation,resultados,0,INF,fecha,6,date,no,,0,0,,Fecha en que se alcanzó o suscribió el resultado,comentario_bd
-core,actor_alias,0,I,id,1,uuid,no,gen_random_uuid(),1,0,,,sin_descripcion
-core,actor_alias,0,I,actor_uid,2,uuid,no,,0,0,core.actores,,sin_descripcion
-core,actor_alias,0,I,alias,3,character varying(200),no,,0,0,,,sin_descripcion
-core,actor_alias,0,I,tipo,4,character varying(30),no,'ALIAS'::character varying,0,0,,,sin_descripcion
-core,actor_alias,0,I,fuente,5,character varying(200),sí,,0,0,,,sin_descripcion
-core,actor_alias,0,I,confianza,6,"numeric(3,2)",sí,,0,0,,,sin_descripcion
-core,actor_alias,0,I,es_validado_humano,7,boolean,no,false,0,0,,,sin_descripcion
-core,actor_alias,0,I,created_at,8,timestamp with time zone,no,now(),0,0,,,sin_descripcion
 core,actor_datos_personales,0,I,actor_uid,1,uuid,no,,1,0,core.actores,"Actor al que pertenecen estos datos personales, en relación uno a uno",comentario_bd
 core,actor_datos_personales,0,I,telefono_contacto,2,character varying(50),sí,,0,0,,"Teléfono de contacto del actor, guardado cifrado para proteger su identidad",comentario_bd
 core,actor_datos_personales,0,I,genero,3,character varying(30),sí,,0,0,,"Género declarado por el actor, usado para desagregar el análisis por sexo",comentario_bd
 core,actor_datos_personales,0,I,autoidentificacion_etnica,4,character varying(100),sí,,0,0,,Pertenencia étnica autodeclarada por el actor para el enfoque intercultural,comentario_bd
-core,actor_datos_personales,0,I,base_legal,5,character varying(100),sí,,0,0,,Texto heredado del prototipo. Se conserva como evidencia de la migración; el valor vigente se lee en base_legal_id.,comentario_bd
+core,actor_datos_personales,0,I,base_legal,5,character varying(100),sí,,0,0,,Fundamento legal que autoriza el tratamiento y conservación de estos datos,comentario_bd
 core,actor_datos_personales,0,I,fecha_consentimiento,6,date,sí,,0,0,,Fecha en que el actor otorgó su consentimiento para el uso de sus datos,comentario_bd
 core,actor_datos_personales,0,I,nivel_clasificacion,7,smallint,no,3,0,0,core.cat_clasificacion(nivel),"Nivel de acceso al dato: 1 público, 2 reservado, 3 confidencial",comentario_bd
 core,actor_datos_personales,0,I,updated_at,8,timestamp with time zone,no,now(),0,0,,Momento de la última modificación del registro,comentario_bd
@@ -660,7 +652,6 @@ core,actor_datos_personales,0,I,dni_cifrado,13,bytea,sí,,0,0,,DNI cifrado con A
 core,actor_datos_personales,0,I,email_cifrado,14,bytea,sí,,0,0,,Correo electrónico cifrado con AES-256 mediante pgp_sym_encrypt; la clave se guarda fuera de la base,comentario_bd
 core,actor_datos_personales,0,I,telefono_cifrado,15,bytea,sí,,0,0,,"Teléfono cifrado con AES-256; guarda el número normalizado cuando existe y, si la fila solo traía el texto original, ese valor",comentario_bd
 core,actor_datos_personales,0,I,dni_hmac,16,bytea,sí,,0,0,,"Huella HMAC-SHA256 del DNI con la misma clave: permite buscar y detectar duplicados sin descifrar nada. No es única a propósito, porque la fuente repite DNI",comentario_bd
-core,actor_datos_personales,0,I,base_legal_id,17,smallint,sí,,0,0,ref.base_legal_tratamiento(id),"Base legal que autoriza el tratamiento, tomada de ref.base_legal_tratamiento. Reemplaza al texto libre de base_legal.",comentario_bd
 core,actor_membresia,0,I,id,1,uuid,no,gen_random_uuid(),1,0,,Identificador interno de la fila,comentario_bd
 core,actor_membresia,0,I,persona_uid,2,uuid,no,,0,0,core.actores(actor_uid),Persona que ocupa el cargo dentro de la organización,comentario_bd
 core,actor_membresia,0,I,organizacion_uid,3,uuid,no,,0,0,core.actores(actor_uid),Organización a la que pertenece la persona en este vínculo,comentario_bd
@@ -687,17 +678,12 @@ core,actores,0,I,nivel_gobierno,17,character varying(15),sí,,0,0,,"Nivel de gob
 core,actores,0,I,categoria,18,character varying(40),sí,,0,0,,"Campo conservado del legado que agrupa actores por categoría, sin uso definido",comentario_bd
 core,actores,0,I,perfil_id,19,smallint,sí,,0,0,core.cat_perfiles_actor(id),Perfil de comportamiento del actor según su disposición al diálogo,comentario_bd
 core,actores,0,I,rol_funcional_id,20,smallint,sí,,0,0,core.cat_roles_funcionales(id),"Rol funcional del actor en el análisis: decisor, proveedor de evidencia u otro",comentario_bd
-core,actores,0,I,distrito_id,21,integer,sí,,0,0,core.distritos(id),"Distrito del actor. Nulo en toda la carga heredada: el origen no registra distrito, sólo departamento. Se llena cuando el dato exista, desde el alta o desde territorio.lugar_actores.",comentario_bd
+core,actores,0,I,distrito_id,21,integer,sí,,0,0,core.distritos(id),Distrito de referencia del actor para la desagregación territorial,comentario_bd
 core,actores,0,I,foto_url,22,character varying(500),sí,,0,0,,Enlace a la fotografía o logotipo con que se identifica al actor,comentario_bd
 core,actores,0,I,activo,23,boolean,no,true,0,0,,Indica si el actor sigue vigente en el padrón y puede asociarse a casos,comentario_bd
 core,actores,0,I,perfil_descripcion,24,text,sí,,0,0,,Texto libre que amplía o justifica el perfil asignado al actor,comentario_bd
 core,actores,0,I,abreviatura,25,character varying(150),sí,,0,0,,Forma corta del nombre usada en listados y etiquetas de la interfaz,comentario_bd
 core,actores,0,I,codigo_legado,26,character varying(50),sí,,0,1,,Código con el que el actor se identificaba en el sistema anterior,comentario_bd
-core,actores,0,I,nivel_identificacion_id,27,smallint,no,3,0,0,core.cat_nivel_identificacion(id),"Cuánto se sabe de la identidad: 1 con DNI, 2 con otro documento, 3 nombre sin documento, 4 alias, 5 colectivo sin individuos.",comentario_bd
-core,actores,0,I,caso_ancla_id,28,uuid,sí,,0,0,core.casos(id),Caso al que se ata un actor de nivel 4 o 5. Obligatorio si no hay organización ancla (ver ck_actor_anclaje).,comentario_bd
-core,actores,0,I,organizacion_ancla_uid,29,uuid,sí,,0,0,core.actores(actor_uid),Organización a la que se ata un actor de nivel 4 o 5.,comentario_bd
-core,actores,0,I,confianza,30,"numeric(3,2)",sí,,0,0,,"Seguridad de la identificación, de 0 a 1. Por debajo de 0.7 la aplicación debe exigir revisión humana (HITL).",comentario_bd
-core,actores,0,I,region_id,31,integer,sí,,0,0,core.regiones(id),Departamento del actor (core.regiones). Es el único nivel geográfico que trae el sistema anterior.,comentario_bd
 core,acuerdo_ospa_sni,0,P,id,1,uuid,no,gen_random_uuid(),1,0,,Identificador interno de la fila,comentario_bd
 core,acuerdo_ospa_sni,0,P,ospa_actor_uid,2,uuid,no,,0,0,core.actores(actor_uid),Organización social de pescadores artesanales que suscribe el acuerdo,comentario_bd
 core,acuerdo_ospa_sni,0,P,planta_actor_uid,3,uuid,no,,0,0,core.actores(actor_uid),Planta pesquera con la que se pactan el volumen y el precio,comentario_bd
@@ -741,7 +727,7 @@ core,alertas_tempranas,0,I,acciones_oaipcs,21,text,sí,,0,0,,Acciones desplegada
 core,alertas_tempranas,0,I,paso_actual,22,smallint,sí,,0,0,,Número del paso del flujo operativo en que se encuentra la alerta,comentario_bd
 core,alertas_tempranas,0,I,fecha_validacion,23,date,sí,,0,0,,Fecha en que un analista validó la alerta,comentario_bd
 core,alertas_tempranas,0,I,fecha_remision,24,date,sí,,0,0,,Fecha en que la alerta se remitió al área competente,comentario_bd
-core,alertas_tempranas,0,I,estado_legado,25,character varying(40),sí,,0,0,,Estado tal como venía del sistema anterior. Se conserva como evidencia de la migración; el estado vigente se lee en core.vw_alerta_estado.,comentario_bd
+core,alertas_tempranas,0,I,estado_legado,25,character varying(40),sí,,0,0,,Estado de la alerta tal como figuraba en el sistema anterior,comentario_bd
 core,alertas_tempranas,0,I,fuente_tipo,26,character varying(120),sí,,0,0,,"Clase de fuente que originó la alerta, por ejemplo un reporte o una nota",comentario_bd
 core,alertas_tempranas,0,I,fuente_descripcion,27,text,sí,,0,0,,Detalle de la fuente que originó la alerta,comentario_bd
 core,alertas_tempranas,0,I,fuente_url,28,character varying(500),sí,,0,0,,Enlace a la fuente externa o al documento que sustenta la alerta,comentario_bd
@@ -750,24 +736,6 @@ core,alertas_tempranas,0,I,sectorista_usuario_id,30,uuid,sí,,0,0,core.usuarios(
 core,alertas_tempranas,0,I,mesa_id,31,uuid,sí,,0,0,core.mesas_dialogo(id),"Mesa de diálogo vinculada a la alerta, si existe",comentario_bd
 core,alertas_tempranas,0,I,codigo_legado,32,character varying(50),sí,,0,1,,"Código de la alerta en el sistema anterior, conservado para trazabilidad",comentario_bd
 core,alertas_tempranas,0,I,subsector_id,33,integer,sí,,0,0,core.cat_subsectores(id),Subsector al que pertenece la alerta registrada,comentario_bd
-core,banco_datos_tratamiento,0,INF,id,1,smallint,no,,1,0,,,sin_descripcion
-core,banco_datos_tratamiento,0,INF,codigo,2,character varying(40),no,,0,1,,"Identificador corto del banco, usado en la documentación y en el expediente.",comentario_bd
-core,banco_datos_tratamiento,0,INF,nombre,3,character varying(200),no,,0,0,,,sin_descripcion
-core,banco_datos_tratamiento,0,INF,finalidad,4,text,no,,0,0,,Para qué se tratan los datos. Debe coincidir con la declaración inscrita: tratar para un fin no declarado es infracción.,comentario_bd
-core,banco_datos_tratamiento,0,INF,categorias_datos,5,text,no,,0,0,,"Qué categorías se recogen (DNI, nombres, gremio de pertenencia, etc.).",comentario_bd
-core,banco_datos_tratamiento,0,INF,colectivos_afectados,6,text,sí,,0,0,,"A quiénes se refieren los datos: dirigentes, socios, participantes de mesas.",comentario_bd
-core,banco_datos_tratamiento,0,INF,tiempo_conservacion_meses,7,smallint,no,,0,0,,"Plazo declarado de conservación, en meses. Pasado el plazo, el dato se elimina o se anonimiza.",comentario_bd
-core,banco_datos_tratamiento,0,INF,nivel_seguridad,8,smallint,no,3,0,0,,"Nivel de seguridad exigido (1 básico, 2 medio, 3 alto). Los datos de afiliación sindical o gremial son sensibles: nivel alto.",comentario_bd
-core,banco_datos_tratamiento,0,INF,medidas_seguridad,9,text,sí,,0,0,,"Resumen de las medidas técnicas y organizativas aplicadas: TLS en tránsito, AES-256 en reposo, RLS por rol, bitácora inmutable.",comentario_bd
-core,banco_datos_tratamiento,0,INF,flujo_transfronterizo,10,boolean,no,false,0,0,,Si los datos salen del país. Debe declararse aunque sea negativo.,comentario_bd
-core,banco_datos_tratamiento,0,INF,oficial_datos_usuario_id,11,uuid,sí,,0,0,core.usuarios(id),Oficial de Datos Personales (ODP) designado ante la ANPDP.,comentario_bd
-core,banco_datos_tratamiento,0,INF,fecha_inscripcion_anpdp,12,date,sí,,0,0,,Fecha de inscripción en el Registro Nacional. NULL = trámite pendiente.,comentario_bd
-core,banco_datos_tratamiento,0,INF,codigo_registro_anpdp,13,character varying(40),sí,,0,0,,,sin_descripcion
-core,banco_datos_tratamiento,0,INF,estado,14,character varying(25),no,'pendiente'::character varying,0,0,,pendiente | inscrito | actualizacion_pendiente | baja.,comentario_bd
-core,banco_datos_tratamiento,0,INF,nivel_clasificacion,15,smallint,no,2,0,0,core.cat_clasificacion(nivel),,sin_descripcion
-core,banco_datos_tratamiento,0,INF,activo,16,boolean,no,true,0,0,,,sin_descripcion
-core,banco_datos_tratamiento,0,INF,created_at,17,timestamp with time zone,no,now(),0,0,,,sin_descripcion
-core,banco_datos_tratamiento,0,INF,updated_at,18,timestamp with time zone,no,now(),0,0,,,sin_descripcion
 core,cambio_normativo,0,P,id,1,uuid,no,gen_random_uuid(),1,0,,Identificador interno de la fila,comentario_bd
 core,cambio_normativo,0,P,tabla_objetivo,2,character varying(60),no,,0,0,,Tabla de datos normativos sobre la que se solicita el cambio,comentario_bd
 core,cambio_normativo,0,P,accion,3,character varying(10),no,,0,0,,"Operación solicitada sobre la fila: alta, edición o baja",comentario_bd
@@ -926,9 +894,6 @@ core,cat_mapeo_estado_externo,0,INF,id,1,smallint,no,,1,0,,Identificador interno
 core,cat_mapeo_estado_externo,0,INF,sistema_destino,2,character varying(100),no,,0,0,,"Sistema externo al que se envía el estado, como SESIGUE",comentario_bd
 core,cat_mapeo_estado_externo,0,INF,estado_local,3,character varying(60),no,,0,0,,Estado del compromiso en el sistema local,comentario_bd
 core,cat_mapeo_estado_externo,0,INF,estado_externo,4,character varying(60),no,,0,0,,Estado equivalente que espera el sistema externo,comentario_bd
-core,cat_nivel_identificacion,0,INF,id,1,smallint,no,,1,0,,,sin_descripcion
-core,cat_nivel_identificacion,0,INF,codigo,2,character varying(30),no,,0,1,,,sin_descripcion
-core,cat_nivel_identificacion,0,INF,descripcion,3,character varying(200),no,,0,0,,,sin_descripcion
 core,cat_niveles_alerta,0,INF,id,1,smallint,no,,1,0,,Identificador interno de la fila,comentario_bd
 core,cat_niveles_alerta,0,INF,nombre,2,character varying(60),no,,0,1,,Denominación del nivel de alerta mostrada en alertas y reportes,comentario_bd
 core,cat_niveles_alerta,0,INF,descripcion,3,text,sí,,0,0,,Explicación del alcance y las implicancias del nivel de alerta,comentario_bd
@@ -1416,9 +1381,6 @@ core,riesgo_social_ordinal,0,P,nivel_clasificacion,10,smallint,no,2,0,0,core.cat
 core,roles,0,INF,id,1,smallint,no,,1,0,,Identificador interno del rol de acceso,comentario_bd
 core,roles,0,INF,codigo,2,character varying(30),no,,0,1,,"Código corto del rol, usado en la asignación de permisos",comentario_bd
 core,roles,0,INF,max_clasificacion,3,smallint,no,,0,0,core.cat_clasificacion(nivel),Nivel máximo de clasificación que el rol puede consultar,comentario_bd
-core,roles,0,INF,puede_crear,4,boolean,no,false,0,0,,Autoriza INSERT en las tablas con RLS por clasificación. El nivel máximo sigue limitando qué filas (max_clasificacion).,comentario_bd
-core,roles,0,INF,puede_editar,5,boolean,no,false,0,0,,Autoriza UPDATE en las tablas con RLS por clasificación.,comentario_bd
-core,roles,0,INF,puede_eliminar,6,boolean,no,false,0,0,,Autoriza DELETE. Nunca se concede sin puede_editar (ver ck_roles_capacidades). El borrado de registros de conflictividad es destructivo y queda reservado a los roles que administran el dato.,comentario_bd
 core,suscripcion_notificacion,0,O,id,1,uuid,no,gen_random_uuid(),1,0,,Identificador interno de la fila,comentario_bd
 core,suscripcion_notificacion,0,O,unidad_id,2,integer,sí,,0,0,core.cat_unidades_organicas(id),Unidad orgánica suscrita a los avisos,comentario_bd
 core,suscripcion_notificacion,0,O,recibe_alerta,3,boolean,no,false,0,0,,Indica si la unidad recibe avisos de alertas,comentario_bd
@@ -3096,23 +3058,6 @@ qda,segmento,0,P,nivel_clasificacion,11,smallint,no,2,0,0,core.cat_clasificacion
 qda,segmento_fragmento,0,P,segmento_id,1,uuid,no,,1,0,qda.segmento(id),Segmento codificado que se cruza con el fragmento del grafo,comentario_bd
 qda,segmento_fragmento,0,P,fragmento_id,2,uuid,no,,1,0,kag.documento_fragmento(id),Fragmento del grafo documental que solapa con el segmento,comentario_bd
 qda,segmento_fragmento,0,P,solape_chars,3,integer,no,,0,0,,Cantidad de caracteres que el segmento y el fragmento comparten,comentario_bd
-ref,base_legal_evidencia,0,INF,base_legal_id,1,smallint,no,,1,0,ref.base_legal_tratamiento(id),,sin_descripcion
-ref,base_legal_evidencia,0,INF,fragmento_id,2,uuid,no,,1,0,kag.documento_fragmento(id),,sin_descripcion
-ref,base_legal_evidencia,0,INF,rol,3,character varying(20),no,'SUSTENTO'::character varying,0,0,,"Papel del fragmento: SUSTENTO (autoriza), CONDICION (limita), PLAZO (fija conservación) o EXCEPCION (excepción al consentimiento).",comentario_bd
-ref,base_legal_evidencia,0,INF,nota,4,text,sí,,0,0,,,sin_descripcion
-ref,base_legal_evidencia,0,INF,created_at,5,timestamp with time zone,no,now(),0,0,,,sin_descripcion
-ref,base_legal_tratamiento,0,INF,id,1,smallint,no,,1,0,,,sin_descripcion
-ref,base_legal_tratamiento,0,INF,codigo,2,character varying(30),no,,0,1,,,sin_descripcion
-ref,base_legal_tratamiento,0,INF,finalidad,3,character varying(200),no,,0,0,,,sin_descripcion
-ref,base_legal_tratamiento,0,INF,plazo_conservacion_meses,4,smallint,no,,0,0,,,sin_descripcion
-ref,base_legal_tratamiento,0,INF,flujo_transfronterizo,5,boolean,no,false,0,0,,Si el tratamiento envía datos fuera del país. Es una de las declaraciones obligatorias ante la Autoridad Nacional de Protección de Datos Personales.,comentario_bd
-ref,base_legal_tratamiento,0,INF,norma,6,character varying(200),sí,,0,0,,,sin_descripcion
-ref,base_legal_tratamiento,0,INF,articulo,7,character varying(60),sí,,0,0,,,sin_descripcion
-ref,base_legal_tratamiento,0,INF,sustento,8,text,sí,,0,0,,Texto que explica por qué esta base autoriza el tratamiento. Los números de inciso se dejan a la revisión de la OGTI y de Asesoría Jurídica (H-04); no se citan como definitivos.,comentario_bd
-ref,base_legal_tratamiento,0,INF,vigente_desde,9,date,sí,,0,0,,,sin_descripcion
-ref,base_legal_tratamiento,0,INF,vigente_hasta,10,date,sí,,0,0,,,sin_descripcion
-ref,base_legal_tratamiento,0,INF,created_at,11,timestamp with time zone,no,now(),0,0,,,sin_descripcion
-ref,base_legal_tratamiento,0,INF,banco_datos_id,12,smallint,sí,,0,0,core.banco_datos_tratamiento(id),Banco de datos personales al que pertenece esta base legal.,comentario_bd
 staging,lote,0,I,id,1,uuid,no,gen_random_uuid(),1,0,,Identificador interno de la fila,comentario_bd
 staging,lote,0,I,punto_ingesta_id,2,smallint,no,,0,0,analisis.punto_ingesta(id),Punto de ingesta por el que entró el lote de archivos,comentario_bd
 staging,lote,0,I,plan_paso_id,3,uuid,sí,,0,0,analisis.plan_paso(id),Paso del plan de análisis al que se asocia la carga,comentario_bd
