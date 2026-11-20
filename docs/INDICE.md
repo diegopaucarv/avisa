@@ -285,7 +285,7 @@ Regla de citación: desde el MVP hacia v10, `[v10 §3.6.v10]`. Desde v10 hacia e
 | 6   | `FLUJO_BASE_MVP_Y_MIGRACION.md`             | cómo se **levanta** la base y se migra                                        |
 | 7   | `ENTORNO_DOCKER_POSTGRES.md`                | **dónde corre** el entorno                                                    |
 
-**Consulta bajo demanda.** No se leen de corrido: se abren para responder una pregunta concreta. `DICCIONARIO_DATOS.md` y su versión máquina `diccionario_datos.csv` (una columna descrita); `BRECHA_CAPA_DATOS_V9.md` (estado medido de la base); `DECISIONES_CARGA_LEGADO_V9.md` (por qué se cargó como se cargó); `ACTA_CIERRE_CARGA_V9.md` (cifras certificadas); `PLAN_PORTE_LEGADO_V9.md` (especificación de la carga); `ANALISIS_PORTABILIDAD_AVISA_2026_A_V9.md` (clases y §3 columna a columna); `parches/P9_SEGURIDAD.md`, `parches/P10_FLUJO_D17.md` y `parches/P11_GRAFO_KAG.md` (los únicos informes de parche que existen, ver §5.e).
+**Consulta bajo demanda.** No se leen de corrido: se abren para responder una pregunta concreta. `DICCIONARIO_DATOS.md` y su versión máquina `diccionario_datos.csv` (una columna descrita); `BRECHA_CAPA_DATOS_V9.md` (estado medido de la base); `DECISIONES_CARGA_LEGADO_V9.md` (por qué se cargó como se cargó); `ACTA_CIERRE_CARGA_V9.md` (cifras certificadas); `PLAN_PORTE_LEGADO_V9.md` (especificación de la carga); `ANALISIS_PORTABILIDAD_AVISA_2026_A_V9.md` (clases y §3 columna a columna); `parches/P9_SEGURIDAD.md`, `parches/P10_FLUJO_D17.md`, `parches/P11_GRAFO_KAG.md`, `parches/P14_CIERRE_ERS.md`, `parches/P15_ROLES_Y_BORRADO.md`, `parches/P16_RLS_CORE_Y_DC04.md` y `parches/P17_RENIEC_Y_COSTOS.md` (los siete informes de parche existentes, ver §5.e).
 
 La descomposición del puente del MVP —cuántas de sus 55 tablas son exactas, cuántas parciales y cuántas nuevas— no quedó medida en esta ronda: no se propaga hasta que se vuelva a medir.
 
@@ -307,7 +307,7 @@ Sobre esos mismos archivos recaen, además, tres reglas de generación:
 - `docs/avisa_actual/Código.txt` (línea **5401**, en `var GEMINI_API_KEY = 'AQ.…'`) contiene una **clave de API de Gemini en texto claro**. Debe rotarse. No confundir con las líneas 5 790-5 810, que solo son validaciones del formato `AIza`.
 - ~~`docs/` contiene dos **TDR** (`TDR_LOCADOR_Nov-Dic_26_REVF_2productos_45d.docx` y su anexo `.pdf`) con **datos personales de un proveedor**~~ **Resuelto (2026-11-20):** los dos TDR se movieron a `backups/tdr/`, que está en `.gitignore`. Siguen en disco para quien los necesite; ya no viven en el árbol documental ni entran al control de versiones.
 
-**e) Hueco documental conocido.** No existen informes para los parches 14, 15, 16 y 17: sólo hay `parches/P9_SEGURIDAD.md`, `parches/P10_FLUJO_D17.md` y `parches/P11_GRAFO_KAG.md`. El contenido de esos cuatro parches está únicamente en su SQL.
+**e) Hueco documental conocido.** Hay siete informes de parche: `parches/P9_SEGURIDAD.md`, `parches/P10_FLUJO_D17.md`, `parches/P11_GRAFO_KAG.md`, `parches/P14_CIERRE_ERS.md`, `parches/P15_ROLES_Y_BORRADO.md`, `parches/P16_RLS_CORE_Y_DC04.md` y `parches/P17_RENIEC_Y_COSTOS.md`. **Quedan sin informe los parches 6, 7, 8, 12 y 13**: su contenido está únicamente en el SQL y, en el caso del 6, 7 y 13, en las cifras resumidas de §2 y §3 de este índice.
 
 **f) Lo archivado el 2026-11-20 (11 archivos).** Se movieron a `docs/_archivo/`; no se borraron, para que la trazabilidad no dependa de la memoria de quien hizo el cambio. Los dos TDR no se archivan ahí: salieron a `backups/tdr/` (ver d).
 
