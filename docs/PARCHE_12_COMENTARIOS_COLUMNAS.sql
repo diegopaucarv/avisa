@@ -1169,12 +1169,12 @@ COMMENT ON COLUMN core.feature_flags.metadata_json IS 'Datos adicionales de cont
 COMMENT ON COLUMN core.flujo_definicion.codigo_legado IS 'Identificador del paso en el sistema anterior: DPP-<n> si viene de dim_paso_proceso y DPPC-<n> si viene de dim_paso_proceso_caso';
 COMMENT ON COLUMN core.flujo_definicion.created_at IS 'Momento en que se creó el registro';
 COMMENT ON COLUMN core.flujo_definicion.descripcion IS 'Descripción de lo que se hace en el paso del flujo';
-COMMENT ON COLUMN core.flujo_definicion.estado_resultante IS 'Estado al que lleva el paso, con el vocabulario del sistema anterior (Activo, Remitido, Atendido, Registrado, Cerrado, Reaperturado). No es clave ajena a core.flujo_estado porque los dos vocabularios no coinciden y emparejarlos sería inventar la equivalencia';
+COMMENT ON COLUMN core.flujo_definicion.estado_resultante IS 'Estado al que lleva el paso, con el vocabulario del sistema anterior (Activo, Remitido, Atendido, Registrado, Validado, Cerrado, Reaperturado, Archivado). No es clave ajena a core.flujo_estado porque los dos vocabularios no coinciden y emparejarlos sería inventar la equivalencia';
 COMMENT ON COLUMN core.flujo_definicion.id IS 'Identificador interno de la fila';
 COMMENT ON COLUMN core.flujo_definicion.nombre IS 'Denominación del paso del flujo mostrada en la interfaz';
 COMMENT ON COLUMN core.flujo_definicion.orden IS 'Posición del paso dentro del flujo operativo';
 COMMENT ON COLUMN core.flujo_definicion.rol_responsable IS 'Rol que debe ejecutar el paso del flujo';
-COMMENT ON COLUMN core.flujo_definicion.tipo_flujo IS 'Tipo de flujo: caso, para el ciclo de vida de un caso, o reporte, para el de un reporte o una alerta';
+COMMENT ON COLUMN core.flujo_definicion.tipo_flujo IS 'Tipo de flujo: caso (ciclo de vida de un caso), reporte (el de un reporte) o alerta (los cuatro pasos de una alerta temprana)';
 COMMENT ON COLUMN core.flujo_definicion.updated_at IS 'Momento de la última modificación del registro';
 COMMENT ON COLUMN core.flujo_estado.codigo IS 'Código de negocio heredado del sistema anterior (EST-01 a EST-05)';
 COMMENT ON COLUMN core.flujo_estado.color_hex IS 'Color con que se muestra el estado en la interfaz, en hexadecimal';

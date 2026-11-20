@@ -3,9 +3,9 @@
 -- =====================================================================
 --  QUÉ CIERRA
 --  El parche 12 comentó las columnas del modelo tal como estaban el
---  2026-11-18. Los parches 15 y 17 crearon después cuatro tablas
+--  2026-11-18. El parche 17 creó después tres tablas
 --  (`core.cat_privilegio`, `core.privilegio_usuario`,
---  `core.consulta_reniec`) y añadieron columnas a
+--  `core.consulta_reniec`) y añadió cinco columnas a
 --  `core.envios_comunicacion`, así que 19 columnas quedaron sin
 --  descripción en la base. Este parche solo agrega esos 19 comentarios:
 --  ninguna otra sentencia, ningún cambio de estructura.

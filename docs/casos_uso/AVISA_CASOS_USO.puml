@@ -1,22 +1,29 @@
 ' =====================================================================
-'  AVISA-PRODUCE · Casos de uso (PlantUML · UML puro)
+'  AVISA-PRODUCE · Casos de uso y mapa de trazabilidad (PlantUML · UML puro)
 ' =====================================================================
-'  Tres láminas, una por tabla del ERS §3.4:
+'  Cuatro láminas, una por tabla del ERS §3.4 y una de trazabilidad:
 '    AVISA_CU_MVP_DIA.svg     -> §3.4 «Página 1 — el día del analista»
+'                                (incluye CU-20 a CU-22: procesamiento
+'                                 de documentos, que entra en el MVP)
 '    AVISA_CU_MVP_SALIDA.svg  -> §3.4 «Página 2 — lo que se valida, se
 '                                envía y se administra»
 '    AVISA_CU_2027.svg        -> §3.4 «Página 3 — 2027 y fase MADRE»
+'    AVISA_CU_MAPA_VISTAS.svg -> §3.4 «Página 4 — de la pieza al caso y al
+'                                objetivo»: pieza -> caso -> objetivo, con
+'                                las brechas de diciembre. Resumen de §17.
 '
 '  Regla de mantenimiento (ERS §3.4): cada caso lleva su código CU-nn y
 '  existe una fila con sus RF en la tabla correspondiente. Un caso sin RF
 '  es un error; un RF que no aparezca en ningún caso debe justificarse.
+'  En la lámina 4 el rótulo de cada caso copia el de §3.4 palabra por
+'  palabra: la lámina es un control de trazabilidad, no un resumen.
 '
 '  Regenerar, desde la carpeta docs/:
 '    java -jar plantuml.jar -tsvg -charset UTF-8 -o img \
 '        casos_uso/AVISA_CASOS_USO.puml
 '
 '  Graphviz es lo recomendado. Sin Graphviz, añadir -Playout=smetana:
-'  no falla, pero el trazado queda peor.
+'  la lámina 4 usa linetype ortho, que allí debe cambiarse por polyline.
 ' =====================================================================
 
 @startuml AVISA_CU_MVP_DIA
@@ -55,18 +62,17 @@ skinparam actor {
   FontColor #0F172A
 }
 
-title AVISA-PRODUCE · Casos de uso del MVP · Página 1 de 3\nEl día del analista · CU-01 a CU-13
+title AVISA-PRODUCE · Casos de uso del MVP · Página 1 de 3\nEl día del analista · CU-01 a CU-13 y CU-20 a CU-22
 
 ' =========================================================
 ' 1. ACTORES PRIMARIOS (Izquierda)
 ' =========================================================
 actor "Analista / Sectorista\n(OAIPCS)" as analista #EFF6FF;line:1D4ED8
 actor "Analista con privilegio\nRENIEC (hoy, Edith)" as reniec #EFF6FF;line:1D4ED8
+actor "Procesos automáticos\nprogramados (CT-04)" as reloj #FEF3C7;line:B45309
 
 ' Herencia de roles: un solo CU-01 sirve a todos los perfiles
 reniec --|> analista
-
-reniec -[hidden]down-> analista
 
 ' =========================================================
 ' 2. FRONTERA DEL SISTEMA
@@ -94,6 +100,12 @@ rectangle "Plataforma AVISA-PRODUCE / SIPRECS (MVP)" {
   package "Productos" {
     usecase "CU-13 · Armar y enviar\nproductos" as uc_productos
   }
+
+  package "Procesamiento de documentos" {
+    usecase "CU-20 · Procesar documentos y\nproponer candidatos" as uc_procesar
+    usecase "CU-21 · Recolectar fuentes\nde la lista blanca" as uc_fuentes
+    usecase "CU-22 · Revisar candidatos y\ncoincidencias dudosas" as uc_revisar
+  }
 }
 
 ' =========================================================
@@ -102,9 +114,8 @@ rectangle "Plataforma AVISA-PRODUCE / SIPRECS (MVP)" {
 actor "Plataforma PIDE\n(RENIEC)" as sys_pide #F1F5F9;line:64748B
 actor "Repositorio documental\n(Google Drive)" as sys_drive #F1F5F9;line:64748B
 actor "Correo institucional" as sys_mail #F1F5F9;line:64748B
-
-sys_pide -[hidden]down-> sys_drive
-sys_drive -[hidden]down-> sys_mail
+actor "Fuentes públicas\nautorizadas (lista blanca)" as sys_fuentes #F1F5F9;line:64748B
+actor "Servicio de IA\n(Gemini)" as sys_ai #F1F5F9;line:64748B
 
 ' =========================================================
 ' 4. RELACIONES ACTOR → CASO
@@ -120,12 +131,18 @@ analista --> uc_exportar
 analista --> uc_alerta
 analista --> uc_productos
 
+analista --> uc_procesar
+analista --> uc_revisar
+reloj --> uc_fuentes
+
 ' =========================================================
 ' 5. RELACIONES ENTRE CASOS
 ' =========================================================
 uc_sin_dni ..> uc_actores : <<extend>>
 uc_exportar ..> uc_reportes : <<extend>>
 uc_pide ..> uc_login : <<include>>
+uc_fuentes ..> uc_procesar : «dispara»
+uc_procesar ..> uc_revisar : «propone candidatos»
 
 ' =========================================================
 ' 6. INTEGRACIONES EXTERNAS
@@ -134,6 +151,8 @@ uc_pide --> sys_pide
 uc_reportes --> sys_drive
 uc_productos --> sys_drive
 uc_productos --> sys_mail
+uc_fuentes --> sys_fuentes
+uc_procesar --> sys_ai
 
 ' =========================================================
 ' 7. CONTROLES TRANSVERSALES (no son casos de uso · ERS §3.4)
@@ -334,7 +353,7 @@ skinparam actor {
   FontColor #0F172A
 }
 
-title AVISA-PRODUCE · Casos de uso · Página 3 de 3\nHorizonte 2027 y fase MADRE · CU-20 a CU-34
+title AVISA-PRODUCE · Casos de uso · Página 3 de 3\nHorizonte 2027 y fase MADRE · CU-23 a CU-34
 
 ' =========================================================
 ' 1. ACTORES PRIMARIOS (Izquierda)
@@ -367,9 +386,6 @@ rectangle "Plataforma AVISA-PRODUCE / SIPRECS (evolución 2027)" {
   }
 
   package "Monitoreo automatizado e IA asistida" {
-    usecase "CU-20 · Procesar documentos y\nproponer candidatos" as uc_procesar
-    usecase "CU-21 · Recolectar fuentes\nde la lista blanca" as uc_fuentes
-    usecase "CU-22 · Revisar candidatos y\ncoincidencias dudosas" as uc_revisar
     usecase "CU-29 · Generar borradores\nde informe" as uc_borradores
     usecase "CU-30 · Avisar vencimientos y escalar\nalertas sin atender" as uc_escalar
     usecase "CU-34 · Traducir estados\nal SESIGUE" as uc_sesigue
@@ -385,23 +401,20 @@ rectangle "Plataforma AVISA-PRODUCE / SIPRECS (evolución 2027)" {
 ' =========================================================
 ' 3. SISTEMAS EXTERNOS QUE ESTA LÁMINA USA
 ' =========================================================
-actor "Fuentes públicas\nautorizadas (lista blanca)" as sys_fuentes #F1F5F9;line:64748B
 actor "Servicio de IA\n(Gemini)" as sys_ai27 #F1F5F9;line:64748B
 actor "Correo institucional" as sys_mail27 #F1F5F9;line:64748B
 actor "Sistema SESIGUE" as sys_sesigue #F1F5F9;line:64748B
 actor "Servicios cartográficos\n(mapas base)" as sys_mapas #F1F5F9;line:64748B
 
-sys_fuentes -[hidden]down-> sys_mail27
+sys_ai27 -[hidden]down-> sys_mail27
+note bottom of uc_borradores : CU-20, CU-21 y CU-22 (ingesta, procesamiento\ny revisión de candidatos) se dibujan en la **página 1**,\nporque el pipeline de documentos entra en el MVP.
 
 
 ' =========================================================
 ' 4. RELACIONES ACTOR → CASO
 ' =========================================================
-reloj --> uc_fuentes
 reloj --> uc_escalar
 
-analista27 --> uc_procesar
-analista27 --> uc_revisar
 analista27 --> uc_borradores
 analista27 --> uc_posicion
 analista27 --> uc_red
@@ -420,14 +433,12 @@ admin27 --> uc_parametros
 ' =========================================================
 ' 5. RELACIONES ENTRE CASOS (cadena de ingesta y consumo)
 ' =========================================================
-uc_fuentes ..> uc_procesar : «dispara»
-uc_procesar ..> uc_revisar : «propone candidatos»
+' CU-20, CU-21 y CU-22 se dibujan en la página 1: el pipeline
+' de documentos entra en el MVP. Aquí queda solo lo de 2027.
 
 ' =========================================================
 ' 6. INTEGRACIONES EXTERNAS
 ' =========================================================
-uc_fuentes --> sys_fuentes
-uc_procesar --> sys_ai27
 uc_borradores --> sys_ai27
 uc_escalar --> sys_mail27
 uc_sesigue --> sys_sesigue
@@ -439,5 +450,326 @@ uc_mapa --> sys_mapas
 
 
 
+
+@enduml
+
+
+' #####################################################################
+'  PÁGINA 4 · DE LA PIEZA AL CASO Y AL OBJETIVO
+' #####################################################################
+
+' #####################################################################
+'  PÁGINA 4 · DEL OBJETIVO Y EL ACTOR AL CASO Y A LA PIEZA (INVERTIDO)
+' #####################################################################
+
+@startuml AVISA_CU_MAPA_VISTAS_INVERTIDO
+'  Mapa de trazabilidad inversa: objetivo + actor -> caso de uso -> pieza.
+'  Puente entre §2.4 (objetivos), §3.4 (actores y casos) y §7 (pantallas
+'  y tableros). Resumen visual de §17.
+'  Los rótulos CU- copian palabra por palabra los de la tabla de §3.4.
+'  Usa linetype polyline para enrutar con limpieza los iconos de actor
+'  tanto con Graphviz como con -Playout=smetana.
+left to right direction
+skinparam shadowing false
+skinparam linetype polyline
+skinparam packageStyle rectangle
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam nodesep 16
+skinparam ranksep 60
+
+skinparam package {
+  BackgroundColor #F8FAFC
+  BorderColor #CBD5E1
+  BorderStyle dashed
+  FontColor #475569
+  FontStyle bold
+}
+skinparam actor {
+  BackgroundColor #EFF6FF
+  BorderColor #1D4ED8
+  FontColor #0F172A
+}
+skinparam artifact {
+  BackgroundColor #FFFFFF
+  BorderColor #64748B
+  FontColor #0F172A
+  FontStyle bold
+}
+skinparam artifact<<brecha>> {
+  BackgroundColor #FFFBEB
+  BorderColor #CA8A04
+  BorderStyle dashed
+  FontColor #78350F
+}
+skinparam usecase {
+  BackgroundColor #FFFFFF
+  BorderColor #2563EB
+  FontColor #0F172A
+  ArrowColor #475569
+}
+skinparam rectangle<<Objetivo>> {
+  BackgroundColor #ECFDF5
+  BorderColor #059669
+  FontColor #064E3B
+  FontStyle bold
+}
+skinparam note {
+  BackgroundColor #FEF9C3
+  BorderColor #CA8A04
+}
+hide stereotype
+
+title AVISA-PRODUCE · Objetivos, actores, casos de uso y vistas · Página 4 de 4\nTrazabilidad inversa: qué objetivo y qué actor demandan cada caso y qué pieza lo resuelve · Diciembre 2026, 2027 y MADRE
+
+' =========================================================
+' NIVEL 1 (IZQUIERDA) · OBJETIVOS DE NEGOCIO Y ACTORES
+' =========================================================
+package "Objetivos de negocio (ERS §2.4)" as PKG_OBJ #F0FDF4 {
+  rectangle "OBJ-01 · Preparar reuniones\ny fichas en menos tiempo" as OBJ01 <<Objetivo>>
+  rectangle "OBJ-02 · Emitir alertas oportunas\ncon reglas claras" as OBJ02 <<Objetivo>>
+  rectangle "OBJ-03 · Informar sin\nsaturar al Ministro" as OBJ03 <<Objetivo>>
+  rectangle "OBJ-04 · Rendir cuentas de los\ncompromisos asumidos" as OBJ04 <<Objetivo>>
+  rectangle "OBJ-05 · Una sola fuente de verdad\ncon trazabilidad" as OBJ05 <<Objetivo>>
+  rectangle "OBJ-06 · Proteger los datos\npersonales (Ley 29733)" as OBJ06 <<Objetivo>>
+  rectangle "OBJ-07 · Que OGTI pueda\nmantener el sistema" as OBJ07 <<Objetivo>>
+  rectangle "OBJ-08 · Entender los conflictos\na través del tiempo" as OBJ08 <<Objetivo>>
+}
+
+package "Actores primarios (ERS §3.4 · Láminas 1 a 3)" as PKG_ACT #EFF6FF {
+  actor "Analista / Sectorista\n(OAIPCS)" as analista #EFF6FF;line:1D4ED8
+  actor "Analista con privilegio\nRENIEC (hoy, Edith)" as reniec #EFF6FF;line:1D4ED8
+  actor "Dirección de la OAIPCS" as direccion #EFF6FF;line:1D4ED8
+  actor "Alta Dirección\n(Despacho Ministerial y Gabinete)" as alta #EFF6FF;line:1D4ED8
+  actor "Administrador Funcional" as admin #EFF6FF;line:1D4ED8
+
+  ' Herencia de perfil según Lámina 1
+  reniec --|> analista
+}
+
+PKG_OBJ -[hidden]down-> PKG_ACT
+
+' =========================================================
+' NIVEL 2 (CENTRO) · CAPACIDADES DEL SISTEMA (ERS §3.4)
+' =========================================================
+package "Casos de uso (ERS §3.4)" as PKG_CU #FFFFFF {
+  usecase "CU-06 · Consultar compromisos\nde un caso" as CU06
+  usecase "CU-07 · Cargar\nalerta temprana" as CU07
+  usecase "CU-08 · Validar alerta\no clima social" as CU08
+  usecase "CU-09 · Calcular destinatarios\ny enviar la alerta" as CU09
+  usecase "CU-11 · Consultar fichas,\ndirectorios y reportes" as CU11
+  usecase "CU-14 · Ver tableros\ny vista ejecutiva" as CU14
+  usecase "CU-17 · Consultar la bitácora\nde accesos" as CU17
+  usecase "CU-22 · Revisar candidatos y\ncoincidencias dudosas" as CU22
+  usecase "CU-24 · Ver la red\nde actores" as CU24
+  usecase "CU-25 · Ver línea\nde tiempo y mapa" as CU25
+  usecase "CU-26 · Ver indicadores\navanzados" as CU26
+  usecase "CU-27 · Simular escenarios\ny tendencia" as CU27
+  usecase "CU-28 · Analizar la pota\nen el tiempo" as CU28
+  usecase "CU-29 · Generar borradores\nde informe" as CU29
+}
+
+' =========================================================
+' NIVEL 3 (DERECHA) · PIEZAS POR HORIZONTE DE ENTREGA
+' =========================================================
+package "Piezas por etapa de entrega" as PKG_PIEZAS {
+
+  package "Diciembre 2026 · módulo mínimo (20 días)" as PKG_DIC #F1F5F9 {
+    artifact "Carga y revisión de alertas\n(PAN-05 · PAN-06) *" as D7
+    artifact "Envíos y bitácora\n(PAN-09 + auditoría) **" as D6
+    artifact "Seguimiento de compromisos\n(TAB-02) *" as D1
+    artifact "Casos estancados\n(TAB-03) *" as D3
+    artifact "Foto para la Alta Dirección\n(TAB-04) **" as D2
+    artifact "Alertas por estado y prioridad\n(TAB-05 · fuera de alcance) *" as D4 <<brecha>>
+    artifact "Fichas de zona, directorios y locales\n(PAN-11 · fuera de alcance) ***" as D5 <<brecha>>
+  }
+
+  package "2027 · capacidades analíticas" as PKG_2027 #F8FAFC {
+    artifact "Red de actores del caso\n¿quién influye sobre quién? ***" as Z1
+    artifact "Clima social por zona\ny mapa de casos ***" as Z3
+    artifact "Candidatos de alerta a escala\n(fuentes abiertas y redes) ***" as Z2
+    artifact "Calidad de la extracción y\nexplicación del riesgo **" as Z4
+    artifact "Índices compuestos: riesgo,\ncumplimiento, tiempos, polarización ***" as Z5
+  }
+
+  package "MADRE · proyecto completo (v10)" as PKG_MADRE #F8FAFC {
+    artifact "Pota en el tiempo y\nperfiles de pescadores ***" as M1
+    artifact "Simulador de escenarios y\ntendencia de riesgo ***" as M2
+    artifact "Seguimiento interministerial y\npanel de consultas RENIEC ***" as M3
+  }
+}
+
+' =========================================================
+' OBJETIVO -> CASO  (continua = diciembre · punteada = futuro)
+' =========================================================
+OBJ01 --> CU06
+OBJ01 --> CU11
+OBJ02 --> CU07
+OBJ02 --> CU08
+OBJ02 --> CU09
+OBJ02 --> CU22
+OBJ03 --> CU08
+OBJ03 --> CU09
+OBJ03 --> CU14
+OBJ03 ..> CU26
+OBJ03 ..> CU29
+OBJ04 --> CU06
+OBJ04 ..> CU26
+OBJ05 --> CU07
+OBJ05 --> CU14
+OBJ05 --> CU22
+OBJ06 --> CU17
+OBJ08 ..> CU24
+OBJ08 ..> CU25
+OBJ08 ..> CU27
+OBJ08 ..> CU28
+
+' =========================================================
+' ACTOR -> CASO  (según Láminas 1, 2 y 3)
+' =========================================================
+analista --> CU06
+analista --> CU07
+analista --> CU11
+analista --> CU22
+analista ..> CU24
+analista ..> CU25
+analista ..> CU28
+analista ..> CU29
+
+direccion --> CU08
+direccion --> CU14
+direccion --> CU17
+direccion ..> CU26
+direccion ..> CU27
+
+alta --> CU14
+alta ..> CU24
+
+admin --> CU17
+
+' Dependencia funcional entre validación y difusión (Lámina 2)
+CU08 ..> CU09 : <<include>>
+
+' =========================================================
+' CASO -> PIEZA  (continua = diciembre · punteada = futuro o brecha)
+' =========================================================
+CU07 --> D7
+CU08 --> D7
+CU22 --> D7
+CU09 --> D6
+CU17 --> D6
+CU06 --> D1
+CU14 --> D1
+CU14 --> D3
+CU14 --> D2
+CU08 --> D4
+CU22 --> D4
+CU14 ..> D4 : "sin tablero asignado"
+CU11 --> D5
+
+CU24 ..> Z1
+CU25 ..> Z3
+CU22 ..> Z2
+CU26 ..> Z4
+CU26 ..> Z5
+CU29 ..> Z5
+
+CU28 ..> M1
+CU27 ..> M2
+CU06 ..> M3
+CU17 ..> M3
+
+' =========================================================
+' BRECHAS ABIERTAS Y DECISIONES PENDIENTES
+' =========================================================
+note left of OBJ07
+  **Soporte estructural.**
+  No depende de una pieza: lo sirve la arquitectura
+  (capas L0–L8, §5.5) y la guía de reconstrucción que
+  exige AC-08.
+end note
+
+note bottom of CU09
+  **CU-09 · Calcular destinatarios y enviar la alerta**
+  **Definición de alcance pendiente.**
+  RF-D08 (WhatsApp) es prioridad Could y el §19 lo
+  excluye de los 20 días, mientras §2.3 y la tabla de
+  CU-09 lo describen como «acotado». Sin resolver
+  **[EN BLANCO · H-45]**.
+end note
+
+note right of D4
+  **TAB-05 · Alertas por estado y prioridad**
+  **Brecha de alcance, no de esfuerzo.**
+  La vista core.vw_alerta_estado ya devuelve
+  **83 alertas** y sirve a la revisión (CU-08,
+  CU-22). Lo que no existe es el tablero: TAB-05
+  quedó fuera de los 20 días (RIE-13, §19).
+  Cuesta lo mismo que TAB-03, que sí entra.
+end note
+
+note right of D5
+  **PAN-11 · Fichas de zona, directorios y locales**
+  **Brecha funcional en requisitos Must.**
+  RF-F01 (quiénes actúan en la zona), RF-F03
+  (directorios de autoridades) y RF-F06 (locales)
+  tienen una sola pantalla: PAN-11, fuera de los
+  20 días. Sus vistas están «por definir [H-41]».
+  Reportes remitidos (RF-F05) y ficha de actor
+  (RF-F02) sí tienen salida parcial en PAN-04 y
+  PAN-07, que son núcleo.
+end note
+
+note right of D2
+  **TAB-04 · Foto para la Alta Dirección**
+  **Lo que el tablero no puede prometer todavía:**
+  1. **Indicadores en blanco:** TAB-04 se alimenta de
+     mv_dashboard_alta_direccion y de
+     vw_indicadores_minister; esta última está vacía
+     porque ind.resultado tiene **0 filas**.
+  2. **Seguridad por fila:** el esquema analytics no
+     aplica RLS; el aislamiento debe resolverse en la
+     vista o en el modelo de Power BI (AC-06).
+  3. **Alcance parcial:** la matview cruza casos y
+     compromisos; **no lee core.alertas_tempranas**,
+     así que el estado de alerta no llega al tablero.
+  4. **Refresco:** es una vista materializada con tarea
+     programada; falta fijar la frecuencia para cumplir
+     IE-03 (≤ 60 s hasta el tablero).
+end note
+
+note right of D7
+  **La bandeja ya es núcleo; los candidatos automáticos, no.**
+  PAN-06 permite aprobar, editar o descartar con motivo
+  (RF-D02, RF-D03). Lo que llega solo son los candidatos
+  del pipeline CT-02, que se entrega en el tramo final de
+  los 20 días: sin él, todo se carga a mano (§19).
+  La lectura abierta de fuentes y redes es la pieza Z2.
+end note
+
+note right of Z1
+  **La red todavía no tiene de dónde leer.**
+  analytics.vw_mactor_red_actores devuelve **0 filas**
+  porque kag.aristas está vacío: el diagrama necesita
+  primero el grafo de relaciones (RF-H01, CU-23).
+end note
+
+' =========================================================
+' LEYENDA
+' =========================================================
+legend right
+  |= Marcador |= Qué significa |= Coste de entrega |
+  | * | La vista existe y devuelve filas; solo falta conectarla | Bajo |
+  | ** | Hay que construir pantalla o tablero, o integrar un servicio | Medio |
+  | *** | Falta el dato, la definición o un servicio externo | Alto |
+  --
+  **Los asteriscos miden lo que falta, no la importancia del objetivo.**
+  --
+  **Conexiones:**
+  - **Línea continua:** capacidad o interacción comprometida para diciembre 2026.
+  - **Línea punteada:** capacidad futura (2027 o MADRE) o bloqueada por una brecha.
+  - **Borde punteado en una pieza:** brecha abierta dentro de la entrega de diciembre.
+endlegend
 
 @enduml

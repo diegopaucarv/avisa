@@ -13,7 +13,7 @@ Estructura del archivo generado:
 
     Sección A · esquema      extensiones + DDL (dos pases) + parches 1-5
                              aplicable sobre una base vacía.
-    Sección B · post-carga   parches 6-18
+    Sección B · post-carga   parches 6-19
                              exige el legado ya cargado.
 
 El script solo lee el repositorio. No abre conexión a ninguna base.
@@ -267,23 +267,11 @@ SECCION_B = (
             "por fila y solo el rol `administrador` puede escribirlas."
         ),
     ),
-    bloque(
-        "B.13",
-        "Parche 19 · los 19 comentarios que faltaban",
-        "docs/PARCHE_19_COMENTARIOS_FALTANTES.sql",
-        tolera_errores=False,
-        nota=(
-            "El parche 12 comentó las columnas tal como estaban el 2026-11-18; los "
-            "parches 15 y 17 crearon después tres tablas y añadieron dos columnas, "
-            "así que 19 columnas quedaron sin descripción. Este bloque solo agrega "
-            "esos comentarios y verifica que no quede ninguna sin describir."
-        ),
-    ),
     # Los comentarios van al final a propósito: el archivo se regeneró contra la
     # base ya parcheada, así que comenta tablas que crean los parches 14, 16, 17
     # y 18. Si corriera antes, `COMMENT ON` fallaría al aplicar desde cero.
     bloque(
-        "B.14",
+        "B.13",
         "Parche 12 · comentarios de tablas y columnas (se aplica al final)",
         "docs/PARCHE_12_COMENTARIOS_COLUMNAS.sql",
         tolera_errores=False,
@@ -292,6 +280,22 @@ SECCION_B = (
             "columnas tal como existen hoy, por eso va después de todos los "
             "parches que crean objetos. Es el bloque que hace que el archivo "
             "pese ~1 MB."
+        ),
+    ),
+    # Va después del parche 12 a propósito: su comprobación cuenta las columnas
+    # que aún no tienen descripción, y es el parche 12 quien comenta el modelo
+    # entero. Al revés, el archivo abortaría al aplicarse desde cero.
+    bloque(
+        "B.14",
+        "Parche 19 · los 19 comentarios que faltaban",
+        "docs/PARCHE_19_COMENTARIOS_FALTANTES.sql",
+        tolera_errores=False,
+        nota=(
+            "El parche 12 comentó las columnas tal como estaban el 2026-11-18; el "
+            "parche 17 creó después tres tablas y añadió columnas a "
+            "`core.envios_comunicacion`, así que 19 columnas quedaron sin "
+            "descripción. Se aplica después del parche 12 para que la comprobación "
+            "final mida lo que de verdad queda sin describir."
         ),
     ),
 )
@@ -368,7 +372,7 @@ def encabezado(solo: str | None) -> list[str]:
         "--  Sección A · esquema    extensiones + DDL v9 (dos pases) + parches 1-5.",
         "--                          Autosuficiente: se puede aplicar sobre una",
         "--                          base VACÍA, sin instalar extensiones aparte.",
-        "--  Sección B · post-carga parches 6-18. NO se puede aplicar sobre una",
+        "--  Sección B · post-carga parches 6-19. NO se puede aplicar sobre una",
         "--                          base vacía: exige el legado ya cargado por",
         "--                          migration/loader (filas en core.*, ind.*,",
         "--                          kag.*). Sobre una base recién creada falla en",
@@ -418,7 +422,8 @@ def encabezado(solo: str | None) -> list[str]:
         "--  cambian porque `legacy` no declara ninguna.",
         "--",
         "--  La diferencia entre ambos estados son 14 tablas, 197 columnas y 29",
-        "--  claves ajenas, todas de los parches 9 a 18:",
+        "--  claves ajenas, todas de los parches 9 a 18 (el 19 sólo añade",
+        "--  comentarios):",
         "--    · parche  9 · `audit.datos_personales_acceso` (8 columnas) y las",
         "--                 4 columnas cifradas de `core.actor_datos_personales`;",
         "--    · parche 10 · `core.flujo_definicion` (10), `core.flujo_estado` (7)",
@@ -451,6 +456,9 @@ def encabezado(solo: str | None) -> list[str]:
         "--                 `config.tope_gasto` (11), con 1 clave ajena; 2 vistas y",
         "--                 2 funciones de control de gasto; seguridad por fila en",
         "--                 `core.roles`, `core.usuarios` y `core.usuario_roles`.",
+        "--    · parche 19 · ningún objeto: los 19 comentarios de columna que",
+        "--                 faltaban; deja el modelo con 2 145 de 2 145 columnas",
+        "--                 descritas.",
         "--  Por eso la sección A termina en 275 tablas y no en 289: las tablas",
         "--  que faltan no son parte del esquema base, se crean después de cargar",
         "--  el legado. Si la sección A se queda corta en algo distinto, el defecto",

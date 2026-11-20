@@ -179,8 +179,6 @@ COMMENT ON TABLE  config.tope_gasto IS
     'un servicio, su estado es `sin_tope`: el mecanismo está listo pero el monto '
     'lo fija la decisión H-65.';
 COMMENT ON COLUMN config.tope_gasto.monto_usd IS 'Gasto máximo admitido en el periodo, en dólares.';
-COMMENT ON COLUMN config.tope_gasto.umbral_aviso_pct IS
-    'Porcentaje del tope a partir del cual se emite el aviso previo (80 % por defecto).';
 COMMENT ON COLUMN config.tope_gasto.aprobado_por IS
     'Usuario que aprobó el tope. Un tope sin aprobación es una estimación, no una decisión.';
 COMMENT ON COLUMN config.tope_gasto.umbral_aviso_pct IS

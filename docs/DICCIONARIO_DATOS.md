@@ -28,7 +28,7 @@ Tres cosas que este documento **no** es:
 | Filas | 4 729 | 13 352 |
 | Objetos derivados (vistas y matviews) | 0 | 36 |
 
-El total de columnas que recorre este diccionario es 3 318: 2 511 del modelo v10 contando sus particiones, más 807 del sistema anterior. De ellas, 2 145 tienen comentario en la propia base y 209 tienen significado documentado por curaduría; el resto aparece con `—`.
+El total de columnas que recorre este diccionario es 3 318: 2 511 del modelo v10 contando sus particiones, más 807 del sistema anterior. De ellas, 2 145 tienen comentario en la propia base y 209 tienen significado documentado por curaduría; el resto son columnas de partición que heredan la descripción de su tabla padre, o celdas del sistema anterior que aparecen con `—`.
 
 ## 2. Cómo se generó y cómo se regenera
 
@@ -43,12 +43,12 @@ De dónde sale cada dato:
 - **Estructura**: tablas, columnas, tipos, nulabilidad, valores por defecto, claves primarias, ajenas, únicas e índices salen del catálogo del motor (`pg_class`, `pg_attribute`, `pg_constraint`, `pg_index`).
 - **Filas**: se cuentan con `count(*)` al generar. No se usan estimaciones, porque la base las tenía desactualizadas.
 - **Clasificación**: entrada, proceso, salida o transversal sale de BRECHA §12.1–12.6 [1]; las tablas que no aparecen allí se marcan como sin clasificar, y las vistas se marcan como salida por una regla explícita.
-- **Propósito**: 265 de las 265 tablas del modelo v10 tienen comentario de tabla en la base, escrito por el parche de comentarios [12]; las del sistema anterior y las vistas vienen de tres módulos de curaduría escritos a partir de las columnas y las claves de cada tabla [10].
-- **Descripciones de columna**: 2 145 columnas del modelo v10 llevan comentario propio en la base [12]. Las particiones heredan la descripción de su tabla padre (366 columnas), porque PostgreSQL no propaga los comentarios a las particiones. Del sistema anterior se documentan las columnas que la migración consume de forma directa; las otras 598 celdas quedan en `—`.
+- **Propósito**: 265 de las 265 tablas del modelo v10 tienen comentario de tabla en la base: casi todos los escribe el parche de comentarios [12], y las seis tablas que llegaron con los parches [14], [17] y [18] traen el suyo; las del sistema anterior y las vistas vienen de tres módulos de curaduría escritos a partir de las columnas y las claves de cada tabla [10].
+- **Descripciones de columna**: 2 145 columnas del modelo v10 llevan comentario propio en la base (los pone el parche [12], salvo los de las tablas que llegaron con los parches [14] a [19]). Las particiones heredan la descripción de su tabla padre (366 columnas), porque PostgreSQL no propaga los comentarios a las particiones. Del sistema anterior se documentan las columnas que la migración consume de forma directa; las otras 598 celdas quedan en `—`.
 
 **Regla de honestidad**: ningún texto se deduce del nombre de la columna. `—` significa «sin descripción documentada», no «sin significado». Se prefiere un hueco visible a una glosa inventada.
 
-El CSV es la versión para máquina: una fila por columna, con la misma información y sin texto de relleno. Es lo que se importa a un catálogo o se cruza con otro inventario.
+El CSV es la versión para máquina: una fila por columna, con la misma información y sin texto de relleno. Es lo que se importa a un catálogo o se cruza con otro inventario. Trae además la columna `origen_descripcion` (comentario_bd, heredado_padre, curaduria o sin_descripcion), que dice de dónde sale cada descripción.
 
 ## 3. Cómo leer una ficha
 
@@ -83,7 +83,7 @@ Las claves únicas compuestas no caben en una celda y se anotan al pie de la tab
 
 ## 4. Panorama
 
-Las cifras de esta sección salen de la base en el momento de generar el documento y coinciden con las del CSV.
+Las cifras de esta sección salen de la base en el momento de generar el documento. El CSV no agrupa por tabla lógica como este texto: tiene una fila por columna física, y suman 3 318 —2 145 del modelo sin sus particiones, 366 de partición (marcadas con es_particion) y 807 del sistema anterior—.
 
 ### 4.1 Tablas por esquema
 
@@ -2237,10 +2237,10 @@ Paso del flujo operativo por tipo de trámite —caso o reporte—, con su orden
 | # | Columna | Tipo | Nulo | Clave | Descripción |
 | --: | --- | --- | :--: | --- | --- |
 | 1 | `id` | uuid | no | PK | Identificador interno de la fila |
-| 2 | `tipo_flujo` | character varying(10) | no | — | Tipo de flujo: caso, para el ciclo de vida de un caso, o reporte, para el de un reporte o una alerta |
+| 2 | `tipo_flujo` | character varying(10) | no | — | Tipo de flujo: caso (ciclo de vida de un caso), reporte (el de un reporte) o alerta (los cuatro pasos de una alerta temprana) |
 | 3 | `orden` | smallint | no | — | Posición del paso dentro del flujo operativo |
 | 4 | `nombre` | character varying(120) | no | — | Denominación del paso del flujo mostrada en la interfaz |
-| 5 | `estado_resultante` | character varying(60) | no | — | Estado al que lleva el paso, con el vocabulario del sistema anterior (Activo, Remitido, Atendido, Registrado, Cerrado, Reaperturado). No es clave ajena a core.flujo_estado porque los dos vocabularios no coinciden y emparejarlos sería inventar la equivalencia |
+| 5 | `estado_resultante` | character varying(60) | no | — | Estado al que lleva el paso, con el vocabulario del sistema anterior (Activo, Remitido, Atendido, Registrado, Validado, Cerrado, Reaperturado, Archivado). No es clave ajena a core.flujo_estado porque los dos vocabularios no coinciden y emparejarlos sería inventar la equivalencia |
 | 6 | `rol_responsable` | character varying(120) | sí | — | Rol que debe ejecutar el paso del flujo |
 | 7 | `descripcion` | text | sí | — | Descripción de lo que se hace en el paso del flujo |
 | 8 | `codigo_legado` | character varying(60) | no | UQ | Identificador del paso en el sistema anterior: DPP-<n> si viene de dim_paso_proceso y DPPC-<n> si viene de dim_paso_proceso_caso |

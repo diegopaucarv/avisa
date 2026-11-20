@@ -84,6 +84,6 @@ Si hace falta reconstruir a mano, el orden es:
 ## Sesión obligatoria del cargador
 
 ```sql
-SET LOCAL app.clasificacion_max = '3';   -- sin esto SELECT/RETURNING ve 0 filas
+SET LOCAL app.rol_codigo = 'administrador';   -- sin esto SELECT/RETURNING ve 0 filas
 SET LOCAL app.user_id = '<uuid admin>';
 ```

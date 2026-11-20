@@ -1232,10 +1232,10 @@ core,feature_flags,0,INF,activado_en,4,timestamp with time zone,sí,,0,0,,Moment
 core,feature_flags,0,INF,activado_por,5,uuid,sí,,0,0,core.usuarios(id),Usuario que cambió el estado del interruptor,comentario_bd
 core,feature_flags,0,INF,metadata_json,6,jsonb,sí,,0,0,,"Datos adicionales de control del interruptor, en estructura libre",comentario_bd
 core,flujo_definicion,0,INF,id,1,uuid,no,gen_random_uuid(),1,0,,Identificador interno de la fila,comentario_bd
-core,flujo_definicion,0,INF,tipo_flujo,2,character varying(10),no,,0,0,,"Tipo de flujo: caso, para el ciclo de vida de un caso, o reporte, para el de un reporte o una alerta",comentario_bd
+core,flujo_definicion,0,INF,tipo_flujo,2,character varying(10),no,,0,0,,"Tipo de flujo: caso (ciclo de vida de un caso), reporte (el de un reporte) o alerta (los cuatro pasos de una alerta temprana)",comentario_bd
 core,flujo_definicion,0,INF,orden,3,smallint,no,,0,0,,Posición del paso dentro del flujo operativo,comentario_bd
 core,flujo_definicion,0,INF,nombre,4,character varying(120),no,,0,0,,Denominación del paso del flujo mostrada en la interfaz,comentario_bd
-core,flujo_definicion,0,INF,estado_resultante,5,character varying(60),no,,0,0,,"Estado al que lleva el paso, con el vocabulario del sistema anterior (Activo, Remitido, Atendido, Registrado, Cerrado, Reaperturado). No es clave ajena a core.flujo_estado porque los dos vocabularios no coinciden y emparejarlos sería inventar la equivalencia",comentario_bd
+core,flujo_definicion,0,INF,estado_resultante,5,character varying(60),no,,0,0,,"Estado al que lleva el paso, con el vocabulario del sistema anterior (Activo, Remitido, Atendido, Registrado, Validado, Cerrado, Reaperturado, Archivado). No es clave ajena a core.flujo_estado porque los dos vocabularios no coinciden y emparejarlos sería inventar la equivalencia",comentario_bd
 core,flujo_definicion,0,INF,rol_responsable,6,character varying(120),sí,,0,0,,Rol que debe ejecutar el paso del flujo,comentario_bd
 core,flujo_definicion,0,INF,descripcion,7,text,sí,,0,0,,Descripción de lo que se hace en el paso del flujo,comentario_bd
 core,flujo_definicion,0,INF,codigo_legado,8,character varying(60),no,,0,1,,Identificador del paso en el sistema anterior: DPP-<n> si viene de dim_paso_proceso y DPPC-<n> si viene de dim_paso_proceso_caso,comentario_bd

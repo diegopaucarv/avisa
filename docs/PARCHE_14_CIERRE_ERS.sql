@@ -232,16 +232,16 @@ INSERT INTO core.flujo_definicion
     (id, tipo_flujo, orden, nombre, estado_resultante, rol_responsable,
      descripcion, codigo_legado)
 VALUES
-    (gen_random_uuid(), 'alerta', 1, 'Elaboración', 'Registrado', 'Sectorista',
+    (gen_random_uuid(), 'alerta', 1, 'Elaboración', 'Registrado', 'sectorista',
      'El sectorista registra la alerta temprana con su situación, hechos y fuente.',
      'DPPA-1'),
-    (gen_random_uuid(), 'alerta', 2, 'Validación', 'Validado', 'Directora',
-     'La Dirección revisa la alerta y la valida o la devuelve con observaciones.',
+    (gen_random_uuid(), 'alerta', 2, 'Validación', 'Validado', 'analista_cualitativo',
+     'El analista revisa la alerta y la valida o la devuelve con observaciones.',
      'DPPA-2'),
-    (gen_random_uuid(), 'alerta', 3, 'Remisión', 'Remitido', 'Directora',
+    (gen_random_uuid(), 'alerta', 3, 'Remisión', 'Remitido', 'alta_direccion',
      'La alerta validada se remite al destinatario que corresponde a su gravedad.',
      'DPPA-3'),
-    (gen_random_uuid(), 'alerta', 4, 'Archivo', 'Archivado', 'Sectorista',
+    (gen_random_uuid(), 'alerta', 4, 'Archivo', 'Archivado', 'sectorista',
      'La alerta se cierra y se archiva, con el resultado documentado.',
      'DPPA-4')
 ON CONFLICT (codigo_legado) DO NOTHING;
@@ -385,6 +385,12 @@ BEGIN
     IF v_def IS NULL OR v_est IS NULL THEN
         RETURN NEW;
     END IF;
+
+    -- El UNIQUE (tipo_origen, fila_legado) convierte el max()+1 en una carrera:
+    -- dos altas simultáneas calculan el mismo número y la segunda aborta el
+    -- INSERT de la alerta. Se serializa por tipo de origen; el bloqueo se
+    -- suelta al cerrar la transacción que inserta la alerta.
+    PERFORM pg_advisory_xact_lock(hashtext('core.proceso_instancia:alerta'));
 
     SELECT COALESCE(max(fila_legado), 0) + 1
       INTO v_fila

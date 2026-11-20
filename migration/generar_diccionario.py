@@ -762,9 +762,24 @@ def panorama(datos: dict, lineas: list[str]) -> None:
 
     lineas.append("## 4. Panorama")
     lineas.append("")
+    n_modelo = sum(len(v["columnas"]) for v in modelo.values())
+    n_parte = sum(len(v["columnas"]) for v in tablas.values() if v["es_particion"])
+    n_legado = sum(len(v["columnas"]) for v in legado.values())
+
+    def miles(n: int) -> str:
+        return "{:,}".format(n).replace(",", " ")
+
     lineas.append(
         "Las cifras de esta sección salen de la base en el momento de generar el "
-        "documento y coinciden con las del CSV."
+        "documento. El CSV no agrupa por tabla lógica como este texto: tiene una "
+        "fila por columna física, y suman {total} —{m} del modelo sin sus "
+        "particiones, {p} de partición (marcadas con es_particion) y {l} del "
+        "sistema anterior—.".format(
+            total=miles(n_modelo + n_parte + n_legado),
+            m=miles(n_modelo),
+            p=miles(n_parte),
+            l=miles(n_legado),
+        )
     )
     lineas.append("")
 
@@ -1132,7 +1147,9 @@ def generar_markdown(datos: dict) -> str:
         f"{num(columnas_modelo + columnas_particiones)} del modelo v10 contando sus "
         f"particiones, más {num(columnas_legado)} del sistema anterior. De ellas, "
         f"{num(con_comentario)} tienen comentario en la propia base y {num(curadas)} "
-        f"tienen significado documentado por curaduría; el resto aparece con `—`."
+        f"tienen significado documentado por curaduría; el resto son columnas de "
+        f"partición que heredan la descripción de su tabla padre, o celdas del "
+        f"sistema anterior que aparecen con `—`."
     )
     lineas.append("")
 
@@ -1195,14 +1212,17 @@ def generar_markdown(datos: dict) -> str:
 
     lineas.append(
         f"- **Propósito**: {num(con_proposito)} de las {len(modelo_doc)} tablas del "
-        "modelo v10 tienen comentario de tabla en la base, escrito por el parche de "
-        "comentarios [12]; las del sistema anterior y las vistas vienen de tres "
+        "modelo v10 tienen comentario de tabla en la base: casi todos los escribe el "
+        "parche de comentarios [12], y las seis tablas que llegaron con los parches "
+        "[14], [17] y [18] traen el suyo; las del sistema anterior y las vistas "
+        "vienen de tres "
         "módulos de curaduría escritos a partir de las columnas y las claves de cada "
         "tabla [10]."
     )
     lineas.append(
         f"- **Descripciones de columna**: {num(con_comentario_propio)} columnas del "
-        "modelo v10 llevan comentario propio en la base [12]. Las particiones heredan "
+        "modelo v10 llevan comentario propio en la base (los pone el parche [12], salvo "
+        "los de las tablas que llegaron con los parches [14] a [19]). Las particiones heredan "
         f"la descripción de su tabla padre ({num(heredadas)} columnas), porque "
         "PostgreSQL no propaga los comentarios a las particiones. Del sistema "
         "anterior se documentan las columnas que la migración consume de forma "
@@ -1218,7 +1238,9 @@ def generar_markdown(datos: dict) -> str:
     lineas.append(
         "El CSV es la versión para máquina: una fila por columna, con la misma "
         "información y sin texto de relleno. Es lo que se importa a un catálogo o se "
-        "cruza con otro inventario."
+        "cruza con otro inventario. Trae además la columna `origen_descripcion` "
+        "(comentario_bd, heredado_padre, curaduria o sin_descripcion), que dice de "
+        "dónde sale cada descripción."
     )
     lineas.append("")
 

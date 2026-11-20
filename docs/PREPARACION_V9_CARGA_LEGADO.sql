@@ -1,14 +1,15 @@
 -- =============================================================================
 -- AVISA · PREPARACIÓN DE v9 PARA RECIBIR EL LEGADO 2026
--- Base destino : avisa  (DDL v9: 254 tablas / 25 schemas)
--- Fuente       : BASE_CONFLICTOS_SOCIALES_2026.xlsx (86 hojas, 4.649 filas)
+-- Base destino : avisa  (sección A del esquema unificado v10)
+-- Fuente       : BASE_CONFLICTOS_SOCIALES_2026.xlsx (86 hojas; 4 649 filas en el libro, 4 643 con algún valor)
 --
 -- ORDEN DE EJECUCIÓN OBLIGATORIO
---   1. backend/PRODUCE_OAIPCS_AVISA_v9_ddl(1).sql     (DDL + catálogos base)
+--   1. backups/backend/PRODUCE_OAIPCS_AVISA_v9_ddl(1).sql  (DDL + catálogos base)
 --   2. este script                                     (preparación)
 --   3. cargador                                        (legacy.* -> core.*)
 --
--- Propiedades: idempotente (se puede repetir), transaccional, no borra nada.
+-- Propiedades: idempotente (se puede repetir), transaccional, no borra datos
+--             (solo suelta y recrea la FK de alertas_tempranas.mesa_id, §4.1).
 -- Requisitos : PostgreSQL 16 + PostGIS + pgvector.
 --
 -- Principios aplicados (los que fijó OAIPCS):
@@ -19,18 +20,19 @@
 --   (e) DNI y teléfonos se conservan en core.actor_datos_personales
 --   (f) mesas / grupos de diálogo pasan a tabla propia
 --   (g) el vínculo alerta <-> demanda se conserva como FK
---   (h) nivel_conflicto se DERIVA de DIM_Tipo_Caso (ver §3.1)
+--   (h) nivel_conflicto se LEE de DIM_Tipo_Caso / FACT_Casos.ID_Tipo (ver §3.1)
 -- =============================================================================
 
 BEGIN;
 
 -- -----------------------------------------------------------------------------
 -- 0. CONTEXTO OBLIGATORIO
---    Nueve tablas de core tienen FORCE ROW LEVEL SECURITY. Sin estas variables
---    los INSERT no fallan: desaparecen en silencio.
+--    Hoy 48 tablas de core tienen FORCE ROW LEVEL SECURITY (eran 11 en el DDL
+--    v9). Sin un rol que pase las politicas, el INSERT falla (viola el WITH
+--    CHECK); lo que queda en silencio es el SELECT, que ve 0 filas.
 -- -----------------------------------------------------------------------------
 SET LOCAL app.user_id                  = '00000000-0000-0000-0000-000000000001';
-SET LOCAL app.clasificacion_max        = '3';
+SET LOCAL app.rol_codigo             = 'administrador';  -- el parche 15 deriva el nivel del rol
 SET LOCAL app.staff_bypass_subject_rls = 'true';
 
 -- NOTA: el cargador debe reemplazar app.user_id por un UUID real de
@@ -318,7 +320,7 @@ ALTER TABLE core.cat_especies
 -- =============================================================================
 
 -- -----------------------------------------------------------------------------
--- 3.1 (h) nivel_conflicto_id DERIVADO DE DIM_Tipo_Caso
+-- 3.1 (h) nivel_conflicto_id LEÍDO DE DIM_Tipo_Caso
 --
 --   El legado YA tiene la escala de 4 niveles de la Guía §7.5.1, y es
 --   fact_casos.id_tipo -> DIM_Tipo_Caso:
@@ -427,7 +429,10 @@ ALTER TABLE core.actor_datos_personales
   ADD COLUMN IF NOT EXISTS telefono_alt  VARCHAR(50),
   ADD COLUMN IF NOT EXISTS telefono_raw  VARCHAR(50);
 
-CREATE UNIQUE INDEX IF NOT EXISTS ux_actor_dni
+-- Índice NORMAL, no único: D43 decidió que los DNI compartidos (45 grupos,
+-- 100 filas) van a core.migracion_conflicto y no abortan la carga. El parche 3
+-- borra core.ux_actor_dni, así que recrearlo como único contradice esa decisión.
+CREATE INDEX IF NOT EXISTS ix_actor_dni
   ON core.actor_datos_personales(dni) WHERE dni IS NOT NULL;
 
 ALTER TABLE core.organizaciones
@@ -717,7 +722,8 @@ COMMIT;
 --            ('demandas','problema_3p'),
 --            ('demandas','pedido_3p'));
 --
--- Tablas nuevas (deben existir las 9)
+-- Tablas nuevas (deben existir las 11: estas 9 más documento_actores y
+-- usuario_territorio, que crea §4.7)
 --   SELECT table_name FROM information_schema.tables
 --    WHERE table_schema='core'
 --      AND table_name IN ('mesas_dialogo','mesa_miembros','capacitaciones',

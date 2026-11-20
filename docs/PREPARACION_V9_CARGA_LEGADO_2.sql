@@ -64,8 +64,10 @@ ALTER TABLE core.mesas_dialogo ADD COLUMN IF NOT EXISTS tiene_norma BOOLEAN;
 -- 6. core.caso_regiones — cobertura territorial multi-departamento.
 --
 --    v9 sólo tenía core.caso_distritos. El legado tiene 8 casos con
---    ID_Ubigeo = 'DEP-20' ("Más de Uno") y BRIDGE_Caso_Depto aporta 85 filas
---    de cobertura departamental (34 casos, exactamente 1 principal por caso).
+--    ID_Ubigeo = 'DEP-20' ("Más de Uno") y BRIDGE_Caso_Depto aporta 87 filas
+--    de cobertura departamental (34 casos, exactamente 1 principal por caso);
+--    de esas 87 entran 81, en 32 casos, porque faltan dos casos en
+--    core.casos y cuatro filas apuntan a una región que no está en core.regiones.
 --    Sin esta tabla esos 8 casos quedan sin territorio utilizable.
 -- -----------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS core.caso_regiones (

@@ -50,9 +50,9 @@
 --    El mapeo del informe es columna a columna y distinto por tabla.
 ---
 -- Idempotencia: el archivo completo puede correrse dos veces. Los catálogos se
--- cargan con upsert por su código de negocio y las instancias por la clave
--- (tipo_origen, codigo_legado_legacy, ocurrido_en) más un índice único sobre
--- (tipo_origen, fila_n_legado), que es la fila del cargador. No se duplican filas.
+-- cargan con upsert por su código de negocio y las instancias por la restricción
+-- UNIQUE (tipo_origen, fila_legado), que es la fila del cargador. No se duplican
+-- filas.
 --
 -- Solo crea objetos nuevos. No modifica core.* existente, ni analisis.*, ni
 -- config.*, ni core.actor_datos_personales.
@@ -67,7 +67,7 @@
 -- REQUISITO DE SESION. `core.proceso_instancia` queda con RLS FORCE. El rol `avisa`
 -- es superusuario con BYPASSRLS, por eso la carga entra. Con otro rol hay que
 -- abrir la sesion antes del BEGIN:
---   SET app.clasificacion_max = '2';
+--   SET app.rol_codigo = 'administrador';
 --   SET app.user_id = '<uuid>';
 -- =============================================================================
 
@@ -247,10 +247,11 @@ CREATE TABLE IF NOT EXISTS core.proceso_instancia (
 );
 
 COMMENT ON TABLE core.proceso_instancia IS
-    'Paso ejecutado del flujo operativo, sobre un caso o sobre un reporte. Origen: '
-    'legacy.fact_proceso_caso (36) + legacy.fact_proceso_reporte (99) = 135 filas.';
+    'Paso ejecutado del flujo operativo, sobre un caso, un reporte o una alerta. '
+    'Este parche carga 135 filas (fact_proceso_caso 36 + fact_proceso_reporte 99); '
+    'el parche 14 añade 83 y la tabla queda en 218.';
 COMMENT ON COLUMN core.proceso_instancia.tipo_origen IS
-    'Origen del paso: caso o reporte. Determina que FK esta poblada y de que tabla del legado viene.';
+    'Origen del paso: caso, reporte o alerta. Determina que FK esta poblada y de que tabla del legado viene.';
 COMMENT ON COLUMN core.proceso_instancia.caso_id IS
     'FK a core.casos cuando el codigo de caso resuelve. Nulo en las 2 filas sin maestro '
     '(CS-PRODUCE-2026-037 y 038, que no existen en core.casos).';
@@ -264,9 +265,9 @@ COMMENT ON COLUMN core.proceso_instancia.codigo_reporte IS
     'lo trae y PR-nnn cuando el legado solo identifica la fila del reporte.';
 COMMENT ON COLUMN core.proceso_instancia.flujo_definicion_id IS
     'Paso del catalogo, resuelto por (tipo_flujo, orden). Nulo en las 9 instancias de reporte con paso '
-    '5 o 6, porque legacy.dim_paso_proceso solo define 3 pasos.';
+    '4, 5 o 6, porque legacy.dim_paso_proceso solo define 3 pasos.';
 COMMENT ON COLUMN core.proceso_instancia.estado_id IS
-    'Estado del paso. Nulo en las 135 filas: el legado no registra estado por paso. El catalogo '
+    'Estado del paso. Nulo en las 135 filas de este parche (el 14 si lo fija en sus 83): el legado no registra estado por paso. El catalogo '
     'core.flujo_estado se carga completo para cuando el flujo se use en vivo.';
 COMMENT ON COLUMN core.proceso_instancia.usuario_id IS
     'FK a core.usuarios resuelta por core.usuarios.codigo_legado. Nula en las 6 filas cuyo responsable '
@@ -504,7 +505,12 @@ COMMIT;
 -- 6. VERIFICACION POSTERIOR
 -- =============================================================================
 
--- 6.1 Conteos duros. Esperado: 7 / 5 / 135.
+-- ATENCION: estas cifras son las de INMEDIATAMENTE DESPUES de este parche. El
+-- parche 14 añade 83 instancias y 4 pasos, asi que sobre el esquema completo
+-- son 11 / 5 / 218 (155 con estado_id, 63 sin el). Si se verifica despues del
+-- 14, los SELECT de este bloque no dan lo que dicen.
+--
+-- 6.1 Conteos duros, los de este parche. Esperado: 7 / 5 / 135.
 SELECT (SELECT count(*) FROM core.flujo_definicion)   AS pasos,
        (SELECT count(*) FROM core.flujo_estado)       AS estados,
        (SELECT count(*) FROM core.proceso_instancia)  AS instancias;
@@ -537,7 +543,7 @@ SELECT count(*)                                  AS filas,
 FROM core.proceso_instancia
 WHERE tipo_origen = 'reporte';
 
--- 6.6 Reportes sin maestro, por codigo conservado. Esperado 9 grupos, 27 filas.
+-- 6.6 Reportes sin maestro, por codigo conservado. Esperado 26 grupos, 27 filas.
 SELECT codigo_reporte, count(*) AS filas
 FROM core.proceso_instancia
 WHERE tipo_origen = 'reporte' AND alerta_id IS NULL
@@ -661,8 +667,9 @@ SELECT
 -- c) 2 casos sin maestro (CS-PRODUCE-2026-037 y 038): el legado los referencia y
 --    core.casos solo llega a 035. Hay que decidir si se crean o se descartan.
 -- d) 27 reportes con enlace solo textual: 18 filas del bloque PR-001..PR-018, que
---    no tienen maestro, y 9 codigos AT sin alerta en core.alertas_tempranas
---    (AT-2026-19, 27, 29, 31, 33, 34, 35 y 39).
+--    no tienen maestro, y 9 filas de 8 codigos AT sin alerta en
+--    core.alertas_tempranas (AT-2026-19 aparece dos veces; ademas 27, 29, 31,
+--    33, 34, 35 y 39).
 -- e) DEST-01 no existe en core.usuarios: 6 instancias de reporte quedan sin
 --    usuario_id. Por los datos (destino en remisiones y convocatorias) parece un
 --    buzon colectivo (DVPA/Gabinete), no una persona.

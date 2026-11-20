@@ -25,7 +25,7 @@
 --  Sección A · esquema    extensiones + DDL v9 (dos pases) + parches 1-5.
 --                          Autosuficiente: se puede aplicar sobre una
 --                          base VACÍA, sin instalar extensiones aparte.
---  Sección B · post-carga parches 6-18. NO se puede aplicar sobre una
+--  Sección B · post-carga parches 6-19. NO se puede aplicar sobre una
 --                          base vacía: exige el legado ya cargado por
 --                          migration/loader (filas en core.*, ind.*,
 --                          kag.*). Sobre una base recién creada falla en
@@ -75,7 +75,8 @@
 --  cambian porque `legacy` no declara ninguna.
 --
 --  La diferencia entre ambos estados son 14 tablas, 197 columnas y 29
---  claves ajenas, todas de los parches 9 a 18:
+--  claves ajenas, todas de los parches 9 a 18 (el 19 sólo añade
+--  comentarios):
 --    · parche  9 · `audit.datos_personales_acceso` (8 columnas) y las
 --                 4 columnas cifradas de `core.actor_datos_personales`;
 --    · parche 10 · `core.flujo_definicion` (10), `core.flujo_estado` (7)
@@ -108,6 +109,9 @@
 --                 `config.tope_gasto` (11), con 1 clave ajena; 2 vistas y
 --                 2 funciones de control de gasto; seguridad por fila en
 --                 `core.roles`, `core.usuarios` y `core.usuario_roles`.
+--    · parche 19 · ningún objeto: los 19 comentarios de columna que
+--                 faltaban; deja el modelo con 2 145 de 2 145 columnas
+--                 descritas.
 --  Por eso la sección A termina en 275 tablas y no en 289: las tablas
 --  que faltan no son parte del esquema base, se crean después de cargar
 --  el legado. Si la sección A se queda corta en algo distinto, el defecto
@@ -8585,20 +8589,21 @@ CREATE INDEX IF NOT EXISTS ix_output_chat_commit ON core.output_contracts(chat_c
 
 -- ---------------------------------------------------------------------
 --  BLOQUE A.3.1 · Parche 1 · catálogos y columnas de legado
---  Fuente: docs/PREPARACION_V9_CARGA_LEGADO.sql (729 líneas)
+--  Fuente: docs/PREPARACION_V9_CARGA_LEGADO.sql (735 líneas)
 --  Errores: abortan la ejecución (ON_ERROR_STOP on)
 -- ---------------------------------------------------------------------
 -- =============================================================================
 -- AVISA · PREPARACIÓN DE v9 PARA RECIBIR EL LEGADO 2026
--- Base destino : avisa  (DDL v9: 254 tablas / 25 schemas)
--- Fuente       : BASE_CONFLICTOS_SOCIALES_2026.xlsx (86 hojas, 4.649 filas)
+-- Base destino : avisa  (sección A del esquema unificado v10)
+-- Fuente       : BASE_CONFLICTOS_SOCIALES_2026.xlsx (86 hojas; 4 649 filas en el libro, 4 643 con algún valor)
 --
 -- ORDEN DE EJECUCIÓN OBLIGATORIO
---   1. backend/PRODUCE_OAIPCS_AVISA_v9_ddl(1).sql     (DDL + catálogos base)
+--   1. backups/backend/PRODUCE_OAIPCS_AVISA_v9_ddl(1).sql  (DDL + catálogos base)
 --   2. este script                                     (preparación)
 --   3. cargador                                        (legacy.* -> core.*)
 --
--- Propiedades: idempotente (se puede repetir), transaccional, no borra nada.
+-- Propiedades: idempotente (se puede repetir), transaccional, no borra datos
+--             (solo suelta y recrea la FK de alertas_tempranas.mesa_id, §4.1).
 -- Requisitos : PostgreSQL 16 + PostGIS + pgvector.
 --
 -- Principios aplicados (los que fijó OAIPCS):
@@ -8609,18 +8614,19 @@ CREATE INDEX IF NOT EXISTS ix_output_chat_commit ON core.output_contracts(chat_c
 --   (e) DNI y teléfonos se conservan en core.actor_datos_personales
 --   (f) mesas / grupos de diálogo pasan a tabla propia
 --   (g) el vínculo alerta <-> demanda se conserva como FK
---   (h) nivel_conflicto se DERIVA de DIM_Tipo_Caso (ver §3.1)
+--   (h) nivel_conflicto se LEE de DIM_Tipo_Caso / FACT_Casos.ID_Tipo (ver §3.1)
 -- =============================================================================
 
 BEGIN;
 
 -- -----------------------------------------------------------------------------
 -- 0. CONTEXTO OBLIGATORIO
---    Nueve tablas de core tienen FORCE ROW LEVEL SECURITY. Sin estas variables
---    los INSERT no fallan: desaparecen en silencio.
+--    Hoy 48 tablas de core tienen FORCE ROW LEVEL SECURITY (eran 11 en el DDL
+--    v9). Sin un rol que pase las politicas, el INSERT falla (viola el WITH
+--    CHECK); lo que queda en silencio es el SELECT, que ve 0 filas.
 -- -----------------------------------------------------------------------------
 SET LOCAL app.user_id                  = '00000000-0000-0000-0000-000000000001';
-SET LOCAL app.clasificacion_max        = '3';
+SET LOCAL app.rol_codigo             = 'administrador';  -- el parche 15 deriva el nivel del rol
 SET LOCAL app.staff_bypass_subject_rls = 'true';
 
 -- NOTA: el cargador debe reemplazar app.user_id por un UUID real de
@@ -8908,7 +8914,7 @@ ALTER TABLE core.cat_especies
 -- =============================================================================
 
 -- -----------------------------------------------------------------------------
--- 3.1 (h) nivel_conflicto_id DERIVADO DE DIM_Tipo_Caso
+-- 3.1 (h) nivel_conflicto_id LEÍDO DE DIM_Tipo_Caso
 --
 --   El legado YA tiene la escala de 4 niveles de la Guía §7.5.1, y es
 --   fact_casos.id_tipo -> DIM_Tipo_Caso:
@@ -9017,7 +9023,10 @@ ALTER TABLE core.actor_datos_personales
   ADD COLUMN IF NOT EXISTS telefono_alt  VARCHAR(50),
   ADD COLUMN IF NOT EXISTS telefono_raw  VARCHAR(50);
 
-CREATE UNIQUE INDEX IF NOT EXISTS ux_actor_dni
+-- Índice NORMAL, no único: D43 decidió que los DNI compartidos (45 grupos,
+-- 100 filas) van a core.migracion_conflicto y no abortan la carga. El parche 3
+-- borra core.ux_actor_dni, así que recrearlo como único contradice esa decisión.
+CREATE INDEX IF NOT EXISTS ix_actor_dni
   ON core.actor_datos_personales(dni) WHERE dni IS NOT NULL;
 
 ALTER TABLE core.organizaciones
@@ -9307,7 +9316,8 @@ COMMIT;
 --            ('demandas','problema_3p'),
 --            ('demandas','pedido_3p'));
 --
--- Tablas nuevas (deben existir las 9)
+-- Tablas nuevas (deben existir las 11: estas 9 más documento_actores y
+-- usuario_territorio, que crea §4.7)
 --   SELECT table_name FROM information_schema.tables
 --    WHERE table_schema='core'
 --      AND table_name IN ('mesas_dialogo','mesa_miembros','capacitaciones',
@@ -9320,7 +9330,7 @@ COMMIT;
 
 -- ---------------------------------------------------------------------
 --  BLOQUE A.3.2 · Parche 2 · huecos detectados columna a columna
---  Fuente: docs/PREPARACION_V9_CARGA_LEGADO_2.sql (123 líneas)
+--  Fuente: docs/PREPARACION_V9_CARGA_LEGADO_2.sql (125 líneas)
 --  Errores: abortan la ejecución (ON_ERROR_STOP on)
 -- ---------------------------------------------------------------------
 -- =============================================================================
@@ -9389,8 +9399,10 @@ ALTER TABLE core.mesas_dialogo ADD COLUMN IF NOT EXISTS tiene_norma BOOLEAN;
 -- 6. core.caso_regiones — cobertura territorial multi-departamento.
 --
 --    v9 sólo tenía core.caso_distritos. El legado tiene 8 casos con
---    ID_Ubigeo = 'DEP-20' ("Más de Uno") y BRIDGE_Caso_Depto aporta 85 filas
---    de cobertura departamental (34 casos, exactamente 1 principal por caso).
+--    ID_Ubigeo = 'DEP-20' ("Más de Uno") y BRIDGE_Caso_Depto aporta 87 filas
+--    de cobertura departamental (34 casos, exactamente 1 principal por caso);
+--    de esas 87 entran 81, en 32 casos, porque faltan dos casos en
+--    core.casos y cuatro filas apuntan a una región que no está en core.regiones.
 --    Sin esta tabla esos 8 casos quedan sin territorio utilizable.
 -- -----------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS core.caso_regiones (
@@ -9449,7 +9461,7 @@ COMMIT;
 
 -- ---------------------------------------------------------------------
 --  BLOQUE A.3.3 · Parche 3 · cierre de bloqueos D43-D49
---  Fuente: docs/PREPARACION_V9_CARGA_LEGADO_3.sql (205 líneas)
+--  Fuente: docs/PREPARACION_V9_CARGA_LEGADO_3.sql (207 líneas)
 --  Errores: abortan la ejecución (ON_ERROR_STOP on)
 -- ---------------------------------------------------------------------
 -- =============================================================================
@@ -9473,9 +9485,11 @@ BEGIN;
 -- 1. D43 — DNI NO ES ÚNICO EN EL ORIGEN
 --
 --    DIM_Actores trae 642 DNI con sólo 587 valores distintos: 45 valores
---    aparecen en 100 filas. El parche 1 creó
+--    aparecen en 100 filas. Una versión anterior del parche 1 creó
 --        ux_actor_dni UNIQUE (dni) WHERE dni IS NOT NULL
---    que ABORTA la carga en la segunda aparición.
+--    que ABORTA la carga en la segunda aparición; el parche 1 actual ya
+--    crea `ix_actor_dni` sin unicidad y explica por qué (§3.1). El DROP
+--    se conserva para las bases que vengan de esa versión antigua.
 --
 --    No se fusionan las personas: DOC-ACT-004 ("Diego Armando Paiva Jacinto")
 --    y ACT-541 ("Diego Paico Seminario") comparten DNI pero son personas
@@ -9547,7 +9561,7 @@ ALTER TABLE core.cat_especies
 --    responsable_id es NOT NULL -> sin unidad no entra ningún caso.
 --
 --    No es un dato inventado: la unidad existe y está documentada en
---    docs/AVISA_PRODUCE_v9(1).md §1 y glosario:
+--    docs/AVISA_PRODUCE_v10.md §1 y glosario:
 --        "OAIPCS. Oficina de Articulación Intergubernamental y Prevención de
 --         Conflictos Sociales."
 --    entidad_id = 1 es PRODUCE (única entidad tenant).
@@ -9673,7 +9687,7 @@ COMMIT;
 --    docs/PREPARACION_V9_CARGA_LEGADO_3.sql   (parche 3)
 --
 --  Idempotente: puede ejecutarse varias veces.
---  Justificación completa: docs/DECISIONES_CARGA_LEGADO_V9.md, decisión D50.
+--  Justificación completa: docs/DECISIONES_CARGA_LEGADO_V9.md, decisiones D50 y D51.
 -- =============================================================================
 
 BEGIN;
@@ -9771,7 +9785,7 @@ COMMIT;
 --  QUÉ SIEMBRA ESTE PARCHE (y con qué fuente)
 --  ---------------------------------------------------------------------------
 --  1. core.cat_pip_etapas — 12 etapas estandarizadas del ciclo de inversión.
---     Fuente: AVISA_PRODUCE_v9.md §1.2.b ("Las 12 etapas estandarizadas").
+--     Fuente: AVISA_PRODUCE_v10.md §1.2.b ("Las 12 etapas estandarizadas").
 --     Las fases (core.cat_pip_fases) ya venían sembradas por el DDL:
 --     1 Programacion, 2 Pre_inversion, 3 Inversion, 4 Ejecucion,
 --     5 Funcionamiento, 6 Desactivado. La fase 6 no tiene etapas en la Guía.
@@ -11638,7 +11652,7 @@ SELECT string_agg(column_name, ', ' ORDER BY ordinal_position) AS columnas_vista
 
 -- ---------------------------------------------------------------------
 --  BLOQUE B.5 · Parche 10 · flujo de proceso (D17)
---  Fuente: docs/PARCHE_10_FLUJO_PROCESO_D17.sql (668 líneas)
+--  Fuente: docs/PARCHE_10_FLUJO_PROCESO_D17.sql (675 líneas)
 --  Errores: abortan la ejecución (ON_ERROR_STOP on)
 -- ---------------------------------------------------------------------
 -- =============================================================================
@@ -11693,9 +11707,9 @@ SELECT string_agg(column_name, ', ' ORDER BY ordinal_position) AS columnas_vista
 --    El mapeo del informe es columna a columna y distinto por tabla.
 ---
 -- Idempotencia: el archivo completo puede correrse dos veces. Los catálogos se
--- cargan con upsert por su código de negocio y las instancias por la clave
--- (tipo_origen, codigo_legado_legacy, ocurrido_en) más un índice único sobre
--- (tipo_origen, fila_n_legado), que es la fila del cargador. No se duplican filas.
+-- cargan con upsert por su código de negocio y las instancias por la restricción
+-- UNIQUE (tipo_origen, fila_legado), que es la fila del cargador. No se duplican
+-- filas.
 --
 -- Solo crea objetos nuevos. No modifica core.* existente, ni analisis.*, ni
 -- config.*, ni core.actor_datos_personales.
@@ -11710,7 +11724,7 @@ SELECT string_agg(column_name, ', ' ORDER BY ordinal_position) AS columnas_vista
 -- REQUISITO DE SESION. `core.proceso_instancia` queda con RLS FORCE. El rol `avisa`
 -- es superusuario con BYPASSRLS, por eso la carga entra. Con otro rol hay que
 -- abrir la sesion antes del BEGIN:
---   SET app.clasificacion_max = '2';
+--   SET app.rol_codigo = 'administrador';
 --   SET app.user_id = '<uuid>';
 -- =============================================================================
 
@@ -11890,10 +11904,11 @@ CREATE TABLE IF NOT EXISTS core.proceso_instancia (
 );
 
 COMMENT ON TABLE core.proceso_instancia IS
-    'Paso ejecutado del flujo operativo, sobre un caso o sobre un reporte. Origen: '
-    'legacy.fact_proceso_caso (36) + legacy.fact_proceso_reporte (99) = 135 filas.';
+    'Paso ejecutado del flujo operativo, sobre un caso, un reporte o una alerta. '
+    'Este parche carga 135 filas (fact_proceso_caso 36 + fact_proceso_reporte 99); '
+    'el parche 14 añade 83 y la tabla queda en 218.';
 COMMENT ON COLUMN core.proceso_instancia.tipo_origen IS
-    'Origen del paso: caso o reporte. Determina que FK esta poblada y de que tabla del legado viene.';
+    'Origen del paso: caso, reporte o alerta. Determina que FK esta poblada y de que tabla del legado viene.';
 COMMENT ON COLUMN core.proceso_instancia.caso_id IS
     'FK a core.casos cuando el codigo de caso resuelve. Nulo en las 2 filas sin maestro '
     '(CS-PRODUCE-2026-037 y 038, que no existen en core.casos).';
@@ -11907,9 +11922,9 @@ COMMENT ON COLUMN core.proceso_instancia.codigo_reporte IS
     'lo trae y PR-nnn cuando el legado solo identifica la fila del reporte.';
 COMMENT ON COLUMN core.proceso_instancia.flujo_definicion_id IS
     'Paso del catalogo, resuelto por (tipo_flujo, orden). Nulo en las 9 instancias de reporte con paso '
-    '5 o 6, porque legacy.dim_paso_proceso solo define 3 pasos.';
+    '4, 5 o 6, porque legacy.dim_paso_proceso solo define 3 pasos.';
 COMMENT ON COLUMN core.proceso_instancia.estado_id IS
-    'Estado del paso. Nulo en las 135 filas: el legado no registra estado por paso. El catalogo '
+    'Estado del paso. Nulo en las 135 filas de este parche (el 14 si lo fija en sus 83): el legado no registra estado por paso. El catalogo '
     'core.flujo_estado se carga completo para cuando el flujo se use en vivo.';
 COMMENT ON COLUMN core.proceso_instancia.usuario_id IS
     'FK a core.usuarios resuelta por core.usuarios.codigo_legado. Nula en las 6 filas cuyo responsable '
@@ -12147,7 +12162,12 @@ COMMIT;
 -- 6. VERIFICACION POSTERIOR
 -- =============================================================================
 
--- 6.1 Conteos duros. Esperado: 7 / 5 / 135.
+-- ATENCION: estas cifras son las de INMEDIATAMENTE DESPUES de este parche. El
+-- parche 14 añade 83 instancias y 4 pasos, asi que sobre el esquema completo
+-- son 11 / 5 / 218 (155 con estado_id, 63 sin el). Si se verifica despues del
+-- 14, los SELECT de este bloque no dan lo que dicen.
+--
+-- 6.1 Conteos duros, los de este parche. Esperado: 7 / 5 / 135.
 SELECT (SELECT count(*) FROM core.flujo_definicion)   AS pasos,
        (SELECT count(*) FROM core.flujo_estado)       AS estados,
        (SELECT count(*) FROM core.proceso_instancia)  AS instancias;
@@ -12180,7 +12200,7 @@ SELECT count(*)                                  AS filas,
 FROM core.proceso_instancia
 WHERE tipo_origen = 'reporte';
 
--- 6.6 Reportes sin maestro, por codigo conservado. Esperado 9 grupos, 27 filas.
+-- 6.6 Reportes sin maestro, por codigo conservado. Esperado 26 grupos, 27 filas.
 SELECT codigo_reporte, count(*) AS filas
 FROM core.proceso_instancia
 WHERE tipo_origen = 'reporte' AND alerta_id IS NULL
@@ -12304,8 +12324,9 @@ SELECT
 -- c) 2 casos sin maestro (CS-PRODUCE-2026-037 y 038): el legado los referencia y
 --    core.casos solo llega a 035. Hay que decidir si se crean o se descartan.
 -- d) 27 reportes con enlace solo textual: 18 filas del bloque PR-001..PR-018, que
---    no tienen maestro, y 9 codigos AT sin alerta en core.alertas_tempranas
---    (AT-2026-19, 27, 29, 31, 33, 34, 35 y 39).
+--    no tienen maestro, y 9 filas de 8 codigos AT sin alerta en
+--    core.alertas_tempranas (AT-2026-19 aparece dos veces; ademas 27, 29, 31,
+--    33, 34, 35 y 39).
 -- e) DEST-01 no existe en core.usuarios: 6 instancias de reporte quedan sin
 --    usuario_id. Por los datos (destino en remisiones y convocatorias) parece un
 --    buzon colectivo (DVPA/Gabinete), no una persona.
@@ -12966,7 +12987,7 @@ COMMIT;
 
 -- ---------------------------------------------------------------------
 --  BLOQUE B.8 · Parche 14 · cierre de brechas del ERS
---  Fuente: docs/PARCHE_14_CIERRE_ERS.sql (1016 líneas)
+--  Fuente: docs/PARCHE_14_CIERRE_ERS.sql (1022 líneas)
 --  Errores: abortan la ejecución (ON_ERROR_STOP on)
 --    Cuatro brechas entre el esquema y el ERS: un rol de aplicación que
 --    sí respete la seguridad por fila, la alerta dentro del motor de
@@ -13209,16 +13230,16 @@ INSERT INTO core.flujo_definicion
     (id, tipo_flujo, orden, nombre, estado_resultante, rol_responsable,
      descripcion, codigo_legado)
 VALUES
-    (gen_random_uuid(), 'alerta', 1, 'Elaboración', 'Registrado', 'Sectorista',
+    (gen_random_uuid(), 'alerta', 1, 'Elaboración', 'Registrado', 'sectorista',
      'El sectorista registra la alerta temprana con su situación, hechos y fuente.',
      'DPPA-1'),
-    (gen_random_uuid(), 'alerta', 2, 'Validación', 'Validado', 'Directora',
-     'La Dirección revisa la alerta y la valida o la devuelve con observaciones.',
+    (gen_random_uuid(), 'alerta', 2, 'Validación', 'Validado', 'analista_cualitativo',
+     'El analista revisa la alerta y la valida o la devuelve con observaciones.',
      'DPPA-2'),
-    (gen_random_uuid(), 'alerta', 3, 'Remisión', 'Remitido', 'Directora',
+    (gen_random_uuid(), 'alerta', 3, 'Remisión', 'Remitido', 'alta_direccion',
      'La alerta validada se remite al destinatario que corresponde a su gravedad.',
      'DPPA-3'),
-    (gen_random_uuid(), 'alerta', 4, 'Archivo', 'Archivado', 'Sectorista',
+    (gen_random_uuid(), 'alerta', 4, 'Archivo', 'Archivado', 'sectorista',
      'La alerta se cierra y se archiva, con el resultado documentado.',
      'DPPA-4')
 ON CONFLICT (codigo_legado) DO NOTHING;
@@ -13362,6 +13383,12 @@ BEGIN
     IF v_def IS NULL OR v_est IS NULL THEN
         RETURN NEW;
     END IF;
+
+    -- El UNIQUE (tipo_origen, fila_legado) convierte el max()+1 en una carrera:
+    -- dos altas simultáneas calculan el mismo número y la segunda aborta el
+    -- INSERT de la alerta. Se serializa por tipo de origen; el bloqueo se
+    -- suelta al cerrar la transacción que inserta la alerta.
+    PERFORM pg_advisory_xact_lock(hashtext('core.proceso_instancia:alerta'));
 
     SELECT COALESCE(max(fila_legado), 0) + 1
       INTO v_fila
@@ -15681,7 +15708,7 @@ SELECT u.email, cp.codigo, pu.desde, pu.hasta, pu.activo
 
 -- ---------------------------------------------------------------------
 --  BLOQUE B.12 · Parche 18 · tope de gasto con aviso y RLS del catálogo de identidad
---  Fuente: docs/PARCHE_18_COSTOS_Y_RLS_ADMIN.sql (620 líneas)
+--  Fuente: docs/PARCHE_18_COSTOS_Y_RLS_ADMIN.sql (618 líneas)
 --  Errores: abortan la ejecución (ON_ERROR_STOP on)
 --    Cierra RNF-13, que el parche 17 dejó a medias: ya había dónde
 --    guardar el costo, pero ningún objeto que fijara un tope, sumara el
@@ -15873,8 +15900,6 @@ COMMENT ON TABLE  config.tope_gasto IS
     'un servicio, su estado es `sin_tope`: el mecanismo está listo pero el monto '
     'lo fija la decisión H-65.';
 COMMENT ON COLUMN config.tope_gasto.monto_usd IS 'Gasto máximo admitido en el periodo, en dólares.';
-COMMENT ON COLUMN config.tope_gasto.umbral_aviso_pct IS
-    'Porcentaje del tope a partir del cual se emite el aviso previo (80 % por defecto).';
 COMMENT ON COLUMN config.tope_gasto.aprobado_por IS
     'Usuario que aprobó el tope. Un tope sin aprobación es una estimación, no una decisión.';
 COMMENT ON COLUMN config.tope_gasto.umbral_aviso_pct IS
@@ -16314,138 +16339,7 @@ $$;
 \echo 'PARCHE 18 · aplicado'
 
 -- ---------------------------------------------------------------------
---  BLOQUE B.13 · Parche 19 · los 19 comentarios que faltaban
---  Fuente: docs/PARCHE_19_COMENTARIOS_FALTANTES.sql (120 líneas)
---  Errores: abortan la ejecución (ON_ERROR_STOP on)
---    El parche 12 comentó las columnas tal como estaban el 2026-11-18;
---    los parches 15 y 17 crearon después tres tablas y añadieron dos
---    columnas, así que 19 columnas quedaron sin descripción. Este bloque
---    solo agrega esos comentarios y verifica que no quede ninguna sin
---    describir.
--- ---------------------------------------------------------------------
--- =====================================================================
---  PARCHE 19 · LOS 19 COMENTARIOS QUE FALTABAN
--- =====================================================================
---  QUÉ CIERRA
---  El parche 12 comentó las columnas del modelo tal como estaban el
---  2026-11-18. Los parches 15 y 17 crearon después cuatro tablas
---  (`core.cat_privilegio`, `core.privilegio_usuario`,
---  `core.consulta_reniec`) y añadieron columnas a
---  `core.envios_comunicacion`, así que 19 columnas quedaron sin
---  descripción en la base. Este parche solo agrega esos 19 comentarios:
---  ninguna otra sentencia, ningún cambio de estructura.
---
---  POR QUÉ UN PARCHE APARTE Y NO EDITAR EL 17
---  El 17 ya está aplicado y se reejecuta entero cuando se levanta un
---  entorno nuevo. Añadirle sentencias cambiaría el contenido de un
---  parche cerrado; uno nuevo deja el rastro de qué se corrigió y cuándo.
---
---  IDEMPOTENTE
---  `COMMENT ON` sobrescribe el comentario anterior, así que se puede
---  ejecutar cuantas veces sea necesario sin error ni duplicados.
---
---  CÓMO SE APLICA
---      psql -U avisa -d avisa -v ON_ERROR_STOP=1 \
---          -f docs/PARCHE_19_COMENTARIOS_FALTANTES.sql
--- =====================================================================
-
-\echo 'PARCHE 19 · comentarios faltantes de los parches 15 y 17'
-
-BEGIN;
-
--- ---------------------------------------------------------------------
--- 1 · core.cat_privilegio (parche 17)
--- ---------------------------------------------------------------------
-COMMENT ON COLUMN core.cat_privilegio.id IS
-    'Identificador corto del privilegio; es la clave que usan las tablas de concesión.';
-COMMENT ON COLUMN core.cat_privilegio.codigo IS
-    'Código estable del privilegio, el que consultan las funciones de permiso.';
-COMMENT ON COLUMN core.cat_privilegio.nombre IS
-    'Nombre del privilegio tal como se muestra a las personas.';
-COMMENT ON COLUMN core.cat_privilegio.descripcion IS
-    'Qué permite hacer el privilegio, en una frase.';
-
--- ---------------------------------------------------------------------
--- 2 · core.privilegio_usuario (parche 17)
--- ---------------------------------------------------------------------
-COMMENT ON COLUMN core.privilegio_usuario.id IS
-    'Identificador interno de la fila';
-COMMENT ON COLUMN core.privilegio_usuario.usuario_id IS
-    'Persona que recibe el privilegio, según core.usuarios.';
-COMMENT ON COLUMN core.privilegio_usuario.privilegio_id IS
-    'Privilegio concedido, según core.cat_privilegio.';
-COMMENT ON COLUMN core.privilegio_usuario.desde IS
-    'Fecha desde la que rige la concesión.';
-COMMENT ON COLUMN core.privilegio_usuario.otorgado_por_usuario_id IS
-    'Persona que autorizó la concesión; queda registrada para la auditoría.';
-COMMENT ON COLUMN core.privilegio_usuario.activo IS
-    'Si la concesión está vigente. Se apaga para retirar el privilegio sin borrar el rastro.';
-COMMENT ON COLUMN core.privilegio_usuario.creado_en IS
-    'Momento en que se registró la concesión.';
-
--- ---------------------------------------------------------------------
--- 3 · core.consulta_reniec (parche 17)
--- ---------------------------------------------------------------------
-COMMENT ON COLUMN core.consulta_reniec.id IS
-    'Identificador interno de la consulta.';
-COMMENT ON COLUMN core.consulta_reniec.actor_uid IS
-    'Actor sobre el que se consultó, según core.actores.';
-COMMENT ON COLUMN core.consulta_reniec.caso_id IS
-    'Caso en cuyo contexto se pidió la consulta, si la consulta se hizo por uno.';
-COMMENT ON COLUMN core.consulta_reniec.consultado_por_usuario_id IS
-    'Persona que pidió y ejecutó la consulta; solo puede ser quien tiene el privilegio.';
-COMMENT ON COLUMN core.consulta_reniec.fecha_consulta IS
-    'Momento en que se hizo la consulta a PIDE-RENIEC.';
-COMMENT ON COLUMN core.consulta_reniec.integracion_id IS
-    'Integración por la que se llegó al servicio, según core.integraciones.';
-
--- ---------------------------------------------------------------------
--- 4 · core.envios_comunicacion, columnas del parche 17
--- ---------------------------------------------------------------------
-COMMENT ON COLUMN core.envios_comunicacion.plantilla_codigo IS
-    'Código de la plantilla de mensaje con la que se redactó el envío.';
-COMMENT ON COLUMN core.envios_comunicacion.actualizado_en IS
-    'Momento de la última actualización del estado del envío.';
-
--- ---------------------------------------------------------------------
--- 5 · Verificación: el modelo no debe tener ninguna columna sin describir
--- ---------------------------------------------------------------------
-DO $p19_verify$
-DECLARE
-    v_sin integer;
-BEGIN
-    WITH modelo AS (
-        SELECT c.oid
-          FROM pg_class c
-          JOIN pg_namespace n ON n.oid = c.relnamespace
-         WHERE c.relkind = 'r'
-           AND n.nspname NOT IN ('pg_catalog', 'information_schema', 'public', 'legacy')
-           AND NOT EXISTS (SELECT 1 FROM pg_inherits i WHERE i.inhrelid = c.oid)
-    )
-    SELECT count(*) INTO v_sin
-      FROM pg_attribute a
-      JOIN modelo m ON m.oid = a.attrelid
-     WHERE a.attnum > 0
-       AND NOT a.attisdropped
-       AND NOT EXISTS (
-           SELECT 1 FROM pg_description d
-            WHERE d.objoid = m.oid AND d.objsubid = a.attnum
-       );
-
-    IF v_sin <> 0 THEN
-        RAISE EXCEPTION 'quedan % columnas del modelo sin comentario', v_sin;
-    END IF;
-
-    RAISE NOTICE 'columnas del modelo sin comentario: 0';
-END
-$p19_verify$;
-
-COMMIT;
-
-\echo 'PARCHE 19 · aplicado'
-
--- ---------------------------------------------------------------------
---  BLOQUE B.14 · Parche 12 · comentarios de tablas y columnas (se aplica al final)
+--  BLOQUE B.13 · Parche 12 · comentarios de tablas y columnas (se aplica al final)
 --  Fuente: docs/PARCHE_12_COMENTARIOS_COLUMNAS.sql (2353 líneas)
 --  Errores: abortan la ejecución (ON_ERROR_STOP on)
 --    2 326 comentarios, sin ninguna otra sentencia. Cubre las tablas y
@@ -17624,12 +17518,12 @@ COMMENT ON COLUMN core.feature_flags.metadata_json IS 'Datos adicionales de cont
 COMMENT ON COLUMN core.flujo_definicion.codigo_legado IS 'Identificador del paso en el sistema anterior: DPP-<n> si viene de dim_paso_proceso y DPPC-<n> si viene de dim_paso_proceso_caso';
 COMMENT ON COLUMN core.flujo_definicion.created_at IS 'Momento en que se creó el registro';
 COMMENT ON COLUMN core.flujo_definicion.descripcion IS 'Descripción de lo que se hace en el paso del flujo';
-COMMENT ON COLUMN core.flujo_definicion.estado_resultante IS 'Estado al que lleva el paso, con el vocabulario del sistema anterior (Activo, Remitido, Atendido, Registrado, Cerrado, Reaperturado). No es clave ajena a core.flujo_estado porque los dos vocabularios no coinciden y emparejarlos sería inventar la equivalencia';
+COMMENT ON COLUMN core.flujo_definicion.estado_resultante IS 'Estado al que lleva el paso, con el vocabulario del sistema anterior (Activo, Remitido, Atendido, Registrado, Validado, Cerrado, Reaperturado, Archivado). No es clave ajena a core.flujo_estado porque los dos vocabularios no coinciden y emparejarlos sería inventar la equivalencia';
 COMMENT ON COLUMN core.flujo_definicion.id IS 'Identificador interno de la fila';
 COMMENT ON COLUMN core.flujo_definicion.nombre IS 'Denominación del paso del flujo mostrada en la interfaz';
 COMMENT ON COLUMN core.flujo_definicion.orden IS 'Posición del paso dentro del flujo operativo';
 COMMENT ON COLUMN core.flujo_definicion.rol_responsable IS 'Rol que debe ejecutar el paso del flujo';
-COMMENT ON COLUMN core.flujo_definicion.tipo_flujo IS 'Tipo de flujo: caso, para el ciclo de vida de un caso, o reporte, para el de un reporte o una alerta';
+COMMENT ON COLUMN core.flujo_definicion.tipo_flujo IS 'Tipo de flujo: caso (ciclo de vida de un caso), reporte (el de un reporte) o alerta (los cuatro pasos de una alerta temprana)';
 COMMENT ON COLUMN core.flujo_definicion.updated_at IS 'Momento de la última modificación del registro';
 COMMENT ON COLUMN core.flujo_estado.codigo IS 'Código de negocio heredado del sistema anterior (EST-01 a EST-05)';
 COMMENT ON COLUMN core.flujo_estado.color_hex IS 'Color con que se muestra el estado en la interfaz, en hexadecimal';
@@ -18806,3 +18700,134 @@ COMMENT ON COLUMN territorio.zona_pesca.poligono IS 'Polígono que delimita la z
 COMMENT ON COLUMN territorio.zona_pesca.tipo IS 'Tipo al que corresponde la zona de pesca';
 COMMENT ON COLUMN territorio.zona_pesca.valid_from IS 'Fecha desde la cual rige la delimitación de la zona';
 COMMENT ON COLUMN territorio.zona_pesca.valid_to IS 'Fecha hasta la cual rige la delimitación de la zona';
+
+-- ---------------------------------------------------------------------
+--  BLOQUE B.14 · Parche 19 · los 19 comentarios que faltaban
+--  Fuente: docs/PARCHE_19_COMENTARIOS_FALTANTES.sql (120 líneas)
+--  Errores: abortan la ejecución (ON_ERROR_STOP on)
+--    El parche 12 comentó las columnas tal como estaban el 2026-11-18; el
+--    parche 17 creó después tres tablas y añadió columnas a
+--    `core.envios_comunicacion`, así que 19 columnas quedaron sin
+--    descripción. Se aplica después del parche 12 para que la
+--    comprobación final mida lo que de verdad queda sin describir.
+-- ---------------------------------------------------------------------
+-- =====================================================================
+--  PARCHE 19 · LOS 19 COMENTARIOS QUE FALTABAN
+-- =====================================================================
+--  QUÉ CIERRA
+--  El parche 12 comentó las columnas del modelo tal como estaban el
+--  2026-11-18. El parche 17 creó después tres tablas
+--  (`core.cat_privilegio`, `core.privilegio_usuario`,
+--  `core.consulta_reniec`) y añadió cinco columnas a
+--  `core.envios_comunicacion`, así que 19 columnas quedaron sin
+--  descripción en la base. Este parche solo agrega esos 19 comentarios:
+--  ninguna otra sentencia, ningún cambio de estructura.
+--
+--  POR QUÉ UN PARCHE APARTE Y NO EDITAR EL 17
+--  El 17 ya está aplicado y se reejecuta entero cuando se levanta un
+--  entorno nuevo. Añadirle sentencias cambiaría el contenido de un
+--  parche cerrado; uno nuevo deja el rastro de qué se corrigió y cuándo.
+--
+--  IDEMPOTENTE
+--  `COMMENT ON` sobrescribe el comentario anterior, así que se puede
+--  ejecutar cuantas veces sea necesario sin error ni duplicados.
+--
+--  CÓMO SE APLICA
+--      psql -U avisa -d avisa -v ON_ERROR_STOP=1 \
+--          -f docs/PARCHE_19_COMENTARIOS_FALTANTES.sql
+-- =====================================================================
+
+\echo 'PARCHE 19 · comentarios faltantes de los parches 15 y 17'
+
+BEGIN;
+
+-- ---------------------------------------------------------------------
+-- 1 · core.cat_privilegio (parche 17)
+-- ---------------------------------------------------------------------
+COMMENT ON COLUMN core.cat_privilegio.id IS
+    'Identificador corto del privilegio; es la clave que usan las tablas de concesión.';
+COMMENT ON COLUMN core.cat_privilegio.codigo IS
+    'Código estable del privilegio, el que consultan las funciones de permiso.';
+COMMENT ON COLUMN core.cat_privilegio.nombre IS
+    'Nombre del privilegio tal como se muestra a las personas.';
+COMMENT ON COLUMN core.cat_privilegio.descripcion IS
+    'Qué permite hacer el privilegio, en una frase.';
+
+-- ---------------------------------------------------------------------
+-- 2 · core.privilegio_usuario (parche 17)
+-- ---------------------------------------------------------------------
+COMMENT ON COLUMN core.privilegio_usuario.id IS
+    'Identificador interno de la fila';
+COMMENT ON COLUMN core.privilegio_usuario.usuario_id IS
+    'Persona que recibe el privilegio, según core.usuarios.';
+COMMENT ON COLUMN core.privilegio_usuario.privilegio_id IS
+    'Privilegio concedido, según core.cat_privilegio.';
+COMMENT ON COLUMN core.privilegio_usuario.desde IS
+    'Fecha desde la que rige la concesión.';
+COMMENT ON COLUMN core.privilegio_usuario.otorgado_por_usuario_id IS
+    'Persona que autorizó la concesión; queda registrada para la auditoría.';
+COMMENT ON COLUMN core.privilegio_usuario.activo IS
+    'Si la concesión está vigente. Se apaga para retirar el privilegio sin borrar el rastro.';
+COMMENT ON COLUMN core.privilegio_usuario.creado_en IS
+    'Momento en que se registró la concesión.';
+
+-- ---------------------------------------------------------------------
+-- 3 · core.consulta_reniec (parche 17)
+-- ---------------------------------------------------------------------
+COMMENT ON COLUMN core.consulta_reniec.id IS
+    'Identificador interno de la consulta.';
+COMMENT ON COLUMN core.consulta_reniec.actor_uid IS
+    'Actor sobre el que se consultó, según core.actores.';
+COMMENT ON COLUMN core.consulta_reniec.caso_id IS
+    'Caso en cuyo contexto se pidió la consulta, si la consulta se hizo por uno.';
+COMMENT ON COLUMN core.consulta_reniec.consultado_por_usuario_id IS
+    'Persona que pidió y ejecutó la consulta; solo puede ser quien tiene el privilegio.';
+COMMENT ON COLUMN core.consulta_reniec.fecha_consulta IS
+    'Momento en que se hizo la consulta a PIDE-RENIEC.';
+COMMENT ON COLUMN core.consulta_reniec.integracion_id IS
+    'Integración por la que se llegó al servicio, según core.integraciones.';
+
+-- ---------------------------------------------------------------------
+-- 4 · core.envios_comunicacion, columnas del parche 17
+-- ---------------------------------------------------------------------
+COMMENT ON COLUMN core.envios_comunicacion.plantilla_codigo IS
+    'Código de la plantilla de mensaje con la que se redactó el envío.';
+COMMENT ON COLUMN core.envios_comunicacion.actualizado_en IS
+    'Momento de la última actualización del estado del envío.';
+
+-- ---------------------------------------------------------------------
+-- 5 · Verificación: el modelo no debe tener ninguna columna sin describir
+-- ---------------------------------------------------------------------
+DO $p19_verify$
+DECLARE
+    v_sin integer;
+BEGIN
+    WITH modelo AS (
+        SELECT c.oid
+          FROM pg_class c
+          JOIN pg_namespace n ON n.oid = c.relnamespace
+         WHERE c.relkind = 'r'
+           AND n.nspname NOT IN ('pg_catalog', 'information_schema', 'public', 'legacy')
+           AND NOT EXISTS (SELECT 1 FROM pg_inherits i WHERE i.inhrelid = c.oid)
+    )
+    SELECT count(*) INTO v_sin
+      FROM pg_attribute a
+      JOIN modelo m ON m.oid = a.attrelid
+     WHERE a.attnum > 0
+       AND NOT a.attisdropped
+       AND NOT EXISTS (
+           SELECT 1 FROM pg_description d
+            WHERE d.objoid = m.oid AND d.objsubid = a.attnum
+       );
+
+    IF v_sin <> 0 THEN
+        RAISE EXCEPTION 'quedan % columnas del modelo sin comentario', v_sin;
+    END IF;
+
+    RAISE NOTICE 'columnas del modelo sin comentario: 0';
+END
+$p19_verify$;
+
+COMMIT;
+
+\echo 'PARCHE 19 · aplicado'

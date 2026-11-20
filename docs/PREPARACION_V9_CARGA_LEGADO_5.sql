@@ -16,7 +16,7 @@
 --  QUÉ SIEMBRA ESTE PARCHE (y con qué fuente)
 --  ---------------------------------------------------------------------------
 --  1. core.cat_pip_etapas — 12 etapas estandarizadas del ciclo de inversión.
---     Fuente: AVISA_PRODUCE_v9.md §1.2.b ("Las 12 etapas estandarizadas").
+--     Fuente: AVISA_PRODUCE_v10.md §1.2.b ("Las 12 etapas estandarizadas").
 --     Las fases (core.cat_pip_fases) ya venían sembradas por el DDL:
 --     1 Programacion, 2 Pre_inversion, 3 Inversion, 4 Ejecucion,
 --     5 Funcionamiento, 6 Desactivado. La fase 6 no tiene etapas en la Guía.

@@ -47,8 +47,10 @@ Cinco señales por tabla, todas verificables:
 
 Dos advertencias para no sobreinterpretar:
 
-- **Los consumidores casi no aportan todavía.** El código de la aplicación es un esqueleto: el backend tiene 147 líneas y el frontend 21. Ninguna tabla tiene consumo real, así que esa señal vale cero hoy y valdrá mucho dentro de tres semanas.
+- **Los consumidores casi no aportan todavía.** El código de la aplicación es un esqueleto: el backend tiene 147 líneas y el frontend 48. Ninguna tabla tiene consumo real, así que esa señal vale cero hoy y valdrá mucho dentro de tres semanas.
 - **El DDL no es un consumidor.** Al medir por primera vez aparecieron 115 tablas "usadas por el código"; todas eran falsos positivos: el escáner estaba leyendo el archivo `PRODUCE_OAIPCS_AVISA_v9_ddl(1).sql`, que **define** las tablas, no las consulta.
+
+**Qué entra en la cuenta.** El universo son las relaciones de tipo tabla (`relkind` `r` y `p`), con cada tabla particionada contada **una vez** —sus 24 particiones hijas quedan fuera— y sin vistas, vistas materializadas ni catálogos del sistema. Se excluyen además `legacy` (87 tablas: la copia en bruto del libro, fase 0 del cargador) y `public.spatial_ref_sys`, que no forman parte del modelo. De 353 tablas contadas así sobran 88: el modelo son **265**.
 
 ---
 
@@ -119,18 +121,18 @@ Dos sorpresas útiles:
 | `qda.mapeo_pseudonimo`          |        4 |
 | `staging.lote`                  |       13 |
 
-Son 99 columnas vacías que el MVP ya usa en su diseño. Se crean con su bloque (ver §6), no antes: una tabla vacía sin endpoint solo ocupa espacio.
+Son 99 columnas vacías que el MVP ya usa en su diseño. Se crean con su bloque (ver §8), no antes: una tabla vacía sin endpoint solo ocupa espacio.
 
 ---
 
-## 5. Capa T2 — lo vivo que el MVP no pidió (75 tablas)
+## 5. Capa T2 — lo vivo que el MVP no pidió (76 tablas)
 
 76 tablas con 4 973 filas que **no están en las 55 del contrato del MVP** pero ya tienen datos. No se tocan: se heredan.
 
 | Esquema      | Tablas T2 | Qué es                                  |
 | ------------ | --------: | --------------------------------------- |
 | `core`       |        49 | catálogos, geografía y soporte del caso |
-| `config`     |         6 | parámetros y guardrails                 |
+| `config`     |         7 | parámetros y guardrails                 |
 | `kag`        |         6 | resto del grafo                         |
 | `domain`     |         3 | reglas de negocio                       |
 | `agent`      |         2 | bitácora de corridas                    |
@@ -162,7 +164,7 @@ Son 99 columnas vacías que el MVP ya usa en su diseño. Se crean con su bloque 
 | 2    | acciones y planes de acción                                | `core`                                                                                |
 | 2    | hipótesis y su evidencia                                   | `kag`                                                                                 |
 | 2    | lecciones y retroalimentación del agente                   | `agent`                                                                               |
-| 41   | una tabla cada una                                         | todos                                                                                 |
+| 42   | una tabla cada una                                         | todos                                                                                 |
 
 **Decisión recomendada: no borrar nada, no construir nada.** La v10 es el producto completo y estas islas son su alcance de año 2. Lo que sí conviene es **sacarlas del camino crítico**: que ningún entregable del MVP dependa de ellas.
 
@@ -172,7 +174,7 @@ Son 99 columnas vacías que el MVP ya usa en su diseño. Se crean con su bloque 
 
 ## 7. El puente: 55 tablas del MVP contra 265 de la v10
 
-La correspondencia no se inventó aquí: sigue el **Anexo D.2** de `AVISA_PRODUCE_v10.md`. Al contrastarla con la base viva aparece el dato que ordena todo el trabajo. De los 55 objetos que pide el contrato, 46 se apoyan hoy en una tabla existente —34 con datos y 12 vacías—; el resto son piezas que todavía hay que crear o completar. Cuando el alcance se recorta antes de migrar a SQL Server, quedan **42**: se difieren las cuatro tablas de `kag` que hoy entran en el contrato (`kag.aristas`, `kag.documento_fuente`, `kag.documento_fragmento` y `kag.entity_merge_log`).
+La correspondencia no se inventó aquí: sigue el **Anexo D.2** de `AVISA_PRODUCE_v10.md`. Al contrastarla con la base viva aparece el dato que ordena todo el trabajo. De los 55 objetos que pide el contrato, 47 se apoyan hoy en una tabla existente —46 tablas distintas, porque `policy.escenario_regla` cubre dos objetos: la regla exacta y la simulación parcial—: 34 tablas con datos y 12 vacías. Los otros 8 son piezas que todavía hay que crear. Cuando el alcance se recorta antes de migrar a SQL Server, quedan **45**: se difiere solo `kag.aristas`, porque el grafo de la red de actores es de 2027 y nada en diciembre lo consume. Las otras tres tablas de `kag` —`documento_fuente`, `documento_fragmento` y `entity_merge_log`— sí entran: son el corpus segmentado y el registro de fusiones sobre el que se apoya la base legal, y el procesamiento de documentos ya es de diciembre.
 
 ```mermaid
 pie showData
@@ -216,6 +218,8 @@ Cinco de las ocho son de cumplimiento o de seguridad, no de funcionalidad. Es de
 
 Seis bloques. Cada uno termina en algo demostrable y no abre el siguiente hasta cerrar su criterio.
 
+**Sobre el plazo.** Los 45 días son el calendario del MVP-45 (`mvp.md`). El ERS toma ese documento como **fuente de funciones y reglas, no como plan de trabajo** (C-02), y fija el compromiso de diciembre en **20 días** con unos cuatro desarrolladores (RES-09, C-13). Este orden de bloques sirve para decidir **qué se construye primero** y con qué criterio se cierra cada parte; no es una promesa de 45 días.
+
 ```mermaid
 flowchart TD
     B1["Bloque 1 · días 1-7 · catálogos y seguridad"]
@@ -243,6 +247,8 @@ flowchart TD
 
 **Ya existe (T2):** `kag.actor_name_history` (1 160). Guarda el historial de nombres, pero queda fuera del contrato del MVP.
 
+**Ya existe vacío (T1):** `core.consulta_reniec` (10 columnas y 4 disparadores ya instalados), `kag.entity_merge_log` (donde la fusión queda auditada, con `justificacion` y `reversible`) y `qda.mapeo_pseudonimo` (el token que enlaza con `actor_uid` en el corpus QDA).
+
 **Crear:** `core.actor_consentimiento`. Los alias ya tienen tabla propia con datos.
 
 **Endpoints:** `GET/POST/PATCH /actores`, `POST /actores/{id}/promover`, `POST /actores/fusionar`.
@@ -256,6 +262,8 @@ flowchart TD
 **Ya existe también (T0):** `core.distritos` (698), que cubre el objeto de ubigeo del MVP.
 
 **Ya existe (T2):** `core.documentos` (153), con datos pero fuera del contrato.
+
+**Ya existe vacío (T1):** `kag.documento_fragmento` (`inicio_char`, `fin_char`, `pagina_o_minuto`): es el soporte del parcial `core.cita`; sin él la cronología no puede citar con precisión.
 
 **Crear:** `core.alerta_fuente` (se usa en el bloque 4, se define aquí).
 
@@ -280,6 +288,8 @@ flowchart TD
 **Ya existe vacío (T1):** `policy.escenario_regla`, `core.output_contracts`.
 
 **Vacías y sin uso (T4):** `core.riesgo_social_ordinal` (K1 y K5) y `policy.snapshot`. Aquí el trabajo no es crear tablas: es poblarlas desde cero y probar que el simulador devuelve algo.
+
+**Ya existe vacío (T1):** `ind.resultado` (16 columnas: `variante_id`, `distrito_id`, `periodo`, `valor`, `incertidumbre`): es donde aterriza el cálculo, por variante, distrito y periodo.
 
 **Crear:** `analisis.caso_analogo` y `analisis.calidad_fuente`.
 
@@ -313,9 +323,29 @@ python migration/prioridad_mvp.py
 
 Lee la base, escribe `docs/mvp_prioridad_tablas.csv` (una fila por tabla, con capa y causa) e imprime el resumen. **Solo lee**: no crea, no borra, no comenta.
 
-Si se añade una tabla a la v10 o se cambia el contrato del MVP, se edita el diccionario `MVP` del script y se vuelve a ejecutar. Las cifras de este documento salen de esa ejecución, no de una estimación. La corrida corresponde a la medición del **2026-11-20** e incluye los parches 14 a 18: `core.banco_datos_tratamiento` ya existe con una fila, y `core` tiene 48 de sus 102 tablas con RLS y 315 políticas.
+Si se añade una tabla a la v10 o se cambia el contrato del MVP, se edita el diccionario `MVP` del script y se vuelve a ejecutar. Las cifras de este documento salen de esa ejecución, no de una estimación. La corrida corresponde a la medición del **2026-11-20** e incluye los parches 14 a 19: `core.banco_datos_tratamiento` ya existe con una fila, y `core` tiene 48 de sus 102 tablas con RLS y 315 políticas. El parche 19 no mueve la medición —sólo añade comentarios de columna—, así que las cifras son las mismas con él aplicado.
 
 **Este documento no se regenera.** `migration/prioridad_mvp.py` sólo escribe `docs/mvp_prioridad_tablas.csv` y el resumen por consola; el `.md` se edita a mano a partir de esas dos salidas. Volver a ejecutar el script refresca la medición, no el texto.
+
+**Los bloques también viven en SQL.** `docs/AVISA_V10_PRIORIZACION.sql` materializa esta
+medición y este cuadro en un esquema propio (`priorizacion`), de manera que la asignación de
+cada tabla a su bloque sea una consulta y no una lectura. Carga `docs/mvp_prioridad_tablas.csv`,
+crea las cinco capas, los seis bloques y las 51 tablas con bloque (46 del contrato y 5
+heredadas), y termina verificando 265 tablas, 2 145 columnas y 13 352 filas, y que ninguna
+tabla T0 quede sin bloque (si faltara una T1, el script lo avisa sin abortar). Se ejecuta a mano y es idempotente:
+
+```
+docker cp docs/mvp_prioridad_tablas.csv avisa-db:/tmp/docs/
+docker cp docs/AVISA_V10_PRIORIZACION.sql avisa-db:/tmp/
+docker exec -i -w /tmp avisa-db psql -U avisa -d avisa \
+    -v ON_ERROR_STOP=1 -f /tmp/AVISA_V10_PRIORIZACION.sql
+```
+
+No toca nada fuera de `priorizacion` ni lleva ningún `DROP`: el único esquema que vacía es el
+suyo, y esa es la razón por la que se puede repetir sin consecuencias. Tampoco se aplica por
+defecto: es un **artefacto de consulta**, no una capa del sistema. No lo monta `compose.yaml` ni
+lo ejecuta el `initdb`, y por eso no aparece en `DICCIONARIO_DATOS.md`, que se genera desde la
+base viva.
 
 ---
 
@@ -326,9 +356,10 @@ Si se añade una tabla a la v10 o se cambia el contrato del MVP, se edita el dic
 3. `docs/LEGADO_A_V10_SIMILITUDES_Y_DIFERENCIAS.md` — puente sistema anterior ↔ v10, con la estadística en §11 y los componentes en §12.
 4. `docs/DICCIONARIO_DATOS.md` — significado de cada tabla y columna; versión máquina en `docs/diccionario_datos.csv`.
 5. `docs/mvp_prioridad_tablas.csv` — la medición completa, una fila por tabla.
-6. `migration/prioridad_mvp.py` — el medidor.
-7. `migration/loader/phases/` — las 14 fases del cargador de legado.
-8. Ley N.° 29733 y su Reglamento (D.S. N.° 003-2013-JUS) — medidas de seguridad de nivel alto, bancos de datos y Oficial de Datos Personales.
-9. D.U. N.° 007-2020 y D.S. N.° 029-2021-PCM — Marco de Confianza Digital y notificación de incidentes en 48 horas.
-10. R.M. N.° 00207-2026-PRODUCE — Guía para la Prevención y Gestión de Conflictos Sociales del Sector Producción; triangulación y Marco Situacional.
-11. D.S. N.° 115-2025-PCM — Reglamento de la Ley de Inteligencia Artificial; prohibición de perfilamiento y supervisión humana.
+6. `docs/AVISA_V10_PRIORIZACION.sql` — la misma priorización en SQL: medición, seis bloques, asignación de tablas a bloque y verificación, en un esquema propio (`priorizacion`).
+7. `migration/prioridad_mvp.py` — el medidor.
+8. `migration/loader/phases/` — las 14 fases del cargador de legado.
+9. Ley N.° 29733 y su Reglamento (D.S. N.° 003-2013-JUS) — medidas de seguridad de nivel alto, bancos de datos y Oficial de Datos Personales.
+10. D.U. N.° 007-2020 y D.S. N.° 029-2021-PCM — Marco de Confianza Digital y notificación de incidentes en 48 horas.
+11. R.M. N.° 00207-2026-PRODUCE — Guía para la Prevención y Gestión de Conflictos Sociales del Sector Producción; triangulación y Marco Situacional.
+12. D.S. N.° 115-2025-PCM — Reglamento de la Ley de Inteligencia Artificial; prohibición de perfilamiento y supervisión humana.

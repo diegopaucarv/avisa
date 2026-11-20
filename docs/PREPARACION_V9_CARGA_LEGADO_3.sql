@@ -19,9 +19,11 @@ BEGIN;
 -- 1. D43 — DNI NO ES ÚNICO EN EL ORIGEN
 --
 --    DIM_Actores trae 642 DNI con sólo 587 valores distintos: 45 valores
---    aparecen en 100 filas. El parche 1 creó
+--    aparecen en 100 filas. Una versión anterior del parche 1 creó
 --        ux_actor_dni UNIQUE (dni) WHERE dni IS NOT NULL
---    que ABORTA la carga en la segunda aparición.
+--    que ABORTA la carga en la segunda aparición; el parche 1 actual ya
+--    crea `ix_actor_dni` sin unicidad y explica por qué (§3.1). El DROP
+--    se conserva para las bases que vengan de esa versión antigua.
 --
 --    No se fusionan las personas: DOC-ACT-004 ("Diego Armando Paiva Jacinto")
 --    y ACT-541 ("Diego Paico Seminario") comparten DNI pero son personas
@@ -93,7 +95,7 @@ ALTER TABLE core.cat_especies
 --    responsable_id es NOT NULL -> sin unidad no entra ningún caso.
 --
 --    No es un dato inventado: la unidad existe y está documentada en
---    docs/AVISA_PRODUCE_v9(1).md §1 y glosario:
+--    docs/AVISA_PRODUCE_v10.md §1 y glosario:
 --        "OAIPCS. Oficina de Articulación Intergubernamental y Prevención de
 --         Conflictos Sociales."
 --    entidad_id = 1 es PRODUCE (única entidad tenant).
