@@ -66,15 +66,15 @@ memorizarlos: están aquí para consultarlos cuando aparezcan.
 
 | Aspecto                     | Sistema anterior (2026)                                                                                                                 | v10                                                                                                          |
 | --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| **Plataforma**              | Google Sheets y Apps Script: 244 funciones en el servidor y 450 nombres en el navegador (158 escritos una vez y 292 redefinidos encima) | PostgreSQL 16 con dos extensiones (mapas y vectores): 284 tablas físicas, 260 lógicas y 601 llaves foráneas  |
-| **Modelo de datos**         | 86 hojas planas (75 con datos), sin llaves foráneas ni reglas de unicidad; el tipo de cada valor se adivina al leerlo                   | 260 tablas lógicas con llaves foráneas, reglas de validación, catálogos cerrados y seguridad por fila        |
+| **Plataforma**              | Google Sheets y Apps Script: 244 funciones en el servidor y 450 nombres en el navegador (158 escritos una vez y 292 redefinidos encima) | PostgreSQL 16 con dos extensiones (mapas y vectores): 287 tablas físicas, 263 lógicas y 609 llaves foráneas  |
+| **Modelo de datos**         | 86 hojas planas (75 con datos), sin llaves foráneas ni reglas de unicidad; el tipo de cada valor se adivina al leerlo                   | 263 tablas lógicas con llaves foráneas, reglas de validación, catálogos cerrados y seguridad por fila        |
 | **Nivel de detalle**        | Una fila por fila de hoja: el mismo conflicto se escribe hasta cuatro veces con distinto detalle                                        | Un concepto por tabla: caso, alerta, demanda, hecho, actor y compromiso son cosas distintas                  |
 | **Identidad**               | Códigos de texto (`ID_*`); el DNI hace de identificador de persona                                                                      | Identificador interno + el código original conservado + un identificador único generado cuando no hay código |
 | **Acceso**                  | Una clave numérica guardada en una hoja; los permisos se aplican en la pantalla                                                         | Inicio de sesión único, permisos por rol y seguridad por fila, con tres perfiles                             |
 | **Auditoría**               | Una hoja de envíos y el registro de inicio de sesión                                                                                    | Bitácoras que solo agregan filas + registro de cada ejecución de agente                                      |
 | **Salida**                  | Se redacta a mano y se archiva el PDF en Drive (153 documentos, 153 enlaces)                                                            | Plantillas y consultas guardadas; la redacción automática solo cuando el texto no se puede derivar           |
-| **Proceso**                 | No existe: ocurre en la cabeza del analista                                                                                             | Agentes A1 (extrae), A2 (pauta) y A3 (sintetiza), con revisión humana                                        |
-| **Inteligencia artificial** | Ninguna                                                                                                                                 | Grafo de conocimiento, análisis cualitativo, contexto del entorno y reglas de control G1 a G25               |
+| **Proceso**                 | No existe como flujo de trabajo: ocurre en la cabeza del analista. Hubo una maqueta de consultas con IA que nunca operó (§6)            | Agentes A1 (extrae), A2 (pauta) y A3 (sintetiza), con revisión humana                                        |
+| **Inteligencia artificial** | Ninguna en operación. Un conector a Gemini y una pantalla «Consultas con IA» quedaron en maqueta, sin clave válida y sin uso (§6)       | Grafo de conocimiento, análisis cualitativo, contexto del entorno y reglas de control G1 a G25               |
 | **Certificación**           | —                                                                                                                                       | 4 649 filas declaradas en 86 hojas cargadas; la verificación automática da 58 de 58 controles                |
 
 **En una línea.** El sistema anterior registra y después imprime. La v10 registra
@@ -101,7 +101,7 @@ Estos conceptos significan lo mismo en los dos sistemas:
 | **Documento**          | 8 tablas de documentos + PDFs en Drive                            | `core.documentos` (153) + tabla de 15 tipos                                      | El concepto no; el formato de entrega sí                                           |
 | **Mesa de diálogo**    | `dim_mesas_grupos` (21)                                           | `core.mesas_dialogo` (21) + `mesa_miembros` (62)                                 | No; la v10 la trata como una entidad propia                                        |
 | **Local o sede**       | `dim_locales` (27)                                                | `core.locales` (27)                                                              | No                                                                                 |
-| **Usuario y rol**      | `dim_sectoristas` + `dim_pf` + `dim_autoridades` (31)             | `core.usuarios` (31) + `usuario_roles` (34)                                      | Cambia cómo se entra al sistema, no el rol                                         |
+| **Usuario y rol**      | `dim_sectoristas` + `dim_pf` + `dim_autoridades` (34)             | `core.usuarios` (32) + `usuario_roles` (35)                                      | Cambia cómo se entra al sistema, no el rol                                         |
 | **Envío**              | `LOG_Envios` (17)                                                 | `core.envios_comunicacion` (17)                                                  | No                                                                                 |
 
 **Las tres cosas que importan:**
@@ -235,25 +235,25 @@ análisis de conflictividad existen vacías, y su contenido terminó en
 
 ### 5.2 Solo en v10
 
-| Esquema                                                                                                           |          Tablas | Qué aporta                                                            | Qué tiene hoy                      |
-| ----------------------------------------------------------------------------------------------------------------- | --------------: | --------------------------------------------------------------------- | ---------------------------------- |
-| `agent`                                                                                                           |         11 (23) | Los agentes A1, A2 y A3, sus instrucciones y su registro de ejecución | 1 fila                             |
-| `kag`                                                                                                             |              30 | Grafo de conocimiento, vectores, comunidades e hipótesis              | 1 520 nodos, 450 relaciones        |
-| `avisa`                                                                                                           |           2 (8) | Captura de datos crudos, en tablas divididas                          | 0                                  |
-| `ind`                                                                                                             |               9 | Plantillas, indicadores y resultados                                  | 3 plantillas, 0 espacios definidos |
-| `ctx`                                                                                                             |         10 (16) | Contexto del entorno (clima, pobreza, zonas marítimas)                | 28                                 |
-| `qda` + `lex` + `chat`                                                                                            |              35 | Análisis cualitativo, vocabulario y conversaciones                    | 0                                  |
-| `policy` + `config` + `model`                                                                                     |              15 | Reglas de control, parámetros y fichas de modelo                      | 6 / 6 / 1                          |
-| `territorio`                                                                                                      |              16 | Lugares, caletas, plantas y zonas de pesca                            | 9 catálogos                        |
-| `ref`                                                                                                             |               2 | Base legal que respalda cada tratamiento de datos y cada evidencia    | 5 filas                            |
-| `analisis`                                                                                                        |               4 | Plan de análisis y marcos situacionales                               | 14                                 |
-| `analytics`                                                                                                       | 0 (+22 objetos) | Indicadores y agregados: 17 vistas y 5 vistas materializadas          | sin tablas propias                 |
-| `forecast`, `impact`, `economic`, `consultation`, `community`, `domain`, `mype`, `pesca`, `proteccion`, `staging` |              26 | Módulos previstos para los próximos cinco años                        | catálogos ya creados               |
+| Esquema                                                                                                           |          Tablas | Qué aporta                                                            | Qué tiene hoy                         |
+| ----------------------------------------------------------------------------------------------------------------- | --------------: | --------------------------------------------------------------------- | ------------------------------------- |
+| `agent`                                                                                                           |         11 (23) | Los agentes A1, A2 y A3, sus instrucciones y su registro de ejecución | 5 filas                               |
+| `kag`                                                                                                             |              30 | Grafo de conocimiento, vectores, comunidades e hipótesis              | 1 520 nodos, 450 relaciones           |
+| `avisa`                                                                                                           |           2 (8) | Captura de datos crudos, en tablas divididas                          | 0                                     |
+| `ind`                                                                                                             |               9 | Plantillas, indicadores y resultados                                  | 3 plantillas, 0 espacios definidos    |
+| `ctx`                                                                                                             |         10 (16) | Contexto del entorno (clima, pobreza, zonas marítimas)                | 28                                    |
+| `qda` + `lex` + `chat`                                                                                            |              35 | Análisis cualitativo, vocabulario y conversaciones                    | 0                                     |
+| `policy` + `config` + `model`                                                                                     |              15 | Reglas de control, parámetros y fichas de modelo                      | 10 reglas / 17 parámetros / 12 fichas |
+| `territorio`                                                                                                      |              16 | Lugares, caletas, plantas y zonas de pesca                            | 9 catálogos                           |
+| `ref`                                                                                                             |               2 | Base legal que respalda cada tratamiento de datos y cada evidencia    | 5 filas                               |
+| `analisis`                                                                                                        |               4 | Plan de análisis y marcos situacionales                               | 14                                    |
+| `analytics`                                                                                                       | 0 (+22 objetos) | Indicadores y agregados: 17 vistas y 5 vistas materializadas          | sin tablas propias                    |
+| `forecast`, `impact`, `economic`, `consultation`, `community`, `domain`, `mype`, `pesca`, `proteccion`, `staging` |              26 | Módulos previstos para los próximos cinco años                        | catálogos ya creados                  |
 
 Los números entre paréntesis son tablas físicas: una tabla dividida en partes
-cuenta una vez como tabla lógica y varias como tabla física. Con `core` (99) y
+cuenta una vez como tabla lógica y varias como tabla física. Con `core` (102) y
 `audit` (1), que no figuran aquí por ser el núcleo compartido, la suma da las
-**260 tablas lógicas** de §11.1.
+**263 tablas lógicas** de §11.1.
 
 Además hay un grupo de **tablas creadas para que los datos del sistema anterior
 pudieran aterrizar**: `core.log_accesos`, `core.mesas_dialogo`,
@@ -265,14 +265,17 @@ pudieran aterrizar**: `core.log_accesos`, `core.mesas_dialogo`,
 
 ## 6. Las tres funciones: entrada, proceso y salida
 
-| Tipo de función | Sistema anterior                                                                                                     | v10                                                                   | Qué falta                                                                                            |
-| --------------- | -------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| **Entrada**     | 6 puntos de captura manual: caso, hecho, alerta, reporte rápido, clima social y catálogos                            | `avisa.raw_ingest` + `staging` + `ctx.captura` (los tres **en cero**) | Convertir el paquete de datos recibidos en campos ordenados                                          |
-| **Proceso**     | **No existe.** Ninguna de las 244 funciones convierte texto libre en datos ordenados                                 | `agent.*`, `analisis.*`, `qda.*`, `kag.*` (78 tablas, todas vacías)   | Reconocer entidades y generar la pauta del análisis                                                  |
-| **Salida**      | 12 funciones `generar*` (unas 1 400 líneas) que rearman lo que una persona ya escribió; 153 PDFs archivados en Drive | `ind.plantilla` + vistas + agente A3                                  | Falta el esquema de 15 tipos de documento (está vacío) y la tabla de espacios de plantilla (0 filas) |
+| Tipo de función | Sistema anterior                                                                                                                                                 | v10                                                                                  | Qué falta                                                                                            |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------- |
+| **Entrada**     | 6 puntos de captura manual: caso, hecho, alerta, reporte rápido, clima social y catálogos                                                                        | `avisa.raw_ingest` + `staging` + `ctx.captura` (los tres **en cero**)                | Convertir el paquete de datos recibidos en campos ordenados                                          |
+| **Proceso**     | **No existe en operación.** Ninguna de las 244 funciones convierte texto libre en datos ordenados; la consulta con IA existió como maqueta y nunca operó (abajo) | `agent.*`, `analisis.*`, `qda.*`, `kag.*` (55 tablas; 12 con filas y 3 206 en total) | Reconocer entidades y generar la pauta del análisis                                                  |
+| **Salida**      | 12 funciones `generar*` (unas 1 400 líneas) que rearman lo que una persona ya escribió; 153 PDFs archivados en Drive                                             | `ind.plantilla` + vistas + agente A3                                                 | Falta el esquema de 15 tipos de documento (está vacío) y la tabla de espacios de plantilla (0 filas) |
+
+**La IA del sistema anterior.** No es cierto que no tuviera ninguna: sí tenía un módulo de consultas con IA. En `Código.txt`, un conector a Gemini (`_llamarGemini`) con `analizarConsultaGeneral`, `buscarConIA` y `analizarCasoConIA`; en el navegador, una pantalla «Consultas con IA» que ofrecía análisis de riesgos, de demandas e histórico. **Nunca operó**: la clave era el marcador `PENDIENTE_API_KEY_GEMINI`, cada llamada devolvía el aviso de que faltaba configurarla y no hay uso en producción. Era una maqueta. Por eso el balance no cambia: el sistema registraba a mano lo que esa maqueta nunca llegó a generar.
 
 **El hallazgo que resume las dos arquitecturas:** el sistema anterior **captura,
-guarda e imprime**. La v10 **captura, procesa e imprime a partir de los datos**.
+guarda e imprime** —la consulta con IA quedó en maqueta—. La v10 **captura, procesa
+e imprime a partir de los datos**.
 Lo que separa a las dos no es una tabla: son las ocho brechas C1 a C8 descritas en
 **[3]** §12.9, y ninguna de ellas exige crear una tabla nueva.
 
@@ -323,7 +326,7 @@ documento: se consulta `legacy.*` y se cuenta con `count(*)`. Esa copia es la
 
 ## 9. Errores de lectura frecuentes
 
-1. **«103 tablas con datos» no significa que el sistema funcione.** Todo lo que
+1. **«109 tablas con datos» no significa que el sistema funcione.** Todo lo que
    hay es histórico. Cualquier indicador que se calcule hoy se calcula sobre
    historia congelada, y con `ind.indicador` en 0 filas el tablero no tiene de
    dónde salir.
@@ -358,7 +361,7 @@ documento: se consulta `legacy.*` y se cuenta con `count(*)`. Esa copia es la
 
 ## 11. Estadística del sistema
 
-**Medido el 2026-11-18** sobre la base `avisa-db` (PostgreSQL 16.14 con PostGIS
+**Medido el 2026-11-19** sobre la base `avisa` (PostgreSQL 16.14 con PostGIS
 3.7 y pgvector 0.8.3), contando fila por fila con `count(*)`. No se usó la
 estimación aproximada que guarda el motor (`pg_class.reltuples`) porque en esta
 base está sin actualizar, con valor `-1`, y habría dado ceros falsos. Todo lo que
@@ -367,24 +370,24 @@ gráficos de esta sección y escribe la tabla de §11.5.
 
 ### 11.1 Los dos sistemas en números
 
-| Dimensión                      | Sistema anterior (`legacy`)        | v10                                                                                   |
-| ------------------------------ | ---------------------------------- | ------------------------------------------------------------------------------------- |
-| Esquemas (carpetas)            | 1                                  | 27 (26 con tablas; `analytics` solo tiene vistas; `public` es de PostGIS y no cuenta) |
-| Tablas físicas                 | 87                                 | 284 (24 son partes de tablas divididas)                                               |
-| Tablas lógicas                 | 87                                 | 260                                                                                   |
-| Columnas                       | 807                                | 2 421                                                                                 |
-| Filas                          | 4 729                              | 13 346                                                                                |
-| Con datos / vacías             | 76 / 11                            | 107 / 177 físicas (153 lógicas)                                                       |
-| Llaves primarias               | 87                                 | 283                                                                                   |
-| Llaves foráneas                | **0**                              | **601**                                                                               |
-| Reglas de unicidad (UNIQUE)    | **0**                              | 141                                                                                   |
-| Reglas de validación (CHECK)   | **0**                              | 342                                                                                   |
-| Índices                        | 87                                 | 748 (sin contar los internos de PostgreSQL ni los 6 de vistas materializadas)         |
-| Vistas y vistas materializadas | **0**                              | 34 (28 + 6)                                                                           |
-| Tablas con seguridad por fila  | **0**                              | 81 (todas activas también para el dueño de la tabla)                                  |
-| Políticas de seguridad         | **0**                              | 518                                                                                   |
-| Triggers                       | **0**                              | 62                                                                                    |
-| Tipos de dato distintos        | 2 (3 contando la tabla manifiesto) | 17                                                                                    |
+| Dimensión                      | Sistema anterior (`legacy`)                           | v10                                                                                   |
+| ------------------------------ | ----------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| Esquemas (carpetas)            | 1                                                     | 27 (26 con tablas; `analytics` solo tiene vistas; `public` es de PostGIS y no cuenta) |
+| Tablas físicas                 | 87                                                    | 287 (24 son partes de tablas divididas)                                               |
+| Tablas lógicas                 | 87                                                    | 263                                                                                   |
+| Columnas                       | 807                                                   | 2 492                                                                                 |
+| Filas                          | 4 729                                                 | 13 348                                                                                |
+| Con datos / vacías             | 76 / 11                                               | 109 / 178 físicas (154 lógicas)                                                       |
+| Llaves primarias               | 87                                                    | 286                                                                                   |
+| Llaves foráneas                | **0**                                                 | **609**                                                                               |
+| Reglas de unicidad (UNIQUE)    | **0**                                                 | 143                                                                                   |
+| Reglas de validación (CHECK)   | **0**                                                 | 347                                                                                   |
+| Índices                        | 87                                                    | 757 (sin contar los internos de PostgreSQL ni los 6 de vistas materializadas)         |
+| Vistas y vistas materializadas | **0**                                                 | 34 (28 + 6)                                                                           |
+| Tablas con seguridad por fila  | **0**                                                 | 82 (todas activas también para el dueño de la tabla)                                  |
+| Políticas de seguridad         | **0**                                                 | 520                                                                                   |
+| Triggers                       | **0**                                                 | 66                                                                                    |
+| Tipos de dato distintos        | 3 (2 en las hojas y la fecha de carga del manifiesto) | 17                                                                                    |
 
 ![Sistema anterior y v10, lado a lado](img/delta_estructura.svg)
 
@@ -396,14 +399,14 @@ propia tabla registro. Los dos tipos de dato de las hojas son `text` y el `int4`
 hoja. Las **76 tablas con datos son 75 hojas más la tabla registro**; las 11 vacías
 son hojas que nunca se usaron (§4).
 
-**Dos detalles que la tabla deja ver.** Hay 283 llaves primarias para 284 tablas
+**Dos detalles que la tabla deja ver.** Hay 286 llaves primarias para 287 tablas
 físicas: la única sin llave primaria es `core.cronologia_vinculos`, que es una
-tabla de vínculos entre registros. Y las 601 llaves foráneas se reparten en 200 en
+tabla de vínculos entre registros. Y las 609 llaves foráneas se reparten en 208 en
 `core`, 67 en `ctx`, 61 en `kag`, 48 en `chat`, 31 en `agent`, 25 en `qda` y 169
 en el resto.
 
-**De dónde salen los números de la v10.** Las 13 346 filas se reparten así: `core`
-6 901 · `kag` 3 187 · `audit` 3 088 · `config` 64 · `ctx` 28 · `policy` 15 ·
+**De dónde salen los números de la v10.** Las 13 348 filas se reparten así: `core`
+6 903 · `kag` 3 187 · `audit` 3 088 · `config` 64 · `ctx` 28 · `policy` 15 ·
 `domain` 15 · `analisis` 14 · `model` 12 · `territorio` 9 · `ref` 5 · `agent` 5 ·
 `ind` 3. Y hay **13 esquemas con tablas que hoy tienen cero filas**: `avisa`,
 `chat`, `community`, `consultation`, `economic`, `forecast`, `impact`, `lex`,
@@ -438,30 +441,30 @@ tendrá tabla mientras el RADAR siga diferido.
 
 El sistema anterior guarda **todo como texto** salvo `fila_n`: no hay fechas,
 números, valores verdadero/falso ni referencias. La v10 usa **17 tipos distintos**
-repartidos en 2 421 columnas.
+repartidos en 2 492 columnas.
 
 | Tipo             | Columnas | Para qué sirve                                       |
 | ---------------- | -------: | ---------------------------------------------------- |
-| `varchar`        |      637 | Texto corto y acotado (nombres, códigos, estados)    |
-| `uuid`           |      573 | Identificadores únicos, la mayoría de las llaves     |
-| `int2`           |      242 | Números pequeños (ordinales, niveles, códigos)       |
-| `timestamptz`    |      202 | Fecha y hora con zona horaria                        |
-| `int4`           |      136 | Enteros                                              |
-| `text`           |      128 | Texto libre, sin límite                              |
-| `numeric`        |      103 | Decimales exactos (coordenadas, montos, porcentajes) |
+| `varchar`        |      642 | Texto corto y acotado (nombres, códigos, estados)    |
+| `uuid`           |      581 | Identificadores únicos, la mayoría de las llaves     |
+| `int2`           |      245 | Números pequeños (ordinales, niveles, códigos)       |
+| `timestamptz`    |      205 | Fecha y hora con zona horaria                        |
+| `int4`           |      150 | Enteros                                              |
+| `text`           |      131 | Texto libre, sin límite                              |
+| `bool`           |      120 | Verdadero/falso                                      |
+| `numeric`        |      111 | Decimales exactos (coordenadas, montos, porcentajes) |
+| `date`           |      103 | Fecha sin hora                                       |
 | `jsonb`          |      103 | Contenido variable, sin columnas fijas               |
-| `date`           |      101 | Fecha sin hora                                       |
-| `bool`           |       97 | Verdadero/falso                                      |
-| `bpchar`         |       67 | Texto de longitud exacta (códigos de una letra)      |
+| `bpchar`         |       68 | Texto de longitud exacta (códigos de una letra)      |
 | `int8`           |       19 | Enteros grandes (contadores)                         |
-| `bytea`          |        5 | Binario (archivos, hashes)                           |
+| `bytea`          |        6 | Binario (archivos, hashes)                           |
 | `geography`      |        3 | Punto o área en el mapa                              |
 | `_text`, `_uuid` |        4 | Listas dentro de una sola columna                    |
 | `vector`         |        1 | Huella numérica para búsqueda semántica              |
 
 Los dos tipos que más crecieron son los dos que el sistema anterior no tenía en
-absoluto: **identificadores** y **fechas**. `uuid` aparece 573 veces porque cada
-entidad y cada relación tiene su propia llave; `timestamptz` más `date` suman 303
+absoluto: **identificadores** y **fechas**. `uuid` aparece 581 veces porque cada
+entidad y cada relación tiene su propia llave; `timestamptz` más `date` suman 308
 columnas de tiempo, contra cero antes.
 
 **Por qué importa.** El tipo de dato es donde vive la validación que antes no
@@ -473,8 +476,8 @@ dejó de aceptar cualquier texto.
 
 ![Estructura por esquema](img/delta_esquemas.svg)
 
-La estructura no se reparte igual que los datos. `core` tiene **99 tablas y 810
-columnas**; le siguen `agent` **23 físicas y 262 columnas** (11 lógicas: 12 de las
+La estructura no se reparte igual que los datos. `core` tiene **102 tablas y 839
+columnas**; le siguen `agent` **23 físicas y 304 columnas** (11 lógicas: 12 de las
 23 son pedazos de tablas divididas por mes), `kag` **30 y 205**, `chat` **14 y
 148**, `ctx` **16 y 139** (10 lógicas) y `territorio` **16 y 100**.
 
@@ -596,7 +599,7 @@ edita a mano: se regenera con el script descrito en §11.7.
 
 <!-- FIN TABLA 86 HOJAS -->
 
-**Nota de conciliación.** De las 86 hojas, **7** declaran columnas distintas de
+**Nota de conciliación.** De las 86 hojas, **6** declaran columnas distintas de
 las reales (697 frente a 716) y solo **1** declara filas distintas
 (`fact_historial_estado`: 33 declaradas frente a 27 reales). Por eso el total
 declarado (4 649) y el medido (4 643) difieren en **6**.
@@ -645,9 +648,9 @@ por primera vez.
 | `bridge_caso_actor`   |    80 | 3 filas apuntan a actores inexistentes; el campo del caso mezcla 46 códigos `CS-%` con 34 números sueltos, y 18 de esos códigos no existen en `fact_casos` |
 
 **Qué significa todo esto.** El problema del sistema anterior no era el volumen
-(4 643 filas) sino la ausencia de reglas: el software no impedía escribir el mismo
+(4 643 filas de hoja) sino la ausencia de reglas: el software no impedía escribir el mismo
 DNI 45 veces ni dejar 186 actores sin DNI. La v10 lleva esa validación al esquema
-—**601 llaves foráneas, 141 reglas de unicidad y 342 reglas de validación**— y la
+—**609 llaves foráneas, 143 reglas de unicidad y 347 reglas de validación**— y la
 cola de revisión de DNI es la consecuencia directa de esas 45 repeticiones: lo que
 el sistema anterior aceptaba, la v10 lo detecta y lo pone en cola para revisión.
 
@@ -665,15 +668,23 @@ una de esas dos fuentes cambia, la tabla y el gráfico cambian con ellas. Cómo
 levantar la base y conectarse está en **[12]**, y el flujo completo —crear, cargar,
 y aplicar parches— en **[16]**.
 
+Las cifras de este documento corresponden a la medición del **2026-11-19**. La
+prioridad del MVP la calcula otro script, `migration/prioridad_mvp.py`, que cruza
+cada tabla con el contrato MVP-45 y escribe `docs/mvp_prioridad_tablas.csv`; sus
+totales son los que cita el documento **[15]**. Si se vuelve a ejecutar cualquiera
+de los dos, las cifras cambian con la base.
+
 El diccionario de **[13]** se regenera aparte, cuando cambia el esquema o la carga:
 
 ```sh
 python migration/generar_diccionario.py
 ```
 
-La cobertura del modelo v10 es completa: las **2 091 columnas** de las tablas
-lógicas tienen descripción escrita en la propia base y las **330 de las
-particiones** la heredan de su tabla padre. En el sistema anterior se describen
+De las **2 126 columnas** de las tablas lógicas, **2 107 tienen descripción**
+escrita en la propia base y las **366 de las particiones** la heredan de su tabla
+padre. Las 19 que aún no la tienen están en `core.cat_privilegio`,
+`core.privilegio_usuario`, `core.consulta_reniec` y `core.envios_comunicacion`,
+tablas creadas por los parches 16 y 17. En el sistema anterior se describen
 **209 de sus 807 columnas**, y las 598 restantes son, en su mayoría, columnas
 posicionales (`c01`, `c02`, …) del volcado de formularios: para explicarlas hace
 falta la hoja original.
@@ -697,7 +708,7 @@ módulos**. Este es el mapa de esa superficie.
 | Demandas                                     |        21 | `core.demandas` + `demandas_actores` + `demandas_evidencias`                                                             | Se mantiene   |
 | Hechos ocurridos                             |        12 | `core.caso_cronologia` + `fuentes_evidencia` + `cronologia_vinculos`                                                     | Se mantiene   |
 | Registro de envíos                           |         6 | `core.envios_comunicacion`                                                                                               | Se mantiene   |
-| Navegación, permisos y pantallas de relación |        43 | Permisos por rol y seguridad por fila (81 tablas, 518 políticas); las relaciones muchos-a-muchos pasan a llaves foráneas | Se transforma |
+| Navegación, permisos y pantallas de relación |        43 | Permisos por rol y seguridad por fila (82 tablas, 520 políticas); las relaciones muchos-a-muchos pasan a llaves foráneas | Se transforma |
 | Análisis de casos (formato Anexo 8)          |        33 | `core.documentos` + `analytics.vw_anexo_15_matriz_conflictividad`                                                        | Se transforma |
 | Sectoristas, puntos focales y autoridades    |        29 | `core.usuarios` + `usuario_roles` + `usuario_territorio`                                                                 | Se transforma |
 | Catálogos y datos de referencia              |        27 | `core.cat_*` (38 catálogos) + regiones, provincias y distritos                                                           | Se transforma |
@@ -747,7 +758,8 @@ conflictividad) y **6 son de salida** (tablero de mando, documentos y reportes,
 WhatsApp y correo, proceso por pasos, análisis regional y registro de envíos). Los
 4 restantes son infraestructura. Dicho de otro modo: **el sistema anterior solo
 automatiza la salida**, y ni eso, porque sus 20 funciones de reporte rearman texto
-que alguien escribió a mano.
+que alguien escribió a mano. La consulta con IA existió como maqueta y nunca operó
+(§6), así que tampoco aportaba proceso.
 
 ### 12.3 Lo que solo existe en la v10
 
@@ -756,7 +768,7 @@ reemplazar. No son mejoras de algo existente: son piezas nuevas.
 
 | Componente nuevo                                         | Dónde                                             | Qué aporta                                                                                                                            |
 | -------------------------------------------------------- | ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| Seguridad por fila                                       | 81 tablas, 518 políticas                          | El aislamiento por rol, territorio y nivel de reserva vive en la base. En el alcance del MVP quedan 28 tablas y 189 políticas         |
+| Seguridad por fila                                       | 82 tablas, 520 políticas                          | El aislamiento por rol, territorio y nivel de reserva vive en la base. En el alcance del MVP quedan 26 tablas y 170 políticas         |
 | Auditoría que solo agrega filas                          | `audit.datos_personales_acceso` + `agent.run_log` | Historial que no se puede alterar: rechaza modificar, borrar y vaciar                                                                 |
 | Cifrado de datos personales con registro de cada lectura | `actor_datos_personales.dni_cifrado` y `dni_hmac` | El DNI queda cifrado, con una huella para detectar duplicados, y cada descifrado deja rastro                                          |
 | Agentes A1, A2 y A3                                      | `agent.sesion`, `agent.llm_call`, `agent.run_log` | Extraer, pautar y sintetizar, con traza de cada llamada                                                                               |
@@ -804,24 +816,24 @@ pero no reemplazarlos, porque el dato nace de una persona en territorio.
 Cada número entre corchetes en este documento remite a uno de estos archivos.
 Todos están en `docs/` salvo donde se indica otra ruta.
 
-| #    | Documento                                                             | Qué contiene                                                                                                                                                                                                                     |
-| ---- | --------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [1]  | `AVISA_PRODUCE_v10.md`                                                | La arquitectura objetivo de la v10. El anexo D.2 compara los nombres del MVP con los de la v10 y el anexo E reúne las doce decisiones legales DC-01 a DC-12.                                                                     |
-| [2]  | `mvp.md`                                                              | El alcance del MVP de 45 componentes. El §2.3.bis y el §2.5 tratan la protección de datos personales y los límites de los agentes; el §3.3.bis, la clasificación de la información.                                              |
-| [3]  | `BRECHA_CAPA_DATOS_V9.md`                                             | El diagnóstico de la base tal como está hoy. El §7 ordena las prioridades 0 y 1, el §11 mide el estado, el §12 explica qué hace cada tabla y describe las ocho brechas C1 a C8, y el §13.1 trata la clasificación de documentos. |
-| [4]  | `DECISIONES_CARGA_LEGADO_V9.md`                                       | Las 51 decisiones de carga (D1 a D51). El anexo A da los totales por clase, el A.2 las 21 reclasificaciones y el A.4 las filas que quedaron sin destino.                                                                         |
-| [5]  | `PLAN_PORTE_LEGADO_V9.md`                                             | Cómo se ejecuta la carga paso a paso. El §2 corrige el mapa de origen y el §3 a §4 describen el proceso; el anexo E lista de qué hoja sale cada tabla.                                                                           |
-| [6]  | `ANALISIS_PORTABILIDAD_AVISA_2026_A_V9.md`                            | El análisis que asignó las clases A, B, C, D y X. El anexo A dice la clase de cada hoja, y el §3 a §5 explican columna por columna y por qué una hoja no tiene equivalente.                                                      |
-| [7]  | `ACTA_CIERRE_CARGA_V9.md`                                             | Las cifras certificadas de la carga, firmadas al cerrarla.                                                                                                                                                                       |
-| [8]  | `INDICE.md`                                                           | El índice del conjunto documental: qué documento existe, en qué estado está y cuál reemplaza a cuál.                                                                                                                             |
-| [9]  | `avisa_actual/CLASIFICACION_INPUT_PROCESO_OUTPUT.md`                  | Qué función del código es de entrada, de proceso o de salida. El §3 da la clasificación y el §7 los criterios.                                                                                                                   |
-| [10] | `avisa_actual/LEEME.md`                                               | Qué es cada archivo del sistema que hoy está en producción.                                                                                                                                                                      |
-| [11] | `migration/reporte_estadistica.py` (raíz del proyecto, no en `docs/`) | El script que mide la base, calcula las cifras de §11 y genera los seis gráficos de este documento. Solo lee la base; no la modifica.                                                                                            |
-| [12] | `ENTORNO_DOCKER_POSTGRES.md`                                          | Cómo levantar la base en Docker, con sus credenciales, y cómo conectarse.                                                                                                                                                        |
-| [13] | `DICCIONARIO_DATOS.md` y `diccionario_datos.csv`                      | El diccionario de las dos capas: propósito de cada tabla, significado de cada columna, claves, relaciones y la correspondencia entre el sistema anterior y la v10. El CSV es la versión máquina, una fila por columna.           |
-| [14] | `REVISION_DICCIONARIO_Y_V10.md`                                       | La auditoría del diccionario y del modelo: qué estaba sin describir, cómo conviven dos significados del nivel de clasificación y qué le falta al documento de diseño.                                                            |
-| [15] | `PRIORIZACION_MVP_v10.md`                                             | Qué parte de la v10 se construye primero: cinco capas medidas sobre la base viva (31 tablas con datos, 11 vacías del MVP, 72 vivas fuera del MVP, 22 enganchadas y 119 dormidas) y el puente de las 55 tablas del MVP.           |
-| [16] | `FLUJO_BASE_MVP_Y_MIGRACION.md`                                       | El flujo completo, en orden y con comandos: crear la base MVP, cargar el legado, aplicar los parches, recortar el alcance y migrar a SQL Server. Incluye la tabla de errores conocidos.                                          |
+| #    | Documento                                                             | Qué contiene                                                                                                                                                                                                                                                         |
+| ---- | --------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [1]  | `AVISA_PRODUCE_v10.md`                                                | La arquitectura objetivo de la v10. El anexo D.2 compara los nombres del MVP con los de la v10 y el anexo E reúne las doce decisiones legales DC-01 a DC-12.                                                                                                         |
+| [2]  | `mvp.md`                                                              | El alcance del MVP de 45 componentes. El §2.3.bis y el §2.5 tratan la protección de datos personales y los límites de los agentes; el §3.3.bis, la clasificación de la información.                                                                                  |
+| [3]  | `BRECHA_CAPA_DATOS_V9.md`                                             | El diagnóstico de la base tal como está hoy. El §7 ordena las prioridades 0 y 1, el §11 mide el estado, el §12 explica qué hace cada tabla y describe las ocho brechas C1 a C8, y el §13.1 trata la clasificación de documentos.                                     |
+| [4]  | `DECISIONES_CARGA_LEGADO_V9.md`                                       | Las 51 decisiones de carga (D1 a D51). El anexo A da los totales por clase, el A.2 las 21 reclasificaciones y el A.4 las filas que quedaron sin destino.                                                                                                             |
+| [5]  | `PLAN_PORTE_LEGADO_V9.md`                                             | Cómo se ejecuta la carga paso a paso. El §2 corrige el mapa de origen y el §3 a §4 describen el proceso; el anexo E lista de qué hoja sale cada tabla.                                                                                                               |
+| [6]  | `ANALISIS_PORTABILIDAD_AVISA_2026_A_V9.md`                            | El análisis que asignó las clases A, B, C, D y X. El anexo A dice la clase de cada hoja, y el §3 a §5 explican columna por columna y por qué una hoja no tiene equivalente.                                                                                          |
+| [7]  | `ACTA_CIERRE_CARGA_V9.md`                                             | Las cifras certificadas de la carga, firmadas al cerrarla.                                                                                                                                                                                                           |
+| [8]  | `INDICE.md`                                                           | El índice del conjunto documental: qué documento existe, en qué estado está y cuál reemplaza a cuál.                                                                                                                                                                 |
+| [9]  | `avisa_actual/CLASIFICACION_INPUT_PROCESO_OUTPUT.md`                  | Qué función del código es de entrada, de proceso o de salida. El §3 da la clasificación y el §7 los criterios.                                                                                                                                                       |
+| [10] | `avisa_actual/README.md`                                              | Qué es cada archivo del sistema que hoy está en producción.                                                                                                                                                                                                          |
+| [11] | `migration/reporte_estadistica.py` (raíz del proyecto, no en `docs/`) | El script que mide la base, calcula las cifras de §11 y genera los seis gráficos de este documento. Solo lee la base; no la modifica.                                                                                                                                |
+| [12] | `ENTORNO_DOCKER_POSTGRES.md`                                          | Cómo levantar la base en Docker, con sus credenciales, y cómo conectarse.                                                                                                                                                                                            |
+| [13] | `DICCIONARIO_DATOS.md` y `diccionario_datos.csv`                      | El diccionario de las dos capas: propósito de cada tabla, significado de cada columna, claves, relaciones y la correspondencia entre el sistema anterior y la v10. El CSV es la versión máquina, una fila por columna.                                               |
+| [14] | `_archivo/REVISION_DICCIONARIO_Y_V10.md`                              | La auditoría del diccionario y del modelo: qué estaba sin describir, cómo conviven dos significados del nivel de clasificación y qué le falta al documento de diseño.                                                                                                |
+| [15] | `PRIORIZACION_MVP_v10.md`                                             | Qué parte de la v10 se construye primero: cinco capas medidas sobre la base viva (34 tablas con datos, 12 vacías del MVP, 75 vivas fuera del MVP, 22 enganchadas y 120 dormidas) y el puente de los 55 objetos del MVP, que hoy se cumplen con 46 tablas existentes. |
+| [16] | `FLUJO_BASE_MVP_Y_MIGRACION.md`                                       | El flujo completo, en orden y con comandos: crear la base MVP, cargar el legado, aplicar los parches, recortar el alcance y migrar a SQL Server. Incluye la tabla de errores conocidos.                                                                              |
 
 **Los seis gráficos** citados en §11 están en `docs/img/` y los genera el script
 [11]: `delta_estructura.svg`, `delta_clases_legacy.svg`, `delta_atributos.svg`,

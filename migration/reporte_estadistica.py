@@ -498,8 +498,20 @@ def grafico_estructura(e: dict[str, dict]) -> Path:
     mod = [e["modelo"][k] for _, k in grupos]
     y = np.arange(len(etiquetas))
     alto = 0.36
-    ax2.barh(y - alto / 2, leg, alto, color=COLOR_LEGADO, label="legado (87 tablas)")
-    ax2.barh(y + alto / 2, mod, alto, color=COLOR_MODELO, label="v10 (279 tablas)")
+    ax2.barh(
+        y - alto / 2,
+        leg,
+        alto,
+        color=COLOR_LEGADO,
+        label=f"legado ({e['legado']['tablas']} tablas)",
+    )
+    ax2.barh(
+        y + alto / 2,
+        mod,
+        alto,
+        color=COLOR_MODELO,
+        label=f"v10 ({e['modelo']['tablas']} tablas)",
+    )
     ax2.set_xscale("log")
     ax2.set_xlim(50, max(mod) * 2)
     ax2.set_yticks(y, etiquetas)
@@ -721,7 +733,7 @@ def grafico_esquemas(esquemas: list[tuple[str, int, int]]) -> Path:
 
     fig.suptitle(
         "La estructura se concentra en core; kag y audit pesan por datos, no por tablas.\n"
-        "analytics no tiene tablas base: 24 vistas y 6 vistas materializadas.",
+        "analytics no tiene tablas base: solo vistas y tablas materializadas.",
         fontsize=9,
     )
     fig.tight_layout()

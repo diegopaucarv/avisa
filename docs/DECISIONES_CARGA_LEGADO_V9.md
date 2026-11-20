@@ -5,7 +5,7 @@
 **Compañía de:**
 
 - `docs/ANALISIS_PORTABILIDAD_AVISA_2026_A_V9.md` — diagnóstico de las 86 hojas
-- `docs/MAPA_CARGA_LEGADO_A_V9.md` — mapa por dominio, decisiones D1–D22
+- `docs/_archivo/MAPA_CARGA_LEGADO_A_V9.md` — mapa por dominio, decisiones D1–D22
 - `docs/PLAN_PORTE_LEGADO_V9.md` — especificación de carga, D23–D42
 - `docs/PREPARACION_V9_CARGA_LEGADO.sql` (parche 1) · `…_2.sql` (parche 2) · `…_3.sql` (parche 3, nuevo)
 - `migration/decisions.py` (reglas ejecutables) · `migration/test_decisions.py` (**122 comprobaciones, 0 fallos**)
@@ -205,6 +205,19 @@ compatibilidad: **el dato normativo se lee, no se estima.**
 
 > Nota de implementación: `DIM_Tipo_Caso` y `DIM_Tipo_Cambio` **reusan** los
 > códigos `TC-01..TC-06`. Se namespacean por hoja, jamás por código.
+
+### 2(i) El literal del mapa de carga (absorbido de MAPA_CARGA_LEGADO_A_V9.md)
+
+Proviene de `docs/_archivo/MAPA_CARGA_LEGADO_A_V9.md`, líneas 26 a 31, y se
+conserva aquí porque el original se archivó el 2026-11-20. Es el literal de la
+tabla, sin resumir:
+
+| `dim_tipo_caso`          | Descripción en la hoja                                                               | `core.cat_niveles_conflicto` |
+| ------------------------ | ------------------------------------------------------------------------------------ | ---------------------------- |
+| `TC-01` Diferencias      | "Posiciones distintas entre actores sobre un tema, sin acciones de protesta activas" | `1 Diferencia`               |
+| `TC-02` Controversias    | "Disputas formales que requieren atención institucional pero sin escalamiento"       | `2 Controversia`             |
+| `TC-03` Conflicto Activo | "Situación que involucra acciones colectivas, protestas o riesgo de violencia"       | `3 Conflicto_social`         |
+| `TC-04` Crísis           | "Ruptura institucional, violencia generalizada e ingobernabilidad…"                  | `4 Crisis_social`            |
 
 ---
 
@@ -448,43 +461,43 @@ resuelven a ninguna organización).
 
 Todas verificadas contra el workbook (no estimadas):
 
-| Tabla                        |     Filas | Nota                                                             |
-| ---------------------------- | --------: | ---------------------------------------------------------------- |
-| `regiones`                   |    **25** | 27 − DEP-20 − fusión 15/16                                       |
-| `provincias`                 |    **70** | `Cod_INEI` con `zfill(4)`                                        |
-| `distritos`                  |   **698** | `Cod_INEI` con `zfill(6)`                                        |
-| `cat_especies`               |    **39** | 5 semilla + 34 nuevas                                            |
-| `entidades`                  |    **23** | 22 externas + PRODUCE                                            |
-| `cat_unidades_organicas`     |    **66** | 66 áreas; `OAIPCS` **es** `AR-047`                               |
-| `usuarios`                   |    **31** | 34 − 3 solapamientos                                             |
-| `actores`                    | **1 160** | 828 + 108 + 224                                                  |
-| `actor_datos_personales`     |   **847** | 747 + 100                                                        |
-| `organizaciones`             |   **224** |                                                                  |
-| `actor_membresia`            |   **292** | de 660 refs; 368 sin match; 254 con `valid_from` NULL (D50)      |
-| `casos`                      |    **35** |                                                                  |
-| `caso_regiones`              |    **81** | 87 bridge − 2 huérfanos − 4 fusión Lima; 32 principales          |
-| `caso_distritos`             |    **23** |                                                                  |
-| `casos_actores`              |    **60** | 141 bridge → 60 pares; 11 casos sin actor                        |
-| `caso_cronologia`            |    **80** |                                                                  |
-| `documentos`                 |   **153** |                                                                  |
-| `caso_estado_historial`      |    **35** | por trigger, no se carga                                         |
-| `demandas`                   |   **325** | 222 con `alerta_id`, 99 con `caso_id`                            |
-| `demandas_evidencias`        |    **77** |                                                                  |
-| `demandas_actores`           |    **98** |                                                                  |
-| `alertas_tempranas`          |    **83** | 81 con `prioridad_id`                                            |
-| `alertas_actores`            |   **161** | 167 bridge − 5 alertas fantasma; 3 filas con columnas invertidas |
-| `alerta_especies`            |    **30** | 32 bridge − 2 alertas fantasma                                   |
-| `compromisos`                |     **8** | sintéticos, estado `En_proceso`                                  |
-| `hitos_compromiso`           |    **12** |                                                                  |
-| `mesas_dialogo`              |    **21** |                                                                  |
-| `mesa_miembros`              |    **62** |                                                                  |
-| `locales`                    |    **27** |                                                                  |
-| `capacitaciones`             |     **1** |                                                                  |
-| `capacitacion_participantes` |     **9** | ⚠ antes 1 (D46)                                                  |
-| `envios_comunicacion`        |    **17** |                                                                  |
-| `suscripcion_notificacion`   |     **4** |                                                                  |
-| `log_accesos`                |   **857** |                                                                  |
-| `usuario_territorio`         |    **25** | 27 − `DEP-20` − (`DEP-15/16` colapsan)                           |
+| Tabla                        |     Filas | Nota                                                                      |
+| ---------------------------- | --------: | ------------------------------------------------------------------------- |
+| `regiones`                   |    **25** | 27 − DEP-20 − fusión 15/16                                                |
+| `provincias`                 |    **70** | `Cod_INEI` con `zfill(4)`                                                 |
+| `distritos`                  |   **698** | `Cod_INEI` con `zfill(6)`                                                 |
+| `cat_especies`               |    **39** | 5 semilla + 34 nuevas                                                     |
+| `entidades`                  |    **23** | 22 externas + PRODUCE                                                     |
+| `cat_unidades_organicas`     |    **66** | 66 áreas; `OAIPCS` **es** `AR-047`                                        |
+| `usuarios`                   |    **32** | 31 del legado (34 − 3 solapamientos) + el admin; 28 activos y 4 inactivos |
+| `actores`                    | **1 160** | 828 + 108 + 224                                                           |
+| `actor_datos_personales`     |   **847** | 747 + 100                                                                 |
+| `organizaciones`             |   **224** |                                                                           |
+| `actor_membresia`            |   **292** | de 660 refs; 368 sin match; 254 con `valid_from` NULL (D50)               |
+| `casos`                      |    **35** |                                                                           |
+| `caso_regiones`              |    **81** | 87 bridge − 2 huérfanos − 4 fusión Lima; 32 principales                   |
+| `caso_distritos`             |    **23** |                                                                           |
+| `casos_actores`              |    **60** | 141 bridge → 60 pares; 11 casos sin actor                                 |
+| `caso_cronologia`            |    **80** |                                                                           |
+| `documentos`                 |   **153** |                                                                           |
+| `caso_estado_historial`      |    **35** | por trigger, no se carga                                                  |
+| `demandas`                   |   **325** | 222 con `alerta_id`, 99 con `caso_id`                                     |
+| `demandas_evidencias`        |    **77** |                                                                           |
+| `demandas_actores`           |    **98** |                                                                           |
+| `alertas_tempranas`          |    **83** | 81 con `prioridad_id`                                                     |
+| `alertas_actores`            |   **161** | 167 bridge − 5 alertas fantasma; 3 filas con columnas invertidas          |
+| `alerta_especies`            |    **30** | 32 bridge − 2 alertas fantasma                                            |
+| `compromisos`                |     **8** | sintéticos, estado `En_proceso`                                           |
+| `hitos_compromiso`           |    **12** |                                                                           |
+| `mesas_dialogo`              |    **21** |                                                                           |
+| `mesa_miembros`              |    **62** |                                                                           |
+| `locales`                    |    **27** |                                                                           |
+| `capacitaciones`             |     **1** |                                                                           |
+| `capacitacion_participantes` |     **9** | ⚠ antes 1 (D46)                                                           |
+| `envios_comunicacion`        |    **17** |                                                                           |
+| `suscripcion_notificacion`   |     **4** |                                                                           |
+| `log_accesos`                |   **857** |                                                                           |
+| `usuario_territorio`         |    **25** | 27 − `DEP-20` − (`DEP-15/16` colapsan)                                    |
 
 **Cambios respecto del plan anterior:** `demandas.alerta_id` 248 → **222**;
 `capacitacion_participantes` 1 → **9**; `regiones` 27 → **25** (ya estaba previsto).

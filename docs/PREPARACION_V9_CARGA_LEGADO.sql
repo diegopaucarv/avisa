@@ -461,7 +461,7 @@ ALTER TABLE core.cat_unidades_organicas
 -- 3.7 Usuarios internos: sectoristas (15), puntos focales (17), autoridades (2)
 --     clave_sectorista / clave_pf / clave_autoridades son credenciales en claro
 --     (INT). NO se trasladan tal cual: se usa clave_hash y se fuerza reseteo.
---     Ver decisión D11 en MAPA_CARGA_LEGADO_A_V9.md
+--     Ver decisión D11 en docs/_archivo/MAPA_CARGA_LEGADO_A_V9.md
 -- -----------------------------------------------------------------------------
 ALTER TABLE core.usuarios
   ADD COLUMN IF NOT EXISTS dni           VARCHAR(12),

@@ -4,9 +4,11 @@
 --  POR QUÉ HACE FALTA
 --  SSMA lee la base como cualquier otro cliente. Si se conecta con un rol
 --  sujeto a las políticas de seguridad por fila (RLS) y sin el contexto de
---  sesión, PostgreSQL no devuelve un error: devuelve CERO filas. El
---  asistente migraría 37 tablas vacías y el informe diría «correcto».
---  Ese fallo silencioso es la razón de este rol.
+--  sesión, PostgreSQL no devuelve un error: devuelve CERO filas. Sin
+--  BYPASSRLS, las 30 tablas del alcance con seguridad por fila —de las 78
+--  cerradas: 42 declaradas por prioridad (T0/T1) y 36 que añade el cierre de
+--  dependencias— llegarían todas vacías y el informe diría «correcto». Ese
+--  fallo silencioso es la razón de este rol.
 --
 --  QUÉ HACE
 --  Crea un rol de login con BYPASSRLS, que ve todas las filas sin depender

@@ -3,17 +3,17 @@
 Herramientas de sólo lectura sobre `backend/BASE_CONFLICTOS_SOCIALES_2026.xlsx`
 (86 hojas). No escriben en ninguna base de datos.
 
-| Script                    | Qué hace                                                                                                                                                                         | Salida                     |
-| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- |
-| `inspect_legacy.py`       | Inventario de las 86 hojas: filas, columnas por posición, nulos, distintos, largo máximo y muestras                                                                              | `legacy_inventory.json`    |
-| `print_inventory.py`      | Vista legible del inventario                                                                                                                                                     | `out_legacy_columns.txt`   |
-| `dump_samples.py`         | Valores reales: filas completas de hojas ≤ 40 filas, 3 filas de muestra en las grandes                                                                                           | `docs/_legacy_samples.txt` |
-| `verify_integrity.py`     | Chequeos de integridad: ordinales de los bridges, temáticas, estados, tipos                                                                                                      | stdout                     |
-| `audit_bridges.py`        | Cuantifica cuánto de cada bridge es recuperable (ordinal vs código)                                                                                                              | stdout                     |
-| `audit_alerta_demanda.py` | Verdad duplicada alerta↔demanda (columna vs bridge)                                                                                                                              | stdout                     |
-| `audit_identity.py`       | Duplicados de ID y solape de los dos censos de personas                                                                                                                          | stdout                     |
-| `decisions.py`            | **Reglas ejecutables** del cierre de decisiones (mapeos de catálogo, geografía INEI, bridges ordinales, especies, unión alerta↔demanda, riesgo derivado). Lo importa el cargador | stdout con `resumen()`     |
-| `test_decisions.py`       | Verifica las 122 cifras del acta de cierre contra el workbook real                                                                                                               | stdout, exit 0/1           |
+| Script                    | Qué hace                                                                                                                                                                         | Salida                              |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
+| `inspect_legacy.py`       | Inventario de las 86 hojas: filas, columnas por posición, nulos, distintos, largo máximo y muestras                                                                              | `legacy_inventory.json`             |
+| `print_inventory.py`      | Vista legible del inventario                                                                                                                                                     | `out_legacy_columns.txt`            |
+| `dump_samples.py`         | Valores reales: filas completas de hojas ≤ 40 filas, 3 filas de muestra en las grandes                                                                                           | `docs/_archivo/_legacy_samples.txt` |
+| `verify_integrity.py`     | Chequeos de integridad: ordinales de los bridges, temáticas, estados, tipos                                                                                                      | stdout                              |
+| `audit_bridges.py`        | Cuantifica cuánto de cada bridge es recuperable (ordinal vs código)                                                                                                              | stdout                              |
+| `audit_alerta_demanda.py` | Verdad duplicada alerta↔demanda (columna vs bridge)                                                                                                                              | stdout                              |
+| `audit_identity.py`       | Duplicados de ID y solape de los dos censos de personas                                                                                                                          | stdout                              |
+| `decisions.py`            | **Reglas ejecutables** del cierre de decisiones (mapeos de catálogo, geografía INEI, bridges ordinales, especies, unión alerta↔demanda, riesgo derivado). Lo importa el cargador | stdout con `resumen()`              |
+| `test_decisions.py`       | Verifica las 122 cifras del acta de cierre contra el workbook real                                                                                                               | stdout, exit 0/1                    |
 
 ## Reproducir
 

@@ -33,15 +33,16 @@ if str(REPO_ROOT) not in sys.path:
 # El paquete `backend` vivió en la raíz y hoy está en `backups/backend`.
 # Se expone `backups/` en la ruta de importación para que `from backend import db`
 # siga funcionando sin mover archivos: Python lo resuelve como paquete de
-# espacio de nombres, sin necesidad de `__init__.py`.
+# espacio de nombres, sin necesidad de `__init__.py`. La condición mira `db.py`
+# y no el directorio: la raíz conserva un `backend/` con la API FastAPI, que no
+# trae `db.py` y dejaría el import sin resolver.
 if (
-    not (REPO_ROOT / "backend").is_dir()
-    and (REPO_ROOT / "backups" / "backend").is_dir()
+    not (REPO_ROOT / "backend" / "db.py").is_file()
+    and (REPO_ROOT / "backups" / "backend" / "db.py").is_file()
 ):
     sys.path.insert(0, str(REPO_ROOT / "backups"))
 
 from backend import db  # noqa: E402
-
 from migration.loader import legacy, registry  # noqa: E402
 from migration.loader.bootstrap import ADMIN_ID, ensure_admin_user  # noqa: E402
 from migration.loader.context import LoadContext  # noqa: E402

@@ -103,7 +103,9 @@ def main():
         emit(name, data, header, limit)
 
     text = "\n".join(out)
-    path = os.path.join(os.path.dirname(__file__), "..", "docs", "_legacy_samples.txt")
+    path = os.path.join(
+        os.path.dirname(__file__), "..", "docs", "_archivo", "_legacy_samples.txt"
+    )
     with open(path, "w", encoding="utf-8") as fh:
         fh.write(text)
     print(f"-> {path}  ({len(text)} bytes)")

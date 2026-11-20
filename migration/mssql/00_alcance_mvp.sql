@@ -2,9 +2,10 @@
 --  AVISA · Paso 1 · Aislar el alcance del MVP (base de staging)
 -- =====================================================================
 --  PARA QUÉ
---  El esquema completo tiene 371 tablas físicas. Si SSMA las ve todas,
---  genera cientos de errores y advertencias que esconden los reales. Este
---  script deja sólo lo que el módulo de diciembre necesita: 73 tablas.
+--  El esquema completo tiene 374 tablas físicas (287 del modelo v10 y 87
+--  del legado). Si SSMA las ve todas, genera cientos de errores y
+--  advertencias que esconden los reales. Este script deja sólo lo que el
+--  módulo de diciembre necesita: 78 tablas, 685 columnas.
 --
 --  DÓNDE SE EJECUTA
 --  En una base de staging, NUNCA en la base de trabajo. Se crea así:
@@ -14,9 +15,10 @@
 --  Si se ejecuta sobre otra base, aborta (bloque 0).
 --
 --  QUÉ CONSERVA
---  Las 37 tablas de las capas T0 y T1 de docs/mvp_prioridad_tablas.csv
---  MÁS todas las tablas padre que esas 37 necesitan para que sus claves
---  ajenas tengan destino (bloque 1.2). El resultado son 73 tablas.
+--  Las 46 tablas de las capas T0 y T1 de docs/mvp_prioridad_tablas.csv
+--  (42 si se descuentan las 4 de kag), MÁS todas las tablas padre que
+--  esas 42 necesitan para que sus claves ajenas tengan destino (bloque
+--  1.2). El resultado son 78 tablas.
 --
 --  POR QUÉ HAY QUE CERRAR LAS DEPENDENCIAS
 --  Recortar por prioridad, tabla a tabla, deja columnas que apuntan a
@@ -71,11 +73,13 @@ ON COMMIT DROP;
 INSERT INTO alcance_mvp (esquema, tabla) VALUES
     ('agent',   'run_log'),
     ('audit',   'datos_personales_acceso'),
+    ('core',    'actor_alias'),
     ('core',    'actor_datos_personales'),
     ('core',    'actor_membresia'),
     ('core',    'actores'),
     ('core',    'alertas_actores'),
     ('core',    'alertas_tempranas'),
+    ('core',    'banco_datos_tratamiento'),
     ('core',    'caso_cronologia'),
     ('core',    'caso_estado_historial'),
     ('core',    'casos'),
@@ -84,6 +88,7 @@ INSERT INTO alcance_mvp (esquema, tabla) VALUES
     ('core',    'cat_estados_caso'),
     ('core',    'cat_estados_compromiso'),
     ('core',    'cat_estados_hito'),
+    ('core',    'cat_nivel_identificacion'),
     ('core',    'cat_niveles_conflicto'),
     ('core',    'cat_niveles_riesgo'),
     ('core',    'cat_prioridades_alerta'),
@@ -91,6 +96,7 @@ INSERT INTO alcance_mvp (esquema, tabla) VALUES
     ('core',    'cat_tipos_hecho'),
     ('core',    'compromiso_colaboradores'),
     ('core',    'compromisos'),
+    ('core',    'consulta_reniec'),
     ('core',    'cronologia_vinculos'),
     ('core',    'distritos'),
     ('core',    'hitos_compromiso'),
@@ -105,12 +111,14 @@ INSERT INTO alcance_mvp (esquema, tabla) VALUES
     ('ind',     'resultado'),
     ('policy',  'escenario_regla'),
     ('qda',     'mapeo_pseudonimo'),
+    ('ref',     'base_legal_tratamiento'),
     ('staging', 'lote');
 
 -- ---------------------------------------------------------------------
 -- 1.2 · Cierre de dependencias: añadir los padres que falten
 -- ---------------------------------------------------------------------
---  Se recorre el grafo de claves ajenas desde las 37 declaradas. Cada
+--  Se recorre el grafo de claves ajenas desde las 42 declaradas (más
+--  ref, que entra completo). Cada
 --  destino que no esté ya en la lista entra como tabla necesaria. La
 --  recursión se corta en los esquemas diferidos a 2027.
 CREATE TEMP TABLE esquemas_diferidos (nspname text PRIMARY KEY) ON COMMIT DROP;

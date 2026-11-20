@@ -125,6 +125,13 @@ CLASIFICACION_EXPLICITA = {
     "core.cronologia_vinculos": ("I", "criterio: vínculo de `core.caso_cronologia`"),
     "core.entidades": ("INF", "criterio: tabla de inquilino (parámetro)"),
     "core.migracion_conflicto": ("INF", "criterio: soporte de la carga (§1.2)"),
+    # Parche 17. Ninguna aparece en §12 del BRECHA.
+    "core.consulta_reniec": (
+        "I",
+        "criterio: dato externo que se registra a mano (RF-D13)",
+    ),
+    "core.cat_privilegio": ("INF", "criterio: catálogo de autorización (RA-07)"),
+    "core.privilegio_usuario": ("INF", "criterio: concesión de autorización (RA-07)"),
 }
 
 # El BRECHA nombra `_rejected` dentro de la fila de `avisa.raw_ingest`.

@@ -13,7 +13,7 @@ Estructura del archivo generado:
 
     Sección A · esquema      extensiones + DDL (dos pases) + parches 1-5
                              aplicable sobre una base vacía.
-    Sección B · post-carga   parches 6-16
+    Sección B · post-carga   parches 6-17
                              exige el legado ya cargado.
 
 El script solo lee el repositorio. No abre conexión a ninguna base.
@@ -53,7 +53,7 @@ _DDL_CANDIDATOS = (
     "backups/backend/PRODUCE_OAIPCS_AVISA_v9_ddl(1).sql",
 )
 RUTA_DDL = next(
-    (ruta for ruta in _DDL_CANDIDATOS if (RAIZ / ruta).exists()),
+    (ruta for ruta in _DDL_CANDIDATOS if (RAIZ / ruta).is_file()),
     _DDL_CANDIDATOS[0],
 )
 
@@ -183,16 +183,6 @@ SECCION_B = (
         tolera_errores=False,
     ),
     bloque(
-        "B.7",
-        "Parche 12 · comentarios de tablas y columnas",
-        "docs/PARCHE_12_COMENTARIOS_COLUMNAS.sql",
-        tolera_errores=False,
-        nota=(
-            "No se recorta: cubre 255 tablas lógicas y 2 036 columnas. Es el "
-            "bloque que hace que el archivo pese ~970 KB."
-        ),
-    ),
-    bloque(
         "B.8",
         "Parche 13 · nivel de clasificación en un solo formato",
         "docs/PARCHE_13_CLASIFICACION.sql",
@@ -234,16 +224,47 @@ SECCION_B = (
     ),
     bloque(
         "B.11",
-        "Parche 16 · RLS completo en core y banco de datos (DC-04)",
+        "Parche 16 · RLS completo en `core` y banco de datos personales",
         "docs/PARCHE_16_RLS_CORE_Y_DC04.sql",
         tolera_errores=False,
         nota=(
-            "Completa la seguridad por fila del esquema `core`: de 12 a 44 "
-            "tablas protegidas. Las 26 tablas de detalle heredan el nivel de su "
-            "padre con EXISTS, de modo que una lista de asistentes a una reunión "
-            "confidencial deja de ser legible. Añade `core.banco_datos_tratamiento` "
-            "(inscripción del banco ante la ANPDP, Ley N° 29733 art. 34) y liga "
-            "`ref.base_legal_tratamiento` a ese banco."
+            "Pasa de 12 a 44 tablas de `core` con seguridad por fila (32 nuevas, "
+            "26 de ellas heredando el nivel de su padre) y crea "
+            "`core.banco_datos_tratamiento`, donde se registra el banco de datos "
+            "personales que exige el artículo 34 de la Ley 29733. Enlaza "
+            "`ref.base_legal_tratamiento` con ese banco. Sin este bloque el "
+            "esquema unificado no crearía la tabla y los comentarios y el relleno "
+            "del parche 17 fallarían al aplicarlo desde cero."
+        ),
+    ),
+    bloque(
+        "B.12",
+        "Parche 17 · consulta PIDE-RENIEC y control de costos",
+        "docs/PARCHE_17_RENIEC_Y_COSTOS.sql",
+        tolera_errores=False,
+        nota=(
+            "Cierra el hueco que deja el ERS v0.5 al mover PIDE-RENIEC, Gemini "
+            "y WhatsApp a diciembre: no había ninguna tabla donde guardar el "
+            "resultado de una consulta de requisitorias. Añade el privilegio "
+            "nominal (RA-07 pide una persona, no un rol), `core.consulta_reniec` "
+            "cifrada y de solo agregar, el rastro automático en la bitácora de "
+            "accesos y las columnas de consumo que hacen verificables RNF-13 y "
+            "RM-11 a RM-21."
+        ),
+    ),
+    # Los comentarios van al final a propósito: el archivo se regeneró contra la
+    # base ya parcheada, así que comenta tablas que crean los parches 14, 16 y
+    # 17. Si corriera antes, `COMMENT ON` fallaría al aplicar desde cero.
+    bloque(
+        "B.13",
+        "Parche 12 · comentarios de tablas y columnas (se aplica al final)",
+        "docs/PARCHE_12_COMENTARIOS_COLUMNAS.sql",
+        tolera_errores=False,
+        nota=(
+            "2 326 comentarios, sin ninguna otra sentencia. Cubre las tablas y "
+            "columnas tal como existen hoy, por eso va después de todos los "
+            "parches que crean objetos. Es el bloque que hace que el archivo "
+            "pese ~1 MB."
         ),
     ),
 )
@@ -320,7 +341,7 @@ def encabezado(solo: str | None) -> list[str]:
         "--  Sección A · esquema    extensiones + DDL v9 (dos pases) + parches 1-5.",
         "--                          Autosuficiente: se puede aplicar sobre una",
         "--                          base VACÍA, sin instalar extensiones aparte.",
-        "--  Sección B · post-carga parches 6-16. NO se puede aplicar sobre una",
+        "--  Sección B · post-carga parches 6-17. NO se puede aplicar sobre una",
         "--                          base vacía: exige el legado ya cargado por",
         "--                          migration/loader (filas en core.*, ind.*,",
         "--                          kag.*). Sobre una base recién creada falla en",
@@ -363,14 +384,14 @@ def encabezado(solo: str | None) -> list[str]:
         "--  sección A → cargador del legado → sección B.",
         "--",
         "--  Con el legado cargado y la sección B aplicada (el estado de la base",
-        "--  `avisa`, sin contar `legacy` ni `public`): 284 tablas físicas (260",
-        "--  lógicas + 24 hijas de partición), 2 421 columnas y 601 claves",
-        "--  ajenas. Sumando el volcado histórico `legacy` (87 tablas): 371",
-        "--  tablas físicas y 3 228 columnas; las claves ajenas no cambian",
-        "--  porque `legacy` no declara ninguna.",
+        "--  `avisa`, sin contar `legacy` ni `public`): 287 tablas físicas (263",
+        "--  lógicas + 24 hijas de partición), 2 492 columnas y 609 claves",
+        "--  ajenas. Sumando el volcado histórico `legacy` (87 tablas, 807",
+        "--  columnas): 374 tablas físicas y 3 299 columnas; las claves ajenas no",
+        "--  cambian porque `legacy` no declara ninguna.",
         "--",
-        "--  La diferencia entre ambos estados son 9 tablas, 107 columnas y 20",
-        "--  claves ajenas, todas de los parches 9 a 16:",
+        "--  La diferencia entre ambos estados son 12 tablas, 178 columnas y 28",
+        "--  claves ajenas, todas de los parches 9 a 17:",
         "--    · parche  9 · `audit.datos_personales_acceso` (8 columnas) y las",
         "--                 4 columnas cifradas de `core.actor_datos_personales`;",
         "--    · parche 10 · `core.flujo_definicion` (10), `core.flujo_estado` (7)",
@@ -392,8 +413,14 @@ def encabezado(solo: str | None) -> list[str]:
         "--                 implícito;",
         "--    · parche 16 · `core.banco_datos_tratamiento` (18 columnas, 2 claves",
         "--                 ajenas), `ref.base_legal_tratamiento.banco_datos_id` y",
-        "--                 la cobertura de RLS de `core` (44 tablas, 301 políticas).",
-        "--  Por eso la sección A termina en 275 tablas y no en 284: las tablas",
+        "--                 la cobertura de RLS de `core`;",
+        "--    · parche 17 · `core.cat_privilegio` (5), `core.privilegio_usuario`",
+        "--                 (9) y `core.consulta_reniec` (10), con 8 claves ajenas;",
+        "--                 6 columnas de consumo en `agent.llm_call` (que se",
+        "--                 replican en sus 6 particiones) y 5 en",
+        "--                 `core.envios_comunicacion`. `core` queda con 45 tablas",
+        "--                 protegidas y 303 políticas.",
+        "--  Por eso la sección A termina en 275 tablas y no en 287: las tablas",
         "--  que faltan no son parte del esquema base, se crean después de cargar",
         "--  el legado. Si la sección A se queda corta en algo distinto, el defecto",
         "--  no está en este archivo: falta una fuente o cambió el DDL.",
@@ -492,7 +519,7 @@ def componer(secciones: list[str], solo: str | None) -> tuple[list[str], list[di
             "B",
             "Post-carga (exige el legado cargado)",
             [
-                "Parches 6-16. Requiere el legado cargado por migration/loader;",
+                "Parches 6-17. Requiere el legado cargado por migration/loader;",
                 "sobre una base vacía aborta en el primer parche que lee datos.",
             ],
             SECCION_B,

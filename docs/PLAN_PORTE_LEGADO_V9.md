@@ -2,7 +2,7 @@
 
 **Fecha:** 2026-10-31
 **Compañía de:** `docs/ANALISIS_PORTABILIDAD_AVISA_2026_A_V9.md` (diagnóstico de las 86 hojas),
-`docs/MAPA_CARGA_LEGADO_A_V9.md` (mapa por dominio y decisiones D1–D22),
+`docs/_archivo/MAPA_CARGA_LEGADO_A_V9.md` (mapa por dominio y decisiones D1–D22),
 `docs/PREPARACION_V9_CARGA_LEGADO.sql` (parche 1) y
 `docs/PREPARACION_V9_CARGA_LEGADO_2.sql` (parche 2, nuevos huecos).
 
@@ -34,7 +34,7 @@ no a `core.cat_roles_actor` (esa es el eje relacional Principal/Secundario/Terce
 
 Recontado desde el `.xlsx` con `migration/inspect_legacy.py`
 (salida completa: `migration/out_legacy_columns.txt`, valores reales:
-`docs/_legacy_samples.txt`).
+`docs/_archivo/_legacy_samples.txt`).
 
 | Métrica                                                 | Valor     |
 | ------------------------------------------------------- | --------- |

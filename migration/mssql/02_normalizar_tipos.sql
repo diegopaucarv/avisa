@@ -59,8 +59,8 @@ END $$;
 -- ---------------------------------------------------------------------
 --  Estado antes de ejecutar, medido en esta corrida (el script lo cuenta):
 --
---    columnas uuid en el alcance ....... 114
---    de ellas, con DEFAULT ............  25
+--    columnas uuid en el alcance ....... 124
+--    de ellas, con DEFAULT ............  28
 --    DEFAULT observado ................ gen_random_uuid()  (todas)
 --    DEFAULT uuid_generate_v4() .......   0  (la extensión uuid-ossp
 --                                             no está instalada)
@@ -116,16 +116,19 @@ BEGIN
         RAISE NOTICE 'defaults uuid retirados en esta pasada: %', v_n;
         RAISE NOTICE 'columnas afectadas: %', trim(v_lista);
         RAISE NOTICE 'recrear en SQL Server con DEFAULT NEWSEQUENTIALID() '
-                     '(13 son PK de una columna; run_log.id va en PK compuesta)';
+                     '(27 son PK de una columna; run_log.id va en PK compuesta)';
     END IF;
 END $$;
 
 -- ---------------------------------------------------------------------
 -- 2 · arrays: convertir a texto JSON, sólo si existen
 -- ---------------------------------------------------------------------
---  Medido: CERO columnas de tipo array en toda la base de staging (37 tablas
---  del MVP, ref, legacy). El bloque se conserva porque el alcance puede
---  crecer; si no encuentra arrays, no hace nada y lo dice.
+--  Medido el 2026-11-19 sobre `avisa`: en el alcance cerrado de 78 tablas hay
+--  UNA sola columna de tipo array, policy.cat_tipos_regla.claves_requeridas
+--  (text[]), que este bloque convierte. Fuera del alcance quedan 3 más
+--  (chat.commit.parent_ids, config.aplicacion.libreria_ids y
+--  ctx.herramienta.dominios_permitidos) que retira el paso 1, y en legacy no
+--  hay ninguna. Tras este bloque el recuento de arrays es 0 en el staging.
 --
 --  Por qué se convierten: SSMA no reconoce int[] / text[] y genera una tabla
 --  incompleta. array_to_json() produce un JSON válido que SQL Server puede

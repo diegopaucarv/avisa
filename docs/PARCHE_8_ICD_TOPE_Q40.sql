@@ -216,7 +216,7 @@ JOIN pg_namespace n ON n.oid = p.pronamespace
 WHERE n.nspname = 'core'
   AND p.proname = 'icd_aplicar_ajuste';
 
--- 3.3 Tabla de casos (la misma del informe P8_ICD_Q40.md).
+-- 3.3 Tabla de casos (la misma del informe P8_ICD_Q40.md, hoy en docs/_archivo/).
 --     Esperado, en este orden:
 --       +15 sobre 70  → aplicado +10, recortado true,  final 80
 --       -3  sobre 70  → aplicado  -3, recortado false, final 67

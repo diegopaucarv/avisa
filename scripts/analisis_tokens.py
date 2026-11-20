@@ -153,11 +153,17 @@ def medir_insumos_complementarios() -> list[dict]:
         ("ALCALDES 2027-2030.docx", RAIZ / "scripts" / "ALCALDES 2027 - 2030.docx"),
         (
             "TDR locador (docx)",
-            RAIZ / "docs" / "TDR_LOCADOR_Nov-Dic_26_REVF_2productos_45d.docx",
+            RAIZ
+            / "backups"
+            / "tdr"
+            / "TDR_LOCADOR_Nov-Dic_26_REVF_2productos_45d.docx",
         ),
         (
             "TDR locador (pdf)",
-            RAIZ / "docs" / "TDR_LOCADOR_Nov-Dic_26_REVF_2productos_45d-anexo b.pdf",
+            RAIZ
+            / "backups"
+            / "tdr"
+            / "TDR_LOCADOR_Nov-Dic_26_REVF_2productos_45d-anexo b.pdf",
         ),
         (
             "esquema v10 unificado (DDL)",

@@ -1,5 +1,14 @@
 # Brecha de la capa de datos v9 — AVISA / PRODUCE-OAIPCS
 
+> **Remedición del 2026-11-20.** Las cifras de este diagnóstico son las del
+> momento en que se escribió y se conservan como foto fechada. Medición actual
+> sobre la base viva: **263 tablas lógicas** (34 / 12 / 75 / 22 / 120 por capa),
+> **34 vistas** (241 columnas), **2 126 columnas lógicas** de las cuales **2 107
+> tienen comentario** y **19 no lo tienen**, **520 políticas RLS sobre 82 tablas**
+> (`core`: 45 con RLS, **57 sin RLS**), **87 objetos** en el esquema `legacy` y
+> **1 520 nodos / 450 aristas** en el grafo KAG. La clasificación funcional de la
+> §12 no se ha modificado.
+
 Estado: **estructura completa; contenido y derivados parciales**.
 
 Actualización **2026-11-18 — parches 6–10 aplicados.** El 6 cerró la clasificación
@@ -32,7 +41,7 @@ cerrada y verificada según `docs/ACTA_CIERRE_CARGA_V9.md`.
 
 Este informe responde a una pregunta concreta: **¿qué falta para que la base
 real cumpla la capa de datos descrita en `docs/AVISA_PRODUCE_v10.md` y
-`backend/PRODUCE_OAIPCS_AVISA_v9_ddl(1).sql`?**
+`backups/backend/PRODUCE_OAIPCS_AVISA_v9_ddl(1).sql`?**
 
 La respuesta corta es:
 
@@ -503,7 +512,7 @@ La carga del legado está cerrada:
 - `legacy` tiene 87 tablas, **807 columnas** y 4 729 filas totales (4 643 + 86).
 - 76 tablas de `legacy` tienen filas.
 - **160 filas quedaron sin destino dedicado** según el acta y el mapa
-  (`docs/MAPA_CARGA_LEGADO_A_V9.md` §3.11). El desglose de esa sección suma
+  (`docs/_archivo/MAPA_CARGA_LEGADO_A_V9.md` §3.11). El desglose de esa sección suma
   **165**: 142 de workflow + 6 de RADAR + 14 bridges absorbidos en JSON + 3 de
   `dim_responsable` descartadas (162 sin estas últimas). La cifra conciliada y
   su aritmética están en `PLAN` §4.11; ninguna de las tres versiones cambia lo

@@ -1,23 +1,28 @@
 # 03 · Mapa de tipos para SSMA y contrato de seguridad de la API .NET
 
-Medición hecha el **2026-11-19** sobre la base `avisa_mssql` (PostgreSQL 16.14,
-contenedor `avisa-db`), recién reconstruida y con los pasos 1, 2 y 3 ya aplicados
-(`00_alcance_mvp.sql`, `01_rol_migracion.sql`, `02_normalizar_tipos.sql`).
+Medición hecha el **2026-11-19** sobre la base de origen `avisa` (PostgreSQL 16.14,
+contenedor `avisa-db`), con el alcance cerrado de `00_alcance_mvp.sql` y proyectada
+al staging tras los pasos 1, 2 y 3. La copia `avisa_mssql` no se ha reconstruido
+con el alcance nuevo: sus 74 tablas / 651 columnas son la medición anterior y no
+se usan aquí.
 
-El alcance es de **74 tablas del dominio y 651 columnas**. Esas 74 salen de las
-**37 tablas declaradas** por prioridad (T0/T1) **más 36 incorporadas al cerrar las
-dependencias** —34 tablas padre alcanzadas recorriendo las claves ajenas
-(`core.regiones`, `core.provincias`, `core.documentos`, `core.mesas_dialogo`,
-`policy.regla`, `ind.variante`…) y las **2 de `ref`** que se conservan enteras—
-y **más la tabla nueva `core.banco_datos_tratamiento`** (parche 16).
-Sin ese cierre quedaban columnas huérfanas —`core.casos.region_principal_id` sin
-`core.regiones`, `core.actores.region_id` sin destino— y el esquema no se podía
-ni migrar ni consultar.
+El alcance es de **78 tablas del dominio y 685 columnas**. Esas 78 salen de las
+**42 tablas declaradas** por prioridad (T0/T1), que ya incluyen `core.actor_alias`,
+`core.banco_datos_tratamiento`, `core.cat_nivel_identificacion` y
+`ref.base_legal_tratamiento` (parche 16) y `core.consulta_reniec` (parche 17),
+**más 36 incorporadas al cerrar las dependencias**: **34 tablas padre** alcanzadas
+recorriendo las claves ajenas (`core.regiones`, `core.provincias`,
+`core.documentos`, `core.mesas_dialogo`, `policy.regla`, `ind.variante`,
+`kag.documento_fuente`…) y **2 más al sembrar `ref` entera**
+(`ref.base_legal_evidencia` y `kag.documento_fragmento`, que sólo se alcanzan
+desde ella). Sin ese cierre quedaban columnas huérfanas
+—`core.casos.region_principal_id` sin `core.regiones`, `core.actores.region_id`
+sin destino— y el esquema no se podía ni migrar ni consultar.
 
 Fuera del alcance quedan `legacy` (**87 tablas, 807 columnas**) y la tabla de
 PostGIS `public.spatial_ref_sys` (5 columnas, 8 500 filas), que no se migra porque
-pertenece a la extensión. En total hay **162 tablas físicas y 1 463 columnas** en
-`avisa_mssql`; las cifras de este documento son siempre del alcance de 74, salvo
+pertenece a la extensión. Con ellas, el staging tiene **166 tablas físicas y 1 497
+columnas**; las cifras de este documento son siempre del alcance de 78, salvo
 donde se diga lo contrario.
 
 Todas las cifras salen del catálogo de PostgreSQL o de `count(*)`; ninguna es
@@ -40,39 +45,39 @@ docker compose exec -T db psql -U avisa -d avisa_mssql -c "SELECT ..."
 
 | Dato                                                                             |    Valor medido |
 | -------------------------------------------------------------------------------- | --------------: |
-| Tablas del alcance (9 esquemas; 37 declaradas + 36 por cierre + parche 16)       |              74 |
-| Columnas del alcance                                                             |         **651** |
+| Tablas del alcance (9 esquemas; 42 declaradas + 36 por cierre)                   |              78 |
+| Columnas del alcance                                                             |         **685** |
 | **Combinaciones distintas de tipo** (`udt_name` + longitud + precisión + escala) |          **40** |
-| Columnas `uuid`                                                                  |             115 |
-| Columnas `uuid` con `DEFAULT` (el paso 3 se lo retiró a 25)                      |               0 |
-| Columnas `jsonb` / `json`                                                        |          12 / 0 |
-| Columnas `text`                                                                  |              42 |
-| Columnas `bytea`                                                                 |               4 |
-| Columnas `timestamptz` / `timestamp` sin zona                                    |          46 / 0 |
-| Columnas `timestamptz` con `DEFAULT now()`                                       |              36 |
+| Columnas `uuid`                                                                  |             124 |
+| Columnas `uuid` con `DEFAULT` (el paso 3 se lo retiró a 28)                      |               0 |
+| Columnas `jsonb` / `json`                                                        |          13 / 0 |
+| Columnas `text`                                                                  |              43 |
+| Columnas `bytea`                                                                 |               5 |
+| Columnas `timestamptz` / `timestamp` sin zona                                    |          49 / 0 |
+| Columnas `timestamptz` con `DEFAULT now()`                                       |              38 |
 | Columnas `date`                                                                  |              33 |
 | Columnas de tipo array                                                           |               0 |
 | Enums, dominios                                                                  |           0 / 0 |
 | Columnas generadas (`GENERATED ALWAYS AS`)                                       |               0 |
 | Columnas `IDENTITY`                                                              |               3 |
 | Columnas `serial` (`nextval`)                                                    |               8 |
-| Claves primarias                                                                 |              73 |
-| Claves ajenas                                                                    |             156 |
-| Restricciones `UNIQUE` / `CHECK`                                                 |         70 / 78 |
-| Índices únicos (incluye las 73 PK)                                               |             148 |
+| Claves primarias                                                                 |              77 |
+| Claves ajenas                                                                    |             169 |
+| Restricciones `UNIQUE` / `CHECK`                                                 |         73 / 85 |
+| Índices únicos (incluye las 77 PK)                                               |             155 |
 | Índices parciales (`WHERE ...`)                                                  |              10 |
-| Tablas con RLS (todas con `FORCE`) / políticas                                   |        28 / 189 |
-| Triggers                                                                         | 25 en 14 tablas |
-| Funciones PL/pgSQL y SQL                                                         |              52 |
-| Comentarios de tabla + columna en `avisa_mssql`                                  |  701 (73 + 628) |
+| Tablas con RLS (todas con `FORCE`) / políticas                                   |        30 / 198 |
+| Triggers                                                                         | 30 en 16 tablas |
+| Funciones PL/pgSQL y SQL                                                         |              56 |
+| Comentarios de tabla + columna en `avisa` (756 en el staging)                    |  757 (78 + 679) |
 | Extensiones                                                                      |               6 |
-| Filas en las 74 tablas                                                           |       **8 244** |
+| Filas en las 78 tablas                                                           |       **8 428** |
 | Filas en `legacy` (87 tablas)                                                    |           4 729 |
 | Filas en `public.spatial_ref_sys` (PostGIS)                                      |           8 500 |
 
-Tipos presentes en el alcance (13): `character varying` 202 + `character` 12 · `uuid`
-115 · `smallint` 99 · `timestamptz` 46 · `integer` 39 · `text` 42 · `date` 33 ·
-`boolean` 29 · `numeric` 16 · `jsonb` 12 · `bytea` 4 · `bigint` 2.
+Tipos presentes en el alcance (13): `character varying` 215 + `character` 13 · `uuid`
+124 · `smallint` 102 · `timestamptz` 49 · `integer` 39 · `text` 43 · `date` 33 ·
+`boolean` 30 · `numeric` 17 · `jsonb` 13 · `bytea` 5 · `bigint` 2.
 
 Las 3 vistas del alcance (`core.v_actor_datos_personales_seguro` 6 columnas,
 `ref.nivel_identificacion` 3, `ref.vw_base_legal_fuente` 12) **no** se cuentan: no
@@ -82,7 +87,7 @@ son tablas y no se migran como datos.
 
 Combinaciones de tipo (una fila por combinación). El filtro por `relkind` es
 obligatorio: `information_schema.columns` también devuelve columnas de vistas y,
-si no se excluyen, el alcance saldría con 672 columnas y las cuentas por tipo
+si no se excluyen, el alcance saldría con 706 columnas y las cuentas por tipo
 dejarían de cerrar.
 
 ```sql
@@ -100,7 +105,7 @@ SELECT c.udt_name, c.data_type,
                           'staging','qda','ref')
  GROUP BY 1,2,3,4,5
  ORDER BY columnas DESC, c.udt_name;
--- 40 filas; la suma de "columnas" es 651
+-- 40 filas; la suma de "columnas" es 685
 ```
 
 Conteo de filas exacto, en una sola consulta (con `query_to_xml`, porque no hay
@@ -116,7 +121,7 @@ SELECT sum((xpath('/row/c/text()',
  WHERE c.relkind IN ('r', 'p')
    AND n.nspname IN ('agent','audit','core','ind','kag','policy',
                      'staging','qda','ref');
--- 8244
+-- 8428
 ```
 
 ---
@@ -129,32 +134,32 @@ _Revisar_ = SSMA lo traduce, pero la semántica no es idéntica.
 
 |   # | Tipo origen (`udt_name`)  | Largo / prec.,esc. | Cols. | Tablas | Tipo destino en SQL Server                  | Ajuste  | Observación para el equipo .NET                                                                                                                                                                                                                                    |
 | --: | ------------------------- | ------------------ | ----: | -----: | ------------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-|   1 | `uuid`                    | —                  |   115 |     39 | `UNIQUEIDENTIFIER`                          | Sí      | `Guid`. 25 tenían `DEFAULT gen_random_uuid()` y el paso 3 se lo retiró: en SQL Server van con `DEFAULT NEWSEQUENTIALID()` (§3.1). Las otras 90 **no** llevan `DEFAULT`: las genera la API o heredan la clave de otra tabla; ponerles `NEWID()` rompe esa herencia. |
-|   2 | `int2` (`smallint`)       | —                  |    99 |     55 | `SMALLINT`                                  | No      | `short`. No mapear a `TINYINT`: es 0..255 y perdería el rango negativo y el límite 32 767. Una es `IDENTITY` (`policy.titular.id`).                                                                                                                                |
-|   3 | `timestamptz`             | —                  |    46 |     27 | `DATETIMEOFFSET(7)`                         | Sí      | `DateTimeOffset`, no `DateTime`. 36 tienen `DEFAULT now()` → `DEFAULT SYSDATETIMEOFFSET()`. Si no se fija el mapeo, SSMA las pasa a `DATETIME2` y la zona desaparece sin aviso.                                                                                    |
+|   1 | `uuid`                    | —                  |   124 |     42 | `UNIQUEIDENTIFIER`                          | Sí      | `Guid`. 28 tenían `DEFAULT gen_random_uuid()` y el paso 3 se lo retiró: en SQL Server van con `DEFAULT NEWSEQUENTIALID()` (§3.1). Las otras 96 **no** llevan `DEFAULT`: las genera la API o heredan la clave de otra tabla; ponerles `NEWID()` rompe esa herencia. |
+|   2 | `int2` (`smallint`)       | —                  |   102 |     58 | `SMALLINT`                                  | No      | `short`. No mapear a `TINYINT`: es 0..255 y perdería el rango negativo y el límite 32 767. Una es `IDENTITY` (`policy.titular.id`).                                                                                                                                |
+|   3 | `timestamptz`             | —                  |    49 |     30 | `DATETIMEOFFSET(7)`                         | Sí      | `DateTimeOffset`, no `DateTime`. 38 tienen `DEFAULT now()` → `DEFAULT SYSDATETIMEOFFSET()`. Si no se fija el mapeo, SSMA las pasa a `DATETIME2` y la zona desaparece sin aviso.                                                                                    |
 |   4 | `int4` (`integer`)        | —                  |    39 |     20 | `INT`                                       | No      | `int`. 8 son `serial` (§3.6) → `INT IDENTITY(1,1)`.                                                                                                                                                                                                                |
-|   5 | `text`                    | —                  |    42 |     24 | `NVARCHAR(MAX)`                             | Sí      | `string`. Sin longitud: no truncará, pero no se puede indexar la columna entera (usar columna calculada o índice de prefijo).                                                                                                                                      |
-|   6 | `varchar`                 | 20                 |    33 |     27 | `NVARCHAR(20)`                              | Sí      | Longitud en caracteres, igual que en origen. Incluye `ref.base_legal_evidencia.rol`, `core.cat_unidades_organicas.estado` y `core.entidades.estado`.                                                                                                               |
+|   5 | `text`                    | —                  |    43 |     25 | `NVARCHAR(MAX)`                             | Sí      | `string`. Sin longitud: no truncará, pero no se puede indexar la columna entera (usar columna calculada o índice de prefijo).                                                                                                                                      |
+|   6 | `varchar`                 | 20                 |    34 |     28 | `NVARCHAR(20)`                              | Sí      | Longitud en caracteres, igual que en origen. Incluye `ref.base_legal_evidencia.rol`, `core.cat_unidades_organicas.estado` y `core.entidades.estado`.                                                                                                               |
 |   7 | `date`                    | —                  |    33 |     18 | `DATE`                                      | No      | `DateOnly` (o `DateTime` a medianoche). No convertir a `DATETIME`.                                                                                                                                                                                                 |
-|   8 | `varchar`                 | 50                 |    32 |     22 | `NVARCHAR(50)`                              | Sí      | Idem (nombres y códigos de catálogo).                                                                                                                                                                                                                              |
-|   9 | `bool`                    | —                  |    29 |     18 | `BIT`                                       | No      | `bool`. Traducir `true/false` a `1/0` en el DDL, en los `DEFAULT` y en las pruebas.                                                                                                                                                                                |
+|   8 | `varchar`                 | 50                 |    34 |     23 | `NVARCHAR(50)`                              | Sí      | Idem (nombres y códigos de catálogo).                                                                                                                                                                                                                              |
+|   9 | `bool`                    | —                  |    30 |     19 | `BIT`                                       | No      | `bool`. Traducir `true/false` a `1/0` en el DDL, en los `DEFAULT` y en las pruebas.                                                                                                                                                                                |
 |  10 | `varchar`                 | 500                |    19 |     15 | `NVARCHAR(500)`                             | Sí      | URLs, rutas y enlaces (`foto_url`, `url_pdf`, `link_evidencia`, `fuente_url`, `archivo_uri`).                                                                                                                                                                      |
-|  11 | `varchar`                 | 30                 |    17 |     14 | `NVARCHAR(30)`                              | Sí      | Incluye `core.roles.codigo`, `agent.run_log.rol` y `policy.snapshot.rol`: son la llave del contrato de seguridad (§7); no cambiar su contenido.                                                                                                                    |
+|  11 | `varchar`                 | 30                 |    18 |     15 | `NVARCHAR(30)`                              | Sí      | Incluye `core.roles.codigo`, `agent.run_log.rol` y `policy.snapshot.rol`: son la llave del contrato de seguridad (§7); no cambiar su contenido.                                                                                                                    |
 |  12 | `varchar`                 | 255                |    17 |     12 | `NVARCHAR(255)`                             | Sí      | Rutas, correos y nombres de archivo.                                                                                                                                                                                                                               |
-|  13 | `jsonb`                   | —                  |    12 |     11 | `NVARCHAR(MAX)` + `CHECK (ISJSON(col) = 1)` | Sí      | `string` JSON (`System.Text.Json`). 4 con `DEFAULT '{}'::jsonb` → `DEFAULT N'{}'`. Consultar con `JSON_VALUE`/`OPENJSON`. `jsonb` no conserva orden de claves ni duplicados: no depender de ellos.                                                                 |
-|  14 | `varchar`                 | 40                 |    13 |     12 | `NVARCHAR(40)`                              | Sí      | Incluye `qda.mapeo_pseudonimo.token` (seudónimo, **no** el identificador real) y `core.documentos.estado`.                                                                                                                                                         |
+|  13 | `jsonb`                   | —                  |    13 |     12 | `NVARCHAR(MAX)` + `CHECK (ISJSON(col) = 1)` | Sí      | `string` JSON (`System.Text.Json`). 4 con `DEFAULT '{}'::jsonb` → `DEFAULT N'{}'`. Consultar con `JSON_VALUE`/`OPENJSON`. `jsonb` no conserva orden de claves ni duplicados: no depender de ellos.                                                                 |
+|  14 | `varchar`                 | 40                 |    14 |     13 | `NVARCHAR(40)`                              | Sí      | Incluye `qda.mapeo_pseudonimo.token` (seudónimo, **no** el identificador real) y `core.documentos.estado`.                                                                                                                                                         |
 |  15 | `varchar`                 | 60                 |    11 |     11 | `NVARCHAR(60)`                              | Sí      | Códigos y nombres cortos (`codigo_compromiso`, `documentos.codigo`, `kag.documento_fuente.tipo`).                                                                                                                                                                  |
-|  16 | `varchar`                 | 100                |    11 |     10 | `NVARCHAR(100)`                             | Sí      | Nombres de región, provincia y distrito: son la clave del emparejamiento geográfico.                                                                                                                                                                               |
-|  17 | `numeric`                 | 3,2                |     9 |      8 | `DECIMAL(3,2)`                              | No      | `decimal`. `confidence`/`confianza` (0,00 a 9,99).                                                                                                                                                                                                                 |
+|  16 | `varchar`                 | 100                |    14 |     11 | `NVARCHAR(100)`                             | Sí      | Nombres de región, provincia y distrito: son la clave del emparejamiento geográfico.                                                                                                                                                                               |
+|  17 | `numeric`                 | 3,2                |    10 |      9 | `DECIMAL(3,2)`                              | No      | `decimal`. `confidence`/`confianza` (0,00 a 9,99).                                                                                                                                                                                                                 |
 |  18 | `varchar`                 | 12                 |     8 |      8 | `NVARCHAR(12)`                              | Sí      | Códigos y estados. Incluye `dni` (12) y `staging.lote.estado`, que tiene `CHECK` de lista cerrada.                                                                                                                                                                 |
-|  19 | `bpchar` (`char(n)`)      | 64                 |     7 |      5 | `CHAR(64)`                                  | Revisar | Hashes hexadecimales. `CHAR` rellena con espacios y compara ignorando blancos finales (igual que `bpchar`); en .NET llega con o sin relleno según el driver → `.Trim()` al comparar.                                                                               |
+|  19 | `bpchar` (`char(n)`)      | 64                 |     8 |      6 | `CHAR(64)`                                  | Revisar | Hashes hexadecimales. `CHAR` rellena con espacios y compara ignorando blancos finales (igual que `bpchar`); en .NET llega con o sin relleno según el driver → `.Trim()` al comparar.                                                                               |
 |  20 | `varchar`                 | 10                 |     7 |      7 | `NVARCHAR(10)`                              | Sí      | `ind.resultado.periodo`, `core.log_accesos.resultado`, `qda.proyecto.estado`.                                                                                                                                                                                      |
 |  21 | `varchar`                 | 80                 |     7 |      7 | `NVARCHAR(80)`                              | Sí      | Nombres de catálogo y cargos.                                                                                                                                                                                                                                      |
-|  22 | `varchar`                 | 200                |     7 |      6 | `NVARCHAR(200)`                             | Sí      | Títulos y nombres largos (`policy.regla.titulo`, `qda.proyecto.nombre`, `ref.base_legal_tratamiento.norma`).                                                                                                                                                       |
-|  23 | `varchar`                 | 120                |     5 |      5 | `NVARCHAR(120)`                             | Sí      | Nombres de tipos de documento y de gobierno.                                                                                                                                                                                                                       |
-|  24 | `bytea`                   | —                  |     4 |      1 | `VARBINARY(MAX)`                            | Sí      | `byte[]`. Es PII cifrada (`dni_cifrado`, `dni_hmac`, `email_cifrado`, `telefono_cifrado`): no debe pasar nunca por `string` ni por `NVARCHAR`.                                                                                                                     |
+|  22 | `varchar`                 | 200                |     9 |      7 | `NVARCHAR(200)`                             | Sí      | Títulos y nombres largos (`policy.regla.titulo`, `qda.proyecto.nombre`, `ref.base_legal_tratamiento.norma`).                                                                                                                                                       |
+|  23 | `varchar`                 | 120                |     6 |      6 | `NVARCHAR(120)`                             | Sí      | Nombres de tipos de documento y de gobierno.                                                                                                                                                                                                                       |
+|  24 | `bytea`                   | —                  |     5 |      2 | `VARBINARY(MAX)`                            | Sí      | `byte[]`. Cuatro son PII cifrada (`dni_cifrado`, `dni_hmac`, `email_cifrado`, `telefono_cifrado`) y la quinta es `core.consulta_reniec.resultado_cifrado`: ninguna debe pasar nunca por `string` ni por `NVARCHAR`.                                                |
 |  25 | `varchar`                 | 150                |     4 |      3 | `NVARCHAR(150)`                             | Sí      | `core.actores.abreviatura`/`cargo_actual`, `core.usuarios.cargo`.                                                                                                                                                                                                  |
-|  26 | `varchar`                 | 15                 |     3 |      3 | `NVARCHAR(15)`                              | Sí      | `nivel_gobierno` y `core.entidades.nivel`.                                                                                                                                                                                                                         |
+|  26 | `varchar`                 | 15                 |     4 |      4 | `NVARCHAR(15)`                              | Sí      | `nivel_gobierno` y `core.entidades.nivel`.                                                                                                                                                                                                                         |
 |  27 | `varchar`                 | 25                 |     4 |      3 | `NVARCHAR(25)`                              | Sí      | `policy.regla.alcance`/`tipo_fuente` e `ind.indicador.componente_guia`.                                                                                                                                                                                            |
 |  28 | `int8` (`bigint`)         | —                  |     2 |      2 | `BIGINT`                                    | No      | `long`. Ambas son `IDENTITY` (`audit.datos_personales_acceso.id`, `core.log_accesos.id`).                                                                                                                                                                          |
 |  29 | `numeric`                 | 5,2                |     2 |      2 | `DECIMAL(5,2)`                              | No      | `decimal`; porcentajes 0,00 a 999,99 (`core.casos.pct_avance`, `ind.resultado.cobertura_pct`).                                                                                                                                                                     |
@@ -167,12 +172,12 @@ _Revisar_ = SSMA lo traduce, pero la semántica no es idéntica.
 |  36 | `bpchar` (`char(n)`)      | 6                  |     1 |      1 | `CHAR(6)`                                   | Revisar | `core.distritos.ubigeo`: clave de emparejamiento con `legacy.dim_distritos`. Debe conservar el relleno para que el join no cambie.                                                                                                                                 |
 |  37 | `bpchar` (`char(n)`)      | 11                 |     1 |      1 | `CHAR(11)`                                  | Revisar | `core.organizaciones.ruc`; su índice único es filtrado (§6.4) y tiene 219 `NULL`.                                                                                                                                                                                  |
 |  38 | `numeric`                 | 6,1                |     1 |      1 | `DECIMAL(6,1)`                              | No      | `decimal`; `ind.variante.horas_estimadas`.                                                                                                                                                                                                                         |
-|  39 | `varchar`                 | 5                  |     1 |      1 | `NVARCHAR(5)`                               | Sí      | `ind.resultado.incertidumbre`: texto corto, **no** numérico.                                                                                                                                                                                                       |
+|  39 | `varchar`                 | 5                  |     2 |      2 | `NVARCHAR(5)`                               | Sí      | `ind.resultado.incertidumbre`: texto corto, **no** numérico.                                                                                                                                                                                                       |
 |  40 | `varchar`                 | 70                 |     1 |      1 | `NVARCHAR(70)`                              | Sí      | `core.hitos_compromiso.codigo_hito`.                                                                                                                                                                                                                               |
 
-**Total: 651 columnas en 40 combinaciones distintas.** La suma de la columna
-«Cols.» es 651 y el número de filas es 40; ambas coinciden con `count(*)` sobre
-las 74 tablas y con las combinaciones del catálogo.
+**Total: 685 columnas en 40 combinaciones distintas.** La suma de la columna
+«Cols.» es 685 y el número de filas es 40; ambas coinciden con `count(*)` sobre
+las 78 tablas y con las combinaciones del catálogo.
 
 ### Por qué `NVARCHAR` y no `VARCHAR`
 
@@ -189,16 +194,17 @@ las 74 tablas y con las combinaciones del catálogo.
 
 ## 3. Notas de los tipos delicados
 
-### 3.1 · `uuid` (115 columnas, 39 tablas)
+### 3.1 · `uuid` (124 columnas, 42 tablas)
 
 - Destino: `UNIQUEIDENTIFIER`. En .NET, `Guid`.
-- **25 columnas tenían `DEFAULT gen_random_uuid()` y hoy no tienen `DEFAULT`**
+- **28 columnas tenían `DEFAULT gen_random_uuid()` y hoy no tienen `DEFAULT`**
   (el paso 3 se lo retiró a propósito). En SQL Server deben recuperarlo como
   `DEFAULT NEWSEQUENTIALID()`. Todas son `id` salvo `core.actores.actor_uid`:
 
 | Tabla                        | Columna     | Filas |
 | ---------------------------- | ----------- | ----: |
 | `agent.run_log`              | `id`        |     0 |
+| `core.actor_alias`           | `id`        |   143 |
 | `core.actor_membresia`       | `id`        |   292 |
 | `core.actores`               | `actor_uid` | 1 160 |
 | `core.alertas_tempranas`     | `id`        |    83 |
@@ -206,8 +212,10 @@ las 74 tablas y con las combinaciones del catálogo.
 | `core.caso_estado_historial` | `id`        |    35 |
 | `core.casos`                 | `id`        |    35 |
 | `core.compromisos`           | `id`        |     8 |
+| `core.consulta_reniec`       | `id`        |     0 |
 | `core.documentos`            | `id`        |   153 |
 | `core.hitos_compromiso`      | `id`        |    12 |
+| `core.integraciones`         | `id`        |    20 |
 | `core.mesas_dialogo`         | `id`        |    21 |
 | `core.output_contracts`      | `id`        |     0 |
 | `core.permiso_aprobacion`    | `id`        |     0 |
@@ -224,7 +232,7 @@ las 74 tablas y con las combinaciones del catálogo.
 | `qda.proyecto`               | `id`        |     0 |
 | `staging.lote`               | `id`        |     0 |
 
-- Las **90 restantes** no llevan `DEFAULT`: unas las genera la API, otras heredan
+- Las **96 restantes** no llevan `DEFAULT`: unas las genera la API, otras heredan
   la clave de otra tabla (`core.organizaciones.actor_uid`,
   `core.actor_datos_personales.actor_uid`, `core.reunion_participantes.actor_uid`,
   `kag.documento_fragmento.documento_id`…). Si SSMA les pone `NEWID()`, se rompe
@@ -235,7 +243,7 @@ las 74 tablas y con las combinaciones del catálogo.
 - `agent.run_log` tiene clave primaria **compuesta** `(id, ts)`: el `DEFAULT` va
   solo en `id`.
 
-### 3.2 · `jsonb` (12 columnas, 11 tablas)
+### 3.2 · `jsonb` (13 columnas, 12 tablas)
 
 | Tabla.Columna                                    | Filas | Nulable                 |
 | ------------------------------------------------ | ----: | ----------------------- |
@@ -246,6 +254,7 @@ las 74 tablas y con las combinaciones del catálogo.
 | `core.cat_tipos_documento.esquema_json`          |    15 | sí                      |
 | `core.compromisos.criterios_smart`               |     8 | sí                      |
 | `core.documentos.contenido_json`                 |   153 | **no** (`DEFAULT '{}'`) |
+| `core.integraciones.metadata_json`               |    20 | sí                      |
 | `core.output_contracts.response_json`            |     0 | sí                      |
 | `ind.variante.especificacion`                    |     0 | **no** (`DEFAULT '{}'`) |
 | `policy.cat_tipos_regla.esquema_json`            |     5 | sí                      |
@@ -254,13 +263,11 @@ las 74 tablas y con las combinaciones del catálogo.
 
 - Destino `NVARCHAR(MAX)` con `CHECK (ISJSON(col) = 1)` (el chequeo está en
   `04_chequeos_postmigracion.sql`, §2).
-- **Pendiente en el script 04:** su §2 sólo verifica las 7 columnas `jsonb` del
-  alcance anterior. Faltan las 5 nuevas: `core.cat_tipos_documento.esquema_json`,
-  `core.documentos.contenido_json`, `ind.variante.especificacion`,
-  `policy.cat_tipos_regla.esquema_json` y `policy.regla.parametros`. Hasta que se
-  añadan, el script no es una puerta de calidad completa para estas 12 columnas.
+- **Cubierto en el script 04:** su §2 comprueba las 13 columnas `jsonb` del
+  alcance y crea 13 `CHECK` sobre 12 tablas, `core.integraciones.metadata_json`
+  incluida. La comprobación previa de §2.1 debe dar 0 filas en cada columna.
 - Un `CHECK` con expresión `UNKNOWN` (columna `NULL`) se acepta: el `NULL` pasa,
-  que es lo que corresponde a las 8 columnas nulables.
+  que es lo que corresponde a las 9 columnas nulables.
 - `jsonb` no conserva el orden de las claves ni los duplicados, y normaliza
   números. Si el contrato con la API depende del texto exacto, hay que guardar
   además la cadena original o aceptar la normalización.
@@ -268,10 +275,11 @@ las 74 tablas y con las combinaciones del catálogo.
   `PERSISTED` + índice, o usar una tabla hija.
 - `'{}'::jsonb` como `DEFAULT` → `DEFAULT N'{}'` (sin `::jsonb`).
 - La antigua `policy.cat_tipos_regla.claves_requeridas` era la única columna
-  array de la base; el paso 3 la convirtió con `array_to_json()` y hoy es `text`
-  (42 columnas `text`, §3.3). No queda ninguna columna array en el alcance.
+  array del alcance (las otras 3 de la base quedan fuera y las retira el paso 1);
+  el paso 3 la convirtió con `array_to_json()` y hoy es `text`
+  (43 columnas `text`, §3.3). No queda ninguna columna array en el alcance.
 
-### 3.3 · `text` (42 columnas, 24 tablas)
+### 3.3 · `text` (43 columnas, 25 tablas)
 
 Destino `NVARCHAR(MAX)`. No se puede poner índice sobre la columna completa
 (límite de 1 700 bytes de clave en SQL Server): si hace falta, índice sobre
@@ -281,10 +289,12 @@ los tres campos de `audit.datos_personales_acceso` (`usuario`, `operacion`,
 `casos.motivo_cierre`, `alertas_tempranas.hechos_recientes`), `policy.regla.texto`
 y `kag.documento_fragmento.texto` —este último es el que más crece.
 
-### 3.4 · `bytea` (4 columnas, 1 tabla)
+### 3.4 · `bytea` (5 columnas, 2 tablas)
 
 `core.actor_datos_personales.{dni_cifrado, dni_hmac, email_cifrado,
-telefono_cifrado}` → `VARBINARY(MAX)`. En .NET, `byte[]`. La única función de
+telefono_cifrado}` → `VARBINARY(MAX)`. Se suma
+`core.consulta_reniec.resultado_cifrado` (respuesta de la consulta RENIEC,
+cifrada). En .NET, `byte[]`. La única función de
 origen que usa `pgcrypto` es `core.actor_datos_personales_descifrar(...)`: en
 SQL Server **no** se reconstruye con T-SQL; el descifrado pasa a la API
 (Data Protection / Always Encrypted) y queda registrado en
@@ -327,9 +337,9 @@ migra con `IDENTITY_INSERT` y no se reajusta la semilla, el siguiente alta
 choca con la clave. El reajuste y su verificación están en
 `04_chequeos_postmigracion.sql` (§1.3).
 
-### 3.7 · Fechas: `timestamptz` (46 columnas, 27 tablas)
+### 3.7 · Fechas: `timestamptz` (49 columnas, 30 tablas)
 
-Destino `DATETIMEOFFSET(7)`. En .NET, `DateTimeOffset`. **36 de las 46** tienen
+Destino `DATETIMEOFFSET(7)`. En .NET, `DateTimeOffset`. **38 de las 49** tienen
 `DEFAULT now()`, que pasa a `DEFAULT SYSDATETIMEOFFSET()`.
 
 El `AVISA_PRODUCE_v10.md` §3.17.2.v10 admite dos variantes: `DATETIME2` en UTC
@@ -342,7 +352,7 @@ tratar todo `DateTime` como UTC (`Kind = Utc`); en ese caso el chequeo de §4 de
 la conversión.
 
 `timestamp without time zone`: **0 columnas**. No hay nada que "arreglar" por
-ese lado, pero sí hay que evitar que SSMA convierta las 46 a `datetime2` por
+ese lado, pero sí hay que evitar que SSMA convierta las 49 a `datetime2` por
 defecto (es el error clásico: la zona desaparece sin aviso).
 
 ---
@@ -434,8 +444,8 @@ Regla corta: **AI para buscar, AS para guardar y para los índices únicos.**
 
 ## 5. Palabras reservadas
 
-Se buscaron estas 36 palabras contra los nombres de las **74 tablas** y de sus
-**651 columnas**, y también contra las 87 tablas de `legacy`:
+Se buscaron estas 36 palabras contra los nombres de las **78 tablas** y de sus
+**685 columnas**, y también contra las 87 tablas de `legacy`:
 
 `user`, `order`, `group`, `level`, `status`, `key`, `plan`, `percent`, `public`,
 `authorization`, `check`, `default`, `desc`, `file`, `line`, `print`, `rule`,
@@ -444,8 +454,8 @@ Se buscaron estas 36 palabras contra los nombres de las **74 tablas** y de sus
 `references`, `column`.
 
 **Resultado medido: 0 coincidencias.** Ningún nombre de tabla ni de columna del
-alcance es palabra reservada en SQL Server ni en PostgreSQL. Además, los 651
-nombres de columna y los 74 de tabla cumplen `^[a-z_][a-z0-9_]*$` (0 no
+alcance es palabra reservada en SQL Server ni en PostgreSQL. Además, los 685
+nombres de columna y los 78 de tabla cumplen `^[a-z_][a-z0-9_]*$` (0 no
 conformes, 0 con tilde): no hay mayúsculas, espacios, tildes ni comillas que
 escapar.
 
@@ -521,74 +531,77 @@ necesita corchetes; SSMA las entrecomillará igualmente (ver abajo).
 ## 6. Lo que SSMA no migra y hay que reconstruir
 
 Conteos medidos en el alcance. SSMA **sí** traduce tablas, claves primarias
-(73), claves ajenas (156), `UNIQUE` (70), `CHECK` (78), índices simples y vistas
+(77), claves ajenas (169), `UNIQUE` (73), `CHECK` (85), índices simples y vistas
 sencillas. Lo siguiente no viaja o viaja mal:
 
 | Objeto de origen                                                          |                                                                                                      Cantidad medida | Qué pasa en SSMA                                                                                     | Alternativa en SQL Server                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 | ------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------: | ---------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Políticas RLS (`CREATE POLICY`, 28 tablas con `FORCE ROW LEVEL SECURITY`) |                                                                                                    **189** políticas | No se migran. Sin RLS, la API vería todo: es la mayor pérdida de seguridad posible.                  | `CREATE SECURITY POLICY` + función de predicado en línea + `SESSION_CONTEXT`. Ver §7 y `04_...sql` §5.                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| Triggers                                                                  |                                                                                                  **25** en 14 tablas | No se traducen (son PL/pgSQL). Uno es _constraint trigger_ (`ind.variante.trg_proxy_justificacion`). | Triggers `AFTER`/`INSTEAD OF`. `BEFORE` → `AFTER` + validación; para auditoría (`trg_audit`, `set_audit`), `AFTER INSERT/UPDATE` o valores por defecto en columnas.                                                                                                                                                                                                                                                                                                                                                                                         |
-| Funciones PL/pgSQL y SQL                                                  |                                                                                                 **52** en 8 esquemas | No se migran.                                                                                        | Reescribir en T-SQL como procedimientos o funciones; las de seguridad (`clasificacion_max`, `puede_*`, `rol_actual`) **desaparecen**: su papel lo asume `SESSION_CONTEXT`. `core.actor_datos_personales_descifrar` pasa a la API.                                                                                                                                                                                                                                                                                                                           |
+| Políticas RLS (`CREATE POLICY`, 30 tablas con `FORCE ROW LEVEL SECURITY`) |                                                                                                    **198** políticas | No se migran. Sin RLS, la API vería todo: es la mayor pérdida de seguridad posible.                  | `CREATE SECURITY POLICY` + función de predicado en línea + `SESSION_CONTEXT`. Ver §7 y `04_...sql` §5.                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| Triggers                                                                  |                                                                                                  **30** en 16 tablas | No se traducen (son PL/pgSQL). Uno es _constraint trigger_ (`ind.variante.trg_proxy_justificacion`). | Triggers `AFTER`/`INSTEAD OF`. `BEFORE` → `AFTER` + validación; para auditoría (`trg_audit`, `set_audit`), `AFTER INSERT/UPDATE` o valores por defecto en columnas.                                                                                                                                                                                                                                                                                                                                                                                         |
+| Funciones PL/pgSQL y SQL                                                  |                                                                                                 **56** en 8 esquemas | No se migran.                                                                                        | Reescribir en T-SQL como procedimientos o funciones; las de seguridad (`clasificacion_max`, `puede_*`, `rol_actual`) **desaparecen**: su papel lo asume `SESSION_CONTEXT`. `core.actor_datos_personales_descifrar` pasa a la API.                                                                                                                                                                                                                                                                                                                           |
 | Vistas                                                                    | **3** en el alcance (`core.v_actor_datos_personales_seguro`, `ref.nivel_identificacion`, `ref.vw_base_legal_fuente`) | Las simples se traducen; las que usan `DISTINCT ON`, `FILTER`, `LATERAL` o arrays fallan.            | Reescribir como `CREATE VIEW`. Ojo: la vista segura no es la frontera de seguridad; lo es la RLS.                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | Índices parciales (`WHERE ...`)                                           |                                                                                       **10** (5 únicos, 5 no únicos) | No se traducen.                                                                                      | Índices **filtrados**. 8 de 10 son traducción directa; 2 usan `IN`/`NOT IN` (`ix_casos_activos`, `ix_hitos_por_vencer`), que un índice filtrado no admite → rediseñar. Ver §6.4 y `04_...sql` §6.                                                                                                                                                                                                                                                                                                                                                           |
 | Índices únicos con columnas nulables                                      |                                                                                        **28** índices; **10 fallan** | SQL Server admite un solo `NULL` por índice único; PostgreSQL admite muchos.                         | Índice único **filtrado** `WHERE col IS NOT NULL`. Medido (nulos por columna): `organizaciones.ruc` 219, `cat_unidades_organicas.codigo_legado_unidad` 39, `caso_estado_historial.codigo_legado` 35 de 35, `usuarios.sso_subject` 32, `usuarios.email` 27, `usuarios.dni` 21, `compromisos.redefinido_de_id` 8, `cat_roles_actor.codigo_legado` 6, `cat_tipos_actor.codigo_legado` 4, `cat_tipos_organizacion.codigo_legado` 3. Los otros 18 hoy tienen 0 `NULL`, pero también se filtran: si no, el segundo `NULL` fallaría (en origen se admiten varios). |
-| Comentarios (`COMMENT ON`)                                                |                                                              **701** en `avisa_mssql` (73 de tabla + 628 de columna) | No se migran.                                                                                        | `sp_addextendedproperty` (y `fn_listextendedproperty` para leerlos). Es documentación de la PII y de la clasificación: no es opcional. Diferencia medida: `agent.run_log` tiene comentario de tabla en `avisa` pero lo perdió al aplanarse en el paso 1.                                                                                                                                                                                                                                                                                                    |
+| Comentarios (`COMMENT ON`)                                                |                                                                    **757** en `avisa` (78 de tabla + 679 de columna) | No se migran.                                                                                        | `sp_addextendedproperty` (y `fn_listextendedproperty` para leerlos). Es documentación de la PII y de la clasificación: no es opcional. Diferencia medida: `agent.run_log` tiene comentario de tabla en `avisa` pero lo perdió al aplanarse en el paso 1.                                                                                                                                                                                                                                                                                                    |
 | Extensiones                                                               |                                           **6**: `btree_gist`, `pg_trgm`, `pgcrypto`, `plpgsql`, `postgis`, `vector` | No existen en SQL Server.                                                                            | `pgcrypto` → cifrado en la API o Always Encrypted; `pg_trgm` → similitud en el servicio Python (v10 §3.17.2.v10); `postgis`/`vector` → no se usan en el alcance (0 columnas de geometría y 0 `vector`); `btree_gist` → no hay restricciones `EXCLUDE` en el alcance (0).                                                                                                                                                                                                                                                                                    |
 | Secuencias (`serial` + `IDENTITY`)                                        |                                                                                                            **8 + 3** | Se convierten en secuencia + `DEFAULT nextval` o se pierden.                                         | `IDENTITY` (recomendado) o `SEQUENCE` + `NEXT VALUE FOR`. Ver §3.6.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | Privilegios y roles de PostgreSQL (`GRANT`, `avisa_app`)                  |                                                                                                                    — | No viajan.                                                                                           | Usuarios/roles de base de datos y `GRANT`/`DENY`. El login de la API **no** debe ser `db_owner`.                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 
 ### 6.1 · RLS
 
-28 tablas con `relrowsecurity = true` **y** `relforcerowsecurity = true`
+30 tablas con `relrowsecurity = true` **y** `relforcerowsecurity = true`
 (hasta el dueño queda sujeto a las políticas):
 
 `audit.datos_personales_acceso`; en `core`,
-`actor_datos_personales`, `actor_membresia`, `actores`, `alertas_actores`,
-`alertas_tempranas`, `banco_datos_tratamiento`, `caso_cronologia`,
+`actor_alias`, `actor_datos_personales`, `actor_membresia`, `actores`,
+`alertas_actores`, `alertas_tempranas`, `banco_datos_tratamiento`, `caso_cronologia`,
 `caso_estado_historial`, `casos`, `casos_actores`, `compromiso_colaboradores`,
-`compromisos`, `cronologia_vinculos`, `documentos`, `hitos_compromiso`,
-`log_accesos`, `mesas_dialogo`, `organizaciones`, `output_contracts`,
-`reunion_participantes` y `reuniones_dialogo`; en `kag`,
+`compromisos`, `consulta_reniec`, `cronologia_vinculos`, `documentos`,
+`hitos_compromiso`, `log_accesos`, `mesas_dialogo`, `organizaciones`,
+`output_contracts`, `reunion_participantes` y `reuniones_dialogo`; en `kag`,
 `documento_fragmento` y `documento_fuente`; `policy.regla`;
 `qda.mapeo_pseudonimo` y `qda.proyecto`; y `staging.lote`.
 
-Reparto de las 189 políticas: 23 tablas × 7 políticas (3 permisivas de
-clasificación + 4 restrictivas de rol/capacidad) = 161,
+Reparto de las 198 políticas: 24 tablas × 7 políticas (3 permisivas de
+clasificación + 4 restrictivas de rol/capacidad) = 168,
 `core.hitos_compromiso` y `core.output_contracts` con 8 cada una = 16,
 `core.log_accesos` con 6, `staging.lote` con 4 (solo clasificación, **sin**
-capacidades) y `audit.datos_personales_acceso` con 2 (lectura por `puede_auditar`,
-alta siempre permitida). `audit.datos_personales_acceso` es la única tabla con RLS
+capacidades), `audit.datos_personales_acceso` con 2 (lectura por `puede_auditar`,
+alta siempre permitida) y `core.consulta_reniec` con 2 (inmutable: lectura y alta).
+`audit.datos_personales_acceso` es la única tabla con RLS
 que **no** tiene columna `nivel_clasificacion`: su política no filtra por nivel.
 
-El parche 16 (bloque B.11) completó la cobertura de `core`: las 19 tablas del
+El parche 16 (bloque B.11) completó la cobertura de `core`: las 20 tablas del
 alcance con `nivel_clasificacion` tienen RLS, incluidas `core.hitos_compromiso`,
 `core.log_accesos`, `core.mesas_dialogo` y `core.output_contracts` (`log_accesos`
 con nivel 3 por defecto), que eran las cuatro que quedaban sin filtro.
 
-### 6.2 · Triggers (25, en 14 tablas)
+### 6.2 · Triggers (30, en 16 tablas)
 
-| Tabla                                                                                                                           | Triggers                                                               | Comportamiento                                             | Equivalente                                                                                                                                     |
-| ------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- | ---------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| `audit.datos_personales_acceso`                                                                                                 | `tg_append_only_row`, `tg_append_only_stmt`, `tg_append_only_truncate` | Rechaza `DELETE`/`UPDATE`/`TRUNCATE` (bitácora inmutable)  | `DENY UPDATE, DELETE` al login de la API + trigger `INSTEAD OF` si se quiere mensaje claro. `TRUNCATE` se controla con permisos (`DENY ALTER`). |
-| `core.actor_datos_personales`                                                                                                   | `tg_audit_datos_personales`, `trg_pii_solo_identificados`              | Audita la PII y solo la permite de actores identificados   | `AFTER INSERT, UPDATE, DELETE` que inserta en la bitácora; y `AFTER INSERT, UPDATE` + `THROW`, o `CHECK` si la condición es de la misma fila.   |
-| `core.actores`                                                                                                                  | `trg_actor_nace`, `trg_actor_renombra`, `trg_audit`                    | Nace, registra renombres y rellena auditoría               | `AFTER INSERT` / `AFTER UPDATE` + `DEFAULT` en las columnas de auditoría.                                                                       |
-| `core.alertas_tempranas`, `core.caso_cronologia`, `core.casos`, `core.compromisos`, `core.documentos`, `core.reuniones_dialogo` | `trg_audit`                                                            | Rellena `created_by`/`updated_by` y fechas                 | `DEFAULT` en las columnas + `AFTER` trigger; el `user_id` llega por `SESSION_CONTEXT` (§7).                                                     |
-| `core.casos`                                                                                                                    | `trg_caso_historial`, `trg_caso_nace`, `trg_caso_renombra`             | Historial de estado y alta del caso                        | Trigger `AFTER INSERT, UPDATE`.                                                                                                                 |
-| `core.alertas_tempranas`                                                                                                        | `trg_alerta_nace`                                                      | Nace con su actor/estado                                   | Trigger `AFTER INSERT`.                                                                                                                         |
-| `core.actor_membresia`, `core.casos_actores`                                                                                    | `trg_membresia_nace`, `trg_caso_actor_nace`                            | Alta de vínculos actor↔organización y actor↔caso           | Trigger `AFTER INSERT`.                                                                                                                         |
-| `core.cat_niveles_conflicto`                                                                                                    | `trg_bloquear_niveles_conflicto`                                       | Bloquea escritura directa del catálogo                     | `DENY INSERT, UPDATE, DELETE` al login de la API (mejor que un trigger).                                                                        |
-| `core.compromisos`                                                                                                              | `trg_chk_compromiso`                                                   | Valida campos obligatorios del compromiso                  | `CHECK` + trigger `AFTER` si hay reglas entre filas.                                                                                            |
-| `policy.regla`                                                                                                                  | `trg_chk_regla`, `trg_aviso_vencimiento`                               | Valida la regla y avisa de su vencimiento                  | `CHECK` + `AFTER INSERT, UPDATE` o un trabajo programado para el aviso.                                                                         |
-| `ind.variante`                                                                                                                  | `trg_proxy_justificacion`                                              | _Constraint trigger_ (se difiere al fin de la transacción) | No tiene equivalente directo: validar en la API o con `AFTER` + `THROW`.                                                                        |
+| Tabla                                                                                                                           | Triggers                                                                                                                  | Comportamiento                                             | Equivalente                                                                                                                                     |
+| ------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `audit.datos_personales_acceso`                                                                                                 | `tg_append_only_row`, `tg_append_only_stmt`, `tg_append_only_truncate`                                                    | Rechaza `DELETE`/`UPDATE`/`TRUNCATE` (bitácora inmutable)  | `DENY UPDATE, DELETE` al login de la API + trigger `INSTEAD OF` si se quiere mensaje claro. `TRUNCATE` se controla con permisos (`DENY ALTER`). |
+| `core.actor_datos_personales`                                                                                                   | `tg_audit_datos_personales`, `trg_pii_solo_identificados`                                                                 | Audita la PII y solo la permite de actores identificados   | `AFTER INSERT, UPDATE, DELETE` que inserta en la bitácora; y `AFTER INSERT, UPDATE` + `THROW`, o `CHECK` si la condición es de la misma fila.   |
+| `core.actores`                                                                                                                  | `trg_actor_nace`, `trg_actor_renombra`, `trg_audit`                                                                       | Nace, registra renombres y rellena auditoría               | `AFTER INSERT` / `AFTER UPDATE` + `DEFAULT` en las columnas de auditoría.                                                                       |
+| `core.alertas_tempranas`, `core.caso_cronologia`, `core.casos`, `core.compromisos`, `core.documentos`, `core.reuniones_dialogo` | `trg_audit`                                                                                                               | Rellena `created_by`/`updated_by` y fechas                 | `DEFAULT` en las columnas + `AFTER` trigger; el `user_id` llega por `SESSION_CONTEXT` (§7).                                                     |
+| `core.casos`                                                                                                                    | `trg_caso_historial`, `trg_caso_nace`, `trg_caso_renombra`                                                                | Historial de estado y alta del caso                        | Trigger `AFTER INSERT, UPDATE`.                                                                                                                 |
+| `core.alertas_tempranas`                                                                                                        | `trg_alerta_nace`                                                                                                         | Nace con su actor/estado                                   | Trigger `AFTER INSERT`.                                                                                                                         |
+| `core.actor_membresia`, `core.casos_actores`                                                                                    | `trg_membresia_nace`, `trg_caso_actor_nace`                                                                               | Alta de vínculos actor↔organización y actor↔caso           | Trigger `AFTER INSERT`.                                                                                                                         |
+| `core.cat_niveles_conflicto`                                                                                                    | `trg_bloquear_niveles_conflicto`                                                                                          | Bloquea escritura directa del catálogo                     | `DENY INSERT, UPDATE, DELETE` al login de la API (mejor que un trigger).                                                                        |
+| `core.compromisos`                                                                                                              | `trg_chk_compromiso`                                                                                                      | Valida campos obligatorios del compromiso                  | `CHECK` + trigger `AFTER` si hay reglas entre filas.                                                                                            |
+| `policy.regla`                                                                                                                  | `trg_chk_regla`, `trg_aviso_vencimiento`                                                                                  | Valida la regla y avisa de su vencimiento                  | `CHECK` + `AFTER INSERT, UPDATE` o un trabajo programado para el aviso.                                                                         |
+| `ind.variante`                                                                                                                  | `trg_proxy_justificacion`                                                                                                 | _Constraint trigger_ (se difiere al fin de la transacción) | No tiene equivalente directo: validar en la API o con `AFTER` + `THROW`.                                                                        |
+| `core.consulta_reniec`                                                                                                          | `tg_consulta_reniec_auditar`, `tg_reniec_append_only_row`, `tg_reniec_append_only_stmt`, `tg_reniec_append_only_truncate` | Audita la consulta y la vuelve inmutable                   | `AFTER INSERT` para la auditoría + `DENY UPDATE, DELETE` al login de la API; igual que la bitácora de PII.                                      |
+| `agent.run_log`                                                                                                                 | `trg_runlog_guard`                                                                                                        | Guarda la escritura del registro de ejecuciones            | `AFTER INSERT, UPDATE, DELETE` o `DENY UPDATE, DELETE` al login de la API, según la política.                                                   |
 
-### 6.3 · Funciones (52)
+### 6.3 · Funciones (56)
 
-Por esquema: `core` 22, `kag` 16, `policy` 6, `ind` 3, `qda` 2, `audit` 1,
+Por esquema: `core` 26, `kag` 16, `policy` 6, `ind` 3, `qda` 2, `audit` 1,
 `agent` 1, `staging` 1.
 
 | Grupo                   | Funciones                                                                                                                                                                                                                                                                                                                                                                                                                                                         | Destino                                                                                                 |
 | ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| Seguridad               | `core.rol_actual`, `clasificacion_max`, `puede_crear`, `puede_editar`, `puede_eliminar`, `puede_auditar`, `staff_bypass_subject_rls`                                                                                                                                                                                                                                                                                                                              | **No se reescriben como funciones de tabla**: el valor vive en `SESSION_CONTEXT` y lo fija la API (§7). |
+| Seguridad               | `core.rol_actual`, `clasificacion_max`, `puede_crear`, `puede_editar`, `puede_eliminar`, `puede_auditar`, `puede_consultar_reniec`, `usuario_actual`, `staff_bypass_subject_rls`                                                                                                                                                                                                                                                                                  | **No se reescriben como funciones de tabla**: el valor vive en `SESSION_CONTEXT` y lo fija la API (§7). |
 | Auditoría / triggers    | `core.set_audit`, `caso_historial`, `tg_alerta_nace`, `tg_audit_datos_personales`, `tg_pii_solo_identificados`, `bloquear_escritura_directa`, `audit.tg_rechazar_mutacion`                                                                                                                                                                                                                                                                                        | Lógica dentro de los triggers T-SQL reconstruidos.                                                      |
 | Validación / negocio    | `core.chk_compromiso`, `chk_outbox_aprobacion`, `sync_hito_estado`, `deriv_limite`, `icd_aplicar_ajuste`, `aplicar_cambio_normativo`, `revertir_cambio_normativo`, `ind.chk_brecha_capacidad`, `chk_sin_ciclo`, `exigir_justificacion`, `policy.chk_regla`, `policy.aviso_vencimiento`, `policy.vencer_reglas`, `policy.crear_snapshot`, `policy.contexto_activo`, `policy.reglas_activas`, `qda.chk_exportacion`, `qda.hereda_clasificacion`, `staging.promover` | Procedimientos/funciones T-SQL o lógica en la API, según dónde debe ejecutarse.                         |
 | Utilidad de partición   | `core.crear_particion`                                                                                                                                                                                                                                                                                                                                                                                                                                            | No hace falta: `agent.run_log` ya se aplanó en el paso 1 y el particionado no es necesario en el MVP.   |
@@ -618,23 +631,26 @@ cual: `organizaciones.ruc` 219, `cat_unidades_organicas.codigo_legado_unidad` 39
 `caso_estado_historial.codigo_legado` 35 de 35, `usuarios.sso_subject` 32,
 `usuarios.email` 27, `usuarios.dni` 21, `compromisos.redefinido_de_id` 8,
 `cat_roles_actor.codigo_legado` 6, `cat_tipos_actor.codigo_legado` 4 y
-`cat_tipos_organizacion.codigo_legado` 3. Cinco ya eran parciales en origen
-(`ux_usuarios_dni`, `ux_caso_historial_vigente`, `ux_ind_resultado_vigente`,
-`ux_regla_codigo_vigente`, `entidades_codigo_legado_key`). Los 18 restantes
-tienen **0 `NULL` hoy**, pero su columna es nulable: un índice único sin filtro
-aceptaría un solo `NULL` y rechazaría el segundo, cosa que en PostgreSQL no pasa.
-Por eso hay que filtrarlos también.
+`cat_tipos_organizacion.codigo_legado` 3. De los 28, tres ya eran parciales en
+origen (`ux_usuarios_dni`, `ux_ind_resultado_vigente` y
+`entidades_codigo_legado_key`); los otros dos parciales del alcance
+(`ux_caso_historial_vigente`, sobre `caso_id`, y `ux_regla_codigo_vigente`, sobre
+`codigo`) no entran en la cuenta porque esas columnas son `NOT NULL`. Los 18
+restantes tienen **0 `NULL` hoy**, pero su columna es nulable: un índice único sin
+filtro aceptaría un solo `NULL` y rechazaría el segundo, cosa que en PostgreSQL no
+pasa. Por eso hay que filtrarlos también.
 
-**Pendiente en el script 04:** su bloque §6.2b se escribió para **5** índices y su
-§6 habla de «seis índices únicos»; con el alcance de 74 tablas son **18** los que
-hoy tienen 0 `NULL` y **28** los únicos con columna nulable. Hay que extenderlo
-antes de usarlo como lista de comprobación.
+**Cobertura en el script 04:** su §6.2 crea los 25 únicos no parciales con
+columna nulable (9 con `NULL` hoy y 16 sin), §6.3 traduce los 5 parciales y §6.4
+los 3 parciales no únicos; §6.6 espera **33** índices filtrados. Fuera quedan sólo
+los 2 cuyo predicado usa `IN` / `NOT IN` (§6.5), que van como índice plano.
 
 ### 6.5 · Comentarios
 
-701 comentarios en `avisa_mssql` (73 de tabla + 628 de columna). Incluyen la
+757 comentarios en `avisa` (78 de tabla + 679 de columna); 756 en el staging,
+porque `agent.run_log` conserva el suyo. Incluyen la
 clasificación de cada dato («interno», «sensible»), que es lo que permite auditar
-la PII: 19 tablas del alcance tienen columna `nivel_clasificacion`. La única
+la PII: 20 tablas del alcance tienen columna `nivel_clasificacion`. La única
 tabla sin comentario de tabla es `agent.run_log`, que lo perdió al aplanarse en
 el paso 1 (medido: en `avisa` sí lo tiene). Reconstruir con
 `sp_addextendedproperty`; el script de origen ya los tiene
@@ -653,6 +669,7 @@ el paso 1 (medido: en `avisa` sí lo tiene). Reconstruir con
 | `core.clasificacion_max()`           | `roles.max_clasificacion` del rol, o **0** si no hay rol | Nivel máximo de fila visible.               |
 | `core.puede_crear/editar/eliminar()` | `roles.puede_*` del rol, o `false`                       | Capacidades de escritura.                   |
 | `core.puede_auditar()`               | rol ∈ (`administrador`, `auditor`, `alta_direccion`)     | Lectura de la bitácora de PII.              |
+| `core.puede_consultar_reniec()`      | `tiene_privilegio('consulta_reniec')`                    | Única puerta a `core.consulta_reniec`.      |
 | `app.user_id`                        | uuid del usuario                                         | `created_by`/`updated_by` (tienen FK real). |
 | `app.staff_bypass_subject_rls`       | booleano                                                 | Perfiles no acotados a un actor.            |
 
@@ -671,21 +688,23 @@ Los valores de `core.roles` (9 filas) son la única fuente de verdad:
 | `servicio_agente`      |                   3 | sí    | sí     | no       |
 
 Sin rol: `clasificacion_max() = 0` → **ninguna fila visible ni escribible**
-(el silencio cierra, no abre). La misma regla debe valer para las 28 tablas con
-RLS del §6.1.
+(el silencio cierra, no abre). La misma regla debe valer para las 30 tablas con
+RLS del §6.1, salvo `core.consulta_reniec`: su política de origen no mira el
+nivel ni las capacidades, sólo el privilegio nominal RENIEC.
 
 ### 7.2 · Traducción a `SESSION_CONTEXT`
 
-| Clave de sesión       | Tipo SQL Server    | Origen del valor                                   | Quién la fija       |
-| --------------------- | ------------------ | -------------------------------------------------- | ------------------- |
-| `rol_codigo`          | `NVARCHAR(30)`     | claim del token ya validado                        | API                 |
-| `nivel_clasificacion` | `SMALLINT`         | `core.roles.max_clasificacion` del rol             | API (al autenticar) |
-| `puede_crear`         | `BIT`              | `core.roles.puede_crear`                           | API                 |
-| `puede_editar`        | `BIT`              | `core.roles.puede_editar`                          | API                 |
-| `puede_eliminar`      | `BIT`              | `core.roles.puede_eliminar`                        | API                 |
-| `puede_auditar`       | `BIT`              | rol ∈ (`administrador`,`auditor`,`alta_direccion`) | API                 |
-| `user_id`             | `UNIQUEIDENTIFIER` | claim `sub`                                        | API                 |
-| `staff`               | `BIT`              | perfil no acotado                                  | API                 |
+| Clave de sesión          | Tipo SQL Server    | Origen del valor                                   | Quién la fija       |
+| ------------------------ | ------------------ | -------------------------------------------------- | ------------------- |
+| `rol_codigo`             | `NVARCHAR(30)`     | claim del token ya validado                        | API                 |
+| `nivel_clasificacion`    | `SMALLINT`         | `core.roles.max_clasificacion` del rol             | API (al autenticar) |
+| `puede_crear`            | `BIT`              | `core.roles.puede_crear`                           | API                 |
+| `puede_editar`           | `BIT`              | `core.roles.puede_editar`                          | API                 |
+| `puede_eliminar`         | `BIT`              | `core.roles.puede_eliminar`                        | API                 |
+| `puede_auditar`          | `BIT`              | rol ∈ (`administrador`,`auditor`,`alta_direccion`) | API                 |
+| `puede_consultar_reniec` | `BIT`              | `core.tiene_privilegio('consulta_reniec')`         | API                 |
+| `user_id`                | `UNIQUEIDENTIFIER` | claim `sub`                                        | API                 |
+| `staff`                  | `BIT`              | perfil no acotado                                  | API                 |
 
 Se fijan con:
 
@@ -696,6 +715,7 @@ EXEC sp_set_session_context @key = N'puede_crear',          @value = 1,         
 EXEC sp_set_session_context @key = N'puede_editar',         @value = 1,             @read_only = 1;
 EXEC sp_set_session_context @key = N'puede_eliminar',       @value = 1,             @read_only = 1;
 EXEC sp_set_session_context @key = N'puede_auditar',        @value = 0,             @read_only = 1;
+EXEC sp_set_session_context @key = N'puede_consultar_reniec', @value = 0,           @read_only = 1;
 EXEC sp_set_session_context @key = N'user_id',              @value = @uid,          @read_only = 1;
 EXEC sp_set_session_context @key = N'staff',                @value = 1,             @read_only = 1;
 ```
@@ -788,10 +808,11 @@ SESSION_CONTEXT(N'rol_codigo')`). Si sobrevive, hay que fijar el contexto con
    tabla vacía hoy.
 4. `core.hitos_compromiso`, `core.log_accesos`, `core.mesas_dialogo` y
    `core.output_contracts` ya tienen RLS tras el parche 16 (§6.1). **Resuelto:**
-   la política de SQL Server de `04_...sql` §5 ya cubre las 28 tablas del alcance
-   con 136 predicados (13 tablas nuevas × 5, más las 14 anteriores × 5 y el
-   único FILTER de `audit.datos_personales_acceso`). El bloque §5.5 lo prueba
-   con un arnés de dos niveles; dio 28 tablas y 136 predicados.
+   la política de SQL Server de `04_...sql` §5 ya cubre las 30 tablas del alcance
+   con 143 predicados (13 tablas nuevas × 5 = 65, más las 14 anteriores × 5 = 70,
+   más 5 de `core.actor_alias`, 2 de `core.consulta_reniec` y el único FILTER de
+   `audit.datos_personales_acceso`). El bloque §5.5 lo prueba con un arnés de dos
+   niveles; dio 30 tablas y 143 predicados.
 5. `core.regiones` ya está en el alcance (padre por cierre de dependencias):
    hay que decidir si se corrigen las 24 grafías sin tilde antes de migrar, o si
    se migran tal cual y la corrección se hace después con el Resolver. Afecta a

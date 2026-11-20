@@ -3382,19 +3382,18 @@ de 16 GB de RAM mantiene el índice vectorial y los datos calientes en memoria d
 
 > **Ejemplo de traducción (una tabla).** `core.actor_alias` en v9 (§3.6.v10) usa `uuid` y `current_date`. En SQL Server queda: `id UNIQUEIDENTIFIER NOT NULL DEFAULT NEWSEQUENTIALID() PRIMARY KEY`, `vigente_desde DATE NOT NULL DEFAULT CAST(SYSUTCDATETIME() AS DATE)`. El resto —columnas, nombres, `CHECK` de `tipo_alias`— es idéntico.
 
-**Seguridad por fila en SQL Server.** La API .NET abre la conexión y fija el contexto **a partir de los claims del token** (nunca desde datos que envíe el cliente). La traducción del mecanismo de v9 (`SET app.clasificacion_max`, `app.actor_uid`, §11.10.bis) es esta:
+**Seguridad por fila en SQL Server.** La API .NET abre la conexión y fija el contexto **a partir de los claims del token** (nunca desde datos que envíe el cliente). La traducción del mecanismo vigente (`app.rol_codigo`, `app.actor_uid`, §11.10.bis) es esta:
 
-| v9 (PostgreSQL)                  | Perfil SQL Server                                                                                          |
-| -------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `SET app.clasificacion_max = n`  | `sp_set_session_context N'clasificacion_max', n, @read_only = 1`                                           |
-| `app.actor_uid` (sujeto externo) | `sp_set_session_context N'actor_uid', @aid, @read_only = 1`                                                |
-| `app.staff_bypass_subject_rls`   | `sp_set_session_context N'staff', 1, @read_only = 1`                                                       |
-| Política `RESTRICTIVE` por tabla | Un **único** predicado de filtro y bloqueo por tabla, con todas las condiciones dentro de la misma función |
+| v9 (PostgreSQL)                     | Perfil SQL Server                                                                                                                                                 |
+| ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SET app.rol_codigo = 'sectorista'` | `sp_set_session_context N'rol_codigo', N'sectorista', @read_only = 1`; el nivel y las capacidades **los resuelve la base** desde la tabla de roles, no el cliente |
+| `app.actor_uid` (sujeto externo)    | `sp_set_session_context N'actor_uid', @aid, @read_only = 1`                                                                                                       |
+| `app.staff_bypass_subject_rls`      | `sp_set_session_context N'staff', 1, @read_only = 1`                                                                                                              |
+| Política `RESTRICTIVE` por tabla    | Un **único** predicado de filtro y bloqueo por tabla, con todas las condiciones dentro de la misma función                                                        |
 
 ```sql
 -- La API fija el contexto al abrir CADA conexión (interceptor de EF Core):
---   EXEC sp_set_session_context N'perfil',           N'A', @read_only = 1;
---   EXEC sp_set_session_context N'clasificacion_max', 3,   @read_only = 1;
+--   EXEC sp_set_session_context N'rol_codigo',        N'A', @read_only = 1;  -- rol de core.roles, nunca un nivel numérico
 --   EXEC sp_set_session_context N'actor_uid',         @aid, @read_only = 1;  -- solo perfil C
 CREATE FUNCTION seg.fn_acceso_caso(@clasificacion TINYINT)
 RETURNS TABLE WITH SCHEMABINDING
@@ -3453,7 +3452,7 @@ flowchart LR
     end
     CORE -.-> REP
     subgraph QR["Consulta"]
-        U["Usuario y rol"] --> API["API REST"] --> SET["SET app.clasificacion_max"] --> RLS
+        U["Usuario y rol"] --> API["API REST"] --> SET["SET app.rol_codigo"] --> RLS
         RLS --> SG["kag.subgrafo en SQL"]
         RLS --> VS["Búsqueda vectorial"]
         SG --> FUS["Fusión RRF"]
@@ -4612,11 +4611,11 @@ tabla `core.roles` incluye esos cuatro más cuatro técnicos y funcionales. Un u
 | Analista cualitativo (codificación y análisis léxico) | `analista_cualitativo`         | 3                                |
 | Curador de política                                   | `curador_politica`             | 2 (Reservado)                    |
 | Director (OAIPCS)                                     | `sectorista`                   | 3                                |
-| Executive (Alta Dirección)                            | `alta_direccion`               | 3                                |
+| Executive (Alta Dirección)                            | `alta_direccion`               | 3, solo lectura                  |
 | External (otras entidades, transparencia)             | `externo_publico`              | 1 (Público)                      |
 | Lectura institucional                                 | `consulta_lectura`             | 2 (Reservado)                    |
 | Agentes del sistema                                   | `servicio_agente`              | 3, con enrutamiento R-LLM (3.17) |
-| Control y auditoría                                   | `auditor`                      | 3, solo lectura                  |
+| Control y auditoría                                   | `auditor`                      | 3, crea y edita; no borra        |
 
 **Las aprobaciones no se dan por rol sino por permiso.** En el modelo de roles de OGTI la Dirección de la OAIPCS comparte el rol `sectorista` con el personal de campo; por eso `core.permiso_aprobacion` (usuario, objeto, vigencia) otorga las aprobaciones específicas (por ejemplo, exportar sin pseudonimizar).
 
@@ -4647,11 +4646,11 @@ RS-08 (altas, bajas y cambios de permisos) cubre los roles nuevos. Cada exportac
 
 **Por qué hace falta.** El TDR y el MVP hablan de Perfil A, B y C. v9 habla de personas (Field, Analyst, Director, Executive, External) y de roles de sistema. Esta tabla las une, para que nadie cree dos modelos de permisos.
 
-| Perfil MVP                      | Persona v9 (§11.1–11.5) | Rol de sistema (`core.roles`) | Nivel máx. de clasificación | Qué lo limita                                                                                                                                                                           |
-| ------------------------------- | ----------------------- | ----------------------------- | --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **A — Office View**             | Analyst, Director       | `sectorista`                  | 3                           | Casos asignados; datos personales solo con permiso específico y auditoría                                                                                                               |
-| **B — Minister View**           | Executive               | `alta_direccion`              | **2** (v9 le da 3)          | **Decisión v10 (D25):** en el MVP queda en 2 y solo ve vistas agregadas; no ve datos personales, alertas pendientes ni texto de fuentes. Puede subirse a 3 por decisión de la Dirección |
-| **C — Portal de Transparencia** | External                | `externo_publico`             | 1                           | **Seguridad por sujeto** (`actor_uid` de §11.10.bis): solo ve **sus** compromisos y las alertas sectoriales donde es destinatario                                                       |
+| Perfil MVP                      | Persona v9 (§11.1–11.5) | Rol de sistema (`core.roles`) | Nivel máx. de clasificación | Qué lo limita                                                                                                                                                                                                                                                                        |
+| ------------------------------- | ----------------------- | ----------------------------- | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **A — Office View**             | Analyst, Director       | `sectorista`                  | 3                           | Casos asignados; datos personales solo con permiso específico y auditoría                                                                                                                                                                                                            |
+| **B — Minister View**           | Executive               | `alta_direccion`              | **3**                       | Lee todo lo Confidencial (incluidos datos personales) y **no escribe**: no crea, no edita y no borra. En tableros solo ve vistas agregadas; nunca datos personales en el Dashboard Estratégico (RD-08). **D25 quedó sin efecto el 2026-11-20** (ver 11.1, tabla de personas y roles) |
+| **C — Portal de Transparencia** | External                | `externo_publico`             | 1                           | **Seguridad por sujeto** (`actor_uid` de §11.10.bis): solo ve **sus** compromisos y las alertas sectoriales donde es destinatario                                                                                                                                                    |
 
 **Aclaración importante.** El Perfil C **no es** el portal público de transparencia del módulo M9 (§13, F6): M9 publica vistas agregadas con k-anonimato para cualquiera; el Perfil C es una vista **autenticada** para un actor externo concreto. Pueden coexistir.
 
@@ -4660,9 +4659,11 @@ RS-08 (altas, bajas y cambios de permisos) cubre los roles nuevos. Cada exportac
 **Qué pasa con las aprobaciones.** Se mantiene la regla de v9: las aprobaciones no se dan por rol sino por permiso (`core.permiso_aprobacion`). En el MVP, «aprobar alerta» lo tiene el analista y «confirmar crisis» lo tiene la Dirección de la OAIPCS (ciclo de vida de la alerta, MVP §3.4).
 <!-- v10:P07 end -->
 
-### 11.9 IdP y `app.clasificacion_max` — _añade_ — cierra SE-1, SE-2
+### 11.9 IdP y `app.rol_codigo` — _añade_ — cierra SE-1, SE-2
 
-El informe OGTI no confirma PIDE vs. SAML vs. OAuth2; v9 no decide por PRODUCE — documenta el contrato: el IdP que se elija debe mapear sus atributos de sesión a `app.clasificacion_max` y `app.actor_uid` (ambas variables de sesión Postgres, ya consumidas por toda la RLS del sistema desde v8.3) y a `app.staff_bypass_subject_rls` (booleana, solo para roles no acotados a un actor — ver §11.10.bis). `core.clasificacion_max()` (función ya existente en v8.3) las lee; nada más del sistema necesita saber qué IdP hay detrás.
+El informe OGTI no confirma PIDE vs. SAML vs. OAuth2; v9 no decide por PRODUCE — documenta el contrato: el IdP que se elija debe entregar, en los claims del token, el **rol de sistema** de la persona (`core.roles.codigo`) y, cuando aplique, el `actor_uid` del sujeto externo. La API .NET abre la conexión y fija `app.rol_codigo`, `app.actor_uid` y `app.staff_bypass_subject_rls` (booleana, solo para roles no acotados a un actor — ver §11.10.bis).
+
+**El nivel de clasificación y las capacidades no viajan en el token.** `core.clasificacion_max()`, `core.puede_crear()`, `core.puede_editar()` y `core.puede_eliminar()` los resuelve la base leyendo `core.roles` a partir de `app.rol_codigo` (parches 15 y 16). Antes el cliente declaraba `app.clasificacion_max` como número y eso permitía escalar privilegios: cualquier conexión podía fijar 3. Hoy ese parámetro **se ignora**; si llega, no cambia nada. Nada más del sistema necesita saber qué IdP hay detrás.
 
 ### 11.10.bis Mecanismo de RLS por sujeto — _añade_ — cierra SE-3
 
@@ -4995,7 +4996,7 @@ Las columnas en claro (`dni`, `email`, `telefono_contacto`, `telefono_alt`, `tel
 **Lo que el cifrado no tapa.**
 
 - `base_legal` tiene un único valor, `LEGADO_AVISA_2026`, en las 847 filas: es una etiqueta de migración, no el catálogo del art. 14 (DC-03). `fecha_consentimiento` está vacía en las 847. Con ese insumo, G23 (§16.1.quinquies) rechazaría toda escritura si su trigger existiera; hoy no existe.
-- El rol `avisa` es superusuario con `rolbypassrls`: las cuatro políticas de RLS de la tabla están, pero no lo limitan (DC-02). `app.clasificacion_max` y `app.crypto_key` son parámetros de sesión, no credenciales: cualquier conexión puede fijarlos. El nivel 3 evita descifrados accidentales, no a un atacante con acceso directo.
+- El rol `avisa` es superusuario con `rolbypassrls`: las cuatro políticas de RLS de la tabla están, pero no lo limitan (DC-02). `app.clasificacion_max` y `app.crypto_key` son parámetros de sesión, no credenciales: cualquier conexión puede fijarlos. El nivel 3 evita descifrados accidentales, no a un atacante con acceso directo. **Matizado el 2026-11-20:** el parche 15 cerró la parte de escalado — el nivel ya no lo declara el cliente, sale de `core.roles` — y creó `avisa_api`, un rol de login sin `BYPASSRLS` ni superusuario, que es el que debe usar la aplicación. El riesgo residual es la superusuario `avisa`, reservada a operación y migración.
 - Los intentos denegados no dejan fila: la excepción revierte la transacción y con ella el `INSERT` en la bitácora.
 - La bitácora no identifica a la persona: sin `SET ROLE` por funcionario, `session_user` es siempre `avisa`.
 
@@ -6290,7 +6291,7 @@ Se suman a las decisiones D1 a D9 de 0.6.6.
 | D22 | **El MVP usa los nombres de tabla de v9** (`core.actores`, `core.casos`, …). Los esquemas `seg`, `ia`, `audit` y `ref` del MVP se absorben en los de v9. _Por qué:_ evita una deuda de renombrado al migrar al modelo completo. _Costo:_ una pasada mecánica sobre el DDL del MVP (tabla en Anexo D.2) | Anexo D.2           |
 | D23 | SQL Server ≥ 2019 es el perfil de despliegue del MVP; PostgreSQL sigue siendo la referencia                                                                                                                                                                                                            | §3.17.2.v10         |
 | D24 | El simulador de 45 días es **M5a-lite**, una excepción de nivel declarada, con las reglas de v9 intactas                                                                                                                                                                                               | §0.7.1, §13.5.v10   |
-| D25 | Los cinco KPIs entran como semillas de `ind` (IRE e IPS30 como `proxy`); el Perfil B queda en clasificación ≤ 2                                                                                                                                                                                        | §8.4.ter, §11.8.v10 |
+| D25 | Los cinco KPIs entran como semillas de `ind` (IRE e IPS30 como `proxy`); ~~el Perfil B queda en clasificación ≤ 2~~ **segunda mitad sin efecto (2026-11-20):** el Perfil B (`alta_direccion`) queda en clasificación 3 y solo lectura. Los KPIs siguen vigentes                                        | §8.4.ter, §11.8.v10 |
 | D26 | «Tiempo real» = tres tramos medibles; _polling_ de 60 s                                                                                                                                                                                                                                                | §10.2.v10           |
 | D27 | AVISA: copia congelada, carga por `staging`, delta semanal hasta el _cutover_                                                                                                                                                                                                                          | UC-14               |
 | D28 | Redes sociales solo por API oficial o proveedor licenciado, con lista blanca                                                                                                                                                                                                                           | §7.5.v10, G22       |
@@ -7361,6 +7362,8 @@ $$;
 ```
 
 ### 20.16 Parte 16 — Seguridad: RLS por nivel de clasificación (la app debe fijar app.clasificacion_max)
+
+> **Superado por el parche 15 (2026-11-20).** El código de esta parte se conserva como registro del corte, pero **no debe reutilizarse tal cual**: la función leía el nivel de `app.clasificacion_max`, un parámetro que el cliente podía fijar a 3 y escalar privilegios (DC-02). La versión vigente toma el nivel de `core.roles` a partir de `app.rol_codigo` y añade políticas `RESTRICTIVE` de capacidad (`puede_crear`, `puede_editar`, `puede_eliminar`). Ver `PARCHE_15_ROLES_Y_BORRADO.sql` y §11.9.
 
 ```sql
 CREATE FUNCTION core.clasificacion_max() RETURNS smallint LANGUAGE sql STABLE AS $$
@@ -8464,23 +8467,23 @@ Extiende la numeración de tests de v8.3 (T1–T75, §3.16 y anexos) con los tes
 
 Extiende la numeración de §22.3.bis. Las pruebas T97–T99 se ejecutan **en cada despliegue** (canal de integración continua).
 
-| ID   | Prueba                                                                                                                                                                                | Bloque   |
-| ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
-| T91  | Insertar un actor de nivel 4 con `caso_ancla_id` y sin ningún documento: se acepta                                                                                                    | B11      |
-| T92  | Insertar un actor de nivel 4 o 5 sin caso ni organización ancla: se rechaza (`ck_actor_anclaje`)                                                                                      | B11      |
-| T93  | Promover un actor de nivel 4 a nivel 1: el `actor_uid` no cambia y el número de relaciones, citas y alias es el mismo antes y después                                                 | B11      |
-| T94  | Dos actores con el mismo `documento_hmac`: el segundo se rechaza; muchos actores sin documento: se aceptan                                                                            | B11      |
-| T95  | El Resolver con similitud 0,92 entre un actor de nivel 4 y otro candidato **no fusiona**: crea una tarea HITL                                                                         | B11      |
-| T96  | Con contexto de Perfil B o C, `SELECT` sobre `core.actor_datos_personales` devuelve 0 filas o niega el permiso                                                                        | B11      |
-| T97  | Batería de aislamiento: 20 actores externos con compromisos cruzados; ninguna consulta del Perfil C devuelve filas de otro actor                                                      | B12      |
-| T98  | Una conexión reutilizada del _pool_ con otro usuario **no hereda** el contexto de sesión anterior                                                                                     | B12      |
-| T99  | El Perfil B no ve alertas en estado «pendiente»; el Perfil C no ve alertas cuyo destinatario no es su actor (G21)                                                                     | B12, B15 |
-| T100 | Una cita alterada en un solo carácter respecto de la fuente queda con `verificada_literal = false` y no aparece en ningún informe (G20)                                               | B15      |
-| T101 | El IRE del ejemplo de §8.4.ter se recalcula desde tablas y da **55,5**                                                                                                                | B13      |
-| T102 | El IPA del ejemplo de §8.4.ter da **61,25**                                                                                                                                           | B13      |
-| T103 | Las cuatro combinaciones de los dos ejes devuelven E1–E4; toda simulación guarda insumos, resultado, usuario y versión de reglas, y lleva el rótulo «ESCENARIO — no vigente»          | B14      |
-| T104 | Con una fuente simulada, una noticia llega a la bandeja en ≤ 30 min; un cambio aprobado se ve en el tablero en ≤ 60 s; una crisis confirmada dispara el envío en ≤ 10 min (§10.2.v10) | B15      |
-| T105 | Reconciliación de la migración: origen = cargados + fusionados + descartados + pendientes                                                                                             | B11, B16 |
+| ID   | Prueba                                                                                                                                                                                                                                                                  | Bloque   |
+| ---- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| T91  | Insertar un actor de nivel 4 con `caso_ancla_id` y sin ningún documento: se acepta                                                                                                                                                                                      | B11      |
+| T92  | Insertar un actor de nivel 4 o 5 sin caso ni organización ancla: se rechaza (`ck_actor_anclaje`)                                                                                                                                                                        | B11      |
+| T93  | Promover un actor de nivel 4 a nivel 1: el `actor_uid` no cambia y el número de relaciones, citas y alias es el mismo antes y después                                                                                                                                   | B11      |
+| T94  | Dos actores con el mismo `documento_hmac`: el segundo se rechaza; muchos actores sin documento: se aceptan                                                                                                                                                              | B11      |
+| T95  | El Resolver con similitud 0,92 entre un actor de nivel 4 y otro candidato **no fusiona**: crea una tarea HITL                                                                                                                                                           | B11      |
+| T96  | Con contexto de Perfil C, `SELECT` sobre `core.actor_datos_personales` devuelve 0 filas o niega el permiso; con Perfil B la lectura se permite y deja una fila en `audit.datos_personales_acceso`, y ninguna vista del Dashboard Estratégico proyecta esos campos (G24) | B11      |
+| T97  | Batería de aislamiento: 20 actores externos con compromisos cruzados; ninguna consulta del Perfil C devuelve filas de otro actor                                                                                                                                        | B12      |
+| T98  | Una conexión reutilizada del _pool_ con otro usuario **no hereda** el contexto de sesión anterior                                                                                                                                                                       | B12      |
+| T99  | El Perfil B no ve alertas en estado «pendiente»; el Perfil C no ve alertas cuyo destinatario no es su actor (G21)                                                                                                                                                       | B12, B15 |
+| T100 | Una cita alterada en un solo carácter respecto de la fuente queda con `verificada_literal = false` y no aparece en ningún informe (G20)                                                                                                                                 | B15      |
+| T101 | El IRE del ejemplo de §8.4.ter se recalcula desde tablas y da **55,5**                                                                                                                                                                                                  | B13      |
+| T102 | El IPA del ejemplo de §8.4.ter da **61,25**                                                                                                                                                                                                                             | B13      |
+| T103 | Las cuatro combinaciones de los dos ejes devuelven E1–E4; toda simulación guarda insumos, resultado, usuario y versión de reglas, y lleva el rótulo «ESCENARIO — no vigente»                                                                                            | B14      |
+| T104 | Con una fuente simulada, una noticia llega a la bandeja en ≤ 30 min; un cambio aprobado se ve en el tablero en ≤ 60 s; una crisis confirmada dispara el envío en ≤ 10 min (§10.2.v10)                                                                                   | B15      |
+| T105 | Reconciliación de la migración: origen = cargados + fusionados + descartados + pendientes                                                                                                                                                                               | B11, B16 |
 
 **Para SQL Server.** T83 (`EXCLUDE USING gist`) se reescribe como prueba del _trigger_ de vigencias sin solape (§3.17.2.v10).
 <!-- v10:P14 end -->

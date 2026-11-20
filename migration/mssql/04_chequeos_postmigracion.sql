@@ -8,10 +8,10 @@
    (seguridad por fila e índices filtrados).
 
    DE DÓNDE SALEN LOS VALORES ESPERADOS
-   Todos están medidos sobre la base de origen `avisa_mssql`
-   (PostgreSQL 16.14, contenedor `avisa-db`) el 2026-11-19, con el rol
-   `avisa` (superusuario y BYPASSRLS). Ninguno es estimado.
-   La consulta de origen que produce los conteos está en §1.1.
+   Todos están medidos sobre la base de origen `avisa` (PostgreSQL 16.14,
+   contenedor `avisa-db`) el 2026-11-19, con el alcance cerrado de
+   `00_alcance_mvp.sql` y el rol `avisa` (superusuario y BYPASSRLS). Ninguno
+   es estimado. La consulta de origen que produce los conteos está en §1.1.
 
    CÓMO SE EJECUTA
        sqlcmd -S <servidor> -d <base_destino> -E -i 04_chequeos_postmigracion.sql
@@ -20,18 +20,19 @@
    corresponda.
 
    ALCANCE Y SUPUESTOS
-   · El alcance del staging son 74 tablas de dominio (agent, audit, core,
+   · El alcance del staging son 78 tablas de dominio (agent, audit, core,
      ind, kag, policy, qda, ref, staging), 87 de `legacy` y 1 de PostGIS
-     (`public.spatial_ref_sys`): 162 tablas en total.
+     (`public.spatial_ref_sys`): 166 tablas en total.
    · Se asume que SSMA creó los esquemas con el mismo nombre que en
      origen: agent, audit, core, ind, kag, policy, qda, ref, staging
      (más legacy y public).
      Si los renombró, ajustar las listas de §1 y las llamadas de §5/§6.
    · Se asume SQL Server 2016 SP1 o superior (CREATE OR ALTER).
-   · Las secciones §1 a §4, §7, §8 y §9 son de LECTURA (no cambian nada).
-     Las secciones §5 y §6 CREAN objetos (funciones, política de
-     seguridad, índices). Ejecutar primero en una base de pruebas.
-   · §5 y §6 son idempotentes: se pueden volver a ejecutar.
+   · Son de LECTURA (no cambian nada) §1, §3, §4, §7, §8 y §9.
+     §2 CREA los 13 CHECK ISJSON que falten (idempotente, igual que §5 y
+     §6, que crean funciones, política de seguridad e índices). Ejecutar
+     primero en una base de pruebas.
+   · §2, §5 y §6 son idempotentes: se pueden volver a ejecutar.
 
    ORDEN RECOMENDADO
      1) §1 conteos y §1.3 identidades  → si algo no cuadra, parar.
@@ -57,7 +58,7 @@ GO
    Objetivo: que ninguna tabla llegue vacía por accidente y que cada
    tabla tenga exactamente las filas del origen.
 
-   Las 19 tablas que en origen están vacías NO son un fallo: se listan
+   Las 20 tablas que en origen están vacías NO son un fallo: se listan
    con 0 esperado y el informe las distingue ("vacía de origen").
    ===================================================================== */
 
@@ -68,7 +69,8 @@ GO
 
    WITH alcance(esquema, tabla) AS (
      VALUES ('agent','run_log'),('audit','datos_personales_acceso'),
-            ('core','actor_datos_personales'),('core','actor_membresia'),
+            ('core','actor_alias'),('core','actor_datos_personales'),
+            ('core','actor_membresia'),
             ('core','actores'),('core','alertas_actores'),
             ('core','alertas_tempranas'),('core','banco_datos_tratamiento'),
             ('core','caso_cronologia'),
@@ -86,12 +88,15 @@ GO
             ('core','cat_tipos_actor'),('core','cat_tipos_cambio_caso'),
             ('core','cat_tipos_documento'),
             ('core','cat_tipos_espacio_dialogo'),
+            ('core','cat_tipos_fuente_integracion'),
             ('core','cat_tipos_hecho'),('core','cat_tipos_organizacion'),
             ('core','cat_tipos_reunion'),('core','cat_unidades_organicas'),
             ('core','compromiso_colaboradores'),('core','compromisos'),
+            ('core','consulta_reniec'),
             ('core','cronologia_vinculos'),('core','distritos'),
             ('core','documentos'),('core','entidades'),
-            ('core','hitos_compromiso'),('core','log_accesos'),
+            ('core','hitos_compromiso'),('core','integraciones'),
+            ('core','log_accesos'),
             ('core','mesas_dialogo'),('core','organizaciones'),
             ('core','output_contracts'),('core','permiso_aprobacion'),
             ('core','provincias'),('core','regiones'),
@@ -115,7 +120,7 @@ GO
      FROM alcance a
     ORDER BY 1;
 
-   Suma de control: 8 244 filas en las 74 tablas.
+   Suma de control: 8 428 filas en las 78 tablas.
    (Con un rol sujeto a RLS y sin contexto, varias darían 0 sin error.)
    --------------------------------------------------------------------- */
 
@@ -131,6 +136,7 @@ CREATE TABLE #esperado
 INSERT INTO #esperado (esquema, tabla, filas) VALUES
     ('agent',   'run_log',                       0),
     ('audit',   'datos_personales_acceso',    3088),
+    ('core',    'actor_alias',                 143),
     ('core',    'actor_datos_personales',      847),
     ('core',    'actor_membresia',             292),
     ('core',    'actores',                    1160),
@@ -162,17 +168,20 @@ INSERT INTO #esperado (esquema, tabla, filas) VALUES
     ('core',    'cat_tipos_cambio_caso',         6),
     ('core',    'cat_tipos_documento',          15),
     ('core',    'cat_tipos_espacio_dialogo',     7),
+    ('core',    'cat_tipos_fuente_integracion', 21),
     ('core',    'cat_tipos_hecho',               9),
     ('core',    'cat_tipos_organizacion',        7),
     ('core',    'cat_tipos_reunion',             4),
     ('core',    'cat_unidades_organicas',       66),
     ('core',    'compromiso_colaboradores',      0),
     ('core',    'compromisos',                   8),
+    ('core',    'consulta_reniec',               0),
     ('core',    'cronologia_vinculos',           5),
     ('core',    'distritos',                   698),
     ('core',    'documentos',                  153),
     ('core',    'entidades',                    23),
     ('core',    'hitos_compromiso',             12),
+    ('core',    'integraciones',               20),
     ('core',    'log_accesos',                 857),
     ('core',    'mesas_dialogo',                21),
     ('core',    'organizaciones',              224),
@@ -204,7 +213,7 @@ INSERT INTO #esperado (esquema, tabla, filas) VALUES
     ('ref',     'base_legal_tratamiento',        5),
     ('staging', 'lote',                          0);
 
-/* Suma de control de los valores esperados: debe dar 8244. */
+/* Suma de control de los valores esperados: debe dar 8428. */
 SELECT SUM(filas) AS filas_esperadas_totales,
        COUNT(*)    AS tablas_esperadas
   FROM #esperado;
@@ -450,11 +459,12 @@ GO
 /* =====================================================================
    §2 · JSON: CHECK (ISJSON(columna) = 1)
    =====================================================================
-   Las 12 columnas que llegan de `jsonb` (y 0 de `json`).
+   Las 13 columnas que llegan de `jsonb` (y 0 de `json`), en 12 tablas;
+   este bloque comprueba las 13.
    Sin este CHECK, un texto cualquiera puede entrar en la columna y
    JSON_VALUE/OPENJSON fallarán en tiempo de consulta, no de escritura.
 
-   Nota: un CHECK se cumple si la expresión da UNKNOWN, así que las 8
+   Nota: un CHECK se cumple si la expresión da UNKNOWN, así que las 9
    columnas nulables aceptan NULL. Las 4 NOT NULL son
    audit.datos_personales_acceso.contexto, core.documentos.contenido_json,
    ind.variante.especificacion y policy.regla.parametros (todas con
@@ -497,6 +507,11 @@ SELECT 'core.documentos.contenido_json',
        COUNT_BIG(*)
   FROM core.documentos
  WHERE contenido_json IS NOT NULL AND ISJSON(contenido_json) = 0
+UNION ALL
+SELECT 'core.integraciones.metadata_json',
+       COUNT_BIG(*)
+  FROM core.integraciones
+ WHERE metadata_json IS NOT NULL AND ISJSON(metadata_json) = 0
 UNION ALL
 SELECT 'core.output_contracts.response_json',
        COUNT_BIG(*)
@@ -583,6 +598,13 @@ IF NOT EXISTS (SELECT 1 FROM sys.check_constraints
       CHECK (ISJSON(contenido_json) = 1);
 
 IF NOT EXISTS (SELECT 1 FROM sys.check_constraints
+                WHERE name = N'ck_integraciones_metadata_isjson'
+                  AND parent_object_id = OBJECT_ID(N'core.integraciones'))
+    ALTER TABLE core.integraciones WITH CHECK
+      ADD CONSTRAINT ck_integraciones_metadata_isjson
+      CHECK (ISJSON(metadata_json) = 1);
+
+IF NOT EXISTS (SELECT 1 FROM sys.check_constraints
                 WHERE name = N'ck_ind_variante_especificacion_isjson'
                   AND parent_object_id = OBJECT_ID(N'ind.variante'))
     ALTER TABLE ind.variante WITH CHECK
@@ -603,22 +625,22 @@ IF NOT EXISTS (SELECT 1 FROM sys.check_constraints
       ADD CONSTRAINT ck_policy_regla_parametros_isjson
       CHECK (ISJSON(parametros) = 1);
 
-/* 2.3 · Verificación: los 12 CHECK existen sobre las 11 tablas. */
+/* 2.3 · Verificación: los 13 CHECK existen sobre las 12 tablas. */
 SELECT OBJECT_SCHEMA_NAME(parent_object_id) AS esquema,
        OBJECT_NAME(parent_object_id)        AS tabla,
        name                                 AS restriccion
   FROM sys.check_constraints
  WHERE name LIKE N'%_isjson'
  ORDER BY 1, 2;
-/* Esperado: 12 filas. */
+/* Esperado: 13 filas. */
 
 
 /* =====================================================================
    §3 · DEFAULT NEWID() / NEWSEQUENTIALID() en uniqueidentifier
    =====================================================================
-   En origen había 25 columnas `uuid` con DEFAULT gen_random_uuid()
+   En origen había 28 columnas `uuid` con DEFAULT gen_random_uuid()
    (el paso 3 les retiró el DEFAULT a propósito). Deben recuperarlo en
-   SQL Server. Las otras 90 columnas `uuid` NO llevan DEFAULT: heredan
+   SQL Server. Las otras 96 columnas `uuid` NO llevan DEFAULT: heredan
    el valor de la clave de otra tabla o lo genera la API.
    ===================================================================== */
 
@@ -633,6 +655,7 @@ CREATE TABLE #uuid_esperado
 
 INSERT INTO #uuid_esperado (esquema, tabla, columna) VALUES
     ('agent',   'run_log',                 'id'),
+    ('core',    'actor_alias',             'id'),
     ('core',    'actor_membresia',         'id'),
     ('core',    'actores',                 'actor_uid'),
     ('core',    'alertas_tempranas',       'id'),
@@ -640,8 +663,10 @@ INSERT INTO #uuid_esperado (esquema, tabla, columna) VALUES
     ('core',    'caso_estado_historial',   'id'),
     ('core',    'casos',                   'id'),
     ('core',    'compromisos',             'id'),
+    ('core',    'consulta_reniec',         'id'),
     ('core',    'documentos',              'id'),
     ('core',    'hitos_compromiso',        'id'),
+    ('core',    'integraciones',           'id'),
     ('core',    'mesas_dialogo',           'id'),
     ('core',    'output_contracts',        'id'),
     ('core',    'permiso_aprobacion',      'id'),
@@ -658,7 +683,7 @@ INSERT INTO #uuid_esperado (esquema, tabla, columna) VALUES
     ('qda',     'proyecto',                'id'),
     ('staging', 'lote',                    'id');
 
-/* 3.1 · Las 25 deben tener default NEWSEQUENTIALID() (o NEWID()).
+/* 3.1 · Las 28 deben tener default NEWSEQUENTIALID() (o NEWID()).
          Informe: sólo las que faltan o están mal. */
 SELECT  e.esquema,
         e.tabla,
@@ -694,7 +719,7 @@ SELECT s.name AS esquema, t.name AS tabla, c.name AS columna, d.definition
                       AND e.columna = c.name)
  ORDER BY 1, 2, 3;
 
-/* 3.3 · Conteo: 115 columnas uniqueidentifier en las 74 tablas. */
+/* 3.3 · Conteo: 124 columnas uniqueidentifier en las 78 tablas. */
 SELECT COUNT(*) AS columnas_uniqueidentifier
   FROM sys.columns c
   JOIN sys.tables  t ON t.object_id = c.object_id
@@ -702,14 +727,14 @@ SELECT COUNT(*) AS columnas_uniqueidentifier
   JOIN sys.types   ty ON ty.user_type_id = c.user_type_id
  WHERE ty.name = N'uniqueidentifier'
    AND s.name IN ('agent','audit','core','ind','kag','policy','qda','ref','staging');
-/* Esperado: 115. */
+/* Esperado: 124. */
 
 
 /* =====================================================================
    §4 · FECHAS: que ninguna columna haya perdido la zona
    =====================================================================
-   En origen hay 46 columnas `timestamptz` (36 con DEFAULT `now()`)
-   y 0 `timestamp` sin zona. El destino debe tener 46 `datetimeoffset(7)`
+   En origen hay 49 columnas `timestamptz` (38 con DEFAULT `now()`)
+   y 0 `timestamp` sin zona. El destino debe tener 49 `datetimeoffset(7)`
    y 0 `datetime`, `datetime2` o `smalldatetime`.
 
    Si OGTI decide DATETIME2 en UTC (v10 §3.17.2.v10), §4.1 y §4.2
@@ -727,7 +752,7 @@ SELECT s.name AS esquema, t.name AS tabla, c.name AS columna, ty.name AS tipo
    AND s.name IN ('agent','audit','core','ind','kag','policy','qda','ref','staging')
  ORDER BY 1, 2, 3;
 
-/* 4.2 · Las 46 columnas medidas en origen, una por una. */
+/* 4.2 · Las 49 columnas medidas en origen, una por una. */
 IF OBJECT_ID('tempdb..#fechas_esperado') IS NOT NULL DROP TABLE #fechas_esperado;
 CREATE TABLE #fechas_esperado
 (
@@ -740,6 +765,7 @@ CREATE TABLE #fechas_esperado
 INSERT INTO #fechas_esperado (esquema, tabla, columna) VALUES
     ('agent',   'run_log',                  'ts'),
     ('audit',   'datos_personales_acceso',  'ocurrido_en'),
+    ('core',    'actor_alias',              'created_at'),
     ('core',    'actor_datos_personales',   'updated_at'),
     ('core',    'actores',                  'created_at'),
     ('core',    'actores',                  'updated_at'),
@@ -756,8 +782,10 @@ INSERT INTO #fechas_esperado (esquema, tabla, columna) VALUES
     ('core',    'casos',                    'updated_at'),
     ('core',    'compromisos',              'created_at'),
     ('core',    'compromisos',              'updated_at'),
+    ('core',    'consulta_reniec',          'fecha_consulta'),
     ('core',    'documentos',               'created_at'),
     ('core',    'documentos',               'updated_at'),
+    ('core',    'integraciones',            'ultima_sincronizacion'),
     ('core',    'log_accesos',              'fecha'),
     ('core',    'mesas_dialogo',            'created_at'),
     ('core',    'mesas_dialogo',            'updated_at'),
@@ -800,7 +828,7 @@ SELECT  f.esquema, f.tabla, f.columna,
  ORDER BY f.esquema, f.tabla, f.columna;
 /* Esperado: 0 filas. */
 
-/* 4.3 · Conteo por tipo. Esperado: datetimeoffset 46, date 33. */
+/* 4.3 · Conteo por tipo. Esperado: datetimeoffset 49, date 33. */
 SELECT ty.name AS tipo, COUNT(*) AS columnas
   FROM sys.columns c
   JOIN sys.tables  t ON t.object_id = c.object_id
@@ -824,15 +852,37 @@ SELECT ty.name AS tipo, COUNT(*) AS columnas
      core.puede_editar()       → SESSION_CONTEXT(N'puede_editar')
      core.puede_eliminar()     → SESSION_CONTEXT(N'puede_eliminar')
      core.puede_auditar()      → SESSION_CONTEXT(N'puede_auditar')
+     core.puede_consultar_reniec() → SESSION_CONTEXT(N'puede_consultar_reniec')
+     core.usuario_actual()     → SESSION_CONTEXT(N'user_id')
 
    REGLA DE ORO: esos valores los fija la API desde el token, nunca
    desde el cuerpo de la petición, y se derivan de la fila de
    `core.roles` (como hacía clasificacion_max()), no de un número que
-   declare el cliente.
+   declare el cliente. La excepción es `puede_consultar_reniec`: no sale
+   de `core.roles` sino de `core.tiene_privilegio('consulta_reniec')`,
+   que es un privilegio nominal por usuario.
+
+   CLAVES QUE LA API FIJA EN CADA CONEXIÓN (03_mapa_tipos_ssma.md §7.2)
+   Antes de la primera consulta, al abrir cada conexión del pool:
+
+     rol_codigo, nivel_clasificacion, puede_crear, puede_editar,
+     puede_eliminar, puede_auditar, puede_consultar_reniec, user_id
+
+   `puede_consultar_reniec` es `core.tiene_privilegio('consulta_reniec')`
+   (core.puede_consultar_reniec()) y `user_id` es el uuid del claim `sub`
+   (core.usuario_actual()). Las dos últimas sólo las usan los predicados
+   de core.consulta_reniec (§5.3).
 
    Las funciones de predicado leen SÓLO SESSION_CONTEXT: no tocan
    tablas, así que no pueden entrar en recursión ni cuestan E/S.
    Si la clave no está, el resultado es NULL → no hay fila → DENIEGA.
+   Falla cerrado, nunca abierto: sin `nivel_clasificacion` el SELECT
+   devuelve 0 filas en silencio, y el INSERT/UPDATE/DELETE bloqueado
+   lanza el error 33504 (§5.2, punto 4). En core.consulta_reniec eso
+   significa que sin `puede_consultar_reniec` nadie lee y sin `user_id`
+   nadie inserta —la firma `consultado_por_usuario_id` tiene que ser el
+   usuario de la sesión—, tampoco un administrador: el privilegio es
+   nominal y no se hereda del rol (RA-07).
    ===================================================================== */
 
 IF SCHEMA_ID(N'seg') IS NULL
@@ -954,6 +1004,46 @@ AS
 RETURN
     SELECT 1 AS permitido
      WHERE TRY_CAST(SESSION_CONTEXT(N'puede_auditar') AS bit) = 1;
+GO
+
+/* core.consulta_reniec: traducción literal de sus dos únicas políticas
+   de origen (§6.1 de 03_mapa_tipos_ssma.md):
+
+     p_reniec_select  USING (core.puede_consultar_reniec())
+     p_reniec_insert  WITH CHECK (core.puede_consultar_reniec()
+                                  AND consultado_por_usuario_id = core.usuario_actual()
+                                  AND nivel_clasificacion = 3)
+
+   `core.puede_consultar_reniec()` es `tiene_privilegio('consulta_reniec')`
+   y llega por la clave `puede_consultar_reniec`; `core.usuario_actual()`
+   llega por `user_id`. Las dos las fija la API en cada conexión (§5).
+   Faltar una cierra la tabla: el privilegio es nominal y no se hereda
+   del rol, así que tampoco un administrador lee ni inserta sin ellas.
+
+   El parámetro de fn_reniec_ver no se usa en la comparación: existe
+   porque un FILTER recibe una columna, igual que en fn_auditar. */
+CREATE OR ALTER FUNCTION seg.fn_reniec_ver (@nivel smallint)
+RETURNS TABLE
+WITH SCHEMABINDING
+AS
+RETURN
+    SELECT 1 AS permitido
+     WHERE TRY_CAST(SESSION_CONTEXT(N'puede_consultar_reniec') AS bit) = 1;
+GO
+
+CREATE OR ALTER FUNCTION seg.fn_reniec_insertar
+(
+    @nivel          smallint,
+    @consultado_por uniqueidentifier
+)
+RETURNS TABLE
+WITH SCHEMABINDING
+AS
+RETURN
+    SELECT 1 AS permitido
+     WHERE TRY_CAST(SESSION_CONTEXT(N'puede_consultar_reniec') AS bit) = 1
+       AND @nivel = 3
+       AND @consultado_por = TRY_CAST(SESSION_CONTEXT(N'user_id') AS uniqueidentifier);
 GO
 
 /* ---- 5.2 · Funciones de predicado para las 13 tablas del parche 16 ----
@@ -1260,13 +1350,19 @@ RETURN
 GO
 
 /* ---- 5.3 · Política de seguridad ----------------------------------
-   En origen hay 28 tablas con RLS y 189 políticas: 23 tablas x 7 (= 161),
+   En origen hay 30 tablas con RLS y 198 políticas: 24 tablas x 7 (= 168),
    core.hitos_compromiso y core.output_contracts con 8 cada una (16),
-   core.log_accesos 6, staging.lote 4 y audit.datos_personales_acceso 2.
-   Esta política traduce las 28 tablas en 136 predicados:
+   core.log_accesos 6, staging.lote 4, audit.datos_personales_acceso 2 y
+   core.consulta_reniec 2.
+   Esta política traduce las 30 tablas en 143 predicados:
 
      · 15 tablas del alcance anterior                        71
      · 13 tablas que añadió el parche 16 (5 cada una)        65
+     · core.actor_alias (5) y core.consulta_reniec (2)        7
+
+   Restricción de T-SQL: un solo predicado por tabla y operación, así
+   que las cinco operaciones de una tabla van en cinco predicados
+   distintos.
 
    Las cinco tablas con nivel propio que no añaden padre
    (core.banco_datos_tratamiento y core.mesas_dialogo) y
@@ -1503,6 +1599,19 @@ CREATE SECURITY POLICY seg.pol_avisa
     ADD BLOCK  PREDICATE seg.fn_accion_actor(5, actor_uid)
         ON core.organizaciones BEFORE DELETE,
 
+    /* core.actor_alias · hereda de core.actores(actor_uid); mismo patrón
+       que core.organizaciones. */
+    ADD FILTER PREDICATE seg.fn_accion_actor(1, actor_uid)
+        ON core.actor_alias,
+    ADD BLOCK  PREDICATE seg.fn_accion_actor(2, actor_uid)
+        ON core.actor_alias AFTER INSERT,
+    ADD BLOCK  PREDICATE seg.fn_accion_actor(3, actor_uid)
+        ON core.actor_alias BEFORE UPDATE,
+    ADD BLOCK  PREDICATE seg.fn_accion_actor(4, actor_uid)
+        ON core.actor_alias AFTER UPDATE,
+    ADD BLOCK  PREDICATE seg.fn_accion_actor(5, actor_uid)
+        ON core.actor_alias BEFORE DELETE,
+
     /* core.actor_membresia · dos actores: persona y organización. */
     ADD FILTER PREDICATE seg.fn_accion_actor_actor(1, persona_uid, organizacion_uid)
         ON core.actor_membresia,
@@ -1600,6 +1709,26 @@ CREATE SECURITY POLICY seg.pol_avisa
     ADD BLOCK  PREDICATE seg.fn_accion_contrato(5, nivel_clasificacion, caso_id)
         ON core.output_contracts BEFORE DELETE,
 
+    /* core.consulta_reniec · tabla inmutable (sólo INSERT y SELECT).
+       La inmutabilidad no la impone esta política sino el `DENY UPDATE,
+       DELETE` al login de la API (§6.2 de 03_mapa_tipos_ssma.md): aquí
+       sólo van los dos predicados que replican sus dos políticas de
+       origen (§5.1).
+         · FILTER: sólo exige `puede_consultar_reniec`; el permiso es
+           todo o nada y no filtra por nivel, igual que p_reniec_select.
+           Todas sus filas son de nivel 3, pero una sesión con privilegio
+           las ve aunque su nivel sea menor: así estaba en origen.
+         · BLOCK AFTER INSERT: además, el usuario de la sesión tiene que
+           ser el consultado y la fila tiene que ser de nivel 3, como
+           p_reniec_insert. No se exige `puede_crear`: el privilegio
+           RENIEC basta, igual que en PostgreSQL.
+       Las dos claves (puede_consultar_reniec y user_id) las fija la API
+       en cada conexión; si faltan, la tabla queda cerrada. */
+    ADD FILTER PREDICATE seg.fn_reniec_ver(nivel_clasificacion)
+        ON core.consulta_reniec,
+    ADD BLOCK  PREDICATE seg.fn_reniec_insertar(nivel_clasificacion, consultado_por_usuario_id)
+        ON core.consulta_reniec AFTER INSERT,
+
     /* --- bitácora de PII: lectura sólo con puede_auditar --- */
     ADD FILTER PREDICATE seg.fn_auditar(id)
         ON audit.datos_personales_acceso
@@ -1607,9 +1736,10 @@ CREATE SECURITY POLICY seg.pol_avisa
 WITH (STATE = ON);
 GO
 
-/* 5.4 · Verificación de la política: 28 tablas, 136 predicados.
-         27 tablas x 5 predicados (SELECT, INSERT, UPDATE previo, UPDATE
-         nuevo y DELETE) = 135, más el único FILTER de
+/* 5.4 · Verificación de la política: 30 tablas, 143 predicados.
+         28 tablas x 5 predicados (SELECT, INSERT, UPDATE previo, UPDATE
+         nuevo y DELETE) = 140, más los 2 de core.consulta_reniec (FILTER +
+         BLOCK AFTER INSERT, tabla inmutable) y el único FILTER de
          audit.datos_personales_acceso.
 
    En `sys.security_predicates` el vínculo con la política está en
@@ -1625,7 +1755,7 @@ SELECT OBJECT_SCHEMA_NAME(p.target_object_id) AS esquema,
   JOIN sys.security_policies  sp ON sp.object_id = p.object_id
  ORDER BY 1, 2, 3, 4;
 
-/* Recuento de una línea: esperado 28 tablas y 136 predicados.
+/* Recuento de una línea: esperado 30 tablas y 143 predicados.
    Si el número de tablas es menor, alguna tabla quedó sin predicado y la
    política no la protege: eso no da error al crear, se nota aquí. */
 SELECT COUNT(DISTINCT p.target_object_id) AS tablas,
@@ -1664,6 +1794,11 @@ GO
 GRANT UPDATE ON core.actores TO avisa_prueba_rls;
 GO
 
+/* La prueba 7 necesita INSERT en core.consulta_reniec: sin el permiso el
+   rechazo vendría de los permisos y no de los predicados de RENIEC. */
+GRANT INSERT ON core.consulta_reniec TO avisa_prueba_rls;
+GO
+
 PRINT '--- Prueba 1: SIN contexto de sesión no se ve NADA ---';
 EXEC sp_set_session_context @key = N'rol_codigo',          @value = NULL;
 EXEC sp_set_session_context @key = N'nivel_clasificacion', @value = NULL;
@@ -1671,6 +1806,8 @@ EXEC sp_set_session_context @key = N'puede_crear',         @value = NULL;
 EXEC sp_set_session_context @key = N'puede_editar',        @value = NULL;
 EXEC sp_set_session_context @key = N'puede_eliminar',      @value = NULL;
 EXEC sp_set_session_context @key = N'puede_auditar',       @value = NULL;
+EXEC sp_set_session_context @key = N'puede_consultar_reniec', @value = NULL;
+EXEC sp_set_session_context @key = N'user_id',             @value = NULL;
 
 EXECUTE AS USER = N'avisa_prueba_rls';
     SELECT COUNT_BIG(*) AS actores_visibles   FROM core.actores;              -- 0
@@ -1812,6 +1949,80 @@ EXECUTE AS USER = N'avisa_prueba_rls';
 REVERT;
 GO
 
+PRINT '--- Prueba 7: core.consulta_reniec exige las claves RENIEC ---';
+/* La tabla está vacía en origen (0 filas), así que la lectura no se puede
+   probar contando: se prueba el alta, que es donde actúan las dos claves
+   nuevas. `consultado_por_usuario_id` tiene clave ajena a core.usuarios,
+   así que se usan usuarios reales y el INSERT va dentro de una
+   transacción que se revierte.
+
+   7a: sin `puede_consultar_reniec` ni `user_id`, el alta se rechaza.
+   7b: con privilegio y firmando con el propio usuario, el alta pasa.
+   7c: con privilegio pero firmando a nombre de OTRO usuario, se rechaza. */
+DECLARE @actor_reniec uniqueidentifier = (SELECT TOP (1) actor_uid FROM core.actores);
+DECLARE @yo           uniqueidentifier = (SELECT TOP (1) id FROM core.usuarios);
+DECLARE @otro         uniqueidentifier = (SELECT TOP (1) id FROM core.usuarios
+                                           WHERE id <> @yo);
+
+EXEC sp_set_session_context @key = N'nivel_clasificacion',    @value = 3,    @read_only = 0;
+EXEC sp_set_session_context @key = N'puede_consultar_reniec', @value = NULL, @read_only = 0;
+EXEC sp_set_session_context @key = N'user_id',                @value = NULL, @read_only = 0;
+
+EXECUTE AS USER = N'avisa_prueba_rls';
+    BEGIN TRANSACTION;
+    BEGIN TRY
+        INSERT INTO core.consulta_reniec
+               (id, actor_uid, consultado_por_usuario_id, motivo,
+                fecha_consulta, resultado_cifrado, resultado_hmac)
+        VALUES (NEWID(), @actor_reniec, @yo, N'prueba RLS',
+                SYSUTCDATETIME(), 0x00, REPLICATE(N'0', 64));
+
+        PRINT 'FALLA (7a): sin puede_consultar_reniec el INSERT debió bloquearse';
+    END TRY
+    BEGIN CATCH
+        PRINT 'OK (7a): INSERT bloqueado sin clave -> ' + ERROR_MESSAGE();
+    END CATCH
+    ROLLBACK TRANSACTION;
+REVERT;
+
+EXEC sp_set_session_context @key = N'puede_consultar_reniec', @value = 1,   @read_only = 0;
+EXEC sp_set_session_context @key = N'user_id',                @value = @yo, @read_only = 0;
+
+EXECUTE AS USER = N'avisa_prueba_rls';
+    BEGIN TRANSACTION;
+    BEGIN TRY
+        INSERT INTO core.consulta_reniec
+               (id, actor_uid, consultado_por_usuario_id, motivo,
+                fecha_consulta, resultado_cifrado, resultado_hmac)
+        VALUES (NEWID(), @actor_reniec, @yo, N'prueba RLS',
+                SYSUTCDATETIME(), 0x00, REPLICATE(N'0', 64));
+
+        SELECT @@ROWCOUNT AS filas_insertadas;   -- 1
+    END TRY
+    BEGIN CATCH
+        PRINT 'FALLA (7b): el alta con las claves debió pasar -> ' + ERROR_MESSAGE();
+    END CATCH
+    ROLLBACK TRANSACTION;
+REVERT;
+
+EXECUTE AS USER = N'avisa_prueba_rls';
+    BEGIN TRANSACTION;
+    BEGIN TRY
+        INSERT INTO core.consulta_reniec
+               (id, actor_uid, consultado_por_usuario_id, motivo,
+                fecha_consulta, resultado_cifrado, resultado_hmac)
+        VALUES (NEWID(), @actor_reniec, @otro, N'prueba RLS',
+                SYSUTCDATETIME(), 0x00, REPLICATE(N'0', 64));
+
+        PRINT 'FALLA (7c): firmar a nombre de otro debió bloquearse';
+    END TRY
+    BEGIN CATCH
+        PRINT 'OK (7c): INSERT bloqueado por firma ajena -> ' + ERROR_MESSAGE();
+    END CATCH
+    ROLLBACK TRANSACTION;
+REVERT;
+GO
+
 /* Limpieza del usuario de prueba (ejecutar cuando ya no haga falta):
        DROP USER avisa_prueba_rls;
 */
@@ -1826,8 +2037,12 @@ GO
       salvo que el predicado use IN / NOT IN, que no se admite.
 
    B) Índices ÚNICOS sobre columnas nulables: PostgreSQL admite muchos
-      NULL; SQL Server, UNO SOLO. En el alcance hay 25 UNIQUE sobre
-      columnas nulables: 9 tienen NULL hoy y 16 tienen 0 NULL. Los 9 que
+      NULL; SQL Server, UNO SOLO. En el alcance hay 25 UNIQUE no
+      parciales sobre columnas nulables: 9 tienen NULL hoy y 16 tienen
+      0 NULL. Con los 3 únicos parciales de §6.3 cuya columna es nulable
+      (`ux_usuarios_dni`, `ux_ind_resultado_vigente` y
+      `entidades_codigo_legado_key`) el alcance suma 28 únicos sobre
+      columna nulable: 10 con NULL y 18 sin. Los 9 no parciales que
       fallarían tal cual están medidos en origen:
           core.organizaciones.ruc                         219 NULL de 224
           core.usuarios.email                              27 NULL de 32
@@ -2454,9 +2669,9 @@ SELECT OBJECT_SCHEMA_NAME(i.object_id) AS esquema,
 /* =====================================================================
    §7 · OPCIONAL · comentarios (propiedades extendidas)
    =====================================================================
-   En la base fuente `avisa` hay 702 comentarios en tablas y columnas del
-   alcance (74 de tabla + 628 de columna) más 10 de función. En la copia de
-   staging `avisa_mssql` son 701 (73 de tabla + 628): `agent.run_log` tiene
+   En la base fuente `avisa` hay 757 comentarios en tablas y columnas del
+   alcance (78 de tabla + 679 de columna) más 10 de función. En el staging
+   son 756 (77 de tabla + 679): `agent.run_log` tiene
    comentario de tabla en `avisa` pero lo perdió al aplanarse en el paso 1.
    El parche 16 sumó 12 comentarios de columna (11 en
    `core.banco_datos_tratamiento` y 1 en `ref.base_legal_tratamiento`).
@@ -2470,7 +2685,7 @@ SELECT COUNT(*) AS propiedades_extendidas
           FROM sys.tables t
           JOIN sys.schemas s ON s.schema_id = t.schema_id
          WHERE s.name IN ('agent','audit','core','ind','kag','policy','qda','ref','staging'));
-/* Esperado: 701 si se restaura desde `avisa_mssql`; 702 si se restaura
+/* Esperado: 756 si se restaura desde el staging; 757 si se restaura
    desde la base fuente `avisa` (allí `agent.run_log` sí tiene el suyo). */
 
 /* =====================================================================
@@ -2480,13 +2695,13 @@ SELECT COUNT(*) AS propiedades_extendidas
    cerrar sus dependencias: quedaban claves ajenas apuntando a tablas
    que no se migraban. Aquí se vigila que el cierre sea completo.
 
-   8.1 · Total de claves ajenas del dominio: 156.
+   8.1 · Total de claves ajenas del dominio: 169.
    8.2 · Ninguna FK del dominio apunta fuera del dominio ni a una tabla
          ausente. Esperado: 0 filas.
    8.3 · Reparto por esquema de la tabla que declara la FK.
    ===================================================================== */
 
-/* 8.1 · Total. Esperado: 156. */
+/* 8.1 · Total. Esperado: 169. */
 SELECT COUNT(*) AS claves_ajenas
   FROM sys.foreign_keys fk
   JOIN sys.tables  t ON t.object_id = fk.parent_object_id
@@ -2510,7 +2725,7 @@ SELECT s.name AS esquema_origen,
  ORDER BY 1, 2, 3;
 
 /* 8.3 · Reparto por esquema. Esperado:
-         core 122, policy 14, kag 5, qda 5, ind 4, ref 3, staging 3. */
+         core 131, policy 14, qda 6, ind 5, kag 5, staging 5, ref 3. */
 SELECT s.name AS esquema, COUNT(*) AS claves_ajenas
   FROM sys.foreign_keys fk
   JOIN sys.tables  t ON t.object_id = fk.parent_object_id
@@ -2523,7 +2738,7 @@ SELECT s.name AS esquema, COUNT(*) AS claves_ajenas
 /* =====================================================================
    §9 · TRIGGERS heredados del modelo de origen
    =====================================================================
-   En origen hay 25 triggers NO internos repartidos en 14 tablas del
+   En origen hay 30 triggers NO internos repartidos en 16 tablas del
    alcance, y no son cosméticos:
      · bitácora de PII append-only y auditoría de sus cambios
        (audit.datos_personales_acceso, core.actor_datos_personales);
@@ -2538,16 +2753,17 @@ SELECT s.name AS esquema, COUNT(*) AS claves_ajenas
    SSMA no los migra. Este bloque NO los reconstruye: sólo informa de
    cuántos hay en el destino para que su ausencia no pase inadvertida.
 
-   Reparto medido en origen (25 en total):
+   Reparto medido en origen (30 en total):
        audit.datos_personales_acceso 3    core.actores 3   core.casos 4
        core.actor_datos_personales 2      core.alertas_tempranas 2
        core.compromisos 2                 policy.regla 2
+       core.consulta_reniec 4             agent.run_log 1
        core.actor_membresia 1             core.caso_cronologia 1
        core.casos_actores 1               core.cat_niveles_conflicto 1
        core.documentos 1                  core.reuniones_dialogo 1
        ind.variante 1
 
-   Esperado: 25 si se recrean en T-SQL. Si OGTI decide mover esa lógica
+   Esperado: 30 si se recrean en T-SQL. Si OGTI decide mover esa lógica
    a la API, dejar constancia de la decisión y ajustar la expectativa:
    el script no debe fallar en silencio.
    ===================================================================== */
@@ -2564,7 +2780,7 @@ SELECT s.name              AS esquema,
    AND s.name IN ('agent','audit','core','ind','kag','policy','qda','ref','staging')
  GROUP BY s.name, t.name
  ORDER BY 1, 2;
-/* Esperado: 25 triggers sobre 14 tablas (la columna `total` debe dar 25). */
+/* Esperado: 30 triggers sobre 16 tablas (la columna `total` debe dar 30). */
 
 PRINT '=== AVISA · chequeos post-migración · fin ===';
 GO

@@ -35,6 +35,12 @@ agent,llm_call,0,P,tokens_out,12,integer,sí,,0,0,,Cantidad de tokens producidos
 agent,llm_call,0,P,latencia_ms,13,integer,sí,,0,0,,"Tiempo de respuesta de la llamada al modelo, medido en milisegundos",comentario_bd
 agent,llm_call,0,P,veredicto_guardrails,14,jsonb,sí,,0,0,,Resultado de los filtros de seguridad aplicados al prompt y a la respuesta,comentario_bd
 agent,llm_call,0,P,nivel_clasificacion,15,smallint,no,,0,0,core.cat_clasificacion(nivel),"Nivel de acceso al dato: 1 público, 2 reservado, 3 confidencial",comentario_bd
+agent,llm_call,0,P,tokens_thinking,16,integer,sí,,0,0,,Tokens de razonamiento interno. Google los cobra a precio de salida: es el costo oculto nº 1 de la ficha 13.3.1 y RM-11 exige que sea mínimo.,comentario_bd
+agent,llm_call,0,P,thinking_budget,17,integer,sí,,0,0,,Valor de thinking_budget usado en la llamada. RM-11: 0 o el mínimo.,comentario_bd
+agent,llm_call,0,P,grounding_habilitado,18,boolean,no,false,0,0,,Si se activó búsqueda web. RM-13 lo prohíbe en ingesta y mandatos: queda en falso salvo excepción documentada.,comentario_bd
+agent,llm_call,0,P,store_habilitado,19,boolean,no,false,0,0,,Si Google conserva el contenido. RM-15 exige falso (Ley 29733).,comentario_bd
+agent,llm_call,0,P,datos_anonimizados,20,boolean,no,false,0,0,,Si el texto se anonimizó antes de salir (DNI y teléfonos retirados). RM-15.,comentario_bd
+agent,llm_call,0,P,costo_estimado_usd,21,"numeric(12,6)",sí,,0,0,,"Costo aproximado de la llamada, calculado por el servicio de aplicación. RNF-13: permite sumar consumo por servicio y por mes.",comentario_bd
 agent,llm_call_202611,1,P,id,1,uuid,no,gen_random_uuid(),1,0,,Identificador interno de la fila,heredado_padre
 agent,llm_call_202611,1,P,run_id,2,uuid,sí,,0,0,,"Ejecución del agente a la que pertenece la llamada, para agrupar su costo y su latencia",heredado_padre
 agent,llm_call_202611,1,P,ts,3,timestamp with time zone,no,now(),1,0,,"Momento en que se hizo la llamada al modelo, parte de su clave de partición",heredado_padre
@@ -50,6 +56,12 @@ agent,llm_call_202611,1,P,tokens_out,12,integer,sí,,0,0,,Cantidad de tokens pro
 agent,llm_call_202611,1,P,latencia_ms,13,integer,sí,,0,0,,"Tiempo de respuesta de la llamada al modelo, medido en milisegundos",heredado_padre
 agent,llm_call_202611,1,P,veredicto_guardrails,14,jsonb,sí,,0,0,,Resultado de los filtros de seguridad aplicados al prompt y a la respuesta,heredado_padre
 agent,llm_call_202611,1,P,nivel_clasificacion,15,smallint,no,,0,0,core.cat_clasificacion(nivel),"Nivel de acceso al dato: 1 público, 2 reservado, 3 confidencial",heredado_padre
+agent,llm_call_202611,1,P,tokens_thinking,16,integer,sí,,0,0,,Tokens de razonamiento interno. Google los cobra a precio de salida: es el costo oculto nº 1 de la ficha 13.3.1 y RM-11 exige que sea mínimo.,heredado_padre
+agent,llm_call_202611,1,P,thinking_budget,17,integer,sí,,0,0,,Valor de thinking_budget usado en la llamada. RM-11: 0 o el mínimo.,heredado_padre
+agent,llm_call_202611,1,P,grounding_habilitado,18,boolean,no,false,0,0,,Si se activó búsqueda web. RM-13 lo prohíbe en ingesta y mandatos: queda en falso salvo excepción documentada.,heredado_padre
+agent,llm_call_202611,1,P,store_habilitado,19,boolean,no,false,0,0,,Si Google conserva el contenido. RM-15 exige falso (Ley 29733).,heredado_padre
+agent,llm_call_202611,1,P,datos_anonimizados,20,boolean,no,false,0,0,,Si el texto se anonimizó antes de salir (DNI y teléfonos retirados). RM-15.,heredado_padre
+agent,llm_call_202611,1,P,costo_estimado_usd,21,"numeric(12,6)",sí,,0,0,,"Costo aproximado de la llamada, calculado por el servicio de aplicación. RNF-13: permite sumar consumo por servicio y por mes.",heredado_padre
 agent,llm_call_202612,1,P,id,1,uuid,no,gen_random_uuid(),1,0,,Identificador interno de la fila,heredado_padre
 agent,llm_call_202612,1,P,run_id,2,uuid,sí,,0,0,,"Ejecución del agente a la que pertenece la llamada, para agrupar su costo y su latencia",heredado_padre
 agent,llm_call_202612,1,P,ts,3,timestamp with time zone,no,now(),1,0,,"Momento en que se hizo la llamada al modelo, parte de su clave de partición",heredado_padre
@@ -65,6 +77,12 @@ agent,llm_call_202612,1,P,tokens_out,12,integer,sí,,0,0,,Cantidad de tokens pro
 agent,llm_call_202612,1,P,latencia_ms,13,integer,sí,,0,0,,"Tiempo de respuesta de la llamada al modelo, medido en milisegundos",heredado_padre
 agent,llm_call_202612,1,P,veredicto_guardrails,14,jsonb,sí,,0,0,,Resultado de los filtros de seguridad aplicados al prompt y a la respuesta,heredado_padre
 agent,llm_call_202612,1,P,nivel_clasificacion,15,smallint,no,,0,0,core.cat_clasificacion(nivel),"Nivel de acceso al dato: 1 público, 2 reservado, 3 confidencial",heredado_padre
+agent,llm_call_202612,1,P,tokens_thinking,16,integer,sí,,0,0,,Tokens de razonamiento interno. Google los cobra a precio de salida: es el costo oculto nº 1 de la ficha 13.3.1 y RM-11 exige que sea mínimo.,heredado_padre
+agent,llm_call_202612,1,P,thinking_budget,17,integer,sí,,0,0,,Valor de thinking_budget usado en la llamada. RM-11: 0 o el mínimo.,heredado_padre
+agent,llm_call_202612,1,P,grounding_habilitado,18,boolean,no,false,0,0,,Si se activó búsqueda web. RM-13 lo prohíbe en ingesta y mandatos: queda en falso salvo excepción documentada.,heredado_padre
+agent,llm_call_202612,1,P,store_habilitado,19,boolean,no,false,0,0,,Si Google conserva el contenido. RM-15 exige falso (Ley 29733).,heredado_padre
+agent,llm_call_202612,1,P,datos_anonimizados,20,boolean,no,false,0,0,,Si el texto se anonimizó antes de salir (DNI y teléfonos retirados). RM-15.,heredado_padre
+agent,llm_call_202612,1,P,costo_estimado_usd,21,"numeric(12,6)",sí,,0,0,,"Costo aproximado de la llamada, calculado por el servicio de aplicación. RNF-13: permite sumar consumo por servicio y por mes.",heredado_padre
 agent,llm_call_202701,1,P,id,1,uuid,no,gen_random_uuid(),1,0,,Identificador interno de la fila,heredado_padre
 agent,llm_call_202701,1,P,run_id,2,uuid,sí,,0,0,,"Ejecución del agente a la que pertenece la llamada, para agrupar su costo y su latencia",heredado_padre
 agent,llm_call_202701,1,P,ts,3,timestamp with time zone,no,now(),1,0,,"Momento en que se hizo la llamada al modelo, parte de su clave de partición",heredado_padre
@@ -80,6 +98,12 @@ agent,llm_call_202701,1,P,tokens_out,12,integer,sí,,0,0,,Cantidad de tokens pro
 agent,llm_call_202701,1,P,latencia_ms,13,integer,sí,,0,0,,"Tiempo de respuesta de la llamada al modelo, medido en milisegundos",heredado_padre
 agent,llm_call_202701,1,P,veredicto_guardrails,14,jsonb,sí,,0,0,,Resultado de los filtros de seguridad aplicados al prompt y a la respuesta,heredado_padre
 agent,llm_call_202701,1,P,nivel_clasificacion,15,smallint,no,,0,0,core.cat_clasificacion(nivel),"Nivel de acceso al dato: 1 público, 2 reservado, 3 confidencial",heredado_padre
+agent,llm_call_202701,1,P,tokens_thinking,16,integer,sí,,0,0,,Tokens de razonamiento interno. Google los cobra a precio de salida: es el costo oculto nº 1 de la ficha 13.3.1 y RM-11 exige que sea mínimo.,heredado_padre
+agent,llm_call_202701,1,P,thinking_budget,17,integer,sí,,0,0,,Valor de thinking_budget usado en la llamada. RM-11: 0 o el mínimo.,heredado_padre
+agent,llm_call_202701,1,P,grounding_habilitado,18,boolean,no,false,0,0,,Si se activó búsqueda web. RM-13 lo prohíbe en ingesta y mandatos: queda en falso salvo excepción documentada.,heredado_padre
+agent,llm_call_202701,1,P,store_habilitado,19,boolean,no,false,0,0,,Si Google conserva el contenido. RM-15 exige falso (Ley 29733).,heredado_padre
+agent,llm_call_202701,1,P,datos_anonimizados,20,boolean,no,false,0,0,,Si el texto se anonimizó antes de salir (DNI y teléfonos retirados). RM-15.,heredado_padre
+agent,llm_call_202701,1,P,costo_estimado_usd,21,"numeric(12,6)",sí,,0,0,,"Costo aproximado de la llamada, calculado por el servicio de aplicación. RNF-13: permite sumar consumo por servicio y por mes.",heredado_padre
 agent,llm_call_202702,1,P,id,1,uuid,no,gen_random_uuid(),1,0,,Identificador interno de la fila,heredado_padre
 agent,llm_call_202702,1,P,run_id,2,uuid,sí,,0,0,,"Ejecución del agente a la que pertenece la llamada, para agrupar su costo y su latencia",heredado_padre
 agent,llm_call_202702,1,P,ts,3,timestamp with time zone,no,now(),1,0,,"Momento en que se hizo la llamada al modelo, parte de su clave de partición",heredado_padre
@@ -95,6 +119,12 @@ agent,llm_call_202702,1,P,tokens_out,12,integer,sí,,0,0,,Cantidad de tokens pro
 agent,llm_call_202702,1,P,latencia_ms,13,integer,sí,,0,0,,"Tiempo de respuesta de la llamada al modelo, medido en milisegundos",heredado_padre
 agent,llm_call_202702,1,P,veredicto_guardrails,14,jsonb,sí,,0,0,,Resultado de los filtros de seguridad aplicados al prompt y a la respuesta,heredado_padre
 agent,llm_call_202702,1,P,nivel_clasificacion,15,smallint,no,,0,0,core.cat_clasificacion(nivel),"Nivel de acceso al dato: 1 público, 2 reservado, 3 confidencial",heredado_padre
+agent,llm_call_202702,1,P,tokens_thinking,16,integer,sí,,0,0,,Tokens de razonamiento interno. Google los cobra a precio de salida: es el costo oculto nº 1 de la ficha 13.3.1 y RM-11 exige que sea mínimo.,heredado_padre
+agent,llm_call_202702,1,P,thinking_budget,17,integer,sí,,0,0,,Valor de thinking_budget usado en la llamada. RM-11: 0 o el mínimo.,heredado_padre
+agent,llm_call_202702,1,P,grounding_habilitado,18,boolean,no,false,0,0,,Si se activó búsqueda web. RM-13 lo prohíbe en ingesta y mandatos: queda en falso salvo excepción documentada.,heredado_padre
+agent,llm_call_202702,1,P,store_habilitado,19,boolean,no,false,0,0,,Si Google conserva el contenido. RM-15 exige falso (Ley 29733).,heredado_padre
+agent,llm_call_202702,1,P,datos_anonimizados,20,boolean,no,false,0,0,,Si el texto se anonimizó antes de salir (DNI y teléfonos retirados). RM-15.,heredado_padre
+agent,llm_call_202702,1,P,costo_estimado_usd,21,"numeric(12,6)",sí,,0,0,,"Costo aproximado de la llamada, calculado por el servicio de aplicación. RNF-13: permite sumar consumo por servicio y por mes.",heredado_padre
 agent,llm_call_202703,1,P,id,1,uuid,no,gen_random_uuid(),1,0,,Identificador interno de la fila,heredado_padre
 agent,llm_call_202703,1,P,run_id,2,uuid,sí,,0,0,,"Ejecución del agente a la que pertenece la llamada, para agrupar su costo y su latencia",heredado_padre
 agent,llm_call_202703,1,P,ts,3,timestamp with time zone,no,now(),1,0,,"Momento en que se hizo la llamada al modelo, parte de su clave de partición",heredado_padre
@@ -110,6 +140,12 @@ agent,llm_call_202703,1,P,tokens_out,12,integer,sí,,0,0,,Cantidad de tokens pro
 agent,llm_call_202703,1,P,latencia_ms,13,integer,sí,,0,0,,"Tiempo de respuesta de la llamada al modelo, medido en milisegundos",heredado_padre
 agent,llm_call_202703,1,P,veredicto_guardrails,14,jsonb,sí,,0,0,,Resultado de los filtros de seguridad aplicados al prompt y a la respuesta,heredado_padre
 agent,llm_call_202703,1,P,nivel_clasificacion,15,smallint,no,,0,0,core.cat_clasificacion(nivel),"Nivel de acceso al dato: 1 público, 2 reservado, 3 confidencial",heredado_padre
+agent,llm_call_202703,1,P,tokens_thinking,16,integer,sí,,0,0,,Tokens de razonamiento interno. Google los cobra a precio de salida: es el costo oculto nº 1 de la ficha 13.3.1 y RM-11 exige que sea mínimo.,heredado_padre
+agent,llm_call_202703,1,P,thinking_budget,17,integer,sí,,0,0,,Valor de thinking_budget usado en la llamada. RM-11: 0 o el mínimo.,heredado_padre
+agent,llm_call_202703,1,P,grounding_habilitado,18,boolean,no,false,0,0,,Si se activó búsqueda web. RM-13 lo prohíbe en ingesta y mandatos: queda en falso salvo excepción documentada.,heredado_padre
+agent,llm_call_202703,1,P,store_habilitado,19,boolean,no,false,0,0,,Si Google conserva el contenido. RM-15 exige falso (Ley 29733).,heredado_padre
+agent,llm_call_202703,1,P,datos_anonimizados,20,boolean,no,false,0,0,,Si el texto se anonimizó antes de salir (DNI y teléfonos retirados). RM-15.,heredado_padre
+agent,llm_call_202703,1,P,costo_estimado_usd,21,"numeric(12,6)",sí,,0,0,,"Costo aproximado de la llamada, calculado por el servicio de aplicación. RNF-13: permite sumar consumo por servicio y por mes.",heredado_padre
 agent,llm_call_default,1,P,id,1,uuid,no,gen_random_uuid(),1,0,,Identificador interno de la fila,heredado_padre
 agent,llm_call_default,1,P,run_id,2,uuid,sí,,0,0,,"Ejecución del agente a la que pertenece la llamada, para agrupar su costo y su latencia",heredado_padre
 agent,llm_call_default,1,P,ts,3,timestamp with time zone,no,now(),1,0,,"Momento en que se hizo la llamada al modelo, parte de su clave de partición",heredado_padre
@@ -125,8 +161,14 @@ agent,llm_call_default,1,P,tokens_out,12,integer,sí,,0,0,,Cantidad de tokens pr
 agent,llm_call_default,1,P,latencia_ms,13,integer,sí,,0,0,,"Tiempo de respuesta de la llamada al modelo, medido en milisegundos",heredado_padre
 agent,llm_call_default,1,P,veredicto_guardrails,14,jsonb,sí,,0,0,,Resultado de los filtros de seguridad aplicados al prompt y a la respuesta,heredado_padre
 agent,llm_call_default,1,P,nivel_clasificacion,15,smallint,no,,0,0,core.cat_clasificacion(nivel),"Nivel de acceso al dato: 1 público, 2 reservado, 3 confidencial",heredado_padre
-agent,llm_call_fragmento,0,P,call_id,1,uuid,no,,1,0,agent.llm_call_default(id);agent.llm_call(id);agent.llm_call_202611(id);agent.llm_call_202612(id);agent.llm_call_202701(id);agent.llm_call_202702(id);agent.llm_call_202703(id),Llamada al modelo que recuperó el fragmento documental,comentario_bd
-agent,llm_call_fragmento,0,P,call_ts,2,timestamp with time zone,no,,1,0,agent.llm_call_default(ts);agent.llm_call(ts);agent.llm_call_202611(ts);agent.llm_call_202612(ts);agent.llm_call_202701(ts);agent.llm_call_202702(ts);agent.llm_call_202703(ts),"Momento de la llamada, que con su identificador completa la clave del vínculo",comentario_bd
+agent,llm_call_default,1,P,tokens_thinking,16,integer,sí,,0,0,,Tokens de razonamiento interno. Google los cobra a precio de salida: es el costo oculto nº 1 de la ficha 13.3.1 y RM-11 exige que sea mínimo.,heredado_padre
+agent,llm_call_default,1,P,thinking_budget,17,integer,sí,,0,0,,Valor de thinking_budget usado en la llamada. RM-11: 0 o el mínimo.,heredado_padre
+agent,llm_call_default,1,P,grounding_habilitado,18,boolean,no,false,0,0,,Si se activó búsqueda web. RM-13 lo prohíbe en ingesta y mandatos: queda en falso salvo excepción documentada.,heredado_padre
+agent,llm_call_default,1,P,store_habilitado,19,boolean,no,false,0,0,,Si Google conserva el contenido. RM-15 exige falso (Ley 29733).,heredado_padre
+agent,llm_call_default,1,P,datos_anonimizados,20,boolean,no,false,0,0,,Si el texto se anonimizó antes de salir (DNI y teléfonos retirados). RM-15.,heredado_padre
+agent,llm_call_default,1,P,costo_estimado_usd,21,"numeric(12,6)",sí,,0,0,,"Costo aproximado de la llamada, calculado por el servicio de aplicación. RNF-13: permite sumar consumo por servicio y por mes.",heredado_padre
+agent,llm_call_fragmento,0,P,call_id,1,uuid,no,,1,0,agent.llm_call_default(id);agent.llm_call_202703(id);agent.llm_call_202702(id);agent.llm_call_202701(id);agent.llm_call_202612(id);agent.llm_call_202611(id);agent.llm_call(id),Llamada al modelo que recuperó el fragmento documental,comentario_bd
+agent,llm_call_fragmento,0,P,call_ts,2,timestamp with time zone,no,,1,0,agent.llm_call_default(ts);agent.llm_call_202703(ts);agent.llm_call_202702(ts);agent.llm_call_202701(ts);agent.llm_call_202612(ts);agent.llm_call_202611(ts);agent.llm_call(ts),"Momento de la llamada, que con su identificador completa la clave del vínculo",comentario_bd
 agent,llm_call_fragmento,0,P,fragmento_id,3,uuid,no,,1,0,kag.documento_fragmento(id),Fragmento documental recuperado como insumo de la llamada,comentario_bd
 agent,llm_call_fragmento,0,P,rank_rrf,4,integer,sí,,0,0,,Posición que el fragmento ocupó tras fusionar los resultados de búsqueda,comentario_bd
 agent,llm_call_fragmento,0,P,score_rrf,5,numeric,sí,,0,0,,"Puntaje de fusión del fragmento, que pondera sus apariciones en cada búsqueda",comentario_bd
@@ -397,8 +439,8 @@ avisa,raw_ingest_default,1,I,caso_id,12,uuid,sí,,0,0,core.casos(id),"Caso al qu
 avisa,raw_ingest_default,1,I,tipo_registro,13,character varying(20),no,'evento'::character varying,0,0,,"Clase de registro que el mensaje representa, por defecto evento",heredado_padre
 avisa,raw_ingest_default,1,I,policy_snapshot_id,14,uuid,sí,,0,0,policy.snapshot(id),Foto de las políticas vigentes al momento de recibir el mensaje,heredado_padre
 avisa,raw_ingest_rejected,0,I,id,1,uuid,no,gen_random_uuid(),1,0,,Identificador interno de la fila,comentario_bd
-avisa,raw_ingest_rejected,0,I,raw_id,2,uuid,no,,0,0,avisa.raw_ingest_202702(id);avisa.raw_ingest_default(id);avisa.raw_ingest_202611(id);avisa.raw_ingest_202612(id);avisa.raw_ingest_202701(id);avisa.raw_ingest_202703(id);avisa.raw_ingest(id),"Mensaje crudo descartado, buscado en la partición donde ingresó",comentario_bd
-avisa,raw_ingest_rejected,0,I,raw_received_at,3,timestamp with time zone,no,,0,0,avisa.raw_ingest_202702(received_at);avisa.raw_ingest_default(received_at);avisa.raw_ingest_202611(received_at);avisa.raw_ingest_202612(received_at);avisa.raw_ingest_202701(received_at);avisa.raw_ingest_202703(received_at);avisa.raw_ingest(received_at),"Momento en que se recibió el mensaje descartado, junto con su identificador",comentario_bd
+avisa,raw_ingest_rejected,0,I,raw_id,2,uuid,no,,0,0,avisa.raw_ingest_202702(id);avisa.raw_ingest_202701(id);avisa.raw_ingest_202611(id);avisa.raw_ingest_default(id);avisa.raw_ingest_202612(id);avisa.raw_ingest_202703(id);avisa.raw_ingest(id),"Mensaje crudo descartado, buscado en la partición donde ingresó",comentario_bd
+avisa,raw_ingest_rejected,0,I,raw_received_at,3,timestamp with time zone,no,,0,0,avisa.raw_ingest_202702(received_at);avisa.raw_ingest_202701(received_at);avisa.raw_ingest_202611(received_at);avisa.raw_ingest_default(received_at);avisa.raw_ingest_202612(received_at);avisa.raw_ingest_202703(received_at);avisa.raw_ingest(received_at),"Momento en que se recibió el mensaje descartado, junto con su identificador",comentario_bd
 avisa,raw_ingest_rejected,0,I,error_json,4,jsonb,no,,0,0,,Detalle estructurado del error que motivó el rechazo del mensaje,comentario_bd
 avisa,raw_ingest_rejected,0,I,created_at,5,timestamp with time zone,no,now(),0,0,,Momento en que se creó el registro,comentario_bd
 chat,blame,0,P,id,1,uuid,no,gen_random_uuid(),1,0,,Identificador interno de la fila,comentario_bd
@@ -958,6 +1000,11 @@ core,cat_prioridades_alerta,0,INF,sla_horas,3,smallint,sí,,0,0,,"Plazo de respu
 core,cat_prioridades_atencion,0,INF,id,1,smallint,no,,1,0,,Identificador interno de la fila,comentario_bd
 core,cat_prioridades_atencion,0,INF,codigo,2,character varying(20),no,,0,1,,Código de la prioridad de atención del caso,comentario_bd
 core,cat_prioridades_atencion,0,INF,orden,3,smallint,no,,0,0,,Posición de la prioridad en la escala de atención,comentario_bd
+core,cat_privilegio,0,INF,id,1,smallint,no,,1,0,,,sin_descripcion
+core,cat_privilegio,0,INF,codigo,2,character varying(40),no,,0,1,,,sin_descripcion
+core,cat_privilegio,0,INF,nombre,3,character varying(120),no,,0,0,,,sin_descripcion
+core,cat_privilegio,0,INF,descripcion,4,text,sí,,0,0,,,sin_descripcion
+core,cat_privilegio,0,INF,requiere_motivo,5,boolean,no,true,0,0,,"Si es cierto, cada uso del privilegio debe declarar un motivo escrito.",comentario_bd
 core,cat_roles_actor,0,INF,id,1,integer,no,nextval('core.cat_roles_actor_id_seq'::regclass),1,0,,Identificador interno de la fila,comentario_bd
 core,cat_roles_actor,0,INF,nombre,2,character varying(50),no,,0,1,,Denominación del rol del actor en el conflicto,comentario_bd
 core,cat_roles_actor,0,INF,codigo_legado,3,character varying(50),sí,,0,1,,Código del rol en el sistema anterior,comentario_bd
@@ -1049,6 +1096,16 @@ core,compromisos,0,I,origen_dato,22,character varying(20),no,'MANUAL'::character
 core,compromisos,0,I,confidence,23,"numeric(3,2)",sí,,0,0,,"Grado de certeza del dato, entre 0 y 1",comentario_bd
 core,compromisos,0,I,es_validado_humano,24,boolean,no,false,0,0,,Indica si un analista revisó y avaló el registro,comentario_bd
 core,compromisos,0,I,nivel_clasificacion,25,smallint,no,2,0,0,core.cat_clasificacion(nivel),"Nivel de acceso al dato: 1 público, 2 reservado, 3 confidencial",comentario_bd
+core,consulta_reniec,0,I,id,1,uuid,no,gen_random_uuid(),1,0,,,sin_descripcion
+core,consulta_reniec,0,I,actor_uid,2,uuid,no,,0,0,core.actores,,sin_descripcion
+core,consulta_reniec,0,I,caso_id,3,uuid,sí,,0,0,core.casos(id),,sin_descripcion
+core,consulta_reniec,0,I,consultado_por_usuario_id,4,uuid,no,,0,0,core.usuarios(id),,sin_descripcion
+core,consulta_reniec,0,I,motivo,5,text,no,,0,0,,"Motivo del pedido, escrito por la persona. Obligatorio y de al menos 15 caracteres: es la justificación de finalidad que exige la Ley 29733.",comentario_bd
+core,consulta_reniec,0,I,fecha_consulta,6,timestamp with time zone,no,now(),0,0,,,sin_descripcion
+core,consulta_reniec,0,I,integracion_id,7,uuid,sí,,0,0,core.integraciones(id),,sin_descripcion
+core,consulta_reniec,0,I,resultado_cifrado,8,bytea,no,,0,0,,Resultado de la consulta cifrado con AES-256 (pgp_sym_encrypt). Se descifra solo con la clave de sesión app.crypto_key.,comentario_bd
+core,consulta_reniec,0,I,resultado_hmac,9,character(64),no,,0,0,,Huella del resultado en claro (SHA-256 con sal de la aplicación). Sirve para detectar consultas repetidas sin descifrar el contenido.,comentario_bd
+core,consulta_reniec,0,I,nivel_clasificacion,10,smallint,no,3,0,0,core.cat_clasificacion(nivel),Fijo en 3 (Confidencial). Las reglas de acceso solo distinguen niveles 1 a 3; fijarlo impide degradar la protección por error.,comentario_bd
 core,cronologia_vinculos,0,I,cronologia_id,1,uuid,no,,0,0,core.caso_cronologia(id),Hecho de la cronología que se vincula con otros registros,comentario_bd
 core,cronologia_vinculos,0,I,alerta_id,2,uuid,sí,,0,0,core.alertas_tempranas(id),Alerta temprana relacionada con el hecho,comentario_bd
 core,cronologia_vinculos,0,I,documento_id,3,uuid,sí,,0,0,core.documentos(id),Documento que respalda o da origen al hecho,comentario_bd
@@ -1144,6 +1201,11 @@ core,envios_comunicacion,0,I,destinatario_texto,9,text,sí,,0,0,,Destinatario de
 core,envios_comunicacion,0,I,url_pdf,10,character varying(500),sí,,0,0,,Enlace al PDF del oficio o comunicación enviada,comentario_bd
 core,envios_comunicacion,0,I,resultado,11,character varying(255),sí,,0,0,,Resultado de la entrega de la comunicación,comentario_bd
 core,envios_comunicacion,0,I,observacion,12,text,sí,,0,0,,Observaciones sobre el envío o sobre su resultado,comentario_bd
+core,envios_comunicacion,0,I,id_externo,13,character varying(120),sí,,0,0,,Identificador del mensaje en el proveedor (wamid de WhatsApp Cloud API). Su ausencia era la razón por la que no se podía confirmar una entrega.,comentario_bd
+core,envios_comunicacion,0,I,plantilla_codigo,14,character varying(80),sí,,0,0,,,sin_descripcion
+core,envios_comunicacion,0,I,estado_entrega,15,character varying(20),sí,,0,0,,enviado · entregado · leido · fallido · sin_confirmar. Lo actualiza el webhook de Meta; el envío nace en sin_confirmar.,comentario_bd
+core,envios_comunicacion,0,I,costo_estimado_usd,16,"numeric(12,6)",sí,,0,0,,Costo del mensaje de utilidad. RNF-13: consumo por servicio y por mes.,comentario_bd
+core,envios_comunicacion,0,I,actualizado_en,17,timestamp with time zone,sí,,0,0,,,sin_descripcion
 core,feature_flags,0,INF,codigo,1,character varying(40),no,,1,0,,Clave única que identifica el interruptor de funcionalidad,comentario_bd
 core,feature_flags,0,INF,descripcion,2,text,no,,0,0,,Descripción de la funcionalidad que controla el interruptor,comentario_bd
 core,feature_flags,0,INF,activo,3,boolean,no,false,0,0,,Indica si la funcionalidad está habilitada en el sistema,comentario_bd
@@ -1345,6 +1407,15 @@ core,planes_accion,0,P,documento_id,1,uuid,no,,1,0,core.documentos(id),Documento
 core,planes_accion,0,P,monto_presupuestal,2,"numeric(15,2)",sí,,0,0,,Monto presupuestal asignado al plan de acción,comentario_bd
 core,planes_accion,0,P,plazo_limite,3,timestamp with time zone,sí,,0,0,,Fecha y hora límite comprometida para ejecutar el plan,comentario_bd
 core,planes_accion,0,P,estado_aprobacion,4,character varying(20),no,'Borrador'::character varying,0,0,,"Situación de aprobación del plan: borrador, en revisión, aprobado o rechazado",comentario_bd
+core,privilegio_usuario,0,INF,id,1,uuid,no,gen_random_uuid(),1,0,,,sin_descripcion
+core,privilegio_usuario,0,INF,usuario_id,2,uuid,no,,0,0,core.usuarios(id),,sin_descripcion
+core,privilegio_usuario,0,INF,privilegio_id,3,smallint,no,,0,0,core.cat_privilegio(id),,sin_descripcion
+core,privilegio_usuario,0,INF,motivo,4,text,no,,0,0,,Por qué se concede. Obligatorio: una concesión sin motivo no es auditable ante la ANPDP.,comentario_bd
+core,privilegio_usuario,0,INF,otorgado_por_usuario_id,5,uuid,sí,,0,0,core.usuarios(id),,sin_descripcion
+core,privilegio_usuario,0,INF,desde,6,date,no,CURRENT_DATE,0,0,,,sin_descripcion
+core,privilegio_usuario,0,INF,hasta,7,date,sí,,0,0,,"Fin de vigencia. NULL = sin fecha de fin, revisable en cada auditoría.",comentario_bd
+core,privilegio_usuario,0,INF,activo,8,boolean,no,true,0,0,,,sin_descripcion
+core,privilegio_usuario,0,INF,creado_en,9,timestamp with time zone,no,now(),0,0,,,sin_descripcion
 core,proceso_instancia,0,P,id,1,uuid,no,gen_random_uuid(),1,0,,Identificador interno de la fila,comentario_bd
 core,proceso_instancia,0,P,tipo_origen,2,character varying(10),no,,0,0,,Origen del paso: caso o reporte. Determina qué clave ajena queda poblada y de qué tabla del sistema anterior viene,comentario_bd
 core,proceso_instancia,0,P,caso_id,3,uuid,sí,,0,0,core.casos(id),"Caso asociado, cuando el código de caso existe en el maestro. Está vacío en las filas cuyo código no existe como caso",comentario_bd

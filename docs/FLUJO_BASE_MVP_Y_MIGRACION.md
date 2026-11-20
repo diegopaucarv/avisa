@@ -194,11 +194,12 @@ python -m migration.loader.run --verify
 > informe dirá «FALLA … 0 (esperado N)» en casi todas las líneas: no es un
 > problema de la carga, es que no hay nada que verificar.
 
-La comprobación acepta **34 o 35** filas en la tabla de roles de usuario: la
-carga escribe 34 y el parche 16 añade una (el rol de administrador y oficial de
-datos personales). Verificar antes o después de los parches es legítimo.
+La comprobación exige **35** filas en la tabla de roles de usuario, que es el
+total que deja la carga más el parche 16 con su rol de administrador y oficial de
+datos personales. Si se verifica antes de ese parche, la línea avisa de la fila
+que falta y no es un problema de la carga.
 
-### 5.4 Aplicar los parches 6 a 16
+### 5.4 Aplicar los parches 6 a 17
 
 Los parches vienen **después** de la carga, siempre en orden, y nunca antes.
 Cada uno hace algo que necesita datos reales: reclasificar documentos, cifrar
@@ -221,7 +222,7 @@ MSYS_NO_PATHCONV=1 docker exec -i avisa-db psql -U avisa -d avisa \
   -v ON_ERROR_STOP=1 -f - < docs/PARCHE_6_CIERRE_CUMPLIMIENTO.sql
 ```
 
-…y así hasta el 16, cambiando solo el nombre del archivo. El parche 9 además
+…y así hasta el 17, cambiando solo el nombre del archivo. El parche 9 además
 necesita `-v crypto_key="$APP_CRYPTO_KEY"`; sin esa variable aborta a propósito.
 
 **Detalles que importan:**
@@ -234,6 +235,10 @@ necesita `-v crypto_key="$APP_CRYPTO_KEY"`; sin esa variable aborta a propósito
   él mismo autoriza a borrar cuando se valida. En la base de trabajo ya está
   borrada, por eso los conteos no la incluyen; en una base reconstruida existe
   hasta que se borre.
+- El parche 17 va al final y depende del 15 y del 16: crea `core.consulta_reniec`
+  (cifrada, de solo agregar y con huella HMAC), el privilegio nominal
+  (`core.cat_privilegio`, `core.privilegio_usuario`) y las columnas de costo de
+  Gemini y WhatsApp. Como el 14, el 15 y el 16, se pasa por entrada estándar.
 
 ### 5.5 Verificar de nuevo
 
@@ -258,7 +263,7 @@ cuenta).
 
 ## 6. Parte C — Preparar la copia para SQL Server
 
-El asistente de SQL Server (SSMA) no debe ver las 371 tablas: genera cientos de
+El asistente de SQL Server (SSMA) no debe ver las 374 tablas: genera cientos de
 avisos que esconden los reales. Se le entrega una copia recortada.
 
 ### 6.1 Crear la copia
@@ -282,9 +287,13 @@ MSYS_NO_PATHCONV=1 docker exec -i avisa-db psql -U avisa -d avisa_mssql \
   -v ON_ERROR_STOP=1 -f - < migration/mssql/00_alcance_mvp.sql
 ```
 
-Resultado esperado: **74 tablas** (el comentario del script dice 73 porque se
-escribió antes del parche 16), 651 columnas, 156 claves ajenas. Incluye el
-esquema `legacy` completo si OGTI va a conservar el archivo histórico.
+Resultado esperado: **78 tablas**, **685 columnas** y **169 claves ajenas** (163
+de ellas entre tablas del propio alcance). Son las **46 tablas del MVP** más las
+que entran por dependencias: al recortar, cada clave ajena que apunta fuera de la
+lista arrastra consigo la tabla padre que le da destino, y así se suman 32
+tablas, **3 de ellas de `kag`** (el mínimo que sostiene
+`ref.base_legal_evidencia`). Incluye el esquema `legacy` completo si OGTI va a
+conservar el archivo histórico.
 
 ### 6.3 Crear el rol de migración
 
@@ -346,9 +355,9 @@ políticas de seguridad por fila y comentarios.
 migration/mssql/04_chequeos_postmigracion.sql
 ```
 
-> **Cobertura:** esos chequeos ya cubren las 28 tablas con seguridad por fila del
-> alcance recortado, con 136 predicados. Las 13 tablas que añadieron los parches
-> 14, 15 y 16 tienen su equivalente en SQL Server en el apartado §5.2 y §5.3 del
+> **Cobertura:** esos chequeos ya cubren las 30 tablas con seguridad por fila del
+> alcance recortado, con 143 predicados. Las tablas que añadieron los parches
+> 14, 15, 16 y 17 tienen su equivalente en SQL Server en el apartado §5.2 y §5.3 del
 > mismo archivo, y las pruebas del §5.5 las ejercitan con dos niveles de
 > clasificación. El detalle técnico está en `migration/mssql/INFORME_TIPOS.md`.
 
@@ -379,29 +388,40 @@ los parches (partes B y siguientes).
 La secuencia completa que se verificó en una base nueva:
 
 ```
-sección A  →  carga del legado  →  parches 6 a 16  →  pruebas 15 y 16
+sección A  →  carga del legado  →  parches 6 a 17  →  pruebas 15 y 16
 ```
 
-Al terminar: **285 tablas** (261 lógicas y 24 hijas de partición), **2 425
-columnas** y **601 claves ajenas**, sin contar `legacy` ni `public`. La base de
-trabajo (`avisa`) tiene una tabla y 4 columnas menos porque conserva el esquema
-sin la instantánea del parche 6, que allí ya se borró.
+Al terminar: **287 tablas físicas** (263 lógicas y 24 hijas de partición),
+**2 492 columnas** y **609 claves ajenas**, sin contar `legacy` ni `public`. Son
+las cifras medidas en la base de trabajo el 2026-11-19.
+
+**Comprobación del 2026-11-19, de punta a punta.** La secuencia completa se
+corrió sobre una base desechable (`avisa_check`) para validar el orden de los
+bloques del archivo unificado. El resultado fue: sección A → **275 tablas
+físicas, 2 314 columnas y 581 claves ajenas**; tras la carga y los parches
+6–17 → **288 tablas físicas, 2 496 columnas y 609 claves ajenas**. La única
+diferencia con la base de trabajo es `core.patch6_documentos_snapshot` (1 tabla,
+4 columnas y 1 comentario), que el parche 6 crea como respaldo y deja a la
+espera de que se valide y se borre; al quitarla quedan exactamente **287 / 2 492
+/ 609**. La seguridad por fila también coincide: **520 políticas en 82 tablas**
+y **66 disparadores**.
 
 ---
 
 ## 9. Errores conocidos
 
-| Síntoma                                                                                      | Causa                                                                             | Qué hacer                                                                                                              |
-| -------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `No hay DSN. Definí DATABASE_URL…`                                                           | El programa no encontraba el `.env`                                               | Corregido: ahora busca el `.env` en la raíz y un nivel arriba. Si persiste, exporta `DATABASE_URL` a mano              |
-| `no encuentro el workbook del legado`                                                        | El libro estaba en `backend/`, que ya no existe                                   | Corregido: ahora busca en `backend/` y en `backups/backend/`. Usa `--xlsx` si está en otro sitio                       |
-| El parche 14 aborta con `violates check constraint proceso_instancia_origen_coherente_check` | Convertía filas a origen «alerta» antes de relajar la restricción que lo prohibía | Corregido: la restricción se retira al inicio del bloque 2 y se vuelve a crear al final, ya con los datos normalizados |
-| `permission denied for table actor_alias`                                                    | Los permisos generales corrían antes de crear la tabla                            | Corregido: los permisos se otorgan al crear cada tabla nueva                                                           |
-| `--verify` dice «FALLA … 0 (esperado N)» en todo                                             | Se ejecutó sin cargar primero                                                     | Corre la carga (`python -m migration.loader.run`) y después la verificación                                            |
-| Un borrado «no falla» pero no borra nada                                                     | La seguridad por fila no lanza error al denegar un `DELETE`: afecta 0 filas       | Comprueba filas afectadas, no la ausencia de error                                                                     |
-| `psql` busca en `C:/Program Files/Git/tmp/...`                                               | Git Bash convierte las rutas que empiezan por `/`                                 | Usa `MSYS_NO_PATHCONV=1` y pasa el archivo por entrada estándar                                                        |
-| Recuentos de filas que no cuadran                                                            | `public.spatial_ref_sys` (PostGIS) tiene 8 500 filas ajenas al sistema            | Excluye el esquema `public` de cualquier conteo                                                                        |
-| Recuentos de tablas que no cuadran                                                           | Las particiones se cuentan como tablas físicas                                    | Distingue tablas lógicas (`relkind='r'`) de particiones (`relkind='p'`)                                                |
+| Síntoma                                                                                      | Causa                                                                                      | Qué hacer                                                                                                              |
+| -------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------- |
+| `No hay DSN. Definí DATABASE_URL…`                                                           | El programa no encontraba el `.env`                                                        | Corregido: ahora busca el `.env` en la raíz y un nivel arriba. Si persiste, exporta `DATABASE_URL` a mano              |
+| `no encuentro el workbook del legado`                                                        | El libro vivía en `backend/`, que hoy aloja la API y no el libro                           | Corregido: ahora busca en `backend/` y en `backups/backend/`. Usa `--xlsx` si está en otro sitio                       |
+| `ImportError: cannot import name 'db' from 'backend'`                                        | La raíz conserva un `backend/` con la API y sin `db.py`, que hacía sombra al de `backups/` | Corregido: la ruta de importación se decide por la presencia de `backend/db.py`, no del directorio                     |
+| El parche 14 aborta con `violates check constraint proceso_instancia_origen_coherente_check` | Convertía filas a origen «alerta» antes de relajar la restricción que lo prohibía          | Corregido: la restricción se retira al inicio del bloque 2 y se vuelve a crear al final, ya con los datos normalizados |
+| `permission denied for table actor_alias`                                                    | Los permisos generales corrían antes de crear la tabla                                     | Corregido: los permisos se otorgan al crear cada tabla nueva                                                           |
+| `--verify` dice «FALLA … 0 (esperado N)» en todo                                             | Se ejecutó sin cargar primero                                                              | Corre la carga (`python -m migration.loader.run`) y después la verificación                                            |
+| Un borrado «no falla» pero no borra nada                                                     | La seguridad por fila no lanza error al denegar un `DELETE`: afecta 0 filas                | Comprueba filas afectadas, no la ausencia de error                                                                     |
+| `psql` busca en `C:/Program Files/Git/tmp/...`                                               | Git Bash convierte las rutas que empiezan por `/`                                          | Usa `MSYS_NO_PATHCONV=1` y pasa el archivo por entrada estándar                                                        |
+| Recuentos de filas que no cuadran                                                            | `public.spatial_ref_sys` (PostGIS) tiene 8 500 filas ajenas al sistema                     | Excluye el esquema `public` de cualquier conteo                                                                        |
+| Recuentos de tablas que no cuadran                                                           | Las particiones se cuentan como tablas físicas                                             | Distingue tablas lógicas (`relkind='r'`) de particiones (`relkind='p'`)                                                |
 
 ---
 
@@ -425,7 +445,7 @@ psql -U avisa -d avisa -v ON_ERROR_STOP=1 -f /tmp/seccion_a.sql
 python -m migration.loader.run
 python -m migration.loader.run --verify
 
-# --- parches 6 a 16
+# --- parches 6 a 17
 python migration/consolidar_esquema.py --seccion B --salida /tmp/seccion_b.sql
 MSYS_NO_PATHCONV=1 docker exec -i avisa-db psql -U avisa -d avisa \
   -v ON_ERROR_STOP=1 -v crypto_key="$APP_CRYPTO_KEY" -f - < /tmp/seccion_b.sql
@@ -461,7 +481,7 @@ MSYS_NO_PATHCONV=1 docker exec -i avisa-db psql -U avisa -d avisa_mssql \
 Los documentos citados en este texto, con lo que aporta cada uno:
 
 1. `docs/ENTORNO_DOCKER_POSTGRES.md` — el contenedor, las credenciales, el
-   arranque y la aplicación de los parches 6 a 16 (§9).
+   arranque y la aplicación de los parches 6 a 17 (§9).
 2. `docs/AVISA_V10_ESQUEMA_UNIFICADO.sql` — todo el esquema en un archivo, en dos
    secciones, con el detalle de qué produce cada una. Generado: no se edita a mano.
 3. `migration/consolidar_esquema.py` — el programa que arma ese archivo unificado.
@@ -482,5 +502,8 @@ Los documentos citados en este texto, con lo que aporta cada uno:
     por qué necesita `crypto_key`.
 12. `docs/PARCHE_16_RLS_CORE_Y_DC04.sql` — la seguridad por fila de `core` y el
     registro del banco de datos personales.
-13. `docs/LEGADO_A_V10_SIMILITUDES_Y_DIFERENCIAS.md` — qué es igual y qué cambia
+13. `docs/PARCHE_17_RENIEC_Y_COSTOS.sql` — la consulta PIDE-RENIEC cifrada e
+    inmutable, el privilegio nominal y las columnas de costo de Gemini y de
+    WhatsApp.
+14. `docs/LEGADO_A_V10_SIMILITUDES_Y_DIFERENCIAS.md` — qué es igual y qué cambia
     entre el sistema anterior y la v10, con las cifras comparadas.

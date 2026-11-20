@@ -25,6 +25,7 @@ Uso:
 from __future__ import annotations
 
 import csv
+import sys
 from collections import Counter
 from pathlib import Path
 
@@ -52,9 +53,9 @@ MODELO = (
 MVP: dict[str, dict[str, tuple[str | None, str, str]]] = {
     "ref": {
         "nivel_identificacion": (
-            None,
-            "crear",
-            "no hay catálogo de nivel de identificación",
+            "core.cat_nivel_identificacion",
+            "exacta",
+            "catálogo creado en el parche 14",
         ),
         "tipo_actor": ("core.cat_tipos_actor", "exacta", ""),
         "nivel_conflicto": ("core.cat_niveles_conflicto", "exacta", ""),
@@ -70,16 +71,16 @@ MVP: dict[str, dict[str, tuple[str | None, str, str]]] = {
             "parcial",
             "la v10 reparte la geografía en regiones, provincias y distritos",
         ),
-        "base_legal_tratamiento": (None, "crear", "no hay catálogo de base legal"),
+        "base_legal_tratamiento": (
+            "ref.base_legal_tratamiento",
+            "exacta",
+            "catálogo creado en el parche 14",
+        ),
     },
     "core": {
         "actor": ("core.actores", "exacta", ""),
         "actor_pii": ("core.actor_datos_personales", "exacta", ""),
-        "actor_alias": (
-            "kag.actor_name_history",
-            "parcial",
-            "D.2 prevé `core.actor_alias`; hoy solo existe el historial de nombres",
-        ),
+        "actor_alias": ("core.actor_alias", "exacta", ""),
         "organizacion": ("core.organizaciones", "exacta", ""),
         "membresia": ("core.actor_membresia", "exacta", ""),
         "caso": ("core.casos", "exacta", ""),
@@ -111,11 +112,15 @@ MVP: dict[str, dict[str, tuple[str | None, str, str]]] = {
         ),
         "actor_seudonimo": ("qda.mapeo_pseudonimo", "parcial", "existe, pero en `qda`"),
         "situacion_judicial_restricta": (
-            None,
-            "crear",
-            "guardrail de presunción de inocencia",
+            "core.consulta_reniec",
+            "parcial",
+            "el parche 17 cubre la consulta PIDE-RENIEC; faltan las requisitorias MININTER",
         ),
-        "banco_datos_tratamiento": (None, "crear", "inscripción ANPDP"),
+        "banco_datos_tratamiento": (
+            "core.banco_datos_tratamiento",
+            "exacta",
+            "inscripción ANPDP en el parche 16",
+        ),
         "permiso_aprobacion": ("core.permiso_aprobacion", "exacta", ""),
         "actor_fusion": (
             "kag.entity_merge_log",
@@ -287,6 +292,11 @@ def leer_tablas(conn: psycopg.Connection) -> list[dict]:
 
 
 def main() -> None:
+    # La consola de Windows abre en cp1252 y las flechas del resumen revientan.
+    for flujo in (sys.stdout, sys.stderr):
+        if flujo.encoding and flujo.encoding.lower().replace("-", "") != "utf8":
+            flujo.reconfigure(encoding="utf-8", errors="replace")
+
     mvp_destino = {
         destino
         for grupo in MVP.values()

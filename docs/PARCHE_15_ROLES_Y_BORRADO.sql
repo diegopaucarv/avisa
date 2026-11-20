@@ -65,7 +65,10 @@ COMMENT ON COLUMN core.roles.puede_eliminar IS
 --                        un registro equivocado.
 --   administrador        dueño funcional del dato, incluye al ODP.
 --   consulta_lectura     es el rol más numeroso (17 usuarios). Solo lee.
---   alta_direccion       lee todo y puede emitir/corregir productos.
+--   alta_direccion       lee todo (incluido lo Confidencial) y NO escribe.
+--                        Recibe alertas y tableros; no captura ni corrige
+--                        datos. Si escribiera, el registro dejaría de
+--                        tener un único dueño funcional.
 --   servicio_agente      servicio automático: escribe, no borra.
 --   auditor              revisa y corrige observaciones, no borra.
 --   externo_publico      solo lectura de lo público.
@@ -73,13 +76,11 @@ COMMENT ON COLUMN core.roles.puede_eliminar IS
 --   curador_politica     mantiene base legal y política (nivel 2): escribe,
 --                        no borra.
 UPDATE core.roles SET puede_crear = true,  puede_editar = true,  puede_eliminar = true
- WHERE codigo IN ('sectorista', 'administrador', 'alta_direccion');
-
+ WHERE codigo IN ('sectorista', 'administrador');
 UPDATE core.roles SET puede_crear = true,  puede_editar = true,  puede_eliminar = false
  WHERE codigo IN ('servicio_agente', 'auditor', 'analista_cualitativo', 'curador_politica');
-
 UPDATE core.roles SET puede_crear = false, puede_editar = false, puede_eliminar = false
- WHERE codigo IN ('consulta_lectura', 'externo_publico');
+ WHERE codigo IN ('consulta_lectura', 'externo_publico', 'alta_direccion');
 
 -- Coherencia: quien no edita no borra. Borrar sin poder corregir antes
 -- sería un poder más amplio que el de editar, y eso no tiene sentido.
@@ -342,6 +343,12 @@ BEGIN
     SELECT NOT (puede_crear OR puede_editar OR puede_eliminar) INTO v_b
       FROM core.roles WHERE codigo = 'consulta_lectura';
     RAISE NOTICE 'consulta_lectura es solo lectura .... %', v_b;
+
+    -- alta_direccion lee lo Confidencial y no escribe nada.
+    SELECT max_clasificacion = 3
+       AND NOT (puede_crear OR puede_editar OR puede_eliminar) INTO v_b
+      FROM core.roles WHERE codigo = 'alta_direccion';
+    RAISE NOTICE 'alta_direccion: nivel 3, no escribe .. %', v_b;
 
     -- Sin rol fijado, el nivel es 0: nada visible.
     PERFORM set_config('app.rol_codigo', '', true);

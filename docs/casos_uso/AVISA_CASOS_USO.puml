@@ -1,0 +1,213 @@
+' =====================================================================
+'  AVISA-PRODUCE · Casos de uso (sistema)
+' =====================================================================
+'  QUÉ ES
+'  Diagrama de casos de uso del ERS (docs/ERS_AVISA_PRODUCE_v0.4.md §3.4),
+'  dibujado con C4-PlantUML porque Mermaid no tiene notación de casos de
+'  uso y el resto del ERS ya usa C4 para los niveles 1 a 3.
+'
+'  REGLA UML QUE SE RESPETA
+'  Los actores son EXTERNOS al sistema: ninguna persona ni servicio aparece
+'  dentro de la frontera. La frontera encierra solo los casos de uso.
+'  Los servicios por integrar (SVC-xx) son actores secundarios, como manda
+'  UML: quien intercambia mensajes con el sistema es actor.
+'
+'  TRAZABILIDAD
+'  Cada caso lleva en su descripción los códigos RF del ERS §4, de modo que
+'  el diagrama se puede auditar contra el documento sin ambigüedad.
+'
+'  TRES PÁGINAS
+'    1 · AVISA_CU_MVP_DIA       el trabajo diario del analista
+'    2 · AVISA_CU_MVP_SALIDA    lo que se valida, se envía y se administra
+'    3 · AVISA_CU_2027          lo que queda para 2027 y la fase MADRE
+'  Se parte en tres porque un solo lienzo con 34 casos y 12 actores no se
+'  lee: las aristas cruzan la frontera de lado a lado y el texto se pierde.
+'  CU-01 (ingresar) aparece en las páginas 1 y 2 porque todos los actores
+'  lo usan; no son dos casos distintos.
+'
+'  CÓMO SE RENDERIZA
+'     java -jar plantuml.jar -tsvg docs/casos_uso/AVISA_CASOS_USO.puml
+'  Sin Graphviz instalado, se fuerza el layout `smetana` (Java puro) con
+'     java -jar plantuml.jar -Playout=smetana -tsvg docs/casos_uso/AVISA_CASOS_USO.puml
+'  El resultado es menos ordenado, pero no exige instalar nada más.
+' =====================================================================
+
+
+@startuml AVISA_CU_MVP_DIA
+!include <C4/C4_Container>
+LAYOUT_LEFT_RIGHT()
+HIDE_STEREOTYPE()
+skinparam shadowing false
+
+title AVISA-PRODUCE · Casos de uso · MVP, página 1 de 2: el día del analista\nActores fuera de la frontera · cada caso cita sus RF del ERS §4
+
+' ACTORES (personas, externas al sistema)
+Person_Ext(analista, "Analista / sectorista OAIPCS", "Perfil A · INT-01 · carga, valida y consulta")
+Person_Ext(reniec, "Analista con privilegio RENIEC", "Perfil A + privilegio · INT-11 · hoy Edith · RA-07")
+
+' FRONTERA DEL SISTEMA
+System_Boundary(sis, "AVISA-PRODUCE / SIPRECS") {
+  Container(cu01, "CU-01 Ingresar con\nidentidad institucional", "RF del ERS §4", "RF-A01 · el perfil y la seguridad por fila se aplican en todo caso posterior (RF-A02 a A04)")
+  Container(cu02, "CU-02 Registrar y consultar\nactores y organizaciones", "RF del ERS §4", "RF-B01, B03, B05, B07, B08")
+  Container(cu03, "CU-03 Registrar un\nactor sin DNI", "RF del ERS §4", "RF-B01, B02 · extiende CU-02")
+  Container(cu05, "CU-05 Registrar compromisos,\nrelatorías y mesas", "RF del ERS §4", "RF-C01, C02, C04")
+  Container(cu06, "CU-06 Consultar compromisos\nde un caso", "RF del ERS §4", "RF-C05")
+  Container(cu07, "CU-07 Cargar alerta temprana", "RF del ERS §4", "RF-D01, D03, D05")
+  Container(cu10, "CU-10 Registrar consulta\nPIDE-RENIEC", "RF del ERS §4", "RF-D13 · solo el privilegio nombrado, con motivo y fecha")
+  Container(cu11, "CU-11 Consultar fichas,\ndirectorios y reportes", "RF del ERS §4", "RF-F01 a F05, F07")
+  Container(cu12, "CU-12 Exportar listas de\nasistencia y mapa de actores", "RF del ERS §4", "RF-F08")
+  Container(cu13, "CU-13 Armar y enviar productos", "RF del ERS §4", "RF-G01, G03, G06")
+}
+
+' ACTORES SECUNDARIOS (servicios)
+System_Ext(svc09, "SVC-09 Identidad institucional", "Login · H-52 por definir")
+System_Ext(svc16, "SVC-16 PIDE-RENIEC", "Requisitorias y antecedentes")
+System_Ext(svc05, "SVC-05 Google Drive", "Borradores de productos")
+System_Ext(svc06, "SVC-06 Correo institucional", "Envío de productos")
+
+' ASOCIACIONES
+Rel(analista, cu01, "")
+Rel(reniec, cu01, "")
+Rel(analista, cu02, "")
+Rel(analista, cu05, "")
+Rel(analista, cu06, "")
+Rel(analista, cu07, "")
+Rel(analista, cu11, "")
+Rel(analista, cu12, "")
+Rel(analista, cu13, "")
+Rel(reniec, cu10, "")
+
+Rel(cu03, cu02, "«extend»")
+Rel(cu01, svc09, "")
+Rel(cu10, svc16, "")
+Rel(cu13, svc05, "")
+Rel(cu13, svc06, "")
+@enduml
+
+
+@startuml AVISA_CU_MVP_SALIDA
+!include <C4/C4_Container>
+LAYOUT_LEFT_RIGHT()
+HIDE_STEREOTYPE()
+skinparam shadowing false
+
+title AVISA-PRODUCE · Casos de uso · MVP, página 2 de 2: validar, enviar y administrar\nLo que sale hacia la Alta Dirección y lo que sostiene OGTI
+
+Person_Ext(direccion, "Dirección de la OAIPCS", "Perfil A con aprobación · INT-02")
+Person_Ext(alta, "Alta Dirección", "Perfil B · INT-03 · ministro, viceministros, secretaría general, jefaturas de gabinete")
+Person_Ext(admin, "Administrador del sistema", "Técnico · INT-08 · H-16: quién será")
+Person_Ext(ogti, "OGTI", "Administración técnica · INT-05 · construye, aloja y opera")
+
+System_Boundary(sis2, "AVISA-PRODUCE / SIPRECS") {
+  Container(cu01b, "CU-01 Ingresar con\nidentidad institucional", "RF del ERS §4", "RF-A01 · mismo caso que la página 1")
+  Container(cu04, "CU-04 Fusionar actores\nduplicados", "RF del ERS §4", "RF-B04 · deja registro de quién y por qué")
+  Container(cu08, "CU-08 Validar alerta\no clima social", "RF del ERS §4", "RF-D04, D09 · incluye CU-09")
+  Container(cu09, "CU-09 Calcular destinatarios\ny enviar la alerta", "RF del ERS §4", "RF-D06, D07, D08, D10, D12")
+  Container(cu14, "CU-14 Ver tableros y\nvista ejecutiva", "RF del ERS §4", "RF-H02, H05 · sin datos personales")
+  Container(cu15, "CU-15 Verificar la carga\ndel sistema anterior", "RF del ERS §4", "RF-M01, M02, M03")
+  Container(cu16, "CU-16 Administrar usuarios,\nroles y catálogos", "RF del ERS §4", "RF-X02")
+  Container(cu17, "CU-17 Consultar la bitácora\nde accesos", "RF del ERS §4", "RF-X01 · no se modifica ni se borra")
+  Container(cu18, "CU-18 Respaldar y\nrecuperar la base", "RF del ERS §4", "RF-X04")
+  Container(cu19, "CU-19 Configurar el\nmodelo de lenguaje", "RF del ERS §4", "RF-E08, E09, E10 · conexión intercambiable y sin datos personales")
+}
+
+System_Ext(svc09b, "SVC-09 Identidad institucional", "Login · H-52 por definir")
+System_Ext(svc06b, "SVC-06 Correo institucional", "Envío de alertas")
+System_Ext(svc07, "SVC-07 WhatsApp Cloud API", "Alertas y mandatos acotados")
+System_Ext(svc10, "SVC-10 Power BI", "Dashboard Analítico y Estratégico")
+System_Ext(svc04, "SVC-04 Sistema anterior", "Google Sheets + Apps Script")
+System_Ext(svc02, "SVC-02 Gemini", "Modelo de lenguaje")
+
+Rel(direccion, cu01b, "")
+Rel(alta, cu01b, "")
+Rel(admin, cu01b, "")
+Rel(ogti, cu01b, "")
+
+Rel(direccion, cu04, "")
+Rel(direccion, cu08, "")
+Rel(direccion, cu14, "")
+Rel(direccion, cu17, "")
+Rel(alta, cu14, "")
+Rel(admin, cu16, "")
+Rel(admin, cu17, "")
+Rel(ogti, cu15, "")
+Rel(ogti, cu18, "")
+Rel(ogti, cu19, "")
+
+Rel(cu08, cu09, "«include»")
+Rel(cu01b, svc09b, "")
+Rel(cu09, svc06b, "")
+Rel(cu09, svc07, "")
+Rel(cu14, svc10, "")
+Rel(cu15, svc04, "")
+Rel(cu19, svc02, "")
+@enduml
+
+
+@startuml AVISA_CU_2027
+!include <C4/C4_Container>
+LAYOUT_LEFT_RIGHT()
+HIDE_STEREOTYPE()
+skinparam shadowing false
+
+title AVISA-PRODUCE · Casos de uso · 2027 y fase MADRE\nLo que no entra en el módulo de diciembre
+
+Person_Ext(analista27, "Analista / sectorista OAIPCS", "Perfil A · INT-01")
+Person_Ext(direccion27, "Dirección de la OAIPCS", "Perfil A con aprobación · INT-02")
+Person_Ext(alta27, "Alta Dirección", "Perfil B · INT-03")
+Person_Ext(externo, "Actor externo o gremio", "Perfil C · INT-04 · ve solo sus compromisos y las alertas aprobadas")
+Person_Ext(admin27, "Administrador del sistema", "Técnico · INT-08")
+Person_Ext(reloj, "Tareas programadas (CT-04)", "Dispara trabajos por horario")
+
+System_Boundary(sis27, "AVISA-PRODUCE / SIPRECS") {
+  Container(cu21, "CU-21 Recolectar fuentes\nde la lista blanca", "RF del ERS §4", "RF-E02, E03")
+  Container(cu20, "CU-20 Procesar documentos\ny proponer candidatos", "RF del ERS §4", "RF-E01, E05, E06, E11")
+  Container(cu22, "CU-22 Revisar candidatos y\ncoincidencias dudosas", "RF del ERS §4", "RF-D02, D03, E04 · nunca fusiona solo")
+  Container(cu30, "CU-30 Avisar vencimientos y\nescalar alertas sin atender", "RF del ERS §4", "RF-C03, D11")
+  Container(cu23, "CU-23 Registrar posición,\ninfluencia y relaciones", "RF del ERS §4", "RF-B06")
+  Container(cu24, "CU-24 Ver la red de actores", "RF del ERS §4", "RF-H01")
+  Container(cu25, "CU-25 Ver línea de\ntiempo y mapa", "RF del ERS §4", "RF-H03, H04")
+  Container(cu28, "CU-28 Analizar la pota\nen el tiempo", "RF del ERS §4", "RF-N01, N02")
+  Container(cu29, "CU-29 Generar borradores\nde informe", "RF del ERS §4", "RF-G02, G04 · marcados «borrador por validar»")
+  Container(cu26, "CU-26 Ver indicadores\navanzados", "RF del ERS §4", "RF-J01, J02, J03")
+  Container(cu27, "CU-27 Simular escenarios\ny tendencia", "RF del ERS §4", "RF-J04, J05 · rótulos «no vigente» y «no es una predicción»")
+  Container(cu32, "CU-32 Ingresar con\nsegundo factor", "RF del ERS §4", "RF-A07")
+  Container(cu31, "CU-31 Consultar el estado\nde mis compromisos", "RF del ERS §4", "RF-A05 · portal del actor")
+  Container(cu33, "CU-33 Cambiar parámetros\ncon historial", "RF del ERS §4", "RF-X03")
+  Container(cu34, "CU-34 Traducir estados\nal SESIGUE", "RF del ERS §4", "RF-C06")
+}
+
+System_Ext(svc0127, "SVC-01 Fuentes públicas", "Lista blanca de medios y portales")
+System_Ext(svc0227, "SVC-02 Gemini", "Modelo de lenguaje")
+System_Ext(svc0627, "SVC-06 Correo institucional", "Avisos y escalamiento")
+System_Ext(svc1127, "SVC-11 Mapas base", "Cartografía")
+System_Ext(svc1227, "SVC-12 SESIGUE", "Estado de compromisos")
+
+Rel(reloj, cu21, "")
+Rel(reloj, cu30, "")
+
+Rel(analista27, cu20, "")
+Rel(analista27, cu22, "")
+Rel(analista27, cu23, "")
+Rel(analista27, cu24, "")
+Rel(analista27, cu25, "")
+Rel(analista27, cu28, "")
+Rel(analista27, cu29, "")
+
+Rel(direccion27, cu26, "")
+Rel(direccion27, cu27, "")
+Rel(alta27, cu24, "")
+Rel(alta27, cu32, "")
+Rel(externo, cu31, "")
+Rel(admin27, cu33, "")
+
+Rel(cu21, svc0127, "")
+Rel(cu20, svc0227, "")
+Rel(cu29, svc0227, "")
+Rel(cu30, svc0627, "")
+Rel(cu25, svc1127, "")
+Rel(cu34, svc1227, "")
+
+Rel(cu21, cu20, "«include»")
+Rel(cu20, cu22, "«include»")
+@enduml

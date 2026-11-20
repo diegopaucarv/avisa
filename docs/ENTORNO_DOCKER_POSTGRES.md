@@ -69,12 +69,17 @@ está vacío, en este orden:
 | `10_apply_v9.sql`   | DDL v9 **dos pasadas**, luego parches 1 → 2 → 3 → 4 → 5                |
 | `20_verify.sql`     | informa y **aborta la inicialización** si el esquema no quedó completo |
 
-El `initdb` se detiene en el parche 5. Los parches 6–10 **no** se aplican aquí:
-necesitan el legado ya cargado y se ejecutan a mano (§9).
+El `initdb` se detiene en el parche 5. Los parches 6–16 **no** se aplican aquí:
+necesitan el legado ya cargado y se ejecutan a mano (§9). El 17 tampoco: no se
+monta siquiera y se pasa a mano.
 
-El DDL y los parches **no se copian**: se montan como bind mounts desde
-`backend/` y `docs/` con nombres limpios (`/opt/avisa/sql/90_ddl_v9.sql`, etc.).
-Así no existen dos versiones del esquema que puedan divergir.
+El DDL y los parches **no se copian**: se montan como bind mounts con nombres
+limpios (`/opt/avisa/sql/90_ddl_v9.sql`, `91_patch_01.sql` … `106_patch_16.sql`).
+El DDL sale de `backups/backend/PRODUCE_OAIPCS_AVISA_v9_ddl(1).sql` —la copia
+del repositorio, no `backend/`, que es otra carpeta— y los parches, de `docs/`.
+Así no existen dos versiones del esquema que puedan divergir. Son **16 montajes
+de parche**: los 5 `PREPARACION_*` (que sí ejecuta el `initdb`) y los 11
+`PARCHE_6`…`PARCHE_16` (que no).
 
 ### Por qué dos pasadas
 
@@ -111,9 +116,12 @@ Lo que **sí** es un fallo y no aparece en un arranque sano:
 
 ### Receta de sesión obligatoria
 
-Once tablas de `core` tienen `FORCE ROW LEVEL SECURITY`: **el dueño de la tabla
-tampoco lee ni escribe** si la sesión no declara el contexto. Sin esto, un
-`INSERT` falla con la política `p_insert` y un `SELECT` devuelve 0 filas.
+**45 de las 102 tablas de `core` tienen RLS** y **57 no**; en todo el modelo son
+**520 políticas sobre 82 tablas** (303 de ellas en `core`). Medición del
+2026-11-20; antes del parche 16 eran 11. Donde la política rige con
+`FORCE ROW LEVEL SECURITY`, **el dueño de la tabla tampoco lee ni escribe** si la
+sesión no declara el contexto. Sin esto, un `INSERT` falla con la política
+`p_insert` y un `SELECT` devuelve 0 filas.
 
 ```python
 async with conn.transaction():
@@ -148,26 +156,26 @@ valor en ambos estados (los catálogos **crecen** con la carga, nunca se
 reducen; por eso las comprobaciones son contra mínimos, no contra igualdad
 exacta):
 
-| control                         | esperado                                                  |
-| ------------------------------- | --------------------------------------------------------- |
-| extensiones                     | `btree_gist, pg_trgm, pgcrypto, plpgsql, postgis, vector` |
-| esquemas                        | 27 tras la carga (26 antes: sin `legacy`)                 |
-| tablas                          | 359 tras la carga (272 del modelo + 87 de `legacy`)       |
-| columnas `geography`            | 3                                                         |
-| tablas territorio con geometría | 3 de 3                                                    |
-| `cat_tematicas`                 | 7                                                         |
-| `cat_subsectores`               | 3                                                         |
-| `cat_tipos_actor`               | 7                                                         |
-| `cat_roles_funcionales`         | 4                                                         |
-| `cat_tipos_organizacion`        | 7                                                         |
-| `cat_especies` (mínimo)         | 5 en `initdb`, 39 tras la carga                           |
-| `cat_unidades_organicas`        | 1 en `initdb` (unidad `OAIPCS`), 66 tras la carga         |
-| `cat_pip_etapas`                | 12                                                        |
-| `config.schema_registry`        | 2 (`avisa.raw_ingest` v1 y v2)                            |
-| `agent.cat_detalle_schema`      | 1 (v1 provisional)                                        |
-| `ind.plantilla`                 | 3 (Anexo 2, Anexo 15, Minister View)                      |
-| `ind.indicador` (pendiente)     | 0 (falta el catálogo de la Tabla 3)                       |
-| RLS forzadas en `core`          | 11                                                        |
+| control                         | esperado                                                                                                                   |
+| ------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| extensiones                     | `btree_gist, pg_trgm, pgcrypto, plpgsql, postgis, vector`                                                                  |
+| esquemas                        | 27 tras la carga (26 antes: sin `legacy`)                                                                                  |
+| tablas                          | 374 tras la carga: 287 físicas del modelo (263 lógicas + 24 particiones) + 87 de `legacy`. Antes de la v10: 359 (272 + 87) |
+| columnas `geography`            | 3                                                                                                                          |
+| tablas territorio con geometría | 3 de 3                                                                                                                     |
+| `cat_tematicas`                 | 7                                                                                                                          |
+| `cat_subsectores`               | 3                                                                                                                          |
+| `cat_tipos_actor`               | 7                                                                                                                          |
+| `cat_roles_funcionales`         | 4                                                                                                                          |
+| `cat_tipos_organizacion`        | 7                                                                                                                          |
+| `cat_especies` (mínimo)         | 5 en `initdb`, 39 tras la carga                                                                                            |
+| `cat_unidades_organicas`        | 1 en `initdb` (unidad `OAIPCS`), 66 tras la carga                                                                          |
+| `cat_pip_etapas`                | 12                                                                                                                         |
+| `config.schema_registry`        | 2 (`avisa.raw_ingest` v1 y v2)                                                                                             |
+| `agent.cat_detalle_schema`      | 1 (v1 provisional)                                                                                                         |
+| `ind.plantilla`                 | 3 (Anexo 2, Anexo 15, Minister View)                                                                                       |
+| `ind.indicador` (pendiente)     | 0 (falta el catálogo de la Tabla 3)                                                                                        |
+| RLS forzadas en `core`          | 45 de 102 (medición 2026-11-20; antes 11)                                                                                  |
 
 La verificación es un `DO` con `RAISE EXCEPTION` si algo no cuadra: si el
 esquema queda a medias, el contenedor **no** arranca. Preferimos un fallo ruidoso
@@ -178,6 +186,13 @@ Las cifras de la tabla son el mínimo que exige `20_verify.sql`. Tras los parche
 propios y 48 tablas con RLS `FORCE` en todo el modelo —la fila de `core` cuenta solo
 las 11 de ese esquema, y la particionada `agent.llm_call` cuenta como una—; la
 medición completa del 2026-11-18 está en `docs/INDICE.md` §3.
+
+Esa frase es la foto del 2026-11-18 y se conserva tal cual. **Remedición del
+2026-11-20 sobre `avisa-db`, ya con los parches 16 y 17:** **263 tablas lógicas**
+(34 / 12 / 75 / 22 / 120 por capa), **287 físicas** (263 + 24 particiones),
+**34 vistas y materializadas** (241 columnas) y **2 126 columnas lógicas**, de las
+cuales **2 107 tienen comentario** y **19 no**. El modelo tiene además 9 roles en
+`core.roles`, 32 usuarios (28 activos) y el esquema `legacy` con **87 objetos**.
 
 ---
 
@@ -227,16 +242,16 @@ arranque.
 
 ---
 
-## 9. Aplicación de los parches 6–16 (post-carga)
+## 9. Aplicación de los parches 6–17 (post-carga)
 
-El `initdb` aplica el DDL y los parches 1–5, y se detiene ahí. Los parches 6–16 no
+El `initdb` aplica el DDL y los parches 1–5, y se detiene ahí. Los parches 6–17 no
 pueden correr en ese momento: el 6 reclasifica documentos `RED-%` que todavía no
 existen; el 9 y el 10 leen `legacy.dim_actores`, `legacy.dim_paso_proceso` y
 `legacy.fact_proceso_*`; y el 11 rellena el grafo con las filas ya cargadas. En un
 arranque limpio afectarían **0 filas sin dar error**. Por eso:
 
 - solo se aplican **después** de cargar el legado, en orden 6 → 7 → 8 → 9 → 10 →
-  11 → 12 → 13 → 14 → 15 → 16;
+  11 → 12 → 13 → 14 → 15 → 16 → 17;
 - el 12 comenta tablas y columnas y comenta también las columnas que añade el 11,
   así que va justo antes del 13;
 - el 13 cambia el tipo de `consultation.procesos.nivel_clasificacion` y alinea el
@@ -250,10 +265,14 @@ arranque limpio afectarían **0 filas sin dar error**. Por eso:
 - el 16 completa la seguridad por fila de `core` y registra el banco de datos
   personales (DC-04). Depende del 15: usa `core.clasificacion_max()` y
   `core.puede_crear()`, `core.puede_editar()`, `core.puede_eliminar()`;
-- los ocho SQL del 6 al 13 están montados de solo lectura en
-  `/opt/avisa/sql/96..103` (`96_patch_06.sql` … `103_patch_13.sql`), pero ningún
-  script del `initdb` los invoca. El 14, el 15 y el 16 no están montados: se
-  pasan por entrada estándar, como se explica abajo;
+- el 17 crea la consulta PIDE-RENIEC cifrada e inmutable, el privilegio nominal
+  y las columnas de costo de Gemini y WhatsApp. Depende del 15 y del 16: usa las
+  funciones de nivel y reutiliza el par de cifrado del 9;
+- los **once** SQL del 6 al 16 están montados de solo lectura en
+  `/opt/avisa/sql/96..106` (`96_patch_06.sql` … `106_patch_16.sql`), pero ningún
+  script del `initdb` los invoca. El **17 no está montado** (`docs/PARCHE_17_RENIEC_Y_COSTOS.sql`
+  sigue sólo en el disco): tanto el 17 como cualquiera de los once se pasan por
+  entrada estándar, como se explica abajo;
 - ni `./scripts/db.sh apply` ni `fresh` los tocan: esos comandos re-aplican el DDL
   y los parches 1–5 (§7).
 
@@ -303,6 +322,8 @@ docker/postgres/initdb/
     10_apply_v9.sql                 DDL x2 + parches 1-5
     20_verify.sql                   verificación con aborto
 scripts/db.sh                       operación
+backups/backend/PRODUCE_OAIPCS_AVISA_v9_ddl(1).sql
+                                   DDL v9 (montado como /opt/avisa/sql/90_ddl_v9.sql)
 docs/PREPARACION_V9_CARGA_LEGADO_5.sql   parche 5 (seeds de cierre)
 docs/PARCHE_6_CIERRE_CUMPLIMIENTO.sql    parche 6 (post-carga, §9)
 docs/PARCHE_7_GUARDRAILS_G19_G25.sql     parche 7 (post-carga, §9)
@@ -312,6 +333,10 @@ docs/PARCHE_10_FLUJO_PROCESO_D17.sql     parche 10 (post-carga, §9)
 docs/PARCHE_11_GRAFO_KAG.sql             parche 11 (post-carga, §9)
 docs/PARCHE_12_COMENTARIOS_COLUMNAS.sql  parche 12 (post-carga, §9)
 docs/PARCHE_13_CLASIFICACION.sql         parche 13 (post-carga, §9)
+docs/PARCHE_14_CIERRE_ERS.sql            parche 14 (post-carga, §9)
+docs/PARCHE_15_ROLES_Y_BORRADO.sql       parche 15 (post-carga, §9)
+docs/PARCHE_16_RLS_CORE_Y_DC04.sql       parche 16 (post-carga, §9)
+docs/PARCHE_17_RENIEC_Y_COSTOS.sql       parche 17 (post-carga; **no** montado, se pasa a mano)
 ```
 
 ---

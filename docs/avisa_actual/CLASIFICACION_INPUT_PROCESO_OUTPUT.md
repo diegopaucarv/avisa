@@ -69,8 +69,8 @@ otra parte:
 
 ## 3. COMPONENTES DE PROCESO — qué tareas pueden usar IA
 
-Son las transformaciones que hoy no existen en el sistema (el sistema solo _guarda y lee_) y que en
-v9 pasan a los tres agentes.
+Son las transformaciones que hoy no existen en el sistema (el sistema solo _guarda y lee_, más una
+maqueta de consultas con IA que nunca operó) y que en v9 pasan a los tres agentes.
 
 | #       | Proceso                                                                                                  | Estado hoy                                                                                                                             | Destino IA                                                                                           | HITL obligatorio                                                              |
 | ------- | -------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
@@ -85,15 +85,22 @@ v9 pasan a los tres agentes.
 | **P9**  | **Deduplicación / reconciliación de registros**                                                          | Existe solo para alertas y como script suelto (`repararAlertasDuplicadas`, `diagnosticarAlertasDuplicadas`, `migrarLlavesUnificadas`). | **Resolver + servicio** sobre todos los `dim_*`; hoy se muta la fuente (deuda).                      | Sí en zona gris.                                                              |
 | **P10** | **Mantenimiento de la calidad del esquema**                                                              | Si una columna no existe, el código la **crea** al escribir (`_asegurarColumnas*`, 12 funciones).                                      | **Proceso de validación de schema** antes de escribir; nunca mutar tablas en producción.             | — (es infraestructura, no IA).                                                |
 
-### El hallazgo principal: el sistema actual **no procesa**
+### El hallazgo principal: el sistema actual **no procesa** (la IA quedó en maqueta)
 
-No existe una sola función que _transforme_ un texto libre en estructura. Las 244 funciones del
-backend son `get*` (lectura), `guardar*/actualizar*/eliminar*` (CRUD) y `generar*` (render). El
+No existe una sola función que _transforme_ un texto libre en estructura ordenada. Las 244 funciones
+del backend son `get*` (lectura), `guardar*/actualizar*/eliminar*` (CRUD) y `generar*` (render). El
 "procesamiento" ocurre hoy **en la cabeza del sectorista**, y es por eso que:
 
 - los campos semánticos (`situacion_actual`, `hechos_recientes`, `resumen_ejecutivo`,
   `descripcion_riesgo`, `manifestaciones`, `causas`…) son `TEXT`/`JSON` sin catálogo;
 - los auxiliares `_asegurarColumnas*` existen porque el esquema no se validaba.
+
+**La salvedad de la IA.** El sistema anterior sí tenía un módulo de consultas con IA. En `Código.txt`
+hay un conector a Gemini (`_llamarGemini`) con `analizarConsultaGeneral`, `buscarConIA` y
+`analizarCasoConIA`, y en el navegador existe la pantalla «Consultas con IA». **Nunca operó**: la
+clave era el marcador `PENDIENTE_API_KEY_GEMINI`, cada llamada devolvía el aviso de que faltaba
+configurarla y no hay uso en producción. Era una maqueta, y por eso no altera el hallazgo: no
+devolvía estructura, devolvía texto —y ni eso, porque nunca llegó a ejecutarse.
 
 Es exactamente el vacío que cubren P1–P7. Por eso la migración de AVISA no consiste en _portar
 funciones_ sino en **separar lo que el sistema nunca separó: capturar ≠ pensar ≠ imprimir**.
@@ -189,13 +196,13 @@ funcional nuevo (lo que exige IA) es mucho menor de lo que sugiere el conteo bru
 
 ## 7. MATRIZ DE DECISIÓN — qué hacer con cada clase
 
-| Clase                     | ¿Migrar?       | ¿Reescribir?   | ¿Agente? | Destino v9                                                               |
-| ------------------------- | -------------- | -------------- | -------- | ------------------------------------------------------------------------ |
-| **I Entrada manual**      | Sí, el dominio | Sí, como UI    | No       | HITL + formularios asistidos; el texto libre entra a `avisa.raw_ingest`. |
-| **P Proceso con IA**      | No existe hoy  | Sí, es nuevo   | **Sí**   | A1 (P1–P3), A2 (P4, P5, P7), A3 (P6); `agent.*` para trazabilidad.       |
-| **O Salida determinista** | Sí             | **No**, portar | No       | Plantillas (`ind.plantilla`), vistas SQL, servicios de entrega.          |
-| **INF Infraestructura**   | Parcial        | Sí             | No       | SSO/RBAC, object storage, bootstrap modular.                             |
-| **M Muerto**              | No             | —              | —        | Eliminar antes de contar líneas.                                         |
+| Clase                     | ¿Migrar?                                        | ¿Reescribir?   | ¿Agente? | Destino v9                                                               |
+| ------------------------- | ----------------------------------------------- | -------------- | -------- | ------------------------------------------------------------------------ |
+| **I Entrada manual**      | Sí, el dominio                                  | Sí, como UI    | No       | HITL + formularios asistidos; el texto libre entra a `avisa.raw_ingest`. |
+| **P Proceso con IA**      | No existe en operación (la maqueta nunca operó) | Sí, es nuevo   | **Sí**   | A1 (P1–P3), A2 (P4, P5, P7), A3 (P6); `agent.*` para trazabilidad.       |
+| **O Salida determinista** | Sí                                              | **No**, portar | No       | Plantillas (`ind.plantilla`), vistas SQL, servicios de entrega.          |
+| **INF Infraestructura**   | Parcial                                         | Sí             | No       | SSO/RBAC, object storage, bootstrap modular.                             |
+| **M Muerto**              | No                                              | —              | —        | Eliminar antes de contar líneas.                                         |
 
 Recomendación de secuencia:
 
@@ -214,8 +221,9 @@ Recomendación de secuencia:
 - **Entrada (I)**: 6 puntos de captura (caso, hecho, alerta, RR/clima, análisis, catálogos). El
   dato del conflicto se re-escribe hasta cuatro veces con distinta granularidad — es la fuente del
   costo operativo y el lugar donde una mala captura se propaga a todos los reportes.
-- **Proceso (P)**: **no existe**. Ninguna de las 244 funciones transforma texto libre en
-  estructura. Ahí están los siete agentes/procesos de IA (P1–P7), y ahí está el valor de v9.
+- **Proceso (P)**: **no existe en operación**. Ninguna de las 244 funciones transforma texto libre en
+  estructura; la consulta con IA quedó en maqueta y nunca operó (§3). Ahí están los siete
+  agentes/procesos de IA (P1–P7), y ahí está el valor de v9.
 - **Salida (O)**: sí existe y es ~40 % de las funciones, concentrada en 12 `generar*` y el cuadro de
   mando. **No necesita IA**: necesita plantillas y una sola capa de resolución de nombres.
 - **Infra (INF)**: el bootstrap `eval()` de 7 bundles y el auth por hoja son la deuda que condiciona

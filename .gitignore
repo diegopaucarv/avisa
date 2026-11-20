@@ -22,3 +22,7 @@ node_modules
 __pycache__/
 *.pyc
 .venv/
+
+# Documentos con datos personales de terceros (TDR de locador: DNI, RUC,
+# correo y teléfono). Se conservan en local, fuera del control de versiones.
+backups/tdr/

@@ -3,6 +3,10 @@
 Fecha: 2026-11-18. Base viva: contenedor `avisa-db`, base `avisa`.
 Se excluyen siempre `public`, `information_schema`, `pg_*` y (salvo que se diga) `legacy`.
 
+> Las cifras de este documento son las de ese día y se conservan como registro. El modelo
+> creció después: ver la medición del 2026-11-19 en `INDICE.md` §3 y el diccionario vigente en
+> `DICCIONARIO_DATOS.md`.
+
 ## 1. Veredicto
 
 **El diccionario ya es publicable en lo que toca al modelo v10 y no queda nada abierto en la
