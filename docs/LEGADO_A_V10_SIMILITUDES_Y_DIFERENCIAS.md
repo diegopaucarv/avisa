@@ -66,8 +66,8 @@ memorizarlos: están aquí para consultarlos cuando aparezcan.
 
 | Aspecto                     | Sistema anterior (2026)                                                                                                                 | v10                                                                                                          |
 | --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| **Plataforma**              | Google Sheets y Apps Script: 244 funciones en el servidor y 450 nombres en el navegador (158 escritos una vez y 292 redefinidos encima) | PostgreSQL 16 con dos extensiones (mapas y vectores): 287 tablas físicas, 263 lógicas y 609 llaves foráneas  |
-| **Modelo de datos**         | 86 hojas planas (75 con datos), sin llaves foráneas ni reglas de unicidad; el tipo de cada valor se adivina al leerlo                   | 263 tablas lógicas con llaves foráneas, reglas de validación, catálogos cerrados y seguridad por fila        |
+| **Plataforma**              | Google Sheets y Apps Script: 244 funciones en el servidor y 450 nombres en el navegador (158 escritos una vez y 292 redefinidos encima) | PostgreSQL 16 con dos extensiones (mapas y vectores): 289 tablas físicas, 265 lógicas y 610 llaves foráneas  |
+| **Modelo de datos**         | 86 hojas planas (75 con datos), sin llaves foráneas ni reglas de unicidad; el tipo de cada valor se adivina al leerlo                   | 265 tablas lógicas con llaves foráneas, reglas de validación, catálogos cerrados y seguridad por fila        |
 | **Nivel de detalle**        | Una fila por fila de hoja: el mismo conflicto se escribe hasta cuatro veces con distinto detalle                                        | Un concepto por tabla: caso, alerta, demanda, hecho, actor y compromiso son cosas distintas                  |
 | **Identidad**               | Códigos de texto (`ID_*`); el DNI hace de identificador de persona                                                                      | Identificador interno + el código original conservado + un identificador único generado cuando no hay código |
 | **Acceso**                  | Una clave numérica guardada en una hoja; los permisos se aplican en la pantalla                                                         | Inicio de sesión único, permisos por rol y seguridad por fila, con tres perfiles                             |
@@ -243,7 +243,7 @@ análisis de conflictividad existen vacías, y su contenido terminó en
 | `ind`                                                                                                             |               9 | Plantillas, indicadores y resultados                                  | 3 plantillas, 0 espacios definidos    |
 | `ctx`                                                                                                             |         10 (16) | Contexto del entorno (clima, pobreza, zonas marítimas)                | 28                                    |
 | `qda` + `lex` + `chat`                                                                                            |              35 | Análisis cualitativo, vocabulario y conversaciones                    | 0                                     |
-| `policy` + `config` + `model`                                                                                     |              15 | Reglas de control, parámetros y fichas de modelo                      | 10 reglas / 17 parámetros / 12 fichas |
+| `policy` + `config` + `model`                                                                                     |              17 | Reglas de control, parámetros y fichas de modelo                      | 10 reglas / 17 parámetros / 12 fichas |
 | `territorio`                                                                                                      |              16 | Lugares, caletas, plantas y zonas de pesca                            | 9 catálogos                           |
 | `ref`                                                                                                             |               2 | Base legal que respalda cada tratamiento de datos y cada evidencia    | 5 filas                               |
 | `analisis`                                                                                                        |               4 | Plan de análisis y marcos situacionales                               | 14                                    |
@@ -253,7 +253,7 @@ análisis de conflictividad existen vacías, y su contenido terminó en
 Los números entre paréntesis son tablas físicas: una tabla dividida en partes
 cuenta una vez como tabla lógica y varias como tabla física. Con `core` (102) y
 `audit` (1), que no figuran aquí por ser el núcleo compartido, la suma da las
-**263 tablas lógicas** de §11.1.
+**265 tablas lógicas** de §11.1.
 
 Además hay un grupo de **tablas creadas para que los datos del sistema anterior
 pudieran aterrizar**: `core.log_accesos`, `core.mesas_dialogo`,
@@ -372,20 +372,20 @@ gráficos de esta sección y escribe la tabla de §11.5.
 
 | Dimensión                      | Sistema anterior (`legacy`)                           | v10                                                                                   |
 | ------------------------------ | ----------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| Esquemas (carpetas)            | 1                                                     | 27 (26 con tablas; `analytics` solo tiene vistas; `public` es de PostGIS y no cuenta) |
-| Tablas físicas                 | 87                                                    | 287 (24 son partes de tablas divididas)                                               |
-| Tablas lógicas                 | 87                                                    | 263                                                                                   |
-| Columnas                       | 807                                                   | 2 492                                                                                 |
-| Filas                          | 4 729                                                 | 13 348                                                                                |
-| Con datos / vacías             | 76 / 11                                               | 109 / 178 físicas (154 lógicas)                                                       |
-| Llaves primarias               | 87                                                    | 286                                                                                   |
-| Llaves foráneas                | **0**                                                 | **609**                                                                               |
+| Esquemas (carpetas)            | 1                                                     | 28 (27 con tablas; `analytics` solo tiene vistas; `public` es de PostGIS y no cuenta) |
+| Tablas físicas                 | 87                                                    | 289 (24 son partes de tablas divididas)                                               |
+| Tablas lógicas                 | 87                                                    | 265                                                                                   |
+| Columnas                       | 807                                                   | 2 511                                                                                 |
+| Filas                          | 4 729                                                 | 13 352                                                                                |
+| Con datos / vacías             | 76 / 11                                               | 110 / 179 físicas (155 lógicas)                                                       |
+| Llaves primarias               | 87                                                    | 288                                                                                   |
+| Llaves foráneas                | **0**                                                 | **610**                                                                               |
 | Reglas de unicidad (UNIQUE)    | **0**                                                 | 143                                                                                   |
 | Reglas de validación (CHECK)   | **0**                                                 | 347                                                                                   |
 | Índices                        | 87                                                    | 757 (sin contar los internos de PostgreSQL ni los 6 de vistas materializadas)         |
-| Vistas y vistas materializadas | **0**                                                 | 34 (28 + 6)                                                                           |
-| Tablas con seguridad por fila  | **0**                                                 | 82 (todas activas también para el dueño de la tabla)                                  |
-| Políticas de seguridad         | **0**                                                 | 520                                                                                   |
+| Vistas y vistas materializadas | **0**                                                 | 36 (30 + 6)                                                                           |
+| Tablas con seguridad por fila  | **0**                                                 | 87 (todas activas también para el dueño de la tabla)                                  |
+| Políticas de seguridad         | **0**                                                 | 540                                                                                   |
 | Triggers                       | **0**                                                 | 66                                                                                    |
 | Tipos de dato distintos        | 3 (2 en las hojas y la fecha de carga del manifiesto) | 17                                                                                    |
 
@@ -399,14 +399,14 @@ propia tabla registro. Los dos tipos de dato de las hojas son `text` y el `int4`
 hoja. Las **76 tablas con datos son 75 hojas más la tabla registro**; las 11 vacías
 son hojas que nunca se usaron (§4).
 
-**Dos detalles que la tabla deja ver.** Hay 286 llaves primarias para 287 tablas
+**Dos detalles que la tabla deja ver.** Hay 288 llaves primarias para 289 tablas
 físicas: la única sin llave primaria es `core.cronologia_vinculos`, que es una
-tabla de vínculos entre registros. Y las 609 llaves foráneas se reparten en 208 en
-`core`, 67 en `ctx`, 61 en `kag`, 48 en `chat`, 31 en `agent`, 25 en `qda` y 169
+tabla de vínculos entre registros. Y las 610 llaves foráneas se reparten en 208 en
+`core`, 67 en `ctx`, 61 en `kag`, 48 en `chat`, 31 en `agent`, 25 en `qda` y 170
 en el resto.
 
-**De dónde salen los números de la v10.** Las 13 348 filas se reparten así: `core`
-6 903 · `kag` 3 187 · `audit` 3 088 · `config` 64 · `ctx` 28 · `policy` 15 ·
+**De dónde salen los números de la v10.** Las 13 352 filas se reparten así: `core`
+6 903 · `kag` 3 187 · `audit` 3 088 · `config` 68 · `ctx` 28 · `policy` 15 ·
 `domain` 15 · `analisis` 14 · `model` 12 · `territorio` 9 · `ref` 5 · `agent` 5 ·
 `ind` 3. Y hay **13 esquemas con tablas que hoy tienen cero filas**: `avisa`,
 `chat`, `community`, `consultation`, `economic`, `forecast`, `impact`, `lex`,
@@ -441,19 +441,19 @@ tendrá tabla mientras el RADAR siga diferido.
 
 El sistema anterior guarda **todo como texto** salvo `fila_n`: no hay fechas,
 números, valores verdadero/falso ni referencias. La v10 usa **17 tipos distintos**
-repartidos en 2 492 columnas.
+repartidos en 2 511 columnas.
 
 | Tipo             | Columnas | Para qué sirve                                       |
 | ---------------- | -------: | ---------------------------------------------------- |
 | `varchar`        |      642 | Texto corto y acotado (nombres, códigos, estados)    |
-| `uuid`           |      581 | Identificadores únicos, la mayoría de las llaves     |
-| `int2`           |      245 | Números pequeños (ordinales, niveles, códigos)       |
-| `timestamptz`    |      205 | Fecha y hora con zona horaria                        |
+| `uuid`           |      583 | Identificadores únicos, la mayoría de las llaves     |
+| `int2`           |      246 | Números pequeños (ordinales, niveles, códigos)       |
+| `timestamptz`    |      208 | Fecha y hora con zona horaria                        |
 | `int4`           |      150 | Enteros                                              |
-| `text`           |      131 | Texto libre, sin límite                              |
-| `bool`           |      120 | Verdadero/falso                                      |
-| `numeric`        |      111 | Decimales exactos (coordenadas, montos, porcentajes) |
-| `date`           |      103 | Fecha sin hora                                       |
+| `text`           |      139 | Texto libre, sin límite                              |
+| `bool`           |      121 | Verdadero/falso                                      |
+| `numeric`        |      113 | Decimales exactos (coordenadas, montos, porcentajes) |
+| `date`           |      105 | Fecha sin hora                                       |
 | `jsonb`          |      103 | Contenido variable, sin columnas fijas               |
 | `bpchar`         |       68 | Texto de longitud exacta (códigos de una letra)      |
 | `int8`           |       19 | Enteros grandes (contadores)                         |
@@ -463,8 +463,8 @@ repartidos en 2 492 columnas.
 | `vector`         |        1 | Huella numérica para búsqueda semántica              |
 
 Los dos tipos que más crecieron son los dos que el sistema anterior no tenía en
-absoluto: **identificadores** y **fechas**. `uuid` aparece 581 veces porque cada
-entidad y cada relación tiene su propia llave; `timestamptz` más `date` suman 308
+absoluto: **identificadores** y **fechas**. `uuid` aparece 583 veces porque cada
+entidad y cada relación tiene su propia llave; `timestamptz` más `date` suman 313
 columnas de tiempo, contra cero antes.
 
 **Por qué importa.** El tipo de dato es donde vive la validación que antes no
@@ -487,9 +487,9 @@ una tabla particionada por mes más su tabla de rechazos. No guarda información
 sistema: guarda lo que llegó y todavía no se procesó.
 
 `analytics` no tiene ni una tabla propia: sus **17 vistas y 5 vistas materializadas**
-son la capa de lectura. El resto de vistas se reparte en `core` (4), `ref` (2),
-`mype` (2 más 1 materializada), `lex` (1), `pesca` (1) y `territorio` (1), para 28
-vistas y 6 materializadas en total.
+son la capa de lectura. El resto de vistas se reparte en `core` (4), `config` (2),
+`ref` (2), `mype` (2 más 1 materializada), `lex` (1), `pesca` (1) y `territorio` (1),
+para 30 vistas y 6 materializadas en total.
 
 Dicho al revés: **`kag` y `audit` tienen muchas filas pero pocas tablas**. Su peso
 está en los datos, no en la estructura. Quien dimensione el sistema contando
@@ -650,7 +650,7 @@ por primera vez.
 **Qué significa todo esto.** El problema del sistema anterior no era el volumen
 (4 643 filas de hoja) sino la ausencia de reglas: el software no impedía escribir el mismo
 DNI 45 veces ni dejar 186 actores sin DNI. La v10 lleva esa validación al esquema
-—**609 llaves foráneas, 143 reglas de unicidad y 347 reglas de validación**— y la
+—**610 llaves foráneas, 143 reglas de unicidad y 351 reglas de validación**— y la
 cola de revisión de DNI es la consecuencia directa de esas 45 repeticiones: lo que
 el sistema anterior aceptaba, la v10 lo detecta y lo pone en cola para revisión.
 
@@ -680,11 +680,12 @@ El diccionario de **[13]** se regenera aparte, cuando cambia el esquema o la car
 python migration/generar_diccionario.py
 ```
 
-De las **2 126 columnas** de las tablas lógicas, **2 107 tienen descripción**
-escrita en la propia base y las **366 de las particiones** la heredan de su tabla
-padre. Las 19 que aún no la tienen están en `core.cat_privilegio`,
-`core.privilegio_usuario`, `core.consulta_reniec` y `core.envios_comunicacion`,
-tablas creadas por los parches 16 y 17. En el sistema anterior se describen
+De las **2 145 columnas** de las tablas lógicas, **todas tienen descripción**
+escrita en la propia base; las **366 de las particiones** la heredan de su tabla
+padre, porque PostgreSQL no propaga los comentarios. Las **19 últimas** las cerró
+el parche 19: estaban en `core.cat_privilegio`, `core.privilegio_usuario`,
+`core.consulta_reniec` y `core.envios_comunicacion`, objetos que creó el parche 17
+después de que el parche 12 hubiera comentado el resto. En el sistema anterior se describen
 **209 de sus 807 columnas**, y las 598 restantes son, en su mayoría, columnas
 posicionales (`c01`, `c02`, …) del volcado de formularios: para explicarlas hace
 falta la hoja original.
@@ -708,7 +709,7 @@ módulos**. Este es el mapa de esa superficie.
 | Demandas                                     |        21 | `core.demandas` + `demandas_actores` + `demandas_evidencias`                                                             | Se mantiene   |
 | Hechos ocurridos                             |        12 | `core.caso_cronologia` + `fuentes_evidencia` + `cronologia_vinculos`                                                     | Se mantiene   |
 | Registro de envíos                           |         6 | `core.envios_comunicacion`                                                                                               | Se mantiene   |
-| Navegación, permisos y pantallas de relación |        43 | Permisos por rol y seguridad por fila (82 tablas, 520 políticas); las relaciones muchos-a-muchos pasan a llaves foráneas | Se transforma |
+| Navegación, permisos y pantallas de relación |        43 | Permisos por rol y seguridad por fila (87 tablas, 540 políticas); las relaciones muchos-a-muchos pasan a llaves foráneas | Se transforma |
 | Análisis de casos (formato Anexo 8)          |        33 | `core.documentos` + `analytics.vw_anexo_15_matriz_conflictividad`                                                        | Se transforma |
 | Sectoristas, puntos focales y autoridades    |        29 | `core.usuarios` + `usuario_roles` + `usuario_territorio`                                                                 | Se transforma |
 | Catálogos y datos de referencia              |        27 | `core.cat_*` (38 catálogos) + regiones, provincias y distritos                                                           | Se transforma |
@@ -768,7 +769,7 @@ reemplazar. No son mejoras de algo existente: son piezas nuevas.
 
 | Componente nuevo                                         | Dónde                                             | Qué aporta                                                                                                                            |
 | -------------------------------------------------------- | ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| Seguridad por fila                                       | 82 tablas, 520 políticas                          | El aislamiento por rol, territorio y nivel de reserva vive en la base. En el alcance del MVP quedan 26 tablas y 170 políticas         |
+| Seguridad por fila                                       | 87 tablas, 540 políticas                          | El aislamiento por rol, territorio y nivel de reserva vive en la base. En el alcance del MVP quedan 26 tablas y 170 políticas         |
 | Auditoría que solo agrega filas                          | `audit.datos_personales_acceso` + `agent.run_log` | Historial que no se puede alterar: rechaza modificar, borrar y vaciar                                                                 |
 | Cifrado de datos personales con registro de cada lectura | `actor_datos_personales.dni_cifrado` y `dni_hmac` | El DNI queda cifrado, con una huella para detectar duplicados, y cada descifrado deja rastro                                          |
 | Agentes A1, A2 y A3                                      | `agent.sesion`, `agent.llm_call`, `agent.run_log` | Extraer, pautar y sintetizar, con traza de cada llamada                                                                               |

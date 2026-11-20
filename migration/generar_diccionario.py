@@ -132,6 +132,12 @@ CLASIFICACION_EXPLICITA = {
     ),
     "core.cat_privilegio": ("INF", "criterio: catálogo de autorización (RA-07)"),
     "core.privilegio_usuario": ("INF", "criterio: concesión de autorización (RA-07)"),
+    # Parche 18. Ninguna aparece en §12 del BRECHA.
+    "config.servicio_externo": (
+        "INF",
+        "criterio: catálogo de servicios y costos (RNF-13)",
+    ),
+    "config.tope_gasto": ("INF", "criterio: parámetro de gasto (RNF-13, H-65)"),
 }
 
 # El BRECHA nombra `_rejected` dentro de la fila de `avisa.raw_ingest`.

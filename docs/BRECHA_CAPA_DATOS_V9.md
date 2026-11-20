@@ -2,12 +2,13 @@
 
 > **Remedición del 2026-11-20.** Las cifras de este diagnóstico son las del
 > momento en que se escribió y se conservan como foto fechada. Medición actual
-> sobre la base viva: **263 tablas lógicas** (34 / 12 / 75 / 22 / 120 por capa),
-> **34 vistas** (241 columnas), **2 126 columnas lógicas** de las cuales **2 107
-> tienen comentario** y **19 no lo tienen**, **520 políticas RLS sobre 82 tablas**
-> (`core`: 45 con RLS, **57 sin RLS**), **87 objetos** en el esquema `legacy` y
-> **1 520 nodos / 450 aristas** en el grafo KAG. La clasificación funcional de la
-> §12 no se ha modificado.
+> sobre la base viva: **265 tablas lógicas**, clasificadas en capas como **34 / 12 /
+> 76 / 22 / 121**, **36 objetos derivados**
+> (30 vistas y 6 materializadas, 298 columnas), **2 145 columnas lógicas**, de las
+> cuales **2 145 tienen comentario** (ninguna sin describir, tras el parche 19), **540 políticas RLS sobre
+> 87 tablas** (`core`: 48 con RLS, **54 sin RLS**), **87 objetos** en el esquema
+> `legacy` y **1 520 nodos / 450 aristas** en el grafo KAG. La clasificación
+> funcional de la §12 no se ha modificado.
 
 Estado: **estructura completa; contenido y derivados parciales**.
 

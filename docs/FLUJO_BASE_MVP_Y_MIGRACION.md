@@ -199,7 +199,7 @@ total que deja la carga más el parche 16 con su rol de administrador y oficial 
 datos personales. Si se verifica antes de ese parche, la línea avisa de la fila
 que falta y no es un problema de la carga.
 
-### 5.4 Aplicar los parches 6 a 17
+### 5.4 Aplicar los parches 6 a 18
 
 Los parches vienen **después** de la carga, siempre en orden, y nunca antes.
 Cada uno hace algo que necesita datos reales: reclasificar documentos, cifrar
@@ -225,20 +225,55 @@ MSYS_NO_PATHCONV=1 docker exec -i avisa-db psql -U avisa -d avisa \
 …y así hasta el 17, cambiando solo el nombre del archivo. El parche 9 además
 necesita `-v crypto_key="$APP_CRYPTO_KEY"`; sin esa variable aborta a propósito.
 
+El parche 18 va aparte, siempre al final:
+
+```sh
+MSYS_NO_PATHCONV=1 docker exec -i avisa-db psql -U avisa -d avisa \
+  -v ON_ERROR_STOP=1 -f /dev/stdin < docs/PARCHE_18_COSTOS_Y_RLS_ADMIN.sql
+```
+
+Y después el 19, que cierra los comentarios que faltaban:
+
+```sh
+MSYS_NO_PATHCONV=1 docker exec -i avisa-db psql -U avisa -d avisa \
+  -v ON_ERROR_STOP=1 -f /dev/stdin < docs/PARCHE_19_COMENTARIOS_FALTANTES.sql
+```
+
 **Detalles que importan:**
 
 - `MSYS_NO_PATHCONV=1` es necesario en Git Bash: si no, el sistema convierte las
   rutas que empiezan por `/` a rutas de Windows y `psql` busca en el lugar
   equivocado.
-- El archivo se pasa por entrada estándar (`-f -`), no con `-f /tmp/...`.
+- El archivo se pasa por entrada estándar (`-f -`, o `-f /dev/stdin` como en el
+  18), no con `-f /tmp/...`. Los 19 archivos del entorno —los 5 de preparación y
+  los parches 6 a 19— están montados de solo lectura dentro del contenedor, de
+  `96_patch_06.sql` a `109_patch_19.sql` (el 17 es `107_patch_17.sql`, el 18 el
+  `108` y el 19 el `109`), así que también vale `-f /opt/avisa/sql/109_patch_19.sql`.
 - El parche 6 crea una tabla de respaldo (`core.patch6_documentos_snapshot`) que
   él mismo autoriza a borrar cuando se valida. En la base de trabajo ya está
   borrada, por eso los conteos no la incluyen; en una base reconstruida existe
   hasta que se borre.
-- El parche 17 va al final y depende del 15 y del 16: crea `core.consulta_reniec`
+- El parche 17 depende del 15 y del 16: crea `core.consulta_reniec`
   (cifrada, de solo agregar y con huella HMAC), el privilegio nominal
   (`core.cat_privilegio`, `core.privilegio_usuario`) y las columnas de costo de
   Gemini y WhatsApp. Como el 14, el 15 y el 16, se pasa por entrada estándar.
+- El parche 18 cierra el tope de gasto de RNF-13 y la escalada de privilegios
+  del catálogo de identidad. Crea `config.servicio_externo` (8 columnas, 4
+  filas: SVC-02 Gemini, SVC-06 correo, SVC-07 WhatsApp y SVC-16 PIDE-RENIEC) y
+  `config.tope_gasto` (11 columnas y **0 filas**: el monto es la decisión
+  abierta H-65), las vistas `config.v_consumo_servicio_mes` y
+  `config.v_tope_aviso`, y las funciones `config.gasto_mes(text, date)` y
+  `config.puede_gastar(text)`. Además pone seguridad por fila con `FORCE` en
+  `core.roles`, `core.usuarios`, `core.usuario_roles` y en las dos tablas
+  nuevas: la escritura queda solo para el rol `administrador`, y `core.roles`
+  mantiene el `SELECT` abierto porque las funciones de contexto de todos los
+  usuarios lo necesitan. Son 20 políticas nuevas (`p18_*`) y se puede repetir
+  sin daño: se ha ejecutado cuatro veces sin error.
+- El parche 19 no toca la estructura: agrega los **19 comentarios de columna**
+  que quedaron pendientes en `core.cat_privilegio`, `core.privilegio_usuario`,
+  `core.consulta_reniec` y `core.envios_comunicacion`, porque el parche 12 los
+  comentó antes de que el 17 creara esos objetos. Verifica que el modelo quede
+  sin ninguna columna sin describir; si quedara una, aborta.
 
 ### 5.5 Verificar de nuevo
 
@@ -388,23 +423,29 @@ los parches (partes B y siguientes).
 La secuencia completa que se verificó en una base nueva:
 
 ```
-sección A  →  carga del legado  →  parches 6 a 17  →  pruebas 15 y 16
+sección A  →  carga del legado  →  parches 6 a 19  →  pruebas 15 y 16
 ```
 
-Al terminar: **287 tablas físicas** (263 lógicas y 24 hijas de partición),
-**2 492 columnas** y **609 claves ajenas**, sin contar `legacy` ni `public`. Son
-las cifras medidas en la base de trabajo el 2026-11-19.
+Al terminar: **289 tablas físicas** (265 lógicas y 24 hijas de partición),
+**2 511 columnas** y **610 claves ajenas**, sin contar `legacy` ni `public`. Son
+las cifras medidas en la base de trabajo el 2026-11-20.
 
 **Comprobación del 2026-11-19, de punta a punta.** La secuencia completa se
 corrió sobre una base desechable (`avisa_check`) para validar el orden de los
 bloques del archivo unificado. El resultado fue: sección A → **275 tablas
 físicas, 2 314 columnas y 581 claves ajenas**; tras la carga y los parches
-6–17 → **288 tablas físicas, 2 496 columnas y 609 claves ajenas**. La única
-diferencia con la base de trabajo es `core.patch6_documentos_snapshot` (1 tabla,
-4 columnas y 1 comentario), que el parche 6 crea como respaldo y deja a la
-espera de que se valide y se borre; al quitarla quedan exactamente **287 / 2 492
-/ 609**. La seguridad por fila también coincide: **520 políticas en 82 tablas**
-y **66 disparadores**.
+hasta el 17 → **288 tablas físicas, 2 496 columnas y 609 claves ajenas**. La
+única diferencia con la base de trabajo es `core.patch6_documentos_snapshot` (1
+tabla, 4 columnas y 1 comentario), que el parche 6 crea como respaldo y deja a
+la espera de que se valide y se borre; al quitarla quedan exactamente **287 /
+2 492 / 609**. La seguridad por fila también coincide: **520 políticas en 82
+tablas** y **66 disparadores**.
+
+El parche 18, que entró después, añade 2 tablas, 19 columnas, 1 clave ajena y 20
+políticas en 5 tablas: el estado final es **290 tablas físicas, 2 515 columnas y
+610 claves ajenas** (**289 / 2 511 / 610** sin el respaldo del parche 6) y **540
+políticas en 87 tablas**. El parche 19 no altera ninguna de esas cifras: solo
+escribe los 19 comentarios de columna que el 17 había dejado pendientes.
 
 ---
 
@@ -445,10 +486,18 @@ psql -U avisa -d avisa -v ON_ERROR_STOP=1 -f /tmp/seccion_a.sql
 python -m migration.loader.run
 python -m migration.loader.run --verify
 
-# --- parches 6 a 17
+# --- parches 6 a 19
 python migration/consolidar_esquema.py --seccion B --salida /tmp/seccion_b.sql
 MSYS_NO_PATHCONV=1 docker exec -i avisa-db psql -U avisa -d avisa \
   -v ON_ERROR_STOP=1 -v crypto_key="$APP_CRYPTO_KEY" -f - < /tmp/seccion_b.sql
+
+# --- parche 18 suelto (si se aplica uno por uno)
+MSYS_NO_PATHCONV=1 docker exec -i avisa-db psql -U avisa -d avisa \
+  -v ON_ERROR_STOP=1 -f /dev/stdin < docs/PARCHE_18_COSTOS_Y_RLS_ADMIN.sql
+
+# --- parche 19 suelto (los comentarios de columna que faltaban)
+MSYS_NO_PATHCONV=1 docker exec -i avisa-db psql -U avisa -d avisa \
+  -v ON_ERROR_STOP=1 -f /dev/stdin < docs/PARCHE_19_COMENTARIOS_FALTANTES.sql
 
 # --- pruebas
 MSYS_NO_PATHCONV=1 docker exec -i avisa-db psql -U avisa -d avisa \
@@ -481,7 +530,7 @@ MSYS_NO_PATHCONV=1 docker exec -i avisa-db psql -U avisa -d avisa_mssql \
 Los documentos citados en este texto, con lo que aporta cada uno:
 
 1. `docs/ENTORNO_DOCKER_POSTGRES.md` — el contenedor, las credenciales, el
-   arranque y la aplicación de los parches 6 a 17 (§9).
+   arranque y la aplicación de los parches 6 a 18 (§9).
 2. `docs/AVISA_V10_ESQUEMA_UNIFICADO.sql` — todo el esquema en un archivo, en dos
    secciones, con el detalle de qué produce cada una. Generado: no se edita a mano.
 3. `migration/consolidar_esquema.py` — el programa que arma ese archivo unificado.
@@ -507,3 +556,6 @@ Los documentos citados en este texto, con lo que aporta cada uno:
     WhatsApp.
 14. `docs/LEGADO_A_V10_SIMILITUDES_Y_DIFERENCIAS.md` — qué es igual y qué cambia
     entre el sistema anterior y la v10, con las cifras comparadas.
+15. `docs/PARCHE_18_COSTOS_Y_RLS_ADMIN.sql` — el tope de gasto de RNF-13 (aviso
+    al acercarse, bloqueo al excederse) y la seguridad por fila del catálogo de
+    identidad: `core.roles`, `core.usuarios` y `core.usuario_roles`.

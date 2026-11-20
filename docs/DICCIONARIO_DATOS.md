@@ -1,10 +1,10 @@
 # Diccionario de datos — AVISA / SIPRECS
 
-Generado el 2026-11-19 desde la base viva con `migration/generar_diccionario.py` [9]. No se edita a mano: se regenera.
+Generado el 2026-11-20 desde la base viva con `migration/generar_diccionario.py` [9]. No se edita a mano: se regenera.
 
 ## 1. Qué es este documento
 
-Es el diccionario único del sistema. Describe, con el mismo formato, las dos capas que hoy conviven en la base: el **sistema anterior** (87 tablas con columnas posicionales) y el **modelo v10** (263 tablas lógicas en 27 esquemas, de los cuales uno solo contiene vistas, más 34 objetos derivados).
+Es el diccionario único del sistema. Describe, con el mismo formato, las dos capas que hoy conviven en la base: el **sistema anterior** (87 tablas con columnas posicionales) y el **modelo v10** (265 tablas lógicas en 27 esquemas, de los cuales uno solo contiene vistas, más 36 objetos derivados).
 
 Para cada tabla dice qué guarda, cuántas filas y columnas tiene, cuáles son sus claves y relaciones, y qué significa cada columna. Para el sistema anterior añade el destino que tiene en v10, de modo que un mismo documento sirve para leer el pasado y el presente.
 
@@ -20,15 +20,15 @@ Tres cosas que este documento **no** es:
 
 | Dimensión | Sistema anterior | Modelo v10 |
 | --- | --: | --: |
-| Tablas lógicas | 87 | 263 |
+| Tablas lógicas | 87 | 265 |
 | Particiones de tabla | 0 | 24 |
-| Tablas físicas | 87 | 287 |
-| Columnas (sin particiones) | 807 | 2 126 |
-| Columnas (con particiones) | 807 | 2 492 |
-| Filas | 4 729 | 13 348 |
-| Objetos derivados (vistas y matviews) | 0 | 34 |
+| Tablas físicas | 87 | 289 |
+| Columnas (sin particiones) | 807 | 2 145 |
+| Columnas (con particiones) | 807 | 2 511 |
+| Filas | 4 729 | 13 352 |
+| Objetos derivados (vistas y matviews) | 0 | 36 |
 
-El total de columnas que recorre este diccionario es 3 299: 2 492 del modelo v10 contando sus particiones, más 807 del sistema anterior. De ellas, 2 107 tienen comentario en la propia base y 209 tienen significado documentado por curaduría; el resto aparece con `—`.
+El total de columnas que recorre este diccionario es 3 318: 2 511 del modelo v10 contando sus particiones, más 807 del sistema anterior. De ellas, 2 145 tienen comentario en la propia base y 209 tienen significado documentado por curaduría; el resto aparece con `—`.
 
 ## 2. Cómo se generó y cómo se regenera
 
@@ -43,8 +43,8 @@ De dónde sale cada dato:
 - **Estructura**: tablas, columnas, tipos, nulabilidad, valores por defecto, claves primarias, ajenas, únicas e índices salen del catálogo del motor (`pg_class`, `pg_attribute`, `pg_constraint`, `pg_index`).
 - **Filas**: se cuentan con `count(*)` al generar. No se usan estimaciones, porque la base las tenía desactualizadas.
 - **Clasificación**: entrada, proceso, salida o transversal sale de BRECHA §12.1–12.6 [1]; las tablas que no aparecen allí se marcan como sin clasificar, y las vistas se marcan como salida por una regla explícita.
-- **Propósito**: 263 de las 263 tablas del modelo v10 tienen comentario de tabla en la base, escrito por el parche de comentarios [12]; las del sistema anterior y las vistas vienen de tres módulos de curaduría escritos a partir de las columnas y las claves de cada tabla [10].
-- **Descripciones de columna**: 2 107 columnas del modelo v10 llevan comentario propio en la base [12]. Las particiones heredan la descripción de su tabla padre (366 columnas), porque PostgreSQL no propaga los comentarios a las particiones. Del sistema anterior se documentan las columnas que la migración consume de forma directa; las otras 617 celdas quedan en `—`.
+- **Propósito**: 265 de las 265 tablas del modelo v10 tienen comentario de tabla en la base, escrito por el parche de comentarios [12]; las del sistema anterior y las vistas vienen de tres módulos de curaduría escritos a partir de las columnas y las claves de cada tabla [10].
+- **Descripciones de columna**: 2 145 columnas del modelo v10 llevan comentario propio en la base [12]. Las particiones heredan la descripción de su tabla padre (366 columnas), porque PostgreSQL no propaga los comentarios a las particiones. Del sistema anterior se documentan las columnas que la migración consume de forma directa; las otras 598 celdas quedan en `—`.
 
 **Regla de honestidad**: ningún texto se deduce del nombre de la columna. `—` significa «sin descripción documentada», no «sin significado». Se prefiere un hueco visible a una glosa inventada.
 
@@ -95,7 +95,7 @@ Las cifras de esta sección salen de la base en el momento de generar el documen
 | `avisa` | Entrada cruda: mensajes y adjuntos recibidos antes de validarse, más la cola de rechazos. | 2 | 19 | 0 | I |
 | `chat` | Historial de conversación con el asistente, versionado por ramas y confirmaciones. | 14 | 148 | 0 | P |
 | `community` | Módulo de expansión sobre organización comunitaria; hoy solo catálogos. | 1 | 10 | 0 | INF |
-| `config` | Parámetros, aplicaciones, librerías, registro de esquemas y transiciones de estado. | 6 | 51 | 64 | INF, P |
+| `config` | Parámetros, aplicaciones, librerías, registro de esquemas y transiciones de estado. | 8 | 70 | 68 | INF, P |
 | `consultation` | Módulo de expansión para consultas a actores; sin uso todavía. | 4 | 26 | 0 | INF |
 | `core` | El dominio: casos, alertas, demandas, actores, documentos, compromisos y territorio. | 102 | 839 | 6 903 | I, INF, O, P |
 | `ctx` | Contexto sistémico: variables externas, dominios y observaciones que condicionan el análisis. | 10 | 61 | 28 | I, P |
@@ -115,10 +115,10 @@ Las cifras de esta sección salen de la base en el momento de generar el documen
 | `ref` | — | 2 | 17 | 5 | INF |
 | `staging` | Aterrizaje temporal de importaciones externas antes de validarlas. | 2 | 18 | 0 | I |
 | `territorio` | Módulo de expansión territorial; sin uso todavía. | 16 | 100 | 9 | INF |
-| **Total modelo** | 26 esquemas | **263** | **2 126** | **13 348** | — |
+| **Total modelo** | 26 esquemas | **265** | **2 145** | **13 352** | — |
 | `legacy` | Sistema anterior, conservado como archivo | 87 | 807 | 4 729 | X |
 
-El modelo tiene 287 tablas físicas: 263 lógicas y 24 particiones que reparten cuatro tablas del dominio: `agent.llm_call` (6), `agent.run_log` (6), `avisa.raw_ingest` (6), `ctx.observaciones` (6). Las fichas son de la tabla lógica, porque la partición repite su estructura; el CSV sí las incluye fila a fila.
+El modelo tiene 289 tablas físicas: 265 lógicas y 24 particiones que reparten cuatro tablas del dominio: `agent.llm_call` (6), `agent.run_log` (6), `avisa.raw_ingest` (6), `ctx.observaciones` (6). Las fichas son de la tabla lógica, porque la partición repite su estructura; el CSV sí las incluye fila a fila.
 
 Las cifras de esta sección se cuentan por tabla y no por línea del inventario del BRECHA §12: allí se agrupan filas («`core.cat_*` (38 distintas, 41 tablas)», «y 10 más») y se suman las vistas a la salida. Por eso los totales difieren de los 31 / 78 / 24 / 54 que declara ese capítulo, aunque la clase de cada tabla sea la misma.
 
@@ -129,7 +129,7 @@ Las cifras de esta sección se cuentan por tabla y no por línea del inventario 
 | **I · Entrada** | Donde aterriza el dato del mundo. | 35 | 449 | 4 126 |
 | **P · Proceso** | Intermedios de extracción, pauta y síntesis, con su trazabilidad. | 102 | 796 | 3 489 |
 | **O · Salida** | Se deriva de datos ya presentes; reproducible con la misma base. | 14 | 132 | 914 |
-| **INF · Transversal** | No es contenido: catálogos, parámetros, geografía, integraciones. | 112 | 749 | 4 819 |
+| **INF · Transversal** | No es contenido: catálogos, parámetros, geografía, integraciones. | 114 | 768 | 4 823 |
 | **X · Archivo** | Sistema anterior completo | 87 | 807 | 4 729 |
 
 ### 4.3 Vistas y vistas materializadas
@@ -139,13 +139,14 @@ Resumen por esquema; las fichas de cada objeto están en §6.
 | Esquema | Objetos | Vistas | Matviews | Columnas | Filas |
 | --- | --: | --: | --: | --: | --: |
 | `analytics` | 22 | 17 | 5 | 172 | 1 459 |
+| `config` | 2 | 2 | 0 | 20 | 7 |
 | `core` | 4 | 4 | 0 | 40 | 2 090 |
 | `lex` | 1 | 1 | 0 | 6 | 0 |
 | `mype` | 3 | 2 | 1 | 32 | 0 |
 | `pesca` | 1 | 1 | 0 | 7 | 0 |
 | `ref` | 2 | 2 | 0 | 15 | 5 |
 | `territorio` | 1 | 1 | 0 | 6 | 0 |
-| **Total** | **34** | **28** | **6** | **278** | **3 554** |
+| **Total** | **36** | **30** | **6** | **298** | **3 561** |
 
 ## 5. Modelo v10
 
@@ -243,8 +244,8 @@ Vínculo entre una llamada al modelo y los fragmentos documentales que recuperó
 
 | # | Columna | Tipo | Nulo | Clave | Descripción |
 | --: | --- | --- | :--: | --- | --- |
-| 1 | `call_id` | uuid | no | PK, FK → agent.llm_call_default(id), agent.llm_call_202703(id), agent.llm_call_202702(id), agent.llm_call_202701(id), agent.llm_call_202612(id), agent.llm_call_202611(id), agent.llm_call(id) | Llamada al modelo que recuperó el fragmento documental |
-| 2 | `call_ts` | timestamp with time zone | no | PK, FK → agent.llm_call_default(ts), agent.llm_call_202703(ts), agent.llm_call_202702(ts), agent.llm_call_202701(ts), agent.llm_call_202612(ts), agent.llm_call_202611(ts), agent.llm_call(ts) | Momento de la llamada, que con su identificador completa la clave del vínculo |
+| 1 | `call_id` | uuid | no | PK, FK → agent.llm_call_202703(id), agent.llm_call_202701(id), agent.llm_call_202612(id), agent.llm_call_202611(id), agent.llm_call(id), agent.llm_call_default(id), agent.llm_call_202702(id) | Llamada al modelo que recuperó el fragmento documental |
+| 2 | `call_ts` | timestamp with time zone | no | PK, FK → agent.llm_call_202703(ts), agent.llm_call_202701(ts), agent.llm_call_202612(ts), agent.llm_call_202611(ts), agent.llm_call(ts), agent.llm_call_default(ts), agent.llm_call_202702(ts) | Momento de la llamada, que con su identificador completa la clave del vínculo |
 | 3 | `fragmento_id` | uuid | no | PK, FK → kag.documento_fragmento(id) | Fragmento documental recuperado como insumo de la llamada |
 | 4 | `rank_rrf` | integer | sí | — | Posición que el fragmento ocupó tras fusionar los resultados de búsqueda |
 | 5 | `score_rrf` | numeric | sí | — | Puntaje de fusión del fragmento, que pondera sus apariciones en cada búsqueda |
@@ -494,8 +495,8 @@ Mensaje crudo descartado por el canal de ingesta, con el error que motivó el re
 | # | Columna | Tipo | Nulo | Clave | Descripción |
 | --: | --- | --- | :--: | --- | --- |
 | 1 | `id` | uuid | no | PK | Identificador interno de la fila |
-| 2 | `raw_id` | uuid | no | FK → avisa.raw_ingest_202702(id), avisa.raw_ingest_202701(id), avisa.raw_ingest_202611(id), avisa.raw_ingest_default(id), avisa.raw_ingest_202612(id), avisa.raw_ingest_202703(id), avisa.raw_ingest(id) | Mensaje crudo descartado, buscado en la partición donde ingresó |
-| 3 | `raw_received_at` | timestamp with time zone | no | FK → avisa.raw_ingest_202702(received_at), avisa.raw_ingest_202701(received_at), avisa.raw_ingest_202611(received_at), avisa.raw_ingest_default(received_at), avisa.raw_ingest_202612(received_at), avisa.raw_ingest_202703(received_at), avisa.raw_ingest(received_at) | Momento en que se recibió el mensaje descartado, junto con su identificador |
+| 2 | `raw_id` | uuid | no | FK → avisa.raw_ingest_202611(id), avisa.raw_ingest_202702(id), avisa.raw_ingest_202703(id), avisa.raw_ingest_202701(id), avisa.raw_ingest_202612(id), avisa.raw_ingest_default(id), avisa.raw_ingest(id) | Mensaje crudo descartado, buscado en la partición donde ingresó |
+| 3 | `raw_received_at` | timestamp with time zone | no | FK → avisa.raw_ingest_202611(received_at), avisa.raw_ingest_202702(received_at), avisa.raw_ingest_202703(received_at), avisa.raw_ingest_202701(received_at), avisa.raw_ingest_202612(received_at), avisa.raw_ingest_default(received_at), avisa.raw_ingest(received_at) | Momento en que se recibió el mensaje descartado, junto con su identificador |
 | 4 | `error_json` | jsonb | no | — | Detalle estructurado del error que motivó el rechazo del mensaje |
 | 5 | `created_at` | timestamp with time zone | no | — | Momento en que se creó el registro |
 
@@ -820,7 +821,7 @@ Encuesta de percepción aplicada en una caleta: satisfacción, confianza institu
 
 Parámetros, aplicaciones, librerías, registro de esquemas y transiciones de estado.
 
-6 tablas · 51 columnas · 64 filas.
+8 tablas · 70 columnas · 68 filas.
 
 #### `config.a2_transiciones`
 
@@ -932,6 +933,43 @@ Registro de versiones de los esquemas de extracción por tipo de registro, con s
 | 6 | `vigente_hasta` | date | sí | — | Fecha en que la versión deja de aplicarse, vacía si sigue vigente |
 
 Claves únicas compuestas: `codigo`, `version`.
+
+#### `config.servicio_externo`
+
+**Clasificación:** INF · Transversal (criterio: catálogo de servicios y costos (RNF-13)) · **Filas:** 4 · **Columnas:** 8 · **Clave primaria:** `codigo` · **Relaciones:** 0 · **Índices:** 1
+
+Catálogo de los servicios externos que generan gasto, con la unidad en que se mide su consumo (token, mensaje, consulta). Da nombre y unidad a los códigos SVC-xx que usa el ERS.
+
+| # | Columna | Tipo | Nulo | Clave | Descripción |
+| --: | --- | --- | :--: | --- | --- |
+| 1 | `codigo` | text | no | PK | Código del servicio en el ERS (SVC-02, SVC-06, SVC-07, SVC-16). |
+| 2 | `nombre` | text | no | — | Nombre legible del servicio, el que se muestra en el panel de costos. |
+| 3 | `unidad` | text | no | — | Unidad de medida del consumo: token, mensaje o consulta. |
+| 4 | `costo_unitario_usd` | numeric(12,6) | sí | — | Costo de referencia por unidad. NULL si el proveedor cobra por tramos y el costo real solo se conoce al cerrar el mes. |
+| 5 | `moneda` | text | no | — | Moneda del costo unitario. Hoy siempre USD: si alguien factura en soles, aquí se ve antes de que el total mezcle monedas. |
+| 6 | `activo` | boolean | no | — | false cuando el servicio deja de usarse; los históricos de consumo se conservan. |
+| 7 | `observacion` | text | sí | — | Qué se cobra y con qué periodicidad; el detalle que explica el costo unitario. |
+| 8 | `creado_en` | timestamp with time zone | no | — | Cuándo se dio de alta el servicio en el catálogo. |
+
+#### `config.tope_gasto`
+
+**Clasificación:** INF · Transversal (criterio: parámetro de gasto (RNF-13, H-65)) · **Filas:** 0 · **Columnas:** 11 · **Clave primaria:** `id` · **Relaciones:** 1 · **Índices:** 2
+
+Tope de gasto por servicio y periodo (RNF-13). Mientras no exista fila para un servicio, su estado es `sin_tope`: el mecanismo está listo pero el monto lo fija la decisión H-65.
+
+| # | Columna | Tipo | Nulo | Clave | Descripción |
+| --: | --- | --- | :--: | --- | --- |
+| 1 | `id` | uuid | no | PK | Identificador del tope. Existe para poder versionar el monto de un mismo servicio y periodo sin sobrescribir el anterior. |
+| 2 | `servicio_codigo` | text | no | FK → config.servicio_externo(codigo) | Servicio externo al que se aplica el tope. |
+| 3 | `periodo` | text | no | — | Periodo que cubre el tope. Hoy solo admite mensual (restricción ck_tope_periodo). |
+| 4 | `monto_usd` | numeric(12,2) | no | — | Gasto máximo admitido en el periodo, en dólares. |
+| 5 | `umbral_aviso_pct` | smallint | no | — | Porcentaje del tope a partir del cual se emite el aviso previo (80 % por defecto). Con 100 el estado pasa de normal a excedido sin aviso intermedio. |
+| 6 | `vigente_desde` | date | no | — | Primer día del periodo cubierto. Junto con servicio y periodo forma la clave única del tope vigente. |
+| 7 | `vigente_hasta` | date | sí | — | Último día cubierto. NULL significa que el tope sigue vigente hasta que otro lo reemplace. |
+| 8 | `aprobado_por` | uuid | sí | — | Usuario que aprobó el tope. Un tope sin aprobación es una estimación, no una decisión. |
+| 9 | `aprobado_en` | timestamp with time zone | sí | — | Cuándo se aprobó. Un tope sin fecha está propuesto, pero **sí limita**: en gasto es preferible quedarse corto por un tope no aprobado que pasarse por no tener ninguno. La fecha sirve para saber quién decidió el monto, no para desactivarlo. |
+| 10 | `observacion` | text | sí | — | Motivo del monto y de dónde salió la cifra. |
+| 11 | `creado_en` | timestamp with time zone | no | — | Cuándo se registró la fila. |
 
 ### 5.8 `consultation`
 
@@ -1703,10 +1741,10 @@ Catálogo de privilegios nominales: capacidades que se conceden a una persona co
 
 | # | Columna | Tipo | Nulo | Clave | Descripción |
 | --: | --- | --- | :--: | --- | --- |
-| 1 | `id` | smallint | no | PK | — |
-| 2 | `codigo` | character varying(40) | no | UQ | — |
-| 3 | `nombre` | character varying(120) | no | — | — |
-| 4 | `descripcion` | text | sí | — | — |
+| 1 | `id` | smallint | no | PK | Identificador corto del privilegio; es la clave que usan las tablas de concesión. |
+| 2 | `codigo` | character varying(40) | no | UQ | Código estable del privilegio, el que consultan las funciones de permiso. |
+| 3 | `nombre` | character varying(120) | no | — | Nombre del privilegio tal como se muestra a las personas. |
+| 4 | `descripcion` | text | sí | — | Qué permite hacer el privilegio, en una frase. |
 | 5 | `requiere_motivo` | boolean | no | — | Si es cierto, cada uso del privilegio debe declarar un motivo escrito. |
 
 #### `core.cat_roles_actor`
@@ -1972,13 +2010,13 @@ Registro de cada consulta a PIDE-RENIEC (SVC-16): quién la pidió, sobre qué a
 
 | # | Columna | Tipo | Nulo | Clave | Descripción |
 | --: | --- | --- | :--: | --- | --- |
-| 1 | `id` | uuid | no | PK | — |
-| 2 | `actor_uid` | uuid | no | FK → core.actores | — |
-| 3 | `caso_id` | uuid | sí | FK → core.casos(id) | — |
-| 4 | `consultado_por_usuario_id` | uuid | no | FK → core.usuarios(id) | — |
+| 1 | `id` | uuid | no | PK | Identificador interno de la consulta. |
+| 2 | `actor_uid` | uuid | no | FK → core.actores | Actor sobre el que se consultó, según core.actores. |
+| 3 | `caso_id` | uuid | sí | FK → core.casos(id) | Caso en cuyo contexto se pidió la consulta, si la consulta se hizo por uno. |
+| 4 | `consultado_por_usuario_id` | uuid | no | FK → core.usuarios(id) | Persona que pidió y ejecutó la consulta; solo puede ser quien tiene el privilegio. |
 | 5 | `motivo` | text | no | — | Motivo del pedido, escrito por la persona. Obligatorio y de al menos 15 caracteres: es la justificación de finalidad que exige la Ley 29733. |
-| 6 | `fecha_consulta` | timestamp with time zone | no | — | — |
-| 7 | `integracion_id` | uuid | sí | FK → core.integraciones(id) | — |
+| 6 | `fecha_consulta` | timestamp with time zone | no | — | Momento en que se hizo la consulta a PIDE-RENIEC. |
+| 7 | `integracion_id` | uuid | sí | FK → core.integraciones(id) | Integración por la que se llegó al servicio, según core.integraciones. |
 | 8 | `resultado_cifrado` | bytea | no | — | Resultado de la consulta cifrado con AES-256 (pgp_sym_encrypt). Se descifra solo con la clave de sesión app.crypto_key. |
 | 9 | `resultado_hmac` | character(64) | no | — | Huella del resultado en claro (SHA-256 con sal de la aplicación). Sirve para detectar consultas repetidas sin descifrar el contenido. |
 | 10 | `nivel_clasificacion` | smallint | no | FK → core.cat_clasificacion(nivel) | Fijo en 3 (Confidencial). Las reglas de acceso solo distinguen niveles 1 a 3; fijarlo impide degradar la protección por error. |
@@ -2170,10 +2208,10 @@ Envío de comunicaciones y oficios, con su canal, remitente, destinatario, docum
 | 11 | `resultado` | character varying(255) | sí | — | Resultado de la entrega de la comunicación |
 | 12 | `observacion` | text | sí | — | Observaciones sobre el envío o sobre su resultado |
 | 13 | `id_externo` | character varying(120) | sí | — | Identificador del mensaje en el proveedor (wamid de WhatsApp Cloud API). Su ausencia era la razón por la que no se podía confirmar una entrega. |
-| 14 | `plantilla_codigo` | character varying(80) | sí | — | — |
+| 14 | `plantilla_codigo` | character varying(80) | sí | — | Código de la plantilla de mensaje con la que se redactó el envío. |
 | 15 | `estado_entrega` | character varying(20) | sí | — | enviado · entregado · leido · fallido · sin_confirmar. Lo actualiza el webhook de Meta; el envío nace en sin_confirmar. |
 | 16 | `costo_estimado_usd` | numeric(12,6) | sí | — | Costo del mensaje de utilidad. RNF-13: consumo por servicio y por mes. |
-| 17 | `actualizado_en` | timestamp with time zone | sí | — | — |
+| 17 | `actualizado_en` | timestamp with time zone | sí | — | Momento de la última actualización del estado del envío. |
 
 #### `core.feature_flags`
 
@@ -2561,15 +2599,15 @@ Concesiones nominales y con fecha de caducidad. Una persona puede tener el privi
 
 | # | Columna | Tipo | Nulo | Clave | Descripción |
 | --: | --- | --- | :--: | --- | --- |
-| 1 | `id` | uuid | no | PK | — |
-| 2 | `usuario_id` | uuid | no | FK → core.usuarios(id) | — |
-| 3 | `privilegio_id` | smallint | no | FK → core.cat_privilegio(id) | — |
+| 1 | `id` | uuid | no | PK | Identificador interno de la fila |
+| 2 | `usuario_id` | uuid | no | FK → core.usuarios(id) | Persona que recibe el privilegio, según core.usuarios. |
+| 3 | `privilegio_id` | smallint | no | FK → core.cat_privilegio(id) | Privilegio concedido, según core.cat_privilegio. |
 | 4 | `motivo` | text | no | — | Por qué se concede. Obligatorio: una concesión sin motivo no es auditable ante la ANPDP. |
-| 5 | `otorgado_por_usuario_id` | uuid | sí | FK → core.usuarios(id) | — |
-| 6 | `desde` | date | no | — | — |
+| 5 | `otorgado_por_usuario_id` | uuid | sí | FK → core.usuarios(id) | Persona que autorizó la concesión; queda registrada para la auditoría. |
+| 6 | `desde` | date | no | — | Fecha desde la que rige la concesión. |
 | 7 | `hasta` | date | sí | — | Fin de vigencia. NULL = sin fecha de fin, revisable en cada auditoría. |
-| 8 | `activo` | boolean | no | — | — |
-| 9 | `creado_en` | timestamp with time zone | no | — | — |
+| 8 | `activo` | boolean | no | — | Si la concesión está vigente. Se apaga para retirar el privilegio sin borrar el rastro. |
+| 9 | `creado_en` | timestamp with time zone | no | — | Momento en que se registró la concesión. |
 
 Claves únicas compuestas: `usuario_id`, `privilegio_id`, `desde`.
 
@@ -3319,7 +3357,7 @@ Casillero de una plantilla que reserva un lugar para un indicador determinado, c
 | 4 | `codigo` | character varying(40) | no | — | Código del casillero usado para referenciarlo en el documento |
 | 5 | `indicador_id` | uuid | no | FK → ind.indicador(id) | Indicador que ocupa el casillero de la plantilla |
 
-Claves únicas compuestas: `plantilla_id`, `orden`; `plantilla_id`, `codigo`.
+Claves únicas compuestas: `plantilla_id`, `codigo`; `plantilla_id`, `orden`.
 
 #### `ind.proxy_justificacion`
 
@@ -5066,7 +5104,23 @@ Selecciones de indicadores no reemplazadas y aún vigentes, con plantilla, slot,
 
 Lee: `ind.indicador, ind.plantilla, ind.plantilla_slot, ind.proxy_justificacion, ind.seleccion, ind.variante`.
 
-### 6.2 `core`
+### 6.2 `config`
+
+2 objetos · 20 columnas · 7 filas.
+
+#### `config.v_consumo_servicio_mes`
+
+**Clasificación:** O · Salida · **Tipo:** vista · **Filas:** 7 · **Columnas:** 11
+
+Sin propósito documentado.
+
+#### `config.v_tope_aviso`
+
+**Clasificación:** O · Salida · **Tipo:** vista · **Filas:** 0 · **Columnas:** 9
+
+Sin propósito documentado.
+
+### 6.3 `core`
 
 4 objetos · 40 columnas · 2 090 filas.
 
@@ -5098,7 +5152,7 @@ Lee: `core.integraciones`.
 
 Sin propósito documentado.
 
-### 6.3 `lex`
+### 6.4 `lex`
 
 1 objeto · 6 columnas · 0 filas.
 
@@ -5110,7 +5164,7 @@ Clases de corridas léxicas completas que informan estabilidad, con porcentaje d
 
 Lee: `lex.clase, lex.corrida`.
 
-### 6.4 `mype`
+### 6.5 `mype`
 
 3 objetos · 32 columnas · 0 filas.
 
@@ -5138,7 +5192,7 @@ Ejecuciones NEC con días de mora calculados cuando no hay pago registrado, para
 
 Lee: `mype.ejecucion_nec`.
 
-### 6.5 `pesca`
+### 6.6 `pesca`
 
 1 objeto · 7 columnas · 0 filas.
 
@@ -5150,7 +5204,7 @@ Cuotas CITES por especie y año, con monto consumido y estado, para el control d
 
 Lee: `domain.artefacto, domain.tipo_artefacto`.
 
-### 6.6 `ref`
+### 6.7 `ref`
 
 2 objetos · 15 columnas · 5 filas.
 
@@ -5166,7 +5220,7 @@ Sin propósito documentado.
 
 Sin propósito documentado.
 
-### 6.7 `territorio`
+### 6.8 `territorio`
 
 1 objeto · 6 columnas · 0 filas.
 
@@ -6603,6 +6657,7 @@ Ordenado por nombre de objeto, para encontrar una tabla cuando se conoce el nomb
 - `qda.segmento_fragmento`
 - `ind.seleccion`
 - `lex.serie`
+- `config.servicio_externo`
 - `agent.sesion`
 - `agent.sesion_paso`
 - `ctx.snapshot`
@@ -6618,6 +6673,7 @@ Ordenado por nombre de objeto, para encontrar una tabla cuando se conoce el nomb
 - `lex.termino`
 - `domain.tipo_artefacto`
 - `policy.titular`
+- `config.tope_gasto`
 - `ctx.trabajo_recoleccion`
 - `pesca.trazabilidad_qr`
 - `chat.turno`
@@ -6653,7 +6709,9 @@ Ordenado por nombre de objeto, para encontrar una tabla cuando se conoce el nomb
 - `analytics.mv_tablero_decisional`
 - `ref.nivel_identificacion`
 - `core.v_actor_datos_personales_seguro`
+- `config.v_consumo_servicio_mes`
 - `mype.v_ejecucion_nec_mora_vigente`
+- `config.v_tope_aviso`
 - `core.vw_actor_territorio`
 - `core.vw_agregacion_compromiso_externo`
 - `core.vw_alerta_estado`

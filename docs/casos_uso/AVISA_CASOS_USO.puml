@@ -1,213 +1,443 @@
 ' =====================================================================
-'  AVISA-PRODUCE · Casos de uso (sistema)
+'  AVISA-PRODUCE · Casos de uso (PlantUML · UML puro)
 ' =====================================================================
-'  QUÉ ES
-'  Diagrama de casos de uso del ERS (docs/ERS_AVISA_PRODUCE_v0.4.md §3.4),
-'  dibujado con C4-PlantUML porque Mermaid no tiene notación de casos de
-'  uso y el resto del ERS ya usa C4 para los niveles 1 a 3.
+'  Tres láminas, una por tabla del ERS §3.4:
+'    AVISA_CU_MVP_DIA.svg     -> §3.4 «Página 1 — el día del analista»
+'    AVISA_CU_MVP_SALIDA.svg  -> §3.4 «Página 2 — lo que se valida, se
+'                                envía y se administra»
+'    AVISA_CU_2027.svg        -> §3.4 «Página 3 — 2027 y fase MADRE»
 '
-'  REGLA UML QUE SE RESPETA
-'  Los actores son EXTERNOS al sistema: ninguna persona ni servicio aparece
-'  dentro de la frontera. La frontera encierra solo los casos de uso.
-'  Los servicios por integrar (SVC-xx) son actores secundarios, como manda
-'  UML: quien intercambia mensajes con el sistema es actor.
+'  Regla de mantenimiento (ERS §3.4): cada caso lleva su código CU-nn y
+'  existe una fila con sus RF en la tabla correspondiente. Un caso sin RF
+'  es un error; un RF que no aparezca en ningún caso debe justificarse.
 '
-'  TRAZABILIDAD
-'  Cada caso lleva en su descripción los códigos RF del ERS §4, de modo que
-'  el diagrama se puede auditar contra el documento sin ambigüedad.
+'  Regenerar, desde la carpeta docs/:
+'    java -jar plantuml.jar -tsvg -charset UTF-8 -o img \
+'        casos_uso/AVISA_CASOS_USO.puml
 '
-'  TRES PÁGINAS
-'    1 · AVISA_CU_MVP_DIA       el trabajo diario del analista
-'    2 · AVISA_CU_MVP_SALIDA    lo que se valida, se envía y se administra
-'    3 · AVISA_CU_2027          lo que queda para 2027 y la fase MADRE
-'  Se parte en tres porque un solo lienzo con 34 casos y 12 actores no se
-'  lee: las aristas cruzan la frontera de lado a lado y el texto se pierde.
-'  CU-01 (ingresar) aparece en las páginas 1 y 2 porque todos los actores
-'  lo usan; no son dos casos distintos.
-'
-'  CÓMO SE RENDERIZA
-'     java -jar plantuml.jar -tsvg docs/casos_uso/AVISA_CASOS_USO.puml
-'  Sin Graphviz instalado, se fuerza el layout `smetana` (Java puro) con
-'     java -jar plantuml.jar -Playout=smetana -tsvg docs/casos_uso/AVISA_CASOS_USO.puml
-'  El resultado es menos ordenado, pero no exige instalar nada más.
+'  Graphviz es lo recomendado. Sin Graphviz, añadir -Playout=smetana:
+'  no falla, pero el trazado queda peor.
 ' =====================================================================
-
 
 @startuml AVISA_CU_MVP_DIA
-!include <C4/C4_Container>
-LAYOUT_LEFT_RIGHT()
-HIDE_STEREOTYPE()
+left to right direction
 skinparam shadowing false
+skinparam roundcorner 12
+skinparam linetype polyline
+skinparam packageStyle rectangle
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam nodesep 12
+skinparam ranksep 60
 
-title AVISA-PRODUCE · Casos de uso · MVP, página 1 de 2: el día del analista\nActores fuera de la frontera · cada caso cita sus RF del ERS §4
-
-' ACTORES (personas, externas al sistema)
-Person_Ext(analista, "Analista / sectorista OAIPCS", "Perfil A · INT-01 · carga, valida y consulta")
-Person_Ext(reniec, "Analista con privilegio RENIEC", "Perfil A + privilegio · INT-11 · hoy Edith · RA-07")
-
-' FRONTERA DEL SISTEMA
-System_Boundary(sis, "AVISA-PRODUCE / SIPRECS") {
-  Container(cu01, "CU-01 Ingresar con\nidentidad institucional", "RF del ERS §4", "RF-A01 · el perfil y la seguridad por fila se aplican en todo caso posterior (RF-A02 a A04)")
-  Container(cu02, "CU-02 Registrar y consultar\nactores y organizaciones", "RF del ERS §4", "RF-B01, B03, B05, B07, B08")
-  Container(cu03, "CU-03 Registrar un\nactor sin DNI", "RF del ERS §4", "RF-B01, B02 · extiende CU-02")
-  Container(cu05, "CU-05 Registrar compromisos,\nrelatorías y mesas", "RF del ERS §4", "RF-C01, C02, C04")
-  Container(cu06, "CU-06 Consultar compromisos\nde un caso", "RF del ERS §4", "RF-C05")
-  Container(cu07, "CU-07 Cargar alerta temprana", "RF del ERS §4", "RF-D01, D03, D05")
-  Container(cu10, "CU-10 Registrar consulta\nPIDE-RENIEC", "RF del ERS §4", "RF-D13 · solo el privilegio nombrado, con motivo y fecha")
-  Container(cu11, "CU-11 Consultar fichas,\ndirectorios y reportes", "RF del ERS §4", "RF-F01 a F05, F07")
-  Container(cu12, "CU-12 Exportar listas de\nasistencia y mapa de actores", "RF del ERS §4", "RF-F08")
-  Container(cu13, "CU-13 Armar y enviar productos", "RF del ERS §4", "RF-G01, G03, G06")
+skinparam rectangle {
+  BackgroundColor #FFFFFF
+  BorderColor #64748B
+  FontColor #0F172A
+  FontStyle bold
+}
+skinparam package {
+  BackgroundColor #F8FAFC
+  BorderColor #CBD5E1
+  BorderStyle dashed
+  FontColor #475569
+  FontStyle bold
+}
+skinparam usecase {
+  BackgroundColor #FFFFFF
+  BorderColor #2563EB
+  FontColor #0F172A
+  ArrowColor #475569
+}
+skinparam actor {
+  BackgroundColor #EFF6FF
+  BorderColor #1D4ED8
+  FontColor #0F172A
 }
 
-' ACTORES SECUNDARIOS (servicios)
-System_Ext(svc09, "SVC-09 Identidad institucional", "Login · H-52 por definir")
-System_Ext(svc16, "SVC-16 PIDE-RENIEC", "Requisitorias y antecedentes")
-System_Ext(svc05, "SVC-05 Google Drive", "Borradores de productos")
-System_Ext(svc06, "SVC-06 Correo institucional", "Envío de productos")
+title AVISA-PRODUCE · Casos de uso del MVP · Página 1 de 3\nEl día del analista · CU-01 a CU-13
 
-' ASOCIACIONES
-Rel(analista, cu01, "")
-Rel(reniec, cu01, "")
-Rel(analista, cu02, "")
-Rel(analista, cu05, "")
-Rel(analista, cu06, "")
-Rel(analista, cu07, "")
-Rel(analista, cu11, "")
-Rel(analista, cu12, "")
-Rel(analista, cu13, "")
-Rel(reniec, cu10, "")
+' =========================================================
+' 1. ACTORES PRIMARIOS (Izquierda)
+' =========================================================
+actor "Analista / Sectorista\n(OAIPCS)" as analista #EFF6FF;line:1D4ED8
+actor "Analista con privilegio\nRENIEC (hoy, Edith)" as reniec #EFF6FF;line:1D4ED8
 
-Rel(cu03, cu02, "«extend»")
-Rel(cu01, svc09, "")
-Rel(cu10, svc16, "")
-Rel(cu13, svc05, "")
-Rel(cu13, svc06, "")
+' Herencia de roles: un solo CU-01 sirve a todos los perfiles
+reniec --|> analista
+
+reniec -[hidden]down-> analista
+
+' =========================================================
+' 2. FRONTERA DEL SISTEMA
+' =========================================================
+rectangle "Plataforma AVISA-PRODUCE / SIPRECS (MVP)" {
+
+  package "Acceso e identidad" {
+    usecase "CU-01 · Ingresar con identidad\ninstitucional" as uc_login
+    usecase "CU-10 · Registrar consulta\nPIDE-RENIEC" as uc_pide
+  }
+
+  package "Gestión territorial y actores" {
+    usecase "CU-02 · Registrar y consultar\nactores y organizaciones" as uc_actores
+    usecase "CU-03 · Registrar actor\nsin DNI" as uc_sin_dni
+    usecase "CU-05 · Registrar compromisos,\nrelatorías y mesas" as uc_compromisos
+    usecase "CU-06 · Consultar compromisos\nde un caso" as uc_cons_comp
+    usecase "CU-11 · Consultar fichas,\ndirectorios y reportes" as uc_reportes
+    usecase "CU-12 · Exportar listas de asistencia\ny mapa de actores" as uc_exportar
+  }
+
+  package "Alertas tempranas" {
+    usecase "CU-07 · Cargar alerta\ntemprana" as uc_alerta
+  }
+
+  package "Productos" {
+    usecase "CU-13 · Armar y enviar\nproductos" as uc_productos
+  }
+}
+
+' =========================================================
+' 3. SISTEMAS EXTERNOS QUE ESTA LÁMINA USA
+' =========================================================
+actor "Plataforma PIDE\n(RENIEC)" as sys_pide #F1F5F9;line:64748B
+actor "Repositorio documental\n(Google Drive)" as sys_drive #F1F5F9;line:64748B
+actor "Correo institucional" as sys_mail #F1F5F9;line:64748B
+
+sys_pide -[hidden]down-> sys_drive
+sys_drive -[hidden]down-> sys_mail
+
+' =========================================================
+' 4. RELACIONES ACTOR → CASO
+' =========================================================
+analista --> uc_login
+reniec --> uc_pide
+
+analista --> uc_actores
+analista --> uc_compromisos
+analista --> uc_cons_comp
+analista --> uc_reportes
+analista --> uc_exportar
+analista --> uc_alerta
+analista --> uc_productos
+
+' =========================================================
+' 5. RELACIONES ENTRE CASOS
+' =========================================================
+uc_sin_dni ..> uc_actores : <<extend>>
+uc_exportar ..> uc_reportes : <<extend>>
+uc_pide ..> uc_login : <<include>>
+
+' =========================================================
+' 6. INTEGRACIONES EXTERNAS
+' =========================================================
+uc_pide --> sys_pide
+uc_reportes --> sys_drive
+uc_productos --> sys_drive
+uc_productos --> sys_mail
+
+' =========================================================
+' 7. CONTROLES TRANSVERSALES (no son casos de uso · ERS §3.4)
+' =========================================================
+
+
+
+
+
 @enduml
 
+
+' #####################################################################
+'  PÁGINA 2 · LO QUE SE VALIDA, SE ENVÍA Y SE ADMINISTRA
+' #####################################################################
 
 @startuml AVISA_CU_MVP_SALIDA
-!include <C4/C4_Container>
-LAYOUT_LEFT_RIGHT()
-HIDE_STEREOTYPE()
+left to right direction
 skinparam shadowing false
+skinparam roundcorner 12
+skinparam linetype polyline
+skinparam packageStyle rectangle
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam nodesep 12
+skinparam ranksep 60
 
-title AVISA-PRODUCE · Casos de uso · MVP, página 2 de 2: validar, enviar y administrar\nLo que sale hacia la Alta Dirección y lo que sostiene OGTI
-
-Person_Ext(direccion, "Dirección de la OAIPCS", "Perfil A con aprobación · INT-02")
-Person_Ext(alta, "Alta Dirección", "Perfil B · INT-03 · ministro, viceministros, secretaría general, jefaturas de gabinete")
-Person_Ext(admin, "Administrador del sistema", "Técnico · INT-08 · H-16: quién será")
-Person_Ext(ogti, "OGTI", "Administración técnica · INT-05 · construye, aloja y opera")
-
-System_Boundary(sis2, "AVISA-PRODUCE / SIPRECS") {
-  Container(cu01b, "CU-01 Ingresar con\nidentidad institucional", "RF del ERS §4", "RF-A01 · mismo caso que la página 1")
-  Container(cu04, "CU-04 Fusionar actores\nduplicados", "RF del ERS §4", "RF-B04 · deja registro de quién y por qué")
-  Container(cu08, "CU-08 Validar alerta\no clima social", "RF del ERS §4", "RF-D04, D09 · incluye CU-09")
-  Container(cu09, "CU-09 Calcular destinatarios\ny enviar la alerta", "RF del ERS §4", "RF-D06, D07, D08, D10, D12")
-  Container(cu14, "CU-14 Ver tableros y\nvista ejecutiva", "RF del ERS §4", "RF-H02, H05 · sin datos personales")
-  Container(cu15, "CU-15 Verificar la carga\ndel sistema anterior", "RF del ERS §4", "RF-M01, M02, M03")
-  Container(cu16, "CU-16 Administrar usuarios,\nroles y catálogos", "RF del ERS §4", "RF-X02")
-  Container(cu17, "CU-17 Consultar la bitácora\nde accesos", "RF del ERS §4", "RF-X01 · no se modifica ni se borra")
-  Container(cu18, "CU-18 Respaldar y\nrecuperar la base", "RF del ERS §4", "RF-X04")
-  Container(cu19, "CU-19 Configurar el\nmodelo de lenguaje", "RF del ERS §4", "RF-E08, E09, E10 · conexión intercambiable y sin datos personales")
+skinparam rectangle {
+  BackgroundColor #FFFFFF
+  BorderColor #64748B
+  FontColor #0F172A
+  FontStyle bold
+}
+skinparam package {
+  BackgroundColor #F8FAFC
+  BorderColor #CBD5E1
+  BorderStyle dashed
+  FontColor #475569
+  FontStyle bold
+}
+skinparam usecase {
+  BackgroundColor #FFFFFF
+  BorderColor #2563EB
+  FontColor #0F172A
+  ArrowColor #475569
+}
+skinparam actor {
+  BackgroundColor #EFF6FF
+  BorderColor #1D4ED8
+  FontColor #0F172A
 }
 
-System_Ext(svc09b, "SVC-09 Identidad institucional", "Login · H-52 por definir")
-System_Ext(svc06b, "SVC-06 Correo institucional", "Envío de alertas")
-System_Ext(svc07, "SVC-07 WhatsApp Cloud API", "Alertas y mandatos acotados")
-System_Ext(svc10, "SVC-10 Power BI", "Dashboard Analítico y Estratégico")
-System_Ext(svc04, "SVC-04 Sistema anterior", "Google Sheets + Apps Script")
-System_Ext(svc02, "SVC-02 Gemini", "Modelo de lenguaje")
+title AVISA-PRODUCE · Casos de uso del MVP · Página 2 de 3\nLo que se valida, se envía y se administra · CU-01 y CU-04 a CU-19
 
-Rel(direccion, cu01b, "")
-Rel(alta, cu01b, "")
-Rel(admin, cu01b, "")
-Rel(ogti, cu01b, "")
+' =========================================================
+' 1. ACTORES PRIMARIOS (Izquierda)
+' =========================================================
+actor "Dirección de la OAIPCS" as direccion #EFF6FF;line:1D4ED8
+actor "Alta Dirección\n(Despacho Ministerial y Gabinete)" as alta #EFF6FF;line:1D4ED8
+actor "Administrador Funcional" as admin #EFF6FF;line:1D4ED8
+actor "Oficina General de Tecnologías\nde la Información (OGTI)" as ogti #EFF6FF;line:1D4ED8
 
-Rel(direccion, cu04, "")
-Rel(direccion, cu08, "")
-Rel(direccion, cu14, "")
-Rel(direccion, cu17, "")
-Rel(alta, cu14, "")
-Rel(admin, cu16, "")
-Rel(admin, cu17, "")
-Rel(ogti, cu15, "")
-Rel(ogti, cu18, "")
-Rel(ogti, cu19, "")
+direccion -[hidden]down-> alta
+alta -[hidden]down-> admin
+admin -[hidden]down-> ogti
 
-Rel(cu08, cu09, "«include»")
-Rel(cu01b, svc09b, "")
-Rel(cu09, svc06b, "")
-Rel(cu09, svc07, "")
-Rel(cu14, svc10, "")
-Rel(cu15, svc04, "")
-Rel(cu19, svc02, "")
+' =========================================================
+' 2. FRONTERA DEL SISTEMA
+' =========================================================
+rectangle "Plataforma AVISA-PRODUCE / SIPRECS (MVP)" {
+
+  package "Acceso" {
+    usecase "CU-01 · Ingresar con identidad\ninstitucional" as uc_login
+  }
+
+  package "Validación y difusión" {
+    usecase "CU-04 · Fusionar actores\nduplicados" as uc_fusionar
+    usecase "CU-08 · Validar alerta\no clima social" as uc_validar
+    usecase "CU-09 · Calcular destinatarios\ny enviar la alerta" as uc_difundir
+  }
+
+  package "Decisión ejecutiva" {
+    usecase "CU-14 · Ver tableros\ny vista ejecutiva" as uc_tableros
+  }
+
+  package "Gobierno, auditoría y administración" {
+    usecase "CU-15 · Verificar la carga\ndel sistema anterior" as uc_migracion
+    usecase "CU-16 · Administrar usuarios,\nroles y catálogos" as uc_usuarios
+    usecase "CU-17 · Consultar la bitácora\nde accesos" as uc_bitacora
+    usecase "CU-18 · Respaldar y recuperar\nla base" as uc_respaldo
+    usecase "CU-19 · Configurar el modelo\nde lenguaje" as uc_ia
+  }
+}
+
+' =========================================================
+' 3. SISTEMAS EXTERNOS QUE ESTA LÁMINA USA
+' =========================================================
+actor "Identidad institucional\n(acceso único)" as sys_sso #F1F5F9;line:64748B
+actor "Correo institucional" as sys_mail #F1F5F9;line:64748B
+actor "Repositorio documental\n(Google Drive)" as sys_drive #F1F5F9;line:64748B
+actor "Mensajería ejecutiva\n(WhatsApp institucional)" as sys_wa #F1F5F9;line:64748B
+actor "Analítica ejecutiva\n(Power BI, 2 salidas)" as sys_bi #F1F5F9;line:64748B
+actor "Sistema anterior\n(hojas de cálculo)" as sys_legacy #F1F5F9;line:64748B
+actor "Servicio de IA\n(Gemini)" as sys_ai #F1F5F9;line:64748B
+
+sys_sso -[hidden]down-> sys_mail
+sys_mail -[hidden]down-> sys_drive
+sys_drive -[hidden]down-> sys_wa
+sys_wa -[hidden]down-> sys_bi
+sys_bi -[hidden]down-> sys_legacy
+sys_legacy -[hidden]down-> sys_ai
+
+' =========================================================
+' 4. RELACIONES ACTOR → CASO
+' =========================================================
+direccion --> uc_login
+alta --> uc_login
+admin --> uc_login
+ogti --> uc_login
+
+direccion --> uc_fusionar
+direccion --> uc_validar
+direccion --> uc_tableros
+direccion --> uc_bitacora
+
+alta --> uc_tableros
+
+admin --> uc_usuarios
+admin --> uc_bitacora
+
+ogti --> uc_migracion
+ogti --> uc_respaldo
+ogti --> uc_ia
+
+' =========================================================
+' 5. RELACIONES ENTRE CASOS
+' =========================================================
+uc_validar ..> uc_difundir : <<include>>
+
+' =========================================================
+' 6. INTEGRACIONES EXTERNAS
+' =========================================================
+uc_login --> sys_sso
+uc_difundir --> sys_mail
+uc_difundir --> sys_wa
+uc_difundir --> sys_drive
+uc_tableros --> sys_bi
+uc_migracion --> sys_legacy
+uc_ia --> sys_ai
+
+' =========================================================
+' 7. CONTROLES TRANSVERSALES (no son casos de uso · ERS §3.4)
+' =========================================================
+
+
+
+
 @enduml
 
 
+' #####################################################################
+'  PÁGINA 3 · 2027 Y FASE MADRE
+' #####################################################################
+
 @startuml AVISA_CU_2027
-!include <C4/C4_Container>
-LAYOUT_LEFT_RIGHT()
-HIDE_STEREOTYPE()
+left to right direction
 skinparam shadowing false
+skinparam roundcorner 12
+skinparam linetype polyline
+skinparam packageStyle rectangle
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam nodesep 12
+skinparam ranksep 60
 
-title AVISA-PRODUCE · Casos de uso · 2027 y fase MADRE\nLo que no entra en el módulo de diciembre
-
-Person_Ext(analista27, "Analista / sectorista OAIPCS", "Perfil A · INT-01")
-Person_Ext(direccion27, "Dirección de la OAIPCS", "Perfil A con aprobación · INT-02")
-Person_Ext(alta27, "Alta Dirección", "Perfil B · INT-03")
-Person_Ext(externo, "Actor externo o gremio", "Perfil C · INT-04 · ve solo sus compromisos y las alertas aprobadas")
-Person_Ext(admin27, "Administrador del sistema", "Técnico · INT-08")
-Person_Ext(reloj, "Tareas programadas (CT-04)", "Dispara trabajos por horario")
-
-System_Boundary(sis27, "AVISA-PRODUCE / SIPRECS") {
-  Container(cu21, "CU-21 Recolectar fuentes\nde la lista blanca", "RF del ERS §4", "RF-E02, E03")
-  Container(cu20, "CU-20 Procesar documentos\ny proponer candidatos", "RF del ERS §4", "RF-E01, E05, E06, E11")
-  Container(cu22, "CU-22 Revisar candidatos y\ncoincidencias dudosas", "RF del ERS §4", "RF-D02, D03, E04 · nunca fusiona solo")
-  Container(cu30, "CU-30 Avisar vencimientos y\nescalar alertas sin atender", "RF del ERS §4", "RF-C03, D11")
-  Container(cu23, "CU-23 Registrar posición,\ninfluencia y relaciones", "RF del ERS §4", "RF-B06")
-  Container(cu24, "CU-24 Ver la red de actores", "RF del ERS §4", "RF-H01")
-  Container(cu25, "CU-25 Ver línea de\ntiempo y mapa", "RF del ERS §4", "RF-H03, H04")
-  Container(cu28, "CU-28 Analizar la pota\nen el tiempo", "RF del ERS §4", "RF-N01, N02")
-  Container(cu29, "CU-29 Generar borradores\nde informe", "RF del ERS §4", "RF-G02, G04 · marcados «borrador por validar»")
-  Container(cu26, "CU-26 Ver indicadores\navanzados", "RF del ERS §4", "RF-J01, J02, J03")
-  Container(cu27, "CU-27 Simular escenarios\ny tendencia", "RF del ERS §4", "RF-J04, J05 · rótulos «no vigente» y «no es una predicción»")
-  Container(cu32, "CU-32 Ingresar con\nsegundo factor", "RF del ERS §4", "RF-A07")
-  Container(cu31, "CU-31 Consultar el estado\nde mis compromisos", "RF del ERS §4", "RF-A05 · portal del actor")
-  Container(cu33, "CU-33 Cambiar parámetros\ncon historial", "RF del ERS §4", "RF-X03")
-  Container(cu34, "CU-34 Traducir estados\nal SESIGUE", "RF del ERS §4", "RF-C06")
+skinparam rectangle {
+  BackgroundColor #FFFFFF
+  BorderColor #64748B
+  FontColor #0F172A
+  FontStyle bold
+}
+skinparam package {
+  BackgroundColor #F8FAFC
+  BorderColor #CBD5E1
+  BorderStyle dashed
+  FontColor #475569
+  FontStyle bold
+}
+skinparam usecase {
+  BackgroundColor #FFFFFF
+  BorderColor #2563EB
+  FontColor #0F172A
+  ArrowColor #475569
+}
+skinparam actor {
+  BackgroundColor #EFF6FF
+  BorderColor #1D4ED8
+  FontColor #0F172A
 }
 
-System_Ext(svc0127, "SVC-01 Fuentes públicas", "Lista blanca de medios y portales")
-System_Ext(svc0227, "SVC-02 Gemini", "Modelo de lenguaje")
-System_Ext(svc0627, "SVC-06 Correo institucional", "Avisos y escalamiento")
-System_Ext(svc1127, "SVC-11 Mapas base", "Cartografía")
-System_Ext(svc1227, "SVC-12 SESIGUE", "Estado de compromisos")
+title AVISA-PRODUCE · Casos de uso · Página 3 de 3\nHorizonte 2027 y fase MADRE · CU-20 a CU-34
 
-Rel(reloj, cu21, "")
-Rel(reloj, cu30, "")
+' =========================================================
+' 1. ACTORES PRIMARIOS (Izquierda)
+' =========================================================
+actor "Procesos automáticos\nprogramados (CT-04)" as reloj #FEF3C7;line:B45309
+actor "Analista / Sectorista\n(OAIPCS)" as analista27 #EFF6FF;line:1D4ED8
+actor "Dirección de la OAIPCS" as direccion27 #EFF6FF;line:1D4ED8
+actor "Alta Dirección" as alta27 #EFF6FF;line:1D4ED8
+actor "Actor externo o gremio\n(perfil C, acceso acotado)" as externo #EFF6FF;line:1D4ED8
+actor "Administrador Funcional" as admin27 #EFF6FF;line:1D4ED8
 
-Rel(analista27, cu20, "")
-Rel(analista27, cu22, "")
-Rel(analista27, cu23, "")
-Rel(analista27, cu24, "")
-Rel(analista27, cu25, "")
-Rel(analista27, cu28, "")
-Rel(analista27, cu29, "")
+reloj -[hidden]down-> analista27
+analista27 -[hidden]down-> direccion27
+direccion27 -[hidden]down-> alta27
+alta27 -[hidden]down-> externo
+externo -[hidden]down-> admin27
 
-Rel(direccion27, cu26, "")
-Rel(direccion27, cu27, "")
-Rel(alta27, cu24, "")
-Rel(alta27, cu32, "")
-Rel(externo, cu31, "")
-Rel(admin27, cu33, "")
+' =========================================================
+' 2. FRONTERA DEL SISTEMA
+' =========================================================
+rectangle "Plataforma AVISA-PRODUCE / SIPRECS (evolución 2027)" {
 
-Rel(cu21, svc0127, "")
-Rel(cu20, svc0227, "")
-Rel(cu29, svc0227, "")
-Rel(cu30, svc0627, "")
-Rel(cu25, svc1127, "")
-Rel(cu34, svc1227, "")
+  package "Inteligencia territorial y escenarios" {
+    usecase "CU-23 · Registrar posición,\ninfluencia y relaciones" as uc_posicion
+    usecase "CU-24 · Ver la red\nde actores" as uc_red
+    usecase "CU-25 · Ver línea de tiempo\ny mapa" as uc_mapa
+    usecase "CU-28 · Analizar la pota\nen el tiempo" as uc_pota
+    usecase "CU-26 · Ver indicadores\navanzados" as uc_indicadores
+    usecase "CU-27 · Simular escenarios\ny tendencia" as uc_escenarios
+  }
 
-Rel(cu21, cu20, "«include»")
-Rel(cu20, cu22, "«include»")
+  package "Monitoreo automatizado e IA asistida" {
+    usecase "CU-20 · Procesar documentos y\nproponer candidatos" as uc_procesar
+    usecase "CU-21 · Recolectar fuentes\nde la lista blanca" as uc_fuentes
+    usecase "CU-22 · Revisar candidatos y\ncoincidencias dudosas" as uc_revisar
+    usecase "CU-29 · Generar borradores\nde informe" as uc_borradores
+    usecase "CU-30 · Avisar vencimientos y escalar\nalertas sin atender" as uc_escalar
+    usecase "CU-34 · Traducir estados\nal SESIGUE" as uc_sesigue
+  }
+
+  package "Apertura externa, seguridad y control" {
+    usecase "CU-31 · Consultar el estado de\nmis compromisos" as uc_portal
+    usecase "CU-32 · Ingresar con\nsegundo factor (MFA)" as uc_mfa
+    usecase "CU-33 · Cambiar parámetros\ncon historial" as uc_parametros
+  }
+}
+
+' =========================================================
+' 3. SISTEMAS EXTERNOS QUE ESTA LÁMINA USA
+' =========================================================
+actor "Fuentes públicas\nautorizadas (lista blanca)" as sys_fuentes #F1F5F9;line:64748B
+actor "Servicio de IA\n(Gemini)" as sys_ai27 #F1F5F9;line:64748B
+actor "Correo institucional" as sys_mail27 #F1F5F9;line:64748B
+actor "Sistema SESIGUE" as sys_sesigue #F1F5F9;line:64748B
+actor "Servicios cartográficos\n(mapas base)" as sys_mapas #F1F5F9;line:64748B
+
+sys_fuentes -[hidden]down-> sys_mail27
+
+
+' =========================================================
+' 4. RELACIONES ACTOR → CASO
+' =========================================================
+reloj --> uc_fuentes
+reloj --> uc_escalar
+
+analista27 --> uc_procesar
+analista27 --> uc_revisar
+analista27 --> uc_borradores
+analista27 --> uc_posicion
+analista27 --> uc_red
+analista27 --> uc_mapa
+analista27 --> uc_pota
+
+direccion27 --> uc_indicadores
+direccion27 --> uc_escenarios
+
+alta27 --> uc_red
+alta27 --> uc_mfa
+
+externo --> uc_portal
+admin27 --> uc_parametros
+
+' =========================================================
+' 5. RELACIONES ENTRE CASOS (cadena de ingesta y consumo)
+' =========================================================
+uc_fuentes ..> uc_procesar : «dispara»
+uc_procesar ..> uc_revisar : «propone candidatos»
+
+' =========================================================
+' 6. INTEGRACIONES EXTERNAS
+' =========================================================
+uc_fuentes --> sys_fuentes
+uc_procesar --> sys_ai27
+uc_borradores --> sys_ai27
+uc_escalar --> sys_mail27
+uc_sesigue --> sys_sesigue
+uc_mapa --> sys_mapas
+
+' =========================================================
+' 7. CONTROLES TRANSVERSALES (no son casos de uso · ERS §3.4)
+' =========================================================
+
+
+
+
 @enduml

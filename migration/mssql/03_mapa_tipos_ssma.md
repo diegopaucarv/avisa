@@ -571,7 +571,7 @@ alta siempre permitida) y `core.consulta_reniec` con 2 (inmutable: lectura y alt
 `audit.datos_personales_acceso` es la única tabla con RLS
 que **no** tiene columna `nivel_clasificacion`: su política no filtra por nivel.
 
-El parche 16 (bloque B.11) completó la cobertura de `core`: las 20 tablas del
+El parche 16 (bloque B.10) completó la cobertura de `core`: las 20 tablas del
 alcance con `nivel_clasificacion` tienen RLS, incluidas `core.hitos_compromiso`,
 `core.log_accesos`, `core.mesas_dialogo` y `core.output_contracts` (`log_accesos`
 con nivel 3 por defecto), que eran las cuatro que quedaban sin filtro.

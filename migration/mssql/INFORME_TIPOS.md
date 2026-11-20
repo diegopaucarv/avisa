@@ -415,7 +415,7 @@ llevan 2:
 | `staging.lote`                  |         4 |
 | **Total**                       |   **198** |
 
-El parche 16 (bloque B.11) completó la cobertura de `core`: añadió RLS a las
+El parche 16 (bloque B.10) completó la cobertura de `core`: añadió RLS a las
 tablas de detalle que heredan el nivel de su padre y a la tabla nueva
 `core.banco_datos_tratamiento`. Por eso el alcance pasa de 15 a 30 tablas con RLS
 y de 97 a 198 políticas: las dos últimas las sumó el parche 17

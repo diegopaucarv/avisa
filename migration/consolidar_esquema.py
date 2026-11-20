@@ -13,7 +13,7 @@ Estructura del archivo generado:
 
     Sección A · esquema      extensiones + DDL (dos pases) + parches 1-5
                              aplicable sobre una base vacía.
-    Sección B · post-carga   parches 6-17
+    Sección B · post-carga   parches 6-18
                              exige el legado ya cargado.
 
 El script solo lee el repositorio. No abre conexión a ninguna base.
@@ -183,7 +183,7 @@ SECCION_B = (
         tolera_errores=False,
     ),
     bloque(
-        "B.8",
+        "B.7",
         "Parche 13 · nivel de clasificación en un solo formato",
         "docs/PARCHE_13_CLASIFICACION.sql",
         tolera_errores=False,
@@ -194,7 +194,7 @@ SECCION_B = (
         ),
     ),
     bloque(
-        "B.9",
+        "B.8",
         "Parche 14 · cierre de brechas del ERS",
         "docs/PARCHE_14_CIERRE_ERS.sql",
         tolera_errores=False,
@@ -208,7 +208,7 @@ SECCION_B = (
         ),
     ),
     bloque(
-        "B.10",
+        "B.9",
         "Parche 15 · el rol manda: nivel y capacidades",
         "docs/PARCHE_15_ROLES_Y_BORRADO.sql",
         tolera_errores=False,
@@ -223,7 +223,7 @@ SECCION_B = (
         ),
     ),
     bloque(
-        "B.11",
+        "B.10",
         "Parche 16 · RLS completo en `core` y banco de datos personales",
         "docs/PARCHE_16_RLS_CORE_Y_DC04.sql",
         tolera_errores=False,
@@ -238,7 +238,7 @@ SECCION_B = (
         ),
     ),
     bloque(
-        "B.12",
+        "B.11",
         "Parche 17 · consulta PIDE-RENIEC y control de costos",
         "docs/PARCHE_17_RENIEC_Y_COSTOS.sql",
         tolera_errores=False,
@@ -252,11 +252,38 @@ SECCION_B = (
             "RM-11 a RM-21."
         ),
     ),
-    # Los comentarios van al final a propósito: el archivo se regeneró contra la
-    # base ya parcheada, así que comenta tablas que crean los parches 14, 16 y
-    # 17. Si corriera antes, `COMMENT ON` fallaría al aplicar desde cero.
+    bloque(
+        "B.12",
+        "Parche 18 · tope de gasto con aviso y RLS del catálogo de identidad",
+        "docs/PARCHE_18_COSTOS_Y_RLS_ADMIN.sql",
+        tolera_errores=False,
+        nota=(
+            "Cierra RNF-13, que el parche 17 dejó a medias: ya había dónde guardar "
+            "el costo, pero ningún objeto que fijara un tope, sumara el consumo "
+            "del mes ni dijera cuándo avisar. Añade `config.servicio_externo`, "
+            "`config.tope_gasto`, las vistas de consumo y aviso y `puede_gastar()`. "
+            "Cierra además la otra puerta de la escalada de privilegios: "
+            "`core.roles`, `core.usuarios` y `core.usuario_roles` ganan seguridad "
+            "por fila y solo el rol `administrador` puede escribirlas."
+        ),
+    ),
     bloque(
         "B.13",
+        "Parche 19 · los 19 comentarios que faltaban",
+        "docs/PARCHE_19_COMENTARIOS_FALTANTES.sql",
+        tolera_errores=False,
+        nota=(
+            "El parche 12 comentó las columnas tal como estaban el 2026-11-18; los "
+            "parches 15 y 17 crearon después tres tablas y añadieron dos columnas, "
+            "así que 19 columnas quedaron sin descripción. Este bloque solo agrega "
+            "esos comentarios y verifica que no quede ninguna sin describir."
+        ),
+    ),
+    # Los comentarios van al final a propósito: el archivo se regeneró contra la
+    # base ya parcheada, así que comenta tablas que crean los parches 14, 16, 17
+    # y 18. Si corriera antes, `COMMENT ON` fallaría al aplicar desde cero.
+    bloque(
+        "B.14",
         "Parche 12 · comentarios de tablas y columnas (se aplica al final)",
         "docs/PARCHE_12_COMENTARIOS_COLUMNAS.sql",
         tolera_errores=False,
@@ -341,7 +368,7 @@ def encabezado(solo: str | None) -> list[str]:
         "--  Sección A · esquema    extensiones + DDL v9 (dos pases) + parches 1-5.",
         "--                          Autosuficiente: se puede aplicar sobre una",
         "--                          base VACÍA, sin instalar extensiones aparte.",
-        "--  Sección B · post-carga parches 6-17. NO se puede aplicar sobre una",
+        "--  Sección B · post-carga parches 6-18. NO se puede aplicar sobre una",
         "--                          base vacía: exige el legado ya cargado por",
         "--                          migration/loader (filas en core.*, ind.*,",
         "--                          kag.*). Sobre una base recién creada falla en",
@@ -384,14 +411,14 @@ def encabezado(solo: str | None) -> list[str]:
         "--  sección A → cargador del legado → sección B.",
         "--",
         "--  Con el legado cargado y la sección B aplicada (el estado de la base",
-        "--  `avisa`, sin contar `legacy` ni `public`): 287 tablas físicas (263",
-        "--  lógicas + 24 hijas de partición), 2 492 columnas y 609 claves",
+        "--  `avisa`, sin contar `legacy` ni `public`): 289 tablas físicas (265",
+        "--  lógicas + 24 hijas de partición), 2 511 columnas y 610 claves",
         "--  ajenas. Sumando el volcado histórico `legacy` (87 tablas, 807",
-        "--  columnas): 374 tablas físicas y 3 299 columnas; las claves ajenas no",
+        "--  columnas): 376 tablas físicas y 3 318 columnas; las claves ajenas no",
         "--  cambian porque `legacy` no declara ninguna.",
         "--",
-        "--  La diferencia entre ambos estados son 12 tablas, 178 columnas y 28",
-        "--  claves ajenas, todas de los parches 9 a 17:",
+        "--  La diferencia entre ambos estados son 14 tablas, 197 columnas y 29",
+        "--  claves ajenas, todas de los parches 9 a 18:",
         "--    · parche  9 · `audit.datos_personales_acceso` (8 columnas) y las",
         "--                 4 columnas cifradas de `core.actor_datos_personales`;",
         "--    · parche 10 · `core.flujo_definicion` (10), `core.flujo_estado` (7)",
@@ -420,7 +447,11 @@ def encabezado(solo: str | None) -> list[str]:
         "--                 replican en sus 6 particiones) y 5 en",
         "--                 `core.envios_comunicacion`. `core` queda con 45 tablas",
         "--                 protegidas y 303 políticas.",
-        "--  Por eso la sección A termina en 275 tablas y no en 287: las tablas",
+        "--    · parche 18 · `config.servicio_externo` (8 columnas) y",
+        "--                 `config.tope_gasto` (11), con 1 clave ajena; 2 vistas y",
+        "--                 2 funciones de control de gasto; seguridad por fila en",
+        "--                 `core.roles`, `core.usuarios` y `core.usuario_roles`.",
+        "--  Por eso la sección A termina en 275 tablas y no en 289: las tablas",
         "--  que faltan no son parte del esquema base, se crean después de cargar",
         "--  el legado. Si la sección A se queda corta en algo distinto, el defecto",
         "--  no está en este archivo: falta una fuente o cambió el DDL.",
@@ -519,7 +550,7 @@ def componer(secciones: list[str], solo: str | None) -> tuple[list[str], list[di
             "B",
             "Post-carga (exige el legado cargado)",
             [
-                "Parches 6-17. Requiere el legado cargado por migration/loader;",
+                "Parches 6-18. Requiere el legado cargado por migration/loader;",
                 "sobre una base vacía aborta en el primer parche que lee datos.",
             ],
             SECCION_B,

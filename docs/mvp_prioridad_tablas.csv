@@ -27,9 +27,9 @@ T0,core,distritos,4,698,18,7,1,False,0,False,True,0,MVP-45 y ya tiene datos o ca
 T0,core,hitos_compromiso,12,12,1,0,3,True,0,False,True,0,MVP-45 y ya tiene datos o cargador,nada
 T0,core,log_accesos,9,857,0,0,2,True,0,False,True,0,MVP-45 y ya tiene datos o cargador,nada
 T0,core,organizaciones,21,224,0,0,3,True,0,False,True,0,MVP-45 y ya tiene datos o cargador,nada
-T0,core,roles,6,9,1,1,1,False,0,False,False,0,MVP-45 y ya tiene datos o cargador,referencia_viva
-T0,core,usuario_roles,4,35,0,0,2,False,0,False,True,0,MVP-45 y ya tiene datos o cargador,nada
-T0,core,usuarios,13,32,84,20,1,False,0,True,True,0,MVP-45 y ya tiene datos o cargador,referencia_viva
+T0,core,roles,6,9,1,1,1,True,0,False,False,0,MVP-45 y ya tiene datos o cargador,referencia_viva
+T0,core,usuario_roles,4,35,0,0,2,True,0,False,True,0,MVP-45 y ya tiene datos o cargador,nada
+T0,core,usuarios,13,32,84,20,1,True,0,True,True,0,MVP-45 y ya tiene datos o cargador,referencia_viva
 T0,kag,aristas,17,450,3,1,7,True,0,False,False,0,MVP-45 y ya tiene datos o cargador,referencia_viva
 T0,kag,documento_fuente,10,10,12,1,3,True,0,False,False,0,MVP-45 y ya tiene datos o cargador,referencia_viva
 T0,ref,base_legal_tratamiento,12,5,2,1,1,False,0,False,False,0,MVP-45 y ya tiene datos o cargador,referencia_viva
@@ -55,6 +55,7 @@ T2,config,guardrail_contract,7,25,0,0,0,False,0,False,False,0,fuera del MVP-45 p
 T2,config,libreria,11,6,1,1,0,False,0,False,False,0,fuera del MVP-45 pero con datos o cargador,referencia_viva
 T2,config,parametro,12,17,1,1,3,False,1,False,False,0,fuera del MVP-45 pero con datos o cargador,referencia_viva+trigger
 T2,config,schema_registry,6,2,0,0,0,False,0,False,False,0,fuera del MVP-45 pero con datos o cargador,nada
+T2,config,servicio_externo,8,4,1,0,0,True,0,False,False,0,fuera del MVP-45 pero con datos o cargador,nada
 T2,core,alerta_especies,2,30,0,0,2,True,0,False,True,0,fuera del MVP-45 pero con datos o cargador,nada
 T2,core,capacitacion_participantes,4,9,0,0,2,True,0,False,True,0,fuera del MVP-45 pero con datos o cargador,nada
 T2,core,capacitaciones,16,1,1,1,3,True,0,False,True,0,fuera del MVP-45 pero con datos o cargador,referencia_viva
@@ -103,7 +104,7 @@ T2,core,proceso_instancia,21,218,0,0,8,True,1,True,False,0,fuera del MVP-45 pero
 T2,core,provincias,4,70,9,2,1,False,0,False,True,0,fuera del MVP-45 pero con datos o cargador,referencia_viva
 T2,core,regiones,3,25,12,5,0,False,0,False,True,0,fuera del MVP-45 pero con datos o cargador,referencia_viva
 T2,core,suscripcion_notificacion,8,4,0,0,1,False,0,True,True,0,fuera del MVP-45 pero con datos o cargador,nada
-T2,core,usuario_territorio,2,25,0,0,2,False,0,False,True,0,fuera del MVP-45 pero con datos o cargador,nada
+T2,core,usuario_territorio,2,25,0,0,2,False,0,False,True,3,fuera del MVP-45 pero con datos o cargador,codigo
 T2,ctx,cat_dominios,2,8,1,1,0,False,0,False,False,0,fuera del MVP-45 pero con datos o cargador,referencia_viva
 T2,ctx,cat_variables,9,20,11,0,1,False,0,False,False,0,fuera del MVP-45 pero con datos o cargador,nada
 T2,domain,cat_estados_artefacto,3,6,3,1,0,False,0,False,False,0,fuera del MVP-45 pero con datos o cargador,referencia_viva
@@ -167,6 +168,7 @@ T4,chat,remote,9,0,0,0,2,True,0,False,False,0,vacía y solo se relaciona con otr
 T4,chat,repositorio,13,0,7,0,6,True,0,False,False,0,vacía y solo se relaciona con otras vacías,nada
 T4,chat,stash,10,0,0,0,4,True,0,False,False,0,vacía y solo se relaciona con otras vacías,nada
 T4,community,encuestas_percepcion,10,0,0,0,2,False,0,False,False,0,vacía y solo se relaciona con otras vacías,nada
+T4,config,tope_gasto,11,0,0,0,1,True,0,False,False,0,vacía y solo se relaciona con otras vacías,nada
 T4,consultation,actores,3,0,0,0,2,False,0,False,False,0,vacía y solo se relaciona con otras vacías,nada
 T4,consultation,etapas,7,0,0,0,1,False,0,False,False,0,vacía y solo se relaciona con otras vacías,nada
 T4,consultation,procesos,10,0,3,0,2,False,0,False,False,0,vacía y solo se relaciona con otras vacías,nada

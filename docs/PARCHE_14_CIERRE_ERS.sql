@@ -3,7 +3,7 @@
 -- =====================================================================
 --  QUÉ ES
 --  Cierra las cuatro brechas críticas que quedaron abiertas entre el
---  esquema v10 y la Especificación de Requisitos (ERS v0.4), más el
+--  esquema v10 y la Especificación de Requisitos (ERS v0.6), más el
 --  enlace entre la base legal y el corpus documental del KAG.
 --
 --  POR QUÉ EXISTE

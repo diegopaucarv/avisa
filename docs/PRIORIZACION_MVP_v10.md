@@ -1,6 +1,8 @@
 # Qué construir primero — capas de la v10 y puente con el MVP-45
 
-**Para qué sirve este documento.** La v10 tiene 263 tablas; el MVP-45 pide 55 objetos para 45 días, que hoy se cumplen con 46 tablas existentes (34 con datos y 12 todavía vacías). Este documento dice, con medición sobre la base viva, **qué parte de la v10 ya está en pie, qué parte hay que crear primero y qué parte puede esperar**. No reemplaza al `mvp.md` ni al `AVISA_PRODUCE_v10.md`: los ordena en el tiempo.
+**Para qué sirve este documento.** La v10 tiene 265 tablas; el MVP-45 pide 55 objetos para 45 días, que hoy se cumplen con 46 tablas existentes (34 con datos y 12 todavía vacías). Este documento dice, con medición sobre la base viva, **qué parte de la v10 ya está en pie, qué parte hay que crear primero y qué parte puede esperar**. No reemplaza al `mvp.md` ni al `AVISA_PRODUCE_v10.md`: los ordena en el tiempo.
+
+> **Nota de medición.** Las cifras de capas salen de `mvp_prioridad_tablas.csv` regenerado el **2026-11-20**, con el parche 18 ya aplicado. Las dos tablas que trajo ese parche entran por la regla del clasificador, no por la lista del contrato MVP-45: `config.servicio_externo` (8 columnas, 4 filas) cae en **T2** porque el contrato no la nombra, y `config.tope_gasto` (11 columnas, 0 filas) en **T4**. El ERS las exige por RNF-13, así que en la práctica se programan junto con T0 y T1.
 
 **Cómo se lee.** Cinco capas, de la que ya funciona a la que duerme. Después, el puente entre los nombres del MVP y los de la v10. Al final, el orden de construcción del backend, bloque por bloque.
 
@@ -15,19 +17,19 @@ xychart-beta
     title "Tablas de la v10 por capa"
     x-axis ["T0 ya vive", "T1 MVP vacía", "T2 viva fuera", "T3 enganchada", "T4 dormida"]
     y-axis "Tablas" 0 --> 130
-    bar [34, 12, 75, 22, 120]
+    bar [34, 12, 76, 22, 121]
 ```
 
 | Capa   | Qué significa                                        | Tablas |  Columnas |      Filas |
 | ------ | ---------------------------------------------------- | -----: | --------: | ---------: |
 | **T0** | El MVP la exige y ya tiene datos o cargador          |     34 |       364 |  **8 379** |
 | **T1** | El MVP la exige y todavía está vacía                 |     12 |        99 |          0 |
-| **T2** | No la pide el MVP, pero está viva (datos o cargador) |     75 |       534 |  **4 969** |
+| **T2** | No la pide el MVP, pero está viva (datos o cargador) |     76 |       542 |  **4 973** |
 | **T3** | Vacía, pero algo vivo la usa (una FK, un disparador) |     22 |       226 |          0 |
-| **T4** | Vacía y sin nada vivo que la toque                   |    120 |       903 |          0 |
-| Total  |                                                      |    263 | **2 126** | **13 348** |
+| **T4** | Vacía y sin nada vivo que la toque                   |    121 |       914 |          0 |
+| Total  |                                                      |    265 | **2 145** | **13 352** |
 
-Las 13 348 filas se reparten solo entre T0 y T2. **La mitad baja del modelo está vacía hoy**: 142 tablas (T3 + T4) no tienen una sola fila.
+Las 13 352 filas se reparten solo entre T0 y T2. **La mitad baja del modelo está vacía hoy**: 143 tablas (T3 + T4) no tienen una sola fila.
 
 ---
 
@@ -123,7 +125,7 @@ Son 99 columnas vacías que el MVP ya usa en su diseño. Se crean con su bloque 
 
 ## 5. Capa T2 — lo vivo que el MVP no pidió (75 tablas)
 
-75 tablas con 4 969 filas que **no están en las 55 del contrato del MVP** pero ya tienen datos. No se tocan: se heredan.
+76 tablas con 4 973 filas que **no están en las 55 del contrato del MVP** pero ya tienen datos. No se tocan: se heredan.
 
 | Esquema      | Tablas T2 | Qué es                                  |
 | ------------ | --------: | --------------------------------------- |
@@ -139,7 +141,7 @@ Son 99 columnas vacías que el MVP ya usa en su diseño. Se crean con su bloque 
 | `model`      |         1 | ficha de modelo                         |
 | `territorio` |         1 | catálogo de tipos de lugar              |
 
-**Por qué importa.** El MVP se construye **sobre** estas tablas, no en paralelo. Si alguien "limpia" la base para dejar solo las 55 del contrato, borra 4 969 filas de historia.
+**Por qué importa.** El MVP se construye **sobre** estas tablas, no en paralelo. Si alguien "limpia" la base para dejar solo las 55 del contrato, borra 4 973 filas de historia.
 
 ---
 
@@ -147,7 +149,7 @@ Son 99 columnas vacías que el MVP ya usa en su diseño. Se crean con su bloque 
 
 **T3 (22 tablas, 226 columnas):** vacías, pero enganchadas. 20 de las 22 llevan un disparador; 3 las referencia una tabla viva (`policy.gobierno`, `policy.titular`, `core.reuniones_dialogo`). **Ninguna se recorta**: están cableadas al modelo.
 
-**T4 (120 tablas, 903 columnas):** vacías y sin nada vivo que las toque. Se agrupan en 50 islas: 9 islas de más de una tabla y 41 tablas sueltas. Las mayores:
+**T4 (121 tablas, 914 columnas):** vacías y sin nada vivo que las toque. Se agrupan en 51 islas: 9 islas de más de una tabla y 42 tablas sueltas. Las mayores:
 
 | Isla | Integrantes                                                | Esquemas                                                                              |
 | ---- | ---------------------------------------------------------- | ------------------------------------------------------------------------------------- |
@@ -168,7 +170,7 @@ Son 99 columnas vacías que el MVP ya usa en su diseño. Se crean con su bloque 
 
 ---
 
-## 7. El puente: 55 tablas del MVP contra 263 de la v10
+## 7. El puente: 55 tablas del MVP contra 265 de la v10
 
 La correspondencia no se inventó aquí: sigue el **Anexo D.2** de `AVISA_PRODUCE_v10.md`. Al contrastarla con la base viva aparece el dato que ordena todo el trabajo. De los 55 objetos que pide el contrato, 46 se apoyan hoy en una tabla existente —34 con datos y 12 vacías—; el resto son piezas que todavía hay que crear o completar. Cuando el alcance se recorta antes de migrar a SQL Server, quedan **42**: se difieren las cuatro tablas de `kag` que hoy entran en el contrato (`kag.aristas`, `kag.documento_fuente`, `kag.documento_fragmento` y `kag.entity_merge_log`).
 
@@ -233,7 +235,7 @@ flowchart TD
 
 **Relaciones primero:** las 63 claves foráneas que apuntan a `core.cat_clasificacion` y las 84 que apuntan a `core.usuarios`. Son las que hacen que todo lo demás pueda existir.
 
-**Cierra cuando:** dos perfiles distintos consultan la misma tabla y ven cosas distintas (RLS probado), y cada catálogo tiene sus filas semilla. El esquema ya cumple su parte: el parche 16 dejó `core` con 45 de 102 tablas con RLS (eran 12) y 303 políticas.
+**Cierra cuando:** dos perfiles distintos consultan la misma tabla y ven cosas distintas (RLS probado), y cada catálogo tiene sus filas semilla. El esquema ya cumple su parte: los parches 16 y 18 dejaron `core` con 48 de 102 tablas con RLS (eran 12) y 315 políticas.
 
 ### Bloque 2 — Identidad del actor (días 8–15)
 
@@ -311,7 +313,7 @@ python migration/prioridad_mvp.py
 
 Lee la base, escribe `docs/mvp_prioridad_tablas.csv` (una fila por tabla, con capa y causa) e imprime el resumen. **Solo lee**: no crea, no borra, no comenta.
 
-Si se añade una tabla a la v10 o se cambia el contrato del MVP, se edita el diccionario `MVP` del script y se vuelve a ejecutar. Las cifras de este documento salen de esa ejecución, no de una estimación. La corrida corresponde a la medición del **2026-11-19** e incluye los parches 14 a 17: `core.banco_datos_tratamiento` ya existe con una fila, y `core` tiene 45 de sus 102 tablas con RLS y 303 políticas.
+Si se añade una tabla a la v10 o se cambia el contrato del MVP, se edita el diccionario `MVP` del script y se vuelve a ejecutar. Las cifras de este documento salen de esa ejecución, no de una estimación. La corrida corresponde a la medición del **2026-11-20** e incluye los parches 14 a 18: `core.banco_datos_tratamiento` ya existe con una fila, y `core` tiene 48 de sus 102 tablas con RLS y 315 políticas.
 
 **Este documento no se regenera.** `migration/prioridad_mvp.py` sólo escribe `docs/mvp_prioridad_tablas.csv` y el resumen por consola; el `.md` se edita a mano a partir de esas dos salidas. Volver a ejecutar el script refresca la medición, no el texto.
 

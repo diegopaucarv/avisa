@@ -82,7 +82,7 @@ Cuando dos fuentes dicen cosas distintas, manda el siguiente orden:
 | C-12 | Carga de datos históricos                            | —                                                                                                                                                                                                                                                                                                                                | El MVP-45 planifica migrar la matriz actual en los primeros 10 días; el diccionario muestra que **la carga ya está hecha** (p. ej. 35 casos, 83 alertas, 1 160 actores)         | La migración histórica **ya existe**. Falta repetir la **reconciliación** en el entorno de OGTI                                                                                                                                                                      |
 | C-13 | Alcance de diciembre                                 | Un **módulo mínimo en producción** según el uso actual de AVISA, con **login institucional, datos maestros precargados y tableros**. El **procesamiento automático masivo pasa a 2027**, igual que todo lo que no quepa en **20 días**; la **IA acotada (Gemini) y WhatsApp sí entran en diciembre**, con reglas de costo (13.3) | La versión 0.1 de este ERS y el MVP-45 incluían procesamiento con IA, Gemini, diagrama interactivo de la red de actores y candidatos de alerta automáticos en el primer alcance | El primer alcance es el **módulo de diciembre**. El procesamiento automático masivo y la red de actores interactiva pasan al horizonte **2027**; **Gemini y WhatsApp entran en diciembre** con alcance acotado y las reglas RM-11 a RM-21 (13.3)                     |
 | C-14 | Cómo se aprueba el alcance                           | Idea → **prototipo en Figma** (para verlo en conjunto) → **documento de análisis** con reglas y roles → **acuerdo firmado** entre ambas partes sobre el alcance definitivo → recién entonces la parte técnica                                                                                                                    | La versión 0.1 suponía que OGTI construiría directamente desde el ERS y el mockup                                                                                               | Este documento hace de **documento de análisis**; la sección 19 es el borrador del **acuerdo de alcance**. El prototipo lo **diseña OAIPCS** (Diego), a partir de las secciones 5 a 8 y de la metodología 7.4                                                        |
-| C-15 | Expectativa de OGTI frente al rediseño               | OGTI esperaba recibir la **aplicación actual** para levantarla tal cual; OAIPCS llegó con un **rediseño** (de Excel a modelo relacional)                                                                                                                                                                                         | R3 y R4 describen el modelo v10 completo (263 tablas)                                                                                                                           | La sección 5 muestra la **paridad con el AVISA actual**. **Decidido:** el módulo se levanta sobre el **modelo relacional (v10)**, traducido a **SQL Server** (H-01), sujeto a optimizaciones de OGTI; primero se presenta la necesidad y después el modelo (ver 5.4) |
+| C-15 | Expectativa de OGTI frente al rediseño               | OGTI esperaba recibir la **aplicación actual** para levantarla tal cual; OAIPCS llegó con un **rediseño** (de Excel a modelo relacional)                                                                                                                                                                                         | R3 y R4 describen el modelo v10 completo (265 tablas)                                                                                                                           | La sección 5 muestra la **paridad con el AVISA actual**. **Decidido:** el módulo se levanta sobre el **modelo relacional (v10)**, traducido a **SQL Server** (H-01), sujeto a optimizaciones de OGTI; primero se presenta la necesidad y después el modelo (ver 5.4) |
 | C-16 | Nivel de la conversación                             | Hablar de LLM, WhatsApp, Python, servidores y Extranet **no corresponde a esta etapa**                                                                                                                                                                                                                                           | Las secciones 14 y 13 de este ERS las describen                                                                                                                                 | Se conservan como **material interno** y **no se llevan** a la reunión (ver 0.4)                                                                                                                                                                                     |
 | C-17 | Necesidades de los tres usuarios                     | Notas de Edith, Iván y Esteban                                                                                                                                                                                                                                                                                                   | El plan de diciembre habla del «uso actual de AVISA»                                                                                                                            | En diciembre entra lo que AVISA ya hace hoy; lo demás se reclasifica a 2027 **[EN BLANCO · H-45]**                                                                                                                                                                   |
 | C-18 | Costo de los servicios externos                      | **Minimizar** las dependencias externas para reducir los costos que asumirá OAIPCS                                                                                                                                                                                                                                               | El MVP-45 prevé servicios de terceros (Modal, Hetzner, modelos externos, SMS, redes, mapas, Extranet)                                                                           | Presupuesto y requisitos de cada actor externo en 13.3 y 13.4; reglas de minimización en 13.5. En diciembre solo se usan servicios que la institución ya tiene                                                                                                       |
@@ -132,7 +132,7 @@ Este documento dice **qué debe hacer el sistema**, para quién y con qué condi
 | **ENTREGA**              | Lo que prepara este equipo: base de datos, este documento de análisis e información para el prototipo                                               | Este documento                                 |
 | **MVP (diciembre 2026)** | **Módulo mínimo en producción en 20 días**: el uso actual de AVISA, con login institucional, datos maestros precargados y tableros                  | Secciones 5 a 8 y requisitos con horizonte MVP |
 | **2027**                 | Inteligencia artificial a escala, procesamiento automático de documentos y todo lo que no quepa en 20 días                                          | Requisitos con horizonte 2027                  |
-| **MADRE**                | El proyecto completo (v10): 263 tablas, grafo de conocimiento, análisis cualitativo, agentes, indicadores y módulos de expansión; mucho más extenso | Documentos de la v10                           |
+| **MADRE**                | El proyecto completo (v10): 265 tablas, grafo de conocimiento, análisis cualitativo, agentes, indicadores y módulos de expansión; mucho más extenso | Documentos de la v10                           |
 
 **Dentro del alcance del MVP (diciembre):** el circuito de lo que AVISA ya hace hoy —casos, hechos, alertas tempranas, demandas, actores y organizaciones, compromisos, documentos y envíos—, con **login institucional**, **datos maestros precargados**, **tableros prioritarios** y reglas y roles definidos.
 
@@ -162,7 +162,7 @@ El glosario completo está en el Anexo A.
 | ------ | ----------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
 | R1     | Conversaciones del proyecto (reunión con OGTI y entrevistas a usuarios) | Fuente que **prevalece**                                                                                                          |
 | R2     | `mvp.md` — AVISA-PRODUCE MVP-45                                         | Funciones, perfiles, indicadores, ciclo de la alerta                                                                              |
-| R3     | `DICCIONARIO_DATOS.md`                                                  | Qué existe hoy en la base (263 tablas lógicas, 26 esquemas con tablas, 34 objetos derivados: 28 vistas y 6 tablas materializadas) |
+| R3     | `DICCIONARIO_DATOS.md`                                                  | Qué existe hoy en la base (265 tablas lógicas, 26 esquemas con tablas, 36 objetos derivados: 30 vistas y 6 tablas materializadas) |
 | R4     | `LEGADO_A_V10_SIMILITUDES_Y_DIFERENCIAS.md`                             | Qué cambia del sistema anterior a la v10                                                                                          |
 | R5     | `mvp_prioridad_tablas.csv`                                              | Qué tablas son del MVP (T0 y T1) y cuáles quedan para después                                                                     |
 | R6     | Diagnóstico y plan de diciembre acordado tras la reunión con OGTI       | Plazos de 20 días, alcance inicial y reparto de responsabilidades                                                                 |
@@ -326,7 +326,7 @@ Esta es la vista que faltaba: **qué puede hacer cada actor con el sistema**. Lo
 - **Legal (INT-06), quienes aprueban el alcance (INT-09) y el diseñador del prototipo (INT-10)**: son interesados del proyecto, no usuarios del sistema. Están en 3.1; Legal vuelve a aparecer en 13.4 y el prototipo y la firma, en 18. Aquí no.
 - **Tareas programadas (CT-04)** sí es actor en la página 3: dispara trabajos por horario, sin persona detrás.
 
-**Los requisitos que no son casos de uso.** Los controles RF-A02, RF-A03, RF-A04, RF-D12, RF-E10 y RF-X01 no se dibujan como casos: son reglas que se aplican en todos. Van anotados en la descripción del caso que los sufre (por ejemplo, CU-01 carga A02 a A04 y CU-09 carga D12).
+**Los requisitos que no son casos de uso.** Los controles RF-A02, RF-A03, RF-A04, RF-D12, RF-E10 y RF-X01 no se dibujan como casos: son reglas que se aplican en todos. Van anotados en la descripción del caso que los sufre (por ejemplo, CU-01 carga A02 a A04 y CU-09 carga D12); el detalle está en la tabla **«Controles que viajan con cada caso»**, al final de esta sección.
 
 ### Página 1 — el día del analista
 
@@ -384,15 +384,45 @@ Esta es la vista que faltaba: **qué puede hacer cada actor con el sistema**. Lo
 | CU-33 Cambiar parámetros con historial                  | Administrador                        | RF-X03                | 2027         |
 | CU-34 Traducir estados al SESIGUE                       | SESIGUE (actor secundario)           | RF-C06                | MADRE        |
 
+### Controles que viajan con cada caso
+
+La frase de arriba —«los controles no se dibujan como casos, van anotados en el caso que los sufre»— se cumple en esta tabla, que es la que hay que leer junto al diagrama. Son los RF que no tienen óvalo propio porque se aplican a toda operación del caso:
+
+| Caso  | Controles que arrastra | Qué obliga                                                                                                                      |
+| ----- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| CU-01 | RF-A01, A02, A03, A04  | Un solo rol por sesión, tomado de `core.roles`; la base aplica RLS y la aplicación se conecta con un login **sin** `BYPASSRLS`  |
+| CU-07 | RF-D01, D03, D05       | La alerta nace como borrador en bandeja de revisión; no sale sin pasar por CU-08                                                |
+| CU-08 | RF-D04, D09, D12       | Confirmación de la Dirección antes de avisar una crisis; ninguna alerta sin aprobación humana llega a los perfiles B y C        |
+| CU-09 | RF-D06, D07, D08, D10  | Destinatarios según gravedad (RN-02); borrador en Google Drive; cada envío queda registrado con canal, destinatario y resultado |
+| CU-10 | RF-A06, D13, X01       | Solo el privilegio RENIEC; resultado cifrado, con motivo y fecha, y cada lectura auditada                                       |
+| CU-12 | RF-F08, X01            | Toda salida del perímetro deja hash en `audit.exportacion`                                                                      |
+| CU-14 | RF-H02, H05, RD-08     | Ningún dato personal pasa por el Dashboard Estratégico (Publish to Web no tiene control de acceso por fila)                     |
+| CU-19 | RF-E08, E09, E10       | Cada corrida registrada; proveedor intercambiable; ningún dato personal ni documento interno al modelo externo                  |
+| CU-20 | RF-E05, E08, E10       | Una cita solo se acepta si aparece literalmente en la fuente; corrida registrada                                                |
+| CU-22 | RF-E04, E05            | Similitud intermedia (0,85–0,95) abre tarea humana; nada se fusiona automáticamente                                             |
+
 ### Cómo se mantiene este diagrama
 
-La fuente es `docs/casos_uso/AVISA_CASOS_USO.puml`, en PlantUML con la librería C4. Las tres láminas se regeneran con un comando; sin Graphviz instalado se puede forzar el motor `smetana`, aunque el resultado queda menos ordenado.
+La fuente es `docs/casos_uso/AVISA_CASOS_USO.puml`, en **PlantUML con UML 2 puro**: no usa la librería C4 —los diagramas C4 del sistema están en la sección 14 y son mermaid—. El archivo tiene **tres bloques**, y el nombre de cada bloque es exactamente el del SVG que se publica, de modo que regenerar no deja huérfanos: `AVISA_CU_MVP_DIA`, `AVISA_CU_MVP_SALIDA` y `AVISA_CU_2027`.
+
+**Qué relaciona el diagrama.** Además de las flechas actor → caso, las láminas dibujan:
+
+- en la **página 1**, la **generalización de actores**: el analista con privilegio RENIEC hereda del analista, de modo que puede hacer todo lo suyo y además el CU-10;
+- los `<<extend>>` e `<<include>>` que las tablas ya declaran (CU-03 extiende CU-02; CU-12 extiende CU-11; CU-10 incluye CU-01; CU-09 es incluido por CU-08);
+- en la **página 3**, el **encadenamiento real de la ingesta**: la recolección dispara el procesamiento (`«dispara»`) y el procesamiento propone candidatos a la revisión (`«propone candidatos»`). El paso siguiente —lo aprobado entra al circuito de validación y envío del MVP— cruza de lámina y por eso no se dibuja: es CU-08 en la página 2;
+- las **integraciones externas** de cada caso, de modo que un caso sin sistema externo se ve de inmediato como un caso cuyo resultado vive solo en la base.
+
+Se regeneran con un comando. Graphviz es lo recomendado; sin él, `smetana` evita el fallo pero desordena el trazado.
 
 ```sh
-java -jar plantuml.jar -tsvg -o ../img docs/casos_uso/AVISA_CASOS_USO.puml
+# con Graphviz instalado (recomendado)
+java -jar plantuml.jar -tsvg -charset UTF-8 -o ../img docs/casos_uso/AVISA_CASOS_USO.puml
+
+# sin Graphviz (no falla, pero el trazado queda peor)
+java -jar plantuml.jar -tsvg -charset UTF-8 -Playout=smetana -o ../img docs/casos_uso/AVISA_CASOS_USO.puml
 ```
 
-**Regla de mantenimiento.** Si se añade o se cambia un requisito funcional, el diagrama se actualiza en el mismo cambio. Cada caso lleva escrito su RF, así que la comprobación es mecánica: **un caso sin RF es un error**, y un RF que no aparezca en ningún caso debe justificarse como control o como requisito de soporte que no se dibuja.
+**Regla de mantenimiento.** Si se añade o se cambia un requisito funcional, el diagrama se actualiza en el mismo cambio. Cada caso lleva escrito su **código CU y sus RF** en la tabla de su página, así que la comprobación es mecánica: **un caso sin RF es un error**, y un RF que no aparezca en ningún caso debe justificarse como control o como requisito de soporte que no se dibuja. Los códigos CU-nn aparecen también dentro de cada óvalo, de forma que el diagrama y la tabla se pueden cotejar a la vista.
 
 ---
 
@@ -1073,7 +1103,7 @@ Los nombres que ve el usuario salen de los **catálogos de la base** (niveles de
 
 # 9. REQUISITOS NO FUNCIONALES
 
-Los volúmenes actuales son pequeños (13 348 filas en el modelo y 32 usuarios), de modo que la exigencia de capacidad es moderada. Las medidas en blanco deben acordarse con OGTI.
+Los volúmenes actuales son pequeños (13 352 filas en el modelo y 32 usuarios), de modo que la exigencia de capacidad es moderada. Las medidas en blanco deben acordarse con OGTI.
 
 | ID     | Característica (ISO/IEC 25010) | Requisito                                                                                                            | Medida                                                                         | Estado                                                  |
 | ------ | ------------------------------ | -------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ | ------------------------------------------------------- |
@@ -1279,12 +1309,12 @@ El modelo de datos **ya existe y está probado** en PostgreSQL, y está descrito
 
 | Dato                                     | Valor                                                                                                                                                     |
 | ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Tablas lógicas del modelo completo (v10) | 263, en 26 esquemas con tablas más el de vistas. Las particiones (24) no se cuentan como tablas: si se suman, la base física muestra 287 objetos de tabla |
+| Tablas lógicas del modelo completo (v10) | 265, en 26 esquemas con tablas más el de vistas. Las particiones (24) no se cuentan como tablas: si se suman, la base física muestra 289 objetos de tabla |
 | Tablas del MVP (medido en la base viva)  | **46** (34 con datos y 12 vacías); 42 si se descuentan las 4 de `kag`                                                                                     |
-| Objetos derivados                        | 34 (28 vistas y 6 tablas materializadas)                                                                                                                  |
-| Filas hoy                                | 13 348 en el modelo v10 y 4 729 en el archivo del sistema anterior                                                                                        |
-| Llaves foráneas                          | 609                                                                                                                                                       |
-| Seguridad por fila                       | 82 tablas con 520 políticas                                                                                                                               |
+| Objetos derivados                        | 36 (30 vistas y 6 tablas materializadas)                                                                                                                  |
+| Filas hoy                                | 13 352 en el modelo v10 y 4 729 en el archivo del sistema anterior                                                                                        |
+| Llaves foráneas                          | 610                                                                                                                                                       |
+| Seguridad por fila                       | 87 tablas con 540 políticas                                                                                                                               |
 
 ## 12.2 Datos principales y su volumen actual
 
@@ -1311,6 +1341,8 @@ El modelo de datos **ya existe y está probado** en PostgreSQL, y está descrito
 > Observaciones: los **compromisos (8)** y las **reuniones** (`core.reuniones_dialogo`, 0 filas; 21 mesas con 62 miembros) son muy pocos para calcular indicadores confiables; y la tabla de indicadores está **vacía** (`ind.resultado`, 0 filas), por lo que el tablero hoy «no tiene de dónde salir».
 
 > **Qué significa «Heredado (T2)».** Son tablas que **ya tienen datos y se conservan en el modelo**, pero que **no están entre las 46 que se migran en diciembre** (14.3.3): el contrato del MVP-45 no las pide. Importa porque algunos requisitos de diciembre sí parecen apoyarse en ellas: los reportes ya remitidos (RF-F05) leen documentos y envíos, y la matriz de trazabilidad (17) manda RF-D06 a `core.envios_comunicacion`. **Decisión que hay que tomar antes de cerrar la migración [EN BLANCO · H-75]:** incluirlas en el alcance de diciembre (suben las tablas y las filas a migrar) o resolver esos requisitos con vistas que no las necesiten.
+
+**Cuánto de ese volumen ya está medido y cuánto sigue en H-67.** La base viva ya da los acumulados: 1 160 actores, 35 casos, 83 alertas tempranas, 153 documentos, 17 envíos de comunicación y 8 compromisos; 32 usuarios migrados (28 activos), 35 asignaciones de rol y 9 roles de acceso definidos, de los que 4 están en uso; 3 088 accesos a datos personales en la auditoría, y un grafo de conocimiento con 1 520 nodos y 450 aristas. Eso dice **cuánto hay**, no **a qué ritmo se usa**: las series por mes y el número de destinatarios por alerta no se pueden reconstruir con esos totales, así que esa parte del volumen de uso sigue abierta en **H-67**, que responde OAIPCS.
 
 ## 12.3 Vistas que alimentan tableros e informes
 
@@ -1599,27 +1631,31 @@ flowchart LR
   S16["SVC-16 PIDE-RENIEC<br/>(solo Edith, Ahora)"]:::integra
 
   AN --> CT05
-  ALTA --> CT06
+  AN -->|"Dashboard Analítico Especial"| CT06
+  ALTA -->|"Dashboard Estratégico"| CT06
   ALTA <-->|"mandatos y alertas"| S07
   CT05 --> CT03
+  CT05 -->|"enlace al tablero del caso"| CT06
   CT03 <--> BD
-  CT04 --> CT03
+  CT04 -->|"encola trabajos"| CT03
   CT04 --> CT02
+  CT04 -->|"refresco del dataset"| CT06
+  CT04 -->|"avisos de vencimiento"| CT08
   S01 --> CT02
   CT02 <--> S02
   CT03 <-->|"sync 24 h + manual (migración, mandatos)"| S02
   CT02 -->|"candidatos de alerta (2027)"| CT03
-  S04 --> BD
+  S04 -->|"carga inicial (una sola vez)"| BD
   CT03 --> CT08
   CT08 --> S06
   CT08 <--> S07
   CT03 <--> S05
-  S09 --> CT03
+  S09 <-->|"sesión y rol"| CT03
   CT03 <-->|"consulta nominal"| S16
   BD -->|"vistas detalladas"| S10A
   BD -->|"vistas agregadas"| S10B
-  S10A --> CT06
-  S10B --> CT06
+  S10A <--> CT06
+  S10B <--> CT06
   CT03 --> CT07
   S11 --> CT07
 ```
@@ -1772,7 +1808,7 @@ flowchart TB
     end
   end
 
-  ANL["analytics · 34 objetos<br/>28 vistas y 6 materializadas"]:::fuera
+  ANL["analytics · 22 objetos<br/>17 vistas y 5 materializadas"]:::fuera
   LEG["legacy · 87 tablas<br/>archivo del sistema anterior"]:::fuera
 
   C -->|"casos_actores"| P
@@ -1791,7 +1827,7 @@ flowchart TB
   C -->|"vistas"| ANL
 ```
 
-**Cómo se lee.** La caja grande es la base del MVP. Los nueve recuadros de `core` son bloques funcionales, no esquemas: agrupan las tablas que siempre se usan juntas. Los ocho recuadros de abajo son esquemas con una o cuatro tablas, cada uno con un solo asunto. `analytics` y `legacy` quedan **fuera** del recuento: el primero son las 34 vistas y tablas materializadas que alimentan los dos Power BI; el segundo es la copia del sistema anterior, que se conserva como archivo y no se migra.
+**Cómo se lee.** La caja grande es la base del MVP. Los nueve recuadros de `core` son bloques funcionales, no esquemas: agrupan las tablas que siempre se usan juntas. Los ocho recuadros de abajo son esquemas con una o cuatro tablas, cada uno con un solo asunto. `analytics` y `legacy` quedan **fuera** del recuento: el primero son las 22 vistas y tablas materializadas que alimentan los dos Power BI (el modelo tiene 36 objetos derivados en total); el segundo es la copia del sistema anterior, que se conserva como archivo y no se migra.
 
 **El interior de core, con las tablas y sus relaciones.** Esta es la lámina de detalle. El relleno indica que la tabla ya tiene filas; el punteado, que está creada y todavía vacía. Las flechas son claves foráneas que existen hoy en la base, y llevan el nombre de la columna que las produce.
 
@@ -2001,24 +2037,37 @@ Criterios de aceptación **propuestos** para el módulo de diciembre. Las prueba
 
 # 17. MATRIZ DE TRAZABILIDAD
 
-| Necesidad                                 | Historia     | Requisito              | Pantalla        | Origen de datos                                 | Criterio        |
-| ----------------------------------------- | ------------ | ---------------------- | --------------- | ----------------------------------------------- | --------------- |
-| N-01, N-15 Quiénes actúan en una zona     | HU-01        | RF-F01, RF-F02         | PAN-11          | Vistas por definir **[H-41]**                   | AC-03           |
-| N-02 Reportes remitidos                   | HU-07        | RF-F05                 | PAN-04, PAN-11  | `analytics.vw_anexo_17_registro_reportes`       | AC-03           |
-| N-03 Compromisos de ayudas memoria        | HU-08        | RF-C01, RF-C02, RF-C05 | PAN-08          | `analytics.vw_anexo_14_seguimiento_compromisos` | AC-03, AC-06    |
-| N-05, N-06 Directorios de autoridades     | HU-01        | RF-F03                 | PAN-11          | Vistas por definir **[H-41]**                   | AC-03           |
-| N-08 Validar alertas                      | HU-04        | RF-D03, RF-D04, RF-D12 | PAN-06          | `core.alertas_tempranas`                        | AC-02, AC-03    |
-| N-09 Teléfonos y OSPA                     | HU-02        | RF-B05, RF-B07, RF-F04 | PAN-07          | Vistas por definir **[H-41]**                   | AC-02           |
-| N-10 Cargar alertas                       | HU-03        | RF-D01                 | PAN-05          | `core.alertas_tempranas`                        | AC-03           |
-| N-11 Envío según gravedad                 | HU-05, HU-06 | RF-D06, RF-G01, RF-G03 | PAN-09          | `core.envios_comunicacion`                      | AC-03           |
-| N-14 Riesgos por clasificación de eventos | HU-05        | RF-D05, RN-01          | PAN-05, PAN-06  | Catálogo por definir **[H-24]**                 | **[EN BLANCO]** |
-| Login institucional                       | —            | RF-A01, RF-A02         | PAN-01          | Identidad **[H-52]**                            | AC-01           |
-| Datos maestros                            | —            | RF-M01                 | —               | `legacy` → `core`                               | AC-05           |
-| Tableros                                  | —            | RF-H02                 | TAB-01 a TAB-05 | Vistas `analytics`                              | AC-06           |
+| Necesidad                                 | Historia     | Requisito              | Pantalla          | Origen de datos                                                    | Criterio        |
+| ----------------------------------------- | ------------ | ---------------------- | ----------------- | ------------------------------------------------------------------ | --------------- |
+| N-01, N-15 Quiénes actúan en una zona     | HU-01        | RF-F01, RF-F02         | PAN-11            | Vistas por definir **[H-41]**                                      | AC-03           |
+| N-02 Reportes remitidos                   | HU-07        | RF-F05                 | PAN-04, PAN-11    | `analytics.vw_anexo_17_registro_reportes`                          | AC-03           |
+| N-03 Compromisos de ayudas memoria        | HU-08        | RF-C01, RF-C02, RF-C05 | PAN-08            | `analytics.vw_anexo_14_seguimiento_compromisos`                    | AC-03, AC-06    |
+| N-05, N-06 Directorios de autoridades     | HU-01        | RF-F03                 | PAN-11            | Vistas por definir **[H-41]**                                      | AC-03           |
+| N-08 Validar alertas                      | HU-04        | RF-D03, RF-D04, RF-D12 | PAN-06            | `core.alertas_tempranas`                                           | AC-02, AC-03    |
+| N-09 Teléfonos y OSPA                     | HU-02        | RF-B05, RF-B07, RF-F04 | PAN-07            | Vistas por definir **[H-41]**                                      | AC-02           |
+| N-10 Cargar alertas                       | HU-03        | RF-D01                 | PAN-05            | `core.alertas_tempranas`                                           | AC-03           |
+| N-11 Envío según gravedad                 | HU-05, HU-06 | RF-D06, RF-G01, RF-G03 | PAN-09            | `core.envios_comunicacion`                                         | AC-03           |
+| N-14 Riesgos por clasificación de eventos | HU-05        | RF-D05, RN-01          | PAN-05, PAN-06    | Catálogo por definir **[H-24]**                                    | **[EN BLANCO]** |
+| Login institucional                       | —            | RF-A01, RF-A02         | PAN-01            | Identidad **[H-52]**                                               | AC-01           |
+| Datos maestros                            | —            | RF-M01                 | —                 | `legacy` → `core`                                                  | AC-05           |
+| Tableros                                  | —            | RF-H02                 | TAB-01 a TAB-05   | Vistas `analytics`                                                 | AC-06           |
+| N-04 Locales para reuniones               | —            | RF-F06                 | PAN-11            | `core.locales`                                                     | **[EN BLANCO]** |
+| N-07 Análisis de casos                    | —            | RF-G05                 | PAN-04            | `analytics.vw_anexo_15_matriz_conflictividad`                      | **[EN BLANCO]** |
+| N-12 Relatorías y transcripciones         | HU-08, HU-11 | RF-C02, RF-E01         | PAN-04, PAN-08    | `core.documentos`, `core.compromisos`                              | AC-03           |
+| N-13 Envíos por correo y WhatsApp         | HU-05        | RF-D07, RF-D08         | PAN-09            | `core.envios_comunicacion`                                         | AC-03, AC-09    |
+| N-16 Análisis de la pota                  | HU-13        | RF-H03, RF-N01         | —                 | Vistas por definir **[H-35]**                                      | **[EN BLANCO]** |
+| N-17 Perfiles de pescadores               | —            | RF-N02                 | —                 | Vistas por definir **[H-36]**                                      | **[EN BLANCO]** |
+| Sincronización bajo demanda               | HU-08b       | RF-E13, RF-E14, RN-18  | PAN-04 **[H-77]** | Sincronización con Gemini (SVC-02) **[H-73]**                      | AC-09           |
+| Actores sin DNI                           | HU-09        | RF-B01, RF-B02         | PAN-07            | `core.actores`, `core.actor_datos_personales`                      | AC-04           |
+| Red de actores (N-01, N-17)               | HU-10        | RF-H01                 | —                 | `analytics.vw_mactor_red_actores`                                  | **[EN BLANCO]** |
+| Relatoría con IA                          | HU-11        | RF-E01, RF-E04, RF-E05 | —                 | `core.documentos`                                                  | **[EN BLANCO]** |
+| Resumen para la Alta Dirección            | HU-12        | RF-G04, RF-H05         | TAB-04            | `mv_dashboard_alta_direccion`, `analytics.vw_indicadores_minister` | AC-02, AC-06    |
+| Auditoría de datos personales             | —            | RF-X01                 | —                 | `audit.datos_personales_acceso`                                    | AC-07           |
+| Entrega y reconstrucción del módulo       | —            | RNF-04                 | —                 | Guía de reconstrucción y scripts **[H-61]**                        | AC-08           |
 
 > **Filas que apuntan a PAN-11** (N-01/N-15, N-02 y N-05/N-06): PAN-11 quedó **fuera de los 20 días** (7.1 y 19), así que esas filas trazan requisitos **MVP** a una pantalla que diciembre no entrega; entra solo si H-45 la reclasifica.
 
-> **Cobertura pendiente:** no hay fila para N-04, N-07, N-12, N-13, N-16 ni N-17, ni para HU-08b a HU-13; AC-04, AC-07, AC-08 y AC-09 no son criterio de ninguna fila y RF-D05 queda sin criterio. Se cierra antes de la firma (19).
+> **Cobertura pendiente (actualizada al 2026-11-20):** ya tienen fila N-04, N-07, N-12, N-13, N-16, N-17 y HU-08b a HU-13, y AC-04 (HU-09), AC-07 (RF-X01), AC-08 (RNF-04) y AC-09 (N-13 y HU-08b) son criterio de alguna fila. Queda abierto: **RF-D05 sigue [EN BLANCO]** porque ningún AC de la sección 16 verifica la clasificación de eventos, que depende del catálogo H-24; **N-04, N-07, N-16/HU-13, N-17, HU-10 y HU-11 no tienen AC** porque la sección 16 solo cubre diciembre y esas filas son MADRE o 2027 (en HU-13 no habrá criterio hasta que H-35 defina «controversia» y fuentes); y **N-04 vuelve a apuntar a PAN-11**, que sigue fuera de los 20 días, igual que N-01/N-15, N-02 y N-05/N-06.
 
 ---
 
