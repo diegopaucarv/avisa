@@ -1,8 +1,12 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+import dynamic from 'next/dynamic'
 import { Activity, ArrowDownRight, ArrowRight, ArrowUpRight, Check, ChevronRight, CircleHelp, Clock3, ExternalLink, FileCheck2, Filter, Info, MapPin, MoreHorizontal, Pencil, Search, ShieldCheck, Sparkles, X } from 'lucide-react'
 import { demoCases, demoCommitments, type DemoAlert, type DemoCase, type WorkspaceView } from './avisa-demo-data'
+import { AvisaDirectory } from './avisa-directory'
+
+const AvisaMap = dynamic(() => import('./avisa-map'), { ssr: false, loading: () => <div className="map-loading" role="status">Cargando mapa demostrativo…</div> })
 
 type WorkspaceProps = { view: WorkspaceView; onNavigate: (view: WorkspaceView) => void; selectedCase: DemoCase; onSelectCase: (item: DemoCase) => void; alerts: DemoAlert[]; onAlertUpdate: (id: string, status: DemoAlert['status'], note?: string) => void; onAlertEdit: (id: string, quote: string) => void }
 
@@ -48,6 +52,8 @@ export function WorkspaceViewContent({ view, onNavigate, selectedCase, onSelectC
     <div className="case-grid">{filteredCases.map((item) => <button key={item.code} className="case-card" onClick={() => { onSelectCase(item); onNavigate('case-detail') }}><div className="case-card-top"><span className="case-code">{item.code}</span><RiskBadge level={item.risk} /></div><h3>{item.title}</h3><div className="case-location"><MapPin size={14} />{item.region} <span>·</span> {item.subject}</div><p>{item.summary}</p><div className="case-card-bottom"><span>{item.stage}</span><span>{item.updated} <ChevronRight size={14} /></span></div></button>)}</div>
   </>
   if (view === 'case-detail') return <CaseDetail item={selectedCase} onNavigate={onNavigate} />
+  if (view === 'directory') return <AvisaDirectory />
+  if (view === 'map') return <AvisaMap onSelectCase={(code) => { const item = demoCases.find((row) => row.code === code); if (item) { onSelectCase(item); onNavigate('case-detail') } }} />
   if (view === 'alerts') return <>
     <SectionTitle eyebrow="CONTROL HUMANO · G20 / G21" title="Revisión de alertas" description="Comprueba la fuente y la cita antes de aprobar la visibilidad." action={<span className="review-count">{activeAlerts.length} pendientes</span>} />
     {notice && <div className="inline-notice" role="status"><Check size={16} />{notice}<button onClick={() => setNotice('')} aria-label="Cerrar aviso"><X size={15} /></button></div>}
