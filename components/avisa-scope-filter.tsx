@@ -1,7 +1,5 @@
 'use client'
 
-import { MapPinned } from 'lucide-react'
-
 export type RegionScope = 'Todo el Perú' | 'Piura' | 'Áncash' | 'Junín'
 export type TimeScope = '7 días' | '30 días' | '90 días'
 
@@ -14,5 +12,9 @@ export function isWithinDemoWindow(value: string, timeScope: TimeScope) {
 }
 
 export function AvisaScopeFilter({ region, onRegionChange }: { region: RegionScope; onRegionChange: (value: RegionScope) => void }) {
-  return <label className="scope-control"><MapPinned size={15} /><span className="sr-only">Región geográfica</span><select value={region} onChange={(event) => onRegionChange(event.target.value as RegionScope)} aria-label="Región geográfica"><option>Todo el Perú</option><option>Piura</option><option>Áncash</option><option>Junín</option></select></label>
+  const regions: RegionScope[] = ['Todo el Perú', 'Piura', 'Áncash', 'Junín']
+
+  return <div className="scope-options" role="group" aria-label="Elegir ámbito territorial">
+    {regions.map((option) => <button key={option} type="button" className={`scope-option ${region === option ? 'selected' : ''}`} aria-pressed={region === option} onClick={() => onRegionChange(option)}>{option}</button>)}
+  </div>
 }
