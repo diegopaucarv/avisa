@@ -4,7 +4,7 @@ import './globals.css'
 
 export const metadata: Metadata = {
   title: 'AVISA — Ministerio de Producción',
-  description: 'Prototipo de consola operativa AVISA para seguimiento territorial, revisión humana de alertas y compromisos.',
+  description: 'Prototipo de consola operativa AVISA con seguimiento territorial, mapas demostrativos, directorio de actores, alertas y compromisos.',
   generator: 'v0.app',
   icons: {
     icon: [
