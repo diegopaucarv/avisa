@@ -403,13 +403,14 @@ La frase de arriba —«los controles no se dibujan como casos, van anotados en 
 | CU-20 | RF-E05, E08, E10       | Una cita solo se acepta si aparece literalmente en la fuente; corrida registrada                                                |
 | CU-22 | RF-E04, E05            | Similitud intermedia (0,85–0,95) abre tarea humana; nada se fusiona automáticamente                                             |
 
-### Página 4 — de la pieza al caso y al objetivo
+### Página 4 — del actor y el objetivo al caso y a la pieza
 
-![Mapa de vistas, casos de uso y objetivos](img/AVISA_CU_MAPA_VISTAS.svg)
+![Actores, objetivos, casos de uso y vistas](img/AVISA_CU_MAPA_VISTAS.svg)
 
-Esta lámina no es un diagrama de casos de uso: es el **puente** entre las pantallas y tableros de la sección 7, los casos de esta sección y los objetivos de 2.4. Se lee de arriba abajo —la pieza que se entrega, el caso que habilita y el objetivo que sirve— y resume visualmente la matriz de la sección 17.
+Esta lámina no es un diagrama de casos de uso: es el **puente** entre las pantallas y tableros de la sección 7, los casos de esta sección y los objetivos de 2.4. Se lee de izquierda a derecha —quién impulsa el objetivo, qué caso lo realiza y qué pieza lo resuelve— y resume visualmente la matriz de la sección 17.
 
 - **Los asteriscos miden el esfuerzo que falta, no la importancia del objetivo.** `*` la vista existe y solo hay que conectarla; `**` hay que construir pantalla, tablero o integración; `***` falta el dato, la definición o el servicio externo.
+- **La línea azul responde a «quién responde por este objetivo»:** es la responsabilidad directa de cada rol, depurada de la transitividad actor → caso → objetivo que ya muestran las páginas 1 a 3, de modo que un objetivo no se le atribuye a un rol solo porque consuma su caso.
 - **La línea punteada no es una promesa:** marca capacidad de 2027 o MADRE, o una relación bloqueada por una brecha de diciembre.
 - **El borde punteado** señala las dos piezas que quedan fuera de los 20 días: TAB-05 y PAN-11 (sección 19).
 
@@ -432,7 +433,7 @@ La fuente es `docs/casos_uso/AVISA_CASOS_USO.puml`, en **PlantUML con UML 2 puro
 - los `<<extend>>` e `<<include>>` que las tablas ya declaran (CU-03 extiende CU-02; CU-12 extiende CU-11; CU-10 incluye CU-01; CU-09 es incluido por CU-08);
 - las **integraciones externas** de cada caso, de modo que un caso sin sistema externo se ve de inmediato como un caso cuyo resultado vive solo en la base.
 
-Se regeneran con un comando. Graphviz es lo recomendado; sin él, `smetana` evita el fallo pero desordena el trazado. La lámina 4 usa `linetype ortho`, que con `smetana` hay que cambiar por `polyline`.
+Se regeneran con un comando. Graphviz es lo recomendado; sin él, `smetana` evita el fallo pero desordena el trazado.
 
 ```sh
 # con Graphviz instalado (recomendado)
@@ -1628,70 +1629,69 @@ flowchart LR
   ALTA["Autoridad PRODUCE (3)"]:::persona
 
   subgraph SIS["Sistema AVISA-PRODUCE"]
-    CT05["CT-05 Pantallas de trabajo (Angular)<br/>carga de alertas, bandeja de revisión,<br/>fichas, plantillas de envío"]:::pieza
+    CT05["CT-05 Pantallas de trabajo (Angular)<br/>carga de alertas, bandeja de revisión,<br/>fichas de actor/caso, plantillas de envío<br/>(fichas de zona PAN-11: fuera de alcance)"]:::pieza
     CT06["CT-06 Paneles de indicadores<br/>(Power BI, 2 salidas)"]:::pieza
-    CT07["CT-07 Vista de diagramas interactivos<br/>red de actores (2027)"]:::futuro
+    CT07["CT-07 Vistas analíticas interactivas<br/>red de actores y mapa de casos (2027)"]:::futuro
     CT03["CT-03 Servicio de aplicación (.NET API)<br/>reglas de negocio, permisos,<br/>aprobaciones, envíos, RENIEC"]:::pieza
     CT02["CT-02 Servicio de procesamiento<br/>de documentos (.NET, tramo final)"]:::pieza
-    CT04["CT-04 Programador de tareas<br/>(ciclo 24 h + manual bajo demanda, RF-E13)"]:::pieza
-    CT08["CT-08 Notificador (correo + WhatsApp)"]:::pieza
-    BD[("CT-01 Base de datos SQL Server<br/>(migrada desde modelo v10 PostgreSQL)<br/>core · audit · agent · ind · policy ·<br/>qda · ref · staging · kag<br/>+ vistas para Power BI y archivo legacy")]:::pieza
+    CT04["CT-04 Programador de tareas<br/>(ciclo 24 h + manual bajo demanda, RF-E13;<br/>tensión por IE-03 ≤ 60 s en tableros)"]:::pieza
+    CT08["CT-08 Notificador (correo; WhatsApp H-45)"]:::pieza
+    BD[("CT-01 Base de datos SQL Server<br/>(migrada desde modelo v10 PostgreSQL)<br/>core · analytics · audit · agent · ind ·<br/>policy · qda · ref · staging · kag<br/>+ vistas para Power BI y archivo legacy")]:::pieza
   end
 
-  S01["SVC-01 Medios y<br/>portales oficiales (lista blanca)"]:::integra
+  S01["SVC-01 Medios y portales oficiales<br/>(lista blanca: MVP · lectura abierta: 2027)"]:::integra
   S02["SVC-02 Gemini<br/>(sync acotado, Ahora)"]:::integra
   S04["SVC-04 Sistema anterior"]:::integra
   S05["SVC-05 Google Drive"]:::integra
   S06["SVC-06 Correo"]:::integra
-  S07["SVC-07 WhatsApp<br/>(mandatos y alertas, Ahora)"]:::integra
+  S07["SVC-07 WhatsApp<br/>(alcance pendiente H-45)"]:::pendiente
   S09["SVC-09 Identidad"]:::integra
   S10A["SVC-10a Power BI Pro<br/>(Dashboard Analítico)"]:::integra
-  S10B["SVC-10b Power BI Publish to Web<br/>(Dashboard Estratégico)"]:::integra
+  S10B["SVC-10b Power BI Service<br/>(Dashboard Estratégico · con RLS/AC-06)"]:::integra
   S11["SVC-11 Mapas base (2027)"]:::futuro
   S16["SVC-16 PIDE-RENIEC<br/>(solo Edith, Ahora)"]:::integra
 
   AN --> CT05
   AN -->|"Dashboard Analítico Especial"| CT06
   ALTA -->|"Dashboard Estratégico"| CT06
-  ALTA <-->|"mandatos y alertas"| S07
   CT05 --> CT03
   CT05 -->|"enlace al tablero del caso"| CT06
   CT03 <--> BD
   CT04 -->|"encola trabajos"| CT03
   CT04 --> CT02
   CT04 -->|"refresco del dataset"| CT06
-  CT04 -->|"avisos de vencimiento"| CT08
+  CT04 -.->|"avisos de vencimiento (2027)"| CT08
   S01 --> CT02
   CT02 <--> S02
-  CT03 <-->|"sync 24 h + manual (migración, mandatos)"| S02
-  CT02 -->|"candidatos de alerta"| CT03
+  CT03 <-->|"sync 24 h + manual (migración)"| S02
+  CT02 -->|"candidatos de docs (MVP) / medios (2027)"| CT03
   S04 -->|"carga inicial (una sola vez)"| BD
   CT03 --> CT08
   CT08 --> S06
-  CT08 <--> S07
+  CT08 -->|"según definición H-45"| S07
   CT03 <--> S05
   S09 <-->|"sesión y rol"| CT03
   CT03 <-->|"consulta nominal"| S16
-  BD -->|"vistas detalladas"| S10A
-  BD -->|"vistas agregadas"| S10B
-  S10A <--> CT06
-  S10B <--> CT06
-  CT03 --> CT07
-  S11 --> CT07
+  BD -->|"vistas detalladas (analytics/core)"| S10A
+  BD -->|"vistas agregadas (analytics)"| S10B
+  S10A --> CT06
+  S10B --> CT06
+  CT03 -.-> CT07
+  S11 -.-> CT07
 ```
 
 **Estado de cada contenedor**
 
-| ID    | Contenedor                              | Qué hace                                                                                                                                                          | Tecnología                                          | Estado                                      |
-| ----- | --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- | ------------------------------------------- |
-| CT-01 | Base de datos                           | Guarda todo; aplica seguridad por fila, cifrado de datos personales y auditoría                                                                                   | **SQL Server** (migrada desde PostgreSQL v10, H-01) | **Resuelto**; migración en curso            |
-| CT-02 | Servicio de procesamiento de documentos | Lee los documentos cargados y la lista blanca de fuentes, extrae actores, eventos y citas, propone puntaje de riesgo                                              | **.NET** (OAIPCS/Diego)                             | **MVP (tramo final; no bloquea el núcleo)** |
-| CT-03 | Servicio de aplicación (API)            | Reglas de negocio, permisos por perfil, aprobación de alertas, informes, envíos, **consulta nominal a RENIEC**                                                    | **.NET** (confirmado por OGTI)                      | **Resuelto**                                |
-| CT-04 | Programador de tareas                   | Lanza recolecciones, sync con Gemini, recálculos de indicadores, vencimiento de compromisos (ciclo automático cada 24 h, más disparo manual bajo demanda, RF-E13) | **[EN BLANCO · H-17]**                              | Por construir                               |
-| CT-05 | Pantallas de trabajo                    | Cargar alertas, revisar y aprobar, ver fichas, armar plantillas de envío                                                                                          | **Angular** (confirmado por OGTI)                   | **Resuelto**                                |
-| CT-06 | Paneles de indicadores                  | Dos salidas: Dashboard Analítico Especial (detalle, DNI) y Dashboard Estratégico (agregado, sin DNI)                                                              | **Power BI** (Pro + Publish to Web)                 | Por construir                               |
-| CT-07 | Vista de diagramas interactivos         | Red de actores y relaciones; línea de tiempo (fase siguiente)                                                                                                     | **[EN BLANCO · H-05]**                              | **2027**                                    |
-| CT-08 | Notificador                             | Envía correos y mensajes de WhatsApp con enlace; deja registro de cada envío                                                                                      | **[EN BLANCO · H-19]**                              | Por construir                               |
+| ID    | Contenedor                              | Qué hace                                                                                                                                                                                                                        | Tecnología                                          | Estado                                      |
+| ----- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- | ------------------------------------------- |
+| CT-01 | Base de datos                           | Guarda todo; aplica seguridad por fila, cifrado de datos personales y auditoría                                                                                                                                                 | **SQL Server** (migrada desde PostgreSQL v10, H-01) | **Resuelto**; migración en curso            |
+| CT-02 | Servicio de procesamiento de documentos | Lee los documentos cargados y la lista blanca de fuentes, extrae actores, eventos y citas, propone puntaje de riesgo                                                                                                            | **.NET** (OAIPCS/Diego)                             | **MVP (tramo final; no bloquea el núcleo)** |
+| CT-03 | Servicio de aplicación (API)            | Reglas de negocio, permisos por perfil, aprobación de alertas, informes, envíos, **consulta nominal a RENIEC**                                                                                                                  | **.NET** (confirmado por OGTI)                      | **Resuelto**                                |
+| CT-04 | Programador de tareas                   | Lanza recolecciones, sync con Gemini, recálculos de indicadores, vencimiento de compromisos (ciclo automático cada 24 h, más disparo manual bajo demanda, RF-E13); el refresco ≤ 60 s de los tableros (IE-03) sigue sin ajustar | **[EN BLANCO · H-17]**                              | Por construir                               |
+| CT-05 | Pantallas de trabajo                    | Cargar alertas, revisar y aprobar, ver fichas de actor y caso y armar plantillas de envío (las fichas de zona, PAN-11, quedan fuera de diciembre)                                                                               | **Angular** (confirmado por OGTI)                   | **Resuelto**                                |
+| CT-06 | Paneles de indicadores                  | Dos salidas: Dashboard Analítico Especial (detalle, DNI) y Dashboard Estratégico (agregado, sin DNI)                                                                                                                            | **Power BI** (Pro + Service, con RLS/AC-06)         | Por construir                               |
+| CT-07 | Vistas analíticas interactivas          | Red de actores, mapa de casos y línea de tiempo (fase siguiente)                                                                                                                                                                | **[EN BLANCO · H-05]**                              | **2027**                                    |
+| CT-08 | Notificador                             | Envía correos y deja registro de cada envío; el canal de WhatsApp sigue pendiente de definición (H-45)                                                                                                                          | **[EN BLANCO · H-19]**                              | Por construir                               |
 
 ## 14.3 Nivel 3 — Componentes (qué hay dentro de las piezas clave)
 

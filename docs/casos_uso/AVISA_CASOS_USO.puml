@@ -8,9 +8,10 @@
 '    AVISA_CU_MVP_SALIDA.svg  -> §3.4 «Página 2 — lo que se valida, se
 '                                envía y se administra»
 '    AVISA_CU_2027.svg        -> §3.4 «Página 3 — 2027 y fase MADRE»
-'    AVISA_CU_MAPA_VISTAS.svg -> §3.4 «Página 4 — de la pieza al caso y al
-'                                objetivo»: pieza -> caso -> objetivo, con
-'                                las brechas de diciembre. Resumen de §17.
+'    AVISA_CU_MAPA_VISTAS.svg -> §3.4 «Página 4 — del actor y el objetivo al
+'                                caso y a la pieza»: actor -> objetivo ->
+'                                caso -> pieza, con las brechas de diciembre.
+'                                Resumen visual de §17.
 '
 '  Regla de mantenimiento (ERS §3.4): cada caso lleva su código CU-nn y
 '  existe una fila con sus RF en la tabla correspondiente. Un caso sin RF
@@ -23,7 +24,7 @@
 '        casos_uso/AVISA_CASOS_USO.puml
 '
 '  Graphviz es lo recomendado. Sin Graphviz, añadir -Playout=smetana:
-'  la lámina 4 usa linetype ortho, que allí debe cambiarse por polyline.
+'  no falla, pero el trazado queda peor.
 ' =====================================================================
 
 @startuml AVISA_CU_MVP_DIA
@@ -455,29 +456,23 @@ uc_mapa --> sys_mapas
 
 
 ' #####################################################################
-'  PÁGINA 4 · DE LA PIEZA AL CASO Y AL OBJETIVO
+'  PÁGINA 4 · DEL ACTOR Y EL OBJETIVO AL CASO Y A LA PIEZA
 ' #####################################################################
 
-' #####################################################################
-'  PÁGINA 4 · DEL OBJETIVO Y EL ACTOR AL CASO Y A LA PIEZA (INVERTIDO)
-' #####################################################################
-
-@startuml AVISA_CU_MAPA_VISTAS_INVERTIDO
-'  Mapa de trazabilidad inversa: objetivo + actor -> caso de uso -> pieza.
-'  Puente entre §2.4 (objetivos), §3.4 (actores y casos) y §7 (pantallas
-'  y tableros). Resumen visual de §17.
-'  Los rótulos CU- copian palabra por palabra los de la tabla de §3.4.
-'  Usa linetype polyline para enrutar con limpieza los iconos de actor
-'  tanto con Graphviz como con -Playout=smetana.
+@startuml AVISA_CU_MAPA_VISTAS
+'  Mapa de trazabilidad completa: actor -> objetivo -> caso de uso -> pieza.
+'  Las relaciones Actor -> Objetivo depuran la transitividad desde
+'  Actor -> Caso de uso (láminas 1–3) y Caso de uso -> Objetivo (§2.4 y §3.4),
+'  eliminando duplicidades entre roles productores, validadores y consumidores.
+'  Nota: "Analista con privilegio RENIEC" hereda de Analista en Lámina 1 y su
+'  caso diferencial (CU-10) no forma parte de esta lámina, por lo que no se
+'  duplica como nodo separado.
 left to right direction
 skinparam shadowing false
-skinparam linetype polyline
 skinparam packageStyle rectangle
 skinparam roundcorner 12
 skinparam defaultFontName Arial
 skinparam defaultFontSize 12
-skinparam nodesep 16
-skinparam ranksep 60
 
 skinparam package {
   BackgroundColor #F8FAFC
@@ -521,10 +516,21 @@ skinparam note {
 }
 hide stereotype
 
-title AVISA-PRODUCE · Objetivos, actores, casos de uso y vistas · Página 4 de 4\nTrazabilidad inversa: qué objetivo y qué actor demandan cada caso y qué pieza lo resuelve · Diciembre 2026, 2027 y MADRE
+title AVISA-PRODUCE · Actores, objetivos, casos de uso y vistas · Página 4 de 4\nTrazabilidad completa: quién impulsa cada objetivo, qué caso lo realiza y qué pieza lo resuelve · Diciembre 2026, 2027 y MADRE
 
 ' =========================================================
-' NIVEL 1 (IZQUIERDA) · OBJETIVOS DE NEGOCIO Y ACTORES
+' NIVEL 1 · ACTORES PRIMARIOS (ERS §3.4 · LÁMINAS 1 A 3)
+' =========================================================
+package "Actores primarios (ERS §3.4)" as PKG_ACT #EFF6FF {
+  actor "Analista / Sectorista\n(OAIPCS)" as analista #EFF6FF;line:1D4ED8
+  actor "Dirección de la OAIPCS" as direccion #EFF6FF;line:1D4ED8
+  actor "Alta Dirección\n(Despacho Ministerial y Gabinete)" as alta #EFF6FF;line:1D4ED8
+  actor "Administrador Funcional" as admin #EFF6FF;line:1D4ED8
+  actor "Oficina General de Tecnologías\nde la Información (OGTI)" as ogti #EFF6FF;line:1D4ED8
+}
+
+' =========================================================
+' NIVEL 2 · OBJETIVOS DE NEGOCIO (ERS §2.4)
 ' =========================================================
 package "Objetivos de negocio (ERS §2.4)" as PKG_OBJ #F0FDF4 {
   rectangle "OBJ-01 · Preparar reuniones\ny fichas en menos tiempo" as OBJ01 <<Objetivo>>
@@ -537,27 +543,13 @@ package "Objetivos de negocio (ERS §2.4)" as PKG_OBJ #F0FDF4 {
   rectangle "OBJ-08 · Entender los conflictos\na través del tiempo" as OBJ08 <<Objetivo>>
 }
 
-package "Actores primarios (ERS §3.4 · Láminas 1 a 3)" as PKG_ACT #EFF6FF {
-  actor "Analista / Sectorista\n(OAIPCS)" as analista #EFF6FF;line:1D4ED8
-  actor "Analista con privilegio\nRENIEC (hoy, Edith)" as reniec #EFF6FF;line:1D4ED8
-  actor "Dirección de la OAIPCS" as direccion #EFF6FF;line:1D4ED8
-  actor "Alta Dirección\n(Despacho Ministerial y Gabinete)" as alta #EFF6FF;line:1D4ED8
-  actor "Administrador Funcional" as admin #EFF6FF;line:1D4ED8
-
-  ' Herencia de perfil según Lámina 1
-  reniec --|> analista
-}
-
-PKG_OBJ -[hidden]down-> PKG_ACT
-
 ' =========================================================
-' NIVEL 2 (CENTRO) · CAPACIDADES DEL SISTEMA (ERS §3.4)
+' NIVEL 3 · CAPACIDADES DEL SISTEMA (ERS §3.4)
 ' =========================================================
 package "Casos de uso (ERS §3.4)" as PKG_CU #FFFFFF {
   usecase "CU-06 · Consultar compromisos\nde un caso" as CU06
   usecase "CU-07 · Cargar\nalerta temprana" as CU07
   usecase "CU-08 · Validar alerta\no clima social" as CU08
-  usecase "CU-09 · Calcular destinatarios\ny enviar la alerta" as CU09
   usecase "CU-11 · Consultar fichas,\ndirectorios y reportes" as CU11
   usecase "CU-14 · Ver tableros\ny vista ejecutiva" as CU14
   usecase "CU-17 · Consultar la bitácora\nde accesos" as CU17
@@ -571,7 +563,7 @@ package "Casos de uso (ERS §3.4)" as PKG_CU #FFFFFF {
 }
 
 ' =========================================================
-' NIVEL 3 (DERECHA) · PIEZAS POR HORIZONTE DE ENTREGA
+' NIVEL 4 · PIEZAS POR HORIZONTE DE ENTREGA
 ' =========================================================
 package "Piezas por etapa de entrega" as PKG_PIEZAS {
 
@@ -601,16 +593,39 @@ package "Piezas por etapa de entrega" as PKG_PIEZAS {
 }
 
 ' =========================================================
-' OBJETIVO -> CASO  (continua = diciembre · punteada = futuro)
+' 1. ACTOR -> OBJETIVO (DEPURADO POR ROL PRIMARIO)
+' =========================================================
+' Analista: operación territorial, ingesta/curaduría y análisis temporal
+analista -[#1D4ED8]-> OBJ01
+analista -[#1D4ED8]-> OBJ02
+analista -[#1D4ED8]-> OBJ04
+analista -[#1D4ED8]-> OBJ05
+analista -[#1D4ED8]..> OBJ08
+
+' Dirección OAIPCS: validación de alertas, filtro ejecutivo y gobierno de tableros
+direccion -[#1D4ED8]-> OBJ02
+direccion -[#1D4ED8]-> OBJ03
+direccion -[#1D4ED8]-> OBJ05
+
+' Alta Dirección: consumo ejecutivo sin saturación y lectura estratégica de conflictos
+alta -[#1D4ED8]-> OBJ03
+alta -[#1D4ED8]..> OBJ08
+
+' Administrador Funcional: control de accesos y protección de datos (Ley 29733)
+admin -[#1D4ED8]-> OBJ06
+
+' OGTI: sostenibilidad y mantenimiento técnico del sistema
+ogti -[#1D4ED8]-> OBJ07
+
+' =========================================================
+' 2. OBJETIVO -> CASO DE USO
 ' =========================================================
 OBJ01 --> CU06
 OBJ01 --> CU11
 OBJ02 --> CU07
 OBJ02 --> CU08
-OBJ02 --> CU09
 OBJ02 --> CU22
 OBJ03 --> CU08
-OBJ03 --> CU09
 OBJ03 --> CU14
 OBJ03 ..> CU26
 OBJ03 ..> CU29
@@ -626,38 +641,12 @@ OBJ08 ..> CU27
 OBJ08 ..> CU28
 
 ' =========================================================
-' ACTOR -> CASO  (según Láminas 1, 2 y 3)
-' =========================================================
-analista --> CU06
-analista --> CU07
-analista --> CU11
-analista --> CU22
-analista ..> CU24
-analista ..> CU25
-analista ..> CU28
-analista ..> CU29
-
-direccion --> CU08
-direccion --> CU14
-direccion --> CU17
-direccion ..> CU26
-direccion ..> CU27
-
-alta --> CU14
-alta ..> CU24
-
-admin --> CU17
-
-' Dependencia funcional entre validación y difusión (Lámina 2)
-CU08 ..> CU09 : <<include>>
-
-' =========================================================
-' CASO -> PIEZA  (continua = diciembre · punteada = futuro o brecha)
+' 3. CASO DE USO -> PIEZA
 ' =========================================================
 CU07 --> D7
 CU08 --> D7
 CU22 --> D7
-CU09 --> D6
+CU08 --> D6
 CU17 --> D6
 CU06 --> D1
 CU14 --> D1
@@ -683,15 +672,11 @@ CU17 ..> M3
 ' =========================================================
 ' BRECHAS ABIERTAS Y DECISIONES PENDIENTES
 ' =========================================================
-note left of OBJ07
-  **Soporte estructural.**
-  No depende de una pieza: lo sirve la arquitectura
-  (capas L0–L8, §5.5) y la guía de reconstrucción que
-  exige AC-08.
-end note
+note "**Soporte estructural (OGTI).**\nNo depende de una pieza visual: lo sirve la\narquitectura (capas L0–L8, §5.5) y la guía de\nreconstrucción que exige AC-08." as N_OBJ07
+N_OBJ07 .. OBJ07
 
-note bottom of CU09
-  **CU-09 · Calcular destinatarios y enviar la alerta**
+note right of D6
+  **PAN-09 · Envíos y difusión (alcance de CU-09)**
   **Definición de alcance pendiente.**
   RF-D08 (WhatsApp) es prioridad Could y el §19 lo
   excluye de los 20 días, mientras §2.3 y la tabla de
@@ -767,8 +752,9 @@ legend right
   **Los asteriscos miden lo que falta, no la importancia del objetivo.**
   --
   **Conexiones:**
-  - **Línea continua:** capacidad o interacción comprometida para diciembre 2026.
-  - **Línea punteada:** capacidad futura (2027 o MADRE) o bloqueada por una brecha.
+  - **Línea azul (Actor → Objetivo):** responsabilidad o beneficio directo del rol sobre el objetivo.
+  - **Línea gris (Objetivo → Caso → Pieza):** trazabilidad funcional y de entrega.
+  - **Continua vs. punteada:** diciembre 2026 (continua) frente a 2027 / MADRE o brecha (punteada).
   - **Borde punteado en una pieza:** brecha abierta dentro de la entrega de diciembre.
 endlegend
 
