@@ -28,7 +28,7 @@ Tres cosas que este documento **no** es:
 | Filas | 4 729 | 13 346 |
 | Objetos derivados (vistas y matviews) | 0 | 34 |
 
-El total de columnas que recorre este diccionario es 3 228: 2 421 del modelo v10 contando sus particiones, más 807 del sistema anterior. De ellas, 2 060 tienen comentario en la propia base y 197 tienen significado documentado por curaduría; el resto aparece con `—`.
+El total de columnas que recorre este diccionario es 3 228: 2 421 del modelo v10 contando sus particiones, más 807 del sistema anterior. De ellas, 2 091 tienen comentario en la propia base y 209 tienen significado documentado por curaduría; el resto aparece con `—`.
 
 ## 2. Cómo se generó y cómo se regenera
 
@@ -44,7 +44,7 @@ De dónde sale cada dato:
 - **Filas**: se cuentan con `count(*)` al generar. No se usan estimaciones, porque la base las tenía desactualizadas.
 - **Clasificación**: entrada, proceso, salida o transversal sale de BRECHA §12.1–12.6 [1]; las tablas que no aparecen allí se marcan como sin clasificar, y las vistas se marcan como salida por una regla explícita.
 - **Propósito**: 260 de las 260 tablas del modelo v10 tienen comentario de tabla en la base, escrito por el parche de comentarios [12]; las del sistema anterior y las vistas vienen de tres módulos de curaduría escritos a partir de las columnas y las claves de cada tabla [10].
-- **Descripciones de columna**: 2 060 columnas del modelo v10 llevan comentario propio en la base [12]. Las particiones heredan la descripción de su tabla padre (330 columnas), porque PostgreSQL no propaga los comentarios a las particiones. Del sistema anterior se documentan las columnas que la migración consume de forma directa; las otras 641 celdas quedan en `—`.
+- **Descripciones de columna**: 2 091 columnas del modelo v10 llevan comentario propio en la base [12]. Las particiones heredan la descripción de su tabla padre (330 columnas), porque PostgreSQL no propaga los comentarios a las particiones. Del sistema anterior se documentan las columnas que la migración consume de forma directa; las otras 598 celdas quedan en `—`.
 
 **Regla de honestidad**: ningún texto se deduce del nombre de la columna. `—` significa «sin descripción documentada», no «sin significado». Se prefiere un hueco visible a una glosa inventada.
 
@@ -1009,14 +1009,14 @@ Otros nombres con los que se conoce a un actor —alias, abreviatura, cargo o no
 
 | # | Columna | Tipo | Nulo | Clave | Descripción |
 | --: | --- | --- | :--: | --- | --- |
-| 1 | `id` | uuid | no | PK | — |
-| 2 | `actor_uid` | uuid | no | FK → core.actores | — |
-| 3 | `alias` | character varying(200) | no | — | — |
-| 4 | `tipo` | character varying(30) | no | — | — |
-| 5 | `fuente` | character varying(200) | sí | — | — |
-| 6 | `confianza` | numeric(3,2) | sí | — | — |
-| 7 | `es_validado_humano` | boolean | no | — | — |
-| 8 | `created_at` | timestamp with time zone | no | — | — |
+| 1 | `id` | uuid | no | PK | Identificador interno del alias |
+| 2 | `actor_uid` | uuid | no | FK → core.actores | Actor al que pertenece este nombre alternativo |
+| 3 | `alias` | character varying(200) | no | — | Nombre alternativo con el que se conoce al actor |
+| 4 | `tipo` | character varying(30) | no | — | Clase de nombre alternativo: alias, abreviatura, cargo, nombre histórico o sobrenombre |
+| 5 | `fuente` | character varying(200) | sí | — | Origen del alias: el sistema anterior, una entrevista o un documento |
+| 6 | `confianza` | numeric(3,2) | sí | — | Seguridad de que el alias corresponde al actor, de 0 a 1; por debajo de 0.7 exige revisión humana |
+| 7 | `es_validado_humano` | boolean | no | — | Indica si un analista confirmó que el alias corresponde al actor |
+| 8 | `created_at` | timestamp with time zone | no | — | Momento en que se registró el alias |
 
 Claves únicas compuestas: `actor_uid`, `alias`.
 
@@ -1032,7 +1032,7 @@ Datos personales del actor cifrados con AES-256 y su HMAC de búsqueda, con base
 | 2 | `telefono_contacto` | character varying(50) | sí | — | Teléfono de contacto del actor, guardado cifrado para proteger su identidad |
 | 3 | `genero` | character varying(30) | sí | — | Género declarado por el actor, usado para desagregar el análisis por sexo |
 | 4 | `autoidentificacion_etnica` | character varying(100) | sí | — | Pertenencia étnica autodeclarada por el actor para el enfoque intercultural |
-| 5 | `base_legal` | character varying(100) | sí | — | Texto heredado del prototipo. Se conserva como evidencia de la migración; el valor vigente se lee en base_legal_id. |
+| 5 | `base_legal` | character varying(100) | sí | — | Fundamento legal que autoriza el tratamiento y conservación de estos datos |
 | 6 | `fecha_consentimiento` | date | sí | — | Fecha en que el actor otorgó su consentimiento para el uso de sus datos |
 | 7 | `nivel_clasificacion` | smallint | no | FK → core.cat_clasificacion(nivel) | Nivel de acceso al dato: 1 público, 2 reservado, 3 confidencial |
 | 8 | `updated_at` | timestamp with time zone | no | — | Momento de la última modificación del registro |
@@ -1089,7 +1089,7 @@ Sujeto individual o colectivo que participa en la conflictividad —dirigente, g
 | 18 | `categoria` | character varying(40) | sí | — | Campo conservado del legado que agrupa actores por categoría, sin uso definido |
 | 19 | `perfil_id` | smallint | sí | FK → core.cat_perfiles_actor(id) | Perfil de comportamiento del actor según su disposición al diálogo |
 | 20 | `rol_funcional_id` | smallint | sí | FK → core.cat_roles_funcionales(id) | Rol funcional del actor en el análisis: decisor, proveedor de evidencia u otro |
-| 21 | `distrito_id` | integer | sí | FK → core.distritos(id) | Distrito del actor. Nulo en toda la carga heredada: el origen no registra distrito, sólo departamento. Se llena cuando el dato exista, desde el alta o desde territorio.lugar_actores. |
+| 21 | `distrito_id` | integer | sí | FK → core.distritos(id) | Distrito de referencia del actor para la desagregación territorial |
 | 22 | `foto_url` | character varying(500) | sí | — | Enlace a la fotografía o logotipo con que se identifica al actor |
 | 23 | `activo` | boolean | no | — | Indica si el actor sigue vigente en el padrón y puede asociarse a casos |
 | 24 | `perfil_descripcion` | text | sí | — | Texto libre que amplía o justifica el perfil asignado al actor |
@@ -1179,7 +1179,7 @@ Alerta temprana sobre un caso: situación actual, riesgos, acciones sugeridas, n
 | 22 | `paso_actual` | smallint | sí | — | Número del paso del flujo operativo en que se encuentra la alerta |
 | 23 | `fecha_validacion` | date | sí | — | Fecha en que un analista validó la alerta |
 | 24 | `fecha_remision` | date | sí | — | Fecha en que la alerta se remitió al área competente |
-| 25 | `estado_legado` | character varying(40) | sí | — | Estado tal como venía del sistema anterior. Se conserva como evidencia de la migración; el estado vigente se lee en core.vw_alerta_estado. |
+| 25 | `estado_legado` | character varying(40) | sí | — | Estado de la alerta tal como figuraba en el sistema anterior |
 | 26 | `fuente_tipo` | character varying(120) | sí | — | Clase de fuente que originó la alerta, por ejemplo un reporte o una nota |
 | 27 | `fuente_descripcion` | text | sí | — | Detalle de la fuente que originó la alerta |
 | 28 | `fuente_url` | character varying(500) | sí | — | Enlace a la fuente externa o al documento que sustenta la alerta |
@@ -1197,9 +1197,9 @@ Registro del banco de datos personales que exige la Ley 29733: finalidad, catego
 
 | # | Columna | Tipo | Nulo | Clave | Descripción |
 | --: | --- | --- | :--: | --- | --- |
-| 1 | `id` | smallint | no | PK | — |
+| 1 | `id` | smallint | no | PK | Identificador interno del banco de datos |
 | 2 | `codigo` | character varying(40) | no | UQ | Identificador corto del banco, usado en la documentación y en el expediente. |
-| 3 | `nombre` | character varying(200) | no | — | — |
+| 3 | `nombre` | character varying(200) | no | — | Nombre oficial del banco de datos personales, tal como se declara ante la autoridad |
 | 4 | `finalidad` | text | no | — | Para qué se tratan los datos. Debe coincidir con la declaración inscrita: tratar para un fin no declarado es infracción. |
 | 5 | `categorias_datos` | text | no | — | Qué categorías se recogen (DNI, nombres, gremio de pertenencia, etc.). |
 | 6 | `colectivos_afectados` | text | sí | — | A quiénes se refieren los datos: dirigentes, socios, participantes de mesas. |
@@ -1209,12 +1209,12 @@ Registro del banco de datos personales que exige la Ley 29733: finalidad, catego
 | 10 | `flujo_transfronterizo` | boolean | no | — | Si los datos salen del país. Debe declararse aunque sea negativo. |
 | 11 | `oficial_datos_usuario_id` | uuid | sí | FK → core.usuarios(id) | Oficial de Datos Personales (ODP) designado ante la ANPDP. |
 | 12 | `fecha_inscripcion_anpdp` | date | sí | — | Fecha de inscripción en el Registro Nacional. NULL = trámite pendiente. |
-| 13 | `codigo_registro_anpdp` | character varying(40) | sí | — | — |
+| 13 | `codigo_registro_anpdp` | character varying(40) | sí | — | Código que asigna la Autoridad Nacional de Protección de Datos Personales al inscribir el banco; vacío mientras el trámite está pendiente |
 | 14 | `estado` | character varying(25) | no | — | pendiente \| inscrito \| actualizacion_pendiente \| baja. |
-| 15 | `nivel_clasificacion` | smallint | no | FK → core.cat_clasificacion(nivel) | — |
-| 16 | `activo` | boolean | no | — | — |
-| 17 | `created_at` | timestamp with time zone | no | — | — |
-| 18 | `updated_at` | timestamp with time zone | no | — | — |
+| 15 | `nivel_clasificacion` | smallint | no | FK → core.cat_clasificacion(nivel) | Nivel de clasificación de la información del propio registro (1 público, 2 interno, 3 reservado) |
+| 16 | `activo` | boolean | no | — | Indica si el banco sigue en operación; un banco inactivo conserva su historial pero no recibe datos nuevos |
+| 17 | `created_at` | timestamp with time zone | no | — | Momento en que se registró el banco en el sistema |
+| 18 | `updated_at` | timestamp with time zone | no | — | Momento de la última actualización del registro del banco |
 
 #### `core.cambio_normativo`
 
@@ -1582,9 +1582,9 @@ Cuánto se sabe de la identidad de un actor. Es la escala que permite registrar 
 
 | # | Columna | Tipo | Nulo | Clave | Descripción |
 | --: | --- | --- | :--: | --- | --- |
-| 1 | `id` | smallint | no | PK | — |
-| 2 | `codigo` | character varying(30) | no | UQ | — |
-| 3 | `descripcion` | character varying(200) | no | — | — |
+| 1 | `id` | smallint | no | PK | Número del nivel, de 1 a 5 |
+| 2 | `codigo` | character varying(30) | no | UQ | Nombre corto del nivel, usado por la aplicación |
+| 3 | `descripcion` | character varying(200) | no | — | Qué significa el nivel: desde identificado con documento hasta colectivo anónimo |
 
 #### `core.cat_niveles_alerta`
 
@@ -4495,11 +4495,11 @@ Fragmento del banco de conocimiento que respalda una base legal, con su página,
 
 | # | Columna | Tipo | Nulo | Clave | Descripción |
 | --: | --- | --- | :--: | --- | --- |
-| 1 | `base_legal_id` | smallint | no | PK, FK → ref.base_legal_tratamiento(id) | — |
-| 2 | `fragmento_id` | uuid | no | PK, FK → kag.documento_fragmento(id) | — |
+| 1 | `base_legal_id` | smallint | no | PK, FK → ref.base_legal_tratamiento(id) | Base legal que este fragmento respalda |
+| 2 | `fragmento_id` | uuid | no | PK, FK → kag.documento_fragmento(id) | Fragmento del banco de conocimiento del que se extrajo el texto de respaldo |
 | 3 | `rol` | character varying(20) | no | — | Papel del fragmento: SUSTENTO (autoriza), CONDICION (limita), PLAZO (fija conservación) o EXCEPCION (excepción al consentimiento). |
-| 4 | `nota` | text | sí | — | — |
-| 5 | `created_at` | timestamp with time zone | no | — | — |
+| 4 | `nota` | text | sí | — | Observación del analista sobre la correspondencia entre el fragmento y la base legal |
+| 5 | `created_at` | timestamp with time zone | no | — | Momento en que se registró la evidencia |
 
 #### `ref.base_legal_tratamiento`
 
@@ -4509,17 +4509,17 @@ Base legal que autoriza el tratamiento de datos personales —norma, artículo, 
 
 | # | Columna | Tipo | Nulo | Clave | Descripción |
 | --: | --- | --- | :--: | --- | --- |
-| 1 | `id` | smallint | no | PK | — |
-| 2 | `codigo` | character varying(30) | no | UQ | — |
-| 3 | `finalidad` | character varying(200) | no | — | — |
-| 4 | `plazo_conservacion_meses` | smallint | no | — | — |
+| 1 | `id` | smallint | no | PK | Identificador interno de la base legal |
+| 2 | `codigo` | character varying(30) | no | UQ | Código corto de la base legal, usado en el expediente y en la documentación |
+| 3 | `finalidad` | character varying(200) | no | — | Para qué autoriza esta norma el tratamiento de los datos |
+| 4 | `plazo_conservacion_meses` | smallint | no | — | Plazo que la norma o el banco fija para conservar los datos, en meses |
 | 5 | `flujo_transfronterizo` | boolean | no | — | Si el tratamiento envía datos fuera del país. Es una de las declaraciones obligatorias ante la Autoridad Nacional de Protección de Datos Personales. |
-| 6 | `norma` | character varying(200) | sí | — | — |
-| 7 | `articulo` | character varying(60) | sí | — | — |
+| 6 | `norma` | character varying(200) | sí | — | Norma que autoriza el tratamiento (ley, decreto o reglamento) |
+| 7 | `articulo` | character varying(60) | sí | — | Artículo o inciso de la norma que sirve de sustento |
 | 8 | `sustento` | text | sí | — | Texto que explica por qué esta base autoriza el tratamiento. Los números de inciso se dejan a la revisión de la OGTI y de Asesoría Jurídica (H-04); no se citan como definitivos. |
-| 9 | `vigente_desde` | date | sí | — | — |
-| 10 | `vigente_hasta` | date | sí | — | — |
-| 11 | `created_at` | timestamp with time zone | no | — | — |
+| 9 | `vigente_desde` | date | sí | — | Fecha desde la que rige la norma citada |
+| 10 | `vigente_hasta` | date | sí | — | Fecha hasta la que rige la norma; vacío si sigue vigente |
+| 11 | `created_at` | timestamp with time zone | no | — | Momento en que se registró la base legal |
 | 12 | `banco_datos_id` | smallint | sí | FK → core.banco_datos_tratamiento(id) | Banco de datos personales al que pertenece esta base legal. |
 
 ### 5.25 `staging`
@@ -5146,7 +5146,7 @@ Vínculo entre alertas tempranas y actores civiles, con rol y marca de principal
 
 | # | Columna | Tipo | Nulo | Descripción |
 | --: | --- | --- | :--: | --- |
-| 1 | `fila_n` | integer | no | — |
+| 1 | `fila_n` | integer | no | Número de fila que la hoja ocupa en el libro original; sirve para rastrear el origen de cada registro. |
 | 2 | `c01` | text | sí | Identificador de la relación alerta-actor (BAA-...); presente en 67 de las 162 filas. |
 | 3 | `c02` | text | sí | Código de la alerta (AT-2026-xx), con relleno de dos o tres dígitos según la fila. |
 | 4 | `c03` | text | sí | Código del actor (ACT-xxx); en tres filas las posiciones de alerta y actor están invertidas. |
@@ -5172,7 +5172,7 @@ Vínculo entre alertas y demandas con la temática del vínculo; refuerza el ví
 
 | # | Columna | Tipo | Nulo | Descripción |
 | --: | --- | --- | :--: | --- |
-| 1 | `fila_n` | integer | no | — |
+| 1 | `fila_n` | integer | no | Número de fila que la hoja ocupa en el libro original; sirve para rastrear el origen de cada registro. |
 | 2 | `c01` | text | sí | Identificador de la relación alerta-demanda (BAD-...); 207 valores distintos en 231 filas. |
 | 3 | `c02` | text | sí | Constante: valor 'TR-01' en todas las filas. |
 | 4 | `c03` | text | sí | Código de la alerta (AT-2026-xx); 75 valores distintos. |
@@ -5205,7 +5205,7 @@ Vínculo entre casos y actores civiles, con referencias de caso que mezclan cód
 
 | # | Columna | Tipo | Nulo | Descripción |
 | --: | --- | --- | :--: | --- |
-| 1 | `fila_n` | integer | no | — |
+| 1 | `fila_n` | integer | no | Número de fila que la hoja ocupa en el libro original; sirve para rastrear el origen de cada registro. |
 | 2 | `c01` | text | sí | Identificador de la relación caso-actor (RA-xxx); 68 valores distintos en 80 filas. |
 | 3 | `c02` | text | sí | Código del actor (ACT-xxx); es el actor del vínculo, no el caso. |
 | 4 | `c03` | text | sí | Referencia del caso: 46 códigos completos CS-PRODUCE-2026-xxx y 34 números sueltos (1 a 33) que se interpretan como ordinal de FACT_Casos. |
@@ -5388,7 +5388,7 @@ Censo de actores civiles (pescadores, dirigentes y representantes) con sus datos
 
 | # | Columna | Tipo | Nulo | Descripción |
 | --: | --- | --- | :--: | --- |
-| 1 | `fila_n` | integer | no | — |
+| 1 | `fila_n` | integer | no | Número de fila que la hoja ocupa en el libro original; sirve para rastrear el origen de cada registro. |
 | 2 | `c01` | text | sí | Identificador interno del actor (ACT-xxx); dos códigos se repiten en las 828 filas. |
 | 3 | `c02` | text | sí | Nombre completo del actor; 819 valores distintos en 828 filas. |
 | 4 | `c03` | text | sí | DNI del actor en claro; falta en 186 filas y perdió los ceros a la izquierda al guardarse como número. |
@@ -5416,7 +5416,7 @@ Censo de funcionarios del Estado con cargo, contacto y nivel de gobierno; se fus
 
 | # | Columna | Tipo | Nulo | Descripción |
 | --: | --- | --- | :--: | --- |
-| 1 | `fila_n` | integer | no | — |
+| 1 | `fila_n` | integer | no | Número de fila que la hoja ocupa en el libro original; sirve para rastrear el origen de cada registro. |
 | 2 | `c01` | text | sí | Identificador del funcionario del Estado (ACT-EST-xxx); único en las 108 filas. |
 | 3 | `c02` | text | sí | Nombre del funcionario; 86 valores distintos en 108 filas. |
 | 4 | `c03` | text | sí | Constante: valor 'N/D' en todas las filas. |
@@ -5444,7 +5444,7 @@ Alertas tempranas con su situación, hechos, acciones sugeridas, fuente y enlace
 
 | # | Columna | Tipo | Nulo | Descripción |
 | --: | --- | --- | :--: | --- |
-| 1 | `fila_n` | integer | no | — |
+| 1 | `fila_n` | integer | no | Número de fila que la hoja ocupa en el libro original; sirve para rastrear el origen de cada registro. |
 | 2 | `c01` | text | sí | Identificador de la alerta (AT-2026-xx); AT-2026-48 y AT-2026-49 se repiten. |
 | 3 | `c02` | text | sí | Código del caso vinculado (CS-PRODUCE-2026-xxx); vacío en 33 filas. |
 | 4 | `c03` | text | sí | Código del sectorista responsable (SEC-xx). |
@@ -5527,7 +5527,7 @@ Reportes de clima social general por departamento o provincia, con situación, f
 
 | # | Columna | Tipo | Nulo | Descripción |
 | --: | --- | --- | :--: | --- |
-| 1 | `fila_n` | integer | no | — |
+| 1 | `fila_n` | integer | no | Número de fila que la hoja ocupa en el libro original; sirve para rastrear el origen de cada registro. |
 | 2 | `c01` | text | sí | Identificador del reporte de clima (CS-2026-xx); único en las 7 filas. |
 | 3 | `c02` | text | sí | Código del caso vinculado; sólo una de las 7 filas lo trae. |
 | 4 | `c03` | text | sí | Código del sectorista responsable (SEC-xx); 2 valores distintos. |
@@ -5583,7 +5583,7 @@ Demandas de los actores con su descripción, organización, caso, alerta, temát
 
 | # | Columna | Tipo | Nulo | Descripción |
 | --: | --- | --- | :--: | --- |
-| 1 | `fila_n` | integer | no | — |
+| 1 | `fila_n` | integer | no | Número de fila que la hoja ocupa en el libro original; sirve para rastrear el origen de cada registro. |
 | 2 | `c01` | text | sí | Identificador de la demanda (DEM-2026-xxxx); único en las 325 filas. |
 | 3 | `c02` | text | sí | Descripción libre de la demanda; 305 valores distintos. |
 | 4 | `c03` | text | sí | Código de la organización que formula la demanda (ORG-xxx); presente en 98 filas. |
@@ -5708,7 +5708,7 @@ Censo de organizaciones sociales y gremios con su tipo, representante, integrant
 
 | # | Columna | Tipo | Nulo | Descripción |
 | --: | --- | --- | :--: | --- |
-| 1 | `fila_n` | integer | no | — |
+| 1 | `fila_n` | integer | no | Número de fila que la hoja ocupa en el libro original; sirve para rastrear el origen de cada registro. |
 | 2 | `c01` | text | sí | Identificador de la organización (ORG-xxx); único en las 224 filas. |
 | 3 | `c02` | text | sí | Nombre de la organización; 222 valores distintos en 224 filas. |
 | 4 | `c03` | text | sí | Código de departamento (DEP-xx) de la organización; presente en 121 filas. |
@@ -5792,7 +5792,7 @@ Reporte rápido de una intervención territorial con lugar, desarrollo, acuerdos
 
 | # | Columna | Tipo | Nulo | Descripción |
 | --: | --- | --- | :--: | --- |
-| 1 | `fila_n` | integer | no | — |
+| 1 | `fila_n` | integer | no | Número de fila que la hoja ocupa en el libro original; sirve para rastrear el origen de cada registro. |
 | 2 | `c01` | text | sí | Identificador del reporte rápido (RR-2026-01). |
 | 3 | `c02` | text | sí | Columna vacía en todas las filas. |
 | 4 | `c03` | text | sí | Código del sectorista responsable (SEC-xx). |
@@ -5941,7 +5941,7 @@ Un caso de conflictividad con su etapa, tipo, territorio y fechas de seguimiento
 
 | # | Columna | Tipo | Nulo | Descripción |
 | --: | --- | --- | :--: | --- |
-| 1 | `fila_n` | integer | no | — |
+| 1 | `fila_n` | integer | no | Número de fila que la hoja ocupa en el libro original; sirve para rastrear el origen de cada registro. |
 | 2 | `c01` | text | sí | Identificador del caso (CS-PRODUCE-2026-xxx); único en las 35 filas. |
 | 3 | `c02` | text | sí | Tipo de caso (TC-01 a TC-03) según la escala de conflictividad; falta en una fila. |
 | 4 | `c03` | text | sí | Nombre del caso; distinto en cada fila. |
@@ -5982,7 +5982,7 @@ Hechos de la cronología de un caso, con fecha, tipo, criticidad, evidencia y re
 
 | # | Columna | Tipo | Nulo | Descripción |
 | --: | --- | --- | :--: | --- |
-| 1 | `fila_n` | integer | no | — |
+| 1 | `fila_n` | integer | no | Número de fila que la hoja ocupa en el libro original; sirve para rastrear el origen de cada registro. |
 | 2 | `c01` | text | sí | Identificador del hecho (HECHO-xxx); HECHO-012 y HECHO-047 se repiten. |
 | 3 | `c02` | text | sí | Código del caso al que pertenece el hecho; 5 valores distintos. |
 | 4 | `c03` | text | sí | Fecha del hecho; 74 valores distintos. |

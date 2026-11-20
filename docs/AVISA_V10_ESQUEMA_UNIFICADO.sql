@@ -56,13 +56,11 @@
 --  ya construida no la duplica.
 --
 --  QUÉ PRODUCE CADA SECCIÓN (cifras medidas, no estimadas)
---  Solo la sección A, sobre una base vacía: 25 esquemas (incluido
---  `staging`) y 273 tablas físicas (269 lógicas + 4 particiones),
---  2 296 columnas y 575 claves ajenas. Si se cuenta el esquema `staging`
---  que la propia sección A crea (2 tablas, 18 columnas, 6 claves
---  ajenas): 275 tablas físicas, 2 314 columnas y 581 claves ajenas. Las
---  4 particiones nacen aquí con PARTITION OF. El esquema `audit`
---  todavía no existe: lo crea el parche 9.
+--  Solo la sección A, sobre una base vacía: 25 esquemas y 275 tablas
+--  físicas (251 lógicas + 24 hijas de partición), 2 314 columnas y 581
+--  claves ajenas. Las 4 tablas particionadas cuentan como lógicas; las
+--  24 hijas se crean aquí con PARTITION OF. El esquema `audit` todavía
+--  no existe: lo crea el parche 9.
 --
 --  En ese estado los cinco scripts de preparación dejan avisos de
 --  error, porque `core.usuarios` y `core.cambio_normativo` aún no
@@ -70,10 +68,11 @@
 --  sección A → cargador del legado → sección B.
 --
 --  Con el legado cargado y la sección B aplicada (el estado de la base
---  `avisa`), sin contar `legacy` ni `staging`: 26 esquemas y 282 tablas
---  físicas (278 lógicas + 4 particiones), 2 403 columnas y 595 claves
---  ajenas. Contando el volcado histórico `legacy` (87 tablas): 371
---  tablas físicas, 3 228 columnas y 601 claves ajenas.
+--  `avisa`, sin contar `legacy` ni `public`): 284 tablas físicas (260
+--  lógicas + 24 hijas de partición), 2 421 columnas y 601 claves
+--  ajenas. Sumando el volcado histórico `legacy` (87 tablas): 371
+--  tablas físicas y 3 228 columnas; las claves ajenas no cambian
+--  porque `legacy` no declara ninguna.
 --
 --  La diferencia entre ambos estados son 9 tablas, 107 columnas y 20
 --  claves ajenas, todas de los parches 9 a 16:
@@ -99,11 +98,10 @@
 --    · parche 16 · `core.banco_datos_tratamiento` (18 columnas, 2 claves
 --                 ajenas), `ref.base_legal_tratamiento.banco_datos_id` y
 --                 la cobertura de RLS de `core` (44 tablas, 301 políticas).
---  Por eso la sección A termina en 273 tablas (282 con `staging`) y no
---  en 282: las tablas que faltan no son parte del esquema base, se crean
---  después de cargar el legado. Si la sección A se queda corta en algo
---  distinto, el defecto no está en este archivo: falta una fuente o
---  cambió el DDL.
+--  Por eso la sección A termina en 275 tablas y no en 284: las tablas
+--  que faltan no son parte del esquema base, se crean después de cargar
+--  el legado. Si la sección A se queda corta en algo distinto, el defecto
+--  no está en este archivo: falta una fuente o cambió el DDL.
 --
 --  El parche 6 crea una instantánea de rollback
 --  (`core.patch6_documentos_snapshot`) que él mismo autoriza a borrar
@@ -12649,7 +12647,7 @@ COMMIT;
 
 -- ---------------------------------------------------------------------
 --  BLOQUE B.7 · Parche 12 · comentarios de tablas y columnas
---  Fuente: docs/PARCHE_12_COMENTARIOS_COLUMNAS.sql (2318 líneas)
+--  Fuente: docs/PARCHE_12_COMENTARIOS_COLUMNAS.sql (2353 líneas)
 --  Errores: abortan la ejecución (ON_ERROR_STOP on)
 --    No se recorta: cubre 255 tablas lógicas y 2 036 columnas. Es el
 --    bloque que hace que el archivo pese ~970 KB.
@@ -12721,6 +12719,7 @@ COMMENT ON TABLE consultation.actores IS 'Participación de un actor en un proce
 COMMENT ON TABLE consultation.etapas IS 'Etapa de un proceso de consulta previa, con sus fechas de inicio y fin, el documento de evidencia y las observaciones del caso.';
 COMMENT ON TABLE consultation.procesos IS 'Proceso de consulta previa asociado a un caso, con el pueblo indígena involucrado, su fase actual y su estado.';
 COMMENT ON TABLE consultation.resultados IS 'Resultado o acuerdo alcanzado en un proceso de consulta, con su tipo, descripción, fecha y documento de respaldo.';
+COMMENT ON TABLE core.actor_alias IS 'Otros nombres con los que se conoce a un actor —alias, abreviatura, cargo o nombre histórico—, con su fuente y si un analista lo validó.';
 COMMENT ON TABLE core.actor_datos_personales IS 'Datos personales del actor cifrados con AES-256 y su HMAC de búsqueda, con base legal y consentimiento, separados del padrón por privacidad.';
 COMMENT ON TABLE core.actor_membresia IS 'Pertenencia de una persona a una organización, con el cargo que ejerce y el período de vigencia del vínculo.';
 COMMENT ON TABLE core.actores IS 'Sujeto individual o colectivo que participa en la conflictividad —dirigente, gremio, autoridad o empresa— con su tipo, rol, perfil y distrito de referencia.';
@@ -12728,6 +12727,7 @@ COMMENT ON TABLE core.acuerdo_ospa_sni IS 'Acuerdo entre una organización socia
 COMMENT ON TABLE core.alerta_especies IS 'Especies involucradas en una alerta temprana, como vínculo entre la alerta y el catálogo de especies del sector.';
 COMMENT ON TABLE core.alertas_actores IS 'Actores implicados en una alerta temprana, como vínculo entre la alerta y el padrón de actores.';
 COMMENT ON TABLE core.alertas_tempranas IS 'Alerta temprana sobre un caso: situación actual, riesgos, acciones sugeridas, nivel, prioridad y plazos de atención y remisión.';
+COMMENT ON TABLE core.banco_datos_tratamiento IS 'Registro del banco de datos personales que exige la Ley 29733: finalidad, categorías tratadas, plazo de conservación, nivel de seguridad, oficial responsable, flujo transfronterizo y estado de inscripción ante la autoridad.';
 COMMENT ON TABLE core.cambio_normativo IS 'Solicitud de cambio sobre datos normativos, con el antes y el después de la fila, la norma que lo respalda y su aprobación o reversión.';
 COMMENT ON TABLE core.capacidad_campo IS 'Horas de campo disponibles de cada usuario en un mes, para planificar la recolección y estimar el esfuerzo de cerrar brechas de información.';
 COMMENT ON TABLE core.capacitacion_participantes IS 'Inscripción y culminación de un actor en una capacitación, como vínculo entre la actividad formativa y el padrón de actores.';
@@ -12915,6 +12915,8 @@ COMMENT ON TABLE qda.perdida_roundtrip IS 'Elemento que no sobrevive al viaje de
 COMMENT ON TABLE qda.proyecto IS 'Proyecto cualitativo importado desde un software de análisis, con su versión del estándar, su archivo y su hash.';
 COMMENT ON TABLE qda.segmento IS 'Tramo de texto codificado con un código, delimitado por posiciones de caracteres y con vigencia bitemporal.';
 COMMENT ON TABLE qda.segmento_fragmento IS 'Solape entre un segmento codificado y un fragmento del grafo, con el número de caracteres que comparten.';
+COMMENT ON TABLE ref.base_legal_evidencia IS 'Fragmento del banco de conocimiento que respalda una base legal, con su página, su similitud y la confianza de la correspondencia, para poder citar la fuente exacta.';
+COMMENT ON TABLE ref.base_legal_tratamiento IS 'Base legal que autoriza el tratamiento de datos personales —norma, artículo, finalidad y condiciones—, ligada al banco de datos que la invoca.';
 COMMENT ON TABLE staging.lote IS 'Lote de carga manual de archivos externos, con su punto de ingesta, su hash, su estado y su validación.';
 COMMENT ON TABLE staging.registro IS 'Fila de un lote de aterrizaje temporal, con su carga útil y los errores de validación que se le detectaron.';
 COMMENT ON TABLE territorio.anomalias_ais IS 'Anomalía detectada en el seguimiento satelital de embarcaciones, con su zona, su tipo y su severidad.';
@@ -13321,6 +13323,14 @@ COMMENT ON COLUMN consultation.resultados.fecha IS 'Fecha en que se alcanzó o s
 COMMENT ON COLUMN consultation.resultados.id IS 'Identificador interno de la fila';
 COMMENT ON COLUMN consultation.resultados.proceso_id IS 'Proceso de consulta previa en el que se alcanzó el resultado';
 COMMENT ON COLUMN consultation.resultados.tipo_resultado IS 'Naturaleza del resultado, como acuerdo, desacuerdo o acta';
+COMMENT ON COLUMN core.actor_alias.actor_uid IS 'Actor al que pertenece este nombre alternativo';
+COMMENT ON COLUMN core.actor_alias.alias IS 'Nombre alternativo con el que se conoce al actor';
+COMMENT ON COLUMN core.actor_alias.confianza IS 'Seguridad de que el alias corresponde al actor, de 0 a 1; por debajo de 0.7 exige revisión humana';
+COMMENT ON COLUMN core.actor_alias.created_at IS 'Momento en que se registró el alias';
+COMMENT ON COLUMN core.actor_alias.es_validado_humano IS 'Indica si un analista confirmó que el alias corresponde al actor';
+COMMENT ON COLUMN core.actor_alias.fuente IS 'Origen del alias: el sistema anterior, una entrevista o un documento';
+COMMENT ON COLUMN core.actor_alias.id IS 'Identificador interno del alias';
+COMMENT ON COLUMN core.actor_alias.tipo IS 'Clase de nombre alternativo: alias, abreviatura, cargo, nombre histórico o sobrenombre';
 COMMENT ON COLUMN core.actor_datos_personales.actor_uid IS 'Actor al que pertenecen estos datos personales, en relación uno a uno';
 COMMENT ON COLUMN core.actor_datos_personales.autoidentificacion_etnica IS 'Pertenencia étnica autodeclarada por el actor para el enfoque intercultural';
 COMMENT ON COLUMN core.actor_datos_personales.base_legal IS 'Fundamento legal que autoriza el tratamiento y conservación de estos datos';
@@ -13421,6 +13431,13 @@ COMMENT ON COLUMN core.alertas_tempranas.subsector_id IS 'Subsector al que perte
 COMMENT ON COLUMN core.alertas_tempranas.titulo IS 'Título breve que resume el motivo de la alerta';
 COMMENT ON COLUMN core.alertas_tempranas.updated_at IS 'Momento de la última modificación del registro';
 COMMENT ON COLUMN core.alertas_tempranas.updated_by IS 'Usuario que realizó la última modificación del registro';
+COMMENT ON COLUMN core.banco_datos_tratamiento.activo IS 'Indica si el banco sigue en operación; un banco inactivo conserva su historial pero no recibe datos nuevos';
+COMMENT ON COLUMN core.banco_datos_tratamiento.codigo_registro_anpdp IS 'Código que asigna la Autoridad Nacional de Protección de Datos Personales al inscribir el banco; vacío mientras el trámite está pendiente';
+COMMENT ON COLUMN core.banco_datos_tratamiento.created_at IS 'Momento en que se registró el banco en el sistema';
+COMMENT ON COLUMN core.banco_datos_tratamiento.id IS 'Identificador interno del banco de datos';
+COMMENT ON COLUMN core.banco_datos_tratamiento.nivel_clasificacion IS 'Nivel de clasificación de la información del propio registro (1 público, 2 interno, 3 reservado)';
+COMMENT ON COLUMN core.banco_datos_tratamiento.nombre IS 'Nombre oficial del banco de datos personales, tal como se declara ante la autoridad';
+COMMENT ON COLUMN core.banco_datos_tratamiento.updated_at IS 'Momento de la última actualización del registro del banco';
 COMMENT ON COLUMN core.cambio_normativo.accion IS 'Operación solicitada sobre la fila: alta, edición o baja';
 COMMENT ON COLUMN core.cambio_normativo.aplicado_en IS 'Momento en que el cambio se aplicó efectivamente a los datos';
 COMMENT ON COLUMN core.cambio_normativo.aprobado_en IS 'Momento en que se aprobó la solicitud';
@@ -13579,6 +13596,9 @@ COMMENT ON COLUMN core.cat_mapeo_estado_externo.estado_externo IS 'Estado equiva
 COMMENT ON COLUMN core.cat_mapeo_estado_externo.estado_local IS 'Estado del compromiso en el sistema local';
 COMMENT ON COLUMN core.cat_mapeo_estado_externo.id IS 'Identificador interno de la fila';
 COMMENT ON COLUMN core.cat_mapeo_estado_externo.sistema_destino IS 'Sistema externo al que se envía el estado, como SESIGUE';
+COMMENT ON COLUMN core.cat_nivel_identificacion.codigo IS 'Nombre corto del nivel, usado por la aplicación';
+COMMENT ON COLUMN core.cat_nivel_identificacion.descripcion IS 'Qué significa el nivel: desde identificado con documento hasta colectivo anónimo';
+COMMENT ON COLUMN core.cat_nivel_identificacion.id IS 'Número del nivel, de 1 a 5';
 COMMENT ON COLUMN core.cat_niveles_alerta.categoria IS 'Carácter del nivel de alerta: reactivo o preventivo';
 COMMENT ON COLUMN core.cat_niveles_alerta.codigo_legado IS 'Código del nivel de alerta en el sistema anterior';
 COMMENT ON COLUMN core.cat_niveles_alerta.descripcion IS 'Explicación del alcance y las implicancias del nivel de alerta';
@@ -14854,6 +14874,19 @@ COMMENT ON COLUMN qda.segmento.supersedes_id IS 'Segmento anterior que esta vers
 COMMENT ON COLUMN qda.segmento_fragmento.fragmento_id IS 'Fragmento del grafo documental que solapa con el segmento';
 COMMENT ON COLUMN qda.segmento_fragmento.segmento_id IS 'Segmento codificado que se cruza con el fragmento del grafo';
 COMMENT ON COLUMN qda.segmento_fragmento.solape_chars IS 'Cantidad de caracteres que el segmento y el fragmento comparten';
+COMMENT ON COLUMN ref.base_legal_evidencia.base_legal_id IS 'Base legal que este fragmento respalda';
+COMMENT ON COLUMN ref.base_legal_evidencia.created_at IS 'Momento en que se registró la evidencia';
+COMMENT ON COLUMN ref.base_legal_evidencia.fragmento_id IS 'Fragmento del banco de conocimiento del que se extrajo el texto de respaldo';
+COMMENT ON COLUMN ref.base_legal_evidencia.nota IS 'Observación del analista sobre la correspondencia entre el fragmento y la base legal';
+COMMENT ON COLUMN ref.base_legal_tratamiento.articulo IS 'Artículo o inciso de la norma que sirve de sustento';
+COMMENT ON COLUMN ref.base_legal_tratamiento.codigo IS 'Código corto de la base legal, usado en el expediente y en la documentación';
+COMMENT ON COLUMN ref.base_legal_tratamiento.created_at IS 'Momento en que se registró la base legal';
+COMMENT ON COLUMN ref.base_legal_tratamiento.finalidad IS 'Para qué autoriza esta norma el tratamiento de los datos';
+COMMENT ON COLUMN ref.base_legal_tratamiento.id IS 'Identificador interno de la base legal';
+COMMENT ON COLUMN ref.base_legal_tratamiento.norma IS 'Norma que autoriza el tratamiento (ley, decreto o reglamento)';
+COMMENT ON COLUMN ref.base_legal_tratamiento.plazo_conservacion_meses IS 'Plazo que la norma o el banco fija para conservar los datos, en meses';
+COMMENT ON COLUMN ref.base_legal_tratamiento.vigente_desde IS 'Fecha desde la que rige la norma citada';
+COMMENT ON COLUMN ref.base_legal_tratamiento.vigente_hasta IS 'Fecha hasta la que rige la norma; vacío si sigue vigente';
 COMMENT ON COLUMN staging.lote.aprobado_por IS 'Usuario que aprobó la carga del lote';
 COMMENT ON COLUMN staging.lote.archivo_uri IS 'Ubicación del archivo cargado en el lote';
 COMMENT ON COLUMN staging.lote.cargado_por IS 'Usuario que cargó el lote al sistema';

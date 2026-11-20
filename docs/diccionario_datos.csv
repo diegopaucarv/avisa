@@ -636,19 +636,19 @@ consultation,resultados,0,INF,tipo_resultado,3,character varying(50),no,,0,0,,"N
 consultation,resultados,0,INF,descripcion,4,text,no,,0,0,,Detalle del acuerdo o resultado alcanzado en la consulta,comentario_bd
 consultation,resultados,0,INF,documento_url,5,character varying(500),sí,,0,0,,Enlace al documento que respalda el resultado registrado,comentario_bd
 consultation,resultados,0,INF,fecha,6,date,no,,0,0,,Fecha en que se alcanzó o suscribió el resultado,comentario_bd
-core,actor_alias,0,I,id,1,uuid,no,gen_random_uuid(),1,0,,,sin_descripcion
-core,actor_alias,0,I,actor_uid,2,uuid,no,,0,0,core.actores,,sin_descripcion
-core,actor_alias,0,I,alias,3,character varying(200),no,,0,0,,,sin_descripcion
-core,actor_alias,0,I,tipo,4,character varying(30),no,'ALIAS'::character varying,0,0,,,sin_descripcion
-core,actor_alias,0,I,fuente,5,character varying(200),sí,,0,0,,,sin_descripcion
-core,actor_alias,0,I,confianza,6,"numeric(3,2)",sí,,0,0,,,sin_descripcion
-core,actor_alias,0,I,es_validado_humano,7,boolean,no,false,0,0,,,sin_descripcion
-core,actor_alias,0,I,created_at,8,timestamp with time zone,no,now(),0,0,,,sin_descripcion
+core,actor_alias,0,I,id,1,uuid,no,gen_random_uuid(),1,0,,Identificador interno del alias,comentario_bd
+core,actor_alias,0,I,actor_uid,2,uuid,no,,0,0,core.actores,Actor al que pertenece este nombre alternativo,comentario_bd
+core,actor_alias,0,I,alias,3,character varying(200),no,,0,0,,Nombre alternativo con el que se conoce al actor,comentario_bd
+core,actor_alias,0,I,tipo,4,character varying(30),no,'ALIAS'::character varying,0,0,,"Clase de nombre alternativo: alias, abreviatura, cargo, nombre histórico o sobrenombre",comentario_bd
+core,actor_alias,0,I,fuente,5,character varying(200),sí,,0,0,,"Origen del alias: el sistema anterior, una entrevista o un documento",comentario_bd
+core,actor_alias,0,I,confianza,6,"numeric(3,2)",sí,,0,0,,"Seguridad de que el alias corresponde al actor, de 0 a 1; por debajo de 0.7 exige revisión humana",comentario_bd
+core,actor_alias,0,I,es_validado_humano,7,boolean,no,false,0,0,,Indica si un analista confirmó que el alias corresponde al actor,comentario_bd
+core,actor_alias,0,I,created_at,8,timestamp with time zone,no,now(),0,0,,Momento en que se registró el alias,comentario_bd
 core,actor_datos_personales,0,I,actor_uid,1,uuid,no,,1,0,core.actores,"Actor al que pertenecen estos datos personales, en relación uno a uno",comentario_bd
 core,actor_datos_personales,0,I,telefono_contacto,2,character varying(50),sí,,0,0,,"Teléfono de contacto del actor, guardado cifrado para proteger su identidad",comentario_bd
 core,actor_datos_personales,0,I,genero,3,character varying(30),sí,,0,0,,"Género declarado por el actor, usado para desagregar el análisis por sexo",comentario_bd
 core,actor_datos_personales,0,I,autoidentificacion_etnica,4,character varying(100),sí,,0,0,,Pertenencia étnica autodeclarada por el actor para el enfoque intercultural,comentario_bd
-core,actor_datos_personales,0,I,base_legal,5,character varying(100),sí,,0,0,,Texto heredado del prototipo. Se conserva como evidencia de la migración; el valor vigente se lee en base_legal_id.,comentario_bd
+core,actor_datos_personales,0,I,base_legal,5,character varying(100),sí,,0,0,,Fundamento legal que autoriza el tratamiento y conservación de estos datos,comentario_bd
 core,actor_datos_personales,0,I,fecha_consentimiento,6,date,sí,,0,0,,Fecha en que el actor otorgó su consentimiento para el uso de sus datos,comentario_bd
 core,actor_datos_personales,0,I,nivel_clasificacion,7,smallint,no,3,0,0,core.cat_clasificacion(nivel),"Nivel de acceso al dato: 1 público, 2 reservado, 3 confidencial",comentario_bd
 core,actor_datos_personales,0,I,updated_at,8,timestamp with time zone,no,now(),0,0,,Momento de la última modificación del registro,comentario_bd
@@ -687,7 +687,7 @@ core,actores,0,I,nivel_gobierno,17,character varying(15),sí,,0,0,,"Nivel de gob
 core,actores,0,I,categoria,18,character varying(40),sí,,0,0,,"Campo conservado del legado que agrupa actores por categoría, sin uso definido",comentario_bd
 core,actores,0,I,perfil_id,19,smallint,sí,,0,0,core.cat_perfiles_actor(id),Perfil de comportamiento del actor según su disposición al diálogo,comentario_bd
 core,actores,0,I,rol_funcional_id,20,smallint,sí,,0,0,core.cat_roles_funcionales(id),"Rol funcional del actor en el análisis: decisor, proveedor de evidencia u otro",comentario_bd
-core,actores,0,I,distrito_id,21,integer,sí,,0,0,core.distritos(id),"Distrito del actor. Nulo en toda la carga heredada: el origen no registra distrito, sólo departamento. Se llena cuando el dato exista, desde el alta o desde territorio.lugar_actores.",comentario_bd
+core,actores,0,I,distrito_id,21,integer,sí,,0,0,core.distritos(id),Distrito de referencia del actor para la desagregación territorial,comentario_bd
 core,actores,0,I,foto_url,22,character varying(500),sí,,0,0,,Enlace a la fotografía o logotipo con que se identifica al actor,comentario_bd
 core,actores,0,I,activo,23,boolean,no,true,0,0,,Indica si el actor sigue vigente en el padrón y puede asociarse a casos,comentario_bd
 core,actores,0,I,perfil_descripcion,24,text,sí,,0,0,,Texto libre que amplía o justifica el perfil asignado al actor,comentario_bd
@@ -741,7 +741,7 @@ core,alertas_tempranas,0,I,acciones_oaipcs,21,text,sí,,0,0,,Acciones desplegada
 core,alertas_tempranas,0,I,paso_actual,22,smallint,sí,,0,0,,Número del paso del flujo operativo en que se encuentra la alerta,comentario_bd
 core,alertas_tempranas,0,I,fecha_validacion,23,date,sí,,0,0,,Fecha en que un analista validó la alerta,comentario_bd
 core,alertas_tempranas,0,I,fecha_remision,24,date,sí,,0,0,,Fecha en que la alerta se remitió al área competente,comentario_bd
-core,alertas_tempranas,0,I,estado_legado,25,character varying(40),sí,,0,0,,Estado tal como venía del sistema anterior. Se conserva como evidencia de la migración; el estado vigente se lee en core.vw_alerta_estado.,comentario_bd
+core,alertas_tempranas,0,I,estado_legado,25,character varying(40),sí,,0,0,,Estado de la alerta tal como figuraba en el sistema anterior,comentario_bd
 core,alertas_tempranas,0,I,fuente_tipo,26,character varying(120),sí,,0,0,,"Clase de fuente que originó la alerta, por ejemplo un reporte o una nota",comentario_bd
 core,alertas_tempranas,0,I,fuente_descripcion,27,text,sí,,0,0,,Detalle de la fuente que originó la alerta,comentario_bd
 core,alertas_tempranas,0,I,fuente_url,28,character varying(500),sí,,0,0,,Enlace a la fuente externa o al documento que sustenta la alerta,comentario_bd
@@ -750,9 +750,9 @@ core,alertas_tempranas,0,I,sectorista_usuario_id,30,uuid,sí,,0,0,core.usuarios(
 core,alertas_tempranas,0,I,mesa_id,31,uuid,sí,,0,0,core.mesas_dialogo(id),"Mesa de diálogo vinculada a la alerta, si existe",comentario_bd
 core,alertas_tempranas,0,I,codigo_legado,32,character varying(50),sí,,0,1,,"Código de la alerta en el sistema anterior, conservado para trazabilidad",comentario_bd
 core,alertas_tempranas,0,I,subsector_id,33,integer,sí,,0,0,core.cat_subsectores(id),Subsector al que pertenece la alerta registrada,comentario_bd
-core,banco_datos_tratamiento,0,INF,id,1,smallint,no,,1,0,,,sin_descripcion
+core,banco_datos_tratamiento,0,INF,id,1,smallint,no,,1,0,,Identificador interno del banco de datos,comentario_bd
 core,banco_datos_tratamiento,0,INF,codigo,2,character varying(40),no,,0,1,,"Identificador corto del banco, usado en la documentación y en el expediente.",comentario_bd
-core,banco_datos_tratamiento,0,INF,nombre,3,character varying(200),no,,0,0,,,sin_descripcion
+core,banco_datos_tratamiento,0,INF,nombre,3,character varying(200),no,,0,0,,"Nombre oficial del banco de datos personales, tal como se declara ante la autoridad",comentario_bd
 core,banco_datos_tratamiento,0,INF,finalidad,4,text,no,,0,0,,Para qué se tratan los datos. Debe coincidir con la declaración inscrita: tratar para un fin no declarado es infracción.,comentario_bd
 core,banco_datos_tratamiento,0,INF,categorias_datos,5,text,no,,0,0,,"Qué categorías se recogen (DNI, nombres, gremio de pertenencia, etc.).",comentario_bd
 core,banco_datos_tratamiento,0,INF,colectivos_afectados,6,text,sí,,0,0,,"A quiénes se refieren los datos: dirigentes, socios, participantes de mesas.",comentario_bd
@@ -762,12 +762,12 @@ core,banco_datos_tratamiento,0,INF,medidas_seguridad,9,text,sí,,0,0,,"Resumen d
 core,banco_datos_tratamiento,0,INF,flujo_transfronterizo,10,boolean,no,false,0,0,,Si los datos salen del país. Debe declararse aunque sea negativo.,comentario_bd
 core,banco_datos_tratamiento,0,INF,oficial_datos_usuario_id,11,uuid,sí,,0,0,core.usuarios(id),Oficial de Datos Personales (ODP) designado ante la ANPDP.,comentario_bd
 core,banco_datos_tratamiento,0,INF,fecha_inscripcion_anpdp,12,date,sí,,0,0,,Fecha de inscripción en el Registro Nacional. NULL = trámite pendiente.,comentario_bd
-core,banco_datos_tratamiento,0,INF,codigo_registro_anpdp,13,character varying(40),sí,,0,0,,,sin_descripcion
+core,banco_datos_tratamiento,0,INF,codigo_registro_anpdp,13,character varying(40),sí,,0,0,,Código que asigna la Autoridad Nacional de Protección de Datos Personales al inscribir el banco; vacío mientras el trámite está pendiente,comentario_bd
 core,banco_datos_tratamiento,0,INF,estado,14,character varying(25),no,'pendiente'::character varying,0,0,,pendiente | inscrito | actualizacion_pendiente | baja.,comentario_bd
-core,banco_datos_tratamiento,0,INF,nivel_clasificacion,15,smallint,no,2,0,0,core.cat_clasificacion(nivel),,sin_descripcion
-core,banco_datos_tratamiento,0,INF,activo,16,boolean,no,true,0,0,,,sin_descripcion
-core,banco_datos_tratamiento,0,INF,created_at,17,timestamp with time zone,no,now(),0,0,,,sin_descripcion
-core,banco_datos_tratamiento,0,INF,updated_at,18,timestamp with time zone,no,now(),0,0,,,sin_descripcion
+core,banco_datos_tratamiento,0,INF,nivel_clasificacion,15,smallint,no,2,0,0,core.cat_clasificacion(nivel),"Nivel de clasificación de la información del propio registro (1 público, 2 interno, 3 reservado)",comentario_bd
+core,banco_datos_tratamiento,0,INF,activo,16,boolean,no,true,0,0,,Indica si el banco sigue en operación; un banco inactivo conserva su historial pero no recibe datos nuevos,comentario_bd
+core,banco_datos_tratamiento,0,INF,created_at,17,timestamp with time zone,no,now(),0,0,,Momento en que se registró el banco en el sistema,comentario_bd
+core,banco_datos_tratamiento,0,INF,updated_at,18,timestamp with time zone,no,now(),0,0,,Momento de la última actualización del registro del banco,comentario_bd
 core,cambio_normativo,0,P,id,1,uuid,no,gen_random_uuid(),1,0,,Identificador interno de la fila,comentario_bd
 core,cambio_normativo,0,P,tabla_objetivo,2,character varying(60),no,,0,0,,Tabla de datos normativos sobre la que se solicita el cambio,comentario_bd
 core,cambio_normativo,0,P,accion,3,character varying(10),no,,0,0,,"Operación solicitada sobre la fila: alta, edición o baja",comentario_bd
@@ -926,9 +926,9 @@ core,cat_mapeo_estado_externo,0,INF,id,1,smallint,no,,1,0,,Identificador interno
 core,cat_mapeo_estado_externo,0,INF,sistema_destino,2,character varying(100),no,,0,0,,"Sistema externo al que se envía el estado, como SESIGUE",comentario_bd
 core,cat_mapeo_estado_externo,0,INF,estado_local,3,character varying(60),no,,0,0,,Estado del compromiso en el sistema local,comentario_bd
 core,cat_mapeo_estado_externo,0,INF,estado_externo,4,character varying(60),no,,0,0,,Estado equivalente que espera el sistema externo,comentario_bd
-core,cat_nivel_identificacion,0,INF,id,1,smallint,no,,1,0,,,sin_descripcion
-core,cat_nivel_identificacion,0,INF,codigo,2,character varying(30),no,,0,1,,,sin_descripcion
-core,cat_nivel_identificacion,0,INF,descripcion,3,character varying(200),no,,0,0,,,sin_descripcion
+core,cat_nivel_identificacion,0,INF,id,1,smallint,no,,1,0,,"Número del nivel, de 1 a 5",comentario_bd
+core,cat_nivel_identificacion,0,INF,codigo,2,character varying(30),no,,0,1,,"Nombre corto del nivel, usado por la aplicación",comentario_bd
+core,cat_nivel_identificacion,0,INF,descripcion,3,character varying(200),no,,0,0,,Qué significa el nivel: desde identificado con documento hasta colectivo anónimo,comentario_bd
 core,cat_niveles_alerta,0,INF,id,1,smallint,no,,1,0,,Identificador interno de la fila,comentario_bd
 core,cat_niveles_alerta,0,INF,nombre,2,character varying(60),no,,0,1,,Denominación del nivel de alerta mostrada en alertas y reportes,comentario_bd
 core,cat_niveles_alerta,0,INF,descripcion,3,text,sí,,0,0,,Explicación del alcance y las implicancias del nivel de alerta,comentario_bd
@@ -2024,7 +2024,7 @@ legacy,bridge_actor_grupo,0,X,fila_n,1,integer,no,,1,0,,,sin_descripcion
 legacy,bridge_actor_grupo,0,X,c01,2,text,sí,,0,0,,,sin_descripcion
 legacy,bridge_actor_grupo,0,X,c02,3,text,sí,,0,0,,,sin_descripcion
 legacy,bridge_actor_grupo,0,X,c03,4,text,sí,,0,0,,,sin_descripcion
-legacy,bridge_alerta_actor,0,X,fila_n,1,integer,no,,1,0,,,sin_descripcion
+legacy,bridge_alerta_actor,0,X,fila_n,1,integer,no,,1,0,,Número de fila que la hoja ocupa en el libro original; sirve para rastrear el origen de cada registro.,curaduria
 legacy,bridge_alerta_actor,0,X,c01,2,text,sí,,0,0,,Identificador de la relación alerta-actor (BAA-...); presente en 67 de las 162 filas.,curaduria
 legacy,bridge_alerta_actor,0,X,c02,3,text,sí,,0,0,,"Código de la alerta (AT-2026-xx), con relleno de dos o tres dígitos según la fila.",curaduria
 legacy,bridge_alerta_actor,0,X,c03,4,text,sí,,0,0,,Código del actor (ACT-xxx); en tres filas las posiciones de alerta y actor están invertidas.,curaduria
@@ -2035,7 +2035,7 @@ legacy,bridge_alerta_actorestado,0,X,fila_n,1,integer,no,,1,0,,,sin_descripcion
 legacy,bridge_alerta_actorestado,0,X,c01,2,text,sí,,0,0,,,sin_descripcion
 legacy,bridge_alerta_actorestado,0,X,c02,3,text,sí,,0,0,,,sin_descripcion
 legacy,bridge_alerta_actorestado,0,X,c03,4,text,sí,,0,0,,,sin_descripcion
-legacy,bridge_alerta_demandas,0,I,fila_n,1,integer,no,,1,0,,,sin_descripcion
+legacy,bridge_alerta_demandas,0,I,fila_n,1,integer,no,,1,0,,Número de fila que la hoja ocupa en el libro original; sirve para rastrear el origen de cada registro.,curaduria
 legacy,bridge_alerta_demandas,0,I,c01,2,text,sí,,0,0,,Identificador de la relación alerta-demanda (BAD-...); 207 valores distintos en 231 filas.,curaduria
 legacy,bridge_alerta_demandas,0,I,c02,3,text,sí,,0,0,,Constante: valor 'TR-01' en todas las filas.,curaduria
 legacy,bridge_alerta_demandas,0,I,c03,4,text,sí,,0,0,,Código de la alerta (AT-2026-xx); 75 valores distintos.,curaduria
@@ -2051,7 +2051,7 @@ legacy,bridge_capacitacion_participant,0,X,c02,3,text,sí,,0,0,,,sin_descripcion
 legacy,bridge_capacitacion_participant,0,X,c03,4,text,sí,,0,0,,,sin_descripcion
 legacy,bridge_capacitacion_participant,0,X,c04,5,text,sí,,0,0,,,sin_descripcion
 legacy,bridge_capacitacion_participant,0,X,c05,6,text,sí,,0,0,,,sin_descripcion
-legacy,bridge_caso_actor,0,X,fila_n,1,integer,no,,1,0,,,sin_descripcion
+legacy,bridge_caso_actor,0,X,fila_n,1,integer,no,,1,0,,Número de fila que la hoja ocupa en el libro original; sirve para rastrear el origen de cada registro.,curaduria
 legacy,bridge_caso_actor,0,X,c01,2,text,sí,,0,0,,Identificador de la relación caso-actor (RA-xxx); 68 valores distintos en 80 filas.,curaduria
 legacy,bridge_caso_actor,0,X,c02,3,text,sí,,0,0,,"Código del actor (ACT-xxx); es el actor del vínculo, no el caso.",curaduria
 legacy,bridge_caso_actor,0,X,c03,4,text,sí,,0,0,,Referencia del caso: 46 códigos completos CS-PRODUCE-2026-xxx y 34 números sueltos (1 a 33) que se interpretan como ordinal de FACT_Casos.,curaduria
@@ -2178,7 +2178,7 @@ legacy,dim_acciones_hitos,0,X,c10,11,text,sí,,0,0,,,sin_descripcion
 legacy,dim_acciones_hitos,0,X,c11,12,text,sí,,0,0,,,sin_descripcion
 legacy,dim_acciones_hitos,0,X,c12,13,text,sí,,0,0,,,sin_descripcion
 legacy,dim_acciones_hitos,0,X,c13,14,text,sí,,0,0,,,sin_descripcion
-legacy,dim_actores,0,X,fila_n,1,integer,no,,1,0,,,sin_descripcion
+legacy,dim_actores,0,X,fila_n,1,integer,no,,1,0,,Número de fila que la hoja ocupa en el libro original; sirve para rastrear el origen de cada registro.,curaduria
 legacy,dim_actores,0,X,c01,2,text,sí,,0,0,,Identificador interno del actor (ACT-xxx); dos códigos se repiten en las 828 filas.,curaduria
 legacy,dim_actores,0,X,c02,3,text,sí,,0,0,,Nombre completo del actor; 819 valores distintos en 828 filas.,curaduria
 legacy,dim_actores,0,X,c03,4,text,sí,,0,0,,DNI del actor en claro; falta en 186 filas y perdió los ceros a la izquierda al guardarse como número.,curaduria
@@ -2195,7 +2195,7 @@ legacy,dim_actores,0,X,c13,14,text,sí,,0,0,,Código de departamento (DEP-xx) de
 legacy,dim_actores,0,X,c14,15,text,sí,,0,0,,URL de la fotografía del actor; presente en 95 filas.,curaduria
 legacy,dim_actores,0,X,c15,16,text,sí,,0,0,,"Marca de actividad del actor (Sí en 296 filas, No en 2); vacía en las demás.",curaduria
 legacy,dim_actores,0,X,c16,17,text,sí,,0,0,,Descripción libre del perfil del actor; presente en 74 filas.,curaduria
-legacy,dim_actores_estado,0,X,fila_n,1,integer,no,,1,0,,,sin_descripcion
+legacy,dim_actores_estado,0,X,fila_n,1,integer,no,,1,0,,Número de fila que la hoja ocupa en el libro original; sirve para rastrear el origen de cada registro.,curaduria
 legacy,dim_actores_estado,0,X,c01,2,text,sí,,0,0,,Identificador del funcionario del Estado (ACT-EST-xxx); único en las 108 filas.,curaduria
 legacy,dim_actores_estado,0,X,c02,3,text,sí,,0,0,,Nombre del funcionario; 86 valores distintos en 108 filas.,curaduria
 legacy,dim_actores_estado,0,X,c03,4,text,sí,,0,0,,Constante: valor 'N/D' en todas las filas.,curaduria
@@ -2212,7 +2212,7 @@ legacy,dim_actores_estado,0,X,c13,14,text,sí,,0,0,,Columna vacía en todas las 
 legacy,dim_actores_estado,0,X,c14,15,text,sí,,0,0,,Columna vacía en todas las filas.,curaduria
 legacy,dim_actores_estado,0,X,c15,16,text,sí,,0,0,,Marca de actividad del funcionario; sólo 9 filas traen 'Sí' y el resto está vacío.,curaduria
 legacy,dim_actores_estado,0,X,c16,17,text,sí,,0,0,,Columna sin cabecera y vacía en todas las filas.,curaduria
-legacy,dim_alertas,0,X,fila_n,1,integer,no,,1,0,,,sin_descripcion
+legacy,dim_alertas,0,X,fila_n,1,integer,no,,1,0,,Número de fila que la hoja ocupa en el libro original; sirve para rastrear el origen de cada registro.,curaduria
 legacy,dim_alertas,0,X,c01,2,text,sí,,0,0,,Identificador de la alerta (AT-2026-xx); AT-2026-48 y AT-2026-49 se repiten.,curaduria
 legacy,dim_alertas,0,X,c02,3,text,sí,,0,0,,Código del caso vinculado (CS-PRODUCE-2026-xxx); vacío en 33 filas.,curaduria
 legacy,dim_alertas,0,X,c03,4,text,sí,,0,0,,Código del sectorista responsable (SEC-xx).,curaduria
@@ -2295,7 +2295,7 @@ legacy,dim_capacitaciones,0,X,c20,21,text,sí,,0,0,,,sin_descripcion
 legacy,dim_causas,0,X,fila_n,1,integer,no,,1,0,,,sin_descripcion
 legacy,dim_causas,0,X,c01,2,text,sí,,0,0,,,sin_descripcion
 legacy,dim_causas,0,X,c02,3,text,sí,,0,0,,,sin_descripcion
-legacy,dim_climasocial,0,X,fila_n,1,integer,no,,1,0,,,sin_descripcion
+legacy,dim_climasocial,0,X,fila_n,1,integer,no,,1,0,,Número de fila que la hoja ocupa en el libro original; sirve para rastrear el origen de cada registro.,curaduria
 legacy,dim_climasocial,0,X,c01,2,text,sí,,0,0,,Identificador del reporte de clima (CS-2026-xx); único en las 7 filas.,curaduria
 legacy,dim_climasocial,0,X,c02,3,text,sí,,0,0,,Código del caso vinculado; sólo una de las 7 filas lo trae.,curaduria
 legacy,dim_climasocial,0,X,c03,4,text,sí,,0,0,,Código del sectorista responsable (SEC-xx); 2 valores distintos.,curaduria
@@ -2365,7 +2365,7 @@ legacy,dim_coordinacion_tecnica,0,X,c10,11,text,sí,,0,0,,,sin_descripcion
 legacy,dim_coordinacion_tecnica,0,X,c11,12,text,sí,,0,0,,,sin_descripcion
 legacy,dim_coordinacion_tecnica,0,X,c12,13,text,sí,,0,0,,,sin_descripcion
 legacy,dim_coordinacion_tecnica,0,X,c13,14,text,sí,,0,0,,,sin_descripcion
-legacy,dim_demandas,0,I,fila_n,1,integer,no,,1,0,,,sin_descripcion
+legacy,dim_demandas,0,I,fila_n,1,integer,no,,1,0,,Número de fila que la hoja ocupa en el libro original; sirve para rastrear el origen de cada registro.,curaduria
 legacy,dim_demandas,0,I,c01,2,text,sí,,0,0,,Identificador de la demanda (DEM-2026-xxxx); único en las 325 filas.,curaduria
 legacy,dim_demandas,0,I,c02,3,text,sí,,0,0,,Descripción libre de la demanda; 305 valores distintos.,curaduria
 legacy,dim_demandas,0,I,c03,4,text,sí,,0,0,,Código de la organización que formula la demanda (ORG-xxx); presente en 98 filas.,curaduria
@@ -2492,7 +2492,7 @@ legacy,dim_nivel_alertas,0,X,c01,2,text,sí,,0,0,,,sin_descripcion
 legacy,dim_nivel_alertas,0,X,c02,3,text,sí,,0,0,,,sin_descripcion
 legacy,dim_nivel_alertas,0,X,c03,4,text,sí,,0,0,,,sin_descripcion
 legacy,dim_nivel_alertas,0,X,c04,5,text,sí,,0,0,,,sin_descripcion
-legacy,dim_organizacion,0,X,fila_n,1,integer,no,,1,0,,,sin_descripcion
+legacy,dim_organizacion,0,X,fila_n,1,integer,no,,1,0,,Número de fila que la hoja ocupa en el libro original; sirve para rastrear el origen de cada registro.,curaduria
 legacy,dim_organizacion,0,X,c01,2,text,sí,,0,0,,Identificador de la organización (ORG-xxx); único en las 224 filas.,curaduria
 legacy,dim_organizacion,0,X,c02,3,text,sí,,0,0,,Nombre de la organización; 222 valores distintos en 224 filas.,curaduria
 legacy,dim_organizacion,0,X,c03,4,text,sí,,0,0,,Código de departamento (DEP-xx) de la organización; presente en 121 filas.,curaduria
@@ -2568,7 +2568,7 @@ legacy,dim_redaccion,0,X,c10,11,text,sí,,0,0,,,sin_descripcion
 legacy,dim_redaccion,0,X,c11,12,text,sí,,0,0,,,sin_descripcion
 legacy,dim_redaccion,0,X,c12,13,text,sí,,0,0,,,sin_descripcion
 legacy,dim_redaccion,0,X,c13,14,text,sí,,0,0,,,sin_descripcion
-legacy,dim_reporte_rapido,0,X,fila_n,1,integer,no,,1,0,,,sin_descripcion
+legacy,dim_reporte_rapido,0,X,fila_n,1,integer,no,,1,0,,Número de fila que la hoja ocupa en el libro original; sirve para rastrear el origen de cada registro.,curaduria
 legacy,dim_reporte_rapido,0,X,c01,2,text,sí,,0,0,,Identificador del reporte rápido (RR-2026-01).,curaduria
 legacy,dim_reporte_rapido,0,X,c02,3,text,sí,,0,0,,Columna vacía en todas las filas.,curaduria
 legacy,dim_reporte_rapido,0,X,c03,4,text,sí,,0,0,,Código del sectorista responsable (SEC-xx).,curaduria
@@ -2686,7 +2686,7 @@ legacy,fact_analisis_casos,0,X,c23,24,text,sí,,0,0,,,sin_descripcion
 legacy,fact_analisis_casos,0,X,c24,25,text,sí,,0,0,,,sin_descripcion
 legacy,fact_analisis_casos,0,X,c25,26,text,sí,,0,0,,,sin_descripcion
 legacy,fact_analisis_casos,0,X,c26,27,text,sí,,0,0,,,sin_descripcion
-legacy,fact_casos,0,X,fila_n,1,integer,no,,1,0,,,sin_descripcion
+legacy,fact_casos,0,X,fila_n,1,integer,no,,1,0,,Número de fila que la hoja ocupa en el libro original; sirve para rastrear el origen de cada registro.,curaduria
 legacy,fact_casos,0,X,c01,2,text,sí,,0,0,,Identificador del caso (CS-PRODUCE-2026-xxx); único en las 35 filas.,curaduria
 legacy,fact_casos,0,X,c02,3,text,sí,,0,0,,Tipo de caso (TC-01 a TC-03) según la escala de conflictividad; falta en una fila.,curaduria
 legacy,fact_casos,0,X,c03,4,text,sí,,0,0,,Nombre del caso; distinto en cada fila.,curaduria
@@ -2716,7 +2716,7 @@ legacy,fact_casos,0,X,c26,27,text,sí,,0,0,,Columna vacía en todas las filas.,c
 legacy,fact_casos,0,X,c27,28,text,sí,,0,0,,Columna vacía en todas las filas.,curaduria
 legacy,fact_casos,0,X,c28,29,text,sí,,0,0,,Columna vacía en todas las filas.,curaduria
 legacy,fact_casos,0,X,c29,30,text,sí,,0,0,,Columna sin cabecera y vacía en todas las filas.,curaduria
-legacy,fact_hechos_casos,0,X,fila_n,1,integer,no,,1,0,,,sin_descripcion
+legacy,fact_hechos_casos,0,X,fila_n,1,integer,no,,1,0,,Número de fila que la hoja ocupa en el libro original; sirve para rastrear el origen de cada registro.,curaduria
 legacy,fact_hechos_casos,0,X,c01,2,text,sí,,0,0,,Identificador del hecho (HECHO-xxx); HECHO-012 y HECHO-047 se repiten.,curaduria
 legacy,fact_hechos_casos,0,X,c02,3,text,sí,,0,0,,Código del caso al que pertenece el hecho; 5 valores distintos.,curaduria
 legacy,fact_hechos_casos,0,X,c03,4,text,sí,,0,0,,Fecha del hecho; 74 valores distintos.,curaduria
@@ -3096,22 +3096,22 @@ qda,segmento,0,P,nivel_clasificacion,11,smallint,no,2,0,0,core.cat_clasificacion
 qda,segmento_fragmento,0,P,segmento_id,1,uuid,no,,1,0,qda.segmento(id),Segmento codificado que se cruza con el fragmento del grafo,comentario_bd
 qda,segmento_fragmento,0,P,fragmento_id,2,uuid,no,,1,0,kag.documento_fragmento(id),Fragmento del grafo documental que solapa con el segmento,comentario_bd
 qda,segmento_fragmento,0,P,solape_chars,3,integer,no,,0,0,,Cantidad de caracteres que el segmento y el fragmento comparten,comentario_bd
-ref,base_legal_evidencia,0,INF,base_legal_id,1,smallint,no,,1,0,ref.base_legal_tratamiento(id),,sin_descripcion
-ref,base_legal_evidencia,0,INF,fragmento_id,2,uuid,no,,1,0,kag.documento_fragmento(id),,sin_descripcion
+ref,base_legal_evidencia,0,INF,base_legal_id,1,smallint,no,,1,0,ref.base_legal_tratamiento(id),Base legal que este fragmento respalda,comentario_bd
+ref,base_legal_evidencia,0,INF,fragmento_id,2,uuid,no,,1,0,kag.documento_fragmento(id),Fragmento del banco de conocimiento del que se extrajo el texto de respaldo,comentario_bd
 ref,base_legal_evidencia,0,INF,rol,3,character varying(20),no,'SUSTENTO'::character varying,0,0,,"Papel del fragmento: SUSTENTO (autoriza), CONDICION (limita), PLAZO (fija conservación) o EXCEPCION (excepción al consentimiento).",comentario_bd
-ref,base_legal_evidencia,0,INF,nota,4,text,sí,,0,0,,,sin_descripcion
-ref,base_legal_evidencia,0,INF,created_at,5,timestamp with time zone,no,now(),0,0,,,sin_descripcion
-ref,base_legal_tratamiento,0,INF,id,1,smallint,no,,1,0,,,sin_descripcion
-ref,base_legal_tratamiento,0,INF,codigo,2,character varying(30),no,,0,1,,,sin_descripcion
-ref,base_legal_tratamiento,0,INF,finalidad,3,character varying(200),no,,0,0,,,sin_descripcion
-ref,base_legal_tratamiento,0,INF,plazo_conservacion_meses,4,smallint,no,,0,0,,,sin_descripcion
+ref,base_legal_evidencia,0,INF,nota,4,text,sí,,0,0,,Observación del analista sobre la correspondencia entre el fragmento y la base legal,comentario_bd
+ref,base_legal_evidencia,0,INF,created_at,5,timestamp with time zone,no,now(),0,0,,Momento en que se registró la evidencia,comentario_bd
+ref,base_legal_tratamiento,0,INF,id,1,smallint,no,,1,0,,Identificador interno de la base legal,comentario_bd
+ref,base_legal_tratamiento,0,INF,codigo,2,character varying(30),no,,0,1,,"Código corto de la base legal, usado en el expediente y en la documentación",comentario_bd
+ref,base_legal_tratamiento,0,INF,finalidad,3,character varying(200),no,,0,0,,Para qué autoriza esta norma el tratamiento de los datos,comentario_bd
+ref,base_legal_tratamiento,0,INF,plazo_conservacion_meses,4,smallint,no,,0,0,,"Plazo que la norma o el banco fija para conservar los datos, en meses",comentario_bd
 ref,base_legal_tratamiento,0,INF,flujo_transfronterizo,5,boolean,no,false,0,0,,Si el tratamiento envía datos fuera del país. Es una de las declaraciones obligatorias ante la Autoridad Nacional de Protección de Datos Personales.,comentario_bd
-ref,base_legal_tratamiento,0,INF,norma,6,character varying(200),sí,,0,0,,,sin_descripcion
-ref,base_legal_tratamiento,0,INF,articulo,7,character varying(60),sí,,0,0,,,sin_descripcion
+ref,base_legal_tratamiento,0,INF,norma,6,character varying(200),sí,,0,0,,"Norma que autoriza el tratamiento (ley, decreto o reglamento)",comentario_bd
+ref,base_legal_tratamiento,0,INF,articulo,7,character varying(60),sí,,0,0,,Artículo o inciso de la norma que sirve de sustento,comentario_bd
 ref,base_legal_tratamiento,0,INF,sustento,8,text,sí,,0,0,,Texto que explica por qué esta base autoriza el tratamiento. Los números de inciso se dejan a la revisión de la OGTI y de Asesoría Jurídica (H-04); no se citan como definitivos.,comentario_bd
-ref,base_legal_tratamiento,0,INF,vigente_desde,9,date,sí,,0,0,,,sin_descripcion
-ref,base_legal_tratamiento,0,INF,vigente_hasta,10,date,sí,,0,0,,,sin_descripcion
-ref,base_legal_tratamiento,0,INF,created_at,11,timestamp with time zone,no,now(),0,0,,,sin_descripcion
+ref,base_legal_tratamiento,0,INF,vigente_desde,9,date,sí,,0,0,,Fecha desde la que rige la norma citada,comentario_bd
+ref,base_legal_tratamiento,0,INF,vigente_hasta,10,date,sí,,0,0,,Fecha hasta la que rige la norma; vacío si sigue vigente,comentario_bd
+ref,base_legal_tratamiento,0,INF,created_at,11,timestamp with time zone,no,now(),0,0,,Momento en que se registró la base legal,comentario_bd
 ref,base_legal_tratamiento,0,INF,banco_datos_id,12,smallint,sí,,0,0,core.banco_datos_tratamiento(id),Banco de datos personales al que pertenece esta base legal.,comentario_bd
 staging,lote,0,I,id,1,uuid,no,gen_random_uuid(),1,0,,Identificador interno de la fila,comentario_bd
 staging,lote,0,I,punto_ingesta_id,2,smallint,no,,0,0,analisis.punto_ingesta(id),Punto de ingesta por el que entró el lote de archivos,comentario_bd

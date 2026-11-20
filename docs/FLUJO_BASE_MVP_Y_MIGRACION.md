@@ -29,11 +29,11 @@ base para que el equipo de OGTI la migre a SQL Server.
 En el mismo servidor de PostgreSQL conviven tres bases con propósitos distintos.
 Confundirlas es el error más caro de esta etapa.
 
-| Base | Para qué | Se puede destruir |
-|---|---|---|
-| `avisa` | La base de trabajo: todo el esquema más los datos del sistema anterior. Es la que se consulta y se mide. | No sin copia |
-| `avisa_template` | Plantilla con el esquema **vacío**. Sirve para crear una base nueva idéntica en segundos. | Se regenera |
-| `avisa_mssql` | Copia **recortada** de `avisa`, con solo las tablas del MVP, preparada para el asistente de SQL Server. | Sí, siempre |
+| Base             | Para qué                                                                                                 | Se puede destruir |
+| ---------------- | -------------------------------------------------------------------------------------------------------- | ----------------- |
+| `avisa`          | La base de trabajo: todo el esquema más los datos del sistema anterior. Es la que se consulta y se mide. | No sin copia      |
+| `avisa_template` | Plantilla con el esquema **vacío**. Sirve para crear una base nueva idéntica en segundos.                | Se regenera       |
+| `avisa_mssql`    | Copia **recortada** de `avisa`, con solo las tablas del MVP, preparada para el asistente de SQL Server.  | Sí, siempre       |
 
 La base recortada no se toca a mano: se crea como copia y se recorta con un
 script, para poder repetirlo cuantas veces haga falta.
@@ -116,9 +116,9 @@ python migration/consolidar_esquema.py --seccion A --salida /tmp/seccion_a.sql
 psql -U avisa -d avisa -v ON_ERROR_STOP=1 -f /tmp/seccion_a.sql
 ```
 
-Al terminar tendrás **25 esquemas y 273 tablas** (269 tablas y 4 particiones),
-2 296 columnas y 575 claves ajenas. Si cuentas también el esquema `staging`, que
-la sección A crea con 2 tablas: 275 tablas, 2 314 columnas y 581 claves ajenas.
+Al terminar tendrás **25 esquemas y 275 tablas** (251 tablas lógicas y 24
+hijas de partición), 2 314 columnas y 581 claves ajenas. La sección A crea
+también el esquema `staging`, con 2 tablas, que ya está incluido en esas cifras.
 
 > En ese momento verás **avisos de error** porque cinco scripts de preparación
 > mencionan tablas que todavía no existen (`core.usuarios`,
@@ -156,22 +156,22 @@ garantía —nunca una carga a medias— vale más.
 
 Las fases, en orden:
 
-| Fase | Qué carga |
-|---|---|
-| 0 | Copia en bruto de cada hoja del libro (`legacy.*`) |
-| 1 | Geografía: 25 regiones, 70 provincias, 698 distritos |
-| 2 | Catálogos: especies, entidades, unidades orgánicas, tipos |
-| 3 | Actores y organizaciones |
-| 4 | Usuarios, roles y territorios asignados |
-| 5 | Actores con datos personales (cifrados) y membresías |
-| 6 | Casos y sus territorios |
-| 7 | Cronología de casos y documentos |
-| 8 | Alertas tempranas y especies involucradas |
-| 9 | Demandas y sus evidencias |
-| 10 | Compromisos e hitos |
-| 11 | Mesas de diálogo, capacitaciones y locales |
-| 12 | Envíos de comunicación y suscripciones |
-| 13 | Bitácora de accesos del sistema anterior |
+| Fase | Qué carga                                                 |
+| ---- | --------------------------------------------------------- |
+| 0    | Copia en bruto de cada hoja del libro (`legacy.*`)        |
+| 1    | Geografía: 25 regiones, 70 provincias, 698 distritos      |
+| 2    | Catálogos: especies, entidades, unidades orgánicas, tipos |
+| 3    | Actores y organizaciones                                  |
+| 4    | Usuarios, roles y territorios asignados                   |
+| 5    | Actores con datos personales (cifrados) y membresías      |
+| 6    | Casos y sus territorios                                   |
+| 7    | Cronología de casos y documentos                          |
+| 8    | Alertas tempranas y especies involucradas                 |
+| 9    | Demandas y sus evidencias                                 |
+| 10   | Compromisos e hitos                                       |
+| 11   | Mesas de diálogo, capacitaciones y locales                |
+| 12   | Envíos de comunicación y suscripciones                    |
+| 13   | Bitácora de accesos del sistema anterior                  |
 
 Para reanudar un tramo o depurar una fase:
 
@@ -311,12 +311,12 @@ MSYS_NO_PATHCONV=1 docker exec -i avisa-db psql -U avisa -d avisa_mssql \
 
 SQL Server no tiene equivalentes directos de tres cosas que PostgreSQL sí tiene:
 
-| En PostgreSQL | Qué se hace antes de migrar |
-|---|---|
+| En PostgreSQL                           | Qué se hace antes de migrar                                        |
+| --------------------------------------- | ------------------------------------------------------------------ |
 | `uuid` con valor por defecto automático | Se retira el valor por defecto; SQL Server lo genera con `NEWID()` |
-| `jsonb` | Se mapea a `nvarchar(max)` y se valida con `ISJSON(...) = 1` |
-| `timestamptz` (fecha con zona) | Se lleva a `datetimeoffset(7)`, o se estandariza a UTC |
-| Arreglos (`text[]`) | No existen en SQL Server: se convierten a texto JSON |
+| `jsonb`                                 | Se mapea a `nvarchar(max)` y se valida con `ISJSON(...) = 1`       |
+| `timestamptz` (fecha con zona)          | Se lleva a `datetimeoffset(7)`, o se estandariza a UTC             |
+| Arreglos (`text[]`)                     | No existen en SQL Server: se convierten a texto JSON               |
 
 El script retira 25 valores por defecto de `uuid` y deja constancia de los 12
 campos `jsonb`. La lista completa de correspondencias está en
@@ -347,8 +347,7 @@ migration/mssql/04_chequeos_postmigracion.sql
 ```
 
 > **Hueco conocido:** esos chequeos cubren 15 tablas con seguridad por fila. La
-> base tiene 28 en el alcance recortado. Las 13 tablas nuevas (parches 14, 15 y
-> 16) todavía no tienen su equivalente en SQL Server escrito. Está anotado en
+> base tiene 28 en el alcance recortado. Las 13 tablas nuevas (parches 14, 15 y 16) todavía no tienen su equivalente en SQL Server escrito. Está anotado en
 > `migration/mssql/INFORME_TIPOS.md`.
 
 5. Cuando la migración esté cerrada, elimina el rol de migración: es una
@@ -381,26 +380,26 @@ La secuencia completa que se verificó en una base nueva:
 sección A  →  carga del legado  →  parches 6 a 16  →  pruebas 15 y 16
 ```
 
-Al terminar: **283 tablas** (279 lógicas y 4 particiones), **2 407 columnas** y
-**595 claves ajenas**, sin contar `legacy` ni `staging`. Las 4 columnas y la
-tabla de más, respecto a la base de trabajo (`avisa`, con 282 y 2 403), son la
-instantánea del parche 6.
+Al terminar: **285 tablas** (261 lógicas y 24 hijas de partición), **2 425
+columnas** y **601 claves ajenas**, sin contar `legacy` ni `public`. La base de
+trabajo (`avisa`) tiene una tabla y 4 columnas menos porque conserva el esquema
+sin la instantánea del parche 6, que allí ya se borró.
 
 ---
 
 ## 9. Errores conocidos
 
-| Síntoma | Causa | Qué hacer |
-|---|---|---|
-| `No hay DSN. Definí DATABASE_URL…` | El programa no encontraba el `.env` | Corregido: ahora busca el `.env` en la raíz y un nivel arriba. Si persiste, exporta `DATABASE_URL` a mano |
-| `no encuentro el workbook del legado` | El libro estaba en `backend/`, que ya no existe | Corregido: ahora busca en `backend/` y en `backups/backend/`. Usa `--xlsx` si está en otro sitio |
+| Síntoma                                                                                      | Causa                                                                             | Qué hacer                                                                                                              |
+| -------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `No hay DSN. Definí DATABASE_URL…`                                                           | El programa no encontraba el `.env`                                               | Corregido: ahora busca el `.env` en la raíz y un nivel arriba. Si persiste, exporta `DATABASE_URL` a mano              |
+| `no encuentro el workbook del legado`                                                        | El libro estaba en `backend/`, que ya no existe                                   | Corregido: ahora busca en `backend/` y en `backups/backend/`. Usa `--xlsx` si está en otro sitio                       |
 | El parche 14 aborta con `violates check constraint proceso_instancia_origen_coherente_check` | Convertía filas a origen «alerta» antes de relajar la restricción que lo prohibía | Corregido: la restricción se retira al inicio del bloque 2 y se vuelve a crear al final, ya con los datos normalizados |
-| `permission denied for table actor_alias` | Los permisos generales corrían antes de crear la tabla | Corregido: los permisos se otorgan al crear cada tabla nueva |
-| `--verify` dice «FALLA … 0 (esperado N)» en todo | Se ejecutó sin cargar primero | Corre la carga (`python -m migration.loader.run`) y después la verificación |
-| Un borrado «no falla» pero no borra nada | La seguridad por fila no lanza error al denegar un `DELETE`: afecta 0 filas | Comprueba filas afectadas, no la ausencia de error |
-| `psql` busca en `C:/Program Files/Git/tmp/...` | Git Bash convierte las rutas que empiezan por `/` | Usa `MSYS_NO_PATHCONV=1` y pasa el archivo por entrada estándar |
-| Recuentos de filas que no cuadran | `public.spatial_ref_sys` (PostGIS) tiene 8 500 filas ajenas al sistema | Excluye el esquema `public` de cualquier conteo |
-| Recuentos de tablas que no cuadran | Las particiones se cuentan como tablas físicas | Distingue tablas lógicas (`relkind='r'`) de particiones (`relkind='p'`) |
+| `permission denied for table actor_alias`                                                    | Los permisos generales corrían antes de crear la tabla                            | Corregido: los permisos se otorgan al crear cada tabla nueva                                                           |
+| `--verify` dice «FALLA … 0 (esperado N)» en todo                                             | Se ejecutó sin cargar primero                                                     | Corre la carga (`python -m migration.loader.run`) y después la verificación                                            |
+| Un borrado «no falla» pero no borra nada                                                     | La seguridad por fila no lanza error al denegar un `DELETE`: afecta 0 filas       | Comprueba filas afectadas, no la ausencia de error                                                                     |
+| `psql` busca en `C:/Program Files/Git/tmp/...`                                               | Git Bash convierte las rutas que empiezan por `/`                                 | Usa `MSYS_NO_PATHCONV=1` y pasa el archivo por entrada estándar                                                        |
+| Recuentos de filas que no cuadran                                                            | `public.spatial_ref_sys` (PostGIS) tiene 8 500 filas ajenas al sistema            | Excluye el esquema `public` de cualquier conteo                                                                        |
+| Recuentos de tablas que no cuadran                                                           | Las particiones se cuentan como tablas físicas                                    | Distingue tablas lógicas (`relkind='r'`) de particiones (`relkind='p'`)                                                |
 
 ---
 

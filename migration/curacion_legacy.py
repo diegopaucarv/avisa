@@ -97,6 +97,7 @@ PROPOSITO: dict[str, str] = {
 
 COLUMNAS: dict[str, dict[str, str]] = {
     "dim_actores": {
+        "fila_n": "Número de fila que la hoja ocupa en el libro original; sirve para rastrear el origen de cada registro.",
         "c01": "Identificador interno del actor (ACT-xxx); dos códigos se repiten en las 828 filas.",
         "c02": "Nombre completo del actor; 819 valores distintos en 828 filas.",
         "c03": "DNI del actor en claro; falta en 186 filas y perdió los ceros a la izquierda al guardarse como número.",
@@ -115,6 +116,7 @@ COLUMNAS: dict[str, dict[str, str]] = {
         "c16": "Descripción libre del perfil del actor; presente en 74 filas.",
     },
     "dim_actores_estado": {
+        "fila_n": "Número de fila que la hoja ocupa en el libro original; sirve para rastrear el origen de cada registro.",
         "c01": "Identificador del funcionario del Estado (ACT-EST-xxx); único en las 108 filas.",
         "c02": "Nombre del funcionario; 86 valores distintos en 108 filas.",
         "c03": "Constante: valor 'N/D' en todas las filas.",
@@ -133,6 +135,7 @@ COLUMNAS: dict[str, dict[str, str]] = {
         "c16": "Columna sin cabecera y vacía en todas las filas.",
     },
     "dim_organizacion": {
+        "fila_n": "Número de fila que la hoja ocupa en el libro original; sirve para rastrear el origen de cada registro.",
         "c01": "Identificador de la organización (ORG-xxx); único en las 224 filas.",
         "c02": "Nombre de la organización; 222 valores distintos en 224 filas.",
         "c03": "Código de departamento (DEP-xx) de la organización; presente en 121 filas.",
@@ -151,6 +154,7 @@ COLUMNAS: dict[str, dict[str, str]] = {
         "c16": "Abreviatura de la organización; presente en 11 filas.",
     },
     "dim_alertas": {
+        "fila_n": "Número de fila que la hoja ocupa en el libro original; sirve para rastrear el origen de cada registro.",
         "c01": "Identificador de la alerta (AT-2026-xx); AT-2026-48 y AT-2026-49 se repiten.",
         "c02": "Código del caso vinculado (CS-PRODUCE-2026-xxx); vacío en 33 filas.",
         "c03": "Código del sectorista responsable (SEC-xx).",
@@ -184,6 +188,7 @@ COLUMNAS: dict[str, dict[str, str]] = {
         "c31": "Columna vacía en todas las filas.",
     },
     "dim_demandas": {
+        "fila_n": "Número de fila que la hoja ocupa en el libro original; sirve para rastrear el origen de cada registro.",
         "c01": "Identificador de la demanda (DEM-2026-xxxx); único en las 325 filas.",
         "c02": "Descripción libre de la demanda; 305 valores distintos.",
         "c03": "Código de la organización que formula la demanda (ORG-xxx); presente en 98 filas.",
@@ -195,6 +200,7 @@ COLUMNAS: dict[str, dict[str, str]] = {
         "c09": "Enlace a la evidencia del registro; presente en 77 filas y 12 valores distintos.",
     },
     "fact_casos": {
+        "fila_n": "Número de fila que la hoja ocupa en el libro original; sirve para rastrear el origen de cada registro.",
         "c01": "Identificador del caso (CS-PRODUCE-2026-xxx); único en las 35 filas.",
         "c02": "Tipo de caso (TC-01 a TC-03) según la escala de conflictividad; falta en una fila.",
         "c03": "Nombre del caso; distinto en cada fila.",
@@ -226,6 +232,7 @@ COLUMNAS: dict[str, dict[str, str]] = {
         "c29": "Columna sin cabecera y vacía en todas las filas.",
     },
     "fact_hechos_casos": {
+        "fila_n": "Número de fila que la hoja ocupa en el libro original; sirve para rastrear el origen de cada registro.",
         "c01": "Identificador del hecho (HECHO-xxx); HECHO-012 y HECHO-047 se repiten.",
         "c02": "Código del caso al que pertenece el hecho; 5 valores distintos.",
         "c03": "Fecha del hecho; 74 valores distintos.",
@@ -241,6 +248,7 @@ COLUMNAS: dict[str, dict[str, str]] = {
         "c13": "Código del documento de redacción vinculado (RED-2026-xxx); presente en 2 filas.",
     },
     "dim_climasocial": {
+        "fila_n": "Número de fila que la hoja ocupa en el libro original; sirve para rastrear el origen de cada registro.",
         "c01": "Identificador del reporte de clima (CS-2026-xx); único en las 7 filas.",
         "c02": "Código del caso vinculado; sólo una de las 7 filas lo trae.",
         "c03": "Código del sectorista responsable (SEC-xx); 2 valores distintos.",
@@ -271,6 +279,7 @@ COLUMNAS: dict[str, dict[str, str]] = {
         "c28": "Riesgos inmediatos del reporte; una sola fila los trae.",
     },
     "dim_reporte_rapido": {
+        "fila_n": "Número de fila que la hoja ocupa en el libro original; sirve para rastrear el origen de cada registro.",
         "c01": "Identificador del reporte rápido (RR-2026-01).",
         "c02": "Columna vacía en todas las filas.",
         "c03": "Código del sectorista responsable (SEC-xx).",
@@ -298,6 +307,7 @@ COLUMNAS: dict[str, dict[str, str]] = {
         "c25": "Columna sin cabecera; su única fila trae '0'.",
     },
     "bridge_alerta_actor": {
+        "fila_n": "Número de fila que la hoja ocupa en el libro original; sirve para rastrear el origen de cada registro.",
         "c01": "Identificador de la relación alerta-actor (BAA-...); presente en 67 de las 162 filas.",
         "c02": "Código de la alerta (AT-2026-xx), con relleno de dos o tres dígitos según la fila.",
         "c03": "Código del actor (ACT-xxx); en tres filas las posiciones de alerta y actor están invertidas.",
@@ -306,11 +316,13 @@ COLUMNAS: dict[str, dict[str, str]] = {
         "c06": "Segundo identificador de relación (BAA-...) presente en 95 filas y nunca junto al anterior.",
     },
     "bridge_caso_actor": {
+        "fila_n": "Número de fila que la hoja ocupa en el libro original; sirve para rastrear el origen de cada registro.",
         "c01": "Identificador de la relación caso-actor (RA-xxx); 68 valores distintos en 80 filas.",
         "c02": "Código del actor (ACT-xxx); es el actor del vínculo, no el caso.",
         "c03": "Referencia del caso: 46 códigos completos CS-PRODUCE-2026-xxx y 34 números sueltos (1 a 33) que se interpretan como ordinal de FACT_Casos.",
     },
     "bridge_alerta_demandas": {
+        "fila_n": "Número de fila que la hoja ocupa en el libro original; sirve para rastrear el origen de cada registro.",
         "c01": "Identificador de la relación alerta-demanda (BAD-...); 207 valores distintos en 231 filas.",
         "c02": "Constante: valor 'TR-01' en todas las filas.",
         "c03": "Código de la alerta (AT-2026-xx); 75 valores distintos.",
