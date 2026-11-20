@@ -787,9 +787,11 @@ SESSION_CONTEXT(N'rol_codigo')`). Si sobrevive, hay que fijar el contexto con
 3. `DECIMAL(28,10)` para las 2 columnas `numeric` sin precisión (§3.5), con la
    tabla vacía hoy.
 4. `core.hitos_compromiso`, `core.log_accesos`, `core.mesas_dialogo` y
-   `core.output_contracts` ya tienen RLS tras el parche 16 (§6.1). Queda pendiente
-   replicarlas en la política de SQL Server, que en `04_...sql` §5 sólo cubre las
-   15 tablas del alcance anterior.
+   `core.output_contracts` ya tienen RLS tras el parche 16 (§6.1). **Resuelto:**
+   la política de SQL Server de `04_...sql` §5 ya cubre las 28 tablas del alcance
+   con 136 predicados (13 tablas nuevas × 5, más las 14 anteriores × 5 y el
+   único FILTER de `audit.datos_personales_acceso`). El bloque §5.5 lo prueba
+   con un arnés de dos niveles; dio 28 tablas y 136 predicados.
 5. `core.regiones` ya está en el alcance (padre por cierre de dependencias):
    hay que decidir si se corrigen las 24 grafías sin tilde antes de migrar, o si
    se migran tal cual y la corrección se hace después con el Resolver. Afecta a

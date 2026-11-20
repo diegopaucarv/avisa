@@ -346,9 +346,11 @@ políticas de seguridad por fila y comentarios.
 migration/mssql/04_chequeos_postmigracion.sql
 ```
 
-> **Hueco conocido:** esos chequeos cubren 15 tablas con seguridad por fila. La
-> base tiene 28 en el alcance recortado. Las 13 tablas nuevas (parches 14, 15 y 16) todavía no tienen su equivalente en SQL Server escrito. Está anotado en
-> `migration/mssql/INFORME_TIPOS.md`.
+> **Cobertura:** esos chequeos ya cubren las 28 tablas con seguridad por fila del
+> alcance recortado, con 136 predicados. Las 13 tablas que añadieron los parches
+> 14, 15 y 16 tienen su equivalente en SQL Server en el apartado §5.2 y §5.3 del
+> mismo archivo, y las pruebas del §5.5 las ejercitan con dos niveles de
+> clasificación. El detalle técnico está en `migration/mssql/INFORME_TIPOS.md`.
 
 5. Cuando la migración esté cerrada, elimina el rol de migración: es una
    excepción a la seguridad y no debe quedarse.

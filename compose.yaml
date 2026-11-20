@@ -47,8 +47,12 @@ services:
       # DDL y parches: se montan con nombres limpios para que la aplicación del
       # esquema no dependa de rutas con espacios ni paréntesis. Siempre es la
       # copia del repositorio, nunca una copia divergente.
+      #
+      # El DDL vive en `backups/backend/`: la carpeta `backend/` de la raíz no
+      # existe, y montarla abortaba el arranque con "not a directory: Are you
+      # trying to mount a directory onto a file".
       - type: bind
-        source: "./backend/PRODUCE_OAIPCS_AVISA_v9_ddl(1).sql"
+        source: "./backups/backend/PRODUCE_OAIPCS_AVISA_v9_ddl(1).sql"
         target: /opt/avisa/sql/90_ddl_v9.sql
         read_only: true
       - type: bind
@@ -72,7 +76,7 @@ services:
         target: /opt/avisa/sql/95_patch_05.sql
         read_only: true
 
-      # Parches 6–13: se montan pero NO los aplica el initdb. Dependen de datos que
+      # Parches 6–16: se montan pero NO los aplica el initdb. Dependen de datos que
       # sólo existen después de la carga (documentos `RED-%`, tablas `legacy.*`), así
       # que se ejecutan a mano: ver docs/ENTORNO_DOCKER_POSTGRES.md §9.
       - type: bind
@@ -115,6 +119,10 @@ services:
         source: ./docs/PARCHE_15_ROLES_Y_BORRADO.sql
         target: /opt/avisa/sql/105_patch_15.sql
         read_only: true
+      - type: bind
+        source: ./docs/PARCHE_16_RLS_CORE_Y_DC04.sql
+        target: /opt/avisa/sql/106_patch_16.sql
+        read_only: true
 
     healthcheck:
       # -h 127.0.0.1 es imprescindible: sin host, pg_isready usa el socket Unix,
@@ -139,6 +147,75 @@ services:
       - -c
       - log_min_duration_statement=1000
 
+  # ===========================================================================
+  #  API · FastAPI (demostración)
+  #
+  #  Sirve /api/auth/login y /api/dashboard con datos de ejemplo. La interfaz
+  #  le habla por la red interna del compose (http://api:8000), no por el host.
+  #  El puerto 8000 se publica igual para poder probar la API con curl.
+  # ===========================================================================
+  api:
+    build:
+      context: .
+      dockerfile: docker/api/Dockerfile
+    image: avisa/api:dev
+    container_name: avisa-api
+    restart: unless-stopped
+
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-avisa}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-avisa}
+      TZ: ${TZ:-America/Lima}
+
+    ports:
+      - "${API_PORT:-8000}:8000"
+
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # ===========================================================================
+  #  UI · Next.js 16 en modo desarrollo
+  #
+  #  El código entra por un montaje desde el disco y los dos volúmenes evitan
+  #  que ese montaje tape `node_modules` y `.next`. Docker siembra
+  #  `avisa_node_modules` la primera vez con las dependencias que ya trae la
+  #  imagen, así que no se reinstala en cada arranque.
+  #
+  #  Si cambia package.json:  docker compose build ui
+  #  y, si el volumen ya existía:  docker volume rm avisa_node_modules
+  # ===========================================================================
+  ui:
+    build:
+      context: .
+      dockerfile: docker/ui/Dockerfile
+    image: avisa/ui:dev
+    container_name: avisa-ui
+    restart: unless-stopped
+
+    environment:
+      AVISA_API_URL: http://api:8000
+      NEXT_TELEMETRY_DISABLED: "1"
+      # Docker Desktop en Windows no siempre propaga los eventos del sistema
+      # de archivos al montaje; sondeando, la recarga en caliente sí funciona.
+      WATCHPACK_POLLING: "true"
+      CHOKIDAR_USEPOLLING: "true"
+      TZ: ${TZ:-America/Lima}
+
+    ports:
+      - "${UI_PORT:-3000}:3000"
+
+    volumes:
+      - .:/app
+      - avisa_node_modules:/app/node_modules
+      - avisa_next_cache:/app/.next
+
+    depends_on:
+      - api
+
 volumes:
   avisa_pgdata:
     name: avisa_pgdata
+  avisa_node_modules:
+    name: avisa_node_modules
+  avisa_next_cache:
+    name: avisa_next_cache

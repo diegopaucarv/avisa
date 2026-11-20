@@ -995,10 +995,12 @@ Formato: _Como [quién] quiero [qué] para [para qué]_. Criterios en formato Da
 
 ### HU-08 — Compromisos y relatorías
 
-**Como** analista **quiero** registrar la relatoría de una reunión y sus compromisos **para** dar seguimiento a lo acordado. _(N-03, N-12 · RF-C01, RF-C02, RF-E01)_
+**Como** analista **quiero** registrar la relatoría de una reunión y sus compromisos **para** dar seguimiento a lo acordado. _(N-03, N-12 · RF-C01, RF-C02)_
 
-- **Dado** una relatoría cargada, **cuando** el sistema propone compromisos, **entonces** quedan «pendientes de validación» hasta que yo los confirme.
-- **Dado** un compromiso confirmado, **cuando** reviso el caso, **entonces** veo su estado, hitos y fecha límite.
+> **Corrección:** en diciembre el registro es **manual** — el analista digita el compromiso al revisar la relatoría. La propuesta automática por IA (RF-E01) es 2027, salvo lo acotado por CA-10 (migración y mandatos, 14.3.2), que no cubre este caso.
+
+- **Dado** una relatoría cargada como documento, **cuando** el analista digita un compromiso a partir de ella, **entonces** queda vinculado a esa relatoría y en estado «registrado».
+- **Dado** un compromiso registrado, **cuando** reviso el caso, **entonces** veo su estado, hitos y fecha límite.
 
 ### HU-09 — Registrar un actor sin DNI
 
@@ -1088,25 +1090,25 @@ El modelo de datos **ya existe y está probado** en PostgreSQL, y está descrito
 
 ## 12.2 Datos principales y su volumen actual
 
-| Concepto                               | Tabla                                   |   Filas hoy | Horizonte     |
-| -------------------------------------- | --------------------------------------- | ----------: | ------------- |
-| Casos                                  | `core.casos`                            |          35 | MVP           |
-| Cronología de hechos                   | `core.caso_cronologia`                  |          80 | MVP           |
-| Alertas tempranas                      | `core.alertas_tempranas`                |          83 | MVP           |
-| Demandas                               | `core.demandas`                         |         325 | MVP           |
-| Actores                                | `core.actores`                          |       1 160 | MVP           |
-| Datos personales de actores            | `core.actor_datos_personales`           |         847 | MVP           |
-| Organizaciones                         | `core.organizaciones`                   |         224 | MVP           |
-| Pertenencia a organizaciones           | `core.actor_membresia`                  |         292 | MVP           |
-| Documentos                             | `core.documentos`                       |         153 | MVP           |
-| Compromisos / hitos                    | `core.compromisos` / `hitos_compromiso` |      8 / 12 | MVP           |
-| Mesas de diálogo / miembros            | `core.mesas_dialogo` / `mesa_miembros`  |     21 / 62 | MVP           |
-| Locales                                | `core.locales`                          |          27 | MVP           |
-| Envíos de comunicación                 | `core.envios_comunicacion`              |          17 | MVP           |
-| Usuarios y roles                       | `core.usuarios` / `usuario_roles`       |  31–32 / 34 | MVP           |
-| Distritos                              | `core.distritos`                        |         698 | MVP           |
-| Grafo de conocimiento                  | `kag.nodos` / `kag.aristas`             | 1 520 / 450 | MVP (parcial) |
-| Registro de accesos a datos personales | `audit.datos_personales_acceso`         |       2 241 | MVP           |
+| Concepto                               | Tabla                                   |   Filas hoy | Horizonte                                       |
+| -------------------------------------- | --------------------------------------- | ----------: | ----------------------------------------------- |
+| Casos                                  | `core.casos`                            |          35 | MVP                                             |
+| Cronología de hechos                   | `core.caso_cronologia`                  |          80 | MVP                                             |
+| Alertas tempranas                      | `core.alertas_tempranas`                |          83 | MVP                                             |
+| Demandas                               | `core.demandas`                         |         325 | MVP                                             |
+| Actores                                | `core.actores`                          |       1 160 | MVP                                             |
+| Datos personales de actores            | `core.actor_datos_personales`           |         847 | MVP                                             |
+| Organizaciones                         | `core.organizaciones`                   |         224 | MVP                                             |
+| Pertenencia a organizaciones           | `core.actor_membresia`                  |         292 | MVP                                             |
+| Documentos                             | `core.documentos`                       |         153 | MVP                                             |
+| Compromisos / hitos                    | `core.compromisos` / `hitos_compromiso` |      8 / 12 | MVP                                             |
+| Mesas de diálogo / miembros            | `core.mesas_dialogo` / `mesa_miembros`  |     21 / 62 | MVP                                             |
+| Locales                                | `core.locales`                          |          27 | MVP                                             |
+| Envíos de comunicación                 | `core.envios_comunicacion`              |          17 | MVP                                             |
+| Usuarios y roles                       | `core.usuarios` / `usuario_roles`       |  31–32 / 34 | MVP                                             |
+| Distritos                              | `core.distritos`                        |         698 | MVP                                             |
+| Grafo de conocimiento                  | `kag.nodos` / `kag.aristas`             | 1 520 / 450 | **Fuera del MVP** (2027, con CT-07; ver 14.3.3) |
+| Registro de accesos a datos personales | `audit.datos_personales_acceso`         |       2 241 | MVP                                             |
 
 > Observaciones: los **compromisos (8) y la cantidad de reuniones** son muy pocos para calcular indicadores confiables; y la tabla de indicadores está **vacía** (`ind.resultado`, 0 filas), por lo que el tablero hoy «no tiene de dónde salir».
 
@@ -1149,128 +1151,110 @@ Las vistas necesarias para la **ficha de actor y territorio** y para las **lista
 
 # 13. INTERFACES EXTERNAS (FICHA POR SERVICIO)
 
-> **Material interno.** No se lleva a la reunión. Solo los servicios del horizonte MVP condicionan diciembre.
+> **Material interno.** No se lleva a la reunión. **Actualizado:** OAIPCS redefinió el alcance de servicios activos. A diferencia de la versión anterior (que dejaba Gemini, WhatsApp y PIDE-RENIEC para 2027), estos tres **sí entran en diciembre**, con un uso acotado y con mitigaciones obligatorias contra sus costos ocultos (13.3). Lo que permanece en 2027 es la lectura abierta de fuentes públicas y redes sociales (SVC-01, SVC-03), los mapas (SVC-11), SESIGUE y otros ministerios (SVC-12, SVC-14), y el acceso externo (Extranet, Perfil C).
 
-## 13.1 Servicios que condicionan diciembre
+## 13.1 Servicios activos para diciembre («Ahora»)
 
-| ID            | <u>Servicio</u>                                              | Qué se intercambia                                                                               | Quién lo provee  | Cómo se accede                                                                                        | Costo                                                                                | Decisión pendiente                                     |
-| ------------- | ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------ | ---------------- | ----------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ | ------------------------------------------------------ |
-| <u>SVC-04</u> | Sistema anterior (Google Sheets + Apps Script)               | Copia de los registros para la precarga y, si hace falta, los cambios hasta el cambio de sistema | OAIPCS           | Copia ya cargada en la base (`legacy`)                                                                | Sin costo                                                                            | Fecha de cambio y frecuencia **[H-29]**                |
-| <u>SVC-09</u> | Identidad institucional                                      | Identidad y grupo de cada usuario                                                                | OGTI             | **[EN BLANCO · H-52]**                                                                                | **[EN BLANCO]**                                                                      | Servicio, grupos y plazo **[H-52]**                    |
-| <u>SVC-10</u> | Power BI (licencia de OGTI)                                  | Lectura de las vistas de la base de datos                                                        | OGTI             | Conexión a la base de datos                                                                           | Licencia ya existente                                                                | Si los tableros se hacen aquí **[H-50]**               |
-| <u>SVC-16</u> | **PIDE-RENIEC** (Plataforma de Interoperabilidad del Estado) | Consulta de requisitorias y antecedentes de una persona identificada                             | RENIEC, vía PIDE | Convenio institucional de OAIPCS/Ministerio con RENIEC; acceso nominal al **analista con privilegio** | Convenio sin costo por consulta en el Estado; trámite de alta **[EN BLANCO · H-68]** | Convenio vigente, quién lo gestiona y plazo **[H-68]** |
-| <u>SVC-05</u> | Google Drive                                                 | PDF y borradores                                                                                 | OAIPCS / Google  | **[EN BLANCO]**                                                                                       | **[EN BLANCO]**                                                                      | ¿Entra en diciembre? **[H-59]**                        |
-| <u>SVC-06</u> | Correo institucional                                         | Envíos con enlace                                                                                | OGTI             | **[EN BLANCO]**                                                                                       | **[EN BLANCO]**                                                                      | ¿Entra en diciembre? **[H-59]**                        |
+| ID             | <u>Servicio</u>                                     | Qué se intercambia                                                                                             | Quién lo provee            | Cómo se accede                                                      | Costo                                                                                                 | Decisión pendiente                                                                                                  |
+| -------------- | --------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- | -------------------------- | ------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| <u>SVC-04</u>  | Sistema anterior (Google Sheets + Apps Script)      | Copia de los registros para la precarga y, si hace falta, los cambios hasta el cambio de sistema               | OAIPCS                     | Copia ya cargada en la base (`legacy`)                              | Sin costo                                                                                             | Fecha de cambio y frecuencia — **resuelto parcialmente: reconciliación antes del 23-dic-2026 (H-29)**               |
+| <u>SVC-09</u>  | Identidad institucional                             | Identidad y grupo de cada usuario                                                                              | OGTI                       | **[EN BLANCO · H-52]**                                              | Sin costo previsto                                                                                    | Servicio, grupos y plazo **[H-52]**                                                                                 |
+| <u>SVC-10a</u> | **Power BI Pro — Dashboard Analítico Especial**     | Lectura de vistas con detalle, incluida búsqueda por DNI                                                       | OAIPCS (licencias propias) | 7 licencias Pro ya pagadas por OAIPCS                               | **US$ 0 adicional** (ya pagado)                                                                       | Confirmar que cubre a los 7 usuarios núcleo (H-64, **resuelto**)                                                    |
+| <u>SVC-10b</u> | **Power BI Publish to Web — Dashboard Estratégico** | Vista pública de solo indicadores **agregados**, sin DNI ni datos personales                                   | OGTI / OAIPCS              | Publicación web (modo Importación obligatorio)                      | **US$ 0 extra**, pero exige un **Gateway de datos on-premises** en un servidor Windows de OGTI (13.3) | Quién instala y mantiene el Gateway **[EN BLANCO · H-71]**                                                          |
+| <u>SVC-05</u>  | Google Drive                                        | PDF y borradores                                                                                               | OAIPCS / Google            | Cuenta institucional ya existente                                   | Sin costo adicional                                                                                   | Estructura de carpetas **[EN BLANCO · H-72]**                                                                       |
+| <u>SVC-06</u>  | Correo institucional                                | Envíos con enlace                                                                                              | OGTI                       | Cuenta institucional ya existente                                   | Sin costo adicional                                                                                   | Remitente autorizado **[EN BLANCO · H-59]**                                                                         |
+| <u>SVC-02</u>  | **Gemini (modelo de lenguaje de Google)**           | Sincronización diaria de un lote de datos (**~75 piezas/día**), apoyo a mandatos y a la migración de diciembre | Google Cloud               | API con facturación activa                                          | Por uso, **≈ US$ 15 a 22/mes en operación normal** antes de costos ocultos (13.3)                     | Qué son exactamente las «75 piezas» diarias y su fuente **[EN BLANCO · H-73]**; dictamen legal **[H-04]**           |
+| <u>SVC-07</u>  | **WhatsApp Cloud API**                              | Mandatos (~5 veces al mes) y alertas, conectado **directo** a la Graph API de Meta (sin intermediario/BSP)     | Meta, vía OGTI             | Webhook propio en .NET (CT-03)                                      | Por mensaje de utilidad + línea dedicada (13.3)                                                       | Verificación de la cuenta de empresa; plantillas; línea telefónica dedicada **[EN BLANCO · H-74]**                  |
+| <u>SVC-16</u>  | **PIDE-RENIEC**                                     | Consulta de requisitorias y antecedentes de una persona identificada                                           | RENIEC, vía PIDE           | Convenio institucional; acceso **nominal, un solo usuario (Edith)** | Sin costo por consulta (convenio de Estado)                                                           | Convenio vigente y quién lo gestiona — **usuario resuelto: Edith (H-68, parcial)**; convenio **[EN BLANCO · H-68]** |
 
 ## 13.2 Servicios de 2027 en adelante
 
-| ID            | <u>Servicio</u>                          | Para qué                            | Costo                                  | Decisión pendiente                              |
-| ------------- | ---------------------------------------- | ----------------------------------- | -------------------------------------- | ----------------------------------------------- |
-| <u>SVC-01</u> | Medios digitales y portales oficiales    | Leer noticias y reportes            | Sin costo conocido                     | Lista blanca **[H-32]**                         |
-| <u>SVC-02</u> | Modelo de lenguaje de Google (Gemini)    | Extraer datos y redactar borradores | **[EN BLANCO]**                        | Dictamen legal **[H-04]**                       |
-| <u>SVC-03</u> | Redes sociales (API oficial o proveedor) | Acciones de las OSPA                | **[EN BLANCO]**                        | Proveedor **[H-10]**                            |
-| <u>SVC-07</u> | WhatsApp                                 | Alertas tempranas                   | Lo asume la oficina; monto desconocido | **[H-06]**                                      |
-| <u>SVC-08</u> | SMS                                      | Avisos de crisis                    | **[EN BLANCO]**                        | **[H-07]**                                      |
-| <u>SVC-11</u> | Mapas base                               | Mapas                               | **[EN BLANCO]**                        | Los mosaicos públicos no sirven para producción |
-| <u>SVC-12</u> | SESIGUE                                  | Estados de compromisos              | —                                      | Solo contrato de interfaz                       |
-| <u>SVC-13</u> | IMARPE, OEFA, SUNAT, VUCE                | Contexto del entorno                | —                                      | Fase siguiente                                  |
-| <u>SVC-14</u> | MEF, MINAM, MINCETUR, MININTER, RREE     | Compromisos interministeriales      | —                                      | Fase siguiente                                  |
-| <u>SVC-15</u> | Transcripción de audio a texto           | Relatorías                          | **[EN BLANCO]**                        | **[H-21]**                                      |
-| Extranet      | Acceso de actores externos (Perfil C)    | Consulta de compromisos propios     | **[EN BLANCO]**                        | **[H-54]**: pasa a 2027                         |
+| ID            | <u>Servicio</u>                                                                                                                                               | Para qué                                                  | Costo              | Decisión pendiente                              |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- | ------------------ | ----------------------------------------------- |
+| <u>SVC-01</u> | Medios digitales y portales oficiales                                                                                                                         | Leer noticias y reportes                                  | Sin costo conocido | Lista blanca **[H-32]**                         |
+| <u>SVC-03</u> | Redes sociales (API oficial o proveedor)                                                                                                                      | Acciones de las OSPA                                      | **[EN BLANCO]**    | Proveedor **[H-10]**                            |
+| <u>SVC-08</u> | SMS                                                                                                                                                           | Avisos de crisis                                          | **[EN BLANCO]**    | **[H-07]**                                      |
+| <u>SVC-11</u> | Mapas base                                                                                                                                                    | Mapas                                                     | **[EN BLANCO]**    | Los mosaicos públicos no sirven para producción |
+| <u>SVC-12</u> | SESIGUE                                                                                                                                                       | Estados de compromisos                                    | —                  | Solo contrato de interfaz                       |
+| <u>SVC-13</u> | IMARPE, OEFA, SUNAT, VUCE                                                                                                                                     | Contexto del entorno                                      | —                  | Fase siguiente                                  |
+| <u>SVC-14</u> | MEF, MINAM, MINCETUR, MININTER, RREE                                                                                                                          | Compromisos interministeriales                            | —                  | Fase siguiente                                  |
+| <u>SVC-15</u> | Transcripción de audio a texto                                                                                                                                | Relatorías                                                | **[EN BLANCO]**    | **[H-21]**                                      |
+| Extranet      | Acceso de **Gobiernos Regionales/Locales y Ciudadanía** (Perfil C) — los usuarios finales de la misión de OAIPCS, pero no del sistema en esta etapa (ver 3.1) | Consulta de indicadores abiertos y de compromisos propios | **[EN BLANCO]**    | **[H-54]**: pasa a 2027                         |
 
-## 13.3 Presupuesto de servicios externos
+## 13.3 Presupuesto de servicios externos y costos ocultos
 
-> **Intención:** reducir al mínimo los costos que asumirá OAIPCS. Por eso el presupuesto separa lo que **ya existe y paga la institución** de lo que **se paga por uso** y de lo que **exige un contrato fijo**. Los precios son **de referencia** (consultados en noviembre de 2026) y deben verificarse con cada proveedor **[EN BLANCO · H-66]**. Montos en dólares estadounidenses.
+> El consumo directo de tokens y mensajes es bajo: **≈ US$ 15 a 22/mes en operación normal**. El riesgo real son los **costos ocultos** —técnicos, administrativos y tributarios— que pueden **duplicar o triplicar** ese presupuesto si no se bloquean desde la arquitectura. Fuente: análisis de costos ocultos aportado por OAIPCS (R10).
 
-### 13.3.1 Quién paga qué
+### 13.3.1 Costos ocultos de Gemini (SVC-02) y cómo se evitan
 
-| Tipo                                               | Qué es                                                             | Servicios                                                                                                     |
-| -------------------------------------------------- | ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------- |
-| **A. Ya existe** (costo adicional para OAIPCS ≈ 0) | Infraestructura o licencias de la institución                      | SVC-09 identidad, SVC-10 Power BI, SVC-06 correo, SVC-04 sistema anterior, base de datos y servidores de OGTI |
-| **B. Pago por uso**                                | Se cobra según lo que se consume                                   | SVC-02 Gemini, SVC-07 WhatsApp, SVC-08 SMS, SVC-15 transcripción                                              |
-| **C. Contrato fijo**                               | Cuota mensual o anual                                              | Proveedor de WhatsApp (si no se usa el acceso directo), escucha de redes (SVC-03), servicio de mapas (SVC-11) |
-| **D. Costo de apertura externa**                   | Seguridad, soporte y mantenimiento de lo que ven personas de fuera | Extranet para actores externos                                                                                |
-| **E. Esfuerzo (no es dinero, pero cuesta)**        | Trámites y decisiones                                              | Dictamen legal, verificación de cuenta de WhatsApp, registro de bancos de datos personales si corresponde     |
+| #   | Costo oculto                                           | Cómo ocurre                                                                                                                                                    | Impacto                                                                        | Mitigación (regla)                                                                                                                           |
+| --- | ------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | **Tokens de razonamiento interno** («thinking tokens») | El modelo piensa antes de responder y Google cobra esos tokens a precio de salida (5× el de entrada)                                                           | Puede multiplicar el costo por 2× o 3× en cada extracción                      | **RM-11:** fijar `thinking_budget = 0` (o mínimo) y usar `responseSchema` (salida estructurada) en toda extracción                           |
+| 2   | **PDFs e imágenes sin extraer**                        | Enviar un PDF entero a Gemini lo procesa como imagen por página (hasta 1 120 tokens/página)                                                                    | Un informe de 20 páginas pasa de ~4 000 a ~22 400 tokens (5,6× más caro)       | **RM-12:** extraer primero el texto plano en .NET (p. ej. PdfPig o iText) y enviar imágenes solo si son escaneos o fotos de campo            |
+| 3   | **Grounding con Google Search activado**               | Si se habilita la búsqueda web en las llamadas, Google cobra US$ 14 por cada 1 000 búsquedas, además de tokens ocultos de instrucciones                        | Cargo adicional fuera del cálculo de tokens                                    | **RM-13:** mantener `google_search_retrieval` **desactivado** en los flujos de ingesta y mandatos internos                                   |
+| 4   | **Reintentos por JSON malformado**                     | Sin validación estricta, un dato que falla al parsear se reintenta 3 veces en tiempo real → se paga 3× por lo mismo                                            | Desperdicio silencioso de cuota                                                | **RM-14:** usar salida estructurada nativa + cola de fallidos (Dead Letter Queue) con máximo 1 reintento                                     |
+| 5   | **Nivel gratuito y retención de datos**                | El nivel gratuito da a Google derechos de revisión/entrenamiento sobre los datos; desde oct-2026 los proyectos de pago nuevos activan `store=true` por defecto | **Incumplimiento de la Ley N.° 29733** si viajan nombres o contextos sensibles | **RM-15:** usar siempre un proyecto con **facturación activa**, fijar `store=false`, y **anonimizar DNI/teléfonos antes de llamar a la API** |
 
-### 13.3.2 Presupuesto por servicio
+### 13.3.2 Costos ocultos de WhatsApp Cloud API (SVC-07) y cómo se evitan
 
-| ID            | <u>Servicio</u>                          | Horizonte           | Tipo                   | Referencia de precio                                                                                                                                                                                                                                 | Costo mensual de ejemplo                                                                          | Quién paga             | Estado                          |
-| ------------- | ---------------------------------------- | ------------------- | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- | ---------------------- | ------------------------------- |
-| <u>SVC-09</u> | Identidad institucional                  | MVP                 | A                      | Sin cobro adicional previsto                                                                                                                                                                                                                         | 0                                                                                                 | OGTI                   | **[EN BLANCO · H-52]**          |
-| <u>SVC-10</u> | Power BI                                 | MVP                 | A                      | Licencia ya existente. **Ojo:** quien ve los informes puede necesitar licencia propia, salvo que el contenido esté en una capacidad dedicada                                                                                                         | 0 si las licencias cubren a los lectores                                                          | OGTI                   | **[EN BLANCO · H-64]**          |
-| <u>SVC-04</u> | Sistema anterior                         | MVP                 | A                      | Sin cobro                                                                                                                                                                                                                                            | 0                                                                                                 | OAIPCS                 | Definido                        |
-| <u>SVC-06</u> | Correo institucional                     | MVP (por confirmar) | A                      | Sin cobro adicional previsto                                                                                                                                                                                                                         | 0                                                                                                 | OGTI                   | **[EN BLANCO · H-59]**          |
-| <u>SVC-05</u> | Google Drive                             | MVP (por confirmar) | A                      | Sin cobro adicional si ya se usa la cuenta institucional                                                                                                                                                                                             | 0                                                                                                 | **[EN BLANCO · H-65]** | **[EN BLANCO · H-59]**          |
-| <u>SVC-02</u> | Gemini (modelo de lenguaje de Google)    | 2027                | B                      | Modelos Flash: **US$ 0,75 por millón de tokens de entrada y 3,75 de salida hasta el 31-dic-2026; desde el 1-ene-2027, 1,50 y 7,50**. Hay descuento de 50 % si el procesamiento es por lotes                                                          | **≈ 3** con 150 documentos al mes; **≈ 30** con diez veces más (ver ejemplo abajo)                | **[EN BLANCO · H-65]** | Falta dictamen legal **[H-04]** |
-| <u>SVC-07</u> | WhatsApp                                 | 2027                | B + C                  | Cobro **por mensaje entregado**, según categoría y país; desde el 1-oct-2026 los mensajes de utilidad dentro de la ventana de 24 horas vuelven a cobrarse. Referencias de utilidad: Brasil 0,0078 y Argentina 0,0299 por mensaje. **Perú: sin dato** | **≈ 2 a 9** con 300 mensajes al mes (ver ejemplo abajo), más la cuota del proveedor si se usa uno | **[EN BLANCO · H-65]** | **[EN BLANCO · H-06, H-66]**    |
-| <u>SVC-08</u> | SMS                                      | MADRE               | B                      | Por mensaje; sin tarifa verificada                                                                                                                                                                                                                   | **[EN BLANCO]**                                                                                   | **[EN BLANCO]**        | No se incluye **[H-07]**        |
-| <u>SVC-03</u> | Redes sociales (API oficial o proveedor) | MADRE               | C                      | Suscripción o cuota; sin tarifa verificada                                                                                                                                                                                                           | **[EN BLANCO]**                                                                                   | **[EN BLANCO]**        | **[H-10]**                      |
-| <u>SVC-11</u> | Mapas base                               | 2027 / MADRE        | C                      | Servidor propio o proveedor con acuerdo de servicio; los mosaicos públicos no sirven para producción                                                                                                                                                 | **[EN BLANCO]**                                                                                   | OGTI                   | **[H-22]**                      |
-| <u>SVC-15</u> | Transcripción de audio                   | 2027                | B                      | Por minuto de audio; sin tarifa verificada                                                                                                                                                                                                           | **[EN BLANCO]**                                                                                   | **[EN BLANCO]**        | **[H-21]**                      |
-| <u>SVC-16</u> | PIDE-RENIEC                              | MVP (si se activa)  | A (convenio de Estado) | Interoperabilidad entre entidades públicas; habitualmente sin cobro por consulta                                                                                                                                                                     | 0 por consulta; costo de alta y mantenimiento del convenio                                        | **[EN BLANCO]**        |
-| Extranet      | Acceso de actores externos               | 2027 / MADRE        | D                      | Seguridad, hosting expuesto, soporte                                                                                                                                                                                                                 | **[EN BLANCO]**                                                                                   | **[EN BLANCO]**        | **[H-54]**                      |
+| #   | Costo oculto                               | Detalle                                                                                                                                                        | Estimado                                                 | Mitigación (regla)                                                                                                                      |
+| --- | ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | **Línea telefónica dedicada**              | Meta exige un número exclusivo, fuera de la app móvil; si es prepago sin recargas, la operadora lo recicla y se pierde la cuenta                               | S/ 30 a S/ 50/mes (≈ US$ 8–13)                           | **RM-16:** línea fija virtual o **postpago institucional**, gestionada por OGTI                                                         |
+| 2   | **Reclasificación de plantillas por Meta** | Desde oct-2026, Meta cobra toda plantilla entregada; si el texto es genérico, una plantilla de «Utilidad» (≈ US$ 0,03 en Perú) se reclasifica como «Marketing» | La tarifa sube a más del doble (≈ US$ 0,07+ por mensaje) | **RM-17:** redactar plantillas **estrictamente transaccionales**, con variables obligatorias (`{{1}}` código de alerta, `{{2}}` región) |
+| 3   | **Intermediarios (BSP) innecesarios**      | Contratar Twilio, Wati o Respond.io suma una cuota fija más 15 % a 20 % de recargo por mensaje                                                                 | US$ 20 a 55/mes adicionales                              | **RM-18:** OGTI conecta el webhook en .NET **directo contra la Graph API** de Meta (sin intermediario)                                  |
+| 4   | **Exposición segura del webhook**          | Meta necesita enviar POST a un servidor público con SSL válido y reglas de firewall/WAF                                                                        | Horas de ingeniería de OGTI                              | **RM-19:** incluir el endpoint del webhook en el paquete de despliegue de CT-03 desde el inicio                                         |
 
-### 13.3.3 Ejemplos de cálculo (ilustrativos)
+### 13.3.3 Costos administrativos y tributarios (Google Workspace, Power BI, SUNAT)
 
-Los volúmenes son **supuestos**; el dato real se pide en H-67.
+| Concepto                              | Detalle                                                                                                                                                                                            | Mitigación (regla)                                                                                                      |
+| ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| **IGV y retención a no domiciliados** | Pagar Gemini o Meta directo desde una entidad pública peruana aplica 18 % de IGV por servicios digitales del exterior, y eventual retención de renta si no hay distribuidor local autorizado       | **RM-20:** prever un margen de **+18 % a +30 %** sobre el consumo neto de API en el presupuesto                         |
+| **Gateway de datos de Power BI**      | SQL Server está en OGTI y el Dashboard Estratégico usa Publish to Web (exige modo Importación); OGTI debe instalar y mantener un **On-Premises Data Gateway** para hasta 8 actualizaciones diarias | **RM-21:** incluir el Gateway en el plan de despliegue de OGTI (18.2); sin él, el Dashboard Estratégico no se actualiza |
 
-| Cálculo      | Supuestos                                                                                                     | Resultado                                                                                                                     |
-| ------------ | ------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| **Gemini**   | 150 documentos al mes; 6 000 tokens de entrada y 1 500 de salida por documento; precios de 2027 (1,50 y 7,50) | Entrada 0,9 millones × 1,50 = 1,35; salida 0,225 millones × 7,50 = 1,69; **≈ US$ 3 al mes**. Con diez veces más: **≈ US$ 30** |
-| **WhatsApp** | 30 alertas al mes × 10 destinatarios = 300 mensajes de utilidad; tarifa entre 0,0078 y 0,0299                 | **≈ US$ 2,35 a 9 al mes**                                                                                                     |
+### 13.3.4 Resumen de presupuesto
 
-### 13.3.4 Resumen
+| Concepto                                                | Diciembre 2026                                                                           |
+| ------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| Consumo directo (Gemini + WhatsApp) en operación normal | **≈ US$ 15 a 22/mes**                                                                    |
+| Con las 5+4 mitigaciones de costos ocultos aplicadas    | Se mantiene cerca del rango anterior                                                     |
+| Sin mitigaciones                                        | Puede **duplicarse o triplicarse** (RM-11 a RM-19)                                       |
+| Margen tributario (RM-20)                               | **+18 % a 30 %** sobre el consumo neto                                                   |
+| Línea WhatsApp dedicada                                 | US$ 8 a 13/mes                                                                           |
+| PIDE-RENIEC                                             | US$ 0 por consulta (convenio de Estado)                                                  |
+| Power BI Pro (7 licencias) y Publish to Web             | **US$ 0 adicional** (ya pagadas / gratis), salvo el Gateway (esfuerzo de OGTI, no cuota) |
+| **Tope de gasto de OAIPCS**                             | **[EN BLANCO · H-65]**                                                                   |
 
-| Concepto                            | Diciembre 2026                                                             | 2027                                                                 |
-| ----------------------------------- | -------------------------------------------------------------------------- | -------------------------------------------------------------------- |
-| Costo por uso adicional para OAIPCS | **≈ 0**, si OGTI cubre identidad, Power BI y correo **[H-64, H-59, H-65]** | Del orden de **US$ 5 a 40 al mes** en el ejemplo (Gemini y WhatsApp) |
-| Contratos fijos                     | Ninguno                                                                    | **[EN BLANCO]** según WhatsApp, redes y mapas                        |
-| Extranet                            | No existe                                                                  | **[EN BLANCO · H-54]**: es el costo más probable de ser alto         |
-| Esfuerzo legal y de trámites        | Dictamen sobre datos personales **[H-04]**                                 | Verificación de WhatsApp, dictamen sobre IA                          |
-| **Tope de gasto de OAIPCS**         | **[EN BLANCO · H-65]**                                                     | **[EN BLANCO · H-65]**                                               |
-
-> **Lectura:** con los volúmenes actuales (35 casos, 83 alertas, 153 documentos), el **consumo** de los servicios es pequeño. Lo que puede encarecer el proyecto no es el uso, sino los **contratos fijos**, las **licencias de lectura** y la **apertura a actores externos**.
-
-**Fuentes de referencia:** páginas de precios de Gemini en Google Cloud y en Google AI for Developers; documentación de precios de WhatsApp Business Platform de Meta; tablas de tarifas publicadas por proveedores autorizados de WhatsApp. Las tarifas se actualizan con frecuencia (las de WhatsApp, normalmente cada trimestre).
+> **Fuentes de referencia:** páginas de precios de Gemini (Google Cloud / Google AI for Developers); documentación de precios de WhatsApp Business Platform de Meta; análisis de costos ocultos de OAIPCS (R10). Las tarifas cambian con frecuencia — verificar antes de presupuestar en firme (H-66).
 
 ## 13.4 Qué exige cada actor externo al sistema
 
-Aquí se listan los **requisitos exactos** que cada actor externo impone, para poder decidir si vale la pena abrir esa puerta. «Actor externo» incluye **servicios y proveedores**, **instituciones** y **personas de fuera de OAIPCS**.
+| Actor externo                                            | Qué exige al sistema (requisito exacto)                                                                                                | Qué hay que tramitar o contratar              | Costo                      | Mínimo propuesto para diciembre                                                                                        |
+| -------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- | -------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| <u>SVC-09</u> Identidad institucional                    | Aceptar el inicio de sesión que ofrezca OGTI; leer el grupo del usuario para asignar su rol                                            | Alta de la aplicación y de los grupos por rol | Sin costo                  | Solo los 10 usuarios núcleo (6.1)                                                                                      |
+| <u>SVC-10a</u> Power BI Pro                              | 7 licencias ya asignadas; acceso de solo lectura a las vistas                                                                          | Ya resuelto                                   | US$ 0 adicional            | Dashboard Analítico Especial para el equipo OAIPCS (7)                                                                 |
+| <u>SVC-10b</u> Power BI Publish to Web                   | Datos **agregados únicamente**, sin DNI ni contacto; modo Importación; Gateway en OGTI                                                 | Gateway on-premises (RM-21)                   | US$ 0 + esfuerzo de OGTI   | Dashboard Estratégico para Alta Dirección (3)                                                                          |
+| <u>SVC-04</u> Sistema anterior                           | Lectura de la hoja o de su exportación                                                                                                 | Autorización de acceso de OAIPCS              | Sin costo                  | Una carga congelada; reconciliación antes del 23-dic (H-29)                                                            |
+| <u>SVC-06</u> Correo                                     | Remitente autorizado; plantillas; enlace, no adjunto                                                                                   | Autorización del remitente                    | Sin costo                  | Envío de alertas e informes                                                                                            |
+| <u>SVC-05</u> Google Drive                               | Permiso de acceso a carpetas; estructura de carpetas                                                                                   | Cuenta de servicio o permisos                 | Sin costo                  | Borradores de documentos, enlazados desde el correo                                                                    |
+| <u>SVC-02</u> Gemini                                     | Cuenta con facturación activa; `store=false`; sin datos personales en el texto; RM-11 a RM-15                                          | Dictamen legal (H-04); cuenta y tope de gasto | Por uso (13.3)             | Sincronización diaria acotada (~75 piezas); sin grounding web                                                          |
+| <u>SVC-07</u> WhatsApp                                   | Cuenta de empresa verificada; número dedicado; plantillas transaccionales; webhook directo a Meta; RM-16 a RM-19                       | Verificación, número, plantillas, webhook     | Por mensaje + línea (13.3) | Mandatos (~5/mes) y alertas, sin intermediario (BSP)                                                                   |
+| <u>SVC-16</u> PIDE-RENIEC                                | Convenio vigente; **usuario nominal único (Edith)**; motivo obligatorio por consulta; auditoría inmutable; resultado nunca en tableros | Gestión del convenio                          | Sin costo por consulta     | Solo Edith; ver RA-07, RA-08                                                                                           |
+| **Gobiernos Regionales/Locales y Ciudadanía** (Perfil C) | Portal accesible desde internet; identidad externa; separación de datos; soporte                                                       | Hosting expuesto, seguridad reforzada (H-54)  | Alto                       | **No se abre en diciembre** — es el público final de la misión de OAIPCS, pero no un usuario del sistema en esta etapa |
+| **Legal / protección de datos**                          | Dictamen sobre datos personales y uso de IA externa; inscripción del banco de datos personales (Anexo D)                               | Dictamen e inscripción (H-04)                 | Esfuerzo                   | Antes de activar Gemini y PIDE-RENIEC                                                                                  |
 
-| Actor externo                                                          | Qué exige al sistema (requisito exacto)                                                                                                                                                                                                                             | Qué hay que tramitar o contratar                                                                                           | Costo                                                         | Mínimo propuesto                                                                                                                         |
-| ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| <u>SVC-09</u> Identidad institucional                                  | Aceptar el inicio de sesión que ofrezca OGTI; leer el grupo del usuario para asignar su rol; registrar la aplicación ante el servicio                                                                                                                               | Alta de la aplicación y de los grupos por rol                                                                              | Sin cobro adicional previsto                                  | **Solo ingreso interno.** Sin login para externos                                                                                        |
-| <u>SVC-10</u> Power BI                                                 | Una cuenta de **solo lectura** a las vistas; refresco programado; licencias para quienes ven los informes                                                                                                                                                           | Cuenta de lectura, licencias de lectores, puerta de enlace si la base no es accesible desde la nube **[EN BLANCO · H-64]** | Licencias existentes                                          | **Entre 4 y 6 tableros**, todos sobre vistas ya existentes                                                                               |
-| <u>SVC-04</u> Sistema anterior                                         | Lectura de la hoja o de su exportación; formato estable de columnas                                                                                                                                                                                                 | Autorización de acceso de OAIPCS                                                                                           | Sin cobro                                                     | **Una carga congelada**; cambios semanales solo hasta el día de cambio **[H-29]**                                                        |
-| <u>SVC-06</u> Correo                                                   | Un remitente autorizado y un servidor de envío; plantillas de mensaje; **enlace, no adjunto**                                                                                                                                                                       | Autorización del remitente                                                                                                 | Sin cobro adicional previsto                                  | Mensaje con enlace desde el correo institucional                                                                                         |
-| <u>SVC-05</u> Google Drive                                             | Permiso de acceso a carpetas; consentimiento de la aplicación; estructura de carpetas                                                                                                                                                                               | Cuenta de servicio o permisos de carpeta                                                                                   | Sin cobro si ya existe la cuenta                              | **No integrar en diciembre**: se guarda el enlace manualmente                                                                            |
-| <u>SVC-02</u> Gemini                                                   | Una cuenta con facturación; una clave guardada en un gestor de secretos; límites de uso configurados; **nunca texto con datos personales**; revisar la política de uso de datos del nivel gratuito frente al de pago                                                | Dictamen legal **[H-04]**; cuenta y tope de gasto                                                                          | Por uso                                                       | **2027.** Solo texto público; procesamiento por lotes                                                                                    |
-| <u>SVC-07</u> WhatsApp                                                 | Una cuenta de empresa de Meta **verificada**; un número de teléfono dedicado; **plantillas aprobadas por Meta**; **consentimiento previo** de cada destinatario; una dirección web pública segura para recibir respuestas; un proveedor autorizado o acceso directo | Verificación de la empresa, número, plantillas, consentimientos, contrato con proveedor                                    | Por mensaje + cuota                                           | **No usar en diciembre**; correo                                                                                                         |
-| <u>SVC-08</u> SMS                                                      | Pasarela de envío; remitente registrado                                                                                                                                                                                                                             | Contrato con proveedor                                                                                                     | Por mensaje                                                   | **No usar**                                                                                                                              |
-| <u>SVC-03</u> Redes sociales                                           | Acceso por API oficial o proveedor licenciado; lista blanca de cuentas públicas; revisión legal                                                                                                                                                                     | Contrato, cuota y dictamen                                                                                                 | Suscripción                                                   | **No integrar**: el analista registra a mano las acciones relevantes                                                                     |
-| <u>SVC-11</u> Mapas                                                    | Servidor de mapas o proveedor con acuerdo de servicio; atribución visible                                                                                                                                                                                           | Contrato o servidor propio                                                                                                 | **[EN BLANCO]**                                               | **Sin mapa en diciembre**; ubicación como texto y código                                                                                 |
-| <u>SVC-12</u> SESIGUE                                                  | Formato de estados y credenciales de la otra entidad                                                                                                                                                                                                                | Convenio o acuerdo de interfaz                                                                                             | **[EN BLANCO]**                                               | **No integrar**; exportación manual si se pide                                                                                           |
-| <u>SVC-16</u> PIDE-RENIEC                                              | Convenio institucional vigente; usuario nominal (no genérico) con el privilegio asignado por OGTI o por el ente rector; cada consulta debe declarar el motivo; sin consultas masivas; auditoría obligatoria                                                         | Gestión del convenio y del usuario nominal; dictamen legal sobre uso del dato                                              | Sin costo por consulta (convenio de Estado); esfuerzo de alta | **Un solo usuario nominal** (hoy, Edith); nunca un rol compartido; resultado nunca en tableros                                           |
-| <u>SVC-14</u> Otros ministerios                                        | Convenios de intercambio y formatos acordados                                                                                                                                                                                                                       | Convenios                                                                                                                  | **[EN BLANCO]**                                               | **No integrar**                                                                                                                          |
-| **Actores externos humanos** (gremios, organizaciones con compromisos) | Un portal accesible desde internet; identidad externa con segundo factor por código; separación estricta de sus datos; soporte a usuarios; términos de uso                                                                                                          | Hosting expuesto, seguridad reforzada, mesa de ayuda **[H-54]**                                                            | **Alto**                                                      | **No abrir Extranet.** Si hace falta informar a un actor externo, se le envía **manualmente** un resumen aprobado de **sus** compromisos |
-| **Legal / protección de datos**                                        | Dictamen sobre datos personales y uso de IA externa; si corresponde, registro de bancos de datos personales                                                                                                                                                         | Dictamen e inscripción **[H-04]**                                                                                          | Esfuerzo                                                      | **Dictamen antes de cualquier servicio que reciba texto o contactos**                                                                    |
+## 13.5 Reglas para minimizar costos y dependencias
 
-## 13.5 Reglas para minimizar la dependencia y el costo
-
-| ID    | Regla                                                                                                       |
-| ----- | ----------------------------------------------------------------------------------------------------------- |
-| RM-01 | En diciembre se usan **solo servicios que la institución ya tiene** (identidad, Power BI, correo)           |
-| RM-02 | **Ninguna integración nueva** sin una persona o área que se haga cargo de su pago                           |
-| RM-03 | Toda integración va detrás de un **adaptador** que permita cambiar de proveedor sin reescribir el sistema   |
-| RM-04 | Se prefiere el **pago por uso con tope de gasto** y alerta de consumo a las cuotas fijas                    |
-| RM-05 | Si la respuesta no es urgente, se usa el procesamiento **por lotes** (más barato) en lugar de tiempo real   |
-| RM-06 | Se envían **enlaces**, no adjuntos ni contenido sensible                                                    |
-| RM-07 | **No se abre Extranet** hasta que se demuestre su valor y se defina quién la sostiene                       |
-| RM-08 | **Ningún dato personal** sale a servicios externos sin dictamen legal                                       |
-| RM-09 | Cada servicio se evalúa con una pregunta: _¿qué decisión habilita y cuánto cuesta por cada vez que se usa?_ |
-| RM-10 | Cada integración registra su **consumo** (llamadas, tokens, mensajes y costo)                               |
-
----
+| ID                | Regla                                                                                                                                                                                                                                        |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| RM-01             | Todo servicio activado en diciembre (SVC-02, SVC-07, SVC-16) lo es con **alcance acotado** (13.1) y mitigaciones obligatorias (13.3), no en abierto                                                                                          |
+| RM-02             | **Ninguna integración nueva** sin una persona o área que se haga cargo de su pago                                                                                                                                                            |
+| RM-03             | Toda integración va detrás de un **adaptador** que permita cambiar de proveedor sin reescribir el sistema                                                                                                                                    |
+| RM-04             | Se prefiere el **pago por uso con tope de gasto** y alerta de consumo a las cuotas fijas                                                                                                                                                     |
+| RM-05             | Si la respuesta no es urgente, se usa el procesamiento **por lotes** (más barato) en lugar de tiempo real                                                                                                                                    |
+| RM-06 a RM-10     | _(reglas generales previas: enlaces no adjuntos, no abrir Extranet sin sostenibilidad definida, ningún dato personal sin dictamen, evaluar cada servicio por decisión habilitada y costo por uso, registrar el consumo de cada integración)_ |
+| **RM-11 a RM-15** | **Mitigación de costos ocultos de Gemini** (13.3.1): `thinking_budget` mínimo, extraer texto antes de enviar PDFs, sin grounding web, máximo 1 reintento con cola de fallidos, `store=false` y anonimización                                 |
+| **RM-16 a RM-19** | **Mitigación de costos ocultos de WhatsApp** (13.3.2): línea postpago institucional, plantillas transaccionales, webhook directo sin BSP, endpoint seguro desde el inicio                                                                    |
+| **RM-20, RM-21**  | **Mitigación de costos administrativos** (13.3.3): margen tributario de 18-30 %, Gateway de Power BI incluido en el despliegue                                                                                                               |
 
 # 14. ARQUITECTURA DEL SISTEMA (MODELO C4)
 
@@ -1280,57 +1264,101 @@ El modelo C4 describe el sistema en tres niveles de acercamiento: **C1** (qué e
 
 > **Importante.** Este capítulo es **material interno** y no se lleva a la reunión. Con el plan de diciembre solo se integran <u>SVC-04</u> (sistema anterior), <u>SVC-09</u> (login institucional) y <u>SVC-10</u> (Power BI, si OGTI lo usa para los tableros **[EN BLANCO · H-50]**); <u>SVC-05</u> y <u>SVC-06</u> quedan por confirmar. Todo lo demás pasa a 2027.
 
-## 13.1 Nivel 1 — Contexto del sistema
+## 14.1 Nivel 1 — Contexto del sistema
+
+> **Actualizado por OAIPCS (R10).** Refleja el alcance real: 7 usuarios OAIPCS + 3 de Alta Dirección (10 nominales, ver 6.1); dos tableros según costo (6.2); Gemini, WhatsApp y PIDE-RENIEC activos ahora, acotados; Gobiernos Regionales/Locales y Ciudadanía son los usuarios finales de la **misión** de OAIPCS, pero no del sistema en esta etapa (Perfil C, 2027).
 
 ```mermaid
 flowchart TB
-  classDef persona fill:#eef2ff,stroke:#4f46e5,stroke-width:1px;
-  classDef sistema fill:#e6fffa,stroke:#0f766e,stroke-width:2px;
-  classDef integra fill:#fff7ed,stroke:#c2410c,stroke-width:2px,stroke-dasharray:5 3;
+  classDef persona fill:#eef2ff,stroke:#4f46e5,stroke-width:1.5px;
+  classDef sistema fill:#e6fffa,stroke:#0f766e,stroke-width:2.5px;
+  classDef activo fill:#fff7ed,stroke:#c2410c,stroke-width:2px,stroke-dasharray:5 3;
   classDef futuro fill:#f3f4f6,stroke:#6b7280,stroke-width:1.5px,stroke-dasharray:5 3,color:#4b5563;
 
-  AN["Analistas y sectoristas<br/>OAIPCS (Perfil A)"]:::persona
-  DIR["Dirección de la OAIPCS"]:::persona
-  ALTA["Alta Dirección: ministro, viceministros,<br/>secretaría general, jefaturas de gabinete (Perfil B)"]:::persona
-  EXT["Actores externos y gremios<br/>(Perfil C, fase siguiente)"]:::futuro
-  OGTI["OGTI: construye,<br/>opera y mantiene (.NET)"]:::persona
+  %% USUARIOS ACTUALES (10 NOMINALES)
+  subgraph OAIPCS_USERS["Equipo OAIPCS (7 usuarios · Dashboard Analítico Especial)"]
+    DIR["Directora OAIPCS (1)<br/>Valida crisis, mandatos y consulta personas"]:::persona
+    SEC["Sectoristas OAIPCS (5)<br/>Registra, valida, consulta personas (1 con RENIEC)"]:::persona
+    ADM["Administrador (1)<br/>Usuarios, catálogos y auditoría"]:::persona
+  end
 
-  SIS["SISTEMA AVISA-PRODUCE<br/>Reúne casos, actores, compromisos y alertas;<br/>muestra fichas y tableros"]:::sistema
+  subgraph ALTA_USERS["Autoridad PRODUCE (3 usuarios · Dashboard Estratégico)"]
+    AUT["Ministro (1) y Viceministros (2)<br/>Alertas aprobadas, tablero estratégico<br/>y consulta de perfil público de actores"]:::persona
+  end
 
-  S01["SVC-01 Medios digitales y<br/>portales oficiales (2027)"]:::futuro
-  S02["SVC-02 Modelo de lenguaje<br/>de Google (2027)"]:::futuro
-  S03["SVC-03 Redes sociales<br/>(API oficial o proveedor)"]:::futuro
-  S04["SVC-04 Sistema anterior<br/>(Google Sheets + Apps Script)"]:::integra
-  S05["SVC-05 Google Drive"]:::integra
-  S06["SVC-06 Correo institucional"]:::integra
-  S07["SVC-07 WhatsApp"]:::futuro
-  S09["SVC-09 Identidad institucional<br/>(inicio de sesión)"]:::integra
-  S10["SVC-10 Power BI"]:::integra
-  S11["SVC-11 Mapas base (2027)"]:::futuro
-  S12["SVC-12 SESIGUE y otros<br/>sistemas del Estado"]:::futuro
+  OGTI["OGTI PRODUCE<br/>Construye, aloja y mantiene (.NET / Angular / SQL Server)"]:::persona
+  EXT["Público externo OAIPCS (Futuro · Perfil C)<br/>Gobiernos Regionales/Locales, Ciudadanía y Gremios"]:::futuro
 
-  AN -->|"carga, valida, consulta"| SIS
-  DIR -->|"confirma y valida"| SIS
-  SIS -->|"alertas, resúmenes, indicadores"| ALTA
-  EXT -.->|"consulta lo propio"| SIS
-  OGTI -->|"aloja y mantiene"| SIS
+  %% SISTEMA CENTRAL
+  SIS["SISTEMA AVISA-PRODUCE<br/>Ingesta diaria (75 pzas), gestión de casos y actores,<br/>consultas por rol, alertas y 2 tableros diferenciados"]:::sistema
 
-  S01 -->|"noticias y reportes"| SIS
-  S03 -.->|"publicaciones públicas"| SIS
-  S04 -->|"carga histórica y cambios"| SIS
-  SIS <-->|"texto a analizar / datos extraídos"| S02
-  SIS <-->|"borradores y documentos"| S05
-  SIS -->|"envíos"| S06
-  SIS -.->|"alertas"| S07
-  S09 -->|"quién es el usuario"| SIS
-  SIS -->|"vistas de datos"| S10
-  S11 -->|"mapa base"| SIS
-  SIS -.->|"estados de compromisos"| S12
+  %% CONTENEDOR 1: SERVICIOS QUE YA PAGAMOS
+  subgraph PAGADOS["Servicios que ya pagamos (Suite PRODUCE + 7 Power BI Pro · US$ 0 extra)"]
+    S04["SVC-04 Google Sheets<br/>(Migración corte dic: 86 hojas / 4,729 filas)"]:::activo
+    S05["SVC-05 Google Drive<br/>(Borradores y documentos)"]:::activo
+    S06["SVC-06 Gmail Institucional<br/>(Envío de alertas e informes)"]:::activo
+    S09["SVC-09 Identidad Institucional<br/>(Login y roles)"]:::activo
+    S10A["SVC-10a Power BI Pro (7 lic. pagadas OAIPCS)<br/>Dashboard Analítico Especial"]:::activo
+    S10B["SVC-10b Power BI Vista Pública (Publish to Web)<br/>Dashboard Estratégico (US$ 0 extra · datos agregados)"]:::activo
+  end
+
+  %% CONTENEDOR 2: SERVICIOS DE PAGA
+  subgraph PAGA["Servicios de paga por consumo (API Pay-as-you-go)"]
+    S02["SVC-02 Google Gemini API<br/>(Sync diario 75 pzas + mandatos + migración dic · Ahora)"]:::activo
+    S07["SVC-07 WhatsApp Cloud API<br/>(Mandatos 5x/mes y alertas · Ahora)"]:::activo
+    S03["SVC-03 Redes Sociales<br/>(API oficial / escucha · Futuro)"]:::futuro
+    S11["SVC-11 Mapas Base<br/>(Mosaicos producción · Futuro)"]:::futuro
+  end
+
+  %% CONTENEDOR 3: SERVICIOS DEL ESTADO
+  subgraph ESTADO["Servicios del Estado (Interoperabilidad y Portales)"]
+    S16["SVC-16 PIDE-RENIEC<br/>(Consulta nominal solo 1 sectorista)"]:::activo
+    S01["SVC-01 Portales Oficiales / gob.pe<br/>(Fuentes públicas · Futuro)"]:::futuro
+    S12["SVC-12 SESIGUE<br/>(Seguimiento compromisos · Futuro)"]:::futuro
+    S13["SVC-13 Entidades Sectoriales<br/>IMARPE, OEFA, SUNAT, VUCE (Futuro)"]:::futuro
+    S14["SVC-14 Otros Ministerios<br/>MEF, MINAM, MININTER (Futuro)"]:::futuro
+  end
+
+  %% FLUJO DE USUARIOS
+  DIR -->|"confirma crisis, consulta personas"| SIS
+  SEC -->|"opera casos, alertas, consulta personas"| SIS
+  ADM -->|"administra y audita"| SIS
+  AUT <-->|"consulta perfil público y alertas"| SIS
+  OGTI -->|"despliega y mantiene"| SIS
+  EXT -.->|"consulta compromisos (Futuro)"| SIS
+
+  %% FLUJO SERVICIOS YA PAGADOS
+  S04 -->|"carga histórica y corte dic"| SIS
+  SIS <-->|"archivos y enlaces"| S05
+  SIS -->|"notificaciones"| S06
+  S09 -->|"autenticación y grupos"| SIS
+  SIS -->|"vistas analíticas detalladas"| S10A
+  S10A -->|"Dashboard Analítico Especial (Pro)"| OAIPCS_USERS
+  SIS -->|"vistas ejecutivas agregadas"| S10B
+  S10B -->|"Dashboard Estratégico (Vista Pública)"| ALTA_USERS
+  S10B -.->|"indicadores abiertos (Futuro)"| EXT
+
+  %% FLUJO SERVICIOS DE PAGA
+  SIS <-->|"75 pzas/día + texto/imagen + migración"| S02
+  DIR <-->|"mandatos y consultas WA"| S07
+  AUT <-->|"alertas y consultas WA"| S07
+  S07 <-->|"webhook de comandos y envíos"| SIS
+  S03 -.->|"acciones de OSPA"| SIS
+  S11 -.->|"capas cartográficas"| SIS
+
+  %% FLUJO SERVICIOS DEL ESTADO
+  S16 -->|"antecedentes (solo sectorista autorizado)"| SIS
+  S01 -.->|"noticias y normas"| SIS
+  SIS <-.->|"estados de compromisos"| S12
+  S13 -.->|"datos técnicos pesqueros"| SIS
+  SIS <-.->|"coordinación interministerial"| S14
 ```
 
-## 13.2 Nivel 2 — Contenedores (las grandes piezas)
+## 14.2 Nivel 2 — Contenedores (las grandes piezas)
 
 Un **contenedor** es una pieza que se ejecuta y se puede desplegar por separado (no es necesariamente un contenedor de Docker).
+
+> **Actualizado (R10):** SVC-02 (Gemini), SVC-07 (WhatsApp) y SVC-16 (PIDE-RENIEC) pasan a activos, con alcance acotado (13.1). El uso de Gemini **no es** el pipeline completo de procesamiento de documentos (CT-02, que sigue en 2027): es un apoyo puntual a la migración y a los mandatos por WhatsApp — su alcance exacto queda **[EN BLANCO · H-73]**. SVC-10 se divide en dos salidas de Power BI (Dashboard Analítico y Dashboard Estratégico, 6.2).
 
 ```mermaid
 flowchart LR
@@ -1340,64 +1368,72 @@ flowchart LR
   classDef futuro fill:#f3f4f6,stroke:#6b7280,stroke-width:1.5px,stroke-dasharray:5 3,color:#4b5563;
   classDef persona fill:#eef2ff,stroke:#4f46e5,stroke-width:1px;
 
-  AN["Analista (A)"]:::persona
-  ALTA["Alta Dirección (B)"]:::persona
+  AN["Equipo OAIPCS (7)"]:::persona
+  ALTA["Autoridad PRODUCE (3)"]:::persona
 
   subgraph SIS["Sistema AVISA-PRODUCE"]
-    CT05["CT-05 Pantallas de trabajo<br/>carga de alertas, bandeja de revisión,<br/>fichas, plantillas de envío"]:::pendiente
-    CT06["CT-06 Paneles de indicadores<br/>(Power BI)"]:::pieza
+    CT05["CT-05 Pantallas de trabajo (Angular)<br/>carga de alertas, bandeja de revisión,<br/>fichas, plantillas de envío"]:::pieza
+    CT06["CT-06 Paneles de indicadores<br/>(Power BI, 2 salidas)"]:::pieza
     CT07["CT-07 Vista de diagramas interactivos<br/>red de actores (2027)"]:::futuro
-    CT03["CT-03 Servicio de aplicación (API)<br/>reglas de negocio, permisos,<br/>aprobaciones, envíos"]:::pieza
-    CT02["CT-02 Servicio de procesamiento<br/>de documentos (2027)"]:::futuro
+    CT03["CT-03 Servicio de aplicación (.NET API)<br/>reglas de negocio, permisos,<br/>aprobaciones, envíos, RENIEC"]:::pieza
+    CT02["CT-02 Servicio de procesamiento<br/>de documentos (completo, 2027)"]:::futuro
     CT04["CT-04 Programador de tareas"]:::pieza
-    CT08["CT-08 Notificador"]:::pieza
-    BD[("CT-01 Base de datos PostgreSQL<br/>core · ref · analisis · ia · kag ·<br/>audit · staging · vistas para Power BI<br/>+ archivo legacy")]:::pieza
+    CT08["CT-08 Notificador (correo + WhatsApp)"]:::pieza
+    BD[("CT-01 Base de datos SQL Server<br/>(migrada desde modelo v10 PostgreSQL)<br/>core · ref · analisis · ia · kag ·<br/>audit · staging · vistas para Power BI<br/>+ archivo legacy")]:::pieza
   end
 
   S01["SVC-01 Medios y<br/>portales oficiales (2027)"]:::futuro
-  S02["SVC-02 Gemini (2027)"]:::futuro
+  S02["SVC-02 Gemini<br/>(sync acotado, Ahora)"]:::integra
   S04["SVC-04 Sistema anterior"]:::integra
   S05["SVC-05 Google Drive"]:::integra
   S06["SVC-06 Correo"]:::integra
+  S07["SVC-07 WhatsApp<br/>(mandatos y alertas, Ahora)"]:::integra
   S09["SVC-09 Identidad"]:::integra
-  S10["SVC-10 Power BI (licencia OGTI)"]:::integra
-  S11["SVC-11 Mapas base"]:::integra
+  S10A["SVC-10a Power BI Pro<br/>(Dashboard Analítico)"]:::integra
+  S10B["SVC-10b Power BI Publish to Web<br/>(Dashboard Estratégico)"]:::integra
+  S11["SVC-11 Mapas base (2027)"]:::futuro
+  S16["SVC-16 PIDE-RENIEC<br/>(solo Edith, Ahora)"]:::integra
 
   AN --> CT05
   ALTA --> CT06
-  ALTA -->|"mensajes"| S06
+  ALTA <-->|"mandatos y alertas"| S07
   CT05 --> CT03
   CT03 <--> BD
   CT04 --> CT03
   CT04 --> CT02
   S01 --> CT02
   CT02 <--> S02
-  CT02 -->|"candidatos de alerta"| CT03
+  CT03 <-->|"sync acotado (migración, mandatos)"| S02
+  CT02 -->|"candidatos de alerta (2027)"| CT03
   S04 --> BD
   CT03 --> CT08
   CT08 --> S06
+  CT08 <--> S07
   CT03 <--> S05
   S09 --> CT03
-  BD -->|"vistas"| S10
-  S10 --> CT06
+  CT03 <-->|"consulta nominal"| S16
+  BD -->|"vistas detalladas"| S10A
+  BD -->|"vistas agregadas"| S10B
+  S10A --> CT06
+  S10B --> CT06
   CT03 --> CT07
   S11 --> CT07
 ```
 
 **Estado de cada contenedor**
 
-| ID    | Contenedor                              | Qué hace                                                                                   | Tecnología                                                           | Estado           |
-| ----- | --------------------------------------- | ------------------------------------------------------------------------------------------ | -------------------------------------------------------------------- | ---------------- |
-| CT-01 | Base de datos PostgreSQL                | Guarda todo; aplica seguridad por fila, cifrado de datos personales y auditoría            | PostgreSQL (ya probada)                                              | **Existe** (v10) |
-| CT-02 | Servicio de procesamiento de documentos | Lee fuentes y documentos, extrae actores, eventos y citas, propone puntaje de riesgo       | **[EN BLANCO · H-03]** (hoy existe solo como demostración en Python) | **2027**         |
-| CT-03 | Servicio de aplicación (API)            | Reglas de negocio, permisos por perfil, aprobación de alertas, informes, envíos            | **.NET** (confirmado por OGTI)                                       | **Resuelto**     |
-| CT-04 | Programador de tareas                   | Lanza recolecciones, recálculos de indicadores, vencimiento de compromisos y escalamientos | **[EN BLANCO · H-17]** (el MVP-45 propone Hangfire o Quartz)         | Por construir    |
-| CT-05 | Pantallas de trabajo                    | Cargar alertas, revisar y aprobar, ver fichas, armar plantillas de envío                   | **Angular** (confirmado por OGTI)                                    | **Resuelto**     |
-| CT-06 | Paneles de indicadores                  | Indicadores, tablas y mapas para los usuarios y la Alta Dirección                          | **Power BI**                                                         | Por construir    |
-| CT-07 | Vista de diagramas interactivos         | Red de actores y relaciones; línea de tiempo (fase siguiente)                              | **[EN BLANCO · H-05]**                                               | **2027**         |
-| CT-08 | Notificador                             | Envía correos con enlace y borrador; deja registro de cada envío                           | **[EN BLANCO · H-19]**                                               | Por construir    |
+| ID    | Contenedor                                         | Qué hace                                                                                                       | Tecnología                                          | Estado                           |
+| ----- | -------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- | -------------------------------- |
+| CT-01 | Base de datos                                      | Guarda todo; aplica seguridad por fila, cifrado de datos personales y auditoría                                | **SQL Server** (migrada desde PostgreSQL v10, H-01) | **Resuelto**; migración en curso |
+| CT-02 | Servicio de procesamiento de documentos (completo) | Lee fuentes públicas y documentos, extrae actores, eventos y citas, propone puntaje de riesgo                  | **[EN BLANCO · H-03]**                              | **2027**                         |
+| CT-03 | Servicio de aplicación (API)                       | Reglas de negocio, permisos por perfil, aprobación de alertas, informes, envíos, **consulta nominal a RENIEC** | **.NET** (confirmado por OGTI)                      | **Resuelto**                     |
+| CT-04 | Programador de tareas                              | Lanza recolecciones, sync con Gemini, recálculos de indicadores, vencimiento de compromisos                    | **[EN BLANCO · H-17]**                              | Por construir                    |
+| CT-05 | Pantallas de trabajo                               | Cargar alertas, revisar y aprobar, ver fichas, armar plantillas de envío                                       | **Angular** (confirmado por OGTI)                   | **Resuelto**                     |
+| CT-06 | Paneles de indicadores                             | Dos salidas: Dashboard Analítico Especial (detalle, DNI) y Dashboard Estratégico (agregado, sin DNI)           | **Power BI** (Pro + Publish to Web)                 | Por construir                    |
+| CT-07 | Vista de diagramas interactivos                    | Red de actores y relaciones; línea de tiempo (fase siguiente)                                                  | **[EN BLANCO · H-05]**                              | **2027**                         |
+| CT-08 | Notificador                                        | Envía correos y mensajes de WhatsApp con enlace; deja registro de cada envío                                   | **[EN BLANCO · H-19]**                              | Por construir                    |
 
-## 13.3 Nivel 3 — Componentes (qué hay dentro de las piezas clave)
+## 14.3 Nivel 3 — Componentes (qué hay dentro de las piezas clave)
 
 ### 14.3.1 Dentro del Servicio de procesamiento de documentos (CT-02) — horizonte 2027
 
@@ -1443,39 +1479,48 @@ flowchart TD
 
 ### 14.3.2 Dentro del Servicio de aplicación (CT-03)
 
-> En diciembre **no se construye CA-10** (conector del modelo de lenguaje) y **CA-05** funciona solo con alertas cargadas a mano.
+> **Actualizado (R10):** en diciembre **CA-10** (conector de Gemini) se construye, pero **acotado** a la sincronización de la migración y al apoyo de mandatos por WhatsApp — no al procesamiento abierto de documentos (eso sigue en CT-02, 2027. **CA-05** (bandeja de revisión) funciona solo con alertas cargadas a mano, ya que no recibe candidatos automáticos de CT-02. Se agrega **CA-13**, exclusivo para el analista con privilegio RENIEC.
 
 ```mermaid
 flowchart TD
   classDef comp fill:#e6fffa,stroke:#0f766e,stroke-width:1.5px;
   classDef integra fill:#fff7ed,stroke:#c2410c,stroke-width:2px,stroke-dasharray:5 3;
+  classDef restringido fill:#fef2f2,stroke:#b91c1c,stroke-width:1.5px;
 
   A1["CA-01 Acceso y perfiles<br/>(A, B, C)"]:::comp
   A2["CA-02 Gestor de actores y organizaciones<br/>(incluye actores sin DNI)"]:::comp
   A3["CA-03 Gestor de casos, hechos y cronología"]:::comp
   A4["CA-04 Gestor de compromisos,<br/>relatorías y mesas"]:::comp
-  A5["CA-05 Recepción de candidatos<br/>y bandeja de revisión"]:::comp
+  A5["CA-05 Recepción de candidatos<br/>y bandeja de revisión (solo manual en dic.)"]:::comp
   A6["CA-06 Motor de reglas de gravedad<br/>y destinatarios"]:::comp
   A7["CA-07 Generador de productos<br/>(plantillas de informe y resumen)"]:::comp
-  A8["CA-08 Servicio de envíos<br/>(correo, borrador en Drive)"]:::comp
-  A9["CA-09 Cálculo de indicadores"]:::comp
-  A10["CA-10 Conector de modelo de lenguaje<br/>(intercambiable)"]:::comp
+  A8["CA-08 Servicio de envíos<br/>(correo, Drive, WhatsApp)"]:::comp
+  A9["CA-09 Cálculo de indicadores<br/>(2 salidas: Analítico y Estratégico)"]:::comp
+  A10["CA-10 Conector de Gemini<br/>(acotado: sync migración + mandatos)"]:::comp
   A11["CA-11 Auditoría y registro de accesos"]:::comp
   A12["CA-12 Carga y reconciliación<br/>del sistema anterior"]:::comp
+  A13["CA-13 Consulta nominal RENIEC<br/>(solo Edith)"]:::restringido
   S02["SVC-02 Gemini"]:::integra
   S05["SVC-05 Google Drive"]:::integra
   S06["SVC-06 Correo"]:::integra
+  S07["SVC-07 WhatsApp"]:::integra
   S09["SVC-09 Identidad"]:::integra
   S04["SVC-04 Sistema anterior"]:::integra
+  S16["SVC-16 PIDE-RENIEC"]:::integra
   BD[("CT-01 Base de datos")]:::comp
 
   S09 --> A1
   A1 --> A2 & A3 & A4 & A5 & A7 & A9
+  A1 -->|"solo si tiene el privilegio"| A13
   A5 --> A6 --> A8
   A7 --> A8
   A7 <--> A10 <--> S02
+  A4 <--> A10
   A8 --> S06
   A8 <--> S05
+  A8 <--> S07
+  A13 <--> S16
+  A13 --> A11
   S04 --> A12 --> BD
   A2 & A3 & A4 & A5 & A9 --> BD
   A1 & A2 & A5 & A8 --> A11 --> BD
@@ -1483,24 +1528,26 @@ flowchart TD
 
 ### 14.3.3 Dentro de la base de datos (CT-01): qué trae el MVP
 
-Del inventario R5, **42 tablas** son del MVP (31 ya tienen datos y 11 están todavía vacías). Las otras 213 quedan para la fase siguiente o no se usan aún.
+Del inventario R5, **37 tablas** son del MVP (31 ya tienen datos y 6 están todavía vacías). Las otras 218 quedan para la fase siguiente o no se usan aún.
 
-| Esquema     | Qué guarda                                                                                               | Tablas del MVP | Observación                               |
-| ----------- | -------------------------------------------------------------------------------------------------------- | -------------: | ----------------------------------------- |
-| `core`      | Casos, hechos, actores, organizaciones, compromisos, alertas, documentos, usuarios, catálogos, geografía |             31 | Núcleo del MVP                            |
-| `kag`       | Grafo de conocimiento (nodos, aristas, fuentes)                                                          |              5 | Solo lo que ya alimenta la red de actores |
-| `audit`     | Registro inmutable de acceso a datos personales                                                          |              1 | Obligatorio                               |
-| `agent`     | Registro de ejecuciones de agentes de IA                                                                 |              1 | Trazabilidad                              |
-| `ind`       | Indicadores y resultados                                                                                 |              1 | Hoy sin filas                             |
-| `policy`    | Reglas de control                                                                                        |              1 |                                           |
-| `qda`       | Equivalencia de seudónimos (análisis cualitativo)                                                        |              1 |                                           |
-| `staging`   | Aterrizaje temporal de cargas                                                                            |              1 |                                           |
-| `legacy`    | Copia exacta del sistema anterior (87 tablas)                                                            |              — | Se conserva como archivo                  |
-| `analytics` | 22 vistas para tableros e informes                                                                       |              — | Alimenta Power BI                         |
+> **Corrección:** el esquema `kag` (grafo de conocimiento: `kag.nodos`, `kag.aristas`) **no entra en el MVP**. El diagrama interactivo de la red de actores (RF-H01, CT-07) es 2027, y nada en diciembre lo consume, así que construir y mantener el grafo ahora no tiene destino. Lo que **sí** entra, y siempre estuvo en `core`, es la **tabla de actores** (`core.actores`) con sus relaciones básicas (RF-B06): eso basta para las fichas y para los 5 roles de 6.1. El grafo se retoma en 2027 junto con CT-07.
 
-> Si OGTI decide otro motor de base de datos, las diferencias de tipos (`UUID`, `JSONB`) y de seguridad por fila deben revisarse **[EN BLANCO · H-01]**.
+| Esquema     | Qué guarda                                                                                                                                  |        Tablas del MVP | Observación                         |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------- | --------------------: | ----------------------------------- |
+| `core`      | Casos, hechos, actores (incluida la relación entre ellos), organizaciones, compromisos, alertas, documentos, usuarios, catálogos, geografía |                    31 | Núcleo del MVP                      |
+| `audit`     | Registro inmutable de acceso a datos personales y a RENIEC                                                                                  |                     1 | Obligatorio                         |
+| `agent`     | Registro de ejecuciones del conector de Gemini (CA-10 acotado)                                                                              |                     1 | Trazabilidad del uso de IA          |
+| `ind`       | Indicadores y resultados (alimenta los dos Power BI)                                                                                        |                     1 | Hoy sin filas                       |
+| `policy`    | Reglas de control (gravedad, enrutamiento)                                                                                                  |                     1 |                                     |
+| `staging`   | Aterrizaje temporal de cargas (migración y sync de Gemini)                                                                                  |                     1 |                                     |
+| `qda`       | Equivalencia de seudónimos (análisis cualitativo)                                                                                           |                     1 | Por confirmar si entra (RF-N, 2027) |
+| `kag`       | Grafo de conocimiento (nodos, aristas, fuentes)                                                                                             | **0 — fuera del MVP** | Se retoma en 2027 con CT-07         |
+| `legacy`    | Copia exacta del sistema anterior (87 tablas)                                                                                               |                     — | Se conserva como archivo            |
+| `analytics` | Vistas para tableros e informes (filtradas: solo las de 7.2, Analítico y Estratégico)                                                       |                     — | Alimenta los dos Power BI           |
 
-## 13.4 Flujo de una alerta (de la fuente al destinatario)
+> **Resuelto (H-01):** el motor de producción es **SQL Server**, no PostgreSQL. Las diferencias de tipos (`UUID`→`UNIQUEIDENTIFIER`, `JSONB`→`NVARCHAR(MAX)` + `ISJSON`) y de seguridad por fila se verifican según la tabla de 12.1.
+
+## 14.4 Flujo de una alerta (de la fuente al destinatario)
 
 ```mermaid
 sequenceDiagram
@@ -1542,7 +1589,7 @@ sequenceDiagram
 
 > Las alertas tempranas por **WhatsApp** que pidió Iván se agregarían como un paso más de envío cuando se conozca el costo (<u>SVC-07</u>) **[EN BLANCO · H-06]**.
 
-## 13.5 Catálogo de servicios por integrar
+## 14.5 Catálogo de servicios por integrar
 
 Aquí están reunidos todos los servicios que el sistema necesita conectar. La ficha detallada de cada uno está en la sección 13.
 

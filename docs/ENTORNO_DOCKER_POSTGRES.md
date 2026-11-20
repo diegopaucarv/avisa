@@ -313,3 +313,74 @@ docs/PARCHE_11_GRAFO_KAG.sql             parche 11 (post-carga, §9)
 docs/PARCHE_12_COMENTARIOS_COLUMNAS.sql  parche 12 (post-carga, §9)
 docs/PARCHE_13_CLASIFICACION.sql         parche 13 (post-carga, §9)
 ```
+
+---
+
+## 11. La interfaz y la API en el mismo entorno
+
+El compose tiene tres servicios: `db`, `api` y `ui`. Los dos últimos existen
+para poder ver la interfaz sin instalar Node ni Python en la máquina.
+
+### Arranque
+
+```bash
+docker compose up -d api ui
+```
+
+Y se abre **http://localhost:3000**. El servicio de acceso ya está contestando:
+usuario `12345678`, clave `demo`.
+
+| Servicio | Contenedor  | Puerto del host | Qué es                        |
+| -------- | ----------- | --------------- | ----------------------------- |
+| `db`     | `avisa-db`  | 55433           | PostgreSQL 16                 |
+| `api`    | `avisa-api` | 8000            | FastAPI de demostración       |
+| `ui`     | `avisa-ui`  | 3000            | Next.js 16 en modo desarrollo |
+
+La interfaz no llama a la API desde el navegador: pide a sus propias rutas
+`/api/...` y Next reenvía a `http://api:8000` por la red interna del compose.
+Por eso no importa que el puerto 8000 no esté expuesto al exterior; se
+expone igual para poder probar la API con `curl`.
+
+### Cómo entra el código en la interfaz
+
+El código se monta desde el disco (`.:/app`) y las dependencias viven en el
+volumen `avisa_node_modules`, que Docker rellena la primera vez con lo que ya
+viene instalado en la imagen. Por eso:
+
+- **Editar** un archivo de `app/`, `components/` o `frontend/` se refleja solo,
+  sin reconstruir ni reiniciar.
+- **Cambiar `package.json`** sí exige `docker compose build ui`; y si el
+  volumen ya existía hay que vaciarlo para que se vuelva a rellenar:
+  `docker volume rm avisa_node_modules`. Esto borra el volumen: hacerlo con
+  el contenedor de la interfaz parado.
+- La primera construcción tarda unos 3–4 minutos (descarga e instalación de
+  dependencias). Los arranques siguientes tardan segundos.
+
+### Comprobaciones
+
+```bash
+curl -s -o /dev/null -w "%{http_code}\n" http://localhost:3000/
+curl -s -o /dev/null -w "%{http_code}\n" -X POST http://localhost:3000/api/auth/login \
+     -H "Content-Type: application/json" -d '{"dni":"12345678","password":"demo"}'
+```
+
+Las dos deben devolver `200`. La segunda prueba el camino completo navegador →
+Next → FastAPI.
+
+### Lo que este entorno no hace
+
+- La API sigue sirviendo **datos de ejemplo**: no lee la base. El login y el
+  tablero funcionan aunque `db` esté vacía.
+- La interfaz corre en modo desarrollo, no compilada. Para una entrega hay que
+  construirla aparte (`pnpm build` y `pnpm start`).
+- `.next` se guarda en un volumen porque el montaje de Windows es lento; Next
+  avisa de ello en el registro (`Slow filesystem detected`). Es una advertencia,
+  no un fallo.
+
+### Archivos que añade esta parte
+
+```
+docker/api/Dockerfile               API FastAPI (contexto: raíz del repo)
+docker/ui/Dockerfile                interfaz Next.js 16 (contexto: raíz del repo)
+.dockerignore                       deja fuera node_modules, .next, docs y migration
+```

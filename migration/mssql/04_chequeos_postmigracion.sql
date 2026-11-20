@@ -956,14 +956,322 @@ RETURN
      WHERE TRY_CAST(SESSION_CONTEXT(N'puede_auditar') AS bit) = 1;
 GO
 
-/* ---- 5.2 · Política de seguridad ----------------------------------
+/* ---- 5.2 · Funciones de predicado para las 13 tablas del parche 16 ----
+   El parche 16 (`PARCHE_16_RLS_CORE_Y_DC04.sql`) añadió seguridad por
+   fila a 13 tablas de `core`. Ocho de ellas no tienen columna propia de
+   nivel y heredan el de su padre con un EXISTS sobre `core.actores`,
+   `core.casos`, etc.; las otras cinco sí tienen el nivel y añaden, como
+   mucho, la comprobación de un padre.
+
+   HECHOS COMPROBADOS EN SQL SERVER 2022 (edición Developer), no
+   supuestos, porque de ellos depende la forma de este bloque:
+
+     1. Un predicado SÍ puede consultar otra tabla. La prueba con dos
+        tablas dejó ver sólo las filas del padre visible, y ninguna
+        cuando faltaba la clave de sesión.
+     2. Una tabla y una operación admiten UN SOLO predicado:
+        "A FILTER predicate for the same operation has already been
+        defined on table ...". Las cinco condiciones de PostgreSQL no se
+        pueden repartir en cinco funciones apiladas.
+     3. El argumento de un predicado puede ser una CONSTANTE. Eso es lo
+        que permite una función por forma de tabla en lugar de cinco.
+
+   Y un cuarto, medido con el arnés del §5.5: un BLOCK que rechaza una
+   escritura NO devuelve cero filas en silencio, sino que lanza el error
+   33504. El SELECT sí es silencioso (cero filas). La API .NET tiene que
+   tratar ese error como "sin permiso", no como "no había nada que
+   cambiar".
+
+   De ahí el parámetro @accion, con el mismo código en las diez
+   funciones parametrizadas:
+
+     1 = SELECT         → padres visibles (y nivel propio, si lo hay)
+     2 = INSERT         → + máximo ≥ 2 y puede_crear
+     3 = UPDATE previo  → + máximo ≥ 2 y puede_editar
+     4 = UPDATE nuevo   → + puede_editar
+     5 = DELETE         → + máximo ≥ 3 y puede_eliminar
+
+   Cada condición es la política permisiva (p_*) unida con AND a la
+   restrictiva (r_rol_*) y a la de herencia (r_herencia), que es como las
+   combina PostgreSQL. En SQL Server todos los predicados de una misma
+   operación se suman también con AND.
+   --------------------------------------------------------------------- */
+
+/* INSERT sin condiciones: en origen `p_insert` de core.log_accesos es
+   `true` y no tiene política restrictiva de rol, así que cualquier
+   usuario puede escribir una fila de bitácora. El parámetro existe
+   porque un predicado recibe columnas. */
+CREATE OR ALTER FUNCTION seg.fn_siempre (@id bigint)
+RETURNS TABLE
+WITH SCHEMABINDING
+AS
+RETURN
+    SELECT 1 AS permitido;
+GO
+
+/* core.caso_estado_historial · hereda de un padre: core.casos(id). */
+CREATE OR ALTER FUNCTION seg.fn_accion_caso (@accion tinyint, @caso uniqueidentifier)
+RETURNS TABLE
+WITH SCHEMABINDING
+AS
+RETURN
+    SELECT 1 AS permitido
+     WHERE EXISTS (SELECT 1 FROM core.casos hp
+                    WHERE hp.id = @caso
+                      AND hp.nivel_clasificacion <= TRY_CAST(SESSION_CONTEXT(N'nivel_clasificacion') AS smallint))
+       AND ( @accion = 1
+          OR (@accion = 2 AND TRY_CAST(SESSION_CONTEXT(N'nivel_clasificacion') AS smallint) >= 2
+                           AND TRY_CAST(SESSION_CONTEXT(N'puede_crear') AS bit) = 1)
+          OR (@accion = 3 AND TRY_CAST(SESSION_CONTEXT(N'nivel_clasificacion') AS smallint) >= 2
+                           AND TRY_CAST(SESSION_CONTEXT(N'puede_editar') AS bit) = 1)
+          OR (@accion = 4 AND TRY_CAST(SESSION_CONTEXT(N'puede_editar') AS bit) = 1)
+          OR (@accion = 5 AND TRY_CAST(SESSION_CONTEXT(N'nivel_clasificacion') AS smallint) >= 3
+                           AND TRY_CAST(SESSION_CONTEXT(N'puede_eliminar') AS bit) = 1) );
+GO
+
+/* core.organizaciones · hereda de un padre: core.actores(actor_uid). */
+CREATE OR ALTER FUNCTION seg.fn_accion_actor (@accion tinyint, @actor uniqueidentifier)
+RETURNS TABLE
+WITH SCHEMABINDING
+AS
+RETURN
+    SELECT 1 AS permitido
+     WHERE EXISTS (SELECT 1 FROM core.actores hp
+                    WHERE hp.actor_uid = @actor
+                      AND hp.nivel_clasificacion <= TRY_CAST(SESSION_CONTEXT(N'nivel_clasificacion') AS smallint))
+       AND ( @accion = 1
+          OR (@accion = 2 AND TRY_CAST(SESSION_CONTEXT(N'nivel_clasificacion') AS smallint) >= 2
+                           AND TRY_CAST(SESSION_CONTEXT(N'puede_crear') AS bit) = 1)
+          OR (@accion = 3 AND TRY_CAST(SESSION_CONTEXT(N'nivel_clasificacion') AS smallint) >= 2
+                           AND TRY_CAST(SESSION_CONTEXT(N'puede_editar') AS bit) = 1)
+          OR (@accion = 4 AND TRY_CAST(SESSION_CONTEXT(N'puede_editar') AS bit) = 1)
+          OR (@accion = 5 AND TRY_CAST(SESSION_CONTEXT(N'nivel_clasificacion') AS smallint) >= 3
+                           AND TRY_CAST(SESSION_CONTEXT(N'puede_eliminar') AS bit) = 1) );
+GO
+
+/* core.actor_membresia · dos padres, ambos actores: persona_uid y
+   organizacion_uid. Los dos tienen que ser visibles. */
+CREATE OR ALTER FUNCTION seg.fn_accion_actor_actor (@accion tinyint,
+                                                    @persona      uniqueidentifier,
+                                                    @organizacion uniqueidentifier)
+RETURNS TABLE
+WITH SCHEMABINDING
+AS
+RETURN
+    SELECT 1 AS permitido
+     WHERE EXISTS (SELECT 1 FROM core.actores hp
+                    WHERE hp.actor_uid = @persona
+                      AND hp.nivel_clasificacion <= TRY_CAST(SESSION_CONTEXT(N'nivel_clasificacion') AS smallint))
+       AND EXISTS (SELECT 1 FROM core.actores hp
+                    WHERE hp.actor_uid = @organizacion
+                      AND hp.nivel_clasificacion <= TRY_CAST(SESSION_CONTEXT(N'nivel_clasificacion') AS smallint))
+       AND ( @accion = 1
+          OR (@accion = 2 AND TRY_CAST(SESSION_CONTEXT(N'nivel_clasificacion') AS smallint) >= 2
+                           AND TRY_CAST(SESSION_CONTEXT(N'puede_crear') AS bit) = 1)
+          OR (@accion = 3 AND TRY_CAST(SESSION_CONTEXT(N'nivel_clasificacion') AS smallint) >= 2
+                           AND TRY_CAST(SESSION_CONTEXT(N'puede_editar') AS bit) = 1)
+          OR (@accion = 4 AND TRY_CAST(SESSION_CONTEXT(N'puede_editar') AS bit) = 1)
+          OR (@accion = 5 AND TRY_CAST(SESSION_CONTEXT(N'nivel_clasificacion') AS smallint) >= 3
+                           AND TRY_CAST(SESSION_CONTEXT(N'puede_eliminar') AS bit) = 1) );
+GO
+
+/* core.casos_actores · hereda de core.actores(actor_id) y core.casos(caso_id). */
+CREATE OR ALTER FUNCTION seg.fn_accion_actor_caso (@accion tinyint,
+                                                   @actor  uniqueidentifier,
+                                                   @caso   uniqueidentifier)
+RETURNS TABLE
+WITH SCHEMABINDING
+AS
+RETURN
+    SELECT 1 AS permitido
+     WHERE EXISTS (SELECT 1 FROM core.actores hp
+                    WHERE hp.actor_uid = @actor
+                      AND hp.nivel_clasificacion <= TRY_CAST(SESSION_CONTEXT(N'nivel_clasificacion') AS smallint))
+       AND EXISTS (SELECT 1 FROM core.casos hp
+                    WHERE hp.id = @caso
+                      AND hp.nivel_clasificacion <= TRY_CAST(SESSION_CONTEXT(N'nivel_clasificacion') AS smallint))
+       AND ( @accion = 1
+          OR (@accion = 2 AND TRY_CAST(SESSION_CONTEXT(N'nivel_clasificacion') AS smallint) >= 2
+                           AND TRY_CAST(SESSION_CONTEXT(N'puede_crear') AS bit) = 1)
+          OR (@accion = 3 AND TRY_CAST(SESSION_CONTEXT(N'nivel_clasificacion') AS smallint) >= 2
+                           AND TRY_CAST(SESSION_CONTEXT(N'puede_editar') AS bit) = 1)
+          OR (@accion = 4 AND TRY_CAST(SESSION_CONTEXT(N'puede_editar') AS bit) = 1)
+          OR (@accion = 5 AND TRY_CAST(SESSION_CONTEXT(N'nivel_clasificacion') AS smallint) >= 3
+                           AND TRY_CAST(SESSION_CONTEXT(N'puede_eliminar') AS bit) = 1) );
+GO
+
+/* core.alertas_actores · hereda de core.actores(actor_id) y
+   core.alertas_tempranas(alerta_id). */
+CREATE OR ALTER FUNCTION seg.fn_accion_actor_alerta (@accion tinyint,
+                                                     @actor  uniqueidentifier,
+                                                     @alerta uniqueidentifier)
+RETURNS TABLE
+WITH SCHEMABINDING
+AS
+RETURN
+    SELECT 1 AS permitido
+     WHERE EXISTS (SELECT 1 FROM core.actores hp
+                    WHERE hp.actor_uid = @actor
+                      AND hp.nivel_clasificacion <= TRY_CAST(SESSION_CONTEXT(N'nivel_clasificacion') AS smallint))
+       AND EXISTS (SELECT 1 FROM core.alertas_tempranas hp
+                    WHERE hp.id = @alerta
+                      AND hp.nivel_clasificacion <= TRY_CAST(SESSION_CONTEXT(N'nivel_clasificacion') AS smallint))
+       AND ( @accion = 1
+          OR (@accion = 2 AND TRY_CAST(SESSION_CONTEXT(N'nivel_clasificacion') AS smallint) >= 2
+                           AND TRY_CAST(SESSION_CONTEXT(N'puede_crear') AS bit) = 1)
+          OR (@accion = 3 AND TRY_CAST(SESSION_CONTEXT(N'nivel_clasificacion') AS smallint) >= 2
+                           AND TRY_CAST(SESSION_CONTEXT(N'puede_editar') AS bit) = 1)
+          OR (@accion = 4 AND TRY_CAST(SESSION_CONTEXT(N'puede_editar') AS bit) = 1)
+          OR (@accion = 5 AND TRY_CAST(SESSION_CONTEXT(N'nivel_clasificacion') AS smallint) >= 3
+                           AND TRY_CAST(SESSION_CONTEXT(N'puede_eliminar') AS bit) = 1) );
+GO
+
+/* core.compromiso_colaboradores · hereda de core.actores(actor_uid) y
+   core.compromisos(compromiso_id). */
+CREATE OR ALTER FUNCTION seg.fn_accion_actor_compromiso (@accion     tinyint,
+                                                         @actor      uniqueidentifier,
+                                                         @compromiso uniqueidentifier)
+RETURNS TABLE
+WITH SCHEMABINDING
+AS
+RETURN
+    SELECT 1 AS permitido
+     WHERE EXISTS (SELECT 1 FROM core.actores hp
+                    WHERE hp.actor_uid = @actor
+                      AND hp.nivel_clasificacion <= TRY_CAST(SESSION_CONTEXT(N'nivel_clasificacion') AS smallint))
+       AND EXISTS (SELECT 1 FROM core.compromisos hp
+                    WHERE hp.id = @compromiso
+                      AND hp.nivel_clasificacion <= TRY_CAST(SESSION_CONTEXT(N'nivel_clasificacion') AS smallint))
+       AND ( @accion = 1
+          OR (@accion = 2 AND TRY_CAST(SESSION_CONTEXT(N'nivel_clasificacion') AS smallint) >= 2
+                           AND TRY_CAST(SESSION_CONTEXT(N'puede_crear') AS bit) = 1)
+          OR (@accion = 3 AND TRY_CAST(SESSION_CONTEXT(N'nivel_clasificacion') AS smallint) >= 2
+                           AND TRY_CAST(SESSION_CONTEXT(N'puede_editar') AS bit) = 1)
+          OR (@accion = 4 AND TRY_CAST(SESSION_CONTEXT(N'puede_editar') AS bit) = 1)
+          OR (@accion = 5 AND TRY_CAST(SESSION_CONTEXT(N'nivel_clasificacion') AS smallint) >= 3
+                           AND TRY_CAST(SESSION_CONTEXT(N'puede_eliminar') AS bit) = 1) );
+GO
+
+/* core.reunion_participantes · hereda de core.actores(actor_uid) y
+   core.reuniones_dialogo(reunion_id). `institucion_uid` no se comprueba
+   en origen. */
+CREATE OR ALTER FUNCTION seg.fn_accion_actor_reunion (@accion  tinyint,
+                                                      @actor   uniqueidentifier,
+                                                      @reunion uniqueidentifier)
+RETURNS TABLE
+WITH SCHEMABINDING
+AS
+RETURN
+    SELECT 1 AS permitido
+     WHERE EXISTS (SELECT 1 FROM core.actores hp
+                    WHERE hp.actor_uid = @actor
+                      AND hp.nivel_clasificacion <= TRY_CAST(SESSION_CONTEXT(N'nivel_clasificacion') AS smallint))
+       AND EXISTS (SELECT 1 FROM core.reuniones_dialogo hp
+                    WHERE hp.id = @reunion
+                      AND hp.nivel_clasificacion <= TRY_CAST(SESSION_CONTEXT(N'nivel_clasificacion') AS smallint))
+       AND ( @accion = 1
+          OR (@accion = 2 AND TRY_CAST(SESSION_CONTEXT(N'nivel_clasificacion') AS smallint) >= 2
+                           AND TRY_CAST(SESSION_CONTEXT(N'puede_crear') AS bit) = 1)
+          OR (@accion = 3 AND TRY_CAST(SESSION_CONTEXT(N'nivel_clasificacion') AS smallint) >= 2
+                           AND TRY_CAST(SESSION_CONTEXT(N'puede_editar') AS bit) = 1)
+          OR (@accion = 4 AND TRY_CAST(SESSION_CONTEXT(N'puede_editar') AS bit) = 1)
+          OR (@accion = 5 AND TRY_CAST(SESSION_CONTEXT(N'nivel_clasificacion') AS smallint) >= 3
+                           AND TRY_CAST(SESSION_CONTEXT(N'puede_eliminar') AS bit) = 1) );
+GO
+
+/* core.cronologia_vinculos · `cronologia_id` obligatorio; `alerta_id` y
+   `documento_id` pueden ser NULL, y un NULL no se comprueba (así está en
+   origen). */
+CREATE OR ALTER FUNCTION seg.fn_accion_vinculos (@accion     tinyint,
+                                                 @cronologia uniqueidentifier,
+                                                 @alerta     uniqueidentifier,
+                                                 @documento  uniqueidentifier)
+RETURNS TABLE
+WITH SCHEMABINDING
+AS
+RETURN
+    SELECT 1 AS permitido
+     WHERE EXISTS (SELECT 1 FROM core.caso_cronologia hp
+                    WHERE hp.id = @cronologia
+                      AND hp.nivel_clasificacion <= TRY_CAST(SESSION_CONTEXT(N'nivel_clasificacion') AS smallint))
+       AND (@alerta IS NULL OR EXISTS (SELECT 1 FROM core.alertas_tempranas hp
+                                        WHERE hp.id = @alerta
+                                          AND hp.nivel_clasificacion <= TRY_CAST(SESSION_CONTEXT(N'nivel_clasificacion') AS smallint)))
+       AND (@documento IS NULL OR EXISTS (SELECT 1 FROM core.documentos hp
+                                           WHERE hp.id = @documento
+                                             AND hp.nivel_clasificacion <= TRY_CAST(SESSION_CONTEXT(N'nivel_clasificacion') AS smallint)))
+       AND ( @accion = 1
+          OR (@accion = 2 AND TRY_CAST(SESSION_CONTEXT(N'nivel_clasificacion') AS smallint) >= 2
+                           AND TRY_CAST(SESSION_CONTEXT(N'puede_crear') AS bit) = 1)
+          OR (@accion = 3 AND TRY_CAST(SESSION_CONTEXT(N'nivel_clasificacion') AS smallint) >= 2
+                           AND TRY_CAST(SESSION_CONTEXT(N'puede_editar') AS bit) = 1)
+          OR (@accion = 4 AND TRY_CAST(SESSION_CONTEXT(N'puede_editar') AS bit) = 1)
+          OR (@accion = 5 AND TRY_CAST(SESSION_CONTEXT(N'nivel_clasificacion') AS smallint) >= 3
+                           AND TRY_CAST(SESSION_CONTEXT(N'puede_eliminar') AS bit) = 1) );
+GO
+
+/* core.hitos_compromiso · nivel propio MÁS herencia del compromiso
+   (`r_herencia`, que en origen es restrictiva y cubre todas las
+   operaciones). */
+CREATE OR ALTER FUNCTION seg.fn_accion_hito (@accion     tinyint,
+                                             @nivel      smallint,
+                                             @compromiso uniqueidentifier)
+RETURNS TABLE
+WITH SCHEMABINDING
+AS
+RETURN
+    SELECT 1 AS permitido
+     WHERE @nivel <= TRY_CAST(SESSION_CONTEXT(N'nivel_clasificacion') AS smallint)
+       AND EXISTS (SELECT 1 FROM core.compromisos hp
+                    WHERE hp.id = @compromiso
+                      AND hp.nivel_clasificacion <= TRY_CAST(SESSION_CONTEXT(N'nivel_clasificacion') AS smallint))
+       AND ( @accion = 1
+          OR (@accion = 2 AND TRY_CAST(SESSION_CONTEXT(N'nivel_clasificacion') AS smallint) >= 2
+                           AND TRY_CAST(SESSION_CONTEXT(N'puede_crear') AS bit) = 1)
+          OR (@accion = 3 AND TRY_CAST(SESSION_CONTEXT(N'nivel_clasificacion') AS smallint) >= 2
+                           AND TRY_CAST(SESSION_CONTEXT(N'puede_editar') AS bit) = 1)
+          OR (@accion = 4 AND TRY_CAST(SESSION_CONTEXT(N'puede_editar') AS bit) = 1)
+          OR (@accion = 5 AND TRY_CAST(SESSION_CONTEXT(N'nivel_clasificacion') AS smallint) >= 3
+                           AND TRY_CAST(SESSION_CONTEXT(N'puede_eliminar') AS bit) = 1) );
+GO
+
+/* core.output_contracts · nivel propio MÁS herencia del caso, con
+   `caso_id` opcional (un contrato global no hereda de nadie). */
+CREATE OR ALTER FUNCTION seg.fn_accion_contrato (@accion tinyint,
+                                                 @nivel  smallint,
+                                                 @caso   uniqueidentifier)
+RETURNS TABLE
+WITH SCHEMABINDING
+AS
+RETURN
+    SELECT 1 AS permitido
+     WHERE @nivel <= TRY_CAST(SESSION_CONTEXT(N'nivel_clasificacion') AS smallint)
+       AND (@caso IS NULL OR EXISTS (SELECT 1 FROM core.casos hp
+                                      WHERE hp.id = @caso
+                                        AND hp.nivel_clasificacion <= TRY_CAST(SESSION_CONTEXT(N'nivel_clasificacion') AS smallint)))
+       AND ( @accion = 1
+          OR (@accion = 2 AND TRY_CAST(SESSION_CONTEXT(N'nivel_clasificacion') AS smallint) >= 2
+                           AND TRY_CAST(SESSION_CONTEXT(N'puede_crear') AS bit) = 1)
+          OR (@accion = 3 AND TRY_CAST(SESSION_CONTEXT(N'nivel_clasificacion') AS smallint) >= 2
+                           AND TRY_CAST(SESSION_CONTEXT(N'puede_editar') AS bit) = 1)
+          OR (@accion = 4 AND TRY_CAST(SESSION_CONTEXT(N'puede_editar') AS bit) = 1)
+          OR (@accion = 5 AND TRY_CAST(SESSION_CONTEXT(N'nivel_clasificacion') AS smallint) >= 3
+                           AND TRY_CAST(SESSION_CONTEXT(N'puede_eliminar') AS bit) = 1) );
+GO
+
+/* ---- 5.3 · Política de seguridad ----------------------------------
    En origen hay 28 tablas con RLS y 189 políticas: 23 tablas x 7 (= 161),
    core.hitos_compromiso y core.output_contracts con 8 cada una (16),
    core.log_accesos 6, staging.lote 4 y audit.datos_personales_acceso 2.
-   Esta política traduce las 15 tablas del alcance anterior en los 71
-   predicados de abajo. El parche 16 añadió RLS a 13 tablas más de `core`
-   (las de detalle heredan el nivel de su padre) que aún no están aquí:
-   incorporarlas con el mismo patrón antes de usar esto en producción.
+   Esta política traduce las 28 tablas en 136 predicados:
+
+     · 15 tablas del alcance anterior                        71
+     · 13 tablas que añadió el parche 16 (5 cada una)        65
+
+   Las cinco tablas con nivel propio que no añaden padre
+   (core.banco_datos_tratamiento y core.mesas_dialogo) y
+   core.log_accesos reutilizan las funciones de §5.1; las demás usan las
+   de §5.2.
    FILTER      → SELECT (y visibilidad de las filas para UPDATE/DELETE)
    BLOCK AFTER INSERT   → WITH CHECK del INSERT
    BLOCK BEFORE UPDATE  → USING del UPDATE (fila anterior)
@@ -1127,6 +1435,171 @@ CREATE SECURITY POLICY seg.pol_avisa
     ADD BLOCK  PREDICATE seg.fn_borrar_clasif(nivel_clasificacion)
         ON staging.lote BEFORE DELETE,
 
+    /* --- las 13 tablas del parche 16 ---
+       El primer argumento es la acción (ver §5.2). Los cinco predicados
+       de cada tabla son, en orden: SELECT, INSERT, UPDATE previo, UPDATE
+       nuevo y DELETE. */
+
+    /* core.banco_datos_tratamiento · nivel propio, sin padre.
+       Reutiliza las funciones genéricas de §5.1. */
+    ADD FILTER PREDICATE seg.fn_ver(nivel_clasificacion)
+        ON core.banco_datos_tratamiento,
+    ADD BLOCK  PREDICATE seg.fn_insertar(nivel_clasificacion)
+        ON core.banco_datos_tratamiento AFTER INSERT,
+    ADD BLOCK  PREDICATE seg.fn_actualizar_previo(nivel_clasificacion)
+        ON core.banco_datos_tratamiento BEFORE UPDATE,
+    ADD BLOCK  PREDICATE seg.fn_actualizar_nuevo(nivel_clasificacion)
+        ON core.banco_datos_tratamiento AFTER UPDATE,
+    ADD BLOCK  PREDICATE seg.fn_borrar(nivel_clasificacion)
+        ON core.banco_datos_tratamiento BEFORE DELETE,
+
+    /* core.mesas_dialogo · nivel propio, sin padre. */
+    ADD FILTER PREDICATE seg.fn_ver(nivel_clasificacion)
+        ON core.mesas_dialogo,
+    ADD BLOCK  PREDICATE seg.fn_insertar(nivel_clasificacion)
+        ON core.mesas_dialogo AFTER INSERT,
+    ADD BLOCK  PREDICATE seg.fn_actualizar_previo(nivel_clasificacion)
+        ON core.mesas_dialogo BEFORE UPDATE,
+    ADD BLOCK  PREDICATE seg.fn_actualizar_nuevo(nivel_clasificacion)
+        ON core.mesas_dialogo AFTER UPDATE,
+    ADD BLOCK  PREDICATE seg.fn_borrar(nivel_clasificacion)
+        ON core.mesas_dialogo BEFORE DELETE,
+
+    /* core.log_accesos · bitácora de inicio de sesión: INSERT libre
+       (`true` en origen, sin política de rol), UPDATE y DELETE sin el
+       requisito de máximo ≥ 2 que tienen las demás tablas. */
+    ADD FILTER PREDICATE seg.fn_ver(nivel_clasificacion)
+        ON core.log_accesos,
+    ADD BLOCK  PREDICATE seg.fn_siempre(id)
+        ON core.log_accesos AFTER INSERT,
+    ADD BLOCK  PREDICATE seg.fn_actualizar_nuevo(nivel_clasificacion)
+        ON core.log_accesos BEFORE UPDATE,
+    ADD BLOCK  PREDICATE seg.fn_actualizar_nuevo(nivel_clasificacion)
+        ON core.log_accesos AFTER UPDATE,
+    ADD BLOCK  PREDICATE seg.fn_borrar(nivel_clasificacion)
+        ON core.log_accesos BEFORE DELETE,
+
+    /* core.caso_estado_historial · hereda de core.casos(caso_id). */
+    ADD FILTER PREDICATE seg.fn_accion_caso(1, caso_id)
+        ON core.caso_estado_historial,
+    ADD BLOCK  PREDICATE seg.fn_accion_caso(2, caso_id)
+        ON core.caso_estado_historial AFTER INSERT,
+    ADD BLOCK  PREDICATE seg.fn_accion_caso(3, caso_id)
+        ON core.caso_estado_historial BEFORE UPDATE,
+    ADD BLOCK  PREDICATE seg.fn_accion_caso(4, caso_id)
+        ON core.caso_estado_historial AFTER UPDATE,
+    ADD BLOCK  PREDICATE seg.fn_accion_caso(5, caso_id)
+        ON core.caso_estado_historial BEFORE DELETE,
+
+    /* core.organizaciones · hereda de core.actores(actor_uid). */
+    ADD FILTER PREDICATE seg.fn_accion_actor(1, actor_uid)
+        ON core.organizaciones,
+    ADD BLOCK  PREDICATE seg.fn_accion_actor(2, actor_uid)
+        ON core.organizaciones AFTER INSERT,
+    ADD BLOCK  PREDICATE seg.fn_accion_actor(3, actor_uid)
+        ON core.organizaciones BEFORE UPDATE,
+    ADD BLOCK  PREDICATE seg.fn_accion_actor(4, actor_uid)
+        ON core.organizaciones AFTER UPDATE,
+    ADD BLOCK  PREDICATE seg.fn_accion_actor(5, actor_uid)
+        ON core.organizaciones BEFORE DELETE,
+
+    /* core.actor_membresia · dos actores: persona y organización. */
+    ADD FILTER PREDICATE seg.fn_accion_actor_actor(1, persona_uid, organizacion_uid)
+        ON core.actor_membresia,
+    ADD BLOCK  PREDICATE seg.fn_accion_actor_actor(2, persona_uid, organizacion_uid)
+        ON core.actor_membresia AFTER INSERT,
+    ADD BLOCK  PREDICATE seg.fn_accion_actor_actor(3, persona_uid, organizacion_uid)
+        ON core.actor_membresia BEFORE UPDATE,
+    ADD BLOCK  PREDICATE seg.fn_accion_actor_actor(4, persona_uid, organizacion_uid)
+        ON core.actor_membresia AFTER UPDATE,
+    ADD BLOCK  PREDICATE seg.fn_accion_actor_actor(5, persona_uid, organizacion_uid)
+        ON core.actor_membresia BEFORE DELETE,
+
+    /* core.casos_actores · actor y caso. */
+    ADD FILTER PREDICATE seg.fn_accion_actor_caso(1, actor_id, caso_id)
+        ON core.casos_actores,
+    ADD BLOCK  PREDICATE seg.fn_accion_actor_caso(2, actor_id, caso_id)
+        ON core.casos_actores AFTER INSERT,
+    ADD BLOCK  PREDICATE seg.fn_accion_actor_caso(3, actor_id, caso_id)
+        ON core.casos_actores BEFORE UPDATE,
+    ADD BLOCK  PREDICATE seg.fn_accion_actor_caso(4, actor_id, caso_id)
+        ON core.casos_actores AFTER UPDATE,
+    ADD BLOCK  PREDICATE seg.fn_accion_actor_caso(5, actor_id, caso_id)
+        ON core.casos_actores BEFORE DELETE,
+
+    /* core.alertas_actores · actor y alerta. */
+    ADD FILTER PREDICATE seg.fn_accion_actor_alerta(1, actor_id, alerta_id)
+        ON core.alertas_actores,
+    ADD BLOCK  PREDICATE seg.fn_accion_actor_alerta(2, actor_id, alerta_id)
+        ON core.alertas_actores AFTER INSERT,
+    ADD BLOCK  PREDICATE seg.fn_accion_actor_alerta(3, actor_id, alerta_id)
+        ON core.alertas_actores BEFORE UPDATE,
+    ADD BLOCK  PREDICATE seg.fn_accion_actor_alerta(4, actor_id, alerta_id)
+        ON core.alertas_actores AFTER UPDATE,
+    ADD BLOCK  PREDICATE seg.fn_accion_actor_alerta(5, actor_id, alerta_id)
+        ON core.alertas_actores BEFORE DELETE,
+
+    /* core.compromiso_colaboradores · actor y compromiso. */
+    ADD FILTER PREDICATE seg.fn_accion_actor_compromiso(1, actor_uid, compromiso_id)
+        ON core.compromiso_colaboradores,
+    ADD BLOCK  PREDICATE seg.fn_accion_actor_compromiso(2, actor_uid, compromiso_id)
+        ON core.compromiso_colaboradores AFTER INSERT,
+    ADD BLOCK  PREDICATE seg.fn_accion_actor_compromiso(3, actor_uid, compromiso_id)
+        ON core.compromiso_colaboradores BEFORE UPDATE,
+    ADD BLOCK  PREDICATE seg.fn_accion_actor_compromiso(4, actor_uid, compromiso_id)
+        ON core.compromiso_colaboradores AFTER UPDATE,
+    ADD BLOCK  PREDICATE seg.fn_accion_actor_compromiso(5, actor_uid, compromiso_id)
+        ON core.compromiso_colaboradores BEFORE DELETE,
+
+    /* core.reunion_participantes · actor y reunión. */
+    ADD FILTER PREDICATE seg.fn_accion_actor_reunion(1, actor_uid, reunion_id)
+        ON core.reunion_participantes,
+    ADD BLOCK  PREDICATE seg.fn_accion_actor_reunion(2, actor_uid, reunion_id)
+        ON core.reunion_participantes AFTER INSERT,
+    ADD BLOCK  PREDICATE seg.fn_accion_actor_reunion(3, actor_uid, reunion_id)
+        ON core.reunion_participantes BEFORE UPDATE,
+    ADD BLOCK  PREDICATE seg.fn_accion_actor_reunion(4, actor_uid, reunion_id)
+        ON core.reunion_participantes AFTER UPDATE,
+    ADD BLOCK  PREDICATE seg.fn_accion_actor_reunion(5, actor_uid, reunion_id)
+        ON core.reunion_participantes BEFORE DELETE,
+
+    /* core.cronologia_vinculos · cronología obligatoria; alerta y
+       documento pueden ser NULL. */
+    ADD FILTER PREDICATE seg.fn_accion_vinculos(1, cronologia_id, alerta_id, documento_id)
+        ON core.cronologia_vinculos,
+    ADD BLOCK  PREDICATE seg.fn_accion_vinculos(2, cronologia_id, alerta_id, documento_id)
+        ON core.cronologia_vinculos AFTER INSERT,
+    ADD BLOCK  PREDICATE seg.fn_accion_vinculos(3, cronologia_id, alerta_id, documento_id)
+        ON core.cronologia_vinculos BEFORE UPDATE,
+    ADD BLOCK  PREDICATE seg.fn_accion_vinculos(4, cronologia_id, alerta_id, documento_id)
+        ON core.cronologia_vinculos AFTER UPDATE,
+    ADD BLOCK  PREDICATE seg.fn_accion_vinculos(5, cronologia_id, alerta_id, documento_id)
+        ON core.cronologia_vinculos BEFORE DELETE,
+
+    /* core.hitos_compromiso · nivel propio más herencia del compromiso. */
+    ADD FILTER PREDICATE seg.fn_accion_hito(1, nivel_clasificacion, compromiso_id)
+        ON core.hitos_compromiso,
+    ADD BLOCK  PREDICATE seg.fn_accion_hito(2, nivel_clasificacion, compromiso_id)
+        ON core.hitos_compromiso AFTER INSERT,
+    ADD BLOCK  PREDICATE seg.fn_accion_hito(3, nivel_clasificacion, compromiso_id)
+        ON core.hitos_compromiso BEFORE UPDATE,
+    ADD BLOCK  PREDICATE seg.fn_accion_hito(4, nivel_clasificacion, compromiso_id)
+        ON core.hitos_compromiso AFTER UPDATE,
+    ADD BLOCK  PREDICATE seg.fn_accion_hito(5, nivel_clasificacion, compromiso_id)
+        ON core.hitos_compromiso BEFORE DELETE,
+
+    /* core.output_contracts · nivel propio más herencia del caso. */
+    ADD FILTER PREDICATE seg.fn_accion_contrato(1, nivel_clasificacion, caso_id)
+        ON core.output_contracts,
+    ADD BLOCK  PREDICATE seg.fn_accion_contrato(2, nivel_clasificacion, caso_id)
+        ON core.output_contracts AFTER INSERT,
+    ADD BLOCK  PREDICATE seg.fn_accion_contrato(3, nivel_clasificacion, caso_id)
+        ON core.output_contracts BEFORE UPDATE,
+    ADD BLOCK  PREDICATE seg.fn_accion_contrato(4, nivel_clasificacion, caso_id)
+        ON core.output_contracts AFTER UPDATE,
+    ADD BLOCK  PREDICATE seg.fn_accion_contrato(5, nivel_clasificacion, caso_id)
+        ON core.output_contracts BEFORE DELETE,
+
     /* --- bitácora de PII: lectura sólo con puede_auditar --- */
     ADD FILTER PREDICATE seg.fn_auditar(id)
         ON audit.datos_personales_acceso
@@ -1134,21 +1607,36 @@ CREATE SECURITY POLICY seg.pol_avisa
 WITH (STATE = ON);
 GO
 
-/* 5.3 · Verificación de la política: 15 tablas, 71 predicados.
-         (Las 13 tablas de `core` que el parche 16 añadió con RLS todavía
-         no están en esta política; ver la nota de §5.2.) */
+/* 5.4 · Verificación de la política: 28 tablas, 136 predicados.
+         27 tablas x 5 predicados (SELECT, INSERT, UPDATE previo, UPDATE
+         nuevo y DELETE) = 135, más el único FILTER de
+         audit.datos_personales_acceso.
+
+   En `sys.security_predicates` el vínculo con la política está en
+   `object_id` (no existe `security_policy_id`), y `is_enabled` vive en
+   `sys.security_policies`. Comprobado en SQL Server 2022 Developer. */
 SELECT OBJECT_SCHEMA_NAME(p.target_object_id) AS esquema,
        OBJECT_NAME(p.target_object_id)        AS tabla,
-       p.predicate_type_desc                  AS predicado,
+       p.predicate_type_desc                  AS tipo,
+       p.operation_desc                       AS operacion,
        sp.name                                AS politica,
-       p.is_enabled
+       sp.is_enabled
   FROM sys.security_predicates p
-  JOIN sys.security_policies  sp ON sp.object_id = p.security_policy_id
- ORDER BY 1, 2, 3;
+  JOIN sys.security_policies  sp ON sp.object_id = p.object_id
+ ORDER BY 1, 2, 3, 4;
+
+/* Recuento de una línea: esperado 28 tablas y 136 predicados.
+   Si el número de tablas es menor, alguna tabla quedó sin predicado y la
+   política no la protege: eso no da error al crear, se nota aquí. */
+SELECT COUNT(DISTINCT p.target_object_id) AS tablas,
+       COUNT(*)                          AS predicados
+  FROM sys.security_predicates p
+  JOIN sys.security_policies  sp ON sp.object_id = p.object_id
+ WHERE sp.name = N'pol_avisa';
 
 
 /* ---------------------------------------------------------------------
-   5.4 · Pruebas
+   5.5 · Pruebas
    ---------------------------------------------------------------------
    Las políticas se aplican a todos los usuarios de la base, incluidos
    dbo y db_owner. Aun así se prueba con un usuario sin privilegios y
@@ -1229,9 +1717,15 @@ GO
 
 PRINT '--- Prueba 4: puede_editar = 0 -> el UPDATE no modifica filas ---';
 /* Semántica: el BLOCK ... BEFORE UPDATE hace de USING (como en PostgreSQL).
-   Lo que NUNCA puede pasar es que se actualice una fila; según la versión,
-   las filas se descartan en silencio (0 filas) o la sentencia falla. Se
-   aceptan las dos respuestas y se rechaza cualquier otra. */
+   Lo que NUNCA puede pasar es que se actualice una fila.
+
+   MEDIDO en SQL Server 2022 Developer: el UPDATE no devuelve 0 filas en
+   silencio, sino que falla con el error 33504 ("... has a block predicate
+   that conflicts with this operation"). En PostgreSQL el mismo caso
+   afectaba 0 filas. Es una diferencia real que la API .NET debe conocer:
+   un UPDATE o DELETE bloqueado llega como excepción, no como cero filas
+   afectadas, así que no hay que confundirlo con "no hab\\u00eda nada que
+   cambiar". El INSERT bloqueado se comporta igual (error, no omisión). */
 EXEC sp_set_session_context @key = N'puede_editar', @value = 0, @read_only = 0;
 EXECUTE AS USER = N'avisa_prueba_rls';
     BEGIN TRY
@@ -1254,6 +1748,62 @@ EXECUTE AS USER = N'avisa_prueba_rls';
         VALUES (NEWID(), 1, N'prueba://rls', REPLICATE(N'0', 64), 2);
 
         PRINT 'FALLA: el INSERT debió bloquearse';
+    END TRY
+    BEGIN CATCH
+        PRINT 'OK: INSERT bloqueado -> ' + ERROR_MESSAGE();
+    END CATCH
+    ROLLBACK TRANSACTION;
+REVERT;
+GO
+
+PRINT '--- Prueba 6: las tablas heredadas ocultan lo que oculta su padre ---';
+/* Dos tablas del parche 16 que no tienen nivel propio:
+     core.casos_actores   (60 filas; padre core.casos, todas nivel 2)
+     core.organizaciones  (224 filas; padre core.actores, todas nivel 2)
+   Con nivel 1 no se ve ninguna; con nivel 2 se ven todas. Los valores
+   están medidos en origen (avisa_mssql), no estimados. */
+EXEC sp_set_session_context @key = N'nivel_clasificacion', @value = 1, @read_only = 0;
+EXEC sp_set_session_context @key = N'puede_crear',         @value = 0, @read_only = 0;
+EXEC sp_set_session_context @key = N'puede_editar',        @value = 0, @read_only = 0;
+EXEC sp_set_session_context @key = N'puede_eliminar',      @value = 0, @read_only = 0;
+
+EXECUTE AS USER = N'avisa_prueba_rls';
+    SELECT COUNT_BIG(*) AS casos_actores_visibles_n1 FROM core.casos_actores;   -- 0
+    SELECT COUNT_BIG(*) AS organizaciones_visibles_n1 FROM core.organizaciones; -- 0
+REVERT;
+GO
+
+EXEC sp_set_session_context @key = N'nivel_clasificacion', @value = 2, @read_only = 0;
+EXECUTE AS USER = N'avisa_prueba_rls';
+    SELECT COUNT_BIG(*) AS casos_actores_visibles_n2 FROM core.casos_actores;   -- 60
+    SELECT COUNT_BIG(*) AS organizaciones_visibles_n2 FROM core.organizaciones; -- 224
+REVERT;
+GO
+
+PRINT '--- Prueba 6b: escribir un hijo cuyo padre no se ve debe fallar ---';
+/* core.log_accesos admite INSERT libre, pero core.casos_actores no: el
+   INSERT exige ver el caso y el actor. Con nivel 1 no se ve ninguno, así
+   que el INSERT tiene que ser rechazado.
+
+   Los dos identificadores se leen ANTES de suplantar al usuario, con la
+   visibilidad completa de la sesión de administración. Si se leyeran
+   dentro del SELECT del INSERT, el FILTER los ocultaría, el INSERT no
+   tendría filas que insertar y no habría error: la prueba diría
+   "correcto" sin haber probado nada. Eso se comprobó y se corrigió. */
+DECLARE @caso  uniqueidentifier = (SELECT TOP (1) id        FROM core.casos);
+DECLARE @actor uniqueidentifier = (SELECT TOP (1) actor_uid FROM core.actores);
+
+EXEC sp_set_session_context @key = N'nivel_clasificacion', @value = 1, @read_only = 0;
+EXEC sp_set_session_context @key = N'puede_crear',         @value = 1, @read_only = 0;
+
+EXECUTE AS USER = N'avisa_prueba_rls';
+    BEGIN TRANSACTION;
+    BEGIN TRY
+        INSERT INTO core.casos_actores (id, caso_id, actor_id)
+        VALUES (NEWID(), @caso, @actor);
+
+        SELECT @@ROWCOUNT AS filas_insertadas;
+        PRINT 'FALLA: el INSERT debió bloquearse (0 filas no es un resultado válido aquí)';
     END TRY
     BEGIN CATCH
         PRINT 'OK: INSERT bloqueado -> ' + ERROR_MESSAGE();

@@ -1,0 +1,13 @@
+# Contexto de construcción = raíz del repositorio.
+# Se deja fuera lo que no hace falta para construir la interfaz ni la API:
+# dependencias instaladas, caché de Next, historial y documentación.
+
+node_modules
+.next
+.git
+.gitignore
+docs
+migration
+docker/postgres
+*.log
+*.dump
