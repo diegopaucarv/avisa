@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import { Building2, MapPin, Search, ShieldCheck, UsersRound } from 'lucide-react'
+import type { RegionScope } from './avisa-scope-filter'
 
 const directory = [
   { id: 'ORG-01', name: 'Asociación artesanal (alias)', kind: 'Organización', place: 'Paita · Piura', scope: 'Pesca artesanal', contact: 'Contacto protegido', initials: 'AA' },
@@ -13,10 +14,10 @@ const directory = [
 
 const categories = ['Todos', 'Actor', 'Organización', 'Local']
 
-export function AvisaDirectory() {
+export function AvisaDirectory({ regionScope = 'Todo el Perú' }: { regionScope?: RegionScope }) {
   const [query, setQuery] = useState('')
   const [category, setCategory] = useState('Todos')
-  const records = useMemo(() => directory.filter((item) => `${item.name} ${item.place} ${item.scope} ${item.id}`.toLowerCase().includes(query.toLowerCase()) && (category === 'Todos' || item.kind === category)), [query, category])
+  const records = useMemo(() => directory.filter((item) => (regionScope === 'Todo el Perú' || item.place.toLocaleLowerCase('es').includes(regionScope.toLocaleLowerCase('es'))) && `${item.name} ${item.place} ${item.scope} ${item.id}`.toLowerCase().includes(query.toLowerCase()) && (category === 'Todos' || item.kind === category)), [query, category, regionScope])
 
   return <>
     <div className="demo-notice" role="status"><ShieldCheck size={15} /><span><strong>Directorio demostrativo</strong> — nombres sintéticos; no se muestran teléfonos ni direcciones personales.</span></div>
