@@ -33,6 +33,8 @@ export type CaseDraft = {
   puntoFocal?: string;
   nivelConflicto?: DemoCase["nivelConflicto"];
   prioridad?: DemoCase["prioridad"];
+  subsector?: DemoCase["subsector"];
+  documentacionNormativa?: DemoCase["documentacionNormativa"];
   origen?: DemoCase["origen"];
 };
 
@@ -42,6 +44,7 @@ export type AlertDraft = {
   source: string;
   published: string;
   priority: DemoAlert["priority"];
+  risk?: DemoAlert["risk"];
   quote: string;
   note: string;
   caseCode?: string;
@@ -59,6 +62,7 @@ export type CommitmentDraft = {
   due: string;
   status: DemoCommitment["status"];
   progress?: number;
+  agreementType?: DemoCommitment["agreementType"];
   tipo?: DemoCommitment["tipo"];
   nivelGobierno?: DemoCommitment["nivelGobierno"];
   unidadResponsable?: string;

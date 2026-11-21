@@ -9,7 +9,7 @@ import {
 } from "./avisa-demo-data";
 import { DeleteButton, DocumentUploadForm } from "./avisa-crud";
 import { useAvisa } from "@/lib/avisa-store";
-import type { RegionScope } from "./avisa-scope-filter";
+import { isTerritoryVisible, type RegionScope } from "./avisa-scope-filter";
 
 const fragmentLabel: Record<FragmentKind, string> = {
   hecho: "Hecho verificable",
@@ -39,7 +39,7 @@ const extractionChip = (tipo: DemoDocument["extracciones"][number]["tipo"]) =>
         ? "riesgo"
         : "demanda";
 
-export function AvisaDocuments({ regionScope }: { regionScope: RegionScope }) {
+export function AvisaDocuments({ regionScope, assignedRegions, unrestricted }: { regionScope: RegionScope; assignedRegions: RegionScope[]; unrestricted: boolean }) {
   const {
     documents,
     cases,
@@ -55,14 +55,9 @@ export function AvisaDocuments({ regionScope }: { regionScope: RegionScope }) {
   const [selectedId, setSelectedId] = useState("");
 
   const inScope = (doc: DemoDocument) => {
-    if (regionScope === "Todo el Perú") return true;
+    if (unrestricted && regionScope === "Todo el Perú") return true;
     const related = cases.find((item) => item.code === doc.casoCode);
-    return (
-      !related ||
-      related.region
-        .toLocaleLowerCase("es")
-        .includes(regionScope.toLocaleLowerCase("es"))
-    );
+    return related ? isTerritoryVisible(related.region, regionScope, assignedRegions, unrestricted) : unrestricted;
   };
 
   const filtered = documents

@@ -40,6 +40,7 @@ import {
   AvisaScopeFilter,
   isWithinDemoWindow,
   normalizeAssignedRegions,
+  isTerritoryVisible,
   REGION_SCOPES,
   ScopePopover,
   type RegionScope,
@@ -100,15 +101,21 @@ export function AvisaDashboard({
     () => normalizeAssignedRegions(session.regiones),
     [session.regiones],
   );
-  const assignedLabel = assignedRegions.length
-    ? assignedRegions.join(" · ")
-    : "Todo el Perú";
-  const restrictedScope =
-    assignedRegions.length > 0 && assignedRegions.length < REGION_SCOPES.length;
-  // Con una sola región asignada, el ámbito inicial es esa región (no hay agregado).
+  const explicitRegionAssignment = Boolean(session.regiones?.length);
+  const unrestricted =
+    !explicitRegionAssignment &&
+    ["Admin", "Directora", "Autoridad"].includes(session.rol);
+  const assignedLabel = unrestricted
+    ? "Todo el Perú"
+    : assignedRegions.length
+      ? assignedRegions.join(" · ")
+      : "Sin regiones habilitadas";
+  const restrictedScope = !unrestricted;
   const [regionScope, setRegionScope] = useState<RegionScope>(
-    assignedRegions.length === 1 ? assignedRegions[0] : "Todo el Perú",
+    assignedRegions[0] ?? "Todo el Perú",
   );
+  const territoryVisible = (territory: string) =>
+    isTerritoryVisible(territory, regionScope, assignedRegions, unrestricted);
   const [timeScope, setTimeScope] = useState<TimeScope>("30 días");
   const [systemNotice, setSystemNotice] = useState("");
   const selectedCase =
@@ -120,30 +127,21 @@ export function AvisaDashboard({
     (item) =>
       item.status === "Pendiente de revisión" &&
       isWithinDemoWindow(item.published, timeScope) &&
-      (regionScope === "Todo el Perú" ||
-        item.location
-          .toLocaleLowerCase("es")
-          .includes(regionScope.toLocaleLowerCase("es"))),
+      territoryVisible(item.location),
   ).length;
   const scopedCaseCount = cases.filter(
     (item) =>
       isWithinDemoWindow(item.updated, timeScope) &&
-      (regionScope === "Todo el Perú" ||
-        item.region
-          .toLocaleLowerCase("es")
-          .includes(regionScope.toLocaleLowerCase("es"))),
+      territoryVisible(item.region),
   ).length;
   const scopedOverdueCommitments = commitments.filter((item) => {
     const relatedCase = cases.find(
       (caseItem) => caseItem.code === item.caseCode,
     );
     return (
-      item.status === "Vencido" &&
+      item.status === "Paralizado" &&
       (!relatedCase || isWithinDemoWindow(relatedCase.updated, timeScope)) &&
-      (regionScope === "Todo el Perú" ||
-        relatedCase?.region
-          .toLocaleLowerCase("es")
-          .includes(regionScope.toLocaleLowerCase("es")))
+      (relatedCase ? territoryVisible(relatedCase.region) : unrestricted)
     );
   }).length;
 
@@ -162,10 +160,7 @@ export function AvisaDashboard({
       .filter(
         (item) =>
           isWithinDemoWindow(item.updated, timeScope) &&
-          (regionScope === "Todo el Perú" ||
-            item.region
-              .toLocaleLowerCase("es")
-              .includes(regionScope.toLocaleLowerCase("es"))) &&
+          territoryVisible(item.region) &&
           `${item.code} ${item.title} ${item.region}`
             .toLowerCase()
             .includes(normalized),
@@ -381,8 +376,8 @@ export function AvisaDashboard({
               </div>
               <AvisaScopeFilter
                 region={regionScope}
-                regions={assignedRegions}
-                allLabel={restrictedScope ? "Mis regiones" : "Todo el Perú"}
+              regions={unrestricted ? REGION_SCOPES : assignedRegions}
+              allLabel={restrictedScope ? "Mis regiones" : "Todo el Perú"}
                 onRegionChange={(region) => {
                   setRegionScope(region);
                   setScopeOpen(false);
@@ -521,6 +516,8 @@ export function AvisaDashboard({
               onAlertEdit={handleAlertEdit}
               regionScope={regionScope}
               timeScope={timeScope}
+              assignedRegions={assignedRegions}
+              unrestricted={unrestricted}
             />
           </div>
           <footer className="app-footer">

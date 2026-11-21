@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { CircleMarker, MapContainer, Popup, TileLayer, useMap } from 'react-leaflet'
 import { ArrowRight, MapPin, ShieldCheck } from 'lucide-react'
 import { demoCases } from './avisa-demo-data'
-import { isWithinDemoWindow, type RegionScope, type TimeScope } from './avisa-scope-filter'
+import { isWithinDemoWindow, isTerritoryVisible, type RegionScope, type TimeScope } from './avisa-scope-filter'
 
 const places = [
   { id: 'DEMO-2026-041', label: 'Paita · Piura', detail: '1 caso demostrativo · riesgo alto', position: [-5.09, -81.11] as [number, number], tone: '#b76b56' },
@@ -17,11 +17,11 @@ function FitPlaces({ locations }: { locations: [number, number][] }) {
   return <button className="map-reset" onClick={() => map.fitBounds(locations, { padding: [40, 40] })}>Ver todos</button>
 }
 
-export default function AvisaMap({ onSelectCase, regionScope, timeScope }: { onSelectCase: (code: string) => void; regionScope: RegionScope; timeScope: TimeScope }) {
+export default function AvisaMap({ onSelectCase, regionScope, timeScope, assignedRegions, unrestricted }: { onSelectCase: (code: string) => void; regionScope: RegionScope; timeScope: TimeScope; assignedRegions: RegionScope[]; unrestricted: boolean }) {
   const [selected, setSelected] = useState('')
   const scopedPlaces = places.filter((place) => {
     const latestEvent = demoCases.find((item) => item.code === place.id)?.events[0]?.date ?? ''
-    return (regionScope === 'Todo el Perú' || place.label.toLocaleLowerCase('es').includes(regionScope.toLocaleLowerCase('es'))) && isWithinDemoWindow(latestEvent, timeScope)
+    return isTerritoryVisible(place.label, regionScope, assignedRegions, unrestricted) && isWithinDemoWindow(latestEvent, timeScope)
   })
   const selectedPlace = scopedPlaces.find((place) => place.id === selected)
   const selectedCase = demoCases.find((item) => item.code === selected)
