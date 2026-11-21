@@ -1,17 +1,26 @@
 ' =====================================================================
 '  AVISA-PRODUCE · Casos de uso y mapa de trazabilidad (PlantUML · UML puro)
 ' =====================================================================
-'  Cuatro láminas, una por tabla del ERS §3.4 y una de trazabilidad:
+'  Cinco láminas, una por tabla del ERS §3.4, una de trazabilidad
+'  y una de arquitectura:
 '    AVISA_CU_MVP_DIA.svg     -> §3.4 «Página 1 — el día del analista»
-'                                (incluye CU-20 a CU-22: procesamiento
-'                                 de documentos, que entra en el MVP)
+'                                (incluye CU-20 a CU-22, el procesamiento
+'                                 de documentos, y CU-35 y CU-36, la
+'                                 sincronización con Gemini: todo entra
+'                                 en el MVP)
 '    AVISA_CU_MVP_SALIDA.svg  -> §3.4 «Página 2 — lo que se valida, se
 '                                envía y se administra»
-'    AVISA_CU_2027.svg        -> §3.4 «Página 3 — 2027 y fase MADRE»
+'    AVISA_CU_2027.svg        -> §3.4 «Página 3 — 2027: un solo horizonte
+'                                con dos tramos»: los tramos se ordenan por
+'                                dependencia, no son dos horizontes
 '    AVISA_CU_MAPA_VISTAS.svg -> §3.4 «Página 4 — del actor y el objetivo al
 '                                caso y a la pieza»: actor -> objetivo ->
 '                                caso -> pieza, con las brechas de diciembre.
 '                                Resumen visual de §17.
+'    AVISA_CU_CONTENEDORES.svg -> §3.4 «Página 5 — qué pieza realiza cada caso»:
+'                                caso de uso -> contenedor (C2, §14.2) ->
+'                                componente (C3, §14.3). Cierra el puente
+'                                entre §3.4 y §14, que hasta ahora no existía.
 '
 '  Regla de mantenimiento (ERS §3.4): cada caso lleva su código CU-nn y
 '  existe una fila con sus RF en la tabla correspondiente. Un caso sin RF
@@ -19,9 +28,10 @@
 '  En la lámina 4 el rótulo de cada caso copia el de §3.4 palabra por
 '  palabra: la lámina es un control de trazabilidad, no un resumen.
 '
-'  Regenerar, desde la carpeta docs/:
-'    java -jar plantuml.jar -tsvg -charset UTF-8 -o img \
-'        casos_uso/AVISA_CASOS_USO.puml
+'  Regenerar, desde la carpeta docs/casos_uso/ (PlantUML resuelve `-o`
+'  respecto de la carpeta del .puml, no del directorio actual):
+'    java -jar plantuml.jar -tsvg -charset UTF-8 -o ../img \
+'        AVISA_CASOS_USO.puml
 '
 '  Graphviz es lo recomendado. Sin Graphviz, añadir -Playout=smetana:
 '  no falla, pero el trazado queda peor.
@@ -63,13 +73,14 @@ skinparam actor {
   FontColor #0F172A
 }
 
-title AVISA-PRODUCE · Casos de uso del MVP · Página 1 de 3\nEl día del analista · CU-01 a CU-13 y CU-20 a CU-22
+title AVISA-PRODUCE · Casos de uso del MVP · Página 1 de 3\nEl día del analista · CU-01 a CU-03, CU-05 a CU-08, CU-10, CU-12, CU-13, CU-20 a CU-22, CU-35 y CU-36
 
 ' =========================================================
 ' 1. ACTORES PRIMARIOS (Izquierda)
 ' =========================================================
 actor "Analista / Sectorista\n(OAIPCS)" as analista #EFF6FF;line:1D4ED8
 actor "Analista con privilegio\nRENIEC (hoy, Edith)" as reniec #EFF6FF;line:1D4ED8
+actor "Dirección de la OAIPCS" as direccion_dia #EFF6FF;line:1D4ED8
 actor "Procesos automáticos\nprogramados (CT-04)" as reloj #FEF3C7;line:B45309
 
 ' Herencia de roles: un solo CU-01 sirve a todos los perfiles
@@ -90,12 +101,12 @@ rectangle "Plataforma AVISA-PRODUCE / SIPRECS (MVP)" {
     usecase "CU-03 · Registrar actor\nsin DNI" as uc_sin_dni
     usecase "CU-05 · Registrar compromisos,\nrelatorías y mesas" as uc_compromisos
     usecase "CU-06 · Consultar compromisos\nde un caso" as uc_cons_comp
-    usecase "CU-11 · Consultar fichas,\ndirectorios y reportes" as uc_reportes
     usecase "CU-12 · Exportar listas de asistencia\ny mapa de actores" as uc_exportar
   }
 
   package "Alertas tempranas" {
     usecase "CU-07 · Cargar alerta\ntemprana" as uc_alerta
+    usecase "CU-08 · Validar alerta\ntemprana (validación previa)" as uc_val_prev
   }
 
   package "Productos" {
@@ -106,6 +117,8 @@ rectangle "Plataforma AVISA-PRODUCE / SIPRECS (MVP)" {
     usecase "CU-20 · Procesar documentos y\nproponer candidatos" as uc_procesar
     usecase "CU-21 · Recolectar fuentes\nde la lista blanca" as uc_fuentes
     usecase "CU-22 · Revisar candidatos y\ncoincidencias dudosas" as uc_revisar
+    usecase "CU-35 · Sincronizar bajo\ndemanda con Gemini" as uc_sync_demanda
+    usecase "CU-36 · Sincronizar mensajes\nde WhatsApp con Gemini" as uc_sync_wa
   }
 }
 
@@ -116,7 +129,8 @@ actor "Plataforma PIDE\n(RENIEC)" as sys_pide #F1F5F9;line:64748B
 actor "Repositorio documental\n(Google Drive)" as sys_drive #F1F5F9;line:64748B
 actor "Correo institucional" as sys_mail #F1F5F9;line:64748B
 actor "Fuentes públicas\nautorizadas (lista blanca)" as sys_fuentes #F1F5F9;line:64748B
-actor "Servicio de IA\n(Gemini)" as sys_ai #F1F5F9;line:64748B
+actor "Servicio de IA\n(Gemini · Google)" as sys_ai #F1F5F9;line:64748B
+actor "WhatsApp Cloud API\n(Meta) · SVC-07" as sys_whatsapp #F1F5F9;line:64748B
 
 ' =========================================================
 ' 4. RELACIONES ACTOR → CASO
@@ -127,42 +141,81 @@ reniec --> uc_pide
 analista --> uc_actores
 analista --> uc_compromisos
 analista --> uc_cons_comp
-analista --> uc_reportes
 analista --> uc_exportar
+direccion_dia --> uc_exportar
 analista --> uc_alerta
+analista --> uc_val_prev
 analista --> uc_productos
 
 analista --> uc_procesar
 analista --> uc_revisar
 reloj --> uc_fuentes
 
+' CU-35 la pide un usuario autorizado; CU-36 la dispara el reloj o un usuario
+analista --> uc_sync_demanda
+direccion_dia --> uc_sync_demanda
+analista --> uc_sync_wa
+reloj --> uc_sync_wa
+
 ' =========================================================
 ' 5. RELACIONES ENTRE CASOS
 ' =========================================================
 uc_sin_dni ..> uc_actores : <<extend>>
-uc_exportar ..> uc_reportes : <<extend>>
+uc_exportar ..> uc_actores : <<extend>>
 uc_pide ..> uc_login : <<include>>
+uc_alerta ..> uc_val_prev : «pasa a validación»
 uc_fuentes ..> uc_procesar : «dispara»
 uc_procesar ..> uc_revisar : «propone candidatos»
+uc_sync_wa ..> uc_revisar : «deja candidatos de WhatsApp»
+
+' Cadena de datos: qué caso alimenta a cuál
+uc_actores ..> uc_exportar : «alimenta»
+uc_compromisos ..> uc_productos : «alimenta»
+uc_revisar ..> uc_alerta : «se convierte en alerta»
 
 ' =========================================================
 ' 6. INTEGRACIONES EXTERNAS
 ' =========================================================
 uc_pide --> sys_pide
-uc_reportes --> sys_drive
 uc_productos --> sys_drive
 uc_productos --> sys_mail
 uc_fuentes --> sys_fuentes
 uc_procesar --> sys_ai
+uc_sync_demanda --> sys_ai
+uc_sync_wa --> sys_whatsapp
+uc_sync_wa --> sys_ai
 
-' =========================================================
-' 7. CONTROLES TRANSVERSALES (no son casos de uso · ERS §3.4)
-' =========================================================
+note right of uc_exportar
+  **RF-F08, Should del MVP.** Exporta listas de asistencia y el mapa de
+  actores con lo que CU-02 ya registró. **Cada exportación deja un hash en
+  `audit.exportacion`** (RF-X01): la salida cruza el perímetro de la base.
+end note
 
+note right of uc_sync_demanda
+  **RF-E13, RF-E14, RN-18, RN-19.** Un usuario autorizado (Sectorista o
+  Dirección) pide «la información más reciente» de un caso, actor o zona y
+  dispara una **sincronización inmediata**, sin esperar el ciclo de 24 h.
+  El resultado se muestra con **fecha y hora** y marcado «recién
+  sincronizado, pendiente de revisión». Hay **límite de frecuencia por
+  usuario**: al superarlo se usa el último dato sincronizado, con su fecha.
+end note
 
+note right of uc_sync_wa
+  **RF-E12, SVC-07.** Los mensajes que llegan por WhatsApp Cloud API los
+  procesa Gemini y entran como **candidatos** con origen WhatsApp, pendientes
+  de **revisión humana** (CU-22). Corre en **ciclo automático de 24 h** y
+  también bajo demanda; sin revisión, nada de lo sincronizado se publica.
+end note
 
+note "**CU-11 ya no está en esta lámina.**\nConsulta de fichas, directorios y reportes se dibuja en la\npágina 3, dentro del paquete de 2027: RF-F01 a F03 y F05 a F07\npasan a ese horizonte. RF-F04 (contactos) y RF-F08 (exportación,\nCU-12) se quedan en diciembre." as N_CU11
+N_CU11 .. uc_actores
 
-
+legend right
+  |= Trazo |= Qué significa |
+  | **━━━ Línea continua** | El actor usa el caso, o el caso usa el sistema externo |
+  | **- - - `<<include>>` / `<<extend>>`** | Relación UML: obligatoria / opcional |
+  | **- - - texto en español** | Orden de trabajo o cadena de datos entre casos (no es UML) |
+endlegend
 @enduml
 
 
@@ -206,13 +259,13 @@ skinparam actor {
   FontColor #0F172A
 }
 
-title AVISA-PRODUCE · Casos de uso del MVP · Página 2 de 3\nLo que se valida, se envía y se administra · CU-01 y CU-04 a CU-19
+title AVISA-PRODUCE · Casos de uso del MVP · Página 2 de 3\nLo que se valida, se envía y se administra · CU-01, CU-04, CU-08, CU-09 y CU-14 a CU-19
 
 ' =========================================================
 ' 1. ACTORES PRIMARIOS (Izquierda)
 ' =========================================================
 actor "Dirección de la OAIPCS" as direccion #EFF6FF;line:1D4ED8
-actor "Alta Dirección\n(Despacho Ministerial y Gabinete)" as alta #EFF6FF;line:1D4ED8
+actor "Alta Dirección\n(Ministro, 2 Viceministros\ny Secretario General)" as alta #EFF6FF;line:1D4ED8
 actor "Administrador Funcional" as admin #EFF6FF;line:1D4ED8
 actor "Oficina General de Tecnologías\nde la Información (OGTI)" as ogti #EFF6FF;line:1D4ED8
 
@@ -231,7 +284,7 @@ rectangle "Plataforma AVISA-PRODUCE / SIPRECS (MVP)" {
 
   package "Validación y difusión" {
     usecase "CU-04 · Fusionar actores\nduplicados" as uc_fusionar
-    usecase "CU-08 · Validar alerta\no clima social" as uc_validar
+    usecase "CU-08 · Validar alerta\no clima social (aprobación final)" as uc_validar
     usecase "CU-09 · Calcular destinatarios\ny enviar la alerta" as uc_difundir
   }
 
@@ -304,18 +357,55 @@ uc_tableros --> sys_bi
 uc_migracion --> sys_legacy
 uc_ia --> sys_ai
 
-' =========================================================
-' 7. CONTROLES TRANSVERSALES (no son casos de uso · ERS §3.4)
-' =========================================================
+note right of alta
+  **Cuatro usuarios de Alta Dirección**, no tres: el Ministro, los 2
+  Viceministros y el **Secretario General**. Acceso de **lectura** a todas las
+  vistas operativas, con **inicio en el tablero Estratégico**; toda lectura de
+  datos personales queda auditada (RD-08, RF-A04). Las **jefaturas de gabinete
+  siguen siendo destinatarias de envíos, no usuarias** (RN-02).
+end note
 
+note right of uc_usuarios
+  **PAN-10 · V_ADMIN es vista primaria, no secundaria.** CU-16 es **Must** del
+  MVP (RF-X02) y se dibuja con la misma línea continua que los demás casos.
+  Desde ahí se editan como **datos de catálogo**: usuarios y roles; unidades y
+  geografía; y los **niveles de gravedad con su plazo y su destinatario**
+  (1 Crítica ≤ 24 h → Ministro; 2 Alta 24–48 h → Ministro, con copia;
+  3 Media ≤ 72 h → Viceministros, Secretaría General y jefaturas).
+  El catálogo de la base guarda **cuatro** filas y la decisión las resuelve en
+  **tres niveles con plazo** más una cuarta fila **sin plazo** (`Seguimiento`),
+  que no es un grado de gravedad [H-14, cerrada].
+end note
 
+note right of uc_difundir
+  **Tres niveles de gravedad (ERS §11.1), no dos.**
+  |= Nivel |= Plazo |= Destinatario |
+  | **1 Crítica** | ≤ 24 h | Ministro |
+  | **2 Alta** | 24–48 h | Ministro, con Viceministros y Secretaría General en copia |
+  | **3 Media** | ≤ 72 h | Viceministros, Secretaría General y jefaturas de gabinete |
+  --
+  **Graves = niveles 1 y 2.** La aprobación de la Dirección (RN-04) se exige
+  en los **tres** niveles, y la gravedad decide **a quién** se avisa, no
+  **quién** autoriza.
+end note
 
-
+note right of uc_ia
+  **Una sola consola técnica: ETL-01 (V_ETL), con tres pestañas.**
+  1. **Ingesta en vivo**: relatorías, lista blanca, WhatsApp/Gemini, revisión
+     de citas y demo en vivo. Sirve a CU-20 y a CU-36.
+  2. **Migración y calidad** (OGTI): cuadratura de la carga del sistema
+     anterior (CU-15).
+  3. **Respaldos y modelo** (OGTI): CU-18 y CU-19.
+  **QDA-01 «análisis cualitativo» deja de existir como vista aparte**: se
+  fusiona aquí y el nombre se retira para no confundirlo con CU-28, que es
+  del tramo 2 de 2027. CU-19 deja de apuntar a dos vistas distintas: apunta
+  solo a ETL-01.
+end note
 @enduml
 
 
 ' #####################################################################
-'  PÁGINA 3 · 2027 Y FASE MADRE
+'  PÁGINA 3 · 2027: UN SOLO HORIZONTE CON DOS TRAMOS
 ' #####################################################################
 
 @startuml AVISA_CU_2027
@@ -354,7 +444,7 @@ skinparam actor {
   FontColor #0F172A
 }
 
-title AVISA-PRODUCE · Casos de uso · Página 3 de 3\nHorizonte 2027 y fase MADRE · CU-23 a CU-34
+title AVISA-PRODUCE · Casos de uso · Página 3 de 3\nUn solo horizonte 2027 con dos tramos ordenados por dependencia\nTramo 1: CU-11, CU-23, CU-24, CU-26, CU-29, CU-30, CU-32 y CU-33\nTramo 2 (MADRE): CU-25, CU-27, CU-28, CU-31 y CU-34
 
 ' =========================================================
 ' 1. ACTORES PRIMARIOS (Izquierda)
@@ -362,7 +452,7 @@ title AVISA-PRODUCE · Casos de uso · Página 3 de 3\nHorizonte 2027 y fase MAD
 actor "Procesos automáticos\nprogramados (CT-04)" as reloj #FEF3C7;line:B45309
 actor "Analista / Sectorista\n(OAIPCS)" as analista27 #EFF6FF;line:1D4ED8
 actor "Dirección de la OAIPCS" as direccion27 #EFF6FF;line:1D4ED8
-actor "Alta Dirección" as alta27 #EFF6FF;line:1D4ED8
+actor "Alta Dirección\n(Ministro, 2 Viceministros\ny Secretario General)" as alta27 #EFF6FF;line:1D4ED8
 actor "Actor externo o gremio\n(perfil C, acceso acotado)" as externo #EFF6FF;line:1D4ED8
 actor "Administrador Funcional" as admin27 #EFF6FF;line:1D4ED8
 
@@ -375,27 +465,25 @@ externo -[hidden]down-> admin27
 ' =========================================================
 ' 2. FRONTERA DEL SISTEMA
 ' =========================================================
-rectangle "Plataforma AVISA-PRODUCE / SIPRECS (evolución 2027)" {
+rectangle "Plataforma AVISA-PRODUCE / SIPRECS (2027: un solo horizonte, dos tramos — el segundo es MADRE)" {
 
-  package "Inteligencia territorial y escenarios" {
+  package "2027 · tramo 1 — sobre lo ya entregado" {
+    usecase "CU-11 · Consultar fichas,\ndirectorios y reportes" as uc_reportes27
     usecase "CU-23 · Registrar posición,\ninfluencia y relaciones" as uc_posicion
     usecase "CU-24 · Ver la red\nde actores" as uc_red
-    usecase "CU-25 · Ver línea de tiempo\ny mapa" as uc_mapa
-    usecase "CU-28 · Analizar la pota\nen el tiempo" as uc_pota
     usecase "CU-26 · Ver indicadores\navanzados" as uc_indicadores
-    usecase "CU-27 · Simular escenarios\ny tendencia" as uc_escenarios
-  }
-
-  package "Monitoreo automatizado e IA asistida" {
     usecase "CU-29 · Generar borradores\nde informe" as uc_borradores
     usecase "CU-30 · Avisar vencimientos y escalar\nalertas sin atender" as uc_escalar
-    usecase "CU-34 · Traducir estados\nal SESIGUE" as uc_sesigue
-  }
-
-  package "Apertura externa, seguridad y control" {
-    usecase "CU-31 · Consultar el estado de\nmis compromisos" as uc_portal
     usecase "CU-32 · Ingresar con\nsegundo factor (MFA)" as uc_mfa
     usecase "CU-33 · Cambiar parámetros\ncon historial" as uc_parametros
+  }
+
+  package "2027 · tramo 2 (MADRE) — depende de servicios o calibración que aún no existen" {
+    usecase "CU-25 · Ver línea de tiempo\ny mapa" as uc_mapa
+    usecase "CU-27 · Simular escenarios\ny tendencia" as uc_escenarios
+    usecase "CU-28 · Analizar la pota\nen el tiempo" as uc_pota
+    usecase "CU-31 · Consultar el estado de\nmis compromisos" as uc_portal
+    usecase "CU-34 · Traducir estados\nal SESIGUE" as uc_sesigue
   }
 }
 
@@ -406,15 +494,40 @@ actor "Servicio de IA\n(Gemini)" as sys_ai27 #F1F5F9;line:64748B
 actor "Correo institucional" as sys_mail27 #F1F5F9;line:64748B
 actor "Sistema SESIGUE" as sys_sesigue #F1F5F9;line:64748B
 actor "Servicios cartográficos\n(mapas base)" as sys_mapas #F1F5F9;line:64748B
+actor "Repositorio documental\n(Google Drive)" as sys_drive27 #F1F5F9;line:64748B
 
 sys_ai27 -[hidden]down-> sys_mail27
+sys_mapas -[hidden]down-> sys_drive27
 note bottom of uc_borradores : CU-20, CU-21 y CU-22 (ingesta, procesamiento\ny revisión de candidatos) se dibujan en la **página 1**,\nporque el pipeline de documentos entra en el MVP.
+
+note bottom of uc_reportes27
+  **Llega en 2027, no en diciembre:** RF-F01 (quiénes actúan en la zona),
+  RF-F02 (perfil de actor), RF-F03 (directorios), RF-F05 (reportes remitidos
+  por zona) y RF-F07 (búsqueda global). **RF-F04 (contactos) y RF-F08
+  (exportación, CU-12) se quedan en el MVP.**
+end note
+
+note right of uc_mfa
+  **Deja de ser solo una comodidad de 2027.** Ahora que la Alta Dirección lee
+  datos personales dentro de la aplicación, el segundo factor se **recomienda
+  para los roles `alta_direccion` y `direccion_oaipcs`** en cuanto SVC-09 lo
+  ofrezca (RF-A07, H-23).
+end note
+
+note right of uc_indicadores
+  **El índice de riesgo compuesto (RF-J01) va en el tramo 2 de 2027**, no en
+  el tramo 1: necesita la red de actores completa y la calibración contra el
+  informe del caso SANIPES Sechura [H-34]. CU-26 dibuja solo RF-J02 y RF-J03.
+end note
 
 
 ' =========================================================
 ' 4. RELACIONES ACTOR → CASO
 ' =========================================================
 reloj --> uc_escalar
+
+' CU-11 llega con 2027: por eso no se dibuja en la página 1
+analista27 ..> uc_reportes27 : «llega en 2027»
 
 analista27 --> uc_borradores
 analista27 --> uc_posicion
@@ -435,7 +548,7 @@ admin27 --> uc_parametros
 ' 5. RELACIONES ENTRE CASOS (cadena de ingesta y consumo)
 ' =========================================================
 ' CU-20, CU-21 y CU-22 se dibujan en la página 1: el pipeline
-' de documentos entra en el MVP. Aquí queda solo lo de 2027.
+' de documentos entra en el MVP. Aquí queda solo 2027, con sus dos tramos.
 
 ' =========================================================
 ' 6. INTEGRACIONES EXTERNAS
@@ -444,13 +557,13 @@ uc_borradores --> sys_ai27
 uc_escalar --> sys_mail27
 uc_sesigue --> sys_sesigue
 uc_mapa --> sys_mapas
+uc_reportes27 --> sys_drive27
 
-' =========================================================
-' 7. CONTROLES TRANSVERSALES (no son casos de uso · ERS §3.4)
-' =========================================================
-
-
-
+legend right
+  |= Tramo de 2027 |= Qué significa |
+  | **Tramo 1** | Se construye **sobre** el módulo de diciembre; llega en la anualidad siguiente |
+  | **Tramo 2 (MADRE)** | Va después por dependencia, no por horizonte: necesita el acervo histórico, el servicio cartográfico (SVC-11), convenios y calibración [H-34] |
+endlegend
 
 @enduml
 
@@ -516,7 +629,7 @@ skinparam note {
 }
 hide stereotype
 
-title AVISA-PRODUCE · Actores, objetivos, casos de uso y vistas · Página 4 de 4\nTrazabilidad completa: quién impulsa cada objetivo, qué caso lo realiza y qué pieza lo resuelve · Diciembre 2026, 2027 y MADRE
+title AVISA-PRODUCE · Actores, objetivos, casos de uso y vistas · Página 4 de 4\nTrazabilidad completa: quién impulsa cada objetivo, qué caso lo realiza y qué pieza lo resuelve · Diciembre 2026 y 2027, con sus dos tramos
 
 ' =========================================================
 ' NIVEL 1 · ACTORES PRIMARIOS (ERS §3.4 · LÁMINAS 1 A 3)
@@ -524,7 +637,7 @@ title AVISA-PRODUCE · Actores, objetivos, casos de uso y vistas · Página 4 de
 package "Actores primarios (ERS §3.4)" as PKG_ACT #EFF6FF {
   actor "Analista / Sectorista\n(OAIPCS)" as analista #EFF6FF;line:1D4ED8
   actor "Dirección de la OAIPCS" as direccion #EFF6FF;line:1D4ED8
-  actor "Alta Dirección\n(Despacho Ministerial y Gabinete)" as alta #EFF6FF;line:1D4ED8
+  actor "Alta Dirección\n(Ministro, 2 Viceministros\ny Secretario General)" as alta #EFF6FF;line:1D4ED8
   actor "Administrador Funcional" as admin #EFF6FF;line:1D4ED8
   actor "Oficina General de Tecnologías\nde la Información (OGTI)" as ogti #EFF6FF;line:1D4ED8
 }
@@ -551,7 +664,9 @@ package "Casos de uso (ERS §3.4)" as PKG_CU #FFFFFF {
   usecase "CU-07 · Cargar\nalerta temprana" as CU07
   usecase "CU-08 · Validar alerta\no clima social" as CU08
   usecase "CU-11 · Consultar fichas,\ndirectorios y reportes" as CU11
+  usecase "CU-12 · Exportar listas de asistencia\ny mapa de actores" as CU12
   usecase "CU-14 · Ver tableros\ny vista ejecutiva" as CU14
+  usecase "CU-16 · Administrar usuarios,\nroles y catálogos" as CU16
   usecase "CU-17 · Consultar la bitácora\nde accesos" as CU17
   usecase "CU-22 · Revisar candidatos y\ncoincidencias dudosas" as CU22
   usecase "CU-24 · Ver la red\nde actores" as CU24
@@ -568,16 +683,17 @@ package "Casos de uso (ERS §3.4)" as PKG_CU #FFFFFF {
 package "Piezas por etapa de entrega" as PKG_PIEZAS {
 
   package "Diciembre 2026 · módulo mínimo (20 días)" as PKG_DIC #F1F5F9 {
-    artifact "Carga y revisión de alertas\n(PAN-05 · PAN-06) *" as D7
-    artifact "Envíos y bitácora\n(PAN-09 + auditoría) **" as D6
-    artifact "Seguimiento de compromisos\n(TAB-02) *" as D1
-    artifact "Casos estancados\n(TAB-03) *" as D3
-    artifact "Foto para la Alta Dirección\n(TAB-04) **" as D2
-    artifact "Alertas por estado y prioridad\n(TAB-05 · fuera de alcance) *" as D4 <<brecha>>
-    artifact "Fichas de zona, directorios y locales\n(PAN-11 · fuera de alcance) ***" as D5 <<brecha>>
+    artifact "Carga y revisión de alertas\n(PAN-05 · PAN-06) *\n**Host:** aplicación web" as D7
+    artifact "Envíos y bitácora\n(PAN-09 + auditoría) **\n**Host:** aplicación web" as D6
+    artifact "Seguimiento de compromisos\n(TAB-02) *\n**Host:** Analítico Especial (detalle) y\nEstratégico (agregado, sin DNI)" as D1
+    artifact "Casos estancados\n(TAB-03) *\n**Host:** Analítico Especial (Power BI Pro, con detalle)" as D3
+    artifact "Foto para la Alta Dirección\n(TAB-04) **\n**Host:** Analítico Especial (detalle) y\nEstratégico (agregado, sin DNI)" as D2
+    artifact "Alertas por estado y prioridad\n(TAB-05 · fuera de alcance) *\n**Host:** Analítico Especial (Power BI Pro, con detalle)" as D4 <<brecha>>
+    artifact "Fichas de zona, directorios y locales\n(PAN-11 · fuera de alcance) ***\n**Host:** aplicación web" as D5 <<brecha>>
+    artifact "Administración de usuarios, roles y catálogos\n(PAN-10 · V_ADMIN) **\n**Host:** aplicación web (vista primaria)" as D8
   }
 
-  package "2027 · capacidades analíticas" as PKG_2027 #F8FAFC {
+  package "2027 · tramo 1 — capacidades analíticas" as PKG_TRAMO1 #F8FAFC {
     artifact "Red de actores del caso\n¿quién influye sobre quién? ***" as Z1
     artifact "Clima social por zona\ny mapa de casos ***" as Z3
     artifact "Candidatos de alerta a escala\n(fuentes abiertas y redes) ***" as Z2
@@ -585,7 +701,7 @@ package "Piezas por etapa de entrega" as PKG_PIEZAS {
     artifact "Índices compuestos: riesgo,\ncumplimiento, tiempos, polarización ***" as Z5
   }
 
-  package "MADRE · proyecto completo (v10)" as PKG_MADRE #F8FAFC {
+  package "2027 · tramo 2 (MADRE) — proyecto completo (v10)" as PKG_TRAMO2 #F8FAFC {
     artifact "Pota en el tiempo y\nperfiles de pescadores ***" as M1
     artifact "Simulador de escenarios y\ntendencia de riesgo ***" as M2
     artifact "Seguimiento interministerial y\npanel de consultas RENIEC ***" as M3
@@ -621,7 +737,8 @@ ogti -[#1D4ED8]-> OBJ07
 ' 2. OBJETIVO -> CASO DE USO
 ' =========================================================
 OBJ01 --> CU06
-OBJ01 --> CU11
+OBJ01 ..> CU11 : "2027 · fichas y directorios"
+OBJ01 --> CU12
 OBJ02 --> CU07
 OBJ02 --> CU08
 OBJ02 --> CU22
@@ -634,6 +751,7 @@ OBJ04 ..> CU26
 OBJ05 --> CU07
 OBJ05 --> CU14
 OBJ05 --> CU22
+OBJ06 --> CU16
 OBJ06 --> CU17
 OBJ08 ..> CU24
 OBJ08 ..> CU25
@@ -655,7 +773,9 @@ CU14 --> D2
 CU08 --> D4
 CU22 --> D4
 CU14 ..> D4 : "sin tablero asignado"
-CU11 --> D5
+CU11 ..> D5 : "2027 · el directorio sigue sin pantalla"
+CU12 ..> D5 : "exporta lo ya registrado; el directorio aún es brecha"
+CU16 --> D8
 
 CU24 ..> Z1
 CU25 ..> Z3
@@ -696,14 +816,17 @@ end note
 
 note right of D5
   **PAN-11 · Fichas de zona, directorios y locales**
-  **Brecha funcional en requisitos Must.**
+  **Brecha de la que ya no depende diciembre.**
   RF-F01 (quiénes actúan en la zona), RF-F03
   (directorios de autoridades) y RF-F06 (locales)
   tienen una sola pantalla: PAN-11, fuera de los
-  20 días. Sus vistas están «por definir [H-41]».
-  Reportes remitidos (RF-F05) y ficha de actor
-  (RF-F02) sí tienen salida parcial en PAN-04 y
-  PAN-07, que son núcleo.
+  20 días, y sus vistas están «por definir [H-41]».
+  **CU-11 deja de ser MVP:** fichas, directorios,
+  reportes remitidos (RF-F05), perfil de actor
+  (RF-F02) y búsqueda global (RF-F07) pasan a 2027.
+  **RF-F04 (contactos) y RF-F08 (exportación) se
+  quedan en diciembre**: CU-12 exporta lo que CU-02
+  ya registró y deja hash en `audit.exportacion`.
 end note
 
 note right of D2
@@ -740,6 +863,39 @@ note right of Z1
   primero el grafo de relaciones (RF-H01, CU-23).
 end note
 
+note right of D3
+  **Casa de cada tablero (host).**
+  **Estratégico** (Publish to Web, solo agregados):
+  T_ALTA_EST, T_PANO, T_CLIMA.
+  **Analítico Especial** (Power BI Pro, con detalle):
+  T_ALTA_DET, T_COMP, T_ESTANC, T_ALERTAS_EST.
+  **M_MAPA:** detalle por distrito en el Analítico;
+  su agregado distrital se publica en el Estratégico.
+end note
+
+note right of D8
+  **Vista primaria, no secundaria.** CU-16 es Must
+  (RF-X02), así que PAN-10 · V_ADMIN se dibuja con
+  línea continua y sin recorte. Desde ahí se editan
+  como **catálogo** los **niveles de gravedad, sus
+  plazos y sus destinatarios** (1 Crítica ≤ 24 h →
+  Ministro; 2 Alta 24–48 h; 3 Media ≤ 72 h),
+  además de usuarios, roles y unidades. El catálogo
+  de la base tiene cuatro filas, resueltas en tres
+  niveles con plazo y una sin plazo (`Seguimiento`)
+  [H-14, cerrada].
+end note
+
+note right of alta
+  **Cuatro usuarios**, no tres: Ministro, 2
+  Viceministros y **Secretario General** (11 usuarios
+  nominales en total). Lectura de todas las vistas
+  operativas con **inicio en el tablero Estratégico**;
+  toda lectura de datos personales queda auditada.
+  Las **jefaturas de gabinete son destinatarias de
+  envíos, no usuarias** (RN-02).
+end note
+
 ' =========================================================
 ' LEYENDA
 ' =========================================================
@@ -754,8 +910,341 @@ legend right
   **Conexiones:**
   - **Línea azul (Actor → Objetivo):** responsabilidad o beneficio directo del rol sobre el objetivo.
   - **Línea gris (Objetivo → Caso → Pieza):** trazabilidad funcional y de entrega.
-  - **Continua vs. punteada:** diciembre 2026 (continua) frente a 2027 / MADRE o brecha (punteada).
+  - **Continua vs. punteada:** diciembre 2026 (continua) frente a 2027 —sea tramo 1 o tramo 2— o brecha (punteada).
   - **Borde punteado en una pieza:** brecha abierta dentro de la entrega de diciembre.
+  - **Primaria vs. secundaria:** ningún caso **Must** se dibuja con vista secundaria; el punteado
+    marca horizonte o brecha, nunca importancia.
+  - **Casa de las piezas:** `T_*` vive en Power BI (Estratégico = Publish to Web, solo agregados;
+    Analítico Especial = Pro, con detalle). `V_*` y `M_*` son vista web embebida en la aplicación,
+    salvo `M_MAPA`, que se detalla por distrito en el Analítico y se agrega en el Estratégico.
+endlegend
+
+@enduml
+
+' #####################################################################
+'  PÁGINA 5 · CONTENEDORES, COMPONENTES Y CASOS
+' #####################################################################
+
+@startuml AVISA_CU_CONTENEDORES
+'  Puente entre §3.4 (casos de uso) y §14 (arquitectura C4).
+'  Es un diagrama de componentes (§14.3), no de casos: cada caja es una
+'  pieza que se construye, y lleva escrito dentro el código de los casos
+'  de uso de §3.4 que realiza. Así se ve, de una vez, qué pieza resuelve
+'  qué caso y cómo se hablan las piezas entre sí —las dos cosas que ni
+'  el diagrama de casos ni el C2 (que solo llega a contenedores) mostraban.
+'  Los códigos son los de §7.1 (PAN-nn), §7.2 (TAB-nn), §14.2 (CT-nn) y
+'  §14.3 (CA-nn, CP-nn); la lámina no inventa nomenclatura.
+'  Criterio: se dibujan los casos del MVP (diciembre). Los de 2027, en sus
+'  dos tramos, aparecen solo donde el componente ya los anticipa, con «2027»
+'  delante.
+left to right direction
+skinparam shadowing false
+skinparam roundcorner 10
+skinparam linetype polyline
+skinparam packageStyle rectangle
+skinparam defaultFontName Arial
+skinparam defaultFontSize 10
+skinparam nodesep 8
+skinparam ranksep 70
+
+skinparam package {
+  BackgroundColor #F8FAFC
+  BorderColor #94A3B8
+  BorderStyle dashed
+  FontColor #475569
+  FontStyle bold
+}
+skinparam rectangle {
+  BackgroundColor #FFFFFF
+  BorderColor #0F766E
+  FontColor #0F172A
+}
+skinparam rectangle<<pantalla>> {
+  BackgroundColor #EFF6FF
+  BorderColor #2563EB
+}
+skinparam rectangle<<api>> {
+  BackgroundColor #F0FDFA
+  BorderColor #0F766E
+}
+skinparam rectangle<<proceso>> {
+  BackgroundColor #FFFBEB
+  BorderColor #B45309
+}
+skinparam rectangle<<reloj>> {
+  BackgroundColor #F5F3FF
+  BorderColor #7C3AED
+}
+skinparam rectangle<<panel>> {
+  BackgroundColor #ECFEFF
+  BorderColor #0891B2
+}
+skinparam rectangle<<aviso>> {
+  BackgroundColor #FDF2F8
+  BorderColor #DB2777
+}
+skinparam rectangle<<base>> {
+  BackgroundColor #F8FAFC
+  BorderColor #475569
+}
+skinparam rectangle<<servicio>> {
+  BackgroundColor #FFF7ED
+  BorderColor #C2410C
+  BorderStyle dashed
+}
+skinparam rectangle<<futuro>> {
+  BackgroundColor #F9FAFB
+  BorderColor #9CA3AF
+  BorderStyle dashed
+  FontColor #6B7280
+}
+skinparam note {
+  BackgroundColor #FEF9C3
+  BorderColor #CA8A04
+}
+hide stereotype
+
+title AVISA-PRODUCE · Contenedores, componentes y casos · Página 5 de 5\nQué pieza resuelve cada caso de uso y cómo se hablan las piezas · MVP de diciembre (con las anticipaciones de 2027)
+
+' =========================================================
+' PERSONAS
+' =========================================================
+actor "Analista / Sectorista\n(OAIPCS)" as ANALISTA #EFF6FF;line:1D4ED8
+actor "Dirección de la OAIPCS" as DIRECCION #EFF6FF;line:1D4ED8
+actor "Alta Dirección\n(4 usuarios)" as ALTA #EFF6FF;line:1D4ED8
+actor "Administrador\nFuncional" as ADMIN #EFF6FF;line:1D4ED8
+actor "OGTI" as OGTI #EFF6FF;line:1D4ED8
+
+' =========================================================
+' CT-05 · PANTALLAS DE TRABAJO (Angular) · PAN-01 a PAN-10 + ETL-01
+' =========================================================
+package "CT-05 · Pantallas de trabajo (Angular)" as PKG05 {
+  rectangle "PAN-01 · PAN-02 · Ingreso e inicio\nCU-01" as P0102 <<pantalla>>
+  rectangle "PAN-03 · PAN-04 · Lista y ficha de caso\nCU-02 · CU-05 · CU-06" as P0304 <<pantalla>>
+  rectangle "PAN-05 · PAN-06 · Alerta y su revisión\nCU-07 · CU-08 · CU-22" as P0506 <<pantalla>>
+  rectangle "PAN-07 · Actores y organizaciones\nCU-02 · CU-03 · CU-04 · CU-10 · CU-12" as P07 <<pantalla>>
+  rectangle "PAN-08 · Compromisos e hitos\nCU-05 · CU-06" as P08 <<pantalla>>
+  rectangle "PAN-09 · Envíos y comunicaciones\nCU-13" as P09 <<pantalla>>
+  rectangle "PAN-10 · Administración\nCU-16 · «2027» CU-33" as P10 <<pantalla>>
+  rectangle "ETL-01 · Consola técnica (3 pestañas)\nCU-15 · CU-18 · CU-19 · CU-20 · CU-35\nbitácora: CU-17" as ETL01 <<pantalla>>
+  rectangle "«2027» PAN-11 · Ficha de zona\nCU-11 · CU-23" as P11 <<futuro>>
+}
+
+' =========================================================
+' CT-03 · SERVICIO DE APLICACIÓN (.NET) · CA-01 a CA-13
+' =========================================================
+package "CT-03 · Servicio de aplicación (.NET)" as PKG03 {
+  rectangle "CA-01 · Acceso y perfiles\nCU-01 · CU-16" as CA01 <<api>>
+  rectangle "CA-02 · Actores y organizaciones\nCU-02 · CU-03 · CU-04 · CU-12" as CA02 <<api>>
+  rectangle "CA-03 · Casos, hechos y cronología\nCU-05" as CA03 <<api>>
+  rectangle "CA-04 · Compromisos, relatorías y mesas\nCU-05 · CU-06" as CA04 <<api>>
+  rectangle "CA-05 · Bandeja de candidatos\nCU-07 · CU-20 · CU-22 · CU-36" as CA05 <<api>>
+  rectangle "CA-06 · Reglas de gravedad y destinatarios\nCU-08 · CU-09" as CA06 <<api>>
+  rectangle "CA-07 · Productos y plantillas\nCU-13" as CA07 <<api>>
+  rectangle "CA-08 · Envíos\nCU-09 · CU-13" as CA08 <<api>>
+  rectangle "CA-09 · Cálculo de indicadores\nCU-14 · «2027» CU-26 · CU-27" as CA09 <<api>>
+  rectangle "CA-10 · Conector de Gemini\nCU-19 · CU-35 · CU-36" as CA10 <<api>>
+  rectangle "CA-11 · Auditoría y accesos\nCU-17" as CA11 <<api>>
+  rectangle "CA-12 · Carga del sistema anterior\nCU-15" as CA12 <<api>>
+  rectangle "CA-13 · Consulta RENIEC\nCU-10 (solo el privilegio)" as CA13 <<api>>
+}
+
+' =========================================================
+' CT-02 · PROCESAMIENTO DE DOCUMENTOS (.NET) · CP-01 a CP-09
+' =========================================================
+package "CT-02 · Procesamiento de documentos (.NET)" as PKG02 {
+  rectangle "CP-01 a CP-09 · Pipeline\nrecolección → normalización → extracción\n→ citas → riesgo → empaquetado\nCU-20 · CU-21" as CP <<proceso>>
+}
+
+' =========================================================
+' CT-04 · PROGRAMADOR DE TAREAS
+' =========================================================
+package "CT-04 · Programador de tareas" as PKG04 {
+  rectangle "Ciclo de 24 h y disparo manual\nCU-21 · CU-36 · «2027» CU-30" as RELOJ24 <<reloj>>
+  rectangle "Refresco de los tableros\nCU-14" as REFRESCO <<reloj>>
+}
+
+' =========================================================
+' CT-06 · PANELES (Power BI, dos canales)
+' =========================================================
+package "CT-06 · Paneles (Power BI, SaaS)" as PKG06 {
+  rectangle "TAB-02 · Compromisos\nCU-06 · CU-14" as TAB02 <<panel>>
+  rectangle "TAB-03 · Casos estancados\nCU-14" as TAB03 <<panel>>
+  rectangle "TAB-04 · Foto para la Alta Dirección\nCU-14" as TAB04 <<panel>>
+  rectangle "«2027» TAB-01 · TAB-05\nCU-26" as TAB15 <<futuro>>
+}
+
+' =========================================================
+' CT-08 · NOTIFICADOR
+' =========================================================
+package "CT-08 · Notificador" as PKG08 {
+  rectangle "Correo y WhatsApp\nCU-09 · CU-13 · «2027» CU-30" as NOTIF <<aviso>>
+}
+
+' =========================================================
+' CT-01 · BASE DE DATOS
+' =========================================================
+package "CT-01 · Base de datos (SQL Server)" as PKG01 {
+  rectangle "266 tablas · core, analytics, audit, agent, ind,\npolicy, qda, ref, staging, kag\nrespaldos: CU-18" as BD <<base>>
+}
+
+' =========================================================
+' CT-07 · VISTAS INTERACTIVAS (2027)
+' =========================================================
+package "CT-07 · Vistas interactivas (2027)" as PKG07 {
+  rectangle "Red de actores y línea de tiempo\n«2027» CU-24 · CU-25 · CU-28" as VISTAS <<futuro>>
+}
+
+' =========================================================
+' SERVICIOS EXTERNOS (SVC-nn)
+' =========================================================
+rectangle "SVC-09 · Identidad\ninstitucional" as S09 <<servicio>>
+rectangle "SVC-01 · Fuentes de\nlista blanca" as S01 <<servicio>>
+rectangle "SVC-02 · Gemini\n(Google)" as S02 <<servicio>>
+rectangle "SVC-04 · Sistema\nanterior" as S04 <<servicio>>
+rectangle "SVC-05 · Google\nDrive" as S05 <<servicio>>
+rectangle "SVC-06 · Correo" as S06 <<servicio>>
+rectangle "SVC-07 · WhatsApp\nCloud API" as S07 <<servicio>>
+rectangle "SVC-16 · PIDE-RENIEC" as S16 <<servicio>>
+
+' =========================================================
+' RELACIONES: PERSONAS CON LAS PANTALLAS
+' =========================================================
+ANALISTA --> P0102
+ANALISTA --> P0304
+ANALISTA --> P0506
+ANALISTA --> P07
+ANALISTA --> P08
+ANALISTA --> P09
+ANALISTA --> ETL01
+DIRECCION --> P0304
+DIRECCION --> P0506
+DIRECCION --> P07
+DIRECCION --> P08
+DIRECCION --> ETL01
+ALTA --> P0304
+ALTA --> P07
+ALTA --> P08
+ADMIN --> P10
+ADMIN --> ETL01
+OGTI --> ETL01
+
+' =========================================================
+' RELACIONES: PANTALLAS -> SERVICIO DE APLICACIÓN
+' =========================================================
+P0102 --> CA01
+P0304 --> CA03
+P0304 --> CA04
+P0304 --> CA02
+P0304 --> CA09
+P0506 --> CA05
+P0506 --> CA06
+P07 --> CA02
+P07 --> CA13
+P07 --> CA05
+P08 --> CA04
+P09 --> CA08
+P09 --> CA07
+P10 --> CA01
+ETL01 --> CA12
+ETL01 --> CA05
+ETL01 --> CA10
+ETL01 --> CA11
+P11 --> CA02
+P11 --> CA09
+
+' =========================================================
+' RELACIONES DENTRO DEL SERVICIO DE APLICACIÓN
+' =========================================================
+CA01 --> CA02
+CA01 --> CA03
+CA01 --> CA04
+CA01 --> CA05
+CA01 --> CA07
+CA01 --> CA09
+CA01 --> CA13
+CA05 --> CA06
+CA06 --> CA08
+CA07 --> CA08
+CA07 --> CA10
+CA08 --> CA10
+CA13 --> CA11
+CA10 --> CA11
+
+' =========================================================
+' RELACIONES: PROCESAMIENTO, RELOJ, PANELES, AVISOS
+' =========================================================
+S01 --> CP
+S05 --> CP
+CP <--> S02
+CP --> CA05
+RELOJ24 --> CP
+REFRESCO --> TAB02
+REFRESCO --> TAB03
+REFRESCO --> TAB04
+TAB02 --> BD
+TAB03 --> BD
+TAB04 --> BD
+CA08 --> NOTIF
+NOTIF --> S06
+NOTIF --> S07
+CA09 --> TAB02
+
+' =========================================================
+' RELACIONES: BASE DE DATOS Y SERVICIOS EXTERNOS
+' =========================================================
+CA02 --> BD
+CA03 --> BD
+CA04 --> BD
+CA05 --> BD
+CA09 --> BD
+CA11 --> BD
+CA12 --> BD
+CA10 <--> S02
+CA08 <--> S05
+CA13 <--> S16
+S09 --> P0102
+S09 --> CA01
+S04 --> CA12
+VISTAS --> BD
+
+' =========================================================
+' NOTAS
+' =========================================================
+note right of CP
+  **CT-02 no ve datos personales ni escribe en las tablas de
+  negocio.** Entrega **candidatos** a CA-05, que es quien decide.
+  Se entrega en el **tramo final** de los 20 días: si no llega,
+  todo lo demás opera con carga manual.
+end note
+
+note right of BD
+  **Nadie escribe en CT-01 salvo CT-03** (regla 1 de §14.2):
+  los paneles y las vistas de 2027 solo **leen**. La única
+  excepción es **CU-18**, que es trabajo de base.
+end note
+
+note bottom of TAB04
+  **Un contenedor, dos canales.** El canal Estratégico
+  (Publish to Web) nunca lleva datos personales (RD-08);
+  el Analítico Especial (Pro) sí, con seguridad por fila.
+end note
+
+legend right
+  |= Color |= Qué es |
+  | **Azul** | CT-05 · pantalla que la persona usa |
+  | **Verde** | CT-03 · regla de negocio en el servicio de aplicación |
+  | **Ámbar** | CT-02 · pipeline de documentos (tramo final) |
+  | **Violeta** | CT-04 · trabajo programado, sin persona detrás |
+  | **Cian** | CT-06 · tablero de Power BI |
+  | **Rosa** | CT-08 · envío de correo o WhatsApp |
+  | **Gris** | CT-01 · base de datos |
+  | **Naranja discontinuo** | SVC-nn · servicio que hay que integrar |
+  | **Gris discontinuo** | pieza de 2027 |
+  --
+  Cada caja lleva dentro el caso de uso de §3.4 que realiza, con su
+  código `CU-nn`. La tabla «Página 5» del ERS da la misma información
+  fila por fila, para quien tiene que leerla y no mirarla.
 endlegend
 
 @enduml

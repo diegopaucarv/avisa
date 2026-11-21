@@ -25,7 +25,7 @@
 --  Sección A · esquema    extensiones + DDL v9 (dos pases) + parches 1-5.
 --                          Autosuficiente: se puede aplicar sobre una
 --                          base VACÍA, sin instalar extensiones aparte.
---  Sección B · post-carga parches 6-19. NO se puede aplicar sobre una
+--  Sección B · post-carga parches 6-23. NO se puede aplicar sobre una
 --                          base vacía: exige el legado ya cargado por
 --                          migration/loader (filas en core.*, ind.*,
 --                          kag.*). Sobre una base recién creada falla en
@@ -68,15 +68,18 @@
 --  sección A → cargador del legado → sección B.
 --
 --  Con el legado cargado y la sección B aplicada (el estado de la base
---  `avisa`, sin contar `legacy` ni `public`): 289 tablas físicas (265
---  lógicas + 24 hijas de partición), 2 511 columnas y 610 claves
+--  `avisa`, sin contar `legacy` ni `public`): 290 tablas físicas (266
+--  lógicas + 24 hijas de partición), 2 527 columnas y 616 claves
 --  ajenas. Sumando el volcado histórico `legacy` (87 tablas, 807
---  columnas): 376 tablas físicas y 3 318 columnas; las claves ajenas no
+--  columnas): 377 tablas físicas y 3 334 columnas; las claves ajenas no
 --  cambian porque `legacy` no declara ninguna.
 --
---  La diferencia entre ambos estados son 14 tablas, 197 columnas y 29
---  claves ajenas, todas de los parches 9 a 18 (el 19 sólo añade
---  comentarios):
+--  La diferencia entre ambos estados son 15 tablas, 213 columnas y 35
+--  claves ajenas: 197 y 29 de los parches 9 a 18, más 2 columnas y 1
+--  clave ajena del parche 21, 1 columna del parche 22 y las 13 columnas
+--  con 5 claves ajenas del parche 23 (el 19 y el 20 no añaden objetos:
+--  el 19 sólo comenta y el 20 sólo renumera pasos, crea un rol y pone
+--  cuatro políticas):
 --    · parche  9 · `audit.datos_personales_acceso` (8 columnas) y las
 --                 4 columnas cifradas de `core.actor_datos_personales`;
 --    · parche 10 · `core.flujo_definicion` (10), `core.flujo_estado` (7)
@@ -112,7 +115,40 @@
 --    · parche 19 · ningún objeto: los 19 comentarios de columna que
 --                 faltaban; deja el modelo con 2 145 de 2 145 columnas
 --                 descritas.
---  Por eso la sección A termina en 275 tablas y no en 289: las tablas
+--    · parche 20 · ningún objeto nuevo: el rol `direccion_oaipcs`, el paso
+--                 `V10-ALERTA-APROB` del flujo de alerta, la renumeración
+--                 del paso 4 al 5 en 83 instancias y 4 políticas en
+--                 `core.flujo_definicion` (lectura abierta, escritura sólo
+--                 `administrador`).
+--    · parche 21 · `aprobada_por` (con clave ajena a `core.usuarios`) y
+--                 `aprobada_en` en `core.alertas_tempranas`, su índice
+--                 parcial y 8 políticas (4 en `core.flujo_estado` y 4 en
+--                 `core.permiso_aprobacion`); la vista
+--                 `core.vw_alerta_estado` pasa a 19 columnas; 1 restricción
+--                 y 1 trigger de validación en `core.flujo_definicion`; 1
+--                 asignación de rol, que no crea objetos.
+--    · parche 22 · `visibilidad` en `core.alertas_tempranas`, con su
+--                 restricción `alertas_visibilidad_valida` y su índice
+--                 parcial; el trigger `alertas_g21_visibilidad`, que hace
+--                 ejecutable G21; `core.puede_aprobar()` y la vista
+--                 `core.vw_permiso_aprobacion` (10 columnas), que dan
+--                 consumidor a `core.permiso_aprobacion`; `core.vw_alerta_estado`
+--                 pasa a 20 columnas; no añade claves ajenas ni filas.
+--    · parche 23 · `core.alerta_destinatario` (11 columnas, vacía),
+--                 `validada_por` y `es_grave` en `core.alertas_tempranas`
+--                 y `core.cat_prioridades_alerta` respectivamente, sus 2
+--                 restricciones de coherencia y de cuatro ojos, 5 claves
+--                 ajenas, 1 trigger `trg_audit`, 5 índices y 4 políticas;
+--                 `core.vw_alerta_estado` pasa a 22 columnas. La tabla nueva
+--                 estrena RLS **forzada** —`ENABLE` y `FORCE`—, como el
+--                 resto de `core`: sin `FORCE` el propietario se salta las
+--                 cuatro políticas y no sirven de nada.
+--    · parche 24 · ningún objeto nuevo: los 7 comentarios de columna que
+--                 faltaban en `core.alerta_destinatario` (`id`, `alerta_id`,
+--                 `motivo` y las 4 de auditoría). Deja el modelo en 2 161 de
+--                 2 161 columnas descritas y devuelve al parche 19 su
+--                 reejecutabilidad, porque su candado mide el modelo entero.
+--  Por eso la sección A termina en 275 tablas y no en 290: las tablas
 --  que faltan no son parte del esquema base, se crean después de cargar
 --  el legado. Si la sección A se queda corta en algo distinto, el defecto
 --  no está en este archivo: falta una fuente o cambió el DDL.
@@ -10120,7 +10156,7 @@ COMMIT;
 -- =====================================================================
 --  SECCIÓN B · POST-CARGA (EXIGE EL LEGADO CARGADO)
 -- =====================================================================
---  Parches 6-18. Requiere el legado cargado por migration/loader;
+--  Parches 6-23. Requiere el legado cargado por migration/loader;
 --  sobre una base vacía aborta en el primer parche que lee datos.
 
 -- Delimitador: desde aquí un error ABORTA el script.
@@ -10362,7 +10398,7 @@ WHERE tipo_id = 15
 
 -- ---------------------------------------------------------------------
 --  BLOQUE B.2 · Parche 7 · guardrails G19-G25
---  Fuente: docs/PARCHE_7_GUARDRAILS_G19_G25.sql (247 líneas)
+--  Fuente: docs/PARCHE_7_GUARDRAILS_G19_G25.sql (267 líneas)
 --  Errores: abortan la ejecución (ON_ERROR_STOP on)
 -- ---------------------------------------------------------------------
 -- =============================================================================
@@ -10385,14 +10421,29 @@ WHERE tipo_id = 15
 -- guardrails «rechazan, no solo advierten».
 --
 -- Qué NO hace.
---   - No toca las 18 filas G1–G18: el ON CONFLICT solo puede afectar a las
---     claves que este INSERT aporta (G19–G25).
+--   - No toca ninguna fila existente: `ON CONFLICT DO NOTHING` solo inserta las
+--     siete claves que faltan. No reescribe G1–G18 ni una fila de G19–G25 que ya
+--     exista (véase «por qué DO NOTHING», más abajo).
 --   - No toca `config.parametro` (lo usa otro parche).
---   No altera el CHECK de `guardrail`: el parche 6 ya lo amplió a G1–G25.
+--   - No altera el CHECK de `guardrail`: el parche 6 ya lo amplió a G1–G25.
 --
--- Idempotente. Re-ejecutable: `ON CONFLICT (guardrail) DO UPDATE` deja las 7
--- filas convergiendo al mismo contenido (también corrige una fila que se haya
--- desviado a mano). El conteo no cambia entre la primera y la segunda corrida.
+-- Idempotente. Re-ejecutable: `ON CONFLICT (guardrail) DO NOTHING` crea las siete
+-- filas si faltan y no reescribe ninguna que ya exista. El conteo no cambia entre
+-- la primera y la segunda corrida.
+--
+-- POR QUÉ `DO NOTHING` Y NO `DO UPDATE` (corregido el 2026-11-21). Hasta esa
+-- fecha el archivo usaba `DO UPDATE`, que dejaba las siete filas convergiendo al
+-- contenido del 18 de noviembre. Era cómodo mientras este era el último parche
+-- que tocaba la tabla, y dejó de serlo: el parche 22 creó
+-- `core.alertas_tempranas.visibilidad` con el vocabulario `interna`/`ejecutiva`/
+-- `sectorial`, y el 23 reescribió la fila de G21 con ese vocabulario y le añadió
+-- `validada_por`, porque el `perfil_b` que trae este archivo ya no es un valor
+-- que el CHECK admita. Con `DO UPDATE`, una reejecución suelta del 7 después del
+-- 23 deshacía esa corrección y, de paso, dejaba al 23 sin poder reejecutarse: su
+-- comprobación aborta si G21 no dice `ejecutiva`. Con `DO NOTHING` el contenido de
+-- una fila pertenece al último parche que la toca, y el orden de la cadena deja de
+-- ser una condición de corrección. El precio es explícito: este parche ya no
+-- «corrige» una fila desviada a mano; eso le corresponde al parche que la posee.
 --
 -- Ejecución (forma obligatoria en este repo):
 --   docker exec -i avisa-db psql -U avisa -d avisa -f - \
@@ -10522,12 +10573,11 @@ VALUES
         '{"ok": true, "msg": null, "code": null}'::jsonb,
         'block'
     )
-ON CONFLICT (guardrail) DO UPDATE
-    SET input_dispara              = EXCLUDED.input_dispara,
-        input_no_dispara           = EXCLUDED.input_no_dispara,
-        output_esperado_dispara    = EXCLUDED.output_esperado_dispara,
-        output_esperado_no_dispara = EXCLUDED.output_esperado_no_dispara,
-        severidad                  = EXCLUDED.severidad;
+-- `DO NOTHING`, no `DO UPDATE`: el porqué está en la cabecera. Esta fila de G21
+-- se escribe con `perfil_b`, el vocabulario anterior a que existiera la columna;
+-- el parche 23 la deja en `ejecutiva` y le añade `validada_por`, y desde hoy este
+-- parche ya no puede pisarla.
+ON CONFLICT (guardrail) DO NOTHING;
 
 COMMIT;
 
@@ -10606,8 +10656,14 @@ WHERE (substring(guardrail FROM 2))::int BETWEEN 1 AND 18;
 --    (trigger de visibilidad de G21, vista que no proyecta PII de G24,
 --    verificación de offsets de G20) no existen todavía en el esquema.
 -- b) G21 supone una tabla de alertas con `visibilidad`, `aprobada_por` y
---    `aprobada_en`. `core.alertas_tempranas` no las tiene hoy: el guardrail fija
---    el contrato antes que la columna, a propósito (v10 §16.1.quater).
+--    `aprobada_en`. Cuando se escribió este parche, el 18 de noviembre de 2026,
+--    `core.alertas_tempranas` no las tenía y el contrato se fijó antes que la
+--    columna, a propósito (v10 §16.1.quater). Hoy las tres existen: `aprobada_por`
+--    y `aprobada_en` desde el parche 21, `visibilidad` desde el 22. El gate
+--    `alertas_g21_visibilidad` es ejecutable, y el parche 23 reescribió esta misma
+--    fila con el vocabulario real (`ejecutiva`) y con `validada_por`, el cuarto
+--    ojo. El `perfil_b` del `VALUES` es histórico: sobrevive en el archivo, no en
+--    la base.
 -- c) `core.situacion_judicial_restricta` (G25) está definida en v10 §13.6.bis.v10
 --    y §2.3.bis, pero no se crea en este parche.
 -- d) La lista blanca de fuentes (G22) vive en `config.parametro` y la siembra
@@ -16497,7 +16553,7 @@ COMMENT ON TABLE core.notificaciones IS 'Aviso dirigido a un usuario sobre un he
 COMMENT ON TABLE core.organizaciones IS 'Organización inscrita como actor colectivo, con su RUC, base legal, integrantes y situación ante el registro de OSPA.';
 COMMENT ON TABLE core.outbox_integracion IS 'Cola de envíos hacia un sistema externo, con el contenido transformado, los reintentos y la aprobación previa.';
 COMMENT ON TABLE core.output_contracts IS 'Contrato de cada salida generada, con su formato, la consulta que la originó y el commit y snapshot que la respaldan.';
-COMMENT ON TABLE core.permiso_aprobacion IS 'Autorización temporal que habilita a un usuario a aprobar un objeto determinado, con su vigencia y quién la otorgó.';
+COMMENT ON TABLE core.permiso_aprobacion IS 'Autorización temporal que habilita a un usuario a aprobar un objeto determinado, con su vigencia y quién la otorgó. Desde el parche 22 tiene consumidor: core.puede_aprobar() la consulta para la suplencia del aprobador y core.vw_permiso_aprobacion la expone a la pantalla de administración. Una fila aquí no concede un rol: solo habilita a esa persona para ese objeto mientras la vigencia esté abierta. Vacía significa que no hay suplencia designada';
 COMMENT ON TABLE core.plan_acciones IS 'Acción de un plan de intervención, con su responsable, plazo, criterio de contención y estado de avance.';
 COMMENT ON TABLE core.planes_accion IS 'Plan de acción con su monto presupuestal, plazo límite y estado de aprobación, asociado a un documento del expediente.';
 COMMENT ON TABLE core.proceso_instancia IS 'Paso ejecutado del flujo operativo sobre un caso o un reporte, con su estado, responsable y fechas de ocurrencia.';
@@ -17117,7 +17173,7 @@ COMMENT ON COLUMN core.alertas_tempranas.mesa_id IS 'Mesa de diálogo vinculada 
 COMMENT ON COLUMN core.alertas_tempranas.nivel_alerta_id IS 'Nivel de gravedad de la alerta según el catálogo de niveles';
 COMMENT ON COLUMN core.alertas_tempranas.nivel_clasificacion IS 'Nivel de acceso al dato: 1 público, 2 reservado, 3 confidencial';
 COMMENT ON COLUMN core.alertas_tempranas.origen_dato IS 'Procedencia del registro: legado, captura manual o agente';
-COMMENT ON COLUMN core.alertas_tempranas.paso_actual IS 'Número del paso del flujo operativo en que se encuentra la alerta';
+COMMENT ON COLUMN core.alertas_tempranas.paso_actual IS 'Número del paso del flujo operativo en que se encuentra la alerta. Es una copia desnormalizada de core.proceso_instancia: el paso real es el de la última instancia de proceso de la alerta. El parche 22 puso en 5 las 83 alertas migradas que decían 1 con el proceso ya archivado';
 COMMENT ON COLUMN core.alertas_tempranas.prioridad_id IS 'Prioridad de la alerta, que determina el plazo de respuesta';
 COMMENT ON COLUMN core.alertas_tempranas.riesgos_json IS 'Listado estructurado de riesgos identificados en la situación analizada';
 COMMENT ON COLUMN core.alertas_tempranas.sectorista_usuario_id IS 'Usuario responsable de dar seguimiento a la alerta';
@@ -17515,15 +17571,15 @@ COMMENT ON COLUMN core.feature_flags.activo IS 'Indica si la funcionalidad está
 COMMENT ON COLUMN core.feature_flags.codigo IS 'Clave única que identifica el interruptor de funcionalidad';
 COMMENT ON COLUMN core.feature_flags.descripcion IS 'Descripción de la funcionalidad que controla el interruptor';
 COMMENT ON COLUMN core.feature_flags.metadata_json IS 'Datos adicionales de control del interruptor, en estructura libre';
-COMMENT ON COLUMN core.flujo_definicion.codigo_legado IS 'Identificador del paso en el sistema anterior: DPP-<n> si viene de dim_paso_proceso y DPPC-<n> si viene de dim_paso_proceso_caso';
+COMMENT ON COLUMN core.flujo_definicion.codigo_legado IS 'Identificador del paso en el sistema anterior: DPP-<n> si viene de dim_paso_proceso, DPPC-<n> si viene de dim_paso_proceso_caso y DPPA-<n> si es un paso del flujo de alerta. Los pasos que solo existen en la v10 llevan prefijo V10- y no tienen equivalencia en el legado';
 COMMENT ON COLUMN core.flujo_definicion.created_at IS 'Momento en que se creó el registro';
 COMMENT ON COLUMN core.flujo_definicion.descripcion IS 'Descripción de lo que se hace en el paso del flujo';
-COMMENT ON COLUMN core.flujo_definicion.estado_resultante IS 'Estado al que lleva el paso, con el vocabulario del sistema anterior (Activo, Remitido, Atendido, Registrado, Validado, Cerrado, Reaperturado, Archivado). No es clave ajena a core.flujo_estado porque los dos vocabularios no coinciden y emparejarlos sería inventar la equivalencia';
+COMMENT ON COLUMN core.flujo_definicion.estado_resultante IS 'Estado de negocio al que lleva el paso. En caso y reporte conserva el vocabulario del sistema anterior (Activo, Remitido, Atendido, Registrado, Validado, Cerrado, Reaperturado, Archivado); en alerta usa el del ERS (Registrado, Validado, Aprobado, Remitido, Archivado). No es clave ajena a core.flujo_estado porque los dos vocabularios no coinciden y emparejarlos sería inventar la equivalencia';
 COMMENT ON COLUMN core.flujo_definicion.id IS 'Identificador interno de la fila';
 COMMENT ON COLUMN core.flujo_definicion.nombre IS 'Denominación del paso del flujo mostrada en la interfaz';
 COMMENT ON COLUMN core.flujo_definicion.orden IS 'Posición del paso dentro del flujo operativo';
-COMMENT ON COLUMN core.flujo_definicion.rol_responsable IS 'Rol que debe ejecutar el paso del flujo';
-COMMENT ON COLUMN core.flujo_definicion.tipo_flujo IS 'Tipo de flujo: caso (ciclo de vida de un caso), reporte (el de un reporte) o alerta (los cuatro pasos de una alerta temprana)';
+COMMENT ON COLUMN core.flujo_definicion.rol_responsable IS 'Rol que debe ejecutar el paso del flujo, como código de core.roles. Un código único significa «solo ese rol»; varios códigos separados por coma, sin espacios, significan «cualquiera de ellos» (alternativa, no secuencia): sectorista,direccion_oaipcs quiere decir que el paso lo ejecuta el sectorista o la Dirección. En caso y reporte el texto libre del sistema anterior quedó normalizado por el parche 21; la restricción de formato y el trigger flujo_definicion_valida_rol impiden que vuelva';
+COMMENT ON COLUMN core.flujo_definicion.tipo_flujo IS 'Tipo de flujo: caso (ciclo de vida de un caso), reporte (el de un reporte) o alerta (los cinco pasos de una alerta temprana)';
 COMMENT ON COLUMN core.flujo_definicion.updated_at IS 'Momento de la última modificación del registro';
 COMMENT ON COLUMN core.flujo_estado.codigo IS 'Código de negocio heredado del sistema anterior (EST-01 a EST-05)';
 COMMENT ON COLUMN core.flujo_estado.color_hex IS 'Color con que se muestra el estado en la interfaz, en hexadecimal';
@@ -17721,12 +17777,12 @@ COMMENT ON COLUMN core.proceso_instancia.created_by IS 'Usuario que registró la
 COMMENT ON COLUMN core.proceso_instancia.estado_id IS 'Estado del paso. El sistema anterior no registraba estado por paso, así que está vacío en todas las instancias cargadas; el catálogo se llena igual para cuando el flujo se use en vivo';
 COMMENT ON COLUMN core.proceso_instancia.fila_legado IS 'Número de fila de la tabla de origen; junto con el tipo de origen forma la clave que evita cargar dos veces el mismo paso';
 COMMENT ON COLUMN core.proceso_instancia.finalizado_en IS 'Fecha y hora de fin del paso, cuando el sistema anterior la trae';
-COMMENT ON COLUMN core.proceso_instancia.flujo_definicion_id IS 'Paso del catálogo, resuelto por tipo de flujo y número de orden. Está vacío en las instancias de reporte cuyo paso no existe en el sistema anterior, porque allí solo hay tres pasos definidos';
+COMMENT ON COLUMN core.proceso_instancia.flujo_definicion_id IS 'Paso del catálogo, resuelto por tipo de flujo y número de orden. Está vacío en las 9 instancias migradas del flujo de reporte cuyos pasos 4, 5 y 6 venían del sistema anterior y no existen en el modelo de tres pasos (Elaboración, Remisión, Archivo): no es un dato que falte, es la huella de que el flujo anterior tenía seis pasos. El parche 22 lo deja así a propósito y no amplía el catálogo';
 COMMENT ON COLUMN core.proceso_instancia.id IS 'Identificador interno de la fila';
 COMMENT ON COLUMN core.proceso_instancia.nivel_clasificacion IS 'Nivel de acceso al dato: 1 público, 2 reservado, 3 confidencial';
 COMMENT ON COLUMN core.proceso_instancia.nota IS 'Texto libre del paso; en caso viene de la columna c09 y en reporte de la c08, porque las dos tablas de origen no comparten el significado de sus columnas';
 COMMENT ON COLUMN core.proceso_instancia.ocurrido_en IS 'Fecha y hora del paso, interpretada en hora de Lima. Está vacía en la fila que viene sin fecha de inicio';
-COMMENT ON COLUMN core.proceso_instancia.orden IS 'Número de paso tal como viene en el sistema anterior; se conserva aunque no exista una definición para ese paso';
+COMMENT ON COLUMN core.proceso_instancia.orden IS 'Número de paso, alineado con core.flujo_definicion.orden. En las filas migradas conserva el número del sistema anterior salvo la renumeración del parche 20, que pasó el Archivo del paso 4 al 5 al insertarse la aprobación definitiva';
 COMMENT ON COLUMN core.proceso_instancia.tipo_origen IS 'Origen del paso: caso o reporte. Determina qué clave ajena queda poblada y de qué tabla del sistema anterior viene';
 COMMENT ON COLUMN core.proceso_instancia.updated_at IS 'Momento de la última modificación del registro';
 COMMENT ON COLUMN core.proceso_instancia.updated_by IS 'Usuario de la última modificación';
@@ -18831,3 +18887,2723 @@ $p19_verify$;
 COMMIT;
 
 \echo 'PARCHE 19 · aplicado'
+
+-- ---------------------------------------------------------------------
+--  BLOQUE B.15 · Parche 20 · flujo de alerta en dos niveles
+--  Fuente: docs/PARCHE_20_FLUJO_ALERTA.sql (412 líneas)
+--  Errores: abortan la ejecución (ON_ERROR_STOP on)
+--    Modela los dos niveles de aprobación que exige RN-04: el flujo de
+--    alerta pasa a cinco pasos, con validación previa del sectorista y
+--    aprobación definitiva de `direccion_oaipcs`. Crea ese rol, renumera
+--    las 83 instancias del Archivo del paso 4 al 5 y pone RLS en
+--    `core.flujo_definicion` (lectura abierta, escritura sólo
+--    `administrador`).
+-- ---------------------------------------------------------------------
+-- =====================================================================
+--  AVISA · PARCHE 20 · Los dos niveles de aprobación de la alerta temprana
+-- =====================================================================
+--  QUÉ ES
+--
+--  Rehace el flujo `alerta` de `core.flujo_definicion` para que modele los
+--  dos niveles que exige el ERS v0.6 (RN-04, RF-D09, CU-08; H-25 cerrado):
+--
+--      (a) validación previa del Sectorista, y
+--      (b) aprobación definitiva de la Dirección de la OAIPCS,
+--
+--  antes de cualquier remisión. Aplica a TODA alerta, grave o no. La
+--  gravedad decide el destinatario y el plazo, no quién autoriza.
+--
+--  Son cinco pasos: Elaboración → Validación previa → Aprobación definitiva
+--  → Remisión → Archivo. Se añade el rol `direccion_oaipcs` a `core.roles`
+--  porque el paso de aprobación necesita un responsable que no existía.
+--
+--  POR QUÉ EXISTE
+--
+--  1. El paso 2 apuntaba a `analista_cualitativo`, que es el rol del
+--     análisis cualitativo REFI-QDA (`qda`), ajeno al flujo de alertas.
+--     Ningún sectorista podía validar y el analista cualitativo no tiene
+--     nada que ver con una alerta.
+--
+--  2. No existía ninguna aprobación de la Dirección. El paso 3 (Remisión)
+--     apuntaba a `alta_direccion`, que es el ministerio que RECIBE la
+--     alerta, no quien la aprueba: el flujo decía que el destinatario se
+--     remitía a sí mismo. La aprobación definitiva no estaba modelada en
+--     ningún sitio.
+--
+--  3. Sin el paso de aprobación, `core.vw_alerta_estado` nunca podía
+--     mostrar una alerta «aprobada» y el gate G21 (visibilidad para los
+--     perfiles B y C) no tenía paso al que agarrarse.
+--
+--  QUÉ NO HACE
+--
+--  · No inventa historia. No inserta filas en `core.proceso_instancia`
+--    (el UNIQUE (tipo_origen, fila_legado) obligaría a inventar
+--    `fila_legado`): solo renumera las existentes y reapunta su definición.
+--  · No toca el paso 1 (Elaboración / `sectorista`), que es el anclaje de
+--    `core.tg_alerta_nace()`. La función queda como está.
+--  · No crea ningún estado en `core.flujo_estado`. Ese catálogo son los
+--    cinco estados de paso que trae el legado (EST-01..EST-05, parche 10)
+--    y «Aprobado» es un estado de negocio, que ya se escribe en
+--    `core.flujo_definicion.estado_resultante`. Añadirlo al catálogo
+--    rompería la separación que fijó el parche 10 (§2.3) entre estado de
+--    paso (`estado_id`) y estado resultante (texto del legado).
+--  · No asigna cuentas al rol nuevo. Quién ocupa la Dirección es un hecho
+--    administrativo, no un dato que este parche pueda deducir.
+--  · No usa `core.permiso_aprobacion` (suplencia del aprobador). Queda
+--    reservada, sin filas y sin política; se detalla en el informe P20 §7.
+--  · No modela a la Secretaría General ni a las jefaturas de gabinete como
+--    roles: son DESTINATARIOS, no usuarios del sistema (RN-02).
+--  · No arregla la inconsistencia `reporte`: `core.proceso_instancia` tiene
+--    pasos 2..6 de reporte y `core.flujo_definicion` solo define 1..3. Se
+--    reporta en el informe, no se toca aquí.
+--
+--  DÓNDE SE EJECUTA
+--
+--  En la base viva del contenedor `avisa-db` (PostgreSQL 16, usuario
+--  `avisa`, base `avisa`). Con el archivo montado en el contenedor:
+--
+--      docker exec -i avisa-db psql -U avisa -d avisa -v ON_ERROR_STOP=1 \
+--          -f <ruta de este parche dentro del contenedor>
+--
+--  O por la entrada estándar, desde el host:
+--
+--      cat docs/PARCHE_20_FLUJO_ALERTA.sql \
+--        | docker exec -i avisa-db psql -U avisa -d avisa -v ON_ERROR_STOP=1
+--
+--  ORDEN
+--  Después del parche 19. Usa `core.rol_actual()` (parche 15), los cinco
+--  pasos DPPA-1..4 (parche 14) y las columnas de auditoría del parche 10.
+--
+--  IDEMPOTENTE
+--  Se puede repetir: los INSERT van con `WHERE NOT EXISTS` o
+--  `ON CONFLICT ... DO NOTHING`, los UPDATE llevan guarda
+--  `IS DISTINCT FROM` (segunda pasada = 0 filas), y las políticas se
+--  recrean con `DROP POLICY IF EXISTS` antes de `CREATE POLICY`. Correrlo
+--  dos veces seguidas no falla, no duplica y no reescribe `updated_at`.
+-- =====================================================================
+
+\set ON_ERROR_STOP on
+
+\echo 'PARCHE 20 · bloque 0/6 · comprobaciones previas'
+
+-- ---------------------------------------------------------------------
+-- 0 · El estado de partida tiene que ser el esperado
+-- ---------------------------------------------------------------------
+DO $p20_pre$
+DECLARE
+    v_n integer;
+BEGIN
+    IF to_regclass('core.flujo_definicion') IS NULL
+       OR to_regclass('core.flujo_estado') IS NULL
+       OR to_regclass('core.proceso_instancia') IS NULL
+       OR to_regclass('core.roles') IS NULL THEN
+        RAISE EXCEPTION
+            'Faltan tablas del núcleo. Aplique antes los parches 10, 14 y 15.';
+    END IF;
+
+    IF to_regprocedure('core.rol_actual()') IS NULL THEN
+        RAISE EXCEPTION 'Falta core.rol_actual(). Aplique antes el parche 15.';
+    END IF;
+
+    SELECT count(*) INTO v_n
+      FROM core.flujo_definicion
+     WHERE tipo_flujo = 'alerta'
+       AND codigo_legado IN ('DPPA-1', 'DPPA-2', 'DPPA-3', 'DPPA-4');
+    IF v_n <> 4 THEN
+        RAISE EXCEPTION
+            'Se esperaban los 4 pasos DPPA-1..4 del flujo de alerta y hay %. '
+            'Aplique antes el parche 14.', v_n;
+    END IF;
+
+    -- El legado nunca registró validación ni remisión: esos pasos no
+    -- existen como dato. Si aparecen, alguien aplicó otra variante.
+    SELECT count(*) INTO v_n
+      FROM core.proceso_instancia
+     WHERE tipo_origen = 'alerta' AND orden IN (2, 3);
+    IF v_n <> 0 THEN
+        RAISE EXCEPTION
+            'Hay % instancias de alerta en los pasos 2 o 3, que este diseño '
+            'no espera. Revise la base antes de aplicar el parche 20.', v_n;
+    END IF;
+
+    SELECT count(*) INTO v_n
+      FROM core.proceso_instancia
+     WHERE tipo_origen = 'alerta' AND orden > 5;
+    IF v_n <> 0 THEN
+        RAISE EXCEPTION
+            'Hay % instancias de alerta con orden mayor que 5; el flujo tiene '
+            '5 pasos.', v_n;
+    END IF;
+
+    RAISE NOTICE 'PARCHE 20 · estado de partida coherente';
+END
+$p20_pre$;
+
+BEGIN;
+
+-- =====================================================================
+-- BLOQUE 1 · El rol de la aprobación definitiva
+-- =====================================================================
+\echo 'PARCHE 20 · bloque 1/6 · rol direccion_oaipcs'
+
+--  `alta_direccion` no sirve para aprobar: es el ministerio que recibe la
+--  alerta (nivel 3 y solo lectura). La Dirección de la OAIPCS es otra
+--  unidad: aprueba. Necesita nivel 3 para ver alertas confidenciales, y
+--  crear y editar porque aprobar es un acto de escritura: registra el paso
+--  en `core.proceso_instancia` y la aprobación en la alerta. No borra
+--  nada: ningún paso del flujo lo requiere.
+INSERT INTO core.roles (id, codigo, max_clasificacion,
+                        puede_crear, puede_editar, puede_eliminar)
+SELECT (SELECT COALESCE(max(id), 0) + 1 FROM core.roles),
+       'direccion_oaipcs', 3, true, true, false
+ WHERE NOT EXISTS (SELECT 1 FROM core.roles WHERE codigo = 'direccion_oaipcs');
+
+--  Si ya existía con otros atributos, se dejan los del diseño.
+UPDATE core.roles
+   SET max_clasificacion = 3,
+       puede_crear       = true,
+       puede_editar      = true,
+       puede_eliminar    = false
+ WHERE codigo = 'direccion_oaipcs'
+   AND (max_clasificacion, puede_crear, puede_editar, puede_eliminar)
+       IS DISTINCT FROM (3, true, true, false);
+
+-- =====================================================================
+-- BLOQUE 2 · Los cinco pasos del flujo de alerta
+-- =====================================================================
+\echo 'PARCHE 20 · bloque 2/6 · pasos del flujo de alerta'
+
+--  El UNIQUE (tipo_flujo, orden) no admite dos pasos en el mismo puesto,
+--  ni siquiera dentro de la misma transacción. Por eso se renumera de
+--  arriba abajo: primero el 4 se va al 5, luego el 3 ocupa el 4 y al final
+--  el paso nuevo entra en el 3.
+--
+--  `codigo_legado` se conserva en el paso equivalente (DPPA-3 sigue siendo
+--  Remisión y DPPA-4 sigue siendo Archivo). Solo cambia su `orden`, porque
+--  cambió su posición, no su identidad.
+
+-- 2.1 · Archivo sube de 4 a 5 (el paso 1 no se toca: es el anclaje del trigger)
+UPDATE core.flujo_definicion
+   SET orden      = 5,
+       updated_at = now()
+ WHERE tipo_flujo   = 'alerta'
+   AND codigo_legado = 'DPPA-4'
+   AND orden        = 4;
+
+-- 2.2 · Remisión sube de 3 a 4 y cambia de responsable. El ministerio
+--       recibe la alerta; el envío lo ejecuta el servicio.
+UPDATE core.flujo_definicion
+   SET orden           = 4,
+       rol_responsable = 'servicio_agente',
+       descripcion     = 'La alerta aprobada se remite por el canal que corresponde a su gravedad: al Ministro si es grave, y a los viceministros, a la Secretaría General y a las jefaturas de gabinete si no lo es. La crisis (nivel 1) conserva el plazo de 24 horas y el destinatario Ministro. La Secretaría General y los gabinetes son destinatarios, no usuarios del sistema.',
+       updated_at      = now()
+ WHERE tipo_flujo      = 'alerta'
+   AND codigo_legado    = 'DPPA-3'
+   AND (orden, rol_responsable, descripcion) IS DISTINCT FROM
+       (4::smallint, 'servicio_agente',
+        'La alerta aprobada se remite por el canal que corresponde a su gravedad: al Ministro si es grave, y a los viceministros, a la Secretaría General y a las jefaturas de gabinete si no lo es. La crisis (nivel 1) conserva el plazo de 24 horas y el destinatario Ministro. La Secretaría General y los gabinetes son destinatarios, no usuarios del sistema.');
+
+-- 2.3 · Validación pasa a ser la validación PREVIA del Sectorista, el rol
+--       que el ERS nombra. `analista_cualitativo` sale del flujo de alerta.
+UPDATE core.flujo_definicion
+   SET nombre          = 'Validación previa',
+       rol_responsable = 'sectorista',
+       descripcion     = 'El sectorista depura las coincidencias dudosas y valida la alerta, o la devuelve al paso anterior con el motivo registrado. Es el primero de los dos niveles que exige RN-04 y no se salta aunque la alerta sea grave.',
+       updated_at      = now()
+ WHERE tipo_flujo      = 'alerta'
+   AND codigo_legado    = 'DPPA-2'
+   AND (nombre, rol_responsable, descripcion) IS DISTINCT FROM
+       ('Validación previa', 'sectorista',
+        'El sectorista depura las coincidencias dudosas y valida la alerta, o la devuelve al paso anterior con el motivo registrado. Es el primero de los dos niveles que exige RN-04 y no se salta aunque la alerta sea grave.');
+
+-- 2.4 · El paso nuevo: aprobación definitiva de la Dirección.
+--       No tiene equivalente en el sistema anterior, así que su
+--       `codigo_legado` no puede ser DPPA-<n>: se marca como paso de la v10.
+INSERT INTO core.flujo_definicion
+    (tipo_flujo, orden, nombre, estado_resultante, rol_responsable,
+     descripcion, codigo_legado)
+SELECT 'alerta', 3, 'Aprobación definitiva', 'Aprobado', 'direccion_oaipcs',
+       'La Dirección de la OAIPCS da la aprobación definitiva de toda alerta, grave o no, antes de cualquier remisión. Es el segundo nivel de RN-04. Si la devuelve, la alerta vuelve a la validación previa con el motivo registrado.',
+       'V10-ALERTA-APROB'
+ WHERE NOT EXISTS (
+       SELECT 1 FROM core.flujo_definicion
+        WHERE (tipo_flujo = 'alerta' AND orden = 3)
+           OR codigo_legado = 'V10-ALERTA-APROB');
+
+-- =====================================================================
+-- BLOQUE 3 · Las instancias de proceso que ya existen
+-- =====================================================================
+\echo 'PARCHE 20 · bloque 3/6 · renumeración de proceso_instancia'
+
+--  Las 72 filas del paso 1 no se tocan: siguen en el paso 1 y siguen
+--  apuntando a DPPA-1. Las 83 filas del Archivo pasan de 4 a 5 para no
+--  quedar empatadas con Remisión (la vista `core.vw_alerta_estado` ordena
+--  por `orden` descendente y mostraría el paso equivocado). Se reapunta
+--  la definición por código, que es único, para dejar el enlace explícito.
+--
+--  La guarda es SOLO `p.orden = 4`. No se usa `flujo_definicion_id` como
+--  condición: las 72 filas del paso 1 apuntan a DPPA-1 y también son
+--  «distintas» de DPPA-4, así que una condición de reapunado las habría
+--  arrastrado al paso 5 (se comprobó en el ensayo: UPDATE 155 en vez de 83).
+UPDATE core.proceso_instancia p
+   SET orden               = 5,
+       flujo_definicion_id = d.id
+  FROM core.flujo_definicion d
+ WHERE p.tipo_origen   = 'alerta'
+   AND d.tipo_flujo    = 'alerta'
+   AND d.codigo_legado = 'DPPA-4'
+   AND p.orden         = 4;
+
+-- =====================================================================
+-- BLOQUE 4 · RLS del catálogo de pasos
+-- =====================================================================
+\echo 'PARCHE 20 · bloque 4/6 · RLS de core.flujo_definicion'
+
+--  Hasta hoy cualquiera con sesión de aplicación podía reescribir el flujo
+--  de toda la organización. La lectura queda abierta a propósito: el
+--  aplicativo pinta el flujo y `core.tg_alerta_nace()` hace SELECT sobre
+--  esta tabla; una política de lectura que devolviera 0 filas dejaría a
+--  las alertas naciendo sin paso 1. La escritura queda solo para
+--  `administrador`, igual que en `core.roles` (parche 18).
+ALTER TABLE core.flujo_definicion ENABLE ROW LEVEL SECURITY;
+ALTER TABLE core.flujo_definicion FORCE  ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS p20_flujo_def_sel ON core.flujo_definicion;
+CREATE POLICY p20_flujo_def_sel ON core.flujo_definicion
+    AS PERMISSIVE FOR SELECT TO PUBLIC
+    USING (true);
+
+DROP POLICY IF EXISTS p20_flujo_def_ins ON core.flujo_definicion;
+CREATE POLICY p20_flujo_def_ins ON core.flujo_definicion
+    AS PERMISSIVE FOR INSERT TO PUBLIC
+    WITH CHECK (core.rol_actual() = 'administrador');
+
+DROP POLICY IF EXISTS p20_flujo_def_upd ON core.flujo_definicion;
+CREATE POLICY p20_flujo_def_upd ON core.flujo_definicion
+    AS PERMISSIVE FOR UPDATE TO PUBLIC
+    USING (core.rol_actual() = 'administrador')
+    WITH CHECK (core.rol_actual() = 'administrador');
+
+DROP POLICY IF EXISTS p20_flujo_def_del ON core.flujo_definicion;
+CREATE POLICY p20_flujo_def_del ON core.flujo_definicion
+    AS PERMISSIVE FOR DELETE TO PUBLIC
+    USING (core.rol_actual() = 'administrador');
+
+-- =====================================================================
+-- BLOQUE 5 · Comentarios que el cambio dejó desactualizados
+-- =====================================================================
+\echo 'PARCHE 20 · bloque 5/6 · comentarios del modelo'
+
+COMMENT ON COLUMN core.flujo_definicion.tipo_flujo IS
+    'Tipo de flujo: caso (ciclo de vida de un caso), reporte (el de un reporte) o alerta (los cinco pasos de una alerta temprana)';
+
+COMMENT ON COLUMN core.flujo_definicion.estado_resultante IS
+    'Estado de negocio al que lleva el paso. En caso y reporte conserva el vocabulario del sistema anterior (Activo, Remitido, Atendido, Registrado, Validado, Cerrado, Reaperturado, Archivado); en alerta usa el del ERS (Registrado, Validado, Aprobado, Remitido, Archivado). No es clave ajena a core.flujo_estado porque los dos vocabularios no coinciden y emparejarlos sería inventar la equivalencia';
+
+COMMENT ON COLUMN core.flujo_definicion.rol_responsable IS
+    'Rol que debe ejecutar el paso del flujo. En el flujo de alerta es el código de core.roles (sectorista, direccion_oaipcs, servicio_agente); en caso y reporte conserva el texto libre del sistema anterior';
+
+COMMENT ON COLUMN core.flujo_definicion.codigo_legado IS
+    'Identificador del paso en el sistema anterior: DPP-<n> si viene de dim_paso_proceso, DPPC-<n> si viene de dim_paso_proceso_caso y DPPA-<n> si es un paso del flujo de alerta. Los pasos que solo existen en la v10 llevan prefijo V10- y no tienen equivalencia en el legado';
+
+COMMENT ON COLUMN core.proceso_instancia.orden IS
+    'Número de paso, alineado con core.flujo_definicion.orden. En las filas migradas conserva el número del sistema anterior salvo la renumeración del parche 20, que pasó el Archivo del paso 4 al 5 al insertarse la aprobación definitiva';
+
+-- =====================================================================
+-- BLOQUE 6 · Verificación
+-- =====================================================================
+\echo 'PARCHE 20 · bloque 6/6 · verificación'
+
+DO $p20_verify$
+DECLARE
+    v_n      integer;
+    v_paso1  integer;
+    v_paso5  integer;
+    v_vista  integer;
+    v_rol    text;
+BEGIN
+    -- 6.1 · Cinco pasos, sin huecos ni sobrantes
+    SELECT count(*) INTO v_n
+      FROM core.flujo_definicion WHERE tipo_flujo = 'alerta';
+    IF v_n <> 5 THEN
+        RAISE EXCEPTION 'el flujo de alerta tiene % pasos y debe tener 5', v_n;
+    END IF;
+
+    SELECT count(*) INTO v_n
+      FROM generate_series(1, 5) g
+     WHERE NOT EXISTS (SELECT 1 FROM core.flujo_definicion d
+                        WHERE d.tipo_flujo = 'alerta' AND d.orden = g);
+    IF v_n <> 0 THEN
+        RAISE EXCEPTION 'faltan % puestos en la secuencia 1..5 del flujo de alerta', v_n;
+    END IF;
+
+    -- 6.2 · El paso 1 sigue siendo el anclaje del trigger
+    SELECT count(*) INTO v_n
+      FROM core.flujo_definicion
+     WHERE tipo_flujo = 'alerta' AND orden = 1
+       AND codigo_legado = 'DPPA-1' AND rol_responsable = 'sectorista';
+    IF v_n <> 1 THEN
+        RAISE EXCEPTION
+            'el paso 1 del flujo de alerta dejó de ser Elaboración/sectorista (DPPA-1)';
+    END IF;
+
+    -- 6.3 · El paso 3 es la aprobación de la Dirección
+    SELECT count(*) INTO v_n
+      FROM core.flujo_definicion
+     WHERE tipo_flujo = 'alerta' AND orden = 3
+       AND codigo_legado = 'V10-ALERTA-APROB'
+       AND rol_responsable = 'direccion_oaipcs'
+       AND estado_resultante = 'Aprobado';
+    IF v_n <> 1 THEN
+        RAISE EXCEPTION
+            'el paso 3 del flujo de alerta no es la aprobación de direccion_oaipcs';
+    END IF;
+
+    -- 6.4 · Ningún paso usa el rol del análisis cualitativo
+    SELECT count(*) INTO v_n
+      FROM core.flujo_definicion WHERE rol_responsable = 'analista_cualitativo';
+    IF v_n <> 0 THEN
+        RAISE EXCEPTION
+            'quedan % pasos con rol_responsable = analista_cualitativo', v_n;
+    END IF;
+
+    -- 6.5 · El rol existe y tiene las capacidades del diseño
+    SELECT codigo INTO v_rol
+      FROM core.roles
+     WHERE codigo = 'direccion_oaipcs'
+       AND max_clasificacion = 3
+       AND puede_crear AND puede_editar AND NOT puede_eliminar;
+    IF v_rol IS NULL THEN
+        RAISE EXCEPTION
+            'falta el rol direccion_oaipcs o no tiene nivel 3 con las capacidades esperadas';
+    END IF;
+
+    -- 6.6 · La RLS del catálogo quedó puesta, con lectura abierta
+    SELECT count(*) INTO v_n
+      FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
+     WHERE n.nspname = 'core' AND c.relname = 'flujo_definicion'
+       AND c.relrowsecurity AND c.relforcerowsecurity;
+    IF v_n <> 1 THEN
+        RAISE EXCEPTION 'core.flujo_definicion no tiene RLS y FORCE RLS';
+    END IF;
+
+    SELECT count(*) INTO v_n
+      FROM pg_policies
+     WHERE schemaname = 'core' AND tablename = 'flujo_definicion'
+       AND policyname LIKE 'p20_flujo_def_%';
+    IF v_n <> 4 THEN
+        RAISE EXCEPTION 'se esperaban 4 políticas p20_flujo_def_* y hay %', v_n;
+    END IF;
+
+    -- 6.7 · Cifras del estado posterior (informativas: la base nueva
+    --       puede no tener alertas todavía, y eso no es un error)
+    SELECT count(*) INTO v_paso1
+      FROM core.proceso_instancia WHERE tipo_origen = 'alerta' AND orden = 1;
+    SELECT count(*) INTO v_paso5
+      FROM core.proceso_instancia WHERE tipo_origen = 'alerta' AND orden = 5;
+    SELECT count(*) INTO v_vista FROM core.vw_alerta_estado;
+
+    RAISE NOTICE 'flujo alerta: 5 pasos (1..5) · instancias en paso 1: % · instancias en paso 5: % · vw_alerta_estado: % filas',
+        v_paso1, v_paso5, v_vista;
+END
+$p20_verify$;
+
+COMMIT;
+
+\echo 'PARCHE 20 · aplicado'
+
+-- ---------------------------------------------------------------------
+--  BLOQUE B.16 · Parche 21 · la Dirección y la normalización del flujo
+--  Fuente: docs/PARCHE_21_DIRECCION_Y_FLUJO.sql (633 líneas)
+--  Errores: abortan la ejecución (ON_ERROR_STOP on)
+--    Asigna `direccion_oaipcs` a la Directora, que era el único hueco que
+--    dejó abierto el parche 20: sin cuenta, el paso de aprobación no
+--    tenía quién lo ejecutara. Normaliza `rol_responsable` de caso y
+--    reporte a códigos de `core.roles` y lo blinda con una restricción de
+--    formato y un trigger que valida cada token. Cierra además G21 con
+--    `aprobada_por`/`aprobada_en` en la alerta y RLS en los dos catálogos
+--    del flujo que seguían abiertos.
+-- ---------------------------------------------------------------------
+-- =====================================================================
+--  AVISA · PARCHE 21 · La Dirección y la normalización del flujo
+-- =====================================================================
+--  QUÉ ES
+--
+--  Cierra cuatro cosas que el parche 20 dejó abiertas:
+--
+--      (a) asigna el rol `direccion_oaipcs` a la Directora de la OAIPCS,
+--      (b) normaliza `core.flujo_definicion.rol_responsable` en los flujos
+--          `caso` y `reporte`, que todavía traían texto libre del sistema
+--          anterior («Sectorista», «Sectorista/Directora»),
+--      (c) cierra G21: añade `aprobada_por` y `aprobada_en` a
+--          `core.alertas_tempranas` y las expone al final de
+--          `core.vw_alerta_estado`,
+--      (d) pone seguridad por fila en los dos catálogos del flujo que
+--          quedaron sin política (`core.flujo_estado` y
+--          `core.permiso_aprobacion`).
+--
+--  POR QUÉ EXISTE
+--
+--  1. El parche 20 creó el rol `direccion_oaipcs` pero no se lo asignó a
+--     nadie: el paso 3 del flujo de alerta (Aprobación definitiva) no tenía
+--     una sola cuenta elegible. El flujo quedaba bien modelado e inoperante.
+--     Quién ocupa la Dirección es un hecho administrativo, y ese hecho ya
+--     está: la Directora de la OAIPCS es Edith Bautista León, cuyo código
+--     en el sistema anterior es `SEC-11`. Asignarlo es un acto de este
+--     parche, no una deducción del SQL.
+--
+--  2. `rol_responsable` es `varchar(120)` sin clave ajena y sin ninguna
+--     validación. En el flujo de alerta ya usa códigos de `core.roles`
+--     (parche 20); en `caso` y `reporte` seguía el texto libre del sistema
+--     anterior. Mientras siga así, cualquier escritura puede volver a
+--     meter texto libre y el responsable del paso deja de ser resoluble
+--     contra el catálogo de roles. Se normaliza y se impide la recaída con
+--     una restricción de formato y un trigger de validación semántica.
+--
+--  3. G21 pide que la alerta aprobada sea visible como tal. La tabla no
+--     tenía dónde guardar quién aprobó ni cuándo: el único rastro vivía en
+--     `core.proceso_instancia.usuario_id`, que no distingue la aprobación
+--     de cualquier otro paso. La vista `core.vw_alerta_estado` tampoco las
+--     exponía.
+--
+--  4. `core.flujo_estado` y `core.permiso_aprobacion` eran los dos últimos
+--     catálogos del flujo sin política. Cualquier sesión de aplicación
+--     podía reescribir los cinco estados de paso, y `core.tg_alerta_nace()`
+--     los lee por código (`EST-01`): un cambio ahí deja alertas naciendo
+--     sin fila de proceso, y sin error visible.
+--
+--  QUÉ NO HACE
+--
+--  · No inventa aprobaciones. Las 83 alertas existentes quedan con
+--    `aprobada_por` en NULL: el sistema anterior nunca registró quién
+--    aprobaba. Eso no es un hueco de la migración, es el dato que hay.
+--  · No toca los cinco pasos del flujo `alerta`: ya usaban códigos desde el
+--    parche 20 y su renumeración sigue vigente.
+--  · No inserta filas en `core.proceso_instancia` ni en
+--    `core.permiso_aprobacion`.
+--  · No crea estados nuevos en `core.flujo_estado` ni comenta tablas de los
+--    catálogos: los comentarios de columna ya existen (parches 12 y 19) y
+--    los de tabla se reportan, no se improvisan.
+--  · No asigna ningún otro rol a nadie, ni toca el esquema `ref`.
+--
+--  DÓNDE SE EJECUTA
+--
+--  En la base viva del contenedor `avisa-db` (PostgreSQL 16, usuario
+--  `avisa`, base `avisa`). Con el archivo montado en el contenedor:
+--
+--      docker exec -i avisa-db psql -U avisa -d avisa -v ON_ERROR_STOP=1 \
+--          -f <ruta de este parche dentro del contenedor>
+--
+--  O por la entrada estándar, desde el host:
+--
+--      cat docs/PARCHE_21_DIRECCION_Y_FLUJO.sql \
+--        | docker exec -i avisa-db psql -U avisa -d avisa -v ON_ERROR_STOP=1
+--
+--  ORDEN
+--  Después del parche 20. Usa `core.rol_actual()` (parche 15), el rol
+--  `direccion_oaipcs` y los cinco pasos del flujo de alerta (parche 20),
+--  la vista `core.vw_alerta_estado` (parche 14) y los comentarios de
+--  columna del modelo (parches 12 y 19).
+--
+--  IDEMPOTENTE
+--  Se puede repetir: el INSERT de la asignación va con `NOT EXISTS` sobre
+--  la asignación vigente, los UPDATE llevan guarda `IS DISTINCT FROM`
+--  (segunda pasada = 0 filas, sin reescribir `updated_at`), las columnas
+--  se añaden con `IF NOT EXISTS`, la restricción se recrea con
+--  `DROP CONSTRAINT IF EXISTS`, la función y el trigger se recrean con
+--  `CREATE OR REPLACE` y `DROP TRIGGER IF EXISTS`, la vista con
+--  `CREATE OR REPLACE` y las políticas con `DROP POLICY IF EXISTS` antes
+--  de `CREATE POLICY`. Correrlo dos veces seguidas no falla, no duplica y
+--  no deja rastro.
+-- =====================================================================
+
+\set ON_ERROR_STOP on
+
+\echo 'PARCHE 21 · bloque 0/7 · comprobaciones previas'
+
+-- ---------------------------------------------------------------------
+-- 0 · El estado de partida tiene que ser el esperado
+-- ---------------------------------------------------------------------
+DO $p21_pre$
+DECLARE
+    v_n integer;
+BEGIN
+    IF to_regclass('core.usuario_roles')     IS NULL
+       OR to_regclass('core.roles')           IS NULL
+       OR to_regclass('core.flujo_definicion') IS NULL
+       OR to_regclass('core.flujo_estado')    IS NULL
+       OR to_regclass('core.alertas_tempranas') IS NULL THEN
+        RAISE EXCEPTION
+            'Faltan tablas del núcleo. Aplique antes los parches 10, 14, 15 y 18.';
+    END IF;
+
+    IF to_regprocedure('core.rol_actual()') IS NULL THEN
+        RAISE EXCEPTION 'Falta core.rol_actual(). Aplique antes el parche 15.';
+    END IF;
+
+    IF to_regclass('core.permiso_aprobacion') IS NULL THEN
+        RAISE EXCEPTION
+            'Falta core.permiso_aprobacion. Aplique antes el parche 10.';
+    END IF;
+
+    -- Los cinco pasos del flujo de alerta los dejó el parche 20. Si faltan,
+    -- este parche estaría normalizando un flujo que todavía no existe.
+    SELECT count(*) INTO v_n
+      FROM core.flujo_definicion WHERE tipo_flujo = 'alerta';
+    IF v_n <> 5 THEN
+        RAISE EXCEPTION
+            'Se esperaban los 5 pasos del flujo de alerta y hay %. '
+            'Aplique antes el parche 20.', v_n;
+    END IF;
+
+    -- El rol de la aprobación tiene que estar tal como lo dejó el parche 20.
+    SELECT count(*) INTO v_n
+      FROM core.roles
+     WHERE codigo = 'direccion_oaipcs'
+       AND max_clasificacion = 3
+       AND puede_crear AND puede_editar AND NOT puede_eliminar;
+    IF v_n <> 1 THEN
+        RAISE EXCEPTION
+            'Falta el rol direccion_oaipcs con nivel 3 y las capacidades '
+            'esperadas. Aplique antes el parche 20.';
+    END IF;
+
+    RAISE NOTICE 'PARCHE 21 · estado de partida coherente';
+END
+$p21_pre$;
+
+BEGIN;
+
+-- =====================================================================
+-- BLOQUE 1 · La Dirección de la OAIPCS
+-- =====================================================================
+\echo 'PARCHE 21 · bloque 1/7 · la Directora recibe direccion_oaipcs'
+
+--  La asignación es a una sola persona y por su código del sistema
+--  anterior. No se busca «el usuario con cargo Director»: el cargo es texto
+--  libre y varias personas pueden tenerlo escrito de formas distintas. El
+--  código `SEC-11` sí es único y es el que la OAIPCS dio de alta.
+DO $p21_direccion$
+DECLARE
+    v_n integer;
+BEGIN
+    SELECT count(*) INTO v_n
+      FROM core.usuarios WHERE codigo_legado = 'SEC-11';
+    IF v_n <> 1 THEN
+        RAISE EXCEPTION
+            'Se esperaba exactamente 1 usuario con codigo_legado SEC-11 y hay '
+            '%. Revise core.usuarios antes de aplicar el parche 21.', v_n;
+    END IF;
+END
+$p21_direccion$;
+
+--  `desde` fija el día del parche y `hasta` queda NULL, que en esta tabla
+--  significa «vigente». La guarda `x.hasta IS NULL` evita duplicar una
+--  asignación abierta; una asignación histórica ya cerrada no estorba.
+INSERT INTO core.usuario_roles (usuario_id, rol_id, desde)
+SELECT u.id, r.id, DATE '2026-11-20'
+  FROM core.usuarios u, core.roles r
+ WHERE u.codigo_legado = 'SEC-11'
+   AND r.codigo = 'direccion_oaipcs'
+   AND NOT EXISTS (
+       SELECT 1 FROM core.usuario_roles x
+        WHERE x.usuario_id = u.id
+          AND x.rol_id     = r.id
+          AND x.hasta IS NULL);
+
+-- =====================================================================
+-- BLOQUE 2 · Normalización de rol_responsable
+-- =====================================================================
+\echo 'PARCHE 21 · bloque 2/7 · normalización de rol_responsable'
+
+--  Convención (se documenta en el comentario de la columna más abajo):
+--  un código único de `core.roles.codigo` significa «solo ese rol»; varios
+--  códigos separados por coma, sin espacios, significan «cualquiera de
+--  ellos» (alternativa, no secuencia).
+--
+--  En `caso`, «Remisión», «Cierre» y «Reapertura» dicen «Sectorista /
+--  Directora»: cualquiera de los dos ejecuta el paso. Se traducen a los dos
+--  códigos separados por coma.
+--
+--  `IS DISTINCT FROM` deja explícita la guarda de idempotencia: una fila
+--  cuyo texto ya sea el normalizado no se toca y no reescribe `updated_at`.
+UPDATE core.flujo_definicion
+   SET rol_responsable = 'sectorista',
+       updated_at      = now()
+ WHERE tipo_flujo IN ('caso', 'reporte')
+   AND rol_responsable = 'Sectorista'
+   AND rol_responsable IS DISTINCT FROM 'sectorista';
+
+UPDATE core.flujo_definicion
+   SET rol_responsable = 'sectorista,direccion_oaipcs',
+       updated_at      = now()
+ WHERE tipo_flujo IN ('caso', 'reporte')
+   AND rol_responsable = 'Sectorista/Directora'
+   AND rol_responsable IS DISTINCT FROM 'sectorista,direccion_oaipcs';
+
+COMMENT ON COLUMN core.flujo_definicion.rol_responsable IS
+    'Rol que debe ejecutar el paso del flujo, como código de core.roles. Un código único significa «solo ese rol»; varios códigos separados por coma, sin espacios, significan «cualquiera de ellos» (alternativa, no secuencia): sectorista,direccion_oaipcs quiere decir que el paso lo ejecuta el sectorista o la Dirección. En caso y reporte el texto libre del sistema anterior quedó normalizado por el parche 21; la restricción de formato y el trigger flujo_definicion_valida_rol impiden que vuelva';
+
+--  Restricción de sintaxis: barata, no depende de las filas y se valida una
+--  sola vez sobre las 12 del catálogo. No comprueba que el código exista;
+--  de eso se encarga el trigger.
+ALTER TABLE core.flujo_definicion
+    DROP CONSTRAINT IF EXISTS flujo_definicion_rol_responsable_formato;
+ALTER TABLE core.flujo_definicion
+    ADD CONSTRAINT flujo_definicion_rol_responsable_formato
+    CHECK (rol_responsable ~ '^[a-z_]+(,[a-z_]+)*$');
+
+--  Validación semántica: cada token tiene que existir en core.roles.codigo.
+--  La función es SECURITY DEFINER y fija `search_path` para que la consulta
+--  al catálogo no dependa de la RLS de quien esté escribiendo el flujo: la
+--  política de `core.roles` es de lectura abierta, pero una escritura hecha
+--  por un rol sin privilegios de lectura no debe poder colar un rol
+--  inventado «porque no lo ve».
+CREATE OR REPLACE FUNCTION core.tg_flujo_def_valida_rol()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path TO 'pg_catalog', 'core'
+AS $fn$
+DECLARE
+    v_token text;
+BEGIN
+    IF NEW.rol_responsable IS NULL THEN
+        RETURN NEW;
+    END IF;
+
+    FOREACH v_token IN ARRAY string_to_array(NEW.rol_responsable, ',') LOOP
+        IF NOT EXISTS (SELECT 1 FROM core.roles r WHERE r.codigo = v_token) THEN
+            RAISE EXCEPTION
+                'rol_responsable: el token «%» no existe en core.roles.codigo',
+                v_token;
+        END IF;
+    END LOOP;
+
+    RETURN NEW;
+END
+$fn$;
+
+DROP TRIGGER IF EXISTS flujo_definicion_valida_rol ON core.flujo_definicion;
+CREATE TRIGGER flujo_definicion_valida_rol
+    BEFORE INSERT OR UPDATE OF rol_responsable ON core.flujo_definicion
+    FOR EACH ROW EXECUTE FUNCTION core.tg_flujo_def_valida_rol();
+
+-- =====================================================================
+-- BLOQUE 3 · G21: la aprobación definitiva de la alerta
+-- =====================================================================
+\echo 'PARCHE 21 · bloque 3/7 · aprobación de la alerta (G21)'
+
+--  `aprobada_por` no inventa historia: la columna nace vacía y las 83
+--  alertas migradas se quedan así. El sistema anterior no registraba quién
+--  aprobaba, y rellenarlo con el sectorista asignado o con la Directora
+--  sería fabricar un acto administrativo que nadie firmó.
+ALTER TABLE core.alertas_tempranas
+    ADD COLUMN IF NOT EXISTS aprobada_por uuid
+        REFERENCES core.usuarios(id) ON DELETE RESTRICT;
+
+ALTER TABLE core.alertas_tempranas
+    ADD COLUMN IF NOT EXISTS aprobada_en timestamptz;
+
+--  Coherencia: una fecha de aprobación sin aprobador no significa nada. Al
+--  revés sí: puede haber aprobador con fecha pendiente mientras el acto se
+--  está registrando, de modo que solo se exige una dirección.
+ALTER TABLE core.alertas_tempranas
+    DROP CONSTRAINT IF EXISTS alertas_aprobacion_coherente;
+ALTER TABLE core.alertas_tempranas
+    ADD CONSTRAINT alertas_aprobacion_coherente
+    CHECK (aprobada_en IS NULL OR aprobada_por IS NOT NULL);
+
+COMMENT ON COLUMN core.alertas_tempranas.aprobada_por IS
+    'Usuario de la Dirección de la OAIPCS que dio la aprobación definitiva de la alerta antes de su remisión; nulo en las alertas que no llegaron a aprobarse y en las migradas, porque el sistema anterior no registraba quién aprobaba';
+COMMENT ON COLUMN core.alertas_tempranas.aprobada_en IS
+    'Momento en que se registró la aprobación definitiva de la alerta; nulo mientras la alerta no esté aprobada';
+
+--  Índice parcial: las consultas de G21 buscan «quién aprobó y cuándo», y
+--  mientras la mayoría de las filas tenga NULL el índice no crece.
+CREATE INDEX IF NOT EXISTS ix_alertas_aprobada_por
+    ON core.alertas_tempranas (aprobada_por, aprobada_en)
+    WHERE aprobada_por IS NOT NULL;
+
+--  La vista conserva sus 17 columnas en el mismo orden y añade las dos
+--  nuevas al final. Reordenar o renombrar rompería a cualquier consumidor
+--  que la lea por posición.
+CREATE OR REPLACE VIEW core.vw_alerta_estado AS
+SELECT a.id                       AS alerta_id,
+       a.codigo_alerta,
+       a.titulo,
+       a.prioridad_id,
+       a.nivel_alerta_id,
+       a.fecha_reporte,
+       pi.id                      AS proceso_id,
+       pi.orden                   AS paso,
+       d.nombre                   AS paso_nombre,
+       pi.estado_id,
+       e.codigo                   AS estado_codigo,
+       e.nombre                   AS estado_nombre,
+       e.es_final,
+       pi.ocurrido_en             AS estado_desde,
+       a.es_validado_humano,
+       a.fecha_validacion,
+       a.fecha_remision,
+       a.aprobada_por,
+       a.aprobada_en
+  FROM core.alertas_tempranas a
+  LEFT JOIN LATERAL (
+        SELECT p.*
+          FROM core.proceso_instancia p
+         WHERE p.tipo_origen = 'alerta' AND p.alerta_id = a.id
+         ORDER BY p.orden DESC, p.ocurrido_en DESC NULLS LAST
+         LIMIT 1
+  ) pi ON true
+  LEFT JOIN core.flujo_estado e ON e.id = pi.estado_id
+  LEFT JOIN core.flujo_definicion d ON d.id = pi.flujo_definicion_id;
+
+COMMENT ON VIEW core.vw_alerta_estado IS
+    'Estado vigente de cada alerta temprana. El estado no vive en '
+    'core.alertas_tempranas: vive en core.proceso_instancia, igual que en '
+    'casos y reportes. Esta vista lo resuelve en una sola lectura. Expone '
+    'además la aprobación definitiva de la alerta (aprobada_por, '
+    'aprobada_en), que registra el paso 3 del flujo de alerta.';
+
+-- =====================================================================
+-- BLOQUE 4 · RLS de los dos catálogos del flujo
+-- =====================================================================
+\echo 'PARCHE 21 · bloque 4/7 · RLS de los catálogos del flujo'
+
+--  La lectura queda abierta a propósito, igual que en el catálogo de pasos
+--  (parche 20): `core.tg_alerta_nace()` hace SELECT sobre
+--  `core.flujo_estado` por código (`EST-01`) con los permisos de quien
+--  inserta la alerta; una política de lectura que devolviera 0 filas dejaría
+--  a las alertas naciendo sin paso 1 y sin error. `core.permiso_aprobacion`
+--  se cierra con el mismo patrón por coherencia, aunque hoy no tenga filas.
+--
+--  La escritura queda solo para `administrador`, como en `core.roles`
+--  (parche 18) y `core.flujo_definicion` (parche 20).
+ALTER TABLE core.flujo_estado ENABLE ROW LEVEL SECURITY;
+ALTER TABLE core.flujo_estado FORCE  ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS p21_flujo_estado_select ON core.flujo_estado;
+CREATE POLICY p21_flujo_estado_select ON core.flujo_estado
+    AS PERMISSIVE FOR SELECT TO PUBLIC
+    USING (true);
+
+DROP POLICY IF EXISTS p21_flujo_estado_insert ON core.flujo_estado;
+CREATE POLICY p21_flujo_estado_insert ON core.flujo_estado
+    AS PERMISSIVE FOR INSERT TO PUBLIC
+    WITH CHECK (core.rol_actual() = 'administrador');
+
+DROP POLICY IF EXISTS p21_flujo_estado_update ON core.flujo_estado;
+CREATE POLICY p21_flujo_estado_update ON core.flujo_estado
+    AS PERMISSIVE FOR UPDATE TO PUBLIC
+    USING (core.rol_actual() = 'administrador')
+    WITH CHECK (core.rol_actual() = 'administrador');
+
+DROP POLICY IF EXISTS p21_flujo_estado_delete ON core.flujo_estado;
+CREATE POLICY p21_flujo_estado_delete ON core.flujo_estado
+    AS PERMISSIVE FOR DELETE TO PUBLIC
+    USING (core.rol_actual() = 'administrador');
+
+ALTER TABLE core.permiso_aprobacion ENABLE ROW LEVEL SECURITY;
+ALTER TABLE core.permiso_aprobacion FORCE  ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS p21_permiso_aprob_select ON core.permiso_aprobacion;
+CREATE POLICY p21_permiso_aprob_select ON core.permiso_aprobacion
+    AS PERMISSIVE FOR SELECT TO PUBLIC
+    USING (true);
+
+DROP POLICY IF EXISTS p21_permiso_aprob_insert ON core.permiso_aprobacion;
+CREATE POLICY p21_permiso_aprob_insert ON core.permiso_aprobacion
+    AS PERMISSIVE FOR INSERT TO PUBLIC
+    WITH CHECK (core.rol_actual() = 'administrador');
+
+DROP POLICY IF EXISTS p21_permiso_aprob_update ON core.permiso_aprobacion;
+CREATE POLICY p21_permiso_aprob_update ON core.permiso_aprobacion
+    AS PERMISSIVE FOR UPDATE TO PUBLIC
+    USING (core.rol_actual() = 'administrador')
+    WITH CHECK (core.rol_actual() = 'administrador');
+
+DROP POLICY IF EXISTS p21_permiso_aprob_delete ON core.permiso_aprobacion;
+CREATE POLICY p21_permiso_aprob_delete ON core.permiso_aprobacion
+    AS PERMISSIVE FOR DELETE TO PUBLIC
+    USING (core.rol_actual() = 'administrador');
+
+-- =====================================================================
+-- BLOQUE 5 · Comentarios de los catálogos: se miden, no se inventan
+-- =====================================================================
+\echo 'PARCHE 21 · bloque 5/7 · comentarios de los catálogos'
+
+--  Las columnas de los dos catálogos ya están descritas (parches 12 y 19).
+--  Lo que falta es el comentario de TABLA. No se redacta aquí: el parche 19
+--  cerró las columnas del modelo v10 y ningún parche anterior comenta
+--  tablas sobre la marcha. Se mide y se informa para que lo cierre quien
+--  corresponda; inventar el texto ahora sería escribir documentación a
+--  medias desde un parche de datos.
+DO $p21_comentarios$
+DECLARE
+    v_tablas integer;
+    v_cols_sin integer;
+BEGIN
+    SELECT count(*) INTO v_tablas
+      FROM pg_description d
+      JOIN pg_class c     ON c.oid = d.objoid
+      JOIN pg_namespace n ON n.oid = c.relnamespace
+     WHERE n.nspname = 'core'
+       AND c.relname IN ('flujo_estado', 'permiso_aprobacion')
+       AND d.objsubid = 0;
+
+    SELECT count(*) INTO v_cols_sin
+      FROM pg_attribute a
+      JOIN pg_class c     ON c.oid = a.attrelid
+      JOIN pg_namespace n ON n.oid = c.relnamespace
+     WHERE n.nspname = 'core'
+       AND c.relname IN ('flujo_estado', 'permiso_aprobacion')
+       AND a.attnum > 0 AND NOT a.attisdropped
+       AND col_description(c.oid, a.attnum) IS NULL;
+
+    RAISE NOTICE 'catálogos del flujo: % de 2 tablas con comentario de tabla, % columnas sin comentario',
+        v_tablas, v_cols_sin;
+END
+$p21_comentarios$;
+
+-- =====================================================================
+-- BLOQUE 6 · Verificación
+-- =====================================================================
+\echo 'PARCHE 21 · bloque 6/7 · verificación'
+
+DO $p21_verify$
+DECLARE
+    v_n        integer;
+    v_id       uuid;
+    v_fallo    boolean;
+    v_ok       boolean;
+    v_cols     integer;
+    v_alertas  integer;
+    v_cuentas  integer;
+    v_roles    integer;
+    v_pi       integer;
+BEGIN
+    -- 6.1 · Una sola cuenta vigente de direccion_oaipcs, y es SEC-11
+    SELECT count(*) INTO v_cuentas
+      FROM core.usuario_roles ur
+      JOIN core.roles r ON r.id = ur.rol_id
+     WHERE r.codigo = 'direccion_oaipcs' AND ur.hasta IS NULL;
+    IF v_cuentas <> 1 THEN
+        RAISE EXCEPTION
+            'se esperaba 1 cuenta vigente de direccion_oaipcs y hay %', v_cuentas;
+    END IF;
+
+    SELECT count(*) INTO v_n
+      FROM core.usuario_roles ur
+      JOIN core.roles r    ON r.id = ur.rol_id
+      JOIN core.usuarios u ON u.id = ur.usuario_id
+     WHERE r.codigo = 'direccion_oaipcs' AND ur.hasta IS NULL
+       AND u.codigo_legado = 'SEC-11';
+    IF v_n <> 1 THEN
+        RAISE EXCEPTION
+            'la cuenta vigente de direccion_oaipcs no es SEC-11';
+    END IF;
+
+    SELECT count(*) INTO v_n FROM core.usuario_roles;
+    IF v_n <> 36 THEN
+        RAISE EXCEPTION 'core.usuario_roles tiene % filas y debe tener 36', v_n;
+    END IF;
+
+    -- 6.2 · Los 12 pasos cumplen el formato y todos sus tokens existen
+    SELECT count(*) INTO v_n
+      FROM core.flujo_definicion
+     WHERE rol_responsable IS NULL
+        OR rol_responsable !~ '^[a-z_]+(,[a-z_]+)*$';
+    IF v_n <> 0 THEN
+        RAISE EXCEPTION 'quedan % pasos con rol_responsable fuera de formato', v_n;
+    END IF;
+
+    SELECT count(*) INTO v_n
+      FROM core.flujo_definicion d,
+           LATERAL unnest(string_to_array(d.rol_responsable, ',')) AS t(token)
+     WHERE NOT EXISTS (SELECT 1 FROM core.roles r WHERE r.codigo = t.token);
+    IF v_n <> 0 THEN
+        RAISE EXCEPTION 'hay % tokens de rol_responsable que no existen en core.roles', v_n;
+    END IF;
+
+    SELECT count(*) INTO v_n FROM core.flujo_definicion;
+    IF v_n <> 12 THEN
+        RAISE EXCEPTION 'core.flujo_definicion tiene % filas y debe tener 12', v_n;
+    END IF;
+
+    -- 6.3 · Las columnas de la aprobación existen, tienen comentario y la
+    --       vista las expone al final
+    SELECT count(*) INTO v_n
+      FROM pg_attribute a
+     WHERE a.attrelid = 'core.alertas_tempranas'::regclass
+       AND a.attname IN ('aprobada_por', 'aprobada_en')
+       AND a.attnum > 0 AND NOT a.attisdropped
+       AND col_description(a.attrelid, a.attnum) IS NOT NULL;
+    IF v_n <> 2 THEN
+        RAISE EXCEPTION
+            'faltan columnas de aprobación o su comentario: % de 2', v_n;
+    END IF;
+
+    SELECT count(*) INTO v_n
+      FROM pg_attribute a
+     WHERE a.attrelid = 'core.vw_alerta_estado'::regclass
+       AND a.attname = 'aprobada_por'
+       AND a.attnum > 0 AND NOT a.attisdropped;
+    IF v_n <> 1 THEN
+        RAISE EXCEPTION 'core.vw_alerta_estado no expone aprobada_por';
+    END IF;
+
+    SELECT count(*) INTO v_cols
+      FROM pg_attribute a
+     WHERE a.attrelid = 'core.vw_alerta_estado'::regclass
+       AND a.attnum > 0 AND NOT a.attisdropped;
+    IF v_cols <> 19 THEN
+        RAISE EXCEPTION
+            'core.vw_alerta_estado tiene % columnas y debe tener 19', v_cols;
+    END IF;
+
+    SELECT count(*) INTO v_alertas FROM core.vw_alerta_estado;
+    IF v_alertas <> 83 THEN
+        RAISE EXCEPTION
+            'core.vw_alerta_estado devuelve % filas y debe devolver 83', v_alertas;
+    END IF;
+
+    -- 6.4 · RLS de los dos catálogos
+    SELECT count(*) INTO v_n
+      FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
+     WHERE n.nspname = 'core'
+       AND c.relname IN ('flujo_estado', 'permiso_aprobacion')
+       AND c.relrowsecurity AND c.relforcerowsecurity;
+    IF v_n <> 2 THEN
+        RAISE EXCEPTION 'los catálogos del flujo no tienen RLS y FORCE RLS';
+    END IF;
+
+    SELECT count(*) INTO v_n
+      FROM pg_policies
+     WHERE schemaname = 'core' AND tablename = 'flujo_estado'
+       AND policyname LIKE 'p21_flujo_estado_%';
+    IF v_n <> 4 THEN
+        RAISE EXCEPTION 'se esperaban 4 políticas p21_flujo_estado_* y hay %', v_n;
+    END IF;
+
+    SELECT count(*) INTO v_n
+      FROM pg_policies
+     WHERE schemaname = 'core' AND tablename = 'permiso_aprobacion'
+       AND policyname LIKE 'p21_permiso_aprob_%';
+    IF v_n <> 4 THEN
+        RAISE EXCEPTION 'se esperaban 4 políticas p21_permiso_aprob_* y hay %', v_n;
+    END IF;
+
+    -- 6.5 · El proceso no se toca
+    SELECT count(*) INTO v_n FROM core.proceso_instancia;
+    IF v_n <> 218 THEN
+        RAISE EXCEPTION
+            'core.proceso_instancia tiene % filas y debía seguir con 218', v_n;
+    END IF;
+
+    -- 6.6 · Prueba funcional del trigger, sobre una fila que se borra al
+    --       final: ni un paso real se toca y no queda rastro
+    INSERT INTO core.flujo_definicion
+        (tipo_flujo, orden, nombre, estado_resultante, rol_responsable,
+         codigo_legado)
+    VALUES ('caso', 99, 'Prueba del trigger', 'Prueba', 'sectorista',
+            'P21-PRUEBA')
+    RETURNING id INTO v_id;
+
+    BEGIN
+        UPDATE core.flujo_definicion
+           SET rol_responsable = 'inventado' WHERE id = v_id;
+        v_fallo := false;
+    EXCEPTION WHEN raise_exception THEN
+        v_fallo := true;
+    END;
+    IF NOT v_fallo THEN
+        DELETE FROM core.flujo_definicion WHERE id = v_id;
+        RAISE EXCEPTION
+            'el trigger aceptó rol_responsable = inventado';
+    END IF;
+
+    BEGIN
+        UPDATE core.flujo_definicion
+           SET rol_responsable = 'sectorista,direccion_oaipcs' WHERE id = v_id;
+        v_ok := true;
+    EXCEPTION WHEN raise_exception THEN
+        v_ok := false;
+    END;
+    IF NOT v_ok THEN
+        DELETE FROM core.flujo_definicion WHERE id = v_id;
+        RAISE EXCEPTION
+            'el trigger rechazó la combinación sectorista,direccion_oaipcs';
+    END IF;
+
+    DELETE FROM core.flujo_definicion WHERE id = v_id;
+
+    SELECT count(*) INTO v_n FROM core.flujo_definicion;
+    IF v_n <> 12 THEN
+        RAISE EXCEPTION
+            'la prueba del trigger dejó % filas en core.flujo_definicion', v_n;
+    END IF;
+
+    -- 6.7 · Cifras del estado posterior (informativas)
+    SELECT count(*) INTO v_roles FROM core.usuario_roles;
+    SELECT count(*) INTO v_pi    FROM core.proceso_instancia;
+
+    RAISE NOTICE
+        'direccion_oaipcs: % cuenta vigente (SEC-11) · usuario_roles: % · flujo_definicion: 12 pasos · proceso_instancia: % · alertas: % · columnas de vw_alerta_estado: %',
+        v_cuentas, v_roles, v_pi, v_alertas, v_cols;
+END
+$p21_verify$;
+
+COMMIT;
+
+\echo 'PARCHE 21 · aplicado'
+
+-- ---------------------------------------------------------------------
+--  BLOQUE B.17 · Parche 22 · visibilidad, G21 ejecutable y suplencia
+--  Fuente: docs/PARCHE_22_VISIBILIDAD_Y_G21.sql (917 líneas)
+--  Errores: abortan la ejecución (ON_ERROR_STOP on)
+--    Cierra cinco pendientes de base de los parches 20 y 21. Añade
+--    `core.alertas_tempranas.visibilidad` con sus tres valores, su
+--    restricción y un índice parcial; hace ejecutable G21 con el trigger
+--    `alertas_g21_visibilidad`, que rechaza salir de `interna` sin las
+--    dos aprobaciones humanas; da consumidor a `core.permiso_aprobacion`
+--    con `core.puede_aprobar()` y la vista `core.vw_permiso_aprobacion`;
+--    amplía `core.vw_alerta_estado` a 20 columnas; corrige el desfase de
+--    `paso_actual` en las 83 alertas derivándolo de
+--    `core.proceso_instancia`; y documenta, sin ampliar el catálogo, por
+--    qué 9 instancias de reporte no tienen paso definido.
+-- ---------------------------------------------------------------------
+-- =====================================================================
+--  AVISA · PARCHE 22 · Visibilidad, G21 ejecutable y suplencia
+-- =====================================================================
+--  QUÉ ES
+--
+--  Cierra los cinco pendientes de base que dejaron abiertos los parches
+--  20 y 21:
+--
+--      (a) añade `core.alertas_tempranas.visibilidad`, la columna que
+--          distingue una alerta que solo ve la OAIPCS de una que se
+--          publica en el Perfil B o que se remite a destinatarios
+--          nombrados;
+--      (b) hace ejecutable G21 con un trigger que rechaza cualquier
+--          visibilidad distinta de `interna` mientras falte alguna de
+--          las dos aprobaciones humanas;
+--      (c) da consumidor a `core.permiso_aprobacion`, la tabla de
+--          suplencias que el parche 10 creó y que hasta hoy nadie leía,
+--          con la función `core.puede_aprobar()` y una vista de apoyo
+--          para la pantalla de administración;
+--      (d) expone `visibilidad` al final de `core.vw_alerta_estado`;
+--      (e) corrige el desfase de `core.alertas_tempranas.paso_actual`,
+--          que decía 1 en alertas cuyo proceso está en el paso 5.
+--
+--  A eso se suma una decisión documental, no un cambio de catálogo: las
+--  9 instancias del flujo `reporte` que no tienen `flujo_definicion_id`
+--  se explican como pasos del sistema anterior sin equivalente en el
+--  modelo de tres pasos.
+--
+--  POR QUÉ EXISTE
+--
+--  1. El parche 21 puso `aprobada_por` y `aprobada_en`, pero G21 no era
+--     ejecutable: el gate se dispara con `visibilidad = 'perfil_b'` y la
+--     columna `visibilidad` no existía. El contrato en
+--     `config.guardrail_contract` era declarativo: decía qué debía
+--     rechazarse, no que ya se rechazara.
+--
+--  2. `core.permiso_aprobacion` tenía RLS y 0 filas, pero ni una función
+--     ni una pantalla que la leyeran. Una tabla sin consumidor no es una
+--     capacidad: es una promesa. Mientras no exista el consumidor, la
+--     suplencia del aprobador no se puede ni consultar.
+--
+--  3. `paso_actual` es una copia desnormalizada del paso del proceso y
+--     nunca se sincronizó: las 83 alertas migradas quedaron en 1 aunque
+--     su instancia de proceso está en el paso 5 (Archivo). Mientras siga
+--     así, cualquier regla que lo lea —empezando por el propio gate—
+--     miente.
+--
+--  QUÉ NO HACE
+--
+--  · No siembra filas en `core.permiso_aprobacion`. Designar a un
+--    suplente es un acto administrativo de la OAIPCS y hoy no hay
+--    decisión. El consumo queda resuelto aunque la tabla siga con 0
+--    filas.
+--
+--  · No inventa aprobaciones. Las 83 alertas existentes se quedan en
+--    `visibilidad = 'interna'` y con `aprobada_por` en NULL; el gate no
+--    las toca porque su regla solo mira los valores distintos de
+--    `interna`.
+--
+--  · No amplía el catálogo de pasos del flujo `reporte`. El modelo nuevo
+--    tiene tres pasos y las 9 instancias en los pasos 4, 5 y 6 son del
+--    sistema anterior. Se documenta el significado de `NULL`; inventar
+--    pasos 4 a 6 sería modelar un flujo que nadie definió.
+--
+--  · No toca `core.proceso_instancia` (sigue con 218 filas), ni
+--    `core.flujo_definicion` (12 pasos), ni `core.usuario_roles` (36
+--    asignaciones), ni el esquema `ref`.
+--
+--  · No reescribe la política de RLS de ninguna tabla y no mueve
+--    `app.rol_codigo`: las escrituras de este parche se hacen con la
+--    cuenta de aplicación, que es dueña del esquema.
+--
+--  DÓNDE SE EJECUTA
+--
+--  En la base viva del contenedor `avisa-db` (PostgreSQL 16, usuario
+--  `avisa`, base `avisa`), por entrada estándar si el archivo no está
+--  montado todavía:
+--
+--      MSYS_NO_PATHCONV=1 docker exec -i avisa-db psql -U avisa -d avisa \
+--          -v ON_ERROR_STOP=1 -f - < docs/PARCHE_22_VISIBILIDAD_Y_G21.sql
+--
+--  ORDEN
+--  Después del parche 21. Usa `aprobada_por` y `aprobada_en` (parche 21),
+--  el rol `direccion_oaipcs` y su cuenta vigente (parches 20 y 21), los
+--  cinco pasos del flujo de alerta (parche 20), `core.usuario_roles`
+--  (parches 4, 16 y 21) y la vista `core.vw_alerta_estado` (parches 14 y
+--  21).
+--
+--  IDEMPOTENTE
+--  Se puede repetir. La columna se añade con `IF NOT EXISTS`; la
+--  restricción se busca antes en `pg_constraint` y solo se recrea si su
+--  definición no es la del parche; el índice va con `IF NOT EXISTS`; la
+--  función y el trigger se recrean con `CREATE OR REPLACE` y
+--  `DROP TRIGGER IF EXISTS`; la vista con `CREATE OR REPLACE`; y el
+--  `UPDATE` del desfase lleva la guarda `IS DISTINCT FROM`, de modo que
+--  la segunda pasada no reescribe ninguna fila ni su `updated_at`.
+--  Correrlo dos veces seguidas no falla y no deja rastro.
+-- =====================================================================
+
+\set ON_ERROR_STOP on
+
+\echo 'PARCHE 22 · bloque 0/8 · comprobaciones previas'
+
+-- ---------------------------------------------------------------------
+-- 0 · El estado de partida tiene que ser el esperado
+-- ---------------------------------------------------------------------
+DO $p22_pre$
+DECLARE
+    v_n integer;
+BEGIN
+    IF to_regclass('core.alertas_tempranas')  IS NULL
+       OR to_regclass('core.proceso_instancia') IS NULL
+       OR to_regclass('core.flujo_definicion')  IS NULL
+       OR to_regclass('core.flujo_estado')      IS NULL
+       OR to_regclass('core.permiso_aprobacion') IS NULL
+       OR to_regclass('core.usuario_roles')     IS NULL
+       OR to_regclass('core.roles')             IS NULL THEN
+        RAISE EXCEPTION
+            'Faltan tablas del núcleo. Aplique antes los parches 10, 14 y 21.';
+    END IF;
+
+    --  G21 se apoya en las dos columnas que dejó el parche 21. Si no están,
+    --  este parche estaría haciendo ejecutable un gate que no tiene qué leer.
+    SELECT count(*) INTO v_n
+      FROM pg_attribute a
+     WHERE a.attrelid = 'core.alertas_tempranas'::regclass
+       AND a.attname IN ('aprobada_por', 'aprobada_en')
+       AND a.attnum > 0 AND NOT a.attisdropped;
+    IF v_n <> 2 THEN
+        RAISE EXCEPTION
+            'Faltan aprobada_por/aprobada_en (% de 2). Aplique antes el parche 21.', v_n;
+    END IF;
+
+    --  La Dirección tiene que existir como rol (parche 20) y tener su cuenta
+    --  vigente (parche 21): sin eso, `core.puede_aprobar()` devolvería
+    --  siempre falso y el gate no tendría a quién autorizar.
+    SELECT count(*) INTO v_n FROM core.roles WHERE codigo = 'direccion_oaipcs';
+    IF v_n <> 1 THEN
+        RAISE EXCEPTION 'Falta el rol direccion_oaipcs. Aplique antes el parche 20.';
+    END IF;
+
+    SELECT count(*) INTO v_n
+      FROM core.usuario_roles ur
+      JOIN core.roles r ON r.id = ur.rol_id
+     WHERE r.codigo = 'direccion_oaipcs' AND ur.hasta IS NULL;
+    IF v_n <> 1 THEN
+        RAISE EXCEPTION
+            'Se esperaba 1 cuenta vigente de direccion_oaipcs y hay %. '
+            'Aplique antes el parche 21.', v_n;
+    END IF;
+
+    --  El flujo de alerta tiene que estar en cinco pasos (parche 20): el gate
+    --  habla del paso 2 (validación previa) y del paso 3 (aprobación).
+    SELECT count(*) INTO v_n FROM core.flujo_definicion WHERE tipo_flujo = 'alerta';
+    IF v_n <> 5 THEN
+        RAISE EXCEPTION
+            'Se esperaban los 5 pasos del flujo de alerta y hay %. '
+            'Aplique antes el parche 20.', v_n;
+    END IF;
+
+    --  El flujo de reporte tiene que seguir en tres pasos: el bloque 6
+    --  documenta las 9 instancias sin definición y NO amplía este catálogo.
+    --  Si alguien lo amplió antes, la nota que escribe este parche mentiría.
+    SELECT count(*) INTO v_n FROM core.flujo_definicion WHERE tipo_flujo = 'reporte';
+    IF v_n <> 3 THEN
+        RAISE EXCEPTION
+            'Se esperaban 3 pasos del flujo de reporte y hay %. Revise '
+            'core.flujo_definicion antes de aplicar el parche 22.', v_n;
+    END IF;
+
+    --  Las cifras de partida que el bloque 5 necesita para no forzar números.
+    SELECT count(*) INTO v_n FROM core.alertas_tempranas;
+    IF v_n <> 83 THEN
+        RAISE EXCEPTION 'Se esperaban 83 alertas y hay %', v_n;
+    END IF;
+
+    SELECT count(*) INTO v_n FROM core.proceso_instancia;
+    IF v_n <> 218 THEN
+        RAISE EXCEPTION 'Se esperaban 218 instancias de proceso y hay %', v_n;
+    END IF;
+
+    RAISE NOTICE 'PARCHE 22 · estado de partida coherente';
+END
+$p22_pre$;
+
+BEGIN;
+
+-- =====================================================================
+-- BLOQUE 1 · La visibilidad de la alerta
+-- =====================================================================
+\echo 'PARCHE 22 · bloque 1/8 · la visibilidad de la alerta'
+
+--  Tres valores, no un booleano: `interna` es «solo la OAIPCS»; `ejecutiva`
+--  añade el Perfil B; `sectorial` limita la remisión a los destinatarios
+--  nombrados. Están diseñados en docs/03_ejecucion/mvp.md (§2.2, ALERTA y
+--  matriz de acceso) y son los únicos que admite la restricción.
+--
+--  El DEFAULT es `interna` a propósito: una alerta nace invisible fuera de
+--  la OAIPCS y solo deja de serlo cuando una persona la aprueba. Que el
+--  valor de nacimiento sea el seguro es lo que hace que el gate tenga algo
+--  que proteger.
+ALTER TABLE core.alertas_tempranas
+    ADD COLUMN IF NOT EXISTS visibilidad varchar(12) NOT NULL DEFAULT 'interna';
+
+--  La restricción se busca en `pg_constraint` antes de crearla. Recrearla
+--  siempre sería más corto, pero comparar el texto de `pg_get_constraintdef`
+--  sirve además para detectar que alguien la redefinió por su cuenta: si la
+--  definición no es la del parche, se rectifica. El literal es el que produce
+--  PostgreSQL 16 al crear la restricción; si otra versión lo formatea distinto,
+--  el peor caso es una recreación inocua.
+DO $p22_check$
+DECLARE
+    v_def text;
+BEGIN
+    SELECT pg_get_constraintdef(c.oid) INTO v_def
+      FROM pg_constraint c
+     WHERE c.conrelid = 'core.alertas_tempranas'::regclass
+       AND c.conname  = 'alertas_visibilidad_valida';
+
+    IF v_def IS NULL THEN
+        ALTER TABLE core.alertas_tempranas
+            ADD CONSTRAINT alertas_visibilidad_valida
+            CHECK (visibilidad IN ('interna', 'ejecutiva', 'sectorial'));
+    ELSIF v_def <> $lit$CHECK (((visibilidad)::text = ANY ((ARRAY['interna'::character varying, 'ejecutiva'::character varying, 'sectorial'::character varying])::text[])))$lit$ THEN
+        ALTER TABLE core.alertas_tempranas
+            DROP CONSTRAINT alertas_visibilidad_valida;
+        ALTER TABLE core.alertas_tempranas
+            ADD CONSTRAINT alertas_visibilidad_valida
+            CHECK (visibilidad IN ('interna', 'ejecutiva', 'sectorial'));
+        RAISE NOTICE 'alertas_visibilidad_valida tenía otra definición: recreada';
+    END IF;
+END
+$p22_check$;
+
+--  RD-08 no es una restricción de visibilidad: prohíbe datos personales en el
+--  canal público del Dashboard Estratégico (Publish to Web), sea cual sea la
+--  visibilidad de la alerta. Se dice en el comentario para que nadie lea
+--  `ejecutiva` como un permiso para publicar lo que sea.
+COMMENT ON COLUMN core.alertas_tempranas.visibilidad IS
+    'Alcance de la alerta. interna: solo la ve la OAIPCS (Perfil A), es el valor de nacimiento y el único admisible mientras falte alguna de las dos aprobaciones humanas. ejecutiva: además se ve en el Perfil B (Alta Dirección). sectorial: la remisión se limita a los destinatarios nombrados de esa alerta (el portal del Perfil C queda fuera del MVP). No relaja RD-08: ningún dato personal pasa por el canal público del Dashboard Estratégico, cualquiera sea la visibilidad. El gate G21 (trigger alertas_g21_visibilidad) impide salir de interna sin la validación previa del Sectorista y la aprobación definitiva de la Dirección';
+
+--  Índice parcial: las consultas del Perfil B y de la remisión buscan «lo que
+--  no es interna», que hoy son cero filas. Un índice completo sería casi todo
+--  hueco y solo costaría escritura.
+CREATE INDEX IF NOT EXISTS ix_alertas_visibilidad_no_interna
+    ON core.alertas_tempranas (visibilidad)
+    WHERE visibilidad <> 'interna';
+
+-- =====================================================================
+-- BLOQUE 2 · G21: el gate, ejecutable
+-- =====================================================================
+\echo 'PARCHE 22 · bloque 2/8 · G21 ejecutable'
+
+--  G21 (§11.8 de AVISA_PRODUCE_v10) exige dos aprobaciones humanas antes de
+--  que una alerta salga de la OAIPCS:
+--
+--    · validación previa del Sectorista: `es_validado_humano` verdadero,
+--      `fecha_validacion` no nula y el proceso en el paso 2 o posterior;
+--    · aprobación definitiva de la Dirección: `aprobada_por` y `aprobada_en`
+--      no nulos.
+--
+--  El trigger es BEFORE y no AFTER a propósito: si algo falta, la escritura
+--  no llega a ocurrir. Con un AFTER la fila ya estaría guardada y habría que
+--  deshacerla desde la aplicación, que es justo lo que el gate evita.
+--
+--  ORDEN DE DISPARADORES. PostgreSQL ejecuta los BEFORE por nombre, en orden
+--  alfabético. En esta tabla conviven `alertas_g21_visibilidad` (este
+--  parche), `trg_audit` (rellena updated_at/updated_by/created_by) y
+--  `trg_alerta_nace` (AFTER INSERT, crea el paso 1 en core.proceso_instancia).
+--  El orden no se pisa: `trg_audit` solo escribe columnas de auditoría y este
+--  gate solo lee columnas de negocio; `trg_alerta_nace` es AFTER, de modo que
+--  si el gate rechaza un alta, el trigger que crea el proceso nunca llega a
+--  ejecutarse y no queda una instancia huérfana.
+CREATE OR REPLACE FUNCTION core.tg_alerta_g21_visibilidad()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $fn$
+DECLARE
+    v_falta text[] := ARRAY[]::text[];
+BEGIN
+    --  El único caso libre es el valor de nacimiento. Cualquier otro exige
+    --  las dos firmas, sin importar la prioridad ni la gravedad de la alerta:
+    --  la gravedad decide el destinatario y el plazo, no quién autoriza.
+    IF NEW.visibilidad IS NULL OR NEW.visibilidad = 'interna' THEN
+        RETURN NEW;
+    END IF;
+
+    IF NOT (COALESCE(NEW.es_validado_humano, false)
+            AND NEW.fecha_validacion IS NOT NULL
+            AND COALESCE(NEW.paso_actual, 0) >= 2) THEN
+        v_falta := v_falta || 'la validación previa del Sectorista (es_validado_humano, fecha_validacion y paso_actual >= 2)'::text;
+    END IF;
+
+    IF NEW.aprobada_por IS NULL OR NEW.aprobada_en IS NULL THEN
+        v_falta := v_falta || 'la aprobación definitiva de la Dirección de la OAIPCS (aprobada_por y aprobada_en)'::text;
+    END IF;
+
+    IF cardinality(v_falta) > 0 THEN
+        RAISE EXCEPTION
+            'G21_SIN_APROBACION: la alerta % no puede pasar a visibilidad «%»; falta %',
+            NEW.codigo_alerta, NEW.visibilidad, array_to_string(v_falta, ' y ')
+            USING ERRCODE = 'P0001';
+    END IF;
+
+    RETURN NEW;
+END
+$fn$;
+
+--  Se dispara en todo INSERT y en todo UPDATE, sin lista de columnas: el
+--  invariante depende de seis columnas y una lista incompleta lo dejaría
+--  abierto por el lado que nadie probó. El coste es una comparación por
+--  escritura, y en las 83 filas migradas (`interna`) la función sale en la
+--  primera línea.
+DROP TRIGGER IF EXISTS alertas_g21_visibilidad ON core.alertas_tempranas;
+CREATE TRIGGER alertas_g21_visibilidad
+    BEFORE INSERT OR UPDATE ON core.alertas_tempranas
+    FOR EACH ROW EXECUTE FUNCTION core.tg_alerta_g21_visibilidad();
+
+COMMENT ON FUNCTION core.tg_alerta_g21_visibilidad() IS
+    'Gate G21: rechaza con ERRCODE P0001 y mensaje G21_SIN_APROBACION cualquier visibilidad distinta de interna mientras falte la validación previa del Sectorista o la aprobación definitiva de la Dirección. Las alertas internas, incluidas las 83 migradas, pasan sin comprobación';
+
+-- =====================================================================
+-- BLOQUE 3 · La suplencia: consumidor de core.permiso_aprobacion
+-- =====================================================================
+\echo 'PARCHE 22 · bloque 3/8 · la suplencia del aprobador'
+
+--  `core.permiso_aprobacion` habilita a una persona concreta para un objeto
+--  concreto durante una vigencia. Es la vía para que alguien que no tiene el
+--  rol `direccion_oaipcs` pueda aprobar mientras la Dirección está ausente,
+--  sin darle el rol entero.
+--
+--  La función es SECURITY DEFINER por la misma razón que
+--  `core.tg_flujo_def_valida_rol()`: `core.usuario_roles` tiene RLS forzada y
+--  un rol sin privilegios de lectura no debe poder contestar «no» a una
+--  pregunta cuya respuesta no puede ver. Con el dueño de la función, la
+--  respuesta no depende de quién pregunte.
+--
+--  `p_objeto` tiene valor por defecto porque hoy hay un solo objeto de
+--  aprobación en el sistema; cuando existan más, el parámetro ya está.
+CREATE OR REPLACE FUNCTION core.puede_aprobar(
+    p_usuario uuid,
+    p_objeto  text DEFAULT 'aprobacion_alerta'
+)
+RETURNS boolean
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path TO 'pg_catalog', 'core'
+AS $fn$
+    SELECT p_usuario IS NOT NULL
+       AND (
+            --  Camino 1 · tiene el rol de la Dirección y la asignación está
+            --  vigente hoy: `hasta` nulo significa «abierta».
+            EXISTS (
+                SELECT 1
+                  FROM core.usuario_roles ur
+                  JOIN core.roles r ON r.id = ur.rol_id
+                 WHERE ur.usuario_id = p_usuario
+                   AND r.codigo = 'direccion_oaipcs'
+                   AND ur.desde <= CURRENT_DATE
+                   AND (ur.hasta IS NULL OR ur.hasta >= CURRENT_DATE))
+            OR
+            --  Camino 2 · tiene una suplencia vigente para ese objeto.
+            EXISTS (
+                SELECT 1
+                  FROM core.permiso_aprobacion pa
+                 WHERE pa.usuario_id = p_usuario
+                   AND pa.objeto = p_objeto
+                   AND pa.vigente_desde <= CURRENT_DATE
+                   AND (pa.vigente_hasta IS NULL OR pa.vigente_hasta >= CURRENT_DATE))
+       );
+$fn$;
+
+COMMENT ON FUNCTION core.puede_aprobar(uuid, text) IS
+    'true si el usuario puede aprobar el objeto indicado: o tiene el rol direccion_oaipcs vigente en core.usuario_roles, o tiene una suplencia vigente en core.permiso_aprobacion para ese objeto. p_objeto vale aprobacion_alerta por defecto. No escribe nada y no sustituye al gate G21: el gate sigue exigiendo las dos firmas en la alerta';
+
+--  Contrato de la tabla. Se amplía el comentario que ya estaba en la
+--  curaduría en lugar de reemplazarlo: el texto base sigue siendo válido.
+COMMENT ON TABLE core.permiso_aprobacion IS
+    'Autorización temporal que habilita a un usuario a aprobar un objeto determinado, con su vigencia y quién la otorgó. Desde el parche 22 tiene consumidor: core.puede_aprobar() la consulta para la suplencia del aprobador y core.vw_permiso_aprobacion la expone a la pantalla de administración. Una fila aquí no concede un rol: solo habilita a esa persona para ese objeto mientras la vigencia esté abierta. Vacía significa que no hay suplencia designada';
+
+--  Vista de apoyo de la pantalla de administración. `security_invoker` para
+--  que cada sesión vea lo que su propia RLS le permite ver de `core.usuarios`:
+--  el rol `administrador` ve el padrón completo y cualquier otro solo su fila.
+--  Sin ese ajuste, la vista correría con los permisos del dueño y un sectorista
+--  que abriera el panel vería nombres que la tabla le oculta.
+CREATE OR REPLACE VIEW core.vw_permiso_aprobacion
+WITH (security_invoker = true) AS
+SELECT pa.id,
+       pa.usuario_id,
+       u.nombre              AS usuario_nombre,
+       u.codigo_legado       AS usuario_codigo_legado,
+       pa.objeto,
+       pa.vigente_desde,
+       pa.vigente_hasta,
+       (pa.vigente_desde <= CURRENT_DATE
+        AND (pa.vigente_hasta IS NULL OR pa.vigente_hasta >= CURRENT_DATE))
+                             AS vigente,
+       pa.otorgado_por,
+       o.nombre              AS otorgado_por_nombre
+  FROM core.permiso_aprobacion pa
+  JOIN core.usuarios u ON u.id = pa.usuario_id
+  LEFT JOIN core.usuarios o ON o.id = pa.otorgado_por;
+
+COMMENT ON VIEW core.vw_permiso_aprobacion IS
+    'Suplencias de aprobación con nombre de la persona habilitada, objeto, vigencia y una marca vigente calculada al consultar. Es la lectura de la pantalla de administración de membresías; no cambia permisos, solo los muestra. Hoy devuelve 0 filas porque no hay suplente designado';
+
+-- =====================================================================
+-- BLOQUE 4 · La vista del estado, con la visibilidad
+-- =====================================================================
+\echo 'PARCHE 22 · bloque 4/8 · core.vw_alerta_estado con visibilidad'
+
+--  Se conservan las 19 columnas en el mismo orden y `visibilidad` va al
+--  final, igual que el parche 21 hizo con las dos de la aprobación. Un
+--  consumidor que lea por posición no se entera; uno que lea por nombre
+--  encuentra la columna nueva sin que cambie nada de lo anterior.
+CREATE OR REPLACE VIEW core.vw_alerta_estado AS
+SELECT a.id                       AS alerta_id,
+       a.codigo_alerta,
+       a.titulo,
+       a.prioridad_id,
+       a.nivel_alerta_id,
+       a.fecha_reporte,
+       pi.id                      AS proceso_id,
+       pi.orden                   AS paso,
+       d.nombre                   AS paso_nombre,
+       pi.estado_id,
+       e.codigo                   AS estado_codigo,
+       e.nombre                   AS estado_nombre,
+       e.es_final,
+       pi.ocurrido_en             AS estado_desde,
+       a.es_validado_humano,
+       a.fecha_validacion,
+       a.fecha_remision,
+       a.aprobada_por,
+       a.aprobada_en,
+       a.visibilidad
+  FROM core.alertas_tempranas a
+  LEFT JOIN LATERAL (
+        SELECT p.*
+          FROM core.proceso_instancia p
+         WHERE p.tipo_origen = 'alerta' AND p.alerta_id = a.id
+         ORDER BY p.orden DESC, p.ocurrido_en DESC NULLS LAST
+         LIMIT 1
+  ) pi ON true
+  LEFT JOIN core.flujo_estado e ON e.id = pi.estado_id
+  LEFT JOIN core.flujo_definicion d ON d.id = pi.flujo_definicion_id;
+
+COMMENT ON VIEW core.vw_alerta_estado IS
+    'Estado vigente de cada alerta temprana. El estado no vive en '
+    'core.alertas_tempranas: vive en core.proceso_instancia, igual que en '
+    'casos y reportes. Esta vista lo resuelve en una sola lectura. Expone '
+    'además la aprobación definitiva de la alerta (aprobada_por, '
+    'aprobada_en), que registra el paso 3 del flujo de alerta, y su '
+    'visibilidad (interna, ejecutiva o sectorial), que el gate G21 controla';
+
+-- =====================================================================
+-- BLOQUE 5 · El desfase de paso_actual
+-- =====================================================================
+\echo 'PARCHE 22 · bloque 5/8 · desfase de paso_actual'
+
+--  `paso_actual` es una copia desnormalizada y nunca se sincronizó: el
+--  cargador la rellenó con el paso del sistema anterior (1) y el parche 20
+--  renumeró el Archivo al paso 5 en core.proceso_instancia, pero no en la
+--  alerta. El paso real de una alerta es el de su última instancia de
+--  proceso —el mismo que lee la vista—, así que se deriva de ahí: no se
+--  escribe un 5 a mano.
+--
+--  El criterio se comprueba antes de aplicarlo. Si el desfase no cubre
+--  exactamente las 83 alertas (o cero, que es la segunda pasada), el parche
+--  se detiene: un número forzado sobre un criterio que no calza es peor que
+--  un pendiente declarado.
+DO $p22_desfase$
+DECLARE
+    v_desfase integer;
+    v_otro    integer;
+BEGIN
+    SELECT count(*) INTO v_desfase
+      FROM core.alertas_tempranas a
+      JOIN LATERAL (
+            SELECT max(p.orden) AS ultimo
+              FROM core.proceso_instancia p
+             WHERE p.tipo_origen = 'alerta' AND p.alerta_id = a.id
+           ) x ON true
+     WHERE x.ultimo IS NOT NULL
+       AND a.paso_actual IS DISTINCT FROM x.ultimo;
+
+    IF v_desfase NOT IN (0, 83) THEN
+        RAISE EXCEPTION
+            'el desfase de paso_actual cubre % alertas y no las 83 esperadas. '
+            'Revise core.proceso_instancia antes de aplicar el parche 22', v_desfase;
+    END IF;
+
+    --  Toda fila que el criterio toca tiene que quedar en el paso 5. Si alguna
+    --  derivara a otro paso, no es el desfase documentado y no se toca.
+    SELECT count(*) INTO v_otro
+      FROM core.alertas_tempranas a
+      JOIN LATERAL (
+            SELECT max(p.orden) AS ultimo
+              FROM core.proceso_instancia p
+             WHERE p.tipo_origen = 'alerta' AND p.alerta_id = a.id
+           ) x ON true
+     WHERE x.ultimo IS NOT NULL AND x.ultimo <> 5
+       AND a.paso_actual IS DISTINCT FROM x.ultimo;
+
+    IF v_otro <> 0 THEN
+        RAISE EXCEPTION
+            '% alertas quedarían en un paso distinto de 5 con este criterio', v_otro;
+    END IF;
+
+    RAISE NOTICE 'desfase de paso_actual: % alertas por corregir', v_desfase;
+END
+$p22_desfase$;
+
+--  `IS DISTINCT FROM` es la guarda de idempotencia: en la segunda pasada no
+--  hay filas que cumplan el predicado y `updated_at` no se reescribe. El
+--  trigger de auditoría sí mueve `updated_at` en la primera pasada, y es
+--  correcto: la fila cambió de verdad.
+UPDATE core.alertas_tempranas a
+   SET paso_actual = x.ultimo
+  FROM (
+        SELECT p.alerta_id, max(p.orden) AS ultimo
+          FROM core.proceso_instancia p
+         WHERE p.tipo_origen = 'alerta' AND p.alerta_id IS NOT NULL
+         GROUP BY p.alerta_id
+       ) x
+ WHERE x.alerta_id = a.id
+   AND a.paso_actual IS DISTINCT FROM x.ultimo;
+
+COMMENT ON COLUMN core.alertas_tempranas.paso_actual IS
+    'Número del paso del flujo operativo en que se encuentra la alerta. Es una copia desnormalizada de core.proceso_instancia: el paso real es el de la última instancia de proceso de la alerta. El parche 22 puso en 5 las 83 alertas migradas que decían 1 con el proceso ya archivado';
+
+-- =====================================================================
+-- BLOQUE 6 · Los pasos de reporte sin definición: se documentan, no se
+--           inventan
+-- =====================================================================
+\echo 'PARCHE 22 · bloque 6/8 · los pasos de reporte sin definición'
+
+--  `core.flujo_definicion` define tres pasos de reporte (Elaboración,
+--  Remisión, Archivo). `core.proceso_instancia` tiene 9 instancias de reporte
+--  en los pasos 4, 5 y 6 sin `flujo_definicion_id`: son pasos del sistema
+--  anterior, que tenía seis, y no tienen equivalente en el modelo nuevo.
+--
+--  Ampliar el catálogo habría sido peor: crearía tres pasos que nadie
+--  definió, con un rol responsable inventado y un estado resultante sacado de
+--  la nada, y el flujo de reporte del sistema nuevo pasaría a tener seis
+--  pasos «porque el anterior los tenía». La alternativa —mapear el paso 6
+--  (Archivado) al 3 (Archivo)— tampoco vale: reescribiría la historia de un
+--  reporte archivado en febrero de 2026 como si hubiera pasado por un flujo
+--  que no existía.
+--
+--  Así que `NULL` significa exactamente eso y se dice en el comentario de la
+--  columna: no es un dato que falte.
+COMMENT ON COLUMN core.proceso_instancia.flujo_definicion_id IS
+    'Paso del catálogo, resuelto por tipo de flujo y número de orden. Está vacío en las 9 instancias migradas del flujo de reporte cuyos pasos 4, 5 y 6 venían del sistema anterior y no existen en el modelo de tres pasos (Elaboración, Remisión, Archivo): no es un dato que falte, es la huella de que el flujo anterior tenía seis pasos. El parche 22 lo deja así a propósito y no amplía el catálogo';
+
+DO $p22_reporte$
+DECLARE
+    v_total  integer;
+    v_sin    integer;
+    v_otro   integer;
+    v_notas  text;
+BEGIN
+    SELECT count(*) INTO v_total FROM core.proceso_instancia WHERE tipo_origen = 'reporte';
+    SELECT count(*) INTO v_sin
+      FROM core.proceso_instancia
+     WHERE tipo_origen = 'reporte' AND flujo_definicion_id IS NULL;
+
+    IF v_sin <> 9 THEN
+        RAISE EXCEPTION
+            'se esperaban 9 instancias de reporte sin flujo_definicion_id y hay %', v_sin;
+    END IF;
+
+    SELECT count(*) INTO v_otro
+      FROM core.proceso_instancia
+     WHERE flujo_definicion_id IS NULL AND tipo_origen <> 'reporte';
+    IF v_otro <> 0 THEN
+        RAISE EXCEPTION
+            'hay % instancias sin flujo_definicion_id que no son de reporte', v_otro;
+    END IF;
+
+    SELECT string_agg(format('paso %s: %s', orden, coalesce(nota, '(sin nota)')), ' · '
+                      ORDER BY orden, codigo_legado)
+      INTO v_notas
+      FROM core.proceso_instancia
+     WHERE tipo_origen = 'reporte' AND flujo_definicion_id IS NULL;
+
+    RAISE NOTICE
+        'reporte: % instancias, % sin definición (pasos 4-6) · %', v_total, v_sin, v_notas;
+END
+$p22_reporte$;
+
+-- =====================================================================
+-- BLOQUE 7 · Verificación
+-- =====================================================================
+\echo 'PARCHE 22 · bloque 7/8 · verificación'
+
+DO $p22_verify$
+DECLARE
+    v_n           integer;
+    v_cols        integer;
+    v_alertas     integer;
+    v_cols_vista  text[];
+    v_sec11       uuid;
+    v_otro        uuid;
+    v_id          uuid;
+    v_fallo       boolean;
+    v_msg         text;
+    v_estado      text;
+    v_internas    integer;
+    v_pi          integer;
+BEGIN
+    -- 7.1 · La columna, con su comentario, su restricción y su índice
+    SELECT count(*) INTO v_n
+      FROM pg_attribute a
+     WHERE a.attrelid = 'core.alertas_tempranas'::regclass
+       AND a.attname = 'visibilidad'
+       AND a.attnum > 0 AND NOT a.attisdropped
+       AND col_description(a.attrelid, a.attnum) IS NOT NULL;
+    IF v_n <> 1 THEN
+        RAISE EXCEPTION 'falta la columna visibilidad o su comentario';
+    END IF;
+
+    SELECT count(*) INTO v_n
+      FROM pg_constraint c
+     WHERE c.conrelid = 'core.alertas_tempranas'::regclass
+       AND c.conname  = 'alertas_visibilidad_valida'
+       AND c.contype  = 'c' AND c.convalidated;
+    IF v_n <> 1 THEN
+        RAISE EXCEPTION 'falta la restricción alertas_visibilidad_valida';
+    END IF;
+
+    SELECT count(*) INTO v_n
+      FROM pg_index i
+      JOIN pg_class c ON c.oid = i.indexrelid
+     WHERE i.indrelid = 'core.alertas_tempranas'::regclass
+       AND c.relname  = 'ix_alertas_visibilidad_no_interna'
+       AND i.indpred IS NOT NULL;
+    IF v_n <> 1 THEN
+        RAISE EXCEPTION 'falta el índice parcial ix_alertas_visibilidad_no_interna';
+    END IF;
+
+    -- 7.2 · 36 columnas y las 83 alertas en interna
+    SELECT count(*) INTO v_cols
+      FROM pg_attribute a
+     WHERE a.attrelid = 'core.alertas_tempranas'::regclass
+       AND a.attnum > 0 AND NOT a.attisdropped;
+    IF v_cols <> 36 THEN
+        RAISE EXCEPTION
+            'core.alertas_tempranas tiene % columnas y debe tener 36', v_cols;
+    END IF;
+
+    SELECT count(*) INTO v_alertas FROM core.alertas_tempranas;
+    IF v_alertas <> 83 THEN
+        RAISE EXCEPTION 'hay % alertas y deben ser 83', v_alertas;
+    END IF;
+
+    SELECT count(*) INTO v_n
+      FROM core.alertas_tempranas WHERE visibilidad = 'interna';
+    IF v_n <> 83 THEN
+        RAISE EXCEPTION 'hay % alertas internas y deben ser las 83', v_n;
+    END IF;
+
+    SELECT count(*) INTO v_n
+      FROM core.alertas_tempranas WHERE visibilidad <> 'interna';
+    IF v_n <> 0 THEN
+        RAISE EXCEPTION 'hay % alertas con visibilidad distinta de interna', v_n;
+    END IF;
+
+    -- 7.3 · La vista: 20 columnas, las 19 anteriores intactas y 83 filas
+    SELECT array_agg(a.attname ORDER BY a.attnum) INTO v_cols_vista
+      FROM pg_attribute a
+     WHERE a.attrelid = 'core.vw_alerta_estado'::regclass
+       AND a.attnum > 0 AND NOT a.attisdropped;
+
+    IF array_length(v_cols_vista, 1) <> 20 THEN
+        RAISE EXCEPTION
+            'core.vw_alerta_estado tiene % columnas y debe tener 20',
+            array_length(v_cols_vista, 1);
+    END IF;
+
+    IF v_cols_vista[1:19] <> ARRAY[
+           'alerta_id', 'codigo_alerta', 'titulo', 'prioridad_id',
+           'nivel_alerta_id', 'fecha_reporte', 'proceso_id', 'paso',
+           'paso_nombre', 'estado_id', 'estado_codigo', 'estado_nombre',
+           'es_final', 'estado_desde', 'es_validado_humano', 'fecha_validacion',
+           'fecha_remision', 'aprobada_por', 'aprobada_en']::text[]
+       OR v_cols_vista[20] <> 'visibilidad' THEN
+        RAISE EXCEPTION
+            'core.vw_alerta_estado cambió de orden o de nombres: %', v_cols_vista;
+    END IF;
+
+    SELECT count(*) INTO v_n FROM core.vw_alerta_estado;
+    IF v_n <> 83 THEN
+        RAISE EXCEPTION
+            'core.vw_alerta_estado devuelve % filas y debe devolver 83', v_n;
+    END IF;
+
+    SELECT count(*) INTO v_n
+      FROM core.vw_alerta_estado WHERE visibilidad = 'interna';
+    IF v_n <> 83 THEN
+        RAISE EXCEPTION 'la vista devuelve % alertas internas y deben ser 83', v_n;
+    END IF;
+
+    -- 7.4 · El gate existe y es BEFORE INSERT OR UPDATE FOR EACH ROW
+    SELECT count(*) INTO v_n
+      FROM pg_trigger t
+     WHERE t.tgrelid = 'core.alertas_tempranas'::regclass
+       AND t.tgname  = 'alertas_g21_visibilidad'
+       AND NOT t.tgisinternal
+       AND pg_get_triggerdef(t.oid) LIKE '%BEFORE INSERT OR UPDATE ON%'
+       AND pg_get_triggerdef(t.oid) LIKE '%FOR EACH ROW%';
+    IF v_n <> 1 THEN
+        RAISE EXCEPTION 'el trigger alertas_g21_visibilidad no existe o no es BEFORE INSERT OR UPDATE FOR EACH ROW';
+    END IF;
+
+    -- 7.5 · puede_aprobar: true para la Directora, false para quien no tiene
+    --       el rol, false para un usuario inexistente y false con NULL
+    SELECT u.id INTO v_sec11 FROM core.usuarios u WHERE u.codigo_legado = 'SEC-11';
+    IF v_sec11 IS NULL THEN
+        RAISE EXCEPTION 'no existe la cuenta SEC-11';
+    END IF;
+
+    IF core.puede_aprobar(v_sec11) IS NOT TRUE THEN
+        RAISE EXCEPTION 'core.puede_aprobar() debería devolver true para SEC-11';
+    END IF;
+
+    SELECT u.id INTO v_otro
+      FROM core.usuarios u
+     WHERE NOT EXISTS (
+             SELECT 1
+               FROM core.usuario_roles ur
+               JOIN core.roles r ON r.id = ur.rol_id
+              WHERE ur.usuario_id = u.id
+                AND r.codigo = 'direccion_oaipcs'
+                AND ur.desde <= CURRENT_DATE
+                AND (ur.hasta IS NULL OR ur.hasta >= CURRENT_DATE))
+     ORDER BY u.codigo_legado
+     LIMIT 1;
+    IF v_otro IS NULL THEN
+        RAISE EXCEPTION
+            'la verificación necesita al menos una cuenta sin direccion_oaipcs';
+    END IF;
+
+    IF core.puede_aprobar(v_otro) IS NOT FALSE THEN
+        RAISE EXCEPTION 'core.puede_aprobar() debería devolver false para una cuenta sin el rol';
+    END IF;
+
+    IF core.puede_aprobar(gen_random_uuid()) IS NOT FALSE THEN
+        RAISE EXCEPTION 'core.puede_aprobar() debería devolver false para un usuario inexistente';
+    END IF;
+
+    IF core.puede_aprobar(NULL) IS NOT FALSE THEN
+        RAISE EXCEPTION 'core.puede_aprobar() debería devolver false con NULL';
+    END IF;
+
+    --  La suplencia sigue sin filas: el parche no designa a nadie.
+    SELECT count(*) INTO v_n FROM core.permiso_aprobacion;
+    IF v_n <> 0 THEN
+        RAISE EXCEPTION 'core.permiso_aprobacion tiene % filas y no debe tener ninguna', v_n;
+    END IF;
+
+    -- 7.6 · El gate rechaza de verdad. Se hace sobre una fila temporal que se
+    --       borra al final, dentro de esta transacción: no queda rastro.
+    INSERT INTO core.alertas_tempranas (codigo_alerta, situacion_actual)
+    VALUES ('P22-PRUEBA-G21', 'fila temporal de la verificación del parche 22')
+    RETURNING id INTO v_id;
+
+    -- (a) sin ninguna de las dos aprobaciones
+    BEGIN
+        UPDATE core.alertas_tempranas SET visibilidad = 'ejecutiva' WHERE id = v_id;
+        v_fallo := false;
+    EXCEPTION WHEN raise_exception THEN
+        GET STACKED DIAGNOSTICS v_estado = RETURNED_SQLSTATE, v_msg = MESSAGE_TEXT;
+        v_fallo := true;
+    END;
+    IF NOT v_fallo THEN
+        DELETE FROM core.proceso_instancia WHERE alerta_id = v_id;
+        DELETE FROM core.alertas_tempranas WHERE id = v_id;
+        RAISE EXCEPTION 'el gate aceptó visibilidad = ejecutiva sin ninguna aprobación';
+    END IF;
+    IF v_estado <> 'P0001' OR v_msg NOT LIKE 'G21_SIN_APROBACION:%' THEN
+        DELETE FROM core.proceso_instancia WHERE alerta_id = v_id;
+        DELETE FROM core.alertas_tempranas WHERE id = v_id;
+        RAISE EXCEPTION 'el gate falló con un código o un mensaje que no son los del contrato: % / %', v_estado, v_msg;
+    END IF;
+    IF position('validación previa' in v_msg) = 0
+       OR position('aprobación definitiva' in v_msg) = 0 THEN
+        DELETE FROM core.proceso_instancia WHERE alerta_id = v_id;
+        DELETE FROM core.alertas_tempranas WHERE id = v_id;
+        RAISE EXCEPTION 'el mensaje del gate no dice qué falta: %', v_msg;
+    END IF;
+
+    -- (b) con la validación previa, pero sin la aprobación de la Dirección
+    BEGIN
+        UPDATE core.alertas_tempranas
+           SET visibilidad      = 'sectorial',
+               es_validado_humano = true,
+               fecha_validacion = CURRENT_DATE,
+               paso_actual      = 5
+         WHERE id = v_id;
+        v_fallo := false;
+    EXCEPTION WHEN raise_exception THEN
+        GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
+        v_fallo := true;
+    END;
+    IF NOT v_fallo THEN
+        DELETE FROM core.proceso_instancia WHERE alerta_id = v_id;
+        DELETE FROM core.alertas_tempranas WHERE id = v_id;
+        RAISE EXCEPTION 'el gate aceptó visibilidad = sectorial sin aprobación de la Dirección';
+    END IF;
+    IF v_msg NOT LIKE 'G21_SIN_APROBACION:%'
+       OR position('aprobación definitiva' in v_msg) = 0
+       OR position('validación previa' in v_msg) > 0 THEN
+        DELETE FROM core.proceso_instancia WHERE alerta_id = v_id;
+        DELETE FROM core.alertas_tempranas WHERE id = v_id;
+        RAISE EXCEPTION 'el mensaje del gate no nombra solo lo que falta: %', v_msg;
+    END IF;
+
+    -- (c) con las dos aprobaciones, el paso a visibilidad ejecutiva pasa. La
+    --     validación previa se vuelve a fijar porque la sentencia (b) abortó y
+    --     no dejó nada escrito: es el mismo acto único que hará la aplicación.
+    UPDATE core.alertas_tempranas
+       SET es_validado_humano = true,
+           fecha_validacion  = CURRENT_DATE,
+           paso_actual       = 5,
+           aprobada_por      = v_sec11,
+           aprobada_en       = now(),
+           visibilidad       = 'ejecutiva'
+     WHERE id = v_id;
+
+    -- (d) y una vez aprobada, el CHECK sigue rechazando un valor que no es
+    --     de los tres: el gate no sustituye a la restricción.
+    BEGIN
+        UPDATE core.alertas_tempranas SET visibilidad = 'perfil_b' WHERE id = v_id;
+        v_fallo := false;
+    EXCEPTION WHEN check_violation THEN
+        v_fallo := true;
+    END;
+    IF NOT v_fallo THEN
+        DELETE FROM core.proceso_instancia WHERE alerta_id = v_id;
+        DELETE FROM core.alertas_tempranas WHERE id = v_id;
+        RAISE EXCEPTION 'la restricción aceptó visibilidad = perfil_b';
+    END IF;
+
+    --  La fila de prueba y su paso automático se borran; el recuento vuelve.
+    DELETE FROM core.proceso_instancia WHERE alerta_id = v_id;
+    DELETE FROM core.alertas_tempranas WHERE id = v_id;
+
+    SELECT count(*) INTO v_n FROM core.alertas_tempranas;
+    IF v_n <> 83 THEN
+        RAISE EXCEPTION 'la prueba del gate dejó % alertas (deben ser 83)', v_n;
+    END IF;
+
+    -- 7.7 · paso_actual: las 83 en el 5, derivado del proceso, y solo ellas
+    SELECT count(*) INTO v_n
+      FROM core.alertas_tempranas WHERE paso_actual = 5;
+    IF v_n <> 83 THEN
+        RAISE EXCEPTION 'hay % alertas en el paso 5 y deben ser las 83', v_n;
+    END IF;
+
+    SELECT count(*) INTO v_n
+      FROM core.alertas_tempranas
+     WHERE paso_actual IS DISTINCT FROM 5;
+    IF v_n <> 0 THEN
+        RAISE EXCEPTION 'quedan % alertas fuera del paso 5', v_n;
+    END IF;
+
+    SELECT count(*) INTO v_n
+      FROM core.alertas_tempranas a
+      JOIN LATERAL (
+            SELECT max(p.orden) AS ultimo
+              FROM core.proceso_instancia p
+             WHERE p.tipo_origen = 'alerta' AND p.alerta_id = a.id
+           ) x ON true
+     WHERE x.ultimo = 5 AND a.paso_actual = 5;
+    IF v_n <> 83 THEN
+        RAISE EXCEPTION
+            'solo % alertas tienen paso_actual coherente con su proceso', v_n;
+    END IF;
+
+    -- 7.8 · Nada más se movió
+    SELECT count(*) INTO v_n FROM core.proceso_instancia;
+    IF v_n <> 218 THEN
+        RAISE EXCEPTION
+            'core.proceso_instancia tiene % filas y debía seguir con 218', v_n;
+    END IF;
+
+    SELECT count(*) INTO v_n FROM core.flujo_definicion;
+    IF v_n <> 12 THEN
+        RAISE EXCEPTION
+            'core.flujo_definicion tiene % filas y debía seguir con 12', v_n;
+    END IF;
+
+    SELECT count(*) INTO v_n
+      FROM core.proceso_instancia
+     WHERE tipo_origen = 'reporte' AND flujo_definicion_id IS NULL;
+    IF v_n <> 9 THEN
+        RAISE EXCEPTION
+            'las instancias de reporte sin definición cambiaron: hay %', v_n;
+    END IF;
+
+    -- 7.9 · Cifras del estado posterior (informativas)
+    SELECT count(*) INTO v_internas
+      FROM core.alertas_tempranas WHERE visibilidad = 'interna';
+    SELECT count(*) INTO v_alertas FROM core.vw_alerta_estado;
+    SELECT count(*) INTO v_pi FROM core.proceso_instancia;
+
+    RAISE NOTICE
+        'visibilidad: % alertas internas · alertas_tempranas: % columnas · vw_alerta_estado: % columnas y % filas · paso_actual: 83 en el paso 5 · permiso_aprobacion: 0 filas · proceso_instancia: %',
+        v_internas, v_cols, array_length(v_cols_vista, 1), v_alertas, v_pi;
+END
+$p22_verify$;
+
+COMMIT;
+
+\echo 'PARCHE 22 · aplicado'
+
+-- ---------------------------------------------------------------------
+--  BLOQUE B.18 · Parche 23 · destinatarios nombrados, cuatro ojos y escala de gravedad
+--  Fuente: docs/PARCHE_23_DESTINATARIOS_Y_CUATRO_OJOS.sql (574 líneas)
+--  Errores: abortan la ejecución (ON_ERROR_STOP on)
+--    Resuelve H-14 poniendo la gravedad en el dato:
+--    `core.cat_prioridades_alerta` gana `es_grave`, verdadero solo en los
+--    dos niveles con plazo grave (`Critica_Inmediata` y `Urgente`).
+--    Cierra H-79 con `core.alertas_tempranas.validada_por` y dos
+--    restricciones —la firma y la fecha de validación van juntas, y quien
+--    valida no puede ser quien aprueba—, y amplía el gate G21 a los
+--    cuatro ojos y a los destinatarios. Crea `core.alerta_destinatario`,
+--    la tabla que faltaba para la visibilidad `sectorial`, y alinea el
+--    contrato de G21 en `config.guardrail_contract`, que se disparaba con
+--    un valor que el CHECK no admite. `core.vw_alerta_estado` pasa de 20
+--    a 22 columnas.
+-- ---------------------------------------------------------------------
+-- =====================================================================
+--  AVISA · PARCHE 23 · Destinatarios nombrados, cuatro ojos y escala de gravedad
+-- =====================================================================
+--  QUÉ ES
+--
+--  Cierra los pendientes de base que dejó abiertos el parche 22 y resuelve
+--  el vacío H-14 sobre si los niveles de alerta son tres o cuatro:
+--
+--      (a) `core.cat_prioridades_alerta` gana `es_grave`: la regla RN-02
+--          («graves son los niveles 1 y 2») deja de estar escrita en el
+--          documento y pasa a estar en el dato;
+--      (b) `core.alertas_tempranas` gana `validada_por`, el autor de la
+--          validación previa, que faltaba: `es_validado_humano` era un
+--          booleano sin firma y no se podía comprobar el «cuatro ojos»;
+--      (c) el gate G21 pasa a exigir que quien valida y quien aprueba
+--          sean personas distintas, y que una alerta con visibilidad
+--          `sectorial` tenga al menos un destinatario nombrado;
+--      (d) `core.alerta_destinatario` da soporte a esa visibilidad: hoy
+--          `sectorial` era un valor del CHECK sin tabla que lo sostuviera;
+--      (e) corrige el contrato G21 de `config.guardrail_contract`, que
+--          se disparaba con un valor (`perfil_b`) que el CHECK de la
+--          columna no admite;
+--      (f) expone `validada_por` y el número de destinatarios al final de
+--          `core.vw_alerta_estado`.
+--
+--  POR QUÉ EXISTE
+--
+--  1. El parche 22 dejó dicho que `visibilidad = 'sectorial'` no tenía
+--     tabla de destinatarios: el valor existía en el CHECK y la remisión
+--     se mapeaba «≈» a `core.alertas_actores`, que es una tabla de
+--     actores del conflicto, no de destinatarios de una alerta. Una
+--     visibilidad que no puede nombrar a quién se dirige no es una
+--     visibilidad: es una etiqueta.
+--
+--  2. H-79 («cuatro ojos») pedía separar a quien valida de quien aprueba.
+--     `es_validado_humano` es un booleano: dice que hubo validación, no
+--     quién la hizo. Sin autor no hay manera de comprobar que sean dos
+--     personas distintas, y por tanto la regla no se puede imponer.
+--
+--  3. H-14 preguntaba si los niveles son tres o cuatro. La respuesta
+--     está en el dato y se aplica aquí: el catálogo tiene **cuatro filas**,
+--     pero solo **tres tienen plazo**. `Seguimiento` no es un grado de
+--     gravedad: es el cajón de lo que se observa sin plazo. La gravedad
+--     son tres niveles, y los graves son los dos primeros.
+--
+--  4. El contrato de G21 en `config.guardrail_contract` decía
+--     `"visibilidad": "perfil_b"`, un valor que el `CHECK` de la columna
+--     no admite desde el parche 22 (`interna`, `ejecutiva`, `sectorial`).
+--     Un contrato de prueba que usa un valor imposible nunca puede pasar:
+--     el guardrail se probaría contra sí mismo y fallaría siempre.
+--
+--  QUÉ NO HACE
+--
+--  · No siembra destinatarios. `core.alerta_destinatario` nace vacía: los
+--    destinatarios nombrados son configuración viva de la OAIPCS.
+--
+--  · No rellena `fecha_validacion` ni `validada_por` en las 83 alertas
+--    migradas. Las 83 tienen `es_validado_humano = true` y
+--    `fecha_validacion` en NULL: el sistema anterior marcaba la bandera
+--    pero nunca guardó la fecha. Inventarla sería fabricar un acto
+--    administrativo. Se quedan como están y siguen en `interna`.
+--
+--  · No cambia las filas de `core.cat_prioridades_alerta`: siguen siendo
+--    cuatro, con sus mismos códigos y plazos. Solo se les añade un dato
+--    derivado (`es_grave`).
+--
+--  · No toca `core.alertas_actores`, que sigue siendo la tabla de actores
+--    del conflicto, ni `legacy.dim_destinatarios_fijos`, que es archivo.
+--
+--  DÓNDE SE EJECUTA
+--
+--  En la base viva del contenedor `avisa-db` (PostgreSQL 16, usuario
+--  `avisa`, base `avisa`), por entrada estándar si el archivo no está
+--  montado todavía:
+--
+--      MSYS_NO_PATHCONV=1 docker exec -i avisa-db psql -U avisa -d avisa \
+--          -v ON_ERROR_STOP=1 -f - < docs/PARCHE_23_DESTINATARIOS_Y_CUATRO_OJOS.sql
+--
+--  Es transaccional e idempotente: se puede correr varias veces seguidas
+--  sin duplicar objetos ni filas. Al final imprime el recuento de cada
+--  pieza para poder comparar dos pasadas.
+-- =====================================================================
+
+\set ON_ERROR_STOP on
+\timing off
+
+BEGIN;
+
+\echo 'PARCHE 23 · bloque 0/8 · comprobaciones previas'
+
+--  El parche 22 tiene que estar aplicado: sin `visibilidad` no hay gate que
+--  ampliar y sin `aprobada_por` no hay «cuatro ojos» que comprobar.
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns
+         WHERE table_schema = 'core'
+           AND table_name   = 'alertas_tempranas'
+           AND column_name  = 'visibilidad'
+    ) THEN
+        RAISE EXCEPTION
+            'PARCHE_23_PREVIO: falta core.alertas_tempranas.visibilidad; aplique antes el parche 22';
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns
+         WHERE table_schema = 'core'
+           AND table_name   = 'alertas_tempranas'
+           AND column_name  = 'aprobada_por'
+    ) THEN
+        RAISE EXCEPTION
+            'PARCHE_23_PREVIO: falta core.alertas_tempranas.aprobada_por; aplique antes el parche 21';
+    END IF;
+END
+$$;
+
+-- =====================================================================
+-- BLOQUE 1 · H-14 · La gravedad como dato, no como prosa
+-- =====================================================================
+\echo 'PARCHE 23 · bloque 1/8 · es_grave en el catálogo de prioridades'
+
+--  El catálogo tiene cuatro filas y tres plazos:
+--
+--      1 Critica_Inmediata  24 h   grave
+--      2 Urgente            48 h   grave
+--      3 Temprana           72 h   no grave
+--      4 Seguimiento        NULL   no grave, y sin plazo: no es un grado
+--
+--  `es_grave` no es un adorno: es la regla RN-02 («graves son los niveles 1
+--  y 2») traducida a una columna, de modo que la aplicación no tenga que
+--  llevar el número de nivel escrito en el código cuando mañana la OAIPCS
+--  decida mover el umbral.
+ALTER TABLE core.cat_prioridades_alerta
+    ADD COLUMN IF NOT EXISTS es_grave boolean NOT NULL DEFAULT false;
+
+--  Los valores se fijan por código, no por id: si algún día se renumeran
+--  las filas, la regla sigue significando lo mismo. El `WHERE` los deja
+--  idempotentes: correrlo dos veces escribe lo mismo.
+UPDATE core.cat_prioridades_alerta SET es_grave = true
+ WHERE codigo IN ('Critica_Inmediata', 'Urgente');
+
+UPDATE core.cat_prioridades_alerta SET es_grave = false
+ WHERE codigo IN ('Temprana', 'Seguimiento');
+
+--  Coherencia de la escala: lo que no tiene plazo no puede ser grave. Un
+--  nivel sin `sla_horas` es un cajón de observación, no una urgencia; si
+--  alguna vez se quiere un nivel grave sin plazo, habrá que decidirlo
+--  explícitamente y no por omisión.
+ALTER TABLE core.cat_prioridades_alerta
+    DROP CONSTRAINT IF EXISTS cat_prioridades_alerta_grave_con_plazo;
+ALTER TABLE core.cat_prioridades_alerta
+    ADD CONSTRAINT cat_prioridades_alerta_grave_con_plazo
+    CHECK (NOT es_grave OR sla_horas IS NOT NULL);
+
+COMMENT ON COLUMN core.cat_prioridades_alerta.es_grave IS
+    'Marca si el nivel de prioridad es grave para la regla RN-02: los graves llevan al Ministro como destinatario. Verdaderos hoy: Critica_Inmediata (24 h) y Urgente (48 h). Un nivel sin plazo de atención (Seguimiento) no puede ser grave, y la restricción cat_prioridades_alerta_grave_con_plazo lo impide';
+
+-- =====================================================================
+-- BLOQUE 2 · La firma de la validación previa (H-79)
+-- =====================================================================
+\echo 'PARCHE 23 · bloque 2/8 · validada_por y el «cuatro ojos»'
+
+--  `aprobada_por` (parche 21) dio autor a la aprobación definitiva. Faltaba
+--  el mismo dato para la validación previa: `es_validado_humano` dice que
+--  alguien validó, no quién. Sin autor no se puede comprobar que sean dos
+--  personas distintas.
+--
+--  ON DELETE RESTRICT por la misma razón que en `aprobada_por`: no se puede
+--  borrar a quien firmó mientras su firma conste en una alerta.
+ALTER TABLE core.alertas_tempranas
+    ADD COLUMN IF NOT EXISTS validada_por uuid
+        REFERENCES core.usuarios(id) ON DELETE RESTRICT;
+
+--  Coherencia: la firma y la fecha van juntas o no van. Se exige la
+--  equivalencia, no la presencia, porque las 83 filas migradas tienen las
+--  dos en NULL a propósito —el sistema anterior marcó la bandera y nunca
+--  guardó la fecha— y un CHECK que exigiera la fecha sobre `es_validado_humano`
+--  las rechazaría.
+ALTER TABLE core.alertas_tempranas
+    DROP CONSTRAINT IF EXISTS alertas_validacion_coherente;
+ALTER TABLE core.alertas_tempranas
+    ADD CONSTRAINT alertas_validacion_coherente
+    CHECK ((validada_por IS NULL) = (fecha_validacion IS NULL));
+
+--  El «cuatro ojos» en su forma mínima y comprobable en la base: cuando
+--  constan las dos firmas, tienen que ser de dos personas distintas. Se
+--  permite que falte alguna (NULL) para no bloquear el registro de una
+--  aprobación mientras la validación se está consignando; lo que no se
+--  permite es que una misma persona firme los dos actos.
+ALTER TABLE core.alertas_tempranas
+    DROP CONSTRAINT IF EXISTS alertas_cuatro_ojos;
+ALTER TABLE core.alertas_tempranas
+    ADD CONSTRAINT alertas_cuatro_ojos
+    CHECK (validada_por IS NULL
+        OR aprobada_por IS NULL
+        OR validada_por <> aprobada_por);
+
+--  Índice parcial: las consultas del gate y de la pantalla buscan las
+--  alertas que ya tienen validación firmada, que hoy son cero filas.
+CREATE INDEX IF NOT EXISTS ix_alertas_validada_por
+    ON core.alertas_tempranas (validada_por)
+    WHERE validada_por IS NOT NULL;
+
+COMMENT ON COLUMN core.alertas_tempranas.validada_por IS
+    'Autor de la validación previa del Sectorista. Junto con fecha_validacion forma la primera de las dos firmas de G21; la segunda es aprobada_por y aprobada_en. La restricción alertas_cuatro_ojos impide que la misma persona firme la validación y la aprobación. Las 83 alertas migradas lo tienen en NULL porque el sistema anterior nunca registró quién validaba';
+
+-- =====================================================================
+-- BLOQUE 3 · Los destinatarios nombrados de una alerta
+-- =====================================================================
+\echo 'PARCHE 23 · bloque 3/8 · core.alerta_destinatario'
+
+--  El valor `sectorial` del CHECK de `visibilidad` significa «la remisión se
+--  limita a los destinatarios nombrados de esa alerta», pero no existía la
+--  tabla donde nombrarlos. `core.alertas_actores` no sirve: relaciona una
+--  alerta con los actores del conflicto, no con las personas a las que se
+--  avisa.
+--
+--  El destinatario puede ser un usuario del sistema (Ministro, viceministros,
+--  secretario general) o un cargo sin cuenta (las jefaturas de gabinete, que
+--  reciben envíos de alertas no graves y no entran al sistema: 6.1). Por eso
+--  hay dos columnas excluyentes y no una sola clave ajena.
+CREATE TABLE IF NOT EXISTS core.alerta_destinatario (
+    id             uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
+    alerta_id      uuid        NOT NULL
+                               REFERENCES core.alertas_tempranas(id) ON DELETE CASCADE,
+    usuario_id     uuid        REFERENCES core.usuarios(id) ON DELETE RESTRICT,
+    cargo          varchar(80),
+    canal          varchar(20) NOT NULL DEFAULT 'correo',
+    motivo         varchar(120),
+    notificado_en  timestamptz,
+    created_at     timestamptz NOT NULL DEFAULT now(),
+    updated_at     timestamptz NOT NULL DEFAULT now(),
+    created_by     uuid        REFERENCES core.usuarios(id),
+    updated_by     uuid        REFERENCES core.usuarios(id),
+
+    CONSTRAINT alerta_destinatario_canal_valido
+        CHECK (canal IN ('correo', 'whatsapp', 'sms')),
+
+    --  Exactamente uno de los dos: o es una persona con cuenta, o es un
+    --  cargo sin cuenta. Los dos a la vez sería ambiguo; ninguno, un
+    --  destinatario que no existe.
+    CONSTRAINT alerta_destinatario_identidad
+        CHECK ((usuario_id IS NULL) <> (cargo IS NULL)),
+
+    --  Un envío registrado no puede ser anterior a la alerta que lo origina.
+    CONSTRAINT alerta_destinatario_notificado_coherente
+        CHECK (notificado_en IS NULL OR notificado_en >= created_at)
+);
+
+--  Una misma persona no se repite por el mismo canal en la misma alerta.
+CREATE UNIQUE INDEX IF NOT EXISTS ux_alerta_destinatario_usuario_canal
+    ON core.alerta_destinatario (alerta_id, usuario_id, canal)
+    WHERE usuario_id IS NOT NULL;
+
+CREATE UNIQUE INDEX IF NOT EXISTS ux_alerta_destinatario_cargo_canal
+    ON core.alerta_destinatario (alerta_id, lower(cargo), canal)
+    WHERE cargo IS NOT NULL;
+
+CREATE INDEX IF NOT EXISTS ix_alerta_destinatario_alerta
+    ON core.alerta_destinatario (alerta_id);
+
+--  Auditoría estándar del esquema: rellena updated_at/updated_by/created_by
+--  desde `app.user_id`. El `DROP ... IF EXISTS` la hace reejecutable.
+DROP TRIGGER IF EXISTS trg_audit ON core.alerta_destinatario;
+CREATE TRIGGER trg_audit
+    BEFORE INSERT OR UPDATE ON core.alerta_destinatario
+    FOR EACH ROW EXECUTE FUNCTION core.set_audit();
+
+--  RLS: lectura abierta para la aplicación y escritura solo de los roles que
+--  remiten o administran. Se aplica el mismo patrón que el parche 21 usó en
+--  `core.flujo_estado` y `core.permiso_aprobacion`.
+ALTER TABLE core.alerta_destinatario ENABLE ROW LEVEL SECURITY;
+--  Y forzada, como el resto de `core`: la aplicación se conecta como `avisa`,
+--  que es la propietaria de las tablas, y sin `FORCE` el propietario se salta
+--  las políticas. Las cuatro políticas de este bloque no servirían de nada.
+--  Es el mismo criterio del parche 21 en `core.flujo_estado` y
+--  `core.permiso_aprobacion`.
+ALTER TABLE core.alerta_destinatario FORCE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS p23_alerta_destinatario_select ON core.alerta_destinatario;
+CREATE POLICY p23_alerta_destinatario_select ON core.alerta_destinatario
+    FOR SELECT
+    USING (true);
+
+DROP POLICY IF EXISTS p23_alerta_destinatario_insert ON core.alerta_destinatario;
+CREATE POLICY p23_alerta_destinatario_insert ON core.alerta_destinatario
+    FOR INSERT
+    WITH CHECK (core.rol_actual() IN ('administrador', 'direccion_oaipcs',
+                                      'sectorista', 'servicio_agente'));
+
+DROP POLICY IF EXISTS p23_alerta_destinatario_update ON core.alerta_destinatario;
+CREATE POLICY p23_alerta_destinatario_update ON core.alerta_destinatario
+    FOR UPDATE
+    USING (core.rol_actual() IN ('administrador', 'direccion_oaipcs',
+                                 'sectorista', 'servicio_agente'))
+    WITH CHECK (core.rol_actual() IN ('administrador', 'direccion_oaipcs',
+                                      'sectorista', 'servicio_agente'));
+
+DROP POLICY IF EXISTS p23_alerta_destinatario_delete ON core.alerta_destinatario;
+CREATE POLICY p23_alerta_destinatario_delete ON core.alerta_destinatario
+    FOR DELETE
+    USING (core.rol_actual() = 'administrador');
+
+COMMENT ON TABLE core.alerta_destinatario IS
+    'Destinatarios nombrados de una alerta: las personas a las que se remite cuando la visibilidad es «sectorial». El destinatario es un usuario del sistema (usuario_id) o un cargo sin cuenta (cargo), nunca los dos. Reemplaza el mapeo aproximado a core.alertas_actores, que relaciona la alerta con los actores del conflicto y no con quienes reciben el aviso';
+
+COMMENT ON COLUMN core.alerta_destinatario.usuario_id IS
+    'Persona con cuenta en el sistema a la que se remite la alerta. Excluyente con cargo';
+
+COMMENT ON COLUMN core.alerta_destinatario.cargo IS
+    'Cargo sin cuenta en el sistema al que se remite la alerta, por ejemplo una jefatura de gabinete. Excluyente con usuario_id. Se compara sin distinguir mayúsculas en la unicidad';
+
+COMMENT ON COLUMN core.alerta_destinatario.canal IS
+    'Canal del aviso: correo, whatsapp o sms. Un mismo destinatario puede tener una fila por canal';
+
+COMMENT ON COLUMN core.alerta_destinatario.notificado_en IS
+    'Momento en que el envío se completó por este canal. NULL mientras el aviso esté pendiente; no puede ser anterior a la creación de la fila';
+
+-- =====================================================================
+-- BLOQUE 4 · El gate G21, ampliado
+-- =====================================================================
+\echo 'PARCHE 23 · bloque 4/8 · G21 exige cuatro ojos y destinatarios'
+
+--  Se recrea la función entera en lugar de parchearla: `CREATE OR REPLACE`
+--  deja la definición en un solo sitio, que es lo que se puede leer y
+--  auditar. Los tres requisitos de salida de `interna` son ahora:
+--
+--    1. la validación previa del Sectorista, con autor y fecha;
+--    2. la aprobación definitiva de la Dirección, con autor y fecha;
+--    3. que los dos autores sean personas distintas;
+--
+--  y uno adicional, que solo aplica a `sectorial`:
+--
+--    4. al menos un destinatario nombrado, porque una visibilidad que no
+--       puede nombrar a quién se dirige no es una visibilidad.
+CREATE OR REPLACE FUNCTION core.tg_alerta_g21_visibilidad()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $fn$
+DECLARE
+    v_falta text[] := ARRAY[]::text[];
+BEGIN
+    --  El único caso libre es el valor de nacimiento. Cualquier otro exige
+    --  las dos firmas, sin importar la prioridad ni la gravedad de la alerta:
+    --  la gravedad decide el destinatario y el plazo, no quién autoriza.
+    IF NEW.visibilidad IS NULL OR NEW.visibilidad = 'interna' THEN
+        RETURN NEW;
+    END IF;
+
+    IF NOT (COALESCE(NEW.es_validado_humano, false)
+            AND NEW.fecha_validacion IS NOT NULL
+            AND NEW.validada_por IS NOT NULL
+            AND COALESCE(NEW.paso_actual, 0) >= 2) THEN
+        v_falta := v_falta || 'la validación previa del Sectorista (es_validado_humano, fecha_validacion, validada_por y paso_actual >= 2)'::text;
+    END IF;
+
+    IF NEW.aprobada_por IS NULL OR NEW.aprobada_en IS NULL THEN
+        v_falta := v_falta || 'la aprobación definitiva de la Dirección de la OAIPCS (aprobada_por y aprobada_en)'::text;
+    END IF;
+
+    IF NEW.validada_por IS NOT NULL
+       AND NEW.aprobada_por IS NOT NULL
+       AND NEW.validada_por = NEW.aprobada_por THEN
+        v_falta := v_falta || 'dos firmas de personas distintas: quien valida y quien aprueba no pueden ser la misma (H-79)'::text;
+    END IF;
+
+    --  La comprobación de destinatarios solo puede hacerse sobre una fila que
+    --  ya existe, porque en un INSERT la clave todavía no sirve para buscar
+    --  en la tabla hija. En el alta, la alerta nace `interna` y los
+    --  destinatarios se añaden después; el paso a `sectorial` es un UPDATE y
+    --  ahí sí se comprueba.
+    IF NEW.visibilidad = 'sectorial' AND TG_OP = 'UPDATE' THEN
+        IF NOT EXISTS (
+            SELECT 1 FROM core.alerta_destinatario d WHERE d.alerta_id = NEW.id
+        ) THEN
+            v_falta := v_falta || 'al menos un destinatario nombrado para la visibilidad «sectorial» (core.alerta_destinatario)'::text;
+        END IF;
+    END IF;
+
+    IF cardinality(v_falta) > 0 THEN
+        RAISE EXCEPTION
+            'G21_SIN_APROBACION: la alerta % no puede pasar a visibilidad «%»; falta %',
+            NEW.codigo_alerta, NEW.visibilidad, array_to_string(v_falta, ' y ')
+            USING ERRCODE = 'P0001';
+    END IF;
+
+    RETURN NEW;
+END
+$fn$;
+
+--  Se dispara en todo INSERT y en todo UPDATE, sin lista de columnas: el
+--  invariante depende de siete columnas y una lista incompleta lo dejaría
+--  abierto por el lado que nadie probó.
+DROP TRIGGER IF EXISTS alertas_g21_visibilidad ON core.alertas_tempranas;
+CREATE TRIGGER alertas_g21_visibilidad
+    BEFORE INSERT OR UPDATE ON core.alertas_tempranas
+    FOR EACH ROW EXECUTE FUNCTION core.tg_alerta_g21_visibilidad();
+
+COMMENT ON FUNCTION core.tg_alerta_g21_visibilidad() IS
+    'Gate G21: rechaza con ERRCODE P0001 y mensaje G21_SIN_APROBACION cualquier visibilidad distinta de interna mientras falte la validación previa del Sectorista (con autor y fecha), la aprobación definitiva de la Dirección, la distinción de personas entre ambas firmas o, para la visibilidad sectorial, al menos un destinatario nombrado. Las alertas internas, incluidas las 83 migradas, pasan sin comprobación';
+
+-- =====================================================================
+-- BLOQUE 5 · El contrato de G21, con un valor que existe
+-- =====================================================================
+\echo 'PARCHE 23 · bloque 5/8 · config.guardrail_contract'
+
+--  El contrato se disparaba con `"visibilidad": "perfil_b"`, que el CHECK de
+--  la columna no admite desde el parche 22: un contrato de prueba que usa un
+--  valor imposible no puede pasar nunca. Se alinea con el vocabulario real
+--  (`interna`, `ejecutiva`, `sectorial`) y se le añade el cuarto ojo, para
+--  que el caso negativo cubra también la firma duplicada.
+UPDATE config.guardrail_contract
+   SET input_dispara = jsonb_build_object(
+           'visibilidad',  'ejecutiva',
+           'aprobada_por', NULL,
+           'aprobada_en',  NULL,
+           'validada_por', NULL
+       ),
+       input_no_dispara = jsonb_build_object(
+           'visibilidad',  'ejecutiva',
+           'aprobada_por', '3f9c2a41-7b8e-4d6f-9a01-5c2e8b7d4a63',
+           'aprobada_en',  '2026-11-18T10:15:00-05:00',
+           'validada_por', 'a2d5c9e0-1b47-4f83-8e26-7c0d9b3a5f18'
+       )
+ WHERE guardrail = 'G21';
+
+-- =====================================================================
+-- BLOQUE 6 · La vista de estado, con las dos piezas nuevas
+-- =====================================================================
+\echo 'PARCHE 23 · bloque 6/8 · vw_alerta_estado'
+
+--  `validada_por` entra al final, junto a la aprobación, y `destinatarios`
+--  cuenta las filas de la tabla nueva. La vista pasa de 20 a 22 columnas y
+--  conserva sus 83 filas: los dos contadores se resuelven con subconsultas
+--  escalares sobre una tabla vacía.
+CREATE OR REPLACE VIEW core.vw_alerta_estado AS
+ SELECT a.id AS alerta_id,
+    a.codigo_alerta,
+    a.titulo,
+    a.prioridad_id,
+    a.nivel_alerta_id,
+    a.fecha_reporte,
+    pi.id AS proceso_id,
+    pi.orden AS paso,
+    d.nombre AS paso_nombre,
+    pi.estado_id,
+    e.codigo AS estado_codigo,
+    e.nombre AS estado_nombre,
+    e.es_final,
+    pi.ocurrido_en AS estado_desde,
+    a.es_validado_humano,
+    a.fecha_validacion,
+    a.fecha_remision,
+    a.aprobada_por,
+    a.aprobada_en,
+    a.visibilidad,
+    a.validada_por,
+    (SELECT count(*) FROM core.alerta_destinatario d2 WHERE d2.alerta_id = a.id) AS destinatarios
+   FROM core.alertas_tempranas a
+     LEFT JOIN LATERAL ( SELECT p.id,
+            p.tipo_origen,
+            p.caso_id,
+            p.codigo_caso_legado,
+            p.alerta_id,
+            p.codigo_reporte,
+            p.flujo_definicion_id,
+            p.estado_id,
+            p.usuario_id,
+            p.codigo_responsable_legado,
+            p.ocurrido_en,
+            p.finalizado_en,
+            p.orden,
+            p.nota,
+            p.codigo_legado,
+            p.fila_legado,
+            p.created_at,
+            p.updated_at,
+            p.created_by,
+            p.updated_by,
+            p.nivel_clasificacion
+           FROM core.proceso_instancia p
+          WHERE p.tipo_origen::text = 'alerta'::text AND p.alerta_id = a.id
+          ORDER BY p.orden DESC, p.ocurrido_en DESC NULLS LAST
+         LIMIT 1) pi ON true
+     LEFT JOIN core.flujo_estado e ON e.id = pi.estado_id
+     LEFT JOIN core.flujo_definicion d ON d.id = pi.flujo_definicion_id;
+
+COMMENT ON VIEW core.vw_alerta_estado IS
+    'Estado consolidado de cada alerta: su paso y estado vigentes, sus dos firmas de aprobación y su visibilidad. Desde el parche 23 expone también el autor de la validación previa (validada_por) y cuántos destinatarios nombrados tiene (destinatarios), que es lo que la pantalla necesita para saber si la alerta puede publicarse como sectorial';
+
+COMMENT ON COLUMN core.vw_alerta_estado.validada_por IS
+    'Autor de la validación previa del Sectorista; primera de las dos firmas de G21';
+
+COMMENT ON COLUMN core.vw_alerta_estado.destinatarios IS
+    'Número de destinatarios nombrados en core.alerta_destinatario. Una alerta con visibilidad sectorial necesita al menos uno';
+
+-- =====================================================================
+-- BLOQUE 7 · Comprobación
+-- =====================================================================
+\echo 'PARCHE 23 · bloque 7/8 · comprobación'
+
+DO $$
+DECLARE
+    v_cols      int;
+    v_view_cols int;
+    v_graves    int;
+    v_dest      bigint;
+    v_g21       text;
+BEGIN
+    SELECT count(*) INTO v_cols
+      FROM information_schema.columns
+     WHERE table_schema = 'core' AND table_name = 'alertas_tempranas';
+
+    SELECT count(*) INTO v_view_cols
+      FROM information_schema.columns
+     WHERE table_schema = 'core' AND table_name = 'vw_alerta_estado';
+
+    SELECT count(*) INTO v_graves
+      FROM core.cat_prioridades_alerta WHERE es_grave;
+
+    SELECT count(*) INTO v_dest FROM core.alerta_destinatario;
+
+    SELECT input_dispara->>'visibilidad' INTO v_g21
+      FROM config.guardrail_contract WHERE guardrail = 'G21';
+
+    IF v_cols <> 37 THEN
+        RAISE EXCEPTION 'PARCHE_23_VERIFICA: core.alertas_tempranas tiene % columnas, se esperaban 37', v_cols;
+    END IF;
+
+    IF v_view_cols <> 22 THEN
+        RAISE EXCEPTION 'PARCHE_23_VERIFICA: core.vw_alerta_estado tiene % columnas, se esperaban 22', v_view_cols;
+    END IF;
+
+    IF v_graves <> 2 THEN
+        RAISE EXCEPTION 'PARCHE_23_VERIFICA: hay % niveles graves, se esperaban 2', v_graves;
+    END IF;
+
+    IF v_g21 IS DISTINCT FROM 'ejecutiva' THEN
+        RAISE EXCEPTION 'PARCHE_23_VERIFICA: el contrato G21 usa «%», se esperaba «ejecutiva»', v_g21;
+    END IF;
+
+    RAISE NOTICE 'PARCHE 23 · alertas_tempranas: % columnas · vw_alerta_estado: % columnas · niveles graves: % · destinatarios: %',
+        v_cols, v_view_cols, v_graves, v_dest;
+END
+$$;
+
+--  Las 83 alertas siguen internas y sin firmas: el parche no inventa actos.
+DO $$
+DECLARE
+    v_no_internas bigint;
+    v_sin_fecha   bigint;
+BEGIN
+    SELECT count(*) INTO v_no_internas
+      FROM core.alertas_tempranas WHERE visibilidad <> 'interna';
+    SELECT count(*) INTO v_sin_fecha
+      FROM core.alertas_tempranas WHERE es_validado_humano AND fecha_validacion IS NULL;
+
+    IF v_no_internas <> 0 THEN
+        RAISE EXCEPTION 'PARCHE_23_VERIFICA: % alertas dejaron de ser internas', v_no_internas;
+    END IF;
+
+    RAISE NOTICE 'PARCHE 23 · alertas no internas: % · alertas con la bandera de validación pero sin fecha (esperado 83): %',
+        v_no_internas, v_sin_fecha;
+END
+$$;
+
+-- =====================================================================
+-- BLOQUE 8 · Cierre
+-- =====================================================================
+\echo 'PARCHE 23 · bloque 8/8 · cierre'
+
+COMMIT;
+
+\echo 'PARCHE 23 · aplicado'
+
+-- ---------------------------------------------------------------------
+--  BLOQUE B.19 · Parche 24 · los siete comentarios del destinatario
+--  Fuente: docs/PARCHE_24_COMENTARIOS_DESTINATARIO.sql (114 líneas)
+--  Errores: abortan la ejecución (ON_ERROR_STOP on)
+--    El parche 23 describió cuatro de las once columnas de
+--    `core.alerta_destinatario`; las siete restantes eran las únicas del
+--    modelo sin descripción, y hacían disparar la guardia final del
+--    parche 19. Este bloque solo agrega esos siete comentarios y
+--    comprueba sus propias columnas, sin replicar el candado global que
+--    volvió no reejecutable al 19.
+-- ---------------------------------------------------------------------
+-- =====================================================================
+--  PARCHE 24 · LOS SIETE COMENTARIOS QUE FALTABAN EN EL DESTINATARIO
+-- =====================================================================
+--  QUÉ CIERRA
+--  El parche 23 creó `core.alerta_destinatario` y describió cuatro de
+--  sus once columnas (`usuario_id`, `cargo`, `canal`, `notificado_en`).
+--  Las otras siete —`id`, `alerta_id`, `motivo`, `created_at`,
+--  `updated_at`, `created_by`, `updated_by`— quedaron sin descripción.
+--  Hoy son las ÚNICAS siete columnas del modelo entero sin comentario.
+--  Este parche solo agrega esos siete comentarios: ninguna otra
+--  sentencia, ningún cambio de estructura.
+--
+--  POR QUÉ UN PARCHE APARTE Y NO EDITAR EL 23
+--  El 23 ya está aplicado y se reejecuta entero cuando se levanta un
+--  entorno nuevo. Añadirle sentencias cambiaría el contenido de un
+--  parche cerrado; uno nuevo deja el rastro de qué se corrigió y cuándo.
+--  Es el mismo criterio que se siguió con el parche 19.
+--
+--  EFECTO SECUNDARIO BUSCADO: EL PARCHE 19 VUELVE A SER REEJECUTABLE
+--  El parche 19 termina con una guardia que aborta si queda una sola
+--  columna del modelo sin comentario. Como las siete de este parche
+--  existían, esa guardia hoy dispara y revierte al 19 entero. Al
+--  describirlas aquí, el 19 vuelve a cerrar limpio. Por eso este parche
+--  debe correr DESPUÉS del 19: si corriera antes, la guardia del 19
+--  seguiría encontrando columnas propias del 23 creadas después.
+--
+--  IDEMPOTENTE
+--  `COMMENT ON` sobrescribe el comentario anterior, así que se puede
+--  ejecutar cuantas veces sea necesario sin error ni duplicados.
+--
+--  CÓMO SE APLICA
+--      psql -U avisa -d avisa -v ON_ERROR_STOP=1 \
+--          -f docs/PARCHE_24_COMENTARIOS_DESTINATARIO.sql
+-- =====================================================================
+
+\echo 'PARCHE 24 · comentarios restantes de core.alerta_destinatario'
+
+BEGIN;
+
+-- ---------------------------------------------------------------------
+-- 1 · Columnas de identidad y relación
+-- ---------------------------------------------------------------------
+COMMENT ON COLUMN core.alerta_destinatario.id IS
+    'Identificador interno de la fila';
+COMMENT ON COLUMN core.alerta_destinatario.alerta_id IS
+    'Alerta a la que pertenece el destinatario, según core.alertas_tempranas. Al borrar la alerta se borran sus destinatarios';
+
+-- ---------------------------------------------------------------------
+-- 2 · Columna de negocio
+-- ---------------------------------------------------------------------
+COMMENT ON COLUMN core.alerta_destinatario.motivo IS
+    'Motivo o causa del aviso, cuando el canal no basta para explicar por qué se remite a esta persona o cargo';
+
+-- ---------------------------------------------------------------------
+-- 3 · Bloque estándar de auditoría
+-- ---------------------------------------------------------------------
+COMMENT ON COLUMN core.alerta_destinatario.created_at IS
+    'Momento en que se creó el registro';
+COMMENT ON COLUMN core.alerta_destinatario.updated_at IS
+    'Momento de la última modificación del registro';
+COMMENT ON COLUMN core.alerta_destinatario.created_by IS
+    'Usuario que registró el destinatario';
+COMMENT ON COLUMN core.alerta_destinatario.updated_by IS
+    'Usuario que realizó la última modificación del registro';
+
+-- ---------------------------------------------------------------------
+-- 4 · Verificación
+--     La guardia comprueba solo las columnas de ESTE parche. El recuento
+--     global del modelo se informa, no bloquea: el candado global es lo
+--     que volvió no reejecutable al parche 19 y aquí no se replica.
+-- ---------------------------------------------------------------------
+DO $p24_verify$
+DECLARE
+    v_propias integer;
+    v_global  integer;
+BEGIN
+    SELECT count(*) INTO v_propias
+      FROM pg_attribute a
+      JOIN pg_class c ON c.oid = a.attrelid
+      JOIN pg_namespace n ON n.oid = c.relnamespace
+     WHERE n.nspname = 'core'
+       AND c.relname = 'alerta_destinatario'
+       AND a.attnum > 0
+       AND NOT a.attisdropped
+       AND NOT EXISTS (
+           SELECT 1 FROM pg_description d
+            WHERE d.objoid = c.oid AND d.objsubid = a.attnum
+       );
+
+    IF v_propias <> 0 THEN
+        RAISE EXCEPTION 'quedan % columnas de core.alerta_destinatario sin comentario', v_propias;
+    END IF;
+
+    SELECT count(*) INTO v_global
+      FROM pg_attribute a
+      JOIN pg_class c ON c.oid = a.attrelid
+      JOIN pg_namespace n ON n.oid = c.relnamespace
+     WHERE c.relkind IN ('r', 'p')
+       AND n.nspname NOT IN ('pg_catalog', 'information_schema', 'public', 'legacy')
+       AND NOT EXISTS (SELECT 1 FROM pg_inherits i WHERE i.inhrelid = c.oid)
+       AND a.attnum > 0
+       AND NOT a.attisdropped
+       AND NOT EXISTS (
+           SELECT 1 FROM pg_description d
+            WHERE d.objoid = c.oid AND d.objsubid = a.attnum
+       );
+
+    RAISE NOTICE 'core.alerta_destinatario comentada · columnas del modelo sin comentario: %', v_global;
+END
+$p24_verify$;
+
+COMMIT;
+
+\echo 'PARCHE 24 · aplicado'

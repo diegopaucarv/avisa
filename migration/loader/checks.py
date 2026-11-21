@@ -18,8 +18,9 @@ import asyncpg
 # (etiqueta, SQL que devuelve un escalar, valor esperado)
 # El valor esperado puede ser un rango (mínimo, máximo) cuando el número depende
 # del momento de la comprobación: el cargador escribe 34 filas en
-# `core.usuario_roles` y el parche 16 añade 1 (el rol de administrador y oficial
-# de datos personales). Verificar antes o después del parche 16 es legítimo.
+# `core.usuario_roles`, el parche 16 añade 1 (el rol de administrador y oficial
+# de datos personales) y el parche 21 añade otra (el rol `direccion_oaipcs` a la
+# Directora). Verificar antes o después de esos parches es legítimo.
 CONTEO: tuple[tuple[str, str, int | tuple[int, int]], ...] = (
     ("regiones", "SELECT count(*) FROM core.regiones", 25),
     ("provincias", "SELECT count(*) FROM core.provincias", 70),
@@ -28,7 +29,7 @@ CONTEO: tuple[tuple[str, str, int | tuple[int, int]], ...] = (
     ("entidades", "SELECT count(*) FROM core.entidades", 23),
     ("cat_unidades_organicas", "SELECT count(*) FROM core.cat_unidades_organicas", 66),
     ("usuarios (31 + admin)", "SELECT count(*) FROM core.usuarios", 32),
-    ("usuario_roles", "SELECT count(*) FROM core.usuario_roles", (34, 35)),
+    ("usuario_roles", "SELECT count(*) FROM core.usuario_roles", (34, 36)),
     ("usuario_territorio", "SELECT count(*) FROM core.usuario_territorio", 25),
     ("actores", "SELECT count(*) FROM core.actores", 1160),
     ("actor_datos_personales", "SELECT count(*) FROM core.actor_datos_personales", 847),

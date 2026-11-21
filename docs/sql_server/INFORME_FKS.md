@@ -8,17 +8,17 @@
 | Archivo | Contenido |
 |---|---|
 | `docs/sql_server/AVISA_V10_ESQUEMA_SIN_FK.sql` | Esquema completo sin claves ajenas |
-| `docs/sql_server/AVISA_V10_CLAVES_AJENAS.sql` | Las 526 claves ajenas como `ALTER TABLE … ADD CONSTRAINT` |
+| `docs/sql_server/AVISA_V10_CLAVES_AJENAS.sql` | Las 532 claves ajenas como `ALTER TABLE … ADD CONSTRAINT` |
 
 ## Cuántas y de dónde salieron
 
 | Origen en el SQL | Claves ajenas |
 |---|---:|
-| `CREATE TABLE` · en la definición de la columna | 479 |
+| `CREATE TABLE` · en la definición de la columna | 483 |
 | `CREATE TABLE` · a nivel de tabla | 10 |
 | `ALTER TABLE … ADD CONSTRAINT … FOREIGN KEY` | 11 |
-| `ALTER TABLE … ADD COLUMN … REFERENCES` | 26 |
-| **Total único** | **526** |
+| `ALTER TABLE … ADD COLUMN … REFERENCES` | 28 |
+| **Total único** | **532** |
 
 El DDL corre dos veces en el archivo unificado, así que **452** claves ajenas estaban repetidas y se descartaron.
 
@@ -33,7 +33,7 @@ El DDL corre dos veces en el archivo unificado, así que **452** claves ajenas e
 | `community` | 2 |
 | `config` | 5 |
 | `consultation` | 6 |
-| `core` | 208 |
+| `core` | 214 |
 | `ctx` | 19 |
 | `domain` | 16 |
 | `economic` | 3 |
@@ -96,4 +96,4 @@ sin ellas la columna quedaría apuntando a una tabla inexistente.
 ## Comprobaciones
 
 - Todas las tablas padre existen en el archivo: el bloque de claves ajenas se puede aplicar tal cual.
-- Conteo bruto: 495 `CREATE TABLE` revisadas y 978 ediciones aplicadas al texto.
+- Conteo bruto: 496 `CREATE TABLE` revisadas y 984 ediciones aplicadas al texto.

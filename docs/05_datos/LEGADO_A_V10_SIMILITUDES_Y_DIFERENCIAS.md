@@ -66,8 +66,8 @@ memorizarlos: están aquí para consultarlos cuando aparezcan.
 
 | Aspecto                     | Sistema anterior (2026)                                                                                                                 | v10                                                                                                          |
 | --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| **Plataforma**              | Google Sheets y Apps Script: 244 funciones en el servidor y 450 nombres en el navegador (158 escritos una vez y 292 redefinidos encima) | PostgreSQL 16 con dos extensiones (mapas y vectores): 289 tablas físicas, 265 lógicas y 610 llaves foráneas  |
-| **Modelo de datos**         | 86 hojas planas (75 con datos), sin llaves foráneas ni reglas de unicidad; el tipo de cada valor se adivina al leerlo                   | 265 tablas lógicas con llaves foráneas, reglas de validación, catálogos cerrados y seguridad por fila        |
+| **Plataforma**              | Google Sheets y Apps Script: 244 funciones en el servidor y 450 nombres en el navegador (158 escritos una vez y 292 redefinidos encima) | PostgreSQL 16 con dos extensiones (mapas y vectores): 290 tablas físicas, 266 lógicas y 616 llaves foráneas  |
+| **Modelo de datos**         | 86 hojas planas (75 con datos), sin llaves foráneas ni reglas de unicidad; el tipo de cada valor se adivina al leerlo                   | 266 tablas lógicas con llaves foráneas, reglas de validación, catálogos cerrados y seguridad por fila        |
 | **Nivel de detalle**        | Una fila por fila de hoja: el mismo conflicto se escribe hasta cuatro veces con distinto detalle                                        | Un concepto por tabla: caso, alerta, demanda, hecho, actor y compromiso son cosas distintas                  |
 | **Identidad**               | Códigos de texto (`ID_*`); el DNI hace de identificador de persona                                                                      | Identificador interno + el código original conservado + un identificador único generado cuando no hay código |
 | **Acceso**                  | Una clave numérica guardada en una hoja; los permisos se aplican en la pantalla                                                         | Inicio de sesión único, permisos por rol y seguridad por fila, con tres perfiles                             |
@@ -251,9 +251,9 @@ análisis de conflictividad existen vacías, y su contenido terminó en
 | `forecast`, `impact`, `economic`, `consultation`, `community`, `domain`, `mype`, `pesca`, `proteccion`, `staging` |              26 | Módulos previstos para los próximos cinco años                        | catálogos ya creados                  |
 
 Los números entre paréntesis son tablas físicas: una tabla dividida en partes
-cuenta una vez como tabla lógica y varias como tabla física. Con `core` (102) y
+cuenta una vez como tabla lógica y varias como tabla física. Con `core` (103) y
 `audit` (1), que no figuran aquí por ser el núcleo compartido, la suma da las
-**265 tablas lógicas** de §11.1.
+**266 tablas lógicas** de §11.1.
 
 Además hay un grupo de **tablas creadas para que los datos del sistema anterior
 pudieran aterrizar**: `core.log_accesos`, `core.mesas_dialogo`,
@@ -361,7 +361,7 @@ documento: se consulta `legacy.*` y se cuenta con `count(*)`. Esa copia es la
 
 ## 11. Estadística del sistema
 
-**Medido el 2026-11-19** sobre la base `avisa` (PostgreSQL 16.14 con PostGIS
+**Medido el 2026-11-20** sobre la base `avisa` (PostgreSQL 16.14 con PostGIS
 3.7 y pgvector 0.8.3), contando fila por fila con `count(*)`. No se usó la
 estimación aproximada que guarda el motor (`pg_class.reltuples`) porque en esta
 base está sin actualizar, con valor `-1`, y habría dado ceros falsos. Todo lo que
@@ -370,24 +370,24 @@ gráficos de esta sección y escribe la tabla de §11.5.
 
 ### 11.1 Los dos sistemas en números
 
-| Dimensión                      | Sistema anterior (`legacy`)                           | v10                                                                                   |
-| ------------------------------ | ----------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| Esquemas (carpetas)            | 1                                                     | 28 (27 con tablas; `analytics` solo tiene vistas; `public` es de PostGIS y no cuenta) |
-| Tablas físicas                 | 87                                                    | 289 (24 son partes de tablas divididas)                                               |
-| Tablas lógicas                 | 87                                                    | 265                                                                                   |
-| Columnas                       | 807                                                   | 2 511                                                                                 |
-| Filas                          | 4 729                                                 | 13 352                                                                                |
-| Con datos / vacías             | 76 / 11                                               | 110 / 179 físicas (155 lógicas)                                                       |
-| Llaves primarias               | 87                                                    | 288                                                                                   |
-| Llaves foráneas                | **0**                                                 | **610**                                                                               |
-| Reglas de unicidad (UNIQUE)    | **0**                                                 | 143                                                                                   |
-| Reglas de validación (CHECK)   | **0**                                                 | 347                                                                                   |
-| Índices                        | 87                                                    | 757 (sin contar los internos de PostgreSQL ni los 6 de vistas materializadas)         |
-| Vistas y vistas materializadas | **0**                                                 | 36 (30 + 6)                                                                           |
-| Tablas con seguridad por fila  | **0**                                                 | 87 (todas activas también para el dueño de la tabla)                                  |
-| Políticas de seguridad         | **0**                                                 | 540                                                                                   |
-| Triggers                       | **0**                                                 | 66                                                                                    |
-| Tipos de dato distintos        | 3 (2 en las hojas y la fecha de carga del manifiesto) | 17                                                                                    |
+| Dimensión                      | Sistema anterior (`legacy`)                           | v10                                                                          |
+| ------------------------------ | ----------------------------------------------------- | ---------------------------------------------------------------------------- |
+| Esquemas (carpetas)            | 1                                                     | 27 (26 con tablas; `analytics` solo tiene vistas)                            |
+| Tablas físicas                 | 87                                                    | 290 (24 son partes de tablas divididas)                                      |
+| Tablas lógicas                 | 87                                                    | 266                                                                          |
+| Columnas                       | 807                                                   | 2 527 con particiones (2 161 en tablas lógicas)                              |
+| Filas                          | 4 729                                                 | 13 355                                                                       |
+| Con datos / vacías             | 76 / 11                                               | 110 / 180 físicas (156 lógicas)                                              |
+| Llaves primarias               | 87                                                    | 289                                                                          |
+| Llaves foráneas                | **0**                                                 | **616**                                                                      |
+| Reglas de unicidad (UNIQUE)    | **0**                                                 | 143                                                                          |
+| Reglas de validación (CHECK)   | **0**                                                 | 360                                                                          |
+| Índices                        | 87                                                    | 767 (criterio del script [11], detallado abajo; excluye internos y matviews) |
+| Vistas y vistas materializadas | **0**                                                 | 37 (31 + 6), con 313 columnas                                                |
+| Tablas con seguridad por fila  | **0**                                                 | 91 (52 en `core`; todas activas también para el dueño de la tabla)           |
+| Políticas de seguridad         | **0**                                                 | 556 (331 en `core`)                                                          |
+| Triggers                       | **0**                                                 | 69                                                                           |
+| Tipos de dato distintos        | 3 (2 en las hojas y la fecha de carga del manifiesto) | 17                                                                           |
 
 ![Sistema anterior y v10, lado a lado](../img/delta_estructura.svg)
 
@@ -399,18 +399,28 @@ propia tabla registro. Los dos tipos de dato de las hojas son `text` y el `int4`
 hoja. Las **76 tablas con datos son 75 hojas más la tabla registro**; las 11 vacías
 son hojas que nunca se usaron (§4).
 
-**Dos detalles que la tabla deja ver.** Hay 288 llaves primarias para 289 tablas
+**Dos detalles que la tabla deja ver.** Hay 289 llaves primarias para 290 tablas
 físicas: la única sin llave primaria es `core.cronologia_vinculos`, que es una
-tabla de vínculos entre registros. Y las 610 llaves foráneas se reparten en 208 en
+tabla de vínculos entre registros. Y las 616 llaves foráneas se reparten en 214 en
 `core`, 67 en `ctx`, 61 en `kag`, 48 en `chat`, 31 en `agent`, 25 en `qda` y 170
 en el resto.
 
-**De dónde salen los números de la v10.** Las 13 352 filas se reparten así: `core`
-6 903 · `kag` 3 187 · `audit` 3 088 · `config` 68 · `ctx` 28 · `policy` 15 ·
+**De dónde salen los números de la v10.** Las 13 355 filas se reparten así: `core`
+6 906 · `kag` 3 187 · `audit` 3 088 · `config` 68 · `ctx` 28 · `policy` 15 ·
 `domain` 15 · `analisis` 14 · `model` 12 · `territorio` 9 · `ref` 5 · `agent` 5 ·
 `ind` 3. Y hay **13 esquemas con tablas que hoy tienen cero filas**: `avisa`,
 `chat`, `community`, `consultation`, `economic`, `forecast`, `impact`, `lex`,
 `mype`, `pesca`, `proteccion`, `qda` y `staging`.
+
+**Cómo se cuentan los índices.** El criterio es el de `migration/reporte_estadistica.py`
+(el script [11]): cuenta las filas de `pg_index` cuyo `indrelid` es una tabla con
+`relkind IN ('r','p')` en los esquemas del modelo, de modo que quedan fuera los
+índices internos de PostgreSQL —viven en `pg_catalog`— y los de las 6 vistas
+materializadas, que no son tablas. Con ese criterio hoy son **767**; el parche 21
+sumó uno, el parcial sobre `core.alertas_tempranas.aprobada_por`, y el 22 otro, el
+parcial `core.ix_alertas_visibilidad_no_interna`; el 23 suma cinco, los cuatro
+índices de `core.alerta_destinatario` —sus dos únicos y el de la alerta— y el
+parcial sobre `core.alertas_tempranas.validada_por`.
 
 **Lo que el gráfico muestra y no suele verse.** El sistema anterior no es «un
 modelo más simple»: es una base **sin una sola relación**. Cero llaves foráneas,
@@ -441,14 +451,14 @@ tendrá tabla mientras el RADAR siga diferido.
 
 El sistema anterior guarda **todo como texto** salvo `fila_n`: no hay fechas,
 números, valores verdadero/falso ni referencias. La v10 usa **17 tipos distintos**
-repartidos en 2 511 columnas.
+repartidos en 2 527 columnas.
 
 | Tipo             | Columnas | Para qué sirve                                       |
 | ---------------- | -------: | ---------------------------------------------------- |
-| `varchar`        |      642 | Texto corto y acotado (nombres, códigos, estados)    |
-| `uuid`           |      583 | Identificadores únicos, la mayoría de las llaves     |
+| `varchar`        |      643 | Texto corto y acotado (nombres, códigos, estados)    |
+| `uuid`           |      584 | Identificadores únicos, la mayoría de las llaves     |
 | `int2`           |      246 | Números pequeños (ordinales, niveles, códigos)       |
-| `timestamptz`    |      208 | Fecha y hora con zona horaria                        |
+| `timestamptz`    |      209 | Fecha y hora con zona horaria                        |
 | `int4`           |      150 | Enteros                                              |
 | `text`           |      139 | Texto libre, sin límite                              |
 | `bool`           |      121 | Verdadero/falso                                      |
@@ -463,8 +473,8 @@ repartidos en 2 511 columnas.
 | `vector`         |        1 | Huella numérica para búsqueda semántica              |
 
 Los dos tipos que más crecieron son los dos que el sistema anterior no tenía en
-absoluto: **identificadores** y **fechas**. `uuid` aparece 583 veces porque cada
-entidad y cada relación tiene su propia llave; `timestamptz` más `date` suman 313
+absoluto: **identificadores** y **fechas**. `uuid` aparece 584 veces porque cada
+entidad y cada relación tiene su propia llave; `timestamptz` más `date` suman 314
 columnas de tiempo, contra cero antes.
 
 **Por qué importa.** El tipo de dato es donde vive la validación que antes no
@@ -476,7 +486,7 @@ dejó de aceptar cualquier texto.
 
 ![Estructura por esquema](../img/delta_esquemas.svg)
 
-La estructura no se reparte igual que los datos. `core` tiene **102 tablas y 839
+La estructura no se reparte igual que los datos. `core` tiene **102 tablas y 842
 columnas**; le siguen `agent` **23 físicas y 304 columnas** (11 lógicas: 12 de las
 23 son pedazos de tablas divididas por mes), `kag` **30 y 205**, `chat` **14 y
 148**, `ctx` **16 y 139** (10 lógicas) y `territorio` **16 y 100**.
@@ -487,9 +497,9 @@ una tabla particionada por mes más su tabla de rechazos. No guarda información
 sistema: guarda lo que llegó y todavía no se procesó.
 
 `analytics` no tiene ni una tabla propia: sus **17 vistas y 5 vistas materializadas**
-son la capa de lectura. El resto de vistas se reparte en `core` (4), `config` (2),
+son la capa de lectura. El resto de vistas se reparte en `core` (5), `config` (2),
 `ref` (2), `mype` (2 más 1 materializada), `lex` (1), `pesca` (1) y `territorio` (1),
-para 30 vistas y 6 materializadas en total.
+para 31 vistas y 6 materializadas en total.
 
 Dicho al revés: **`kag` y `audit` tienen muchas filas pero pocas tablas**. Su peso
 está en los datos, no en la estructura. Quien dimensione el sistema contando
@@ -507,94 +517,95 @@ edita a mano: se regenera con el script descrito en §11.7.
   no tiene lugar.
 
 <!-- INICIO TABLA 86 HOJAS -->
-| # | Hoja del sistema anterior | Clase original | Clase actual | Columnas | Filas | Dónde vive hoy |
-| --: | --- | :---: | :---: | ---: | ---: | --- |
-| 1 | `respuestas_de_formulario_1` | B | B | 23 | 1 | `core.alertas_tempranas`, `core.actores` |
-| 2 | `bridge_capacitacion_participant` | D | **B** | 5 | 9 | `core.capacitacion_participantes` |
-| 3 | `dim_capacitaciones` | D | **B** | 20 | 1 | `core.capacitaciones` |
-| 4 | `fact_analisis_casos` | C | C | 26 | 1 | `core.documentos` |
-| 5 | `bridge_alerta_recurso` | D | **B** | 3 | 32 | `core.alerta_especies` |
-| 6 | `bridge_caso_actorestado` | B | B | 3 | 1 | `core.casos_actores` |
-| 7 | `log_accesos` | D | **B** | 5 | 857 | `core.log_accesos` |
-| 8 | `fact_casos` | B | B | 29 | 35 | `core.casos` |
-| 9 | `fact_proceso_caso` | D | **B** | 10 | 36 | `core.proceso_instancia` |
-| 10 | `fact_red_radar` | D | **B** | 6 | 1 | diferido a `territorio.*` por D18 |
-| 11 | `fact_nodo` | D | **B** | 9 | 1 | diferido a `territorio.*` por D18 |
-| 12 | `fact_proceso_reporte` | D | **B** | 8 | 99 | `core.proceso_instancia` |
-| 13 | `dim_paso_proceso_caso` | D | **B** | 6 | 4 | `core.flujo_definicion` |
-| 14 | `dim_paso_proceso` | D | **B** | 5 | 3 | `core.flujo_definicion` |
-| 15 | `fact_historial_estado` | B | B | 10 | 27 | `core.caso_estado_historial` |
-| 16 | `dim_tipo_cambio` | C | C | 3 | 6 | — |
-| 17 | `log_envios` | B | B | 13 | 17 | `core.notificaciones` |
-| 18 | `dim_alertas` | B | B | 31 | 83 | `core.alertas_tempranas` |
-| 19 | `dim_reporte_rapido` | C | C | 25 | 1 | `core.documentos` |
-| 20 | `dim_climasocial` | C | C | 28 | 7 | `core.documentos` |
-| 21 | `dim_climasocial_focalizado` | C | C | 26 | 6 | `core.documentos` |
-| 22 | `dim_riesgos` | A | A | 2 | 3 | `core.cat_niveles_riesgo` |
-| 23 | `dim_locales` | D | **B** | 15 | 27 | `core.locales` |
-| 24 | `dim_destinatarios_fijos` | D | **B** | 7 | 4 | `core.suscripcion_notificacion` |
-| 25 | `dim_recurso_pesca` | A | A | 6 | 37 | `core.cat_especies` |
-| 26 | `dim_estado_proceso` | B | B | 4 | 5 | `core.flujo_estado` |
-| 27 | `bridge_caso_recurso` | X | X | 3 | 0 | — |
-| 28 | `bridge_caso_demandas` | A | A | 5 | 12 | — |
-| 29 | `bridge_alerta_demandas` | B | B | 5 | 231 | `core.demandas` |
-| 30 | `bridge_alerta_actorestado` | A | A | 3 | 5 | `core.alertas_actores` |
-| 31 | `dim_tipo_tematica` | A | A | 3 | 7 | `core.cat_tematicas` |
-| 32 | `dim_demandas` | B | B | 9 | 325 | `core.demandas` |
-| 33 | `dim_anuncios_acuerdos` | X | X | 7 | 0 | — |
-| 34 | `dim_nivel_alertas` | B | B | 4 | 4 | — |
-| 35 | `bridge_caso_descencadenantes` | C | C | 4 | 1 | `documentos.contenido_json` |
-| 36 | `bridge_caso_impulsores` | C | C | 4 | 5 | `documentos.contenido_json` |
-| 37 | `bridge_caso_causas` | C | C | 4 | 4 | `documentos.contenido_json` |
-| 38 | `bridge_caso_medios` | C | C | 7 | 4 | `documentos.contenido_json` |
-| 39 | `bridge_actor_grupo` | X | X | 3 | 0 | `kag.aristas` |
-| 40 | `bridge_caso_posiciones` | X | X | 5 | 0 | — |
-| 41 | `bridge_caso_intereses` | X | X | 5 | 0 | `kag.actor_profile_attribute` |
-| 42 | `bridge_caso_necesidades` | X | X | 5 | 0 | — |
-| 43 | `bridge_caso_ineteres_comunes` | X | X | 4 | 0 | — |
-| 44 | `dim_descencadenantes` | X | X | 2 | 0 | — |
-| 45 | `dim_impulsores` | X | X | 2 | 0 | — |
-| 46 | `dim_causas` | X | X | 2 | 0 | — |
-| 47 | `dim_medios` | X | X | 5 | 0 | — |
-| 48 | `dim_tipo_proceso` | B | B | 6 | 4 | `core.cat_tipos_documento` |
-| 49 | `dim_acciones_hitos` | B | B | 13 | 8 | `core.plan_acciones` |
-| 50 | `dim_hitos` | B | B | 13 | 12 | `core.hitos_compromiso` |
-| 51 | `dim_redaccion` | C | C | 13 | 51 | `core.documentos` |
-| 52 | `dim_coordinacion_tecnica` | C | C | 13 | 4 | `core.documentos` |
-| 53 | `dim_mesas_grupos` | D | **B** | 23 | 21 | `core.mesas_dialogo`, `core.mesa_miembros` |
-| 54 | `dim_organizacion` | A | A | 16 | 224 | `core.actores`, `core.organizaciones` |
-| 55 | `dim_tipo_org` | B | B | 2 | 4 | `core.cat_tipos_actor` |
-| 56 | `dim_actores` | B | B | 16 | 828 | `core.actores` |
-| 57 | `dim_actores_estado` | B | B | 16 | 108 | `core.actores` |
-| 58 | `fact_hechos_casos` | B | B | 13 | 80 | `core.caso_cronologia` |
-| 59 | `bridge_caso_depto` | A | A | 6 | 87 | `core.caso_distritos` |
-| 60 | `bridge_caso_actor` | B | B | 3 | 80 | `core.casos_actores` |
-| 61 | `bridge_radar_actor` | D | **B** | 4 | 1 | diferido a `territorio.*` por D18 |
-| 62 | `bridge_nodo_actor` | D | **B** | 4 | 3 | diferido a `territorio.*` por D18 |
-| 63 | `bridge_caso_actor_estado` | B | B | 3 | 61 | `core.casos_actores` |
-| 64 | `bridge_alerta_actor` | A | A | 6 | 162 | `core.alertas_actores` |
-| 65 | `bridge_reporte_actor` | D | **B** | 5 | 1 | `core.documento_actores` |
-| 66 | `bridge_reporte_actor_estado` | D | **B** | 5 | 1 | `core.documento_actores` |
-| 67 | `bridge_clima_actor` | D | **B** | 5 | 1 | `core.documento_actores` |
-| 68 | `bridge_clima_actor_estado` | D | **B** | 5 | 1 | `core.documento_actores` |
-| 69 | `bridge_sectorista_departamento` | D | **B** | 3 | 27 | `core.usuario_territorio` |
-| 70 | `dim_departamentos` | A | A | 11 | 27 | `core.regiones` |
-| 71 | `dim_provincias` | A | A | 8 | 70 | `core.provincias` |
-| 72 | `dim_distritos` | A | A | 11 | 698 | `core.distritos` |
-| 73 | `dim_tipo_caso` | B | B | 3 | 4 | `core.cat_tematicas` |
-| 74 | `dim_rol_actor` | A | A | 3 | 4 | `core.cat_roles_actor` |
-| 75 | `dim_tipo_sector` | A | A | 3 | 3 | `core.cat_subsectores` |
-| 76 | `dim_tipo_actor` | A | A | 2 | 3 | `core.cat_tipos_actor` |
-| 77 | `dim_tipo_actor_radar` | D | D | 2 | 3 | — |
-| 78 | `dim_perfil` | B | B | 2 | 3 | — |
-| 79 | `dim_intervencion` | D | **B** | 2 | 4 | `core.cat_ciclos_intervencion` |
-| 80 | `dim_sectoristas` | B | B | 13 | 15 | `core.usuarios` |
-| 81 | `dim_punto_focal` | B | B | 12 | 17 | — |
-| 82 | `dim_autoridades` | B | B | 12 | 2 | — |
-| 83 | `dim_responsable` | D | D | 4 | 3 | — |
-| 84 | `dim_entidad_responsable` | B | B | 5 | 23 | `core.actores` |
-| 85 | `dim_area_responsable` | B | B | 5 | 66 | `core.cat_unidades_organicas` |
-| 86 | `dim_unidades_organicas_responsa` | B | B | 6 | 27 | `core.cat_unidades_organicas` |
+
+|   # | Hoja del sistema anterior         | Clase original | Clase actual | Columnas | Filas | Dónde vive hoy                             |
+| --: | --------------------------------- | :------------: | :----------: | -------: | ----: | ------------------------------------------ |
+|   1 | `respuestas_de_formulario_1`      |       B        |      B       |       23 |     1 | `core.alertas_tempranas`, `core.actores`   |
+|   2 | `bridge_capacitacion_participant` |       D        |    **B**     |        5 |     9 | `core.capacitacion_participantes`          |
+|   3 | `dim_capacitaciones`              |       D        |    **B**     |       20 |     1 | `core.capacitaciones`                      |
+|   4 | `fact_analisis_casos`             |       C        |      C       |       26 |     1 | `core.documentos`                          |
+|   5 | `bridge_alerta_recurso`           |       D        |    **B**     |        3 |    32 | `core.alerta_especies`                     |
+|   6 | `bridge_caso_actorestado`         |       B        |      B       |        3 |     1 | `core.casos_actores`                       |
+|   7 | `log_accesos`                     |       D        |    **B**     |        5 |   857 | `core.log_accesos`                         |
+|   8 | `fact_casos`                      |       B        |      B       |       29 |    35 | `core.casos`                               |
+|   9 | `fact_proceso_caso`               |       D        |    **B**     |       10 |    36 | `core.proceso_instancia`                   |
+|  10 | `fact_red_radar`                  |       D        |    **B**     |        6 |     1 | diferido a `territorio.*` por D18          |
+|  11 | `fact_nodo`                       |       D        |    **B**     |        9 |     1 | diferido a `territorio.*` por D18          |
+|  12 | `fact_proceso_reporte`            |       D        |    **B**     |        8 |    99 | `core.proceso_instancia`                   |
+|  13 | `dim_paso_proceso_caso`           |       D        |    **B**     |        6 |     4 | `core.flujo_definicion`                    |
+|  14 | `dim_paso_proceso`                |       D        |    **B**     |        5 |     3 | `core.flujo_definicion`                    |
+|  15 | `fact_historial_estado`           |       B        |      B       |       10 |    27 | `core.caso_estado_historial`               |
+|  16 | `dim_tipo_cambio`                 |       C        |      C       |        3 |     6 | —                                          |
+|  17 | `log_envios`                      |       B        |      B       |       13 |    17 | `core.notificaciones`                      |
+|  18 | `dim_alertas`                     |       B        |      B       |       31 |    83 | `core.alertas_tempranas`                   |
+|  19 | `dim_reporte_rapido`              |       C        |      C       |       25 |     1 | `core.documentos`                          |
+|  20 | `dim_climasocial`                 |       C        |      C       |       28 |     7 | `core.documentos`                          |
+|  21 | `dim_climasocial_focalizado`      |       C        |      C       |       26 |     6 | `core.documentos`                          |
+|  22 | `dim_riesgos`                     |       A        |      A       |        2 |     3 | `core.cat_niveles_riesgo`                  |
+|  23 | `dim_locales`                     |       D        |    **B**     |       15 |    27 | `core.locales`                             |
+|  24 | `dim_destinatarios_fijos`         |       D        |    **B**     |        7 |     4 | `core.suscripcion_notificacion`            |
+|  25 | `dim_recurso_pesca`               |       A        |      A       |        6 |    37 | `core.cat_especies`                        |
+|  26 | `dim_estado_proceso`              |       B        |      B       |        4 |     5 | `core.flujo_estado`                        |
+|  27 | `bridge_caso_recurso`             |       X        |      X       |        3 |     0 | —                                          |
+|  28 | `bridge_caso_demandas`            |       A        |      A       |        5 |    12 | —                                          |
+|  29 | `bridge_alerta_demandas`          |       B        |      B       |        5 |   231 | `core.demandas`                            |
+|  30 | `bridge_alerta_actorestado`       |       A        |      A       |        3 |     5 | `core.alertas_actores`                     |
+|  31 | `dim_tipo_tematica`               |       A        |      A       |        3 |     7 | `core.cat_tematicas`                       |
+|  32 | `dim_demandas`                    |       B        |      B       |        9 |   325 | `core.demandas`                            |
+|  33 | `dim_anuncios_acuerdos`           |       X        |      X       |        7 |     0 | —                                          |
+|  34 | `dim_nivel_alertas`               |       B        |      B       |        4 |     4 | —                                          |
+|  35 | `bridge_caso_descencadenantes`    |       C        |      C       |        4 |     1 | `documentos.contenido_json`                |
+|  36 | `bridge_caso_impulsores`          |       C        |      C       |        4 |     5 | `documentos.contenido_json`                |
+|  37 | `bridge_caso_causas`              |       C        |      C       |        4 |     4 | `documentos.contenido_json`                |
+|  38 | `bridge_caso_medios`              |       C        |      C       |        7 |     4 | `documentos.contenido_json`                |
+|  39 | `bridge_actor_grupo`              |       X        |      X       |        3 |     0 | `kag.aristas`                              |
+|  40 | `bridge_caso_posiciones`          |       X        |      X       |        5 |     0 | —                                          |
+|  41 | `bridge_caso_intereses`           |       X        |      X       |        5 |     0 | `kag.actor_profile_attribute`              |
+|  42 | `bridge_caso_necesidades`         |       X        |      X       |        5 |     0 | —                                          |
+|  43 | `bridge_caso_ineteres_comunes`    |       X        |      X       |        4 |     0 | —                                          |
+|  44 | `dim_descencadenantes`            |       X        |      X       |        2 |     0 | —                                          |
+|  45 | `dim_impulsores`                  |       X        |      X       |        2 |     0 | —                                          |
+|  46 | `dim_causas`                      |       X        |      X       |        2 |     0 | —                                          |
+|  47 | `dim_medios`                      |       X        |      X       |        5 |     0 | —                                          |
+|  48 | `dim_tipo_proceso`                |       B        |      B       |        6 |     4 | `core.cat_tipos_documento`                 |
+|  49 | `dim_acciones_hitos`              |       B        |      B       |       13 |     8 | `core.plan_acciones`                       |
+|  50 | `dim_hitos`                       |       B        |      B       |       13 |    12 | `core.hitos_compromiso`                    |
+|  51 | `dim_redaccion`                   |       C        |      C       |       13 |    51 | `core.documentos`                          |
+|  52 | `dim_coordinacion_tecnica`        |       C        |      C       |       13 |     4 | `core.documentos`                          |
+|  53 | `dim_mesas_grupos`                |       D        |    **B**     |       23 |    21 | `core.mesas_dialogo`, `core.mesa_miembros` |
+|  54 | `dim_organizacion`                |       A        |      A       |       16 |   224 | `core.actores`, `core.organizaciones`      |
+|  55 | `dim_tipo_org`                    |       B        |      B       |        2 |     4 | `core.cat_tipos_actor`                     |
+|  56 | `dim_actores`                     |       B        |      B       |       16 |   828 | `core.actores`                             |
+|  57 | `dim_actores_estado`              |       B        |      B       |       16 |   108 | `core.actores`                             |
+|  58 | `fact_hechos_casos`               |       B        |      B       |       13 |    80 | `core.caso_cronologia`                     |
+|  59 | `bridge_caso_depto`               |       A        |      A       |        6 |    87 | `core.caso_distritos`                      |
+|  60 | `bridge_caso_actor`               |       B        |      B       |        3 |    80 | `core.casos_actores`                       |
+|  61 | `bridge_radar_actor`              |       D        |    **B**     |        4 |     1 | diferido a `territorio.*` por D18          |
+|  62 | `bridge_nodo_actor`               |       D        |    **B**     |        4 |     3 | diferido a `territorio.*` por D18          |
+|  63 | `bridge_caso_actor_estado`        |       B        |      B       |        3 |    61 | `core.casos_actores`                       |
+|  64 | `bridge_alerta_actor`             |       A        |      A       |        6 |   162 | `core.alertas_actores`                     |
+|  65 | `bridge_reporte_actor`            |       D        |    **B**     |        5 |     1 | `core.documento_actores`                   |
+|  66 | `bridge_reporte_actor_estado`     |       D        |    **B**     |        5 |     1 | `core.documento_actores`                   |
+|  67 | `bridge_clima_actor`              |       D        |    **B**     |        5 |     1 | `core.documento_actores`                   |
+|  68 | `bridge_clima_actor_estado`       |       D        |    **B**     |        5 |     1 | `core.documento_actores`                   |
+|  69 | `bridge_sectorista_departamento`  |       D        |    **B**     |        3 |    27 | `core.usuario_territorio`                  |
+|  70 | `dim_departamentos`               |       A        |      A       |       11 |    27 | `core.regiones`                            |
+|  71 | `dim_provincias`                  |       A        |      A       |        8 |    70 | `core.provincias`                          |
+|  72 | `dim_distritos`                   |       A        |      A       |       11 |   698 | `core.distritos`                           |
+|  73 | `dim_tipo_caso`                   |       B        |      B       |        3 |     4 | `core.cat_tematicas`                       |
+|  74 | `dim_rol_actor`                   |       A        |      A       |        3 |     4 | `core.cat_roles_actor`                     |
+|  75 | `dim_tipo_sector`                 |       A        |      A       |        3 |     3 | `core.cat_subsectores`                     |
+|  76 | `dim_tipo_actor`                  |       A        |      A       |        2 |     3 | `core.cat_tipos_actor`                     |
+|  77 | `dim_tipo_actor_radar`            |       D        |      D       |        2 |     3 | —                                          |
+|  78 | `dim_perfil`                      |       B        |      B       |        2 |     3 | —                                          |
+|  79 | `dim_intervencion`                |       D        |    **B**     |        2 |     4 | `core.cat_ciclos_intervencion`             |
+|  80 | `dim_sectoristas`                 |       B        |      B       |       13 |    15 | `core.usuarios`                            |
+|  81 | `dim_punto_focal`                 |       B        |      B       |       12 |    17 | —                                          |
+|  82 | `dim_autoridades`                 |       B        |      B       |       12 |     2 | —                                          |
+|  83 | `dim_responsable`                 |       D        |      D       |        4 |     3 | —                                          |
+|  84 | `dim_entidad_responsable`         |       B        |      B       |        5 |    23 | `core.actores`                             |
+|  85 | `dim_area_responsable`            |       B        |      B       |        5 |    66 | `core.cat_unidades_organicas`              |
+|  86 | `dim_unidades_organicas_responsa` |       B        |      B       |        6 |    27 | `core.cat_unidades_organicas`              |
 
 <!-- FIN TABLA 86 HOJAS -->
 
@@ -649,7 +660,7 @@ por primera vez.
 **Qué significa todo esto.** El problema del sistema anterior no era el volumen
 (4 643 filas de hoja) sino la ausencia de reglas: el software no impedía escribir el mismo
 DNI 45 veces ni dejar 186 actores sin DNI. La v10 lleva esa validación al esquema
-—**610 llaves foráneas, 143 reglas de unicidad y 351 reglas de validación**— y la
+—**616 llaves foráneas, 143 reglas de unicidad y 360 reglas de validación**— y la
 cola de revisión de DNI es la consecuencia directa de esas 45 repeticiones: lo que
 el sistema anterior aceptaba, la v10 lo detecta y lo pone en cola para revisión.
 
@@ -667,7 +678,7 @@ una de esas dos fuentes cambia, la tabla y el gráfico cambian con ellas. Cómo
 levantar la base y conectarse está en **[12]**, y el flujo completo —crear, cargar,
 y aplicar parches— en **[16]**.
 
-Las cifras de este documento corresponden a la medición del **2026-11-19**. La
+Las cifras de este documento corresponden a la medición del **2026-11-20**. La
 prioridad del MVP la calcula otro script, `migration/prioridad_mvp.py`, que cruza
 cada tabla con el contrato MVP-45 y escribe `docs/03_ejecucion/mvp_prioridad_tablas.csv`; sus
 totales son los que cita el documento **[15]**. Si se vuelve a ejecutar cualquiera
@@ -679,12 +690,20 @@ El diccionario de **[13]** se regenera aparte, cuando cambia el esquema o la car
 python migration/generar_diccionario.py
 ```
 
-De las **2 145 columnas** de las tablas lógicas, **todas tienen descripción**
-escrita en la propia base; las **366 de las particiones** la heredan de su tabla
-padre, porque PostgreSQL no propaga los comentarios. Las **19 últimas** las cerró
-el parche 19: estaban en `core.cat_privilegio`, `core.privilegio_usuario`,
+Tras la última regeneración, `docs/05_datos/diccionario_datos.csv` tiene **3 334
+filas**: las 2 527 columnas del modelo más las 807 del legado.
+
+De las **2 161 columnas** de las tablas lógicas, **todas tienen descripción
+escrita en la propia base**, y las **366 de las particiones** la heredan de su tabla
+padre, porque PostgreSQL no propaga los comentarios. Las **19 que faltaban** las
+cerró el parche 19: estaban en `core.cat_privilegio`, `core.privilegio_usuario`,
 `core.consulta_reniec` y `core.envios_comunicacion`, objetos que creó el parche 17
-después de que el parche 12 hubiera comentado el resto. En el sistema anterior se describen
+después de que el parche 12 hubiera comentado el resto. El parche 21 añade otras
+dos, `core.alertas_tempranas.aprobada_por` y `aprobada_en`, y las comenta en el
+mismo parche; el 22 añade una más, `core.alertas_tempranas.visibilidad`, con su
+propio `COMMENT ON COLUMN`; el 23 añade once —las de `core.alerta_destinatario`, de
+las que describe cuatro— y deja **siete sin comentario**, todas en esa tabla; y el
+24 las describe, con lo que el modelo cierra en **2 161 de 2 161**. En el sistema anterior se describen
 **209 de sus 807 columnas**, y las 598 restantes son, en su mayoría, columnas
 posicionales (`c01`, `c02`, …) del volcado de formularios: para explicarlas hace
 falta la hoja original.
@@ -708,7 +727,7 @@ módulos**. Este es el mapa de esa superficie.
 | Demandas                                     |        21 | `core.demandas` + `demandas_actores` + `demandas_evidencias`                                                             | Se mantiene   |
 | Hechos ocurridos                             |        12 | `core.caso_cronologia` + `fuentes_evidencia` + `cronologia_vinculos`                                                     | Se mantiene   |
 | Registro de envíos                           |         6 | `core.envios_comunicacion`                                                                                               | Se mantiene   |
-| Navegación, permisos y pantallas de relación |        43 | Permisos por rol y seguridad por fila (87 tablas, 540 políticas); las relaciones muchos-a-muchos pasan a llaves foráneas | Se transforma |
+| Navegación, permisos y pantallas de relación |        43 | Permisos por rol y seguridad por fila (91 tablas, 556 políticas); las relaciones muchos-a-muchos pasan a llaves foráneas | Se transforma |
 | Análisis de casos (formato Anexo 8)          |        33 | `core.documentos` + `analytics.vw_anexo_15_matriz_conflictividad`                                                        | Se transforma |
 | Sectoristas, puntos focales y autoridades    |        29 | `core.usuarios` + `usuario_roles` + `usuario_territorio`                                                                 | Se transforma |
 | Catálogos y datos de referencia              |        27 | `core.cat_*` (38 catálogos) + regiones, provincias y distritos                                                           | Se transforma |
@@ -768,7 +787,7 @@ reemplazar. No son mejoras de algo existente: son piezas nuevas.
 
 | Componente nuevo                                         | Dónde                                             | Qué aporta                                                                                                                            |
 | -------------------------------------------------------- | ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| Seguridad por fila                                       | 87 tablas, 540 políticas                          | El aislamiento por rol, territorio y nivel de reserva vive en la base. En el alcance del MVP quedan 26 tablas y 170 políticas         |
+| Seguridad por fila                                       | 91 tablas, 556 políticas                          | El aislamiento por rol, territorio y nivel de reserva vive en la base. En el alcance del MVP quedan 26 tablas y 170 políticas         |
 | Auditoría que solo agrega filas                          | `audit.datos_personales_acceso` + `agent.run_log` | Historial que no se puede alterar: rechaza modificar, borrar y vaciar                                                                 |
 | Cifrado de datos personales con registro de cada lectura | `actor_datos_personales.dni_cifrado` y `dni_hmac` | El DNI queda cifrado, con una huella para detectar duplicados, y cada descifrado deja rastro                                          |
 | Agentes A1, A2 y A3                                      | `agent.sesion`, `agent.llm_call`, `agent.run_log` | Extraer, pautar y sintetizar, con traza de cada llamada                                                                               |
@@ -780,6 +799,13 @@ reemplazar. No son mejoras de algo existente: son piezas nuevas.
 | Proceso por pasos como modelo                            | `core.proceso_instancia`, `flujo_definicion`      | El paso es un dato con plazo y transición, no un campo de texto                                                                       |
 | Mesas de diálogo como entidad                            | `core.mesas_dialogo`, `mesa_miembros`             | La mesa existe por sí misma, separada de la reunión puntual                                                                           |
 | Territorio con coordenadas                               | `territorio.lugares`, `caleta_detalle`            | Lugares, caletas y plantas con ubicación real, no solo un código de ubigeo                                                            |
+
+De las 25 reglas de control, la que custodia la salida de una alerta de la OAIPCS
+es **G21**, y desde el parche 22 es ejecutable en la base: la columna
+`core.alertas_tempranas.visibilidad` y el trigger `alertas_g21_visibilidad`
+rechazan con `G21_SIN_APROBACION` cualquier visibilidad distinta de `interna`
+mientras falte la validación previa del Sectorista o la aprobación definitiva de
+la Dirección.
 
 ### 12.4 Lo que no se traslada
 

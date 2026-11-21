@@ -2,11 +2,13 @@
 
 > **Remedición del 2026-11-20.** Las cifras de este diagnóstico son las del
 > momento en que se escribió y se conservan como foto fechada. Medición actual
-> sobre la base viva: **265 tablas lógicas**, clasificadas en capas como **34 / 12 /
-> 76 / 22 / 121**, **36 objetos derivados**
-> (30 vistas y 6 materializadas, 298 columnas), **2 145 columnas lógicas**, de las
-> cuales **2 145 tienen comentario** (ninguna sin describir, tras el parche 19), **540 políticas RLS sobre
-> 87 tablas** (`core`: 48 con RLS, **54 sin RLS**), **87 objetos** en el esquema
+> sobre la base viva: **266 tablas lógicas**, clasificadas en capas como **33 / 13 /
+> 77 / 22 / 121**, **37 objetos derivados**
+> (31 vistas y 6 materializadas, 313 columnas), **2 161 columnas lógicas**, todas
+> con comentario salvo las siete que deja sin describir el parche 23 en
+> `core.alerta_destinatario` (tras los parches 19 a 22 no quedaba ninguna),
+> **556 políticas RLS sobre
+> 91 tablas** (`core`: 52 con RLS, **51 sin RLS**), **87 objetos** en el esquema
 > `legacy` y **1 520 nodos / 450 aristas** en el grafo KAG. La clasificación
 > funcional de la §12 no se ha modificado.
 
@@ -634,22 +636,22 @@ instancia conserva su código legado en una columna de texto. El detalle, en
 Aunque la carga del legado ya ocurrió, estas decisiones siguen abiertas para
 que la capa v9 quede cerrada:
 
-| #   | Decisión                                                                                        | Por qué bloquea                                                                                        |
-| --- | ----------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| 1   | Qué indicadores de la Tabla 3 se siembran, con código, definición, componente y anexo           | `ind.indicador` y sus dependientes no se pueden inventar (las 3 plantillas ya están sembradas)         |
-| 2   | Qué JSON Schema corresponde a cada tipo documental (anexos 4–9)                                 | Sin `esquema_json` no se valida `documentos.contenido_json`                                            |
-| 3   | Qué esquema versionado usa `run_log.detalle`                                                    | T66 no es ejecutable                                                                                   |
-| 4   | Qué mapeo legado → `kag.cat_tipos_arista` se aprueba                                            | El grafo no se puede poblar sin semántica                                                              |
-| 5   | Si `DIM_Redaccion` se convierte en `reuniones_dialogo` o sigue solo como documentos             | Anexo 16 vacío                                                                                         |
-| 6   | Si se siembra `territorio.lugares` desde geografía administrativa o se espera fuente de caletas | 15 de 16 tablas territoriales vacías                                                                   |
-| 7   | Si se siembran `policy.gobierno`/`titular` y reglas P/L                                         | Ministerio View sin prioridades/lentes                                                                 |
-| 8   | Si `ctx.cat_fuentes` y `ctx.zonas_maritimas` se siembran ahora o en F1b                         | C5/C6 no operable                                                                                      |
-| 9   | Si el `REFRESH` de matviews va en el cargador o en un job                                       | Riesgo de caché obsoleta                                                                               |
-| 10  | Si se añade PK/unique a `core.cronologia_vinculos`                                              | Duplicados silenciosos                                                                                 |
-| 11  | Quién mantiene la suite T1–T90 y con qué datos                                                  | La integridad no es reproducible                                                                       |
-| 12  | Si se abre D18 (RADAR): las 6 filas siguen diferidas                                            | D17 ya está cargado (parche 10); solo RADAR queda fuera                                                |
-| 13  | Qué `$defs` tiene cada valor de `tipo_registro` en `avisa.raw_ingest.v2`                        | La v2 sembrada valida la envoltura, no el detalle de cada ruta C–G                                     |
-| 14  | Cómo se normalizan los identificadores de contrato de `agent.plantilla_prompt`                  | `avisa.raw_ingest.v2` usa punto; `pauta_a2.v1`, `minister_view_v1` y `critic_v1` no encajan en `codigo |     | '.' |     | version` |
+| #   | Decisión                                                                                        | Por qué bloquea                                                                                                                  |
+| --- | ----------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Qué indicadores de la Tabla 3 se siembran, con código, definición, componente y anexo           | `ind.indicador` y sus dependientes no se pueden inventar (las 3 plantillas ya están sembradas)                                   |
+| 2   | Qué JSON Schema corresponde a cada tipo documental (anexos 4–9)                                 | Sin `esquema_json` no se valida `documentos.contenido_json`                                                                      |
+| 3   | Qué esquema versionado usa `run_log.detalle`                                                    | T66 no es ejecutable                                                                                                             |
+| 4   | Qué mapeo legado → `kag.cat_tipos_arista` se aprueba                                            | El grafo no se puede poblar sin semántica                                                                                        |
+| 5   | Si `DIM_Redaccion` se convierte en `reuniones_dialogo` o sigue solo como documentos             | Anexo 16 vacío                                                                                                                   |
+| 6   | Si se siembra `territorio.lugares` desde geografía administrativa o se espera fuente de caletas | 15 de 16 tablas territoriales vacías                                                                                             |
+| 7   | Si se siembran `policy.gobierno`/`titular` y reglas P/L                                         | Ministerio View sin prioridades/lentes                                                                                           |
+| 8   | Si `ctx.cat_fuentes` y `ctx.zonas_maritimas` se siembran ahora o en F1b                         | C5/C6 no operable                                                                                                                |
+| 9   | Si el `REFRESH` de matviews va en el cargador o en un job                                       | Riesgo de caché obsoleta                                                                                                         |
+| 10  | Si se añade PK/unique a `core.cronologia_vinculos`                                              | Duplicados silenciosos                                                                                                           |
+| 11  | Quién mantiene la suite T1–T90 y con qué datos                                                  | La integridad no es reproducible                                                                                                 |
+| 12  | Si se abre D18 (RADAR): las 6 filas siguen diferidas                                            | D17 ya está cargado (parche 10); solo RADAR queda fuera                                                                          |
+| 13  | Qué `$defs` tiene cada valor de `tipo_registro` en `avisa.raw_ingest.v2`                        | La v2 sembrada valida la envoltura, no el detalle de cada ruta C–G                                                               |
+| 14  | Cómo se normalizan los identificadores de contrato de `agent.plantilla_prompt`                  | `avisa.raw_ingest.v2` usa punto; `pauta_a2.v1`, `minister_view_v1` y `critic_v1` no encajan en la regla «codigo, punto, version» |
 
 ---
 
@@ -1208,9 +1210,15 @@ función de cálculo que no persiste nada.
 - **`clave_version`.** No hay columna de versión de clave en
   `core.actor_datos_personales`: rotar `APP_CRYPTO_KEY` obliga a re-cifrar todo de
   una vez. Falta la columna, no la decisión de diseño.
-- **Las columnas que G21 necesita.** `core.alertas_tempranas` no tiene
-  `visibilidad`, `aprobada_por` ni `aprobada_en`. El contrato de G21 está sembrado y
-  verificado (parche 7), pero vigila columnas que todavía no existen.
+- **Las columnas que G21 necesita.** Ya existen: `aprobada_por` y `aprobada_en`
+  desde el parche 21 y `visibilidad` desde el 22, con el trigger
+  `alertas_g21_visibilidad` que hace efectivo el contrato del parche 7. **Este punto
+  deja de ser una brecha.** Quedan fuera del gate dos cosas: el valor `sectorial`
+  de `visibilidad` no tiene todavía tabla de destinatarios (`core.alerta_destinatario`
+  no existe; el puente del MVP-45 la mapea «≈» a `core.alertas_actores`), y las 83
+  alertas migradas no se pueden publicar con un `UPDATE` porque nunca tuvieron
+  `fecha_validacion`: publicarlas exige que una persona las valide, que es justo lo
+  que G21 significa.
 - **La tabla que G25 necesita.** `core.situacion_judicial_restricta` no existe en la
   base, aunque v10 §13.6.bis.v10 y §2.3.bis la definen.
 - **Los cuatro frentes de D17.** Las 147 filas del flujo están escritas, pero **29
@@ -1235,7 +1243,8 @@ particiones), **2 366 columnas**, **12 257 filas** (core 6 664 · kag 3 187 · a
 FK**, 48 tablas con RLS forzada (todas en `FORCE`; una es particionada), **173
 políticas** y **60 triggers**. `legacy` no
 cambia: 87 tablas, 807 columnas, 4 729 filas. Las cabeceras de §1 y §2 ya están
-medidas sobre este estado.
+medidas sobre este estado. Esa es la foto de los parches 6–12: la medición vigente,
+con los parches 21 y 22, es la de la nota de cabecera.
 
 ---
 

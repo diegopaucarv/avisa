@@ -191,10 +191,10 @@ v9 sitúa algunas piezas en el año 2 (Nivel 2). El TDR exige versiones iniciale
 | Pieza              | Dónde la pone v9                             | Qué hace el MVP-45                                                                                              | Condición para no contradecir a v9                                                                 |
 | ------------------ | -------------------------------------------- | --------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
 | Simulador What-if  | M5a, año 2, Nivel 2 (§13.5)                  | **M5a-lite**: motor de reglas determinista con matriz E1–E4 (§13.5.v10)                                         | Se mantiene el rótulo «ESCENARIO — no vigente» y la prueba T42; no alimenta `forecast.predictions` |
-| Minister View      | «Minister View completa» en Nivel 2 (§17.13) | Versión con **5 KPIs** (§8.4.ter)                                                                               | Solo entran indicadores validados por una persona y con incertidumbre no «alta» (G14)              |
+| Minister View      | «Minister View completa» en Nivel 2 (§17.13) | Los **5 KPIs definidos** en §8.4.ter; en diciembre entran solo los que tengan datos (ver computabilidad)        | Solo entran indicadores validados por una persona y con incertidumbre no «alta» (G14)              |
 | KAG bitemporal     | Capa 3 (§5)                                  | **Diferida.** El MVP guarda `valid_from`/`valid_to` en relaciones y membresías; no guarda tiempo de transacción | Se pierde solo la pregunta «¿qué sabía el sistema el día X?»; no se pierde ningún dato             |
 | RAG-MACTOR         | §6                                           | Casos análogos + citas literales verificadas                                                                    | Las ramas completas se activan al reactivar KAG                                                    |
-| Tres agentes A1–A3 | §9.2                                         | Un pipeline Python (hace el trabajo de A1) + un Sintetizador (A3)                                               | A2 queda apagado, como permite §3.20                                                               |
+| Tres agentes A1–A3 | §9.2                                         | El pipeline de documentos **CT-02** (.NET, OAIPCS) hace el trabajo de A1 (§9.2.v10)                             | A2 queda apagado, como permite §3.20                                                               |
 | Portal Perfil C    | Rol `externo_publico` (§11.5, §11.8)         | Piloto o ambiente de pruebas (MVP §0.3)                                                                         | Perfil C **no** es el portal público de M9: es una vista autenticada por sujeto (§11.8.v10)        |
 
 **Perfil de despliegue.** v9 está escrito para PostgreSQL. La ejecución con OGTI usa SQL Server. El modelo lógico, los nombres de tabla y las reglas de negocio no cambian; solo cambian los tipos y el mecanismo de seguridad por fila. Equivalencias en §3.17.2.v10.
@@ -3195,7 +3195,7 @@ implementación operativa existe aún. Los ocho sin diseño dependen mayormente 
 | ------ | ---------------------------------------------------------------------------------------------------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | RF-01  | SSO institucional                                                                                                      | Parcial        | `usuarios.sso_subject`; integración con el IdP pendiente (OGTI)                                                                                                                |
 | RF-02  | Publicación en el portal de aplicaciones de SITRADOC                                                                   | **Sin diseño** | Depende de criterios de OGTI                                                                                                                                                   |
-| RF-03  | Perfiles: sectorista, administrador, consulta/lectura, Alta Dirección                                                  | Cubierto       | `core.roles` (los 4 + 5 técnicos y funcionales)                                                                                                                                |
+| RF-03  | Perfiles: sectorista, administrador, consulta/lectura, Alta Dirección                                                  | Cubierto       | `core.roles` (los 4 + 5 técnicos y funcionales, más `direccion_oaipcs` desde el parche 20)                                                                                     |
 | RF-04  | Registro de auditoría de accesos y operaciones                                                                         | Parcial        | Escritura auditada (`set_audit`, `run_log`); lecturas descifradas en `audit.datos_personales_acceso` (§13.6.ter.v10); **faltan las lecturas directas** (pgaudit, no instalado) |
 | RF-05  | Preservar funcionalidades de AVISA (casos, alertas, actores, demandas, compromisos, hitos, mesas, diálogo, documentos) | Parcial        | Cubiertas salvo "mesas de trabajo", sin entidad propia (hoy son `reuniones_dialogo`)                                                                                           |
 | RF-06  | Migrar histórico de Google Sheets                                                                                      | Parcial        | `fuente_original`, `es_seed_historico`; falta especificar el ETL y su reconciliación                                                                                           |
@@ -3573,6 +3573,19 @@ al revés.
    `core.caso_cronologia`, `core.alertas_tempranas`.
 9. **Indexación.** Calcula embeddings para pgvector e inserta aristas
    bitemporales cuando corresponde.
+
+**La mensajería de campo entra sola.** El paso 8 no depende de que una
+persona registre el mensaje: WhatsApp/Meta (SVC-07) entrega los mensajes,
+la corrida programada (CT-04) los trae cada 24 h —o la llegada de un
+mensaje nuevo— y **Gemini (SVC-02)** los procesa (CU-36, RF-E12). El
+mensaje entra como **candidato con origen «WhatsApp» y pendiente de
+revisión** y recorre el mismo circuito que los candidatos del pipeline;
+la revisión humana no se salta. La **sincronización manual** (CU-35,
+RF-E13/E14) es un disparo **bajo demanda** sobre una pieza —un caso, un
+actor o una zona—, con el sello de fecha y hora de la última
+actualización y un **límite de frecuencia por usuario** (RN-18; cuántas
+veces por hora sigue abierto en H-76). El dato traído nace «pendiente de
+revisión» (RN-19).
 
 ### 4.2 El schema `avisa.raw_ingest.v1`
 
@@ -4037,6 +4050,8 @@ total de casos, riesgo alto, crisis, compromisos vencidos, días
 estancado, ENOS promedio 30 días, precio internacional promedio 30 días.
 Se reconstruye a partir de las selecciones vigentes de indicadores (8.4) y no de columnas fijas.
 
+> **Estado medido (2026-11-20), _añade (v10)_.** La reconstrucción desde las selecciones vigentes es el diseño; lo que corre hoy es otra cosa: `analytics.vw_selecciones_vigentes` e `ind.resultado` tienen 0 filas, y la vista materializada se calcula solo de `core.casos`, `core.hitos_compromiso` y `core.compromisos` — devuelve 9 regiones y 22 casos activos, sin ningún KPI. El tablero no se cae por la capa `ind` vacía porque hoy no la usa.
+
 ### 8.4 De la regla al indicador (`ind`)
 
 **Propósito.** Traducir una prioridad o un requisito en una medición concreta, mostrando siempre qué alternativas existen y quién eligió cuál. DDL en 20.21.
@@ -4070,7 +4085,29 @@ Se reconstruye a partir de las selecciones vigentes de indicadores (8.4) y no de
 
 ### 8.4.ter Semilla de indicadores del MVP-45: K1 a K5 y la proyección — _añade a 8.4 (v10)_ — V10-04
 
-**Qué resuelve.** §8.4 explica cómo se elige un indicador entre cuatro alternativas, pero no trae fórmulas. Aquí están las semillas iniciales de `ind.indicador` / `ind.variante`, con su clase v9.
+**Qué resuelve.** §8.4 explica cómo se elige un indicador entre cuatro alternativas, pero no trae fórmulas. Aquí están las definiciones de los seis indicadores del MVP-45 y sus fórmulas, con la clase que les corresponde en v9.
+
+**Estas son definiciones de diseño, no indicadores cargados.** Al 20 de noviembre de 2026 la capa `ind` está vacía: K1–K5 y la proyección P1 son especificación, no resultados. Ninguna cifra de este apartado sale de la base; las únicas cifras medidas son las de la tabla siguiente.
+
+**Estado medido de la capa `ind`** (contenedor `avisa-db`, usuario `avisa`, base `avisa`, 2026-11-20).
+
+| Tabla o vista                           | Filas | Qué significa                                                                                                                                                           |
+| --------------------------------------- | ----- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ind.indicador`                         | 0     | Ningún KPI está registrado como indicador.                                                                                                                              |
+| `ind.variante`                          | 0     | No hay variante `estandar`, `factible`, `proxy` ni `brecha`.                                                                                                            |
+| `ind.proxy_justificacion`               | 0     | Ninguna justificación de proxy. El trigger la exigirá al sembrar.                                                                                                       |
+| `ind.plantilla`                         | 3     | Las tres plantillas de §8.4 sí existen: Anexo 2, Anexo 15 y Minister View.                                                                                              |
+| `ind.plantilla_slot`                    | 0     | Las plantillas no tienen espacios: no apuntan a ningún indicador.                                                                                                       |
+| `ind.seleccion`                         | 0     | Nadie ha elegido una variante todavía.                                                                                                                                  |
+| `ind.resultado`                         | 0     | No hay valores calculados.                                                                                                                                              |
+| `ind.brecha`                            | 0     | No hay brechas de recolección registradas.                                                                                                                              |
+| `ind.relacion_dependencia`              | 0     | La propagación de obsolescencia (§8.4.bis) no tiene aristas que recorrer.                                                                                               |
+| `analytics.vw_selecciones_vigentes`     | 0     | La vista de la que dependen la Minister View y el tablero no devuelve filas.                                                                                            |
+| `analytics.vw_indicadores_minister`     | 0     | TAB-04 nace con esta fuente vacía.                                                                                                                                      |
+| `config.parametro`                      | 17    | De los seis KPIs, el único parámetro cargado es `ICD.ajuste_tope_puntos`. No hay pesos del IRE ni umbrales de TAA.                                                      |
+| `analytics.mv_dashboard_alta_direccion` | 9     | Sí devuelve filas (9 regiones, 22 casos activos), pero se calcula de `core.casos`, `core.hitos_compromiso` y `core.compromisos`, no de `ind`, y no contiene ningún KPI. |
+
+De la tabla se sigue lo que este apartado ya no puede afirmar: la Minister View no «entra» en diciembre porque no tiene nada que mostrar (`analytics.vw_indicadores_minister` devuelve 0 filas), y las tres plantillas de §8.4 existen, pero sin espacios ni indicadores a los que apuntar.
 
 **Aviso.** Son **índices de gestión, no probabilidades**. Los pesos y umbrales viven en `config.parametro` (con versión) y se calibran con las y los analistas contra casos históricos. Mientras no estén calibrados, el semáforo se rotula «PROVISIONAL».
 
@@ -4083,7 +4120,9 @@ Se reconstruye a partir de las selecciones vigentes de indicadores (8.4) y no de
 | `K5_ICD`   | Índice de Condiciones de Diálogo (0–100)  | `factible` | ¿Hay condiciones para dialogar? (OE2)                      | media                   | Sí. Su ajuste automático se muestra aparte y rotulado «PROXY» |
 | `P1_IPS30` | Exposición socioeconómica a 30 días       | `proxy`    | ¿Cuánto empleo local está expuesto si el caso se paraliza? | **alta** hasta calibrar | **No** hasta calibrar (G14); sí en Office View                |
 
-**Fórmulas (versión inicial) y un ejemplo numérico de cada una.** Todas las cifras de los ejemplos son **ILUSTRATIVAS**.
+**La columna «¿Entra a Minister View?» describe la intención de diseño, no un estado.** Hoy el criterio G14 no se ejerce porque no hay ninguna fila que filtrar; se aplicará cuando existan `ind.variante` e `ind.resultado` (ver la tabla de computabilidad más abajo).
+
+**Fórmulas (versión inicial) y un ejemplo numérico de cada una.** Las fórmulas son la definición vigente. Las cifras de los ejemplos son **ILUSTRATIVAS** y **verificables a mano** con la fórmula correspondiente: son ejemplos de diseño, no resultados de la base.
 
 **K1 — IRE.** Suma ponderada de seis dimensiones, cada una normalizada de 0 a 1.
 
@@ -4127,7 +4166,59 @@ _Ejemplo:_ cuatro actores con influencia 80 (oposición), 60 (apoyo), 40 (neutra
 
 _Ejemplo (ILUSTRATIVO):_ caso con 120 empleos vinculados en cuadrante E3 → **36 a 72 empleos expuestos**. Los valores de FP son **hipótesis a calibrar con al menos cinco casos AVISA**; hasta entonces la incertidumbre es «alta» y, por G14, `P1_IPS30` solo se ve en la Office View. Al calibrarse y pasar a «media», puede entrar a la Minister View. Esto **cumple la letra del TDR** (hay proyección en el tablero) **sin prometer más de lo que se sabe**.
 
-**Cómo se reproduce un KPI.** Cada KPI se calcula desde tablas con una vista (`analytics.vw_k1_ire`, etc.); la prueba T101 y T102 recalculan los ejemplos de arriba y deben dar 55,5 y 61,25.
+**Tabla de computabilidad por KPI.** Qué necesita cada indicador, qué hay realmente, si se puede calcular en diciembre de 2026 y qué falta. La columna «Qué hay hoy» recoge lo medido el 2026-11-20.
+
+| KPI        | Insumos que necesita                                                                                                                                                                       | Qué hay hoy (medido el 2026-11-20)                                                                                                                                                                                                                           | ¿Calculable en diciembre de 2026?                                                                                      | Qué falta sembrar o qué vista crear                                                                                                                                                                      | Dependencia                                                                                                |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `K1_IRE`   | `core.casos.nivel_conflicto_id`; `core.caso_cronologia`; `core.casos_actores`; `core.compromisos` y `core.hitos_compromiso`; `core.alertas_tempranas` y `core.permiso_aprobacion`; y el K4 | 35 casos (34 con nivel de conflicto); 80 hechos (0 en los últimos 14 días, 5 casos); 60 vínculos actor-caso (60 «Neutral»); 12 hitos (1 con fecha, ya cumplido); 83 alertas (0 en 14 días); `core.permiso_aprobacion` 0                                      | **Parcial.** Solo 2 de las 6 dimensiones tienen insumo y 4 no tienen ninguno. Sin los pesos, no hay índice que mostrar | `ind.indicador` + `ind.variante` de clase `proxy` + `ind.proxy_justificacion` (el trigger la exige); los 6 pesos en `config.parametro`; vista `analytics.vw_k1_ire`                                      | Calibración H-34 (informe SANIPES Sechura) y red de actores completa: **tramo 2 de 2027** (RF-J01, §17.15) |
+| `K2_ICC`   | `core.compromisos.estado_id`, el plazo del compromiso y `core.hitos_compromiso.fecha_vencimiento`                                                                                          | 8 compromisos, todos «En_proceso», 0 «Cumplido». **No hay columna de plazo en `core.compromisos`** (solo `criterios_smart` JSONB, vacío en las 8 filas). 12 hitos, 1 con `fecha_vencimiento`, y ese figura «Cumplido»                                        | **Parcial.** La fórmula corre, pero devuelve 0 ÷ 0: no hay denominador. El índice sería estadísticamente vacío         | Definir el plazo (columna `fecha_limite` o regla «plazo = primer hito no terminal»); cargar compromisos con plazo y estado final; `ind.variante` de clase `factible`; vista `analytics.vw_k2_icc`        | Decisión de modelado: §1.2.c exige vencimiento y §20.10 no lo tiene. Además, la carga de compromisos       |
+| `K3_TAA`   | `core.alertas_tempranas.fecha_reporte` y la marca de decisión; `core.proceso_instancia.finalizado_en`; `nivel_alerta_id` para el SLA                                                       | 83 alertas con `fecha_reporte` (83 de 83) y 4 niveles distintos. `fecha_validacion` 0 de 83 y `fecha_remision` 0 de 83. 218 instancias de proceso (155 de alertas) con `finalizado_en` 0 de 155 y `ocurrido_en` igual a la fecha de reporte (carga heredada) | **Parcial.** Es el único con volumen real de hechos; lo que falta es una sola pieza: la marca de decisión              | Registrar la decisión (columna `fecha_decision` o cierre del paso de flujo con `finalizado_en`); `ind.variante` de clase `factible`; el SLA por nivel en `config.parametro`; vista `analytics.vw_k3_taa` | Solo operación: que el flujo registre la fecha. No requiere calibración estadística                        |
+| `K4_IPA`   | `core.casos_actores` (posicion, nivel_influencia); `kag.aristas` con tipos de tensión, posición e influencia, y su `intensidad`                                                            | 60 vínculos actor-caso, **todos «Neutral»**. 450 aristas con **`intensidad` 0 de 450** y solo tres tipos con filas (MIEMBRO_DE 292, EXIGE 98, PARTICIPA_EN 60). TENSION, EN_CONTRA_DE, A_FAVOR_DE e INFLUYE_SOBRE tienen 0 aristas                           | **No.** Sin relaciones tensas ni intensidad, el índice daría 0 por falta de dato, no por falta de polarización         | Registrar posición, influencia e intensidad (CU-23 y CU-24); después `ind.indicador` + `ind.variante` y vista `analytics.vw_k4_ipa`                                                                      | Grafo completo: 2027 (§17.15). La red completa es el prerrequisito de RF-J01, que se ordena en el tramo 2  |
+| `K5_ICD`   | La evaluación humana de las 6 condiciones con evidencia (`kag.documento_fuente`) y `ICD.ajuste_tope_puntos`                                                                                | No hay tabla de evaluación del ICD en el núcleo; `core.reuniones_dialogo` 0; `analisis.evaluacion_riesgo` no existe en la base. El parámetro `ICD.ajuste_tope_puntos` = 10 sí existe y `core.icd_aplicar_ajuste` está probada (Q40)                          | **Parcial.** Es juicio humano y no necesita calibración estadística, pero hoy no hay dónde guardarlo                   | Decidir dónde se persiste (tabla de evaluación, o `ind.seleccion` + `ind.resultado` por caso y período); `ind.indicador` + `ind.variante`                                                                | Decisión de persistencia y carga manual del analista                                                       |
+| `P1_IPS30` | Los empleos vinculados al caso (EJ), la fracción expuesta (FP) por cuadrante E1–E4 y el cuadrante de K4 y K5                                                                               | `core.casos` tiene 40 columnas y ninguna de empleo ni de actividad económica; FP son hipótesis de trabajo; el cuadrante depende de K4 y K5, que hoy no son calculables                                                                                       | **No.** Faltan los dos factores de la fórmula                                                                          | Columna o tabla de empleo por caso; calibrar FP con al menos 5 casos; `ind.variante` de clase `proxy` + justificación con incertidumbre «alta» (G14 la deja fuera de la Minister View)                   | Calibración (5 casos) y K4/K5 para el cuadrante                                                            |
+
+**Lectura de la tabla.**
+
+- `K1_IRE` es un **proxy parcial del índice de riesgo compuesto (RF-J01)**, que §17.15 sitúa en el **tramo 2 de 2027**: necesita la red de actores completa (CU-24) y la calibración contra el informe del caso SANIPES Sechura, todavía vacía (H-34). No puede presentarse como «el índice del MVP».
+- `K2_ICC` se apoya en `core.compromisos`, que tiene 8 filas y ningún compromiso cerrado; además el modelo no guarda el plazo en la cabecera del compromiso. El índice es calculable, pero su valor sería 0 ÷ 0 y no dice nada del cumplimiento del Estado.
+- `K3_TAA` es el único con hechos en volumen (83 alertas, 218 instancias de proceso). No se puede cerrar porque la decisión del analista no se registra con fecha, no porque falten datos de origen: es el candidato real, y le falta una sola pieza.
+- `K4_IPA` depende del grafo: hay 450 aristas, pero ninguno de los tipos que el índice necesita y ninguna con `intensidad`. Eso lo deja en 2027 y, para el índice compuesto, en su tramo 2.
+- `K5_ICD` no depende de calibración estadística —es juicio humano con evidencia— sino de una decisión: dónde se persiste.
+- `P1_IPS30` no tiene el factor EJ en ninguna tabla del núcleo: la fórmula no puede evaluarse ni con datos parciales.
+
+**Qué se puede prometer a la Alta Dirección en diciembre de 2026 y qué no.**
+
+Sí:
+
+- El tablero operativo con los datos que ya existen: 35 casos, 83 alertas, 8 compromisos con sus hitos, 1160 actores y el agregado regional de `analytics.mv_dashboard_alta_direccion` (9 regiones, 22 casos activos).
+- La **serie de atención de alertas** (K3), si el flujo registra la fecha de decisión desde el primer día: en diciembre habrá una serie corta, y su valor será real aunque el período sea breve.
+- El **ICD del analista** (K5) como captura estructurada con evidencia, si se decide antes dónde se guarda; no requiere calibración.
+- La **definición y la fórmula** de los seis indicadores, con ejemplo verificable: eso es lo que entrega B13.
+
+No:
+
+- El **IRE** como «índice de riesgo» del sistema: es un proxy parcial y sin calibración (H-34).
+- El **ICC** como cifra de cumplimiento del Estado: 8 compromisos, 0 cumplidos, sin plazo en la cabecera.
+- Ni el **IPA** ni el **IPS30**: sin red de actores ni empleo local.
+- La frase «cinco KPIs en la Minister View»: hoy esa vista devuelve 0 filas. Solo entrarán los que tengan semilla, resultado y validación humana.
+
+**Qué hay que sembrar para que TAB-04 no nazca vacío.** Lista mínima, en orden. Todo cae en tablas que ya existen, salvo la marca de decisión de K3.
+
+1. `ind.indicador`: seis filas (`K1_IRE`, `K2_ICC`, `K3_TAA`, `K4_IPA`, `K5_ICD`, `P1_IPS30`) con `componente_guia`, `anexo_origen` y `direccion`.
+2. `ind.variante`: al menos una por indicador. `K1_IRE` y `P1_IPS30` en clase `proxy`, con su `ind.proxy_justificacion` (el trigger `trg_proxy_justificacion` la exige al cerrar la transacción); `K3_TAA` en clase `factible`.
+3. `ind.plantilla_slot`: los espacios de las tres plantillas ya sembradas que apuntan a esos indicadores. Sin espacios no hay `ind.seleccion` posible.
+4. `ind.seleccion` e `ind.resultado`: al menos una selección y un valor por período. Son las dos tablas que lee `analytics.vw_indicadores_minister`; mientras estén vacías, TAB-04 no tiene fuente.
+5. `config.parametro`: los seis pesos del IRE, los umbrales de semáforo y el SLA por nivel de alerta. Hoy solo existe `ICD.ajuste_tope_puntos`.
+6. Vistas por KPI: `analytics.vw_k3_taa` es la única que puede sostenerse en diciembre; las demás, cuando exista el insumo. Hoy no está creada ninguna — `analytics.vw_k1_ire` y sus hermanas no existen en la base.
+7. Dato operativo que no es semilla, pero condiciona todo lo anterior: registrar la fecha de decisión de la alerta y las posiciones e influencias de los actores.
+
+**Quién lo decide.** La semilla es decisión de la OAIPCS, dueña del dato y de la definición del indicador; la calibración (pesos del IRE, FP del IPS30) corresponde al Data Scientist con las y los analistas, contra casos históricos. D25 (§18.ter) es hoy una **propuesta**: ninguna de las dos partes la ha ejecutado, y publicar la cifra exige además que la Dirección acepte qué se publica y que OGTI lo despliegue.
+
+**Cómo se verifica un KPI.** Hay dos verificaciones distintas y no deben confundirse.
+
+- **Verificación de fórmula (diseño).** Se recalcula el ejemplo con la fórmula: da 55,5 para el IRE y 61,25 para el IPA. Es aritmética, se hace a mano y no toca la base.
+- **Verificación de integración.** Recalcular desde tablas exige que `ind` tenga filas y que existan las vistas por KPI. Ninguna de las dos condiciones se cumple hoy: `ind.indicador`, `ind.variante` e `ind.resultado` tienen 0 filas, `kag.aristas.intensidad` está vacía y `analytics.vw_k1_ire` no existe. Por eso T101 y T102 quedan **bloqueadas** hasta la siembra (§22.3.ter).
+
 <!-- v10:P08 end -->
 
 ### 8.5 Contrato de seed por tipo de indicador/artefacto — _añade_
@@ -4224,14 +4315,18 @@ especializados y escala a HITL solo cuando hay discrepancia.
 
 **Qué se enciende.** v9 dice que el Nivel 1 opera con tres agentes. El MVP-45 usa menos, y lo declara.
 
-| Componente v9              | En el MVP-45                                                                            | Quién lo hace                                               | Control humano                                                                    |
-| -------------------------- | --------------------------------------------------------------------------------------- | ----------------------------------------------------------- | --------------------------------------------------------------------------------- |
-| A1 Extractor-Estructurador | **Encendido**, como pipeline Python (recolección, deduplicación, NLP, citas candidatas) | Servicio Python; no accede a la base, solo habla con la API | El analista aprueba cada alerta (G21)                                             |
-| A2 Generador de Pautas     | **Apagado** (permitido por §3.20)                                                       | —                                                           | —                                                                                 |
-| A3 Sintetizador            | **Encendido** para el informe OE1–OE3 y el resumen de una página                        | API .NET con el modelo de lenguaje                          | Sale como «BORRADOR IA — requiere validación»; solo lo validado llega al Perfil B |
-| Resolver                   | **Determinista** (trigramas, umbrales 0,85 y 0,6) con la excepción de nivel 4–5         | Servicio                                                    | Cola de revisión del analista                                                     |
-| Critic                     | Reemplazado por la **validación del analista** (100 % de lo que ve el Perfil B)         | Persona                                                     | —                                                                                 |
-| Guardrails                 | G14, G15 y los nuevos G19–G22                                                           | Reglas deterministas                                        | Rechazan, no solo advierten                                                       |
+| Componente v9              | En el MVP-45                                                                     | Quién lo hace                                           | Control humano                                                                    |
+| -------------------------- | -------------------------------------------------------------------------------- | ------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| A1 Extractor-Estructurador | **Encendido**, como pipeline de documentos (recolección, NLP y citas candidatas) | CT-02 (.NET, OAIPCS); habla con la API, no toca la base | El sectorista valida y la Dirección aprueba cada alerta (G21)                     |
+| A2 Generador de Pautas     | **Apagado** (permitido por §3.20)                                                | —                                                       | —                                                                                 |
+| A3 Sintetizador            | **Encendido** para el informe OE1–OE3 y el resumen de una página                 | API .NET con el modelo de lenguaje                      | Sale como «BORRADOR IA — requiere validación»; solo lo validado llega al Perfil B |
+| Resolver                   | **Determinista** (trigramas, umbrales 0,85 y 0,6) con la excepción de nivel 4–5  | Servicio                                                | Cola de revisión del analista                                                     |
+| Critic                     | Reemplazado por la **validación del analista** (100 % de lo que ve el Perfil B)  | Persona                                                 | —                                                                                 |
+| Guardrails                 | G14, G15 y los nuevos G19–G22                                                    | Reglas deterministas                                    | Rechazan, no solo advierten                                                       |
+
+**El pipeline del MVP es CT-02, no una pieza de 2027.** En la ejecución con OGTI, el trabajo de A1 lo hace **CT-02**: el servicio de procesamiento de documentos en **.NET** que construye OAIPCS (Diego), alimentado por la lista blanca de fuentes (SVC-01) y que cubre **RF-E01 a RF-E06 y RF-E11** en el **tramo final de los 20 días**. La descripción «pipeline Python» de la fila A1 corresponde a la arquitectura v9; si CT-02 no llega a tiempo, el módulo opera con carga manual sin tocar el núcleo (ERS v0.6 §14.3.1). Lo que queda para **2027** es solo la **lectura abierta** de fuentes públicas y redes sociales a escala _(Alineado con ERS v0.6 §5.1/§14.3.1)._
+
+**Las dos sincronizaciones del MVP (CU-35 y CU-36).** **CU-36** (RF-E12) es automática: WhatsApp/Meta (SVC-07) entrega los mensajes, Tareas programadas (CT-04) dispara la corrida cada 24 h y **Gemini** (SVC-02) los convierte en **candidatos con origen «WhatsApp»**, pendientes de revisión, por el mismo circuito del pipeline. **CU-35** (RF-E13/E14) es manual y bajo demanda: un disparo sobre una pieza —un caso, un actor o una zona—, con el sello de fecha y hora de la última actualización y un **límite de frecuencia por usuario** para controlar el costo de Gemini (RN-18; el tope exacto sigue abierto en H-76). Ninguna de las dos salta la revisión humana (RN-19).
 
 **Ejemplo del mensaje que envía el pipeline (ILUSTRATIVO).** Se envía por `POST /ingesta/alertas`, con firma HMAC en el encabezado y una clave de idempotencia (si el mismo mensaje llega dos veces, la API lo ignora la segunda vez).
 
@@ -4448,12 +4543,14 @@ pipeline completo. Latencia objetivo < 8s.
 > | 09:15 | Ciclo de recolección: baja la nota y la deduplica                          | Máquina     |
 > | 09:17 | NLP, resolución de actores, citas, puntaje de riesgo                       | Máquina     |
 > | 09:18 | `POST /ingesta/alertas`; aparece en la bandeja                             | Máquina     |
-> | 09:41 | El analista revisa, edita la explicación y **aprueba**                     | **Persona** |
-> | 09:42 | La alerta aparece en los KPIs y el mapa del Perfil B (≤ 60 s)              | Máquina     |
-> | 09:43 | La Dirección de la OAIPCS **confirma la crisis**                           | **Persona** |
+> | 09:41 | El sectorista revisa la explicación y registra la **validación previa**    | **Persona** |
+> | 09:43 | La Dirección de la OAIPCS da la **aprobación definitiva** (toda alerta)    | **Persona** |
+> | 09:44 | La alerta aprobada aparece en los KPIs y el mapa del Perfil B (≤ 60 s)     | Máquina     |
 > | 09:45 | Llega el SMS al despacho del Ministro, con enlace al resumen de una página | Máquina     |
 >
-> De publicación a bandeja pasaron **16 minutos**; de la bandeja a la aprobación, 23 minutos de **decisión humana**, que es el cuello de botella deseado.
+> De publicación a bandeja pasaron **16 minutos**; de la bandeja a la aprobación definitiva, 25 minutos de **decisión humana en dos pasos** (validación y aprobación), que es el cuello de botella deseado.
+
+**La visibilidad la impone la base, no la aplicación.** Hasta la aprobación de las 09:43 la alerta no está «oculta» por el _frontend_: el _trigger_ `alertas_g21_visibilidad` (parche 22) impide que `visibilidad` salga de `interna` mientras falte una de las dos firmas, y `core.vw_alerta_estado` expone esa columna para que el tablero filtre por ella.
 
 **Fast path del Sintetizador (resumen de una página).** Para el resumen de una página el Sintetizador usa una plantilla cerrada (_Situación · Qué cambió en 7 días · Riesgo y tendencia · Decisión requerida y plazo · Próximos hitos_, máximo 350 palabras) y un paquete de datos cerrado: las cifras salen de las tablas, no del modelo de lenguaje. No pasa por el Critic en línea; pasa por la **validación del analista** antes de llegar al Perfil B (§9.2.v10).
 
@@ -4601,7 +4698,8 @@ political requirements** without forking the database five times.
 ### 11.8 Personas y roles RBAC de OGTI
 
 Los cinco "roles" de esta sección son **personas** (perfiles de uso). OGTI pidió en RF-03 cuatro **roles de sistema**; la
-tabla `core.roles` incluye esos cuatro más cuatro técnicos y funcionales. Un usuario recibe uno o más roles con vigencia
+tabla `core.roles` incluye esos cuatro más cinco técnicos y funcionales —**nueve roles heredados**— y el parche 20 añadió
+`direccion_oaipcs`: **diez roles en total**. Un usuario recibe uno o más roles con vigencia
 (`core.usuario_roles`) y cada rol fija el nivel máximo de clasificación que puede leer (RLS).
 
 | Persona (11.1–11.5)                                   | Rol de sistema (`core.roles`)  | Nivel máx. de clasificación      |
@@ -4610,14 +4708,14 @@ tabla `core.roles` incluye esos cuatro más cuatro técnicos y funcionales. Un u
 | Analyst (DS / analista)                               | `sectorista` y `administrador` | 3                                |
 | Analista cualitativo (codificación y análisis léxico) | `analista_cualitativo`         | 3                                |
 | Curador de política                                   | `curador_politica`             | 2 (Reservado)                    |
-| Director (OAIPCS)                                     | `sectorista`                   | 3                                |
+| Director (OAIPCS)                                     | `direccion_oaipcs`             | 3                                |
 | Executive (Alta Dirección)                            | `alta_direccion`               | 3, solo lectura                  |
 | External (otras entidades, transparencia)             | `externo_publico`              | 1 (Público)                      |
 | Lectura institucional                                 | `consulta_lectura`             | 2 (Reservado)                    |
 | Agentes del sistema                                   | `servicio_agente`              | 3, con enrutamiento R-LLM (3.17) |
 | Control y auditoría                                   | `auditor`                      | 3, crea y edita; no borra        |
 
-**Las aprobaciones no se dan por rol sino por permiso.** En el modelo de roles de OGTI la Dirección de la OAIPCS comparte el rol `sectorista` con el personal de campo; por eso `core.permiso_aprobacion` (usuario, objeto, vigencia) otorga las aprobaciones específicas (por ejemplo, exportar sin pseudonimizar).
+**Las aprobaciones no se dan por rol sino por permiso.** En el modelo de roles de OGTI la Dirección de la OAIPCS comparte el rol `sectorista` con el personal de campo; desde el parche 20 tiene además un rol propio, `direccion_oaipcs`, que es el que firma el paso 3 del flujo de alerta. `core.permiso_aprobacion` (usuario, objeto, vigencia) sigue siendo el mecanismo de las aprobaciones que no son ese paso: por ejemplo, exportar sin pseudonimizar o una suplencia. Hoy la tabla tiene 0 filas, porque no hay suplente designado, pero ya tiene consumidor: `core.puede_aprobar(uuid, text)` la consulta y `core.vw_permiso_aprobacion` la expone a la administración (parche 22). Sin filas a propósito: nombrar un suplente es un acto administrativo de la OAIPCS.
 
 **Matriz permiso × objeto para los objetos de las capas incorporadas** (RS-02).
 
@@ -4646,18 +4744,41 @@ RS-08 (altas, bajas y cambios de permisos) cubre los roles nuevos. Cada exportac
 
 **Por qué hace falta.** El TDR y el MVP hablan de Perfil A, B y C. v9 habla de personas (Field, Analyst, Director, Executive, External) y de roles de sistema. Esta tabla las une, para que nadie cree dos modelos de permisos.
 
-| Perfil MVP                      | Persona v9 (§11.1–11.5) | Rol de sistema (`core.roles`) | Nivel máx. de clasificación | Qué lo limita                                                                                                                                                                                                                                                                        |
-| ------------------------------- | ----------------------- | ----------------------------- | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **A — Office View**             | Analyst, Director       | `sectorista`                  | 3                           | Casos asignados; datos personales solo con permiso específico y auditoría                                                                                                                                                                                                            |
-| **B — Minister View**           | Executive               | `alta_direccion`              | **3**                       | Lee todo lo Confidencial (incluidos datos personales) y **no escribe**: no crea, no edita y no borra. En tableros solo ve vistas agregadas; nunca datos personales en el Dashboard Estratégico (RD-08). **D25 quedó sin efecto el 2026-11-20** (ver 11.1, tabla de personas y roles) |
-| **C — Portal de Transparencia** | External                | `externo_publico`             | 1                           | **Seguridad por sujeto** (`actor_uid` de §11.10.bis): solo ve **sus** compromisos y las alertas sectoriales donde es destinatario                                                                                                                                                    |
+| Perfil MVP                      | Persona v9 (§11.1–11.5) | Rol de sistema (`core.roles`) | Nivel máx. de clasificación | Qué lo limita                                                                                                                                                                                                                                                                                                                                                            |
+| ------------------------------- | ----------------------- | ----------------------------- | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **A — Office View**             | Analyst, Director       | `sectorista`                  | 3                           | Casos asignados; datos personales solo con permiso específico y auditoría                                                                                                                                                                                                                                                                                                |
+| **B — Minister View**           | Executive               | `alta_direccion`              | **3**                       | Lee **todas** las vistas operativas y analíticas, con el **Dashboard Estratégico como pantalla de inicio**, y **no escribe**: no crea, no edita y no borra. Cada lectura de datos personales queda auditada; por el canal público (Publish to Web) nunca pasa ningún dato personal (RD-08). **D25 quedó sin efecto el 2026-11-20** (ver 11.1, tabla de personas y roles) |
+| **C — Portal de Transparencia** | External                | `externo_publico`             | 1                           | **Seguridad por sujeto** (`actor_uid` de §11.10.bis): solo ve **sus** compromisos y las alertas sectoriales donde es destinatario                                                                                                                                                                                                                                        |
 
 **Aclaración importante.** El Perfil C **no es** el portal público de transparencia del módulo M9 (§13, F6): M9 publica vistas agregadas con k-anonimato para cualquiera; el Perfil C es una vista **autenticada** para un actor externo concreto. Pueden coexistir.
 
 > **Ejemplo (ILUSTRATIVO).** Un gremio de pescadores artesanales entra con su credencial. Ve tres compromisos del Estado hacia él (uno vencido, dos en plazo) y ninguna otra cosa: ni el resto de los casos, ni los otros actores, ni los análisis. Si cambia en la URL el identificador de un compromiso ajeno, recibe una respuesta vacía, no un error que confirme que existe.
 
-**Qué pasa con las aprobaciones.** Se mantiene la regla de v9: las aprobaciones no se dan por rol sino por permiso (`core.permiso_aprobacion`). En el MVP, «aprobar alerta» lo tiene el analista y «confirmar crisis» lo tiene la Dirección de la OAIPCS (ciclo de vida de la alerta, MVP §3.4).
+**Qué pasa con las aprobaciones.** Se mantiene la regla de v9: las aprobaciones no se dan por rol sino por permiso (`core.permiso_aprobacion`). En el MVP, **toda** alerta —grave o no— recorre dos niveles antes de salir: la **validación previa del Sectorista** y la **aprobación definitiva de la Dirección de la OAIPCS**. La crisis (nivel 1) conserva además el plazo ≤ 24 h y el destinatario Ministro (H-25 cerrado, RN-04). La gravedad decide **a quién** se avisa y **en cuánto tiempo**, no **quién** autoriza _(Alineado con ERS v0.6 §11.1/§14.4.)_ El gate lo impone la base y no la aplicación: el _trigger_ `alertas_g21_visibilidad` (parche 22) rechaza con `G21_SIN_APROBACION` cualquier `visibilidad` distinta de `interna` mientras falte una de las dos firmas, de modo que la alerta solo existe para la OAIPCS hasta entonces.
 <!-- v10:P07 end -->
+
+### 11.8.v10.bis Usuarios nominales, destinatarios y los tres catálogos de rol — _añade a 11.8 (v10)_
+
+**Cuántos usuarios hay en diciembre.** Son **11 puestos**: 7 de OAIPCS y 4 de Alta Dirección. Los 11 puestos son **11 personas**: el administrador es un **puesto nuevo** —el sistema anterior no traía una cuenta de administrador—; hoy el rol `administrador` está sobre la cuenta de la Directora, que acumula cuatro roles, y la cuenta propia del administrador se crea en diciembre. Las licencias Power BI Pro pasan de **7 a 11** (7 del equipo de la OAIPCS + 4 de la Alta Dirección); las 4 nuevas quedan **a confirmar con OGTI** (H-78).
+
+| Grupo              | Puestos                                                                   | Total |
+| ------------------ | ------------------------------------------------------------------------- | :---: |
+| **OAIPCS**         | Directora (única con el privilegio RENIEC), 5 sectoristas y administrador |   7   |
+| **Alta Dirección** | Ministro, 2 viceministros y Secretario General                            |   4   |
+
+**Quiénes no son usuarios.** Las **jefaturas de gabinete** no tienen cuenta ni entran al sistema: son **destinatarios** de los envíos de alertas **no graves** (nivel 3, RN-02). La **Secretaría General ya no está en esta lista**: el **Secretario General** es usuario de Alta Dirección (el cuarto puesto), entra con el **Dashboard Estratégico como pantalla de inicio** y puede leer las vistas operativas, con **cada lectura de datos personales auditada**. Los **Gobiernos Regionales/Locales** y la **Ciudadanía** son usuarios finales de la **misión**, no del sistema en este MVP: acceden con el Perfil C en 2027 (H-54).
+
+**Las 32 cuentas migradas.** 28 están activas y 4 inactivas; el resto queda como **dato histórico precargado**, no como acceso del día 1. Sobre esas cuentas están en uso **cinco** roles de acceso: `consulta_lectura` (17), `sectorista` (15), `alta_direccion` (2), `administrador` (1) y `direccion_oaipcs` (1, la Directora, desde el parche 21) —**36 asignaciones sobre 31 personas**: la cuenta restante es el cargador de migración (`LEGADO_AVISA_2026`, sin rol), y una misma persona acumula varios roles —la Directora sola tiene cuatro—. `administrador` y `direccion_oaipcs` no vienen del sistema anterior: `administrador` no tenía cuenta migrada y hoy lo lleva la cuenta de la Directora; `direccion_oaipcs` nació con 0 cuentas en el parche 20 y el parche 21 se lo asignó a ella. Los otros cinco roles de `core.roles` (`auditor`, `servicio_agente`, `externo_publico`, `analista_cualitativo`, `curador_politica`) no tienen ninguna cuenta hoy.
+
+**No confundir tres catálogos.**
+
+| Catálogo                     | Qué clasifica                                                                                        | Filas |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------- | :---: |
+| `core.roles`                 | El rol de **acceso al sistema**; decide qué filas ve la sesión (RLS)                                 |  10   |
+| `core.cat_roles_actor`       | El rol de un **actor del conflicto** (Principal, Secundario, Tercero…)                               |   7   |
+| `core.cat_roles_funcionales` | El rol de ese actor **en el análisis** (decisor, proveedor de evidencia, implementador, articulador) |   4   |
+
+> Se parecen en el nombre y no se sustituyen: `core.roles` es seguridad de acceso; `core.cat_roles_actor` clasifica a quién protagoniza el conflicto; `core.cat_roles_funcionales` describe su papel en la lectura analítica. _(Alineado con ERS v0.6 §6.1.)_
 
 ### 11.9 IdP y `app.rol_codigo` — _añade_ — cierra SE-1, SE-2
 
@@ -5874,7 +5995,7 @@ flowchart TB
 
 **G20 — Cita literal.** Una cita solo se muestra si el servidor comprueba, de forma determinista, que el fragmento existe **literalmente** en el texto de la fuente (tras normalizar espacios y codificación) y que `offset_inicio`/`offset_fin` caen dentro del texto. Si no coincide, se descarta. _Ejemplo:_ la fuente dice «Dejen trabajar a la gente»; el modelo propone «Dejen trabajar a la gente de la caleta»; la cita se **descarta** porque la segunda versión no está en la fuente. Reason code: `G20_CITA_NO_LITERAL`.
 
-**G21 — Aprobación humana antes de visibilidad.** Ninguna alerta es visible para los perfiles B o C si no tiene aprobación humana registrada (`aprobada_por`, `aprobada_en`). Es el mismo principio del gate HITL de `core.outbox_integracion` (§15.6) aplicado a alertas, y lo impone la base, no la aplicación: un _trigger_ rechaza `visibilidad ≠ 'interna'` si `aprobada_por` es nulo (el trigger es el diseño; aún no existe, §16.1.quinquies). Reason code: `G21_SIN_APROBACION`.
+**G21 — Aprobación humana antes de visibilidad.** Ninguna alerta es visible para los perfiles B o C si no tiene registradas las **dos aprobaciones humanas**: la **validación previa del Sectorista** y la **aprobación definitiva de la Dirección de la OAIPCS** (`aprobada_por`, `aprobada_en`). Vale para **toda** alerta, grave o no: la gravedad decide el destinatario y el plazo, no quién autoriza (H-25, RN-04). Es el mismo principio del gate HITL de `core.outbox_integracion` (§15.6) aplicado a alertas, y lo impone la base, no la aplicación: el _trigger_ **`alertas_g21_visibilidad`** (`BEFORE INSERT OR UPDATE`, creado por el parche 22 junto con la columna `visibilidad`) rechaza con `G21_SIN_APROBACION` cualquier `visibilidad` distinta de `interna` mientras falte alguna de las dos. La columna que el gate lee, `core.alertas_tempranas.visibilidad`, es `varchar(12)` `NOT NULL DEFAULT 'interna'`, con `CHECK` de tres valores —**interna** (solo la OAIPCS), **ejecutiva** (visible al Perfil B) y **sectorial** (solo destinatarios nombrados)—: toda alerta nace y se queda en `interna` hasta que existan ambas firmas. Reason code: `G21_SIN_APROBACION`.
 
 **G22 — Fuente permitida.** Solo se recolecta de fuentes en la lista blanca (§7.5.v10). Una fuente fuera de la lista, o una red social sin API oficial o proveedor licenciado, se rechaza y se registra. Reason code: `G22_FUENTE_NO_PERMITIDA`.
 
@@ -5891,7 +6012,7 @@ Los cuatro códigos siguen el patrón de los 18 anteriores y sus filas están se
 
 Los tres códigos están sembrados en `config.guardrail_contract` —G23–G25, todas `block`— y entran al contrato de test de §9.9 y a §22.3.ter, junto a G16–G22. El `CHECK` de la columna `guardrail` admite G1–G25 desde el parche 6 de cumplimiento, y desde el 18 de noviembre de 2026 la tabla tiene **25 filas**: las 18 de G1–G18 más las siete de G19–G25, con reparto 22 `block` y 3 `warn`. Cada fila trae `input_dispara`, `input_no_dispara`, `output_esperado_dispara` (con su `reason_code`), `output_esperado_no_dispara` y `severidad`.
 
-Lo sembrado es el contrato, no la implementación. No existen todavía: el trigger de visibilidad de G21 (`core.alertas_tempranas` no tiene `visibilidad`, `aprobada_por` ni `aprobada_en`), la verificación determinista de offsets de G20, el rechazo de escritura de G23 sobre `core.actor_datos_personales`, la comprobación automática de que ninguna vista de perfil B o C proyecte nombre o documento para G24, y `core.situacion_judicial_restricta` para G25. Mientras esos objetos no existan, la fila del contrato dice qué debe rechazarse, no que ya se rechace.
+Lo sembrado es el contrato, no la implementación. No existen todavía: la verificación determinista de offsets de G20, el rechazo de escritura de G23 sobre `core.actor_datos_personales`, la comprobación automática de que ninguna vista de perfil B o C proyecte nombre o documento para G24, y `core.situacion_judicial_restricta` para G25. Mientras esos objetos no existan, la fila del contrato dice qué debe rechazarse, no que ya se rechace.
 
 ### 16.4.bis Umbrales de drift (C4–C6) — _añade a §16.2_
 
@@ -5900,7 +6021,10 @@ Lo sembrado es el contrato, no la implementación. No existen todavía: el trigg
 ## 17. Roadmap 2027–2031
 
 > **Nota de diseño.** El título no coincide con el contenido (25 meses, no cinco años) y las tablas 17.11 y 17.12 son
-> incoherentes entre sí. Ver 17.13 para la re-línea base.
+> incoherentes entre sí. Ver 17.13 para la re-línea base. **Hay un solo horizonte después de diciembre, «2027»:** la
+> anualidad que sigue al módulo. «MADRE» es el nombre de este documento completo —y también el del **tramo 2**,
+> el que espera servicios, convenios o calibraciones—, no un horizonte; el reparto en dos
+> tramos dentro de 2027 está en 17.15.
 
 ### 17.1 Fase 0 — Infraestructura (mes 1)
 
@@ -6135,6 +6259,30 @@ MININTER, SUNAT) fuera del control del equipo; y "2027–2031" no corresponde a 
 
 El roadmap de 25 meses de v8.3 pasa a **~30 meses** con C4–C6; estas fases requieren un tercer perfil técnico (especialista en datos financieros o hidrológicos) además del segundo perfil ya identificado en v8.3.
 
+### 17.15 Un solo horizonte: 2027, con dos tramos — _añade a §17 (v10)_
+
+**Un solo horizonte.** Después de diciembre hay un único horizonte, **2027**: la **evolución sobre lo ya entregado** en diciembre, que se construye sobre el módulo y llega en la anualidad siguiente. No hay un segundo horizonte tras él. Lo que antes se leía como dos horizontes son **dos tramos dentro de 2027**, y el orden entre ellos lo fija la **dependencia**, no la fecha: el tramo 2 arranca cuando el tramo 1 ya entregó el insumo del que depende. **MADRE** no designa un horizonte: es el nombre de este documento, el proyecto completo v10, con el roadmap de §17 y las fases C4–C6 de §17.14, sus servicios, convenios y calibraciones; y es también el nombre con el que los documentos llaman al **tramo 2** de 2027 —el que espera esos servicios, convenios o calibraciones—. Este documento es MADRE; el módulo de diciembre y su año siguiente son recortes suyos.
+
+| Tramo (dentro de 2027) | Caso                                                    | Requisitos  |
+| ---------------------- | ------------------------------------------------------- | ----------- |
+| **Tramo 1**            | CU-23 Registrar posición, influencia y relaciones       | RF-B06      |
+| **Tramo 1**            | CU-24 Ver la red de actores                             | RF-H01      |
+| **Tramo 1**            | CU-26 Ver indicadores avanzados                         | RF-J02, J03 |
+| **Tramo 1**            | CU-29 Generar borradores de informe                     | RF-G02, G04 |
+| **Tramo 1**            | CU-30 Avisar vencimientos y escalar alertas sin atender | RF-C03, D11 |
+| **Tramo 1**            | CU-32 Ingresar con segundo factor (MFA)                 | RF-A07      |
+| **Tramo 1**            | CU-33 Cambiar parámetros con historial                  | RF-X03      |
+| **Tramo 2**            | CU-25 Ver la línea de tiempo y el mapa                  | RF-H03, H04 |
+| **Tramo 2**            | Índice de riesgo compuesto (parte de CU-26)             | RF-J01      |
+| **Tramo 2**            | CU-27 Simular escenarios y tendencia (M5a/M5b)          | RF-J04, J05 |
+| **Tramo 2**            | CU-28 Analizar la pota en el tiempo                     | RF-N01, N02 |
+| **Tramo 2**            | CU-31 Consultar el estado de mis compromisos (Perfil C) | RF-A05      |
+| **Tramo 2**            | CU-34 Traducir estados al SESIGUE (M4)                  | RF-C06      |
+
+> **El índice de riesgo compuesto va en el tramo 2 por dependencia, no por horizonte.** RF-J01 (índice de riesgo compuesto) no entra en el tramo 1 aunque los demás indicadores sí: necesita la **red de actores completa** (CU-24), que entrega el tramo 1, y la **calibración contra el informe del caso SANIPES Sechura**, todavía vacía (H-34). RF-J02 y RF-J03 se calculan con datos que el módulo ya registra; por eso son del tramo 1. El mismo criterio ordena la red de actores (tramo 1) antes que el mapa con línea de tiempo (tramo 2): la primera es una vista sobre datos que ya se capturan; el segundo exige **acervo histórico** y el servicio de mapas (**SVC-11**), que todavía no existen.
+
+**El pipeline de documentos no es de 2027.** **CT-02** —el servicio de procesamiento de documentos en **.NET** que construye OAIPCS (Diego)— entra en el **tramo final de los 20 días del MVP**, alimentado por la lista blanca de SVC-01 y cubriendo **RF-E01 a RF-E06 y RF-E11** (§9.2.v10). Lo que queda para 2027 es solo la **lectura abierta** de fuentes públicas y redes sociales a escala, no el procesamiento de documentos _(Alineado con ERS v0.6 §3.4/§21.2–21.3)._
+
 ## 18. Preguntas abiertas, riesgos consolidados y decisiones
 
 ### 18.1 Preguntas abiertas
@@ -6291,7 +6439,7 @@ Se suman a las decisiones D1 a D9 de 0.6.6.
 | D22 | **El MVP usa los nombres de tabla de v9** (`core.actores`, `core.casos`, …). Los esquemas `seg`, `ia`, `audit` y `ref` del MVP se absorben en los de v9. _Por qué:_ evita una deuda de renombrado al migrar al modelo completo. _Costo:_ una pasada mecánica sobre el DDL del MVP (tabla en Anexo D.2) | Anexo D.2           |
 | D23 | SQL Server ≥ 2019 es el perfil de despliegue del MVP; PostgreSQL sigue siendo la referencia                                                                                                                                                                                                            | §3.17.2.v10         |
 | D24 | El simulador de 45 días es **M5a-lite**, una excepción de nivel declarada, con las reglas de v9 intactas                                                                                                                                                                                               | §0.7.1, §13.5.v10   |
-| D25 | Los cinco KPIs entran como semillas de `ind` (IRE e IPS30 como `proxy`); ~~el Perfil B queda en clasificación ≤ 2~~ **segunda mitad sin efecto (2026-11-20):** el Perfil B (`alta_direccion`) queda en clasificación 3 y solo lectura. Los KPIs siguen vigentes                                        | §8.4.ter, §11.8.v10 |
+| D25 | Los cinco KPIs se siembran en `ind` (IRE e IPS30 como `proxy`); ~~el Perfil B queda en clasificación ≤ 2~~ **segunda mitad sin efecto (2026-11-20):** el Perfil B (`alta_direccion`) queda en clasificación 3 y solo lectura. Los KPIs siguen vigentes. **Sin sembrar (2026-11-20): 0 filas en `ind`** | §8.4.ter, §11.8.v10 |
 | D26 | «Tiempo real» = tres tramos medibles; _polling_ de 60 s                                                                                                                                                                                                                                                | §10.2.v10           |
 | D27 | AVISA: copia congelada, carga por `staging`, delta semanal hasta el _cutover_                                                                                                                                                                                                                          | UC-14               |
 | D28 | Redes sociales solo por API oficial o proveedor licenciado, con lista blanca                                                                                                                                                                                                                           | §7.5.v10, G22       |
@@ -6850,6 +6998,8 @@ CREATE TABLE core.derivaciones_alerta (
 );
 CREATE INDEX ix_deriv_pendientes ON core.derivaciones_alerta(fecha_limite) WHERE estado_atencion <> 'Atendida';
 ```
+
+> **Nota (2026-11-20).** Este bloque es el DDL v8.3 validado; la tabla viva suma tres columnas posteriores: `aprobada_por` y `aprobada_en` (parche 21) y `visibilidad` —`varchar(12)` `NOT NULL DEFAULT 'interna'`, con `CHECK` de tres valores: interna, ejecutiva y sectorial— (parche 22). El gate G21 lee `visibilidad`, y el esquema vigente está en el DDL unificado y en el diccionario de datos.
 
 ### 20.8 Parte 8 — Documentos (política única: todo anexo documental es un documento tipado)
 
@@ -8479,11 +8629,13 @@ Extiende la numeración de §22.3.bis. Las pruebas T97–T99 se ejecutan **en ca
 | T98  | Una conexión reutilizada del _pool_ con otro usuario **no hereda** el contexto de sesión anterior                                                                                                                                                                       | B12      |
 | T99  | El Perfil B no ve alertas en estado «pendiente»; el Perfil C no ve alertas cuyo destinatario no es su actor (G21)                                                                                                                                                       | B12, B15 |
 | T100 | Una cita alterada en un solo carácter respecto de la fuente queda con `verificada_literal = false` y no aparece en ningún informe (G20)                                                                                                                                 | B15      |
-| T101 | El IRE del ejemplo de §8.4.ter se recalcula desde tablas y da **55,5**                                                                                                                                                                                                  | B13      |
-| T102 | El IPA del ejemplo de §8.4.ter da **61,25**                                                                                                                                                                                                                             | B13      |
+| T101 | Prueba de fórmula de §8.4.ter: el cálculo da **55,5**. Queda **bloqueada como prueba de integración** hasta que `ind.indicador`, `ind.variante` e `ind.resultado` tengan filas y exista `analytics.vw_k1_ire` (hoy: 0 filas; la vista no está creada)                   | B13      |
+| T102 | Prueba de fórmula de §8.4.ter: 50 × (150 ÷ 250) + 50 × (10 ÷ 16) = **61,25**. Queda **bloqueada como prueba de integración** mientras `kag.aristas.intensidad` esté vacía (0 de 450) y TENSION, EN_CONTRA_DE, A_FAVOR_DE e INFLUYE_SOBRE tengan 0 aristas               | B13      |
 | T103 | Las cuatro combinaciones de los dos ejes devuelven E1–E4; toda simulación guarda insumos, resultado, usuario y versión de reglas, y lleva el rótulo «ESCENARIO — no vigente»                                                                                            | B14      |
 | T104 | Con una fuente simulada, una noticia llega a la bandeja en ≤ 30 min; un cambio aprobado se ve en el tablero en ≤ 60 s; una crisis confirmada dispara el envío en ≤ 10 min (§10.2.v10)                                                                                   | B15      |
 | T105 | Reconciliación de la migración: origen = cargados + fusionados + descartados + pendientes                                                                                                                                                                               | B11, B16 |
+
+**Condición previa de T101 y T102.** Ninguna de las dos se ejecuta hoy, y no se marcan como aprobadas en la entrega de diciembre. Son verificaciones de fórmula (§8.4.ter); pasan a ser verificaciones de integración solo cuando la capa `ind` tenga semilla y existan las vistas por KPI. Se desbloquean cuando: `ind.indicador`, `ind.variante`, `ind.seleccion` e `ind.resultado` tengan filas; `kag.aristas.intensidad` esté poblada; y existan `analytics.vw_k1_ire` y `analytics.vw_k4_ipa`. T103 no depende de `ind`.
 
 **Para SQL Server.** T83 (`EXCLUDE USING gist`) se reescribe como prueba del _trigger_ de vigencias sin solape (§3.17.2.v10).
 <!-- v10:P14 end -->
@@ -8531,7 +8683,7 @@ flowchart LR
     classDef activo fill:#D1FAE5,stroke:#059669,color:#000
     subgraph AVISA["AVISA — prototipo actual (ene–ago 2026)"]
         GS["Google Sheets: 35 casos, 83 alertas, 931 actores, 219 organizaciones"]:::legado
-        AS["Apps Script: generación Word/PDF y consulta asistida"]:::legado
+        AS["Apps Script: generación Word/PDF y consulta asistida (maqueta)"]:::legado
         GD["Google Drive"]:::legado
         PB["Power BI"]:::legado
         CC["Cuenta compartida"]:::brecha
@@ -8556,6 +8708,8 @@ flowchart LR
     GS ==> K2
     AS ==> K1
 ```
+
+**Nota sobre la «consulta asistida» (2026-11-20).** El AVISA original tenía un módulo de consultas con IA (conector a Gemini en `Code.gs` y pantalla «Consultas con IA»), pero **nunca operó: era una maqueta** —la clave quedó en el marcador `PENDIENTE_API_KEY_GEMINI` y no hay uso en producción—. Se conserva como **antecedente de interfaz**, no como capacidad existente: por eso la paridad del módulo de diciembre no lo incluye y la IA del sistema nuevo se planifica desde cero _(Alineado con ERS v0.6 §5.1)._
 
 **Diagrama B — Evolución por niveles.** Distingue lo que existe (ámbar), lo nuevo del Nivel 1 y 2 (azul) y lo condicional (gris).
 
@@ -8705,14 +8859,14 @@ Todas las cifras son **ILUSTRATIVAS — no son datos del sistema**, salvo el sup
 
 **Recorrido.** Es el de §10.2.v10 (cuadro de las 09:02 a las 09:45). Lo que se verifica en el camino:
 
-| Punto de control | Qué ocurre                                                                                               | Guardrail         |
-| ---------------- | -------------------------------------------------------------------------------------------------------- | ----------------- |
-| Entrada          | La fuente está en la lista blanca; se deduplica por URL canónica y huella de texto                       | G22               |
-| Citas            | El modelo propone dos citas; una no es literal y se descarta                                             | G20               |
-| Actores          | «El dirigente de la caleta X» se asocia al alias existente; **no** se le asigna nombre                   | G19               |
-| Visibilidad      | Hasta las 09:41 la alerta es invisible para el Perfil B; el analista la aprueba con un motivo registrado | G21               |
-| Crisis           | La Dirección confirma; recién entonces se envía el SMS                                                   | gate HITL (§15.6) |
-| Resumen          | El Sintetizador produce el resumen de una página como «BORRADOR IA»; el analista lo valida               | §9.2.v10          |
+| Punto de control  | Qué ocurre                                                                                             | Guardrail         |
+| ----------------- | ------------------------------------------------------------------------------------------------------ | ----------------- |
+| Entrada           | La fuente está en la lista blanca; se deduplica por URL canónica y huella de texto                     | G22               |
+| Citas             | El modelo propone dos citas; una no es literal y se descarta                                           | G20               |
+| Actores           | «El dirigente de la caleta X» se asocia al alias existente; **no** se le asigna nombre                 | G19               |
+| Validación previa | Hasta las 09:41 la alerta es invisible para el Perfil B; el sectorista la valida con motivo registrado | G21               |
+| Aprobación        | La Dirección de la OAIPCS aprueba definitivamente toda alerta; en crisis, ese acto dispara el SMS      | gate HITL (§15.6) |
+| Resumen           | El Sintetizador produce el resumen de una página como «BORRADOR IA»; el analista lo valida             | §9.2.v10          |
 
 **Qué no pasa:** el Ministro no recibe nunca una alerta sin aprobación humana. **Pruebas:** T99, T100, T104.
 

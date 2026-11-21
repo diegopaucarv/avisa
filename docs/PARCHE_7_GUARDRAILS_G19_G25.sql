@@ -18,14 +18,29 @@
 -- guardrails «rechazan, no solo advierten».
 --
 -- Qué NO hace.
---   - No toca las 18 filas G1–G18: el ON CONFLICT solo puede afectar a las
---     claves que este INSERT aporta (G19–G25).
+--   - No toca ninguna fila existente: `ON CONFLICT DO NOTHING` solo inserta las
+--     siete claves que faltan. No reescribe G1–G18 ni una fila de G19–G25 que ya
+--     exista (véase «por qué DO NOTHING», más abajo).
 --   - No toca `config.parametro` (lo usa otro parche).
---   No altera el CHECK de `guardrail`: el parche 6 ya lo amplió a G1–G25.
+--   - No altera el CHECK de `guardrail`: el parche 6 ya lo amplió a G1–G25.
 --
--- Idempotente. Re-ejecutable: `ON CONFLICT (guardrail) DO UPDATE` deja las 7
--- filas convergiendo al mismo contenido (también corrige una fila que se haya
--- desviado a mano). El conteo no cambia entre la primera y la segunda corrida.
+-- Idempotente. Re-ejecutable: `ON CONFLICT (guardrail) DO NOTHING` crea las siete
+-- filas si faltan y no reescribe ninguna que ya exista. El conteo no cambia entre
+-- la primera y la segunda corrida.
+--
+-- POR QUÉ `DO NOTHING` Y NO `DO UPDATE` (corregido el 2026-11-21). Hasta esa
+-- fecha el archivo usaba `DO UPDATE`, que dejaba las siete filas convergiendo al
+-- contenido del 18 de noviembre. Era cómodo mientras este era el último parche
+-- que tocaba la tabla, y dejó de serlo: el parche 22 creó
+-- `core.alertas_tempranas.visibilidad` con el vocabulario `interna`/`ejecutiva`/
+-- `sectorial`, y el 23 reescribió la fila de G21 con ese vocabulario y le añadió
+-- `validada_por`, porque el `perfil_b` que trae este archivo ya no es un valor
+-- que el CHECK admita. Con `DO UPDATE`, una reejecución suelta del 7 después del
+-- 23 deshacía esa corrección y, de paso, dejaba al 23 sin poder reejecutarse: su
+-- comprobación aborta si G21 no dice `ejecutiva`. Con `DO NOTHING` el contenido de
+-- una fila pertenece al último parche que la toca, y el orden de la cadena deja de
+-- ser una condición de corrección. El precio es explícito: este parche ya no
+-- «corrige» una fila desviada a mano; eso le corresponde al parche que la posee.
 --
 -- Ejecución (forma obligatoria en este repo):
 --   docker exec -i avisa-db psql -U avisa -d avisa -f - \
@@ -155,12 +170,11 @@ VALUES
         '{"ok": true, "msg": null, "code": null}'::jsonb,
         'block'
     )
-ON CONFLICT (guardrail) DO UPDATE
-    SET input_dispara              = EXCLUDED.input_dispara,
-        input_no_dispara           = EXCLUDED.input_no_dispara,
-        output_esperado_dispara    = EXCLUDED.output_esperado_dispara,
-        output_esperado_no_dispara = EXCLUDED.output_esperado_no_dispara,
-        severidad                  = EXCLUDED.severidad;
+-- `DO NOTHING`, no `DO UPDATE`: el porqué está en la cabecera. Esta fila de G21
+-- se escribe con `perfil_b`, el vocabulario anterior a que existiera la columna;
+-- el parche 23 la deja en `ejecutiva` y le añade `validada_por`, y desde hoy este
+-- parche ya no puede pisarla.
+ON CONFLICT (guardrail) DO NOTHING;
 
 COMMIT;
 
@@ -239,8 +253,14 @@ WHERE (substring(guardrail FROM 2))::int BETWEEN 1 AND 18;
 --    (trigger de visibilidad de G21, vista que no proyecta PII de G24,
 --    verificación de offsets de G20) no existen todavía en el esquema.
 -- b) G21 supone una tabla de alertas con `visibilidad`, `aprobada_por` y
---    `aprobada_en`. `core.alertas_tempranas` no las tiene hoy: el guardrail fija
---    el contrato antes que la columna, a propósito (v10 §16.1.quater).
+--    `aprobada_en`. Cuando se escribió este parche, el 18 de noviembre de 2026,
+--    `core.alertas_tempranas` no las tenía y el contrato se fijó antes que la
+--    columna, a propósito (v10 §16.1.quater). Hoy las tres existen: `aprobada_por`
+--    y `aprobada_en` desde el parche 21, `visibilidad` desde el 22. El gate
+--    `alertas_g21_visibilidad` es ejecutable, y el parche 23 reescribió esta misma
+--    fila con el vocabulario real (`ejecutiva`) y con `validada_por`, el cuarto
+--    ojo. El `perfil_b` del `VALUES` es histórico: sobrevive en el archivo, no en
+--    la base.
 -- c) `core.situacion_judicial_restricta` (G25) está definida en v10 §13.6.bis.v10
 --    y §2.3.bis, pero no se crea en este parche.
 -- d) La lista blanca de fuentes (G22) vive en `config.parametro` y la siembra

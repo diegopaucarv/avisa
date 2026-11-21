@@ -138,6 +138,11 @@ CLASIFICACION_EXPLICITA = {
         "criterio: catálogo de servicios y costos (RNF-13)",
     ),
     "config.tope_gasto": ("INF", "criterio: parámetro de gasto (RNF-13, H-65)"),
+    # Parche 23. No aparece en §12 del BRECHA.
+    "core.alerta_destinatario": (
+        "O",
+        "criterio: destinatarios del aviso, junto a `core.suscripcion_notificacion`",
+    ),
 }
 
 # El BRECHA nombra `_rejected` dentro de la fila de `avisa.raw_ingest`.
@@ -1222,7 +1227,8 @@ def generar_markdown(datos: dict) -> str:
     lineas.append(
         f"- **Descripciones de columna**: {num(con_comentario_propio)} columnas del "
         "modelo v10 llevan comentario propio en la base (los pone el parche [12], salvo "
-        "los de las tablas que llegaron con los parches [14] a [19]). Las particiones heredan "
+        "los de las tablas que llegaron con los parches [14] a [19] y los de las dos "
+        "columnas de aprobación que añade el [21]). Las particiones heredan "
         f"la descripción de su tabla padre ({num(heredadas)} columnas), porque "
         "PostgreSQL no propaga los comentarios a las particiones. Del sistema "
         "anterior se documentan las columnas que la migración consume de forma "

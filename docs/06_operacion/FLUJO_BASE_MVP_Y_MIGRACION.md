@@ -199,7 +199,7 @@ total que deja la carga más el parche 16 con su rol de administrador y oficial 
 datos personales. Si se verifica antes de ese parche, la línea avisa de la fila
 que falta y no es un problema de la carga.
 
-### 5.4 Aplicar los parches 6 a 19
+### 5.4 Aplicar los parches 6 a 24
 
 Los parches vienen **después** de la carga, siempre en orden, y nunca antes.
 Cada uno hace algo que necesita datos reales: reclasificar documentos, cifrar
@@ -239,16 +239,75 @@ MSYS_NO_PATHCONV=1 docker exec -i avisa-db psql -U avisa -d avisa \
   -v ON_ERROR_STOP=1 -f /dev/stdin < docs/PARCHE_19_COMENTARIOS_FALTANTES.sql
 ```
 
+Y el 20, que deja el flujo de alerta en cinco pasos con la aprobación
+definitiva de la Dirección:
+
+```sh
+MSYS_NO_PATHCONV=1 docker exec -i avisa-db psql -U avisa -d avisa \
+  -v ON_ERROR_STOP=1 -f /dev/stdin < docs/PARCHE_20_FLUJO_ALERTA.sql
+```
+
+Y el 21, que da cuenta a la Dirección, normaliza el
+`rol_responsable` del flujo y añade la aprobación de la alerta.
+
+```sh
+MSYS_NO_PATHCONV=1 docker exec -i avisa-db psql -U avisa -d avisa \
+  -v ON_ERROR_STOP=1 -f /dev/stdin < docs/PARCHE_21_DIRECCION_Y_FLUJO.sql
+```
+
+Y el 22, que cierra los pendientes de base del 20 y el 21: hace ejecutable el gate
+G21 y da visibilidad a la alerta.
+
+```sh
+MSYS_NO_PATHCONV=1 docker exec -i avisa-db psql -U avisa -d avisa \
+  -v ON_ERROR_STOP=1 -f /dev/stdin < docs/PARCHE_22_VISIBILIDAD_Y_G21.sql
+```
+
+Debe cerrar con `PARCHE 22 · aplicado`, y los dos `NOTICE` de cierre lo dicen todo:
+las **83** alertas quedan en `interna`, `core.alertas_tempranas` en **36 columnas**,
+`core.vw_alerta_estado` en **20 columnas y 83 filas** y `paso_actual` en el paso 5
+en las **83**; el parche aborta si el trigger `alertas_g21_visibilidad` no existe o
+deja pasar una visibilidad sin las dos firmas.
+
+Y el 23, que hace nombrables los destinatarios y pone la gravedad en el dato:
+
+```sh
+MSYS_NO_PATHCONV=1 docker exec -i avisa-db psql -U avisa -d avisa \
+  -v ON_ERROR_STOP=1 -f /dev/stdin < docs/PARCHE_23_DESTINATARIOS_Y_CUATRO_OJOS.sql
+```
+
+Debe cerrar con `PARCHE 23 · aplicado`, `core.alertas_tempranas` en **37 columnas**,
+`core.vw_alerta_estado` en **22**, **2** niveles con `es_grave` y **0**
+destinatarios: el parche crea la tabla pero no siembra a quién avisar. Aborta si el
+contrato de G21 no queda en `ejecutiva`, o si alguna de las **83** alertas deja de
+ser `interna`.
+
+Y el 24, que describe las siete columnas que el 23 dejó sin comentario:
+
+```sh
+MSYS_NO_PATHCONV=1 docker exec -i avisa-db psql -U avisa -d avisa \
+  -v ON_ERROR_STOP=1 -f /dev/stdin < docs/PARCHE_24_COMENTARIOS_DESTINATARIO.sql
+```
+
+Debe cerrar con `PARCHE 24 · aplicado` y el `NOTICE` «columnas del modelo sin
+comentario: 0». Este parche es además lo que devuelve al 19 su reejecutabilidad: el
+candado del 19 mide el modelo entero y aborta mientras quede una columna sin
+describir.
+
 **Detalles que importan:**
 
 - `MSYS_NO_PATHCONV=1` es necesario en Git Bash: si no, el sistema convierte las
   rutas que empiezan por `/` a rutas de Windows y `psql` busca en el lugar
   equivocado.
 - El archivo se pasa por entrada estándar (`-f -`, o `-f /dev/stdin` como en el
-  18), no con `-f /tmp/...`. Los 19 archivos del entorno —los 5 de preparación y
-  los parches 6 a 19— están montados de solo lectura dentro del contenedor, de
-  `96_patch_06.sql` a `109_patch_19.sql` (el 17 es `107_patch_17.sql`, el 18 el
-  `108` y el 19 el `109`), así que también vale `-f /opt/avisa/sql/109_patch_19.sql`.
+  18), no con `-f /tmp/...`. Los **24** archivos del entorno —los 5 de preparación y
+  los parches 6 a 24— están montados de solo lectura dentro del contenedor, de
+  `96_patch_06.sql` a `114_patch_24.sql` (el 17 es `107_patch_17.sql`, el 18 el
+  `108`, el 19 el `109`, el 20 el `110`, el 21 el `111`, el 22 el `112`, el 23 el
+  `113` y el 24 el `114`), así que también vale `-f /opt/avisa/sql/114_patch_24.sql`.
+  En el contenedor que está en marcha hoy los montajes llegan solo hasta el `109`,
+  porque se fijan al crear el contenedor: del `110` en adelante hay que pasar el
+  archivo por entrada estándar hasta el próximo `docker compose up -d`.
 - El parche 6 crea una tabla de respaldo (`core.patch6_documentos_snapshot`) que
   él mismo autoriza a borrar cuando se valida. En la base de trabajo ya está
   borrada, por eso los conteos no la incluyen; en una base reconstruida existe
@@ -274,6 +333,28 @@ MSYS_NO_PATHCONV=1 docker exec -i avisa-db psql -U avisa -d avisa \
   `core.consulta_reniec` y `core.envios_comunicacion`, porque el parche 12 los
   comentó antes de que el 17 creara esos objetos. Verifica que el modelo quede
   sin ninguna columna sin describir; si quedara una, aborta.
+- El parche 20 rehace el flujo de la alerta temprana: cinco pasos, con la
+  aprobación definitiva de la Dirección en un rol nuevo (`direccion_oaipcs`),
+  las 83 instancias del Archivo renumeradas del paso 4 al 5 y RLS forzada en
+  `core.flujo_definicion`. Comprueba el estado de partida y aborta si hay
+  instancias de alerta en los pasos 2 o 3; no inserta ninguna instancia.
+- El parche 21 le da cuenta a ese rol —asigna `direccion_oaipcs` a la Directora
+  (`SEC-11`)—, normaliza el `rol_responsable` de los 7 pasos de `caso` y `reporte`
+  que seguía en texto libre y cierra G21 con `aprobada_por` y `aprobada_en` en
+  `core.alertas_tempranas`, más RLS forzada en `core.flujo_estado` y
+  `core.permiso_aprobacion`. No inventa aprobaciones: las 83 alertas siguen con
+  `aprobada_por` en nulo.
+- El parche 22 hace ejecutable G21: añade `visibilidad` a `core.alertas_tempranas`
+  (tres valores: `interna`, `ejecutiva` y `sectorial`, por defecto `interna`) y el
+  trigger `alertas_g21_visibilidad` rechaza con `G21_SIN_APROBACION` cualquier
+  visibilidad distinta de `interna` mientras falte la validación previa del
+  Sectorista o la aprobación definitiva de la Dirección. Da consumidor a
+  `core.permiso_aprobacion` (`core.puede_aprobar()`, que responde `true` para la
+  Directora y `false` para el resto mientras la tabla siga con 0 filas), amplía
+  `core.vw_alerta_estado` a 20 columnas y corrige `paso_actual` en las 83 alertas
+  derivándolo de `core.proceso_instancia`. No siembra suplencias ni amplía el flujo
+  `reporte`: los 9 pasos 4–6 de ese flujo quedan documentados, sin ampliar el
+  catálogo, como pasos del sistema anterior que no tienen equivalente.
 
 ### 5.5 Verificar de nuevo
 
@@ -297,7 +378,7 @@ cuenta).
 ### 5.6 Regenerar los artefactos derivados
 
 Los documentos que se generan **no se editan a mano**: se regeneran cuando cambia su fuente. Este es
-el orden, porque cada uno puede alimentar al siguiente (la razón de cada flecha está en `INDICE.md`
+el orden, porque cada uno puede alimentar al siguiente (la razón de cada flecha está en `README.md`
 **§6.e**):
 
 ```sh
@@ -311,13 +392,13 @@ python migration/extraer_fks.py               # 6. sql_server/*.sql + INFORME_FK
 
 **Cuáles necesitan la base encendida y cuáles no.** Los pasos 1, 3, 4 y 5 leen el catálogo vivo
 (`pg_class`, `pg_attribute`, `pg_constraint`) y fallan sin base: miden filas y columnas reales, no
-heredan cifras. Los pasos 2 y 6 trabajan sobre archivos —el 2 lee el DDL y los 19 SQL, el 6 lee el
+heredan cifras. Los pasos 2 y 6 trabajan sobre archivos —el 2 lee el DDL y los 24 SQL, el 6 lee el
 unificado del paso 2— y por eso son los únicos que corren con la base apagada.
 
 **Comprobación de que quedaron coherentes.** Después del paso 3, las «Cifras de esta edición» del
-encabezado de `05_datos/DICCIONARIO_DATOS.md` deben coincidir con la medición del 2026-11-20 de
-`INDICE.md` §3; si no coinciden, el desactualizado es el diccionario. Después del paso 5, el CSV
-debe tener **265** filas de datos y sumar **2 145** columnas y **13 352** filas, que es lo que dice
+encabezado de `05_datos/DICCIONARIO_DATOS.md` deben coincidir con la medición del 2026-11-21 de
+`README.md` §3; si no coinciden, el desactualizado es el diccionario. Después del paso 5, el CSV
+debe tener **266** filas de datos y sumar **2 161** columnas y **13 355** filas, que es lo que dice
 `03_ejecucion/PRIORIZACION_MVP_v10.md` §1.
 
 ---
@@ -449,11 +530,11 @@ los parches (partes B y siguientes).
 La secuencia completa que se verificó en una base nueva:
 
 ```
-sección A  →  carga del legado  →  parches 6 a 19  →  pruebas 15 y 16
+sección A  →  carga del legado  →  parches 6 a 24  →  pruebas 15 y 16
 ```
 
-Al terminar: **289 tablas físicas** (265 lógicas y 24 hijas de partición),
-**2 511 columnas** y **610 claves ajenas**, sin contar `legacy` ni `public`. Son
+Al terminar: **290 tablas físicas** (266 lógicas y 24 hijas de partición),
+**2 527 columnas** y **616 claves ajenas**, sin contar `legacy` ni `public`. Son
 las cifras medidas en la base de trabajo el 2026-11-20.
 
 **Comprobación del 2026-11-19, de punta a punta.** La secuencia completa se
@@ -471,7 +552,22 @@ El parche 18, que entró después, añade 2 tablas, 19 columnas, 1 clave ajena y
 políticas en 5 tablas: el estado final es **290 tablas físicas, 2 515 columnas y
 610 claves ajenas** (**289 / 2 511 / 610** sin el respaldo del parche 6) y **540
 políticas en 87 tablas**. El parche 19 no altera ninguna de esas cifras: solo
-escribe los 19 comentarios de columna que el 17 había dejado pendientes.
+escribe los 19 comentarios de columna que el 17 había dejado pendientes. El 20
+tampoco: no crea tablas ni columnas (sigue en 289 físicas y 2 511 columnas), solo
+añade filas de catálogo —un paso de flujo y un rol— y 4 políticas, y deja **544
+políticas en 88 tablas**. El 21 no mueve tablas, pero suma 1 cuenta, 2 columnas, un
+índice parcial y 8 políticas en los dos últimos catálogos del flujo: **289 tablas
+físicas y 2 513 columnas** —la cuenta sin el respaldo del parche 6, que es la que se
+conserva hasta el final— y **556 políticas en 91 tablas**. El 22 tampoco mueve
+tablas: suma 1 columna, 1 restricción `CHECK`, 1 índice parcial, 1 trigger, 1 función
+y 1 vista, y deja **2 514 columnas**, los objetos derivados en **37 y 313 columnas** y
+las políticas en **556 sobre 91 tablas**. El 23 suma 1 tabla
+(`core.alerta_destinatario`, 11 columnas, vacía), 1 columna en
+`core.alertas_tempranas`, 1 en `core.cat_prioridades_alerta`, 5 claves ajenas, 6
+`CHECK`, 1 trigger, 5 índices y 4 políticas: el estado final, medido el 2026-11-20, es
+**290 tablas físicas** (266 lógicas y 24 particiones), **2 527 columnas** (**2 161**
+lógicas), **616 claves ajenas**, **360 `CHECK`**, **69 triggers**, **767 índices**, **37
+objetos derivados con 313 columnas** y **556 políticas sobre 91 tablas**.
 
 ---
 
@@ -512,7 +608,7 @@ psql -U avisa -d avisa -v ON_ERROR_STOP=1 -f /tmp/seccion_a.sql
 python -m migration.loader.run
 python -m migration.loader.run --verify
 
-# --- parches 6 a 19
+# --- parches 6 a 24
 python migration/consolidar_esquema.py --seccion B --salida /tmp/seccion_b.sql
 MSYS_NO_PATHCONV=1 docker exec -i avisa-db psql -U avisa -d avisa \
   -v ON_ERROR_STOP=1 -v crypto_key="$APP_CRYPTO_KEY" -f - < /tmp/seccion_b.sql
@@ -524,6 +620,26 @@ MSYS_NO_PATHCONV=1 docker exec -i avisa-db psql -U avisa -d avisa \
 # --- parche 19 suelto (los comentarios de columna que faltaban)
 MSYS_NO_PATHCONV=1 docker exec -i avisa-db psql -U avisa -d avisa \
   -v ON_ERROR_STOP=1 -f /dev/stdin < docs/PARCHE_19_COMENTARIOS_FALTANTES.sql
+
+# --- parche 20 suelto (flujo de alerta en dos niveles)
+MSYS_NO_PATHCONV=1 docker exec -i avisa-db psql -U avisa -d avisa \
+  -v ON_ERROR_STOP=1 -f /dev/stdin < docs/PARCHE_20_FLUJO_ALERTA.sql
+
+# --- parche 21 suelto (la Dirección y la normalización del flujo)
+MSYS_NO_PATHCONV=1 docker exec -i avisa-db psql -U avisa -d avisa \
+  -v ON_ERROR_STOP=1 -f /dev/stdin < docs/PARCHE_21_DIRECCION_Y_FLUJO.sql
+
+# --- parche 22 suelto (visibilidad de la alerta y G21 ejecutable)
+MSYS_NO_PATHCONV=1 docker exec -i avisa-db psql -U avisa -d avisa \
+  -v ON_ERROR_STOP=1 -f /dev/stdin < docs/PARCHE_22_VISIBILIDAD_Y_G21.sql
+
+# --- parche 23 suelto (destinatarios nombrados y escala de gravedad)
+MSYS_NO_PATHCONV=1 docker exec -i avisa-db psql -U avisa -d avisa \
+  -v ON_ERROR_STOP=1 -f /dev/stdin < docs/PARCHE_23_DESTINATARIOS_Y_CUATRO_OJOS.sql
+
+# --- parche 24 suelto (los siete comentarios del destinatario)
+MSYS_NO_PATHCONV=1 docker exec -i avisa-db psql -U avisa -d avisa \
+  -v ON_ERROR_STOP=1 -f /dev/stdin < docs/PARCHE_24_COMENTARIOS_DESTINATARIO.sql
 
 # --- pruebas
 MSYS_NO_PATHCONV=1 docker exec -i avisa-db psql -U avisa -d avisa \
@@ -556,7 +672,7 @@ MSYS_NO_PATHCONV=1 docker exec -i avisa-db psql -U avisa -d avisa_mssql \
 Los documentos citados en este texto, con lo que aporta cada uno:
 
 1. `docs/06_operacion/ENTORNO_DOCKER_POSTGRES.md` — el contenedor, las credenciales, el
-   arranque y la aplicación de los parches 6 a 19 (§9).
+   arranque y la aplicación de los parches 6 a 24 (§9).
 2. `docs/AVISA_V10_ESQUEMA_UNIFICADO.sql` — todo el esquema en un archivo, en dos
    secciones, con el detalle de qué produce cada una. Generado: no se edita a mano.
 3. `migration/consolidar_esquema.py` — el programa que arma ese archivo unificado.

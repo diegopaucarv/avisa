@@ -76,7 +76,7 @@ services:
         target: /opt/avisa/sql/95_patch_05.sql
         read_only: true
 
-      # Parches 6–19: se montan pero NO los aplica el initdb. Dependen de datos que
+      # Parches 6–24: se montan pero NO los aplica el initdb. Dependen de datos que
       # sólo existen después de la carga (documentos `RED-%`, tablas `legacy.*`), así
       # que se ejecutan a mano: ver docs/06_operacion/ENTORNO_DOCKER_POSTGRES.md §9.
       - type: bind
@@ -134,6 +134,26 @@ services:
       - type: bind
         source: ./docs/PARCHE_19_COMENTARIOS_FALTANTES.sql
         target: /opt/avisa/sql/109_patch_19.sql
+        read_only: true
+      - type: bind
+        source: ./docs/PARCHE_20_FLUJO_ALERTA.sql
+        target: /opt/avisa/sql/110_patch_20.sql
+        read_only: true
+      - type: bind
+        source: ./docs/PARCHE_21_DIRECCION_Y_FLUJO.sql
+        target: /opt/avisa/sql/111_patch_21.sql
+        read_only: true
+      - type: bind
+        source: ./docs/PARCHE_22_VISIBILIDAD_Y_G21.sql
+        target: /opt/avisa/sql/112_patch_22.sql
+        read_only: true
+      - type: bind
+        source: ./docs/PARCHE_23_DESTINATARIOS_Y_CUATRO_OJOS.sql
+        target: /opt/avisa/sql/113_patch_23.sql
+        read_only: true
+      - type: bind
+        source: ./docs/PARCHE_24_COMENTARIOS_DESTINATARIO.sql
+        target: /opt/avisa/sql/114_patch_24.sql
         read_only: true
 
     healthcheck:

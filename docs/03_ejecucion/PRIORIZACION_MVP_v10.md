@@ -1,8 +1,8 @@
 # Qué construir primero — capas de la v10 y puente con el MVP-45
 
-**Para qué sirve este documento.** La v10 tiene 265 tablas; el MVP-45 pide 55 objetos para 45 días, que hoy se cumplen con 46 tablas existentes (34 con datos y 12 todavía vacías). Este documento dice, con medición sobre la base viva, **qué parte de la v10 ya está en pie, qué parte hay que crear primero y qué parte puede esperar**. No reemplaza al `mvp.md` ni al `AVISA_PRODUCE_v10.md`: los ordena en el tiempo.
+**Para qué sirve este documento.** La v10 tiene 266 tablas; el MVP-45 pide 55 objetos para 45 días, que hoy se cumplen con 46 tablas existentes (33 con datos y 13 todavía vacías). Este documento dice, con medición sobre la base viva, **qué parte de la v10 ya está en pie, qué parte hay que crear primero y qué parte puede esperar**. No reemplaza al `mvp.md` ni al `AVISA_PRODUCE_v10.md`: los ordena en el tiempo.
 
-> **Nota de medición.** Las cifras de capas salen de `mvp_prioridad_tablas.csv` regenerado el **2026-11-20**, con el parche 18 ya aplicado. Las dos tablas que trajo ese parche entran por la regla del clasificador, no por la lista del contrato MVP-45: `config.servicio_externo` (8 columnas, 4 filas) cae en **T2** porque el contrato no la nombra, y `config.tope_gasto` (11 columnas, 0 filas) en **T4**. El ERS las exige por RNF-13, así que en la práctica se programan junto con T0 y T1.
+> **Nota de medición.** Las cifras de capas salen de `mvp_prioridad_tablas.csv` regenerado el **2026-11-20**, con los parches 18 a 23 ya aplicados. Las dos tablas que trajo el parche 18 entran por la regla del clasificador, no por la lista del contrato MVP-45: `config.servicio_externo` (8 columnas, 4 filas) cae en **T2** porque el contrato no la nombra, y `config.tope_gasto` (11 columnas, 0 filas) en **T4**. El ERS las exige por RNF-13, así que en la práctica se programan junto con T0 y T1. El **parche 23** creó `core.alerta_destinatario`, que es la tabla exacta que el contrato del MVP pedía como `alerta_destinatario`: antes se aproximaba a `core.alertas_actores`, que relaciona la alerta con los actores del conflicto y no con quien recibe el aviso. La correspondencia del puente (§7) ya la apunta a la tabla nueva y por eso `core.alertas_actores` pasa a **T2**.
 
 **Cómo se lee.** Cinco capas, de la que ya funciona a la que duerme. Después, el puente entre los nombres del MVP y los de la v10. Al final, el orden de construcción del backend, bloque por bloque.
 
@@ -17,19 +17,19 @@ xychart-beta
     title "Tablas de la v10 por capa"
     x-axis ["T0 ya vive", "T1 MVP vacía", "T2 viva fuera", "T3 enganchada", "T4 dormida"]
     y-axis "Tablas" 0 --> 130
-    bar [34, 12, 76, 22, 121]
+    bar [33, 13, 77, 22, 121]
 ```
 
 | Capa   | Qué significa                                        | Tablas |  Columnas |      Filas |
 | ------ | ---------------------------------------------------- | -----: | --------: | ---------: |
-| **T0** | El MVP la exige y ya tiene datos o cargador          |     34 |       364 |  **8 379** |
-| **T1** | El MVP la exige y todavía está vacía                 |     12 |        99 |          0 |
-| **T2** | No la pide el MVP, pero está viva (datos o cargador) |     76 |       542 |  **4 973** |
+| **T0** | El MVP la exige y ya tiene datos o cargador          |     33 |       367 |  **8 220** |
+| **T1** | El MVP la exige y todavía está vacía                 |     13 |       110 |          0 |
+| **T2** | No la pide el MVP, pero está viva (datos o cargador) |     77 |       544 |  **5 135** |
 | **T3** | Vacía, pero algo vivo la usa (una FK, un disparador) |     22 |       226 |          0 |
 | **T4** | Vacía y sin nada vivo que la toque                   |    121 |       914 |          0 |
-| Total  |                                                      |    265 | **2 145** | **13 352** |
+| Total  |                                                      |    266 | **2 161** | **13 355** |
 
-Las 13 352 filas se reparten solo entre T0 y T2. **La mitad baja del modelo está vacía hoy**: 143 tablas (T3 + T4) no tienen una sola fila.
+Las 13 355 filas se reparten solo entre T0 y T2. **La mitad baja del modelo está vacía hoy**: 143 tablas (T3 + T4) no tienen una sola fila.
 
 ---
 
@@ -50,23 +50,23 @@ Dos advertencias para no sobreinterpretar:
 - **Los consumidores casi no aportan todavía.** El código de la aplicación es un esqueleto: el backend tiene 147 líneas y el frontend 48. Ninguna tabla tiene consumo real, así que esa señal vale cero hoy y valdrá mucho dentro de tres semanas.
 - **El DDL no es un consumidor.** Al medir por primera vez aparecieron 115 tablas "usadas por el código"; todas eran falsos positivos: el escáner estaba leyendo el archivo `PRODUCE_OAIPCS_AVISA_v9_ddl(1).sql`, que **define** las tablas, no las consulta.
 
-**Qué entra en la cuenta.** El universo son las relaciones de tipo tabla (`relkind` `r` y `p`), con cada tabla particionada contada **una vez** —sus 24 particiones hijas quedan fuera— y sin vistas, vistas materializadas ni catálogos del sistema. Se excluyen además `legacy` (87 tablas: la copia en bruto del libro, fase 0 del cargador) y `public.spatial_ref_sys`, que no forman parte del modelo. De 353 tablas contadas así sobran 88: el modelo son **265**.
+**Qué entra en la cuenta.** El universo son las relaciones de tipo tabla (`relkind` `r` y `p`), con cada tabla particionada contada **una vez** —sus 24 particiones hijas quedan fuera— y sin vistas, vistas materializadas ni catálogos del sistema. Se excluyen además `legacy` (87 tablas: la copia en bruto del libro, fase 0 del cargador) y `public.spatial_ref_sys`, que no forman parte del modelo. De 354 tablas contadas así sobran 88: el modelo son **266**.
 
 ---
 
-## 3. Capa T0 — lo que ya vive (34 tablas)
+## 3. Capa T0 — lo que ya vive (33 tablas)
 
 Es el punto de partida real. Todo esto ya tiene filas en la base y ya es parte del MVP.
 
 | Tabla                           | Filas | La referencian | Columnas |
 | ------------------------------- | ----: | -------------: | -------: |
-| `core.usuarios`                 |    32 |             84 |       13 |
+| `core.usuarios`                 |    32 |             89 |       13 |
 | `core.cat_clasificacion`        |     3 |             63 |        2 |
 | `core.casos`                    |    35 |             47 |       40 |
 | `core.actores`                  | 1 160 |             37 |       31 |
 | `core.distritos`                |   698 |             18 |        4 |
 | `kag.documento_fuente`          |    10 |             12 |       10 |
-| `core.alertas_tempranas`        |    83 |              6 |       33 |
+| `core.alertas_tempranas`        |    83 |              7 |       37 |
 | `core.compromisos`              |     8 |              5 |       25 |
 | `kag.aristas`                   |   450 |              3 |       17 |
 | `core.caso_cronologia`          |    80 |              2 |       20 |
@@ -76,26 +76,25 @@ Es el punto de partida real. Todo esto ya tiene filas en la base y ya es parte d
 | `core.cat_niveles_riesgo`       |     3 |              2 |        3 |
 | `ref.base_legal_tratamiento`    |     5 |              2 |       12 |
 | `core.cat_estados_compromiso`   |     5 |              1 |        4 |
-| `core.cat_prioridades_alerta`   |     4 |              1 |        3 |
+| `core.cat_prioridades_alerta`   |     4 |              1 |        4 |
 | `core.cat_tipos_actor`          |     7 |              1 |        3 |
 | `core.cat_tipos_hecho`          |     9 |              1 |        2 |
 | `core.hitos_compromiso`         |    12 |              1 |       12 |
-| `core.roles`                    |     9 |              1 |        6 |
+| `core.roles`                    |    10 |              1 |        6 |
 | `core.cat_nivel_identificacion` |     5 |              1 |        3 |
 | `core.banco_datos_tratamiento`  |     1 |              1 |       18 |
 | `audit.datos_personales_acceso` | 3 088 |              0 |        8 |
 | `core.actor_datos_personales`   |   847 |              0 |       17 |
 | `core.actor_membresia`          |   292 |              0 |        6 |
-| `core.alertas_actores`          |   161 |              0 |        2 |
 | `core.caso_estado_historial`    |    35 |              0 |       11 |
 | `core.casos_actores`            |    60 |              0 |        4 |
 | `core.cronologia_vinculos`      |     5 |              0 |        3 |
 | `core.log_accesos`              |   857 |              0 |        9 |
 | `core.organizaciones`           |   224 |              0 |       21 |
-| `core.usuario_roles`            |    35 |              0 |        4 |
+| `core.usuario_roles`            |    36 |              0 |        4 |
 | `core.actor_alias`              |   143 |              0 |        8 |
 
-**Qué dice la columna «la referencian».** Si es alta, esa tabla hay que crearla antes que las demás: `core.usuarios` (84) y `core.cat_clasificacion` (63) son la base de todo. Si es cero, no significa que sobre: `core.actor_datos_personales` (847 filas) no la referencia ninguna clave foránea, pero es donde vive el DNI cifrado.
+**Qué dice la columna «la referencian».** Si es alta, esa tabla hay que crearla antes que las demás: `core.usuarios` (85) y `core.cat_clasificacion` (63) son la base de todo. Si es cero, no significa que sobre: `core.actor_datos_personales` (847 filas) no la referencia ninguna clave foránea, pero es donde vive el DNI cifrado.
 
 Dos sorpresas útiles:
 
@@ -104,11 +103,12 @@ Dos sorpresas útiles:
 
 ---
 
-## 4. Capa T1 — lo que el MVP pide y aún no tiene datos (12 tablas)
+## 4. Capa T1 — lo que el MVP pide y aún no tiene datos (13 tablas)
 
 | Tabla                           | Columnas |
 | ------------------------------- | -------: |
 | `agent.run_log`                 |       13 |
+| `core.alerta_destinatario`      |       11 |
 | `core.compromiso_colaboradores` |        2 |
 | `core.consulta_reniec`          |       10 |
 | `core.output_contracts`         |       12 |
@@ -121,17 +121,17 @@ Dos sorpresas útiles:
 | `qda.mapeo_pseudonimo`          |        4 |
 | `staging.lote`                  |       13 |
 
-Son 99 columnas vacías que el MVP ya usa en su diseño. Se crean con su bloque (ver §8), no antes: una tabla vacía sin endpoint solo ocupa espacio.
+Son 110 columnas vacías que el MVP ya usa en su diseño. Se crean con su bloque (ver §8), no antes: una tabla vacía sin endpoint solo ocupa espacio.
 
 ---
 
-## 5. Capa T2 — lo vivo que el MVP no pidió (76 tablas)
+## 5. Capa T2 — lo vivo que el MVP no pidió (77 tablas)
 
-76 tablas con 4 973 filas que **no están en las 55 del contrato del MVP** pero ya tienen datos. No se tocan: se heredan.
+77 tablas con 5 135 filas que **no están en las 55 del contrato del MVP** pero ya tienen datos. No se tocan: se heredan.
 
 | Esquema      | Tablas T2 | Qué es                                  |
 | ------------ | --------: | --------------------------------------- |
-| `core`       |        49 | catálogos, geografía y soporte del caso |
+| `core`       |        50 | catálogos, geografía y soporte del caso |
 | `config`     |         7 | parámetros y guardrails                 |
 | `kag`        |         6 | resto del grafo                         |
 | `domain`     |         3 | reglas de negocio                       |
@@ -143,7 +143,7 @@ Son 99 columnas vacías que el MVP ya usa en su diseño. Se crean con su bloque 
 | `model`      |         1 | ficha de modelo                         |
 | `territorio` |         1 | catálogo de tipos de lugar              |
 
-**Por qué importa.** El MVP se construye **sobre** estas tablas, no en paralelo. Si alguien "limpia" la base para dejar solo las 55 del contrato, borra 4 973 filas de historia.
+**Por qué importa.** El MVP se construye **sobre** estas tablas, no en paralelo. Si alguien "limpia" la base para dejar solo las 55 del contrato, borra 5 135 filas de historia.
 
 ---
 
@@ -172,15 +172,15 @@ Son 99 columnas vacías que el MVP ya usa en su diseño. Se crean con su bloque 
 
 ---
 
-## 7. El puente: 55 tablas del MVP contra 265 de la v10
+## 7. El puente: 55 objetos del MVP contra 266 tablas de la v10
 
-La correspondencia no se inventó aquí: sigue el **Anexo D.2** de `AVISA_PRODUCE_v10.md`. Al contrastarla con la base viva aparece el dato que ordena todo el trabajo. De los 55 objetos que pide el contrato, 47 se apoyan hoy en una tabla existente —46 tablas distintas, porque `policy.escenario_regla` cubre dos objetos: la regla exacta y la simulación parcial—: 34 tablas con datos y 12 vacías. Los otros 8 son piezas que todavía hay que crear. Cuando el alcance se recorta antes de migrar a SQL Server, quedan **45**: se difiere solo `kag.aristas`, porque el grafo de la red de actores es de 2027 y nada en diciembre lo consume. Las otras tres tablas de `kag` —`documento_fuente`, `documento_fragmento` y `entity_merge_log`— sí entran: son el corpus segmentado y el registro de fusiones sobre el que se apoya la base legal, y el procesamiento de documentos ya es de diciembre.
+La correspondencia no se inventó aquí: sigue el **Anexo D.2** de `AVISA_PRODUCE_v10.md`. Al contrastarla con la base viva aparece el dato que ordena todo el trabajo. De los 55 objetos que pide el contrato, 47 se apoyan hoy en una tabla existente —46 tablas distintas, porque `policy.escenario_regla` cubre dos objetos: la regla exacta y la simulación parcial—: 33 tablas con datos y 13 vacías. Los otros 8 son piezas que todavía hay que crear. Cuando el alcance se recorta antes de migrar a SQL Server, quedan **45**: se difiere solo `kag.aristas`, porque el grafo de la red de actores es de 2027 y nada en diciembre lo consume. Las otras tres tablas de `kag` —`documento_fuente`, `documento_fragmento` y `entity_merge_log`— sí entran: son el corpus segmentado y el registro de fusiones sobre el que se apoya la base legal, y el procesamiento de documentos ya es de diciembre.
 
 ```mermaid
 pie showData
     title "Las 55 tablas del MVP-45 frente a la v10"
-    "Ya existe y hace lo mismo" : 30
-    "Existe algo parecido" : 17
+    "Ya existe y hace lo mismo" : 31
+    "Existe algo parecido" : 16
     "No existe: hay que crearla" : 8
 ```
 
@@ -237,9 +237,9 @@ flowchart TD
 
 **Crear:** `seg.usuario_actor_externo`, `seg.usuario_caso`. Son las dos únicas piezas de este bloque que todavía no existen.
 
-**Relaciones primero:** las 63 claves foráneas que apuntan a `core.cat_clasificacion` y las 84 que apuntan a `core.usuarios`. Son las que hacen que todo lo demás pueda existir.
+**Relaciones primero:** las 63 claves foráneas que apuntan a `core.cat_clasificacion` y las 85 que apuntan a `core.usuarios`. Son las que hacen que todo lo demás pueda existir.
 
-**Cierra cuando:** dos perfiles distintos consultan la misma tabla y ven cosas distintas (RLS probado), y cada catálogo tiene sus filas semilla. El esquema ya cumple su parte: los parches 16 y 18 dejaron `core` con 48 de 102 tablas con RLS (eran 12) y 315 políticas.
+**Cierra cuando:** dos perfiles distintos consultan la misma tabla y ven cosas distintas (RLS probado), y cada catálogo tiene sus filas semilla. El esquema ya cumple su parte: los parches 16, 18 y 20 dejaron `core` con 49 de 102 tablas con RLS (eran 12) y 319 políticas; hoy son **52 de 103** y **331 políticas**.
 
 ### Bloque 2 — Identidad del actor (días 8–15)
 
@@ -323,7 +323,7 @@ python migration/prioridad_mvp.py
 
 Lee la base, escribe `docs/03_ejecucion/mvp_prioridad_tablas.csv` (una fila por tabla, con capa y causa) e imprime el resumen. **Solo lee**: no crea, no borra, no comenta.
 
-Si se añade una tabla a la v10 o se cambia el contrato del MVP, se edita el diccionario `MVP` del script y se vuelve a ejecutar. Las cifras de este documento salen de esa ejecución, no de una estimación. La corrida corresponde a la medición del **2026-11-20** e incluye los parches 14 a 19: `core.banco_datos_tratamiento` ya existe con una fila, y `core` tiene 48 de sus 102 tablas con RLS y 315 políticas. El parche 19 no mueve la medición —sólo añade comentarios de columna—, así que las cifras son las mismas con él aplicado.
+Si se añade una tabla a la v10 o se cambia el contrato del MVP, se edita el diccionario `MVP` del script y se vuelve a ejecutar. Las cifras de este documento salen de esa ejecución, no de una estimación. La corrida corresponde a la medición del **2026-11-20** e incluye los parches 14 a 23: `core.banco_datos_tratamiento` ya existe con una fila, y `core` tiene 52 de sus 103 tablas con RLS y 331 políticas. Los parches 20, 21 y 22 no mueven el número de tablas; el 23 llega a **266** lógicas y **55** objetos de contrato: el 20 sólo añade filas de catálogo y 4 políticas de RLS, el 21 dos columnas de aprobación, una cuenta de rol y 8 políticas, y el 22 una columna (`visibilidad`), su `CHECK`, un índice parcial, un trigger, una función y una vista, sin política nueva. Las cifras de arriba ya los incluyen.
 
 **Este documento no se regenera.** `migration/prioridad_mvp.py` sólo escribe `docs/03_ejecucion/mvp_prioridad_tablas.csv` y el resumen por consola; el `.md` se edita a mano a partir de esas dos salidas. Volver a ejecutar el script refresca la medición, no el texto.
 
@@ -331,7 +331,7 @@ Si se añade una tabla a la v10 o se cambia el contrato del MVP, se edita el dic
 medición y este cuadro en un esquema propio (`priorizacion`), de manera que la asignación de
 cada tabla a su bloque sea una consulta y no una lectura. Carga `docs/03_ejecucion/mvp_prioridad_tablas.csv`,
 crea las cinco capas, los seis bloques y las 51 tablas con bloque (46 del contrato y 5
-heredadas), y termina verificando 265 tablas, 2 145 columnas y 13 352 filas, y que ninguna
+heredadas), y termina verificando 266 tablas, 2 161 columnas y 13 355 filas, y que ninguna
 tabla T0 quede sin bloque (si faltara una T1, el script lo avisa sin abortar). Se ejecuta a mano y es idempotente:
 
 ```

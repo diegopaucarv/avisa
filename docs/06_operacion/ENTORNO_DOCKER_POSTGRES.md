@@ -69,17 +69,17 @@ está vacío, en este orden:
 | `10_apply_v9.sql`   | DDL v9 **dos pasadas**, luego parches 1 → 2 → 3 → 4 → 5                |
 | `20_verify.sql`     | informa y **aborta la inicialización** si el esquema no quedó completo |
 
-El `initdb` se detiene en el parche 5. Los parches 6–19 **no** se aplican aquí:
+El `initdb` se detiene en el parche 5. Los parches 6–24 **no** se aplican aquí:
 necesitan el legado ya cargado y se ejecutan a mano (§9). Están montados en el
 contenedor, pero ningún script del `initdb` los invoca.
 
 El DDL y los parches **no se copian**: se montan como bind mounts con nombres
-limpios (`/opt/avisa/sql/90_ddl_v9.sql`, `91_patch_01.sql` … `109_patch_19.sql`).
+limpios (`/opt/avisa/sql/90_ddl_v9.sql`, `91_patch_01.sql` … `112_patch_22.sql`).
 El DDL sale de `backups/backend/PRODUCE_OAIPCS_AVISA_v9_ddl(1).sql` —la copia
 del repositorio, no `backend/`, que es otra carpeta— y los parches, de `docs/`.
-Así no existen dos versiones del esquema que puedan divergir. Son **19 montajes
-de parche**: los 5 `PREPARACION_*` (que sí ejecuta el `initdb`) y los 14
-`PARCHE_6`…`PARCHE_19`, de `96_patch_06.sql` a `109_patch_19.sql` (que no).
+Así no existen dos versiones del esquema que puedan divergir. Son **22 montajes
+de parche**: los 5 `PREPARACION_*` (que sí ejecuta el `initdb`) y los 17
+`PARCHE_6`…`PARCHE_24`, de `96_patch_06.sql` a `114_patch_24.sql` (que no).
 
 ### Por qué dos pasadas
 
@@ -116,13 +116,14 @@ Lo que **sí** es un fallo y no aparece en un arranque sano:
 
 ### Receta de sesión obligatoria
 
-Hoy **48 de las 102 tablas de `core` tienen RLS** y **54 no**; en todo el modelo
-son **540 políticas sobre 87 tablas** (315 de ellas en `core`). Antes del parche 16
-eran 11 tablas y 76 políticas; el 17 sumó una tabla y dos políticas, y el 18 suma
-20 políticas en 5 tablas (§9). Donde la política rige con
-`FORCE ROW LEVEL SECURITY`, **el dueño de la tabla tampoco lee ni escribe** si la
-sesión no declara el contexto. Sin esto, un `INSERT` falla con la política
-`p_insert` y un `SELECT` devuelve 0 filas.
+Hoy **52 de las 103 tablas de `core` tienen RLS** y **51 no**; en todo el modelo
+son **556 políticas sobre 91 tablas** (331 de ellas en `core`). Antes del parche 16
+eran 11 tablas y 76 políticas; el 17 sumó una tabla y dos políticas, el 18 sumó
+20 políticas en 5 tablas, el 20 una tabla con cuatro políticas y el 21 los dos últimos
+catálogos del flujo con ocho más (§9); el 22 no añade ninguna y el 23 suma una tabla
+con cuatro políticas. Donde la política rige con `FORCE ROW LEVEL SECURITY`, **el
+dueño de la tabla tampoco lee ni escribe** si la sesión no declara el contexto. Sin
+esto, un `INSERT` falla con la política `p_insert` y un `SELECT` devuelve 0 filas.
 
 ```python
 async with conn.transaction():
@@ -157,26 +158,26 @@ valor en ambos estados (los catálogos **crecen** con la carga, nunca se
 reducen; por eso las comprobaciones son contra mínimos, no contra igualdad
 exacta):
 
-| control                         | esperado                                                                                       |
-| ------------------------------- | ---------------------------------------------------------------------------------------------- |
-| extensiones                     | `btree_gist, pg_trgm, pgcrypto, plpgsql, postgis, vector`                                      |
-| esquemas                        | 29 tras la carga (28 antes: sin `legacy`)                                                      |
-| tablas                          | 373 tras la carga: 285 ordinarias del modelo + 87 de `legacy` + 1 de `public`; sin particiones |
-| columnas `geography`            | 3                                                                                              |
-| tablas territorio con geometría | 3 de 3                                                                                         |
-| `cat_tematicas`                 | 7                                                                                              |
-| `cat_subsectores`               | 3                                                                                              |
-| `cat_tipos_actor`               | 7                                                                                              |
-| `cat_roles_funcionales`         | 4                                                                                              |
-| `cat_tipos_organizacion`        | 7                                                                                              |
-| `cat_especies` (mínimo)         | 5 en `initdb`, 39 tras la carga                                                                |
-| `cat_unidades_organicas`        | 1 en `initdb` (unidad `OAIPCS`), 66 tras la carga                                              |
-| `cat_pip_etapas`                | 12                                                                                             |
-| `config.schema_registry`        | 2 (`avisa.raw_ingest` v1 y v2)                                                                 |
-| `agent.cat_detalle_schema`      | 1 (v1 provisional)                                                                             |
-| `ind.plantilla`                 | 3 (Anexo 2, Anexo 15, Minister View)                                                           |
-| `ind.indicador` (pendiente)     | 0 (falta el catálogo de la Tabla 3)                                                            |
-| RLS forzadas en `core`          | 48 (medición 2026-11-20 tras el parche 18; 45 antes de él, 11 antes del 16)                    |
+| control                         | esperado                                                                                                      |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| extensiones                     | `btree_gist, pg_trgm, pgcrypto, plpgsql, postgis, vector`                                                     |
+| esquemas                        | 29 tras la carga (28 antes: sin `legacy`)                                                                     |
+| tablas                          | 373 tras la carga: 285 ordinarias del modelo + 87 de `legacy` + 1 de `public`; sin particiones                |
+| columnas `geography`            | 3                                                                                                             |
+| tablas territorio con geometría | 3 de 3                                                                                                        |
+| `cat_tematicas`                 | 7                                                                                                             |
+| `cat_subsectores`               | 3                                                                                                             |
+| `cat_tipos_actor`               | 7                                                                                                             |
+| `cat_roles_funcionales`         | 4                                                                                                             |
+| `cat_tipos_organizacion`        | 7                                                                                                             |
+| `cat_especies` (mínimo)         | 5 en `initdb`, 39 tras la carga                                                                               |
+| `cat_unidades_organicas`        | 1 en `initdb` (unidad `OAIPCS`), 66 tras la carga                                                             |
+| `cat_pip_etapas`                | 12                                                                                                            |
+| `config.schema_registry`        | 2 (`avisa.raw_ingest` v1 y v2)                                                                                |
+| `agent.cat_detalle_schema`      | 1 (v1 provisional)                                                                                            |
+| `ind.plantilla`                 | 3 (Anexo 2, Anexo 15, Minister View)                                                                          |
+| `ind.indicador` (pendiente)     | 0 (falta el catálogo de la Tabla 3)                                                                           |
+| RLS forzadas en `core`          | 52 (2026-11-20 tras el 23; 51 tras el 22 y 21; 49 tras el 20, 48 tras el 18, 45 antes de él, 11 antes del 16) |
 
 La verificación es un `DO` con `RAISE EXCEPTION` si algo no cuadra: si el
 esquema queda a medias, el contenedor **no** arranca. Preferimos un fallo ruidoso
@@ -186,18 +187,20 @@ a un entorno que parece sano y no lo está.
 tablas de territorio con geometría, la unidad `OAIPCS` o alguno de los catálogos
 sembrados. Las filas de conteo (esquemas, tablas, RLS) son un termómetro y crecen
 con los parches. Los valores de la tabla son la salida medida el **2026-11-20**
-sobre `avisa-db` con los parches 6–19 aplicados.
+sobre `avisa-db` con los parches 6–24 aplicados.
 
-Esa medición deja el detalle así: **265 tablas lógicas** —clasificadas en capas como
-34 / 12 / 76 / 22 / 121—, **289 físicas** (265 + 24
-particiones), **36 vistas y materializadas** (298 columnas) y **2 145 columnas
-lógicas**, **todas con comentario** (el parche 19 cerró las 19 últimas).
-Además, 9 roles en `core.roles`, 32 usuarios (28 activos), 610 claves ajenas y
-**540 políticas RLS sobre 87 tablas** (todas `FORCE`, contando cada tabla
+Esa medición deja el detalle así: **266 tablas lógicas** —clasificadas en capas como
+34 / 13 / 76 / 22 / 121—, **290 físicas** (266 + 24
+particiones), **37 vistas y materializadas** (**313** columnas) y **2 161 columnas
+lógicas**, **todas con comentario** (el parche 19 cerró las 19 últimas de la
+curaduría, el 21 trae el comentario de sus dos columnas nuevas y el 22 el de
+`visibilidad`).
+Además, 10 roles en `core.roles`, 32 usuarios (28 activos), 616 claves ajenas y
+**556 políticas RLS sobre 91 tablas** (todas `FORCE`, contando cada tabla
 particionada como una); `legacy` conserva sus **87 objetos**. La foto anterior
 (2026-11-18, parches 6–10) era 279 tablas físicas, 26 esquemas y 48 tablas con RLS
 `FORCE` en todo el modelo —la fila de `core` contaba solo las 11 de ese esquema—;
-la medición completa del 2026-11-18 está en `docs/INDICE.md` §3.
+la medición completa del 2026-11-18 está en `docs/README.md` §3.
 
 ---
 
@@ -247,16 +250,18 @@ arranque.
 
 ---
 
-## 9. Aplicación de los parches 6–19 (post-carga)
+## 9. Aplicación de los parches 6–24 (post-carga)
 
-El `initdb` aplica el DDL y los parches 1–5, y se detiene ahí. Los parches 6–19 no
+El `initdb` aplica el DDL y los parches 1–5, y se detiene ahí. Los parches 6–24 no
 pueden correr en ese momento: el 6 reclasifica documentos `RED-%` que todavía no
 existen; el 9 y el 10 leen `legacy.dim_actores`, `legacy.dim_paso_proceso` y
-`legacy.fact_proceso_*`; y el 11 rellena el grafo con las filas ya cargadas. En un
-arranque limpio afectarían **0 filas sin dar error**. Por eso:
+`legacy.fact_proceso_*`; el 11 rellena el grafo con las filas ya cargadas; y el 20
+renumera las instancias de proceso que dejó la carga, así que sobre una base vacía
+no tendría nada que renumerar. En un arranque limpio afectarían **0 filas sin dar
+error**. Por eso:
 
 - solo se aplican **después** de cargar el legado, en orden 6 → 7 → 8 → 9 → 10 →
-  11 → 12 → 13 → 14 → 15 → 16 → 17 → 18;
+  11 → 12 → 13 → 14 → 15 → 16 → 17 → 18 → 19 → 20 → 21 → 22 → 23 → 24;
 - el 12 comenta tablas y columnas y comenta también las columnas que añade el 11,
   así que va justo antes del 13;
 - el 13 cambia el tipo de `consultation.procesos.nivel_clasificacion` y alinea el
@@ -282,8 +287,48 @@ arranque limpio afectarían **0 filas sin dar error**. Por eso:
   `core.usuario_roles`, `config.servicio_externo` y `config.tope_gasto`. Depende
   del 17: suma sus columnas de costo y usa `core.rol_actual()` y
   `core.clasificacion_max()`;
-- los **catorce** SQL del 6 al 19 están montados de solo lectura en
-  `/opt/avisa/sql/96..109` (`96_patch_06.sql` … `109_patch_19.sql`), pero ningún
+- el 20 deja el flujo de alerta en cinco pasos con la aprobación definitiva de la
+  Dirección: crea el rol `direccion_oaipcs` (nivel 3, crea y edita, no borra, sin
+  cuentas), reapunta los pasos `DPPA-2`, `DPPA-3` y `DPPA-4`, inserta el paso 3
+  (`V10-ALERTA-APROB`), renumera las 83 instancias del Archivo del paso 4 al 5 y
+  pone RLS `FORCE` en `core.flujo_definicion` con 4 políticas `p20_*` (lectura
+  abierta, escritura solo `administrador`);
+- el 21 le da cuenta a la Dirección y normaliza el flujo: asigna `direccion_oaipcs`
+  a la Directora (`SEC-11`), pasa a código de rol el `rol_responsable` de los 7 pasos
+  de `caso` y `reporte` que seguía en texto libre —con `CHECK` de formato y un
+  disparador que valida cada token contra `core.roles`—, añade `aprobada_por` y
+  `aprobada_en` a `core.alertas_tempranas` (G21) con índice parcial y las expone al
+  final de `core.vw_alerta_estado`, y pone RLS `FORCE` en `core.flujo_estado` y
+  `core.permiso_aprobacion` con 4 políticas `p21_*` cada uno. Depende del 20: usa el
+  rol y los pasos que ese parche dejó;
+- el 22 hace ejecutable G21 y cierra la visibilidad: añade `visibilidad` a
+  `core.alertas_tempranas` (`varchar(12)`, por defecto `interna`, con `CHECK` de
+  `interna`, `ejecutiva` y `sectorial` e índice parcial), crea el trigger
+  `alertas_g21_visibilidad` —que rechaza con `G21_SIN_APROBACION` cualquier
+  visibilidad distinta de `interna` mientras falte la validación previa del
+  Sectorista o la aprobación definitiva de la Dirección—, la función
+  `core.puede_aprobar()` y la vista `core.vw_permiso_aprobacion`, amplía
+  `core.vw_alerta_estado` a 20 columnas y corrige `paso_actual` de 1 a 5 en las 83
+  alertas, derivándolo de `core.proceso_instancia`. No siembra suplencias ni amplía
+  el flujo `reporte`. Depende del 20 y del 21: usa el flujo de cinco pasos y las dos
+  columnas de aprobación;
+- el 23 hace nombrables los destinatarios y pone la gravedad en el dato: añade
+  `es_grave` a `core.cat_prioridades_alerta` —verdadero solo en los dos niveles con
+  plazo grave, `Critica_Inmediata` y `Urgente`, con un `CHECK` que impide grave sin
+  plazo—, `validada_por` a `core.alertas_tempranas` (de 36 a 37 columnas) con las
+  restricciones de firma y de cuatro ojos, y crea `core.alerta_destinatario` (11
+  columnas, vacía) para nombrar a quién se remite la alerta, por cuenta o por cargo.
+  Amplía el gate G21 a los cuatro ojos y al destinatario de la visibilidad
+  `sectorial`, lleva `core.vw_alerta_estado` a 22 columnas y corrige el contrato de
+  G21 en `config.guardrail_contract`, que se disparaba con un valor que el `CHECK`
+  no admite. Depende del 22: usa `visibilidad`;
+- el 24 describe las siete columnas que el 23 dejó sin comentario en
+  `core.alerta_destinatario` (`id`, `alerta_id`, `motivo`, `created_at`,
+  `updated_at`, `created_by` y `updated_by`). Depende del 23: antes de él la tabla
+  no existe. Al correr después del 19 devuelve la reejecutabilidad a ese parche;
+  al revés no funciona, porque el candado del 19 mide el modelo entero;
+- los **diecinueve** SQL del 6 al 24 están montados de solo lectura en
+  `/opt/avisa/sql/96..114` (`96_patch_06.sql` … `114_patch_24.sql`), pero ningún
   script del `initdb` los invoca: se pasan por entrada estándar, como se explica
   abajo;
 - ni `./scripts/db.sh apply` ni `fresh` los tocan: esos comandos re-aplican el DDL
@@ -300,9 +345,15 @@ Se cambia el nombre del archivo por el del parche que toca. El archivo se pasa p
 **entrada estándar** (`-f -`): no se copia al contenedor ni se usa `-f /tmp/...`,
 porque MSYS reescribe las rutas que empiezan por `/` y `psql` termina buscando
 `C:/Program Files/Git/tmp/...`. `MSYS_NO_PATHCONV=1` evita esa conversión; es lo
-mismo que hace `scripts/db.sh` (§8). Como los catorce parches están montados, en
+mismo que hace `scripts/db.sh` (§8). Como los diecinueve parches están montados, en
 lugar de pasar el archivo también vale ejecutarlos por su ruta dentro del
-contenedor: `-f /opt/avisa/sql/109_patch_19.sql` (con `MSYS_NO_PATHCONV=1`).
+contenedor: `-f /opt/avisa/sql/114_patch_24.sql` (con `MSYS_NO_PATHCONV=1`).
+
+Ojo con el contenedor que está en marcha: los _bind mounts_ se fijan al crear el
+contenedor, y el que existe hoy llega solo hasta `109_patch_19.sql`, de modo que el
+`110` al `114` no están dentro. El montaje nuevo aparece al recrear el
+contenedor (`docker compose up -d`); hasta entonces el parche entra por entrada
+estándar, que no depende del montaje.
 
 ### El parche 9 necesita `APP_CRYPTO_KEY`
 
@@ -321,12 +372,12 @@ rol con `BYPASSRLS` (aquí `avisa`) o afectará 0 filas en silencio.
 
 **La clave no tiene `clave_version`.** Se cifró con una sola versión de clave, de
 modo que **rotarla obliga a re-cifrar todo**; no hay convivencia entre clave vieja
-y nueva. Esa rotación y la custodia de la clave siguen abiertas (`docs/INDICE.md`
-§5).
+y nueva. Esa rotación y la custodia de la clave siguen abiertas (`docs/README.md`
+§8).
 
-### Comprobación de los pasos 17 y 18
+### Comprobación de los pasos 17 a 22
 
-Los dos últimos se aplican igual que el resto y se comprueban por lo que
+Los últimos se aplican igual que el resto y se comprueban por lo que
 imprimen al terminar. Primero el 17:
 
 ```sh
@@ -373,10 +424,147 @@ NOTICE:  columnas del modelo sin comentario: 0
 Si quedara alguna columna sin describir, el 19 lanza `EXCEPTION` y no confirma.
 Solo agrega `COMMENT ON COLUMN`: no cambia estructura ni datos.
 
-Tras el 18 el modelo queda en **289 tablas físicas** (265 lógicas + 24
+El 20, que rehace el flujo de la alerta temprana:
+
+```sh
+MSYS_NO_PATHCONV=1 docker exec -i avisa-db psql -U avisa -d avisa \
+  -v ON_ERROR_STOP=1 -f - < docs/PARCHE_20_FLUJO_ALERTA.sql
+```
+
+Debe cerrar con `PARCHE 20 · aplicado` y un `NOTICE` con esta forma:
+
+```
+NOTICE:  flujo alerta: 5 pasos (1..5) · instancias en paso 1: 72 · instancias en paso 5: 83 · vw_alerta_estado: 83 filas
+```
+
+Ese `NOTICE` es informativo (una base recién creada puede no tener alertas). Lo que
+sí aborta la transacción es lo estructural: que el flujo no quede en cinco pasos o
+tenga huecos en la secuencia 1..5, que el paso 1 deje de ser `DPPA-1`/`sectorista`,
+que el paso 3 no sea la aprobación de `direccion_oaipcs`, que quede algún paso con
+`analista_cualitativo`, que falte el rol o sus capacidades, o que la RLS del
+catálogo no quede con `FORCE` y sus 4 políticas. Antes de tocar nada comprueba el
+estado de partida: si hay instancias de alerta en los pasos 2 o 3, o con `orden`
+amayor que 5, se detiene sin aplicar.
+
+El 21, que da cuenta a la Dirección y normaliza el flujo:
+
+```sh
+MSYS_NO_PATHCONV=1 docker exec -i avisa-db psql -U avisa -d avisa \
+  -v ON_ERROR_STOP=1 -f - < docs/PARCHE_21_DIRECCION_Y_FLUJO.sql
+```
+
+Debe cerrar con `PARCHE 21 · aplicado` y un `NOTICE` con esta forma:
+
+```
+NOTICE:  direccion_oaipcs: 1 cuenta vigente (SEC-11) · usuario_roles: 36 · flujo_definicion: 12 pasos · proceso_instancia: 218 · alertas: 83 · columnas de vw_alerta_estado: 19
+```
+
+Ese `NOTICE` es informativo. Lo que aborta la transacción es lo estructural: que
+`SEC-11` no exista o no reciba el rol, que el `rol_responsable` de algún paso de
+`caso` o `reporte` no sea un código válido de `core.roles`, que la alerta quede sin
+`aprobada_por`/`aprobada_en` o con una fecha sin aprobador, o que los dos catálogos
+del flujo no queden con RLS `FORCE` y sus 4 políticas `p21_*`. Es idempotente: se
+ejecutó cuatro veces seguidas sin cambiar nada.
+
+El 22, que hace ejecutable G21 y cierra la visibilidad:
+
+```sh
+MSYS_NO_PATHCONV=1 docker exec -i avisa-db psql -U avisa -d avisa \
+  -v ON_ERROR_STOP=1 -f - < docs/PARCHE_22_VISIBILIDAD_Y_G21.sql
+```
+
+Debe cerrar con `PARCHE 22 · aplicado` y dos `NOTICE` con esta forma (la primera
+línea enumera además los nueve casos de `reporte`; aquí va abreviada):
+
+```
+NOTICE:  reporte: 27 instancias, 9 sin definición (pasos 4-6) · paso 4: (sin nota) · …
+NOTICE:  visibilidad: 83 alertas internas · alertas_tempranas: 36 columnas · vw_alerta_estado: 20 columnas y 83 filas · paso_actual: 83 en el paso 5 · permiso_aprobacion: 0 filas · proceso_instancia: 218
+```
+
+Ese `NOTICE` es informativo. Lo que aborta la transacción es lo estructural: que la
+alerta no quede con `visibilidad` y su `CHECK` de tres valores, que el trigger
+`alertas_g21_visibilidad` no exista o deje pasar una visibilidad sin las dos firmas,
+que `core.vw_alerta_estado` no quede en 20 columnas y 83 filas, o que `paso_actual`
+no coincida con el paso 5 en las 83 alertas. Es idempotente: se ejecutó cinco veces
+y la marca `updated_at` de las 83 filas sigue siendo la de la primera pasada.
+
+Desde este parche **G21 es ejecutable**: una alerta solo deja de ser `interna` con la
+validación previa del Sectorista (`es_validado_humano`, `fecha_validacion` y
+`paso_actual >= 2`) y la aprobación definitiva de la Dirección (`aprobada_por` y
+`aprobada_en`); si falta alguna, el trigger responde `G21_SIN_APROBACION`.
+`core.puede_aprobar()` devuelve `true` para la Directora (`SEC-11`) y `false` para
+cualquier otro usuario mientras `core.permiso_aprobacion` siga con 0 filas.
+
+El 23, que hace nombrables los destinatarios y cierra la escala de gravedad:
+
+```sh
+MSYS_NO_PATHCONV=1 docker exec -i avisa-db psql -U avisa -d avisa \
+  -v ON_ERROR_STOP=1 -f - < docs/PARCHE_23_DESTINATARIOS_Y_CUATRO_OJOS.sql
+```
+
+Debe cerrar con `PARCHE 23 · aplicado` y dos `NOTICE` con esta forma:
+
+```
+NOTICE:  PARCHE 23 · alertas_tempranas: 37 columnas · vw_alerta_estado: 22 columnas · niveles graves: 2 · destinatarios: 0
+NOTICE:  PARCHE 23 · alertas no internas: 0 · alertas con la bandera de validación pero sin fecha (esperado 83): 83
+```
+
+Ese `NOTICE` es informativo. Lo que aborta la transacción es lo estructural: que
+`core.alertas_tempranas` no quede en 37 columnas, que `core.vw_alerta_estado` no
+quede en 22, que no haya exactamente 2 niveles con `es_grave` o que el contrato de
+G21 no use `ejecutiva`. Es idempotente.
+
+El 24, que describe las siete columnas que el 23 dejó sin comentario:
+
+```sh
+MSYS_NO_PATHCONV=1 docker exec -i avisa-db psql -U avisa -d avisa \
+  -v ON_ERROR_STOP=1 -f - < docs/PARCHE_24_COMENTARIOS_DESTINATARIO.sql
+```
+
+Debe cerrar con `PARCHE 24 · aplicado` y este `NOTICE`:
+
+```
+NOTICE:  core.alerta_destinatario comentada · columnas del modelo sin comentario: 0
+```
+
+Solo agrega `COMMENT ON COLUMN`: no cambia estructura ni datos. La guardia comprueba
+sus propias siete columnas y aborta si alguna queda sin describir; el recuento
+global del modelo se informa pero no bloquea, para no repetir el candado que volvió
+no reejecutable al 19. Además de dejar el modelo en **2 161 de 2 161** columnas
+descritas, es lo que permite que el 19 vuelva a cerrar: hasta que corre el 24, el 19
+aborta con «quedan 7 columnas del modelo sin comentario» y revierte sus propios
+comentarios. Es idempotente: se ejecutó dos veces seguidas sin error.
+
+Tras el 18 el modelo queda en **290 tablas físicas** (266 lógicas + 24
 particiones), **2 511 columnas**, **610 claves ajenas** y **540 políticas RLS sobre
 87 tablas**. Tras el 19, las **2 145 columnas lógicas** quedan todas con
-comentario.
+comentario. El 20 no mueve tablas ni columnas: suma un paso de flujo, un rol y
+cuatro políticas, y deja **544 políticas RLS sobre 88 tablas**. El 21 tampoco mueve
+tablas: suma dos columnas de aprobación, una cuenta, un índice parcial y ocho
+políticas en los dos últimos catálogos del flujo, y deja **2 147 columnas lógicas** y
+**556 políticas RLS sobre 91 tablas** (331 de ellas en `core`). El 22 tampoco mueve
+tablas: suma una columna, una restricción `CHECK`, un índice parcial, un trigger, una
+función y una vista, y deja **2 148 columnas lógicas** y **37 objetos derivados con
+313 columnas**; las políticas siguen en **556 sobre 91 tablas**. El 23 suma una tabla
+(`core.alerta_destinatario`, 11 columnas, vacía), una columna en
+`core.alertas_tempranas` y otra en `core.cat_prioridades_alerta`, cinco claves ajenas,
+seis `CHECK`, un trigger, cinco índices y cuatro políticas en la tabla nueva: el
+estado final es **290 tablas físicas**, **2 161 columnas lógicas** (**2 527** con
+particiones), **616 claves ajenas**, **360 CHECK**, **69 triggers**, **767 índices**,
+**37 objetos derivados con 313 columnas** y **556 políticas sobre 91 tablas**.
+El 24 no mueve tabla, columna, restricción ni política: escribe siete comentarios
+de columna y deja el modelo en **2 161 de 2 161** columnas descritas, con lo que
+la guardia del 19 vuelve a cerrar en cero.
+
+**Los parches se reejecutan en orden, nunca sueltos.** La cadena se armó para
+correrse de arriba abajo y cada parche supone lo que dejó el anterior; un
+`97_patch_07.sql` corrido a mano después del `113_patch_23.sql` puede deshacer lo
+que el 23 escribió si toca las mismas filas. Desde el 2026-11-21 el 7 ya no es un
+ejemplo de ese riesgo: su `INSERT` de G19–G25 usa `ON CONFLICT … DO NOTHING`, así
+que no reescribe la fila G21 que el 23 corrigió —medido: `INSERT 0 0` y la fila
+intacta—. La regla de orden sigue siendo la norma; lo que cambió es que reejecutar
+el 7 ya no revierte nada. Si hay que reponer el estado completo, se vuelve a correr
+la cadena entera, no una pieza.
 
 **Las pruebas de RLS se corren con `SET LOCAL ROLE avisa_app`.** El usuario `avisa`
 es superusuario y tiene `BYPASSRLS`: consultando como `avisa` todas las políticas
@@ -446,6 +634,11 @@ docs/PARCHE_16_RLS_CORE_Y_DC04.sql       parche 16 (post-carga, §9)
 docs/PARCHE_17_RENIEC_Y_COSTOS.sql       parche 17 (post-carga, §9)
 docs/PARCHE_18_COSTOS_Y_RLS_ADMIN.sql    parche 18 (post-carga, §9)
 docs/PARCHE_19_COMENTARIOS_FALTANTES.sql parche 19 (post-carga, §9)
+docs/PARCHE_20_FLUJO_ALERTA.sql          parche 20 (post-carga, §9)
+docs/PARCHE_21_DIRECCION_Y_FLUJO.sql     parche 21 (post-carga, §9)
+docs/PARCHE_22_VISIBILIDAD_Y_G21.sql     parche 22 (post-carga, §9)
+docs/PARCHE_23_DESTINATARIOS_Y_CUATRO_OJOS.sql  parche 23 (post-carga, §9)
+docs/PARCHE_24_COMENTARIOS_DESTINATARIO.sql     parche 24 (post-carga, §9)
 ```
 
 ---

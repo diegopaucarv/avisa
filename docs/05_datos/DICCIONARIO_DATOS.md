@@ -1,10 +1,10 @@
 # Diccionario de datos — AVISA / SIPRECS
 
-Generado el 2026-11-20 desde la base viva con `migration/generar_diccionario.py` [9]. No se edita a mano: se regenera.
+Generado el 2026-11-21 desde la base viva con `migration/generar_diccionario.py` [9]. No se edita a mano: se regenera.
 
 ## 1. Qué es este documento
 
-Es el diccionario único del sistema. Describe, con el mismo formato, las dos capas que hoy conviven en la base: el **sistema anterior** (87 tablas con columnas posicionales) y el **modelo v10** (265 tablas lógicas en 27 esquemas, de los cuales uno solo contiene vistas, más 36 objetos derivados).
+Es el diccionario único del sistema. Describe, con el mismo formato, las dos capas que hoy conviven en la base: el **sistema anterior** (87 tablas con columnas posicionales) y el **modelo v10** (266 tablas lógicas en 27 esquemas, de los cuales uno solo contiene vistas, más 37 objetos derivados).
 
 Para cada tabla dice qué guarda, cuántas filas y columnas tiene, cuáles son sus claves y relaciones, y qué significa cada columna. Para el sistema anterior añade el destino que tiene en v10, de modo que un mismo documento sirve para leer el pasado y el presente.
 
@@ -20,15 +20,15 @@ Tres cosas que este documento **no** es:
 
 | Dimensión | Sistema anterior | Modelo v10 |
 | --- | --: | --: |
-| Tablas lógicas | 87 | 265 |
+| Tablas lógicas | 87 | 266 |
 | Particiones de tabla | 0 | 24 |
-| Tablas físicas | 87 | 289 |
-| Columnas (sin particiones) | 807 | 2 145 |
-| Columnas (con particiones) | 807 | 2 511 |
-| Filas | 4 729 | 13 352 |
-| Objetos derivados (vistas y matviews) | 0 | 36 |
+| Tablas físicas | 87 | 290 |
+| Columnas (sin particiones) | 807 | 2 161 |
+| Columnas (con particiones) | 807 | 2 527 |
+| Filas | 4 729 | 13 355 |
+| Objetos derivados (vistas y matviews) | 0 | 37 |
 
-El total de columnas que recorre este diccionario es 3 318: 2 511 del modelo v10 contando sus particiones, más 807 del sistema anterior. De ellas, 2 145 tienen comentario en la propia base y 209 tienen significado documentado por curaduría; el resto son columnas de partición que heredan la descripción de su tabla padre, o celdas del sistema anterior que aparecen con `—`.
+El total de columnas que recorre este diccionario es 3 334: 2 527 del modelo v10 contando sus particiones, más 807 del sistema anterior. De ellas, 2 161 tienen comentario en la propia base y 209 tienen significado documentado por curaduría; el resto son columnas de partición que heredan la descripción de su tabla padre, o celdas del sistema anterior que aparecen con `—`.
 
 ## 2. Cómo se generó y cómo se regenera
 
@@ -43,8 +43,8 @@ De dónde sale cada dato:
 - **Estructura**: tablas, columnas, tipos, nulabilidad, valores por defecto, claves primarias, ajenas, únicas e índices salen del catálogo del motor (`pg_class`, `pg_attribute`, `pg_constraint`, `pg_index`).
 - **Filas**: se cuentan con `count(*)` al generar. No se usan estimaciones, porque la base las tenía desactualizadas.
 - **Clasificación**: entrada, proceso, salida o transversal sale de BRECHA §12.1–12.6 [1]; las tablas que no aparecen allí se marcan como sin clasificar, y las vistas se marcan como salida por una regla explícita.
-- **Propósito**: 265 de las 265 tablas del modelo v10 tienen comentario de tabla en la base: casi todos los escribe el parche de comentarios [12], y las seis tablas que llegaron con los parches [14], [17] y [18] traen el suyo; las del sistema anterior y las vistas vienen de tres módulos de curaduría escritos a partir de las columnas y las claves de cada tabla [10].
-- **Descripciones de columna**: 2 145 columnas del modelo v10 llevan comentario propio en la base (los pone el parche [12], salvo los de las tablas que llegaron con los parches [14] a [19]). Las particiones heredan la descripción de su tabla padre (366 columnas), porque PostgreSQL no propaga los comentarios a las particiones. Del sistema anterior se documentan las columnas que la migración consume de forma directa; las otras 598 celdas quedan en `—`.
+- **Propósito**: 266 de las 266 tablas del modelo v10 tienen comentario de tabla en la base: casi todos los escribe el parche de comentarios [12], y las seis tablas que llegaron con los parches [14], [17] y [18] traen el suyo; las del sistema anterior y las vistas vienen de tres módulos de curaduría escritos a partir de las columnas y las claves de cada tabla [10].
+- **Descripciones de columna**: 2 161 columnas del modelo v10 llevan comentario propio en la base (los pone el parche [12], salvo los de las tablas que llegaron con los parches [14] a [19] y los de las dos columnas de aprobación que añade el [21]). Las particiones heredan la descripción de su tabla padre (366 columnas), porque PostgreSQL no propaga los comentarios a las particiones. Del sistema anterior se documentan las columnas que la migración consume de forma directa; las otras 598 celdas quedan en `—`.
 
 **Regla de honestidad**: ningún texto se deduce del nombre de la columna. `—` significa «sin descripción documentada», no «sin significado». Se prefiere un hueco visible a una glosa inventada.
 
@@ -83,7 +83,7 @@ Las claves únicas compuestas no caben en una celda y se anotan al pie de la tab
 
 ## 4. Panorama
 
-Las cifras de esta sección salen de la base en el momento de generar el documento. El CSV no agrupa por tabla lógica como este texto: tiene una fila por columna física, y suman 3 318 —2 145 del modelo sin sus particiones, 366 de partición (marcadas con es_particion) y 807 del sistema anterior—.
+Las cifras de esta sección salen de la base en el momento de generar el documento. El CSV no agrupa por tabla lógica como este texto: tiene una fila por columna física, y suman 3 334 —2 161 del modelo sin sus particiones, 366 de partición (marcadas con es_particion) y 807 del sistema anterior—.
 
 ### 4.1 Tablas por esquema
 
@@ -97,7 +97,7 @@ Las cifras de esta sección salen de la base en el momento de generar el documen
 | `community` | Módulo de expansión sobre organización comunitaria; hoy solo catálogos. | 1 | 10 | 0 | INF |
 | `config` | Parámetros, aplicaciones, librerías, registro de esquemas y transiciones de estado. | 8 | 70 | 68 | INF, P |
 | `consultation` | Módulo de expansión para consultas a actores; sin uso todavía. | 4 | 26 | 0 | INF |
-| `core` | El dominio: casos, alertas, demandas, actores, documentos, compromisos y territorio. | 102 | 839 | 6 903 | I, INF, O, P |
+| `core` | El dominio: casos, alertas, demandas, actores, documentos, compromisos y territorio. | 103 | 855 | 6 906 | I, INF, O, P |
 | `ctx` | Contexto sistémico: variables externas, dominios y observaciones que condicionan el análisis. | 10 | 61 | 28 | I, P |
 | `domain` | Módulo de expansión con artefactos de dominio; sin uso todavía. | 4 | 47 | 15 | INF |
 | `economic` | Módulo de expansión económica; sin uso todavía. | 3 | 25 | 0 | INF |
@@ -115,10 +115,10 @@ Las cifras de esta sección salen de la base en el momento de generar el documen
 | `ref` | — | 2 | 17 | 5 | INF |
 | `staging` | Aterrizaje temporal de importaciones externas antes de validarlas. | 2 | 18 | 0 | I |
 | `territorio` | Módulo de expansión territorial; sin uso todavía. | 16 | 100 | 9 | INF |
-| **Total modelo** | 26 esquemas | **265** | **2 145** | **13 352** | — |
+| **Total modelo** | 26 esquemas | **266** | **2 161** | **13 355** | — |
 | `legacy` | Sistema anterior, conservado como archivo | 87 | 807 | 4 729 | X |
 
-El modelo tiene 289 tablas físicas: 265 lógicas y 24 particiones que reparten cuatro tablas del dominio: `agent.llm_call` (6), `agent.run_log` (6), `avisa.raw_ingest` (6), `ctx.observaciones` (6). Las fichas son de la tabla lógica, porque la partición repite su estructura; el CSV sí las incluye fila a fila.
+El modelo tiene 290 tablas físicas: 266 lógicas y 24 particiones que reparten cuatro tablas del dominio: `agent.llm_call` (6), `agent.run_log` (6), `avisa.raw_ingest` (6), `ctx.observaciones` (6). Las fichas son de la tabla lógica, porque la partición repite su estructura; el CSV sí las incluye fila a fila.
 
 Las cifras de esta sección se cuentan por tabla y no por línea del inventario del BRECHA §12: allí se agrupan filas («`core.cat_*` (38 distintas, 41 tablas)», «y 10 más») y se suman las vistas a la salida. Por eso los totales difieren de los 31 / 78 / 24 / 54 que declara ese capítulo, aunque la clase de cada tabla sea la misma.
 
@@ -126,10 +126,10 @@ Las cifras de esta sección se cuentan por tabla y no por línea del inventario 
 
 | Clase | Qué significa | Tablas v10 | Columnas | Filas |
 | --- | --- | --: | --: | --: |
-| **I · Entrada** | Donde aterriza el dato del mundo. | 35 | 449 | 4 126 |
+| **I · Entrada** | Donde aterriza el dato del mundo. | 35 | 453 | 4 127 |
 | **P · Proceso** | Intermedios de extracción, pauta y síntesis, con su trazabilidad. | 102 | 796 | 3 489 |
-| **O · Salida** | Se deriva de datos ya presentes; reproducible con la misma base. | 14 | 132 | 914 |
-| **INF · Transversal** | No es contenido: catálogos, parámetros, geografía, integraciones. | 114 | 768 | 4 823 |
+| **O · Salida** | Se deriva de datos ya presentes; reproducible con la misma base. | 15 | 143 | 914 |
+| **INF · Transversal** | No es contenido: catálogos, parámetros, geografía, integraciones. | 114 | 769 | 4 825 |
 | **X · Archivo** | Sistema anterior completo | 87 | 807 | 4 729 |
 
 ### 4.3 Vistas y vistas materializadas
@@ -140,13 +140,13 @@ Resumen por esquema; las fichas de cada objeto están en §6.
 | --- | --: | --: | --: | --: | --: |
 | `analytics` | 22 | 17 | 5 | 172 | 1 459 |
 | `config` | 2 | 2 | 0 | 20 | 7 |
-| `core` | 4 | 4 | 0 | 40 | 2 090 |
+| `core` | 5 | 5 | 0 | 55 | 2 090 |
 | `lex` | 1 | 1 | 0 | 6 | 0 |
 | `mype` | 3 | 2 | 1 | 32 | 0 |
 | `pesca` | 1 | 1 | 0 | 7 | 0 |
 | `ref` | 2 | 2 | 0 | 15 | 5 |
 | `territorio` | 1 | 1 | 0 | 6 | 0 |
-| **Total** | **36** | **30** | **6** | **298** | **3 561** |
+| **Total** | **37** | **31** | **6** | **313** | **3 561** |
 
 ## 5. Modelo v10
 
@@ -495,8 +495,8 @@ Mensaje crudo descartado por el canal de ingesta, con el error que motivó el re
 | # | Columna | Tipo | Nulo | Clave | Descripción |
 | --: | --- | --- | :--: | --- | --- |
 | 1 | `id` | uuid | no | PK | Identificador interno de la fila |
-| 2 | `raw_id` | uuid | no | FK → avisa.raw_ingest_202611(id), avisa.raw_ingest_202702(id), avisa.raw_ingest_202703(id), avisa.raw_ingest_202701(id), avisa.raw_ingest_202612(id), avisa.raw_ingest_default(id), avisa.raw_ingest(id) | Mensaje crudo descartado, buscado en la partición donde ingresó |
-| 3 | `raw_received_at` | timestamp with time zone | no | FK → avisa.raw_ingest_202611(received_at), avisa.raw_ingest_202702(received_at), avisa.raw_ingest_202703(received_at), avisa.raw_ingest_202701(received_at), avisa.raw_ingest_202612(received_at), avisa.raw_ingest_default(received_at), avisa.raw_ingest(received_at) | Momento en que se recibió el mensaje descartado, junto con su identificador |
+| 2 | `raw_id` | uuid | no | FK → avisa.raw_ingest_202703(id), avisa.raw_ingest_202702(id), avisa.raw_ingest_202701(id), avisa.raw_ingest_202612(id), avisa.raw_ingest_202611(id), avisa.raw_ingest_default(id), avisa.raw_ingest(id) | Mensaje crudo descartado, buscado en la partición donde ingresó |
+| 3 | `raw_received_at` | timestamp with time zone | no | FK → avisa.raw_ingest_202703(received_at), avisa.raw_ingest_202702(received_at), avisa.raw_ingest_202701(received_at), avisa.raw_ingest_202612(received_at), avisa.raw_ingest_202611(received_at), avisa.raw_ingest_default(received_at), avisa.raw_ingest(received_at) | Momento en que se recibió el mensaje descartado, junto con su identificador |
 | 4 | `error_json` | jsonb | no | — | Detalle estructurado del error que motivó el rechazo del mensaje |
 | 5 | `created_at` | timestamp with time zone | no | — | Momento en que se creó el registro |
 
@@ -1043,7 +1043,7 @@ Resultado o acuerdo alcanzado en un proceso de consulta, con su tipo, descripci�
 
 El dominio: casos, alertas, demandas, actores, documentos, compromisos y territorio.
 
-102 tablas · 839 columnas · 6 903 filas.
+103 tablas · 855 columnas · 6 906 filas.
 
 #### `core.actor_alias`
 
@@ -1169,6 +1169,26 @@ Acuerdo entre una organización social de pescadores artesanales y una planta, c
 | 14 | `nivel_clasificacion` | smallint | no | FK → core.cat_clasificacion(nivel) | Nivel de acceso al dato: 1 público, 2 reservado, 3 confidencial |
 | 15 | `notas` | text | sí | — | Observaciones libres sobre la suscripción, ejecución o incumplimiento del acuerdo |
 
+#### `core.alerta_destinatario`
+
+**Clasificación:** O · Salida (criterio: destinatarios del aviso, junto a `core.suscripcion_notificacion`) · **Filas:** 0 · **Columnas:** 11 · **Clave primaria:** `id` · **Relaciones:** 4 · **Índices:** 4
+
+Destinatarios nombrados de una alerta: las personas a las que se remite cuando la visibilidad es «sectorial». El destinatario es un usuario del sistema (usuario_id) o un cargo sin cuenta (cargo), nunca los dos. Reemplaza el mapeo aproximado a core.alertas_actores, que relaciona la alerta con los actores del conflicto y no con quienes reciben el aviso
+
+| # | Columna | Tipo | Nulo | Clave | Descripción |
+| --: | --- | --- | :--: | --- | --- |
+| 1 | `id` | uuid | no | PK | Identificador interno de la fila |
+| 2 | `alerta_id` | uuid | no | FK → core.alertas_tempranas(id) | Alerta a la que pertenece el destinatario, según core.alertas_tempranas. Al borrar la alerta se borran sus destinatarios |
+| 3 | `usuario_id` | uuid | sí | FK → core.usuarios(id) | Persona con cuenta en el sistema a la que se remite la alerta. Excluyente con cargo |
+| 4 | `cargo` | character varying(80) | sí | — | Cargo sin cuenta en el sistema al que se remite la alerta, por ejemplo una jefatura de gabinete. Excluyente con usuario_id. Se compara sin distinguir mayúsculas en la unicidad |
+| 5 | `canal` | character varying(20) | no | — | Canal del aviso: correo, whatsapp o sms. Un mismo destinatario puede tener una fila por canal |
+| 6 | `motivo` | character varying(120) | sí | — | Motivo o causa del aviso, cuando el canal no basta para explicar por qué se remite a esta persona o cargo |
+| 7 | `notificado_en` | timestamp with time zone | sí | — | Momento en que el envío se completó por este canal. NULL mientras el aviso esté pendiente; no puede ser anterior a la creación de la fila |
+| 8 | `created_at` | timestamp with time zone | no | — | Momento en que se creó el registro |
+| 9 | `updated_at` | timestamp with time zone | no | — | Momento de la última modificación del registro |
+| 10 | `created_by` | uuid | sí | FK → core.usuarios(id) | Usuario que registró el destinatario |
+| 11 | `updated_by` | uuid | sí | FK → core.usuarios(id) | Usuario que realizó la última modificación del registro |
+
 #### `core.alerta_especies`
 
 **Clasificación:** I · Entrada (§12.1) · **Filas:** 30 · **Columnas:** 2 · **Clave primaria:** `alerta_id`, `especie_id` · **Relaciones:** 2 · **Índices:** 1
@@ -1193,7 +1213,7 @@ Actores implicados en una alerta temprana, como vínculo entre la alerta y el pa
 
 #### `core.alertas_tempranas`
 
-**Clasificación:** I · Entrada (§12.1) · **Filas:** 83 · **Columnas:** 33 · **Clave primaria:** `id` · **Relaciones:** 10 · **Índices:** 4
+**Clasificación:** I · Entrada (§12.1) · **Filas:** 83 · **Columnas:** 37 · **Clave primaria:** `id` · **Relaciones:** 12 · **Índices:** 7
 
 Alerta temprana sobre un caso: situación actual, riesgos, acciones sugeridas, nivel, prioridad y plazos de atención y remisión.
 
@@ -1220,7 +1240,7 @@ Alerta temprana sobre un caso: situación actual, riesgos, acciones sugeridas, n
 | 19 | `descripcion_riesgo` | text | sí | — | Explicación del riesgo que motiva la alerta y de sus posibles efectos |
 | 20 | `hechos_recientes` | text | sí | — | Relato de los hechos ocurridos poco antes de emitirse la alerta |
 | 21 | `acciones_oaipcs` | text | sí | — | Acciones desplegadas por la oficina de prevención de conflictos ante la alerta |
-| 22 | `paso_actual` | smallint | sí | — | Número del paso del flujo operativo en que se encuentra la alerta |
+| 22 | `paso_actual` | smallint | sí | — | Número del paso del flujo operativo en que se encuentra la alerta. Es una copia desnormalizada de core.proceso_instancia: el paso real es el de la última instancia de proceso de la alerta. El parche 22 puso en 5 las 83 alertas migradas que decían 1 con el proceso ya archivado |
 | 23 | `fecha_validacion` | date | sí | — | Fecha en que un analista validó la alerta |
 | 24 | `fecha_remision` | date | sí | — | Fecha en que la alerta se remitió al área competente |
 | 25 | `estado_legado` | character varying(40) | sí | — | Estado de la alerta tal como figuraba en el sistema anterior |
@@ -1232,6 +1252,10 @@ Alerta temprana sobre un caso: situación actual, riesgos, acciones sugeridas, n
 | 31 | `mesa_id` | uuid | sí | FK → core.mesas_dialogo(id) | Mesa de diálogo vinculada a la alerta, si existe |
 | 32 | `codigo_legado` | character varying(50) | sí | UQ | Código de la alerta en el sistema anterior, conservado para trazabilidad |
 | 33 | `subsector_id` | integer | sí | FK → core.cat_subsectores(id) | Subsector al que pertenece la alerta registrada |
+| 34 | `aprobada_por` | uuid | sí | FK → core.usuarios(id) | Usuario de la Dirección de la OAIPCS que dio la aprobación definitiva de la alerta antes de su remisión; nulo en las alertas que no llegaron a aprobarse y en las migradas, porque el sistema anterior no registraba quién aprobaba |
+| 35 | `aprobada_en` | timestamp with time zone | sí | — | Momento en que se registró la aprobación definitiva de la alerta; nulo mientras la alerta no esté aprobada |
+| 36 | `visibilidad` | character varying(12) | no | — | Alcance de la alerta. interna: solo la ve la OAIPCS (Perfil A), es el valor de nacimiento y el único admisible mientras falte alguna de las dos aprobaciones humanas. ejecutiva: además se ve en el Perfil B (Alta Dirección). sectorial: la remisión se limita a los destinatarios nombrados de esa alerta (el portal del Perfil C queda fuera del MVP). No relaja RD-08: ningún dato personal pasa por el canal público del Dashboard Estratégico, cualquiera sea la visibilidad. El gate G21 (trigger alertas_g21_visibilidad) impide salir de interna sin la validación previa del Sectorista y la aprobación definitiva de la Dirección |
+| 37 | `validada_por` | uuid | sí | FK → core.usuarios(id) | Autor de la validación previa del Sectorista. Junto con fecha_validacion forma la primera de las dos firmas de G21; la segunda es aprobada_por y aprobada_en. La restricción alertas_cuatro_ojos impide que la misma persona firme la validación y la aprobación. Las 83 alertas migradas lo tienen en NULL porque el sistema anterior nunca registró quién validaba |
 
 #### `core.banco_datos_tratamiento`
 
@@ -1711,7 +1735,7 @@ Catálogo de fases del ciclo de inversión pública: programación, preinversió
 
 #### `core.cat_prioridades_alerta`
 
-**Clasificación:** INF · Transversal (§12.4) · **Filas:** 4 · **Columnas:** 3 · **Clave primaria:** `id` · **Relaciones:** 0 · **Índices:** 2
+**Clasificación:** INF · Transversal (§12.4) · **Filas:** 4 · **Columnas:** 4 · **Clave primaria:** `id` · **Relaciones:** 0 · **Índices:** 2
 
 Catálogo de prioridades de alerta, con su plazo de respuesta: crítica inmediata, urgente, temprana o seguimiento.
 
@@ -1720,6 +1744,7 @@ Catálogo de prioridades de alerta, con su plazo de respuesta: crítica inmediat
 | 1 | `id` | smallint | no | PK | Identificador interno de la fila |
 | 2 | `codigo` | character varying(30) | no | UQ | Código de la prioridad, asociado a su plazo de respuesta |
 | 3 | `sla_horas` | smallint | sí | — | Plazo de respuesta de la prioridad, expresado en horas |
+| 4 | `es_grave` | boolean | no | — | Marca si el nivel de prioridad es grave para la regla RN-02: los graves llevan al Ministro como destinatario. Verdaderos hoy: Critica_Inmediata (24 h) y Urgente (48 h). Un nivel sin plazo de atención (Seguimiento) no puede ser grave, y la restricción cat_prioridades_alerta_grave_con_plazo lo impide |
 
 #### `core.cat_prioridades_atencion`
 
@@ -2230,20 +2255,20 @@ Interruptor de funcionalidad del sistema, con su estado, quién lo activó y met
 
 #### `core.flujo_definicion`
 
-**Clasificación:** INF · Transversal (§12 (encabezado)) · **Filas:** 11 · **Columnas:** 10 · **Clave primaria:** `id` · **Relaciones:** 0 · **Índices:** 3
+**Clasificación:** INF · Transversal (§12 (encabezado)) · **Filas:** 12 · **Columnas:** 10 · **Clave primaria:** `id` · **Relaciones:** 0 · **Índices:** 3
 
 Paso del flujo operativo por tipo de trámite —caso o reporte—, con su orden, estado resultante y rol responsable.
 
 | # | Columna | Tipo | Nulo | Clave | Descripción |
 | --: | --- | --- | :--: | --- | --- |
 | 1 | `id` | uuid | no | PK | Identificador interno de la fila |
-| 2 | `tipo_flujo` | character varying(10) | no | — | Tipo de flujo: caso (ciclo de vida de un caso), reporte (el de un reporte) o alerta (los cuatro pasos de una alerta temprana) |
+| 2 | `tipo_flujo` | character varying(10) | no | — | Tipo de flujo: caso (ciclo de vida de un caso), reporte (el de un reporte) o alerta (los cinco pasos de una alerta temprana) |
 | 3 | `orden` | smallint | no | — | Posición del paso dentro del flujo operativo |
 | 4 | `nombre` | character varying(120) | no | — | Denominación del paso del flujo mostrada en la interfaz |
-| 5 | `estado_resultante` | character varying(60) | no | — | Estado al que lleva el paso, con el vocabulario del sistema anterior (Activo, Remitido, Atendido, Registrado, Validado, Cerrado, Reaperturado, Archivado). No es clave ajena a core.flujo_estado porque los dos vocabularios no coinciden y emparejarlos sería inventar la equivalencia |
-| 6 | `rol_responsable` | character varying(120) | sí | — | Rol que debe ejecutar el paso del flujo |
+| 5 | `estado_resultante` | character varying(60) | no | — | Estado de negocio al que lleva el paso. En caso y reporte conserva el vocabulario del sistema anterior (Activo, Remitido, Atendido, Registrado, Validado, Cerrado, Reaperturado, Archivado); en alerta usa el del ERS (Registrado, Validado, Aprobado, Remitido, Archivado). No es clave ajena a core.flujo_estado porque los dos vocabularios no coinciden y emparejarlos sería inventar la equivalencia |
+| 6 | `rol_responsable` | character varying(120) | sí | — | Rol que debe ejecutar el paso del flujo, como código de core.roles. Un código único significa «solo ese rol»; varios códigos separados por coma, sin espacios, significan «cualquiera de ellos» (alternativa, no secuencia): sectorista,direccion_oaipcs quiere decir que el paso lo ejecuta el sectorista o la Dirección. En caso y reporte el texto libre del sistema anterior quedó normalizado por el parche 21; la restricción de formato y el trigger flujo_definicion_valida_rol impiden que vuelva |
 | 7 | `descripcion` | text | sí | — | Descripción de lo que se hace en el paso del flujo |
-| 8 | `codigo_legado` | character varying(60) | no | UQ | Identificador del paso en el sistema anterior: DPP-<n> si viene de dim_paso_proceso y DPPC-<n> si viene de dim_paso_proceso_caso |
+| 8 | `codigo_legado` | character varying(60) | no | UQ | Identificador del paso en el sistema anterior: DPP-<n> si viene de dim_paso_proceso, DPPC-<n> si viene de dim_paso_proceso_caso y DPPA-<n> si es un paso del flujo de alerta. Los pasos que solo existen en la v10 llevan prefijo V10- y no tienen equivalencia en el legado |
 | 9 | `created_at` | timestamp with time zone | no | — | Momento en que se creó el registro |
 | 10 | `updated_at` | timestamp with time zone | no | — | Momento de la última modificación del registro |
 
@@ -2549,7 +2574,7 @@ Contrato de cada salida generada, con su formato, la consulta que la originó y 
 
 **Clasificación:** P · Proceso (§12.5) · **Filas:** 0 · **Columnas:** 6 · **Clave primaria:** `id` · **Relaciones:** 2 · **Índices:** 3
 
-Autorización temporal que habilita a un usuario a aprobar un objeto determinado, con su vigencia y quién la otorgó.
+Autorización temporal que habilita a un usuario a aprobar un objeto determinado, con su vigencia y quién la otorgó. Desde el parche 22 tiene consumidor: core.puede_aprobar() la consulta para la suplencia del aprobador y core.vw_permiso_aprobacion la expone a la pantalla de administración. Una fila aquí no concede un rol: solo habilita a esa persona para ese objeto mientras la vigencia esté abierta. Vacía significa que no hay suplencia designada
 
 | # | Columna | Tipo | Nulo | Clave | Descripción |
 | --: | --- | --- | :--: | --- | --- |
@@ -2625,13 +2650,13 @@ Paso ejecutado del flujo operativo sobre un caso o un reporte, con su estado, re
 | 4 | `codigo_caso_legado` | character varying(50) | sí | — | Código de caso tal como venía en el sistema anterior; se conserva siempre, exista o no el caso, para poder rastrearlo |
 | 5 | `alerta_id` | uuid | sí | FK → core.alertas_tempranas(id) | Alerta temprana asociada, cuando el código de reporte existe en el maestro de alertas. Está vacío en las filas cuyo vínculo es solo el código de texto |
 | 6 | `codigo_reporte` | character varying(50) | sí | — | Código de reporte conservado como texto, sin clave ajena. Trae el código de alerta cuando el origen lo tiene y, si no, el código de la fila de reporte |
-| 7 | `flujo_definicion_id` | uuid | sí | FK → core.flujo_definicion(id) | Paso del catálogo, resuelto por tipo de flujo y número de orden. Está vacío en las instancias de reporte cuyo paso no existe en el sistema anterior, porque allí solo hay tres pasos definidos |
+| 7 | `flujo_definicion_id` | uuid | sí | FK → core.flujo_definicion(id) | Paso del catálogo, resuelto por tipo de flujo y número de orden. Está vacío en las 9 instancias migradas del flujo de reporte cuyos pasos 4, 5 y 6 venían del sistema anterior y no existen en el modelo de tres pasos (Elaboración, Remisión, Archivo): no es un dato que falte, es la huella de que el flujo anterior tenía seis pasos. El parche 22 lo deja así a propósito y no amplía el catálogo |
 | 8 | `estado_id` | uuid | sí | FK → core.flujo_estado(id) | Estado del paso. El sistema anterior no registraba estado por paso, así que está vacío en todas las instancias cargadas; el catálogo se llena igual para cuando el flujo se use en vivo |
 | 9 | `usuario_id` | uuid | sí | FK → core.usuarios(id) | Usuario responsable, resuelto por su código del sistema anterior. Está vacío en las filas cuyo responsable no existe como usuario |
 | 10 | `codigo_responsable_legado` | character varying(50) | sí | — | Responsable tal como venía en el sistema anterior; se conserva aunque se resuelva el usuario |
 | 11 | `ocurrido_en` | timestamp with time zone | sí | — | Fecha y hora del paso, interpretada en hora de Lima. Está vacía en la fila que viene sin fecha de inicio |
 | 12 | `finalizado_en` | timestamp with time zone | sí | — | Fecha y hora de fin del paso, cuando el sistema anterior la trae |
-| 13 | `orden` | smallint | no | — | Número de paso tal como viene en el sistema anterior; se conserva aunque no exista una definición para ese paso |
+| 13 | `orden` | smallint | no | — | Número de paso, alineado con core.flujo_definicion.orden. En las filas migradas conserva el número del sistema anterior salvo la renumeración del parche 20, que pasó el Archivo del paso 4 al 5 al insertarse la aprobación definitiva |
 | 14 | `nota` | text | sí | — | Texto libre del paso; en caso viene de la columna c09 y en reporte de la c08, porque las dos tablas de origen no comparten el significado de sus columnas |
 | 15 | `codigo_legado` | character varying(50) | no | — | Código de la fila de proceso en el sistema anterior (PC, PR o PR-AL). No es único: hay códigos repetidos con instantes distintos |
 | 16 | `fila_legado` | smallint | no | — | Número de fila de la tabla de origen; junto con el tipo de origen forma la clave que evita cargar dos veces el mismo paso |
@@ -2750,7 +2775,7 @@ Claves únicas compuestas: `lugar_id`, `fecha`, `fuente`.
 
 #### `core.roles`
 
-**Clasificación:** INF · Transversal (§12.4) · **Filas:** 9 · **Columnas:** 6 · **Clave primaria:** `id` · **Relaciones:** 1 · **Índices:** 2
+**Clasificación:** INF · Transversal (§12.4) · **Filas:** 10 · **Columnas:** 6 · **Clave primaria:** `id` · **Relaciones:** 1 · **Índices:** 2
 
 Rol de acceso del sistema con su nivel máximo de clasificación, base del control de permisos por perfil.
 
@@ -2782,7 +2807,7 @@ Suscripción de una unidad orgánica a los avisos de alerta, clima social y repo
 
 #### `core.usuario_roles`
 
-**Clasificación:** I · Entrada (§12.1) · **Filas:** 35 · **Columnas:** 4 · **Clave primaria:** `usuario_id`, `rol_id`, `desde` · **Relaciones:** 2 · **Índices:** 1
+**Clasificación:** I · Entrada (§12.1) · **Filas:** 36 · **Columnas:** 4 · **Clave primaria:** `usuario_id`, `rol_id`, `desde` · **Relaciones:** 2 · **Índices:** 1
 
 Asignación de un rol a un usuario, con el período durante el cual esa asignación está vigente.
 
@@ -3357,7 +3382,7 @@ Casillero de una plantilla que reserva un lugar para un indicador determinado, c
 | 4 | `codigo` | character varying(40) | no | — | Código del casillero usado para referenciarlo en el documento |
 | 5 | `indicador_id` | uuid | no | FK → ind.indicador(id) | Indicador que ocupa el casillero de la plantilla |
 
-Claves únicas compuestas: `plantilla_id`, `codigo`; `plantilla_id`, `orden`.
+Claves únicas compuestas: `plantilla_id`, `orden`; `plantilla_id`, `codigo`.
 
 #### `ind.proxy_justificacion`
 
@@ -5122,7 +5147,7 @@ Sin propósito documentado.
 
 ### 6.3 `core`
 
-4 objetos · 40 columnas · 2 090 filas.
+5 objetos · 55 columnas · 2 090 filas.
 
 #### `core.v_actor_datos_personales_seguro`
 
@@ -5148,9 +5173,19 @@ Lee: `core.integraciones`.
 
 #### `core.vw_alerta_estado`
 
-**Clasificación:** O · Salida · **Tipo:** vista · **Filas:** 83 · **Columnas:** 17
+**Clasificación:** O · Salida · **Tipo:** vista · **Filas:** 83 · **Columnas:** 22
 
-Sin propósito documentado.
+Estado vigente de cada alerta temprana: el paso del flujo en que va, su estado, la validación previa del Sectorista con su firma, la aprobación definitiva de la Dirección, la visibilidad y el número de destinatarios nombrados, resueltos en una sola lectura desde core.proceso_instancia para la bandeja de alertas y el tablero de seguimiento.
+
+Lee: `core.alerta_destinatario, core.alertas_tempranas, core.flujo_definicion, core.flujo_estado, core.proceso_instancia`.
+
+#### `core.vw_permiso_aprobacion`
+
+**Clasificación:** O · Salida · **Tipo:** vista · **Filas:** 0 · **Columnas:** 10
+
+Suplencias de aprobación con el nombre de la persona habilitada, el objeto, la vigencia y una marca de vigencia calculada al consultar, para la pantalla de administración de membresías.
+
+Lee: `core.permiso_aprobacion, core.usuarios`.
 
 ### 6.4 `lex`
 
@@ -6295,6 +6330,7 @@ Ordenado por nombre de objeto, para encontrar una tabla cuando se conoce el nomb
 - `consultation.actores`
 - `core.actores`
 - `core.acuerdo_ospa_sni`
+- `core.alerta_destinatario`
 - `core.alerta_especies`
 - `core.alertas_actores`
 - `core.alertas_tempranas`
@@ -6733,6 +6769,7 @@ Ordenado por nombre de objeto, para encontrar una tabla cuando se conoce el nomb
 - `analytics.vw_marco_situacional_robustez`
 - `territorio.vw_monitoreo_hidrico_excede_eca`
 - `analytics.vw_organizaciones_vigencia`
+- `core.vw_permiso_aprobacion`
 - `analytics.vw_riesgo_sistemico`
 - `analytics.vw_selecciones_vigentes`
 

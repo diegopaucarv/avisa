@@ -13,7 +13,7 @@ Estructura del archivo generado:
 
     Sección A · esquema      extensiones + DDL (dos pases) + parches 1-5
                              aplicable sobre una base vacía.
-    Sección B · post-carga   parches 6-19
+    Sección B · post-carga   parches 6-23
                              exige el legado ya cargado.
 
 El script solo lee el repositorio. No abre conexión a ninguna base.
@@ -298,6 +298,110 @@ SECCION_B = (
             "final mida lo que de verdad queda sin describir."
         ),
     ),
+    # Va después del parche 19 y del 12 a propósito: reescribe los comentarios de
+    # `core.flujo_definicion` que fija el parche 12, y necesita los pasos DPPA del
+    # parche 14 y `core.rol_actual()` del parche 15.
+    bloque(
+        "B.15",
+        "Parche 20 · flujo de alerta en dos niveles",
+        "docs/PARCHE_20_FLUJO_ALERTA.sql",
+        tolera_errores=False,
+        nota=(
+            "Modela los dos niveles de aprobación que exige RN-04: el flujo de "
+            "alerta pasa a cinco pasos, con validación previa del sectorista y "
+            "aprobación definitiva de `direccion_oaipcs`. Crea ese rol, renumera "
+            "las 83 instancias del Archivo del paso 4 al 5 y pone RLS en "
+            "`core.flujo_definicion` (lectura abierta, escritura sólo "
+            "`administrador`)."
+        ),
+    ),
+    # Va después del parche 20 a propósito: normaliza `rol_responsable` sobre
+    # los pasos de caso y reporte que definió el parche 10 y deja la restricción
+    # y el trigger de validación; necesita el rol `direccion_oaipcs` del parche
+    # 20, `core.rol_actual()` del 15 y la vista del parche 14, que aquí se amplía.
+    bloque(
+        "B.16",
+        "Parche 21 · la Dirección y la normalización del flujo",
+        "docs/PARCHE_21_DIRECCION_Y_FLUJO.sql",
+        tolera_errores=False,
+        nota=(
+            "Asigna `direccion_oaipcs` a la Directora, que era el único hueco que "
+            "dejó abierto el parche 20: sin cuenta, el paso de aprobación no tenía "
+            "quién lo ejecutara. Normaliza `rol_responsable` de caso y reporte a "
+            "códigos de `core.roles` y lo blinda con una restricción de formato y "
+            "un trigger que valida cada token. Cierra además G21 con "
+            "`aprobada_por`/`aprobada_en` en la alerta y RLS en los dos catálogos "
+            "del flujo que seguían abiertos."
+        ),
+    ),
+    # Va después del parche 21 a propósito: el gate necesita las dos columnas de
+    # aprobación que dejó el 21 y el rol con su cuenta vigente de los parches 20
+    # y 21. Reescribe además comentarios de columnas que fija el parche 12 (que
+    # corre en B.13), así que tampoco puede ir antes.
+    bloque(
+        "B.17",
+        "Parche 22 · visibilidad, G21 ejecutable y suplencia",
+        "docs/PARCHE_22_VISIBILIDAD_Y_G21.sql",
+        tolera_errores=False,
+        nota=(
+            "Cierra cinco pendientes de base de los parches 20 y 21. Añade "
+            "`core.alertas_tempranas.visibilidad` con sus tres valores, su "
+            "restricción y un índice parcial; hace ejecutable G21 con el trigger "
+            "`alertas_g21_visibilidad`, que rechaza salir de `interna` sin las dos "
+            "aprobaciones humanas; da consumidor a `core.permiso_aprobacion` con "
+            "`core.puede_aprobar()` y la vista `core.vw_permiso_aprobacion`; amplía "
+            "`core.vw_alerta_estado` a 20 columnas; corrige el desfase de "
+            "`paso_actual` en las 83 alertas derivándolo de `core.proceso_instancia`; "
+            "y documenta, sin ampliar el catálogo, por qué 9 instancias de reporte "
+            "no tienen paso definido."
+        ),
+    ),
+    # Va después del parche 22 a propósito: el gate ampliado necesita la columna
+    # `visibilidad` que dejó el 22 y las dos columnas de aprobación del 21.
+    # Va también después del parche 7: la fila G21 de `config.guardrail_contract`
+    # la siembra el 7 (bloque B.2) —el 6 solo amplía el CHECK, no siembra filas— y
+    # el `UPDATE … WHERE guardrail = 'G21'` del 23 no tiene fila que escribir sin
+    # ella. La verificación del cierre del 23 lo confirma: aborta con
+    # `PARCHE_23_VERIFICA` si G21 no dice `ejecutiva`, y sin fila el valor es NULL.
+    # Desde el 2026-11-21 el 7 usa `DO NOTHING`, así que reejecutarlo suelto ya no
+    # revierte lo que el 23 dejó en esa fila; el orden sigue siendo la norma.
+    bloque(
+        "B.18",
+        "Parche 23 · destinatarios nombrados, cuatro ojos y escala de gravedad",
+        "docs/PARCHE_23_DESTINATARIOS_Y_CUATRO_OJOS.sql",
+        tolera_errores=False,
+        nota=(
+            "Resuelve H-14 poniendo la gravedad en el dato: `core.cat_prioridades_alerta` "
+            "gana `es_grave`, verdadero solo en los dos niveles con plazo grave "
+            "(`Critica_Inmediata` y `Urgente`). Cierra H-79 con "
+            "`core.alertas_tempranas.validada_por` y dos restricciones —la firma y la "
+            "fecha de validación van juntas, y quien valida no puede ser quien aprueba—, "
+            "y amplía el gate G21 a los cuatro ojos y a los destinatarios. Crea "
+            "`core.alerta_destinatario`, la tabla que faltaba para la visibilidad "
+            "`sectorial`, y alinea el contrato de G21 en `config.guardrail_contract`, "
+            "que se disparaba con un valor que el CHECK no admite. "
+            "`core.vw_alerta_estado` pasa de 20 a 22 columnas."
+        ),
+    ),
+    # Va después del parche 23 a propósito: comenta la tabla que ese parche
+    # crea, así que antes del 23 `COMMENT ON` fallaría al aplicar desde cero.
+    # Y va después del 19 a propósito: es el 19 quien trae la guardia global
+    # que hoy aborta con estas siete columnas; describirlas aquí devuelve al 19
+    # su reejecutabilidad.
+    bloque(
+        "B.19",
+        "Parche 24 · los siete comentarios del destinatario",
+        "docs/PARCHE_24_COMENTARIOS_DESTINATARIO.sql",
+        tolera_errores=False,
+        nota=(
+            "El parche 23 describió cuatro de las once columnas de "
+            "`core.alerta_destinatario`; las siete restantes eran las únicas del "
+            "modelo sin descripción, y hacían disparar la guardia final del parche "
+            "19. Este bloque solo agrega esos siete comentarios y comprueba sus "
+            "propias columnas, sin replicar el candado global que volvió no "
+            "reejecutable al 19."
+        ),
+    ),
 )
 
 # Ancla para detectar un include de psql (`\i`, `\ir`, `\include`, `\include_relative`).
@@ -372,7 +476,7 @@ def encabezado(solo: str | None) -> list[str]:
         "--  Sección A · esquema    extensiones + DDL v9 (dos pases) + parches 1-5.",
         "--                          Autosuficiente: se puede aplicar sobre una",
         "--                          base VACÍA, sin instalar extensiones aparte.",
-        "--  Sección B · post-carga parches 6-19. NO se puede aplicar sobre una",
+        "--  Sección B · post-carga parches 6-23. NO se puede aplicar sobre una",
         "--                          base vacía: exige el legado ya cargado por",
         "--                          migration/loader (filas en core.*, ind.*,",
         "--                          kag.*). Sobre una base recién creada falla en",
@@ -415,15 +519,18 @@ def encabezado(solo: str | None) -> list[str]:
         "--  sección A → cargador del legado → sección B.",
         "--",
         "--  Con el legado cargado y la sección B aplicada (el estado de la base",
-        "--  `avisa`, sin contar `legacy` ni `public`): 289 tablas físicas (265",
-        "--  lógicas + 24 hijas de partición), 2 511 columnas y 610 claves",
+        "--  `avisa`, sin contar `legacy` ni `public`): 290 tablas físicas (266",
+        "--  lógicas + 24 hijas de partición), 2 527 columnas y 616 claves",
         "--  ajenas. Sumando el volcado histórico `legacy` (87 tablas, 807",
-        "--  columnas): 376 tablas físicas y 3 318 columnas; las claves ajenas no",
+        "--  columnas): 377 tablas físicas y 3 334 columnas; las claves ajenas no",
         "--  cambian porque `legacy` no declara ninguna.",
         "--",
-        "--  La diferencia entre ambos estados son 14 tablas, 197 columnas y 29",
-        "--  claves ajenas, todas de los parches 9 a 18 (el 19 sólo añade",
-        "--  comentarios):",
+        "--  La diferencia entre ambos estados son 15 tablas, 213 columnas y 35",
+        "--  claves ajenas: 197 y 29 de los parches 9 a 18, más 2 columnas y 1",
+        "--  clave ajena del parche 21, 1 columna del parche 22 y las 13 columnas",
+        "--  con 5 claves ajenas del parche 23 (el 19 y el 20 no añaden objetos:",
+        "--  el 19 sólo comenta y el 20 sólo renumera pasos, crea un rol y pone",
+        "--  cuatro políticas):",
         "--    · parche  9 · `audit.datos_personales_acceso` (8 columnas) y las",
         "--                 4 columnas cifradas de `core.actor_datos_personales`;",
         "--    · parche 10 · `core.flujo_definicion` (10), `core.flujo_estado` (7)",
@@ -459,7 +566,40 @@ def encabezado(solo: str | None) -> list[str]:
         "--    · parche 19 · ningún objeto: los 19 comentarios de columna que",
         "--                 faltaban; deja el modelo con 2 145 de 2 145 columnas",
         "--                 descritas.",
-        "--  Por eso la sección A termina en 275 tablas y no en 289: las tablas",
+        "--    · parche 20 · ningún objeto nuevo: el rol `direccion_oaipcs`, el paso",
+        "--                 `V10-ALERTA-APROB` del flujo de alerta, la renumeración",
+        "--                 del paso 4 al 5 en 83 instancias y 4 políticas en",
+        "--                 `core.flujo_definicion` (lectura abierta, escritura sólo",
+        "--                 `administrador`).",
+        "--    · parche 21 · `aprobada_por` (con clave ajena a `core.usuarios`) y",
+        "--                 `aprobada_en` en `core.alertas_tempranas`, su índice",
+        "--                 parcial y 8 políticas (4 en `core.flujo_estado` y 4 en",
+        "--                 `core.permiso_aprobacion`); la vista",
+        "--                 `core.vw_alerta_estado` pasa a 19 columnas; 1 restricción",
+        "--                 y 1 trigger de validación en `core.flujo_definicion`; 1",
+        "--                 asignación de rol, que no crea objetos.",
+        "--    · parche 22 · `visibilidad` en `core.alertas_tempranas`, con su",
+        "--                 restricción `alertas_visibilidad_valida` y su índice",
+        "--                 parcial; el trigger `alertas_g21_visibilidad`, que hace",
+        "--                 ejecutable G21; `core.puede_aprobar()` y la vista",
+        "--                 `core.vw_permiso_aprobacion` (10 columnas), que dan",
+        "--                 consumidor a `core.permiso_aprobacion`; `core.vw_alerta_estado`",
+        "--                 pasa a 20 columnas; no añade claves ajenas ni filas.",
+        "--    · parche 23 · `core.alerta_destinatario` (11 columnas, vacía),",
+        "--                 `validada_por` y `es_grave` en `core.alertas_tempranas`",
+        "--                 y `core.cat_prioridades_alerta` respectivamente, sus 2",
+        "--                 restricciones de coherencia y de cuatro ojos, 5 claves",
+        "--                 ajenas, 1 trigger `trg_audit`, 5 índices y 4 políticas;",
+        "--                 `core.vw_alerta_estado` pasa a 22 columnas. La tabla nueva",
+        "--                 estrena RLS **forzada** —`ENABLE` y `FORCE`—, como el",
+        "--                 resto de `core`: sin `FORCE` el propietario se salta las",
+        "--                 cuatro políticas y no sirven de nada.",
+        "--    · parche 24 · ningún objeto nuevo: los 7 comentarios de columna que",
+        "--                 faltaban en `core.alerta_destinatario` (`id`, `alerta_id`,",
+        "--                 `motivo` y las 4 de auditoría). Deja el modelo en 2 161 de",
+        "--                 2 161 columnas descritas y devuelve al parche 19 su",
+        "--                 reejecutabilidad, porque su candado mide el modelo entero.",
+        "--  Por eso la sección A termina en 275 tablas y no en 290: las tablas",
         "--  que faltan no son parte del esquema base, se crean después de cargar",
         "--  el legado. Si la sección A se queda corta en algo distinto, el defecto",
         "--  no está en este archivo: falta una fuente o cambió el DDL.",
@@ -558,7 +698,7 @@ def componer(secciones: list[str], solo: str | None) -> tuple[list[str], list[di
             "B",
             "Post-carga (exige el legado cargado)",
             [
-                "Parches 6-18. Requiere el legado cargado por migration/loader;",
+                "Parches 6-23. Requiere el legado cargado por migration/loader;",
                 "sobre una base vacía aborta en el primer parche que lee datos.",
             ],
             SECCION_B,

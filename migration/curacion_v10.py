@@ -141,7 +141,7 @@ PROPOSITO: dict[str, str] = {
     "core.organizaciones": "Organización inscrita como actor colectivo, con su RUC, base legal, integrantes y situación ante el registro de OSPA.",
     "core.outbox_integracion": "Cola de envíos hacia un sistema externo, con el contenido transformado, los reintentos y la aprobación previa.",
     "core.output_contracts": "Contrato de cada salida generada, con su formato, la consulta que la originó y el commit y snapshot que la respaldan.",
-    "core.permiso_aprobacion": "Autorización temporal que habilita a un usuario a aprobar un objeto determinado, con su vigencia y quién la otorgó.",
+    "core.permiso_aprobacion": "Autorización temporal que habilita a un usuario a aprobar un objeto determinado, con su vigencia y quién la otorgó. Desde el parche 22 tiene consumidor: core.puede_aprobar() la consulta para la suplencia del aprobador y core.vw_permiso_aprobacion la expone a la pantalla de administración. Una fila aquí no concede un rol: solo habilita a esa persona para ese objeto mientras la vigencia esté abierta. Vacía significa que no hay suplencia designada",
     "core.plan_acciones": "Acción de un plan de intervención, con su responsable, plazo, criterio de contención y estado de avance.",
     "core.planes_accion": "Plan de acción con su monto presupuestal, plazo límite y estado de aprobación, asociado a un documento del expediente.",
     "core.proceso_instancia": "Paso ejecutado del flujo operativo sobre un caso o un reporte, con su estado, responsable y fechas de ocurrencia.",

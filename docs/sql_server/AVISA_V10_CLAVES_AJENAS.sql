@@ -20,7 +20,7 @@
 --  Para volver a aplicarlo, primero se borran las claves ajenas; el
 --  bloque final deja la consulta que genera los DROP.
 --
---  526 claves ajenas, agrupadas por tabla hija.
+--  532 claves ajenas, agrupadas por tabla hija.
 -- =====================================================================
 
 \set ON_ERROR_STOP on
@@ -290,6 +290,14 @@ ALTER TABLE core.acuerdo_ospa_sni ADD CONSTRAINT acuerdo_ospa_sni_ospa_actor_uid
 ALTER TABLE core.acuerdo_ospa_sni ADD CONSTRAINT acuerdo_ospa_sni_planta_actor_uid_fkey FOREIGN KEY (planta_actor_uid) REFERENCES core.actores(actor_uid);
 
 -- ---------------------------------------------------------------------
+--  core.alerta_destinatario · 4 claves ajenas
+-- ---------------------------------------------------------------------
+ALTER TABLE core.alerta_destinatario ADD CONSTRAINT alerta_destinatario_alerta_id_fkey FOREIGN KEY (alerta_id) REFERENCES core.alertas_tempranas(id) ON DELETE CASCADE;
+ALTER TABLE core.alerta_destinatario ADD CONSTRAINT alerta_destinatario_created_by_fkey FOREIGN KEY (created_by) REFERENCES core.usuarios(id);
+ALTER TABLE core.alerta_destinatario ADD CONSTRAINT alerta_destinatario_updated_by_fkey FOREIGN KEY (updated_by) REFERENCES core.usuarios(id);
+ALTER TABLE core.alerta_destinatario ADD CONSTRAINT alerta_destinatario_usuario_id_fkey FOREIGN KEY (usuario_id) REFERENCES core.usuarios(id) ON DELETE RESTRICT;
+
+-- ---------------------------------------------------------------------
 --  core.alerta_especies · 2 claves ajenas
 -- ---------------------------------------------------------------------
 ALTER TABLE core.alerta_especies ADD CONSTRAINT alerta_especies_alerta_id_fkey FOREIGN KEY (alerta_id) REFERENCES core.alertas_tempranas(id) ON DELETE CASCADE;
@@ -302,8 +310,9 @@ ALTER TABLE core.alertas_actores ADD CONSTRAINT alertas_actores_actor_id_fkey FO
 ALTER TABLE core.alertas_actores ADD CONSTRAINT alertas_actores_alerta_id_fkey FOREIGN KEY (alerta_id) REFERENCES core.alertas_tempranas(id) ON DELETE CASCADE;
 
 -- ---------------------------------------------------------------------
---  core.alertas_tempranas · 10 claves ajenas
+--  core.alertas_tempranas · 12 claves ajenas
 -- ---------------------------------------------------------------------
+ALTER TABLE core.alertas_tempranas ADD CONSTRAINT alertas_tempranas_aprobada_por_fkey FOREIGN KEY (aprobada_por) REFERENCES core.usuarios(id) ON DELETE RESTRICT;
 ALTER TABLE core.alertas_tempranas ADD CONSTRAINT alertas_tempranas_caso_id_fkey FOREIGN KEY (caso_id) REFERENCES core.casos(id) ON DELETE CASCADE;
 ALTER TABLE core.alertas_tempranas ADD CONSTRAINT alertas_tempranas_created_by_fkey FOREIGN KEY (created_by) REFERENCES core.usuarios(id);
 ALTER TABLE core.alertas_tempranas ADD CONSTRAINT alertas_tempranas_distrito_id_fkey FOREIGN KEY (distrito_id) REFERENCES core.distritos(id);
@@ -314,6 +323,7 @@ ALTER TABLE core.alertas_tempranas ADD CONSTRAINT alertas_tempranas_prioridad_id
 ALTER TABLE core.alertas_tempranas ADD CONSTRAINT alertas_tempranas_sectorista_usuario_id_fkey FOREIGN KEY (sectorista_usuario_id) REFERENCES core.usuarios(id);
 ALTER TABLE core.alertas_tempranas ADD CONSTRAINT alertas_tempranas_subsector_id_fkey FOREIGN KEY (subsector_id) REFERENCES core.cat_subsectores(id);
 ALTER TABLE core.alertas_tempranas ADD CONSTRAINT alertas_tempranas_updated_by_fkey FOREIGN KEY (updated_by) REFERENCES core.usuarios(id);
+ALTER TABLE core.alertas_tempranas ADD CONSTRAINT alertas_tempranas_validada_por_fkey FOREIGN KEY (validada_por) REFERENCES core.usuarios(id) ON DELETE RESTRICT;
 
 -- ---------------------------------------------------------------------
 --  core.banco_datos_tratamiento · 2 claves ajenas

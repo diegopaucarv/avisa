@@ -90,11 +90,11 @@ INSERT INTO priorizacion.capa AS c
     (codigo, significado, criterio, tablas_esperadas, columnas_esperadas, filas_esperadas)
 VALUES
     ('T0', 'El MVP la exige y ya tiene datos o cargador',
-     'está en el contrato MVP-45 y tiene filas o una fase del cargador',  34, 364, 8379),
+     'está en el contrato MVP-45 y tiene filas o una fase del cargador',  33, 367, 8220),
     ('T1', 'El MVP la exige y todavía está vacía',
-     'está en el contrato MVP-45 y no tiene filas',                       12,  99,    0),
+     'está en el contrato MVP-45 y no tiene filas',                       13, 110,    0),
     ('T2', 'No la pide el MVP, pero está viva',
-     'fuera del contrato y tiene filas o cargador; se hereda',            76, 542, 4973),
+     'fuera del contrato y tiene filas o cargador; se hereda',            77, 544, 5135),
     ('T3', 'Vacía, pero algo vivo la usa',
      'sin filas y con un disparador o una clave ajena viva apuntándole',  22, 226,    0),
     ('T4', 'Vacía y sin nada vivo que la toque',
@@ -157,12 +157,12 @@ ON CONFLICT (numero) DO UPDATE SET
 -- ---------------------------------------------------------------------
 --  `horizonte_ers` es el horizonte que el ERS da al requisito que cubre
 --  el endpoint, y sirve para delatar promesas de diciembre que el ERS
---  sitúa en 2027 o en MADRE. NULL = no se localizó requisito.
+--  sitúa en 2027. NULL = no se localizó requisito.
 CREATE TABLE IF NOT EXISTS priorizacion.bloque_endpoint (
     bloque        integer NOT NULL REFERENCES priorizacion.bloque(numero) ON DELETE CASCADE,
     ruta          text    NOT NULL,
     metodos       text    NOT NULL,
-    horizonte_ers text    CHECK (horizonte_ers IN ('MVP', '2027', 'MADRE')),
+    horizonte_ers text    CHECK (horizonte_ers IN ('MVP', '2027')),
     requisito     text,
     PRIMARY KEY (bloque, ruta)
 );
@@ -181,12 +181,12 @@ VALUES
     (2, '/actores/{id}/promover',  'POST',             'MVP',   'RF-B02'),
     (2, '/actores/fusionar',       'POST',             'MVP',   'RF-B04'),
     (3, '/casos',                  'GET',              'MVP',   'RF-F01 a RF-F05'),
-    (3, '/casos/{id}/hechos',      'GET',            'MADRE', 'RF-H03 / CU-25: línea de tiempo de hechos y normas (Could, MADRE); hoy la cronología es insumo diario del analista'),
+    (3, '/casos/{id}/hechos',      'GET',              '2027',  'RF-H03 / CU-25: línea de tiempo de hechos y normas (Could, tramo 2 de 2027); hoy la cronología es insumo diario del analista'),
     (3, '/casos/{id}/red',         'GET',              '2027',  'RF-H01 y CU-24: el diagrama interactivo de la red es 2027'),
     (4, '/ingesta/alertas',        'POST',             'MVP',   'RF-D01'),
     (4, '/alertas/{id}/aprobar',   'POST',             'MVP',   'RF-D04 (HU-04)'),
     (4, '/alertas/{id}/descartar', 'POST',             'MVP',   'RF-D04 (HU-04)'),
-    (5, '/simulaciones',           'POST',            'MADRE', 'RF-J04 está en Won''t / MADRE: el simulador no es MVP'),
+    (5, '/simulaciones',           'POST',             '2027',  'RF-J04 está en Won''t: el simulador no es MVP y cae en el tramo 2 de 2027'),
     (5, '/casos/{id}/analogos',    'GET',               NULL,   'sin requisito localizado en el ERS'),
     (5, '/ejecutivo/kpis',         'GET',              'MVP',   'tablero de Alta Dirección (§7.2)'),
     (5, '/informes/generar',       'POST',            '2027',  'RF-G04 (resumen de una página) es 2027; el MVP solo tiene RF-G01 (plantilla) y RF-G03 (envío)')
@@ -221,7 +221,7 @@ CREATE TABLE IF NOT EXISTS priorizacion.medicion (
 
 COMMENT ON TABLE priorizacion.medicion IS
     'Una fila por tabla de la v10, con la capa y la causa que la clasifican. '
-    'Copia de docs/03_ejecucion/mvp_prioridad_tablas.csv (265 filas).';
+    'Copia de docs/03_ejecucion/mvp_prioridad_tablas.csv (266 filas).';
 COMMENT ON COLUMN priorizacion.medicion.causa IS
     'Qué señal decidió la capa: referencia_viva, referencia_viva+trigger, trigger, codigo o nada.';
 COMMENT ON COLUMN priorizacion.medicion.fk_entrantes_vivas IS
@@ -246,7 +246,7 @@ CREATE TABLE IF NOT EXISTS priorizacion.bloque_tabla (
 
 COMMENT ON TABLE priorizacion.bloque_tabla IS
     'Tablas existentes que PRIORIZACION §8 asigna a cada bloque: 51 filas, de '
-    'las que 46 son del contrato (34 T0 y 12 T1, sin ninguna huérfana) y 5 se '
+    'las que 46 son del contrato (33 T0 y 13 T1, sin ninguna huérfana) y 5 se '
     'heredan (3 T2 y 2 T4), nombradas porque el bloque las usa, no porque sean '
     'alcance del MVP.';
 
@@ -544,7 +544,7 @@ SELECT m.capa,
 
 COMMENT ON VIEW priorizacion.v_sin_asignar IS
     'Tablas del contrato MVP-45 (T0 y T1) que no aparecen en ningún bloque de '
-    '§8. Hoy devuelve 0 filas: las 34 T0 y las 12 T1 tienen bloque. Una fila '
+    '§8. Hoy devuelve 0 filas: las 33 T0 y las 13 T1 tienen bloque. Una fila '
     'aquí es una tabla nueva del contrato a la que nadie le asignó bloque.';
 
 -- Cómo se reparten los 55 objetos del contrato.
@@ -574,7 +574,7 @@ SELECT e.bloque,
 
 COMMENT ON VIEW priorizacion.v_endpoint_contra_ers IS
     'Endpoints asignados a un bloque del plan cuyo requisito el ERS sitúa en '
-    '2027, en MADRE, o en ningún sitio. Es la lista de promesas a revisar.';
+    '2027 o en ningún sitio. Es la lista de promesas a revisar.';
 
 -- ---------------------------------------------------------------------
 -- 10 · Verificación
@@ -730,7 +730,7 @@ COMMIT;
 --
 --      SELECT * FROM priorizacion.v_sin_asignar;
 --
---  Promesas de diciembre que el ERS sitúa en 2027 o en MADRE:
+--  Promesas de diciembre que el ERS sitúa en 2027:
 --
 --      SELECT * FROM priorizacion.v_endpoint_contra_ers;
 --

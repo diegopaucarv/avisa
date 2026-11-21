@@ -103,7 +103,11 @@ MVP: dict[str, dict[str, tuple[str | None, str, str]]] = {
         "compromiso_colaboradores": ("core.compromiso_colaboradores", "exacta", ""),
         "alerta": ("core.alertas_tempranas", "exacta", ""),
         "alerta_fuente": (None, "crear", "no existe vínculo alerta → fuente"),
-        "alerta_destinatario": ("core.alertas_actores", "parcial", "D.2: ≈"),
+        "alerta_destinatario": (
+            "core.alerta_destinatario",
+            "exacta",
+            "creada en el parche 23; antes se aproximaba a `core.alertas_actores`, que relaciona la alerta con los actores del conflicto y no con quien recibe el aviso",
+        ),
         "actor_consentimiento": (None, "crear", "pieza de la Ley 29733, §2.3.bis"),
         "padron_asistencia": (
             "core.reunion_participantes",
