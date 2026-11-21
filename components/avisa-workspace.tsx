@@ -195,6 +195,7 @@ export function WorkspaceViewContent({
   } = useAvisa();
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("Todos");
+  const [inboxType, setInboxType] = useState("Todos");
   const [notice, setNotice] = useState("");
   const inScope = (territory: string) =>
     isTerritoryVisible(territory, regionScope, assignedRegions, unrestricted);
@@ -241,6 +242,50 @@ export function WorkspaceViewContent({
   const activeAlerts = scopedAlerts.filter(
     (item) => item.status === "Pendiente de revisión",
   );
+  const inboxItems = [
+    ...activeAlerts.map((item) => ({
+      id: item.id,
+      category: "Alerta",
+      type: "Alerta pendiente",
+      title: item.title,
+      sub: `${item.id} · ${item.location} · SLA ${item.slaHours ?? "—"} h`,
+      priority: item.priority,
+      score: item.priority === "Crítica" ? 4 : item.priority === "Alta" ? 3 : 2,
+      action: () => onNavigate("alerts" as WorkspaceView),
+    })),
+    ...scopedCommitments
+      .filter(
+        (item) =>
+          item.status === "Paralizado" || item.status === "Por vencer",
+      )
+      .map((item) => ({
+        id: item.id,
+        category: "Compromiso",
+        type: `Compromiso ${item.status.toLowerCase()}`,
+        title: item.title,
+        sub: `${item.id} · ${item.owner} · vence ${item.due}`,
+        priority: item.status === "Paralizado" ? "Crítica" : "Alta",
+        score: item.status === "Paralizado" ? 4 : 3,
+        action: () => onNavigate("commitments" as WorkspaceView),
+      })),
+    ...scopedCases
+      .filter((item) => item.risk === "Alto")
+      .map((item) => ({
+        id: item.code,
+        category: "Caso",
+        type: "Caso de riesgo alto",
+        title: item.title,
+        sub: `${item.code} · ${item.region} · ${item.updated}`,
+        priority: "Alta",
+        score: 2,
+        action: () => {
+          onSelectCase(item);
+          onNavigate("case-detail" as WorkspaceView);
+        },
+      })),
+  ]
+    .filter((item) => inboxType === "Todos" || item.category === inboxType)
+    .sort((a, b) => b.score - a.score || a.id.localeCompare(b.id));
   const handleAlertDecision = (
     id: string,
     status: DemoAlert["status"],
@@ -309,60 +354,49 @@ export function WorkspaceViewContent({
               placeholder="Buscar caso, alerta o responsable"
             />
           </label>
+          <label className="select-filter">
+            Tipo{" "}
+            <select
+              aria-label="Filtrar bandeja por tipo"
+              value={inboxType}
+              onChange={(event) => setInboxType(event.target.value)}
+            >
+              <option>Todos</option>
+              <option>Alerta</option>
+              <option>Compromiso</option>
+              <option>Caso</option>
+            </select>
+          </label>
           <span className="filter-caption">
-            <Filter size={14} /> Prioridad del sistema: plazo + riesgo +
-            revisión pendiente
+            <Filter size={14} /> Orden: alertas críticas, compromisos paralizados y riesgo alto
           </span>
         </div>
         <div className="work-list">
-          {[
-            ...activeAlerts.map((item) => ({
-              type: "Alerta pendiente",
-              title: item.title,
-              sub: `${item.id} · ${item.location}`,
-              priority: item.priority,
-              action: () => onNavigate("alerts"),
-            })),
-            ...scopedCommitments
-              .filter(
-                (item) =>
-                  item.status === "Paralizado" || item.status === "Por vencer",
-              )
-              .map((item) => ({
-                type: `Compromiso ${item.status.toLowerCase()}`,
-                title: item.title,
-                sub: `${item.id} · ${item.owner} · vence ${item.due}`,
-                priority: item.status === "Paralizado" ? "Crítica" : "Alta",
-                action: () => onNavigate("commitments"),
-              })),
-            ...scopedCases
-              .filter((item) => item.risk === "Alto")
-              .map((item) => ({
-                type: "Caso de riesgo alto",
-                title: item.title,
-                sub: `${item.code} · ${item.region} · ${item.updated}`,
-                priority: "Alta",
-                action: () => {
-                  onSelectCase(item);
-                  onNavigate("case-detail");
-                },
-              })),
-          ].map((item, index) => (
-            <button
-              className="work-row"
-              key={`${item.type}-${index}`}
-              onClick={item.action}
-            >
-              <span className={`work-type type-${item.priority.toLowerCase()}`}>
-                <span className="status-dot" />
-                {item.type}
-              </span>
-              <strong>{item.title}</strong>
-              <small>{item.sub}</small>
-              <PriorityLabel priority={item.priority} />
-              <ChevronRight size={16} className="row-chevron" />
-            </button>
-          ))}
+          {inboxItems
+            .filter((item) =>
+              `${item.title} ${item.sub} ${item.type}`
+                .toLocaleLowerCase("es")
+                .includes(search.trim().toLocaleLowerCase("es")),
+            )
+            .map((item) => (
+              <button
+                className="work-row"
+                key={`${item.category}-${item.id}`}
+                onClick={item.action}
+              >
+                <span className={`work-type type-${item.priority.toLowerCase()}`}>
+                  <span className="status-dot" />
+                  {item.type}
+                </span>
+                <strong>{item.title}</strong>
+                <small>{item.sub}</small>
+                <PriorityLabel priority={item.priority} />
+                <ChevronRight size={16} className="row-chevron" />
+              </button>
+            ))}
+          {inboxItems.length === 0 && (
+            <div className="empty-state">No hay tareas para este tipo y ámbito.</div>
+          )}
         </div>
       </>
     );
