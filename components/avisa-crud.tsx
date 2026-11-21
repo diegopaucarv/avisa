@@ -10,6 +10,7 @@ import {
   type DocKind,
 } from "./avisa-demo-data";
 import { useAvisa } from "@/lib/avisa-store";
+import { conflictLevels, deriveGeographicScope, priorities, subsectors, themes } from "./avisa-catalogs";
 
 export function FormDrawer({
   open,
@@ -18,6 +19,7 @@ export function FormDrawer({
   onClose,
   onSubmit,
   submitLabel = "Guardar",
+  lockDismiss = false,
   children,
 }: {
   open: boolean;
@@ -26,11 +28,17 @@ export function FormDrawer({
   onClose: () => void;
   onSubmit: () => void;
   submitLabel?: string;
+  lockDismiss?: boolean;
   children: ReactNode;
 }) {
   if (!open) return null;
   return (
-    <div className="drawer-scrim" onClick={onClose}>
+    <div
+      className="drawer-scrim"
+      onClick={(event) => {
+        if (!lockDismiss && event.target === event.currentTarget) onClose();
+      }}
+    >
       <aside
         className="drawer"
         role="dialog"
@@ -43,13 +51,15 @@ export function FormDrawer({
             <h3>{title}</h3>
             {description && <p>{description}</p>}
           </div>
-          <button
-            className="icon-button"
-            aria-label="Cerrar formulario"
-            onClick={onClose}
-          >
-            <X size={17} />
-          </button>
+          {!lockDismiss && (
+            <button
+              className="icon-button"
+              aria-label="Cerrar formulario"
+              onClick={onClose}
+            >
+              <X size={17} />
+            </button>
+          )}
         </div>
         <form
           className="drawer-form"
@@ -143,11 +153,12 @@ export function CaseForm({ item }: { item?: DemoCase } = {}) {
     summary: item?.summary ?? "",
     nivelConflicto:
       item?.nivelConflicto ??
-      ("Medio" as NonNullable<DemoCase["nivelConflicto"]>),
-    alcance: item?.alcance ?? ("Norte" as NonNullable<DemoCase["alcance"]>),
-    tematica: item?.tematica ?? "",
+      ("Diferencia" as NonNullable<DemoCase["nivelConflicto"]>),
+    prioridad: item?.prioridad ?? ("Moderado" as NonNullable<DemoCase["prioridad"]>),
+    alcance: item?.alcance ?? deriveGeographicScope(item?.region ?? "Piura"),
+    tematica: item?.tematica ?? "Infraestructura",
+    subsector: item?.subsector ?? ("Pesca y Acuicultura" as NonNullable<DemoCase["subsector"]>),
     unidadResponsable: item?.unidadResponsable ?? "OAIPCS",
-    puntoFocal: item?.puntoFocal ?? "",
   }));
   const submit = () => {
     if (!form.title.trim())
@@ -167,8 +178,6 @@ export function CaseForm({ item }: { item?: DemoCase } = {}) {
       ...prev,
       title: "",
       summary: "",
-      tematica: "",
-      puntoFocal: "",
     }));
   };
   return (
@@ -191,9 +200,10 @@ export function CaseForm({ item }: { item?: DemoCase } = {}) {
         title={item ? `Editar ${item.code}` : "Nuevo caso"}
         description={
           item
-            ? "La modificación queda registrada; la validación humana del caso no cambia."
-            : "Alta manual. Queda sin validar hasta la revisión humana."
+            ? "Los cambios del prototipo se guardan al confirmar."
+            : "Alta manual en datos de demostración."
         }
+        lockDismiss={Boolean(item)}
         onClose={() => setOpen(false)}
         onSubmit={submit}
         submitLabel={item ? "Guardar cambios" : "Crear caso"}
@@ -209,29 +219,37 @@ export function CaseForm({ item }: { item?: DemoCase } = {}) {
           />
         </Field>
         <div className="form-grid">
-          <Field label="Distrito / territorio">
+          <Field label="Región · distrito">
             <input
               className="form-input"
               value={form.region}
               onChange={(event) =>
-                setForm({ ...form, region: event.target.value })
+                setForm({
+                  ...form,
+                  region: event.target.value,
+                  alcance: deriveGeographicScope(event.target.value),
+                })
               }
+              placeholder="Piura · Paita"
             />
           </Field>
           <Field label="Subsector">
-            <input
-              className="form-input"
-              value={form.subject}
-              onChange={(event) =>
-                setForm({ ...form, subject: event.target.value })
-              }
-            />
+            <select
+              className="form-select"
+              value={form.subsector}
+              onChange={(event) => {
+                const subsector = event.target.value as NonNullable<DemoCase["subsector"]>;
+                setForm({ ...form, subsector, subject: subsector });
+              }}
+            >
+              {subsectors.map((subsector) => <option key={subsector}>{subsector}</option>)}
+            </select>
           </Field>
         </div>
         <div className="form-grid">
           <Field
-            label="Nivel de conflicto"
-            hint="Hechos observables (4 niveles)"
+            label="Nivel de conflictividad"
+            hint="Grado de exteriorización pública de la discrepancia · guía 7.5.1"
           >
             <select
               className="form-select"
@@ -239,55 +257,31 @@ export function CaseForm({ item }: { item?: DemoCase } = {}) {
               onChange={(event) =>
                 setForm({
                   ...form,
-                  nivelConflicto: event.target.value as NonNullable<
-                    DemoCase["nivelConflicto"]
-                  >,
+                  nivelConflicto: event.target.value as NonNullable<DemoCase["nivelConflicto"]>,
                 })
               }
             >
-              <option>Bajo</option>
-              <option>Medio</option>
-              <option>Alto</option>
-              <option>Muy alto</option>
+              {conflictLevels.map((level) => <option key={level}>{level}</option>)}
             </select>
           </Field>
-          <Field label="Nivel de riesgo" hint="Probabilidad de escalamiento">
+          <Field label="Prioridad de atención" hint="Seguimiento según la matriz de conflictividad">
             <select
               className="form-select"
-              value={form.risk}
+              value={form.prioridad}
               onChange={(event) =>
                 setForm({
                   ...form,
-                  risk: event.target.value as DemoCase["risk"],
+                  prioridad: event.target.value as NonNullable<DemoCase["prioridad"]>,
                 })
               }
             >
-              <option>Alto</option>
-              <option>Moderado</option>
-              <option>Bajo</option>
+              {priorities.map((priority) => <option key={priority}>{priority}</option>)}
             </select>
           </Field>
         </div>
         <div className="form-grid">
-          <Field label="Alcance">
-            <select
-              className="form-select"
-              value={form.alcance}
-              onChange={(event) =>
-                setForm({
-                  ...form,
-                  alcance: event.target.value as NonNullable<
-                    DemoCase["alcance"]
-                  >,
-                })
-              }
-            >
-              <option>Norte</option>
-              <option>Centro</option>
-              <option>Sur</option>
-              <option>Oriente</option>
-              <option>Nacional</option>
-            </select>
+          <Field label="Alcance geográfico" hint="Autocompletado según la región">
+            <input className="form-input" value={form.alcance} readOnly />
           </Field>
           <Field label="Estado">
             <select
@@ -313,28 +307,17 @@ export function CaseForm({ item }: { item?: DemoCase } = {}) {
               }
             />
           </Field>
-          <Field label="Punto focal">
-            <input
-              className="form-input"
-              value={form.puntoFocal}
-              onChange={(event) =>
-                setForm({ ...form, puntoFocal: event.target.value })
-              }
-              placeholder="Alias, sin datos personales"
-            />
+          <Field label="Temática principal">
+            <select
+              className="form-select"
+              value={form.tematica}
+              onChange={(event) => setForm({ ...form, tematica: event.target.value })}
+            >
+              {themes.map((theme) => <option key={theme}>{theme}</option>)}
+            </select>
           </Field>
         </div>
-        <Field label="Temática">
-          <input
-            className="form-input"
-            value={form.tematica}
-            onChange={(event) =>
-              setForm({ ...form, tematica: event.target.value })
-            }
-            placeholder="Ej.: Vías de acceso"
-          />
-        </Field>
-        <Field label="Descripción del riesgo">
+        <Field label="Resumen del caso">
           <textarea
             className="form-textarea"
             value={form.summary}
@@ -372,6 +355,7 @@ export function AlertForm({
     priority: (item?.priority ?? "Alta") as NonNullable<
       "Crítica" | "Alta" | "Media"
     >,
+    risk: item?.risk ?? ("Moderado" as NonNullable<DemoAlert["risk"]>),
     quote: item?.quote ?? "",
     note: item?.note ?? "",
     riesgos: item?.riesgos?.join(", ") ?? "",
@@ -406,6 +390,7 @@ export function AlertForm({
         source: form.source || item.source,
         published: form.published,
         priority: form.priority,
+        risk: form.risk,
         quote: form.quote,
         note: form.note || item.note,
         caseCode: form.caseCode || undefined,
@@ -423,6 +408,7 @@ export function AlertForm({
       source: form.source || "Registro manual",
       published: form.published,
       priority: form.priority,
+      risk: form.risk,
       quote: form.quote,
       note:
         form.note ||
@@ -512,6 +498,17 @@ export function AlertForm({
             <input className="form-input" value={`${sla} horas`} readOnly />
           </Field>
         </div>
+        <Field label="Nivel de riesgo de la alerta" hint="Solo se refleja en el caso cuando la alerta se aprueba por revisión humana.">
+          <select
+            className="form-select"
+            value={form.risk}
+            onChange={(event) => setForm({ ...form, risk: event.target.value as NonNullable<DemoAlert["risk"]> })}
+          >
+            <option>Alto</option>
+            <option>Moderado</option>
+            <option>Bajo</option>
+          </select>
+        </Field>
         <div className="form-grid">
           <Field label="Territorio">
             <input
@@ -598,6 +595,7 @@ export function CommitmentForm({
     caseCode: item?.caseCode ?? caseCode ?? cases[0]?.code ?? "",
     title: item?.title ?? "",
     tipo: item?.tipo ?? ("Actividad" as NonNullable<DemoCommitment["tipo"]>),
+    agreementType: item?.agreementType ?? ("Progresivo o parcial" as NonNullable<DemoCommitment["agreementType"]>),
     owner: item?.owner ?? "",
     nivelGobierno:
       item?.nivelGobierno ??
@@ -624,6 +622,7 @@ export function CommitmentForm({
         due: form.due,
         status: form.status,
         progress: Number(form.progress) || 0,
+        agreementType: form.agreementType,
         tipo: form.tipo,
         nivelGobierno: form.nivelGobierno,
         atiendeGenero: form.atiendeGenero,
@@ -641,6 +640,7 @@ export function CommitmentForm({
       due: form.due,
       status: "En curso",
       progress: 0,
+      agreementType: form.agreementType,
       tipo: form.tipo,
       nivelGobierno: form.nivelGobierno,
       atiendeGenero: form.atiendeGenero,
@@ -740,6 +740,17 @@ export function CommitmentForm({
             </select>
           </Field>
         </div>
+        <Field label="Tipo de acuerdo" hint="Clasificación del acuerdo según la guía">
+          <select
+            className="form-select"
+            value={form.agreementType}
+            onChange={(event) => setForm({ ...form, agreementType: event.target.value as NonNullable<DemoCommitment["agreementType"]> })}
+          >
+            <option>Progresivo o parcial</option>
+            <option>Entendimiento operativo</option>
+            <option>Condicionado</option>
+          </select>
+        </Field>
         <div className="form-grid">
           <Field label="Responsable / unidad">
             <input
@@ -798,7 +809,7 @@ export function CommitmentForm({
               >
                 <option>En curso</option>
                 <option>Por vencer</option>
-                <option>Vencido</option>
+                <option>Paralizado</option>
                 <option>Cumplido</option>
               </select>
             </Field>

@@ -47,6 +47,24 @@ export function normalizeAssignedRegions(
   return REGION_SCOPES.filter((region) => assigned.has(stripAccents(region)));
 }
 
+export function isTerritoryVisible(
+  territory: string,
+  selected: RegionScope,
+  assigned: readonly RegionScope[],
+  unrestricted: boolean,
+) {
+  const departments = territory
+    .split(/[·,/-]/)
+    .map((part) => stripAccents(part))
+    .filter(Boolean);
+  const matches = (region: string) => departments.includes(stripAccents(region));
+  if (unrestricted) {
+    return selected === ALL_REGION_LABEL || matches(selected);
+  }
+  if (!assigned.some(matches)) return false;
+  return selected === ALL_REGION_LABEL || matches(selected);
+}
+
 export function AvisaScopeFilter({
   region,
   onRegionChange,
@@ -59,14 +77,15 @@ export function AvisaScopeFilter({
   regions?: RegionScope[];
   allLabel?: string;
 }) {
-  const allowed = regions?.length ? regions : REGION_SCOPES;
-  // Si el usuario cubre todo el país no hay preferencia que destacar.
-  const restricted = allowed.length < REGION_SCOPES.length;
-  const options: RegionScope[] = restricted
-    ? allowed.length === 1
-      ? [allowed[0]]
-      : [...allowed, ALL_REGION_LABEL]
-    : [ALL_REGION_LABEL, ...REGION_SCOPES];
+  const allowed = regions ?? REGION_SCOPES;
+  const restricted = allLabel !== ALL_REGION_LABEL;
+  const options: RegionScope[] = allowed.length === 0
+    ? []
+    : restricted
+      ? allowed.length === 1
+        ? [allowed[0]]
+        : [...allowed, ALL_REGION_LABEL]
+      : [ALL_REGION_LABEL, ...REGION_SCOPES];
 
   return (
     <div
@@ -74,7 +93,11 @@ export function AvisaScopeFilter({
       role="radiogroup"
       aria-label="Elegir ámbito territorial"
     >
-      {options.map((option) => (
+      {options.length === 0 ? (
+        <p className="scope-empty" role="status">
+          Sin regiones habilitadas. El acceso queda restringido hasta corregir la asignación.
+        </p>
+      ) : options.map((option) => (
         <button
           key={option}
           type="button"

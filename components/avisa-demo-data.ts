@@ -14,7 +14,16 @@ export type WorkspaceView =
   | "executive";
 
 export type RiskLevel = "Alto" | "Moderado" | "Bajo";
-export type NivelConflicto = "Bajo" | "Medio" | "Alto" | "Muy alto";
+export type NivelConflicto = "Diferencia" | "Controversia" | "Conflicto social" | "Crisis social";
+export type CasePriority = "Urgente" | "Moderado" | "Bajo";
+export type DemoActor = {
+  apellidos: string;
+  nombres: string;
+  correo?: string;
+  tipo: "Social" | "Público" | "Privado";
+  funcion: "Principal" | "Secundario" | "Tercero imparcial";
+  posicionamiento: "Dialogante" | "Legitimante" | "Conflictivo";
+};
 export type CaseState = "Activo" | "En seguimiento" | "Resuelto" | "Archivado";
 export type DataOrigin = "Manual" | "Ingesta" | "Legado" | "WhatsApp";
 
@@ -35,17 +44,20 @@ export type DemoCase = {
   updated: string;
   progress: number;
   summary: string;
-  actors: string[];
+  actors: DemoActor[];
   events: {
     date: string;
     title: string;
     description: string;
+    actor?: string;
     kind: "validated" | "pending" | "system";
   }[];
   alcance?: "Norte" | "Centro" | "Sur" | "Oriente" | "Nacional";
   estado?: CaseState;
   nivelConflicto?: NivelConflicto;
-  prioridad?: "Crítica" | "Alta" | "Media" | "Seguimiento";
+  prioridad?: CasePriority;
+  subsector?: "Pesca y Acuicultura" | "MYPE e Industria";
+  documentacionNormativa?: string[];
   unidadResponsable?: string;
   puntoFocal?: string;
   tematica?: string;
@@ -61,6 +73,8 @@ export type DemoAlert = {
   source: string;
   published: string;
   priority: "Crítica" | "Alta" | "Media";
+  risk?: RiskLevel;
+  alertType?: "AT" | "RR" | "PAR";
   status: "Pendiente de revisión" | "Aprobada" | "Descartada";
   quote: string;
   note: string;
@@ -93,7 +107,7 @@ export type DemoCommitment = {
   caseCode: string;
   owner: string;
   due: string;
-  status: "Vencido" | "Por vencer" | "En curso" | "Cumplido";
+  status: "Paralizado" | "Por vencer" | "En curso" | "Cumplido";
   progress: number;
   tipo?: "Actividad" | "PIP";
   nivelGobierno?:
@@ -105,6 +119,7 @@ export type DemoCommitment = {
   fechaInicio?: string;
   origen?: DataOrigin;
   validado?: boolean;
+  agreementType?: "Progresivo o parcial" | "Entendimiento operativo" | "Condicionado";
   hitos?: DemoHito[];
 };
 
@@ -163,21 +178,23 @@ export const demoCases: DemoCase[] = [
     region: "Piura · Paita",
     subject: "Pesca artesanal",
     risk: "Alto",
-    stage: "Diálogo activo",
+    stage: "En atención",
     updated: "Hace 18 min",
     progress: 68,
     summary:
       "Representantes de organizaciones locales solicitaron una mesa de trabajo sobre el acceso a infraestructura de desembarque. La ficha y sus datos son ilustrativos; no representan un caso real.",
     actors: [
-      "Organización local (alias)",
-      "Gobierno regional",
-      "Entidad sectorial",
+      { apellidos: "Asociación costera", nombres: "representante (alias)", tipo: "Social", funcion: "Principal", posicionamiento: "Dialogante" },
+      { apellidos: "GORE Piura", nombres: "enlace institucional", tipo: "Público", funcion: "Secundario", posicionamiento: "Dialogante" },
+      { apellidos: "Sector competente", nombres: "equipo técnico", tipo: "Público", funcion: "Tercero imparcial", posicionamiento: "Legitimante" },
     ],
     alcance: "Norte",
     estado: "Activo",
-    nivelConflicto: "Alto",
-    prioridad: "Crítica",
-    tematica: "Acceso a infraestructura",
+    nivelConflicto: "Conflicto social",
+    prioridad: "Urgente",
+    tematica: "Infraestructura",
+    subsector: "Pesca y Acuicultura",
+    documentacionNormativa: ["Marco sectorial de pesca artesanal · referencia demostrativa"],
     unidadResponsable: "OAIPCS",
     puntoFocal: "Analista de enlace (alias)",
     origen: "Manual",
@@ -195,6 +212,7 @@ export const demoCases: DemoCase[] = [
       {
         date: "19 nov · 10:42",
         title: "Nueva alerta en revisión",
+        actor: "Sistema de demostración",
         description:
           "Se detectó una publicación en fuente autorizada. Aún no es visible fuera de la bandeja.",
         kind: "pending",
@@ -202,6 +220,7 @@ export const demoCases: DemoCase[] = [
       {
         date: "19 nov · 09:10",
         title: "Reunión de coordinación",
+        actor: "Enlace sectorial (alias)",
         description:
           "Se registró un acta de coordinación como evidencia pendiente de validación.",
         kind: "validated",
@@ -209,6 +228,7 @@ export const demoCases: DemoCase[] = [
       {
         date: "18 nov · 16:30",
         title: "Compromiso actualizado",
+        actor: "Equipo sectorial (alias)",
         description:
           "La entidad responsable informó avance en la propuesta de agenda.",
         kind: "system",
@@ -227,15 +247,16 @@ export const demoCases: DemoCase[] = [
     summary:
       "Solicitud ilustrativa de coordinación sobre continuidad de una actividad acuícola y monitoreo de calidad de agua. La evidencia de este prototipo es ficticia.",
     actors: [
-      "Asociación productiva (alias)",
-      "Autoridad local",
-      "Equipo técnico",
+      { apellidos: "Asociación productiva", nombres: "representante (alias)", tipo: "Social", funcion: "Principal", posicionamiento: "Dialogante" },
+      { apellidos: "Gobierno local", nombres: "enlace institucional", tipo: "Público", funcion: "Secundario", posicionamiento: "Legitimante" },
+      { apellidos: "Equipo técnico", nombres: "sectorial", tipo: "Público", funcion: "Tercero imparcial", posicionamiento: "Dialogante" },
     ],
     alcance: "Norte",
     estado: "En seguimiento",
-    nivelConflicto: "Medio",
-    prioridad: "Alta",
-    tematica: "Calidad de agua",
+    nivelConflicto: "Controversia",
+    prioridad: "Moderado",
+    tematica: "Impactos de terceros",
+    subsector: "Pesca y Acuicultura",
     unidadResponsable: "OAIPCS",
     puntoFocal: "Analista de enlace (alias)",
     origen: "Ingesta",
@@ -244,6 +265,7 @@ export const demoCases: DemoCase[] = [
       {
         date: "19 nov · 08:35",
         title: "Muestra registrada",
+        actor: "Equipo técnico (alias)",
         description:
           "Resultado ingresado a revisión técnica; no constituye una conclusión validada.",
         kind: "pending",
@@ -261,12 +283,17 @@ export const demoCases: DemoCase[] = [
     progress: 84,
     summary:
       "Caso demostrativo de coordinación entre actores locales para el seguimiento de acuerdos de mantenimiento.",
-    actors: ["Comité local (alias)", "Gobierno local", "Sector competente"],
+    actors: [
+      { apellidos: "Comité local", nombres: "representante (alias)", tipo: "Social", funcion: "Principal", posicionamiento: "Dialogante" },
+      { apellidos: "Gobierno local", nombres: "enlace institucional", tipo: "Público", funcion: "Secundario", posicionamiento: "Dialogante" },
+      { apellidos: "Sector competente", nombres: "equipo técnico", tipo: "Público", funcion: "Tercero imparcial", posicionamiento: "Legitimante" },
+    ],
     alcance: "Centro",
     estado: "Activo",
-    nivelConflicto: "Bajo",
-    prioridad: "Media",
-    tematica: "Vías de acceso",
+    nivelConflicto: "Diferencia",
+    prioridad: "Bajo",
+    tematica: "Infraestructura",
+    subsector: "MYPE e Industria",
     unidadResponsable: "OAIPCS",
     origen: "Manual",
     validado: true,
@@ -290,6 +317,8 @@ export const demoAlerts: DemoAlert[] = [
     source: "Medio regional de ejemplo",
     published: "19 nov · 10:24",
     priority: "Crítica",
+    risk: "Alto",
+    alertType: "AT",
     status: "Pendiente de revisión",
     quote:
       "“Solicitamos una reunión para revisar el acceso a la zona de desembarque.”",
@@ -306,6 +335,8 @@ export const demoAlerts: DemoAlert[] = [
     source: "Boletín de ejemplo",
     published: "19 nov · 08:40",
     priority: "Alta",
+    risk: "Moderado",
+    alertType: "RR",
     status: "Pendiente de revisión",
     quote:
       "“Proponemos instalar una mesa técnica con participación de las autoridades.”",
@@ -322,6 +353,8 @@ export const demoAlerts: DemoAlert[] = [
     source: "Acta simulada",
     published: "18 nov · 15:12",
     priority: "Media",
+    risk: "Bajo",
+    alertType: "PAR",
     status: "Aprobada",
     quote: "“Se coordinará una nueva fecha para la inspección conjunta.”",
     note: "Aprobación demostrativa: no corresponde a un acto administrativo real.",
@@ -339,8 +372,9 @@ export const demoCommitments: DemoCommitment[] = [
     caseCode: "DEMO-2026-041",
     owner: "Equipo sectorial",
     due: "19 nov 2026",
-    status: "Vencido",
+    status: "Paralizado",
     progress: 70,
+    agreementType: "Entendimiento operativo",
     tipo: "Actividad",
     nivelGobierno: "Nacional",
     unidadResponsable: "OAIPCS",
@@ -370,6 +404,7 @@ export const demoCommitments: DemoCommitment[] = [
     due: "20 nov 2026",
     status: "Por vencer",
     progress: 45,
+    agreementType: "Condicionado",
     tipo: "Actividad",
     nivelGobierno: "Regional",
     origen: "Ingesta",

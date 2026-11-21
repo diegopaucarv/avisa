@@ -17,7 +17,6 @@ import {
   Filter,
   Info,
   MapPin,
-  MoreHorizontal,
   Pencil,
   Search,
   ShieldCheck,
@@ -33,9 +32,9 @@ import {
   type WorkspaceView,
 } from "./avisa-demo-data";
 import { AvisaDirectory } from "./avisa-directory";
-import { ConflictResolutionJourney } from "./conflict-resolution-journey";
 import {
   isWithinDemoWindow,
+  isTerritoryVisible,
   type RegionScope,
   type TimeScope,
 } from "./avisa-scope-filter";
@@ -48,6 +47,7 @@ import {
 } from "./avisa-crud";
 import { AvisaDocuments } from "./avisa-documents";
 import { useAvisa } from "@/lib/avisa-store";
+import { deriveGeographicScope, guideDefinitions } from "./avisa-catalogs";
 
 const AvisaMap = dynamic(() => import("./avisa-map"), {
   ssr: false,
@@ -72,6 +72,8 @@ type WorkspaceProps = {
   onAlertEdit: (id: string, quote: string) => void;
   regionScope: RegionScope;
   timeScope: TimeScope;
+  assignedRegions: RegionScope[];
+  unrestricted: boolean;
 };
 
 function SectionTitle({
@@ -94,7 +96,8 @@ function SectionTitle({
     </div>
   );
 }
-function RiskBadge({ level }: { level: string }) {
+function RiskBadge({ level }: { level?: string }) {
+  if (!level) return <span className="risk-inactive">Inactivo</span>;
   return (
     <span className={`status-badge risk-${level.toLowerCase()}`}>
       <span className="status-dot" />
@@ -111,6 +114,18 @@ function DemoNotice() {
         institucionales ni asociar a personas reales.
       </span>
     </div>
+  );
+}
+function CatalogInfo({ label, definition }: { label: string; definition: string }) {
+  return (
+    <button
+      type="button"
+      className="catalog-info"
+      title={`${label}: ${definition}`}
+      aria-label={`${label}: ${definition}`}
+    >
+      <CircleHelp size={13} aria-hidden="true" />
+    </button>
   );
 }
 function Freshness() {
@@ -170,6 +185,8 @@ export function WorkspaceViewContent({
   onAlertEdit,
   regionScope,
   timeScope,
+  assignedRegions,
+  unrestricted,
 }: WorkspaceProps) {
   const {
     cases: allCases,
@@ -180,10 +197,7 @@ export function WorkspaceViewContent({
   const [filter, setFilter] = useState("Todos");
   const [notice, setNotice] = useState("");
   const inScope = (territory: string) =>
-    regionScope === "Todo el Perú" ||
-    territory
-      .toLocaleLowerCase("es")
-      .includes(regionScope.toLocaleLowerCase("es"));
+    isTerritoryVisible(territory, regionScope, assignedRegions, unrestricted);
   const inWindow = (date: string) => isWithinDemoWindow(date, timeScope);
   const scopedCases = useMemo(
     () =>
@@ -195,10 +209,9 @@ export function WorkspaceViewContent({
   );
   const scopedCommitments = allCommitments.filter((item) => {
     const relatedCase = allCases.find((row) => row.code === item.caseCode);
-    return (
-      !relatedCase ||
-      (inScope(relatedCase.region) && inWindow(relatedCase.updated))
-    );
+    return relatedCase
+      ? inScope(relatedCase.region) && inWindow(relatedCase.updated)
+      : unrestricted;
   });
   const filteredCases = useMemo(
     () =>
@@ -252,7 +265,7 @@ export function WorkspaceViewContent({
       <Overview
         onNavigate={onNavigate}
         onSelectCase={onSelectCase}
-        alerts={activeAlerts}
+        alerts={scopedAlerts}
         pendingAlerts={activeAlerts.length}
         cases={scopedCases}
         commitments={scopedCommitments}
@@ -313,13 +326,13 @@ export function WorkspaceViewContent({
             ...scopedCommitments
               .filter(
                 (item) =>
-                  item.status === "Vencido" || item.status === "Por vencer",
+                  item.status === "Paralizado" || item.status === "Por vencer",
               )
               .map((item) => ({
                 type: `Compromiso ${item.status.toLowerCase()}`,
                 title: item.title,
                 sub: `${item.id} · ${item.owner} · vence ${item.due}`,
-                priority: item.status === "Vencido" ? "Crítica" : "Alta",
+                priority: item.status === "Paralizado" ? "Crítica" : "Alta",
                 action: () => onNavigate("commitments"),
               })),
             ...scopedCases
@@ -401,7 +414,7 @@ export function WorkspaceViewContent({
             >
               <div className="case-card-top">
                 <span className="case-code">{item.code}</span>
-                <RiskBadge level={item.risk} />
+                <RiskBadge level={scopedAlerts.find((alert) => alert.caseCode === item.code && alert.status === "Aprobada")?.risk} />
               </div>
               <h3>{item.title}</h3>
               <div className="case-location">
@@ -429,18 +442,20 @@ export function WorkspaceViewContent({
       />
     );
   if (view === "directory-actors")
-    return <AvisaDirectory regionScope={regionScope} kind="Actor" />;
+    return <AvisaDirectory regionScope={regionScope} assignedRegions={assignedRegions} unrestricted={unrestricted} kind="Actor" />;
   if (view === "directory-organizations")
-    return <AvisaDirectory regionScope={regionScope} kind="Organización" />;
+    return <AvisaDirectory regionScope={regionScope} assignedRegions={assignedRegions} unrestricted={unrestricted} kind="Organización" />;
   if (view === "directory-institutions")
-    return <AvisaDirectory regionScope={regionScope} kind="Institución" />;
+    return <AvisaDirectory regionScope={regionScope} assignedRegions={assignedRegions} unrestricted={unrestricted} kind="Institución" />;
   if (view === "directory-locals")
-    return <AvisaDirectory regionScope={regionScope} kind="Local" />;
+    return <AvisaDirectory regionScope={regionScope} assignedRegions={assignedRegions} unrestricted={unrestricted} kind="Local" />;
   if (view === "map")
     return (
       <AvisaMap
         regionScope={regionScope}
         timeScope={timeScope}
+        assignedRegions={assignedRegions}
+        unrestricted={unrestricted}
         onSelectCase={(code) => {
           const item = allCases.find((row) => row.code === code);
           if (item) {
@@ -549,7 +564,7 @@ export function WorkspaceViewContent({
               onChange={(event) => setFilter(event.target.value)}
             >
               <option>Todos</option>
-              <option>Vencido</option>
+              <option>Paralizado</option>
               <option>Por vencer</option>
               <option>En curso</option>
               <option>Cumplido</option>
@@ -596,7 +611,7 @@ export function WorkspaceViewContent({
                   <td>
                     <span
                       className={
-                        item.status === "Vencido" ? "date-overdue" : ""
+                        item.status === "Paralizado" ? "date-overdue" : ""
                       }
                     >
                       {item.due}
@@ -636,7 +651,7 @@ export function WorkspaceViewContent({
         </div>
       </>
     );
-  if (view === "documents") return <AvisaDocuments regionScope={regionScope} />;
+  if (view === "documents") return <AvisaDocuments regionScope={regionScope} assignedRegions={assignedRegions} unrestricted={unrestricted} />;
   return (
     <ExecutiveView
       onNavigate={onNavigate}
@@ -694,9 +709,9 @@ function Overview({
           tone="amber"
         />
         <StatCard
-          label="Compromisos vencidos"
+          label="Compromisos paralizados"
           value={String(
-            commitments.filter((item) => item.status === "Vencido").length,
+            commitments.filter((item) => item.status === "Paralizado").length,
           )}
           detail="Requiere seguimiento"
           icon={Clock3}
@@ -760,7 +775,7 @@ function Overview({
               <Clock3 size={17} />
             </span>
             <span className="task-copy">
-              <strong>Dar seguimiento a compromiso vencido</strong>
+              <strong>Dar seguimiento a compromiso paralizado</strong>
               <small>{commitments[0]?.caseCode ?? "—"} · venció hoy</small>
             </span>
             <PriorityLabel priority="Alta" />
@@ -816,7 +831,7 @@ function Overview({
               <span className="signal-marker signal-due" />
               <span>
                 <strong>Vencimientos</strong>
-                <small>Compromisos vencidos / próximos</small>
+                <small>Compromisos paralizados / próximos</small>
               </span>
               <b>2</b>
             </div>
@@ -863,7 +878,7 @@ function Overview({
               </span>
               <span>{item.region}</span>
               <span>{item.stage}</span>
-              <RiskBadge level={item.risk} />
+              <RiskBadge level={alerts.find((alert) => alert.caseCode === item.code && alert.status === "Aprobada")?.risk} />
               <span className="mini-progress">
                 <span>{item.progress}%</span>
                 <i>
@@ -880,7 +895,7 @@ function Overview({
 
 const caseTabs = [
   "Resumen",
-  "Demandas 3P",
+  "Demandas",
   "Cronología",
   "Documentos",
   "Alertas",
@@ -903,22 +918,25 @@ function CaseDetail({
   item: DemoCase;
   onNavigate: WorkspaceProps["onNavigate"];
 }) {
-  const { alerts, commitments, documents, deleteCase } = useAvisa();
+  const { alerts, commitments, documents, updateCase } = useAvisa();
   const [tab, setTab] = useState<CaseTab>("Resumen");
   const caseAlerts = alerts.filter((row) => row.caseCode === item.code);
   const caseCommitments = commitments.filter(
     (row) => row.caseCode === item.code,
   );
   const caseDocuments = documents.filter((row) => row.casoCode === item.code);
+  const latestApprovedAlert = caseAlerts.find((row) => row.status === "Aprobada");
+  const activeCase = item.estado === "Activo" || item.estado === "En seguimiento";
+  const displayedRisk = activeCase ? latestApprovedAlert?.risk : undefined;
   const demandas = item.demandas ?? [];
   const pending = caseAlerts.filter(
     (row) => row.status === "Pendiente de revisión",
   ).length;
-  const overdue = caseCommitments.filter(
-    (row) => row.status === "Vencido",
+  const paralyzed = caseCommitments.filter(
+    (row) => row.status === "Paralizado",
   ).length;
   const tabCount = (value: CaseTab) =>
-    value === "Demandas 3P"
+    value === "Demandas"
       ? demandas.length
       : value === "Cronología"
         ? item.events.length
@@ -941,25 +959,24 @@ function CaseDetail({
         <div>
           <div className="case-title-line">
             <span className="case-code">{item.code}</span>
-            <RiskBadge level={item.risk} />
-            <span className="validation-chip">
-              <ShieldCheck size={13} />
-              {item.validado ? "Validado por persona" : "Sin validación humana"}
-            </span>
+            {displayedRisk ? (
+              <><RiskBadge level={displayedRisk} />{displayedRisk && <CatalogInfo label="Nivel de riesgo" definition={guideDefinitions.risk} />}</>
+            ) : (
+              <span className="risk-inactive">Riesgo inactivo</span>
+            )}
+            <span className="validation-chip">Datos ilustrativos · prototipo</span>
           </div>
           <h2>{item.title}</h2>
           <p>
             <MapPin size={14} />
-            {item.region}
+            Región: {item.region}
             <span>·</span>
-            {item.subject}
+            {item.subsector ?? item.subject}
             <span>·</span>Actualizado {item.updated}
           </p>
           <p className="case-origin">
-            Origen del dato: {item.origen ?? "Legado"}
-            <span>·</span>Alcance {item.alcance ?? "Nacional"}
-            <span>·</span>Responsable {item.unidadResponsable ?? "OAIPCS"}
-            <span>·</span>Punto focal {item.puntoFocal ?? "por asignar"}
+            Estado del caso: {item.estado ?? "En seguimiento"}
+            <span>·</span>Unidad responsable {item.unidadResponsable ?? "OAIPCS"}
           </p>
         </div>
         <div className="detail-actions">
@@ -971,10 +988,10 @@ function CaseDetail({
             Documentos <ArrowRight size={14} />
           </button>
           <DeleteButton
-            label="Eliminar caso"
-            confirmText="Se eliminan también sus alertas y compromisos vinculados."
+            label="Archivar caso"
+            confirmText="El caso y sus vínculos se conservan; solo cambia su estado a Archivado."
             onConfirm={() => {
-              deleteCase(item.code);
+              updateCase(item.code, { estado: "Archivado", stage: "Archivado" });
               onNavigate("cases");
             }}
           />
@@ -987,7 +1004,7 @@ function CaseDetail({
         </span>
         <span>
           <Clock3 size={14} />
-          {caseCommitments.length} compromisos · {overdue} vencidos
+          {caseCommitments.length} compromisos · {paralyzed} paralizados
         </span>
         <span>
           <FileStack size={14} />
@@ -1018,57 +1035,85 @@ function CaseDetail({
             <section className="surface detail-section">
               <div className="detail-section-title">
                 <h3>Resumen del caso</h3>
-                <span className="validation-chip">
-                  <Info size={13} /> Datos de demostración
-                </span>
+                <span className="validation-chip">Datos de demostración</span>
               </div>
               <p>{item.summary}</p>
               <div className="case-facts">
                 {[
-                  ["Estado", item.stage],
-                  ["Nivel de conflicto", item.nivelConflicto ?? "No declarado"],
-                  ["Nivel de riesgo", item.risk],
-                  ["Prioridad", item.prioridad ?? "Seguimiento"],
-                  ["Alcance", item.alcance ?? "Nacional"],
-                  ["Temática", item.tematica ?? item.subject],
-                  ["Unidad responsable", item.unidadResponsable ?? "OAIPCS"],
-                  ["Punto focal", item.puntoFocal ?? "Por asignar"],
-                  ["Avance registrado", `${item.progress}%`],
-                  ["Origen del dato", item.origen ?? "Legado"],
-                ].map(([label, value]) => (
+                  { label: "Nivel de conflictividad", value: item.nivelConflicto ?? "Diferencia", definition: guideDefinitions.conflictLevel },
+                  { label: "Temática", value: item.tematica ?? "Infraestructura", definition: guideDefinitions.theme },
+                  { label: "Subsector", value: item.subsector ?? item.subject, definition: guideDefinitions.subsector },
+                  { label: "Prioridad de atención", value: item.prioridad ?? "Moderado", definition: guideDefinitions.priority },
+                  { label: "Alcance geográfico", value: deriveGeographicScope(item.region), definition: "Alcance territorial autocompletado a partir de la región." },
+                  { label: "Región", value: item.region },
+                  { label: "Unidad responsable", value: item.unidadResponsable ?? "OAIPCS" },
+                  { label: "Estado", value: item.estado ?? "En seguimiento" },
+                ].map(({ label, value, definition }) => (
                   <div key={label}>
-                    <span>{label}</span>
+                    <span className="case-fact-label">
+                      {label}
+                      {definition && <CatalogInfo label={label} definition={definition} />}
+                    </span>
                     <strong>{value}</strong>
                   </div>
                 ))}
               </div>
               <p className="quote-note">
-                El nivel de conflicto describe los hechos observados; el nivel
-                de riesgo estima el escalamiento. Ambos requieren validación
-                humana antes de sostener una decisión institucional.
+                El nivel de riesgo se toma de la última alerta aprobada y no se interpreta como atributo permanente del caso.
               </p>
+              <section className="normative-documentation">
+                <h3>Documentación normativa relacionada</h3>
+                {(item.documentacionNormativa ?? []).length ? (
+                  <ul>{item.documentacionNormativa?.map((entry) => <li key={entry}>{entry}</li>)}</ul>
+                ) : (
+                  <p>No hay documentación normativa vinculada en esta demostración.</p>
+                )}
+              </section>
             </section>
-            <ConflictResolutionJourney key={item.code} caseCode={item.code} />
+            <section className="surface detail-section intervention-cycle">
+              <div className="detail-section-title">
+                <h3>Ruta de atención · Ciclo de Intervención Sectorial</h3>
+                <CatalogInfo label="Ruta de atención" definition="Las intervenciones pueden ser simultáneas; no constituyen etapas rígidas." />
+              </div>
+              <ol>
+                <li>Intervención preventiva</li>
+                <li>Intervención y tratamiento</li>
+                <li>Monitoreo de compromisos</li>
+              </ol>
+              <p>Gestión del conocimiento es transversal a todo el ciclo. La ruta orienta el trabajo; no es una secuencia obligatoria.</p>
+            </section>
           </div>
           <aside className="case-detail-aside">
             <section className="surface detail-section">
               <h3>Actores vinculados</h3>
               <p className="privacy-caption">
-                <ShieldCheck size={13} /> Identidades sintéticas por defecto
+                <ShieldCheck size={13} /> Alias sintéticos · correo opcional
               </p>
-              <div className="actor-list">
-                {item.actors.map((actor, index) => (
-                  <div className="actor-row" key={actor}>
-                    <span className="actor-avatar">
-                      {String.fromCharCode(65 + index)}
-                    </span>
-                    <span>
-                      <strong>{actor}</strong>
-                      <small>Vínculo de ejemplo</small>
-                    </span>
-                    <MoreHorizontal size={16} />
-                  </div>
-                ))}
+              <div className="actor-definitions" aria-label="Definiciones de actor">
+                <span>Tipo <CatalogInfo label="Tipo de actor" definition={guideDefinitions.actorType} /></span>
+                <span>Función <CatalogInfo label="Función de actor" definition={guideDefinitions.actorRole} /></span>
+                <span>Posicionamiento <CatalogInfo label="Posicionamiento" definition={guideDefinitions.actorPosition} /></span>
+              </div>
+              <div className="actor-table-wrap">
+                <table className="actor-table">
+                  <thead><tr><th>Apellidos</th><th>Nombres</th><th>Correo</th></tr></thead>
+                  <tbody>
+                    {item.actors.map((actor, index) => (
+                      <tr key={`${actor.apellidos}-${index}`}>
+                        <td>{actor.apellidos}</td>
+                        <td>
+                          {actor.nombres}
+                          <span className="actor-tags">
+                            <span>{actor.tipo}</span>
+                            <span>{actor.funcion}</span>
+                            <span>{actor.posicionamiento}</span>
+                          </span>
+                        </td>
+                        <td>{actor.correo ?? "No registrado"}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
               {item.actors.length === 0 && (
                 <p className="quote-note">
@@ -1079,37 +1124,40 @@ function CaseDetail({
             </section>
             <section className="surface detail-section">
               <div className="detail-section-title">
-                <h3>Próximo paso</h3>
-                <span
-                  className={`commit-status commit-${overdue ? "vencido" : "en-curso"}`}
-                >
-                  {overdue ? `${overdue} vencido` : "Sin vencidos"}
+                <h3>Próximo paso sugerido</h3>
+                <span className={displayedRisk ? `risk-label risk-${displayedRisk.toLowerCase()}` : "risk-inactive"}>
+                  {displayedRisk ?? "Inactivo"}
                 </span>
               </div>
               <p>
                 {pending
-                  ? "Hay alertas pendientes de revisión humana antes de cambiar su visibilidad."
-                  : "Verifica los compromisos y registra evidencia de avance."}
+                  ? "Primero revisa las alertas pendientes; el riesgo no se publica hasta una aprobación humana."
+                  : displayedRisk === "Moderado"
+                    ? "Activar prevención y articulación intergubernamental."
+                    : displayedRisk === "Alto"
+                      ? "Activar intervención y tratamiento con coordinación intergubernamental."
+                      : displayedRisk === "Bajo"
+                        ? "Mantener monitoreo preventivo y actualizar la evidencia."
+                        : "No existe una alerta aprobada para sugerir una acción por riesgo."}
               </p>
               <button
                 className="button-primary full-button"
                 onClick={() => onNavigate(pending ? "alerts" : "commitments")}
               >
-                {pending ? "Revisar alertas" : "Ir a compromisos"}{" "}
-                <ArrowRight size={14} />
+                {pending ? "Revisar alertas" : "Ir a compromisos"} <ArrowRight size={14} />
               </button>
             </section>
           </aside>
         </div>
       )}
-      {tab === "Demandas 3P" && (
+      {tab === "Demandas" && (
         <section className="surface detail-section">
           <div className="detail-section-title">
             <div>
-              <h3>Demandas 3P</h3>
+              <h3>Demandas</h3>
               <p>
-                Problema, propuesta y pedido tal como se registraron en la
-                fuente.
+                Problema, propuesta y pedido tal como se registraron en la fuente.
+                <CatalogInfo label="Estructura 3P" definition={guideDefinitions.threeP} />
               </p>
             </div>
             <span className="result-count">{demandas.length} demandas</span>
@@ -1160,8 +1208,8 @@ function CaseDetail({
         <section className="surface detail-section">
           <div className="detail-section-title">
             <div>
-              <h3>Cronología y evidencia</h3>
-              <p>Los hechos pendientes se distinguen de los validados.</p>
+              <h3>Cronología</h3>
+              <p>Orden inverso · fecha, actor y acción; evidencia ilustrativa sujeta a revisión humana.</p>
             </div>
             <span className="result-count">{item.events.length} hitos</span>
           </div>
@@ -1174,6 +1222,7 @@ function CaseDetail({
                     <strong>{event.title}</strong>
                     <time>{event.date}</time>
                   </div>
+                  <small className="timeline-actor">Actor: {event.actor ?? "No especificado"}</small>
                   <p>{event.description}</p>
                   <span className={`evidence-state evidence-${event.kind}`}>
                     {event.kind === "validated"
@@ -1285,7 +1334,7 @@ function CaseDetail({
                     <span className="case-code">{row.id}</span>
                     <strong>{row.title}</strong>
                     <small>
-                      {row.location} · {row.published} · SLA{" "}
+                      {row.alertType ?? "AT"} · {row.location} · {row.published} · SLA{" "}
                       {row.slaHours ?? "—"} h
                     </small>
                   </span>
@@ -1330,9 +1379,8 @@ function CaseDetail({
                     <span className="case-code">{row.id}</span>
                     <strong>{row.title}</strong>
                     <small>
-                      {row.tipo ?? "Actividad"} ·{" "}
-                      {row.nivelGobierno ?? "Nacional"} · {row.owner} · vence{" "}
-                      {row.due}
+                      {row.agreementType ?? "Tipo de acuerdo no registrado"} <CatalogInfo label="Tipo de acuerdo" definition={guideDefinitions.agreementType} /> · {row.tipo ?? "Actividad"} ·{" "}
+                      {row.nivelGobierno ?? "Nacional"} · {row.owner} · vence {row.due}
                     </small>
                   </span>
                   <span className="linked-progress">
@@ -1559,7 +1607,7 @@ function ExecutiveView({
           tone="amber"
         />
         <StatCard
-          label="Compromisos vencidos"
+          label="Compromisos paralizados"
           value="1"
           detail="requiere seguimiento"
           icon={Clock3}
@@ -1584,7 +1632,7 @@ function ExecutiveView({
             <span className="micro-label">QUÉ CAMBIÓ</span>
             <p>
               Se muestra una alerta pendiente de revisión y un compromiso
-              vencido en los datos de ejemplo.
+              paralizado en los datos de ejemplo.
             </p>
           </div>
           <div>

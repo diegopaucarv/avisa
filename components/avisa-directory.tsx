@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import { Building2, Landmark, MapPin, Search, ShieldCheck, UsersRound } from 'lucide-react'
-import type { RegionScope } from './avisa-scope-filter'
+import { isTerritoryVisible, type RegionScope } from './avisa-scope-filter'
 
 export type DirectoryKind = 'Actor' | 'Organización' | 'Institución' | 'Local'
 
@@ -22,11 +22,11 @@ const kindDetails: Record<DirectoryKind, { icon: typeof UsersRound; view: string
   Local: { icon: MapPin, view: 'Locales', singular: 'local' },
 }
 
-export function AvisaDirectory({ regionScope = 'Todo el Perú', kind }: { regionScope?: RegionScope; kind: DirectoryKind }) {
+export function AvisaDirectory({ regionScope = 'Todo el Perú', assignedRegions = [], unrestricted = true, kind }: { regionScope?: RegionScope; assignedRegions?: RegionScope[]; unrestricted?: boolean; kind: DirectoryKind }) {
   const [query, setQuery] = useState('')
   const detail = kindDetails[kind]
   const KindIcon = detail.icon
-  const records = useMemo(() => directory.filter((item) => item.kind === kind && (regionScope === 'Todo el Perú' || item.place.toLocaleLowerCase('es').includes(regionScope.toLocaleLowerCase('es'))) && `${item.name} ${item.place} ${item.scope} ${item.id}`.toLocaleLowerCase('es').includes(query.trim().toLocaleLowerCase('es'))), [query, kind, regionScope])
+  const records = useMemo(() => directory.filter((item) => item.kind === kind && isTerritoryVisible(item.place, regionScope, assignedRegions, unrestricted) && `${item.name} ${item.place} ${item.scope} ${item.id}`.toLocaleLowerCase('es').includes(query.trim().toLocaleLowerCase('es'))), [query, kind, regionScope, assignedRegions, unrestricted])
 
   return <>
     <div className="demo-notice" role="status"><ShieldCheck size={15} /><span><strong>Directorio demostrativo</strong> — nombres sintéticos; no se muestran teléfonos ni direcciones personales.</span></div>
