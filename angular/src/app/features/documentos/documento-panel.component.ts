@@ -272,6 +272,7 @@ export class DocumentoPanelComponent {
 
   readonly cerrado = output<void>();
   readonly actualizado = output<void>();
+  readonly anular = output<void>();
 
   private readonly detalleRecurso = consulta<DetalleDocumento>({
     fuente: () => {
@@ -298,6 +299,9 @@ export class DocumentoPanelComponent {
   readonly puedeModificar = computed(() =>
     this.capacidades.puedeModificar(this.cabecera().clasificacion),
   );
+
+  /** Anular exige, además de escritura sobre la clasificación, el privilegio de anulación. */
+  readonly puedeAnular = computed(() => this.capacidades.puedeEliminar() && this.puedeModificar());
 
   readonly editando = signal(false);
   readonly guardando = signal(false);

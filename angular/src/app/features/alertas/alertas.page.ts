@@ -22,6 +22,10 @@ import {
 import { consulta } from '../../core/http/consulta';
 import { aErrorApi } from '../../core/http/errores';
 import { CapacidadesService } from '../../core/permisos/capacidades.service';
+import {
+  AnularPanelComponent,
+  type ResultadoAnulacion,
+} from '../../shared/ui/anular-panel.component';
 import { ExportarMenuComponent } from '../../shared/ui/exportar-menu.component';
 import { IconoComponent } from '../../shared/ui/icono.component';
 import { PaginacionComponent } from '../../shared/ui/paginacion.component';
@@ -75,7 +79,13 @@ const FILTROS_INICIALES: FiltrosAlertas = {
  */
 @Component({
   selector: 'app-alertas',
-  imports: [IconoComponent, PaginacionComponent, AlertaPanelComponent, ExportarMenuComponent],
+  imports: [
+    IconoComponent,
+    PaginacionComponent,
+    AlertaPanelComponent,
+    AnularPanelComponent,
+    ExportarMenuComponent,
+  ],
   templateUrl: './alertas.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
@@ -202,6 +212,22 @@ const FILTROS_INICIALES: FiltrosAlertas = {
       font-size: 9.5px;
     }
 
+    .aviso-ok {
+      color: #2f6f52;
+      font-size: 11.5px;
+    }
+
+    .celda-anular {
+      white-space: nowrap;
+      text-align: right;
+    }
+
+    .celda-anular .button-secondary {
+      min-height: 26px;
+      padding: 0 9px;
+      font-size: 9.5px;
+    }
+
     @media (max-width: 720px) {
       .view-body {
         padding: 18px 16px 40px;
@@ -299,6 +325,12 @@ export class AlertasPage {
   readonly errorGuardado = signal<string | null>(null);
   readonly aviso = signal<string | null>(null);
 
+  /** Alerta que se está anulando en el panel compartido. */
+  readonly alertaAnulacion = signal<Alerta | null>(null);
+  readonly enviandoAnulacion = signal(false);
+  readonly errorAnulacion = signal<string | null>(null);
+  readonly avisoAnulacion = signal<string | null>(null);
+
   /** Último fallo del botón de exportación; vacío si no hubo. */
   readonly exportarError = signal<string | null>(null);
 
@@ -331,6 +363,59 @@ export class AlertasPage {
     this.aviso.set(null);
     this.alertaAbierta.set(alerta);
     this.seleccionadaId.set(alerta.id);
+  }
+
+  /** Las alertas se anulan con el privilegio de anulación y sobre su clasificación. */
+  puedeAnular(alerta: Alerta): boolean {
+    return (
+      this.capacidades.puedeEliminar() && this.capacidades.puedeModificar(alerta.clasificacion)
+    );
+  }
+
+  abrirAnulacion(alerta: Alerta): void {
+    if (!alerta.id || !this.puedeAnular(alerta)) return;
+    this.errorAnulacion.set(null);
+    this.avisoAnulacion.set(null);
+    this.alertaAnulacion.set(alerta);
+  }
+
+  cerrarAnulacion(): void {
+    this.alertaAnulacion.set(null);
+    this.errorAnulacion.set(null);
+  }
+
+  /**
+   * `DELETE /api/v1/alerts/{id}` con `{ motivo }`: es la anulación lógica. La
+   * regla de producto y cualquier rechazo del backend se muestran tal cual;
+   * la UI no inventa restricciones que el servidor no aplique.
+   */
+  confirmarAnulacion(resultado: ResultadoAnulacion): void {
+    const alerta = this.alertaAnulacion();
+    if (!alerta || resultado.modo !== 'anular') return;
+
+    const motivo = (resultado.motivo ?? '').trim();
+    if (!motivo) return;
+
+    this.enviandoAnulacion.set(true);
+    this.errorAnulacion.set(null);
+
+    this.http
+      .delete<unknown>(urlApi(`/v1/alerts/${encodeURIComponent(alerta.id)}`), {
+        body: { motivo },
+      })
+      .subscribe({
+        next: () => {
+          this.enviandoAnulacion.set(false);
+          this.alertaAnulacion.set(null);
+          if (this.alertaAbierta()?.id === alerta.id) this.cerrarPanel();
+          this.avisoAnulacion.set(`Alerta ${alerta.codigo || 'seleccionada'} anulada.`);
+          this.listado.recargar();
+        },
+        error: (fallo: unknown) => {
+          this.enviandoAnulacion.set(false);
+          this.errorAnulacion.set(aErrorApi(fallo).message);
+        },
+      });
   }
 
   cerrarPanel(): void {

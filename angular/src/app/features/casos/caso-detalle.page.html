@@ -7,7 +7,7 @@
     <button type="button" class="button-secondary" (click)="recargar()">Reintentar</button>
     <a class="button-secondary" routerLink="/casos">Volver a casos</a>
   </div>
-  } @else if (detalle(); as d) {
+  } @else if (ficha(); as d) {
   <div class="view-head">
     <div>
       <div class="breadcrumb-current">
@@ -19,6 +19,13 @@
       <p class="view-subtitle">{{ d.caso.resumen || "Sin resumen registrado." }}</p>
     </div>
     <div class="view-actions">
+      @if (anulado()) {
+      <span class="status-badge">Anulado</span>
+      @if (puedeAnular()) {
+      <button type="button" class="button-secondary" (click)="abrirRestauracion()">
+        Restaurar caso
+      </button>
+      } } @else {
       <app-exportar-menu entidad="casos" [id]="d.caso.id" (fallo)="alFallarExportacion($event)" />
       <span class="status-badge" [class]="'status-badge risk-' + d.caso.riesgo.toLowerCase()">
         <span class="status-dot"></span>
@@ -26,10 +33,15 @@
       </span>
       <span class="status-badge">{{ d.caso.nivelConflicto }}</span>
       <span class="status-badge">{{ d.caso.estado }}</span>
+      @if (puedeAnular()) {
+      <button type="button" class="button-danger" (click)="abrirAnulacion()">Anular caso</button>
+      } }
     </div>
   </div>
 
-  @if (exportarError(); as mensaje) {
+  @if (avisoAnulacion(); as aviso) {
+  <p class="form-hint aviso-ok" role="status">{{ aviso }}</p>
+  } @if (exportarError(); as mensaje) {
   <p class="form-error" role="alert">{{ mensaje }}</p>
   }
 
@@ -176,5 +188,19 @@
     </div>
     }
   </section>
-  }
+
+  @if (panelAnulacion(); as modoAnulacion) {
+  <app-anular-panel
+    [modo]="modoAnulacion"
+    entidad="caso"
+    [codigo]="d.caso.codigo"
+    [cascada]="true"
+    detalleCascada="sus alertas, su cronología, sus demandas, sus compromisos (con sus hitos) y sus documentos"
+    [enviando]="enviandoAnulacion()"
+    [errorEnvio]="errorAnulacion()"
+    [puedeConfirmar]="puedeAnular()"
+    (cerrar)="cerrarPanelAnulacion()"
+    (hecho)="confirmarAnulacion($event)"
+  />
+  } }
 </section>

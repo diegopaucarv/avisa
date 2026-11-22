@@ -97,14 +97,6 @@ export function AvisaDocuments({
         </div>
         <DocumentUploadForm />
       </div>
-      <div className="demo-notice" role="status">
-        <Sparkles size={15} />
-        <span>
-          <strong>Extracción de demostración</strong> — el extractor es
-          heurístico y no usa un modelo real. Toda propuesta requiere revisión
-          de una persona.
-        </span>
-      </div>
       <p className="doc-evidence-note">
         <FileStack size={14} />
         <span>

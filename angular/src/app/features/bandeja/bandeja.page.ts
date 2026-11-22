@@ -3,7 +3,6 @@ import { RouterLink } from '@angular/router';
 
 import { urlApi } from '../../core/config/entorno';
 import {
-  TAMANO_PAGINA,
   normalizarColeccion,
   paramsDePagina,
   urlConParametros,
@@ -29,7 +28,7 @@ import {
   type ResolucionVencimiento,
   type Situacion,
 } from '../compromisos/compromiso.mapeo';
-import { compromisosPorVencer } from '../resumen/resumen.mapeo';
+import { HORIZONTE_POR_VENCER_DIAS, rangoPorVencer } from '../resumen/resumen.mapeo';
 
 /**
  * Bandeja de trabajo.
@@ -212,29 +211,35 @@ export class BandejaPage {
   readonly errorAlertas = this.recursoAlertas.error;
 
   /* ------------------------------------------------------------------ *
-   * Compromisos vencidos o por vencer
+   * Compromisos por vencer
    * ------------------------------------------------------------------ */
 
+  /** Días del horizonte que anuncia el bloque y que se envía al servidor. */
+  readonly horizonteDias = HORIZONTE_POR_VENCER_DIAS;
+
   /**
-   * Sin orden ni filtro por vencimiento en el servidor: se pide una página de
-   * `TAMANO_PAGINA` filas y la selección se hace en el cliente sobre esa
-   * página. El `total` del sobre sigue siendo el recuento exacto del servidor.
+   * El rango de vencimiento se resuelve en el servidor (`vencimiento_desde`
+   * hoy, `vencimiento_hasta` hoy + horizonte), que lo aplica sobre el
+   * vencimiento efectivo y ordena por esa misma fecha de forma ascendente. El
+   * `total` del sobre es el recuento exacto de la cola y la página trae sólo
+   * las cinco filas más próximas.
    */
   private readonly recursoCompromisos = consulta<Coleccion<Compromiso>>({
-    fuente: () =>
-      urlConParametros(
-        urlApi('/v1/commitments'),
-        paramsDePagina({ pagina: 1, tamano: TAMANO_PAGINA }),
-      ),
+    fuente: () => {
+      const rango = rangoPorVencer();
+      return urlConParametros(urlApi('/v1/commitments'), {
+        ...paramsDePagina({ pagina: 1, tamano: 5 }),
+        vencimiento_desde: rango.desde,
+        vencimiento_hasta: rango.hasta,
+      });
+    },
     esquema: (bruto) => {
       const coleccion = normalizarColeccion<unknown>(bruto);
       return { ...coleccion, elementos: coleccion.elementos.map(aCompromiso) };
     },
   });
 
-  readonly compromisos = computed(() =>
-    compromisosPorVencer(this.recursoCompromisos.valor()?.elementos ?? []),
-  );
+  readonly compromisos = computed(() => this.recursoCompromisos.valor()?.elementos ?? []);
   readonly totalCompromisos = computed(() => this.recursoCompromisos.valor()?.total ?? 0);
   readonly estadoCompromisos = this.recursoCompromisos.estado;
   readonly errorCompromisos = this.recursoCompromisos.error;

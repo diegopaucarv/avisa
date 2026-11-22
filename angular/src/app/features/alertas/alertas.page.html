@@ -16,6 +16,8 @@
 
   @if (exportarError(); as mensaje) {
   <p class="form-error" role="alert">{{ mensaje }}</p>
+  } @if (avisoAnulacion(); as aviso) {
+  <p class="form-hint aviso-ok" role="status">{{ aviso }}</p>
   }
 
   <div class="filter-bar filter-bar-wrap">
@@ -112,6 +114,7 @@
           <th scope="col">Nivel</th>
           <th scope="col">Fecha de reporte</th>
           <th scope="col">Estado</th>
+          <th scope="col">Acciones</th>
         </tr>
       </thead>
       <tbody>
@@ -166,6 +169,18 @@
               {{ alerta.estado || 'Sin estado' }}
             </span>
           </td>
+          <td class="celda-anular">
+            @if (puedeAnular(alerta)) {
+            <button
+              type="button"
+              class="button-secondary"
+              [attr.aria-label]="'Anular la alerta ' + (alerta.codigo || alerta.titulo)"
+              (click)="abrirAnulacion(alerta); $event.stopPropagation()"
+            >
+              Anular
+            </button>
+            }
+          </td>
         </tr>
         }
       </tbody>
@@ -193,6 +208,17 @@
     (reintentar)="recargarDetalle()"
     (guardar)="guardar($event)"
     (accion)="accionFlujo($event)"
+  />
+  } @if (alertaAnulacion(); as alertaAnular) {
+  <app-anular-panel
+    modo="anular"
+    entidad="alerta"
+    [codigo]="alertaAnular.codigo"
+    [enviando]="enviandoAnulacion()"
+    [errorEnvio]="errorAnulacion()"
+    [puedeConfirmar]="puedeAnular(alertaAnular)"
+    (cerrar)="cerrarAnulacion()"
+    (hecho)="confirmarAnulacion($event)"
   />
   }
 </section>

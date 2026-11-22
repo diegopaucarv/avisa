@@ -1,36 +1,36 @@
 capa,esquema,tabla,columnas,filas,fk_entrantes,fk_entrantes_vivas,fk_salientes,rls,triggers,codigo_legado,cargador,refs_codigo,motivo,causa
-T0,audit,datos_personales_acceso,8,3088,0,0,0,True,3,False,False,0,MVP-45 y ya tiene datos o cargador,trigger
+T0,audit,datos_personales_acceso,8,3090,0,0,0,True,3,False,False,1,MVP-45 y ya tiene datos o cargador,trigger+codigo
 T0,core,actor_alias,8,143,0,0,1,True,0,False,False,0,MVP-45 y ya tiene datos o cargador,nada
-T0,core,actor_datos_personales,17,847,0,0,3,True,2,False,True,0,MVP-45 y ya tiene datos o cargador,trigger
+T0,core,actor_datos_personales,17,847,0,0,3,True,2,False,True,3,MVP-45 y ya tiene datos o cargador,trigger+codigo
 T0,core,actor_membresia,6,292,0,0,2,True,1,False,True,0,MVP-45 y ya tiene datos o cargador,trigger
-T0,core,actores,31,1160,37,12,12,True,3,True,True,0,MVP-45 y ya tiene datos o cargador,referencia_viva+trigger
-T0,core,alertas_tempranas,37,83,7,5,12,True,3,True,True,0,MVP-45 y ya tiene datos o cargador,referencia_viva+trigger
+T0,core,actores,31,1160,37,12,12,True,3,True,True,9,MVP-45 y ya tiene datos o cargador,referencia_viva+trigger+codigo
+T0,core,alertas_tempranas,41,83,7,5,13,True,3,True,True,10,MVP-45 y ya tiene datos o cargador,referencia_viva+trigger+codigo
 T0,core,banco_datos_tratamiento,18,1,1,1,2,True,0,False,False,0,MVP-45 y ya tiene datos o cargador,referencia_viva
-T0,core,caso_cronologia,20,80,2,1,7,True,1,True,True,0,MVP-45 y ya tiene datos o cargador,referencia_viva+trigger
+T0,core,caso_cronologia,24,80,2,1,8,True,1,True,True,9,MVP-45 y ya tiene datos o cargador,referencia_viva+trigger+codigo
 T0,core,caso_estado_historial,11,35,0,0,6,True,0,True,False,0,MVP-45 y ya tiene datos o cargador,nada
-T0,core,casos,40,35,47,12,17,True,4,True,True,0,MVP-45 y ya tiene datos o cargador,referencia_viva+trigger
-T0,core,casos_actores,4,60,0,0,2,True,1,False,True,0,MVP-45 y ya tiene datos o cargador,trigger
+T0,core,casos,44,35,47,12,18,True,4,True,True,24,MVP-45 y ya tiene datos o cargador,referencia_viva+trigger+codigo
+T0,core,casos_actores,4,60,0,0,2,True,1,False,True,2,MVP-45 y ya tiene datos o cargador,trigger+codigo
 T0,core,cat_clasificacion,2,3,63,19,0,False,0,False,False,0,MVP-45 y ya tiene datos o cargador,referencia_viva
-T0,core,cat_estados_caso,3,4,2,2,0,False,0,False,False,0,MVP-45 y ya tiene datos o cargador,referencia_viva
-T0,core,cat_estados_compromiso,4,5,1,1,0,False,0,False,False,0,MVP-45 y ya tiene datos o cargador,referencia_viva
-T0,core,cat_estados_hito,3,5,2,1,0,False,0,False,False,0,MVP-45 y ya tiene datos o cargador,referencia_viva
+T0,core,cat_estados_caso,3,4,2,2,0,False,0,False,False,6,MVP-45 y ya tiene datos o cargador,referencia_viva+codigo
+T0,core,cat_estados_compromiso,4,5,1,1,0,False,0,False,False,5,MVP-45 y ya tiene datos o cargador,referencia_viva+codigo
+T0,core,cat_estados_hito,3,5,2,1,0,False,0,False,False,7,MVP-45 y ya tiene datos o cargador,referencia_viva+codigo
 T0,core,cat_nivel_identificacion,3,5,1,1,0,False,0,False,False,0,MVP-45 y ya tiene datos o cargador,referencia_viva
-T0,core,cat_niveles_conflicto,4,4,2,2,0,False,1,False,False,0,MVP-45 y ya tiene datos o cargador,referencia_viva+trigger
-T0,core,cat_niveles_riesgo,3,3,2,2,0,False,0,False,False,0,MVP-45 y ya tiene datos o cargador,referencia_viva
-T0,core,cat_prioridades_alerta,4,4,1,1,0,False,0,False,False,0,MVP-45 y ya tiene datos o cargador,referencia_viva
-T0,core,cat_tipos_actor,3,7,1,1,0,False,0,True,False,0,MVP-45 y ya tiene datos o cargador,referencia_viva
-T0,core,cat_tipos_hecho,2,9,1,1,0,False,0,False,False,0,MVP-45 y ya tiene datos o cargador,referencia_viva
-T0,core,compromisos,25,8,5,2,11,True,2,False,True,0,MVP-45 y ya tiene datos o cargador,referencia_viva+trigger
+T0,core,cat_niveles_conflicto,4,4,2,2,0,False,1,False,False,3,MVP-45 y ya tiene datos o cargador,referencia_viva+trigger+codigo
+T0,core,cat_niveles_riesgo,3,3,2,2,0,False,0,False,False,3,MVP-45 y ya tiene datos o cargador,referencia_viva+codigo
+T0,core,cat_prioridades_alerta,4,4,1,1,0,False,0,False,False,3,MVP-45 y ya tiene datos o cargador,referencia_viva+codigo
+T0,core,cat_tipos_actor,3,3,1,1,0,False,0,True,False,3,MVP-45 y ya tiene datos o cargador,referencia_viva+codigo
+T0,core,cat_tipos_hecho,2,7,1,1,0,False,0,False,False,6,MVP-45 y ya tiene datos o cargador,referencia_viva+codigo
+T0,core,compromisos,30,8,5,2,12,True,2,False,True,13,MVP-45 y ya tiene datos o cargador,referencia_viva+trigger+codigo
 T0,core,cronologia_vinculos,3,5,0,0,3,True,0,False,True,0,MVP-45 y ya tiene datos o cargador,nada
-T0,core,distritos,4,698,18,7,1,False,0,False,True,0,MVP-45 y ya tiene datos o cargador,referencia_viva
-T0,core,hitos_compromiso,12,12,1,0,3,True,0,False,True,0,MVP-45 y ya tiene datos o cargador,nada
+T0,core,distritos,4,698,18,7,1,False,0,False,True,4,MVP-45 y ya tiene datos o cargador,referencia_viva+codigo
+T0,core,hitos_compromiso,16,12,1,0,4,True,0,False,True,13,MVP-45 y ya tiene datos o cargador,codigo
 T0,core,log_accesos,9,857,0,0,2,True,0,False,True,0,MVP-45 y ya tiene datos o cargador,nada
-T0,core,organizaciones,21,224,0,0,3,True,0,False,True,0,MVP-45 y ya tiene datos o cargador,nada
-T0,core,roles,6,10,1,1,1,True,0,False,False,0,MVP-45 y ya tiene datos o cargador,referencia_viva
-T0,core,usuario_roles,4,36,0,0,2,True,0,False,True,0,MVP-45 y ya tiene datos o cargador,nada
-T0,core,usuarios,13,32,89,20,1,True,0,True,True,0,MVP-45 y ya tiene datos o cargador,referencia_viva
+T0,core,organizaciones,21,224,0,0,3,True,0,False,True,3,MVP-45 y ya tiene datos o cargador,codigo
+T0,core,roles,6,10,1,1,1,True,0,False,False,3,MVP-45 y ya tiene datos o cargador,referencia_viva+codigo
+T0,core,usuario_roles,4,43,0,0,2,True,0,False,True,0,MVP-45 y ya tiene datos o cargador,nada
+T0,core,usuarios,13,33,96,21,1,True,0,True,True,0,MVP-45 y ya tiene datos o cargador,referencia_viva
 T0,kag,aristas,17,450,3,1,7,True,0,False,False,0,MVP-45 y ya tiene datos o cargador,referencia_viva
-T0,kag,documento_fuente,10,10,12,1,3,True,0,False,False,0,MVP-45 y ya tiene datos o cargador,referencia_viva
+T0,kag,documento_fuente,10,10,12,1,3,True,0,False,False,3,MVP-45 y ya tiene datos o cargador,referencia_viva+codigo
 T0,ref,base_legal_tratamiento,12,5,2,1,1,False,0,False,False,0,MVP-45 y ya tiene datos o cargador,referencia_viva
 T1,agent,run_log,13,0,0,0,0,False,1,False,False,0,"MVP-45, todavía vacía",trigger
 T1,core,alerta_destinatario,11,0,0,0,4,True,1,False,False,0,"MVP-45, todavía vacía",trigger
@@ -40,7 +40,7 @@ T1,core,output_contracts,12,0,1,0,6,True,0,False,False,0,"MVP-45, todavía vací
 T1,core,permiso_aprobacion,6,0,0,0,2,True,0,False,False,0,"MVP-45, todavía vacía",nada
 T1,core,reunion_participantes,5,0,0,0,3,True,0,False,False,0,"MVP-45, todavía vacía",nada
 T1,ind,resultado,16,0,0,0,2,False,0,False,False,0,"MVP-45, todavía vacía",nada
-T1,kag,documento_fragmento,9,0,9,0,2,True,0,False,False,0,"MVP-45, todavía vacía",nada
+T1,kag,documento_fragmento,9,0,9,0,2,True,0,False,False,1,"MVP-45, todavía vacía",codigo
 T1,kag,entity_merge_log,7,0,1,0,2,False,0,False,False,0,"MVP-45, todavía vacía",nada
 T1,policy,escenario_regla,2,0,0,0,2,False,0,False,False,0,"MVP-45, todavía vacía",nada
 T1,qda,mapeo_pseudonimo,4,0,0,0,3,True,0,False,False,0,"MVP-45, todavía vacía",nada
@@ -49,6 +49,7 @@ T2,agent,cat_detalle_schema,4,1,0,0,0,False,0,False,False,0,fuera del MVP-45 per
 T2,agent,plantilla_prompt,11,4,1,1,1,False,0,False,False,0,fuera del MVP-45 pero con datos o cargador,referencia_viva
 T2,analisis,cat_herramientas,3,7,1,0,0,False,0,False,False,0,fuera del MVP-45 pero con datos o cargador,nada
 T2,analisis,punto_ingesta,5,7,2,0,0,False,0,False,False,0,fuera del MVP-45 pero con datos o cargador,nada
+T2,audit,cambios,9,54,0,0,0,False,0,False,False,1,fuera del MVP-45 pero con datos o cargador,codigo
 T2,config,a2_transiciones,6,10,0,0,0,False,0,False,False,0,fuera del MVP-45 pero con datos o cargador,nada
 T2,config,aplicacion,9,4,2,1,1,False,0,False,False,0,fuera del MVP-45 pero con datos o cargador,referencia_viva
 T2,config,guardrail_contract,7,25,0,0,0,False,0,False,False,0,fuera del MVP-45 pero con datos o cargador,nada
@@ -61,51 +62,52 @@ T2,core,alertas_actores,2,161,0,0,2,True,0,False,True,0,fuera del MVP-45 pero co
 T2,core,capacitacion_participantes,4,9,0,0,2,True,0,False,True,0,fuera del MVP-45 pero con datos o cargador,nada
 T2,core,capacitaciones,16,1,1,1,3,True,0,False,True,0,fuera del MVP-45 pero con datos o cargador,referencia_viva
 T2,core,caso_distritos,2,23,0,0,2,True,0,False,True,0,fuera del MVP-45 pero con datos o cargador,nada
-T2,core,caso_regiones,3,81,0,0,2,True,0,False,True,0,fuera del MVP-45 pero con datos o cargador,nada
-T2,core,cat_alcances_geograficos,2,5,2,2,0,False,0,False,False,0,fuera del MVP-45 pero con datos o cargador,referencia_viva
-T2,core,cat_ciclos_intervencion,3,4,1,1,0,False,0,True,False,0,fuera del MVP-45 pero con datos o cargador,referencia_viva
+T2,core,caso_regiones,3,81,0,0,2,True,0,False,True,5,fuera del MVP-45 pero con datos o cargador,codigo
+T2,core,cat_alcances_geograficos,2,5,2,2,0,False,0,False,False,5,fuera del MVP-45 pero con datos o cargador,referencia_viva+codigo
+T2,core,cat_ciclos_intervencion,3,5,1,1,0,False,0,True,False,3,fuera del MVP-45 pero con datos o cargador,referencia_viva+codigo
 T2,core,cat_especies,8,39,11,1,0,False,0,True,True,0,fuera del MVP-45 pero con datos o cargador,referencia_viva
 T2,core,cat_estados_integracion,3,8,1,0,0,False,0,False,False,0,fuera del MVP-45 pero con datos o cargador,nada
 T2,core,cat_factores_contexto,3,5,1,0,0,False,0,False,False,0,fuera del MVP-45 pero con datos o cargador,nada
 T2,core,cat_mapeo_estado_externo,4,3,0,0,0,False,0,False,False,0,fuera del MVP-45 pero con datos o cargador,nada
-T2,core,cat_niveles_alerta,6,4,1,1,0,False,0,True,False,0,fuera del MVP-45 pero con datos o cargador,referencia_viva
-T2,core,cat_perfiles_actor,3,3,1,1,0,False,0,True,False,0,fuera del MVP-45 pero con datos o cargador,referencia_viva
+T2,core,cat_niveles_alerta,6,4,1,1,0,False,0,True,False,3,fuera del MVP-45 pero con datos o cargador,referencia_viva+codigo
+T2,core,cat_perfiles_actor,3,3,1,1,0,False,0,True,False,3,fuera del MVP-45 pero con datos o cargador,referencia_viva+codigo
 T2,core,cat_pip_etapas,4,12,1,0,1,False,0,False,False,0,fuera del MVP-45 pero con datos o cargador,nada
 T2,core,cat_pip_fases,3,6,1,1,0,False,0,False,False,0,fuera del MVP-45 pero con datos o cargador,referencia_viva
-T2,core,cat_prioridades_atencion,3,3,1,1,0,False,0,False,False,0,fuera del MVP-45 pero con datos o cargador,referencia_viva
+T2,core,cat_prioridades_atencion,3,3,1,1,0,False,0,False,False,3,fuera del MVP-45 pero con datos o cargador,referencia_viva+codigo
 T2,core,cat_privilegio,5,1,1,1,0,False,0,False,False,0,fuera del MVP-45 pero con datos o cargador,referencia_viva
-T2,core,cat_roles_actor,3,7,1,1,0,False,0,True,False,0,fuera del MVP-45 pero con datos o cargador,referencia_viva
+T2,core,cat_roles_actor,3,4,1,1,0,False,0,True,False,3,fuera del MVP-45 pero con datos o cargador,referencia_viva+codigo
 T2,core,cat_roles_funcionales,4,4,1,1,0,False,0,True,False,0,fuera del MVP-45 pero con datos o cargador,referencia_viva
-T2,core,cat_subsectores,4,3,2,2,0,False,0,True,False,0,fuera del MVP-45 pero con datos o cargador,referencia_viva
-T2,core,cat_tematicas,6,7,3,3,0,False,0,True,False,0,fuera del MVP-45 pero con datos o cargador,referencia_viva
+T2,core,cat_subsectores,4,2,2,2,0,False,0,True,False,5,fuera del MVP-45 pero con datos o cargador,referencia_viva+codigo
+T2,core,cat_tematicas,6,6,3,3,0,False,0,True,False,7,fuera del MVP-45 pero con datos o cargador,referencia_viva+codigo
 T2,core,cat_tipos_cambio_caso,4,6,1,1,0,False,0,True,False,0,fuera del MVP-45 pero con datos o cargador,referencia_viva
 T2,core,cat_tipos_capacitacion,2,4,1,1,0,False,0,False,False,0,fuera del MVP-45 pero con datos o cargador,referencia_viva
-T2,core,cat_tipos_documento,5,15,2,2,0,False,0,False,False,0,fuera del MVP-45 pero con datos o cargador,referencia_viva
+T2,core,cat_tipos_documento,5,17,2,2,0,False,0,False,False,5,fuera del MVP-45 pero con datos o cargador,referencia_viva+codigo
 T2,core,cat_tipos_espacio_dialogo,2,7,1,1,0,False,0,False,False,0,fuera del MVP-45 pero con datos o cargador,referencia_viva
 T2,core,cat_tipos_fuente_integracion,3,21,1,1,0,False,0,False,False,0,fuera del MVP-45 pero con datos o cargador,referencia_viva
-T2,core,cat_tipos_organizacion,3,7,1,1,0,False,0,True,False,0,fuera del MVP-45 pero con datos o cargador,referencia_viva
+T2,core,cat_tipos_organizacion,3,7,1,1,0,False,0,True,False,2,fuera del MVP-45 pero con datos o cargador,referencia_viva+codigo
 T2,core,cat_tipos_reunion,2,4,1,0,0,False,0,False,False,0,fuera del MVP-45 pero con datos o cargador,nada
-T2,core,cat_unidades_organicas,8,66,7,5,2,False,0,False,True,0,fuera del MVP-45 pero con datos o cargador,referencia_viva
-T2,core,demandas,26,325,2,2,7,True,2,True,True,0,fuera del MVP-45 pero con datos o cargador,referencia_viva+trigger
+T2,core,cat_unidades_organicas,8,66,7,5,2,False,0,False,True,6,fuera del MVP-45 pero con datos o cargador,referencia_viva+codigo
+T2,core,demandas,30,325,2,2,8,True,2,True,True,11,fuera del MVP-45 pero con datos o cargador,referencia_viva+trigger+codigo
 T2,core,demandas_actores,3,98,0,0,2,True,1,False,True,0,fuera del MVP-45 pero con datos o cargador,trigger
 T2,core,demandas_evidencias,6,77,0,0,1,True,0,False,True,0,fuera del MVP-45 pero con datos o cargador,nada
-T2,core,documentos,24,153,6,4,8,True,1,True,True,0,fuera del MVP-45 pero con datos o cargador,referencia_viva+trigger
+T2,core,documentos,28,153,6,4,9,True,1,True,True,14,fuera del MVP-45 pero con datos o cargador,referencia_viva+trigger+codigo
 T2,core,entidades,6,23,2,2,0,False,0,True,True,0,fuera del MVP-45 pero con datos o cargador,referencia_viva
 T2,core,envios_comunicacion,17,17,0,0,1,False,0,False,True,0,fuera del MVP-45 pero con datos o cargador,nada
 T2,core,feature_flags,6,9,0,0,1,False,0,False,False,0,fuera del MVP-45 pero con datos o cargador,nada
 T2,core,flujo_definicion,10,12,1,1,0,True,1,True,False,0,fuera del MVP-45 pero con datos o cargador,referencia_viva+trigger
 T2,core,flujo_estado,7,5,1,1,0,True,0,False,False,0,fuera del MVP-45 pero con datos o cargador,referencia_viva
 T2,core,integraciones,13,20,2,0,1,False,0,False,False,0,fuera del MVP-45 pero con datos o cargador,nada
-T2,core,locales,17,27,0,0,1,False,0,False,True,0,fuera del MVP-45 pero con datos o cargador,nada
+T2,core,locales,17,27,0,0,1,False,0,False,True,2,fuera del MVP-45 pero con datos o cargador,codigo
 T2,core,mesa_miembros,8,62,0,0,2,True,0,False,True,0,fuera del MVP-45 pero con datos o cargador,nada
 T2,core,mesas_dialogo,24,21,2,2,3,True,0,False,True,0,fuera del MVP-45 pero con datos o cargador,referencia_viva
 T2,core,migracion_conflicto,11,498,0,0,1,False,0,True,True,0,fuera del MVP-45 pero con datos o cargador,nada
 T2,core,privilegio_usuario,9,1,0,0,3,False,0,False,False,0,fuera del MVP-45 pero con datos o cargador,nada
 T2,core,proceso_instancia,21,218,0,0,8,True,1,True,False,0,fuera del MVP-45 pero con datos o cargador,trigger
 T2,core,provincias,4,70,9,2,1,False,0,False,True,0,fuera del MVP-45 pero con datos o cargador,referencia_viva
-T2,core,regiones,3,25,12,5,0,False,0,False,True,0,fuera del MVP-45 pero con datos o cargador,referencia_viva
+T2,core,regiones,3,25,12,5,0,False,0,False,True,9,fuera del MVP-45 pero con datos o cargador,referencia_viva+codigo
+T2,core,secuencia_codigo,3,16,0,0,0,False,0,False,False,1,fuera del MVP-45 pero con datos o cargador,codigo
 T2,core,suscripcion_notificacion,8,4,0,0,1,False,0,True,True,0,fuera del MVP-45 pero con datos o cargador,nada
-T2,core,usuario_territorio,2,25,0,0,2,False,0,False,True,3,fuera del MVP-45 pero con datos o cargador,codigo
+T2,core,usuario_territorio,2,25,0,0,2,False,0,False,True,1,fuera del MVP-45 pero con datos o cargador,codigo
 T2,ctx,cat_dominios,2,8,1,1,0,False,0,False,False,0,fuera del MVP-45 pero con datos o cargador,referencia_viva
 T2,ctx,cat_variables,9,20,11,0,1,False,0,False,False,0,fuera del MVP-45 pero con datos o cargador,nada
 T2,domain,cat_estados_artefacto,3,6,3,1,0,False,0,False,False,0,fuera del MVP-45 pero con datos o cargador,referencia_viva
@@ -117,7 +119,7 @@ T2,kag,cat_clases_arista,2,6,1,1,0,False,0,False,False,0,fuera del MVP-45 pero c
 T2,kag,cat_corpus,3,6,2,1,0,False,0,False,False,0,fuera del MVP-45 pero con datos o cargador,referencia_viva
 T2,kag,cat_tipos_arista,6,20,1,1,1,False,0,False,False,0,fuera del MVP-45 pero con datos o cargador,referencia_viva
 T2,kag,cat_tipos_nodo,2,15,1,1,0,False,0,False,False,0,fuera del MVP-45 pero con datos o cargador,referencia_viva
-T2,kag,nodos,6,1520,4,1,1,False,1,False,False,0,fuera del MVP-45 pero con datos o cargador,referencia_viva+trigger
+T2,kag,nodos,6,1528,4,1,1,False,1,False,False,0,fuera del MVP-45 pero con datos o cargador,referencia_viva+trigger
 T2,model,model_card,18,12,4,2,2,False,1,False,False,0,fuera del MVP-45 pero con datos o cargador,referencia_viva+trigger
 T2,policy,cat_tipos_regla,5,5,1,1,0,False,0,False,False,0,fuera del MVP-45 pero con datos o cargador,referencia_viva
 T2,policy,regla,24,10,4,2,9,True,2,False,False,0,fuera del MVP-45 pero con datos o cargador,referencia_viva+trigger
@@ -126,6 +128,7 @@ T3,chat,reflog,9,0,0,0,2,False,1,False,False,0,"vacía, pero algo vivo la usa",t
 T3,chat,turno,18,0,2,0,5,True,1,False,False,0,"vacía, pero algo vivo la usa",trigger
 T3,core,derivaciones_alerta,7,0,0,0,2,True,1,False,False,0,"vacía, pero algo vivo la usa",trigger
 T3,core,hitos_compromiso_estado_historico,7,0,0,0,3,True,1,False,False,0,"vacía, pero algo vivo la usa",trigger
+T3,core,notificaciones,8,0,0,0,1,False,0,False,False,2,"vacía, pero algo vivo la usa",codigo
 T3,core,outbox_integracion,12,0,0,0,3,False,1,False,False,0,"vacía, pero algo vivo la usa",trigger
 T3,core,reuniones_dialogo,19,0,3,2,7,True,1,False,False,0,"vacía, pero algo vivo la usa",referencia_viva+trigger
 T3,ctx,captura,9,0,0,0,3,True,1,False,False,0,"vacía, pero algo vivo la usa",trigger
@@ -183,7 +186,6 @@ T4,core,compromiso_distritos,2,0,0,0,2,True,0,False,False,0,vacía y solo se rel
 T4,core,compromiso_pip,11,0,0,0,2,True,0,False,False,0,vacía y solo se relaciona con otras vacías,nada
 T4,core,documento_actores,4,0,0,0,2,True,0,False,False,0,vacía y solo se relaciona con otras vacías,nada
 T4,core,fuentes_evidencia,5,0,0,0,1,True,0,False,False,0,vacía y solo se relaciona con otras vacías,nada
-T4,core,notificaciones,8,0,0,0,1,False,0,False,False,0,vacía y solo se relaciona con otras vacías,nada
 T4,core,plan_acciones,9,0,0,0,2,True,0,False,False,0,vacía y solo se relaciona con otras vacías,nada
 T4,core,planes_accion,4,0,1,0,1,True,0,False,False,0,vacía y solo se relaciona con otras vacías,nada
 T4,core,query_cache,6,0,0,0,1,False,0,False,False,0,vacía y solo se relaciona con otras vacías,nada

@@ -707,7 +707,7 @@ COMMIT;
 --   SELECT * FROM core.cat_tematicas            ORDER BY id;   -- 7 filas
 --   SELECT * FROM core.cat_subsectores          ORDER BY id;   -- 3 filas
 --   SELECT id, nombre, codigo_legado FROM core.cat_tipos_actor  ORDER BY id;  -- 1..7
---   SELECT id, nombre, codigo_legado FROM core.cat_roles_actor  ORDER BY id;  -- 1,2,3,4,5,6,7
+--   SELECT id, nombre, codigo_legado FROM core.cat_roles_actor  ORDER BY id;  -- 4 filas (1, 2, 3 y 7)
 --   SELECT * FROM core.cat_roles_funcionales    ORDER BY id;   -- 4 filas
 --
 -- Restricciones relajadas (deben devolver 'YES' en is_nullable)

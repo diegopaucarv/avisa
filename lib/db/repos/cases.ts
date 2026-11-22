@@ -103,10 +103,6 @@ const SORTS: Record<string, string> = {
   code: "c.codigo_caso asc",
 };
 
-function normalizeState(value: string): string {
-  return value.trim().replace(/\s+/g, "_");
-}
-
 export async function listCases(
   client: PoolClient,
   query: CaseListQuery,
@@ -125,15 +121,71 @@ export async function listCases(
       `(c.codigo_caso ilike ${like} or c.nombre_caso ilike ${like} or coalesce(c.resumen_ejecutivo, '') ilike ${like})`,
     );
   }
-  if (query.estado)
-    where.push(`ec.codigo = ${bind(normalizeState(query.estado))}`);
-  if (query.riesgo) where.push(`nr.codigo = ${bind(query.riesgo)}`);
-  if (query.prioridad) where.push(`pa.codigo = ${bind(query.prioridad)}`);
-  if (query.alcance) where.push(`ag.codigo = ${bind(query.alcance)}`);
-  if (query.tematica) where.push(`te.nombre = ${bind(query.tematica)}`);
-  if (query.unidad) where.push(`uo.siglas = ${bind(query.unidad)}`);
+
+  // Cada filtro de catálogo se resuelve a su id y se compara la columna FK, no
+  // la etiqueta. Así un valor fuera de catálogo se rechaza (422) en vez de
+  // llegar al SQL, y el mismo valor sirve aunque la etiqueta cambie de grafía
+  // (`En seguimiento` / `En_seguimiento`).
+  await filtrarPorCatalogo(
+    client,
+    where,
+    bind,
+    "estado",
+    "estado",
+    "c.estado_id",
+    query.estado,
+  );
+  await filtrarPorCatalogo(
+    client,
+    where,
+    bind,
+    "riesgo",
+    "riesgo",
+    "c.nivel_riesgo_id",
+    query.riesgo,
+  );
+  await filtrarPorCatalogo(
+    client,
+    where,
+    bind,
+    "prioridad",
+    "prioridad",
+    "c.prioridad_id",
+    query.prioridad,
+  );
+  await filtrarPorCatalogo(
+    client,
+    where,
+    bind,
+    "alcance",
+    "alcance",
+    "c.alcance_id",
+    query.alcance,
+  );
+  await filtrarPorCatalogo(
+    client,
+    where,
+    bind,
+    "tematica",
+    "tematica",
+    "c.tematica_id",
+    query.tematica,
+  );
+  await filtrarPorCatalogo(
+    client,
+    where,
+    bind,
+    "unidad",
+    "unidadResponsable",
+    "c.unidad_responsable_id",
+    query.unidad,
+  );
+
   if (query.region) {
-    where.push(`coalesce(reg.nombre, rp.nombre) = ${bind(query.region)}`);
+    const nombre = await resolverRegion(client, query.region);
+    where.push(
+      `core.normalizar_ref(coalesce(reg.nombre, rp.nombre)) = core.normalizar_ref(${bind(nombre)})`,
+    );
   }
 
   const page = Math.max(1, Math.trunc(query.page ?? 1));
@@ -579,16 +631,17 @@ function pick(
   return out;
 }
 
-async function resolveCatalog(
+/**
+ * Busca el id de un valor de catálogo por código o por etiqueta visible.
+ * Las etiquetas llevan espacio y tilde (`En ejecución`), pero la API también
+ * acepta `En_ejecucion`; `core.normalizar_ref` iguala ambas formas. Devuelve
+ * `null` si el valor no existe: el llamador decide si eso es un error.
+ */
+async function lookupCatalog(
   client: PoolClient,
   key: CatalogKey,
-  raw: unknown,
-): Promise<number> {
-  if (typeof raw !== "string") invalid();
-  const value = raw.trim();
-  if (!value) invalid();
-  // Las etiquetas de catálogo llevan espacio y tilde (`En ejecución`), pero la
-  // API sigue aceptando `En_ejecucion`. `core.normalizar_ref` iguala ambas.
+  value: string,
+): Promise<number | null> {
   const spec = CASE_CATALOGS[key];
   const matches = [
     `core.normalizar_ref(${spec.code}) = core.normalizar_ref($1)`,
@@ -600,8 +653,80 @@ async function resolveCatalog(
     [value],
   );
   const id = result.rows[0]?.id;
-  if (id === undefined || id === null) invalid();
-  return Number(id);
+  return id === undefined || id === null ? null : Number(id);
+}
+
+/** Un filtro de listado fuera de catálogo se rechaza antes de llegar al SQL. */
+function filtroInvalido(clave: string): never {
+  throw new ApiError(
+    422,
+    `El filtro «${clave}» no coincide con el catálogo.`,
+    "FILTRO_INVALIDO",
+  );
+}
+
+async function resolverFiltroCatalogo(
+  client: PoolClient,
+  key: CatalogKey,
+  clave: string,
+  raw: string,
+): Promise<number> {
+  const value = raw.trim();
+  if (!value) filtroInvalido(clave);
+  const id = await lookupCatalog(client, key, value);
+  if (id === null) filtroInvalido(clave);
+  return id;
+}
+
+/**
+ * Añade a `where` el filtro de un catálogo sólo si llegó un valor. La columna
+ * es siempre una FK literal del repositorio; el valor va parametrizado.
+ */
+async function filtrarPorCatalogo(
+  client: PoolClient,
+  where: string[],
+  bind: (value: unknown) => string,
+  clave: string,
+  key: CatalogKey,
+  columna: string,
+  raw: string | undefined,
+): Promise<void> {
+  if (!raw) return;
+  const id = await resolverFiltroCatalogo(client, key, clave, raw);
+  where.push(`${columna} = ${bind(id)}`);
+}
+
+/** El nombre canónico se toma de `core.regiones` para no comparar etiquetas. */
+async function resolverRegion(
+  client: PoolClient,
+  raw: string,
+): Promise<string> {
+  const value = raw.trim();
+  if (!value) filtroInvalido("region");
+  const result = await client.query<{ nombre: string }>(
+    `select nombre
+       from core.regiones
+      where core.normalizar_ref(nombre) = core.normalizar_ref($1)
+      order by id
+      limit 1`,
+    [value],
+  );
+  const nombre = result.rows[0]?.nombre;
+  if (!nombre) filtroInvalido("region");
+  return nombre;
+}
+
+async function resolveCatalog(
+  client: PoolClient,
+  key: CatalogKey,
+  raw: unknown,
+): Promise<number> {
+  if (typeof raw !== "string") invalid();
+  const value = raw.trim();
+  if (!value) invalid();
+  const id = await lookupCatalog(client, key, value);
+  if (id === null) invalid();
+  return id;
 }
 
 async function catalogValue(

@@ -9337,7 +9337,7 @@ COMMIT;
 --   SELECT * FROM core.cat_tematicas            ORDER BY id;   -- 7 filas
 --   SELECT * FROM core.cat_subsectores          ORDER BY id;   -- 3 filas
 --   SELECT id, nombre, codigo_legado FROM core.cat_tipos_actor  ORDER BY id;  -- 1..7
---   SELECT id, nombre, codigo_legado FROM core.cat_roles_actor  ORDER BY id;  -- 1,2,3,4,5,6,7
+--   SELECT id, nombre, codigo_legado FROM core.cat_roles_actor  ORDER BY id;  -- 4 filas (1, 2, 3 y 7)
 --   SELECT * FROM core.cat_roles_funcionales    ORDER BY id;   -- 4 filas
 --
 -- Restricciones relajadas (deben devolver 'YES' en is_nullable)
@@ -21062,7 +21062,7 @@ ALTER TABLE core.cat_prioridades_alerta
     CHECK (NOT es_grave OR sla_horas IS NOT NULL);
 
 COMMENT ON COLUMN core.cat_prioridades_alerta.es_grave IS
-    'Marca si el nivel de prioridad es grave para la regla RN-02: los graves llevan al Ministro como destinatario. Verdaderos hoy: Critica_Inmediata (24 h) y Urgente (48 h). Un nivel sin plazo de atención (Seguimiento) no puede ser grave, y la restricción cat_prioridades_alerta_grave_con_plazo lo impide';
+    'Marca si el nivel de prioridad es grave para la regla RN-02: los graves llevan al Ministro como destinatario. Verdaderos hoy: Crítica inmediata (24 h) y Urgente (48 h). Un nivel sin plazo de atención (Seguimiento) no puede ser grave, y la restricción cat_prioridades_alerta_grave_con_plazo lo impide';
 
 -- =====================================================================
 -- BLOQUE 2 · La firma de la validación previa (H-79)

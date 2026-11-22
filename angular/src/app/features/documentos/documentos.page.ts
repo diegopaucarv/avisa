@@ -1,3 +1,4 @@
+import { HttpClient } from '@angular/common/http';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -20,9 +21,15 @@ import {
   type Coleccion,
 } from '../../core/http/coleccion';
 import { consulta } from '../../core/http/consulta';
+import { aErrorApi } from '../../core/http/errores';
+import { CapacidadesService } from '../../core/permisos/capacidades.service';
 import { IconoComponent } from '../../shared/ui/icono.component';
 import { ExportarMenuComponent } from '../../shared/ui/exportar-menu.component';
 import { PaginacionComponent } from '../../shared/ui/paginacion.component';
+import {
+  AnularPanelComponent,
+  type ResultadoAnulacion,
+} from '../../shared/ui/anular-panel.component';
 import {
   FILTROS_ESTADO,
   ORDENES_DOCUMENTO,
@@ -67,7 +74,13 @@ const FILTROS_INICIALES: FiltrosDocumentos = {
  */
 @Component({
   selector: 'app-documentos',
-  imports: [IconoComponent, PaginacionComponent, DocumentoPanelComponent, ExportarMenuComponent],
+  imports: [
+    IconoComponent,
+    PaginacionComponent,
+    DocumentoPanelComponent,
+    AnularPanelComponent,
+    ExportarMenuComponent,
+  ],
   templateUrl: './documentos.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
@@ -120,6 +133,12 @@ const FILTROS_INICIALES: FiltrosDocumentos = {
       margin: 0;
       color: #b42318;
       font-size: 10px;
+    }
+
+    .aviso-ok {
+      margin: 0;
+      color: #2f6f52;
+      font-size: 11.5px;
     }
 
     .fila-documento {
@@ -182,6 +201,8 @@ export class DocumentosPage {
   private readonly ruta = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly destruccion = inject(DestroyRef);
+  private readonly http = inject(HttpClient);
+  private readonly capacidades = inject(CapacidadesService);
 
   readonly estados = FILTROS_ESTADO;
   readonly ordenes = ORDENES_DOCUMENTO;
@@ -254,6 +275,12 @@ export class DocumentosPage {
   /** Último fallo del botón de exportación; vacío si no hubo. */
   readonly exportarError = signal<string | null>(null);
 
+  /** Documento que se está anulando en el panel compartido. */
+  readonly documentoAnulacion = signal<Documento | null>(null);
+  readonly enviandoAnulacion = signal(false);
+  readonly errorAnulacion = signal<string | null>(null);
+  readonly avisoAnulacion = signal<string | null>(null);
+
   private readonly respaldo = signal<Documento | null>(null);
 
   /**
@@ -306,6 +333,66 @@ export class DocumentosPage {
 
   alActualizar(): void {
     this.listado.recargar();
+  }
+
+  /** Anular exige el privilegio de anulación y escritura sobre la clasificación. */
+  puedeAnular(documento: Documento): boolean {
+    return (
+      this.capacidades.puedeEliminar() && this.capacidades.puedeModificar(documento.clasificacion)
+    );
+  }
+
+  abrirAnulacion(documento: Documento): void {
+    if (!documento.id || !this.puedeAnular(documento)) return;
+    this.errorAnulacion.set(null);
+    this.avisoAnulacion.set(null);
+    // El panel del documento y el de anulación escuchan Escape en `document`:
+    // se deja abierto uno solo.
+    this.cerrarPanel();
+    this.documentoAnulacion.set(documento);
+  }
+
+  cerrarAnulacion(): void {
+    this.documentoAnulacion.set(null);
+    this.errorAnulacion.set(null);
+  }
+
+  /**
+   * `DELETE /v1/documents/{id}` con `{ motivo }` es la anulación lógica: la fila
+   * deja de devolverse. Restaurar no lleva cuerpo. No se navega: se recarga el
+   * listado y los filtros y la página de la URL se conservan.
+   */
+  confirmarAnulacion(resultado: ResultadoAnulacion): void {
+    const documento = this.documentoAnulacion();
+    if (!documento?.id) return;
+
+    const anular = resultado.modo === 'anular';
+    const motivo = (resultado.motivo ?? '').trim();
+    if (anular && !motivo) return;
+
+    const id = encodeURIComponent(documento.id);
+    const peticion = anular
+      ? this.http.delete<unknown>(urlApi(`/v1/documents/${id}`), { body: { motivo } })
+      : this.http.post<unknown>(urlApi(`/v1/documents/${id}/restaurar`), {});
+
+    this.enviandoAnulacion.set(true);
+    this.errorAnulacion.set(null);
+
+    peticion.subscribe({
+      next: () => {
+        this.enviandoAnulacion.set(false);
+        this.documentoAnulacion.set(null);
+        const etiqueta = documento.codigo || documento.titulo || 'seleccionado';
+        this.avisoAnulacion.set(
+          anular ? `Documento ${etiqueta} anulado.` : `Documento ${etiqueta} restaurado.`,
+        );
+        this.alActualizar();
+      },
+      error: (fallo: unknown) => {
+        this.enviandoAnulacion.set(false);
+        this.errorAnulacion.set(aErrorApi(fallo).message);
+      },
+    });
   }
 
   buscar(evento: Event): void {

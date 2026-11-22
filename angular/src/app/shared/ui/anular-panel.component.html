@@ -1,0 +1,113 @@
+<div class="drawer-scrim" (click)="alFondo($event)" (keydown)="alTecla($event)">
+  <aside
+    #panel
+    class="drawer"
+    tabindex="-1"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="anular-panel-titulo"
+  >
+    <header class="drawer-head">
+      <div class="anular-panel-cabecera">
+        @if (codigo()) {
+          <p class="anular-panel-codigo">{{ codigo() }}</p>
+        }
+        <h2 id="anular-panel-titulo">
+          {{ esAnular() ? 'Anular ' : 'Restaurar ' }}{{ entidad() }}
+        </h2>
+        <p class="anular-panel-sub">
+          @if (esAnular()) {
+            La anulación es lógica: el registro deja de mostrarse y conserva el motivo y su historial.
+          } @else {
+            La restauración recupera el registro y los que se anularon en la misma operación.
+          }
+        </p>
+      </div>
+
+      <button
+        type="button"
+        class="icon-button"
+        [attr.aria-label]="'Cerrar el panel de ' + (esAnular() ? 'anulación' : 'restauración')"
+        (click)="cerrar.emit()"
+      >
+        <app-icono nombre="cerrar" [tamano]="18" />
+      </button>
+    </header>
+
+    <div class="drawer-body">
+      @if (!puedeConfirmar()) {
+        <p class="form-hint" role="status">
+          Su rol no permite anular ni restaurar este registro.
+        </p>
+      }
+      @if (bloqueo(); as motivoBloqueo) {
+        <p class="anular-bloqueo" role="note">{{ motivoBloqueo }}</p>
+      }
+      @if (errorEnvio(); as fallo) {
+        <p class="form-error" role="alert">{{ fallo }}</p>
+      }
+
+      <form class="anular-formulario" (submit)="alEnviarFormulario($event)">
+        @if (esAnular()) {
+          <div class="form-field">
+            <label class="form-label" for="anular-motivo">Motivo de la anulación</label>
+            <textarea
+              id="anular-motivo"
+              class="form-textarea"
+              rows="4"
+              required
+              [attr.aria-invalid]="errorMotivo() ? 'true' : null"
+              [attr.aria-describedby]="descritoPor()"
+              [value]="motivo()"
+              (input)="alEscribir($event)"
+            ></textarea>
+            <span id="anular-motivo-contador" class="form-hint anular-contador">
+              {{ longitud() }} / {{ motivoMinimo() }} caracteres mínimos
+            </span>
+            @if (errorMotivo(); as falloMotivo) {
+              <p id="anular-motivo-error" class="form-error" role="alert">{{ falloMotivo }}</p>
+            }
+          </div>
+        } @else {
+          <p class="anular-confirmacion">
+            ¿Confirma la restauración de {{ entidad() }}
+            @if (codigo()) {
+              <strong>{{ codigo() }}</strong>
+            }
+            ? No se pide motivo: el backend no lo exige para restaurar.
+          </p>
+        }
+
+        @if (cascada()) {
+          <p class="anular-aviso" role="note">
+            @if (esAnular()) {
+              Al anular {{ entidad() }} también se anulan en cascada {{ detalleCascada() }}.
+              Restaurar revierte esa misma operación.
+            } @else {
+              Al restaurar {{ entidad() }} se recuperan también {{ detalleCascada() }}, anulados
+              en la misma operación.
+            }
+          </p>
+        }
+
+        <div class="anular-formulario-acciones">
+          <button
+            type="submit"
+            [class]="esAnular() ? 'button-danger' : 'button-primary'"
+            [disabled]="enviando() || !puedeConfirmar() || bloqueo() !== null"
+          >
+            {{ enviando() ? 'Procesando…' : esAnular() ? 'Anular' : 'Restaurar' }}
+          </button>
+          <button
+            type="button"
+            class="button-secondary"
+            [disabled]="enviando()"
+            (click)="cerrar.emit()"
+          >
+            Cancelar
+          </button>
+        </div>
+      </form>
+    </div>
+  </aside>
+</div>

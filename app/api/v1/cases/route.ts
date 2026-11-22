@@ -16,6 +16,13 @@ import { withSession } from "@/lib/db/tenant";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+/**
+ * Filtros de listado que llegan por query string. Todos se aplican en SQL
+ * dentro de `withSession` (la RLS sigue vigente) y los que apuntan a un
+ * catálogo (`estado`, `riesgo`, `prioridad`, `alcance`, `tematica`, `unidad`)
+ * se validan contra la tabla real: un valor fuera de catálogo responde 422
+ * `FILTRO_INVALIDO` en vez de llegar al SQL.
+ */
 const FILTERS = [
   "q",
   "estado",

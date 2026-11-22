@@ -447,14 +447,6 @@ export default function AvisaMap({
 
   return (
     <>
-      <div className="demo-notice" role="status">
-        <ShieldCheck size={15} />
-        <span>
-          <strong>Mapa demostrativo</strong> — ubicaciones aproximadas por
-          departamento; no representan reportes ni actividad real.
-        </span>
-      </div>
-
       <div className="section-title-row">
         <div>
           <p className="section-eyebrow">VISTA TERRITORIAL · DATOS SIMULADOS</p>

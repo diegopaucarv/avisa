@@ -223,6 +223,7 @@ export class CompromisoPanelComponent {
 
   readonly cerrado = output<void>();
   readonly actualizado = output<void>();
+  readonly anular = output<void>();
 
   readonly estadosCompromiso: readonly string[] = ESTADOS_COMPROMISO;
   readonly estadosHito: readonly string[] = ESTADOS_HITO;
@@ -272,6 +273,9 @@ export class CompromisoPanelComponent {
   readonly puedeModificar = computed(() =>
     this.capacidades.puedeModificar(this.cabecera().clasificacion),
   );
+
+  /** Anular exige, además de escritura sobre la clasificación, el privilegio de anulación. */
+  readonly puedeAnular = computed(() => this.capacidades.puedeEliminar() && this.puedeModificar());
 
   readonly criteriosJson = computed<string | null>(() => {
     const valor = this.cabecera().criteriosSmart;

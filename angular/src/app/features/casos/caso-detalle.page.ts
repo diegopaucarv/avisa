@@ -9,6 +9,11 @@ import { consulta } from '../../core/http/consulta';
 import { aErrorApi } from '../../core/http/errores';
 import { CapacidadesService } from '../../core/permisos/capacidades.service';
 import { aDetalleCaso, DetalleCaso, EventoCaso } from '../../dominio/mapeo';
+import {
+  AnularPanelComponent,
+  ResultadoAnulacion,
+  type ModoAnulacion,
+} from '../../shared/ui/anular-panel.component';
 import { ExportarMenuComponent } from '../../shared/ui/exportar-menu.component';
 import { IconoComponent } from '../../shared/ui/icono.component';
 import {
@@ -20,7 +25,13 @@ import {
 
 @Component({
   selector: 'app-caso-detalle',
-  imports: [RouterLink, IconoComponent, ExportarMenuComponent, EventoPanelComponent],
+  imports: [
+    RouterLink,
+    IconoComponent,
+    ExportarMenuComponent,
+    EventoPanelComponent,
+    AnularPanelComponent,
+  ],
   templateUrl: './caso-detalle.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
@@ -29,6 +40,11 @@ import {
       margin-top: 4px;
       padding: 0 10px;
       font-size: 10px;
+    }
+
+    .aviso-ok {
+      color: #2f6f52;
+      font-size: 11.5px;
     }
   `,
 })
@@ -53,13 +69,39 @@ export class CasoDetallePage {
   readonly detalle = this.recurso.valor;
   readonly estado = this.recurso.estado;
   readonly error = this.recurso.error;
-  readonly caso = computed(() => this.detalle()?.caso);
+
+  /**
+   * Tras anular, la API deja de devolver el caso: la política RLS de `SELECT`
+   * esconde lo anulado. Se retiene la última ficha para poder mostrar el estado
+   * y ofrecer la restauración sin inventar una papelera.
+   */
+  readonly snapshotAnulado = signal<DetalleCaso | null>(null);
+
+  /** Ficha visible: la retenida tras anular o la que llega de la API. */
+  readonly ficha = computed(() => this.snapshotAnulado() ?? this.detalle() ?? null);
+  readonly caso = computed(() => this.ficha()?.caso);
+  readonly anulado = computed(
+    () => this.snapshotAnulado() !== null || this.caso()?.anulado === true,
+  );
 
   /** Mismo criterio que la ficha de alerta: el rol debe poder escribir el caso. */
   readonly puedeModificar = computed(() => {
     const caso = this.caso();
-    return caso ? this.capacidades.puedeModificar(caso.clasificacion) : false;
+    if (!caso || this.anulado()) return false;
+    return this.capacidades.puedeModificar(caso.clasificacion);
   });
+
+  /** Anular y restaurar exigen, además de escritura, el privilegio de anulación. */
+  readonly puedeAnular = computed(() => {
+    const caso = this.caso();
+    if (!caso) return false;
+    return this.capacidades.puedeEliminar() && this.capacidades.puedeModificar(caso.clasificacion);
+  });
+
+  readonly panelAnulacion = signal<ModoAnulacion | null>(null);
+  readonly enviandoAnulacion = signal(false);
+  readonly errorAnulacion = signal<string | null>(null);
+  readonly avisoAnulacion = signal<string | null>(null);
 
   /** Hecho abierto en el panel; `null` significa alta. */
   readonly eventoEditado = signal<EventoCaso | null>(null);
@@ -140,6 +182,70 @@ export class CasoDetallePage {
 
   alFallarExportacion(mensaje: string): void {
     this.exportarError.set(mensaje);
+  }
+
+  abrirAnulacion(): void {
+    if (!this.puedeAnular() || this.anulado()) return;
+    this.errorAnulacion.set(null);
+    this.avisoAnulacion.set(null);
+    this.panelAnulacion.set('anular');
+  }
+
+  abrirRestauracion(): void {
+    if (!this.puedeAnular() || !this.anulado()) return;
+    this.errorAnulacion.set(null);
+    this.avisoAnulacion.set(null);
+    this.panelAnulacion.set('restaurar');
+  }
+
+  cerrarPanelAnulacion(): void {
+    this.panelAnulacion.set(null);
+    this.errorAnulacion.set(null);
+  }
+
+  /**
+   * `POST /v1/cases/{codigo}/anular` (con `motivo`) y `…/restaurar` (sin
+   * cuerpo). Tras restaurar se recarga la ficha; tras anular no se puede, así
+   * que se conserva la copia local marcada como anulada.
+   */
+  confirmarAnulacion(resultado: ResultadoAnulacion): void {
+    const codigo = this.codigo();
+    if (!codigo) return;
+
+    const base = `/v1/cases/${encodeURIComponent(codigo)}`;
+    const url = urlApi(resultado.modo === 'anular' ? `${base}/anular` : `${base}/restaurar`);
+    const cuerpo = resultado.modo === 'anular' ? { motivo: resultado.motivo ?? '' } : {};
+
+    this.enviandoAnulacion.set(true);
+    this.errorAnulacion.set(null);
+
+    this.http.post<unknown>(url, cuerpo).subscribe({
+      next: () => {
+        this.enviandoAnulacion.set(false);
+        this.panelAnulacion.set(null);
+
+        if (resultado.modo === 'anular') {
+          const actual = this.detalle();
+          this.snapshotAnulado.set(
+            actual ? { ...actual, caso: { ...actual.caso, anulado: true } } : null,
+          );
+          this.avisoAnulacion.set(
+            'Caso anulado. Sus alertas y registros vinculados quedaron anulados en cascada.',
+          );
+          return;
+        }
+
+        this.snapshotAnulado.set(null);
+        this.recargar();
+        this.avisoAnulacion.set(
+          'Caso restaurado. Se recuperaron también los registros anulados en la misma operación.',
+        );
+      },
+      error: (fallo: unknown) => {
+        this.enviandoAnulacion.set(false);
+        this.errorAnulacion.set(aErrorApi(fallo).message);
+      },
+    });
   }
 
   private mensajeDeError(fallo: unknown): string {

@@ -11,13 +11,13 @@
 
 ## Resumen
 
-| #   | Decisión                                                                         | Estado               | Dónde                                   |
-| --- | -------------------------------------------------------------------------------- | -------------------- | --------------------------------------- |
-| D3  | Tipificar **sólo** los Anexos 1 y 2 como tipo documental                          | aplicada             | `migration/20_tipos_documento_anexos.sql` |
-| D4  | **No** unificar nivel de alerta con prioridad de alerta                           | resuelta sin migración | este documento                        |
-| D7  | Retirar `cat_tipos_reunion`; imposible por FK → queda marcado obsoleto            | aplicada parcialmente | `migration/21_retiro_cat_tipos_reunion.sql` |
-| D9  | Alinear `cat_ciclos_intervencion` a las 5 etiquetas de la Guía, renombrando en sitio | aplicada          | `migration/22_ciclos_intervencion_guia.sql` |
-| D10 | No tocar el `CHECK` de `origen_dato`; dar etiqueta explícita a `KAG` y `WORKFLOW`  | aplicada             | `angular/src/app/dominio/mapeo.ts`      |
+| #   | Decisión                                                                             | Estado                 | Dónde                                       |
+| --- | ------------------------------------------------------------------------------------ | ---------------------- | ------------------------------------------- |
+| D3  | Tipificar **sólo** los Anexos 1 y 2 como tipo documental                             | aplicada               | `migration/20_tipos_documento_anexos.sql`   |
+| D4  | **No** unificar nivel de alerta con prioridad de alerta                              | resuelta sin migración | este documento                              |
+| D7  | Retirar `cat_tipos_reunion`; imposible por FK → queda marcado obsoleto               | aplicada parcialmente  | `migration/21_retiro_cat_tipos_reunion.sql` |
+| D9  | Alinear `cat_ciclos_intervencion` a las 5 etiquetas de la Guía, renombrando en sitio | aplicada               | `migration/22_ciclos_intervencion_guia.sql` |
+| D10 | No tocar el `CHECK` de `origen_dato`; dar etiqueta explícita a `KAG` y `WORKFLOW`    | aplicada               | `angular/src/app/dominio/mapeo.ts`          |
 
 ---
 
@@ -27,20 +27,20 @@
 
 | Anexo | Código                                     | Nombre                                        |
 | ----- | ------------------------------------------ | --------------------------------------------- |
-| 1     | `matriz_sistematizacion_demandas`          | Matriz de Sistematización de Demandas          |
-| 2     | `reporte_regional_conflictividad_demandas` | Reporte Regional de Conflictividad y Demandas  |
+| 1     | `matriz_sistematizacion_demandas`          | Matriz de Sistematización de Demandas         |
+| 2     | `reporte_regional_conflictividad_demandas` | Reporte Regional de Conflictividad y Demandas |
 
 **No se añaden los Anexos 14 a 17.**
 
 **Por qué.** Un tipo documental es una **plantilla de documento** que se archiva y se adjunta. Los
 Anexos 14, 15 y 16 son **registros estructurados que ya tienen tabla propia**:
 
-| Anexo | Ya modelado en                                                              |
-| ----- | --------------------------------------------------------------------------- |
-| 14    | `core.compromisos` + `core.hitos_compromiso`                                |
-| 15    | `core.casos` (código `CS-<PA\|MI>-<TEMA>-<AAAA>-<NN>`)                       |
-| 16    | `core.reuniones_dialogo` + `core.reunion_participantes`                     |
-| 17    | **sin soporte** — es el gap estructural **E4**, que necesita una tabla, no un tipo documental |
+| Anexo | Ya modelado en                                                                         |
+| ----- | -------------------------------------------------------------------------------------- |
+| 14    | `core.compromisos` + `core.hitos_compromiso`                                           |
+| 15    | `core.casos` (código `CS-<PA\|MI>-<TEMA>-<AAAA>-<NN>`)                                 |
+| 16    | `core.reuniones_dialogo` + `core.reunion_participantes`                                |
+| 17    | `analytics.vw_anexo_17_registro_reportes` (vista existente; **E4** se cerró sin tabla) |
 
 Tipificar los 14–17 como documento habría creado una segunda vía de captura para datos que ya se
 capturan en su tabla, con el riesgo de divergencia que eso implica.
@@ -56,10 +56,10 @@ se insertaron con `max(id)+n`, no con id fijo, para no colisionar si el catálog
 
 **Por qué.** Son ejes distintos y unificarlos destruye información:
 
-| Eje                          | Catálogo                     | Valores                                                                          | Para qué sirve                    |
-| ---------------------------- | ---------------------------- | -------------------------------------------------------------------------------- | --------------------------------- |
-| **Nivel** de la alerta       | `core.cat_niveles_alerta`    | `Inmediato` · `Táctico` · `Preventivo` · `Monitoreo`                             | Semáforo de atención              |
-| **Prioridad** de la alerta   | `core.cat_prioridades_alerta`| `Crítica inmediata` · `Urgente` · `Temprana` · `Seguimiento`, con `sla_horas` 24/48/72/sin plazo | Plazo de respuesta     |
+| Eje                        | Catálogo                      | Valores                                                                                          | Para qué sirve       |
+| -------------------------- | ----------------------------- | ------------------------------------------------------------------------------------------------ | -------------------- |
+| **Nivel** de la alerta     | `core.cat_niveles_alerta`     | `Inmediato` · `Táctico` · `Preventivo` · `Monitoreo`                                             | Semáforo de atención |
+| **Prioridad** de la alerta | `core.cat_prioridades_alerta` | `Crítica inmediata` · `Urgente` · `Temprana` · `Seguimiento`, con `sla_horas` 24/48/72/sin plazo | Plazo de respuesta   |
 
 Un solo eje obligaría a elegir entre perder el nivel del semáforo o perder el SLA. El Anexo 3
 (Formato de Alerta Temprana) usa el nivel para describir la situación, y el flujo de cinco pasos usa
@@ -98,7 +98,7 @@ rama de retirada de la migración 21 se puede reejecutar.
 
 **Decisión.** Alinear `core.cat_ciclos_intervencion` a las **cinco etiquetas** de la Guía §8.1–8.4:
 
-1. Prevención estratégica *(nueva)*
+1. Prevención estratégica _(nueva)_
 2. Prevención operativa
 3. Intervención y tratamiento
 4. Monitoreo de compromisos
@@ -152,13 +152,13 @@ respaldo**: no era una equivalencia declarada, era un descarte silencioso.
 
 **Corrección.**
 
-| Código            | Etiqueta   |
-| ----------------- | ---------- |
-| `MANUAL`          | Manual     |
-| `KAG`             | KAG        |
-| `WORKFLOW`        | Workflow   |
-| `AVISA_HISTORICO` | Legado     |
-| `WHATSAPP`        | WhatsApp   |
+| Código            | Etiqueta |
+| ----------------- | -------- |
+| `MANUAL`          | Manual   |
+| `KAG`             | KAG      |
+| `WORKFLOW`        | Workflow |
+| `AVISA_HISTORICO` | Legado   |
+| `WHATSAPP`        | WhatsApp |
 
 `Caso.origen` se amplió en `dominio/modelos.ts` para admitir los seis valores; sin ese cambio el
 typecheck fallaba. Se prefirió ampliar el tipo antes que un `as unknown as` que habría pasado la
@@ -170,7 +170,14 @@ compilación mintiendo sobre el dominio.
 
 - **Ubigeo / centroide y calibración del riesgo**: aplazados por el usuario. Por eso `/mapa` sigue en
   marcador y no se documenta ninguna fórmula de riesgo.
-- **E4 · Anexo 17 (Registro de reportes)**: necesita tabla nueva. Es el único mecanismo de la Guía sin
-  soporte.
-- **Anulación en la UI**: el backend ya la sostiene (E2 cerrado); falta el diálogo con motivo
-  obligatorio en la ficha del caso y en los paneles laterales.
+- **E4 · Anexo 17 (Registro de reportes)**: se cerró **sin tabla nueva**, sirviéndolo desde la vista
+  `analytics.vw_anexo_17_registro_reportes` con `security_invoker` (migración 23), más repo, API
+  (`GET /api/v1/reportes`), pantalla `/reportes` y exportación `entidad=reportes`. Ningún mecanismo de
+  la Guía queda sin soporte.
+- **Anulación en la UI**: el backend la sostiene (E2 cerrado) y la interfaz ya existe —panel
+  `shared/ui/anular-panel.component` con motivo obligatorio, montado en la ficha de caso, alertas,
+  compromisos y documentos—. Restaurar sólo se ofrece donde la API proyecta el estado de anulación
+  (hoy, casos); falta el panel en demandas y Reportes.
+- **Vocabulario de `estado_atencion`**: el `CHECK` de `core.demandas` admitía `En_proceso`; la
+  migración 24 lo dejó en `Pendiente` · `En proceso` · `Atendida` · `Desestimada` sin mover filas
+  (ver `GAPS_GUIA_SQL_UI.md` §2.1, G-09, y el glosario §1.8).

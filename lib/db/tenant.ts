@@ -6,6 +6,35 @@ export type DbSession = {
   rolCodigo: string;
 };
 
+export type SessionOptions = {
+  /**
+   * Abre la papelera: `set_config('app.ver_anulados', 'on', true)`.
+   *
+   * Igual que `app.rol_codigo`, la bandera dura la transacción (`true` es el
+   * equivalente a `SET LOCAL`), así que no se filtra a la siguiente petición
+   * que reutilice la conexión del pool. Por omisión vale `'off'` y la política
+   * `p_anulados` de `core.compromisos`/`core.documentos` no devuelve filas.
+   */
+  verAnulados?: boolean;
+};
+
+/**
+ * Roles que pueden anular y restaurar (borrado lógico).
+ *
+ * Es el mismo conjunto que `ANULAN` en la SPA
+ * (`angular/src/app/core/permisos/capacidades.service.ts`). Se usa para que
+ * `?anulados=true` sólo se sirva a quien puede vaciar la papelera. No se usa
+ * `core.puede_eliminar()` porque en la base viva esa matriz no coincide con la
+ * de la interfaz: `sectorista` tiene `puede_eliminar = true` y
+ * `direccion_oaipcs` lo tiene en `false`. Si la matriz se corrige en la base,
+ * este conjunto debe seguirla.
+ */
+const ROLES_ANULAN = new Set(["administrador", "direccion_oaipcs"]);
+
+export function puedeAnularRegistros(roles: readonly string[]): boolean {
+  return roles.some((rol) => ROLES_ANULAN.has(rol));
+}
+
 /**
  * La clave de cifrado de PII vive fuera de la base (`.env`). Se fija por
  * transacción junto con el resto de GUC; si falta, el descifrado falla con un
@@ -27,6 +56,7 @@ function cryptoKey(): string {
 export async function withSession<T>(
   session: DbSession,
   work: (client: PoolClient) => Promise<T>,
+  options: SessionOptions = {},
 ): Promise<T> {
   const client = await getPool().connect();
   try {
@@ -38,12 +68,16 @@ export async function withSession<T>(
               set_config('app.staff_bypass_subject_rls', 'false', true),
               set_config('app.crypto_key', $3, true),
               -- Queda en audit.datos_personales_acceso.contexto->>'origen'.
-              set_config('app.p9_origen', $4, true)`,
+              set_config('app.p9_origen', $4, true),
+              -- Papelera: 'on' sólo si el llamador lo pide explícitamente
+              -- (parámetro anulados=true). Dura la transacción, como el resto.
+              set_config('app.ver_anulados', $5, true)`,
       [
         session.rolCodigo,
         session.usuarioId,
         cryptoKey(),
         `avisa-next usuario=${session.usuarioId}`,
+        options.verAnulados ? "on" : "off",
       ],
     );
     const result = await work(client);

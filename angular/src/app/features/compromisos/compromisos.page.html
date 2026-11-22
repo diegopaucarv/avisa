@@ -14,6 +14,8 @@
 
   @if (exportarError(); as mensaje) {
   <p class="form-error" role="alert">{{ mensaje }}</p>
+  } @if (avisoAnulacion(); as aviso) {
+  <p class="form-hint aviso-ok" role="status">{{ aviso }}</p>
   }
 
   <div class="filter-bar">
@@ -72,7 +74,22 @@
     <button type="button" class="button-secondary" (click)="limpiar()">Limpiar filtros</button>
   </div>
 
-  @if (estado() === 'inactivo' || estado() === 'cargando') {
+  <div class="view-toolbar">
+    <div class="segmented" role="group" aria-label="Vista de compromisos">
+      <button type="button" [attr.aria-pressed]="modo() === 'tabla'" (click)="cambiarModo('tabla')">
+        Tabla
+      </button>
+      <button
+        type="button"
+        [attr.aria-pressed]="modo() === 'calendario'"
+        (click)="cambiarModo('calendario')"
+      >
+        Calendario
+      </button>
+    </div>
+  </div>
+
+  @if (modo() === 'tabla') { @if (estado() === 'inactivo' || estado() === 'cargando') {
   <div class="empty-state" role="status">Cargando compromisos…</div>
   } @else if (estado() === 'error') {
   <div class="empty-state" role="alert">
@@ -156,7 +173,116 @@
     (paginaCambia)="cambiarPagina($event)"
     (tamanoCambia)="cambiarTamano($event)"
   />
-  }
+  } } @else {
+  <div class="calendario-barra">
+    <div class="calendario-nav">
+      <button
+        type="button"
+        class="button-secondary"
+        aria-label="Mes anterior"
+        (click)="mesAnterior()"
+      >
+        <app-icono nombre="chevron-izquierda" [tamano]="14" />
+      </button>
+      <button type="button" class="button-secondary" (click)="irAHoy()">Hoy</button>
+      <button
+        type="button"
+        class="button-secondary"
+        aria-label="Mes siguiente"
+        (click)="mesSiguiente()"
+      >
+        <app-icono nombre="chevron-derecha" [tamano]="14" />
+      </button>
+    </div>
+    <h2 class="calendario-titulo" aria-live="polite">{{ calendario().titulo }}</h2>
+    <p class="calendario-resumen">
+      {{ calendario().totalMes }} compromisos con vencimiento en el mes.
+    </p>
+  </div>
+
+  @if (estadoCalendario() === 'inactivo' || estadoCalendario() === 'cargando') {
+  <div class="empty-state" role="status">Cargando el calendario…</div>
+  } @else if (estadoCalendario() === 'error') {
+  <div class="empty-state" role="alert">
+    <p>{{ errorCalendario()?.message }}</p>
+    <button type="button" class="button-secondary" (click)="recargarCalendario()">
+      Reintentar
+    </button>
+  </div>
+  } @else { @if (calendario().truncado) {
+  <p class="calendario-aviso" role="status">
+    Se muestran {{ compromisosCalendario().length }} de {{ totalCalendario() }} compromisos del
+    rango. Acote los filtros para ver el resto.
+  </p>
+  } @if (calendario().totalMes === 0) {
+  <div class="empty-state">
+    <strong>Sin compromisos en {{ calendario().titulo }}</strong>
+    <p>No hay vencimientos para los filtros seleccionados en este mes.</p>
+  </div>
+  } @else {
+  <div class="calendario-wrap">
+    <table
+      class="data-table calendario-rejilla"
+      [attr.aria-label]="'Calendario de vencimientos de ' + calendario().titulo"
+    >
+      <thead>
+        <tr>
+          @for (dia of diasSemana; track dia.corto) {
+          <th scope="col">
+            <abbr [attr.title]="dia.largo" aria-hidden="true">{{ dia.corto }}</abbr>
+            <span class="sr-only">{{ dia.largo }}</span>
+          </th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        @for (semana of semanas(); track $index) {
+        <tr>
+          @for (dia of semana; track dia.fecha) {
+          <td
+            class="calendario-dia"
+            [class.calendario-dia-ajeno]="!dia.delMes"
+            [class.calendario-dia-hoy]="dia.esHoy"
+            [attr.aria-current]="dia.esHoy ? 'date' : null"
+            [attr.aria-label]="dia.etiqueta"
+            tabindex="0"
+          >
+            <span class="calendario-numero">{{ dia.dia }}</span>
+            <div class="calendario-pastillas">
+              @for (item of dia.visibles; track item.compromiso.id) {
+              <button
+                type="button"
+                [class]="'calendario-pastilla ' + item.plazo.clase"
+                [attr.aria-label]="item.etiqueta"
+                (click)="abrir(item.compromiso)"
+              >
+                <span class="calendario-pastilla-codigo">{{ item.compromiso.codigo }}</span>
+                <span class="calendario-pastilla-plazo">{{ item.plazo.texto }}</span>
+              </button>
+              } @if (dia.total > maxPastillas) {
+              <button
+                type="button"
+                class="calendario-mas"
+                [attr.aria-expanded]="dia.expandido"
+                [attr.aria-label]="
+                      dia.expandido
+                        ? 'Contraer los compromisos del ' + dia.nombreFecha
+                        : 'Ver ' + dia.restantes + ' compromisos más del ' + dia.nombreFecha
+                    "
+                (click)="alternarDia(dia.fecha)"
+              >
+                {{ dia.expandido ? 'Ver menos' : '+' + dia.restantes + ' más' }}
+              </button>
+              }
+            </div>
+          </td>
+          }
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  } } }
 </section>
 
 @if (seleccionado(); as compromisoSel) {
@@ -164,5 +290,19 @@
   [compromiso]="compromisoSel"
   (cerrado)="cerrarPanel()"
   (actualizado)="alActualizar()"
+  (anular)="abrirAnulacion(compromisoSel)"
+/>
+} @if (compromisoAnulacion(); as compromisoAnular) {
+<app-anular-panel
+  modo="anular"
+  entidad="compromiso"
+  [codigo]="compromisoAnular.codigo"
+  [cascada]="true"
+  detalleCascada="sus hitos"
+  [enviando]="enviandoAnulacion()"
+  [errorEnvio]="errorAnulacion()"
+  [puedeConfirmar]="puedeAnular(compromisoAnular)"
+  (cerrar)="cerrarAnulacion()"
+  (hecho)="confirmarAnulacion($event)"
 />
 }

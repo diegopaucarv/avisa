@@ -1,3 +1,4 @@
+import { HttpClient } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -13,6 +14,12 @@ import {
   type Coleccion,
 } from '../../core/http/coleccion';
 import { consulta } from '../../core/http/consulta';
+import { aErrorApi } from '../../core/http/errores';
+import { CapacidadesService } from '../../core/permisos/capacidades.service';
+import {
+  AnularPanelComponent,
+  type ResultadoAnulacion,
+} from '../../shared/ui/anular-panel.component';
 import { ExportarMenuComponent } from '../../shared/ui/exportar-menu.component';
 import { IconoComponent } from '../../shared/ui/icono.component';
 import { PaginacionComponent } from '../../shared/ui/paginacion.component';
@@ -47,14 +54,111 @@ const GENERO = [
   { valor: 'false', etiqueta: 'No atiende brecha de género' },
 ] as const;
 
+type ModoVista = 'tabla' | 'calendario';
+
+type MesCalendario = { anio: number; mes: number };
+
+type PlazoCompromiso = { texto: string; clase: string };
+
+type CompromisoDia = {
+  compromiso: Compromiso;
+  plazo: PlazoCompromiso;
+  /** Etiqueta accesible de la pastilla: código, caso, fecha y plazo. */
+  etiqueta: string;
+};
+
+type DiaCalendario = {
+  fecha: string;
+  dia: number;
+  delMes: boolean;
+  esHoy: boolean;
+  nombreFecha: string;
+  etiqueta: string;
+  visibles: CompromisoDia[];
+  restantes: number;
+  expandido: boolean;
+  total: number;
+};
+
+type Calendario = {
+  titulo: string;
+  dias: DiaCalendario[];
+  /** Compromisos cuyo vencimiento cae en el mes visible (no en los ajenos). */
+  totalMes: number;
+  truncado: boolean;
+  desde: string;
+  hasta: string;
+};
+
+const MESES = [
+  'Enero',
+  'Febrero',
+  'Marzo',
+  'Abril',
+  'Mayo',
+  'Junio',
+  'Julio',
+  'Agosto',
+  'Septiembre',
+  'Octubre',
+  'Noviembre',
+  'Diciembre',
+] as const;
+
+const DIAS_SEMANA = [
+  { corto: 'L', largo: 'Lunes' },
+  { corto: 'M', largo: 'Martes' },
+  { corto: 'X', largo: 'Miércoles' },
+  { corto: 'J', largo: 'Jueves' },
+  { corto: 'V', largo: 'Viernes' },
+  { corto: 'S', largo: 'Sábado' },
+  { corto: 'D', largo: 'Domingo' },
+] as const;
+
+/** Pastillas visibles por celda antes del «+N más». */
+const MAX_PASTILLAS = 3;
+
+/** Tope de la vista de calendario: coincide con el máximo de la API. */
+const TAMANO_CALENDARIO = 100;
+
+const MS_DIA = 86_400_000;
+
+/** Fecha de una rejilla construida en UTC (`YYYY-MM-DD`). */
+function isoDia(fecha: Date): string {
+  const anio = fecha.getUTCFullYear();
+  const mes = String(fecha.getUTCMonth() + 1).padStart(2, '0');
+  const dia = String(fecha.getUTCDate()).padStart(2, '0');
+  return `${anio}-${mes}-${dia}`;
+}
+
+/** Fecha local de hoy, sin pasar por `toISOString` para no cruzar de día. */
+function isoHoy(): string {
+  const hoy = new Date();
+  const anio = hoy.getFullYear();
+  const mes = String(hoy.getMonth() + 1).padStart(2, '0');
+  const dia = String(hoy.getDate()).padStart(2, '0');
+  return `${anio}-${mes}-${dia}`;
+}
+
 @Component({
   selector: 'app-compromisos',
-  imports: [IconoComponent, PaginacionComponent, CompromisoPanelComponent, ExportarMenuComponent],
+  imports: [
+    IconoComponent,
+    PaginacionComponent,
+    CompromisoPanelComponent,
+    AnularPanelComponent,
+    ExportarMenuComponent,
+  ],
   templateUrl: './compromisos.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
     .filter-bar {
       flex-wrap: wrap;
+    }
+    .aviso-ok {
+      margin: 0;
+      color: #2f6f52;
+      font-size: 11.5px;
     }
     .fila-compromiso {
       cursor: pointer;
@@ -85,11 +189,155 @@ const GENERO = [
     .aviso-fecha {
       color: #a27435 !important;
     }
+    .calendario-barra {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 0 0 12px;
+    }
+    .calendario-nav {
+      display: inline-flex;
+      gap: 6px;
+    }
+    .calendario-titulo {
+      margin: 0;
+      font-size: 15px;
+      color: #1c2a38;
+    }
+    .calendario-resumen {
+      margin: 0 0 0 auto;
+      color: #647487;
+      font-size: 10px;
+    }
+    .calendario-aviso {
+      margin: 0 0 10px;
+      padding: 8px 10px;
+      border: 1px solid #f0d9b5;
+      border-radius: 6px;
+      background: #fff8ec;
+      color: #8a5a1f;
+      font-size: 10px;
+      line-height: 1.45;
+    }
+    /* Si la rejilla no cabe se desplaza en horizontal antes que apilar días. */
+    .calendario-wrap {
+      overflow-x: auto;
+      border: 1px solid #e6ecf1;
+      border-radius: 8px;
+    }
+    .calendario-rejilla {
+      width: 100%;
+      min-width: 760px;
+      table-layout: fixed;
+    }
+    .calendario-rejilla th {
+      padding: 7px 6px;
+      border-bottom: 1px solid #e6ecf1;
+      color: #647487;
+      font-size: 9px;
+      font-weight: 700;
+      text-align: center;
+      text-transform: uppercase;
+    }
+    .calendario-rejilla td {
+      height: 96px;
+      padding: 5px;
+      border: 1px solid #eef2f6;
+      vertical-align: top;
+    }
+    .calendario-rejilla td:focus-visible {
+      outline: 2px solid #1d4b86;
+      outline-offset: -2px;
+    }
+    .calendario-dia-ajeno {
+      opacity: 0.55;
+    }
+    .calendario-dia-hoy {
+      outline: 2px solid #1d4b86;
+      outline-offset: -2px;
+    }
+    .calendario-dia-hoy .calendario-numero {
+      color: #1d4b86;
+    }
+    .calendario-numero {
+      display: block;
+      margin-bottom: 4px;
+      color: #52677a;
+      font-size: 10px;
+      font-weight: 600;
+    }
+    .calendario-pastillas {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .calendario-pastilla {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 4px;
+      width: 100%;
+      padding: 2px 5px;
+      border: 0;
+      border-left: 3px solid transparent;
+      border-radius: 4px;
+      font-size: 8.5px;
+      line-height: 1.3;
+      text-align: left;
+      cursor: pointer;
+    }
+    .calendario-pastilla.due-vencido {
+      border-left-color: #ad4d46;
+    }
+    .calendario-pastilla.due-por-vencer {
+      border-left-color: #93621d;
+    }
+    .calendario-pastilla.due-en-plazo {
+      border-left-color: #34785b;
+    }
+    .calendario-pastilla:hover {
+      filter: brightness(0.97);
+    }
+    .calendario-pastilla:focus-visible {
+      outline: 2px solid #1d4b86;
+      outline-offset: 1px;
+    }
+    .calendario-pastilla-codigo {
+      overflow: hidden;
+      font-weight: 600;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .calendario-pastilla-plazo {
+      flex: none;
+      font-size: 8px;
+      font-weight: 700;
+    }
+    .calendario-mas {
+      padding: 1px 2px;
+      border: 0;
+      background: transparent;
+      color: #1d4b86;
+      font-size: 8px;
+      font-weight: 600;
+      text-align: left;
+      cursor: pointer;
+    }
+    .calendario-mas:hover {
+      text-decoration: underline;
+    }
+    .calendario-mas:focus-visible {
+      outline: 2px solid #1d4b86;
+      outline-offset: 1px;
+    }
   `,
 })
 export class CompromisosPage {
   private readonly ruta = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly http = inject(HttpClient);
+  private readonly capacidades = inject(CapacidadesService);
 
   readonly estados = ESTADOS_COMPROMISO as readonly string[];
   readonly tipos = TIPOS_COMPROMISO as readonly string[];
@@ -98,8 +346,26 @@ export class CompromisosPage {
 
   readonly seleccionado = signal<Compromiso | null>(null);
 
+  /** Compromiso que se está anulando en el panel compartido. */
+  readonly compromisoAnulacion = signal<Compromiso | null>(null);
+  readonly enviandoAnulacion = signal(false);
+  readonly errorAnulacion = signal<string | null>(null);
+  readonly avisoAnulacion = signal<string | null>(null);
+
   /** Último fallo del botón de exportación; vacío si no hubo. */
   readonly exportarError = signal<string | null>(null);
+
+  /** Vista activa: la tabla paginada de siempre o el calendario mensual. */
+  readonly modo = signal<ModoVista>('tabla');
+
+  private readonly hoy = new Date();
+  readonly mesVisible = signal<MesCalendario>({
+    anio: this.hoy.getFullYear(),
+    mes: this.hoy.getMonth() + 1,
+  });
+
+  /** Días con «+N más» desplegado; se reinicia al cambiar de mes. */
+  private readonly diasExpandidos = signal<ReadonlySet<string>>(new Set());
 
   private readonly parametros = toSignal(
     this.ruta.queryParamMap.pipe(
@@ -127,6 +393,20 @@ export class CompromisosPage {
   );
 
   readonly filtros = computed(() => this.parametros());
+
+  /**
+   * Rejilla del mes visible, de lunes a domingo. Incluye los días de los meses
+   * vecinos que completan la primera y la última semana, para que el rango
+   * consultado y lo dibujado coincidan.
+   */
+  private readonly rejilla = computed(() => {
+    const { anio, mes } = this.mesVisible();
+    const primero = new Date(Date.UTC(anio, mes - 1, 1));
+    const inicio = new Date(primero.getTime() - ((primero.getUTCDay() + 6) % 7) * MS_DIA);
+    const ultimo = new Date(Date.UTC(anio, mes, 0));
+    const fin = new Date(ultimo.getTime() + (6 - ((ultimo.getUTCDay() + 6) % 7)) * MS_DIA);
+    return { inicio, fin, desde: isoDia(inicio), hasta: isoDia(fin) };
+  });
 
   private readonly recurso = consulta<Coleccion<Compromiso>>({
     fuente: () => {
@@ -163,6 +443,130 @@ export class CompromisosPage {
     return `${this.total()} compromisos · ${rango.desde}–${rango.hasta} · el vencimiento manual prevalece sobre el derivado del próximo hito.`;
   });
 
+  /**
+   * El calendario no pagina de 25 en 25: pide el rango completo de la rejilla
+   * (con los filtros activos) y se queda con el tope de la API. `total` avisa
+   * si se cortó.
+   */
+  private readonly recursoCalendario = consulta<Coleccion<Compromiso>>({
+    fuente: () => {
+      if (this.modo() !== 'calendario') return null;
+
+      const filtros = this.parametros();
+      const rango = this.rejilla();
+
+      return urlConParametros(urlApi('/v1/commitments'), {
+        ...paramsDePagina({ pagina: 1, tamano: TAMANO_CALENDARIO }),
+        vencimiento_desde: rango.desde,
+        vencimiento_hasta: rango.hasta,
+        q: filtros.q,
+        estado: filtros.estado,
+        tipo: filtros.tipo,
+        nivelGobierno: filtros.nivelGobierno,
+        atiendeGenero: filtros.atiendeGenero,
+      });
+    },
+    esquema: (bruto) => {
+      const coleccion = normalizarColeccion<unknown>(bruto);
+      return {
+        ...coleccion,
+        elementos: coleccion.elementos.map(aCompromiso),
+      } satisfies Coleccion<Compromiso>;
+    },
+  });
+
+  readonly compromisosCalendario = computed(() => this.recursoCalendario.valor()?.elementos ?? []);
+  readonly totalCalendario = computed(() => this.recursoCalendario.valor()?.total ?? 0);
+  readonly estadoCalendario = this.recursoCalendario.estado;
+  readonly errorCalendario = this.recursoCalendario.error;
+
+  readonly maxPastillas = MAX_PASTILLAS;
+  readonly diasSemana = DIAS_SEMANA;
+
+  readonly calendario = computed<Calendario>(() => {
+    const { anio, mes } = this.mesVisible();
+    const rejilla = this.rejilla();
+    const hoy = isoHoy();
+    const expandidos = this.diasExpandidos();
+
+    const porFecha = new Map<string, CompromisoDia[]>();
+    for (const compromiso of this.compromisosCalendario()) {
+      const { fecha } = resolverVencimiento(compromiso);
+      if (!fecha) continue;
+
+      const clave = fecha.slice(0, 10);
+      const plazo = this.plazoDe(compromiso);
+      const caso = compromiso.casoCodigo ? `caso ${compromiso.casoCodigo}` : 'sin caso asociado';
+      const item: CompromisoDia = {
+        compromiso,
+        plazo,
+        etiqueta: `Compromiso ${compromiso.codigo}, ${caso}, vence el ${formatearFecha(
+          clave,
+        )}: ${plazo.texto}. ${compromiso.accion}`,
+      };
+
+      const lista = porFecha.get(clave);
+      if (lista) lista.push(item);
+      else porFecha.set(clave, [item]);
+    }
+
+    const totalDias = Math.round((rejilla.fin.getTime() - rejilla.inicio.getTime()) / MS_DIA) + 1;
+    const dias: DiaCalendario[] = [];
+    let totalMes = 0;
+
+    for (let i = 0; i < totalDias; i += 1) {
+      const fecha = new Date(rejilla.inicio.getTime() + i * MS_DIA);
+      const clave = isoDia(fecha);
+      const delMes = fecha.getUTCFullYear() === anio && fecha.getUTCMonth() === mes - 1;
+      const items = porFecha.get(clave) ?? [];
+      if (delMes) totalMes += items.length;
+
+      const expandido = expandidos.has(clave);
+      const visibles = expandido ? items : items.slice(0, MAX_PASTILLAS);
+      const nombreFecha = `${fecha.getUTCDate()} de ${MESES[
+        fecha.getUTCMonth()
+      ].toLowerCase()} de ${fecha.getUTCFullYear()}`;
+      const cuenta =
+        items.length === 0
+          ? 'sin compromisos'
+          : items.length === 1
+            ? '1 compromiso'
+            : `${items.length} compromisos`;
+
+      dias.push({
+        fecha: clave,
+        dia: fecha.getUTCDate(),
+        delMes,
+        esHoy: clave === hoy,
+        nombreFecha,
+        etiqueta: `${delMes ? 'Día ' : ''}${nombreFecha}, ${cuenta}`,
+        visibles,
+        restantes: Math.max(0, items.length - MAX_PASTILLAS),
+        expandido,
+        total: items.length,
+      });
+    }
+
+    return {
+      titulo: `${MESES[mes - 1]} ${anio}`,
+      dias,
+      totalMes,
+      truncado: this.totalCalendario() > this.compromisosCalendario().length,
+      desde: rejilla.desde,
+      hasta: rejilla.hasta,
+    };
+  });
+
+  /** Filas de la tabla: siempre bloques de siete días. */
+  readonly semanas = computed(() => {
+    const dias = this.calendario().dias;
+    const semanas: DiaCalendario[][] = [];
+    for (let i = 0; i < dias.length; i += 7) {
+      semanas.push(dias.slice(i, i + 7));
+    }
+    return semanas;
+  });
+
   private temporizador?: ReturnType<typeof setTimeout>;
 
   buscar(evento: Event): void {
@@ -197,6 +601,37 @@ export class CompromisosPage {
     void this.actualizar({ tamano, pagina: 1 });
   }
 
+  cambiarModo(modo: ModoVista): void {
+    this.modo.set(modo);
+  }
+
+  mesAnterior(): void {
+    this.desplazarMes(-1);
+  }
+
+  mesSiguiente(): void {
+    this.desplazarMes(1);
+  }
+
+  irAHoy(): void {
+    const hoy = new Date();
+    this.mesVisible.set({ anio: hoy.getFullYear(), mes: hoy.getMonth() + 1 });
+    this.diasExpandidos.set(new Set());
+  }
+
+  alternarDia(fecha: string): void {
+    this.diasExpandidos.update((actual) => {
+      const siguiente = new Set(actual);
+      if (siguiente.has(fecha)) siguiente.delete(fecha);
+      else siguiente.add(fecha);
+      return siguiente;
+    });
+  }
+
+  recargarCalendario(): void {
+    this.recursoCalendario.recargar();
+  }
+
   limpiar(): void {
     void this.router.navigate([], {
       relativeTo: this.ruta,
@@ -223,6 +658,91 @@ export class CompromisosPage {
 
   alActualizar(): void {
     this.recurso.recargar();
+    if (this.modo() === 'calendario') this.recursoCalendario.recargar();
+  }
+
+  /** Anular exige el privilegio de anulación y escritura sobre la clasificación. */
+  puedeAnular(compromiso: Compromiso): boolean {
+    return (
+      this.capacidades.puedeEliminar() && this.capacidades.puedeModificar(compromiso.clasificacion)
+    );
+  }
+
+  abrirAnulacion(compromiso: Compromiso): void {
+    if (!compromiso.id || !this.puedeAnular(compromiso)) return;
+    this.errorAnulacion.set(null);
+    this.avisoAnulacion.set(null);
+    // El panel del compromiso y el de anulación escuchan Escape en `document`:
+    // se deja abierto uno solo.
+    this.cerrarPanel();
+    this.compromisoAnulacion.set(compromiso);
+  }
+
+  cerrarAnulacion(): void {
+    this.compromisoAnulacion.set(null);
+    this.errorAnulacion.set(null);
+  }
+
+  /**
+   * `DELETE /v1/commitments/{id}` con `{ motivo }` es la anulación lógica: la fila
+   * deja de devolverse y sus hitos caen en cascada. Restaurar no lleva cuerpo.
+   *
+   * Al terminar se recarga el listado: no hay navegación, así que los filtros y
+   * la página que viven en la URL se conservan.
+   */
+  confirmarAnulacion(resultado: ResultadoAnulacion): void {
+    const compromiso = this.compromisoAnulacion();
+    if (!compromiso?.id) return;
+
+    const anular = resultado.modo === 'anular';
+    const motivo = (resultado.motivo ?? '').trim();
+    if (anular && !motivo) return;
+
+    const id = encodeURIComponent(compromiso.id);
+    const peticion = anular
+      ? this.http.delete<unknown>(urlApi(`/v1/commitments/${id}`), { body: { motivo } })
+      : this.http.post<unknown>(urlApi(`/v1/commitments/${id}/restaurar`), {});
+
+    this.enviandoAnulacion.set(true);
+    this.errorAnulacion.set(null);
+
+    peticion.subscribe({
+      next: () => {
+        this.enviandoAnulacion.set(false);
+        this.compromisoAnulacion.set(null);
+        this.avisoAnulacion.set(
+          anular
+            ? `Compromiso ${compromiso.codigo} anulado. Sus hitos quedaron anulados en cascada.`
+            : `Compromiso ${compromiso.codigo} restaurado.`,
+        );
+        this.alActualizar();
+      },
+      error: (fallo: unknown) => {
+        this.enviandoAnulacion.set(false);
+        this.errorAnulacion.set(aErrorApi(fallo).message);
+      },
+    });
+  }
+
+  /**
+   * Traduce la situación de la tabla al vocabulario del calendario, sin
+   * cambiar la regla: `situacionDe` sigue decidiendo vencido / por vencer.
+   */
+  private plazoDe(compromiso: Compromiso): PlazoCompromiso {
+    const { clase } = situacionDe(compromiso);
+    if (clase === 'due-vencido') return { texto: 'Vencido', clase };
+    if (clase === 'due-por-vencer') return { texto: 'Por vencer', clase };
+    if (clase === 'due-en-plazo') return { texto: 'Vigente', clase };
+    return { texto: 'Sin fecha', clase };
+  }
+
+  private desplazarMes(delta: number): void {
+    const { anio, mes } = this.mesVisible();
+    const indice = anio * 12 + (mes - 1) + delta;
+    const siguienteAnio = Math.floor(indice / 12);
+    const siguienteMes = (indice % 12) + 1;
+    this.mesVisible.set({ anio: siguienteAnio, mes: siguienteMes });
+    this.diasExpandidos.set(new Set());
   }
 
   vencimiento(compromiso: Compromiso): ResolucionVencimiento {

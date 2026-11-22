@@ -84,8 +84,11 @@
       <div class="surface-heading">
         <div>
           <p class="section-eyebrow">COMPROMISOS</p>
-          <h3 id="titulo-compromisos-vencer">Por vencer o vencidos</h3>
-          <p>Hasta cinco compromisos abiertos de la página más reciente, ordenados por fecha.</p>
+          <h3 id="titulo-compromisos-vencer">Por vencer</h3>
+          <p>
+            Hasta cinco compromisos con vencimiento entre hoy y los próximos {{ horizonteDias }}
+            días.
+          </p>
         </div>
         <a class="link-button" routerLink="/compromisos">
           Ver todos
@@ -98,7 +101,9 @@
       } @else if (estadoCompromisos() === 'cargando' || estadoCompromisos() === 'inactivo') {
       <p class="panel-vacio" role="status">Cargando compromisos…</p>
       } @else { @if (compromisos().length === 0) {
-      <p class="panel-vacio">No hay compromisos vencidos ni próximos a vencer.</p>
+      <p class="panel-vacio">
+        No hay compromisos por vencer en los próximos {{ horizonteDias }} días.
+      </p>
       } @else {
       <ul class="tarea-lista">
         @for (compromiso of compromisos(); track compromiso.id) {
@@ -118,7 +123,9 @@
         }
       </ul>
       @if (totalCompromisos() > 0) {
-      <p class="panel-pie">{{ totalCompromisos() }} compromisos registrados en total.</p>
+      <p class="panel-pie">
+        {{ totalCompromisos() }} compromisos por vencer en los próximos {{ horizonteDias }} días.
+      </p>
       } } }
     </section>
   </div>

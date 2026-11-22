@@ -20,6 +20,8 @@
 
   @if (exportarError(); as mensaje) {
   <p class="exportar-error" role="alert">{{ mensaje }}</p>
+  } @if (avisoAnulacion(); as aviso) {
+  <p class="form-hint aviso-ok" role="status">{{ aviso }}</p>
   }
 
   <div class="filter-bar filter-bar-wrap">
@@ -172,5 +174,17 @@
   [tipos]="tipos()"
   (cerrado)="cerrarPanel()"
   (actualizado)="alActualizar()"
+  (anular)="abrirAnulacion(documentoActual)"
+/>
+} @if (documentoAnulacion(); as documentoAnular) {
+<app-anular-panel
+  modo="anular"
+  entidad="documento"
+  [codigo]="documentoAnular.codigo"
+  [enviando]="enviandoAnulacion()"
+  [errorEnvio]="errorAnulacion()"
+  [puedeConfirmar]="puedeAnular(documentoAnular)"
+  (cerrar)="cerrarAnulacion()"
+  (hecho)="confirmarAnulacion($event)"
 />
 }

@@ -1,15 +1,16 @@
 /**
- * Resumen operativo: lectura de los agregados reales.
+ * Resumen operativo: lectura de los agregados reales y el rango de vencimiento
+ * que comparten Resumen y Bandeja.
  *
  * No existe un endpoint de tablero. Los indicadores se calculan con el `total`
  * de los listados ya existentes, pedidos con `tamano=1` para no traer filas.
- * Aquí sólo vive lo imprescindible de esa lectura: extraer el total del sobre y
- * elegir los compromisos cuyo vencimiento está próximo o ya pasó.
+ * Aquí viven dos piezas: extraer el total del sobre paginado y construir el
+ * rango `vencimiento_desde`/`vencimiento_hasta` que el servidor aplica sobre
+ * el vencimiento efectivo.
  */
 
 import { normalizarColeccion } from '../../core/http/coleccion';
 import { esRegistro } from '../../dominio/mapeo';
-import { resolverVencimiento, situacionDe, type Compromiso } from '../compromisos/compromiso.mapeo';
 
 /** `total` del sobre paginado (`{items,total,...}`), sin construir filas. */
 export function aTotal(bruto: unknown): number {
@@ -30,28 +31,40 @@ export function aSinCasoTotal(bruto: unknown): number {
   return aTotal(bruto);
 }
 
-/** Situaciones que la pantalla de compromisos ya considera «atrasado» o «por vencer». */
-const SITUACIONES_DE_ATENCION = new Set(['due-vencido', 'due-por-vencer']);
+/** Horizonte de «por vencer»: hoy y los próximos 30 días, ambos inclusive. */
+export const HORIZONTE_POR_VENCER_DIAS = 30;
+
+/** `YYYY-MM-DD` de una fecha en hora local, sin pasar por `toISOString`. */
+function isoLocal(fecha: Date): string {
+  const anio = fecha.getFullYear();
+  const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+  const dia = String(fecha.getDate()).padStart(2, '0');
+  return `${anio}-${mes}-${dia}`;
+}
+
+/** Suma días de calendario a una fecha `YYYY-MM-DD` (aritmética en UTC). */
+function sumarDias(iso: string, dias: number): string {
+  const [anio, mes, dia] = iso.split('-').map(Number);
+  const fecha = new Date(Date.UTC(anio, mes - 1, dia + dias));
+  const resultadoAnio = fecha.getUTCFullYear();
+  const resultadoMes = String(fecha.getUTCMonth() + 1).padStart(2, '0');
+  const resultadoDia = String(fecha.getUTCDate()).padStart(2, '0');
+  return `${resultadoAnio}-${resultadoMes}-${resultadoDia}`;
+}
 
 /**
- * Compromisos con vencimiento próximo o vencidos.
+ * Rango inclusivo para `GET /api/v1/commitments` que acota «por vencer» a hoy
+ * y los próximos `dias` días.
  *
- * `GET /api/v1/commitments` no ordena por vencimiento ni filtra por situación,
- * así que la selección se hace en cliente sobre las filas de la página paginada
- * que sirve el servidor. Se descartan los compromisos terminales (Cumplido,
- * Redefinido, Desestimado): su vencimiento ya no exige atención. El orden
- * resultante es por fecha.
+ * El servidor compara el rango contra el vencimiento efectivo (fecha manual y,
+ * si falta, la del próximo hito no terminal) y ordena por esa misma fecha de
+ * forma ascendente, así que el `total` del sobre es el recuento exacto de la
+ * cola y la primera página trae los vencimientos más próximos.
  */
-export function compromisosPorVencer(compromisos: readonly Compromiso[], limite = 5): Compromiso[] {
-  return compromisos
-    .filter(
-      (compromiso) =>
-        !compromiso.terminal && SITUACIONES_DE_ATENCION.has(situacionDe(compromiso).clase),
-    )
-    .sort((a, b) =>
-      (resolverVencimiento(a).fecha ?? '9999-12-31').localeCompare(
-        resolverVencimiento(b).fecha ?? '9999-12-31',
-      ),
-    )
-    .slice(0, limite);
+export function rangoPorVencer(
+  hoy: Date = new Date(),
+  dias: number = HORIZONTE_POR_VENCER_DIAS,
+): { desde: string; hasta: string } {
+  const desde = isoLocal(hoy);
+  return { desde, hasta: sumarDias(desde, dias) };
 }

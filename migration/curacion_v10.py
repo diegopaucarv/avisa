@@ -97,7 +97,7 @@ PROPOSITO: dict[str, str] = {
     "core.cat_pip_fases": "Catálogo de fases del ciclo de inversión pública: programación, preinversión, inversión, ejecución y funcionamiento.",
     "core.cat_prioridades_alerta": "Catálogo de prioridades de alerta, con su plazo de respuesta: crítica inmediata, urgente, temprana o seguimiento.",
     "core.cat_prioridades_atencion": "Catálogo de prioridades de atención de un caso —urgente, moderado o bajo— con su orden de atención.",
-    "core.cat_roles_actor": "Catálogo de roles del actor en el conflicto: principal, secundario, tercero, proveedor, exportador o inspector.",
+    "core.cat_roles_actor": "Catálogo de roles del actor en el conflicto: principal, secundario, tercero imparcial o no determinado.",
     "core.cat_roles_funcionales": "Catálogo de roles funcionales del actor en el análisis: decisor, proveedor de evidencia, implementador o articulador territorial.",
     "core.cat_subsectores": "Catálogo de subsectores del sector: pesca y acuicultura, MYPE e industria, y gestión y prevención de conflictos.",
     "core.cat_tematicas": "Catálogo de temáticas que clasifican el origen del conflicto, de infraestructura a impactos de terceros, con su definición.",

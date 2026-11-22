@@ -34,12 +34,12 @@ Ordené los cambios por dificultad creciente y los aterricé en la arquitectura 
 17. **Ficha: documentación normativa.** Reemplazaría la tarjeta “Avance registrado” por una sección de Documentación normativa relacionada, con referencias, título, fecha y acceso al documento. No confundiría esa sección con los documentos de evidencia del caso.
 18. **◐ Parcial (2026-11-22).** **Ficha: edición explícita.** Presentaría cada campo editable dentro de un recuadro con contenido centrado y comentario asociado cuando corresponda (por ejemplo, distrito). El clic fuera no cerraría ni cancelaría el formulario: solo los botones Cancelar y Guardar cambios finalizarían la edición. Aplicaría el mismo patrón a los drawers de edición pertinentes, incluidos la línea de tiempo y las alertas, donde la edición se abre en panel lateral en lugar de navegar a otra vista. Falta: la edición por campo en la ficha del caso; la cronología y las alertas ya se editan en panel lateral con Cancelar/Guardar.
 19. **Ficha: Próximo paso.** Sustituiría el texto genérico por una regla basada en el riesgo del caso y la Tabla 3 de la guía; por ejemplo, para riesgo Moderado, “Activar prevención y articulación intergubernamental”. Mostraría qué regla y qué valor de riesgo del caso originaron la recomendación.
-20. **◐ Parcial (2026-11-22).** **Casos: listado.** Mantendría la cuadrícula existente y añadiría conmutador tabla/cuadrícula, orden por fecha/riesgo/prioridad, paginación en servidor y exportación —el endpoint ya existe (gap E5, cerrado); falta el menú en la lista—. Incorporaría filtros de estado, prioridad, alcance, temática y unidad además del filtro actual por riesgo, y una vista “Sin caso” para las demandas que aún no tienen caso vinculado, como vista dentro de Casos y no como ruta de primer nivel (la página existe y su ruta aún no está cableada). Falta: los filtros de estado, prioridad, alcance, temática y unidad (hoy solo `q`); el conmutador tabla/cuadrícula, el orden, la paginación en servidor, la exportación y la ruta «Sin caso» ya están.
+20. **◐ Parcial (2026-11-22).** **Casos: listado.** Mantendría la cuadrícula existente y añadiría conmutador tabla/cuadrícula, orden por fecha/riesgo/prioridad, paginación en servidor y exportación —el endpoint ya existe (gap E5, cerrado); falta el menú en la lista—. Incorporaría filtros de estado, prioridad, alcance, temática y unidad además del filtro actual por riesgo, y una vista “Sin caso” para las demandas que aún no tienen caso vinculado, como vista dentro de Casos y no como ruta de primer nivel (la página existe y su ruta aún no está cableada). Hecho (2026-11-22): los filtros de estado, prioridad, alcance, temática y unidad se resuelven en SQL y se validan contra catálogo (un valor inexistente devuelve `422 FILTRO_INVALIDO`), la vista los lleva a la URL y reinicia a página 1; el conmutador tabla/cuadrícula, el orden, la paginación en servidor, la exportación y la ruta «Sin caso» ya estaban.
 21. **Casos: formulario y selección territorial.** Incluiría Archivado en el formulario porque ya está en el tipo pero no en la interfaz. Reemplazaría territorio libre por un selector de distrito basado en ubigeo; validaría formato de código (CS-<PA|MI>-<INF|OAT|NOR|DBE|GOB|ITE>-<AAAA>-<NN>) y duplicados antes de guardar.
 22. **◐ Parcial (2026-11-22).** **Bandeja de trabajo.** Reemplazaría la concatenación actual de alertas, compromisos y casos de alto riesgo por una lista ordenada realmente por plazo, riesgo y revisión pendiente. Agregaría cuenta regresiva/SLA, filtro por tipo y vista del usuario; las acciones asignar, posponer y completar cambiarían estado con confirmación y quedarían registradas. Falta: la lista única ordenada por plazo/riesgo/revisión, el filtro por tipo, la vista del usuario y esas acciones; hoy son tres bloques con datos reales y SLA visible.
 23. **◐ Parcial (2026-11-22).** **Alertas: controles de revisión.** Pediría confirmación al aprobar; permitiría volver a abrir una alerta descartada y deshacer una acción con permisos adecuados. Añadiría estados “Atendida” y visibilidad de la derivación, evitando que `derivacion` quede solo en los tipos de datos. Falta: confirmación al aprobar, reapertura de una alerta descartada, deshacer y visibilidad de `derivacion`; el estado «Atendida» ya está en el filtro y el flujo de cinco pasos se opera en panel lateral.
 24. **◐ Parcial (2026-11-22).** **Compromisos: formulario y calendario.** Cambiaría la fecha de texto libre por selector de fecha y derivaría el estado según fechas y avance en vez de pedirlo como texto. La fecha de vencimiento se derivaría del próximo hito cuando no se ingrese a mano; si no hay hito, la interfaz abriría un popup para ingresarla. Añadiría los hitos en la ficha/formulario, clasificación formal/verbal, enlace al documento de origen y recordatorios; evidencias dejarían de ser solo un campo de texto y pasarían a archivos adjuntos. Falta: la clasificación formal/verbal, los recordatorios, los adjuntos (la evidencia es una URI) y el popup cuando no hay hito; el selector de fecha, el vencimiento derivado del próximo hito y el alta de hitos ya están.
-25. **◐ Parcial (2026-11-22).** **Compromisos: vistas de seguimiento.** Añadiría vista de calendario y desglose por responsable y nivel de gobierno. Incorporaría una exportación del Anexo 14 y reemplazaría la eliminación dura por anulación lógica con restauración, motivo e historial; la base y la API ya lo soportan (gap E2, cerrado), así que lo que falta es solo la interfaz. Falta: la vista de calendario, el desglose por responsable y nivel de gobierno, la exportación específica del Anexo 14 y la interfaz de anular/restaurar; los endpoints `anular`/`restaurar` y la anulación lógica con motivo e historial ya existen.
+25. **◐ Parcial (2026-11-22).** **Compromisos: vistas de seguimiento.** Añadiría vista de calendario y desglose por responsable y nivel de gobierno. Incorporaría una exportación del Anexo 14 y reemplazaría la eliminación dura por anulación lógica con restauración, motivo e historial; la base y la API ya lo soportan (gap E2, cerrado), así que lo que falta es solo la interfaz. Falta: el desglose por responsable y nivel de gobierno y la exportación específica del Anexo 14; la vista de calendario ya está (conmutador Tabla · Calendario en la propia página), y la anulación con motivo obligatorio ya se ofrece en el panel del compromiso. Restaurar desde esta vista no es alcanzable porque la API no proyecta el estado de anulación y RLS oculta las filas anuladas. El calendario se pinta vacío porque los 8 compromisos no tienen `fecha_vencimiento` y el único hito con fecha está `Cumplido`: es un hueco de datos, no de la vista.
 26. **◐ Parcial (2026-11-22).** **Documentos: controles visibles.** Añadiría botón para validar o rechazar un documento y controles separados para validar cada fragmento. El filtro “Rechazado” tendría una acción que lo produzca. Permitiría relanzar extracción y consultar versiones anteriores. Falta: botones explícitos de validar/rechazar, la validación por fragmento, relanzar la extracción y consultar versiones; el estado se cambia con un selector y el filtro «Rechazado» ya existe.
 27. **Mapa: controles de uso (aplazado).** Queda aplazado por el usuario hasta que exista el dataset de ubigeo/centroide; no se construye la pantalla. Añadiría leyenda, selección de capas y agrupación de puntos; “Ver todos” ajustaría los límites automáticamente al abrir y al cambiar el ámbito territorial. La línea de tiempo mostraría todos los eventos del caso, no solo el primero.
 28. **◐ Parcial (2026-11-22).** **Preferencias y accesibilidad.** Ampliaría las preferencias que hoy cubren principalmente el tema con ámbito predeterminado, densidad y opciones de notificación. Auditaría todos los drawers y contraste; corregiría el drawer de preferencias con trampa de foco, Escape y retorno de foco al control que lo abrió. Guardaría las preferencias por usuario cuando exista perfil persistido, en vez de solo en el navegador. Falta: el ámbito predeterminado, las opciones de notificación, el tamaño de página (deshabilitado) y la persistencia por usuario; tema y densidad ya se guardan, hoy en el almacenamiento local.
@@ -69,7 +69,7 @@ Ordené los cambios por dificultad creciente y los aterricé en la arquitectura 
 39. **◐ Parcial (2026-11-22).** **Compromisos: estado calculado y auditoría.** Guardaría fechas como fechas reales y derivaría el plazo (vencido o por vencer) con una regla explícita, manteniendo separado el estado de gestión del compromiso (Por iniciar, En proceso, Cumplido, Redefinido, Desestimado); “Paralizado” sería un estado de hito, no sinónimo automático de vencido. Persistiría hitos, evidencia, responsables, nivel y fuente, con recordatorios e historial, en vez de borrar el registro. Falta: los recordatorios y el historial visible; las fechas reales, el plazo derivado, la separación del estado de hito («Paralizado»), los hitos, la evidencia, los responsables, el nivel y la fuente ya se persisten.
 40. **◐ Parcial (2026-11-22).** **Ficha: actores y relaciones.** Agregaría/desvincularía actores desde la ficha y guardaría tipo, función y posicionamiento como relación del caso, no como nombres concatenados. Reutilizaría el catálogo de actores para mantener consistencia con el Directorio. Falta: el alta y la desvinculación de actores desde la ficha; tipo, función y posicionamiento ya se guardan como relación del caso y se leen del catálogo.
 41. **Ficha: pestañas operativas faltantes.** Añadiría Reuniones, Productos/Envíos e Historial/Auditoría, conectadas a las tablas/relaciones del caso. El historial registraría usuario, fecha, operación y valores modificados; el flujo `ConflictResolutionJourney`, que hoy solo mueve un contador local, se convertiría en estado del caso persistente, con reglas de transición y permisos.
-42. **◐ Parcial (2026-11-22).** **Exportación de caso y reportes.** Implementaría exportación real en PDF, Excel y JSON —la API ya exporta por entidad y por base (gap E5, cerrado)— para listados y ficha —el JSON sirve además para el respaldo de una entidad y de la base completa—, con impresión de ficha y hoja de estilos de impresión. Cada exportación respetaría permisos/ámbito/filtros, mostraría fecha y fuente, y se registraría en auditoría cuando descargue datos sensibles. Falta: que la exportación respete filtros/q/orden, la hoja de impresión de la ficha y el registro en auditoría de la descarga; JSON/Excel/PDF, la exportación por `id` y `entidad=base` (solo en la API) ya existen.
+42. **◐ Parcial (2026-11-22).** **Exportación de caso y reportes.** Implementaría exportación real en PDF, Excel y JSON —la API ya exporta por entidad y por base (gap E5, cerrado)— para listados y ficha —el JSON sirve además para el respaldo de una entidad y de la base completa—, con impresión de ficha y hoja de estilos de impresión. Cada exportación respetaría permisos/ámbito/filtros, mostraría fecha y fuente, y se registraría en auditoría cuando descargue datos sensibles. Falta: que la exportación respete filtros/q/orden, la hoja de impresión de la ficha y el registro en auditoría de la descarga; JSON/Excel/PDF, la exportación por `id` y `entidad=base` ya existen, y la base completa ya se ofrece en el menú de exportación de la SPA.
 43. **◐ Parcial (2026-11-22).** **Exportación del directorio.** Añadiría exportación en PDF, Excel y JSON con los campos permitidos por rol; aplicaría las reglas de acceso a los datos de contacto y registraría la descarga cuando corresponda. Falta: el registro en auditoría de la descarga; el menú de exportación ya está en actores, organizaciones, instituciones y locales.
 44. **◐ Parcial (2026-11-22).** **Directorio: CRUD y detalles.** Pasaría las seis filas sintéticas embebidas en `avisa-directory.tsx` a registros persistentes. Incorporaría detalle, alta, edición, fusión de duplicados y baja lógica, relaciones con casos/compromisos y enlaces desde las fichas. Falta: el alta, la edición, la fusión de duplicados y la baja lógica (la API de actores solo expone lectura) y los enlaces desde las fichas de caso; el detalle en panel lateral y las cuatro pantallas del directorio ya son persistentes.
 45. **◐ Parcial (2026-11-22).** **Registro de actores y privacidad.** Permitiría registro con o sin DNI, membresía OSPA y contacto opcional, con validaciones y campos personales segregados/protegidos como plantea el esquema. Los perfiles autorizados (sectoristas, dirección OAIPCS y alta dirección) ven DNI y teléfonos, y la PII se pide bajo demanda con motivo, quedando auditada: el descifrado se habilita por rol y lo que cambian son las reglas de acceso; una consulta RENIEC se implementaría solo tras validar disponibilidad, base legal, consentimiento/permisos y la integración aprobada, sin convertirla en requisito del formulario. Falta: el registro de actores con o sin DNI, la membresía OSPA y el contacto opcional (no hay formulario ni `POST`); la PII bajo demanda con motivo auditado y el acceso por rol ya funcionan.
@@ -141,9 +141,75 @@ De los 87 items del catálogo, 9 están cerrados (HECHO), 31 tienen avance parci
 - **Con generación desde el expediente:** 1 (item 13 para captura, 75 para la matriz), 3 (76 y 75), 4 y 5 (78), 6 y 12 (75), 8 (83), 9 (84), 10 (73 y 75) y 13 (77).
 - **Fuera de este catálogo:** cualquier otro formato de la Guía queda pendiente de que se defina su alcance operativo. No se documenta una pantalla sin esa decisión de producto.
 
+## Pendientes heredados de la base, la carga y el glosario (2026-11-22)
+
+El catálogo de arriba dice **qué construir en la SPA**. Esta sección dice **qué sigue abierto en los datos, en las reglas y en los artefactos**, con la acción concreta y el efecto que tiene sobre la interfaz. No es una segunda lista de pantallas: cada pendiente se resuelve fuera del frontend, pero mientras siga abierto condiciona lo que la SPA puede mostrar sin inventar. Los defectos de redacción y de artefacto generado no se repiten aquí: se detallan en «Hallazgos» y en §3 solo figura su acción de cierre.
+
+### 1 · Datos que esperan una decisión de OAIPCS
+
+Ninguno bloquea la carga; todos entraron marcados y revisables, y por eso la interfaz debe mostrarlos como faltantes en lugar de estimarlos.
+
+| #   | Pendiente                                   | Alcance                             | Acción                                                                                             | Efecto en la interfaz                                                        |
+| --- | ------------------------------------------- | ----------------------------------- | -------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| P1  | 45 grupos de DNI compartido                 | 100 filas de 642                    | Revisar `core.migracion_conflicto` (`DNI_DUPLICADO`) y fusionar solo los que sean la misma persona | El directorio muestra como dos personas lo que puede ser una (items 12 y 44) |
+| P2  | Actores sin organización                    | 368 referencias                     | Completar `legacy.dim_actores.id_organizacion`                                                     | El riel y el mapa de actores subestiman la representación (items 67 y 83)    |
+| P3  | `base_legal` de los datos personales        | 642 DNI, 606 teléfonos, 141 correos | Sustituir `LEGADO_AVISA_2026` por la base legal formal (Ley 29733)                                 | Mientras siga así, la PII no se expone fuera de `administrador` (item 45)    |
+| P4  | 12 demandas con padre de serie anterior     | `CS-2026-xx`                        | Decidir si se mapean a un caso real                                                                | Aparecen en «Sin caso» aunque su código mencione un caso                     |
+| P5  | Alertas inexistentes y vínculos descartados | 9 + 14                              | Confirmar que `AT-2026-19/27/29/31/33/34/35/39` no existen                                         | Esos vínculos no aparecen en la cronología ni en la ficha                    |
+| P6  | Casos ausentes                              | `CS-PRODUCE-2026-037` y `038`       | Crearlos o descartarlos                                                                            | Dos instancias de proceso quedan con código legado y sin `caso_id`           |
+| P7  | Bloque `PR-001..PR-018` sin maestro         | 18 reportes                         | Definir maestro de reportes o aceptar enlace blando                                                | El Anexo 17 muestra el código sin padre al que apuntar                       |
+| P8  | `DEST-01` no es usuario                     | 6 filas                             | Confirmar si es buzón colectivo y modelarlo como tal                                               | El responsable aparece como código en lugar de persona                       |
+| P9  | Datos maestros menores                      | 3                                   | Ratificar unidad `OAIPCS`, descripción de `TEMA-03` y taxonomía `Sphyrna zygaena` / `lewini`       | Etiquetas sin descripción o con nombre dudoso                                |
+| P10 | Cobertura de distritos                      | 698 de 1 874                        | Ampliar el catálogo cuando se compre el ubigeo                                                     | El selector territorial no ofrece todos los distritos (items 21 y 36)        |
+
+Regla común: **el dato ausente se declara, no se estima.** El indicador de completitud (item 68) es el lugar donde eso se ve; ninguna pantalla debe rellenar un hueco con un valor verosímil.
+
+### 2 · Reglas que la interfaz no puede inventar
+
+**Prioridad de atención.** La Guía la lista como columna 10 del Anexo 15 (§8.3.1) pero no define cómo se calcula. Derivarla de la conflictividad o del riesgo sería inventar una regla institucional. Acción: pedir la regla a OAIPCS y, hasta entonces, mostrar el valor almacenado marcado como «sin regla definida» en la ficha y en la bandeja (items 5 y 22).
+
+**Riesgo del caso.** La carga del legado usó una regla explícita y en orden: dato directo → alertas vinculadas → prioridad del caso → nulo. La SPA no debe recalcular con otra fórmula ni promediar señales; si se implementa el recálculo del item 11, debe invocar esa misma regla en servidor en lugar de reimplementarla en el cliente.
+
+**Alertas históricas.** Las 83 alertas con `estado_legado = 'Archivado'` se documentan como `Atendidas` por decisión tomada, pero la migración de datos sigue pendiente. Consecuencia: el filtro «Atendida» no las encuentra aunque la decisión exista. Acción: migrar el estado antes de usar ese conteo en un reporte.
+
+**Caso sin ciclo.** 1 de los 35 casos no tiene `ciclo_intervencion_id` (G-10). No es una desalineación de catálogo: es un dato incompleto que se completa desde la ficha cuando exista escritura (item 37).
+
+**Orden de los catálogos.** `lib/db/repos/catalogs.ts` ordena por `id`, así que «Prevención estratégica» (id 5) aparece última aunque la Guía la describa primero. Acción: añadir una columna `orden` al catálogo o un mapa de orden en el dominio (item 8). No es un error de modelo: la Guía aclara que los componentes no son etapas sucesivas.
+
+**Evidencias y preferencias.** Las evidencias de compromiso como archivos exigen almacenamiento y quedan fuera del prototipo (item 24); las preferencias y el contraste por usuario viven hoy en `localStorage` y necesitan perfil persistido (item 47). Ninguna de las dos se simula.
+
+### 3 · Esquema y artefactos: acciones de cierre
+
+Cinco operaciones cortas que no son trabajo de interfaz pero que conviene cerrar antes de que el sistema crezca. Los hallazgos que las motivan están en la sección siguiente.
+
+1. ~~`DROP FUNCTION core.siguiente_codigo_caso()`~~ **Hecho (migración 25).** La sobrecarga sin argumentos quedó retirada; `pg_proc` sólo conserva `(integer, integer)`. Comprobado además que la llamada sin argumentos no emitía el formato viejo: fallaba con `is not unique` (42725) por el `DEFAULT 1` de la firma vigente.
+2. ~~Corregir el artefacto v10~~ **Hecho (2026-11-22).** `cat_roles_actor` figura con 4 posiciones (`:4799`) y `core.demandas.caso_id` ya no lleva `NOT NULL` (`:7107`). Residuo abierto: el SQL unificado sigue sembrando roles 4–6 (G-01).
+3. ~~Regenerar `DICCIONARIO_DATOS.md` desde su fuente~~ **Hecho (2026-11-22).** Se corrigió el comentario de `es_grave` en la base, se alineó el Anexo A de `ANALISIS_PORTABILIDAD` (`dim_rol_actor` → «4 filas: 1, 2, 3 y 7») y se regeneró: sin `Critica_Inmediata` y sin «sembrar 1–3» en ese destino. Residuo: el literal sigue en `docs/PARCHE_23_*.sql`.
+4. ~~Corregir el generador de `log_envios`~~ **Hecho (2026-11-22).** Corregida la fuente en `ANALISIS_PORTABILIDAD` y regenerada §11.5: `core.envios_comunicacion` es el único destino.
+5. Reejecutar la rama de retirada de `cat_tipos_reunion` (D7) cuando se elimine la FK desde `core.reuniones_dialogo`; el catálogo está marcado obsoleto y no debe recibir valores nuevos.
+
+**Defectos operativos de la DDL v9** que se reportan pero no se corrigen aquí: no corre de una sola pasada (FK adelantada a `core.usuarios`), exige PostGIS, el seed de `cat_variables` viola su propia FK, `core.entidadess` no existe —el objeto real es `core.entidades`— y conviven `core.plan_acciones` y `core.planes_accion`. No se construye nada sobre esos nombres ni se citan como vigentes.
+
+### 4 · Lo que sigue aplazado por decisión de producto
+
+- **Ubigeo, centroide y calibración del riesgo:** aplazado expresamente. Por eso `/mapa` sigue en marcador (items 27, 33 y 53) y no se documenta ninguna fórmula de riesgo.
+- **RADAR / RED y NODO (D18):** `dim_tipo_actor_radar` (3 filas) se queda en `legacy.*` porque `territorio.*` no modela RED ni NODO. Los módulos 2027 dependen de ese modelo (item 54); inventarles un catálogo ahora fijaría un eje que no existe.
+- **Pasos 4–6 del flujo `reporte`:** las 9 instancias se conservan sin `flujo_definicion_id` a propósito. Ampliar el catálogo a seis pasos inventaría tres pasos y su rol; el `NULL` está documentado en el comentario de la columna.
+
+**Procedencia.** Los pendientes de §1 y §2 salen de `DECISIONES_CARGA_LEGADO_V9.md` (§5, §8, §10, A.4 y A.5), `GAPS_GUIA_SQL_UI.md` (§2.4, §3.2, §3.4 y §9) y `GLOSARIO_ALINEACION_GUIA.md` (§1.7 y §1.12); los de §3, de los hallazgos G-01 a G-06 y de `DECISIONES_D3_D4_D7_D9_D10.md` (D7); los de §4, de D9, D18 y de la decisión de producto sobre ubigeo.
+
+Cierre: ninguno de estos pendientes se resuelve escribiendo en la SPA. La regla del capítulo 8.4 de la Guía —transformar datos dispersos en conocimiento útil— exige que la interfaz distinga lo que sabe de lo que supone; cuando el dato falta, lo declara.
+
 ## Hallazgos que exigen decisión o regeneración (2026-11-22)
 
 Estos nueve hallazgos no son erratas de redacción: cada uno cambia el modelo de datos, cambia un dato vivo u obliga a regenerar un artefacto. Se comprobaron contra la base viva y el código, no contra la documentación. Al final se registran dos falsos positivos que traía el inventario y que quedaron descartados al verificarlos.
+
+**Estado al 2026-11-22.** Cerrados: **2, 3, 5, 6, 7, 8 y 9**. El **5** se retiró (API de demostración),
+el **9** con `migration/24`, el **3** con `migration/25`, el **2** corrigiendo la v10, el **6**
+regenerando §11.5 y el **8** portando el calendario. El **7** era de redacción. Quedan **parciales 1
+y 4**: la v10 y el diccionario ya están alineados, pero el `AVISA_V10_ESQUEMA_UNIFICADO.sql` sigue
+sembrando roles 4–6 y el literal `Critica_Inmediata` sobrevive en `docs/PARCHE_23_*.sql`, que el
+glosario prohíbe editar a mano.
 
 ### 1. `cat_roles_actor`: 7 filas en la v10 frente a 4 en la base
 
@@ -153,6 +219,12 @@ Estos nueve hallazgos no son erratas de redacción: cada uno cambia el modelo de
 
 **Qué propongo.** El criterio correcto es el que ya está en la base: **4 posiciones** (incluida `No determinado`, que en v10 ocupa el hueco 7). Corregir el artefacto v10 para que no siembre 4–6 ni espere siete filas, y dejar las funciones en `cat_roles_funcionales`. El `id 7` significa hoy dos cosas distintas según se lea la base o el script, y eso es lo que hay que eliminar.
 
+**Parcialmente resuelto (2026-11-22).** La tabla de la v10 ya da 4 filas (`:4799`) y el diccionario
+regenerado también («Filas: 4»). Sigue inconsistente `docs/AVISA_V10_ESQUEMA_UNIFICADO.sql`: siembra
+`4 Proveedor MYPE`, `5 Exportador CITES` y `6 Inspector CITE` en `core.cat_roles_actor` (`:3280` y
+`:7484`) y su comprobación de cierre espera `1..7` (`:9340`). El origen son los parches, así que
+corregirlo exige editar `docs/*.sql` y regenerar con `migration/consolidar_esquema.py`.
+
 ### 2. `core.demandas.caso_id` es `NOT NULL` en la v10 y anulable en la base
 
 **Comprobado.** La v10 lo declara `caso_id UUID NOT NULL REFERENCES core.casos(id) ON DELETE CASCADE` (`4964`; igual en `759`). En la base viva la columna acepta nulos (`is_nullable = YES`).
@@ -160,6 +232,10 @@ Estos nueve hallazgos no son erratas de redacción: cada uno cambia el modelo de
 **Por qué importa.** El requisito del producto es explícito: una demanda puede existir **sin caso** —de ahí la vista «Demandas sin caso» dentro de Casos y el contador `sinCasoTotal` del sobre de `GET /api/v1/demandas`—. Con `NOT NULL` esa función no se puede sostener: o se obliga a inventar un caso, o no se registra la demanda hasta vincularla. La base ya refleja la decisión correcta; el DDL de referencia quedó atrás.
 
 **Qué propongo.** No hay nada que migrar en la base (ya es anulable). Lo que hay que corregir es el artefacto v10: `caso_id UUID NULL` y documentar que la demanda sin caso es un estado legítimo, no un dato incompleto.
+
+**Resuelto (2026-11-22).** La v10 ya lo declara sin `NOT NULL` (`:7107`) y el diccionario publica la
+columna como anulable. Queda anotado, sin tocar, que `problema_3p` y `pedido_3p` siguen `NOT NULL`
+en ese mismo bloque aunque la base las tiene anulables.
 
 ### 3. `core.siguiente_codigo_caso()` tiene dos sobrecargas vivas
 
@@ -169,6 +245,13 @@ Estos nueve hallazgos no son erratas de redacción: cada uno cambia el modelo de
 
 **Qué propongo.** Retirar la sobrecarga sin argumentos en una migración breve (con su reversión), después de confirmar que ni el código ni las propias funciones la invocan por dentro. Es una operación de una línea y elimina el riesgo de forma definitiva.
 
+**Resuelto (2026-11-22, `migration/25_retiro_sobrecarga_siguiente_codigo.sql`).** Comprobados 0
+dependientes en `pg_depend`, `prosrc`, vistas, políticas, triggers y defaults, la sobrecarga se
+retiró. **Corrección a este hallazgo:** la llamada sin argumentos no llegaba a emitir
+`CS-PRODUCE-…`; fallaba con `function core.siguiente_codigo_caso() is not unique` (42725), porque el
+`DEFAULT 1` de la firma de dos argumentos crea un segundo candidato. Tras el retiro se resuelve a esa
+firma con `(1, 1)` y devuelve `CS-PA-INF-<AAAA>-NN`. El formato antiguo ya no es alcanzable.
+
 ### 4. El diccionario generado contiene un literal obsoleto: «sembrar 1–3»
 
 **Comprobado.** `docs/05_datos/DICCIONARIO_DATOS.md:5995` documenta el destino de `legacy.dim_rol_actor` como «`core.cat_roles_actor` (sembrar 1–3)». La base tiene 4 filas, no 3.
@@ -176,6 +259,14 @@ Estos nueve hallazgos no son erratas de redacción: cada uno cambia el modelo de
 **Por qué importa.** El diccionario es un artefacto **generado**: si se corrige a mano, la siguiente regeneración lo revierte. Y mientras diga «1–3», quien lo lea concluirá que el catálogo tiene tres roles y que `No determinado` sobra. Es el mismo desorden del hallazgo 1, pero en un documento que parece normativo.
 
 **Qué propongo.** Corregir el literal **en la fuente del generador** (la definición de destinos de la tabla heredada), no en el Markdown, y regenerar. A mano sólo se pierde el cambio.
+
+**Parcialmente resuelto (2026-11-22).** El diccionario **parsea** el Anexo A de
+`ANALISIS_PORTABILIDAD_AVISA_2026_A_V9.md`; ahí estaba el defecto: `dim_rol_actor` declaraba 4 filas y
+«sembrar 1–3». Corregido a «4 filas: 1, 2, 3 y 7» y regenerado, la ficha y la tabla del diccionario ya
+lo dicen así (`dim_tipo_actor` conserva «1–3», que es correcto porque tiene 3 filas). Además se
+corrigió el `COMMENT ON COLUMN` de `es_grave` en la base, que contenía `Critica_Inmediata`.
+Queda un residuo en `docs/PARCHE_23_DESTINATARIOS_Y_CUATRO_OJOS.sql:156` y su copia en el SQL
+unificado: mismo caso que el hallazgo 1, requiere autorización para editar `docs/*.sql`.
 
 ### 5. `backend/main.py` mantiene usuarios demo con la clave en claro
 
@@ -185,6 +276,15 @@ Estos nueve hallazgos no son erratas de redacción: cada uno cambia el modelo de
 
 **Qué propongo.** Hay que decidir su destino: retirarlo, o degradarlo explícitamente a arnés de demostración local con un aviso en el propio archivo y en el README. No conviene que siga existiendo sin etiqueta. **Esta decisión es tuya**; no requiere tocar la aplicación.
 
+**Resuelto (2026-11-22).** Se retiró. Se borró `backend/` —el duplicado suelto— y también el código
+del demo que construía el contenedor de verdad (`backups/backend/main.py`, `db.py`,
+`requirements.txt`). El servicio `api` salió de `compose.yaml` junto con `docker/api/Dockerfile` y la
+variable muerta `AVISA_API_URL`, que no leía nadie; el runbook
+`docs/06_operacion/ENTORNO_DOCKER_POSTGRES.md` §11 ya no describe la API de ejemplo. Nada dependía de
+ella: las rutas las sirve Next desde `app/api/**` contra PostgreSQL, y el login usa
+`core.autenticar_usuario`. Queda un contenedor `avisa-api` en ejecución que pasó a huérfano
+(`docker rm -f avisa-api` para eliminarlo).
+
 ### 6. `legacy.log_envios` apunta a dos tablas distintas
 
 **Comprobado.** El diccionario lo mapea a `core.notificaciones (parcial)` (`DICCIONARIO_DATOS.md:6310` y `6604`), mientras que `docs/05_datos/BRECHA_CAPA_DATOS_V9.md` y `LEGADO_A_V10_SIMILITUDES_Y_DIFERENCIAS.md:105` lo mapean a `core.envios_comunicacion`, con el mismo recuento de 17 filas. En la base existen `core.envios_comunicacion` y `legacy.log_envios`; **no existe** `core.log_envios`.
@@ -192,6 +292,11 @@ Estos nueve hallazgos no son erratas de redacción: cada uno cambia el modelo de
 **Por qué importa.** Los 17 envíos heredados son registros de mensajes enviados (con destinatario, canal y estado), que es lo que modela `core.envios_comunicacion`. `core.notificaciones` es otra cosa: avisos para el usuario dentro del sistema. Un mapeo que manda los envíos a notificaciones no sólo duplica destino: confunde «lo que el sistema envió» con «lo que el usuario debe leer», y eso afecta a la trazabilidad de comunicaciones y a cualquier cifra de envíos.
 
 **Qué propongo.** Fijar `core.envios_comunicacion` como destino único (es la que existe y la que coincide 1:1 con las 17 filas), corregir la fuente del generador del diccionario y regenerar. Confirmar antes si algún indicador usa `notificaciones` para contar envíos; si lo hace, hay que corregir también esa consulta.
+
+**Resuelto (2026-11-22).** Se corrigió la fuente en `ANALISIS_PORTABILIDAD_AVISA_2026_A_V9.md`
+(`:467` y `:600`) y se regeneró §11.5. El documento ya no menciona `core.notificaciones` (0
+coincidencias) y el diccionario apunta a `core.envios_comunicacion`. `core.notificaciones` existe,
+pero tiene 0 filas: son avisos al usuario, no envíos.
 
 ### 7. Numeración duplicada en este documento (corregido)
 
@@ -201,13 +306,28 @@ Estos nueve hallazgos no son erratas de redacción: cada uno cambia el modelo de
 
 **Estado.** Corregido en esta misma pasada: quedan como `2.` y `5.`.
 
-### 8. El calendario de compromisos sigue pendiente
+### 8. El calendario de compromisos (resuelto en código; vacío por falta de fechas)
 
-**Comprobado.** Es el item 25 del catálogo, marcado como parcial. La vista `features/compromisos/compromisos.page.html` es una tabla con filtros y paginación de servidor; no hay calendario, no hay desglose por responsable ni por nivel de gobierno, y no existe una ruta de calendario.
+**Hallazgo.** Es el item 25 del catálogo. La vista `features/compromisos/compromisos.page.html` era
+una tabla con filtros y paginación de servidor: no había calendario, no había desglose por responsable
+ni por nivel de gobierno, y no existía una ruta de calendario.
 
 **Por qué importa.** Los compromisos son el objeto que más se consulta por fecha: vencimientos, hitos y plazos son su razón de ser. Una tabla ordenada no responde a la pregunta operativa real («qué vence esta semana y de quién depende»). El dato ya está: `fecha_vencimiento`, hitos y responsables están persistidos; lo que falta es la vista, no el modelo.
 
 **Qué propongo.** Construirlo como vista dentro de Compromisos —conmutador Tabla / Calendario, igual que el conmutador ya existente en Casos—, reutilizando la consulta paginada y el mismo filtro de fechas. No requiere migración.
+
+**Resuelto en código (2026-11-22).** El conmutador Tabla · Calendario ya está en
+`features/compromisos/compromisos.page.{ts,html}`, con rejilla mensual, navegación, estados
+`Vencido` / `Por vencer` / `En plazo` y accesibilidad por teclado. El rango viaja al servidor:
+`GET /api/v1/commitments` acepta `vencimiento_desde` y `vencimiento_hasta` (ISO `YYYY-MM-DD`,
+inclusivos) y devuelve `400` si la fecha no existe o el rango está invertido. El rango se aplica
+sobre el **vencimiento efectivo** —fecha manual y, si falta, el próximo hito no terminal—, que es la
+misma fecha que muestra la tabla.
+
+**Advertencia de datos:** hoy el calendario se pinta **vacío**, y es correcto. Los 8 compromisos
+tienen `fecha_vencimiento` nula y el único hito con fecha (`2025-04-04`) está en estado `Cumplido`,
+que es terminal y por tanto no cuenta como vencimiento pendiente. Sin fechas, la vista de calendario
+no tiene qué mostrar: es un hueco de datos, no un defecto de la vista.
 
 ### 9. `core.demandas.estado_atencion` admite `En_proceso`
 
@@ -216,6 +336,13 @@ Estos nueve hallazgos no son erratas de redacción: cada uno cambia el modelo de
 **Por qué importa.** El vocabulario de la interfaz está congelado y usa `En proceso`, con espacio. Mientras la base use `En_proceso`, cada pantalla necesita traducir, y cualquier consulta escrita en SQL contra el valor «legible» devuelve cero filas sin avisar. Es el defecto más silencioso de la lista.
 
 **Qué propongo.** Renombrar el valor del `CHECK` a `En proceso` (y revisar de paso si `Atendida`/`Desestimada` deben mantener esa forma). Como sólo hay filas en `Pendiente`, es un cambio de esquema sin migración de datos: se demuestra comprobando el recuento antes y después. Es una decisión de vocabulario, no de arquitectura, y por eso conviene cerrarla cuanto antes para no tener que tocar vistas después.
+
+**Resuelto (2026-11-22).** `migration/24_estado_atencion_legible.sql` recrea el `CHECK` con
+`Pendiente · En proceso · Atendida · Desestimada`. No movió datos: 0 filas tenían el valor viejo y
+las 325 siguen en `Pendiente`. `lib/db/repos/demandas.ts` acepta la forma legada `En_proceso` y
+escribe siempre la canónica, de modo que un cliente antiguo no se rompe. Los otros dos catálogos de
+estado (`cat_estados_compromiso`, `cat_estados_hito`) ya estaban bien en la base; el único objeto del
+esquema `core` con el literal heredado era este `CHECK`.
 
 ### Falsos positivos descartados
 
@@ -226,17 +353,17 @@ El inventario traía dos hallazgos que no lo son; los descarto dejando la compro
 
 ### Resumen
 
-| #   | Hallazgo                                | Tipo                   | ¿Requiere tu decisión?                            |
-| --- | --------------------------------------- | ---------------------- | ------------------------------------------------- |
-| 1   | `cat_roles_actor` 7 vs 4                | Modelo / artefacto v10 | No: la base ya es correcta                        |
-| 2   | `demandas.caso_id` `NOT NULL`           | Artefacto v10          | No: la base ya es correcta                        |
-| 3   | Sobrecarga de `siguiente_codigo_caso()` | Esquema vivo           | No: retirar la heredada                           |
-| 4   | Literal «sembrar 1–3»                   | Artefacto generado     | No: corregir el generador                         |
-| 5   | Usuario demo en `backend/`              | Autenticación paralela | **Sí**                                            |
-| 6   | `log_envios` a dos tablas               | Artefacto generado     | No, salvo que se use `notificaciones` para envíos |
-| 7   | Numeración duplicada                    | Documento              | No: corregido                                     |
-| 8   | Calendario de compromisos               | Vista pendiente        | No: construir la vista                            |
-| 9   | `estado_atencion` con `En_proceso`      | Vocabulario / esquema  | Sí, de criterio: confirmar el renombre            |
+| #   | Hallazgo                                | Tipo                   | ¿Requiere tu decisión?                                           |
+| --- | --------------------------------------- | ---------------------- | ---------------------------------------------------------------- |
+| 1   | `cat_roles_actor` 7 vs 4                | Modelo / artefacto v10 | Parcial: v10 y diccionario alineados; falta el SQL unificado     |
+| 2   | `demandas.caso_id` `NOT NULL`           | Artefacto v10          | Resuelto: v10 y diccionario anulables                            |
+| 3   | Sobrecarga de `siguiente_codigo_caso()` | Esquema vivo           | Resuelto: migración 25 (retirada)                                |
+| 4   | Literales obsoletos en el diccionario   | Artefacto generado     | Parcial: diccionario limpio; queda el parche 23                  |
+| 5   | Usuario demo en `backend/`              | Autenticación paralela | Resuelto: retirado                                               |
+| 6   | `log_envios` a dos tablas               | Artefacto generado     | Resuelto: `core.envios_comunicacion`                             |
+| 7   | Numeración duplicada                    | Documento              | No: corregido                                                    |
+| 8   | Calendario de compromisos               | Vista pendiente        | Resuelto en código; el calendario está vacío por falta de fechas |
+| 9   | `estado_atencion` con `En_proceso`      | Vocabulario / esquema  | Resuelto: migración 24                                           |
 
 ## Orden recomendado de entrega
 
@@ -247,4 +374,4 @@ El inventario traía dos hallazgos que no lo son; los descarto dejando la compro
 5. **Construir módulos nuevos e integración:** V_ENVIOS, V_AUDITORIA, V_ADMIN, módulos 2027 y V_ETL; empezar ETL con archivos controlados y datos reales, después habilitar fuentes reales/OCR/integraciones autorizadas (54–62).
 6. **Productos documentales y automatización asistida:** primero el kit de formularios y la capa de reuniones (65–67, 72), después captura, triage y extracción (73–78), luego el generador de anexos (75) y al final análisis, memoria y lote (79–87). La regla se mantiene en todo el tramo: la máquina propone, la especialista valida y la operación queda registrada.
 
-**Dependencia clave:** la UI Next congelada se apoya en estado React y datos de demostración; la SPA Angular ya lee datos reales y le faltan persistencia de escritura, auditoría y filtros seguros, que son la base para que los cambios se conviertan en un sistema operativo real. El esquema V10 ofrece una referencia de dominio útil, pero antes de cualquier migración revisaría el esquema efectivamente conectado, sus catálogos y políticas de acceso. El login demo no equivale a autenticación institucional. En la ampliación, la dependencia crítica es la capa de reuniones (72): los items 65, 73, 74 y 77 no tienen sustrato sin ella y el Anexo 16 seguirá sin una sola fila. El generador de anexos (75) depende de que el vocabulario y los formularios sean únicos (66); construirlo antes produce plantillas que reproducen datos inconsistentes a escala.
+**Dependencia clave:** la UI Next congelada se apoya en estado React y datos de demostración; la SPA Angular ya lee datos reales y le faltan persistencia de escritura, auditoría y filtros seguros, que son la base para que los cambios se conviertan en un sistema operativo real. El esquema V10 ofrece una referencia de dominio útil, pero antes de cualquier migración revisaría el esquema efectivamente conectado, sus catálogos y políticas de acceso. El login demo no equivale a autenticación institucional. En la ampliación, la dependencia crítica es la capa de reuniones (72): los items 65, 73, 74 y 77 no tienen sustrato sin ella y el Anexo 16 seguirá sin una sola fila. El generador de anexos (75) depende de que el vocabulario y los formularios sean únicos (66); construirlo antes produce plantillas que reproducen datos inconsistentes a escala. Los pendientes P3 a P5 condicionan cualquier demostración con datos del legado: sin base legal formal no se expone PII fuera de `administrador` (item 45), y sin resolver los padres de demanda el Anexo 1 no cuadra aunque la vista funcione.

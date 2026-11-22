@@ -16,16 +16,95 @@
   <p class="form-error" role="alert">{{ mensaje }}</p>
   }
 
-  <div class="view-filters">
-    <label class="search-filter">
+  <div class="filter-bar filter-bar-wrap">
+    <label class="search-field">
       <app-icono nombre="buscar" [tamano]="14" />
       <input
         type="search"
-        placeholder="Buscar por código, título o región"
+        placeholder="Buscar por código, título o resumen"
         [value]="filtros().q"
         aria-label="Buscar casos"
         (input)="buscar($event)"
       />
+    </label>
+
+    <label class="select-filter">
+      Estado
+      <select aria-label="Filtrar casos por estado" (change)="cambiarEstado($event)">
+        <option value="" [selected]="filtros().estado === ''">Todos</option>
+        @for (opcion of estados(); track opcion.valor) {
+        <option [value]="opcion.valor" [selected]="filtros().estado === opcion.valor">
+          {{ opcion.etiqueta }}
+        </option>
+        }
+      </select>
+    </label>
+
+    <label class="select-filter">
+      Prioridad
+      <select
+        aria-label="Filtrar casos por prioridad de atención"
+        (change)="cambiarPrioridad($event)"
+      >
+        <option value="" [selected]="filtros().prioridad === ''">Todas</option>
+        @for (opcion of prioridades(); track opcion.valor) {
+        <option [value]="opcion.valor" [selected]="filtros().prioridad === opcion.valor">
+          {{ opcion.etiqueta }}
+        </option>
+        }
+      </select>
+    </label>
+
+    <label class="select-filter">
+      Alcance
+      <select aria-label="Filtrar casos por alcance geográfico" (change)="cambiarAlcance($event)">
+        <option value="" [selected]="filtros().alcance === ''">Todos</option>
+        @for (opcion of alcances(); track opcion.valor) {
+        <option [value]="opcion.valor" [selected]="filtros().alcance === opcion.valor">
+          {{ opcion.etiqueta }}
+        </option>
+        }
+      </select>
+    </label>
+
+    <label class="select-filter">
+      Temática
+      <select aria-label="Filtrar casos por temática" (change)="cambiarTematica($event)">
+        <option value="" [selected]="filtros().tematica === ''">Todas</option>
+        @for (opcion of tematicas(); track opcion.valor) {
+        <option [value]="opcion.valor" [selected]="filtros().tematica === opcion.valor">
+          {{ opcion.etiqueta }}
+        </option>
+        }
+      </select>
+    </label>
+
+    <label class="select-filter">
+      Unidad
+      <select
+        aria-label="Filtrar casos por unidad orgánica responsable"
+        (change)="cambiarUnidad($event)"
+      >
+        <option value="" [selected]="filtros().unidad === ''">Todas</option>
+        @for (opcion of unidades(); track opcion.valor) {
+        <option
+          [value]="opcion.valor"
+          [selected]="filtros().unidad === opcion.valor"
+          [title]="opcion.etiqueta"
+        >
+          {{ opcion.valor }}
+        </option>
+        }
+      </select>
+    </label>
+
+    <label class="select-filter">
+      Orden
+      <select aria-label="Ordenar casos" [value]="filtros().orden" (change)="cambiarOrden($event)">
+        @for (orden of ordenes; track orden.valor) {
+        <option [value]="orden.valor">{{ orden.etiqueta }}</option>
+        }
+      </select>
     </label>
 
     <button type="button" class="button-secondary" (click)="limpiar()">Limpiar filtros</button>
@@ -53,15 +132,6 @@
       Demandas sin caso
       <app-icono nombre="chevron-derecha" [tamano]="12" />
     </a>
-
-    <label class="select-filter">
-      Orden
-      <select aria-label="Ordenar casos" [value]="filtros().orden" (change)="cambiarOrden($event)">
-        @for (orden of ordenes; track orden.valor) {
-        <option [value]="orden.valor">{{ orden.etiqueta }}</option>
-        }
-      </select>
-    </label>
   </div>
 
   @if (estado() === "cargando") {

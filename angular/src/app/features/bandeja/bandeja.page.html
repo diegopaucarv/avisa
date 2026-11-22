@@ -71,9 +71,9 @@
         <p class="section-eyebrow">COMPROMISOS</p>
         <h3 class="bloque-titulo" id="titulo-compromisos-atencion">
           <app-icono nombre="compromisos" [tamano]="15" />
-          Vencidos o por vencer
+          Por vencer
         </h3>
-        <p>Compromisos abiertos con vencimiento pasado o dentro de 30 días.</p>
+        <p>Compromisos con vencimiento entre hoy y los próximos {{ horizonteDias }} días.</p>
       </div>
       <a class="link-button" routerLink="/compromisos">
         Ver todo
@@ -87,7 +87,7 @@
     <p class="bloque-vacio" role="status">Cargando compromisos…</p>
     } @else { @if (compromisos().length === 0) {
     <p class="bloque-vacio">
-      No hay compromisos vencidos ni próximos a vencer en la página más reciente.
+      No hay compromisos por vencer en los próximos {{ horizonteDias }} días.
     </p>
     } @else {
     <ul class="tarea-lista">
@@ -109,9 +109,7 @@
     </ul>
     } @if (totalCompromisos() > 0) {
     <p class="bloque-pie">
-      {{ totalCompromisos() }} compromisos registrados en total. La selección de vencidos o por
-      vencer se calcula sobre la página más reciente del servidor; el listado completo está en
-      Compromisos.
+      {{ totalCompromisos() }} compromisos por vencer en los próximos {{ horizonteDias }} días.
     </p>
     } }
   </section>

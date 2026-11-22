@@ -3,7 +3,6 @@ import { RouterLink } from '@angular/router';
 
 import { urlApi } from '../../core/config/entorno';
 import {
-  TAMANO_PAGINA,
   paramsDePagina,
   normalizarColeccion,
   urlConParametros,
@@ -22,7 +21,7 @@ import {
   type ResolucionVencimiento,
   type Situacion,
 } from '../compromisos/compromiso.mapeo';
-import { aSinCasoTotal, aTotal, compromisosPorVencer } from './resumen.mapeo';
+import { HORIZONTE_POR_VENCER_DIAS, aSinCasoTotal, aTotal, rangoPorVencer } from './resumen.mapeo';
 
 type Indicador = {
   clave: string;
@@ -296,27 +295,31 @@ export class ResumenPage {
   readonly estadoAlertas = this.recursoAlertas.estado;
   readonly errorAlertas = this.recursoAlertas.error;
 
+  /** Días del horizonte que anuncia el bloque y que se envía al servidor. */
+  readonly horizonteDias = HORIZONTE_POR_VENCER_DIAS;
+
   /**
-   * El listado de compromisos sólo ordena por fecha de inicio y no permite
-   * filtrar por situación, así que se pide una página de `TAMANO_PAGINA` filas
-   * y la selección por vencimiento se hace en el cliente sobre esa página.
-   * El `total` del sobre sigue siendo el recuento exacto del servidor.
+   * El listado aplica el rango en el servidor (`vencimiento_desde` hoy,
+   * `vencimiento_hasta` hoy + horizonte) sobre el vencimiento efectivo y ordena
+   * por esa fecha de forma ascendente. El `total` del sobre cuenta la cola
+   * completa y la página trae sólo las cinco más próximas.
    */
   private readonly recursoCompromisos = consulta<Coleccion<Compromiso>>({
-    fuente: () =>
-      urlConParametros(
-        urlApi('/v1/commitments'),
-        paramsDePagina({ pagina: 1, tamano: TAMANO_PAGINA }),
-      ),
+    fuente: () => {
+      const rango = rangoPorVencer();
+      return urlConParametros(urlApi('/v1/commitments'), {
+        ...paramsDePagina({ pagina: 1, tamano: 5 }),
+        vencimiento_desde: rango.desde,
+        vencimiento_hasta: rango.hasta,
+      });
+    },
     esquema: (bruto) => {
       const coleccion = normalizarColeccion<unknown>(bruto);
       return { ...coleccion, elementos: coleccion.elementos.map(aCompromiso) };
     },
   });
 
-  readonly compromisos = computed(() =>
-    compromisosPorVencer(this.recursoCompromisos.valor()?.elementos ?? []),
-  );
+  readonly compromisos = computed(() => this.recursoCompromisos.valor()?.elementos ?? []);
   readonly totalCompromisos = computed(() => this.recursoCompromisos.valor()?.total ?? 0);
   readonly estadoCompromisos = this.recursoCompromisos.estado;
   readonly errorCompromisos = this.recursoCompromisos.error;

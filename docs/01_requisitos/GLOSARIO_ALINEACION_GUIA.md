@@ -154,6 +154,12 @@ Activo · En seguimiento · Resuelto · Archivado
   sinónimo de `Paralizado`.
 - «Vencido» existe, pero es el **cálculo de plazo por fecha**, no un estado de gestión.
 
+El **estado de atención de la demanda** es un eje independiente (no está entre los doce ejes
+congelados) y usa los mismos valores legibles desde la migración 24: `Pendiente` · `En proceso` ·
+`Atendida` · `Desestimada`. La forma con guion bajo ya no existe en la base: un `CHECK` que la admita
+sería un error, y la API acepta la forma legada sólo para no romper clientes, escribiendo siempre la
+canónica.
+
 ### 1.9 · Alcance geográfico
 
 ```
@@ -200,9 +206,12 @@ La numeración es la de la Guía y no se reutiliza:
 | 16  | Registro de Reuniones y Espacios de Diálogo   |
 | 17  | Registro de Reportes                          |
 
-- `cat_tipos_documento` cubre hoy los anexos 4–13 y el reporte de alerta temprana ya lleva
-  `anexo_numero = 3` (migración 14). Los anexos 1, 2 y 14–17 no están tipificados todavía
-  (decisión pendiente).
+- `cat_tipos_documento` cubre hoy los anexos **1 a 13**: el reporte de alerta temprana lleva
+  `anexo_numero = 3` desde la migración 14 y los anexos 1 y 2 se añadieron en la migración 20
+  (decisión D3). Los anexos **14 a 17 no se tipifican a propósito**: los anexos 14, 15 y 16 son
+  registros estructurados con tabla propia (`compromisos` e `hitos_compromiso`, `casos`,
+  `reuniones_dialogo`) y el 17 se sirve desde `analytics.vw_anexo_17_registro_reportes` (E4,
+  cerrado sin crear tabla).
 
 ### 1.12 · Vocabulario CONGELADO
 

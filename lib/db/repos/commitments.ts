@@ -36,6 +36,7 @@ const COMMITMENT_COLUMNS = `
   cmp.confidence::float8 as confianza,
   cmp.es_validado_humano as validado,
   cmp.nivel_clasificacion as clasificacion,
+  cmp.anulado_en as anulado_en,
   to_char(current_date, 'YYYY-MM-DD') as today
 `;
 
@@ -47,6 +48,27 @@ const COMMITMENT_FROM = `
   left join core.cat_alcances_geograficos ag on ag.id = cmp.alcance_id
   left join core.cat_tematicas te on te.id = cmp.tematica_id
 `;
+
+/**
+ * Vencimiento efectivo de un compromiso: la fecha manual prevalece y, si
+ * falta, se usa la del próximo hito no terminal (el más temprano con fecha).
+ * Es la misma regla que `mapItem` y la que muestra la columna «Vencimiento»
+ * de la tabla, de modo que el calendario y el listado no se contradicen.
+ *
+ * Vive en el WHERE y en el ORDER BY del rango de fechas, nunca se concatena
+ * un valor: los límites van como parámetros `$n`.
+ */
+const VENCIMIENTO_EFECTIVO = `coalesce(
+    cmp.fecha_vencimiento,
+    (
+      select min(h.fecha_vencimiento)
+        from core.hitos_compromiso h
+        left join core.cat_estados_hito eh on eh.id = h.estado_id
+       where h.compromiso_id = cmp.id
+         and h.fecha_vencimiento is not null
+         and coalesce(eh.es_terminal, false) = false
+    )
+  )`;
 
 const HITOS_LIST_JSON = `
   coalesce((
@@ -93,6 +115,18 @@ export type CommitmentListQuery = {
   tipo?: string;
   nivelGobierno?: string;
   atiendeGenero?: string;
+  /** `YYYY-MM-DD` inclusive; filtra por el vencimiento efectivo. */
+  vencimientoDesde?: string;
+  /** `YYYY-MM-DD` inclusive; filtra por el vencimiento efectivo. */
+  vencimientoHasta?: string;
+  /**
+   * `true` lista la papelera: añade `anulado_en is not null`. Requiere abrir
+   * la RLS con `withSession(..., { verAnulados: true })`; si no, la política
+   * sigue ocultando las filas y el listado sale vacío.
+   */
+  incluirAnulados?: boolean;
+  /** `true` excluye los compromisos en estado terminal (cumplido, desestimado…). */
+  excluirTerminales?: boolean;
   page?: number;
   pageSize?: number;
 };
@@ -147,6 +181,8 @@ export type CommitmentListItem = {
   confianza: number | null;
   validado: boolean | null;
   clasificacion: number | null;
+  /** Fecha de anulación en ISO 8601, o `null` si el registro está vigente. */
+  anuladoEn: string | null;
   hitos: CommitmentHito[];
   proximoHito: CommitmentProximoHito | null;
   vencido: boolean;
@@ -190,6 +226,16 @@ function parseBool(value: string): boolean | undefined {
   if (value === "true") return true;
   if (value === "false") return false;
   return undefined;
+}
+
+/**
+ * `pg` devuelve `timestamptz` como `Date`; se normaliza a ISO para el payload.
+ * Cualquier valor no convertible se trata como ausente.
+ */
+function isoOrNull(value: unknown): string | null {
+  if (!value) return null;
+  const date = value instanceof Date ? value : new Date(String(value));
+  return Number.isNaN(date.getTime()) ? null : date.toISOString();
 }
 
 /**
@@ -255,6 +301,7 @@ function mapItem(row: CommitmentRow): CommitmentListItem {
     confianza: row.confianza,
     validado: row.validado,
     clasificacion: row.clasificacion,
+    anuladoEn: isoOrNull(row.anulado_en),
     hitos,
     proximoHito,
     // Comparación lexicográfica de YYYY-MM-DD es equivalente a comparar fechas.
@@ -302,8 +349,41 @@ export async function listCommitments(
     }
   }
 
+  // Papelera: abrir la RLS es cosa de `app.ver_anulados`; aquí sólo se acota
+  // el resultado a las filas anuladas. Sin `incluirAnulados` no se añade
+  // `anulado_en is null`: `p_clasificacion` ya lo impone.
+  if (query.incluirAnulados) {
+    where.push("cmp.anulado_en is not null");
+  }
+  // Cola de vencidos: un compromiso terminal no se cuenta como pendiente.
+  if (query.excluirTerminales) {
+    where.push("coalesce(ec.es_terminal, false) = false");
+  }
+
+  // Rango de vencimiento para la vista de calendario. Las fechas ya llegan
+  // validadas desde la ruta; aquí se comprueba otra vez para que el repo no
+  // dependa de ese contrato y para no castear texto libre a `date` (un valor
+  // mal formado provocaría un 500).
+  const desde = query.vencimientoDesde?.trim();
+  const hasta = query.vencimientoHasta?.trim();
+  const desdeValido = desde && isIsoDate(desde) ? desde : null;
+  const hastaValido = hasta && isIsoDate(hasta) ? hasta : null;
+  if (desdeValido) {
+    where.push(`${VENCIMIENTO_EFECTIVO} >= ${bind(desdeValido)}::date`);
+  }
+  if (hastaValido) {
+    where.push(`${VENCIMIENTO_EFECTIVO} <= ${bind(hastaValido)}::date`);
+  }
+
   const page = Math.max(1, Math.trunc(query.page ?? 1));
   const pageSize = Math.min(100, Math.max(1, Math.trunc(query.pageSize ?? 25)));
+
+  // Con rango de fechas interesa que el tope de filas conserve las fechas más
+  // próximas; sin rango se mantiene el orden histórico del listado.
+  const orden =
+    desdeValido || hastaValido
+      ? `${VENCIMIENTO_EFECTIVO} asc nulls last, cmp.codigo_compromiso`
+      : "cmp.fecha_inicio desc nulls last, cmp.codigo_compromiso";
 
   const sql = `
     select ${COMMITMENT_COLUMNS},
@@ -311,7 +391,7 @@ export async function listCommitments(
            count(*) over()::int as total
     ${COMMITMENT_FROM}
     ${where.length ? `where ${where.join(" and ")}` : ""}
-    order by cmp.fecha_inicio desc nulls last, cmp.codigo_compromiso
+    order by ${orden}
     limit ${bind(pageSize)} offset ${bind((page - 1) * pageSize)}
   `;
 

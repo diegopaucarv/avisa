@@ -137,14 +137,7 @@ function RiskBadge({ level }: { level?: string }) {
     </span>
   );
 }
-function DemoNotice() {
-  return (
-    <div className="demo-notice" role="status">
-      <Info size={15} />
 
-    </div>
-  );
-}
 function governmentLevelLabel(level?: string) {
   if (!level) return "Nacional";
   return level === "Regional" ? "GORE" : level;
@@ -1984,7 +1977,6 @@ function Overview({
   ).length;
   return (
     <>
-      <DemoNotice />
       <div className="overview-heading">
         <div>
           <p className="section-eyebrow">

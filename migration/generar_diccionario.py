@@ -870,8 +870,8 @@ def panorama(datos: dict, lineas: list[str]) -> None:
         )
         lineas.append(
             f"Tablas sin clasificar: {nombres}. Ninguna aparece en el inventario del "
-            "BRECHA §12; las tres son objetos de soporte y su clase se deduce de su "
-            "función (ver `CLASIFICACION_EXPLICITA` en el generador)."
+            "BRECHA §12 ni en `CLASIFICACION_EXPLICITA`; se listan aparte para que su "
+            "clase se asigne a mano en el generador."
         )
         lineas.append("")
 

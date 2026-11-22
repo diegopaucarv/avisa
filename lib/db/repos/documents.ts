@@ -42,7 +42,8 @@ const DOCUMENT_SELECT = `
   d.nivel_clasificacion as clasificacion,
   d.responsable_usuario_id,
   d.reunion_id,
-  d.distrito_id
+  d.distrito_id,
+  d.anulado_en as anulado_en
 `;
 
 const DOCUMENT_FROM = `
@@ -57,6 +58,12 @@ export type DocumentListQuery = {
   tipo?: string;
   estado?: string;
   sort?: string;
+  /**
+   * `true` lista la papelera: añade `anulado_en is not null`. Requiere abrir
+   * la RLS con `withSession(..., { verAnulados: true })`; si no, la política
+   * sigue ocultando las filas.
+   */
+  incluirAnulados?: boolean;
   page?: number;
   pageSize?: number;
 };
@@ -85,6 +92,8 @@ export type DocumentListItem = {
   responsableUsuarioId: string | null;
   reunionId: string | null;
   distritoId: number | null;
+  /** Fecha de anulación en ISO 8601, o `null` si el documento está vigente. */
+  anuladoEn: string | null;
 };
 
 export type DocumentListResult = {
@@ -125,7 +134,18 @@ function mapDocument(row: Record<string, unknown>): DocumentListItem {
     responsableUsuarioId: row.responsable_usuario_id as string | null,
     reunionId: row.reunion_id as string | null,
     distritoId: row.distrito_id as number | null,
+    anuladoEn: isoOrNull(row.anulado_en),
   };
+}
+
+/**
+ * `pg` devuelve `timestamptz` como `Date`; se normaliza a ISO para el payload.
+ * Cualquier valor no convertible se trata como ausente.
+ */
+function isoOrNull(value: unknown): string | null {
+  if (!value) return null;
+  const date = value instanceof Date ? value : new Date(String(value));
+  return Number.isNaN(date.getTime()) ? null : date.toISOString();
 }
 
 export async function listDocuments(
@@ -154,6 +174,13 @@ export async function listDocuments(
     where.push("d.estado is not null");
   } else if (query.estado) {
     where.push(`lower(btrim(d.estado)) = lower(${bind(query.estado)})`);
+  }
+
+  // Papelera: abrir la RLS es cosa de `app.ver_anulados`; aquí sólo se acota
+  // el resultado a las filas anuladas. Sin `incluirAnulados` no se añade
+  // `anulado_en is null`: `p_clasificacion` ya lo impone.
+  if (query.incluirAnulados) {
+    where.push("d.anulado_en is not null");
   }
 
   const page = Math.max(1, Math.trunc(query.page ?? 1));

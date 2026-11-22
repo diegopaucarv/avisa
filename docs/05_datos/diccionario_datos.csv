@@ -167,8 +167,8 @@ agent,llm_call_default,1,P,grounding_habilitado,18,boolean,no,false,0,0,,Si se a
 agent,llm_call_default,1,P,store_habilitado,19,boolean,no,false,0,0,,Si Google conserva el contenido. RM-15 exige falso (Ley 29733).,heredado_padre
 agent,llm_call_default,1,P,datos_anonimizados,20,boolean,no,false,0,0,,Si el texto se anonimizó antes de salir (DNI y teléfonos retirados). RM-15.,heredado_padre
 agent,llm_call_default,1,P,costo_estimado_usd,21,"numeric(12,6)",sí,,0,0,,"Costo aproximado de la llamada, calculado por el servicio de aplicación. RNF-13: permite sumar consumo por servicio y por mes.",heredado_padre
-agent,llm_call_fragmento,0,P,call_id,1,uuid,no,,1,0,agent.llm_call_202703(id);agent.llm_call_202701(id);agent.llm_call_202612(id);agent.llm_call_202611(id);agent.llm_call(id);agent.llm_call_default(id);agent.llm_call_202702(id),Llamada al modelo que recuperó el fragmento documental,comentario_bd
-agent,llm_call_fragmento,0,P,call_ts,2,timestamp with time zone,no,,1,0,agent.llm_call_202703(ts);agent.llm_call_202701(ts);agent.llm_call_202612(ts);agent.llm_call_202611(ts);agent.llm_call(ts);agent.llm_call_default(ts);agent.llm_call_202702(ts),"Momento de la llamada, que con su identificador completa la clave del vínculo",comentario_bd
+agent,llm_call_fragmento,0,P,call_id,1,uuid,no,,1,0,agent.llm_call(id);agent.llm_call_202611(id);agent.llm_call_202612(id);agent.llm_call_202701(id);agent.llm_call_202702(id);agent.llm_call_202703(id);agent.llm_call_default(id),Llamada al modelo que recuperó el fragmento documental,comentario_bd
+agent,llm_call_fragmento,0,P,call_ts,2,timestamp with time zone,no,,1,0,agent.llm_call(ts);agent.llm_call_202611(ts);agent.llm_call_202612(ts);agent.llm_call_202701(ts);agent.llm_call_202702(ts);agent.llm_call_202703(ts);agent.llm_call_default(ts),"Momento de la llamada, que con su identificador completa la clave del vínculo",comentario_bd
 agent,llm_call_fragmento,0,P,fragmento_id,3,uuid,no,,1,0,kag.documento_fragmento(id),Fragmento documental recuperado como insumo de la llamada,comentario_bd
 agent,llm_call_fragmento,0,P,rank_rrf,4,integer,sí,,0,0,,Posición que el fragmento ocupó tras fusionar los resultados de búsqueda,comentario_bd
 agent,llm_call_fragmento,0,P,score_rrf,5,numeric,sí,,0,0,,"Puntaje de fusión del fragmento, que pondera sus apariciones en cada búsqueda",comentario_bd
@@ -332,6 +332,15 @@ analisis,punto_ingesta,0,P,codigo,2,character varying(40),no,,0,1,,"Código esta
 analisis,punto_ingesta,0,P,descripcion,3,text,no,,0,0,,Descripción del punto de ingesta y de los datos que admite,comentario_bd
 analisis,punto_ingesta,0,P,esquema_validacion,4,jsonb,sí,,0,0,,Reglas de validación en JSON que deben cumplir los datos cargados,comentario_bd
 analisis,punto_ingesta,0,P,destino,5,character varying(5),no,,0,0,,Destino del modelo donde quedan cargados los datos ingresados,comentario_bd
+audit,cambios,0,,id,1,uuid,no,gen_random_uuid(),1,0,,,sin_descripcion
+audit,cambios,0,,tabla,2,text,no,,0,0,,,sin_descripcion
+audit,cambios,0,,registro_id,3,text,no,,0,0,,,sin_descripcion
+audit,cambios,0,,accion,4,text,no,,0,0,,,sin_descripcion
+audit,cambios,0,,usuario_id,5,uuid,sí,,0,0,,,sin_descripcion
+audit,cambios,0,,rol_codigo,6,text,sí,,0,0,,,sin_descripcion
+audit,cambios,0,,datos_antes,7,jsonb,sí,,0,0,,Estado previo de la fila (sólo UPDATE/DELETE). No debe contener PII descifrada.,comentario_bd
+audit,cambios,0,,datos_despues,8,jsonb,sí,,0,0,,Estado posterior de la fila (sólo INSERT/UPDATE). No debe contener PII descifrada.,comentario_bd
+audit,cambios,0,,created_at,9,timestamp with time zone,no,now(),0,0,,,sin_descripcion
 audit,datos_personales_acceso,0,INF,id,1,bigint,no,,1,0,,Identificador interno del evento registrado en la bitácora,comentario_bd
 audit,datos_personales_acceso,0,INF,ocurrido_en,2,timestamp with time zone,no,now(),0,0,,Momento exacto en que ocurrió el acceso o la escritura auditada,comentario_bd
 audit,datos_personales_acceso,0,INF,usuario,3,text,no,CURRENT_USER,0,0,,"Usuario de la sesión que ejecutó el acceso; se toma de la conexión y no del propietario del objeto, porque el propietario no diría quién accedió",comentario_bd
@@ -439,8 +448,8 @@ avisa,raw_ingest_default,1,I,caso_id,12,uuid,sí,,0,0,core.casos(id),"Caso al qu
 avisa,raw_ingest_default,1,I,tipo_registro,13,character varying(20),no,'evento'::character varying,0,0,,"Clase de registro que el mensaje representa, por defecto evento",heredado_padre
 avisa,raw_ingest_default,1,I,policy_snapshot_id,14,uuid,sí,,0,0,policy.snapshot(id),Foto de las políticas vigentes al momento de recibir el mensaje,heredado_padre
 avisa,raw_ingest_rejected,0,I,id,1,uuid,no,gen_random_uuid(),1,0,,Identificador interno de la fila,comentario_bd
-avisa,raw_ingest_rejected,0,I,raw_id,2,uuid,no,,0,0,avisa.raw_ingest_202703(id);avisa.raw_ingest_202702(id);avisa.raw_ingest_202701(id);avisa.raw_ingest_202612(id);avisa.raw_ingest_202611(id);avisa.raw_ingest_default(id);avisa.raw_ingest(id),"Mensaje crudo descartado, buscado en la partición donde ingresó",comentario_bd
-avisa,raw_ingest_rejected,0,I,raw_received_at,3,timestamp with time zone,no,,0,0,avisa.raw_ingest_202703(received_at);avisa.raw_ingest_202702(received_at);avisa.raw_ingest_202701(received_at);avisa.raw_ingest_202612(received_at);avisa.raw_ingest_202611(received_at);avisa.raw_ingest_default(received_at);avisa.raw_ingest(received_at),"Momento en que se recibió el mensaje descartado, junto con su identificador",comentario_bd
+avisa,raw_ingest_rejected,0,I,raw_id,2,uuid,no,,0,0,avisa.raw_ingest(id);avisa.raw_ingest_202702(id);avisa.raw_ingest_202612(id);avisa.raw_ingest_default(id);avisa.raw_ingest_202703(id);avisa.raw_ingest_202611(id);avisa.raw_ingest_202701(id),"Mensaje crudo descartado, buscado en la partición donde ingresó",comentario_bd
+avisa,raw_ingest_rejected,0,I,raw_received_at,3,timestamp with time zone,no,,0,0,avisa.raw_ingest(received_at);avisa.raw_ingest_202702(received_at);avisa.raw_ingest_202612(received_at);avisa.raw_ingest_default(received_at);avisa.raw_ingest_202703(received_at);avisa.raw_ingest_202611(received_at);avisa.raw_ingest_202701(received_at),"Momento en que se recibió el mensaje descartado, junto con su identificador",comentario_bd
 avisa,raw_ingest_rejected,0,I,error_json,4,jsonb,no,,0,0,,Detalle estructurado del error que motivó el rechazo del mensaje,comentario_bd
 avisa,raw_ingest_rejected,0,I,created_at,5,timestamp with time zone,no,now(),0,0,,Momento en que se creó el registro,comentario_bd
 chat,blame,0,P,id,1,uuid,no,gen_random_uuid(),1,0,,Identificador interno de la fila,comentario_bd
@@ -826,6 +835,10 @@ core,alertas_tempranas,0,I,aprobada_por,34,uuid,sí,,0,0,core.usuarios(id),"Usua
 core,alertas_tempranas,0,I,aprobada_en,35,timestamp with time zone,sí,,0,0,,Momento en que se registró la aprobación definitiva de la alerta; nulo mientras la alerta no esté aprobada,comentario_bd
 core,alertas_tempranas,0,I,visibilidad,36,character varying(12),no,'interna'::character varying,0,0,,"Alcance de la alerta. interna: solo la ve la OAIPCS (Perfil A), es el valor de nacimiento y el único admisible mientras falte alguna de las dos aprobaciones humanas. ejecutiva: además se ve en el Perfil B (Alta Dirección). sectorial: la remisión se limita a los destinatarios nombrados de esa alerta (el portal del Perfil C queda fuera del MVP). No relaja RD-08: ningún dato personal pasa por el canal público del Dashboard Estratégico, cualquiera sea la visibilidad. El gate G21 (trigger alertas_g21_visibilidad) impide salir de interna sin la validación previa del Sectorista y la aprobación definitiva de la Dirección",comentario_bd
 core,alertas_tempranas,0,I,validada_por,37,uuid,sí,,0,0,core.usuarios(id),Autor de la validación previa del Sectorista. Junto con fecha_validacion forma la primera de las dos firmas de G21; la segunda es aprobada_por y aprobada_en. La restricción alertas_cuatro_ojos impide que la misma persona firme la validación y la aprobación. Las 83 alertas migradas lo tienen en NULL porque el sistema anterior nunca registró quién validaba,comentario_bd
+core,alertas_tempranas,0,I,anulado_en,38,timestamp with time zone,sí,,0,0,,,sin_descripcion
+core,alertas_tempranas,0,I,anulado_por,39,uuid,sí,,0,0,core.usuarios(id),,sin_descripcion
+core,alertas_tempranas,0,I,anulacion_id,40,uuid,sí,,0,0,,,sin_descripcion
+core,alertas_tempranas,0,I,motivo_anulacion,41,text,sí,,0,0,,,sin_descripcion
 core,banco_datos_tratamiento,0,INF,id,1,smallint,no,,1,0,,Identificador interno del banco de datos,comentario_bd
 core,banco_datos_tratamiento,0,INF,codigo,2,character varying(40),no,,0,1,,"Identificador corto del banco, usado en la documentación y en el expediente.",comentario_bd
 core,banco_datos_tratamiento,0,INF,nombre,3,character varying(200),no,,0,0,,"Nombre oficial del banco de datos personales, tal como se declara ante la autoridad",comentario_bd
@@ -901,6 +914,10 @@ core,caso_cronologia,0,I,sectorista_usuario_id,17,uuid,sí,,0,0,core.usuarios(id
 core,caso_cronologia,0,I,link_evidencia,18,character varying(500),sí,,0,0,,Enlace al documento o archivo que respalda el hecho,comentario_bd
 core,caso_cronologia,0,I,tipo_evidencia_legado,19,character varying(80),sí,,0,0,,Tipo de evidencia tal como se anotó en el sistema anterior,comentario_bd
 core,caso_cronologia,0,I,codigo_legado,20,character varying(50),sí,,0,1,,"Código del hecho en el sistema anterior, útil para trazabilidad",comentario_bd
+core,caso_cronologia,0,I,anulado_en,21,timestamp with time zone,sí,,0,0,,,sin_descripcion
+core,caso_cronologia,0,I,anulado_por,22,uuid,sí,,0,0,core.usuarios(id),,sin_descripcion
+core,caso_cronologia,0,I,anulacion_id,23,uuid,sí,,0,0,,,sin_descripcion
+core,caso_cronologia,0,I,motivo_anulacion,24,text,sí,,0,0,,,sin_descripcion
 core,caso_distritos,0,I,caso_id,1,uuid,no,,1,0,core.casos(id),Caso que alcanza al distrito registrado,comentario_bd
 core,caso_distritos,0,I,distrito_id,2,integer,no,,1,0,core.distritos(id),"Distrito alcanzado por el caso, dentro de su alcance territorial",comentario_bd
 core,caso_estado_historial,0,O,id,1,uuid,no,gen_random_uuid(),1,0,,Identificador interno de la fila,comentario_bd
@@ -963,6 +980,10 @@ core,casos,0,I,n_reaperturas,37,smallint,no,0,0,0,,Cantidad de veces que el caso
 core,casos,0,I,motivo_cierre,38,text,sí,,0,0,,Razón por la que se cerró el caso,comentario_bd
 core,casos,0,I,link_reporte_pdf,39,character varying(500),sí,,0,0,,Enlace al reporte en PDF generado para el caso,comentario_bd
 core,casos,0,I,codigo_legado,40,character varying(50),sí,,0,1,,Código del caso en el sistema anterior,comentario_bd
+core,casos,0,I,anulado_en,41,timestamp with time zone,sí,,0,0,,Momento de la anulación lógica. NULL = vigente.,comentario_bd
+core,casos,0,I,anulado_por,42,uuid,sí,,0,0,core.usuarios(id),,sin_descripcion
+core,casos,0,I,anulacion_id,43,uuid,sí,,0,0,,Lote de anulación: agrupa el caso y sus dependencias para restaurarlos juntos.,comentario_bd
+core,casos,0,I,motivo_anulacion,44,text,sí,,0,0,,Motivo declarado al anular (obligatorio).,comentario_bd
 core,casos_actores,0,I,caso_id,1,uuid,no,,1,0,core.casos(id),Caso en el que participa el actor,comentario_bd
 core,casos_actores,0,I,actor_id,2,uuid,no,,1,0,core.actores(actor_uid),Actor vinculado al caso dentro del padrón,comentario_bd
 core,casos_actores,0,I,nivel_influencia,3,smallint,no,50,0,0,,"Grado de influencia del actor en el desarrollo del caso, de 0 a 100",comentario_bd
@@ -1031,7 +1052,7 @@ core,cat_pip_fases,0,INF,orden,3,smallint,no,,0,0,,Posición de la fase dentro d
 core,cat_prioridades_alerta,0,INF,id,1,smallint,no,,1,0,,Identificador interno de la fila,comentario_bd
 core,cat_prioridades_alerta,0,INF,codigo,2,character varying(30),no,,0,1,,"Código de la prioridad, asociado a su plazo de respuesta",comentario_bd
 core,cat_prioridades_alerta,0,INF,sla_horas,3,smallint,sí,,0,0,,"Plazo de respuesta de la prioridad, expresado en horas",comentario_bd
-core,cat_prioridades_alerta,0,INF,es_grave,4,boolean,no,false,0,0,,"Marca si el nivel de prioridad es grave para la regla RN-02: los graves llevan al Ministro como destinatario. Verdaderos hoy: Critica_Inmediata (24 h) y Urgente (48 h). Un nivel sin plazo de atención (Seguimiento) no puede ser grave, y la restricción cat_prioridades_alerta_grave_con_plazo lo impide",comentario_bd
+core,cat_prioridades_alerta,0,INF,es_grave,4,boolean,no,false,0,0,,"Marca si el nivel de prioridad es grave para la regla RN-02: los graves llevan al Ministro como destinatario. Verdaderos hoy: Crítica inmediata (24 h) y Urgente (48 h). Un nivel sin plazo de atención (Seguimiento) no puede ser grave, y la restricción cat_prioridades_alerta_grave_con_plazo lo impide",comentario_bd
 core,cat_prioridades_atencion,0,INF,id,1,smallint,no,,1,0,,Identificador interno de la fila,comentario_bd
 core,cat_prioridades_atencion,0,INF,codigo,2,character varying(20),no,,0,1,,Código de la prioridad de atención del caso,comentario_bd
 core,cat_prioridades_atencion,0,INF,orden,3,smallint,no,,0,0,,Posición de la prioridad en la escala de atención,comentario_bd
@@ -1131,6 +1152,11 @@ core,compromisos,0,I,origen_dato,22,character varying(20),no,'MANUAL'::character
 core,compromisos,0,I,confidence,23,"numeric(3,2)",sí,,0,0,,"Grado de certeza del dato, entre 0 y 1",comentario_bd
 core,compromisos,0,I,es_validado_humano,24,boolean,no,false,0,0,,Indica si un analista revisó y avaló el registro,comentario_bd
 core,compromisos,0,I,nivel_clasificacion,25,smallint,no,2,0,0,core.cat_clasificacion(nivel),"Nivel de acceso al dato: 1 público, 2 reservado, 3 confidencial",comentario_bd
+core,compromisos,0,I,fecha_vencimiento,26,date,sí,,0,0,,"D3: vencimiento manual del compromiso. Si es NULL, se deriva del próximo hito no terminal.",comentario_bd
+core,compromisos,0,I,anulado_en,27,timestamp with time zone,sí,,0,0,,,sin_descripcion
+core,compromisos,0,I,anulado_por,28,uuid,sí,,0,0,core.usuarios(id),,sin_descripcion
+core,compromisos,0,I,anulacion_id,29,uuid,sí,,0,0,,,sin_descripcion
+core,compromisos,0,I,motivo_anulacion,30,text,sí,,0,0,,,sin_descripcion
 core,consulta_reniec,0,I,id,1,uuid,no,gen_random_uuid(),1,0,,Identificador interno de la consulta.,comentario_bd
 core,consulta_reniec,0,I,actor_uid,2,uuid,no,,0,0,core.actores,"Actor sobre el que se consultó, según core.actores.",comentario_bd
 core,consulta_reniec,0,I,caso_id,3,uuid,sí,,0,0,core.casos(id),"Caso en cuyo contexto se pidió la consulta, si la consulta se hizo por uno.",comentario_bd
@@ -1149,7 +1175,7 @@ core,demandas,0,I,caso_id,2,uuid,sí,,0,0,core.casos(id),Caso en el que se plant
 core,demandas,0,I,problema_3p,3,text,sí,,0,0,,Problema que los actores identifican como origen de la demanda,comentario_bd
 core,demandas,0,I,propuesta_3p,4,text,sí,,0,0,,Propuesta que los actores plantean para atender el problema,comentario_bd
 core,demandas,0,I,pedido_3p,5,text,sí,,0,0,,Pedido concreto que los actores dirigen a la entidad,comentario_bd
-core,demandas,0,I,estado_atencion,6,character varying(20),no,'Pendiente'::character varying,0,0,,Situación de atención de la demanda,comentario_bd
+core,demandas,0,I,estado_atencion,6,character varying(20),no,'Pendiente'::character varying,0,0,,Estado de atención de la demanda: Pendiente · En proceso · Atendida · Desestimada. Eje independiente del estado de hito y del estado de compromiso (glosario §1.8).,comentario_bd
 core,demandas,0,I,motivo_no_atencion,7,text,sí,,0,0,,Razón por la que la demanda no fue atendida,comentario_bd
 core,demandas,0,I,fecha_vencimiento_respuesta,8,date,sí,,0,0,,Fecha límite para responder la demanda,comentario_bd
 core,demandas,0,I,afecta_diferenciadamente_mujeres,9,boolean,no,false,0,0,,Indica si la demanda afecta de manera distinta a las mujeres,comentario_bd
@@ -1170,6 +1196,10 @@ core,demandas,0,I,referencia_evidencia_legado,23,character varying(255),sí,,0,0
 core,demandas,0,I,codigo_legado,24,character varying(50),sí,,0,1,,Código de la demanda en el sistema anterior,comentario_bd
 core,demandas,0,I,documento_origen_id,25,uuid,sí,,0,0,core.documentos(id),Documento del que proviene la demanda,comentario_bd
 core,demandas,0,I,codigo_padre_legado,26,character varying(50),sí,,0,0,,"Código del registro padre en el legado, para reconstruir jerarquías",comentario_bd
+core,demandas,0,I,anulado_en,27,timestamp with time zone,sí,,0,0,,,sin_descripcion
+core,demandas,0,I,anulado_por,28,uuid,sí,,0,0,core.usuarios(id),,sin_descripcion
+core,demandas,0,I,anulacion_id,29,uuid,sí,,0,0,,,sin_descripcion
+core,demandas,0,I,motivo_anulacion,30,text,sí,,0,0,,,sin_descripcion
 core,demandas_actores,0,I,demanda_id,1,uuid,no,,1,0,core.demandas(id),Demanda que el actor plantea o respalda,comentario_bd
 core,demandas_actores,0,I,actor_id,2,uuid,no,,1,0,core.actores(actor_uid),Actor que plantea o respalda la demanda,comentario_bd
 core,demandas_actores,0,I,rol_en_demanda,3,character varying(20),no,,0,0,,"Rol del actor en esa demanda, por ejemplo promotor o adherente",comentario_bd
@@ -1218,6 +1248,10 @@ core,documentos,0,I,estado,21,character varying(40),sí,,0,0,,"Situación del do
 core,documentos,0,I,distrito_id,22,integer,sí,,0,0,core.distritos(id),Distrito al que se refiere el documento,comentario_bd
 core,documentos,0,I,url_lista,23,character varying(500),sí,,0,0,,Enlace al listado o índice asociado al documento,comentario_bd
 core,documentos,0,I,url_foto,24,character varying(500),sí,,0,0,,Enlace a la fotografía vinculada al documento,comentario_bd
+core,documentos,0,I,anulado_en,25,timestamp with time zone,sí,,0,0,,,sin_descripcion
+core,documentos,0,I,anulado_por,26,uuid,sí,,0,0,core.usuarios(id),,sin_descripcion
+core,documentos,0,I,anulacion_id,27,uuid,sí,,0,0,,,sin_descripcion
+core,documentos,0,I,motivo_anulacion,28,text,sí,,0,0,,,sin_descripcion
 core,entidades,0,INF,id,1,smallint,no,,1,0,,Identificador interno de la fila,comentario_bd
 core,entidades,0,INF,siglas,2,character varying(20),no,,0,1,,Siglas con las que se identifica la entidad del Estado,comentario_bd
 core,entidades,0,INF,nombre,3,character varying(255),no,,0,0,,Denominación completa y oficial de la entidad,comentario_bd
@@ -1281,6 +1315,10 @@ core,hitos_compromiso,0,I,descripcion_evidencia,9,text,sí,,0,0,,Detalle de la e
 core,hitos_compromiso,0,I,link_evidencia,10,character varying(500),sí,,0,0,,Enlace a la evidencia de cumplimiento del hito,comentario_bd
 core,hitos_compromiso,0,I,origen_dato,11,character varying(20),no,'AVISA_HISTORICO'::character varying,0,0,,"Procedencia del registro: legado, captura manual o agente",comentario_bd
 core,hitos_compromiso,0,I,nivel_clasificacion,12,smallint,no,2,0,0,core.cat_clasificacion(nivel),"Nivel de acceso al dato: 1 público, 2 reservado, 3 confidencial",comentario_bd
+core,hitos_compromiso,0,I,anulado_en,13,timestamp with time zone,sí,,0,0,,,sin_descripcion
+core,hitos_compromiso,0,I,anulado_por,14,uuid,sí,,0,0,core.usuarios(id),,sin_descripcion
+core,hitos_compromiso,0,I,anulacion_id,15,uuid,sí,,0,0,,,sin_descripcion
+core,hitos_compromiso,0,I,motivo_anulacion,16,text,sí,,0,0,,,sin_descripcion
 core,hitos_compromiso_estado_historico,0,P,id,1,uuid,no,gen_random_uuid(),1,0,,Identificador interno de la fila,comentario_bd
 core,hitos_compromiso_estado_historico,0,P,hito_id,2,uuid,no,,0,0,core.hitos_compromiso(id),Hito cuyo estado se registra en este corte,comentario_bd
 core,hitos_compromiso_estado_historico,0,P,fecha_corte,3,date,no,,0,0,,Fecha a la que corresponde el corte de estado,comentario_bd
@@ -1525,6 +1563,9 @@ core,roles,0,INF,max_clasificacion,3,smallint,no,,0,0,core.cat_clasificacion(niv
 core,roles,0,INF,puede_crear,4,boolean,no,false,0,0,,Autoriza INSERT en las tablas con RLS por clasificación. El nivel máximo sigue limitando qué filas (max_clasificacion).,comentario_bd
 core,roles,0,INF,puede_editar,5,boolean,no,false,0,0,,Autoriza UPDATE en las tablas con RLS por clasificación.,comentario_bd
 core,roles,0,INF,puede_eliminar,6,boolean,no,false,0,0,,Autoriza DELETE. Nunca se concede sin puede_editar (ver ck_roles_capacidades). El borrado de registros de conflictividad es destructivo y queda reservado a los roles que administran el dato.,comentario_bd
+core,secuencia_codigo,0,,ambito,1,text,no,,1,0,,,sin_descripcion
+core,secuencia_codigo,0,,ultimo,2,bigint,no,0,0,0,,,sin_descripcion
+core,secuencia_codigo,0,,actualizado_en,3,timestamp with time zone,no,now(),0,0,,,sin_descripcion
 core,suscripcion_notificacion,0,O,id,1,uuid,no,gen_random_uuid(),1,0,,Identificador interno de la fila,comentario_bd
 core,suscripcion_notificacion,0,O,unidad_id,2,integer,sí,,0,0,core.cat_unidades_organicas(id),Unidad orgánica suscrita a los avisos,comentario_bd
 core,suscripcion_notificacion,0,O,recibe_alerta,3,boolean,no,false,0,0,,Indica si la unidad recibe avisos de alertas,comentario_bd

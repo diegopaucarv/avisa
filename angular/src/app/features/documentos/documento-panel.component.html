@@ -190,6 +190,11 @@
             } @else {
               <p class="panel-nota">Su rol no permite modificar este documento.</p>
             }
+            @if (puedeAnular()) {
+              <button type="button" class="button-danger" (click)="anular.emit()">
+                Anular documento
+              </button>
+            }
           </div>
         }
 

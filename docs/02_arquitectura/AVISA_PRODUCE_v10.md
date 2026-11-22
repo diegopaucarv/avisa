@@ -4796,7 +4796,7 @@ RS-08 (altas, bajas y cambios de permisos) cubre los roles nuevos. Cada exportac
 | Catálogo                     | Qué clasifica                                                                                        | Filas |
 | ---------------------------- | ---------------------------------------------------------------------------------------------------- | :---: |
 | `core.roles`                 | El rol de **acceso al sistema**; decide qué filas ve la sesión (RLS)                                 |  10   |
-| `core.cat_roles_actor`       | El rol de un **actor del conflicto** (Principal, Secundario, Tercero imparcial…)                     |   7   |
+| `core.cat_roles_actor`       | El rol de un **actor del conflicto** (Principal, Secundario, Tercero imparcial…)                     |   4   |
 | `core.cat_roles_funcionales` | El rol de ese actor **en el análisis** (decisor, proveedor de evidencia, implementador, articulador) |   4   |
 
 > Se parecen en el nombre y no se sustituyen: `core.roles` es seguridad de acceso; `core.cat_roles_actor` clasifica a quién protagoniza el conflicto; `core.cat_roles_funcionales` describe su papel en la lectura analítica. _(Alineado con ERS v0.6 §6.1.)_
@@ -7104,9 +7104,9 @@ CREATE TABLE core.cronologia_vinculos (         -- 'Alertas vinculadas' del Anex
     CHECK (num_nonnulls(alerta_id, documento_id) = 1)
 );
 CREATE TABLE core.demandas (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(), caso_id UUID NOT NULL REFERENCES core.casos(id) ON DELETE CASCADE,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(), caso_id UUID REFERENCES core.casos(id) ON DELETE CASCADE,
     problema_3p TEXT NOT NULL, propuesta_3p TEXT, pedido_3p TEXT NOT NULL,
-    estado_atencion VARCHAR(20) NOT NULL DEFAULT 'Pendiente' CHECK (estado_atencion IN ('Pendiente','En_proceso','Atendida','Desestimada')),
+    estado_atencion VARCHAR(20) NOT NULL DEFAULT 'Pendiente' CHECK (estado_atencion IN ('Pendiente','En proceso','Atendida','Desestimada')),
     motivo_no_atencion TEXT, fecha_vencimiento_respuesta DATE, afecta_diferenciadamente_mujeres BOOLEAN NOT NULL DEFAULT FALSE,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(), updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     created_by UUID REFERENCES core.usuarios(id), updated_by UUID REFERENCES core.usuarios(id),

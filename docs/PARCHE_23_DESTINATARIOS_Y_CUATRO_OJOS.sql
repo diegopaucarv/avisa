@@ -153,7 +153,7 @@ ALTER TABLE core.cat_prioridades_alerta
     CHECK (NOT es_grave OR sla_horas IS NOT NULL);
 
 COMMENT ON COLUMN core.cat_prioridades_alerta.es_grave IS
-    'Marca si el nivel de prioridad es grave para la regla RN-02: los graves llevan al Ministro como destinatario. Verdaderos hoy: Critica_Inmediata (24 h) y Urgente (48 h). Un nivel sin plazo de atención (Seguimiento) no puede ser grave, y la restricción cat_prioridades_alerta_grave_con_plazo lo impide';
+    'Marca si el nivel de prioridad es grave para la regla RN-02: los graves llevan al Ministro como destinatario. Verdaderos hoy: Crítica inmediata (24 h) y Urgente (48 h). Un nivel sin plazo de atención (Seguimiento) no puede ser grave, y la restricción cat_prioridades_alerta_grave_con_plazo lo impide';
 
 -- =====================================================================
 -- BLOQUE 2 · La firma de la validación previa (H-79)

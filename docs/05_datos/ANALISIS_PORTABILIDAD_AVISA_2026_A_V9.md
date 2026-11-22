@@ -464,7 +464,7 @@ Donde no hay clave (actores, organizaciones, usuarios), UUID determinista:
 8. `core.demandas` → `demandas_actores` → `demandas_evidencias`.
 9. `core.alertas_tempranas` → `alertas_actores` → `derivaciones_alerta`.
 10. `core.compromisos` (sintéticos) → `hitos_compromiso` → `hitos_compromiso_estado_historico`.
-11. `core.notificaciones` (desde `log_envios`, parcial).
+11. `core.envios_comunicacion` (desde `log_envios`, parcial).
 12. Fase 2: `kag.actor_profile`, `kag.aristas` (desde las tablas puente de posición/interés,
     hoy vacías), `domain.artefacto` (no aplica al legado).
 
@@ -597,7 +597,7 @@ Clases: **A** directa · **B** transformación estructural · **C** absorbida en
 |  14 | `dim_paso_proceso`                |     3 |    5 |   D   | —                                                                                                     |
 |  15 | `fact_historial_estado`           |    33 |   10 |   B   | `core.caso_estado_historial`                                                                          |
 |  16 | `dim_tipo_cambio`                 |     6 |    3 |   C   | `core.caso_estado_historial.motivo`                                                                   |
-|  17 | `log_envios`                      |    17 |   13 |   B   | `core.notificaciones` (parcial)                                                                       |
+|  17 | `log_envios`                      |    17 |   13 |   B   | `core.envios_comunicacion` (parcial)                                                                  |
 |  18 | `dim_alertas`                     |    83 |   31 |   B   | `core.alertas_tempranas` + `alertas_actores` + `derivaciones_alerta`                                  |
 |  19 | `dim_reporte_rapido`              |     1 |   25 |   C   | `core.documentos` tipo `reporte_rapido`                                                               |
 |  20 | `dim_climasocial`                 |     7 |   28 |   C   | `core.documentos` tipo `clima_social_general`                                                         |
@@ -654,7 +654,7 @@ Clases: **A** directa · **B** transformación estructural · **C** absorbida en
 |  71 | `dim_provincias`                  |    70 |    5 |   A   | `core.provincias`                                                                                     |
 |  72 | `dim_distritos`                   |   698 |    8 |   A   | `core.distritos`                                                                                      |
 |  73 | `dim_tipo_caso`                   |     4 |    3 |   B   | `core.cat_niveles_conflicto` (escala de 4 niveles, decisión h)                                        |
-|  74 | `dim_rol_actor`                   |     4 |    3 |   A   | `core.cat_roles_actor` (sembrar 1–3)                                                                  |
+|  74 | `dim_rol_actor`                   |     4 |    3 |   A   | `core.cat_roles_actor` (4 filas: 1, 2, 3 y 7)                                                         |
 |  75 | `dim_tipo_sector`                 |     3 |    3 |   A   | `core.cat_subsectores` (semilla; hoy vacía)                                                           |
 |  76 | `dim_tipo_actor`                  |     3 |    2 |   A   | `core.cat_tipos_actor` (sembrar 1–3)                                                                  |
 |  77 | `dim_tipo_actor_radar`            |     3 |    2 |   D   | —                                                                                                     |
