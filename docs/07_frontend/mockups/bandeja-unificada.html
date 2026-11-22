@@ -1,0 +1,523 @@
+<!doctype html>
+<html lang="es">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Bandeja de trabajo unificada · Mockup AVISA</title>
+        <style>
+            :root {
+                --bg: #f4f6f8;
+                --panel: #ffffff;
+                --ink: #16202b;
+                --muted: #5d6b7a;
+                --line: #dfe4ea;
+                --accent: #1f4e79;
+                --accent-soft: #eaf1f8;
+                --risk-alto: #b42318;
+                --risk-moderado: #b54708;
+                --risk-bajo: #2f6f52;
+                --warn: #b54708;
+            }
+            * {
+                box-sizing: border-box;
+            }
+            body {
+                margin: 0;
+                background: var(--bg);
+                color: var(--ink);
+                font:
+                    13px/1.5 -apple-system,
+                    "Segoe UI",
+                    Roboto,
+                    Helvetica,
+                    Arial,
+                    sans-serif;
+            }
+            main {
+                max-width: 1180px;
+                margin: 0 auto;
+                padding: 28px 24px 56px;
+            }
+            .eyebrow {
+                margin: 0 0 4px;
+                color: var(--muted);
+                font-size: 10px;
+                letter-spacing: 0.12em;
+                text-transform: uppercase;
+            }
+            h1 {
+                margin: 0 0 6px;
+                font-size: 24px;
+                letter-spacing: -0.01em;
+            }
+            h2 {
+                margin: 0 0 10px;
+                font-size: 14px;
+            }
+            .view-subtitle {
+                margin: 0;
+                max-width: 70ch;
+                color: var(--muted);
+            }
+            .view-head {
+                display: flex;
+                align-items: flex-start;
+                justify-content: space-between;
+                gap: 16px;
+                margin-bottom: 18px;
+            }
+            .badge {
+                display: inline-block;
+                padding: 3px 9px;
+                border: 1px solid var(--line);
+                border-radius: 999px;
+                background: var(--panel);
+                color: var(--muted);
+                font-size: 10px;
+                letter-spacing: 0.08em;
+                text-transform: uppercase;
+                white-space: nowrap;
+            }
+            .filter-bar {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: flex-end;
+                gap: 10px;
+                margin-bottom: 12px;
+            }
+            .search-field {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                min-width: 280px;
+                padding: 0 10px;
+                border: 1px solid var(--line);
+                border-radius: 8px;
+                background: var(--panel);
+            }
+            .search-field input {
+                width: 100%;
+                padding: 8px 0;
+                border: 0;
+                background: none;
+                color: inherit;
+                font: inherit;
+                outline: none;
+            }
+            .select-filter {
+                display: grid;
+                gap: 3px;
+                color: var(--muted);
+                font-size: 10px;
+                letter-spacing: 0.06em;
+                text-transform: uppercase;
+            }
+            .select-filter select {
+                min-width: 190px;
+                padding: 7px 8px;
+                border: 1px solid var(--line);
+                border-radius: 8px;
+                background: var(--panel);
+                color: var(--ink);
+                font: inherit;
+            }
+            .segmented {
+                display: inline-flex;
+                padding: 2px;
+                border: 1px solid var(--line);
+                border-radius: 8px;
+                background: var(--panel);
+            }
+            .segmented button,
+            .type-chips button {
+                padding: 6px 12px;
+                border: 0;
+                border-radius: 6px;
+                background: none;
+                color: var(--muted);
+                font: inherit;
+                cursor: pointer;
+            }
+            .segmented button[aria-pressed="true"] {
+                background: var(--accent);
+                color: #fff;
+            }
+            .type-chips {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 6px;
+                margin-bottom: 10px;
+            }
+            .type-chips button {
+                border: 1px solid var(--line);
+                background: var(--panel);
+            }
+            .type-chips button[aria-pressed="true"] {
+                border-color: var(--accent);
+                background: var(--accent-soft);
+                color: var(--accent);
+            }
+            .type-chips b {
+                margin-left: 5px;
+                font-size: 11px;
+                font-variant-numeric: tabular-nums;
+                opacity: 0.75;
+            }
+            .strip {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 22px;
+                margin: 0 0 14px;
+                padding: 10px 14px;
+                border: 1px solid var(--line);
+                border-radius: 10px;
+                background: var(--panel);
+                font-size: 12px;
+            }
+            .strip b {
+                font-size: 15px;
+                font-variant-numeric: tabular-nums;
+            }
+            .strip span {
+                color: var(--muted);
+            }
+            .panel {
+                border: 1px solid var(--line);
+                border-radius: 10px;
+                background: var(--panel);
+                overflow: hidden;
+            }
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                font-size: 12px;
+            }
+            caption {
+                padding: 10px 14px;
+                color: var(--muted);
+                font-size: 11px;
+                text-align: left;
+            }
+            th {
+                padding: 8px 12px;
+                border-bottom: 1px solid var(--line);
+                background: #fafbfc;
+                color: var(--muted);
+                font-size: 10px;
+                font-weight: 600;
+                letter-spacing: 0.07em;
+                text-align: left;
+                text-transform: uppercase;
+            }
+            td {
+                padding: 11px 12px;
+                border-bottom: 1px solid #eef1f4;
+                vertical-align: top;
+            }
+            tr:last-child td {
+                border-bottom: 0;
+            }
+            .code {
+                font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+                font-size: 11px;
+            }
+            .tag {
+                display: inline-block;
+                padding: 1px 7px;
+                border: 1px solid var(--line);
+                border-radius: 999px;
+                font-size: 10px;
+                white-space: nowrap;
+            }
+            .r-alto {
+                color: var(--risk-alto);
+                border-color: #f3c3bd;
+                background: #fdf1ef;
+            }
+            .r-moderado {
+                color: var(--risk-moderado);
+                border-color: #f5d6b3;
+                background: #fdf6ec;
+            }
+            .r-bajo {
+                color: var(--risk-bajo);
+                border-color: #c9e3d5;
+                background: #eef7f2;
+            }
+            .vencido {
+                color: var(--risk-alto);
+                font-weight: 600;
+            }
+            .sin-dato {
+                color: #97a3b0;
+            }
+            .acciones {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 6px;
+            }
+            .acciones button {
+                padding: 4px 9px;
+                border: 1px solid var(--line);
+                border-radius: 6px;
+                background: #fff;
+                color: var(--muted);
+                font-size: 11px;
+                cursor: not-allowed;
+            }
+            .acciones button.primario {
+                border-color: var(--accent);
+                color: var(--accent);
+            }
+            .empty-state {
+                padding: 22px 16px;
+                color: var(--muted);
+                text-align: center;
+            }
+            .notes {
+                margin-top: 22px;
+                padding: 16px 18px;
+                border: 1px solid #f1d9a8;
+                border-radius: 10px;
+                background: #fffaf0;
+                font-size: 12px;
+            }
+            .notes h2 {
+                color: #8a5a00;
+            }
+            .notes ol,
+            .notes ul {
+                margin: 0;
+                padding-left: 20px;
+            }
+            .notes li {
+                margin-bottom: 5px;
+            }
+            code {
+                padding: 0 3px;
+                border-radius: 3px;
+                background: #eef1f4;
+                font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+                font-size: 11px;
+            }
+        </style>
+    </head>
+    <body>
+        <main>
+            <header class="view-head">
+                <div>
+                    <p class="eyebrow">Bandeja de trabajo · mockup</p>
+                    <h1>Bandeja de trabajo</h1>
+                    <p class="view-subtitle">
+                        Una sola cola ordenada por plazo, riesgo y revisión pendiente, en lugar de
+                        tres bloques independientes (alertas, compromisos y casos de alto riesgo).
+                        Cada fila declara de qué tipo es y qué acción admite.
+                    </p>
+                </div>
+                <div><span class="badge">Mockup · no implementado</span></div>
+            </header>
+
+            <div class="filter-bar">
+                <label class="search-field">
+                    <span aria-hidden="true">⌕</span>
+                    <input type="search" placeholder="Buscar por código, caso o responsable" />
+                </label>
+                <div class="segmented" role="group" aria-label="Ámbito de la bandeja">
+                    <button type="button" aria-pressed="true">Mi bandeja</button>
+                    <button type="button" aria-pressed="false">Toda la unidad</button>
+                </div>
+                <label class="select-filter">
+                    Ordenar por
+                    <select>
+                        <option>Plazo (más próximo primero)</option>
+                        <option>Riesgo (Alto → Bajo)</option>
+                        <option>Revisión pendiente</option>
+                        <option>Antigüedad</option>
+                    </select>
+                </label>
+                <label class="select-filter">
+                    Unidad responsable
+                    <select>
+                        <option>Todas</option>
+                    </select>
+                </label>
+            </div>
+
+            <div class="type-chips" role="group" aria-label="Filtrar por tipo de registro">
+                <button type="button" aria-pressed="true">Todas <b>—</b></button>
+                <button type="button" aria-pressed="false">Alertas <b>76</b></button>
+                <button type="button" aria-pressed="false">Compromisos <b>8</b></button>
+                <button type="button" aria-pressed="false">Casos <b>34</b></button>
+                <button type="button" aria-pressed="false">Documentos <b>143</b></button>
+            </div>
+
+            <div class="strip" role="status">
+                <span><b>0</b> con revisión pendiente</span>
+                <span><b>0</b> con plazo vencido</span>
+                <span><b>8</b> compromisos sin fecha de vencimiento</span>
+                <span><b>34</b> casos abiertos (todos «En seguimiento»)</span>
+            </div>
+
+            <section class="panel" aria-labelledby="cola">
+                <table>
+                    <caption id="cola">
+                        Cola única · el plazo se calcula con la fecha de vencimiento efectiva (fecha
+                        manual o próximo hito no terminal). Sin fecha, el plazo se declara «—», no
+                        se estima.
+                    </caption>
+                    <thead>
+                        <tr>
+                            <th scope="col">Plazo</th>
+                            <th scope="col">Tipo</th>
+                            <th scope="col">Registro</th>
+                            <th scope="col">Caso</th>
+                            <th scope="col">Riesgo</th>
+                            <th scope="col">Responsable</th>
+                            <th scope="col">Estado</th>
+                            <th scope="col">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="sin-dato">—</td>
+                            <td><span class="tag">Compromiso</span></td>
+                            <td>
+                                <div class="code">CS-PA-INF-2012-01_COMP001</div>
+                                <div class="sin-dato">
+                                    En el marco del DU 004-2025, corresponde a PRODUCE brindar…
+                                </div>
+                            </td>
+                            <td class="code">CS-PA-INF-2012-01</td>
+                            <td><span class="tag r-alto">Alto</span></td>
+                            <td class="sin-dato">Sin asignar</td>
+                            <td>En proceso</td>
+                            <td>
+                                <div class="acciones">
+                                    <button type="button" disabled>Asignar</button>
+                                    <button type="button" disabled>Posponer</button>
+                                    <button type="button" class="primario" disabled>Completar</button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="sin-dato">—</td>
+                            <td><span class="tag">Compromiso</span></td>
+                            <td>
+                                <div class="code">CS-PA-INF-2024-01_COMP001</div>
+                                <div class="sin-dato">
+                                    Seguimiento de reapertura de DPA Los Órganos por DICAPI
+                                </div>
+                            </td>
+                            <td class="code">CS-PA-INF-2024-01</td>
+                            <td><span class="tag r-moderado">Moderado</span></td>
+                            <td class="sin-dato">Sin asignar</td>
+                            <td>En proceso</td>
+                            <td>
+                                <div class="acciones">
+                                    <button type="button" disabled>Asignar</button>
+                                    <button type="button" disabled>Posponer</button>
+                                    <button type="button" class="primario" disabled>Completar</button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="sin-dato">—</td>
+                            <td><span class="tag">Compromiso</span></td>
+                            <td>
+                                <div class="code">CS-PA-OAT-2024-02_COMP001</div>
+                                <div class="sin-dato">
+                                    Desarrollar estudio «Evaluación y monitoreo de…»
+                                </div>
+                            </td>
+                            <td class="code">CS-PA-OAT-2024-02</td>
+                            <td><span class="tag r-bajo">Bajo</span></td>
+                            <td class="sin-dato">Sin asignar</td>
+                            <td>En proceso</td>
+                            <td>
+                                <div class="acciones">
+                                    <button type="button" disabled>Asignar</button>
+                                    <button type="button" disabled>Posponer</button>
+                                    <button type="button" class="primario" disabled>Completar</button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>20/07/2026</td>
+                            <td><span class="tag">Alerta</span></td>
+                            <td>
+                                <div class="code">AT-2026-43</div>
+                                <div class="sin-dato">Bloqueo de…</div>
+                            </td>
+                            <td class="sin-dato">Sin vínculo</td>
+                            <td><span class="tag r-alto">Alto</span></td>
+                            <td class="sin-dato">Sin asignar</td>
+                            <td>Completado</td>
+                            <td>
+                                <div class="acciones">
+                                    <button type="button" class="primario" disabled>Revisar</button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>13/08/2026</td>
+                            <td><span class="tag">Alerta</span></td>
+                            <td>
+                                <div class="code">AT-2026-46</div>
+                                <div class="sin-dato">Enfrentamiento…</div>
+                            </td>
+                            <td class="sin-dato">Sin vínculo</td>
+                            <td><span class="tag r-moderado">Moderado</span></td>
+                            <td class="sin-dato">Sin asignar</td>
+                            <td>Completado</td>
+                            <td>
+                                <div class="acciones">
+                                    <button type="button" class="primario" disabled>Revisar</button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="empty-state" role="note">
+                    <strong>Cola de revisión vacía.</strong> Las 76 alertas vivas están en paso
+                    «Completado» y los 8 compromisos no tienen fecha de vencimiento: no hay nada
+                    con plazo próximo que ordenar. El estado vacío de la bandeja es un hueco de
+                    datos, no un defecto de la vista.
+                </div>
+            </section>
+
+            <aside class="notes">
+                <h2>Qué debe construir el equipo</h2>
+                <ol>
+                    <li>
+                        Persistir asignación, fecha límite, responsable, posposición y cierre (item
+                        50): hoy no existe tabla ni endpoint. Sin esos datos la lista no puede
+                        ordenarse «realmente por plazo».
+                    </li>
+                    <li>
+                        Un solo endpoint de cola (<code>GET /api/v1/bandeja</code>) que una alertas,
+                        compromisos, casos y documentos con un <code>plazo_efectivo</code> común y
+                        un criterio de orden estable (plazo → riesgo → revisión pendiente).
+                    </li>
+                    <li>
+                        Confirmación y registro de auditoría en asignar, posponer y completar; el
+                        historial de reasignaciones y reaperturas es el que sostiene el SLA.
+                    </li>
+                    <li>
+                        <code>core.notificaciones</code> está vacía: no hay avisos de vencimiento
+                        que alimenten la cola. No se simulan.
+                    </li>
+                    <li>
+                        Hoy la pantalla concatena tres bloques con datos reales y SLA visible. Este
+                        mockup sustituye esa concatenación; no cambia el modelo.
+                    </li>
+                </ol>
+                <p style="margin: 10px 0 0; color: #8a5a00">
+                    Items 22 y 50 de <code>docs/07_frontend/frontend.md</code>. Ninguna cifra de
+                    esta página es inventada: 76 alertas vivas, 8 compromisos (todos «En proceso»,
+                    sin vencimiento), 34 casos abiertos y 143 documentos, leídos de la base el
+                    22.11.2026.
+                </p>
+            </aside>
+        </main>
+    </body>
+</html>

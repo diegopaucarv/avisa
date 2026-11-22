@@ -1,0 +1,531 @@
+<!doctype html>
+<html lang="es">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Bandeja RED-RADAR y notificaciones · Mockup AVISA</title>
+        <style>
+            :root {
+                --bg: #f4f6f8;
+                --panel: #fff;
+                --ink: #16202b;
+                --muted: #5d6b7a;
+                --line: #dfe4ea;
+                --accent: #1f4e79;
+                --accent-soft: #eaf1f8;
+                --alto: #b42318;
+                --medio: #b54708;
+                --bajo: #2f6f52;
+            }
+            * {
+                box-sizing: border-box;
+            }
+            body {
+                margin: 0;
+                background: var(--bg);
+                color: var(--ink);
+                font:
+                    13px/1.5 -apple-system,
+                    "Segoe UI",
+                    Roboto,
+                    Helvetica,
+                    Arial,
+                    sans-serif;
+            }
+            main {
+                max-width: 1180px;
+                margin: 0 auto;
+                padding: 28px 24px 56px;
+            }
+            .eyebrow {
+                margin: 0 0 4px;
+                color: var(--muted);
+                font-size: 10px;
+                letter-spacing: 0.12em;
+                text-transform: uppercase;
+            }
+            h1 {
+                margin: 0 0 6px;
+                font-size: 24px;
+            }
+            h2 {
+                margin: 0 0 4px;
+                font-size: 15px;
+            }
+            .view-subtitle {
+                margin: 0;
+                max-width: 72ch;
+                color: var(--muted);
+            }
+            .view-head {
+                display: flex;
+                align-items: flex-start;
+                justify-content: space-between;
+                gap: 16px;
+                margin-bottom: 18px;
+            }
+            .badge {
+                padding: 3px 9px;
+                border: 1px solid var(--line);
+                border-radius: 999px;
+                background: var(--panel);
+                color: var(--muted);
+                font-size: 10px;
+                letter-spacing: 0.08em;
+                text-transform: uppercase;
+                white-space: nowrap;
+            }
+            .section {
+                margin-bottom: 26px;
+            }
+            .section-head {
+                display: flex;
+                align-items: baseline;
+                justify-content: space-between;
+                gap: 12px;
+                margin-bottom: 10px;
+            }
+            .section-head p {
+                margin: 0;
+                color: var(--muted);
+                font-size: 12px;
+            }
+            .panel {
+                border: 1px solid var(--line);
+                border-radius: 10px;
+                background: var(--panel);
+                overflow: hidden;
+            }
+            .toolbar {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+                padding: 10px 12px;
+                border-bottom: 1px solid var(--line);
+                background: #fafbfc;
+            }
+            .toolbar button,
+            .chip {
+                padding: 5px 11px;
+                border: 1px solid var(--line);
+                border-radius: 999px;
+                background: #fff;
+                color: var(--muted);
+                font: inherit;
+                font-size: 11px;
+                cursor: pointer;
+            }
+            .toolbar button[aria-pressed="true"] {
+                border-color: var(--accent);
+                background: var(--accent-soft);
+                color: var(--accent);
+            }
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                font-size: 12px;
+            }
+            th {
+                padding: 8px 12px;
+                border-bottom: 1px solid var(--line);
+                color: var(--muted);
+                font-size: 10px;
+                letter-spacing: 0.07em;
+                text-align: left;
+                text-transform: uppercase;
+            }
+            td {
+                padding: 11px 12px;
+                border-bottom: 1px solid #eef1f4;
+                vertical-align: top;
+            }
+            tr:last-child td {
+                border-bottom: 0;
+            }
+            .code {
+                font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+                font-size: 11px;
+            }
+            .tag {
+                display: inline-block;
+                padding: 1px 7px;
+                border: 1px solid var(--line);
+                border-radius: 999px;
+                font-size: 10px;
+                white-space: nowrap;
+            }
+            .t-alto {
+                color: var(--alto);
+                border-color: #f3c3bd;
+                background: #fdf1ef;
+            }
+            .t-medio {
+                color: var(--medio);
+                border-color: #f5d6b3;
+                background: #fdf6ec;
+            }
+            .t-bajo {
+                color: var(--bajo);
+                border-color: #c9e3d5;
+                background: #eef7f2;
+            }
+            .acciones {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 6px;
+            }
+            .acciones button {
+                padding: 4px 9px;
+                border: 1px solid var(--line);
+                border-radius: 6px;
+                background: #fff;
+                color: var(--muted);
+                font-size: 11px;
+                cursor: not-allowed;
+            }
+            .acciones button.primario {
+                border-color: var(--accent);
+                color: var(--accent);
+            }
+            .empty {
+                padding: 20px 16px;
+                color: var(--muted);
+                text-align: center;
+            }
+            .empty strong {
+                display: block;
+                margin-bottom: 3px;
+                color: var(--ink);
+            }
+            .grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 16px;
+            }
+            @media (max-width: 860px) {
+                .grid {
+                    grid-template-columns: 1fr;
+                }
+            }
+            .kv {
+                display: grid;
+                grid-template-columns: 150px 1fr;
+                gap: 6px 12px;
+                padding: 14px 16px;
+                font-size: 12px;
+            }
+            .kv dt {
+                color: var(--muted);
+            }
+            .kv dd {
+                margin: 0;
+            }
+            .notes {
+                padding: 16px 18px;
+                border: 1px solid #f1d9a8;
+                border-radius: 10px;
+                background: #fffaf0;
+                font-size: 12px;
+            }
+            .notes h2 {
+                color: #8a5a00;
+            }
+            .notes ul {
+                margin: 0;
+                padding-left: 20px;
+            }
+            .notes li {
+                margin-bottom: 5px;
+            }
+            code {
+                padding: 0 3px;
+                border-radius: 3px;
+                background: #eef1f4;
+                font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+                font-size: 11px;
+            }
+            .count {
+                margin-left: 5px;
+                font-variant-numeric: tabular-nums;
+                opacity: 0.7;
+            }
+        </style>
+    </head>
+    <body>
+        <main>
+            <header class="view-head">
+                <div>
+                    <p class="eyebrow">Señales tempranas · mockup</p>
+                    <h1>Bandeja RED-RADAR</h1>
+                    <p class="view-subtitle">
+                        Cola de señales tempranas con triage: agrupa por caso y territorio,
+                        ordena por riesgo, permite descartar con motivo y convertir la señal en
+                        alerta. La señal no es un registro nuevo: es una alerta en su estado
+                        inicial.
+                    </p>
+                </div>
+                <div><span class="badge">Mockup · no implementado</span></div>
+            </header>
+
+            <section class="section" aria-labelledby="triage">
+                <div class="section-head">
+                    <div>
+                        <h2 id="triage">Señales sin triage</h2>
+                        <p>
+                            Agrupadas por caso y territorio. Nivel y prioridad son ejes distintos;
+                            el plazo vive en el SLA y no forma parte de la etiqueta.
+                        </p>
+                    </div>
+                    <span class="chip">0 pendientes</span>
+                </div>
+                <div class="panel">
+                    <div class="toolbar" role="group" aria-label="Filtros de la cola">
+                        <button type="button" aria-pressed="true">Todas <span class="count">76</span></button>
+                        <button type="button" aria-pressed="false">Inmediato <span class="count">—</span></button>
+                        <button type="button" aria-pressed="false">Táctico <span class="count">—</span></button>
+                        <button type="button" aria-pressed="false">Preventivo <span class="count">—</span></button>
+                        <button type="button" aria-pressed="false">Monitoreo <span class="count">—</span></button>
+                        <button type="button" aria-pressed="false">Sin vínculo a caso</button>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th scope="col">Señal</th>
+                                <th scope="col">Nivel</th>
+                                <th scope="col">Prioridad</th>
+                                <th scope="col">SLA</th>
+                                <th scope="col">Reporte</th>
+                                <th scope="col">Caso / territorio</th>
+                                <th scope="col">Estado</th>
+                                <th scope="col">Triage</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <div class="code">AT-2026-43</div>
+                                    <div style="color: var(--muted)">Bloqueo de…</div>
+                                </td>
+                                <td><span class="tag t-alto">Inmediato</span></td>
+                                <td><span class="tag t-alto">Crítica inmediata</span></td>
+                                <td>24 h</td>
+                                <td>20/07/2026</td>
+                                <td style="color: #97a3b0">Sin vínculo</td>
+                                <td>Completado</td>
+                                <td>
+                                    <div class="acciones">
+                                        <button type="button" class="primario" disabled>
+                                            Convertir en alerta
+                                        </button>
+                                        <button type="button" disabled>Descartar</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="code">AT-2026-25</div>
+                                    <div style="color: var(--muted)">Intentos…</div>
+                                </td>
+                                <td><span class="tag t-alto">Inmediato</span></td>
+                                <td><span class="tag t-alto">Crítica inmediata</span></td>
+                                <td>24 h</td>
+                                <td>20/07/2026</td>
+                                <td style="color: #97a3b0">Sin vínculo</td>
+                                <td>Completado</td>
+                                <td>
+                                    <div class="acciones">
+                                        <button type="button" class="primario" disabled>
+                                            Convertir en alerta
+                                        </button>
+                                        <button type="button" disabled>Descartar</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="code">AT-2026-42</div>
+                                    <div style="color: var(--muted)">Movilización…</div>
+                                </td>
+                                <td><span class="tag t-alto">Inmediato</span></td>
+                                <td><span class="tag t-alto">Crítica inmediata</span></td>
+                                <td>24 h</td>
+                                <td>03/07/2026</td>
+                                <td style="color: #97a3b0">Sin vínculo</td>
+                                <td>Completado</td>
+                                <td>
+                                    <div class="acciones">
+                                        <button type="button" class="primario" disabled>
+                                            Convertir en alerta
+                                        </button>
+                                        <button type="button" disabled>Descartar</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="code">AT-2026-89</div>
+                                    <div style="color: var(--muted)">FREDEMYPE…</div>
+                                </td>
+                                <td><span class="tag t-medio">Preventivo</span></td>
+                                <td><span class="tag t-medio">Temprana</span></td>
+                                <td>72 h</td>
+                                <td>30/07/2026</td>
+                                <td style="color: #97a3b0">Sin vínculo</td>
+                                <td>Completado</td>
+                                <td>
+                                    <div class="acciones">
+                                        <button type="button" class="primario" disabled>
+                                            Convertir en alerta
+                                        </button>
+                                        <button type="button" disabled>Descartar</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="code">AT-2026-86</div>
+                                    <div style="color: var(--muted)">Escalada…</div>
+                                </td>
+                                <td><span class="tag t-medio">Preventivo</span></td>
+                                <td><span class="tag t-medio">Temprana</span></td>
+                                <td>72 h</td>
+                                <td>03/07/2026</td>
+                                <td style="color: #97a3b0">Sin vínculo</td>
+                                <td>Completado</td>
+                                <td>
+                                    <div class="acciones">
+                                        <button type="button" class="primario" disabled>
+                                            Convertir en alerta
+                                        </button>
+                                        <button type="button" disabled>Descartar</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="code">AT-2026-46</div>
+                                    <div style="color: var(--muted)">Enfrentamiento…</div>
+                                </td>
+                                <td><span class="tag t-bajo">Monitoreo</span></td>
+                                <td><span class="tag t-bajo">Seguimiento</span></td>
+                                <td style="color: #97a3b0">Sin plazo</td>
+                                <td>13/08/2026</td>
+                                <td style="color: #97a3b0">Sin vínculo</td>
+                                <td>Completado</td>
+                                <td>
+                                    <div class="acciones">
+                                        <button type="button" class="primario" disabled>
+                                            Convertir en alerta
+                                        </button>
+                                        <button type="button" disabled>Descartar</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="empty" role="note">
+                        <strong>Cola de triage vacía.</strong>
+                        Las 76 alertas vivas ya están en paso «Completado»: ninguna quedó en el
+                        estado inicial que define la señal. Las filas de arriba son históricas y
+                        sirven para fijar el formato; las acciones están deshabilitadas porque no
+                        existe aún el estado de revisión persistido.
+                    </div>
+                </div>
+            </section>
+
+            <div class="grid">
+                <section class="section" aria-labelledby="notificaciones">
+                    <div class="section-head">
+                        <div>
+                            <h2 id="notificaciones">Centro de notificaciones</h2>
+                            <p>Categoría, fecha, estado de lectura y enlace al registro concreto.</p>
+                        </div>
+                        <span class="chip">0 sin leer</span>
+                    </div>
+                    <div class="panel">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th scope="col">Notificación</th>
+                                    <th scope="col">Categoría</th>
+                                    <th scope="col">Fecha</th>
+                                    <th scope="col">Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                        <div class="empty" role="note">
+                            <strong>Sin notificaciones.</strong>
+                            <code>core.notificaciones</code> tiene 0 filas: no hay tráfico real que
+                            produzca avisos. La campana no debe mostrar un punto ni un contador
+                            mientras siga así.
+                        </div>
+                    </div>
+                </section>
+
+                <section class="section" aria-labelledby="derivacion">
+                    <div class="section-head">
+                        <div>
+                            <h2 id="derivacion">Derivación y destinatarios</h2>
+                            <p>Lo que hoy solo existe en el tipo de datos, visible en la alerta.</p>
+                        </div>
+                        <span class="chip">Item 23</span>
+                    </div>
+                    <div class="panel">
+                        <dl class="kv">
+                            <dt>Alerta</dt>
+                            <dd class="code">AT-2026-43</dd>
+                            <dt>Visibilidad</dt>
+                            <dd>interna · ejecutiva · sectorial</dd>
+                            <dt>Derivada a</dt>
+                            <dd>— (sin destinatarios registrados)</dd>
+                            <dt>Destinatarios</dt>
+                            <dd>0</dd>
+                            <dt>Aprobación</dt>
+                            <dd>Requiere <code>direccion_oaipcs</code> o suplencia vigente</dd>
+                            <dt>Reapertura</dt>
+                            <dd>
+                                Permitida con motivo y permiso; queda registrada en el historial de
+                                pasos
+                            </dd>
+                            <dt>Deshacer</dt>
+                            <dd>Volver al paso anterior con motivo obligatorio</dd>
+                        </dl>
+                    </div>
+                </section>
+            </div>
+
+            <aside class="notes">
+                <h2>Qué debe construir el equipo</h2>
+                <ul>
+                    <li>
+                        <b>Item 76.</b> Un estado de señal (inicial / en triage / convertida /
+                        descartada) con motivo de descarte obligatorio, y el botón «Convertir en
+                        alerta» precargando los seis bloques del Anexo 3. No se crea entidad nueva:
+                        la señal es una alerta en estado inicial.
+                    </li>
+                    <li>
+                        <b>Item 31.</b> Tabla de notificaciones por usuario, con lectura, categoría
+                        y enlace al registro; el punto y el contador de la campana deben depender de
+                        pendientes reales, no de un valor fijo.
+                    </li>
+                    <li>
+                        <b>Item 23.</b> Visibilidad de la derivación y de los destinatarios en el
+                        panel de la alerta, con la regla de aprobación por <code>direccion_oaipcs</code>.
+                    </li>
+                    <li>
+                        Datos que faltan y no se estiman: ninguna alerta tiene vínculo a caso en la
+                        muestra, 0 destinatarios registrados y 0 notificaciones. Se declaran «—».
+                    </li>
+                </ul>
+                <p style="margin: 10px 0 0; color: #8a5a00">
+                    Items 23, 31 y 76 de <code>docs/07_frontend/frontend.md</code>. Cifras reales
+                    del 22.11.2026: 76 alertas vivas, 0 sin validar, 0 notificaciones. Niveles y
+                    prioridades provienen de <code>core.cat_niveles_alerta</code> y
+                    <code>core.cat_prioridades_alerta</code>, con sus SLA de 24 / 48 / 72 h y sin
+                    plazo.
+                </p>
+            </aside>
+        </main>
+    </body>
+</html>

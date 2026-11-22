@@ -151,15 +151,8 @@ export function claseEstadoDemanda(estado: EstadoDemanda): string {
   }
 }
 
-/** `YYYY-MM-DD` → `DD/MM/YYYY`, sin depender del locale. */
-export function formatearFecha(valor: string | null | undefined): string {
-  if (!valor) return '—';
-
-  const partes = valor.slice(0, 10).split('-');
-  if (partes.length !== 3) return valor;
-
-  const [anio, mes, dia] = partes;
-  if (!anio || !mes || !dia) return valor;
-
-  return `${dia}/${mes}/${anio}`;
-}
+/**
+ * Regla única de fechas: se reexporta desde `shared/formato-fecha.ts` para que
+ * esta lista acepte también el formato legado `DD/MM/YYYY`.
+ */
+export { formatearFecha } from '../../shared/formato-fecha';
