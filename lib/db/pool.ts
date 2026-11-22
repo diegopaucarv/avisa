@@ -21,13 +21,12 @@ export function getPool(): Pool {
   if (!globalPool.__avisaPool) {
     globalPool.__avisaPool = new Pool({
       connectionString: resolveConnectionString(),
-      max: Number(process.env.APP_DB_POOL_MAX ?? 8),
+      max: Number(process.env.APP_DB_POOL_MAX ?? 3),
       idleTimeoutMillis: 30_000,
-      connectionTimeoutMillis: 5_000,
+      connectionTimeoutMillis: 10_000,
       application_name: "avisa-next",
-      // Ninguna consulta de la interfaz puede quedarse colgada sin límite.
-      options:
-        "-c statement_timeout=10000 -c idle_in_transaction_session_timeout=15000",
+      // Los timeouts viven en el rol `avisa_api` (ALTER ROLE ... SET): el pooler
+      // de Neon rechaza el parámetro de arranque `options`.
     });
     globalPool.__avisaPool.on("error", (error) => {
       console.error("[avisa-db] error en el pool", error);

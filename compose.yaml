@@ -199,8 +199,9 @@ services:
     restart: unless-stopped
 
     environment:
-      # Capa de datos D3: el contenedor ui habla con el servicio db del compose.
-      APP_DATABASE_URL: postgresql://avisa_api:Av1saApi_Local_2026@db:5432/avisa
+      # Capa de datos D3: la cadena vive en .env (ignorado por git) para no
+      # versionar la clave del pooler de Neon.
+      APP_DATABASE_URL: ${APP_DATABASE_URL:?define APP_DATABASE_URL en .env}
       APP_SESSION_SECRET: ${APP_SESSION_SECRET}
       # Clave de descifrado de PII (Ley 29733). Nunca se guarda en la base.
       APP_CRYPTO_KEY: ${APP_CRYPTO_KEY}
@@ -218,9 +219,6 @@ services:
       - .:/app
       - avisa_node_modules:/app/node_modules
       - avisa_next_cache:/app/.next
-
-    depends_on:
-      - api
 
 volumes:
   avisa_pgdata:
