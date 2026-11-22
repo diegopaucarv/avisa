@@ -1,0 +1,152 @@
+<section class="view-body" aria-labelledby="titulo-reportes">
+  <header class="view-head">
+    <div>
+      <h1 id="titulo-reportes">Registro de reportes</h1>
+      <p class="view-subtitle">
+        Anexo N° 17 de la Guía de Prevención y Gestión de Conflictos Sociales: registro consolidado
+        de reportes rápidos, de clima social, de actividad, informes oficiales y alertas tempranas.
+        Es una vista de sólo lectura; el alta se realiza desde las pantallas de Documentos y
+        Alertas.
+      </p>
+    </div>
+    <div class="view-acciones">
+      <app-exportar-menu
+        entidad="reportes"
+        etiqueta="Exportar"
+        (fallo)="alFallarExportacion($event)"
+      />
+      <p class="result-count" aria-live="polite">{{ total() }} reportes</p>
+    </div>
+  </header>
+
+  @if (exportarError(); as mensaje) {
+  <p class="exportar-error" role="alert">{{ mensaje }}</p>
+  }
+
+  <div class="filter-bar filter-bar-wrap">
+    <label class="search-field">
+      <app-icono nombre="buscar" [tamano]="14" />
+      <input
+        type="search"
+        placeholder="Buscar por título, código de reporte o de caso"
+        [value]="filtros().q"
+        aria-label="Buscar reportes"
+        (input)="buscar($event)"
+      />
+    </label>
+
+    <label class="select-filter">
+      Tipo
+      <select aria-label="Filtrar reportes por tipo" (change)="cambiarTipo($event)">
+        <option value="" [selected]="filtros().tipo === ''">Todos</option>
+        @for (tipo of tipos; track tipo.valor) {
+        <option [value]="tipo.valor" [selected]="filtros().tipo === tipo.valor">
+          {{ tipo.etiqueta }}
+        </option>
+        }
+      </select>
+    </label>
+
+    <label class="search-field">
+      <app-icono nombre="mapa" [tamano]="14" />
+      <input
+        type="search"
+        placeholder="Región (p. ej. Lima)"
+        [value]="filtros().region"
+        aria-label="Filtrar reportes por región"
+        (input)="filtrarRegion($event)"
+      />
+    </label>
+
+    <label class="select-filter">
+      Desde
+      <input
+        type="date"
+        [value]="filtros().desde"
+        aria-label="Fecha inicial del rango"
+        (change)="cambiarDesde($event)"
+      />
+    </label>
+
+    <label class="select-filter">
+      Hasta
+      <input
+        type="date"
+        [value]="filtros().hasta"
+        aria-label="Fecha final del rango"
+        (change)="cambiarHasta($event)"
+      />
+    </label>
+
+    <button type="button" class="button-secondary" (click)="limpiar()">Limpiar filtros</button>
+  </div>
+
+  @if (estadoListado() === 'error') {
+  <div class="empty-state" role="alert">
+    <strong>No se pudieron cargar los reportes</strong>
+    <p>{{ errorListado()?.message }}</p>
+    <button type="button" class="button-secondary" (click)="recargarListado()">Reintentar</button>
+  </div>
+  } @else if (reportes().length === 0) { @if (estadoListado() === 'cargando' || estadoListado()
+  === 'inactivo') {
+  <div class="empty-state" role="status">Cargando reportes…</div>
+  } @else {
+  <div class="empty-state">
+    <strong>No hay reportes con estos filtros</strong>
+    <p>Pruebe a quitar algún filtro o a revisar el texto de búsqueda.</p>
+  </div>
+  } } @else { @if (estadoListado() === 'cargando') {
+  <p class="actualizando" role="status">Actualizando el listado…</p>
+  }
+
+  <div class="table-wrap">
+    <table class="data-table">
+      <caption class="table-caption">
+        {{ resumenTabla() }}
+      </caption>
+      <thead>
+        <tr>
+          <th scope="col">Tipo</th>
+          <th scope="col">Código</th>
+          <th scope="col">Caso</th>
+          <th scope="col">Responsable</th>
+          <th scope="col">Fecha</th>
+          <th scope="col">Región</th>
+          <th scope="col">Ubicación</th>
+          <th scope="col">Título</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (reporte of reportes(); track (reporte.codigoReporte || '') + '|' + (reporte.titulo || '')) {
+        <tr>
+          <td>{{ reporte.tipo || '—' }}</td>
+          <td>{{ reporte.codigoReporte || '—' }}</td>
+          <td class="celda-caso">
+            @if (reporte.codigoCaso) {
+            <a class="table-link" [routerLink]="['/casos', reporte.codigoCaso]">
+              {{ reporte.codigoCaso }}
+            </a>
+            } @else {
+            <span class="sin-dato">No vinculado</span>
+            }
+          </td>
+          <td>{{ reporte.responsable || '—' }}</td>
+          <td>{{ formatearFecha(reporte.fecha) }}</td>
+          <td>{{ reporte.region || '—' }}</td>
+          <td>{{ reporte.ubicacion || '—' }}</td>
+          <td class="celda-titulo">{{ reporte.titulo || 'Sin título' }}</td>
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  } @if (total() > 0 && estadoListado() !== 'error') {
+  <app-paginacion
+    [pagina]="filtros().pagina"
+    [tamano]="filtros().tamano"
+    [total]="total()"
+    (paginaCambia)="cambiarPagina($event)"
+    (tamanoCambia)="cambiarTamano($event)"
+  />
+  }
+</section>

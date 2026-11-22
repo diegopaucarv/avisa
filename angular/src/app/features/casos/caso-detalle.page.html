@@ -19,6 +19,7 @@
       <p class="view-subtitle">{{ d.caso.resumen || "Sin resumen registrado." }}</p>
     </div>
     <div class="view-actions">
+      <app-exportar-menu entidad="casos" [id]="d.caso.id" (fallo)="alFallarExportacion($event)" />
       <span class="status-badge" [class]="'status-badge risk-' + d.caso.riesgo.toLowerCase()">
         <span class="status-dot"></span>
         Riesgo {{ d.caso.riesgo }}
@@ -27,6 +28,10 @@
       <span class="status-badge">{{ d.caso.estado }}</span>
     </div>
   </div>
+
+  @if (exportarError(); as mensaje) {
+  <p class="form-error" role="alert">{{ mensaje }}</p>
+  }
 
   <dl class="detail-grid">
     <div>
@@ -94,7 +99,15 @@
   </section>
 
   <section class="detail-section" aria-labelledby="eventos-caso">
-    <h2 id="eventos-caso">Cronología ({{ d.eventos.length }})</h2>
+    <div class="detail-section-title">
+      <h2 id="eventos-caso">Cronología ({{ d.eventos.length }})</h2>
+      @if (puedeModificar()) {
+      <button type="button" class="button-secondary" (click)="registrarHecho()">
+        <app-icono nombre="documentos" [tamano]="14" />
+        Registrar hecho
+      </button>
+      }
+    </div>
     @if (d.eventos.length === 0) {
     <p class="empty-inline">Sin hechos registrados.</p>
     } @else {
@@ -105,12 +118,36 @@
         <div>
           <strong>{{ evento.tipo || "Hecho" }}</strong>
           <p>{{ evento.descripcion }}</p>
+          @if (puedeModificar()) {
+          <button
+            type="button"
+            class="button-secondary timeline-edit"
+            [attr.aria-label]="'Editar el hecho del ' + (evento.fecha || 'sin fecha')"
+            (click)="editarHecho(evento)"
+          >
+            Editar
+          </button>
+          }
         </div>
       </li>
       }
     </ol>
     }
   </section>
+
+  @if (panelHechoAbierto()) {
+  <app-evento-panel
+    [evento]="eventoEditado()"
+    [tipos]="tiposHecho()"
+    [cargandoTipos]="cargandoTipos()"
+    [codigoCaso]="d.caso.codigo"
+    [puedeModificar]="puedeModificar()"
+    [guardando]="guardandoEvento()"
+    [errorGuardado]="errorEvento()"
+    (cerrar)="cerrarPanelHecho()"
+    (guardar)="guardarHecho($event)"
+  />
+  }
 
   <section class="detail-section" aria-labelledby="demandas-caso">
     <h2 id="demandas-caso">Demandas ({{ d.demandas.length }})</h2>

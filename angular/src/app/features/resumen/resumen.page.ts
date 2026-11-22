@@ -1,14 +1,16 @@
-import { ChangeDetectionStrategy, Component, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 import { urlApi } from '../../core/config/entorno';
 import {
+  TAMANO_PAGINA,
   paramsDePagina,
   normalizarColeccion,
   urlConParametros,
   type Coleccion,
 } from '../../core/http/coleccion';
 import { consulta, type Consulta } from '../../core/http/consulta';
+import { ExportarMenuComponent } from '../../shared/ui/exportar-menu.component';
 import { IconoComponent } from '../../shared/ui/icono.component';
 import { aAlerta, formatearPlazo, type Alerta } from '../alertas/alerta.mapeo';
 import {
@@ -43,7 +45,7 @@ type Indicador = {
  */
 @Component({
   selector: 'app-resumen',
-  imports: [RouterLink, IconoComponent],
+  imports: [RouterLink, IconoComponent, ExportarMenuComponent],
   templateUrl: './resumen.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
@@ -171,6 +173,13 @@ type Indicador = {
       color: #909ba4;
     }
 
+    .panel-pie {
+      margin: 9px 0 0;
+      color: #9aa5ae;
+      font-size: 9px;
+      line-height: 1.5;
+    }
+
     @media (max-width: 760px) {
       .view-body {
         padding: 18px 16px 40px;
@@ -185,6 +194,9 @@ type Indicador = {
   `,
 })
 export class ResumenPage {
+  /** Último fallo del botón de exportación; vacío si no hubo. */
+  readonly exportarError = signal<string | null>(null);
+
   /* ------------------------------------------------------------------ *
    * Indicadores: un `total` por endpoint, sin traer filas
    * ------------------------------------------------------------------ */
@@ -286,12 +298,16 @@ export class ResumenPage {
 
   /**
    * El listado de compromisos sólo ordena por fecha de inicio y no permite
-   * filtrar por situación, así que se piden como máximo las 100 filas que
-   * admite el endpoint y la selección por vencimiento se hace en el cliente.
+   * filtrar por situación, así que se pide una página de `TAMANO_PAGINA` filas
+   * y la selección por vencimiento se hace en el cliente sobre esa página.
+   * El `total` del sobre sigue siendo el recuento exacto del servidor.
    */
   private readonly recursoCompromisos = consulta<Coleccion<Compromiso>>({
     fuente: () =>
-      urlConParametros(urlApi('/v1/commitments'), paramsDePagina({ pagina: 1, tamano: 100 })),
+      urlConParametros(
+        urlApi('/v1/commitments'),
+        paramsDePagina({ pagina: 1, tamano: TAMANO_PAGINA }),
+      ),
     esquema: (bruto) => {
       const coleccion = normalizarColeccion<unknown>(bruto);
       return { ...coleccion, elementos: coleccion.elementos.map(aCompromiso) };
@@ -301,6 +317,7 @@ export class ResumenPage {
   readonly compromisos = computed(() =>
     compromisosPorVencer(this.recursoCompromisos.valor()?.elementos ?? []),
   );
+  readonly totalCompromisos = computed(() => this.recursoCompromisos.valor()?.total ?? 0);
   readonly estadoCompromisos = this.recursoCompromisos.estado;
   readonly errorCompromisos = this.recursoCompromisos.error;
 
@@ -322,6 +339,10 @@ export class ResumenPage {
 
   vencimiento(compromiso: Compromiso): ResolucionVencimiento {
     return resolverVencimiento(compromiso);
+  }
+
+  alFallarExportacion(mensaje: string): void {
+    this.exportarError.set(mensaje);
   }
 
   recargar(): void {

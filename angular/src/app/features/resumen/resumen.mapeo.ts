@@ -9,11 +9,7 @@
 
 import { normalizarColeccion } from '../../core/http/coleccion';
 import { esRegistro } from '../../dominio/mapeo';
-import {
-  resolverVencimiento,
-  situacionDe,
-  type Compromiso,
-} from '../compromisos/compromiso.mapeo';
+import { resolverVencimiento, situacionDe, type Compromiso } from '../compromisos/compromiso.mapeo';
 
 /** `total` del sobre paginado (`{items,total,...}`), sin construir filas. */
 export function aTotal(bruto: unknown): number {
@@ -41,19 +37,16 @@ const SITUACIONES_DE_ATENCION = new Set(['due-vencido', 'due-por-vencer']);
  * Compromisos con vencimiento próximo o vencidos.
  *
  * `GET /api/v1/commitments` no ordena por vencimiento ni filtra por situación,
- * así que la selección se hace sobre las filas que sí devolvió el listado. Se
- * descartan los compromisos terminales (Cumplido, Redefinido, Desestimado):
- * su vencimiento ya no exige atención. El orden resultante es por fecha.
+ * así que la selección se hace en cliente sobre las filas de la página paginada
+ * que sirve el servidor. Se descartan los compromisos terminales (Cumplido,
+ * Redefinido, Desestimado): su vencimiento ya no exige atención. El orden
+ * resultante es por fecha.
  */
-export function compromisosPorVencer(
-  compromisos: readonly Compromiso[],
-  limite = 5,
-): Compromiso[] {
+export function compromisosPorVencer(compromisos: readonly Compromiso[], limite = 5): Compromiso[] {
   return compromisos
     .filter(
       (compromiso) =>
-        !compromiso.terminal &&
-        SITUACIONES_DE_ATENCION.has(situacionDe(compromiso).clase),
+        !compromiso.terminal && SITUACIONES_DE_ATENCION.has(situacionDe(compromiso).clase),
     )
     .sort((a, b) =>
       (resolverVencimiento(a).fecha ?? '9999-12-31').localeCompare(

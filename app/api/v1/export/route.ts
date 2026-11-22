@@ -12,6 +12,7 @@ import { listDocuments } from "@/lib/db/repos/documents";
 import { listLocales } from "@/lib/db/repos/locales";
 import { listNotifications } from "@/lib/db/repos/notifications";
 import { listOrganizaciones } from "@/lib/db/repos/organizaciones";
+import { listReportes } from "@/lib/db/repos/reportes";
 import {
   dumpBase,
   dumpEntidad,
@@ -66,6 +67,7 @@ const ALIAS: Record<string, string> = {
   organizacion: "organizaciones",
   local: "locales",
   notificacion: "notificaciones",
+  reporte: "reportes",
 };
 
 const TAMANO_LECTURA = 100;
@@ -100,6 +102,10 @@ function registro(sesion: {
           { usuarioId: sesion.uid, rolCodigo: sesion.rol },
           query,
         ),
+    },
+    reportes: {
+      titulo: "Registro de reportes (Anexo 17)",
+      listar: listReportes,
     },
   };
 }

@@ -7,31 +7,32 @@
  */
 
 /** Niveles de conflictividad (Guía §7.5.1). */
-export type NivelConflicto =
-  | "Diferencia"
-  | "Controversia"
-  | "Conflicto social"
-  | "Crisis social";
+export type NivelConflicto = 'Diferencia' | 'Controversia' | 'Conflicto social' | 'Crisis social';
 
 /** Riesgo del caso: atributo propio, recalculable. «Moderado», nunca «Medio». */
-export type Riesgo = "Bajo" | "Moderado" | "Alto";
+export type Riesgo = 'Bajo' | 'Moderado' | 'Alto';
 
 /** Prioridad de atención (eje distinto del riesgo). */
-export type PrioridadAtencion = "Urgente" | "Moderado" | "Bajo";
+export type PrioridadAtencion = 'Urgente' | 'Moderado' | 'Bajo';
 
-export type EstadoCaso = "Activo" | "En seguimiento" | "Resuelto" | "Archivado";
+export type EstadoCaso = 'Activo' | 'En seguimiento' | 'Resuelto' | 'Archivado';
 
-export type Alcance = "Norte" | "Centro" | "Sur" | "Oriente" | "Nacional";
+export type Alcance = 'Norte' | 'Centro' | 'Sur' | 'Oriente' | 'Nacional';
 
-export type OrigenDato = "Manual" | "Ingesta" | "Legado" | "WhatsApp";
+/**
+ * Procedencia técnica de `core.casos.origen_dato`. `KAG` y `Workflow` son
+ * códigos de ingesta automática y tienen etiqueta propia (gap D10); no deben
+ * confundirse con un alta manual.
+ */
+export type OrigenDato = 'Manual' | 'Ingesta' | 'KAG' | 'Workflow' | 'Legado' | 'WhatsApp';
 
 /** Etapas del ciclo de gestión (Guía §8). */
 export type EtapaCiclo =
-  | "Prevención estratégica"
-  | "Prevención operativa"
-  | "Intervención y tratamiento"
-  | "Monitoreo de compromisos"
-  | "Gestión de la información y del conocimiento";
+  | 'Prevención estratégica'
+  | 'Prevención operativa'
+  | 'Intervención y tratamiento'
+  | 'Monitoreo de compromisos'
+  | 'Gestión de la información y del conocimiento';
 
 export type Caso = {
   id: string;

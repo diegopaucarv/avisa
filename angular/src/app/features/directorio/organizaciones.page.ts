@@ -23,6 +23,7 @@ import {
   type Coleccion,
 } from '../../core/http/coleccion';
 import { consulta } from '../../core/http/consulta';
+import { ExportarMenuComponent } from '../../shared/ui/exportar-menu.component';
 import { IconoComponent } from '../../shared/ui/icono.component';
 import { PaginacionComponent } from '../../shared/ui/paginacion.component';
 import {
@@ -62,7 +63,7 @@ const FILTROS_INICIALES: FiltrosOrganizaciones = {
  */
 @Component({
   selector: 'app-organizaciones',
-  imports: [IconoComponent, PaginacionComponent],
+  imports: [IconoComponent, PaginacionComponent, ExportarMenuComponent],
   templateUrl: './organizaciones.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
@@ -293,6 +294,9 @@ export class OrganizacionesPage {
   /** Organización cuya ficha está abierta en el panel lateral. */
   readonly seleccionado = signal<OrganizacionDirectorio | null>(null);
 
+  /** Último fallo del botón de exportación; vacío si no hubo. */
+  readonly exportarError = signal<string | null>(null);
+
   private readonly panel = viewChild<ElementRef<HTMLElement>>('panel');
 
   /** Elemento que tenía el foco al abrir, para devolvérselo al cerrar. */
@@ -371,11 +375,16 @@ export class OrganizacionesPage {
     void this.router.navigate([], {
       relativeTo: this.ruta,
       queryParams: {},
+      replaceUrl: true,
     });
   }
 
   recargar(): void {
     this.listado.recargar();
+  }
+
+  alFallarExportacion(mensaje: string): void {
+    this.exportarError.set(mensaje);
   }
 
   /** `YYYY-MM-DD` → `DD/MM/AAAA`; cualquier otro valor se deja tal cual. */

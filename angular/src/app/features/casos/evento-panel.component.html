@@ -1,0 +1,140 @@
+<div class="drawer-scrim" (click)="alFondo($event)" (keydown)="alTecla($event)">
+  <aside
+    #panel
+    class="drawer"
+    tabindex="-1"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="evento-panel-titulo"
+  >
+    <header class="drawer-head">
+      <div class="evento-panel-cabecera">
+        @if (codigoCaso()) {
+          <p class="evento-panel-codigo">{{ codigoCaso() }}</p>
+        }
+        <h2 id="evento-panel-titulo">
+          {{ evento() ? 'Editar hecho' : 'Registrar hecho' }}
+        </h2>
+        <p class="evento-panel-sub">
+          @if (evento()) {
+            Sólo se envían los campos que cambian.
+          } @else {
+            Complete al menos la descripción; sin fecha se registra la del día.
+          }
+        </p>
+      </div>
+
+      <button
+        type="button"
+        class="icon-button"
+        aria-label="Cerrar el panel del hecho"
+        (click)="cerrar.emit()"
+      >
+        <app-icono nombre="cerrar" [tamano]="18" />
+      </button>
+    </header>
+
+    <div class="drawer-body">
+      @if (!puedeModificar()) {
+        <p class="form-hint" role="status">
+          Su rol no permite modificar la cronología de este caso.
+        </p>
+      }
+      @if (errorGuardado(); as fallo) {
+        <p class="form-error" role="alert">{{ fallo }}</p>
+      }
+      @if (mensajeLocal(); as mensaje) {
+        <p class="form-error" role="alert">{{ mensaje }}</p>
+      }
+
+      <form class="evento-formulario" (submit)="alEnviarFormulario($event)">
+        <div class="form-field">
+          <label class="form-label" for="evento-campo-fecha">Fecha del hecho</label>
+          <input
+            id="evento-campo-fecha"
+            class="form-input"
+            type="date"
+            [value]="borrador().fecha"
+            (input)="campo('fecha', $event)"
+          />
+          <span class="form-hint">
+            @if (evento()) {
+              Vacía conserva la fecha registrada.
+            } @else {
+              Vacía se registra con la fecha de hoy.
+            }
+          </span>
+        </div>
+
+        <div class="form-field">
+          <label class="form-label" for="evento-campo-tipo">Tipo de hecho</label>
+          <select
+            id="evento-campo-tipo"
+            class="form-select"
+            [value]="borrador().tipo"
+            (change)="campo('tipo', $event)"
+          >
+            <option value="">Sin tipo</option>
+            @for (tipo of opcionesTipo(); track tipo.valor) {
+              <option [value]="tipo.valor">{{ tipo.etiqueta }}</option>
+            }
+          </select>
+          @if (cargandoTipos() && tipos().length === 0) {
+            <span class="form-hint" role="status">Cargando el catálogo de tipos de hecho…</span>
+          } @else if (tipos().length === 0) {
+            <span class="form-hint">
+              El catálogo de tipos de hecho no está disponible; puede registrar el hecho sin tipo.
+            </span>
+          }
+        </div>
+
+        <div class="form-field">
+          <label class="form-label" for="evento-campo-descripcion">Descripción</label>
+          <textarea
+            id="evento-campo-descripcion"
+            class="form-textarea"
+            rows="4"
+            required
+            [value]="borrador().descripcion"
+            (input)="campo('descripcion', $event)"
+          ></textarea>
+        </div>
+
+        <div class="form-field">
+          <label class="form-label" for="evento-campo-evidencia">Evidencia</label>
+          <input
+            id="evento-campo-evidencia"
+            class="form-input"
+            type="text"
+            [value]="borrador().evidencia"
+            (input)="campo('evidencia', $event)"
+          />
+          <span class="form-hint">Opcional: enlace o referencia de la evidencia.</span>
+        </div>
+
+        <p class="form-hint">
+          El actor del hecho no se edita desde este panel: la API de cronología no contempla
+          cambiarlo.
+        </p>
+
+        <div class="evento-formulario-acciones">
+          <button
+            type="submit"
+            class="button-primary"
+            [disabled]="guardando() || !puedeModificar()"
+          >
+            {{ guardando() ? 'Guardando…' : evento() ? 'Guardar cambios' : 'Registrar hecho' }}
+          </button>
+          <button
+            type="button"
+            class="button-secondary"
+            [disabled]="guardando()"
+            (click)="cerrar.emit()"
+          >
+            Cancelar
+          </button>
+        </div>
+      </form>
+    </div>
+  </aside>
+</div>

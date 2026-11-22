@@ -71,6 +71,11 @@ export const routes: Routes = [
           import('./features/documentos/documentos.page').then((m) => m.DocumentosPage),
       },
       {
+        path: 'reportes',
+        loadComponent: () =>
+          import('./features/reportes/reportes.page').then((m) => m.ReportesPage),
+      },
+      {
         path: 'mapa',
         data: { titulo: 'Mapa territorial' },
         loadComponent: () =>

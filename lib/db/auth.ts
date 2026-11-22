@@ -11,7 +11,6 @@ export type SessionPayload = {
   cod: string;
   dn: string;
   area: string;
-  email: string;
   cargo: string;
   regs: string[];
   exp: number;

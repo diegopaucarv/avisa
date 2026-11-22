@@ -20,7 +20,6 @@ export async function GET(request: Request) {
         roles: session.roles,
         id: session.cod,
         area: session.area,
-        email: session.email,
         cargo: session.cargo,
         regiones: session.regs,
       },

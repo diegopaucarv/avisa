@@ -3,14 +3,19 @@
     <div>
       <h1 id="titulo-bandeja">Bandeja de trabajo</h1>
       <p class="view-subtitle">
-        Lo que requiere atención hoy, reunido en una sola vista. Cada bloque enlaza a su
-        pantalla completa para trabajar con todos los registros.
+        Lo que requiere atención hoy, reunido en una sola vista. Cada bloque enlaza a su pantalla
+        completa para trabajar con todos los registros.
       </p>
     </div>
     <div class="view-actions">
+      <app-exportar-menu entidad="casos" (fallo)="alFallarExportacion($event)" />
       <button type="button" class="button-secondary" (click)="recargar()">Recargar</button>
     </div>
   </header>
+
+  @if (exportarError(); as mensaje) {
+  <p class="form-error" role="alert">{{ mensaje }}</p>
+  }
 
   <section class="surface bloque" aria-labelledby="titulo-alertas-pendientes">
     <div class="surface-heading">
@@ -29,36 +34,35 @@
     </div>
 
     @if (estadoAlertas() === 'error') {
-      <p class="bloque-nota" role="alert">{{ errorAlertas()?.message }}</p>
+    <p class="bloque-nota" role="alert">{{ errorAlertas()?.message }}</p>
     } @else if (estadoAlertas() === 'cargando' || estadoAlertas() === 'inactivo') {
-      <p class="bloque-vacio" role="status">Cargando alertas…</p>
+    <p class="bloque-vacio" role="status">Cargando alertas…</p>
     } @else if (alertas().length === 0) {
-      <p class="bloque-vacio">No hay alertas pendientes de revisión.</p>
+    <p class="bloque-vacio">No hay alertas pendientes de revisión.</p>
     } @else {
-      <ul class="tarea-lista">
-        @for (alerta of alertas(); track alerta.id) {
-          <li class="tarea">
-            <span class="tarea-principal">
-              <span class="tarea-titulo">{{ alerta.titulo || 'Sin título' }}</span>
-              <span class="tarea-meta">
-                <span>{{ alerta.codigo }}</span>
-                @if (alerta.prioridad) {
-                  <span class="priority-label">{{ alerta.prioridad }}</span>
-                }
-                <span>{{ plazo(alerta.plazoHoras) }}</span>
-                <span>{{ fecha(alerta.fechaReporte) }}</span>
-              </span>
-            </span>
-            @if (alerta.casoCodigo) {
-              <span class="tarea-codigo">{{ alerta.casoCodigo }}</span>
+    <ul class="tarea-lista">
+      @for (alerta of alertas(); track alerta.id) {
+      <li class="tarea">
+        <span class="tarea-principal">
+          <span class="tarea-titulo">{{ alerta.titulo || 'Sin título' }}</span>
+          <span class="tarea-meta">
+            <span>{{ alerta.codigo }}</span>
+            @if (alerta.prioridad) {
+            <span class="priority-label">{{ alerta.prioridad }}</span>
             }
-          </li>
+            <span>{{ plazo(alerta.plazoHoras) }}</span>
+            <span>{{ fecha(alerta.fechaReporte) }}</span>
+          </span>
+        </span>
+        @if (alerta.casoCodigo) {
+        <span class="tarea-codigo">{{ alerta.casoCodigo }}</span>
         }
-      </ul>
-      @if (totalAlertas() > alertas().length) {
-        <p class="bloque-pie">{{ totalAlertas() }} alertas pendientes en total.</p>
+      </li>
       }
-    }
+    </ul>
+    @if (totalAlertas() > alertas().length) {
+    <p class="bloque-pie">{{ totalAlertas() }} alertas pendientes en total.</p>
+    } }
   </section>
 
   <section class="surface bloque" aria-labelledby="titulo-compromisos-atencion">
@@ -78,34 +82,38 @@
     </div>
 
     @if (estadoCompromisos() === 'error') {
-      <p class="bloque-nota" role="alert">{{ errorCompromisos()?.message }}</p>
+    <p class="bloque-nota" role="alert">{{ errorCompromisos()?.message }}</p>
     } @else if (estadoCompromisos() === 'cargando' || estadoCompromisos() === 'inactivo') {
-      <p class="bloque-vacio" role="status">Cargando compromisos…</p>
-    } @else if (compromisos().length === 0) {
-      <p class="bloque-vacio">No hay compromisos vencidos ni próximos a vencer.</p>
+    <p class="bloque-vacio" role="status">Cargando compromisos…</p>
+    } @else { @if (compromisos().length === 0) {
+    <p class="bloque-vacio">
+      No hay compromisos vencidos ni próximos a vencer en la página más reciente.
+    </p>
     } @else {
-      <ul class="tarea-lista">
-        @for (compromiso of compromisos(); track compromiso.id) {
-          <li class="tarea">
-            <span class="tarea-principal">
-              <span class="tarea-titulo">{{ compromiso.accion }}</span>
-              <span class="tarea-meta">
-                <span>{{ compromiso.codigo }}</span>
-                <span>{{ compromiso.casoCodigo || 'Sin caso' }}</span>
-                <span>{{ fecha(vencimiento(compromiso).fecha) }}</span>
-              </span>
-            </span>
-            <span [class]="'due-state ' + situacion(compromiso).clase">
-              {{ situacion(compromiso).etiqueta }}
-            </span>
-          </li>
-        }
-      </ul>
-      <p class="bloque-pie">
-        El listado del servidor no ordena por vencimiento: la selección se calcula sobre los
-        compromisos más recientes devueltos por la API.
-      </p>
-    }
+    <ul class="tarea-lista">
+      @for (compromiso of compromisos(); track compromiso.id) {
+      <li class="tarea">
+        <span class="tarea-principal">
+          <span class="tarea-titulo">{{ compromiso.accion }}</span>
+          <span class="tarea-meta">
+            <span>{{ compromiso.codigo }}</span>
+            <span>{{ compromiso.casoCodigo || 'Sin caso' }}</span>
+            <span>{{ fecha(vencimiento(compromiso).fecha) }}</span>
+          </span>
+        </span>
+        <span [class]="'due-state ' + situacion(compromiso).clase">
+          {{ situacion(compromiso).etiqueta }}
+        </span>
+      </li>
+      }
+    </ul>
+    } @if (totalCompromisos() > 0) {
+    <p class="bloque-pie">
+      {{ totalCompromisos() }} compromisos registrados en total. La selección de vencidos o por
+      vencer se calcula sobre la página más reciente del servidor; el listado completo está en
+      Compromisos.
+    </p>
+    } }
   </section>
 
   <section class="surface bloque" aria-labelledby="titulo-demandas-sin-caso">
@@ -125,39 +133,38 @@
     </div>
 
     @if (estadoDemandas() === 'error') {
-      <p class="bloque-nota" role="alert">{{ errorDemandas()?.message }}</p>
+    <p class="bloque-nota" role="alert">{{ errorDemandas()?.message }}</p>
     } @else if (estadoDemandas() === 'cargando' || estadoDemandas() === 'inactivo') {
-      <p class="bloque-vacio" role="status">Cargando demandas…</p>
+    <p class="bloque-vacio" role="status">Cargando demandas…</p>
     } @else if (demandas().length === 0) {
-      <p class="bloque-vacio">No hay demandas sin caso.</p>
+    <p class="bloque-vacio">No hay demandas sin caso.</p>
     } @else {
-      <ul class="tarea-lista">
-        @for (demanda of demandas(); track demanda.id) {
-          <li class="tarea">
-            <span class="tarea-principal">
-              <span class="tarea-titulo">
-                {{ demanda.descripcion || demanda.pedido || demanda.problema || 'Sin descripción' }}
-              </span>
-              <span class="tarea-meta">
-                <span [class]="'status-badge ' + claseDemanda(demanda.estado)">
-                  <span class="status-dot"></span>
-                  {{ demanda.estado }}
-                </span>
-                <span>{{ fechaDemanda(demanda.fechaRegistro) }}</span>
-                @if (demanda.tematica) {
-                  <span>{{ demanda.tematica }}</span>
-                }
-              </span>
+    <ul class="tarea-lista">
+      @for (demanda of demandas(); track demanda.id) {
+      <li class="tarea">
+        <span class="tarea-principal">
+          <span class="tarea-titulo">
+            {{ demanda.descripcion || demanda.pedido || demanda.problema || 'Sin descripción' }}
+          </span>
+          <span class="tarea-meta">
+            <span [class]="'status-badge ' + claseDemanda(demanda.estado)">
+              <span class="status-dot"></span>
+              {{ demanda.estado }}
             </span>
-            @if (demanda.afectaMujeres) {
-              <span class="status-badge state-pending">Afecta a mujeres</span>
+            <span>{{ fechaDemanda(demanda.fechaRegistro) }}</span>
+            @if (demanda.tematica) {
+            <span>{{ demanda.tematica }}</span>
             }
-          </li>
+          </span>
+        </span>
+        @if (demanda.afectaMujeres) {
+        <span class="status-badge state-pending">Afecta a mujeres</span>
         }
-      </ul>
-      @if (totalDemandas() > demandas().length) {
-        <p class="bloque-pie">{{ totalDemandas() }} demandas sin caso en total.</p>
+      </li>
       }
-    }
+    </ul>
+    @if (totalDemandas() > demandas().length) {
+    <p class="bloque-pie">{{ totalDemandas() }} demandas sin caso en total.</p>
+    } }
   </section>
 </section>

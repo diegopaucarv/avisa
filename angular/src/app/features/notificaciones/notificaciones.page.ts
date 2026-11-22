@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
@@ -13,6 +13,7 @@ import {
 } from '../../core/http/coleccion';
 import { consulta } from '../../core/http/consulta';
 import { esRegistro, texto, type Registro } from '../../dominio/mapeo';
+import { ExportarMenuComponent } from '../../shared/ui/exportar-menu.component';
 import { IconoComponent } from '../../shared/ui/icono.component';
 import { PaginacionComponent } from '../../shared/ui/paginacion.component';
 
@@ -179,7 +180,7 @@ const FILTROS_INICIALES: FiltrosNotificaciones = {
  */
 @Component({
   selector: 'app-notificaciones',
-  imports: [RouterLink, IconoComponent, PaginacionComponent],
+  imports: [RouterLink, IconoComponent, PaginacionComponent, ExportarMenuComponent],
   templateUrl: './notificaciones.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
@@ -312,6 +313,9 @@ export class NotificacionesPage {
   readonly estadoListado = this.listado.estado;
   readonly errorListado = this.listado.error;
 
+  /** Último fallo del botón de exportación; vacío si no hubo. */
+  readonly exportarError = signal<string | null>(null);
+
   /** Leyenda de la tabla; se arma aquí para no partir `@if` dentro de `<caption>`. */
   readonly resumenTabla = computed(() => {
     const partes = [`Total: ${this.total()}`];
@@ -343,6 +347,10 @@ export class NotificacionesPage {
 
   recargar(): void {
     this.listado.recargar();
+  }
+
+  alFallarExportacion(mensaje: string): void {
+    this.exportarError.set(mensaje);
   }
 
   private actualizar(cambios: Partial<FiltrosNotificaciones>): void {

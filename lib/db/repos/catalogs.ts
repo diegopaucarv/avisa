@@ -29,6 +29,7 @@ export type Catalogs = {
   tiposActor: CatalogItem[];
   rolesActor: CatalogItem[];
   perfilesActor: CatalogItem[];
+  tiposHecho: CatalogItem[];
 };
 
 /**
@@ -53,6 +54,7 @@ export async function getCatalogs(): Promise<Catalogs> {
     tiposActor,
     rolesActor,
     perfilesActor,
+    tiposHecho,
   ] = await Promise.all([
     query(
       `select id, replace(codigo, '_', ' ') as codigo, replace(codigo, '_', ' ') as etiqueta,
@@ -139,6 +141,11 @@ export async function getCatalogs(): Promise<Catalogs> {
          from core.cat_perfiles_actor
         order by id`,
     ),
+    query(
+      `select id, nombre as codigo, nombre as etiqueta
+         from core.cat_tipos_hecho
+        order by id`,
+    ),
   ]);
 
   return {
@@ -158,5 +165,6 @@ export async function getCatalogs(): Promise<Catalogs> {
     tiposActor,
     rolesActor,
     perfilesActor,
+    tiposHecho,
   };
 }

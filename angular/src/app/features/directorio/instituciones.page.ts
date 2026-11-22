@@ -19,6 +19,7 @@ import {
   type Coleccion,
 } from '../../core/http/coleccion';
 import { consulta } from '../../core/http/consulta';
+import { ExportarMenuComponent } from '../../shared/ui/exportar-menu.component';
 import { IconoComponent } from '../../shared/ui/icono.component';
 import { PaginacionComponent } from '../../shared/ui/paginacion.component';
 import { ActorPanelComponent } from './actor-panel.component';
@@ -58,7 +59,7 @@ const FILTROS_INICIALES: FiltrosInstituciones = {
  */
 @Component({
   selector: 'app-instituciones',
-  imports: [IconoComponent, PaginacionComponent, ActorPanelComponent],
+  imports: [IconoComponent, PaginacionComponent, ActorPanelComponent, ExportarMenuComponent],
   templateUrl: './instituciones.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
@@ -180,6 +181,9 @@ export class InstitucionesPage {
   /** Actor público cuya ficha está abierta en el panel lateral. */
   readonly seleccionado = signal<ActorDirectorio | null>(null);
 
+  /** Último fallo del botón de exportación; vacío si no hubo. */
+  readonly exportarError = signal<string | null>(null);
+
   private temporizadorBusqueda?: ReturnType<typeof setTimeout>;
   private temporizadorRegion?: ReturnType<typeof setTimeout>;
 
@@ -240,6 +244,10 @@ export class InstitucionesPage {
 
   recargar(): void {
     this.listado.recargar();
+  }
+
+  alFallarExportacion(mensaje: string): void {
+    this.exportarError.set(mensaje);
   }
 
   private actualizar(cambios: Partial<FiltrosInstituciones>): void {

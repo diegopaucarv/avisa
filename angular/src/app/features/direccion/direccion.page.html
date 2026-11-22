@@ -4,13 +4,14 @@
       <p class="section-eyebrow">Alta Dirección · lectura ejecutiva</p>
       <h1 id="titulo-direccion">Resumen de Dirección</h1>
       <p class="view-subtitle">
-        Panorama agregado de la conflictividad sectorial construido con los totales y las filas
-        reales de la API. Base normativa: Guía §8.1.2.3 «Reportes de clima social» y Anexo 2
-        «Reporte Regional de Conflictividad y Demandas».
+        Panorama agregado de la conflictividad sectorial construido con los totales reales que
+        reporta el servidor en cada listado paginado. Base normativa: Guía §8.1.2.3 «Reportes de
+        clima social» y Anexo 2 «Reporte Regional de Conflictividad y Demandas».
       </p>
     </div>
 
     <div class="view-actions">
+      <app-exportar-menu entidad="casos" (fallo)="alFallarExportacion($event)" />
       <button type="button" class="button-secondary" (click)="imprimir()">
         <app-icono nombre="documentos" [tamano]="14" />
         Imprimir / Guardar PDF
@@ -18,7 +19,9 @@
     </div>
   </header>
 
-  @if (error()) {
+  @if (exportarError(); as mensaje) {
+  <p class="form-error" role="alert">{{ mensaje }}</p>
+  } @if (error()) {
   <div class="empty-state" role="alert">
     <strong>No se pudo cargar el panorama</strong>
     <p>{{ error()?.message }}</p>
@@ -64,9 +67,9 @@
     </div>
   </div>
 
-  @if (cargando() && filasAnalizadas() === 0) {
+  @if (cargando() && casosTotales() === 0) {
   <div class="empty-state" role="status">Cargando panorama…</div>
-  } @else if (filasAnalizadas() === 0) {
+  } @else if (casosTotales() === 0) {
   <div class="empty-state">
     <strong>Sin casos para el panorama</strong>
     <p>La API no devolvió casos en la consulta de lectura.</p>
@@ -76,42 +79,16 @@
     <div class="surface-heading">
       <div>
         <p class="section-eyebrow">Panorama de casos</p>
-        <h3 id="titulo-desglose">Desglose por región, nivel, riesgo y temática</h3>
+        <h3 id="titulo-desglose">Desglose por prioridad, riesgo y temática</h3>
         <p>{{ notaBase() }}</p>
       </div>
     </div>
 
     <div class="breakdown-grid">
       <div class="breakdown-card">
-        <h3>Por región</h3>
+        <h3>Por prioridad</h3>
         <ul class="breakdown-list">
-          @for (grupo of porRegion(); track grupo.etiqueta) {
-          <li>
-            @if (grupo.etiqueta === sinRegion) {
-            <span>{{ grupo.etiqueta }}</span>
-            } @else {
-            <a
-              [routerLink]="['/casos']"
-              [queryParams]="{ q: grupo.etiqueta }"
-              [attr.aria-label]="'Buscar casos de ' + grupo.etiqueta"
-            >
-              {{ grupo.etiqueta }}
-            </a>
-            }
-            <span class="breakdown-bar"><i [style.width.%]="grupo.porcentaje"></i></span>
-            <span class="breakdown-count">
-              {{ grupo.total }} <small>{{ grupo.porcentaje }}%</small>
-            </span>
-          </li>
-          }
-        </ul>
-        <a class="link-button" routerLink="/casos">Abrir todos los casos</a>
-      </div>
-
-      <div class="breakdown-card">
-        <h3>Por nivel de conflicto</h3>
-        <ul class="breakdown-list">
-          @for (grupo of porNivel(); track grupo.etiqueta) {
+          @for (grupo of porPrioridad(); track grupo.etiqueta) {
           <li>
             <span>{{ grupo.etiqueta }}</span>
             <span class="breakdown-bar"><i [style.width.%]="grupo.porcentaje"></i></span>
@@ -163,8 +140,9 @@
     <span>
       Este resumen ordena datos operativos; no reemplaza el Reporte Regional de Conflictividad y
       Demandas (Anexo 2), que distingue hechos confirmados de percepciones y añade el perfil de
-      actores y la relevancia de cada caso. El desglose cubre como máximo {{ tamanoAnalisis }} filas
-      recientes por listado.
+      actores y la relevancia de cada caso. La API no acepta filtro por nivel de conflicto ni
+      publica un catálogo de regiones; por eso el desglose se agrupa por prioridad, riesgo y
+      temática con los totales del servidor.
     </span>
   </div>
   }

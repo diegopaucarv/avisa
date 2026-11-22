@@ -7,8 +7,15 @@
         función y posicionamiento en el escenario de conflictividad (Guía §7.4).
       </p>
     </div>
-    <p class="result-count" aria-live="polite">{{ total() }} actores</p>
+    <div class="view-actions">
+      <app-exportar-menu entidad="actores" (fallo)="alFallarExportacion($event)" />
+      <p class="result-count" aria-live="polite">{{ total() }} actores</p>
+    </div>
   </header>
+
+  @if (exportarError(); as mensaje) {
+  <p class="form-error" role="alert">{{ mensaje }}</p>
+  }
 
   <div class="filter-bar filter-bar-wrap">
     <label class="search-field">
@@ -27,25 +34,25 @@
       <select aria-label="Filtrar por naturaleza del actor" (change)="cambiarNaturaleza($event)">
         <option value="" [selected]="filtros().naturaleza === ''">Todas</option>
         @for (naturaleza of naturalezas; track naturaleza.valor) {
-          <option [value]="naturaleza.valor" [selected]="filtros().naturaleza === naturaleza.valor">
-            {{ naturaleza.etiqueta }}
-          </option>
+        <option [value]="naturaleza.valor" [selected]="filtros().naturaleza === naturaleza.valor">
+          {{ naturaleza.etiqueta }}
+        </option>
         }
       </select>
     </label>
 
     @if (tiposActor().length > 0) {
-      <label class="select-filter">
-        Tipo
-        <select aria-label="Filtrar por tipo de actor" (change)="cambiarTipo($event)">
-          <option value="" [selected]="filtros().tipo === ''">Todos</option>
-          @for (tipo of tiposActor(); track tipo.valor) {
-            <option [value]="tipo.valor" [selected]="filtros().tipo === tipo.valor">
-              {{ tipo.etiqueta }}
-            </option>
-          }
-        </select>
-      </label>
+    <label class="select-filter">
+      Tipo
+      <select aria-label="Filtrar por tipo de actor" (change)="cambiarTipo($event)">
+        <option value="" [selected]="filtros().tipo === ''">Todos</option>
+        @for (tipo of tiposActor(); track tipo.valor) {
+        <option [value]="tipo.valor" [selected]="filtros().tipo === tipo.valor">
+          {{ tipo.etiqueta }}
+        </option>
+        }
+      </select>
+    </label>
     }
 
     <label class="search-field">
@@ -63,87 +70,80 @@
   </div>
 
   @if (estado() === "error") {
-    <div class="empty-state" role="alert">
-      <strong>No se pudieron cargar los actores</strong>
-      <p>{{ error()?.message }}</p>
-      <button type="button" class="button-secondary" (click)="recargar()">Reintentar</button>
-    </div>
-  } @else if (actores().length === 0) {
-    @if (estado() === "cargando" || estado() === "inactivo") {
-      <div class="empty-state" role="status">Cargando actores…</div>
-    } @else {
-      <div class="empty-state">
-        <strong>Sin actores para estos filtros</strong>
-        <p>
-          No hay actores que coincidan con la búsqueda. La región se compara con el nombre
-          registrado, así que debe escribirse completo (por ejemplo, el departamento).
-        </p>
-      </div>
-    }
+  <div class="empty-state" role="alert">
+    <strong>No se pudieron cargar los actores</strong>
+    <p>{{ error()?.message }}</p>
+    <button type="button" class="button-secondary" (click)="recargar()">Reintentar</button>
+  </div>
+  } @else if (actores().length === 0) { @if (estado() === "cargando" || estado() === "inactivo") {
+  <div class="empty-state" role="status">Cargando actores…</div>
   } @else {
-    @if (estado() === "cargando") {
-      <p class="actor-actualizando" role="status">Actualizando el listado…</p>
-    }
+  <div class="empty-state">
+    <strong>Sin actores para estos filtros</strong>
+    <p>
+      No hay actores que coincidan con la búsqueda. La región se compara con el nombre registrado,
+      así que debe escribirse completo (por ejemplo, el departamento).
+    </p>
+  </div>
+  } } @else { @if (estado() === "cargando") {
+  <p class="actor-actualizando" role="status">Actualizando el listado…</p>
+  }
 
-    <div class="table-wrap">
-      <table class="data-table">
-        <caption class="table-caption">
-          Pulse una fila para abrir la ficha en el panel lateral. Los datos personales sólo se
-          consultan desde la ficha y quedan registrados en la auditoría de la base.
-        </caption>
-        <thead>
-          <tr>
-            <th scope="col">Nombre</th>
-            <th scope="col">Naturaleza</th>
-            <th scope="col">Tipo</th>
-            <th scope="col">Función</th>
-            <th scope="col">Región</th>
-            <th scope="col">Organización ancla</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (actor of actores(); track actor.id) {
-            <tr
-              class="case-row-clickable"
-              [class.row-selected]="seleccionado()?.id === actor.id"
-              (click)="abrir(actor)"
+  <div class="table-wrap">
+    <table class="data-table">
+      <caption class="table-caption">
+        Pulse una fila para abrir la ficha en el panel lateral. Los datos personales sólo se
+        consultan desde la ficha y quedan registrados en la auditoría de la base.
+      </caption>
+      <thead>
+        <tr>
+          <th scope="col">Nombre</th>
+          <th scope="col">Naturaleza</th>
+          <th scope="col">Tipo</th>
+          <th scope="col">Función</th>
+          <th scope="col">Región</th>
+          <th scope="col">Organización ancla</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (actor of actores(); track actor.id) {
+        <tr
+          class="case-row-clickable"
+          [class.row-selected]="seleccionado()?.id === actor.id"
+          (click)="abrir(actor)"
+        >
+          <td>
+            <button
+              type="button"
+              class="table-link actor-nombre"
+              [attr.aria-label]="'Abrir la ficha de ' + actor.nombre"
+              (click)="abrir(actor); $event.stopPropagation()"
             >
-              <td>
-                <button
-                  type="button"
-                  class="table-link actor-nombre"
-                  [attr.aria-label]="'Abrir la ficha de ' + actor.nombre"
-                  (click)="abrir(actor); $event.stopPropagation()"
-                >
-                  <strong>{{ actor.nombre }}</strong>
-                  @if (actor.abreviatura) {
-                    <small>{{ actor.abreviatura }}</small>
-                  }
-                </button>
-              </td>
-              <td>{{ actor.naturaleza }}</td>
-              <td>{{ actor.tipo || "—" }}</td>
-              <td>{{ actor.funcion || "No determinado" }}</td>
-              <td>{{ actor.region || "—" }}</td>
-              <td class="actor-organizacion">{{ actor.organizacionAncla || "—" }}</td>
-            </tr>
-          }
-        </tbody>
-      </table>
-    </div>
-  }
-
-  @if (total() > 0 && estado() !== "error") {
-    <app-paginacion
-      [pagina]="filtros().pagina"
-      [tamano]="filtros().tamano"
-      [total]="total()"
-      (paginaCambia)="cambiarPagina($event)"
-      (tamanoCambia)="cambiarTamano($event)"
-    />
-  }
-
-  @if (seleccionado(); as actorAbierto) {
-    <app-actor-panel [actor]="actorAbierto" (cerrar)="cerrarPanel()" />
+              <strong>{{ actor.nombre }}</strong>
+              @if (actor.abreviatura) {
+              <small>{{ actor.abreviatura }}</small>
+              }
+            </button>
+          </td>
+          <td>{{ actor.naturaleza }}</td>
+          <td>{{ actor.tipo || "—" }}</td>
+          <td>{{ actor.funcion || "No determinado" }}</td>
+          <td>{{ actor.region || "—" }}</td>
+          <td class="actor-organizacion">{{ actor.organizacionAncla || "—" }}</td>
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  } @if (total() > 0 && estado() !== "error") {
+  <app-paginacion
+    [pagina]="filtros().pagina"
+    [tamano]="filtros().tamano"
+    [total]="total()"
+    (paginaCambia)="cambiarPagina($event)"
+    (tamanoCambia)="cambiarTamano($event)"
+  />
+  } @if (seleccionado(); as actorAbierto) {
+  <app-actor-panel [actor]="actorAbierto" (cerrar)="cerrarPanel()" />
   }
 </section>

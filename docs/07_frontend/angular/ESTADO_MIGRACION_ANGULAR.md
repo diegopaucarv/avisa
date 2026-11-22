@@ -142,63 +142,74 @@ Esta capa está probada contra el contrato actual: `GET /api/v1/cases?page=1&pag
 
 ## 6 · Vistas portadas
 
-| Vista         | Ruta                        | Qué hace                                                                                                                                                                                             |
-| ------------- | --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Acceso        | `/acceso`                   | Login con el marcado y las clases originales. Tras autenticar, respeta `?volver=`.                                                                                                                   |
-| Shell         | `/` (layout)                | Cabecera, barra lateral con Mi espacio / Seguimiento / Directorio / Análisis, menú de perfil y cierre de sesión.                                                                                     |
-| Casos         | `/casos`                    | Tarjetas y tabla; búsqueda, orden, página y tamaño viven en la URL; paginación de servidor con 25 / 50 / 100 filas; el riesgo se muestra como atributo del caso.                                     |
-| Ficha de caso | `/casos/:codigo`            | **Sólo lectura**: datos generales, actores, cronología y demandas. Sin formularios, porque el contrato de escritura no está portado. No ofrece el botón de anulación mientras no exista el endpoint. |
-| Alertas       | `/alertas`                  | Listado paginado en servidor, filtros en la URL y panel lateral con la ficha y el recorrido de la alerta. La alerta no tiene nivel de riesgo: el riesgo es del caso.                                 |
-| Compromisos   | `/compromisos`              | Listado paginado en servidor, filtros en la URL y panel lateral. El vencimiento se resuelve como manual > próximo hito > aviso.                                                                      |
-| Documentos    | `/documentos`               | Maestro-detalle con listado paginado, filtros en la URL y panel lateral del documento.                                                                                                               |
-| Actores       | `/directorio/actores`       | Listado paginado con filtros por naturaleza, tipo y región; panel lateral con la ficha. La PII se pide sólo desde el panel, con motivo auditado.                                                     |
-| Instituciones | `/directorio/instituciones` | El mismo listado restringido a `Actor público`; panel lateral y la misma regla de PII bajo demanda.                                                                                                  |
+| Vista              | Ruta                         | Qué hace                                                                                                                                                                                                                  |
+| ------------------ | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Acceso             | `/acceso`                    | Login con el marcado y las clases originales. Tras autenticar, respeta `?volver=`.                                                                                                                                        |
+| Shell              | `/` (layout)                 | Cabecera (estado del sistema, búsqueda y notificaciones), barra lateral con Mapa / Mi espacio / Seguimiento / Directorio / Análisis, menú de perfil y cierre de sesión.                                                   |
+| Resumen operativo  | `/resumen`                   | KPIs desde el `total` de los sobres paginados (`tamano=1`), últimas alertas y vista previa de compromisos. No pide colecciones completas.                                                                                 |
+| Bandeja de trabajo | `/bandeja`                   | Colas de trabajo: alertas pendientes, compromisos por vencer y demandas sin caso, todas paginadas en servidor.                                                                                                            |
+| Búsqueda           | `/busqueda`                  | Búsqueda transversal paginada en servidor, filtros en la URL.                                                                                                                                                             |
+| Notificaciones     | `/notificaciones`            | Bandeja de notificaciones paginada; estado vacío honesto cuando `core.notificaciones` no tiene filas.                                                                                                                     |
+| Casos              | `/casos`                     | Tarjetas y tabla; búsqueda, orden, página y tamaño viven en la URL; paginación de servidor con 25 / 50 / 100 filas; el riesgo se muestra como atributo del caso; acceso a demandas sin caso.                              |
+| Demandas sin caso  | `/casos/sin-caso`            | Demandas huérfanas paginadas, con búsqueda y vinculación a un caso (`PATCH /v1/demandas/{id}`); la búsqueda de casos también pagina en servidor.                                                                          |
+| Ficha de caso      | `/casos/:codigo`             | Datos generales, actores y demandas en lectura. La cronología registra y edita hechos en panel lateral (`POST` / `PATCH …/events`).                                                                                       |
+| Alertas            | `/alertas`                   | Listado paginado en servidor, filtros en la URL y panel lateral con la ficha y el recorrido de la alerta. La alerta no tiene nivel de riesgo: el riesgo es del caso.                                                      |
+| Compromisos        | `/compromisos`               | Listado paginado en servidor, filtros en la URL y panel lateral. El vencimiento se resuelve como manual > próximo hito > aviso.                                                                                           |
+| Documentos         | `/documentos`                | Maestro-detalle con listado paginado, filtros en la URL y panel lateral del documento. Incluye el menú de exportación JSON / Excel / PDF como implementación de referencia.                                               |
+| Reportes           | `/reportes`                  | **Sólo lectura**: registro del Anexo N° 17 sobre `analytics.vw_anexo_17_registro_reportes`. Listado paginado, filtros (tipo, región, fechas, búsqueda) en la URL, enlace al caso y menú de exportación. Cierra el gap E4. |
+| Actores            | `/directorio/actores`        | Listado paginado con filtros por naturaleza, tipo y región; panel lateral con la ficha. La PII se pide sólo desde el panel, con motivo auditado.                                                                          |
+| Organizaciones     | `/directorio/organizaciones` | Listado paginado con filtros por texto, tipo y vigencia; panel lateral.                                                                                                                                                   |
+| Instituciones      | `/directorio/instituciones`  | El mismo listado restringido a `Actor público`; panel lateral y la misma regla de PII bajo demanda.                                                                                                                       |
+| Locales            | `/directorio/locales`        | Listado paginado de locales con filtro por texto y actividad. El `distrito_id` sigue nulo: el ubigeo está aplazado.                                                                                                       |
+| Dirección          | `/direccion`                 | Agregados por `total` de sobres paginados. Sin desglose por región ni por nivel de conflicto: la API no los expone y no se estiman.                                                                                       |
+| Ayuda y criterios  | `/ayuda`                     | Contenido normativo desde `ayuda.contenido.ts`, alineado al vocabulario congelado.                                                                                                                                        |
+| Preferencias       | `/preferencias`              | Tema y densidad, que sí surten efecto. El tamaño de página aparece deshabilitado con nota: la API no expone esa preferencia.                                                                                              |
 
 Todos los componentes usan `OnPush` y las rutas cargan con `loadComponent` (lazy), lo que mantiene
-pequeño el bundle inicial.
+pequeño el bundle inicial. Todas las vistas paginan en el servidor; ninguna trae una colección
+completa para calcular contadores.
+
+La cronología de la ficha (`/casos/:codigo`) ya registra y edita hechos en un panel lateral; el backend
+expone `PATCH /api/v1/cases/:codigo/events/:id`.
+
+La vista de Reportes (`/reportes`) cierra el gap estructural **E4** del Anexo 17: la vista
+`analytics.vw_anexo_17_registro_reportes` ya existía y ahora tiene pantalla, API (`GET /api/v1/reportes`)
+y exportación; además, `migration/23_vistas_anexos_security_invoker.sql` corrigió la fuga de RLS de las
+vistas de los anexos 16 y 17. El detalle vive en `docs/01_requisitos/GAPS_GUIA_SQL_UI.md` §2.1 y §2.3.
 
 ---
 
 ## 7 · Pantallas en migración
 
-Ocho rutas existen y responden, pero muestran `EnMigracionComponent`
-(`src/app/shared/ui/en-migracion.component.ts`): un marcador que declara el estado y qué falta. No
-simula datos, no dibuja botones inactivos y no inventa cifras.
+Sólo queda una ruta con marcador `EnMigracionComponent`
+(`src/app/shared/ui/en-migracion.component.ts`):
 
-| Sección    | Rutas                                                                                |
-| ---------- | ------------------------------------------------------------------------------------ |
-| Mi espacio | `/resumen` (Resumen operativo), `/bandeja` (Bandeja de trabajo)                      |
-| Directorio | `/directorio/organizaciones`, `/directorio/locales`                                  |
-| Análisis   | `/direccion` (Resumen de Dirección)                                                  |
-| Utilidades | `/ayuda`, `/preferencias`                                                            |
-| Aplazado   | `/mapa` (Mapa territorial; aplazado hasta que exista el dataset de ubigeo/centroide) |
+| Sección  | Ruta    | Motivo                                                                             |
+| -------- | ------- | ---------------------------------------------------------------------------------- |
+| Aplazado | `/mapa` | Aplazado por decisión del usuario hasta que exista el dataset de ubigeo/centroide. |
 
-`/casos/sin-caso`, `/busqueda` y `/notificaciones` **no tienen ruta todavía**. La vista de demandas sin
-caso ya existe en `features/casos` y su ruta debe declararse **antes** de `/casos/:codigo`.
-
-Hay componentes de página construidos para varias de estas pantallas (`resumen`, `bandeja`,
-`direccion`, `locales`, `organizaciones`, `busqueda`, `notificaciones`, `preferencias` y `ayuda`),
-pero mientras la ruta cargue `EnMigracionComponent` no cuentan como portadas.
-
-El comportamiento es intencional: una pantalla que aparenta datos que no puede sostener es peor
-que una que declara su estado.
+El resto de rutas carga ya su página real. El marcador no simula datos, no dibuja botones
+inactivos y no inventa cifras: una pantalla que aparenta datos que no puede sostener es peor que
+una que declara su estado.
 
 ---
 
 ## 8 · Riesgos técnicos abiertos
 
-| #   | Riesgo                                                                                                   | Consecuencia                                                                                                    | Mitigación / siguiente paso                                                                                                              |
-| --- | -------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| A1  | El contrato de escritura (`POST`, `PATCH`, `DELETE`) no está portado.                                    | Todas las vistas son de lectura. La ficha no edita.                                                             | Portar primero casos; el adaptador de errores ya está.                                                                                   |
-| A2  | No existen endpoints `anular` / `restaurar` (E2).                                                        | No hay operación de anulación que probar; el botón no debe existir. La ficha es de sólo lectura.                | Depende de E2. La base ya tiene la anulación lógica con restauración; la UI la ofrecerá cuando existan los endpoints.                    |
-| A3  | `/api/dashboard` no existe.                                                                              | La sesión se restaura con `GET /api/v1/session` y los agregados salen de los totales de los listados paginados. | No reintroducir esa ruta al portar las pantallas de resumen y dirección.                                                                 |
-| A4  | El mapa está aplazado por decisión del usuario hasta que exista el dataset de ubigeo/centroide.          | La ruta `/mapa` sigue en marcador; no se documentan coordenadas ni una fórmula de calibración de riesgo.        | No portar Leaflet hasta que se reabra el aplazamiento.                                                                                   |
-| A5  | El calendario de compromisos no está portado.                                                            | La vista `/compromisos` funciona con listado y panel, pero el calendario queda pendiente.                       | Resolver junto con A1, porque el calendario necesita escribir.                                                                           |
-| A6  | Vitest está instalado y `ng test` configurado, pero **no hay archivos de prueba**.                       | Las puertas G1–G5 no se pueden automatizar todavía.                                                             | Empezar por el adaptador de colecciones y por el store de sesión, que son lógica pura.                                                   |
-| A7  | El mapeo de `origen_dato` envía `KAG` y `WORKFLOW` a `Manual` por descarte (`dominio/mapeo.ts:121-128`). | Un dato ingestado podría mostrarse como manual.                                                                 | D10 debe quedar **declarado**, no por descarte: cada valor del `CHECK` necesita su etiqueta explícita antes de dar el mapeo por cerrado. |
-| A10 | La exportación PDF / Excel / JSON está decidida y no implementada (E5).                                  | Ninguna vista puede ofrecer el botón como si la exportación existiera.                                          | Anotar E5; implementarla antes de darla por portada.                                                                                     |
-| A8  | Las fuentes se cargan desde Google Fonts.                                                                | Dependencia de red y de terceros en el primer pintado.                                                          | Autoalojar y eliminar el `@import`.                                                                                                      |
-| A9  | `angular/README.md` sigue siendo el README genérico que genera el CLI, en inglés.                        | Confunde a quien llegue al workspace.                                                                           | Sustituirlo por las instrucciones de §10.                                                                                                |
+| #   | Riesgo                                                                                           | Consecuencia                                                                                                    | Mitigación / siguiente paso                                                                                  |
+| --- | ------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| A1  | El contrato de escritura (`POST`, `PATCH`) **de la UI** no está portado.                         | Las vistas siguen siendo de lectura y la ficha no edita. El backend sí acepta escritura.                        | Portar primero casos; el adaptador de errores ya está.                                                       |
+| A2  | ~~No existen endpoints `anular` / `restaurar` (E2).~~ **Cerrado.**                               | Ya existen `POST …/anular` y `POST …/restaurar` para casos, alertas, compromisos, demandas y documentos.        | Falta cablear los botones en la UI; el `DELETE` ahora exige `motivo` y no borra físicamente.                 |
+| A3  | `/api/dashboard` no existe.                                                                      | La sesión se restaura con `GET /api/v1/session` y los agregados salen de los totales de los listados paginados. | No reintroducir esa ruta. Resumen, Bandeja y Dirección ya usan `tamano=1` + `total`.                         |
+| A4  | El mapa está aplazado por decisión del usuario hasta que exista el dataset de ubigeo/centroide.  | La ruta `/mapa` sigue en marcador; no se documentan coordenadas ni una fórmula de calibración de riesgo.        | No portar Leaflet hasta que se reabra el aplazamiento.                                                       |
+| A5  | El calendario de compromisos no está portado.                                                    | La vista `/compromisos` funciona con listado y panel, pero el calendario queda pendiente.                       | Resolver junto con A1, porque el calendario necesita escribir.                                               |
+| A6  | Vitest está instalado y `ng test` configurado, pero **no hay archivos de prueba**.               | Las puertas G1–G5 no se pueden automatizar todavía.                                                             | Empezar por el adaptador de colecciones y por el store de sesión, que son lógica pura.                       |
+| A7  | ~~El mapeo de `origen_dato` enviaba `KAG` y `WORKFLOW` a `Manual`.~~ **Cerrado por D10.**        | `KAG` y `Workflow` tienen etiqueta explícita en `dominio/mapeo.ts`.                                             | Mantener el `CHECK` técnico (`MANUAL · KAG · WORKFLOW · AVISA_HISTORICO · WHATSAPP`) sin cambios.            |
+| A10 | ~~La exportación PDF / Excel / JSON está decidida y no implementada (E5).~~ **Cerrado.**         | `GET /api/v1/export?formato=&entidad=` sirve JSON, XLSX y PDF; el menú está cableado en Documentos.             | Replicar el menú en las demás vistas cuando el usuario lo pida (mismo componente `exportar-menu`).           |
+| A11 | Los contadores de Resumen y Bandeja filtran «por vencer» sobre la página, no sobre la colección. | El pie muestra el `total` real del servidor; el aviso explica que el recorte es de página.                      | Añadir orden/filtro por vencimiento en `/v1/commitments` para que el listado sea exacto.                     |
+| A12 | El catálogo de ciclos se ordena por `id`, así que «Prevención estratégica» aparece última.       | El orden de presentación no coincide con la Guía §8.                                                            | Añadir columna `orden` al catálogo cuando se reabra el tema; la Guía aclara que las etapas no son sucesivas. |
+| A8  | Las fuentes se cargan desde Google Fonts.                                                        | Dependencia de red y de terceros en el primer pintado.                                                          | Autoalojar y eliminar el `@import`.                                                                          |
+| A9  | `angular/README.md` sigue siendo el README genérico que genera el CLI, en inglés.                | Confunde a quien llegue al workspace.                                                                           | Sustituirlo por las instrucciones de §10.                                                                    |
 
 ---
 
@@ -206,17 +217,19 @@ que una que declara su estado.
 
 > Resultados registrados el **2026-11-22**. No se repitieron al escribir este documento.
 
-| Prueba                                        | Resultado                                                                                                                 |
-| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| `ng build` (producción)                       | 432,34 kB iniciales · 98,34 kB de transferencia. Bajo el presupuesto de 1,2 MB / 2 MB y bajo la puerta de 250 kB en gzip. |
-| `npx tsc --noEmit` en la raíz del repositorio | pasa, sin errores                                                                                                         |
-| `POST /api/auth/login`, DNI `11111111`        | 200                                                                                                                       |
-| `POST /api/auth/login`, DNI `22222222`        | 200                                                                                                                       |
-| `POST /api/auth/login`, DNI `41907320`        | 200                                                                                                                       |
-| `POST /api/auth/login`, DNI `10654038`        | 200                                                                                                                       |
-| `POST /api/auth/login`, DNI `46078289`        | 200                                                                                                                       |
-| `GET /api/v1/session`                         | hidrata la sesión del perfil autenticado                                                                                  |
-| `GET /api/v1/cases?page=1&pageSize=2`         | sobre paginado con `items`, `total`, `page`, `pageSize`                                                                   |
+| Prueba                                 | Resultado                                                                                                                 |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `ng build` (producción)                | 437,09 kB iniciales · 99,61 kB de transferencia. Bajo el presupuesto de 1,2 MB / 2 MB y bajo la puerta de 250 kB en gzip. |
+| `npm run typecheck` (`tsc --noEmit`)   | pasa, sin errores                                                                                                         |
+| `grep -rn "tamano: 100" src/app`       | sin coincidencias: no quedan lecturas de colección completa                                                               |
+| Recuento de rutas en `app.routes.ts`   | 21 rutas hijas reales + `/mapa` en marcador                                                                               |
+| `POST /api/auth/login`, DNI `11111111` | 200                                                                                                                       |
+| `POST /api/auth/login`, DNI `22222222` | 200                                                                                                                       |
+| `POST /api/auth/login`, DNI `41907320` | 200                                                                                                                       |
+| `POST /api/auth/login`, DNI `10654038` | 200                                                                                                                       |
+| `POST /api/auth/login`, DNI `46078289` | 200                                                                                                                       |
+| `GET /api/v1/session`                  | hidrata la sesión del perfil autenticado                                                                                  |
+| `GET /api/v1/cases?pagina=1&tamano=2`  | sobre paginado con `items`, `total`, `page`, `pageSize`, `pagina`, `tamanoPagina`                                         |
 
 Las rutas de la API siguen en inglés (la API en español está decidida y pendiente); la UI las envuelve
 y traduce las claves en su capa HTTP.
@@ -257,19 +270,23 @@ Pruebas: `npm test` (`ng test`, Vitest). Hoy no hay especificaciones que ejecuta
 
 ## 12 · Siguiente en orden
 
-1. **Portar el contrato de escritura de casos** (`POST`, `PATCH`, `DELETE`) con Vitest, y conectar la
-   edición de la ficha. Es el desbloqueo de todo lo demás: sin escritura, ninguna vista nueva deja
-   de ser un espejo de datos ajenos.
-2. **Cerrar E2 en el backend**: exponer `anular` y `restaurar`; la base ya tiene la anulación lógica
-   con restauración. Recién entonces ofrecer la operación en la ficha.
-3. **Portar `/resumen` y `/bandeja`** con datos reales y mantener los agregados en los totales de
-   los listados paginados; `/api/dashboard` no existe y no se reintroduce.
+1. **Portar el contrato de escritura en la UI** (`POST`, `PATCH`) con Vitest, y conectar la edición de
+   la ficha. El backend ya lo acepta; falta la capa de formularios.
+2. **Ofrecer la anulación en la UI**: ya existen `POST …/anular` y `POST …/restaurar`, y el `DELETE`
+   exige `motivo`. Falta el diálogo con motivo obligatorio en la ficha del caso y en los paneles
+   laterales de alertas, compromisos y documentos.
+3. **Replicar el menú de exportación** (`shared/ui/exportar-menu`) en Casos, Alertas, Compromisos y en
+   cada panel lateral. La implementación de referencia está en Documentos.
 4. **No portar el mapa**: queda aplazado hasta que exista el dataset de ubigeo/centroide.
-5. **Portar compromisos** (calendario y hitos) después de (1), porque el calendario necesita
+5. **Portar compromisos** (calendario e hitos) después de (1), porque el calendario necesita
    escritura. El vencimiento ya se resuelve como manual > próximo hito > aviso.
-6. **Sustituir el `@import` de Google Fonts** por fuentes autoalojadas y añadir una comprobación de
+6. **Añadir orden y filtro por vencimiento en `/v1/commitments`** para que los recortes de Resumen,
+   Bandeja y Dirección no dependan de la página.
+7. **Sustituir el `@import` de Google Fonts** por fuentes autoalojadas y añadir una comprobación de
    tamaño gzip en CI, además de los presupuestos de `angular.json`.
-7. **Reemplazar `angular/README.md`** por las instrucciones de §10; este documento ya figura en
+8. **Reemplazar `angular/README.md`** por las instrucciones de §10; este documento ya figura en
    `docs/README.md` §2.
-8. **Declarar `/casos/sin-caso` antes de `/casos/:codigo`** y cablear la vista de demandas sin caso.
-9. **Implementar la exportación PDF/Excel/JSON** (E5) y ofrecerla sólo cuando exista.
+9. **Unificar el nombre de la API en español** (decisión del usuario, pendiente): hoy las rutas son
+   `/api/v1/*` en inglés y la UI traduce.
+10. **Añadir columna `orden` a `core.cat_ciclos_intervencion`** para que la presentación siga el orden
+    de la Guía §8.

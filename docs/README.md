@@ -28,6 +28,26 @@ actor existente sin datos personales devuelve 200 con `null` en lugar de 404. Lo
 vigentes se barrieron contra los doce ejes con seis agentes por bloque (requisitos; arquitectura;
 ejecución y operación; migración y datos; informes de parche; frontend).
 
+**Séptima pasada (2026-11-22): se cierran los gaps abiertos y la SPA Angular queda completa.** Se
+aplicaron en la base viva las migraciones `migration/20_tipos_documento_anexos.sql`,
+`21_retiro_cat_tipos_reunion.sql` y `22_ciclos_intervencion_guia.sql`: los Anexos 1 y 2 entran como tipo
+documental (D3, `cat_tipos_documento` en 17 filas), `cat_tipos_reunion` se conserva marcado «OBSOLETO
+(D7)» porque `reuniones_dialogo.tipo_id` lo referencia por FK, y `cat_ciclos_intervencion` pasa a las
+cinco etiquetas de la Guía §8.1–8.4 renombrando en sitio (D9), sin mover una fila de `core.casos`
+—34 casos con ciclo, 1 sin ciclo—. **D4 queda resuelta sin migración**: nivel de alerta (semáforo) y
+prioridad de alerta (SLA) son ejes distintos y se conservan los dos. **D10** se cierra en el mapeo de
+la UI: `KAG` y `WORKFLOW` tienen etiqueta explícita y el `CHECK` técnico no se toca. En el backend,
+**E2** deja de estar abierto: hay `POST …/anular` y `…/restaurar` para casos, alertas, compromisos,
+demandas y documentos, y los siete `DELETE` pasan a anulación lógica con `motivo` obligatorio
+(`400 MOTIVO_REQUERIDO`). **E5** también: `lib/export/{json,xlsx,pdf}.ts` y `GET /api/v1/export` sirven
+JSON por entidad o de base completa, XLSX (ZIP + OOXML, sin dependencias) y PDF 1.4, con el menú de
+exportación cableado en Documentos. Las 20 pantallas de la SPA tienen ruta real —sólo `/mapa` sigue en
+marcador por el aplazamiento de ubigeo/centroide— y todas paginan en el servidor; se retiraron las
+últimas lecturas de colección completa (`tamano: 100`) y los contadores de Resumen, Bandeja y
+Dirección se calculan con el `total` del sobre paginado. `ng build` pasa en 437,09 kB iniciales y
+99,61 kB de transferencia. Queda como único gap estructural **E4** (Anexo 17: registro de reportes).
+Las decisiones están en `04_migracion/DECISIONES_D3_D4_D7_D9_D10.md`.
+
 **En dos minutos.** Seis carpetas, en orden de lectura:
 
 | #   | Carpeta            | Qué responde                                                                                                                                                      |
@@ -190,7 +210,7 @@ su ruta es contrato de `compose.yaml` (ver §5.c).
 | `avisa_actual/CLASIFICACION_BASE_V9_EN_VIVO.md`      | **eliminado**                                                 | inventario de las 279 tablas (255 lógicas) / 26 esquemas                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | absorbido en `BRECHA` §12–§13 y retirado el 2026-11-18              |
 | `AVISA_PRODUCE_v9(1).md`                             | **eliminado**                                                 | texto íntegro contenido en v10 (283/284 encabezados; sólo difiere el título y 57 líneas)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | absorbido en `AVISA_PRODUCE_v10.md`; retirado el 2026-11-18         |
 
-### 2.1 · Migraciones de alineación con la Guía (12–19)
+### 2.1 · Migraciones de alineación con la Guía (12–22)
 
 Se aplican a mano, en orden, sobre la base ya cargada y con los parches 6–24 puestos. Todas van en una
 transacción y traen su bloque de reversión comentado.
@@ -205,9 +225,12 @@ transacción y traen su bloque de reversión comentado.
 | 17  | `migration/17_usuarios_y_privilegios.sql`    | cuentas demo, rol primario por jerarquía y separación de `administrador` de la cuenta de la Directora                | **aplicada** |
 | 18  | `migration/18_normalizacion_refs.sql`        | `core.normalizar_ref(text)`: comparación tolerante a mayúsculas, tildes y separadores                                | **aplicada** |
 | 19  | `migration/19_codigos_genericos.sql`         | sigla `GEN` cuando falta subsector o temática, en lugar de `XX`/`XXX`                                                | **aplicada** |
+| 20  | `migration/20_tipos_documento_anexos.sql`    | D3: Anexos 1 y 2 como tipo documental (los 14–17 no: son registros ya modelados)                                     | **aplicada** |
+| 21  | `migration/21_retiro_cat_tipos_reunion.sql`  | D7: retira `cat_tipos_reunion` si no hay dependientes; hoy queda marcada obsoleta por la FK de `reuniones_dialogo`   | **aplicada** |
+| 22  | `migration/22_ciclos_intervencion_guia.sql`  | D9: alinea `cat_ciclos_intervencion` a las 5 etiquetas de la Guía §8.1–8.4                                           | **aplicada** |
 
 El detalle de lo que cada una resolvió, y lo que sigue abierto, está en
-`01_requisitos/GAPS_GUIA_SQL_UI.md`.
+`01_requisitos/GAPS_GUIA_SQL_UI.md` y en `04_migracion/DECISIONES_D3_D4_D7_D9_D10.md`.
 
 **Regla de retirada.** Un archivo solo se elimina si su contenido **completo**
 vive ya en otro documento verificable, y su retirada se anota en esta tabla. Los

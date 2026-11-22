@@ -96,40 +96,44 @@ export const ETAPAS = [
 ] as const satisfies readonly EtapaCiclo[];
 
 /**
- * El catálogo legado (`core.cat_ciclos_intervencion`) tiene 4 valores y la Guía
- * define 5 etapas. La equivalencia es explícita y está registrada en el
- * documento de gaps: no se inventa una «Prevención estratégica» que la base
- * todavía no distingue.
+ * Tras la migración 22 (`migration/22_ciclos_intervencion_guia.sql`) el
+ * catálogo `core.cat_ciclos_intervencion` y `core.casos.ciclo_intervencion_id`
+ * usan las mismas cinco etiquetas que `EtapaCiclo`. Por eso el mapeo es
+ * identidad: ya no queda ningún valor legado que traducir.
+ *
+ * No se conserva la tabla de equivalencias anterior («Prevención»,
+ * «Seguimiento», «Gestión del Conocimiento»): mantener alias que la base ya no
+ * emite volvería a aceptar en silencio un valor desalineado y ocultaría una
+ * regresión del catálogo en lugar de exponerla. Si apareciera un valor fuera de
+ * la lista, se usa «Prevención operativa» como respaldo histórico.
  */
-const ETAPA_LEGADO: Record<string, EtapaCiclo> = {
-  prevención: 'Prevención operativa',
-  'intervención y tratamiento': 'Intervención y tratamiento',
-  seguimiento: 'Monitoreo de compromisos',
-  'gestión del conocimiento': 'Gestión de la información y del conocimiento',
-  'monitoreo de compromisos': 'Monitoreo de compromisos',
-};
-
 function etapaDe(valor: string | null): EtapaCiclo {
-  if (!valor) return 'Prevención operativa';
-  const clave = valor.trim().toLowerCase();
-  const equivalencia = ETAPA_LEGADO[clave];
-  if (equivalencia) return equivalencia;
   return unoDe(valor, ETAPAS, 'Prevención operativa');
 }
 
-/** `origen_dato` en la base usa códigos técnicos; la UI usa cuatro etiquetas. */
+/**
+ * `origen_dato` en la base usa códigos técnicos de procedencia; la UI muestra
+ * una etiqueta por código. `KAG` y `WORKFLOW` tienen etiqueta propia: antes
+ * caían en «Manual» por el valor de respaldo, lo que confundía una ingesta
+ * automática con un alta manual (gap D10). `AVISA_HISTORICO` conserva «Legado»
+ * y `WHATSAPP` conserva «WhatsApp».
+ */
 function origenDe(valor: string | null): OrigenDato {
   if (!valor) return 'Manual';
   const clave = valor.trim().toLowerCase();
+  if (clave.includes('kag')) return 'KAG';
+  if (clave.includes('workflow')) return 'Workflow';
   if (clave.includes('historico') || clave.includes('legado')) return 'Legado';
-  if (clave.includes('ingesta') || clave.includes('importa')) return 'Ingesta';
   if (clave.includes('whatsapp')) return 'WhatsApp';
+  if (clave.includes('ingesta') || clave.includes('importa')) return 'Ingesta';
   return unoDe(valor, ORIGENES, 'Manual');
 }
 
 export const ORIGENES = [
   'Manual',
   'Ingesta',
+  'KAG',
+  'Workflow',
   'Legado',
   'WhatsApp',
 ] as const satisfies readonly OrigenDato[];

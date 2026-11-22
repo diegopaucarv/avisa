@@ -22,6 +22,7 @@ import {
 import { consulta } from '../../core/http/consulta';
 import { aErrorApi } from '../../core/http/errores';
 import { CapacidadesService } from '../../core/permisos/capacidades.service';
+import { ExportarMenuComponent } from '../../shared/ui/exportar-menu.component';
 import { IconoComponent } from '../../shared/ui/icono.component';
 import { PaginacionComponent } from '../../shared/ui/paginacion.component';
 import { AlertaPanelComponent } from './alerta-panel.component';
@@ -74,7 +75,7 @@ const FILTROS_INICIALES: FiltrosAlertas = {
  */
 @Component({
   selector: 'app-alertas',
-  imports: [IconoComponent, PaginacionComponent, AlertaPanelComponent],
+  imports: [IconoComponent, PaginacionComponent, AlertaPanelComponent, ExportarMenuComponent],
   templateUrl: './alertas.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
@@ -298,6 +299,9 @@ export class AlertasPage {
   readonly errorGuardado = signal<string | null>(null);
   readonly aviso = signal<string | null>(null);
 
+  /** Último fallo del botón de exportación; vacío si no hubo. */
+  readonly exportarError = signal<string | null>(null);
+
   readonly puedeModificarAbierta = computed(() => {
     const alerta = this.alertaPanel();
     return alerta ? this.capacidades.puedeModificar(alerta.clasificacion) : false;
@@ -338,6 +342,10 @@ export class AlertasPage {
 
   recargarListado(): void {
     this.listado.recargar();
+  }
+
+  alFallarExportacion(mensaje: string): void {
+    this.exportarError.set(mensaje);
   }
 
   recargarDetalle(): void {

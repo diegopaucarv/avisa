@@ -1,9 +1,9 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from "@angular/core";
-import { ActivatedRoute, Router, RouterLink } from "@angular/router";
-import { toSignal } from "@angular/core/rxjs-interop";
-import { map } from "rxjs";
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { map } from 'rxjs';
 
-import { urlApi } from "../../core/config/entorno";
+import { urlApi } from '../../core/config/entorno';
 import {
   Coleccion,
   TAMANO_PAGINA,
@@ -11,15 +11,16 @@ import {
   paramsDePagina,
   totalPaginas,
   urlConParametros,
-} from "../../core/http/coleccion";
-import { consulta } from "../../core/http/consulta";
-import { CapacidadesService } from "../../core/permisos/capacidades.service";
-import { aCaso } from "../../dominio/mapeo";
-import type { Caso } from "../../dominio/modelos";
-import { IconoComponent } from "../../shared/ui/icono.component";
-import { PaginacionComponent } from "../../shared/ui/paginacion.component";
+} from '../../core/http/coleccion';
+import { consulta } from '../../core/http/consulta';
+import { CapacidadesService } from '../../core/permisos/capacidades.service';
+import { aCaso } from '../../dominio/mapeo';
+import type { Caso } from '../../dominio/modelos';
+import { ExportarMenuComponent } from '../../shared/ui/exportar-menu.component';
+import { IconoComponent } from '../../shared/ui/icono.component';
+import { PaginacionComponent } from '../../shared/ui/paginacion.component';
 
-type ModoVista = "tarjetas" | "tabla";
+type ModoVista = 'tarjetas' | 'tabla';
 
 type FiltrosCasos = {
   q: string;
@@ -29,15 +30,15 @@ type FiltrosCasos = {
 };
 
 const ORDENES = [
-  { valor: "recent", etiqueta: "Fecha (más reciente)" },
-  { valor: "risk", etiqueta: "Riesgo (Alto → Bajo)" },
-  { valor: "priority", etiqueta: "Prioridad (Urgente → Bajo)" },
+  { valor: 'recent', etiqueta: 'Fecha (más reciente)' },
+  { valor: 'risk', etiqueta: 'Riesgo (Alto → Bajo)' },
+  { valor: 'priority', etiqueta: 'Prioridad (Urgente → Bajo)' },
 ] as const;
 
 @Component({
-  selector: "app-casos",
-  imports: [RouterLink, IconoComponent, PaginacionComponent],
-  templateUrl: "./casos.page.html",
+  selector: 'app-casos',
+  imports: [RouterLink, IconoComponent, PaginacionComponent, ExportarMenuComponent],
+  templateUrl: './casos.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CasosPage {
@@ -46,23 +47,26 @@ export class CasosPage {
   readonly capacidades = inject(CapacidadesService);
 
   readonly ordenes = ORDENES;
-  readonly modo = signal<ModoVista>("tarjetas");
+  readonly modo = signal<ModoVista>('tarjetas');
+
+  /** Último fallo del botón de exportación; vacío si no hubo. */
+  readonly exportarError = signal<string | null>(null);
 
   private readonly parametros = toSignal(
     this.ruta.queryParamMap.pipe(
       map((params) => ({
-        q: params.get("q") ?? "",
-        pagina: Math.max(1, Number(params.get("pagina") ?? "1") || 1),
-        tamano: Math.max(1, Number(params.get("tamano") ?? String(TAMANO_PAGINA)) || TAMANO_PAGINA),
-        orden: params.get("orden") ?? "recent",
+        q: params.get('q') ?? '',
+        pagina: Math.max(1, Number(params.get('pagina') ?? '1') || 1),
+        tamano: Math.max(1, Number(params.get('tamano') ?? String(TAMANO_PAGINA)) || TAMANO_PAGINA),
+        orden: params.get('orden') ?? 'recent',
       })),
     ),
     {
       initialValue: {
-        q: "",
+        q: '',
         pagina: 1,
         tamano: TAMANO_PAGINA,
-        orden: "recent",
+        orden: 'recent',
       } satisfies FiltrosCasos,
     },
   );
@@ -72,7 +76,7 @@ export class CasosPage {
   private readonly recurso = consulta<Coleccion<Caso>>({
     fuente: () => {
       const filtros = this.parametros();
-      return urlConParametros(urlApi("/v1/cases"), {
+      return urlConParametros(urlApi('/v1/cases'), {
         ...paramsDePagina({ pagina: filtros.pagina, tamano: filtros.tamano }),
         q: filtros.q,
         sort: filtros.orden,
@@ -88,7 +92,9 @@ export class CasosPage {
   readonly total = computed(() => this.recurso.valor()?.total ?? 0);
   readonly estado = this.recurso.estado;
   readonly error = this.recurso.error;
-  readonly paginas = computed(() => totalPaginas(this.recurso.valor() ?? { total: 0, tamanoPagina: TAMANO_PAGINA }));
+  readonly paginas = computed(() =>
+    totalPaginas(this.recurso.valor() ?? { total: 0, tamanoPagina: TAMANO_PAGINA }),
+  );
 
   private temporizador?: ReturnType<typeof setTimeout>;
 
@@ -128,6 +134,10 @@ export class CasosPage {
     this.recurso.recargar();
   }
 
+  alFallarExportacion(mensaje: string): void {
+    this.exportarError.set(mensaje);
+  }
+
   private actualizar(cambios: Partial<FiltrosCasos>): void {
     const actuales = this.parametros();
     const siguiente = { ...actuales, ...cambios };
@@ -138,9 +148,9 @@ export class CasosPage {
         q: siguiente.q || null,
         pagina: siguiente.pagina > 1 ? siguiente.pagina : null,
         tamano: siguiente.tamano !== TAMANO_PAGINA ? siguiente.tamano : null,
-        orden: siguiente.orden !== "recent" ? siguiente.orden : null,
+        orden: siguiente.orden !== 'recent' ? siguiente.orden : null,
       },
-      queryParamsHandling: "merge",
+      queryParamsHandling: 'merge',
       replaceUrl: true,
     });
   }

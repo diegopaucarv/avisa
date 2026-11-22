@@ -24,6 +24,7 @@ import { aErrorApi } from '../../core/http/errores';
 import { CapacidadesService } from '../../core/permisos/capacidades.service';
 import { aCaso } from '../../dominio/mapeo';
 import type { Caso } from '../../dominio/modelos';
+import { ExportarMenuComponent } from '../../shared/ui/exportar-menu.component';
 import { IconoComponent } from '../../shared/ui/icono.component';
 import { PaginacionComponent } from '../../shared/ui/paginacion.component';
 import {
@@ -63,7 +64,7 @@ const FILTROS_INICIALES: FiltrosDemandas = {
  */
 @Component({
   selector: 'app-demandas-sin-caso',
-  imports: [IconoComponent, PaginacionComponent],
+  imports: [IconoComponent, PaginacionComponent, ExportarMenuComponent],
   templateUrl: './demandas-sin-caso.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
@@ -299,13 +300,23 @@ export class DemandasSinCasoPage {
   readonly errorVinculo = signal<string | null>(null);
   readonly aviso = signal<string | null>(null);
 
+  /** Último fallo del botón de exportación; vacío si no hubo. */
+  readonly exportarError = signal<string | null>(null);
+
   private readonly busquedaCaso = signal('');
+
+  /** Página del buscador de casos; también se pagina en servidor. */
+  readonly paginaCasos = signal(1);
+  readonly tamanoCasos = signal(TAMANO_PAGINA);
 
   private readonly casosEncontrados = consulta<Coleccion<Caso>>({
     fuente: () => {
       if (!this.demandaElegida()) return null;
       return urlConParametros(urlApi('/v1/cases'), {
-        ...paramsDePagina({ pagina: 1, tamano: 8 }),
+        ...paramsDePagina({
+          pagina: this.paginaCasos(),
+          tamano: this.tamanoCasos(),
+        }),
         q: this.busquedaCaso(),
         sort: 'recent',
       });
@@ -317,6 +328,7 @@ export class DemandasSinCasoPage {
   });
 
   readonly casos = computed(() => this.casosEncontrados.valor()?.elementos ?? []);
+  readonly totalCasos = computed(() => this.casosEncontrados.valor()?.total ?? 0);
   readonly estadoCasos = this.casosEncontrados.estado;
   readonly errorCasos = this.casosEncontrados.error;
 
@@ -368,6 +380,10 @@ export class DemandasSinCasoPage {
     this.listado.recargar();
   }
 
+  alFallarExportacion(mensaje: string): void {
+    this.exportarError.set(mensaje);
+  }
+
   /* ------------------------------------------------------------------ *
    * Vinculación
    * ------------------------------------------------------------------ */
@@ -377,12 +393,14 @@ export class DemandasSinCasoPage {
     this.errorVinculo.set(null);
     this.aviso.set(null);
     this.busquedaCaso.set('');
+    this.paginaCasos.set(1);
     this.demandaElegida.set(demanda);
   }
 
   cerrarVinculo(): void {
     clearTimeout(this.temporizadorCaso);
     this.demandaElegida.set(null);
+    this.paginaCasos.set(1);
     this.errorVinculo.set(null);
   }
 
@@ -390,8 +408,19 @@ export class DemandasSinCasoPage {
     const valor = (evento.target as HTMLInputElement).value;
     clearTimeout(this.temporizadorCaso);
     this.temporizadorCaso = setTimeout(() => {
+      this.paginaCasos.set(1);
       this.busquedaCaso.set(valor);
     }, 300);
+  }
+
+  cambiarPaginaCasos(pagina: number): void {
+    this.paginaCasos.set(Math.max(1, pagina));
+  }
+
+  cambiarTamanoCasos(tamano: number): void {
+    if (tamano <= 0) return;
+    this.tamanoCasos.set(tamano);
+    this.paginaCasos.set(1);
   }
 
   vincular(caso: Caso): void {
@@ -415,7 +444,13 @@ export class DemandasSinCasoPage {
           this.guardando.set(false);
           this.demandaElegida.set(null);
           this.aviso.set(`Demanda vinculada al caso ${caso.codigo}.`);
-          this.listado.recargar();
+          // La fila vinculada sale del filtro: si estábamos en una página
+          // posterior a la primera, volver a ella deja el listado vacío.
+          if (this.filtros().pagina > 1) {
+            void this.actualizar({ pagina: 1 });
+          } else {
+            this.listado.recargar();
+          }
         },
         error: (fallo: unknown) => {
           this.guardando.set(false);

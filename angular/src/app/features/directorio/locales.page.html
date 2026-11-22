@@ -7,8 +7,15 @@
         equipamiento y ubicación (Guía §8.2.5 y Anexo 16, columna «Lugar»).
       </p>
     </div>
-    <p class="result-count" aria-live="polite">{{ total() }} locales</p>
+    <div class="view-actions">
+      <app-exportar-menu entidad="locales" (fallo)="alFallarExportacion($event)" />
+      <p class="result-count" aria-live="polite">{{ total() }} locales</p>
+    </div>
   </header>
+
+  @if (exportarError(); as mensaje) {
+  <p class="form-error" role="alert">{{ mensaje }}</p>
+  }
 
   <div class="filter-bar filter-bar-wrap">
     <label class="search-field">

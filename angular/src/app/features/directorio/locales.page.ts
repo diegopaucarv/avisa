@@ -24,6 +24,7 @@ import {
 } from '../../core/http/coleccion';
 import { consulta } from '../../core/http/consulta';
 import { CapacidadesService } from '../../core/permisos/capacidades.service';
+import { ExportarMenuComponent } from '../../shared/ui/exportar-menu.component';
 import { IconoComponent } from '../../shared/ui/icono.component';
 import { PaginacionComponent } from '../../shared/ui/paginacion.component';
 import { aLocalDirectorio, type LocalDirectorio } from './local.mapeo';
@@ -55,7 +56,7 @@ const FILTROS_INICIALES: FiltrosLocales = {
  */
 @Component({
   selector: 'app-locales',
-  imports: [IconoComponent, PaginacionComponent],
+  imports: [IconoComponent, PaginacionComponent, ExportarMenuComponent],
   templateUrl: './locales.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
@@ -286,6 +287,9 @@ export class LocalesPage {
   /** Local cuya ficha está abierta en el panel lateral. */
   readonly seleccionado = signal<LocalDirectorio | null>(null);
 
+  /** Último fallo del botón de exportación; vacío si no hubo. */
+  readonly exportarError = signal<string | null>(null);
+
   private readonly panel = viewChild<ElementRef<HTMLElement>>('panel');
 
   /** Elemento que tenía el foco al abrir, para devolvérselo al cerrar. */
@@ -355,11 +359,16 @@ export class LocalesPage {
     void this.router.navigate([], {
       relativeTo: this.ruta,
       queryParams: {},
+      replaceUrl: true,
     });
   }
 
   recargar(): void {
     this.listado.recargar();
+  }
+
+  alFallarExportacion(mensaje: string): void {
+    this.exportarError.set(mensaje);
   }
 
   /** Booleano anulable → «Sí»/«No»/«—», sin afirmar lo que la base no dice. */

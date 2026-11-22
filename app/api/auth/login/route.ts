@@ -17,7 +17,6 @@ type AuthRow = {
   codigo_legado: string | null;
   nombre: string;
   dni: string;
-  email: string | null;
   cargo: string | null;
   unidad_siglas: string | null;
   rol_codigo: string | null;
@@ -65,7 +64,7 @@ export async function POST(request: Request) {
 
   try {
     const result = await getPool().query<AuthRow>(
-      `select usuario_id, codigo_legado, nombre, dni, email, cargo,
+      `select usuario_id, codigo_legado, nombre, dni, cargo,
               unidad_siglas, rol_codigo, roles, regiones
          from core.autenticar_usuario($1, $2)`,
       [dni, password],
@@ -91,7 +90,6 @@ export async function POST(request: Request) {
       cod: row.codigo_legado ?? "",
       dn: row.dni,
       area: row.unidad_siglas ?? "OAIPCS",
-      email: row.email ?? "",
       cargo: row.cargo ?? rol,
       regs: regiones,
       exp: Date.now() + SESSION_MAX_AGE_SECONDS * 1000,
@@ -103,7 +101,6 @@ export async function POST(request: Request) {
       rol,
       id: row.codigo_legado ?? row.usuario_id,
       area: session.area,
-      email: session.email,
       cargo: session.cargo,
       regiones,
       rolCodigo: session.rol,

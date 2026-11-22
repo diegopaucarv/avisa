@@ -8,9 +8,14 @@
       </p>
     </div>
     <div class="view-actions">
+      <app-exportar-menu entidad="casos" (fallo)="alFallarExportacion($event)" />
       <button type="button" class="button-secondary" (click)="recargar()">Recargar</button>
     </div>
   </header>
+
+  @if (exportarError(); as mensaje) {
+  <p class="form-error" role="alert">{{ mensaje }}</p>
+  }
 
   <div class="executive-kpis">
     @for (kpi of indicadores(); track kpi.clave) {
@@ -80,7 +85,7 @@
         <div>
           <p class="section-eyebrow">COMPROMISOS</p>
           <h3 id="titulo-compromisos-vencer">Por vencer o vencidos</h3>
-          <p>Hasta cinco compromisos abiertos, ordenados por fecha.</p>
+          <p>Hasta cinco compromisos abiertos de la página más reciente, ordenados por fecha.</p>
         </div>
         <a class="link-button" routerLink="/compromisos">
           Ver todos
@@ -92,7 +97,7 @@
       <p class="panel-nota" role="alert">{{ errorCompromisos()?.message }}</p>
       } @else if (estadoCompromisos() === 'cargando' || estadoCompromisos() === 'inactivo') {
       <p class="panel-vacio" role="status">Cargando compromisos…</p>
-      } @else if (compromisos().length === 0) {
+      } @else { @if (compromisos().length === 0) {
       <p class="panel-vacio">No hay compromisos vencidos ni próximos a vencer.</p>
       } @else {
       <ul class="tarea-lista">
@@ -112,7 +117,9 @@
         </li>
         }
       </ul>
-      }
+      @if (totalCompromisos() > 0) {
+      <p class="panel-pie">{{ totalCompromisos() }} compromisos registrados en total.</p>
+      } } }
     </section>
   </div>
 </section>

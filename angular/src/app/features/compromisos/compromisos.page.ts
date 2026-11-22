@@ -13,6 +13,7 @@ import {
   type Coleccion,
 } from '../../core/http/coleccion';
 import { consulta } from '../../core/http/consulta';
+import { ExportarMenuComponent } from '../../shared/ui/exportar-menu.component';
 import { IconoComponent } from '../../shared/ui/icono.component';
 import { PaginacionComponent } from '../../shared/ui/paginacion.component';
 import {
@@ -48,7 +49,7 @@ const GENERO = [
 
 @Component({
   selector: 'app-compromisos',
-  imports: [IconoComponent, PaginacionComponent, CompromisoPanelComponent],
+  imports: [IconoComponent, PaginacionComponent, CompromisoPanelComponent, ExportarMenuComponent],
   templateUrl: './compromisos.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
@@ -96,6 +97,9 @@ export class CompromisosPage {
   readonly generos = GENERO;
 
   readonly seleccionado = signal<Compromiso | null>(null);
+
+  /** Último fallo del botón de exportación; vacío si no hubo. */
+  readonly exportarError = signal<string | null>(null);
 
   private readonly parametros = toSignal(
     this.ruta.queryParamMap.pipe(
@@ -203,6 +207,10 @@ export class CompromisosPage {
 
   recargar(): void {
     this.recurso.recargar();
+  }
+
+  alFallarExportacion(mensaje: string): void {
+    this.exportarError.set(mensaje);
   }
 
   abrir(compromiso: Compromiso): void {

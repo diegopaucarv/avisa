@@ -349,7 +349,12 @@ export async function updateCaseEvent(
   }
 
   const fecha = readField(body, ["fecha", "fechaEvento"]);
-  if (fecha.present) add("fecha_evento", dateOnly(fecha.value));
+  if (fecha.present) {
+    // `fecha_evento` es NOT NULL: vaciarla no es un cambio válido.
+    const valor = dateOnly(fecha.value);
+    if (valor === null) invalid();
+    add("fecha_evento", valor);
+  }
 
   const critico = readField(body, ["critico", "esCritico"]);
   if (critico.present) add("es_hecho_critico", booleanValue(critico.value));
@@ -360,6 +365,17 @@ export async function updateCaseEvent(
   const evidencia = readField(body, ["evidencia", "linkEvidencia"]);
   if (evidencia.present) {
     add("link_evidencia", text(evidencia.value, MAX_EVIDENCE_LENGTH, false));
+  }
+
+  // El tipo se resuelve por id o por nombre contra `core.cat_tipos_hecho`, igual
+  // que en el alta; `null` lo desvincula. Sin esto la ficha no podría corregir
+  // el tipo de un hecho ya registrado.
+  const tipo = readField(body, ["tipoHecho", "tipo_hecho", "tipo"]);
+  if (tipo.present) {
+    add(
+      "tipo_hecho_id",
+      tipo.value === null ? null : await resolveTipoHecho(client, tipo.value),
+    );
   }
 
   if (sets.length === 0) invalid();

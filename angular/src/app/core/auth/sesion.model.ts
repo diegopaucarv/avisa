@@ -8,7 +8,6 @@ export type Usuario = {
   roles: string[];
   id: string;
   area: string;
-  email: string;
   cargo: string;
   regiones: string[];
 };
@@ -22,7 +21,6 @@ export type ApiSesion = {
     roles?: string[];
     id: string;
     area: string;
-    email: string;
     cargo: string;
     regiones?: string[];
   };
@@ -37,15 +35,14 @@ export type ApiLogin = {
   rol: string;
   id: string;
   area: string;
-  email: string;
   cargo: string;
   regiones?: string[];
   rolCodigo?: string;
   roles?: string[];
 };
 
-export function aUsuario(datos: ApiLogin | ApiSesion["user"]): Usuario {
-  const roles = "roles" in datos && Array.isArray(datos.roles) ? datos.roles : [];
+export function aUsuario(datos: ApiLogin | ApiSesion['user']): Usuario {
+  const roles = 'roles' in datos && Array.isArray(datos.roles) ? datos.roles : [];
   return {
     dni: datos.dni,
     nombre: datos.nombre,
@@ -53,7 +50,6 @@ export function aUsuario(datos: ApiLogin | ApiSesion["user"]): Usuario {
     roles,
     id: datos.id,
     area: datos.area,
-    email: datos.email,
     cargo: datos.cargo,
     regiones: Array.isArray(datos.regiones) ? datos.regiones : [],
   };

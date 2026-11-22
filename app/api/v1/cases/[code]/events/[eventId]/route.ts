@@ -8,6 +8,28 @@ export const dynamic = "force-dynamic";
 
 type Context = { params: Promise<{ code: string; eventId: string }> };
 
+/**
+ * Campos que `updateCaseEvent` sabe escribir. Se aceptan las mismas grafías
+ * (español, camelCase y columna) que ya reconocen las altas de cronología; todo
+ * lo demás se descarta antes de llegar al repositorio.
+ */
+const CAMPOS_EDITABLES = new Set<string>([
+  "descripcion",
+  "descripcionHecho",
+  "descripcion_hecho",
+  "fecha",
+  "fechaEvento",
+  "tipoHecho",
+  "tipo_hecho",
+  "tipo",
+  "evidencia",
+  "linkEvidencia",
+  "critico",
+  "esCritico",
+  "validado",
+  "esValidado",
+]);
+
 async function readBody(request: Request): Promise<Record<string, unknown>> {
   let parsed: unknown;
   try {
@@ -21,12 +43,26 @@ async function readBody(request: Request): Promise<Record<string, unknown>> {
   return parsed as Record<string, unknown>;
 }
 
+function soloCamposEditables(
+  body: Record<string, unknown>,
+): Record<string, unknown> {
+  const cambios: Record<string, unknown> = {};
+  for (const [clave, valor] of Object.entries(body)) {
+    if (CAMPOS_EDITABLES.has(clave)) cambios[clave] = valor;
+  }
+  if (Object.keys(cambios).length === 0) {
+    throw new ApiError(400, "No hay cambios que guardar.", "SIN_CAMBIOS");
+  }
+  return cambios;
+}
+
 export async function PATCH(request: Request, context: Context) {
   try {
     const session = requireSession(request);
     const { code, eventId } = await context.params;
     const decoded = decodeURIComponent(code);
     const body = await readBody(request);
+    const cambios = soloCamposEditables(body);
     const scope = { usuarioId: session.uid, rolCodigo: session.rol };
 
     const item = await withSession(scope, (client) =>
@@ -35,7 +71,7 @@ export async function PATCH(request: Request, context: Context) {
         scope,
         decoded,
         decodeURIComponent(eventId),
-        body,
+        cambios,
       ),
     );
 
