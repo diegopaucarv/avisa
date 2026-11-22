@@ -485,11 +485,7 @@
             .conflict-crisis::before {
                 background: #a84f49;
             }
-            .estado-seguimiento {
-                background: #eaf1fb;
-                color: #2455a2;
-            }
-            .estado-activo {
+            .estado-abierto {
                 background: #e9f5ef;
                 color: #34785b;
             }
@@ -635,6 +631,92 @@
             .notes a {
                 color: #4c7099;
             }
+            .contract-table {
+                width: 100%;
+                margin: 8px 0 0;
+                border-collapse: collapse;
+                font-size: 9.5px;
+                line-height: 1.45;
+            }
+            .contract-table th,
+            .contract-table td {
+                padding: 5px 8px;
+                border: 1px solid #edf0f2;
+                text-align: left;
+                vertical-align: top;
+                color: #526577;
+            }
+            .contract-table th {
+                background: #f6f8fa;
+                color: #687988;
+                font-weight: 700;
+            }
+            .contract-table td:first-child {
+                width: 150px;
+                color: #465a6c;
+                font-weight: 600;
+            }
+            .contract-table code {
+                font-family:
+                    ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+                font-size: 8.5px;
+                background: #f2f5f8;
+                border: 1px solid #e6ebef;
+                border-radius: 4px;
+                padding: 1px 3px;
+                color: #33475b;
+            }
+            .contract-table .req {
+                color: #93621d;
+                font-weight: 700;
+            }
+            .state-grid {
+                display: grid;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: 10px;
+                margin: 8px 0 0;
+            }
+            .state-card {
+                padding: 12px 14px;
+                border: 1px solid var(--line);
+                border-radius: 8px;
+                background: #fbfcfd;
+            }
+            .state-card h4 {
+                margin: 0 0 5px;
+                color: #465a6c;
+                font: 700 10px/1.3 var(--font-display);
+                letter-spacing: 0.03em;
+                text-transform: uppercase;
+            }
+            .state-card p {
+                margin: 0;
+                color: #778797;
+                font-size: 9.5px;
+                line-height: 1.5;
+            }
+            .skeleton {
+                display: flex;
+                flex-direction: column;
+                gap: 6px;
+                margin: 8px 0;
+            }
+            .skeleton span {
+                height: 8px;
+                border-radius: 4px;
+                background: linear-gradient(90deg, #eef2f5, #e2e8ed, #eef2f5);
+            }
+            .skeleton span:nth-child(2) {
+                width: 85%;
+            }
+            .skeleton span:nth-child(3) {
+                width: 65%;
+            }
+            @media (max-width: 720px) {
+                .state-grid {
+                    grid-template-columns: 1fr;
+                }
+            }
         </style>
     </head>
     <body>
@@ -694,18 +776,10 @@
                     <button
                         type="button"
                         class="status-chip"
-                        data-estado="Activo"
+                        data-estado="Abierto"
                         aria-pressed="false"
                     >
-                        Activo
-                    </button>
-                    <button
-                        type="button"
-                        class="status-chip"
-                        data-estado="En seguimiento"
-                        aria-pressed="false"
-                    >
-                        En seguimiento
+                        Abierto
                     </button>
                     <button
                         type="button"
@@ -831,9 +905,9 @@
 
             <p class="meta-line">
                 Fuente:
-                <code>analytics.vw_anexo_15_matriz_conflictividad</code>. Filas
-                reales; las columnas que la vista no expone se leyeron de las
-                tablas de origen (ver notas 2 y 3).
+                <code>analytics.vw_anexo_15_matriz_conflictividad</code>. El
+                contrato columna por columna está en la nota 2; las seis
+                columnas que la vista no expone se marcan «requiere».
             </p>
 
             <div class="table-wrap">
@@ -875,7 +949,7 @@
                             data-subsector="MYPE e Industria"
                             data-riesgo="Bajo"
                             data-prioridad="Moderado"
-                            data-estado="En seguimiento"
+                            data-estado="Abierto"
                             data-unidad="OAIPCS"
                             data-inicio="2026-05-01"
                         >
@@ -906,9 +980,8 @@
                                 >
                             </td>
                             <td>
-                                <span class="status-badge estado-seguimiento"
-                                    ><i class="status-dot"></i>En
-                                    seguimiento</span
+                                <span class="status-badge estado-abierto"
+                                    ><i class="status-dot"></i>Abierto</span
                                 >
                             </td>
                             <td>OAIPCS</td>
@@ -936,7 +1009,7 @@
                             data-subsector="MYPE e Industria"
                             data-riesgo="Bajo"
                             data-prioridad="Bajo"
-                            data-estado="En seguimiento"
+                            data-estado="Abierto"
                             data-unidad="OAIPCS"
                             data-inicio="2026-01-01"
                         >
@@ -967,9 +1040,8 @@
                                 >
                             </td>
                             <td>
-                                <span class="status-badge estado-seguimiento"
-                                    ><i class="status-dot"></i>En
-                                    seguimiento</span
+                                <span class="status-badge estado-abierto"
+                                    ><i class="status-dot"></i>Abierto</span
                                 >
                             </td>
                             <td>OAIPCS</td>
@@ -997,7 +1069,7 @@
                             data-subsector="Pesca y Acuicultura"
                             data-riesgo="Moderado"
                             data-prioridad="Moderado"
-                            data-estado="En seguimiento"
+                            data-estado="Abierto"
                             data-unidad="OAIPCS"
                             data-inicio="2026-01-01"
                         >
@@ -1030,9 +1102,8 @@
                                 >
                             </td>
                             <td>
-                                <span class="status-badge estado-seguimiento"
-                                    ><i class="status-dot"></i>En
-                                    seguimiento</span
+                                <span class="status-badge estado-abierto"
+                                    ><i class="status-dot"></i>Abierto</span
                                 >
                             </td>
                             <td>OAIPCS</td>
@@ -1060,7 +1131,7 @@
                             data-subsector="Pesca y Acuicultura"
                             data-riesgo="Bajo"
                             data-prioridad="Bajo"
-                            data-estado="En seguimiento"
+                            data-estado="Abierto"
                             data-unidad="OAIPCS"
                             data-inicio="2026-01-01"
                         >
@@ -1091,9 +1162,8 @@
                                 >
                             </td>
                             <td>
-                                <span class="status-badge estado-seguimiento"
-                                    ><i class="status-dot"></i>En
-                                    seguimiento</span
+                                <span class="status-badge estado-abierto"
+                                    ><i class="status-dot"></i>Abierto</span
                                 >
                             </td>
                             <td>OAIPCS</td>
@@ -1121,7 +1191,7 @@
                             data-subsector="Pesca y Acuicultura"
                             data-riesgo="Bajo"
                             data-prioridad="Moderado"
-                            data-estado="En seguimiento"
+                            data-estado="Abierto"
                             data-unidad="OAIPCS"
                             data-inicio="2026-01-01"
                         >
@@ -1152,9 +1222,8 @@
                                 >
                             </td>
                             <td>
-                                <span class="status-badge estado-seguimiento"
-                                    ><i class="status-dot"></i>En
-                                    seguimiento</span
+                                <span class="status-badge estado-abierto"
+                                    ><i class="status-dot"></i>Abierto</span
                                 >
                             </td>
                             <td>OAIPCS</td>
@@ -1182,7 +1251,7 @@
                             data-subsector="Pesca y Acuicultura"
                             data-riesgo="Bajo"
                             data-prioridad="Bajo"
-                            data-estado="En seguimiento"
+                            data-estado="Abierto"
                             data-unidad="OAIPCS"
                             data-inicio="2025-11-01"
                         >
@@ -1214,9 +1283,8 @@
                                 >
                             </td>
                             <td>
-                                <span class="status-badge estado-seguimiento"
-                                    ><i class="status-dot"></i>En
-                                    seguimiento</span
+                                <span class="status-badge estado-abierto"
+                                    ><i class="status-dot"></i>Abierto</span
                                 >
                             </td>
                             <td>OAIPCS</td>
@@ -1244,7 +1312,7 @@
                             data-subsector="Pesca y Acuicultura"
                             data-riesgo="Bajo"
                             data-prioridad="Bajo"
-                            data-estado="En seguimiento"
+                            data-estado="Abierto"
                             data-unidad="OAIPCS"
                             data-inicio="2025-11-01"
                         >
@@ -1275,9 +1343,8 @@
                                 >
                             </td>
                             <td>
-                                <span class="status-badge estado-seguimiento"
-                                    ><i class="status-dot"></i>En
-                                    seguimiento</span
+                                <span class="status-badge estado-abierto"
+                                    ><i class="status-dot"></i>Abierto</span
                                 >
                             </td>
                             <td>OAIPCS</td>
@@ -1305,7 +1372,7 @@
                             data-subsector="MYPE e Industria"
                             data-riesgo="Moderado"
                             data-prioridad="Moderado"
-                            data-estado="En seguimiento"
+                            data-estado="Abierto"
                             data-unidad="OAIPCS"
                             data-inicio="2025-08-01"
                         >
@@ -1338,9 +1405,8 @@
                                 >
                             </td>
                             <td>
-                                <span class="status-badge estado-seguimiento"
-                                    ><i class="status-dot"></i>En
-                                    seguimiento</span
+                                <span class="status-badge estado-abierto"
+                                    ><i class="status-dot"></i>Abierto</span
                                 >
                             </td>
                             <td>OAIPCS</td>
@@ -1368,7 +1434,7 @@
                             data-subsector="Pesca y Acuicultura"
                             data-riesgo="Bajo"
                             data-prioridad="Bajo"
-                            data-estado="En seguimiento"
+                            data-estado="Abierto"
                             data-unidad="OAIPCS"
                             data-inicio="2025-08-01"
                         >
@@ -1399,9 +1465,8 @@
                                 >
                             </td>
                             <td>
-                                <span class="status-badge estado-seguimiento"
-                                    ><i class="status-dot"></i>En
-                                    seguimiento</span
+                                <span class="status-badge estado-abierto"
+                                    ><i class="status-dot"></i>Abierto</span
                                 >
                             </td>
                             <td>OAIPCS</td>
@@ -1429,7 +1494,7 @@
                             data-subsector="MYPE e Industria"
                             data-riesgo="Alto"
                             data-prioridad="Moderado"
-                            data-estado="En seguimiento"
+                            data-estado="Abierto"
                             data-unidad="OAIPCS"
                             data-inicio="2025-07-01"
                         >
@@ -1460,9 +1525,8 @@
                                 >
                             </td>
                             <td>
-                                <span class="status-badge estado-seguimiento"
-                                    ><i class="status-dot"></i>En
-                                    seguimiento</span
+                                <span class="status-badge estado-abierto"
+                                    ><i class="status-dot"></i>Abierto</span
                                 >
                             </td>
                             <td>OAIPCS</td>
@@ -1490,7 +1554,7 @@
                             data-subsector="MYPE e Industria"
                             data-riesgo="Bajo"
                             data-prioridad="Bajo"
-                            data-estado="En seguimiento"
+                            data-estado="Abierto"
                             data-unidad="OAIPCS"
                             data-inicio="2025-01-01"
                         >
@@ -1520,9 +1584,8 @@
                                 >
                             </td>
                             <td>
-                                <span class="status-badge estado-seguimiento"
-                                    ><i class="status-dot"></i>En
-                                    seguimiento</span
+                                <span class="status-badge estado-abierto"
+                                    ><i class="status-dot"></i>Abierto</span
                                 >
                             </td>
                             <td>OAIPCS</td>
@@ -1550,7 +1613,7 @@
                             data-subsector="Pesca y Acuicultura"
                             data-riesgo="Moderado"
                             data-prioridad="Moderado"
-                            data-estado="En seguimiento"
+                            data-estado="Abierto"
                             data-unidad="OAIPCS"
                             data-inicio="2025-01-01"
                         >
@@ -1583,9 +1646,8 @@
                                 >
                             </td>
                             <td>
-                                <span class="status-badge estado-seguimiento"
-                                    ><i class="status-dot"></i>En
-                                    seguimiento</span
+                                <span class="status-badge estado-abierto"
+                                    ><i class="status-dot"></i>Abierto</span
                                 >
                             </td>
                             <td>OAIPCS</td>
@@ -1613,7 +1675,7 @@
                             data-subsector="Pesca y Acuicultura"
                             data-riesgo="Moderado"
                             data-prioridad="Moderado"
-                            data-estado="En seguimiento"
+                            data-estado="Abierto"
                             data-unidad="OAIPCS"
                             data-inicio="2024-12-04"
                         >
@@ -1646,9 +1708,8 @@
                                 >
                             </td>
                             <td>
-                                <span class="status-badge estado-seguimiento"
-                                    ><i class="status-dot"></i>En
-                                    seguimiento</span
+                                <span class="status-badge estado-abierto"
+                                    ><i class="status-dot"></i>Abierto</span
                                 >
                             </td>
                             <td>OAIPCS</td>
@@ -1676,7 +1737,7 @@
                             data-subsector="Pesca y Acuicultura"
                             data-riesgo="Bajo"
                             data-prioridad="Moderado"
-                            data-estado="En seguimiento"
+                            data-estado="Abierto"
                             data-unidad="OAIPCS"
                             data-inicio="2024-12-01"
                         >
@@ -1707,9 +1768,8 @@
                                 >
                             </td>
                             <td>
-                                <span class="status-badge estado-seguimiento"
-                                    ><i class="status-dot"></i>En
-                                    seguimiento</span
+                                <span class="status-badge estado-abierto"
+                                    ><i class="status-dot"></i>Abierto</span
                                 >
                             </td>
                             <td>OAIPCS</td>
@@ -1737,7 +1797,7 @@
                             data-subsector="Pesca y Acuicultura"
                             data-riesgo="Bajo"
                             data-prioridad="Urgente"
-                            data-estado="En seguimiento"
+                            data-estado="Abierto"
                             data-unidad="OAIPCS"
                             data-inicio="2024-10-15"
                         >
@@ -1768,9 +1828,8 @@
                                 >
                             </td>
                             <td>
-                                <span class="status-badge estado-seguimiento"
-                                    ><i class="status-dot"></i>En
-                                    seguimiento</span
+                                <span class="status-badge estado-abierto"
+                                    ><i class="status-dot"></i>Abierto</span
                                 >
                             </td>
                             <td>OAIPCS</td>
@@ -1798,7 +1857,7 @@
                             data-subsector="Pesca y Acuicultura"
                             data-riesgo="Moderado"
                             data-prioridad="Moderado"
-                            data-estado="En seguimiento"
+                            data-estado="Abierto"
                             data-unidad="OAIPCS"
                             data-inicio="2024-07-01"
                         >
@@ -1832,9 +1891,8 @@
                                 >
                             </td>
                             <td>
-                                <span class="status-badge estado-seguimiento"
-                                    ><i class="status-dot"></i>En
-                                    seguimiento</span
+                                <span class="status-badge estado-abierto"
+                                    ><i class="status-dot"></i>Abierto</span
                                 >
                             </td>
                             <td>OAIPCS</td>
@@ -1862,7 +1920,7 @@
                             data-subsector="Pesca y Acuicultura"
                             data-riesgo="Moderado"
                             data-prioridad="Moderado"
-                            data-estado="En seguimiento"
+                            data-estado="Abierto"
                             data-unidad="OAIPCS"
                             data-inicio="2022-01-01"
                         >
@@ -1895,9 +1953,8 @@
                                 >
                             </td>
                             <td>
-                                <span class="status-badge estado-seguimiento"
-                                    ><i class="status-dot"></i>En
-                                    seguimiento</span
+                                <span class="status-badge estado-abierto"
+                                    ><i class="status-dot"></i>Abierto</span
                                 >
                             </td>
                             <td>OAIPCS</td>
@@ -1925,7 +1982,7 @@
                             data-subsector="Pesca y Acuicultura"
                             data-riesgo="Bajo"
                             data-prioridad="Bajo"
-                            data-estado="En seguimiento"
+                            data-estado="Abierto"
                             data-unidad="OAIPCS"
                             data-inicio="2017-01-01"
                         >
@@ -1956,9 +2013,8 @@
                                 >
                             </td>
                             <td>
-                                <span class="status-badge estado-seguimiento"
-                                    ><i class="status-dot"></i>En
-                                    seguimiento</span
+                                <span class="status-badge estado-abierto"
+                                    ><i class="status-dot"></i>Abierto</span
                                 >
                             </td>
                             <td>OAIPCS</td>
@@ -1986,7 +2042,7 @@
                             data-subsector="Pesca y Acuicultura"
                             data-riesgo="Bajo"
                             data-prioridad="Urgente"
-                            data-estado="En seguimiento"
+                            data-estado="Abierto"
                             data-unidad="OAIPCS"
                             data-inicio="2012-08-01"
                         >
@@ -2017,9 +2073,8 @@
                                 >
                             </td>
                             <td>
-                                <span class="status-badge estado-seguimiento"
-                                    ><i class="status-dot"></i>En
-                                    seguimiento</span
+                                <span class="status-badge estado-abierto"
+                                    ><i class="status-dot"></i>Abierto</span
                                 >
                             </td>
                             <td>OAIPCS</td>
@@ -2047,7 +2102,7 @@
                             data-subsector="Pesca y Acuicultura"
                             data-riesgo="Moderado"
                             data-prioridad="Moderado"
-                            data-estado="En seguimiento"
+                            data-estado="Abierto"
                             data-unidad="OAIPCS"
                             data-inicio=""
                         >
@@ -2080,9 +2135,8 @@
                                 >
                             </td>
                             <td>
-                                <span class="status-badge estado-seguimiento"
-                                    ><i class="status-dot"></i>En
-                                    seguimiento</span
+                                <span class="status-badge estado-abierto"
+                                    ><i class="status-dot"></i>Abierto</span
                                 >
                             </td>
                             <td>OAIPCS</td>
@@ -2110,7 +2164,7 @@
                             data-subsector="Pesca y Acuicultura"
                             data-riesgo="Bajo"
                             data-prioridad="Moderado"
-                            data-estado="En seguimiento"
+                            data-estado="Abierto"
                             data-unidad="OAIPCS"
                             data-inicio=""
                         >
@@ -2141,9 +2195,8 @@
                                 >
                             </td>
                             <td>
-                                <span class="status-badge estado-seguimiento"
-                                    ><i class="status-dot"></i>En
-                                    seguimiento</span
+                                <span class="status-badge estado-abierto"
+                                    ><i class="status-dot"></i>Abierto</span
                                 >
                             </td>
                             <td>OAIPCS</td>
@@ -2152,6 +2205,778 @@
                             <td class="col-num">—</td>
                             <td>—</td>
                             <td class="col-num">1</td>
+                            <td>
+                                <button
+                                    type="button"
+                                    class="table-link"
+                                    title="Mockup sin ruta de ficha"
+                                >
+                                    Ver ficha
+                                </button>
+                            </td>
+                        </tr>
+                        <tr
+                            data-codigo=""
+                            data-nombre="Ley N.° 31749 de pesca artesanal y tradicional"
+                            data-region=""
+                            data-alcance=""
+                            data-tematica="Normatividad"
+                            data-subsector="Pesca y Acuicultura"
+                            data-riesgo="Moderado"
+                            data-prioridad="Urgente"
+                            data-estado="Abierto"
+                            data-unidad="OAIPCS"
+                            data-inicio="2025-02-27"
+                        >
+                            <td class="col-n">—</td>
+                            <td class="col-codigo">—</td>
+                            <td class="col-nombre">
+                                Ley N.° 31749 de pesca artesanal y tradicional
+                            </td>
+                            <td>—</td>
+                            <td>—</td>
+                            <td>Normatividad</td>
+                            <td>Pesca y Acuicultura</td>
+                            <td>
+                                <span class="conflict-tag conflict-conflicto"
+                                    >Conflicto social</span
+                                >
+                            </td>
+                            <td>
+                                <span class="risk-label risk-moderado"
+                                    >Moderado</span
+                                >
+                            </td>
+                            <td class="col-prio">
+                                <span class="status-badge priority-urgente"
+                                    >Urgente</span
+                                >
+                                <span class="rule-note"
+                                    >sin regla definida</span
+                                >
+                            </td>
+                            <td>
+                                <span class="status-badge estado-abierto"
+                                    ><i class="status-dot"></i>Abierto</span
+                                >
+                            </td>
+                            <td>OAIPCS</td>
+                            <td class="col-date">2025-02-27</td>
+                            <td class="col-date">—</td>
+                            <td class="col-num">—</td>
+                            <td>—</td>
+                            <td class="col-num">—</td>
+                            <td>
+                                <button
+                                    type="button"
+                                    class="table-link"
+                                    title="Mockup sin ruta de ficha"
+                                >
+                                    Ver ficha
+                                </button>
+                            </td>
+                        </tr>
+                        <tr
+                            data-codigo=""
+                            data-nombre="Ordenamiento de la pesquería del calamar gigante (pota)"
+                            data-region=""
+                            data-alcance=""
+                            data-tematica="Ordenamiento y acceso territorial"
+                            data-subsector="Pesca y Acuicultura"
+                            data-riesgo="Moderado"
+                            data-prioridad="Urgente"
+                            data-estado="Abierto"
+                            data-unidad="OAIPCS"
+                            data-inicio="2026-02-20"
+                        >
+                            <td class="col-n">—</td>
+                            <td class="col-codigo">—</td>
+                            <td class="col-nombre">
+                                Ordenamiento de la pesquería del calamar gigante
+                                (pota)
+                            </td>
+                            <td>—</td>
+                            <td>—</td>
+                            <td>Ordenamiento y acceso territorial</td>
+                            <td>Pesca y Acuicultura</td>
+                            <td>
+                                <span class="conflict-tag conflict-conflicto"
+                                    >Conflicto social</span
+                                >
+                            </td>
+                            <td>
+                                <span class="risk-label risk-moderado"
+                                    >Moderado</span
+                                >
+                            </td>
+                            <td class="col-prio">
+                                <span class="status-badge priority-urgente"
+                                    >Urgente</span
+                                >
+                                <span class="rule-note"
+                                    >sin regla definida</span
+                                >
+                            </td>
+                            <td>
+                                <span class="status-badge estado-abierto"
+                                    ><i class="status-dot"></i>Abierto</span
+                                >
+                            </td>
+                            <td>OAIPCS</td>
+                            <td class="col-date">2026-02-20</td>
+                            <td class="col-date">—</td>
+                            <td class="col-num">—</td>
+                            <td>—</td>
+                            <td class="col-num">—</td>
+                            <td>
+                                <button
+                                    type="button"
+                                    class="table-link"
+                                    title="Mockup sin ruta de ficha"
+                                >
+                                    Ver ficha
+                                </button>
+                            </td>
+                        </tr>
+                        <tr
+                            data-codigo=""
+                            data-nombre="Ampliación del proceso de formalización pesquera en Piura y Lambayeque"
+                            data-region=""
+                            data-alcance=""
+                            data-tematica="Gobernanza"
+                            data-subsector="Pesca y Acuicultura"
+                            data-riesgo="Bajo"
+                            data-prioridad="Moderado"
+                            data-estado="Abierto"
+                            data-unidad="OAIPCS"
+                            data-inicio=""
+                        >
+                            <td class="col-n">—</td>
+                            <td class="col-codigo">—</td>
+                            <td class="col-nombre">
+                                Ampliación del proceso de formalización pesquera
+                                en Piura y Lambayeque
+                            </td>
+                            <td>—</td>
+                            <td>—</td>
+                            <td>Gobernanza</td>
+                            <td>Pesca y Acuicultura</td>
+                            <td>
+                                <span class="conflict-tag conflict-controversia"
+                                    >Controversia</span
+                                >
+                            </td>
+                            <td>
+                                <span class="risk-label risk-bajo">Bajo</span>
+                            </td>
+                            <td class="col-prio">
+                                <span class="status-badge priority-moderado"
+                                    >Moderado</span
+                                >
+                                <span class="rule-note"
+                                    >sin regla definida</span
+                                >
+                            </td>
+                            <td>
+                                <span class="status-badge estado-abierto"
+                                    ><i class="status-dot"></i>Abierto</span
+                                >
+                            </td>
+                            <td>OAIPCS</td>
+                            <td class="col-date">—</td>
+                            <td class="col-date">—</td>
+                            <td class="col-num">—</td>
+                            <td>—</td>
+                            <td class="col-num">—</td>
+                            <td>
+                                <button
+                                    type="button"
+                                    class="table-link"
+                                    title="Mockup sin ruta de ficha"
+                                >
+                                    Ver ficha
+                                </button>
+                            </td>
+                        </tr>
+                        <tr
+                            data-codigo=""
+                            data-nombre="DPA Chimbote"
+                            data-region=""
+                            data-alcance=""
+                            data-tematica="Infraestructura"
+                            data-subsector="Pesca y Acuicultura"
+                            data-riesgo="Bajo"
+                            data-prioridad="Bajo"
+                            data-estado="Abierto"
+                            data-unidad="OAIPCS"
+                            data-inicio="2025-02-01"
+                        >
+                            <td class="col-n">—</td>
+                            <td class="col-codigo">—</td>
+                            <td class="col-nombre">DPA Chimbote</td>
+                            <td>—</td>
+                            <td>—</td>
+                            <td>Infraestructura</td>
+                            <td>Pesca y Acuicultura</td>
+                            <td>
+                                <span class="conflict-tag conflict-controversia"
+                                    >Controversia</span
+                                >
+                            </td>
+                            <td>
+                                <span class="risk-label risk-bajo">Bajo</span>
+                            </td>
+                            <td class="col-prio">
+                                <span class="status-badge priority-bajo"
+                                    >Bajo</span
+                                >
+                                <span class="rule-note"
+                                    >sin regla definida</span
+                                >
+                            </td>
+                            <td>
+                                <span class="status-badge estado-abierto"
+                                    ><i class="status-dot"></i>Abierto</span
+                                >
+                            </td>
+                            <td>OAIPCS</td>
+                            <td class="col-date">2025-02-01</td>
+                            <td class="col-date">—</td>
+                            <td class="col-num">—</td>
+                            <td>—</td>
+                            <td class="col-num">—</td>
+                            <td>
+                                <button
+                                    type="button"
+                                    class="table-link"
+                                    title="Mockup sin ruta de ficha"
+                                >
+                                    Ver ficha
+                                </button>
+                            </td>
+                        </tr>
+                        <tr
+                            data-codigo=""
+                            data-nombre="Derrame en la Refinería La Pampilla"
+                            data-region=""
+                            data-alcance=""
+                            data-tematica="Impactos de terceros"
+                            data-subsector="Pesca y Acuicultura"
+                            data-riesgo="Bajo"
+                            data-prioridad="Moderado"
+                            data-estado="Abierto"
+                            data-unidad="OAIPCS"
+                            data-inicio="2022-01-15"
+                        >
+                            <td class="col-n">—</td>
+                            <td class="col-codigo">—</td>
+                            <td class="col-nombre">
+                                Derrame en la Refinería La Pampilla
+                            </td>
+                            <td>—</td>
+                            <td>—</td>
+                            <td>Impactos de terceros</td>
+                            <td>Pesca y Acuicultura</td>
+                            <td>
+                                <span class="conflict-tag conflict-controversia"
+                                    >Controversia</span
+                                >
+                            </td>
+                            <td>
+                                <span class="risk-label risk-bajo">Bajo</span>
+                            </td>
+                            <td class="col-prio">
+                                <span class="status-badge priority-moderado"
+                                    >Moderado</span
+                                >
+                                <span class="rule-note"
+                                    >sin regla definida</span
+                                >
+                            </td>
+                            <td>
+                                <span class="status-badge estado-abierto"
+                                    ><i class="status-dot"></i>Abierto</span
+                                >
+                            </td>
+                            <td>OAIPCS</td>
+                            <td class="col-date">2022-01-15</td>
+                            <td class="col-date">—</td>
+                            <td class="col-num">—</td>
+                            <td>—</td>
+                            <td class="col-num">—</td>
+                            <td>
+                                <button
+                                    type="button"
+                                    class="table-link"
+                                    title="Mockup sin ruta de ficha"
+                                >
+                                    Ver ficha
+                                </button>
+                            </td>
+                        </tr>
+                        <tr
+                            data-codigo=""
+                            data-nombre="DPA Huacho"
+                            data-region=""
+                            data-alcance=""
+                            data-tematica="Infraestructura"
+                            data-subsector="Pesca y Acuicultura"
+                            data-riesgo="Bajo"
+                            data-prioridad="Bajo"
+                            data-estado="Abierto"
+                            data-unidad="OAIPCS"
+                            data-inicio="2025-10-01"
+                        >
+                            <td class="col-n">—</td>
+                            <td class="col-codigo">—</td>
+                            <td class="col-nombre">DPA Huacho</td>
+                            <td>—</td>
+                            <td>—</td>
+                            <td>Infraestructura</td>
+                            <td>Pesca y Acuicultura</td>
+                            <td>
+                                <span class="conflict-tag conflict-controversia"
+                                    >Controversia</span
+                                >
+                            </td>
+                            <td>
+                                <span class="risk-label risk-bajo">Bajo</span>
+                            </td>
+                            <td class="col-prio">
+                                <span class="status-badge priority-bajo"
+                                    >Bajo</span
+                                >
+                                <span class="rule-note"
+                                    >sin regla definida</span
+                                >
+                            </td>
+                            <td>
+                                <span class="status-badge estado-abierto"
+                                    ><i class="status-dot"></i>Abierto</span
+                                >
+                            </td>
+                            <td>OAIPCS</td>
+                            <td class="col-date">2025-10-01</td>
+                            <td class="col-date">—</td>
+                            <td class="col-num">—</td>
+                            <td>—</td>
+                            <td class="col-num">—</td>
+                            <td>
+                                <button
+                                    type="button"
+                                    class="table-link"
+                                    title="Mockup sin ruta de ficha"
+                                >
+                                    Ver ficha
+                                </button>
+                            </td>
+                        </tr>
+                        <tr
+                            data-codigo=""
+                            data-nombre="Medidas de ordenamiento del recurso bonito"
+                            data-region=""
+                            data-alcance=""
+                            data-tematica="Ordenamiento y acceso territorial"
+                            data-subsector="Pesca y Acuicultura"
+                            data-riesgo="Moderado"
+                            data-prioridad="Urgente"
+                            data-estado="Abierto"
+                            data-unidad="OAIPCS"
+                            data-inicio="2026-02-25"
+                        >
+                            <td class="col-n">—</td>
+                            <td class="col-codigo">—</td>
+                            <td class="col-nombre">
+                                Medidas de ordenamiento del recurso bonito
+                            </td>
+                            <td>—</td>
+                            <td>—</td>
+                            <td>Ordenamiento y acceso territorial</td>
+                            <td>Pesca y Acuicultura</td>
+                            <td>
+                                <span class="conflict-tag conflict-conflicto"
+                                    >Conflicto social</span
+                                >
+                            </td>
+                            <td>
+                                <span class="risk-label risk-moderado"
+                                    >Moderado</span
+                                >
+                            </td>
+                            <td class="col-prio">
+                                <span class="status-badge priority-urgente"
+                                    >Urgente</span
+                                >
+                                <span class="rule-note"
+                                    >sin regla definida</span
+                                >
+                            </td>
+                            <td>
+                                <span class="status-badge estado-abierto"
+                                    ><i class="status-dot"></i>Abierto</span
+                                >
+                            </td>
+                            <td>OAIPCS</td>
+                            <td class="col-date">2026-02-25</td>
+                            <td class="col-date">—</td>
+                            <td class="col-num">—</td>
+                            <td>—</td>
+                            <td class="col-num">—</td>
+                            <td>
+                                <button
+                                    type="button"
+                                    class="table-link"
+                                    title="Mockup sin ruta de ficha"
+                                >
+                                    Ver ficha
+                                </button>
+                            </td>
+                        </tr>
+                        <tr
+                            data-codigo=""
+                            data-nombre="OSPAS artes pasivas, cuotas de jurel y caballa"
+                            data-region=""
+                            data-alcance=""
+                            data-tematica="Ordenamiento y acceso territorial"
+                            data-subsector="Pesca y Acuicultura"
+                            data-riesgo="Bajo"
+                            data-prioridad="Moderado"
+                            data-estado="Abierto"
+                            data-unidad="OAIPCS"
+                            data-inicio="2024-12-30"
+                        >
+                            <td class="col-n">—</td>
+                            <td class="col-codigo">—</td>
+                            <td class="col-nombre">
+                                OSPAS artes pasivas, cuotas de jurel y caballa
+                            </td>
+                            <td>—</td>
+                            <td>—</td>
+                            <td>Ordenamiento y acceso territorial</td>
+                            <td>Pesca y Acuicultura</td>
+                            <td>
+                                <span class="conflict-tag conflict-controversia"
+                                    >Controversia</span
+                                >
+                            </td>
+                            <td>
+                                <span class="risk-label risk-bajo">Bajo</span>
+                            </td>
+                            <td class="col-prio">
+                                <span class="status-badge priority-moderado"
+                                    >Moderado</span
+                                >
+                                <span class="rule-note"
+                                    >sin regla definida</span
+                                >
+                            </td>
+                            <td>
+                                <span class="status-badge estado-abierto"
+                                    ><i class="status-dot"></i>Abierto</span
+                                >
+                            </td>
+                            <td>OAIPCS</td>
+                            <td class="col-date">2024-12-30</td>
+                            <td class="col-date">—</td>
+                            <td class="col-num">—</td>
+                            <td>—</td>
+                            <td class="col-num">—</td>
+                            <td>
+                                <button
+                                    type="button"
+                                    class="table-link"
+                                    title="Mockup sin ruta de ficha"
+                                >
+                                    Ver ficha
+                                </button>
+                            </td>
+                        </tr>
+                        <tr
+                            data-codigo=""
+                            data-nombre="DPA La Punchana (Loreto)"
+                            data-region="Loreto"
+                            data-alcance="Oriente"
+                            data-tematica="Infraestructura"
+                            data-subsector="Pesca y Acuicultura"
+                            data-riesgo="Bajo"
+                            data-prioridad="Bajo"
+                            data-estado="Abierto"
+                            data-unidad="OAIPCS"
+                            data-inicio="2025-01-01"
+                        >
+                            <td class="col-n">—</td>
+                            <td class="col-codigo">—</td>
+                            <td class="col-nombre">DPA La Punchana (Loreto)</td>
+                            <td>Loreto</td>
+                            <td>Oriente</td>
+                            <td>Infraestructura</td>
+                            <td>Pesca y Acuicultura</td>
+                            <td>—</td>
+                            <td>
+                                <span class="risk-label risk-bajo">Bajo</span>
+                            </td>
+                            <td class="col-prio">
+                                <span class="status-badge priority-bajo"
+                                    >Bajo</span
+                                >
+                                <span class="rule-note"
+                                    >sin regla definida</span
+                                >
+                            </td>
+                            <td>
+                                <span class="status-badge estado-abierto"
+                                    ><i class="status-dot"></i>Abierto</span
+                                >
+                            </td>
+                            <td>OAIPCS</td>
+                            <td class="col-date">2025-01-01</td>
+                            <td class="col-date">—</td>
+                            <td class="col-num">—</td>
+                            <td>—</td>
+                            <td class="col-num">—</td>
+                            <td>
+                                <button
+                                    type="button"
+                                    class="table-link"
+                                    title="Mockup sin ruta de ficha"
+                                >
+                                    Ver ficha
+                                </button>
+                            </td>
+                        </tr>
+                        <tr
+                            data-codigo=""
+                            data-nombre="Cancelación de la temporada de anchoveta"
+                            data-region=""
+                            data-alcance=""
+                            data-tematica="Ordenamiento y acceso territorial"
+                            data-subsector="Pesca y Acuicultura"
+                            data-riesgo="Moderado"
+                            data-prioridad="Moderado"
+                            data-estado="Abierto"
+                            data-unidad="OAIPCS"
+                            data-inicio="2026-04-28"
+                        >
+                            <td class="col-n">—</td>
+                            <td class="col-codigo">—</td>
+                            <td class="col-nombre">
+                                Cancelación de la temporada de anchoveta
+                            </td>
+                            <td>—</td>
+                            <td>—</td>
+                            <td>Ordenamiento y acceso territorial</td>
+                            <td>Pesca y Acuicultura</td>
+                            <td>
+                                <span class="conflict-tag conflict-controversia"
+                                    >Controversia</span
+                                >
+                            </td>
+                            <td>
+                                <span class="risk-label risk-moderado"
+                                    >Moderado</span
+                                >
+                            </td>
+                            <td class="col-prio">
+                                <span class="status-badge priority-moderado"
+                                    >Moderado</span
+                                >
+                                <span class="rule-note"
+                                    >sin regla definida</span
+                                >
+                            </td>
+                            <td>
+                                <span class="status-badge estado-abierto"
+                                    ><i class="status-dot"></i>Abierto</span
+                                >
+                            </td>
+                            <td>OAIPCS</td>
+                            <td class="col-date">2026-04-28</td>
+                            <td class="col-date">—</td>
+                            <td class="col-num">—</td>
+                            <td>—</td>
+                            <td class="col-num">—</td>
+                            <td>
+                                <button
+                                    type="button"
+                                    class="table-link"
+                                    title="Mockup sin ruta de ficha"
+                                >
+                                    Ver ficha
+                                </button>
+                            </td>
+                        </tr>
+                        <tr
+                            data-codigo=""
+                            data-nombre="Continuidad de la pesquería del tiburón (DENP y CITES)"
+                            data-region=""
+                            data-alcance=""
+                            data-tematica="Ordenamiento y acceso territorial"
+                            data-subsector="Pesca y Acuicultura"
+                            data-riesgo="Moderado"
+                            data-prioridad="Moderado"
+                            data-estado="Abierto"
+                            data-unidad="OAIPCS"
+                            data-inicio="2026-04-25"
+                        >
+                            <td class="col-n">—</td>
+                            <td class="col-codigo">—</td>
+                            <td class="col-nombre">
+                                Continuidad de la pesquería del tiburón (DENP y
+                                CITES)
+                            </td>
+                            <td>—</td>
+                            <td>—</td>
+                            <td>Ordenamiento y acceso territorial</td>
+                            <td>Pesca y Acuicultura</td>
+                            <td>
+                                <span class="conflict-tag conflict-conflicto"
+                                    >Conflicto social</span
+                                >
+                            </td>
+                            <td>
+                                <span class="risk-label risk-moderado"
+                                    >Moderado</span
+                                >
+                            </td>
+                            <td class="col-prio">
+                                <span class="status-badge priority-moderado"
+                                    >Moderado</span
+                                >
+                                <span class="rule-note"
+                                    >sin regla definida</span
+                                >
+                            </td>
+                            <td>
+                                <span class="status-badge estado-abierto"
+                                    ><i class="status-dot"></i>Abierto</span
+                                >
+                            </td>
+                            <td>OAIPCS</td>
+                            <td class="col-date">2026-04-25</td>
+                            <td class="col-date">—</td>
+                            <td class="col-num">—</td>
+                            <td>—</td>
+                            <td class="col-num">—</td>
+                            <td>
+                                <button
+                                    type="button"
+                                    class="table-link"
+                                    title="Mockup sin ruta de ficha"
+                                >
+                                    Ver ficha
+                                </button>
+                            </td>
+                        </tr>
+                        <tr
+                            data-codigo=""
+                            data-nombre="Mortandad de truchas en Pariahuanca (Junín)"
+                            data-region=""
+                            data-alcance=""
+                            data-tematica=""
+                            data-subsector="Pesca y Acuicultura"
+                            data-riesgo="Bajo"
+                            data-prioridad="Bajo"
+                            data-estado="Abierto"
+                            data-unidad="OAIPCS"
+                            data-inicio="2026-04-27"
+                        >
+                            <td class="col-n">—</td>
+                            <td class="col-codigo">—</td>
+                            <td class="col-nombre">
+                                Mortandad de truchas en Pariahuanca (Junín)
+                            </td>
+                            <td>—</td>
+                            <td>—</td>
+                            <td>—</td>
+                            <td>Pesca y Acuicultura</td>
+                            <td>
+                                <span class="conflict-tag conflict-controversia"
+                                    >Controversia</span
+                                >
+                            </td>
+                            <td>
+                                <span class="risk-label risk-bajo">Bajo</span>
+                            </td>
+                            <td class="col-prio">
+                                <span class="status-badge priority-bajo"
+                                    >Bajo</span
+                                >
+                                <span class="rule-note"
+                                    >sin regla definida</span
+                                >
+                            </td>
+                            <td>
+                                <span class="status-badge estado-abierto"
+                                    ><i class="status-dot"></i>Abierto</span
+                                >
+                            </td>
+                            <td>OAIPCS</td>
+                            <td class="col-date">2026-04-27</td>
+                            <td class="col-date">—</td>
+                            <td class="col-num">—</td>
+                            <td>—</td>
+                            <td class="col-num">—</td>
+                            <td>
+                                <button
+                                    type="button"
+                                    class="table-link"
+                                    title="Mockup sin ruta de ficha"
+                                >
+                                    Ver ficha
+                                </button>
+                            </td>
+                        </tr>
+                        <tr
+                            data-codigo=""
+                            data-nombre="Impacto del Fenómeno El Niño (FEN)"
+                            data-region=""
+                            data-alcance=""
+                            data-tematica="Impactos de terceros"
+                            data-subsector="Pesca y Acuicultura"
+                            data-riesgo="Moderado"
+                            data-prioridad="Urgente"
+                            data-estado="Abierto"
+                            data-unidad="OAIPCS"
+                            data-inicio="2026-02-01"
+                        >
+                            <td class="col-n">—</td>
+                            <td class="col-codigo">—</td>
+                            <td class="col-nombre">
+                                Impacto del Fenómeno El Niño (FEN)
+                            </td>
+                            <td>—</td>
+                            <td>—</td>
+                            <td>Impactos de terceros</td>
+                            <td>Pesca y Acuicultura</td>
+                            <td>
+                                <span class="conflict-tag conflict-controversia"
+                                    >Controversia</span
+                                >
+                            </td>
+                            <td>
+                                <span class="risk-label risk-moderado"
+                                    >Moderado</span
+                                >
+                            </td>
+                            <td class="col-prio">
+                                <span class="status-badge priority-urgente"
+                                    >Urgente</span
+                                >
+                                <span class="rule-note"
+                                    >sin regla definida</span
+                                >
+                            </td>
+                            <td>
+                                <span class="status-badge estado-abierto"
+                                    ><i class="status-dot"></i>Abierto</span
+                                >
+                            </td>
+                            <td>OAIPCS</td>
+                            <td class="col-date">2026-02-01</td>
+                            <td class="col-date">—</td>
+                            <td class="col-num">—</td>
+                            <td>—</td>
+                            <td class="col-num">—</td>
                             <td>
                                 <button
                                     type="button"
@@ -2171,9 +2996,9 @@
                     ‹ Anterior
                 </button>
                 <span id="range-label"
-                    >1–10 de 21 · el caso anulado no aparece</span
+                    >— de — · el caso anulado no aparece</span
                 >
-                <span id="page-label">Página 1 de 3</span>
+                <span id="page-label">Página — de —</span>
                 <button type="button" id="next" class="button-secondary">
                     Siguiente ›
                 </button>
@@ -2181,19 +3006,29 @@
 
             <p class="footnote">
                 <strong
-                    >«—» significa «sin dato registrado»; no se estima.</strong
+                    >«—» significa «sin dato registrado»; no se estima y nunca
+                    se lee como cero.</strong
                 >
-                <code>Inicio</code> es <code>core.casos.fecha_inicio</code> (dos
-                casos no la tienen). <code>Último hecho</code> es el máximo
-                <code>fecha_evento</code> de <code>core.caso_cronologia</code>:
-                solo 5 de los 21 casos tienen hechos y ninguno cae en la primera
-                página. <code>Compromisos</code> y
+                <code>Inicio</code> es <code>core.casos.fecha_inicio</code>.
+                <code>Último hecho</code> es el máximo
+                <code>fecha_evento</code> de
+                <code>core.caso_cronologia</code> no anulado.
+                <code>Compromisos</code> y
                 <code>Tipo de compromiso</code> agregan
-                <code>core.compromisos</code> (8 en total, en 3 casos, todos con
-                el valor <code>Actividad</code>). <code>Documentos</code> cuenta
-                <code>core.documentos</code> no anulados. La prioridad de
-                atención se muestra tal cual está almacenada y se marca «sin
-                regla definida» porque la Guía no define su cálculo.
+                <code>core.compromisos</code> no anulados (el único valor
+                almacenado hoy es <code>Actividad</code>).
+                <code>Documentos</code> cuenta <code>core.documentos</code> no
+                anulados.
+                <b
+                    >Los totales del paginador y la numeración se calculan sobre
+                    las filas devueltas; ningún conteo está escrito a mano.</b
+                >
+                La prioridad de atención se muestra tal cual está almacenada y
+                se marca «sin regla definida» porque la Guía no define su
+                cálculo. En las trece filas reconstruidas desde
+                <code>FACT_Casos</code>, las celdas «—» de código de caso,
+                alcance derivado y agregados son datos que este mockup no
+                reproduce: los calcula la consulta.
             </p>
 
             <section class="notes" aria-labelledby="notas">
@@ -2202,78 +3037,203 @@
                     <li>
                         Esto es un <b>mockup</b>: no existe ruta en la SPA ni
                         endpoint <code>GET /api/v1/anexos/15</code>. La fuente
-                        es
+                        de las quince columnas es
                         <code>analytics.vw_anexo_15_matriz_conflictividad</code
-                        >; las columnas que la vista no expone se completaron
-                        aquí con un <code>SELECT</code> de solo lectura a las
-                        tablas de origen (ver nota 2).
+                        >, resuelta en
+                        <code>migration/32_anexo15_left_join.sql</code>. Las
+                        seis columnas que la vista no expone aparecen como
+                        <span class="req">requiere</span> en el contrato de la
+                        nota siguiente.
                     </li>
                     <li>
-                        La vista ya corre con
-                        <code>security_invoker=true</code> (migración
-                        <code>migration/30_alcance_derivado.sql</code>), así que
-                        la RLS del rol que consulta se aplica: el caso anulado
-                        (<code>CS-MI-ITE-2026-02</code>) no se ve con
-                        <code>avisa_app</code>. Columnas del mockup ausentes en
-                        la vista: <code>estado</code>,
-                        <code>fecha_inicio</code>, <code>ultimo_hecho</code>,
-                        <code>compromisos</code>, <code>tipo_compromiso</code> y
-                        <code>documentos</code>. Propuesta de
-                        <code>CREATE OR REPLACE VIEW</code> (<b>no ejecutada</b
-                        >):
-                        <pre
-                            class="code-block"
-                        ><code>CREATE OR REPLACE VIEW analytics.vw_anexo_15_matriz_conflictividad
-WITH (security_invoker = true) AS
-SELECT
-    c.codigo_caso,
-    g.region,
-    al.codigo                               AS alcance,
-    s.nombre                                AS subsector,
-    tm.nombre                               AS tematica,
-    uo.siglas                               AS responsable,
-    nc.nombre                               AS nivel_conflicto,
-    nr.codigo                               AS nivel_riesgo,
-    c.descripcion_riesgo,
-    pa.codigo                               AS prioridad_atencion,
-    c.nombre_caso,
-    (SELECT string_agg(to_char(k.fecha_evento, 'DD.MM.YYYY') || ' ' || k.descripcion_hecho, ' | '
-                       ORDER BY k.fecha_evento DESC)
-       FROM core.caso_cronologia k
-      WHERE k.caso_id = c.id AND k.anulado_en IS NULL) AS narracion_cronologica,
-    (SELECT string_agg(a.codigo_alerta::text, ', ')
-       FROM core.alertas_tempranas a
-      WHERE a.caso_id = c.id)               AS alertas_vinculadas,
-    (SELECT string_agg(ac.nombre_actual, '; ')
-       FROM core.casos_actores ca
-       JOIN core.actores ac ON ac.actor_uid = ca.actor_id
-      WHERE ca.caso_id = c.id)              AS actores_involucrados,
-    pf.nombre                               AS punto_focal,
-    <span class="cm">-- columnas que el mockup pide y la vista actual no expone</span>
-    ec.codigo                               AS estado,
-    c.fecha_inicio,
-    (SELECT max(k.fecha_evento)
-       FROM core.caso_cronologia k
-      WHERE k.caso_id = c.id AND k.anulado_en IS NULL) AS ultimo_hecho,
-    (SELECT count(*)
-       FROM core.compromisos co
-      WHERE co.caso_id = c.id AND co.anulado_en IS NULL) AS compromisos,
-    (SELECT string_agg(DISTINCT co.tipo_compromiso, ', ')
-       FROM core.compromisos co
-      WHERE co.caso_id = c.id AND co.anulado_en IS NULL) AS tipo_compromiso,
-    (SELECT count(*)
-       FROM core.documentos d
-      WHERE d.caso_id = c.id AND d.anulado_en IS NULL) AS documentos
-  FROM core.casos c
-  LEFT JOIN core.usuarios pf                 ON pf.id = c.punto_focal_usuario_id
-  LEFT JOIN analytics.vw_geo_distrito g      ON g.distrito_id = c.distrito_principal_id
-  LEFT JOIN core.cat_subsectores s           ON s.id = c.subsector_id
-  LEFT JOIN core.cat_tematicas tm            ON tm.id = c.tematica_id
-  LEFT JOIN core.cat_unidades_organicas uo   ON uo.id = c.unidad_responsable_id
-  LEFT JOIN core.cat_niveles_conflicto nc    ON nc.id = c.nivel_conflicto_id
-  LEFT JOIN core.cat_niveles_riesgo nr       ON nr.id = c.nivel_riesgo_id
-  LEFT JOIN core.cat_alcances_geograficos al ON al.id = core.alcance_caso(c.id)
-  LEFT JOIN core.cat_prioridades_atencion pa ON pa.id = c.prioridad_id;</code></pre>
+                        <b>Contrato de datos, columna por columna.</b> La vista
+                        conserva el orden del Anexo 15 y expone quince columnas:
+                        <code
+                            >codigo_caso, region, alcance, subsector, tematica,
+                            responsable, nivel_conflicto, nivel_riesgo,
+                            descripcion_riesgo, prioridad_atencion, nombre_caso,
+                            narracion_cronologica, alertas_vinculadas,
+                            actores_involucrados, punto_focal</code
+                        >. La pantalla usa diez de ellas;
+                        <code>descripcion_riesgo</code>,
+                        <code>narracion_cronologica</code>,
+                        <code>alertas_vinculadas</code>,
+                        <code>actores_involucrados</code> y
+                        <code>punto_focal</code> se reservan para la ficha.
+                        Corre con <code>security_invoker = true</code>: la RLS
+                        del rol se aplica, y por eso un rol sujeto a RLS ve 34
+                        filas vigentes mientras el propietario ve 35 (la 35.ª es
+                        el caso anulado <code>CS-MI-ITE-2026-02</code>).
+                        <table class="contract-table">
+                            <thead>
+                                <tr>
+                                    <th>Columna de la pantalla</th>
+                                    <th>Origen del dato</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>N°</td>
+                                    <td>
+                                        Índice de la página, calculado en el
+                                        cliente. No es un dato.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Código de caso</td>
+                                    <td><code>codigo_caso</code> (vista).</td>
+                                </tr>
+                                <tr>
+                                    <td>Nombre del caso</td>
+                                    <td><code>nombre_caso</code> (vista).</td>
+                                </tr>
+                                <tr>
+                                    <td>Región</td>
+                                    <td>
+                                        <code>region</code>, de
+                                        <code>analytics.vw_geo_distrito</code>
+                                        por
+                                        <code>c.distrito_principal_id</code>.
+                                        <code>LEFT JOIN</code>: si no hay
+                                        distrito queda nulo → «—».
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Alcance</td>
+                                    <td>
+                                        Derivado: <code>al.codigo</code> con
+                                        <code
+                                            >al.id =
+                                            core.alcance_caso(c.id)</code
+                                        >. Nunca se elige ni se envía.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Temática</td>
+                                    <td>
+                                        <code>tematica</code> ←
+                                        <code>core.cat_tematicas.nombre</code>
+                                        (<code>LEFT JOIN</code>).
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Subsector</td>
+                                    <td>
+                                        <code>subsector</code> ←
+                                        <code>core.cat_subsectores.nombre</code>
+                                        (<code>LEFT JOIN</code>).
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Nivel de conflictividad</td>
+                                    <td>
+                                        <code>nivel_conflicto</code> ←
+                                        <code
+                                            >core.cat_niveles_conflicto.nombre</code
+                                        >
+                                        (<code>LEFT JOIN</code>).
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Nivel de riesgo</td>
+                                    <td>
+                                        <code>nivel_riesgo</code> ←
+                                        <code
+                                            >core.cat_niveles_riesgo.codigo</code
+                                        >
+                                        (<code>LEFT JOIN</code>).
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Prioridad de atención</td>
+                                    <td>
+                                        <code>prioridad_atencion</code> ←
+                                        <code
+                                            >core.cat_prioridades_atencion.codigo</code
+                                        >. Valor almacenado; se muestra «sin
+                                        regla definida».
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Estado</td>
+                                    <td>
+                                        <span class="req">requiere</span>
+                                        columna <code>estado</code>, ausente en
+                                        la vista:
+                                        <code>core.casos.estado_id</code> →
+                                        <code>core.cat_estados_caso.codigo</code
+                                        >.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Unidad responsable</td>
+                                    <td>
+                                        <code>responsable</code> ←
+                                        <code
+                                            >core.cat_unidades_organicas.siglas</code
+                                        >
+                                        (<code>LEFT JOIN</code>).
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Inicio</td>
+                                    <td>
+                                        <span class="req">requiere</span>
+                                        columna <code>fecha_inicio</code>,
+                                        ausente en la vista:
+                                        <code>core.casos.fecha_inicio</code>.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Último hecho</td>
+                                    <td>
+                                        <span class="req">requiere</span>
+                                        columna <code>ultimo_hecho</code>:
+                                        <code
+                                            >max(core.caso_cronologia.fecha_evento)</code
+                                        >
+                                        con <code>anulado_en IS NULL</code>.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Compromisos</td>
+                                    <td>
+                                        <span class="req">requiere</span>
+                                        columna <code>compromisos</code>:
+                                        <code>count(core.compromisos)</code> con
+                                        <code>anulado_en IS NULL</code>.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Tipo de compromiso</td>
+                                    <td>
+                                        <span class="req">requiere</span>
+                                        columna <code>tipo_compromiso</code>:
+                                        <code
+                                            >string_agg(core.compromisos.tipo_compromiso)</code
+                                        >.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Documentos</td>
+                                    <td>
+                                        <span class="req">requiere</span>
+                                        columna <code>documentos</code>:
+                                        <code>count(core.documentos)</code> con
+                                        <code>anulado_en IS NULL</code>.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Ver ficha</td>
+                                    <td>
+                                        Acción, no dato: abre
+                                        <code>GET /api/v1/cases/{codigo}</code>.
+                                        Una fila sin <code>codigo_caso</code> no
+                                        puede abrir ficha.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </li>
                     <li>
                         El alcance <b>nunca</b> se elige a mano: lo deriva
@@ -2288,9 +3248,7 @@ SELECT
                         glosario de alineación):
                         <dl class="vocab">
                             <dt>Estados de caso</dt>
-                            <dd>
-                                Activo · En seguimiento · Resuelto · Archivado
-                            </dd>
+                            <dd>Abierto · Resuelto · Archivado</dd>
                             <dt>Conflictividad</dt>
                             <dd>
                                 Diferencia · Controversia · Conflicto social ·
@@ -2307,24 +3265,39 @@ SELECT
                                 «Región» (no «Territorio») · «GORE» (no
                                 «Gobierno regional»)
                             </dd>
+                            <dt>Campos de la tabla</dt>
+                            <dd>
+                                «Unidad responsable» · «Inicio» (fecha real del
+                                caso; nunca «Actualizado») · «Tipo de
+                                compromiso» (no «tipo de acuerdo»)
+                            </dd>
                         </dl>
                     </li>
                     <li>
                         Qué falta para implementarlo de verdad: repo
                         <code>lib/db/repos/anexos.ts</code> +
-                        <code>GET /api/v1/anexos/15</code> + ruta SPA +
-                        exportación con los filtros activos (items 42 y 70 del
-                        catálogo de frontend).
+                        <code>GET /api/v1/anexos/15</code> + ruta SPA + las seis
+                        columnas marcadas <span class="req">requiere</span>
+                        (estado, fecha de inicio, último hecho, compromisos,
+                        tipo de compromiso, documentos) + exportación con los
+                        filtros activos (items 42 y 70 del catálogo de
+                        frontend).
                     </li>
                 </ol>
 
                 <h3>Decisiones aplicadas</h3>
                 <ul>
                     <li>
-                        La vista ya es <code>security_invoker</code> (migración
-                        <code>migration/30_alcance_derivado.sql</code>): el
-                        cierre de seguridad está hecho y lo pendiente es la
-                        pantalla.
+                        La vista es <code>security_invoker</code> y usa
+                        <code>LEFT JOIN</code> para los ocho catálogos
+                        (<code>migration/32_anexo15_left_join.sql</code>): el
+                        cierre de seguridad y la cobertura están hechos; lo
+                        pendiente es la pantalla.
+                    </li>
+                    <li>
+                        Los estados de caso quedaron unificados el 2026-11-22 en
+                        tres: <b>Abierto · Resuelto · Archivado</b>. Cualquier
+                        sinónimo anterior ya no existe en el sistema.
                     </li>
                     <li>
                         <b>«Tipo de compromiso»</b> sustituye al rótulo anterior
@@ -2341,14 +3314,19 @@ SELECT
                 <h3>Estado de la cobertura</h3>
                 <ul>
                     <li>
-                        <b>Cobertura de filas:</b> la vista ya devuelve todas
-                        las filas. Con <code>LEFT JOIN</code> en distrito,
+                        <b>Cobertura de filas:</b> la vista devuelve todas las
+                        filas. Con <code>LEFT JOIN</code> en distrito,
                         subsector, temática, unidad, conflicto, riesgo, alcance
-                        y prioridad, un caso sin dato aparece con «—» en esa
-                        columna en lugar de desaparecer. Decisión aplicada en
-                        <code>migration/32_anexo15_left_join.sql</code>: 35
-                        filas como propietario (12 sin región) y 34 vigentes
-                        visibles para un rol sujeto a RLS.
+                        y prioridad
+                        (<code>migration/32_anexo15_left_join.sql</code>), un
+                        caso sin dato aparece con «—» en esa columna en lugar de
+                        desaparecer. Esta pantalla
+                        <b>lista todos los casos vigentes</b>, con «—» donde
+                        falta la región; el propietario ve una fila más (el caso
+                        anulado <code>CS-MI-ITE-2026-02</code>), que la RLS
+                        oculta a los demás roles. Los conteos del paginador y la
+                        numeración se calculan en el cliente sobre las filas
+                        devueltas; no hay constantes escritas.
                     </li>
                     <li>
                         <b>Clasificación del compromiso:</b> el item 16 pide
@@ -2364,6 +3342,73 @@ SELECT
                         la lista como columna pero no define su cálculo. Se
                         muestra el valor almacenado, marcado «sin regla
                         definida»; no se deriva del riesgo.
+                    </li>
+                </ul>
+
+                <h3>Estados de la pantalla</h3>
+                <p>
+                    Además del estado normal, la pantalla debe cubrir estos
+                    tres. No se dibujan con datos: son el contrato de
+                    comportamiento para quien implemente.
+                </p>
+                <div class="state-grid">
+                    <div class="state-card">
+                        <h4>Cargando</h4>
+                        <div class="skeleton" aria-hidden="true">
+                            <span></span><span></span><span></span>
+                        </div>
+                        <p>
+                            Esqueleto de la tabla mientras responde la consulta;
+                            el paginador y los conteos quedan vacíos hasta el
+                            primer render.
+                        </p>
+                    </div>
+                    <div class="state-card">
+                        <h4>Vacío</h4>
+                        <p>
+                            Si la consulta no devuelve filas, la tabla muestra
+                            «Ningún caso coincide con los filtros» (ya
+                            implementado). Si el vacío viene de la RLS, el
+                            mensaje no revela cuántas filas existen.
+                        </p>
+                    </div>
+                    <div class="state-card">
+                        <h4>Error</h4>
+                        <p>
+                            Si la consulta falla, la tabla se sustituye por el
+                            mensaje de error y un botón «Reintentar» que repite
+                            la misma consulta. Nunca se muestra una tabla vacía
+                            como si no hubiera casos.
+                        </p>
+                    </div>
+                </div>
+
+                <h3>Fuera de alcance de este mockup</h3>
+                <ul>
+                    <li>
+                        <b>No define un selector de alcance:</b> el alcance es
+                        derivado y la API rechaza un valor manual con
+                        <code>422 ALCANCE_DERIVADO</code>.
+                    </li>
+                    <li>
+                        <b>No define la regla de prioridad de atención:</b> solo
+                        muestra el valor almacenado con la marca «sin regla
+                        definida».
+                    </li>
+                    <li>
+                        <b>No implementa el generador del item 75</b> ni la
+                        exportación real de los items 42 y 70: el menú
+                        «Exportar» es decorativo y no produce archivos.
+                    </li>
+                    <li>
+                        <b>No decide impresión, RLS ni permisos por rol:</b> la
+                        RLS ya vive en la vista; aquí solo se documenta su
+                        efecto sobre el número de filas.
+                    </li>
+                    <li>
+                        <b>No define el detalle de la ficha:</b> «Ver ficha»
+                        apunta a <code>GET /api/v1/cases/{codigo}</code> (ver el
+                        mockup de pestañas de la ficha).
                     </li>
                 </ul>
             </section>

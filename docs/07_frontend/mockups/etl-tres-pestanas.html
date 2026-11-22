@@ -1075,6 +1075,56 @@
                     ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
                 font-size: 9px;
             }
+            /* ── Estados de pantalla y marcas de «requiere» ─────────────────── */
+            .state-grid {
+                display: grid;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: 12px;
+                margin-top: 10px;
+            }
+            @media (max-width: 1000px) {
+                .state-grid {
+                    grid-template-columns: 1fr;
+                }
+            }
+            .state-card {
+                padding: 14px 15px;
+                border: 1px solid var(--line);
+                border-radius: 8px;
+                background: #fff;
+            }
+            .state-card h4 {
+                margin: 0 0 4px;
+                color: #2b3d4f;
+                font: 700 11px/1.3 var(--font-display);
+            }
+            .state-card p {
+                margin: 0;
+                color: #77878f;
+                font-size: 9.5px;
+                line-height: 1.55;
+            }
+            .state-card .state-demo {
+                margin-top: 10px;
+                padding: 14px;
+                border: 1px dashed #d7dee4;
+                border-radius: 6px;
+                background: #fafbfc;
+                color: #8b97a1;
+                font-size: 9px;
+                line-height: 1.5;
+                text-align: center;
+            }
+            .state-card .state-demo b {
+                display: block;
+                margin-bottom: 3px;
+                color: #5a6c7d;
+                font-size: 10px;
+            }
+            .req {
+                color: var(--red);
+                font-weight: 700;
+            }
             @media print {
                 body {
                     background: #fff;
@@ -1089,22 +1139,33 @@
                     <h1>Carga y gobierno ETL</h1>
                     <p class="view-subtitle">
                         Vista de tres pestañas para la ingesta documental:
-                        <b>Ejecución</b> (selector de fuente, archivo, validación,
-                        pipeline observable y conciliación), <b>Fuentes</b> (lista
-                        blanca, permisos por rol e integraciones) e
-                        <b>Historial</b> (ejecuciones, generación por lote y
-                        gobierno de sugerencias). Todo lo que se muestra son
-                        recuentos reales de una consulta de solo lectura del
-                        22.11.2026; lo que no existe se marca «—» y <b>no se
-                        simula</b>.
+                        <b>Fuentes</b> (lista blanca, permisos por rol e
+                        integraciones), <b>Mapeo y ejecución</b> (selector de
+                        fuente, archivo, mapeo de columnas, validación, pipeline
+                        observable y conciliación) y
+                        <b>Ejecuciones y log</b> (ejecuciones, generación por
+                        lote y gobierno de sugerencias). En todo el flujo
+                        <b
+                            >la máquina propone, la especialista valida y la
+                            operación queda registrada</b
+                        >. Todo lo que se muestra son recuentos reales de una
+                        consulta de solo lectura del 22.11.2026; lo que no
+                        existe se marca <b>requiere</b> o «—» y
+                        <b>no se simula</b>.
                     </p>
                 </div>
                 <div class="view-actions">
-                    <span class="anexo-badge">Items 58 · 59 · 60 · 61 · 62 · 86 · 87</span>
+                    <span class="anexo-badge"
+                        >Items 58 · 59 · 60 · 61 · 62 · 86 · 87</span
+                    >
                 </div>
             </header>
 
-            <nav class="mode-tabs" role="tablist" aria-label="Pestañas de la vista ETL">
+            <nav
+                class="mode-tabs"
+                role="tablist"
+                aria-label="Pestañas de la vista ETL"
+            >
                 <button
                     type="button"
                     role="tab"
@@ -1113,7 +1174,8 @@
                     aria-controls="panel-ejecucion"
                     data-tab="ejecucion"
                 >
-                    Ejecución <span class="num">ITEMS 58 · 59 · 61</span>
+                    Mapeo y ejecución
+                    <span class="num">ITEMS 58 · 59 · 61</span>
                 </button>
                 <button
                     type="button"
@@ -1133,11 +1195,12 @@
                     aria-controls="panel-historial"
                     data-tab="historial"
                 >
-                    Historial <span class="num">ITEMS 62 · 86 · 87</span>
+                    Ejecuciones y log
+                    <span class="num">ITEMS 59 · 62 · 86 · 87</span>
                 </button>
             </nav>
 
-            <!-- ══════════════════════════ EJECUCIÓN ══════════════════════════ -->
+            <!-- ══════════════════════ MAPEO Y EJECUCIÓN ══════════════════════ -->
             <section
                 class="tabpanel"
                 id="panel-ejecucion"
@@ -1147,20 +1210,37 @@
                 <div class="banner">
                     <div>
                         <b>No hay una ejecución real que mostrar.</b>
-                        <code>staging.lote</code> y <code>staging.registro</code>
-                        tienen <b>0 filas</b>, no existe tabla de ejecuciones y no
-                        hay endpoint de carga en la API. El esquema de
-                        <code>staging.lote</code> ya está definido
-                        (<code>punto_ingesta_id</code>, <code>plan_paso_id</code>,
-                        <code>origen_software</code>,
+                        <code>staging.lote</code> y
+                        <code>staging.registro</code> tienen <b>0 filas</b>, no
+                        existe tabla de ejecuciones y no hay endpoint de carga
+                        en la API. El esquema de <code>staging.lote</code> ya
+                        está definido (<code>punto_ingesta_id</code>,
+                        <code>plan_paso_id</code>, <code>origen_software</code>,
                         <code>version_software</code>, <code>archivo_uri</code>,
                         <code>hash_archivo</code>, <code>estado</code>,
                         <code>validacion</code>, <code>cargado_por</code>,
                         <code>aprobado_por</code>,
                         <code>nivel_clasificacion</code>), pero ninguna fila lo
-                        usa. Por eso el pipeline se dibuja <b>apagado</b>: encender
-                        un stepper con contadores inventados sería peor que
-                        mostrarlo vacío.
+                        usa. Por eso el pipeline se dibuja <b>apagado</b>:
+                        encender un stepper con contadores inventados sería peor
+                        que mostrarlo vacío.
+                    </div>
+                </div>
+
+                <div class="banner banner-neutral">
+                    <div>
+                        <b>Regla de todo el flujo:</b> la máquina propone, la
+                        especialista valida y la operación queda registrada.
+                        Cada sugerencia (mapeo de columna, tipo detectado,
+                        duplicado propuesto) se muestra como propuesta editable
+                        con <b>Aceptar · Corregir · Descartar</b>; nada se
+                        escribe sin aceptación explícita. La propuesta y su
+                        resultado humano se registran en
+                        <code>agent.run_log</code> y
+                        <code>agent.feedback_log</code> (item 87); quién cambió
+                        qué, en <code>audit.cambios</code> (item 62). Ambas
+                        tablas existen pero hoy tienen <b>0 filas</b> de este
+                        tipo de operación.
                     </div>
                 </div>
 
@@ -1177,16 +1257,37 @@
                             <span class="tag-mini">Item 58</span>
                         </div>
 
-                        <label class="select-filter" style="height: auto; padding: 6px 9px">
+                        <label
+                            class="select-filter"
+                            style="height: auto; padding: 6px 9px"
+                        >
                             <span>Fuente</span>
-                            <select id="sel-fuente" aria-label="Fuente de ingesta">
-                                <option>PI-06 · Tabla externa CSV o XLSX con esquema → core</option>
+                            <select
+                                id="sel-fuente"
+                                aria-label="Fuente de ingesta"
+                            >
+                                <option>
+                                    PI-06 · Tabla externa CSV o XLSX con esquema
+                                    → core
+                                </option>
                                 <option>PI-01 · Plan de análisis → core</option>
-                                <option>PI-02 · Proyecto cualitativo .qdpx y libro de códigos .qdc → qda</option>
-                                <option>PI-03 · Resultados léxicos CSV → lex</option>
-                                <option>PI-04 · Validación de aristas del grafo → kag</option>
-                                <option>PI-05 · Selección de indicadores → ind</option>
-                                <option>PI-07 · Salida final aprobada → core</option>
+                                <option>
+                                    PI-02 · Proyecto cualitativo .qdpx y libro
+                                    de códigos .qdc → qda
+                                </option>
+                                <option>
+                                    PI-03 · Resultados léxicos CSV → lex
+                                </option>
+                                <option>
+                                    PI-04 · Validación de aristas del grafo →
+                                    kag
+                                </option>
+                                <option>
+                                    PI-05 · Selección de indicadores → ind
+                                </option>
+                                <option>
+                                    PI-07 · Salida final aprobada → core
+                                </option>
                             </select>
                         </label>
 
@@ -1197,35 +1298,48 @@
                                 accept=".csv,.xlsx,.txt,.pdf"
                             />
                             <strong>Selecciona un archivo</strong>
-                            Arrástralo aquí o usa el explorador. La validación de
-                            abajo se ejecuta en el navegador, no en el servidor.
-                            <span class="dz-ext">csv · xlsx · txt · pdf con capa de texto</span>
+                            Arrástralo aquí o usa el explorador. La validación
+                            de abajo se ejecuta en el navegador, no en el
+                            servidor.
+                            <span class="dz-ext"
+                                >csv · xlsx · txt · pdf con capa de texto</span
+                            >
                         </label>
 
-                        <div class="file-line" id="file-line" aria-live="polite">
+                        <div
+                            class="file-line"
+                            id="file-line"
+                            aria-live="polite"
+                        >
                             <b id="file-name">—</b>
                             <span id="file-size">—</span>
                         </div>
 
                         <p class="footnote">
-                            <strong>Límites propuestos</strong> por este mockup (no
-                            existen como configuración en la API): 25 MB, extensión
-                            en minúsculas, MIME declarado por el navegador. Un
-                            <code>.qdpx</code> (PI-02) no se acepta aquí: necesita
-                            su propio lector, no el de CSV/XLSX.
+                            <strong>Límites propuestos</strong> por este mockup
+                            (no existen como configuración en la API): 25 MB,
+                            extensión en minúsculas, MIME declarado por el
+                            navegador. Un <code>.qdpx</code> (PI-02) no se
+                            acepta aquí: necesita su propio lector, no el de
+                            CSV/XLSX.
                         </p>
                     </article>
 
                     <article class="card">
                         <div class="card-head">
                             <div>
-                                <h2 class="card-title">2 · Validación previa</h2>
+                                <h2 class="card-title">
+                                    2 · Validación previa
+                                </h2>
                                 <p class="card-sub">
-                                    Extensión, MIME, tamaño, codificación, hash y
-                                    deduplicación antes de iniciar el pipeline.
+                                    Extensión, MIME, tamaño, codificación, hash
+                                    y deduplicación antes de iniciar el
+                                    pipeline.
                                 </p>
                             </div>
-                            <span class="flag flag-off" id="val-count">Sin archivo</span>
+                            <span class="flag flag-off" id="val-count"
+                                >Sin archivo</span
+                            >
                         </div>
 
                         <ul class="checks" id="checks">
@@ -1233,7 +1347,9 @@
                                 <span class="ico">○</span>
                                 <span>
                                     Extensión permitida
-                                    <span class="hint">csv · xlsx · txt · pdf</span>
+                                    <span class="hint"
+                                        >csv · xlsx · txt · pdf</span
+                                    >
                                 </span>
                                 <span class="val">Pendiente</span>
                             </li>
@@ -1241,7 +1357,9 @@
                                 <span class="ico">○</span>
                                 <span>
                                     MIME declarado por el navegador
-                                    <span class="hint">Coincide con la extensión</span>
+                                    <span class="hint"
+                                        >Coincide con la extensión</span
+                                    >
                                 </span>
                                 <span class="val">Pendiente</span>
                             </li>
@@ -1249,7 +1367,9 @@
                                 <span class="ico">○</span>
                                 <span>
                                     Tamaño ≤ 25 MB
-                                    <span class="hint">Límite propuesto por el mockup</span>
+                                    <span class="hint"
+                                        >Límite propuesto por el mockup</span
+                                    >
                                 </span>
                                 <span class="val">Pendiente</span>
                             </li>
@@ -1265,7 +1385,10 @@
                                 <span class="ico">○</span>
                                 <span>
                                     Huella SHA-256
-                                    <span class="hint">Calculada sobre el archivo completo</span>
+                                    <span class="hint"
+                                        >Calculada sobre el archivo
+                                        completo</span
+                                    >
                                 </span>
                                 <span class="val">Pendiente</span>
                             </li>
@@ -1273,7 +1396,12 @@
                                 <span class="ico">○</span>
                                 <span>
                                     Deduplicación
-                                    <span class="hint">Contra <code>staging.lote.hash_archivo</code></span>
+                                    <span class="hint"
+                                        >Contra
+                                        <code
+                                            >staging.lote.hash_archivo</code
+                                        ></span
+                                    >
                                 </span>
                                 <span class="val">Pendiente</span>
                             </li>
@@ -1285,8 +1413,8 @@
                             El hash y los controles de formato <b>sí</b> se
                             calculan aquí, en tu navegador. La deduplicación
                             <b>no</b> puede completarse: exigiría una consulta a
-                            <code>staging.lote</code>, que hoy tiene 0 filas y no
-                            está expuesta por la API.
+                            <code>staging.lote</code>, que hoy tiene 0 filas y
+                            no está expuesta por la API.
                         </p>
                     </article>
                 </div>
@@ -1294,11 +1422,76 @@
                 <article class="card">
                     <div class="card-head">
                         <div>
+                            <h2 class="card-title">
+                                3 · Mapeo de columnas al esquema
+                            </h2>
+                            <p class="card-sub">
+                                Columna de origen contra columna de destino por
+                                fuente. La máquina propone el mapeo; la
+                                especialista lo valida antes de la etapa 4.
+                            </p>
+                        </div>
+                        <span class="flag flag-bad"
+                            ><span class="req">requiere</span> esquema</span
+                        >
+                    </div>
+
+                    <div class="table-wrap">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Columna de origen</th>
+                                    <th>Columna destino</th>
+                                    <th>Tipo</th>
+                                    <th>Obligatorio</th>
+                                    <th>Validación</th>
+                                    <th>Propuesta</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="6">
+                                        <div
+                                            class="empty-state"
+                                            style="padding: 22px"
+                                        >
+                                            Sin filas de mapeo. La tabla se
+                                            llena desde
+                                            <code
+                                                >analisis.punto_ingesta.esquema_validacion</code
+                                            >, que es nulo en las <b>7 de 7</b>
+                                            fuentes: sin esquema no hay destinos
+                                            contra los que mapear.
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <p class="footnote">
+                        <strong><span class="req">requiere</span>:</strong>
+                        definir <code>esquema_validacion</code> por fuente
+                        (columnas de destino, tipo, obligatoriedad y regla de
+                        validación), hoy nulo en PI-01…PI-07. Mientras falte, la
+                        etapa 4 del pipeline y esta tabla no pueden llenarse. El
+                        resultado de una propuesta aceptada o corregida se
+                        registra en <code>agent.feedback_log</code> (<span
+                            class="req"
+                            >requiere</span
+                        >
+                        endpoint de escritura).
+                    </p>
+                </article>
+
+                <article class="card">
+                    <div class="card-head">
+                        <div>
                             <h2 class="card-title">Pipeline observable</h2>
                             <p class="card-sub">
                                 Siete etapas con estado y contadores por etapa
-                                (item 59). Sin ejecución persistida, todas quedan
-                                en «No ejecutado».
+                                (item 59). Sin ejecución persistida, todas
+                                quedan en «No ejecutado».
                             </p>
                         </div>
                         <button
@@ -1315,10 +1508,12 @@
                         <li class="step">
                             <span class="step-dot">1</span>
                             <span>
-                                <span class="step-nm">Recepción del archivo</span>
+                                <span class="step-nm"
+                                    >Recepción del archivo</span
+                                >
                                 <span class="step-ds"
-                                    >Nombre, tamaño, tipo y URI de evidencia
-                                    (no se almacena el binario).</span
+                                    >Nombre, tamaño, tipo y URI de evidencia (no
+                                    se almacena el binario).</span
                                 >
                             </span>
                             <span class="step-ct">No ejecutado · «—»</span>
@@ -1326,7 +1521,9 @@
                         <li class="step">
                             <span class="step-dot">2</span>
                             <span>
-                                <span class="step-nm">Validación de formato y codificación</span>
+                                <span class="step-nm"
+                                    >Validación de formato y codificación</span
+                                >
                                 <span class="step-ds"
                                     >Extensión, MIME, tamaño y codificación de
                                     texto.</span
@@ -1337,7 +1534,9 @@
                         <li class="step">
                             <span class="step-dot">3</span>
                             <span>
-                                <span class="step-nm">Hash y deduplicación</span>
+                                <span class="step-nm"
+                                    >Hash y deduplicación</span
+                                >
                                 <span class="step-ds"
                                     >SHA-256 del archivo y comparación con lotes
                                     anteriores.</span
@@ -1348,7 +1547,9 @@
                         <li class="step">
                             <span class="step-dot">4</span>
                             <span>
-                                <span class="step-nm">Lectura y mapeo al esquema</span>
+                                <span class="step-nm"
+                                    >Lectura y mapeo al esquema</span
+                                >
                                 <span class="step-ds"
                                     >Columnas de origen contra
                                     <code>esquema_validacion</code> de la
@@ -1360,7 +1561,9 @@
                         <li class="step">
                             <span class="step-dot">5</span>
                             <span>
-                                <span class="step-nm">Normalización y reconciliación</span>
+                                <span class="step-nm"
+                                    >Normalización y reconciliación</span
+                                >
                                 <span class="step-ds"
                                     >Entidades repetidas: fusionar, descartar o
                                     dejar pendiente.</span
@@ -1371,7 +1574,9 @@
                         <li class="step">
                             <span class="step-dot">6</span>
                             <span>
-                                <span class="step-nm">Escritura en tablas destino</span>
+                                <span class="step-nm"
+                                    >Escritura en tablas destino</span
+                                >
                                 <span class="step-ds"
                                     >Transacción por tabla con recuento
                                     antes/después.</span
@@ -1382,10 +1587,13 @@
                         <li class="step">
                             <span class="step-dot">7</span>
                             <span>
-                                <span class="step-nm">Conciliación y cierre</span>
+                                <span class="step-nm"
+                                    >Conciliación y cierre</span
+                                >
                                 <span class="step-ds"
-                                    >Cuadre de la tarjeta de conciliación y firma
-                                    de aprobación (<code>aprobado_por</code>).</span
+                                    >Cuadre de la tarjeta de conciliación y
+                                    firma de aprobación
+                                    (<code>aprobado_por</code>).</span
                                 >
                             </span>
                             <span class="step-ct">No ejecutado · «—»</span>
@@ -1393,9 +1601,9 @@
                     </ol>
 
                     <p class="footnote">
-                        En esta versión solo la etapa 2 corre en el navegador y de
-                        forma informativa; las etapas 1, 3–7 requieren un servicio
-                        de ingesta inexistente.
+                        En esta versión solo la etapa 2 corre en el navegador y
+                        de forma informativa; las etapas 1, 3–7 requieren un
+                        servicio de ingesta inexistente.
                     </p>
                 </article>
 
@@ -1430,104 +1638,166 @@
                                         <td class="num">35</td>
                                         <td class="num">—</td>
                                         <td class="num">—</td>
-                                        <td><span class="flag flag-off</td>">Sin ejecución</span></td>
+                                        <td>
+                                            <span class="flag flag-off"
+                                                >Sin ejecución</span
+                                            >
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td><code>core.actores</code></td>
                                         <td class="num">1 160</td>
                                         <td class="num">—</td>
                                         <td class="num">—</td>
-                                        <td><span class="flag flag-off">Sin ejecución</span></td>
+                                        <td>
+                                            <span class="flag flag-off"
+                                                >Sin ejecución</span
+                                            >
+                                        </td>
                                     </tr>
                                     <tr>
-                                        <td><code>core.organizaciones</code></td>
+                                        <td>
+                                            <code>core.organizaciones</code>
+                                        </td>
                                         <td class="num">224</td>
                                         <td class="num">—</td>
                                         <td class="num">—</td>
-                                        <td><span class="flag flag-off">Sin ejecución</span></td>
+                                        <td>
+                                            <span class="flag flag-off"
+                                                >Sin ejecución</span
+                                            >
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td><code>core.locales</code></td>
                                         <td class="num">27</td>
                                         <td class="num">—</td>
                                         <td class="num">—</td>
-                                        <td><span class="flag flag-off">Sin ejecución</span></td>
+                                        <td>
+                                            <span class="flag flag-off"
+                                                >Sin ejecución</span
+                                            >
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td><code>core.demandas</code></td>
                                         <td class="num">325</td>
                                         <td class="num">—</td>
                                         <td class="num">—</td>
-                                        <td><span class="flag flag-off">Sin ejecución</span></td>
+                                        <td>
+                                            <span class="flag flag-off"
+                                                >Sin ejecución</span
+                                            >
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td><code>core.documentos</code></td>
                                         <td class="num">153</td>
                                         <td class="num">—</td>
                                         <td class="num">—</td>
-                                        <td><span class="flag flag-off">Sin ejecución</span></td>
+                                        <td>
+                                            <span class="flag flag-off"
+                                                >Sin ejecución</span
+                                            >
+                                        </td>
                                     </tr>
                                     <tr>
-                                        <td><code>core.caso_cronologia</code></td>
+                                        <td>
+                                            <code>core.caso_cronologia</code>
+                                        </td>
                                         <td class="num">80</td>
                                         <td class="num">—</td>
                                         <td class="num">—</td>
-                                        <td><span class="flag flag-off">Sin ejecución</span></td>
+                                        <td>
+                                            <span class="flag flag-off"
+                                                >Sin ejecución</span
+                                            >
+                                        </td>
                                     </tr>
                                     <tr>
-                                        <td><code>core.alertas_tempranas</code></td>
+                                        <td>
+                                            <code>core.alertas_tempranas</code>
+                                        </td>
                                         <td class="num">83</td>
                                         <td class="num">—</td>
                                         <td class="num">—</td>
-                                        <td><span class="flag flag-off">Sin ejecución</span></td>
+                                        <td>
+                                            <span class="flag flag-off"
+                                                >Sin ejecución</span
+                                            >
+                                        </td>
                                     </tr>
                                     <tr>
-                                        <td><code>kag.documento_fuente</code></td>
+                                        <td>
+                                            <code>kag.documento_fuente</code>
+                                        </td>
                                         <td class="num">10</td>
                                         <td class="num">—</td>
                                         <td class="num">—</td>
-                                        <td><span class="flag flag-off">Sin ejecución</span></td>
+                                        <td>
+                                            <span class="flag flag-off"
+                                                >Sin ejecución</span
+                                            >
+                                        </td>
                                     </tr>
                                     <tr>
-                                        <td><code>kag.documento_fragmento</code></td>
+                                        <td>
+                                            <code>kag.documento_fragmento</code>
+                                        </td>
                                         <td class="num">0</td>
                                         <td class="num">—</td>
                                         <td class="num">—</td>
-                                        <td><span class="flag flag-off">Sin ejecución</span></td>
+                                        <td>
+                                            <span class="flag flag-off"
+                                                >Sin ejecución</span
+                                            >
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td><code>staging.lote</code></td>
                                         <td class="num">0</td>
                                         <td class="num">—</td>
                                         <td class="num">—</td>
-                                        <td><span class="flag flag-off">Sin ejecución</span></td>
+                                        <td>
+                                            <span class="flag flag-off"
+                                                >Sin ejecución</span
+                                            >
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td><code>staging.registro</code></td>
                                         <td class="num">0</td>
                                         <td class="num">—</td>
                                         <td class="num">—</td>
-                                        <td><span class="flag flag-off">Sin ejecución</span></td>
+                                        <td>
+                                            <span class="flag flag-off"
+                                                >Sin ejecución</span
+                                            >
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
                         <p class="footnote">
                             Los recuentos de <code>core.*</code> incluyen filas
-                            anuladas: <code>core.casos</code> 35 con 34 vigentes y
-                            <code>core.documentos</code> 153 con 143 vigentes. La
-                            cifra correcta para una comparación de carga depende de
-                            la regla de anulación, que la vista todavía no fija.
+                            anuladas: <code>core.casos</code> 35 con 34 vigentes
+                            y <code>core.documentos</code> 153 con 143 vigentes.
+                            La cifra correcta para una comparación de carga
+                            depende de la regla de anulación, que la vista
+                            todavía no fija.
                         </p>
                     </article>
 
                     <article class="card">
                         <div class="card-head">
                             <div>
-                                <h2 class="card-title">Conciliación del lote</h2>
+                                <h2 class="card-title">
+                                    Conciliación del lote
+                                </h2>
                                 <p class="card-sub">
-                                    La suma debe cuadrar con los registros leídos
-                                    del archivo; si no cuadra, el lote no cierra.
+                                    La suma debe cuadrar con los registros
+                                    leídos del archivo; si no cuadra, el lote no
+                                    cierra.
                                 </p>
                             </div>
                             <span class="flag flag-bad">Sin cuadre</span>
@@ -1535,19 +1805,26 @@
 
                         <div class="recon">
                             <div class="box"><b>—</b><span>Cargados</span></div>
-                            <div class="box"><b>—</b><span>Fusionados</span></div>
-                            <div class="box"><b>—</b><span>Descartados</span></div>
-                            <div class="box"><b>—</b><span>Pendientes</span></div>
+                            <div class="box">
+                                <b>—</b><span>Fusionados</span>
+                            </div>
+                            <div class="box">
+                                <b>—</b><span>Descartados</span>
+                            </div>
+                            <div class="box">
+                                <b>—</b><span>Pendientes</span>
+                            </div>
                         </div>
                         <div class="recon-eq">
                             — + — + — + — = <b>— registros fuente</b>
                         </div>
 
                         <p class="footnote">
-                            Los cuatro sumandos y el total son «—» porque no existe
-                            lote. No se rellenan con ceros: un <b>0</b> afirmaría
-                            «se procesó un archivo vacío», que es un hecho distinto
-                            de «no se procesó ningún archivo».
+                            Los cuatro sumandos y el total son «—» porque no
+                            existe lote. No se rellenan con ceros: un
+                            <b>0</b> afirmaría «se procesó un archivo vacío»,
+                            que es un hecho distinto de «no se procesó ningún
+                            archivo».
                         </p>
                     </article>
                 </div>
@@ -1555,7 +1832,9 @@
                 <article class="card">
                     <div class="card-head">
                         <div>
-                            <h2 class="card-title">Rechazos y errores por fila</h2>
+                            <h2 class="card-title">
+                                Rechazos y errores por fila
+                            </h2>
                             <p class="card-sub">
                                 Motivo por registro rechazado y descarga del
                                 detalle. Sin ejecución no hay rechazos que
@@ -1573,8 +1852,8 @@
                     </div>
                     <div class="empty-state">
                         Sin rechazos registrados. La tabla se llenaría con
-                        <code>fila · columna · valor · motivo · severidad</code> al
-                        ejecutarse un lote.
+                        <code>fila · columna · valor · motivo · severidad</code>
+                        al ejecutarse un lote.
                     </div>
                 </article>
             </section>
@@ -1593,8 +1872,8 @@
                             <h2 class="card-title">Lista blanca de ingesta</h2>
                             <p class="card-sub">
                                 Siete fuentes declaradas en
-                                <code>analisis.punto_ingesta</code>, con su esquema
-                                de destino. Ninguna tiene
+                                <code>analisis.punto_ingesta</code>, con su
+                                esquema de destino. Ninguna tiene
                                 <code>esquema_validacion</code> definido.
                             </p>
                         </div>
@@ -1620,15 +1899,26 @@
                                     <td><code>core</code></td>
                                     <td>—</td>
                                     <td>—</td>
-                                    <td><span class="flag flag-ok">Declarada</span></td>
+                                    <td>
+                                        <span class="flag flag-ok"
+                                            >Declarada</span
+                                        >
+                                    </td>
                                 </tr>
                                 <tr>
                                     <td><b>PI-02</b></td>
-                                    <td>Proyecto cualitativo .qdpx y libro de códigos .qdc</td>
+                                    <td>
+                                        Proyecto cualitativo .qdpx y libro de
+                                        códigos .qdc
+                                    </td>
                                     <td><code>qda</code></td>
                                     <td>—</td>
                                     <td>—</td>
-                                    <td><span class="flag flag-ok">Declarada</span></td>
+                                    <td>
+                                        <span class="flag flag-ok"
+                                            >Declarada</span
+                                        >
+                                    </td>
                                 </tr>
                                 <tr>
                                     <td><b>PI-03</b></td>
@@ -1636,7 +1926,11 @@
                                     <td><code>lex</code></td>
                                     <td>—</td>
                                     <td>—</td>
-                                    <td><span class="flag flag-ok">Declarada</span></td>
+                                    <td>
+                                        <span class="flag flag-ok"
+                                            >Declarada</span
+                                        >
+                                    </td>
                                 </tr>
                                 <tr>
                                     <td><b>PI-04</b></td>
@@ -1644,7 +1938,11 @@
                                     <td><code>kag</code></td>
                                     <td>—</td>
                                     <td>—</td>
-                                    <td><span class="flag flag-ok">Declarada</span></td>
+                                    <td>
+                                        <span class="flag flag-ok"
+                                            >Declarada</span
+                                        >
+                                    </td>
                                 </tr>
                                 <tr>
                                     <td><b>PI-05</b></td>
@@ -1652,15 +1950,25 @@
                                     <td><code>ind</code></td>
                                     <td>—</td>
                                     <td>—</td>
-                                    <td><span class="flag flag-ok">Declarada</span></td>
+                                    <td>
+                                        <span class="flag flag-ok"
+                                            >Declarada</span
+                                        >
+                                    </td>
                                 </tr>
                                 <tr>
                                     <td><b>PI-06</b></td>
-                                    <td>Tabla externa CSV o XLSX con esquema</td>
+                                    <td>
+                                        Tabla externa CSV o XLSX con esquema
+                                    </td>
                                     <td><code>core</code></td>
                                     <td>—</td>
                                     <td>—</td>
-                                    <td><span class="flag flag-ok">Declarada</span></td>
+                                    <td>
+                                        <span class="flag flag-ok"
+                                            >Declarada</span
+                                        >
+                                    </td>
                                 </tr>
                                 <tr>
                                     <td><b>PI-07</b></td>
@@ -1668,7 +1976,11 @@
                                     <td><code>core</code></td>
                                     <td>—</td>
                                     <td>—</td>
-                                    <td><span class="flag flag-ok">Declarada</span></td>
+                                    <td>
+                                        <span class="flag flag-ok"
+                                            >Declarada</span
+                                        >
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
@@ -1676,9 +1988,9 @@
                     <p class="footnote">
                         <strong>«—» en esquema de validación:</strong> las siete
                         filas tienen <code>esquema_validacion</code> nulo. Sin
-                        esquema no se puede validar el mapeo de columnas (etapa 4
-                        del pipeline), así que esa etapa tampoco podría ejecutarse
-                        hoy aunque existiera el endpoint.
+                        esquema no se puede validar el mapeo de columnas (etapa
+                        4 del pipeline), así que esa etapa tampoco podría
+                        ejecutarse hoy aunque existiera el endpoint.
                     </p>
                 </article>
 
@@ -1686,34 +1998,38 @@
                     <article class="card">
                         <div class="card-head">
                             <div>
-                                <h2 class="card-title">Control de cambios de la lista blanca</h2>
+                                <h2 class="card-title">
+                                    Control de cambios de la lista blanca
+                                </h2>
                                 <p class="card-sub">
-                                    Quién añadió, editó o retiró una fuente, cuándo
-                                    y con qué motivo.
+                                    Quién añadió, editó o retiró una fuente,
+                                    cuándo y con qué motivo.
                                 </p>
                             </div>
                             <span class="flag flag-bad">Sin tabla</span>
                         </div>
                         <div class="empty-box">
                             <strong>Sin cambios registrados</strong>
-                            <code>analisis.punto_ingesta</code> no tiene tabla de
-                            versiones ni historial, y
+                            <code>analisis.punto_ingesta</code> no tiene tabla
+                            de versiones ni historial, y
                             <code>audit.cambios</code> no contiene ninguna fila
                             sobre ella (0 de 57 filas totales). El control de
-                            cambios del item 62 exige crear ese registro antes de
-                            permitir editar la lista.
+                            cambios del item 62 exige crear ese registro antes
+                            de permitir editar la lista.
                         </div>
                         <p class="footnote">
-                            Sin historial, una fuente puede desaparecer sin dejar
-                            rastro; por eso la edición de la lista queda reservada
-                            al administrador en la matriz de abajo.
+                            Sin historial, una fuente puede desaparecer sin
+                            dejar rastro; por eso la edición de la lista queda
+                            reservada al administrador en la matriz de abajo.
                         </p>
                     </article>
 
                     <article class="card">
                         <div class="card-head">
                             <div>
-                                <h2 class="card-title">Permisos por pestaña y acción</h2>
+                                <h2 class="card-title">
+                                    Permisos por pestaña y acción
+                                </h2>
                                 <p class="card-sub">
                                     Propuesta de la interfaz para el item 60; la
                                     decisión real corresponde al servidor.
@@ -1722,11 +2038,19 @@
                             <span class="tag-mini">Item 60 · 49</span>
                         </div>
 
-                        <label class="select-filter" style="height: auto; padding: 6px 9px">
+                        <label
+                            class="select-filter"
+                            style="height: auto; padding: 6px 9px"
+                        >
                             <span>Rol</span>
-                            <select id="sel-rol" aria-label="Rol para resaltar en la matriz">
+                            <select
+                                id="sel-rol"
+                                aria-label="Rol para resaltar en la matriz"
+                            >
                                 <option value="sectorista">Sectorista</option>
-                                <option value="direccion">Dirección OAIPCS</option>
+                                <option value="direccion">
+                                    Dirección OAIPCS
+                                </option>
                                 <option value="alta">Alta dirección</option>
                                 <option value="admin">Administrador</option>
                             </select>
@@ -1737,85 +2061,254 @@
                                 <thead>
                                     <tr>
                                         <th>Acción</th>
-                                        <th class="num" data-col="sectorista">Sectorista</th>
-                                        <th class="num" data-col="direccion">Dirección OAIPCS</th>
-                                        <th class="num" data-col="alta">Alta dirección</th>
-                                        <th class="num" data-col="admin">Admin.</th>
+                                        <th class="num" data-col="sectorista">
+                                            Sectorista
+                                        </th>
+                                        <th class="num" data-col="direccion">
+                                            Dirección OAIPCS
+                                        </th>
+                                        <th class="num" data-col="alta">
+                                            Alta dirección
+                                        </th>
+                                        <th class="num" data-col="admin">
+                                            Admin.
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td class="role">Ver Ejecución</td>
-                                        <td class="num"><span class="perm-chip on">Ver</span></td>
-                                        <td class="num"><span class="perm-chip on">Ver</span></td>
-                                        <td class="num"><span class="perm-chip on">Ver</span></td>
-                                        <td class="num"><span class="perm-chip on">Ver</span></td>
+                                        <td class="role">
+                                            Ver Mapeo y ejecución
+                                        </td>
+                                        <td class="num">
+                                            <span class="perm-chip on"
+                                                >Ver</span
+                                            >
+                                        </td>
+                                        <td class="num">
+                                            <span class="perm-chip on"
+                                                >Ver</span
+                                            >
+                                        </td>
+                                        <td class="num">
+                                            <span class="perm-chip on"
+                                                >Ver</span
+                                            >
+                                        </td>
+                                        <td class="num">
+                                            <span class="perm-chip on"
+                                                >Ver</span
+                                            >
+                                        </td>
                                     </tr>
                                     <tr>
-                                        <td class="role">Cargar archivo e iniciar ejecución</td>
-                                        <td class="num"><span class="perm-chip on">Cargar</span></td>
-                                        <td class="num"><span class="perm-chip on">Cargar</span></td>
-                                        <td class="num"><span class="perm-chip none">—</span></td>
-                                        <td class="num"><span class="perm-chip on">Cargar</span></td>
+                                        <td class="role">
+                                            Cargar archivo e iniciar ejecución
+                                        </td>
+                                        <td class="num">
+                                            <span class="perm-chip on"
+                                                >Cargar</span
+                                            >
+                                        </td>
+                                        <td class="num">
+                                            <span class="perm-chip on"
+                                                >Cargar</span
+                                            >
+                                        </td>
+                                        <td class="num">
+                                            <span class="perm-chip none"
+                                                >—</span
+                                            >
+                                        </td>
+                                        <td class="num">
+                                            <span class="perm-chip on"
+                                                >Cargar</span
+                                            >
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td class="role">Aprobar lote</td>
-                                        <td class="num"><span class="perm-chip none">—</span></td>
-                                        <td class="num"><span class="perm-chip apr">Aprobar</span></td>
-                                        <td class="num"><span class="perm-chip none">—</span></td>
-                                        <td class="num"><span class="perm-chip apr">Aprobar</span></td>
+                                        <td class="num">
+                                            <span class="perm-chip none"
+                                                >—</span
+                                            >
+                                        </td>
+                                        <td class="num">
+                                            <span class="perm-chip apr"
+                                                >Aprobar</span
+                                            >
+                                        </td>
+                                        <td class="num">
+                                            <span class="perm-chip none"
+                                                >—</span
+                                            >
+                                        </td>
+                                        <td class="num">
+                                            <span class="perm-chip apr"
+                                                >Aprobar</span
+                                            >
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td class="role">Ver Fuentes</td>
-                                        <td class="num"><span class="perm-chip on">Ver</span></td>
-                                        <td class="num"><span class="perm-chip on">Ver</span></td>
-                                        <td class="num"><span class="perm-chip on">Ver</span></td>
-                                        <td class="num"><span class="perm-chip on">Ver</span></td>
+                                        <td class="num">
+                                            <span class="perm-chip on"
+                                                >Ver</span
+                                            >
+                                        </td>
+                                        <td class="num">
+                                            <span class="perm-chip on"
+                                                >Ver</span
+                                            >
+                                        </td>
+                                        <td class="num">
+                                            <span class="perm-chip on"
+                                                >Ver</span
+                                            >
+                                        </td>
+                                        <td class="num">
+                                            <span class="perm-chip on"
+                                                >Ver</span
+                                            >
+                                        </td>
                                     </tr>
                                     <tr>
-                                        <td class="role">Editar lista blanca</td>
-                                        <td class="num"><span class="perm-chip none">—</span></td>
-                                        <td class="num"><span class="perm-chip none">—</span></td>
-                                        <td class="num"><span class="perm-chip none">—</span></td>
-                                        <td class="num"><span class="perm-chip apr">Editar</span></td>
+                                        <td class="role">
+                                            Editar lista blanca
+                                        </td>
+                                        <td class="num">
+                                            <span class="perm-chip none"
+                                                >—</span
+                                            >
+                                        </td>
+                                        <td class="num">
+                                            <span class="perm-chip none"
+                                                >—</span
+                                            >
+                                        </td>
+                                        <td class="num">
+                                            <span class="perm-chip none"
+                                                >—</span
+                                            >
+                                        </td>
+                                        <td class="num">
+                                            <span class="perm-chip apr"
+                                                >Editar</span
+                                            >
+                                        </td>
                                     </tr>
                                     <tr>
-                                        <td class="role">Ver Historial</td>
-                                        <td class="num"><span class="perm-chip none">—</span></td>
-                                        <td class="num"><span class="perm-chip on">Ver</span></td>
-                                        <td class="num"><span class="perm-chip on">Ver</span></td>
-                                        <td class="num"><span class="perm-chip on">Ver</span></td>
+                                        <td class="role">
+                                            Ver Ejecuciones y log
+                                        </td>
+                                        <td class="num">
+                                            <span class="perm-chip none"
+                                                >—</span
+                                            >
+                                        </td>
+                                        <td class="num">
+                                            <span class="perm-chip on"
+                                                >Ver</span
+                                            >
+                                        </td>
+                                        <td class="num">
+                                            <span class="perm-chip on"
+                                                >Ver</span
+                                            >
+                                        </td>
+                                        <td class="num">
+                                            <span class="perm-chip on"
+                                                >Ver</span
+                                            >
+                                        </td>
                                     </tr>
                                     <tr>
-                                        <td class="role">Reintentar ejecución</td>
-                                        <td class="num"><span class="perm-chip none">—</span></td>
-                                        <td class="num"><span class="perm-chip on">Reintentar</span></td>
-                                        <td class="num"><span class="perm-chip none">—</span></td>
-                                        <td class="num"><span class="perm-chip on">Reintentar</span></td>
+                                        <td class="role">
+                                            Reintentar ejecución
+                                        </td>
+                                        <td class="num">
+                                            <span class="perm-chip none"
+                                                >—</span
+                                            >
+                                        </td>
+                                        <td class="num">
+                                            <span class="perm-chip on"
+                                                >Reintentar</span
+                                            >
+                                        </td>
+                                        <td class="num">
+                                            <span class="perm-chip none"
+                                                >—</span
+                                            >
+                                        </td>
+                                        <td class="num">
+                                            <span class="perm-chip on"
+                                                >Reintentar</span
+                                            >
+                                        </td>
                                     </tr>
                                     <tr>
-                                        <td class="role">Generar lote documental (item 86)</td>
-                                        <td class="num"><span class="perm-chip none">—</span></td>
-                                        <td class="num"><span class="perm-chip apr">Generar</span></td>
-                                        <td class="num"><span class="perm-chip none">—</span></td>
-                                        <td class="num"><span class="perm-chip apr">Generar</span></td>
+                                        <td class="role">
+                                            Generar lote documental (item 86)
+                                        </td>
+                                        <td class="num">
+                                            <span class="perm-chip none"
+                                                >—</span
+                                            >
+                                        </td>
+                                        <td class="num">
+                                            <span class="perm-chip apr"
+                                                >Generar</span
+                                            >
+                                        </td>
+                                        <td class="num">
+                                            <span class="perm-chip none"
+                                                >—</span
+                                            >
+                                        </td>
+                                        <td class="num">
+                                            <span class="perm-chip apr"
+                                                >Generar</span
+                                            >
+                                        </td>
                                     </tr>
                                     <tr>
-                                        <td class="role">Validar sugerencias asistidas (item 87)</td>
-                                        <td class="num"><span class="perm-chip on">Validar</span></td>
-                                        <td class="num"><span class="perm-chip on">Validar</span></td>
-                                        <td class="num"><span class="perm-chip none">—</span></td>
-                                        <td class="num"><span class="perm-chip apr">Curar</span></td>
+                                        <td class="role">
+                                            Validar sugerencias asistidas (item
+                                            87)
+                                        </td>
+                                        <td class="num">
+                                            <span class="perm-chip on"
+                                                >Validar</span
+                                            >
+                                        </td>
+                                        <td class="num">
+                                            <span class="perm-chip on"
+                                                >Validar</span
+                                            >
+                                        </td>
+                                        <td class="num">
+                                            <span class="perm-chip none"
+                                                >—</span
+                                            >
+                                        </td>
+                                        <td class="num">
+                                            <span class="perm-chip apr"
+                                                >Curar</span
+                                            >
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
                         <p class="footnote">
-                            <strong>Ocultar una pestaña no es control de
-                            seguridad</strong> (item 49): cada acción y conjunto de
-                            datos debe verificar permisos en el servidor. Esta
-                            matriz es una propuesta de producto, no una
-                            implementación.
+                            <strong
+                                >Ocultar una pestaña no es control de
+                                seguridad</strong
+                            >
+                            (item 49): cada acción y conjunto de datos debe
+                            verificar permisos en el servidor. Esta matriz es
+                            una propuesta de producto, no una implementación.
                         </p>
                     </article>
                 </div>
@@ -1824,10 +2317,12 @@
                     <article class="card">
                         <div class="card-head">
                             <div>
-                                <h2 class="card-title">Feed WhatsApp / Gemini</h2>
+                                <h2 class="card-title">
+                                    Feed WhatsApp / Gemini
+                                </h2>
                                 <p class="card-sub">
-                                    Canal de señales tempranas. Se mostraría con el
-                                    timestamp real de sincronización.
+                                    Canal de señales tempranas. Se mostraría con
+                                    el timestamp real de sincronización.
                                 </p>
                             </div>
                             <span class="flag flag-off">No conectado</span>
@@ -1847,19 +2342,22 @@
                         <p class="footnote">
                             No existe fila de WhatsApp ni de Gemini en
                             <code>core.integraciones</code>: sus 20 vínculos son
-                            institucionales (CITES, ANA-SIAGUA, OEFA-PAM, SANIPES,
-                            SBS, SUNAT, VUCE, CITERED, DGSFS-PA-Tiburón, SESIGUE).
-                            Con la integración ausente, <b>no se muestra ni un
-                            mensaje de ejemplo</b>: el item 60 prohíbe registros
-                            simulados. El timestamp aparecerá cuando exista una
-                            sincronización real.
+                            institucionales (CITES, ANA-SIAGUA, OEFA-PAM,
+                            SANIPES, SBS, SUNAT, VUCE, CITERED,
+                            DGSFS-PA-Tiburón, SESIGUE). Con la integración
+                            ausente,
+                            <b>no se muestra ni un mensaje de ejemplo</b>: el
+                            item 60 prohíbe registros simulados. El timestamp
+                            aparecerá cuando exista una sincronización real.
                         </p>
                     </article>
 
                     <article class="card">
                         <div class="card-head">
                             <div>
-                                <h2 class="card-title">Lectura, OCR y trazabilidad</h2>
+                                <h2 class="card-title">
+                                    Lectura, OCR y trazabilidad
+                                </h2>
                                 <p class="card-sub">
                                     Un PDF con capa de texto se lee; un PDF
                                     escaneado, no.
@@ -1883,11 +2381,12 @@
 
                         <p class="footnote">
                             El item 61 pide OCR como etapa aparte, con idioma,
-                            confianza, costo, fallos y revisión humana. Tratar la
-                            extracción de texto como OCR sería una promesa falsa.
-                            <code>kag.documento_fragmento</code> existe pero tiene
-                            <b>0 filas</b>: no hay fragmentos con página/offset que
-                            enlazar.
+                            confianza, costo, fallos y revisión humana. Tratar
+                            la extracción de texto como OCR sería una promesa
+                            falsa.
+                            <code>kag.documento_fragmento</code> existe pero
+                            tiene <b>0 filas</b>: no hay fragmentos con
+                            página/offset que enlazar.
                         </p>
                     </article>
                 </div>
@@ -1895,11 +2394,13 @@
                 <article class="card">
                     <div class="card-head">
                         <div>
-                            <h2 class="card-title">Integraciones registradas</h2>
+                            <h2 class="card-title">
+                                Integraciones registradas
+                            </h2>
                             <p class="card-sub">
-                                20 vínculos en <code>core.integraciones</code>: 2
-                                activos y 18 pendientes de autorización. Ninguno
-                                tiene fecha de última sincronización.
+                                20 vínculos en <code>core.integraciones</code>:
+                                2 activos y 18 pendientes de autorización.
+                                Ninguno tiene fecha de última sincronización.
                             </p>
                         </div>
                         <span class="tag-mini">Item 60</span>
@@ -1924,7 +2425,9 @@
                                     <td><code>api_rest_pide</code></td>
                                     <td class="num">2</td>
                                     <td class="num">0</td>
-                                    <td><span class="flag flag-ok">Activa</span></td>
+                                    <td>
+                                        <span class="flag flag-ok">Activa</span>
+                                    </td>
                                 </tr>
                                 <tr>
                                     <td>ANA_SIAGUA</td>
@@ -1932,7 +2435,11 @@
                                     <td><code>api_rest_pide</code></td>
                                     <td class="num">2</td>
                                     <td class="num">0</td>
-                                    <td><span class="flag flag-off">Pendiente auth</span></td>
+                                    <td>
+                                        <span class="flag flag-off"
+                                            >Pendiente auth</span
+                                        >
+                                    </td>
                                 </tr>
                                 <tr>
                                     <td>OEFA_PAM</td>
@@ -1940,7 +2447,11 @@
                                     <td><code>oficio_manual</code></td>
                                     <td class="num">2</td>
                                     <td class="num">0</td>
-                                    <td><span class="flag flag-off">Pendiente auth</span></td>
+                                    <td>
+                                        <span class="flag flag-off"
+                                            >Pendiente auth</span
+                                        >
+                                    </td>
                                 </tr>
                                 <tr>
                                     <td>SANIPES</td>
@@ -1948,7 +2459,11 @@
                                     <td><code>batch_sftp</code></td>
                                     <td class="num">2</td>
                                     <td class="num">0</td>
-                                    <td><span class="flag flag-off">Pendiente auth</span></td>
+                                    <td>
+                                        <span class="flag flag-off"
+                                            >Pendiente auth</span
+                                        >
+                                    </td>
                                 </tr>
                                 <tr>
                                     <td>SBS</td>
@@ -1956,7 +2471,11 @@
                                     <td><code>oficio_manual</code></td>
                                     <td class="num">2</td>
                                     <td class="num">0</td>
-                                    <td><span class="flag flag-off">Pendiente auth</span></td>
+                                    <td>
+                                        <span class="flag flag-off"
+                                            >Pendiente auth</span
+                                        >
+                                    </td>
                                 </tr>
                                 <tr>
                                     <td>SUNAT</td>
@@ -1964,7 +2483,11 @@
                                     <td><code>api_rest_pide</code></td>
                                     <td class="num">2</td>
                                     <td class="num">0</td>
-                                    <td><span class="flag flag-off">Pendiente auth</span></td>
+                                    <td>
+                                        <span class="flag flag-off"
+                                            >Pendiente auth</span
+                                        >
+                                    </td>
                                 </tr>
                                 <tr>
                                     <td>VUCE</td>
@@ -1972,7 +2495,11 @@
                                     <td><code>api_rest_pide</code></td>
                                     <td class="num">2</td>
                                     <td class="num">0</td>
-                                    <td><span class="flag flag-off">Pendiente auth</span></td>
+                                    <td>
+                                        <span class="flag flag-off"
+                                            >Pendiente auth</span
+                                        >
+                                    </td>
                                 </tr>
                                 <tr>
                                     <td>CITERED</td>
@@ -1980,7 +2507,11 @@
                                     <td><code>oficio_manual</code></td>
                                     <td class="num">2</td>
                                     <td class="num">0</td>
-                                    <td><span class="flag flag-off">Pendiente auth</span></td>
+                                    <td>
+                                        <span class="flag flag-off"
+                                            >Pendiente auth</span
+                                        >
+                                    </td>
                                 </tr>
                                 <tr>
                                     <td>DGSFS_PA_TIBURON</td>
@@ -1988,7 +2519,11 @@
                                     <td><code>oficio_manual</code></td>
                                     <td class="num">2</td>
                                     <td class="num">0</td>
-                                    <td><span class="flag flag-off">Pendiente auth</span></td>
+                                    <td>
+                                        <span class="flag flag-off"
+                                            >Pendiente auth</span
+                                        >
+                                    </td>
                                 </tr>
                                 <tr>
                                     <td>PRODUCE</td>
@@ -1996,7 +2531,11 @@
                                     <td><code>oficio_manual</code></td>
                                     <td class="num">2</td>
                                     <td class="num">0</td>
-                                    <td><span class="flag flag-off">Pendiente auth</span></td>
+                                    <td>
+                                        <span class="flag flag-off"
+                                            >Pendiente auth</span
+                                        >
+                                    </td>
                                 </tr>
                             </tbody>
                             <tfoot>
@@ -2018,7 +2557,7 @@
                 </article>
             </section>
 
-            <!-- ══════════════════════════ HISTORIAL ══════════════════════════ -->
+            <!-- ══════════════════════════ EJECUCIONES Y LOG ══════════════════ -->
             <section
                 class="tabpanel"
                 id="panel-historial"
@@ -2028,14 +2567,14 @@
             >
                 <div class="banner banner-neutral">
                     <div>
-                        <b>No hay run log.</b> No existe una tabla de ejecuciones
-                        ETL: <code>staging.lote</code> y
+                        <b>No hay run log.</b> No existe una tabla de
+                        ejecuciones ETL: <code>staging.lote</code> y
                         <code>staging.registro</code> están en 0 filas y
                         <code>legacy.log_envios</code> (17 filas) es el volcado
-                        crudo de una hoja heredada —columnas <code>fila_n</code>,
-                        <code>c01…c13</code>—, no un registro de ejecuciones. La
-                        tabla de abajo se dibuja con el contrato de columnas del
-                        item 59, sin filas.
+                        crudo de una hoja heredada —columnas
+                        <code>fila_n</code>, <code>c01…c13</code>—, no un
+                        registro de ejecuciones. La tabla de abajo se dibuja con
+                        el contrato de columnas del item 59, sin filas.
                     </div>
                 </div>
 
@@ -2045,7 +2584,8 @@
                             <h2 class="card-title">Ejecuciones</h2>
                             <p class="card-sub">
                                 Una fila por lote: duración, costo/metadatos,
-                                reintentos, versión y vínculo propuesta → registro.
+                                reintentos, versión y vínculo propuesta →
+                                registro.
                             </p>
                         </div>
                         <span class="tag-mini">Item 59 · 62</span>
@@ -2070,10 +2610,13 @@
                             <tbody>
                                 <tr>
                                     <td colspan="10">
-                                        <div class="empty-state" style="padding: 22px">
-                                            Sin ejecuciones registradas. La tabla
-                                            queda vacía hasta que exista la
-                                            persistencia del item 59.
+                                        <div
+                                            class="empty-state"
+                                            style="padding: 22px"
+                                        >
+                                            Sin ejecuciones registradas. La
+                                            tabla queda vacía hasta que exista
+                                            la persistencia del item 59.
                                         </div>
                                     </td>
                                 </tr>
@@ -2081,11 +2624,11 @@
                         </table>
                     </div>
                     <p class="footnote">
-                        El <b>vínculo bidireccional</b> (item 62) exige guardar qué
-                        versión del archivo y de la propuesta sustentó cada alerta,
-                        compromiso, demanda o actor. Hoy ninguna tabla enlaza un
-                        registro de <code>core.*</code> con un lote, así que esa
-                        columna no puede poblarse.
+                        El <b>vínculo bidireccional</b> (item 62) exige guardar
+                        qué versión del archivo y de la propuesta sustentó cada
+                        alerta, compromiso, demanda o actor. Hoy ninguna tabla
+                        enlaza un registro de <code>core.*</code> con un lote,
+                        así que esa columna no puede poblarse.
                     </p>
                 </article>
 
@@ -2153,7 +2696,11 @@
                             >
                                 Generar lote
                             </button>
-                            <button type="button" class="button-secondary" disabled>
+                            <button
+                                type="button"
+                                class="button-secondary"
+                                disabled
+                            >
                                 Reintentar fallidos
                             </button>
                         </div>
@@ -2161,16 +2708,19 @@
                         <p class="footnote">
                             <strong>Dependencia bloqueante:</strong> el item 86
                             necesita el generador con contrato del item 75
-                            (<code>POST /api/v1/anexos/{n}</code>). La salida sería
-                            siempre <b>borrador</b> con fecha de corte y revisión
-                            humana obligatoria antes de cualquier envío.
+                            (<code>POST /api/v1/anexos/{n}</code>). La salida
+                            sería siempre <b>borrador</b> con fecha de corte y
+                            revisión humana obligatoria antes de cualquier
+                            envío.
                         </p>
                     </article>
 
                     <article class="card">
                         <div class="card-head">
                             <div>
-                                <h2 class="card-title">Conciliación del lote documental</h2>
+                                <h2 class="card-title">
+                                    Conciliación del lote documental
+                                </h2>
                                 <p class="card-sub">
                                     Reutiliza el cuadre del item 59 para el job
                                     documental.
@@ -2180,10 +2730,14 @@
                         </div>
 
                         <div class="recon">
-                            <div class="box"><b>—</b><span>Generados</span></div>
+                            <div class="box">
+                                <b>—</b><span>Generados</span>
+                            </div>
                             <div class="box"><b>—</b><span>Omitidos</span></div>
                             <div class="box"><b>—</b><span>Fallidos</span></div>
-                            <div class="box"><b>—</b><span>Solicitados</span></div>
+                            <div class="box">
+                                <b>—</b><span>Solicitados</span>
+                            </div>
                         </div>
                         <div class="recon-eq">
                             — + — + — = <b>— solicitados</b>
@@ -2201,7 +2755,10 @@
                                 <tbody>
                                     <tr>
                                         <td colspan="3">
-                                            <div class="empty-state" style="padding: 18px">
+                                            <div
+                                                class="empty-state"
+                                                style="padding: 18px"
+                                            >
                                                 Run log del lote vacío.
                                             </div>
                                         </td>
@@ -2221,8 +2778,12 @@
                     <article class="card">
                         <div class="card-head">
                             <div>
-                                <h2 class="card-title">Propuestas registradas</h2>
-                                <p class="card-sub"><code>agent.run_log</code></p>
+                                <h2 class="card-title">
+                                    Propuestas registradas
+                                </h2>
+                                <p class="card-sub">
+                                    <code>agent.run_log</code>
+                                </p>
                             </div>
                         </div>
                         <div class="kpi-val">0</div>
@@ -2232,17 +2793,23 @@
                         <div class="card-head">
                             <div>
                                 <h2 class="card-title">Resultados humanos</h2>
-                                <p class="card-sub"><code>agent.feedback_log</code></p>
+                                <p class="card-sub">
+                                    <code>agent.feedback_log</code>
+                                </p>
                             </div>
                         </div>
                         <div class="kpi-val">0</div>
-                        <div class="kpi-note">Ni aceptadas ni corregidas: sin propuestas.</div>
+                        <div class="kpi-note">
+                            Ni aceptadas ni corregidas: sin propuestas.
+                        </div>
                     </article>
                     <article class="card">
                         <div class="card-head">
                             <div>
                                 <h2 class="card-title">Lecciones aprendidas</h2>
-                                <p class="card-sub"><code>agent.lessons_learned</code></p>
+                                <p class="card-sub">
+                                    <code>agent.lessons_learned</code>
+                                </p>
                             </div>
                         </div>
                         <div class="kpi-val">0</div>
@@ -2252,11 +2819,15 @@
                         <div class="card-head">
                             <div>
                                 <h2 class="card-title">Casos de regresión</h2>
-                                <p class="card-sub"><code>agent.synthetic_test_cases</code></p>
+                                <p class="card-sub">
+                                    <code>agent.synthetic_test_cases</code>
+                                </p>
                             </div>
                         </div>
                         <div class="kpi-val">0</div>
-                        <div class="kpi-note">Sin conjunto de regresión definido.</div>
+                        <div class="kpi-note">
+                            Sin conjunto de regresión definido.
+                        </div>
                     </article>
                 </div>
 
@@ -2264,10 +2835,13 @@
                     <article class="card">
                         <div class="card-head">
                             <div>
-                                <h2 class="card-title">Aceptación por tipo de sugerencia</h2>
+                                <h2 class="card-title">
+                                    Aceptación por tipo de sugerencia
+                                </h2>
                                 <p class="card-sub">
-                                    Solo tiene sentido con propuestas registradas;
-                                    la tasa no se define con cero filas.
+                                    Solo tiene sentido con propuestas
+                                    registradas; la tasa no se define con cero
+                                    filas.
                                 </p>
                             </div>
                         </div>
@@ -2322,18 +2896,20 @@
                         </div>
                         <p class="footnote">
                             No se escribe «0 %»: con cero propuestas la tasa es
-                            indeterminada, no nula. Un 0 % afirmaría que todas las
-                            propuestas fueron rechazadas.
+                            indeterminada, no nula. Un 0 % afirmaría que todas
+                            las propuestas fueron rechazadas.
                         </p>
                     </article>
 
                     <article class="card">
                         <div class="card-head">
                             <div>
-                                <h2 class="card-title">Registro del asistente</h2>
+                                <h2 class="card-title">
+                                    Registro del asistente
+                                </h2>
                                 <p class="card-sub">
-                                    Llamadas al modelo y sesiones, para auditar el
-                                    costo y la versión.
+                                    Llamadas al modelo y sesiones, para auditar
+                                    el costo y la versión.
                                 </p>
                             </div>
                         </div>
@@ -2350,13 +2926,379 @@
                             <dd>No definido</dd>
                         </dl>
                         <p class="footnote">
-                            Sin <code>run_log</code> no se puede medir aceptación ni
-                            detectar una regresión tras cambiar prompt o modelo; por
-                            eso el item 87 exige ambas cosas antes de automatizar
-                            los items 73–78.
+                            Sin <code>run_log</code> no se puede medir
+                            aceptación ni detectar una regresión tras cambiar
+                            prompt o modelo; por eso el item 87 exige ambas
+                            cosas antes de automatizar los items 73–78.
                         </p>
                     </article>
                 </div>
+            </section>
+
+            <!-- ───────────────────────── ESTADOS DE PANTALLA ─────────────────── -->
+            <section
+                class="notes"
+                id="estados-pantalla"
+                aria-labelledby="estados-titulo"
+            >
+                <h2 id="estados-titulo">Estados de pantalla</h2>
+                <p>
+                    Las tres pestañas comparten los mismos tres estados de
+                    lectura. Ninguno se resuelve con cifras de ejemplo: una
+                    tarjeta en carga no pinta un número provisorio y un error no
+                    cae a un valor cacheado. El servicio de ejecución
+                    <span class="req">requiere</span> existir para que cargando
+                    y error tengan contrato.
+                </p>
+                <div class="state-grid">
+                    <div class="state-card">
+                        <h4>Cargando</h4>
+                        <p>
+                            Se conserva el encabezado, las pestañas y los
+                            filtros; cada bloque muestra esqueleto y el estado
+                            «No ejecutado · —» hasta que responda el servidor.
+                        </p>
+                        <div class="state-demo">
+                            <b>Consultando ejecuciones…</b>0 filas hasta que
+                            llegue la respuesta; el corte se muestra al final.
+                        </div>
+                    </div>
+                    <div class="state-card">
+                        <h4>Vacío</h4>
+                        <p>
+                            Es el estado real de hoy: 0 lotes, 0 ejecuciones y
+                            lista blanca sin esquema. Se escribe el hecho y el
+                            motivo, no un <b>0</b> que parezca «procesado y
+                            vacío».
+                        </p>
+                        <div class="state-demo">
+                            <b>Sin ejecuciones registradas</b>Se distinguen «no
+                            se ejecutó» y «se ejecutó sin filas».
+                        </div>
+                    </div>
+                    <div class="state-card">
+                        <h4>Error</h4>
+                        <p>
+                            Si el servicio de ingesta falla o expira, se muestra
+                            el mensaje del servidor y «Reintentar»; el lote
+                            queda sin estado, no en «fallido» sin evidencia.
+                        </p>
+                        <div class="state-demo">
+                            <b>No se pudo consultar el lote</b>requiere contrato
+                            de error y código de reintento del servicio.
+                        </div>
+                    </div>
+                </div>
+
+                <h3>Confirmación de acción destructiva</h3>
+                <p>
+                    Anular un lote (o descartar una ejecución fallida) es la
+                    única operación destructiva de esta vista. No hay borrado
+                    duro: se anula con motivo obligatorio y queda auditado.
+                </p>
+                <div class="empty-box">
+                    <strong>Anular lote LOTE-… · ¿continuar?</strong>
+                    Motivo (obligatorio) · será visible en el log · esta acción
+                    se registra en <code>audit.cambios</code>. El lote no se
+                    borra: se marca anulado y sus registros de
+                    <code>staging.registro</code> dejan de alimentar
+                    <code>core</code>.
+                </div>
+                <p class="footnote">
+                    <span class="req">requiere</span>
+                    <code>PATCH /api/v1/etl/lotes/{id}</code> con
+                    <code>anulado_en</code>, <code>motivo</code> y
+                    <code>anulado_por</code>; hoy el lote solo existe como
+                    esquema en 0 filas.
+                </p>
+            </section>
+
+            <!-- ───────────────────────── CONTRATO DE DATOS ───────────────────── -->
+            <section
+                class="notes"
+                id="contrato-datos"
+                aria-labelledby="contrato-titulo"
+            >
+                <h2 id="contrato-titulo">Contrato de datos por elemento</h2>
+                <p>
+                    Cada bloque de la vista declara de qué tabla, vista o
+                    endpoint sale. Si el origen no existe todavía, se marca
+                    <span class="req">requiere</span> y se nombra el hueco
+                    exacto que el equipo que construye debe llenar.
+                </p>
+                <div class="table-wrap">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Elemento</th>
+                                <th>Origen</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Selector de fuente</td>
+                                <td>
+                                    <code>analisis.punto_ingesta</code> (7
+                                    filas, PI-01…PI-07)
+                                </td>
+                                <td>
+                                    <span class="flag flag-ok">Existe</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Esquema de validación y mapeo de columnas
+                                </td>
+                                <td>
+                                    <code
+                                        >punto_ingesta.esquema_validacion</code
+                                    >
+                                </td>
+                                <td>
+                                    <span class="flag flag-bad"
+                                        ><span class="req">requiere</span>
+                                        esquema</span
+                                    >
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Hash del archivo</td>
+                                <td>
+                                    <code>staging.lote.hash_archivo</code>
+                                    (columna existe, 0 filas)
+                                </td>
+                                <td>
+                                    <span class="flag flag-off">Sin filas</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Deduplicación por hash</td>
+                                <td>
+                                    consulta a
+                                    <code>staging.lote.hash_archivo</code>
+                                </td>
+                                <td>
+                                    <span class="flag flag-bad"
+                                        ><span class="req">requiere</span>
+                                        endpoint</span
+                                    >
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Pipeline, contadores por etapa y rechazos
+                                </td>
+                                <td>run log de ejecuciones</td>
+                                <td>
+                                    <span class="flag flag-bad"
+                                        ><span class="req">requiere</span>
+                                        <code>staging.ejecucion</code></span
+                                    >
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Tablas alimentadas · «antes»</td>
+                                <td>
+                                    recuento de <code>core.*</code> y
+                                    <code>kag.*</code>
+                                </td>
+                                <td>
+                                    <span class="flag flag-ok">Existe</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Tablas alimentadas · «después» y Δ</td>
+                                <td>run log del lote</td>
+                                <td>
+                                    <span class="flag flag-bad"
+                                        ><span class="req">requiere</span> run
+                                        log</span
+                                    >
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Conciliación: cargados + fusionados +
+                                    descartados + pendientes
+                                </td>
+                                <td>columnas de cuadre del run log</td>
+                                <td>
+                                    <span class="flag flag-bad"
+                                        ><span class="req">requiere</span> run
+                                        log</span
+                                    >
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Lista blanca de fuentes</td>
+                                <td><code>analisis.punto_ingesta</code></td>
+                                <td>
+                                    <span class="flag flag-ok">Existe</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Control de cambios de la lista blanca</td>
+                                <td>
+                                    <code>audit.cambios</code> (57 filas, 0
+                                    sobre <code>punto_ingesta</code>)
+                                </td>
+                                <td>
+                                    <span class="flag flag-bad"
+                                        ><span class="req">requiere</span> tabla
+                                        de versiones</span
+                                    >
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Permisos por pestaña y acción</td>
+                                <td>
+                                    RLS <code>core.puede_editar()</code> ·
+                                    <code>puede_eliminar()</code> (item 49)
+                                </td>
+                                <td>
+                                    <span class="flag flag-ok">Existe</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Integraciones e «última sincronización»</td>
+                                <td>
+                                    <code>core.integraciones</code> (20
+                                    vínculos, 0 con fecha)
+                                </td>
+                                <td>
+                                    <span class="flag flag-ok">Existe</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Feed WhatsApp / Gemini</td>
+                                <td>fila de <code>core.integraciones</code></td>
+                                <td>
+                                    <span class="flag flag-bad"
+                                        ><span class="req">requiere</span>
+                                        integración</span
+                                    >
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>OCR y fragmentos con página/offset</td>
+                                <td>
+                                    <code>kag.documento_fragmento</code> (0
+                                    filas) + servicio OCR
+                                </td>
+                                <td>
+                                    <span class="flag flag-bad"
+                                        ><span class="req">requiere</span>
+                                        servicio OCR</span
+                                    >
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Ejecución de carga (escribir lote y
+                                    registro)
+                                </td>
+                                <td><code>POST /api/v1/etl/lotes</code></td>
+                                <td>
+                                    <span class="flag flag-bad"
+                                        ><span class="req">requiere</span>
+                                        endpoint</span
+                                    >
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Sugerencias asistidas (item 87)</td>
+                                <td>
+                                    <code>agent.run_log</code> ·
+                                    <code>feedback_log</code> ·
+                                    <code>lessons_learned</code> ·
+                                    <code>synthetic_test_cases</code>
+                                </td>
+                                <td>
+                                    <span class="flag flag-off"
+                                        >Existe, 0 filas</span
+                                    >
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Generación por lote (item 86)</td>
+                                <td>
+                                    <code>POST /api/v1/anexos/{n}</code> (item
+                                    75)
+                                </td>
+                                <td>
+                                    <span class="flag flag-bad"
+                                        ><span class="req">requiere</span>
+                                        generador</span
+                                    >
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Registro de la operación (validación humana)
+                                </td>
+                                <td>
+                                    <code>audit.cambios</code> y
+                                    <code>agent.feedback_log</code>
+                                </td>
+                                <td>
+                                    <span class="flag flag-off"
+                                        >Existe, sin filas de ETL</span
+                                    >
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- ───────────────────── FUERA DE ALCANCE ───────────────────── -->
+            <section
+                class="notes"
+                id="fuera-alcance"
+                aria-labelledby="fuera-titulo"
+            >
+                <h2 id="fuera-titulo">Fuera de alcance de este mockup</h2>
+                <ul>
+                    <li>
+                        <b>OCR:</b> no se implementa. Un PDF escaneado no se lee
+                        y no se dibuja como si se leyera; la extracción de texto
+                        no es OCR (item 61).
+                    </li>
+                    <li>
+                        <b>Fuentes externas:</b> WhatsApp, Gemini y cualquier
+                        feed externo quedan fuera; no se dibuja un mensaje de
+                        ejemplo ni una sincronización que no existe (item 60).
+                    </li>
+                    <li>
+                        <b>Documentos pesados:</b> <code>.qdpx</code>/<code
+                            >.qdc</code
+                        >
+                        (PI-02) siguen su propio lector y no se cargan por este
+                        formulario CSV/XLSX/TXT/PDF.
+                    </li>
+                    <li>
+                        <b>Almacenamiento de archivos:</b> la evidencia es una
+                        URI; no hay bucket, retención ni versionado de binarios.
+                    </li>
+                    <li>
+                        <b>Credenciales del lado servidor:</b> la autorización
+                        de fuentes externas no vive en el navegador ni se
+                        simula.
+                    </li>
+                    <li>
+                        <b>Flujo subir → procesar:</b> el selector y la
+                        validación de abajo corren <b>solo en el navegador</b>;
+                        no se dibuja una subida, un parseo ni una persistencia
+                        que hoy no existen. El botón «Iniciar ejecución» está
+                        deshabilitado a propósito.
+                    </li>
+                    <li>
+                        <b>Datos simulados:</b> no se rellenan ejecuciones,
+                        contadores, rechazos ni mensajes para «que se vea lleno»
+                        (item 60).
+                    </li>
+                </ul>
             </section>
 
             <!-- ───────────────────────────── NOTAS ───────────────────────────── -->
@@ -2385,8 +3327,9 @@
                         <code>esquema_validacion</code> nulo en todas.
                     </li>
                     <li>
-                        Integraciones: 20 filas en <code>core.integraciones</code>,
-                        10 sistemas, 2 <code>activa</code>
+                        Integraciones: 20 filas en
+                        <code>core.integraciones</code>, 10 sistemas, 2
+                        <code>activa</code>
                         (CITES_SECRETARIAT → PRODUCE) y 18
                         <code>pendiente_auth</code>; 0 con
                         <code>ultima_sincronizacion</code>.
@@ -2394,8 +3337,8 @@
                     <li>
                         Registro del asistente: <code>agent.run_log</code>,
                         <code>feedback_log</code>, <code>lessons_learned</code>,
-                        <code>synthetic_test_cases</code>, <code>llm_call</code> y
-                        <code>sesion</code> con 0 filas;
+                        <code>synthetic_test_cases</code>,
+                        <code>llm_call</code> y <code>sesion</code> con 0 filas;
                         <code>agent.plantilla_prompt</code> con 4.
                     </li>
                     <li>
@@ -2405,9 +3348,9 @@
                         <code>staging</code>.
                     </li>
                     <li>
-                        La validación de extensión, MIME, tamaño, codificación y el
-                        SHA-256 se calculan de verdad en tu navegador sobre el
-                        archivo que elijas; no son cifras escritas.
+                        La validación de extensión, MIME, tamaño, codificación y
+                        el SHA-256 se calculan de verdad en tu navegador sobre
+                        el archivo que elijas; no son cifras escritas.
                     </li>
                 </ul>
 
@@ -2419,18 +3362,18 @@
                         rechazos ni conciliación.
                     </li>
                     <li>
-                        <b>Filas «después» y Δ</b> de cada tabla: dependen de una
-                        ejecución que no ocurrió.
+                        <b>Filas «después» y Δ</b> de cada tabla: dependen de
+                        una ejecución que no ocurrió.
                     </li>
                     <li>
-                        <b>Esquema de validación de las 7 fuentes</b>: la columna
-                        existe y está vacía; sin ella la etapa de mapeo no puede
-                        validar columnas.
+                        <b>Esquema de validación de las 7 fuentes</b>: la
+                        columna existe y está vacía; sin ella la etapa de mapeo
+                        no puede validar columnas.
                     </li>
                     <li>
-                        <b>Historial y run log</b>: no existe tabla de ejecuciones;
-                        <code>legacy.log_envios</code> es un volcado de hoja, no un
-                        log.
+                        <b>Ejecuciones y log (run log)</b>: no existe tabla de
+                        ejecuciones; <code>legacy.log_envios</code> es un
+                        volcado de hoja, no un log.
                     </li>
                     <li>
                         <b>Última sincronización de integraciones</b>: los 20
@@ -2441,53 +3384,59 @@
                         estado es «No conectado», sin timestamp y sin mensajes.
                     </li>
                     <li>
-                        <b>Generación por lote (86)</b>: depende del generador del
-                        item 75, inexistente.
+                        <b>Generación por lote (86)</b>: depende del generador
+                        del item 75, inexistente.
                     </li>
                     <li>
                         <b>Aceptación de sugerencias (87)</b>: 0 propuestas
                         registradas; la tasa es indeterminada, no 0 %.
                     </li>
                     <li>
-                        <b>OCR</b>: no implementado; un PDF escaneado no se lee y
-                        no se finge que sí.
+                        <b>OCR</b>: no implementado; un PDF escaneado no se lee
+                        y no se finge que sí.
                     </li>
                 </ul>
 
                 <h3>Qué falta para implementarlo</h3>
                 <ol>
                     <li>
-                        <b>Endpoint de carga</b> (<code>POST /api/v1/etl/lotes</code>
+                        <b>Endpoint de carga</b> (<code
+                            >POST /api/v1/etl/lotes</code
+                        >
                         o equivalente) con límites de tamaño/tipo validados en
                         servidor, no solo en el navegador.
                     </li>
                     <li>
-                        <b>Persistencia en <code>staging</code></b>: escribir
-                        <code>lote</code> y <code>registro</code>, hoy en 0 filas.
+                        <b>Persistencia en <code>staging</code></b
+                        >: escribir <code>lote</code> y <code>registro</code>,
+                        hoy en 0 filas.
                     </li>
                     <li>
-                        <b>Tabla de ejecuciones / run log</b> con duración, costo,
-                        reintentos, versión y vínculo propuesta → registro.
+                        <b>Tabla de ejecuciones / run log</b> con duración,
+                        costo, reintentos, versión y vínculo propuesta →
+                        registro.
                     </li>
                     <li>
-                        <b>Esquemas de validación</b> por fuente
-                        (<code>esquema_validacion</code> nulo en las 7).
+                        <b>Esquemas de validación</b> por fuente (<code
+                            >esquema_validacion</code
+                        >
+                        nulo en las 7).
                     </li>
                     <li>
                         <b>Tabla de control de cambios</b> de la lista blanca.
                     </li>
                     <li>
-                        <b>Servicio de OCR</b> separado (idioma, confianza, costo,
-                        revisión humana) y almacenamiento de archivos: hoy la
-                        evidencia es solo una URI.
+                        <b>Servicio de OCR</b> separado (idioma, confianza,
+                        costo, revisión humana) y almacenamiento de archivos:
+                        hoy la evidencia es solo una URI.
                     </li>
                     <li>
                         <b>Generador de anexos (item 75)</b> antes de cualquier
                         lote documental.
                     </li>
                     <li>
-                        <b>Credenciales de integración</b> del lado servidor para
-                        cualquier fuente externa (WhatsApp, Gemini u otra).
+                        <b>Credenciales de integración</b> del lado servidor
+                        para cualquier fuente externa (WhatsApp, Gemini u otra).
                     </li>
                 </ol>
 
@@ -2495,8 +3444,8 @@
                 <ul>
                     <li>
                         <b>No simular</b> ejecuciones, contadores, rechazos ni
-                        mensajes de WhatsApp para «que se vea lleno». El item 60 lo
-                        prohíbe explícitamente.
+                        mensajes de WhatsApp para «que se vea lleno». El item 60
+                        lo prohíbe explícitamente.
                     </li>
                     <li>
                         <b>No tratar la extracción de texto como OCR</b> ni
@@ -2504,19 +3453,21 @@
                     </li>
                     <li>
                         <b>No escribir 0</b> donde el hecho es «no se ejecutó»:
-                        0 significa «se procesó y no había nada», que es distinto.
+                        0 significa «se procesó y no había nada», que es
+                        distinto.
                     </li>
                     <li>
-                        <b>No calcular 0 % de aceptación</b> con cero propuestas.
+                        <b>No calcular 0 % de aceptación</b> con cero
+                        propuestas.
                     </li>
                     <li>
                         <b>No confiar en ocultar pestañas</b> como control de
                         acceso: la autorización va en el servidor (item 49/60).
                     </li>
                     <li>
-                        <b>No mostrar una integración como conectada</b> porque su
-                        estado diga «activa»: sin fecha de sincronización no hay
-                        prueba de que haya corrido.
+                        <b>No mostrar una integración como conectada</b> porque
+                        su estado diga «activa»: sin fecha de sincronización no
+                        hay prueba de que haya corrido.
                     </li>
                 </ul>
 
@@ -2527,7 +3478,11 @@
                     <dt>Niveles de gobierno</dt>
                     <dd>Nacional · Regional (GORE) · Local.</dd>
                     <dt>Estados de caso</dt>
-                    <dd>Activo · En seguimiento · Resuelto · Archivado.</dd>
+                    <dd>Abierto · Resuelto · Archivado.</dd>
+                    <dt>GORE</dt>
+                    <dd>Siempre «GORE», nunca «Gobierno regional».</dd>
+                    <dt>Unidad responsable</dt>
+                    <dd>Nunca «unidad asignada» ni «área encargada».</dd>
                 </dl>
             </section>
         </main>
@@ -2538,15 +3493,18 @@
 
                 /* ── Pestañas ──────────────────────────────────────────────── */
                 var tabButtons = Array.prototype.slice.call(
-                    document.querySelectorAll(".mode-tabs [data-tab]")
+                    document.querySelectorAll(".mode-tabs [data-tab]"),
                 );
                 tabButtons.forEach(function (btn) {
                     btn.addEventListener("click", function () {
                         tabButtons.forEach(function (b) {
                             var on = b === btn;
-                            b.setAttribute("aria-selected", on ? "true" : "false");
+                            b.setAttribute(
+                                "aria-selected",
+                                on ? "true" : "false",
+                            );
                             var panel = document.getElementById(
-                                "panel-" + b.getAttribute("data-tab")
+                                "panel-" + b.getAttribute("data-tab"),
                             );
                             if (panel) panel.hidden = !on;
                         });
@@ -2568,16 +3526,16 @@
                         "application/vnd.ms-excel",
                         "text/plain",
                         "application/octet-stream",
-                        ""
+                        "",
                     ],
                     xlsx: [
                         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                         "application/zip",
                         "application/octet-stream",
-                        ""
+                        "",
                     ],
                     txt: ["text/plain", "application/octet-stream", ""],
-                    pdf: ["application/pdf", "application/octet-stream", ""]
+                    pdf: ["application/pdf", "application/octet-stream", ""],
                 };
 
                 function row(key) {
@@ -2589,7 +3547,13 @@
                     li.classList.remove("ok", "warn", "bad");
                     if (state) li.classList.add(state);
                     li.querySelector(".ico").textContent =
-                        state === "ok" ? "✓" : state === "warn" ? "!" : state === "bad" ? "✕" : "○";
+                        state === "ok"
+                            ? "✓"
+                            : state === "warn"
+                              ? "!"
+                              : state === "bad"
+                                ? "✕"
+                                : "○";
                     li.querySelector(".val").textContent = text;
                 }
                 function humanSize(n) {
@@ -2614,16 +3578,21 @@
                     sizeEl.textContent = humanSize(file.size);
 
                     var ext = (file.name.split(".").pop() || "").toLowerCase();
-                    var extOk = Object.prototype.hasOwnProperty.call(MIME_BY_EXT, ext);
+                    var extOk = Object.prototype.hasOwnProperty.call(
+                        MIME_BY_EXT,
+                        ext,
+                    );
                     setCheck(
                         "ext",
                         extOk ? "ok" : "bad",
-                        extOk ? "." + ext : "No permitida"
+                        extOk ? "." + ext : "No permitida",
                     );
                     if (!extOk) {
-                        ["mime", "size", "enc", "hash", "dedupe"].forEach(function (k) {
-                            setCheck(k, null, "No evaluado");
-                        });
+                        ["mime", "size", "enc", "hash", "dedupe"].forEach(
+                            function (k) {
+                                setCheck(k, null, "No evaluado");
+                            },
+                        );
                         hashEl.textContent = "SHA-256: —";
                         countEl.textContent = "Archivo rechazado";
                         countEl.className = "flag flag-bad";
@@ -2638,23 +3607,27 @@
                         mimeOk ? "ok" : "warn",
                         mimeOk
                             ? file.type || "no declarado"
-                            : file.type + " (no coincide)"
+                            : file.type + " (no coincide)",
                     );
 
                     var sizeOk = file.size > 0 && file.size <= MAX_BYTES;
                     setCheck(
                         "size",
                         sizeOk ? "ok" : "bad",
-                        sizeOk ? humanSize(file.size) : "Supera 25 MB"
+                        sizeOk ? humanSize(file.size) : "Supera 25 MB",
                     );
 
                     /* Codificación: solo aplica a texto (csv/txt). */
                     if (ext === "csv" || ext === "txt") {
                         try {
                             var head = new Uint8Array(
-                                await file.slice(0, 4096).arrayBuffer()
+                                await file.slice(0, 4096).arrayBuffer(),
                             );
-                            if (head[0] === 0xef && head[1] === 0xbb && head[2] === 0xbf) {
+                            if (
+                                head[0] === 0xef &&
+                                head[1] === 0xbb &&
+                                head[2] === 0xbf
+                            ) {
                                 setCheck("enc", "ok", "UTF-8 con BOM");
                             } else if (head[0] === 0xff && head[1] === 0xfe) {
                                 setCheck("enc", "warn", "UTF-16 LE (revisar)");
@@ -2662,10 +3635,16 @@
                                 setCheck("enc", "warn", "UTF-16 BE (revisar)");
                             } else {
                                 try {
-                                    new TextDecoder("utf-8", { fatal: true }).decode(head);
+                                    new TextDecoder("utf-8", {
+                                        fatal: true,
+                                    }).decode(head);
                                     setCheck("enc", "ok", "UTF-8 sin BOM");
                                 } catch (e) {
-                                    setCheck("enc", "warn", "No UTF-8: posible Latin-1");
+                                    setCheck(
+                                        "enc",
+                                        "warn",
+                                        "No UTF-8: posible Latin-1",
+                                    );
                                 }
                             }
                         } catch (e) {
@@ -2677,11 +3656,15 @@
 
                     try {
                         var full = await file.arrayBuffer();
-                        var digest = await crypto.subtle.digest("SHA-256", full);
+                        var digest = await crypto.subtle.digest(
+                            "SHA-256",
+                            full,
+                        );
                         hashEl.textContent = "SHA-256: " + hex(digest);
                         setCheck("hash", "ok", "Calculado");
                     } catch (e) {
-                        hashEl.textContent = "SHA-256: — (requiere contexto seguro)";
+                        hashEl.textContent =
+                            "SHA-256: — (requiere contexto seguro)";
                         setCheck("hash", "warn", "No calculable");
                     }
 
@@ -2701,8 +3684,11 @@
                     Array.prototype.forEach.call(
                         document.querySelectorAll(".perm-table [data-col]"),
                         function (th) {
-                            th.classList.toggle("perm-col-hot", th.getAttribute("data-col") === col);
-                        }
+                            th.classList.toggle(
+                                "perm-col-hot",
+                                th.getAttribute("data-col") === col,
+                            );
+                        },
                     );
                 }
                 rolSel.addEventListener("change", paintRole);

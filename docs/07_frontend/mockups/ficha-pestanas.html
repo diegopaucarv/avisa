@@ -3,7 +3,9 @@
     <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>Ficha por pestañas · Mockup AVISA (items 12–18, 41, 67, 68)</title>
+        <title>
+            Ficha por pestañas · Mockup AVISA (items 12–18, 41, 67, 68)
+        </title>
         <style>
             /* ─────────────────────────────────────────────────────────────────────────
          Tokens y clases base copiados de angular/src/styles/global.css y del
@@ -447,14 +449,11 @@
                 border-radius: 50%;
                 background: #a6732d;
             }
-            .estado-seguimiento {
-                background: #eaf1fb;
-                color: #2455a2;
-            }
-            .estado-activo {
+            .estado-abierto {
                 background: #e9f5ef;
                 color: #34785b;
             }
+
             .estado-resuelto {
                 background: #eaf1f9;
                 color: #2a5b8f;
@@ -1044,20 +1043,108 @@
                     padding: 18px 16px 40px;
                 }
             }
+            .req {
+                color: #93621d;
+                font-weight: 700;
+            }
+            .contract-table {
+                width: 100%;
+                margin: 8px 0 0;
+                border-collapse: collapse;
+                font-size: 9.5px;
+                line-height: 1.45;
+            }
+            .contract-table th,
+            .contract-table td {
+                padding: 5px 8px;
+                border: 1px solid #edf0f2;
+                text-align: left;
+                vertical-align: top;
+                color: #526577;
+            }
+            .contract-table th {
+                background: #f6f8fa;
+                color: #687988;
+                font-weight: 700;
+            }
+            .contract-table td:first-child {
+                width: 140px;
+                color: #465a6c;
+                font-weight: 600;
+            }
+            .contract-table code {
+                font-family:
+                    ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+                font-size: 8.5px;
+                background: #f2f5f8;
+                border: 1px solid #e6ebef;
+                border-radius: 4px;
+                padding: 1px 3px;
+                color: #33475b;
+            }
+            .state-grid {
+                display: grid;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: 10px;
+                margin: 8px 0 0;
+            }
+            .state-card {
+                padding: 12px 14px;
+                border: 1px solid var(--line);
+                border-radius: 8px;
+                background: #fbfcfd;
+            }
+            .state-card h4 {
+                margin: 0 0 5px;
+                color: #465a6c;
+                font: 700 10px/1.3 var(--font-display);
+                letter-spacing: 0.03em;
+                text-transform: uppercase;
+            }
+            .state-card p {
+                margin: 0;
+                color: #778797;
+                font-size: 9.5px;
+                line-height: 1.5;
+            }
+            .skeleton {
+                display: flex;
+                flex-direction: column;
+                gap: 6px;
+                margin: 8px 0;
+            }
+            .skeleton span {
+                height: 8px;
+                border-radius: 4px;
+                background: linear-gradient(90deg, #eef2f5, #e2e8ed, #eef2f5);
+            }
+            .skeleton span:nth-child(2) {
+                width: 85%;
+            }
+            .skeleton span:nth-child(3) {
+                width: 65%;
+            }
+            @media (max-width: 980px) {
+                .state-grid {
+                    grid-template-columns: 1fr;
+                }
+            }
         </style>
     </head>
     <body>
         <main class="view-body">
             <header class="view-head">
                 <div>
-                    <span class="anexo-badge">Mockup · item 41 · pestañas 12–18 · 67 · 68</span>
+                    <span class="anexo-badge"
+                        >Mockup · item 41 · pestañas 12–18 · 67 · 68</span
+                    >
                     <h1>Ficha del caso por pestañas operativas</h1>
                     <p class="view-subtitle">
-                        Estructura propuesta para la ficha de caso: cabecera, riel de
-                        relaciones, diez pestañas y el patrón de edición por campo.
-                        Todos los valores provienen de la base AVISA
-                        (<code>core.*</code>); lo que no existe se muestra «—» y se
-                        explica en las notas.
+                        Estructura propuesta para la ficha de caso: cabecera,
+                        riel de relaciones, diez pestañas y el patrón de edición
+                        por campo. Todos los valores provienen de la base AVISA
+                        (<code>core.*</code>); lo que no existe se muestra «—» y
+                        se explica en las notas.
                     </p>
                 </div>
             </header>
@@ -1070,17 +1157,29 @@
                         <span class="dash">·</span>
                         <span>OAIPCS</span>
                     </div>
-                    <h2>Uso de red de cortina de fondo en Cabo Blanco y Los Órganos</h2>
+                    <h2>
+                        Uso de red de cortina de fondo en Cabo Blanco y Los
+                        Órganos
+                    </h2>
                     <div class="loc">
                         <b>Región</b> Piura · <b>Alcance derivado</b> Norte ·
                         <b>Temática</b> Ordenamiento y acceso territorial ·
                         <b>Subsector</b> Pesca y Acuicultura
                     </div>
                     <div class="badge-row">
-                        <span class="badge risk-bajo"><span class="k">Riesgo</span> Bajo</span>
-                        <span class="badge badge-conflicto">Conflicto social</span>
-                        <span class="badge estado-seguimiento">En seguimiento</span>
-                        <span class="badge priority-urgente"><span class="k">Prioridad</span> Urgente</span>
+                        <span class="badge risk-bajo"
+                            ><span class="k">Riesgo</span> Bajo</span
+                        >
+                        <span class="badge badge-conflicto"
+                            >Conflicto social</span
+                        >
+                        <span class="badge estado-abierto">Abierto</span>
+                        <span class="badge priority-urgente"
+                            ><span class="k">Prioridad</span> Urgente</span
+                        >
+                        <span class="chip neutral"
+                            >Prioridad sin regla definida</span
+                        >
                     </div>
                 </div>
                 <div class="head-actions">
@@ -1098,7 +1197,10 @@
             </section>
 
             <!-- Indicador de expediente (item 68) -->
-            <section class="completeness card" aria-label="Indicador de completitud del expediente">
+            <section
+                class="completeness card"
+                aria-label="Indicador de completitud del expediente"
+            >
                 <div class="completeness-head">
                     <div class="completeness-title">
                         Expediente <b>4 de 5</b>
@@ -1107,11 +1209,25 @@
                     <div class="meter" aria-hidden="true"><span></span></div>
                 </div>
                 <ul>
-                    <li><span class="mark" style="color: #34785b">✓</span> Hechos (21)</li>
-                    <li><span class="mark" style="color: #34785b">✓</span> Actores con tipo y función (15)</li>
-                    <li class="miss"><span class="mark">✗</span> Demandas con 3P (0 de 10)</li>
-                    <li><span class="mark" style="color: #34785b">✓</span> Geografía (Piura · El Alto)</li>
-                    <li><span class="mark" style="color: #34785b">✓</span> Marco situacional (3 de 5 dimensiones)</li>
+                    <li>
+                        <span class="mark" style="color: #34785b">✓</span>
+                        Hechos (21)
+                    </li>
+                    <li>
+                        <span class="mark" style="color: #34785b">✓</span>
+                        Actores con tipo y función (15)
+                    </li>
+                    <li class="miss">
+                        <span class="mark">✗</span> Demandas con 3P (0 de 10)
+                    </li>
+                    <li>
+                        <span class="mark" style="color: #34785b">✓</span>
+                        Geografía (Piura · El Alto)
+                    </li>
+                    <li>
+                        <span class="mark" style="color: #34785b">✓</span> Marco
+                        situacional (3 de 5 dimensiones)
+                    </li>
                 </ul>
             </section>
 
@@ -1140,29 +1256,102 @@
                     <div class="rail-sep"></div>
                     <div class="rail-note">
                         * Las 10 demandas provienen de las alertas del caso y
-                        tienen <code>caso_id</code> vacío: no están vinculadas al
-                        expediente.
+                        tienen <code>caso_id</code> vacío: no están vinculadas
+                        al expediente.
                     </div>
                 </aside>
 
                 <div class="tabs-area">
-                    <div class="tabs" role="tablist" aria-label="Pestañas de la ficha">
-                        <button class="tab" role="tab" data-tab="resumen" aria-selected="true">Resumen</button>
-                        <button class="tab" role="tab" data-tab="actores" aria-selected="false">Actores</button>
-                        <button class="tab" role="tab" data-tab="demandas" aria-selected="false">
+                    <div
+                        class="tabs"
+                        role="tablist"
+                        aria-label="Pestañas de la ficha"
+                    >
+                        <button
+                            class="tab"
+                            role="tab"
+                            data-tab="resumen"
+                            aria-selected="true"
+                        >
+                            Resumen
+                        </button>
+                        <button
+                            class="tab"
+                            role="tab"
+                            data-tab="actores"
+                            aria-selected="false"
+                        >
+                            Actores
+                        </button>
+                        <button
+                            class="tab"
+                            role="tab"
+                            data-tab="demandas"
+                            aria-selected="false"
+                        >
                             Demandas (3P)
                         </button>
-                        <button class="tab" role="tab" data-tab="cronologia" aria-selected="false">Cronología</button>
-                        <button class="tab" role="tab" data-tab="alertas" aria-selected="false">Alertas</button>
-                        <button class="tab" role="tab" data-tab="compromisos" aria-selected="false">Compromisos</button>
-                        <button class="tab" role="tab" data-tab="documentos" aria-selected="false">Documentos</button>
-                        <button class="tab" role="tab" data-tab="reuniones" aria-selected="false">
-                            Reuniones <span class="dot" title="Sin datos reales"></span>
+                        <button
+                            class="tab"
+                            role="tab"
+                            data-tab="cronologia"
+                            aria-selected="false"
+                        >
+                            Cronología
                         </button>
-                        <button class="tab" role="tab" data-tab="historial" aria-selected="false">
-                            Historial/Auditoría <span class="dot partial" title="Solo cambios de estado"></span>
+                        <button
+                            class="tab"
+                            role="tab"
+                            data-tab="alertas"
+                            aria-selected="false"
+                        >
+                            Alertas
                         </button>
-                        <button class="tab" role="tab" data-tab="marco" aria-selected="false">Marco situacional</button>
+                        <button
+                            class="tab"
+                            role="tab"
+                            data-tab="compromisos"
+                            aria-selected="false"
+                        >
+                            Compromisos
+                        </button>
+                        <button
+                            class="tab"
+                            role="tab"
+                            data-tab="documentos"
+                            aria-selected="false"
+                        >
+                            Documentos
+                        </button>
+                        <button
+                            class="tab"
+                            role="tab"
+                            data-tab="reuniones"
+                            aria-selected="false"
+                        >
+                            Reuniones
+                            <span class="dot" title="Sin datos reales"></span>
+                        </button>
+                        <button
+                            class="tab"
+                            role="tab"
+                            data-tab="historial"
+                            aria-selected="false"
+                        >
+                            Historial/Auditoría
+                            <span
+                                class="dot partial"
+                                title="Solo cambios de estado"
+                            ></span>
+                        </button>
+                        <button
+                            class="tab"
+                            role="tab"
+                            data-tab="marco"
+                            aria-selected="false"
+                        >
+                            Marco situacional
+                        </button>
                     </div>
 
                     <!-- RESUMEN -->
@@ -1171,9 +1360,12 @@
                             <div>
                                 <h3>Resumen</h3>
                                 <p class="sub">
-                                    Vista de lectura del caso. El «Próximo paso» se
-                                    muestra como hueco de regla (item 19) para no
-                                    inventar una recomendación.
+                                    Vista de lectura del caso. El «Próximo paso»
+                                    se muestra como hueco de regla (item 19)
+                                    para no inventar una recomendación.
+                                    <br /><b>Origen:</b> <code>case</code> +
+                                    <code>completeness</code>. <b>Acción:</b>
+                                    edición por campo (item 18).
                                 </p>
                             </div>
                         </div>
@@ -1182,40 +1374,44 @@
                             <div class="block">
                                 <h4>Descripción del riesgo</h4>
                                 <p class="prose">
-                                    Bloqueo de Panamericana Norte (altura Cabo Blanco)
-                                    por plazo vencido del estudio técnico.
+                                    Bloqueo de Panamericana Norte (altura Cabo
+                                    Blanco) por plazo vencido del estudio
+                                    técnico.
                                 </p>
 
-                                <h4 style="margin-top: 14px">Resumen ejecutivo</h4>
+                                <h4 style="margin-top: 14px">
+                                    Resumen ejecutivo
+                                </h4>
                                 <p class="prose">
                                     Los pescadores de Cabo Blanco denuncian que
                                     pescadores de Los Órganos extraen recursos
-                                    hidrobiológicos dentro de sus áreas de reserva
-                                    empleando red cortina de fondo de hasta 50 paños,
-                                    práctica que estaría deteriorando los bancos de
-                                    pesca y el fondo marino. El conflicto escaló en
-                                    octubre de 2024 con un bloqueo de la Panamericana,
-                                    tras lo cual PRODUCE inició un proceso de diálogo
-                                    que derivó en tres compromisos: un estudio técnico
-                                    asesorado por IMARPE y financiado por SERNANP (con
-                                    cierre previsto en julio de 2026), la actualización
-                                    de la RDR de Piura y la conformación de las
-                                    COREVIPAS. Mediante R.M. N.° 000115-2026-PRODUCE
-                                    se suspendió el uso de la red de cortina de fondo
-                                    dentro de las 5 millas en los sectores II, III y
-                                    IV.
+                                    hidrobiológicos dentro de sus áreas de
+                                    reserva empleando red cortina de fondo de
+                                    hasta 50 paños, práctica que estaría
+                                    deteriorando los bancos de pesca y el fondo
+                                    marino. El conflicto escaló en octubre de
+                                    2024 con un bloqueo de la Panamericana, tras
+                                    lo cual PRODUCE inició un proceso de diálogo
+                                    que derivó en tres compromisos: un estudio
+                                    técnico asesorado por IMARPE y financiado
+                                    por SERNANP (con cierre previsto en julio de
+                                    2026), la actualización de la RDR de Piura y
+                                    la conformación de las COREVIPAS. Mediante
+                                    R.M. N.° 000115-2026-PRODUCE se suspendió el
+                                    uso de la red de cortina de fondo dentro de
+                                    las 5 millas en los sectores II, III y IV.
                                 </p>
 
                                 <h4 style="margin-top: 14px">Próximo paso</h4>
                                 <div class="banner warn">
                                     <span>⚠</span>
                                     <span>
-                                        Regla pendiente (</span>item 19). El caso tiene
-                                        <b>riesgo Bajo</b>; la recomendación debe
-                                        derivarse de la Tabla 3 de la Guía y declarar
-                                        qué regla y qué valor la originaron. Hoy no
-                                        existe la regla en el sistema: el contenido es
-                                        <b>«—»</b>.
+                                        Regla pendiente (item 19). El caso tiene
+                                        <b>riesgo Bajo</b>; la recomendación
+                                        debe derivarse de la Tabla 3 de la Guía
+                                        y declarar qué regla y qué valor la
+                                        originaron. Hoy no existe la regla en el
+                                        sistema: el contenido es <b>«—»</b>.
                                     </span>
                                 </div>
                             </div>
@@ -1226,41 +1422,56 @@
                                     <dt>Código</dt>
                                     <dd>CS-PA-OAT-2024-02</dd>
                                     <dt>Estado</dt>
-                                    <dd>En seguimiento</dd>
+                                    <dd>Abierto</dd>
                                     <dt>Nivel de conflictividad</dt>
                                     <dd>Conflicto social</dd>
                                     <dt>Nivel de riesgo</dt>
                                     <dd>Bajo</dd>
                                     <dt>Prioridad de atención</dt>
-                                    <dd>Urgente</dd>
+                                    <dd>
+                                        Urgente
+                                        <span class="chip neutral"
+                                            >sin regla definida</span
+                                        >
+                                    </dd>
                                     <dt>Inicio</dt>
                                     <dd>15.10.2024</dd>
-                                    <dt>Última actualización</dt>
-                                    <dd>31.10.2026</dd>
-                                    <dt>Avance registrado</dt>
-                                    <dd>90 %</dd>
                                     <dt>Unidad responsable</dt>
                                     <dd>OAIPCS</dd>
                                     <dt>Geografía</dt>
                                     <dd>Piura · distrito El Alto</dd>
                                     <dt>Alcance</dt>
-                                    <dd>Norte <span class="chip neutral">derivado</span></dd>
+                                    <dd>
+                                        Norte
+                                        <span class="chip neutral"
+                                            >derivado</span
+                                        >
+                                    </dd>
                                 </dl>
 
-                                <h4 style="margin-top: 14px">Edición por campo (item 18)</h4>
+                                <h4 style="margin-top: 14px">
+                                    Edición por campo (item 18)
+                                </h4>
                                 <div class="inline-edit">
                                     <div class="cap">✎ Editando · Distrito</div>
                                     <div class="row">
-                                        <input value="El Alto" aria-label="Distrito" />
+                                        <input
+                                            value="El Alto"
+                                            aria-label="Distrito"
+                                        />
                                     </div>
                                     <div class="hint">
                                         El clic fuera no cierra ni cancela la
-                                        edición. Solo «Cancelar» o «Guardar cambios»
-                                        finalizan el formulario.
+                                        edición. Solo «Cancelar» o «Guardar
+                                        cambios» finalizan el formulario.
                                     </div>
                                     <div class="btns">
-                                        <button class="button-secondary">Cancelar</button>
-                                        <button class="button-primary">Guardar cambios</button>
+                                        <button class="button-secondary">
+                                            Cancelar
+                                        </button>
+                                        <button class="button-primary">
+                                            Guardar cambios
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -1268,28 +1479,42 @@
                     </section>
 
                     <!-- ACTORES -->
-                    <section class="panel" data-panel="actores" role="tabpanel" hidden>
+                    <section
+                        class="panel"
+                        data-panel="actores"
+                        role="tabpanel"
+                        hidden
+                    >
                         <div class="panel-head">
                             <div>
                                 <h3>Actores</h3>
                                 <p class="sub">
-                                    Relación del caso con el Directorio. Tipo, función
-                                    y posicionamiento se guardan como relación
-                                    (<code>core.casos_actores</code>), no como nombres
-                                    concatenados (item 40).
+                                    Relación del caso con el Directorio. Tipo,
+                                    función y posicionamiento se guardan como
+                                    relación (<code>core.casos_actores</code>),
+                                    no como nombres concatenados (item 40).
+                                    <br /><b>Origen:</b> <code>actors</code>.
+                                    <b>Acción:</b> vincular/desvincular actor →
+                                    item 12 y 40 (<span class="req"
+                                        >requiere</span
+                                    >
+                                    alta de la relación; no existe endpoint).
                                 </p>
                             </div>
                             <div class="panel-actions">
-                                <button class="button-primary">Vincular actor</button>
+                                <button class="button-primary">
+                                    Vincular actor
+                                </button>
                             </div>
                         </div>
 
                         <div class="banner">
                             <span>ℹ</span>
                             <span>
-                                El modelo guarda un único <code>nombre_actual</code>.
-                                El corte Apellidos | Nombres de la tabla es una
-                                convención de presentación, no un dato persistido.
+                                El modelo guarda un único
+                                <code>nombre_actual</code>. El corte Apellidos |
+                                Nombres de la tabla es una convención de
+                                presentación, no un dato persistido.
                                 <b>Posicionamiento</b> es texto libre y las 60
                                 relaciones de la base tienen un solo valor:
                                 «Neutral».
@@ -1315,170 +1540,282 @@
                                         <td>Adonay</td>
                                         <td class="dash">—</td>
                                         <td>Actor social</td>
-                                        <td><span class="chip">No determinado</span></td>
+                                        <td>
+                                            <span class="chip"
+                                                >No determinado</span
+                                            >
+                                        </td>
                                         <td>Neutral</td>
-                                        <td><button class="button-link">Desvincular</button></td>
+                                        <td>
+                                            <button class="button-link">
+                                                Desvincular
+                                            </button>
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td class="strong">Namuche</td>
                                         <td>Armando</td>
                                         <td class="dash">—</td>
                                         <td>Actor social</td>
-                                        <td><span class="chip">Principal</span></td>
+                                        <td>
+                                            <span class="chip">Principal</span>
+                                        </td>
                                         <td>Neutral</td>
-                                        <td><button class="button-link">Desvincular</button></td>
+                                        <td>
+                                            <button class="button-link">
+                                                Desvincular
+                                            </button>
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td class="strong">Jacinto Tume</td>
                                         <td>Carlos Alberto</td>
                                         <td class="dash">—</td>
                                         <td>Actor social</td>
-                                        <td><span class="chip">Principal</span></td>
+                                        <td>
+                                            <span class="chip">Principal</span>
+                                        </td>
                                         <td>Neutral</td>
-                                        <td><button class="button-link">Desvincular</button></td>
+                                        <td>
+                                            <button class="button-link">
+                                                Desvincular
+                                            </button>
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td class="strong">Chapilliquen</td>
                                         <td>Carlos</td>
                                         <td class="dash">—</td>
                                         <td>Actor social</td>
-                                        <td><span class="chip">Secundario</span></td>
+                                        <td>
+                                            <span class="chip">Secundario</span>
+                                        </td>
                                         <td>Neutral</td>
-                                        <td><button class="button-link">Desvincular</button></td>
+                                        <td>
+                                            <button class="button-link">
+                                                Desvincular
+                                            </button>
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td class="strong">Paiva Jacinto</td>
                                         <td>Diego Armando</td>
-                                        <td>paivajacintodiegoarmando@gmail.com</td>
+                                        <td>
+                                            paivajacintodiegoarmando@gmail.com
+                                        </td>
                                         <td>Actor social</td>
-                                        <td><span class="chip">Principal</span></td>
+                                        <td>
+                                            <span class="chip">Principal</span>
+                                        </td>
                                         <td>Neutral</td>
-                                        <td><button class="button-link">Desvincular</button></td>
+                                        <td>
+                                            <button class="button-link">
+                                                Desvincular
+                                            </button>
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td class="strong">Jiménez Caipa</td>
                                         <td>Edgar</td>
                                         <td class="dash">—</td>
                                         <td>Actor social</td>
-                                        <td><span class="chip">Principal</span></td>
+                                        <td>
+                                            <span class="chip">Principal</span>
+                                        </td>
                                         <td>Neutral</td>
-                                        <td><button class="button-link">Desvincular</button></td>
+                                        <td>
+                                            <button class="button-link">
+                                                Desvincular
+                                            </button>
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td class="strong">Ruíz</td>
                                         <td>Ernesto</td>
                                         <td class="dash">—</td>
                                         <td>Actor social</td>
-                                        <td><span class="chip">Principal</span></td>
+                                        <td>
+                                            <span class="chip">Principal</span>
+                                        </td>
                                         <td>Neutral</td>
-                                        <td><button class="button-link">Desvincular</button></td>
+                                        <td>
+                                            <button class="button-link">
+                                                Desvincular
+                                            </button>
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td class="strong">Juárez Ruiz</td>
                                         <td>Henry</td>
                                         <td>gredepesarpa2025@gmail.com</td>
                                         <td>Actor social</td>
-                                        <td><span class="chip">Principal</span></td>
+                                        <td>
+                                            <span class="chip">Principal</span>
+                                        </td>
                                         <td>Neutral</td>
-                                        <td><button class="button-link">Desvincular</button></td>
+                                        <td>
+                                            <button class="button-link">
+                                                Desvincular
+                                            </button>
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td class="strong">Pazos Anthón</td>
                                         <td>José</td>
                                         <td class="dash">—</td>
                                         <td>Actor social</td>
-                                        <td><span class="chip">Principal</span></td>
+                                        <td>
+                                            <span class="chip">Principal</span>
+                                        </td>
                                         <td>Neutral</td>
-                                        <td><button class="button-link">Desvincular</button></td>
+                                        <td>
+                                            <button class="button-link">
+                                                Desvincular
+                                            </button>
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td class="strong">Panta Ramírez</td>
                                         <td>José Sixto</td>
                                         <td class="dash">—</td>
                                         <td>Actor social</td>
-                                        <td><span class="chip">Principal</span></td>
+                                        <td>
+                                            <span class="chip">Principal</span>
+                                        </td>
                                         <td>Neutral</td>
-                                        <td><button class="button-link">Desvincular</button></td>
+                                        <td>
+                                            <button class="button-link">
+                                                Desvincular
+                                            </button>
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td class="strong">Chulle</td>
                                         <td>Juan Carlos</td>
                                         <td class="dash">—</td>
                                         <td>Actor social</td>
-                                        <td><span class="chip">Secundario</span></td>
+                                        <td>
+                                            <span class="chip">Secundario</span>
+                                        </td>
                                         <td>Neutral</td>
-                                        <td><button class="button-link">Desvincular</button></td>
+                                        <td>
+                                            <button class="button-link">
+                                                Desvincular
+                                            </button>
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td class="strong">Gonzales</td>
                                         <td>Marcelino</td>
                                         <td class="dash">—</td>
                                         <td>Actor social</td>
-                                        <td><span class="chip">Secundario</span></td>
+                                        <td>
+                                            <span class="chip">Secundario</span>
+                                        </td>
                                         <td>Neutral</td>
-                                        <td><button class="button-link">Desvincular</button></td>
+                                        <td>
+                                            <button class="button-link">
+                                                Desvincular
+                                            </button>
+                                        </td>
                                     </tr>
                                     <tr>
-                                        <td class="strong">Querevalu Querevalu</td>
+                                        <td class="strong">
+                                            Querevalu Querevalu
+                                        </td>
                                         <td>Raul</td>
                                         <td>vqagri.querevalu@gmail.com</td>
                                         <td>Actor social</td>
-                                        <td><span class="chip">Principal</span></td>
+                                        <td>
+                                            <span class="chip">Principal</span>
+                                        </td>
                                         <td>Neutral</td>
-                                        <td><button class="button-link">Desvincular</button></td>
+                                        <td>
+                                            <button class="button-link">
+                                                Desvincular
+                                            </button>
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td class="strong">Paiva Chulle</td>
                                         <td>Rolando</td>
                                         <td class="dash">—</td>
                                         <td>Actor social</td>
-                                        <td><span class="chip">Principal</span></td>
+                                        <td>
+                                            <span class="chip">Principal</span>
+                                        </td>
                                         <td>Neutral</td>
-                                        <td><button class="button-link">Desvincular</button></td>
+                                        <td>
+                                            <button class="button-link">
+                                                Desvincular
+                                            </button>
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td class="strong">Cornejo Palma</td>
                                         <td>Ronal Paul</td>
                                         <td class="dash">—</td>
                                         <td>Actor social</td>
-                                        <td><span class="chip">Secundario</span></td>
+                                        <td>
+                                            <span class="chip">Secundario</span>
+                                        </td>
                                         <td>Neutral</td>
-                                        <td><button class="button-link">Desvincular</button></td>
+                                        <td>
+                                            <button class="button-link">
+                                                Desvincular
+                                            </button>
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
                         <p class="footnote">
-                            15 actores vinculados. 3 de 15 tienen correo en la base;
-                            el resto muestra «—» porque <code>actores.email_contacto</code>
-                            está vacío. Todos son <b>Actor social</b>.
+                            15 actores vinculados. 3 de 15 tienen correo en la
+                            base; el resto muestra «—» porque
+                            <code>actores.email_contacto</code> está vacío.
+                            Todos son <b>Actor social</b>.
                         </p>
                     </section>
 
                     <!-- DEMANDAS -->
-                    <section class="panel" data-panel="demandas" role="tabpanel" hidden>
+                    <section
+                        class="panel"
+                        data-panel="demandas"
+                        role="tabpanel"
+                        hidden
+                    >
                         <div class="panel-head">
                             <div>
-                                <h3>Demandas (Problema · Propuesta · Pedido)</h3>
+                                <h3>
+                                    Demandas (Problema · Propuesta · Pedido)
+                                </h3>
                                 <p class="sub">
-                                    Las 10 demandas se crearon desde las alertas del
-                                    caso y quedaron con <code>caso_id</code> vacío. La
-                                    pestaña debe permitir vincularlas y editar su 3P.
+                                    Las 10 demandas se crearon desde las alertas
+                                    del caso y quedaron con
+                                    <code>caso_id</code> vacío. La pestaña debe
+                                    permitir vincularlas y editar su 3P.
+                                    <br /><b>Origen:</b> <code>demandas</code>.
+                                    <b>Acción:</b> alta/edición → item 13
+                                    (<code>POST</code>/<code
+                                        >PATCH /api/v1/demandas</code
+                                    >).
                                 </p>
                             </div>
                             <div class="panel-actions">
-                                <button class="button-secondary">Nueva demanda</button>
+                                <button class="button-secondary">
+                                    Nueva demanda
+                                </button>
                             </div>
                         </div>
 
                         <div class="banner warn">
                             <span>⚠</span>
                             <span>
-                                <b>3P vacío en toda la base:</b> 325 demandas, 0 con
-                                Problema, Propuesta o Pedido registrados. Las columnas
-                                3P muestran «—» porque el campo no existe en el dato,
-                                no porque falte la vista. Todas están en estado
-                                <b>Pendiente</b>.
+                                <b>3P vacío en toda la base:</b> 325 demandas, 0
+                                con Problema, Propuesta o Pedido registrados.
+                                Las columnas 3P muestran «—» porque el campo no
+                                existe en el dato, no porque falte la vista.
+                                Todas están en estado <b>Pendiente</b>.
                             </span>
                         </div>
 
@@ -1499,89 +1836,178 @@
                                     <tr>
                                         <td class="dash">—</td>
                                         <td class="dash">—</td>
-                                        <td class="wrap">Rechazo a la espera de los resultados del estudio del IMARPE y solicitud de acciones inmediatas</td>
-                                        <td><span class="chip warn">Pendiente</span></td>
+                                        <td class="wrap">
+                                            Rechazo a la espera de los
+                                            resultados del estudio del IMARPE y
+                                            solicitud de acciones inmediatas
+                                        </td>
+                                        <td>
+                                            <span class="chip warn"
+                                                >Pendiente</span
+                                            >
+                                        </td>
                                         <td>AT-2026-01</td>
                                         <td>31.08.2026</td>
-                                        <td><button class="button-link">Editar</button></td>
+                                        <td>
+                                            <button class="button-link">
+                                                Editar
+                                            </button>
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td class="dash">—</td>
                                         <td class="dash">—</td>
-                                        <td class="wrap">Prohibición definitiva del uso de redes de fondo dentro de las 5 millas náuticas y mayor fiscalización</td>
-                                        <td><span class="chip warn">Pendiente</span></td>
+                                        <td class="wrap">
+                                            Prohibición definitiva del uso de
+                                            redes de fondo dentro de las 5
+                                            millas náuticas y mayor
+                                            fiscalización
+                                        </td>
+                                        <td>
+                                            <span class="chip warn"
+                                                >Pendiente</span
+                                            >
+                                        </td>
                                         <td>AT-2026-01</td>
                                         <td>31.08.2026</td>
-                                        <td><button class="button-link">Editar</button></td>
+                                        <td>
+                                            <button class="button-link">
+                                                Editar
+                                            </button>
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td class="dash">—</td>
                                         <td class="dash">—</td>
-                                        <td class="wrap">Presencia inmediata del Ministro y Viceministro de PRODUCE en la zona del conflicto</td>
-                                        <td><span class="chip warn">Pendiente</span></td>
+                                        <td class="wrap">
+                                            Presencia inmediata del Ministro y
+                                            Viceministro de PRODUCE en la zona
+                                            del conflicto
+                                        </td>
+                                        <td>
+                                            <span class="chip warn"
+                                                >Pendiente</span
+                                            >
+                                        </td>
                                         <td>AT-2026-01</td>
                                         <td>31.08.2026</td>
-                                        <td><button class="button-link">Editar</button></td>
+                                        <td>
+                                            <button class="button-link">
+                                                Editar
+                                            </button>
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td class="dash">—</td>
                                         <td class="dash">—</td>
-                                        <td class="wrap">Adopción de acuerdos inmediatos orientados a la protección del ecosistema marino</td>
-                                        <td><span class="chip warn">Pendiente</span></td>
+                                        <td class="wrap">
+                                            Adopción de acuerdos inmediatos
+                                            orientados a la protección del
+                                            ecosistema marino
+                                        </td>
+                                        <td>
+                                            <span class="chip warn"
+                                                >Pendiente</span
+                                            >
+                                        </td>
                                         <td>AT-2026-02</td>
                                         <td>02.09.2026</td>
-                                        <td><button class="button-link">Editar</button></td>
+                                        <td>
+                                            <button class="button-link">
+                                                Editar
+                                            </button>
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td class="dash">—</td>
                                         <td class="dash">—</td>
-                                        <td class="wrap">Rechazo categórico al uso de redes de cortina de fondo en sus zonas de pesca</td>
-                                        <td><span class="chip warn">Pendiente</span></td>
+                                        <td class="wrap">
+                                            Rechazo categórico al uso de redes
+                                            de cortina de fondo en sus zonas de
+                                            pesca
+                                        </td>
+                                        <td>
+                                            <span class="chip warn"
+                                                >Pendiente</span
+                                            >
+                                        </td>
                                         <td>AT-2026-03</td>
                                         <td>02.09.2026</td>
-                                        <td><button class="button-link">Editar</button></td>
+                                        <td>
+                                            <button class="button-link">
+                                                Editar
+                                            </button>
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td class="dash">—</td>
                                         <td class="dash">—</td>
-                                        <td class="wrap">Solicitud de mayor involucramiento con presencia y comunicación institucional de IMARPE</td>
-                                        <td><span class="chip warn">Pendiente</span></td>
+                                        <td class="wrap">
+                                            Solicitud de mayor involucramiento
+                                            con presencia y comunicación
+                                            institucional de IMARPE
+                                        </td>
+                                        <td>
+                                            <span class="chip warn"
+                                                >Pendiente</span
+                                            >
+                                        </td>
                                         <td>AT-2026-03</td>
                                         <td>02.09.2026</td>
-                                        <td><button class="button-link">Editar</button></td>
+                                        <td>
+                                            <button class="button-link">
+                                                Editar
+                                            </button>
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
                         <p class="footnote">
-                            Se muestran 6 de 10. Las 4 restantes también tienen 3P
-                            vacío y estado Pendiente. <b>Vincular al caso</b> y
-                            <b>Editar 3P</b> son las acciones que faltan (item 13).
+                            Se muestran 6 de 10. Las 4 restantes también tienen
+                            3P vacío y estado Pendiente.
+                            <b>Vincular al caso</b> y <b>Editar 3P</b> son las
+                            acciones que faltan (item 13).
                         </p>
 
                         <div class="mini-form">
                             <h5>Nueva demanda · formulario que falta</h5>
                             <div class="fields">
-                                <label>Problema (3P) <span class="req">*</span>
-                                    <textarea placeholder="Qué ocurre y a quién afecta"></textarea>
+                                <label
+                                    >Problema (3P) <span class="req">*</span>
+                                    <textarea
+                                        placeholder="Qué ocurre y a quién afecta"
+                                    ></textarea>
                                 </label>
-                                <label>Propuesta (3P)
-                                    <textarea placeholder="Qué se plant</label>ea como salida"></textarea>
+                                <label
+                                    >Propuesta (3P)
+                                    <textarea
+                                        placeholder="Qué se plantea como salida"
+                                    ></textarea>
                                 </label>
-                                <label>Pedido (3P) <span class="req">*</span>
-                                    <textarea placeholder="Qué se solicita concretamente"></textarea>
+                                <label
+                                    >Pedido (3P) <span class="req">*</span>
+                                    <textarea
+                                        placeholder="Qué se solicita concretamente"
+                                    ></textarea>
                                 </label>
-                                <label>Temática
+                                <label
+                                    >Temática
                                     <select>
-                                        <option>Ordenamiento y acceso territorial</option>
+                                        <option>
+                                            Ordenamiento y acceso territorial
+                                        </option>
                                         <option>Infraestructura</option>
                                         <option>Normatividad</option>
-                                        <option>Distribución de beneficios</option>
+                                        <option>
+                                            Distribución de beneficios
+                                        </option>
                                         <option>Gobernanza</option>
                                         <option>Impactos de terceros</option>
                                     </select>
                                 </label>
-                                <label>Estado de atención
+                                <label
+                                    >Estado de atención
                                     <select>
                                         <option>Pendiente</option>
                                         <option>En proceso</option>
@@ -1589,7 +2015,8 @@
                                         <option>No atendida</option>
                                     </select>
                                 </label>
-                                <label>Documento de origen
+                                <label
+                                    >Documento de origen
                                     <select>
                                         <option>AT-2026-01</option>
                                         <option>AT-2026-02</option>
@@ -1598,36 +2025,56 @@
                                 </label>
                             </div>
                             <div class="actions">
-                                <button class="button-secondary">Cancelar</button>
-                                <button class="button-primary">Guardar demanda</button>
+                                <button class="button-secondary">
+                                    Cancelar
+                                </button>
+                                <button class="button-primary">
+                                    Guardar demanda
+                                </button>
                             </div>
                         </div>
                     </section>
 
                     <!-- CRONOLOGIA -->
-                    <section class="panel" data-panel="cronologia" role="tabpanel" hidden>
+                    <section
+                        class="panel"
+                        data-panel="cronologia"
+                        role="tabpanel"
+                        hidden
+                    >
                         <div class="panel-head">
                             <div>
                                 <h3>Cronología</h3>
                                 <p class="sub">
                                     Hechos del más reciente al más antiguo, con
-                                    evidencia y estado de validación (item 14). La
-                                    validación es acción explícita, no efecto del alta.
+                                    evidencia y estado de validación (item 14).
+                                    La validación es acción explícita, no efecto
+                                    del alta.
+                                    <br /><b>Origen:</b> <code>events</code>.
+                                    <b>Acción:</b> registrar hecho →
+                                    <b>ya implementado</b>
+                                    (<code
+                                        >POST
+                                        /api/v1/cases/{codigo}/events</code
+                                    >).
                                 </p>
                             </div>
                             <div class="panel-actions">
-                                <button class="button-primary">Registrar hecho</button>
+                                <button class="button-primary">
+                                    Registrar hecho
+                                </button>
                             </div>
                         </div>
 
                         <div class="banner">
                             <span>ℹ</span>
                             <span>
-                                80 hechos en la base: <b>80 validados</b>, 0 pendientes.
-                                El estado «pendiente/validado» se muestra como diseño;
-                                hoy no hay ningún hecho pendiente porque la carga
-                                histórica entró ya validada. <b>Actor del hecho</b> está
-                                vacío en los 80 registros: columna «—».
+                                80 hechos en la base: <b>80 validados</b>, 0
+                                pendientes. El estado «pendiente/validado» se
+                                muestra como diseño; hoy no hay ningún hecho
+                                pendiente porque la carga histórica entró ya
+                                validada. <b>Actor del hecho</b> está vacío en
+                                los 80 registros: columna «—».
                             </span>
                         </div>
 
@@ -1648,145 +2095,306 @@
                                     <tr>
                                         <td>26.05.2026</td>
                                         <td class="dash">—</td>
-                                        <td class="wrap">RD N° 219-2026/GOBIERNO REGIONAL PIURA - DIREPRO, conforma el Comité Regional de Vigilancia</td>
+                                        <td class="wrap">
+                                            RD N° 219-2026/GOBIERNO REGIONAL
+                                            PIURA - DIREPRO, conforma el Comité
+                                            Regional de Vigilancia
+                                        </td>
                                         <td>Aprobación de Normatividad</td>
                                         <td><span class="chip ok">Sí</span></td>
-                                        <td><span class="chip ok">Validado</span></td>
-                                        <td><button class="button-link">Editar</button></td>
+                                        <td>
+                                            <span class="chip ok"
+                                                >Validado</span
+                                            >
+                                        </td>
+                                        <td>
+                                            <button class="button-link">
+                                                Editar
+                                            </button>
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td>22.05.2026</td>
                                         <td class="dash">—</td>
-                                        <td class="wrap">Espacio de diálogo en El Alto, PAR 22.05.2026</td>
+                                        <td class="wrap">
+                                            Espacio de diálogo en El Alto, PAR
+                                            22.05.2026
+                                        </td>
                                         <td>Reunión Técnica</td>
                                         <td><span class="chip ok">Sí</span></td>
-                                        <td><span class="chip ok">Validado</span></td>
-                                        <td><button class="button-link">Editar</button></td>
+                                        <td>
+                                            <span class="chip ok"
+                                                >Validado</span
+                                            >
+                                        </td>
+                                        <td>
+                                            <button class="button-link">
+                                                Editar
+                                            </button>
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td>18.05.2026</td>
                                         <td class="dash">—</td>
-                                        <td class="wrap">Carta N.º 00000925-2026-PRODUCE/DGPARPA e Informe N.º 00000614-2026-PRODUCE/DPO</td>
+                                        <td class="wrap">
+                                            Carta N.º
+                                            00000925-2026-PRODUCE/DGPARPA e
+                                            Informe N.º
+                                            00000614-2026-PRODUCE/DPO
+                                        </td>
                                         <td>Comunicado</td>
                                         <td><span class="chip ok">Sí</span></td>
-                                        <td><span class="chip ok">Validado</span></td>
-                                        <td><button class="button-link">Editar</button></td>
+                                        <td>
+                                            <span class="chip ok"
+                                                >Validado</span
+                                            >
+                                        </td>
+                                        <td>
+                                            <button class="button-link">
+                                                Editar
+                                            </button>
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td>14.05.2026</td>
                                         <td class="dash">—</td>
-                                        <td class="wrap">Oficio N.º 17-2026/GPASP, solicitud de documento aclaratorio</td>
+                                        <td class="wrap">
+                                            Oficio N.º 17-2026/GPASP, solicitud
+                                            de documento aclaratorio
+                                        </td>
                                         <td>Comunicado</td>
                                         <td><span class="chip ok">Sí</span></td>
-                                        <td><span class="chip ok">Validado</span></td>
-                                        <td><button class="button-link">Editar</button></td>
+                                        <td>
+                                            <span class="chip ok"
+                                                >Validado</span
+                                            >
+                                        </td>
+                                        <td>
+                                            <button class="button-link">
+                                                Editar
+                                            </button>
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td>07.05.2026</td>
                                         <td class="dash">—</td>
-                                        <td class="wrap">Espacio de diálogo en Los Órganos, PAR 07.05.2026</td>
+                                        <td class="wrap">
+                                            Espacio de diálogo en Los Órganos,
+                                            PAR 07.05.2026
+                                        </td>
                                         <td>Reunión Técnica</td>
                                         <td><span class="chip ok">Sí</span></td>
-                                        <td><span class="chip ok">Validado</span></td>
-                                        <td><button class="button-link">Editar</button></td>
+                                        <td>
+                                            <span class="chip ok"
+                                                >Validado</span
+                                            >
+                                        </td>
+                                        <td>
+                                            <button class="button-link">
+                                                Editar
+                                            </button>
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td>05.05.2026</td>
                                         <td class="dash">—</td>
-                                        <td class="wrap">Los Órganos, Piura — la Asociación de Pescadores Artesanales inicia bloqueo</td>
+                                        <td class="wrap">
+                                            Los Órganos, Piura — la Asociación
+                                            de Pescadores Artesanales inicia
+                                            bloqueo
+                                        </td>
                                         <td>Bloqueo</td>
-                                        <td><span class="chip neutral">Sin enlace</span></td>
-                                        <td><span class="chip ok">Validado</span></td>
-                                        <td><button class="button-link">Editar</button></td>
+                                        <td>
+                                            <span class="chip neutral"
+                                                >Sin enlace</span
+                                            >
+                                        </td>
+                                        <td>
+                                            <span class="chip ok"
+                                                >Validado</span
+                                            >
+                                        </td>
+                                        <td>
+                                            <button class="button-link">
+                                                Editar
+                                            </button>
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td>27.04.2026</td>
                                         <td class="dash">—</td>
-                                        <td class="wrap">Oficio Múltiple N.º 015-2026/GPASP-LO, del presidente del Gremio de Pescadores</td>
+                                        <td class="wrap">
+                                            Oficio Múltiple N.º
+                                            015-2026/GPASP-LO, del presidente
+                                            del Gremio de Pescadores
+                                        </td>
                                         <td>Comunicado</td>
                                         <td><span class="chip ok">Sí</span></td>
-                                        <td><span class="chip ok">Validado</span></td>
-                                        <td><button class="button-link">Editar</button></td>
+                                        <td>
+                                            <span class="chip ok"
+                                                >Validado</span
+                                            >
+                                        </td>
+                                        <td>
+                                            <button class="button-link">
+                                                Editar
+                                            </button>
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td>23.04.2026</td>
                                         <td class="dash">—</td>
-                                        <td class="wrap">Espacio de diálogo en El Ñuro, PAR 23.04.2026</td>
+                                        <td class="wrap">
+                                            Espacio de diálogo en El Ñuro, PAR
+                                            23.04.2026
+                                        </td>
                                         <td>Reunión Técnica</td>
                                         <td><span class="chip ok">Sí</span></td>
-                                        <td><span class="chip ok">Validado</span></td>
-                                        <td><button class="button-link">Editar</button></td>
+                                        <td>
+                                            <span class="chip ok"
+                                                >Validado</span
+                                            >
+                                        </td>
+                                        <td>
+                                            <button class="button-link">
+                                                Editar
+                                            </button>
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td>21.04.2026</td>
                                         <td class="dash">—</td>
-                                        <td class="wrap">DVPA realizó reunión con IMARPE y SERNANP sobre evaluación y monitoreo</td>
+                                        <td class="wrap">
+                                            DVPA realizó reunión con IMARPE y
+                                            SERNANP sobre evaluación y monitoreo
+                                        </td>
                                         <td>Reunión Técnica</td>
-                                        <td><span class="chip neutral">Sin enlace</span></td>
-                                        <td><span class="chip ok">Validado</span></td>
-                                        <td><button class="button-link">Editar</button></td>
+                                        <td>
+                                            <span class="chip neutral"
+                                                >Sin enlace</span
+                                            >
+                                        </td>
+                                        <td>
+                                            <span class="chip ok"
+                                                >Validado</span
+                                            >
+                                        </td>
+                                        <td>
+                                            <button class="button-link">
+                                                Editar
+                                            </button>
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td>12.03.2026</td>
                                         <td class="dash">—</td>
-                                        <td class="wrap">Oficio Múltiple N.º 10-2026/GPASP-LO, solicitud de precisión técnica</td>
+                                        <td class="wrap">
+                                            Oficio Múltiple N.º
+                                            10-2026/GPASP-LO, solicitud de
+                                            precisión técnica
+                                        </td>
                                         <td>Comunicado</td>
                                         <td><span class="chip ok">Sí</span></td>
-                                        <td><span class="chip ok">Validado</span></td>
-                                        <td><button class="button-link">Editar</button></td>
+                                        <td>
+                                            <span class="chip ok"
+                                                >Validado</span
+                                            >
+                                        </td>
+                                        <td>
+                                            <button class="button-link">
+                                                Editar
+                                            </button>
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td>23.02.2026</td>
                                         <td class="dash">—</td>
-                                        <td class="wrap">Consultor informa que sensores NIKE llegarán el 6 de marzo desde Francia</td>
+                                        <td class="wrap">
+                                            Consultor informa que sensores NIKE
+                                            llegarán el 6 de marzo desde Francia
+                                        </td>
                                         <td>Comunicado</td>
                                         <td><span class="chip ok">Sí</span></td>
-                                        <td><span class="chip ok">Validado</span></td>
-                                        <td><button class="button-link">Editar</button></td>
+                                        <td>
+                                            <span class="chip ok"
+                                                >Validado</span
+                                            >
+                                        </td>
+                                        <td>
+                                            <button class="button-link">
+                                                Editar
+                                            </button>
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td>17.02.2026</td>
                                         <td class="dash">—</td>
-                                        <td class="wrap">Oficio N.º 0267-2026-IMARPE/PE, informe sobre incidente en la Caleta Cabo Blanco</td>
+                                        <td class="wrap">
+                                            Oficio N.º 0267-2026-IMARPE/PE,
+                                            informe sobre incidente en la Caleta
+                                            Cabo Blanco
+                                        </td>
                                         <td>Comunicado</td>
                                         <td><span class="chip ok">Sí</span></td>
-                                        <td><span class="chip ok">Validado</span></td>
-                                        <td><button class="button-link">Editar</button></td>
+                                        <td>
+                                            <span class="chip ok"
+                                                >Validado</span
+                                            >
+                                        </td>
+                                        <td>
+                                            <button class="button-link">
+                                                Editar
+                                            </button>
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
                         <p class="footnote">
-                            Se muestran 12 de 21 hechos. 63 de 80 hechos en la base
-                            tienen enlace de evidencia; 17 no lo tienen.
+                            Se muestran 12 de 21 hechos. 63 de 80 hechos en la
+                            base tienen enlace de evidencia; 17 no lo tienen.
                         </p>
                     </section>
 
                     <!-- ALERTAS -->
-                    <section class="panel" data-panel="alertas" role="tabpanel" hidden>
+                    <section
+                        class="panel"
+                        data-panel="alertas"
+                        role="tabpanel"
+                        hidden
+                    >
                         <div class="panel-head">
                             <div>
                                 <h3>Alertas</h3>
                                 <p class="sub">
-                                    Alertas vinculadas con su código, categoría de la
-                                    Guía (AT · RR · PAR), nivel, prioridad, SLA y paso
-                                    del flujo (item 15).
+                                    Alertas vinculadas con su código, categoría
+                                    de la Guía (AT · RR · PAR), nivel,
+                                    prioridad, SLA y paso del flujo (item 15).
+                                    <br /><b>Origen:</b> <code>alerts</code>.
+                                    <b>Acción:</b> nueva/editar alerta →
+                                    <code>POST</code>/<code
+                                        >PATCH /api/v1/alerts</code
+                                    >.
                                 </p>
                             </div>
                             <div class="panel-actions">
-                                <button class="button-secondary">Nueva alerta</button>
+                                <button class="button-secondary">
+                                    Nueva alerta
+                                </button>
                             </div>
                         </div>
 
                         <div class="banner">
                             <span>ℹ</span>
                             <span>
-                                Las 4 alertas son de categoría <b>AT</b> (Anexo 3).
-                                En la base no hay alertas RR ni PAR: esos códigos
-                                existen como <b>tipos de documento</b>
-                                (<code>reporte_rapido</code>, <code>par</code>) con 1 y
-                                0 filas. Las 83 alertas están en <b>paso 5</b> y estado
-                                heredado «Archivado», sin aprobación registrada.
+                                Las 4 alertas son de categoría <b>AT</b> (Anexo
+                                3). En la base no hay alertas RR ni PAR: esos
+                                códigos existen como
+                                <b>tipos de documento</b>
+                                (<code>reporte_rapido</code>, <code>par</code>)
+                                con 1 y 0 filas. Las 83 alertas están en
+                                <b>paso 5</b> y estado heredado «Archivado», sin
+                                aprobación registrada.
                             </span>
                         </div>
 
@@ -1808,42 +2416,89 @@
                                     <tr>
                                         <td class="strong">AT-2026-49-bis</td>
                                         <td><span class="chip">AT</span></td>
-                                        <td class="wrap">🚨 Paro pescadores artesanales Los Órganos — posible bloqueo Panamericana</td>
+                                        <td class="wrap">
+                                            🚨 Paro pescadores artesanales Los
+                                            Órganos — posible bloqueo
+                                            Panamericana
+                                        </td>
                                         <td>Inmediato</td>
-                                        <td><span class="chip warn">Crítica inmediata</span></td>
+                                        <td>
+                                            <span class="chip warn"
+                                                >Crítica inmediata</span
+                                            >
+                                        </td>
                                         <td>04.05.2026</td>
                                         <td>24 h</td>
-                                        <td><span class="chip neutral">Paso 5 · Archivado</span></td>
+                                        <td>
+                                            <span class="chip neutral"
+                                                >Paso 5 · Archivado</span
+                                            >
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td class="strong">AT-2026-03</td>
                                         <td><span class="chip">AT</span></td>
-                                        <td class="wrap">🚨 Movilización social y bloqueo de Panamericana norte, altura de Cabo Blanco</td>
+                                        <td class="wrap">
+                                            🚨 Movilización social y bloqueo de
+                                            Panamericana norte, altura de Cabo
+                                            Blanco
+                                        </td>
                                         <td>Táctico</td>
-                                        <td><span class="chip warn">Urgente</span></td>
+                                        <td>
+                                            <span class="chip warn"
+                                                >Urgente</span
+                                            >
+                                        </td>
                                         <td>17.04.2026</td>
                                         <td>48 h</td>
-                                        <td><span class="chip neutral">Paso 5 · Archivado</span></td>
+                                        <td>
+                                            <span class="chip neutral"
+                                                >Paso 5 · Archivado</span
+                                            >
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td class="strong">AT-2026-01</td>
                                         <td><span class="chip">AT</span></td>
-                                        <td class="wrap">🔔 Conflicto pesquero por uso de redes de fondo</td>
+                                        <td class="wrap">
+                                            🔔 Conflicto pesquero por uso de
+                                            redes de fondo
+                                        </td>
                                         <td>Táctico</td>
-                                        <td><span class</td>="chip warn">Urgente</span></td>
+                                        <td>
+                                            <span class="chip warn"
+                                                >Urgente</span
+                                            >
+                                        </td>
                                         <td>10.02.2026</td>
                                         <td>48 h</td>
-                                        <td><span class="chip neutral">Paso 5 · Archivado</span></td>
+                                        <td>
+                                            <span class="chip neutral"
+                                                >Paso 5 · Archivado</span
+                                            >
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td class="strong">AT-2026-02</td>
                                         <td><span class="chip">AT</span></td>
-                                        <td class="wrap">🚨 Movilización de pescadores artesanales en Cabo Blanco por rechazo a «red cortina de fondo»</td>
+                                        <td class="wrap">
+                                            🚨 Movilización de pescadores
+                                            artesanales en Cabo Blanco por
+                                            rechazo a «red cortina de fondo»
+                                        </td>
                                         <td>Inmediato</td>
-                                        <td><span class="chip warn">Crítica inmediata</span></td>
+                                        <td>
+                                            <span class="chip warn"
+                                                >Crítica inmediata</span
+                                            >
+                                        </td>
                                         <td>27.11.2025</td>
                                         <td>24 h</td>
-                                        <td><span class="chip neutral">Paso 5 · Archivado</span></td>
+                                        <td>
+                                            <span class="chip neutral"
+                                                >Paso 5 · Archivado</span
+                                            >
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -1851,31 +2506,49 @@
                     </section>
 
                     <!-- COMPROMISOS -->
-                    <section class="panel" data-panel="compromisos" role="tabpanel" hidden>
+                    <section
+                        class="panel"
+                        data-panel="compromisos"
+                        role="tabpanel"
+                        hidden
+                    >
                         <div class="panel-head">
                             <div>
                                 <h3>Compromisos e hitos</h3>
                                 <p class="sub">
-                                    Estados de compromiso e hitos separados (item 16).
-                                    La clasificación «progresivo/parcial · entendimiento
-                                    operativo · condicionado» se muestra como hueco.
+                                    Estados de compromiso e hitos separados
+                                    (item 16). La clasificación
+                                    «progresivo/parcial · entendimiento
+                                    operativo · condicionado» se muestra como
+                                    hueco.
+                                    <br /><b>Origen:</b>
+                                    <code>commitments</code> (+ hitos).
+                                    <b>Acción:</b> alta/edición →
+                                    <code>/api/v1/commitments</code> (e
+                                    <code>/hitos</code>).
                                 </p>
                             </div>
                             <div class="panel-actions">
-                                <button class="button-secondary">Añadir hito</button>
-                                <button class="button-primary">Nuevo compromiso</button>
+                                <button class="button-secondary">
+                                    Añadir hito
+                                </button>
+                                <button class="button-primary">
+                                    Nuevo compromiso
+                                </button>
                             </div>
                         </div>
 
                         <div class="banner warn">
                             <span>⚠</span>
                             <span>
-                                <b>Clasificación sin dato:</b> el modelo no tiene el
-                                campo progresivo/parcial · entendimiento operativo ·
-                                condicionado. Los 8 compromisos de la base tienen
+                                <b>Clasificación sin dato:</b> el modelo no
+                                tiene el campo progresivo/parcial ·
+                                entendimiento operativo · condicionado. Los 8
+                                compromisos de la base tienen
                                 <code>tipo_compromiso = «Actividad»</code> y
-                                <code>nivel_gobierno</code> vacío. Además, ningún
-                                compromiso tiene <code>fecha_vencimiento</code>.
+                                <code>nivel_gobierno</code> vacío. Además,
+                                ningún compromiso tiene
+                                <code>fecha_vencimiento</code>.
                             </span>
                         </div>
 
@@ -1895,36 +2568,81 @@
                                 <tbody>
                                     <tr>
                                         <td class="strong">…COMP001</td>
-                                        <td class="wrap">Desarrollar estudio «Evaluación y monitoreo de los efectos de la pesquería artesanal de la merluza peruana con redes de enmalle de fondo en la zona norte del Perú»</td>
-                                        <td><span class="chip neutral">sin dato</span></td>
-                                        <td><span class="chip">En proceso</span></td>
+                                        <td class="wrap">
+                                            Desarrollar estudio «Evaluación y
+                                            monitoreo de los efectos de la
+                                            pesquería artesanal de la merluza
+                                            peruana con redes de enmalle de
+                                            fondo en la zona norte del Perú»
+                                        </td>
+                                        <td>
+                                            <span class="chip neutral"
+                                                >sin dato</span
+                                            >
+                                        </td>
+                                        <td>
+                                            <span class="chip">En proceso</span>
+                                        </td>
                                         <td>15.10.2024</td>
                                         <td class="dash">—</td>
                                         <td>3</td>
                                     </tr>
                                     <tr>
                                         <td class="strong">…COMP002</td>
-                                        <td class="wrap">Ratificación de la Resolución Directoral Regional N.° 366-2018-GOBIERNO REGIONAL PIURA-DRP-DR con la incorporación de nuevas zonas</td>
-                                        <td><span class="chip neutral">sin dato</span></td>
-                                        <td><span class="chip">En proceso</span></td>
+                                        <td class="wrap">
+                                            Ratificación de la Resolución
+                                            Directoral Regional N.°
+                                            366-2018-GOBIERNO REGIONAL
+                                            PIURA-DRP-DR con la incorporación de
+                                            nuevas zonas
+                                        </td>
+                                        <td>
+                                            <span class="chip neutral"
+                                                >sin dato</span
+                                            >
+                                        </td>
+                                        <td>
+                                            <span class="chip">En proceso</span>
+                                        </td>
                                         <td>15.10.2024</td>
                                         <td class="dash">—</td>
                                         <td>2</td>
                                     </tr>
                                     <tr>
                                         <td class="strong">…COMP003</td>
-                                        <td class="wrap">Conformación y acreditación de los COREVIPA (Comités de Vigilancia y Control Pesquero Artesanal)</td>
-                                        <td><span class="chip neutral">sin dato</span></td>
-                                        <td><span class="chip">En proceso</span></td>
+                                        <td class="wrap">
+                                            Conformación y acreditación de los
+                                            COREVIPA (Comités de Vigilancia y
+                                            Control Pesquero Artesanal)
+                                        </td>
+                                        <td>
+                                            <span class="chip neutral"
+                                                >sin dato</span
+                                            >
+                                        </td>
+                                        <td>
+                                            <span class="chip">En proceso</span>
+                                        </td>
                                         <td>15.10.2024</td>
                                         <td class="dash">—</td>
                                         <td>2</td>
                                     </tr>
                                     <tr>
                                         <td class="strong">…COMP004</td>
-                                        <td class="wrap">Aplicar medidas de corto plazo: fiscalización reforzada, registro obligatorio y control de desembarques</td>
-                                        <td><span class="chip neutral">sin dato</span></td>
-                                        <td><span class="chip">En proceso</span></td>
+                                        <td class="wrap">
+                                            Aplicar medidas de corto plazo:
+                                            fiscalización reforzada, registro
+                                            obligatorio y control de
+                                            desembarques
+                                        </td>
+                                        <td>
+                                            <span class="chip neutral"
+                                                >sin dato</span
+                                            >
+                                        </td>
+                                        <td>
+                                            <span class="chip">En proceso</span>
+                                        </td>
                                         <td>15.10.2024</td>
                                         <td class="dash">—</td>
                                         <td>1</td>
@@ -1937,47 +2655,70 @@
                         <div class="hitos">
                             <div class="hito">
                                 <code>COMP001_H001</code>
-                                <span class="h-name">Aprobación de términos de referencia.</span>
+                                <span class="h-name"
+                                    >Aprobación de términos de referencia.</span
+                                >
                                 <span class="chip ok">Cumplido</span>
                                 <span>vence 04.04.2025</span>
                             </div>
                             <div class="hito">
                                 <code>COMP001_H002</code>
-                                <span class="h-name">Ejecución de evaluación in situ y recolección de datos.</span>
+                                <span class="h-name"
+                                    >Ejecución de evaluación in situ y
+                                    recolección de datos.</span
+                                >
                                 <span class="chip">En ejecución</span>
                             </div>
                             <div class="hito">
                                 <code>COMP001_H003</code>
-                                <span class="h-name">Análisis de datos y presentación de informe final.</span>
+                                <span class="h-name"
+                                    >Análisis de datos y presentación de informe
+                                    final.</span
+                                >
                                 <span class="chip">Registrado</span>
                             </div>
                             <div class="hito">
                                 <code>COMP002_H001</code>
-                                <span class="h-name">Reunión de trabajo PRODUCE, DIREPRO Piura y dirigentes.</span>
+                                <span class="h-name"
+                                    >Reunión de trabajo PRODUCE, DIREPRO Piura y
+                                    dirigentes.</span
+                                >
                                 <span class="chip ok">Cumplido</span>
                                 <span>real 02.12.2025</span>
                             </div>
                             <div class="hito">
                                 <code>COMP002_H002</code>
-                                <span class="h-name">Emisión y publicación de resolución ratificatoria.</span>
+                                <span class="h-name"
+                                    >Emisión y publicación de resolución
+                                    ratificatoria.</span
+                                >
                                 <span class="chip ok">Cumplido</span>
                                 <span>real 05.12.2025</span>
                             </div>
                             <div class="hito">
                                 <code>COMP003_H001</code>
-                                <span class="h-name">Seguimiento en la presentación de documentación por OSPA.</span>
+                                <span class="h-name"
+                                    >Seguimiento en la presentación de
+                                    documentación por OSPA.</span
+                                >
                                 <span class="chip ok">Cumplido</span>
                                 <span>real 27.04.2026</span>
                             </div>
                             <div class="hito">
                                 <code>COMP003_H002</code>
-                                <span class="h-name">Seguimiento sobre evaluación técnica y emisión de acreditación.</span>
+                                <span class="h-name"
+                                    >Seguimiento sobre evaluación técnica y
+                                    emisión de acreditación.</span
+                                >
                                 <span class="chip ok">Cumplido</span>
                                 <span>real 26.05.2026</span>
                             </div>
                             <div class="hito">
                                 <code>COMP004_H001</code>
-                                <span class="h-name">Intervención de la Dirección General de Supervisión, Fiscalización y Sanción.</span>
+                                <span class="h-name"
+                                    >Intervención de la Dirección General de
+                                    Supervisión, Fiscalización y Sanción.</span
+                                >
                                 <span class="chip ok">Cumplido</span>
                                 <span>real 20.02.2026</span>
                             </div>
@@ -1985,14 +2726,23 @@
                     </section>
 
                     <!-- DOCUMENTOS -->
-                    <section class="panel" data-panel="documentos" role="tabpanel" hidden>
+                    <section
+                        class="panel"
+                        data-panel="documentos"
+                        role="tabpanel"
+                        hidden
+                    >
                         <div class="panel-head">
                             <div>
                                 <h3>Documentos</h3>
                                 <p class="sub">
-                                    La documentación normativa va separada de las
-                                    evidencias del caso (item 17). No son la misma
-                                    sección ni se mezclan en la misma tabla.
+                                    La documentación normativa va separada de
+                                    las evidencias del caso (item 17). No son la
+                                    misma sección ni se mezclan en la misma
+                                    tabla.
+                                    <br /><b>Origen:</b> <code>documents</code>.
+                                    <b>Acción:</b> adjuntar documento →
+                                    <code>POST /api/v1/documents</code>.
                                 </p>
                             </div>
                         </div>
@@ -2000,12 +2750,14 @@
                         <div class="banner warn">
                             <span>⚠</span>
                             <span>
-                                <b>Documentación normativa: 0 filas.</b> El catálogo
-                                <code>core.cat_tipos_documento</code> no tiene un eje
-                                normativo/evidencia: una resolución o una RDR no se
-                                distinguen de un reporte de alerta. Las referencias
-                                normativas existen solo citadas en el texto y la
-                                cronología, sin fila de documento.
+                                <b>Documentación normativa: 0 filas.</b> El
+                                catálogo
+                                <code>core.cat_tipos_documento</code> no tiene
+                                un eje normativo/evidencia: una resolución o una
+                                RDR no se distinguen de un reporte de alerta.
+                                Las referencias normativas existen solo citadas
+                                en el texto y la cronología, sin fila de
+                                documento.
                             </span>
                         </div>
 
@@ -2022,20 +2774,41 @@
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td class="strong">R.M. N.° 000115-2026-PRODUCE</td>
-                                        <td class="wrap">Suspensión del uso de la red de cortina de fondo dentro de las 5 millas (sectores II, III y IV). Citada en el resumen ejecutivo.</td>
+                                        <td class="strong">
+                                            R.M. N.° 000115-2026-PRODUCE
+                                        </td>
+                                        <td class="wrap">
+                                            Suspensión del uso de la red de
+                                            cortina de fondo dentro de las 5
+                                            millas (sectores II, III y IV).
+                                            Citada en el resumen ejecutivo.
+                                        </td>
                                         <td class="dash">—</td>
                                         <td class="dash">—</td>
                                     </tr>
                                     <tr>
-                                        <td class="strong">RDR N.° 1042-2025-GRP-DRP-DR</td>
-                                        <td class="wrap">Ratifica la RDR N.° 366-2018 y amplía la cobertura a Talara, Cabo Blanco y Lobitos. Citada en la cronología del 05.12.2025.</td>
+                                        <td class="strong">
+                                            RDR N.° 1042-2025-GRP-DRP-DR
+                                        </td>
+                                        <td class="wrap">
+                                            Ratifica la RDR N.° 366-2018 y
+                                            amplía la cobertura a Talara, Cabo
+                                            Blanco y Lobitos. Citada en la
+                                            cronología del 05.12.2025.
+                                        </td>
                                         <td>05.12.2025</td>
                                         <td class="dash">—</td>
                                     </tr>
                                     <tr>
-                                        <td class="strong">RD N.° 219-2026/GOBIERNO REGIONAL PIURA - DIREPRO</td>
-                                        <td class="wrap">Conforma el Comité Regional de Vigilancia. Citada en la cronología del 26.05.2026.</td>
+                                        <td class="strong">
+                                            RD N.° 219-2026/GOBIERNO REGIONAL
+                                            PIURA - DIREPRO
+                                        </td>
+                                        <td class="wrap">
+                                            Conforma el Comité Regional de
+                                            Vigilancia. Citada en la cronología
+                                            del 26.05.2026.
+                                        </td>
                                         <td>26.05.2026</td>
                                         <td class="dash">—</td>
                                     </tr>
@@ -2043,9 +2816,9 @@
                             </table>
                         </div>
                         <p class="footnote">
-                            Las tres referencias son reales, tomadas del texto del
-                            caso y de la cronología. La columna «Acceso» es «—»
-                            porque no hay documento ni URL asociados.
+                            Las tres referencias son reales, tomadas del texto
+                            del caso y de la cronología. La columna «Acceso» es
+                            «—» porque no hay documento ni URL asociados.
                         </p>
 
                         <h4 style="margin-top: 16px">Evidencias del caso</h4>
@@ -2062,37 +2835,58 @@
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td class="strong">ANA-1789079399963</td>
+                                        <td class="strong">
+                                            ANA-1789079399963
+                                        </td>
                                         <td>Análisis de Caso (Anexo 8)</td>
-                                        <td class="wrap">Uso de red de cortina de fondo en Cabo Blanco y Los Órganos</td>
+                                        <td class="wrap">
+                                            Uso de red de cortina de fondo en
+                                            Cabo Blanco y Los Órganos
+                                        </td>
                                         <td>23.09.2026</td>
-                                        <td><span class="chip neutral">Sin PDF</span></td>
+                                        <td>
+                                            <span class="chip neutral"
+                                                >Sin PDF</span
+                                            >
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td class="strong">AT-2026-49_pdf-2</td>
                                         <td>Reporte de Alerta Temprana (AT)</td>
-                                        <td class="wrap">🚨 Paro pescadores artesanales Los Órganos</td>
+                                        <td class="wrap">
+                                            🚨 Paro pescadores artesanales Los
+                                            Órganos
+                                        </td>
                                         <td>04.05.2026</td>
                                         <td><span class="chip ok">Sí</span></td>
                                     </tr>
                                     <tr>
                                         <td class="strong">AT-2026-03_pdf</td>
                                         <td>Reporte de Alerta Temprana (AT)</td>
-                                        <td class="wrap">🚨 Movilización social y bloqueo de Panamericana</td>
+                                        <td class="wrap">
+                                            🚨 Movilización social y bloqueo de
+                                            Panamericana
+                                        </td>
                                         <td>17.04.2026</td>
                                         <td><span class="chip ok">Sí</span></td>
                                     </tr>
                                     <tr>
                                         <td class="strong">AT-2026-01_pdf</td>
                                         <td>Reporte de Alerta Temprana (AT)</td>
-                                        <td class="wrap">🔔 Conflicto pesquero por uso de redes de fondo</td>
+                                        <td class="wrap">
+                                            🔔 Conflicto pesquero por uso de
+                                            redes de fondo
+                                        </td>
                                         <td>10.02.2026</td>
                                         <td><span class="chip ok">Sí</span></td>
                                     </tr>
                                     <tr>
                                         <td class="strong">AT-2026-02_pdf</td>
                                         <td>Reporte de Alerta Temprana (AT)</td>
-                                        <td class="wrap">🚨 Movilización de pescadores artesanales en Cabo Blanco</td>
+                                        <td class="wrap">
+                                            🚨 Movilización de pescadores
+                                            artesanales en Cabo Blanco
+                                        </td>
                                         <td>27.11.2025</td>
                                         <td><span class="chip ok">Sí</span></td>
                                     </tr>
@@ -2102,17 +2896,33 @@
                     </section>
 
                     <!-- REUNIONES -->
-                    <section class="panel" data-panel="reuniones" role="tabpanel" hidden>
+                    <section
+                        class="panel"
+                        data-panel="reuniones"
+                        role="tabpanel"
+                        hidden
+                    >
                         <div class="panel-head">
                             <div>
-                                <h3>Reuniones <span class="chip warn">sin dato</span></h3>
+                                <h3>
+                                    Reuniones
+                                    <span class="chip warn">sin dato</span>
+                                </h3>
                                 <p class="sub">
                                     No hay reuniones capturadas como entidad: la
                                     pestaña depende del item 72.
+                                    <br /><b>Origen:</b>
+                                    <span class="req">requiere</span> sección
+                                    <code>reuniones</code> (item 72; no hay
+                                    endpoint ni tabla con datos).
                                 </p>
                             </div>
                             <div class="panel-actions">
-                                <button class="button-secondary" disabled style="opacity: 0.55; cursor: not-allowed">
+                                <button
+                                    class="button-secondary"
+                                    disabled
+                                    style="opacity: 0.55; cursor: not-allowed"
+                                >
                                     Programar reunión
                                 </button>
                             </div>
@@ -2121,11 +2931,13 @@
                         <div class="banner warn">
                             <span>⚠</span>
                             <span>
-                                <code>core.reuniones_dialogo</code> tiene 0 filas y no
-                                existe endpoint ni repositorio de reuniones (item 72).
-                                Sin embargo, la cronología registra <b>6 hechos de tipo
-                                «Reunión Técnica»</b>: la reunión ocurrió, pero no se
-                                captura como entidad.
+                                <code>core.reuniones_dialogo</code> tiene 0
+                                filas y no existe endpoint ni repositorio de
+                                reuniones (item 72). Sin embargo, la cronología
+                                registra
+                                <b>6 hechos de tipo «Reunión Técnica»</b>: la
+                                reunión ocurrió, pero no se captura como
+                                entidad.
                             </span>
                         </div>
 
@@ -2134,7 +2946,9 @@
                                 <thead>
                                     <tr>
                                         <th>Fecha</th>
-                                        <th class="wrap">Espacio registrado en la cronología</th>
+                                        <th class="wrap">
+                                            Espacio registrado en la cronología
+                                        </th>
                                         <th>Tipo de hecho</th>
                                         <th>Estado de la reunión</th>
                                     </tr>
@@ -2142,39 +2956,80 @@
                                 <tbody>
                                     <tr>
                                         <td>22.05.2026</td>
-                                        <td class="wrap">Espacio de diálogo en El Alto, PAR 22.05.2026</td>
+                                        <td class="wrap">
+                                            Espacio de diálogo en El Alto, PAR
+                                            22.05.2026
+                                        </td>
                                         <td>Reunión Técnica</td>
-                                        <td><span class="chip neutral">sin entidad</span></td>
+                                        <td>
+                                            <span class="chip neutral"
+                                                >sin entidad</span
+                                            >
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td>07.05.2026</td>
-                                        <td class="wrap">Espacio de diálogo en Los Órganos, PAR 07.05.2026</td>
+                                        <td class="wrap">
+                                            Espacio de diálogo en Los Órganos,
+                                            PAR 07.05.2026
+                                        </td>
                                         <td>Reunión Técnica</td>
-                                        <td><span class="chip neutral">sin entidad</span></td>
+                                        <td>
+                                            <span class="chip neutral"
+                                                >sin entidad</span
+                                            >
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td>23.04.2026</td>
-                                        <td class="wrap">Espacio de diálogo en El Ñuro, PAR 23.04.2026</td>
+                                        <td class="wrap">
+                                            Espacio de diálogo en El Ñuro, PAR
+                                            23.04.2026
+                                        </td>
                                         <td>Reunión Técnica</td>
-                                        <td><span class="chip neutral">sin entidad</span></td>
+                                        <td>
+                                            <span class="chip neutral"
+                                                >sin entidad</span
+                                            >
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td>21.04.2026</td>
-                                        <td class="wrap">Reunión de DVPA con IMARPE y SERNANP</td>
+                                        <td class="wrap">
+                                            Reunión de DVPA con IMARPE y SERNANP
+                                        </td>
                                         <td>Reunión Técnica</td>
-                                        <td><span class="chip neutral">sin entidad</span></td>
+                                        <td>
+                                            <span class="chip neutral"
+                                                >sin entidad</span
+                                            >
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td>05.02.2026</td>
-                                        <td class="wrap">Reunión informativa sobre evaluación y monitoreo</td>
+                                        <td class="wrap">
+                                            Reunión informativa sobre evaluación
+                                            y monitoreo
+                                        </td>
                                         <td>Reunión Técnica</td>
-                                        <td><span class="chip neutral">sin entidad</span></td>
+                                        <td>
+                                            <span class="chip neutral"
+                                                >sin entidad</span
+                                            >
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td>18.10.2024</td>
-                                        <td class="wrap">Espacio de diálogo entre pescadores y PRODUCE (tres compromisos)</td>
+                                        <td class="wrap">
+                                            Espacio de diálogo entre pescadores
+                                            y PRODUCE (tres compromisos)
+                                        </td>
                                         <td>Reunión Técnica</td>
-                                        <td><span class="chip neutral">sin entidad</span></td>
+                                        <td>
+                                            <span class="chip neutral"
+                                                >sin entidad</span
+                                            >
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -2182,14 +3037,28 @@
                     </section>
 
                     <!-- HISTORIAL -->
-                    <section class="panel" data-panel="historial" role="tabpanel" hidden>
+                    <section
+                        class="panel"
+                        data-panel="historial"
+                        role="tabpanel"
+                        hidden
+                    >
                         <div class="panel-head">
                             <div>
-                                <h3>Historial / Auditoría <span class="chip">parcial</span></h3>
+                                <h3>
+                                    Historial / Auditoría
+                                    <span class="chip">parcial</span>
+                                </h3>
                                 <p class="sub">
                                     Historial de estados del caso (item 37). La
-                                    auditoría de campos —usuario, operación y valores
-                                    modificados— no existe como registro consultable.
+                                    auditoría de campos —usuario, operación y
+                                    valores modificados— no existe como registro
+                                    consultable.
+                                    <br /><b>Origen:</b>
+                                    <code>stateHistory</code>. La auditoría de
+                                    campos
+                                    <span class="req">requiere</span> tabla y
+                                    endpoint nuevos (item 41).
                                 </p>
                             </div>
                         </div>
@@ -2199,10 +3068,12 @@
                             <span>
                                 <b>No hay auditoría de campos.</b>
                                 <code>core.caso_estado_historial</code> guarda
-                                únicamente cambios de estado, riesgo y conflictividad
-                                (3 filas para este caso). Un cambio de título, de
-                                distrito o de un actor no queda registrado como
-                                historial consultable.
+                                únicamente cambios de estado, riesgo y
+                                conflictividad (3 filas para este caso). Un
+                                cambio de título, de distrito o de un actor no
+                                queda registrado como historial consultable. Los
+                                tres tramos muestran nombres de estado ya
+                                unificados: el valor vigente es <b>Abierto</b>.
                             </span>
                         </div>
 
@@ -2222,8 +3093,10 @@
                                 <tbody>
                                     <tr>
                                         <td>22.11.2026 06:12</td>
-                                        <td><span class="chip ok">vigente</span></td>
-                                        <td>En seguimiento</td>
+                                        <td>
+                                            <span class="chip ok">vigente</span>
+                                        </td>
+                                        <td>Abierto</td>
                                         <td>Conflicto social</td>
                                         <td>Bajo</td>
                                         <td class="dash">—</td>
@@ -2232,7 +3105,7 @@
                                     <tr>
                                         <td>31.10.2026 02:52</td>
                                         <td>22.11.2026 06:12</td>
-                                        <td>Activo</td>
+                                        <td>Abierto</td>
                                         <td>Conflicto social</td>
                                         <td>Bajo</td>
                                         <td><code>0000…0001</code></td>
@@ -2241,11 +3114,14 @@
                                     <tr>
                                         <td>22.11.2026 06:12</td>
                                         <td>22.11.2026 06:12</td>
-                                        <td>En seguimiento</td>
+                                        <td>Abierto</td>
                                         <td>Conflicto social</td>
                                         <td>Bajo</td>
                                         <td class="dash">—</td>
-                                        <td class="wrap">Reclasificación del legado: el expediente está abierto y en seguimiento</td>
+                                        <td class="wrap">
+                                            Reclasificación del legado: estados
+                                            previos unificados como Abierto
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -2253,19 +3129,36 @@
                         <p class="footnote">
                             El usuario «—» corresponde a filas sin
                             <code>usuario_id</code>. El identificador
-                            <code>0000…0001</code> es el usuario de carga del legado.
+                            <code>0000…0001</code> es el usuario de carga del
+                            legado.
                         </p>
                     </section>
 
                     <!-- MARCO SITUACIONAL -->
-                    <section class="panel" data-panel="marco" role="tabpanel" hidden>
+                    <section
+                        class="panel"
+                        data-panel="marco"
+                        role="tabpanel"
+                        hidden
+                    >
                         <div class="panel-head">
                             <div>
                                 <h3>Marco situacional</h3>
                                 <p class="sub">
                                     Robustez del marco según
-                                    <code>analytics.vw_marco_situacional_robustez</code>
-                                    (item 68/79). El texto del marco no existe todavía.
+                                    <code
+                                        >analytics.vw_marco_situacional_robustez</code
+                                    >
+                                    (item 68/79). El texto del marco no existe
+                                    todavía.
+                                    <br /><b>Origen:</b> la respuesta de
+                                    <code>GET /api/v1/cases/{codigo}</code> no
+                                    incluye el marco: hoy se lee de
+                                    <code
+                                        >analytics.vw_marco_situacional_robustez</code
+                                    >
+                                    (<span class="req">requiere</span> incluirlo
+                                    en la respuesta).
                                 </p>
                             </div>
                         </div>
@@ -2274,8 +3167,9 @@
                             <span>⚠</span>
                             <span>
                                 La vista expone 5 banderas booleanas para los 35
-                                casos, pero <b>no hay texto de marco situacional</b> ni
-                                el motor de triangulación del item 79. Las banderas
+                                casos, pero
+                                <b>no hay texto de marco situacional</b> ni el
+                                motor de triangulación del item 79. Las banderas
                                 indican forma, no calidad del análisis.
                             </span>
                         </div>
@@ -2288,24 +3182,36 @@
                                 Correspondencia <span class="val no">✗ no</span>
                             </div>
                             <div class="flag">
-                                Coherencia contextual <span class="val yes">✓ sí</span>
+                                Coherencia contextual
+                                <span class="val yes">✓ sí</span>
                             </div>
                             <div class="flag">
-                                Sat</td>uración <span class="val no">✗ no</span>
+                                Saturación <span class="val no">✗ no</span>
                             </div>
                             <div class="flag">
                                 Trazabilidad <span class="val yes">✓ sí</span>
                             </div>
                         </div>
 
-                        <h4 style="margin-top: 16px">Qué falta para completar el expediente</h4>
+                        <h4 style="margin-top: 16px">
+                            Qué falta para completar el expediente
+                        </h4>
                         <ul class="vocab">
                             <dt>Demandas 3P</dt>
-                            <dd>0 de 10 demandas tienen Problema · Propuesta · Pedido.</dd>
+                            <dd>
+                                0 de 10 demandas tienen Problema · Propuesta ·
+                                Pedido.
+                            </dd>
                             <dt>Correspondencia</dt>
-                            <dd>La vista la marca en falso: no hay contraste entre fuentes.</dd>
+                            <dd>
+                                La vista la marca en falso: no hay contraste
+                                entre fuentes.
+                            </dd>
                             <dt>Saturación</dt>
-                            <dd>La vista la marca en falso: no hay conteo de fuentes por afirmación.</dd>
+                            <dd>
+                                La vista la marca en falso: no hay conteo de
+                                fuentes por afirmación.
+                            </dd>
                         </ul>
                     </section>
                 </div>
@@ -2314,33 +3220,165 @@
             <p class="meta-line">
                 Fuente: consultas de solo lectura a <code>core.casos</code>,
                 <code>core.alertas_tempranas</code>, <code>core.demandas</code>,
-                <code>core.compromisos</code>, <code>core.hitos_compromiso</code>,
+                <code>core.compromisos</code>,
+                <code>core.hitos_compromiso</code>,
                 <code>core.documentos</code>, <code>core.caso_cronologia</code>,
-                <code>core.casos_actores</code>, <code>core.caso_estado_historial</code> y
-                <code>analytics.vw_marco_situacional_robustez</code>, a 22.11.2026.
+                <code>core.casos_actores</code>,
+                <code>core.caso_estado_historial</code> y
+                <code>analytics.vw_marco_situacional_robustez</code>, a
+                22.11.2026.
             </p>
 
             <section class="notes">
                 <h2>Notas del mockup</h2>
 
+                <h3>Contrato de datos por pestaña</h3>
+                <p>
+                    Las diez pestañas <b>reorganizan una sola respuesta</b>,
+                    <code>GET /api/v1/cases/{codigo}</code>, que devuelve
+                    <code
+                        >case, actors, events, demandas, alerts, commitments,
+                        documents, stateHistory, completeness</code
+                    >. Cada pestaña declara qué sección muestra y qué acción
+                    aloja. Lo marcado <span class="req">requiere</span> no
+                    existe todavía en la API.
+                </p>
+                <table class="contract-table">
+                    <thead>
+                        <tr>
+                            <th>Pestaña</th>
+                            <th>Sección de la respuesta</th>
+                            <th>Acción y endpoint</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Resumen</td>
+                            <td>
+                                <code>case</code> + <code>completeness</code>
+                            </td>
+                            <td>
+                                Edición por campo (item 18) →
+                                <code>PATCH /api/v1/cases/{codigo}</code>.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Actores</td>
+                            <td><code>actors</code></td>
+                            <td>
+                                Vincular/desvincular actor (item 12 y 40);
+                                <span class="req">requiere</span> alta de la
+                                relación caso–actor.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Demandas (3P)</td>
+                            <td><code>demandas</code></td>
+                            <td>
+                                Nueva/editar demanda (item 13) →
+                                <code>POST</code>/<code
+                                    >PATCH /api/v1/demandas</code
+                                >.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Cronología</td>
+                            <td><code>events</code></td>
+                            <td>
+                                Registrar hecho → <b>ya implementado</b> (<code
+                                    >POST /api/v1/cases/{codigo}/events</code
+                                >).
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Alertas</td>
+                            <td><code>alerts</code></td>
+                            <td>
+                                Nueva/editar alerta → <code>POST</code>/<code
+                                    >PATCH /api/v1/alerts</code
+                                >.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Compromisos</td>
+                            <td><code>commitments</code> (+ hitos)</td>
+                            <td>
+                                Alta/edición de compromiso e hito →
+                                <code>/api/v1/commitments</code> (e
+                                <code>/hitos</code>).
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Documentos</td>
+                            <td><code>documents</code></td>
+                            <td>
+                                Adjuntar documento →
+                                <code>POST /api/v1/documents</code>.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Reuniones</td>
+                            <td>
+                                <span class="req">requiere</span> sección
+                                <code>reuniones</code>
+                            </td>
+                            <td>
+                                Item 72: no hay endpoint ni tabla con datos.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Historial / Auditoría</td>
+                            <td><code>stateHistory</code></td>
+                            <td>
+                                Auditoría de campos
+                                <span class="req">requiere</span> tabla y
+                                endpoint (item 41).
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Marco situacional</td>
+                            <td>
+                                <span class="req">requiere</span> incluirlo en
+                                la respuesta
+                            </td>
+                            <td>
+                                Hoy se lee de
+                                <code
+                                    >analytics.vw_marco_situacional_robustez</code
+                                >; el motor del item 79 no existe.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p>
+                    El <b>riel de relaciones</b> (item 67) no es una pestaña:
+                    sus contadores se calculan sobre
+                    <code
+                        >actors, alerts, demandas, commitments, documents</code
+                    >
+                    y <code>events</code>
+                    de la misma respuesta. Nada más se recalcula en el cliente.
+                </p>
+
                 <h3>Datos reales usados</h3>
                 <ul>
                     <li>
-                        Caso de la ficha: <b>CS-PA-OAT-2024-02</b> «Uso de red de
-                        cortina de fondo en Cabo Blanco y Los Órganos» (Piura,
-                        distrito El Alto, OAIPCS). Es el caso con más relaciones
-                        simultáneas: 15 actores, 4 alertas, 4 compromisos, 8 hitos,
-                        5 documentos, 21 hechos y 3 filas de historial.
+                        Caso de la ficha: <b>CS-PA-OAT-2024-02</b> «Uso de red
+                        de cortina de fondo en Cabo Blanco y Los Órganos»
+                        (Piura, distrito El Alto, OAIPCS). Es el caso con más
+                        relaciones simultáneas: 15 actores, 4 alertas, 4
+                        compromisos, 8 hitos, 5 documentos, 21 hechos y 3 filas
+                        de historial.
                     </li>
                     <li>
-                        Un solo caso no reúne todas las entidades: las demandas del
-                        caso tienen <code>caso_id</code> vacío y se enlazan por
-                        <code>alerta_id</code> (10 filas). Por eso el riel marca
-                        «10*».
+                        Un solo caso no reúne todas las entidades: las demandas
+                        del caso tienen <code>caso_id</code> vacío y se enlazan
+                        por <code>alerta_id</code> (10 filas). Por eso el riel
+                        marca «10*».
                     </li>
                     <li>
-                        Recuentos de la base: 35 casos (34 vigentes, 1 anulado), 83
-                        alertas, 325 demandas, 8 compromisos, 12 hitos, 153
+                        Recuentos de la base: 35 casos (34 vigentes, 1 anulado),
+                        83 alertas, 325 demandas, 8 compromisos, 12 hitos, 153
                         documentos, 80 hechos, 1.160 actores y 60 relaciones
                         caso–actor.
                     </li>
@@ -2349,13 +3387,14 @@
                 <h3>Campos que salieron «—» y por qué</h3>
                 <ul>
                     <li>
-                        <b>Problema · Propuesta · Pedido (3P):</b> las 325 demandas
-                        tienen los tres campos vacíos. No es un fallo de la vista:
-                        el dato nunca se capturó.
+                        <b>Problema · Propuesta · Pedido (3P):</b> las 325
+                        demandas tienen los tres campos vacíos. No es un fallo
+                        de la vista: el dato nunca se capturó.
                     </li>
                     <li>
                         <b>Actor en la cronología:</b> 0 de 80 hechos tienen
-                        <code>actor_uid</code>; el campo existe pero no se pobló.
+                        <code>actor_uid</code>; el campo existe pero no se
+                        pobló.
                     </li>
                     <li>
                         <b>Correo de actores:</b> solo 3 de 15 tienen
@@ -2363,29 +3402,31 @@
                     </li>
                     <li>
                         <b>Clasificación del compromiso:</b> el campo
-                        progresivo/parcial · entendimiento operativo · condicionado
-                        no existe en el modelo; <code>tipo_compromiso</code> solo
-                        vale «Actividad».
+                        progresivo/parcial · entendimiento operativo ·
+                        condicionado no existe en el modelo;
+                        <code>tipo_compromiso</code> solo vale «Actividad».
                     </li>
                     <li>
-                        <b>Vencimiento y nivel de gobierno del compromiso:</b> 8 de 8
-                        compromisos tienen <code>fecha_vencimiento</code> y
+                        <b>Vencimiento y nivel de gobierno del compromiso:</b> 8
+                        de 8 compromisos tienen <code>fecha_vencimiento</code> y
                         <code>nivel_gobierno</code> vacíos.
                     </li>
                     <li>
-                        <b>Próximo paso:</b> no hay regla implementada (item 19); no
-                        se inventó el texto.
+                        <b>Próximo paso:</b> no hay regla implementada (item
+                        19); no se inventó el texto.
                     </li>
                     <li>
-                        <b>Documentación normativa:</b> 0 filas; las referencias se
-                        citan desde el texto y la cronología, sin documento ni URL.
+                        <b>Documentación normativa:</b> 0 filas; las referencias
+                        se citan desde el texto y la cronología, sin documento
+                        ni URL.
                     </li>
                     <li>
-                        <b>Reuniones:</b> 0 filas en <code>core.reuniones_dialogo</code>.
+                        <b>Reuniones:</b> 0 filas en
+                        <code>core.reuniones_dialogo</code>.
                     </li>
                     <li>
-                        <b>Auditoría de campos:</b> no existe; solo hay 3 filas de
-                        cambio de estado/riesgo/conflictividad.
+                        <b>Auditoría de campos:</b> no existe; solo hay 3 filas
+                        de cambio de estado/riesgo/conflictividad.
                     </li>
                 </ul>
 
@@ -2393,49 +3434,147 @@
                 <ol>
                     <li>
                         ¿La pestaña Demandas cuenta las demandas del caso
-                        (<code>caso_id</code>) o también las heredadas de sus alertas
-                        (<code>alerta_id</code>)? El mockup usa el segundo criterio y
-                        lo marca.
+                        (<code>caso_id</code>) o también las heredadas de sus
+                        alertas (<code>alerta_id</code>)? El mockup usa el
+                        segundo criterio y lo marca.
                     </li>
                     <li>
-                        ¿Se parte <code>nombre_actual</code> en Apellidos | Nombres en
-                        la ficha o se añaden columnas al modelo? El corte actual es
-                        convención de presentación.
+                        ¿Se parte <code>nombre_actual</code> en Apellidos |
+                        Nombres en la ficha o se añaden columnas al modelo? El
+                        corte actual es convención de presentación.
                     </li>
                     <li>
                         ¿Se crea un catálogo de posicionamiento (Dialogante,
-                        Legitimante, Conflictivo) o se mantiene texto libre? Hoy las
-                        60 relaciones dicen «Neutral».
+                        Legitimante, Conflictivo) o se mantiene texto libre? Hoy
+                        las 60 relaciones dicen «Neutral».
                     </li>
                     <li>
                         ¿Se añade al catálogo de documentos un eje
-                        normativo/evidencia? Sin él, la separación del item 17 no se
-                        puede persistir.
+                        normativo/evidencia? Sin él, la separación del item 17
+                        no se puede persistir.
                     </li>
                     <li>
-                        ¿El indicador de expediente bloquea algo? El mockup lo deja
-                        como orientación, no como bloqueo (item 68).
+                        ¿El indicador de expediente bloquea algo? El mockup lo
+                        deja como orientación, no como bloqueo (item 68).
                     </li>
                     <li>
-                        ¿Historial se limita a estados o se construye auditoría de
-                        campos? Son dos esfuerzos distintos.
+                        ¿Historial se limita a estados o se construye auditoría
+                        de campos? Son dos esfuerzos distintos.
                     </li>
                 </ol>
+
+                <h3>Estados de la pantalla</h3>
+                <p>
+                    Como todas las pestañas comparten la misma llamada, el
+                    estado se decide una sola vez sobre la respuesta. Cada
+                    pestaña lo hereda:
+                </p>
+                <div class="state-grid">
+                    <div class="state-card">
+                        <h4>Cargando</h4>
+                        <div class="skeleton" aria-hidden="true">
+                            <span></span><span></span><span></span>
+                        </div>
+                        <p>
+                            Esqueleto en la pestaña activa mientras resuelve el
+                            <code>GET</code>; el riel y el indicador de
+                            expediente quedan vacíos hasta el primer render.
+                        </p>
+                    </div>
+                    <div class="state-card">
+                        <h4>Vacío</h4>
+                        <p>
+                            Cada sección sin filas muestra un texto explícito
+                            («sin datos»). <b>Vacío nunca significa cero:</b>
+                            <code>completeness</code> declara lo que falta (p.
+                            ej. «Demandas con 3P (0 de 10)»), no lo estima.
+                        </p>
+                    </div>
+                    <div class="state-card">
+                        <h4>Error</h4>
+                        <p>
+                            Si el <code>GET</code> falla, se muestra un
+                            <code>banner warn</code> con «Reintentar» y no se
+                            renderizan pestañas parciales.
+                        </p>
+                    </div>
+                </div>
+
+                <h3>Fuera de alcance de este mockup</h3>
+                <ul>
+                    <li>
+                        <b>No captura reuniones</b> ni asistentes/acuerdos:
+                        depende del item 72.
+                    </li>
+                    <li>
+                        <b>No implementa auditoría de campos</b> (item 41): solo
+                        documenta que falta.
+                    </li>
+                    <li>
+                        <b
+                            >No define el catálogo de clasificación del
+                            compromiso</b
+                        >
+                        (item 16) ni el eje normativo del documento (item 17).
+                    </li>
+                    <li>
+                        <b>No define la regla de validación 3P</b> (item 13) ni
+                        la de prioridad de atención: se muestran como huecos.
+                    </li>
+                    <li>
+                        <b>No dibuja un selector de alcance:</b> el alcance es
+                        derivado y la API rechaza un valor manual con
+                        <code>422 ALCANCE_DERIVADO</code>.
+                    </li>
+                    <li>
+                        <b>No decide permisos ni RLS por rol</b>, ni formatos de
+                        exportación: el menú «Exportar» es decorativo.
+                    </li>
+                    <li>
+                        <b
+                            >No define el motor de triangulación del marco
+                            situacional</b
+                        >
+                        (item 79).
+                    </li>
+                </ul>
 
                 <h3>Vocabulario respetado</h3>
                 <dl class="vocab">
                     <dt>Estados de caso</dt>
-                    <dd>Activo · En seguimiento · Resuelto · Archivado</dd>
+                    <dd>Abierto · Resuelto · Archivado</dd>
                     <dt>Conflictividad</dt>
-                    <dd>Diferencia · Controversia · Conflicto social · Crisis social</dd>
+                    <dd>
+                        Diferencia · Controversia · Conflicto social · Crisis
+                        social
+                    </dd>
                     <dt>Riesgo</dt>
                     <dd>Bajo · Moderado · Alto</dd>
                     <dt>Prioridad</dt>
                     <dd>Urgente · Moderado · Bajo</dd>
+                    <dt>Subsector</dt>
+                    <dd>Pesca y Acuicultura · MYPE e Industria</dd>
+                    <dt>Geografía</dt>
+                    <dd>
+                        «Región» (no «Territorio») · «GORE» (no «Gobierno
+                        regional»)
+                    </dd>
+                    <dt>Campos de la ficha</dt>
+                    <dd>
+                        «Tipo de compromiso» (no «tipo de acuerdo») · «Unidad
+                        responsable» · «Inicio» (fecha real del caso; nunca
+                        «Actualizado»)
+                    </dd>
                     <dt>Compromiso</dt>
-                    <dd>Por iniciar · En proceso · Cumplido · Redefinido · Desestimado</dd>
+                    <dd>
+                        Por iniciar · En proceso · Cumplido · Redefinido ·
+                        Desestimado
+                    </dd>
                     <dt>Hito</dt>
-                    <dd>Registrado · En ejecución · Paralizado · Cumplido · Desestimado</dd>
+                    <dd>
+                        Registrado · En ejecución · Paralizado · Cumplido ·
+                        Desestimado
+                    </dd>
                 </dl>
             </section>
 
@@ -2443,44 +3582,52 @@
                 <h2>Qué debe construir el equipo</h2>
                 <ol>
                     <li>
-                        <b>Endpoint de ficha compuesta:</b>
-                        <code>GET /api/v1/cases/{codigo}/ficha</code> que devuelva
-                        cabecera, contadores del riel y el indicador de expediente en
-                        una sola respuesta, con ámbito y permisos aplicados en
-                        servidor.
+                        <b>Una sola llamada ya existe:</b>
+                        <code>GET /api/v1/cases/{codigo}</code> devuelve
+                        <code
+                            >case, actors, events, demandas, alerts,
+                            commitments, documents, stateHistory,
+                            completeness</code
+                        >. Las diez pestañas reorganizan esa respuesta; no hace
+                        falta un endpoint «ficha». Quedan como
+                        <span class="req">requiere</span> la sección
+                        <code>reuniones</code> (item 72) y la auditoría de
+                        campos (item 41).
                     </li>
                     <li>
                         <b>Tabla puente de demandas:</b> decidir si
-                        <code>core.demandas.caso_id</code> es obligatorio y migrar las
-                        226 demandas sin caso; exponer «vincular al caso» desde la
-                        pestaña.
+                        <code>core.demandas.caso_id</code> es obligatorio y
+                        migrar las 226 demandas sin caso; exponer «vincular al
+                        caso» desde la pestaña.
                     </li>
                     <li>
-                        <b>Regla de negocio del 3P:</b> validación que exige Problema
-                        y Pedido para pasar de «Pendiente», y registro del fragmento o
-                        documento de origen de cada campo.
+                        <b>Regla de negocio del 3P:</b> validación que exige
+                        Problema y Pedido para pasar de «Pendiente», y registro
+                        del fragmento o documento de origen de cada campo.
                     </li>
                     <li>
-                        <b>Campo de clasificación del compromiso:</b> nueva columna o
-                        catálogo con progresivo/parcial · entendimiento operativo ·
-                        condicionado, y su validación en el formulario.
+                        <b>Campo de clasificación del compromiso:</b> nueva
+                        columna o catálogo con progresivo/parcial ·
+                        entendimiento operativo · condicionado, y su validación
+                        en el formulario.
                     </li>
                     <li>
-                        <b>Eje normativo del documento:</b> columna o catálogo que
-                        separe documentación normativa de evidencia del caso.
+                        <b>Eje normativo del documento:</b> columna o catálogo
+                        que separe documentación normativa de evidencia del
+                        caso.
                     </li>
                     <li>
-                        <b>Auditoría de campos:</b> tabla de cambios con usuario,
-                        fecha, operación y valores anterior/nuevo; hoy solo existe el
-                        historial de estados.
+                        <b>Auditoría de campos:</b> tabla de cambios con
+                        usuario, fecha, operación y valores anterior/nuevo; hoy
+                        solo existe el historial de estados.
                     </li>
                     <li>
-                        <b>Item 72:</b> endpoint, repositorio y pestaña de reuniones,
-                        más la captura de asistentes y acuerdos.
+                        <b>Item 72:</b> endpoint, repositorio y pestaña de
+                        reuniones, más la captura de asistentes y acuerdos.
                     </li>
                     <li>
-                        <b>Patrón de edición por campo (item 18):</b> componente con
-                        Cancelar/Guardar, sin cierre por clic fuera y con
+                        <b>Patrón de edición por campo (item 18):</b> componente
+                        con Cancelar/Guardar, sin cierre por clic fuera y con
                         comentario asociado cuando corresponda.
                     </li>
                 </ol>
@@ -2492,17 +3639,19 @@
         <script>
             (function () {
                 var tabs = Array.prototype.slice.call(
-                    document.querySelectorAll("[data-tab]")
+                    document.querySelectorAll("[data-tab]"),
                 );
                 var panels = Array.prototype.slice.call(
-                    document.querySelectorAll("[data-panel]")
+                    document.querySelectorAll("[data-panel]"),
                 );
                 function activate(name) {
                     tabs.forEach(function (t) {
                         if (t.getAttribute("role") === "tab") {
                             t.setAttribute(
                                 "aria-selected",
-                                t.getAttribute("data-tab") === name ? "true" : "false"
+                                t.getAttribute("data-tab") === name
+                                    ? "true"
+                                    : "false",
                             );
                         }
                     });

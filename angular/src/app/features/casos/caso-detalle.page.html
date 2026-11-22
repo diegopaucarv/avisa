@@ -27,7 +27,12 @@
       </button>
       } } @else {
       <app-exportar-menu entidad="casos" [id]="d.caso.id" (fallo)="alFallarExportacion($event)" />
-      <button type="button" class="button-secondary" (click)="imprimir()">
+      <button
+        type="button"
+        class="button-secondary"
+        title="Imprime la ficha; en el diálogo puede elegir «Guardar como PDF»"
+        (click)="imprimir()"
+      >
         <app-icono nombre="documentos" [tamano]="14" />
         Imprimir / Guardar PDF
       </button>
@@ -255,10 +260,7 @@
                   <button
                     type="button"
                     class="button-secondary timeline-edit"
-                    [attr.aria-label]="
-                              'Editar la demanda: ' +
-                              (demanda.problema || demanda.descripcion || 'sin problema')
-                            "
+                    [attr.aria-label]="'Editar la demanda: ' + referenciaDemanda(demanda)"
                     (click)="editarDemanda(demanda)"
                   >
                     Editar

@@ -196,10 +196,16 @@ export class DemandaPanelComponent {
         return;
       }
 
+      const casoCode = this.codigoCaso().trim();
+      if (!casoCode) {
+        this.mensajeLocal.set('No se pudo identificar el caso de la demanda.');
+        return;
+      }
+
       // Alta: `POST /api/v1/demandas` exige `descripcion` no vacía; se usa el
       // problema, que es el ancla conceptual de la demanda.
       const cambios: CuerpoDemanda = {
-        casoCode: this.codigoCaso().trim(),
+        casoCode,
         descripcion: problema,
         problema,
         estado: estado || 'Pendiente',

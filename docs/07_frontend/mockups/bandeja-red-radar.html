@@ -197,6 +197,64 @@
                 margin-bottom: 3px;
                 color: var(--ink);
             }
+            .estados {
+                display: grid;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: 10px;
+            }
+            @media (max-width: 860px) {
+                .estados {
+                    grid-template-columns: 1fr;
+                }
+            }
+            .card {
+                padding: 12px 14px;
+                border: 1px solid var(--line);
+                border-radius: 10px;
+                background: var(--panel);
+                font-size: 12px;
+            }
+            .card strong {
+                display: block;
+                margin-bottom: 3px;
+            }
+            .card p {
+                margin: 0;
+                color: var(--muted);
+            }
+            .flow {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                gap: 8px;
+                padding: 14px 16px;
+                font-size: 12px;
+            }
+            .flow span {
+                padding: 5px 10px;
+                border: 1px solid var(--line);
+                border-radius: 8px;
+                background: #fafbfc;
+            }
+            .flow i {
+                color: var(--muted);
+                font-style: normal;
+            }
+            .sub {
+                margin-top: 2px;
+                color: #97a3b0;
+                font-size: 11px;
+            }
+            .req {
+                color: var(--medio);
+                border-color: #f5d6b3;
+                background: #fdf6ec;
+            }
+            .ok {
+                color: var(--bajo);
+                border-color: #c9e3d5;
+                background: #eef7f2;
+            }
             .grid {
                 display: grid;
                 grid-template-columns: 1fr 1fr;
@@ -258,10 +316,12 @@
                     <p class="eyebrow">Señales tempranas · mockup</p>
                     <h1>Bandeja RED-RADAR</h1>
                     <p class="view-subtitle">
-                        Cola de señales tempranas con triage: agrupa por caso y territorio,
-                        ordena por riesgo, permite descartar con motivo y convertir la señal en
-                        alerta. La señal no es un registro nuevo: es una alerta en su estado
-                        inicial.
+                        Cola de señales tempranas con triage: agrupa por caso y
+                        Región, ordena por riesgo, permite descartar con motivo
+                        y convertir la señal en alerta. La señal no es un
+                        registro nuevo: es una alerta en su estado inicial. La
+                        Región se deriva; el eje RED/NODO aún no tiene modelo en
+                        <code>territorio.*</code> (<code>requiere</code>).
                     </p>
                 </div>
                 <div><span class="badge">Mockup · no implementado</span></div>
@@ -272,30 +332,49 @@
                     <div>
                         <h2 id="triage">Señales sin triage</h2>
                         <p>
-                            Agrupadas por caso y territorio. Nivel y prioridad son ejes distintos;
-                            el plazo vive en el SLA y no forma parte de la etiqueta.
+                            Agrupadas por caso y Región. Nivel y prioridad son
+                            ejes distintos; el plazo vive en el SLA y no forma
+                            parte de la etiqueta. La prioridad de esta columna
+                            es la de la alerta; la prioridad de atención del
+                            caso es otro valor almacenado, sin regla definida.
                         </p>
                     </div>
                     <span class="chip">0 pendientes</span>
                 </div>
                 <div class="panel">
-                    <div class="toolbar" role="group" aria-label="Filtros de la cola">
-                        <button type="button" aria-pressed="true">Todas <span class="count">76</span></button>
-                        <button type="button" aria-pressed="false">Inmediato <span class="count">—</span></button>
-                        <button type="button" aria-pressed="false">Táctico <span class="count">—</span></button>
-                        <button type="button" aria-pressed="false">Preventivo <span class="count">—</span></button>
-                        <button type="button" aria-pressed="false">Monitoreo <span class="count">—</span></button>
-                        <button type="button" aria-pressed="false">Sin vínculo a caso</button>
+                    <div
+                        class="toolbar"
+                        role="group"
+                        aria-label="Filtros de la cola"
+                    >
+                        <button type="button" aria-pressed="true">
+                            Todas <span class="count">76</span>
+                        </button>
+                        <button type="button" aria-pressed="false">
+                            Inmediato <span class="count">—</span>
+                        </button>
+                        <button type="button" aria-pressed="false">
+                            Táctico <span class="count">—</span>
+                        </button>
+                        <button type="button" aria-pressed="false">
+                            Preventivo <span class="count">—</span>
+                        </button>
+                        <button type="button" aria-pressed="false">
+                            Monitoreo <span class="count">—</span>
+                        </button>
+                        <button type="button" aria-pressed="false">
+                            Sin vínculo a caso
+                        </button>
                     </div>
                     <table>
                         <thead>
                             <tr>
                                 <th scope="col">Señal</th>
                                 <th scope="col">Nivel</th>
-                                <th scope="col">Prioridad</th>
+                                <th scope="col">Prioridad de alerta</th>
                                 <th scope="col">SLA</th>
                                 <th scope="col">Reporte</th>
-                                <th scope="col">Caso / territorio</th>
+                                <th scope="col">Caso / Región</th>
                                 <th scope="col">Estado</th>
                                 <th scope="col">Triage</th>
                             </tr>
@@ -304,120 +383,198 @@
                             <tr>
                                 <td>
                                     <div class="code">AT-2026-43</div>
-                                    <div style="color: var(--muted)">Bloqueo de…</div>
+                                    <div style="color: var(--muted)">
+                                        Bloqueo de…
+                                    </div>
                                 </td>
-                                <td><span class="tag t-alto">Inmediato</span></td>
-                                <td><span class="tag t-alto">Crítica inmediata</span></td>
+                                <td>
+                                    <span class="tag t-alto">Inmediato</span>
+                                </td>
+                                <td>
+                                    <span class="tag t-alto"
+                                        >Crítica inmediata</span
+                                    >
+                                </td>
                                 <td>24 h</td>
                                 <td>20/07/2026</td>
                                 <td style="color: #97a3b0">Sin vínculo</td>
                                 <td>Completado</td>
                                 <td>
                                     <div class="acciones">
-                                        <button type="button" class="primario" disabled>
+                                        <button
+                                            type="button"
+                                            class="primario"
+                                            disabled
+                                        >
                                             Convertir en alerta
                                         </button>
-                                        <button type="button" disabled>Descartar</button>
+                                        <button type="button" disabled>
+                                            Descartar
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
                             <tr>
                                 <td>
                                     <div class="code">AT-2026-25</div>
-                                    <div style="color: var(--muted)">Intentos…</div>
+                                    <div style="color: var(--muted)">
+                                        Intentos…
+                                    </div>
                                 </td>
-                                <td><span class="tag t-alto">Inmediato</span></td>
-                                <td><span class="tag t-alto">Crítica inmediata</span></td>
+                                <td>
+                                    <span class="tag t-alto">Inmediato</span>
+                                </td>
+                                <td>
+                                    <span class="tag t-alto"
+                                        >Crítica inmediata</span
+                                    >
+                                </td>
                                 <td>24 h</td>
                                 <td>20/07/2026</td>
                                 <td style="color: #97a3b0">Sin vínculo</td>
                                 <td>Completado</td>
                                 <td>
                                     <div class="acciones">
-                                        <button type="button" class="primario" disabled>
+                                        <button
+                                            type="button"
+                                            class="primario"
+                                            disabled
+                                        >
                                             Convertir en alerta
                                         </button>
-                                        <button type="button" disabled>Descartar</button>
+                                        <button type="button" disabled>
+                                            Descartar
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
                             <tr>
                                 <td>
                                     <div class="code">AT-2026-42</div>
-                                    <div style="color: var(--muted)">Movilización…</div>
+                                    <div style="color: var(--muted)">
+                                        Movilización…
+                                    </div>
                                 </td>
-                                <td><span class="tag t-alto">Inmediato</span></td>
-                                <td><span class="tag t-alto">Crítica inmediata</span></td>
+                                <td>
+                                    <span class="tag t-alto">Inmediato</span>
+                                </td>
+                                <td>
+                                    <span class="tag t-alto"
+                                        >Crítica inmediata</span
+                                    >
+                                </td>
                                 <td>24 h</td>
                                 <td>03/07/2026</td>
                                 <td style="color: #97a3b0">Sin vínculo</td>
                                 <td>Completado</td>
                                 <td>
                                     <div class="acciones">
-                                        <button type="button" class="primario" disabled>
+                                        <button
+                                            type="button"
+                                            class="primario"
+                                            disabled
+                                        >
                                             Convertir en alerta
                                         </button>
-                                        <button type="button" disabled>Descartar</button>
+                                        <button type="button" disabled>
+                                            Descartar
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
                             <tr>
                                 <td>
                                     <div class="code">AT-2026-89</div>
-                                    <div style="color: var(--muted)">FREDEMYPE…</div>
+                                    <div style="color: var(--muted)">
+                                        FREDEMYPE…
+                                    </div>
                                 </td>
-                                <td><span class="tag t-medio">Preventivo</span></td>
-                                <td><span class="tag t-medio">Temprana</span></td>
+                                <td>
+                                    <span class="tag t-medio">Preventivo</span>
+                                </td>
+                                <td>
+                                    <span class="tag t-medio">Temprana</span>
+                                </td>
                                 <td>72 h</td>
                                 <td>30/07/2026</td>
                                 <td style="color: #97a3b0">Sin vínculo</td>
                                 <td>Completado</td>
                                 <td>
                                     <div class="acciones">
-                                        <button type="button" class="primario" disabled>
+                                        <button
+                                            type="button"
+                                            class="primario"
+                                            disabled
+                                        >
                                             Convertir en alerta
                                         </button>
-                                        <button type="button" disabled>Descartar</button>
+                                        <button type="button" disabled>
+                                            Descartar
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
                             <tr>
                                 <td>
                                     <div class="code">AT-2026-86</div>
-                                    <div style="color: var(--muted)">Escalada…</div>
+                                    <div style="color: var(--muted)">
+                                        Escalada…
+                                    </div>
                                 </td>
-                                <td><span class="tag t-medio">Preventivo</span></td>
-                                <td><span class="tag t-medio">Temprana</span></td>
+                                <td>
+                                    <span class="tag t-medio">Preventivo</span>
+                                </td>
+                                <td>
+                                    <span class="tag t-medio">Temprana</span>
+                                </td>
                                 <td>72 h</td>
                                 <td>03/07/2026</td>
                                 <td style="color: #97a3b0">Sin vínculo</td>
                                 <td>Completado</td>
                                 <td>
                                     <div class="acciones">
-                                        <button type="button" class="primario" disabled>
+                                        <button
+                                            type="button"
+                                            class="primario"
+                                            disabled
+                                        >
                                             Convertir en alerta
                                         </button>
-                                        <button type="button" disabled>Descartar</button>
+                                        <button type="button" disabled>
+                                            Descartar
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
                             <tr>
                                 <td>
                                     <div class="code">AT-2026-46</div>
-                                    <div style="color: var(--muted)">Enfrentamiento…</div>
+                                    <div style="color: var(--muted)">
+                                        Enfrentamiento…
+                                    </div>
                                 </td>
-                                <td><span class="tag t-bajo">Monitoreo</span></td>
-                                <td><span class="tag t-bajo">Seguimiento</span></td>
+                                <td>
+                                    <span class="tag t-bajo">Monitoreo</span>
+                                </td>
+                                <td>
+                                    <span class="tag t-bajo">Seguimiento</span>
+                                </td>
                                 <td style="color: #97a3b0">Sin plazo</td>
                                 <td>13/08/2026</td>
                                 <td style="color: #97a3b0">Sin vínculo</td>
                                 <td>Completado</td>
                                 <td>
                                     <div class="acciones">
-                                        <button type="button" class="primario" disabled>
+                                        <button
+                                            type="button"
+                                            class="primario"
+                                            disabled
+                                        >
                                             Convertir en alerta
                                         </button>
-                                        <button type="button" disabled>Descartar</button>
+                                        <button type="button" disabled>
+                                            Descartar
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
@@ -425,10 +582,290 @@
                     </table>
                     <div class="empty" role="note">
                         <strong>Cola de triage vacía.</strong>
-                        Las 76 alertas vivas ya están en paso «Completado»: ninguna quedó en el
-                        estado inicial que define la señal. Las filas de arriba son históricas y
-                        sirven para fijar el formato; las acciones están deshabilitadas porque no
-                        existe aún el estado de revisión persistido.
+                        Las 76 alertas vivas ya están en paso «Completado»:
+                        ninguna quedó en el estado inicial que define la señal.
+                        Las filas de arriba son históricas y solo fijan el
+                        formato; las acciones están deshabilitadas porque no
+                        existe aún el estado de triage persistido.
+                    </div>
+                </div>
+            </section>
+
+            <section class="section" aria-labelledby="eje-red">
+                <div class="section-head">
+                    <div>
+                        <h2 id="eje-red">Eje RED · NODO (requiere modelo)</h2>
+                        <p>
+                            Solo <code>legacy.dim_tipo_actor_radar</code> existe
+                            hoy: clasifica al actor (Titular · Alterno ·
+                            Participante Institucional), no la RED ni el NODO.
+                            <code>territorio.*</code> no modela RED ni NODO y
+                            los módulos 2027 dependen de ese modelo (D18
+                            diferido). Por eso se muestra la interacción y la
+                            derivación, sin afirmar un catálogo que no existe.
+                        </p>
+                    </div>
+                    <span class="chip">requiere modelo</span>
+                </div>
+                <div class="panel">
+                    <div class="flow" aria-label="Flujo de derivación">
+                        <span>Actor</span><i>→</i> <span>RED / NODO</span
+                        ><i>→</i> <span>Región</span><i>→</i> <span>Caso</span
+                        ><i>→</i> <span>Señal</span>
+                    </div>
+                    <table>
+                        <caption>
+                            La derivación lee el actor y su RED/NODO para llegar
+                            a la Región del caso. Cada salto nombra su fuente o
+                            su
+                            <code>requiere</code
+                            >.
+                        </caption>
+                        <thead>
+                            <tr>
+                                <th scope="col">Salto</th>
+                                <th scope="col">Fuente exacta</th>
+                                <th scope="col">Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Actor → RED / NODO</td>
+                                <td>
+                                    <code>legacy.dim_tipo_actor_radar</code>
+                                    (solo tipo de actor)
+                                </td>
+                                <td>
+                                    <span class="tag req">requiere</span>
+                                    <code>territorio.red</code> y
+                                    <code>territorio.nodo</code>, y las columnas
+                                    <code>red_id</code>, <code>nodo_id</code>,
+                                    <code>tipo_actor_radar_id</code> en el actor
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>RED / NODO → Región</td>
+                                <td>
+                                    <code>core.alcance_caso(uuid)</code> para el
+                                    caso
+                                </td>
+                                <td>
+                                    <span class="tag ok">existe</span> para el
+                                    caso; <span class="tag req">requiere</span>
+                                    la relación RED/NODO → Región
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Región → Caso</td>
+                                <td>
+                                    <code>alerts.caso_id</code> →
+                                    <code>core.alcance_caso</code>
+                                </td>
+                                <td><span class="tag ok">existe</span></td>
+                            </tr>
+                            <tr>
+                                <td>Caso → Señal</td>
+                                <td>
+                                    <code>alerts.caso_id</code>; hoy NULL, se
+                                    muestra «Sin vínculo»
+                                </td>
+                                <td><span class="tag ok">existe</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="section" aria-labelledby="contrato-radar">
+                <div class="section-head">
+                    <div>
+                        <h2 id="contrato-radar">
+                            Contrato de datos de la cola
+                        </h2>
+                        <p>
+                            Cada columna, badge, KPI y acción nombra su campo o
+                            endpoint. «—» es ausente, nunca 0.
+                        </p>
+                    </div>
+                </div>
+                <div class="panel">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th scope="col">Elemento</th>
+                                <th scope="col">Fuente exacta</th>
+                                <th scope="col">Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Chip «0 pendientes»</td>
+                                <td>Cómputo de alertas con triage pendiente</td>
+                                <td>
+                                    <span class="tag req">requiere</span>
+                                    estado de triage persistido
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Chips Todas · Inmediato · Táctico ·
+                                    Preventivo · Monitoreo · Sin vínculo a caso
+                                </td>
+                                <td>
+                                    <code>alerts.nivel</code> de
+                                    <code>core.cat_niveles_alerta</code>; «Sin
+                                    vínculo a caso» filtra
+                                    <code>caso_id IS NULL</code>
+                                </td>
+                                <td>
+                                    <span class="tag ok">existe</span>; conteo
+                                    por nivel
+                                    <span class="tag req">requiere</span>
+                                    agregado
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Señal</td>
+                                <td>
+                                    <code>alerts.codigo</code> +
+                                    <code>alerts.titulo</code>
+                                </td>
+                                <td><span class="tag ok">existe</span></td>
+                            </tr>
+                            <tr>
+                                <td>Nivel</td>
+                                <td>
+                                    <code>alerts.nivel</code> de
+                                    <code>core.cat_niveles_alerta</code>
+                                </td>
+                                <td><span class="tag ok">existe</span></td>
+                            </tr>
+                            <tr>
+                                <td>Prioridad de alerta</td>
+                                <td>
+                                    <code>alerts.prioridad</code> de
+                                    <code>core.cat_prioridades_alerta</code>
+                                </td>
+                                <td><span class="tag ok">existe</span></td>
+                            </tr>
+                            <tr>
+                                <td>SLA</td>
+                                <td>
+                                    <code
+                                        >core.cat_niveles_alerta.sla_horas</code
+                                    >
+                                    (24 / 48 / 72 h o NULL)
+                                </td>
+                                <td><span class="tag ok">existe</span></td>
+                            </tr>
+                            <tr>
+                                <td>Reporte</td>
+                                <td><code>alerts.fecha_reporte</code></td>
+                                <td><span class="tag ok">existe</span></td>
+                            </tr>
+                            <tr>
+                                <td>Caso / Región</td>
+                                <td>
+                                    <code>alerts.casoCode</code>; Región
+                                    derivada de
+                                    <code>core.alcance_caso(uuid)</code>
+                                </td>
+                                <td>
+                                    <span class="tag req">requiere</span>
+                                    exponer <code>region</code> por fila de
+                                    alerta (el mapper hoy solo trae
+                                    <code>distrito</code>)
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Estado</td>
+                                <td>
+                                    <code>alerts.paso_actual</code> /
+                                    <code>alerts.estado</code>
+                                </td>
+                                <td><span class="tag ok">existe</span></td>
+                            </tr>
+                            <tr>
+                                <td>Acciones de triage</td>
+                                <td>
+                                    Convertir en alerta · Descartar (con motivo)
+                                </td>
+                                <td>
+                                    <span class="tag req">requiere</span>
+                                    <code>alerts.estado_triage</code> +
+                                    <code
+                                        >POST
+                                        /api/v1/alerts/{id}/{convertir|descartar}</code
+                                    >
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Notificaciones</td>
+                                <td>
+                                    <code>core.notificaciones</code>:
+                                    <code>id</code>, <code>tipo</code>,
+                                    <code>entidadTipo</code>,
+                                    <code>entidadId</code>,
+                                    <code>venceEn</code>, <code>estado</code>,
+                                    <code>createdAt</code>
+                                </td>
+                                <td>
+                                    <span class="tag req">requiere</span>
+                                    <code>titulo</code> / <code>detalle</code> y
+                                    <code
+                                        >PATCH /api/v1/notificaciones/{id}</code
+                                    >
+                                    para marcar leída
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Derivación y destinatarios</td>
+                                <td>
+                                    <code>alerts.derivacion</code>
+                                    (visibilidad interna · ejecutiva ·
+                                    sectorial)
+                                </td>
+                                <td>
+                                    <span class="tag req">requiere</span> tabla
+                                    de destinatarios + endpoints de derivación
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="section" aria-labelledby="estados-radar">
+                <div class="section-head">
+                    <div>
+                        <h2 id="estados-radar">Estados de la pantalla</h2>
+                        <p>
+                            Carga, error y parcial, tanto en la cola como en el
+                            centro de notificaciones.
+                        </p>
+                    </div>
+                </div>
+                <div class="estados">
+                    <div class="card">
+                        <strong>Cargando</strong>
+                        <p>
+                            Chip «0 pendientes» en «…» y filas esqueleto; el
+                            triage permanece deshabilitado.
+                        </p>
+                    </div>
+                    <div class="card">
+                        <strong>Error</strong>
+                        <p>
+                            Contadores «No disponible», nunca 0, con Reintentar;
+                            el centro de notificaciones falla por separado.
+                        </p>
+                    </div>
+                    <div class="card">
+                        <strong>Parcial</strong>
+                        <p>
+                            Si cae la fuente de notificaciones, la cola sigue
+                            visible y el centro muestra «—» con aviso.
+                        </p>
                     </div>
                 </div>
             </section>
@@ -437,8 +874,14 @@
                 <section class="section" aria-labelledby="notificaciones">
                     <div class="section-head">
                         <div>
-                            <h2 id="notificaciones">Centro de notificaciones</h2>
-                            <p>Categoría, fecha, estado de lectura y enlace al registro concreto.</p>
+                            <h2 id="notificaciones">
+                                Centro de notificaciones
+                            </h2>
+                            <p>
+                                Categoría, fecha, estado de lectura y enlace al
+                                registro concreto. Hoy el aviso se deriva del
+                                trabajo pendiente, no de un bus de mensajes.
+                            </p>
                         </div>
                         <span class="chip">0 sin leer</span>
                     </div>
@@ -456,9 +899,20 @@
                         </table>
                         <div class="empty" role="note">
                             <strong>Sin notificaciones.</strong>
-                            <code>core.notificaciones</code> tiene 0 filas: no hay tráfico real que
-                            produzca avisos. La campana no debe mostrar un punto ni un contador
-                            mientras siga así.
+                            <code>core.notificaciones</code> tiene 0 filas: el
+                            aviso se deriva hoy del trabajo pendiente, no de un
+                            bus de eventos. La campana no debe mostrar un punto
+                            ni un contador mientras siga así.
+                            <div class="sub" style="margin-top: 6px">
+                                <code>requiere</code> columnas
+                                <code>titulo</code> / <code>detalle</code> y
+                                <code>PATCH /api/v1/notificaciones/{id}</code>
+                                para marcar leída; el enlace al registro
+                                necesita
+                                <code>entidadTipo</code> +
+                                <code>entidadId</code>
+                                resueltos.
+                            </div>
                         </div>
                     </div>
                 </section>
@@ -467,7 +921,10 @@
                     <div class="section-head">
                         <div>
                             <h2 id="derivacion">Derivación y destinatarios</h2>
-                            <p>Lo que hoy solo existe en el tipo de datos, visible en la alerta.</p>
+                            <p>
+                                Lo que hoy solo existe en el tipo de datos,
+                                visible en la alerta.
+                            </p>
                         </div>
                         <span class="chip">Item 23</span>
                     </div>
@@ -480,16 +937,24 @@
                             <dt>Derivada a</dt>
                             <dd>— (sin destinatarios registrados)</dd>
                             <dt>Destinatarios</dt>
-                            <dd>0</dd>
+                            <dd>
+                                0 · <code>requiere</code> tabla de destinatarios
+                                y endpoints de derivación
+                            </dd>
                             <dt>Aprobación</dt>
-                            <dd>Requiere <code>direccion_oaipcs</code> o suplencia vigente</dd>
+                            <dd>
+                                Requiere <code>direccion_oaipcs</code> o
+                                suplencia vigente
+                            </dd>
                             <dt>Reapertura</dt>
                             <dd>
-                                Permitida con motivo y permiso; queda registrada en el historial de
-                                pasos
+                                Permitida con motivo y permiso; queda registrada
+                                en el historial de pasos
                             </dd>
                             <dt>Deshacer</dt>
-                            <dd>Volver al paso anterior con motivo obligatorio</dd>
+                            <dd>
+                                Volver al paso anterior con motivo obligatorio
+                            </dd>
                         </dl>
                     </div>
                 </section>
@@ -499,32 +964,102 @@
                 <h2>Qué debe construir el equipo</h2>
                 <ul>
                     <li>
-                        <b>Item 76.</b> Un estado de señal (inicial / en triage / convertida /
-                        descartada) con motivo de descarte obligatorio, y el botón «Convertir en
-                        alerta» precargando los seis bloques del Anexo 3. No se crea entidad nueva:
-                        la señal es una alerta en estado inicial.
+                        <b>Item 76.</b> Un estado de señal (inicial / en triage
+                        / convertida / descartada) con motivo de descarte
+                        obligatorio, y el botón «Convertir en alerta»
+                        precargando los seis bloques del Anexo 3. No se crea
+                        entidad nueva: la señal es una alerta en estado inicial.
                     </li>
                     <li>
-                        <b>Item 31.</b> Tabla de notificaciones por usuario, con lectura, categoría
-                        y enlace al registro; el punto y el contador de la campana deben depender de
-                        pendientes reales, no de un valor fijo.
+                        <b>Item 31.</b> Tabla de notificaciones por usuario, con
+                        lectura, categoría y enlace al registro. Hoy el aviso se
+                        deriva del trabajo pendiente, no de un bus de mensajes;
+                        el punto y el contador deben depender de pendientes
+                        reales, no de un valor fijo.
                     </li>
                     <li>
-                        <b>Item 23.</b> Visibilidad de la derivación y de los destinatarios en el
-                        panel de la alerta, con la regla de aprobación por <code>direccion_oaipcs</code>.
+                        <b>Item 23.</b> Visibilidad de la derivación y de los
+                        destinatarios en el panel de la alerta, con la regla de
+                        aprobación por <code>direccion_oaipcs</code>.
                     </li>
                     <li>
-                        Datos que faltan y no se estiman: ninguna alerta tiene vínculo a caso en la
-                        muestra, 0 destinatarios registrados y 0 notificaciones. Se declaran «—».
+                        <b>Modelo RED/NODO.</b> <code>territorio.*</code> no
+                        modela RED ni NODO; solo existe
+                        <code>legacy.dim_tipo_actor_radar</code>. Sin
+                        <code>territorio.red</code> /
+                        <code>territorio.nodo</code> y las columnas
+                        <code>red_id</code>, <code>nodo_id</code>,
+                        <code>tipo_actor_radar_id</code>, el eje no se puede
+                        persistir ni afirmar.
+                    </li>
+                    <li>
+                        Datos que faltan y no se estiman: ninguna alerta tiene
+                        vínculo a caso en la muestra, 0 destinatarios
+                        registrados y 0 notificaciones. Se declaran «—».
                     </li>
                 </ul>
                 <p style="margin: 10px 0 0; color: #8a5a00">
-                    Items 23, 31 y 76 de <code>docs/07_frontend/frontend.md</code>. Cifras reales
-                    del 22.11.2026: 76 alertas vivas, 0 sin validar, 0 notificaciones. Niveles y
-                    prioridades provienen de <code>core.cat_niveles_alerta</code> y
-                    <code>core.cat_prioridades_alerta</code>, con sus SLA de 24 / 48 / 72 h y sin
-                    plazo.
+                    Items 23, 31 y 76 de
+                    <code>docs/07_frontend/frontend.md</code>. Cifras reales del
+                    22.11.2026: 76 alertas vivas, 0 sin validar, 0
+                    notificaciones. Niveles y prioridades provienen de
+                    <code>core.cat_niveles_alerta</code> y
+                    <code>core.cat_prioridades_alerta</code>, con sus SLA de 24
+                    / 48 / 72 h y sin plazo.
                 </p>
+            </aside>
+
+            <aside class="notes" style="margin-top: 12px">
+                <h2>Fuera de alcance de este mockup</h2>
+                <ul>
+                    <li>
+                        Modelo y catálogo RED/NODO: se muestra el flujo, no se
+                        fija una lista que no existe.
+                    </li>
+                    <li>
+                        Bus de notificaciones: el aviso se deriva de trabajo
+                        pendiente, no de eventos publicados.
+                    </li>
+                    <li>Persistencia de destinatarios y de la derivación.</li>
+                    <li>
+                        Persistencia del triage (estado y motivo de descarte).
+                    </li>
+                    <li>
+                        Derivar la prioridad de atención desde el riesgo: está
+                        prohibido; requiere la regla que OAIPCS no ha definido.
+                    </li>
+                    <li>
+                        Cambios de aging o de SLA: los plazos son los del
+                        catálogo de niveles, no una regla nueva.
+                    </li>
+                </ul>
+                <h2 style="margin-top: 14px">Vocabulario congelado</h2>
+                <ul>
+                    <li>
+                        Estados de caso:
+                        <code>Abierto · Resuelto · Archivado</code>.
+                    </li>
+                    <li>
+                        Conflictividad:
+                        <code
+                            >Diferencia · Controversia · Conflicto social ·
+                            Crisis social</code
+                        >.
+                    </li>
+                    <li>
+                        Riesgo <code>Bajo · Moderado · Alto</code>; prioridad
+                        <code>Urgente · Moderado · Bajo</code>.
+                    </li>
+                    <li>
+                        «Región», nunca «Territorio»; «GORE», nunca «Gobierno
+                        regional».
+                    </li>
+                    <li>
+                        «Tipo de compromiso», nunca «tipo de acuerdo»; «Unidad
+                        responsable». La prioridad de la columna es «prioridad
+                        de alerta», distinta de la prioridad de atención.
+                    </li>
+                </ul>
             </aside>
         </main>
     </body>

@@ -904,18 +904,29 @@
                         de trabajo y la capacidad del equipo. Todos los valores
                         son agregados reales de una consulta de solo lectura
                         ejecutada el 22.11.2026; lo que no existe se marca «—» y
-                        no se estima.
+                        no se estima. Cada serie declara su
+                        <b>vista de agregación</b>; si esa vista no existe, la
+                        tarjeta se marca <b>requiere</b> y no se dibuja una
+                        cifra plausible.
                     </p>
                 </div>
                 <div class="view-actions">
                     <span class="anexo-badge">Items 51 · 52 · 57 · 85</span>
-                    <button type="button" class="button-secondary" id="btn-print">
+                    <button
+                        type="button"
+                        class="button-secondary"
+                        id="btn-print"
+                    >
                         Preparar hoja de impresión
                     </button>
                 </div>
             </header>
 
-            <nav class="mode-tabs" role="tablist" aria-label="Modo del dashboard">
+            <nav
+                class="mode-tabs"
+                role="tablist"
+                aria-label="Modo del dashboard"
+            >
                 <button
                     type="button"
                     role="tab"
@@ -947,14 +958,20 @@
                 </label>
                 <label class="select-filter">
                     <span>Riesgo</span>
-                    <select id="f-riesgo" aria-label="Filtrar por nivel de riesgo">
+                    <select
+                        id="f-riesgo"
+                        aria-label="Filtrar por nivel de riesgo"
+                    >
                         <option value="*">Todos</option>
                         <option value="Alto">Alto</option>
                         <option value="Moderado">Moderado</option>
                         <option value="Bajo">Bajo</option>
                     </select>
                 </label>
-                <span class="cut-chip" title="Fecha de la consulta de solo lectura">
+                <span
+                    class="cut-chip"
+                    title="Fecha de la consulta de solo lectura"
+                >
                     Corte de datos <b>22.11.2026</b> · última alerta 13.08.2026
                 </span>
                 <span class="result-count" id="filtro-estado"
@@ -986,11 +1003,16 @@
                         </div>
                         <dl class="meta">
                             <dt>Definición</dt>
-                            <dd>Conteo de casos con <code>anulado_en IS NULL</code>.</dd>
+                            <dd>
+                                Conteo de casos con
+                                <code>anulado_en IS NULL</code>.
+                            </dd>
                             <dt>Filtros</dt>
                             <dd>Ninguno (total institucional).</dd>
                             <dt>Fuente</dt>
-                            <dd><a href="#src-casos">core.casos</a> · Anexo 2</dd>
+                            <dd>
+                                <a href="#src-casos">core.casos</a> · Anexo 2
+                            </dd>
                             <dt>Corte</dt>
                             <dd>22.11.2026 · alta máxima de caso 01.05.2026</dd>
                         </dl>
@@ -1007,8 +1029,8 @@
                         </div>
                         <div class="kpi-val">1 <small>/ 34</small></div>
                         <div class="kpi-note">
-                            Distribución real: Bajo 20 · Moderado 13 · Alto 1. El
-                            único Alto es de Lima.
+                            Distribución real: Bajo 20 · Moderado 13 · Alto 1.
+                            El único Alto es de Lima.
                         </div>
                         <dl class="meta">
                             <dt>Definición</dt>
@@ -1044,7 +1066,8 @@
                             <dt>Definición</dt>
                             <dd>
                                 Regiones distintas en
-                                <code>core.caso_regiones</code> con caso vigente.
+                                <code>core.caso_regiones</code> con caso
+                                vigente.
                             </dd>
                             <dt>Filtros</dt>
                             <dd>Ninguno.</dd>
@@ -1075,11 +1098,17 @@
                         </div>
                         <dl class="meta">
                             <dt>Definición</dt>
-                            <dd>Filas de <code>core.alertas_tempranas</code>.</dd>
+                            <dd>
+                                Filas de <code>core.alertas_tempranas</code>.
+                            </dd>
                             <dt>Filtros</dt>
                             <dd>Ninguno.</dd>
                             <dt>Fuente</dt>
-                            <dd><a href="#src-alertas">core.alertas_tempranas</a></dd>
+                            <dd>
+                                <a href="#src-alertas"
+                                    >core.alertas_tempranas</a
+                                >
+                            </dd>
                             <dt>Corte</dt>
                             <dd>22.11.2026 · última alerta 13.08.2026</dd>
                         </dl>
@@ -1095,7 +1124,8 @@
                                 </h2>
                                 <p class="card-sub">
                                     Barras apiladas por nivel de riesgo; el
-                                    número a la derecha es el total de la región.
+                                    número a la derecha es el total de la
+                                    región.
                                 </p>
                             </div>
                             <span class="tag-mini" id="chart-mode-label"
@@ -1116,7 +1146,8 @@
                         ></figure>
                         <p class="footnote" style="margin: 0">
                             Escala común de 0 a 11 casos. Los conteos por región
-                            suman 80 porque un caso puede cubrir varias regiones;
+                            suman 80 porque un caso puede cubrir varias
+                            regiones;
                             <b>no</b> son una partición de los 34 casos.
                         </p>
                         <dl class="meta">
@@ -1128,7 +1159,9 @@
                             <dt>Filtros</dt>
                             <dd>Región y riesgo de la barra superior.</dd>
                             <dt>Fuente</dt>
-                            <dd><a href="#src-regiones">core.caso_regiones</a></dd>
+                            <dd>
+                                <a href="#src-regiones">core.caso_regiones</a>
+                            </dd>
                             <dt>Corte</dt>
                             <dd>22.11.2026</dd>
                         </dl>
@@ -1147,7 +1180,9 @@
                         <div class="table-wrap" style="border: 0">
                             <table class="data-table" id="tabla-region">
                                 <caption class="table-caption">
-                                    <code>analytics.vw_anexo_02_panorama_regional</code>
+                                    <code
+                                        >analytics.vw_anexo_02_panorama_regional</code
+                                    >
                                     agrupa por región y subsector; aquí se
                                     agrega el subsector para leer el total
                                     regional.
@@ -1156,7 +1191,9 @@
                                     <tr>
                                         <th scope="col">Región</th>
                                         <th scope="col" class="num">Alto</th>
-                                        <th scope="col" class="num">Moderado</th>
+                                        <th scope="col" class="num">
+                                            Moderado
+                                        </th>
                                         <th scope="col" class="num">Bajo</th>
                                         <th scope="col" class="num">Total</th>
                                     </tr>
@@ -1175,8 +1212,8 @@
                         </div>
                         <p class="footnote" style="margin: 0">
                             Suma de vínculos caso–región, no de casos. Los 34
-                            casos incluyen 3 sin región, por eso no coinciden con
-                            el total institucional.
+                            casos incluyen 3 sin región, por eso no coinciden
+                            con el total institucional.
                         </p>
                         <dl class="meta">
                             <dt>Definición</dt>
@@ -1239,10 +1276,42 @@
                                 y2="20"
                                 stroke="#f0f3f6"
                             />
-                            <text x="42" y="153" text-anchor="end" font-size="8" fill="#9aa5ae">0</text>
-                            <text x="42" y="109.7" text-anchor="end" font-size="8" fill="#9aa5ae">15</text>
-                            <text x="42" y="66.3" text-anchor="end" font-size="8" fill="#9aa5ae">30</text>
-                            <text x="42" y="23" text-anchor="end" font-size="8" fill="#9aa5ae">45</text>
+                            <text
+                                x="42"
+                                y="153"
+                                text-anchor="end"
+                                font-size="8"
+                                fill="#9aa5ae"
+                            >
+                                0
+                            </text>
+                            <text
+                                x="42"
+                                y="109.7"
+                                text-anchor="end"
+                                font-size="8"
+                                fill="#9aa5ae"
+                            >
+                                15
+                            </text>
+                            <text
+                                x="42"
+                                y="66.3"
+                                text-anchor="end"
+                                font-size="8"
+                                fill="#9aa5ae"
+                            >
+                                30
+                            </text>
+                            <text
+                                x="42"
+                                y="23"
+                                text-anchor="end"
+                                font-size="8"
+                                fill="#9aa5ae"
+                            >
+                                45
+                            </text>
                             <polyline
                                 points="50,124 167.5,126.9 285,106.7 402.5,118.2 520,34.4"
                                 fill="none"
@@ -1252,25 +1321,133 @@
                                 stroke-linecap="round"
                             />
                             <circle cx="50" cy="124" r="3.5" fill="#2455a2" />
-                            <circle cx="167.5" cy="126.9" r="3.5" fill="#2455a2" />
-                            <circle cx="285" cy="106.7" r="3.5" fill="#2455a2" />
-                            <circle cx="402.5" cy="118.2" r="3.5" fill="#2455a2" />
+                            <circle
+                                cx="167.5"
+                                cy="126.9"
+                                r="3.5"
+                                fill="#2455a2"
+                            />
+                            <circle
+                                cx="285"
+                                cy="106.7"
+                                r="3.5"
+                                fill="#2455a2"
+                            />
+                            <circle
+                                cx="402.5"
+                                cy="118.2"
+                                r="3.5"
+                                fill="#2455a2"
+                            />
                             <circle cx="520" cy="34.4" r="3.5" fill="#ad4d46" />
-                            <text x="50" y="114" text-anchor="middle" font-size="8.5" fill="#465a6c" font-weight="600">9</text>
-                            <text x="167.5" y="117" text-anchor="middle" font-size="8.5" fill="#465a6c" font-weight="600">8</text>
-                            <text x="285" y="97" text-anchor="middle" font-size="8.5" fill="#465a6c" font-weight="600">15</text>
-                            <text x="402.5" y="108" text-anchor="middle" font-size="8.5" fill="#465a6c" font-weight="600">11</text>
-                            <text x="520" y="24" text-anchor="middle" font-size="8.5" fill="#ad4d46" font-weight="700">40*</text>
-                            <text x="50" y="168" text-anchor="middle" font-size="8.5" fill="#8b97a1">2022</text>
-                            <text x="167.5" y="168" text-anchor="middle" font-size="8.5" fill="#8b97a1">2023</text>
-                            <text x="285" y="168" text-anchor="middle" font-size="8.5" fill="#8b97a1">2024</text>
-                            <text x="402.5" y="168" text-anchor="middle" font-size="8.5" fill="#8b97a1">2025</text>
-                            <text x="520" y="168" text-anchor="middle" font-size="8.5" fill="#8b97a1">2026</text>
-                            <text x="520" y="183" text-anchor="end" font-size="7.5" fill="#9aa5ae">* hasta 13.08.2026</text>
+                            <text
+                                x="50"
+                                y="114"
+                                text-anchor="middle"
+                                font-size="8.5"
+                                fill="#465a6c"
+                                font-weight="600"
+                            >
+                                9
+                            </text>
+                            <text
+                                x="167.5"
+                                y="117"
+                                text-anchor="middle"
+                                font-size="8.5"
+                                fill="#465a6c"
+                                font-weight="600"
+                            >
+                                8
+                            </text>
+                            <text
+                                x="285"
+                                y="97"
+                                text-anchor="middle"
+                                font-size="8.5"
+                                fill="#465a6c"
+                                font-weight="600"
+                            >
+                                15
+                            </text>
+                            <text
+                                x="402.5"
+                                y="108"
+                                text-anchor="middle"
+                                font-size="8.5"
+                                fill="#465a6c"
+                                font-weight="600"
+                            >
+                                11
+                            </text>
+                            <text
+                                x="520"
+                                y="24"
+                                text-anchor="middle"
+                                font-size="8.5"
+                                fill="#ad4d46"
+                                font-weight="700"
+                            >
+                                40*
+                            </text>
+                            <text
+                                x="50"
+                                y="168"
+                                text-anchor="middle"
+                                font-size="8.5"
+                                fill="#8b97a1"
+                            >
+                                2022
+                            </text>
+                            <text
+                                x="167.5"
+                                y="168"
+                                text-anchor="middle"
+                                font-size="8.5"
+                                fill="#8b97a1"
+                            >
+                                2023
+                            </text>
+                            <text
+                                x="285"
+                                y="168"
+                                text-anchor="middle"
+                                font-size="8.5"
+                                fill="#8b97a1"
+                            >
+                                2024
+                            </text>
+                            <text
+                                x="402.5"
+                                y="168"
+                                text-anchor="middle"
+                                font-size="8.5"
+                                fill="#8b97a1"
+                            >
+                                2025
+                            </text>
+                            <text
+                                x="520"
+                                y="168"
+                                text-anchor="middle"
+                                font-size="8.5"
+                                fill="#8b97a1"
+                            >
+                                2026
+                            </text>
+                            <text
+                                x="520"
+                                y="183"
+                                text-anchor="end"
+                                font-size="7.5"
+                                fill="#9aa5ae"
+                            >
+                                * hasta 13.08.2026
+                            </text>
                         </svg>
                         <p class="footnote" style="margin: 0">
-                            Son conteos de <b>registros por año de reporte</b>, no
-                            tasas ni tendencia de conflictividad. 2026 está
+                            Son conteos de <b>registros por año de reporte</b>,
+                            no tasas ni tendencia de conflictividad. 2026 está
                             incompleto y no debe compararse con años cerrados;
                             los años sin registros no significan «cero
                             conflictos».
@@ -1282,7 +1459,9 @@
                                     <thead>
                                         <tr>
                                             <th scope="col">Año</th>
-                                            <th scope="col" class="num">Alertas</th>
+                                            <th scope="col" class="num">
+                                                Alertas
+                                            </th>
                                             <th scope="col">Lectura</th>
                                         </tr>
                                     </thead>
@@ -1393,7 +1572,10 @@
                         </p>
                         <dl class="meta">
                             <dt>Definición</dt>
-                            <dd>Casos vigentes por <code>nivel_conflicto_id</code>.</dd>
+                            <dd>
+                                Casos vigentes por
+                                <code>nivel_conflicto_id</code>.
+                            </dd>
                             <dt>Filtros</dt>
                             <dd>Ninguno (distribución institucional).</dd>
                             <dt>Fuente</dt>
@@ -1441,7 +1623,9 @@
                             style="margin: 0"
                         >
                             <div class="bar-row">
-                                <span class="bar-lab" title="André Jiménez Agapito"
+                                <span
+                                    class="bar-lab"
+                                    title="André Jiménez Agapito"
                                     >A. Jiménez Agapito</span
                                 >
                                 <span class="bar-track"
@@ -1453,7 +1637,9 @@
                                 <span class="bar-val">14</span>
                             </div>
                             <div class="bar-row">
-                                <span class="bar-lab" title="Peggy Contreras Montes"
+                                <span
+                                    class="bar-lab"
+                                    title="Peggy Contreras Montes"
                                     >P. Contreras Montes</span
                                 >
                                 <span class="bar-track"
@@ -1465,7 +1651,9 @@
                                 <span class="bar-val">9</span>
                             </div>
                             <div class="bar-row">
-                                <span class="bar-lab" title="Iván Enrique Ascurra Santillán"
+                                <span
+                                    class="bar-lab"
+                                    title="Iván Enrique Ascurra Santillán"
                                     >I. Ascurra Santillán</span
                                 >
                                 <span class="bar-track"
@@ -1477,7 +1665,9 @@
                                 <span class="bar-val">8</span>
                             </div>
                             <div class="bar-row">
-                                <span class="bar-lab" title="Esteban Vidal Saldarriaga"
+                                <span
+                                    class="bar-lab"
+                                    title="Esteban Vidal Saldarriaga"
                                     >E. Vidal Saldarriaga</span
                                 >
                                 <span class="bar-track"
@@ -1491,8 +1681,8 @@
                         </figure>
                         <p class="footnote" style="margin: 0">
                             <code>core.usuarios</code> tiene 33 filas y solo 4
-                            usuarios concentran los 34 casos; el resto está en 0.
-                            Este indicador mide <b>conteo de casos</b>, no
+                            usuarios concentran los 34 casos; el resto está en
+                            0. Este indicador mide <b>conteo de casos</b>, no
                             esfuerzo, horas ni complejidad.
                         </p>
                         <dl class="meta">
@@ -1513,9 +1703,7 @@
                     <article class="card">
                         <div class="card-head">
                             <div>
-                                <h2 class="card-title">
-                                    Compromisos vencidos
-                                </h2>
+                                <h2 class="card-title">Compromisos vencidos</h2>
                                 <p class="card-sub">
                                     Plazo calculado por fecha de vencimiento, no
                                     por estado de gestión.
@@ -1524,7 +1712,9 @@
                             <span class="flag flag-off">No calculable</span>
                         </div>
                         <div class="chart-empty">
-                            <strong>«—» Sin dato para calcular vencimientos</strong>
+                            <strong
+                                >«—» Sin dato para calcular vencimientos</strong
+                            >
                             Los 8 compromisos vigentes están en estado
                             <b>En proceso</b> y <b>ninguno</b> tiene
                             <code>fecha_vencimiento</code>. Con la columna vacía
@@ -1547,7 +1737,9 @@
                             <dt>Filtros</dt>
                             <dd>Ninguno (vacío por falta de dato).</dd>
                             <dt>Fuente</dt>
-                            <dd><a href="#src-compromisos">core.compromisos</a></dd>
+                            <dd>
+                                <a href="#src-compromisos">core.compromisos</a>
+                            </dd>
                             <dt>Corte</dt>
                             <dd>22.11.2026</dd>
                         </dl>
@@ -1580,7 +1772,11 @@
                             <dt>Filtros</dt>
                             <dd>Ninguno.</dd>
                             <dt>Fuente</dt>
-                            <dd><a href="#src-alertas">core.alertas_tempranas</a></dd>
+                            <dd>
+                                <a href="#src-alertas"
+                                    >core.alertas_tempranas</a
+                                >
+                            </dd>
                             <dt>Corte</dt>
                             <dd>22.11.2026</dd>
                         </dl>
@@ -1599,9 +1795,10 @@
                             <b>13</b><span>de 25 regiones</span>
                         </div>
                         <p class="footnote" style="margin: 0">
-                            12 regiones no tienen casos y 3 casos no tienen región
-                            asignada. La cobertura cuenta regiones, no población ni
-                            superficie: no debe leerse como «% del país cubierto».
+                            12 regiones no tienen casos y 3 casos no tienen
+                            región asignada. La cobertura cuenta regiones, no
+                            población ni superficie: no debe leerse como «% del
+                            país cubierto».
                         </p>
                         <dl class="meta">
                             <dt>Definición</dt>
@@ -1612,7 +1809,9 @@
                             <dt>Filtros</dt>
                             <dd>Ninguno.</dd>
                             <dt>Fuente</dt>
-                            <dd><a href="#src-regiones">core.caso_regiones</a></dd>
+                            <dd>
+                                <a href="#src-regiones">core.caso_regiones</a>
+                            </dd>
                             <dt>Corte</dt>
                             <dd>22.11.2026</dd>
                         </dl>
@@ -1636,9 +1835,9 @@
                             Solo 5 de 34 casos tienen hechos en
                             <code>core.caso_cronologia</code>, y en esos 5 la
                             fecha del primer hecho es <b>anterior</b> a
-                            <code>fecha_inicio</code> (deltas negativos, promedio
-                            −74 días por fechas del legado). No existe además un
-                            timestamp de «respuesta»: el cálculo no es
+                            <code>fecha_inicio</code> (deltas negativos,
+                            promedio −74 días por fechas del legado). No existe
+                            además un timestamp de «respuesta»: el cálculo no es
                             defendible.
                         </div>
                         <dl class="meta">
@@ -1675,9 +1874,12 @@
                     <div class="table-wrap" style="border: 0">
                         <table class="data-table mx">
                             <caption class="table-caption">
-                                Cruce de <code>core.cat_niveles_conflicto</code>
-                                y <code>core.cat_niveles_riesgo</code> sobre casos
-                                vigentes. Las celdas en 0 son ceros reales.
+                                Cruce de
+                                <code>core.cat_niveles_conflicto</code>
+                                y
+                                <code>core.cat_niveles_riesgo</code>
+                                sobre casos vigentes. Las celdas en 0 son ceros
+                                reales.
                             </caption>
                             <thead>
                                 <tr>
@@ -1752,24 +1954,408 @@
                 <p class="meta-line">
                     El panel OAIPCS no repite el Panorama: aquí la unidad es la
                     <b>cola de trabajo</b> (casos por especialista, señales sin
-                    caso, compromisos con plazo) y la <b>capacidad del equipo</b>,
-                    no la lectura institucional.
+                    caso, compromisos con plazo) y la
+                    <b>capacidad del equipo</b>, no la lectura institucional.
                 </p>
             </section>
 
+            <!-- ─────────────────── CONTRATO DE SERIES ─────────────────── -->
+            <section
+                class="notes"
+                id="contrato-series"
+                aria-labelledby="contrato-titulo"
+            >
+                <h2 id="contrato-titulo">
+                    Contrato de datos: una vista de agregación por serie
+                </h2>
+                <p>
+                    Ninguna tarjeta se alimenta de una cifra escrita a mano:
+                    cada serie declara la vista que la agrega. Si la vista no
+                    existe, la tarjeta se marca <b>requiere</b> y no se dibuja
+                    un número plausible. La consulta del bloque «Fuentes» es el
+                    respaldo reproducible del snapshot, no el contrato de la
+                    API.
+                </p>
+                <div class="table-wrap">
+                    <table class="data-table">
+                        <caption class="table-caption">
+                            El equipo que implemente consume la vista de
+                            agregación; no repite el
+                            <code>SELECT</code>
+                            del mockup ni cablea el resultado.
+                        </caption>
+                        <thead>
+                            <tr>
+                                <th scope="col">Serie o tarjeta</th>
+                                <th scope="col">Consulta del snapshot</th>
+                                <th scope="col">Vista de agregación</th>
+                                <th scope="col">Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    Casos vigentes · riesgo · conflictividad ·
+                                    prioridad
+                                </td>
+                                <td><code>core.casos</code> + catálogos</td>
+                                <td><code>analytics.vw_casos_resumen</code></td>
+                                <td>
+                                    <span class="flag flag-off">Requiere</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Casos por región (barras y tabla)</td>
+                                <td>
+                                    <code>core.caso_regiones</code> +
+                                    <code>core.regiones</code>
+                                </td>
+                                <td>
+                                    <code
+                                        >analytics.vw_anexo_02_panorama_regional</code
+                                    >
+                                </td>
+                                <td>
+                                    <span class="flag flag-ok">Existe</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Matriz nivel de conflictividad × riesgo</td>
+                                <td><code>core.casos</code> + catálogos</td>
+                                <td>
+                                    <code
+                                        >analytics.vw_anexo_15_matriz_conflictividad</code
+                                    >
+                                </td>
+                                <td>
+                                    <span class="flag flag-ok">Existe</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Alertas por año de reporte</td>
+                                <td>
+                                    <code
+                                        >core.alertas_tempranas.fecha_reporte</code
+                                    >
+                                </td>
+                                <td>
+                                    <code>analytics.vw_alertas_por_anio</code>
+                                </td>
+                                <td>
+                                    <span class="flag flag-off">Requiere</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Carga por especialista (punto focal)</td>
+                                <td>
+                                    <code
+                                        >core.casos.punto_focal_usuario_id</code
+                                    >
+                                </td>
+                                <td>
+                                    <code>analytics.vw_carga_especialista</code>
+                                </td>
+                                <td>
+                                    <span class="flag flag-off">Requiere</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Señales sin triage</td>
+                                <td>
+                                    <code
+                                        >core.alertas_tempranas.caso_id IS
+                                        NULL</code
+                                    >
+                                </td>
+                                <td>
+                                    <code>analytics.vw_alertas_sin_triage</code>
+                                </td>
+                                <td>
+                                    <span class="flag flag-off">Requiere</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Cobertura regional</td>
+                                <td>
+                                    <code>core.caso_regiones</code> /
+                                    <code>core.regiones</code>
+                                </td>
+                                <td>
+                                    <code>analytics.vw_cobertura_regional</code>
+                                </td>
+                                <td>
+                                    <span class="flag flag-off">Requiere</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Compromisos vencidos</td>
+                                <td><code>core.compromisos</code></td>
+                                <td>
+                                    <code
+                                        >analytics.vw_anexo_14_seguimiento_compromisos</code
+                                    >
+                                    existe, pero <b>requiere</b>
+                                    <code
+                                        >core.compromisos.fecha_vencimiento</code
+                                    >
+                                </td>
+                                <td>
+                                    <span class="flag flag-off">Requiere</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Tiempo de primera respuesta</td>
+                                <td>
+                                    <code>core.caso_cronologia</code> + evento
+                                    de respuesta
+                                </td>
+                                <td>
+                                    <code>analytics.vw_primera_respuesta</code>
+                                </td>
+                                <td>
+                                    <span class="flag flag-off">Requiere</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>SLA y <i>aging</i></td>
+                                <td>No hay historia de estados por caso</td>
+                                <td><code>analytics.vw_sla_aging</code></td>
+                                <td>
+                                    <span class="flag flag-off">Requiere</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Última sincronización por fuente</td>
+                                <td>
+                                    <code
+                                        >core.integraciones.ultima_sincronizacion</code
+                                    >
+                                    (nula en 20/20)
+                                </td>
+                                <td>
+                                    <code
+                                        >analytics.vw_sincronizacion_fuente</code
+                                    >
+                                </td>
+                                <td>
+                                    <span class="flag flag-off">Requiere</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>Vistas del item 51 que todavía no existen</h3>
+                <p>
+                    El item 51 nombra siete vistas del módulo analítico. Ninguna
+                    está creada en el snapshot: todas se marcan
+                    <b>requiere</b> y no se dibujan hasta que exista su
+                    definición de métrica, filtros y fecha de corte.
+                </p>
+                <ul>
+                    <li>
+                        <code>T_COMP</code> — comparativa por subsector.
+                        <b>Requiere</b> la vista y la regla de agregación.
+                    </li>
+                    <li>
+                        <code>T_ALTA_DET</code> — alertas en detalle.
+                        <b>Requiere</b> la vista.
+                    </li>
+                    <li>
+                        <code>T_ALTA_EST</code> — alertas estratégicas.
+                        <b>Requiere</b> la vista.
+                    </li>
+                    <li>
+                        <code>T_ESTANC</code> — estancamiento por etapa.
+                        <b>Requiere</b> historia de estados por caso.
+                    </li>
+                    <li>
+                        <code>T_PANO</code> — panorama. <b>Requiere</b> la
+                        vista.
+                    </li>
+                    <li>
+                        <code>T_ALERTAS_EST</code> — alertas por estado.
+                        <b>Requiere</b> estados de triage registrados.
+                    </li>
+                    <li>
+                        <code>T_CLIMA</code> — clima social. <b>Requiere</b> la
+                        capa de reuniones y el registro de clima, que no existe.
+                    </li>
+                </ul>
+
+                <h3>Vocabulario congelado</h3>
+                <dl class="vocab">
+                    <dt>Estados de caso</dt>
+                    <dd>Abierto · Resuelto · Archivado</dd>
+                    <dt>Conflictividad</dt>
+                    <dd>
+                        Diferencia · Controversia · Conflicto social · Crisis
+                        social
+                    </dd>
+                    <dt>Riesgo</dt>
+                    <dd>Bajo · Moderado · Alto</dd>
+                    <dt>Prioridad</dt>
+                    <dd>Urgente · Moderado · Bajo</dd>
+                    <dt>Subsector</dt>
+                    <dd>Pesca y Acuicultura · MYPE e Industria</dd>
+                    <dt>Geografía y gobierno</dt>
+                    <dd>
+                        «Región» (no «Territorio») · «GORE» (no «Gobierno
+                        regional») · «Unidad responsable»
+                    </dd>
+                </dl>
+                <p class="meta-line" style="margin-top: 10px">
+                    Un caso está <b>vigente</b> cuando
+                    <code>anulado_en IS NULL</code>; su estado solo puede ser
+                    Abierto, Resuelto o Archivado. «Vigente» no es un estado y
+                    no se pinta como badge.
+                </p>
+            </section>
+
+            <!-- ─────────────────── ESTADOS DE PANTALLA ─────────────────── -->
+            <section
+                class="notes"
+                id="estados-pantalla"
+                aria-labelledby="estados-titulo"
+            >
+                <h2 id="estados-titulo">Estados de pantalla</h2>
+                <p>
+                    Las tres rutas de lectura de cada tarjeta, para que el
+                    diseño no se evalúe solo con datos. El endpoint de agregados
+                    <code>GET /api/v1/analitica/resumen</code>
+                    <b>requiere</b> ser creado; hoy no existe.
+                </p>
+                <div class="grid three-col">
+                    <article class="card">
+                        <div class="card-head">
+                            <div>
+                                <h3 class="card-title">Cargando</h3>
+                                <p class="card-sub">
+                                    Mientras responde el endpoint.
+                                </p>
+                            </div>
+                            <span class="flag flag-off">Requiere</span>
+                        </div>
+                        <div class="chart-empty">
+                            <strong>Consultando agregados…</strong>
+                            Esqueleto de tarjeta sin cifras: no se pinta un
+                            valor de ejemplo mientras llega la respuesta. La
+                            fecha de corte se muestra al terminar, no antes.
+                        </div>
+                        <p class="footnote" style="margin: 0">
+                            <b>Requiere</b>
+                            <code>GET /api/v1/analitica/resumen</code>
+                            con indicador de carga por tarjeta.
+                        </p>
+                    </article>
+                    <article class="card">
+                        <div class="card-head">
+                            <div>
+                                <h3 class="card-title">Vacío</h3>
+                                <p class="card-sub">
+                                    La consulta responde sin filas.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="chart-empty">
+                            <strong>Sin datos para este filtro</strong>
+                            «Sin datos» es un hecho distinto de «cero casos»: se
+                            escribe el filtro aplicado y se ofrece limpiarlo. No
+                            se rellena con 0 ni con un guion sin explicación.
+                        </div>
+                        <p class="footnote" style="margin: 0">
+                            Se conserva el corte y la fuente para que el vacío
+                            sea auditable.
+                        </p>
+                    </article>
+                    <article class="card">
+                        <div class="card-head">
+                            <div>
+                                <h3 class="card-title">Error</h3>
+                                <p class="card-sub">
+                                    El endpoint falla o expira.
+                                </p>
+                            </div>
+                            <span class="flag">Sin respaldo</span>
+                        </div>
+                        <div class="chart-empty">
+                            <strong>No se pudo cargar la serie</strong>
+                            Se muestra el mensaje del servidor y el botón
+                            «Reintentar»; la tarjeta queda sin cifra. Prohibido
+                            caer a un número de respaldo o a la última cifra
+                            cacheada sin marcarla como tal.
+                        </div>
+                        <p class="footnote" style="margin: 0">
+                            <b>Requiere</b> contrato de error del endpoint y un
+                            código de reintento.
+                        </p>
+                    </article>
+                </div>
+            </section>
+
+            <!-- ───────────────────── FUERA DE ALCANCE ───────────────────── -->
+            <section
+                class="notes"
+                id="fuera-alcance"
+                aria-labelledby="fuera-titulo"
+            >
+                <h2 id="fuera-titulo">Fuera de alcance de este mockup</h2>
+                <ul>
+                    <li>
+                        <b>Mapa y ubigeo (item 53):</b> aplazado por decisión de
+                        producto hasta que exista el dataset de ubigeo y
+                        centroide. No se dibuja ninguna capa cartográfica.
+                    </li>
+                    <li>
+                        <b>SLA, <i>aging</i> y tendencia interanual:</b> no hay
+                        historia de estados ni serie plurianual; se dibujaría
+                        una forma sin dato.
+                    </li>
+                    <li>
+                        <b>Módulos 2027 y <code>T_CLIMA</code>:</b> sin tablas
+                        ni captura que los alimenten; no se reutilizan datos de
+                        demo como si fueran históricos.
+                    </li>
+                    <li>
+                        <b>Datos personales (PII):</b> esta pantalla solo
+                        agrega; no expone ni enmascara PII. Ese contrato vive en
+                        el directorio de actores.
+                    </li>
+                    <li>
+                        <b>Hoja oficial firmada:</b> la hoja de impresión es un
+                        borrador con fecha de corte; no sustituye una salida
+                        aprobada ni se genera desde un endpoint de anexos.
+                    </li>
+                    <li>
+                        <b>Exportación y envío:</b> no se incluyen; el item 57
+                        pide series y sincronización, no distribución.
+                    </li>
+                </ul>
+            </section>
+
             <!-- ───────────────────────── FUENTES ───────────────────────── -->
-            <section class="notes" id="fuentes" aria-labelledby="fuentes-titulo">
+            <section
+                class="notes"
+                id="fuentes"
+                aria-labelledby="fuentes-titulo"
+            >
                 <h2 id="fuentes-titulo">Fuentes, filtros y fecha de corte</h2>
                 <p>
-                    Todas las cifras de esta pantalla provienen de una consulta de
-                    <b>solo lectura</b> a la base de AVISA del <b>22.11.2026</b>.
-                    No hay series, promedios ni porcentajes estimados. Las
-                    consultas se listan para que el equipo pueda reproducirlas.
+                    Todas las cifras de esta pantalla provienen de una consulta
+                    de
+                    <b>solo lectura</b> a la base de AVISA del
+                    <b>22.11.2026</b>. No hay series, promedios ni porcentajes
+                    estimados. Las consultas se listan para que el equipo pueda
+                    reproducirlas.
                 </p>
 
                 <details class="sql-box" id="src-casos">
-                    <summary>Casos: totales, estado, nivel, riesgo y prioridad</summary>
-                    <pre class="code-block"><code>SELECT ec.codigo AS estado, count(*)
+                    <summary>
+                        Casos: totales, estado, nivel, riesgo y prioridad
+                    </summary>
+                    <pre
+                        class="code-block"
+                    ><code>SELECT ec.codigo AS estado, count(*)
   FROM core.casos c
   JOIN core.cat_estados_caso ec ON ec.id = c.estado_id
  WHERE c.anulado_en IS NULL
@@ -1785,7 +2371,11 @@ SELECT nc.nombre AS nivel, nr.codigo AS riesgo, pa.codigo AS prioridad,
  GROUP BY 1, 2, 3;</code></pre>
                 </details>
 
-                <details class="sql-box" id="src-regiones" style="margin-top: 8px">
+                <details
+                    class="sql-box"
+                    id="src-regiones"
+                    style="margin-top: 8px"
+                >
                     <summary>Desglose regional por riesgo</summary>
                     <pre class="code-block"><code>SELECT r.nombre AS region,
        count(DISTINCT c.id) FILTER (WHERE nr.codigo = 'Alto')     AS alto,
@@ -1805,7 +2395,9 @@ SELECT nc.nombre AS nivel, nr.codigo AS riesgo, pa.codigo AS prioridad,
 
                 <details class="sql-box" id="src-serie" style="margin-top: 8px">
                     <summary>Serie temporal de alertas por año</summary>
-                    <pre class="code-block"><code>SELECT extract(year FROM fecha_reporte)::int AS anio, count(*)
+                    <pre
+                        class="code-block"
+                    ><code>SELECT extract(year FROM fecha_reporte)::int AS anio, count(*)
   FROM core.alertas_tempranas
  GROUP BY 1
  ORDER BY 1;
@@ -1813,7 +2405,11 @@ SELECT nc.nombre AS nivel, nr.codigo AS riesgo, pa.codigo AS prioridad,
 -- max(fecha_reporte) = 2026-08-13  → 2026 es parcial</span></code></pre>
                 </details>
 
-                <details class="sql-box" id="src-alertas" style="margin-top: 8px">
+                <details
+                    class="sql-box"
+                    id="src-alertas"
+                    style="margin-top: 8px"
+                >
                     <summary>Alertas: sin caso, validación y nivel</summary>
                     <pre class="code-block"><code>SELECT count(*) AS total,
        count(*) FILTER (WHERE caso_id IS NULL) AS sin_caso,
@@ -1828,7 +2424,11 @@ SELECT na.nombre AS nivel, count(*)
 <span class="cm">-- Inmediato 27 · Táctico 23 · Preventivo 17 · Monitoreo 14</span></code></pre>
                 </details>
 
-                <details class="sql-box" id="src-compromisos" style="margin-top: 8px">
+                <details
+                    class="sql-box"
+                    id="src-compromisos"
+                    style="margin-top: 8px"
+                >
                     <summary>Compromisos y vencimientos</summary>
                     <pre class="code-block"><code>SELECT count(*) AS total,
        count(fecha_vencimiento) AS con_vencimiento,
@@ -1840,7 +2440,9 @@ SELECT na.nombre AS nivel, count(*)
 
                 <details class="sql-box" id="src-carga" style="margin-top: 8px">
                     <summary>Carga por punto focal</summary>
-                    <pre class="code-block"><code>SELECT u.nombre, count(c.id) AS casos
+                    <pre
+                        class="code-block"
+                    ><code>SELECT u.nombre, count(c.id) AS casos
   FROM core.usuarios u
   LEFT JOIN core.casos c
          ON c.punto_focal_usuario_id = u.id AND c.anulado_en IS NULL
@@ -1849,9 +2451,15 @@ SELECT na.nombre AS nivel, count(*)
 <span class="cm">-- 33 usuarios; con carga: 14, 9, 8 y 3.</span></code></pre>
                 </details>
 
-                <details class="sql-box" id="src-cronologia" style="margin-top: 8px">
+                <details
+                    class="sql-box"
+                    id="src-cronologia"
+                    style="margin-top: 8px"
+                >
                     <summary>Primera respuesta: por qué no se grafica</summary>
-                    <pre class="code-block"><code>SELECT count(DISTINCT caso_id)              AS casos_con_hechos,
+                    <pre
+                        class="code-block"
+                    ><code>SELECT count(DISTINCT caso_id)              AS casos_con_hechos,
        count(*)                             AS hechos,
        round(avg(primer - fecha_inicio), 1) AS promedio_dias
   FROM (
@@ -1875,8 +2483,9 @@ SELECT na.nombre AS nivel, count(*)
                     <li>
                         Esto es un <b>mockup estático</b>: no existe ruta en la
                         SPA ni endpoint de agregados. Los números son un
-                        <b>snapshot real</b> del 22.11.2026 y en la implementación
-                        deben llegar por API, nunca cablearse en el cliente.
+                        <b>snapshot real</b> del 22.11.2026 y en la
+                        implementación deben llegar por API, nunca cablearse en
+                        el cliente.
                     </li>
                     <li>
                         <b>Item 51</b> (biblioteca de gráficos accesible): aquí
@@ -1895,10 +2504,15 @@ SELECT na.nombre AS nivel, count(*)
                         del módulo se muestran y con qué agregaciones.
                     </li>
                     <li>
-                        <b>Item 57</b> (series temporales y sincronización): solo
-                        existe una serie anual de alertas. No hay SLA histórico,
-                        <i>aging</i> ni «última sincronización» global; tampoco
-                        una zona horaria declarada. El mockup no los simula.
+                        <b>Item 57</b> (series temporales y sincronización):
+                        solo existe una serie anual de alertas. No hay SLA
+                        histórico, <i>aging</i> ni «última sincronización»
+                        global; tampoco una zona horaria declarada. El mockup no
+                        los simula. La zona de referencia institucional es
+                        <code>America/Lima</code>: <b>requiere</b> que cada
+                        timestamp del origen la declare (o guarde
+                        <code>timestamptz</code>) antes de calcular
+                        vencimientos, SLA o cortes diarios.
                     </li>
                     <li>
                         <b>Item 85</b> (Panel OAIPCS): carga, nivel/riesgo,
@@ -1907,8 +2521,8 @@ SELECT na.nombre AS nivel, count(*)
                         quedan en estado vacío honesto porque el dato no existe.
                     </li>
                     <li>
-                        <b>Filtros:</b> Región y Riesgo recalculan la tabla y las
-                        barras regionales con los agregados disponibles. El
+                        <b>Filtros:</b> Región y Riesgo recalculan la tabla y
+                        las barras regionales con los agregados disponibles. El
                         snapshot no tiene el cruce caso a caso de todas las
                         dimensiones, así que no se ofrecen filtros que prometan
                         intersecciones que la consulta no puede resolver; en
@@ -1952,8 +2566,8 @@ SELECT na.nombre AS nivel, count(*)
                     <li>
                         <b>No inventar tendencias</b> ni completar años sin
                         registros, ni tratar 2026 como año cerrado. Tampoco
-                        convertir conteos de registros en tasas o porcentajes
-                        de conflictividad.
+                        convertir conteos de registros en tasas o porcentajes de
+                        conflictividad.
                     </li>
                     <li>
                         <b>No graficar cifras fijas</b> en el cliente: si el
@@ -2022,14 +2636,14 @@ SELECT na.nombre AS nivel, count(*)
                     { r: "La Libertad", alto: 0, mod: 5, bajo: 0, total: 5 },
                     { r: "Tumbes", alto: 0, mod: 4, bajo: 0, total: 4 },
                     { r: "Loreto", alto: 0, mod: 0, bajo: 2, total: 2 },
-                    { r: "Junín", alto: 0, mod: 0, bajo: 1, total: 1 }
+                    { r: "Junín", alto: 0, mod: 0, bajo: 1, total: 1 },
                 ];
                 var SERIE = [
                     { a: 2022, n: 9 },
                     { a: 2023, n: 8 },
                     { a: 2024, n: 15 },
                     { a: 2025, n: 11 },
-                    { a: 2026, n: 40, parcial: true }
+                    { a: 2026, n: 40, parcial: true },
                 ];
 
                 var state = { region: "*", riesgo: "*" };
@@ -2077,14 +2691,17 @@ SELECT na.nombre AS nivel, count(*)
                         var track = document.createElement("span");
                         track.className = "bar-track";
                         if (state.riesgo === "*") {
-                            [["alto", "seg-alto"], ["mod", "seg-mod"], ["bajo", "seg-bajo"]].forEach(
-                                function (pair) {
-                                    var seg = document.createElement("span");
-                                    seg.className = "bar-seg " + pair[1];
-                                    seg.style.width = (x[pair[0]] / MAX) * 100 + "%";
-                                    track.appendChild(seg);
-                                }
-                            );
+                            [
+                                ["alto", "seg-alto"],
+                                ["mod", "seg-mod"],
+                                ["bajo", "seg-bajo"],
+                            ].forEach(function (pair) {
+                                var seg = document.createElement("span");
+                                seg.className = "bar-seg " + pair[1];
+                                seg.style.width =
+                                    (x[pair[0]] / MAX) * 100 + "%";
+                                track.appendChild(seg);
+                            });
                         } else {
                             var seg = document.createElement("span");
                             seg.className =
@@ -2118,14 +2735,16 @@ SELECT na.nombre AS nivel, count(*)
                     host.setAttribute(
                         "aria-label",
                         "Casos vigentes por región (" +
-                            (state.riesgo === "*" ? "total" : "riesgo " + state.riesgo) +
+                            (state.riesgo === "*"
+                                ? "total"
+                                : "riesgo " + state.riesgo) +
                             "): " +
                             rows()
                                 .map(function (x) {
                                     return x.r + " " + valueOf(x);
                                 })
                                 .join(", ") +
-                            "."
+                            ".",
                     );
                     return sum;
                 }
@@ -2137,10 +2756,19 @@ SELECT na.nombre AS nivel, count(*)
                         var tr = document.createElement("tr");
                         var cells = [
                             { t: x.r },
-                            { t: x.alto, cls: "num" + (x.alto === 0 ? " cell-zero" : "") },
-                            { t: x.mod, cls: "num" + (x.mod === 0 ? " cell-zero" : "") },
-                            { t: x.bajo, cls: "num" + (x.bajo === 0 ? " cell-zero" : "") },
-                            { t: x.total, cls: "num" }
+                            {
+                                t: x.alto,
+                                cls: "num" + (x.alto === 0 ? " cell-zero" : ""),
+                            },
+                            {
+                                t: x.mod,
+                                cls: "num" + (x.mod === 0 ? " cell-zero" : ""),
+                            },
+                            {
+                                t: x.bajo,
+                                cls: "num" + (x.bajo === 0 ? " cell-zero" : ""),
+                            },
+                            { t: x.total, cls: "num" },
                         ];
                         cells.forEach(function (c) {
                             var td = document.createElement("td");
@@ -2171,13 +2799,17 @@ SELECT na.nombre AS nivel, count(*)
                             : "región " + state.region) +
                         " · riesgo " +
                         (state.riesgo === "*" ? "todos" : state.riesgo) +
-                        " · 34 casos vigentes en total.";
+                        " · 34 casos vigentes · total institucional (sin filtro de caso a caso). " +
+                        rows().reduce(function (a, x) {
+                            return a + x.total;
+                        }, 0) +
+                        " vínculos caso–región en el filtro actual (no son casos).";
 
                     var kpis = [
-                        ["34", "casos vigentes"],
-                        ["1", "casos en riesgo Alto"],
-                        ["13 / 25", "regiones con casos"],
-                        ["83", "alertas registradas"]
+                        ["34", "casos vigentes · total institucional"],
+                        ["1", "casos en riesgo Alto · total institucional"],
+                        ["13 / 25", "regiones con casos · total institucional"],
+                        ["83", "alertas registradas · total institucional"],
                     ];
                     $("ps-kpis").innerHTML = kpis
                         .map(function (k) {
@@ -2224,7 +2856,9 @@ SELECT na.nombre AS nivel, count(*)
                             "</td><td class='num'>" +
                             x.n +
                             "</td><td>" +
-                            (x.parcial ? "parcial (hasta 13.08)" : "año cerrado") +
+                            (x.parcial
+                                ? "parcial (hasta 13.08)"
+                                : "año cerrado") +
                             "</td></tr>"
                         );
                     }).join("");
@@ -2243,11 +2877,15 @@ SELECT na.nombre AS nivel, count(*)
                     if (sheet.hidden) {
                         buildPrintSheet();
                         sheet.hidden = false;
-                        sheet.scrollIntoView({ behavior: "smooth", block: "start" });
+                        sheet.scrollIntoView({
+                            behavior: "smooth",
+                            block: "start",
+                        });
                         $("btn-print").textContent = "Cerrar hoja de impresión";
                     } else {
                         sheet.hidden = true;
-                        $("btn-print").textContent = "Preparar hoja de impresión";
+                        $("btn-print").textContent =
+                            "Preparar hoja de impresión";
                     }
                 }
 
@@ -2256,7 +2894,10 @@ SELECT na.nombre AS nivel, count(*)
                         var tab = $("tab-" + m);
                         var panel = $("panel-" + m);
                         var on = m === mode;
-                        tab.setAttribute("aria-selected", on ? "true" : "false");
+                        tab.setAttribute(
+                            "aria-selected",
+                            on ? "true" : "false",
+                        );
                         tab.setAttribute("tabindex", on ? "0" : "-1");
                         panel.hidden = !on;
                     });
@@ -2275,26 +2916,31 @@ SELECT na.nombre AS nivel, count(*)
                     if (!$("hoja-impresion").hidden) buildPrintSheet();
                 });
 
-                document.querySelectorAll(".mode-tabs [data-mode]").forEach(function (b) {
-                    b.addEventListener("click", function () {
-                        setMode(b.getAttribute("data-mode"));
+                document
+                    .querySelectorAll(".mode-tabs [data-mode]")
+                    .forEach(function (b) {
+                        b.addEventListener("click", function () {
+                            setMode(b.getAttribute("data-mode"));
+                        });
+                        b.addEventListener("keydown", function (ev) {
+                            if (
+                                ev.key === "ArrowRight" ||
+                                ev.key === "ArrowLeft"
+                            ) {
+                                ev.preventDefault();
+                                setMode(
+                                    b.getAttribute("data-mode") === "direccion"
+                                        ? "oaipcs"
+                                        : "direccion",
+                                );
+                                document
+                                    .querySelector(
+                                        '.mode-tabs [aria-selected="true"]',
+                                    )
+                                    .focus();
+                            }
+                        });
                     });
-                    b.addEventListener("keydown", function (ev) {
-                        if (ev.key === "ArrowRight" || ev.key === "ArrowLeft") {
-                            ev.preventDefault();
-                            setMode(
-                                b.getAttribute("data-mode") === "direccion"
-                                    ? "oaipcs"
-                                    : "direccion"
-                            );
-                            document
-                                .querySelector(
-                                    '.mode-tabs [aria-selected="true"]'
-                                )
-                                .focus();
-                        }
-                    });
-                });
 
                 $("btn-print").addEventListener("click", togglePrintSheet);
 

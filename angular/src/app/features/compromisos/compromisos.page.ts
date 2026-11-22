@@ -133,10 +133,10 @@ const MAX_PASTILLAS = 3;
 /** Tope de la vista de calendario: coincide con el máximo de la API. */
 const TAMANO_CALENDARIO = 100;
 
-const MS_DIA = 86_400_000;
-
-/** Tope de lectura del desglose: es el máximo por página que admite la API. */
+/** Tope de lectura del desglose: también el máximo por página que admite la API. */
 const TAMANO_DESGLOSE = 100;
+
+const MS_DIA = 86_400_000;
 
 /**
  * Conteo por etiqueta, de mayor a menor y luego alfabético en español. Un
@@ -375,13 +375,13 @@ function isoHoy(): string {
     }
     .desglose-card {
       padding: 12px 14px;
-      border: 1px solid #e6ecf1;
+      border: 1px solid var(--line);
       border-radius: 8px;
-      background: #fff;
+      background: var(--paper);
     }
     .desglose-card h3 {
       margin: 0 0 9px;
-      color: #647487;
+      color: var(--muted);
       font-size: 9px;
       font-weight: 700;
       letter-spacing: 0.05em;
@@ -404,7 +404,7 @@ function isoHoy(): string {
     }
     .desglose-etiqueta {
       overflow: hidden;
-      color: #35485a;
+      color: var(--ink-2);
       text-overflow: ellipsis;
       white-space: nowrap;
     }
@@ -412,28 +412,28 @@ function isoHoy(): string {
       grid-column: 1 / -1;
       height: 3px;
       border-radius: 2px;
-      background: #eef2f6;
+      background: var(--line);
     }
     .desglose-barra i {
       display: block;
       height: 100%;
       border-radius: 2px;
-      background: #3f6f9e;
+      background: var(--blue);
     }
     .desglose-cuenta {
-      color: #1a2b3e;
+      color: var(--ink);
       font-weight: 700;
       white-space: nowrap;
     }
     .desglose-cuenta small {
       margin-left: 3px;
-      color: #8d99a6;
+      color: var(--muted);
       font-size: 8.5px;
       font-weight: 600;
     }
     .desglose-nota {
       margin: 0;
-      color: #7b8896;
+      color: var(--muted);
       font-size: 9.5px;
       line-height: 1.5;
     }
@@ -467,7 +467,7 @@ export class CompromisosPage {
   /** Último fallo del botón de exportación; vacío si no hubo. */
   readonly exportarError = signal<string | null>(null);
 
-  /** Vista activa: la tabla paginada de siempre o el calendario mensual. */
+  /** Vista activa: tabla paginada, calendario mensual o desglose por responsable y nivel. */
   readonly modo = signal<ModoVista>('tabla');
 
   private readonly hoy = new Date();
@@ -511,7 +511,8 @@ export class CompromisosPage {
   /**
    * Filtros, búsqueda y orden vigentes, con los nombres que acepta
    * `GET /api/v1/commitments`. En el calendario se suman las fechas del mes
-   * visible, que son el rango que la pantalla está consultando.
+   * visible, que son el rango que la pantalla está consultando; el desglose usa
+   * sólo los filtros, porque agrega el conjunto completo.
    */
   readonly filtrosExportacion = computed(() => {
     const filtros = this.filtros();

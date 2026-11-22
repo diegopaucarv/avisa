@@ -274,6 +274,53 @@
                 color: var(--muted);
                 text-align: center;
             }
+            .estados {
+                display: grid;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: 10px;
+                margin-top: 14px;
+            }
+            @media (max-width: 760px) {
+                .estados {
+                    grid-template-columns: 1fr;
+                }
+            }
+            .estado-card {
+                padding: 12px 14px;
+                border: 1px solid var(--line);
+                border-radius: 10px;
+                background: var(--panel);
+            }
+            .estado-card strong {
+                display: block;
+                margin-bottom: 4px;
+            }
+            .estado-card p {
+                margin: 0;
+                color: var(--muted);
+                font-size: 12px;
+            }
+            .bloque {
+                margin-top: 22px;
+            }
+            .bloque h2 {
+                margin-bottom: 8px;
+            }
+            .sub {
+                margin-top: 2px;
+                color: #97a3b0;
+                font-size: 11px;
+            }
+            .req {
+                color: var(--warn);
+                border-color: #f5d6b3;
+                background: #fdf6ec;
+            }
+            .ok {
+                color: var(--risk-bajo);
+                border-color: #c9e3d5;
+                background: #eef7f2;
+            }
             .notes {
                 margin-top: 22px;
                 padding: 16px 18px;
@@ -309,9 +356,12 @@
                     <p class="eyebrow">Bandeja de trabajo · mockup</p>
                     <h1>Bandeja de trabajo</h1>
                     <p class="view-subtitle">
-                        Una sola cola ordenada por plazo, riesgo y revisión pendiente, en lugar de
-                        tres bloques independientes (alertas, compromisos y casos de alto riesgo).
-                        Cada fila declara de qué tipo es y qué acción admite.
+                        Consolida demandas sin caso, compromisos vencidos y
+                        alertas pendientes en una sola cola ordenada por plazo,
+                        riesgo y revisión pendiente. Cada fila declara de qué
+                        tipo es, qué campo la respalda y qué acción admite. La
+                        región se deriva del caso: no hay selector de alcance
+                        geográfico.
                     </p>
                 </div>
                 <div><span class="badge">Mockup · no implementado</span></div>
@@ -320,11 +370,22 @@
             <div class="filter-bar">
                 <label class="search-field">
                     <span aria-hidden="true">⌕</span>
-                    <input type="search" placeholder="Buscar por código, caso o responsable" />
+                    <input
+                        type="search"
+                        placeholder="Buscar por código, caso o responsable"
+                    />
                 </label>
-                <div class="segmented" role="group" aria-label="Ámbito de la bandeja">
-                    <button type="button" aria-pressed="true">Mi bandeja</button>
-                    <button type="button" aria-pressed="false">Toda la unidad</button>
+                <div
+                    class="segmented"
+                    role="group"
+                    aria-label="Ámbito de la bandeja"
+                >
+                    <button type="button" aria-pressed="true">
+                        Mi bandeja
+                    </button>
+                    <button type="button" aria-pressed="false">
+                        Toda la unidad
+                    </button>
                 </div>
                 <label class="select-filter">
                     Ordenar por
@@ -343,27 +404,52 @@
                 </label>
             </div>
 
-            <div class="type-chips" role="group" aria-label="Filtrar por tipo de registro">
-                <button type="button" aria-pressed="true">Todas <b>—</b></button>
-                <button type="button" aria-pressed="false">Alertas <b>76</b></button>
-                <button type="button" aria-pressed="false">Compromisos <b>8</b></button>
-                <button type="button" aria-pressed="false">Casos <b>34</b></button>
-                <button type="button" aria-pressed="false">Documentos <b>143</b></button>
+            <div
+                class="type-chips"
+                role="group"
+                aria-label="Filtrar por tipo de registro"
+            >
+                <button type="button" aria-pressed="true">
+                    Todas <b>226</b>
+                </button>
+                <button type="button" aria-pressed="false">
+                    Alertas pendientes <b>0</b>
+                </button>
+                <button type="button" aria-pressed="false">
+                    Compromisos vencidos <b>0</b>
+                </button>
+                <button type="button" aria-pressed="false">
+                    Demandas sin caso <b>226</b>
+                </button>
             </div>
 
             <div class="strip" role="status">
-                <span><b>0</b> con revisión pendiente</span>
-                <span><b>0</b> con plazo vencido</span>
-                <span><b>8</b> compromisos sin fecha de vencimiento</span>
-                <span><b>34</b> casos abiertos (todos «En seguimiento»)</span>
+                <span><b>226</b> demandas sin caso</span>
+                <span
+                    ><b>0</b> alertas pendientes · <b>76</b> en
+                    «Completado»</span
+                >
+                <span
+                    ><b>0</b> compromisos vencidos · <b>8</b> sin fecha (no se
+                    estima)</span
+                >
+                <span><b>34</b> casos abiertos</span>
             </div>
 
             <section class="panel" aria-labelledby="cola">
                 <table>
                     <caption id="cola">
-                        Cola única · el plazo se calcula con la fecha de vencimiento efectiva (fecha
-                        manual o próximo hito no terminal). Sin fecha, el plazo se declara «—», no
-                        se estima.
+                        Cola única por plazo efectivo: alerta →
+                        <code>sla_horas</code>
+                        del nivel; compromiso → fecha manual o próximo hito no
+                        terminal; demanda sin caso → sin plazo («—»). El riesgo
+                        ordena, pero no calcula la prioridad de atención: se
+                        muestra el valor almacenado en
+                        <code>casos.prioridad_id</code>
+                        y su regla no está definida (<code>requiere</code>). La
+                        revisión pendiente tampoco tiene regla definida
+                        (<code>requiere</code>); las filas sin dato se declaran
+                        «—», no se estiman.
                     </caption>
                     <thead>
                         <tr>
@@ -372,6 +458,7 @@
                             <th scope="col">Registro</th>
                             <th scope="col">Caso</th>
                             <th scope="col">Riesgo</th>
+                            <th scope="col">Prioridad de atención</th>
                             <th scope="col">Responsable</th>
                             <th scope="col">Estado</th>
                             <th scope="col">Acciones</th>
@@ -380,22 +467,68 @@
                     <tbody>
                         <tr>
                             <td class="sin-dato">—</td>
+                            <td><span class="tag">Demanda</span></td>
+                            <td>
+                                <div class="code">Demanda sin código</div>
+                                <div class="sin-dato">
+                                    3P «—» · el hueco se declara, no se estima
+                                </div>
+                            </td>
+                            <td class="sin-dato">Sin caso</td>
+                            <td class="sin-dato">—</td>
+                            <td>
+                                <span class="sin-dato">—</span>
+                                <div class="sub">sin regla definida</div>
+                            </td>
+                            <td class="sin-dato">Sin asignar</td>
+                            <td>Pendiente</td>
+                            <td>
+                                <div class="acciones">
+                                    <button
+                                        type="button"
+                                        class="primario"
+                                        disabled
+                                    >
+                                        Vincular a caso
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="sin-dato">—</td>
                             <td><span class="tag">Compromiso</span></td>
                             <td>
-                                <div class="code">CS-PA-INF-2012-01_COMP001</div>
+                                <div class="code">
+                                    CS-PA-INF-2012-01_COMP001
+                                </div>
                                 <div class="sin-dato">
-                                    En el marco del DU 004-2025, corresponde a PRODUCE brindar…
+                                    En el marco del DU 004-2025, corresponde a
+                                    PRODUCE brindar…
                                 </div>
                             </td>
                             <td class="code">CS-PA-INF-2012-01</td>
                             <td><span class="tag r-alto">Alto</span></td>
+                            <td>
+                                <span class="sin-dato">—</span>
+                                <div class="sub">sin regla definida</div>
+                            </td>
                             <td class="sin-dato">Sin asignar</td>
                             <td>En proceso</td>
                             <td>
                                 <div class="acciones">
-                                    <button type="button" disabled>Asignar</button>
-                                    <button type="button" disabled>Posponer</button>
-                                    <button type="button" class="primario" disabled>Completar</button>
+                                    <button type="button" disabled>
+                                        Asignar
+                                    </button>
+                                    <button type="button" disabled>
+                                        Posponer
+                                    </button>
+                                    <button
+                                        type="button"
+                                        class="primario"
+                                        disabled
+                                    >
+                                        Completar
+                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -403,20 +536,39 @@
                             <td class="sin-dato">—</td>
                             <td><span class="tag">Compromiso</span></td>
                             <td>
-                                <div class="code">CS-PA-INF-2024-01_COMP001</div>
+                                <div class="code">
+                                    CS-PA-INF-2024-01_COMP001
+                                </div>
                                 <div class="sin-dato">
-                                    Seguimiento de reapertura de DPA Los Órganos por DICAPI
+                                    Seguimiento de reapertura de DPA Los Órganos
+                                    por DICAPI
                                 </div>
                             </td>
                             <td class="code">CS-PA-INF-2024-01</td>
-                            <td><span class="tag r-moderado">Moderado</span></td>
+                            <td>
+                                <span class="tag r-moderado">Moderado</span>
+                            </td>
+                            <td>
+                                <span class="sin-dato">—</span>
+                                <div class="sub">sin regla definida</div>
+                            </td>
                             <td class="sin-dato">Sin asignar</td>
                             <td>En proceso</td>
                             <td>
                                 <div class="acciones">
-                                    <button type="button" disabled>Asignar</button>
-                                    <button type="button" disabled>Posponer</button>
-                                    <button type="button" class="primario" disabled>Completar</button>
+                                    <button type="button" disabled>
+                                        Asignar
+                                    </button>
+                                    <button type="button" disabled>
+                                        Posponer
+                                    </button>
+                                    <button
+                                        type="button"
+                                        class="primario"
+                                        disabled
+                                    >
+                                        Completar
+                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -424,20 +576,37 @@
                             <td class="sin-dato">—</td>
                             <td><span class="tag">Compromiso</span></td>
                             <td>
-                                <div class="code">CS-PA-OAT-2024-02_COMP001</div>
+                                <div class="code">
+                                    CS-PA-OAT-2024-02_COMP001
+                                </div>
                                 <div class="sin-dato">
-                                    Desarrollar estudio «Evaluación y monitoreo de…»
+                                    Desarrollar estudio «Evaluación y monitoreo
+                                    de…»
                                 </div>
                             </td>
                             <td class="code">CS-PA-OAT-2024-02</td>
                             <td><span class="tag r-bajo">Bajo</span></td>
+                            <td>
+                                <span class="sin-dato">—</span>
+                                <div class="sub">sin regla definida</div>
+                            </td>
                             <td class="sin-dato">Sin asignar</td>
                             <td>En proceso</td>
                             <td>
                                 <div class="acciones">
-                                    <button type="button" disabled>Asignar</button>
-                                    <button type="button" disabled>Posponer</button>
-                                    <button type="button" class="primario" disabled>Completar</button>
+                                    <button type="button" disabled>
+                                        Asignar
+                                    </button>
+                                    <button type="button" disabled>
+                                        Posponer
+                                    </button>
+                                    <button
+                                        type="button"
+                                        class="primario"
+                                        disabled
+                                    >
+                                        Completar
+                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -450,11 +619,21 @@
                             </td>
                             <td class="sin-dato">Sin vínculo</td>
                             <td><span class="tag r-alto">Alto</span></td>
+                            <td>
+                                <span class="sin-dato">—</span>
+                                <div class="sub">sin regla definida</div>
+                            </td>
                             <td class="sin-dato">Sin asignar</td>
                             <td>Completado</td>
                             <td>
                                 <div class="acciones">
-                                    <button type="button" class="primario" disabled>Revisar</button>
+                                    <button
+                                        type="button"
+                                        class="primario"
+                                        disabled
+                                    >
+                                        Revisar
+                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -466,22 +645,293 @@
                                 <div class="sin-dato">Enfrentamiento…</div>
                             </td>
                             <td class="sin-dato">Sin vínculo</td>
-                            <td><span class="tag r-moderado">Moderado</span></td>
+                            <td>
+                                <span class="tag r-moderado">Moderado</span>
+                            </td>
+                            <td>
+                                <span class="sin-dato">—</span>
+                                <div class="sub">sin regla definida</div>
+                            </td>
                             <td class="sin-dato">Sin asignar</td>
                             <td>Completado</td>
                             <td>
                                 <div class="acciones">
-                                    <button type="button" class="primario" disabled>Revisar</button>
+                                    <button
+                                        type="button"
+                                        class="primario"
+                                        disabled
+                                    >
+                                        Revisar
+                                    </button>
                                 </div>
                             </td>
                         </tr>
                     </tbody>
                 </table>
                 <div class="empty-state" role="note">
-                    <strong>Cola de revisión vacía.</strong> Las 76 alertas vivas están en paso
-                    «Completado» y los 8 compromisos no tienen fecha de vencimiento: no hay nada
-                    con plazo próximo que ordenar. El estado vacío de la bandeja es un hueco de
-                    datos, no un defecto de la vista.
+                    <strong>226 demandas sin caso esperan vínculo.</strong>
+                    Las filas de compromiso y alerta de arriba son muestras de
+                    formato: las 76 alertas vivas están en paso «Completado» y
+                    los 8 compromisos no tienen fecha de vencimiento (el hueco
+                    se declara, no se estima), así que no hay plazos próximos
+                    que ordenar. Asignar, posponer, completar y vincular siguen
+                    deshabilitadas hasta que existan los endpoints del item 50.
+                </div>
+            </section>
+
+            <section class="bloque" aria-labelledby="contrato">
+                <h2 id="contrato">Contrato de datos</h2>
+                <div class="panel">
+                    <table>
+                        <caption>
+                            Cada celda, badge o KPI nombra su campo o endpoint.
+                            Lo que no existe se declara
+                            <code>requiere</code>
+                            con la dependencia exacta; «—» es ausente, nunca 0.
+                        </caption>
+                        <thead>
+                            <tr>
+                                <th scope="col">Elemento</th>
+                                <th scope="col">Fuente exacta</th>
+                                <th scope="col">Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Chips y cifras de tipo</td>
+                                <td>
+                                    <code
+                                        >GET /api/v1/demandas?sinCaso=true</code
+                                    >
+                                    → <code>sinCasoTotal</code> (226);
+                                    <code>GET /api/v1/alerts</code> →
+                                    <code>total</code> (76);
+                                    <code
+                                        >GET
+                                        /api/v1/commitments?excluir_terminales=true&amp;vencimiento_hasta=&lt;hoy&gt;</code
+                                    >
+                                    → <code>total</code> (0)
+                                </td>
+                                <td><span class="tag ok">existe</span></td>
+                            </tr>
+                            <tr>
+                                <td>Buscador y orden</td>
+                                <td>
+                                    Parámetros <code>q</code> y
+                                    <code>sort</code>
+                                    sobre la cola unificada
+                                </td>
+                                <td>
+                                    <span class="tag req">requiere</span> el
+                                    endpoint único de cola (item 50)
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Ámbito «Mi bandeja / Toda la unidad»</td>
+                                <td>
+                                    Filtro por usuario responsable o por
+                                    <code>unidad_responsable</code>
+                                </td>
+                                <td>
+                                    <span class="tag req">requiere</span>
+                                    asignación persistida
+                                    (<code>responsable_usuario_id</code>)
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>KPIs del strip</td>
+                                <td>
+                                    <code>GET /api/v1/cases?conteos=true</code>
+                                    → <code>abiertos</code> (34); los tres
+                                    totales del punto anterior para demandas,
+                                    alertas y compromisos
+                                </td>
+                                <td><span class="tag ok">existe</span></td>
+                            </tr>
+                            <tr>
+                                <td>Plazo</td>
+                                <td>
+                                    Alerta: <code>alerts.fecha_reporte</code> +
+                                    <code>cat_niveles_alerta.sla_horas</code>;
+                                    compromiso:
+                                    <code>commitments.fecha_vencimiento</code>
+                                    o próximo hito no terminal; demanda sin
+                                    caso: sin plazo («—»)
+                                </td>
+                                <td>
+                                    <span class="tag ok">existe</span>
+                                    <div class="sub">
+                                        8 compromisos con
+                                        <code>fecha_vencimiento</code> NULL:
+                                        <code>requiere</code> captura (item 24)
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Tipo</td>
+                                <td>Origen de cada fila, unido en cliente</td>
+                                <td>
+                                    <span class="tag req">requiere</span> un
+                                    endpoint único
+                                    <code>GET /api/v1/bandeja</code> (item 50)
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Registro</td>
+                                <td>
+                                    Alerta <code>alerts.codigo</code> +
+                                    <code>titulo</code>; compromiso
+                                    <code>commitments.codigo</code> +
+                                    <code>descripcion</code>; demanda
+                                    <code>demandas.id</code> +
+                                    <code>descripcion</code> (3P)
+                                </td>
+                                <td>
+                                    <span class="tag ok">existe</span>
+                                    <div class="sub">
+                                        código legible de demanda:
+                                        <code>requiere</code>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Caso</td>
+                                <td>
+                                    <code>alerts.caso_id</code>,
+                                    <code>commitments.caso_id</code>,
+                                    <code>demandas.caso_id</code>, mostrado como
+                                    <code>casoCode</code>
+                                </td>
+                                <td>
+                                    <span class="tag ok">existe</span>
+                                    <div class="sub">
+                                        en demandas <code>caso_id</code> es NULL
+                                        (226 filas) y se muestra «Sin caso»
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Riesgo</td>
+                                <td>
+                                    <code>casos.nivel_riesgo_id</code> →
+                                    <code>Bajo · Moderado · Alto</code>
+                                </td>
+                                <td><span class="tag ok">existe</span></td>
+                            </tr>
+                            <tr>
+                                <td>Prioridad de atención</td>
+                                <td>
+                                    <code>casos.prioridad_id</code>; se muestra
+                                    el valor almacenado, no se calcula
+                                </td>
+                                <td>
+                                    <span class="tag req">requiere</span> la
+                                    regla que la calcula (no definida por
+                                    OAIPCS); nunca desde el riesgo. Si falta,
+                                    «—» y no «Moderado»
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Responsable</td>
+                                <td>Hoy no hay responsable por fila</td>
+                                <td>
+                                    <span class="tag req">requiere</span>
+                                    <code>responsable_usuario_id</code> +
+                                    endpoint de asignación (item 50)
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Estado</td>
+                                <td>
+                                    Alerta <code>alerts.paso_actual</code>;
+                                    compromiso <code>commitments.estado</code>;
+                                    demanda
+                                    <code>demandas.estado_atencion</code>
+                                    (CHECK Pendiente · En proceso · Atendida ·
+                                    Desestimada)
+                                </td>
+                                <td><span class="tag ok">existe</span></td>
+                            </tr>
+                            <tr>
+                                <td>Acciones</td>
+                                <td>
+                                    Asignar · Posponer · Completar · Vincular
+                                </td>
+                                <td>
+                                    <span class="tag req">requiere</span>
+                                    <code
+                                        >POST
+                                        /api/v1/bandeja/{tipo}/{id}/{accion}</code
+                                    >
+                                    + columnas
+                                    <code>responsable_usuario_id</code>,
+                                    <code>fecha_limite</code>,
+                                    <code>posposiciones</code>,
+                                    <code>cerrado_por</code>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Región</td>
+                                <td>
+                                    Derivada con
+                                    <code>core.alcance_caso(uuid)</code>; no se
+                                    selecciona ni se edita
+                                </td>
+                                <td>
+                                    <span class="tag ok">existe</span> la
+                                    función;
+                                    <span class="tag req">requiere</span>
+                                    exponer <code>region</code> por fila
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Orden «revisión pendiente»</td>
+                                <td>Sin criterio definido</td>
+                                <td>
+                                    <span class="tag req">requiere</span> regla
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>SLA unificado</td>
+                                <td>
+                                    Un solo <code>plazo_efectivo</code>
+                                    comparable entre alertas, compromisos y
+                                    demandas
+                                </td>
+                                <td>
+                                    <span class="tag req">requiere</span> regla
+                                    común
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="bloque" aria-labelledby="estados-cola">
+                <h2 id="estados-cola">Estados de la cola</h2>
+                <div class="estados">
+                    <div class="estado-card">
+                        <strong>Cargando</strong>
+                        <p>
+                            Contadores en «…» y filas esqueleto; las acciones
+                            permanecen deshabilitadas hasta recibir datos.
+                        </p>
+                    </div>
+                    <div class="estado-card">
+                        <strong>Error</strong>
+                        <p>
+                            Contadores «No disponible», nunca 0, y botón
+                            Reintentar. Una fuente caída no oculta las demás.
+                        </p>
+                    </div>
+                    <div class="estado-card">
+                        <strong>Parcial</strong>
+                        <p>
+                            El KPI de la fuente que falló se muestra «—» con
+                            aviso; el resto de la cola sigue visible.
+                        </p>
+                    </div>
                 </div>
             </section>
 
@@ -489,34 +939,94 @@
                 <h2>Qué debe construir el equipo</h2>
                 <ol>
                     <li>
-                        Persistir asignación, fecha límite, responsable, posposición y cierre (item
-                        50): hoy no existe tabla ni endpoint. Sin esos datos la lista no puede
-                        ordenarse «realmente por plazo».
+                        Persistir asignación, fecha límite, responsable,
+                        posposición y cierre (item 50): hoy no existe tabla ni
+                        endpoint. Sin esos datos la lista no puede ordenarse
+                        «realmente por plazo».
                     </li>
                     <li>
-                        Un solo endpoint de cola (<code>GET /api/v1/bandeja</code>) que una alertas,
-                        compromisos, casos y documentos con un <code>plazo_efectivo</code> común y
-                        un criterio de orden estable (plazo → riesgo → revisión pendiente).
+                        Un solo endpoint de cola (<code
+                            >GET /api/v1/bandeja</code
+                        >) que una alertas, compromisos, casos y documentos con
+                        un <code>plazo_efectivo</code> común y un criterio de
+                        orden estable (plazo → riesgo → revisión pendiente).
                     </li>
                     <li>
-                        Confirmación y registro de auditoría en asignar, posponer y completar; el
-                        historial de reasignaciones y reaperturas es el que sostiene el SLA.
+                        Confirmación y registro de auditoría en asignar,
+                        posponer y completar; el historial de reasignaciones y
+                        reaperturas es el que sostiene el SLA.
                     </li>
                     <li>
-                        <code>core.notificaciones</code> está vacía: no hay avisos de vencimiento
-                        que alimenten la cola. No se simulan.
+                        <code>core.notificaciones</code> está vacía y hoy el
+                        aviso se deriva del trabajo pendiente, no de un bus de
+                        eventos. No se simulan mensajes.
                     </li>
                     <li>
-                        Hoy la pantalla concatena tres bloques con datos reales y SLA visible. Este
-                        mockup sustituye esa concatenación; no cambia el modelo.
+                        Hoy la pantalla concatena tres bloques con datos reales
+                        y SLA visible. Este mockup sustituye esa concatenación;
+                        no cambia el modelo.
                     </li>
                 </ol>
                 <p style="margin: 10px 0 0; color: #8a5a00">
-                    Items 22 y 50 de <code>docs/07_frontend/frontend.md</code>. Ninguna cifra de
-                    esta página es inventada: 76 alertas vivas, 8 compromisos (todos «En proceso»,
-                    sin vencimiento), 34 casos abiertos y 143 documentos, leídos de la base el
-                    22.11.2026.
+                    Items 22 y 50 de <code>docs/07_frontend/frontend.md</code>.
+                    Ninguna cifra de esta página es inventada: 226 demandas sin
+                    caso, 76 alertas vivas, 8 compromisos (todos «En proceso»,
+                    sin vencimiento), 34 casos abiertos y 143 documentos, leídos
+                    de la base el 22.11.2026.
                 </p>
+            </aside>
+
+            <aside class="notes" style="margin-top: 12px">
+                <h2>Fuera de alcance de este mockup</h2>
+                <ul>
+                    <li>
+                        SLA y aging unificados: no se dibuja un
+                        <code>plazo_efectivo</code> común hasta que exista su
+                        regla.
+                    </li>
+                    <li>
+                        Asignación persistida, fecha límite, posposición y
+                        cierre (columnas y endpoints del item 50).
+                    </li>
+                    <li>
+                        Bus de notificaciones: la cola se alimenta de trabajo
+                        pendiente, no de eventos publicados.
+                    </li>
+                    <li>
+                        Selector de alcance geográfico: la Región se deriva del
+                        caso y no se elige.
+                    </li>
+                    <li>
+                        Derivar la prioridad de atención desde el riesgo: está
+                        prohibido; requiere la regla que OAIPCS no ha definido.
+                    </li>
+                </ul>
+                <h2 style="margin-top: 14px">Vocabulario congelado</h2>
+                <ul>
+                    <li>
+                        Estados de caso:
+                        <code>Abierto · Resuelto · Archivado</code>.
+                    </li>
+                    <li>
+                        Conflictividad:
+                        <code
+                            >Diferencia · Controversia · Conflicto social ·
+                            Crisis social</code
+                        >.
+                    </li>
+                    <li>
+                        Riesgo <code>Bajo · Moderado · Alto</code>; prioridad
+                        <code>Urgente · Moderado · Bajo</code>.
+                    </li>
+                    <li>
+                        «Región», nunca «Territorio»; «GORE», nunca «Gobierno
+                        regional».
+                    </li>
+                    <li>
+                        «Tipo de compromiso», nunca «tipo de acuerdo»; «Unidad
+                        responsable».
+                    </li>
+                </ul>
             </aside>
         </main>
     </body>

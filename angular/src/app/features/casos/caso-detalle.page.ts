@@ -374,6 +374,13 @@ export class CasoDetallePage {
     return etiquetaNivelGobierno(valor);
   }
 
+  /** Texto corto de la demanda para las etiquetas accesibles de la tabla. */
+  referenciaDemanda(demanda: DemandaCaso): string {
+    const texto = (demanda.problema ?? demanda.descripcion ?? '').trim();
+    if (!texto) return 'sin problema';
+    return texto.length > 60 ? `${texto.slice(0, 57)}…` : texto;
+  }
+
   registrarHecho(): void {
     if (!this.puedeModificar()) return;
     this.errorEvento.set(null);

@@ -4,37 +4,58 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
 
 import { urlApi } from '../../core/config/entorno';
-import { TAMANO_PAGINA, paramsDePagina, urlConParametros } from '../../core/http/coleccion';
+import { paramsDePagina, urlConParametros, type Coleccion } from '../../core/http/coleccion';
 import { consulta } from '../../core/http/consulta';
 import { IconoComponent } from '../../shared/ui/icono.component';
-import { PaginacionComponent } from '../../shared/ui/paginacion.component';
-import { MINIMO_TERMINO, aColeccionBusqueda, type ColeccionBusqueda } from './busqueda.mapeo';
+import {
+  GRUPOS,
+  MINIMO_TERMINO,
+  TOPE_INDICE,
+  TOPE_POR_GRUPO,
+  aColeccionGrupo,
+  aEnlace,
+  aIndiceBusqueda,
+  enriquecer,
+  type ClaveGrupo,
+  type Enlace,
+  type IndiceBusqueda,
+  type Resultado,
+  type ResultadoEnlazado,
+} from './busqueda.mapeo';
 
-type FiltrosBusqueda = {
-  q: string;
-  pagina: number;
-  tamano: number;
+type GrupoVista = {
+  clave: ClaveGrupo;
+  titulo: string;
+  icono: string;
+  /** Total real del grupo en el servidor (no el de las filas mostradas). */
+  total: number;
+  /** Filas que el tope por grupo dejó fuera. */
+  omitidos: number;
+  resultados: ResultadoEnlazado[];
+  enlaceListado: Enlace;
 };
 
-const FILTROS_INICIALES: FiltrosBusqueda = {
-  q: '',
-  pagina: 1,
-  tamano: TAMANO_PAGINA,
-};
+const FILTROS_INICIALES = { q: '' };
 
 /**
  * Búsqueda global.
  *
- * El término y la página viven en la URL (`replaceUrl`) y el término se
- * escribe con 300 ms de espera. Con menos de dos caracteres no se llama a la
- * API (`GET /api/v1/search` responde 422) y se muestra una invitación.
+ * El término vive en la URL (`replaceUrl`) y se escribe con 300 ms de espera.
+ * Con menos de dos caracteres no se llama a la API (`GET /api/v1/search`
+ * responde 422) y se muestra una invitación.
  *
- * La respuesta usa `results` como clave de la lista, que `normalizarColeccion`
- * no reconoce; el sobre se normaliza a mano en `busqueda.mapeo.ts`.
+ * Se consulta un listado por entidad —cada uno con `q`, `pagina` y `tamano`
+ * verificados en `app/api/v1/`— para tener el total de cada grupo y poder
+ * topear filas sin sepultar a los grupos pequeños. Aparte se pide
+ * `GET /api/v1/search`, que es la única respuesta con la región heredada del
+ * caso: se usa como índice para completar región y el código de las demandas.
+ *
+ * El atajo `/` del shell enfoca el primer `input[type="search"]` visible
+ * (`core/atajos`): este campo lo es, así que no hace falta duplicar nada.
  */
 @Component({
   selector: 'app-busqueda',
-  imports: [RouterLink, IconoComponent, PaginacionComponent],
+  imports: [RouterLink, IconoComponent],
   templateUrl: './busqueda.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
@@ -74,6 +95,57 @@ const FILTROS_INICIALES: FiltrosBusqueda = {
       color: #7b8896;
       font-size: 11px;
       line-height: 1.6;
+    }
+
+    .search-groups {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .search-group {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .search-group-head {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 0 2px;
+    }
+
+    .search-group-icono {
+      display: grid;
+      place-items: center;
+      color: #8b97a2;
+    }
+
+    .search-group-head h2 {
+      margin: 0;
+      color: #5f7690;
+      font: 700 10px/1.3 var(--font-display);
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+    }
+
+    .search-group-omitidos {
+      margin: 0;
+      padding: 0 2px;
+      color: #8b97a2;
+      font-size: 9px;
+    }
+
+    .search-group-omitidos a {
+      color: #5f7690;
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .search-group-omitidos a:hover,
+    .search-group-omitidos a:focus-visible {
+      text-decoration: underline;
     }
 
     .search-results {
@@ -195,6 +267,21 @@ const FILTROS_INICIALES: FiltrosBusqueda = {
       margin-top: 6px;
     }
 
+    .search-aviso {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 12px;
+      border: 1px solid #f0e2cf;
+      border-radius: 8px;
+      background: #fdf8f1;
+      color: #8a5a1f;
+      font-size: 10px;
+      line-height: 1.5;
+    }
+
     @media (max-width: 720px) {
       .view-body {
         padding: 18px 16px 40px;
@@ -207,12 +294,12 @@ export class BusquedaPage {
   private readonly router = inject(Router);
   private readonly destruccion = inject(DestroyRef);
 
+  readonly topePorGrupo = TOPE_POR_GRUPO;
+
   private readonly parametros = toSignal(
     this.ruta.queryParamMap.pipe(
       map((params) => ({
         q: params.get('q') ?? '',
-        pagina: Math.max(1, Number(params.get('pagina') ?? '1') || 1),
-        tamano: Math.max(1, Number(params.get('tamano') ?? String(TAMANO_PAGINA)) || TAMANO_PAGINA),
       })),
     ),
     { initialValue: FILTROS_INICIALES },
@@ -227,25 +314,88 @@ export class BusquedaPage {
    * Sin dos caracteres no hay petición: la ruta responde 422, no una lista
    * vacía. `consulta` acepta `null` y deja el estado en «inactivo».
    */
-  private readonly busqueda = consulta<ColeccionBusqueda>({
+  private readonly consultas = GRUPOS.map((definicion) => ({
+    definicion,
+    fuente: consulta<Coleccion<Resultado>>({
+      fuente: () => {
+        const termino = this.termino();
+        if (termino.length < MINIMO_TERMINO) return null;
+
+        return urlConParametros(urlApi(definicion.recurso), {
+          ...paramsDePagina({ pagina: 1, tamano: TOPE_POR_GRUPO }),
+          q: termino,
+        });
+      },
+      esquema: (bruto) => aColeccionGrupo(bruto, definicion),
+    }),
+  }));
+
+  /**
+   * Índice de región/código de `GET /api/v1/search`. Es opcional: si falla o no
+   * cubre una fila, la tarjeta pinta «—» en lo que falte.
+   */
+  private readonly indice = consulta<IndiceBusqueda>({
     fuente: () => {
-      const { pagina, tamano } = this.parametros();
       const termino = this.termino();
       if (termino.length < MINIMO_TERMINO) return null;
 
       return urlConParametros(urlApi('/v1/search'), {
-        ...paramsDePagina({ pagina, tamano }),
+        ...paramsDePagina({ pagina: 1, tamano: TOPE_INDICE }),
         q: termino,
       });
     },
-    esquema: aColeccionBusqueda,
+    esquema: aIndiceBusqueda,
   });
 
-  readonly resultados = computed(() => this.busqueda.valor()?.elementos ?? []);
-  readonly total = computed(() => this.busqueda.valor()?.total ?? 0);
-  readonly estadoListado = this.busqueda.estado;
-  readonly errorListado = this.busqueda.error;
   readonly consultaValida = computed(() => this.termino().length >= MINIMO_TERMINO);
+
+  readonly grupos = computed<GrupoVista[]>(() => {
+    const termino = this.termino();
+    const indice: IndiceBusqueda = this.indice.valor() ?? new Map();
+
+    return this.consultas.map(({ definicion, fuente }) => {
+      // Mientras llega una consulta nueva no se reutilizan filas del término
+      // anterior: sus enlaces ya se construirían con el término vigente.
+      const coleccion = fuente.estado() === 'listo' ? fuente.valor() : undefined;
+      const total = coleccion?.total ?? 0;
+      const resultados = (coleccion?.elementos ?? []).map((resultado) =>
+        aEnlace(definicion, enriquecer(resultado, indice), termino),
+      );
+
+      return {
+        clave: definicion.clave,
+        titulo: definicion.tituloGrupo,
+        icono: definicion.icono,
+        total,
+        omitidos: Math.max(0, total - resultados.length),
+        resultados,
+        enlaceListado: { ruta: definicion.listado, parametros: { q: termino } },
+      };
+    });
+  });
+
+  /** Grupos con resultados; los vacíos no se pintan. */
+  readonly gruposConResultados = computed(() => this.grupos().filter((grupo) => grupo.total > 0));
+
+  readonly total = computed(() => this.grupos().reduce((suma, grupo) => suma + grupo.total, 0));
+
+  readonly gruposFallidos = computed(() =>
+    this.consultas
+      .filter(({ fuente }) => fuente.estado() === 'error')
+      .map(({ definicion }) => definicion.tituloGrupo),
+  );
+
+  readonly cargando = computed(() =>
+    this.consultas.some(({ fuente }) => fuente.estado() === 'cargando'),
+  );
+
+  readonly todosConError = computed(() =>
+    this.consultas.every(({ fuente }) => fuente.estado() === 'error'),
+  );
+
+  readonly errorListado = computed(
+    () => this.consultas.find(({ fuente }) => fuente.error())?.fuente.error() ?? null,
+  );
 
   private temporizador?: ReturnType<typeof setTimeout>;
 
@@ -257,16 +407,8 @@ export class BusquedaPage {
     const valor = (evento.target as HTMLInputElement).value;
     clearTimeout(this.temporizador);
     this.temporizador = setTimeout(() => {
-      void this.actualizar({ q: valor, pagina: 1 });
+      void this.actualizar({ q: valor });
     }, 300);
-  }
-
-  cambiarPagina(pagina: number): void {
-    void this.actualizar({ pagina });
-  }
-
-  cambiarTamano(tamano: number): void {
-    void this.actualizar({ tamano, pagina: 1 });
   }
 
   limpiar(): void {
@@ -279,20 +421,18 @@ export class BusquedaPage {
   }
 
   recargar(): void {
-    this.busqueda.recargar();
+    for (const { fuente } of this.consultas) fuente.recargar();
+    this.indice.recargar();
   }
 
-  private actualizar(cambios: Partial<FiltrosBusqueda>): void {
-    const siguiente = { ...this.parametros(), ...cambios };
-
+  /**
+   * El término es el único parámetro vigente. Se navega sin `merge` para que
+   * una URL antigua con `pagina`/`tamano` quede limpia.
+   */
+  private actualizar(cambios: { q: string }): void {
     void this.router.navigate([], {
       relativeTo: this.ruta,
-      queryParams: {
-        q: siguiente.q.trim() || null,
-        pagina: siguiente.pagina > 1 ? siguiente.pagina : null,
-        tamano: siguiente.tamano !== TAMANO_PAGINA ? siguiente.tamano : null,
-      },
-      queryParamsHandling: 'merge',
+      queryParams: { q: cambios.q.trim() || null },
       replaceUrl: true,
     });
   }

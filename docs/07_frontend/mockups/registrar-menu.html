@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>Registrar ▾ · Mockup AVISA (items 65, 66, 67, 72)</title>
+        <title>Registrar ▾ · Mockup AVISA (items 65, 66, 72)</title>
         <style>
             /* ─────────────────────────────────────────────────────────────────────────
          Tokens y clases base copiados de angular/src/styles/global.css y del
@@ -466,6 +466,9 @@
                 gap: 16px;
                 align-items: start;
             }
+            .states.tres {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
             .state-card {
                 padding: 0;
                 overflow: hidden;
@@ -495,8 +498,16 @@
                 min-height: 520px;
                 padding: 18px;
                 background:
-                    linear-gradient(180deg, rgba(23, 40, 58, 0.05), rgba(23, 40, 58, 0.02)),
-                    repeating-linear-gradient(0deg, #f6f8fa 0 22px, #f1f4f7 22px 44px);
+                    linear-gradient(
+                        180deg,
+                        rgba(23, 40, 58, 0.05),
+                        rgba(23, 40, 58, 0.02)
+                    ),
+                    repeating-linear-gradient(
+                        0deg,
+                        #f6f8fa 0 22px,
+                        #f1f4f7 22px 44px
+                    );
             }
             .drawer {
                 margin-left: auto;
@@ -724,7 +735,8 @@
             }
 
             @media (max-width: 980px) {
-                .states {
+                .states,
+                .states.tres {
                     grid-template-columns: 1fr;
                 }
             }
@@ -742,14 +754,17 @@
         <main class="view-body">
             <header class="view-head">
                 <div>
-                    <span class="anexo-badge">Mockup · items 65 · 66 · 67 · 72</span>
+                    <span class="anexo-badge">Mockup · items 65 · 66 · 72</span>
                     <h1>Acción global «Registrar ▾»</h1>
                     <p class="view-subtitle">
-                        Dos estados del mismo componente: menú desplegable del shell
-                        y panel lateral de alta generado por descriptor. El tipo se
-                        preselecciona cuando la acción parte de una ficha y el caso
-                        queda fijado. Un solo kit de formularios evita que seis
-                        altas se desalineen del vocabulario (item 66).
+                        Dos estados del mismo componente: menú desplegable del
+                        shell y panel lateral de alta generado por descriptor.
+                        El tipo se preselecciona cuando la acción parte de una
+                        ficha y el caso queda fijado. Un solo kit de formularios
+                        evita que las altas con capa de datos se desalineen del
+                        vocabulario (item 66). Reunión, acta y relatoría no
+                        tienen tabla ni endpoint y se muestran deshabilitadas,
+                        nunca como un flujo que guarda.
                     </p>
                 </div>
             </header>
@@ -766,7 +781,9 @@
                         <span>Directorio</span>
                     </div>
                     <div class="grow"></div>
-                    <span class="chip neutral">Rol: Especialista OAIPCS · escritura</span>
+                    <span class="chip neutral"
+                        >Rol: Especialista OAIPCS · escritura</span
+                    >
                     <div class="registrar">
                         <button class="button-primary">Registrar ▾</button>
                         <div class="dropdown">
@@ -786,30 +803,58 @@
                             <button class="dd-item">
                                 <span class="ico">M</span> Compromiso
                             </button>
-                            <button class="dd-item locked" title="Oculto por capacidad">
-                                <span class="ico">R</span> Reunión
-                                <span class="meta">sin endpoint</span>
-                            </button>
                             <button class="dd-item">
                                 <span class="ico">Doc</span> Documento
                             </button>
                             <div class="dd-sep"></div>
+                            <div class="dd-title">
+                                Sin capa de datos · no registrable
+                            </div>
+                            <button
+                                class="dd-item locked"
+                                title="Requiere tabla y endpoint (item 72)"
+                                disabled
+                            >
+                                <span class="ico">R</span> Reunión
+                                <span class="meta">requiere endpoint</span>
+                            </button>
+                            <button
+                                class="dd-item locked"
+                                title="Requiere reunión, tabla y endpoint (item 72)"
+                                disabled
+                            >
+                                <span class="ico">Acta</span> Acta
+                                <span class="meta">requiere reunión</span>
+                            </button>
+                            <button
+                                class="dd-item locked"
+                                title="Requiere acta, tabla y endpoint (item 72)"
+                                disabled
+                            >
+                                <span class="ico">Rel</span> Relatoría
+                                <span class="meta">requiere acta</span>
+                            </button>
                             <div class="hidden-demo">
-                                En un rol lector el menú completo se oculta. En un
-                                rol sin permiso sobre una entidad, esa opción no se
-                                renderiza (aquí «Reunión» aparece tachada solo para
-                                enseñar el caso).
+                                En un rol lector el menú completo se oculta. En
+                                un rol sin permiso sobre una entidad, esa opción
+                                no se renderiza. Reunión, acta y relatoría
+                                aparecen deshabilitadas porque no existe una
+                                tabla operativa ni
+                                <code>/api/v1/reuniones</code>: no hay flujo que
+                                guarde.
                             </div>
                         </div>
                     </div>
                 </div>
             </section>
 
-            <h2 class="section-title">Estado 1 · Alta y edición en panel lateral</h2>
+            <h2 class="section-title">
+                Estado 1 · Alta y edición en panel lateral
+            </h2>
             <p class="section-sub">
                 Mismo descriptor, dos modos. El formulario se genera desde el
-                contrato: la etiqueta, el catálogo, la obligatoriedad, la validación
-                y la ayuda salen del mismo objeto.
+                contrato: la etiqueta, el catálogo, la obligatoriedad, la
+                validación y la ayuda salen del mismo objeto.
             </p>
 
             <div class="states">
@@ -820,38 +865,77 @@
                         <span>preselección de tipo + caso fijado</span>
                     </div>
                     <div class="drawer-wrap">
-                        <div class="drawer" role="dialog" aria-label="Registrar demanda">
+                        <div
+                            class="drawer"
+                            role="dialog"
+                            aria-label="Registrar demanda"
+                        >
                             <div class="drawer-head">
                                 <div>
                                     <h3>Registrar demanda</h3>
-                                    <p>Tipo preseleccionado · panel lateral · no pierde la vista de origen</p>
+                                    <p>
+                                        Tipo preseleccionado · panel lateral ·
+                                        no pierde la vista de origen
+                                    </p>
                                 </div>
-                                <button class="drawer-close" aria-label="Cerrar">✕</button>
+                                <button
+                                    class="drawer-close"
+                                    aria-label="Cerrar"
+                                >
+                                    ✕
+                                </button>
                             </div>
                             <div class="drawer-body">
                                 <div class="context-chip">
                                     <span>
                                         <b>Caso fijado:</b> CS-PA-OAT-2024-02 ·
-                                        Uso de red de cortina de fondo en Cabo Blanco
-                                        y Los Órganos
+                                        Uso de red de cortina de fondo en Cabo
+                                        Blanco y Los Órganos
                                     </span>
                                     <span class="lock">🔒 no editable</span>
                                 </div>
 
                                 <div class="field">
-                                    <label>Caso <span class="req">*</span></label>
+                                    <label
+                                        >Caso <span class="req">*</span></label
+                                    >
                                     <select disabled>
-                                        <option>CS-PA-OAT-2024-02 — Uso de red de cortina de fondo en Cabo Blanco y Los Órganos</option>
+                                        <option>
+                                            CS-PA-OAT-2024-02 — Uso de red de
+                                            cortina de fondo en Cabo Blanco y
+                                            Los Órganos
+                                        </option>
                                     </select>
                                     <span class="help">
-                                        Se fija desde la ficha de origen; no se puede
-                                        cambiar dentro del panel.
+                                        Se fija desde la ficha de origen; no se
+                                        puede cambiar dentro del panel.
                                     </span>
                                 </div>
 
                                 <div class="field">
-                                    <label>Problema (3P) <span class="req">*</span></label>
-                                    <textarea placeholder="Qué ocurre y a quién afecta"></textarea>
+                                    <label
+                                        >Descripción
+                                        <span class="req">*</span></label
+                                    >
+                                    <textarea
+                                        placeholder="Descripción breve de la demanda"
+                                    ></textarea>
+                                    <span class="help">
+                                        <code>POST /api/v1/demandas</code> exige
+                                        <code>descripcion</code> no vacía. Se
+                                        captura aquí; no se rellena con el
+                                        problema ni con un texto inventado.
+                                    </span>
+                                </div>
+
+                                <div class="field">
+                                    <label
+                                        >Problema (3P)
+                                        <span class="req">*</span></label
+                                    >
+                                    <textarea
+                                        placeholder="Qué ocurre y a quién afecta"
+                                    ></textarea>
                                     <span class="help">
                                         Parte «problema» del 3P. Se vincula al
                                         fragmento o documento de origen.
@@ -860,26 +944,47 @@
 
                                 <div class="field">
                                     <label>Propuesta (3P)</label>
-                                    <textarea placeholder="Qué se plantea como salida"></textarea>
+                                    <textarea
+                                        placeholder="Qué se plantea como salida"
+                                    ></textarea>
                                 </div>
 
                                 <div class="field invalid">
-                                    <label>Pedido (3P) <span class="req">*</span></label>
-                                    <textarea placeholder="Qué se solicita concretamente"></textarea>
-                                    <span class="error">Este campo es obligatorio para guardar.</span>
+                                    <label
+                                        >Pedido (3P)
+                                        <span class="req">*</span></label
+                                    >
+                                    <textarea
+                                        placeholder="Qué se solicita concretamente"
+                                    ></textarea>
+                                    <span class="error"
+                                        >Este campo es obligatorio para
+                                        guardar.</span
+                                    >
                                 </div>
 
                                 <div class="field">
-                                    <label>Temática <span class="req">*</span></label>
+                                    <label
+                                        >Temática
+                                        <span class="req">*</span></label
+                                    >
                                     <select>
-                                        <option>Ordenamiento y acceso territorial</option>
+                                        <option>
+                                            Ordenamiento y acceso territorial
+                                        </option>
                                         <option>Infraestructura</option>
                                         <option>Normatividad</option>
-                                        <option>Distribución de beneficios</option>
+                                        <option>
+                                            Distribución de beneficios
+                                        </option>
                                         <option>Gobernanza</option>
                                         <option>Impactos de terceros</option>
                                     </select>
-                                    <span class="help">Catálogo de <code>/api/v1/catalogs</code>, no lista local.</span>
+                                    <span class="help"
+                                        >Catálogo de
+                                        <code>/api/v1/catalogs</code>, no lista
+                                        local.</span
+                                    >
                                 </div>
 
                                 <div class="field two">
@@ -889,8 +994,14 @@
                                             <option>Pendiente</option>
                                             <option>En proceso</option>
                                             <option>Atendida</option>
-                                            <option>No atendida</option>
+                                            <option>Desestimada</option>
                                         </select>
+                                        <span class="help"
+                                            >Valores del <code>CHECK</code> de
+                                            <code
+                                                >core.demandas.estado_atencion</code
+                                            >; no hay catálogo formal.</span
+                                        >
                                     </div>
                                     <div>
                                         <label>Fecha de registro</label>
@@ -901,26 +1012,48 @@
                                 <div class="field">
                                     <label>Alerta de origen</label>
                                     <select>
-                                        <option>AT-2026-01 — Conflicto pesquero por uso de redes de fondo</option>
-                                        <option>AT-2026-02 — Movilización de pescadores artesanales en Cabo Blanco</option>
-                                        <option>AT-2026-03 — Movilización social y bloqueo de Panamericana</option>
-                                        <option>AT-2026-49-bis — Paro pescadores artesanales Los Órganos</option>
+                                        <option>
+                                            AT-2026-01 — Conflicto pesquero por
+                                            uso de redes de fondo
+                                        </option>
+                                        <option>
+                                            AT-2026-02 — Movilización de
+                                            pescadores artesanales en Cabo
+                                            Blanco
+                                        </option>
+                                        <option>
+                                            AT-2026-03 — Movilización social y
+                                            bloqueo de Panamericana
+                                        </option>
+                                        <option>
+                                            AT-2026-49-bis — Paro pescadores
+                                            artesanales Los Órganos
+                                        </option>
                                     </select>
                                     <span class="help">
-                                        Opcional. Si la demanda nace de una alerta del
-                                        caso, se conserva el vínculo.
+                                        Opcional. Si la demanda nace de una
+                                        alerta del caso, se conserva el vínculo.
                                     </span>
                                 </div>
 
                                 <label class="checkline">
                                     <input type="checkbox" />
-                                    <span>Afecta diferenciadamente a mujeres (campo del modelo)</span>
+                                    <span
+                                        >Afecta diferenciadamente a mujeres
+                                        (campo del modelo)</span
+                                    >
                                 </label>
                             </div>
                             <div class="drawer-foot">
-                                <span class="auto">Borrador local · no guarda al cerrar</span>
-                                <button class="button-secondary">Cancelar</button>
-                                <button class="button-primary">Guardar demanda</button>
+                                <span class="auto"
+                                    >Borrador local · no guarda al cerrar</span
+                                >
+                                <button class="button-secondary">
+                                    Cancelar
+                                </button>
+                                <button class="button-primary">
+                                    Guardar demanda
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -933,40 +1066,73 @@
                         <span>valores precargados</span>
                     </div>
                     <div class="drawer-wrap">
-                        <div class="drawer" role="dialog" aria-label="Editar demanda">
+                        <div
+                            class="drawer"
+                            role="dialog"
+                            aria-label="Editar demanda"
+                        >
                             <div class="drawer-head">
                                 <div>
                                     <h3>Editar demanda</h3>
-                                    <p>El descriptor es el mismo; cambia el modo y el endpoint (PATCH)</p>
+                                    <p>
+                                        El descriptor es el mismo; cambia el
+                                        modo y el endpoint (PATCH)
+                                    </p>
                                 </div>
-                                <button class="drawer-close" aria-label="Cerrar">✕</button>
+                                <button
+                                    class="drawer-close"
+                                    aria-label="Cerrar"
+                                >
+                                    ✕
+                                </button>
                             </div>
                             <div class="drawer-body">
                                 <div class="context-chip">
                                     <span>
-                                        <b>Demanda:</b> «Prohibición definitiva del uso
-                                        de redes de fondo dentro de las 5 millas
-                                        náuticas»
+                                        <b>Demanda:</b> «Prohibición definitiva
+                                        del uso de redes de fondo dentro de las
+                                        5 millas náuticas»
                                     </span>
                                     <span class="lock">Pendiente</span>
                                 </div>
 
                                 <div class="field">
-                                    <label>Problema (3P)</label>
-                                    <textarea placeholder="Sin dato en la base"></textarea>
+                                    <label>Descripción</label>
+                                    <textarea
+                                        placeholder="Sin dato en la base"
+                                    ></textarea>
                                     <span class="help">
-                                        «—» en el registro actual: el campo está vacío.
+                                        Obligatoria al crear; al editar se
+                                        conserva el valor guardado. «—» no se
+                                        convierte en 0 ni en texto estimado.
+                                    </span>
+                                </div>
+
+                                <div class="field">
+                                    <label>Problema (3P)</label>
+                                    <textarea
+                                        placeholder="Sin dato en la base"
+                                    ></textarea>
+                                    <span class="help">
+                                        «—» en el registro actual: el campo está
+                                        vacío.
                                     </span>
                                 </div>
 
                                 <div class="field">
                                     <label>Propuesta (3P)</label>
-                                    <textarea placeholder="Sin dato en la base"></textarea>
+                                    <textarea
+                                        placeholder="Sin dato en la base"
+                                    ></textarea>
                                 </div>
 
                                 <div class="field">
-                                    <label>Pedido (3P) <span class="req">*</span></label>
-                                    <textarea>Prohibición definitiva del uso de redes de fondo dentro de las 5 millas náuticas y mayor fiscalización</textarea>
+                                    <label
+                                        >Pedido (3P)
+                                        <span class="req">*</span></label
+                                    >
+                                    <textarea>
+Prohibición definitiva del uso de redes de fondo dentro de las 5 millas náuticas y mayor fiscalización</textarea>
                                 </div>
 
                                 <div class="field">
@@ -975,66 +1141,98 @@
                                         <option selected>Pendiente</option>
                                         <option>En proceso</option>
                                         <option>Atendida</option>
-                                        <option>No atendida</option>
+                                        <option>Desestimada</option>
                                     </select>
                                 </div>
 
                                 <div class="field">
                                     <label>Documento de origen</label>
                                     <select>
-                                        <option>AT-2026-01_pdf — Reporte de Alerta Temprana</option>
-                                        <option>AT-2026-02_pdf — Reporte de Alerta Temprana</option>
-                                        <option>AT-2026-03_pdf — Reporte de Alerta Temprana</option>
+                                        <option>
+                                            AT-2026-01_pdf — Reporte de Alerta
+                                            Temprana
+                                        </option>
+                                        <option>
+                                            AT-2026-02_pdf — Reporte de Alerta
+                                            Temprana
+                                        </option>
+                                        <option>
+                                            AT-2026-03_pdf — Reporte de Alerta
+                                            Temprana
+                                        </option>
                                     </select>
                                     <span class="help">
-                                        Trazabilidad al fragmento que originó cada
-                                        campo 3P.
+                                        Trazabilidad al fragmento que originó
+                                        cada campo 3P.
                                     </span>
                                 </div>
                             </div>
                             <div class="drawer-foot">
                                 <span class="auto">Cambios auditados</span>
-                                <button class="button-secondary">Cancelar</button>
-                                <button class="button-primary">Guardar cambios</button>
+                                <button class="button-secondary">
+                                    Cancelar
+                                </button>
+                                <button class="button-primary">
+                                    Guardar cambios
+                                </button>
                             </div>
                         </div>
                     </div>
                 </section>
             </div>
 
-            <h2 class="section-title">Estado 2 · Visibilidad por capacidad de escritura</h2>
+            <h2 class="section-title">
+                Estado 2 · Visibilidad por capacidad de escritura
+            </h2>
             <p class="section-sub">
                 Cada opción se muestra solo si el rol puede escribir sobre esa
-                entidad, con la misma comprobación en servidor. Ocultar en cliente no
-                es seguridad (item 49).
+                entidad, con la misma comprobación en servidor. Ocultar en
+                cliente no es seguridad (item 49).
             </p>
 
             <div class="states">
                 <section class="card state-card">
                     <div class="state-cap">
                         <b>Rol operativo con permiso parcial</b>
-                        <span>escribe demanda y documento; no compromiso ni reunión</span>
+                        <span
+                            >escribe demanda y documento; no compromiso ni
+                            reunión</span
+                        >
                     </div>
                     <div style="padding: 16px">
-                        <div class="dropdown" style="position: static; width: 100%; box-shadow: none; border-color: #e6ebef">
+                        <div
+                            class="dropdown"
+                            style="
+                                position: static;
+                                width: 100%;
+                                box-shadow: none;
+                                border-color: #e6ebef;
+                            "
+                        >
                             <div class="dd-title">Nuevo registro</div>
                             <button class="dd-item">
-                                <span class="ico">C</span> Caso <span class="chip ok">permitido</span>
+                                <span class="ico">C</span> Caso
+                                <span class="chip ok">permitido</span>
                             </button>
                             <button class="dd-item">
-                                <span class="ico">A</span> Alerta <span class="chip ok">permitido</span>
+                                <span class="ico">A</span> Alerta
+                                <span class="chip ok">permitido</span>
                             </button>
                             <button class="dd-item ctx">
-                                <span class="ico">D</span> Demanda <span class="chip ok">permitido</span>
+                                <span class="ico">D</span> Demanda
+                                <span class="chip ok">permitido</span>
                             </button>
                             <button class="dd-item">
-                                <span class="ico">Doc</span> Documento <span class="chip ok">permitido</span>
+                                <span class="ico">Doc</span> Documento
+                                <span class="chip ok">permitido</span>
                             </button>
                             <div class="hidden-demo">
-                                «Compromiso» y «Reunión» no se renderizan: el rol no
-                                tiene capacidad de escritura sobre esas entidades. El
-                                servidor rechaza igual el <code>POST</code> si se
-                                fuerza.
+                                «Compromiso» no se renderiza: el rol no tiene
+                                capacidad de escritura sobre esa entidad. El
+                                servidor rechaza igual el <code>POST</code> si
+                                se fuerza. Reunión, acta y relatoría tampoco
+                                aparecen, pero por falta de capa de datos, no
+                                por permisos.
                             </div>
                         </div>
                     </div>
@@ -1046,111 +1244,373 @@
                         <span>sin ninguna acción de registro</span>
                     </div>
                     <div style="padding: 16px">
-                        <div class="dropdown" style="position: static; width: 100%; box-shadow: none; border-color: #e6ebef">
+                        <div
+                            class="dropdown"
+                            style="
+                                position: static;
+                                width: 100%;
+                                box-shadow: none;
+                                border-color: #e6ebef;
+                            "
+                        >
                             <div class="dd-title">Nuevo registro</div>
-                            <div style="padding: 14px 10px; color: #98a3ac; font-size: 9.5px; line-height: 1.5; text-align: center">
-                                No tienes capacidad de escritura. Puedes consultar,
-                                exportar y navegar, pero no registrar.
+                            <div
+                                style="
+                                    padding: 14px 10px;
+                                    color: #98a3ac;
+                                    font-size: 9.5px;
+                                    line-height: 1.5;
+                                    text-align: center;
+                                "
+                            >
+                                No tienes capacidad de escritura. Puedes
+                                consultar, exportar y navegar, pero no
+                                registrar.
                             </div>
                         </div>
                     </div>
                 </section>
             </div>
 
+            <h2 class="section-title">
+                Estado 3 · Carga, error de guardado y catálogo vacío
+            </h2>
+            <p class="section-sub">
+                El panel declara lo que aún no sabe: no hay barras de progreso
+                falsas, ni opciones inventadas cuando el catálogo no responde.
+            </p>
+
+            <div class="states tres">
+                <section class="card state-card">
+                    <div class="state-cap">
+                        <b>Guardando</b>
+                        <span>POST en vuelo</span>
+                    </div>
+                    <div style="padding: 16px; display: grid; gap: 10px">
+                        <div class="banner">
+                            <b>Guardando demanda…</b> El panel no se cierra y el
+                            botón queda bloqueado hasta que responde el
+                            servidor.
+                        </div>
+                        <button class="button-primary" disabled>
+                            Guardando…
+                        </button>
+                        <span class="help"
+                            >Cancelar sigue disponible: el borrador local se
+                            conserva y no se envía nada.</span
+                        >
+                    </div>
+                </section>
+
+                <section class="card state-card">
+                    <div class="state-cap">
+                        <b>Error de guardado</b>
+                        <span>422 de validación · 409 de conflicto</span>
+                    </div>
+                    <div style="padding: 16px; display: grid; gap: 10px">
+                        <div class="banner warn">
+                            <b>No se pudo guardar.</b> El mensaje del servidor
+                            se muestra tal cual; el formulario conserva los
+                            valores escritos y marca el campo rechazado.
+                        </div>
+                        <div style="display: flex; gap: 6px; flex-wrap: wrap">
+                            <button class="button-secondary">Reintentar</button>
+                            <button class="button-secondary">Cancelar</button>
+                        </div>
+                        <span class="help"
+                            >Si el error es de permiso (403), no se reintenta:
+                            se cierra el panel y se explica el rol.</span
+                        >
+                    </div>
+                </section>
+
+                <section class="card state-card">
+                    <div class="state-cap">
+                        <b>Catálogo vacío o caído</b>
+                        <span>sin opciones que ofrecer</span>
+                    </div>
+                    <div style="padding: 16px; display: grid; gap: 10px">
+                        <div class="banner warn">
+                            <b>Sin opciones del catálogo.</b>
+                            <code>/api/v1/catalogs</code> no devolvió filas. No
+                            se escribe un valor a mano ni se usa una lista
+                            local.
+                        </div>
+                        <span class="help"
+                            ><code>requiere</code> que el catálogo tenga filas
+                            vigentes; el alta queda bloqueada, no
+                            simulada.</span
+                        >
+                    </div>
+                </section>
+            </div>
+
             <!-- Descriptor contraído -->
-            <h2 class="section-title">Descriptor por entidad (lo que genera el formulario)</h2>
+            <h2 class="section-title">
+                Descriptor por entidad (lo que genera el formulario)
+            </h2>
             <p class="section-sub">
                 Cada alta y cada edición leen este descriptor; los catálogos se
-                resuelven contra <code>/api/v1/catalogs</code>. No hay seis
-                formularios escritos a mano.
+                resuelven contra <code>/api/v1/catalogs</code>. No hay un
+                formulario escrito a mano por entidad.
+            </p>
+
+            <p class="meta-line" style="margin: 0 0 2px">
+                Convención de datos: «—» = ausente declarado; nunca 0 ni
+                estimación (item 68). Cada fila del contrato nombra su fuente o
+                dice «requiere» con la dependencia exacta.
             </p>
 
             <div class="subgrid" style="margin-bottom: 8px">
                 <div class="spec">
-                    <div class="h"><b>Caso</b><span class="chip">POST /cases</span></div>
+                    <div class="h">
+                        <b>Caso</b><span class="chip">POST /api/v1/cases</span>
+                    </div>
                     <dl>
+                        <dt>endpoints</dt>
+                        <dd>
+                            <code>POST /api/v1/cases</code> ·
+                            <code>PATCH /api/v1/cases/{codigo}</code>
+                        </dd>
                         <dt>obligatorios</dt>
-                        <dd><code>nombre_caso</code>, <code>subsector_id</code>, <code>tematica_id</code>, <code>unidad_responsable_id</code>, <code>nivel_riesgo_id</code></dd>
+                        <dd>
+                            <code>nombre_caso</code>, <code>subsector_id</code>,
+                            <code>tematica_id</code>,
+                            <code>unidad_responsable_id</code>,
+                            <code>nivel_riesgo_id</code>
+                        </dd>
                         <dt>catálogos</dt>
-                        <dd>tematicas · subsectores · unidades · niveles de riesgo/conflicto · prioridades · estados</dd>
+                        <dd>
+                            tematicas · subsectores · unidades · niveles de
+                            riesgo/conflicto · prioridades · estados
+                        </dd>
+                        <dt>prioridad de atención</dt>
+                        <dd>
+                            <code>prioridad_id</code> es un valor almacenado.
+                            OAIPCS no definió la regla que lo calcula
+                            (<code>requiere</code>); no se deriva del riesgo. Si
+                            falta, se muestra «—» y no se completa con
+                            «Moderado» por defecto.
+                        </dd>
+                        <dt>alcance geográfico</dt>
+                        <dd>
+                            derivado por <code>core.alcance_caso(uuid)</code>
+                            desde las regiones del caso; no hay selector. La API
+                            rechaza un alcance manual con
+                            <code>422 ALCANCE_DERIVADO</code>.
+                        </dd>
                         <dt>validación</dt>
-                        <dd>código CS-&lt;PA|MI&gt;-&lt;…&gt;-AAAA-NN y geografía por ubigeo</dd>
+                        <dd>
+                            código CS-&lt;PA|MI&gt;-&lt;…&gt;-AAAA-NN y
+                            geografía por ubigeo
+                        </dd>
                         <dt>ayuda</dt>
-                        <dd>región, alcance derivado, riesgo vs. conflictividad</dd>
+                        <dd>
+                            región, alcance derivado, riesgo vs. conflictividad
+                        </dd>
                     </dl>
                 </div>
                 <div class="spec">
-                    <div class="h"><b>Alerta</b><span class="chip">POST /alerts</span></div>
+                    <div class="h">
+                        <b>Alerta</b
+                        ><span class="chip">POST /api/v1/alerts</span>
+                    </div>
                     <dl>
+                        <dt>endpoints</dt>
+                        <dd>
+                            <code>POST /api/v1/alerts</code> ·
+                            <code>PATCH /api/v1/alerts/{id}</code>
+                        </dd>
                         <dt>obligatorios</dt>
-                        <dd><code>titulo</code>, <code>nivel_alerta_id</code>, <code>prioridad_id</code>, <code>fecha_reporte</code>, <code>situacion_actual</code></dd>
+                        <dd>
+                            <code>titulo</code>, <code>nivel_alerta_id</code>,
+                            <code>prioridad_id</code>,
+                            <code>fecha_reporte</code>,
+                            <code>situacion_actual</code>
+                        </dd>
                         <dt>catálogos</dt>
-                        <dd>niveles de alerta (Inmediato · Táctico · Preventivo · Monitoreo) · prioridades de alerta</dd>
+                        <dd>
+                            niveles de alerta (Inmediato · Táctico · Preventivo
+                            · Monitoreo) · prioridades de alerta (Crítica
+                            inmediata · Urgente · Temprana · Seguimiento)
+                        </dd>
                         <dt>validación</dt>
-                        <dd>SLA se calcula del nivel; caso opcional (33 alertas sin caso)</dd>
+                        <dd>
+                            SLA desde
+                            <code>core.cat_niveles_alerta.sla_horas</code>; caso
+                            opcional (33 alertas sin caso)
+                        </dd>
                         <dt>ayuda</dt>
                         <dd>bloques 1–6 del Anexo 3</dd>
                     </dl>
                 </div>
                 <div class="spec">
-                    <div class="h"><b>Demanda</b><span class="chip">POST /demandas</span></div>
+                    <div class="h">
+                        <b>Demanda</b
+                        ><span class="chip">POST /api/v1/demandas</span>
+                    </div>
                     <dl>
+                        <dt>endpoints</dt>
+                        <dd>
+                            <code>POST /api/v1/demandas</code> ·
+                            <code>PATCH /api/v1/demandas/{id}</code>
+                        </dd>
                         <dt>obligatorios</dt>
-                        <dd><code>problema_3p</code>, <code>pedido_3p</code>; <code>caso_id</code> fijado en contexto</dd>
+                        <dd>
+                            <code>problema</code>, <code>pedido</code>,
+                            <code>descripcion</code> no vacía;
+                            <code>caso_id</code>
+                            fijado en contexto
+                        </dd>
                         <dt>catálogos</dt>
-                        <dd>tematicas · estados de atención</dd>
+                        <dd>
+                            tematicas · estados de atención (Pendiente · En
+                            proceso · Atendida · Desestimada)
+                        </dd>
                         <dt>validación</dt>
-                        <dd>3P mínimo; vínculo a alerta/documento de origen</dd>
+                        <dd>
+                            3P mínimo; el <code>POST</code> exige
+                            <code>descripcion</code>: si no se captura, se usa
+                            el problema como ancla (campo visible para no
+                            duplicarlo)
+                        </dd>
                         <dt>ayuda</dt>
-                        <dd>qué es problema, propuesta y pedido</dd>
+                        <dd>
+                            qué es problema, propuesta y pedido;
+                            <code>afecta_diferenciadamente_mujeres</code> es
+                            columna del modelo
+                        </dd>
                     </dl>
                 </div>
                 <div class="spec">
-                    <div class="h"><b>Compromiso</b><span class="chip">POST /commitments</span></div>
+                    <div class="h">
+                        <b>Compromiso</b
+                        ><span class="chip">POST /api/v1/commitments</span>
+                    </div>
                     <dl>
+                        <dt>endpoints</dt>
+                        <dd>
+                            <code>POST /api/v1/commitments</code> ·
+                            <code>PATCH /api/v1/commitments/{id}</code>
+                        </dd>
                         <dt>obligatorios</dt>
-                        <dd><code>accion_compromiso</code>, <code>caso_id</code>, <code>unidad_responsable_id</code></dd>
+                        <dd>
+                            <code>accion_compromiso</code>,
+                            <code>caso_id</code>,
+                            <code>unidad_responsable_id</code>
+                        </dd>
                         <dt>catálogos</dt>
-                        <dd>estados de compromiso · tematicas · unidades</dd>
+                        <dd>
+                            estados de compromiso · Tipo de compromiso ·
+                            tematicas · Unidad responsable
+                        </dd>
                         <dt>validación</dt>
-                        <dd>vencimiento derivado del próximo hito si falta</dd>
+                        <dd>
+                            fecha de vencimiento manual o derivada del próximo
+                            hito no terminal; si no hay ninguna, se pide a mano
+                            (no se estima)
+                        </dd>
                         <dt>ayuda</dt>
                         <dd>Paralizado es estado de hito, no de compromiso</dd>
                     </dl>
                 </div>
                 <div class="spec">
-                    <div class="h"><b>Documento</b><span class="chip">POST /documents</span></div>
+                    <div class="h">
+                        <b>Documento</b
+                        ><span class="chip">POST /api/v1/documents</span>
+                    </div>
                     <dl>
+                        <dt>endpoints</dt>
+                        <dd>
+                            <code>POST /api/v1/documents</code> ·
+                            <code>PATCH /api/v1/documents/{id}</code>
+                        </dd>
                         <dt>obligatorios</dt>
-                        <dd><code>tipo_id</code>, <code>titulo</code>, <code>fecha</code></dd>
+                        <dd>
+                            <code>tipo_id</code>, <code>titulo</code>,
+                            <code>fecha</code>
+                        </dd>
                         <dt>catálogos</dt>
-                        <dd>17 tipos de documento (AT · RR · PAR · acta · relatoría…)</dd>
+                        <dd>
+                            17 tipos de documento (AT · RR · PAR · acta ·
+                            relatoría…)
+                        </dd>
                         <dt>validación</dt>
                         <dd>tipo y archivo; hash y tamaño en la carga</dd>
                         <dt>ayuda</dt>
-                        <dd>normativa vs. evidencia: eje aún inexistente</dd>
+                        <dd>
+                            un documento de tipo acta no sustituye la reunión
+                            que lo produjo (item 72)
+                        </dd>
                     </dl>
                 </div>
                 <div class="spec">
-                    <div class="h"><b>Reunión</b><span class="chip warn">sin endpoint</span></div>
+                    <div class="h">
+                        <b>Reunión</b
+                        ><span class="chip warn"
+                            >requiere tabla + endpoint</span
+                        >
+                    </div>
                     <dl>
                         <dt>tabla</dt>
                         <dd><code>core.reuniones_dialogo</code> (0 filas)</dd>
                         <dt>falta</dt>
-                        <dd>repo + <code>GET/POST/PATCH /api/v1/reuniones</code> (item 72)</dd>
+                        <dd>
+                            repo +
+                            <code>GET/POST/PATCH /api/v1/reuniones</code> (item
+                            72)
+                        </dd>
                         <dt>modelo</dt>
-                        <dd>fecha, espacio, caso, etapa y <code>programada</code></dd>
+                        <dd>
+                            fecha, espacio, caso, etapa y
+                            <code>programada</code>
+                        </dd>
                         <dt>ayuda</dt>
-                        <dd><code>cat_tipos_reunion</code> se retiró en la migración 21</dd>
+                        <dd>
+                            <code>cat_tipos_reunion</code> se retiró en la
+                            migración 21
+                        </dd>
+                    </dl>
+                </div>
+                <div class="spec">
+                    <div class="h">
+                        <b>Acta / Relatoría</b
+                        ><span class="chip warn">requiere reunión</span>
+                    </div>
+                    <dl>
+                        <dt>tabla</dt>
+                        <dd>
+                            no existe; un documento de tipo acta o relatoría no
+                            es el registro de la reunión
+                        </dd>
+                        <dt>falta</dt>
+                        <dd>
+                            <code>core.reuniones_dialogo</code> + asistentes +
+                            acuerdos + vínculo documento→reunión, y su repo
+                        </dd>
+                        <dt>modelo</dt>
+                        <dd>
+                            <code>requiere</code> columnas de vínculo
+                            (reunion_id en el documento o acta_id/relatoria_id
+                            en la reunión); no hay ninguna hoy
+                        </dd>
+                        <dt>ayuda</dt>
+                        <dd>
+                            se muestran deshabilitadas en el menú; no abren
+                            formulario
+                        </dd>
                     </dl>
                 </div>
             </div>
 
             <p class="meta-line">
                 Datos de contexto reales: caso CS-PA-OAT-2024-02 y alertas
-                AT-2026-01 / 02 / 03 / 49-bis de <code>core.alertas_tempranas</code>;
-                el catálogo de temáticas sale de <code>core.cat_tematicas</code>. El
-                resto de campos se muestran como estructura, no como dato.
+                AT-2026-01 / 02 / 03 / 49-bis de
+                <code>core.alertas_tempranas</code>; el catálogo de temáticas
+                sale de <code>core.cat_tematicas</code>. La prioridad de
+                atención se muestra como valor almacenado, no derivado del
+                riesgo. El resto de campos se muestran como estructura, no como
+                dato.
             </p>
 
             <section class="notes">
@@ -1159,28 +1619,33 @@
                 <h3>Qué se resolvió visualmente</h3>
                 <ul>
                     <li>
-                        Un único botón «Registrar ▾» en el shell con seis tipos; el
-                        tipo se preselecciona al lanzar desde una ficha y el caso
-                        queda fijado y bloqueado.
+                        Un único botón «Registrar ▾» en el shell con cinco altas
+                        que tienen endpoint (caso, alerta, demanda, compromiso y
+                        documento) y tres entradas deshabilitadas por falta de
+                        capa de datos (reunión, acta y relatoría). El tipo se
+                        preselecciona al lanzar desde una ficha y el caso queda
+                        fijado y bloqueado.
                     </li>
                     <li>
-                        El panel lateral no navega: se abre sobre la vista de origen,
-                        conservando el contexto.
+                        El panel lateral no navega: se abre sobre la vista de
+                        origen, conservando el contexto.
                     </li>
                     <li>
                         Alta y edición comparten descriptor; cambia el modo y el
                         verbo HTTP.
                     </li>
                     <li>
-                        La visibilidad por capacidad se muestra en dos roles reales
-                        del sistema (especialista con permiso parcial y lector).
+                        La visibilidad por capacidad se muestra en dos roles
+                        reales del sistema (especialista con permiso parcial y
+                        lector).
                     </li>
                 </ul>
 
                 <h3>Contrato del descriptor (ejemplo)</h3>
                 <p>
-                    Forma mínima que el equipo debe leer para generar el formulario
-                    de demanda. El resto de entidades repite la misma forma.
+                    Forma mínima que el equipo debe leer para generar el
+                    formulario de demanda. El resto de entidades repite la misma
+                    forma.
                 </p>
                 <pre class="code-block"><code>{
   "entidad": "demanda",
@@ -1192,48 +1657,91 @@
     "alerta_id": { "origen": "ficha", "obligatorio": false }
   },
   "campos": [
-    { "name": "problema_3p", "label": "Problema (3P)", "tipo": "texto_largo",
+    { "name": "descripcion", "label": "Descripción", "tipo": "texto_largo",
+      "obligatorio": true, "ayuda": "Descripción breve; la exige el POST." },
+    { "name": "problema", "label": "Problema (3P)", "tipo": "texto_largo",
       "obligatorio": true, "max": 2000, "ayuda": "Qué ocurre y a quién afecta." },
-    { "name": "propuesta_3p", "label": "Propuesta (3P)", "tipo": "texto_largo",
+    { "name": "propuesta", "label": "Propuesta (3P)", "tipo": "texto_largo",
       "obligatorio": false, "ayuda": "Qué se plantea como salida." },
-    { "name": "pedido_3p", "label": "Pedido (3P)", "tipo": "texto_largo",
+    { "name": "pedido", "label": "Pedido (3P)", "tipo": "texto_largo",
       "obligatorio": true, "ayuda": "Qué se solicita concretamente." },
     { "name": "tematica_id", "label": "Temática", "tipo": "catalogo",
       "catalogo": "tematicas", "obligatorio": true },
     { "name": "estado_atencion", "label": "Estado de atención", "tipo": "catalogo",
-      "catalogo": "estados_atencion", "obligatorio": false, "default": "Pendiente" },
+      "catalogo": "estados_atencion", "obligatorio": false, "default": "Pendiente",
+      "requiere": "catálogo formal (hoy CHECK de core.demandas)" },
     { "name": "documento_origen_id", "label": "Documento de origen", "tipo": "referencia",
       "entidad": "documento", "obligatorio": false }
   ],
-  "reglas": ["3P mínimo: problema y pedido", "si viene de alerta, conservar alerta_id"],
+  "reglas": ["3P mínimo: problema y pedido", "descripcion no vacía al crear",
+              "si viene de alerta, conservar alerta_id"],
   "ayudaGlosario": ["3p", "tipo_compromiso"]
 }</code></pre>
 
                 <h3>Qué falta</h3>
                 <ul>
                     <li>
-                        <b>Reunión:</b> sin repositorio ni endpoint (item 72). La
-                        opción del menú existe, el formulario no puede guardar.
+                        <b>Reunión, acta y relatoría:</b> <code>requiere</code>
+                        <code>core.reuniones_dialogo</code> operativa,
+                        asistentes y acuerdos, y
+                        <code>GET/POST/PATCH /api/v1/reuniones</code> (item 72).
+                        Las tres entradas del menú están deshabilitadas; no se
+                        dibuja un flujo que no puede guardar.
                     </li>
                     <li>
                         <b>Capacidad por entidad:</b> el modelo tiene
-                        <code>privilegio_usuario</code> y RLS, pero no una matriz
-                        explícita «rol × entidad × escritura» que el descriptor pueda
-                        leer; hay que definirla para que el menú no se codifique a
-                        mano.
+                        <code>privilegio_usuario</code> y RLS, pero no una
+                        matriz explícita «rol × entidad × escritura» que el
+                        descriptor pueda leer. <code>requiere</code> esa matriz
+                        expuesta por la API; hoy el menú tendría que codificarse
+                        a mano.
                     </li>
                     <li>
-                        <b>3P obligatorio:</b> hoy el 100 % de las demandas tiene el
-                        3P vacío; activar la validación sin datos previos obliga a
-                        decidir si se migran o se dejan incompletas.
+                        <b>3P obligatorio:</b> hoy el 100 % de las demandas
+                        tiene el 3P vacío; activar la validación sin datos
+                        previos obliga a decidir si se migran o se dejan
+                        incompletas.
                     </li>
                     <li>
-                        <b>Catálogo de estados de atención:</b> no hay catálogo
-                        formal; el único valor es «Pendiente».
+                        <b>Estado de atención:</b> no hay catálogo formal. El
+                        <code>CHECK</code> admite Pendiente · En proceso ·
+                        Atendida · Desestimada; <code>requiere</code> catálogo
+                        propio si se quiere ofrecer fuera del formulario.
                     </li>
                     <li>
-                        <b>Aviso de duplicados (item 71):</b> el descriptor necesita
-                        una regla de comparación por entidad antes de confirmar.
+                        <b>Prioridad de atención:</b> <code>requiere</code> la
+                        regla que la calcula, que OAIPCS no ha definido. La API
+                        hoy completa «Moderado» cuando falta; la interfaz debe
+                        mostrar «—» y nunca derivarla del riesgo (item 68).
+                    </li>
+                    <li>
+                        <b>Aviso de duplicados (item 71):</b> el descriptor
+                        <code>requiere</code> una regla de comparación por
+                        entidad antes de confirmar.
+                    </li>
+                </ul>
+
+                <h3>Fuera de alcance de este mockup</h3>
+                <ul>
+                    <li>
+                        El registro de reuniones, actas y relatorías y su
+                        pestaña en la ficha. Sin tabla ni endpoint no hay flujo
+                        que mostrar.
+                    </li>
+                    <li>
+                        El cálculo de la prioridad de atención. Se muestra el
+                        valor almacenado, marcado «sin regla definida»; no se
+                        reabre la decisión.
+                    </li>
+                    <li>
+                        El selector de alcance geográfico. No existe: se deriva
+                        con <code>core.alcance_caso(uuid)</code> y la API
+                        rechaza el alcance manual.
+                    </li>
+                    <li>
+                        La carga de archivos, OCR y conciliación documental
+                        (item 61) y la regla de duplicados y la matriz de
+                        capacidades: aquí se declaran, no se resuelven.
                     </li>
                 </ul>
 
@@ -1244,27 +1752,50 @@
                         cerrándolo y abriéndolo desde otra ficha?
                     </li>
                     <li>
-                        ¿El selector de alerta de origen se limita a las alertas del
-                        caso o permite cualquier alerta del ámbito?
+                        ¿El selector de alerta de origen se limita a las alertas
+                        del caso o permite cualquier alerta del ámbito?
                     </li>
                     <li>
-                        ¿Los formularios heredan la ayuda del glosario (item 7) y de
-                        la ayuda navegable (item 9) desde el mismo descriptor?
+                        ¿Los formularios heredan la ayuda del glosario (item 7)
+                        y de la ayuda navegable (item 9) desde el mismo
+                        descriptor?
                     </li>
                     <li>
-                        ¿Qué pasa con un registro iniciado al cambiar de vista? ¿Se
-                        conserva como borrador o se descarta?
+                        ¿Qué pasa con un registro iniciado al cambiar de vista?
+                        ¿Se conserva como borrador o se descarta?
                     </li>
                 </ol>
 
                 <h3>Vocabulario respetado</h3>
                 <dl class="vocab">
+                    <dt>Estados de caso</dt>
+                    <dd>Abierto · Resuelto · Archivado</dd>
+                    <dt>Conflictividad</dt>
+                    <dd>
+                        Diferencia · Controversia · Conflicto social · Crisis
+                        social
+                    </dd>
+                    <dt>Riesgo</dt>
+                    <dd>Bajo · Moderado · Alto</dd>
+                    <dt>Prioridad de atención</dt>
+                    <dd>
+                        Urgente · Moderado · Bajo (valor almacenado; regla sin
+                        definir)
+                    </dd>
                     <dt>Prioridad de alerta</dt>
-                    <dd>Crítica inmediata · Urgente · Temprana · Seguimiento</dd>
+                    <dd>
+                        Crítica inmediata · Urgente · Temprana · Seguimiento
+                    </dd>
                     <dt>Nivel de alerta</dt>
                     <dd>Inmediato · Táctico · Preventivo · Monitoreo</dd>
-                    <dt>Estados de caso</dt>
-                    <dd>Activo · En seguimiento · Resuelto · Archivado</dd>
+                    <dt>Región</dt>
+                    <dd>Nunca «Territorio»</dd>
+                    <dt>GORE</dt>
+                    <dd>Nunca «Gobierno regional»</dd>
+                    <dt>Tipo de compromiso</dt>
+                    <dd>Nunca «tipo de acuerdo»</dd>
+                    <dt>Unidad responsable</dt>
+                    <dd>Nunca «área» ni «unidad» a secas en la etiqueta</dd>
                     <dt>Subsector</dt>
                     <dd>Pesca y Acuicultura · MYPE e Industria</dd>
                 </dl>

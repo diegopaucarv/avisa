@@ -1064,6 +1064,51 @@
             .vocab dd {
                 margin: 0;
             }
+            .state-grid {
+                display: grid;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: 12px;
+                margin-top: 10px;
+            }
+            @media (max-width: 1000px) {
+                .state-grid {
+                    grid-template-columns: 1fr;
+                }
+            }
+            .state-card {
+                padding: 14px 15px;
+                border: 1px solid var(--line);
+                border-radius: 8px;
+                background: #fff;
+            }
+            .state-card h4 {
+                margin: 0 0 4px;
+                color: #2b3d4f;
+                font: 700 11px/1.3 var(--font-display);
+            }
+            .state-card p {
+                margin: 0;
+                color: #77878f;
+                font-size: 9.5px;
+                line-height: 1.55;
+            }
+            .state-card .state-demo {
+                margin-top: 10px;
+                padding: 14px;
+                border: 1px dashed #d7dee4;
+                border-radius: 6px;
+                background: #fafbfc;
+                color: #8b97a1;
+                font-size: 9px;
+                line-height: 1.5;
+                text-align: center;
+            }
+            .state-card .state-demo b {
+                display: block;
+                margin-bottom: 3px;
+                color: #5a6c7d;
+                font-size: 10px;
+            }
             .sr-only {
                 position: absolute;
                 width: 1px;
@@ -1083,59 +1128,80 @@
                 <div>
                     <h1>Directorio de actores</h1>
                     <p class="view-subtitle">
-                        Registro único de personas, organizaciones, instituciones
-                        y locales que participan en los casos. Esta pantalla
-                        resuelve el detalle en panel lateral, el alta, la
-                        edición, la fusión de duplicados y la baja lógica, y
-                        separa lo público de lo restringido por rol. La PII se
-                        consulta bajo demanda con motivo auditado.
+                        Registro único de personas, organizaciones,
+                        instituciones y locales que participan en los casos.
+                        Esta pantalla resuelve el detalle en panel lateral, el
+                        alta, la edición, la fusión de duplicados, la baja
+                        lógica y la exportación con campos permitidos por rol
+                        (item 43), y separa lo público de lo restringido por
+                        rol. La PII se consulta bajo demanda con motivo
+                        auditado.
                     </p>
                 </div>
                 <div class="view-actions">
-                    <span class="anexo-badge">Items 44 · 45 · 71</span>
+                    <span class="anexo-badge">Items 43 · 44 · 45 · 71</span>
                 </div>
             </header>
 
             <div class="banner" role="note">
                 <span>
-                    <b>API en solo lectura.</b> Hoy existen
-                    <code>GET</code> de actores, organizaciones, instituciones y
-                    locales; <b>no hay</b> <code>POST</code>,
-                    <code>PATCH</code> ni <code>DELETE</code> de actores. Todo lo
-                    que se ve como alta, edición, fusión o baja es
-                    <b>diseño de interacción</b>: los botones de escritura están
-                    deshabilitados a propósito.
+                    <b>API en solo lectura.</b> Hoy existen <code>GET</code> de
+                    actores, organizaciones, instituciones y locales;
+                    <b>no hay</b> <code>POST</code>, <code>PATCH</code> ni
+                    <code>DELETE</code> de actores. Todo lo que se ve como alta,
+                    edición, fusión o baja es <b>diseño de interacción</b>: los
+                    botones de escritura están deshabilitados a propósito.
                 </span>
             </div>
 
             <div class="role-bar">
                 <span class="role-label">Ver como</span>
-                <div class="segmented" role="group" aria-label="Rol de la sesión">
-                    <button type="button" data-role="sectorista" aria-pressed="false">
+                <div
+                    class="segmented"
+                    role="group"
+                    aria-label="Rol de la sesión"
+                >
+                    <button
+                        type="button"
+                        data-role="sectorista"
+                        aria-pressed="false"
+                    >
                         Sectorista
                     </button>
-                    <button type="button" data-role="direccion" aria-pressed="true">
+                    <button
+                        type="button"
+                        data-role="direccion"
+                        aria-pressed="true"
+                    >
                         Dirección OAIPCS
                     </button>
                     <button type="button" data-role="alta" aria-pressed="false">
                         Alta dirección
                     </button>
-                    <button type="button" data-role="admin" aria-pressed="false">
+                    <button
+                        type="button"
+                        data-role="admin"
+                        aria-pressed="false"
+                    >
                         Administrador
                     </button>
                 </div>
                 <span class="role-note" id="role-note"
-                    >Dirección OAIPCS: ve datos públicos y PII, y puede
-                    proponer fusión y baja lógica.</span
+                    >Dirección OAIPCS: ve datos públicos y PII, y puede proponer
+                    fusión y baja lógica.</span
                 >
             </div>
 
-            <div class="pattern" aria-label="Patrón de acceso a PII bajo demanda">
+            <div
+                class="pattern"
+                aria-label="Patrón de acceso a PII bajo demanda"
+            >
                 <div class="step">
                     <b><span class="n">1</span>Dato enmascarado</b>
                     <span
                         >La ficha muestra el DNI y el teléfono como
-                        <code>••••</code>; el correo oculta la parte local.</span
+                        <code>••••</code>; el correo oculta la parte
+                        local.</span
                     >
                 </div>
                 <div class="step">
@@ -1148,8 +1214,8 @@
                 <div class="step">
                     <b><span class="n">3</span>Diálogo con motivo</b>
                     <span
-                        >El motivo es obligatorio, se declara la base legal y
-                        se advierte que quedará auditado.</span
+                        >El motivo es obligatorio, se declara la base legal y se
+                        advierte que quedará auditado.</span
                     >
                 </div>
                 <div class="step">
@@ -1162,7 +1228,14 @@
                 </div>
             </div>
 
-            <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px">
+            <div
+                style="
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 8px;
+                    margin-top: 14px;
+                "
+            >
                 <button type="button" class="button-primary" id="btn-alta">
                     Nuevo actor
                 </button>
@@ -1171,6 +1244,9 @@
                 </button>
                 <button type="button" class="button-danger" id="btn-baja">
                     Baja lógica
+                </button>
+                <button type="button" class="button-secondary" id="btn-export">
+                    Exportar
                 </button>
                 <span class="filter-caption" id="api-state"
                     >Escritura no disponible (API de solo lectura)</span
@@ -1209,17 +1285,45 @@
                     </select>
                 </label>
                 <div class="segmented" role="group" aria-label="Vista rápida">
-                    <button type="button" class="quick" data-quick="todos" aria-pressed="true">
+                    <button
+                        type="button"
+                        class="quick"
+                        data-quick="todos"
+                        aria-pressed="true"
+                    >
                         Todos
                     </button>
-                    <button type="button" class="quick" data-quick="persona" aria-pressed="false">
+                    <button
+                        type="button"
+                        class="quick"
+                        data-quick="persona"
+                        aria-pressed="false"
+                    >
                         Personas
                     </button>
-                    <button type="button" class="quick" data-quick="organizacion" aria-pressed="false">
+                    <button
+                        type="button"
+                        class="quick"
+                        data-quick="organizacion"
+                        aria-pressed="false"
+                    >
                         Organizaciones
                     </button>
-                    <button type="button" class="quick" data-quick="dup" aria-pressed="false">
+                    <button
+                        type="button"
+                        class="quick"
+                        data-quick="dup"
+                        aria-pressed="false"
+                    >
                         Duplicados
+                    </button>
+                    <button
+                        type="button"
+                        class="quick"
+                        data-quick="sinorg"
+                        aria-pressed="false"
+                    >
+                        Sin organización
                     </button>
                 </div>
                 <span class="result-count" id="count"></span>
@@ -1242,8 +1346,11 @@
                                     <th scope="col">Identificación</th>
                                     <th scope="col">Cargo · nivel</th>
                                     <th scope="col">Región</th>
+                                    <th scope="col">Calidad</th>
                                     <th scope="col">PII</th>
-                                    <th scope="col"><span class="sr-only">Acciones</span></th>
+                                    <th scope="col">
+                                        <span class="sr-only">Acciones</span>
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody id="tbody"></tbody>
@@ -1269,10 +1376,11 @@
                         </button>
                     </div>
                     <p class="meta-line" style="margin-top: 10px">
-                        Región solo está registrada en <b>236 de 1 160</b>
-                        actores (20 %) y <code>distrito_id</code> en
-                        <b>0</b>: por eso la columna muestra «—» con frecuencia.
-                        No es un error del mockup, es el estado del dato.
+                        Región solo está registrada en
+                        <b>236 de 1 160</b> actores (20 %) y
+                        <code>distrito_id</code> en <b>0</b>: por eso la columna
+                        muestra «—» con frecuencia. No es un error del mockup,
+                        es el estado del dato.
                     </p>
                 </div>
 
@@ -1282,7 +1390,9 @@
                     <div class="section">
                         <div class="section-head">
                             <h3 class="section-title">Datos públicos</h3>
-                            <span class="pill">visible para todos los roles</span>
+                            <span class="pill"
+                                >visible para todos los roles</span
+                            >
                         </div>
                         <dl class="dl" id="pub-dl"></dl>
                     </div>
@@ -1298,7 +1408,10 @@
                                 <span class="lock" aria-hidden="true">▮</span>
                                 Restringido · datos personales
                             </h3>
-                            <span class="pill pill-red" id="pii-role-pill"></span>
+                            <span
+                                class="pill pill-red"
+                                id="pii-role-pill"
+                            ></span>
                         </div>
                         <div id="pii-rows"></div>
                         <div class="audit">
@@ -1333,7 +1446,9 @@
                         </thead>
                         <tbody>
                             <tr>
-                                <td>Ficha pública (nombre, tipo, rol, región)</td>
+                                <td>
+                                    Ficha pública (nombre, tipo, rol, región)
+                                </td>
                                 <td class="yes">✓</td>
                                 <td class="yes">✓</td>
                                 <td class="yes">✓</td>
@@ -1417,9 +1532,10 @@
                         vacías: el mockup no puede revelar un DNI que no tiene.
                     </li>
                     <li>
-                        <b>292</b> membresías, <b>143</b> alias y <b>224</b>
-                        organizaciones. En las 224, <code>expediente_ospa</code>
-                        y <code>estado_ospa</code> están vacíos: hoy no hay
+                        <b>292</b> membresías, <b>143</b> alias y
+                        <b>224</b> organizaciones. En las 224,
+                        <code>expediente_ospa</code> y
+                        <code>estado_ospa</code> están vacíos: hoy no hay
                         membresía OSPA validada que mostrar.
                     </li>
                     <li>
@@ -1434,38 +1550,53 @@
                     <li>
                         Esto es un <b>mockup</b>. El detalle en panel lateral y
                         las cuatro pantallas del directorio ya son persistentes;
-                        lo que falta es <b>alta, edición, fusión y baja lógica</b>
+                        lo que falta es
+                        <b>alta, edición, fusión y baja lógica</b>
                         (item 44) porque la API de actores solo expone lectura.
                     </li>
                     <li>
                         <b>P1 · DNI compartido:</b> hay 642 filas con
                         <code>dni_hmac</code> pero solo <b>587</b> valores
-                        distintos: <b>45 HMAC</b> aparecen en más de una fila.
+                        distintos: <b>45 grupos</b> aparecen en más de una fila.
                         Por eso el DNI <b>no</b> puede ser clave única del
                         directorio y la fusión no puede ser automática por DNI:
-                        debe pedir confirmación humana y conservar alias.
+                        debe pedir confirmación humana y conservar alias. La
+                        columna «Calidad» marca «DNI repetido» y la vista rápida
+                        «Duplicados» los reúne en pantalla.
                     </li>
                     <li>
-                        <b>P2 · Actores sin organización:</b> <b>644 de 936</b>
-                        personas no tienen organización ancla ni membresía. El
-                        alta no puede exigir organización y la ficha no puede
-                        asumir pertenencia. De ahí que la membresía OSPA sea un
-                        bloque <i>opcional</i>, no un requisito.
+                        <b>P2 · Actores sin organización:</b> <b>368</b> actores
+                        no tienen organización ancla (<code
+                            >legacy.dim_actores.id_organizacion</code
+                        >
+                        nulo). El alta no puede exigir organización y la ficha
+                        no puede asumir pertenencia. De ahí que la membresía
+                        OSPA sea un bloque <i>opcional</i>, no un requisito. La
+                        columna «Calidad» y la vista rápida «Sin organización»
+                        marcan estos registros en pantalla; no se ocultan ni se
+                        completan a mano.
                     </li>
                     <li>
-                        <b>PII bajo demanda:</b> el correo del actor se puede
-                        revelar porque <code>core.actores.email_contacto</code>
-                        está en claro (141 filas). El <b>DNI y el teléfono</b> no:
-                        viven cifrados y el snapshot solo contiene el texto
-                        cifrado, así que tras el motivo se muestran «—» con la
-                        explicación. En producción la API descifra en servidor y
-                        escribe la auditoría; el cliente nunca recibe la clave.
+                        <b>PII bajo demanda:</b> el DNI, el teléfono y el correo
+                        viven cifrados en
+                        <code>core.actor_datos_personales</code>
+                        (<code>dni_cifrado</code> 642,
+                        <code>telefono_cifrado</code> 606,
+                        <code>email_cifrado</code> 141); las columnas en claro
+                        de <code>core.actores</code> están vacías. El snapshot
+                        solo contiene el texto cifrado, así que tras el motivo
+                        se muestra «—» con la explicación. En producción la API
+                        descifra en servidor y escribe la auditoría; el cliente
+                        nunca recibe la clave. La base legal registrada es
+                        <code>LEGADO_AVISA_2026</code>, todavía no la base
+                        formal de la Ley 29733.
                     </li>
                     <li>
                         <b>Inconsistencia a corregir:</b>
                         <code>core.locales</code> guarda
-                        <code>contacto_nombre</code>, <code>contacto_celular</code>
-                        y <code>contacto_email</code> en claro, fuera del modelo
+                        <code>contacto_nombre</code>,
+                        <code>contacto_celular</code> y
+                        <code>contacto_email</code> en claro, fuera del modelo
                         de PII cifrada. El directorio no debe leer esos campos
                         como si fueran seguros.
                     </li>
@@ -1478,17 +1609,18 @@
                         casos, alertas, demandas y membresías.
                     </li>
                     <li>
-                        <b>Baja lógica:</b> se propone <code>activo = false</code>
-                        con motivo, no <code>DELETE</code>. No existe endpoint;
-                        el borrado físico perdería la trazabilidad de los casos
-                        que mencionan al actor.
+                        <b>Baja lógica:</b> se propone
+                        <code>activo = false</code> con motivo, no
+                        <code>DELETE</code>. No existe endpoint; el borrado
+                        físico perdería la trazabilidad de los casos que
+                        mencionan al actor.
                     </li>
                 </ol>
 
                 <h3>Vocabulario congelado que debe respetarse</h3>
                 <dl class="vocab">
                     <dt>Estados de caso</dt>
-                    <dd>Activo · En seguimiento · Resuelto · Archivado</dd>
+                    <dd>Abierto · Resuelto · Archivado</dd>
                     <dt>Conflictividad</dt>
                     <dd>
                         Diferencia · Controversia · Conflicto social · Crisis
@@ -1501,7 +1633,17 @@
                     <dt>Nivel de gobierno</dt>
                     <dd>Nacional · Regional (GORE) · Local</dd>
                     <dt>Geografía</dt>
-                    <dd>«Región» (no «Territorio») · «GORE» (no «Gobierno regional»)</dd>
+                    <dd>
+                        «Región» (no «Territorio») · «GORE» (no «Gobierno
+                        regional»)
+                    </dd>
+                    <dt>Subsector</dt>
+                    <dd>Pesca y Acuicultura · MYPE e Industria</dd>
+                    <dt>Compromiso</dt>
+                    <dd>
+                        «Tipo de compromiso» (no «tipo de acuerdo») · «Unidad
+                        responsable»
+                    </dd>
                 </dl>
 
                 <h3>Decisiones de producto pendientes</h3>
@@ -1524,6 +1666,296 @@
                         <b>Membresía OSPA:</b> falta definir la fuente
                         (expediente, vigencia, estado) antes de mostrar el campo
                         como dato validado.
+                    </li>
+                </ul>
+            </section>
+
+            <section
+                class="notes"
+                id="estados-pantalla"
+                aria-labelledby="estados-titulo"
+            >
+                <h2 id="estados-titulo">Estados de pantalla</h2>
+                <p>
+                    La lista y el panel tienen tres rutas de lectura. El
+                    endpoint de actores (<code>GET /api/v1/actores</code>)
+                    existe; las acciones de escritura no, así que su error es
+                    explícito, no un botón que parece funcionar.
+                </p>
+                <div class="state-grid">
+                    <div class="state-card">
+                        <h4>Cargando</h4>
+                        <p>
+                            Se conserva el encabezado y el filtro; la tabla y el
+                            panel muestran esqueleto, sin cifras de ejemplo.
+                        </p>
+                        <div class="state-demo">
+                            <b>Cargando actores…</b>0 filas hasta que responda
+                            el servidor.
+                        </div>
+                    </div>
+                    <div class="state-card">
+                        <h4>Vacío</h4>
+                        <p>
+                            La API responde 0 filas o el filtro no deja
+                            coincidencias. Se escribe el filtro aplicado y se
+                            ofrece limpiarlo.
+                        </p>
+                        <div class="state-demo">
+                            <b>Sin actores para este filtro</b>No se rellena con
+                            filas de ejemplo.
+                        </div>
+                    </div>
+                    <div class="state-card">
+                        <h4>Error</h4>
+                        <p>
+                            Falla la lectura o una escritura no autorizada. Se
+                            muestra el código y «Reintentar»; la acción de
+                            escritura queda deshabilitada con su motivo.
+                        </p>
+                        <div class="state-demo">
+                            <b>No se pudo cargar el directorio</b
+                            ><code>POST</code> no existe: escritura no
+                            disponible.
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section
+                class="notes"
+                id="contrato-datos"
+                aria-labelledby="contrato-titulo"
+            >
+                <h2 id="contrato-titulo">
+                    Contrato de datos por columna y acción
+                </h2>
+                <p>
+                    Cada celda y cada botón declara su origen. «Requiere» nombra
+                    lo que falta: el equipo que implemente no debe adivinar el
+                    campo ni el endpoint.
+                </p>
+                <div class="table-wrap">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Elemento</th>
+                                <th scope="col">Origen exacto</th>
+                                <th scope="col">Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Nombre</td>
+                                <td><code>core.actores.nombre_actual</code></td>
+                                <td>Existe</td>
+                            </tr>
+                            <tr>
+                                <td>Código (ACT / ORG)</td>
+                                <td><code>core.actores.codigo_legado</code></td>
+                                <td><b>Requiere</b> la columna</td>
+                            </tr>
+                            <tr>
+                                <td>Tipo de actor</td>
+                                <td>
+                                    <code>core.cat_tipos_actor.nombre</code> vía
+                                    <code>tipo_actor_id</code>
+                                </td>
+                                <td>Existe</td>
+                            </tr>
+                            <tr>
+                                <td>Función</td>
+                                <td>
+                                    <code>core.cat_roles_actor.nombre</code> vía
+                                    <code>rol_actor_id</code>
+                                </td>
+                                <td>Existe</td>
+                            </tr>
+                            <tr>
+                                <td>Identificación</td>
+                                <td>
+                                    <code
+                                        >core.cat_nivel_identificacion.nombre</code
+                                    >
+                                    vía <code>nivel_identificacion_id</code>
+                                </td>
+                                <td>Existe</td>
+                            </tr>
+                            <tr>
+                                <td>Cargo</td>
+                                <td><code>core.actor_membresia.cargo</code></td>
+                                <td>Existe</td>
+                            </tr>
+                            <tr>
+                                <td>Nivel de gobierno</td>
+                                <td>
+                                    No hay columna en
+                                    <code>core.actores</code> (solo en
+                                    <code>core.compromisos</code>)
+                                </td>
+                                <td>
+                                    <b>Requiere</b>
+                                    <code>core.actores.nivel_gobierno</code>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Región</td>
+                                <td>
+                                    236 de 1 160 en el legado; no hay tabla
+                                    actor–región
+                                </td>
+                                <td>
+                                    <b>Requiere</b>
+                                    <code>core.actor_region</code>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Calidad: DNI repetido</td>
+                                <td>
+                                    <code>core.migracion_conflicto</code>
+                                    (<code>DNI_DUPLICADO</code>) sobre
+                                    <code>dni_hmac</code> no único
+                                </td>
+                                <td>
+                                    Existe en origen; <b>requiere</b> vista
+                                    <code>analytics.vw_calidad_actor</code>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Calidad: sin organización</td>
+                                <td>
+                                    <code
+                                        >legacy.dim_actores.id_organizacion IS
+                                        NULL</code
+                                    >
+                                    (368)
+                                </td>
+                                <td>
+                                    Existe en origen; <b>requiere</b> la misma
+                                    vista
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>PII enmascarada</td>
+                                <td>
+                                    <code
+                                        >core.actor_datos_personales.dni_cifrado</code
+                                    >, <code>telefono_cifrado</code>,
+                                    <code>email_cifrado</code> +
+                                    <code>dni_hmac</code>
+                                </td>
+                                <td>Existe</td>
+                            </tr>
+                            <tr>
+                                <td>Base legal</td>
+                                <td>
+                                    <code
+                                        >core.actor_datos_personales.base_legal</code
+                                    >
+                                    = <code>LEGADO_AVISA_2026</code>
+                                </td>
+                                <td>
+                                    Existe; <b>requiere</b> base formal Ley
+                                    29733
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Ver dato (revelar)</td>
+                                <td>
+                                    <code>audit.datos_personales_acceso</code>
+                                </td>
+                                <td>
+                                    <b>Requiere</b>
+                                    <code
+                                        >POST
+                                        /api/v1/actores/{id}/pii/revelar</code
+                                    >
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Lista y panel</td>
+                                <td><code>GET /api/v1/actores</code></td>
+                                <td>Existe</td>
+                            </tr>
+                            <tr>
+                                <td>Alta</td>
+                                <td><code>POST /api/v1/actores</code></td>
+                                <td><b>Requiere</b></td>
+                            </tr>
+                            <tr>
+                                <td>Edición</td>
+                                <td><code>PATCH /api/v1/actores/{id}</code></td>
+                                <td><b>Requiere</b></td>
+                            </tr>
+                            <tr>
+                                <td>Fusión</td>
+                                <td>
+                                    <code>kag.entity_merge_log</code> (0 filas)
+                                </td>
+                                <td>
+                                    <b>Requiere</b>
+                                    <code>POST /api/v1/actores/fusion</code>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Baja lógica</td>
+                                <td><code>activo = false</code> con motivo</td>
+                                <td><b>Requiere</b> endpoint y regla</td>
+                            </tr>
+                            <tr>
+                                <td>Exportar</td>
+                                <td>
+                                    <code
+                                        >GET
+                                        /api/v1/export?entidad=actores</code
+                                    >
+                                </td>
+                                <td>
+                                    Existe; <b>requiere</b>
+                                    <code>audit.exportaciones</code>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section
+                class="notes"
+                id="fuera-alcance"
+                aria-labelledby="fuera-titulo"
+            >
+                <h2 id="fuera-titulo">Fuera de alcance de este mockup</h2>
+                <ul>
+                    <li>
+                        <b>Consulta RENIEC:</b> solo tras validar
+                        disponibilidad, base legal, consentimiento y la
+                        integración aprobada. No es requisito del formulario y
+                        no se simula.
+                    </li>
+                    <li>
+                        <b>Borrado físico:</b> el mockup solo plantea baja
+                        lógica; un <code>DELETE</code> perdería el vínculo con
+                        casos, alertas y compromisos.
+                    </li>
+                    <li>
+                        <b>Validación contra padrón OSPA:</b> no hay expediente
+                        ni estado OSPA en las 224 organizaciones; el campo se
+                        captura, no se valida.
+                    </li>
+                    <li>
+                        <b>Directorio completo de 1 160 actores:</b> la pantalla
+                        muestra una muestra de 12; la paginación real se
+                        resuelve en servidor.
+                    </li>
+                    <li>
+                        <b>Descifrado en el cliente:</b> el navegador nunca
+                        recibe la clave ni el valor en claro; solo la máscara o
+                        el texto cifrado.
+                    </li>
+                    <li>
+                        <b>API de escritura:</b> alta, edición, fusión y baja se
+                        dibujan como diseño; no existen endpoints.
                     </li>
                 </ul>
             </section>
@@ -1567,7 +1999,7 @@
                         membresia:
                             "Frente Nacional de Defensa de la Mype (desde 01.01.2025)",
                         grupo: null,
-                        nota: "Tiene 1 alias registrado: «FREDEMYPE» (abreviatura)."
+                        nota: "Tiene 1 alias registrado: «FREDEMYPE» (abreviatura).",
                     },
                     {
                         cod: "ACT-653",
@@ -1589,7 +2021,7 @@
                         membresia:
                             "Asociación Peruana Unidos para el Desarrollo Textil",
                         grupo: "absalon",
-                        nota: ""
+                        nota: "",
                     },
                     {
                         cod: "ACT-654",
@@ -1611,7 +2043,7 @@
                         membresia:
                             "Asociación Peruana Unidos para el Desarrollo Textil",
                         grupo: "absalon",
-                        nota: ""
+                        nota: "",
                     },
                     {
                         cod: "ORG-043",
@@ -1632,7 +2064,7 @@
                         casos: "0",
                         membresia: "—",
                         grupo: "ampa",
-                        nota: ""
+                        nota: "",
                     },
                     {
                         cod: "ORG-044",
@@ -1653,7 +2085,7 @@
                         casos: "0",
                         membresia: "—",
                         grupo: "ampa",
-                        nota: ""
+                        nota: "",
                     },
                     {
                         cod: "ORG-045",
@@ -1674,7 +2106,7 @@
                         casos: "0",
                         membresia: "—",
                         grupo: null,
-                        nota: ""
+                        nota: "",
                     },
                     {
                         cod: "ACT-EST-067",
@@ -1695,7 +2127,7 @@
                         casos: "0",
                         membresia: "—",
                         grupo: "edith",
-                        nota: ""
+                        nota: "",
                     },
                     {
                         cod: "ACT-EST-089",
@@ -1716,7 +2148,7 @@
                         casos: "0",
                         membresia: "—",
                         grupo: "edith",
-                        nota: ""
+                        nota: "",
                     },
                     {
                         cod: "ACT-EST-002",
@@ -1737,7 +2169,7 @@
                         casos: "0",
                         membresia: "—",
                         grupo: "fernando",
-                        nota: ""
+                        nota: "",
                     },
                     {
                         cod: "ACT-EST-074",
@@ -1758,7 +2190,7 @@
                         casos: "0",
                         membresia: "—",
                         grupo: "fernando",
-                        nota: ""
+                        nota: "",
                     },
                     {
                         cod: "ACT-EST-101",
@@ -1779,7 +2211,7 @@
                         casos: "0",
                         membresia: "—",
                         grupo: "fernando",
-                        nota: ""
+                        nota: "",
                     },
                     {
                         cod: "ACT-772",
@@ -1800,8 +2232,8 @@
                         casos: "0",
                         membresia: "—",
                         grupo: null,
-                        nota: ""
-                    }
+                        nota: "",
+                    },
                 ];
 
                 // Roles y permisos.
@@ -1814,7 +2246,7 @@
                         alta: true,
                         edicion: true,
                         fusion: false,
-                        baja: false
+                        baja: false,
                     },
                     direccion: {
                         label: "Dirección OAIPCS",
@@ -1824,7 +2256,7 @@
                         alta: true,
                         edicion: true,
                         fusion: true,
-                        baja: true
+                        baja: true,
                     },
                     alta: {
                         label: "Alta dirección",
@@ -1834,7 +2266,7 @@
                         alta: false,
                         edicion: false,
                         fusion: false,
-                        baja: false
+                        baja: false,
                     },
                     admin: {
                         label: "Administrador",
@@ -1844,8 +2276,8 @@
                         alta: false,
                         edicion: false,
                         fusion: false,
-                        baja: false
-                    }
+                        baja: false,
+                    },
                 };
 
                 var state = {
@@ -1862,16 +2294,18 @@
                             who: "avisa_api",
                             op: "select_descifrado",
                             motivo: "Consulta de ficha de actor",
-                            filas: 1
+                            base: "LEGADO_AVISA_2026",
+                            filas: 1,
                         },
                         {
                             t: "21.11.2026 21:11",
                             who: "avisa_api",
                             op: "select_descifrado",
                             motivo: "Consulta de ficha de actor",
-                            filas: 1
-                        }
-                    ]
+                            base: "LEGADO_AVISA_2026",
+                            filas: 1,
+                        },
+                    ],
                 };
                 var PAGE = 6;
 
@@ -1891,23 +2325,43 @@
                     return v === "Regional" ? "Regional (GORE)" : v;
                 }
 
-                function maskEmail(email) {
-                    var at = email.indexOf("@");
-                    if (at < 1) return "••••••••";
-                    var local = email.slice(0, at);
-                    var dom = email.slice(at);
-                    var visible = local.slice(0, 1);
-                    return visible + "•••••••" + dom;
-                }
+                // Marcas de calidad de la muestra. El cálculo real se hace en
+                // servidor: 45 grupos de DNI repetido sobre `dni_hmac` no único
+                // y 368 actores sin organización (`legacy.dim_actores.id_organizacion`
+                // nulo). Aquí solo se marcan las filas de esta muestra.
+                var DNI_REPETIDO = ["ACT-026", "ACT-772"];
+                var SIN_ORGANIZACION = [
+                    "ACT-EST-067",
+                    "ACT-EST-089",
+                    "ACT-EST-002",
+                    "ACT-EST-074",
+                    "ACT-EST-101",
+                    "ACT-772",
+                ];
 
                 function filtered() {
                     var q = state.q.trim().toLowerCase();
                     return ACTORES.filter(function (a) {
-                        if (state.tipo !== "*" && a.tipo !== state.tipo) return false;
-                        if (state.quick === "persona" && a.nat !== "persona") return false;
-                        if (state.quick === "organizacion" && a.nat !== "organizacion")
+                        if (state.tipo !== "*" && a.tipo !== state.tipo)
                             return false;
-                        if (state.quick === "dup" && !a.grupo) return false;
+                        if (state.quick === "persona" && a.nat !== "persona")
+                            return false;
+                        if (
+                            state.quick === "organizacion" &&
+                            a.nat !== "organizacion"
+                        )
+                            return false;
+                        if (
+                            state.quick === "dup" &&
+                            !a.grupo &&
+                            DNI_REPETIDO.indexOf(a.cod) === -1
+                        )
+                            return false;
+                        if (
+                            state.quick === "sinorg" &&
+                            SIN_ORGANIZACION.indexOf(a.cod) === -1
+                        )
+                            return false;
                         if (
                             q &&
                             a.nom.toLowerCase().indexOf(q) === -1 &&
@@ -1920,7 +2374,8 @@
 
                 function current() {
                     for (var i = 0; i < ACTORES.length; i++) {
-                        if (ACTORES[i].cod === state.selected) return ACTORES[i];
+                        if (ACTORES[i].cod === state.selected)
+                            return ACTORES[i];
                     }
                     return ACTORES[0];
                 }
@@ -1934,13 +2389,27 @@
 
                     $("tbody").innerHTML = slice
                         .map(function (a) {
-                            var sel = a.cod === state.selected ? " is-selected" : "";
+                            var sel =
+                                a.cod === state.selected ? " is-selected" : "";
                             var pii = a.pii
                                 ? '<span class="pill pill-amber">con PII</span>'
                                 : '<span class="pill">sin PII</span>';
-                            var dup = a.grupo
-                                ? ' <span class="pill pill-red">dup</span>'
-                                : "";
+                            var qa = [];
+                            if (a.grupo)
+                                qa.push(
+                                    '<span class="pill pill-red">posible duplicado</span>',
+                                );
+                            if (DNI_REPETIDO.indexOf(a.cod) !== -1)
+                                qa.push(
+                                    '<span class="pill pill-red">DNI repetido</span>',
+                                );
+                            if (SIN_ORGANIZACION.indexOf(a.cod) !== -1)
+                                qa.push(
+                                    '<span class="pill pill-amber">sin organización</span>',
+                                );
+                            var qaCell = qa.length
+                                ? qa.join(" ")
+                                : '<span class="pill pill-green">sin alertas</span>';
                             var cargo = a.cargo
                                 ? esc(a.cargo) +
                                   (a.ngob
@@ -1971,11 +2440,15 @@
                                 cargo +
                                 "</td>" +
                                 "<td>" +
-                                (a.region ? esc(a.region) : '<span class="dash">—</span>') +
+                                (a.region
+                                    ? esc(a.region)
+                                    : '<span class="dash">—</span>') +
+                                "</td>" +
+                                "<td>" +
+                                qaCell +
                                 "</td>" +
                                 "<td>" +
                                 pii +
-                                dup +
                                 "</td>" +
                                 '<td><button type="button" class="table-link" data-open="' +
                                 a.cod +
@@ -1985,6 +2458,13 @@
                         })
                         .join("");
 
+                    if (!slice.length) {
+                        $("tbody").innerHTML =
+                            '<tr><td colspan="8"><div class="empty-state">' +
+                            "Ninguna fila coincide con la búsqueda o la vista rápida. " +
+                            "Limpia la búsqueda o cambia de filtro: la tabla no rellena con filas de ejemplo." +
+                            "</div></td></tr>";
+                    }
                     $("page-info").textContent =
                         "Página " +
                         state.page +
@@ -1998,7 +2478,8 @@
                     $("prev").disabled = state.page <= 1;
                     $("next").disabled = state.page >= pages;
                     $("count").textContent =
-                        list.length + (list.length === 1 ? " resultado" : " resultados");
+                        list.length +
+                        (list.length === 1 ? " resultado" : " resultados");
                 }
 
                 function renderPanel() {
@@ -2056,7 +2537,9 @@
                         esc(a.rol) +
                         "</dd>" +
                         "<dt>Cargo</dt><dd>" +
-                        (a.cargo ? esc(a.cargo) : '<span class="dash">—</span>') +
+                        (a.cargo
+                            ? esc(a.cargo)
+                            : '<span class="dash">—</span>') +
                         "</dd>" +
                         "<dt>Nivel de gobierno</dt><dd>" +
                         (a.ngob
@@ -2064,9 +2547,11 @@
                             : '<span class="dash">—</span>') +
                         "</dd>" +
                         "<dt>Región</dt><dd>" +
-                        (a.region ? esc(a.region) : '<span class="dash">—</span>') +
+                        (a.region
+                            ? esc(a.region)
+                            : '<span class="dash">—</span>') +
                         "</dd>" +
-                        "<dt>Distrito</dt><dd><span class=\"dash\">—</span> <span style=\"color:#b3bcc4;font-size:8px\">(columna sin datos en toda la tabla)</span></dd>" +
+                        '<dt>Distrito</dt><dd><span class="dash">—</span> <span style="color:#b3bcc4;font-size:8px">(columna sin datos en toda la tabla)</span></dd>' +
                         "<dt>Validado</dt><dd>Sí · origen AVISA_HISTORICO</dd>";
 
                     $("rel-dl").innerHTML =
@@ -2076,7 +2561,7 @@
                         "<dt>Membresía</dt><dd>" +
                         esc(a.membresia) +
                         "</dd>" +
-                        "<dt>OSPA</dt><dd><span class=\"dash\">—</span> <span style=\"color:#b3bcc4;font-size:8px\">(sin expediente ni estado en la base)</span></dd>" +
+                        '<dt>OSPA</dt><dd><span class="dash">—</span> <span style="color:#b3bcc4;font-size:8px">(sin expediente ni estado en la base)</span></dd>' +
                         (a.nota
                             ? "<dt>Nota</dt><dd>" + esc(a.nota) + "</dd>"
                             : "");
@@ -2109,57 +2594,65 @@
                             has: a.dni,
                             masked: "•••• ••••",
                             value: null,
-                            why: "cifrado en core.actor_datos_personales (dni_cifrado)"
+                            why: "cifrado en core.actor_datos_personales (dni_cifrado)",
                         },
                         {
                             key: "Teléfono",
                             has: a.tel,
                             masked: "+51 ••• ••• •••",
                             value: null,
-                            why: "cifrado en core.actor_datos_personales (telefono_cifrado)"
+                            why: "cifrado en core.actor_datos_personales (telefono_cifrado)",
                         },
                         {
                             key: "Correo",
                             has: a.mail,
-                            masked: maskEmail(a.email),
-                            value: a.email,
-                            why: "columna en claro core.actores.email_contacto"
-                        }
+                            masked: "•••••••@••••••",
+                            value: null,
+                            why: "cifrado en core.actor_datos_personales (email_cifrado)",
+                        },
                     ];
 
-                    $("pii-rows").innerHTML = rows
-                        .map(function (r) {
-                            var id = a.cod + "|" + r.key;
-                            var revealed = state.reveal[id];
-                            var right;
-                            if (!r.has) {
-                                right =
-                                    '<span class="dash">—</span><span style="color:#b3bcc4;font-size:8px">sin dato registrado</span>';
-                            } else if (revealed) {
-                                right = r.value
-                                    ? '<span class="revealed">' +
-                                      esc(r.value) +
-                                      "</span>"
-                                    : '<span class="revealed">—</span><span style="color:#b07a72;font-size:8px">descifrado en servidor; el snapshot no trae el valor</span>';
-                            } else {
-                                right =
-                                    '<span class="masked">' +
-                                    esc(r.masked) +
-                                    "</span>" +
-                                    '<button type="button" class="btn-mini" data-pii="' +
-                                    esc(id) +
-                                    '">Ver dato</button>';
-                            }
-                            return (
-                                '<div class="pii-row"><span class="pii-key"><b>' +
-                                r.key +
-                                "</b></span>" +
-                                '<span class="pii-val">' +
-                                right +
-                                "</span></div>"
-                            );
-                        })
-                        .join("");
+                    $("pii-rows").innerHTML =
+                        rows
+                            .map(function (r) {
+                                var id = a.cod + "|" + r.key;
+                                var revealed = state.reveal[id];
+                                var right;
+                                if (!r.has) {
+                                    right =
+                                        '<span class="dash">—</span><span style="color:#b3bcc4;font-size:8px">sin dato registrado</span>';
+                                } else if (revealed) {
+                                    right = r.value
+                                        ? '<span class="revealed">' +
+                                          esc(r.value) +
+                                          "</span>"
+                                        : '<span class="revealed">—</span><span style="color:#b07a72;font-size:8px">descifrado en servidor; el snapshot no trae el valor</span>';
+                                } else {
+                                    right =
+                                        '<span class="masked">' +
+                                        esc(r.masked) +
+                                        "</span>" +
+                                        '<button type="button" class="btn-mini" data-pii="' +
+                                        esc(id) +
+                                        '">Ver dato</button>';
+                                }
+                                return (
+                                    '<div class="pii-row"><span class="pii-key"><b>' +
+                                    r.key +
+                                    "</b></span>" +
+                                    '<span class="pii-val">' +
+                                    right +
+                                    "</span></div>"
+                                );
+                            })
+                            .join("") +
+                        '<div class="callout" style="margin-top: 10px">' +
+                        "<b>Base legal pendiente:</b> el único valor registrado es " +
+                        "<code>LEGADO_AVISA_2026</code> en " +
+                        "<code>core.actor_datos_personales.base_legal</code>. No es " +
+                        "todavía la base formal de la Ley 29733, así que no " +
+                        "justifica el descifrado hasta que se defina." +
+                        "</div>";
 
                     renderAudit();
                 }
@@ -2177,9 +2670,11 @@
                                 esc(r.who) +
                                 "</b> · " +
                                 esc(r.op) +
-                                ' · «' +
+                                " · «" +
                                 esc(r.motivo || "sin motivo") +
-                                "»</span></li>"
+                                "»" +
+                                (r.base ? " · base " + esc(r.base) : "") +
+                                "</span></li>"
                             );
                         })
                         .join("");
@@ -2200,7 +2695,9 @@
                     card.className = "modal-card" + (wide ? " is-wide" : "");
                     card.innerHTML = html;
                     overlay.hidden = false;
-                    var first = card.querySelector("input, select, textarea, button");
+                    var first = card.querySelector(
+                        "input, select, textarea, button",
+                    );
                     if (first) first.focus();
                 }
 
@@ -2238,7 +2735,7 @@
                                 esc(perm.label) +
                                 " no propone altas.</p></div>" +
                                 '<button type="button" class="btn-mini" data-close>Cerrar</button></div>' +
-                                '<div class="modal-body"><div class="callout">Cambia a Sectorista o Dirección OAIPCS para ver el formulario completo.</div></div>'
+                                '<div class="modal-body"><div class="callout">Cambia a Sectorista o Dirección OAIPCS para ver el formulario completo.</div></div>',
                         );
                         return;
                     }
@@ -2303,49 +2800,57 @@
                             "</div>" +
                             "</div>" +
                             footer(
-                                "Sin POST: el formulario no puede enviarse. Falta el endpoint de alta y la regla de P1."
+                                "Sin POST: el formulario no puede enviarse. Falta el endpoint de alta y la regla de P1.",
                             ),
-                        true
+                        true,
                     );
 
-                    card.querySelectorAll('input[name="idn"]').forEach(function (r) {
-                        r.addEventListener("change", function () {
-                            $("dni-field").hidden = r.value !== "dni" || !r.checked;
-                        });
-                    });
-                    card.querySelector("#alta-nom").addEventListener("input", function (e) {
-                        var q = e.target.value.trim().toLowerCase();
-                        var box = $("dup-text");
-                        if (q.length < 3) {
+                    card.querySelectorAll('input[name="idn"]').forEach(
+                        function (r) {
+                            r.addEventListener("change", function () {
+                                $("dni-field").hidden =
+                                    r.value !== "dni" || !r.checked;
+                            });
+                        },
+                    );
+                    card.querySelector("#alta-nom").addEventListener(
+                        "input",
+                        function (e) {
+                            var q = e.target.value.trim().toLowerCase();
+                            var box = $("dup-text");
+                            if (q.length < 3) {
+                                box.innerHTML =
+                                    "Escribe el nombre para comparar contra los actores existentes.";
+                                return;
+                            }
+                            var hits = ACTORES.filter(function (a) {
+                                return a.nom.toLowerCase().indexOf(q) !== -1;
+                            });
+                            if (!hits.length) {
+                                box.innerHTML =
+                                    "Sin coincidencias en la muestra. La comprobación real se hace contra 1 160 actores.";
+                                return;
+                            }
                             box.innerHTML =
-                                "Escribe el nombre para comparar contra los actores existentes.";
-                            return;
-                        }
-                        var hits = ACTORES.filter(function (a) {
-                            return a.nom.toLowerCase().indexOf(q) !== -1;
-                        });
-                        if (!hits.length) {
-                            box.innerHTML =
-                                "Sin coincidencias en la muestra. La comprobación real se hace contra 1 160 actores.";
-                            return;
-                        }
-                        box.innerHTML =
-                            "<b>" +
-                            hits.length +
-                            "</b> coincidencia(s). ¿Es el mismo actor?" +
-                            hits
-                                .map(function (a) {
-                                    return (
-                                        '<div class="dup-item"><span>' +
-                                        esc(a.nom) +
-                                        " · " +
-                                        esc(a.cod) +
-                                        (a.grupo ? ' <span class="pill pill-red">dup</span>' : "") +
-                                        '</span><button type="button" class="btn-mini" disabled title="Requiere API de escritura">Vincular</button></div>'
-                                    );
-                                })
-                                .join("");
-                    });
+                                "<b>" +
+                                hits.length +
+                                "</b> coincidencia(s). ¿Es el mismo actor?" +
+                                hits
+                                    .map(function (a) {
+                                        return (
+                                            '<div class="dup-item"><span>' +
+                                            esc(a.nom) +
+                                            " · " +
+                                            esc(a.cod) +
+                                            (a.grupo
+                                                ? ' <span class="pill pill-red">dup</span>'
+                                                : "") +
+                                            '</span><button type="button" class="btn-mini" disabled title="Requiere API de escritura">Vincular</button></div>'
+                                        );
+                                    })
+                                    .join("");
+                        },
+                    );
                 }
 
                 function openEdicion() {
@@ -2358,7 +2863,7 @@
                                 esc(perm.label) +
                                 " no edita fichas.</p></div>" +
                                 '<button type="button" class="btn-mini" data-close>Cerrar</button></div>' +
-                                '<div class="modal-body"><div class="callout">Cambia a Sectorista o Dirección OAIPCS para ver el formulario de edición.</div></div>'
+                                '<div class="modal-body"><div class="callout">Cambia a Sectorista o Dirección OAIPCS para ver el formulario de edición.</div></div>',
                         );
                         return;
                     }
@@ -2381,7 +2886,12 @@
                             (a.tipo === "Actor privado" ? " selected" : "") +
                             ">Actor privado</option></select></div>" +
                             '<div class="field"><label for="ed-rol">Función</label><select id="ed-rol">' +
-                            ["Principal", "Secundario", "Tercero imparcial", "No determinado"]
+                            [
+                                "Principal",
+                                "Secundario",
+                                "Tercero imparcial",
+                                "No determinado",
+                            ]
                                 .map(function (r) {
                                     return (
                                         "<option" +
@@ -2396,10 +2906,16 @@
                             '<div class="field"><label for="ed-nivel">Identificación</label><select id="ed-nivel">' +
                             [
                                 ["IDENTIFICADO_DNI", "Identificado con DNI"],
-                                ["IDENTIFICADO_OTRO_DOC", "Identificado con otro documento"],
-                                ["IDENTIFICADO_SIN_DOC", "Identificado sin documento"],
+                                [
+                                    "IDENTIFICADO_OTRO_DOC",
+                                    "Identificado con otro documento",
+                                ],
+                                [
+                                    "IDENTIFICADO_SIN_DOC",
+                                    "Identificado sin documento",
+                                ],
                                 ["SEUDONIMO", "Seudónimo o cargo conocido"],
-                                ["COLECTIVO_ANONIMO", "Colectivo anónimo"]
+                                ["COLECTIVO_ANONIMO", "Colectivo anónimo"],
                             ]
                                 .map(function (n) {
                                     return (
@@ -2437,7 +2953,7 @@
                             '<div class="callout danger" style="margin-top:12px">Cambiar el nombre deja rastro en <code>kag.actor_name_history</code>; el campo <code>fecha_ultimo_cambio_nombre</code> se actualiza por trigger. El directorio no debe sobrescribir alias.</div>' +
                             "</div>" +
                             footer("Sin PATCH: la edición no puede guardarse."),
-                        true
+                        true,
                     );
                 }
 
@@ -2450,7 +2966,7 @@
                                 esc(perm.label) +
                                 " no propone fusiones.</p></div>" +
                                 '<button type="button" class="btn-mini" data-close>Cerrar</button></div>' +
-                                '<div class="modal-body"><div class="callout">Solo Dirección OAIPCS propone la fusión; Alta dirección la revisa.</div></div>'
+                                '<div class="modal-body"><div class="callout">Solo Dirección OAIPCS propone la fusión; Alta dirección la revisa.</div></div>',
                         );
                         return;
                     }
@@ -2514,11 +3030,11 @@
                             "' checked><span>067</span></label> <label><input type='radio' name='win-cargo' value='" +
                             esc(right.cargo) +
                             "'><span>089</span></label></td></tr>" +
-                            "<tr><td class='campo'>Correo</td><td>" +
-                            cell(left, "email") +
+                            "<tr><td class='campo'>Correo (PII)</td><td>" +
+                            "<span class='val'><span class='masked'>•••••••@••••••</span></span>" +
                             "</td><td>" +
-                            cell(right, "email") +
-                            "</td><td><span class='same'>iguales</span></td></tr>" +
+                            "<span class='val'><span class='masked'>•••••••@••••••</span></span>" +
+                            "</td><td><span class='same'>no se descifra para fusionar</span></td></tr>" +
                             "<tr><td class='campo'>Código de legado</td><td>" +
                             cell(left, "cod", true) +
                             "</td><td>" +
@@ -2532,14 +3048,18 @@
                             '<div class="callout danger" style="margin-top:10px"><b>Riesgo de PII:</b> cada fila tiene su propio <code>actor_datos_personales</code>. Fusionar exige consolidar dos filas cifradas sin perder la auditoría; <code>kag.entity_merge_log</code> está vacío (0 fusiones ejecutadas), así que no hay precedente operativo.</div>' +
                             "</div>" +
                             footer(
-                                "No hay endpoint de fusión. La operación requiere transacción, cuatro ojos y consolidación de PII."
+                                "No hay endpoint de fusión. La operación requiere transacción, cuatro ojos y consolidación de PII.",
                             ),
-                        true
+                        true,
                     );
 
                     function summary() {
-                        var c = card.querySelector('input[name="win-cargo"]:checked').value;
-                        var k = card.querySelector('input[name="win-cod"]:checked').value;
+                        var c = card.querySelector(
+                            'input[name="win-cargo"]:checked',
+                        ).value;
+                        var k = card.querySelector(
+                            'input[name="win-cod"]:checked',
+                        ).value;
                         $("merge-summary").innerHTML =
                             "Resultado propuesto: se conserva <b>" +
                             esc(k) +
@@ -2548,11 +3068,11 @@
                             "</b>; el otro código queda como alias. " +
                             "Efecto calculado con datos reales: <b>0 casos</b>, <b>0 membresías</b> y <b>2 filas de PII → 1</b>.";
                     }
-                    card.querySelectorAll('input[name="win-cargo"], input[name="win-cod"]').forEach(
-                        function (r) {
-                            r.addEventListener("change", summary);
-                        }
-                    );
+                    card.querySelectorAll(
+                        'input[name="win-cargo"], input[name="win-cod"]',
+                    ).forEach(function (r) {
+                        r.addEventListener("change", summary);
+                    });
                     summary();
                 }
 
@@ -2566,7 +3086,7 @@
                                 esc(perm.label) +
                                 " no da de baja actores.</p></div>" +
                                 '<button type="button" class="btn-mini" data-close>Cerrar</button></div>' +
-                                '<div class="modal-body"><div class="callout">La baja lógica con motivo la propone Dirección OAIPCS.</div></div>'
+                                '<div class="modal-body"><div class="callout">La baja lógica con motivo la propone Dirección OAIPCS.</div></div>',
                         );
                         return;
                     }
@@ -2595,8 +3115,10 @@
                             (a.membresia === "—" ? "0" : "1") +
                             "</b> membresía(s). La baja debe decidir si el vínculo se conserva como histórico o queda oculto.</div>" +
                             "</div>" +
-                            footer("No existe DELETE ni baja lógica en la API: falta definir el endpoint."),
-                        true
+                            footer(
+                                "No existe DELETE ni baja lógica en la API: falta definir el endpoint.",
+                            ),
+                        true,
                     );
                 }
 
@@ -2623,19 +3145,16 @@
                             esc(field) +
                             '" disabled></div>' +
                             '<div class="field"><span class="lab">Base legal</span><input type="text" value="LEGADO_AVISA_2026" disabled></div>' +
-                            '<div class="field is-full"><span class="lab">Valor actual</span><input type="text" value="' +
-                            esc(field === "Correo" ? maskEmail(a.email) : "•••• ••••") +
-                            '" disabled></div>' +
+                            '<div class="field is-full"><span class="lab">Valor actual</span><input type="text" value="•••• ••••" disabled></div>' +
                             "</div>" +
                             '<div class="callout" style="margin-top:12px">' +
-                            (field === "Correo"
-                                ? "El correo se revelará con su valor real (columna en claro en <code>core.actores</code>)."
-                                : "El valor <b>no</b> se puede revelar en este mockup: solo existe el texto cifrado. En producción la API descifra y devuelve el dato con la auditoría ya escrita.") +
+                            "<b>Base legal pendiente:</b> <code>LEGADO_AVISA_2026</code> es la marca de origen del legado, no la base formal de la Ley 29733. El descifrado queda condicionado a que se defina esa base. " +
+                            "El valor <b>no</b> se puede revelar en este mockup: DNI, teléfono y correo viven cifrados en <code>core.actor_datos_personales</code> (<code>dni_cifrado</code>, <code>telefono_cifrado</code>, <code>email_cifrado</code>) y las columnas en claro de <code>core.actores</code> están vacías. En producción la API descifra en servidor y devuelve el dato con la auditoría ya escrita." +
                             "</div>" +
                             "</div>" +
                             '<div class="modal-foot"><span class="left">El registro de auditoría es obligatorio y lo escribe el servidor.</span>' +
                             '<button type="button" class="button-secondary" data-close>Cancelar</button>' +
-                            '<button type="button" class="button-primary" id="pii-confirm" disabled>Registrar y ver</button></div>'
+                            '<button type="button" class="button-primary" id="pii-confirm" disabled>Registrar y ver</button></div>',
                     );
 
                     var motivo = card.querySelector("#pii-motivo");
@@ -2655,40 +3174,77 @@
                             who: ROLES[state.role].label,
                             op: "select_descifrado",
                             motivo: motivo.value.trim(),
-                            filas: 1
+                            base: "LEGADO_AVISA_2026",
+                            filas: 1,
                         });
                         closeModal();
                         renderPanel();
                     });
                 }
 
+                function openExport() {
+                    var perm = ROLES[state.role];
+                    openModal(
+                        '<div class="modal-head"><div><h3 id="modal-title">Exportar directorio</h3>' +
+                            "<p>Item 43 · PDF, Excel y JSON con los campos permitidos por el rol " +
+                            esc(perm.label) +
+                            ".</p></div>" +
+                            '<button type="button" class="btn-mini" data-close>Cerrar</button></div>' +
+                            '<div class="modal-body">' +
+                            '<div class="form-grid">' +
+                            '<div class="field"><label for="exp-formato">Formato</label>' +
+                            '<select id="exp-formato"><option>PDF</option><option>Excel (.xlsx)</option><option>JSON</option></select></div>' +
+                            '<div class="field"><label for="exp-alcance">Alcance</label>' +
+                            '<select id="exp-alcance"><option>Filtro actual</option><option>Toda la muestra</option><option>Selección</option></select></div>' +
+                            "</div>" +
+                            '<div class="table-wrap" style="margin-top:12px"><table class="data-table"><thead><tr><th>Campo</th><th>Rol</th><th>Salida</th></tr></thead><tbody>' +
+                            "<tr><td>Nombre, tipo, función, región</td><td>Todos</td><td>Valor</td></tr>" +
+                            "<tr><td>DNI, teléfono, correo</td><td>Sectorista · Dirección OAIPCS · Alta dirección</td><td>Enmascarado</td></tr>" +
+                            "<tr><td>DNI, teléfono, correo</td><td>Administrador</td><td>Omitido</td></tr>" +
+                            "<tr><td>Motivo de consulta PII</td><td>Todos</td><td>No se exporta</td></tr>" +
+                            "</tbody></table></div>" +
+                            '<div class="callout" style="margin-top:12px">' +
+                            "<b>La PII nunca sale descifrada.</b> El endpoint <code>GET /api/v1/export?entidad=actores</code> ya existe y acepta los filtros de la lista; falta registrar cada descarga en <code>audit.exportaciones</code> (usuario, filtros, columnas y formato). Sin ese registro la descarga no se habilita." +
+                            "</div>" +
+                            "</div>" +
+                            '<div class="modal-foot"><span class="left">Requiere el registro de auditoría de la descarga.</span>' +
+                            '<button type="button" class="button-secondary" data-close>Cancelar</button>' +
+                            '<button type="button" class="button-primary" disabled title="Falta el registro de auditoría de la descarga">Descargar</button></div>',
+                        true,
+                    );
+                }
+
                 // ───────── Eventos ─────────
-                document.querySelectorAll(".role-bar [data-role]").forEach(function (b) {
-                    b.addEventListener("click", function () {
-                        state.role = b.getAttribute("data-role");
-                        document
-                            .querySelectorAll(".role-bar [data-role]")
-                            .forEach(function (x) {
-                                x.setAttribute(
-                                    "aria-pressed",
-                                    x === b ? "true" : "false"
-                                );
-                            });
-                        $("role-note").textContent = ROLES[state.role].note;
-                        renderPanel();
+                document
+                    .querySelectorAll(".role-bar [data-role]")
+                    .forEach(function (b) {
+                        b.addEventListener("click", function () {
+                            state.role = b.getAttribute("data-role");
+                            document
+                                .querySelectorAll(".role-bar [data-role]")
+                                .forEach(function (x) {
+                                    x.setAttribute(
+                                        "aria-pressed",
+                                        x === b ? "true" : "false",
+                                    );
+                                });
+                            $("role-note").textContent = ROLES[state.role].note;
+                            renderPanel();
+                        });
                     });
-                });
 
                 document.querySelectorAll(".quick").forEach(function (b) {
                     b.addEventListener("click", function () {
                         state.quick = b.getAttribute("data-quick");
                         state.page = 1;
-                        document.querySelectorAll(".quick").forEach(function (x) {
-                            x.setAttribute(
-                                "aria-pressed",
-                                x === b ? "true" : "false"
-                            );
-                        });
+                        document
+                            .querySelectorAll(".quick")
+                            .forEach(function (x) {
+                                x.setAttribute(
+                                    "aria-pressed",
+                                    x === b ? "true" : "false",
+                                );
+                            });
                         renderTable();
                     });
                 });
@@ -2734,6 +3290,7 @@
                 $("btn-alta").addEventListener("click", openAlta);
                 $("btn-fusion").addEventListener("click", openFusion);
                 $("btn-baja").addEventListener("click", openBaja);
+                $("btn-export").addEventListener("click", openExport);
 
                 card.addEventListener("click", function (e) {
                     if (e.target.closest("[data-close]")) closeModal();
