@@ -18,6 +18,9 @@ node_modules
 .next/
 .DS_Store
 
+# Artefacto incremental de `tsc`: cambia en cada type-check, no se versiona.
+*.tsbuildinfo
+
 # Python
 __pycache__/
 *.pyc
