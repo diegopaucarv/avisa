@@ -54,12 +54,13 @@ export const OPCIONES_NIVEL: readonly { valor: string; etiqueta: NivelAlerta }[]
 ];
 
 /**
- * Estados que el servidor sí acepta filtrar (`ESTADOS` de
- * `lib/db/repos/alerts.ts`). «En revisión» se muestra pero no se ofrece como
- * filtro porque el backend lo ignora en silencio.
+ * Estados derivados que el servidor acepta filtrar (`ESTADOS` de
+ * `lib/db/repos/alerts.ts`). Son los mismos cinco que emite `ALERT_STATE`; si se
+ * añade uno aquí sin añadirlo allá, el filtro devolvería vacío en silencio.
  */
 export const ESTADOS_ALERTA = [
   'Pendiente de revisión',
+  'En revisión',
   'Validada',
   'Aprobada',
   'Atendida',

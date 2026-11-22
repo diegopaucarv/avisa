@@ -6,8 +6,9 @@ import { sesionGuard, visitanteGuard } from './core/auth/sesion.guard';
  * Rutas de la aplicación.
  *
  * Todo es `loadComponent` (lazy) para que el bundle inicial quede pequeño.
- * El único marcador pendiente es `mapa`: la Guía fija el territorio, pero el
- * dataset ubigeo/centroide y la calibración de riesgo están aplazados.
+ * La raíz abre el panorama territorial, que es la ventana principal: distribuye
+ * los casos abiertos por ámbito y región sin dibujar geometría (el dataset
+ * ubigeo/centroide sigue aplazado).
  */
 export const routes: Routes = [
   {
@@ -20,7 +21,7 @@ export const routes: Routes = [
     canActivate: [sesionGuard],
     loadComponent: () => import('./layouts/shell/shell.component').then((m) => m.ShellComponent),
     children: [
-      { path: '', pathMatch: 'full', redirectTo: 'resumen' },
+      { path: '', pathMatch: 'full', redirectTo: 'mapa' },
 
       {
         path: 'resumen',
@@ -82,9 +83,8 @@ export const routes: Routes = [
       },
       {
         path: 'mapa',
-        data: { titulo: 'Mapa territorial' },
-        loadComponent: () =>
-          import('./shared/ui/en-migracion.component').then((m) => m.EnMigracionComponent),
+        data: { titulo: 'Panorama territorial' },
+        loadComponent: () => import('./features/mapa/mapa.page').then((m) => m.MapaPage),
       },
 
       {

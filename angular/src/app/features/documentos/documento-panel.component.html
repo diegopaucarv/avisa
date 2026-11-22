@@ -116,21 +116,6 @@
             </div>
 
             <div class="form-field">
-              <label class="form-label" for="documento-campo-estado">Estado</label>
-              <select
-                id="documento-campo-estado"
-                class="form-select"
-                [value]="b.estado"
-                (change)="campo('estado', $event)"
-              >
-                <option value="" [selected]="!b.estado">Sin estado registrado</option>
-                @for (estado of opcionesEstado(); track estado) {
-                  <option [value]="estado" [selected]="b.estado === estado">{{ estado }}</option>
-                }
-              </select>
-            </div>
-
-            <div class="form-field">
               <label class="form-label" for="documento-campo-resumen">Resumen ejecutivo</label>
               <textarea
                 id="documento-campo-resumen"
@@ -182,6 +167,68 @@
             </div>
           </form>
         } @else {
+          @if (puedeModificar()) {
+            <div class="panel-acciones-estado" role="group" aria-label="Validación del documento">
+              <button
+                type="button"
+                class="button-primary"
+                [disabled]="guardandoEstado() || d.estadoUi === 'Validado'"
+                (click)="pedirCambioEstado('Validado')"
+              >
+                Validar
+              </button>
+              <button
+                type="button"
+                class="button-danger"
+                [disabled]="guardandoEstado() || d.estadoUi === 'Rechazado'"
+                (click)="pedirCambioEstado('Rechazado')"
+              >
+                Rechazar
+              </button>
+            </div>
+            <p class="panel-nota">
+              Validar y Rechazar cambian el estado de flujo con
+              <code>PATCH /api/v1/documents/:id</code>. El indicador «Validado por humano» es de
+              sólo lectura y no se modifica desde aquí.
+            </p>
+          }
+
+          @if (estadoPendiente(); as objetivo) {
+            <div class="panel-confirmacion" role="group" aria-label="Confirmar el cambio de estado">
+              <p>
+                ¿Confirmar que el documento queda como «{{ objetivo }}»?
+                @if (objetivo === 'Rechazado') {
+                  La API no admite un motivo en este cambio de estado.
+                }
+              </p>
+              <div class="panel-formulario-acciones">
+                <button
+                  type="button"
+                  class="button-primary"
+                  [disabled]="guardandoEstado()"
+                  (click)="confirmarCambioEstado()"
+                >
+                  {{ guardandoEstado() ? 'Guardando…' : 'Confirmar' }}
+                </button>
+                <button
+                  type="button"
+                  class="button-secondary"
+                  [disabled]="guardandoEstado()"
+                  (click)="cancelarCambioEstado()"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          }
+
+          @if (avisoEstado(); as avisoFlujo) {
+            <p class="panel-aviso" role="status">{{ avisoFlujo }}</p>
+          }
+          @if (errorEstado(); as errorFlujo) {
+            <p class="form-error" role="alert">{{ errorFlujo }}</p>
+          }
+
           <div class="panel-formulario-acciones">
             @if (puedeModificar()) {
               <button type="button" class="button-secondary" (click)="iniciarEdicion()">

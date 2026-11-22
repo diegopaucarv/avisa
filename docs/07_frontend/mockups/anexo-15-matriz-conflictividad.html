@@ -737,6 +737,36 @@
                 </div>
             </header>
 
+            <!-- Declaración: qué cubre, qué dato necesita y qué es solo forma. -->
+            <div
+                style="
+                    font-size: 11.5px;
+                    line-height: 1.5;
+                    color: #4a5b6c;
+                    border: 1px solid #e6ebef;
+                    border-radius: 6px;
+                    background: #f8fafb;
+                    padding: 8px 11px;
+                "
+            >
+                <p style="margin: 0 0 3px">
+                    <b>Items que cubre:</b> 6 · 7 · 42 · 70.
+                </p>
+                <p style="margin: 0 0 3px">
+                    <b>Dato que necesita:</b>
+                    <code>analytics.vw_anexo_15_matriz_conflictividad</code>
+                    (8 <code>LEFT JOIN</code>,
+                    <code>security_invoker = true</code>): 35 filas como
+                    propietario, 34 vigentes y 12 sin región. El endpoint
+                    <code>GET /api/v1/anexos/15</code> requiere crearse.
+                </p>
+                <p style="margin: 0">
+                    <b>Solo forma (sin dato):</b> búsqueda, filtros, orden,
+                    paginación, menú «Exportar» y los estados vacío, de carga y
+                    de error.
+                </p>
+            </div>
+
             <div class="filter-bar filter-bar-wrap">
                 <label class="search-field">
                     <svg
@@ -3025,10 +3055,16 @@
                 >
                 La prioridad de atención se muestra tal cual está almacenada y
                 se marca «sin regla definida» porque la Guía no define su
-                cálculo. En las trece filas reconstruidas desde
-                <code>FACT_Casos</code>, las celdas «—» de código de caso,
-                alcance derivado y agregados son datos que este mockup no
-                reproduce: los calcula la consulta.
+                cálculo.
+                <b
+                    >Las filas sin dato no se omiten: la vista conserva la fila
+                    y deja la celda en «—»</b
+                >
+                (hoy, 12 de las 35 filas no tienen región). Un caso sin
+                <code>fecha_inicio</code> muestra «Sin fecha de inicio
+                registrada». En las filas reconstruidas desde
+                <code>FACT_Casos</code>, el código de caso, el alcance derivado
+                y los agregados son datos que calcula la consulta, no el mockup.
             </p>
 
             <section class="notes" aria-labelledby="notas">
@@ -3538,6 +3574,13 @@
                         list.slice(start, end).forEach(function (row, i) {
                             var n = row.querySelector(".col-n");
                             if (n) n.textContent = String(start + i + 1);
+                            if (!row.dataset.inicio) {
+                                var celdaInicio = row.children[12];
+                                if (celdaInicio) {
+                                    celdaInicio.textContent =
+                                        "Sin fecha de inicio registrada";
+                                }
+                            }
                             tbody.appendChild(row);
                         });
                     }

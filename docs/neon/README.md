@@ -351,6 +351,34 @@ SELECT * FROM core.autenticar_usuario('11111111', 'demo');
 Si `core.casos` devuelve 35 en vez de 0, la app está conectada con un rol con
 `BYPASSRLS` (probablemente `neondb_owner`).
 
+### 7.1 Migraciones 32–35 aplicadas en Neon (2026-11-22)
+
+El esquema de Neon quedó por detrás del local: las migraciones `32` a `35` se
+ejecutaron primero contra `avisa-db` y después contra Neon, con `neondb_owner`
+por el **host directo** (el pooler no conserva la sesión). Cada archivo se aplicó
+en su propia transacción, cortado antes de sus comprobaciones finales.
+
+| Archivo                        | Efecto en Neon                                              |
+| ------------------------------ | ----------------------------------------------------------- |
+| `32_anexo15_left_join.sql`     | `CREATE` + `ALTER`: ocho `LEFT JOIN`, `security_invoker`    |
+| `33_estado_abierto_unico.sql`  | 35 casos a `Abierto`, estado 2 retirado del catálogo        |
+| `34_historial_tramo_unico.sql` | 35 tramos sintéticos eliminados, 35 tramos reabiertos       |
+| `35_fecha_inicio_real.sql`     | Sin cambios (`0` filas): la fecha del legado ya era la real |
+
+Dos avisos al replicar:
+
+- **No ejecutar el archivo 32 completo.** Su último bloque hace `set role
+avisa_app`, que en Neon no aplica; hay que cortar en `-- 1 · Comprobación` y
+  ejecutar solo la parte de datos.
+- **Las verificaciones por identidad no son intercambiables.** Como
+  `neondb_owner` la vista devuelve 35 filas; como `avisa_api` con
+  `set_config('app.rol_codigo', ...)` devuelve 34; sin variables de sesión, 0.
+
+`migration/` contiene dos archivos numerados `32`. Se aplicó
+`32_anexo15_left_join.sql`; `32_exigir_anulacion_puede_eliminar.sql` (endurecer
+`core.exigir_anulacion` para exigir `puede_eliminar`) sigue **sin aplicar** en
+ninguna de las dos bases.
+
 ---
 
 ## 8. Diferencias de esta copia respecto del original

@@ -19,8 +19,19 @@
     </div>
 
     <div class="header-right">
-      <div class="system-status"><span class="freshness-dot"></span> Sistema operativo</div>
-
+      @if (!enMapa()) {
+        <a
+          class="system-status ambito-chip"
+          routerLink="/preferencias"
+          [attr.aria-label]="'Ámbito vigente: ' + ambitoEtiqueta() + '. Cambiar en Preferencias'"
+          [attr.title]="'Ámbito vigente: ' + ambitoEtiqueta() + '. Cambiar en Preferencias'"
+        >
+          <app-icono nombre="mapa" [tamano]="13" />
+          <span
+            >Ámbito: <strong>{{ ambitoEtiqueta() }}</strong></span
+          >
+        </a>
+      }
       <a
         class="header-icon-button"
         routerLink="/busqueda"
@@ -80,18 +91,6 @@
   <div class="app-layout">
     <aside class="avisa-sidebar" [class.open]="menuAbierto()">
       <div class="sidebar-scroll">
-        <nav class="territorial-map-nav" aria-label="Mapa territorial">
-          <span
-            class="side-nav side-nav-pending"
-            aria-disabled="true"
-            title="Aplazado hasta que exista el dataset de ubigeo/centroide"
-          >
-            <app-icono nombre="mapa" [tamano]="17" />
-            <span>Mapa territorial</span>
-            <span class="side-nav-badge">Aplazado</span>
-          </span>
-        </nav>
-
         <div class="sidebar-label">MI ESPACIO</div>
         <nav aria-label="Navegación principal">
           @for (enlace of enlacesTrabajo; track enlace.ruta) {

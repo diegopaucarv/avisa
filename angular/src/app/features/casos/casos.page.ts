@@ -17,9 +17,9 @@ import {
 import { consulta } from '../../core/http/consulta';
 import { aErrorApi } from '../../core/http/errores';
 import { CapacidadesService } from '../../core/permisos/capacidades.service';
-import { aCaso, esRegistro, leer, texto } from '../../dominio/mapeo';
+import { ALCANCES, aCaso, esRegistro, formatearFechaCaso, leer, texto } from '../../dominio/mapeo';
 import type { Caso } from '../../dominio/modelos';
-import { formatearFecha, formatearFechaHora } from '../../shared/formato-fecha';
+import { formatearFechaHora } from '../../shared/formato-fecha';
 import { ExportarMenuComponent } from '../../shared/ui/exportar-menu.component';
 import { IconoComponent } from '../../shared/ui/icono.component';
 import { PaginacionComponent } from '../../shared/ui/paginacion.component';
@@ -61,6 +61,24 @@ const ORDENES = [
   { valor: 'risk', etiqueta: 'Riesgo (Alto → Bajo)' },
   { valor: 'priority', etiqueta: 'Prioridad (Urgente → Bajo)' },
 ] as const;
+
+/** Clave de `localStorage` que guarda el ámbito predeterminado (item 28). */
+const CLAVE_ALCANCE = 'avisa-alcance';
+
+/**
+ * Ámbito predeterminado elegido en Preferencias. Es un filtro de presentación,
+ * no un permiso: el ámbito de la sesión lo aplica la RLS. Sólo se toma cuando la
+ * URL no trae `alcance`, y `alcance=todos` lo desactiva de forma explícita para
+ * que el usuario pueda limpiarlo sin que vuelva a aplicarse al recargar.
+ */
+function alcancePreferido(): string {
+  try {
+    const valor = window.localStorage.getItem(CLAVE_ALCANCE) ?? '';
+    return (ALCANCES as readonly string[]).includes(valor) ? valor : '';
+  } catch {
+    return '';
+  }
+}
 
 /** Opción de `GET /api/v1/catalogs` para los selects de filtro. */
 type OpcionFiltro = {
@@ -207,19 +225,26 @@ export class CasosPage {
 
   private readonly parametros = toSignal(
     this.ruta.queryParamMap.pipe(
-      map((params) => ({
-        q: params.get('q') ?? '',
-        estado: params.get('estado') ?? '',
-        abiertos: params.get('abiertos') === 'true',
-        prioridad: params.get('prioridad') ?? '',
-        alcance: params.get('alcance') ?? '',
-        tematica: params.get('tematica') ?? '',
-        unidad: params.get('unidad') ?? '',
-        pagina: Math.max(1, Number(params.get('pagina') ?? '1') || 1),
-        tamano: Math.max(1, Number(params.get('tamano') ?? String(TAMANO_PAGINA)) || TAMANO_PAGINA),
-        orden: params.get('orden') ?? 'recent',
-        ver: params.get('ver') === 'anulados' ? 'anulados' : 'activos',
-      })),
+      map((params) => {
+        const alcance = params.get('alcance');
+        return {
+          q: params.get('q') ?? '',
+          estado: params.get('estado') ?? '',
+          abiertos: params.get('abiertos') === 'true',
+          prioridad: params.get('prioridad') ?? '',
+          // Sin `alcance` rige Preferencias; `todos` es la limpieza explícita.
+          alcance: alcance === null ? alcancePreferido() : alcance === 'todos' ? '' : alcance,
+          tematica: params.get('tematica') ?? '',
+          unidad: params.get('unidad') ?? '',
+          pagina: Math.max(1, Number(params.get('pagina') ?? '1') || 1),
+          tamano: Math.max(
+            1,
+            Number(params.get('tamano') ?? String(TAMANO_PAGINA)) || TAMANO_PAGINA,
+          ),
+          orden: params.get('orden') ?? 'recent',
+          ver: params.get('ver') === 'anulados' ? 'anulados' : 'activos',
+        };
+      }),
     ),
     { initialValue: FILTROS_INICIALES },
   );
@@ -370,7 +395,7 @@ export class CasosPage {
   }
 
   fechaTexto(valor: string | null | undefined): string {
-    return formatearFecha(valor);
+    return formatearFechaCaso(valor);
   }
 
   fechaHoraTexto(valor: string | null | undefined): string {
@@ -412,6 +437,14 @@ export class CasosPage {
     const actuales = this.parametros();
     const siguiente = { ...actuales, ...cambios };
 
+    // `alcance=todos` fija la limpieza del ámbito predeterminado en la URL: si
+    // se enviara `null`, la vista volvería a aplicar la preferencia.
+    const alcanceCrudo = this.ruta.snapshot.queryParamMap.get('alcance');
+    const limpioAlcance = cambios.alcance !== undefined && !cambios.alcance;
+    const alcance = limpioAlcance
+      ? 'todos'
+      : siguiente.alcance || (alcanceCrudo === 'todos' ? 'todos' : null);
+
     void this.router.navigate([], {
       relativeTo: this.ruta,
       queryParams: {
@@ -419,7 +452,7 @@ export class CasosPage {
         estado: siguiente.estado || null,
         abiertos: siguiente.abiertos ? 'true' : null,
         prioridad: siguiente.prioridad || null,
-        alcance: siguiente.alcance || null,
+        alcance,
         tematica: siguiente.tematica || null,
         unidad: siguiente.unidad || null,
         pagina: siguiente.pagina > 1 ? siguiente.pagina : null,

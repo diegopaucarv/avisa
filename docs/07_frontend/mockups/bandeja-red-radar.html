@@ -327,6 +327,39 @@
                 <div><span class="badge">Mockup · no implementado</span></div>
             </header>
 
+            <!-- Declaración: qué cubre, qué dato necesita y qué es solo forma. -->
+            <div
+                style="
+                    font-size: 11.5px;
+                    line-height: 1.5;
+                    color: #4a5b6c;
+                    border: 1px solid #e6ebef;
+                    border-radius: 6px;
+                    background: #f8fafb;
+                    padding: 8px 11px;
+                "
+            >
+                <p style="margin: 0 0 3px">
+                    <b>Items que cubre:</b> 23 · 31 · 76.
+                </p>
+                <p style="margin: 0 0 3px">
+                    <b>Dato que necesita:</b> <code>core.alertas</code> (83
+                    registradas, 76 vivas, 33 sin caso, 0 validadas) y
+                    <code>core.cat_niveles_alerta</code> /
+                    <code>core.cat_prioridades_alerta</code> con sus SLA. El
+                    estado de triage y el motivo de descarte requieren
+                    persistirse.
+                </p>
+                <p style="margin: 0">
+                    <b>Solo forma (sin dato):</b> triage, descarte, conversión
+                    en alerta, notificaciones (item 31) y eje RED/NODO (<code
+                        >territorio.red</code
+                    >
+                    y <code>territorio.nodo</code>
+                    no existen).
+                </p>
+            </div>
+
             <section class="section" aria-labelledby="triage">
                 <div class="section-head">
                     <div>

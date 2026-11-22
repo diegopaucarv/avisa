@@ -1,0 +1,221 @@
+<section class="view-body" aria-labelledby="titulo-panorama">
+  <header class="view-head">
+    <div>
+      <p class="section-eyebrow">TERRITORIO</p>
+      <h1 id="titulo-panorama">Panorama territorial</h1>
+      <p class="view-subtitle">
+        Distribución de los casos abiertos por ámbito y región, con el riesgo alto de cada
+        territorio. El tamaño de cada banda refleja el número de casos, no la geografía.
+      </p>
+      <p class="view-meta">
+        @if (corte(); as sello) {
+        <span>Datos al {{ sello }}</span>
+        <span class="meta-separador" aria-hidden="true">·</span>
+        } @if (conRecorte()) {
+        <span class="sesion-chip">Mis regiones ({{ regionesSesion().length }})</span>
+        <span>{{ regionesSesion().join(' · ') }}</span>
+        } @else {
+        <span>Ámbito de sesión: Nacional</span>
+        }
+      </p>
+    </div>
+    <div class="view-actions">
+      <button type="button" class="button-secondary" (click)="recargar()">Recargar</button>
+    </div>
+  </header>
+
+  @if (cargando()) {
+  <p class="estado-carga" role="status">Cargando el panorama territorial…</p>
+  } @else if (error(); as fallo) {
+  <div class="surface panel estado-error" role="alert">
+    <p>No se pudo cargar el panorama: {{ fallo.message }}</p>
+    <button type="button" class="button-secondary" (click)="recargar()">Reintentar</button>
+  </div>
+  } @else if (sinCoincidenciasRol()) {
+  <div class="surface panel vacio">
+    <h3>No hay casos en las regiones asignadas</h3>
+    <p>
+      La sesión está acotada a {{ regionesSesion().join(' · ') }}. Los casos sin región no se
+      incluyen porque no se puede confirmar su pertenencia, y la vista no cae a «Todo el Perú».
+    </p>
+  </div>
+  } @else if (sinCasos()) {
+  <div class="surface panel vacio">
+    <h3>No hay casos abiertos registrados</h3>
+    <p>La API no devolvió casos con estado abierto para el conjunto completo.</p>
+  </div>
+  } @else {
+  <div class="executive-kpis">
+    <div class="stat-card">
+      <span class="stat-icon">
+        <app-icono nombre="casos" [tamano]="16" />
+      </span>
+      <span class="stat-copy">
+        <span>Casos abiertos</span>
+        <strong>{{ visibles().length }}</strong>
+        <small>{{ alcanceTexto() }}</small>
+      </span>
+    </div>
+
+    <div class="stat-card">
+      <span class="stat-icon">
+        <app-icono nombre="mapa" [tamano]="16" />
+      </span>
+      <span class="stat-copy">
+        <span>Regiones con casos</span>
+        <strong>{{ regionesConCasos() }}</strong>
+        <small>Regiones distintas con al menos un caso</small>
+      </span>
+    </div>
+
+    <div class="stat-card">
+      <span class="stat-icon amber">
+        <app-icono nombre="info" [tamano]="16" />
+      </span>
+      <span class="stat-copy">
+        <span>Sin región</span>
+        <strong>{{ sinRegion() }}</strong>
+        <small>Casos sin región principal asignada</small>
+      </span>
+    </div>
+
+    <div class="stat-card">
+      <span class="stat-icon red">
+        <app-icono nombre="alerta" [tamano]="16" />
+      </span>
+      <span class="stat-copy">
+        <span>Riesgo alto</span>
+        <strong>{{ riesgoAlto() }}</strong>
+        <small>Riesgo propio del caso en nivel Alto</small>
+      </span>
+    </div>
+  </div>
+
+  <div class="segmented ambito-chips" role="group" aria-label="Filtrar por ámbito">
+    <button
+      type="button"
+      [attr.aria-pressed]="alcanceActivo() === null"
+      (click)="elegirAlcance(null)"
+    >
+      Todos <span class="chip-count">{{ base().length }}</span>
+    </button>
+    @for (conteo of conteos(); track conteo.alcance) {
+    <button
+      type="button"
+      [attr.aria-pressed]="alcanceActivo() === conteo.alcance"
+      (click)="elegirAlcance(conteo.alcance)"
+    >
+      {{ conteo.alcance }} <span class="chip-count">{{ conteo.total }}</span>
+    </button>
+    }
+  </div>
+
+  @if (sinCoincidenciasAlcance()) {
+  <div class="surface panel vacio">
+    <h3>{{ alcanceTexto() }} sin casos visibles</h3>
+    <p>
+      No hay casos abiertos en ese ámbito para el recorte de la sesión. Elige «Todos» para volver al
+      conjunto visible.
+    </p>
+  </div>
+  } @else {
+  <section class="surface panel" aria-labelledby="titulo-vista-esquematica">
+    <div class="surface-heading">
+      <div>
+        <p class="section-eyebrow">ÁMBITOS</p>
+        <h3 id="titulo-vista-esquematica">Vista esquemática por ámbito</h3>
+        <p>
+          Cada banda agrupa las regiones del ámbito; el orden y el ancho siguen el conteo de casos.
+        </p>
+      </div>
+    </div>
+
+    <p class="panel-nota">
+      La capa cartográfica requiere el dataset ubigeo/centroide, aún aplazado; esta vista no inventa
+      geometría.
+    </p>
+
+    <div class="ambitos">
+      @for (banda of bandas(); track banda.alcance) {
+      <article class="ambito">
+        <header class="ambito-cabeza">
+          <span class="ambito-nombre">{{ banda.alcance }}</span>
+          <span class="ambito-total">
+            {{ banda.total }} {{ banda.total === 1 ? 'caso' : 'casos' }}
+          </span>
+        </header>
+        <div class="ambito-barra" aria-hidden="true">
+          <span [style.width.%]="banda.proporcion"></span>
+        </div>
+        <div class="ambito-regiones">
+          @for (region of banda.regiones; track region.region) {
+          <span class="region-chip">{{ region.region }} <strong>{{ region.total }}</strong></span>
+          } @if (banda.sinRegion > 0) {
+          <span class="region-chip region-chip-vacia">
+            Sin región <strong>{{ banda.sinRegion }}</strong>
+          </span>
+          }
+        </div>
+      </article>
+      }
+    </div>
+  </section>
+
+  <section class="surface panel" aria-labelledby="titulo-regiones">
+    <div class="surface-heading">
+      <div>
+        <p class="section-eyebrow">REGIONES</p>
+        <h3 id="titulo-regiones">Regiones con casos abiertos</h3>
+        <p>Ordenadas por número de casos; el riesgo alto es el atributo propio de cada caso.</p>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table class="data-table" aria-label="Casos abiertos por región">
+        <thead>
+          <tr>
+            <th scope="col">Región</th>
+            <th scope="col">Ámbito</th>
+            <th scope="col">Casos abiertos</th>
+            <th scope="col">Riesgo alto</th>
+            <th scope="col">Listado</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (fila of filasRegion(); track fila.region) {
+          <tr>
+            <td><strong>{{ fila.region }}</strong></td>
+            <td>{{ etiquetaAmbitos(fila.ambitos) }}</td>
+            <td>{{ fila.total }}</td>
+            <td>{{ fila.riesgoAlto }}</td>
+            <td>
+              <a class="table-link" routerLink="/casos" [queryParams]="verCasos(fila)">
+                Ver casos
+              </a>
+            </td>
+          </tr>
+          } @if (sinRegion() > 0) {
+          <tr>
+            <td><strong>Sin región</strong></td>
+            <td>{{ etiquetaAmbitos(alcancesSinRegion()) }}</td>
+            <td>{{ sinRegion() }}</td>
+            <td>{{ riesgoAltoSinRegion() }}</td>
+            <td>—</td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    @if (filasRegion().length === 0) {
+    <p class="panel-vacio">No hay casos con región asignada en el conjunto visible.</p>
+    }
+
+    <p class="tabla-nota">
+      Los casos sin región se muestran en su propia fila: suman al total de casos abiertos, no a
+      ninguna región. La región contada es la principal del caso. El listado de Casos no acepta
+      filtro por región; «Ver casos» lleva al ámbito del registro y conserva «abiertos».
+    </p>
+  </section>
+  } }
+</section>

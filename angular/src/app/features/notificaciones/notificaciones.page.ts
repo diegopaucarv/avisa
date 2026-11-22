@@ -24,13 +24,14 @@ import { PaginacionComponent } from '../../shared/ui/paginacion.component';
  * `entidadId`, `venceEn`, `estado` y `createdAt`. No hay título, detalle ni
  * booleano de lectura.
  *
- * `estado` sí es una marca de lectura (`pendiente` | `enviada` | `leida` según
- * el CHECK de `core.notificaciones`): se pinta como leída sólo cuando vale
- * `leida`. No existe endpoint para cambiar ese estado, así que la pantalla no
+ * `estado` es el ciclo de vida (`pendiente` | `enviada` | `leida` según el
+ * CHECK de `core.notificaciones`): sólo `leida` significa leída. No existe
+ * `PATCH` ni `POST` sobre `/api/v1/notifications`, así que la pantalla no
  * ofrece «marcar como leída».
  *
- * `entidadId` es un UUID interno y ninguna ruta de la SPA lo acepta: el enlace
- * abre la sección del recurso, nunca una ficha concreta.
+ * `entidadId` es un UUID interno y ninguna ruta de la SPA lo acepta (casos usa
+ * `codigo`, no UUID; alertas, compromisos y documentos no tienen ficha). El
+ * enlace abre la sección del recurso, nunca una ficha concreta.
  */
 export type Notificacion = {
   id: string;
@@ -112,15 +113,13 @@ function etiquetaEstado(valor: string | null): string {
   }
 }
 
-function claseEstado(valor: string | null): string {
-  switch (estadoClave(valor)) {
-    case 'leida':
-      return 'state-approved';
-    case 'pendiente':
-      return 'state-pending';
-    default:
-      return 'state-dismissed';
-  }
+/** Estado de lectura visible: sólo `leida` cuenta como leída. */
+function etiquetaLectura(valor: string | null): string {
+  return estadoClave(valor) === 'leida' ? 'Leída' : 'No leída';
+}
+
+function claseLectura(valor: string | null): string {
+  return estadoClave(valor) === 'leida' ? 'state-approved' : 'state-pending';
 }
 
 /** Un elemento de `items[]`. */
@@ -175,7 +174,7 @@ const FILTROS_INICIALES: FiltrosNotificaciones = {
  * Bandeja de notificaciones.
  *
  * Listado paginado en servidor. La tabla `core.notificaciones` está vacía hoy:
- * el estado vacío es honesto y no se rellenan filas de ejemplo. Las no leídas
+ * el estado vacío es explícito y no se rellenan filas de ejemplo. Las no leídas
  * se marcan con el campo `estado`, sin ofrecer una acción que la API no tiene.
  */
 @Component({
@@ -333,8 +332,12 @@ export class NotificacionesPage {
     return etiquetaEstado(valor);
   }
 
-  estadoClase(valor: string | null): string {
-    return claseEstado(valor);
+  lecturaEtiqueta(valor: string | null): string {
+    return etiquetaLectura(valor);
+  }
+
+  lecturaClase(valor: string | null): string {
+    return claseLectura(valor);
   }
 
   cambiarPagina(pagina: number): void {

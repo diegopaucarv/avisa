@@ -25,7 +25,7 @@
   <div class="empty-state" role="status">Cargando notificaciones…</div>
   } @else if (total() === 0) {
   <div class="empty-state" role="status">
-    <strong>No tiene notificaciones</strong>
+    <strong>Sin notificaciones registradas</strong>
     <p>La bandeja está vacía. Cuando el sistema registre un aviso para usted, aparecerá aquí.</p>
   </div>
   } @else if (notificaciones().length === 0) {
@@ -43,7 +43,7 @@
         <tr>
           <th scope="col">Notificación</th>
           <th scope="col">Categoría</th>
-          <th scope="col">Estado</th>
+          <th scope="col">Lectura</th>
           <th scope="col">Vence</th>
           <th scope="col">Registrada</th>
           <th scope="col">Sección</th>
@@ -65,9 +65,12 @@
           </td>
           <td>{{ notificacion.categoria }}</td>
           <td>
-            <span [class]="'status-badge ' + estadoClase(notificacion.estado)">
+            <span
+              [class]="'status-badge ' + lecturaClase(notificacion.estado)"
+              [attr.title]="'Estado del aviso: ' + estadoEtiqueta(notificacion.estado)"
+            >
               <span class="status-dot"></span>
-              {{ estadoEtiqueta(notificacion.estado) }}
+              {{ lecturaEtiqueta(notificacion.estado) }}
             </span>
           </td>
           <td>{{ fecha(notificacion.venceEn) }}</td>
@@ -77,7 +80,7 @@
             <a
               class="table-link"
               [routerLink]="seccion.ruta"
-              [attr.title]="'Abrir la sección ' + seccion.etiqueta"
+              [attr.title]="'Abrir la sección ' + seccion.etiqueta + '; el aviso no permite enlazar la ficha concreta'"
             >
               {{ seccion.etiqueta }}
             </a>
@@ -92,10 +95,10 @@
   </div>
 
   <p class="notificaciones-nota">
-    Las no leídas se resaltan y muestran su estado («Pendiente» o «Enviada»); sólo se pintan como
-    leídas cuando el aviso está en estado «Leída». Esta pantalla no ofrece «marcar como leída»
-    porque la API no expone esa acción. El identificador del recurso es interno: el enlace abre la
-    sección, no la ficha concreta.
+    Las no leídas se resaltan y se muestran como «No leída»; sólo se pintan como «Leída» cuando el
+    aviso está en estado «Leída». Esta pantalla no ofrece «marcar como leída» porque la API no
+    expone esa acción. El identificador del recurso es un UUID interno que ninguna ruta acepta: el
+    enlace abre la sección, no la ficha concreta.
   </p>
   } @if (estadoListado() === 'listo' && total() > 0) {
   <app-paginacion

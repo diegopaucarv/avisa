@@ -175,10 +175,12 @@ const SORTS: Record<string, string> = {
 };
 
 // Sólo estos estados derivados se pueden filtrar; cualquier otro valor se ignora.
+// «En revisión» se emite desde `ALERT_STATE`, así que también se ofrece.
 const ESTADOS = new Set([
   "Atendida",
   "Aprobada",
   "Validada",
+  "En revisión",
   "Pendiente de revisión",
 ]);
 

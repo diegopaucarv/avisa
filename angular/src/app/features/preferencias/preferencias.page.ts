@@ -8,6 +8,7 @@ import {
   signal,
 } from '@angular/core';
 
+import { AlcanceService } from '../../core/alcance/alcance.service';
 import { SesionStore } from '../../core/auth/sesion.store';
 import { CapacidadesService } from '../../core/permisos/capacidades.service';
 import { ALCANCES, esRegistro } from '../../dominio/mapeo';
@@ -19,7 +20,8 @@ type Densidad = 'comoda' | 'compacta';
 
 /**
  * `auto` significa «el ámbito que entregue la sesión»: la pantalla no impone un
- * alcance que todavía nadie aplica.
+ * alcance propio. Un valor concreto lo consume la lista de Casos como filtro
+ * predeterminado (la barra lo muestra en el selector y «Todos» lo desactiva).
  */
 type AlcancePreferido = Alcance | 'auto';
 
@@ -262,6 +264,7 @@ export class PreferenciasPage {
   private readonly plataforma = inject(PLATFORM_ID);
   private readonly sesion = inject(SesionStore);
   private readonly capacidades = inject(CapacidadesService);
+  private readonly alcanceServicio = inject(AlcanceService);
 
   readonly usuario = this.sesion.usuario;
   readonly tamanos = TAMANOS;
@@ -331,7 +334,8 @@ export class PreferenciasPage {
     try {
       window.localStorage.setItem(CLAVE_TEMA, resuelto);
       window.localStorage.setItem(CLAVE_DENSIDAD, this.densidad());
-      window.localStorage.setItem(CLAVE_ALCANCE, this.alcance());
+      // `fijar` escribe la misma clave y actualiza el chip del shell al instante.
+      this.alcanceServicio.fijar(this.alcance());
       window.localStorage.setItem(CLAVE_AVISOS, JSON.stringify(this.avisos()));
     } catch {
       this.guardado.set(false);

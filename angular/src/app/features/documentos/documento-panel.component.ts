@@ -20,7 +20,6 @@ import { aErrorApi } from '../../core/http/errores';
 import { CapacidadesService } from '../../core/permisos/capacidades.service';
 import { IconoComponent } from '../../shared/ui/icono.component';
 import {
-  ESTADOS_DOCUMENTO,
   aDetalleDocumento,
   claseEstado,
   etiquetaAnexo,
@@ -37,11 +36,13 @@ type BorradorDocumento = {
   titulo: string;
   tipo: string;
   fecha: string;
-  estado: string;
   resumen: string;
   archivo: string;
   casoCode: string;
 };
+
+/** Estados de flujo que el repositorio acepta al validar o rechazar. */
+type EstadoDecision = 'Validado' | 'Rechazado';
 
 type CampoBorrador = keyof BorradorDocumento;
 
@@ -233,6 +234,29 @@ function diferenciaTexto(valor: string, original: string | null): string | null 
       gap: 8px;
     }
 
+    .panel-acciones-estado {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .panel-confirmacion {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 10px;
+      border: 1px solid #f3e0c2;
+      border-radius: 6px;
+      background: #fdf8ef;
+      color: #7a5a24;
+      font-size: 10.5px;
+    }
+
+    .panel-confirmacion p {
+      margin: 0;
+      line-height: 1.5;
+    }
+
     .panel-fuentes {
       display: flex;
       flex-direction: column;
@@ -313,17 +337,13 @@ export class DocumentoPanelComponent {
   readonly formulario = computed(() => (this.editando() ? this.borrador() : null));
 
   /**
-   * El estado de la ficha se edita en vocabulario de UI (`estadoUi`). Si el
-   * registro guarda un texto heredado se añade como opción en vez de perderlo.
+   * Validar / Rechazar no pasan por el formulario: son acciones explícitas
+   * sobre el estado de flujo del documento (`PATCH /api/v1/documents/:id`).
    */
-  readonly estadoInicial = computed(() => this.cabecera().estadoUi);
-
-  readonly opcionesEstado = computed<readonly string[]>(() => {
-    const actual = this.estadoInicial();
-    const conocidos: readonly string[] = ESTADOS_DOCUMENTO;
-    if (!actual || conocidos.includes(actual)) return conocidos;
-    return [...conocidos, actual];
-  });
+  readonly estadoPendiente = signal<EstadoDecision | null>(null);
+  readonly guardandoEstado = signal(false);
+  readonly errorEstado = signal<string | null>(null);
+  readonly avisoEstado = signal<string | null>(null);
 
   readonly opcionesTipo = computed<readonly OpcionCatalogo[]>(() => {
     const base = this.tipos();
@@ -375,6 +395,9 @@ export class DocumentoPanelComponent {
       this.errorGuardado.set(null);
       this.mensajeLocal.set(null);
       this.aviso.set(null);
+      this.estadoPendiente.set(null);
+      this.errorEstado.set(null);
+      this.avisoEstado.set(null);
     });
   }
 
@@ -414,7 +437,6 @@ export class DocumentoPanelComponent {
       titulo: documento.titulo ?? '',
       tipo: documento.tipo ?? '',
       fecha: documento.fecha ?? '',
-      estado: documento.estadoUi,
       resumen: documento.resumen ?? '',
       archivo: documento.archivo ?? '',
       casoCode: documento.casoCode ?? '',
@@ -422,6 +444,8 @@ export class DocumentoPanelComponent {
     this.mensajeLocal.set(null);
     this.errorGuardado.set(null);
     this.aviso.set(null);
+    this.estadoPendiente.set(null);
+    this.errorEstado.set(null);
     this.editando.set(true);
   }
 
@@ -488,10 +512,6 @@ export class DocumentoPanelComponent {
     const casoCode = diferenciaTexto(borrador.casoCode, documento.casoCode);
     if (casoCode !== undefined) cambios.casoCode = casoCode;
 
-    if (borrador.estado !== this.estadoInicial()) {
-      cambios.estado = borrador.estado.trim() || null;
-    }
-
     if (Object.keys(cambios).length === 0) {
       this.mensajeLocal.set('No hay cambios que guardar.');
       return;
@@ -499,6 +519,61 @@ export class DocumentoPanelComponent {
 
     this.mensajeLocal.set(null);
     this.enviar(documento.id, cambios);
+  }
+
+  /** Abre la confirmación de validación o rechazo; nunca envía directo. */
+  pedirCambioEstado(objetivo: EstadoDecision): void {
+    if (!this.puedeModificar() || this.guardandoEstado()) return;
+    this.errorEstado.set(null);
+    this.avisoEstado.set(null);
+    this.estadoPendiente.set(objetivo);
+  }
+
+  cancelarCambioEstado(): void {
+    if (this.guardandoEstado()) return;
+    this.estadoPendiente.set(null);
+  }
+
+  /**
+   * `PATCH /api/v1/documents/:id` con `{ estado }`: el repositorio sólo acepta
+   * los estados de `ESTADOS_DOCUMENTO` y no recibe motivo para este cambio. El
+   * indicador `es_validado_humano` no es escribible por la API y no se toca.
+   */
+  confirmarCambioEstado(): void {
+    const objetivo = this.estadoPendiente();
+    const documento = this.cabecera();
+    if (!objetivo) return;
+
+    if (!documento.id) {
+      this.errorEstado.set('El documento no tiene identificador.');
+      return;
+    }
+
+    if (!this.puedeModificar()) {
+      this.errorEstado.set('Su rol no permite modificar este documento.');
+      return;
+    }
+
+    this.guardandoEstado.set(true);
+    this.errorEstado.set(null);
+
+    this.http
+      .patch<unknown>(urlApi(`/v1/documents/${encodeURIComponent(documento.id)}`), {
+        estado: objetivo,
+      })
+      .subscribe({
+        next: () => {
+          this.guardandoEstado.set(false);
+          this.estadoPendiente.set(null);
+          this.avisoEstado.set(`El documento quedó como «${objetivo}».`);
+          this.detalleRecurso.recargar();
+          this.actualizado.emit();
+        },
+        error: (fallo: unknown) => {
+          this.guardandoEstado.set(false);
+          this.errorEstado.set(this.mensajeDeError(fallo));
+        },
+      });
   }
 
   alFondo(evento: MouseEvent): void {

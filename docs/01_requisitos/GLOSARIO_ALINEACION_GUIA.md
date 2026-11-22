@@ -147,9 +147,12 @@ Por iniciar · En proceso · Cumplido · Redefinido · Desestimado
 Caso:
 
 ```
-Activo · En seguimiento · Resuelto · Archivado
+Abierto · Resuelto · Archivado
 ```
 
+- `Activo` y `En seguimiento` quedaron retirados en la migración 33: eran dos nombres para el
+  mismo hecho (`es_activo = true`) y se unificaron en `Abierto`. La SPA normaliza cualquier
+  respuesta antigua a esos tres valores.
 - Prohibido: `En_ejecucion`, `En_seguimiento`, `Por_iniciar`, `En_proceso`, `Vencido` como
   sinónimo de `Paralizado`.
 - «Vencido» existe, pero es el **cálculo de plazo por fecha**, no un estado de gestión.
@@ -238,7 +241,7 @@ Sólo se aplican a etiquetas, valores de catálogo y enumeraciones cerradas.
 | `Conflicto_social`           | `Conflicto social`                                   | 1.1     |
 | `Crisis_social`              | `Crisis social`                                      | 1.1     |
 | `En_ejecucion`               | `En ejecución`                                       | 1.8     |
-| `En_seguimiento`             | `En seguimiento`                                     | 1.8     |
+| `En_seguimiento`             | _retirado_ (migración 33: se unificó en `Abierto`)   | 1.8     |
 | `Por_iniciar` / `En_proceso` | `Por iniciar` / `En proceso`                         | 1.8     |
 | `Critica_Inmediata`          | `Crítica inmediata`                                  | 1.7     |
 | `Protesta o Bloqueo`         | `Bloqueo`                                            | 1.4.bis |

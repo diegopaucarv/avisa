@@ -6,8 +6,11 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { Router, NavigationEnd, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { filter, map, startWith } from 'rxjs';
 
+import { AlcanceService } from '../../core/alcance/alcance.service';
 import { AtajosService } from '../../core/atajos/atajos.service';
 import { SesionStore } from '../../core/auth/sesion.store';
 import { ENTORNO } from '../../core/config/entorno';
@@ -21,6 +24,36 @@ type EnlaceNav = { etiqueta: string; ruta: string; icono: string };
   imports: [RouterOutlet, RouterLink, RouterLinkActive, IconoComponent],
   templateUrl: './shell.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  styles: `
+    /*
+     * El ámbito ocupa el lugar del antiguo indicador «Sistema operativo», que era
+     * texto fijo sin dato. Ahora es un enlace real a Preferencias: necesita
+     * hover, foco visible y un valor con más peso que la etiqueta.
+     */
+    .ambito-chip {
+      gap: 6px;
+      padding: 4px 9px;
+      border-radius: 999px;
+      font-size: 10.5px;
+      text-decoration: none;
+      transition: background-color 120ms ease;
+    }
+
+    .ambito-chip strong {
+      color: var(--ink-2);
+      font-weight: 700;
+    }
+
+    .ambito-chip:hover,
+    .ambito-chip:focus-visible {
+      background: rgba(36, 85, 162, 0.1);
+    }
+
+    .ambito-chip:focus-visible {
+      outline: 3px solid #7aa2e8;
+      outline-offset: 2px;
+    }
+  `,
 })
 export class ShellComponent {
   private readonly sesion = inject(SesionStore);
@@ -28,10 +61,39 @@ export class ShellComponent {
   private readonly router = inject(Router);
   private readonly atajos = inject(AtajosService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly alcance = inject(AlcanceService);
 
   readonly version = ENTORNO.version;
   readonly usuario = this.sesion.usuario;
   readonly roles = computed(() => this.capacidades.etiquetasRoles());
+
+  /**
+   * El mapa ya es la ventana principal, así que su propio filtro de ámbito
+   * sustituye al chip de la cabecera: mostrarlo allí sería duplicar el control.
+   */
+  readonly enMapa = toSignal(
+    this.router.events.pipe(
+      filter((evento): evento is NavigationEnd => evento instanceof NavigationEnd),
+      map((evento) => evento.urlAfterRedirects.startsWith('/mapa')),
+      startWith(this.router.url.startsWith('/mapa')),
+    ),
+    { initialValue: this.router.url.startsWith('/mapa') },
+  );
+
+  /**
+   * Ámbito que la interfaz está aplicando: el elegido en Preferencias o, en
+   * «Sesión», el que entrega el inicio de sesión. No es un permiso: la RLS
+   * decide qué datos llegan.
+   */
+  readonly ambitoEtiqueta = computed(() => {
+    const preferido = this.alcance.preferido();
+    if (preferido !== 'auto') return preferido;
+
+    const regiones = this.usuario()?.regiones ?? [];
+    if (regiones.length === 0) return 'Nacional';
+    if (regiones.length === 1) return regiones[0];
+    return `${regiones.length} regiones`;
+  });
 
   readonly menuAbierto = signal(false);
   readonly perfilAbierto = signal(false);
@@ -41,6 +103,7 @@ export class ShellComponent {
   }
 
   readonly enlacesTrabajo: EnlaceNav[] = [
+    { etiqueta: 'Panorama territorial', ruta: '/mapa', icono: 'mapa' },
     { etiqueta: 'Resumen operativo', ruta: '/resumen', icono: 'cuadricula' },
     { etiqueta: 'Bandeja de trabajo', ruta: '/bandeja', icono: 'bandeja' },
   ];

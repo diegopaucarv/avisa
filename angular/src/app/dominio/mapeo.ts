@@ -57,6 +57,36 @@ function unoDe<T extends string>(valor: string | null, permitidos: readonly T[],
   return permitidos.find((opcion) => opcion.toLowerCase() === limpio) ?? respaldo;
 }
 
+/**
+ * Fecha de caso normalizada a `YYYY-MM-DD`.
+ *
+ * No construye un `Date`: de una fecha ISO con hora se toma el día literal, sin
+ * desplazarlo a la jornada anterior al interpretarlo en una zona al oeste de
+ * UTC (`2026-10-31T00:00:00.000Z` sigue siendo 31/10). Acepta `YYYY-MM-DD`,
+ * ISO con hora y el formato legado `DD/MM/YYYY`. Un valor no reconocible se
+ * declara como hueco (`null`) en vez de propagarse como texto arbitrario.
+ */
+export function fechaIso(valor: string | null | undefined): string | null {
+  if (!valor) return null;
+  const texto = valor.trim();
+
+  const barras = /^(\d{1,2})\/(\d{1,2})\/(\d{4})/.exec(texto);
+  if (barras) {
+    return `${barras[3]}-${barras[2].padStart(2, '0')}-${barras[1].padStart(2, '0')}`;
+  }
+
+  const iso = /^(\d{4})-(\d{2})-(\d{2})(?:$|[T\s])/.exec(texto);
+  return iso ? `${iso[1]}-${iso[2]}-${iso[3]}` : null;
+}
+
+/** `2026-10-31` o `2026-10-31T00:00:00.000Z` → `31/10/2026`; sin fecha → `—`. */
+export function formatearFechaCaso(valor: string | null | undefined): string {
+  const iso = fechaIso(valor);
+  if (!iso) return '—';
+  const [anio, mes, dia] = iso.split('-');
+  return `${dia}/${mes}/${anio}`;
+}
+
 export const NIVELES_CONFLICTO = [
   'Diferencia',
   'Controversia',
@@ -502,7 +532,7 @@ export function aCaso(bruto: unknown): Caso {
     actualizado:
       texto(registro, ['actualizado', 'updated']) ??
       texto(registro, ['actualizadoEn', 'updatedAt']),
-    inicio: texto(registro, ['fechaInicio', 'fecha_inicio', 'inicio']),
+    inicio: fechaIso(texto(registro, ['fechaInicio', 'fecha_inicio', 'inicio'])),
     region: texto(registro, ['region']),
     estado: estadoDeCaso(texto(registro, ['estado'])),
     riesgo: riesgoDe(texto(registro, ['riesgo', 'risk'])),

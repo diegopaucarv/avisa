@@ -54,7 +54,7 @@ export const ORDENES_DOCUMENTO: readonly { valor: string; etiqueta: string }[] =
 export const FILTROS_ESTADO: readonly { valor: string; etiqueta: string }[] = [
   { valor: '', etiqueta: 'Todos' },
   { valor: 'activo', etiqueta: 'Cargado' },
-  { valor: 'sin_estado', etiqueta: 'Sin estado' },
+  { valor: 'sin_estado', etiqueta: 'Sin estado registrado' },
   { valor: 'En análisis', etiqueta: 'En análisis' },
   { valor: 'Extraído', etiqueta: 'Extraído' },
   { valor: 'Validado', etiqueta: 'Validado' },

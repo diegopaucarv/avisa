@@ -922,6 +922,34 @@
                 </div>
             </header>
 
+            <!-- Declaración: qué cubre, qué dato necesita y qué es solo forma. -->
+            <div
+                style="
+                    font-size: 11.5px;
+                    line-height: 1.5;
+                    color: #4a5b6c;
+                    border: 1px solid #e6ebef;
+                    border-radius: 6px;
+                    background: #f8fafb;
+                    padding: 8px 11px;
+                "
+            >
+                <p style="margin: 0 0 3px">
+                    <b>Items que cubre:</b> 51 · 52 · 57 · 85.
+                </p>
+                <p style="margin: 0 0 3px">
+                    <b>Dato que necesita:</b> snapshot de solo lectura del
+                    2026-11-22 sobre <code>core.casos</code> y
+                    <code>analytics.vw_*</code> (35 filas, 34 vigentes, 13
+                    regiones, 80 vínculos caso–región). El endpoint
+                    <code>GET /api/v1/analitica/resumen</code> requiere crearse.
+                </p>
+                <p style="margin: 0">
+                    <b>Solo forma (sin dato):</b> gráficos, hoja de impresión y
+                    las series temporales que no existen (item 57).
+                </p>
+            </div>
+
             <nav
                 class="mode-tabs"
                 role="tablist"
@@ -2317,9 +2345,11 @@
                 <h2 id="fuera-titulo">Fuera de alcance de este mockup</h2>
                 <ul>
                     <li>
-                        <b>Mapa y ubigeo (item 53):</b> aplazado por decisión de
-                        producto hasta que exista el dataset de ubigeo y
-                        centroide. No se dibuja ninguna capa cartográfica.
+                        <b>Capa cartográfica (item 53):</b> aplazada por
+                        decisión de producto hasta que exista el dataset de
+                        ubigeo y centroide. La SPA ya sirve «Panorama
+                        territorial» con datos reales; aquí no se dibuja
+                        geometría.
                     </li>
                     <li>
                         <b>SLA, <i>aging</i> y tendencia interanual:</b> no hay

@@ -75,6 +75,15 @@ import { EnlaceRiel, RielRelacionesComponent } from './riel-relaciones.component
       color: #8d99a6;
     }
 
+    .risk-inactivo {
+      background: var(--canvas);
+      color: var(--muted);
+    }
+
+    .risk-inactivo .status-dot {
+      background: var(--muted);
+    }
+
     /* Ficha en dos columnas: contenido y riel de relaciones (item 67). */
     .ficha-layout {
       display: grid;
@@ -240,6 +249,18 @@ export class CasoDetallePage {
   readonly anulado = computed(
     () => this.snapshotAnulado() !== null || this.caso()?.anulado === true,
   );
+
+  /**
+   * Item 11: la insignia de riesgo sólo conserva su color si el caso está
+   * abierto. Resuelto, Archivado o anulado la muestran en gris. El valor no se
+   * recalcula aquí: la regla pertenece al servidor (matriz del caso) y
+   * `GET /api/v1/cases/{codigo}` no expone endpoint de recálculo.
+   */
+  readonly riesgoInactivo = computed(() => {
+    const caso = this.caso();
+    if (!caso) return false;
+    return this.anulado() || caso.estado !== 'Abierto';
+  });
 
   /**
    * Contadores del riel (item 67). Sólo lee lo que ya está en el detalle: no

@@ -1149,6 +1149,39 @@
                 </div>
             </header>
 
+            <!-- Declaración: qué cubre, qué dato necesita y qué es solo forma. -->
+            <div
+                style="
+                    font-size: 11.5px;
+                    line-height: 1.5;
+                    color: #4a5b6c;
+                    border: 1px solid #e6ebef;
+                    border-radius: 6px;
+                    background: #f8fafb;
+                    padding: 8px 11px;
+                "
+            >
+                <p style="margin: 0 0 3px">
+                    <b>Items que cubre:</b> 12–18 · 41 · 67 · 68.
+                </p>
+                <p style="margin: 0 0 3px">
+                    <b>Dato que necesita:</b> <code>core.casos</code> y sus
+                    tablas hijas (<code>core.caso_cronologia</code>,
+                    <code>core.compromisos</code>, <code>core.documentos</code>,
+                    <code>core.caso_estado_historial</code>); endpoint existente
+                    <code>GET /api/v1/cases/{codigo}</code>.
+                </p>
+                <p style="margin: 0">
+                    <b>Solo forma (sin dato):</b> edición por campo (<code
+                        >PATCH</code
+                    >
+                    por atributo), pestañas Reuniones y Envíos vacías y
+                    auditoría de cambios. Los títulos de documentos se citan
+                    verbatim (una RD dice «GOBIERNO REGIONAL PIURA»); en los
+                    rótulos de la interfaz se usa «GORE».
+                </p>
+            </div>
+
             <!-- Cabecera de la ficha -->
             <section class="ficha-head card" aria-label="Cabecera de la ficha">
                 <div>
@@ -3074,6 +3107,12 @@
                                 queda registrado como historial consultable. Los
                                 tres tramos muestran nombres de estado ya
                                 unificados: el valor vigente es <b>Abierto</b>.
+                                Las marcas «Desde» y «Hasta» son las de
+                                <code>core.caso_estado_historial</code>; el
+                                <b>31.10.2026</b> es la fecha de última
+                                actualización (carga), <b>no</b> el inicio del
+                                caso: el inicio real (<code>fecha_inicio</code>)
+                                está en la cabecera.
                             </span>
                         </div>
 

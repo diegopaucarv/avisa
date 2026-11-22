@@ -367,6 +367,36 @@
                 <div><span class="badge">Mockup · no implementado</span></div>
             </header>
 
+            <!-- Declaración: qué cubre, qué dato necesita y qué es solo forma. -->
+            <div
+                style="
+                    font-size: 11.5px;
+                    line-height: 1.5;
+                    color: #4a5b6c;
+                    border: 1px solid #e6ebef;
+                    border-radius: 6px;
+                    background: #f8fafb;
+                    padding: 8px 11px;
+                "
+            >
+                <p style="margin: 0 0 3px"><b>Items que cubre:</b> 22 · 50.</p>
+                <p style="margin: 0 0 3px">
+                    <b>Dato que necesita:</b>
+                    <code>GET /api/v1/demandas?sinCaso=true</code> (226 ·
+                    <code>sinCasoTotal</code>), <code>GET /api/v1/alerts</code>
+                    (0 pendientes de 76 vivas) y
+                    <code>GET /api/v1/commitments?excluir_terminales=true</code>
+                    (0 vencidos, 8 sin fecha), más
+                    <code>GET /api/v1/cases</code> → <code>abiertos</code> (34).
+                    El endpoint único <code>GET /api/v1/bandeja</code> requiere
+                    crearse (item 50).
+                </p>
+                <p style="margin: 0">
+                    <b>Solo forma (sin dato):</b> orden por plazo y las acciones
+                    de asignar, posponer, completar y vincular.
+                </p>
+            </div>
+
             <div class="filter-bar">
                 <label class="search-field">
                     <span aria-hidden="true">⌕</span>
