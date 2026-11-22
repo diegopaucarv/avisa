@@ -57,6 +57,11 @@ const ALERT_SELECT = `
   a.confidence::float8 as confianza,
   a.es_validado_humano as validado,
   a.nivel_clasificacion::int as clasificacion,
+  a.anulado_en as anulado_en,
+  a.motivo_anulacion as motivo_anulacion,
+  a.anulado_por as anulado_por,
+  ua.nombre as anulado_por_nombre,
+  a.anulacion_id as anulacion_id,
   ${ALERT_STATE} as estado,
   ${ALERT_ATENDIDA} as atendida
 `;
@@ -68,6 +73,7 @@ const ALERT_FROM = `
   left join core.cat_niveles_alerta na on na.id = a.nivel_alerta_id
   left join core.distritos d on d.id = a.distrito_id
   left join core.cat_subsectores ss on ss.id = a.subsector_id
+  left join core.usuarios ua on ua.id = a.anulado_por
 `;
 
 export type AlertListQuery = {
@@ -77,6 +83,12 @@ export type AlertListQuery = {
   nivel?: string;
   estado?: string;
   sort?: string;
+  /**
+   * `true` lista la papelera: añade `anulado_en is not null`. Requiere abrir
+   * la RLS con `withSession(..., { verAnulados: true })`; si no, la política
+   * sigue ocultando las filas y el listado sale vacío.
+   */
+  incluirAnulados?: boolean;
   page?: number;
   pageSize?: number;
 };
@@ -120,6 +132,16 @@ export type AlertItem = {
   clasificacion: number;
   estado: string;
   atendida: boolean;
+  /** Fecha de anulación en ISO 8601, o `null` si la alerta está vigente. */
+  anuladoEn: string | null;
+  /** Motivo declarado al anular; sólo se puebla en la papelera. */
+  motivoAnulacion: string | null;
+  /** Usuario que anuló (id); sólo se puebla en la papelera. */
+  anuladoPor: string | null;
+  /** Nombre legible de quien anuló; `null` si no se puede resolver. */
+  anuladoPorNombre: string | null;
+  /** Lote de anulación al que pertenece la fila. */
+  anulacionId: string | null;
 };
 
 export type AlertListResult = {
@@ -200,7 +222,22 @@ function mapAlert(row: Record<string, any>): AlertItem {
     clasificacion: row.clasificacion,
     estado: row.estado,
     atendida: row.atendida,
+    anuladoEn: isoOrNull(row.anulado_en),
+    motivoAnulacion: row.motivo_anulacion,
+    anuladoPor: row.anulado_por,
+    anuladoPorNombre: row.anulado_por_nombre,
+    anulacionId: row.anulacion_id,
   };
+}
+
+/**
+ * `pg` devuelve `timestamptz` como `Date`; se normaliza a ISO para el payload.
+ * Cualquier valor no convertible se trata como ausente.
+ */
+function isoOrNull(value: unknown): string | null {
+  if (!value) return null;
+  const date = value instanceof Date ? value : new Date(String(value));
+  return Number.isNaN(date.getTime()) ? null : date.toISOString();
 }
 
 export async function listAlerts(
@@ -227,6 +264,13 @@ export async function listAlerts(
   const estado = query.estado?.trim();
   if (estado && ESTADOS.has(estado)) {
     where.push(`${ALERT_STATE} = ${bind(estado)}`);
+  }
+
+  // Papelera: abrir la RLS es cosa de `app.ver_anulados`; aquí sólo se acota
+  // el resultado a las filas anuladas. Sin `incluirAnulados` no se añade
+  // `anulado_en is null`: `p_clasificacion` ya lo impone.
+  if (query.incluirAnulados) {
+    where.push("a.anulado_en is not null");
   }
 
   const page = Math.max(1, Math.trunc(query.page ?? 1));

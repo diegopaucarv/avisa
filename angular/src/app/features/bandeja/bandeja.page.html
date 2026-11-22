@@ -71,14 +71,31 @@
         <p class="section-eyebrow">COMPROMISOS</p>
         <h3 class="bloque-titulo" id="titulo-compromisos-atencion">
           <app-icono nombre="compromisos" [tamano]="15" />
-          Por vencer
+          Vencidos o por vencer
         </h3>
-        <p>Compromisos con vencimiento entre hoy y los próximos {{ horizonteDias }} días.</p>
+        <p>
+          Compromisos vencidos y los que vencen entre hoy y los próximos {{ horizonteDias }} días.
+        </p>
       </div>
       <a class="link-button" routerLink="/compromisos">
         Ver todo
         <app-icono nombre="chevron-derecha" [tamano]="13" />
       </a>
+    </div>
+
+    <div class="contadores-compromisos">
+      <div class="contador">
+        <span class="contador-etiqueta">Vencidos</span>
+        <strong class="contador-valor" [class.contador-sin-dato]="estadoVencidos() === 'error'">
+          {{ textoVencidos() }}
+        </strong>
+      </div>
+      <div class="contador">
+        <span class="contador-etiqueta">Por vencer</span>
+        <strong class="contador-valor" [class.contador-sin-dato]="estadoPorVencer() === 'error'">
+          {{ textoPorVencer() }}
+        </strong>
+      </div>
     </div>
 
     @if (estadoCompromisos() === 'error') {
@@ -87,7 +104,7 @@
     <p class="bloque-vacio" role="status">Cargando compromisos…</p>
     } @else { @if (compromisos().length === 0) {
     <p class="bloque-vacio">
-      No hay compromisos por vencer en los próximos {{ horizonteDias }} días.
+      No hay compromisos vencidos ni por vencer en los próximos {{ horizonteDias }} días.
     </p>
     } @else {
     <ul class="tarea-lista">
@@ -109,7 +126,8 @@
     </ul>
     } @if (totalCompromisos() > 0) {
     <p class="bloque-pie">
-      {{ totalCompromisos() }} compromisos por vencer en los próximos {{ horizonteDias }} días.
+      {{ totalCompromisos() }} compromisos vencidos o que vencen en los próximos {{ horizonteDias }}
+      días.
     </p>
     } }
   </section>

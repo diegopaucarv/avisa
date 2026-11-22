@@ -1,12 +1,12 @@
 /**
- * Resumen operativo: lectura de los agregados reales y el rango de vencimiento
- * que comparten Resumen y Bandeja.
+ * Resumen operativo: lectura de los agregados reales y los rangos de
+ * vencimiento que comparten Resumen y Bandeja.
  *
  * No existe un endpoint de tablero. Los indicadores se calculan con el `total`
  * de los listados ya existentes, pedidos con `tamano=1` para no traer filas.
- * Aquí viven dos piezas: extraer el total del sobre paginado y construir el
- * rango `vencimiento_desde`/`vencimiento_hasta` que el servidor aplica sobre
- * el vencimiento efectivo.
+ * Aquí viven dos piezas: extraer el total del sobre paginado y construir los
+ * rangos de `vencimiento_desde`/`vencimiento_hasta` (ya vencido y por vencer)
+ * que el servidor aplica sobre el vencimiento efectivo.
  */
 
 import { normalizarColeccion } from '../../core/http/coleccion';
@@ -53,13 +53,24 @@ function sumarDias(iso: string, dias: number): string {
 }
 
 /**
+ * Límite superior de lo ya vencido: ayer. Se envía como `vencimiento_hasta`
+ * sin `desde`, de modo que abarca todo lo anterior a hoy.
+ *
+ * `situacionDe` marca como `due-vencido` exactamente lo que vence antes de hoy,
+ * así que el recuento del servidor y la etiqueta de cada fila coinciden.
+ */
+export function rangoVencidos(hoy: Date = new Date()): { hasta: string } {
+  return { hasta: sumarDias(isoLocal(hoy), -1) };
+}
+
+/**
  * Rango inclusivo para `GET /api/v1/commitments` que acota «por vencer» a hoy
  * y los próximos `dias` días.
  *
  * El servidor compara el rango contra el vencimiento efectivo (fecha manual y,
  * si falta, la del próximo hito no terminal) y ordena por esa misma fecha de
- * forma ascendente, así que el `total` del sobre es el recuento exacto de la
- * cola y la primera página trae los vencimientos más próximos.
+ * forma ascendente, así que el `total` del sobre es el recuento exacto y la
+ * primera página trae los vencimientos más próximos.
  */
 export function rangoPorVencer(
   hoy: Date = new Date(),

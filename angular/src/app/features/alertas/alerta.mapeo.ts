@@ -115,6 +115,16 @@ export type Alerta = {
   clasificacion: number;
   estado: string;
   atendida: boolean;
+  /** ISO de la anulación lógica; `null` mientras la alerta está vigente. */
+  anuladoEn: string | null;
+  /** Motivo declarado al anular; sólo se puebla en la papelera. */
+  motivoAnulacion: string | null;
+  /** Usuario que anuló (id); sólo se puebla en la papelera. */
+  anuladoPor: string | null;
+  /** Nombre legible de quien anuló; `null` si no se puede resolver. */
+  anuladoPorNombre: string | null;
+  /** Lote de anulación al que pertenece la fila. */
+  anulacionId: string | null;
 };
 
 export type DemandaAlerta = {
@@ -295,6 +305,11 @@ export function aAlerta(bruto: unknown): Alerta {
     clasificacion: numero(registro, ['clasificacion']) ?? 1,
     estado: texto(registro, ['estado']) ?? '',
     atendida: booleano(registro, ['atendida']),
+    anuladoEn: texto(registro, ['anuladoEn', 'anulado_en']),
+    motivoAnulacion: texto(registro, ['motivoAnulacion', 'motivo_anulacion']),
+    anuladoPor: texto(registro, ['anuladoPor', 'anulado_por']),
+    anuladoPorNombre: texto(registro, ['anuladoPorNombre', 'anulado_por_nombre']),
+    anulacionId: texto(registro, ['anulacionId', 'anulacion_id']),
   };
 }
 

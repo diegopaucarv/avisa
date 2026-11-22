@@ -102,6 +102,16 @@ export type Compromiso = {
   origen: string | null;
   confianza: number | null;
   validado: boolean;
+  /** ISO de la anulación lógica; `null` mientras el registro está activo. */
+  anuladoEn: string | null;
+  /** Motivo declarado al anular; sólo se puebla en la papelera. */
+  motivoAnulacion: string | null;
+  /** Usuario que anuló (id); sólo se puebla en la papelera. */
+  anuladoPor: string | null;
+  /** Nombre legible de quien anuló; `null` si no se puede resolver. */
+  anuladoPorNombre: string | null;
+  /** Lote de anulación al que pertenece la fila. */
+  anulacionId: string | null;
   clasificacion: number;
   hitos: Hito[];
   proximoHito: ProximoHito | null;
@@ -175,6 +185,14 @@ function nivelGobiernoDe(valor: string | null): string | null {
   return limpio || null;
 }
 
+/**
+ * Etiqueta visible de `nivelGobierno`. El valor de la API sigue siendo
+ * `Regional`; la UI muestra `GORE` (Gobierno Regional).
+ */
+export function etiquetaNivelGobierno(valor: string | null): string {
+  return valor === 'Regional' ? 'GORE' : (valor ?? '—');
+}
+
 function origenVencimientoDe(valor: string | null): OrigenVencimiento {
   if (valor === 'manual' || valor === 'hito') return valor;
   return null;
@@ -243,6 +261,11 @@ export function aCompromiso(bruto: unknown): Compromiso {
     origen: texto(registro, ['origen']),
     confianza: numero(registro, ['confianza']),
     validado: booleano(registro, ['validado']),
+    anuladoEn: texto(registro, ['anuladoEn', 'anulado_en']),
+    motivoAnulacion: texto(registro, ['motivoAnulacion', 'motivo_anulacion']),
+    anuladoPor: texto(registro, ['anuladoPor', 'anulado_por']),
+    anuladoPorNombre: texto(registro, ['anuladoPorNombre', 'anulado_por_nombre']),
+    anulacionId: texto(registro, ['anulacionId', 'anulacion_id']),
     clasificacion: numero(registro, ['clasificacion']) ?? 1,
     hitos: lista(registro, ['hitos']).map(aHito),
     proximoHito: aProximoHito(leer(registro, ['proximoHito', 'proximo_hito'])),
@@ -340,7 +363,7 @@ function diasHasta(fecha: string, hoy: Date): number | null {
 export function situacionDe(compromiso: Compromiso, hoy: Date = new Date()): Situacion {
   const { fecha } = resolverVencimiento(compromiso);
   if (!fecha) return { etiqueta: 'Sin fecha', clase: 'due-sin-fecha' };
-  if (compromiso.vencido) return { etiqueta: 'Atrasado', clase: 'due-vencido' };
+  if (compromiso.vencido) return { etiqueta: 'Vencido', clase: 'due-vencido' };
 
   const dias = diasHasta(fecha, hoy);
   if (dias !== null && dias >= 0 && dias <= 30) {
@@ -349,17 +372,9 @@ export function situacionDe(compromiso: Compromiso, hoy: Date = new Date()): Sit
   return { etiqueta: 'En plazo', clase: 'due-en-plazo' };
 }
 
-/** `YYYY-MM-DD` → `DD/MM/YYYY`; no se usa un pipe para no depender del locale. */
-export function formatearFecha(valor: string | null | undefined): string {
-  if (!valor) return '—';
-
-  const partes = valor.slice(0, 10).split('-');
-  if (partes.length !== 3) return valor;
-
-  const anio = partes[0];
-  const mes = partes[1];
-  const dia = partes[2];
-  if (!anio || !mes || !dia) return valor;
-
-  return `${dia}/${mes}/${anio}`;
-}
+/**
+ * `YYYY-MM-DD` → `DD/MM/YYYY` y anulación como timestamp. Se movieron a
+ * `shared/formato-fecha.ts` y se reexportan para no romper los imports que ya
+ * apuntaban a este mapeo.
+ */
+export { formatearFecha, formatearFechaHora } from '../../shared/formato-fecha';

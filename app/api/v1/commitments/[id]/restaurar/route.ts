@@ -17,7 +17,11 @@ export async function POST(
     const decoded = decodeURIComponent(id);
     const scope = { usuarioId: session.uid, rolCodigo: session.rol };
 
-    await withSession(scope, (client) => restoreCommitment(client, decoded));
+    // La papelera se abre sólo para que el prefetch encuentre el compromiso
+    // anulado; la escritura sigue por core.restaurar_registro (SECURITY DEFINER).
+    await withSession(scope, (client) => restoreCommitment(client, decoded), {
+      verAnulados: true,
+    });
 
     return jsonOk({ ok: true });
   } catch (error) {

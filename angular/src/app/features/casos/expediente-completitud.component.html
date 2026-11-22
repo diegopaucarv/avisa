@@ -1,0 +1,54 @@
+<section class="expediente" aria-labelledby="expediente-titulo">
+  <div class="expediente-cabecera">
+    <h2 id="expediente-titulo">Expediente</h2>
+    @if (completitud()) {
+      <span
+        class="status-badge"
+        [class]="cumplidos() === 5 ? 'status-badge exp-completo' : 'status-badge exp-incompleto'"
+      >
+        {{ cumplidos() }} de 5
+      </span>
+    }
+  </div>
+
+  @if (completitud()) {
+    <ul class="expediente-lista">
+      @for (criterio of criterios(); track criterio.clave) {
+        <li class="expediente-item" [class.expediente-item--cumplido]="criterio.cumplido">
+          <span class="expediente-marca" aria-hidden="true">{{
+            criterio.cumplido ? '✓' : '·'
+          }}</span>
+          <span class="expediente-texto">
+            <strong>{{ criterio.etiqueta }}</strong>
+            <small>{{ criterio.detalle }}</small>
+          </span>
+        </li>
+      }
+    </ul>
+
+    @if (faltantes().length > 0) {
+      <div class="expediente-falta">
+        <span class="expediente-falta-titulo">Falta completar</span>
+        <ul>
+          @for (criterio of faltantes(); track criterio.clave) {
+            <li>
+              @if (criterio.ancla) {
+                <a [routerLink]="[]" [fragment]="criterio.ancla">{{ criterio.etiqueta }}</a>
+              } @else {
+                <span>{{ criterio.etiqueta }}</span>
+              }
+            </li>
+          }
+        </ul>
+      </div>
+    } @else {
+      <p class="expediente-ok">Los cinco criterios están cubiertos.</p>
+    }
+
+    <p class="expediente-nota">
+      Conteos de los datos ya registrados. No es un porcentaje ni bloquea el registro.
+    </p>
+  } @else {
+    <p class="expediente-nota">La respuesta no incluye los conteos de completitud.</p>
+  }
+</section>

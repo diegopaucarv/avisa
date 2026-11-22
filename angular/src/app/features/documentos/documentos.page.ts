@@ -28,6 +28,7 @@ import { ExportarMenuComponent } from '../../shared/ui/exportar-menu.component';
 import { PaginacionComponent } from '../../shared/ui/paginacion.component';
 import {
   AnularPanelComponent,
+  type ModoAnulacion,
   type ResultadoAnulacion,
 } from '../../shared/ui/anular-panel.component';
 import {
@@ -38,6 +39,7 @@ import {
   claseEstado,
   etiquetaAnexo,
   formatearFecha,
+  formatearFechaHora,
   type Documento,
   type OpcionCatalogo,
 } from './documento.mapeo';
@@ -50,7 +52,11 @@ type FiltrosDocumentos = {
   orden: string;
   pagina: number;
   tamano: number;
+  ver: VerRegistros;
 };
+
+/** La papelera lista sólo lo anulado; «activos» es la vista de siempre. */
+type VerRegistros = 'activos' | 'anulados';
 
 const FILTROS_INICIALES: FiltrosDocumentos = {
   q: '',
@@ -59,6 +65,7 @@ const FILTROS_INICIALES: FiltrosDocumentos = {
   orden: 'recent',
   pagina: 1,
   tamano: TAMANO_PAGINA,
+  ver: 'activos',
 };
 
 /**
@@ -204,6 +211,9 @@ export class DocumentosPage {
   private readonly http = inject(HttpClient);
   private readonly capacidades = inject(CapacidadesService);
 
+  /** La papelera sólo se ofrece a quien puede anular y restaurar. */
+  readonly puedeVerPapelera = this.capacidades.puedeEliminar;
+
   readonly estados = FILTROS_ESTADO;
   readonly ordenes = ORDENES_DOCUMENTO;
 
@@ -216,6 +226,7 @@ export class DocumentosPage {
         orden: params.get('orden') ?? 'recent',
         pagina: Math.max(1, Number(params.get('pagina') ?? '1') || 1),
         tamano: Math.max(1, Number(params.get('tamano') ?? String(TAMANO_PAGINA)) || TAMANO_PAGINA),
+        ver: params.get('ver') === 'anulados' ? 'anulados' : 'activos',
       })),
     ),
     { initialValue: FILTROS_INICIALES },
@@ -223,11 +234,15 @@ export class DocumentosPage {
 
   readonly filtros = computed(() => this.parametros());
 
+  /** `?ver=anulados`: el listado muestra la papelera. */
+  readonly verPapelera = computed(() => this.parametros().ver === 'anulados');
+
   private readonly listado = consulta<Coleccion<Documento>>({
     fuente: () => {
       const filtros = this.parametros();
       return urlConParametros(urlApi('/v1/documents'), {
         ...paramsDePagina({ pagina: filtros.pagina, tamano: filtros.tamano }),
+        anulados: filtros.ver === 'anulados' ? 'true' : '',
         q: filtros.q,
         tipo: filtros.tipo,
         estado: filtros.estado,
@@ -258,6 +273,12 @@ export class DocumentosPage {
     return `${this.total()} documentos · ${rango.desde}–${rango.hasta} · pulse una fila para abrir la ficha en el panel lateral. «Cargado» filtra el estado heredado «Activo»; los documentos sin estado se filtran aparte.`;
   });
 
+  /** Pie de la papelera: sólo lo que devuelve la API, sin estimar nada. */
+  readonly resumenPapelera = computed(() => {
+    const rango = this.rango();
+    return `${this.total()} documentos anulados · ${rango.desde}–${rango.hasta}`;
+  });
+
   /**
    * Tipos del catálogo, no una lista escrita a mano: el filtro y el formulario
    * del panel usan el mismo vocabulario que la API.
@@ -281,6 +302,9 @@ export class DocumentosPage {
   readonly errorAnulacion = signal<string | null>(null);
   readonly avisoAnulacion = signal<string | null>(null);
 
+  /** Modo del panel compartido: anular pide motivo, restaurar no. */
+  readonly modoAnulacion = signal<ModoAnulacion>('anular');
+
   private readonly respaldo = signal<Documento | null>(null);
 
   /**
@@ -302,6 +326,10 @@ export class DocumentosPage {
 
   formatearFecha(valor: string | null | undefined): string {
     return formatearFecha(valor);
+  }
+
+  fechaHoraTexto(valor: string | null | undefined): string {
+    return formatearFechaHora(valor);
   }
 
   claseEstado(estado: string | null): string {
@@ -349,6 +377,21 @@ export class DocumentosPage {
     // El panel del documento y el de anulación escuchan Escape en `document`:
     // se deja abierto uno solo.
     this.cerrarPanel();
+    this.modoAnulacion.set('anular');
+    this.documentoAnulacion.set(documento);
+  }
+
+  /**
+   * Restaurar desde la papelera: no pide motivo. No se abre el panel de detalle
+   * porque `GET /v1/documents/{id}` responde 404 mientras el registro está
+   * anulado; la acción vive en la propia fila.
+   */
+  abrirRestauracion(documento: Documento): void {
+    if (!documento.id || !this.puedeVerPapelera()) return;
+    this.errorAnulacion.set(null);
+    this.avisoAnulacion.set(null);
+    this.cerrarPanel();
+    this.modoAnulacion.set('restaurar');
     this.documentoAnulacion.set(documento);
   }
 
@@ -373,7 +416,7 @@ export class DocumentosPage {
     const id = encodeURIComponent(documento.id);
     const peticion = anular
       ? this.http.delete<unknown>(urlApi(`/v1/documents/${id}`), { body: { motivo } })
-      : this.http.post<unknown>(urlApi(`/v1/documents/${id}/restaurar`), {});
+      : this.http.post<unknown>(urlApi(`/v1/documents/${id}/restaurar`), null);
 
     this.enviandoAnulacion.set(true);
     this.errorAnulacion.set(null);
@@ -415,6 +458,13 @@ export class DocumentosPage {
     void this.actualizar({ orden: this.valorDe(evento), pagina: 1 });
   }
 
+  /** Cambia entre activos y papelera; reinicia a la primera página y cierra el panel. */
+  cambiarVer(ver: VerRegistros): void {
+    this.cerrarPanel();
+    this.cerrarAnulacion();
+    void this.actualizar({ ver, pagina: 1 });
+  }
+
   cambiarPagina(pagina: number): void {
     void this.actualizar({ pagina });
   }
@@ -427,7 +477,8 @@ export class DocumentosPage {
     clearTimeout(this.temporizador);
     void this.router.navigate([], {
       relativeTo: this.ruta,
-      queryParams: {},
+      // `ver` no es un filtro: se conserva la pestaña (activos o papelera).
+      queryParams: { ver: this.verPapelera() ? 'anulados' : null },
       replaceUrl: true,
     });
   }
@@ -460,6 +511,7 @@ export class DocumentosPage {
         orden: siguiente.orden !== 'recent' ? siguiente.orden : null,
         pagina: siguiente.pagina > 1 ? siguiente.pagina : null,
         tamano: siguiente.tamano !== TAMANO_PAGINA ? siguiente.tamano : null,
+        ver: siguiente.ver === 'anulados' ? 'anulados' : null,
       },
       queryParamsHandling: 'merge',
       replaceUrl: true,

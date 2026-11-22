@@ -496,6 +496,52 @@ export const SECCIONES_AYUDA: readonly SeccionAyuda[] = [
     ],
   },
   {
+    id: 'subsectores',
+    titulo: 'Subsectores del Sector Producción',
+    fuente: 'Guía §7.2 · Anexo 15',
+    introduccion:
+      'El subsector fija el bloque del código del caso y no es una temática ni un tipo de actor.',
+    entradas: [
+      {
+        id: 'subsector-pesca',
+        termino: 'Pesca y Acuicultura (PA)',
+        definicion:
+          'Actividades de extracción, procesamiento y comercialización pesquera y acuícola, incluidas las de la pesca artesanal. «Pesca artesanal» es una subopción del subsector, no un subsector paralelo.',
+      },
+      {
+        id: 'subsector-mype',
+        termino: 'MYPE e Industria (MI)',
+        definicion:
+          'Actividades de la micro, pequeña y mediana empresa y de la industria manufacturera bajo competencia del sector.',
+      },
+    ],
+  },
+  {
+    id: 'demandas',
+    titulo: 'Demandas: problema, propuesta y pedido (3P)',
+    fuente: 'Guía §7.7',
+    introduccion:
+      'El 3P permite ordenar la participación, reducir ambigüedades y facilitar la sistematización de la información. Los tres campos son distintos y no se sustituyen entre sí.',
+    entradas: [
+      {
+        id: 'demanda-problema',
+        termino: 'Problema',
+        definicion: 'Identificación clara de la situación o afectación percibida por el actor.',
+      },
+      {
+        id: 'demanda-propuesta',
+        termino: 'Propuesta',
+        definicion: 'Planteamiento de alternativas de solución o mejora.',
+      },
+      {
+        id: 'demanda-pedido',
+        termino: 'Pedido',
+        definicion:
+          'Formulación de requerimientos concretos hacia las entidades competentes. Un pedido no es un compromiso: su responsabilidad de ejecución aún no está confirmada.',
+      },
+    ],
+  },
+  {
     id: 'actores',
     titulo: 'Actores y roles',
     fuente: 'Guía §7.4 · Glosario §1.6',
@@ -561,6 +607,41 @@ export const SECCIONES_AYUDA: readonly SeccionAyuda[] = [
         termino: 'Posicionamiento: Conflictivo',
         definicion:
           'Valor de catálogo que describe una posición de confrontación o presión dentro del escenario de conflictividad.',
+      },
+    ],
+  },
+  {
+    id: 'niveles-gobierno',
+    titulo: 'Niveles de gobierno',
+    fuente: 'Guía §7.4 · Glosario §1.8',
+    introduccion:
+      'Identifican a la entidad responsable de un compromiso o a la que pertenece un actor público. En la interfaz, el nivel regional se rotula «GORE».',
+    entradas: [
+      {
+        id: 'nivel-gobierno-nacional',
+        termino: 'Nacional',
+        definicion:
+          'Entidades del gobierno nacional involucradas en la gestión de la conflictividad o en el compromiso.',
+      },
+      {
+        id: 'nivel-gobierno-regional',
+        termino: 'Regional (GORE) — Gobierno Regional',
+        definicion: 'Gobiernos regionales; en la interfaz, este nivel se rotula «GORE».',
+      },
+      {
+        id: 'nivel-gobierno-local',
+        termino: 'Local — gobiernos provinciales y distritales',
+        definicion: 'Gobiernos provinciales y distritales.',
+      },
+      {
+        id: 'nivel-gobierno-empresa',
+        termino: 'Empresa',
+        definicion: 'Actor privado con actividad productiva en el sector.',
+      },
+      {
+        id: 'nivel-gobierno-sociedad',
+        termino: 'Sociedad Civil',
+        definicion: 'Organizaciones y colectivos de la sociedad civil.',
       },
     ],
   },
@@ -646,6 +727,25 @@ export const SECCIONES_AYUDA: readonly SeccionAyuda[] = [
     ],
   },
   {
+    id: 'tipos-compromiso',
+    titulo: 'Tipos de compromiso',
+    fuente: 'Guía §8.3.2 · Anexo 14',
+    introduccion:
+      'El tipo describe la naturaleza de la obligación asumida en el espacio de diálogo.',
+    entradas: [
+      {
+        id: 'tipo-compromiso-actividad',
+        termino: 'Actividad',
+        definicion: 'El compromiso se ejecuta mediante acciones de gestión.',
+      },
+      {
+        id: 'tipo-compromiso-pip',
+        termino: 'PIP',
+        definicion: 'El compromiso se ejecuta como proyecto de inversión pública.',
+      },
+    ],
+  },
+  {
     id: 'codigos',
     titulo: 'Códigos y formatos',
     fuente: 'Anexo 15 · Glosario §0.6',
@@ -673,6 +773,32 @@ export const SECCIONES_AYUDA: readonly SeccionAyuda[] = [
         termino: 'Código de hito',
         definicion:
           'Se deriva del compromiso: <código de compromiso>_H001, con correlativo dentro del compromiso.',
+      },
+    ],
+  },
+  {
+    id: 'atajos',
+    titulo: 'Atajos de teclado',
+    fuente: 'Interfaz AVISA',
+    introduccion:
+      'Atajos disponibles en toda la aplicación. El atajo «/» no se activa mientras se escribe en un campo de texto, y ninguno lo hace mientras hay un panel lateral abierto.',
+    entradas: [
+      {
+        id: 'atajo-busqueda-global',
+        termino: 'Ctrl + K / ⌘ + K',
+        definicion:
+          'Abre la búsqueda transversal desde cualquier vista y deja el cursor en el buscador.',
+      },
+      {
+        id: 'atajo-buscador-lista',
+        termino: '/',
+        definicion:
+          'Enfoca el buscador de la lista que está viendo. Si la vista no tiene buscador, no hace nada.',
+      },
+      {
+        id: 'atajo-cerrar-panel',
+        termino: 'Esc',
+        definicion: 'Cierra el panel lateral abierto y devuelve el foco al elemento que lo abrió.',
       },
     ],
   },

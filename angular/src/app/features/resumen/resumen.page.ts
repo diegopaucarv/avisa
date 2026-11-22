@@ -21,7 +21,13 @@ import {
   type ResolucionVencimiento,
   type Situacion,
 } from '../compromisos/compromiso.mapeo';
-import { HORIZONTE_POR_VENCER_DIAS, aSinCasoTotal, aTotal, rangoPorVencer } from './resumen.mapeo';
+import {
+  HORIZONTE_POR_VENCER_DIAS,
+  aSinCasoTotal,
+  aTotal,
+  rangoPorVencer,
+  rangoVencidos,
+} from './resumen.mapeo';
 
 type Indicador = {
   clave: string;
@@ -179,6 +185,43 @@ type Indicador = {
       line-height: 1.5;
     }
 
+    .contadores-compromisos {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .contador {
+      flex: 1 1 120px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      padding: 9px 11px;
+      border: 1px solid #e6ebef;
+      border-radius: 8px;
+      background: #fafbfc;
+    }
+
+    .contador-etiqueta {
+      color: #7b8896;
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+    }
+
+    .contador-valor {
+      color: #1a2b3e;
+      font: 700 18px/1.2 var(--font-display);
+    }
+
+    .contador-valor.contador-sin-dato {
+      color: #8b97a2;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
     @media (max-width: 760px) {
       .view-body {
         padding: 18px 16px 40px;
@@ -204,7 +247,7 @@ export class ResumenPage {
     fuente: () =>
       urlConParametros(urlApi('/v1/cases'), {
         ...paramsDePagina({ pagina: 1, tamano: 1 }),
-        estado: 'Activo',
+        abiertos: 'true',
       }),
     esquema: aTotal,
   });
@@ -240,7 +283,7 @@ export class ResumenPage {
     this.indicador(
       'casos',
       'Casos activos',
-      'Casos con estado Activo',
+      'Abiertos: Activo o En seguimiento',
       'casos',
       '',
       '/casos',
@@ -299,18 +342,54 @@ export class ResumenPage {
   readonly horizonteDias = HORIZONTE_POR_VENCER_DIAS;
 
   /**
-   * El listado aplica el rango en el servidor (`vencimiento_desde` hoy,
-   * `vencimiento_hasta` hoy + horizonte) sobre el vencimiento efectivo y ordena
-   * por esa fecha de forma ascendente. El `total` del sobre cuenta la cola
-   * completa y la página trae sólo las cinco más próximas.
+   * Contador de vencidos: `vencimiento_hasta` ayer, sin `desde`, y sin estados
+   * terminales. El `total` del sobre es la cifra exacta; no se traen filas.
+   *
+   * `situacionDe` marca `due-vencido` con la misma frontera (vence antes de
+   * hoy), así que el contador y las etiquetas de la cola no se contradicen.
    */
-  private readonly recursoCompromisos = consulta<Coleccion<Compromiso>>({
+  private readonly kpiVencidos = consulta<number>({
+    fuente: () => {
+      const { hasta } = rangoVencidos();
+      return urlConParametros(urlApi('/v1/commitments'), {
+        ...paramsDePagina({ pagina: 1, tamano: 1 }),
+        excluir_terminales: 'true',
+        vencimiento_hasta: hasta,
+      });
+    },
+    esquema: aTotal,
+  });
+
+  /**
+   * Contador de «por vencer»: hoy y los próximos `horizonteDias`, ambos
+   * inclusive, sin estados terminales. También sale del `total`, no de filas.
+   */
+  private readonly kpiPorVencer = consulta<number>({
     fuente: () => {
       const rango = rangoPorVencer();
       return urlConParametros(urlApi('/v1/commitments'), {
-        ...paramsDePagina({ pagina: 1, tamano: 5 }),
+        ...paramsDePagina({ pagina: 1, tamano: 1 }),
+        excluir_terminales: 'true',
         vencimiento_desde: rango.desde,
         vencimiento_hasta: rango.hasta,
+      });
+    },
+    esquema: aTotal,
+  });
+
+  /**
+   * Cola combinada: todo lo que vence hasta hoy + horizonte, sin `desde` y sin
+   * estados terminales. El servidor ordena por vencimiento efectivo ascendente,
+   * así que los vencidos salen primero; el `total` del sobre es el tamaño del
+   * conjunto y la página trae sólo las cinco filas más próximas.
+   */
+  private readonly recursoCompromisos = consulta<Coleccion<Compromiso>>({
+    fuente: () => {
+      const { hasta } = rangoPorVencer();
+      return urlConParametros(urlApi('/v1/commitments'), {
+        ...paramsDePagina({ pagina: 1, tamano: 5 }),
+        excluir_terminales: 'true',
+        vencimiento_hasta: hasta,
       });
     },
     esquema: (bruto) => {
@@ -323,6 +402,11 @@ export class ResumenPage {
   readonly totalCompromisos = computed(() => this.recursoCompromisos.valor()?.total ?? 0);
   readonly estadoCompromisos = this.recursoCompromisos.estado;
   readonly errorCompromisos = this.recursoCompromisos.error;
+
+  readonly textoVencidos = computed(() => this.textoTotal(this.kpiVencidos));
+  readonly textoPorVencer = computed(() => this.textoTotal(this.kpiPorVencer));
+  readonly estadoVencidos = this.kpiVencidos.estado;
+  readonly estadoPorVencer = this.kpiPorVencer.estado;
 
   /* ------------------------------------------------------------------ *
    * Helpers de plantilla
@@ -354,7 +438,16 @@ export class ResumenPage {
     this.kpiCompromisos.recargar();
     this.kpiDemandas.recargar();
     this.recursoAlertas.recargar();
+    this.kpiVencidos.recargar();
+    this.kpiPorVencer.recargar();
     this.recursoCompromisos.recargar();
+  }
+
+  /** Texto del contador: «…» mientras carga, «No disponible» si falló. */
+  private textoTotal(recurso: Consulta<number>): string {
+    if (recurso.estado() === 'error') return 'No disponible';
+    const valor = recurso.valor();
+    return valor === undefined ? '…' : String(valor);
   }
 
   private indicador(

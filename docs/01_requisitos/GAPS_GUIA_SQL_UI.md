@@ -5,8 +5,8 @@
 | **Fecha**                 | 2026-11-22                                                                                                                                      |
 | **Base normativa**        | `docs/01_requisitos/guia.md`. Ante cualquier discrepancia de vocabulario, manda la Guía.                                                        |
 | **Vocabulario operativo** | `docs/01_requisitos/GLOSARIO_ALINEACION_GUIA.md` (traducción de la Guía a etiquetas)                                                            |
-| **Alcance**               | Catálogos `core.cat_*`, tablas de caso / alerta / compromiso, migraciones 12–19, API (`app/api`, `lib/db`) y SPA Angular (`angular/src`)        |
-| **Sustituye a**           | La versión del 2026-11-21, que daba la migración 14 por «escrita, no aplicada». Hoy las ocho, de la 12 a la 19, están aplicadas.                |
+| **Alcance**               | Catálogos `core.cat_*`, tablas de caso / alerta / compromiso, migraciones 12–32, API (`app/api`, `lib/db`) y SPA Angular (`angular/src`)        |
+| **Sustituye a**           | La versión del 2026-11-21, que daba la migración 14 por «escrita, no aplicada». Hoy las veintiuna, de la 12 a la 32, están aplicadas.           |
 | **Regla de evidencia**    | Toda afirmación sobre el repositorio cita archivo y línea. Los conteos marcados «base» provienen de la medición en la base viva del 2026-11-22. |
 
 ---
@@ -15,8 +15,9 @@
 
 ### 1.1 · Estado de las migraciones de alineación
 
-Catorce archivos, `migration/12_anulacion_y_secuencia.sql` a `migration/25_retiro_sobrecarga_siguiente_codigo.sql`.
-Los catorce están aplicados y verificados en la base.
+Veintiún archivos, `migration/12_anulacion_y_secuencia.sql` a
+`migration/32_exigir_anulacion_puede_eliminar.sql`.
+Los veintiuno están aplicados y verificados en la base.
 
 | #   | Archivo                                     | Estado   |
 | --- | ------------------------------------------- | -------- |
@@ -34,25 +35,37 @@ Los catorce están aplicados y verificados en la base.
 | 23  | `23_vistas_anexos_security_invoker.sql`     | aplicada |
 | 24  | `24_estado_atencion_legible.sql`            | aplicada |
 | 25  | `25_retiro_sobrecarga_siguiente_codigo.sql` | aplicada |
+| 26  | `26_papelera_compromisos_documentos.sql`    | aplicada |
+| 27  | `27_papelera_tablas_anulables.sql`          | aplicada |
+| 28  | `28_fix_anular_registro_found.sql`          | aplicada |
+| 29  | `29_restauracion_por_fila.sql`              | aplicada |
+| 30  | `30_alcance_derivado.sql`                   | aplicada |
+| 31  | `31_casos_en_seguimiento.sql`               | aplicada |
+| 32  | `32_exigir_anulacion_puede_eliminar.sql`    | aplicada |
 
 ### 1.2 · Recuento de gaps por estado
 
-| Estado                                           | Cuántos | Cuáles                                                                                                                                                                      |
-| ------------------------------------------------ | ------: | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Cerrados                                         |      33 | S1–S12 (migración 14), D1, D2, D5, D6, D8, E1, E3, D3, D7, D9, D10, E2, E5 (casos), E4, G-05, G-09, G-02, G-03, G-06, G-07, G-08                                            |
-| Parciales                                        |       2 | G-01 y G-04: corregidos en la v10 y en el diccionario, pero el `AVISA_V10_ESQUEMA_UNIFICADO.sql` y el parche 23 siguen sembrando roles 4–6 y el literal `Critica_Inmediata` |
-| Resueltos sin migración                          |       1 | D4 (los dos ejes se conservan; ver §2.2)                                                                                                                                    |
-| Abiertos que requieren decisión del usuario      |       0 | —                                                                                                                                                                           |
-| Estructurales abiertos                           |       0 | —                                                                                                                                                                           |
-| Observaciones abiertas (no son gaps de catálogo) |       2 | El caso sin ciclo (G-10) y el orden del catálogo de ciclos por `id` (G-11)                                                                                                  |
+| Estado                                           | Cuántos | Cuáles                                                                                                                                                                                       |
+| ------------------------------------------------ | ------: | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Cerrados                                         |      34 | S1–S12 (migración 14), D1, D2, D5, D6, D8, E1, E3, D3, D7, D9, D10, E2, E5 (casos), E4, G-05, G-09, G-02, G-03, G-06, G-07, G-08, G-04                                                       |
+| Parciales                                        |       1 | G-01: la siembra de los roles de actor 4–6 (`Proveedor MYPE`, `Exportador CITES`, `Inspector CITE`) sigue en el DDL heredado, que el generador incrusta en `AVISA_V10_ESQUEMA_UNIFICADO.sql` |
+| Resueltos sin migración                          |       1 | D4 (los dos ejes se conservan; ver §2.2)                                                                                                                                                     |
+| Abiertos que requieren decisión del usuario      |       0 | —                                                                                                                                                                                            |
+| Estructurales abiertos                           |       0 | —                                                                                                                                                                                            |
+| Observaciones abiertas (no son gaps de catálogo) |       2 | El caso sin ciclo (G-10) y el orden del catálogo de ciclos por `id` (G-11)                                                                                                                   |
 
-Ya no queda ningún gap de etiqueta ni estructural abierto. Lo que sigue son dos observaciones
-técnicas (el caso sin ciclo y el orden de presentación del catálogo de ciclos). El
+Ya no queda ningún gap de etiqueta ni estructural abierto, y **G-04** pasó a cerrado: el único
+literal `Critica_Inmediata` que quedaba en prosa visible se corrigió en
+`docs/PARCHE_23_DESTINATARIOS_Y_CUATRO_OJOS.sql` y el consolidado se regeneró; las 16 apariciones
+restantes son el **código técnico** del catálogo (`codigo in ('Critica_Inmediata','Urgente')`), que el
+glosario §1.7 mantiene como valor de base. Lo que sigue son dos observaciones técnicas (el caso sin
+ciclo y el orden de presentación del catálogo de ciclos). El
 Anexo 17 se cerró sin crear tabla: se sirve desde la vista `analytics.vw_anexo_17_registro_reportes`
 que ya existía (ver §2.1 y §2.3). En la misma pasada se cerraron **G-05** (API de demostración
 retirada), **G-09** (`En_proceso` → `En proceso`, migración 24), **G-03** (sobrecarga del contador,
-migración 25), **G-02**, **G-06**, **G-07** y **G-08** (calendario). Quedan **parciales G-01 y G-04**,
-cuyo residuo está en artefactos que el glosario prohíbe editar a mano (`docs/*.sql`).
+migración 25), **G-02**, **G-06**, **G-07** y **G-08** (calendario). Queda **parcial G-01**, cuyo
+residuo está en el DDL heredado que el generador incrusta en un artefacto que el glosario prohíbe
+editar a mano (`docs/*.sql`).
 
 ---
 
@@ -79,6 +92,7 @@ cuyo residuo está en artefactos que el glosario prohíbe editar a mano (`docs/*
 | E4     | El Anexo 17 (Registro de reportes) no tenía pantalla ni API; la vista `analytics.vw_anexo_17_registro_reportes` existía pero se ejecutaba con los privilegios del superusuario y saltaba la RLS de `core.documentos`, `core.casos` y `core.alertas_tempranas` | Repo `lib/db/repos/reportes.ts` · `GET /api/v1/reportes` · pantalla Angular `/reportes` · exportación `entidad=reportes` · `migration/23_vistas_anexos_security_invoker.sql`                   | Vista con `security_invoker=true` · `externo_publico` (clasificación 1): 0 filas por la vista (antes 42) · `sectorista`: 42 filas                                          |
 | G-05   | La API FastAPI de demostración seguía en el árbol: `backend/main.py` (duplicado suelto) y `backups/backend/{main,db}.py`, que era la que de verdad construía `docker/api/Dockerfile`; servía datos de ejemplo y un usuario demo `12345678`                    | Retiro completo: `backend/`, `backups/backend/{main,db,requirements}.py`, `docker/api/` y el servicio `api` de `compose.yaml`; `AVISA_API_URL` era una variable muerta que ningún archivo leía | Ninguna ruta dependía de ella: `/api/...` las sirve Next contra PostgreSQL con `lib/db`. El contenedor `avisa-api` sigue huérfano; se elimina con `docker rm -f avisa-api` |
 | G-09   | `core.demandas.estado_atencion` admitía `En_proceso`, el literal que el glosario §1.8 prohíbe. Es un eje propio (atención de la demanda), no el de hito o compromiso                                                                                          | `migration/24_estado_atencion_legible.sql`: `DROP CONSTRAINT` → `UPDATE` → `ADD CONSTRAINT` con los valores legibles; `lib/db/repos/demandas.ts` normaliza guion bajo → espacio                | `CHECK` con `Pendiente` · `En proceso` · `Atendida` · `Desestimada` · `UPDATE 0` (ninguna fila usaba el valor) · 325 demandas en `Pendiente` · 0 filas con guion bajo      |
+| Lote   | `core.restaurar_registro` restauraba por `anulacion_id`, así que restaurar **un** documento de un caso anulado levantaba los 10 del mismo lote                                                                                                                | `migration/29_restauracion_por_fila.sql`: `where id = $1 using p_id`, recuento con `GET DIAGNOSTICS` y restauración de los hitos cuando la tabla es `compromisos`                              | restaurar 1 documento de `CS-MI-ITE-2026-02` devolvió `1`; ese documento quedó activo, los otros 9 siguen anulados y el caso sigue anulado                                 |
 
 **Contador de códigos.** Hay un único punto de emisión,
 `core.siguiente_codigo_caso(subsector_id, tematica_id)`
@@ -191,19 +205,22 @@ sugeriría un trabajo que ya no se hace sobre ese código.
 
 ### 3.1 · Resuelto
 
-| Cambio                                                                                                                                                                                                   | Dónde                                                                                                                                               |
-| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Adaptador de colecciones tolerante a claves ES/EN (`elementos`/`items`, `pagina`/`page`, `tamanoPagina`/`pageSize`)                                                                                      | `angular/src/app/core/http/coleccion.ts:41-89`                                                                                                      |
-| Adaptador de errores de API, un único punto de traducción                                                                                                                                                | `angular/src/app/core/http/errores.ts`                                                                                                              |
-| Fachada de consulta con señales; los componentes no importan `httpResource`                                                                                                                              | `angular/src/app/core/http/consulta.ts:16-90`                                                                                                       |
-| Ciclo de intervención (D9) ya es identidad: la base emite las 5 etiquetas de la Guía                                                                                                                     | `angular/src/app/dominio/mapeo.ts`                                                                                                                  |
-| `origen_dato` (D10): `KAG` y `Workflow` con etiqueta explícita, sin descarte a «Manual»                                                                                                                  | `angular/src/app/dominio/mapeo.ts`                                                                                                                  |
-| Las 20 pantallas tienen ruta real; sólo `/mapa` sigue en marcador                                                                                                                                        | `angular/src/app/app.routes.ts`                                                                                                                     |
-| Paginación en servidor en todas las vistas; contadores desde el `total` del sobre (`tamano=1`)                                                                                                           | `features/resumen`, `features/bandeja`, `features/direccion`                                                                                        |
-| Filtros de casos en SQL (estado, prioridad, alcance, temática, unidad, riesgo, región) validados contra catálogo; valor inválido → `422 FILTRO_INVALIDO`; la UI los lleva a la URL y reinicia a página 1 | `lib/db/repos/cases.ts`, `app/api/v1/cases/route.ts`, `features/casos/casos.page.{ts,html}`                                                         |
-| Menú de exportación JSON / Excel / PDF                                                                                                                                                                   | `angular/src/app/shared/ui/exportar-menu.component.*`, cableado en las 15 vistas con listado o ficha; incluye «Base completa» (`entidad=base`)      |
-| Cola «por vencer» de Resumen y Bandeja: el rango se pide al servidor (`vencimiento_desde`/`vencimiento_hasta`) y el KPI lee su `total`, en lugar de recortar la página ya traída                         | `features/resumen/resumen.{page.ts,mapeo.ts}`, `features/bandeja/bandeja.page.ts`, `app/api/v1/commitments/route.ts`, `lib/db/repos/commitments.ts` |
-| Una demanda aceptada desde un documento conserva documento y fragmento de origen                                                                                                                         | Modelo preparado; queda demostrarlo cuando la vista de documentos tenga escritura                                                                   |
+| Cambio                                                                                                                                                                                                                    | Dónde                                                                                                                                               |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Adaptador de colecciones tolerante a claves ES/EN (`elementos`/`items`, `pagina`/`page`, `tamanoPagina`/`pageSize`)                                                                                                       | `angular/src/app/core/http/coleccion.ts:41-89`                                                                                                      |
+| Adaptador de errores de API, un único punto de traducción                                                                                                                                                                 | `angular/src/app/core/http/errores.ts`                                                                                                              |
+| Fachada de consulta con señales; los componentes no importan `httpResource`                                                                                                                                               | `angular/src/app/core/http/consulta.ts:16-90`                                                                                                       |
+| Ciclo de intervención (D9) ya es identidad: la base emite las 5 etiquetas de la Guía                                                                                                                                      | `angular/src/app/dominio/mapeo.ts`                                                                                                                  |
+| `origen_dato` (D10): `KAG` y `Workflow` con etiqueta explícita, sin descarte a «Manual»                                                                                                                                   | `angular/src/app/dominio/mapeo.ts`                                                                                                                  |
+| Las 21 pantallas tienen ruta real; sólo `/mapa` sigue en marcador                                                                                                                                                         | `angular/src/app/app.routes.ts`                                                                                                                     |
+| Paginación en servidor en todas las vistas; contadores desde el `total` del sobre (`tamano=1`)                                                                                                                            | `features/resumen`, `features/bandeja`, `features/direccion`                                                                                        |
+| Filtros de casos en SQL (estado, prioridad, alcance, temática, unidad, riesgo, región) validados contra catálogo; valor inválido → `422 FILTRO_INVALIDO`; la UI los lleva a la URL y reinicia a página 1                  | `lib/db/repos/cases.ts`, `app/api/v1/cases/route.ts`, `features/casos/casos.page.{ts,html}`                                                         |
+| Menú de exportación JSON / Excel / PDF                                                                                                                                                                                    | `angular/src/app/shared/ui/exportar-menu.component.*`, cableado en las 15 vistas con listado o ficha; incluye «Base completa» (`entidad=base`)      |
+| Cola «por vencer» de Resumen y Bandeja: el rango se pide al servidor (`vencimiento_desde`/`vencimiento_hasta`) y el KPI lee su `total`, en lugar de recortar la página ya traída                                          | `features/resumen/resumen.{page.ts,mapeo.ts}`, `features/bandeja/bandeja.page.ts`, `app/api/v1/commitments/route.ts`, `lib/db/repos/commitments.ts` |
+| Una demanda aceptada desde un documento conserva documento y fragmento de origen                                                                                                                                          | Modelo preparado; queda demostrarlo cuando la vista de documentos tenga escritura                                                                   |
+| Papelera con restauración por fila en compromisos y documentos: conmutador **Activos · Anulados** (`?ver=anulados`), fecha de anulación visible y `Restaurar` en la propia fila; sólo se ofrece a quien puede anular      | `features/compromisos/*`, `features/documentos/*`, `lib/db/repos/{commitments,documents}.ts`, `migration/26_papelera_compromisos_documentos.sql`    |
+| Papelera dedicada `/papelera`: cinco pestañas (casos, alertas, demandas, documentos, compromisos) con paginación de servidor, motivo, fecha, autor y `Restaurar` por fila; visible sólo con `capacidades.puedeEliminar()` | `features/papelera/*`, `app.routes.ts`, `layouts/shell/*`, `app/api/v1/{alerts,demandas}/route.ts`                                                  |
+| Cola «vencidos o por vencer» de Resumen y Bandeja: tres consultas al servidor (`excluir_terminales=true`), contador de vencidos, contador de por vencer y cola combinada de cinco filas                                   | `features/resumen/*`, `features/bandeja/*`, `app/api/v1/commitments/route.ts`                                                                       |
 
 ### 3.2 · Resuelto: anulación en la UI
 
@@ -222,11 +239,64 @@ montado en cuatro vistas: ficha de caso, alertas, **compromisos** y **documentos
 panel lateral del registro—, y cada contenedor recarga la misma página al terminar, de modo que los
 filtros y la página de la URL se conservan.
 
-Dos límites que no son de la interfaz: en compromisos y documentos la anulación va por
-`DELETE /api/v1/<entidad>/{id}` con `{ motivo }` (sin `motivo`, el servidor responde
-`400 MOTIVO_REQUERIDO`) y **restaurar no es alcanzable desde esas vistas**, porque RLS oculta las filas
-anuladas y la API no proyecta su estado, a diferencia de casos. Faltan demandas y los paneles de
-Reportes.
+La **papelera dedicada** cierra ese hueco. `angular/src/app/features/papelera/` es una página
+propia (`/papelera`, hija del shell y cargada con `loadComponent`) con cinco pestañas —Casos, Alertas,
+Demandas, Documentos y Compromisos—; cada una pide su listado con `?anulados=true` y paginación de
+servidor, y la tabla comparte columnas: registro, caso asociado, motivo, fecha de anulación, autor y
+`Restaurar`. La entrada de navegación y la página sólo se ofrecen a quien
+`capacidades.puedeEliminar()`; sin ese rol, la ruta muestra un estado «sin permiso» y la API responde
+`403`. El panel lateral de la fila muestra el detalle, el motivo, la fecha, el autor y el lote de
+anulación; en la pestaña Casos advierte que **restaurar el caso reabre también su lote**. Para que la
+tabla fuera consistente en las cinco entidades, los listados exponen `anuladoEn`, `motivoAnulacion`,
+`anuladoPor`, `anuladoPorNombre` y `anulacionId`, y `?anulados=true` devuelve **sólo** los anulados,
+no activos + anulados.
+
+La restauración es **por fila**, no por lote. `migration/29_restauracion_por_fila.sql` redefine
+`core.restaurar_registro` para que escriba `where id = $1 using p_id` en lugar de `where anulacion_id = $1`,
+y toma el recuento con `GET DIAGNOSTICS n = row_count` porque `EXECUTE` no actualiza `FOUND` —el mismo
+defecto de las migraciones 13 y 28—. Cuando la tabla es `compromisos` restaura además sus hitos, que
+acompañan al compromiso por diseño. `core.restaurar_caso` **no** se toca a propósito: sigue restaurando
+el caso con su lote completo, porque es la acción «reabrir el caso». Medido en la base sobre el lote
+`35f6ccf9-649d-4275-915c-8051293c5b37` del caso `CS-MI-ITE-2026-02` (10 documentos anulados): restaurar
+**un** documento por id devolvió `1`; ese documento quedó activo, los otros **9** siguen anulados y el
+caso sigue anulado. Con la función anterior la misma llamada alcanzaba las 10 filas del lote por
+`anulacion_id`.
+
+La columna «Caso» de la papelera resolvía `null` cuando el caso también estaba anulado, porque
+`p_clasificacion` de `core.casos` termina en `anulado_en is null` y el `left join` no veía la fila.
+`migration/27_papelera_tablas_anulables.sql` añade la misma política permisiva `p_anulados` de la 26 a
+las tres tablas que faltaban —`core.casos`, `core.alertas_tempranas` y `core.demandas`—, de modo que el
+código del caso se lee justo cuando se decide si restaurar sus documentos.
+
+Esa misma política cierra un defecto mayor: **restaurar devolvía `404` en las cinco entidades**. Los
+cinco `POST …/restaurar` resuelven la fila antes de llamar a la función
+(`fetchDocumentRow`, `findAlert`, `select id from core.casos where codigo_caso = $1`, …); esa lectura
+pasa por la RLS, que escondía lo anulado, así que el prefetch no encontraba nada y la ruta respondía
+`404 NOT_FOUND`. Las cinco rutas abren ahora la bandera de la papelera (`{ verAnulados: true }` en
+`withSession`) **sólo para resolver el registro**; la escritura sigue pasando por
+`core.restaurar_registro` / `core.restaurar_caso`, que son `SECURITY DEFINER`.
+
+Un segundo defecto apareció al probar el ciclo completo: **`core.anular_registro` no anulaba nunca**.
+La versión de `migration/13_anulacion_segura.sql:180` comprobaba el resultado del `EXECUTE` con
+`if not found`, pero `EXECUTE` no actualiza `FOUND`, así que la condición era siempre verdadera y toda
+anulación por API respondía `404 El registro no existe o excede el nivel de acceso.`
+`migration/28_fix_anular_registro_found.sql` reemplaza esa comprobación por `GET DIAGNOSTICS` sin
+tocar firma, privilegios ni la semántica del lote.
+
+Quién anula lo fija `core.roles.puede_eliminar` (parche 15 de la DDL): **`administrador` y
+`sectorista`**. `direccion_oaipcs` edita pero no borra. La SPA (`capacidades.service.ts`), el guard de
+la API (`tenant.ts`) y la matriz de la base eran tres conjuntos distintos —la SPA y la API decían
+`administrador` + `direccion_oaipcs`—; ahora los tres son el mismo y el `?anulados=true` responde 403 a
+quien la RLS le negaría el `DELETE`.
+
+El desajuste **medido** quedó cerrado con
+`migration/32_exigir_anulacion_puede_eliminar.sql`: `core.exigir_anulacion` comprobaba
+`core.puede_editar()`, no `puede_eliminar()`, así que la cuenta de `direccion_oaipcs` (`41907320`) podía
+anular y restaurar por la API aunque los listados de la papelera le respondieran `403` y la UI le
+ocultara la acción. La migración conserva firma, `stable`, `search_path` y el `42501`, y cambia sólo la
+guarda. Verificado: `DELETE /api/v1/documents/{id}` y `POST …/restaurar` con esa cuenta responden ahora
+`403 Sin permiso para esta operación.` sin mover ninguna fila; `administrador` y `sectorista` siguen
+pasando.
 
 La regla de producto del usuario se cumple en la base: una alerta se anula mientras exista el caso,
 pero al anular el caso se anulan sus alertas en cascada bajo un `anulacion_id`; restaurar el caso las
@@ -242,9 +312,9 @@ El mapeo de `origen_dato` ya no descarta valores: `KAG` y `WORKFLOW` tienen etiq
 - Prioridad de atención del caso: la Guía la lista como columna de la matriz (§8.3.1) pero no
   define la regla de cálculo; derivarla sería inventar.
 - Evidencias de compromiso como archivos: requiere almacenamiento, fuera del prototipo.
-- `/v1/commitments` no permite excluir estados terminales ni ordenar de forma descendente por
-  vencimiento; por eso la cola «por vencer» se acota a `hoy … hoy+30` y una cola de «vencidos»
-  exacta no se puede ofrecer todavía.
+- `/v1/commitments` ya permite excluir estados terminales (`excluir_terminales=true`) y la cola de
+  vencidos se sirve con él; lo único que falta es orden descendente por vencimiento, que ninguna vista
+  necesita hoy.
 - Preferencias y contraste por usuario: hoy viven en `localStorage`; persistirlas exige perfil en
   la base.
 
@@ -317,7 +387,8 @@ select core.siguiente_codigo_caso(1, null),
 | Medición                                | Resultado                                                     |
 | --------------------------------------- | ------------------------------------------------------------- |
 | Casos                                   | 35                                                            |
-| Casos anulados                          | 0                                                             |
+| Casos anulados                          | 1 (`CS-MI-ITE-2026-02`, lote `35f6ccf9`)                      |
+| Documentos anulados                     | 10 (los del caso anterior, mismo lote)                        |
 | Códigos fuera de formato                | 0                                                             |
 | Alertas con `estado_legado='Archivado'` | 83                                                            |
 | Temáticas                               | 6                                                             |
@@ -332,18 +403,22 @@ select core.siguiente_codigo_caso(1, null),
 
 ### 5.2 · Código y API
 
-| Prueba                                                     | Resultado                                                                                                                     |
-| ---------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| `npx tsc --noEmit` en la raíz del repositorio              | pasa, sin errores                                                                                                             |
-| Existencia de rutas `anular` / `restaurar` en `app/api/**` | no hay rutas; la única aparición de «restaurar» es un comentario (`app/api/v1/session/route.ts:9`)                            |
-| Código de caso en `lib/db/repos/cases.ts`                  | llama a `core.siguiente_codigo_caso($1,$2)`                                                                                   |
-| Listado de casos                                           | `{items, total, page, pageSize, generatedAt}`, `pageSize` por omisión 25 y tope 100 (`lib/db/repos/cases.ts:137-141,178-184`) |
+| Prueba                                                     | Resultado                                                                                                                                                  |
+| ---------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npx tsc --noEmit` en la raíz del repositorio              | pasa, sin errores                                                                                                                                          |
+| Existencia de rutas `anular` / `restaurar` en `app/api/**` | cinco rutas `POST …/restaurar` (casos, alertas, compromisos, demandas y documentos); las cinco abren `{ verAnulados: true }` para resolver la fila anulada |
+| `core.anular_registro` sobre una fila activa               | `200`; antes de la migración 28 devolvía `404` por `if not found` tras un `EXECUTE`                                                                        |
+| Ciclo anular → papelera → restaurar (documentos)           | `143 → 142 → 143` activos y `10 → 11 → 10` anulados; la restauración afectó sólo a la fila anulada                                                         |
+| Ciclo anular → papelera → restaurar (compromisos)          | `8 → 7 → 8` activos y `0 → 1 → 0` anulados, con `casoCode` resuelto en la papelera                                                                         |
+| Política `p_anulados`                                      | presente en las cinco tablas; `p_clasificacion` intacta en las cinco                                                                                       |
+| Código de caso en `lib/db/repos/cases.ts`                  | llama a `core.siguiente_codigo_caso($1,$2)`                                                                                                                |
+| Listado de casos                                           | `{items, total, page, pageSize, generatedAt}`, `pageSize` por omisión 25 y tope 100 (`lib/db/repos/cases.ts:137-141,178-184`)                              |
 
 ### 5.3 · SPA Angular
 
 | Prueba                                         | Resultado                                               |
 | ---------------------------------------------- | ------------------------------------------------------- |
-| `ng build` (producción)                        | 437,09 kB iniciales · 99,61 kB de transferencia         |
+| `ng build` (producción)                        | 438,45 kB iniciales · 99,78 kB de transferencia         |
 | `POST /api/auth/login` con las 5 cuentas de §8 | 200 en las cinco                                        |
 | `GET /api/v1/session`                          | hidrata la sesión                                       |
 | `GET /api/v1/cases?pagina=1&tamano=2`          | sobre paginado con `items`, `total`, `page`, `pageSize` |

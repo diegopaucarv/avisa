@@ -1,0 +1,14 @@
+<nav class="riel" aria-label="Relaciones del caso">
+  <h2 class="riel-titulo">Relaciones del caso</h2>
+  <ul class="riel-lista">
+    @for (enlace of enlaces(); track enlace.ancla) {
+      <li>
+        <a class="riel-enlace" [routerLink]="[]" [fragment]="enlace.ancla">
+          <app-icono [nombre]="enlace.icono" [tamano]="14" />
+          <span class="riel-etiqueta">{{ enlace.etiqueta }}</span>
+          <span class="riel-contador">{{ enlace.contador }}</span>
+        </a>
+      </li>
+    }
+  </ul>
+</nav>

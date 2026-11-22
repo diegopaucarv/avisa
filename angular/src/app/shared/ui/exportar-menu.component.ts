@@ -15,11 +15,13 @@ import { IconoComponent } from './icono.component';
 /**
  * Botón «Exportar» con menú JSON / Excel / PDF.
  *
- * Recibe la entidad lógica y, opcionalmente, un `id` para exportar sólo ese
- * registro. Además ofrece el respaldo de la base completa (`entidad=base`),
- * que el servidor ya sirve con los mismos tres formatos. No conoce la API:
- * delega en `descargarExportacion`, que se encarga de la cookie de sesión y del
- * nombre que propone el servidor.
+ * Recibe la entidad lógica, un `id` opcional para exportar sólo ese registro y
+ * un mapa opcional de parámetros de consulta con los filtros, la búsqueda y el
+ * orden vigentes: se anexan a la URL para que el archivo respete lo que la
+ * pantalla muestra. Además ofrece el respaldo de la base completa
+ * (`entidad=base`), que se exporta sin filtros y con los mismos tres formatos.
+ * No conoce la API: delega en `descargarExportacion`, que se encarga de la
+ * cookie de sesión y del nombre que propone el servidor.
  */
 @Component({
   selector: 'app-exportar-menu',
@@ -107,6 +109,8 @@ export class ExportarMenuComponent {
   readonly entidad = input.required<string>();
   readonly id = input<string | null>(null);
   readonly etiqueta = input('Exportar');
+  /** Filtros vigentes de la vista; se omiten al exportar la base completa. */
+  readonly consulta = input<Record<string, string> | null>(null);
 
   /** Mensaje legible para la pantalla que contiene el botón. */
   readonly fallo = output<string>();
@@ -148,8 +152,10 @@ export class ExportarMenuComponent {
       await descargarExportacion({
         entidad,
         formato,
-        // El `id` sólo aplica a una entidad suelta, nunca al respaldo completo.
+        // El `id` y los filtros sólo aplican a una entidad suelta, nunca al
+        // respaldo completo.
         id: entidad === 'base' ? null : this.id(),
+        consulta: entidad === 'base' ? null : this.consulta(),
       });
     } catch (error) {
       this.fallo.emit(

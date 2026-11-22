@@ -26,7 +26,8 @@
         routerLink="/busqueda"
         routerLinkActive="icon-active"
         aria-label="Búsqueda transversal"
-        title="Búsqueda transversal"
+        aria-keyshortcuts="Control+K Meta+K"
+        title="Búsqueda transversal (Ctrl K)"
       >
         <app-icono nombre="buscar" [tamano]="18" />
       </a>
@@ -78,26 +79,17 @@
 
   <div class="app-layout">
     <aside class="avisa-sidebar" [class.open]="menuAbierto()">
-      <button class="sidebar-context" type="button" title="Gestión territorial">
-        <span class="context-mark">
-          <app-icono nombre="mapa" [tamano]="15" />
-        </span>
-        <span>
-          <strong>Gestión territorial</strong>
-        </span>
-      </button>
-
       <div class="sidebar-scroll">
         <nav class="territorial-map-nav" aria-label="Mapa territorial">
-          <a
-            class="side-nav"
-            routerLink="/mapa"
-            routerLinkActive="selected"
-            (click)="menuAbierto.set(false)"
+          <span
+            class="side-nav side-nav-pending"
+            aria-disabled="true"
+            title="Aplazado hasta que exista el dataset de ubigeo/centroide"
           >
             <app-icono nombre="mapa" [tamano]="17" />
             <span>Mapa territorial</span>
-          </a>
+            <span class="side-nav-badge">Aplazado</span>
+          </span>
         </nav>
 
         <div class="sidebar-label">MI ESPACIO</div>
@@ -129,6 +121,22 @@
             </a>
           }
         </nav>
+
+        @if (puedeVerPapelera()) {
+          <nav aria-label="Papelera">
+            @for (enlace of enlacesPapelera; track enlace.ruta) {
+              <a
+                class="side-nav"
+                [routerLink]="enlace.ruta"
+                routerLinkActive="selected"
+                (click)="menuAbierto.set(false)"
+              >
+                <app-icono [nombre]="enlace.icono" [tamano]="17" />
+                <span>{{ enlace.etiqueta }}</span>
+              </a>
+            }
+          </nav>
+        }
 
         <div class="sidebar-label section-nav-label">DIRECTORIO</div>
         <nav aria-label="Directorio">

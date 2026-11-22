@@ -14,6 +14,7 @@ import { urlApi } from '../../core/config/entorno';
 import { consulta } from '../../core/http/consulta';
 import { aErrorApi } from '../../core/http/errores';
 import { CapacidadesService } from '../../core/permisos/capacidades.service';
+import { GlosarioComponent } from '../../shared/ui/glosario.component';
 import { IconoComponent } from '../../shared/ui/icono.component';
 import {
   ALCANCES,
@@ -23,6 +24,7 @@ import {
   TIPOS_COMPROMISO,
   aCatalogosCompromiso,
   aDetalleCompromiso,
+  etiquetaNivelGobierno,
   formatearFecha,
   resolverVencimiento,
   type CatalogosCompromiso,
@@ -108,7 +110,7 @@ function leerValor(evento: Event): string {
 
 @Component({
   selector: 'app-compromiso-panel',
-  imports: [IconoComponent],
+  imports: [IconoComponent, GlosarioComponent],
   templateUrl: './compromiso-panel.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
@@ -521,6 +523,11 @@ export class CompromisoPanelComponent {
 
   fechaTexto(valor: string | null | undefined): string {
     return formatearFecha(valor);
+  }
+
+  /** «Regional» se muestra como GORE; el valor del catálogo no cambia. */
+  nivelTexto(valor: string | null | undefined): string {
+    return etiquetaNivelGobierno(valor ?? null);
   }
 
   esEnlace(uri: string | null): boolean {

@@ -7,13 +7,22 @@
         caso.
       </p>
     </div>
-    <div class="view-actions">
-      <app-exportar-menu entidad="casos" (fallo)="alFallarExportacion($event)" />
-    </div>
+    @if (!verPapelera()) {
+      <div class="view-actions">
+        <app-exportar-menu
+          entidad="casos"
+          [consulta]="filtrosExportacion()"
+          (fallo)="alFallarExportacion($event)"
+        />
+      </div>
+    }
   </header>
 
   @if (exportarError(); as mensaje) {
-  <p class="form-error" role="alert">{{ mensaje }}</p>
+    <p class="form-error" role="alert">{{ mensaje }}</p>
+  }
+  @if (aviso(); as mensaje) {
+    <p class="aviso-ok" role="status">{{ mensaje }}</p>
   }
 
   <div class="filter-bar filter-bar-wrap">
@@ -28,29 +37,52 @@
       />
     </label>
 
-    <label class="select-filter">
-      Estado
-      <select aria-label="Filtrar casos por estado" (change)="cambiarEstado($event)">
-        <option value="" [selected]="filtros().estado === ''">Todos</option>
-        @for (opcion of estados(); track opcion.valor) {
-        <option [value]="opcion.valor" [selected]="filtros().estado === opcion.valor">
-          {{ opcion.etiqueta }}
-        </option>
-        }
-      </select>
-    </label>
+    <div class="segmented status-chips" role="group" aria-label="Filtrar casos por estado">
+      <button
+        type="button"
+        [attr.aria-pressed]="!filtros().abiertos && filtros().estado === ''"
+        [class.chip-vacia]="conteos().todos === 0"
+        (click)="cambiarChip('', false)"
+      >
+        Todos <span class="chip-count">{{ conteos().todos }}</span>
+      </button>
+      <button
+        type="button"
+        [attr.aria-pressed]="filtros().abiertos"
+        [class.chip-vacia]="conteos().abiertos === 0"
+        (click)="cambiarChip('', true)"
+      >
+        Abiertos <span class="chip-count">{{ conteos().abiertos }}</span>
+      </button>
+      <button
+        type="button"
+        [attr.aria-pressed]="!filtros().abiertos && filtros().estado === 'Resuelto'"
+        [class.chip-vacia]="conteos().resueltos === 0"
+        (click)="cambiarChip('Resuelto', false)"
+      >
+        Resueltos <span class="chip-count">{{ conteos().resueltos }}</span>
+      </button>
+      <button
+        type="button"
+        [attr.aria-pressed]="!filtros().abiertos && filtros().estado === 'Archivado'"
+        [class.chip-vacia]="conteos().archivados === 0"
+        (click)="cambiarChip('Archivado', false)"
+      >
+        Archivados <span class="chip-count">{{ conteos().archivados }}</span>
+      </button>
+    </div>
 
     <label class="select-filter">
-      Prioridad
+      Prioridad de atención
       <select
         aria-label="Filtrar casos por prioridad de atención"
         (change)="cambiarPrioridad($event)"
       >
         <option value="" [selected]="filtros().prioridad === ''">Todas</option>
         @for (opcion of prioridades(); track opcion.valor) {
-        <option [value]="opcion.valor" [selected]="filtros().prioridad === opcion.valor">
-          {{ opcion.etiqueta }}
-        </option>
+          <option [value]="opcion.valor" [selected]="filtros().prioridad === opcion.valor">
+            {{ opcion.etiqueta }}
+          </option>
         }
       </select>
     </label>
@@ -60,9 +92,9 @@
       <select aria-label="Filtrar casos por alcance geográfico" (change)="cambiarAlcance($event)">
         <option value="" [selected]="filtros().alcance === ''">Todos</option>
         @for (opcion of alcances(); track opcion.valor) {
-        <option [value]="opcion.valor" [selected]="filtros().alcance === opcion.valor">
-          {{ opcion.etiqueta }}
-        </option>
+          <option [value]="opcion.valor" [selected]="filtros().alcance === opcion.valor">
+            {{ opcion.etiqueta }}
+          </option>
         }
       </select>
     </label>
@@ -72,37 +104,37 @@
       <select aria-label="Filtrar casos por temática" (change)="cambiarTematica($event)">
         <option value="" [selected]="filtros().tematica === ''">Todas</option>
         @for (opcion of tematicas(); track opcion.valor) {
-        <option [value]="opcion.valor" [selected]="filtros().tematica === opcion.valor">
-          {{ opcion.etiqueta }}
-        </option>
+          <option [value]="opcion.valor" [selected]="filtros().tematica === opcion.valor">
+            {{ opcion.etiqueta }}
+          </option>
         }
       </select>
     </label>
 
     <label class="select-filter">
-      Unidad
+      Unidad responsable
       <select
         aria-label="Filtrar casos por unidad orgánica responsable"
         (change)="cambiarUnidad($event)"
       >
         <option value="" [selected]="filtros().unidad === ''">Todas</option>
         @for (opcion of unidades(); track opcion.valor) {
-        <option
-          [value]="opcion.valor"
-          [selected]="filtros().unidad === opcion.valor"
-          [title]="opcion.etiqueta"
-        >
-          {{ opcion.valor }}
-        </option>
+          <option
+            [value]="opcion.valor"
+            [selected]="filtros().unidad === opcion.valor"
+            [title]="opcion.etiqueta"
+          >
+            {{ opcion.valor }}
+          </option>
         }
       </select>
     </label>
 
     <label class="select-filter">
-      Orden
+      Ordenar por
       <select aria-label="Ordenar casos" [value]="filtros().orden" (change)="cambiarOrden($event)">
         @for (orden of ordenes; track orden.valor) {
-        <option [value]="orden.valor">{{ orden.etiqueta }}</option>
+          <option [value]="orden.valor">{{ orden.etiqueta }}</option>
         }
       </select>
     </label>
@@ -111,18 +143,34 @@
   </div>
 
   <div class="view-toolbar">
-    <div class="segmented" role="group" aria-label="Vista de casos">
-      <button
-        type="button"
-        [attr.aria-pressed]="modo() === 'tarjetas'"
-        (click)="cambiarModo('tarjetas')"
-      >
-        Tarjetas
-      </button>
-      <button type="button" [attr.aria-pressed]="modo() === 'tabla'" (click)="cambiarModo('tabla')">
-        Tabla
-      </button>
-    </div>
+    @if (puedeVerPapelera()) {
+      <div class="segmented" role="group" aria-label="Estado del registro: vigentes o anulados">
+        <button type="button" [attr.aria-pressed]="!verPapelera()" (click)="cambiarVer('activos')">
+          Vigentes
+        </button>
+        <button type="button" [attr.aria-pressed]="verPapelera()" (click)="cambiarVer('anulados')">
+          Anulados
+        </button>
+      </div>
+    }
+    @if (!verPapelera()) {
+      <div class="segmented" role="group" aria-label="Vista de casos">
+        <button
+          type="button"
+          [attr.aria-pressed]="modo() === 'tarjetas'"
+          (click)="cambiarModo('tarjetas')"
+        >
+          Tarjetas
+        </button>
+        <button
+          type="button"
+          [attr.aria-pressed]="modo() === 'tabla'"
+          (click)="cambiarModo('tabla')"
+        >
+          Tabla
+        </button>
+      </div>
+    }
 
     <a
       class="table-link"
@@ -134,93 +182,149 @@
     </a>
   </div>
 
-  @if (estado() === "cargando") {
-  <div class="empty-state" role="status">Cargando casos…</div>
-  } @else if (estado() === "error") {
-  <div class="empty-state" role="alert">
-    <p>{{ error()?.message }}</p>
-    <button type="button" class="button-secondary" (click)="recargar()">Reintentar</button>
-  </div>
+  @if (estado() === 'cargando') {
+    <div class="empty-state" role="status">Cargando casos…</div>
+  } @else if (estado() === 'error') {
+    <div class="empty-state" role="alert">
+      <p>{{ error()?.message }}</p>
+      <button type="button" class="button-secondary" (click)="recargar()">Reintentar</button>
+    </div>
   } @else if (casos().length === 0) {
-  <div class="empty-state">
-    <strong>Sin casos</strong>
-    <p>No hay casos para los filtros seleccionados.</p>
-  </div>
-  } @else if (modo() === "tarjetas") {
-  <div class="case-grid">
-    @for (caso of casos(); track caso.codigo) {
-    <a
-      class="case-card"
-      [routerLink]="['/casos', caso.codigo]"
-      [attr.aria-label]="'Abrir el caso ' + caso.codigo + ': ' + caso.titulo"
-    >
-      <div class="case-card-top">
-        <span class="case-code">{{ caso.codigo }}</span>
-        <span class="status-badge" [class]="'status-badge risk-' + caso.riesgo.toLowerCase()">
-          <span class="status-dot"></span>
-          {{ caso.riesgo }}
-        </span>
+    @if (verPapelera()) {
+      <div class="empty-state">
+        <strong>No hay casos anulados</strong>
+        <p>No hay casos anulados para los filtros seleccionados.</p>
       </div>
-      <h3>{{ caso.titulo }}</h3>
-      <div class="case-location">
-        <app-icono nombre="mapa" [tamano]="14" />
-        {{ caso.region || "Sin región" }} @if (caso.tematica) {
-        <span>·</span> {{ caso.tematica }} }
+    } @else {
+      <div class="empty-state">
+        <strong>Sin casos</strong>
+        <p>No hay casos para los filtros seleccionados.</p>
       </div>
-      <p>{{ caso.resumen || "Sin resumen registrado." }}</p>
-      <div class="case-card-bottom">
-        <span>{{ caso.etapa }}</span>
-        <span>
-          {{ caso.actualizado || "Sin fecha" }}
-          <app-icono nombre="chevron-derecha" [tamano]="14" />
-        </span>
-      </div>
-    </a>
     }
-  </div>
+  } @else if (verPapelera()) {
+    <div class="table-wrap">
+      <table class="data-table">
+        <caption class="table-caption">
+          {{
+            total()
+          }}
+          casos anulados · se restauran a la vista de vigentes.
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">Código</th>
+            <th scope="col">Caso</th>
+            <th scope="col">Región</th>
+            <th scope="col">Fecha de anulación</th>
+            <th scope="col">Acción</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (caso of casos(); track caso.codigo) {
+            <tr>
+              <td>{{ caso.codigo }}</td>
+              <td>{{ caso.titulo }}</td>
+              <td>{{ caso.region || '—' }}</td>
+              <td>{{ fechaHoraTexto(caso.anuladoEn) }}</td>
+              <td>
+                <button
+                  type="button"
+                  class="button-secondary"
+                  [disabled]="restaurando() === caso.codigo"
+                  [attr.aria-label]="'Restaurar el caso ' + caso.codigo"
+                  (click)="restaurar(caso, $event)"
+                >
+                  {{ restaurando() === caso.codigo ? 'Restaurando…' : 'Restaurar' }}
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  } @else if (modo() === 'tarjetas') {
+    <div class="case-grid">
+      @for (caso of casos(); track caso.codigo) {
+        <a
+          class="case-card"
+          [routerLink]="['/casos', caso.codigo]"
+          [attr.aria-label]="'Abrir el caso ' + caso.codigo + ': ' + caso.titulo"
+        >
+          <div class="case-card-top">
+            <span class="case-code">{{ caso.codigo }}</span>
+            <span class="status-badge" [class]="'status-badge risk-' + caso.riesgo.toLowerCase()">
+              <span class="status-dot"></span>
+              {{ caso.riesgo }}
+            </span>
+          </div>
+          <h3>{{ caso.titulo }}</h3>
+          <div class="case-location">
+            <app-icono nombre="mapa" [tamano]="14" />
+            {{ caso.region || 'Sin región' }}
+            @if (caso.tematica) {
+              <span>·</span> {{ caso.tematica }}
+            }
+          </div>
+          <p>{{ caso.resumen || 'Sin resumen registrado.' }}</p>
+          <div class="case-card-bottom">
+            <span>{{ caso.etapa }}</span>
+            <span>
+              {{ caso.inicio ? 'Inicio ' + fechaTexto(caso.inicio) : 'Sin fecha de inicio' }}
+              <app-icono nombre="chevron-derecha" [tamano]="14" />
+            </span>
+          </div>
+        </a>
+      }
+    </div>
   } @else {
-  <div class="table-wrap">
-    <table class="data-table">
-      <caption class="table-caption">
-        {{ total() }} casos · el riesgo es atributo del caso y se recalcula en su ficha.
-      </caption>
-      <thead>
-        <tr>
-          <th scope="col">Caso</th>
-          <th scope="col">Región</th>
-          <th scope="col">Temática</th>
-          <th scope="col">Estado</th>
-          <th scope="col">Prioridad</th>
-          <th scope="col">Riesgo</th>
-          <th scope="col">Unidad</th>
-          <th scope="col">Etapa</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (caso of casos(); track caso.codigo) {
-        <tr class="case-row-clickable" [routerLink]="['/casos', caso.codigo]">
-          <td>
-            <a class="table-link" [routerLink]="['/casos', caso.codigo]">{{ caso.codigo }}</a>
-          </td>
-          <td>{{ caso.region || "—" }}</td>
-          <td>{{ caso.tematica || "—" }}</td>
-          <td>{{ caso.estado }}</td>
-          <td>{{ caso.prioridad }}</td>
-          <td>{{ caso.riesgo }}</td>
-          <td>{{ caso.unidadResponsable || "—" }}</td>
-          <td>{{ caso.etapa }}</td>
-        </tr>
-        }
-      </tbody>
-    </table>
-  </div>
-  } @if (total() > 0) {
-  <app-paginacion
-    [pagina]="filtros().pagina"
-    [tamano]="filtros().tamano"
-    [total]="total()"
-    (paginaCambia)="cambiarPagina($event)"
-    (tamanoCambia)="cambiarTamano($event)"
-  />
+    <div class="table-wrap">
+      <table class="data-table">
+        <caption class="table-caption">
+          {{
+            total()
+          }}
+          casos · el riesgo es atributo del caso y se recalcula en su ficha.
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">Caso</th>
+            <th scope="col">Inicio</th>
+            <th scope="col">Región</th>
+            <th scope="col">Temática</th>
+            <th scope="col">Estado</th>
+            <th scope="col">Prioridad</th>
+            <th scope="col">Riesgo</th>
+            <th scope="col">Unidad</th>
+            <th scope="col">Etapa</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (caso of casos(); track caso.codigo) {
+            <tr class="case-row-clickable" [routerLink]="['/casos', caso.codigo]">
+              <td>
+                <a class="table-link" [routerLink]="['/casos', caso.codigo]">{{ caso.codigo }}</a>
+              </td>
+              <td>{{ caso.inicio ? fechaTexto(caso.inicio) : '—' }}</td>
+              <td>{{ caso.region || '—' }}</td>
+              <td>{{ caso.tematica || '—' }}</td>
+              <td>{{ caso.estado }}</td>
+              <td>{{ caso.prioridad }}</td>
+              <td>{{ caso.riesgo }}</td>
+              <td>{{ caso.unidadResponsable || '—' }}</td>
+              <td>{{ caso.etapa }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+  @if (total() > 0) {
+    <app-paginacion
+      [pagina]="filtros().pagina"
+      [tamano]="filtros().tamano"
+      [total]="total()"
+      (paginaCambia)="cambiarPagina($event)"
+      (tamanoCambia)="cambiarTamano($event)"
+    />
   }
 </section>

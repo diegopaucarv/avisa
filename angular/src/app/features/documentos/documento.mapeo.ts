@@ -97,6 +97,16 @@ export type Documento = {
   distritoId: number | null;
   /** Sólo viene en `GET /api/v1/documents/:id`. */
   codigoLegado: string | null;
+  /** ISO de la anulación lógica; `null` mientras el registro está activo. */
+  anuladoEn: string | null;
+  /** Motivo declarado al anular; sólo se puebla en la papelera. */
+  motivoAnulacion: string | null;
+  /** Usuario que anuló (id); sólo se puebla en la papelera. */
+  anuladoPor: string | null;
+  /** Nombre legible de quien anuló; `null` si no se puede resolver. */
+  anuladoPorNombre: string | null;
+  /** Lote de anulación al que pertenece la fila. */
+  anulacionId: string | null;
 };
 
 export type FuenteDocumento = {
@@ -173,6 +183,11 @@ export function aDocumento(bruto: unknown): Documento {
     reunionId: texto(registro, ['reunionId', 'reunion_id']),
     distritoId: numero(registro, ['distritoId', 'distrito_id']),
     codigoLegado: texto(registro, ['codigoLegado', 'codigo_legado']),
+    anuladoEn: texto(registro, ['anuladoEn', 'anulado_en']),
+    motivoAnulacion: texto(registro, ['motivoAnulacion', 'motivo_anulacion']),
+    anuladoPor: texto(registro, ['anuladoPor', 'anulado_por']),
+    anuladoPorNombre: texto(registro, ['anuladoPorNombre', 'anulado_por_nombre']),
+    anulacionId: texto(registro, ['anulacionId', 'anulacion_id']),
   };
 }
 
@@ -236,6 +251,23 @@ export function formatearFecha(valor: string | null | undefined): string {
   if (!anio || !mes || !dia) return valor;
 
   return `${dia}/${mes}/${anio}`;
+}
+
+/**
+ * `2026-11-22T09:07:00.776Z` → `22/11/2026 04:07` (hora local del navegador).
+ * La anulación es un timestamp: no se rotula con ningún estado de catálogo.
+ */
+export function formatearFechaHora(valor: string | null | undefined): string {
+  if (!valor) return '—';
+
+  const fecha = new Date(valor);
+  if (Number.isNaN(fecha.getTime())) return valor;
+
+  const dia = String(fecha.getDate()).padStart(2, '0');
+  const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+  const hora = String(fecha.getHours()).padStart(2, '0');
+  const minuto = String(fecha.getMinutes()).padStart(2, '0');
+  return `${dia}/${mes}/${fecha.getFullYear()} ${hora}:${minuto}`;
 }
 
 /** «Anexo N° 16». No se fabrica un anexo para los tipos que no lo tienen. */

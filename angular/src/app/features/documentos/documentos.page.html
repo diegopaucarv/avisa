@@ -14,7 +14,9 @@
         etiqueta="Exportar"
         (fallo)="alFallarExportacion($event)"
       />
-      <p class="result-count" aria-live="polite">{{ total() }} documentos</p>
+      <p class="result-count" aria-live="polite">
+        {{ total() }} {{ verPapelera() ? 'documentos anulados' : 'documentos' }}
+      </p>
     </div>
   </header>
 
@@ -73,7 +75,18 @@
     <button type="button" class="button-secondary" (click)="limpiar()">Limpiar filtros</button>
   </div>
 
-  @if (estadoListado() === 'error') {
+  @if (puedeVerPapelera()) {
+  <div class="view-toolbar">
+    <div class="segmented" role="group" aria-label="Documentos activos o anulados">
+      <button type="button" [attr.aria-pressed]="!verPapelera()" (click)="cambiarVer('activos')">
+        Activos
+      </button>
+      <button type="button" [attr.aria-pressed]="verPapelera()" (click)="cambiarVer('anulados')">
+        Anulados
+      </button>
+    </div>
+  </div>
+  } @if (estadoListado() === 'error') {
   <div class="empty-state" role="alert">
     <strong>No se pudieron cargar los documentos</strong>
     <p>{{ errorListado()?.message }}</p>
@@ -82,6 +95,11 @@
   } @else if (documentos().length === 0) { @if (estadoListado() === 'cargando' || estadoListado()
   === 'inactivo') {
   <div class="empty-state" role="status">Cargando documentos…</div>
+  } @else if (verPapelera()) {
+  <div class="empty-state">
+    <strong>No hay documentos anulados</strong>
+    <p>No hay documentos anulados para los filtros seleccionados.</p>
+  </div>
   } @else {
   <div class="empty-state">
     <strong>No hay documentos con estos filtros</strong>
@@ -89,7 +107,55 @@
   </div>
   } } @else { @if (estadoListado() === 'cargando') {
   <p class="actualizando" role="status">Actualizando el listado…</p>
-  }
+  } @if (verPapelera()) {
+  <div class="table-wrap">
+    <table class="data-table">
+      <caption class="table-caption">
+        {{ resumenPapelera() }}
+      </caption>
+      <thead>
+        <tr>
+          <th scope="col">Código</th>
+          <th scope="col">Título</th>
+          <th scope="col">Caso</th>
+          <th scope="col">Fecha de anulación</th>
+          <th scope="col">Acción</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (documento of documentos(); track documento.id) {
+        <tr>
+          <td>{{ documento.codigo || 'Sin código' }}</td>
+          <td class="celda-titulo">{{ documento.titulo || 'Sin título' }}</td>
+          <td class="celda-caso">
+            @if (documento.casoCode) {
+            <strong>{{ documento.casoCode }}</strong>
+            @if (documento.casoTitulo) {
+            <small>{{ documento.casoTitulo }}</small>
+            } } @else {
+            <span class="sin-dato">Sin caso</span>
+            }
+          </td>
+          <td>{{ fechaHoraTexto(documento.anuladoEn) }}</td>
+          <td>
+            <button
+              type="button"
+              class="button-secondary"
+              [attr.aria-label]="
+                'Restaurar el documento ' +
+                (documento.codigo || documento.titulo || 'sin código')
+              "
+              (click)="abrirRestauracion(documento)"
+            >
+              Restaurar
+            </button>
+          </td>
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  } @else {
 
   <div class="table-wrap">
     <table class="data-table">
@@ -157,7 +223,7 @@
       </tbody>
     </table>
   </div>
-  } @if (total() > 0 && estadoListado() !== 'error') {
+  } } @if (total() > 0 && estadoListado() !== 'error') {
   <app-paginacion
     [pagina]="filtros().pagina"
     [tamano]="filtros().tamano"
@@ -178,12 +244,14 @@
 />
 } @if (documentoAnulacion(); as documentoAnular) {
 <app-anular-panel
-  modo="anular"
+  [modo]="modoAnulacion()"
   entidad="documento"
   [codigo]="documentoAnular.codigo"
   [enviando]="enviandoAnulacion()"
   [errorEnvio]="errorAnulacion()"
-  [puedeConfirmar]="puedeAnular(documentoAnular)"
+  [puedeConfirmar]="
+    modoAnulacion() === 'anular' ? puedeAnular(documentoAnular) : puedeVerPapelera()
+  "
   (cerrar)="cerrarAnulacion()"
   (hecho)="confirmarAnulacion($event)"
 />

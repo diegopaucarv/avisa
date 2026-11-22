@@ -23,13 +23,19 @@ const DEMANDA_SELECT = `
   d.es_validado_humano as validado,
   d.nivel_clasificacion as clasificacion,
   d.afecta_diferenciadamente_mujeres as afecta_mujeres,
-  d.documento_origen_id
+  d.documento_origen_id,
+  d.anulado_en as anulado_en,
+  d.motivo_anulacion as motivo_anulacion,
+  d.anulado_por as anulado_por,
+  ua.nombre as anulado_por_nombre,
+  d.anulacion_id as anulacion_id
 `;
 
 const DEMANDA_FROM = `
   from core.demandas d
   left join core.casos c on c.id = d.caso_id
   left join core.cat_tematicas te on te.id = d.tematica_id
+  left join core.usuarios ua on ua.id = d.anulado_por
 `;
 
 export type DemandaListQuery = {
@@ -38,6 +44,12 @@ export type DemandaListQuery = {
   sinCaso?: string;
   estado?: string;
   sort?: string;
+  /**
+   * `true` lista la papelera: añade `anulado_en is not null`. Requiere abrir
+   * la RLS con `withSession(..., { verAnulados: true })`; si no, la política
+   * sigue ocultando las filas y el listado sale vacío.
+   */
+  incluirAnulados?: boolean;
   page?: number;
   pageSize?: number;
 };
@@ -63,6 +75,16 @@ export type DemandaListItem = {
   clasificacion: number | null;
   afectaMujeres: boolean | null;
   documentoOrigenId: string | null;
+  /** Fecha de anulación en ISO 8601, o `null` si la demanda está vigente. */
+  anuladoEn: string | null;
+  /** Motivo declarado al anular; sólo se puebla en la papelera. */
+  motivoAnulacion: string | null;
+  /** Usuario que anuló (id); sólo se puebla en la papelera. */
+  anuladoPor: string | null;
+  /** Nombre legible de quien anuló; `null` si no se puede resolver. */
+  anuladoPorNombre: string | null;
+  /** Lote de anulación al que pertenece la fila. */
+  anulacionId: string | null;
 };
 
 export type DemandaListResult = {
@@ -102,7 +124,22 @@ function mapDemanda(row: Record<string, unknown>): DemandaListItem {
     clasificacion: row.clasificacion as number | null,
     afectaMujeres: row.afecta_mujeres as boolean | null,
     documentoOrigenId: row.documento_origen_id as string | null,
+    anuladoEn: isoOrNull(row.anulado_en),
+    motivoAnulacion: row.motivo_anulacion as string | null,
+    anuladoPor: row.anulado_por as string | null,
+    anuladoPorNombre: row.anulado_por_nombre as string | null,
+    anulacionId: row.anulacion_id as string | null,
   };
+}
+
+/**
+ * `pg` devuelve `timestamptz` como `Date`; se normaliza a ISO para el payload.
+ * Cualquier valor no convertible se trata como ausente.
+ */
+function isoOrNull(value: unknown): string | null {
+  if (!value) return null;
+  const date = value instanceof Date ? value : new Date(String(value));
+  return Number.isNaN(date.getTime()) ? null : date.toISOString();
 }
 
 /**
@@ -141,6 +178,13 @@ export async function listDemandas(
   }
   if (query.estado) {
     where.push(`d.estado_atencion = ${bind(normalizeEstado(query.estado))}`);
+  }
+
+  // Papelera: abrir la RLS es cosa de `app.ver_anulados`; aquí sólo se acota
+  // el resultado a las filas anuladas. Sin `incluirAnulados` no se añade
+  // `anulado_en is null`: `p_clasificacion` ya lo impone.
+  if (query.incluirAnulados) {
+    where.push("d.anulado_en is not null");
   }
 
   const page = Math.max(1, Math.trunc(query.page ?? 1));

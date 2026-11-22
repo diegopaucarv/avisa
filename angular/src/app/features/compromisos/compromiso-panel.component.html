@@ -47,13 +47,13 @@
         </span>
         <span class="badge">{{ cabecera().tipo }}</span>
         @if (cabecera().nivelGobierno) {
-          <span class="badge">{{ cabecera().nivelGobierno }}</span>
+          <span class="badge">{{ nivelTexto(cabecera().nivelGobierno) }}</span>
         }
         @if (cabecera().terminal) {
           <span class="badge badge-archived">Estado terminal</span>
         }
         @if (cabecera().vencido) {
-          <span class="due-state due-vencido">Atrasado</span>
+          <span class="due-state due-vencido">Vencido</span>
         }
       </div>
 
@@ -61,7 +61,7 @@
         <h3 id="datos-compromiso">Datos del compromiso</h3>
         <div class="detail-data-row">
           <div>
-            <span>Tipo</span>
+            <span>Tipo de compromiso <app-glosario termino="tipo-compromiso" /></span>
             <strong>{{ cabecera().tipo }}</strong>
           </div>
           <div>
@@ -69,16 +69,17 @@
             <strong>{{ cabecera().unidad || '—' }}</strong>
           </div>
           <div>
-            <span>Alcance</span>
+            <span>Alcance (registrado)</span>
             <strong>{{ cabecera().alcance || '—' }}</strong>
+            <small class="form-hint">Se registra a mano; no se deriva de la región.</small>
           </div>
           <div>
             <span>Temática</span>
             <strong>{{ cabecera().tematica || '—' }}</strong>
           </div>
           <div>
-            <span>Nivel de gobierno</span>
-            <strong>{{ cabecera().nivelGobierno || '—' }}</strong>
+            <span>Nivel de gobierno <app-glosario termino="nivel-gobierno" /></span>
+            <strong>{{ nivelTexto(cabecera().nivelGobierno) }}</strong>
           </div>
           <div>
             <span>Brecha de género</span>
@@ -186,7 +187,7 @@
             </div>
 
             <div class="form-field">
-              <label class="form-label" for="comp-tipo">Tipo</label>
+              <label class="form-label" for="comp-tipo">Tipo de compromiso</label>
               <select id="comp-tipo" class="form-select" (change)="actualizarTexto('tipo', $event)">
                 @for (tipo of tiposCompromiso; track tipo) {
                   <option [value]="tipo" [selected]="tipo === formulario().tipo">
@@ -206,7 +207,7 @@
                 <option value="" [selected]="!formulario().nivelGobierno">Sin especificar</option>
                 @for (nivel of nivelesGobierno; track nivel) {
                   <option [value]="nivel" [selected]="nivel === formulario().nivelGobierno">
-                    {{ nivel }}
+                    {{ nivelTexto(nivel) }}
                   </option>
                 }
                 @if (
@@ -214,7 +215,7 @@
                   !nivelesGobierno.includes(formulario().nivelGobierno)
                 ) {
                   <option [value]="formulario().nivelGobierno" selected>
-                    {{ formulario().nivelGobierno }}
+                    {{ nivelTexto(formulario().nivelGobierno) }}
                   </option>
                 }
               </select>
@@ -361,7 +362,7 @@
               {{ vencimiento().origen === 'manual' ? 'Fecha manual' : 'Derivada del próximo hito' }}
             </span>
             @if (cabecera().vencido) {
-              <span class="due-state due-vencido">Atrasado</span>
+              <span class="due-state due-vencido">Vencido</span>
             }
           </p>
           <p class="form-hint">

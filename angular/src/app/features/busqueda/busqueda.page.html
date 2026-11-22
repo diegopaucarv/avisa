@@ -68,7 +68,10 @@
             class="search-result"
             [routerLink]="resultado.ruta"
             [attr.aria-label]="
-              'Abrir ' + resultado.etiquetaTipo.toLowerCase() + ': ' + resultado.titulo
+              (resultado.abreFicha ? 'Abrir la ficha del ' : 'Ver en el listado el ') +
+              resultado.etiquetaTipo.toLowerCase() +
+              ': ' +
+              resultado.titulo
             "
           >
             <span class="search-result-icono" aria-hidden="true">
@@ -82,23 +85,29 @@
               }
               <span class="search-result-meta">
                 <span class="search-result-tipo">{{ resultado.etiquetaTipo }}</span>
-                @if (resultado.codigo) {
-                  <span class="search-result-codigo">{{ resultado.codigo }}</span>
-                }
+                <span class="search-result-dato">
+                  <span class="search-result-dato-etiqueta">Código</span>
+                  <span class="search-result-codigo">{{ resultado.codigo ?? '—' }}</span>
+                </span>
+                <span class="search-result-dato">
+                  <span class="search-result-dato-etiqueta">Territorio</span>
+                  <span class="search-result-region">{{ resultado.region ?? '—' }}</span>
+                </span>
               </span>
             </span>
 
-            @if (resultado.ruta) {
+            @if (resultado.abreFicha) {
               <span class="search-result-flecha" aria-hidden="true">
                 <app-icono nombre="chevron-derecha" [tamano]="15" />
               </span>
+            } @else if (resultado.ruta) {
+              <span class="search-result-destino">Ver listado</span>
             }
           </a>
         </li>
       }
     </ul>
   }
-
   @if (consultaValida() && estadoListado() === 'listo' && total() > 0) {
     <app-paginacion
       [pagina]="filtros().pagina"

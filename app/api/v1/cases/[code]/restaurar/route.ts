@@ -17,7 +17,11 @@ export async function POST(
     const decoded = decodeURIComponent(code);
     const scope = { usuarioId: session.uid, rolCodigo: session.rol };
 
-    await withSession(scope, (client) => restoreCase(client, decoded));
+    // La papelera se abre sólo para que el prefetch encuentre el caso anulado;
+    // la escritura sigue por core.restaurar_caso (SECURITY DEFINER).
+    await withSession(scope, (client) => restoreCase(client, decoded), {
+      verAnulados: true,
+    });
 
     return jsonOk({ ok: true });
   } catch (error) {

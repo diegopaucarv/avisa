@@ -13,7 +13,8 @@ export type SessionOptions = {
    * Igual que `app.rol_codigo`, la bandera dura la transacción (`true` es el
    * equivalente a `SET LOCAL`), así que no se filtra a la siguiente petición
    * que reutilice la conexión del pool. Por omisión vale `'off'` y la política
-   * `p_anulados` de `core.compromisos`/`core.documentos` no devuelve filas.
+   * `p_anulados` de `core.casos`, `core.alertas_tempranas`, `core.demandas`,
+   * `core.compromisos` y `core.documentos` no devuelve filas.
    */
   verAnulados?: boolean;
 };
@@ -21,15 +22,16 @@ export type SessionOptions = {
 /**
  * Roles que pueden anular y restaurar (borrado lógico).
  *
- * Es el mismo conjunto que `ANULAN` en la SPA
+ * Es exactamente `core.roles.puede_eliminar = true` (parche 15 de la DDL, que
+ * lo concede a `sectorista` y `administrador` y a ningún otro rol) y el mismo
+ * conjunto que `ANULAN` en la SPA
  * (`angular/src/app/core/permisos/capacidades.service.ts`). Se usa para que
- * `?anulados=true` sólo se sirva a quien puede vaciar la papelera. No se usa
- * `core.puede_eliminar()` porque en la base viva esa matriz no coincide con la
- * de la interfaz: `sectorista` tiene `puede_eliminar = true` y
- * `direccion_oaipcs` lo tiene en `false`. Si la matriz se corrige en la base,
- * este conjunto debe seguirla.
+ * `?anulados=true` sólo se sirva a quien puede vaciar la papelera: la RLS ya
+ * impone el permiso, pero el listado debe fallar con 403 y no con una papelera
+ * vacía. Si la matriz cambia en la base, este conjunto y el de la SPA la
+ * siguen.
  */
-const ROLES_ANULAN = new Set(["administrador", "direccion_oaipcs"]);
+const ROLES_ANULAN = new Set(["administrador", "sectorista"]);
 
 export function puedeAnularRegistros(roles: readonly string[]): boolean {
   return roles.some((rol) => ROLES_ANULAN.has(rol));

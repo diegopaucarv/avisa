@@ -71,6 +71,11 @@ export const routes: Routes = [
           import('./features/documentos/documentos.page').then((m) => m.DocumentosPage),
       },
       {
+        path: 'papelera',
+        loadComponent: () =>
+          import('./features/papelera/papelera.page').then((m) => m.PapeleraPage),
+      },
+      {
         path: 'reportes',
         loadComponent: () =>
           import('./features/reportes/reportes.page').then((m) => m.ReportesPage),

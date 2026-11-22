@@ -10,7 +10,7 @@
     @if (actor(); as a) {
       <header class="drawer-head">
         <div class="actor-panel-cabecera">
-          <p class="actor-panel-etiqueta">{{ a.tipo || "Sin tipo de actor" }}</p>
+          <p class="actor-panel-etiqueta">{{ a.tipo || 'Sin tipo de actor' }}</p>
           <h2 id="actor-panel-titulo">{{ a.nombre }}</h2>
           <div class="actor-panel-badges">
             @if (a.abreviatura) {
@@ -57,45 +57,45 @@
             </div>
             <div>
               <dt>Tipo</dt>
-              <dd>{{ a.tipo || "—" }}</dd>
+              <dd>{{ a.tipo || '—' }}</dd>
             </div>
             <div>
               <dt>Función</dt>
-              <dd>{{ a.funcion || "No determinado" }}</dd>
+              <dd>{{ a.funcion || 'No determinado' }}</dd>
             </div>
             <div>
               <dt>Posicionamiento</dt>
-              <dd>{{ a.posicionamiento || "—" }}</dd>
+              <dd>{{ a.posicionamiento || '—' }}</dd>
             </div>
             <div>
               <dt>Cargo</dt>
-              <dd>{{ a.cargo || "—" }}</dd>
+              <dd>{{ a.cargo || '—' }}</dd>
             </div>
             <div>
               <dt>Nivel de gobierno</dt>
-              <dd>{{ a.nivelGobierno || "—" }}</dd>
+              <dd>{{ a.nivelGobierno || '—' }}</dd>
             </div>
             <div>
               <dt>Categoría</dt>
-              <dd>{{ a.categoria || "—" }}</dd>
+              <dd>{{ a.categoria || '—' }}</dd>
             </div>
           </dl>
         </section>
 
         <section class="actor-seccion" aria-labelledby="actor-panel-territorio">
-          <h3 id="actor-panel-territorio">Territorio y organización</h3>
+          <h3 id="actor-panel-territorio">Ubicación y organización</h3>
           <dl class="actor-datos">
             <div>
               <dt>Región</dt>
-              <dd>{{ a.region || "—" }}</dd>
+              <dd>{{ a.region || '—' }}</dd>
             </div>
             <div>
               <dt>Distrito</dt>
-              <dd>{{ a.distrito || "—" }}</dd>
+              <dd>{{ a.distrito || '—' }}</dd>
             </div>
             <div>
               <dt>Organización ancla</dt>
-              <dd>{{ a.organizacionAncla || "—" }}</dd>
+              <dd>{{ a.organizacionAncla || '—' }}</dd>
             </div>
           </dl>
         </section>
@@ -105,11 +105,11 @@
           <dl class="actor-datos">
             <div>
               <dt>Validación</dt>
-              <dd>{{ a.validado ? "Validado por humano" : "Pendiente de validación" }}</dd>
+              <dd>{{ a.validado ? 'Validado por humano' : 'Pendiente de validación' }}</dd>
             </div>
             <div>
               <dt>Estado</dt>
-              <dd>{{ a.activo ? "Activo" : "Inactivo" }}</dd>
+              <dd>{{ a.activo ? 'Activo' : 'Inactivo' }}</dd>
             </div>
           </dl>
         </section>
@@ -133,25 +133,25 @@
               <p class="actor-pii-aviso">
                 <app-icono nombre="candado" [tamano]="13" />
                 <span>
-                  El acceso a DNI y teléfonos queda registrado en la base con el usuario y el
-                  motivo de la consulta.
+                  El acceso a DNI y teléfonos queda registrado en la base con el usuario y el motivo
+                  de la consulta.
                 </span>
               </p>
 
               @switch (estadoPii()) {
-                @case ("inactivo") {
+                @case ('inactivo') {
                   <button type="button" class="button-secondary" (click)="solicitarPii()">
                     <app-icono nombre="candado" [tamano]="14" />
                     Ver DNI y teléfonos
                   </button>
                 }
-                @case ("cargando") {
+                @case ('cargando') {
                   <p class="actor-nota" role="status">Solicitando los datos personales…</p>
                 }
-                @case ("prohibido") {
+                @case ('prohibido') {
                   <p class="actor-error" role="alert">Su rol no permite ver datos personales.</p>
                 }
-                @case ("error") {
+                @case ('error') {
                   <div class="actor-error" role="alert">
                     <p>{{ errorPii() }}</p>
                     <button type="button" class="button-secondary" (click)="solicitarPii()">
@@ -159,7 +159,7 @@
                     </button>
                   </div>
                 }
-                @case ("listo") {
+                @case ('listo') {
                   @if (datos(); as ficha) {
                     @if (ficha.vacio) {
                       <p class="actor-vacio">El actor no tiene ficha de datos personales.</p>
@@ -167,15 +167,15 @@
                       <dl class="actor-datos">
                         <div>
                           <dt>DNI</dt>
-                          <dd>{{ ficha.dni || "—" }}</dd>
+                          <dd>{{ ficha.dni || '—' }}</dd>
                         </div>
                         <div>
                           <dt>Correo</dt>
-                          <dd>{{ ficha.email || "—" }}</dd>
+                          <dd>{{ ficha.email || '—' }}</dd>
                         </div>
                         <div>
                           <dt>Teléfono</dt>
-                          <dd>{{ ficha.telefono || "—" }}</dd>
+                          <dd>{{ ficha.telefono || '—' }}</dd>
                         </div>
                       </dl>
                       <button type="button" class="button-secondary" (click)="ocultarPii()">

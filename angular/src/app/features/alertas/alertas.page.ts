@@ -15,6 +15,7 @@ import { urlApi } from '../../core/config/entorno';
 import {
   TAMANO_PAGINA,
   normalizarColeccion,
+  parametrosConValor,
   paramsDePagina,
   urlConParametros,
   type Coleccion,
@@ -263,6 +264,21 @@ export class AlertasPage {
   );
 
   readonly filtros = computed(() => this.parametros());
+
+  /**
+   * Filtros, búsqueda y orden vigentes, con los nombres que acepta
+   * `GET /api/v1/alerts`. La exportación los reenvía para respetar la vista.
+   */
+  readonly filtrosExportacion = computed(() => {
+    const filtros = this.filtros();
+    return parametrosConValor({
+      q: filtros.q,
+      prioridad: filtros.prioridad,
+      nivel: filtros.nivel,
+      estado: filtros.estado,
+      sort: filtros.orden,
+    });
+  });
 
   private readonly listado = consulta<Coleccion<Alerta>>({
     fuente: () => {

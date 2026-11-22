@@ -1,8 +1,8 @@
-import { urlApi } from "../config/entorno";
-import { ErrorApi } from "./errores";
+import { urlApi } from '../config/entorno';
+import { ErrorApi } from './errores';
 
 /** Formatos que entiende `GET /api/v1/export`. */
-export type FormatoExportacion = "json" | "excel" | "pdf";
+export type FormatoExportacion = 'json' | 'excel' | 'pdf';
 
 export type OpcionesExportacion = {
   /** Entidad lógica (`documentos`, `casos`, …) o `base`. */
@@ -10,19 +10,23 @@ export type OpcionesExportacion = {
   formato: FormatoExportacion;
   /** Exporta sólo el registro con ese uuid. */
   id?: string | null;
+  /**
+   * Filtros, búsqueda y orden vigentes en la vista. Se anexan a la URL para que
+   * la exportación coincida con lo que la pantalla está mostrando.
+   */
+  consulta?: Record<string, string> | null;
 };
 
 const EXTENSIONES: Record<FormatoExportacion, string> = {
-  json: "json",
-  excel: "xlsx",
-  pdf: "pdf",
+  json: 'json',
+  excel: 'xlsx',
+  pdf: 'pdf',
 };
 
 const ACEPTADOS: Record<FormatoExportacion, string> = {
-  json: "application/json",
-  excel:
-    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-  pdf: "application/pdf",
+  json: 'application/json',
+  excel: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  pdf: 'application/pdf',
 };
 
 function fechaDeHoy(): string {
@@ -57,40 +61,42 @@ function nombreDesdeCabecera(valor: string | null): string | null {
  * descarga con un `Blob` temporal. Los errores de la API se traducen a
  * `ErrorApi`, igual que el resto de las llamadas de la SPA.
  */
-export async function descargarExportacion(
-  opciones: OpcionesExportacion,
-): Promise<void> {
+export async function descargarExportacion(opciones: OpcionesExportacion): Promise<void> {
   const parametros = new URLSearchParams({
     formato: opciones.formato,
     entidad: opciones.entidad,
   });
-  if (opciones.id) parametros.set("id", opciones.id);
+  if (opciones.id) parametros.set('id', opciones.id);
+  for (const [clave, valor] of Object.entries(opciones.consulta ?? {})) {
+    if (!valor) continue;
+    parametros.set(clave, valor);
+  }
 
-  const url = `${urlApi("/v1/export")}?${parametros.toString()}`;
+  const url = `${urlApi('/v1/export')}?${parametros.toString()}`;
 
   let respuesta: Response;
   try {
     respuesta = await fetch(url, {
-      credentials: "include",
+      credentials: 'include',
       headers: { Accept: ACEPTADOS[opciones.formato] },
     });
   } catch {
-    throw new ErrorApi("No hay conexión con el servidor.", 0, "CLIENT_ERROR");
+    throw new ErrorApi('No hay conexión con el servidor.', 0, 'CLIENT_ERROR');
   }
 
   if (!respuesta.ok) {
-    let detalle = "No se pudo generar la exportación.";
-    let codigo = "HTTP_ERROR";
+    let detalle = 'No se pudo generar la exportación.';
+    let codigo = 'HTTP_ERROR';
 
     try {
       const cuerpo = (await respuesta.json()) as {
         detail?: unknown;
         code?: unknown;
       };
-      if (typeof cuerpo.detail === "string" && cuerpo.detail) {
+      if (typeof cuerpo.detail === 'string' && cuerpo.detail) {
         detalle = cuerpo.detail;
       }
-      if (typeof cuerpo.code === "string" && cuerpo.code) {
+      if (typeof cuerpo.code === 'string' && cuerpo.code) {
         codigo = cuerpo.code;
       }
     } catch {
@@ -102,14 +108,14 @@ export async function descargarExportacion(
 
   const archivo = await respuesta.blob();
   const nombre =
-    nombreDesdeCabecera(respuesta.headers.get("content-disposition")) ??
+    nombreDesdeCabecera(respuesta.headers.get('content-disposition')) ??
     `avisa_${opciones.entidad}_${fechaDeHoy()}.${EXTENSIONES[opciones.formato]}`;
 
-  const enlace = document.createElement("a");
+  const enlace = document.createElement('a');
   const objeto = URL.createObjectURL(archivo);
   enlace.href = objeto;
   enlace.download = nombre;
-  enlace.rel = "noopener";
+  enlace.rel = 'noopener';
   document.body.appendChild(enlace);
   enlace.click();
   enlace.remove();

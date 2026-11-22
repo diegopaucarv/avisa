@@ -40,7 +40,15 @@ export type Caso = {
   titulo: string;
   resumen: string | null;
   avance: number | null;
+  /**
+   * Instante de la última actualización (`fecha_ultima_actualizacion`). Es la
+   * hora de carga del legado para casi todas las filas, así que **no** debe
+   * rotularse como «Actualizado» en la UI. Queda reservado al historial de
+   * estados (item 41); hoy ninguna plantilla lo consume.
+   */
   actualizado: string | null;
+  /** Fecha real del caso (`fecha_inicio`), no la de carga del legado. */
+  inicio: string | null;
   region: string | null;
   estado: EstadoCaso;
   /** Riesgo del caso. Se recalcula en el caso, no se hereda de la alerta. */
@@ -55,4 +63,14 @@ export type Caso = {
   origen: OrigenDato;
   clasificacion: number;
   anulado: boolean;
+  /** ISO de la anulación lógica; `null` mientras el registro está activo. */
+  anuladoEn: string | null;
+  /** Motivo declarado al anular; sólo se puebla en la papelera. */
+  motivoAnulacion: string | null;
+  /** Usuario que anuló (id); sólo se puebla en la papelera. */
+  anuladoPor: string | null;
+  /** Nombre legible de quien anuló; `null` si no se puede resolver. */
+  anuladoPorNombre: string | null;
+  /** Lote de anulación al que pertenece la fila. */
+  anulacionId: string | null;
 };

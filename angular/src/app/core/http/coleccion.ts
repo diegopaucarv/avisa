@@ -23,7 +23,7 @@ export type PeticionPagina = {
 export const TAMANO_PAGINA = 25;
 
 function esRegistro(valor: unknown): valor is Record<string, unknown> {
-  return typeof valor === "object" && valor !== null;
+  return typeof valor === 'object' && valor !== null;
 }
 
 function leer(objeto: Record<string, unknown>, claves: string[]): unknown {
@@ -34,7 +34,7 @@ function leer(objeto: Record<string, unknown>, claves: string[]): unknown {
 }
 
 function numero(valor: unknown, respaldo: number): number {
-  return typeof valor === "number" && Number.isFinite(valor) ? valor : respaldo;
+  return typeof valor === 'number' && Number.isFinite(valor) ? valor : respaldo;
 }
 
 /** Normaliza un sobre paginado o una lista suelta. */
@@ -60,16 +60,16 @@ export function normalizarColeccion<T>(bruto: unknown): Coleccion<T> {
     };
   }
 
-  const crudos = leer(bruto, ["elementos", "items", "data"]);
+  const crudos = leer(bruto, ['elementos', 'items', 'data']);
   const elementos = Array.isArray(crudos) ? (crudos as T[]) : [];
-  const generadoEn = leer(bruto, ["generadoEn", "generatedAt"]);
+  const generadoEn = leer(bruto, ['generadoEn', 'generatedAt']);
 
   return {
     elementos,
-    total: numero(leer(bruto, ["total"]), elementos.length),
-    pagina: numero(leer(bruto, ["pagina", "page"]), 1),
-    tamanoPagina: numero(leer(bruto, ["tamanoPagina", "pageSize"]), TAMANO_PAGINA),
-    generadoEn: typeof generadoEn === "string" ? generadoEn : null,
+    total: numero(leer(bruto, ['total']), elementos.length),
+    pagina: numero(leer(bruto, ['pagina', 'page']), 1),
+    tamanoPagina: numero(leer(bruto, ['tamanoPagina', 'pageSize']), TAMANO_PAGINA),
+    generadoEn: typeof generadoEn === 'string' ? generadoEn : null,
   };
 }
 
@@ -96,18 +96,35 @@ export function urlConParametros(
   const busqueda = new URLSearchParams();
 
   for (const [clave, valor] of Object.entries(parametros)) {
-    if (valor === null || valor === undefined || valor === "") continue;
+    if (valor === null || valor === undefined || valor === '') continue;
     busqueda.set(clave, String(valor));
   }
 
   const texto = busqueda.toString();
   if (!texto) return ruta;
-  return `${ruta}${ruta.includes("?") ? "&" : "?"}${texto}`;
+  return `${ruta}${ruta.includes('?') ? '&' : '?'}${texto}`;
+}
+
+/**
+ * Mapa de parámetros sin valores vacíos, para reenviar sólo los filtros que
+ * están realmente activos (por ejemplo, a la exportación).
+ */
+export function parametrosConValor(
+  parametros: Record<string, string | number | null | undefined>,
+): Record<string, string> {
+  const resultado: Record<string, string> = {};
+
+  for (const [clave, valor] of Object.entries(parametros)) {
+    if (valor === null || valor === undefined || valor === '') continue;
+    resultado[clave] = String(valor);
+  }
+
+  return resultado;
 }
 
 /** Rango `desde–hasta` de la página actual, para el pie de tabla. */
 export function rangoPagina(
-  coleccion: Pick<Coleccion<unknown>, "pagina" | "tamanoPagina" | "total">,
+  coleccion: Pick<Coleccion<unknown>, 'pagina' | 'tamanoPagina' | 'total'>,
 ): { desde: number; hasta: number } {
   if (coleccion.total === 0) return { desde: 0, hasta: 0 };
   const desde = (coleccion.pagina - 1) * coleccion.tamanoPagina + 1;
@@ -116,7 +133,7 @@ export function rangoPagina(
 }
 
 export function totalPaginas(
-  coleccion: Pick<Coleccion<unknown>, "tamanoPagina" | "total">,
+  coleccion: Pick<Coleccion<unknown>, 'tamanoPagina' | 'total'>,
 ): number {
   if (coleccion.tamanoPagina <= 0) return 1;
   return Math.max(1, Math.ceil(coleccion.total / coleccion.tamanoPagina));

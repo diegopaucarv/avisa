@@ -162,7 +162,7 @@ export class DireccionPage {
 
   private readonly casosTotal = this.contarCasos({});
 
-  private readonly casosActivosRec = this.contarCasos({ estado: 'Activo' });
+  private readonly casosActivosRec = this.contarCasos({ abiertos: 'true' });
 
   private readonly alertasRec = consulta<number>({
     fuente: () => urlConParametros(urlApi('/v1/alerts'), paramsDePagina({ pagina: 1, tamano: 1 })),

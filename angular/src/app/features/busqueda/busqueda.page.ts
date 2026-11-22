@@ -161,6 +161,34 @@ const FILTROS_INICIALES: FiltrosBusqueda = {
       white-space: nowrap;
     }
 
+    .search-result-dato {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 4px;
+      min-width: 0;
+    }
+
+    .search-result-dato-etiqueta {
+      color: #a3aeb8;
+      font-size: 8px;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+    }
+
+    .search-result-region {
+      color: #7f8c98;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .search-result-destino {
+      flex: none;
+      margin-top: 6px;
+      color: #9aa5ae;
+      font-size: 9px;
+      white-space: nowrap;
+    }
+
     .search-result-flecha {
       flex: none;
       color: #9aa5ae;

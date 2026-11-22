@@ -37,6 +37,10 @@ const COMMITMENT_COLUMNS = `
   cmp.es_validado_humano as validado,
   cmp.nivel_clasificacion as clasificacion,
   cmp.anulado_en as anulado_en,
+  cmp.motivo_anulacion as motivo_anulacion,
+  cmp.anulado_por as anulado_por,
+  ua.nombre as anulado_por_nombre,
+  cmp.anulacion_id as anulacion_id,
   to_char(current_date, 'YYYY-MM-DD') as today
 `;
 
@@ -47,6 +51,7 @@ const COMMITMENT_FROM = `
   left join core.cat_unidades_organicas uo on uo.id = cmp.unidad_responsable_id
   left join core.cat_alcances_geograficos ag on ag.id = cmp.alcance_id
   left join core.cat_tematicas te on te.id = cmp.tematica_id
+  left join core.usuarios ua on ua.id = cmp.anulado_por
 `;
 
 /**
@@ -183,6 +188,14 @@ export type CommitmentListItem = {
   clasificacion: number | null;
   /** Fecha de anulación en ISO 8601, o `null` si el registro está vigente. */
   anuladoEn: string | null;
+  /** Motivo declarado al anular; sólo se puebla en la papelera. */
+  motivoAnulacion: string | null;
+  /** Usuario que anuló (id); sólo se puebla en la papelera. */
+  anuladoPor: string | null;
+  /** Nombre legible de quien anuló; `null` si no se puede resolver. */
+  anuladoPorNombre: string | null;
+  /** Lote de anulación al que pertenece la fila. */
+  anulacionId: string | null;
   hitos: CommitmentHito[];
   proximoHito: CommitmentProximoHito | null;
   vencido: boolean;
@@ -302,6 +315,10 @@ function mapItem(row: CommitmentRow): CommitmentListItem {
     validado: row.validado,
     clasificacion: row.clasificacion,
     anuladoEn: isoOrNull(row.anulado_en),
+    motivoAnulacion: row.motivo_anulacion,
+    anuladoPor: row.anulado_por,
+    anuladoPorNombre: row.anulado_por_nombre,
+    anulacionId: row.anulacion_id,
     hitos,
     proximoHito,
     // Comparación lexicográfica de YYYY-MM-DD es equivalente a comparar fechas.

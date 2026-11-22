@@ -43,13 +43,18 @@ const DOCUMENT_SELECT = `
   d.responsable_usuario_id,
   d.reunion_id,
   d.distrito_id,
-  d.anulado_en as anulado_en
+  d.anulado_en as anulado_en,
+  d.motivo_anulacion as motivo_anulacion,
+  d.anulado_por as anulado_por,
+  ua.nombre as anulado_por_nombre,
+  d.anulacion_id as anulacion_id
 `;
 
 const DOCUMENT_FROM = `
   from core.documentos d
   left join core.cat_tipos_documento td on td.id = d.tipo_id
   left join core.casos c on c.id = d.caso_id
+  left join core.usuarios ua on ua.id = d.anulado_por
 `;
 
 export type DocumentListQuery = {
@@ -94,6 +99,14 @@ export type DocumentListItem = {
   distritoId: number | null;
   /** Fecha de anulación en ISO 8601, o `null` si el documento está vigente. */
   anuladoEn: string | null;
+  /** Motivo declarado al anular; sólo se puebla en la papelera. */
+  motivoAnulacion: string | null;
+  /** Usuario que anuló (id); sólo se puebla en la papelera. */
+  anuladoPor: string | null;
+  /** Nombre legible de quien anuló; `null` si no se puede resolver. */
+  anuladoPorNombre: string | null;
+  /** Lote de anulación al que pertenece la fila. */
+  anulacionId: string | null;
 };
 
 export type DocumentListResult = {
@@ -135,6 +148,10 @@ function mapDocument(row: Record<string, unknown>): DocumentListItem {
     reunionId: row.reunion_id as string | null,
     distritoId: row.distrito_id as number | null,
     anuladoEn: isoOrNull(row.anulado_en),
+    motivoAnulacion: row.motivo_anulacion as string | null,
+    anuladoPor: row.anulado_por as string | null,
+    anuladoPorNombre: row.anulado_por_nombre as string | null,
+    anulacionId: row.anulacion_id as string | null,
   };
 }
 

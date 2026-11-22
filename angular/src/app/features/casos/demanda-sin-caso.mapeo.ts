@@ -10,12 +10,7 @@
 import { normalizarColeccion, type Coleccion } from '../../core/http/coleccion';
 import { booleano, esRegistro, numero, texto } from '../../dominio/mapeo';
 
-export const ESTADOS_DEMANDA = [
-  'Pendiente',
-  'En proceso',
-  'Atendida',
-  'Desestimada',
-] as const;
+export const ESTADOS_DEMANDA = ['Pendiente', 'En proceso', 'Atendida', 'Desestimada'] as const;
 
 export type EstadoDemanda = (typeof ESTADOS_DEMANDA)[number];
 
@@ -43,6 +38,16 @@ export type Demanda = {
   clasificacion: number;
   afectaMujeres: boolean;
   documentoOrigenId: string | null;
+  /** ISO de la anulación lógica; `null` mientras la demanda está vigente. */
+  anuladoEn: string | null;
+  /** Motivo declarado al anular; sólo se puebla en la papelera. */
+  motivoAnulacion: string | null;
+  /** Usuario que anuló (id); sólo se puebla en la papelera. */
+  anuladoPor: string | null;
+  /** Nombre legible de quien anuló; `null` si no se puede resolver. */
+  anuladoPorNombre: string | null;
+  /** Lote de anulación al que pertenece la fila. */
+  anulacionId: string | null;
 };
 
 export type ColeccionDemandas = Coleccion<Demanda> & {
@@ -68,10 +73,7 @@ function normalizarClave(valor: string): string {
 export function estadoDemandaDe(valor: string | null): EstadoDemanda {
   if (!valor) return 'Pendiente';
   const clave = normalizarClave(valor);
-  return (
-    ESTADOS_DEMANDA.find((estado) => normalizarClave(estado) === clave) ??
-    'Pendiente'
-  );
+  return ESTADOS_DEMANDA.find((estado) => normalizarClave(estado) === clave) ?? 'Pendiente';
 }
 
 /** Registro de `items[]`: sólo los campos que el repositorio documenta. */
@@ -91,20 +93,19 @@ export function aDemanda(bruto: unknown): Demanda {
     casoTitulo: texto(registro, ['casoTitulo', 'caso_titulo']),
     alertaId: texto(registro, ['alertaId', 'alerta_id']),
     fechaRegistro: texto(registro, ['fechaRegistro', 'fecha_registro']),
-    fechaVencimiento: texto(registro, [
-      'fechaVencimiento',
-      'fecha_vencimiento',
-    ]),
+    fechaVencimiento: texto(registro, ['fechaVencimiento', 'fecha_vencimiento']),
     tematica: texto(registro, ['tematica']),
     origen: texto(registro, ['origen']),
     confianza: numero(registro, ['confianza']),
     validado: booleano(registro, ['validado']),
     clasificacion: numero(registro, ['clasificacion']) ?? 1,
     afectaMujeres: booleano(registro, ['afectaMujeres', 'afecta_mujeres']),
-    documentoOrigenId: texto(registro, [
-      'documentoOrigenId',
-      'documento_origen_id',
-    ]),
+    documentoOrigenId: texto(registro, ['documentoOrigenId', 'documento_origen_id']),
+    anuladoEn: texto(registro, ['anuladoEn', 'anulado_en']),
+    motivoAnulacion: texto(registro, ['motivoAnulacion', 'motivo_anulacion']),
+    anuladoPor: texto(registro, ['anuladoPor', 'anulado_por']),
+    anuladoPorNombre: texto(registro, ['anuladoPorNombre', 'anulado_por_nombre']),
+    anulacionId: texto(registro, ['anulacionId', 'anulacion_id']),
   };
 }
 

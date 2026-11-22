@@ -1,0 +1,2312 @@
+<!doctype html>
+<html lang="es">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Dashboard analítico · mockup AVISA</title>
+        <style>
+            /* ─────────────────────────────────────────────────────────────────────────
+         Tokens y clases copiados de angular/src/styles/global.css (sin cambios).
+         DM Sans/Manrope caen a fuente del sistema si no están instaladas:
+         el mockup no carga webfonts ni depende de un build.
+         ───────────────────────────────────────────────────────────────────────── */
+            :root {
+                --ink: #17283a;
+                --ink-2: #33475b;
+                --muted: #778797;
+                --line: #e6ebef;
+                --paper: #fff;
+                --canvas: #f5f7f8;
+                --blue: #2455a2;
+                --blue-dark: #1d427f;
+                --blue-pale: #eaf1fb;
+                --teal: #397c79;
+                --amber: #aa6a11;
+                --amber-pale: #fff4e2;
+                --red: #ad4d46;
+                --red-pale: #fbeceb;
+                --green: #34785b;
+                --green-pale: #e9f5ef;
+                --font-sans:
+                    "DM Sans", system-ui, -apple-system, "Segoe UI", Arial,
+                    sans-serif;
+                --font-display:
+                    "Manrope", "DM Sans", system-ui, -apple-system, "Segoe UI",
+                    sans-serif;
+            }
+            * {
+                box-sizing: border-box;
+            }
+            html {
+                min-height: 100%;
+                background: var(--canvas);
+            }
+            body {
+                margin: 0;
+                color: var(--ink);
+                font-family: var(--font-sans);
+                font-size: 13px;
+                -webkit-font-smoothing: antialiased;
+            }
+            button,
+            input,
+            select {
+                font: inherit;
+            }
+            button {
+                color: inherit;
+                cursor: pointer;
+            }
+            button:focus-visible,
+            input:focus-visible,
+            select:focus-visible {
+                outline: 3px solid #7aa2e8;
+                outline-offset: 2px;
+            }
+
+            .view-body {
+                display: flex;
+                flex-direction: column;
+                gap: 14px;
+                width: 100%;
+                max-width: 1420px;
+                margin: 0 auto;
+                padding: 27px 34px 50px;
+                box-sizing: border-box;
+            }
+            .view-head {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: flex-start;
+                justify-content: space-between;
+                gap: 16px;
+            }
+            .view-head h1 {
+                margin: 0;
+                color: var(--ink);
+                font: 700 22px/1.3 var(--font-display);
+                letter-spacing: -0.65px;
+            }
+            .view-subtitle {
+                max-width: 780px;
+                margin: 6px 0 0;
+                color: var(--muted);
+                font-size: 11px;
+                line-height: 1.6;
+            }
+            .view-actions {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                flex-wrap: wrap;
+            }
+
+            .filter-bar {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                margin-bottom: 14px;
+            }
+            .filter-bar-wrap {
+                flex-wrap: wrap;
+                row-gap: 10px;
+            }
+            .search-field {
+                height: 35px;
+                min-width: 210px;
+                max-width: 440px;
+                flex: 1;
+                padding: 0 10px;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                border: 1px solid #e0e5e9;
+                border-radius: 6px;
+                background: #fff;
+                color: #8996a1;
+            }
+            .search-field input {
+                width: 100%;
+                min-width: 0;
+                border: 0;
+                outline: 0 !important;
+                background: transparent;
+                color: var(--ink);
+                font-size: 10px;
+            }
+            .select-filter {
+                height: 35px;
+                padding: 0 9px;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                border: 1px solid #e0e5e9;
+                border-radius: 6px;
+                background: #fff;
+                color: #8b97a1;
+                font-size: 9px;
+            }
+            .select-filter select {
+                max-width: 170px;
+                border: 0;
+                outline: 0;
+                background: transparent;
+                color: #536779;
+                font-size: 10px;
+            }
+            .segmented {
+                display: inline-flex;
+                gap: 2px;
+                padding: 3px;
+                border: 1px solid #e6ecf1;
+                border-radius: 7px;
+                background: #f6f8fa;
+            }
+            .segmented > button {
+                display: inline-flex;
+                align-items: center;
+                gap: 5px;
+                padding: 5px 10px;
+                border: 0;
+                border-radius: 5px;
+                background: transparent;
+                color: #647487;
+                font-size: 9px;
+                font-weight: 600;
+                font-family: inherit;
+                white-space: nowrap;
+                cursor: pointer;
+            }
+            .segmented > button:hover {
+                background: #eef2f7;
+                color: #33465a;
+            }
+            .segmented > button[aria-pressed="true"] {
+                background: #fff;
+                color: #1d4b86;
+                box-shadow: 0 1px 3px rgba(17, 32, 45, 0.12);
+            }
+            .status-badge {
+                width: max-content;
+                display: inline-flex;
+                align-items: center;
+                gap: 5px;
+                padding: 3px 7px;
+                border-radius: 12px;
+                font-size: 9px;
+                white-space: nowrap;
+            }
+            .status-dot {
+                width: 6px;
+                height: 6px;
+                flex: none;
+                border-radius: 50%;
+                background: currentColor;
+            }
+            .risk-label {
+                display: inline-flex;
+                align-items: center;
+                padding: 4px 8px;
+                border-radius: 999px;
+                font-size: 10px;
+                font-weight: 700;
+            }
+            .risk-alto {
+                background: #fbeceb;
+                color: #ad4d46;
+            }
+            .risk-moderado {
+                background: #fff4e2;
+                color: #93621d;
+            }
+            .risk-bajo {
+                background: #e9f5ef;
+                color: #34785b;
+            }
+            .button-primary,
+            .button-secondary,
+            .button-danger,
+            .button-light {
+                min-height: 32px;
+                padding: 0 11px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 6px;
+                border-radius: 6px;
+                font-size: 10px;
+                font-weight: 600;
+                white-space: nowrap;
+            }
+            .button-secondary {
+                border: 1px solid #dce3e8;
+                background: #fff;
+                color: #526577;
+            }
+            .button-secondary:hover {
+                background: #f5f7f8;
+            }
+            .button-primary {
+                border: 1px solid var(--blue);
+                background: var(--blue);
+                color: #fff;
+            }
+            .button-primary:hover {
+                background: var(--blue-dark);
+            }
+            .result-count,
+            .filter-caption {
+                margin-left: auto;
+                color: #94a0a8;
+                font-size: 9px;
+                white-space: nowrap;
+            }
+            .table-wrap {
+                border: 1px solid var(--line);
+                border-radius: 8px;
+                background: #fff;
+                overflow-x: auto;
+            }
+            .data-table {
+                width: 100%;
+                border-collapse: collapse;
+                text-align: left;
+            }
+            .data-table th {
+                height: 38px;
+                padding: 0 11px;
+                border-bottom: 1px solid #edf0f2;
+                color: #97a1aa;
+                font-size: 8px;
+                font-weight: 600;
+                letter-spacing: 0.5px;
+                text-transform: uppercase;
+                white-space: nowrap;
+            }
+            .data-table td {
+                height: 40px;
+                padding: 7px 11px;
+                border-bottom: 1px solid #f0f2f4;
+                color: #687988;
+                font-size: 9px;
+                white-space: nowrap;
+            }
+            .data-table tbody tr:last-child td {
+                border-bottom: 0;
+            }
+            .data-table tfoot td {
+                border-top: 1px solid #e6ebef;
+                background: #fafbfc;
+                color: #465a6c;
+                font-weight: 600;
+            }
+            .data-table td.num,
+            .data-table th.num {
+                text-align: right;
+                font-variant-numeric: tabular-nums;
+            }
+            .table-caption {
+                caption-side: top;
+                padding: 10px 11px 3px;
+                color: #94a0a8;
+                font-size: 9px;
+                line-height: 1.45;
+                text-align: left;
+            }
+            .table-link {
+                padding: 0;
+                border: 0;
+                background: transparent;
+                color: #4c7099;
+                font-size: 9px;
+            }
+            .link-button:hover,
+            .table-link:hover {
+                color: #173e78;
+                text-decoration: underline;
+            }
+            .empty-state {
+                padding: 32px;
+                text-align: center;
+                color: #909ba4;
+                font-size: 10px;
+            }
+            @media (max-width: 720px) {
+                .view-body {
+                    padding: 18px 16px 40px;
+                }
+            }
+
+            /* ─────────────────────────────────────────────────────────────────────────
+         Ayudas propias del mockup (no existen en global.css). No redefinen
+         ninguna clase del sistema: se añaden con nombres nuevos.
+         ───────────────────────────────────────────────────────────────────────── */
+            .anexo-badge {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                height: 26px;
+                padding: 0 10px;
+                border: 1px solid #cddcef;
+                border-radius: 999px;
+                background: var(--blue-pale);
+                color: var(--blue);
+                font-size: 9px;
+                font-weight: 700;
+                letter-spacing: 0.05em;
+                text-transform: uppercase;
+                white-space: nowrap;
+            }
+            .mode-tabs {
+                display: flex;
+                gap: 4px;
+                padding: 4px;
+                border: 1px solid var(--line);
+                border-radius: 9px;
+                background: #fff;
+                width: max-content;
+                max-width: 100%;
+            }
+            .mode-tabs button {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                padding: 8px 14px;
+                border: 0;
+                border-radius: 6px;
+                background: transparent;
+                color: #647487;
+                font-size: 11px;
+                font-weight: 600;
+                white-space: nowrap;
+            }
+            .mode-tabs button:hover {
+                background: #f4f7fa;
+            }
+            .mode-tabs button[aria-selected="true"] {
+                background: var(--blue-pale);
+                color: var(--blue);
+                box-shadow: inset 0 0 0 1px #cddcef;
+            }
+            .mode-tabs .num {
+                font-size: 8px;
+                font-weight: 700;
+                color: #8b97a1;
+                letter-spacing: 0.05em;
+            }
+            .mode-tabs button[aria-selected="true"] .num {
+                color: #5b7fae;
+            }
+            .cut-chip {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                height: 35px;
+                padding: 0 10px;
+                border: 1px dashed #d7dee4;
+                border-radius: 6px;
+                background: #fbfcfd;
+                color: #8b97a1;
+                font-size: 9px;
+                white-space: nowrap;
+            }
+            .cut-chip b {
+                color: #5a6c7d;
+                font-weight: 600;
+            }
+            .grid {
+                display: grid;
+                gap: 14px;
+            }
+            .kpi-grid {
+                grid-template-columns: repeat(4, minmax(0, 1fr));
+            }
+            .two-col {
+                grid-template-columns: 1.02fr 0.98fr;
+                align-items: start;
+            }
+            .three-col {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                align-items: start;
+            }
+            @media (max-width: 1120px) {
+                .kpi-grid {
+                    grid-template-columns: repeat(2, minmax(0, 1fr));
+                }
+                .two-col,
+                .three-col {
+                    grid-template-columns: 1fr;
+                }
+            }
+            .card {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                padding: 14px 15px 12px;
+                border: 1px solid var(--line);
+                border-radius: 9px;
+                background: #fff;
+            }
+            .card-head {
+                display: flex;
+                align-items: flex-start;
+                justify-content: space-between;
+                gap: 10px;
+            }
+            .card-title {
+                margin: 0;
+                color: #2b3d4f;
+                font: 700 12.5px/1.3 var(--font-display);
+                letter-spacing: -0.15px;
+            }
+            .card-sub {
+                margin: 3px 0 0;
+                color: #8b97a1;
+                font-size: 9px;
+                line-height: 1.5;
+            }
+            .tag-mini {
+                flex: none;
+                padding: 3px 7px;
+                border: 1px solid #e6ebef;
+                border-radius: 999px;
+                color: #8b97a1;
+                font-size: 7.5px;
+                font-weight: 700;
+                letter-spacing: 0.06em;
+                text-transform: uppercase;
+                white-space: nowrap;
+            }
+            .kpi-val {
+                color: var(--ink);
+                font: 700 32px/1.02 var(--font-display);
+                letter-spacing: -1.3px;
+            }
+            .kpi-val small {
+                margin-left: 2px;
+                color: #9aa5ae;
+                font-size: 13px;
+                font-weight: 600;
+                letter-spacing: 0;
+            }
+            .kpi-lab {
+                color: #5a6c7d;
+                font-size: 10px;
+                font-weight: 600;
+            }
+            .kpi-note {
+                color: #94a0a8;
+                font-size: 9px;
+                line-height: 1.5;
+            }
+            .meta {
+                display: grid;
+                grid-template-columns: max-content 1fr;
+                gap: 3px 8px;
+                margin: 0;
+                padding-top: 8px;
+                border-top: 1px dashed #edf0f2;
+                color: #5a6c7d;
+                font-size: 8.5px;
+                line-height: 1.45;
+            }
+            .meta dt {
+                color: #9aa5ae;
+                font-size: 7.5px;
+                font-weight: 700;
+                letter-spacing: 0.045em;
+                text-transform: uppercase;
+            }
+            .meta dd {
+                margin: 0;
+            }
+            .meta a {
+                color: #4c7099;
+                text-decoration: none;
+                border-bottom: 1px dotted #b9c9db;
+            }
+            .bars {
+                display: flex;
+                flex-direction: column;
+                gap: 7px;
+            }
+            .bar-row {
+                display: grid;
+                grid-template-columns: 104px 1fr 38px;
+                align-items: center;
+                gap: 8px;
+            }
+            .bar-lab {
+                overflow: hidden;
+                color: #5a6c7d;
+                font-size: 9px;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+            .bar-track {
+                display: flex;
+                height: 9px;
+                overflow: hidden;
+                border-radius: 999px;
+                background: #f0f3f6;
+            }
+            .bar-seg {
+                height: 100%;
+            }
+            .seg-alto {
+                background: #ad4d46;
+            }
+            .seg-mod {
+                background: #c98a33;
+            }
+            .seg-bajo {
+                background: #4c8a6c;
+            }
+            .bar-val {
+                color: #465a6c;
+                font-size: 9px;
+                font-weight: 600;
+                text-align: right;
+                font-variant-numeric: tabular-nums;
+            }
+            .legend {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 12px;
+                color: #77878f;
+                font-size: 8.5px;
+            }
+            .legend span {
+                display: inline-flex;
+                align-items: center;
+                gap: 5px;
+            }
+            .legend i {
+                display: inline-block;
+                width: 8px;
+                height: 8px;
+                border-radius: 2px;
+            }
+            .chart-empty {
+                padding: 26px 18px;
+                border: 1px dashed #d7dee4;
+                border-radius: 8px;
+                background: #fafbfc;
+                color: #8b97a1;
+                font-size: 10px;
+                line-height: 1.6;
+                text-align: center;
+            }
+            .chart-empty strong {
+                display: block;
+                margin-bottom: 4px;
+                color: #5a6c7d;
+                font-size: 11px;
+            }
+            .chart-empty code {
+                font-family:
+                    ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+                font-size: 9px;
+            }
+            .flag {
+                display: inline-flex;
+                align-items: center;
+                gap: 5px;
+                padding: 2px 7px;
+                border-radius: 999px;
+                background: var(--amber-pale);
+                color: #93621d;
+                font-size: 7.5px;
+                font-weight: 700;
+                letter-spacing: 0.03em;
+                text-transform: uppercase;
+            }
+            .flag-ok {
+                background: var(--green-pale);
+                color: var(--green);
+            }
+            .flag-off {
+                background: #eef1f4;
+                color: #687988;
+            }
+            .metric-inline {
+                display: flex;
+                align-items: baseline;
+                gap: 8px;
+            }
+            .metric-inline b {
+                color: var(--ink);
+                font: 700 22px/1 var(--font-display);
+                letter-spacing: -0.6px;
+            }
+            .metric-inline span {
+                color: #8b97a1;
+                font-size: 9px;
+            }
+            .mx td,
+            .mx th {
+                text-align: center;
+            }
+            .mx td:first-child,
+            .mx th:first-child {
+                text-align: left;
+            }
+            .cell-zero {
+                color: #c3cbd2;
+            }
+            .series {
+                display: block;
+                width: 100%;
+                height: auto;
+            }
+            .note-list {
+                margin: 0;
+                padding-left: 18px;
+                color: #526577;
+                font-size: 10.5px;
+                line-height: 1.6;
+            }
+            .note-list li {
+                margin: 0 0 6px;
+            }
+            .note-list b {
+                color: #33475b;
+            }
+            .sql-box {
+                border: 1px solid var(--line);
+                border-radius: 7px;
+                background: #fff;
+            }
+            .sql-box > summary {
+                padding: 8px 11px;
+                color: #526577;
+                font-size: 9.5px;
+                font-weight: 600;
+                cursor: pointer;
+            }
+            .sql-box > summary::marker {
+                color: #9aa5ae;
+            }
+            .code-block {
+                margin: 0;
+                padding: 12px 14px;
+                overflow: auto;
+                border-top: 1px solid var(--line);
+                border-radius: 0 0 7px 7px;
+                background: #0f1b2a;
+                color: #d6e2ef;
+                font-family:
+                    ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+                font-size: 9px;
+                line-height: 1.55;
+            }
+            .code-block .cm {
+                color: #7f9bb8;
+            }
+            .meta-line {
+                margin: -4px 2px 0;
+                color: #94a0a8;
+                font-size: 9px;
+            }
+            .meta-line code,
+            .footnote code,
+            .notes code {
+                padding: 1px 4px;
+                border: 1px solid #e6ebef;
+                border-radius: 4px;
+                background: #f2f5f8;
+                color: #33475b;
+                font-family:
+                    ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+                font-size: 9px;
+            }
+            .footnote {
+                margin: 8px 2px 0;
+                color: #94a0a8;
+                font-size: 9px;
+                line-height: 1.6;
+            }
+            .footnote strong {
+                color: #687988;
+                font-weight: 600;
+            }
+            .notes {
+                margin-top: 4px;
+                padding: 18px 20px;
+                border: 1px solid var(--line);
+                border-radius: 8px;
+                background: #fff;
+            }
+            .notes h2 {
+                margin: 0 0 10px;
+                color: var(--ink);
+                font: 700 16px/1.3 var(--font-display);
+                letter-spacing: -0.3px;
+            }
+            .notes h3 {
+                margin: 18px 0 6px;
+                color: #465a6c;
+                font: 700 11px/1.3 var(--font-display);
+                letter-spacing: 0.03em;
+                text-transform: uppercase;
+            }
+            .notes ol,
+            .notes ul {
+                margin: 0;
+                padding-left: 20px;
+                color: #526577;
+                font-size: 10.5px;
+                line-height: 1.6;
+            }
+            .notes li {
+                margin: 0 0 7px;
+            }
+            .notes li:last-child {
+                margin-bottom: 0;
+            }
+            .notes p {
+                margin: 0 0 8px;
+                color: #526577;
+                font-size: 10.5px;
+                line-height: 1.6;
+            }
+            .notes b {
+                color: #33475b;
+            }
+            .vocab {
+                display: grid;
+                grid-template-columns: max-content 1fr;
+                gap: 4px 14px;
+                margin: 2px 0 0;
+                color: #526577;
+                font-size: 10.5px;
+                line-height: 1.5;
+            }
+            .vocab dt {
+                color: #687988;
+                font-weight: 600;
+            }
+            .vocab dd {
+                margin: 0;
+            }
+            .print-sheet {
+                max-width: 980px;
+                margin: 24px auto 60px;
+                padding: 30px 34px 34px;
+                border: 1px solid var(--line);
+                border-radius: 8px;
+                background: #fff;
+            }
+            .print-sheet[hidden] {
+                display: none;
+            }
+            .print-sheet h2 {
+                margin: 0;
+                color: var(--ink);
+                font: 700 20px/1.25 var(--font-display);
+                letter-spacing: -0.5px;
+            }
+            .print-sheet .ps-meta {
+                margin: 6px 0 16px;
+                color: #77878f;
+                font-size: 10px;
+                line-height: 1.6;
+            }
+            .print-sheet h3 {
+                margin: 20px 0 6px;
+                color: #465a6c;
+                font: 700 11px/1.3 var(--font-display);
+                letter-spacing: 0.04em;
+                text-transform: uppercase;
+            }
+            .print-sheet .ps-kpis {
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 10px;
+                margin: 10px 0 4px;
+            }
+            .print-sheet .ps-kpi {
+                padding: 9px 11px;
+                border: 1px solid var(--line);
+                border-radius: 6px;
+            }
+            .print-sheet .ps-kpi b {
+                display: block;
+                font: 700 19px/1.1 var(--font-display);
+                color: var(--ink);
+            }
+            .print-sheet .ps-kpi span {
+                color: #77878f;
+                font-size: 9px;
+            }
+            .print-sheet table {
+                width: 100%;
+                border-collapse: collapse;
+                font-size: 9.5px;
+            }
+            .print-sheet th,
+            .print-sheet td {
+                padding: 6px 8px;
+                border-bottom: 1px solid #eef1f4;
+                text-align: left;
+                color: #526577;
+            }
+            .print-sheet th {
+                color: #8b97a1;
+                font-size: 8px;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+            }
+            .print-sheet td.num,
+            .print-sheet th.num {
+                text-align: right;
+            }
+            .print-sheet .ps-foot {
+                margin-top: 18px;
+                padding-top: 10px;
+                border-top: 1px solid var(--line);
+                color: #94a0a8;
+                font-size: 8.5px;
+                line-height: 1.6;
+            }
+            @media print {
+                body {
+                    background: #fff;
+                }
+                .view-body {
+                    display: none !important;
+                }
+                .print-sheet,
+                .print-sheet[hidden] {
+                    display: block !important;
+                    max-width: none;
+                    margin: 0;
+                    padding: 0;
+                    border: 0;
+                }
+                .print-sheet a {
+                    color: inherit;
+                    text-decoration: none;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <main class="view-body">
+            <header class="view-head">
+                <div>
+                    <h1>Dashboard analítico</h1>
+                    <p class="view-subtitle">
+                        Dos lecturas del mismo conjunto de métricas: el
+                        <b>Panorama de Dirección</b> (item 52) mira la
+                        institución y su desglose regional; el
+                        <b>Panel de operación OAIPCS</b> (item 85) mira la cola
+                        de trabajo y la capacidad del equipo. Todos los valores
+                        son agregados reales de una consulta de solo lectura
+                        ejecutada el 22.11.2026; lo que no existe se marca «—» y
+                        no se estima.
+                    </p>
+                </div>
+                <div class="view-actions">
+                    <span class="anexo-badge">Items 51 · 52 · 57 · 85</span>
+                    <button type="button" class="button-secondary" id="btn-print">
+                        Preparar hoja de impresión
+                    </button>
+                </div>
+            </header>
+
+            <nav class="mode-tabs" role="tablist" aria-label="Modo del dashboard">
+                <button
+                    type="button"
+                    role="tab"
+                    id="tab-direccion"
+                    aria-selected="true"
+                    aria-controls="panel-direccion"
+                    data-mode="direccion"
+                >
+                    Panorama de Dirección <span class="num">ITEM 52</span>
+                </button>
+                <button
+                    type="button"
+                    role="tab"
+                    id="tab-oaipcs"
+                    aria-selected="false"
+                    aria-controls="panel-oaipcs"
+                    data-mode="oaipcs"
+                >
+                    Panel de operación OAIPCS <span class="num">ITEM 85</span>
+                </button>
+            </nav>
+
+            <div class="filter-bar filter-bar-wrap">
+                <label class="select-filter">
+                    <span>Región</span>
+                    <select id="f-region" aria-label="Filtrar por región">
+                        <option value="*">Todas las regiones</option>
+                    </select>
+                </label>
+                <label class="select-filter">
+                    <span>Riesgo</span>
+                    <select id="f-riesgo" aria-label="Filtrar por nivel de riesgo">
+                        <option value="*">Todos</option>
+                        <option value="Alto">Alto</option>
+                        <option value="Moderado">Moderado</option>
+                        <option value="Bajo">Bajo</option>
+                    </select>
+                </label>
+                <span class="cut-chip" title="Fecha de la consulta de solo lectura">
+                    Corte de datos <b>22.11.2026</b> · última alerta 13.08.2026
+                </span>
+                <span class="result-count" id="filtro-estado"
+                    >Sin filtro regional</span
+                >
+            </div>
+
+            <!-- ───────────────────────── PANORAMA DE DIRECCIÓN ───────────────────────── -->
+            <section
+                id="panel-direccion"
+                role="tabpanel"
+                aria-labelledby="tab-direccion"
+            >
+                <div class="grid kpi-grid">
+                    <article class="card">
+                        <div class="card-head">
+                            <div>
+                                <h2 class="card-title">Casos vigentes</h2>
+                                <p class="card-sub">
+                                    Casos no anulados en el sistema.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="kpi-val">34</div>
+                        <div class="kpi-note">
+                            35 filas en <code>core.casos</code>; 1 anulado
+                            (<code>CS-MI-ITE-2026-02</code>, no visible con
+                            <code>security_invoker</code>).
+                        </div>
+                        <dl class="meta">
+                            <dt>Definición</dt>
+                            <dd>Conteo de casos con <code>anulado_en IS NULL</code>.</dd>
+                            <dt>Filtros</dt>
+                            <dd>Ninguno (total institucional).</dd>
+                            <dt>Fuente</dt>
+                            <dd><a href="#src-casos">core.casos</a> · Anexo 2</dd>
+                            <dt>Corte</dt>
+                            <dd>22.11.2026 · alta máxima de caso 01.05.2026</dd>
+                        </dl>
+                    </article>
+
+                    <article class="card">
+                        <div class="card-head">
+                            <div>
+                                <h2 class="card-title">Casos en riesgo Alto</h2>
+                                <p class="card-sub">
+                                    Nivel de riesgo del caso (no de la alerta).
+                                </p>
+                            </div>
+                        </div>
+                        <div class="kpi-val">1 <small>/ 34</small></div>
+                        <div class="kpi-note">
+                            Distribución real: Bajo 20 · Moderado 13 · Alto 1. El
+                            único Alto es de Lima.
+                        </div>
+                        <dl class="meta">
+                            <dt>Definición</dt>
+                            <dd>
+                                Casos con <code>nivel_riesgo_id</code> = Alto,
+                                según <code>core.cat_niveles_riesgo</code>.
+                            </dd>
+                            <dt>Filtros</dt>
+                            <dd>Región y riesgo (afectan el desglose).</dd>
+                            <dt>Fuente</dt>
+                            <dd><a href="#src-casos">core.casos</a></dd>
+                            <dt>Corte</dt>
+                            <dd>22.11.2026</dd>
+                        </dl>
+                    </article>
+
+                    <article class="card">
+                        <div class="card-head">
+                            <div>
+                                <h2 class="card-title">Regiones con casos</h2>
+                                <p class="card-sub">
+                                    Cobertura del registro sobre el país.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="kpi-val">13 <small>/ 25</small></div>
+                        <div class="kpi-note">
+                            80 vínculos caso–región para 34 casos (un caso puede
+                            cubrir varias regiones). 3 casos no tienen región
+                            asignada.
+                        </div>
+                        <dl class="meta">
+                            <dt>Definición</dt>
+                            <dd>
+                                Regiones distintas en
+                                <code>core.caso_regiones</code> con caso vigente.
+                            </dd>
+                            <dt>Filtros</dt>
+                            <dd>Ninguno.</dd>
+                            <dt>Fuente</dt>
+                            <dd>
+                                <a href="#src-regiones">core.caso_regiones</a> ·
+                                <code>core.regiones</code>
+                            </dd>
+                            <dt>Corte</dt>
+                            <dd>22.11.2026</dd>
+                        </dl>
+                    </article>
+
+                    <article class="card">
+                        <div class="card-head">
+                            <div>
+                                <h2 class="card-title">Alertas registradas</h2>
+                                <p class="card-sub">
+                                    Registro histórico de alertas tempranas.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="kpi-val">83</div>
+                        <div class="kpi-note">
+                            33 sin caso vinculado. Ninguna tiene
+                            <code>fecha_validacion</code> ni aprobación: las 83
+                            están en el paso legado <code>5</code>.
+                        </div>
+                        <dl class="meta">
+                            <dt>Definición</dt>
+                            <dd>Filas de <code>core.alertas_tempranas</code>.</dd>
+                            <dt>Filtros</dt>
+                            <dd>Ninguno.</dd>
+                            <dt>Fuente</dt>
+                            <dd><a href="#src-alertas">core.alertas_tempranas</a></dd>
+                            <dt>Corte</dt>
+                            <dd>22.11.2026 · última alerta 13.08.2026</dd>
+                        </dl>
+                    </article>
+                </div>
+
+                <div class="grid two-col" style="margin-top: 14px">
+                    <article class="card">
+                        <div class="card-head">
+                            <div>
+                                <h2 class="card-title">
+                                    Casos vigentes por región
+                                </h2>
+                                <p class="card-sub">
+                                    Barras apiladas por nivel de riesgo; el
+                                    número a la derecha es el total de la región.
+                                </p>
+                            </div>
+                            <span class="tag-mini" id="chart-mode-label"
+                                >Total</span
+                            >
+                        </div>
+                        <div class="legend">
+                            <span><i class="seg-alto"></i>Alto</span>
+                            <span><i class="seg-mod"></i>Moderado</span>
+                            <span><i class="seg-bajo"></i>Bajo</span>
+                        </div>
+                        <figure
+                            class="bars"
+                            id="bars-region"
+                            role="img"
+                            aria-label="Casos vigentes por región: Lima 11, Piura 11, Áncash 7, Arequipa 7, Lambayeque 7, Moquegua 7, Callao 6, Ica 6, Tacna 6, La Libertad 5, Tumbes 4, Loreto 2, Junín 1."
+                            style="margin: 0"
+                        ></figure>
+                        <p class="footnote" style="margin: 0">
+                            Escala común de 0 a 11 casos. Los conteos por región
+                            suman 80 porque un caso puede cubrir varias regiones;
+                            <b>no</b> son una partición de los 34 casos.
+                        </p>
+                        <dl class="meta">
+                            <dt>Definición</dt>
+                            <dd>
+                                Casos vigentes por región; un caso se cuenta en
+                                cada región que cubre.
+                            </dd>
+                            <dt>Filtros</dt>
+                            <dd>Región y riesgo de la barra superior.</dd>
+                            <dt>Fuente</dt>
+                            <dd><a href="#src-regiones">core.caso_regiones</a></dd>
+                            <dt>Corte</dt>
+                            <dd>22.11.2026</dd>
+                        </dl>
+                    </article>
+
+                    <article class="card">
+                        <div class="card-head">
+                            <div>
+                                <h2 class="card-title">Desglose regional</h2>
+                                <p class="card-sub">
+                                    Misma serie que el gráfico, en tabla: es el
+                                    respaldo accesible de las barras.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="table-wrap" style="border: 0">
+                            <table class="data-table" id="tabla-region">
+                                <caption class="table-caption">
+                                    <code>analytics.vw_anexo_02_panorama_regional</code>
+                                    agrupa por región y subsector; aquí se
+                                    agrega el subsector para leer el total
+                                    regional.
+                                </caption>
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Región</th>
+                                        <th scope="col" class="num">Alto</th>
+                                        <th scope="col" class="num">Moderado</th>
+                                        <th scope="col" class="num">Bajo</th>
+                                        <th scope="col" class="num">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabla-region-body"></tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td>13 regiones</td>
+                                        <td class="num">1</td>
+                                        <td class="num">56</td>
+                                        <td class="num">23</td>
+                                        <td class="num">80</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                        <p class="footnote" style="margin: 0">
+                            Suma de vínculos caso–región, no de casos. Los 34
+                            casos incluyen 3 sin región, por eso no coinciden con
+                            el total institucional.
+                        </p>
+                        <dl class="meta">
+                            <dt>Definición</dt>
+                            <dd>Conteo de vínculos por región y riesgo.</dd>
+                            <dt>Filtros</dt>
+                            <dd>Región y riesgo.</dd>
+                            <dt>Fuente</dt>
+                            <dd><a href="#src-regiones">ver consulta</a></dd>
+                            <dt>Corte</dt>
+                            <dd>22.11.2026</dd>
+                        </dl>
+                    </article>
+                </div>
+
+                <div class="grid two-col" style="margin-top: 14px">
+                    <article class="card">
+                        <div class="card-head">
+                            <div>
+                                <h2 class="card-title">
+                                    Alertas por año de reporte
+                                </h2>
+                                <p class="card-sub">
+                                    Serie temporal real (único eje temporal
+                                    completo disponible en el registro).
+                                </p>
+                            </div>
+                            <span class="flag">2026 parcial</span>
+                        </div>
+                        <svg
+                            class="series"
+                            viewBox="0 0 560 190"
+                            role="img"
+                            aria-label="Alertas por año: 2022, 9; 2023, 8; 2024, 15; 2025, 11; 2026, 40. El año 2026 está incompleto: corte al 13 de agosto."
+                        >
+                            <line
+                                x1="50"
+                                y1="150"
+                                x2="520"
+                                y2="150"
+                                stroke="#e6ebef"
+                            />
+                            <line
+                                x1="50"
+                                y1="106.7"
+                                x2="520"
+                                y2="106.7"
+                                stroke="#f0f3f6"
+                            />
+                            <line
+                                x1="50"
+                                y1="63.3"
+                                x2="520"
+                                y2="63.3"
+                                stroke="#f0f3f6"
+                            />
+                            <line
+                                x1="50"
+                                y1="20"
+                                x2="520"
+                                y2="20"
+                                stroke="#f0f3f6"
+                            />
+                            <text x="42" y="153" text-anchor="end" font-size="8" fill="#9aa5ae">0</text>
+                            <text x="42" y="109.7" text-anchor="end" font-size="8" fill="#9aa5ae">15</text>
+                            <text x="42" y="66.3" text-anchor="end" font-size="8" fill="#9aa5ae">30</text>
+                            <text x="42" y="23" text-anchor="end" font-size="8" fill="#9aa5ae">45</text>
+                            <polyline
+                                points="50,124 167.5,126.9 285,106.7 402.5,118.2 520,34.4"
+                                fill="none"
+                                stroke="#2455a2"
+                                stroke-width="2"
+                                stroke-linejoin="round"
+                                stroke-linecap="round"
+                            />
+                            <circle cx="50" cy="124" r="3.5" fill="#2455a2" />
+                            <circle cx="167.5" cy="126.9" r="3.5" fill="#2455a2" />
+                            <circle cx="285" cy="106.7" r="3.5" fill="#2455a2" />
+                            <circle cx="402.5" cy="118.2" r="3.5" fill="#2455a2" />
+                            <circle cx="520" cy="34.4" r="3.5" fill="#ad4d46" />
+                            <text x="50" y="114" text-anchor="middle" font-size="8.5" fill="#465a6c" font-weight="600">9</text>
+                            <text x="167.5" y="117" text-anchor="middle" font-size="8.5" fill="#465a6c" font-weight="600">8</text>
+                            <text x="285" y="97" text-anchor="middle" font-size="8.5" fill="#465a6c" font-weight="600">15</text>
+                            <text x="402.5" y="108" text-anchor="middle" font-size="8.5" fill="#465a6c" font-weight="600">11</text>
+                            <text x="520" y="24" text-anchor="middle" font-size="8.5" fill="#ad4d46" font-weight="700">40*</text>
+                            <text x="50" y="168" text-anchor="middle" font-size="8.5" fill="#8b97a1">2022</text>
+                            <text x="167.5" y="168" text-anchor="middle" font-size="8.5" fill="#8b97a1">2023</text>
+                            <text x="285" y="168" text-anchor="middle" font-size="8.5" fill="#8b97a1">2024</text>
+                            <text x="402.5" y="168" text-anchor="middle" font-size="8.5" fill="#8b97a1">2025</text>
+                            <text x="520" y="168" text-anchor="middle" font-size="8.5" fill="#8b97a1">2026</text>
+                            <text x="520" y="183" text-anchor="end" font-size="7.5" fill="#9aa5ae">* hasta 13.08.2026</text>
+                        </svg>
+                        <p class="footnote" style="margin: 0">
+                            Son conteos de <b>registros por año de reporte</b>, no
+                            tasas ni tendencia de conflictividad. 2026 está
+                            incompleto y no debe compararse con años cerrados;
+                            los años sin registros no significan «cero
+                            conflictos».
+                        </p>
+                        <details class="sql-box">
+                            <summary>Ver la serie como tabla</summary>
+                            <div class="table-wrap" style="border: 0">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Año</th>
+                                            <th scope="col" class="num">Alertas</th>
+                                            <th scope="col">Lectura</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>2022</td>
+                                            <td class="num">9</td>
+                                            <td>año cerrado</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2023</td>
+                                            <td class="num">8</td>
+                                            <td>año cerrado</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2024</td>
+                                            <td class="num">15</td>
+                                            <td>año cerrado</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2025</td>
+                                            <td class="num">11</td>
+                                            <td>año cerrado</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2026</td>
+                                            <td class="num">40</td>
+                                            <td>parcial (hasta 13.08)</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </details>
+                        <dl class="meta">
+                            <dt>Definición</dt>
+                            <dd>
+                                Conteo de alertas por
+                                <code>extract(year from fecha_reporte)</code>.
+                            </dd>
+                            <dt>Filtros</dt>
+                            <dd>Ninguno en el snapshot; el año es el eje.</dd>
+                            <dt>Fuente</dt>
+                            <dd><a href="#src-serie">ver consulta</a></dd>
+                            <dt>Corte</dt>
+                            <dd>22.11.2026 · último reporte 13.08.2026</dd>
+                        </dl>
+                    </article>
+
+                    <article class="card">
+                        <div class="card-head">
+                            <div>
+                                <h2 class="card-title">
+                                    Casos por nivel de conflictividad
+                                </h2>
+                                <p class="card-sub">
+                                    Catálogo congelado de cuatro niveles,
+                                    separado del riesgo.
+                                </p>
+                            </div>
+                        </div>
+                        <figure
+                            class="bars"
+                            role="img"
+                            aria-label="Casos por nivel de conflictividad: Controversia 20, Conflicto social 12, Diferencia 1, Crisis social 0."
+                            style="margin: 0"
+                        >
+                            <div class="bar-row">
+                                <span class="bar-lab">Controversia</span>
+                                <span class="bar-track"
+                                    ><span
+                                        class="bar-seg seg-mod"
+                                        style="width: 100%"
+                                    ></span
+                                ></span>
+                                <span class="bar-val">20</span>
+                            </div>
+                            <div class="bar-row">
+                                <span class="bar-lab">Conflicto social</span>
+                                <span class="bar-track"
+                                    ><span
+                                        class="bar-seg seg-alto"
+                                        style="width: 60%"
+                                    ></span
+                                ></span>
+                                <span class="bar-val">12</span>
+                            </div>
+                            <div class="bar-row">
+                                <span class="bar-lab">Diferencia</span>
+                                <span class="bar-track"
+                                    ><span
+                                        class="bar-seg seg-bajo"
+                                        style="width: 5%"
+                                    ></span
+                                ></span>
+                                <span class="bar-val">1</span>
+                            </div>
+                            <div class="bar-row">
+                                <span class="bar-lab">Crisis social</span>
+                                <span class="bar-track"></span>
+                                <span class="bar-val cell-zero">0</span>
+                            </div>
+                        </figure>
+                        <p class="footnote" style="margin: 0">
+                            «Crisis social» existe en
+                            <code>core.cat_niveles_conflicto</code> pero ningún
+                            caso está clasificado en ese nivel: es un cero real,
+                            no un dato faltante.
+                        </p>
+                        <dl class="meta">
+                            <dt>Definición</dt>
+                            <dd>Casos vigentes por <code>nivel_conflicto_id</code>.</dd>
+                            <dt>Filtros</dt>
+                            <dd>Ninguno (distribución institucional).</dd>
+                            <dt>Fuente</dt>
+                            <dd><a href="#src-casos">core.casos</a></dd>
+                            <dt>Corte</dt>
+                            <dd>22.11.2026</dd>
+                        </dl>
+                    </article>
+                </div>
+
+                <p class="meta-line">
+                    Los tres controles que el item 52 pide para la fuente están
+                    en cada tarjeta: <b>definición</b>, <b>filtros</b> y
+                    <b>fuente enlazable con fecha de corte</b>. La hoja de
+                    impresión se compone desde estas mismas métricas y no
+                    depende solo de <code>window.print()</code>.
+                </p>
+            </section>
+
+            <!-- ───────────────────────── PANEL OAIPCS ───────────────────────── -->
+            <section
+                id="panel-oaipcs"
+                role="tabpanel"
+                aria-labelledby="tab-oaipcs"
+                hidden
+            >
+                <div class="grid two-col">
+                    <article class="card">
+                        <div class="card-head">
+                            <div>
+                                <h2 class="card-title">
+                                    Carga por especialista (punto focal)
+                                </h2>
+                                <p class="card-sub">
+                                    Casos vigentes asignados a cada usuario
+                                    responsable.
+                                </p>
+                            </div>
+                            <span class="flag flag-ok">4 con carga</span>
+                        </div>
+                        <figure
+                            class="bars"
+                            role="img"
+                            aria-label="Casos por especialista: André Jiménez Agapito 14, Peggy Contreras Montes 9, Iván Enrique Ascurra Santillán 8, Esteban Vidal Saldarriaga 3; los otros usuarios tienen 0."
+                            style="margin: 0"
+                        >
+                            <div class="bar-row">
+                                <span class="bar-lab" title="André Jiménez Agapito"
+                                    >A. Jiménez Agapito</span
+                                >
+                                <span class="bar-track"
+                                    ><span
+                                        class="bar-seg seg-mod"
+                                        style="width: 100%"
+                                    ></span
+                                ></span>
+                                <span class="bar-val">14</span>
+                            </div>
+                            <div class="bar-row">
+                                <span class="bar-lab" title="Peggy Contreras Montes"
+                                    >P. Contreras Montes</span
+                                >
+                                <span class="bar-track"
+                                    ><span
+                                        class="bar-seg seg-mod"
+                                        style="width: 64%"
+                                    ></span
+                                ></span>
+                                <span class="bar-val">9</span>
+                            </div>
+                            <div class="bar-row">
+                                <span class="bar-lab" title="Iván Enrique Ascurra Santillán"
+                                    >I. Ascurra Santillán</span
+                                >
+                                <span class="bar-track"
+                                    ><span
+                                        class="bar-seg seg-mod"
+                                        style="width: 57%"
+                                    ></span
+                                ></span>
+                                <span class="bar-val">8</span>
+                            </div>
+                            <div class="bar-row">
+                                <span class="bar-lab" title="Esteban Vidal Saldarriaga"
+                                    >E. Vidal Saldarriaga</span
+                                >
+                                <span class="bar-track"
+                                    ><span
+                                        class="bar-seg seg-bajo"
+                                        style="width: 21%"
+                                    ></span
+                                ></span>
+                                <span class="bar-val">3</span>
+                            </div>
+                        </figure>
+                        <p class="footnote" style="margin: 0">
+                            <code>core.usuarios</code> tiene 33 filas y solo 4
+                            usuarios concentran los 34 casos; el resto está en 0.
+                            Este indicador mide <b>conteo de casos</b>, no
+                            esfuerzo, horas ni complejidad.
+                        </p>
+                        <dl class="meta">
+                            <dt>Definición</dt>
+                            <dd>
+                                Casos vigentes por
+                                <code>punto_focal_usuario_id</code>.
+                            </dd>
+                            <dt>Filtros</dt>
+                            <dd>Ninguno.</dd>
+                            <dt>Fuente</dt>
+                            <dd><a href="#src-carga">core.casos</a></dd>
+                            <dt>Corte</dt>
+                            <dd>22.11.2026</dd>
+                        </dl>
+                    </article>
+
+                    <article class="card">
+                        <div class="card-head">
+                            <div>
+                                <h2 class="card-title">
+                                    Compromisos vencidos
+                                </h2>
+                                <p class="card-sub">
+                                    Plazo calculado por fecha de vencimiento, no
+                                    por estado de gestión.
+                                </p>
+                            </div>
+                            <span class="flag flag-off">No calculable</span>
+                        </div>
+                        <div class="chart-empty">
+                            <strong>«—» Sin dato para calcular vencimientos</strong>
+                            Los 8 compromisos vigentes están en estado
+                            <b>En proceso</b> y <b>ninguno</b> tiene
+                            <code>fecha_vencimiento</code>. Con la columna vacía
+                            no se puede derivar «vencido» sin inventar la fecha;
+                            por eso la tarjeta queda en estado vacío.
+                        </div>
+                        <p class="footnote" style="margin: 0">
+                            La regla definida sería
+                            <code>fecha_vencimiento &lt; hoy</code> y estado
+                            distinto de <b>Cumplido</b>. Los 12 hitos de
+                            <code>core.hitos_compromiso</code> tampoco aportan
+                            una fecha de vencimiento al compromiso.
+                        </p>
+                        <dl class="meta">
+                            <dt>Definición</dt>
+                            <dd>
+                                Compromisos con <code>fecha_vencimiento</code>
+                                anterior al corte y estado ≠ Cumplido.
+                            </dd>
+                            <dt>Filtros</dt>
+                            <dd>Ninguno (vacío por falta de dato).</dd>
+                            <dt>Fuente</dt>
+                            <dd><a href="#src-compromisos">core.compromisos</a></dd>
+                            <dt>Corte</dt>
+                            <dd>22.11.2026</dd>
+                        </dl>
+                    </article>
+                </div>
+
+                <div class="grid three-col" style="margin-top: 14px">
+                    <article class="card">
+                        <div class="card-head">
+                            <div>
+                                <h2 class="card-title">Señales sin triage</h2>
+                                <p class="card-sub">
+                                    Alertas que todavía no tienen caso
+                                    vinculado.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="metric-inline">
+                            <b>33</b><span>de 83 alertas</span>
+                        </div>
+                        <p class="footnote" style="margin: 0">
+                            Se usa «sin caso» como proxy porque las 83 alertas
+                            comparten <code>paso_actual = 5</code> y ninguna
+                            tiene validación: el pipeline de triage no está
+                            registrado por etapas en el origen.
+                        </p>
+                        <dl class="meta">
+                            <dt>Definición</dt>
+                            <dd>Alertas con <code>caso_id IS NULL</code>.</dd>
+                            <dt>Filtros</dt>
+                            <dd>Ninguno.</dd>
+                            <dt>Fuente</dt>
+                            <dd><a href="#src-alertas">core.alertas_tempranas</a></dd>
+                            <dt>Corte</dt>
+                            <dd>22.11.2026</dd>
+                        </dl>
+                    </article>
+
+                    <article class="card">
+                        <div class="card-head">
+                            <div>
+                                <h2 class="card-title">Cobertura regional</h2>
+                                <p class="card-sub">
+                                    Regiones con al menos un caso vigente.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="metric-inline">
+                            <b>13</b><span>de 25 regiones</span>
+                        </div>
+                        <p class="footnote" style="margin: 0">
+                            12 regiones no tienen casos y 3 casos no tienen región
+                            asignada. La cobertura cuenta regiones, no población ni
+                            superficie: no debe leerse como «% del país cubierto».
+                        </p>
+                        <dl class="meta">
+                            <dt>Definición</dt>
+                            <dd>
+                                Regiones distintas con caso vigente /
+                                <code>count(core.regiones)</code>.
+                            </dd>
+                            <dt>Filtros</dt>
+                            <dd>Ninguno.</dd>
+                            <dt>Fuente</dt>
+                            <dd><a href="#src-regiones">core.caso_regiones</a></dd>
+                            <dt>Corte</dt>
+                            <dd>22.11.2026</dd>
+                        </dl>
+                    </article>
+
+                    <article class="card">
+                        <div class="card-head">
+                            <div>
+                                <h2 class="card-title">
+                                    Tiempo de primera respuesta
+                                </h2>
+                                <p class="card-sub">
+                                    Días entre el inicio del caso y el primer
+                                    hecho registrado.
+                                </p>
+                            </div>
+                            <span class="flag flag-off">No fiable</span>
+                        </div>
+                        <div class="chart-empty">
+                            <strong>«—» No hay serie de respuesta</strong>
+                            Solo 5 de 34 casos tienen hechos en
+                            <code>core.caso_cronologia</code>, y en esos 5 la
+                            fecha del primer hecho es <b>anterior</b> a
+                            <code>fecha_inicio</code> (deltas negativos, promedio
+                            −74 días por fechas del legado). No existe además un
+                            timestamp de «respuesta»: el cálculo no es
+                            defendible.
+                        </div>
+                        <dl class="meta">
+                            <dt>Definición</dt>
+                            <dd>
+                                Pendiente de decisión: falta el evento de
+                                respuesta y la regla de fecha base.
+                            </dd>
+                            <dt>Filtros</dt>
+                            <dd>Ninguno (vacío por falta de serie).</dd>
+                            <dt>Fuente</dt>
+                            <dd>
+                                <a href="#src-cronologia"
+                                    >core.caso_cronologia</a
+                                >
+                            </dd>
+                            <dt>Corte</dt>
+                            <dd>22.11.2026 · último hecho 22.09.2026</dd>
+                        </dl>
+                    </article>
+                </div>
+
+                <article class="card" style="margin-top: 14px">
+                    <div class="card-head">
+                        <div>
+                            <h2 class="card-title">Casos por nivel y riesgo</h2>
+                            <p class="card-sub">
+                                Matriz real de la cola de trabajo: nivel de
+                                conflictividad en filas, riesgo en columnas.
+                            </p>
+                        </div>
+                        <span class="tag-mini">34 casos</span>
+                    </div>
+                    <div class="table-wrap" style="border: 0">
+                        <table class="data-table mx">
+                            <caption class="table-caption">
+                                Cruce de <code>core.cat_niveles_conflicto</code>
+                                y <code>core.cat_niveles_riesgo</code> sobre casos
+                                vigentes. Las celdas en 0 son ceros reales.
+                            </caption>
+                            <thead>
+                                <tr>
+                                    <th scope="col">Nivel de conflictividad</th>
+                                    <th scope="col" class="num">Alto</th>
+                                    <th scope="col" class="num">Moderado</th>
+                                    <th scope="col" class="num">Bajo</th>
+                                    <th scope="col" class="num">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Diferencia</td>
+                                    <td class="num cell-zero">0</td>
+                                    <td class="num cell-zero">0</td>
+                                    <td class="num">1</td>
+                                    <td class="num">1</td>
+                                </tr>
+                                <tr>
+                                    <td>Controversia</td>
+                                    <td class="num">1</td>
+                                    <td class="num">6</td>
+                                    <td class="num">13</td>
+                                    <td class="num">20</td>
+                                </tr>
+                                <tr>
+                                    <td>Conflicto social</td>
+                                    <td class="num cell-zero">0</td>
+                                    <td class="num">7</td>
+                                    <td class="num">5</td>
+                                    <td class="num">12</td>
+                                </tr>
+                                <tr>
+                                    <td>Crisis social</td>
+                                    <td class="num cell-zero">0</td>
+                                    <td class="num cell-zero">0</td>
+                                    <td class="num cell-zero">0</td>
+                                    <td class="num cell-zero">0</td>
+                                </tr>
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td>Total</td>
+                                    <td class="num">1</td>
+                                    <td class="num">13</td>
+                                    <td class="num">20</td>
+                                    <td class="num">34</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    <p class="footnote" style="margin: 0">
+                        La prioridad de atención (Urgente 6 · Moderado 17 · Bajo
+                        11) <b>no</b> se deriva de esta matriz: se muestra el
+                        valor almacenado porque la Guía no define su cálculo.
+                    </p>
+                    <dl class="meta">
+                        <dt>Definición</dt>
+                        <dd>
+                            Conteo de casos vigentes por nivel de conflictividad
+                            y nivel de riesgo.
+                        </dd>
+                        <dt>Filtros</dt>
+                        <dd>Ninguno; es la distribución completa.</dd>
+                        <dt>Fuente</dt>
+                        <dd><a href="#src-casos">core.casos</a></dd>
+                        <dt>Corte</dt>
+                        <dd>22.11.2026</dd>
+                    </dl>
+                </article>
+
+                <p class="meta-line">
+                    El panel OAIPCS no repite el Panorama: aquí la unidad es la
+                    <b>cola de trabajo</b> (casos por especialista, señales sin
+                    caso, compromisos con plazo) y la <b>capacidad del equipo</b>,
+                    no la lectura institucional.
+                </p>
+            </section>
+
+            <!-- ───────────────────────── FUENTES ───────────────────────── -->
+            <section class="notes" id="fuentes" aria-labelledby="fuentes-titulo">
+                <h2 id="fuentes-titulo">Fuentes, filtros y fecha de corte</h2>
+                <p>
+                    Todas las cifras de esta pantalla provienen de una consulta de
+                    <b>solo lectura</b> a la base de AVISA del <b>22.11.2026</b>.
+                    No hay series, promedios ni porcentajes estimados. Las
+                    consultas se listan para que el equipo pueda reproducirlas.
+                </p>
+
+                <details class="sql-box" id="src-casos">
+                    <summary>Casos: totales, estado, nivel, riesgo y prioridad</summary>
+                    <pre class="code-block"><code>SELECT ec.codigo AS estado, count(*)
+  FROM core.casos c
+  JOIN core.cat_estados_caso ec ON ec.id = c.estado_id
+ WHERE c.anulado_en IS NULL
+ GROUP BY 1;
+
+SELECT nc.nombre AS nivel, nr.codigo AS riesgo, pa.codigo AS prioridad,
+       count(*)
+  FROM core.casos c
+  JOIN core.cat_niveles_conflicto nc ON nc.id = c.nivel_conflicto_id
+  JOIN core.cat_niveles_riesgo    nr ON nr.id = c.nivel_riesgo_id
+  JOIN core.cat_prioridades_atencion pa ON pa.id = c.prioridad_id
+ WHERE c.anulado_en IS NULL
+ GROUP BY 1, 2, 3;</code></pre>
+                </details>
+
+                <details class="sql-box" id="src-regiones" style="margin-top: 8px">
+                    <summary>Desglose regional por riesgo</summary>
+                    <pre class="code-block"><code>SELECT r.nombre AS region,
+       count(DISTINCT c.id) FILTER (WHERE nr.codigo = 'Alto')     AS alto,
+       count(DISTINCT c.id) FILTER (WHERE nr.codigo = 'Moderado') AS moderado,
+       count(DISTINCT c.id) FILTER (WHERE nr.codigo = 'Bajo')     AS bajo,
+       count(DISTINCT c.id)                                       AS total
+  FROM core.casos c
+  JOIN core.caso_regiones cr ON cr.caso_id = c.id
+  JOIN core.regiones r       ON r.id = cr.region_id
+  JOIN core.cat_niveles_riesgo nr ON nr.id = c.nivel_riesgo_id
+ WHERE c.anulado_en IS NULL
+ GROUP BY 1
+ ORDER BY total DESC, 1;
+
+<span class="cm">-- 13 regiones; 80 vínculos. 3 casos vigentes no tienen región.</span></code></pre>
+                </details>
+
+                <details class="sql-box" id="src-serie" style="margin-top: 8px">
+                    <summary>Serie temporal de alertas por año</summary>
+                    <pre class="code-block"><code>SELECT extract(year FROM fecha_reporte)::int AS anio, count(*)
+  FROM core.alertas_tempranas
+ GROUP BY 1
+ ORDER BY 1;
+<span class="cm">-- 2022: 9 · 2023: 8 · 2024: 15 · 2025: 11 · 2026: 40
+-- max(fecha_reporte) = 2026-08-13  → 2026 es parcial</span></code></pre>
+                </details>
+
+                <details class="sql-box" id="src-alertas" style="margin-top: 8px">
+                    <summary>Alertas: sin caso, validación y nivel</summary>
+                    <pre class="code-block"><code>SELECT count(*) AS total,
+       count(*) FILTER (WHERE caso_id IS NULL) AS sin_caso,
+       count(fecha_validacion) AS validadas,
+       count(aprobada_en)      AS aprobadas
+  FROM core.alertas_tempranas;
+
+SELECT na.nombre AS nivel, count(*)
+  FROM core.alertas_tempranas a
+  JOIN core.cat_niveles_alerta na ON na.id = a.nivel_alerta_id
+ GROUP BY 1 ORDER BY 2 DESC;
+<span class="cm">-- Inmediato 27 · Táctico 23 · Preventivo 17 · Monitoreo 14</span></code></pre>
+                </details>
+
+                <details class="sql-box" id="src-compromisos" style="margin-top: 8px">
+                    <summary>Compromisos y vencimientos</summary>
+                    <pre class="code-block"><code>SELECT count(*) AS total,
+       count(fecha_vencimiento) AS con_vencimiento,
+       count(*) FILTER (WHERE fecha_vencimiento &lt; current_date) AS vencidos
+  FROM core.compromisos
+ WHERE anulado_en IS NULL;
+<span class="cm">-- total 8 · con_vencimiento 0 · vencidos 0 (no calculable)</span></code></pre>
+                </details>
+
+                <details class="sql-box" id="src-carga" style="margin-top: 8px">
+                    <summary>Carga por punto focal</summary>
+                    <pre class="code-block"><code>SELECT u.nombre, count(c.id) AS casos
+  FROM core.usuarios u
+  LEFT JOIN core.casos c
+         ON c.punto_focal_usuario_id = u.id AND c.anulado_en IS NULL
+ GROUP BY 1
+ ORDER BY 2 DESC;
+<span class="cm">-- 33 usuarios; con carga: 14, 9, 8 y 3.</span></code></pre>
+                </details>
+
+                <details class="sql-box" id="src-cronologia" style="margin-top: 8px">
+                    <summary>Primera respuesta: por qué no se grafica</summary>
+                    <pre class="code-block"><code>SELECT count(DISTINCT caso_id)              AS casos_con_hechos,
+       count(*)                             AS hechos,
+       round(avg(primer - fecha_inicio), 1) AS promedio_dias
+  FROM (
+    SELECT c.id, c.fecha_inicio,
+           (SELECT min(k.fecha_evento)
+              FROM core.caso_cronologia k
+             WHERE k.caso_id = c.id AND k.anulado_en IS NULL) AS primer
+      FROM core.casos c
+     WHERE c.anulado_en IS NULL AND c.fecha_inicio IS NOT NULL
+  ) q
+ WHERE primer IS NOT NULL;
+<span class="cm">-- 5 casos con hechos (80 hechos). promedio_dias = -74.2
+-- deltas negativos: fechas del legado anteriores a fecha_inicio.</span></code></pre>
+                </details>
+            </section>
+
+            <!-- ───────────────────────── NOTAS ───────────────────────── -->
+            <section class="notes" aria-labelledby="notas-titulo">
+                <h2 id="notas-titulo">Notas para el equipo que implemente</h2>
+                <ol>
+                    <li>
+                        Esto es un <b>mockup estático</b>: no existe ruta en la
+                        SPA ni endpoint de agregados. Los números son un
+                        <b>snapshot real</b> del 22.11.2026 y en la implementación
+                        deben llegar por API, nunca cablearse en el cliente.
+                    </li>
+                    <li>
+                        <b>Item 51</b> (biblioteca de gráficos accesible): aquí
+                        se dibujan barras CSS y una serie SVG para no atar el
+                        mockup a un CDN. En producción se reemplazan por los
+                        componentes de gráficos del proyecto (Recharts u
+                        equivalente) con <code>role="img"</code>, resumen
+                        accesible y tabla de datos alternativa —como ya se
+                        incluye aquí—.
+                    </li>
+                    <li>
+                        <b>Item 52</b> (Resumen de Dirección): el desglose
+                        regional es real, la fuente es enlazable y la hoja de
+                        impresión se compone aparte de
+                        <code>window.print()</code>. Falta decidir qué variantes
+                        del módulo se muestran y con qué agregaciones.
+                    </li>
+                    <li>
+                        <b>Item 57</b> (series temporales y sincronización): solo
+                        existe una serie anual de alertas. No hay SLA histórico,
+                        <i>aging</i> ni «última sincronización» global; tampoco
+                        una zona horaria declarada. El mockup no los simula.
+                    </li>
+                    <li>
+                        <b>Item 85</b> (Panel OAIPCS): carga, nivel/riesgo,
+                        señales sin caso y cobertura salen de datos reales.
+                        «Compromisos vencidos» y «tiempo de primera respuesta»
+                        quedan en estado vacío honesto porque el dato no existe.
+                    </li>
+                    <li>
+                        <b>Filtros:</b> Región y Riesgo recalculan la tabla y las
+                        barras regionales con los agregados disponibles. El
+                        snapshot no tiene el cruce caso a caso de todas las
+                        dimensiones, así que no se ofrecen filtros que prometan
+                        intersecciones que la consulta no puede resolver; en
+                        producción los cuatro filtros viajan al endpoint de
+                        agregados.
+                    </li>
+                </ol>
+
+                <h3>Qué falta para implementarlo de verdad</h3>
+                <ul>
+                    <li>
+                        <b>Biblioteca de gráficos accesible</b> integrada en la
+                        SPA, con tabla alternativa y navegación por teclado.
+                    </li>
+                    <li>
+                        <b>Endpoint de agregados</b> (por ejemplo
+                        <code>GET /api/v1/analitica/resumen</code>) que reciba
+                        región, nivel, riesgo, prioridad y rango temporal, y
+                        devuelva la métrica con su fecha de corte.
+                    </li>
+                    <li>
+                        <b>Definición de cada métrica</b> firmada por OAIPCS:
+                        qué cuenta «cobertura», qué es una «señal sin triage» y
+                        cómo se mide la «primera respuesta».
+                    </li>
+                    <li>
+                        <b>Serie temporal instrumentada</b>: registrar el evento
+                        de respuesta, la validación de alertas y la
+                        sincronización por fuente, con zona horaria explícita.
+                    </li>
+                </ul>
+
+                <h3>Qué no debe hacerse</h3>
+                <ul>
+                    <li>
+                        <b>No derivar la prioridad de atención del riesgo</b> ni
+                        pintarla como conclusión: son escalas distintas y la
+                        Guía no define la regla de prioridad. El mockup muestra
+                        el valor almacenado.
+                    </li>
+                    <li>
+                        <b>No inventar tendencias</b> ni completar años sin
+                        registros, ni tratar 2026 como año cerrado. Tampoco
+                        convertir conteos de registros en tasas o porcentajes
+                        de conflictividad.
+                    </li>
+                    <li>
+                        <b>No graficar cifras fijas</b> en el cliente: si el
+                        endpoint falla, la tarjeta debe mostrar error/vacío con
+                        fuente y corte, no un número de respaldo.
+                    </li>
+                </ul>
+
+                <h3>Decisiones de producto pendientes</h3>
+                <ul>
+                    <li>
+                        <b>Cobertura regional:</b> ¿se mide en regiones con
+                        casos (13/25) o en casos con región asignada (31/34)?
+                        Son indicadores distintos y hoy conviven.
+                    </li>
+                    <li>
+                        <b>Señal sin triage:</b> ¿basta «sin caso vinculado» o
+                        se exige el estado de triage del flujo? Hoy las 83
+                        alertas comparten <code>paso_actual = 5</code>.
+                    </li>
+                    <li>
+                        <b>Ventana de la serie:</b> ¿año calendario, últimos 12
+                        meses o acumulado? Afecta la lectura de 2026.
+                    </li>
+                    <li>
+                        <b>Compromisos vencidos:</b> falta cargar
+                        <code>fecha_vencimiento</code> o derivarla del próximo
+                        hito; sin eso la tarjeta no puede existir.
+                    </li>
+                </ul>
+            </section>
+        </main>
+
+        <!-- Hoja de impresión propia: se compone desde las métricas activas. -->
+        <section
+            class="print-sheet"
+            id="hoja-impresion"
+            aria-labelledby="ps-titulo"
+            hidden
+        >
+            <h2 id="ps-titulo">AVISA · Resumen de Dirección</h2>
+            <p class="ps-meta" id="ps-meta"></p>
+            <div class="ps-kpis" id="ps-kpis"></div>
+            <h3>Desglose regional</h3>
+            <div id="ps-region"></div>
+            <h3>Alertas por año de reporte</h3>
+            <div id="ps-serie"></div>
+            <div class="ps-foot" id="ps-foot"></div>
+        </section>
+
+        <script>
+            (function () {
+                "use strict";
+
+                // Snapshot real: consulta de solo lectura del 22.11.2026.
+                var REGIONES = [
+                    { r: "Lima", alto: 1, mod: 5, bajo: 5, total: 11 },
+                    { r: "Piura", alto: 0, mod: 9, bajo: 2, total: 11 },
+                    { r: "Áncash", alto: 0, mod: 6, bajo: 1, total: 7 },
+                    { r: "Arequipa", alto: 0, mod: 5, bajo: 2, total: 7 },
+                    { r: "Lambayeque", alto: 0, mod: 6, bajo: 1, total: 7 },
+                    { r: "Moquegua", alto: 0, mod: 5, bajo: 2, total: 7 },
+                    { r: "Callao", alto: 0, mod: 3, bajo: 3, total: 6 },
+                    { r: "Ica", alto: 0, mod: 3, bajo: 3, total: 6 },
+                    { r: "Tacna", alto: 0, mod: 5, bajo: 1, total: 6 },
+                    { r: "La Libertad", alto: 0, mod: 5, bajo: 0, total: 5 },
+                    { r: "Tumbes", alto: 0, mod: 4, bajo: 0, total: 4 },
+                    { r: "Loreto", alto: 0, mod: 0, bajo: 2, total: 2 },
+                    { r: "Junín", alto: 0, mod: 0, bajo: 1, total: 1 }
+                ];
+                var SERIE = [
+                    { a: 2022, n: 9 },
+                    { a: 2023, n: 8 },
+                    { a: 2024, n: 15 },
+                    { a: 2025, n: 11 },
+                    { a: 2026, n: 40, parcial: true }
+                ];
+
+                var state = { region: "*", riesgo: "*" };
+                var MAX = 11;
+
+                var $ = function (id) {
+                    return document.getElementById(id);
+                };
+
+                function fillRegionOptions() {
+                    var sel = $("f-region");
+                    REGIONES.forEach(function (x) {
+                        var o = document.createElement("option");
+                        o.value = x.r;
+                        o.textContent = x.r;
+                        sel.appendChild(o);
+                    });
+                }
+
+                function rows() {
+                    return REGIONES.filter(function (x) {
+                        return state.region === "*" || x.r === state.region;
+                    });
+                }
+
+                function valueOf(x) {
+                    if (state.riesgo === "Alto") return x.alto;
+                    if (state.riesgo === "Moderado") return x.mod;
+                    if (state.riesgo === "Bajo") return x.bajo;
+                    return x.total;
+                }
+
+                function renderBars() {
+                    var host = $("bars-region");
+                    host.innerHTML = "";
+                    rows().forEach(function (x) {
+                        var total = valueOf(x);
+                        var row = document.createElement("div");
+                        row.className = "bar-row";
+
+                        var lab = document.createElement("span");
+                        lab.className = "bar-lab";
+                        lab.textContent = x.r;
+
+                        var track = document.createElement("span");
+                        track.className = "bar-track";
+                        if (state.riesgo === "*") {
+                            [["alto", "seg-alto"], ["mod", "seg-mod"], ["bajo", "seg-bajo"]].forEach(
+                                function (pair) {
+                                    var seg = document.createElement("span");
+                                    seg.className = "bar-seg " + pair[1];
+                                    seg.style.width = (x[pair[0]] / MAX) * 100 + "%";
+                                    track.appendChild(seg);
+                                }
+                            );
+                        } else {
+                            var seg = document.createElement("span");
+                            seg.className =
+                                "bar-seg " +
+                                (state.riesgo === "Alto"
+                                    ? "seg-alto"
+                                    : state.riesgo === "Moderado"
+                                      ? "seg-mod"
+                                      : "seg-bajo");
+                            seg.style.width = (total / MAX) * 100 + "%";
+                            track.appendChild(seg);
+                        }
+
+                        var val = document.createElement("span");
+                        val.className = "bar-val";
+                        val.textContent = total;
+
+                        row.appendChild(lab);
+                        row.appendChild(track);
+                        row.appendChild(val);
+                        host.appendChild(row);
+                    });
+
+                    var label = $("chart-mode-label");
+                    label.textContent =
+                        state.riesgo === "*" ? "Total" : "Solo " + state.riesgo;
+
+                    var sum = rows().reduce(function (a, x) {
+                        return a + valueOf(x);
+                    }, 0);
+                    host.setAttribute(
+                        "aria-label",
+                        "Casos vigentes por región (" +
+                            (state.riesgo === "*" ? "total" : "riesgo " + state.riesgo) +
+                            "): " +
+                            rows()
+                                .map(function (x) {
+                                    return x.r + " " + valueOf(x);
+                                })
+                                .join(", ") +
+                            "."
+                    );
+                    return sum;
+                }
+
+                function renderTabla() {
+                    var body = $("tabla-region-body");
+                    body.innerHTML = "";
+                    rows().forEach(function (x) {
+                        var tr = document.createElement("tr");
+                        var cells = [
+                            { t: x.r },
+                            { t: x.alto, cls: "num" + (x.alto === 0 ? " cell-zero" : "") },
+                            { t: x.mod, cls: "num" + (x.mod === 0 ? " cell-zero" : "") },
+                            { t: x.bajo, cls: "num" + (x.bajo === 0 ? " cell-zero" : "") },
+                            { t: x.total, cls: "num" }
+                        ];
+                        cells.forEach(function (c) {
+                            var td = document.createElement("td");
+                            td.textContent = c.t;
+                            if (c.cls) td.className = c.cls;
+                            tr.appendChild(td);
+                        });
+                        body.appendChild(tr);
+                    });
+                    var estado = $("filtro-estado");
+                    estado.textContent =
+                        state.region === "*"
+                            ? "Sin filtro regional"
+                            : "Región: " + state.region;
+                }
+
+                function render() {
+                    renderBars();
+                    renderTabla();
+                }
+
+                // Hoja de impresión: se arma desde el estado activo.
+                function buildPrintSheet() {
+                    $("ps-meta").textContent =
+                        "Corte de datos 22.11.2026 · última alerta registrada 13.08.2026 · " +
+                        (state.region === "*"
+                            ? "todas las regiones"
+                            : "región " + state.region) +
+                        " · riesgo " +
+                        (state.riesgo === "*" ? "todos" : state.riesgo) +
+                        " · 34 casos vigentes en total.";
+
+                    var kpis = [
+                        ["34", "casos vigentes"],
+                        ["1", "casos en riesgo Alto"],
+                        ["13 / 25", "regiones con casos"],
+                        ["83", "alertas registradas"]
+                    ];
+                    $("ps-kpis").innerHTML = kpis
+                        .map(function (k) {
+                            return (
+                                '<div class="ps-kpi"><b>' +
+                                k[0] +
+                                "</b><span>" +
+                                k[1] +
+                                "</span></div>"
+                            );
+                        })
+                        .join("");
+
+                    var head =
+                        "<table><thead><tr><th>Región</th><th class='num'>Alto</th>" +
+                        "<th class='num'>Moderado</th><th class='num'>Bajo</th>" +
+                        "<th class='num'>Total</th></tr></thead><tbody>";
+                    var body = rows()
+                        .map(function (x) {
+                            return (
+                                "<tr><td>" +
+                                x.r +
+                                "</td><td class='num'>" +
+                                x.alto +
+                                "</td><td class='num'>" +
+                                x.mod +
+                                "</td><td class='num'>" +
+                                x.bajo +
+                                "</td><td class='num'>" +
+                                x.total +
+                                "</td></tr>"
+                            );
+                        })
+                        .join("");
+                    $("ps-region").innerHTML = head + body + "</tbody></table>";
+
+                    var s =
+                        "<table><thead><tr><th>Año</th><th class='num'>Alertas</th>" +
+                        "<th>Lectura</th></tr></thead><tbody>";
+                    s += SERIE.map(function (x) {
+                        return (
+                            "<tr><td>" +
+                            x.a +
+                            "</td><td class='num'>" +
+                            x.n +
+                            "</td><td>" +
+                            (x.parcial ? "parcial (hasta 13.08)" : "año cerrado") +
+                            "</td></tr>"
+                        );
+                    }).join("");
+                    $("ps-serie").innerHTML = s + "</tbody></table>";
+
+                    $("ps-foot").textContent =
+                        "Fuente: core.casos, core.caso_regiones, core.regiones, " +
+                        "core.alertas_tempranas, core.compromisos (consultas de solo lectura, 22.11.2026). " +
+                        "«—» significa sin dato registrado; no se estima. Los conteos regionales " +
+                        "son vínculos caso–región y suman 80, no 34. Documento de borrador: " +
+                        "no sustituye una salida oficial firmada.";
+                }
+
+                function togglePrintSheet() {
+                    var sheet = $("hoja-impresion");
+                    if (sheet.hidden) {
+                        buildPrintSheet();
+                        sheet.hidden = false;
+                        sheet.scrollIntoView({ behavior: "smooth", block: "start" });
+                        $("btn-print").textContent = "Cerrar hoja de impresión";
+                    } else {
+                        sheet.hidden = true;
+                        $("btn-print").textContent = "Preparar hoja de impresión";
+                    }
+                }
+
+                function setMode(mode) {
+                    ["direccion", "oaipcs"].forEach(function (m) {
+                        var tab = $("tab-" + m);
+                        var panel = $("panel-" + m);
+                        var on = m === mode;
+                        tab.setAttribute("aria-selected", on ? "true" : "false");
+                        tab.setAttribute("tabindex", on ? "0" : "-1");
+                        panel.hidden = !on;
+                    });
+                }
+
+                fillRegionOptions();
+
+                $("f-region").addEventListener("change", function (e) {
+                    state.region = e.target.value;
+                    render();
+                    if (!$("hoja-impresion").hidden) buildPrintSheet();
+                });
+                $("f-riesgo").addEventListener("change", function (e) {
+                    state.riesgo = e.target.value;
+                    render();
+                    if (!$("hoja-impresion").hidden) buildPrintSheet();
+                });
+
+                document.querySelectorAll(".mode-tabs [data-mode]").forEach(function (b) {
+                    b.addEventListener("click", function () {
+                        setMode(b.getAttribute("data-mode"));
+                    });
+                    b.addEventListener("keydown", function (ev) {
+                        if (ev.key === "ArrowRight" || ev.key === "ArrowLeft") {
+                            ev.preventDefault();
+                            setMode(
+                                b.getAttribute("data-mode") === "direccion"
+                                    ? "oaipcs"
+                                    : "direccion"
+                            );
+                            document
+                                .querySelector(
+                                    '.mode-tabs [aria-selected="true"]'
+                                )
+                                .focus();
+                        }
+                    });
+                });
+
+                $("btn-print").addEventListener("click", togglePrintSheet);
+
+                window.addEventListener("beforeprint", function () {
+                    if ($("hoja-impresion").hidden) {
+                        buildPrintSheet();
+                        $("hoja-impresion").hidden = false;
+                    }
+                });
+
+                render();
+            })();
+        </script>
+    </body>
+</html>

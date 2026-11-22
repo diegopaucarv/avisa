@@ -38,8 +38,14 @@ const ESCRIBEN = new Set<string>([
   ROL.curadorPolitica,
 ]);
 
-/** Quién anula (borrado lógico) y restaura. */
-const ANULAN = new Set<string>([ROL.administrador, ROL.direccionOaipcs]);
+/**
+ * Quién anula (borrado lógico) y restaura.
+ *
+ * Réplica de `core.roles.puede_eliminar = true` (parche 15 de la DDL): sólo
+ * `sectorista` y `administrador`. `direccion_oaipcs` edita pero no borra, así
+ * que la UI no debe ofrecerle una acción que la RLS le negaría.
+ */
+const ANULAN = new Set<string>([ROL.administrador, ROL.sectorista]);
 
 /**
  * Quién ve DNI y teléfonos (descifrado habilitado).

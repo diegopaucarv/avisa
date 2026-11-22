@@ -2,6 +2,7 @@ import { ApiError, jsonError } from "@/lib/db/errors";
 import {
   conAliasDePagina,
   jsonOk,
+  leerBooleano,
   leerPagina,
   queryParams,
   requireSession,
@@ -11,7 +12,7 @@ import {
   listCases,
   type CaseListQuery,
 } from "@/lib/db/repos/cases";
-import { withSession } from "@/lib/db/tenant";
+import { puedeAnularRegistros, withSession } from "@/lib/db/tenant";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -19,9 +20,22 @@ export const dynamic = "force-dynamic";
 /**
  * Filtros de listado que llegan por query string. Todos se aplican en SQL
  * dentro de `withSession` (la RLS sigue vigente) y los que apuntan a un
- * catálogo (`estado`, `riesgo`, `prioridad`, `alcance`, `tematica`, `unidad`)
+ * `estado`, `riesgo`, `prioridad`, `alcance`, `tematica`, `unidad`)
  * se validan contra la tabla real: un valor fuera de catálogo responde 422
  * `FILTRO_INVALIDO` en vez de llegar al SQL.
+ *
+ * `anulados=true` lista la **papelera** (casos anulados). Sólo se sirve a un rol
+ * con capacidad de anulación; si no la tiene, responde 403. La consulta se
+ * ejecuta con `verAnulados: true` para que la RLS de `core.casos` deje pasar las
+ * filas anuladas.
+ *
+ * `abiertos=true` se queda con los estados que el catálogo marca como abiertos
+ * (`es_activo`): hoy `Activo` y `En seguimiento`. No se filtra por etiqueta para
+ * que un alta nueva en `Activo` siga contando en los indicadores.
+ *
+ * `conteos=true` no es un filtro: pide que la respuesta incluya los conteos de
+ * los chips de estado (`todos`, `abiertos`, `resueltos`, `archivados`), que se
+ * calculan con los filtros vigentes pero ignorando el propio estado.
  */
 const FILTERS = [
   "q",
@@ -47,9 +61,28 @@ export async function GET(request: Request) {
       if (value) query[key] = value;
     }
 
+    const anulados = leerBooleano(params.get("anulados"));
+    if (anulados) {
+      if (!puedeAnularRegistros(session.roles)) {
+        throw new ApiError(
+          403,
+          "Sin permiso para consultar registros anulados.",
+        );
+      }
+      query.anulados = true;
+    }
+
+    if (leerBooleano(params.get("abiertos"))) query.abiertos = true;
+
+    // `conteos=true` añade al sobre el bloque `conteos` de la barra de estados.
+    // No cambia el listado ni el `total`; sin el parámetro la respuesta es la
+    // misma de siempre.
+    if (leerBooleano(params.get("conteos"))) query.conteos = true;
+
     const result = await withSession(
       { usuarioId: session.uid, rolCodigo: session.rol },
       (client) => listCases(client, query),
+      { verAnulados: anulados },
     );
 
     return jsonOk(conAliasDePagina(result));

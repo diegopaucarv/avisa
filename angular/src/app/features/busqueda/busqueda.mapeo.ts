@@ -8,7 +8,9 @@
  * `tamanoPagina`.
  *
  * `type`/`view` llegan en inglés desde `lib/db/repos/search.ts`; este archivo
- * los traduce a la etiqueta en español y a la ruta interna de la SPA.
+ * los traduce a la etiqueta en español y a la ruta interna de la SPA. El
+ * servidor añade `region` a cada resultado (heredada del caso cuando el
+ * registro no tiene región propia).
  */
 
 import { TAMANO_PAGINA, type Coleccion } from '../../core/http/coleccion';
@@ -29,9 +31,13 @@ export type ResultadoBusqueda = {
   titulo: string;
   subtitulo: string | null;
   codigo: string | null;
+  /** Región del registro; `null` cuando el modelo no la tiene. La tarjeta pone «—». */
+  region: string | null;
   icono: string;
   /** Ruta de la pantalla que muestra el recurso; `null` si el tipo no se reconoce. */
   ruta: string[] | null;
+  /** `true` si `ruta` abre la ficha del registro; `false` si abre su listado. */
+  abreFicha: boolean;
 };
 
 export type ColeccionBusqueda = Coleccion<ResultadoBusqueda>;
@@ -39,40 +45,49 @@ export type ColeccionBusqueda = Coleccion<ResultadoBusqueda>;
 type Definicion = {
   etiqueta: string;
   icono: string;
-  /** El caso tiene ficha propia por código; el resto abre su listado. */
-  ruta: (codigo: string | null) => string[];
+  /** Listado del tipo; destino cuando no hay ficha del registro. */
+  listado: () => string[];
+  /** Ficha del registro. Hoy sólo los casos la tienen (`/casos/:codigo`). */
+  ficha?: (codigo: string | null) => string[] | null;
 };
 
+/**
+ * Sólo el caso tiene pantalla de detalle. Alertas, compromisos, documentos,
+ * actores y demandas no la tienen todavía: se declaran sin `ficha` para que la
+ * tarjeta enlace a su listado y lo anuncie («Ver listado») en vez de fingir que
+ * abre el registro. Añadir esas fichas es trabajo pendiente, no de este cambio.
+ */
 const DEFINICIONES: Record<TipoResultado, Definicion> = {
   case: {
     etiqueta: 'Caso',
     icono: 'casos',
-    ruta: (codigo) => (codigo ? ['/casos', codigo] : ['/casos']),
+    listado: () => ['/casos'],
+    ficha: (codigo) => (codigo ? ['/casos', codigo] : null),
   },
   alert: {
     etiqueta: 'Alerta temprana',
     icono: 'alertas',
-    ruta: () => ['/alertas'],
+    listado: () => ['/alertas'],
   },
   commitment: {
     etiqueta: 'Compromiso',
     icono: 'compromisos',
-    ruta: () => ['/compromisos'],
+    listado: () => ['/compromisos'],
   },
   document: {
     etiqueta: 'Documento',
     icono: 'documentos',
-    ruta: () => ['/documentos'],
+    listado: () => ['/documentos'],
   },
   actor: {
     etiqueta: 'Actor',
     icono: 'actores',
-    ruta: () => ['/directorio', 'actores'],
+    listado: () => ['/directorio', 'actores'],
   },
   demanda: {
     etiqueta: 'Demanda sin caso',
     icono: 'bandeja',
-    ruta: () => ['/casos', 'sin-caso'],
+    listado: () => ['/casos', 'sin-caso'],
   },
 };
 
@@ -87,6 +102,7 @@ export function aResultadoBusqueda(bruto: unknown): ResultadoBusqueda {
   const definicion = esTipo(tipo) ? DEFINICIONES[tipo] : null;
   const codigo = texto(registro, ['code']);
   const id = texto(registro, ['id']) ?? codigo ?? '';
+  const ficha = definicion?.ficha?.(codigo) ?? null;
 
   return {
     clave: `${tipo}:${id}`,
@@ -96,8 +112,10 @@ export function aResultadoBusqueda(bruto: unknown): ResultadoBusqueda {
     titulo: texto(registro, ['title']) ?? 'Sin título',
     subtitulo: texto(registro, ['subtitle']),
     codigo,
+    region: texto(registro, ['region']),
     icono: definicion?.icono ?? 'buscar',
-    ruta: definicion ? definicion.ruta(codigo) : null,
+    ruta: ficha ?? definicion?.listado() ?? null,
+    abreFicha: ficha !== null,
   };
 }
 

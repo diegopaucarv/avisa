@@ -1,6 +1,14 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
+import { AtajosService } from '../../core/atajos/atajos.service';
 import { SesionStore } from '../../core/auth/sesion.store';
 import { ENTORNO } from '../../core/config/entorno';
 import { CapacidadesService } from '../../core/permisos/capacidades.service';
@@ -18,6 +26,8 @@ export class ShellComponent {
   private readonly sesion = inject(SesionStore);
   private readonly capacidades = inject(CapacidadesService);
   private readonly router = inject(Router);
+  private readonly atajos = inject(AtajosService);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly version = ENTORNO.version;
   readonly usuario = this.sesion.usuario;
@@ -25,6 +35,10 @@ export class ShellComponent {
 
   readonly menuAbierto = signal(false);
   readonly perfilAbierto = signal(false);
+
+  constructor() {
+    this.destroyRef.onDestroy(this.atajos.instalar());
+  }
 
   readonly enlacesTrabajo: EnlaceNav[] = [
     { etiqueta: 'Resumen operativo', ruta: '/resumen', icono: 'cuadricula' },
@@ -37,6 +51,13 @@ export class ShellComponent {
     { etiqueta: 'Compromisos', ruta: '/compromisos', icono: 'compromisos' },
     { etiqueta: 'Documentos', ruta: '/documentos', icono: 'documentos' },
     { etiqueta: 'Reportes', ruta: '/reportes', icono: 'actividad' },
+  ];
+
+  /** La papelera sólo se muestra a quien puede anular y restaurar. */
+  readonly puedeVerPapelera = this.capacidades.puedeEliminar;
+
+  readonly enlacesPapelera: EnlaceNav[] = [
+    { etiqueta: 'Papelera', ruta: '/papelera', icono: 'papelera' },
   ];
 
   readonly enlacesDirectorio: EnlaceNav[] = [

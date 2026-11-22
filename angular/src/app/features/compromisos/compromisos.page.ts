@@ -8,6 +8,7 @@ import { urlApi } from '../../core/config/entorno';
 import {
   TAMANO_PAGINA,
   normalizarColeccion,
+  parametrosConValor,
   paramsDePagina,
   rangoPagina,
   urlConParametros,
@@ -18,9 +19,11 @@ import { aErrorApi } from '../../core/http/errores';
 import { CapacidadesService } from '../../core/permisos/capacidades.service';
 import {
   AnularPanelComponent,
+  type ModoAnulacion,
   type ResultadoAnulacion,
 } from '../../shared/ui/anular-panel.component';
 import { ExportarMenuComponent } from '../../shared/ui/exportar-menu.component';
+import { GlosarioComponent } from '../../shared/ui/glosario.component';
 import { IconoComponent } from '../../shared/ui/icono.component';
 import { PaginacionComponent } from '../../shared/ui/paginacion.component';
 import {
@@ -28,7 +31,9 @@ import {
   NIVELES_GOBIERNO,
   TIPOS_COMPROMISO,
   aCompromiso,
+  etiquetaNivelGobierno,
   formatearFecha,
+  formatearFechaHora,
   resolverVencimiento,
   situacionDe,
   type Compromiso,
@@ -46,6 +51,7 @@ type FiltrosCompromisos = {
   tipo: string;
   nivelGobierno: string;
   atiendeGenero: string;
+  ver: VerRegistros;
 };
 
 const GENERO = [
@@ -55,6 +61,9 @@ const GENERO = [
 ] as const;
 
 type ModoVista = 'tabla' | 'calendario';
+
+/** La papelera lista sólo lo anulado; «activos» es la vista de siempre. */
+type VerRegistros = 'activos' | 'anulados';
 
 type MesCalendario = { anio: number; mes: number };
 
@@ -144,6 +153,7 @@ function isoHoy(): string {
   selector: 'app-compromisos',
   imports: [
     IconoComponent,
+    GlosarioComponent,
     PaginacionComponent,
     CompromisoPanelComponent,
     AnularPanelComponent,
@@ -339,6 +349,9 @@ export class CompromisosPage {
   private readonly http = inject(HttpClient);
   private readonly capacidades = inject(CapacidadesService);
 
+  /** La papelera sólo se ofrece a quien puede anular y restaurar. */
+  readonly puedeVerPapelera = this.capacidades.puedeEliminar;
+
   readonly estados = ESTADOS_COMPROMISO as readonly string[];
   readonly tipos = TIPOS_COMPROMISO as readonly string[];
   readonly niveles = NIVELES_GOBIERNO as readonly string[];
@@ -351,6 +364,9 @@ export class CompromisosPage {
   readonly enviandoAnulacion = signal(false);
   readonly errorAnulacion = signal<string | null>(null);
   readonly avisoAnulacion = signal<string | null>(null);
+
+  /** Modo del panel compartido: anular pide motivo, restaurar no. */
+  readonly modoAnulacion = signal<ModoAnulacion>('anular');
 
   /** Último fallo del botón de exportación; vacío si no hubo. */
   readonly exportarError = signal<string | null>(null);
@@ -377,6 +393,7 @@ export class CompromisosPage {
         tipo: params.get('tipo') ?? '',
         nivelGobierno: params.get('nivelGobierno') ?? '',
         atiendeGenero: params.get('atiendeGenero') ?? '',
+        ver: params.get('ver') === 'anulados' ? 'anulados' : 'activos',
       })),
     ),
     {
@@ -388,11 +405,42 @@ export class CompromisosPage {
         tipo: '',
         nivelGobierno: '',
         atiendeGenero: '',
+        ver: 'activos',
       } satisfies FiltrosCompromisos,
     },
   );
 
   readonly filtros = computed(() => this.parametros());
+
+  /**
+   * Filtros, búsqueda y orden vigentes, con los nombres que acepta
+   * `GET /api/v1/commitments`. En el calendario se suman las fechas del mes
+   * visible, que son el rango que la pantalla está consultando.
+   */
+  readonly filtrosExportacion = computed(() => {
+    const filtros = this.filtros();
+    const parametros: Record<string, string | null | undefined> = {
+      q: filtros.q,
+      estado: filtros.estado,
+      tipo: filtros.tipo,
+      nivelGobierno: filtros.nivelGobierno,
+      atiendeGenero: filtros.atiendeGenero,
+    };
+
+    if (this.vistaCalendario()) {
+      const calendario = this.calendario();
+      parametros['vencimiento_desde'] = calendario.desde;
+      parametros['vencimiento_hasta'] = calendario.hasta;
+    }
+
+    return parametrosConValor(parametros);
+  });
+
+  /** `?ver=anulados`: la tabla muestra la papelera y el calendario no aplica. */
+  readonly verPapelera = computed(() => this.parametros().ver === 'anulados');
+
+  /** El calendario no existe para registros anulados. */
+  readonly vistaCalendario = computed(() => !this.verPapelera() && this.modo() === 'calendario');
 
   /**
    * Rejilla del mes visible, de lunes a domingo. Incluye los días de los meses
@@ -413,6 +461,7 @@ export class CompromisosPage {
       const filtros = this.parametros();
       return urlConParametros(urlApi('/v1/commitments'), {
         ...paramsDePagina({ pagina: filtros.pagina, tamano: filtros.tamano }),
+        anulados: filtros.ver === 'anulados' ? 'true' : '',
         q: filtros.q,
         estado: filtros.estado,
         tipo: filtros.tipo,
@@ -443,6 +492,12 @@ export class CompromisosPage {
     return `${this.total()} compromisos · ${rango.desde}–${rango.hasta} · el vencimiento manual prevalece sobre el derivado del próximo hito.`;
   });
 
+  /** Pie de la papelera: sólo lo que devuelve la API, sin estimar nada. */
+  readonly resumenPapelera = computed(() => {
+    const rango = this.rango();
+    return `${this.total()} compromisos anulados · ${rango.desde}–${rango.hasta}`;
+  });
+
   /**
    * El calendario no pagina de 25 en 25: pide el rango completo de la rejilla
    * (con los filtros activos) y se queda con el tope de la API. `total` avisa
@@ -450,7 +505,7 @@ export class CompromisosPage {
    */
   private readonly recursoCalendario = consulta<Coleccion<Compromiso>>({
     fuente: () => {
-      if (this.modo() !== 'calendario') return null;
+      if (!this.vistaCalendario()) return null;
 
       const filtros = this.parametros();
       const rango = this.rejilla();
@@ -605,6 +660,13 @@ export class CompromisosPage {
     this.modo.set(modo);
   }
 
+  /** Cambia entre activos y papelera; reinicia a la primera página. */
+  cambiarVer(ver: VerRegistros): void {
+    this.cerrarPanel();
+    this.cerrarAnulacion();
+    void this.actualizar({ ver, pagina: 1 });
+  }
+
   mesAnterior(): void {
     this.desplazarMes(-1);
   }
@@ -635,7 +697,8 @@ export class CompromisosPage {
   limpiar(): void {
     void this.router.navigate([], {
       relativeTo: this.ruta,
-      queryParams: {},
+      // `ver` no es un filtro: se conserva la pestaña (activos o papelera).
+      queryParams: { ver: this.verPapelera() ? 'anulados' : null },
       replaceUrl: true,
     });
   }
@@ -658,7 +721,7 @@ export class CompromisosPage {
 
   alActualizar(): void {
     this.recurso.recargar();
-    if (this.modo() === 'calendario') this.recursoCalendario.recargar();
+    if (this.vistaCalendario()) this.recursoCalendario.recargar();
   }
 
   /** Anular exige el privilegio de anulación y escritura sobre la clasificación. */
@@ -675,6 +738,21 @@ export class CompromisosPage {
     // El panel del compromiso y el de anulación escuchan Escape en `document`:
     // se deja abierto uno solo.
     this.cerrarPanel();
+    this.modoAnulacion.set('anular');
+    this.compromisoAnulacion.set(compromiso);
+  }
+
+  /**
+   * Restaurar desde la papelera: no pide motivo. No se abre el panel de detalle
+   * porque `GET /v1/commitments/{id}` responde 404 mientras el registro está
+   * anulado; la acción vive en la propia fila.
+   */
+  abrirRestauracion(compromiso: Compromiso): void {
+    if (!compromiso.id || !this.puedeVerPapelera()) return;
+    this.errorAnulacion.set(null);
+    this.avisoAnulacion.set(null);
+    this.cerrarPanel();
+    this.modoAnulacion.set('restaurar');
     this.compromisoAnulacion.set(compromiso);
   }
 
@@ -701,7 +779,7 @@ export class CompromisosPage {
     const id = encodeURIComponent(compromiso.id);
     const peticion = anular
       ? this.http.delete<unknown>(urlApi(`/v1/commitments/${id}`), { body: { motivo } })
-      : this.http.post<unknown>(urlApi(`/v1/commitments/${id}/restaurar`), {});
+      : this.http.post<unknown>(urlApi(`/v1/commitments/${id}/restaurar`), null);
 
     this.enviandoAnulacion.set(true);
     this.errorAnulacion.set(null);
@@ -763,6 +841,15 @@ export class CompromisosPage {
     return formatearFecha(valor);
   }
 
+  /** «Regional» se muestra como GORE; a la API sigue viajando el valor del catálogo. */
+  nivelTexto(valor: string | null | undefined): string {
+    return etiquetaNivelGobierno(valor ?? null);
+  }
+
+  fechaHoraTexto(valor: string | null | undefined): string {
+    return formatearFechaHora(valor);
+  }
+
   private valorDe(evento: Event): string {
     return (evento.target as HTMLSelectElement).value;
   }
@@ -780,6 +867,7 @@ export class CompromisosPage {
         tipo: siguiente.tipo || null,
         nivelGobierno: siguiente.nivelGobierno || null,
         atiendeGenero: siguiente.atiendeGenero || null,
+        ver: siguiente.ver === 'anulados' ? 'anulados' : null,
       },
       queryParamsHandling: 'merge',
       replaceUrl: true,

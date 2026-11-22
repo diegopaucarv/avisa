@@ -141,6 +141,13 @@ export const ORIGENES = [
 export type ActorCaso = {
   id: string;
   nombre: string;
+  /**
+   * `core.actores` sólo guarda `nombre_actual`: hoy llegan siempre nulos y no se
+   * parten por espacios. Si el backend llegara a poblarlos, se muestran junto al
+   * nombre (ver `CasoDetallePage.nombreActor`).
+   */
+  apellidos: string | null;
+  nombres: string | null;
   naturaleza: string;
   tipo: string | null;
   funcion: string | null;
@@ -156,6 +163,10 @@ export type EventoCaso = {
   validado: boolean;
   critico: boolean;
   evidencia: string | null;
+  /** `core.caso_cronologia.actor_uid`; hoy siempre nulo. */
+  actorId: string | null;
+  /** Nombre del actor del hecho; hoy siempre nulo. */
+  actor: string | null;
 };
 
 export type DemandaCaso = {
@@ -170,11 +181,83 @@ export type DemandaCaso = {
   sinCaso: boolean;
 };
 
+export type HitoCompromisoCaso = {
+  id: string;
+  descripcion: string | null;
+  fecha: string | null;
+  estado: string | null;
+};
+
+/** Compromiso del detalle con su vencimiento efectivo ya resuelto. */
+export type CompromisoCaso = {
+  id: string;
+  codigo: string;
+  accion: string;
+  estado: string | null;
+  nivelGobierno: string | null;
+  unidad: string | null;
+  /** Fecha manual si llega; si no, la del próximo hito no terminal. */
+  vencimiento: string | null;
+  origenVencimiento: 'manual' | 'hito' | null;
+};
+
+export type DocumentoCaso = {
+  id: string;
+  codigo: string | null;
+  titulo: string;
+  fecha: string | null;
+  tipo: string | null;
+  tipoNombre: string | null;
+};
+
+export type AlertaCaso = {
+  id: string;
+  codigo: string;
+  nivel: string | null;
+  prioridad: string | null;
+  estado: string;
+  fechaReporte: string | null;
+  anulada: boolean;
+};
+
+/** Tramo de `core.caso_estado_historial`. */
+export type TramoEstadoCaso = {
+  id: string;
+  estado: string | null;
+  desde: string | null;
+  hasta: string | null;
+  motivo: string | null;
+  usuario: string | null;
+};
+
+/**
+ * Conteos y banderas ya persistidos (item 68). No hay puntuación: la UI sólo
+ * cuenta criterios cubiertos y lista lo que falta.
+ */
+export type CompletitudCaso = {
+  hechos: { total: number; validados: number };
+  actores: { total: number; conTipoYFuncion: number };
+  demandas: { total: number; con3PCompletos: number };
+  geografia: { tieneGeografia: boolean; regiones: number; distrito: string | null };
+  marcoSituacional: {
+    consistencia: boolean;
+    correspondencia: boolean;
+    coherenciaContextual: boolean;
+    saturacion: boolean;
+    trazabilidad: boolean;
+  } | null;
+};
+
 export type DetalleCaso = {
   caso: Caso;
   actores: ActorCaso[];
   eventos: EventoCaso[];
   demandas: DemandaCaso[];
+  alertas: AlertaCaso[];
+  compromisos: CompromisoCaso[];
+  documentos: DocumentoCaso[];
+  historial: TramoEstadoCaso[];
+  completitud: CompletitudCaso | null;
 };
 
 function aActorCaso(bruto: unknown): ActorCaso {
@@ -182,6 +265,8 @@ function aActorCaso(bruto: unknown): ActorCaso {
   return {
     id: texto(registro, ['id']) ?? '',
     nombre: texto(registro, ['nombre']) ?? 'Sin nombre',
+    apellidos: texto(registro, ['apellidos']),
+    nombres: texto(registro, ['nombres']),
     naturaleza: texto(registro, ['naturaleza']) ?? 'No determinada',
     tipo: texto(registro, ['tipo']),
     funcion: texto(registro, ['funcion', 'función']),
@@ -200,6 +285,8 @@ function aEventoCaso(bruto: unknown): EventoCaso {
     validado: booleano(registro, ['validado']),
     critico: booleano(registro, ['critico', 'crítico']),
     evidencia: texto(registro, ['evidencia']),
+    actorId: texto(registro, ['actorId', 'actor_id']),
+    actor: texto(registro, ['actor']),
   };
 }
 
@@ -217,6 +304,137 @@ function aDemandaCaso(bruto: unknown): DemandaCaso {
   };
 }
 
+function aHitoCompromisoCaso(bruto: unknown): HitoCompromisoCaso {
+  const registro = esRegistro(bruto) ? bruto : {};
+  return {
+    id: texto(registro, ['id']) ?? '',
+    descripcion: texto(registro, ['descripcion', 'descripción']),
+    fecha: texto(registro, ['fecha']),
+    estado: texto(registro, ['estado']),
+  };
+}
+
+/**
+ * Estados terminales de `core.cat_estados_hito` (`es_terminal = true`). La
+ * ficha no recibe la bandera, sólo el código; se compara sin acentos.
+ */
+function esEstadoHitoTerminal(estado: string | null): boolean {
+  if (!estado) return false;
+  const clave = estado
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim()
+    .toLowerCase();
+  return clave === 'cumplido' || clave === 'desestimado';
+}
+
+function aCompromisoCaso(bruto: unknown): CompromisoCaso {
+  const registro = esRegistro(bruto) ? bruto : {};
+  const manual = texto(registro, ['fechaVencimiento', 'fecha_vencimiento']);
+
+  // Misma regla que `lib/db/repos/commitments.ts`: la fecha manual prevalece y,
+  // si falta, se usa la del próximo hito no terminal. Hoy el detalle no envía la
+  // fecha manual, así que el vencimiento suele salir del hito.
+  const delHito =
+    lista(registro, ['hitos'])
+      .map(aHitoCompromisoCaso)
+      .filter((hito) => hito.fecha && !esEstadoHitoTerminal(hito.estado))
+      .map((hito) => hito.fecha as string)
+      .sort()[0] ?? null;
+
+  return {
+    id: texto(registro, ['id']) ?? '',
+    codigo: texto(registro, ['codigo', 'code']) ?? 'Sin código',
+    accion: texto(registro, ['accion', 'acción']) ?? 'Sin acción registrada',
+    estado: texto(registro, ['estado']),
+    nivelGobierno: texto(registro, ['nivelGobierno', 'nivel_gobierno']),
+    unidad: texto(registro, ['unidad']),
+    vencimiento: manual ?? delHito,
+    origenVencimiento: manual ? 'manual' : delHito ? 'hito' : null,
+  };
+}
+
+function aDocumentoCaso(bruto: unknown): DocumentoCaso {
+  const registro = esRegistro(bruto) ? bruto : {};
+  return {
+    id: texto(registro, ['id']) ?? '',
+    codigo: texto(registro, ['codigo', 'code']),
+    titulo: texto(registro, ['titulo', 'title']) ?? 'Sin título',
+    fecha: texto(registro, ['fecha']),
+    tipo: texto(registro, ['tipo']),
+    tipoNombre: texto(registro, ['tipoNombre', 'tipo_nombre']),
+  };
+}
+
+function aAlertaCaso(bruto: unknown): AlertaCaso {
+  const registro = esRegistro(bruto) ? bruto : {};
+  return {
+    id: texto(registro, ['id']) ?? '',
+    codigo: texto(registro, ['codigo', 'code']) ?? 'Sin código',
+    nivel: texto(registro, ['nivel']),
+    prioridad: texto(registro, ['prioridad']),
+    estado: texto(registro, ['estado']) ?? 'Sin estado',
+    fechaReporte: texto(registro, ['fechaReporte', 'fecha_reporte']),
+    anulada: booleano(registro, ['anulada']),
+  };
+}
+
+function aTramoEstadoCaso(bruto: unknown): TramoEstadoCaso {
+  const registro = esRegistro(bruto) ? bruto : {};
+  return {
+    id: texto(registro, ['id']) ?? '',
+    estado: texto(registro, ['estado']),
+    desde: texto(registro, ['desde']),
+    hasta: texto(registro, ['hasta']),
+    motivo: texto(registro, ['motivo']),
+    usuario: texto(registro, ['usuario']),
+  };
+}
+
+function subregistro(registro: Registro, claves: readonly string[]): Registro {
+  const valor = leer(registro, claves);
+  return esRegistro(valor) ? valor : {};
+}
+
+function aCompletitud(bruto: unknown): CompletitudCaso | null {
+  if (!esRegistro(bruto)) return null;
+
+  const hechos = subregistro(bruto, ['hechos']);
+  const actores = subregistro(bruto, ['actores']);
+  const demandas = subregistro(bruto, ['demandas']);
+  const geografia = subregistro(bruto, ['geografia', 'geografía']);
+  const marco = leer(bruto, ['marcoSituacional', 'marco_situacional']);
+
+  return {
+    hechos: {
+      total: numero(hechos, ['total']) ?? 0,
+      validados: numero(hechos, ['validados']) ?? 0,
+    },
+    actores: {
+      total: numero(actores, ['total']) ?? 0,
+      conTipoYFuncion: numero(actores, ['conTipoYFuncion', 'con_tipo_y_funcion']) ?? 0,
+    },
+    demandas: {
+      total: numero(demandas, ['total']) ?? 0,
+      con3PCompletos: numero(demandas, ['con3PCompletos', 'con_3p_completos']) ?? 0,
+    },
+    geografia: {
+      tieneGeografia: booleano(geografia, ['tieneGeografia', 'tiene_geografia']),
+      regiones: numero(geografia, ['regiones']) ?? 0,
+      distrito: texto(geografia, ['distrito']),
+    },
+    marcoSituacional: esRegistro(marco)
+      ? {
+          consistencia: booleano(marco, ['consistencia']),
+          correspondencia: booleano(marco, ['correspondencia']),
+          coherenciaContextual: booleano(marco, ['coherenciaContextual', 'coherencia_contextual']),
+          saturacion: booleano(marco, ['saturacion', 'saturación']),
+          trazabilidad: booleano(marco, ['trazabilidad']),
+        }
+      : null,
+  };
+}
+
 /** Detalle de `GET /api/v1/cases/:codigo`. */
 export function aDetalleCaso(bruto: unknown): DetalleCaso {
   const registro = esRegistro(bruto) ? bruto : {};
@@ -225,6 +443,13 @@ export function aDetalleCaso(bruto: unknown): DetalleCaso {
     actores: lista(registro, ['actores', 'actors']).map(aActorCaso),
     eventos: lista(registro, ['eventos', 'events']).map(aEventoCaso),
     demandas: lista(registro, ['demandas']).map(aDemandaCaso),
+    alertas: lista(registro, ['alertas', 'alerts']).map(aAlertaCaso),
+    compromisos: lista(registro, ['compromisos', 'commitments']).map(aCompromisoCaso),
+    documentos: lista(registro, ['documentos', 'documents']).map(aDocumentoCaso),
+    historial: lista(registro, ['historial', 'stateHistory', 'state_history']).map(
+      aTramoEstadoCaso,
+    ),
+    completitud: aCompletitud(leer(registro, ['completitud', 'completeness'])),
   };
 }
 
@@ -250,9 +475,12 @@ export function aCaso(bruto: unknown): Caso {
     titulo: texto(registro, ['titulo', 'title']) ?? 'Sin título',
     resumen: texto(registro, ['resumen', 'summary']),
     avance: numero(registro, ['avance', 'progress']),
+    // `fecha_ultima_actualizacion`: instante de carga del legado, no la fecha del
+    // caso. Reservado al historial (item 41); no rotular como «Actualizado».
     actualizado:
       texto(registro, ['actualizado', 'updated']) ??
       texto(registro, ['actualizadoEn', 'updatedAt']),
+    inicio: texto(registro, ['fechaInicio', 'fecha_inicio', 'inicio']),
     region: texto(registro, ['region']),
     estado: unoDe(texto(registro, ['estado']), ESTADOS_CASO, 'En seguimiento'),
     riesgo: riesgoDe(texto(registro, ['riesgo', 'risk'])),
@@ -271,5 +499,10 @@ export function aCaso(bruto: unknown): Caso {
     clasificacion: numero(registro, ['clasificacion']) ?? 1,
     anulado:
       booleano(registro, ['anulado']) || Boolean(leer(registro, ['anuladoEn', 'anulado_en'])),
+    anuladoEn: texto(registro, ['anuladoEn', 'anulado_en']),
+    motivoAnulacion: texto(registro, ['motivoAnulacion', 'motivo_anulacion']),
+    anuladoPor: texto(registro, ['anuladoPor', 'anulado_por']),
+    anuladoPorNombre: texto(registro, ['anuladoPorNombre', 'anulado_por_nombre']),
+    anulacionId: texto(registro, ['anulacionId', 'anulacion_id']),
   };
 }

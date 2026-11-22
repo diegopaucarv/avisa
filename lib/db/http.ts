@@ -29,6 +29,17 @@ export function queryParams(request: Request): URLSearchParams {
 }
 
 /**
+ * Booleano tolerante para la query: acepta `true/1/si/sí/on` y
+ * `false/0/no/off`; cualquier otro valor (o su ausencia) cuenta como `false`.
+ * Es el mismo criterio que usan las rutas de compromisos y documentos para
+ * `anulados`.
+ */
+export function leerBooleano(value: string | null): boolean {
+  if (!value) return false;
+  return ["true", "1", "si", "sí", "on"].includes(value.trim().toLowerCase());
+}
+
+/**
  * Motivo obligatorio de una anulación: se acepta `?motivo=` o `{ motivo }`
  * en el cuerpo JSON. La base también lo exige; aquí se corta antes con 400.
  */

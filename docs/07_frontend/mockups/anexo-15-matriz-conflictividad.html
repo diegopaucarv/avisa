@@ -1,0 +1,2595 @@
+<!doctype html>
+<html lang="es">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Anexo 15 · Matriz de conflictividad (mockup AVISA)</title>
+        <style>
+            /* ─────────────────────────────────────────────────────────────────────────
+         Tokens y clases copiados de angular/src/styles/global.css (sin cambios).
+         DM Sans/Manrope caen a fuente del sistema si no están instaladas:
+         el mockup no carga webfonts ni depende de un build.
+         ───────────────────────────────────────────────────────────────────────── */
+            :root {
+                --ink: #17283a;
+                --ink-2: #33475b;
+                --muted: #778797;
+                --line: #e6ebef;
+                --paper: #fff;
+                --canvas: #f5f7f8;
+                --blue: #2455a2;
+                --blue-dark: #1d427f;
+                --blue-pale: #eaf1fb;
+                --teal: #397c79;
+                --amber: #aa6a11;
+                --amber-pale: #fff4e2;
+                --red: #ad4d46;
+                --red-pale: #fbeceb;
+                --green: #34785b;
+                --green-pale: #e9f5ef;
+                --font-sans:
+                    "DM Sans", system-ui, -apple-system, "Segoe UI", Arial,
+                    sans-serif;
+                --font-display:
+                    "Manrope", "DM Sans", system-ui, -apple-system, "Segoe UI",
+                    sans-serif;
+            }
+            * {
+                box-sizing: border-box;
+            }
+            html {
+                min-height: 100%;
+                background: var(--canvas);
+            }
+            body {
+                margin: 0;
+                color: var(--ink);
+                font-family: var(--font-sans);
+                font-size: 13px;
+                -webkit-font-smoothing: antialiased;
+            }
+            button,
+            input,
+            select {
+                font: inherit;
+            }
+            button {
+                color: inherit;
+                cursor: pointer;
+            }
+            button:focus-visible,
+            input:focus-visible,
+            select:focus-visible {
+                outline: 3px solid #7aa2e8;
+                outline-offset: 2px;
+            }
+
+            .view-body {
+                display: flex;
+                flex-direction: column;
+                gap: 14px;
+                width: 100%;
+                max-width: 1420px;
+                margin: 0 auto;
+                padding: 27px 34px 50px;
+                box-sizing: border-box;
+            }
+            .view-head {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: flex-start;
+                justify-content: space-between;
+                gap: 16px;
+            }
+            .view-head h1 {
+                margin: 0;
+                color: var(--ink);
+                font: 700 22px/1.3 var(--font-display);
+                letter-spacing: -0.65px;
+            }
+            .view-subtitle {
+                max-width: 760px;
+                margin: 6px 0 0;
+                color: var(--muted);
+                font-size: 11px;
+                line-height: 1.6;
+            }
+            .view-actions {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .filter-bar {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                margin-bottom: 14px;
+            }
+            .filter-bar-wrap {
+                flex-wrap: wrap;
+                row-gap: 10px;
+            }
+            .search-field {
+                height: 35px;
+                min-width: 210px;
+                max-width: 440px;
+                flex: 1;
+                padding: 0 10px;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                border: 1px solid #e0e5e9;
+                border-radius: 6px;
+                background: #fff;
+                color: #8996a1;
+            }
+            .search-field:focus-within {
+                border-color: #96acd0;
+            }
+            .search-field input {
+                width: 100%;
+                min-width: 0;
+                border: 0;
+                outline: 0 !important;
+                background: transparent;
+                color: var(--ink);
+                font-size: 10px;
+            }
+            .search-field input::placeholder {
+                color: #9ba5ad;
+            }
+            .select-filter {
+                height: 35px;
+                padding: 0 9px;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                border: 1px solid #e0e5e9;
+                border-radius: 6px;
+                background: #fff;
+                color: #8b97a1;
+                font-size: 9px;
+            }
+            .select-filter select {
+                max-width: 150px;
+                border: 0;
+                outline: 0;
+                background: transparent;
+                color: #536779;
+                font-size: 10px;
+            }
+            .segmented {
+                display: inline-flex;
+                gap: 2px;
+                padding: 3px;
+                border: 1px solid #e6ecf1;
+                border-radius: 7px;
+                background: #f6f8fa;
+            }
+            .segmented > button {
+                display: inline-flex;
+                align-items: center;
+                gap: 5px;
+                padding: 5px 10px;
+                border: 0;
+                border-radius: 5px;
+                background: transparent;
+                color: #647487;
+                font-size: 9px;
+                font-weight: 600;
+                font-family: inherit;
+                white-space: nowrap;
+                cursor: pointer;
+            }
+            .segmented > button:hover {
+                background: #eef2f7;
+                color: #33465a;
+            }
+            .segmented > button[aria-pressed="true"] {
+                background: #fff;
+                color: #1d4b86;
+                box-shadow: 0 1px 3px rgba(17, 32, 45, 0.12);
+            }
+            .status-badge {
+                width: max-content;
+                display: inline-flex;
+                align-items: center;
+                gap: 5px;
+                padding: 3px 7px;
+                border-radius: 12px;
+                font-size: 9px;
+                white-space: nowrap;
+            }
+            .status-dot {
+                width: 6px;
+                height: 6px;
+                flex: none;
+                border-radius: 50%;
+                background: currentColor;
+            }
+            .risk-label {
+                display: inline-flex;
+                align-items: center;
+                padding: 4px 8px;
+                border-radius: 999px;
+                font-size: 10px;
+                font-weight: 700;
+            }
+            .risk-alto {
+                background: #fbeceb;
+                color: #ad4d46;
+            }
+            .risk-moderado {
+                background: #fff4e2;
+                color: #93621d;
+            }
+            .risk-bajo {
+                background: #e9f5ef;
+                color: #34785b;
+            }
+            .priority-urgente {
+                background: #fbeceb;
+                color: #ad4d46;
+            }
+            .priority-moderado {
+                background: #fff4e2;
+                color: #93621d;
+            }
+            .priority-bajo {
+                background: #e9f5ef;
+                color: #34785b;
+            }
+            .button-primary,
+            .button-secondary,
+            .button-danger,
+            .button-light {
+                min-height: 32px;
+                padding: 0 11px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 6px;
+                border-radius: 6px;
+                font-size: 10px;
+                font-weight: 600;
+                white-space: nowrap;
+            }
+            .button-secondary {
+                border: 1px solid #dce3e8;
+                background: #fff;
+                color: #526577;
+            }
+            .button-secondary:hover {
+                background: #f5f7f8;
+            }
+            .result-count,
+            .filter-caption {
+                margin-left: auto;
+                color: #94a0a8;
+                font-size: 9px;
+                white-space: nowrap;
+            }
+            .table-wrap {
+                border: 1px solid var(--line);
+                border-radius: 8px;
+                background: #fff;
+                overflow-x: auto;
+            }
+            .data-table {
+                width: 100%;
+                border-collapse: collapse;
+                text-align: left;
+            }
+            .data-table th {
+                height: 38px;
+                padding: 0 11px;
+                border-bottom: 1px solid #edf0f2;
+                color: #97a1aa;
+                font-size: 8px;
+                font-weight: 600;
+                letter-spacing: 0.5px;
+                text-transform: uppercase;
+                white-space: nowrap;
+            }
+            .data-table td {
+                height: 54px;
+                padding: 8px 11px;
+                border-bottom: 1px solid #f0f2f4;
+                color: #687988;
+                font-size: 9px;
+                white-space: nowrap;
+            }
+            .data-table tbody tr:last-child td {
+                border-bottom: 0;
+            }
+            .data-table td:first-child {
+                min-width: 205px;
+                white-space: normal;
+            }
+            .data-table td:first-child strong,
+            .data-table td:first-child small {
+                display: block;
+            }
+            .data-table td:first-child strong {
+                color: #465a6c;
+                font-size: 9px;
+                font-weight: 600;
+            }
+            .data-table td:first-child small {
+                margin-top: 4px;
+                color: #99a3aa;
+                font-size: 8px;
+            }
+            .table-caption {
+                caption-side: top;
+                padding: 10px 11px 3px;
+                color: #94a0a8;
+                font-size: 9px;
+                line-height: 1.45;
+                text-align: left;
+            }
+            .table-link {
+                padding: 0;
+                border: 0;
+                background: transparent;
+                color: #4c7099;
+                font-size: 9px;
+            }
+            .link-button:hover,
+            .table-link:hover {
+                color: #173e78;
+                text-decoration: underline;
+            }
+            .empty-state {
+                padding: 32px;
+                text-align: center;
+                color: #909ba4;
+                font-size: 10px;
+            }
+            .pagination {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 12px;
+                margin-top: 14px;
+                color: #7c8995;
+                font-size: 10px;
+            }
+            .pagination button {
+                min-height: 28px;
+                padding: 0 10px;
+            }
+            .pagination button:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+            }
+            @media (max-width: 720px) {
+                .view-body {
+                    padding: 18px 16px 40px;
+                }
+            }
+
+            /* ─────────────────────────────────────────────────────────────────────────
+         Ayudas propias del mockup (no existen en global.css). No redefinen
+         ninguna clase del sistema: se añaden con nombres nuevos.
+         ───────────────────────────────────────────────────────────────────────── */
+            .anexo-badge {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                height: 26px;
+                padding: 0 10px;
+                border: 1px solid #cddcef;
+                border-radius: 999px;
+                background: var(--blue-pale);
+                color: var(--blue);
+                font-size: 9px;
+                font-weight: 700;
+                letter-spacing: 0.05em;
+                text-transform: uppercase;
+            }
+            .status-chips {
+                flex-wrap: wrap;
+            }
+            .chips-label {
+                align-self: center;
+                padding: 0 4px 0 2px;
+                color: #94a0a8;
+                font-size: 9px;
+                font-weight: 600;
+            }
+            .meta-line {
+                margin: -4px 2px 0;
+                color: #94a0a8;
+                font-size: 9px;
+            }
+            .meta-line code,
+            .footnote code,
+            .notes code {
+                font-family:
+                    ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+                font-size: 9px;
+                background: #f2f5f8;
+                border: 1px solid #e6ebef;
+                border-radius: 4px;
+                padding: 1px 4px;
+                color: #33475b;
+            }
+            .data-table.matrix-table {
+                min-width: 1720px;
+            }
+            .data-table.matrix-table td:first-child {
+                min-width: 40px;
+                white-space: nowrap;
+            }
+            .data-table.matrix-table td.col-codigo,
+            .data-table.matrix-table th.col-codigo {
+                min-width: 148px;
+                color: #465a6c;
+                font-weight: 600;
+            }
+            .data-table.matrix-table td.col-nombre {
+                min-width: 250px;
+                max-width: 300px;
+                white-space: normal;
+                line-height: 1.4;
+                color: #41576a;
+            }
+            .data-table.matrix-table td.col-date,
+            .data-table.matrix-table td.col-num {
+                font-variant-numeric: tabular-nums;
+            }
+            .data-table.matrix-table td.col-num {
+                text-align: right;
+            }
+            .data-table.matrix-table th.col-num {
+                text-align: right;
+            }
+            .data-table.matrix-table .empty-row td {
+                min-width: 0;
+                white-space: normal;
+                text-align: center;
+            }
+            .rule-note {
+                display: block;
+                margin-top: 3px;
+                color: #9aa5ae;
+                font-size: 8px;
+                font-weight: 400;
+                white-space: nowrap;
+            }
+            .conflict-tag {
+                display: inline-flex;
+                align-items: center;
+                gap: 5px;
+                white-space: nowrap;
+            }
+            .conflict-tag::before {
+                content: "";
+                width: 6px;
+                height: 6px;
+                flex: none;
+                border-radius: 50%;
+                background: #93a1ab;
+            }
+            .conflict-diferencia::before {
+                background: #6f8fa8;
+            }
+            .conflict-controversia::before {
+                background: #4c7099;
+            }
+            .conflict-conflicto::before {
+                background: #a6732d;
+            }
+            .conflict-crisis::before {
+                background: #a84f49;
+            }
+            .estado-seguimiento {
+                background: #eaf1fb;
+                color: #2455a2;
+            }
+            .estado-activo {
+                background: #e9f5ef;
+                color: #34785b;
+            }
+            .estado-resuelto {
+                background: #eaf1f9;
+                color: #2a5b8f;
+            }
+            .estado-archivado {
+                background: #eef1f4;
+                color: #687988;
+            }
+            .export-menu {
+                position: relative;
+                margin-left: auto;
+            }
+            .export-menu > summary {
+                list-style: none;
+                cursor: pointer;
+            }
+            .export-menu > summary::-webkit-details-marker {
+                display: none;
+            }
+            .export-menu[open] > summary {
+                background: #f5f7f8;
+            }
+            .export-list {
+                position: absolute;
+                right: 0;
+                top: calc(100% + 4px);
+                z-index: 20;
+                min-width: 150px;
+                padding: 4px;
+                border: 1px solid var(--line);
+                border-radius: 6px;
+                background: #fff;
+                box-shadow: 0 8px 20px rgba(17, 32, 45, 0.12);
+            }
+            .export-list button {
+                display: block;
+                width: 100%;
+                padding: 6px 9px;
+                border: 0;
+                border-radius: 4px;
+                background: transparent;
+                color: #526577;
+                font-size: 10px;
+                text-align: left;
+            }
+            .export-list button:hover {
+                background: #f2f5f8;
+            }
+            .footnote {
+                margin: 8px 2px 0;
+                color: #94a0a8;
+                font-size: 9px;
+                line-height: 1.6;
+            }
+            .footnote strong {
+                color: #687988;
+                font-weight: 600;
+            }
+            .notes {
+                margin-top: 4px;
+                padding: 18px 20px;
+                border: 1px solid var(--line);
+                border-radius: 8px;
+                background: #fff;
+            }
+            .notes h2 {
+                margin: 0 0 10px;
+                color: var(--ink);
+                font: 700 16px/1.3 var(--font-display);
+                letter-spacing: -0.3px;
+            }
+            .notes h3 {
+                margin: 18px 0 6px;
+                color: #465a6c;
+                font: 700 11px/1.3 var(--font-display);
+                letter-spacing: 0.03em;
+                text-transform: uppercase;
+            }
+            .notes ol,
+            .notes ul {
+                margin: 0;
+                padding-left: 20px;
+                color: #526577;
+                font-size: 10.5px;
+                line-height: 1.6;
+            }
+            .notes li {
+                margin: 0 0 7px;
+            }
+            .notes li:last-child {
+                margin-bottom: 0;
+            }
+            .notes p {
+                margin: 0 0 8px;
+                color: #526577;
+                font-size: 10.5px;
+                line-height: 1.6;
+            }
+            .notes b {
+                color: #33475b;
+            }
+            .vocab {
+                display: grid;
+                grid-template-columns: max-content 1fr;
+                gap: 4px 14px;
+                margin: 2px 0 0;
+                color: #526577;
+                font-size: 10.5px;
+                line-height: 1.5;
+            }
+            .vocab dt {
+                color: #687988;
+                font-weight: 600;
+            }
+            .vocab dd {
+                margin: 0;
+            }
+            .code-block {
+                margin: 10px 0 0;
+                padding: 12px 14px;
+                overflow: auto;
+                border-radius: 8px;
+                background: #0f1b2a;
+                color: #d6e2ef;
+                font-family:
+                    ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+                font-size: 9px;
+                line-height: 1.55;
+            }
+            .code-block .cm {
+                color: #7f9bb8;
+            }
+            .code-block code {
+                background: transparent;
+                border: 0;
+                padding: 0;
+                color: inherit;
+                font-size: inherit;
+            }
+            .notes a {
+                color: #4c7099;
+            }
+        </style>
+    </head>
+    <body>
+        <main class="view-body">
+            <header class="view-head">
+                <div>
+                    <h1>Matriz de conflictividad</h1>
+                    <p class="view-subtitle">
+                        Herramienta central de seguimiento de casos que organiza
+                        información estructurada sobre actores, evolución, nivel
+                        de riesgo, responsables y estado de los compromisos,
+                        para clasificar y conservar el registro histórico y
+                        facilitar la coordinación (Guía §8.3.1).
+                    </p>
+                </div>
+                <div class="view-actions">
+                    <span class="anexo-badge">Anexo 15</span>
+                </div>
+            </header>
+
+            <div class="filter-bar filter-bar-wrap">
+                <label class="search-field">
+                    <svg
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        aria-hidden="true"
+                    >
+                        <circle cx="11" cy="11" r="7"></circle>
+                        <path d="M20 20l-3.6-3.6"></path>
+                    </svg>
+                    <input
+                        id="q"
+                        type="search"
+                        placeholder="Buscar por código, caso o región"
+                        autocomplete="off"
+                    />
+                </label>
+
+                <div
+                    class="segmented status-chips"
+                    role="group"
+                    aria-label="Estado"
+                >
+                    <span class="chips-label">Estado</span>
+                    <button
+                        type="button"
+                        class="status-chip"
+                        data-estado="Todos"
+                        aria-pressed="true"
+                    >
+                        Todos
+                    </button>
+                    <button
+                        type="button"
+                        class="status-chip"
+                        data-estado="Activo"
+                        aria-pressed="false"
+                    >
+                        Activo
+                    </button>
+                    <button
+                        type="button"
+                        class="status-chip"
+                        data-estado="En seguimiento"
+                        aria-pressed="false"
+                    >
+                        En seguimiento
+                    </button>
+                    <button
+                        type="button"
+                        class="status-chip"
+                        data-estado="Resuelto"
+                        aria-pressed="false"
+                    >
+                        Resuelto
+                    </button>
+                    <button
+                        type="button"
+                        class="status-chip"
+                        data-estado="Archivado"
+                        aria-pressed="false"
+                    >
+                        Archivado
+                    </button>
+                </div>
+
+                <label class="select-filter">
+                    <span>Prioridad de atención</span>
+                    <select data-filter="prioridad">
+                        <option value="Todas">Todas</option>
+                        <option value="Urgente">Urgente</option>
+                        <option value="Moderado">Moderado</option>
+                        <option value="Bajo">Bajo</option>
+                    </select>
+                </label>
+
+                <label class="select-filter">
+                    <span>Alcance</span>
+                    <select data-filter="alcance">
+                        <option value="Todos">Todos</option>
+                        <option value="Norte">Norte</option>
+                        <option value="Centro">Centro</option>
+                        <option value="Sur">Sur</option>
+                        <option value="Oriente">Oriente</option>
+                        <option value="Nacional">Nacional</option>
+                    </select>
+                </label>
+
+                <label class="select-filter">
+                    <span>Temática</span>
+                    <select data-filter="tematica">
+                        <option value="Todas">Todas</option>
+                        <option value="Infraestructura">Infraestructura</option>
+                        <option value="Ordenamiento y acceso territorial">
+                            Ordenamiento y acceso territorial
+                        </option>
+                        <option value="Normatividad">Normatividad</option>
+                        <option value="Distribución de beneficios">
+                            Distribución de beneficios
+                        </option>
+                        <option value="Gobernanza">Gobernanza</option>
+                        <option value="Impactos de terceros">
+                            Impactos de terceros
+                        </option>
+                    </select>
+                </label>
+
+                <label class="select-filter">
+                    <span>Subsector</span>
+                    <select data-filter="subsector">
+                        <option value="Todos">Todos</option>
+                        <option value="Pesca y Acuicultura">
+                            Pesca y Acuicultura
+                        </option>
+                        <option value="MYPE e Industria">
+                            MYPE e Industria
+                        </option>
+                    </select>
+                </label>
+
+                <label class="select-filter">
+                    <span>Región</span>
+                    <select data-filter="region">
+                        <option value="Todas">Todas</option>
+                        <option value="Arequipa">Arequipa</option>
+                        <option value="Callao">Callao</option>
+                        <option value="Ica">Ica</option>
+                        <option value="Lambayeque">Lambayeque</option>
+                        <option value="Lima">Lima</option>
+                        <option value="Loreto">Loreto</option>
+                        <option value="Moquegua">Moquegua</option>
+                        <option value="Piura">Piura</option>
+                        <option value="Tumbes">Tumbes</option>
+                    </select>
+                </label>
+
+                <label class="select-filter">
+                    <span>Unidad responsable</span>
+                    <select data-filter="unidad">
+                        <option value="Todas">Todas</option>
+                        <option value="OAIPCS">OAIPCS</option>
+                    </select>
+                </label>
+
+                <label class="select-filter">
+                    <span>Ordenar por</span>
+                    <select data-filter="orden">
+                        <option value="inicio">Fecha de inicio ↓</option>
+                        <option value="riesgo">Riesgo Alto→Bajo</option>
+                        <option value="prioridad">
+                            Prioridad Urgente→Bajo
+                        </option>
+                        <option value="codigo">Código</option>
+                    </select>
+                </label>
+
+                <button type="button" id="clear" class="button-secondary">
+                    Limpiar filtros
+                </button>
+
+                <details class="export-menu">
+                    <summary class="button-secondary">Exportar ▾</summary>
+                    <div class="export-list" role="menu">
+                        <button type="button" role="menuitem">JSON</button>
+                        <button type="button" role="menuitem">Excel</button>
+                        <button type="button" role="menuitem">PDF</button>
+                    </div>
+                </details>
+            </div>
+
+            <p class="meta-line">
+                Fuente:
+                <code>analytics.vw_anexo_15_matriz_conflictividad</code>. Filas
+                reales; las columnas que la vista no expone se leyeron de las
+                tablas de origen (ver notas 2 y 3).
+            </p>
+
+            <div class="table-wrap">
+                <table id="matrix-table" class="data-table matrix-table">
+                    <caption class="table-caption">
+                        Una fila por caso. Filtros, orden y paginación se
+                        resuelven en el cliente en este mockup; en producción
+                        irían en servidor.
+                    </caption>
+                    <thead>
+                        <tr>
+                            <th class="col-n">N°</th>
+                            <th class="col-codigo">Código de caso</th>
+                            <th>Nombre del caso</th>
+                            <th>Región</th>
+                            <th>Alcance</th>
+                            <th>Temática</th>
+                            <th>Subsector</th>
+                            <th>Nivel de conflictividad</th>
+                            <th>Nivel de riesgo</th>
+                            <th>Prioridad de atención</th>
+                            <th>Estado</th>
+                            <th>Unidad responsable</th>
+                            <th>Inicio</th>
+                            <th>Último hecho</th>
+                            <th class="col-num">Compromisos</th>
+                            <th>Tipo de compromiso</th>
+                            <th class="col-num">Documentos</th>
+                            <th>Ver ficha</th>
+                        </tr>
+                    </thead>
+                    <tbody id="matrix-rows">
+                        <tr
+                            data-codigo="CS-MI-ITE-2026-03"
+                            data-nombre="Participación ciudadana en el EIA-d del proyecto Aceros Americanos (Chilca)"
+                            data-region="Lima"
+                            data-alcance="Centro"
+                            data-tematica="Impactos de terceros"
+                            data-subsector="MYPE e Industria"
+                            data-riesgo="Bajo"
+                            data-prioridad="Moderado"
+                            data-estado="En seguimiento"
+                            data-unidad="OAIPCS"
+                            data-inicio="2026-05-01"
+                        >
+                            <td class="col-n">1</td>
+                            <td class="col-codigo">CS-MI-ITE-2026-03</td>
+                            <td class="col-nombre">
+                                Participación ciudadana en el EIA-d del proyecto
+                                Aceros Americanos (Chilca)
+                            </td>
+                            <td>Lima</td>
+                            <td>Centro</td>
+                            <td>Impactos de terceros</td>
+                            <td>MYPE e Industria</td>
+                            <td>
+                                <span class="conflict-tag conflict-conflicto"
+                                    >Conflicto social</span
+                                >
+                            </td>
+                            <td>
+                                <span class="risk-label risk-bajo">Bajo</span>
+                            </td>
+                            <td class="col-prio">
+                                <span class="status-badge priority-moderado"
+                                    >Moderado</span
+                                >
+                                <span class="rule-note"
+                                    >sin regla definida</span
+                                >
+                            </td>
+                            <td>
+                                <span class="status-badge estado-seguimiento"
+                                    ><i class="status-dot"></i>En
+                                    seguimiento</span
+                                >
+                            </td>
+                            <td>OAIPCS</td>
+                            <td class="col-date">2026-05-01</td>
+                            <td class="col-date">—</td>
+                            <td class="col-num">—</td>
+                            <td>—</td>
+                            <td class="col-num">6</td>
+                            <td>
+                                <button
+                                    type="button"
+                                    class="table-link"
+                                    title="Mockup: la ruta de la ficha del caso no está definida para este anexo"
+                                >
+                                    Ver ficha
+                                </button>
+                            </td>
+                        </tr>
+                        <tr
+                            data-codigo="CS-MI-ITE-2026-01"
+                            data-nombre="Oposición al proyecto de planta de cal de CALCESUR (AA.HH. Márquez, Callao)"
+                            data-region="Callao"
+                            data-alcance="Centro"
+                            data-tematica="Impactos de terceros"
+                            data-subsector="MYPE e Industria"
+                            data-riesgo="Bajo"
+                            data-prioridad="Bajo"
+                            data-estado="En seguimiento"
+                            data-unidad="OAIPCS"
+                            data-inicio="2026-01-01"
+                        >
+                            <td class="col-n">2</td>
+                            <td class="col-codigo">CS-MI-ITE-2026-01</td>
+                            <td class="col-nombre">
+                                Oposición al proyecto de planta de cal de
+                                CALCESUR (AA.HH. Márquez, Callao)
+                            </td>
+                            <td>Callao</td>
+                            <td>Centro</td>
+                            <td>Impactos de terceros</td>
+                            <td>MYPE e Industria</td>
+                            <td>
+                                <span class="conflict-tag conflict-conflicto"
+                                    >Conflicto social</span
+                                >
+                            </td>
+                            <td>
+                                <span class="risk-label risk-bajo">Bajo</span>
+                            </td>
+                            <td class="col-prio">
+                                <span class="status-badge priority-bajo"
+                                    >Bajo</span
+                                >
+                                <span class="rule-note"
+                                    >sin regla definida</span
+                                >
+                            </td>
+                            <td>
+                                <span class="status-badge estado-seguimiento"
+                                    ><i class="status-dot"></i>En
+                                    seguimiento</span
+                                >
+                            </td>
+                            <td>OAIPCS</td>
+                            <td class="col-date">2026-01-01</td>
+                            <td class="col-date">—</td>
+                            <td class="col-num">—</td>
+                            <td>—</td>
+                            <td class="col-num">—</td>
+                            <td>
+                                <button
+                                    type="button"
+                                    class="table-link"
+                                    title="Mockup sin ruta de ficha"
+                                >
+                                    Ver ficha
+                                </button>
+                            </td>
+                        </tr>
+                        <tr
+                            data-codigo="CS-PA-INF-2026-01"
+                            data-nombre="Convocatoria de nuevo administrador para el DPA San José (Lambayeque)"
+                            data-region="Lambayeque"
+                            data-alcance="Norte"
+                            data-tematica="Infraestructura"
+                            data-subsector="Pesca y Acuicultura"
+                            data-riesgo="Moderado"
+                            data-prioridad="Moderado"
+                            data-estado="En seguimiento"
+                            data-unidad="OAIPCS"
+                            data-inicio="2026-01-01"
+                        >
+                            <td class="col-n">3</td>
+                            <td class="col-codigo">CS-PA-INF-2026-01</td>
+                            <td class="col-nombre">
+                                Convocatoria de nuevo administrador para el DPA
+                                San José (Lambayeque)
+                            </td>
+                            <td>Lambayeque</td>
+                            <td>Norte</td>
+                            <td>Infraestructura</td>
+                            <td>Pesca y Acuicultura</td>
+                            <td>
+                                <span class="conflict-tag conflict-controversia"
+                                    >Controversia</span
+                                >
+                            </td>
+                            <td>
+                                <span class="risk-label risk-moderado"
+                                    >Moderado</span
+                                >
+                            </td>
+                            <td class="col-prio">
+                                <span class="status-badge priority-moderado"
+                                    >Moderado</span
+                                >
+                                <span class="rule-note"
+                                    >sin regla definida</span
+                                >
+                            </td>
+                            <td>
+                                <span class="status-badge estado-seguimiento"
+                                    ><i class="status-dot"></i>En
+                                    seguimiento</span
+                                >
+                            </td>
+                            <td>OAIPCS</td>
+                            <td class="col-date">2026-01-01</td>
+                            <td class="col-date">—</td>
+                            <td class="col-num">—</td>
+                            <td>—</td>
+                            <td class="col-num">—</td>
+                            <td>
+                                <button
+                                    type="button"
+                                    class="table-link"
+                                    title="Mockup sin ruta de ficha"
+                                >
+                                    Ver ficha
+                                </button>
+                            </td>
+                        </tr>
+                        <tr
+                            data-codigo="CS-PA-INF-2026-02"
+                            data-nombre="Rehabilitación del Muelle N.° 2 del Desembarcadero Pesquero Artesanal de Ilo"
+                            data-region="Moquegua"
+                            data-alcance="Sur"
+                            data-tematica="Infraestructura"
+                            data-subsector="Pesca y Acuicultura"
+                            data-riesgo="Bajo"
+                            data-prioridad="Bajo"
+                            data-estado="En seguimiento"
+                            data-unidad="OAIPCS"
+                            data-inicio="2026-01-01"
+                        >
+                            <td class="col-n">4</td>
+                            <td class="col-codigo">CS-PA-INF-2026-02</td>
+                            <td class="col-nombre">
+                                Rehabilitación del Muelle N.° 2 del
+                                Desembarcadero Pesquero Artesanal de Ilo
+                            </td>
+                            <td>Moquegua</td>
+                            <td>Sur</td>
+                            <td>Infraestructura</td>
+                            <td>Pesca y Acuicultura</td>
+                            <td>
+                                <span class="conflict-tag conflict-controversia"
+                                    >Controversia</span
+                                >
+                            </td>
+                            <td>
+                                <span class="risk-label risk-bajo">Bajo</span>
+                            </td>
+                            <td class="col-prio">
+                                <span class="status-badge priority-bajo"
+                                    >Bajo</span
+                                >
+                                <span class="rule-note"
+                                    >sin regla definida</span
+                                >
+                            </td>
+                            <td>
+                                <span class="status-badge estado-seguimiento"
+                                    ><i class="status-dot"></i>En
+                                    seguimiento</span
+                                >
+                            </td>
+                            <td>OAIPCS</td>
+                            <td class="col-date">2026-01-01</td>
+                            <td class="col-date">—</td>
+                            <td class="col-num">—</td>
+                            <td>—</td>
+                            <td class="col-num">—</td>
+                            <td>
+                                <button
+                                    type="button"
+                                    class="table-link"
+                                    title="Mockup sin ruta de ficha"
+                                >
+                                    Ver ficha
+                                </button>
+                            </td>
+                        </tr>
+                        <tr
+                            data-codigo="CS-PA-ITE-2026-01"
+                            data-nombre="Afectación a la pesca artesanal por dragado en la Isla San Lorenzo - Callao"
+                            data-region="Callao"
+                            data-alcance="Centro"
+                            data-tematica="Impactos de terceros"
+                            data-subsector="Pesca y Acuicultura"
+                            data-riesgo="Bajo"
+                            data-prioridad="Moderado"
+                            data-estado="En seguimiento"
+                            data-unidad="OAIPCS"
+                            data-inicio="2026-01-01"
+                        >
+                            <td class="col-n">5</td>
+                            <td class="col-codigo">CS-PA-ITE-2026-01</td>
+                            <td class="col-nombre">
+                                Afectación a la pesca artesanal por dragado en
+                                la Isla San Lorenzo - Callao
+                            </td>
+                            <td>Callao</td>
+                            <td>Centro</td>
+                            <td>Impactos de terceros</td>
+                            <td>Pesca y Acuicultura</td>
+                            <td>
+                                <span class="conflict-tag conflict-controversia"
+                                    >Controversia</span
+                                >
+                            </td>
+                            <td>
+                                <span class="risk-label risk-bajo">Bajo</span>
+                            </td>
+                            <td class="col-prio">
+                                <span class="status-badge priority-moderado"
+                                    >Moderado</span
+                                >
+                                <span class="rule-note"
+                                    >sin regla definida</span
+                                >
+                            </td>
+                            <td>
+                                <span class="status-badge estado-seguimiento"
+                                    ><i class="status-dot"></i>En
+                                    seguimiento</span
+                                >
+                            </td>
+                            <td>OAIPCS</td>
+                            <td class="col-date">2026-01-01</td>
+                            <td class="col-date">—</td>
+                            <td class="col-num">—</td>
+                            <td>—</td>
+                            <td class="col-num">—</td>
+                            <td>
+                                <button
+                                    type="button"
+                                    class="table-link"
+                                    title="Mockup sin ruta de ficha"
+                                >
+                                    Ver ficha
+                                </button>
+                            </td>
+                        </tr>
+                        <tr
+                            data-codigo="CS-PA-INF-2025-05"
+                            data-nombre="Mejoramiento de infraestructura del Desembarcadero Pesquero Artesanal de San Juan de Marcona"
+                            data-region="Ica"
+                            data-alcance="Centro"
+                            data-tematica="Infraestructura"
+                            data-subsector="Pesca y Acuicultura"
+                            data-riesgo="Bajo"
+                            data-prioridad="Bajo"
+                            data-estado="En seguimiento"
+                            data-unidad="OAIPCS"
+                            data-inicio="2025-11-01"
+                        >
+                            <td class="col-n">6</td>
+                            <td class="col-codigo">CS-PA-INF-2025-05</td>
+                            <td class="col-nombre">
+                                Mejoramiento de infraestructura del
+                                Desembarcadero Pesquero Artesanal de San Juan de
+                                Marcona
+                            </td>
+                            <td>Ica</td>
+                            <td>Centro</td>
+                            <td>Infraestructura</td>
+                            <td>Pesca y Acuicultura</td>
+                            <td>
+                                <span class="conflict-tag conflict-controversia"
+                                    >Controversia</span
+                                >
+                            </td>
+                            <td>
+                                <span class="risk-label risk-bajo">Bajo</span>
+                            </td>
+                            <td class="col-prio">
+                                <span class="status-badge priority-bajo"
+                                    >Bajo</span
+                                >
+                                <span class="rule-note"
+                                    >sin regla definida</span
+                                >
+                            </td>
+                            <td>
+                                <span class="status-badge estado-seguimiento"
+                                    ><i class="status-dot"></i>En
+                                    seguimiento</span
+                                >
+                            </td>
+                            <td>OAIPCS</td>
+                            <td class="col-date">2025-11-01</td>
+                            <td class="col-date">—</td>
+                            <td class="col-num">—</td>
+                            <td>—</td>
+                            <td class="col-num">1</td>
+                            <td>
+                                <button
+                                    type="button"
+                                    class="table-link"
+                                    title="Mockup sin ruta de ficha"
+                                >
+                                    Ver ficha
+                                </button>
+                            </td>
+                        </tr>
+                        <tr
+                            data-codigo="CS-PA-INF-2025-06"
+                            data-nombre="Culminación de infraestructura del Desembarcadero Pesquero Artesanal de Atico"
+                            data-region="Arequipa"
+                            data-alcance="Sur"
+                            data-tematica="Infraestructura"
+                            data-subsector="Pesca y Acuicultura"
+                            data-riesgo="Bajo"
+                            data-prioridad="Bajo"
+                            data-estado="En seguimiento"
+                            data-unidad="OAIPCS"
+                            data-inicio="2025-11-01"
+                        >
+                            <td class="col-n">7</td>
+                            <td class="col-codigo">CS-PA-INF-2025-06</td>
+                            <td class="col-nombre">
+                                Culminación de infraestructura del
+                                Desembarcadero Pesquero Artesanal de Atico
+                            </td>
+                            <td>Arequipa</td>
+                            <td>Sur</td>
+                            <td>Infraestructura</td>
+                            <td>Pesca y Acuicultura</td>
+                            <td>
+                                <span class="conflict-tag conflict-controversia"
+                                    >Controversia</span
+                                >
+                            </td>
+                            <td>
+                                <span class="risk-label risk-bajo">Bajo</span>
+                            </td>
+                            <td class="col-prio">
+                                <span class="status-badge priority-bajo"
+                                    >Bajo</span
+                                >
+                                <span class="rule-note"
+                                    >sin regla definida</span
+                                >
+                            </td>
+                            <td>
+                                <span class="status-badge estado-seguimiento"
+                                    ><i class="status-dot"></i>En
+                                    seguimiento</span
+                                >
+                            </td>
+                            <td>OAIPCS</td>
+                            <td class="col-date">2025-11-01</td>
+                            <td class="col-date">—</td>
+                            <td class="col-num">—</td>
+                            <td>—</td>
+                            <td class="col-num">—</td>
+                            <td>
+                                <button
+                                    type="button"
+                                    class="table-link"
+                                    title="Mockup sin ruta de ficha"
+                                >
+                                    Ver ficha
+                                </button>
+                            </td>
+                        </tr>
+                        <tr
+                            data-codigo="CS-MI-ITE-2025-02"
+                            data-nombre="Presunta contaminación por plomo de la empresa Baterías ETNA (Mi Perú, Callao)"
+                            data-region="Lima"
+                            data-alcance="Centro"
+                            data-tematica="Impactos de terceros"
+                            data-subsector="MYPE e Industria"
+                            data-riesgo="Moderado"
+                            data-prioridad="Moderado"
+                            data-estado="En seguimiento"
+                            data-unidad="OAIPCS"
+                            data-inicio="2025-08-01"
+                        >
+                            <td class="col-n">8</td>
+                            <td class="col-codigo">CS-MI-ITE-2025-02</td>
+                            <td class="col-nombre">
+                                Presunta contaminación por plomo de la empresa
+                                Baterías ETNA (Mi Perú, Callao)
+                            </td>
+                            <td>Lima</td>
+                            <td>Centro</td>
+                            <td>Impactos de terceros</td>
+                            <td>MYPE e Industria</td>
+                            <td>
+                                <span class="conflict-tag conflict-conflicto"
+                                    >Conflicto social</span
+                                >
+                            </td>
+                            <td>
+                                <span class="risk-label risk-moderado"
+                                    >Moderado</span
+                                >
+                            </td>
+                            <td class="col-prio">
+                                <span class="status-badge priority-moderado"
+                                    >Moderado</span
+                                >
+                                <span class="rule-note"
+                                    >sin regla definida</span
+                                >
+                            </td>
+                            <td>
+                                <span class="status-badge estado-seguimiento"
+                                    ><i class="status-dot"></i>En
+                                    seguimiento</span
+                                >
+                            </td>
+                            <td>OAIPCS</td>
+                            <td class="col-date">2025-08-01</td>
+                            <td class="col-date">—</td>
+                            <td class="col-num">—</td>
+                            <td>—</td>
+                            <td class="col-num">—</td>
+                            <td>
+                                <button
+                                    type="button"
+                                    class="table-link"
+                                    title="Mockup sin ruta de ficha"
+                                >
+                                    Ver ficha
+                                </button>
+                            </td>
+                        </tr>
+                        <tr
+                            data-codigo="CS-PA-INF-2025-03"
+                            data-nombre="Mejoramiento de infraestructura del Desembarcadero Pesquero Artesanal Faro Matarani"
+                            data-region="Arequipa"
+                            data-alcance="Sur"
+                            data-tematica="Infraestructura"
+                            data-subsector="Pesca y Acuicultura"
+                            data-riesgo="Bajo"
+                            data-prioridad="Bajo"
+                            data-estado="En seguimiento"
+                            data-unidad="OAIPCS"
+                            data-inicio="2025-08-01"
+                        >
+                            <td class="col-n">9</td>
+                            <td class="col-codigo">CS-PA-INF-2025-03</td>
+                            <td class="col-nombre">
+                                Mejoramiento de infraestructura del
+                                Desembarcadero Pesquero Artesanal Faro Matarani
+                            </td>
+                            <td>Arequipa</td>
+                            <td>Sur</td>
+                            <td>Infraestructura</td>
+                            <td>Pesca y Acuicultura</td>
+                            <td>
+                                <span class="conflict-tag conflict-controversia"
+                                    >Controversia</span
+                                >
+                            </td>
+                            <td>
+                                <span class="risk-label risk-bajo">Bajo</span>
+                            </td>
+                            <td class="col-prio">
+                                <span class="status-badge priority-bajo"
+                                    >Bajo</span
+                                >
+                                <span class="rule-note"
+                                    >sin regla definida</span
+                                >
+                            </td>
+                            <td>
+                                <span class="status-badge estado-seguimiento"
+                                    ><i class="status-dot"></i>En
+                                    seguimiento</span
+                                >
+                            </td>
+                            <td>OAIPCS</td>
+                            <td class="col-date">2025-08-01</td>
+                            <td class="col-date">—</td>
+                            <td class="col-num">—</td>
+                            <td>—</td>
+                            <td class="col-num">—</td>
+                            <td>
+                                <button
+                                    type="button"
+                                    class="table-link"
+                                    title="Mockup sin ruta de ficha"
+                                >
+                                    Ver ficha
+                                </button>
+                            </td>
+                        </tr>
+                        <tr
+                            data-codigo="CS-MI-INF-2025-01"
+                            data-nombre="Ocupación informal de terreno del Parque Industrial de Ancón (AAMEC)"
+                            data-region="Lima"
+                            data-alcance="Centro"
+                            data-tematica="Infraestructura"
+                            data-subsector="MYPE e Industria"
+                            data-riesgo="Alto"
+                            data-prioridad="Moderado"
+                            data-estado="En seguimiento"
+                            data-unidad="OAIPCS"
+                            data-inicio="2025-07-01"
+                        >
+                            <td class="col-n">10</td>
+                            <td class="col-codigo">CS-MI-INF-2025-01</td>
+                            <td class="col-nombre">
+                                Ocupación informal de terreno del Parque
+                                Industrial de Ancón (AAMEC)
+                            </td>
+                            <td>Lima</td>
+                            <td>Centro</td>
+                            <td>Infraestructura</td>
+                            <td>MYPE e Industria</td>
+                            <td>
+                                <span class="conflict-tag conflict-controversia"
+                                    >Controversia</span
+                                >
+                            </td>
+                            <td>
+                                <span class="risk-label risk-alto">Alto</span>
+                            </td>
+                            <td class="col-prio">
+                                <span class="status-badge priority-moderado"
+                                    >Moderado</span
+                                >
+                                <span class="rule-note"
+                                    >sin regla definida</span
+                                >
+                            </td>
+                            <td>
+                                <span class="status-badge estado-seguimiento"
+                                    ><i class="status-dot"></i>En
+                                    seguimiento</span
+                                >
+                            </td>
+                            <td>OAIPCS</td>
+                            <td class="col-date">2025-07-01</td>
+                            <td class="col-date">—</td>
+                            <td class="col-num">—</td>
+                            <td>—</td>
+                            <td class="col-num">4</td>
+                            <td>
+                                <button
+                                    type="button"
+                                    class="table-link"
+                                    title="Mockup sin ruta de ficha"
+                                >
+                                    Ver ficha
+                                </button>
+                            </td>
+                        </tr>
+                        <tr
+                            data-codigo="CS-MI-ITE-2025-01"
+                            data-nombre="Culminación del Gran Mercado de Belén - Iquitos"
+                            data-region="Loreto"
+                            data-alcance="Oriente"
+                            data-tematica="Impactos de terceros"
+                            data-subsector="MYPE e Industria"
+                            data-riesgo="Bajo"
+                            data-prioridad="Bajo"
+                            data-estado="En seguimiento"
+                            data-unidad="OAIPCS"
+                            data-inicio="2025-01-01"
+                        >
+                            <td class="col-n">11</td>
+                            <td class="col-codigo">CS-MI-ITE-2025-01</td>
+                            <td class="col-nombre">
+                                Culminación del Gran Mercado de Belén - Iquitos
+                            </td>
+                            <td>Loreto</td>
+                            <td>Oriente</td>
+                            <td>Impactos de terceros</td>
+                            <td>MYPE e Industria</td>
+                            <td>
+                                <span class="conflict-tag conflict-diferencia"
+                                    >Diferencia</span
+                                >
+                            </td>
+                            <td>
+                                <span class="risk-label risk-bajo">Bajo</span>
+                            </td>
+                            <td class="col-prio">
+                                <span class="status-badge priority-bajo"
+                                    >Bajo</span
+                                >
+                                <span class="rule-note"
+                                    >sin regla definida</span
+                                >
+                            </td>
+                            <td>
+                                <span class="status-badge estado-seguimiento"
+                                    ><i class="status-dot"></i>En
+                                    seguimiento</span
+                                >
+                            </td>
+                            <td>OAIPCS</td>
+                            <td class="col-date">2025-01-01</td>
+                            <td class="col-date">—</td>
+                            <td class="col-num">—</td>
+                            <td>—</td>
+                            <td class="col-num">—</td>
+                            <td>
+                                <button
+                                    type="button"
+                                    class="table-link"
+                                    title="Mockup sin ruta de ficha"
+                                >
+                                    Ver ficha
+                                </button>
+                            </td>
+                        </tr>
+                        <tr
+                            data-codigo="CS-PA-DBE-2025-01"
+                            data-nombre="Habilitación de áreas acuáticas y fortalecimiento de la maricultura en Sechura"
+                            data-region="Piura"
+                            data-alcance="Norte"
+                            data-tematica="Distribución de beneficios"
+                            data-subsector="Pesca y Acuicultura"
+                            data-riesgo="Moderado"
+                            data-prioridad="Moderado"
+                            data-estado="En seguimiento"
+                            data-unidad="OAIPCS"
+                            data-inicio="2025-01-01"
+                        >
+                            <td class="col-n">12</td>
+                            <td class="col-codigo">CS-PA-DBE-2025-01</td>
+                            <td class="col-nombre">
+                                Habilitación de áreas acuáticas y
+                                fortalecimiento de la maricultura en Sechura
+                            </td>
+                            <td>Piura</td>
+                            <td>Norte</td>
+                            <td>Distribución de beneficios</td>
+                            <td>Pesca y Acuicultura</td>
+                            <td>
+                                <span class="conflict-tag conflict-controversia"
+                                    >Controversia</span
+                                >
+                            </td>
+                            <td>
+                                <span class="risk-label risk-moderado"
+                                    >Moderado</span
+                                >
+                            </td>
+                            <td class="col-prio">
+                                <span class="status-badge priority-moderado"
+                                    >Moderado</span
+                                >
+                                <span class="rule-note"
+                                    >sin regla definida</span
+                                >
+                            </td>
+                            <td>
+                                <span class="status-badge estado-seguimiento"
+                                    ><i class="status-dot"></i>En
+                                    seguimiento</span
+                                >
+                            </td>
+                            <td>OAIPCS</td>
+                            <td class="col-date">2025-01-01</td>
+                            <td class="col-date">—</td>
+                            <td class="col-num">—</td>
+                            <td>—</td>
+                            <td class="col-num">1</td>
+                            <td>
+                                <button
+                                    type="button"
+                                    class="table-link"
+                                    title="Mockup sin ruta de ficha"
+                                >
+                                    Ver ficha
+                                </button>
+                            </td>
+                        </tr>
+                        <tr
+                            data-codigo="CS-PA-INF-2024-02"
+                            data-nombre="Disputa por la administración de la Infraestructura Pesquera Artesanal de Chorrillos"
+                            data-region="Lima"
+                            data-alcance="Centro"
+                            data-tematica="Infraestructura"
+                            data-subsector="Pesca y Acuicultura"
+                            data-riesgo="Moderado"
+                            data-prioridad="Moderado"
+                            data-estado="En seguimiento"
+                            data-unidad="OAIPCS"
+                            data-inicio="2024-12-04"
+                        >
+                            <td class="col-n">13</td>
+                            <td class="col-codigo">CS-PA-INF-2024-02</td>
+                            <td class="col-nombre">
+                                Disputa por la administración de la
+                                Infraestructura Pesquera Artesanal de Chorrillos
+                            </td>
+                            <td>Lima</td>
+                            <td>Centro</td>
+                            <td>Infraestructura</td>
+                            <td>Pesca y Acuicultura</td>
+                            <td>
+                                <span class="conflict-tag conflict-conflicto"
+                                    >Conflicto social</span
+                                >
+                            </td>
+                            <td>
+                                <span class="risk-label risk-moderado"
+                                    >Moderado</span
+                                >
+                            </td>
+                            <td class="col-prio">
+                                <span class="status-badge priority-moderado"
+                                    >Moderado</span
+                                >
+                                <span class="rule-note"
+                                    >sin regla definida</span
+                                >
+                            </td>
+                            <td>
+                                <span class="status-badge estado-seguimiento"
+                                    ><i class="status-dot"></i>En
+                                    seguimiento</span
+                                >
+                            </td>
+                            <td>OAIPCS</td>
+                            <td class="col-date">2024-12-04</td>
+                            <td class="col-date">—</td>
+                            <td class="col-num">—</td>
+                            <td>—</td>
+                            <td class="col-num">1</td>
+                            <td>
+                                <button
+                                    type="button"
+                                    class="table-link"
+                                    title="Mockup sin ruta de ficha"
+                                >
+                                    Ver ficha
+                                </button>
+                            </td>
+                        </tr>
+                        <tr
+                            data-codigo="CS-PA-INF-2024-01"
+                            data-nombre="Rehabilitación del Desembarcadero Pesquero Artesanal de Los Órganos"
+                            data-region="Piura"
+                            data-alcance="Norte"
+                            data-tematica="Infraestructura"
+                            data-subsector="Pesca y Acuicultura"
+                            data-riesgo="Bajo"
+                            data-prioridad="Moderado"
+                            data-estado="En seguimiento"
+                            data-unidad="OAIPCS"
+                            data-inicio="2024-12-01"
+                        >
+                            <td class="col-n">14</td>
+                            <td class="col-codigo">CS-PA-INF-2024-01</td>
+                            <td class="col-nombre">
+                                Rehabilitación del Desembarcadero Pesquero
+                                Artesanal de Los Órganos
+                            </td>
+                            <td>Piura</td>
+                            <td>Norte</td>
+                            <td>Infraestructura</td>
+                            <td>Pesca y Acuicultura</td>
+                            <td>
+                                <span class="conflict-tag conflict-conflicto"
+                                    >Conflicto social</span
+                                >
+                            </td>
+                            <td>
+                                <span class="risk-label risk-bajo">Bajo</span>
+                            </td>
+                            <td class="col-prio">
+                                <span class="status-badge priority-moderado"
+                                    >Moderado</span
+                                >
+                                <span class="rule-note"
+                                    >sin regla definida</span
+                                >
+                            </td>
+                            <td>
+                                <span class="status-badge estado-seguimiento"
+                                    ><i class="status-dot"></i>En
+                                    seguimiento</span
+                                >
+                            </td>
+                            <td>OAIPCS</td>
+                            <td class="col-date">2024-12-01</td>
+                            <td class="col-date">2026-09-01</td>
+                            <td class="col-num">3</td>
+                            <td>Actividad</td>
+                            <td class="col-num">1</td>
+                            <td>
+                                <button
+                                    type="button"
+                                    class="table-link"
+                                    title="Mockup sin ruta de ficha"
+                                >
+                                    Ver ficha
+                                </button>
+                            </td>
+                        </tr>
+                        <tr
+                            data-codigo="CS-PA-OAT-2024-02"
+                            data-nombre="Uso de red de cortina de fondo en Cabo Blanco y Los Órganos"
+                            data-region="Piura"
+                            data-alcance="Norte"
+                            data-tematica="Ordenamiento y acceso territorial"
+                            data-subsector="Pesca y Acuicultura"
+                            data-riesgo="Bajo"
+                            data-prioridad="Urgente"
+                            data-estado="En seguimiento"
+                            data-unidad="OAIPCS"
+                            data-inicio="2024-10-15"
+                        >
+                            <td class="col-n">15</td>
+                            <td class="col-codigo">CS-PA-OAT-2024-02</td>
+                            <td class="col-nombre">
+                                Uso de red de cortina de fondo en Cabo Blanco y
+                                Los Órganos
+                            </td>
+                            <td>Piura</td>
+                            <td>Norte</td>
+                            <td>Ordenamiento y acceso territorial</td>
+                            <td>Pesca y Acuicultura</td>
+                            <td>
+                                <span class="conflict-tag conflict-conflicto"
+                                    >Conflicto social</span
+                                >
+                            </td>
+                            <td>
+                                <span class="risk-label risk-bajo">Bajo</span>
+                            </td>
+                            <td class="col-prio">
+                                <span class="status-badge priority-urgente"
+                                    >Urgente</span
+                                >
+                                <span class="rule-note"
+                                    >sin regla definida</span
+                                >
+                            </td>
+                            <td>
+                                <span class="status-badge estado-seguimiento"
+                                    ><i class="status-dot"></i>En
+                                    seguimiento</span
+                                >
+                            </td>
+                            <td>OAIPCS</td>
+                            <td class="col-date">2024-10-15</td>
+                            <td class="col-date">2026-05-26</td>
+                            <td class="col-num">4</td>
+                            <td>Actividad</td>
+                            <td class="col-num">5</td>
+                            <td>
+                                <button
+                                    type="button"
+                                    class="table-link"
+                                    title="Mockup sin ruta de ficha"
+                                >
+                                    Ver ficha
+                                </button>
+                            </td>
+                        </tr>
+                        <tr
+                            data-codigo="CS-PA-OAT-2024-01"
+                            data-nombre="Rechazo al proyecto de exploración de hidrocarburos de ANADARKO (lotes Z-61, Z-62, Z-63)"
+                            data-region="Piura"
+                            data-alcance="Norte"
+                            data-tematica="Ordenamiento y acceso territorial"
+                            data-subsector="Pesca y Acuicultura"
+                            data-riesgo="Moderado"
+                            data-prioridad="Moderado"
+                            data-estado="En seguimiento"
+                            data-unidad="OAIPCS"
+                            data-inicio="2024-07-01"
+                        >
+                            <td class="col-n">16</td>
+                            <td class="col-codigo">CS-PA-OAT-2024-01</td>
+                            <td class="col-nombre">
+                                Rechazo al proyecto de exploración de
+                                hidrocarburos de ANADARKO (lotes Z-61, Z-62,
+                                Z-63)
+                            </td>
+                            <td>Piura</td>
+                            <td>Norte</td>
+                            <td>Ordenamiento y acceso territorial</td>
+                            <td>Pesca y Acuicultura</td>
+                            <td>
+                                <span class="conflict-tag conflict-controversia"
+                                    >Controversia</span
+                                >
+                            </td>
+                            <td>
+                                <span class="risk-label risk-moderado"
+                                    >Moderado</span
+                                >
+                            </td>
+                            <td class="col-prio">
+                                <span class="status-badge priority-moderado"
+                                    >Moderado</span
+                                >
+                                <span class="rule-note"
+                                    >sin regla definida</span
+                                >
+                            </td>
+                            <td>
+                                <span class="status-badge estado-seguimiento"
+                                    ><i class="status-dot"></i>En
+                                    seguimiento</span
+                                >
+                            </td>
+                            <td>OAIPCS</td>
+                            <td class="col-date">2024-07-01</td>
+                            <td class="col-date">—</td>
+                            <td class="col-num">—</td>
+                            <td>—</td>
+                            <td class="col-num">—</td>
+                            <td>
+                                <button
+                                    type="button"
+                                    class="table-link"
+                                    title="Mockup sin ruta de ficha"
+                                >
+                                    Ver ficha
+                                </button>
+                            </td>
+                        </tr>
+                        <tr
+                            data-codigo="CS-PA-INF-2022-01"
+                            data-nombre="Ocupación informal del predio destinado al PIP de SANIPES en Sechura ('La Paradita')"
+                            data-region="Piura"
+                            data-alcance="Norte"
+                            data-tematica="Infraestructura"
+                            data-subsector="Pesca y Acuicultura"
+                            data-riesgo="Moderado"
+                            data-prioridad="Moderado"
+                            data-estado="En seguimiento"
+                            data-unidad="OAIPCS"
+                            data-inicio="2022-01-01"
+                        >
+                            <td class="col-n">17</td>
+                            <td class="col-codigo">CS-PA-INF-2022-01</td>
+                            <td class="col-nombre">
+                                Ocupación informal del predio destinado al PIP
+                                de SANIPES en Sechura ('La Paradita')
+                            </td>
+                            <td>Piura</td>
+                            <td>Norte</td>
+                            <td>Infraestructura</td>
+                            <td>Pesca y Acuicultura</td>
+                            <td>
+                                <span class="conflict-tag conflict-conflicto"
+                                    >Conflicto social</span
+                                >
+                            </td>
+                            <td>
+                                <span class="risk-label risk-moderado"
+                                    >Moderado</span
+                                >
+                            </td>
+                            <td class="col-prio">
+                                <span class="status-badge priority-moderado"
+                                    >Moderado</span
+                                >
+                                <span class="rule-note"
+                                    >sin regla definida</span
+                                >
+                            </td>
+                            <td>
+                                <span class="status-badge estado-seguimiento"
+                                    ><i class="status-dot"></i>En
+                                    seguimiento</span
+                                >
+                            </td>
+                            <td>OAIPCS</td>
+                            <td class="col-date">2022-01-01</td>
+                            <td class="col-date">—</td>
+                            <td class="col-num">—</td>
+                            <td>—</td>
+                            <td class="col-num">4</td>
+                            <td>
+                                <button
+                                    type="button"
+                                    class="table-link"
+                                    title="Mockup sin ruta de ficha"
+                                >
+                                    Ver ficha
+                                </button>
+                            </td>
+                        </tr>
+                        <tr
+                            data-codigo="CS-PA-INF-2017-01"
+                            data-nombre="Mejoramiento de infraestructura del Desembarcadero Pesquero Artesanal de Supe"
+                            data-region="Lima"
+                            data-alcance="Centro"
+                            data-tematica="Infraestructura"
+                            data-subsector="Pesca y Acuicultura"
+                            data-riesgo="Bajo"
+                            data-prioridad="Bajo"
+                            data-estado="En seguimiento"
+                            data-unidad="OAIPCS"
+                            data-inicio="2017-01-01"
+                        >
+                            <td class="col-n">18</td>
+                            <td class="col-codigo">CS-PA-INF-2017-01</td>
+                            <td class="col-nombre">
+                                Mejoramiento de infraestructura del
+                                Desembarcadero Pesquero Artesanal de Supe
+                            </td>
+                            <td>Lima</td>
+                            <td>Centro</td>
+                            <td>Infraestructura</td>
+                            <td>Pesca y Acuicultura</td>
+                            <td>
+                                <span class="conflict-tag conflict-controversia"
+                                    >Controversia</span
+                                >
+                            </td>
+                            <td>
+                                <span class="risk-label risk-bajo">Bajo</span>
+                            </td>
+                            <td class="col-prio">
+                                <span class="status-badge priority-bajo"
+                                    >Bajo</span
+                                >
+                                <span class="rule-note"
+                                    >sin regla definida</span
+                                >
+                            </td>
+                            <td>
+                                <span class="status-badge estado-seguimiento"
+                                    ><i class="status-dot"></i>En
+                                    seguimiento</span
+                                >
+                            </td>
+                            <td>OAIPCS</td>
+                            <td class="col-date">2017-01-01</td>
+                            <td class="col-date">—</td>
+                            <td class="col-num">—</td>
+                            <td>—</td>
+                            <td class="col-num">—</td>
+                            <td>
+                                <button
+                                    type="button"
+                                    class="table-link"
+                                    title="Mockup sin ruta de ficha"
+                                >
+                                    Ver ficha
+                                </button>
+                            </td>
+                        </tr>
+                        <tr
+                            data-codigo="CS-PA-INF-2012-01"
+                            data-nombre="Reubicación de embarcaciones del Muelle 5E - Terminal Norte Multipropósito del Callao"
+                            data-region="Callao"
+                            data-alcance="Centro"
+                            data-tematica="Infraestructura"
+                            data-subsector="Pesca y Acuicultura"
+                            data-riesgo="Bajo"
+                            data-prioridad="Urgente"
+                            data-estado="En seguimiento"
+                            data-unidad="OAIPCS"
+                            data-inicio="2012-08-01"
+                        >
+                            <td class="col-n">19</td>
+                            <td class="col-codigo">CS-PA-INF-2012-01</td>
+                            <td class="col-nombre">
+                                Reubicación de embarcaciones del Muelle 5E -
+                                Terminal Norte Multipropósito del Callao
+                            </td>
+                            <td>Callao</td>
+                            <td>Centro</td>
+                            <td>Infraestructura</td>
+                            <td>Pesca y Acuicultura</td>
+                            <td>
+                                <span class="conflict-tag conflict-conflicto"
+                                    >Conflicto social</span
+                                >
+                            </td>
+                            <td>
+                                <span class="risk-label risk-bajo">Bajo</span>
+                            </td>
+                            <td class="col-prio">
+                                <span class="status-badge priority-urgente"
+                                    >Urgente</span
+                                >
+                                <span class="rule-note"
+                                    >sin regla definida</span
+                                >
+                            </td>
+                            <td>
+                                <span class="status-badge estado-seguimiento"
+                                    ><i class="status-dot"></i>En
+                                    seguimiento</span
+                                >
+                            </td>
+                            <td>OAIPCS</td>
+                            <td class="col-date">2012-08-01</td>
+                            <td class="col-date">2025-12-31</td>
+                            <td class="col-num">1</td>
+                            <td>Actividad</td>
+                            <td class="col-num">1</td>
+                            <td>
+                                <button
+                                    type="button"
+                                    class="table-link"
+                                    title="Mockup sin ruta de ficha"
+                                >
+                                    Ver ficha
+                                </button>
+                            </td>
+                        </tr>
+                        <tr
+                            data-codigo="CS-PA-GOB-2026-01"
+                            data-nombre="Seguridad y fiscalización pesquera en el litoral de Tumbes"
+                            data-region="Tumbes"
+                            data-alcance="Norte"
+                            data-tematica="Gobernanza"
+                            data-subsector="Pesca y Acuicultura"
+                            data-riesgo="Moderado"
+                            data-prioridad="Moderado"
+                            data-estado="En seguimiento"
+                            data-unidad="OAIPCS"
+                            data-inicio=""
+                        >
+                            <td class="col-n">20</td>
+                            <td class="col-codigo">CS-PA-GOB-2026-01</td>
+                            <td class="col-nombre">
+                                Seguridad y fiscalización pesquera en el litoral
+                                de Tumbes
+                            </td>
+                            <td>Tumbes</td>
+                            <td>Norte</td>
+                            <td>Gobernanza</td>
+                            <td>Pesca y Acuicultura</td>
+                            <td>
+                                <span class="conflict-tag conflict-controversia"
+                                    >Controversia</span
+                                >
+                            </td>
+                            <td>
+                                <span class="risk-label risk-moderado"
+                                    >Moderado</span
+                                >
+                            </td>
+                            <td class="col-prio">
+                                <span class="status-badge priority-moderado"
+                                    >Moderado</span
+                                >
+                                <span class="rule-note"
+                                    >sin regla definida</span
+                                >
+                            </td>
+                            <td>
+                                <span class="status-badge estado-seguimiento"
+                                    ><i class="status-dot"></i>En
+                                    seguimiento</span
+                                >
+                            </td>
+                            <td>OAIPCS</td>
+                            <td class="col-date">—</td>
+                            <td class="col-date">—</td>
+                            <td class="col-num">—</td>
+                            <td>—</td>
+                            <td class="col-num">—</td>
+                            <td>
+                                <button
+                                    type="button"
+                                    class="table-link"
+                                    title="Mockup sin ruta de ficha"
+                                >
+                                    Ver ficha
+                                </button>
+                            </td>
+                        </tr>
+                        <tr
+                            data-codigo="CS-PA-ITE-2026-04"
+                            data-nombre="Extracción de erizo rojo y alga palo en San Juan de Marcona"
+                            data-region="Ica"
+                            data-alcance="Centro"
+                            data-tematica="Impactos de terceros"
+                            data-subsector="Pesca y Acuicultura"
+                            data-riesgo="Bajo"
+                            data-prioridad="Moderado"
+                            data-estado="En seguimiento"
+                            data-unidad="OAIPCS"
+                            data-inicio=""
+                        >
+                            <td class="col-n">21</td>
+                            <td class="col-codigo">CS-PA-ITE-2026-04</td>
+                            <td class="col-nombre">
+                                Extracción de erizo rojo y alga palo en San Juan
+                                de Marcona
+                            </td>
+                            <td>Ica</td>
+                            <td>Centro</td>
+                            <td>Impactos de terceros</td>
+                            <td>Pesca y Acuicultura</td>
+                            <td>
+                                <span class="conflict-tag conflict-controversia"
+                                    >Controversia</span
+                                >
+                            </td>
+                            <td>
+                                <span class="risk-label risk-bajo">Bajo</span>
+                            </td>
+                            <td class="col-prio">
+                                <span class="status-badge priority-moderado"
+                                    >Moderado</span
+                                >
+                                <span class="rule-note"
+                                    >sin regla definida</span
+                                >
+                            </td>
+                            <td>
+                                <span class="status-badge estado-seguimiento"
+                                    ><i class="status-dot"></i>En
+                                    seguimiento</span
+                                >
+                            </td>
+                            <td>OAIPCS</td>
+                            <td class="col-date">—</td>
+                            <td class="col-date">—</td>
+                            <td class="col-num">—</td>
+                            <td>—</td>
+                            <td class="col-num">1</td>
+                            <td>
+                                <button
+                                    type="button"
+                                    class="table-link"
+                                    title="Mockup sin ruta de ficha"
+                                >
+                                    Ver ficha
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="pagination">
+                <button type="button" id="prev" class="button-secondary">
+                    ‹ Anterior
+                </button>
+                <span id="range-label"
+                    >1–10 de 21 · el caso anulado no aparece</span
+                >
+                <span id="page-label">Página 1 de 3</span>
+                <button type="button" id="next" class="button-secondary">
+                    Siguiente ›
+                </button>
+            </div>
+
+            <p class="footnote">
+                <strong
+                    >«—» significa «sin dato registrado»; no se estima.</strong
+                >
+                <code>Inicio</code> es <code>core.casos.fecha_inicio</code> (dos
+                casos no la tienen). <code>Último hecho</code> es el máximo
+                <code>fecha_evento</code> de <code>core.caso_cronologia</code>:
+                solo 5 de los 21 casos tienen hechos y ninguno cae en la primera
+                página. <code>Compromisos</code> y
+                <code>Tipo de compromiso</code> agregan
+                <code>core.compromisos</code> (8 en total, en 3 casos, todos con
+                el valor <code>Actividad</code>). <code>Documentos</code> cuenta
+                <code>core.documentos</code> no anulados. La prioridad de
+                atención se muestra tal cual está almacenada y se marca «sin
+                regla definida» porque la Guía no define su cálculo.
+            </p>
+
+            <section class="notes" aria-labelledby="notas">
+                <h2 id="notas">Notas para el equipo que implemente</h2>
+                <ol>
+                    <li>
+                        Esto es un <b>mockup</b>: no existe ruta en la SPA ni
+                        endpoint <code>GET /api/v1/anexos/15</code>. La fuente
+                        es
+                        <code>analytics.vw_anexo_15_matriz_conflictividad</code
+                        >; las columnas que la vista no expone se completaron
+                        aquí con un <code>SELECT</code> de solo lectura a las
+                        tablas de origen (ver nota 2).
+                    </li>
+                    <li>
+                        La vista ya corre con
+                        <code>security_invoker=true</code> (migración
+                        <code>migration/30_alcance_derivado.sql</code>), así que
+                        la RLS del rol que consulta se aplica: el caso anulado
+                        (<code>CS-MI-ITE-2026-02</code>) no se ve con
+                        <code>avisa_app</code>. Columnas del mockup ausentes en
+                        la vista: <code>estado</code>, <code>fecha_inicio</code>,
+                        <code>ultimo_hecho</code>, <code>compromisos</code>,
+                        <code>tipo_compromiso</code> y <code>documentos</code>.
+                        Propuesta de <code>CREATE OR REPLACE VIEW</code> (<b
+                            >no ejecutada</b
+                        >):
+                        <pre
+                            class="code-block"
+                        ><code>CREATE OR REPLACE VIEW analytics.vw_anexo_15_matriz_conflictividad
+WITH (security_invoker = true) AS
+SELECT
+    c.codigo_caso,
+    g.region,
+    al.codigo                               AS alcance,
+    s.nombre                                AS subsector,
+    tm.nombre                               AS tematica,
+    uo.siglas                               AS responsable,
+    nc.nombre                               AS nivel_conflicto,
+    nr.codigo                               AS nivel_riesgo,
+    c.descripcion_riesgo,
+    pa.codigo                               AS prioridad_atencion,
+    c.nombre_caso,
+    (SELECT string_agg(to_char(k.fecha_evento, 'DD.MM.YYYY') || ' ' || k.descripcion_hecho, ' | '
+                       ORDER BY k.fecha_evento DESC)
+       FROM core.caso_cronologia k
+      WHERE k.caso_id = c.id AND k.anulado_en IS NULL) AS narracion_cronologica,
+    (SELECT string_agg(a.codigo_alerta::text, ', ')
+       FROM core.alertas_tempranas a
+      WHERE a.caso_id = c.id)               AS alertas_vinculadas,
+    (SELECT string_agg(ac.nombre_actual, '; ')
+       FROM core.casos_actores ca
+       JOIN core.actores ac ON ac.actor_uid = ca.actor_id
+      WHERE ca.caso_id = c.id)              AS actores_involucrados,
+    pf.nombre                               AS punto_focal,
+    <span class="cm">-- columnas que el mockup pide y la vista actual no expone</span>
+    ec.codigo                               AS estado,
+    c.fecha_inicio,
+    (SELECT max(k.fecha_evento)
+       FROM core.caso_cronologia k
+      WHERE k.caso_id = c.id AND k.anulado_en IS NULL) AS ultimo_hecho,
+    (SELECT count(*)
+       FROM core.compromisos co
+      WHERE co.caso_id = c.id AND co.anulado_en IS NULL) AS compromisos,
+    (SELECT string_agg(DISTINCT co.tipo_compromiso, ', ')
+       FROM core.compromisos co
+      WHERE co.caso_id = c.id AND co.anulado_en IS NULL) AS tipo_compromiso,
+    (SELECT count(*)
+       FROM core.documentos d
+      WHERE d.caso_id = c.id AND d.anulado_en IS NULL) AS documentos
+  FROM core.casos c
+  LEFT JOIN core.usuarios pf                 ON pf.id = c.punto_focal_usuario_id
+  JOIN analytics.vw_geo_distrito g           ON g.distrito_id = c.distrito_principal_id
+  JOIN core.cat_subsectores s                ON s.id = c.subsector_id
+  JOIN core.cat_tematicas tm                 ON tm.id = c.tematica_id
+  JOIN core.cat_unidades_organicas uo        ON uo.id = c.unidad_responsable_id
+  JOIN core.cat_niveles_conflicto nc         ON nc.id = c.nivel_conflicto_id
+  JOIN core.cat_niveles_riesgo nr            ON nr.id = c.nivel_riesgo_id
+  LEFT JOIN core.cat_alcances_geograficos al ON al.id = core.alcance_caso(c.id)
+  LEFT JOIN core.cat_prioridades_atencion pa ON pa.id = c.prioridad_id
+  LEFT JOIN core.cat_estados_caso ec         ON ec.id = c.estado_id;</code></pre>
+                    </li>
+                    <li>
+                        El alcance <b>nunca</b> se elige a mano: lo deriva
+                        <code>core.alcance_caso(uuid)</code> desde las regiones
+                        del caso (una región → su alcance; varias → Nacional;
+                        sin regiones asignadas → la región principal y, en su
+                        defecto, la provincia). La API rechaza un alcance manual
+                        con <code>422 ALCANCE_DERIVADO</code>.
+                    </li>
+                    <li>
+                        Vocabulario congelado que debe respetarse (copiado del
+                        glosario de alineación):
+                        <dl class="vocab">
+                            <dt>Estados de caso</dt>
+                            <dd>
+                                Activo · En seguimiento · Resuelto · Archivado
+                            </dd>
+                            <dt>Conflictividad</dt>
+                            <dd>
+                                Diferencia · Controversia · Conflicto social ·
+                                Crisis social
+                            </dd>
+                            <dt>Riesgo</dt>
+                            <dd>Bajo · Moderado · Alto</dd>
+                            <dt>Prioridad</dt>
+                            <dd>Urgente · Moderado · Bajo</dd>
+                            <dt>Subsector</dt>
+                            <dd>Pesca y Acuicultura · MYPE e Industria</dd>
+                            <dt>Geografía</dt>
+                            <dd>
+                                «Región» (no «Territorio») · «GORE» (no
+                                «Gobierno regional»)
+                            </dd>
+                        </dl>
+                    </li>
+                    <li>
+                        Qué falta para implementarlo de verdad: repo
+                        <code>lib/db/repos/anexos.ts</code> +
+                        <code>GET /api/v1/anexos/15</code> + ruta SPA +
+                        exportación con los filtros activos (items 42 y 70 del
+                        catálogo de frontend).
+                    </li>
+                </ol>
+
+                <h3>Decisiones aplicadas</h3>
+                <ul>
+                    <li>
+                        La vista ya es <code>security_invoker</code> (migración
+                        <code>migration/30_alcance_derivado.sql</code>): el
+                        cierre de seguridad está hecho y lo pendiente es la
+                        pantalla.
+                    </li>
+                    <li>
+                        <b>«Tipo de compromiso»</b> sustituye al rótulo anterior
+                        del Anexo 15: el dato vive en
+                        <code>core.compromisos.tipo_compromiso</code> (hoy, un
+                        único valor almacenado: <code>Actividad</code>).
+                    </li>
+                    <li>
+                        Lo demás (filtros, orden, paginación y estados vacíos)
+                        se resuelve en el mockup.
+                    </li>
+                </ul>
+
+                <h3>Pendiente de decisión</h3>
+                <ul>
+                    <li>
+                        <b>Cobertura de filas:</b> la vista devuelve 21 de los
+                        34 casos no anulados; 13 quedan fuera por sus
+                        <code>INNER JOIN</code> (sin distrito, conflicto,
+                        riesgo, subsector o temática). ¿El Anexo 15 los lista
+                        con «—» o los excluye? Es decisión de OAIPCS/producto;
+                        el pie dice 21 porque es lo que devuelve la vista.
+                    </li>
+                    <li>
+                        <b>Clasificación del compromiso:</b> el item 16 pide
+                        «progresivo o parcial», «entendimiento operativo» y
+                        «condicionado»;
+                        <code>core.compromisos.tipo_compromiso</code>
+                        es texto libre con un solo valor
+                        (<code>Actividad</code>). ¿Se usa esa columna como eje o
+                        se crea un catálogo?
+                    </li>
+                    <li>
+                        <b>Regla de prioridad de atención:</b> la Guía (§8.3.1)
+                        la lista como columna pero no define su cálculo. Se
+                        muestra el valor almacenado, marcado «sin regla
+                        definida»; no se deriva del riesgo.
+                    </li>
+                </ul>
+            </section>
+        </main>
+
+        <script>
+            (function () {
+                'use strict';
+                var tbody = document.getElementById('matrix-rows');
+                var rows = Array.prototype.slice.call(
+                    tbody.querySelectorAll('tr'),
+                );
+                var rangeLabel = document.getElementById('range-label');
+                var pageLabel = document.getElementById('page-label');
+                var prevBtn = document.getElementById('prev');
+                var nextBtn = document.getElementById('next');
+                var PAGE = 10;
+                var state = {
+                    q: '',
+                    estado: 'Todos',
+                    prioridad: 'Todas',
+                    alcance: 'Todos',
+                    tematica: 'Todas',
+                    subsector: 'Todos',
+                    region: 'Todas',
+                    unidad: 'Todas',
+                    orden: 'inicio',
+                    page: 1,
+                };
+
+                function byInicio(a, b) {
+                    var ia = a.dataset.inicio;
+                    var ib = b.dataset.inicio;
+                    if (ia !== ib) {
+                        if (!ia) return 1;
+                        if (!ib) return -1;
+                        return ia > ib ? -1 : 1;
+                    }
+                    return a.dataset.codigo.localeCompare(b.dataset.codigo);
+                }
+
+                var sorters = {
+                    inicio: byInicio,
+                    riesgo: function (a, b) {
+                        var rank = { Alto: 0, Moderado: 1, Bajo: 2 };
+                        var d = rank[a.dataset.riesgo] - rank[b.dataset.riesgo];
+                        return d !== 0 ? d : byInicio(a, b);
+                    },
+                    prioridad: function (a, b) {
+                        var rank = { Urgente: 0, Moderado: 1, Bajo: 2 };
+                        var d =
+                            rank[a.dataset.prioridad] -
+                            rank[b.dataset.prioridad];
+                        return d !== 0 ? d : byInicio(a, b);
+                    },
+                    codigo: function (a, b) {
+                        return a.dataset.codigo.localeCompare(b.dataset.codigo);
+                    },
+                };
+
+                function matches(row) {
+                    var d = row.dataset;
+                    if (state.estado !== 'Todos' && d.estado !== state.estado)
+                        return false;
+                    if (
+                        state.prioridad !== 'Todas' &&
+                        d.prioridad !== state.prioridad
+                    )
+                        return false;
+                    if (
+                        state.alcance !== 'Todos' &&
+                        d.alcance !== state.alcance
+                    )
+                        return false;
+                    if (
+                        state.tematica !== 'Todas' &&
+                        d.tematica !== state.tematica
+                    )
+                        return false;
+                    if (
+                        state.subsector !== 'Todos' &&
+                        d.subsector !== state.subsector
+                    )
+                        return false;
+                    if (state.region !== 'Todas' && d.region !== state.region)
+                        return false;
+                    if (state.unidad !== 'Todas' && d.unidad !== state.unidad)
+                        return false;
+                    if (state.q) {
+                        var hay = (
+                            d.codigo +
+                            ' ' +
+                            d.nombre +
+                            ' ' +
+                            d.region
+                        ).toLowerCase();
+                        if (hay.indexOf(state.q.toLowerCase()) === -1)
+                            return false;
+                    }
+                    return true;
+                }
+
+                function render() {
+                    var list = rows.filter(matches).sort(sorters[state.orden]);
+                    var total = list.length;
+                    var pages = Math.max(1, Math.ceil(total / PAGE));
+                    if (state.page > pages) state.page = pages;
+                    var start = (state.page - 1) * PAGE;
+                    var end = Math.min(start + PAGE, total);
+
+                    while (tbody.firstChild)
+                        tbody.removeChild(tbody.firstChild);
+
+                    if (total === 0) {
+                        var trEmpty = document.createElement('tr');
+                        trEmpty.className = 'empty-row';
+                        var tdEmpty = document.createElement('td');
+                        tdEmpty.colSpan = 18;
+                        var divEmpty = document.createElement('div');
+                        divEmpty.className = 'empty-state';
+                        divEmpty.textContent =
+                            'Ningún caso coincide con los filtros.';
+                        tdEmpty.appendChild(divEmpty);
+                        trEmpty.appendChild(tdEmpty);
+                        tbody.appendChild(trEmpty);
+                    } else {
+                        list.slice(start, end).forEach(function (row, i) {
+                            var n = row.querySelector('.col-n');
+                            if (n) n.textContent = String(start + i + 1);
+                            tbody.appendChild(row);
+                        });
+                    }
+
+                    var rango =
+                        total === 0
+                            ? '0 de 0'
+                            : start + 1 + '–' + end + ' de ' + total;
+                    rangeLabel.textContent =
+                        rango + ' · el caso anulado no aparece';
+                    pageLabel.textContent =
+                        'Página ' + state.page + ' de ' + pages;
+                    prevBtn.disabled = state.page <= 1;
+                    nextBtn.disabled = state.page >= pages;
+                }
+
+                document
+                    .getElementById('q')
+                    .addEventListener('input', function (e) {
+                        state.q = e.target.value.trim();
+                        state.page = 1;
+                        render();
+                    });
+
+                var chips = Array.prototype.slice.call(
+                    document.querySelectorAll('.status-chip'),
+                );
+                chips.forEach(function (chip) {
+                    chip.addEventListener('click', function () {
+                        state.estado = chip.dataset.estado;
+                        state.page = 1;
+                        chips.forEach(function (c) {
+                            c.setAttribute('aria-pressed', String(c === chip));
+                        });
+                        render();
+                    });
+                });
+
+                var selects = Array.prototype.slice.call(
+                    document.querySelectorAll('select[data-filter]'),
+                );
+                selects.forEach(function (sel) {
+                    sel.addEventListener('change', function () {
+                        state[sel.dataset.filter] = sel.value;
+                        state.page = 1;
+                        render();
+                    });
+                });
+
+                document
+                    .getElementById('clear')
+                    .addEventListener('click', function () {
+                        state.q = '';
+                        state.estado = 'Todos';
+                        state.prioridad = 'Todas';
+                        state.alcance = 'Todos';
+                        state.tematica = 'Todas';
+                        state.subsector = 'Todos';
+                        state.region = 'Todas';
+                        state.unidad = 'Todas';
+                        state.orden = 'inicio';
+                        state.page = 1;
+                        document.getElementById('q').value = '';
+                        chips.forEach(function (c) {
+                            c.setAttribute(
+                                'aria-pressed',
+                                String(c.dataset.estado === 'Todos'),
+                            );
+                        });
+                        selects.forEach(function (sel) {
+                            var key = sel.dataset.filter;
+                            sel.value =
+                                key === 'orden' ? 'inicio' : defaultOption(key);
+                        });
+                        render();
+                    });
+
+                function defaultOption(key) {
+                    if (key === 'alcance' || key === 'subsector')
+                        return 'Todos';
+                    if (key === 'region') return 'Todas';
+                    return 'Todas';
+                }
+
+                prevBtn.addEventListener('click', function () {
+                    if (state.page > 1) {
+                        state.page -= 1;
+                        render();
+                    }
+                });
+
+                nextBtn.addEventListener('click', function () {
+                    state.page += 1;
+                    render();
+                });
+
+                render();
+            })();
+        </script>
+    </body>
+</html>

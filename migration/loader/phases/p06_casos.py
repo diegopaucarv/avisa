@@ -20,8 +20,8 @@ Decisiones que esta fase aplica:
   legado; ver parche 3). `FACT_Casos` no trae área y la columna es NOT NULL.
 * D29: `ID_Ubigeo` de `FACT_Casos` es un **departamento** (`DEP-xx`), no un
   distrito. `DEP-20` ("Más de Uno") no es región: 8 casos quedan con
-  `region_principal_id` NULL y se completan con `BRIDGE_Caso_Depto`; su
-  `alcance_id` es 5 (Nacional).
+  `region_principal_id` NULL y se completan con `BRIDGE_Caso_Depto`. Su alcance
+  ya no se inserta: `core.alcance_caso` lo deriva de las regiones (migración 28).
 * D48: `CS-PRODUCE-2026-016` no trae `ID_Riesgos`; se deriva de la moda de
   `ID_Riesgos` de sus alertas vinculadas.
 
@@ -283,9 +283,11 @@ async def _casos(ctx: LoadContext, geo: dict) -> list[dict]:
 
         await ctx.conn.execute(
             """
+            -- El alcance ya no se almacena: `core.alcance_caso` lo deriva de las
+            -- regiones del caso (migración 28).
             INSERT INTO core.casos
                 (codigo_caso, nombre_caso, codigo_legado, entidad_id,
-                 distrito_principal_id, alcance_id, subsector_id, tematica_id,
+                 distrito_principal_id, subsector_id, tematica_id,
                  unidad_responsable_id, punto_focal_usuario_id,
                  nivel_conflicto_id, nivel_riesgo_id, prioridad_id, estado_id,
                  descripcion_riesgo, resumen_ejecutivo,
@@ -294,15 +296,14 @@ async def _casos(ctx: LoadContext, geo: dict) -> list[dict]:
                  region_principal_id, provincia_principal_id,
                  fuente_original, es_seed_historico, origen_dato,
                  confidence, es_validado_humano, nivel_clasificacion)
-            VALUES ($1, $2, $3, 1, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13,
-                    $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24,
-                    $25, TRUE, $26, 1.00, TRUE, 2)
+            VALUES ($1, $2, $3, 1, $4, $5, $6, $7, $8, $9, $10, $11, $12,
+                    $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23,
+                    $24, TRUE, $25, 1.00, TRUE, 2)
             """,
             codigo,
             nombre[:255],
             codigo,
             geo["distrito_por_dis"].get(distrito) if distrito else None,
-            geo["alcance_por_dep"].get(dep) if dep else None,
             subsectores.get(casos.cell(indice, _C_SECTOR)),
             tematicas.get(casos.cell(indice, _C_TEMATICA)),
             unidad,

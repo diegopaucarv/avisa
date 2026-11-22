@@ -2,6 +2,7 @@ import { ApiError, jsonError } from "@/lib/db/errors";
 import {
   conAliasDePagina,
   jsonOk,
+  leerBooleano,
   leerPagina,
   queryParams,
   requireSession,
@@ -11,13 +12,24 @@ import {
   listDemandas,
   type DemandaListQuery,
 } from "@/lib/db/repos/demandas";
-import { withSession } from "@/lib/db/tenant";
+import { puedeAnularRegistros, withSession } from "@/lib/db/tenant";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const FILTERS = ["q", "caso", "sinCaso", "estado", "sort"] as const;
 
+/**
+ * Demandas (3P).
+ *
+ * `GET` devuelve el sobre paginado con `sinCasoTotal`/`vinculadasTotal` y
+ * acepta los filtros `q`, `caso`, `sinCaso`, `estado` y `sort`.
+ *
+ * `anulados=true` lista la **papelera** (demandas anuladas). Sólo se sirve a un
+ * rol con capacidad de anulación; si no la tiene, responde 403. La consulta se
+ * ejecuta con `verAnulados: true` para que la RLS de `core.demandas` deje pasar
+ * las filas anuladas.
+ */
 export async function GET(request: Request) {
   try {
     const session = requireSession(request);
@@ -30,9 +42,21 @@ export async function GET(request: Request) {
       if (value) query[key] = value;
     }
 
+    const anulados = leerBooleano(params.get("anulados"));
+    if (anulados) {
+      if (!puedeAnularRegistros(session.roles)) {
+        throw new ApiError(
+          403,
+          "Sin permiso para consultar registros anulados.",
+        );
+      }
+      query.incluirAnulados = true;
+    }
+
     const result = await withSession(
       { usuarioId: session.uid, rolCodigo: session.rol },
       (client) => listDemandas(client, query),
+      { verAnulados: anulados },
     );
 
     return jsonOk(conAliasDePagina(result));

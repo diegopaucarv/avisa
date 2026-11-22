@@ -2560,7 +2560,7 @@ function CaseDetail({
         <ChevronRight size={13} />
         <span>{item.code}</span>
       </div>
-      <DemoNotice />
+
       <div className="case-detail-header">
         <div>
           <div className="case-title-line">

@@ -25,7 +25,12 @@ const CASE_SELECT = `
   su.nombre as subsector,
   uo.siglas as unidad_responsable,
   c.origen_dato as origen,
-  c.nivel_clasificacion as clasificacion
+  c.nivel_clasificacion as clasificacion,
+  c.anulado_en as anulado_en,
+  c.motivo_anulacion as motivo_anulacion,
+  c.anulado_por as anulado_por,
+  ua.nombre as anulado_por_nombre,
+  c.anulacion_id as anulacion_id
 `;
 
 const CASE_FROM = `
@@ -33,13 +38,14 @@ const CASE_FROM = `
   left join core.cat_estados_caso ec on ec.id = c.estado_id
   left join core.cat_niveles_riesgo nr on nr.id = c.nivel_riesgo_id
   left join core.cat_prioridades_atencion pa on pa.id = c.prioridad_id
-  left join core.cat_alcances_geograficos ag on ag.id = c.alcance_id
+  left join core.cat_alcances_geograficos ag on ag.id = core.alcance_caso(c.id)
   left join core.cat_niveles_conflicto nc on nc.id = c.nivel_conflicto_id
   left join core.cat_ciclos_intervencion ci on ci.id = c.ciclo_intervencion_id
   left join core.cat_tematicas te on te.id = c.tematica_id
   left join core.cat_subsectores su on su.id = c.subsector_id
   left join core.cat_unidades_organicas uo on uo.id = c.unidad_responsable_id
   left join core.regiones rp on rp.id = c.region_principal_id
+  left join core.usuarios ua on ua.id = c.anulado_por
   left join lateral (
     select rg.nombre
       from core.caso_regiones cr
@@ -59,6 +65,19 @@ export type CaseListQuery = {
   tematica?: string;
   unidad?: string;
   region?: string;
+  /** `true` lista la papelera: sólo casos con `anulado_en` no nulo. */
+  anulados?: boolean;
+  /**
+   * `true` se queda con los estados abiertos del catálogo (`es_activo`), no con
+   * una etiqueta concreta: `Activo` y `En seguimiento` cuentan igual.
+   */
+  abiertos?: boolean;
+  /**
+   * `true` añade al resultado el bloque `conteos` de la barra de estados. Se
+   * calcula con los mismos filtros de la consulta pero ignorando `estado` y
+   * `abiertos`, para que los chips muestren cuántos casos hay al cambiar de chip.
+   */
+  conteos?: boolean;
   page?: number;
   pageSize?: number;
   sort?: string;
@@ -86,6 +105,33 @@ export type CaseListItem = {
   unidadResponsable: string | null;
   origen: string | null;
   clasificacion: number;
+  /** Fecha real del caso (la del legado), no la de carga. */
+  fechaInicio: string | null;
+  anuladoEn: string | Date | null;
+  /** Motivo declarado al anular; sólo se puebla en la papelera. */
+  motivoAnulacion: string | null;
+  /** Usuario que anuló (id); sólo se puebla en la papelera. */
+  anuladoPor: string | null;
+  /** Nombre legible de quien anuló; `null` si no se puede resolver. */
+  anuladoPorNombre: string | null;
+  /** Lote de anulación al que pertenece la fila. */
+  anulacionId: string | null;
+};
+
+/**
+ * Conteos de la barra de filtros de estado. Se calculan con los filtros
+ * vigentes (búsqueda, ámbito, temática, unidad, prioridad, región, anulados)
+ * pero sin aplicar `estado` ni `abiertos`.
+ */
+export type CaseConteos = {
+  /** Filas visibles no anuladas con los filtros vigentes. */
+  todos: number;
+  /** Estados con `es_activo = true` (hoy `Activo` y `En seguimiento`). */
+  abiertos: number;
+  /** Casos en el estado canónico `Resuelto`. */
+  resueltos: number;
+  /** Casos en el estado canónico `Archivado`. */
+  archivados: number;
 };
 
 export type CaseListResult = {
@@ -94,19 +140,45 @@ export type CaseListResult = {
   page: number;
   pageSize: number;
   generatedAt: string;
+  /** Sólo presente cuando la consulta pidió `conteos=true`. */
+  conteos?: CaseConteos;
 };
 
 const SORTS: Record<string, string> = {
-  recent: "c.fecha_ultima_actualizacion desc, c.codigo_caso asc",
+  // «Más reciente» ordena por la fecha real del caso. `fecha_ultima_actualizacion`
+  // es el instante de carga del legado (2026-10-31) para casi todas las filas y
+  // dejaba el orden sin efecto.
+  recent: "c.fecha_inicio desc nulls last, c.codigo_caso asc",
   risk: "nr.orden desc nulls last, c.codigo_caso asc",
   priority: "pa.orden asc nulls last, c.codigo_caso asc",
   code: "c.codigo_caso asc",
 };
 
-export async function listCases(
+/**
+ * Acepta los valores booleanos de la API (`true`) y también los que reenvía la
+ * exportación como texto (`"true"`). `"false"` no activa el filtro.
+ */
+function esVerdadero(valor: unknown): boolean {
+  if (typeof valor === "boolean") return valor;
+  if (typeof valor === "string") {
+    return ["true", "1", "si", "sí", "on"].includes(valor.trim().toLowerCase());
+  }
+  return false;
+}
+
+/**
+ * Constructor único de `WHERE` del listado de casos.
+ *
+ * `sinEstado` omite los filtros `estado` y `abiertos`: es lo que usan los
+ * conteos de la barra para no depender del chip activo. El resto de filtros
+ * (búsqueda, ámbito/RLS, temática, unidad, prioridad, región, anulados) se
+ * aplican igual que en la consulta paginada.
+ */
+async function construirWhere(
   client: PoolClient,
   query: CaseListQuery,
-): Promise<CaseListResult> {
+  opciones: { sinEstado?: boolean } = {},
+): Promise<{ where: string[]; params: unknown[] }> {
   const params: unknown[] = [];
   const where: string[] = [];
   const bind = (value: unknown) => {
@@ -122,19 +194,31 @@ export async function listCases(
     );
   }
 
-  // Cada filtro de catálogo se resuelve a su id y se compara la columna FK, no
-  // la etiqueta. Así un valor fuera de catálogo se rechaza (422) en vez de
-  // llegar al SQL, y el mismo valor sirve aunque la etiqueta cambie de grafía
-  // (`En seguimiento` / `En_seguimiento`).
-  await filtrarPorCatalogo(
-    client,
-    where,
-    bind,
-    "estado",
-    "estado",
-    "c.estado_id",
-    query.estado,
-  );
+  // La RLS de `core.casos` ya oculta las filas anuladas; el filtro explícito sólo
+  // se añade al abrir la papelera (`anulados=true`).
+  if (query.anulados) where.push("c.anulado_en is not null");
+
+  if (!opciones.sinEstado) {
+    // «Abiertos» se define por catálogo, no por una etiqueta: un caso nuevo nace
+    // en `Activo` y los del legado quedaron en `En seguimiento`. Ambos tienen
+    // `es_activo = true`, así que el indicador no cambia al reclasificar.
+    if (esVerdadero(query.abiertos)) where.push("ec.es_activo is true");
+
+    // Cada filtro de catálogo se resuelve a su id y se compara la columna FK, no
+    // la etiqueta. Así un valor fuera de catálogo se rechaza (422) en vez de
+    // llegar al SQL, y el mismo valor sirve aunque la etiqueta cambie de grafía
+    // (`En seguimiento` / `En_seguimiento`).
+    await filtrarPorCatalogo(
+      client,
+      where,
+      bind,
+      "estado",
+      "estado",
+      "c.estado_id",
+      query.estado,
+    );
+  }
+
   await filtrarPorCatalogo(
     client,
     where,
@@ -159,7 +243,7 @@ export async function listCases(
     bind,
     "alcance",
     "alcance",
-    "c.alcance_id",
+    "ag.id",
     query.alcance,
   );
   await filtrarPorCatalogo(
@@ -188,9 +272,51 @@ export async function listCases(
     );
   }
 
+  return { where, params };
+}
+
+async function contarCasos(
+  client: PoolClient,
+  query: CaseListQuery,
+): Promise<CaseConteos> {
+  // Sin `estado` ni `abiertos`: los chips se pintan siempre sobre el resto de la
+  // barra. Una sola consulta agregada, no una por chip.
+  const { where, params } = await construirWhere(client, query, {
+    sinEstado: true,
+  });
+
+  const sql = `
+    select
+      count(*)::int as todos,
+      count(*) filter (where ec.es_activo is true)::int as abiertos,
+      count(*) filter (where ec.codigo = 'Resuelto')::int as resueltos,
+      count(*) filter (where ec.codigo = 'Archivado')::int as archivados
+    ${CASE_FROM}
+    ${where.length ? `where ${where.join(" and ")}` : ""}
+  `;
+
+  const row = (await client.query(sql, params)).rows[0] ?? {};
+  return {
+    todos: Number(row.todos ?? 0),
+    abiertos: Number(row.abiertos ?? 0),
+    resueltos: Number(row.resueltos ?? 0),
+    archivados: Number(row.archivados ?? 0),
+  };
+}
+
+export async function listCases(
+  client: PoolClient,
+  query: CaseListQuery,
+): Promise<CaseListResult> {
+  const { where, params } = await construirWhere(client, query);
+
   const page = Math.max(1, Math.trunc(query.page ?? 1));
   const pageSize = Math.min(100, Math.max(1, Math.trunc(query.pageSize ?? 25)));
   const order = SORTS[query.sort ?? "recent"] ?? SORTS.recent;
+
+  const limit = `$${params.length + 1}`;
+  const offset = `$${params.length + 2}`;
+  params.push(pageSize, (page - 1) * pageSize);
 
   const sql = `
     select ${CASE_SELECT},
@@ -198,7 +324,7 @@ export async function listCases(
     ${CASE_FROM}
     ${where.length ? `where ${where.join(" and ")}` : ""}
     order by ${order}
-    limit ${bind(pageSize)} offset ${bind((page - 1) * pageSize)}
+    limit ${limit} offset ${offset}
   `;
 
   const result = await client.query(sql, params);
@@ -226,7 +352,15 @@ export async function listCases(
     unidadResponsable: row.unidad_responsable,
     origen: row.origen,
     clasificacion: row.clasificacion,
+    fechaInicio: row.fecha_inicio,
+    anuladoEn: row.anulado_en,
+    motivoAnulacion: row.motivo_anulacion,
+    anuladoPor: row.anulado_por,
+    anuladoPorNombre: row.anulado_por_nombre,
+    anulacionId: row.anulacion_id,
   }));
+
+  const conteos = query.conteos ? await contarCasos(client, query) : undefined;
 
   return {
     items,
@@ -234,12 +368,21 @@ export async function listCases(
     page,
     pageSize,
     generatedAt: new Date().toISOString(),
+    // Aditivo: sólo aparece cuando la consulta pide `conteos=true`.
+    ...(conteos ? { conteos } : {}),
   };
 }
 
 export type CaseActor = {
   id: string;
   nombre: string;
+  /**
+   * `core.actores` sólo guarda el nombre completo (`nombre_actual`); ni la tabla
+   * viva ni `legacy.dim_actores` separan apellidos y nombres. Se devuelven nulos
+   * y no se parten por espacios: el dato no existe.
+   */
+  apellidos: string | null;
+  nombres: string | null;
   naturaleza: string;
   tipo: string | null;
   funcion: string | null;
@@ -255,6 +398,58 @@ export type CaseEvent = {
   validado: boolean;
   critico: boolean;
   evidencia: string | null;
+  /** `core.caso_cronologia.actor_uid`; nulo si el hecho no tiene actor. */
+  actorId: string | null;
+  /** Nombre del actor del hecho resuelto desde `core.actores`. */
+  actor: string | null;
+};
+
+/** Alerta vinculada al caso, con el estado derivado de su flujo de revisión. */
+export type CaseAlert = {
+  id: string;
+  codigo: string;
+  nivel: string | null;
+  prioridad: string | null;
+  estado: string;
+  fechaReporte: string | null;
+  anulada: boolean;
+};
+
+/** Tramo de `core.caso_estado_historial`. */
+export type CaseStateHistoryEntry = {
+  id: string;
+  estado: string | null;
+  desde: string | Date | null;
+  hasta: string | Date | null;
+  motivo: string | null;
+  /** Nombre de `core.usuarios`; nulo cuando el tramo no registra usuario. */
+  usuario: string | null;
+};
+
+/**
+ * Conteos ya persistidos para el indicador de completitud (item 68). Son
+ * recuentos y banderas: no hay puntuación ni porcentaje.
+ */
+export type CaseCompleteness = {
+  hechos: { total: number; validados: number };
+  actores: { total: number; conTipoYFuncion: number };
+  demandas: { total: number; con3PCompletos: number };
+  geografia: {
+    tieneGeografia: boolean;
+    regiones: number;
+    distrito: string | null;
+  };
+  /**
+   * Robustez de `analytics.vw_marco_situacional_robustez`. La vista devuelve una
+   * fila por caso, así que `null` sólo ocurriría si la vista deja de cubrirlo.
+   */
+  marcoSituacional: {
+    consistencia: boolean;
+    correspondencia: boolean;
+    coherenciaContextual: boolean;
+    saturacion: boolean;
+    trazabilidad: boolean;
+  } | null;
 };
 
 export type CaseDemanda = {
@@ -314,6 +509,9 @@ export type CaseDetail = {
   demandas: CaseDemanda[];
   commitments: CaseCommitment[];
   documents: CaseDocument[];
+  alerts: CaseAlert[];
+  stateHistory: CaseStateHistoryEntry[];
+  completeness: CaseCompleteness;
   generatedAt: string;
 };
 
@@ -335,10 +533,22 @@ export async function getCaseByCode(
   const row = result.rows[0];
   if (!row) return null;
 
-  const [actors, events, demandas, commitments, documents] = await Promise.all([
+  const [
+    actors,
+    events,
+    demandas,
+    commitments,
+    documents,
+    alerts,
+    stateHistory,
+    completeness,
+  ] = await Promise.all([
     client.query(
       `select a.actor_uid as id,
               a.nombre_actual as nombre,
+              -- Sin columnas separadas: el dato no existe, no se deriva.
+              null::text as apellidos,
+              null::text as nombres,
               a.naturaleza,
               ta.nombre as tipo,
               ra.nombre as funcion,
@@ -360,9 +570,12 @@ export async function getCaseByCode(
               ev.descripcion_hecho as descripcion,
               ev.es_validado_humano as validado,
               ev.es_hecho_critico as critico,
-              ev.link_evidencia as evidencia
+              ev.link_evidencia as evidencia,
+              ev.actor_uid as actor_id,
+              act.nombre_actual as actor
          from core.caso_cronologia ev
          left join core.cat_tipos_hecho th on th.id = ev.tipo_hecho_id
+         left join core.actores act on act.actor_uid = ev.actor_uid
         where ev.caso_id = $1
         order by ev.fecha_evento desc, ev.created_at desc`,
       [row.id],
@@ -427,6 +640,86 @@ export async function getCaseByCode(
         order by d.fecha desc, d.codigo`,
       [row.id],
     ),
+    // El estado de la alerta no es columna: se deriva igual que en `alerts.ts`.
+    client.query(
+      `select a.id,
+              a.codigo_alerta as codigo,
+              na.nombre as nivel,
+              pa.codigo as prioridad,
+              case
+                when a.paso_actual >= 5 then 'Atendida'
+                when a.aprobada_por is not null then 'Aprobada'
+                when a.validada_por is not null then 'Validada'
+                when a.paso_actual >= 3 then 'En revisión'
+                else 'Pendiente de revisión'
+              end as estado,
+              to_char(a.fecha_reporte, 'YYYY-MM-DD') as fecha_reporte,
+              (a.anulado_en is not null) as anulada
+         from core.alertas_tempranas a
+         left join core.cat_prioridades_alerta pa on pa.id = a.prioridad_id
+         left join core.cat_niveles_alerta na on na.id = a.nivel_alerta_id
+        where a.caso_id = $1
+        order by a.fecha_reporte desc nulls last, a.codigo_alerta`,
+      [row.id],
+    ),
+    client.query(
+      `select h.id,
+              replace(ec.codigo, '_', ' ') as estado,
+              h.desde,
+              h.hasta,
+              h.motivo,
+              u.nombre as usuario
+         from core.caso_estado_historial h
+         left join core.cat_estados_caso ec on ec.id = h.estado_id
+         left join core.usuarios u on u.id = h.usuario_id
+        where h.caso_id = $1
+        order by h.desde asc nulls last, h.id`,
+      [row.id],
+    ),
+    // Conteos persistidos para el item 68; sin puntuación derivada.
+    client.query(
+      `select
+              (select count(*)::int from core.caso_cronologia ev
+                where ev.caso_id = c.id and ev.anulado_en is null) as hechos,
+              (select count(*)::int from core.caso_cronologia ev
+                where ev.caso_id = c.id and ev.anulado_en is null
+                  and ev.es_validado_humano) as hechos_validados,
+              (select count(*)::int from core.casos_actores ca
+                where ca.caso_id = c.id) as actores_total,
+              -- 'No determinado' ('categoria.vacia') es la ausencia declarada:
+              -- no cuenta como función determinada.
+              (select count(*)::int
+                 from core.casos_actores ca
+                 join core.actores a on a.actor_uid = ca.actor_id
+                 left join core.cat_roles_actor ra on ra.id = a.rol_actor_id
+                where ca.caso_id = c.id
+                  and a.tipo_actor_id is not null
+                  and a.rol_actor_id is not null
+                  and coalesce(ra.codigo_legado, '') <> 'categoria.vacia')
+                as actores_con_tipo_funcion,
+              (select count(*)::int from core.demandas d
+                where d.caso_id = c.id and d.anulado_en is null) as demandas_total,
+              (select count(*)::int
+                 from core.demandas d
+                where d.caso_id = c.id and d.anulado_en is null
+                  and nullif(btrim(d.problema_3p), '') is not null
+                  and nullif(btrim(d.propuesta_3p), '') is not null
+                  and nullif(btrim(d.pedido_3p), '') is not null)
+                as demandas_con_3p,
+              (select count(*)::int from core.caso_regiones cr
+                where cr.caso_id = c.id) as regiones,
+              dp.nombre as distrito,
+              ms.consistencia,
+              ms.correspondencia,
+              ms.coherencia_contextual,
+              ms.saturacion,
+              ms.trazabilidad
+         from core.casos c
+         left join core.distritos dp on dp.id = c.distrito_principal_id
+         left join analytics.vw_marco_situacional_robustez ms on ms.caso_id = c.id
+        where c.codigo_caso = $1`,
+      [code],
+    ),
   ]);
 
   const item: CaseListItem = {
@@ -451,7 +744,15 @@ export async function getCaseByCode(
     unidadResponsable: row.unidad_responsable,
     origen: row.origen,
     clasificacion: row.clasificacion,
+    fechaInicio: row.fecha_inicio,
+    anuladoEn: row.anulado_en,
+    motivoAnulacion: row.motivo_anulacion,
+    anuladoPor: row.anulado_por,
+    anuladoPorNombre: row.anulado_por_nombre,
+    anulacionId: row.anulacion_id,
   };
+
+  const c = completeness.rows[0];
 
   return {
     case: {
@@ -466,6 +767,31 @@ export async function getCaseByCode(
     demandas: demandas.rows as CaseDemanda[],
     commitments: commitments.rows as CaseCommitment[],
     documents: documents.rows as CaseDocument[],
+    alerts: alerts.rows as CaseAlert[],
+    stateHistory: stateHistory.rows as CaseStateHistoryEntry[],
+    completeness: {
+      hechos: { total: c.hechos, validados: c.hechos_validados },
+      actores: {
+        total: c.actores_total,
+        conTipoYFuncion: c.actores_con_tipo_funcion,
+      },
+      demandas: { total: c.demandas_total, con3PCompletos: c.demandas_con_3p },
+      geografia: {
+        tieneGeografia: c.regiones > 0 || c.distrito !== null,
+        regiones: c.regiones,
+        distrito: c.distrito,
+      },
+      marcoSituacional:
+        c.consistencia === null
+          ? null
+          : {
+              consistencia: c.consistencia,
+              correspondencia: c.correspondencia,
+              coherenciaContextual: c.coherencia_contextual,
+              saturacion: c.saturacion,
+              trazabilidad: c.trazabilidad,
+            },
+    },
     generatedAt: new Date().toISOString(),
   };
 }
@@ -501,7 +827,6 @@ const CASE_WRITE_COLUMNS = [
   "estado_id",
   "nivel_riesgo_id",
   "prioridad_id",
-  "alcance_id",
   "nivel_conflicto_id",
   "ciclo_intervencion_id",
   "tematica_id",
@@ -574,6 +899,22 @@ function readField(
     }
   }
   return { present: false, value: undefined };
+}
+
+/**
+ * El alcance es derivado (`core.alcance_caso`), no un campo de escritura. Se
+ * rechaza cualquier intento de fijarlo para no dar la falsa impresión de que el
+ * valor enviado se respeta: la columna `core.casos.alcance_id` ya no existe.
+ */
+function rechazarAlcanceManual(body: Record<string, unknown>): void {
+  const alcance = readField(body, ["alcance", "alcanceId", "alcance_id"]);
+  if (alcance.present) {
+    throw new ApiError(
+      422,
+      "El alcance se deriva de las regiones del caso y no se puede fijar manualmente.",
+      "ALCANCE_DERIVADO",
+    );
+  }
 }
 
 function text(value: unknown, max: number, required: boolean): string | null {
@@ -909,6 +1250,8 @@ export async function createCase(
   session: WriteSession,
   body: Record<string, unknown>,
 ): Promise<CaseDetail> {
+  rechazarAlcanceManual(body);
+
   const title = requiredText(
     readField(body, ["titulo", "nombreCaso", "nombre_caso"]).value,
     MAX_TITLE_LENGTH,
@@ -1012,14 +1355,6 @@ export async function createCase(
     });
   }
 
-  const alcance = readField(body, ["alcance"]);
-  if (alcance.present && alcance.value !== null) {
-    fields.push({
-      column: "alcance_id",
-      value: await resolveCatalog(client, "alcance", alcance.value),
-    });
-  }
-
   const conflicto = readField(body, ["nivelConflicto", "nivel_conflicto"]);
   if (conflicto.present && conflicto.value !== null) {
     fields.push({
@@ -1078,6 +1413,8 @@ export async function updateCase(
   code: string,
   body: Record<string, unknown>,
 ): Promise<CaseDetail> {
+  rechazarAlcanceManual(body);
+
   const current = await client.query(
     `select * from core.casos where codigo_caso = $1`,
     [code],
@@ -1165,16 +1502,6 @@ export async function updateCase(
       prioridad.value === null
         ? null
         : await resolveCatalog(client, "prioridad", prioridad.value),
-    );
-  }
-
-  const alcance = readField(body, ["alcance"]);
-  if (alcance.present) {
-    add(
-      "alcance_id",
-      alcance.value === null
-        ? null
-        : await resolveCatalog(client, "alcance", alcance.value),
     );
   }
 

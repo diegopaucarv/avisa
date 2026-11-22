@@ -44,9 +44,22 @@ JSON por entidad o de base completa, XLSX (ZIP + OOXML, sin dependencias) y PDF 
 exportación cableado en Documentos. Las 20 pantallas de la SPA tienen ruta real —sólo `/mapa` sigue en
 marcador por el aplazamiento de ubigeo/centroide— y todas paginan en el servidor; se retiraron las
 últimas lecturas de colección completa (`tamano: 100`) y los contadores de Resumen, Bandeja y
-Dirección se calculan con el `total` del sobre paginado. `ng build` pasa en 437,09 kB iniciales y
-99,61 kB de transferencia. Queda como único gap estructural **E4** (Anexo 17: registro de reportes).
+Dirección se calculan con el `total` del sobre paginado. `ng build` pasa en 438,45 kB iniciales y
+99,78 kB de transferencia. Queda como único gap estructural **E4** (Anexo 17: registro de reportes).
 Las decisiones están en `04_migracion/DECISIONES_D3_D4_D7_D9_D10.md`.
+
+**Octava pasada (2026-11-22): migraciones 23–29 aplicadas y papelera dedicada.** Cierran los últimos
+bloqueos entre la base y la interfaz. La **23** pasa las vistas de los anexos 16 y 17 a
+`security_invoker` para que respeten la RLS (gap E4); la **24** deja `core.demandas.estado_atencion` en
+`En proceso`; la **25** retira la sobrecarga heredada de `core.siguiente_codigo_caso()`; las **26** y
+**27** abren la papelera de cinco tablas anulables con la política `p_anulados`; la **28** corrige
+`core.anular_registro` (`GET DIAGNOSTICS` en lugar de `IF NOT FOUND`); y la **29** hace que
+`core.restaurar_registro` restaure **por fila** —`where id = $1 using p_id`, antes
+`where anulacion_id = $1`—, con los hitos del compromiso como única compañía. En la SPA entra
+`/papelera`: cinco pestañas (casos, alertas, demandas, documentos, compromisos) con paginación de
+servidor, motivo, fecha, autor y restauración por fila, visible sólo para quien puede anular.
+`ng build` pasa en 441,60 kB iniciales y 100,19 kB de transferencia, con la página en un chunk lazy de
+20,52 kB (5,81 kB de transferencia).
 
 **En dos minutos.** Seis carpetas, en orden de lectura:
 
@@ -210,24 +223,34 @@ su ruta es contrato de `compose.yaml` (ver §5.c).
 | `avisa_actual/CLASIFICACION_BASE_V9_EN_VIVO.md`      | **eliminado**                                                 | inventario de las 279 tablas (255 lógicas) / 26 esquemas                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | absorbido en `BRECHA` §12–§13 y retirado el 2026-11-18              |
 | `AVISA_PRODUCE_v9(1).md`                             | **eliminado**                                                 | texto íntegro contenido en v10 (283/284 encabezados; sólo difiere el título y 57 líneas)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | absorbido en `AVISA_PRODUCE_v10.md`; retirado el 2026-11-18         |
 
-### 2.1 · Migraciones de alineación con la Guía (12–22)
+### 2.1 · Migraciones de alineación con la Guía (12–32)
 
 Se aplican a mano, en orden, sobre la base ya cargada y con los parches 6–24 puestos. Todas van en una
 transacción y traen su bloque de reversión comentado.
 
-| #   | Archivo                                      | Qué añade                                                                                                            | Estado       |
-| --- | -------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- | ------------ |
-| 12  | `migration/12_anulacion_y_secuencia.sql`     | anulación lógica en 7 tablas, `core.secuencia_codigo` y `core.siguiente_codigo()`                                    | **aplicada** |
-| 13  | `migration/13_anulacion_segura.sql`          | `SECURITY DEFINER` de las cuatro funciones de anulación y `core.exigir_anulacion`                                    | **aplicada** |
-| 14  | `migration/14_alineacion_guia.sql`           | S1–S12: tipos y roles de actor, posicionamiento, subsectores, niveles de conflicto, niveles de alerta y Anexo 3      | **aplicada** |
-| 15  | `migration/15_fusion_hechos_y_tematicas.sql` | D1 (fusión de tipos de hecho) y D2 (retiro de `Otros`), más la ortografía de los catálogos de estado y prioridad     | **aplicada** |
-| 16  | `migration/16_recodificacion_anexo15.sql`    | recodificación de los 35 casos, de sus compromisos e hitos, y el contador persistente por (año, subsector, temática) | **aplicada** |
-| 17  | `migration/17_usuarios_y_privilegios.sql`    | cuentas demo, rol primario por jerarquía y separación de `administrador` de la cuenta de la Directora                | **aplicada** |
-| 18  | `migration/18_normalizacion_refs.sql`        | `core.normalizar_ref(text)`: comparación tolerante a mayúsculas, tildes y separadores                                | **aplicada** |
-| 19  | `migration/19_codigos_genericos.sql`         | sigla `GEN` cuando falta subsector o temática, en lugar de `XX`/`XXX`                                                | **aplicada** |
-| 20  | `migration/20_tipos_documento_anexos.sql`    | D3: Anexos 1 y 2 como tipo documental (los 14–17 no: son registros ya modelados)                                     | **aplicada** |
-| 21  | `migration/21_retiro_cat_tipos_reunion.sql`  | D7: retira `cat_tipos_reunion` si no hay dependientes; hoy queda marcada obsoleta por la FK de `reuniones_dialogo`   | **aplicada** |
-| 22  | `migration/22_ciclos_intervencion_guia.sql`  | D9: alinea `cat_ciclos_intervencion` a las 5 etiquetas de la Guía §8.1–8.4                                           | **aplicada** |
+| #   | Archivo                                               | Qué añade                                                                                                                      | Estado       |
+| --- | ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ | ------------ |
+| 12  | `migration/12_anulacion_y_secuencia.sql`              | anulación lógica en 7 tablas, `core.secuencia_codigo` y `core.siguiente_codigo()`                                              | **aplicada** |
+| 13  | `migration/13_anulacion_segura.sql`                   | `SECURITY DEFINER` de las cuatro funciones de anulación y `core.exigir_anulacion`                                              | **aplicada** |
+| 14  | `migration/14_alineacion_guia.sql`                    | S1–S12: tipos y roles de actor, posicionamiento, subsectores, niveles de conflicto, niveles de alerta y Anexo 3                | **aplicada** |
+| 15  | `migration/15_fusion_hechos_y_tematicas.sql`          | D1 (fusión de tipos de hecho) y D2 (retiro de `Otros`), más la ortografía de los catálogos de estado y prioridad               | **aplicada** |
+| 16  | `migration/16_recodificacion_anexo15.sql`             | recodificación de los 35 casos, de sus compromisos e hitos, y el contador persistente por (año, subsector, temática)           | **aplicada** |
+| 17  | `migration/17_usuarios_y_privilegios.sql`             | cuentas demo, rol primario por jerarquía y separación de `administrador` de la cuenta de la Directora                          | **aplicada** |
+| 18  | `migration/18_normalizacion_refs.sql`                 | `core.normalizar_ref(text)`: comparación tolerante a mayúsculas, tildes y separadores                                          | **aplicada** |
+| 19  | `migration/19_codigos_genericos.sql`                  | sigla `GEN` cuando falta subsector o temática, en lugar de `XX`/`XXX`                                                          | **aplicada** |
+| 20  | `migration/20_tipos_documento_anexos.sql`             | D3: Anexos 1 y 2 como tipo documental (los 14–17 no: son registros ya modelados)                                               | **aplicada** |
+| 21  | `migration/21_retiro_cat_tipos_reunion.sql`           | D7: retira `cat_tipos_reunion` si no hay dependientes; hoy queda marcada obsoleta por la FK de `reuniones_dialogo`             | **aplicada** |
+| 22  | `migration/22_ciclos_intervencion_guia.sql`           | D9: alinea `cat_ciclos_intervencion` a las 5 etiquetas de la Guía §8.1–8.4                                                     | **aplicada** |
+| 23  | `migration/23_vistas_anexos_security_invoker.sql`     | E4: las vistas de los anexos 16 y 17 pasan a `security_invoker` y respetan la RLS de `core`                                    | **aplicada** |
+| 24  | `migration/24_estado_atencion_legible.sql`            | G-09: `core.demandas.estado_atencion` con `En proceso` en lugar de `En_proceso`                                                | **aplicada** |
+| 25  | `migration/25_retiro_sobrecarga_siguiente_codigo.sql` | G-03: retira la sobrecarga de cero argumentos de `core.siguiente_codigo_caso()` tras comprobar 0 dependientes                  | **aplicada** |
+| 26  | `migration/26_papelera_compromisos_documentos.sql`    | política `p_anulados` en `core.compromisos` y `core.documentos` para que la API pueda listar lo anulado                        | **aplicada** |
+| 27  | `migration/27_papelera_tablas_anulables.sql`          | la misma política en `core.casos`, `core.alertas_tempranas` y `core.demandas`                                                  | **aplicada** |
+| 28  | `migration/28_fix_anular_registro_found.sql`          | `core.anular_registro` cuenta con `GET DIAGNOSTICS`: un `EXECUTE` no actualiza `FOUND`                                         | **aplicada** |
+| 29  | `migration/29_restauracion_por_fila.sql`              | `core.restaurar_registro` restaura por `id` y no por `anulacion_id`: la restauración deja de ser por lote                      | **aplicada** |
+| 30  | `migration/30_alcance_derivado.sql`                   | alcance derivado de `core.caso_regiones` (`core.alcance_caso`), `regiones.alcance_id` y `security_invoker` del Anexo 15        | **aplicada** |
+| 31  | `migration/31_casos_en_seguimiento.sql`               | los 35 casos del legado pasan de `Activo` a `En seguimiento`, con su tramo de historial                                        | **aplicada** |
+| 32  | `migration/32_exigir_anulacion_puede_eliminar.sql`    | `core.exigir_anulacion` exige `puede_eliminar`, no `puede_editar`: anular y restaurar quedan en `administrador` + `sectorista` | **aplicada** |
 
 El detalle de lo que cada una resolvió, y lo que sigue abierto, está en
 `01_requisitos/GAPS_GUIA_SQL_UI.md` y en `04_migracion/DECISIONES_D3_D4_D7_D9_D10.md`.

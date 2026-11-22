@@ -9,15 +9,20 @@
       </p>
     </div>
     <div class="view-actions">
-      <app-exportar-menu entidad="alertas" (fallo)="alFallarExportacion($event)" />
+      <app-exportar-menu
+        entidad="alertas"
+        [consulta]="filtrosExportacion()"
+        (fallo)="alFallarExportacion($event)"
+      />
       <p class="result-count" aria-live="polite">{{ total() }} alertas</p>
     </div>
   </header>
 
   @if (exportarError(); as mensaje) {
-  <p class="form-error" role="alert">{{ mensaje }}</p>
-  } @if (avisoAnulacion(); as aviso) {
-  <p class="form-hint aviso-ok" role="status">{{ aviso }}</p>
+    <p class="form-error" role="alert">{{ mensaje }}</p>
+  }
+  @if (avisoAnulacion(); as aviso) {
+    <p class="form-hint aviso-ok" role="status">{{ aviso }}</p>
   }
 
   <div class="filter-bar filter-bar-wrap">
@@ -37,9 +42,9 @@
       <select aria-label="Filtrar por prioridad de la alerta" (change)="cambiarPrioridad($event)">
         <option value="" [selected]="filtros().prioridad === ''">Todas</option>
         @for (prioridad of prioridades; track prioridad) {
-        <option [value]="prioridad" [selected]="filtros().prioridad === prioridad">
-          {{ prioridad }}
-        </option>
+          <option [value]="prioridad" [selected]="filtros().prioridad === prioridad">
+            {{ prioridad }}
+          </option>
         }
       </select>
     </label>
@@ -49,9 +54,9 @@
       <select aria-label="Filtrar por nivel de la alerta" (change)="cambiarNivel($event)">
         <option value="" [selected]="filtros().nivel === ''">Todos</option>
         @for (nivel of niveles; track nivel.valor) {
-        <option [value]="nivel.valor" [selected]="filtros().nivel === nivel.valor">
-          {{ nivel.etiqueta }}
-        </option>
+          <option [value]="nivel.valor" [selected]="filtros().nivel === nivel.valor">
+            {{ nivel.etiqueta }}
+          </option>
         }
       </select>
     </label>
@@ -61,7 +66,7 @@
       <select aria-label="Filtrar por estado de la alerta" (change)="cambiarEstado($event)">
         <option value="" [selected]="filtros().estado === ''">Todos</option>
         @for (estado of estados; track estado) {
-        <option [value]="estado" [selected]="filtros().estado === estado">{{ estado }}</option>
+          <option [value]="estado" [selected]="filtros().estado === estado">{{ estado }}</option>
         }
       </select>
     </label>
@@ -70,9 +75,9 @@
       Orden
       <select aria-label="Ordenar las alertas" (change)="cambiarOrden($event)">
         @for (orden of ordenes; track orden.valor) {
-        <option [value]="orden.valor" [selected]="filtros().orden === orden.valor">
-          {{ orden.etiqueta }}
-        </option>
+          <option [value]="orden.valor" [selected]="filtros().orden === orden.valor">
+            {{ orden.etiqueta }}
+          </option>
         }
       </select>
     </label>
@@ -81,144 +86,151 @@
   </div>
 
   @if (estadoListado() === 'error') {
-  <div class="empty-state" role="alert">
-    <strong>No se pudieron cargar las alertas</strong>
-    <p>{{ errorListado()?.message }}</p>
-    <button type="button" class="button-secondary" (click)="recargarListado()">Reintentar</button>
-  </div>
-  } @else if (alertas().length === 0) { @if (estadoListado() === 'cargando' || estadoListado() ===
-  'inactivo') {
-  <div class="empty-state" role="status">Cargando alertas…</div>
+    <div class="empty-state" role="alert">
+      <strong>No se pudieron cargar las alertas</strong>
+      <p>{{ errorListado()?.message }}</p>
+      <button type="button" class="button-secondary" (click)="recargarListado()">Reintentar</button>
+    </div>
+  } @else if (alertas().length === 0) {
+    @if (estadoListado() === 'cargando' || estadoListado() === 'inactivo') {
+      <div class="empty-state" role="status">Cargando alertas…</div>
+    } @else {
+      <div class="empty-state">
+        <strong>No hay alertas con estos filtros</strong>
+        <p>Pruebe a quitar algún filtro o a revisar el texto de búsqueda.</p>
+      </div>
+    }
   } @else {
-  <div class="empty-state">
-    <strong>No hay alertas con estos filtros</strong>
-    <p>Pruebe a quitar algún filtro o a revisar el texto de búsqueda.</p>
-  </div>
-  } } @else { @if (estadoListado() === 'cargando') {
-  <p class="alerta-actualizando" role="status">Actualizando el listado…</p>
-  }
+    @if (estadoListado() === 'cargando') {
+      <p class="alerta-actualizando" role="status">Actualizando el listado…</p>
+    }
 
-  <div class="table-wrap">
-    <table class="data-table">
-      <caption class="table-caption">
-        Pulse una fila para abrir la ficha en el panel lateral. El plazo se deriva de la prioridad
-        en el catálogo y no forma parte de su etiqueta.
-      </caption>
-      <thead>
-        <tr>
-          <th scope="col">Código</th>
-          <th scope="col">Título</th>
-          <th scope="col">Caso</th>
-          <th scope="col">Prioridad</th>
-          <th scope="col">Plazo</th>
-          <th scope="col">Nivel</th>
-          <th scope="col">Fecha de reporte</th>
-          <th scope="col">Estado</th>
-          <th scope="col">Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (alerta of alertas(); track alerta.id) {
-        <tr
-          class="case-row-clickable"
-          [class.row-selected]="seleccionadaId() === alerta.id"
-          (click)="abrir(alerta)"
-        >
-          <td>
-            <button
-              type="button"
-              class="table-link"
-              [attr.aria-label]="'Abrir la alerta ' + alerta.codigo"
-              (click)="abrir(alerta); $event.stopPropagation()"
+    <div class="table-wrap">
+      <table class="data-table">
+        <caption class="table-caption">
+          Pulse una fila para abrir la ficha en el panel lateral. El plazo se deriva de la prioridad
+          en el catálogo y no forma parte de su etiqueta.
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">Código</th>
+            <th scope="col">Título</th>
+            <th scope="col">Caso</th>
+            <th scope="col">Prioridad</th>
+            <th scope="col">Plazo</th>
+            <th scope="col">Nivel</th>
+            <th scope="col">Fecha de reporte</th>
+            <th scope="col">Estado</th>
+            <th scope="col">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (alerta of alertas(); track alerta.id) {
+            <tr
+              class="case-row-clickable"
+              [class.row-selected]="seleccionadaId() === alerta.id"
+              (click)="abrir(alerta)"
             >
-              {{ alerta.codigo || 'Sin código' }}
-            </button>
-          </td>
-          <td class="alerta-titulo">{{ alerta.titulo || 'Sin título' }}</td>
-          <td class="alerta-caso">
-            @if (alerta.casoCodigo) {
-            <strong>{{ alerta.casoCodigo }}</strong>
-            <small>{{ alerta.casoTitulo || 'Sin título del caso' }}</small>
-            } @else {
-            <span class="alerta-sin-caso">Sin caso</span>
-            }
-          </td>
-          <td>
-            <span [class]="'status-badge alerta-prioridad--' + clavePrioridad(alerta.prioridad)">
-              <span class="status-dot"></span>
-              {{ alerta.prioridad || 'Sin prioridad' }}
-            </span>
-            @if (alerta.grave) {
-            <span class="alerta-grave">
-              <app-icono nombre="alerta" [tamano]="11" />
-              Grave
-            </span>
-            }
-          </td>
-          <td>
-            <span class="alerta-plazo" [class.alerta-plazo--sin]="alerta.plazoHoras === null">
-              <app-icono nombre="reloj" [tamano]="12" />
-              {{ formatearPlazo(alerta.plazoHoras) }}
-            </span>
-          </td>
-          <td>{{ alerta.nivel || '—' }}</td>
-          <td>{{ alerta.fechaReporte || '—' }}</td>
-          <td>
-            <span [class]="'status-badge ' + claseEstado(alerta.estado)">
-              <span class="status-dot"></span>
-              {{ alerta.estado || 'Sin estado' }}
-            </span>
-          </td>
-          <td class="celda-anular">
-            @if (puedeAnular(alerta)) {
-            <button
-              type="button"
-              class="button-secondary"
-              [attr.aria-label]="'Anular la alerta ' + (alerta.codigo || alerta.titulo)"
-              (click)="abrirAnulacion(alerta); $event.stopPropagation()"
-            >
-              Anular
-            </button>
-            }
-          </td>
-        </tr>
-        }
-      </tbody>
-    </table>
-  </div>
-  } @if (total() > 0 && estadoListado() !== 'error') {
-  <app-paginacion
-    [pagina]="filtros().pagina"
-    [tamano]="filtros().tamano"
-    [total]="total()"
-    (paginaCambia)="cambiarPagina($event)"
-    (tamanoCambia)="cambiarTamano($event)"
-  />
-  } @if (alertaPanel(); as alertaActual) {
-  <app-alerta-panel
-    [alerta]="alertaActual"
-    [demandas]="demandasPanel()"
-    [cargando]="cargandoDetalle()"
-    [errorCarga]="errorDetalle()"
-    [puedeModificar]="puedeModificarAbierta()"
-    [guardando]="guardando()"
-    [errorGuardado]="errorGuardado()"
-    [aviso]="aviso()"
-    (cerrar)="cerrarPanel()"
-    (reintentar)="recargarDetalle()"
-    (guardar)="guardar($event)"
-    (accion)="accionFlujo($event)"
-  />
-  } @if (alertaAnulacion(); as alertaAnular) {
-  <app-anular-panel
-    modo="anular"
-    entidad="alerta"
-    [codigo]="alertaAnular.codigo"
-    [enviando]="enviandoAnulacion()"
-    [errorEnvio]="errorAnulacion()"
-    [puedeConfirmar]="puedeAnular(alertaAnular)"
-    (cerrar)="cerrarAnulacion()"
-    (hecho)="confirmarAnulacion($event)"
-  />
+              <td>
+                <button
+                  type="button"
+                  class="table-link"
+                  [attr.aria-label]="'Abrir la alerta ' + alerta.codigo"
+                  (click)="abrir(alerta); $event.stopPropagation()"
+                >
+                  {{ alerta.codigo || 'Sin código' }}
+                </button>
+              </td>
+              <td class="alerta-titulo">{{ alerta.titulo || 'Sin título' }}</td>
+              <td class="alerta-caso">
+                @if (alerta.casoCodigo) {
+                  <strong>{{ alerta.casoCodigo }}</strong>
+                  <small>{{ alerta.casoTitulo || 'Sin título del caso' }}</small>
+                } @else {
+                  <span class="alerta-sin-caso">Sin caso</span>
+                }
+              </td>
+              <td>
+                <span
+                  [class]="'status-badge alerta-prioridad--' + clavePrioridad(alerta.prioridad)"
+                >
+                  <span class="status-dot"></span>
+                  {{ alerta.prioridad || 'Sin prioridad' }}
+                </span>
+                @if (alerta.grave) {
+                  <span class="alerta-grave">
+                    <app-icono nombre="alerta" [tamano]="11" />
+                    Grave
+                  </span>
+                }
+              </td>
+              <td>
+                <span class="alerta-plazo" [class.alerta-plazo--sin]="alerta.plazoHoras === null">
+                  <app-icono nombre="reloj" [tamano]="12" />
+                  {{ formatearPlazo(alerta.plazoHoras) }}
+                </span>
+              </td>
+              <td>{{ alerta.nivel || '—' }}</td>
+              <td>{{ alerta.fechaReporte || '—' }}</td>
+              <td>
+                <span [class]="'status-badge ' + claseEstado(alerta.estado)">
+                  <span class="status-dot"></span>
+                  {{ alerta.estado || 'Sin estado' }}
+                </span>
+              </td>
+              <td class="celda-anular">
+                @if (puedeAnular(alerta)) {
+                  <button
+                    type="button"
+                    class="button-secondary"
+                    [attr.aria-label]="'Anular la alerta ' + (alerta.codigo || alerta.titulo)"
+                    (click)="abrirAnulacion(alerta); $event.stopPropagation()"
+                  >
+                    Anular
+                  </button>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+  @if (total() > 0 && estadoListado() !== 'error') {
+    <app-paginacion
+      [pagina]="filtros().pagina"
+      [tamano]="filtros().tamano"
+      [total]="total()"
+      (paginaCambia)="cambiarPagina($event)"
+      (tamanoCambia)="cambiarTamano($event)"
+    />
+  }
+  @if (alertaPanel(); as alertaActual) {
+    <app-alerta-panel
+      [alerta]="alertaActual"
+      [demandas]="demandasPanel()"
+      [cargando]="cargandoDetalle()"
+      [errorCarga]="errorDetalle()"
+      [puedeModificar]="puedeModificarAbierta()"
+      [guardando]="guardando()"
+      [errorGuardado]="errorGuardado()"
+      [aviso]="aviso()"
+      (cerrar)="cerrarPanel()"
+      (reintentar)="recargarDetalle()"
+      (guardar)="guardar($event)"
+      (accion)="accionFlujo($event)"
+    />
+  }
+  @if (alertaAnulacion(); as alertaAnular) {
+    <app-anular-panel
+      modo="anular"
+      entidad="alerta"
+      [codigo]="alertaAnular.codigo"
+      [enviando]="enviandoAnulacion()"
+      [errorEnvio]="errorAnulacion()"
+      [puedeConfirmar]="puedeAnular(alertaAnular)"
+      (cerrar)="cerrarAnulacion()"
+      (hecho)="confirmarAnulacion($event)"
+    />
   }
 </section>

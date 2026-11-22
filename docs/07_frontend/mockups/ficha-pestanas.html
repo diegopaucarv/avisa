@@ -1,0 +1,2521 @@
+<!doctype html>
+<html lang="es">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Ficha por pestañas · Mockup AVISA (items 12–18, 41, 67, 68)</title>
+        <style>
+            /* ─────────────────────────────────────────────────────────────────────────
+         Tokens y clases base copiados de angular/src/styles/global.css y del
+         mockup hermano anexo-15-matriz-conflictividad.html (sin cambios).
+         DM Sans/Manrope caen a fuente del sistema si no están instaladas:
+         el mockup no carga webfonts ni depende de un build.
+         ───────────────────────────────────────────────────────────────────────── */
+            :root {
+                --ink: #17283a;
+                --ink-2: #33475b;
+                --muted: #778797;
+                --line: #e6ebef;
+                --paper: #fff;
+                --canvas: #f5f7f8;
+                --blue: #2455a2;
+                --blue-dark: #1d427f;
+                --blue-pale: #eaf1fb;
+                --teal: #397c79;
+                --amber: #aa6a11;
+                --amber-pale: #fff4e2;
+                --red: #ad4d46;
+                --red-pale: #fbeceb;
+                --green: #34785b;
+                --green-pale: #e9f5ef;
+                --font-sans:
+                    "DM Sans", system-ui, -apple-system, "Segoe UI", Arial,
+                    sans-serif;
+                --font-display:
+                    "Manrope", "DM Sans", system-ui, -apple-system, "Segoe UI",
+                    sans-serif;
+            }
+            * {
+                box-sizing: border-box;
+            }
+            html {
+                min-height: 100%;
+                background: var(--canvas);
+            }
+            body {
+                margin: 0;
+                color: var(--ink);
+                font-family: var(--font-sans);
+                font-size: 13px;
+                -webkit-font-smoothing: antialiased;
+            }
+            button,
+            input,
+            select,
+            textarea {
+                font: inherit;
+            }
+            button {
+                color: inherit;
+                cursor: pointer;
+            }
+            button:focus-visible,
+            input:focus-visible,
+            select:focus-visible,
+            textarea:focus-visible {
+                outline: 3px solid #7aa2e8;
+                outline-offset: 2px;
+            }
+
+            .view-body {
+                display: flex;
+                flex-direction: column;
+                gap: 14px;
+                width: 100%;
+                max-width: 1420px;
+                margin: 0 auto;
+                padding: 27px 34px 50px;
+                box-sizing: border-box;
+            }
+            .view-head {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: flex-start;
+                justify-content: space-between;
+                gap: 16px;
+            }
+            .view-head h1 {
+                margin: 0;
+                color: var(--ink);
+                font: 700 22px/1.3 var(--font-display);
+                letter-spacing: -0.65px;
+            }
+            .view-subtitle {
+                max-width: 800px;
+                margin: 6px 0 0;
+                color: var(--muted);
+                font-size: 11px;
+                line-height: 1.6;
+            }
+            .status-badge {
+                width: max-content;
+                display: inline-flex;
+                align-items: center;
+                gap: 5px;
+                padding: 3px 7px;
+                border-radius: 12px;
+                font-size: 9px;
+                white-space: nowrap;
+            }
+            .status-dot {
+                width: 6px;
+                height: 6px;
+                flex: none;
+                border-radius: 50%;
+                background: currentColor;
+            }
+            .risk-label {
+                display: inline-flex;
+                align-items: center;
+                padding: 4px 8px;
+                border-radius: 999px;
+                font-size: 10px;
+                font-weight: 700;
+            }
+            .risk-alto {
+                background: #fbeceb;
+                color: #ad4d46;
+            }
+            .risk-moderado {
+                background: #fff4e2;
+                color: #93621d;
+            }
+            .risk-bajo {
+                background: #e9f5ef;
+                color: #34785b;
+            }
+            .priority-urgente {
+                background: #fbeceb;
+                color: #ad4d46;
+            }
+            .priority-moderado {
+                background: #fff4e2;
+                color: #93621d;
+            }
+            .priority-bajo {
+                background: #e9f5ef;
+                color: #34785b;
+            }
+            .button-primary,
+            .button-secondary,
+            .button-danger,
+            .button-light {
+                min-height: 32px;
+                padding: 0 11px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 6px;
+                border-radius: 6px;
+                font-size: 10px;
+                font-weight: 600;
+                white-space: nowrap;
+            }
+            .button-primary {
+                border: 1px solid #2455a2;
+                background: #2455a2;
+                color: #fff;
+            }
+            .button-primary:hover {
+                background: #1d427f;
+            }
+            .button-secondary {
+                border: 1px solid #dce3e8;
+                background: #fff;
+                color: #526577;
+            }
+            .button-secondary:hover {
+                background: #f5f7f8;
+            }
+            .button-danger {
+                border: 1px solid #e6c9c6;
+                background: #fff;
+                color: #ad4d46;
+            }
+            .button-light {
+                border: 1px solid transparent;
+                background: #eef2f7;
+                color: #33465a;
+            }
+            .button-link {
+                padding: 0;
+                border: 0;
+                background: transparent;
+                color: #4c7099;
+                font-size: 9px;
+            }
+            .button-link:hover {
+                color: #173e78;
+                text-decoration: underline;
+            }
+            .data-table {
+                width: 100%;
+                border-collapse: collapse;
+                text-align: left;
+            }
+            .data-table th {
+                height: 34px;
+                padding: 0 10px;
+                border-bottom: 1px solid #edf0f2;
+                color: #97a1aa;
+                font-size: 8px;
+                font-weight: 600;
+                letter-spacing: 0.5px;
+                text-transform: uppercase;
+                white-space: nowrap;
+            }
+            .data-table td {
+                min-height: 40px;
+                padding: 8px 10px;
+                border-bottom: 1px solid #f0f2f4;
+                color: #687988;
+                font-size: 9px;
+                vertical-align: top;
+            }
+            .data-table tbody tr:last-child td {
+                border-bottom: 0;
+            }
+            .data-table td .strong {
+                color: #465a6c;
+                font-weight: 600;
+            }
+            .data-table td.wrap,
+            .data-table th.wrap {
+                white-space: normal;
+                min-width: 180px;
+                line-height: 1.45;
+            }
+            .table-wrap {
+                border: 1px solid var(--line);
+                border-radius: 8px;
+                background: #fff;
+                overflow-x: auto;
+            }
+            .empty-state {
+                padding: 30px;
+                text-align: center;
+                color: #909ba4;
+                font-size: 10px;
+                line-height: 1.6;
+            }
+            .table-caption {
+                caption-side: top;
+                padding: 10px 11px 3px;
+                color: #94a0a8;
+                font-size: 9px;
+                line-height: 1.45;
+                text-align: left;
+            }
+            .notes {
+                margin-top: 4px;
+                padding: 18px 20px;
+                border: 1px solid var(--line);
+                border-radius: 8px;
+                background: #fff;
+            }
+            .notes h2 {
+                margin: 0 0 10px;
+                color: var(--ink);
+                font: 700 16px/1.3 var(--font-display);
+                letter-spacing: -0.3px;
+            }
+            .notes h3 {
+                margin: 18px 0 6px;
+                color: #465a6c;
+                font: 700 11px/1.3 var(--font-display);
+                letter-spacing: 0.03em;
+                text-transform: uppercase;
+            }
+            .notes ol,
+            .notes ul {
+                margin: 0;
+                padding-left: 20px;
+                color: #526577;
+                font-size: 10.5px;
+                line-height: 1.6;
+            }
+            .notes li {
+                margin: 0 0 7px;
+            }
+            .notes li:last-child {
+                margin-bottom: 0;
+            }
+            .notes p {
+                margin: 0 0 8px;
+                color: #526577;
+                font-size: 10.5px;
+                line-height: 1.6;
+            }
+            .notes b {
+                color: #33475b;
+            }
+            .notes code,
+            .footnote code,
+            .meta-line code {
+                font-family:
+                    ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+                font-size: 9px;
+                background: #f2f5f8;
+                border: 1px solid #e6ebef;
+                border-radius: 4px;
+                padding: 1px 4px;
+                color: #33475b;
+            }
+            .code-block {
+                margin: 10px 0 0;
+                padding: 12px 14px;
+                overflow: auto;
+                border-radius: 8px;
+                background: #0f1b2a;
+                color: #d6e2ef;
+                font-family:
+                    ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+                font-size: 9px;
+                line-height: 1.55;
+            }
+            .code-block code {
+                background: transparent;
+                border: 0;
+                padding: 0;
+                color: inherit;
+                font-size: inherit;
+            }
+            .vocab {
+                display: grid;
+                grid-template-columns: max-content 1fr;
+                gap: 4px 14px;
+                margin: 2px 0 0;
+                color: #526577;
+                font-size: 10.5px;
+                line-height: 1.5;
+            }
+            .vocab dt {
+                color: #687988;
+                font-weight: 600;
+            }
+            .vocab dd {
+                margin: 0;
+            }
+            .footnote {
+                margin: 8px 2px 0;
+                color: #94a0a8;
+                font-size: 9px;
+                line-height: 1.6;
+            }
+
+            /* ─────────────────────────────────────────────────────────────────────────
+         Ayudas propias de este mockup (no existen en global.css).
+         ───────────────────────────────────────────────────────────────────────── */
+            .anexo-badge {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                height: 26px;
+                padding: 0 10px;
+                border: 1px solid #cddcef;
+                border-radius: 999px;
+                background: var(--blue-pale);
+                color: var(--blue);
+                font-size: 9px;
+                font-weight: 700;
+                letter-spacing: 0.05em;
+                text-transform: uppercase;
+            }
+            .card {
+                border: 1px solid var(--line);
+                border-radius: 10px;
+                background: #fff;
+            }
+            .meta-line {
+                margin: -4px 2px 0;
+                color: #94a0a8;
+                font-size: 9px;
+            }
+
+            /* Cabecera de ficha */
+            .ficha-head {
+                padding: 16px 18px;
+                display: flex;
+                flex-wrap: wrap;
+                align-items: flex-start;
+                justify-content: space-between;
+                gap: 16px;
+            }
+            .ficha-head .code {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                color: #7b8a98;
+                font-size: 10px;
+                font-weight: 600;
+                letter-spacing: 0.04em;
+            }
+            .ficha-head h2 {
+                margin: 6px 0 0;
+                max-width: 760px;
+                color: var(--ink);
+                font: 700 18px/1.3 var(--font-display);
+                letter-spacing: -0.4px;
+            }
+            .ficha-head .loc {
+                margin-top: 6px;
+                color: #778797;
+                font-size: 10px;
+            }
+            .ficha-head .loc b {
+                color: #465a6c;
+            }
+            .badge-row {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                gap: 6px;
+                margin-top: 12px;
+            }
+            .badge {
+                display: inline-flex;
+                align-items: center;
+                gap: 5px;
+                padding: 4px 8px;
+                border-radius: 999px;
+                font-size: 9px;
+                font-weight: 700;
+                white-space: nowrap;
+            }
+            .badge .k {
+                font-weight: 500;
+                opacity: 0.75;
+            }
+            .badge-conflicto {
+                background: #fff7ec;
+                color: #a6732d;
+            }
+            .badge-conflicto::before {
+                content: "";
+                width: 6px;
+                height: 6px;
+                border-radius: 50%;
+                background: #a6732d;
+            }
+            .estado-seguimiento {
+                background: #eaf1fb;
+                color: #2455a2;
+            }
+            .estado-activo {
+                background: #e9f5ef;
+                color: #34785b;
+            }
+            .estado-resuelto {
+                background: #eaf1f9;
+                color: #2a5b8f;
+            }
+            .estado-archivado {
+                background: #eef1f4;
+                color: #687988;
+            }
+            .head-actions {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+            .export-menu {
+                position: relative;
+            }
+            .export-menu > summary {
+                list-style: none;
+                cursor: pointer;
+            }
+            .export-menu > summary::-webkit-details-marker {
+                display: none;
+            }
+            .export-list {
+                position: absolute;
+                right: 0;
+                top: calc(100% + 4px);
+                z-index: 20;
+                min-width: 150px;
+                padding: 4px;
+                border: 1px solid var(--line);
+                border-radius: 6px;
+                background: #fff;
+                box-shadow: 0 8px 20px rgba(17, 32, 45, 0.12);
+            }
+            .export-list button {
+                display: block;
+                width: 100%;
+                padding: 6px 9px;
+                border: 0;
+                border-radius: 4px;
+                background: transparent;
+                color: #526577;
+                font-size: 10px;
+                text-align: left;
+            }
+            .export-list button:hover {
+                background: #f2f5f8;
+            }
+
+            /* Indicador de expediente (item 68) */
+            .completeness {
+                padding: 14px 18px;
+            }
+            .completeness-head {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                justify-content: space-between;
+                gap: 10px;
+            }
+            .completeness-title {
+                display: flex;
+                align-items: baseline;
+                gap: 10px;
+                color: var(--ink);
+                font: 700 12px/1.3 var(--font-display);
+            }
+            .completeness-title b {
+                color: var(--blue);
+                font-size: 15px;
+            }
+            .meter {
+                flex: 1;
+                min-width: 180px;
+                height: 8px;
+                max-width: 420px;
+                border-radius: 99px;
+                background: #eef1f4;
+                overflow: hidden;
+            }
+            .meter > span {
+                display: block;
+                height: 100%;
+                width: 80%;
+                border-radius: 99px;
+                background: linear-gradient(90deg, #2455a2, #397c79);
+            }
+            .completeness ul {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 6px;
+                margin: 12px 0 0;
+                padding: 0;
+                list-style: none;
+            }
+            .completeness li {
+                display: inline-flex;
+                align-items: center;
+                gap: 5px;
+                padding: 4px 8px;
+                border-radius: 6px;
+                background: #f6f8fa;
+                color: #526577;
+                font-size: 9px;
+            }
+            .completeness li.miss {
+                background: #fff4e2;
+                color: #93621d;
+            }
+            .completeness li .mark {
+                font-weight: 700;
+            }
+
+            /* Rejilla ficha: riel + pestañas */
+            .ficha-grid {
+                display: grid;
+                grid-template-columns: 236px minmax(0, 1fr);
+                gap: 16px;
+                align-items: start;
+            }
+            .rail {
+                position: sticky;
+                top: 14px;
+                padding: 6px;
+            }
+            .rail-title {
+                padding: 9px 10px 7px;
+                color: #94a0a8;
+                font-size: 8px;
+                font-weight: 700;
+                letter-spacing: 0.08em;
+                text-transform: uppercase;
+            }
+            .rail-link {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 8px;
+                width: 100%;
+                padding: 8px 10px;
+                border: 0;
+                border-radius: 6px;
+                background: transparent;
+                color: #415468;
+                font-size: 10px;
+                text-align: left;
+            }
+            .rail-link:hover {
+                background: #f3f6f9;
+            }
+            .rail-link .n {
+                min-width: 20px;
+                padding: 2px 6px;
+                border-radius: 99px;
+                background: #eef2f7;
+                color: #526577;
+                font-size: 9px;
+                font-weight: 700;
+                text-align: center;
+            }
+            .rail-link .n.zero {
+                background: #f6f8fa;
+                color: #a3adb5;
+            }
+            .rail-link .n.warn {
+                background: #fff4e2;
+                color: #93621d;
+            }
+            .rail-sep {
+                height: 1px;
+                margin: 6px 8px;
+                background: #eef1f4;
+            }
+            .rail-note {
+                padding: 2px 10px 10px;
+                color: #9aa5ae;
+                font-size: 8px;
+                line-height: 1.5;
+            }
+
+            /* Pestañas */
+            .tabs-area {
+                min-width: 0;
+            }
+            .tabs {
+                display: flex;
+                gap: 2px;
+                overflow-x: auto;
+                padding: 4px;
+                border: 1px solid var(--line);
+                border-radius: 9px;
+                background: #fff;
+                scrollbar-width: thin;
+            }
+            .tab {
+                display: inline-flex;
+                align-items: center;
+                gap: 5px;
+                padding: 7px 10px;
+                border: 0;
+                border-radius: 6px;
+                background: transparent;
+                color: #647487;
+                font-size: 9.5px;
+                font-weight: 600;
+                white-space: nowrap;
+            }
+            .tab:hover {
+                background: #f2f5f8;
+                color: #33465a;
+            }
+            .tab[aria-selected="true"] {
+                background: #eaf1fb;
+                color: #1d4b86;
+                box-shadow: inset 0 0 0 1px #cddcef;
+            }
+            .tab .dot {
+                width: 6px;
+                height: 6px;
+                border-radius: 50%;
+                background: #d7a33c;
+            }
+            .tab .dot.partial {
+                background: #8fa7c2;
+            }
+            .panel {
+                margin-top: 12px;
+                padding: 16px 18px;
+                border: 1px solid var(--line);
+                border-radius: 10px;
+                background: #fff;
+            }
+            .panel[hidden] {
+                display: none;
+            }
+            .panel-head {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: flex-start;
+                justify-content: space-between;
+                gap: 10px;
+                margin-bottom: 12px;
+            }
+            .panel-head h3 {
+                margin: 0;
+                color: var(--ink);
+                font: 700 14px/1.3 var(--font-display);
+                letter-spacing: -0.2px;
+            }
+            .panel-head .sub {
+                margin-top: 4px;
+                max-width: 640px;
+                color: #8b97a1;
+                font-size: 9.5px;
+                line-height: 1.5;
+            }
+            .panel-actions {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 7px;
+            }
+            .grid-2 {
+                display: grid;
+                grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+                gap: 16px;
+                align-items: start;
+            }
+            .block {
+                min-width: 0;
+            }
+            .block h4 {
+                margin: 0 0 6px;
+                color: #94a0a8;
+                font-size: 8px;
+                font-weight: 700;
+                letter-spacing: 0.08em;
+                text-transform: uppercase;
+            }
+            .prose {
+                margin: 0;
+                color: #526577;
+                font-size: 10.5px;
+                line-height: 1.65;
+            }
+            .data-pairs {
+                display: grid;
+                grid-template-columns: max-content 1fr;
+                gap: 7px 16px;
+                margin: 0;
+                font-size: 10px;
+            }
+            .data-pairs dt {
+                color: #94a0a8;
+            }
+            .data-pairs dd {
+                margin: 0;
+                color: #415468;
+                font-weight: 500;
+            }
+            .stat-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+                gap: 8px;
+            }
+            .stat {
+                padding: 10px 12px;
+                border: 1px solid #eef1f4;
+                border-radius: 8px;
+                background: #fbfcfd;
+            }
+            .stat .k {
+                color: #94a0a8;
+                font-size: 8px;
+                font-weight: 600;
+                letter-spacing: 0.05em;
+                text-transform: uppercase;
+            }
+            .stat .v {
+                margin-top: 4px;
+                color: var(--ink);
+                font: 700 14px/1.2 var(--font-display);
+            }
+            .stat .v small {
+                color: #8b97a1;
+                font-size: 9px;
+                font-weight: 500;
+            }
+
+            /* Avisos y chips */
+            .banner {
+                display: flex;
+                gap: 9px;
+                margin: 0 0 12px;
+                padding: 9px 11px;
+                border: 1px solid #cfe0f5;
+                border-radius: 7px;
+                background: #f2f7fd;
+                color: #3f5d7c;
+                font-size: 9.5px;
+                line-height: 1.55;
+            }
+            .banner.warn {
+                border-color: #f0dcb8;
+                background: #fffbf2;
+                color: #7a5a1e;
+            }
+            .banner b {
+                color: inherit;
+            }
+            .chip {
+                display: inline-flex;
+                align-items: center;
+                gap: 4px;
+                padding: 2px 7px;
+                border-radius: 99px;
+                background: #eef2f7;
+                color: #526577;
+                font-size: 8.5px;
+                font-weight: 600;
+                white-space: nowrap;
+            }
+            .chip.warn {
+                background: #fff4e2;
+                color: #93621d;
+            }
+            .chip.ok {
+                background: #e9f5ef;
+                color: #34785b;
+            }
+            .chip.neutral {
+                background: #f2f5f8;
+                color: #8b97a1;
+                border: 1px dashed #d7dee4;
+            }
+            .dash {
+                color: #b3bcc4;
+            }
+
+            /* Patrón de edición por campo (item 18) */
+            .inline-edit {
+                margin-top: 10px;
+                padding: 11px 12px;
+                border: 1.5px dashed #8fb0d8;
+                border-radius: 8px;
+                background: #f7fafd;
+            }
+            .inline-edit .cap {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                margin-bottom: 8px;
+                color: #5b7592;
+                font-size: 9px;
+                font-weight: 700;
+                letter-spacing: 0.04em;
+                text-transform: uppercase;
+            }
+            .inline-edit .row {
+                display: flex;
+                gap: 8px;
+                align-items: center;
+            }
+            .inline-edit input {
+                width: 100%;
+                min-width: 0;
+                height: 32px;
+                padding: 0 9px;
+                border: 1px solid #cdd8e3;
+                border-radius: 6px;
+                background: #fff;
+                color: var(--ink);
+                font-size: 10px;
+            }
+            .inline-edit .hint {
+                margin-top: 7px;
+                color: #8b97a1;
+                font-size: 8.5px;
+            }
+            .inline-edit .btns {
+                display: flex;
+                gap: 6px;
+                margin-top: 9px;
+            }
+
+            /* Formulario de alta dentro de pestaña */
+            .mini-form {
+                margin-top: 12px;
+                padding: 12px;
+                border: 1px solid #e4eaf0;
+                border-radius: 8px;
+                background: #fbfcfd;
+            }
+            .mini-form h5 {
+                margin: 0 0 9px;
+                color: #465a6c;
+                font-size: 9.5px;
+                font-weight: 700;
+            }
+            .mini-form .fields {
+                display: grid;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: 9px;
+            }
+            .mini-form label {
+                display: block;
+                color: #8b97a1;
+                font-size: 8.5px;
+            }
+            .mini-form input,
+            .mini-form select,
+            .mini-form textarea {
+                width: 100%;
+                margin-top: 3px;
+                padding: 6px 8px;
+                border: 1px solid #dbe2e9;
+                border-radius: 5px;
+                background: #fff;
+                color: var(--ink);
+                font-size: 9.5px;
+            }
+            .mini-form textarea {
+                min-height: 48px;
+                resize: vertical;
+            }
+            .mini-form .req {
+                color: #ad4d46;
+            }
+            .mini-form .actions {
+                display: flex;
+                justify-content: flex-end;
+                gap: 6px;
+                margin-top: 10px;
+            }
+
+            /* Hitos */
+            .hitos {
+                margin-top: 6px;
+                border-left: 2px solid #eef1f4;
+                padding-left: 10px;
+            }
+            .hito {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                gap: 7px;
+                padding: 5px 0;
+                font-size: 9px;
+                color: #687988;
+            }
+            .hito code {
+                font-family:
+                    ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+                font-size: 8px;
+                color: #8b97a1;
+            }
+            .hito .h-name {
+                color: #415468;
+                font-weight: 600;
+            }
+
+            /* Flags de robustez */
+            .flags {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                gap: 8px;
+            }
+            .flag {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 8px;
+                padding: 9px 11px;
+                border: 1px solid #eef1f4;
+                border-radius: 7px;
+                background: #fbfcfd;
+                font-size: 9.5px;
+                color: #415468;
+            }
+            .flag .val {
+                font-weight: 700;
+            }
+            .flag .val.yes {
+                color: #34785b;
+            }
+            .flag .val.no {
+                color: #ad4d46;
+            }
+
+            /* Caja de construcción */
+            .build-box {
+                padding: 16px 18px;
+                border: 1px solid #cddcef;
+                border-radius: 10px;
+                background: #f6f9fd;
+            }
+            .build-box h2 {
+                margin: 0 0 10px;
+                color: #1d427f;
+                font: 700 15px/1.3 var(--font-display);
+            }
+            .build-box ol {
+                margin: 0;
+                padding-left: 20px;
+                color: #415468;
+                font-size: 10.5px;
+                line-height: 1.65;
+            }
+            .build-box li {
+                margin-bottom: 7px;
+            }
+            .build-box code {
+                font-family:
+                    ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+                font-size: 9px;
+                background: #fff;
+                border: 1px solid #dbe6f2;
+                border-radius: 4px;
+                padding: 1px 4px;
+            }
+            .stamp {
+                margin: 2px 0 0;
+                text-align: right;
+                color: #a3adb5;
+                font-size: 9px;
+                font-weight: 600;
+                letter-spacing: 0.06em;
+                text-transform: uppercase;
+            }
+
+            @media (max-width: 980px) {
+                .ficha-grid {
+                    grid-template-columns: 1fr;
+                }
+                .rail {
+                    position: static;
+                }
+                .grid-2 {
+                    grid-template-columns: 1fr;
+                }
+                .mini-form .fields {
+                    grid-template-columns: 1fr;
+                }
+            }
+            @media (max-width: 720px) {
+                .view-body {
+                    padding: 18px 16px 40px;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <main class="view-body">
+            <header class="view-head">
+                <div>
+                    <span class="anexo-badge">Mockup · item 41 · pestañas 12–18 · 67 · 68</span>
+                    <h1>Ficha del caso por pestañas operativas</h1>
+                    <p class="view-subtitle">
+                        Estructura propuesta para la ficha de caso: cabecera, riel de
+                        relaciones, diez pestañas y el patrón de edición por campo.
+                        Todos los valores provienen de la base AVISA
+                        (<code>core.*</code>); lo que no existe se muestra «—» y se
+                        explica en las notas.
+                    </p>
+                </div>
+            </header>
+
+            <!-- Cabecera de la ficha -->
+            <section class="ficha-head card" aria-label="Cabecera de la ficha">
+                <div>
+                    <div class="code">
+                        <span>CS-PA-OAT-2024-02</span>
+                        <span class="dash">·</span>
+                        <span>OAIPCS</span>
+                    </div>
+                    <h2>Uso de red de cortina de fondo en Cabo Blanco y Los Órganos</h2>
+                    <div class="loc">
+                        <b>Región</b> Piura · <b>Alcance derivado</b> Norte ·
+                        <b>Temática</b> Ordenamiento y acceso territorial ·
+                        <b>Subsector</b> Pesca y Acuicultura
+                    </div>
+                    <div class="badge-row">
+                        <span class="badge risk-bajo"><span class="k">Riesgo</span> Bajo</span>
+                        <span class="badge badge-conflicto">Conflicto social</span>
+                        <span class="badge estado-seguimiento">En seguimiento</span>
+                        <span class="badge priority-urgente"><span class="k">Prioridad</span> Urgente</span>
+                    </div>
+                </div>
+                <div class="head-actions">
+                    <details class="export-menu">
+                        <summary class="button-secondary">Exportar ▾</summary>
+                        <div class="export-list">
+                            <button>PDF de la ficha</button>
+                            <button>Excel del expediente</button>
+                            <button>JSON de la entidad</button>
+                        </div>
+                    </details>
+                    <button class="button-danger">Anular</button>
+                    <button class="button-primary">Editar</button>
+                </div>
+            </section>
+
+            <!-- Indicador de expediente (item 68) -->
+            <section class="completeness card" aria-label="Indicador de completitud del expediente">
+                <div class="completeness-head">
+                    <div class="completeness-title">
+                        Expediente <b>4 de 5</b>
+                        <span class="chip neutral">no bloquea el registro</span>
+                    </div>
+                    <div class="meter" aria-hidden="true"><span></span></div>
+                </div>
+                <ul>
+                    <li><span class="mark" style="color: #34785b">✓</span> Hechos (21)</li>
+                    <li><span class="mark" style="color: #34785b">✓</span> Actores con tipo y función (15)</li>
+                    <li class="miss"><span class="mark">✗</span> Demandas con 3P (0 de 10)</li>
+                    <li><span class="mark" style="color: #34785b">✓</span> Geografía (Piura · El Alto)</li>
+                    <li><span class="mark" style="color: #34785b">✓</span> Marco situacional (3 de 5 dimensiones)</li>
+                </ul>
+            </section>
+
+            <div class="ficha-grid">
+                <!-- Riel de relaciones (item 67) -->
+                <aside class="rail card" aria-label="Relaciones del caso">
+                    <div class="rail-title">Relaciones</div>
+                    <button class="rail-link" data-tab="alertas">
+                        Alertas <span class="n">4</span>
+                    </button>
+                    <button class="rail-link" data-tab="compromisos">
+                        Compromisos <span class="n">4</span>
+                    </button>
+                    <button class="rail-link" data-tab="documentos">
+                        Documentos <span class="n">5</span>
+                    </button>
+                    <button class="rail-link" data-tab="demandas">
+                        Demandas <span class="n warn">10*</span>
+                    </button>
+                    <button class="rail-link" data-tab="reuniones">
+                        Reuniones <span class="n zero">0</span>
+                    </button>
+                    <button class="rail-link" data-tab="historial">
+                        Historial <span class="n">3</span>
+                    </button>
+                    <div class="rail-sep"></div>
+                    <div class="rail-note">
+                        * Las 10 demandas provienen de las alertas del caso y
+                        tienen <code>caso_id</code> vacío: no están vinculadas al
+                        expediente.
+                    </div>
+                </aside>
+
+                <div class="tabs-area">
+                    <div class="tabs" role="tablist" aria-label="Pestañas de la ficha">
+                        <button class="tab" role="tab" data-tab="resumen" aria-selected="true">Resumen</button>
+                        <button class="tab" role="tab" data-tab="actores" aria-selected="false">Actores</button>
+                        <button class="tab" role="tab" data-tab="demandas" aria-selected="false">
+                            Demandas (3P)
+                        </button>
+                        <button class="tab" role="tab" data-tab="cronologia" aria-selected="false">Cronología</button>
+                        <button class="tab" role="tab" data-tab="alertas" aria-selected="false">Alertas</button>
+                        <button class="tab" role="tab" data-tab="compromisos" aria-selected="false">Compromisos</button>
+                        <button class="tab" role="tab" data-tab="documentos" aria-selected="false">Documentos</button>
+                        <button class="tab" role="tab" data-tab="reuniones" aria-selected="false">
+                            Reuniones <span class="dot" title="Sin datos reales"></span>
+                        </button>
+                        <button class="tab" role="tab" data-tab="historial" aria-selected="false">
+                            Historial/Auditoría <span class="dot partial" title="Solo cambios de estado"></span>
+                        </button>
+                        <button class="tab" role="tab" data-tab="marco" aria-selected="false">Marco situacional</button>
+                    </div>
+
+                    <!-- RESUMEN -->
+                    <section class="panel" data-panel="resumen" role="tabpanel">
+                        <div class="panel-head">
+                            <div>
+                                <h3>Resumen</h3>
+                                <p class="sub">
+                                    Vista de lectura del caso. El «Próximo paso» se
+                                    muestra como hueco de regla (item 19) para no
+                                    inventar una recomendación.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="grid-2">
+                            <div class="block">
+                                <h4>Descripción del riesgo</h4>
+                                <p class="prose">
+                                    Bloqueo de Panamericana Norte (altura Cabo Blanco)
+                                    por plazo vencido del estudio técnico.
+                                </p>
+
+                                <h4 style="margin-top: 14px">Resumen ejecutivo</h4>
+                                <p class="prose">
+                                    Los pescadores de Cabo Blanco denuncian que
+                                    pescadores de Los Órganos extraen recursos
+                                    hidrobiológicos dentro de sus áreas de reserva
+                                    empleando red cortina de fondo de hasta 50 paños,
+                                    práctica que estaría deteriorando los bancos de
+                                    pesca y el fondo marino. El conflicto escaló en
+                                    octubre de 2024 con un bloqueo de la Panamericana,
+                                    tras lo cual PRODUCE inició un proceso de diálogo
+                                    que derivó en tres compromisos: un estudio técnico
+                                    asesorado por IMARPE y financiado por SERNANP (con
+                                    cierre previsto en julio de 2026), la actualización
+                                    de la RDR de Piura y la conformación de las
+                                    COREVIPAS. Mediante R.M. N.° 000115-2026-PRODUCE
+                                    se suspendió el uso de la red de cortina de fondo
+                                    dentro de las 5 millas en los sectores II, III y
+                                    IV.
+                                </p>
+
+                                <h4 style="margin-top: 14px">Próximo paso</h4>
+                                <div class="banner warn">
+                                    <span>⚠</span>
+                                    <span>
+                                        Regla pendiente (</span>item 19). El caso tiene
+                                        <b>riesgo Bajo</b>; la recomendación debe
+                                        derivarse de la Tabla 3 de la Guía y declarar
+                                        qué regla y qué valor la originaron. Hoy no
+                                        existe la regla en el sistema: el contenido es
+                                        <b>«—»</b>.
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="block">
+                                <h4>Datos del caso</h4>
+                                <dl class="data-pairs">
+                                    <dt>Código</dt>
+                                    <dd>CS-PA-OAT-2024-02</dd>
+                                    <dt>Estado</dt>
+                                    <dd>En seguimiento</dd>
+                                    <dt>Nivel de conflictividad</dt>
+                                    <dd>Conflicto social</dd>
+                                    <dt>Nivel de riesgo</dt>
+                                    <dd>Bajo</dd>
+                                    <dt>Prioridad de atención</dt>
+                                    <dd>Urgente</dd>
+                                    <dt>Inicio</dt>
+                                    <dd>15.10.2024</dd>
+                                    <dt>Última actualización</dt>
+                                    <dd>31.10.2026</dd>
+                                    <dt>Avance registrado</dt>
+                                    <dd>90 %</dd>
+                                    <dt>Unidad responsable</dt>
+                                    <dd>OAIPCS</dd>
+                                    <dt>Geografía</dt>
+                                    <dd>Piura · distrito El Alto</dd>
+                                    <dt>Alcance</dt>
+                                    <dd>Norte <span class="chip neutral">derivado</span></dd>
+                                </dl>
+
+                                <h4 style="margin-top: 14px">Edición por campo (item 18)</h4>
+                                <div class="inline-edit">
+                                    <div class="cap">✎ Editando · Distrito</div>
+                                    <div class="row">
+                                        <input value="El Alto" aria-label="Distrito" />
+                                    </div>
+                                    <div class="hint">
+                                        El clic fuera no cierra ni cancela la
+                                        edición. Solo «Cancelar» o «Guardar cambios»
+                                        finalizan el formulario.
+                                    </div>
+                                    <div class="btns">
+                                        <button class="button-secondary">Cancelar</button>
+                                        <button class="button-primary">Guardar cambios</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- ACTORES -->
+                    <section class="panel" data-panel="actores" role="tabpanel" hidden>
+                        <div class="panel-head">
+                            <div>
+                                <h3>Actores</h3>
+                                <p class="sub">
+                                    Relación del caso con el Directorio. Tipo, función
+                                    y posicionamiento se guardan como relación
+                                    (<code>core.casos_actores</code>), no como nombres
+                                    concatenados (item 40).
+                                </p>
+                            </div>
+                            <div class="panel-actions">
+                                <button class="button-primary">Vincular actor</button>
+                            </div>
+                        </div>
+
+                        <div class="banner">
+                            <span>ℹ</span>
+                            <span>
+                                El modelo guarda un único <code>nombre_actual</code>.
+                                El corte Apellidos | Nombres de la tabla es una
+                                convención de presentación, no un dato persistido.
+                                <b>Posicionamiento</b> es texto libre y las 60
+                                relaciones de la base tienen un solo valor:
+                                «Neutral».
+                            </span>
+                        </div>
+
+                        <div class="table-wrap">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Apellidos</th>
+                                        <th>Nombres</th>
+                                        <th>Correo</th>
+                                        <th>Tipo</th>
+                                        <th>Función</th>
+                                        <th>Posicionamiento</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="strong">Olaya Marchan</td>
+                                        <td>Adonay</td>
+                                        <td class="dash">—</td>
+                                        <td>Actor social</td>
+                                        <td><span class="chip">No determinado</span></td>
+                                        <td>Neutral</td>
+                                        <td><button class="button-link">Desvincular</button></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="strong">Namuche</td>
+                                        <td>Armando</td>
+                                        <td class="dash">—</td>
+                                        <td>Actor social</td>
+                                        <td><span class="chip">Principal</span></td>
+                                        <td>Neutral</td>
+                                        <td><button class="button-link">Desvincular</button></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="strong">Jacinto Tume</td>
+                                        <td>Carlos Alberto</td>
+                                        <td class="dash">—</td>
+                                        <td>Actor social</td>
+                                        <td><span class="chip">Principal</span></td>
+                                        <td>Neutral</td>
+                                        <td><button class="button-link">Desvincular</button></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="strong">Chapilliquen</td>
+                                        <td>Carlos</td>
+                                        <td class="dash">—</td>
+                                        <td>Actor social</td>
+                                        <td><span class="chip">Secundario</span></td>
+                                        <td>Neutral</td>
+                                        <td><button class="button-link">Desvincular</button></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="strong">Paiva Jacinto</td>
+                                        <td>Diego Armando</td>
+                                        <td>paivajacintodiegoarmando@gmail.com</td>
+                                        <td>Actor social</td>
+                                        <td><span class="chip">Principal</span></td>
+                                        <td>Neutral</td>
+                                        <td><button class="button-link">Desvincular</button></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="strong">Jiménez Caipa</td>
+                                        <td>Edgar</td>
+                                        <td class="dash">—</td>
+                                        <td>Actor social</td>
+                                        <td><span class="chip">Principal</span></td>
+                                        <td>Neutral</td>
+                                        <td><button class="button-link">Desvincular</button></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="strong">Ruíz</td>
+                                        <td>Ernesto</td>
+                                        <td class="dash">—</td>
+                                        <td>Actor social</td>
+                                        <td><span class="chip">Principal</span></td>
+                                        <td>Neutral</td>
+                                        <td><button class="button-link">Desvincular</button></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="strong">Juárez Ruiz</td>
+                                        <td>Henry</td>
+                                        <td>gredepesarpa2025@gmail.com</td>
+                                        <td>Actor social</td>
+                                        <td><span class="chip">Principal</span></td>
+                                        <td>Neutral</td>
+                                        <td><button class="button-link">Desvincular</button></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="strong">Pazos Anthón</td>
+                                        <td>José</td>
+                                        <td class="dash">—</td>
+                                        <td>Actor social</td>
+                                        <td><span class="chip">Principal</span></td>
+                                        <td>Neutral</td>
+                                        <td><button class="button-link">Desvincular</button></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="strong">Panta Ramírez</td>
+                                        <td>José Sixto</td>
+                                        <td class="dash">—</td>
+                                        <td>Actor social</td>
+                                        <td><span class="chip">Principal</span></td>
+                                        <td>Neutral</td>
+                                        <td><button class="button-link">Desvincular</button></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="strong">Chulle</td>
+                                        <td>Juan Carlos</td>
+                                        <td class="dash">—</td>
+                                        <td>Actor social</td>
+                                        <td><span class="chip">Secundario</span></td>
+                                        <td>Neutral</td>
+                                        <td><button class="button-link">Desvincular</button></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="strong">Gonzales</td>
+                                        <td>Marcelino</td>
+                                        <td class="dash">—</td>
+                                        <td>Actor social</td>
+                                        <td><span class="chip">Secundario</span></td>
+                                        <td>Neutral</td>
+                                        <td><button class="button-link">Desvincular</button></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="strong">Querevalu Querevalu</td>
+                                        <td>Raul</td>
+                                        <td>vqagri.querevalu@gmail.com</td>
+                                        <td>Actor social</td>
+                                        <td><span class="chip">Principal</span></td>
+                                        <td>Neutral</td>
+                                        <td><button class="button-link">Desvincular</button></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="strong">Paiva Chulle</td>
+                                        <td>Rolando</td>
+                                        <td class="dash">—</td>
+                                        <td>Actor social</td>
+                                        <td><span class="chip">Principal</span></td>
+                                        <td>Neutral</td>
+                                        <td><button class="button-link">Desvincular</button></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="strong">Cornejo Palma</td>
+                                        <td>Ronal Paul</td>
+                                        <td class="dash">—</td>
+                                        <td>Actor social</td>
+                                        <td><span class="chip">Secundario</span></td>
+                                        <td>Neutral</td>
+                                        <td><button class="button-link">Desvincular</button></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <p class="footnote">
+                            15 actores vinculados. 3 de 15 tienen correo en la base;
+                            el resto muestra «—» porque <code>actores.email_contacto</code>
+                            está vacío. Todos son <b>Actor social</b>.
+                        </p>
+                    </section>
+
+                    <!-- DEMANDAS -->
+                    <section class="panel" data-panel="demandas" role="tabpanel" hidden>
+                        <div class="panel-head">
+                            <div>
+                                <h3>Demandas (Problema · Propuesta · Pedido)</h3>
+                                <p class="sub">
+                                    Las 10 demandas se crearon desde las alertas del
+                                    caso y quedaron con <code>caso_id</code> vacío. La
+                                    pestaña debe permitir vincularlas y editar su 3P.
+                                </p>
+                            </div>
+                            <div class="panel-actions">
+                                <button class="button-secondary">Nueva demanda</button>
+                            </div>
+                        </div>
+
+                        <div class="banner warn">
+                            <span>⚠</span>
+                            <span>
+                                <b>3P vacío en toda la base:</b> 325 demandas, 0 con
+                                Problema, Propuesta o Pedido registrados. Las columnas
+                                3P muestran «—» porque el campo no existe en el dato,
+                                no porque falte la vista. Todas están en estado
+                                <b>Pendiente</b>.
+                            </span>
+                        </div>
+
+                        <div class="table-wrap">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Problema</th>
+                                        <th>Propuesta</th>
+                                        <th>Pedido</th>
+                                        <th>Estado de atención</th>
+                                        <th>Origen</th>
+                                        <th>Registro</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="dash">—</td>
+                                        <td class="dash">—</td>
+                                        <td class="wrap">Rechazo a la espera de los resultados del estudio del IMARPE y solicitud de acciones inmediatas</td>
+                                        <td><span class="chip warn">Pendiente</span></td>
+                                        <td>AT-2026-01</td>
+                                        <td>31.08.2026</td>
+                                        <td><button class="button-link">Editar</button></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="dash">—</td>
+                                        <td class="dash">—</td>
+                                        <td class="wrap">Prohibición definitiva del uso de redes de fondo dentro de las 5 millas náuticas y mayor fiscalización</td>
+                                        <td><span class="chip warn">Pendiente</span></td>
+                                        <td>AT-2026-01</td>
+                                        <td>31.08.2026</td>
+                                        <td><button class="button-link">Editar</button></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="dash">—</td>
+                                        <td class="dash">—</td>
+                                        <td class="wrap">Presencia inmediata del Ministro y Viceministro de PRODUCE en la zona del conflicto</td>
+                                        <td><span class="chip warn">Pendiente</span></td>
+                                        <td>AT-2026-01</td>
+                                        <td>31.08.2026</td>
+                                        <td><button class="button-link">Editar</button></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="dash">—</td>
+                                        <td class="dash">—</td>
+                                        <td class="wrap">Adopción de acuerdos inmediatos orientados a la protección del ecosistema marino</td>
+                                        <td><span class="chip warn">Pendiente</span></td>
+                                        <td>AT-2026-02</td>
+                                        <td>02.09.2026</td>
+                                        <td><button class="button-link">Editar</button></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="dash">—</td>
+                                        <td class="dash">—</td>
+                                        <td class="wrap">Rechazo categórico al uso de redes de cortina de fondo en sus zonas de pesca</td>
+                                        <td><span class="chip warn">Pendiente</span></td>
+                                        <td>AT-2026-03</td>
+                                        <td>02.09.2026</td>
+                                        <td><button class="button-link">Editar</button></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="dash">—</td>
+                                        <td class="dash">—</td>
+                                        <td class="wrap">Solicitud de mayor involucramiento con presencia y comunicación institucional de IMARPE</td>
+                                        <td><span class="chip warn">Pendiente</span></td>
+                                        <td>AT-2026-03</td>
+                                        <td>02.09.2026</td>
+                                        <td><button class="button-link">Editar</button></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <p class="footnote">
+                            Se muestran 6 de 10. Las 4 restantes también tienen 3P
+                            vacío y estado Pendiente. <b>Vincular al caso</b> y
+                            <b>Editar 3P</b> son las acciones que faltan (item 13).
+                        </p>
+
+                        <div class="mini-form">
+                            <h5>Nueva demanda · formulario que falta</h5>
+                            <div class="fields">
+                                <label>Problema (3P) <span class="req">*</span>
+                                    <textarea placeholder="Qué ocurre y a quién afecta"></textarea>
+                                </label>
+                                <label>Propuesta (3P)
+                                    <textarea placeholder="Qué se plant</label>ea como salida"></textarea>
+                                </label>
+                                <label>Pedido (3P) <span class="req">*</span>
+                                    <textarea placeholder="Qué se solicita concretamente"></textarea>
+                                </label>
+                                <label>Temática
+                                    <select>
+                                        <option>Ordenamiento y acceso territorial</option>
+                                        <option>Infraestructura</option>
+                                        <option>Normatividad</option>
+                                        <option>Distribución de beneficios</option>
+                                        <option>Gobernanza</option>
+                                        <option>Impactos de terceros</option>
+                                    </select>
+                                </label>
+                                <label>Estado de atención
+                                    <select>
+                                        <option>Pendiente</option>
+                                        <option>En proceso</option>
+                                        <option>Atendida</option>
+                                        <option>No atendida</option>
+                                    </select>
+                                </label>
+                                <label>Documento de origen
+                                    <select>
+                                        <option>AT-2026-01</option>
+                                        <option>AT-2026-02</option>
+                                        <option>AT-2026-03</option>
+                                    </select>
+                                </label>
+                            </div>
+                            <div class="actions">
+                                <button class="button-secondary">Cancelar</button>
+                                <button class="button-primary">Guardar demanda</button>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- CRONOLOGIA -->
+                    <section class="panel" data-panel="cronologia" role="tabpanel" hidden>
+                        <div class="panel-head">
+                            <div>
+                                <h3>Cronología</h3>
+                                <p class="sub">
+                                    Hechos del más reciente al más antiguo, con
+                                    evidencia y estado de validación (item 14). La
+                                    validación es acción explícita, no efecto del alta.
+                                </p>
+                            </div>
+                            <div class="panel-actions">
+                                <button class="button-primary">Registrar hecho</button>
+                            </div>
+                        </div>
+
+                        <div class="banner">
+                            <span>ℹ</span>
+                            <span>
+                                80 hechos en la base: <b>80 validados</b>, 0 pendientes.
+                                El estado «pendiente/validado» se muestra como diseño;
+                                hoy no hay ningún hecho pendiente porque la carga
+                                histórica entró ya validada. <b>Actor del hecho</b> está
+                                vacío en los 80 registros: columna «—».
+                            </span>
+                        </div>
+
+                        <div class="table-wrap">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Fecha</th>
+                                        <th>Actor</th>
+                                        <th class="wrap">Acción</th>
+                                        <th>Tipo</th>
+                                        <th>Evidencia</th>
+                                        <th>Validación</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>26.05.2026</td>
+                                        <td class="dash">—</td>
+                                        <td class="wrap">RD N° 219-2026/GOBIERNO REGIONAL PIURA - DIREPRO, conforma el Comité Regional de Vigilancia</td>
+                                        <td>Aprobación de Normatividad</td>
+                                        <td><span class="chip ok">Sí</span></td>
+                                        <td><span class="chip ok">Validado</span></td>
+                                        <td><button class="button-link">Editar</button></td>
+                                    </tr>
+                                    <tr>
+                                        <td>22.05.2026</td>
+                                        <td class="dash">—</td>
+                                        <td class="wrap">Espacio de diálogo en El Alto, PAR 22.05.2026</td>
+                                        <td>Reunión Técnica</td>
+                                        <td><span class="chip ok">Sí</span></td>
+                                        <td><span class="chip ok">Validado</span></td>
+                                        <td><button class="button-link">Editar</button></td>
+                                    </tr>
+                                    <tr>
+                                        <td>18.05.2026</td>
+                                        <td class="dash">—</td>
+                                        <td class="wrap">Carta N.º 00000925-2026-PRODUCE/DGPARPA e Informe N.º 00000614-2026-PRODUCE/DPO</td>
+                                        <td>Comunicado</td>
+                                        <td><span class="chip ok">Sí</span></td>
+                                        <td><span class="chip ok">Validado</span></td>
+                                        <td><button class="button-link">Editar</button></td>
+                                    </tr>
+                                    <tr>
+                                        <td>14.05.2026</td>
+                                        <td class="dash">—</td>
+                                        <td class="wrap">Oficio N.º 17-2026/GPASP, solicitud de documento aclaratorio</td>
+                                        <td>Comunicado</td>
+                                        <td><span class="chip ok">Sí</span></td>
+                                        <td><span class="chip ok">Validado</span></td>
+                                        <td><button class="button-link">Editar</button></td>
+                                    </tr>
+                                    <tr>
+                                        <td>07.05.2026</td>
+                                        <td class="dash">—</td>
+                                        <td class="wrap">Espacio de diálogo en Los Órganos, PAR 07.05.2026</td>
+                                        <td>Reunión Técnica</td>
+                                        <td><span class="chip ok">Sí</span></td>
+                                        <td><span class="chip ok">Validado</span></td>
+                                        <td><button class="button-link">Editar</button></td>
+                                    </tr>
+                                    <tr>
+                                        <td>05.05.2026</td>
+                                        <td class="dash">—</td>
+                                        <td class="wrap">Los Órganos, Piura — la Asociación de Pescadores Artesanales inicia bloqueo</td>
+                                        <td>Bloqueo</td>
+                                        <td><span class="chip neutral">Sin enlace</span></td>
+                                        <td><span class="chip ok">Validado</span></td>
+                                        <td><button class="button-link">Editar</button></td>
+                                    </tr>
+                                    <tr>
+                                        <td>27.04.2026</td>
+                                        <td class="dash">—</td>
+                                        <td class="wrap">Oficio Múltiple N.º 015-2026/GPASP-LO, del presidente del Gremio de Pescadores</td>
+                                        <td>Comunicado</td>
+                                        <td><span class="chip ok">Sí</span></td>
+                                        <td><span class="chip ok">Validado</span></td>
+                                        <td><button class="button-link">Editar</button></td>
+                                    </tr>
+                                    <tr>
+                                        <td>23.04.2026</td>
+                                        <td class="dash">—</td>
+                                        <td class="wrap">Espacio de diálogo en El Ñuro, PAR 23.04.2026</td>
+                                        <td>Reunión Técnica</td>
+                                        <td><span class="chip ok">Sí</span></td>
+                                        <td><span class="chip ok">Validado</span></td>
+                                        <td><button class="button-link">Editar</button></td>
+                                    </tr>
+                                    <tr>
+                                        <td>21.04.2026</td>
+                                        <td class="dash">—</td>
+                                        <td class="wrap">DVPA realizó reunión con IMARPE y SERNANP sobre evaluación y monitoreo</td>
+                                        <td>Reunión Técnica</td>
+                                        <td><span class="chip neutral">Sin enlace</span></td>
+                                        <td><span class="chip ok">Validado</span></td>
+                                        <td><button class="button-link">Editar</button></td>
+                                    </tr>
+                                    <tr>
+                                        <td>12.03.2026</td>
+                                        <td class="dash">—</td>
+                                        <td class="wrap">Oficio Múltiple N.º 10-2026/GPASP-LO, solicitud de precisión técnica</td>
+                                        <td>Comunicado</td>
+                                        <td><span class="chip ok">Sí</span></td>
+                                        <td><span class="chip ok">Validado</span></td>
+                                        <td><button class="button-link">Editar</button></td>
+                                    </tr>
+                                    <tr>
+                                        <td>23.02.2026</td>
+                                        <td class="dash">—</td>
+                                        <td class="wrap">Consultor informa que sensores NIKE llegarán el 6 de marzo desde Francia</td>
+                                        <td>Comunicado</td>
+                                        <td><span class="chip ok">Sí</span></td>
+                                        <td><span class="chip ok">Validado</span></td>
+                                        <td><button class="button-link">Editar</button></td>
+                                    </tr>
+                                    <tr>
+                                        <td>17.02.2026</td>
+                                        <td class="dash">—</td>
+                                        <td class="wrap">Oficio N.º 0267-2026-IMARPE/PE, informe sobre incidente en la Caleta Cabo Blanco</td>
+                                        <td>Comunicado</td>
+                                        <td><span class="chip ok">Sí</span></td>
+                                        <td><span class="chip ok">Validado</span></td>
+                                        <td><button class="button-link">Editar</button></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <p class="footnote">
+                            Se muestran 12 de 21 hechos. 63 de 80 hechos en la base
+                            tienen enlace de evidencia; 17 no lo tienen.
+                        </p>
+                    </section>
+
+                    <!-- ALERTAS -->
+                    <section class="panel" data-panel="alertas" role="tabpanel" hidden>
+                        <div class="panel-head">
+                            <div>
+                                <h3>Alertas</h3>
+                                <p class="sub">
+                                    Alertas vinculadas con su código, categoría de la
+                                    Guía (AT · RR · PAR), nivel, prioridad, SLA y paso
+                                    del flujo (item 15).
+                                </p>
+                            </div>
+                            <div class="panel-actions">
+                                <button class="button-secondary">Nueva alerta</button>
+                            </div>
+                        </div>
+
+                        <div class="banner">
+                            <span>ℹ</span>
+                            <span>
+                                Las 4 alertas son de categoría <b>AT</b> (Anexo 3).
+                                En la base no hay alertas RR ni PAR: esos códigos
+                                existen como <b>tipos de documento</b>
+                                (<code>reporte_rapido</code>, <code>par</code>) con 1 y
+                                0 filas. Las 83 alertas están en <b>paso 5</b> y estado
+                                heredado «Archivado», sin aprobación registrada.
+                            </span>
+                        </div>
+
+                        <div class="table-wrap">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Código</th>
+                                        <th>Cat.</th>
+                                        <th class="wrap">Título</th>
+                                        <th>Nivel</th>
+                                        <th>Prioridad</th>
+                                        <th>Reporte</th>
+                                        <th>SLA</th>
+                                        <th>Paso / estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="strong">AT-2026-49-bis</td>
+                                        <td><span class="chip">AT</span></td>
+                                        <td class="wrap">🚨 Paro pescadores artesanales Los Órganos — posible bloqueo Panamericana</td>
+                                        <td>Inmediato</td>
+                                        <td><span class="chip warn">Crítica inmediata</span></td>
+                                        <td>04.05.2026</td>
+                                        <td>24 h</td>
+                                        <td><span class="chip neutral">Paso 5 · Archivado</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="strong">AT-2026-03</td>
+                                        <td><span class="chip">AT</span></td>
+                                        <td class="wrap">🚨 Movilización social y bloqueo de Panamericana norte, altura de Cabo Blanco</td>
+                                        <td>Táctico</td>
+                                        <td><span class="chip warn">Urgente</span></td>
+                                        <td>17.04.2026</td>
+                                        <td>48 h</td>
+                                        <td><span class="chip neutral">Paso 5 · Archivado</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="strong">AT-2026-01</td>
+                                        <td><span class="chip">AT</span></td>
+                                        <td class="wrap">🔔 Conflicto pesquero por uso de redes de fondo</td>
+                                        <td>Táctico</td>
+                                        <td><span class</td>="chip warn">Urgente</span></td>
+                                        <td>10.02.2026</td>
+                                        <td>48 h</td>
+                                        <td><span class="chip neutral">Paso 5 · Archivado</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="strong">AT-2026-02</td>
+                                        <td><span class="chip">AT</span></td>
+                                        <td class="wrap">🚨 Movilización de pescadores artesanales en Cabo Blanco por rechazo a «red cortina de fondo»</td>
+                                        <td>Inmediato</td>
+                                        <td><span class="chip warn">Crítica inmediata</span></td>
+                                        <td>27.11.2025</td>
+                                        <td>24 h</td>
+                                        <td><span class="chip neutral">Paso 5 · Archivado</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                    <!-- COMPROMISOS -->
+                    <section class="panel" data-panel="compromisos" role="tabpanel" hidden>
+                        <div class="panel-head">
+                            <div>
+                                <h3>Compromisos e hitos</h3>
+                                <p class="sub">
+                                    Estados de compromiso e hitos separados (item 16).
+                                    La clasificación «progresivo/parcial · entendimiento
+                                    operativo · condicionado» se muestra como hueco.
+                                </p>
+                            </div>
+                            <div class="panel-actions">
+                                <button class="button-secondary">Añadir hito</button>
+                                <button class="button-primary">Nuevo compromiso</button>
+                            </div>
+                        </div>
+
+                        <div class="banner warn">
+                            <span>⚠</span>
+                            <span>
+                                <b>Clasificación sin dato:</b> el modelo no tiene el
+                                campo progresivo/parcial · entendimiento operativo ·
+                                condicionado. Los 8 compromisos de la base tienen
+                                <code>tipo_compromiso = «Actividad»</code> y
+                                <code>nivel_gobierno</code> vacío. Además, ningún
+                                compromiso tiene <code>fecha_vencimiento</code>.
+                            </span>
+                        </div>
+
+                        <div class="table-wrap">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Código</th>
+                                        <th class="wrap">Compromiso</th>
+                                        <th>Clasificación</th>
+                                        <th>Estado</th>
+                                        <th>Inicio</th>
+                                        <th>Vencimiento</th>
+                                        <th>Hitos</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="strong">…COMP001</td>
+                                        <td class="wrap">Desarrollar estudio «Evaluación y monitoreo de los efectos de la pesquería artesanal de la merluza peruana con redes de enmalle de fondo en la zona norte del Perú»</td>
+                                        <td><span class="chip neutral">sin dato</span></td>
+                                        <td><span class="chip">En proceso</span></td>
+                                        <td>15.10.2024</td>
+                                        <td class="dash">—</td>
+                                        <td>3</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="strong">…COMP002</td>
+                                        <td class="wrap">Ratificación de la Resolución Directoral Regional N.° 366-2018-GOBIERNO REGIONAL PIURA-DRP-DR con la incorporación de nuevas zonas</td>
+                                        <td><span class="chip neutral">sin dato</span></td>
+                                        <td><span class="chip">En proceso</span></td>
+                                        <td>15.10.2024</td>
+                                        <td class="dash">—</td>
+                                        <td>2</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="strong">…COMP003</td>
+                                        <td class="wrap">Conformación y acreditación de los COREVIPA (Comités de Vigilancia y Control Pesquero Artesanal)</td>
+                                        <td><span class="chip neutral">sin dato</span></td>
+                                        <td><span class="chip">En proceso</span></td>
+                                        <td>15.10.2024</td>
+                                        <td class="dash">—</td>
+                                        <td>2</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="strong">…COMP004</td>
+                                        <td class="wrap">Aplicar medidas de corto plazo: fiscalización reforzada, registro obligatorio y control de desembarques</td>
+                                        <td><span class="chip neutral">sin dato</span></td>
+                                        <td><span class="chip">En proceso</span></td>
+                                        <td>15.10.2024</td>
+                                        <td class="dash">—</td>
+                                        <td>1</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <h4 style="margin-top: 14px">Hitos del caso (8)</h4>
+                        <div class="hitos">
+                            <div class="hito">
+                                <code>COMP001_H001</code>
+                                <span class="h-name">Aprobación de términos de referencia.</span>
+                                <span class="chip ok">Cumplido</span>
+                                <span>vence 04.04.2025</span>
+                            </div>
+                            <div class="hito">
+                                <code>COMP001_H002</code>
+                                <span class="h-name">Ejecución de evaluación in situ y recolección de datos.</span>
+                                <span class="chip">En ejecución</span>
+                            </div>
+                            <div class="hito">
+                                <code>COMP001_H003</code>
+                                <span class="h-name">Análisis de datos y presentación de informe final.</span>
+                                <span class="chip">Registrado</span>
+                            </div>
+                            <div class="hito">
+                                <code>COMP002_H001</code>
+                                <span class="h-name">Reunión de trabajo PRODUCE, DIREPRO Piura y dirigentes.</span>
+                                <span class="chip ok">Cumplido</span>
+                                <span>real 02.12.2025</span>
+                            </div>
+                            <div class="hito">
+                                <code>COMP002_H002</code>
+                                <span class="h-name">Emisión y publicación de resolución ratificatoria.</span>
+                                <span class="chip ok">Cumplido</span>
+                                <span>real 05.12.2025</span>
+                            </div>
+                            <div class="hito">
+                                <code>COMP003_H001</code>
+                                <span class="h-name">Seguimiento en la presentación de documentación por OSPA.</span>
+                                <span class="chip ok">Cumplido</span>
+                                <span>real 27.04.2026</span>
+                            </div>
+                            <div class="hito">
+                                <code>COMP003_H002</code>
+                                <span class="h-name">Seguimiento sobre evaluación técnica y emisión de acreditación.</span>
+                                <span class="chip ok">Cumplido</span>
+                                <span>real 26.05.2026</span>
+                            </div>
+                            <div class="hito">
+                                <code>COMP004_H001</code>
+                                <span class="h-name">Intervención de la Dirección General de Supervisión, Fiscalización y Sanción.</span>
+                                <span class="chip ok">Cumplido</span>
+                                <span>real 20.02.2026</span>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- DOCUMENTOS -->
+                    <section class="panel" data-panel="documentos" role="tabpanel" hidden>
+                        <div class="panel-head">
+                            <div>
+                                <h3>Documentos</h3>
+                                <p class="sub">
+                                    La documentación normativa va separada de las
+                                    evidencias del caso (item 17). No son la misma
+                                    sección ni se mezclan en la misma tabla.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="banner warn">
+                            <span>⚠</span>
+                            <span>
+                                <b>Documentación normativa: 0 filas.</b> El catálogo
+                                <code>core.cat_tipos_documento</code> no tiene un eje
+                                normativo/evidencia: una resolución o una RDR no se
+                                distinguen de un reporte de alerta. Las referencias
+                                normativas existen solo citadas en el texto y la
+                                cronología, sin fila de documento.
+                            </span>
+                        </div>
+
+                        <h4>Documentación normativa relacionada</h4>
+                        <div class="table-wrap">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Referencia</th>
+                                        <th class="wrap">Título</th>
+                                        <th>Fecha</th>
+                                        <th>Acceso</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="strong">R.M. N.° 000115-2026-PRODUCE</td>
+                                        <td class="wrap">Suspensión del uso de la red de cortina de fondo dentro de las 5 millas (sectores II, III y IV). Citada en el resumen ejecutivo.</td>
+                                        <td class="dash">—</td>
+                                        <td class="dash">—</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="strong">RDR N.° 1042-2025-GRP-DRP-DR</td>
+                                        <td class="wrap">Ratifica la RDR N.° 366-2018 y amplía la cobertura a Talara, Cabo Blanco y Lobitos. Citada en la cronología del 05.12.2025.</td>
+                                        <td>05.12.2025</td>
+                                        <td class="dash">—</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="strong">RD N.° 219-2026/GOBIERNO REGIONAL PIURA - DIREPRO</td>
+                                        <td class="wrap">Conforma el Comité Regional de Vigilancia. Citada en la cronología del 26.05.2026.</td>
+                                        <td>26.05.2026</td>
+                                        <td class="dash">—</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <p class="footnote">
+                            Las tres referencias son reales, tomadas del texto del
+                            caso y de la cronología. La columna «Acceso» es «—»
+                            porque no hay documento ni URL asociados.
+                        </p>
+
+                        <h4 style="margin-top: 16px">Evidencias del caso</h4>
+                        <div class="table-wrap">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Código</th>
+                                        <th>Tipo</th>
+                                        <th class="wrap">Título</th>
+                                        <th>Fecha</th>
+                                        <th>PDF</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="strong">ANA-1789079399963</td>
+                                        <td>Análisis de Caso (Anexo 8)</td>
+                                        <td class="wrap">Uso de red de cortina de fondo en Cabo Blanco y Los Órganos</td>
+                                        <td>23.09.2026</td>
+                                        <td><span class="chip neutral">Sin PDF</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="strong">AT-2026-49_pdf-2</td>
+                                        <td>Reporte de Alerta Temprana (AT)</td>
+                                        <td class="wrap">🚨 Paro pescadores artesanales Los Órganos</td>
+                                        <td>04.05.2026</td>
+                                        <td><span class="chip ok">Sí</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="strong">AT-2026-03_pdf</td>
+                                        <td>Reporte de Alerta Temprana (AT)</td>
+                                        <td class="wrap">🚨 Movilización social y bloqueo de Panamericana</td>
+                                        <td>17.04.2026</td>
+                                        <td><span class="chip ok">Sí</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="strong">AT-2026-01_pdf</td>
+                                        <td>Reporte de Alerta Temprana (AT)</td>
+                                        <td class="wrap">🔔 Conflicto pesquero por uso de redes de fondo</td>
+                                        <td>10.02.2026</td>
+                                        <td><span class="chip ok">Sí</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="strong">AT-2026-02_pdf</td>
+                                        <td>Reporte de Alerta Temprana (AT)</td>
+                                        <td class="wrap">🚨 Movilización de pescadores artesanales en Cabo Blanco</td>
+                                        <td>27.11.2025</td>
+                                        <td><span class="chip ok">Sí</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                    <!-- REUNIONES -->
+                    <section class="panel" data-panel="reuniones" role="tabpanel" hidden>
+                        <div class="panel-head">
+                            <div>
+                                <h3>Reuniones <span class="chip warn">sin dato</span></h3>
+                                <p class="sub">
+                                    No hay reuniones capturadas como entidad: la
+                                    pestaña depende del item 72.
+                                </p>
+                            </div>
+                            <div class="panel-actions">
+                                <button class="button-secondary" disabled style="opacity: 0.55; cursor: not-allowed">
+                                    Programar reunión
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="banner warn">
+                            <span>⚠</span>
+                            <span>
+                                <code>core.reuniones_dialogo</code> tiene 0 filas y no
+                                existe endpoint ni repositorio de reuniones (item 72).
+                                Sin embargo, la cronología registra <b>6 hechos de tipo
+                                «Reunión Técnica»</b>: la reunión ocurrió, pero no se
+                                captura como entidad.
+                            </span>
+                        </div>
+
+                        <div class="table-wrap">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Fecha</th>
+                                        <th class="wrap">Espacio registrado en la cronología</th>
+                                        <th>Tipo de hecho</th>
+                                        <th>Estado de la reunión</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>22.05.2026</td>
+                                        <td class="wrap">Espacio de diálogo en El Alto, PAR 22.05.2026</td>
+                                        <td>Reunión Técnica</td>
+                                        <td><span class="chip neutral">sin entidad</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>07.05.2026</td>
+                                        <td class="wrap">Espacio de diálogo en Los Órganos, PAR 07.05.2026</td>
+                                        <td>Reunión Técnica</td>
+                                        <td><span class="chip neutral">sin entidad</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>23.04.2026</td>
+                                        <td class="wrap">Espacio de diálogo en El Ñuro, PAR 23.04.2026</td>
+                                        <td>Reunión Técnica</td>
+                                        <td><span class="chip neutral">sin entidad</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>21.04.2026</td>
+                                        <td class="wrap">Reunión de DVPA con IMARPE y SERNANP</td>
+                                        <td>Reunión Técnica</td>
+                                        <td><span class="chip neutral">sin entidad</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>05.02.2026</td>
+                                        <td class="wrap">Reunión informativa sobre evaluación y monitoreo</td>
+                                        <td>Reunión Técnica</td>
+                                        <td><span class="chip neutral">sin entidad</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>18.10.2024</td>
+                                        <td class="wrap">Espacio de diálogo entre pescadores y PRODUCE (tres compromisos)</td>
+                                        <td>Reunión Técnica</td>
+                                        <td><span class="chip neutral">sin entidad</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                    <!-- HISTORIAL -->
+                    <section class="panel" data-panel="historial" role="tabpanel" hidden>
+                        <div class="panel-head">
+                            <div>
+                                <h3>Historial / Auditoría <span class="chip">parcial</span></h3>
+                                <p class="sub">
+                                    Historial de estados del caso (item 37). La
+                                    auditoría de campos —usuario, operación y valores
+                                    modificados— no existe como registro consultable.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="banner warn">
+                            <span>⚠</span>
+                            <span>
+                                <b>No hay auditoría de campos.</b>
+                                <code>core.caso_estado_historial</code> guarda
+                                únicamente cambios de estado, riesgo y conflictividad
+                                (3 filas para este caso). Un cambio de título, de
+                                distrito o de un actor no queda registrado como
+                                historial consultable.
+                            </span>
+                        </div>
+
+                        <div class="table-wrap">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Desde</th>
+                                        <th>Hasta</th>
+                                        <th>Estado</th>
+                                        <th>Conflictividad</th>
+                                        <th>Riesgo</th>
+                                        <th>Usuario</th>
+                                        <th class="wrap">Motivo</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>22.11.2026 06:12</td>
+                                        <td><span class="chip ok">vigente</span></td>
+                                        <td>En seguimiento</td>
+                                        <td>Conflicto social</td>
+                                        <td>Bajo</td>
+                                        <td class="dash">—</td>
+                                        <td class="dash">—</td>
+                                    </tr>
+                                    <tr>
+                                        <td>31.10.2026 02:52</td>
+                                        <td>22.11.2026 06:12</td>
+                                        <td>Activo</td>
+                                        <td>Conflicto social</td>
+                                        <td>Bajo</td>
+                                        <td><code>0000…0001</code></td>
+                                        <td class="dash">—</td>
+                                    </tr>
+                                    <tr>
+                                        <td>22.11.2026 06:12</td>
+                                        <td>22.11.2026 06:12</td>
+                                        <td>En seguimiento</td>
+                                        <td>Conflicto social</td>
+                                        <td>Bajo</td>
+                                        <td class="dash">—</td>
+                                        <td class="wrap">Reclasificación del legado: el expediente está abierto y en seguimiento</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <p class="footnote">
+                            El usuario «—» corresponde a filas sin
+                            <code>usuario_id</code>. El identificador
+                            <code>0000…0001</code> es el usuario de carga del legado.
+                        </p>
+                    </section>
+
+                    <!-- MARCO SITUACIONAL -->
+                    <section class="panel" data-panel="marco" role="tabpanel" hidden>
+                        <div class="panel-head">
+                            <div>
+                                <h3>Marco situacional</h3>
+                                <p class="sub">
+                                    Robustez del marco según
+                                    <code>analytics.vw_marco_situacional_robustez</code>
+                                    (item 68/79). El texto del marco no existe todavía.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="banner warn">
+                            <span>⚠</span>
+                            <span>
+                                La vista expone 5 banderas booleanas para los 35
+                                casos, pero <b>no hay texto de marco situacional</b> ni
+                                el motor de triangulación del item 79. Las banderas
+                                indican forma, no calidad del análisis.
+                            </span>
+                        </div>
+
+                        <div class="flags">
+                            <div class="flag">
+                                Consistencia <span class="val yes">✓ sí</span>
+                            </div>
+                            <div class="flag">
+                                Correspondencia <span class="val no">✗ no</span>
+                            </div>
+                            <div class="flag">
+                                Coherencia contextual <span class="val yes">✓ sí</span>
+                            </div>
+                            <div class="flag">
+                                Sat</td>uración <span class="val no">✗ no</span>
+                            </div>
+                            <div class="flag">
+                                Trazabilidad <span class="val yes">✓ sí</span>
+                            </div>
+                        </div>
+
+                        <h4 style="margin-top: 16px">Qué falta para completar el expediente</h4>
+                        <ul class="vocab">
+                            <dt>Demandas 3P</dt>
+                            <dd>0 de 10 demandas tienen Problema · Propuesta · Pedido.</dd>
+                            <dt>Correspondencia</dt>
+                            <dd>La vista la marca en falso: no hay contraste entre fuentes.</dd>
+                            <dt>Saturación</dt>
+                            <dd>La vista la marca en falso: no hay conteo de fuentes por afirmación.</dd>
+                        </ul>
+                    </section>
+                </div>
+            </div>
+
+            <p class="meta-line">
+                Fuente: consultas de solo lectura a <code>core.casos</code>,
+                <code>core.alertas_tempranas</code>, <code>core.demandas</code>,
+                <code>core.compromisos</code>, <code>core.hitos_compromiso</code>,
+                <code>core.documentos</code>, <code>core.caso_cronologia</code>,
+                <code>core.casos_actores</code>, <code>core.caso_estado_historial</code> y
+                <code>analytics.vw_marco_situacional_robustez</code>, a 22.11.2026.
+            </p>
+
+            <section class="notes">
+                <h2>Notas del mockup</h2>
+
+                <h3>Datos reales usados</h3>
+                <ul>
+                    <li>
+                        Caso de la ficha: <b>CS-PA-OAT-2024-02</b> «Uso de red de
+                        cortina de fondo en Cabo Blanco y Los Órganos» (Piura,
+                        distrito El Alto, OAIPCS). Es el caso con más relaciones
+                        simultáneas: 15 actores, 4 alertas, 4 compromisos, 8 hitos,
+                        5 documentos, 21 hechos y 3 filas de historial.
+                    </li>
+                    <li>
+                        Un solo caso no reúne todas las entidades: las demandas del
+                        caso tienen <code>caso_id</code> vacío y se enlazan por
+                        <code>alerta_id</code> (10 filas). Por eso el riel marca
+                        «10*».
+                    </li>
+                    <li>
+                        Recuentos de la base: 35 casos (34 vigentes, 1 anulado), 83
+                        alertas, 325 demandas, 8 compromisos, 12 hitos, 153
+                        documentos, 80 hechos, 1.160 actores y 60 relaciones
+                        caso–actor.
+                    </li>
+                </ul>
+
+                <h3>Campos que salieron «—» y por qué</h3>
+                <ul>
+                    <li>
+                        <b>Problema · Propuesta · Pedido (3P):</b> las 325 demandas
+                        tienen los tres campos vacíos. No es un fallo de la vista:
+                        el dato nunca se capturó.
+                    </li>
+                    <li>
+                        <b>Actor en la cronología:</b> 0 de 80 hechos tienen
+                        <code>actor_uid</code>; el campo existe pero no se pobló.
+                    </li>
+                    <li>
+                        <b>Correo de actores:</b> solo 3 de 15 tienen
+                        <code>email_contacto</code>. El resto es «—».
+                    </li>
+                    <li>
+                        <b>Clasificación del compromiso:</b> el campo
+                        progresivo/parcial · entendimiento operativo · condicionado
+                        no existe en el modelo; <code>tipo_compromiso</code> solo
+                        vale «Actividad».
+                    </li>
+                    <li>
+                        <b>Vencimiento y nivel de gobierno del compromiso:</b> 8 de 8
+                        compromisos tienen <code>fecha_vencimiento</code> y
+                        <code>nivel_gobierno</code> vacíos.
+                    </li>
+                    <li>
+                        <b>Próximo paso:</b> no hay regla implementada (item 19); no
+                        se inventó el texto.
+                    </li>
+                    <li>
+                        <b>Documentación normativa:</b> 0 filas; las referencias se
+                        citan desde el texto y la cronología, sin documento ni URL.
+                    </li>
+                    <li>
+                        <b>Reuniones:</b> 0 filas en <code>core.reuniones_dialogo</code>.
+                    </li>
+                    <li>
+                        <b>Auditoría de campos:</b> no existe; solo hay 3 filas de
+                        cambio de estado/riesgo/conflictividad.
+                    </li>
+                </ul>
+
+                <h3>Decisiones de producto que quedan pendientes</h3>
+                <ol>
+                    <li>
+                        ¿La pestaña Demandas cuenta las demandas del caso
+                        (<code>caso_id</code>) o también las heredadas de sus alertas
+                        (<code>alerta_id</code>)? El mockup usa el segundo criterio y
+                        lo marca.
+                    </li>
+                    <li>
+                        ¿Se parte <code>nombre_actual</code> en Apellidos | Nombres en
+                        la ficha o se añaden columnas al modelo? El corte actual es
+                        convención de presentación.
+                    </li>
+                    <li>
+                        ¿Se crea un catálogo de posicionamiento (Dialogante,
+                        Legitimante, Conflictivo) o se mantiene texto libre? Hoy las
+                        60 relaciones dicen «Neutral».
+                    </li>
+                    <li>
+                        ¿Se añade al catálogo de documentos un eje
+                        normativo/evidencia? Sin él, la separación del item 17 no se
+                        puede persistir.
+                    </li>
+                    <li>
+                        ¿El indicador de expediente bloquea algo? El mockup lo deja
+                        como orientación, no como bloqueo (item 68).
+                    </li>
+                    <li>
+                        ¿Historial se limita a estados o se construye auditoría de
+                        campos? Son dos esfuerzos distintos.
+                    </li>
+                </ol>
+
+                <h3>Vocabulario respetado</h3>
+                <dl class="vocab">
+                    <dt>Estados de caso</dt>
+                    <dd>Activo · En seguimiento · Resuelto · Archivado</dd>
+                    <dt>Conflictividad</dt>
+                    <dd>Diferencia · Controversia · Conflicto social · Crisis social</dd>
+                    <dt>Riesgo</dt>
+                    <dd>Bajo · Moderado · Alto</dd>
+                    <dt>Prioridad</dt>
+                    <dd>Urgente · Moderado · Bajo</dd>
+                    <dt>Compromiso</dt>
+                    <dd>Por iniciar · En proceso · Cumplido · Redefinido · Desestimado</dd>
+                    <dt>Hito</dt>
+                    <dd>Registrado · En ejecución · Paralizado · Cumplido · Desestimado</dd>
+                </dl>
+            </section>
+
+            <section class="build-box">
+                <h2>Qué debe construir el equipo</h2>
+                <ol>
+                    <li>
+                        <b>Endpoint de ficha compuesta:</b>
+                        <code>GET /api/v1/cases/{codigo}/ficha</code> que devuelva
+                        cabecera, contadores del riel y el indicador de expediente en
+                        una sola respuesta, con ámbito y permisos aplicados en
+                        servidor.
+                    </li>
+                    <li>
+                        <b>Tabla puente de demandas:</b> decidir si
+                        <code>core.demandas.caso_id</code> es obligatorio y migrar las
+                        226 demandas sin caso; exponer «vincular al caso» desde la
+                        pestaña.
+                    </li>
+                    <li>
+                        <b>Regla de negocio del 3P:</b> validación que exige Problema
+                        y Pedido para pasar de «Pendiente», y registro del fragmento o
+                        documento de origen de cada campo.
+                    </li>
+                    <li>
+                        <b>Campo de clasificación del compromiso:</b> nueva columna o
+                        catálogo con progresivo/parcial · entendimiento operativo ·
+                        condicionado, y su validación en el formulario.
+                    </li>
+                    <li>
+                        <b>Eje normativo del documento:</b> columna o catálogo que
+                        separe documentación normativa de evidencia del caso.
+                    </li>
+                    <li>
+                        <b>Auditoría de campos:</b> tabla de cambios con usuario,
+                        fecha, operación y valores anterior/nuevo; hoy solo existe el
+                        historial de estados.
+                    </li>
+                    <li>
+                        <b>Item 72:</b> endpoint, repositorio y pestaña de reuniones,
+                        más la captura de asistentes y acuerdos.
+                    </li>
+                    <li>
+                        <b>Patrón de edición por campo (item 18):</b> componente con
+                        Cancelar/Guardar, sin cierre por clic fuera y con
+                        comentario asociado cuando corresponda.
+                    </li>
+                </ol>
+            </section>
+
+            <p class="stamp">Mockup · no implementado</p>
+        </main>
+
+        <script>
+            (function () {
+                var tabs = Array.prototype.slice.call(
+                    document.querySelectorAll("[data-tab]")
+                );
+                var panels = Array.prototype.slice.call(
+                    document.querySelectorAll("[data-panel]")
+                );
+                function activate(name) {
+                    tabs.forEach(function (t) {
+                        if (t.getAttribute("role") === "tab") {
+                            t.setAttribute(
+                                "aria-selected",
+                                t.getAttribute("data-tab") === name ? "true" : "false"
+                            );
+                        }
+                    });
+                    panels.forEach(function (p) {
+                        p.hidden = p.getAttribute("data-panel") !== name;
+                    });
+                }
+                tabs.forEach(function (t) {
+                    t.addEventListener("click", function () {
+                        activate(t.getAttribute("data-tab"));
+                    });
+                });
+            })();
+        </script>
+    </body>
+</html>
