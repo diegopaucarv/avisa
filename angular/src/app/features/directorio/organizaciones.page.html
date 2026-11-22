@@ -1,0 +1,313 @@
+<section class="view-body" aria-labelledby="titulo-organizaciones">
+  <header class="view-head">
+    <div>
+      <h1 id="titulo-organizaciones">Organizaciones</h1>
+      <p class="view-subtitle">
+        Organizaciones sociales, gremios y cooperativas registradas en el directorio, con su tipo,
+        registro OSPA y vigencia (Guía §7.4). Los locales donde se reúnen se consultan en el
+        directorio de locales.
+      </p>
+    </div>
+    <p class="result-count" aria-live="polite">{{ total() }} organizaciones</p>
+  </header>
+
+  <div class="filter-bar filter-bar-wrap">
+    <label class="search-field">
+      <app-icono nombre="buscar" [tamano]="14" />
+      <input
+        type="search"
+        placeholder="Buscar por nombre, código, razón social o siglas"
+        [value]="filtros().q"
+        aria-label="Buscar organizaciones"
+        (input)="buscar($event)"
+      />
+    </label>
+
+    <label class="select-filter">
+      Tipo
+      <select aria-label="Filtrar por tipo de organización" (change)="cambiarTipo($event)">
+        <option value="" [selected]="filtros().tipo === ''">Todos</option>
+        @for (tipo of tipos; track tipo) {
+          <option [value]="tipo" [selected]="filtros().tipo === tipo">{{ tipo }}</option>
+        }
+      </select>
+    </label>
+
+    <label class="select-filter">
+      Activo
+      <select aria-label="Filtrar por estado activo" (change)="cambiarActivo($event)">
+        <option value="" [selected]="filtros().activo === ''">Todos</option>
+        <option value="true" [selected]="filtros().activo === 'true'">Sí</option>
+        <option value="false" [selected]="filtros().activo === 'false'">No</option>
+      </select>
+    </label>
+
+    <label class="select-filter">
+      Vigencia
+      <select aria-label="Filtrar por vigencia" (change)="cambiarVigente($event)">
+        <option value="" [selected]="filtros().vigente === ''">Todas</option>
+        <option value="true" [selected]="filtros().vigente === 'true'">Vigentes hoy</option>
+        <option value="false" [selected]="filtros().vigente === 'false'">No vigentes hoy</option>
+      </select>
+    </label>
+
+    <button type="button" class="button-secondary" (click)="limpiar()">Limpiar filtros</button>
+  </div>
+
+  @if (estado() === "error") {
+    <div class="empty-state" role="alert">
+      <strong>No se pudieron cargar las organizaciones</strong>
+      <p>{{ error()?.message }}</p>
+      <button type="button" class="button-secondary" (click)="recargar()">Reintentar</button>
+    </div>
+  } @else if (organizaciones().length === 0) {
+    @if (estado() === "cargando" || estado() === "inactivo") {
+      <div class="empty-state" role="status">Cargando organizaciones…</div>
+    } @else {
+      <div class="empty-state">
+        <strong>Sin organizaciones para estos filtros</strong>
+        <p>
+          No hay organizaciones que coincidan con la búsqueda. El tipo se compara con el catálogo
+          registrado, así que las siglas y los códigos legados también encuentran resultados.
+        </p>
+      </div>
+    }
+  } @else {
+    @if (estado() === "cargando") {
+      <p class="org-actualizando" role="status">Actualizando el listado…</p>
+    }
+
+    <div class="table-wrap">
+      <table class="data-table">
+        <caption class="table-caption">
+          Pulse una fila para abrir la ficha en el panel lateral. Los datos provienen de
+          <code>core.organizaciones</code> y del actor colectivo; las celdas sin dato muestran «—».
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">Nombre</th>
+            <th scope="col">Tipo</th>
+            <th scope="col">RUC / razón social</th>
+            <th scope="col">Integrantes</th>
+            <th scope="col">Vigencia</th>
+            <th scope="col">Estado OSPA</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (organizacion of organizaciones(); track organizacion.id) {
+            <tr
+              class="case-row-clickable"
+              [class.row-selected]="seleccionado()?.id === organizacion.id"
+              (click)="abrir(organizacion)"
+            >
+              <td>
+                <button
+                  type="button"
+                  class="table-link org-nombre"
+                  [attr.aria-label]="'Abrir la ficha de ' + organizacion.nombre"
+                  (click)="abrir(organizacion); $event.stopPropagation()"
+                >
+                  <strong>{{ organizacion.nombre }}</strong>
+                  @if (organizacion.abreviatura) {
+                    <small>{{ organizacion.abreviatura }}</small>
+                  }
+                </button>
+              </td>
+              <td>{{ organizacion.tipo || "—" }}</td>
+              <td class="org-razon">
+                {{ organizacion.ruc || "—" }}
+                @if (organizacion.razonSocial) {
+                  · {{ organizacion.razonSocial }}
+                }
+              </td>
+              <td>{{ organizacion.numeroIntegrantes ?? "—" }}</td>
+              <td>{{ periodoVigencia(organizacion) }}</td>
+              <td>{{ organizacion.estadoOspa || "—" }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  @if (total() > 0 && estado() !== "error") {
+    <app-paginacion
+      [pagina]="filtros().pagina"
+      [tamano]="filtros().tamano"
+      [total]="total()"
+      (paginaCambia)="cambiarPagina($event)"
+      (tamanoCambia)="cambiarTamano($event)"
+    />
+  }
+
+  @if (seleccionado(); as org) {
+    <div class="drawer-scrim" (click)="alFondo($event)" (keydown)="alTecla($event)">
+      <aside
+        #panel
+        class="drawer"
+        tabindex="-1"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="organizacion-panel-titulo"
+      >
+        <header class="drawer-head">
+          <div class="ficha-cabecera">
+            <p class="ficha-etiqueta">{{ org.tipo || "Sin tipo registrado" }}</p>
+            <h2 id="organizacion-panel-titulo">{{ org.nombre }}</h2>
+            <div class="ficha-badges">
+              @if (org.abreviatura) {
+                <span class="status-badge ficha-chip">{{ org.abreviatura }}</span>
+              }
+              @if (org.codigo) {
+                <span class="status-badge ficha-chip">{{ org.codigo }}</span>
+              }
+              @if (org.activo) {
+                <span class="status-badge ficha-activo">
+                  <app-icono nombre="check" [tamano]="11" />
+                  Activa
+                </span>
+              } @else {
+                <span class="status-badge ficha-inactivo">
+                  <app-icono nombre="reloj" [tamano]="11" />
+                  Inactiva
+                </span>
+              }
+            </div>
+          </div>
+
+          <button
+            type="button"
+            class="icon-button"
+            aria-label="Cerrar la ficha de la organización"
+            (click)="cerrarPanel()"
+          >
+            <app-icono nombre="cerrar" [tamano]="18" />
+          </button>
+        </header>
+
+        <div class="drawer-body">
+          <section class="ficha-seccion" aria-labelledby="organizacion-panel-identificacion">
+            <h3 id="organizacion-panel-identificacion">Identificación</h3>
+            <dl class="ficha-datos">
+              <div>
+                <dt>Código</dt>
+                <dd>{{ org.codigo || "—" }}</dd>
+              </div>
+              <div>
+                <dt>Tipo</dt>
+                <dd>{{ org.tipo || "—" }}</dd>
+              </div>
+              <div>
+                <dt>RUC</dt>
+                <dd>{{ org.ruc || "—" }}</dd>
+              </div>
+              <div>
+                <dt>Razón social</dt>
+                <dd>{{ org.razonSocial || "—" }}</dd>
+              </div>
+              <div>
+                <dt>Representante</dt>
+                <dd>{{ org.representante || "—" }}</dd>
+              </div>
+              <div>
+                <dt>Dirección</dt>
+                <dd>{{ org.direccion || "—" }}</dd>
+              </div>
+            </dl>
+          </section>
+
+          <section class="ficha-seccion" aria-labelledby="organizacion-panel-ospa">
+            <h3 id="organizacion-panel-ospa">Membresía y registro OSPA</h3>
+            <dl class="ficha-datos">
+              <div>
+                <dt>Integrantes</dt>
+                <dd>{{ org.numeroIntegrantes ?? "—" }}</dd>
+              </div>
+              <div>
+                <dt>Expediente OSPA</dt>
+                <dd>{{ org.expedienteOspa || "—" }}</dd>
+              </div>
+              <div>
+                <dt>Estado OSPA</dt>
+                <dd>{{ org.estadoOspa || "—" }}</dd>
+              </div>
+              <div>
+                <dt>Embarcaciones</dt>
+                <dd>{{ org.nEmbarcaciones ?? "—" }}</dd>
+              </div>
+              <div>
+                <dt>Armadores</dt>
+                <dd>{{ org.nArmadores ?? "—" }}</dd>
+              </div>
+              <div>
+                <dt>Inscripción SUNARP</dt>
+                <dd>{{ org.inscripcionSunarp || "—" }}</dd>
+              </div>
+              <div>
+                <dt>Constitución</dt>
+                <dd>{{ fecha(org.fechaConstitucion) }}</dd>
+              </div>
+            </dl>
+          </section>
+
+          <section class="ficha-seccion" aria-labelledby="organizacion-panel-vigencia">
+            <h3 id="organizacion-panel-vigencia">Vigencia y sincronización</h3>
+            <dl class="ficha-datos">
+              <div>
+                <dt>Vigente desde</dt>
+                <dd>{{ fecha(org.vigenciaDesde) }}</dd>
+              </div>
+              <div>
+                <dt>Vigente hasta</dt>
+                <dd>{{ fecha(org.vigenciaHasta) }}</dd>
+              </div>
+              <div>
+                <dt>Fuente de sincronización</dt>
+                <dd>{{ org.fuenteSync || "—" }}</dd>
+              </div>
+              <div>
+                <dt>Última sincronización</dt>
+                <dd>{{ fechaHora(org.ultimaSync) }}</dd>
+              </div>
+            </dl>
+          </section>
+
+          <section class="ficha-seccion" aria-labelledby="organizacion-panel-enlaces">
+            <h3 id="organizacion-panel-enlaces">Enlaces</h3>
+            <dl class="ficha-datos">
+              <div>
+                <dt>Facebook</dt>
+                <dd>
+                  @if (org.facebookUrl; as enlace) {
+                    <a [href]="enlace" target="_blank" rel="noopener">{{ enlace }}</a>
+                  } @else {
+                    —
+                  }
+                </dd>
+              </div>
+              <div>
+                <dt>Fotografía</dt>
+                <dd>
+                  @if (org.fotoUrl; as enlace) {
+                    <a [href]="enlace" target="_blank" rel="noopener">{{ enlace }}</a>
+                  } @else {
+                    —
+                  }
+                </dd>
+              </div>
+            </dl>
+          </section>
+
+          <section class="ficha-seccion" aria-labelledby="organizacion-panel-perfil">
+            <h3 id="organizacion-panel-perfil">Perfil</h3>
+            @if (org.perfil) {
+              <p class="ficha-perfil">{{ org.perfil }}</p>
+            } @else {
+              <p class="ficha-vacio">Sin descripción de perfil registrada.</p>
+            }
+          </section>
+        </div>
+      </aside>
+    </div>
+  }
+</section>

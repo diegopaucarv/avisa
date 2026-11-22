@@ -1,0 +1,349 @@
+<div class="drawer-scrim" (click)="alFondo($event)" (keydown)="alTecla($event)">
+  <aside
+    #panel
+    class="drawer"
+    tabindex="-1"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="documento-panel-titulo"
+  >
+    @if (cabecera(); as d) {
+      <header class="drawer-head">
+        <div class="panel-cabecera">
+          <p class="panel-codigo">{{ d.codigo || 'Sin código' }}</p>
+          <h2 id="documento-panel-titulo">{{ d.titulo || 'Documento sin título' }}</h2>
+          <div class="panel-badges">
+            @if (d.tipoNombre || d.tipo) {
+              <span class="status-badge panel-tipo">{{ d.tipoNombre || d.tipo }}</span>
+            }
+            @if (d.anexoNumero !== null) {
+              <span class="status-badge panel-anexo">{{ etiquetaAnexo(d.anexoNumero) }}</span>
+            }
+            <span [class]="'status-badge ' + claseEstado(d.estadoUi)">
+              <span class="status-dot"></span>
+              {{ d.estadoUi }}
+            </span>
+            @if (d.validado) {
+              <span class="status-badge panel-validado">
+                <app-icono nombre="check" [tamano]="11" />
+                Validado
+              </span>
+            }
+          </div>
+        </div>
+
+        <button
+          type="button"
+          class="icon-button"
+          aria-label="Cerrar el panel del documento"
+          (click)="cerrado.emit()"
+        >
+          <app-icono nombre="cerrar" [tamano]="18" />
+        </button>
+      </header>
+
+      <div class="drawer-body panel-cuerpo">
+        @if (aviso()) {
+          <p class="panel-aviso" role="status">{{ aviso() }}</p>
+        }
+        @if (errorGuardado(); as errorGuardar) {
+          <p class="form-error" role="alert">{{ errorGuardar }}</p>
+        }
+        @if (mensajeLocal(); as mensaje) {
+          <p class="form-error" role="alert">{{ mensaje }}</p>
+        }
+        @if (cargandoDetalle()) {
+          <p class="panel-nota" role="status">Cargando el detalle del documento…</p>
+        }
+        @if (errorDetalle(); as fallo) {
+          <div class="panel-error" role="alert">
+            <p>{{ fallo.message }}</p>
+            <button type="button" class="button-secondary" (click)="recargarDetalle()">
+              Reintentar
+            </button>
+          </div>
+        }
+
+        @if (formulario(); as b) {
+          <form class="panel-formulario" (submit)="alEnviarFormulario($event)">
+            <p class="panel-nota">
+              Sólo se envían los campos que cambian. El título y la fecha no pueden quedar vacíos;
+              el resumen y el archivo se pueden retirar.
+            </p>
+
+            <div class="form-field">
+              <label class="form-label" for="documento-campo-titulo">Título</label>
+              <input
+                id="documento-campo-titulo"
+                class="form-input"
+                type="text"
+                [value]="b.titulo"
+                (input)="campo('titulo', $event)"
+              />
+            </div>
+
+            <div class="form-field">
+              <label class="form-label" for="documento-campo-tipo">Tipo</label>
+              <select
+                id="documento-campo-tipo"
+                class="form-select"
+                [value]="b.tipo"
+                (change)="campo('tipo', $event)"
+              >
+                @if (!b.tipo) {
+                  <option value="" selected>Sin tipo asignado</option>
+                }
+                @for (tipo of opcionesTipo(); track tipo.valor) {
+                  <option [value]="tipo.valor" [selected]="b.tipo === tipo.valor">
+                    {{ tipo.etiqueta }}
+                    @if (tipo.anexoNumero !== null) {
+                      · {{ etiquetaAnexo(tipo.anexoNumero) }}
+                    }
+                  </option>
+                }
+              </select>
+            </div>
+
+            <div class="form-field">
+              <label class="form-label" for="documento-campo-fecha">Fecha</label>
+              <input
+                id="documento-campo-fecha"
+                class="form-input"
+                type="date"
+                [value]="b.fecha"
+                (input)="campo('fecha', $event)"
+              />
+            </div>
+
+            <div class="form-field">
+              <label class="form-label" for="documento-campo-estado">Estado</label>
+              <select
+                id="documento-campo-estado"
+                class="form-select"
+                [value]="b.estado"
+                (change)="campo('estado', $event)"
+              >
+                <option value="" [selected]="!b.estado">Sin estado registrado</option>
+                @for (estado of opcionesEstado(); track estado) {
+                  <option [value]="estado" [selected]="b.estado === estado">{{ estado }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="form-field">
+              <label class="form-label" for="documento-campo-resumen">Resumen ejecutivo</label>
+              <textarea
+                id="documento-campo-resumen"
+                class="form-textarea"
+                rows="3"
+                [value]="b.resumen"
+                (input)="campo('resumen', $event)"
+              ></textarea>
+            </div>
+
+            <div class="form-field">
+              <label class="form-label" for="documento-campo-archivo">Archivo (PDF)</label>
+              <input
+                id="documento-campo-archivo"
+                class="form-input"
+                type="text"
+                [value]="b.archivo"
+                (input)="campo('archivo', $event)"
+              />
+              <span class="form-hint">Enlace o ruta del PDF. Vacío retira el archivo.</span>
+            </div>
+
+            <div class="form-field">
+              <label class="form-label" for="documento-campo-caso">Caso vinculado</label>
+              <input
+                id="documento-campo-caso"
+                class="form-input"
+                type="text"
+                [value]="b.casoCode"
+                (input)="campo('casoCode', $event)"
+              />
+              <span class="form-hint">
+                Código de un caso existente. Vacío desvincula el documento.
+              </span>
+            </div>
+
+            <div class="panel-formulario-acciones">
+              <button type="submit" class="button-primary" [disabled]="guardando()">
+                {{ guardando() ? 'Guardando…' : 'Guardar cambios' }}
+              </button>
+              <button
+                type="button"
+                class="button-secondary"
+                [disabled]="guardando()"
+                (click)="cancelarEdicion()"
+              >
+                Cancelar
+              </button>
+            </div>
+          </form>
+        } @else {
+          <div class="panel-formulario-acciones">
+            @if (puedeModificar()) {
+              <button type="button" class="button-secondary" (click)="iniciarEdicion()">
+                Modificar
+              </button>
+            } @else {
+              <p class="panel-nota">Su rol no permite modificar este documento.</p>
+            }
+          </div>
+        }
+
+        <section class="detail-section" aria-labelledby="documento-panel-datos">
+          <h3 id="documento-panel-datos">Datos del documento</h3>
+          <dl class="panel-datos">
+            <div>
+              <dt>Fecha</dt>
+              <dd>{{ formatearFecha(d.fecha) }}</dd>
+            </div>
+            <div>
+              <dt>Caso</dt>
+              <dd>
+                @if (d.casoCode) {
+                  {{ d.casoCode }} · {{ d.casoTitulo || 'Sin título del caso' }}
+                } @else {
+                  Sin caso
+                }
+              </dd>
+            </div>
+            <div>
+              <dt>Responsable (ID)</dt>
+              <dd>{{ d.responsableUsuarioId || '—' }}</dd>
+            </div>
+            <div>
+              <dt>Origen</dt>
+              <dd>{{ d.origen || '—' }}</dd>
+            </div>
+            <div>
+              <dt>Confianza</dt>
+              <dd>{{ formatearConfianza(d.confianza) }}</dd>
+            </div>
+            <div>
+              <dt>Validado por humano</dt>
+              <dd>{{ d.validado ? 'Sí' : 'No' }}</dd>
+            </div>
+            <div>
+              <dt>Clasificación</dt>
+              <dd>Nivel {{ d.clasificacion }}</dd>
+            </div>
+            @if (d.codigoLegado) {
+              <div>
+                <dt>Código legado</dt>
+                <dd>{{ d.codigoLegado }}</dd>
+              </div>
+            }
+          </dl>
+        </section>
+
+        <section class="detail-section" aria-labelledby="documento-panel-resumen">
+          <h3 id="documento-panel-resumen">Resumen ejecutivo</h3>
+          @if (d.resumen) {
+            <p class="panel-texto">{{ d.resumen }}</p>
+          } @else {
+            <p class="panel-vacio">—</p>
+          }
+        </section>
+
+        <section class="detail-section" aria-labelledby="documento-panel-archivos">
+          <h3 id="documento-panel-archivos">Archivos y enlaces</h3>
+          @if (!d.archivo && !d.urlLista && !d.urlFoto) {
+            <p class="panel-vacio">Sin archivo adjunto.</p>
+          } @else {
+            <dl class="panel-datos">
+              @if (d.archivo) {
+                <div>
+                  <dt>Archivo</dt>
+                  <dd>
+                    @if (esEnlace(d.archivo)) {
+                      <a
+                        class="table-link"
+                        [href]="d.archivo"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {{ nombreArchivo(d.archivo) }}
+                      </a>
+                    } @else {
+                      {{ d.archivo }}
+                    }
+                  </dd>
+                </div>
+              }
+              @if (d.urlLista) {
+                <div>
+                  <dt>Listado o índice</dt>
+                  <dd>
+                    @if (esEnlace(d.urlLista)) {
+                      <a
+                        class="table-link"
+                        [href]="d.urlLista"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {{ nombreArchivo(d.urlLista) }}
+                      </a>
+                    } @else {
+                      {{ d.urlLista }}
+                    }
+                  </dd>
+                </div>
+              }
+              @if (d.urlFoto) {
+                <div>
+                  <dt>Fotografía</dt>
+                  <dd>
+                    @if (esEnlace(d.urlFoto)) {
+                      <a
+                        class="table-link"
+                        [href]="d.urlFoto"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {{ nombreArchivo(d.urlFoto) }}
+                      </a>
+                    } @else {
+                      {{ d.urlFoto }}
+                    }
+                  </dd>
+                </div>
+              }
+            </dl>
+          }
+        </section>
+
+        @if (fuentes().length > 0) {
+          <section class="detail-section" aria-labelledby="documento-panel-fuentes">
+            <h3 id="documento-panel-fuentes">Fuentes de la evidencia ({{ fuentes().length }})</h3>
+            <ol class="panel-fuentes">
+              @for (fuente of fuentes(); track fuente.id) {
+                <li>
+                  <strong>{{ fuente.titulo || 'Fuente sin título' }}</strong>
+                  <small>
+                    {{ fuente.tipo || 'Sin tipo' }}
+                    @if (fuente.fechaIngesta) {
+                      · {{ formatearFecha(fuente.fechaIngesta) }}
+                    }
+                  </small>
+                  @if (esEnlace(fuente.url)) {
+                    <a
+                      class="table-link"
+                      [href]="fuente.url"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Abrir la fuente
+                    </a>
+                  }
+                </li>
+              }
+            </ol>
+          </section>
+        }
+      </div>
+    }
+  </aside>
+</div>

@@ -545,6 +545,7 @@ alternativas descartadas, para que quede el rastro:
 -- VALUES ('reporte', 4, 'V10-REP-04', 'Mesa de diálogo', 'sectorista', 'En_proceso'),
 --        ('reporte', 5, 'V10-REP-05', 'Seguimiento',   'sectorista', 'En_proceso'),
 --        ('reporte', 6, 'V10-REP-06', 'Cierre',        'sectorista', 'Archivado');
+--     (`En_proceso` es la forma legada de `En proceso`; la alternativa no se aplicó.)
 
 -- (c) DESCARTADA: mapear el paso 6 al 3 (Archivo).
 --     Reescribe la historia de reportes archivados en febrero de 2026 y el

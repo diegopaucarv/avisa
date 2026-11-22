@@ -138,11 +138,19 @@ Sugerencia de operación: revisar primero `DNI_DUPLICADO` y
    marcador heredado: **OAIPCS debe sustituirlo** por la base legal formal y
    definir retención antes de exponer la tabla fuera de `administrador`.
 2. **Hojas sin destino (160 filas).** `FACT_Proceso_*`, `DIM_Paso_Proceso*`,
-   RADAR (`FACT_RED_RADAR`, `FACT_NODO`, bridges) y `DIM_Responsable` quedan en
-   `legacy.*`: v9 no tiene workflow ni RADAR todavía (D17/D18).
+   RADAR (`FACT_RED_RADAR`, `FACT_NODO`, bridges) y `DIM_Responsable` quedaron en
+   `legacy.*`: v9 no tenía workflow ni RADAR (D17/D18). **D17 quedó resuelta** —el
+   parche 10 cargó el flujo en `core.proceso_instancia` (135 filas) y
+   `core.flujo_definicion` (7 filas)—; D18 (RADAR) sigue diferida.
 3. **Nombres de columna del legado.** `FACT_Historial_Estado` (27) no se carga:
    sus columnas vienen intercambiadas y el trigger genera el historial correcto.
 4. **`DIM_Envios`.** `url_pdf` no tiene fuente real: queda NULL en los 17 envíos.
+5. **Alertas históricas (83).** Se cargaron con `estado_legado = 'Archivado'`; se
+   presentan como **Atendidas** (decisión tomada; el dato sigue como `Archivado`). El
+   estado no se escribe en la tabla: es derivado del flujo en `core.vw_alerta_estado` y
+   en la aplicación (`paso_actual >= 5`); el parche 22 dejó `paso_actual = 5` en las 83
+   alertas. `estado_legado = 'Archivado'` se conserva como evidencia de la
+   transformación.
 
 ---
 

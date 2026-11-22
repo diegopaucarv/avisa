@@ -1,5 +1,5 @@
 import { ApiError, jsonError } from "@/lib/db/errors";
-import { jsonOk, requireSession } from "@/lib/db/http";
+import { jsonOk, leerMotivo, requireSession } from "@/lib/db/http";
 import {
   deleteDocument,
   getDocumentById,
@@ -72,7 +72,10 @@ export async function DELETE(
     const decoded = decodeURIComponent(id);
 
     const ctx = { usuarioId: session.uid, rolCodigo: session.rol };
-    await withSession(ctx, (client) => deleteDocument(client, ctx, decoded));
+    const motivo = await leerMotivo(request);
+    await withSession(ctx, (client) =>
+      deleteDocument(client, ctx, decoded, motivo),
+    );
 
     return jsonOk({ ok: true });
   } catch (error) {

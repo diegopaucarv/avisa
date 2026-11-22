@@ -2,6 +2,7 @@ import type { PoolClient } from "pg";
 import { auditChange } from "../audit";
 import { nextSequentialCode } from "../codes";
 import { ApiError } from "../errors";
+import { anularRegistro, restaurarRegistro } from "./anulacion";
 
 /**
  * El estado no existe como columna: el legado sólo guarda `paso_actual`, así que
@@ -455,12 +456,16 @@ async function resolveCatalog(
   raw: unknown,
 ): Promise<number> {
   if (typeof raw !== "string") invalid();
-  let value = raw.trim();
+  const value = raw.trim();
   if (!value) invalid();
-  if (key === "prioridad") value = value.replace(/\s+/g, "_");
+  // Las etiquetas de catálogo llevan espacio y tilde (`Crítica inmediata`), pero
+  // la API sigue aceptando `Critica_Inmediata`. `core.normalizar_ref` iguala ambas.
   const spec = ALERT_CATALOGS[key];
-  const matches = [`lower(${spec.code}) = lower($1)`];
-  if (spec.alt) matches.push(`lower(${spec.alt}) = lower($1)`);
+  const matches = [
+    `core.normalizar_ref(${spec.code}) = core.normalizar_ref($1)`,
+  ];
+  if (spec.alt)
+    matches.push(`core.normalizar_ref(${spec.alt}) = core.normalizar_ref($1)`);
   const result = await client.query(
     `select id from ${spec.table} where ${matches.join(" or ")} order by id limit 1`,
     [value],
@@ -904,29 +909,16 @@ export async function deleteAlert(
   client: PoolClient,
   session: WriteSession,
   idOrCode: string,
+  motivo?: string,
 ): Promise<void> {
   const row = await findAlert(client, idOrCode);
 
-  let deleted: { rows: Record<string, any>[] };
-  try {
-    deleted = await client.query(
-      `delete from core.alertas_tempranas where id = $1 returning id`,
-      [row.id],
-    );
-  } catch (error) {
-    if ((error as { code?: string }).code === "23503") {
-      throw new ApiError(
-        409,
-        "El registro tiene datos asociados; no se puede eliminar.",
-        "CONFLICT",
-      );
-    }
-    throw error;
-  }
-
-  if (deleted.rows.length === 0) {
-    throw new ApiError(404, "La alerta no existe.", "NOT_FOUND");
-  }
+  const anulacion = await anularRegistro(
+    client,
+    "alertas_tempranas",
+    String(row.id),
+    motivo,
+  );
 
   await auditChange(client, {
     tabla: "core.alertas_tempranas",
@@ -935,6 +927,14 @@ export async function deleteAlert(
     usuarioId: session.usuarioId,
     rolCodigo: session.rolCodigo,
     antes: pick(row, ALERT_WRITE_COLUMNS),
-    despues: null,
+    despues: { anuladoEn: anulacion.anuladoEn, motivo: anulacion.motivo },
   });
+}
+
+export async function restoreAlert(
+  client: PoolClient,
+  idOrCode: string,
+): Promise<void> {
+  const row = await findAlert(client, idOrCode);
+  await restaurarRegistro(client, "alertas_tempranas", String(row.id));
 }

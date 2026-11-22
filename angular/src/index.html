@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <title>AVISA — Ministerio de Producción</title>
+    <base href="/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#f5f7f8" />
+    <link rel="icon" type="image/svg+xml" href="icon.svg" />
+    <link rel="apple-touch-icon" href="apple-icon.png" />
+    <script src="env.js"></script>
+    <script>
+      // Antes del primer pintado: evita el destello blanco si la preferencia
+      // guardada es el tema oscuro. Portado de app/layout.tsx.
+      (function () {
+        try {
+          var stored = localStorage.getItem('avisa-theme');
+          var preference =
+            stored === 'light' || stored === 'dark' || stored === 'system' ? stored : 'system';
+          var resolved =
+            preference === 'system'
+              ? window.matchMedia('(prefers-color-scheme: dark)').matches
+                ? 'dark'
+                : 'light'
+              : preference;
+          var root = document.documentElement;
+          root.dataset.theme = resolved;
+          root.dataset.themePreference = preference;
+          root.style.colorScheme = resolved;
+        } catch (error) {
+          document.documentElement.dataset.theme = 'light';
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <app-root></app-root>
+  </body>
+</html>

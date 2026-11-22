@@ -465,7 +465,9 @@ de persona (`aprobada_por <> validada_por`), no la RLS. Queda abierto con H-79
 (cómo se elige el rol de la sesión).
 
 **5. `core.alertas_tempranas.paso_actual` sigue desfasado.** Las 83 alertas
-tienen `paso_actual = 1` mientras están archivadas. Es un resto del sistema
+tienen `paso_actual = 1` mientras siguen cargadas con
+`estado_legado = 'Archivado'` (se documentan como **Atendidas**; la
+migración de ese estado sigue pendiente). Es un resto del sistema
 anterior, no lo usa `core.vw_alerta_estado` y el parche no le inventa
 semántica: o se recalcula desde `core.proceso_instancia` o se retira.
 

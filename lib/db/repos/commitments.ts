@@ -2,6 +2,7 @@ import type { PoolClient } from "pg";
 import { auditChange } from "../audit";
 import { nextSequentialCode } from "../codes";
 import { ApiError } from "../errors";
+import { anularRegistro, restaurarRegistro } from "./anulacion";
 
 /**
  * Columnas de un compromiso compartidas por list y detail.
@@ -283,7 +284,9 @@ export async function listCommitments(
   }
   if (query.caso) where.push(`c.codigo_caso = ${bind(query.caso)}`);
   if (query.estado) {
-    where.push(`ec.codigo = ${bind(normalizeEnum(query.estado))}`);
+    where.push(
+      `core.normalizar_ref(ec.codigo) = core.normalizar_ref(${bind(query.estado)})`,
+    );
   }
   if (query.unidad) where.push(`uo.siglas = ${bind(query.unidad)}`);
   if (query.tipo) where.push(`cmp.tipo_compromiso = ${bind(query.tipo)}`);
@@ -545,8 +548,9 @@ async function resolveEstadoCompromiso(
   codigo: string,
 ): Promise<number> {
   const result = await client.query<{ id: number }>(
-    `select id from core.cat_estados_compromiso where codigo = $1 limit 1`,
-    [normalizeEnum(codigo)],
+    `select id from core.cat_estados_compromiso
+      where core.normalizar_ref(codigo) = core.normalizar_ref($1) limit 1`,
+    [codigo],
   );
   const row = result.rows[0];
   if (!row) invalid();
@@ -558,8 +562,9 @@ async function resolveEstadoHito(
   codigo: string,
 ): Promise<number> {
   const result = await client.query<{ id: number }>(
-    `select id from core.cat_estados_hito where codigo = $1 limit 1`,
-    [normalizeEnum(codigo)],
+    `select id from core.cat_estados_hito
+      where core.normalizar_ref(codigo) = core.normalizar_ref($1) limit 1`,
+    [codigo],
   );
   const row = result.rows[0];
   if (!row) invalid();
@@ -849,26 +854,19 @@ export async function deleteCommitment(
   client: PoolClient,
   ctx: CommitmentWriteContext,
   ref: string,
+  motivo?: string,
 ): Promise<void> {
   const current = await fetchCommitmentRow(client, ref);
   if (!current) {
     throw new ApiError(404, "El compromiso no existe.", "NOT_FOUND");
   }
 
-  try {
-    await client.query(`delete from core.compromisos where id = $1`, [
-      current.id,
-    ]);
-  } catch (error) {
-    if ((error as { code?: string }).code === "23503") {
-      throw new ApiError(
-        409,
-        "El registro tiene datos asociados; no se puede eliminar.",
-        "CONFLICT",
-      );
-    }
-    throw error;
-  }
+  const anulacion = await anularRegistro(
+    client,
+    "compromisos",
+    String(current.id),
+    motivo,
+  );
 
   await auditChange(client, {
     tabla: "core.compromisos",
@@ -877,8 +875,20 @@ export async function deleteCommitment(
     usuarioId: ctx.usuarioId,
     rolCodigo: ctx.rolCodigo,
     antes: current,
-    despues: null,
+    despues: { anuladoEn: anulacion.anuladoEn, motivo: anulacion.motivo },
   });
+}
+
+export async function restoreCommitment(
+  client: PoolClient,
+  ref: string,
+): Promise<void> {
+  const current = await fetchCommitmentRow(client, ref);
+  if (!current) {
+    throw new ApiError(404, "El compromiso no existe.", "NOT_FOUND");
+  }
+
+  await restaurarRegistro(client, "compromisos", String(current.id));
 }
 
 /* ------------------------------------------------------------------ */
@@ -932,6 +942,23 @@ async function resolveCommitmentId(
   return row.id;
 }
 
+async function resolveCommitmentTarget(
+  client: PoolClient,
+  ref: string,
+): Promise<{ id: string; codigo: string }> {
+  const result = await client.query<{ id: string; codigo: string }>(
+    `select id, codigo_compromiso as codigo from core.compromisos
+      where id::text = $1 or codigo_compromiso = $1
+      limit 1`,
+    [ref],
+  );
+  const row = result.rows[0];
+  if (!row) {
+    throw new ApiError(404, "El compromiso no existe.", "NOT_FOUND");
+  }
+  return row;
+}
+
 async function fetchHitoFormatted(
   client: PoolClient,
   id: string,
@@ -949,7 +976,10 @@ export async function createHito(
   commitmentRef: string,
   body: unknown,
 ): Promise<CommitmentHitoDetail> {
-  const compromisoId = await resolveCommitmentId(client, commitmentRef);
+  // El código del hito se deriva del compromiso (Anexo 12/14):
+  // <codigo_compromiso>_H001.
+  const compromiso = await resolveCommitmentTarget(client, commitmentRef);
+  const compromisoId = compromiso.id;
   const input = asObject(body);
 
   const descripcion = requiredText(input, "descripcion");
@@ -966,8 +996,8 @@ export async function createHito(
       client,
       "core.hitos_compromiso",
       "codigo_hito",
-      "HIT-",
-      4,
+      `${compromiso.codigo}_H`,
+      3,
     );
     const result = await client.query(
       `insert into core.hitos_compromiso
@@ -1085,6 +1115,7 @@ export async function deleteHito(
   ctx: CommitmentWriteContext,
   commitmentRef: string,
   hitoRef: string,
+  motivo?: string,
 ): Promise<void> {
   const compromisoId = await resolveCommitmentId(client, commitmentRef);
   const currentResult = await client.query(
@@ -1099,20 +1130,12 @@ export async function deleteHito(
     throw new ApiError(404, "El hito no existe.", "NOT_FOUND");
   }
 
-  try {
-    await client.query(`delete from core.hitos_compromiso where id = $1`, [
-      current.id,
-    ]);
-  } catch (error) {
-    if ((error as { code?: string }).code === "23503") {
-      throw new ApiError(
-        409,
-        "El registro tiene datos asociados; no se puede eliminar.",
-        "CONFLICT",
-      );
-    }
-    throw error;
-  }
+  const anulacion = await anularRegistro(
+    client,
+    "hitos_compromiso",
+    String(current.id),
+    motivo,
+  );
 
   await auditChange(client, {
     tabla: "core.hitos_compromiso",
@@ -1121,6 +1144,6 @@ export async function deleteHito(
     usuarioId: ctx.usuarioId,
     rolCodigo: ctx.rolCodigo,
     antes: current,
-    despues: null,
+    despues: { anuladoEn: anulacion.anuladoEn, motivo: anulacion.motivo },
   });
 }

@@ -1,0 +1,109 @@
+<section class="view-body" aria-labelledby="titulo-notificaciones">
+  <header class="view-head">
+    <div>
+      <h1 id="titulo-notificaciones">Notificaciones</h1>
+      <p class="view-subtitle">
+        Avisos que el sistema registra para su usuario. El orden es el del servidor, del más
+        reciente al más antiguo.
+      </p>
+    </div>
+    <div class="view-actions">
+      <button type="button" class="button-secondary" (click)="recargar()">Recargar</button>
+    </div>
+  </header>
+
+  @if (estadoListado() === 'error') {
+    <div class="empty-state" role="alert">
+      <strong>No se pudieron cargar las notificaciones</strong>
+      <p>{{ errorListado()?.message }}</p>
+      <button type="button" class="button-secondary" (click)="recargar()">Reintentar</button>
+    </div>
+  } @else if (estadoListado() === 'cargando' || estadoListado() === 'inactivo') {
+    <div class="empty-state" role="status">Cargando notificaciones…</div>
+  } @else if (total() === 0) {
+    <div class="empty-state" role="status">
+      <strong>No tiene notificaciones</strong>
+      <p>La bandeja está vacía. Cuando el sistema registre un aviso para usted, aparecerá aquí.</p>
+    </div>
+  } @else if (notificaciones().length === 0) {
+    <div class="empty-state">
+      <strong>Esta página no tiene notificaciones</strong>
+      <p>Hay {{ total() }} notificaciones en total. Use la paginación para ver otra página.</p>
+    </div>
+  } @else {
+    <div class="table-wrap">
+      <table class="data-table">
+        <caption class="table-caption">
+          {{
+            resumenTabla()
+          }}
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">Notificación</th>
+            <th scope="col">Categoría</th>
+            <th scope="col">Estado</th>
+            <th scope="col">Vence</th>
+            <th scope="col">Registrada</th>
+            <th scope="col">Sección</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (notificacion of notificaciones(); track notificacion.id) {
+            <tr [class.sin-leer]="!notificacion.leida">
+              <td>
+                <span class="notificacion">
+                  <span class="notificacion-icono" aria-hidden="true">
+                    <app-icono [nombre]="notificacion.icono" [tamano]="14" />
+                  </span>
+                  <span class="notificacion-texto">
+                    <strong>{{ notificacion.titulo }}</strong>
+                    <small>{{ notificacion.entidadTipo || 'Sin recurso asociado' }}</small>
+                  </span>
+                </span>
+              </td>
+              <td>{{ notificacion.categoria }}</td>
+              <td>
+                <span [class]="'status-badge ' + estadoClase(notificacion.estado)">
+                  <span class="status-dot"></span>
+                  {{ estadoEtiqueta(notificacion.estado) }}
+                </span>
+              </td>
+              <td>{{ fecha(notificacion.venceEn) }}</td>
+              <td>{{ fecha(notificacion.creadaEn) }}</td>
+              <td>
+                @if (notificacion.seccion; as seccion) {
+                  <a
+                    class="table-link"
+                    [routerLink]="seccion.ruta"
+                    [attr.title]="'Abrir la sección ' + seccion.etiqueta"
+                  >
+                    {{ seccion.etiqueta }}
+                  </a>
+                } @else {
+                  <span class="sin-dato">Sin sección</span>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <p class="notificaciones-nota">
+      Las no leídas se resaltan y muestran su estado («Pendiente» o «Enviada»); sólo se pintan como
+      leídas cuando el aviso está en estado «Leída». Esta pantalla no ofrece «marcar como leída»
+      porque la API no expone esa acción. El identificador del recurso es interno: el enlace abre la
+      sección, no la ficha concreta.
+    </p>
+  }
+  @if (estadoListado() === 'listo' && total() > 0) {
+    <app-paginacion
+      [pagina]="filtros().pagina"
+      [tamano]="filtros().tamano"
+      [total]="total()"
+      (paginaCambia)="cambiarPagina($event)"
+      (tamanoCambia)="cambiarTamano($event)"
+    />
+  }
+</section>

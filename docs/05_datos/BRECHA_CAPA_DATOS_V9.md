@@ -5,12 +5,28 @@
 > sobre la base viva: **266 tablas lógicas**, clasificadas en capas como **33 / 13 /
 > 77 / 22 / 121**, **37 objetos derivados**
 > (31 vistas y 6 materializadas, 313 columnas), **2 161 columnas lógicas**, todas
-> con comentario salvo las siete que deja sin describir el parche 23 en
-> `core.alerta_destinatario` (tras los parches 19 a 22 no quedaba ninguna),
-> **556 políticas RLS sobre
+> con comentario —el parche 24 describió las siete que el 23 había dejado sin
+> describir en `core.alerta_destinatario`—, **556 políticas RLS sobre
 > 91 tablas** (`core`: 52 con RLS, **51 sin RLS**), **87 objetos** en el esquema
 > `legacy` y **1 520 nodos / 450 aristas** en el grafo KAG. La clasificación
 > funcional de la §12 no se ha modificado.
+
+> **Actualización del 2026-11-22.** Migraciones de alineación **12 a 19 aplicadas**
+> (la 13 incluye `core.anular_caso`, `core.restaurar_caso`, `core.anular_registro`
+> y `core.restaurar_registro`, con `prosecdef = true`, y `core.exigir_anulacion`,
+> `prosecdef = false`). Los 35 casos están recodificados al Anexo 15 con el código
+> anterior en `codigo_legado`; el contador vive en `core.secuencia_codigo` y el
+> código usa `GEN` cuando falta subsector o temática. Catálogos: 3 tipos de actor,
+> 4 roles de actor, 2 subsectores, 6 temáticas, 7 tipos de hecho, 3 niveles de
+> riesgo y 3 prioridades de atención. `core.roles` tiene **10** roles con sus
+> capacidades —`administrador` todo, `alta_direccion` no edita, `sectorista` edita
+> y elimina, `direccion_oaipcs` edita y no elimina—. La anulación es lógica en
+> **7 tablas** (`anulado_en`, `anulado_por`, `motivo_anulacion`) y el caso la
+> propaga en cascada: **base lista**; los `DELETE` de la API siguen siendo físicos
+> y no hay endpoints `anular`/`restaurar`. PII: descifrado por nivel **≥ 3**
+> (sectorista, Dirección de la OAIPCS y Alta Dirección), con motivo y registro en
+> `audit.datos_personales_acceso`. Las 83 alertas se documentan como **Atendidas**;
+> el dato sigue `estado_legado = 'Archivado'`.
 
 Estado: **estructura completa; contenido y derivados parciales**.
 
@@ -207,6 +223,11 @@ documento que falte.** Las funciones clave están presentes:
 `agent.run_log_guard`, `policy.contexto_activo`, `policy.reglas_activas`,
 `policy.crear_snapshot`, `policy.vencer_reglas`, `staging.promover`.
 
+Las funciones de anulación de la migración 13 se suman a esa lista:
+`core.anular_caso`, `core.restaurar_caso`, `core.anular_registro` y
+`core.restaurar_registro` (`prosecdef = true`), más la comprobación
+`core.exigir_anulacion` (`prosecdef = false`).
+
 **Única deuda estructural menor detectada:** `core.cronologia_vinculos` no
 tiene `PRIMARY KEY`. Tiene un `CHECK (num_nonnulls(alerta_id, documento_id) = 1)`
 y tres índices, pero no impide duplicados exactos. No bloquea la carga; se
@@ -321,6 +342,14 @@ Los catálogos que **sí** están sembrados y no requieren acción:
 - `territorio.cat_tipos_lugar` 9.
 - `agent.plantilla_prompt` 4; `model.model_card` 12; `config.*` (salvo
   `schema_registry`) sembrado; `core.feature_flags` 9.
+
+> **Nota de lectura.** «No requieren acción» se refiere a la **carga**: son los
+> conteos de la fuente del sistema anterior, no los de la Guía. «subsectores 3»
+> incluye `Gestión y Prevención de Conflictos` y «tipos de actor 7» incluye
+> `NEC`, `CITE`, `SANIPES` y `Exportador CITES`; la Guía §7.6 fija 6 tipologías y
+> 2 subsectores; la migración 14 alineó los catálogos (S1–S12 del registro de
+> gaps) y la 15 retiró `Otros`, de modo que el catálogo quedó en 6 temáticas,
+> 2 subsectores, 3 tipos de actor y 4 roles de actor.
 
 ### 3.2 El caso especial de `policy.regla`
 
@@ -624,10 +653,11 @@ instancia conserva su código legado en una columna de texto. El detalle, en
     entren en operación.
 20. Resolver la base legal y retención de PII (`actor_datos_personales`):
     el marcador `LEGADO_AVISA_2026` debe sustituirse antes de exponer la tabla
-    fuera de `administrador` (ya señalado en el acta). El parche 9 cerró la
-    exposición del dato en claro —cifrado, vista sin PII y descifrado auditado
-    (§14)—, pero no la base legal ni la retención, que siguen siendo decisión
-    de OAIPCS.
+    fuera de los roles de nivel ≥ 3 (`sectorista`, `direccion_oaipcs` y
+    `alta_direccion`) (ya señalado en el acta). El parche 9 cerró la exposición
+    del dato en claro —cifrado, vista sin PII y descifrado auditado en
+    `audit.datos_personales_acceso` (§14)—, pero no la base legal ni la
+    retención, que siguen siendo decisión de OAIPCS.
 
 ---
 
@@ -927,8 +957,11 @@ vocabulario (**INF**), `core.proceso_instancia` es proceso (**P**) y
 > `dni`, `email`, `telefono_contacto` y `telefono_raw` de
 > `core.actor_datos_personales` están **vacías** (0 valores no nulos) y el dato vive
 > en `dni_cifrado`, `dni_hmac`, `email_cifrado` y `telefono_cifrado`. El DNI en
-> claro solo se recupera por `core.actor_datos_personales_descifrar(uuid, motivo)`
-> —nivel 3, motivo obligatorio, con registro en `audit`— o desde el origen,
+> claro solo se recupera por `core.actor_datos_personales_descifrar(uuid, motivo)`,
+> que exige `core.clasificacion_max() >= 3` —descodifican `sectorista`,
+> `direccion_oaipcs` y `alta_direccion`; no `consulta_lectura` ni
+> `externo_publico`—, con motivo obligatorio y registro en
+> `audit.datos_personales_acceso`; o desde el origen,
 > **`legacy.dim_actores.c03`**. La vista `core.v_actor_datos_personales_seguro`
 > nunca proyecta el plano.
 
@@ -1155,7 +1188,12 @@ no de migración. Evidencia y efecto completo: `LEGADO_A_V10_SIMILITUDES_Y_DIFER
 | `dim_alertas` → `documentos` tipo 13        |                      83 |                      83 | Correcto                             |
 | `cat_especies`                              |                      39 | 39 (`pg_class` decía 5) | Correcto (D22); `reltuples` engañoso |
 | `core.locales` / `mesas_dialogo` / `envios` |            27 / 21 / 17 |            27 / 21 / 17 | Correcto                             |
-| `core.cat_tematicas`                        |                       7 |                       7 | Correcto                             |
+| `core.cat_tematicas`                        |                       7 |                   7 → 6 | Correcto; la 15 retiró `Otros`       |
+
+> **Nota.** «Correcto» aquí significa que la **carga coincidió con el mapa** del sistema
+> anterior, no que el catálogo coincida con la Guía. Las 7 filas del legado se cargaron
+> completas y la migración 15 retiró `Otros` —reclasificando sus 2 casos y sus 48
+> demandas—, con lo que el catálogo quedó en las 6 tipologías de la Guía §7.6.
 
 ### 13.3 El hallazgo de fondo: cobertura del origen
 
@@ -1214,11 +1252,13 @@ función de cálculo que no persiste nada.
   desde el parche 21 y `visibilidad` desde el 22, con el trigger
   `alertas_g21_visibilidad` que hace efectivo el contrato del parche 7. **Este punto
   deja de ser una brecha.** Quedan fuera del gate dos cosas: el valor `sectorial`
-  de `visibilidad` no tiene todavía tabla de destinatarios (`core.alerta_destinatario`
-  no existe; el puente del MVP-45 la mapea «≈» a `core.alertas_actores`), y las 83
+  de `visibilidad` no tiene destinatarios nombrados (`core.alerta_destinatario`
+  existe desde el parche 23, con 11 columnas y cuatro políticas, pero está vacía;
+  el puente del MVP-45 la mapea «≈» a `core.alertas_actores`), y las 83
   alertas migradas no se pueden publicar con un `UPDATE` porque nunca tuvieron
   `fecha_validacion`: publicarlas exige que una persona las valide, que es justo lo
-  que G21 significa.
+  que G21 significa. Las 83 se documentan como **Atendidas**; el dato sigue
+  `estado_legado = 'Archivado'` y la migración del dato sigue pendiente.
 - **La tabla que G25 necesita.** `core.situacion_judicial_restricta` no existe en la
   base, aunque v10 §13.6.bis.v10 y §2.3.bis la definen.
 - **Los cuatro frentes de D17.** Las 147 filas del flujo están escritas, pero **29

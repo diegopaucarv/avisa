@@ -74,11 +74,11 @@ necesitan el legado ya cargado y se ejecutan a mano (§9). Están montados en el
 contenedor, pero ningún script del `initdb` los invoca.
 
 El DDL y los parches **no se copian**: se montan como bind mounts con nombres
-limpios (`/opt/avisa/sql/90_ddl_v9.sql`, `91_patch_01.sql` … `112_patch_22.sql`).
+limpios (`/opt/avisa/sql/90_ddl_v9.sql`, `91_patch_01.sql` … `114_patch_24.sql`).
 El DDL sale de `backups/backend/PRODUCE_OAIPCS_AVISA_v9_ddl(1).sql` —la copia
 del repositorio, no `backend/`, que es otra carpeta— y los parches, de `docs/`.
-Así no existen dos versiones del esquema que puedan divergir. Son **22 montajes
-de parche**: los 5 `PREPARACION_*` (que sí ejecuta el `initdb`) y los 17
+Así no existen dos versiones del esquema que puedan divergir. Son **24 montajes
+de parche**: los 5 `PREPARACION_*` (que sí ejecuta el `initdb`) y los 19
 `PARCHE_6`…`PARCHE_24`, de `96_patch_06.sql` a `114_patch_24.sql` (que no).
 
 ### Por qué dos pasadas
@@ -114,6 +114,11 @@ Lo que **sí** es un fallo y no aparece en un arranque sano:
 `55433` y no `5432` porque `5432` puede estar ocupado por un PostgreSQL local y
 `55432` ya lo usa `avisa-v9-test`.
 
+El rol `avisa` de la tabla es el **superusuario** con el que se administra y se
+miden los parches. La aplicación no lo usa: su login es `avisa_api`, que no es
+superusuario ni tiene `BYPASSRLS` y es **miembro de `avisa_app`**, el rol al que
+los parches conceden los `GRANT EXECUTE` y los privilegios de tabla.
+
 ### Receta de sesión obligatoria
 
 Hoy **52 de las 103 tablas de `core` tienen RLS** y **51 no**; en todo el modelo
@@ -127,15 +132,32 @@ esto, un `INSERT` falla con la política `p_insert` y un `SELECT` devuelve 0 fil
 
 ```python
 async with conn.transaction():
-    await conn.execute("select set_config('app.clasificacion_max', '3', true)")
-    await conn.execute("select set_config('app.user_id', $1, true)", user_uuid)
+    await conn.execute("select set_config('app.rol_codigo', $1, true)", rol_codigo)
+    await conn.execute("select set_config('app.usuario_id', $1, true)", user_uuid)
     # ... trabajo ...
 ```
 
 `set_config(..., true)` es el equivalente a `SET LOCAL`: dura la transacción.
+La API fija ese par —y los GUC que dependen de él— en `withSession`
+(`lib/db/tenant.ts`), que además deja `app.user_id` por compatibilidad. El nivel
+de clasificación no lo declara el cliente: `core.clasificacion_max()` lo deriva
+de `app.rol_codigo`.
 
-Comprobado con `asyncpg 0.32` contra este contenedor: `app.clasificacion_max`
-se lee correctamente dentro de la transacción y las tablas con RLS responden.
+**La trampa de verificar sin sesión.** Consultando como `avisa` (superusuario)
+se lee de más; consultando como `avisa_api` **sin** `withSession`, las tablas
+con RLS `FORCE` devuelven **0 filas sin error**. Un `count(*) = 0` no significa
+que el catálogo esté vacío: significa que falta el contexto. Para comprobar los
+datos como los ve la aplicación, fija rol y usuario dentro de la transacción y
+no confirmes:
+
+```sql
+BEGIN;
+SET LOCAL ROLE avisa_app;
+SELECT set_config('app.rol_codigo', 'sectorista', true),
+       set_config('app.usuario_id', '<uuid-del-usuario>', true);
+SELECT count(*) FROM core.roles;
+ROLLBACK;
+```
 
 ---
 
@@ -165,9 +187,9 @@ exacta):
 | tablas                          | 373 tras la carga: 285 ordinarias del modelo + 87 de `legacy` + 1 de `public`; sin particiones                |
 | columnas `geography`            | 3                                                                                                             |
 | tablas territorio con geometría | 3 de 3                                                                                                        |
-| `cat_tematicas`                 | 7                                                                                                             |
-| `cat_subsectores`               | 3                                                                                                             |
-| `cat_tipos_actor`               | 7                                                                                                             |
+| `cat_tematicas`                 | `≥ 6` (6 hoy, tras las migraciones 14 y 15)                                                                   |
+| `cat_subsectores`               | `≥ 2` (2 hoy, tras la migración 14)                                                                           |
+| `cat_tipos_actor`               | `≥ 3` (3 hoy, tras la migración 14)                                                                           |
 | `cat_roles_funcionales`         | 4                                                                                                             |
 | `cat_tipos_organizacion`        | 7                                                                                                             |
 | `cat_especies` (mínimo)         | 5 en `initdb`, 39 tras la carga                                                                               |
@@ -183,14 +205,20 @@ La verificación es un `DO` con `RAISE EXCEPTION` si algo no cuadra: si el
 esquema queda a medias, el contenedor **no** arranca. Preferimos un fallo ruidoso
 a un entorno que parece sano y no lo está.
 
-`20_verify.sql` imprime todas estas filas, pero solo **aborta** si faltan las
-tablas de territorio con geometría, la unidad `OAIPCS` o alguno de los catálogos
-sembrados. Las filas de conteo (esquemas, tablas, RLS) son un termómetro y crecen
-con los parches. Los valores de la tabla son la salida medida el **2026-11-20**
-sobre `avisa-db` con los parches 6–24 aplicados.
+`20_verify.sql` imprime todas estas filas, pero solo **aborta la
+inicialización** —lanza `RAISE EXCEPTION` y el contenedor no arranca— si faltan
+las tablas de territorio con geometría, la unidad `OAIPCS` o algún catálogo
+queda por debajo de su mínimo: **6** temáticas, **2** subsectores, **3** tipos
+de actor, 4 roles funcionales, 7 tipos de organización, 5 especies, 1 unidad
+orgánica, 12 etapas PIP, 2 `config.schema_registry`, 1
+`agent.cat_detalle_schema` y 3 `ind.plantilla`. Las filas de conteo (esquemas,
+tablas, RLS) son un termómetro y crecen con los parches. Los valores de la tabla
+son la salida medida el **2026-11-20** sobre `avisa-db` con los parches 6–24
+aplicados; las tres filas de catálogo que cambiaron con las migraciones 14 y 15
+se expresan como mínimo.
 
 Esa medición deja el detalle así: **266 tablas lógicas** —clasificadas en capas como
-34 / 13 / 76 / 22 / 121—, **290 físicas** (266 + 24
+33 / 13 / 77 / 22 / 121—, **290 físicas** (266 + 24
 particiones), **37 vistas y materializadas** (**313** columnas) y **2 161 columnas
 lógicas**, **todas con comentario** (el parche 19 cerró las 19 últimas de la
 curaduría, el 21 trae el comentario de sus dos columnas nuevas y el 22 el de
@@ -225,6 +253,13 @@ anterior al último parche no deja la base desactualizada.
 
 `apply` es idempotente: los parches 1–5 lo son por diseño, y el DDL se vuelve a
 aplicar tolerando errores.
+
+**Respaldo y exportación.** El único respaldo disponible hoy es el físico de
+PostgreSQL: `docker exec -i avisa-db pg_dump -U avisa -d avisa > respaldo.sql`, o
+`./scripts/db.sh snapshot` para congelar el esquema vacío como plantilla. La
+exportación por entidad y de la base completa a PDF, Excel y JSON está
+**decidida y no implementada** (gap E5); no existe un botón de exportación en la
+interfaz.
 
 ---
 
@@ -313,8 +348,8 @@ error**. Por eso:
   el flujo `reporte`. Depende del 20 y del 21: usa el flujo de cinco pasos y las dos
   columnas de aprobación;
 - el 23 hace nombrables los destinatarios y pone la gravedad en el dato: añade
-  `es_grave` a `core.cat_prioridades_alerta` —verdadero solo en los dos niveles con
-  plazo grave, `Critica_Inmediata` y `Urgente`, con un `CHECK` que impide grave sin
+  `es_grave` a `core.cat_prioridades_alerta` —verdadero solo en las dos prioridades con
+  plazo grave, `Critica_Inmediata` —literal legado del seed; hoy `Crítica inmediata`— y `Urgente`, con un `CHECK` que impide grave sin
   plazo—, `validada_por` a `core.alertas_tempranas` (de 36 a 37 columnas) con las
   restricciones de firma y de cuatro ojos, y crea `core.alerta_destinatario` (11
   columnas, vacía) para nombrar a quién se remite la alerta, por cuenta o por cargo.
@@ -604,6 +639,57 @@ El día que una de esas tablas entre al alcance, el orden es `ENABLE` y `FORCE`
 RLS con sus políticas, y solo después `GRANT USAGE` al esquema. Al revés se abre
 la tabla completa: `policy` tiene 8 tablas y solo 1 con RLS.
 
+### Migraciones de alineación 12–19 (aplicadas el 2026-11-22)
+
+Van **después** de los parches 6–24, sobre la base ya cargada. No están montadas
+en el contenedor: se pasan por entrada estándar desde `migration/`. Cada archivo
+abre y cierra su propia transacción, así que se ejecutan **una por una**, en
+este orden y sin concatenar:
+
+```sh
+MSYS_NO_PATHCONV=1 docker exec -i -e PGPASSWORD="$POSTGRES_PASSWORD" avisa-db \
+  psql -v ON_ERROR_STOP=1 -U avisa -d avisa < migration/12_anulacion_y_secuencia.sql
+```
+
+Se cambia solo el nombre del archivo, del `12` al `19`. `PGPASSWORD` es la
+misma contraseña de `.env` que usa `avisa`.
+
+| #   | Archivo                            | Qué añade en una línea                                                                                                                            |
+| --- | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 12  | `12_anulacion_y_secuencia.sql`     | anulación lógica en 7 tablas y contador `core.secuencia_codigo` con `core.siguiente_codigo()`                                                     |
+| 13  | `13_anulacion_segura.sql`          | `SECURITY DEFINER` de `core.anular_caso`, `core.restaurar_caso`, `core.anular_registro` y `core.restaurar_registro`; crea `core.exigir_anulacion` |
+| 14  | `14_alineacion_guia.sql`           | catálogos: tipos y roles de actor, posicionamiento, subsectores, niveles de conflicto y de alerta, y Anexo 3                                      |
+| 15  | `15_fusion_hechos_y_tematicas.sql` | fusión de tipos de hecho y retiro de `Otros` de temáticas, más la ortografía de estados y prioridades                                             |
+| 16  | `16_recodificacion_anexo15.sql`    | recodificación de los 35 casos al Anexo 15, con sus compromisos e hitos, y contador por (año, subsector, temática)                                |
+| 17  | `17_usuarios_y_privilegios.sql`    | cuentas demo, rol primario por jerarquía (`administrador` primero) y separación de `administrador` de la cuenta de la Directora                   |
+| 18  | `18_normalizacion_refs.sql`        | `core.normalizar_ref(text)`: comparación sin mayúsculas, tildes ni separadores                                                                    |
+| 19  | `19_codigos_genericos.sql`         | sigla `GEN` cuando falta subsector o temática, en lugar de `XX`/`XXX`                                                                             |
+
+**Idempotencia.** Sólo declaran poder reejecutarse el bloque de recodificación
+del 12 y los archivos 14, 15 y 17. El 13, el 18 y el 19 usan
+`CREATE OR REPLACE FUNCTION` pero no lo declaran; el 16 tampoco. No se
+reejecutan por rutina.
+
+**Verificación por SELECT.** El 14, el 15, el 16, el 17, el 18 y el 19 terminan
+con un bloque de sólo lectura que imprime el estado resultante. Las
+comprobaciones de conjunto que se usaron el 2026-11-22 fueron:
+
+```sql
+select count(*) from core.cat_tematicas;    -- 6
+select count(*) from core.cat_subsectores;  -- 2
+select count(*) from core.cat_tipos_actor;  -- 3
+select codigo_caso, codigo_legado from core.casos order by codigo_caso;  -- 35, formato Anexo 15
+select core.codigo_subsector(null), core.codigo_tematica(null);           -- GEN, GEN
+```
+
+**La baja es anulación, no `DELETE` físico.** Las siete tablas de la migración 12
+guardan `anulado_en`, `anulado_por`, `anulacion_id` y `motivo_anulacion`.
+`core.anular_caso(uuid, motivo)` anula en cascada caso, alertas, documentos,
+compromisos, hitos, demandas y cronología bajo un mismo lote, y
+`core.restaurar_caso(uuid)` restaura exactamente ese lote. **Pendiente:** los
+`DELETE` de la API siguen siendo físicos y no existen endpoints `anular` ni
+`restaurar`.
+
 ---
 
 ## 10. Archivos
@@ -655,7 +741,18 @@ docker compose up -d api ui
 ```
 
 Y se abre **http://localhost:3000**. El servicio de acceso ya está contestando:
-usuario `12345678`, clave `demo`.
+usuario `11111111`, clave `demo`.
+
+Todas las cuentas de verificación usan la clave `demo`. No tienen contraseñas
+distintas:
+
+| DNI        | Cuenta                 | Rol y alcance                                           |
+| ---------- | ---------------------- | ------------------------------------------------------- |
+| `11111111` | Admin                  | `administrador` (los diez roles): todos los privilegios |
+| `22222222` | Alta Dirección (demo)  | `alta_direccion`: lee, no edita ni elimina              |
+| `41907320` | Edith Bautista León    | **sólo** `direccion_oaipcs`: edita, no elimina          |
+| `10654038` | Peggy Contreras Montes | `sectorista`: edita y elimina                           |
+| `46078289` | André Jiménez Agapito  | `consulta_lectura` + `sectorista`: edita y elimina      |
 
 | Servicio | Contenedor  | Puerto del host | Qué es                        |
 | -------- | ----------- | --------------- | ----------------------------- |
@@ -676,6 +773,10 @@ viene instalado en la imagen. Por eso:
 
 - **Editar** un archivo de `app/`, `components/` o `frontend/` se refleja solo,
   sin reconstruir ni reiniciar.
+- **Crear un directorio de rutas nuevo** (un endpoint nuevo) no lo detecta el
+  dev server: Turbopack sobre el bind mount de Windows responde **404** hasta
+  reiniciar el contenedor `avisa-ui` (`docker compose restart ui`). Editarlo
+  después ya se refleja en caliente.
 - **Cambiar `package.json`** sí exige `docker compose build ui`; y si el
   volumen ya existía hay que vaciarlo para que se vuelva a rellenar:
   `docker volume rm avisa_node_modules`. Esto borra el volumen: hacerlo con
@@ -688,11 +789,11 @@ viene instalado en la imagen. Por eso:
 ```bash
 curl -s -o /dev/null -w "%{http_code}\n" http://localhost:3000/
 curl -s -o /dev/null -w "%{http_code}\n" -X POST http://localhost:3000/api/auth/login \
-     -H "Content-Type: application/json" -d '{"dni":"12345678","password":"demo"}'
+     -H "Content-Type: application/json" -d '{"dni":"11111111","password":"demo"}'
 ```
 
 Las dos deben devolver `200`. La segunda prueba el camino completo navegador →
-Next → FastAPI.
+Next → PostgreSQL.
 
 ### Lo que este entorno no hace
 

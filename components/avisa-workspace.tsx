@@ -141,10 +141,7 @@ function DemoNotice() {
   return (
     <div className="demo-notice" role="status">
       <Info size={15} />
-      <span>
-        <strong>Prototipo · Datos simulados</strong> — no usar para decisiones
-        institucionales ni asociar a personas reales.
-      </span>
+
     </div>
   );
 }
@@ -313,7 +310,18 @@ type InboxEntry = {
   open: () => void;
 };
 
-export function WorkspaceViewContent({
+export function WorkspaceViewContent(props: WorkspaceProps) {
+  return (
+    <ViewErrorBoundary
+      title="No se pudo mostrar esta vista"
+      description="Un módulo de la vista falló al renderizar. Puedes reintentar o seguir usando el resto de la consola."
+    >
+      <WorkspaceViewBody {...props} />
+    </ViewErrorBoundary>
+  );
+}
+
+function WorkspaceViewBody({
   view,
   onNavigate,
   selectedCase,

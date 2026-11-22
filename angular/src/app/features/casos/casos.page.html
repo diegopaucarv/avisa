@@ -1,0 +1,150 @@
+<section class="view-body" aria-labelledby="titulo-casos">
+  <header class="view-head">
+    <div>
+      <h1 id="titulo-casos">Casos</h1>
+      <p class="view-subtitle">
+        Seguimiento de la conflictividad registrada, con su nivel, prioridad y
+        riesgo propio del caso.
+      </p>
+    </div>
+  </header>
+
+  <div class="view-filters">
+    <label class="search-filter">
+      <app-icono nombre="buscar" [tamano]="14" />
+      <input
+        type="search"
+        placeholder="Buscar por código, título o región"
+        [value]="filtros().q"
+        aria-label="Buscar casos"
+        (input)="buscar($event)"
+      />
+    </label>
+
+    <button type="button" class="button-secondary" (click)="limpiar()">
+      Limpiar filtros
+    </button>
+  </div>
+
+  <div class="view-toolbar">
+    <div class="segmented" role="group" aria-label="Vista de casos">
+      <button
+        type="button"
+        [attr.aria-pressed]="modo() === 'tarjetas'"
+        (click)="cambiarModo('tarjetas')"
+      >
+        Tarjetas
+      </button>
+      <button
+        type="button"
+        [attr.aria-pressed]="modo() === 'tabla'"
+        (click)="cambiarModo('tabla')"
+      >
+        Tabla
+      </button>
+    </div>
+
+    <label class="select-filter">
+      Orden
+      <select aria-label="Ordenar casos" [value]="filtros().orden" (change)="cambiarOrden($event)">
+        @for (orden of ordenes; track orden.valor) {
+          <option [value]="orden.valor">{{ orden.etiqueta }}</option>
+        }
+      </select>
+    </label>
+  </div>
+
+  @if (estado() === "cargando") {
+    <div class="empty-state" role="status">Cargando casos…</div>
+  } @else if (estado() === "error") {
+    <div class="empty-state" role="alert">
+      <p>{{ error()?.message }}</p>
+      <button type="button" class="button-secondary" (click)="recargar()">Reintentar</button>
+    </div>
+  } @else if (casos().length === 0) {
+    <div class="empty-state">
+      <strong>Sin casos</strong>
+      <p>No hay casos para los filtros seleccionados.</p>
+    </div>
+  } @else if (modo() === "tarjetas") {
+    <div class="case-grid">
+      @for (caso of casos(); track caso.codigo) {
+        <a
+          class="case-card"
+          [routerLink]="['/casos', caso.codigo]"
+          [attr.aria-label]="'Abrir el caso ' + caso.codigo + ': ' + caso.titulo"
+        >
+          <div class="case-card-top">
+            <span class="case-code">{{ caso.codigo }}</span>
+            <span class="status-badge" [class]="'status-badge risk-' + caso.riesgo.toLowerCase()">
+              <span class="status-dot"></span>
+              {{ caso.riesgo }}
+            </span>
+          </div>
+          <h3>{{ caso.titulo }}</h3>
+          <div class="case-location">
+            <app-icono nombre="mapa" [tamano]="14" />
+            {{ caso.region || "Sin región" }}
+            @if (caso.tematica) {
+              <span>·</span> {{ caso.tematica }}
+            }
+          </div>
+          <p>{{ caso.resumen || "Sin resumen registrado." }}</p>
+          <div class="case-card-bottom">
+            <span>{{ caso.etapa }}</span>
+            <span>
+              {{ caso.actualizado || "Sin fecha" }}
+              <app-icono nombre="chevron-derecha" [tamano]="14" />
+            </span>
+          </div>
+        </a>
+      }
+    </div>
+  } @else {
+    <div class="table-wrap">
+      <table class="data-table">
+        <caption class="table-caption">
+          {{ total() }} casos · el riesgo es atributo del caso y se recalcula en su ficha.
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">Caso</th>
+            <th scope="col">Región</th>
+            <th scope="col">Temática</th>
+            <th scope="col">Estado</th>
+            <th scope="col">Prioridad</th>
+            <th scope="col">Riesgo</th>
+            <th scope="col">Unidad</th>
+            <th scope="col">Etapa</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (caso of casos(); track caso.codigo) {
+            <tr class="case-row-clickable" [routerLink]="['/casos', caso.codigo]">
+              <td>
+                <a class="table-link" [routerLink]="['/casos', caso.codigo]">{{ caso.codigo }}</a>
+              </td>
+              <td>{{ caso.region || "—" }}</td>
+              <td>{{ caso.tematica || "—" }}</td>
+              <td>{{ caso.estado }}</td>
+              <td>{{ caso.prioridad }}</td>
+              <td>{{ caso.riesgo }}</td>
+              <td>{{ caso.unidadResponsable || "—" }}</td>
+              <td>{{ caso.etapa }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  @if (total() > 0) {
+    <app-paginacion
+      [pagina]="filtros().pagina"
+      [tamano]="filtros().tamano"
+      [total]="total()"
+      (paginaCambia)="cambiarPagina($event)"
+      (tamanoCambia)="cambiarTamano($event)"
+    />
+  }
+</section>

@@ -199,6 +199,8 @@ en `fact_proceso_caso` la nota está en `c09` y `c06/c07/c08` son constantes o v
 en `fact_proceso_reporte` la nota está en `c08` y `c07` es una diferencia de días.
 El mapeo se hizo por tabla, no por posición.
 
+_Posterior al parche (2026-11-22): los códigos `CS-PRODUCE-2026-nnn` que aquí se emparejan con `core.casos.codigo_caso` se recodificaron al Anexo 15 por `migration/16_recodificacion_anexo15.sql` —hoy son `CS-<PA|MI>-<INF|OAT|NOR|DBE|GOB|ITE>-<AAAA>-<NN>`— y el literal vive en `core.casos.codigo_legado`; `migration/19_codigos_genericos.sql` añadió después la sigla `GEN` sin recodificar ningún caso._
+
 ---
 
 ## 3. Mapeo columna a columna
@@ -261,6 +263,8 @@ El mapeo se hizo por tabla, no por posición.
 | —        | `tipo_origen`                 | constante `'caso'`                                        |
 | —        | `estado_id`                   | nulo: el legado no registra estado por paso               |
 | —        | `alerta_id`, `codigo_reporte` | nulos: son de reporte                                     |
+
+_Posterior al parche (2026-11-22): el emparejamiento `core.casos.codigo_caso = c02` solo vale con los códigos anteriores a la recodificación; hoy `c02` casa contra `core.casos.codigo_legado` (Anexo 15, `migration/16_recodificacion_anexo15.sql`)._
 
 ### 3.5 `legacy.fact_proceso_reporte` → `core.proceso_instancia` (99 filas)
 
@@ -404,3 +408,5 @@ instancias por `(tipo_origen, fila_legado)`.
 6. **Observación menor.** Los casos `CS-PRODUCE-2026-001` y `CS-PRODUCE-2026-002`
    existen en `core.casos` pero no tienen ninguna instancia de proceso en el legado.
    `core.casos` va de `001` a `035`; el `036` no existe en ninguna de las dos capas.
+
+_Posterior al parche (2026-11-22): esos dos casos existen hoy con el código del Anexo 15 y el literal `CS-PRODUCE-2026-00n` quedó en `core.casos.codigo_legado` por `migration/16_recodificacion_anexo15.sql`._

@@ -1,9 +1,10 @@
 # Migración del frontend AVISA a Angular
 
-**Tipo de documento:** diagnóstico y diseño (no implementación)
+**Tipo de documento:** diagnóstico previo (no implementación); la migración está **en curso**
 **Fecha:** 21-nov-2026
-**Alcance:** frontend (`app/`, `components/`, `lib/` de navegador) y su relación con el BFF (`app/api/`, `lib/db/`)
+**Alcance:** la UI Next congelada (`app/`, `components/`, `lib/` de navegador) y su relación con el BFF (`app/api/`, `lib/db/`)
 **Estado del código auditado:** rama `main`, commit `ca9288e`, árbol de trabajo con cambios locales sin confirmar
+**Estado de la migración:** Angular es el frontend definitivo del producto y la UI Next queda **congelada como referencia de diseño**; el avance real se sigue en `07_frontend/angular/ESTADO_MIGRACION_ANGULAR.md` y se resume en §0.1
 
 ---
 
@@ -32,10 +33,23 @@ Todas las cifras de este documento se midieron sobre el repositorio con `wc -l` 
 
 **Totales aproximados del código:** ≈ 15 700 líneas TS/TSX (interfaz + servidor) y 8 629 líneas de CSS.
 
-**Hallazgo que condiciona todo el documento:** la interfaz **no consume la API real**. Solo `components/avisa-login.tsx` llama a `frontend/api.ts` (`login`). El resto del producto se alimenta de `lib/avisa-store.tsx`, sembrado con `components/avisa-demo-data.ts` (`useState(demoCases)`, etc.). Los 16 endpoints de `app/api/v1/**` **no tienen consumidor en la interfaz**. Por tanto, "migrar a Angular" es en realidad **dos trabajos distintos**:
+Las cifras de la tabla son la medición del commit auditado. `app/api` sólo contiene hoy `auth/` y `v1/`: **`/api/dashboard` ya no existe** y los agregados se calculan con los totales de los listados paginados; el recuento de 19 handlers se conserva como medida del código congelado.
+
+**Hallazgo que condiciona todo el documento:** la UI Next (hoy congelada) **no consume la API real**. Solo `components/avisa-login.tsx` llama a `frontend/api.ts` (`login`). El resto del producto se alimenta de `lib/avisa-store.tsx`, sembrado con `components/avisa-demo-data.ts` (`useState(demoCases)`, etc.). Los 16 endpoints de `app/api/v1/**` **no tienen consumidor en la UI Next** (la SPA Angular sí los consume, §0.1). Por tanto, "migrar a Angular" es en realidad **dos trabajos distintos**:
 
 1. **Portar la interfaz** (mecánico, medible, es lo que se estima aquí).
 2. **Conectar la interfaz a los datos reales** (trabajo funcional que hace falta con React o con Angular, y que **no** se resuelve por cambiar de framework). Ver §10 y §13.
+
+### 0.1 · Estado real de la migración (2026-11-22)
+
+| Estado                                         | Pantallas                                                                                                                                                                                                                                                                                                                                                                          |
+| ---------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Cableadas** (componente propio sobre la API) | `casos`, `casos/:codigo`, `alertas`, `compromisos`, `documentos`, `directorio/actores`, `directorio/instituciones` (`angular/src/app/app.routes.ts:37-83`)                                                                                                                                                                                                                         |
+| **En marcador** `EnMigracionComponent`         | `resumen`, `bandeja`, `directorio/organizaciones`, `directorio/locales`, `direccion`, `ayuda`, `preferencias` y `mapa` (`angular/src/app/app.routes.ts:22-108`). De ellas, `resumen`, `bandeja`, `directorio/organizaciones`, `directorio/locales`, `direccion`, `ayuda` y `preferencias` ya tienen página escrita en `angular/src/app/features/`: lo que falta es cablear la ruta |
+| **Sin ruta todavía**                           | `casos/sin-caso` (página en `angular/src/app/features/casos/demandas-sin-caso.page.ts`), `busqueda` y `notificaciones`                                                                                                                                                                                                                                                             |
+| **Aplazado por el usuario**                    | `mapa`: no se construye hasta que exista el dataset de ubigeo/centroide; no hay pantalla de mapa con coordenadas ni fórmula de calibración de riesgo                                                                                                                                                                                                                               |
+
+La SPA Angular sí consume la API real a través de `angular/src/app/core/http/`; la ausencia de consumo descrita en §0 corresponde a la UI Next que se midió aquí.
 
 ---
 
@@ -43,12 +57,12 @@ Todas las cifras de este documento se midieron sobre el repositorio con `wc -l` 
 
 ### ¿Conviene migrar?
 
-**Sí, pero no por las razones habituales.** La migración se justifica por el contexto institucional, no por una deuda técnica del frontend actual:
+**Sí, y ya está decidida y en curso:** Angular es el frontend definitivo del producto y la UI Next queda congelada como referencia de diseño. La migración se justifica por el contexto institucional, no por una deuda técnica del frontend actual:
 
 - El ERS (`docs/01_requisitos/ERS_AVISA_PRODUCE_v0.6.md`, R8) fija el destino **Angular + .NET + SQL Server**, con **≈ 4 desarrolladores de OGTI** y arranque el **24-nov-2026**.
 - El propio ERS advierte en **D-6** que si el prototipo no se diseña "pensando en componentes estándar de Angular" habrá **recodificación por OGTI**. Un prototipo en React garantiza esa recodificación.
 - **CT-05 "Pantallas de trabajo" está confirmado como Angular** (ERS, tabla de contenedores).
-- El frontend actual es, en la práctica, **una SPA pura**: no hay Server Components con fetching, no hay `next/image`, `next/font`, `next/link` ni `next/navigation`; el único uso de `next/dynamic` es el mapa (`ssr: false`). Es decir, **se está pagando Next.js para servir una SPA**.
+- El frontend Next (hoy congelado como referencia) es, en la práctica, **una SPA pura**: no hay Server Components con fetching, no hay `next/image`, `next/font`, `next/link` ni `next/navigation`; el único uso de `next/dynamic` es el mapa (`ssr: false`). Es decir, **se está pagando Next.js para servir una SPA**.
 
 ### Qué se gana
 
@@ -81,7 +95,7 @@ Todas las cifras de este documento se midieron sobre el repositorio con `wc -l` 
 > 4. **No portar el backend a Angular.** La RLS por `set_config`, la firma HMAC de la cookie y la clave de PII (`APP_CRYPTO_KEY`) son de servidor (§5, §11).
 > 5. El destino del backend es **.NET** según el ERS; Angular solo consume HTTP. Un servicio Node intermedio (opción B del §5) **no es destino** y no se recomienda.
 
-**Decisión de negocio previa (bloqueante):** si OGTI va a construir desde el ERS + Figma, el valor de migrar el prototipo es _reducir la traducción_; si el prototipo Angular va a ser la semilla del entregable de diciembre, la migración es _obligatoria_. Conviene resolver esto antes de la fase 1 (§13).
+**Decisión de negocio previa (bloqueante):** si OGTI va a construir desde el ERS + Figma, el valor de migrar el prototipo es _reducir la traducción_; si el prototipo Angular va a ser la semilla del entregable de diciembre, la migración es _obligatoria_. **Resuelta:** Angular es el frontend definitivo y la migración se ejecuta en `angular/` (§0.1, §13 M-01).
 
 ---
 
@@ -120,7 +134,7 @@ Justificación con datos:
 3. **La app cabe en una reescritura.** 20 archivos y 11 129 líneas, sin RSC ni routing, es un tamaño manejable para 2 desarrolladores en 6–8 semanas.
 4. **La red de seguridad no es el strangler, son las E2E.** Con paridad congelada (fase 0), el corte puede hacerse de golpe por grupo funcional detrás de un flag, sin dos shells.
 
-**Regla de corte propuesta:** el proxy sirve Angular en `/` y Next en `/api/`; la app Angular arranca en `/beta` con un flag por vista. Cuando un grupo de vistas alcanza paridad E2E, se activa por defecto; al terminar, `/beta` desaparece y solo queda Angular.
+**Regla de corte propuesta:** el proxy sirve Angular en `/` y Next en `/api/`; la app Angular arranca en `/beta` con un flag por vista. Cuando un grupo de vistas alcanza paridad E2E, se activa por defecto; al terminar, `/beta` desaparece y solo queda Angular. En la implementación en curso no hay `/beta`: la SPA es la única UI servida y las pantallas no portadas se sirven con `EnMigracionComponent` en su propia ruta (§0.1).
 
 ---
 
@@ -154,6 +168,8 @@ Justificación con datos:
 | `components/avisa-directory.tsx`             | 38        | Wrapper de directorio                                                                                                                                            | `DirectoryComponent`                                      | 0,5–1        | Bajo     |
 | `components/conflict-resolution-journey.tsx` | 33        | Línea de tiempo del caso                                                                                                                                         | `JourneyComponent`                                        | 0,5–1        | Bajo     |
 | **Subtotal**                                 | **8 197** |                                                                                                                                                                  |                                                           | **42–57**    |          |
+
+**Nota:** la fila de `avisa-map.tsx` describe el componente congelado; `mapa` está aplazado por el usuario hasta que exista el dataset de ubigeo/centroide (§0.1) y su port no es un entregable del plan.
 
 ### 3.3 Estado y utilidades
 
@@ -232,6 +248,8 @@ Justificación con datos:
 ### Recomendación
 
 **A ahora, C después. B no.** El BFF actual ya resuelve lo difícil y con criterio de seguridad: pool único, `statement_timeout`, transacción por petición, GUC de RLS y traducción de errores de PostgreSQL a respuestas estables (`lib/db/errors.ts`). Reescribirlo en Node no aporta nada que .NET no vaya a reemplazar después. Angular solo necesita que `/api/*` exista en el mismo origen.
+
+**API en español (decidido, pendiente).** Rutas y claves de la API deben quedar en español. Hoy las rutas siguen en inglés (`/api/v1/cases`, `/api/v1/alerts`, …) y la UI traduce en su capa HTTP (`angular/src/app/core/http/`); el cambio no está implementado.
 
 ### Impacto de la cookie `httpOnly`
 
@@ -367,6 +385,8 @@ export class SessionStore {
 
 ### Leaflet
 
+`mapa` está aplazado por el usuario: esta sección describe la trampa del componente congelado y no un entregable del plan (§0.1).
+
 | Opción                          | Ventaja                                                                             | Riesgo                                                                                   |
 | ------------------------------- | ----------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
 | Envoltorio propio (recomendado) | control total del ciclo de vida; funciona con zoneless; sin dependencias de versión | hay que reimplementar popups/tooltips (hoy usa `<Popup>`, `<Tooltip>`, `<CircleMarker>`) |
@@ -448,7 +468,7 @@ export class SessionStore {
 | Aspecto                 | Detalle                                                                                                                                                                                     |
 | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Entregables             | Playwright configurado; flujos: login, 13 vistas, 6 formularios, filtros de alcance, preferencias, tema claro/oscuro, glosario, búsqueda, mapa, descarga CSV; capturas por vista y por tema |
-| Por qué ahora           | **no existe ninguna prueba** en el repo; y los datos son de demostración, por lo que es determinista y fácil de congelar                                                                    |
+| Por qué ahora           | **no existe ninguna prueba** en el repo; y la UI Next congelada, que es la que se congela aquí, se alimenta de datos de demostración, por lo que es determinista y fácil de congelar        |
 | Criterios de aceptación | la suite corre en CI contra `pnpm dev`; 100 % verde; las capturas quedan versionadas como referencia                                                                                        |
 | Días-persona            | 4–6                                                                                                                                                                                         |
 
@@ -527,7 +547,9 @@ export class SessionStore {
 
 **Calendario indicativo:** 1 desarrollador ≈ 5–6,5 meses; 2 desarrolladores ≈ 3–3,5 meses; los 4 de OGTI no bajan de 7–9 semanas por las dependencias entre fases. **Los 20 días de diciembre no alcanzan para el port completo**: por eso el corte debe limitarse al subconjunto del alcance de diciembre (PAN-01 a PAN-10) y no a las 13 vistas.
 
-**Trabajo adicional necesario en cualquier framework (no incluido):** conectar las vistas a los 16 endpoints de `v1` (15–25 d-p). Sin esto, la app Angular será tan demostrativa como la actual.
+**Trabajo adicional necesario en cualquier framework (no incluido):** conectar las vistas a los 16 endpoints de `v1` (15–25 d-p), ya en curso: las pantallas cableadas consumen la API real (§0.1). Sin esto, la app Angular sería tan demostrativa como la actual.
+
+**Mapa:** queda aplazado por el usuario hasta que exista el dataset de ubigeo/centroide (§0.1); los 6–8 d-p de `avisa-map.tsx` siguen en las cifras medidas de §3 y no se suman al alcance a ejecutar.
 
 ---
 
@@ -552,7 +574,7 @@ export class SessionStore {
 | -------------------------------------------------------------------------- | --------------- | ------------------------------------------------------------------------------------------ |
 | `components/avisa-catalogs.ts`                                             | 266             | copiar constantes; renombrar a `models/catalogs.ts`                                        |
 | `components/avisa-ubigeo.ts`                                               | 88              | copiar; `as const` y helpers puros                                                         |
-| `components/avisa-demo-data.ts` (tipos)                                    | —               | copiar tipos a `models/`; las fixtures solo si se mantiene el modo demostración            |
+| `components/avisa-demo-data.ts` (tipos)                                    | —               | copiar tipos a `models/`; las fixtures **no** se copian: la app usa datos reales (M-02)    |
 | `frontend/types.ts`                                                        | 38              | copiar (`Session`, `Role`, `CaseRecord`, `DashboardData`)                                  |
 | `lib/db/scope.ts` (`DataScope`)                                            | 22              | copiar el tipo; la función es de servidor                                                  |
 | Helpers de `avisa-scope-filter.ts`                                         | ~120 de 360     | `isValidTimeRange`, `isWithinDemoWindow`, `normalizeAssignedRegions`, `isTerritoryVisible` |
@@ -592,7 +614,7 @@ src/
     data/
       models/        case.ts · alert.ts · commitment.ts · document.ts · session.ts
       catalogs/      catalogs.ts · ubigeo.ts
-      fixtures/      demo-data.ts            (solo modo demostración)
+      fixtures/      demo-data.ts            (no se usa: la app muestra datos reales, M-02)
       services/      cases.api.ts · alerts.api.ts · commitments.api.ts ·
                      documents.api.ts · search.api.ts · catalogs.api.ts
     state/
@@ -691,6 +713,8 @@ export const routes: Routes = [
 ];
 ```
 
+Este es el esqueleto propuesto; el árbol vigente está en `angular/src/app/app.routes.ts` (§0.1), y la ruta `mapa` del ejemplo no se implementa mientras el mapa siga aplazado.
+
 ### 12.4 `auth.interceptor.ts` de ejemplo
 
 ```ts
@@ -758,30 +782,30 @@ Replicar en este servidor los headers de `next.config.mjs`: `X-Content-Type-Opti
 ### 12.7 Checklist de arranque
 
 - [ ] Leer `docs/01_requisitos/ERS_AVISA_PRODUCE_v0.6.md` §18.1 y D-6 antes de escribir código.
-- [ ] Confirmar con OAIPCS/OGTI si el prototipo Angular será semilla de diciembre (§13).
+- [x] Confirmado: Angular es el frontend definitivo y el prototipo Angular es la semilla del entregable (§13 M-01).
 - [ ] Congelar E2E y capturas de la app React (fase 0) **antes** de crear el proyecto Angular.
 - [ ] Decidir idioma de UI (español) y locale (`es-PE`) desde `app.config.ts`.
 - [ ] Copiar `globals.css`, `theme-dark.generated.css` y `generate_dark_theme.mjs`; verificar `--check`.
 - [ ] Autoalojar DM Sans y Manrope; eliminar el `@import` remoto.
 - [ ] Añadir un reset mínimo y comparar con las capturas.
 - [ ] Definir `SessionStore` + `authGuard` + interceptor antes de la primera vista.
-- [ ] Decidir si se conserva el modo demostración con fixtures o se conecta a `v1` desde el inicio.
-- [ ] Estimar el mapa como tarea aparte (6–8 d-p) y cargarlo con `@defer`.
+- [x] Conectar a `v1` desde el inicio; no se copian fixtures (M-02). La interfaz muestra datos reales y las cuentas de verificación usan clave `demo`.
+- [ ] Estimar el mapa como tarea aparte (6–8 d-p) y cargarlo con `@defer`; hoy queda aplazado hasta que exista el dataset de ubigeo/centroide.
 - [ ] Configurar presupuesto de bundle y fallar el build si el mapa entra en el inicial.
 
 ---
 
 ## 13. Decisiones abiertas antes de implementar
 
-| ID   | Decisión                                                                               | Impacto si no se resuelve                           |
-| ---- | -------------------------------------------------------------------------------------- | --------------------------------------------------- |
-| M-01 | ¿El prototipo Angular será el entregable de diciembre o solo una referencia para OGTI? | define si se migran 13 vistas o solo PAN-01…PAN-10  |
-| M-02 | ¿Se conserva el modo demostración con `demo-data` o se conecta a `v1` desde el inicio? | +15–25 d-p y cambia el orden de las fases           |
-| M-03 | Librería de widgets: CDK puro vs. Material puntual                                     | afecta al theming y al CSS propio                   |
-| M-04 | ¿Se retira Tailwind por completo?                                                      | reset y verificación visual                         |
-| M-05 | ¿El BFF migra a .NET en diciembre o en 2027?                                           | determina si el proxy apunta a Next o a .NET        |
-| M-06 | Versión de Angular objetivo y estado de `httpResource`/Signal Forms                    | puede obligar a usar `HttpClient` + signals         |
-| M-07 | ¿Quién mantiene la suite E2E?                                                          | sin dueño, la red de seguridad se degrada en un mes |
+| ID   | Decisión                                                                                                                                                                                                         | Impacto si no se resuelve                           |
+| ---- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| M-01 | ~~¿El prototipo Angular será el entregable de diciembre o solo una referencia para OGTI?~~ **Resuelto:** Angular es el frontend definitivo del producto; la UI Next queda congelada como referencia de diseño    | — (resuelto)                                        |
+| M-02 | ~~¿Se conserva el modo demostración con `demo-data` o se conecta a `v1` desde el inicio?~~ **Resuelto:** se conecta a `v1` desde el inicio; no se mantiene el modo demostración y se retiran los datos ficticios | — (resuelto)                                        |
+| M-03 | Librería de widgets: CDK puro vs. Material puntual                                                                                                                                                               | afecta al theming y al CSS propio                   |
+| M-04 | ¿Se retira Tailwind por completo?                                                                                                                                                                                | reset y verificación visual                         |
+| M-05 | ¿El BFF migra a .NET en diciembre o en 2027?                                                                                                                                                                     | determina si el proxy apunta a Next o a .NET        |
+| M-06 | Versión de Angular objetivo y estado de `httpResource`/Signal Forms                                                                                                                                              | puede obligar a usar `HttpClient` + signals         |
+| M-07 | ¿Quién mantiene la suite E2E?                                                                                                                                                                                    | sin dueño, la red de seguridad se degrada en un mes |
 
 ---
 

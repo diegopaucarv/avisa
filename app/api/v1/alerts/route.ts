@@ -1,5 +1,11 @@
 import { ApiError, jsonError } from "@/lib/db/errors";
-import { jsonOk, queryParams, requireSession } from "@/lib/db/http";
+import {
+  conAliasDePagina,
+  jsonOk,
+  leerPagina,
+  queryParams,
+  requireSession,
+} from "@/lib/db/http";
 import {
   createAlert,
   listAlerts,
@@ -12,20 +18,13 @@ export const dynamic = "force-dynamic";
 
 const FILTERS = ["q", "caso", "prioridad", "nivel", "estado", "sort"] as const;
 
-function asInt(value: string | null): number | undefined {
-  if (!value || !/^\d{1,6}$/.test(value)) return undefined;
-  return Number(value);
-}
-
 export async function GET(request: Request) {
   try {
     const session = requireSession(request);
     const params = queryParams(request);
+    const { page, pageSize } = leerPagina(params);
 
-    const query: AlertListQuery = {
-      page: asInt(params.get("page")),
-      pageSize: asInt(params.get("pageSize")),
-    };
+    const query: AlertListQuery = { page, pageSize };
     for (const key of FILTERS) {
       const value = params.get(key);
       if (value) query[key] = value;
@@ -36,7 +35,7 @@ export async function GET(request: Request) {
       (client) => listAlerts(client, query),
     );
 
-    return jsonOk(result);
+    return jsonOk(conAliasDePagina(result));
   } catch (error) {
     return jsonError(error);
   }

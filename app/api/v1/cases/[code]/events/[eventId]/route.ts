@@ -1,5 +1,5 @@
 import { ApiError, jsonError } from "@/lib/db/errors";
-import { jsonOk, requireSession } from "@/lib/db/http";
+import { jsonOk, leerMotivo, requireSession } from "@/lib/db/http";
 import { deleteCaseEvent, updateCaseEvent } from "@/lib/db/repos/events";
 import { withSession } from "@/lib/db/tenant";
 
@@ -30,7 +30,13 @@ export async function PATCH(request: Request, context: Context) {
     const scope = { usuarioId: session.uid, rolCodigo: session.rol };
 
     const item = await withSession(scope, (client) =>
-      updateCaseEvent(client, scope, decoded, decodeURIComponent(eventId), body),
+      updateCaseEvent(
+        client,
+        scope,
+        decoded,
+        decodeURIComponent(eventId),
+        body,
+      ),
     );
 
     return jsonOk(item);
@@ -45,9 +51,16 @@ export async function DELETE(request: Request, context: Context) {
     const { code, eventId } = await context.params;
     const decoded = decodeURIComponent(code);
     const scope = { usuarioId: session.uid, rolCodigo: session.rol };
+    const motivo = await leerMotivo(request);
 
     await withSession(scope, (client) =>
-      deleteCaseEvent(client, scope, decoded, decodeURIComponent(eventId)),
+      deleteCaseEvent(
+        client,
+        scope,
+        decoded,
+        decodeURIComponent(eventId),
+        motivo,
+      ),
     );
 
     return jsonOk({ ok: true });

@@ -1,0 +1,167 @@
+<section class="view-body" aria-labelledby="titulo-compromisos">
+  <header class="view-head">
+    <div>
+      <h1 id="titulo-compromisos">Compromisos</h1>
+      <p class="view-subtitle">
+        Matriz de seguimiento de compromisos (Guía §8.3.2 y Anexo 14): cumplimiento, hitos y
+        vencimientos derivados de la intervención.
+      </p>
+    </div>
+  </header>
+
+  <div class="filter-bar">
+    <label class="search-field">
+      <app-icono nombre="buscar" [tamano]="14" />
+      <input
+        type="search"
+        placeholder="Buscar por código de compromiso o acción"
+        [value]="filtros().q"
+        aria-label="Buscar compromisos"
+        (input)="buscar($event)"
+      />
+    </label>
+
+    <label class="select-filter">
+      Estado
+      <select aria-label="Filtrar por estado" (change)="filtrarEstado($event)">
+        <option value="" [selected]="!filtros().estado">Todos</option>
+        @for (estado of estados; track estado) {
+          <option [value]="estado" [selected]="estado === filtros().estado">{{ estado }}</option>
+        }
+      </select>
+    </label>
+
+    <label class="select-filter">
+      Tipo
+      <select aria-label="Filtrar por tipo" (change)="filtrarTipo($event)">
+        <option value="" [selected]="!filtros().tipo">Todos</option>
+        @for (tipo of tipos; track tipo) {
+          <option [value]="tipo" [selected]="tipo === filtros().tipo">{{ tipo }}</option>
+        }
+      </select>
+    </label>
+
+    <label class="select-filter">
+      Nivel de gobierno
+      <select aria-label="Filtrar por nivel de gobierno" (change)="filtrarNivel($event)">
+        <option value="" [selected]="!filtros().nivelGobierno">Todos</option>
+        @for (nivel of niveles; track nivel) {
+          <option [value]="nivel" [selected]="nivel === filtros().nivelGobierno">
+            {{ nivel }}
+          </option>
+        }
+      </select>
+    </label>
+
+    <label class="select-filter">
+      Brecha de género
+      <select aria-label="Filtrar por atención a brecha de género" (change)="filtrarGenero($event)">
+        @for (genero of generos; track genero.valor) {
+          <option [value]="genero.valor" [selected]="genero.valor === filtros().atiendeGenero">
+            {{ genero.etiqueta }}
+          </option>
+        }
+      </select>
+    </label>
+
+    <button type="button" class="button-secondary" (click)="limpiar()">Limpiar filtros</button>
+  </div>
+
+  @if (estado() === 'inactivo' || estado() === 'cargando') {
+    <div class="empty-state" role="status">Cargando compromisos…</div>
+  } @else if (estado() === 'error') {
+    <div class="empty-state" role="alert">
+      <p>{{ error()?.message }}</p>
+      <button type="button" class="button-secondary" (click)="recargar()">Reintentar</button>
+    </div>
+  } @else if (compromisos().length === 0) {
+    <div class="empty-state">
+      <strong>Sin compromisos</strong>
+      <p>No hay compromisos para los filtros seleccionados.</p>
+    </div>
+  } @else {
+    <div class="table-wrap">
+      <table class="data-table">
+        <caption class="table-caption">
+          {{
+            resumenTabla()
+          }}
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">Código</th>
+            <th scope="col">Compromiso</th>
+            <th scope="col">Caso</th>
+            <th scope="col">Tipo</th>
+            <th scope="col">Unidad responsable</th>
+            <th scope="col">Estado</th>
+            <th scope="col">Vencimiento</th>
+            <th scope="col">Situación</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (compromiso of compromisos(); track compromiso.id) {
+            <tr class="fila-compromiso" (click)="abrir(compromiso)">
+              <td>
+                <button
+                  type="button"
+                  class="table-link"
+                  [attr.aria-label]="
+                    'Abrir el compromiso ' + compromiso.codigo + ': ' + compromiso.accion
+                  "
+                  (click)="abrir(compromiso); $event.stopPropagation()"
+                >
+                  {{ compromiso.codigo }}
+                </button>
+              </td>
+              <td class="celda-compromiso">{{ compromiso.accion }}</td>
+              <td>{{ compromiso.casoCodigo || '—' }}</td>
+              <td>{{ compromiso.tipo }}</td>
+              <td>{{ compromiso.unidad || '—' }}</td>
+              <td>
+                <span
+                  class="commit-status"
+                  [class.commit-cumplido]="compromiso.estado === 'Cumplido'"
+                  [class.commit-en-curso]="compromiso.estado === 'En proceso'"
+                >
+                  {{ compromiso.estado }}
+                </span>
+              </td>
+              <td class="celda-vencimiento">
+                @if (vencimiento(compromiso).fecha; as fechaVenc) {
+                  {{ fechaTexto(fechaVenc) }}
+                  <small>{{ origenTexto(vencimiento(compromiso).origen) }}</small>
+                } @else {
+                  <span class="due-state due-sin-fecha">Sin fecha</span>
+                  <small class="aviso-fecha"> Añada una fecha de vencimiento manual </small>
+                }
+              </td>
+              <td>
+                <span [class]="'due-state ' + situacion(compromiso).clase">
+                  {{ situacion(compromiso).etiqueta }}
+                </span>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+  @if (total() > 0) {
+    <app-paginacion
+      [pagina]="filtros().pagina"
+      [tamano]="filtros().tamano"
+      [total]="total()"
+      (paginaCambia)="cambiarPagina($event)"
+      (tamanoCambia)="cambiarTamano($event)"
+    />
+  }
+</section>
+
+@if (seleccionado(); as compromisoSel) {
+  <app-compromiso-panel
+    [compromiso]="compromisoSel"
+    (cerrado)="cerrarPanel()"
+    (actualizado)="alActualizar()"
+  />
+}

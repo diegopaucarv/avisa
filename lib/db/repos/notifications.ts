@@ -11,9 +11,16 @@ export type NotificationItem = {
   createdAt: string | Date | null;
 };
 
+export type NotificationListQuery = {
+  page?: number;
+  pageSize?: number;
+};
+
 export type NotificationListResult = {
   items: NotificationItem[];
   total: number;
+  page: number;
+  pageSize: number;
   generatedAt: string;
 };
 
@@ -28,9 +35,15 @@ const UNRESTRICTED_ROLES = new Set(["administrador", "direccion_oaipcs"]);
 export async function listNotifications(
   client: PoolClient,
   session: DbSession,
+  query: NotificationListQuery = {},
 ): Promise<NotificationListResult> {
   const unrestricted = UNRESTRICTED_ROLES.has(session.rolCodigo);
-  const params = unrestricted ? [] : [session.usuarioId];
+  const params: unknown[] = unrestricted ? [] : [session.usuarioId];
+
+  const page = Math.max(1, Math.trunc(query.page ?? 1));
+  const pageSize = Math.min(100, Math.max(1, Math.trunc(query.pageSize ?? 25)));
+  const limit = params.push(pageSize);
+  const offset = params.push((page - 1) * pageSize);
 
   const sql = `
     select n.id::text as id,
@@ -44,6 +57,7 @@ export async function listNotifications(
       from core.notificaciones n
       ${unrestricted ? "" : "where n.usuario_id = $1"}
      order by n.created_at desc, n.id
+     limit $${limit} offset $${offset}
   `;
 
   const result = await client.query(sql, params);
@@ -60,6 +74,8 @@ export async function listNotifications(
       createdAt: row.created_at as string | Date | null,
     })),
     total,
+    page,
+    pageSize,
     generatedAt: new Date().toISOString(),
   };
 }

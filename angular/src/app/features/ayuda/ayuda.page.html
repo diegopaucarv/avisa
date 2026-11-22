@@ -1,0 +1,87 @@
+<section class="view-body" aria-labelledby="titulo-ayuda">
+  <header class="view-head">
+    <div>
+      <p class="section-eyebrow">Consulta normativa</p>
+      <h1 id="titulo-ayuda">Ayuda y criterios</h1>
+      <p class="view-subtitle">
+        Definiciones, enfoques y reglas de la Guía de gestión de la conflictividad sectorial. El
+        contenido se carga con la página y se filtra aquí mismo: no hay llamadas a la API.
+      </p>
+    </div>
+  </header>
+
+  <div class="filter-bar">
+    <label class="search-field">
+      <app-icono nombre="buscar" [tamano]="14" />
+      <input
+        type="search"
+        placeholder="Buscar un término, una regla o un plazo"
+        aria-label="Buscar en la ayuda"
+        [value]="busqueda()"
+        (input)="buscar($event)"
+      />
+    </label>
+
+    @if (busqueda()) {
+      <button type="button" class="button-secondary" (click)="limpiar()">Limpiar</button>
+    }
+
+    <span class="result-count">{{ totalEntradas() }} entradas</span>
+  </div>
+
+  @if (seccionesFiltradas().length === 0) {
+    <div class="view-state view-state-empty">
+      <p class="view-state-title">Sin coincidencias</p>
+      <p class="view-state-description">
+        Ninguna entrada coincide con «{{ busqueda() }}». Prueba con otro término.
+      </p>
+      <button type="button" class="button-secondary" (click)="limpiar()">Limpiar búsqueda</button>
+    </div>
+  } @else {
+    <div class="help-body">
+      <nav class="help-nav" aria-label="Índice de la ayuda">
+        <p class="help-nav-label">Índice</p>
+        @for (seccion of seccionesFiltradas(); track seccion.id) {
+          <a [attr.href]="'#' + seccion.id">{{ seccion.titulo }}</a>
+        }
+      </nav>
+
+      <div class="help-content">
+        @for (seccion of seccionesFiltradas(); track seccion.id) {
+          <section class="help-section" [id]="seccion.id" tabindex="-1" [attr.aria-labelledby]="seccion.id + '-titulo'">
+            <h4 [id]="seccion.id + '-titulo'">{{ seccion.titulo }}</h4>
+
+            @if (seccion.fuente) {
+              <p class="help-fuente">{{ seccion.fuente }}</p>
+            }
+
+            @if (seccion.introduccion) {
+              <p>{{ seccion.introduccion }}</p>
+            }
+
+            <ul class="help-terms">
+              @for (entrada of seccion.entradas; track entrada.id) {
+                <li class="help-term" [id]="entrada.id" tabindex="-1">
+                  <strong>{{ entrada.termino }}</strong>
+                  <p>{{ entrada.definicion }}</p>
+
+                  @if (entrada.detalles?.length) {
+                    <ul>
+                      @for (detalle of entrada.detalles ?? []; track $index) {
+                        <li>{{ detalle }}</li>
+                      }
+                    </ul>
+                  }
+
+                  @if (entrada.fuente) {
+                    <small>{{ entrada.fuente }}</small>
+                  }
+                </li>
+              }
+            </ul>
+          </section>
+        }
+      </div>
+    </div>
+  }
+</section>

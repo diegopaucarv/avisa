@@ -44,6 +44,8 @@ Las siete sentencias, en el orden del archivo, con su texto literal.
 
 Los cuatro textos de auditoría son literalmente los que usan las tablas vecinas —`core.alertas_tempranas`, por ejemplo—, para que el diccionario no muestre dos voces para la misma columna. El de `alerta_id` añade el efecto del `ON DELETE CASCADE` porque es información que ninguna otra columna de la tabla revela. El de `motivo` sigue la voz del parche 23: describa para qué sirve y cuándo falta.
 
+_Posterior al parche (2026-11-22): la baja de una alerta es lógica desde `migration/12_anulacion_y_secuencia.sql` y `13_anulacion_segura.sql` (`anulado_en`; `core.anular_caso` la anula en cascada); el texto del comentario se conserva literal como se escribió._
+
 ---
 
 ## 3. Por qué, decisión por decisión

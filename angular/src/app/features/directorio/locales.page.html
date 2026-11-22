@@ -1,0 +1,236 @@
+<section class="view-body" aria-labelledby="titulo-locales">
+  <header class="view-head">
+    <div>
+      <h1 id="titulo-locales">Locales</h1>
+      <p class="view-subtitle">
+        Sedes y espacios disponibles para reuniones y espacios de diálogo, con su aforo,
+        equipamiento y ubicación (Guía §8.2.5 y Anexo 16, columna «Lugar»).
+      </p>
+    </div>
+    <p class="result-count" aria-live="polite">{{ total() }} locales</p>
+  </header>
+
+  <div class="filter-bar filter-bar-wrap">
+    <label class="search-field">
+      <app-icono nombre="buscar" [tamano]="14" />
+      <input
+        type="search"
+        placeholder="Buscar por nombre, código, distrito o dirección"
+        [value]="filtros().q"
+        aria-label="Buscar locales"
+        (input)="buscar($event)"
+      />
+    </label>
+
+    <label class="select-filter">
+      Activo
+      <select aria-label="Filtrar locales por estado activo" (change)="cambiarActivo($event)">
+        <option value="" [selected]="filtros().activo === ''">Todos</option>
+        <option value="true" [selected]="filtros().activo === 'true'">Sí</option>
+        <option value="false" [selected]="filtros().activo === 'false'">No</option>
+      </select>
+    </label>
+
+    <button type="button" class="button-secondary" (click)="limpiar()">Limpiar filtros</button>
+  </div>
+
+  @if (estado() === "error") {
+  <div class="empty-state" role="alert">
+    <strong>No se pudieron cargar los locales</strong>
+    <p>{{ error()?.message }}</p>
+    <button type="button" class="button-secondary" (click)="recargar()">Reintentar</button>
+  </div>
+  } @else if (locales().length === 0) { @if (estado() === "cargando" || estado() === "inactivo") {
+  <div class="empty-state" role="status">Cargando locales…</div>
+  } @else {
+  <div class="empty-state">
+    <strong>Sin locales para estos filtros</strong>
+    <p>No hay locales que coincidan con la búsqueda registrada.</p>
+  </div>
+  } } @else { @if (estado() === "cargando") {
+  <p class="local-actualizando" role="status">Actualizando el listado…</p>
+  }
+
+  <div class="table-wrap">
+    <table class="data-table">
+      <caption class="table-caption">
+        Pulse una fila para abrir la ficha en el panel lateral. El equipamiento se muestra como «—»
+        cuando la base no tiene el dato registrado.
+      </caption>
+      <thead>
+        <tr>
+          <th scope="col">Nombre</th>
+          <th scope="col">Distrito</th>
+          <th scope="col">Aforo</th>
+          <th scope="col">Proyector</th>
+          <th scope="col">Cómputo</th>
+          <th scope="col">Audio</th>
+          <th scope="col">Activo</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (local of locales(); track local.id) {
+        <tr
+          class="case-row-clickable"
+          [class.row-selected]="seleccionado()?.id === local.id"
+          (click)="abrir(local)"
+        >
+          <td>
+            <button
+              type="button"
+              class="table-link local-nombre"
+              [attr.aria-label]="'Abrir la ficha de ' + local.nombre"
+              (click)="abrir(local); $event.stopPropagation()"
+            >
+              <strong>{{ local.nombre }}</strong>
+              <small>{{ local.codigo }}</small>
+            </button>
+          </td>
+          <td>{{ local.distrito || "—" }}</td>
+          <td>{{ local.aforo ?? "—" }}</td>
+          <td>{{ siNo(local.tieneProyector) }}</td>
+          <td>{{ siNo(local.tieneEquiposComputo) }}</td>
+          <td>{{ siNo(local.tieneAudioMicro) }}</td>
+          <td>{{ local.activo ? "Sí" : "No" }}</td>
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  } @if (total() > 0 && estado() !== "error") {
+  <app-paginacion
+    [pagina]="filtros().pagina"
+    [tamano]="filtros().tamano"
+    [total]="total()"
+    (paginaCambia)="cambiarPagina($event)"
+    (tamanoCambia)="cambiarTamano($event)"
+  />
+  } @if (seleccionado(); as local) {
+  <div class="drawer-scrim" (click)="alFondo($event)" (keydown)="alTecla($event)">
+    <aside
+      #panel
+      class="drawer"
+      tabindex="-1"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="local-panel-titulo"
+    >
+      <header class="drawer-head">
+        <div class="ficha-cabecera">
+          <p class="ficha-etiqueta">{{ local.codigo }}</p>
+          <h2 id="local-panel-titulo">{{ local.nombre }}</h2>
+          <div class="ficha-badges">
+            @if (local.distrito) {
+            <span class="status-badge ficha-chip">{{ local.distrito }}</span>
+            } @if (local.activo) {
+            <span class="status-badge ficha-activo">
+              <app-icono nombre="check" [tamano]="11" />
+              Activo
+            </span>
+            } @else {
+            <span class="status-badge ficha-inactivo">
+              <app-icono nombre="reloj" [tamano]="11" />
+              Inactivo
+            </span>
+            }
+          </div>
+        </div>
+
+        <button
+          type="button"
+          class="icon-button"
+          aria-label="Cerrar la ficha del local"
+          (click)="cerrarPanel()"
+        >
+          <app-icono nombre="cerrar" [tamano]="18" />
+        </button>
+      </header>
+
+      <div class="drawer-body">
+        <section class="ficha-seccion" aria-labelledby="local-panel-ubicacion">
+          <h3 id="local-panel-ubicacion">Ubicación</h3>
+          <dl class="ficha-datos">
+            <div>
+              <dt>Distrito</dt>
+              <dd>{{ local.distrito || "—" }}</dd>
+            </div>
+            <div>
+              <dt>Dirección</dt>
+              <dd>{{ local.direccion || "—" }}</dd>
+            </div>
+            <div>
+              <dt>Referencia de ubicación</dt>
+              <dd>{{ local.ubicacionRef || "—" }}</dd>
+            </div>
+            <div>
+              <dt>Fotografía</dt>
+              <dd>
+                @if (local.fotoUrl; as enlace) {
+                <a [href]="enlace" target="_blank" rel="noopener">{{ enlace }}</a>
+                } @else { — }
+              </dd>
+            </div>
+          </dl>
+        </section>
+
+        <section class="ficha-seccion" aria-labelledby="local-panel-capacidad">
+          <h3 id="local-panel-capacidad">Capacidad y equipamiento</h3>
+          <dl class="ficha-datos">
+            <div>
+              <dt>Aforo</dt>
+              <dd>{{ local.aforo ?? "—" }}</dd>
+            </div>
+            <div>
+              <dt>Ingresos</dt>
+              <dd>{{ local.ingresos || "—" }}</dd>
+            </div>
+            <div>
+              <dt>Proyector</dt>
+              <dd>{{ siNo(local.tieneProyector) }}</dd>
+            </div>
+            <div>
+              <dt>Equipos de cómputo</dt>
+              <dd>{{ siNo(local.tieneEquiposComputo) }}</dd>
+            </div>
+            <div>
+              <dt>Audio y micrófono</dt>
+              <dd>{{ siNo(local.tieneAudioMicro) }}</dd>
+            </div>
+          </dl>
+        </section>
+
+        <section class="ficha-seccion" aria-labelledby="local-panel-contacto">
+          <h3 id="local-panel-contacto">Contacto del local</h3>
+          @if (!puedeVerPii()) {
+          <p class="ficha-nota">Su rol no permite ver los datos de contacto del local.</p>
+          } @else {
+          <dl class="ficha-datos">
+            <div>
+              <dt>Nombre</dt>
+              <dd>{{ local.contactoNombre || "—" }}</dd>
+            </div>
+            <div>
+              <dt>Celular</dt>
+              <dd>{{ local.contactoCelular || "—" }}</dd>
+            </div>
+            <div>
+              <dt>Correo</dt>
+              <dd>{{ local.contactoEmail || "—" }}</dd>
+            </div>
+          </dl>
+          }
+        </section>
+
+        <section class="ficha-seccion" aria-labelledby="local-panel-recomendacion">
+          <h3 id="local-panel-recomendacion">Recomendación</h3>
+          @if (local.recomendacion) {
+          <p class="ficha-recomendacion">{{ local.recomendacion }}</p>
+          } @else {
+          <p class="ficha-vacio">Sin recomendación registrada.</p>
+          }
+        </section>
+      </div>
+    </aside>
+  </div>
+  }
+</section>

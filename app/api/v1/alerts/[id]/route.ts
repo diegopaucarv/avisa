@@ -1,5 +1,5 @@
 import { ApiError, jsonError } from "@/lib/db/errors";
-import { jsonOk, requireSession } from "@/lib/db/http";
+import { jsonOk, leerMotivo, requireSession } from "@/lib/db/http";
 import { deleteAlert, getAlertById, updateAlert } from "@/lib/db/repos/alerts";
 import { withSession } from "@/lib/db/tenant";
 
@@ -74,8 +74,11 @@ export async function DELETE(
     const { id } = await context.params;
     const decoded = decodeURIComponent(id);
     const scope = { usuarioId: session.uid, rolCodigo: session.rol };
+    const motivo = await leerMotivo(request);
 
-    await withSession(scope, (client) => deleteAlert(client, scope, decoded));
+    await withSession(scope, (client) =>
+      deleteAlert(client, scope, decoded, motivo),
+    );
 
     return jsonOk({ ok: true });
   } catch (error) {

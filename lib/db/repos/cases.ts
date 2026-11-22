@@ -1,7 +1,7 @@
 import type { PoolClient } from "pg";
 import { auditChange } from "../audit";
-import { nextSequentialCode } from "../codes";
 import { ApiError } from "../errors";
+import { normalizarMotivo } from "./anulacion";
 
 const CASE_SELECT = `
   c.id,
@@ -585,13 +585,16 @@ async function resolveCatalog(
   raw: unknown,
 ): Promise<number> {
   if (typeof raw !== "string") invalid();
-  let value = raw.trim();
+  const value = raw.trim();
   if (!value) invalid();
-  // El estado se guarda con guiones bajos (En_seguimiento).
-  if (key === "estado") value = value.replace(/\s+/g, "_");
+  // Las etiquetas de catálogo llevan espacio y tilde (`En ejecución`), pero la
+  // API sigue aceptando `En_ejecucion`. `core.normalizar_ref` iguala ambas.
   const spec = CASE_CATALOGS[key];
-  const matches = [`lower(${spec.code}) = lower($1)`];
-  if (spec.alt) matches.push(`lower(${spec.alt}) = lower($1)`);
+  const matches = [
+    `core.normalizar_ref(${spec.code}) = core.normalizar_ref($1)`,
+  ];
+  if (spec.alt)
+    matches.push(`core.normalizar_ref(${spec.alt}) = core.normalizar_ref($1)`);
   const result = await client.query(
     `select id from ${spec.table} where ${matches.join(" or ")} order by id limit 1`,
     [value],
@@ -621,6 +624,21 @@ async function resolveCatalogOrDefault(
     key,
     raw === null || raw === undefined ? fallback : raw,
   );
+}
+
+/**
+ * Para catálogos donde «no informado» es un valor legítimo: la Guía pide una
+ * única temática principal, pero admite registrar un caso antes de
+ * clasificarlo. Devuelve `null` en vez de inventar una categoría.
+ */
+async function resolveOptionalCatalog(
+  client: PoolClient,
+  key: CatalogKey,
+  raw: unknown,
+): Promise<number | null> {
+  if (raw === null || raw === undefined) return null;
+  if (typeof raw === "string" && !raw.trim()) return null;
+  return resolveCatalog(client, key, raw);
 }
 
 function readRegionNames(
@@ -726,25 +744,26 @@ function insertSql(
 }
 
 /**
- * El código correlativo no lo protege una secuencia: dos altas simultáneas
- * pueden calcular el mismo sufijo. Se reintenta una vez dentro de un
- * savepoint para que el 23505 no aborte toda la transacción.
+ * El código lo emite el contador persistente de la base (`core.secuencia_codigo`
+ * a través de `core.siguiente_codigo_caso`), que es atómico: dos altas
+ * simultáneas reciben números distintos. Se conserva el savepoint para que un
+ * 23505 inesperado no aborte toda la transacción.
  */
 async function insertCaseRow(
   client: PoolClient,
+  subsectorId: number | null,
+  tematicaId: number | null,
   build: (codigo: string) => SqlField[],
 ): Promise<Record<string, any>> {
-  const year = new Date().getFullYear();
   let retried = false;
   for (;;) {
     await client.query("savepoint caso_insert");
     try {
-      const codigo = await nextSequentialCode(
-        client,
-        "core.casos",
-        "codigo_caso",
-        `CS-PRODUCE-${year}-`,
+      const coded = await client.query<{ codigo: string }>(
+        `select core.siguiente_codigo_caso($1::int, $2::int) as codigo`,
+        [subsectorId, tematicaId],
       );
+      const codigo = coded.rows[0].codigo;
       const { sql, params } = insertSql("core.casos", build(codigo));
       const result = await client.query(sql, params);
       await client.query("release savepoint caso_insert");
@@ -773,6 +792,21 @@ export async function createCase(
   if (!regionNames) invalid();
   const regions = await resolveRegions(client, regionNames);
 
+  // El código del caso se compone con estos dos catálogos, así que se resuelven
+  // antes de construir las columnas. La temática puede faltar: la Guía pide una
+  // temática principal, pero un caso se puede registrar antes de clasificarlo.
+  const tematicaId = await resolveOptionalCatalog(
+    client,
+    "tematica",
+    readField(body, ["tematica"]).value,
+  );
+  const subsectorId = await resolveCatalogOrDefault(
+    client,
+    "subsector",
+    readField(body, ["subsector"]).value,
+    "Sector-01",
+  );
+
   const fields: SqlField[] = [
     { column: "nombre_caso", value: title },
     { column: "region_principal_id", value: regions[0]?.id ?? null },
@@ -785,24 +819,8 @@ export async function createCase(
         "Bajo",
       ),
     },
-    {
-      column: "tematica_id",
-      value: await resolveCatalogOrDefault(
-        client,
-        "tematica",
-        readField(body, ["tematica"]).value,
-        "Otros",
-      ),
-    },
-    {
-      column: "subsector_id",
-      value: await resolveCatalogOrDefault(
-        client,
-        "subsector",
-        readField(body, ["subsector"]).value,
-        "Sector-03",
-      ),
-    },
+    { column: "tematica_id", value: tematicaId },
+    { column: "subsector_id", value: subsectorId },
     {
       column: "unidad_responsable_id",
       value: await resolveCatalogOrDefault(
@@ -898,7 +916,7 @@ export async function createCase(
     fields.push({ column: "origen_dato", value: origenValue(origen.value) });
   }
 
-  const row = await insertCaseRow(client, (codigo) => [
+  const row = await insertCaseRow(client, subsectorId, tematicaId, (codigo) => [
     { column: "codigo_caso", value: codigo },
     ...fields,
   ]);
@@ -1116,11 +1134,14 @@ export async function updateCase(
   return detail;
 }
 
-export async function deleteCase(
+export async function anularCase(
   client: PoolClient,
   session: WriteSession,
   code: string,
-): Promise<void> {
+  motivo?: string,
+): Promise<{ anulacionId: string }> {
+  const razon = normalizarMotivo(motivo);
+
   const current = await client.query(
     `select * from core.casos where codigo_caso = $1`,
     [code],
@@ -1128,25 +1149,19 @@ export async function deleteCase(
   const row = current.rows[0];
   if (!row) throw new ApiError(404, "El caso no existe.", "NOT_FOUND");
 
-  let deleted: { rows: Record<string, any>[] };
-  try {
-    deleted = await client.query(
-      `delete from core.casos where id = $1 returning id`,
-      [row.id],
-    );
-  } catch (error) {
-    if ((error as { code?: string }).code === "23503") {
-      throw new ApiError(
-        409,
-        "El registro tiene datos asociados; no se puede eliminar.",
-        "CONFLICT",
-      );
-    }
-    throw error;
+  const result = await client.query<{ data: { anulacionId?: string } }>(
+    `select core.anular_caso($1::uuid, $2) as data`,
+    [String(row.id), razon],
+  );
+  const anulacionId = result.rows[0]?.data?.anulacionId;
+  if (!anulacionId) {
+    throw new ApiError(500, "No se pudo anular el caso.", "ANULAR_FAILED");
   }
-  if (deleted.rows.length === 0) {
-    throw new ApiError(404, "El caso no existe.", "NOT_FOUND");
-  }
+
+  const after = await client.query<{ anulado_en: unknown }>(
+    `select anulado_en from core.casos where id = $1::uuid`,
+    [String(row.id)],
+  );
 
   await auditChange(client, {
     tabla: "core.casos",
@@ -1155,6 +1170,31 @@ export async function deleteCase(
     usuarioId: session.usuarioId,
     rolCodigo: session.rolCodigo,
     antes: pick(row, CASE_WRITE_COLUMNS),
-    despues: null,
+    despues: { anuladoEn: after.rows[0]?.anulado_en ?? null, motivo: razon },
   });
+
+  return { anulacionId: String(anulacionId) };
+}
+
+export async function deleteCase(
+  client: PoolClient,
+  session: WriteSession,
+  code: string,
+  motivo?: string,
+): Promise<void> {
+  await anularCase(client, session, code, motivo);
+}
+
+export async function restoreCase(
+  client: PoolClient,
+  code: string,
+): Promise<void> {
+  const current = await client.query(
+    `select id from core.casos where codigo_caso = $1`,
+    [code],
+  );
+  const row = current.rows[0];
+  if (!row) throw new ApiError(404, "El caso no existe.", "NOT_FOUND");
+
+  await client.query(`select core.restaurar_caso($1::uuid)`, [String(row.id)]);
 }

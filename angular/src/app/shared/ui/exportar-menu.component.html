@@ -1,0 +1,31 @@
+<div class="exportar">
+  <button
+    type="button"
+    class="button-secondary exportar-boton"
+    aria-haspopup="menu"
+    [attr.aria-expanded]="abierto()"
+    [disabled]="descargando() !== null"
+    (click)="alternar()"
+  >
+    <app-icono nombre="documentos" [tamano]="14" />
+    <span>{{ descargando() ? 'Generando…' : etiqueta() }}</span>
+    <app-icono nombre="chevron-abajo" [tamano]="14" />
+  </button>
+
+  @if (abierto()) {
+    <div class="menu" role="menu" aria-label="Formatos de exportación">
+      <button type="button" role="menuitem" (click)="descargar('json')">
+        JSON
+        <small>Datos estructurados (.json)</small>
+      </button>
+      <button type="button" role="menuitem" (click)="descargar('excel')">
+        Excel
+        <small>Hoja de cálculo (.xlsx)</small>
+      </button>
+      <button type="button" role="menuitem" (click)="descargar('pdf')">
+        PDF
+        <small>Tabla imprimible (.pdf)</small>
+      </button>
+    </div>
+  }
+</div>

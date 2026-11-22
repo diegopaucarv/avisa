@@ -22,11 +22,19 @@ idempotente. Catálogos verificados en base:
 | `core.cat_tipos_actor`       | 3 (+4 preexistentes) | `DIM_Tipo_Actor`    |
 | `core.cat_roles_funcionales` |                    4 | `DIM_Rol_Actor`     |
 
+> **Actualización (migraciones 14–15).** Las filas de arriba son las que sembró el
+> parche 1 y se conservan como foto de esa fecha. Hoy `core.cat_tematicas` tiene
+> **6** —la migración 15 retiró `Otros` tras reclasificar 2 casos y 48 demandas—;
+> `core.cat_subsectores` **2** —la 14 retiró `Gestión y Prevención de Conflictos`,
+> sin casos ni alertas—; y `core.cat_tipos_actor` **3** —la 14 retiró `NEC`,
+> `Exportador CITES`, `CITE` y `SANIPES`, sin usos—, con `Actor del Estado` →
+> `Actor público` y `Actor Sociedad Civil` → `Actor social`.
+
 Las 4 tablas que pediste sembrar están creadas y pobladas. Nota de nomenclatura:
 `dim_tipo_sector` **no** se sembró en una tabla `cat_sectores` (v9 no tiene ninguna);
 se sembró en `core.cat_subsectores`, que es la que consume `casos.subsector_id`.
 Lo mismo con `dim_rol_actor`: va a la tabla **nueva** `core.cat_roles_funcionales`,
-no a `core.cat_roles_actor` (esa es el eje relacional Principal/Secundario/Tercero).
+no a `core.cat_roles_actor` (esa es el eje relacional Principal/Secundario/Tercero imparcial).
 
 ---
 
@@ -129,7 +137,7 @@ No hay nada que fusionar: son **dos poblaciones distintas**.
 `DIM_Actores` = actores externos (pescadores, dirigentes, gremios).
 `DIM_Actores_Estado` = funcionarios de PRODUCE (Titular del Despacho, Secretario
 General, Jefe OCI). Se cargan las dos, la segunda con `tipo_actor_id = 1`
-(Actor del Estado). **D9 queda cancelada.**
+(Actor del Estado —canónico `Actor público`—). **D9 queda cancelada.**
 
 ### 2.4 La columna `demandas.alerta_id` es superset del bridge ⚠ (corrige D20)
 
@@ -264,25 +272,25 @@ no se inventan.**
 
 ### 4.2 Catálogos — 129 filas
 
-| Hoja                      | Filas | Destino                     | Nota                                                                                                                                                                                                                                                                                                                                   |
-| ------------------------- | ----: | --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `DIM_Tipo_Tematica`       |     7 | `cat_tematicas` ✅          | ⚠ descripciones de TEMA-03/TEMA-04 cruzadas. TEMA-03 (`Normatividad`) recibe el texto de "Distribución de beneficios"; TEMA-04 recibe un texto copiado de `DIM_Tipo_Caso TC-04`. El script guarda el bruto en `descripcion_legado`, deja `descripcion` NULL en TEMA-03 y marca `nota_calidad`. **OAIPCS debe redactar TEMA-03** (D15). |
-| `DIM_Tipo_Sector`         |     3 | `cat_subsectores` ✅        | `id_area_legado` = `AR-001/002/047`. `"Mype e Industria "` trae espacio final: normalizado.                                                                                                                                                                                                                                            |
-| `DIM_Tipo_Actor`          |     3 | `cat_tipos_actor` ✅        | ids 1–3; v9 ya tenía 4 filas (NEC, Exportador CITES, CITE, SANIPES) → total 7.                                                                                                                                                                                                                                                         |
-| `DIM_Rol_Actor`           |     4 | `cat_roles_funcionales` ✅  | `ROL-01..04`. `Descripcion` vacía en todas.                                                                                                                                                                                                                                                                                            |
-| `DIM_Tipo_Caso`           |     4 | `cat_niveles_conflicto`     | **Es la escala de 4 niveles de la Guía** (decisión h). No se inserta: ya existe y está protegida por trigger. Sólo se usa como tabla de mapeo.                                                                                                                                                                                         |
-| `DIM_Riesgos`             |     3 | `cat_niveles_riesgo`        | `RIE-001 Alto→3`, `RIE-002 Moderado→2`, `RIE-003 Bajo→1`. ⚠ `'Moderado '` con espacio final.                                                                                                                                                                                                                                           |
-| `DIM_Nivel_Alertas`       |     4 | `cat_niveles_alerta`        | `NA-001..NA-004`; `Categoria` = Reactivo/Preventivo.                                                                                                                                                                                                                                                                                   |
-| `DIM_Tipo_Cambio`         |     6 | `cat_tipos_cambio_caso` ✅  | ⚠ colisión `TC-xx` con `DIM_Tipo_Caso` (§2.6).                                                                                                                                                                                                                                                                                         |
-| `DIM_Perfil`              |     3 | `cat_perfiles_actor`        | **Nuevo en parche 1.** Dialogante / Legitimante / Disruptivo.                                                                                                                                                                                                                                                                          |
-| `DIM_Intervencion`        |     4 | `cat_ciclos_intervencion`   | **Nuevo en parche 1.** `Ciclo-001..004`.                                                                                                                                                                                                                                                                                               |
-| `DIM_Tipo_Org`            |     4 | `cat_tipos_organizacion` ✅ | `TIPO_ORG_001..004`.                                                                                                                                                                                                                                                                                                                   |
-| `DIM_Estado_Proceso`      |     5 | ⊘                           | Workflow inexistente en v9 (D17).                                                                                                                                                                                                                                                                                                      |
-| `DIM_Tipo_Proceso`        |     4 | ⊘                           | idem.                                                                                                                                                                                                                                                                                                                                  |
-| `DIM_Tipo_Actor_Radar`    |     3 | ⊘                           | D18 (RADAR diferido).                                                                                                                                                                                                                                                                                                                  |
-| `DIM_Recurso_Pesca`       |    37 | `cat_especies`              | ⚠ ver §4.12: **3 reutilizadas**, se insertan **34** (total **39**).                                                                                                                                                                                                                                                                    |
-| `DIM_Entidad_Responsable` |    23 | `entidades`                 | `codigo_legado = E-xxx` (parche 2). E-014 = PRODUCE = `id 1`, ya existe.                                                                                                                                                                                                                                                               |
-| `DIM_Responsable`         |     3 | ⊘                           | Puntero polimórfico sin valor.                                                                                                                                                                                                                                                                                                         |
+| Hoja                      | Filas | Destino                     | Nota                                                                                                                                                                                                                                                                                                                                                                                                 |
+| ------------------------- | ----: | --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `DIM_Tipo_Tematica`       |     7 | `cat_tematicas` ✅          | ⚠ descripciones de TEMA-03/TEMA-04 cruzadas. TEMA-03 (`Normatividad`) recibe el texto de "Distribución de beneficios"; TEMA-04 recibe un texto copiado de `DIM_Tipo_Caso TC-04`. El script guarda el bruto en `descripcion_legado`, deja `descripcion` NULL en TEMA-03 y marca `nota_calidad`. **OAIPCS debe redactar TEMA-03** (D15). La migración 15 retiró `Otros` y dejó el catálogo en 6 filas. |
+| `DIM_Tipo_Sector`         |     3 | `cat_subsectores` ✅        | `id_area_legado` = `AR-001/002/047`. `"Mype e Industria "` trae espacio final: normalizado a `MYPE e Industria`.                                                                                                                                                                                                                                                                                     |
+| `DIM_Tipo_Actor`          |     3 | `cat_tipos_actor` ✅        | ids 1–3; v9 ya tenía 4 filas (NEC, Exportador CITES, CITE, SANIPES) → total 7 en v9; la migración 14 las retira y deja 3.                                                                                                                                                                                                                                                                            |
+| `DIM_Rol_Actor`           |     4 | `cat_roles_funcionales` ✅  | `ROL-01..04`. `Descripcion` vacía en todas.                                                                                                                                                                                                                                                                                                                                                          |
+| `DIM_Tipo_Caso`           |     4 | `cat_niveles_conflicto`     | **Es la escala de 4 niveles de la Guía** (decisión h). No se inserta: ya existe y está protegida por trigger. Sólo se usa como tabla de mapeo.                                                                                                                                                                                                                                                       |
+| `DIM_Riesgos`             |     3 | `cat_niveles_riesgo`        | `RIE-001 Alto→3`, `RIE-002 Moderado→2`, `RIE-003 Bajo→1`. ⚠ `'Moderado '` con espacio final.                                                                                                                                                                                                                                                                                                         |
+| `DIM_Nivel_Alertas`       |     4 | `cat_niveles_alerta`        | `NA-001..NA-004`; `Categoria` = Reactivo/Preventivo.                                                                                                                                                                                                                                                                                                                                                 |
+| `DIM_Tipo_Cambio`         |     6 | `cat_tipos_cambio_caso` ✅  | ⚠ colisión `TC-xx` con `DIM_Tipo_Caso` (§2.6).                                                                                                                                                                                                                                                                                                                                                       |
+| `DIM_Perfil`              |     3 | `cat_perfiles_actor`        | **Nuevo en parche 1.** Dialogante / Legitimante / Conflictivo (el seed de v9 lo escribe `Disruptivo`).                                                                                                                                                                                                                                                                                               |
+| `DIM_Intervencion`        |     4 | `cat_ciclos_intervencion`   | **Nuevo en parche 1.** `Ciclo-001..004`.                                                                                                                                                                                                                                                                                                                                                             |
+| `DIM_Tipo_Org`            |     4 | `cat_tipos_organizacion` ✅ | `TIPO_ORG_001..004`.                                                                                                                                                                                                                                                                                                                                                                                 |
+| `DIM_Estado_Proceso`      |     5 | ⊘                           | Workflow inexistente en v9 (D17); **hoy cargado** por el parche 10 en `core.flujo_estado`.                                                                                                                                                                                                                                                                                                           |
+| `DIM_Tipo_Proceso`        |     4 | ⊘                           | idem; hoy en `core.flujo_definicion`.                                                                                                                                                                                                                                                                                                                                                                |
+| `DIM_Tipo_Actor_Radar`    |     3 | ⊘                           | D18 (RADAR diferido).                                                                                                                                                                                                                                                                                                                                                                                |
+| `DIM_Recurso_Pesca`       |    37 | `cat_especies`              | ⚠ ver §4.12: **3 reutilizadas**, se insertan **34** (total **39**).                                                                                                                                                                                                                                                                                                                                  |
+| `DIM_Entidad_Responsable` |    23 | `entidades`                 | `codigo_legado = E-xxx` (parche 2). E-014 = PRODUCE = `id 1`, ya existe.                                                                                                                                                                                                                                                                                                                             |
+| `DIM_Responsable`         |     3 | ⊘                           | Puntero polimórfico sin valor.                                                                                                                                                                                                                                                                                                                                                                       |
 
 ### 4.3 Organización interna — 168 filas
 
@@ -311,21 +319,21 @@ no perder el catálogo, pero **ninguna** debe usarse como tenant de unidades
 
 Mapeo de campos:
 
-| Origen               | Destino                                           | Regla                                                                                                          |
-| -------------------- | ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| `Nombre_Actor`       | `nombre_actual`                                   | truncar a 255                                                                                                  |
-| `DNI`                | → `actor_datos_personales.dni`                    | **PII, ver §4.4.1**                                                                                            |
-| `Telefono`           | → `actor_datos_personales.telefono_raw`           | viene como float (`'222.0'`) ⟳ normalizar                                                                      |
-| `Email`              | `email_contacto` + `actor_datos_personales.email` |                                                                                                                |
-| `Cargo`              | `cargo_actual`                                    |                                                                                                                |
-| `Abreviatura`        | `abreviatura`                                     | ⚠ hasta **115** chars → parche 2 ensancha a 150                                                                |
-| `Nivel_Gobierno`     | `nivel_gobierno`                                  | ⚠ CHECK sólo admite `Nacional/Regional/Local/Empresa/Sociedad_Civil`. `Perfil-01`(4), `Sí`(1) → **NULL** (D12) |
-| `Categoria`          | `rol_actor_id`                                    | `Actor Primario→1`, `Actor Secundario→2`; `ROL-01/02` y resto → **7** (`No_determinado`)                       |
-| `ID_Perfil`          | `perfil_id`                                       | `Perfil-0x`; `ROL-01`(1) → NULL                                                                                |
-| `ID_Ubigeo`          | `distrito_id`                                     | ⚠ `ID_Ubigeo` es `DEP-xx` (nivel departamento) → **NULL**                                                      |
-| `Fotografía`         | `foto_url`                                        |                                                                                                                |
-| `Activo`             | `activo`                                          | `Sí→true`, `No→false`, **NULL→true** (530 casos)                                                               |
-| `Descripcion_Perfil` | `perfil_descripcion`                              |                                                                                                                |
+| Origen               | Destino                                           | Regla                                                                                                                               |
+| -------------------- | ------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `Nombre_Actor`       | `nombre_actual`                                   | truncar a 255                                                                                                                       |
+| `DNI`                | → `actor_datos_personales.dni`                    | **PII, ver §4.4.1**                                                                                                                 |
+| `Telefono`           | → `actor_datos_personales.telefono_raw`           | viene como float (`'222.0'`) ⟳ normalizar                                                                                           |
+| `Email`              | `email_contacto` + `actor_datos_personales.email` |                                                                                                                                     |
+| `Cargo`              | `cargo_actual`                                    |                                                                                                                                     |
+| `Abreviatura`        | `abreviatura`                                     | ⚠ hasta **115** chars → parche 2 ensancha a 150                                                                                     |
+| `Nivel_Gobierno`     | `nivel_gobierno`                                  | ⚠ CHECK sólo admite `Nacional/Regional/Local/Empresa/Sociedad_Civil`. `Perfil-01`(4), `Sí`(1) → **NULL** (D12)                      |
+| `Categoria`          | `rol_actor_id`                                    | `Actor Primario→1`, `Actor Secundario→2`; `ROL-01/02` y resto → **7** (`No determinado`; el seed de v9 lo escribe `No_determinado`) |
+| `ID_Perfil`          | `perfil_id`                                       | `Perfil-0x`; `ROL-01`(1) → NULL                                                                                                     |
+| `ID_Ubigeo`          | `distrito_id`                                     | ⚠ `ID_Ubigeo` es `DEP-xx` (nivel departamento) → **NULL**                                                                           |
+| `Fotografía`         | `foto_url`                                        |                                                                                                                                     |
+| `Activo`             | `activo`                                          | `Sí→true`, `No→false`, **NULL→true** (530 casos)                                                                                    |
+| `Descripcion_Perfil` | `perfil_descripcion`                              |                                                                                                                                     |
 
 Campos fijos: `origen_dato='AVISA_HISTORICO'`, `confidence=1.00`,
 `es_validado_humano=true`, `nivel_clasificacion=2`.
@@ -380,9 +388,9 @@ más antiguo del actor. Las otras **254** no tienen fecha en el origen y entran 
 
 | Origen                                             | Destino                              | Regla                                                                                                                                                                       |
 | -------------------------------------------------- | ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ID_Caso`                                          | `codigo_caso` + `codigo_legado`      | 35/35 formato largo `CS-PRODUCE-2026-0NN`                                                                                                                                   |
+| `ID_Caso`                                          | `codigo_caso` + `codigo_legado`      | 35/35 formato largo `CS-PRODUCE-2026-0NN` en `codigo_legado`; `codigo_caso` pasa al formato nuevo de la migración 16 (p. ej. `CS-PA-INF-2026-01`)                           |
 | `Nombre_Caso`                                      | `nombre_caso`                        |                                                                                                                                                                             |
-| `ID_Tipo`                                          | `nivel_conflicto_id`                 | **decisión (h)**: `TC-01→1 Diferencia`, `02→2 Controversia`, `03→3 Conflicto_social`, `04→4 Crisis_social`. Cobertura **34/35**; `CS-PRODUCE-2026-024` sin `ID_Tipo` → NULL |
+| `ID_Tipo`                                          | `nivel_conflicto_id`                 | **decisión (h)**: `TC-01→1 Diferencia`, `02→2 Controversia`, `03→3 Conflicto social`, `04→4 Crisis social`. Cobertura **34/35**; `CS-PRODUCE-2026-024` sin `ID_Tipo` → NULL |
 | `ID_Riesgos`                                       | `nivel_riesgo_id`                    | 34/35. El faltante → derivar de `Prioridad` (D5/D27)                                                                                                                        |
 | `Prioridad`                                        | `prioridad_id`                       | `Urgente→1`, `Moderado→2`, `Bajo→3` (17/11/7)                                                                                                                               |
 | `ID_Sector`                                        | `subsector_id`                       | `Sector-01→1`, `Sector-02→2` (29/6). **`Sector-03` no se usa**                                                                                                              |
@@ -400,6 +408,10 @@ más antiguo del actor. Las otras **254** no tienen fecha en el origen y entran 
 | `Fecha_Cierre`/`Motivo_Cierre`                     | idem                                 | vacías                                                                                                                                                                      |
 | `N_Acciones`, `N_Hitos_Total`, `N_Hitos_Cumplidos` | ⊘                                    | **0 en los 35 casos**: no se cargan como verdad                                                                                                                             |
 | `Link_PDF_Drive`, envíos                           | ⊘                                    | vacíos en `FACT_Casos`                                                                                                                                                      |
+
+**Recodificación (Anexo 15).** `CS-PRODUCE-2026-0NN` queda como `codigo_legado`; el
+`codigo_caso` vigente es `CS-<PA|MI>-<INF|OAT|NOR|DBE|GOB|ITE>-<AAAA>-<NN>`, con `GEN`
+cuando falta subsector o temática, y el consecutivo lo lleva `core.secuencia_codigo`.
 
 Fijos: `entidad_id=1`, `estado_id=1 (Activo)`, `fuente_original='avisa_historico'`,
 `es_seed_historico=true`, `origen_dato='AVISA_HISTORICO'`, `confidence=1.00`.
@@ -439,30 +451,30 @@ inexistentes y tienen `fecha_cambio` = `TEMA-01` e `id_estado_nuevo` = fechas
 
 **`core.caso_cronologia` — 80 filas** ← `FACT_Hechos_Casos`
 
-| Origen                 | Destino                 | Regla                                                                                                 |
-| ---------------------- | ----------------------- | ----------------------------------------------------------------------------------------------------- |
-| `ID_Hecho`             | `codigo_legado`         | ⚠ 78 distintos de 80 (`HECHO-012`, `HECHO-047` duplicados) → sufijar el segundo                       |
-| `ID_Caso`              | `caso_id`               | 80/80 válidos                                                                                         |
-| `Fecha`                | `fecha_evento`          |                                                                                                       |
-| `Tipo_Hecho`           | `tipo_hecho_id`         | 9 valores ↔ 9 filas de `cat_tipos_hecho`, match 1:1 por nombre ✓                                      |
-| `Hecho_Crítico`        | `es_hecho_critico`      | `Sí/No` → boolean                                                                                     |
-| `Descripcion`          | `descripcion_hecho`     |                                                                                                       |
-| `ID_Sectorista`        | `sectorista_usuario_id` |                                                                                                       |
-| `Tipo_evidencia_hecho` | `tipo_evidencia_legado` |                                                                                                       |
-| `Link_Evidencia`       | `link_evidencia`        | 63/80                                                                                                 |
-| `ID_Alerta`            | ⊘                       | ⚠ 2 filas traen una **URL** en vez de `AT-xxxx`; el vínculo alerta↔hecho va por `cronologia_vinculos` |
+| Origen                 | Destino                 | Regla                                                                                                                                                                            |
+| ---------------------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ID_Hecho`             | `codigo_legado`         | ⚠ 78 distintos de 80 (`HECHO-012`, `HECHO-047` duplicados) → sufijar el segundo                                                                                                  |
+| `ID_Caso`              | `caso_id`               | 80/80 válidos                                                                                                                                                                    |
+| `Fecha`                | `fecha_evento`          |                                                                                                                                                                                  |
+| `Tipo_Hecho`           | `tipo_hecho_id`         | 9 valores → 7 filas de `cat_tipos_hecho`: `Protesta o Bloqueo` → `Bloqueo` y `Comunicado o documento` → `Comunicado` (fusión de la migración 15); el resto, match 1:1 por nombre |
+| `Hecho_Crítico`        | `es_hecho_critico`      | `Sí/No` → boolean                                                                                                                                                                |
+| `Descripcion`          | `descripcion_hecho`     |                                                                                                                                                                                  |
+| `ID_Sectorista`        | `sectorista_usuario_id` |                                                                                                                                                                                  |
+| `Tipo_evidencia_hecho` | `tipo_evidencia_legado` |                                                                                                                                                                                  |
+| `Link_Evidencia`       | `link_evidencia`        | 63/80                                                                                                                                                                            |
+| `ID_Alerta`            | ⊘                       | ⚠ 2 filas traen una **URL** en vez de `AT-xxxx`; el vínculo alerta↔hecho va por `cronologia_vinculos`                                                                            |
 
 **`core.documentos` — 153 filas**
 
-| Origen                       | Filas | `tipo_id`                                     | Regla                          |
-| ---------------------------- | ----: | --------------------------------------------- | ------------------------------ |
-| `DIM_Alertas.Link_PDF_Drive` |    83 | 13 `reporte_alerta_temprana`                  | `codigo = <ID_Alerta>_pdf`     |
-| `DIM_REDACCION`              |    51 | `Ayuda Memoria→10`, `Relatoria→11`, `Otro→15` | 34 `Otro`                      |
-| `DIM_COORDINACION_TECNICA`   |     4 | idem                                          |                                |
-| `DIM_Reporte_Rapido`         |     1 | 1 `reporte_rapido`                            | 25 columnas → `contenido_json` |
-| `DIM_ClimaSocial`            |     7 | 2 `clima_social_general`                      | idem                           |
-| `DIM_ClimaSocial_Focalizado` |     6 | 3 `clima_social_focalizado`                   | idem                           |
-| `FACT_Analisis_Casos`        |     1 | 6 `analisis_caso`                             | 26 columnas → `contenido_json` |
+| Origen                       | Filas | `tipo_id`                                     | Regla                                                                         |
+| ---------------------------- | ----: | --------------------------------------------- | ----------------------------------------------------------------------------- |
+| `DIM_Alertas.Link_PDF_Drive` |    83 | 13 `reporte_alerta_temprana` (Anexo N° 3)     | `codigo = <ID_Alerta>_pdf`; `anexo_numero = 3` (sembrado por la migración 14) |
+| `DIM_REDACCION`              |    51 | `Ayuda Memoria→10`, `Relatoria→11`, `Otro→15` | 34 `Otro`                                                                     |
+| `DIM_COORDINACION_TECNICA`   |     4 | idem                                          |                                                                               |
+| `DIM_Reporte_Rapido`         |     1 | 1 `reporte_rapido`                            | 25 columnas → `contenido_json`                                                |
+| `DIM_ClimaSocial`            |     7 | 2 `clima_social_general`                      | idem                                                                          |
+| `DIM_ClimaSocial_Focalizado` |     6 | 3 `clima_social_focalizado`                   | idem                                                                          |
+| `FACT_Analisis_Casos`        |     1 | 6 `analisis_caso`                             | 26 columnas → `contenido_json`                                                |
 
 Campos: `titulo`, `fecha`, `resumen_ejecutivo` (`Descripcion`/`Resumen`),
 `url_pdf` (`Link_Archivo`/`Link_PDF_Drive`), `url_lista`, `url_foto`,
@@ -506,34 +518,34 @@ Campos: `titulo`, `fecha`, `resumen_ejecutivo` (`Descripcion`/`Resumen`),
 
 **`core.alertas_tempranas` — 83 filas**
 
-| Origen                      | Destino                           | Regla                                                                                                                             |
-| --------------------------- | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| `ID_Alerta`                 | `codigo_alerta` + `codigo_legado` | ⚠ **81 distintos de 83**: `AT-2026-48` y `AT-2026-49` están duplicados → sufijar (`-bis`) el segundo (D32/D41)                    |
-| `ID_Caso_Vinculado`         | `caso_id`                         | 50/83; 33 → NULL (D1). 50/50 resuelven ✓                                                                                          |
-| `Sectorista`                | `sectorista_usuario_id`           | 83/83                                                                                                                             |
-| `Fecha`                     | `fecha_reporte`                   |                                                                                                                                   |
-| `ID_Ubigeo`                 | ⊘                                 | ⚠ es `DEP-xx` (departamento), no un distrito: no se usa para `distrito_id`                                                        |
-| `ID_Distrito`               | `distrito_id`                     | 41/83 `DIS-xxxx`, resueltos por ubigeo INEI; el resto → NULL                                                                      |
-| `Titulo_Alerta`             | `titulo`                          | máx. 470 → cabe en 500                                                                                                            |
-| `ID_Sector`                 | `subsector_id`                    | ⚠ guarda `AR-001/AR-002` (código de **área**) → `cat_subsectores.id_area_legado` (AR-001→1, AR-002→2). Columna nueva del parche 2 |
-| `Situacion_Actual`          | `situacion_actual`                |                                                                                                                                   |
-| `Hechos_Recientes`          | `hechos_recientes`                |                                                                                                                                   |
-| `ID_NIVEL_ALERTA`           | `nivel_alerta_id`                 | `NA-001..004`; 81/83                                                                                                              |
-| `ID_Riesgos`                | ⊘                                 | v9 guarda riesgo en el caso, no en la alerta                                                                                      |
-| `Descripcion_Riesgo_Alerta` | `descripcion_riesgo`              |                                                                                                                                   |
-| `Acciones_sugeridas`        | `acciones_sugeridas_json`         | `{"texto": …}`                                                                                                                    |
-| `Acciones_OAIPCS`           | `acciones_oaipcs`                 |                                                                                                                                   |
-| `Paso_Actual`               | `paso_actual`                     | 1 en todas                                                                                                                        |
-| `Link_PDF_Drive`            | → `documentos` tipo 13            |                                                                                                                                   |
-| `Estado`                    | `estado_legado`                   | `Archivado` en las 83                                                                                                             |
-| `Tipo_Fuente`               | `fuente_tipo`                     | 20/83                                                                                                                             |
-| `Descripción_Fuente`        | `fuente_descripcion`              | 18/83                                                                                                                             |
-| `Link_fuente`               | `fuente_url`                      | 5/83                                                                                                                              |
-| `ID_MESA_GRUPO`             | `mesa_id`                         | **vacío en las 83** → NULL                                                                                                        |
+| Origen                      | Destino                           | Regla                                                                                                                                              |
+| --------------------------- | --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ID_Alerta`                 | `codigo_alerta` + `codigo_legado` | ⚠ **81 distintos de 83**: `AT-2026-48` y `AT-2026-49` están duplicados → sufijar (`-bis`) el segundo (D32/D41)                                     |
+| `ID_Caso_Vinculado`         | `caso_id`                         | 50/83; 33 → NULL (D1). 50/50 resuelven ✓                                                                                                           |
+| `Sectorista`                | `sectorista_usuario_id`           | 83/83                                                                                                                                              |
+| `Fecha`                     | `fecha_reporte`                   |                                                                                                                                                    |
+| `ID_Ubigeo`                 | ⊘                                 | ⚠ es `DEP-xx` (departamento), no un distrito: no se usa para `distrito_id`                                                                         |
+| `ID_Distrito`               | `distrito_id`                     | 41/83 `DIS-xxxx`, resueltos por ubigeo INEI; el resto → NULL                                                                                       |
+| `Titulo_Alerta`             | `titulo`                          | máx. 470 → cabe en 500                                                                                                                             |
+| `ID_Sector`                 | `subsector_id`                    | ⚠ guarda `AR-001/AR-002` (código de **área**) → `cat_subsectores.id_area_legado` (AR-001→1, AR-002→2). Columna nueva del parche 2                  |
+| `Situacion_Actual`          | `situacion_actual`                |                                                                                                                                                    |
+| `Hechos_Recientes`          | `hechos_recientes`                |                                                                                                                                                    |
+| `ID_NIVEL_ALERTA`           | `nivel_alerta_id`                 | `NA-001..004`; 81/83                                                                                                                               |
+| `ID_Riesgos`                | ⊘                                 | v9 guarda riesgo en el caso, no en la alerta                                                                                                       |
+| `Descripcion_Riesgo_Alerta` | `descripcion_riesgo`              |                                                                                                                                                    |
+| `Acciones_sugeridas`        | `acciones_sugeridas_json`         | `{"texto": …}`                                                                                                                                     |
+| `Acciones_OAIPCS`           | `acciones_oaipcs`                 |                                                                                                                                                    |
+| `Paso_Actual`               | `paso_actual`                     | 1 en el legado; hoy 5 en las 83 (parche 22)                                                                                                        |
+| `Link_PDF_Drive`            | → `documentos` tipo 13            |                                                                                                                                                    |
+| `Estado`                    | `estado_legado`                   | `Archivado` en las 83; se presentan como **Atendidas** (estado derivado del flujo, `paso_actual = 5`) y `estado_legado` se conserva como evidencia |
+| `Tipo_Fuente`               | `fuente_tipo`                     | 20/83                                                                                                                                              |
+| `Descripción_Fuente`        | `fuente_descripcion`              | 18/83                                                                                                                                              |
+| `Link_fuente`               | `fuente_url`                      | 5/83                                                                                                                                               |
+| `ID_MESA_GRUPO`             | `mesa_id`                         | **vacío en las 83** → NULL                                                                                                                         |
 
-`prioridad_id` es `NOT NULL` en v9 y se deriva del nivel:
-`NA-001→1`, `NA-002→2`, `NA-003→3`, `NA-004→4`. ⚠ 2 alertas sin nivel
-(`AT-2026-80`, `AT-2026-59`) → ver D30.
+`prioridad_id` se deriva del nivel: `NA-001→1`, `NA-002→2`, `NA-003→3`,
+`NA-004→4`. Es NULL-able desde el parche 3, y las 2 alertas sin nivel
+(`AT-2026-80`, `AT-2026-59`) quedan en NULL (D47, que sustituye a D30).
 
 **`core.alertas_actores` — 161 filas** ← `BRIDGE_Alerta_Actor` (162) +
 `BRIDGE_Alerta_ActorEstado` (5) = 167 filas, 166 pares distintos.
@@ -566,14 +578,15 @@ Estrategia: **no** se usan `plan_acciones`/`planes_accion` (exigen un
 | `ID_Area`            | `unidad_responsable_id` | 4/8; resto → unidad OAIPCS (D26)                                                                                        |
 | —                    | `fecha_inicio`          | `NOT NULL`: usar `casos.fecha_inicio`                                                                                   |
 | —                    | `tipo_compromiso`       | `'Actividad'` (el CHECK sólo admite `Actividad`/`PIP`)                                                                  |
-| —                    | `estado_id`             | **2 (`En_proceso`)** — nunca `Cumplido`: el trigger `chk_compromiso` lanza excepción si estado `Cumplido` sin evidencia |
+| —                    | `estado_id`             | **2 (`En proceso`)** — nunca `Cumplido`: el trigger `chk_compromiso` lanza excepción si estado `Cumplido` sin evidencia |
 | `ID_PF`              | ⊘                       | va al hito si aplica                                                                                                    |
 
 **`core.hitos_compromiso` — 12 filas** ← `DIM_Hitos`
 
-`compromiso_id` ← `ID_Accion` mapeado; `codigo_hito = ID_Hitos` (`HIT-0001`,
-UNIQUE ✓); `descripcion_hito`; `fecha_vencimiento` ← `Fecha_Planificada`;
-`estado_id` ← `Estado_Hito` (`Cumplido→4`, `En curso→2`, `No Cumplido→1`).
+`compromiso_id` ← `ID_Accion` mapeado; `codigo_hito` se deriva
+`<codigo_compromiso>_H001` (`~ '_H[0-9]{3}$'`); `HIT-0001` sólo sobrevive en el
+respaldo previo a la migración 16; `descripcion_hito`; `fecha_vencimiento` ← `Fecha_Planificada`;
+`estado_id` ← `Estado_Hito` (`Cumplido→4`, `En curso→2` (`En ejecución`), `No Cumplido→1`).
 `validacion` ← `Validacion_Hito` (`Validado` en 12/12), `fecha_real`,
 `descripcion_evidencia` → columnas nuevas del parche 2.
 `Responsable_Hito` (`PF-xxx`, 3/12) → `compromiso_colaboradores` o se ignora.
@@ -688,6 +701,18 @@ reparte `DEP-15` + `DEP-16`, que colapsan en la región `15` y chocan contra
 | `FACT_RED_RADAR`, `FACT_NODO`, `BRIDGE_RADAR_Actor`, `BRIDGE_Nodo_Actor` | 1 + 1 + 1 + 3 | D18: RADAR diferido                                     |
 | `BRIDGE_Caso_{Descencadenantes,Impulsores,Causas,Medios}`                |       1+5+4+4 | van a `documentos.contenido_json` del análisis (tipo 6) |
 | `DIM_Responsable`                                                        |             3 | ⊘                                                       |
+
+> **Baja lógica, no `DELETE`.** «Descartar» aquí es no cargar la fila de origen; en la
+> base ninguna entidad se borra: `core.anular_caso(uuid, motivo)` marca `anulado_en`,
+> `anulado_por` y `motivo_anulacion` y anula en cascada caso, alertas, documentos,
+> compromisos, hitos, demandas y hechos (`caso_cronologia`); `core.restaurar_caso(uuid)`
+> revierte el lote. Base lista (migraciones 12 y 13 aplicadas); los endpoints
+> `anular`/`restaurar` de la API siguen pendientes.
+
+> **Actualización (parche 10, D17 resuelta).** Las 142 filas de workflow de este
+> cuadro ya tienen destino: `core.proceso_instancia` (135) y
+> `core.flujo_definicion` (7). El RADAR (D18) sigue diferido. La cifra **165** se
+> conserva porque cuenta filas de origen, no filas sin destino.
 
 ### 4.12 `cat_especies` — 37→39 filas (hallazgo nuevo)
 

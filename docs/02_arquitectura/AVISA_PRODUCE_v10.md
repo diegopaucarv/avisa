@@ -291,7 +291,7 @@ por caso inactivo)
 Esta taxonomía reemplaza al ENUM genérico `estado` de versiones
 anteriores. Se implementa como **catálogo cerrado** —`core.cat_estados_compromiso`,
 referenciado por `core.compromisos.estado_id`— y no como columna de texto libre
-ni como `ENUM`: los cinco códigos (`Por_iniciar`, `En_proceso`, `Cumplido`,
+ni como `ENUM`: los cinco códigos (`Por iniciar`, `En proceso`, `Cumplido`,
 `Redefinido`, `Desestimado`) viven en filas, con su `categoria` (Abierto/Cerrado)
 y su `es_terminal`.
 
@@ -3234,19 +3234,21 @@ OAIPCS (D5); el estado de gestión (`cat_estados_caso`) también (D4).
 ```mermaid
 stateDiagram-v2
     direction LR
+    state "Conflicto social" as ConflictoSocial
+    state "Crisis social" as CrisisSocial
     [*] --> Diferencia : Monitoreo (RED-RADAR)
     Diferencia --> Controversia : Alerta temprana (Anexo 3)
-    Controversia --> Conflicto_social : Escalamiento (paros, bloqueos)
-    Conflicto_social --> Crisis_social : Desborde o violencia
-    Crisis_social --> Conflicto_social : Contención
-    Conflicto_social --> Controversia : Desescalamiento parcial
+    Controversia --> ConflictoSocial : Escalamiento (paros, bloqueos)
+    ConflictoSocial --> CrisisSocial : Desborde o violencia
+    CrisisSocial --> ConflictoSocial : Contención
+    ConflictoSocial --> Controversia : Desescalamiento parcial
     Controversia --> Diferencia : Descenso de tensión
     Diferencia --> Resuelto : Cierre sin escalamiento
     Controversia --> Resuelto : Acuerdo cumplido
-    Conflicto_social --> Resuelto : Hitos cumplidos (PAE y Relatoría)
+    ConflictoSocial --> Resuelto : Hitos cumplidos (PAE y Relatoría)
     Resuelto --> Archivado : Evaluación post-resolución
     Archivado --> [*]
-    note right of Conflicto_social
+    note right of ConflictoSocial
       Niveles = hechos observables (Guía 7.5.1).
       Factores como clima o exportación NO son niveles:
       se registran en core.caso_factores.
@@ -3311,7 +3313,7 @@ El DDL completo (Sección 20, partes 20.0 a 20.28, y Sección 14) se ejecutó en
 | T71 | La vista de casos en controversia o conflicto sin reunión de diálogo en los últimos 30 días devuelve los esperados (UC-3)                                                                    | Especificada                                                               |
 | T72 | Un informe a la SGSD sale solo por `core.integraciones` como exportación aprobada, sin acceso directo a la base (UC-3)                                                                       | Especificada                                                               |
 | T73 | Una afirmación que cita una norma inexistente en el registro (p. ej. «falta el reglamento de la Ley N.° 31749») se rechaza por G15 (UC-2)                                                    | Especificada                                                               |
-| T74 | Requerimiento de Contraloría: reconstrucción completa de una alerta Crítica sin acceso a datos por encima del nivel del auditor (UC-5)                                                       | Especificada                                                               |
+| T74 | Requerimiento de Contraloría: reconstrucción completa de una alerta de prioridad `Crítica inmediata` sin acceso a datos por encima del nivel del auditor (UC-5)                              | Especificada                                                               |
 | T75 | Al pasar la fecha de vencimiento, `N-FEN-01` y las reglas que dependen de ella pasan a `vencida` y desaparecen del pie sin intervención (UC-1)                                               | Especificada (el mecanismo se ejecutó en T40)                              |
 
 Regeneración de diagramas: `gen_diagrams.py` (D1–D8) y `gen_diagrams_v83.py` (D9–D12) consultan `pg_attribute`, `pg_constraint` y `pg_index` sobre la base cargada y emiten los bloques Mermaid.
@@ -3550,6 +3552,21 @@ Cada una tiene RLS por clasificación **y** por sujeto (`mype_actor_uid` o `expo
 **La prueba de robustez:** un caso C101 hipotético se añade con `INSERT` en `domain.tipo_artefacto` + `domain.regla_negocio` + `config.parametro` (+ `model.model_card`/`config.aplicacion` si usa un modelo) — sin `CREATE TABLE`, sin `ALTER TABLE`, sin migración. Si ese caso resulta tener el volumen de consulta de un dashboard de producción con forma estable, se promueve a tabla real documentada como excepción (§0.6), igual que se hizo con los ocho de C4–C6.
 
 **Qué no cambia:** las 7 interfaces estables de v8.3 (`ind.indicador`+`ind.variante`, `ctx.cat_variables`+`ctx.observaciones`, `core.integraciones`, `kag.cat_tipos_nodo`+`kag.cat_tipos_arista`, `territorio.cat_tipos_lugar`+`core.cat_tipos_actor`+`core.cat_roles_actor`, `policy.regla`, `forecast.model_registry`) siguen intocables; `model.model_card` extiende la última sin romperla.
+
+### 3.quater.v10 Mecanismos de la capa de aplicación exigidos por la Guía — _añade a 3.quater (v10)_
+
+**Qué es y qué no es.** Estos mecanismos se resuelven en la capa de **aplicación** (API y UI) y el DDL no los modela; se anotan aquí para que la arquitectura no los dé por ausentes. Ninguno cambia el modelo de datos.
+
+- **Exportación (§8.4).** Toda vista y todo contrato de salida se exporta en **PDF, Excel y JSON**, incluido el **respaldo de entidad** y el **respaldo de la base completa**. Es una **decisión tomada y no implementada** (gap E5): hoy no existe ninguna de esas exportaciones.
+- **Paginación en servidor** en todas las listas: ninguna lista devuelve el conjunto completo en una sola respuesta. La **API ya pagina** (sobres con `items`, `total`, `page`, `pageSize`, `pagina` y `tamanoPagina`); la UI Angular la usa en las pantallas portadas y el resto sigue en migración.
+- **PII de un actor sin ficha.** Si el actor existe pero no tiene datos personales registrados, la respuesta es `200` con `null`, **nunca** `404`: el `404` afirmaría que el actor no existe.
+- **Alta mínima de caso.** Basta **un** atributo —el título— para registrar un caso y clasificarlo después; por eso el código de caso admite la sigla provisional `GEN` (§20.6).
+- **`fecha_vencimiento`.** Se registra a mano o se deriva del **próximo hito**; si el compromiso no tiene hitos, la UI la pide en un popup y no la calcula.
+- **Anulación no destructiva.** Ninguna entidad se borra: el ciclo de vida es lógico (§20.6). La **base está lista** (migraciones 12 y 13); **pendiente en la API**: los `DELETE` siguen siendo físicos y no existen endpoints `anular`/`restaurar` (gap E2).
+- **API en español.** Rutas y claves de la API en español: **decidido, pendiente** —las rutas siguen en inglés (`/api/v1/cases`, `/api/v1/alerts`, …) y la UI traduce—.
+- **`/api/dashboard` eliminado.** Los agregados se calculan con los totales de los listados paginados; la ruta no existe.
+- **Demandas sin caso.** Se ven como vista dentro de Casos, no como ruta de primer nivel: **decidido**, la pantalla existe y aún no está cableada.
+- **Panel lateral de edición.** El mismo panel de otras vistas se usa también en la línea de tiempo y en las alertas, sin saltar de pantalla: **decidido, en curso**.
 
 ## 4. Canal de ingesta: del WhatsApp al núcleo operativo
 
@@ -4171,7 +4188,7 @@ _Ejemplo (ILUSTRATIVO):_ caso con 120 empleos vinculados en cuadrante E3 → **3
 | KPI        | Insumos que necesita                                                                                                                                                                       | Qué hay hoy (medido el 2026-11-20)                                                                                                                                                                                                                           | ¿Calculable en diciembre de 2026?                                                                                      | Qué falta sembrar o qué vista crear                                                                                                                                                                      | Dependencia                                                                                                |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
 | `K1_IRE`   | `core.casos.nivel_conflicto_id`; `core.caso_cronologia`; `core.casos_actores`; `core.compromisos` y `core.hitos_compromiso`; `core.alertas_tempranas` y `core.permiso_aprobacion`; y el K4 | 35 casos (34 con nivel de conflicto); 80 hechos (0 en los últimos 14 días, 5 casos); 60 vínculos actor-caso (60 «Neutral»); 12 hitos (1 con fecha, ya cumplido); 83 alertas (0 en 14 días); `core.permiso_aprobacion` 0                                      | **Parcial.** Solo 2 de las 6 dimensiones tienen insumo y 4 no tienen ninguno. Sin los pesos, no hay índice que mostrar | `ind.indicador` + `ind.variante` de clase `proxy` + `ind.proxy_justificacion` (el trigger la exige); los 6 pesos en `config.parametro`; vista `analytics.vw_k1_ire`                                      | Calibración H-34 (informe SANIPES Sechura) y red de actores completa: **tramo 2 de 2027** (RF-J01, §17.15) |
-| `K2_ICC`   | `core.compromisos.estado_id`, el plazo del compromiso y `core.hitos_compromiso.fecha_vencimiento`                                                                                          | 8 compromisos, todos «En_proceso», 0 «Cumplido». **No hay columna de plazo en `core.compromisos`** (solo `criterios_smart` JSONB, vacío en las 8 filas). 12 hitos, 1 con `fecha_vencimiento`, y ese figura «Cumplido»                                        | **Parcial.** La fórmula corre, pero devuelve 0 ÷ 0: no hay denominador. El índice sería estadísticamente vacío         | Definir el plazo (columna `fecha_limite` o regla «plazo = primer hito no terminal»); cargar compromisos con plazo y estado final; `ind.variante` de clase `factible`; vista `analytics.vw_k2_icc`        | Decisión de modelado: §1.2.c exige vencimiento y §20.10 no lo tiene. Además, la carga de compromisos       |
+| `K2_ICC`   | `core.compromisos.estado_id`, el plazo del compromiso y `core.hitos_compromiso.fecha_vencimiento`                                                                                          | 8 compromisos, todos «En proceso», 0 «Cumplido». **No hay columna de plazo en `core.compromisos`** (solo `criterios_smart` JSONB, vacío en las 8 filas). 12 hitos, 1 con `fecha_vencimiento`, y ese figura «Cumplido»                                        | **Parcial.** La fórmula corre, pero devuelve 0 ÷ 0: no hay denominador. El índice sería estadísticamente vacío         | Definir el plazo (columna `fecha_limite` o regla «plazo = primer hito no terminal»); cargar compromisos con plazo y estado final; `ind.variante` de clase `factible`; vista `analytics.vw_k2_icc`        | Decisión de modelado: §1.2.c exige vencimiento y §20.10 no lo tiene. Además, la carga de compromisos       |
 | `K3_TAA`   | `core.alertas_tempranas.fecha_reporte` y la marca de decisión; `core.proceso_instancia.finalizado_en`; `nivel_alerta_id` para el SLA                                                       | 83 alertas con `fecha_reporte` (83 de 83) y 4 niveles distintos. `fecha_validacion` 0 de 83 y `fecha_remision` 0 de 83. 218 instancias de proceso (155 de alertas) con `finalizado_en` 0 de 155 y `ocurrido_en` igual a la fecha de reporte (carga heredada) | **Parcial.** Es el único con volumen real de hechos; lo que falta es una sola pieza: la marca de decisión              | Registrar la decisión (columna `fecha_decision` o cierre del paso de flujo con `finalizado_en`); `ind.variante` de clase `factible`; el SLA por nivel en `config.parametro`; vista `analytics.vw_k3_taa` | Solo operación: que el flujo registre la fecha. No requiere calibración estadística                        |
 | `K4_IPA`   | `core.casos_actores` (posicion, nivel_influencia); `kag.aristas` con tipos de tensión, posición e influencia, y su `intensidad`                                                            | 60 vínculos actor-caso, **todos «Neutral»**. 450 aristas con **`intensidad` 0 de 450** y solo tres tipos con filas (MIEMBRO_DE 292, EXIGE 98, PARTICIPA_EN 60). TENSION, EN_CONTRA_DE, A_FAVOR_DE e INFLUYE_SOBRE tienen 0 aristas                           | **No.** Sin relaciones tensas ni intensidad, el índice daría 0 por falta de dato, no por falta de polarización         | Registrar posición, influencia e intensidad (CU-23 y CU-24); después `ind.indicador` + `ind.variante` y vista `analytics.vw_k4_ipa`                                                                      | Grafo completo: 2027 (§17.15). La red completa es el prerrequisito de RF-J01, que se ordena en el tramo 2  |
 | `K5_ICD`   | La evaluación humana de las 6 condiciones con evidencia (`kag.documento_fuente`) y `ICD.ajuste_tope_puntos`                                                                                | No hay tabla de evaluación del ICD en el núcleo; `core.reuniones_dialogo` 0; `analisis.evaluacion_riesgo` no existe en la base. El parámetro `ICD.ajuste_tope_puntos` = 10 sí existe y `core.icd_aplicar_ajuste` está probada (Q40)                          | **Parcial.** Es juicio humano y no necesita calibración estadística, pero hoy no hay dónde guardarlo                   | Decidir dónde se persiste (tabla de evaluación, o `ind.seleccion` + `ind.resultado` por caso y período); `ind.indicador` + `ind.variante`                                                                | Decisión de persistencia y carga manual del analista                                                       |
@@ -4715,6 +4732,8 @@ tabla `core.roles` incluye esos cuatro más cinco técnicos y funcionales —**n
 | Agentes del sistema                                   | `servicio_agente`              | 3, con enrutamiento R-LLM (3.17) |
 | Control y auditoría                                   | `auditor`                      | 3, crea y edita; no borra        |
 
+**Capacidades de escritura.** Las decide la base con `core.roles.puede_crear`, `puede_editar` y `puede_eliminar` (parche 15; el nivel y las capacidades no viajan en el token, §11.9): `administrador` tiene todos los privilegios —crea, edita y elimina—; `sectorista` crea, edita y elimina; `direccion_oaipcs` crea y edita y no elimina; `servicio_agente`, `auditor`, `analista_cualitativo` y `curador_politica` crean y editan y no eliminan; `consulta_lectura`, `externo_publico` y `alta_direccion` no escriben. El detalle por columna está en la nota de §20.3.
+
 **Las aprobaciones no se dan por rol sino por permiso.** En el modelo de roles de OGTI la Dirección de la OAIPCS comparte el rol `sectorista` con el personal de campo; desde el parche 20 tiene además un rol propio, `direccion_oaipcs`, que es el que firma el paso 3 del flujo de alerta. `core.permiso_aprobacion` (usuario, objeto, vigencia) sigue siendo el mecanismo de las aprobaciones que no son ese paso: por ejemplo, exportar sin pseudonimizar o una suplencia. Hoy la tabla tiene 0 filas, porque no hay suplente designado, pero ya tiene consumidor: `core.puede_aprobar(uuid, text)` la consulta y `core.vw_permiso_aprobacion` la expone a la administración (parche 22). Sin filas a propósito: nombrar un suplente es un acto administrativo de la OAIPCS.
 
 **Matriz permiso × objeto para los objetos de las capas incorporadas** (RS-02).
@@ -4754,12 +4773,12 @@ RS-08 (altas, bajas y cambios de permisos) cubre los roles nuevos. Cada exportac
 
 > **Ejemplo (ILUSTRATIVO).** Un gremio de pescadores artesanales entra con su credencial. Ve tres compromisos del Estado hacia él (uno vencido, dos en plazo) y ninguna otra cosa: ni el resto de los casos, ni los otros actores, ni los análisis. Si cambia en la URL el identificador de un compromiso ajeno, recibe una respuesta vacía, no un error que confirme que existe.
 
-**Qué pasa con las aprobaciones.** Se mantiene la regla de v9: las aprobaciones no se dan por rol sino por permiso (`core.permiso_aprobacion`). En el MVP, **toda** alerta —grave o no— recorre dos niveles antes de salir: la **validación previa del Sectorista** y la **aprobación definitiva de la Dirección de la OAIPCS**. La crisis (nivel 1) conserva además el plazo ≤ 24 h y el destinatario Ministro (H-25 cerrado, RN-04). La gravedad decide **a quién** se avisa y **en cuánto tiempo**, no **quién** autoriza _(Alineado con ERS v0.6 §11.1/§14.4.)_ El gate lo impone la base y no la aplicación: el _trigger_ `alertas_g21_visibilidad` (parche 22) rechaza con `G21_SIN_APROBACION` cualquier `visibilidad` distinta de `interna` mientras falte una de las dos firmas, de modo que la alerta solo existe para la OAIPCS hasta entonces.
+**Qué pasa con las aprobaciones.** Se mantiene la regla de v9: las aprobaciones no se dan por rol sino por permiso (`core.permiso_aprobacion`). En el MVP, **toda** alerta —grave o no— recorre dos niveles antes de salir: la **validación previa del Sectorista** y la **aprobación definitiva de la Dirección de la OAIPCS**. La crisis (nivel 1) conserva además el plazo ≤ 24 h y el destinatario Ministro (H-25 cerrado, RN-04). La prioridad decide **a quién** se avisa y **en cuánto tiempo**, no **quién** autoriza _(Alineado con ERS v0.6 §11.1/§14.4.)_ El gate lo impone la base y no la aplicación: el _trigger_ `alertas_g21_visibilidad` (parche 22) rechaza con `G21_SIN_APROBACION` cualquier `visibilidad` distinta de `interna` mientras falte una de las dos firmas, de modo que la alerta solo existe para la OAIPCS hasta entonces.
 <!-- v10:P07 end -->
 
 ### 11.8.v10.bis Usuarios nominales, destinatarios y los tres catálogos de rol — _añade a 11.8 (v10)_
 
-**Cuántos usuarios hay en diciembre.** Son **11 puestos**: 7 de OAIPCS y 4 de Alta Dirección. Los 11 puestos son **11 personas**: el administrador es un **puesto nuevo** —el sistema anterior no traía una cuenta de administrador—; hoy el rol `administrador` está sobre la cuenta de la Directora, que acumula cuatro roles, y la cuenta propia del administrador se crea en diciembre. Las licencias Power BI Pro pasan de **7 a 11** (7 del equipo de la OAIPCS + 4 de la Alta Dirección); las 4 nuevas quedan **a confirmar con OGTI** (H-78).
+**Cuántos usuarios hay en diciembre.** Son **11 puestos**: 7 de OAIPCS y 4 de Alta Dirección. Los 11 puestos son **11 personas**: el administrador es un **puesto nuevo** —el sistema anterior no traía una cuenta de administrador—; el rol `administrador` ya no lo lleva la Directora: la migración 17 lo pasó a una cuenta de administración propia (`11111111`, «Admin») y a la Directora le dejó sólo `direccion_oaipcs`, y la cuenta nominal del administrador se crea en diciembre. Las licencias Power BI Pro pasan de **7 a 11** (7 del equipo de la OAIPCS + 4 de la Alta Dirección); las 4 nuevas quedan **a confirmar con OGTI** (H-78).
 
 | Grupo              | Puestos                                                                   | Total |
 | ------------------ | ------------------------------------------------------------------------- | :---: |
@@ -4768,14 +4787,16 @@ RS-08 (altas, bajas y cambios de permisos) cubre los roles nuevos. Cada exportac
 
 **Quiénes no son usuarios.** Las **jefaturas de gabinete** no tienen cuenta ni entran al sistema: son **destinatarios** de los envíos de alertas **no graves** (nivel 3, RN-02). La **Secretaría General ya no está en esta lista**: el **Secretario General** es usuario de Alta Dirección (el cuarto puesto), entra con el **Dashboard Estratégico como pantalla de inicio** y puede leer las vistas operativas, con **cada lectura de datos personales auditada**. Los **Gobiernos Regionales/Locales** y la **Ciudadanía** son usuarios finales de la **misión**, no del sistema en este MVP: acceden con el Perfil C en 2027 (H-54).
 
-**Las 32 cuentas migradas.** 28 están activas y 4 inactivas; el resto queda como **dato histórico precargado**, no como acceso del día 1. Sobre esas cuentas están en uso **cinco** roles de acceso: `consulta_lectura` (17), `sectorista` (15), `alta_direccion` (2), `administrador` (1) y `direccion_oaipcs` (1, la Directora, desde el parche 21) —**36 asignaciones sobre 31 personas**: la cuenta restante es el cargador de migración (`LEGADO_AVISA_2026`, sin rol), y una misma persona acumula varios roles —la Directora sola tiene cuatro—. `administrador` y `direccion_oaipcs` no vienen del sistema anterior: `administrador` no tenía cuenta migrada y hoy lo lleva la cuenta de la Directora; `direccion_oaipcs` nació con 0 cuentas en el parche 20 y el parche 21 se lo asignó a ella. Los otros cinco roles de `core.roles` (`auditor`, `servicio_agente`, `externo_publico`, `analista_cualitativo`, `curador_politica`) no tienen ninguna cuenta hoy.
+**Las 32 cuentas migradas.** 28 están activas y 4 inactivas; el resto queda como **dato histórico precargado**, no como acceso del día 1. Sobre esas cuentas están en uso **cinco** roles de acceso: `consulta_lectura` (17), `sectorista` (15), `alta_direccion` (2), `administrador` (1) y `direccion_oaipcs` (1, la Directora, desde el parche 21) —**36 asignaciones sobre 31 personas**, medido antes de la migración 17—: la cuenta restante es el cargador de migración (`LEGADO_AVISA_2026`, sin rol); después de la migración 17 la cuenta `11111111` («Admin») acumula todos los roles y la Directora sólo conserva `direccion_oaipcs`. `administrador` y `direccion_oaipcs` no vienen del sistema anterior: `administrador` no tenía cuenta migrada y desde la migración 17 lo lleva la cuenta `11111111`; `direccion_oaipcs` nació con 0 cuentas en el parche 20, el parche 21 se lo asignó a la Directora y la migración 17 le dejó ese como único rol (puede crear y editar, no eliminar). Los otros cinco roles de `core.roles` (`auditor`, `servicio_agente`, `externo_publico`, `analista_cualitativo`, `curador_politica`) no tienen ninguna cuenta dedicada: sólo los acumula la cuenta `11111111` desde la migración 17.
+
+**Credenciales tras la migración 17.** Cinco cuentas entran con la clave `demo`: `41907320` (`direccion_oaipcs`), `22222222` (`alta_direccion`, sólo lectura), `11111111` (todos los roles), `10654038` (`sectorista`) y `46078289` (`consulta_lectura` + `sectorista`). `core.autenticar_usuario()` devuelve como `rol_codigo` el rol de mayor jerarquía de la cuenta —`administrador` > `direccion_oaipcs` > `alta_direccion` > `sectorista` > `consulta_lectura` > …—, de modo que una cuenta con todos los roles entra como administradora y no como directora. Los conteos exactos de cuentas y asignaciones después de la migración 17 no se han vuelto a medir.
 
 **No confundir tres catálogos.**
 
 | Catálogo                     | Qué clasifica                                                                                        | Filas |
 | ---------------------------- | ---------------------------------------------------------------------------------------------------- | :---: |
 | `core.roles`                 | El rol de **acceso al sistema**; decide qué filas ve la sesión (RLS)                                 |  10   |
-| `core.cat_roles_actor`       | El rol de un **actor del conflicto** (Principal, Secundario, Tercero…)                               |   7   |
+| `core.cat_roles_actor`       | El rol de un **actor del conflicto** (Principal, Secundario, Tercero imparcial…)                     |   7   |
 | `core.cat_roles_funcionales` | El rol de ese actor **en el análisis** (decisor, proveedor de evidencia, implementador, articulador) |   4   |
 
 > Se parecen en el nombre y no se sustituyen: `core.roles` es seguridad de acceso; `core.cat_roles_actor` clasifica a quién protagoniza el conflicto; `core.cat_roles_funcionales` describe su papel en la lectura analítica. _(Alineado con ERS v0.6 §6.1.)_
@@ -5054,7 +5075,7 @@ Un escenario se construye con reglas de tipo `hipotesis_analitica` (2.bis): nunc
 | Resolver un impedimento del predio             | Cambia un ítem de la lista de control                               | Lista del predio                           |
 | Incidente adverso (violencia, bloqueo)         | Empeora «ausencia de violencia reciente» y sube el IRE              | Condición 5 del ICD; hechos                |
 
-**Qué devuelve.** Cuadrante resultante, banda de riesgo **Baja / Media / Alta** (no una probabilidad), indicadores **antes y después**, acciones del banco de intervención (OE3), **disparadores a vigilar** y supuestos usados. Cada simulación se guarda con insumos, resultado, usuario y versión de reglas (T103). El recorrido completo con números está en **UC-13** (§24.ter).
+**Qué devuelve.** Cuadrante resultante, banda de riesgo **Baja / Moderada / Alta** (no una probabilidad), indicadores **antes y después**, acciones del banco de intervención (OE3), **disparadores a vigilar** y supuestos usados. Cada simulación se guarda con insumos, resultado, usuario y versión de reglas (T103). El recorrido completo con números está en **UC-13** (§24.ter).
 
 **Calibración.** Los efectos de cada palanca se calibran con al menos cinco casos históricos y con el caso SANIPES Sechura antes de la demostración integral (Día 36 del plazo, MVP §1.5).
 <!-- v10:P09 end -->
@@ -5598,7 +5619,7 @@ curl -s https://[url-interna]/swagger/v1/swagger.json
   confirme: `api_rest_pide`, `batch_sftp` u `oficio_manual` (§15.5).
 - Definir dirección del sync (`tipo_sync`: push, pull o dual).
 - **Separar las tres taxonomías que el informe no debe mezclar:** la del compromiso local
-  (`core.cat_estados_compromiso`: Por_iniciar, En_proceso, Cumplido, Redefinido, Desestimado), la
+  (`core.cat_estados_compromiso`: Por iniciar, En proceso, Cumplido, Redefinido, Desestimado), la
   del trámite del lado externo (`core.integraciones.workflow_state`, texto libre) y la del mensaje
   de transporte (`core.cat_estados_integracion`, 8 códigos). El puente entre la primera y la
   tercera es `core.cat_mapeo_estado_externo`, sembrado en esta edición como **hipótesis**
@@ -5995,7 +6016,7 @@ flowchart TB
 
 **G20 — Cita literal.** Una cita solo se muestra si el servidor comprueba, de forma determinista, que el fragmento existe **literalmente** en el texto de la fuente (tras normalizar espacios y codificación) y que `offset_inicio`/`offset_fin` caen dentro del texto. Si no coincide, se descarta. _Ejemplo:_ la fuente dice «Dejen trabajar a la gente»; el modelo propone «Dejen trabajar a la gente de la caleta»; la cita se **descarta** porque la segunda versión no está en la fuente. Reason code: `G20_CITA_NO_LITERAL`.
 
-**G21 — Aprobación humana antes de visibilidad.** Ninguna alerta es visible para los perfiles B o C si no tiene registradas las **dos aprobaciones humanas**: la **validación previa del Sectorista** y la **aprobación definitiva de la Dirección de la OAIPCS** (`aprobada_por`, `aprobada_en`). Vale para **toda** alerta, grave o no: la gravedad decide el destinatario y el plazo, no quién autoriza (H-25, RN-04). Es el mismo principio del gate HITL de `core.outbox_integracion` (§15.6) aplicado a alertas, y lo impone la base, no la aplicación: el _trigger_ **`alertas_g21_visibilidad`** (`BEFORE INSERT OR UPDATE`, creado por el parche 22 junto con la columna `visibilidad`) rechaza con `G21_SIN_APROBACION` cualquier `visibilidad` distinta de `interna` mientras falte alguna de las dos. La columna que el gate lee, `core.alertas_tempranas.visibilidad`, es `varchar(12)` `NOT NULL DEFAULT 'interna'`, con `CHECK` de tres valores —**interna** (solo la OAIPCS), **ejecutiva** (visible al Perfil B) y **sectorial** (solo destinatarios nombrados)—: toda alerta nace y se queda en `interna` hasta que existan ambas firmas. Reason code: `G21_SIN_APROBACION`.
+**G21 — Aprobación humana antes de visibilidad.** Ninguna alerta es visible para los perfiles B o C si no tiene registradas las **dos aprobaciones humanas**: la **validación previa del Sectorista** y la **aprobación definitiva de la Dirección de la OAIPCS** (`aprobada_por`, `aprobada_en`). Vale para **toda** alerta, grave o no: la prioridad decide el destinatario y el plazo, no quién autoriza (H-25, RN-04). Es el mismo principio del gate HITL de `core.outbox_integracion` (§15.6) aplicado a alertas, y lo impone la base, no la aplicación: el _trigger_ **`alertas_g21_visibilidad`** (`BEFORE INSERT OR UPDATE`, creado por el parche 22 junto con la columna `visibilidad`) rechaza con `G21_SIN_APROBACION` cualquier `visibilidad` distinta de `interna` mientras falte alguna de las dos. La columna que el gate lee, `core.alertas_tempranas.visibilidad`, es `varchar(12)` `NOT NULL DEFAULT 'interna'`, con `CHECK` de tres valores —**interna** (solo la OAIPCS), **ejecutiva** (visible al Perfil B) y **sectorial** (solo destinatarios nombrados)—: toda alerta nace y se queda en `interna` hasta que existan ambas firmas. Reason code: `G21_SIN_APROBACION`.
 
 **G22 — Fuente permitida.** Solo se recolecta de fuentes en la lista blanca (§7.5.v10). Una fuente fuera de la lista, o una red social sin API oficial o proveedor licenciado, se rechaza y se registra. Reason code: `G22_FUENTE_NO_PERMITIDA`.
 
@@ -6426,7 +6447,7 @@ Se suman a las decisiones D1 a D9 de 0.6.6.
 **D18.** Política de retención de `mype.ejecucion_nec` y `pesca.licencia_cites_denp` — probablemente 10 años por normativa tributaria y aduanera, **sin verificar**.
 **D19.** Confirmado en v9 (§11.10.bis): RLS por actor en `mype` y `pesca`, con bypass para staff interno vía `app.staff_bypass_subject_rls`.
 **D20.** Ampliación de `core.cat_especies` con tiburones CITES — requiere coordinación con IMARPE.
-**D21.** `core.cat_mapeo_estado_externo` se siembra con tres filas **ilustrativas** (`En_Contratación`, `En_Elaboración_TDR`, `Vencido_Sin_Sustento` → `En_Cumplimiento_En_Plazo`/`En_Cumplimiento_Vencido`) porque el encargo de la edición del 30 de octubre las pide como demostración del mecanismo. No son la taxonomía real: los estados locales de este sistema son los cinco de `core.cat_estados_compromiso` (Por_iniciar, En_proceso, Cumplido, Redefinido, Desestimado), y la taxonomía del destino no está confirmada. Hasta que la Mesa Técnica Institucional (Fase 3, §15.7) la confirme, el worker **no debe usarlas en producción** — la tabla queda como hipótesis trazada en Q33, no como configuración vigente.
+**D21.** `core.cat_mapeo_estado_externo` se siembra con tres filas **ilustrativas** (`En_Contratación`, `En_Elaboración_TDR`, `Vencido_Sin_Sustento` → `En_Cumplimiento_En_Plazo`/`En_Cumplimiento_Vencido`) porque el encargo de la edición del 30 de octubre las pide como demostración del mecanismo. No son la taxonomía real: los estados locales de este sistema son los cinco de `core.cat_estados_compromiso` (Por iniciar, En proceso, Cumplido, Redefinido, Desestimado), y la taxonomía del destino no está confirmada. Hasta que la Mesa Técnica Institucional (Fase 3, §15.7) la confirme, el worker **no debe usarlas en producción** — la tabla queda como hipótesis trazada en Q33, no como configuración vigente.
 
 <!-- v10:P15 begin -->
 
@@ -6691,7 +6712,7 @@ CREATE TABLE core.cat_niveles_conflicto (   -- Guía §7.5.1: 4 niveles (los HEC
 );
 INSERT INTO core.cat_niveles_conflicto VALUES
  (1,'Diferencia','Diferencia',1),(2,'Controversia','Controversia',2),
- (3,'Conflicto_social','Conflicto social',3),(4,'Crisis_social','Crisis social',4);
+ (3,'Conflicto social','Conflicto social',3),(4,'Crisis social','Crisis social',4);
 
 CREATE TABLE core.cat_niveles_riesgo (      -- Guía §7.5.2: probabilidad de escalamiento (eje distinto al nivel)
     id SMALLINT PRIMARY KEY, codigo VARCHAR(20) NOT NULL UNIQUE, orden SMALLINT NOT NULL
@@ -6707,12 +6728,12 @@ CREATE TABLE core.cat_prioridades_alerta (   -- Anexo 3: SLA por prioridad
     id SMALLINT PRIMARY KEY, codigo VARCHAR(30) NOT NULL UNIQUE, sla_horas SMALLINT
 );
 INSERT INTO core.cat_prioridades_alerta VALUES
- (1,'Critica_Inmediata',24),(2,'Urgente',48),(3,'Temprana',72),(4,'Seguimiento',NULL);
+ (1,'Crítica inmediata',24),(2,'Urgente',48),(3,'Temprana',72),(4,'Seguimiento',NULL);
 
 CREATE TABLE core.cat_estados_caso (         -- A VALIDAR con OAIPCS (la Guía no lo enumera)
     id SMALLINT PRIMARY KEY, codigo VARCHAR(20) NOT NULL UNIQUE, es_activo BOOLEAN NOT NULL
 );
-INSERT INTO core.cat_estados_caso VALUES (1,'Activo',TRUE),(2,'En_seguimiento',TRUE),(3,'Resuelto',FALSE),(4,'Archivado',FALSE);
+INSERT INTO core.cat_estados_caso VALUES (1,'Activo',TRUE),(2,'En seguimiento',TRUE),(3,'Resuelto',FALSE),(4,'Archivado',FALSE);
 
 CREATE TABLE core.cat_alcances_geograficos (  -- Anexo 14, col. 6
     id SMALLINT PRIMARY KEY, codigo VARCHAR(20) NOT NULL UNIQUE
@@ -6725,14 +6746,14 @@ CREATE TABLE core.cat_estados_compromiso (   -- Protocolo SGSD/SSGC: 2 niveles e
     es_terminal BOOLEAN NOT NULL
 );
 INSERT INTO core.cat_estados_compromiso VALUES
- (1,'Por_iniciar','Abierto',FALSE),(2,'En_proceso','Abierto',FALSE),
+ (1,'Por iniciar','Abierto',FALSE),(2,'En proceso','Abierto',FALSE),
  (3,'Cumplido','Cerrado',TRUE),(4,'Redefinido','Cerrado',TRUE),(5,'Desestimado','Cerrado',TRUE);
 
 CREATE TABLE core.cat_estados_hito (
     id SMALLINT PRIMARY KEY, codigo VARCHAR(20) NOT NULL UNIQUE, es_terminal BOOLEAN NOT NULL
 );
 INSERT INTO core.cat_estados_hito VALUES
- (1,'Registrado',FALSE),(2,'En_ejecucion',FALSE),(3,'Paralizado',FALSE),(4,'Cumplido',TRUE),(5,'Desestimado',TRUE);
+ (1,'Registrado',FALSE),(2,'En ejecución',FALSE),(3,'Paralizado',FALSE),(4,'Cumplido',TRUE),(5,'Desestimado',TRUE);
 
 CREATE TABLE core.cat_pip_fases (id SMALLINT PRIMARY KEY, nombre VARCHAR(30) NOT NULL UNIQUE, orden SMALLINT NOT NULL);
 INSERT INTO core.cat_pip_fases VALUES (1,'Programacion',1),(2,'Pre_inversion',2),(3,'Inversion',3),
@@ -6760,8 +6781,8 @@ CREATE TABLE core.cat_unidades_organicas (
     id SERIAL PRIMARY KEY, entidad_id SMALLINT NOT NULL DEFAULT 1 REFERENCES core.entidades(id),
     siglas VARCHAR(20) NOT NULL, nombre_completo VARCHAR(255) NOT NULL, UNIQUE (entidad_id, siglas)
 );
-CREATE TABLE core.cat_tipos_actor (id SERIAL PRIMARY KEY, nombre VARCHAR(50) NOT NULL UNIQUE);   -- Social/Público/Privado
-CREATE TABLE core.cat_roles_actor (id SERIAL PRIMARY KEY, nombre VARCHAR(50) NOT NULL UNIQUE);   -- Principal/Secundario/Tercero
+CREATE TABLE core.cat_tipos_actor (id SERIAL PRIMARY KEY, nombre VARCHAR(50) NOT NULL UNIQUE);   -- Actor social / Actor público / Actor privado
+CREATE TABLE core.cat_roles_actor (id SERIAL PRIMARY KEY, nombre VARCHAR(50) NOT NULL UNIQUE);   -- Principal/Secundario/Tercero imparcial
 CREATE TABLE core.cat_tipos_documento (
     id SMALLINT PRIMARY KEY, codigo VARCHAR(40) NOT NULL UNIQUE, nombre VARCHAR(120) NOT NULL,
     anexo_numero SMALLINT, esquema_json JSONB          -- JSON Schema de contenido_json por tipo
@@ -6777,6 +6798,8 @@ CREATE TABLE core.cat_especies (
     id SMALLINT PRIMARY KEY, nombre_comun VARCHAR(80) NOT NULL UNIQUE, nombre_cientifico VARCHAR(120)
 );
 ```
+
+> **Nota (migraciones 14–19).** Los `INSERT` de arriba son los del DDL v8.3 validado; tras la alineación con la Guía, los catálogos de esta parte quedan así. `cat_niveles_conflicto` conserva los cuatro de §7.5.1 (`Diferencia`, `Controversia`, `Conflicto social`, `Crisis social`). `cat_niveles_riesgo` son `Bajo`, `Moderado` y `Alto` (§7.5.2), y `cat_prioridades_atencion` son `Urgente`, `Moderado` y `Bajo` (Anexo 15). `cat_prioridades_alerta` son `Crítica inmediata` (24 h), `Urgente` (48 h), `Temprana` (72 h) y `Seguimiento` (sin plazo): el SLA vive en `sla_horas`, nunca en la etiqueta. `cat_estados_caso` son `Activo`, `En seguimiento`, `Resuelto` y `Archivado`; `cat_estados_compromiso` son `Por iniciar`, `En proceso`, `Cumplido`, `Redefinido` y `Desestimado`; `cat_estados_hito` son `Registrado`, `En ejecución`, `Paralizado`, `Cumplido` y `Desestimado`. `cat_tematicas` son las seis de §7.6 (`Infraestructura`, `Ordenamiento y acceso territorial`, `Normatividad`, `Distribución de beneficios`, `Gobernanza`, `Impactos de terceros`) y `Otros` se retiró. `cat_subsectores` son `Pesca y Acuicultura` y `MYPE e Industria`. `cat_tipos_actor` usa el adjetivo en minúscula (`Actor social`, `Actor público`, `Actor privado`); `cat_roles_actor` incluye `Tercero imparcial` y `No determinado`; y `cat_perfiles_actor` —el posicionamiento del actor— usa `Dialogante`, `Legitimante` y `Conflictivo`. El catálogo `cat_niveles_alerta`, que este bloque no incluye, queda con `Inmediato`, `Táctico`, `Preventivo` y `Monitoreo`, también con su SLA en `sla_horas`. La API sigue resolviendo las etiquetas anteriores porque compara con `core.normalizar_ref()` (migración 18), que ignora mayúsculas, tildes y separadores.
 
 ### 20.2 Parte 2 — Geografía con clave natural UBIGEO (INEI)
 
@@ -6817,6 +6840,8 @@ CREATE TABLE core.usuario_roles (
     desde DATE NOT NULL DEFAULT CURRENT_DATE, hasta DATE, PRIMARY KEY (usuario_id, rol_id, desde)
 );
 ```
+
+> **Nota (parches 15 y 20).** El `INSERT` de arriba es el seed de v8.3: **siete** roles. La parte 27 de este mismo DDL añade `analista_cualitativo` (8) y `curador_politica` (9), y el parche 20 añadió `direccion_oaipcs`: **diez roles en la tabla viva**, cifra que confirma la migración 17 (§11.8). El parche 15 sumó las columnas de capacidad `puede_crear`, `puede_editar` y `puede_eliminar` (`boolean NOT NULL DEFAULT false`, con el `CHECK` que impide eliminar sin editar), y `core.puede_crear()`, `core.puede_editar()` y `core.puede_eliminar()` las leen de `core.roles` a partir de `app.rol_codigo` (§11.9). Capacidades vigentes: `administrador` tiene todos los privilegios —crea, edita y elimina—; `sectorista` crea, edita y **elimina**; `direccion_oaipcs` crea y edita, **no** elimina; `servicio_agente`, `auditor`, `analista_cualitativo` y `curador_politica` crean y editan, no eliminan; `consulta_lectura` y `externo_publico` no escriben; `alta_direccion` **no** crea, **no** edita y **no** elimina (nivel 3, solo lectura). Nivel máximo de clasificación: 3 salvo `curador_politica` (2), `consulta_lectura` (2) y `externo_publico` (1). `core.actor_datos_personales_descifrar` exige `clasificacion_max() >= 3`, de modo que descifran datos personales los sectoristas, la Dirección de la OAIPCS y la Alta Dirección; no `consulta_lectura` ni `externo_publico`.
 
 ### 20.4 Parte 4 — Actores (personas y organizaciones), PII separada
 
@@ -6970,6 +6995,8 @@ CREATE TABLE territorio.impacto_conflicto_planta (  -- ex supply_chain.conflict_
 );
 ```
 
+> **Nota (migraciones 12–19).** Este bloque es el DDL v8.3 validado; la tabla viva suma lo siguiente. **Código de caso (Anexo 15):** `codigo_caso` sigue el formato `CS-<PA|MI>-<INF|OAT|NOR|DBE|GOB|ITE|GEN>-<AAAA>-<NN>` (p. ej. `CS-PA-INF-2026-01`); `INF` lo fija la Guía, `OAT`, `NOR`, `DBE`, `GOB` e `ITE` son el acuerdo de la migración 16, y `GEN` cubre el caso sin subsector o sin temática (migración 19). Los 35 casos están recodificados y `codigo_legado` conserva el código anterior `CS-PRODUCE-…`, que es la clave estable del ETL. El código lo emiten `core.codigo_subsector(subsector_id)`, `core.codigo_tematica(tematica_id)` y `core.siguiente_codigo_caso(subsector_id, tematica_id)` —dos argumentos enteros—, con contador persistente en `core.secuencia_codigo` por año, subsector y temática; un número no se reutiliza nunca. Los códigos derivados cuelgan del de caso: el compromiso es `«caso»_COMP001` y el hito `«compromiso»_H001` (Anexo 14). **Anulación lógica:** en lugar de borrar, `casos`, `alertas_tempranas`, `compromisos`, `hitos_compromiso`, `documentos`, `demandas` y `caso_cronologia` llevan `anulado_en`, `anulado_por`, `anulacion_id` y `motivo_anulacion`; el filtro va en la política RLS de `SELECT` —no en cada consulta—, el motivo es obligatorio y `core.anular_caso()` anula en cascada bajo un mismo `anulacion_id`, que `core.restaurar_caso()` restaura. La cascada cubre caso → alertas, documentos, compromisos (con sus hitos), demandas y cronología (hechos). La migración 13 deja esas funciones como `SECURITY DEFINER` (`prosecdef = true`) y añade `core.anular_registro(tabla, id, motivo)`, `core.restaurar_registro(tabla, id)` para una fila suelta y la comprobación `core.exigir_anulacion(nivel)`. Los `ON DELETE CASCADE` que aparecen en el DDL de arriba son integridad referencial del esquema, no el mecanismo de baja: la baja es siempre lógica. **Estado:** base lista (migraciones 12 y 13); **pendiente en la API**, que sigue haciendo `DELETE` físicos y no expone endpoints `anular`/`restaurar` (gap E2). Un caso anulado desactiva sus alertas y deja de mostrarlas.
+
 ### 20.7 Parte 7 — Alertas
 
 ```sql
@@ -7000,6 +7027,8 @@ CREATE INDEX ix_deriv_pendientes ON core.derivaciones_alerta(fecha_limite) WHERE
 ```
 
 > **Nota (2026-11-20).** Este bloque es el DDL v8.3 validado; la tabla viva suma tres columnas posteriores: `aprobada_por` y `aprobada_en` (parche 21) y `visibilidad` —`varchar(12)` `NOT NULL DEFAULT 'interna'`, con `CHECK` de tres valores: interna, ejecutiva y sectorial— (parche 22). El gate G21 lee `visibilidad`, y el esquema vigente está en el DDL unificado y en el diccionario de datos.
+
+> **Nota (migraciones 14–19).** La alerta **no** lleva riesgo: el riesgo es atributo del **caso** (`core.casos.nivel_riesgo_id`, `Bajo`/`Moderado`/`Alto`) y el caso permite recalcularlo. La alerta describe el escenario y sus factores: en la base lleva `descripcion_riesgo` (texto), `riesgos_json` (factores) y `nivel_alerta_id` (FK a `core.cat_niveles_alerta`), más la prioridad (`core.cat_prioridades_alerta`, con su SLA en `sla_horas`); **no** tiene `nivel_riesgo_id`. Las 83 alertas del histórico están cargadas con la etiqueta heredada `estado_legado = 'Archivado'` y se documentan como **Atendida** (decisión D6; la migración de ese estado sigue pendiente).
 
 ### 20.8 Parte 8 — Documentos (política única: todo anexo documental es un documento tipado)
 
@@ -7104,7 +7133,7 @@ CREATE TABLE core.demandas_evidencias (
 ```sql
 CREATE TABLE core.compromisos (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    codigo_compromiso VARCHAR(60) NOT NULL UNIQUE CHECK (codigo_compromiso ~ '_COMP[0-9]{3}$'),   -- Anexo 14: <caso>_COMP00#
+    codigo_compromiso VARCHAR(60) NOT NULL UNIQUE CHECK (codigo_compromiso ~ '_COMP[0-9]{3}$'),   -- Anexo 14: <codigo_caso>_COMP001
     caso_id UUID NOT NULL REFERENCES core.casos(id) ON DELETE CASCADE, reunion_id UUID REFERENCES core.reuniones_dialogo(id),
     documento_origen_id UUID REFERENCES core.documentos(id), unidad_responsable_id INT NOT NULL REFERENCES core.cat_unidades_organicas(id),
     alcance_id SMALLINT REFERENCES core.cat_alcances_geograficos(id), tematica_id INT REFERENCES core.cat_tematicas(id),
@@ -7137,7 +7166,8 @@ CREATE TABLE core.compromiso_colaboradores (
 );
 CREATE TABLE core.hitos_compromiso (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(), compromiso_id UUID NOT NULL REFERENCES core.compromisos(id) ON DELETE CASCADE,
-    codigo_hito VARCHAR(70) NOT NULL UNIQUE, descripcion_hito TEXT NOT NULL, fecha_vencimiento DATE,
+    codigo_hito VARCHAR(70) NOT NULL UNIQUE,   -- Anexo 12/14: <codigo_compromiso>_H001 (p. ej. CS-PA-INF-2026-01_COMP001_H001)
+    descripcion_hito TEXT NOT NULL, fecha_vencimiento DATE,
     estado_id SMALLINT NOT NULL DEFAULT 1 REFERENCES core.cat_estados_hito(id)       -- caché del último estado histórico
 );
 CREATE INDEX ix_hitos_compromiso ON core.hitos_compromiso(compromiso_id);
@@ -7544,7 +7574,7 @@ SELECT d.id AS distrito_id, d.nombre AS distrito, p.id AS provincia_id, p.nombre
 CREATE VIEW analytics.vw_anexo_02_panorama_regional AS
 SELECT g.region, s.nombre AS subsector, COUNT(*) AS total_casos,
        COUNT(*) FILTER (WHERE nr.codigo = 'Alto') AS casos_riesgo_alto,
-       COUNT(*) FILTER (WHERE nc.codigo = 'Crisis_social') AS casos_crisis
+       COUNT(*) FILTER (WHERE nc.codigo = 'Crisis social') AS casos_crisis
   FROM core.casos c JOIN analytics.vw_geo_distrito g ON g.distrito_id = c.distrito_principal_id
   JOIN core.cat_subsectores s ON s.id = c.subsector_id JOIN core.cat_niveles_riesgo nr ON nr.id = c.nivel_riesgo_id
   JOIN core.cat_niveles_conflicto nc ON nc.id = c.nivel_conflicto_id JOIN core.cat_estados_caso e ON e.id = c.estado_id AND e.es_activo
@@ -7636,7 +7666,7 @@ venc AS (   -- pre-agregado: evita el producto cartesiano casos x hitos de la ve
     JOIN analytics.vw_geo_distrito g ON g.distrito_id = c.distrito_principal_id
    WHERE h.fecha_vencimiento < CURRENT_DATE GROUP BY g.region_id)
 SELECT b.region_id, b.region, COUNT(*) AS casos_activos, COUNT(*) FILTER (WHERE b.riesgo = 'Alto') AS riesgo_alto,
-       COUNT(*) FILTER (WHERE b.nivel = 'Crisis_social') AS crisis, COALESCE(MAX(v.n), 0) AS compromisos_vencidos,
+       COUNT(*) FILTER (WHERE b.nivel = 'Crisis social') AS crisis, COALESCE(MAX(v.n), 0) AS compromisos_vencidos,
        MAX(b.fecha_ultima_actualizacion) AS ultima_actividad, MAX(CURRENT_DATE - b.fecha_ultima_actualizacion::date) AS max_dias_estancado
   FROM base b LEFT JOIN venc v ON v.region_id = b.region_id GROUP BY b.region_id, b.region;
 CREATE UNIQUE INDEX ux_mv_dashboard ON analytics.mv_dashboard_alta_direccion(region_id);   -- permite REFRESH ... CONCURRENTLY
@@ -8819,7 +8849,7 @@ Los cuatro primeros casos usan las normas y hechos verificados en 1.5 y muestran
 
 ### UC-5 · Prueba transversal: requerimiento de Contraloría
 
-Dado un `output_contract` de una alerta de nivel Crítico, el sistema debe reconstruir en una sola consulta: la regla de política vigente (snapshot), el modelo y su versión, los fragmentos recuperados con sus rangos, los veredictos de guardrails, la pauta entregada y la decisión humana, y el estado del grafo en `conocido_en`. **Prueba T74:** reconstrucción completa y sin acceso a datos por encima del nivel del auditor.
+Dado un `output_contract` de una alerta de prioridad `Crítica inmediata`, el sistema debe reconstruir en una sola consulta: la regla de política vigente (snapshot), el modelo y su versión, los fragmentos recuperados con sus rangos, los veredictos de guardrails, la pauta entregada y la decisión humana, y el estado del grafo en `conocido_en`. **Prueba T74:** reconstrucción completa y sin acceso a datos por encima del nivel del auditor.
 
 ---
 
@@ -9227,7 +9257,7 @@ Estas son las automatizaciones que recomiendo implementar porque tienen alta fac
 **Automatización propuesta.**
 
 - **Trigger-based notifications:** usar `pg_cron` + `pg_notify` para disparar notificaciones automáticas cuando:
-  - Una alerta cambia a `Critica_Inmediata`.
+  - Una alerta cambia a `Crítica inmediata`.
   - Un compromiso cumple 7 días, 3 días, o vence sin evidencia.
   - Un hito lleva > 30 días sin actualización.
   - Una caleta lleva > 15 días sin reporte.

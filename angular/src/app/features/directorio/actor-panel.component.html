@@ -1,0 +1,195 @@
+<div class="drawer-scrim" (click)="alFondo($event)" (keydown)="alTecla($event)">
+  <aside
+    #panel
+    class="drawer"
+    tabindex="-1"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="actor-panel-titulo"
+  >
+    @if (actor(); as a) {
+      <header class="drawer-head">
+        <div class="actor-panel-cabecera">
+          <p class="actor-panel-etiqueta">{{ a.tipo || "Sin tipo de actor" }}</p>
+          <h2 id="actor-panel-titulo">{{ a.nombre }}</h2>
+          <div class="actor-panel-badges">
+            @if (a.abreviatura) {
+              <span class="status-badge actor-chip">{{ a.abreviatura }}</span>
+            }
+            <span class="status-badge actor-chip">{{ a.naturaleza }}</span>
+            @if (a.funcion) {
+              <span class="status-badge actor-chip">{{ a.funcion }}</span>
+            }
+            @if (a.posicionamiento) {
+              <span class="status-badge actor-chip">{{ a.posicionamiento }}</span>
+            }
+            @if (a.validado) {
+              <span class="status-badge actor-validado">
+                <app-icono nombre="check" [tamano]="11" />
+                Validado por humano
+              </span>
+            } @else {
+              <span class="status-badge actor-pendiente">
+                <app-icono nombre="reloj" [tamano]="11" />
+                Pendiente de validación
+              </span>
+            }
+          </div>
+        </div>
+
+        <button
+          type="button"
+          class="icon-button"
+          aria-label="Cerrar la ficha del actor"
+          (click)="cerrar.emit()"
+        >
+          <app-icono nombre="cerrar" [tamano]="18" />
+        </button>
+      </header>
+
+      <div class="drawer-body">
+        <section class="actor-seccion" aria-labelledby="actor-panel-caracterizacion">
+          <h3 id="actor-panel-caracterizacion">Caracterización</h3>
+          <dl class="actor-datos">
+            <div>
+              <dt>Naturaleza</dt>
+              <dd>{{ a.naturaleza }}</dd>
+            </div>
+            <div>
+              <dt>Tipo</dt>
+              <dd>{{ a.tipo || "—" }}</dd>
+            </div>
+            <div>
+              <dt>Función</dt>
+              <dd>{{ a.funcion || "No determinado" }}</dd>
+            </div>
+            <div>
+              <dt>Posicionamiento</dt>
+              <dd>{{ a.posicionamiento || "—" }}</dd>
+            </div>
+            <div>
+              <dt>Cargo</dt>
+              <dd>{{ a.cargo || "—" }}</dd>
+            </div>
+            <div>
+              <dt>Nivel de gobierno</dt>
+              <dd>{{ a.nivelGobierno || "—" }}</dd>
+            </div>
+            <div>
+              <dt>Categoría</dt>
+              <dd>{{ a.categoria || "—" }}</dd>
+            </div>
+          </dl>
+        </section>
+
+        <section class="actor-seccion" aria-labelledby="actor-panel-territorio">
+          <h3 id="actor-panel-territorio">Territorio y organización</h3>
+          <dl class="actor-datos">
+            <div>
+              <dt>Región</dt>
+              <dd>{{ a.region || "—" }}</dd>
+            </div>
+            <div>
+              <dt>Distrito</dt>
+              <dd>{{ a.distrito || "—" }}</dd>
+            </div>
+            <div>
+              <dt>Organización ancla</dt>
+              <dd>{{ a.organizacionAncla || "—" }}</dd>
+            </div>
+          </dl>
+        </section>
+
+        <section class="actor-seccion" aria-labelledby="actor-panel-registro">
+          <h3 id="actor-panel-registro">Registro</h3>
+          <dl class="actor-datos">
+            <div>
+              <dt>Validación</dt>
+              <dd>{{ a.validado ? "Validado por humano" : "Pendiente de validación" }}</dd>
+            </div>
+            <div>
+              <dt>Estado</dt>
+              <dd>{{ a.activo ? "Activo" : "Inactivo" }}</dd>
+            </div>
+          </dl>
+        </section>
+
+        <section class="actor-seccion" aria-labelledby="actor-panel-perfil">
+          <h3 id="actor-panel-perfil">Perfil</h3>
+          @if (a.perfil) {
+            <p class="actor-perfil">{{ a.perfil }}</p>
+          } @else {
+            <p class="actor-vacio">Sin descripción de perfil registrada.</p>
+          }
+        </section>
+
+        <section class="actor-seccion" aria-labelledby="actor-panel-pii">
+          <h3 id="actor-panel-pii">Datos personales</h3>
+
+          @if (!puedeVerPii()) {
+            <p class="actor-nota">Su rol no permite ver datos personales.</p>
+          } @else {
+            <div class="actor-pii">
+              <p class="actor-pii-aviso">
+                <app-icono nombre="candado" [tamano]="13" />
+                <span>
+                  El acceso a DNI y teléfonos queda registrado en la base con el usuario y el
+                  motivo de la consulta.
+                </span>
+              </p>
+
+              @switch (estadoPii()) {
+                @case ("inactivo") {
+                  <button type="button" class="button-secondary" (click)="solicitarPii()">
+                    <app-icono nombre="candado" [tamano]="14" />
+                    Ver DNI y teléfonos
+                  </button>
+                }
+                @case ("cargando") {
+                  <p class="actor-nota" role="status">Solicitando los datos personales…</p>
+                }
+                @case ("prohibido") {
+                  <p class="actor-error" role="alert">Su rol no permite ver datos personales.</p>
+                }
+                @case ("error") {
+                  <div class="actor-error" role="alert">
+                    <p>{{ errorPii() }}</p>
+                    <button type="button" class="button-secondary" (click)="solicitarPii()">
+                      Reintentar
+                    </button>
+                  </div>
+                }
+                @case ("listo") {
+                  @if (datos(); as ficha) {
+                    @if (ficha.vacio) {
+                      <p class="actor-vacio">El actor no tiene ficha de datos personales.</p>
+                    } @else {
+                      <dl class="actor-datos">
+                        <div>
+                          <dt>DNI</dt>
+                          <dd>{{ ficha.dni || "—" }}</dd>
+                        </div>
+                        <div>
+                          <dt>Correo</dt>
+                          <dd>{{ ficha.email || "—" }}</dd>
+                        </div>
+                        <div>
+                          <dt>Teléfono</dt>
+                          <dd>{{ ficha.telefono || "—" }}</dd>
+                        </div>
+                      </dl>
+                      <button type="button" class="button-secondary" (click)="ocultarPii()">
+                        <app-icono nombre="cerrar" [tamano]="13" />
+                        Ocultar datos
+                      </button>
+                    }
+                  }
+                }
+              }
+            </div>
+          }
+        </section>
+      </div>
+    }
+  </aside>
+</div>

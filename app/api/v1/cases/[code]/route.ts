@@ -1,5 +1,5 @@
 import { ApiError, jsonError } from "@/lib/db/errors";
-import { jsonOk, requireSession } from "@/lib/db/http";
+import { jsonOk, leerMotivo, requireSession } from "@/lib/db/http";
 import { deleteCase, getCaseByCode, updateCase } from "@/lib/db/repos/cases";
 import { withSession } from "@/lib/db/tenant";
 
@@ -74,8 +74,11 @@ export async function DELETE(
     const { code } = await context.params;
     const decoded = decodeURIComponent(code);
     const scope = { usuarioId: session.uid, rolCodigo: session.rol };
+    const motivo = await leerMotivo(request);
 
-    await withSession(scope, (client) => deleteCase(client, scope, decoded));
+    await withSession(scope, (client) =>
+      deleteCase(client, scope, decoded, motivo),
+    );
 
     return jsonOk({ ok: true });
   } catch (error) {

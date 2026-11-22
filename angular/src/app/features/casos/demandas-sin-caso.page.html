@@ -1,0 +1,227 @@
+<section class="view-body" aria-labelledby="titulo-demandas">
+  <header class="view-head">
+    <div>
+      <h1 id="titulo-demandas">Demandas sin caso</h1>
+      <p class="view-subtitle">
+        Demandas registradas que todavía no se vinculan a un caso. Se sistematizan con las 3P
+        de la Guía §8.1.2.1: problema, propuesta y pedido.
+      </p>
+    </div>
+    @if (total() > 0) {
+      <p class="result-count" aria-live="polite">
+        {{ sinCasoTotal() }} demandas sin caso
+      </p>
+    }
+  </header>
+
+  @if (aviso()) {
+    <p class="aviso-vinculo" role="status">{{ aviso() }}</p>
+  }
+
+  <div class="filter-bar">
+    <label class="search-field">
+      <app-icono nombre="buscar" [tamano]="14" />
+      <input
+        type="search"
+        placeholder="Buscar por descripción, problema o pedido"
+        [value]="filtros().q"
+        aria-label="Buscar demandas sin caso"
+        (input)="buscar($event)"
+      />
+    </label>
+
+    <label class="select-filter">
+      Estado
+      <select aria-label="Filtrar por estado de atención" (change)="cambiarEstado($event)">
+        <option value="" [selected]="!filtros().estado">Todos</option>
+        @for (estado of estados; track estado) {
+          <option [value]="estado" [selected]="estado === filtros().estado">
+            {{ estado }}
+          </option>
+        }
+      </select>
+    </label>
+
+    <button type="button" class="button-secondary" (click)="limpiar()">Limpiar filtros</button>
+  </div>
+
+  @if (estado() === 'error') {
+    <div class="empty-state" role="alert">
+      <strong>No se pudieron cargar las demandas</strong>
+      <p>{{ error()?.message }}</p>
+      <button type="button" class="button-secondary" (click)="recargar()">Reintentar</button>
+    </div>
+  } @else if (demandas().length === 0) {
+    @if (estado() === 'cargando' || estado() === 'inactivo') {
+      <div class="empty-state" role="status">Cargando demandas…</div>
+    } @else if (filtros().q || filtros().estado) {
+      <div class="empty-state">
+        <strong>Sin resultados</strong>
+        <p>No hay demandas sin caso para los filtros seleccionados.</p>
+      </div>
+    } @else {
+      <div class="empty-state">
+        <strong>No hay demandas sin caso</strong>
+        <p>Todas las demandas registradas están vinculadas a un caso.</p>
+      </div>
+    }
+  } @else {
+    <div class="table-wrap">
+      <table class="data-table">
+        <caption class="table-caption">
+          {{ total() }} demandas sin caso con los filtros aplicados. La vinculación exige permiso de
+          edición.
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">Descripción</th>
+            <th scope="col">Problema · Propuesta · Pedido</th>
+            <th scope="col">Estado</th>
+            <th scope="col">Registro</th>
+            <th scope="col">Temática</th>
+            <th scope="col">Afecta a mujeres</th>
+            @if (puedeVincular()) {
+              <th scope="col">Acción</th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (demanda of demandas(); track demanda.id) {
+            <tr>
+              <td class="celda-descripcion">
+                {{ demanda.descripcion || 'Sin descripción registrada' }}
+              </td>
+              <td class="celda-3p">
+                @for (parte of partes(demanda); track parte.etiqueta) {
+                  <span class="p3-linea">
+                    <strong>{{ parte.etiqueta }}</strong>{{ parte.valor }}
+                  </span>
+                } @empty {
+                  <span class="sin-dato">—</span>
+                }
+              </td>
+              <td>
+                <span [class]="'status-badge ' + claseEstado(demanda.estado)">
+                  <span class="status-dot"></span>
+                  {{ demanda.estado }}
+                </span>
+              </td>
+              <td class="celda-fecha">{{ fecha(demanda.fechaRegistro) }}</td>
+              <td>{{ demanda.tematica || '—' }}</td>
+              <td>
+                @if (demanda.afectaMujeres) {
+                  <span class="status-badge state-pending">Sí</span>
+                } @else {
+                  <span class="sin-dato">—</span>
+                }
+              </td>
+              @if (puedeVincular()) {
+                <td>
+                  <button
+                    type="button"
+                    class="button-secondary boton-vincular"
+                    [attr.aria-label]="'Vincular la demanda a un caso'"
+                    (click)="abrirVinculo(demanda)"
+                  >
+                    Vincular a un caso
+                  </button>
+                </td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  @if (total() > 0 && estado() !== 'error') {
+    <app-paginacion
+      [pagina]="filtros().pagina"
+      [tamano]="filtros().tamano"
+      [total]="total()"
+      (paginaCambia)="cambiarPagina($event)"
+      (tamanoCambia)="cambiarTamano($event)"
+    />
+  }
+</section>
+
+@if (demandaElegida(); as demandaActual) {
+  <div class="drawer-scrim" (click)="cerrarVinculo()">
+    <aside
+      class="drawer drawer-narrow"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="titulo-vincular"
+      (click)="$event.stopPropagation()"
+    >
+      <header class="drawer-head">
+        <div>
+          <p class="micro-label">Demanda sin caso</p>
+          <h2 id="titulo-vincular">Vincular a un caso</h2>
+          <p>{{ demandaActual.descripcion || 'Sin descripción registrada' }}</p>
+        </div>
+        <button
+          type="button"
+          class="button-secondary"
+          aria-label="Cerrar el panel de vinculación"
+          (click)="cerrarVinculo()"
+        >
+          Cerrar
+        </button>
+      </header>
+
+      <div class="drawer-body">
+        <label class="search-field">
+          <app-icono nombre="buscar" [tamano]="14" />
+          <input
+            type="search"
+            placeholder="Buscar caso por código, título o región"
+            aria-label="Buscar casos para vincular"
+            (input)="buscarCaso($event)"
+          />
+        </label>
+
+        @if (errorVinculo()) {
+          <p class="drawer-error" role="alert">{{ errorVinculo() }}</p>
+        }
+
+        @if (estadoCasos() === 'error') {
+          <p class="drawer-error" role="alert">{{ errorCasos()?.message }}</p>
+        } @else if (estadoCasos() === 'cargando' || estadoCasos() === 'inactivo') {
+          <p class="drawer-num" role="status">Buscando casos…</p>
+        } @else if (casos().length === 0) {
+          <p class="drawer-num">No hay casos que coincidan con la búsqueda.</p>
+        } @else {
+          <ul class="caso-lista">
+            @for (caso of casos(); track caso.codigo) {
+              <li>
+                <button
+                  type="button"
+                  class="caso-opcion"
+                  [disabled]="guardando()"
+                  [attr.aria-label]="'Vincular la demanda al caso ' + caso.codigo"
+                  (click)="vincular(caso)"
+                >
+                  <span class="caso-opcion-copia">
+                    <span class="caso-opcion-codigo">{{ caso.codigo }}</span>
+                    <span class="caso-opcion-titulo">{{ caso.titulo }}</span>
+                  </span>
+                  <span class="status-badge risk-{{ caso.riesgo.toLowerCase() }}">
+                    <span class="status-dot"></span>
+                    {{ caso.riesgo }}
+                  </span>
+                </button>
+              </li>
+            }
+          </ul>
+        }
+      </div>
+
+      <footer class="drawer-foot">
+        <button type="button" class="button-secondary" (click)="cerrarVinculo()">
+          Cancelar
+        </button>
+      </footer>
+    </aside>
+  </div>
+}

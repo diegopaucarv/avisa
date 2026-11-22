@@ -90,19 +90,19 @@ provienen del acta de cierre **[7]**.
 
 Estos conceptos significan lo mismo en los dos sistemas:
 
-| Concepto               | Sistema anterior                                                  | v10                                                                              | ¿Cambia el significado?                                                            |
-| ---------------------- | ----------------------------------------------------------------- | -------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| **Caso**               | `fact_casos` (35 filas)                                           | `core.casos` (35)                                                                | No. Se conserva el mismo código legible (`CS-PRODUCE-2026-007`)                    |
-| **Alerta temprana**    | `dim_alertas` (83)                                                | `core.alertas_tempranas` (83)                                                    | No                                                                                 |
-| **Demanda**            | `dim_demandas` (325)                                              | `core.demandas` (325)                                                            | **Sí en la forma**: una descripción libre pasa a tener problema y pedido separados |
-| **Actor**              | `dim_actores` + `dim_actores_estado` + `dim_organizacion` (1 160) | `core.actores` + `organizaciones` + `actor_datos_personales` + `actor_membresia` | El concepto no; el nivel de detalle sí                                             |
-| **Hecho o cronología** | `fact_hechos_casos` (80)                                          | `core.caso_cronologia` (80)                                                      | No                                                                                 |
-| **Compromiso o hito**  | `dim_acciones_hitos` (8) + `dim_hitos` (12)                       | `core.compromisos` + `hitos_compromiso`                                          | Cambia de qué depende (ver §3.2)                                                   |
-| **Documento**          | 8 tablas de documentos + PDFs en Drive                            | `core.documentos` (153) + tabla de 15 tipos                                      | El concepto no; el formato de entrega sí                                           |
-| **Mesa de diálogo**    | `dim_mesas_grupos` (21)                                           | `core.mesas_dialogo` (21) + `mesa_miembros` (62)                                 | No; la v10 la trata como una entidad propia                                        |
-| **Local o sede**       | `dim_locales` (27)                                                | `core.locales` (27)                                                              | No                                                                                 |
-| **Usuario y rol**      | `dim_sectoristas` + `dim_pf` + `dim_autoridades` (34)             | `core.usuarios` (32) + `usuario_roles` (35)                                      | Cambia cómo se entra al sistema, no el rol                                         |
-| **Envío**              | `LOG_Envios` (17)                                                 | `core.envios_comunicacion` (17)                                                  | No                                                                                 |
+| Concepto               | Sistema anterior                                                  | v10                                                                              | ¿Cambia el significado?                                                                |
+| ---------------------- | ----------------------------------------------------------------- | -------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| **Caso**               | `fact_casos` (35 filas)                                           | `core.casos` (35)                                                                | No. `codigo_legado` conserva `CS-PRODUCE-2026-007`; `codigo_caso` usa el formato nuevo |
+| **Alerta temprana**    | `dim_alertas` (83)                                                | `core.alertas_tempranas` (83)                                                    | No                                                                                     |
+| **Demanda**            | `dim_demandas` (325)                                              | `core.demandas` (325)                                                            | **Sí en la forma**: una descripción libre pasa a tener problema y pedido separados     |
+| **Actor**              | `dim_actores` + `dim_actores_estado` + `dim_organizacion` (1 160) | `core.actores` + `organizaciones` + `actor_datos_personales` + `actor_membresia` | El concepto no; el nivel de detalle sí                                                 |
+| **Hecho o cronología** | `fact_hechos_casos` (80)                                          | `core.caso_cronologia` (80)                                                      | No                                                                                     |
+| **Compromiso o hito**  | `dim_acciones_hitos` (8) + `dim_hitos` (12)                       | `core.compromisos` + `hitos_compromiso`                                          | Cambia de qué depende (ver §3.2)                                                       |
+| **Documento**          | 8 tablas de documentos + PDFs en Drive                            | `core.documentos` (153) + tabla de 15 tipos                                      | El concepto no; el formato de entrega sí                                               |
+| **Mesa de diálogo**    | `dim_mesas_grupos` (21)                                           | `core.mesas_dialogo` (21) + `mesa_miembros` (62)                                 | No; la v10 la trata como una entidad propia                                            |
+| **Local o sede**       | `dim_locales` (27)                                                | `core.locales` (27)                                                              | No                                                                                     |
+| **Usuario y rol**      | `dim_sectoristas` + `dim_pf` + `dim_autoridades` (34)             | `core.usuarios` (32) + `usuario_roles` (35)                                      | Cambia cómo se entra al sistema, no el rol                                             |
+| **Envío**              | `LOG_Envios` (17)                                                 | `core.envios_comunicacion` (17)                                                  | No                                                                                     |
 
 **Las tres cosas que importan:**
 
@@ -112,7 +112,7 @@ Estos conceptos significan lo mismo en los dos sistemas:
    (decisión D13). Las decisiones D1 a D51 están en **[4]**.
 2. **Los códigos siguen sirviendo para buscar.** `CS-PRODUCE-2026-007`,
    `AT-2026-01` o `RECU-008`: quien hoy busca un caso por su código lo sigue
-   encontrando igual.
+   encontrando igual, porque el original se conserva en `codigo_legado`.
 3. **La naturaleza del conflicto tampoco cambia.** Cambia cuántas veces se escribe
    y en cuántas piezas.
 
@@ -227,11 +227,11 @@ manifiesto**.
 | `dim_responsable`      |     3 | Apuntaba a otra tabla por su nombre | Se descarta: la v10 usa llaves foráneas  |
 
 Son las dos únicas hojas sin lugar, y suman **6 filas**. El resto de hojas que en
-su momento no tenían destino ya lo tienen: `core.proceso_instancia` (135),
-`core.flujo_definicion` (7), `core.flujo_estado` (5) y
-`core.cat_ciclos_intervencion` (4). Las 4 tablas y 5 tablas de relación del
-análisis de conflictividad existen vacías, y su contenido terminó en
-`core.documentos.contenido_json` (1 fila).
+su momento no tenían destino ya lo tienen: `core.proceso_instancia` (135 filas
+del legado, 218 hoy), `core.flujo_definicion` (7 del legado, 12 hoy),
+`core.flujo_estado` (5) y `core.cat_ciclos_intervencion` (4). Las 4 tablas y 5
+tablas de relación del análisis de conflictividad existen vacías, y su contenido
+terminó en `core.documentos.contenido_json` (1 fila).
 
 ### 5.2 Solo en v10
 
@@ -303,8 +303,9 @@ cada uno de esos archivos del sistema actual, ver **[10]**.
 Sin esto no se pueden conciliar las dos versiones. Son cuatro mecanismos, y los
 cuatro están ya aplicados:
 
-1. **Se conserva el código original.** `core.casos.codigo_caso` guarda el
-   `ID_Caso`; `core.alertas_tempranas.codigo_alerta` guarda el `ID_Alerta`;
+1. **Se conserva el código original.** `core.casos.codigo_legado` guarda el
+   `ID_Caso` y `codigo_caso` el nuevo `CS-PA-INF-2026-01` (migración 16);
+   `core.alertas_tempranas.codigo_alerta` guarda el `ID_Alerta`;
    `core.documentos.codigo` guarda el identificador que tenía el documento; y hay
    un `codigo_legado` en usuarios, especies y catálogos.
 2. **Se genera un identificador único y reproducible** cuando no hay código:
@@ -592,7 +593,7 @@ edita a mano: se regenera con el script descrito en §11.7.
 |  70 | `dim_departamentos`               |       A        |      A       |       11 |    27 | `core.regiones`                            |
 |  71 | `dim_provincias`                  |       A        |      A       |        8 |    70 | `core.provincias`                          |
 |  72 | `dim_distritos`                   |       A        |      A       |       11 |   698 | `core.distritos`                           |
-|  73 | `dim_tipo_caso`                   |       B        |      B       |        3 |     4 | `core.cat_tematicas`                       |
+|  73 | `dim_tipo_caso`                   |       B        |      B       |        3 |     4 | `core.cat_niveles_conflicto`               |
 |  74 | `dim_rol_actor`                   |       A        |      A       |        3 |     4 | `core.cat_roles_actor`                     |
 |  75 | `dim_tipo_sector`                 |       A        |      A       |        3 |     3 | `core.cat_subsectores`                     |
 |  76 | `dim_tipo_actor`                  |       A        |      A       |        2 |     3 | `core.cat_tipos_actor`                     |

@@ -62,11 +62,21 @@ export async function getActorPii(
   );
 
   const row = result.rows[0];
-  if (!row) return null;
+  if (row) {
+    return {
+      dni: row.dni ?? null,
+      email: row.email ?? null,
+      telefono: row.telefono ?? null,
+    };
+  }
 
-  return {
-    dni: row.dni ?? null,
-    email: row.email ?? null,
-    telefono: row.telefono ?? null,
-  };
+  // Un actor puede existir sin ficha de datos personales. Eso no es un 404:
+  // la ficha se devuelve con los campos en `null` y la UI muestra los huecos.
+  const exists = await client.query(
+    `select 1 from core.actores where actor_uid = $1::uuid limit 1`,
+    [actorUid],
+  );
+  if (exists.rows.length === 0) return null;
+
+  return { dni: null, email: null, telefono: null };
 }

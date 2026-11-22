@@ -4,6 +4,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
   type ReactNode,
@@ -24,6 +25,21 @@ import {
   type DemandaFuente,
   type FragmentKind,
 } from "@/components/avisa-demo-data";
+import { apiGet, apiGetAllPages } from "@/lib/api-client";
+import {
+  mapAlert,
+  mapCase,
+  mapCommitment,
+  mapDocument,
+  mapNotification,
+  type ApiAlertItem,
+  type ApiCaseDetail,
+  type ApiCaseListItem,
+  type ApiCollection,
+  type ApiCommitmentItem,
+  type ApiDocumentItem,
+  type ApiNotificationItem,
+} from "@/lib/api-mappers";
 
 export type CaseDraft = {
   title: string;
@@ -112,6 +128,7 @@ type AvisaStore = {
   commitments: DemoCommitment[];
   documents: DemoDocument[];
   notifications: DemoNotification[];
+  loading: boolean;
   notice: string;
   setNotice: (message: string) => void;
   createCase: (draft: CaseDraft) => DemoCase;
@@ -182,14 +199,160 @@ const fragmentKind = (texto: string, index: number): FragmentKind =>
           ? "hecho"
           : "cita";
 
-export function AvisaProvider({ children }: { children: ReactNode }) {
-  const [cases, setCases] = useState<DemoCase[]>(demoCases);
-  const [alerts, setAlerts] = useState<DemoAlert[]>(demoAlerts);
-  const [commitments, setCommitments] =
-    useState<DemoCommitment[]>(demoCommitments);
-  const [documents, setDocuments] = useState<DemoDocument[]>(demoDocuments);
+export type AvisaInitialData = {
+  cases: DemoCase[];
+  alerts: DemoAlert[];
+  commitments: DemoCommitment[];
+  documents: DemoDocument[];
+  notifications: DemoNotification[];
+};
+
+export function AvisaProvider({
+  children,
+  initialData,
+}: {
+  children: ReactNode;
+  initialData?: AvisaInitialData;
+}) {
+  const [cases, setCases] = useState<DemoCase[]>(initialData?.cases ?? []);
+  const [alerts, setAlerts] = useState<DemoAlert[]>(initialData?.alerts ?? []);
+  const [commitments, setCommitments] = useState<DemoCommitment[]>(
+    initialData?.commitments ?? [],
+  );
+  const [documents, setDocuments] = useState<DemoDocument[]>(
+    initialData?.documents ?? [],
+  );
+  const [apiNotifications, setApiNotifications] = useState<DemoNotification[]>(
+    initialData?.notifications ?? [],
+  );
   const [notice, setNotice] = useState("");
   const [readNotifications, setReadNotifications] = useState<string[]>([]);
+  const [loading, setLoading] = useState(!initialData);
+
+  useEffect(() => {
+    if (initialData) return;
+    let cancelled = false;
+
+    const hydrate = async () => {
+      setLoading(true);
+
+      const casesPromise = (async () => {
+        const items = await apiGetAllPages<ApiCaseListItem>("/api/v1/cases");
+        const details = await Promise.allSettled(
+          items.map((item) =>
+            apiGet<ApiCaseDetail>(
+              `/api/v1/cases/${encodeURIComponent(item.code)}`,
+            ),
+          ),
+        );
+        const detailByCode = new Map<string, ApiCaseDetail>();
+        details.forEach((result, index) => {
+          const item = items[index];
+          if (!item) return;
+          if (result.status === "fulfilled") {
+            detailByCode.set(item.code, result.value);
+          } else {
+            console.warn(
+              `No se pudo cargar el detalle del caso ${item.code}`,
+              result.reason,
+            );
+          }
+        });
+        return items.map((item) => mapCase(item, detailByCode.get(item.code)));
+      })();
+
+      const alertsPromise = apiGetAllPages<ApiAlertItem>("/api/v1/alerts").then(
+        (items) => items.map(mapAlert),
+      );
+
+      const commitmentsPromise = apiGetAllPages<ApiCommitmentItem>(
+        "/api/v1/commitments",
+      ).then((items) => items.map(mapCommitment));
+
+      const documentsPromise = apiGetAllPages<ApiDocumentItem>(
+        "/api/v1/documents",
+      ).then((items) => items.map(mapDocument));
+
+      const notificationsPromise = apiGet<ApiCollection<ApiNotificationItem>>(
+        "/api/v1/notifications",
+      ).then((page) => page.items.map(mapNotification));
+
+      const [
+        casesResult,
+        alertsResult,
+        commitmentsResult,
+        documentsResult,
+        notificationsResult,
+      ] = await Promise.allSettled([
+        casesPromise,
+        alertsPromise,
+        commitmentsPromise,
+        documentsPromise,
+        notificationsPromise,
+      ]);
+
+      if (cancelled) return;
+
+      const failed: string[] = [];
+      if (casesResult.status === "fulfilled") setCases(casesResult.value);
+      else failed.push("casos");
+
+      if (alertsResult.status === "fulfilled") setAlerts(alertsResult.value);
+      else failed.push("alertas");
+
+      if (commitmentsResult.status === "fulfilled")
+        setCommitments(commitmentsResult.value);
+      else failed.push("compromisos");
+
+      if (documentsResult.status === "fulfilled")
+        setDocuments(documentsResult.value);
+      else failed.push("documentos");
+
+      if (notificationsResult.status === "fulfilled")
+        setApiNotifications(notificationsResult.value);
+      else failed.push("notificaciones");
+
+      failed.forEach((source) =>
+        console.warn(`Fuente sin datos desde la base: ${source}`),
+      );
+
+      if (failed.length === 5) {
+        setCases(demoCases);
+        setAlerts(demoAlerts);
+        setCommitments(demoCommitments);
+        setDocuments(demoDocuments);
+        setNotice(
+          "Sin conexión a la base de datos. Se muestran datos de demostración.",
+        );
+      } else if (failed.length > 0) {
+        setNotice(
+          `No se pudo cargar ${failed.join(", ")} desde la base; se muestran datos parciales.`,
+        );
+      }
+
+      setLoading(false);
+    };
+
+    hydrate().catch((error: unknown) => {
+      if (cancelled) return;
+      console.error(
+        "No se pudo hidratar la interfaz desde la base de datos",
+        error,
+      );
+      setCases(demoCases);
+      setAlerts(demoAlerts);
+      setCommitments(demoCommitments);
+      setDocuments(demoDocuments);
+      setNotice(
+        "Sin conexión a la base de datos. Se muestran datos de demostración.",
+      );
+      setLoading(false);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [initialData]);
 
   const createCase = useCallback(
     (draft: CaseDraft) => {
@@ -567,6 +730,7 @@ export function AvisaProvider({ children }: { children: ReactNode }) {
           .filter((fragmento) => fragmento.tipo !== "cita")
           .map((fragmento, index) => ({
             id: `${doc.id}-X${index + 1}`,
+            refId: fragmento.id,
             tipo:
               fragmento.tipo === "acuerdo"
                 ? "compromiso"
@@ -769,6 +933,9 @@ export function AvisaProvider({ children }: { children: ReactNode }) {
           );
           return;
         }
+        const fragmento = extraction.refId
+          ? doc.fragmentos.find((item) => item.id === extraction.refId)
+          : undefined;
         setCases((items) =>
           items.map((item) =>
             item.code === doc.casoCode
@@ -780,6 +947,15 @@ export function AvisaProvider({ children }: { children: ReactNode }) {
                       problema: extraction.titulo,
                       pedido: "Por precisar en la revisión humana.",
                       estado: "Pendiente" as const,
+                      fuentes: [
+                        {
+                          campo: "problema" as const,
+                          documentoId: doc.id,
+                          documentoCodigo: doc.codigo,
+                          fragmentoId: fragmento?.id,
+                          texto: fragmento?.texto ?? extraction.titulo,
+                        },
+                      ],
                     },
                   ],
                 }
@@ -869,16 +1045,24 @@ export function AvisaProvider({ children }: { children: ReactNode }) {
         view: "case-detail" as const,
         refCode: item.code,
       }));
-    return [
+    const derived = [
       ...pendingAlerts,
       ...dueCommitments,
       ...documentReviews,
       ...highRiskCases,
-    ].map((item) => ({
+    ];
+    return [...apiNotifications, ...derived].map((item) => ({
       ...item,
       leida: readNotifications.includes(item.id),
     }));
-  }, [alerts, commitments, documents, cases, readNotifications]);
+  }, [
+    alerts,
+    commitments,
+    documents,
+    cases,
+    readNotifications,
+    apiNotifications,
+  ]);
 
   const markNotificationRead = useCallback((id: string) => {
     setReadNotifications((items) =>
@@ -899,6 +1083,7 @@ export function AvisaProvider({ children }: { children: ReactNode }) {
     commitments,
     documents,
     notifications,
+    loading,
     notice,
     setNotice,
     createCase,

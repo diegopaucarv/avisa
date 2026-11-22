@@ -146,14 +146,17 @@ BEGIN
     SELECT string_agg(x, ', ')
       INTO v_cats
       FROM (
+            -- Mínimos alineados con la Guía: 6 temáticas (§7.6), 2 subsectores y
+            -- 3 tipos de actor (§7.4.1). Reemplazan los umbrales del esquema
+            -- anterior, que tras las migraciones 14 y 15 abortaban la verificación.
             SELECT 'cat_tematicas=' || (SELECT count(*) FROM core.cat_tematicas) AS x
-             WHERE (SELECT count(*) FROM core.cat_tematicas) < 7
+             WHERE (SELECT count(*) FROM core.cat_tematicas) < 6
             UNION ALL
             SELECT 'cat_subsectores=' || (SELECT count(*) FROM core.cat_subsectores)
-             WHERE (SELECT count(*) FROM core.cat_subsectores) < 3
+             WHERE (SELECT count(*) FROM core.cat_subsectores) < 2
             UNION ALL
             SELECT 'cat_tipos_actor=' || (SELECT count(*) FROM core.cat_tipos_actor)
-             WHERE (SELECT count(*) FROM core.cat_tipos_actor) < 7
+             WHERE (SELECT count(*) FROM core.cat_tipos_actor) < 3
             UNION ALL
             SELECT 'cat_roles_funcionales=' || (SELECT count(*) FROM core.cat_roles_funcionales)
              WHERE (SELECT count(*) FROM core.cat_roles_funcionales) < 4

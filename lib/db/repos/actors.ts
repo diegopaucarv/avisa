@@ -78,8 +78,8 @@ export type ActorListResult = {
 };
 
 const SORTS: Record<string, string> = {
-  name: "a.nombre_actual asc",
-  recent: "a.updated_at desc, a.nombre_actual asc",
+  name: "a.nombre_actual asc, a.actor_uid asc",
+  recent: "a.updated_at desc, a.nombre_actual asc, a.actor_uid asc",
 };
 
 function mapActor(row: Record<string, unknown>): ActorListItem {

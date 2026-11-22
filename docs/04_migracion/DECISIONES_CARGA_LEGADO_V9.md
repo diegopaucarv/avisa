@@ -21,14 +21,14 @@ Al especificar la carga columna por columna aparecieron **seis bloqueos nuevos**
 que el plan anterior no veía, y **cinco de sus afirmaciones resultaron falsas**.
 Todos están cerrados:
 
-| #       | Bloqueo nuevo                                                | Efecto si no se cerraba                   | Cierre                                                       |
-| ------- | ------------------------------------------------------------ | ----------------------------------------- | ------------------------------------------------------------ |
-| **D43** | 45 DNI compartidos por 100 filas contra un índice `UNIQUE`   | La carga **aborta** en la 2.ª aparición   | Índice único → índice normal + cola de revisión              |
-| **D44** | `DIM_Demandas.ID_ALERTA` no sólo contiene alertas            | 12 demandas con padre inventado o perdido | Reclasificado; `documento_origen_id` + `codigo_padre_legado` |
-| **D45** | `tipo_actor_id` por defecto = 1 (_Actor del Estado_)         | 586 personas reales mal clasificadas      | Default = 2 (Actor Sociedad Civil)                           |
-| **D46** | 8 de 9 participantes sin `ID_Capacitacion`                   | Se perdían 8 de 9 participantes           | Único candidato posible → `CAP-2026-001`                     |
-| **D47** | 2 alertas sin `ID_NIVEL_ALERTA` pero `prioridad_id` NOT NULL | Alertas no cargan                         | `prioridad_id` relajado a NULL                               |
-| **D48** | Caso sin `ID_Riesgos` con `nivel_riesgo_id` NOT NULL         | Caso 016 no carga                         | Derivado de sus propias alertas (dato del legado)            |
+| #       | Bloqueo nuevo                                                                  | Efecto si no se cerraba                   | Cierre                                                       |
+| ------- | ------------------------------------------------------------------------------ | ----------------------------------------- | ------------------------------------------------------------ |
+| **D43** | 45 DNI compartidos por 100 filas contra un índice `UNIQUE`                     | La carga **aborta** en la 2.ª aparición   | Índice único → índice normal + cola de revisión              |
+| **D44** | `DIM_Demandas.ID_ALERTA` no sólo contiene alertas                              | 12 demandas con padre inventado o perdido | Reclasificado; `documento_origen_id` + `codigo_padre_legado` |
+| **D45** | `tipo_actor_id` por defecto = 1 (_Actor del Estado_, canónico `Actor público`) | 586 personas reales mal clasificadas      | Default = 2 (Actor Sociedad Civil, canónico `Actor social`)  |
+| **D46** | 8 de 9 participantes sin `ID_Capacitacion`                                     | Se perdían 8 de 9 participantes           | Único candidato posible → `CAP-2026-001`                     |
+| **D47** | 2 alertas sin `ID_NIVEL_ALERTA` pero `prioridad_id` NOT NULL                   | Alertas no cargan                         | `prioridad_id` relajado a NULL                               |
+| **D48** | Caso sin `ID_Riesgos` con `nivel_riesgo_id` NOT NULL                           | Caso 016 no carga                         | Derivado de sus propias alertas (dato del legado)            |
 
 Y las correcciones a los documentos anteriores:
 
@@ -101,7 +101,7 @@ exactamente lo que la regla significa.
 
 **Cerrada y aplicada** (parche 1, `ALTER COLUMN … DROP NOT NULL`).
 
-Cobertura real: **34/35**. Sólo `CS-PRODUCE-2026-024` no tiene `ID_Tipo` → NULL.
+Cobertura real: **34/35**. Sólo `CS-PRODUCE-2026-024` (`codigo_legado`) no tiene `ID_Tipo` → NULL.
 No se deriva de `ID_Riesgos` ni de `ID_NIVEL_ALERTA`: son ejes distintos
 (probabilidad de escalamiento y SLA de respuesta).
 
@@ -193,7 +193,7 @@ existen en `DIM_Alertas` y no se inventan: los 14 pares que las referencian van 
 ### (h) `nivel_conflicto` — no se deriva, se lee
 
 **Cerrada.** La pregunta era si derivarlo de `id_riesgos`/`id_nivel_alerta`,
-dejarlo en _Conflicto_social_ por defecto o completarlo caso por caso.
+dejarlo en _Conflicto social_ por defecto o completarlo caso por caso.
 
 La respuesta correcta es **ninguna de las tres**: el legado **ya tiene la escala**.
 `FACT_Casos.ID_Tipo` → `DIM_Tipo_Caso` es exactamente la escala de 4 niveles de la
@@ -203,8 +203,8 @@ Guía (RM N.° 00207-2026-PRODUCE):
 | ------- | ---------------- | ----------------------- |
 | `TC-01` | Diferencias      | 1 `Diferencia`          |
 | `TC-02` | Controversias    | 2 `Controversia`        |
-| `TC-03` | Conflicto activo | 3 `Conflicto_social`    |
-| `TC-04` | Crisis           | 4 `Crisis_social`       |
+| `TC-03` | Conflicto activo | 3 `Conflicto social`    |
+| `TC-04` | Crisis           | 4 `Crisis social`       |
 
 Distribución real: **TC-02 20, TC-03 13, TC-01 1, sin dato 1**. Cobertura 34/35.
 
@@ -227,8 +227,8 @@ tabla, sin resumir:
 | ------------------------ | ------------------------------------------------------------------------------------ | ---------------------------- |
 | `TC-01` Diferencias      | "Posiciones distintas entre actores sobre un tema, sin acciones de protesta activas" | `1 Diferencia`               |
 | `TC-02` Controversias    | "Disputas formales que requieren atención institucional pero sin escalamiento"       | `2 Controversia`             |
-| `TC-03` Conflicto Activo | "Situación que involucra acciones colectivas, protestas o riesgo de violencia"       | `3 Conflicto_social`         |
-| `TC-04` Crísis           | "Ruptura institucional, violencia generalizada e ingobernabilidad…"                  | `4 Crisis_social`            |
+| `TC-03` Conflicto Activo | "Situación que involucra acciones colectivas, protestas o riesgo de violencia"       | `3 Conflicto social`         |
+| `TC-04` Crísis           | "Ruptura institucional, violencia generalizada e ingobernabilidad…"                  | `4 Crisis social`            |
 
 ---
 
@@ -331,16 +331,19 @@ columna — nombra exactamente el mismo padre. No aporta vínculos nuevos.
 ### D45 · `tipo_actor_id` por defecto: 2, no 1
 
 `actores.tipo_actor_id` es **NOT NULL**. El plan proponía 1 para los valores
-vacíos. En v9, `cat_tipos_actor` es:
+vacíos. En v9, `cat_tipos_actor` era (hoy quedan 1–3, ya con los nombres de la Guía):
 
 `1 Actor del Estado · 2 Actor Sociedad Civil · 3 Actor Privado · 4 NEC · 5 Exportador CITES · 6 CITE · 7 SANIPES`
+(1 es `Actor público`, 2 `Actor social` y 3 `Actor privado` en el vocabulario de
+la Guía; 4–7 —NEC, Exportador CITES, CITE, SANIPES— son **entidades o cargos**,
+no tipos de actor.)
 
 Y la distribución del legado es: `Tipo-Act-02` **233**, `Tipo-Act-03` 9,
 vacío **575**, basura (`'Regional'`, `'Sí'`) 11. El **92 %** de los tipados es
-Sociedad Civil y la población es de pescadores y dirigentes.
+Sociedad Civil (canónico `Actor social`) y la población es de pescadores y dirigentes.
 
 → Default = **2**. Resultado: `{2: 819, 3: 9}`. Etiquetar 586 pescadores y dirigentes como
-_Actor del Estado_ habría sido una afirmación falsa.
+_Actor del Estado_ (canónico `Actor público`) habría sido una afirmación falsa.
 
 El censo `DIM_Actores_Estado` (108 funcionarios) sí va a **1**, fijo.
 
@@ -361,7 +364,7 @@ nivel↔riesgo es débil (`NA-001` aparece con `RIE-001` 20 veces y con `RIE-002
 
 → `prioridad_id` **relajado a NULL** (parche 3). El único consumidor es
 `core.deriv_limite()`, que ya tolera NULL (`IF v_sla IS NOT NULL`); ninguna vista
-hace JOIN con esa columna. Inventar "Critica_Inmediata" habría creado falsa
+hace JOIN con esa columna. Inventar "Crítica inmediata" habría creado falsa
 urgencia; inventar "Seguimiento" habría ocultado una alerta real.
 
 ### D48 · Riesgo del caso 016 desde sus propias alertas
@@ -498,7 +501,7 @@ Todas verificadas contra el workbook (no estimadas):
 | `alertas_tempranas`          |    **83** | 81 con `prioridad_id`                                                     |
 | `alertas_actores`            |   **161** | 167 bridge − 5 alertas fantasma; 3 filas con columnas invertidas          |
 | `alerta_especies`            |    **30** | 32 bridge − 2 alertas fantasma                                            |
-| `compromisos`                |     **8** | sintéticos, estado `En_proceso`                                           |
+| `compromisos`                |     **8** | sintéticos, estado `En proceso`                                           |
 | `hitos_compromiso`           |    **12** |                                                                           |
 | `mesas_dialogo`              |    **21** |                                                                           |
 | `mesa_miembros`              |    **62** |                                                                           |
@@ -532,6 +535,12 @@ Las hojas de flujo **ya no están fuera**: el parche 10 (D17) cargó
 `core.flujo_estado`. Ver Anexo A.2 y `docs/04_migracion/parches/P10_FLUJO_D17.md`.
 
 Nada de esto se borra: el staging es la garantía de que la decisión es reversible.
+
+**Baja lógica, no `DELETE`.** En la base toda baja es anulación: `anulado_en`,
+`anulado_por` y `motivo_anulacion`, nunca un `DELETE`. `core.anular_caso(uuid, motivo)`
+anula en cascada caso, alertas, documentos, compromisos, hitos, demandas y hechos
+(`caso_cronologia`), y `core.restaurar_caso(uuid)` revierte; migraciones 12 y 13
+aplicadas, endpoints de API pendientes.
 
 ---
 
@@ -675,9 +684,11 @@ cada fila de A.2 es verificable contra `count(*)` de la base.
 | `dim_responsable`      |     3 | Puntero polimórfico (`tabla_origen`); v10 usa FK explícitas                             | **Descartada**: la asignación de usuarios ya cubre esos vínculos           |
 
 `dim_tipo_actor_radar` no cabe en ningún catálogo existente: no son tipos de actor
-(`core.cat_tipos_actor`: Actor del Estado, Sociedad Civil, Privado, NEC, CITES, CITE,
-SANIPES), ni roles de actor (`core.cat_roles_actor`: Principal, Secundario, Tercero,
-Proveedor MYPE…), ni roles funcionales (`core.cat_roles_funcionales`: Decisor
+(`core.cat_tipos_actor`: Actor del Estado —canónico `Actor público`—, Sociedad Civil
+—`Actor social`—, Privado, NEC, CITES, CITE, SANIPES —estos cuatro son entidades o
+cargos, no tipos de actor—), ni roles de actor (`core.cat_roles_actor`: Principal,
+Secundario, Tercero imparcial, Proveedor MYPE —un cargo, no una función—…), ni roles
+funcionales (`core.cat_roles_funcionales`: Decisor
 Principal, Proveedor de evidencia, Implementador, Articulador territorial). Describen
 la posición de un actor **dentro de una RED o NODO**, y ese modelo es justamente el
 que está diferido en D18. `territorio.*` ya existe (17 tablas: `lugares`, caletas,
@@ -773,5 +784,5 @@ se consulta ahí.
 | 4   | Sin `app.user_id` y `app.clasificacion_max` los `INSERT` no fallan: desaparecen                                                  | **Vigente y ampliado**: `DECISIONES` §11 y `mvp.md` §3.3                                                                                                                                                                                                                                                                                                             |
 | 5   | D17 describía `fact_proceso_*` como «135 filas»                                                                                  | **Resuelta: eran 142** (36 + 99 + 4 + 3) y **están cargadas desde el 2026-11-18** por el parche 10 en `core.proceso_instancia` (135) y `core.flujo_definicion` (7). El total de §3.11 sigue siendo **165** = 142 + 6 (RADAR) + 14 (JSON) + 3 (`dim_responsable`); el acta cita 160 y el desglose sin `dim_responsable` da 162. Ver `PLAN` §4.11 y `P10_FLUJO_D17.md` |
 | 6   | D16 contaba «55 documentos» con `tipo_documento='Otro'`                                                                          | **Corregido por medición.** Antes del parche 6 eran **37** (34 `RED-` + 3 `CT-2026-00x`); después, **3** (solo los `CT-`). El total de `core.documentos` no cambió: **153**. El 55 era una estimación, no un conteo. Ver `LEGADO_A_V10…` §11.5                                                                                                                       |
-| 7   | `DIM_Estado_Proceso` figuraba en el Anexo A de `ANALISIS_PORTABILIDAD` (#26) con destino `core.cat_estados_caso`                 | **Corregido: el destino es `core.flujo_estado`** (5 filas, `EST-01..EST-05`). `core.cat_estados_caso` son estados del **caso** (`Activo`, `En_seguimiento`, `Resuelto`, `Archivado`, 4 filas), no del paso: el mapeo anterior era ficticio (5 filas a una tabla de 4). Ver `P10_FLUJO_D17.md` §3.1                                                                   |
+| 7   | `DIM_Estado_Proceso` figuraba en el Anexo A de `ANALISIS_PORTABILIDAD` (#26) con destino `core.cat_estados_caso`                 | **Corregido: el destino es `core.flujo_estado`** (5 filas, `EST-01..EST-05`). `core.cat_estados_caso` son estados del **caso** (`Activo`, `En seguimiento`, `Resuelto`, `Archivado`, 4 filas), no del paso: el mapeo anterior era ficticio (5 filas a una tabla de 4). Ver `P10_FLUJO_D17.md` §3.1                                                                   |
 | 8   | `DIM_Intervencion` figuraba como clase D «sin catálogo de tipos de intervención»                                                 | **Corregido: es clase B → `core.cat_ciclos_intervencion`.** La hoja tiene 4 filas (`Ciclo-001..004`) idénticas a las 4 del catálogo, que el parche 1 creó y `migration/loader/phases/p02_catalogos.py` ya carga. El Anexo A la daba por D porque **v9 no tenía el catálogo**; v10 sí. Nuevo reparto: **B 48 / 3 211 · D 2 / 6**                                      |

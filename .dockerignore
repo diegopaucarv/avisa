@@ -9,5 +9,6 @@ node_modules
 docs
 migration
 docker/postgres
+angular
 *.log
 *.dump

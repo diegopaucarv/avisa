@@ -10,14 +10,14 @@ entidades, no un grafo. Este parche cierra seis defectos que se sostenían entre
 
 ## 1. Qué estaba mal
 
-| # | Defecto | Consecuencia |
-| - | --- | --- |
-| 1 | El alta del nodo de caso vivía dentro de `core.caso_historial()` | Un caso creado sin pasar por el historial no dejaba nodo |
-| 2 | No existía sincronía de etiqueta al renombrar | El nodo conservaba el nombre viejo para siempre |
-| 3 | `kag.nodos` no tenía marcas de tiempo ni índice por referencia | Imposible saber cuándo entró un nodo o consultarlo por `ref_id` |
-| 4 | Solo había nodos de `actor` y `caso` | Las 325 demandas, que el catálogo ya admitía, no existían en el grafo |
-| 5 | `kag.aristas` estaba vacía | Las tablas puente declaraban relaciones que el grafo ignoraba |
-| 6 | Nada mantenía el grafo al día tras el parche | El grafo volvería a divergir con el primer alta nueva |
+| #   | Defecto                                                          | Consecuencia                                                          |
+| --- | ---------------------------------------------------------------- | --------------------------------------------------------------------- |
+| 1   | El alta del nodo de caso vivía dentro de `core.caso_historial()` | Un caso creado sin pasar por el historial no dejaba nodo              |
+| 2   | No existía sincronía de etiqueta al renombrar                    | El nodo conservaba el nombre viejo para siempre                       |
+| 3   | `kag.nodos` no tenía marcas de tiempo ni índice por referencia   | Imposible saber cuándo entró un nodo o consultarlo por `ref_id`       |
+| 4   | Solo había nodos de `actor` y `caso`                             | Las 325 demandas, que el catálogo ya admitía, no existían en el grafo |
+| 5   | `kag.aristas` estaba vacía                                       | Las tablas puente declaraban relaciones que el grafo ignoraba         |
+| 6   | Nada mantenía el grafo al día tras el parche                     | El grafo volvería a divergir con el primer alta nueva                 |
 
 ---
 
@@ -31,14 +31,14 @@ el catálogo no tenía.
 
 ### 2.2 Estructura de `kag.nodos`
 
-| Columna | Tipo | Nulo | Nota |
-| --- | --- | --- | --- |
-| `id` | uuid | no | clave primaria |
-| `tipo` | varchar(20) | no | `actor`, `caso`, `demanda`… |
-| `ref_id` | uuid | no | identificador en la tabla de origen |
-| `etiqueta` | varchar(255) | sí | nombre visible del nodo |
-| `created_at` | timestamptz | no | nuevo en este parche |
-| `updated_at` | timestamptz | no | nuevo; lo mueve `trg_nodo_toca` |
+| Columna      | Tipo         | Nulo | Nota                                |
+| ------------ | ------------ | ---- | ----------------------------------- |
+| `id`         | uuid         | no   | clave primaria                      |
+| `tipo`       | varchar(20)  | no   | `actor`, `caso`, `demanda`…         |
+| `ref_id`     | uuid         | no   | identificador en la tabla de origen |
+| `etiqueta`   | varchar(255) | sí   | nombre visible del nodo             |
+| `created_at` | timestamptz  | no   | nuevo en este parche                |
+| `updated_at` | timestamptz  | no   | nuevo; lo mueve `trg_nodo_toca`     |
 
 Se añade el índice `ix_nodos_ref` sobre `(tipo, ref_id)`, que es como se busca un
 nodo desde su origen.
@@ -58,16 +58,16 @@ Ambas son idempotentes y se usan desde los disparadores.
 
 ### 2.4 Disparadores
 
-| Disparador | Tabla | Cuándo | Qué hace |
-| --- | --- | --- | --- |
-| `trg_nodo_toca` | `kag.nodos` | antes de actualizar | mueve `updated_at` |
-| `trg_caso_nace` | `core.casos` | después de insertar | crea el nodo del caso |
-| `trg_demanda_nace` | `core.demandas` | después de insertar | crea el nodo de la demanda |
-| `trg_caso_renombra` | `core.casos` | al cambiar `nombre_caso` | sincroniza la etiqueta |
-| `trg_actor_renombra` | `core.actores` | al cambiar `nombre_actual` | sincroniza la etiqueta |
-| `trg_caso_actor_nace` | `core.casos_actores` | después de insertar | crea la arista de participación |
-| `trg_demanda_actor_nace` | `core.demandas_actores` | después de insertar | crea la arista de exigencia |
-| `trg_membresia_nace` | `core.actor_membresia` | después de insertar | crea la arista de membresía |
+| Disparador               | Tabla                   | Cuándo                     | Qué hace                        |
+| ------------------------ | ----------------------- | -------------------------- | ------------------------------- |
+| `trg_nodo_toca`          | `kag.nodos`             | antes de actualizar        | mueve `updated_at`              |
+| `trg_caso_nace`          | `core.casos`            | después de insertar        | crea el nodo del caso           |
+| `trg_demanda_nace`       | `core.demandas`         | después de insertar        | crea el nodo de la demanda      |
+| `trg_caso_renombra`      | `core.casos`            | al cambiar `nombre_caso`   | sincroniza la etiqueta          |
+| `trg_actor_renombra`     | `core.actores`          | al cambiar `nombre_actual` | sincroniza la etiqueta          |
+| `trg_caso_actor_nace`    | `core.casos_actores`    | después de insertar        | crea la arista de participación |
+| `trg_demanda_actor_nace` | `core.demandas_actores` | después de insertar        | crea la arista de exigencia     |
+| `trg_membresia_nace`     | `core.actor_membresia`  | después de insertar        | crea la arista de membresía     |
 
 `core.caso_historial()` se reescribe: ya **no** inserta en `kag.nodos`; vuelve a
 hacer solo lo suyo, que es registrar el cambio de estado.
@@ -76,11 +76,11 @@ hacer solo lo suyo, que es registrar el cambio de estado.
 
 Se rellenan las aristas que la propia base ya declaraba en sus tablas puente:
 
-| Arista | Origen | Destino | Filas | De dónde sale |
-| --- | --- | ---: | --- | --- |
-| `PARTICIPA_EN` | actor | caso | 60 | `core.casos_actores` |
-| `EXIGE` | actor | demanda | 98 | `core.demandas_actores` |
-| `MIEMBRO_DE` | actor | actor | 292 | `core.actor_membresia` |
+| Arista         | Origen | Destino | Filas | De dónde sale           |
+| -------------- | ------ | ------: | ----- | ----------------------- |
+| `PARTICIPA_EN` | actor  |    caso | 60    | `core.casos_actores`    |
+| `EXIGE`        | actor  | demanda | 98    | `core.demandas_actores` |
+| `MIEMBRO_DE`   | actor  |   actor | 292   | `core.actor_membresia`  |
 
 No se inventan `ALIANZA` ni `TENSION`: esas relaciones no están escritas en `core` y
 exigirían lectura documental o análisis de agente. Quedan para una fase posterior.
@@ -89,17 +89,17 @@ exigirían lectura documental o análisis de agente. Quedan para una fase poster
 
 ## 3. Resultado medido
 
-| Métrica | Antes | Después |
-| --- | ---: | ---: |
-| `kag.nodos` | 1 195 | **1 520** |
-| — de tipo `actor` | 1 160 | 1 160 |
-| — de tipo `caso` | 35 | 35 |
-| — de tipo `demanda` | 0 | **325** |
-| `kag.aristas` | 0 | **450** |
-| — `PARTICIPA_EN` | 0 | 60 |
-| — `EXIGE` | 0 | 98 |
-| — `MIEMBRO_DE` | 0 | 292 |
-| Disparadores en el grafo | 0 | 8 |
+| Métrica                  | Antes |   Después |
+| ------------------------ | ----: | --------: |
+| `kag.nodos`              | 1 195 | **1 520** |
+| — de tipo `actor`        | 1 160 |     1 160 |
+| — de tipo `caso`         |    35 |        35 |
+| — de tipo `demanda`      |     0 |   **325** |
+| `kag.aristas`            |     0 |   **450** |
+| — `PARTICIPA_EN`         |     0 |        60 |
+| — `EXIGE`                |     0 |        98 |
+| — `MIEMBRO_DE`           |     0 |       292 |
+| Disparadores en el grafo |     0 |         8 |
 
 Los 1 160 actores provienen de `legacy.dim_actores` (828),
 `legacy.dim_actores_estado` (108) y `legacy.dim_organizacion` (224); todos con
@@ -140,6 +140,8 @@ filas de ensayo en la base.
 - No vuelve a calcular etiquetas de nodos ya existentes más allá del renombre: la
   etiqueta de un caso es su `nombre_caso` y la de una demanda es el texto del
   pedido.
+
+_Posterior al parche (2026-11-22): la baja de las entidades es lógica desde `migration/12_anulacion_y_secuencia.sql` y `13_anulacion_segura.sql` (`anulado_en`; `core.anular_caso` y `core.restaurar_caso`, con cascada a alertas, demandas, compromisos, hitos y hechos), así que el «borrado» de este párrafo ya no es la vía; el grafo sigue sin fecha de vigencia por arista._
 
 ---
 

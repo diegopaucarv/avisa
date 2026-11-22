@@ -1,19 +1,10 @@
 import type { PoolClient } from "pg";
 
 export type SearchResultType =
-  | "case"
-  | "alert"
-  | "document"
-  | "actor"
-  | "commitment"
-  | "demanda";
+  "case" | "alert" | "document" | "actor" | "commitment" | "demanda";
 
 export type SearchView =
-  | "cases"
-  | "alerts"
-  | "documents"
-  | "directory"
-  | "commitments";
+  "cases" | "alerts" | "documents" | "directory" | "commitments";
 
 export type SearchResult = {
   type: SearchResultType;
@@ -27,15 +18,21 @@ export type SearchResult = {
 export type SearchResponse = {
   query: string;
   results: SearchResult[];
+  total: number;
+  page: number;
+  pageSize: number;
   generatedAt: string;
 };
 
-const DEFAULT_LIMIT = 5;
+const DEFAULT_PAGE_SIZE = 25;
+const MAX_PAGE_SIZE = 100;
 
 // Cada fuente se busca por separado para no encadenar joins pesados.
 // El subtítulo es un dato corto del propio registro o de un catálogo pequeño.
-const CASES_SQL = `
-  select c.id::text as id,
+// `ord` conserva el agrupado por tipo que el cliente veía antes de paginar.
+const SEARCH_UNION = `
+  select 1 as ord, 'case'::text as type, 'cases'::text as view,
+         c.id::text as id,
          c.codigo_caso as code,
          c.nombre_caso as title,
          replace(ec.codigo, '_', ' ') as subtitle
@@ -44,81 +41,73 @@ const CASES_SQL = `
    where c.codigo_caso ilike $1
       or c.nombre_caso ilike $1
       or coalesce(c.resumen_ejecutivo, '') ilike $1
-   order by c.codigo_caso
-   limit $2
-`;
-
-const ALERTS_SQL = `
-  select al.id::text as id,
-         al.codigo_alerta as code,
-         al.titulo as title,
-         na.nombre as subtitle
+  union all
+  select 2, 'alert'::text, 'alerts'::text,
+         al.id::text,
+         al.codigo_alerta,
+         al.titulo,
+         na.nombre
     from core.alertas_tempranas al
     left join core.cat_niveles_alerta na on na.id = al.nivel_alerta_id
    where al.codigo_alerta ilike $1
       or al.titulo ilike $1
-   order by al.codigo_alerta
-   limit $2
-`;
-
-const DOCUMENTS_SQL = `
-  select d.id::text as id,
-         d.codigo as code,
-         d.titulo as title,
-         coalesce(td.nombre, d.estado) as subtitle
+  union all
+  select 3, 'document'::text, 'documents'::text,
+         d.id::text,
+         d.codigo,
+         d.titulo,
+         coalesce(td.nombre, d.estado)
     from core.documentos d
     left join core.cat_tipos_documento td on td.id = d.tipo_id
    where d.codigo ilike $1
       or d.titulo ilike $1
-   order by d.codigo
-   limit $2
-`;
-
-const ACTORS_SQL = `
-  select a.actor_uid::text as id,
-         a.codigo_legado as code,
-         a.nombre_actual as title,
-         coalesce(rg.nombre, nullif(a.cargo_actual, '')) as subtitle
+  union all
+  select 4, 'actor'::text, 'directory'::text,
+         a.actor_uid::text,
+         a.codigo_legado,
+         a.nombre_actual,
+         coalesce(rg.nombre, nullif(a.cargo_actual, ''))
     from core.actores a
     left join core.regiones rg on rg.id = a.region_id
    where a.nombre_actual ilike $1
       or coalesce(a.abreviatura, '') ilike $1
-   order by a.nombre_actual
-   limit $2
-`;
-
-const COMMITMENTS_SQL = `
-  select cmp.id::text as id,
-         cmp.codigo_compromiso as code,
-         cmp.accion_compromiso as title,
-         replace(ec.codigo, '_', ' ') as subtitle
+  union all
+  select 5, 'commitment'::text, 'commitments'::text,
+         cmp.id::text,
+         cmp.codigo_compromiso,
+         cmp.accion_compromiso,
+         replace(ec.codigo, '_', ' ')
     from core.compromisos cmp
     left join core.cat_estados_compromiso ec on ec.id = cmp.estado_id
    where cmp.codigo_compromiso ilike $1
       or cmp.accion_compromiso ilike $1
-   order by cmp.codigo_compromiso
-   limit $2
-`;
-
-const DEMANDAS_SQL = `
-  select dm.id::text as id,
-         dm.codigo_legado as code,
-         coalesce(dm.descripcion_demanda, '') as title,
-         replace(dm.estado_atencion, '_', ' ') as subtitle
+  union all
+  select 6, 'demanda'::text, 'cases'::text,
+         dm.id::text,
+         dm.codigo_legado,
+         coalesce(dm.descripcion_demanda, ''),
+         replace(dm.estado_atencion, '_', ' ')
     from core.demandas dm
    where dm.descripcion_demanda ilike $1
-   order by dm.descripcion_demanda
-   limit $2
 `;
 
-function mapRows(
-  rows: Record<string, unknown>[],
-  type: SearchResultType,
-  view: SearchView,
-): SearchResult[] {
+const SEARCH_PAGE_SQL = `
+  select m.type,
+         m.view,
+         m.id,
+         m.code,
+         m.title,
+         m.subtitle,
+         count(*) over()::int as total
+    from (${SEARCH_UNION}) m
+   order by m.ord, m.code nulls last, m.id
+   limit $2 offset $3
+`;
+
+function mapRows(rows: Record<string, unknown>[]): SearchResult[] {
   return rows.map((row) => ({
-    type,
-    view,
+    type: row.type as SearchResultType,
+    view: row.view as SearchView,
     id: row.id as string,
     code: row.code as string | null,
     title: row.title as string,
@@ -129,37 +118,37 @@ function mapRows(
 export async function searchAll(
   client: PoolClient,
   term: string,
-  limitPerType = DEFAULT_LIMIT,
+  page = 1,
+  pageSize = DEFAULT_PAGE_SIZE,
 ): Promise<SearchResponse> {
   const query = term.trim();
-  const limit = Math.min(10, Math.max(1, Math.trunc(limitPerType)));
+  const pagina = Math.max(1, Math.trunc(page));
+  const tamano = Math.min(MAX_PAGE_SIZE, Math.max(1, Math.trunc(pageSize)));
 
   if (query.length < 2) {
-    return { query, results: [], generatedAt: new Date().toISOString() };
+    return {
+      query,
+      results: [],
+      total: 0,
+      page: pagina,
+      pageSize: tamano,
+      generatedAt: new Date().toISOString(),
+    };
   }
 
-  const params = [`%${query}%`, limit];
-
-  const [cases, alerts, documents, actors, commitments, demandas] =
-    await Promise.all([
-      client.query(CASES_SQL, params),
-      client.query(ALERTS_SQL, params),
-      client.query(DOCUMENTS_SQL, params),
-      client.query(ACTORS_SQL, params),
-      client.query(COMMITMENTS_SQL, params),
-      client.query(DEMANDAS_SQL, params),
-    ]);
+  const result = await client.query(SEARCH_PAGE_SQL, [
+    `%${query}%`,
+    tamano,
+    (pagina - 1) * tamano,
+  ]);
+  const total = (result.rows[0]?.total as number | undefined) ?? 0;
 
   return {
     query,
-    results: [
-      ...mapRows(cases.rows, "case", "cases"),
-      ...mapRows(alerts.rows, "alert", "alerts"),
-      ...mapRows(documents.rows, "document", "documents"),
-      ...mapRows(actors.rows, "actor", "directory"),
-      ...mapRows(commitments.rows, "commitment", "commitments"),
-      ...mapRows(demandas.rows, "demanda", "cases"),
-    ],
+    results: mapRows(result.rows),
+    total,
+    page: pagina,
+    pageSize: tamano,
     generatedAt: new Date().toISOString(),
   };
 }

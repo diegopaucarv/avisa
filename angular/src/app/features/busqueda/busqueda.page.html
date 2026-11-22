@@ -1,0 +1,111 @@
+<section class="view-body" aria-labelledby="titulo-busqueda">
+  <header class="view-head">
+    <div>
+      <h1 id="titulo-busqueda">Búsqueda global</h1>
+      <p class="view-subtitle">
+        Busca a la vez en casos, alertas tempranas, compromisos, documentos, actores y demandas. El
+        orden y la relevancia son los que devuelve el servidor.
+      </p>
+    </div>
+    @if (consultaValida() && estadoListado() === 'listo') {
+      <p class="result-count" aria-live="polite">
+        {{ total() }} {{ total() === 1 ? 'resultado' : 'resultados' }}
+      </p>
+    }
+  </header>
+
+  <div class="filter-bar filter-bar-wrap">
+    <label class="search-field">
+      <app-icono nombre="buscar" [tamano]="14" />
+      <input
+        type="search"
+        placeholder="Casos, alertas, compromisos, documentos, actores y demandas"
+        [value]="filtros().q"
+        aria-label="Término de búsqueda global"
+        autocomplete="off"
+        (input)="buscar($event)"
+      />
+    </label>
+
+    @if (filtros().q) {
+      <button type="button" class="button-secondary" (click)="limpiar()">Limpiar</button>
+    }
+  </div>
+
+  @if (!consultaValida()) {
+    <div class="empty-state" role="status">
+      @if (termino()) {
+        <strong>Escriba al menos dos caracteres</strong>
+        <p>La búsqueda global necesita un término de dos caracteres o más.</p>
+      } @else {
+        <strong>Escriba un término para buscar</strong>
+        <p>Se consultan casos, alertas, compromisos, documentos, actores y demandas a la vez.</p>
+      }
+    </div>
+  } @else if (estadoListado() === 'error') {
+    <div class="empty-state" role="alert">
+      <strong>No se pudo completar la búsqueda</strong>
+      <p>{{ errorListado()?.message }}</p>
+      <button type="button" class="button-secondary" (click)="recargar()">Reintentar</button>
+    </div>
+  } @else if (estadoListado() === 'cargando' || estadoListado() === 'inactivo') {
+    <div class="empty-state" role="status">Buscando…</div>
+  } @else if (total() === 0) {
+    <div class="empty-state">
+      <strong>Sin resultados para “{{ termino() }}”</strong>
+      <p>Pruebe con otro término o revise la ortografía.</p>
+    </div>
+  } @else if (resultados().length === 0) {
+    <div class="empty-state">
+      <strong>Esta página no tiene resultados</strong>
+      <p>Hay {{ total() }} resultados en total. Use la paginación para ver otra página.</p>
+    </div>
+  } @else {
+    <ul class="search-results" aria-label="Resultados de la búsqueda">
+      @for (resultado of resultados(); track resultado.clave) {
+        <li>
+          <a
+            class="search-result"
+            [routerLink]="resultado.ruta"
+            [attr.aria-label]="
+              'Abrir ' + resultado.etiquetaTipo.toLowerCase() + ': ' + resultado.titulo
+            "
+          >
+            <span class="search-result-icono" aria-hidden="true">
+              <app-icono [nombre]="resultado.icono" [tamano]="15" />
+            </span>
+
+            <span class="search-result-cuerpo">
+              <span class="search-result-titulo">{{ resultado.titulo }}</span>
+              @if (resultado.subtitulo) {
+                <span class="search-result-subtitulo">{{ resultado.subtitulo }}</span>
+              }
+              <span class="search-result-meta">
+                <span class="search-result-tipo">{{ resultado.etiquetaTipo }}</span>
+                @if (resultado.codigo) {
+                  <span class="search-result-codigo">{{ resultado.codigo }}</span>
+                }
+              </span>
+            </span>
+
+            @if (resultado.ruta) {
+              <span class="search-result-flecha" aria-hidden="true">
+                <app-icono nombre="chevron-derecha" [tamano]="15" />
+              </span>
+            }
+          </a>
+        </li>
+      }
+    </ul>
+  }
+
+  @if (consultaValida() && estadoListado() === 'listo' && total() > 0) {
+    <app-paginacion
+      [pagina]="filtros().pagina"
+      [tamano]="filtros().tamano"
+      [total]="total()"
+      (paginaCambia)="cambiarPagina($event)"
+      (tamanoCambia)="cambiarTamano($event)"
+    />
+  }
+</section>

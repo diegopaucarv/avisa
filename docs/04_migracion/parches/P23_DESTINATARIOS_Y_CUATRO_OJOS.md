@@ -42,27 +42,27 @@ El parche hace seis cosas:
 
 En cifras (medidas en la base viva, no estimadas):
 
-| Dato                                                   |          Antes |               Después |
-| ------------------------------------------------------ | -------------: | --------------------: |
-| Columnas de `core.alertas_tempranas`                   |             36 |                **37** |
-| Columnas de `core.vw_alerta_estado`                    |             20 |                **22** |
-| Niveles del catálogo de prioridades                    |              4 |      **4** (sin alta) |
-| Niveles marcados como graves                           | — (no existía) |                 **2** |
-| Columnas de `core.alerta_destinatario`                 |              — |                **11** |
-| Filas de `core.alerta_destinatario`                    |              — |         **0** (vacía) |
-| Restricciones `CHECK` del modelo v10                   |            354 |               **360** |
-| Triggers (no internos) del modelo v10                  |             68 |                **69** |
-| Índices sobre tablas del modelo v10                    |            762 |               **767** |
-| Tablas lógicas / físicas del modelo v10                |      265 / 289 |         **266 / 290** |
-| Columnas lógicas / con particiones                     |  2 148 / 2 514 |     **2 161 / 2 527** |
-| Filas del modelo v10                                   |         13 355 | **13 355** (sin alta) |
-| Objetos derivados / sus columnas                       |       37 / 311 |          **37 / 313** |
-| Tablas con RLS / políticas (modelo v10)                |       90 / 552 |          **91 / 556** |
-| Tablas con RLS / políticas en `core`                   |       51 / 327 |          **52 / 331** |
-| Claves ajenas (modelo / únicas para SQL Server)        |      611 / 527 |         **616 / 532** |
-| Filas del CSV del diccionario                          |          3 321 |             **3 334** |
-| Alertas migradas con visibilidad distinta de `interna` |              0 |                 **0** |
-| Alertas migradas con `validada_por`                    |              — |                 **0** |
+| Dato                                                   |          Antes |                                                      Después |
+| ------------------------------------------------------ | -------------: | -----------------------------------------------------------: |
+| Columnas de `core.alertas_tempranas`                   |             36 |                                                       **37** |
+| Columnas de `core.vw_alerta_estado`                    |             20 |                                                       **22** |
+| Niveles del catálogo de prioridades                    |              4 | **4** (sin alta; la etiqueta legada `Alta` es hoy `Urgente`) |
+| Niveles marcados como graves                           | — (no existía) |                                                        **2** |
+| Columnas de `core.alerta_destinatario`                 |              — |                                                       **11** |
+| Filas de `core.alerta_destinatario`                    |              — |                                                **0** (vacía) |
+| Restricciones `CHECK` del modelo v10                   |            354 |                                                      **360** |
+| Triggers (no internos) del modelo v10                  |             68 |                                                       **69** |
+| Índices sobre tablas del modelo v10                    |            762 |                                                      **767** |
+| Tablas lógicas / físicas del modelo v10                |      265 / 289 |                                                **266 / 290** |
+| Columnas lógicas / con particiones                     |  2 148 / 2 514 |                                            **2 161 / 2 527** |
+| Filas del modelo v10                                   |         13 355 |                                        **13 355** (sin alta) |
+| Objetos derivados / sus columnas                       |       37 / 311 |                                                 **37 / 313** |
+| Tablas con RLS / políticas (modelo v10)                |       90 / 552 |                                                 **91 / 556** |
+| Tablas con RLS / políticas en `core`                   |       51 / 327 |                                                 **52 / 331** |
+| Claves ajenas (modelo / únicas para SQL Server)        |      611 / 527 |                                                **616 / 532** |
+| Filas del CSV del diccionario                          |          3 321 |                                                    **3 334** |
+| Alertas migradas con visibilidad distinta de `interna` |              0 |                                                        **0** |
+| Alertas migradas con `validada_por`                    |              — |                                                        **0** |
 
 Las cifras cuadran con las piezas: **13 columnas** nuevas (11 + 1 + 1), **6**
 restricciones `CHECK`, **1** trigger (`trg_audit`), **5** índices (la clave
@@ -78,23 +78,23 @@ Se detalla en §3, §4 y §6.
 
 ## 2. Qué cambia
 
-| Objeto                                     | Tipo                                  | Qué hace                                                                                               |
-| ------------------------------------------ | ------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| `core.cat_prioridades_alerta.es_grave`     | columna nueva                         | `boolean NOT NULL DEFAULT false`; verdadera en `Critica_Inmediata` y `Urgente`, fijada por `codigo`.   |
-| `cat_prioridades_alerta_grave_con_plazo`   | `CHECK`                               | `NOT es_grave OR sla_horas IS NOT NULL`: grave sin plazo, imposible.                                   |
-| `core.alertas_tempranas.validada_por`      | columna nueva                         | `uuid REFERENCES core.usuarios(id) ON DELETE RESTRICT`; autor de la validación previa.                 |
-| `alertas_validacion_coherente`             | `CHECK`                               | `(validada_por IS NULL) = (fecha_validacion IS NULL)`.                                                 |
-| `alertas_cuatro_ojos`                      | `CHECK`                               | `validada_por <> aprobada_por` cuando constan las dos.                                                 |
-| `core.ix_alertas_validada_por`             | índice parcial                        | `(validada_por) WHERE validada_por IS NOT NULL`.                                                       |
-| `core.alerta_destinatario`                 | tabla nueva, 11 columnas              | Destinatarios nombrados por alerta: `usuario_id` o `cargo`, excluyentes.                               |
-| `alerta_destinatario_canal_valido`         | `CHECK`                               | `correo`, `whatsapp` o `sms`.                                                                          |
-| `alerta_destinatario_identidad`            | `CHECK`                               | `(usuario_id IS NULL) <> (cargo IS NULL)`: exactamente uno de los dos.                                 |
-| `alerta_destinatario_notificado_coherente` | `CHECK`                               | `notificado_en >= created_at`.                                                                         |
-| `ux_alerta_destinatario_usuario_canal`     | índice único parcial                  | Una fila por persona, canal y alerta.                                                                  |
-| `ux_alerta_destinatario_cargo_canal`       | índice único parcial                  | Una fila por cargo (sin distinguir mayúsculas), canal y alerta.                                        |
-| `core.tg_alerta_g21_visibilidad()`         | función `plpgsql`, recreada           | Acumula lo que falta y lanza `G21_SIN_APROBACION`; ahora incluye el «cuatro ojos» y los destinatarios. |
-| `config.guardrail_contract` (G21)          | `UPDATE` de una fila                  | Pasa de `perfil_b` a `ejecutiva` y añade `validada_por` al caso negativo.                              |
-| `core.vw_alerta_estado`                    | `CREATE OR REPLACE VIEW`, 22 columnas | Conserva sus 20 columnas en el mismo orden y añade `validada_por` y `destinatarios`.                   |
+| Objeto                                     | Tipo                                  | Qué hace                                                                                                                                          |
+| ------------------------------------------ | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `core.cat_prioridades_alerta.es_grave`     | columna nueva                         | `boolean NOT NULL DEFAULT false`; verdadera en `Critica_Inmediata` (legado → `Crítica inmediata`, migración 15) y `Urgente`, fijada por `codigo`. |
+| `cat_prioridades_alerta_grave_con_plazo`   | `CHECK`                               | `NOT es_grave OR sla_horas IS NOT NULL`: grave sin plazo, imposible.                                                                              |
+| `core.alertas_tempranas.validada_por`      | columna nueva                         | `uuid REFERENCES core.usuarios(id) ON DELETE RESTRICT`; autor de la validación previa.                                                            |
+| `alertas_validacion_coherente`             | `CHECK`                               | `(validada_por IS NULL) = (fecha_validacion IS NULL)`.                                                                                            |
+| `alertas_cuatro_ojos`                      | `CHECK`                               | `validada_por <> aprobada_por` cuando constan las dos.                                                                                            |
+| `core.ix_alertas_validada_por`             | índice parcial                        | `(validada_por) WHERE validada_por IS NOT NULL`.                                                                                                  |
+| `core.alerta_destinatario`                 | tabla nueva, 11 columnas              | Destinatarios nombrados por alerta: `usuario_id` o `cargo`, excluyentes.                                                                          |
+| `alerta_destinatario_canal_valido`         | `CHECK`                               | `correo`, `whatsapp` o `sms`.                                                                                                                     |
+| `alerta_destinatario_identidad`            | `CHECK`                               | `(usuario_id IS NULL) <> (cargo IS NULL)`: exactamente uno de los dos.                                                                            |
+| `alerta_destinatario_notificado_coherente` | `CHECK`                               | `notificado_en >= created_at`.                                                                                                                    |
+| `ux_alerta_destinatario_usuario_canal`     | índice único parcial                  | Una fila por persona, canal y alerta.                                                                                                             |
+| `ux_alerta_destinatario_cargo_canal`       | índice único parcial                  | Una fila por cargo (sin distinguir mayúsculas), canal y alerta.                                                                                   |
+| `core.tg_alerta_g21_visibilidad()`         | función `plpgsql`, recreada           | Acumula lo que falta y lanza `G21_SIN_APROBACION`; ahora incluye el «cuatro ojos» y los destinatarios.                                            |
+| `config.guardrail_contract` (G21)          | `UPDATE` de una fila                  | Pasa de `perfil_b` a `ejecutiva` y añade `validada_por` al caso negativo.                                                                         |
+| `core.vw_alerta_estado`                    | `CREATE OR REPLACE VIEW`, 22 columnas | Conserva sus 20 columnas en el mismo orden y añade `validada_por` y `destinatarios`.                                                              |
 
 Todo el cuerpo va entre `BEGIN` y `COMMIT`; el bloque 0 (comprobaciones previas)
 corre **antes** del `BEGIN`, igual que en los parches 21 y 22, para que un estado
@@ -108,12 +108,12 @@ de partida equivocado no abra una transacción que luego haya que deshacer a man
 
 El catálogo tiene cuatro filas y solo tres plazos:
 
-| Fila (`codigo`)     | `sla_horas` | `es_grave` | Nivel del ERS   |
-| ------------------- | ----------: | ---------- | --------------- |
-| `Critica_Inmediata` |          24 | sí         | 1 · Crítica     |
-| `Urgente`           |          48 | sí         | 2 · Alta        |
-| `Temprana`          |          72 | no         | 3 · Media       |
-| `Seguimiento`       |   sin plazo | no         | — (observación) |
+| Fila (`codigo`)                           | `sla_horas` | `es_grave` | Nivel del ERS (legado → canónico, migración 15) |
+| ----------------------------------------- | ----------: | ---------- | ----------------------------------------------- |
+| `Critica_Inmediata` → `Crítica inmediata` |          24 | sí         | 1 · Crítica → `Crítica inmediata`               |
+| `Urgente`                                 |          48 | sí         | 2 · Alta → `Urgente`                            |
+| `Temprana`                                |          72 | no         | 3 · Media → `Temprana`                          |
+| `Seguimiento`                             |   sin plazo | no         | — (observación) → `Seguimiento`                 |
 
 La respuesta a H-14 no es «tres o cuatro»: son **tres niveles de gravedad con
 plazo** más **un cajón de observación sin plazo**. `Seguimiento` no es un grado:
@@ -126,6 +126,8 @@ La columna se fija **por `codigo`, no por `id`**: si mañana se renumeran las
 filas, la regla sigue significando lo mismo. Y sirve para que la aplicación no
 lleve el número de nivel escrito en el código cuando la OAIPCS mueva el umbral:
 cambiar qué es grave pasa a ser un `UPDATE` sobre el catálogo, no un despliegue.
+
+_Posterior al parche (2026-11-21): el renombre de `Critica_Inmediata` a `Crítica inmediata` y la escala de cuatro códigos de D8 (`Crítica inmediata` · `Urgente` · `Temprana` · `Seguimiento`) quedaron resueltos por `migration/15_fusion_hechos_y_tematicas.sql`; el literal del parche queda como valor legado._
 
 ### 3.2 La firma que faltaba (H-84)
 
@@ -252,6 +254,8 @@ se fija con `UPDATE ... WHERE codigo IN (...)`, idempotente por construcción.
 conflicto. Las alertas que antes se mapeaban «≈» a ella para la visibilidad
 `sectorial` conservan sus filas; lo que cambia es que ahora existe la tabla
 correcta para el otro uso.
+
+_Posterior al parche (2026-11-21): el código legado `Critica_Inmediata` que aquí se cuenta entre los «mismos códigos» pasó a `Crítica inmediata` por `migration/15_fusion_hechos_y_tematicas.sql`; siguen siendo cuatro filas con los mismos plazos._
 
 ---
 

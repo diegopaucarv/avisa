@@ -1,6 +1,7 @@
 import type { PoolClient } from "pg";
 import { auditChange } from "../audit";
 import { ApiError } from "../errors";
+import { anularRegistro, normalizarMotivo } from "./anulacion";
 
 export type WriteSession = {
   usuarioId: string;
@@ -229,7 +230,8 @@ export async function createCaseEvent(
   const caseId = await caseIdByCode(client, code);
 
   const descripcion = text(
-    readField(body, ["descripcion", "descripcionHecho", "descripcion_hecho"]).value,
+    readField(body, ["descripcion", "descripcionHecho", "descripcion_hecho"])
+      .value,
     MAX_TEXT_LENGTH,
     true,
   );
@@ -275,7 +277,9 @@ export async function createCaseEvent(
         actorUid,
         tipoId,
         session.usuarioId,
-        evidencia.present ? text(evidencia.value, MAX_EVIDENCE_LENGTH, false) : null,
+        evidencia.present
+          ? text(evidencia.value, MAX_EVIDENCE_LENGTH, false)
+          : null,
         "MANUAL",
       ],
     );
@@ -335,7 +339,11 @@ export async function updateCaseEvent(
     sets.push(`${column} = $${params.length}`);
   };
 
-  const descripcion = readField(body, ["descripcion", "descripcionHecho", "descripcion_hecho"]);
+  const descripcion = readField(body, [
+    "descripcion",
+    "descripcionHecho",
+    "descripcion_hecho",
+  ]);
   if (descripcion.present) {
     add("descripcion_hecho", text(descripcion.value, MAX_TEXT_LENGTH, true));
   }
@@ -385,29 +393,25 @@ export async function deleteCaseEvent(
   session: WriteSession,
   code: string,
   eventId: string,
+  motivo?: string,
 ): Promise<void> {
   if (!UUID_RE.test(eventId)) notFound();
+  const razon = normalizarMotivo(motivo);
   const caseId = await caseIdByCode(client, code);
 
-  let deleted: { rows: Record<string, any>[] };
-  try {
-    deleted = await client.query(
-      `delete from core.caso_cronologia where id = $1 and caso_id = $2 returning *`,
-      [eventId, caseId],
-    );
-  } catch (error) {
-    if ((error as { code?: string }).code === "23503") {
-      throw new ApiError(
-        409,
-        "El registro tiene datos asociados; no se puede eliminar.",
-        "CONFLICT",
-      );
-    }
-    throw error;
-  }
-
-  const row = deleted.rows[0];
+  const current = await client.query(
+    `select * from core.caso_cronologia where id = $1 and caso_id = $2`,
+    [eventId, caseId],
+  );
+  const row = current.rows[0];
   if (!row) notFound();
+
+  const anulacion = await anularRegistro(
+    client,
+    "caso_cronologia",
+    eventId,
+    razon,
+  );
 
   await auditChange(client, {
     tabla: "core.caso_cronologia",
@@ -416,6 +420,6 @@ export async function deleteCaseEvent(
     usuarioId: session.usuarioId,
     rolCodigo: session.rolCodigo,
     antes: pick(row, EVENT_AUDIT_COLUMNS),
-    despues: null,
+    despues: { anuladoEn: anulacion.anuladoEn, motivo: anulacion.motivo },
   });
 }

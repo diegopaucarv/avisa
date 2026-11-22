@@ -1,0 +1,176 @@
+<section class="view-body" aria-labelledby="titulo-documentos">
+  <header class="view-head">
+    <div>
+      <h1 id="titulo-documentos">Documentos</h1>
+      <p class="view-subtitle">
+        Evidencia documental del caso: anexos y formatos de la Guía (§7.7.1 y §8.3.3; Anexos 1–17)
+        para sistematizar demandas, alertas, actas, compromisos, reuniones y reportes. Pulse una
+        fila para revisar la ficha en el panel lateral, sin salir del listado.
+      </p>
+    </div>
+    <div class="view-acciones">
+      <app-exportar-menu
+        entidad="documentos"
+        etiqueta="Exportar"
+        (fallo)="alFallarExportacion($event)"
+      />
+      <p class="result-count" aria-live="polite">{{ total() }} documentos</p>
+    </div>
+  </header>
+
+  @if (exportarError(); as mensaje) {
+  <p class="exportar-error" role="alert">{{ mensaje }}</p>
+  }
+
+  <div class="filter-bar filter-bar-wrap">
+    <label class="search-field">
+      <app-icono nombre="buscar" [tamano]="14" />
+      <input
+        type="search"
+        placeholder="Buscar por código, título o resumen"
+        [value]="filtros().q"
+        aria-label="Buscar documentos"
+        (input)="buscar($event)"
+      />
+    </label>
+
+    <label class="select-filter">
+      Tipo
+      <select aria-label="Filtrar documentos por tipo" (change)="cambiarTipo($event)">
+        <option value="" [selected]="filtros().tipo === ''">Todos</option>
+        @for (tipo of tipos(); track tipo.valor) {
+        <option [value]="tipo.valor" [selected]="filtros().tipo === tipo.valor">
+          {{ tipo.etiqueta }}
+        </option>
+        }
+      </select>
+    </label>
+
+    <label class="select-filter">
+      Estado
+      <select aria-label="Filtrar documentos por estado" (change)="cambiarEstado($event)">
+        @for (estado of estados; track estado.valor) {
+        <option [value]="estado.valor" [selected]="filtros().estado === estado.valor">
+          {{ estado.etiqueta }}
+        </option>
+        }
+      </select>
+    </label>
+
+    <label class="select-filter">
+      Orden
+      <select aria-label="Ordenar los documentos" (change)="cambiarOrden($event)">
+        @for (orden of ordenes; track orden.valor) {
+        <option [value]="orden.valor" [selected]="filtros().orden === orden.valor">
+          {{ orden.etiqueta }}
+        </option>
+        }
+      </select>
+    </label>
+
+    <button type="button" class="button-secondary" (click)="limpiar()">Limpiar filtros</button>
+  </div>
+
+  @if (estadoListado() === 'error') {
+  <div class="empty-state" role="alert">
+    <strong>No se pudieron cargar los documentos</strong>
+    <p>{{ errorListado()?.message }}</p>
+    <button type="button" class="button-secondary" (click)="recargarListado()">Reintentar</button>
+  </div>
+  } @else if (documentos().length === 0) { @if (estadoListado() === 'cargando' || estadoListado()
+  === 'inactivo') {
+  <div class="empty-state" role="status">Cargando documentos…</div>
+  } @else {
+  <div class="empty-state">
+    <strong>No hay documentos con estos filtros</strong>
+    <p>Pruebe a quitar algún filtro o a revisar el texto de búsqueda.</p>
+  </div>
+  } } @else { @if (estadoListado() === 'cargando') {
+  <p class="actualizando" role="status">Actualizando el listado…</p>
+  }
+
+  <div class="table-wrap">
+    <table class="data-table">
+      <caption class="table-caption">
+        {{ resumenTabla() }}
+      </caption>
+      <thead>
+        <tr>
+          <th scope="col">Código</th>
+          <th scope="col">Título</th>
+          <th scope="col">Tipo</th>
+          <th scope="col">Caso</th>
+          <th scope="col">Fecha</th>
+          <th scope="col">Estado</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (documento of documentos(); track documento.id) {
+        <tr
+          class="fila-documento case-row-clickable"
+          [class.row-selected]="seleccionadaId() === documento.id"
+          (click)="abrir(documento)"
+        >
+          <td>
+            <button
+              type="button"
+              class="table-link"
+              [attr.aria-label]="
+                    'Abrir el documento ' +
+                    (documento.codigo || documento.titulo || 'sin código') +
+                    ' en el panel lateral'
+                  "
+              (click)="abrir(documento); $event.stopPropagation()"
+              (keydown.arrowdown)="moverFoco($event, 1)"
+              (keydown.arrowup)="moverFoco($event, -1)"
+            >
+              {{ documento.codigo || 'Sin código' }}
+            </button>
+          </td>
+          <td class="celda-titulo">{{ documento.titulo || 'Sin título' }}</td>
+          <td class="celda-tipo">
+            {{ documento.tipoNombre || documento.tipo || '—' }} @if (documento.anexoNumero !== null)
+            {
+            <small>{{ etiquetaAnexo(documento.anexoNumero) }}</small>
+            }
+          </td>
+          <td class="celda-caso">
+            @if (documento.casoCode) {
+            <strong>{{ documento.casoCode }}</strong>
+            @if (documento.casoTitulo) {
+            <small>{{ documento.casoTitulo }}</small>
+            } } @else {
+            <span class="sin-dato">Sin caso</span>
+            }
+          </td>
+          <td>{{ formatearFecha(documento.fecha) }}</td>
+          <td>
+            <span [class]="'status-badge ' + claseEstado(documento.estadoUi)">
+              <span class="status-dot"></span>
+              {{ documento.estadoUi }}
+            </span>
+          </td>
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  } @if (total() > 0 && estadoListado() !== 'error') {
+  <app-paginacion
+    [pagina]="filtros().pagina"
+    [tamano]="filtros().tamano"
+    [total]="total()"
+    (paginaCambia)="cambiarPagina($event)"
+    (tamanoCambia)="cambiarTamano($event)"
+  />
+  }
+</section>
+
+@if (documentoAbierto(); as documentoActual) {
+<app-documento-panel
+  [documento]="documentoActual"
+  [tipos]="tipos()"
+  (cerrado)="cerrarPanel()"
+  (actualizado)="alActualizar()"
+/>
+}

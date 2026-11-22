@@ -1,0 +1,206 @@
+<div class="avisa-shell">
+  <header class="avisa-header">
+    <div class="header-brand">
+      <button
+        class="icon-button mobile-only"
+        type="button"
+        [attr.aria-label]="menuAbierto() ? 'Cerrar navegación' : 'Abrir navegación'"
+        [attr.aria-expanded]="menuAbierto()"
+        (click)="alternarMenu()"
+      >
+        <app-icono [nombre]="menuAbierto() ? 'cerrar' : 'menu'" [tamano]="19" />
+      </button>
+      <span class="brand-symbol" aria-hidden="true">
+        <app-icono nombre="actividad" [tamano]="17" />
+      </span>
+      <span class="brand-name">AVISA</span>
+      <span class="brand-divider"></span>
+      <small>Producción · OAIPCS</small>
+    </div>
+
+    <div class="header-right">
+      <div class="system-status"><span class="freshness-dot"></span> Sistema operativo</div>
+
+      <a
+        class="header-icon-button"
+        routerLink="/busqueda"
+        routerLinkActive="icon-active"
+        aria-label="Búsqueda transversal"
+        title="Búsqueda transversal"
+      >
+        <app-icono nombre="buscar" [tamano]="18" />
+      </a>
+
+      <a
+        class="header-icon-button"
+        routerLink="/notificaciones"
+        routerLinkActive="icon-active"
+        aria-label="Notificaciones"
+        title="Notificaciones"
+      >
+        <app-icono nombre="campana" [tamano]="18" />
+      </a>
+
+      <div class="header-separator"></div>
+
+      <div class="profile-wrap">
+        <button
+          class="profile-button"
+          type="button"
+          [attr.aria-label]="saludo() + '. Abrir menú de usuario'"
+          [attr.aria-expanded]="perfilAbierto()"
+          (click)="alternarPerfil()"
+        >
+          <span class="avatar">{{ iniciales() }}</span>
+          <span class="profile-copy">
+            <strong>{{ saludo() }}</strong>
+          </span>
+          <app-icono nombre="chevron-abajo" [tamano]="16" />
+        </button>
+
+        @if (perfilAbierto()) {
+          <div class="profile-menu">
+            <span class="profile-menu-name">{{ usuario()?.nombre }}</span>
+            <span class="profile-menu-detail">{{ usuario()?.cargo || usuario()?.rol }}</span>
+            <span class="profile-menu-detail">{{ usuario()?.area }}</span>
+            @for (etiqueta of roles(); track etiqueta) {
+              <span class="profile-menu-detail">{{ etiqueta }}</span>
+            }
+            <button type="button" (click)="cerrarSesion()">
+              <app-icono nombre="salir" [tamano]="15" />
+              Cerrar sesión
+            </button>
+          </div>
+        }
+      </div>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <aside class="avisa-sidebar" [class.open]="menuAbierto()">
+      <button class="sidebar-context" type="button" title="Gestión territorial">
+        <span class="context-mark">
+          <app-icono nombre="mapa" [tamano]="15" />
+        </span>
+        <span>
+          <strong>Gestión territorial</strong>
+        </span>
+      </button>
+
+      <div class="sidebar-scroll">
+        <nav class="territorial-map-nav" aria-label="Mapa territorial">
+          <a
+            class="side-nav"
+            routerLink="/mapa"
+            routerLinkActive="selected"
+            (click)="menuAbierto.set(false)"
+          >
+            <app-icono nombre="mapa" [tamano]="17" />
+            <span>Mapa territorial</span>
+          </a>
+        </nav>
+
+        <div class="sidebar-label">MI ESPACIO</div>
+        <nav aria-label="Navegación principal">
+          @for (enlace of enlacesTrabajo; track enlace.ruta) {
+            <a
+              class="side-nav"
+              [routerLink]="enlace.ruta"
+              routerLinkActive="selected"
+              (click)="menuAbierto.set(false)"
+            >
+              <app-icono [nombre]="enlace.icono" [tamano]="17" />
+              <span>{{ enlace.etiqueta }}</span>
+            </a>
+          }
+        </nav>
+
+        <div class="sidebar-label section-nav-label">SEGUIMIENTO</div>
+        <nav aria-label="Seguimiento">
+          @for (enlace of enlacesSeguimiento; track enlace.ruta) {
+            <a
+              class="side-nav"
+              [routerLink]="enlace.ruta"
+              routerLinkActive="selected"
+              (click)="menuAbierto.set(false)"
+            >
+              <app-icono [nombre]="enlace.icono" [tamano]="17" />
+              <span>{{ enlace.etiqueta }}</span>
+            </a>
+          }
+        </nav>
+
+        <div class="sidebar-label section-nav-label">DIRECTORIO</div>
+        <nav aria-label="Directorio">
+          @for (enlace of enlacesDirectorio; track enlace.ruta) {
+            <a
+              class="side-nav"
+              [routerLink]="enlace.ruta"
+              routerLinkActive="selected"
+              (click)="menuAbierto.set(false)"
+            >
+              <app-icono [nombre]="enlace.icono" [tamano]="17" />
+              <span>{{ enlace.etiqueta }}</span>
+            </a>
+          }
+        </nav>
+
+        <div class="sidebar-label section-nav-label">ANÁLISIS</div>
+        <nav aria-label="Análisis">
+          <a
+            class="side-nav"
+            routerLink="/direccion"
+            routerLinkActive="selected"
+            (click)="menuAbierto.set(false)"
+          >
+            <app-icono nombre="analisis" [tamano]="17" />
+            <span>Resumen de Dirección</span>
+          </a>
+        </nav>
+      </div>
+
+      <div class="sidebar-bottom">
+        <div class="sidebar-rule"></div>
+        <a class="side-nav" routerLink="/ayuda" routerLinkActive="selected">
+          <app-icono nombre="ayuda" [tamano]="17" />
+          <span>Ayuda y criterios</span>
+        </a>
+        <a class="side-nav" routerLink="/preferencias" routerLinkActive="selected">
+          <app-icono nombre="ajustes" [tamano]="17" />
+          <span>Preferencias</span>
+        </a>
+        <div class="environment-card">
+          <span class="environment-mark">
+            <app-icono nombre="actividad" [tamano]="15" />
+          </span>
+          <div>
+            <strong>Entorno</strong>
+            <small>Base institucional</small>
+          </div>
+          <span class="environment-dot"></span>
+        </div>
+        <div class="sidebar-version">AVISA <span>·</span> v{{ version }}</div>
+      </div>
+    </aside>
+
+    @if (menuAbierto()) {
+      <button
+        class="sidebar-scrim"
+        type="button"
+        aria-label="Cerrar navegación"
+        (click)="menuAbierto.set(false)"
+      ></button>
+    }
+
+    <main class="avisa-main">
+      <router-outlet />
+      <footer class="app-footer">
+        <span
+          >AVISA · Oficina de Articulación Intergubernamental y Prevención de Conflictos
+          Sociales</span
+        >
+        <span>Ministerio de la Producción</span>
+      </footer>
+    </main>
+  </div>
+</div>

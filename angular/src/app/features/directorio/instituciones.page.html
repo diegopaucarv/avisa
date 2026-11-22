@@ -1,0 +1,135 @@
+<section class="view-body" aria-labelledby="titulo-instituciones">
+  <header class="view-head">
+    <div>
+      <h1 id="titulo-instituciones">Instituciones</h1>
+      <p class="view-subtitle">
+        Actores públicos: autoridades e instituciones del Estado registradas en el directorio, con su
+        función, nivel de gobierno y territorio (Guía §7.4).
+      </p>
+    </div>
+    <p class="result-count" aria-live="polite">{{ total() }} instituciones</p>
+  </header>
+
+  <div class="filter-bar filter-bar-wrap">
+    <label class="search-field">
+      <app-icono nombre="buscar" [tamano]="14" />
+      <input
+        type="search"
+        placeholder="Buscar por nombre, abreviatura o cargo"
+        [value]="filtros().q"
+        aria-label="Buscar instituciones"
+        (input)="buscar($event)"
+      />
+    </label>
+
+    <label class="select-filter">
+      Naturaleza
+      <select aria-label="Filtrar por naturaleza del actor público" (change)="cambiarNaturaleza($event)">
+        <option value="" [selected]="filtros().naturaleza === ''">Todas</option>
+        @for (naturaleza of naturalezas; track naturaleza.valor) {
+          <option [value]="naturaleza.valor" [selected]="filtros().naturaleza === naturaleza.valor">
+            {{ naturaleza.etiqueta }}
+          </option>
+        }
+      </select>
+    </label>
+
+    <label class="search-field">
+      <app-icono nombre="mapa" [tamano]="14" />
+      <input
+        type="search"
+        placeholder="Región (nombre exacto)"
+        [value]="filtros().region"
+        aria-label="Filtrar por región"
+        (input)="cambiarRegion($event)"
+      />
+    </label>
+
+    <button type="button" class="button-secondary" (click)="limpiar()">Limpiar filtros</button>
+  </div>
+
+  @if (estado() === "error") {
+    <div class="empty-state" role="alert">
+      <strong>No se pudieron cargar las instituciones</strong>
+      <p>{{ error()?.message }}</p>
+      <button type="button" class="button-secondary" (click)="recargar()">Reintentar</button>
+    </div>
+  } @else if (instituciones().length === 0) {
+    @if (estado() === "cargando" || estado() === "inactivo") {
+      <div class="empty-state" role="status">Cargando instituciones…</div>
+    } @else {
+      <div class="empty-state">
+        <strong>Sin instituciones para estos filtros</strong>
+        <p>
+          No hay actores públicos que coincidan con la búsqueda. La región se compara con el nombre
+          registrado, así que debe escribirse completo (por ejemplo, el departamento).
+        </p>
+      </div>
+    }
+  } @else {
+    @if (estado() === "cargando") {
+      <p class="actor-actualizando" role="status">Actualizando el listado…</p>
+    }
+
+    <div class="table-wrap">
+      <table class="data-table">
+        <caption class="table-caption">
+          Sólo actores públicos. Pulse una fila para abrir la ficha en el panel lateral; los datos
+          personales se consultan desde ahí y quedan registrados en la auditoría de la base.
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">Nombre</th>
+            <th scope="col">Naturaleza</th>
+            <th scope="col">Tipo</th>
+            <th scope="col">Función</th>
+            <th scope="col">Región</th>
+            <th scope="col">Organización ancla</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (institucion of instituciones(); track institucion.id) {
+            <tr
+              class="case-row-clickable"
+              [class.row-selected]="seleccionado()?.id === institucion.id"
+              (click)="abrir(institucion)"
+            >
+              <td>
+                <button
+                  type="button"
+                  class="table-link actor-nombre"
+                  [attr.aria-label]="'Abrir la ficha de ' + institucion.nombre"
+                  (click)="abrir(institucion); $event.stopPropagation()"
+                >
+                  <strong>{{ institucion.nombre }}</strong>
+                  @if (institucion.abreviatura) {
+                    <small>{{ institucion.abreviatura }}</small>
+                  }
+                </button>
+              </td>
+              <td>{{ institucion.naturaleza }}</td>
+              <td>{{ institucion.tipo || "—" }}</td>
+              <td>{{ institucion.funcion || "No determinado" }}</td>
+              <td>{{ institucion.region || "—" }}</td>
+              <td class="actor-organizacion">{{ institucion.organizacionAncla || "—" }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  @if (total() > 0 && estado() !== "error") {
+    <app-paginacion
+      [pagina]="filtros().pagina"
+      [tamano]="filtros().tamano"
+      [total]="total()"
+      (paginaCambia)="cambiarPagina($event)"
+      (tamanoCambia)="cambiarTamano($event)"
+    />
+  }
+
+  @if (seleccionado(); as institucionAbierta) {
+    <app-actor-panel [actor]="institucionAbierta" (cerrar)="cerrarPanel()" />
+  }
+</section>

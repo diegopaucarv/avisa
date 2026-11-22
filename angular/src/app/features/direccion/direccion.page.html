@@ -1,0 +1,171 @@
+<section class="view-body" aria-labelledby="titulo-direccion">
+  <header class="view-head">
+    <div>
+      <p class="section-eyebrow">Alta Dirección · lectura ejecutiva</p>
+      <h1 id="titulo-direccion">Resumen de Dirección</h1>
+      <p class="view-subtitle">
+        Panorama agregado de la conflictividad sectorial construido con los totales y las filas
+        reales de la API. Base normativa: Guía §8.1.2.3 «Reportes de clima social» y Anexo 2
+        «Reporte Regional de Conflictividad y Demandas».
+      </p>
+    </div>
+
+    <div class="view-actions">
+      <button type="button" class="button-secondary" (click)="imprimir()">
+        <app-icono nombre="documentos" [tamano]="14" />
+        Imprimir / Guardar PDF
+      </button>
+    </div>
+  </header>
+
+  @if (error()) {
+  <div class="empty-state" role="alert">
+    <strong>No se pudo cargar el panorama</strong>
+    <p>{{ error()?.message }}</p>
+    <button type="button" class="button-secondary" (click)="recargar()">Reintentar</button>
+  </div>
+  }
+
+  <div class="executive-kpis">
+    <a class="stat-card" routerLink="/casos" aria-label="Abrir la lista de casos">
+      <span class="stat-icon"><app-icono nombre="casos" [tamano]="16" /></span>
+      <span class="stat-copy">
+        <span>Casos activos</span>
+        <strong>{{ casosActivos() ?? "—" }}</strong>
+        <small>Abrir casos <app-icono nombre="chevron-derecha" [tamano]="11" /></small>
+      </span>
+    </a>
+
+    <a class="stat-card" routerLink="/alertas" aria-label="Abrir las alertas tempranas">
+      <span class="stat-icon red"><app-icono nombre="alertas" [tamano]="16" /></span>
+      <span class="stat-copy">
+        <span>Alertas registradas</span>
+        <strong>{{ alertas() ?? "—" }}</strong>
+        <small>Abrir alertas <app-icono nombre="chevron-derecha" [tamano]="11" /></small>
+      </span>
+    </a>
+
+    <a class="stat-card" routerLink="/compromisos" aria-label="Abrir los compromisos">
+      <span class="stat-icon green"><app-icono nombre="compromisos" [tamano]="16" /></span>
+      <span class="stat-copy">
+        <span>Compromisos</span>
+        <strong>{{ compromisos() ?? "—" }}</strong>
+        <small>Abrir compromisos <app-icono nombre="chevron-derecha" [tamano]="11" /></small>
+      </span>
+    </a>
+
+    <div class="stat-card">
+      <span class="stat-icon amber"><app-icono nombre="bandeja" [tamano]="16" /></span>
+      <span class="stat-copy">
+        <span>Demandas sin caso</span>
+        <strong>{{ demandasSinCaso() ?? "—" }}</strong>
+        <small>No hay enlace todavía</small>
+      </span>
+    </div>
+  </div>
+
+  @if (cargando() && filasAnalizadas() === 0) {
+  <div class="empty-state" role="status">Cargando panorama…</div>
+  } @else if (filasAnalizadas() === 0) {
+  <div class="empty-state">
+    <strong>Sin casos para el panorama</strong>
+    <p>La API no devolvió casos en la consulta de lectura.</p>
+  </div>
+  } @else {
+  <section class="surface detail-section" aria-labelledby="titulo-desglose">
+    <div class="surface-heading">
+      <div>
+        <p class="section-eyebrow">Panorama de casos</p>
+        <h3 id="titulo-desglose">Desglose por región, nivel, riesgo y temática</h3>
+        <p>{{ notaBase() }}</p>
+      </div>
+    </div>
+
+    <div class="breakdown-grid">
+      <div class="breakdown-card">
+        <h3>Por región</h3>
+        <ul class="breakdown-list">
+          @for (grupo of porRegion(); track grupo.etiqueta) {
+          <li>
+            @if (grupo.etiqueta === sinRegion) {
+            <span>{{ grupo.etiqueta }}</span>
+            } @else {
+            <a
+              [routerLink]="['/casos']"
+              [queryParams]="{ q: grupo.etiqueta }"
+              [attr.aria-label]="'Buscar casos de ' + grupo.etiqueta"
+            >
+              {{ grupo.etiqueta }}
+            </a>
+            }
+            <span class="breakdown-bar"><i [style.width.%]="grupo.porcentaje"></i></span>
+            <span class="breakdown-count">
+              {{ grupo.total }} <small>{{ grupo.porcentaje }}%</small>
+            </span>
+          </li>
+          }
+        </ul>
+        <a class="link-button" routerLink="/casos">Abrir todos los casos</a>
+      </div>
+
+      <div class="breakdown-card">
+        <h3>Por nivel de conflicto</h3>
+        <ul class="breakdown-list">
+          @for (grupo of porNivel(); track grupo.etiqueta) {
+          <li>
+            <span>{{ grupo.etiqueta }}</span>
+            <span class="breakdown-bar"><i [style.width.%]="grupo.porcentaje"></i></span>
+            <span class="breakdown-count">
+              {{ grupo.total }} <small>{{ grupo.porcentaje }}%</small>
+            </span>
+          </li>
+          }
+        </ul>
+        <a class="link-button" routerLink="/casos">Abrir casos</a>
+      </div>
+
+      <div class="breakdown-card">
+        <h3>Por riesgo</h3>
+        <ul class="breakdown-list">
+          @for (grupo of porRiesgo(); track grupo.etiqueta) {
+          <li>
+            <span>{{ grupo.etiqueta }}</span>
+            <span class="breakdown-bar"><i [style.width.%]="grupo.porcentaje"></i></span>
+            <span class="breakdown-count">
+              {{ grupo.total }} <small>{{ grupo.porcentaje }}%</small>
+            </span>
+          </li>
+          }
+        </ul>
+        <a class="link-button" routerLink="/casos">Abrir casos</a>
+      </div>
+
+      <div class="breakdown-card">
+        <h3>Por temática</h3>
+        <ul class="breakdown-list">
+          @for (grupo of porTematica(); track grupo.etiqueta) {
+          <li>
+            <span>{{ grupo.etiqueta }}</span>
+            <span class="breakdown-bar"><i [style.width.%]="grupo.porcentaje"></i></span>
+            <span class="breakdown-count">
+              {{ grupo.total }} <small>{{ grupo.porcentaje }}%</small>
+            </span>
+          </li>
+          }
+        </ul>
+        <a class="link-button" routerLink="/casos">Abrir casos</a>
+      </div>
+    </div>
+  </section>
+
+  <div class="executive-disclaimer">
+    <app-icono nombre="alerta" [tamano]="14" />
+    <span>
+      Este resumen ordena datos operativos; no reemplaza el Reporte Regional de Conflictividad y
+      Demandas (Anexo 2), que distingue hechos confirmados de percepciones y añade el perfil de
+      actores y la relevancia de cada caso. El desglose cubre como máximo {{ tamanoAnalisis }} filas
+      recientes por listado.
+    </span>
+  </div>
+  }
+</section>

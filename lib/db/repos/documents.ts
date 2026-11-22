@@ -2,6 +2,7 @@ import type { PoolClient } from "pg";
 import { auditChange } from "../audit";
 import { nextSequentialCode } from "../codes";
 import { ApiError } from "../errors";
+import { anularRegistro, restaurarRegistro } from "./anulacion";
 
 /**
  * `core.documentos.estado` es texto libre y sólo contiene 'Activo' o NULL.
@@ -615,26 +616,19 @@ export async function deleteDocument(
   client: PoolClient,
   ctx: DocumentWriteContext,
   ref: string,
+  motivo?: string,
 ): Promise<void> {
   const current = await fetchDocumentRow(client, ref);
   if (!current) {
     throw new ApiError(404, "El documento no existe.", "NOT_FOUND");
   }
 
-  try {
-    await client.query(`delete from core.documentos where id = $1`, [
-      current.id,
-    ]);
-  } catch (error) {
-    if ((error as { code?: string }).code === "23503") {
-      throw new ApiError(
-        409,
-        "El registro tiene datos asociados; no se puede eliminar.",
-        "CONFLICT",
-      );
-    }
-    throw error;
-  }
+  const anulacion = await anularRegistro(
+    client,
+    "documentos",
+    String(current.id),
+    motivo,
+  );
 
   await auditChange(client, {
     tabla: "core.documentos",
@@ -643,6 +637,18 @@ export async function deleteDocument(
     usuarioId: ctx.usuarioId,
     rolCodigo: ctx.rolCodigo,
     antes: current,
-    despues: null,
+    despues: { anuladoEn: anulacion.anuladoEn, motivo: anulacion.motivo },
   });
+}
+
+export async function restoreDocument(
+  client: PoolClient,
+  ref: string,
+): Promise<void> {
+  const current = await fetchDocumentRow(client, ref);
+  if (!current) {
+    throw new ApiError(404, "El documento no existe.", "NOT_FOUND");
+  }
+
+  await restaurarRegistro(client, "documentos", String(current.id));
 }

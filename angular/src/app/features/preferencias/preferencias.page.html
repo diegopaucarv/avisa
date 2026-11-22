@@ -1,0 +1,222 @@
+<section class="view-body" aria-labelledby="titulo-preferencias">
+  <header class="view-head">
+    <div>
+      <p class="section-eyebrow">Ajustes personales</p>
+      <h1 id="titulo-preferencias">Preferencias</h1>
+      <p class="view-subtitle">
+        Ajustes de este usuario en este navegador. Se guardan en el almacenamiento local: no viajan
+        al servidor ni modifican la base de datos.
+      </p>
+    </div>
+
+    <div class="view-actions">
+      <button type="button" class="button-primary" (click)="guardar()">
+        <app-icono nombre="check" [tamano]="14" />
+        Guardar preferencias
+      </button>
+    </div>
+  </header>
+
+  @if (mensaje()) {
+  <div
+    class="inline-notice"
+    [class.inline-notice-error]="!guardado()"
+    [attr.role]="guardado() ? 'status' : 'alert'"
+  >
+    <app-icono [nombre]="guardado() ? 'check' : 'alerta'" [tamano]="14" />
+    <span>{{ mensaje() }}</span>
+    <button type="button" aria-label="Cerrar aviso" (click)="cerrarAviso()">
+      <app-icono nombre="cerrar" [tamano]="14" />
+    </button>
+  </div>
+  }
+
+  <div class="pref-layout">
+    <div class="pref-col">
+      <section class="surface detail-section" aria-labelledby="titulo-tema">
+        <div class="pref-section">
+          <div class="pref-section-head">
+            <h3 id="titulo-tema">Tema de la interfaz</h3>
+            <span class="pref-hint">Claro u oscuro</span>
+          </div>
+
+          <div class="theme-options" role="group" aria-labelledby="titulo-tema">
+            <button
+              type="button"
+              class="theme-option"
+              [class.selected]="tema() === 'claro'"
+              [attr.aria-pressed]="tema() === 'claro'"
+              (click)="cambiarTema('claro')"
+            >
+              <span class="theme-option-icon"><app-icono nombre="cuadricula" [tamano]="15" /></span>
+              <span class="theme-option-copy">
+                <strong>Claro</strong>
+                <small>Fondo blanco, para salas iluminadas.</small>
+              </span>
+              @if (tema() === 'claro') {
+              <span class="theme-option-check"><app-icono nombre="check" [tamano]="14" /></span>
+              }
+            </button>
+
+            <button
+              type="button"
+              class="theme-option"
+              [class.selected]="tema() === 'oscuro'"
+              [attr.aria-pressed]="tema() === 'oscuro'"
+              (click)="cambiarTema('oscuro')"
+            >
+              <span class="theme-option-icon"><app-icono nombre="actividad" [tamano]="15" /></span>
+              <span class="theme-option-copy">
+                <strong>Oscuro</strong>
+                <small>Menos brillo en pantallas y turnos nocturnos.</small>
+              </span>
+              @if (tema() === 'oscuro') {
+              <span class="theme-option-check"><app-icono nombre="check" [tamano]="14" /></span>
+              }
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section class="surface detail-section" aria-labelledby="titulo-densidad">
+        <div class="pref-section">
+          <div class="pref-section-head">
+            <h3 id="titulo-densidad">Densidad de las tablas</h3>
+            <span class="pref-hint">Espaciado de filas</span>
+          </div>
+
+          <div class="pref-options" role="group" aria-labelledby="titulo-densidad">
+            <button
+              type="button"
+              class="pref-option"
+              [class.selected]="densidad() === 'comoda'"
+              [attr.aria-pressed]="densidad() === 'comoda'"
+              (click)="cambiarDensidad('comoda')"
+            >
+              <span class="pref-option-icon"><app-icono nombre="cuadricula" [tamano]="14" /></span>
+              <span class="pref-option-copy">
+                <strong>Cómoda</strong>
+                <small>Más aire entre filas; lectura pausada.</small>
+              </span>
+              @if (densidad() === 'comoda') {
+              <span class="pref-option-check"><app-icono nombre="check" [tamano]="14" /></span>
+              }
+            </button>
+
+            <button
+              type="button"
+              class="pref-option"
+              [class.selected]="densidad() === 'compacta'"
+              [attr.aria-pressed]="densidad() === 'compacta'"
+              (click)="cambiarDensidad('compacta')"
+            >
+              <span class="pref-option-icon"><app-icono nombre="documentos" [tamano]="14" /></span>
+              <span class="pref-option-copy">
+                <strong>Compacta</strong>
+                <small>Más filas visibles por pantalla.</small>
+              </span>
+              @if (densidad() === 'compacta') {
+              <span class="pref-option-check"><app-icono nombre="check" [tamano]="14" /></span>
+              }
+            </button>
+          </div>
+
+          <p class="pref-note">
+            La densidad se aplica a las tablas y tarjetas ya preparadas para ella en la hoja de
+            estilos común.
+          </p>
+        </div>
+      </section>
+
+      <section class="surface detail-section" aria-labelledby="titulo-tamano">
+        <div class="pref-section">
+          <div class="pref-section-head">
+            <h3 id="titulo-tamano">Tamaño de página</h3>
+            <span class="pref-hint">Filas por listado</span>
+          </div>
+
+          <div class="pref-size-row">
+            <div
+              class="segmented"
+              role="group"
+              aria-label="Tamaño de página (no disponible)"
+              aria-disabled="true"
+            >
+              @for (tamano of tamanos; track tamano) {
+              <button type="button" disabled>{{ tamano }}</button>
+              }
+            </div>
+            <span class="pref-hint">No disponible</span>
+          </div>
+
+          <p class="pref-note">
+            Deshabilitado: la API no expone una preferencia de tamaño de página y cada listado fija
+            su propio tamaño al consultar. No se simula un ajuste que no surte efecto.
+          </p>
+        </div>
+      </section>
+    </div>
+
+    <div class="pref-col">
+      <section class="surface detail-section" aria-labelledby="titulo-perfil">
+        <div class="pref-section">
+          <div class="pref-section-head">
+            <h3 id="titulo-perfil">Perfil de la sesión</h3>
+            <span class="pref-hint">Sólo lectura</span>
+          </div>
+
+          @if (usuario(); as persona) {
+          <div class="detail-data-row">
+            <div>
+              <span>Nombre</span>
+              <strong>{{ persona.nombre }}</strong>
+            </div>
+            <div>
+              <span>DNI</span>
+              <strong>{{ persona.dni }}</strong>
+            </div>
+            <div>
+              <span>Área</span>
+              <strong>{{ persona.area }}</strong>
+            </div>
+          </div>
+
+          <div class="detail-data-row">
+            <div>
+              <span>Rol principal</span>
+              <strong>{{ persona.rol }}</strong>
+            </div>
+            <div>
+              <span>Roles</span>
+              <strong>{{ rolesTexto() }}</strong>
+            </div>
+            <div>
+              <span>Regiones</span>
+              <strong>{{ regionesTexto() }}</strong>
+            </div>
+          </div>
+
+          <p class="pref-note">
+            Los roles y la contraseña se administran fuera de AVISA. No hay endpoint para cambiarlos
+            desde aquí y esta pantalla no ofrece escritura sobre el perfil.
+          </p>
+          } @else {
+          <p>No hay una sesión activa en este navegador.</p>
+          }
+        </div>
+      </section>
+
+      <section class="surface detail-section" aria-labelledby="titulo-alcance">
+        <div class="pref-section">
+          <div class="pref-section-head">
+            <h3 id="titulo-alcance">Alcance de estos ajustes</h3>
+          </div>
+          <p class="pref-note">
+            Se guardan en el almacenamiento local de este navegador, no en la base de datos. Otro
+            equipo o un navegador distinto partirá de los valores por defecto.
+          </p>
+        </div>
+      </section>
+    </div>
+  </div>
+</section>

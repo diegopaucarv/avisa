@@ -2,7 +2,7 @@
 
 **Para qué sirve este documento.** La v10 tiene 266 tablas; el MVP-45 pide 55 objetos para 45 días, que hoy se cumplen con 46 tablas existentes (33 con datos y 13 todavía vacías). Este documento dice, con medición sobre la base viva, **qué parte de la v10 ya está en pie, qué parte hay que crear primero y qué parte puede esperar**. No reemplaza al `mvp.md` ni al `AVISA_PRODUCE_v10.md`: los ordena en el tiempo.
 
-> **Nota de medición.** Las cifras de capas salen de `mvp_prioridad_tablas.csv` regenerado el **2026-11-20**, con los parches 18 a 23 ya aplicados. Las dos tablas que trajo el parche 18 entran por la regla del clasificador, no por la lista del contrato MVP-45: `config.servicio_externo` (8 columnas, 4 filas) cae en **T2** porque el contrato no la nombra, y `config.tope_gasto` (11 columnas, 0 filas) en **T4**. El ERS las exige por RNF-13, así que en la práctica se programan junto con T0 y T1. El **parche 23** creó `core.alerta_destinatario`, que es la tabla exacta que el contrato del MVP pedía como `alerta_destinatario`: antes se aproximaba a `core.alertas_actores`, que relaciona la alerta con los actores del conflicto y no con quien recibe el aviso. La correspondencia del puente (§7) ya la apunta a la tabla nueva y por eso `core.alertas_actores` pasa a **T2**.
+> **Nota de medición.** Las cifras de capas salen de `mvp_prioridad_tablas.csv` regenerado el **2026-11-20**, con los parches 18 a 23 ya aplicados. Las dos tablas que trajo el parche 18 entran por la regla del clasificador, no por la lista del contrato MVP-45: `config.servicio_externo` (8 columnas, 4 filas) cae en **T2** porque el contrato no la nombra, y `config.tope_gasto` (11 columnas, 0 filas) en **T4**. El ERS las exige por RNF-13, así que en la práctica se programan junto con T0 y T1. El **parche 23** creó `core.alerta_destinatario`, que es la tabla exacta que el contrato del MVP pedía como `alerta_destinatario`: antes se aproximaba a `core.alertas_actores`, que relaciona la alerta con los actores del conflicto y no con quien recibe el aviso. La correspondencia del puente (§7) ya la apunta a la tabla nueva y por eso `core.alertas_actores` pasa a **T2**. Las migraciones de alineación `migration/12` a `migration/19` se aplicaron después, el **2026-11-22** —la 13 incluida—: no añaden tablas, pero reescriben el contenido de varios catálogos, así que las cifras de filas de los catálogos de §3 siguen siendo las de la medición del 2026-11-20 y no se reescriben aquí.
 
 **Cómo se lee.** Cinco capas, de la que ya funciona a la que duerme. Después, el puente entre los nombres del MVP y los de la v10. Al final, el orden de construcción del backend, bloque por bloque.
 
@@ -37,17 +37,17 @@ Las 13 355 filas se reparten solo entre T0 y T2. **La mitad baja del modelo est�
 
 Cinco señales por tabla, todas verificables:
 
-| Señal            | Qué pregunta                                         | Fuente                                                 |
-| ---------------- | ---------------------------------------------------- | ------------------------------------------------------ |
-| **Filas**        | ¿tiene datos hoy?                                    | `count(*)` real, tabla por tabla                       |
-| **Cargador**     | ¿alguna fase del cargador de legado escribe en ella? | `migration/loader/*.py`                                |
-| **Dependencia**  | ¿cuántas tablas **vivas** la referencian?            | claves foráneas del catálogo                           |
-| **Consumidores** | ¿el código de la aplicación la nombra?               | `app/`, `components/`, `lib/`, `frontend/`, `backend/` |
-| **Contrato**     | ¿el MVP-45 la exige?                                 | `mvp.md` §2.4 y §2.5                                   |
+| Señal            | Qué pregunta                                         | Fuente                                                                                                                      |
+| ---------------- | ---------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| **Filas**        | ¿tiene datos hoy?                                    | `count(*)` real, tabla por tabla                                                                                            |
+| **Cargador**     | ¿alguna fase del cargador de legado escribe en ella? | `migration/loader/*.py`                                                                                                     |
+| **Dependencia**  | ¿cuántas tablas **vivas** la referencian?            | claves foráneas del catálogo                                                                                                |
+| **Consumidores** | ¿el código de la aplicación la nombra?               | `app/`, `components/`, `lib/`, `frontend/`, `backend/`; desde el 2026-11-22 también `angular/`, que es la versión que queda |
+| **Contrato**     | ¿el MVP-45 la exige?                                 | `mvp.md` §2.4 y §2.5                                                                                                        |
 
 Dos advertencias para no sobreinterpretar:
 
-- **Los consumidores casi no aportan todavía.** El código de la aplicación es un esqueleto: el backend tiene 147 líneas y el frontend 48. Ninguna tabla tiene consumo real, así que esa señal vale cero hoy y valdrá mucho dentro de tres semanas.
+- **Los consumidores casi no aportan todavía.** El código de la aplicación es un esqueleto: el backend tiene 147 líneas y la UI Next —congelada como referencia de diseño— 48; la versión que queda es la SPA Angular (`angular/`). Ninguna tabla tiene consumo real, así que esa señal vale cero hoy y valdrá mucho dentro de tres semanas.
 - **El DDL no es un consumidor.** Al medir por primera vez aparecieron 115 tablas "usadas por el código"; todas eran falsos positivos: el escáner estaba leyendo el archivo `PRODUCE_OAIPCS_AVISA_v9_ddl(1).sql`, que **define** las tablas, no las consulta.
 
 **Qué entra en la cuenta.** El universo son las relaciones de tipo tabla (`relkind` `r` y `p`), con cada tabla particionada contada **una vez** —sus 24 particiones hijas quedan fuera— y sin vistas, vistas materializadas ni catálogos del sistema. Se excluyen además `legacy` (87 tablas: la copia en bruto del libro, fase 0 del cargador) y `public.spatial_ref_sys`, que no forman parte del modelo. De 354 tablas contadas así sobran 88: el modelo son **266**.

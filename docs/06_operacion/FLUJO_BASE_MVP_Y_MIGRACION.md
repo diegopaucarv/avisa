@@ -199,7 +199,16 @@ total que deja la carga más el parche 16 con su rol de administrador y oficial 
 datos personales. Si se verifica antes de ese parche, la línea avisa de la fila
 que falta y no es un problema de la carga.
 
-### 5.4 Aplicar los parches 6 a 24
+> **Cuidado al comprobar a mano.** Si consultas con el login `avisa_api` sin
+> fijar `app.rol_codigo` y `app.usuario_id`, las tablas con RLS `FORCE`
+> devuelven **cero filas sin error**: `count(*) = 0` no significa que el
+> catálogo esté vacío. La API fija ese contexto por transacción en
+> `withSession` (`lib/db/tenant.ts`); `avisa_api` es el login y hereda de
+> `avisa_app`, que es quien tiene los `GRANT EXECUTE`. Para comprobar a mano,
+> usa `BEGIN; SET LOCAL ROLE avisa_app;` más los dos `set_config`, y `ROLLBACK`
+> (la receta está en `ENTORNO_DOCKER_POSTGRES.md` §5).
+
+### 5.4 Aplicar los parches 6 a 24 y las migraciones 12–19
 
 Los parches vienen **después** de la carga, siempre en orden, y nunca antes.
 Cada uno hace algo que necesita datos reales: reclasificar documentos, cifrar
@@ -225,7 +234,7 @@ MSYS_NO_PATHCONV=1 docker exec -i avisa-db psql -U avisa -d avisa \
 …y así hasta el 17, cambiando solo el nombre del archivo. El parche 9 además
 necesita `-v crypto_key="$APP_CRYPTO_KEY"`; sin esa variable aborta a propósito.
 
-El parche 18 va aparte, siempre al final:
+El parche 18 va aparte, después del 17:
 
 ```sh
 MSYS_NO_PATHCONV=1 docker exec -i avisa-db psql -U avisa -d avisa \
@@ -356,13 +365,53 @@ describir.
   `reporte`: los 9 pasos 4–6 de ese flujo quedan documentados, sin ampliar el
   catálogo, como pasos del sistema anterior que no tienen equivalente.
 
+### 5.4.1 Migraciones de alineación 12–19
+
+Con los parches 6–24 puestos, se aplican las ocho migraciones de alineación
+**en orden y una por una**, sobre la base ya cargada. El unificado de la
+sección B no las incluye. No están montadas en el contenedor y cada archivo abre
+y cierra su propia transacción:
+
+```sh
+MSYS_NO_PATHCONV=1 docker exec -i -e PGPASSWORD="$POSTGRES_PASSWORD" avisa-db \
+  psql -v ON_ERROR_STOP=1 -U avisa -d avisa < migration/12_anulacion_y_secuencia.sql
+```
+
+Se cambia solo el nombre del archivo, del `12` al `19`. Todas quedaron
+aplicadas y verificadas por SELECT el **2026-11-22**.
+
+| #   | Qué añade en una línea                                                                                         |
+| --- | -------------------------------------------------------------------------------------------------------------- |
+| 12  | anulación lógica y contador `core.secuencia_codigo` con `core.siguiente_codigo()`                              |
+| 13  | `SECURITY DEFINER` de las cuatro funciones de anulación; crea `core.exigir_anulacion` (sin él: sólo comprueba) |
+| 14  | catálogos de tipos y roles de actor, posicionamiento, subsectores, niveles de conflicto y de alerta, y Anexo 3 |
+| 15  | fusión de tipos de hecho y retiro de `Otros` de temáticas, más la ortografía de estados y prioridades          |
+| 16  | recodificación de los 35 casos al Anexo 15, con compromisos e hitos, y contador por (año, subsector, temática) |
+| 17  | cuentas demo, rol primario por jerarquía y separación de `administrador` de la cuenta de la Directora          |
+| 18  | `core.normalizar_ref(text)`: comparación sin mayúsculas, tildes ni separadores                                 |
+| 19  | sigla `GEN` cuando falta subsector o temática, en lugar de `XX`/`XXX`                                          |
+
+**Idempotencia.** Sólo declaran poder reejecutarse el bloque de recodificación
+del 12 y los archivos 14, 15 y 17; el 13, el 18 y el 19 usan
+`CREATE OR REPLACE FUNCTION` pero no lo declaran, y el 16 tampoco. No se
+reejecutan por rutina. Se verifican por SELECT: cada uno del 14 al 19 imprime su
+estado resultante, y el conjunto se comprueba con los conteos de catálogo
+(6 temáticas, 2 subsectores, 3 tipos de actor), los 35 códigos del Anexo 15 y
+`core.codigo_subsector(null)`/`core.codigo_tematica(null)` en `GEN`.
+
+**La baja es anulación, no `DELETE` físico.** `core.anular_caso(uuid, motivo)`
+anula en cascada caso, alertas, documentos, compromisos, hitos, demandas y
+cronología (columnas `anulado_en`, `anulado_por`, `motivo_anulacion`), y
+`core.restaurar_caso(uuid)` restaura ese mismo lote. **Pendiente:** los `DELETE`
+de la API siguen siendo físicos y no hay endpoints `anular` ni `restaurar`.
+
 ### 5.5 Verificar de nuevo
 
 ```sh
 python -m migration.loader.run --verify
 ```
 
-Con los parches aplicados deben pasar **todas** las comprobaciones. Además:
+Con los parches y las migraciones aplicados deben pasar **todas** las comprobaciones. Además:
 
 ```sh
 MSYS_NO_PATHCONV=1 docker exec -i avisa-db psql -U avisa -d avisa \
@@ -530,7 +579,7 @@ los parches (partes B y siguientes).
 La secuencia completa que se verificó en una base nueva:
 
 ```
-sección A  →  carga del legado  →  parches 6 a 24  →  pruebas 15 y 16
+sección A  →  carga del legado  →  parches 6 a 24  →  migraciones 12 a 19  →  pruebas 15 y 16
 ```
 
 Al terminar: **290 tablas físicas** (266 lógicas y 24 hijas de partición),
@@ -581,7 +630,7 @@ objetos derivados con 313 columnas** y **556 políticas sobre 91 tablas**.
 | El parche 14 aborta con `violates check constraint proceso_instancia_origen_coherente_check` | Convertía filas a origen «alerta» antes de relajar la restricción que lo prohibía          | Corregido: la restricción se retira al inicio del bloque 2 y se vuelve a crear al final, ya con los datos normalizados |
 | `permission denied for table actor_alias`                                                    | Los permisos generales corrían antes de crear la tabla                                     | Corregido: los permisos se otorgan al crear cada tabla nueva                                                           |
 | `--verify` dice «FALLA … 0 (esperado N)» en todo                                             | Se ejecutó sin cargar primero                                                              | Corre la carga (`python -m migration.loader.run`) y después la verificación                                            |
-| Un borrado «no falla» pero no borra nada                                                     | La seguridad por fila no lanza error al denegar un `DELETE`: afecta 0 filas                | Comprueba filas afectadas, no la ausencia de error                                                                     |
+| Una anulación «no falla» pero no anula nada                                                  | La seguridad por fila no lanza error al denegar el UPDATE de anulación: afecta 0 filas     | Comprueba filas afectadas, no la ausencia de error                                                                     |
 | `psql` busca en `C:/Program Files/Git/tmp/...`                                               | Git Bash convierte las rutas que empiezan por `/`                                          | Usa `MSYS_NO_PATHCONV=1` y pasa el archivo por entrada estándar                                                        |
 | Recuentos de filas que no cuadran                                                            | `public.spatial_ref_sys` (PostGIS) tiene 8 500 filas ajenas al sistema                     | Excluye el esquema `public` de cualquier conteo                                                                        |
 | Recuentos de tablas que no cuadran                                                           | Las particiones se cuentan como tablas físicas                                             | Distingue tablas lógicas (`relkind='r'`) de particiones (`relkind='p'`)                                                |
@@ -640,6 +689,11 @@ MSYS_NO_PATHCONV=1 docker exec -i avisa-db psql -U avisa -d avisa \
 # --- parche 24 suelto (los siete comentarios del destinatario)
 MSYS_NO_PATHCONV=1 docker exec -i avisa-db psql -U avisa -d avisa \
   -v ON_ERROR_STOP=1 -f /dev/stdin < docs/PARCHE_24_COMENTARIOS_DESTINATARIO.sql
+
+# --- migraciones de alineación 12 a 19 (post-carga, en orden, una por una)
+MSYS_NO_PATHCONV=1 docker exec -i -e PGPASSWORD="$POSTGRES_PASSWORD" avisa-db \
+  psql -v ON_ERROR_STOP=1 -U avisa -d avisa < migration/12_anulacion_y_secuencia.sql
+# ... y así hasta 19_codigos_genericos.sql
 
 # --- pruebas
 MSYS_NO_PATHCONV=1 docker exec -i avisa-db psql -U avisa -d avisa \
@@ -701,3 +755,6 @@ Los documentos citados en este texto, con lo que aporta cada uno:
 15. `docs/PARCHE_18_COSTOS_Y_RLS_ADMIN.sql` — el tope de gasto de RNF-13 (aviso
     al acercarse, bloqueo al excederse) y la seguridad por fila del catálogo de
     identidad: `core.roles`, `core.usuarios` y `core.usuario_roles`.
+16. `migration/12_anulacion_y_secuencia.sql` a `19_codigos_genericos.sql` — las
+    migraciones de alineación posteriores a los parches, con la anulación lógica,
+    los catálogos de la Guía y los códigos del Anexo 15 (§5.4.1).

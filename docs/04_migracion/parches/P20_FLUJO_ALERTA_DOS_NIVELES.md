@@ -509,8 +509,10 @@ el flujo de reporte. Hoy no rompe nada: `core.vw_alerta_estado` solo mira
 `tipo_origen = 'alerta'`.
 
 **7. `core.alertas_tempranas.paso_actual` está en desfase, y ya lo estaba.** Las
-83 alertas tienen `paso_actual = 1` mientras todas están `Archivado`. La columna
-no la usa `core.vw_alerta_estado`. Tras el parche la definición tiene cinco
+83 alertas tienen `paso_actual = 1` mientras todas siguen cargadas con
+`estado_legado = 'Archivado'` (se documentan como **Atendidas**; la migración
+de ese estado sigue pendiente). La columna no la usa
+`core.vw_alerta_estado`. Tras el parche la definición tiene cinco
 pasos, así que el campo sigue siendo un resto sin mantenimiento: o se recalcula
 desde `proceso_instancia` o se retira. No se toca aquí para no inventar su
 semántica.

@@ -1,5 +1,11 @@
 import { ApiError, jsonError } from "@/lib/db/errors";
-import { jsonOk, queryParams, requireSession } from "@/lib/db/http";
+import {
+  conAliasDePagina,
+  jsonOk,
+  leerPagina,
+  queryParams,
+  requireSession,
+} from "@/lib/db/http";
 import { searchAll } from "@/lib/db/repos/search";
 import { withSession } from "@/lib/db/tenant";
 
@@ -25,14 +31,23 @@ export async function GET(request: Request) {
       );
     }
 
-    const limit = asLimit(params.get("limit") ?? params.get("limitPerType"));
+    const { page, pageSize: aliasSize } = leerPagina(params);
+
+    // `limit`/`limitPerType` siguen funcionando como tamaño de página si no
+    // llega una grafía de tamaño; los alias españoles tienen prioridad.
+    const legacy = asLimit(params.get("limit") ?? params.get("limitPerType"));
+    const explicitSize = params.get("tamano") ?? params.get("pageSize");
+    const pageSize =
+      explicitSize === null && legacy !== undefined
+        ? Math.min(100, Math.max(1, legacy))
+        : aliasSize;
 
     const result = await withSession(
       { usuarioId: session.uid, rolCodigo: session.rol },
-      (client) => searchAll(client, term, limit),
+      (client) => searchAll(client, term, page, pageSize),
     );
 
-    return jsonOk(result);
+    return jsonOk(conAliasDePagina(result));
   } catch (error) {
     return jsonError(error);
   }

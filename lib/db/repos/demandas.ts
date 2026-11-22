@@ -1,6 +1,7 @@
 import type { PoolClient } from "pg";
 import { auditChange } from "../audit";
 import { ApiError } from "../errors";
+import { anularRegistro, restaurarRegistro } from "./anulacion";
 
 const DEMANDA_SELECT = `
   d.id,
@@ -75,8 +76,8 @@ export type DemandaListResult = {
 };
 
 const SORTS: Record<string, string> = {
-  recent: "d.fecha_registro desc nulls last, d.created_at desc",
-  oldest: "d.fecha_registro asc nulls last, d.created_at desc",
+  recent: "d.fecha_registro desc nulls last, d.created_at desc, d.id asc",
+  oldest: "d.fecha_registro asc nulls last, d.created_at desc, d.id asc",
 };
 
 function mapDemanda(row: Record<string, unknown>): DemandaListItem {
@@ -504,24 +505,19 @@ export async function deleteDemanda(
   client: PoolClient,
   ctx: DemandaWriteContext,
   ref: string,
+  motivo?: string,
 ): Promise<void> {
   const current = await fetchDemandaRow(client, ref);
   if (!current) {
     throw new ApiError(404, "La demanda no existe.", "NOT_FOUND");
   }
 
-  try {
-    await client.query(`delete from core.demandas where id = $1`, [current.id]);
-  } catch (error) {
-    if ((error as { code?: string }).code === "23503") {
-      throw new ApiError(
-        409,
-        "El registro tiene datos asociados; no se puede eliminar.",
-        "CONFLICT",
-      );
-    }
-    throw error;
-  }
+  const anulacion = await anularRegistro(
+    client,
+    "demandas",
+    String(current.id),
+    motivo,
+  );
 
   await auditChange(client, {
     tabla: "core.demandas",
@@ -530,6 +526,18 @@ export async function deleteDemanda(
     usuarioId: ctx.usuarioId,
     rolCodigo: ctx.rolCodigo,
     antes: current,
-    despues: null,
+    despues: { anuladoEn: anulacion.anuladoEn, motivo: anulacion.motivo },
   });
+}
+
+export async function restoreDemanda(
+  client: PoolClient,
+  ref: string,
+): Promise<void> {
+  const current = await fetchDemandaRow(client, ref);
+  if (!current) {
+    throw new ApiError(404, "La demanda no existe.", "NOT_FOUND");
+  }
+
+  await restaurarRegistro(client, "demandas", String(current.id));
 }

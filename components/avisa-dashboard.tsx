@@ -51,6 +51,7 @@ import { PreferencesDrawer, useAvisaPreferences } from "./avisa-preferences";
 import { HelpDrawer, openHelp } from "./avisa-glossary";
 import { AvisaNotifications } from "./avisa-notifications";
 import { AvisaSearch } from "./avisa-search";
+import { LoadingState } from "./avisa-view-state";
 
 type NavItem = {
   label: string;
@@ -87,6 +88,7 @@ export function AvisaDashboard({
     alerts,
     commitments,
     documents,
+    loading,
     updateAlert,
     notice: storeNotice,
     setNotice: setStoreNotice,
@@ -515,21 +517,28 @@ export function AvisaDashboard({
             </div>
           )}
           <div className="workspace-content">
-            <WorkspaceViewContent
-              key={view}
-              view={view}
-              onNavigate={navigateTo}
-              selectedCase={selectedCase}
-              onSelectCase={selectCase}
-              alerts={alerts}
-              onAlertUpdate={handleAlertUpdate}
-              onAlertEdit={handleAlertEdit}
-              regionScope={regionScope}
-              timeScope={timeScope}
-              timeRange={validCustomRange}
-              assignedRegions={assignedRegions}
-              unrestricted={unrestricted}
-            />
+            {loading ? (
+              <LoadingState
+                label="Cargando datos desde la base…"
+                detail="Consultando casos, alertas, compromisos y documentos."
+              />
+            ) : (
+              <WorkspaceViewContent
+                key={view}
+                view={view}
+                onNavigate={navigateTo}
+                selectedCase={selectedCase}
+                onSelectCase={selectCase}
+                alerts={alerts}
+                onAlertUpdate={handleAlertUpdate}
+                onAlertEdit={handleAlertEdit}
+                regionScope={regionScope}
+                timeScope={timeScope}
+                timeRange={validCustomRange}
+                assignedRegions={assignedRegions}
+                unrestricted={unrestricted}
+              />
+            )}
           </div>
           <footer className="app-footer">
             <span>
