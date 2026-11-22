@@ -1,0 +1,2713 @@
+<!doctype html>
+<html lang="es">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Carga ETL · tres pestañas · mockup AVISA</title>
+        <style>
+            /* ─────────────────────────────────────────────────────────────────────────
+         Tokens y clases copiados de angular/src/styles/global.css (sin cambios).
+         DM Sans/Manrope caen a fuente del sistema si no están instaladas:
+         el mockup no carga webfonts ni depende de un build.
+         ───────────────────────────────────────────────────────────────────────── */
+            :root {
+                --ink: #17283a;
+                --ink-2: #33475b;
+                --muted: #778797;
+                --line: #e6ebef;
+                --paper: #fff;
+                --canvas: #f5f7f8;
+                --blue: #2455a2;
+                --blue-dark: #1d427f;
+                --blue-pale: #eaf1fb;
+                --teal: #397c79;
+                --amber: #aa6a11;
+                --amber-pale: #fff4e2;
+                --red: #ad4d46;
+                --red-pale: #fbeceb;
+                --green: #34785b;
+                --green-pale: #e9f5ef;
+                --font-sans:
+                    "DM Sans", system-ui, -apple-system, "Segoe UI", Arial,
+                    sans-serif;
+                --font-display:
+                    "Manrope", "DM Sans", system-ui, -apple-system, "Segoe UI",
+                    sans-serif;
+            }
+            * {
+                box-sizing: border-box;
+            }
+            html {
+                min-height: 100%;
+                background: var(--canvas);
+            }
+            body {
+                margin: 0;
+                color: var(--ink);
+                font-family: var(--font-sans);
+                font-size: 13px;
+                -webkit-font-smoothing: antialiased;
+            }
+            button,
+            input,
+            select {
+                font: inherit;
+            }
+            button {
+                color: inherit;
+                cursor: pointer;
+            }
+            button:focus-visible,
+            input:focus-visible,
+            select:focus-visible {
+                outline: 3px solid #7aa2e8;
+                outline-offset: 2px;
+            }
+
+            .view-body {
+                display: flex;
+                flex-direction: column;
+                gap: 14px;
+                width: 100%;
+                max-width: 1420px;
+                margin: 0 auto;
+                padding: 27px 34px 50px;
+                box-sizing: border-box;
+            }
+            .view-head {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: flex-start;
+                justify-content: space-between;
+                gap: 16px;
+            }
+            .view-head h1 {
+                margin: 0;
+                color: var(--ink);
+                font: 700 22px/1.3 var(--font-display);
+                letter-spacing: -0.65px;
+            }
+            .view-subtitle {
+                max-width: 780px;
+                margin: 6px 0 0;
+                color: var(--muted);
+                font-size: 11px;
+                line-height: 1.6;
+            }
+            .view-actions {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                flex-wrap: wrap;
+            }
+
+            .filter-bar {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                margin-bottom: 14px;
+            }
+            .filter-bar-wrap {
+                flex-wrap: wrap;
+                row-gap: 10px;
+            }
+            .search-field {
+                height: 35px;
+                min-width: 210px;
+                max-width: 440px;
+                flex: 1;
+                padding: 0 10px;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                border: 1px solid #e0e5e9;
+                border-radius: 6px;
+                background: #fff;
+                color: #8996a1;
+            }
+            .search-field:focus-within {
+                border-color: #96acd0;
+            }
+            .search-field input {
+                width: 100%;
+                min-width: 0;
+                border: 0;
+                outline: 0 !important;
+                background: transparent;
+                color: var(--ink);
+                font-size: 10px;
+            }
+            .search-field input::placeholder {
+                color: #9ba5ad;
+            }
+            .select-filter {
+                height: 35px;
+                padding: 0 9px;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                border: 1px solid #e0e5e9;
+                border-radius: 6px;
+                background: #fff;
+                color: #8b97a1;
+                font-size: 9px;
+            }
+            .select-filter select {
+                max-width: 190px;
+                border: 0;
+                outline: 0;
+                background: transparent;
+                color: #536779;
+                font-size: 10px;
+            }
+            .segmented {
+                display: inline-flex;
+                gap: 2px;
+                padding: 3px;
+                border: 1px solid #e6ecf1;
+                border-radius: 7px;
+                background: #f6f8fa;
+            }
+            .segmented > button {
+                display: inline-flex;
+                align-items: center;
+                gap: 5px;
+                padding: 5px 10px;
+                border: 0;
+                border-radius: 5px;
+                background: transparent;
+                color: #647487;
+                font-size: 9px;
+                font-weight: 600;
+            }
+            .segmented > button:hover {
+                background: #eef2f7;
+                color: #33465a;
+            }
+            .segmented > button[aria-pressed="true"] {
+                background: #fff;
+                color: #1d4b86;
+                box-shadow: 0 1px 3px rgba(17, 32, 45, 0.12);
+            }
+            .status-badge {
+                width: max-content;
+                display: inline-flex;
+                align-items: center;
+                gap: 5px;
+                padding: 3px 7px;
+                border-radius: 12px;
+                font-size: 9px;
+                white-space: nowrap;
+            }
+            .status-dot {
+                width: 6px;
+                height: 6px;
+                flex: none;
+                border-radius: 50%;
+                background: currentColor;
+            }
+            .risk-label {
+                display: inline-flex;
+                align-items: center;
+                padding: 4px 8px;
+                border-radius: 999px;
+                font-size: 10px;
+                font-weight: 700;
+            }
+            .risk-alto {
+                background: #fbeceb;
+                color: #ad4d46;
+            }
+            .risk-moderado {
+                background: #fff4e2;
+                color: #93621d;
+            }
+            .risk-bajo {
+                background: #e9f5ef;
+                color: #34785b;
+            }
+            .button-primary,
+            .button-secondary,
+            .button-danger,
+            .button-light {
+                min-height: 32px;
+                padding: 0 11px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 6px;
+                border-radius: 6px;
+                font-size: 10px;
+                font-weight: 600;
+                white-space: nowrap;
+            }
+            .button-secondary {
+                border: 1px solid #dce3e8;
+                background: #fff;
+                color: #526577;
+            }
+            .button-secondary:hover {
+                background: #f5f7f8;
+            }
+            .button-primary {
+                border: 1px solid var(--blue);
+                background: var(--blue);
+                color: #fff;
+            }
+            .button-primary:hover {
+                background: var(--blue-dark);
+            }
+            .button-primary[disabled],
+            .button-secondary[disabled],
+            .button-light[disabled] {
+                opacity: 0.45;
+                cursor: not-allowed;
+            }
+            .result-count,
+            .filter-caption {
+                margin-left: auto;
+                color: #94a0a8;
+                font-size: 9px;
+                white-space: nowrap;
+            }
+            .table-wrap {
+                border: 1px solid var(--line);
+                border-radius: 8px;
+                background: #fff;
+                overflow-x: auto;
+            }
+            .data-table {
+                width: 100%;
+                border-collapse: collapse;
+                text-align: left;
+            }
+            .data-table th {
+                height: 38px;
+                padding: 0 11px;
+                border-bottom: 1px solid #edf0f2;
+                color: #97a1aa;
+                font-size: 8px;
+                font-weight: 600;
+                letter-spacing: 0.5px;
+                text-transform: uppercase;
+                white-space: nowrap;
+            }
+            .data-table td {
+                height: 40px;
+                padding: 7px 11px;
+                border-bottom: 1px solid #f0f2f4;
+                color: #687988;
+                font-size: 9px;
+                white-space: nowrap;
+            }
+            .data-table tbody tr:last-child td {
+                border-bottom: 0;
+            }
+            .data-table tfoot td {
+                border-top: 1px solid #e6ebef;
+                background: #fafbfc;
+                color: #465a6c;
+                font-weight: 600;
+            }
+            .data-table td.num,
+            .data-table th.num {
+                text-align: right;
+                font-variant-numeric: tabular-nums;
+            }
+            .table-caption {
+                caption-side: top;
+                padding: 10px 11px 3px;
+                color: #94a0a8;
+                font-size: 9px;
+                line-height: 1.45;
+                text-align: left;
+            }
+            .table-link {
+                padding: 0;
+                border: 0;
+                background: transparent;
+                color: #4c7099;
+                font-size: 9px;
+            }
+            .link-button:hover,
+            .table-link:hover {
+                color: #173e78;
+                text-decoration: underline;
+            }
+            .empty-state {
+                padding: 32px;
+                text-align: center;
+                color: #909ba4;
+                font-size: 10px;
+            }
+            @media (max-width: 720px) {
+                .view-body {
+                    padding: 18px 16px 40px;
+                }
+            }
+
+            /* ─────────────────────────────────────────────────────────────────────────
+         Ayudas propias del mockup (no existen en global.css). No redefinen
+         ninguna clase del sistema: se añaden con nombres nuevos.
+         ───────────────────────────────────────────────────────────────────────── */
+            .anexo-badge {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                height: 26px;
+                padding: 0 10px;
+                border: 1px solid #cddcef;
+                border-radius: 999px;
+                background: var(--blue-pale);
+                color: var(--blue);
+                font-size: 9px;
+                font-weight: 700;
+                letter-spacing: 0.05em;
+                text-transform: uppercase;
+                white-space: nowrap;
+            }
+            .mode-tabs {
+                display: flex;
+                gap: 4px;
+                padding: 4px;
+                border: 1px solid var(--line);
+                border-radius: 9px;
+                background: #fff;
+                width: max-content;
+                max-width: 100%;
+                flex-wrap: wrap;
+            }
+            .mode-tabs button {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                padding: 8px 14px;
+                border: 0;
+                border-radius: 6px;
+                background: transparent;
+                color: #647487;
+                font-size: 11px;
+                font-weight: 600;
+                white-space: nowrap;
+            }
+            .mode-tabs button:hover {
+                background: #f4f7fa;
+            }
+            .mode-tabs button[aria-selected="true"] {
+                background: var(--blue-pale);
+                color: var(--blue);
+                box-shadow: inset 0 0 0 1px #cddcef;
+            }
+            .mode-tabs .num {
+                font-size: 8px;
+                font-weight: 700;
+                color: #8b97a1;
+                letter-spacing: 0.05em;
+            }
+            .mode-tabs button[aria-selected="true"] .num {
+                color: #5b7fae;
+            }
+            .cut-chip {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                height: 35px;
+                padding: 0 10px;
+                border: 1px dashed #d7dee4;
+                border-radius: 6px;
+                background: #fbfcfd;
+                color: #8b97a1;
+                font-size: 9px;
+                white-space: nowrap;
+            }
+            .cut-chip b {
+                color: #5a6c7d;
+                font-weight: 600;
+            }
+            .grid {
+                display: grid;
+                gap: 14px;
+            }
+            .kpi-grid {
+                grid-template-columns: repeat(4, minmax(0, 1fr));
+            }
+            .two-col {
+                grid-template-columns: 1.02fr 0.98fr;
+                align-items: start;
+            }
+            .three-col {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                align-items: start;
+            }
+            @media (max-width: 1120px) {
+                .kpi-grid {
+                    grid-template-columns: repeat(2, minmax(0, 1fr));
+                }
+                .two-col,
+                .three-col {
+                    grid-template-columns: 1fr;
+                }
+            }
+            .card {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                padding: 14px 15px 12px;
+                border: 1px solid var(--line);
+                border-radius: 9px;
+                background: #fff;
+            }
+            .card-head {
+                display: flex;
+                align-items: flex-start;
+                justify-content: space-between;
+                gap: 10px;
+            }
+            .card-title {
+                margin: 0;
+                color: #2b3d4f;
+                font: 700 12.5px/1.3 var(--font-display);
+                letter-spacing: -0.15px;
+            }
+            .card-sub {
+                margin: 3px 0 0;
+                color: #8b97a1;
+                font-size: 9px;
+                line-height: 1.5;
+            }
+            .tag-mini {
+                flex: none;
+                padding: 3px 7px;
+                border: 1px solid #e6ebef;
+                border-radius: 999px;
+                color: #8b97a1;
+                font-size: 7.5px;
+                font-weight: 700;
+                letter-spacing: 0.06em;
+                text-transform: uppercase;
+                white-space: nowrap;
+            }
+            .kpi-val {
+                color: var(--ink);
+                font: 700 32px/1.02 var(--font-display);
+                letter-spacing: -1.3px;
+            }
+            .kpi-val small {
+                margin-left: 2px;
+                color: #9aa5ae;
+                font-size: 13px;
+                font-weight: 600;
+                letter-spacing: 0;
+            }
+            .kpi-lab {
+                color: #5a6c7d;
+                font-size: 10px;
+                font-weight: 600;
+            }
+            .kpi-note {
+                color: #94a0a8;
+                font-size: 9px;
+                line-height: 1.5;
+            }
+            .meta {
+                display: grid;
+                grid-template-columns: max-content 1fr;
+                gap: 3px 8px;
+                margin: 0;
+                padding-top: 8px;
+                border-top: 1px dashed #edf0f2;
+                color: #5a6c7d;
+                font-size: 8.5px;
+                line-height: 1.45;
+            }
+            .meta dt {
+                color: #9aa5ae;
+                font-size: 7.5px;
+                font-weight: 700;
+                letter-spacing: 0.045em;
+                text-transform: uppercase;
+            }
+            .meta dd {
+                margin: 0;
+            }
+            .meta a {
+                color: #4c7099;
+                text-decoration: none;
+                border-bottom: 1px dotted #b9c9db;
+            }
+            .flag {
+                display: inline-flex;
+                align-items: center;
+                gap: 5px;
+                padding: 2px 7px;
+                border-radius: 999px;
+                background: var(--amber-pale);
+                color: #93621d;
+                font-size: 7.5px;
+                font-weight: 700;
+                letter-spacing: 0.03em;
+                text-transform: uppercase;
+            }
+            .flag-ok {
+                background: var(--green-pale);
+                color: var(--green);
+            }
+            .flag-off {
+                background: #eef1f4;
+                color: #687988;
+            }
+            .flag-bad {
+                background: var(--red-pale);
+                color: var(--red);
+            }
+            .metric-inline {
+                display: flex;
+                align-items: baseline;
+                gap: 8px;
+            }
+            .metric-inline b {
+                color: var(--ink);
+                font: 700 22px/1 var(--font-display);
+                letter-spacing: -0.6px;
+            }
+            .metric-inline span {
+                color: #8b97a1;
+                font-size: 9px;
+            }
+            .note-list {
+                margin: 0;
+                padding-left: 18px;
+                color: #526577;
+                font-size: 10.5px;
+                line-height: 1.6;
+            }
+            .note-list li {
+                margin: 0 0 6px;
+            }
+            .note-list b {
+                color: #33475b;
+            }
+            .sql-box {
+                border: 1px solid var(--line);
+                border-radius: 7px;
+                background: #fff;
+            }
+            .sql-box > summary {
+                padding: 8px 11px;
+                color: #526577;
+                font-size: 9.5px;
+                font-weight: 600;
+                cursor: pointer;
+            }
+            .sql-box > summary::marker {
+                color: #9aa5ae;
+            }
+            .code-block {
+                margin: 0;
+                padding: 12px 14px;
+                overflow: auto;
+                border-top: 1px solid var(--line);
+                border-radius: 0 0 7px 7px;
+                background: #0f1b2a;
+                color: #d6e2ef;
+                font-family:
+                    ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+                font-size: 9px;
+                line-height: 1.55;
+            }
+            .code-block .cm {
+                color: #7f9bb8;
+            }
+            .meta-line {
+                margin: -4px 2px 0;
+                color: #94a0a8;
+                font-size: 9px;
+            }
+            .meta-line code,
+            .footnote code,
+            .notes code {
+                padding: 1px 4px;
+                border: 1px solid #e6ebef;
+                border-radius: 4px;
+                background: #f2f5f8;
+                color: #33475b;
+                font-family:
+                    ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+                font-size: 9px;
+            }
+            .footnote {
+                margin: 8px 2px 0;
+                color: #94a0a8;
+                font-size: 9px;
+                line-height: 1.6;
+            }
+            .footnote strong {
+                color: #687988;
+                font-weight: 600;
+            }
+            .notes {
+                margin-top: 4px;
+                padding: 18px 20px;
+                border: 1px solid var(--line);
+                border-radius: 8px;
+                background: #fff;
+            }
+            .notes h2 {
+                margin: 0 0 10px;
+                color: var(--ink);
+                font: 700 16px/1.3 var(--font-display);
+                letter-spacing: -0.3px;
+            }
+            .notes h3 {
+                margin: 18px 0 6px;
+                color: #465a6c;
+                font: 700 11px/1.3 var(--font-display);
+                letter-spacing: 0.03em;
+                text-transform: uppercase;
+            }
+            .notes ol,
+            .notes ul {
+                margin: 0;
+                padding-left: 20px;
+                color: #526577;
+                font-size: 10.5px;
+                line-height: 1.6;
+            }
+            .notes li {
+                margin: 0 0 7px;
+            }
+            .notes li:last-child {
+                margin-bottom: 0;
+            }
+            .notes p {
+                margin: 0 0 8px;
+                color: #526577;
+                font-size: 10.5px;
+                line-height: 1.6;
+            }
+            .notes b {
+                color: #33475b;
+            }
+            .vocab {
+                display: grid;
+                grid-template-columns: max-content 1fr;
+                gap: 4px 14px;
+                margin: 2px 0 0;
+                color: #526577;
+                font-size: 10.5px;
+                line-height: 1.5;
+            }
+            .vocab dt {
+                color: #687988;
+                font-weight: 600;
+            }
+            .vocab dd {
+                margin: 0;
+            }
+
+            /* ── ETL: ayudas específicas de esta vista ─────────────────────────── */
+            .tabs {
+                display: flex;
+                gap: 2px;
+                border-bottom: 1px solid var(--line);
+            }
+            .tabs > button {
+                position: relative;
+                padding: 9px 14px;
+                border: 0;
+                border-bottom: 2px solid transparent;
+                background: transparent;
+                color: #647487;
+                font-size: 11px;
+                font-weight: 600;
+            }
+            .tabs > button:hover {
+                color: #33465a;
+                background: #f7f9fb;
+            }
+            .tabs > button[aria-selected="true"] {
+                color: var(--blue);
+                border-bottom-color: var(--blue);
+                background: linear-gradient(#f7fafd, #fff);
+            }
+            .tabs > button .num {
+                margin-left: 6px;
+                color: #9aa5ae;
+                font-size: 8px;
+                font-weight: 700;
+                letter-spacing: 0.05em;
+            }
+            .tabs > button[aria-selected="true"] .num {
+                color: #5b7fae;
+            }
+            .tabpanel {
+                display: flex;
+                flex-direction: column;
+                gap: 14px;
+            }
+            .tabpanel[hidden] {
+                display: none;
+            }
+            .banner {
+                display: flex;
+                gap: 11px;
+                padding: 12px 14px;
+                border: 1px solid #f0dcb8;
+                border-left: 3px solid var(--amber);
+                border-radius: 8px;
+                background: var(--amber-pale);
+                color: #7a5312;
+                font-size: 10.5px;
+                line-height: 1.55;
+            }
+            .banner b {
+                color: #5f3f0b;
+            }
+            .banner code {
+                padding: 1px 4px;
+                border: 1px solid #ecd3a6;
+                border-radius: 4px;
+                background: #fff8ec;
+                color: #6b480b;
+                font-family:
+                    ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+                font-size: 9px;
+            }
+            .banner-neutral {
+                border-color: #dbe3ea;
+                border-left-color: #7d94ab;
+                background: #f7f9fb;
+                color: #526577;
+            }
+            .banner-neutral b {
+                color: #33475b;
+            }
+            .dropzone {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 5px;
+                padding: 20px 16px;
+                border: 1.5px dashed #c9d2da;
+                border-radius: 9px;
+                background: #fbfcfd;
+                color: #8b97a1;
+                font-size: 9.5px;
+                line-height: 1.5;
+                text-align: center;
+                cursor: pointer;
+            }
+            .dropzone:hover,
+            .dropzone:focus-within {
+                border-color: #96acd0;
+                background: #f6fafd;
+            }
+            .dropzone input {
+                position: absolute;
+                width: 1px;
+                height: 1px;
+                opacity: 0;
+                pointer-events: none;
+            }
+            .dropzone strong {
+                color: #33475b;
+                font-size: 11px;
+            }
+            .dropzone .dz-ext {
+                color: #a7b1ba;
+                font-size: 8.5px;
+                letter-spacing: 0.04em;
+                text-transform: uppercase;
+            }
+            .file-line {
+                display: none;
+                align-items: baseline;
+                gap: 7px;
+                padding: 7px 9px;
+                border: 1px solid #e2e8ee;
+                border-radius: 6px;
+                background: #f9fbfc;
+                color: #526577;
+                font-size: 9.5px;
+            }
+            .file-line.show {
+                display: flex;
+            }
+            .file-line b {
+                color: #2b3d4f;
+                font-weight: 600;
+            }
+            .file-line span {
+                margin-left: auto;
+                color: #94a0a8;
+                font-variant-numeric: tabular-nums;
+            }
+            .checks {
+                list-style: none;
+                display: flex;
+                flex-direction: column;
+                gap: 7px;
+                margin: 0;
+                padding: 0;
+            }
+            .checks li {
+                display: grid;
+                grid-template-columns: 15px 1fr max-content;
+                gap: 8px;
+                align-items: baseline;
+                color: #5a6c7d;
+                font-size: 9.5px;
+                line-height: 1.45;
+            }
+            .checks .ico {
+                color: #b7c0c8;
+                font-weight: 700;
+                text-align: center;
+            }
+            .checks .val {
+                color: #a2adb6;
+                font-size: 9px;
+                white-space: nowrap;
+            }
+            .checks li.ok .ico,
+            .checks li.ok .val {
+                color: var(--green);
+            }
+            .checks li.warn .ico,
+            .checks li.warn .val {
+                color: #93621d;
+            }
+            .checks li.bad .ico,
+            .checks li.bad .val {
+                color: var(--red);
+            }
+            .checks .hint {
+                display: block;
+                color: #9aa5ae;
+                font-size: 8.5px;
+            }
+            .hash-line {
+                display: block;
+                padding: 8px 10px;
+                overflow-wrap: anywhere;
+                border: 1px solid #e6ebef;
+                border-radius: 6px;
+                background: #f7f9fb;
+                color: #4c7099;
+                font-family:
+                    ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+                font-size: 9px;
+                line-height: 1.5;
+            }
+            .stepper {
+                display: flex;
+                flex-direction: column;
+                margin: 0;
+                padding: 0;
+                list-style: none;
+            }
+            .step {
+                position: relative;
+                display: grid;
+                grid-template-columns: 22px 1fr max-content;
+                gap: 10px;
+                align-items: start;
+                padding: 7px 0;
+            }
+            .step:not(:last-child)::after {
+                content: "";
+                position: absolute;
+                left: 10px;
+                top: 29px;
+                bottom: -1px;
+                width: 2px;
+                background: #eef1f4;
+            }
+            .step-dot {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 21px;
+                height: 21px;
+                border-radius: 50%;
+                background: #f0f3f6;
+                color: #97a1aa;
+                font-size: 8px;
+                font-weight: 700;
+            }
+            .step-nm {
+                display: block;
+                color: #465a6c;
+                font-size: 10px;
+                font-weight: 600;
+            }
+            .step-ds {
+                display: block;
+                color: #94a0a8;
+                font-size: 8.5px;
+                line-height: 1.45;
+            }
+            .step-ct {
+                color: #a7b1ba;
+                font-size: 8.5px;
+                text-align: right;
+                white-space: nowrap;
+                font-variant-numeric: tabular-nums;
+            }
+            .recon {
+                display: grid;
+                grid-template-columns: repeat(4, minmax(0, 1fr));
+                gap: 8px;
+            }
+            @media (max-width: 720px) {
+                .recon {
+                    grid-template-columns: repeat(2, minmax(0, 1fr));
+                }
+            }
+            .recon .box {
+                padding: 9px 10px;
+                border: 1px dashed #d7dee4;
+                border-radius: 7px;
+                background: #fbfcfd;
+                text-align: center;
+            }
+            .recon .box b {
+                display: block;
+                color: #7e8c99;
+                font: 700 18px/1.15 var(--font-display);
+                letter-spacing: -0.4px;
+            }
+            .recon .box span {
+                color: #8b97a1;
+                font-size: 8.5px;
+            }
+            .recon-eq {
+                margin-top: 8px;
+                padding: 8px 10px;
+                border-radius: 7px;
+                background: #f6f8fa;
+                color: #8b97a1;
+                font-size: 9.5px;
+                text-align: center;
+            }
+            .recon-eq b {
+                color: #526577;
+            }
+            .kv {
+                display: grid;
+                grid-template-columns: max-content 1fr;
+                gap: 4px 10px;
+                margin: 0;
+                color: #526577;
+                font-size: 9.5px;
+                line-height: 1.45;
+            }
+            .kv dt {
+                color: #94a0a8;
+            }
+            .kv dd {
+                margin: 0;
+            }
+            .section-title {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                margin: 8px 0 0;
+                color: #465a6c;
+                font: 700 10px/1.3 var(--font-display);
+                letter-spacing: 0.06em;
+                text-transform: uppercase;
+            }
+            .scope-row {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+                align-items: center;
+            }
+            .perm-table td.role {
+                color: #465a6c;
+                font-weight: 600;
+                white-space: normal;
+            }
+            .perm-chip {
+                display: inline-block;
+                padding: 2px 6px;
+                border-radius: 4px;
+                background: #eef1f4;
+                color: #7e8c99;
+                font-size: 8px;
+                font-weight: 600;
+            }
+            .perm-chip.on {
+                background: var(--blue-pale);
+                color: #2f5c96;
+            }
+            .perm-chip.apr {
+                background: var(--green-pale);
+                color: var(--green);
+            }
+            .perm-chip.none {
+                background: transparent;
+                color: #b7c0c8;
+            }
+            .perm-col-hot {
+                background: #f6faff;
+            }
+            .empty-box {
+                padding: 26px 20px;
+                border: 1px dashed #d7dee4;
+                border-radius: 8px;
+                background: #fafbfc;
+                color: #8b97a1;
+                font-size: 10px;
+                line-height: 1.6;
+                text-align: center;
+            }
+            .empty-box strong {
+                display: block;
+                margin-bottom: 4px;
+                color: #5a6c7d;
+                font-size: 11px;
+            }
+            .empty-box code,
+            .footnote code {
+                font-family:
+                    ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+                font-size: 9px;
+            }
+            @media print {
+                body {
+                    background: #fff;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <main class="view-body">
+            <header class="view-head">
+                <div>
+                    <h1>Carga y gobierno ETL</h1>
+                    <p class="view-subtitle">
+                        Vista de tres pestañas para la ingesta documental:
+                        <b>Ejecución</b> (selector de fuente, archivo, validación,
+                        pipeline observable y conciliación), <b>Fuentes</b> (lista
+                        blanca, permisos por rol e integraciones) e
+                        <b>Historial</b> (ejecuciones, generación por lote y
+                        gobierno de sugerencias). Todo lo que se muestra son
+                        recuentos reales de una consulta de solo lectura del
+                        22.11.2026; lo que no existe se marca «—» y <b>no se
+                        simula</b>.
+                    </p>
+                </div>
+                <div class="view-actions">
+                    <span class="anexo-badge">Items 58 · 59 · 60 · 61 · 62 · 86 · 87</span>
+                </div>
+            </header>
+
+            <nav class="mode-tabs" role="tablist" aria-label="Pestañas de la vista ETL">
+                <button
+                    type="button"
+                    role="tab"
+                    id="tab-ejecucion"
+                    aria-selected="true"
+                    aria-controls="panel-ejecucion"
+                    data-tab="ejecucion"
+                >
+                    Ejecución <span class="num">ITEMS 58 · 59 · 61</span>
+                </button>
+                <button
+                    type="button"
+                    role="tab"
+                    id="tab-fuentes"
+                    aria-selected="false"
+                    aria-controls="panel-fuentes"
+                    data-tab="fuentes"
+                >
+                    Fuentes <span class="num">ITEMS 60 · 62</span>
+                </button>
+                <button
+                    type="button"
+                    role="tab"
+                    id="tab-historial"
+                    aria-selected="false"
+                    aria-controls="panel-historial"
+                    data-tab="historial"
+                >
+                    Historial <span class="num">ITEMS 62 · 86 · 87</span>
+                </button>
+            </nav>
+
+            <!-- ══════════════════════════ EJECUCIÓN ══════════════════════════ -->
+            <section
+                class="tabpanel"
+                id="panel-ejecucion"
+                role="tabpanel"
+                aria-labelledby="tab-ejecucion"
+            >
+                <div class="banner">
+                    <div>
+                        <b>No hay una ejecución real que mostrar.</b>
+                        <code>staging.lote</code> y <code>staging.registro</code>
+                        tienen <b>0 filas</b>, no existe tabla de ejecuciones y no
+                        hay endpoint de carga en la API. El esquema de
+                        <code>staging.lote</code> ya está definido
+                        (<code>punto_ingesta_id</code>, <code>plan_paso_id</code>,
+                        <code>origen_software</code>,
+                        <code>version_software</code>, <code>archivo_uri</code>,
+                        <code>hash_archivo</code>, <code>estado</code>,
+                        <code>validacion</code>, <code>cargado_por</code>,
+                        <code>aprobado_por</code>,
+                        <code>nivel_clasificacion</code>), pero ninguna fila lo
+                        usa. Por eso el pipeline se dibuja <b>apagado</b>: encender
+                        un stepper con contadores inventados sería peor que
+                        mostrarlo vacío.
+                    </div>
+                </div>
+
+                <div class="grid two-col">
+                    <article class="card">
+                        <div class="card-head">
+                            <div>
+                                <h2 class="card-title">1 · Fuente y archivo</h2>
+                                <p class="card-sub">
+                                    Selector alimentado por la lista blanca real
+                                    de <code>analisis.punto_ingesta</code>.
+                                </p>
+                            </div>
+                            <span class="tag-mini">Item 58</span>
+                        </div>
+
+                        <label class="select-filter" style="height: auto; padding: 6px 9px">
+                            <span>Fuente</span>
+                            <select id="sel-fuente" aria-label="Fuente de ingesta">
+                                <option>PI-06 · Tabla externa CSV o XLSX con esquema → core</option>
+                                <option>PI-01 · Plan de análisis → core</option>
+                                <option>PI-02 · Proyecto cualitativo .qdpx y libro de códigos .qdc → qda</option>
+                                <option>PI-03 · Resultados léxicos CSV → lex</option>
+                                <option>PI-04 · Validación de aristas del grafo → kag</option>
+                                <option>PI-05 · Selección de indicadores → ind</option>
+                                <option>PI-07 · Salida final aprobada → core</option>
+                            </select>
+                        </label>
+
+                        <label class="dropzone" for="file-input">
+                            <input
+                                id="file-input"
+                                type="file"
+                                accept=".csv,.xlsx,.txt,.pdf"
+                            />
+                            <strong>Selecciona un archivo</strong>
+                            Arrástralo aquí o usa el explorador. La validación de
+                            abajo se ejecuta en el navegador, no en el servidor.
+                            <span class="dz-ext">csv · xlsx · txt · pdf con capa de texto</span>
+                        </label>
+
+                        <div class="file-line" id="file-line" aria-live="polite">
+                            <b id="file-name">—</b>
+                            <span id="file-size">—</span>
+                        </div>
+
+                        <p class="footnote">
+                            <strong>Límites propuestos</strong> por este mockup (no
+                            existen como configuración en la API): 25 MB, extensión
+                            en minúsculas, MIME declarado por el navegador. Un
+                            <code>.qdpx</code> (PI-02) no se acepta aquí: necesita
+                            su propio lector, no el de CSV/XLSX.
+                        </p>
+                    </article>
+
+                    <article class="card">
+                        <div class="card-head">
+                            <div>
+                                <h2 class="card-title">2 · Validación previa</h2>
+                                <p class="card-sub">
+                                    Extensión, MIME, tamaño, codificación, hash y
+                                    deduplicación antes de iniciar el pipeline.
+                                </p>
+                            </div>
+                            <span class="flag flag-off" id="val-count">Sin archivo</span>
+                        </div>
+
+                        <ul class="checks" id="checks">
+                            <li data-check="ext">
+                                <span class="ico">○</span>
+                                <span>
+                                    Extensión permitida
+                                    <span class="hint">csv · xlsx · txt · pdf</span>
+                                </span>
+                                <span class="val">Pendiente</span>
+                            </li>
+                            <li data-check="mime">
+                                <span class="ico">○</span>
+                                <span>
+                                    MIME declarado por el navegador
+                                    <span class="hint">Coincide con la extensión</span>
+                                </span>
+                                <span class="val">Pendiente</span>
+                            </li>
+                            <li data-check="size">
+                                <span class="ico">○</span>
+                                <span>
+                                    Tamaño ≤ 25 MB
+                                    <span class="hint">Límite propuesto por el mockup</span>
+                                </span>
+                                <span class="val">Pendiente</span>
+                            </li>
+                            <li data-check="enc">
+                                <span class="ico">○</span>
+                                <span>
+                                    Codificación de texto
+                                    <span class="hint">BOM / UTF-8 válido</span>
+                                </span>
+                                <span class="val">Pendiente</span>
+                            </li>
+                            <li data-check="hash">
+                                <span class="ico">○</span>
+                                <span>
+                                    Huella SHA-256
+                                    <span class="hint">Calculada sobre el archivo completo</span>
+                                </span>
+                                <span class="val">Pendiente</span>
+                            </li>
+                            <li data-check="dedupe">
+                                <span class="ico">○</span>
+                                <span>
+                                    Deduplicación
+                                    <span class="hint">Contra <code>staging.lote.hash_archivo</code></span>
+                                </span>
+                                <span class="val">Pendiente</span>
+                            </li>
+                        </ul>
+
+                        <span class="hash-line" id="hash-out">SHA-256: —</span>
+
+                        <p class="footnote">
+                            El hash y los controles de formato <b>sí</b> se
+                            calculan aquí, en tu navegador. La deduplicación
+                            <b>no</b> puede completarse: exigiría una consulta a
+                            <code>staging.lote</code>, que hoy tiene 0 filas y no
+                            está expuesta por la API.
+                        </p>
+                    </article>
+                </div>
+
+                <article class="card">
+                    <div class="card-head">
+                        <div>
+                            <h2 class="card-title">Pipeline observable</h2>
+                            <p class="card-sub">
+                                Siete etapas con estado y contadores por etapa
+                                (item 59). Sin ejecución persistida, todas quedan
+                                en «No ejecutado».
+                            </p>
+                        </div>
+                        <button
+                            type="button"
+                            class="button-primary"
+                            disabled
+                            title="No existe endpoint de carga ni persistencia en staging: el pipeline no puede iniciarse"
+                        >
+                            Iniciar ejecución
+                        </button>
+                    </div>
+
+                    <ol class="stepper">
+                        <li class="step">
+                            <span class="step-dot">1</span>
+                            <span>
+                                <span class="step-nm">Recepción del archivo</span>
+                                <span class="step-ds"
+                                    >Nombre, tamaño, tipo y URI de evidencia
+                                    (no se almacena el binario).</span
+                                >
+                            </span>
+                            <span class="step-ct">No ejecutado · «—»</span>
+                        </li>
+                        <li class="step">
+                            <span class="step-dot">2</span>
+                            <span>
+                                <span class="step-nm">Validación de formato y codificación</span>
+                                <span class="step-ds"
+                                    >Extensión, MIME, tamaño y codificación de
+                                    texto.</span
+                                >
+                            </span>
+                            <span class="step-ct">No ejecutado · «—»</span>
+                        </li>
+                        <li class="step">
+                            <span class="step-dot">3</span>
+                            <span>
+                                <span class="step-nm">Hash y deduplicación</span>
+                                <span class="step-ds"
+                                    >SHA-256 del archivo y comparación con lotes
+                                    anteriores.</span
+                                >
+                            </span>
+                            <span class="step-ct">No ejecutado · «—»</span>
+                        </li>
+                        <li class="step">
+                            <span class="step-dot">4</span>
+                            <span>
+                                <span class="step-nm">Lectura y mapeo al esquema</span>
+                                <span class="step-ds"
+                                    >Columnas de origen contra
+                                    <code>esquema_validacion</code> de la
+                                    fuente.</span
+                                >
+                            </span>
+                            <span class="step-ct">No ejecutado · «—»</span>
+                        </li>
+                        <li class="step">
+                            <span class="step-dot">5</span>
+                            <span>
+                                <span class="step-nm">Normalización y reconciliación</span>
+                                <span class="step-ds"
+                                    >Entidades repetidas: fusionar, descartar o
+                                    dejar pendiente.</span
+                                >
+                            </span>
+                            <span class="step-ct">No ejecutado · «—»</span>
+                        </li>
+                        <li class="step">
+                            <span class="step-dot">6</span>
+                            <span>
+                                <span class="step-nm">Escritura en tablas destino</span>
+                                <span class="step-ds"
+                                    >Transacción por tabla con recuento
+                                    antes/después.</span
+                                >
+                            </span>
+                            <span class="step-ct">No ejecutado · «—»</span>
+                        </li>
+                        <li class="step">
+                            <span class="step-dot">7</span>
+                            <span>
+                                <span class="step-nm">Conciliación y cierre</span>
+                                <span class="step-ds"
+                                    >Cuadre de la tarjeta de conciliación y firma
+                                    de aprobación (<code>aprobado_por</code>).</span
+                                >
+                            </span>
+                            <span class="step-ct">No ejecutado · «—»</span>
+                        </li>
+                    </ol>
+
+                    <p class="footnote">
+                        En esta versión solo la etapa 2 corre en el navegador y de
+                        forma informativa; las etapas 1, 3–7 requieren un servicio
+                        de ingesta inexistente.
+                    </p>
+                </article>
+
+                <div class="grid two-col">
+                    <article class="card">
+                        <div class="card-head">
+                            <div>
+                                <h2 class="card-title">Tablas alimentadas</h2>
+                                <p class="card-sub">
+                                    Filas <b>antes</b> reales al 22.11.2026.
+                                    «Después» queda en «—» porque no hay
+                                    ejecución.
+                                </p>
+                            </div>
+                            <span class="tag-mini">Item 59</span>
+                        </div>
+
+                        <div class="table-wrap">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Tabla destino</th>
+                                        <th class="num">Antes</th>
+                                        <th class="num">Después</th>
+                                        <th class="num">Δ</th>
+                                        <th>Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><code>core.casos</code></td>
+                                        <td class="num">35</td>
+                                        <td class="num">—</td>
+                                        <td class="num">—</td>
+                                        <td><span class="flag flag-off</td>">Sin ejecución</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>core.actores</code></td>
+                                        <td class="num">1 160</td>
+                                        <td class="num">—</td>
+                                        <td class="num">—</td>
+                                        <td><span class="flag flag-off">Sin ejecución</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>core.organizaciones</code></td>
+                                        <td class="num">224</td>
+                                        <td class="num">—</td>
+                                        <td class="num">—</td>
+                                        <td><span class="flag flag-off">Sin ejecución</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>core.locales</code></td>
+                                        <td class="num">27</td>
+                                        <td class="num">—</td>
+                                        <td class="num">—</td>
+                                        <td><span class="flag flag-off">Sin ejecución</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>core.demandas</code></td>
+                                        <td class="num">325</td>
+                                        <td class="num">—</td>
+                                        <td class="num">—</td>
+                                        <td><span class="flag flag-off">Sin ejecución</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>core.documentos</code></td>
+                                        <td class="num">153</td>
+                                        <td class="num">—</td>
+                                        <td class="num">—</td>
+                                        <td><span class="flag flag-off">Sin ejecución</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>core.caso_cronologia</code></td>
+                                        <td class="num">80</td>
+                                        <td class="num">—</td>
+                                        <td class="num">—</td>
+                                        <td><span class="flag flag-off">Sin ejecución</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>core.alertas_tempranas</code></td>
+                                        <td class="num">83</td>
+                                        <td class="num">—</td>
+                                        <td class="num">—</td>
+                                        <td><span class="flag flag-off">Sin ejecución</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>kag.documento_fuente</code></td>
+                                        <td class="num">10</td>
+                                        <td class="num">—</td>
+                                        <td class="num">—</td>
+                                        <td><span class="flag flag-off">Sin ejecución</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>kag.documento_fragmento</code></td>
+                                        <td class="num">0</td>
+                                        <td class="num">—</td>
+                                        <td class="num">—</td>
+                                        <td><span class="flag flag-off">Sin ejecución</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>staging.lote</code></td>
+                                        <td class="num">0</td>
+                                        <td class="num">—</td>
+                                        <td class="num">—</td>
+                                        <td><span class="flag flag-off">Sin ejecución</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>staging.registro</code></td>
+                                        <td class="num">0</td>
+                                        <td class="num">—</td>
+                                        <td class="num">—</td>
+                                        <td><span class="flag flag-off">Sin ejecución</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <p class="footnote">
+                            Los recuentos de <code>core.*</code> incluyen filas
+                            anuladas: <code>core.casos</code> 35 con 34 vigentes y
+                            <code>core.documentos</code> 153 con 143 vigentes. La
+                            cifra correcta para una comparación de carga depende de
+                            la regla de anulación, que la vista todavía no fija.
+                        </p>
+                    </article>
+
+                    <article class="card">
+                        <div class="card-head">
+                            <div>
+                                <h2 class="card-title">Conciliación del lote</h2>
+                                <p class="card-sub">
+                                    La suma debe cuadrar con los registros leídos
+                                    del archivo; si no cuadra, el lote no cierra.
+                                </p>
+                            </div>
+                            <span class="flag flag-bad">Sin cuadre</span>
+                        </div>
+
+                        <div class="recon">
+                            <div class="box"><b>—</b><span>Cargados</span></div>
+                            <div class="box"><b>—</b><span>Fusionados</span></div>
+                            <div class="box"><b>—</b><span>Descartados</span></div>
+                            <div class="box"><b>—</b><span>Pendientes</span></div>
+                        </div>
+                        <div class="recon-eq">
+                            — + — + — + — = <b>— registros fuente</b>
+                        </div>
+
+                        <p class="footnote">
+                            Los cuatro sumandos y el total son «—» porque no existe
+                            lote. No se rellenan con ceros: un <b>0</b> afirmaría
+                            «se procesó un archivo vacío», que es un hecho distinto
+                            de «no se procesó ningún archivo».
+                        </p>
+                    </article>
+                </div>
+
+                <article class="card">
+                    <div class="card-head">
+                        <div>
+                            <h2 class="card-title">Rechazos y errores por fila</h2>
+                            <p class="card-sub">
+                                Motivo por registro rechazado y descarga del
+                                detalle. Sin ejecución no hay rechazos que
+                                listar.
+                            </p>
+                        </div>
+                        <button
+                            type="button"
+                            class="button-secondary"
+                            disabled
+                            title="No hay errores que descargar: no se ha ejecutado ningún lote"
+                        >
+                            Descargar errores (CSV)
+                        </button>
+                    </div>
+                    <div class="empty-state">
+                        Sin rechazos registrados. La tabla se llenaría con
+                        <code>fila · columna · valor · motivo · severidad</code> al
+                        ejecutarse un lote.
+                    </div>
+                </article>
+            </section>
+
+            <!-- ══════════════════════════ FUENTES ══════════════════════════ -->
+            <section
+                class="tabpanel"
+                id="panel-fuentes"
+                role="tabpanel"
+                aria-labelledby="tab-fuentes"
+                hidden
+            >
+                <article class="card">
+                    <div class="card-head">
+                        <div>
+                            <h2 class="card-title">Lista blanca de ingesta</h2>
+                            <p class="card-sub">
+                                Siete fuentes declaradas en
+                                <code>analisis.punto_ingesta</code>, con su esquema
+                                de destino. Ninguna tiene
+                                <code>esquema_validacion</code> definido.
+                            </p>
+                        </div>
+                        <span class="tag-mini">Item 62</span>
+                    </div>
+
+                    <div class="table-wrap">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Código</th>
+                                    <th>Fuente</th>
+                                    <th>Destino</th>
+                                    <th>Esquema de validación</th>
+                                    <th>Última ejecución</th>
+                                    <th>Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><b>PI-01</b></td>
+                                    <td>Plan de análisis</td>
+                                    <td><code>core</code></td>
+                                    <td>—</td>
+                                    <td>—</td>
+                                    <td><span class="flag flag-ok">Declarada</span></td>
+                                </tr>
+                                <tr>
+                                    <td><b>PI-02</b></td>
+                                    <td>Proyecto cualitativo .qdpx y libro de códigos .qdc</td>
+                                    <td><code>qda</code></td>
+                                    <td>—</td>
+                                    <td>—</td>
+                                    <td><span class="flag flag-ok">Declarada</span></td>
+                                </tr>
+                                <tr>
+                                    <td><b>PI-03</b></td>
+                                    <td>Resultados léxicos CSV</td>
+                                    <td><code>lex</code></td>
+                                    <td>—</td>
+                                    <td>—</td>
+                                    <td><span class="flag flag-ok">Declarada</span></td>
+                                </tr>
+                                <tr>
+                                    <td><b>PI-04</b></td>
+                                    <td>Validación de aristas del grafo</td>
+                                    <td><code>kag</code></td>
+                                    <td>—</td>
+                                    <td>—</td>
+                                    <td><span class="flag flag-ok">Declarada</span></td>
+                                </tr>
+                                <tr>
+                                    <td><b>PI-05</b></td>
+                                    <td>Selección de indicadores</td>
+                                    <td><code>ind</code></td>
+                                    <td>—</td>
+                                    <td>—</td>
+                                    <td><span class="flag flag-ok">Declarada</span></td>
+                                </tr>
+                                <tr>
+                                    <td><b>PI-06</b></td>
+                                    <td>Tabla externa CSV o XLSX con esquema</td>
+                                    <td><code>core</code></td>
+                                    <td>—</td>
+                                    <td>—</td>
+                                    <td><span class="flag flag-ok">Declarada</span></td>
+                                </tr>
+                                <tr>
+                                    <td><b>PI-07</b></td>
+                                    <td>Salida final aprobada</td>
+                                    <td><code>core</code></td>
+                                    <td>—</td>
+                                    <td>—</td>
+                                    <td><span class="flag flag-ok">Declarada</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="footnote">
+                        <strong>«—» en esquema de validación:</strong> las siete
+                        filas tienen <code>esquema_validacion</code> nulo. Sin
+                        esquema no se puede validar el mapeo de columnas (etapa 4
+                        del pipeline), así que esa etapa tampoco podría ejecutarse
+                        hoy aunque existiera el endpoint.
+                    </p>
+                </article>
+
+                <div class="grid two-col">
+                    <article class="card">
+                        <div class="card-head">
+                            <div>
+                                <h2 class="card-title">Control de cambios de la lista blanca</h2>
+                                <p class="card-sub">
+                                    Quién añadió, editó o retiró una fuente, cuándo
+                                    y con qué motivo.
+                                </p>
+                            </div>
+                            <span class="flag flag-bad">Sin tabla</span>
+                        </div>
+                        <div class="empty-box">
+                            <strong>Sin cambios registrados</strong>
+                            <code>analisis.punto_ingesta</code> no tiene tabla de
+                            versiones ni historial, y
+                            <code>audit.cambios</code> no contiene ninguna fila
+                            sobre ella (0 de 57 filas totales). El control de
+                            cambios del item 62 exige crear ese registro antes de
+                            permitir editar la lista.
+                        </div>
+                        <p class="footnote">
+                            Sin historial, una fuente puede desaparecer sin dejar
+                            rastro; por eso la edición de la lista queda reservada
+                            al administrador en la matriz de abajo.
+                        </p>
+                    </article>
+
+                    <article class="card">
+                        <div class="card-head">
+                            <div>
+                                <h2 class="card-title">Permisos por pestaña y acción</h2>
+                                <p class="card-sub">
+                                    Propuesta de la interfaz para el item 60; la
+                                    decisión real corresponde al servidor.
+                                </p>
+                            </div>
+                            <span class="tag-mini">Item 60 · 49</span>
+                        </div>
+
+                        <label class="select-filter" style="height: auto; padding: 6px 9px">
+                            <span>Rol</span>
+                            <select id="sel-rol" aria-label="Rol para resaltar en la matriz">
+                                <option value="sectorista">Sectorista</option>
+                                <option value="direccion">Dirección OAIPCS</option>
+                                <option value="alta">Alta dirección</option>
+                                <option value="admin">Administrador</option>
+                            </select>
+                        </label>
+
+                        <div class="table-wrap">
+                            <table class="data-table perm-table">
+                                <thead>
+                                    <tr>
+                                        <th>Acción</th>
+                                        <th class="num" data-col="sectorista">Sectorista</th>
+                                        <th class="num" data-col="direccion">Dirección OAIPCS</th>
+                                        <th class="num" data-col="alta">Alta dirección</th>
+                                        <th class="num" data-col="admin">Admin.</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="role">Ver Ejecución</td>
+                                        <td class="num"><span class="perm-chip on">Ver</span></td>
+                                        <td class="num"><span class="perm-chip on">Ver</span></td>
+                                        <td class="num"><span class="perm-chip on">Ver</span></td>
+                                        <td class="num"><span class="perm-chip on">Ver</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="role">Cargar archivo e iniciar ejecución</td>
+                                        <td class="num"><span class="perm-chip on">Cargar</span></td>
+                                        <td class="num"><span class="perm-chip on">Cargar</span></td>
+                                        <td class="num"><span class="perm-chip none">—</span></td>
+                                        <td class="num"><span class="perm-chip on">Cargar</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="role">Aprobar lote</td>
+                                        <td class="num"><span class="perm-chip none">—</span></td>
+                                        <td class="num"><span class="perm-chip apr">Aprobar</span></td>
+                                        <td class="num"><span class="perm-chip none">—</span></td>
+                                        <td class="num"><span class="perm-chip apr">Aprobar</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="role">Ver Fuentes</td>
+                                        <td class="num"><span class="perm-chip on">Ver</span></td>
+                                        <td class="num"><span class="perm-chip on">Ver</span></td>
+                                        <td class="num"><span class="perm-chip on">Ver</span></td>
+                                        <td class="num"><span class="perm-chip on">Ver</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="role">Editar lista blanca</td>
+                                        <td class="num"><span class="perm-chip none">—</span></td>
+                                        <td class="num"><span class="perm-chip none">—</span></td>
+                                        <td class="num"><span class="perm-chip none">—</span></td>
+                                        <td class="num"><span class="perm-chip apr">Editar</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="role">Ver Historial</td>
+                                        <td class="num"><span class="perm-chip none">—</span></td>
+                                        <td class="num"><span class="perm-chip on">Ver</span></td>
+                                        <td class="num"><span class="perm-chip on">Ver</span></td>
+                                        <td class="num"><span class="perm-chip on">Ver</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="role">Reintentar ejecución</td>
+                                        <td class="num"><span class="perm-chip none">—</span></td>
+                                        <td class="num"><span class="perm-chip on">Reintentar</span></td>
+                                        <td class="num"><span class="perm-chip none">—</span></td>
+                                        <td class="num"><span class="perm-chip on">Reintentar</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="role">Generar lote documental (item 86)</td>
+                                        <td class="num"><span class="perm-chip none">—</span></td>
+                                        <td class="num"><span class="perm-chip apr">Generar</span></td>
+                                        <td class="num"><span class="perm-chip none">—</span></td>
+                                        <td class="num"><span class="perm-chip apr">Generar</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="role">Validar sugerencias asistidas (item 87)</td>
+                                        <td class="num"><span class="perm-chip on">Validar</span></td>
+                                        <td class="num"><span class="perm-chip on">Validar</span></td>
+                                        <td class="num"><span class="perm-chip none">—</span></td>
+                                        <td class="num"><span class="perm-chip apr">Curar</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <p class="footnote">
+                            <strong>Ocultar una pestaña no es control de
+                            seguridad</strong> (item 49): cada acción y conjunto de
+                            datos debe verificar permisos en el servidor. Esta
+                            matriz es una propuesta de producto, no una
+                            implementación.
+                        </p>
+                    </article>
+                </div>
+
+                <div class="grid two-col">
+                    <article class="card">
+                        <div class="card-head">
+                            <div>
+                                <h2 class="card-title">Feed WhatsApp / Gemini</h2>
+                                <p class="card-sub">
+                                    Canal de señales tempranas. Se mostraría con el
+                                    timestamp real de sincronización.
+                                </p>
+                            </div>
+                            <span class="flag flag-off">No conectado</span>
+                        </div>
+
+                        <dl class="kv">
+                            <dt>Estado</dt>
+                            <dd>Sin integración registrada</dd>
+                            <dt>Última sincronización</dt>
+                            <dd>—</dd>
+                            <dt>Mensajes recibidos</dt>
+                            <dd>—</dd>
+                            <dt>Señales convertidas</dt>
+                            <dd>—</dd>
+                        </dl>
+
+                        <p class="footnote">
+                            No existe fila de WhatsApp ni de Gemini en
+                            <code>core.integraciones</code>: sus 20 vínculos son
+                            institucionales (CITES, ANA-SIAGUA, OEFA-PAM, SANIPES,
+                            SBS, SUNAT, VUCE, CITERED, DGSFS-PA-Tiburón, SESIGUE).
+                            Con la integración ausente, <b>no se muestra ni un
+                            mensaje de ejemplo</b>: el item 60 prohíbe registros
+                            simulados. El timestamp aparecerá cuando exista una
+                            sincronización real.
+                        </p>
+                    </article>
+
+                    <article class="card">
+                        <div class="card-head">
+                            <div>
+                                <h2 class="card-title">Lectura, OCR y trazabilidad</h2>
+                                <p class="card-sub">
+                                    Un PDF con capa de texto se lee; un PDF
+                                    escaneado, no.
+                                </p>
+                            </div>
+                            <span class="flag flag-bad">OCR no disponible</span>
+                        </div>
+
+                        <dl class="kv">
+                            <dt>PDF con texto</dt>
+                            <dd>Aceptado (lectura de texto)</dd>
+                            <dt>PDF escaneado</dt>
+                            <dd>No legible sin OCR</dd>
+                            <dt>Etapa OCR</dt>
+                            <dd>No implementada (etapa separada)</dd>
+                            <dt>Página / offset del fragmento</dt>
+                            <dd>—</dd>
+                            <dt>Almacenamiento del archivo</dt>
+                            <dd>No existe: la evidencia es una URI</dd>
+                        </dl>
+
+                        <p class="footnote">
+                            El item 61 pide OCR como etapa aparte, con idioma,
+                            confianza, costo, fallos y revisión humana. Tratar la
+                            extracción de texto como OCR sería una promesa falsa.
+                            <code>kag.documento_fragmento</code> existe pero tiene
+                            <b>0 filas</b>: no hay fragmentos con página/offset que
+                            enlazar.
+                        </p>
+                    </article>
+                </div>
+
+                <article class="card">
+                    <div class="card-head">
+                        <div>
+                            <h2 class="card-title">Integraciones registradas</h2>
+                            <p class="card-sub">
+                                20 vínculos en <code>core.integraciones</code>: 2
+                                activos y 18 pendientes de autorización. Ninguno
+                                tiene fecha de última sincronización.
+                            </p>
+                        </div>
+                        <span class="tag-mini">Item 60</span>
+                    </div>
+
+                    <div class="table-wrap">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Origen</th>
+                                    <th>Destino</th>
+                                    <th>Protocolo</th>
+                                    <th class="num">Vínculos</th>
+                                    <th class="num">Con fecha sync</th>
+                                    <th>Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>CITES_SECRETARIAT</td>
+                                    <td>PRODUCE</td>
+                                    <td><code>api_rest_pide</code></td>
+                                    <td class="num">2</td>
+                                    <td class="num">0</td>
+                                    <td><span class="flag flag-ok">Activa</span></td>
+                                </tr>
+                                <tr>
+                                    <td>ANA_SIAGUA</td>
+                                    <td>PRODUCE</td>
+                                    <td><code>api_rest_pide</code></td>
+                                    <td class="num">2</td>
+                                    <td class="num">0</td>
+                                    <td><span class="flag flag-off">Pendiente auth</span></td>
+                                </tr>
+                                <tr>
+                                    <td>OEFA_PAM</td>
+                                    <td>PRODUCE</td>
+                                    <td><code>oficio_manual</code></td>
+                                    <td class="num">2</td>
+                                    <td class="num">0</td>
+                                    <td><span class="flag flag-off">Pendiente auth</span></td>
+                                </tr>
+                                <tr>
+                                    <td>SANIPES</td>
+                                    <td>PRODUCE</td>
+                                    <td><code>batch_sftp</code></td>
+                                    <td class="num">2</td>
+                                    <td class="num">0</td>
+                                    <td><span class="flag flag-off">Pendiente auth</span></td>
+                                </tr>
+                                <tr>
+                                    <td>SBS</td>
+                                    <td>PRODUCE</td>
+                                    <td><code>oficio_manual</code></td>
+                                    <td class="num">2</td>
+                                    <td class="num">0</td>
+                                    <td><span class="flag flag-off">Pendiente auth</span></td>
+                                </tr>
+                                <tr>
+                                    <td>SUNAT</td>
+                                    <td>PRODUCE</td>
+                                    <td><code>api_rest_pide</code></td>
+                                    <td class="num">2</td>
+                                    <td class="num">0</td>
+                                    <td><span class="flag flag-off">Pendiente auth</span></td>
+                                </tr>
+                                <tr>
+                                    <td>VUCE</td>
+                                    <td>PRODUCE</td>
+                                    <td><code>api_rest_pide</code></td>
+                                    <td class="num">2</td>
+                                    <td class="num">0</td>
+                                    <td><span class="flag flag-off">Pendiente auth</span></td>
+                                </tr>
+                                <tr>
+                                    <td>CITERED</td>
+                                    <td>PRODUCE</td>
+                                    <td><code>oficio_manual</code></td>
+                                    <td class="num">2</td>
+                                    <td class="num">0</td>
+                                    <td><span class="flag flag-off">Pendiente auth</span></td>
+                                </tr>
+                                <tr>
+                                    <td>DGSFS_PA_TIBURON</td>
+                                    <td>PRODUCE</td>
+                                    <td><code>oficio_manual</code></td>
+                                    <td class="num">2</td>
+                                    <td class="num">0</td>
+                                    <td><span class="flag flag-off">Pendiente auth</span></td>
+                                </tr>
+                                <tr>
+                                    <td>PRODUCE</td>
+                                    <td>SESIGUE</td>
+                                    <td><code>oficio_manual</code></td>
+                                    <td class="num">2</td>
+                                    <td class="num">0</td>
+                                    <td><span class="flag flag-off">Pendiente auth</span></td>
+                                </tr>
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="3">Total</td>
+                                    <td class="num">20</td>
+                                    <td class="num">0</td>
+                                    <td>2 activos · 18 pendientes</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    <p class="footnote">
+                        «Activa» describe el registro del vínculo, no una
+                        sincronización probada: los dos vínculos CITES tienen
+                        <code>ultima_sincronizacion</code> nula. Por eso no se
+                        muestra una fecha que no existe.
+                    </p>
+                </article>
+            </section>
+
+            <!-- ══════════════════════════ HISTORIAL ══════════════════════════ -->
+            <section
+                class="tabpanel"
+                id="panel-historial"
+                role="tabpanel"
+                aria-labelledby="tab-historial"
+                hidden
+            >
+                <div class="banner banner-neutral">
+                    <div>
+                        <b>No hay run log.</b> No existe una tabla de ejecuciones
+                        ETL: <code>staging.lote</code> y
+                        <code>staging.registro</code> están en 0 filas y
+                        <code>legacy.log_envios</code> (17 filas) es el volcado
+                        crudo de una hoja heredada —columnas <code>fila_n</code>,
+                        <code>c01…c13</code>—, no un registro de ejecuciones. La
+                        tabla de abajo se dibuja con el contrato de columnas del
+                        item 59, sin filas.
+                    </div>
+                </div>
+
+                <article class="card">
+                    <div class="card-head">
+                        <div>
+                            <h2 class="card-title">Ejecuciones</h2>
+                            <p class="card-sub">
+                                Una fila por lote: duración, costo/metadatos,
+                                reintentos, versión y vínculo propuesta → registro.
+                            </p>
+                        </div>
+                        <span class="tag-mini">Item 59 · 62</span>
+                    </div>
+
+                    <div class="table-wrap">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Ejecución</th>
+                                    <th>Fuente</th>
+                                    <th>Inicio</th>
+                                    <th>Duración</th>
+                                    <th class="num">Registros</th>
+                                    <th>Costo / metadatos</th>
+                                    <th class="num">Reint.</th>
+                                    <th>Versión</th>
+                                    <th>Resultado</th>
+                                    <th>Propuesta → registro</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="10">
+                                        <div class="empty-state" style="padding: 22px">
+                                            Sin ejecuciones registradas. La tabla
+                                            queda vacía hasta que exista la
+                                            persistencia del item 59.
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="footnote">
+                        El <b>vínculo bidireccional</b> (item 62) exige guardar qué
+                        versión del archivo y de la propuesta sustentó cada alerta,
+                        compromiso, demanda o actor. Hoy ninguna tabla enlaza un
+                        registro de <code>core.*</code> con un lote, así que esa
+                        columna no puede poblarse.
+                    </p>
+                </article>
+
+                <h2 class="section-title">
+                    Generación documental por lote
+                    <span class="tag-mini">Item 86</span>
+                </h2>
+
+                <div class="grid two-col">
+                    <article class="card">
+                        <div class="card-head">
+                            <div>
+                                <h2 class="card-title">Nuevo lote de anexos</h2>
+                                <p class="card-sub">
+                                    Un job que produce todos los anexos de un
+                                    período y ámbito, con reintentos y versión.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="scope-row">
+                            <label class="select-filter">
+                                <span>Período</span>
+                                <select aria-label="Período">
+                                    <option>Noviembre 2026</option>
+                                    <option>Octubre 2026</option>
+                                    <option>Setiembre 2026</option>
+                                </select>
+                            </label>
+                            <label class="select-filter">
+                                <span>Ámbito</span>
+                                <select aria-label="Ámbito">
+                                    <option>Por Región</option>
+                                    <option>Por caso</option>
+                                    <option>Por mes</option>
+                                </select>
+                            </label>
+                            <label class="select-filter">
+                                <span>Región</span>
+                                <select aria-label="Región">
+                                    <option>Todas</option>
+                                    <option>Lima</option>
+                                    <option>Piura</option>
+                                    <option>Áncash</option>
+                                    <option>Arequipa</option>
+                                    <option>Lambayeque</option>
+                                    <option>Moquegua</option>
+                                    <option>Callao</option>
+                                    <option>Ica</option>
+                                    <option>Tacna</option>
+                                    <option>La Libertad</option>
+                                    <option>Tumbes</option>
+                                    <option>Loreto</option>
+                                    <option>Junín</option>
+                                </select>
+                            </label>
+                        </div>
+
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap">
+                            <button
+                                type="button"
+                                class="button-primary"
+                                disabled
+                                title="Depende del generador del item 75, que no existe: sin él, un anexo mal formado se multiplicaría en lote"
+                            >
+                                Generar lote
+                            </button>
+                            <button type="button" class="button-secondary" disabled>
+                                Reintentar fallidos
+                            </button>
+                        </div>
+
+                        <p class="footnote">
+                            <strong>Dependencia bloqueante:</strong> el item 86
+                            necesita el generador con contrato del item 75
+                            (<code>POST /api/v1/anexos/{n}</code>). La salida sería
+                            siempre <b>borrador</b> con fecha de corte y revisión
+                            humana obligatoria antes de cualquier envío.
+                        </p>
+                    </article>
+
+                    <article class="card">
+                        <div class="card-head">
+                            <div>
+                                <h2 class="card-title">Conciliación del lote documental</h2>
+                                <p class="card-sub">
+                                    Reutiliza el cuadre del item 59 para el job
+                                    documental.
+                                </p>
+                            </div>
+                            <span class="flag flag-bad">Sin ejecución</span>
+                        </div>
+
+                        <div class="recon">
+                            <div class="box"><b>—</b><span>Generados</span></div>
+                            <div class="box"><b>—</b><span>Omitidos</span></div>
+                            <div class="box"><b>—</b><span>Fallidos</span></div>
+                            <div class="box"><b>—</b><span>Solicitados</span></div>
+                        </div>
+                        <div class="recon-eq">
+                            — + — + — = <b>— solicitados</b>
+                        </div>
+
+                        <div class="table-wrap" style="margin-top: 2px">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Anexo</th>
+                                        <th>Versión</th>
+                                        <th>Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td colspan="3">
+                                            <div class="empty-state" style="padding: 18px">
+                                                Run log del lote vacío.
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </article>
+                </div>
+
+                <h2 class="section-title">
+                    Gobierno de las sugerencias asistidas
+                    <span class="tag-mini">Item 87</span>
+                </h2>
+
+                <div class="grid kpi-grid">
+                    <article class="card">
+                        <div class="card-head">
+                            <div>
+                                <h2 class="card-title">Propuestas registradas</h2>
+                                <p class="card-sub"><code>agent.run_log</code></p>
+                            </div>
+                        </div>
+                        <div class="kpi-val">0</div>
+                        <div class="kpi-note">Filas reales al 22.11.2026.</div>
+                    </article>
+                    <article class="card">
+                        <div class="card-head">
+                            <div>
+                                <h2 class="card-title">Resultados humanos</h2>
+                                <p class="card-sub"><code>agent.feedback_log</code></p>
+                            </div>
+                        </div>
+                        <div class="kpi-val">0</div>
+                        <div class="kpi-note">Ni aceptadas ni corregidas: sin propuestas.</div>
+                    </article>
+                    <article class="card">
+                        <div class="card-head">
+                            <div>
+                                <h2 class="card-title">Lecciones aprendidas</h2>
+                                <p class="card-sub"><code>agent.lessons_learned</code></p>
+                            </div>
+                        </div>
+                        <div class="kpi-val">0</div>
+                        <div class="kpi-note">Tabla creada y vacía.</div>
+                    </article>
+                    <article class="card">
+                        <div class="card-head">
+                            <div>
+                                <h2 class="card-title">Casos de regresión</h2>
+                                <p class="card-sub"><code>agent.synthetic_test_cases</code></p>
+                            </div>
+                        </div>
+                        <div class="kpi-val">0</div>
+                        <div class="kpi-note">Sin conjunto de regresión definido.</div>
+                    </article>
+                </div>
+
+                <div class="grid two-col">
+                    <article class="card">
+                        <div class="card-head">
+                            <div>
+                                <h2 class="card-title">Aceptación por tipo de sugerencia</h2>
+                                <p class="card-sub">
+                                    Solo tiene sentido con propuestas registradas;
+                                    la tasa no se define con cero filas.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="table-wrap">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Tipo</th>
+                                        <th class="num">Propuestas</th>
+                                        <th class="num">Aceptadas</th>
+                                        <th class="num">Corregidas</th>
+                                        <th class="num">Descartadas</th>
+                                        <th class="num">Tasa</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Demanda</td>
+                                        <td class="num">—</td>
+                                        <td class="num">—</td>
+                                        <td class="num">—</td>
+                                        <td class="num">—</td>
+                                        <td class="num">—</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Compromiso</td>
+                                        <td class="num">—</td>
+                                        <td class="num">—</td>
+                                        <td class="num">—</td>
+                                        <td class="num">—</td>
+                                        <td class="num">—</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Actor</td>
+                                        <td class="num">—</td>
+                                        <td class="num">—</td>
+                                        <td class="num">—</td>
+                                        <td class="num">—</td>
+                                        <td class="num">—</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Alerta</td>
+                                        <td class="num">—</td>
+                                        <td class="num">—</td>
+                                        <td class="num">—</td>
+                                        <td class="num">—</td>
+                                        <td class="num">—</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <p class="footnote">
+                            No se escribe «0 %»: con cero propuestas la tasa es
+                            indeterminada, no nula. Un 0 % afirmaría que todas las
+                            propuestas fueron rechazadas.
+                        </p>
+                    </article>
+
+                    <article class="card">
+                        <div class="card-head">
+                            <div>
+                                <h2 class="card-title">Registro del asistente</h2>
+                                <p class="card-sub">
+                                    Llamadas al modelo y sesiones, para auditar el
+                                    costo y la versión.
+                                </p>
+                            </div>
+                        </div>
+                        <dl class="kv">
+                            <dt><code>agent.llm_call</code></dt>
+                            <dd>0 filas</dd>
+                            <dt><code>agent.sesion</code></dt>
+                            <dd>0 filas</dd>
+                            <dt><code>agent.plantilla_prompt</code></dt>
+                            <dd>4 filas (plantillas, no ejecuciones)</dd>
+                            <dt>Versión de prompt / modelo</dt>
+                            <dd>Sin historial de cambios: —</dd>
+                            <dt>Conjunto de regresión</dt>
+                            <dd>No definido</dd>
+                        </dl>
+                        <p class="footnote">
+                            Sin <code>run_log</code> no se puede medir aceptación ni
+                            detectar una regresión tras cambiar prompt o modelo; por
+                            eso el item 87 exige ambas cosas antes de automatizar
+                            los items 73–78.
+                        </p>
+                    </article>
+                </div>
+            </section>
+
+            <!-- ───────────────────────────── NOTAS ───────────────────────────── -->
+            <section class="notes">
+                <h2>Notas del mockup</h2>
+
+                <h3>Datos reales usados</h3>
+                <ul>
+                    <li>
+                        Recuentos de destino al 22.11.2026 (consulta de solo
+                        lectura): <code>core.casos</code> 35 (34 vigentes),
+                        <code>core.actores</code> 1 160,
+                        <code>core.organizaciones</code> 224,
+                        <code>core.locales</code> 27,
+                        <code>core.demandas</code> 325,
+                        <code>core.documentos</code> 153 (143 vigentes),
+                        <code>core.caso_cronologia</code> 80,
+                        <code>core.alertas_tempranas</code> 83,
+                        <code>kag.documento_fuente</code> 10,
+                        <code>kag.documento_fragmento</code> 0.
+                    </li>
+                    <li>
+                        Lista blanca real: 7 fuentes en
+                        <code>analisis.punto_ingesta</code> (PI-01 a PI-07), con
+                        destino <code>core · qda · lex · kag · ind</code> y
+                        <code>esquema_validacion</code> nulo en todas.
+                    </li>
+                    <li>
+                        Integraciones: 20 filas en <code>core.integraciones</code>,
+                        10 sistemas, 2 <code>activa</code>
+                        (CITES_SECRETARIAT → PRODUCE) y 18
+                        <code>pendiente_auth</code>; 0 con
+                        <code>ultima_sincronizacion</code>.
+                    </li>
+                    <li>
+                        Registro del asistente: <code>agent.run_log</code>,
+                        <code>feedback_log</code>, <code>lessons_learned</code>,
+                        <code>synthetic_test_cases</code>, <code>llm_call</code> y
+                        <code>sesion</code> con 0 filas;
+                        <code>agent.plantilla_prompt</code> con 4.
+                    </li>
+                    <li>
+                        Control de cambios: <code>audit.cambios</code> tiene 57
+                        filas en total y <b>0</b> sobre
+                        <code>punto_ingesta</code>, <code>lote</code> o
+                        <code>staging</code>.
+                    </li>
+                    <li>
+                        La validación de extensión, MIME, tamaño, codificación y el
+                        SHA-256 se calculan de verdad en tu navegador sobre el
+                        archivo que elijas; no son cifras escritas.
+                    </li>
+                </ul>
+
+                <h3>Qué salió «—» y por qué</h3>
+                <ul>
+                    <li>
+                        <b>Todo el pipeline</b>: sin endpoint de carga ni
+                        persistencia, no hay etapas ejecutadas, contadores,
+                        rechazos ni conciliación.
+                    </li>
+                    <li>
+                        <b>Filas «después» y Δ</b> de cada tabla: dependen de una
+                        ejecución que no ocurrió.
+                    </li>
+                    <li>
+                        <b>Esquema de validación de las 7 fuentes</b>: la columna
+                        existe y está vacía; sin ella la etapa de mapeo no puede
+                        validar columnas.
+                    </li>
+                    <li>
+                        <b>Historial y run log</b>: no existe tabla de ejecuciones;
+                        <code>legacy.log_envios</code> es un volcado de hoja, no un
+                        log.
+                    </li>
+                    <li>
+                        <b>Última sincronización de integraciones</b>: los 20
+                        vínculos tienen la fecha nula, incluidos los 2 «activa».
+                    </li>
+                    <li>
+                        <b>Feed WhatsApp / Gemini</b>: no hay integración; el
+                        estado es «No conectado», sin timestamp y sin mensajes.
+                    </li>
+                    <li>
+                        <b>Generación por lote (86)</b>: depende del generador del
+                        item 75, inexistente.
+                    </li>
+                    <li>
+                        <b>Aceptación de sugerencias (87)</b>: 0 propuestas
+                        registradas; la tasa es indeterminada, no 0 %.
+                    </li>
+                    <li>
+                        <b>OCR</b>: no implementado; un PDF escaneado no se lee y
+                        no se finge que sí.
+                    </li>
+                </ul>
+
+                <h3>Qué falta para implementarlo</h3>
+                <ol>
+                    <li>
+                        <b>Endpoint de carga</b> (<code>POST /api/v1/etl/lotes</code>
+                        o equivalente) con límites de tamaño/tipo validados en
+                        servidor, no solo en el navegador.
+                    </li>
+                    <li>
+                        <b>Persistencia en <code>staging</code></b>: escribir
+                        <code>lote</code> y <code>registro</code>, hoy en 0 filas.
+                    </li>
+                    <li>
+                        <b>Tabla de ejecuciones / run log</b> con duración, costo,
+                        reintentos, versión y vínculo propuesta → registro.
+                    </li>
+                    <li>
+                        <b>Esquemas de validación</b> por fuente
+                        (<code>esquema_validacion</code> nulo en las 7).
+                    </li>
+                    <li>
+                        <b>Tabla de control de cambios</b> de la lista blanca.
+                    </li>
+                    <li>
+                        <b>Servicio de OCR</b> separado (idioma, confianza, costo,
+                        revisión humana) y almacenamiento de archivos: hoy la
+                        evidencia es solo una URI.
+                    </li>
+                    <li>
+                        <b>Generador de anexos (item 75)</b> antes de cualquier
+                        lote documental.
+                    </li>
+                    <li>
+                        <b>Credenciales de integración</b> del lado servidor para
+                        cualquier fuente externa (WhatsApp, Gemini u otra).
+                    </li>
+                </ol>
+
+                <h3>Qué no debe hacerse</h3>
+                <ul>
+                    <li>
+                        <b>No simular</b> ejecuciones, contadores, rechazos ni
+                        mensajes de WhatsApp para «que se vea lleno». El item 60 lo
+                        prohíbe explícitamente.
+                    </li>
+                    <li>
+                        <b>No tratar la extracción de texto como OCR</b> ni
+                        prometer lectura de PDF escaneados.
+                    </li>
+                    <li>
+                        <b>No escribir 0</b> donde el hecho es «no se ejecutó»:
+                        0 significa «se procesó y no había nada», que es distinto.
+                    </li>
+                    <li>
+                        <b>No calcular 0 % de aceptación</b> con cero propuestas.
+                    </li>
+                    <li>
+                        <b>No confiar en ocultar pestañas</b> como control de
+                        acceso: la autorización va en el servidor (item 49/60).
+                    </li>
+                    <li>
+                        <b>No mostrar una integración como conectada</b> porque su
+                        estado diga «activa»: sin fecha de sincronización no hay
+                        prueba de que haya corrido.
+                    </li>
+                </ul>
+
+                <h3>Vocabulario usado</h3>
+                <dl class="vocab">
+                    <dt>Región</dt>
+                    <dd>Nunca «Territorio».</dd>
+                    <dt>Niveles de gobierno</dt>
+                    <dd>Nacional · Regional (GORE) · Local.</dd>
+                    <dt>Estados de caso</dt>
+                    <dd>Activo · En seguimiento · Resuelto · Archivado.</dd>
+                </dl>
+            </section>
+        </main>
+
+        <script>
+            (function () {
+                "use strict";
+
+                /* ── Pestañas ──────────────────────────────────────────────── */
+                var tabButtons = Array.prototype.slice.call(
+                    document.querySelectorAll(".mode-tabs [data-tab]")
+                );
+                tabButtons.forEach(function (btn) {
+                    btn.addEventListener("click", function () {
+                        tabButtons.forEach(function (b) {
+                            var on = b === btn;
+                            b.setAttribute("aria-selected", on ? "true" : "false");
+                            var panel = document.getElementById(
+                                "panel-" + b.getAttribute("data-tab")
+                            );
+                            if (panel) panel.hidden = !on;
+                        });
+                    });
+                });
+
+                /* ── Validación previa real del archivo ────────────────────── */
+                var input = document.getElementById("file-input");
+                var line = document.getElementById("file-line");
+                var nameEl = document.getElementById("file-name");
+                var sizeEl = document.getElementById("file-size");
+                var hashEl = document.getElementById("hash-out");
+                var countEl = document.getElementById("val-count");
+                var MAX_BYTES = 25 * 1024 * 1024;
+
+                var MIME_BY_EXT = {
+                    csv: [
+                        "text/csv",
+                        "application/vnd.ms-excel",
+                        "text/plain",
+                        "application/octet-stream",
+                        ""
+                    ],
+                    xlsx: [
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                        "application/zip",
+                        "application/octet-stream",
+                        ""
+                    ],
+                    txt: ["text/plain", "application/octet-stream", ""],
+                    pdf: ["application/pdf", "application/octet-stream", ""]
+                };
+
+                function row(key) {
+                    return document.querySelector('[data-check="' + key + '"]');
+                }
+                function setCheck(key, state, text) {
+                    var li = row(key);
+                    if (!li) return;
+                    li.classList.remove("ok", "warn", "bad");
+                    if (state) li.classList.add(state);
+                    li.querySelector(".ico").textContent =
+                        state === "ok" ? "✓" : state === "warn" ? "!" : state === "bad" ? "✕" : "○";
+                    li.querySelector(".val").textContent = text;
+                }
+                function humanSize(n) {
+                    if (n < 1024) return n + " B";
+                    if (n < 1048576) return (n / 1024).toFixed(1) + " KB";
+                    return (n / 1048576).toFixed(2) + " MB";
+                }
+                function hex(buf) {
+                    var bytes = new Uint8Array(buf);
+                    var out = "";
+                    for (var i = 0; i < bytes.length; i++) {
+                        out += bytes[i].toString(16).padStart(2, "0");
+                    }
+                    return out;
+                }
+
+                async function inspect(file) {
+                    if (!file) return;
+
+                    line.classList.add("show");
+                    nameEl.textContent = file.name;
+                    sizeEl.textContent = humanSize(file.size);
+
+                    var ext = (file.name.split(".").pop() || "").toLowerCase();
+                    var extOk = Object.prototype.hasOwnProperty.call(MIME_BY_EXT, ext);
+                    setCheck(
+                        "ext",
+                        extOk ? "ok" : "bad",
+                        extOk ? "." + ext : "No permitida"
+                    );
+                    if (!extOk) {
+                        ["mime", "size", "enc", "hash", "dedupe"].forEach(function (k) {
+                            setCheck(k, null, "No evaluado");
+                        });
+                        hashEl.textContent = "SHA-256: —";
+                        countEl.textContent = "Archivo rechazado";
+                        countEl.className = "flag flag-bad";
+                        return;
+                    }
+
+                    var mimeOk =
+                        MIME_BY_EXT[ext].indexOf(file.type) !== -1 ||
+                        (!file.type && ext !== "pdf" && ext !== "xlsx");
+                    setCheck(
+                        "mime",
+                        mimeOk ? "ok" : "warn",
+                        mimeOk
+                            ? file.type || "no declarado"
+                            : file.type + " (no coincide)"
+                    );
+
+                    var sizeOk = file.size > 0 && file.size <= MAX_BYTES;
+                    setCheck(
+                        "size",
+                        sizeOk ? "ok" : "bad",
+                        sizeOk ? humanSize(file.size) : "Supera 25 MB"
+                    );
+
+                    /* Codificación: solo aplica a texto (csv/txt). */
+                    if (ext === "csv" || ext === "txt") {
+                        try {
+                            var head = new Uint8Array(
+                                await file.slice(0, 4096).arrayBuffer()
+                            );
+                            if (head[0] === 0xef && head[1] === 0xbb && head[2] === 0xbf) {
+                                setCheck("enc", "ok", "UTF-8 con BOM");
+                            } else if (head[0] === 0xff && head[1] === 0xfe) {
+                                setCheck("enc", "warn", "UTF-16 LE (revisar)");
+                            } else if (head[0] === 0xfe && head[1] === 0xff) {
+                                setCheck("enc", "warn", "UTF-16 BE (revisar)");
+                            } else {
+                                try {
+                                    new TextDecoder("utf-8", { fatal: true }).decode(head);
+                                    setCheck("enc", "ok", "UTF-8 sin BOM");
+                                } catch (e) {
+                                    setCheck("enc", "warn", "No UTF-8: posible Latin-1");
+                                }
+                            }
+                        } catch (e) {
+                            setCheck("enc", "bad", "No se pudo leer");
+                        }
+                    } else {
+                        setCheck("enc", "ok", "Binario: no aplica");
+                    }
+
+                    try {
+                        var full = await file.arrayBuffer();
+                        var digest = await crypto.subtle.digest("SHA-256", full);
+                        hashEl.textContent = "SHA-256: " + hex(digest);
+                        setCheck("hash", "ok", "Calculado");
+                    } catch (e) {
+                        hashEl.textContent = "SHA-256: — (requiere contexto seguro)";
+                        setCheck("hash", "warn", "No calculable");
+                    }
+
+                    setCheck("dedupe", "warn", "Sin contrastar");
+                    countEl.textContent = "Validado en el navegador";
+                    countEl.className = "flag flag-ok";
+                }
+
+                input.addEventListener("change", function () {
+                    inspect(input.files && input.files[0]);
+                });
+
+                /* ── Resaltado de columna por rol ─────────────────────────── */
+                var rolSel = document.getElementById("sel-rol");
+                function paintRole() {
+                    var col = rolSel.value;
+                    Array.prototype.forEach.call(
+                        document.querySelectorAll(".perm-table [data-col]"),
+                        function (th) {
+                            th.classList.toggle("perm-col-hot", th.getAttribute("data-col") === col);
+                        }
+                    );
+                }
+                rolSel.addEventListener("change", paintRole);
+                paintRole();
+            })();
+        </script>
+    </body>
+</html>
