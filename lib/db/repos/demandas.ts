@@ -105,8 +105,14 @@ function mapDemanda(row: Record<string, unknown>): DemandaListItem {
   };
 }
 
+/**
+ * El catálogo escribe `En proceso`, con espacio (glosario §1.8; `CHECK` de la
+ * migración 24). La API sigue aceptando la forma legada `En_proceso`, pero
+ * normaliza siempre a la etiqueta con espacio, que es la única que la base
+ * admite al escribir.
+ */
 function normalizeEstado(value: string): string {
-  return value.trim().replace(/\s+/g, "_");
+  return value.trim().replace(/_/g, " ").replace(/\s+/g, " ");
 }
 
 export async function listDemandas(
@@ -184,7 +190,7 @@ export type DemandaWriteContext = {
 
 const ESTADOS_ATENCION = [
   "Pendiente",
-  "En_proceso",
+  "En proceso",
   "Atendida",
   "Desestimada",
 ] as const;

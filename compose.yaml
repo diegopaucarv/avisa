@@ -180,32 +180,6 @@ services:
       - log_min_duration_statement=1000
 
   # ===========================================================================
-  #  API · FastAPI (demostración)
-  #
-  #  Sirve /api/auth/login y /api/dashboard con datos de ejemplo. La interfaz
-  #  le habla por la red interna del compose (http://api:8000), no por el host.
-  #  El puerto 8000 se publica igual para poder probar la API con curl.
-  # ===========================================================================
-  api:
-    build:
-      context: .
-      dockerfile: docker/api/Dockerfile
-    image: avisa/api:dev
-    container_name: avisa-api
-    restart: unless-stopped
-
-    environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER:-avisa}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-avisa}
-      TZ: ${TZ:-America/Lima}
-
-    ports:
-      - "${API_PORT:-8000}:8000"
-
-    depends_on:
-      db:
-        condition: service_healthy
-
-  # ===========================================================================
   #  UI · Next.js 16 en modo desarrollo
   #
   #  El código entra por un montaje desde el disco y los dos volúmenes evitan
@@ -225,7 +199,6 @@ services:
     restart: unless-stopped
 
     environment:
-      AVISA_API_URL: http://api:8000
       # Capa de datos D3: el contenedor ui habla con el servicio db del compose.
       APP_DATABASE_URL: postgresql://avisa_api:Av1saApi_Local_2026@db:5432/avisa
       APP_SESSION_SECRET: ${APP_SESSION_SECRET}

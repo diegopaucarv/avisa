@@ -737,8 +737,10 @@ para poder ver la interfaz sin instalar Node ni Python en la máquina.
 ### Arranque
 
 ```bash
-docker compose up -d api ui
+docker compose up -d ui
 ```
+
+La base (`db`) arranca como dependencia del servicio `ui`.
 
 Y se abre **http://localhost:3000**. El servicio de acceso ya está contestando:
 usuario `11111111`, clave `demo`.
@@ -754,16 +756,16 @@ distintas:
 | `10654038` | Peggy Contreras Montes | `sectorista`: edita y elimina                           |
 | `46078289` | André Jiménez Agapito  | `consulta_lectura` + `sectorista`: edita y elimina      |
 
-| Servicio | Contenedor  | Puerto del host | Qué es                        |
-| -------- | ----------- | --------------- | ----------------------------- |
-| `db`     | `avisa-db`  | 55433           | PostgreSQL 16                 |
-| `api`    | `avisa-api` | 8000            | FastAPI de demostración       |
-| `ui`     | `avisa-ui`  | 3000            | Next.js 16 en modo desarrollo |
+| Servicio | Contenedor | Puerto del host | Qué es                        |
+| -------- | ---------- | --------------- | ----------------------------- |
+| `db`     | `avisa-db` | 55433           | PostgreSQL 16                 |
+| `ui`     | `avisa-ui` | 3000            | Next.js 16 en modo desarrollo |
 
-La interfaz no llama a la API desde el navegador: pide a sus propias rutas
-`/api/...` y Next reenvía a `http://api:8000` por la red interna del compose.
-Por eso no importa que el puerto 8000 no esté expuesto al exterior; se
-expone igual para poder probar la API con `curl`.
+La interfaz no llama a ninguna API externa: sus rutas `/api/...` se resuelven
+en el propio proceso de Next y consultan PostgreSQL a través de `lib/db/`
+(`APP_DATABASE_URL`). El antiguo servicio `api` (FastAPI de demostración en
+`:8000`) se retiró el 2026-11-22: no leía la base, tenía credenciales en claro
+y duplicaba el login real (`core.autenticar_usuario`).
 
 ### Cómo entra el código en la interfaz
 
@@ -797,8 +799,6 @@ Next → PostgreSQL.
 
 ### Lo que este entorno no hace
 
-- La API sigue sirviendo **datos de ejemplo**: no lee la base. El login y el
-  tablero funcionan aunque `db` esté vacía.
 - La interfaz corre en modo desarrollo, no compilada. Para una entrega hay que
   construirla aparte (`pnpm build` y `pnpm start`).
 - `.next` se guarda en un volumen porque el montaje de Windows es lento; Next
@@ -808,7 +808,6 @@ Next → PostgreSQL.
 ### Archivos que añade esta parte
 
 ```
-docker/api/Dockerfile               API FastAPI (contexto: raíz del repo)
 docker/ui/Dockerfile                interfaz Next.js 16 (contexto: raíz del repo)
 .dockerignore                       deja fuera node_modules, .next, docs y migration
 ```
