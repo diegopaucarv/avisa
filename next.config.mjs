@@ -1,5 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // `pg` usa APIs nativas de Node; no debe empaquetarse para el bundle del servidor.
+  serverExternalPackages: ['pg'],
   images: {
     unoptimized: true,
   },

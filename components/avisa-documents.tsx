@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Check, FileStack, Search, Sparkles, X } from "lucide-react";
+import { Check, FileStack, RotateCcw, Search, Sparkles, X } from "lucide-react";
 import {
   docKindLabels,
   type DemoDocument,
@@ -39,16 +39,23 @@ const extractionChip = (tipo: DemoDocument["extracciones"][number]["tipo"]) =>
         ? "riesgo"
         : "demanda";
 
-export function AvisaDocuments({ regionScope, assignedRegions, unrestricted }: { regionScope: RegionScope; assignedRegions: RegionScope[]; unrestricted: boolean }) {
-  const {
-    documents,
-    cases,
-    simulateExtraction,
-    validateDocument,
-    acceptExtraction,
-    rejectExtraction,
-    deleteDocument,
-  } = useAvisa();
+const documentStateClass = (estado: DemoDocument["estado"]) =>
+  estado === "Validado"
+    ? "state-approved"
+    : estado === "Rechazado"
+      ? "state-dismissed"
+      : "state-pending";
+
+export function AvisaDocuments({
+  regionScope,
+  assignedRegions,
+  unrestricted,
+}: {
+  regionScope: RegionScope;
+  assignedRegions: RegionScope[];
+  unrestricted: boolean;
+}) {
+  const { documents, cases, simulateExtraction } = useAvisa();
   const [query, setQuery] = useState("");
   const [estado, setEstado] = useState("Todos");
   const [tipo, setTipo] = useState("Todos");
@@ -57,7 +64,14 @@ export function AvisaDocuments({ regionScope, assignedRegions, unrestricted }: {
   const inScope = (doc: DemoDocument) => {
     if (unrestricted && regionScope === "Todo el Perú") return true;
     const related = cases.find((item) => item.code === doc.casoCode);
-    return related ? isTerritoryVisible(related.region, regionScope, assignedRegions, unrestricted) : unrestricted;
+    return related
+      ? isTerritoryVisible(
+          related.region,
+          regionScope,
+          assignedRegions,
+          unrestricted,
+        )
+      : unrestricted;
   };
 
   const filtered = documents
@@ -91,7 +105,15 @@ export function AvisaDocuments({ regionScope, assignedRegions, unrestricted }: {
           de una persona.
         </span>
       </div>
-      <div className="filter-bar">
+      <p className="doc-evidence-note">
+        <FileStack size={14} />
+        <span>
+          <strong>Los documentos son evidencia del caso.</strong> Las
+          referencias normativas se consultan en el caso, aparte de este flujo,
+          y no se validan con la extracción documental.
+        </span>
+      </p>
+      <div className="filter-bar filter-bar-wrap">
         <label className="search-field">
           <Search size={16} />
           <input
@@ -136,13 +158,17 @@ export function AvisaDocuments({ regionScope, assignedRegions, unrestricted }: {
       <div className="doc-layout">
         <div className="table-wrap">
           <table className="data-table">
+            <caption className="table-caption">
+              Documentos de demostración · {filtered.length} resultados ·
+              selecciona una fila para revisar la evidencia.
+            </caption>
             <thead>
               <tr>
-                <th>Documento</th>
-                <th>Tipo</th>
-                <th>Caso</th>
-                <th>Fecha</th>
-                <th>Estado</th>
+                <th scope="col">Documento</th>
+                <th scope="col">Tipo</th>
+                <th scope="col">Caso</th>
+                <th scope="col">Fecha</th>
+                <th scope="col">Estado</th>
               </tr>
             </thead>
             <tbody>
@@ -153,7 +179,17 @@ export function AvisaDocuments({ regionScope, assignedRegions, unrestricted }: {
                   onClick={() => setSelectedId(doc.id)}
                 >
                   <td>
-                    <strong>{doc.titulo}</strong>
+                    <button
+                      type="button"
+                      className="table-link"
+                      aria-label={`Revisar el documento ${doc.codigo}: ${doc.titulo}`}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        setSelectedId(doc.id);
+                      }}
+                    >
+                      {doc.titulo}
+                    </button>
                     <small>
                       {doc.codigo} · {doc.archivo}
                     </small>
@@ -163,8 +199,9 @@ export function AvisaDocuments({ regionScope, assignedRegions, unrestricted }: {
                   <td>{doc.fecha}</td>
                   <td>
                     <span
-                      className={`commit-status commit-${doc.estado.toLowerCase().replace(" ", "-")}`}
+                      className={`alert-state ${documentStateClass(doc.estado)}`}
                     >
+                      <span className="status-dot" />
                       {doc.estado}
                     </span>
                   </td>
@@ -179,14 +216,7 @@ export function AvisaDocuments({ regionScope, assignedRegions, unrestricted }: {
           )}
         </div>
         {selected ? (
-          <DocumentReview
-            doc={selected}
-            onExtract={simulateExtraction}
-            onValidate={validateDocument}
-            onAccept={acceptExtraction}
-            onReject={rejectExtraction}
-            onDelete={deleteDocument}
-          />
+          <DocumentReview doc={selected} onExtract={simulateExtraction} />
         ) : (
           <div className="surface empty-state">
             Carga un documento para comenzar.
@@ -200,36 +230,45 @@ export function AvisaDocuments({ regionScope, assignedRegions, unrestricted }: {
 function DocumentReview({
   doc,
   onExtract,
-  onValidate,
-  onAccept,
-  onReject,
-  onDelete,
 }: {
   doc: DemoDocument;
   onExtract: (id: string) => void;
-  onValidate: (id: string) => void;
-  onAccept: (documentId: string, extractionId: string) => void;
-  onReject: (documentId: string, extractionId: string) => void;
-  onDelete: (id: string) => void;
 }) {
+  const {
+    validateDocument,
+    rejectDocument,
+    reextractDocument,
+    validateFragment,
+    acceptExtraction,
+    rejectExtraction,
+    deleteDocument,
+  } = useAvisa();
+  const [confirmValidate, setConfirmValidate] = useState(false);
+  const [showReject, setShowReject] = useState(false);
+  const [rejectReason, setRejectReason] = useState("");
+  const [openVersion, setOpenVersion] = useState<number | null>(null);
+
   const canExtract = doc.estado === "Cargado" || doc.estado === "En análisis";
-  const canValidate = doc.estado === "Extraído";
+  const canValidate = doc.estado !== "Validado" && doc.estado !== "Rechazado";
+  const validatedFragments = doc.fragmentos.filter(
+    (fragmento) => fragmento.validado,
+  ).length;
+  const titleId = `doc-review-${doc.id}`;
+
   return (
-    <section className="surface detail-section">
+    <section className="surface detail-section" aria-labelledby={titleId}>
       <div className="detail-section-title">
         <div>
           <p className="section-eyebrow">
             {docKindLabels[doc.kind].toLocaleUpperCase("es")} ·{" "}
             {doc.origen.toLocaleUpperCase("es")}
           </p>
-          <h3>{doc.titulo}</h3>
+          <h3 id={titleId}>{doc.titulo}</h3>
           <p>
             {doc.codigo} · {doc.fecha} · {doc.archivo}
           </p>
         </div>
-        <span
-          className={`alert-state ${doc.estado === "Validado" ? "state-approved" : "state-pending"}`}
-        >
+        <span className={`alert-state ${documentStateClass(doc.estado)}`}>
           <span className="status-dot" />
           {doc.estado}
         </span>
@@ -245,22 +284,116 @@ function DocumentReview({
           equivale a validación humana.
         </p>
       )}
-      <div className="review-actions">
+      {doc.rechazoMotivo && (
+        <div className="review-note">
+          <strong>Motivo de rechazo registrado:</strong> {doc.rechazoMotivo}
+        </div>
+      )}
+      <div className="review-actions document-actions">
         {canExtract && (
-          <button className="button-primary" onClick={() => onExtract(doc.id)}>
+          <button
+            type="button"
+            className="button-primary"
+            onClick={() => onExtract(doc.id)}
+          >
             <Sparkles size={15} />
             Ejecutar extracción
           </button>
         )}
-        {canValidate && (
-          <button className="button-primary" onClick={() => onValidate(doc.id)}>
-            <Check size={15} />
-            Validar documento
-          </button>
-        )}
-        <DeleteButton onConfirm={() => onDelete(doc.id)} />
+        <button
+          type="button"
+          className="button-secondary"
+          onClick={() => reextractDocument(doc.id)}
+        >
+          <RotateCcw size={15} />
+          Relanzar extracción
+        </button>
+        {canValidate &&
+          (confirmValidate ? (
+            <span className="confirm-inline">
+              ¿Validar el documento y sus fragmentos como evidencia?
+              <button
+                type="button"
+                className="button-primary"
+                onClick={() => {
+                  validateDocument(doc.id);
+                  setConfirmValidate(false);
+                }}
+              >
+                Sí, validar
+              </button>
+              <button
+                type="button"
+                className="button-secondary"
+                onClick={() => setConfirmValidate(false)}
+              >
+                Cancelar
+              </button>
+            </span>
+          ) : (
+            <button
+              type="button"
+              className="button-primary"
+              onClick={() => setConfirmValidate(true)}
+            >
+              <Check size={15} />
+              Validar documento
+            </button>
+          ))}
+        {doc.estado !== "Rechazado" &&
+          (showReject ? (
+            <div className="archive-form">
+              <label htmlFor={`reject-${doc.id}`}>
+                Motivo de rechazo (obligatorio)
+              </label>
+              <input
+                id={`reject-${doc.id}`}
+                className="form-input"
+                value={rejectReason}
+                onChange={(event) => setRejectReason(event.target.value)}
+                placeholder="Ej.: archivo ilegible o fuente no trazable"
+              />
+              <button
+                type="button"
+                className="button-danger"
+                disabled={!rejectReason.trim()}
+                onClick={() => {
+                  rejectDocument(doc.id, rejectReason);
+                  setRejectReason("");
+                  setShowReject(false);
+                }}
+              >
+                Confirmar rechazo
+              </button>
+              <button
+                type="button"
+                className="button-secondary"
+                onClick={() => {
+                  setShowReject(false);
+                  setRejectReason("");
+                }}
+              >
+                Cancelar
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              className="button-secondary"
+              onClick={() => setShowReject(true)}
+            >
+              <X size={15} />
+              Rechazar documento
+            </button>
+          ))}
+        <DeleteButton onConfirm={() => deleteDocument(doc.id)} />
       </div>
-      <h4 className="micro-label">FRAGMENTOS</h4>
+      <div className="fragment-head">
+        <h4 className="micro-label">FRAGMENTOS</h4>
+        <span className="fragment-counter" aria-live="polite">
+          {validatedFragments} de {doc.fragmentos.length} fragmentos validados
+        </span>
+      </div>
       {doc.fragmentos.length === 0 ? (
         <div className="empty-state">
           Sin fragmentos: ejecuta la extracción.
@@ -278,6 +411,20 @@ function DocumentReview({
                   ? "Validado por persona"
                   : "Pendiente de validación"}
               </small>
+              <div className="fragment-actions">
+                <button
+                  type="button"
+                  className="link-button"
+                  aria-pressed={fragmento.validado}
+                  onClick={() =>
+                    validateFragment(doc.id, fragmento.id, !fragmento.validado)
+                  }
+                >
+                  {fragmento.validado
+                    ? "Quitar validación"
+                    : "Validar fragmento"}
+                </button>
+              </div>
             </div>
           ))}
         </div>
@@ -305,15 +452,17 @@ function DocumentReview({
               {extraction.estado === "Propuesta" && (
                 <div className="extraction-actions">
                   <button
+                    type="button"
                     className="button-secondary"
-                    onClick={() => onAccept(doc.id, extraction.id)}
+                    onClick={() => acceptExtraction(doc.id, extraction.id)}
                   >
                     <Check size={14} />
                     Aceptar
                   </button>
                   <button
+                    type="button"
                     className="button-secondary"
-                    onClick={() => onReject(doc.id, extraction.id)}
+                    onClick={() => rejectExtraction(doc.id, extraction.id)}
                   >
                     <X size={14} />
                     Descartar
@@ -324,6 +473,60 @@ function DocumentReview({
           ))}
         </div>
       )}
+      {doc.versiones?.length ? (
+        <section className="document-versions">
+          <h4 className="micro-label">VERSIONES ANTERIORES</h4>
+          <ul className="version-list">
+            {doc.versiones.map((version) => (
+              <li key={version.n}>
+                <button
+                  type="button"
+                  className="version-toggle"
+                  aria-expanded={openVersion === version.n}
+                  onClick={() =>
+                    setOpenVersion(openVersion === version.n ? null : version.n)
+                  }
+                >
+                  <span>
+                    Versión {version.n} · {version.fecha} ·{" "}
+                    {version.fragmentos.length} fragmentos
+                  </span>
+                  <span aria-hidden="true">
+                    {openVersion === version.n ? "Ocultar" : "Ver"}
+                  </span>
+                </button>
+                {openVersion === version.n && (
+                  <div className="version-fragments">
+                    {version.fragmentos.length === 0 ? (
+                      <p className="form-hint">
+                        Esta versión no tenía fragmentos extraídos.
+                      </p>
+                    ) : (
+                      version.fragmentos.map((fragmento) => (
+                        <div
+                          className="fragment fragment-readonly"
+                          key={fragmento.id}
+                        >
+                          <span className={`chip chip-${fragmento.tipo}`}>
+                            {fragmentLabel[fragmento.tipo]}
+                          </span>
+                          <p>{fragmento.texto}</p>
+                          <small>
+                            {fragmento.validado
+                              ? "Validado en esa versión"
+                              : "Sin validación en esa versión"}{" "}
+                            · lectura de solo consulta
+                          </small>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
     </section>
   );
 }

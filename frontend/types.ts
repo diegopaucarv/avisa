@@ -10,6 +10,9 @@ export interface Session {
   email: string;
   cargo: string;
   regiones?: string[];
+  // Código y lista de roles tal como viven en core.roles (la base manda).
+  rolCodigo?: string;
+  roles?: string[];
 }
 export interface CaseRecord {
   code: string;

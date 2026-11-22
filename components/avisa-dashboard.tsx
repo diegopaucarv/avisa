@@ -1,10 +1,9 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Activity,
   BarChart3,
-  Bell,
   BriefcaseBusiness,
   Building2,
   CalendarDays,
@@ -21,7 +20,6 @@ import {
   MapPin,
   MapPinned,
   Menu,
-  Search,
   Settings2,
   ShieldAlert,
   UserRound,
@@ -39,15 +37,20 @@ import { WorkspaceViewContent } from "./avisa-workspace";
 import {
   AvisaScopeFilter,
   isWithinDemoWindow,
+  isValidTimeRange,
   normalizeAssignedRegions,
   isTerritoryVisible,
   REGION_SCOPES,
   ScopePopover,
   type RegionScope,
+  type TimeRange,
   type TimeScope,
 } from "./avisa-scope-filter";
 import { useAvisa } from "@/lib/avisa-store";
-import { PreferencesDrawer } from "./avisa-preferences";
+import { PreferencesDrawer, useAvisaPreferences } from "./avisa-preferences";
+import { HelpDrawer, openHelp } from "./avisa-glossary";
+import { AvisaNotifications } from "./avisa-notifications";
+import { AvisaSearch } from "./avisa-search";
 
 type NavItem = {
   label: string;
@@ -94,8 +97,7 @@ export function AvisaDashboard({
   const [scopeOpen, setScopeOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [globalSearch, setGlobalSearch] = useState("");
-  const [searchOpen, setSearchOpen] = useState(false);
+  const preferences = useAvisaPreferences();
   const scopeButtonRef = useRef<HTMLButtonElement>(null);
   const assignedRegions = useMemo(
     () => normalizeAssignedRegions(session.regiones),
@@ -114,9 +116,44 @@ export function AvisaDashboard({
   const [regionScope, setRegionScope] = useState<RegionScope>(
     assignedRegions[0] ?? "Todo el Perú",
   );
+  // Solo aplicamos la preferencia cuando el usuario la cambia (o al montar),
+  // para no sobrescribir una selección manual hecha en el filtro de alcance.
+  const appliedDefaultRegionRef = useRef<string | null>(null);
+  useEffect(() => {
+    const preferred = preferences.defaultRegion;
+    if (appliedDefaultRegionRef.current === preferred) return;
+    appliedDefaultRegionRef.current = preferred;
+    if (preferred === "auto") return;
+    const next: RegionScope =
+      preferred === "Todo el Perú"
+        ? unrestricted
+          ? "Todo el Perú"
+          : (assignedRegions[0] ?? "Todo el Perú")
+        : unrestricted || assignedRegions.includes(preferred)
+          ? preferred
+          : (assignedRegions[0] ?? "Todo el Perú");
+    setRegionScope(next);
+  }, [preferences.defaultRegion, unrestricted, assignedRegions]);
   const territoryVisible = (territory: string) =>
     isTerritoryVisible(territory, regionScope, assignedRegions, unrestricted);
   const [timeScope, setTimeScope] = useState<TimeScope>("30 días");
+  const [customFrom, setCustomFrom] = useState("");
+  const [customTo, setCustomTo] = useState("");
+  // Identidad estable: evita que el mapa y las vistas se reajusten en cada
+  // render cuando el rango personalizado no cambió.
+  const validCustomRange = useMemo<TimeRange | undefined>(() => {
+    const candidate: TimeRange = { from: customFrom, to: customTo };
+    return isValidTimeRange(candidate) ? candidate : undefined;
+  }, [customFrom, customTo]);
+  const rangeComplete = Boolean(customFrom && customTo);
+  const rangeMessage =
+    timeScope === "Personalizado"
+      ? !rangeComplete
+        ? "Elige la fecha inicial y final del rango demostrativo. Mientras tanto se aplican 30 días de respaldo."
+        : !validCustomRange
+          ? "La fecha inicial debe ser anterior o igual a la final. Se aplican 30 días de respaldo."
+          : `Rango demostrativo activo: ${customFrom} a ${customTo} (solo datos simulados).`
+      : "";
   const [systemNotice, setSystemNotice] = useState("");
   const selectedCase =
     cases.find((item) => item.code === selectedCode) ??
@@ -126,12 +163,12 @@ export function AvisaDashboard({
   const pendingAlerts = alerts.filter(
     (item) =>
       item.status === "Pendiente de revisión" &&
-      isWithinDemoWindow(item.published, timeScope) &&
+      isWithinDemoWindow(item.published, timeScope, validCustomRange) &&
       territoryVisible(item.location),
   ).length;
   const scopedCaseCount = cases.filter(
     (item) =>
-      isWithinDemoWindow(item.updated, timeScope) &&
+      isWithinDemoWindow(item.updated, timeScope, validCustomRange) &&
       territoryVisible(item.region),
   ).length;
   const scopedOverdueCommitments = commitments.filter((item) => {
@@ -140,7 +177,8 @@ export function AvisaDashboard({
     );
     return (
       item.status === "Paralizado" &&
-      (!relatedCase || isWithinDemoWindow(relatedCase.updated, timeScope)) &&
+      (!relatedCase ||
+        isWithinDemoWindow(relatedCase.updated, timeScope, validCustomRange)) &&
       (relatedCase ? territoryVisible(relatedCase.region) : unrestricted)
     );
   }).length;
@@ -153,27 +191,19 @@ export function AvisaDashboard({
     .map((part) => part[0])
     .join("")
     .toLocaleUpperCase("es");
-  const quickResults = useMemo(() => {
-    const normalized = globalSearch.trim().toLowerCase();
-    if (!normalized) return [];
-    return cases
-      .filter(
-        (item) =>
-          isWithinDemoWindow(item.updated, timeScope) &&
-          territoryVisible(item.region) &&
-          `${item.code} ${item.title} ${item.region}`
-            .toLowerCase()
-            .includes(normalized),
-      )
-      .slice(0, 4);
-  }, [cases, globalSearch, regionScope, timeScope]);
-
   const navigateTo = (next: WorkspaceView) => {
     setView(next);
     setSystemNotice("");
     setSidebarOpen(false);
-    setSearchOpen(false);
     setScopeOpen(false);
+  };
+  const openCaseByCode = (code: string) => {
+    const item = cases.find((row) => row.code === code);
+    if (item) setSelectedCode(item.code);
+  };
+  const openNotificationTarget = (target: WorkspaceView, refCode?: string) => {
+    if (target === "case-detail" && refCode) openCaseByCode(refCode);
+    navigateTo(target);
   };
   const handleAlertUpdate = (
     id: string,
@@ -243,25 +273,16 @@ export function AvisaDashboard({
             <span className="freshness-dot" /> Sistema operativo{" "}
             <span className="status-separator">·</span> Demo
           </div>
-          <button
-            className={`header-icon-button ${searchOpen ? "icon-active" : ""}`}
-            aria-label="Buscar casos demostrativos"
-            aria-expanded={searchOpen}
-            onClick={() => {
-              setSearchOpen(!searchOpen);
-              setGlobalSearch("");
-            }}
-          >
-            <Search size={17} />
-          </button>
-          <button
-            className="header-icon-button notification-button"
-            aria-label={`${pendingAlerts} alertas por revisar`}
-            onClick={() => navigateTo("alerts")}
-          >
-            <Bell size={17} />
-            <span className="notification-dot" />
-          </button>
+          <AvisaSearch
+            onNavigate={navigateTo}
+            onOpenCase={openCaseByCode}
+            regionScope={regionScope}
+            timeScope={timeScope}
+            timeRange={validCustomRange}
+            assignedRegions={assignedRegions}
+            unrestricted={unrestricted}
+          />
+          <AvisaNotifications onGoTo={openNotificationTarget} />
           <div className="header-separator" />
           <button
             className="profile-button"
@@ -295,52 +316,7 @@ export function AvisaDashboard({
           )}
         </div>
       </header>
-      {searchOpen && (
-        <div className="global-search-panel">
-          <label className="search-field">
-            <Search size={17} />
-            <input
-              autoFocus
-              aria-label="Buscar en datos de demostración"
-              value={globalSearch}
-              onChange={(event) => setGlobalSearch(event.target.value)}
-              placeholder="Buscar por código, tema o territorio…"
-              onKeyDown={(event) => {
-                if (event.key === "Escape") setSearchOpen(false);
-              }}
-            />
-          </label>
-          <button
-            className="search-close"
-            onClick={() => setSearchOpen(false)}
-            aria-label="Cerrar búsqueda"
-          >
-            <X size={16} />
-          </button>
-          {globalSearch && (
-            <div className="global-results">
-              {quickResults.length ? (
-                quickResults.map((item) => (
-                  <button
-                    key={item.code}
-                    onClick={() => {
-                      setSelectedCode(item.code);
-                      navigateTo("case-detail");
-                    }}
-                  >
-                    <span className="case-code">{item.code}</span>
-                    <strong>{item.title}</strong>
-                    <small>{item.region}</small>
-                    <ChevronRight size={15} />
-                  </button>
-                ))
-              ) : (
-                <p>No hay coincidencias en los datos de demostración.</p>
-              )}
-            </div>
-          )}
-        </div>
-      )}
+
       <div className="app-layout">
         <aside className={`avisa-sidebar ${sidebarOpen ? "open" : ""}`}>
           <button
@@ -372,12 +348,12 @@ export function AvisaDashboard({
                 className="scope-popover-heading"
                 id="territorial-scope-controls"
               >
-                Ámbito territorial
+                Ámbito regional
               </div>
               <AvisaScopeFilter
                 region={regionScope}
-              regions={unrestricted ? REGION_SCOPES : assignedRegions}
-              allLabel={restrictedScope ? "Mis regiones" : "Todo el Perú"}
+                regions={unrestricted ? REGION_SCOPES : assignedRegions}
+                allLabel={restrictedScope ? "Mis regiones" : "Todo el Perú"}
                 onRegionChange={(region) => {
                   setRegionScope(region);
                   setScopeOpen(false);
@@ -414,11 +390,7 @@ export function AvisaDashboard({
             <div className="sidebar-rule" />
             <button
               className="side-nav"
-              onClick={() =>
-                setSystemNotice(
-                  "La ayuda del prototipo es ilustrativa y no constituye una guía institucional.",
-                )
-              }
+              onClick={() => openHelp("ayuda-inicio")}
             >
               <CircleHelp size={17} />
               <span>Ayuda y criterios</span>
@@ -464,22 +436,60 @@ export function AvisaDashboard({
                       : "Seguimiento"}
               </strong>
             </div>
-            <label className="topline-time-scope">
-              <CalendarDays size={14} />
-              <span className="sr-only">Filtrar periodo temporal</span>
-              <select
-                value={timeScope}
-                onChange={(event) =>
-                  setTimeScope(event.target.value as TimeScope)
-                }
-                aria-label="Filtrar periodo temporal"
-              >
-                <option>7 días</option>
-                <option>30 días</option>
-                <option>90 días</option>
-              </select>
-            </label>
+            <div className="topline-scope-group">
+              <label className="topline-time-scope">
+                <CalendarDays size={14} />
+                <span className="sr-only">Filtrar periodo temporal</span>
+                <select
+                  value={timeScope}
+                  onChange={(event) =>
+                    setTimeScope(event.target.value as TimeScope)
+                  }
+                  aria-label="Filtrar periodo temporal"
+                >
+                  <option>7 días</option>
+                  <option>30 días</option>
+                  <option>90 días</option>
+                  <option>Personalizado</option>
+                </select>
+              </label>
+              {timeScope === "Personalizado" && (
+                <div className="time-range-fields">
+                  <label className="time-range-field">
+                    <span>Desde</span>
+                    <input
+                      type="date"
+                      value={customFrom}
+                      max={customTo || undefined}
+                      aria-label="Fecha inicial del rango demostrativo"
+                      aria-invalid={rangeComplete && !validCustomRange}
+                      onChange={(event) => setCustomFrom(event.target.value)}
+                    />
+                  </label>
+                  <label className="time-range-field">
+                    <span>Hasta</span>
+                    <input
+                      type="date"
+                      value={customTo}
+                      min={customFrom || undefined}
+                      aria-label="Fecha final del rango demostrativo"
+                      aria-invalid={rangeComplete && !validCustomRange}
+                      onChange={(event) => setCustomTo(event.target.value)}
+                    />
+                  </label>
+                </div>
+              )}
+            </div>
           </div>
+          {rangeMessage && (
+            <p
+              className={`time-range-error ${validCustomRange ? "is-valid" : "is-warning"}`}
+              role={validCustomRange ? "status" : "alert"}
+            >
+              <CalendarDays size={14} />
+              <span>{rangeMessage}</span>
+            </p>
+          )}
           {systemNotice && (
             <div className="inline-notice" role="status">
               <CircleHelp size={15} />
@@ -516,6 +526,7 @@ export function AvisaDashboard({
               onAlertEdit={handleAlertEdit}
               regionScope={regionScope}
               timeScope={timeScope}
+              timeRange={validCustomRange}
               assignedRegions={assignedRegions}
               unrestricted={unrestricted}
             />
@@ -535,6 +546,7 @@ export function AvisaDashboard({
         open={settingsOpen}
         onClose={() => setSettingsOpen(false)}
       />
+      <HelpDrawer />
     </div>
   );
 }

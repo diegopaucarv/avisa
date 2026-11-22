@@ -14,12 +14,14 @@ export type WorkspaceView =
   | "executive";
 
 export type RiskLevel = "Alto" | "Moderado" | "Bajo";
-export type NivelConflicto = "Diferencia" | "Controversia" | "Conflicto social" | "Crisis social";
+export type NivelConflicto =
+  "Diferencia" | "Controversia" | "Conflicto social" | "Crisis social";
 export type CasePriority = "Urgente" | "Moderado" | "Bajo";
 export type DemoActor = {
   apellidos: string;
   nombres: string;
   correo?: string;
+  telefono?: string;
   tipo: "Social" | "Público" | "Privado";
   funcion: "Principal" | "Secundario" | "Tercero imparcial";
   posicionamiento: "Dialogante" | "Legitimante" | "Conflictivo";
@@ -27,11 +29,21 @@ export type DemoActor = {
 export type CaseState = "Activo" | "En seguimiento" | "Resuelto" | "Archivado";
 export type DataOrigin = "Manual" | "Ingesta" | "Legado" | "WhatsApp";
 
+export type DemandaFuente = {
+  campo: "problema" | "propuesta" | "pedido";
+  documentoId?: string;
+  documentoCodigo?: string;
+  fragmentoId?: string;
+  texto?: string;
+};
+
 export type DemoDemanda = {
+  id?: string;
   problema: string;
   propuesta?: string;
   pedido: string;
   estado: "Pendiente" | "En proceso" | "Atendida" | "Desestimada";
+  fuentes?: DemandaFuente[];
 };
 
 export type DemoCase = {
@@ -46,18 +58,23 @@ export type DemoCase = {
   summary: string;
   actors: DemoActor[];
   events: {
+    id?: string;
     date: string;
     title: string;
     description: string;
     actor?: string;
     kind: "validated" | "pending" | "system";
+    estado?: "Pendiente" | "Validado";
+    evidencia?: string;
   }[];
   alcance?: "Norte" | "Centro" | "Sur" | "Oriente" | "Nacional";
   estado?: CaseState;
   nivelConflicto?: NivelConflicto;
   prioridad?: CasePriority;
   subsector?: "Pesca y Acuicultura" | "MYPE e Industria";
-  documentacionNormativa?: string[];
+  documentacionNormativa?: (
+    string | { titulo: string; fecha?: string; referencia?: string }
+  )[];
   unidadResponsable?: string;
   puntoFocal?: string;
   tematica?: string;
@@ -75,10 +92,11 @@ export type DemoAlert = {
   priority: "Crítica" | "Alta" | "Media";
   risk?: RiskLevel;
   alertType?: "AT" | "RR" | "PAR";
-  status: "Pendiente de revisión" | "Aprobada" | "Descartada";
+  status: "Pendiente de revisión" | "Aprobada" | "Descartada" | "Atendida";
   quote: string;
   note: string;
   reviewNote?: string;
+  historial?: { accion: string; fecha: string; nota?: string }[];
   caseCode?: string;
   slaHours?: number;
   documentoId?: string;
@@ -115,11 +133,16 @@ export type DemoCommitment = {
   unidadResponsable?: string;
   documentoOrigenId?: string;
   evidenciaUri?: string;
+  evidencias?: { nombre: string; tipo?: string }[];
+  archivado?: { motivo: string; fecha: string };
+  clasificacion?: "Formal" | "Verbal";
   atiendeGenero?: boolean;
   fechaInicio?: string;
   origen?: DataOrigin;
   validado?: boolean;
-  agreementType?: "Progresivo o parcial" | "Entendimiento operativo" | "Condicionado";
+  agreementType?:
+    "Progresivo o parcial" | "Entendimiento operativo" | "Condicionado";
+  recordatorios?: number[];
   hitos?: DemoHito[];
 };
 
@@ -161,6 +184,22 @@ export type DemoDocument = {
   texto?: string;
   fragmentos: DemoFragment[];
   extracciones: DemoExtraction[];
+  rechazoMotivo?: string;
+  versiones?: { n: number; fecha: string; fragmentos: DemoFragment[] }[];
+};
+
+export type DemoNotificationCategory =
+  "Alerta" | "Compromiso" | "Caso" | "Documento" | "Sistema";
+
+export type DemoNotification = {
+  id: string;
+  categoria: DemoNotificationCategory;
+  titulo: string;
+  detalle: string;
+  fecha: string;
+  leida: boolean;
+  view: WorkspaceView;
+  refCode?: string;
 };
 
 export const docKindLabels: Record<DocKind, string> = {
@@ -184,9 +223,27 @@ export const demoCases: DemoCase[] = [
     summary:
       "Representantes de organizaciones locales solicitaron una mesa de trabajo sobre el acceso a infraestructura de desembarque. La ficha y sus datos son ilustrativos; no representan un caso real.",
     actors: [
-      { apellidos: "Asociación costera", nombres: "representante (alias)", tipo: "Social", funcion: "Principal", posicionamiento: "Dialogante" },
-      { apellidos: "GORE Piura", nombres: "enlace institucional", tipo: "Público", funcion: "Secundario", posicionamiento: "Dialogante" },
-      { apellidos: "Sector competente", nombres: "equipo técnico", tipo: "Público", funcion: "Tercero imparcial", posicionamiento: "Legitimante" },
+      {
+        apellidos: "Asociación costera",
+        nombres: "representante (alias)",
+        tipo: "Social",
+        funcion: "Principal",
+        posicionamiento: "Dialogante",
+      },
+      {
+        apellidos: "GORE Piura",
+        nombres: "enlace institucional",
+        tipo: "Público",
+        funcion: "Secundario",
+        posicionamiento: "Dialogante",
+      },
+      {
+        apellidos: "Sector competente",
+        nombres: "equipo técnico",
+        tipo: "Público",
+        funcion: "Tercero imparcial",
+        posicionamiento: "Legitimante",
+      },
     ],
     alcance: "Norte",
     estado: "Activo",
@@ -194,7 +251,14 @@ export const demoCases: DemoCase[] = [
     prioridad: "Urgente",
     tematica: "Infraestructura",
     subsector: "Pesca y Acuicultura",
-    documentacionNormativa: ["Marco sectorial de pesca artesanal · referencia demostrativa"],
+    documentacionNormativa: [
+      {
+        titulo: "Marco sectorial de pesca artesanal",
+        referencia: "Referencia demostrativa · sin norma oficial",
+        fecha: "12 mar 2025",
+      },
+      "Acta de mesa de diálogo · referencia heredada de demostración",
+    ],
     unidadResponsable: "OAIPCS",
     puntoFocal: "Analista de enlace (alias)",
     origen: "Manual",
@@ -247,9 +311,27 @@ export const demoCases: DemoCase[] = [
     summary:
       "Solicitud ilustrativa de coordinación sobre continuidad de una actividad acuícola y monitoreo de calidad de agua. La evidencia de este prototipo es ficticia.",
     actors: [
-      { apellidos: "Asociación productiva", nombres: "representante (alias)", tipo: "Social", funcion: "Principal", posicionamiento: "Dialogante" },
-      { apellidos: "Gobierno local", nombres: "enlace institucional", tipo: "Público", funcion: "Secundario", posicionamiento: "Legitimante" },
-      { apellidos: "Equipo técnico", nombres: "sectorial", tipo: "Público", funcion: "Tercero imparcial", posicionamiento: "Dialogante" },
+      {
+        apellidos: "Asociación productiva",
+        nombres: "representante (alias)",
+        tipo: "Social",
+        funcion: "Principal",
+        posicionamiento: "Dialogante",
+      },
+      {
+        apellidos: "Gobierno local",
+        nombres: "enlace institucional",
+        tipo: "Público",
+        funcion: "Secundario",
+        posicionamiento: "Legitimante",
+      },
+      {
+        apellidos: "Equipo técnico",
+        nombres: "sectorial",
+        tipo: "Público",
+        funcion: "Tercero imparcial",
+        posicionamiento: "Dialogante",
+      },
     ],
     alcance: "Norte",
     estado: "En seguimiento",
@@ -284,9 +366,27 @@ export const demoCases: DemoCase[] = [
     summary:
       "Caso demostrativo de coordinación entre actores locales para el seguimiento de acuerdos de mantenimiento.",
     actors: [
-      { apellidos: "Comité local", nombres: "representante (alias)", tipo: "Social", funcion: "Principal", posicionamiento: "Dialogante" },
-      { apellidos: "Gobierno local", nombres: "enlace institucional", tipo: "Público", funcion: "Secundario", posicionamiento: "Dialogante" },
-      { apellidos: "Sector competente", nombres: "equipo técnico", tipo: "Público", funcion: "Tercero imparcial", posicionamiento: "Legitimante" },
+      {
+        apellidos: "Comité local",
+        nombres: "representante (alias)",
+        tipo: "Social",
+        funcion: "Principal",
+        posicionamiento: "Dialogante",
+      },
+      {
+        apellidos: "Gobierno local",
+        nombres: "enlace institucional",
+        tipo: "Público",
+        funcion: "Secundario",
+        posicionamiento: "Dialogante",
+      },
+      {
+        apellidos: "Sector competente",
+        nombres: "equipo técnico",
+        tipo: "Público",
+        funcion: "Tercero imparcial",
+        posicionamiento: "Legitimante",
+      },
     ],
     alcance: "Centro",
     estado: "Activo",

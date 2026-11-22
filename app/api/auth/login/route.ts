@@ -1,75 +1,125 @@
-import { NextResponse } from 'next/server'
+import { NextResponse } from "next/server";
+import { getPool } from "@/lib/db/pool";
+import {
+  SESSION_COOKIE,
+  SESSION_MAX_AGE_SECONDS,
+  signSession,
+  type SessionPayload,
+} from "@/lib/db/auth";
+import { jsonError } from "@/lib/db/errors";
+import type { Role } from "@/frontend/types";
 
-const API_URL = process.env.AVISA_API_URL
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
-const demoUsers = {
-  '12345678': {
-    password: 'demo',
-    nombre: 'Dirección de demostración',
-    rol: 'Directora',
-    id: 'USR-001',
-    area: 'OAIPCS',
-    email: 'demo-directora@example.invalid',
-    cargo: 'Directora',
-    regiones: [],
-  },
-  '87654321': {
-    password: 'demo',
-    nombre: 'Sectorista Norte Demo',
-    rol: 'Sectorista',
-    id: 'USR-002',
-    area: 'OAIPCS',
-    email: 'demo-sectorista-norte@example.invalid',
-    cargo: 'Sectorista',
-    regiones: ['Piura', 'Áncash'],
-  },
-  '11223344': {
-    password: 'demo',
-    nombre: 'Sectorista Centro Demo',
-    rol: 'Sectorista',
-    id: 'USR-003',
-    area: 'OAIPCS',
-    email: 'demo-sectorista-centro@example.invalid',
-    cargo: 'Sectorista',
-    regiones: ['Junín'],
-  },
-} as const
+type AuthRow = {
+  usuario_id: string;
+  codigo_legado: string | null;
+  nombre: string;
+  dni: string;
+  email: string | null;
+  cargo: string | null;
+  unidad_siglas: string | null;
+  rol_codigo: string | null;
+  roles: string[] | null;
+  regiones: string[] | null;
+};
+
+/**
+ * Los códigos de rol de la base no son etiquetas de interfaz. La base decide el
+ * rol vigente (ya ordenado por precedencia); aquí sólo se traduce para la UI.
+ */
+const UI_ROLE: Record<string, Role> = {
+  direccion_oaipcs: "Directora",
+  administrador: "Admin",
+  alta_direccion: "Autoridad",
+  sectorista: "Sectorista",
+  consulta_lectura: "PuntoFocal",
+};
 
 export async function POST(request: Request) {
-  let payload: { dni?: unknown; password?: unknown }
+  let payload: { dni?: unknown; password?: unknown };
   try {
-    payload = await request.json()
+    payload = await request.json();
   } catch {
-    return NextResponse.json({ detail: 'Solicitud inválida.' }, { status: 400 })
+    return NextResponse.json(
+      { detail: "Solicitud inválida." },
+      { status: 400 },
+    );
   }
 
-  if (typeof payload.dni !== 'string' || typeof payload.password !== 'string' || payload.dni.length < 8 || payload.dni.length > 12 || payload.password.length < 1 || payload.password.length > 128) {
-    return NextResponse.json({ detail: 'DNI o clave incorrectos.' }, { status: 401 })
+  const dni = typeof payload.dni === "string" ? payload.dni.trim() : "";
+  const password = typeof payload.password === "string" ? payload.password : "";
+
+  if (
+    dni.length < 8 ||
+    dni.length > 12 ||
+    password.length < 1 ||
+    password.length > 128
+  ) {
+    return NextResponse.json(
+      { detail: "DNI o clave incorrectos." },
+      { status: 401 },
+    );
   }
 
-  if (API_URL) {
-    try {
-      const response = await fetch(`${API_URL}/api/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-        cache: 'no-store',
-      })
-      return new NextResponse(await response.text(), {
-        status: response.status,
-        headers: { 'Content-Type': response.headers.get('Content-Type') ?? 'application/json' },
-      })
-    } catch {
-      return NextResponse.json({ detail: 'No se pudo conectar con el servicio de acceso.' }, { status: 503 })
+  try {
+    const result = await getPool().query<AuthRow>(
+      `select usuario_id, codigo_legado, nombre, dni, email, cargo,
+              unidad_siglas, rol_codigo, roles, regiones
+         from core.autenticar_usuario($1, $2)`,
+      [dni, password],
+    );
+
+    const row = result.rows[0];
+    if (!row) {
+      return NextResponse.json(
+        { detail: "DNI o clave incorrectos." },
+        { status: 401 },
+      );
     }
-  }
 
-  const dni = payload.dni.padStart(8, '0')
-  const user = demoUsers[dni as keyof typeof demoUsers]
-  if (!user || user.password !== payload.password) {
-    return NextResponse.json({ detail: 'Credenciales inválidas.' }, { status: 401 })
-  }
+    const rol = UI_ROLE[row.rol_codigo ?? ""] ?? "PuntoFocal";
+    const roles = row.roles ?? [];
+    const regiones = row.regiones ?? [];
 
-  const { password: _password, ...session } = user
-  return NextResponse.json({ ...session, dni })
+    const session: SessionPayload = {
+      uid: row.usuario_id,
+      rol: row.rol_codigo ?? "consulta_lectura",
+      roles,
+      nom: row.nombre,
+      cod: row.codigo_legado ?? "",
+      dn: row.dni,
+      area: row.unidad_siglas ?? "OAIPCS",
+      email: row.email ?? "",
+      cargo: row.cargo ?? rol,
+      regs: regiones,
+      exp: Date.now() + SESSION_MAX_AGE_SECONDS * 1000,
+    };
+
+    const response = NextResponse.json({
+      dni: row.dni,
+      nombre: row.nombre,
+      rol,
+      id: row.codigo_legado ?? row.usuario_id,
+      area: session.area,
+      email: session.email,
+      cargo: session.cargo,
+      regiones,
+      rolCodigo: session.rol,
+      roles,
+    });
+
+    response.cookies.set(SESSION_COOKIE, signSession(session), {
+      httpOnly: true,
+      sameSite: "lax",
+      path: "/",
+      maxAge: SESSION_MAX_AGE_SECONDS,
+      secure: process.env.NODE_ENV === "production",
+    });
+
+    return response;
+  } catch (error) {
+    return jsonError(error);
+  }
 }

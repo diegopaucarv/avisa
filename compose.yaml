@@ -226,6 +226,11 @@ services:
 
     environment:
       AVISA_API_URL: http://api:8000
+      # Capa de datos D3: el contenedor ui habla con el servicio db del compose.
+      APP_DATABASE_URL: postgresql://avisa_api:Av1saApi_Local_2026@db:5432/avisa
+      APP_SESSION_SECRET: ${APP_SESSION_SECRET}
+      # Clave de descifrado de PII (Ley 29733). Nunca se guarda en la base.
+      APP_CRYPTO_KEY: ${APP_CRYPTO_KEY}
       NEXT_TELEMETRY_DISABLED: "1"
       # Docker Desktop en Windows no siempre propaga los eventos del sistema
       # de archivos al montaje; sondeando, la recarga en caliente sí funciona.

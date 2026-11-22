@@ -4,6 +4,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useMemo,
   useState,
   type ReactNode,
 } from "react";
@@ -15,8 +16,12 @@ import {
   type DemoAlert,
   type DemoCase,
   type DemoCommitment,
+  type DemoDemanda,
   type DemoDocument,
   type DemoExtraction,
+  type DemoHito,
+  type DemoNotification,
+  type DemandaFuente,
   type FragmentKind,
 } from "@/components/avisa-demo-data";
 
@@ -26,6 +31,7 @@ export type CaseDraft = {
   subject: string;
   risk: DemoCase["risk"];
   stage: string;
+  estado?: DemoCase["estado"];
   summary: string;
   alcance?: DemoCase["alcance"];
   tematica?: string;
@@ -60,15 +66,34 @@ export type CommitmentDraft = {
   caseCode: string;
   owner: string;
   due: string;
+  fechaInicio?: string;
   status: DemoCommitment["status"];
   progress?: number;
+  recordatorios?: number[];
   agreementType?: DemoCommitment["agreementType"];
   tipo?: DemoCommitment["tipo"];
   nivelGobierno?: DemoCommitment["nivelGobierno"];
   unidadResponsable?: string;
   documentoOrigenId?: string;
   atiendeGenero?: boolean;
+  clasificacion?: DemoCommitment["clasificacion"];
   origen?: DemoCommitment["origen"];
+};
+
+export type CaseEventDraft = {
+  title: string;
+  description: string;
+  actor?: string;
+  evidencia?: string;
+  date?: string;
+};
+
+export type DemandaDraft = {
+  problema: string;
+  propuesta?: string;
+  pedido: string;
+  estado: DemoDemanda["estado"];
+  fuentes?: DemandaFuente[];
 };
 
 export type DocumentDraft = {
@@ -86,23 +111,54 @@ type AvisaStore = {
   alerts: DemoAlert[];
   commitments: DemoCommitment[];
   documents: DemoDocument[];
+  notifications: DemoNotification[];
   notice: string;
   setNotice: (message: string) => void;
   createCase: (draft: CaseDraft) => DemoCase;
   updateCase: (code: string, patch: Partial<DemoCase>) => void;
   deleteCase: (code: string) => void;
+  addCaseEvent: (code: string, draft: CaseEventDraft) => void;
+  validateCaseEvent: (code: string, index: number) => void;
+  addDemanda: (code: string, draft: DemandaDraft) => void;
+  updateDemanda: (
+    code: string,
+    index: number,
+    patch: Partial<DemoDemanda>,
+  ) => void;
+  deleteDemanda: (code: string, index: number) => void;
   createAlert: (draft: AlertDraft) => DemoAlert;
   updateAlert: (id: string, patch: Partial<DemoAlert>) => void;
   deleteAlert: (id: string) => void;
   createCommitment: (draft: CommitmentDraft) => DemoCommitment;
   updateCommitment: (id: string, patch: Partial<DemoCommitment>) => void;
   deleteCommitment: (id: string) => void;
+  archiveCommitment: (id: string, motivo: string) => void;
+  restoreCommitment: (id: string) => void;
+  addCommitmentEvidence: (id: string, nombre: string) => void;
+  addCommitmentHito: (
+    id: string,
+    hito: { descripcion: string; fecha: string },
+  ) => void;
+  setCommitmentHitoEstado: (
+    id: string,
+    hitoId: string,
+    estado: DemoHito["estado"],
+  ) => void;
   addDocument: (draft: DocumentDraft) => DemoDocument;
   deleteDocument: (id: string) => void;
   simulateExtraction: (id: string) => void;
+  reextractDocument: (id: string) => void;
   validateDocument: (id: string) => void;
+  rejectDocument: (id: string, motivo: string) => void;
+  validateFragment: (
+    documentId: string,
+    fragmentId: string,
+    validado: boolean,
+  ) => void;
   acceptExtraction: (documentId: string, extractionId: string) => void;
   rejectExtraction: (documentId: string, extractionId: string) => void;
+  markNotificationRead: (id: string) => void;
+  markAllNotificationsRead: () => void;
 };
 
 const AvisaContext = createContext<AvisaStore | null>(null);
@@ -133,6 +189,7 @@ export function AvisaProvider({ children }: { children: ReactNode }) {
     useState<DemoCommitment[]>(demoCommitments);
   const [documents, setDocuments] = useState<DemoDocument[]>(demoDocuments);
   const [notice, setNotice] = useState("");
+  const [readNotifications, setReadNotifications] = useState<string[]>([]);
 
   const createCase = useCallback(
     (draft: CaseDraft) => {
@@ -188,6 +245,118 @@ export function AvisaProvider({ children }: { children: ReactNode }) {
     );
   }, []);
 
+  const addCaseEvent = useCallback((code: string, draft: CaseEventDraft) => {
+    setCases((items) =>
+      items.map((item) =>
+        item.code === code
+          ? {
+              ...item,
+              updated: "Hace un momento",
+              events: [
+                {
+                  id: `EV-${item.code}-${item.events.length + 1}`,
+                  date: draft.date?.trim() || "Hoy · ahora",
+                  title: draft.title,
+                  description: draft.description,
+                  actor: draft.actor?.trim() || "No especificado",
+                  evidencia: draft.evidencia?.trim() || undefined,
+                  kind: "pending" as const,
+                  estado: "Pendiente" as const,
+                },
+                ...item.events,
+              ],
+            }
+          : item,
+      ),
+    );
+    setNotice(
+      "Hecho registrado como pendiente: la validación humana es una acción explícita.",
+    );
+  }, []);
+
+  const validateCaseEvent = useCallback((code: string, index: number) => {
+    setCases((items) =>
+      items.map((item) =>
+        item.code === code
+          ? {
+              ...item,
+              updated: "Hace un momento",
+              events: item.events.map((event, position) =>
+                position === index
+                  ? {
+                      ...event,
+                      kind: "validated" as const,
+                      estado: "Validado" as const,
+                    }
+                  : event,
+              ),
+            }
+          : item,
+      ),
+    );
+    setNotice(
+      "Hecho validado por una persona. En producción la validación dejaría registro de usuario y fecha.",
+    );
+  }, []);
+
+  const addDemanda = useCallback((code: string, draft: DemandaDraft) => {
+    setCases((items) =>
+      items.map((item) =>
+        item.code === code
+          ? {
+              ...item,
+              updated: "Hace un momento",
+              demandas: [
+                ...(item.demandas ?? []),
+                {
+                  ...draft,
+                  id: `DEM-${item.code}-${(item.demandas?.length ?? 0) + 1}`,
+                },
+              ],
+            }
+          : item,
+      ),
+    );
+    setNotice("Demanda registrada con su vínculo a la fuente.");
+  }, []);
+
+  const updateDemanda = useCallback(
+    (code: string, index: number, patch: Partial<DemoDemanda>) => {
+      setCases((items) =>
+        items.map((item) =>
+          item.code === code
+            ? {
+                ...item,
+                updated: "Hace un momento",
+                demandas: (item.demandas ?? []).map((demanda, position) =>
+                  position === index ? { ...demanda, ...patch } : demanda,
+                ),
+              }
+            : item,
+        ),
+      );
+      setNotice("Demanda actualizada en la demostración.");
+    },
+    [],
+  );
+
+  const deleteDemanda = useCallback((code: string, index: number) => {
+    setCases((items) =>
+      items.map((item) =>
+        item.code === code
+          ? {
+              ...item,
+              updated: "Hace un momento",
+              demandas: (item.demandas ?? []).filter(
+                (_, position) => position !== index,
+              ),
+            }
+          : item,
+      ),
+    );
+    setNotice("Demanda retirada del caso en la demostración.");
+  }, []);
+
   const createAlert = useCallback(
     (draft: AlertDraft) => {
       const record: DemoAlert = {
@@ -207,7 +376,25 @@ export function AvisaProvider({ children }: { children: ReactNode }) {
 
   const updateAlert = useCallback((id: string, patch: Partial<DemoAlert>) => {
     setAlerts((items) =>
-      items.map((item) => (item.id === id ? { ...item, ...patch } : item)),
+      items.map((item) =>
+        item.id === id
+          ? {
+              ...item,
+              ...patch,
+              historial:
+                patch.status && patch.status !== item.status
+                  ? [
+                      ...(item.historial ?? []),
+                      {
+                        accion: `Estado: ${patch.status}`,
+                        fecha: "Hoy · ahora",
+                        nota: patch.reviewNote,
+                      },
+                    ]
+                  : item.historial,
+            }
+          : item,
+      ),
     );
   }, []);
 
@@ -247,6 +434,91 @@ export function AvisaProvider({ children }: { children: ReactNode }) {
     setCommitments((items) => items.filter((item) => item.id !== id));
     setNotice(`Compromiso ${id} eliminado del prototipo.`);
   }, []);
+
+  const archiveCommitment = useCallback((id: string, motivo: string) => {
+    setCommitments((items) =>
+      items.map((item) =>
+        item.id === id
+          ? {
+              ...item,
+              archivado: { motivo: motivo.trim(), fecha: "Hoy · ahora" },
+            }
+          : item,
+      ),
+    );
+    setNotice(
+      `Compromiso ${id} archivado con motivo. El registro se conserva para consulta e historial.`,
+    );
+  }, []);
+
+  const restoreCommitment = useCallback((id: string) => {
+    setCommitments((items) =>
+      items.map((item) =>
+        item.id === id ? { ...item, archivado: undefined } : item,
+      ),
+    );
+    setNotice(`Compromiso ${id} restaurado al seguimiento activo.`);
+  }, []);
+
+  const addCommitmentEvidence = useCallback((id: string, nombre: string) => {
+    setCommitments((items) =>
+      items.map((item) =>
+        item.id === id
+          ? {
+              ...item,
+              evidencias: [
+                ...(item.evidencias ?? []),
+                { nombre, tipo: "Adjunto simulado" },
+              ],
+            }
+          : item,
+      ),
+    );
+    setNotice("Evidencia adjuntada al compromiso (archivo simulado).");
+  }, []);
+
+  const addCommitmentHito = useCallback(
+    (id: string, hito: { descripcion: string; fecha: string }) => {
+      setCommitments((items) =>
+        items.map((item) =>
+          item.id === id
+            ? {
+                ...item,
+                hitos: [
+                  ...(item.hitos ?? []),
+                  {
+                    id: `${item.id}-H${(item.hitos?.length ?? 0) + 1}`,
+                    descripcion: hito.descripcion,
+                    fecha: hito.fecha,
+                    estado: "Registrado" as const,
+                  },
+                ],
+              }
+            : item,
+        ),
+      );
+      setNotice("Hito agregado al compromiso.");
+    },
+    [],
+  );
+
+  const setCommitmentHitoEstado = useCallback(
+    (id: string, hitoId: string, estado: DemoHito["estado"]) => {
+      setCommitments((items) =>
+        items.map((item) =>
+          item.id === id
+            ? {
+                ...item,
+                hitos: (item.hitos ?? []).map((hito) =>
+                  hito.id === hitoId ? { ...hito, estado } : hito,
+                ),
+              }
+            : item,
+        ),
+      );
+    },
+    [],
+  );
 
   const addDocument = useCallback(
     (draft: DocumentDraft) => {
@@ -324,6 +596,33 @@ export function AvisaProvider({ children }: { children: ReactNode }) {
     );
   }, []);
 
+  const reextractDocument = useCallback(
+    (id: string) => {
+      setDocuments((items) =>
+        items.map((doc) =>
+          doc.id === id
+            ? {
+                ...doc,
+                versiones: [
+                  ...(doc.versiones ?? []),
+                  {
+                    n: (doc.versiones?.length ?? 0) + 1,
+                    fecha: "Hoy · ahora",
+                    fragmentos: doc.fragmentos,
+                  },
+                ],
+              }
+            : doc,
+        ),
+      );
+      simulateExtraction(id);
+      setNotice(
+        "Extracción relanzada: la versión anterior de los fragmentos quedó guardada.",
+      );
+    },
+    [simulateExtraction],
+  );
+
   const validateDocument = useCallback((id: string) => {
     setDocuments((items) =>
       items.map((doc) =>
@@ -341,6 +640,52 @@ export function AvisaProvider({ children }: { children: ReactNode }) {
     );
     setNotice(`Documento ${id} validado por una persona.`);
   }, []);
+
+  const rejectDocument = useCallback((id: string, motivo: string) => {
+    setDocuments((items) =>
+      items.map((doc) =>
+        doc.id === id
+          ? {
+              ...doc,
+              estado: "Rechazado" as const,
+              rechazoMotivo: motivo.trim(),
+              fragmentos: doc.fragmentos.map((fragmento) => ({
+                ...fragmento,
+                validado: false,
+              })),
+            }
+          : doc,
+      ),
+    );
+    setNotice(
+      `Documento ${id} rechazado con motivo. Se conserva el archivo y la trazabilidad.`,
+    );
+  }, []);
+
+  const validateFragment = useCallback(
+    (documentId: string, fragmentId: string, validado: boolean) => {
+      setDocuments((items) =>
+        items.map((doc) =>
+          doc.id === documentId
+            ? {
+                ...doc,
+                fragmentos: doc.fragmentos.map((fragmento) =>
+                  fragmento.id === fragmentId
+                    ? { ...fragmento, validado }
+                    : fragmento,
+                ),
+              }
+            : doc,
+        ),
+      );
+      setNotice(
+        validado
+          ? "Fragmento validado por una persona; sigue trazado a la página de origen."
+          : "Validación del fragmento retirada.",
+      );
+    },
+    [],
+  );
 
   const rejectExtraction = useCallback(
     (documentId: string, extractionId: string) => {
@@ -468,28 +813,124 @@ export function AvisaProvider({ children }: { children: ReactNode }) {
     [documents, cases, createAlert, createCommitment],
   );
 
+  const notifications = useMemo<DemoNotification[]>(() => {
+    const pendingAlerts = alerts
+      .filter((item) => item.status === "Pendiente de revisión")
+      .map((item) => ({
+        id: `alerta-${item.id}`,
+        categoria: "Alerta" as const,
+        titulo: `Alerta ${item.alertType ?? "AT"} pendiente de revisión`,
+        detalle: `${item.id} · ${item.location}`,
+        fecha: item.published,
+        view: "alerts" as const,
+        refCode: item.id,
+      }));
+    const dueCommitments = commitments
+      .filter(
+        (item) =>
+          !item.archivado &&
+          (item.status === "Paralizado" || item.status === "Por vencer"),
+      )
+      .map((item) => ({
+        id: `compromiso-${item.id}`,
+        categoria: "Compromiso" as const,
+        titulo: `Compromiso ${item.status.toLowerCase()}`,
+        detalle: `${item.id} · ${item.owner} · vence ${item.due}`,
+        fecha: item.due,
+        view: "commitments" as const,
+        refCode: item.id,
+      }));
+    const documentReviews = documents
+      .filter((doc) =>
+        doc.extracciones.some((row) => row.estado === "Propuesta"),
+      )
+      .map((doc) => ({
+        id: `documento-${doc.id}`,
+        categoria: "Documento" as const,
+        titulo: "Propuestas de extracción por revisar",
+        detalle: `${doc.codigo} · ${doc.titulo}`,
+        fecha: doc.fecha,
+        view: "documents" as const,
+        refCode: doc.codigo,
+      }));
+    const highRiskCases = cases
+      .filter(
+        (item) =>
+          item.risk === "Alto" &&
+          item.estado !== "Archivado" &&
+          item.estado !== "Resuelto",
+      )
+      .map((item) => ({
+        id: `caso-${item.code}`,
+        categoria: "Caso" as const,
+        titulo: "Caso de riesgo alto en seguimiento",
+        detalle: `${item.code} · ${item.title}`,
+        fecha: item.updated,
+        view: "case-detail" as const,
+        refCode: item.code,
+      }));
+    return [
+      ...pendingAlerts,
+      ...dueCommitments,
+      ...documentReviews,
+      ...highRiskCases,
+    ].map((item) => ({
+      ...item,
+      leida: readNotifications.includes(item.id),
+    }));
+  }, [alerts, commitments, documents, cases, readNotifications]);
+
+  const markNotificationRead = useCallback((id: string) => {
+    setReadNotifications((items) =>
+      items.includes(id) ? items : [...items, id],
+    );
+  }, []);
+
+  const markAllNotificationsRead = useCallback(() => {
+    setReadNotifications((items) => [
+      ...items,
+      ...notifications.map((row) => row.id).filter((id) => !items.includes(id)),
+    ]);
+  }, [notifications]);
+
   const value: AvisaStore = {
     cases,
     alerts,
     commitments,
     documents,
+    notifications,
     notice,
     setNotice,
     createCase,
     updateCase,
     deleteCase,
+    addCaseEvent,
+    validateCaseEvent,
+    addDemanda,
+    updateDemanda,
+    deleteDemanda,
     createAlert,
     updateAlert,
     deleteAlert,
     createCommitment,
     updateCommitment,
     deleteCommitment,
+    archiveCommitment,
+    restoreCommitment,
+    addCommitmentEvidence,
+    addCommitmentHito,
+    setCommitmentHitoEstado,
     addDocument,
     deleteDocument,
     simulateExtraction,
+    reextractDocument,
     validateDocument,
+    rejectDocument,
+    validateFragment,
     acceptExtraction,
     rejectExtraction,
+    markNotificationRead,
+    markAllNotificationsRead,
   };
 
   return (
