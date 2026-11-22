@@ -33,8 +33,8 @@
     <a class="stat-card" routerLink="/casos" aria-label="Abrir la lista de casos">
       <span class="stat-icon"><app-icono nombre="casos" [tamano]="16" /></span>
       <span class="stat-copy">
-        <span>Casos activos</span>
-        <strong>{{ casosActivos() ?? "—" }}</strong>
+        <span>Casos abiertos</span>
+        <strong>{{ casosAbiertos() ?? "—" }}</strong>
         <small>Abrir casos <app-icono nombre="chevron-derecha" [tamano]="11" /></small>
       </span>
     </a>

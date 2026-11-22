@@ -1,5 +1,13 @@
+import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  PLATFORM_ID,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
@@ -8,7 +16,7 @@ import { urlApi } from '../../core/config/entorno';
 import { consulta } from '../../core/http/consulta';
 import { aErrorApi } from '../../core/http/errores';
 import { CapacidadesService } from '../../core/permisos/capacidades.service';
-import { aDetalleCaso, ActorCaso, DetalleCaso, EventoCaso } from '../../dominio/mapeo';
+import { aDetalleCaso, ActorCaso, DemandaCaso, DetalleCaso, EventoCaso } from '../../dominio/mapeo';
 import {
   AnularPanelComponent,
   ResultadoAnulacion,
@@ -20,6 +28,7 @@ import { GlosarioComponent } from '../../shared/ui/glosario.component';
 import { IconoComponent } from '../../shared/ui/icono.component';
 import { etiquetaNivelGobierno } from '../compromisos/compromiso.mapeo';
 import { COMPONENTES_CICLO } from './ciclo.contenido';
+import { CuerpoDemanda, DemandaPanelComponent } from './demanda-panel.component';
 import {
   CuerpoEvento,
   EventoPanelComponent,
@@ -38,6 +47,7 @@ import { EnlaceRiel, RielRelacionesComponent } from './riel-relaciones.component
     ExportarMenuComponent,
     GlosarioComponent,
     EventoPanelComponent,
+    DemandaPanelComponent,
     AnularPanelComponent,
     RielRelacionesComponent,
     ExpedienteCompletitudComponent,
@@ -138,12 +148,64 @@ import { EnlaceRiel, RielRelacionesComponent } from './riel-relaciones.component
         order: -1;
       }
     }
+
+    /*
+     * Impresión de la ficha (item 42). El bloque global de styles/global.css ya
+     * retira la cabecera, la barra lateral y el pie del shell; aquí se retira lo
+     * propio de la ficha: acciones, ayudas de glosario y paneles laterales, y se
+     * evita que una fila o una sección queden partidas entre páginas.
+     */
+    @media print {
+      .view-actions button,
+      .view-actions app-exportar-menu,
+      .view-actions app-glosario,
+      .detail-section-title button,
+      .timeline-edit,
+      app-glosario,
+      app-demanda-panel,
+      app-evento-panel,
+      app-anular-panel {
+        display: none !important;
+      }
+
+      /* El riel enlaza a las secciones; no aporta nada en papel. */
+      app-riel-relaciones {
+        display: none !important;
+      }
+
+      .ficha-layout {
+        display: block;
+      }
+
+      .ficha-lateral {
+        position: static;
+      }
+
+      .detail-section > .detail-hint {
+        display: none;
+      }
+
+      .detail-section h2 {
+        break-after: avoid;
+      }
+
+      .table-wrap {
+        overflow: visible !important;
+      }
+
+      .data-table tr,
+      .detail-grid > div,
+      .timeline-list li {
+        break-inside: avoid;
+      }
+    }
   `,
 })
 export class CasoDetallePage {
   private readonly ruta = inject(ActivatedRoute);
   private readonly http = inject(HttpClient);
   private readonly capacidades = inject(CapacidadesService);
+  private readonly plataforma = inject(PLATFORM_ID);
 
   readonly codigo = toSignal(this.ruta.paramMap.pipe(map((params) => params.get('codigo') ?? '')), {
     initialValue: '',
@@ -260,6 +322,13 @@ export class CasoDetallePage {
   readonly guardandoEvento = signal(false);
   readonly errorEvento = signal<string | null>(null);
 
+  /** Demanda abierta en el panel; `null` significa alta. */
+  readonly demandaEditada = signal<DemandaCaso | null>(null);
+  readonly panelDemandaAbierto = signal(false);
+  readonly guardandoDemanda = signal(false);
+  readonly errorDemanda = signal<string | null>(null);
+  readonly avisoDemanda = signal<string | null>(null);
+
   /**
    * El catálogo de tipos de hecho sólo se pide al abrir el panel: la ficha en
    * lectura no necesita tráfico adicional.
@@ -357,6 +426,68 @@ export class CasoDetallePage {
     this.exportarError.set(mensaje);
   }
 
+  /** Impresión de la ficha (item 42): usa la hoja `@media print` del componente. */
+  imprimir(): void {
+    if (!isPlatformBrowser(this.plataforma)) return;
+    window.print();
+  }
+
+  altaDemanda(): void {
+    if (!this.puedeModificar()) return;
+    this.errorDemanda.set(null);
+    this.avisoDemanda.set(null);
+    this.demandaEditada.set(null);
+    this.panelDemandaAbierto.set(true);
+  }
+
+  editarDemanda(demanda: DemandaCaso): void {
+    if (!this.puedeModificar()) return;
+    this.errorDemanda.set(null);
+    this.avisoDemanda.set(null);
+    this.demandaEditada.set(demanda);
+    this.panelDemandaAbierto.set(true);
+  }
+
+  cerrarPanelDemanda(): void {
+    this.panelDemandaAbierto.set(false);
+    this.demandaEditada.set(null);
+    this.errorDemanda.set(null);
+  }
+
+  /**
+   * `POST /v1/demandas` (alta, con `casoCode`) y `PATCH /v1/demandas/{id}`
+   * (edición). Tras guardar se cierra el panel, se recarga la ficha y se deja un
+   * aviso breve en el estilo `aviso-ok`.
+   */
+  guardarDemanda(cambios: CuerpoDemanda): void {
+    const demanda = this.demandaEditada();
+    const url = urlApi(demanda ? `/v1/demandas/${encodeURIComponent(demanda.id)}` : '/v1/demandas');
+    const peticion = demanda
+      ? this.http.patch<unknown>(url, cambios)
+      : this.http.post<unknown>(url, cambios);
+
+    this.guardandoDemanda.set(true);
+    this.errorDemanda.set(null);
+
+    peticion.subscribe({
+      next: () => {
+        this.guardandoDemanda.set(false);
+        this.panelDemandaAbierto.set(false);
+        this.demandaEditada.set(null);
+        this.recargar();
+        this.avisoDemanda.set(
+          demanda
+            ? 'Cambios de la demanda guardados.'
+            : 'Demanda registrada. La ficha se actualizó con el nuevo registro.',
+        );
+      },
+      error: (fallo: unknown) => {
+        this.guardandoDemanda.set(false);
+        this.errorDemanda.set(this.mensajeDeErrorDemanda(fallo));
+      },
+    });
+  }
+
   abrirAnulacion(): void {
     if (!this.puedeAnular() || this.anulado()) return;
     this.errorAnulacion.set(null);
@@ -425,6 +556,16 @@ export class CasoDetallePage {
     const error = aErrorApi(fallo);
     if (error.esProhibido) return 'Su rol no permite modificar la cronología de este caso.';
     if (error.codigo === 'SIN_CAMBIOS') return 'No hay cambios que guardar.';
+    return error.message;
+  }
+
+  private mensajeDeErrorDemanda(fallo: unknown): string {
+    const error = aErrorApi(fallo);
+    if (error.esProhibido) return 'Su rol no permite modificar las demandas de este caso.';
+    if (error.codigo === 'SIN_CAMBIOS') return 'No hay cambios que guardar.';
+    if (error.codigo === 'INVALID_INPUT' || error.estado === 422) {
+      return 'Datos inválidos: revise el problema (3P) y el estado de atención.';
+    }
     return error.message;
   }
 }

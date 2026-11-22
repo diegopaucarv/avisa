@@ -30,8 +30,8 @@ export const dynamic = "force-dynamic";
  * filas anuladas.
  *
  * `abiertos=true` se queda con los estados que el catálogo marca como abiertos
- * (`es_activo`): hoy `Activo` y `En seguimiento`. No se filtra por etiqueta para
- * que un alta nueva en `Activo` siga contando en los indicadores.
+ * (`es_activo`): tras la migración 33 sólo `Abierto`. No se filtra por etiqueta
+ * para que el indicador no dependa de la grafía del catálogo.
  *
  * `conteos=true` no es un filtro: pide que la respuesta incluya los conteos de
  * los chips de estado (`todos`, `abiertos`, `resueltos`, `archivados`), que se

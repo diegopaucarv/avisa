@@ -8,11 +8,13 @@
       </p>
     </div>
     <div class="view-actions">
-      <app-exportar-menu
-        entidad="compromisos"
-        [consulta]="filtrosExportacion()"
-        (fallo)="alFallarExportacion($event)"
-      />
+      @if (!verPapelera()) {
+        <app-exportar-menu
+          entidad="compromisos"
+          [consulta]="filtrosExportacion()"
+          (fallo)="alFallarExportacion($event)"
+        />
+      }
     </div>
   </header>
 
@@ -108,11 +110,79 @@
         >
           Calendario
         </button>
+        <button
+          type="button"
+          [attr.aria-pressed]="modo() === 'resumen'"
+          (click)="cambiarModo('resumen')"
+        >
+          Resumen
+        </button>
       </div>
     }
   </div>
 
-  @if (!vistaCalendario()) {
+  @if (vistaResumen()) {
+    @if (estadoResumen() === 'inactivo' || estadoResumen() === 'cargando') {
+      <div class="empty-state" role="status">Cargando el desglose…</div>
+    } @else if (estadoResumen() === 'error') {
+      <div class="empty-state" role="alert">
+        <p>{{ errorResumen()?.message }}</p>
+        <button type="button" class="button-secondary" (click)="recargarResumen()">
+          Reintentar
+        </button>
+      </div>
+    } @else if (compromisosResumen().length === 0) {
+      <div class="empty-state">
+        <strong>Sin compromisos</strong>
+        <p>No hay compromisos para los filtros seleccionados.</p>
+      </div>
+    } @else {
+      @if (desgloseTruncado()) {
+        <p class="calendario-aviso" role="status">
+          El desglose cuenta {{ compromisosResumen().length }} de {{ totalResumen() }} compromisos
+          del filtro. Acote los filtros para ver el resto.
+        </p>
+      }
+      <div class="desglose-grid">
+        <section class="desglose-card" aria-labelledby="desglose-responsable">
+          <h3 id="desglose-responsable">Por responsable</h3>
+          <ul class="desglose-lista">
+            @for (fila of desgloseResponsable(); track fila.etiqueta) {
+              <li class="desglose-fila">
+                <span class="desglose-etiqueta">{{ fila.etiqueta }}</span>
+                <span class="desglose-cuenta">
+                  {{ fila.total }}<small>{{ porcentaje(fila.total) }}%</small>
+                </span>
+                <span class="desglose-barra" aria-hidden="true">
+                  <i [style.width.%]="porcentaje(fila.total)"></i>
+                </span>
+              </li>
+            }
+          </ul>
+        </section>
+        <section class="desglose-card" aria-labelledby="desglose-nivel">
+          <h3 id="desglose-nivel">Por nivel de gobierno</h3>
+          <ul class="desglose-lista">
+            @for (fila of desgloseNivel(); track fila.etiqueta) {
+              <li class="desglose-fila">
+                <span class="desglose-etiqueta">{{ fila.etiqueta }}</span>
+                <span class="desglose-cuenta">
+                  {{ fila.total }}<small>{{ porcentaje(fila.total) }}%</small>
+                </span>
+                <span class="desglose-barra" aria-hidden="true">
+                  <i [style.width.%]="porcentaje(fila.total)"></i>
+                </span>
+              </li>
+            }
+          </ul>
+        </section>
+      </div>
+      <p class="desglose-nota">
+        Conteo sobre {{ compromisosResumen().length }} compromisos con los filtros activos; «GORE»
+        corresponde al nivel regional.
+      </p>
+    }
+  } @else if (!vistaCalendario()) {
     @if (estado() === 'inactivo' || estado() === 'cargando') {
       <div class="empty-state" role="status">
         {{ verPapelera() ? 'Cargando la papelera…' : 'Cargando compromisos…' }}

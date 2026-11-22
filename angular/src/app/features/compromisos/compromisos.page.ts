@@ -60,7 +60,10 @@ const GENERO = [
   { valor: 'false', etiqueta: 'No atiende brecha de género' },
 ] as const;
 
-type ModoVista = 'tabla' | 'calendario';
+type ModoVista = 'tabla' | 'calendario' | 'resumen';
+
+/** Una fila del desglose: la etiqueta agrupada y cuántos compromisos suma. */
+type FilaDesglose = { etiqueta: string; total: number };
 
 /** La papelera lista sólo lo anulado; «activos» es la vista de siempre. */
 type VerRegistros = 'activos' | 'anulados';
@@ -131,6 +134,30 @@ const MAX_PASTILLAS = 3;
 const TAMANO_CALENDARIO = 100;
 
 const MS_DIA = 86_400_000;
+
+/** Tope de lectura del desglose: es el máximo por página que admite la API. */
+const TAMANO_DESGLOSE = 100;
+
+/**
+ * Conteo por etiqueta, de mayor a menor y luego alfabético en español. Un
+ * valor ausente se cuenta como «—», nunca se descarta el registro.
+ */
+function agruparPor(
+  compromisos: readonly Compromiso[],
+  etiquetaDe: (compromiso: Compromiso) => string,
+): FilaDesglose[] {
+  const conteo = new Map<string, number>();
+
+  for (const compromiso of compromisos) {
+    const etiqueta = etiquetaDe(compromiso) || '—';
+    conteo.set(etiqueta, (conteo.get(etiqueta) ?? 0) + 1);
+  }
+
+  return Array.from(conteo, ([etiqueta, total]) => ({ etiqueta, total })).sort(
+    (izquierda, derecha) =>
+      derecha.total - izquierda.total || izquierda.etiqueta.localeCompare(derecha.etiqueta, 'es'),
+  );
+}
 
 /** Fecha de una rejilla construida en UTC (`YYYY-MM-DD`). */
 function isoDia(fecha: Date): string {
@@ -341,6 +368,75 @@ function isoHoy(): string {
       outline: 2px solid #1d4b86;
       outline-offset: 1px;
     }
+    .desglose-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 12px;
+    }
+    .desglose-card {
+      padding: 12px 14px;
+      border: 1px solid #e6ecf1;
+      border-radius: 8px;
+      background: #fff;
+    }
+    .desglose-card h3 {
+      margin: 0 0 9px;
+      color: #647487;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    .desglose-lista {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    .desglose-fila {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 3px 10px;
+      font-size: 10px;
+    }
+    .desglose-etiqueta {
+      overflow: hidden;
+      color: #35485a;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .desglose-barra {
+      grid-column: 1 / -1;
+      height: 3px;
+      border-radius: 2px;
+      background: #eef2f6;
+    }
+    .desglose-barra i {
+      display: block;
+      height: 100%;
+      border-radius: 2px;
+      background: #3f6f9e;
+    }
+    .desglose-cuenta {
+      color: #1a2b3e;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .desglose-cuenta small {
+      margin-left: 3px;
+      color: #8d99a6;
+      font-size: 8.5px;
+      font-weight: 600;
+    }
+    .desglose-nota {
+      margin: 0;
+      color: #7b8896;
+      font-size: 9.5px;
+      line-height: 1.5;
+    }
   `,
 })
 export class CompromisosPage {
@@ -442,6 +538,9 @@ export class CompromisosPage {
   /** El calendario no existe para registros anulados. */
   readonly vistaCalendario = computed(() => !this.verPapelera() && this.modo() === 'calendario');
 
+  /** El desglose tampoco: la papelera se lista como tabla de restauración. */
+  readonly vistaResumen = computed(() => !this.verPapelera() && this.modo() === 'resumen');
+
   /**
    * Rejilla del mes visible, de lunes a domingo. Incluye los días de los meses
    * vecinos que completan la primera y la última semana, para que el rango
@@ -534,6 +633,56 @@ export class CompromisosPage {
   readonly totalCalendario = computed(() => this.recursoCalendario.valor()?.total ?? 0);
   readonly estadoCalendario = this.recursoCalendario.estado;
   readonly errorCalendario = this.recursoCalendario.error;
+
+  /**
+   * Conjunto filtrado para el desglose por responsable y nivel de gobierno. Se
+   * calcula sobre lo que devuelve el filtro, no sobre la página: se pide el tope
+   * de la API y, si quedan filas fuera, la pantalla lo avisa (misma regla que
+   * el calendario) en lugar de inventar el resto.
+   */
+  private readonly recursoResumen = consulta<Coleccion<Compromiso>>({
+    fuente: () => {
+      if (!this.vistaResumen()) return null;
+
+      const filtros = this.parametros();
+
+      return urlConParametros(urlApi('/v1/commitments'), {
+        ...paramsDePagina({ pagina: 1, tamano: TAMANO_DESGLOSE }),
+        q: filtros.q,
+        estado: filtros.estado,
+        tipo: filtros.tipo,
+        nivelGobierno: filtros.nivelGobierno,
+        atiendeGenero: filtros.atiendeGenero,
+      });
+    },
+    esquema: (bruto) => {
+      const coleccion = normalizarColeccion<unknown>(bruto);
+      return {
+        ...coleccion,
+        elementos: coleccion.elementos.map(aCompromiso),
+      } satisfies Coleccion<Compromiso>;
+    },
+  });
+
+  readonly compromisosResumen = computed(() => this.recursoResumen.valor()?.elementos ?? []);
+  readonly totalResumen = computed(() => this.recursoResumen.valor()?.total ?? 0);
+  readonly estadoResumen = this.recursoResumen.estado;
+  readonly errorResumen = this.recursoResumen.error;
+
+  /** `true` cuando el filtro devuelve más filas que el tope leído. */
+  readonly desgloseTruncado = computed(
+    () => this.totalResumen() > this.compromisosResumen().length,
+  );
+
+  readonly desgloseResponsable = computed(() =>
+    agruparPor(this.compromisosResumen(), (compromiso) => compromiso.unidad ?? '—'),
+  );
+
+  readonly desgloseNivel = computed(() =>
+    agruparPor(this.compromisosResumen(), (compromiso) =>
+      etiquetaNivelGobierno(compromiso.nivelGobierno),
+    ),
+  );
 
   readonly maxPastillas = MAX_PASTILLAS;
   readonly diasSemana = DIAS_SEMANA;
@@ -694,6 +843,16 @@ export class CompromisosPage {
     this.recursoCalendario.recargar();
   }
 
+  recargarResumen(): void {
+    this.recursoResumen.recargar();
+  }
+
+  /** Porcentaje de una fila del desglose sobre el conjunto leído. */
+  porcentaje(cantidad: number): number {
+    const base = this.compromisosResumen().length;
+    return base ? Math.round((cantidad / base) * 100) : 0;
+  }
+
   limpiar(): void {
     void this.router.navigate([], {
       relativeTo: this.ruta,
@@ -722,6 +881,7 @@ export class CompromisosPage {
   alActualizar(): void {
     this.recurso.recargar();
     if (this.vistaCalendario()) this.recursoCalendario.recargar();
+    if (this.vistaResumen()) this.recursoResumen.recargar();
   }
 
   /** Anular exige el privilegio de anulación y escritura sobre la clasificación. */

@@ -15,7 +15,11 @@ export type Riesgo = 'Bajo' | 'Moderado' | 'Alto';
 /** Prioridad de atención (eje distinto del riesgo). */
 export type PrioridadAtencion = 'Urgente' | 'Moderado' | 'Bajo';
 
-export type EstadoCaso = 'Activo' | 'En seguimiento' | 'Resuelto' | 'Archivado';
+/**
+ * Estado operativo del caso. `Activo` y «En seguimiento» se unificaron en
+ * `Abierto`: eran dos nombres para el mismo hecho (`es_activo = true`).
+ */
+export type EstadoCaso = 'Abierto' | 'Resuelto' | 'Archivado';
 
 export type Alcance = 'Norte' | 'Centro' | 'Sur' | 'Oriente' | 'Nacional';
 

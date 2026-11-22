@@ -325,6 +325,11 @@ function pickOrigin(value: string | null): DataOrigin | undefined {
 
 function pickCaseState(value: string | null): CaseState | undefined {
   switch (value) {
+    // El catálogo se unificó en `Abierto` (migración 33). El tipo `CaseState`
+    // vive en `components/avisa-demo-data`, que es el espejo Next congelado y
+    // conserva el valor antiguo: el puente se hace aquí, sin tocar la referencia.
+    case "Abierto":
+      return "Activo";
     case "Activo":
       return "Activo";
     case "En seguimiento":

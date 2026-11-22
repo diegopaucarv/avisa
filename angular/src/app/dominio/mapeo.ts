@@ -73,11 +73,32 @@ export const PRIORIDADES = [
 ] as const satisfies readonly PrioridadAtencion[];
 
 export const ESTADOS_CASO = [
-  'Activo',
-  'En seguimiento',
+  'Abierto',
   'Resuelto',
   'Archivado',
 ] as const satisfies readonly EstadoCaso[];
+
+/**
+ * Colapsa las etiquetas del catálogo de estados en los tres valores operativos.
+ *
+ * `core.cat_estados_caso` llegó a tener cuatro filas y dos de ellas —`Activo` y
+ * `En seguimiento`— compartían `es_activo = true`: dos nombres para el mismo
+ * hecho. La migración 33 las unificó en `Abierto`, pero una base sin migrar
+ * sigue respondiendo con las etiquetas anteriores. La normalización vive aquí,
+ * en la frontera de mapeo, para que la interfaz nunca muestre ambos nombres.
+ */
+export function estadoDeCaso(valor: string | null): EstadoCaso {
+  const clave = (valor ?? '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim()
+    .toLowerCase()
+    .replace(/_/g, ' ');
+
+  if (clave === 'resuelto') return 'Resuelto';
+  if (clave === 'archivado') return 'Archivado';
+  return 'Abierto';
+}
 
 export const ALCANCES = [
   'Norte',
@@ -381,9 +402,10 @@ function aAlertaCaso(bruto: unknown): AlertaCaso {
 
 function aTramoEstadoCaso(bruto: unknown): TramoEstadoCaso {
   const registro = esRegistro(bruto) ? bruto : {};
+  const estado = texto(registro, ['estado']);
   return {
     id: texto(registro, ['id']) ?? '',
-    estado: texto(registro, ['estado']),
+    estado: estado ? estadoDeCaso(estado) : null,
     desde: texto(registro, ['desde']),
     hasta: texto(registro, ['hasta']),
     motivo: texto(registro, ['motivo']),
@@ -482,7 +504,7 @@ export function aCaso(bruto: unknown): Caso {
       texto(registro, ['actualizadoEn', 'updatedAt']),
     inicio: texto(registro, ['fechaInicio', 'fecha_inicio', 'inicio']),
     region: texto(registro, ['region']),
-    estado: unoDe(texto(registro, ['estado']), ESTADOS_CASO, 'En seguimiento'),
+    estado: estadoDeCaso(texto(registro, ['estado'])),
     riesgo: riesgoDe(texto(registro, ['riesgo', 'risk'])),
     prioridad: unoDe(texto(registro, ['prioridad']), PRIORIDADES, 'Moderado'),
     alcance: unoDe(texto(registro, ['alcance']), ALCANCES, 'Centro'),

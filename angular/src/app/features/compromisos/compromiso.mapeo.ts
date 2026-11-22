@@ -187,10 +187,12 @@ function nivelGobiernoDe(valor: string | null): string | null {
 
 /**
  * Etiqueta visible de `nivelGobierno`. El valor de la API sigue siendo
- * `Regional`; la UI muestra `GORE` (Gobierno Regional).
+ * `Regional`; la UI muestra `GORE` (Gobierno Regional). También se cubre la
+ * grafía larga (`Gobierno regional`) por si llega de un registro legado.
  */
 export function etiquetaNivelGobierno(valor: string | null): string {
-  return valor === 'Regional' ? 'GORE' : (valor ?? '—');
+  if (!valor) return '—';
+  return valor === 'Regional' || valor === 'Gobierno regional' ? 'GORE' : valor;
 }
 
 function origenVencimientoDe(valor: string | null): OrigenVencimiento {

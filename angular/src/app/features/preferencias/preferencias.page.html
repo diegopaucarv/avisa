@@ -18,17 +18,17 @@
   </header>
 
   @if (mensaje()) {
-  <div
-    class="inline-notice"
-    [class.inline-notice-error]="!guardado()"
-    [attr.role]="guardado() ? 'status' : 'alert'"
-  >
-    <app-icono [nombre]="guardado() ? 'check' : 'alerta'" [tamano]="14" />
-    <span>{{ mensaje() }}</span>
-    <button type="button" aria-label="Cerrar aviso" (click)="cerrarAviso()">
-      <app-icono nombre="cerrar" [tamano]="14" />
-    </button>
-  </div>
+    <div
+      class="inline-notice"
+      [class.inline-notice-error]="!guardado()"
+      [attr.role]="guardado() ? 'status' : 'alert'"
+    >
+      <app-icono [nombre]="guardado() ? 'check' : 'alerta'" [tamano]="14" />
+      <span>{{ mensaje() }}</span>
+      <button type="button" aria-label="Cerrar aviso" (click)="cerrarAviso()">
+        <app-icono nombre="cerrar" [tamano]="14" />
+      </button>
+    </div>
   }
 
   <div class="pref-layout">
@@ -54,7 +54,7 @@
                 <small>Fondo blanco, para salas iluminadas.</small>
               </span>
               @if (tema() === 'claro') {
-              <span class="theme-option-check"><app-icono nombre="check" [tamano]="14" /></span>
+                <span class="theme-option-check"><app-icono nombre="check" [tamano]="14" /></span>
               }
             </button>
 
@@ -71,10 +71,41 @@
                 <small>Menos brillo en pantallas y turnos nocturnos.</small>
               </span>
               @if (tema() === 'oscuro') {
-              <span class="theme-option-check"><app-icono nombre="check" [tamano]="14" /></span>
+                <span class="theme-option-check"><app-icono nombre="check" [tamano]="14" /></span>
               }
             </button>
           </div>
+        </div>
+      </section>
+
+      <section class="surface detail-section" aria-labelledby="titulo-alcance-predeterminado">
+        <div class="pref-section">
+          <div class="pref-section-head">
+            <h3 id="titulo-alcance-predeterminado">Ámbito predeterminado</h3>
+            <span class="pref-hint">Alcance geográfico</span>
+          </div>
+
+          <div
+            class="pref-scope segmented"
+            role="group"
+            aria-labelledby="titulo-alcance-predeterminado"
+          >
+            @for (opcion of opcionesAlcance; track opcion.valor) {
+              <button
+                type="button"
+                [attr.aria-pressed]="alcance() === opcion.valor"
+                (click)="cambiarAlcance(opcion.valor)"
+              >
+                {{ opcion.etiqueta }}
+              </button>
+            }
+          </div>
+
+          <p class="pref-note">
+            «Sesión» conserva el ámbito que entrega el inicio de sesión. El alcance de un caso no se
+            elige a mano —se deriva de sus regiones—; esta preferencia sólo queda guardada en este
+            navegador.
+          </p>
         </div>
       </section>
 
@@ -99,7 +130,7 @@
                 <small>Más aire entre filas; lectura pausada.</small>
               </span>
               @if (densidad() === 'comoda') {
-              <span class="pref-option-check"><app-icono nombre="check" [tamano]="14" /></span>
+                <span class="pref-option-check"><app-icono nombre="check" [tamano]="14" /></span>
               }
             </button>
 
@@ -116,7 +147,7 @@
                 <small>Más filas visibles por pantalla.</small>
               </span>
               @if (densidad() === 'compacta') {
-              <span class="pref-option-check"><app-icono nombre="check" [tamano]="14" /></span>
+                <span class="pref-option-check"><app-icono nombre="check" [tamano]="14" /></span>
               }
             </button>
           </div>
@@ -124,6 +155,43 @@
           <p class="pref-note">
             La densidad se aplica a las tablas y tarjetas ya preparadas para ella en la hoja de
             estilos común.
+          </p>
+        </div>
+      </section>
+
+      <section class="surface detail-section" aria-labelledby="titulo-avisos">
+        <div class="pref-section">
+          <div class="pref-section-head">
+            <h3 id="titulo-avisos">Opciones de notificación</h3>
+            <span class="pref-hint">Qué avisos mostrar</span>
+          </div>
+
+          <div class="pref-options">
+            @for (aviso of avisosDisponibles; track aviso.clave) {
+              <button
+                type="button"
+                class="pref-option"
+                role="switch"
+                [class.selected]="avisos()[aviso.clave]"
+                [attr.aria-checked]="avisos()[aviso.clave]"
+                (click)="alternarAviso(aviso.clave)"
+              >
+                <span class="pref-option-icon">
+                  <app-icono [nombre]="aviso.icono" [tamano]="14" />
+                </span>
+                <span class="pref-option-copy">
+                  <strong>{{ aviso.etiqueta }}</strong>
+                  <small>{{ aviso.pista }}</small>
+                </span>
+                <span class="pref-switch-track" aria-hidden="true">
+                  <span class="pref-switch-thumb"></span>
+                </span>
+              </button>
+            }
+          </div>
+
+          <p class="pref-note">
+            Cada tipo de aviso se activa o desactiva por separado. Se guardan en este navegador.
           </p>
         </div>
       </section>
@@ -143,7 +211,7 @@
               aria-disabled="true"
             >
               @for (tamano of tamanos; track tamano) {
-              <button type="button" disabled>{{ tamano }}</button>
+                <button type="button" disabled>{{ tamano }}</button>
               }
             </div>
             <span class="pref-hint">No disponible</span>
@@ -166,42 +234,42 @@
           </div>
 
           @if (usuario(); as persona) {
-          <div class="detail-data-row">
-            <div>
-              <span>Nombre</span>
-              <strong>{{ persona.nombre }}</strong>
+            <div class="detail-data-row">
+              <div>
+                <span>Nombre</span>
+                <strong>{{ persona.nombre }}</strong>
+              </div>
+              <div>
+                <span>DNI</span>
+                <strong>{{ persona.dni }}</strong>
+              </div>
+              <div>
+                <span>Área</span>
+                <strong>{{ persona.area }}</strong>
+              </div>
             </div>
-            <div>
-              <span>DNI</span>
-              <strong>{{ persona.dni }}</strong>
-            </div>
-            <div>
-              <span>Área</span>
-              <strong>{{ persona.area }}</strong>
-            </div>
-          </div>
 
-          <div class="detail-data-row">
-            <div>
-              <span>Rol principal</span>
-              <strong>{{ persona.rol }}</strong>
+            <div class="detail-data-row">
+              <div>
+                <span>Rol principal</span>
+                <strong>{{ persona.rol }}</strong>
+              </div>
+              <div>
+                <span>Roles</span>
+                <strong>{{ rolesTexto() }}</strong>
+              </div>
+              <div>
+                <span>Regiones</span>
+                <strong>{{ regionesTexto() }}</strong>
+              </div>
             </div>
-            <div>
-              <span>Roles</span>
-              <strong>{{ rolesTexto() }}</strong>
-            </div>
-            <div>
-              <span>Regiones</span>
-              <strong>{{ regionesTexto() }}</strong>
-            </div>
-          </div>
 
-          <p class="pref-note">
-            Los roles y la contraseña se administran fuera de AVISA. No hay endpoint para cambiarlos
-            desde aquí y esta pantalla no ofrece escritura sobre el perfil.
-          </p>
+            <p class="pref-note">
+              Los roles y la contraseña se administran fuera de AVISA. No hay endpoint para
+              cambiarlos desde aquí y esta pantalla no ofrece escritura sobre el perfil.
+            </p>
           } @else {
-          <p>No hay una sesión activa en este navegador.</p>
+            <p>No hay una sesión activa en este navegador.</p>
           }
         </div>
       </section>
@@ -213,7 +281,9 @@
           </div>
           <p class="pref-note">
             Se guardan en el almacenamiento local de este navegador, no en la base de datos. Otro
-            equipo o un navegador distinto partirá de los valores por defecto.
+            equipo o un navegador distinto partirá de los valores por defecto. El ámbito
+            predeterminado y las opciones de notificación quedan guardados, pero ninguna otra
+            pantalla los aplica todavía: el perfil persistido es un cambio aparte.
           </p>
         </div>
       </section>

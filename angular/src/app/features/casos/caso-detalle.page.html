@@ -1,431 +1,463 @@
 <section class="view-body" aria-labelledby="titulo-caso">
   @if (estado() === 'cargando' || estado() === 'inactivo') {
-    <div class="empty-state" role="status">Cargando el caso…</div>
+  <div class="empty-state" role="status">Cargando el caso…</div>
   } @else if (estado() === 'error') {
-    <div class="empty-state" role="alert">
-      <p>{{ error()?.message }}</p>
-      <button type="button" class="button-secondary" (click)="recargar()">Reintentar</button>
-      <a class="button-secondary" routerLink="/casos">Volver a casos</a>
-    </div>
+  <div class="empty-state" role="alert">
+    <p>{{ error()?.message }}</p>
+    <button type="button" class="button-secondary" (click)="recargar()">Reintentar</button>
+    <a class="button-secondary" routerLink="/casos">Volver a casos</a>
+  </div>
   } @else if (ficha(); as d) {
-    <div class="view-head">
-      <div>
-        <div class="breadcrumb-current">
-          <a routerLink="/casos">Casos</a>
-          <app-icono nombre="chevron-derecha" [tamano]="13" />
-          <strong>{{ d.caso.codigo }}</strong>
-        </div>
-        <h1 id="titulo-caso">{{ d.caso.titulo }}</h1>
-        <p class="view-subtitle">{{ d.caso.resumen || 'Sin resumen registrado.' }}</p>
+  <div class="view-head">
+    <div>
+      <div class="breadcrumb-current">
+        <a routerLink="/casos">Casos</a>
+        <app-icono nombre="chevron-derecha" [tamano]="13" />
+        <strong>{{ d.caso.codigo }}</strong>
       </div>
-      <div class="view-actions">
-        @if (anulado()) {
-          <span class="status-badge">Anulado</span>
-          @if (puedeAnular()) {
-            <button type="button" class="button-secondary" (click)="abrirRestauracion()">
-              Restaurar caso
-            </button>
-          }
-        } @else {
-          <app-exportar-menu
-            entidad="casos"
-            [id]="d.caso.id"
-            (fallo)="alFallarExportacion($event)"
-          />
+      <h1 id="titulo-caso">{{ d.caso.titulo }}</h1>
+      <p class="view-subtitle">{{ d.caso.resumen || 'Sin resumen registrado.' }}</p>
+    </div>
+    <div class="view-actions">
+      @if (anulado()) {
+      <span class="status-badge">Anulado</span>
+      @if (puedeAnular()) {
+      <button type="button" class="button-secondary" (click)="abrirRestauracion()">
+        Restaurar caso
+      </button>
+      } } @else {
+      <app-exportar-menu entidad="casos" [id]="d.caso.id" (fallo)="alFallarExportacion($event)" />
+      <button type="button" class="button-secondary" (click)="imprimir()">
+        <app-icono nombre="documentos" [tamano]="14" />
+        Imprimir / Guardar PDF
+      </button>
+      <span class="status-badge" [class]="'status-badge risk-' + d.caso.riesgo.toLowerCase()">
+        <span class="status-dot"></span>
+        Riesgo {{ d.caso.riesgo }}
+      </span>
+      <app-glosario termino="nivel-riesgo" [alineacion]="'fin'" />
+      <span class="status-badge">{{ d.caso.nivelConflicto }}</span>
+      <app-glosario termino="nivel-conflictividad" [alineacion]="'fin'" />
+      <span class="status-badge">{{ d.caso.estado }}</span>
+      @if (puedeAnular()) {
+      <button type="button" class="button-danger" (click)="abrirAnulacion()">Anular caso</button>
+      } }
+    </div>
+  </div>
+
+  @if (avisoAnulacion(); as aviso) {
+  <p class="form-hint aviso-ok" role="status">{{ aviso }}</p>
+  } @if (exportarError(); as mensaje) {
+  <p class="form-error" role="alert">{{ mensaje }}</p>
+  }
+
+  <div class="ficha-layout">
+    <div class="ficha-principal">
+      <dl class="detail-grid" id="datos-caso">
+        <div>
+          <dt>Región</dt>
+          <dd>{{ d.caso.region || '—' }}</dd>
+        </div>
+        <div>
+          <dt>Temática <app-glosario termino="tematica" /></dt>
+          <dd>{{ d.caso.tematica || '—' }}</dd>
+        </div>
+        <div>
+          <dt>Subsector <app-glosario termino="subsector" /></dt>
+          <dd>{{ d.caso.subsector || '—' }}</dd>
+        </div>
+        <div>
+          <dt>Unidad responsable</dt>
+          <dd>{{ d.caso.unidadResponsable || '—' }}</dd>
+        </div>
+        <div>
+          <dt>Prioridad de atención <app-glosario termino="prioridad-atencion" /></dt>
+          <dd>{{ d.caso.prioridad }}</dd>
+        </div>
+        <div>
+          <dt>Alcance</dt>
+          <dd>
+            {{ d.caso.alcance }}
+            <small class="detail-hint">Derivado de las regiones del caso</small>
+          </dd>
+        </div>
+        <div>
+          <dt>Componente del ciclo</dt>
+          <dd>{{ d.caso.etapa }}</dd>
+        </div>
+        <div>
+          <dt>Inicio</dt>
+          <dd>{{ fechaTexto(d.caso.inicio) }}</dd>
+        </div>
+      </dl>
+
+      <section class="detail-section" aria-labelledby="proximo-paso-titulo">
+        <div class="detail-section-title">
+          <h2 id="proximo-paso-titulo">Próximo paso</h2>
           <span class="status-badge" [class]="'status-badge risk-' + d.caso.riesgo.toLowerCase()">
             <span class="status-dot"></span>
             Riesgo {{ d.caso.riesgo }}
           </span>
-          <app-glosario termino="nivel-riesgo" [alineacion]="'fin'" />
-          <span class="status-badge">{{ d.caso.nivelConflicto }}</span>
-          <app-glosario termino="nivel-conflictividad" [alineacion]="'fin'" />
-          <span class="status-badge">{{ d.caso.estado }}</span>
-          @if (puedeAnular()) {
-            <button type="button" class="button-danger" (click)="abrirAnulacion()">
-              Anular caso
-            </button>
+        </div>
+        <ul class="pasos-riesgo">
+          @for (paso of orientacion().pasos; track paso) {
+          <li>{{ paso }}</li>
           }
+        </ul>
+        <p class="detail-hint">
+          Regla: {{ orientacion().regla }} ({{ orientacion().fuente }}). Valor del caso: Riesgo {{
+          d.caso.riesgo }}.
+        </p>
+      </section>
+
+      <section class="detail-section" aria-labelledby="ruta-caso">
+        <h2 id="ruta-caso">Ruta de atención</h2>
+        <p class="cycle-note">
+          Los cinco componentes pueden ocurrir simultáneamente: no son etapas rígidas ni sucesivas.
+        </p>
+        <ol class="cycle-list">
+          @for (componente of componentesCiclo; track componente.nombre) {
+          <li>
+            <strong>{{ componente.nombre }}</strong>
+            <p>{{ componente.definicion }}</p>
+          </li>
+          }
+        </ol>
+      </section>
+
+      <section class="detail-section" aria-labelledby="actores-caso">
+        <h2 id="actores-caso">Actores ({{ d.actores.length }})</h2>
+        @if (d.actores.length === 0) {
+        <p class="empty-inline">Sin actores registrados.</p>
+        } @else {
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th scope="col">Actor</th>
+                <th scope="col">Correo</th>
+                <th scope="col">Tipo <app-glosario termino="tipo-actor" /></th>
+                <th scope="col">Función <app-glosario termino="funcion-actor" /></th>
+                <th scope="col">Posicionamiento</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (actor of d.actores; track actor.id) {
+              <tr>
+                <td>{{ nombreActor(actor) }}</td>
+                <td>{{ actor.correo || '—' }}</td>
+                <td>{{ actor.tipo || '—' }}</td>
+                <td>{{ actor.funcion || '—' }}</td>
+                <td>{{ actor.posicionamiento || '—' }}</td>
+              </tr>
+              }
+            </tbody>
+          </table>
+        </div>
         }
-      </div>
-    </div>
+      </section>
 
-    @if (avisoAnulacion(); as aviso) {
-      <p class="form-hint aviso-ok" role="status">{{ aviso }}</p>
-    }
-    @if (exportarError(); as mensaje) {
-      <p class="form-error" role="alert">{{ mensaje }}</p>
-    }
-
-    <div class="ficha-layout">
-      <div class="ficha-principal">
-        <dl class="detail-grid" id="datos-caso">
-          <div>
-            <dt>Región</dt>
-            <dd>{{ d.caso.region || '—' }}</dd>
-          </div>
-          <div>
-            <dt>Temática <app-glosario termino="tematica" /></dt>
-            <dd>{{ d.caso.tematica || '—' }}</dd>
-          </div>
-          <div>
-            <dt>Subsector <app-glosario termino="subsector" /></dt>
-            <dd>{{ d.caso.subsector || '—' }}</dd>
-          </div>
-          <div>
-            <dt>Unidad responsable</dt>
-            <dd>{{ d.caso.unidadResponsable || '—' }}</dd>
-          </div>
-          <div>
-            <dt>Prioridad de atención <app-glosario termino="prioridad-atencion" /></dt>
-            <dd>{{ d.caso.prioridad }}</dd>
-          </div>
-          <div>
-            <dt>Alcance</dt>
-            <dd>
-              {{ d.caso.alcance }}
-              <small class="detail-hint">Derivado de las regiones del caso</small>
-            </dd>
-          </div>
-          <div>
-            <dt>Componente del ciclo</dt>
-            <dd>{{ d.caso.etapa }}</dd>
-          </div>
-          <div>
-            <dt>Inicio</dt>
-            <dd>{{ fechaTexto(d.caso.inicio) }}</dd>
-          </div>
-        </dl>
-
-        <section class="detail-section" aria-labelledby="proximo-paso-titulo">
-          <div class="detail-section-title">
-            <h2 id="proximo-paso-titulo">Próximo paso</h2>
-            <span class="status-badge" [class]="'status-badge risk-' + d.caso.riesgo.toLowerCase()">
-              <span class="status-dot"></span>
-              Riesgo {{ d.caso.riesgo }}
-            </span>
-          </div>
-          <ul class="pasos-riesgo">
-            @for (paso of orientacion().pasos; track paso) {
-              <li>{{ paso }}</li>
-            }
-          </ul>
-          <p class="detail-hint">
-            Regla: {{ orientacion().regla }} ({{ orientacion().fuente }}). Valor del caso: Riesgo
-            {{ d.caso.riesgo }}.
-          </p>
-        </section>
-
-        <section class="detail-section" aria-labelledby="ruta-caso">
-          <h2 id="ruta-caso">Ruta de atención</h2>
-          <p class="cycle-note">
-            Los cinco componentes pueden ocurrir simultáneamente: no son etapas rígidas ni
-            sucesivas.
-          </p>
-          <ol class="cycle-list">
-            @for (componente of componentesCiclo; track componente.nombre) {
-              <li>
-                <strong>{{ componente.nombre }}</strong>
-                <p>{{ componente.definicion }}</p>
-              </li>
-            }
-          </ol>
-        </section>
-
-        <section class="detail-section" aria-labelledby="actores-caso">
-          <h2 id="actores-caso">Actores ({{ d.actores.length }})</h2>
-          @if (d.actores.length === 0) {
-            <p class="empty-inline">Sin actores registrados.</p>
-          } @else {
-            <div class="table-wrap">
-              <table class="data-table">
-                <thead>
-                  <tr>
-                    <th scope="col">Actor</th>
-                    <th scope="col">Correo</th>
-                    <th scope="col">Tipo <app-glosario termino="tipo-actor" /></th>
-                    <th scope="col">Función <app-glosario termino="funcion-actor" /></th>
-                    <th scope="col">Posicionamiento</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @for (actor of d.actores; track actor.id) {
-                    <tr>
-                      <td>{{ nombreActor(actor) }}</td>
-                      <td>{{ actor.correo || '—' }}</td>
-                      <td>{{ actor.tipo || '—' }}</td>
-                      <td>{{ actor.funcion || '—' }}</td>
-                      <td>{{ actor.posicionamiento || '—' }}</td>
-                    </tr>
-                  }
-                </tbody>
-              </table>
-            </div>
+      <section class="detail-section" aria-labelledby="eventos-caso">
+        <div class="detail-section-title">
+          <h2 id="eventos-caso">Cronología ({{ d.eventos.length }})</h2>
+          @if (puedeModificar()) {
+          <button type="button" class="button-secondary" (click)="registrarHecho()">
+            <app-icono nombre="documentos" [tamano]="14" />
+            Registrar hecho
+          </button>
           }
-        </section>
-
-        <section class="detail-section" aria-labelledby="eventos-caso">
-          <div class="detail-section-title">
-            <h2 id="eventos-caso">Cronología ({{ d.eventos.length }})</h2>
-            @if (puedeModificar()) {
-              <button type="button" class="button-secondary" (click)="registrarHecho()">
-                <app-icono nombre="documentos" [tamano]="14" />
-                Registrar hecho
-              </button>
-            }
-          </div>
-          <p class="detail-hint">
-            Estado de validación en solo lectura: la ficha todavía no permite cambiarlo.
-          </p>
-          @if (d.eventos.length === 0) {
-            <p class="empty-inline">Sin hechos registrados.</p>
-          } @else {
-            <ol class="timeline-list">
-              @for (evento of d.eventos; track evento.id) {
-                <li>
-                  <span class="timeline-date">{{ fechaTexto(evento.fecha) }}</span>
-                  <div>
-                    <div class="timeline-meta">
-                      <strong>{{ evento.tipo || 'Hecho' }}</strong>
-                      <span
-                        class="status-badge"
-                        [class]="
+        </div>
+        <p class="detail-hint">
+          Estado de validación en solo lectura: la ficha todavía no permite cambiarlo.
+        </p>
+        @if (d.eventos.length === 0) {
+        <p class="empty-inline">Sin hechos registrados.</p>
+        } @else {
+        <ol class="timeline-list">
+          @for (evento of d.eventos; track evento.id) {
+          <li>
+            <span class="timeline-date">{{ fechaTexto(evento.fecha) }}</span>
+            <div>
+              <div class="timeline-meta">
+                <strong>{{ evento.tipo || 'Hecho' }}</strong>
+                <span
+                  class="status-badge"
+                  [class]="
                           evento.validado
                             ? 'status-badge state-approved'
                             : 'status-badge state-pending'
                         "
-                      >
-                        <span class="status-dot"></span>
-                        {{ evento.validado ? 'Validado' : 'Pendiente' }}
-                      </span>
-                    </div>
-                    @if (evento.actor) {
-                      <p class="timeline-actor">Actor: {{ evento.actor }}</p>
-                    }
-                    <p>{{ evento.descripcion }}</p>
-                    @if (puedeModificar()) {
-                      <button
-                        type="button"
-                        class="button-secondary timeline-edit"
-                        [attr.aria-label]="'Editar el hecho del ' + (evento.fecha || 'sin fecha')"
-                        (click)="editarHecho(evento)"
-                      >
-                        Editar
-                      </button>
-                    }
-                  </div>
-                </li>
+                >
+                  <span class="status-dot"></span>
+                  {{ evento.validado ? 'Validado' : 'Pendiente' }}
+                </span>
+              </div>
+              @if (evento.actor) {
+              <p class="timeline-actor">Actor: {{ evento.actor }}</p>
               }
-            </ol>
+              <p>{{ evento.descripcion }}</p>
+              @if (puedeModificar()) {
+              <button
+                type="button"
+                class="button-secondary timeline-edit"
+                [attr.aria-label]="'Editar el hecho del ' + (evento.fecha || 'sin fecha')"
+                (click)="editarHecho(evento)"
+              >
+                Editar
+              </button>
+              }
+            </div>
+          </li>
           }
-        </section>
+        </ol>
+        }
+      </section>
 
-        <section class="detail-section" aria-labelledby="demandas-caso">
+      <section class="detail-section" aria-labelledby="demandas-caso">
+        <div class="detail-section-title">
           <h2 id="demandas-caso">
             Demandas ({{ d.demandas.length }}) <app-glosario termino="3p" />
           </h2>
-          @if (d.demandas.length === 0) {
-            <p class="empty-inline">Sin demandas registradas.</p>
-          } @else {
-            <div class="table-wrap">
-              <table class="data-table">
-                <thead>
-                  <tr>
-                    <th scope="col">Problema</th>
-                    <th scope="col">Pedido</th>
-                    <th scope="col">Estado</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @for (demanda of d.demandas; track demanda.id) {
-                    <tr>
-                      <td>{{ demanda.problema || demanda.descripcion || '—' }}</td>
-                      <td>{{ demanda.pedido || demanda.propuesta || '—' }}</td>
-                      <td>{{ demanda.estado }}</td>
-                    </tr>
-                  }
-                </tbody>
-              </table>
-            </div>
+          @if (puedeModificar()) {
+          <button type="button" class="button-secondary" (click)="altaDemanda()">
+            <app-icono nombre="bandeja" [tamano]="14" />
+            Alta de demanda
+          </button>
           }
-        </section>
+        </div>
+        @if (avisoDemanda(); as aviso) {
+        <p class="form-hint aviso-ok" role="status">{{ aviso }}</p>
+        } @if (d.demandas.length === 0) {
+        <p class="empty-inline">Sin demandas registradas.</p>
+        } @else {
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th scope="col">Problema</th>
+                <th scope="col">Propuesta</th>
+                <th scope="col">Pedido</th>
+                <th scope="col">Estado de atención</th>
+                @if (puedeModificar()) {
+                <th scope="col">Acciones</th>
+                }
+              </tr>
+            </thead>
+            <tbody>
+              @for (demanda of d.demandas; track demanda.id) {
+              <tr>
+                <td>{{ demanda.problema || demanda.descripcion || '—' }}</td>
+                <td>{{ demanda.propuesta || '—' }}</td>
+                <td>{{ demanda.pedido || '—' }}</td>
+                <td>{{ demanda.estado || '—' }}</td>
+                @if (puedeModificar()) {
+                <td>
+                  <button
+                    type="button"
+                    class="button-secondary timeline-edit"
+                    [attr.aria-label]="
+                              'Editar la demanda: ' +
+                              (demanda.problema || demanda.descripcion || 'sin problema')
+                            "
+                    (click)="editarDemanda(demanda)"
+                  >
+                    Editar
+                  </button>
+                </td>
+                }
+              </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        }
+      </section>
 
-        <section class="detail-section" aria-labelledby="alertas-caso">
-          <h2 id="alertas-caso">Alertas ({{ d.alertas.length }})</h2>
-          @if (d.alertas.length === 0) {
-            <p class="empty-inline">Sin alertas registradas.</p>
-          } @else {
-            <div class="table-wrap">
-              <table class="data-table">
-                <thead>
-                  <tr>
-                    <th scope="col">Código</th>
-                    <th scope="col">Nivel</th>
-                    <th scope="col">Prioridad</th>
-                    <th scope="col">Estado</th>
-                    <th scope="col">Fecha de reporte</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @for (alerta of d.alertas; track alerta.id) {
-                    <tr>
-                      <td>
-                        <strong>{{ alerta.codigo || 'Sin código' }}</strong>
-                      </td>
-                      <td>{{ alerta.nivel || '—' }}</td>
-                      <td>{{ alerta.prioridad || '—' }}</td>
-                      <td>
-                        <span class="status-badge">{{ alerta.estado }}</span>
-                        @if (alerta.anulada) {
-                          <span class="status-badge state-dismissed">Anulada</span>
-                        }
-                      </td>
-                      <td>{{ fechaTexto(alerta.fechaReporte) }}</td>
-                    </tr>
+      <section class="detail-section" aria-labelledby="alertas-caso">
+        <h2 id="alertas-caso">Alertas ({{ d.alertas.length }})</h2>
+        @if (d.alertas.length === 0) {
+        <p class="empty-inline">Sin alertas registradas.</p>
+        } @else {
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th scope="col">Código</th>
+                <th scope="col">Nivel</th>
+                <th scope="col">Prioridad</th>
+                <th scope="col">Estado</th>
+                <th scope="col">Fecha de reporte</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (alerta of d.alertas; track alerta.id) {
+              <tr>
+                <td>
+                  <strong>{{ alerta.codigo || 'Sin código' }}</strong>
+                </td>
+                <td>{{ alerta.nivel || '—' }}</td>
+                <td>{{ alerta.prioridad || '—' }}</td>
+                <td>
+                  <span class="status-badge">{{ alerta.estado }}</span>
+                  @if (alerta.anulada) {
+                  <span class="status-badge state-dismissed">Anulada</span>
                   }
-                </tbody>
-              </table>
-            </div>
-          }
-        </section>
+                </td>
+                <td>{{ fechaTexto(alerta.fechaReporte) }}</td>
+              </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        }
+      </section>
 
-        <section class="detail-section" aria-labelledby="compromisos-caso">
-          <h2 id="compromisos-caso">Compromisos ({{ d.compromisos.length }})</h2>
-          @if (d.compromisos.length === 0) {
-            <p class="empty-inline">Sin compromisos registrados.</p>
-          } @else {
-            <div class="table-wrap">
-              <table class="data-table">
-                <thead>
-                  <tr>
-                    <th scope="col">Código</th>
-                    <th scope="col">Acción</th>
-                    <th scope="col">Estado</th>
-                    <th scope="col">Nivel de gobierno <app-glosario termino="nivel-gobierno" /></th>
-                    <th scope="col">Unidad</th>
-                    <th scope="col">Vencimiento</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @for (compromiso of d.compromisos; track compromiso.id) {
-                    <tr>
-                      <td>
-                        <strong>{{ compromiso.codigo }}</strong>
-                      </td>
-                      <td class="celda-larga">{{ compromiso.accion }}</td>
-                      <td>{{ compromiso.estado || '—' }}</td>
-                      <td>{{ nivelGobiernoTexto(compromiso.nivelGobierno) }}</td>
-                      <td>{{ compromiso.unidad || '—' }}</td>
-                      <td>
-                        {{ fechaTexto(compromiso.vencimiento) }}
-                        @if (compromiso.origenVencimiento === 'hito') {
-                          <small class="detail-hint">Derivado del próximo hito</small>
-                        }
-                      </td>
-                    </tr>
+      <section class="detail-section" aria-labelledby="compromisos-caso">
+        <h2 id="compromisos-caso">Compromisos ({{ d.compromisos.length }})</h2>
+        @if (d.compromisos.length === 0) {
+        <p class="empty-inline">Sin compromisos registrados.</p>
+        } @else {
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th scope="col">Código</th>
+                <th scope="col">Acción</th>
+                <th scope="col">Estado</th>
+                <th scope="col">Nivel de gobierno <app-glosario termino="nivel-gobierno" /></th>
+                <th scope="col">Unidad</th>
+                <th scope="col">Vencimiento</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (compromiso of d.compromisos; track compromiso.id) {
+              <tr>
+                <td>
+                  <strong>{{ compromiso.codigo }}</strong>
+                </td>
+                <td class="celda-larga">{{ compromiso.accion }}</td>
+                <td>{{ compromiso.estado || '—' }}</td>
+                <td>{{ nivelGobiernoTexto(compromiso.nivelGobierno) }}</td>
+                <td>{{ compromiso.unidad || '—' }}</td>
+                <td>
+                  {{ fechaTexto(compromiso.vencimiento) }} @if (compromiso.origenVencimiento ===
+                  'hito') {
+                  <small class="detail-hint">Derivado del próximo hito</small>
                   }
-                </tbody>
-              </table>
-            </div>
-          }
-        </section>
+                </td>
+              </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        }
+      </section>
 
-        <section class="detail-section" aria-labelledby="documentos-caso">
-          <h2 id="documentos-caso">Documentos ({{ d.documentos.length }})</h2>
-          @if (d.documentos.length === 0) {
-            <p class="empty-inline">Sin documentos registrados.</p>
-          } @else {
-            <div class="table-wrap">
-              <table class="data-table">
-                <thead>
-                  <tr>
-                    <th scope="col">Código</th>
-                    <th scope="col">Título</th>
-                    <th scope="col">Tipo</th>
-                    <th scope="col">Fecha</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @for (documento of d.documentos; track documento.id) {
-                    <tr>
-                      <td>
-                        <strong>{{ documento.codigo || 'Sin código' }}</strong>
-                      </td>
-                      <td class="celda-larga">{{ documento.titulo }}</td>
-                      <td>{{ documento.tipoNombre || documento.tipo || '—' }}</td>
-                      <td>{{ fechaTexto(documento.fecha) }}</td>
-                    </tr>
-                  }
-                </tbody>
-              </table>
-            </div>
-          }
-        </section>
+      <section class="detail-section" aria-labelledby="documentos-caso">
+        <h2 id="documentos-caso">Documentos ({{ d.documentos.length }})</h2>
+        @if (d.documentos.length === 0) {
+        <p class="empty-inline">Sin documentos registrados.</p>
+        } @else {
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th scope="col">Código</th>
+                <th scope="col">Título</th>
+                <th scope="col">Tipo</th>
+                <th scope="col">Fecha</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (documento of d.documentos; track documento.id) {
+              <tr>
+                <td>
+                  <strong>{{ documento.codigo || 'Sin código' }}</strong>
+                </td>
+                <td class="celda-larga">{{ documento.titulo }}</td>
+                <td>{{ documento.tipoNombre || documento.tipo || '—' }}</td>
+                <td>{{ fechaTexto(documento.fecha) }}</td>
+              </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        }
+      </section>
 
-        <section class="detail-section" aria-labelledby="historial-caso">
-          <h2 id="historial-caso">Historial ({{ d.historial.length }})</h2>
-          @if (d.historial.length === 0) {
-            <p class="empty-inline">Sin historial de estados registrado.</p>
-          } @else {
-            <div class="table-wrap">
-              <table class="data-table">
-                <thead>
-                  <tr>
-                    <th scope="col">Estado</th>
-                    <th scope="col">Desde</th>
-                    <th scope="col">Hasta</th>
-                    <th scope="col">Motivo</th>
-                    <th scope="col">Usuario</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @for (tramo of d.historial; track tramo.id) {
-                    <tr>
-                      <td>{{ tramo.estado || '—' }}</td>
-                      <td>{{ fechaTexto(tramo.desde) }}</td>
-                      <td>{{ fechaTexto(tramo.hasta) }}</td>
-                      <td class="celda-larga">{{ tramo.motivo || '—' }}</td>
-                      <td>{{ tramo.usuario || '—' }}</td>
-                    </tr>
-                  }
-                </tbody>
-              </table>
-            </div>
-          }
-        </section>
-      </div>
-
-      <aside class="ficha-lateral" aria-label="Resumen del expediente">
-        <app-expediente-completitud [completitud]="d.completitud" />
-        <app-riel-relaciones [enlaces]="enlacesRiel()" />
-      </aside>
+      <section class="detail-section" aria-labelledby="historial-caso">
+        <h2 id="historial-caso">Historial ({{ d.historial.length }})</h2>
+        @if (d.historial.length === 0) {
+        <p class="empty-inline">Sin historial de estados registrado.</p>
+        } @else {
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th scope="col">Estado</th>
+                <th scope="col">Desde</th>
+                <th scope="col">Hasta</th>
+                <th scope="col">Motivo</th>
+                <th scope="col">Usuario</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (tramo of d.historial; track tramo.id) {
+              <tr>
+                <td>{{ tramo.estado || '—' }}</td>
+                <td>{{ fechaTexto(tramo.desde) }}</td>
+                <td>{{ fechaTexto(tramo.hasta) }}</td>
+                <td class="celda-larga">{{ tramo.motivo || '—' }}</td>
+                <td>{{ tramo.usuario || '—' }}</td>
+              </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        }
+      </section>
     </div>
 
-    @if (panelHechoAbierto()) {
-      <app-evento-panel
-        [evento]="eventoEditado()"
-        [tipos]="tiposHecho()"
-        [cargandoTipos]="cargandoTipos()"
-        [codigoCaso]="d.caso.codigo"
-        [puedeModificar]="puedeModificar()"
-        [guardando]="guardandoEvento()"
-        [errorGuardado]="errorEvento()"
-        (cerrar)="cerrarPanelHecho()"
-        (guardar)="guardarHecho($event)"
-      />
-    }
-    @if (panelAnulacion(); as modoAnulacion) {
-      <app-anular-panel
-        [modo]="modoAnulacion"
-        entidad="caso"
-        [codigo]="d.caso.codigo"
-        [cascada]="true"
-        detalleCascada="sus alertas, su cronología, sus demandas, sus compromisos (con sus hitos) y sus documentos"
-        [enviando]="enviandoAnulacion()"
-        [errorEnvio]="errorAnulacion()"
-        [puedeConfirmar]="puedeAnular()"
-        (cerrar)="cerrarPanelAnulacion()"
-        (hecho)="confirmarAnulacion($event)"
-      />
-    }
-  }
+    <aside class="ficha-lateral" aria-label="Resumen del expediente">
+      <app-expediente-completitud [completitud]="d.completitud" />
+      <app-riel-relaciones [enlaces]="enlacesRiel()" />
+    </aside>
+  </div>
+
+  @if (panelHechoAbierto()) {
+  <app-evento-panel
+    [evento]="eventoEditado()"
+    [tipos]="tiposHecho()"
+    [cargandoTipos]="cargandoTipos()"
+    [codigoCaso]="d.caso.codigo"
+    [puedeModificar]="puedeModificar()"
+    [guardando]="guardandoEvento()"
+    [errorGuardado]="errorEvento()"
+    (cerrar)="cerrarPanelHecho()"
+    (guardar)="guardarHecho($event)"
+  />
+  } @if (panelDemandaAbierto()) {
+  <app-demanda-panel
+    [demanda]="demandaEditada()"
+    [codigoCaso]="d.caso.codigo"
+    [puedeModificar]="puedeModificar()"
+    [guardando]="guardandoDemanda()"
+    [errorGuardado]="errorDemanda()"
+    (cerrar)="cerrarPanelDemanda()"
+    (guardar)="guardarDemanda($event)"
+  />
+  } @if (panelAnulacion(); as modoAnulacion) {
+  <app-anular-panel
+    [modo]="modoAnulacion"
+    entidad="caso"
+    [codigo]="d.caso.codigo"
+    [cascada]="true"
+    detalleCascada="sus alertas, su cronología, sus demandas, sus compromisos (con sus hitos) y sus documentos"
+    [enviando]="enviandoAnulacion()"
+    [errorEnvio]="errorAnulacion()"
+    [puedeConfirmar]="puedeAnular()"
+    (cerrar)="cerrarPanelAnulacion()"
+    (hecho)="confirmarAnulacion($event)"
+  />
+  } }
 </section>

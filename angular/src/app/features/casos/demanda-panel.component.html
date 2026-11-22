@@ -1,0 +1,128 @@
+<div class="drawer-scrim" (click)="alFondo($event)" (keydown)="alTecla($event)">
+  <aside
+    #panel
+    class="drawer"
+    tabindex="-1"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="demanda-panel-titulo"
+  >
+    <header class="drawer-head">
+      <div class="demanda-panel-cabecera">
+        @if (codigoCaso()) {
+          <p class="demanda-panel-codigo">{{ codigoCaso() }}</p>
+        }
+        <h2 id="demanda-panel-titulo">
+          {{ demanda() ? 'Editar demanda' : 'Alta de demanda' }}
+        </h2>
+        <p class="demanda-panel-sub">
+          @if (demanda()) {
+            Sólo se envían los campos que cambian.
+          } @else {
+            El problema (3P) es obligatorio; propuesta y pedido son opcionales.
+          }
+        </p>
+      </div>
+
+      <button
+        type="button"
+        class="icon-button"
+        aria-label="Cerrar el panel de la demanda"
+        (click)="cerrar.emit()"
+      >
+        <app-icono nombre="cerrar" [tamano]="18" />
+      </button>
+    </header>
+
+    <div class="drawer-body">
+      @if (!puedeModificar()) {
+        <p class="form-hint" role="status">
+          Su rol no permite modificar las demandas de este caso.
+        </p>
+      }
+      @if (errorGuardado(); as fallo) {
+        <p class="form-error" role="alert">{{ fallo }}</p>
+      }
+      @if (mensajeLocal(); as mensaje) {
+        <p class="form-error" role="alert">{{ mensaje }}</p>
+      }
+
+      <form class="demanda-formulario" (submit)="alEnviarFormulario($event)">
+        <div class="form-field">
+          <label class="form-label" for="demanda-campo-problema">Problema</label>
+          <textarea
+            id="demanda-campo-problema"
+            class="form-textarea"
+            rows="3"
+            required
+            [value]="borrador().problema"
+            (input)="campo('problema', $event)"
+          ></textarea>
+        </div>
+
+        <div class="form-field">
+          <label class="form-label" for="demanda-campo-propuesta">Propuesta</label>
+          <textarea
+            id="demanda-campo-propuesta"
+            class="form-textarea"
+            rows="3"
+            [value]="borrador().propuesta"
+            (input)="campo('propuesta', $event)"
+          ></textarea>
+        </div>
+
+        <div class="form-field">
+          <label class="form-label" for="demanda-campo-pedido">Pedido</label>
+          <textarea
+            id="demanda-campo-pedido"
+            class="form-textarea"
+            rows="3"
+            [value]="borrador().pedido"
+            (input)="campo('pedido', $event)"
+          ></textarea>
+        </div>
+
+        <div class="form-field">
+          <label class="form-label" for="demanda-campo-estado">Estado de atención</label>
+          <select
+            id="demanda-campo-estado"
+            class="form-select"
+            [value]="borrador().estado"
+            (change)="campo('estado', $event)"
+          >
+            @for (estado of opcionesEstado(); track estado) {
+              <option [value]="estado">{{ estado }}</option>
+            }
+          </select>
+        </div>
+
+        <p class="form-hint">
+          @if (demanda()) {
+            La descripción original del documento no se edita desde este panel: sólo los 3P y el
+            estado de atención.
+          } @else {
+            El problema se guarda también como descripción de la demanda.
+          }
+        </p>
+
+        <div class="demanda-formulario-acciones">
+          <button
+            type="submit"
+            class="button-primary"
+            [disabled]="guardando() || !puedeModificar()"
+          >
+            {{ guardando() ? 'Guardando…' : demanda() ? 'Guardar cambios' : 'Registrar demanda' }}
+          </button>
+          <button
+            type="button"
+            class="button-secondary"
+            [disabled]="guardando()"
+            (click)="cerrar.emit()"
+          >
+            Cancelar
+          </button>
+        </div>
+      </form>
+    </div>
+  </aside>
+</div>

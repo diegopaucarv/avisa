@@ -655,8 +655,12 @@ export const SECCIONES_AYUDA: readonly SeccionAyuda[] = [
       {
         id: 'estado-caso',
         termino: 'Estado de caso',
-        definicion: 'Valores admitidos del catálogo de estados del caso.',
-        detalles: ['Activo', 'En seguimiento', 'Resuelto', 'Archivado'],
+        definicion:
+          'Situación operativa del expediente. Son tres valores: Abierto, mientras el caso exige seguimiento y admite hechos, demandas y compromisos; Resuelto, cuando la intervención concluyó; y Archivado, cuando se conserva como antecedente sin seguimiento activo. Archivar no borra: mantiene vínculos e historial.',
+        detalles: [
+          'Abierto · Resuelto · Archivado. Los indicadores y la bandeja cuentan como abiertos los expedientes en estado Abierto.',
+          'Anular no es archivar: anular retira el registro de la operación diaria y sólo lo restaura un rol con ese privilegio.',
+        ],
       },
       {
         id: 'estado-compromiso',

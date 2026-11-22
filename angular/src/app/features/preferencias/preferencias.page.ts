@@ -10,14 +10,60 @@ import {
 
 import { SesionStore } from '../../core/auth/sesion.store';
 import { CapacidadesService } from '../../core/permisos/capacidades.service';
+import { ALCANCES, esRegistro } from '../../dominio/mapeo';
+import type { Alcance } from '../../dominio/modelos';
 import { IconoComponent } from '../../shared/ui/icono.component';
 
 type Tema = 'claro' | 'oscuro';
 type Densidad = 'comoda' | 'compacta';
 
+/**
+ * `auto` significa «el ámbito que entregue la sesión»: la pantalla no impone un
+ * alcance que todavía nadie aplica.
+ */
+type AlcancePreferido = Alcance | 'auto';
+
+/** Mismas categorías que agrupa la bandeja de notificaciones. */
+type CategoriaAviso = 'Alerta' | 'Compromiso' | 'Documento' | 'Caso';
+type PreferenciasAviso = Record<CategoriaAviso, boolean>;
+
 /** Misma clave que lee el script de `index.html` antes del primer pintado. */
 const CLAVE_TEMA = 'avisa-theme';
 const CLAVE_DENSIDAD = 'avisa-density';
+const CLAVE_ALCANCE = 'avisa-alcance';
+const CLAVE_AVISOS = 'avisa-notificaciones';
+
+const AVISOS_DISPONIBLES: readonly {
+  clave: CategoriaAviso;
+  etiqueta: string;
+  pista: string;
+  icono: string;
+}[] = [
+  {
+    clave: 'Alerta',
+    etiqueta: 'Alertas',
+    pista: 'Avisos de alertas tempranas.',
+    icono: 'alertas',
+  },
+  {
+    clave: 'Compromiso',
+    etiqueta: 'Compromisos',
+    pista: 'Avisos de compromisos e hitos.',
+    icono: 'compromisos',
+  },
+  {
+    clave: 'Documento',
+    etiqueta: 'Documentos',
+    pista: 'Avisos sobre documentos del expediente.',
+    icono: 'documentos',
+  },
+  {
+    clave: 'Caso',
+    etiqueta: 'Casos',
+    pista: 'Avisos sobre casos y su riesgo.',
+    icono: 'casos',
+  },
+];
 
 /** Sólo referencia visual: la preferencia no tiene respaldo real todavía. */
 const TAMANOS = [25, 50, 100] as const;
@@ -64,14 +110,51 @@ function densidadInicial(plataforma: object): Densidad {
   return leer(CLAVE_DENSIDAD, plataforma) === 'compacta' ? 'compacta' : 'comoda';
 }
 
+function esAlcance(valor: unknown): valor is Alcance {
+  return typeof valor === 'string' && (ALCANCES as readonly string[]).includes(valor);
+}
+
+function alcanceInicial(plataforma: object): AlcancePreferido {
+  const guardado = leer(CLAVE_ALCANCE, plataforma);
+  return esAlcance(guardado) ? guardado : 'auto';
+}
+
+/** Los avisos se guardan como un único objeto JSON; todo lo desconocido cae en «activado». */
+function avisosIniciales(plataforma: object): PreferenciasAviso {
+  const porDefecto: PreferenciasAviso = {
+    Alerta: true,
+    Compromiso: true,
+    Documento: true,
+    Caso: true,
+  };
+
+  const guardado = leer(CLAVE_AVISOS, plataforma);
+  if (!guardado) return porDefecto;
+
+  try {
+    const bruto: unknown = JSON.parse(guardado);
+    if (!esRegistro(bruto)) return porDefecto;
+    return {
+      Alerta: bruto['Alerta'] !== false,
+      Compromiso: bruto['Compromiso'] !== false,
+      Documento: bruto['Documento'] !== false,
+      Caso: bruto['Caso'] !== false,
+    };
+  } catch {
+    return porDefecto;
+  }
+}
+
 /**
  * Preferencias del usuario.
  *
- * No hay perfil persistido en la base ni endpoint de preferencias: el tema y
- * la densidad se guardan en `localStorage` de este navegador. El tema reutiliza
- * el mecanismo real de la aplicación (`data-theme` en `<html>`, clave
- * `avisa-theme`), y la densidad usa el atributo `data-density` que ya estiliza
- * `global.css`. El tamaño de página no se guarda: ningún listado lo lee.
+ * No hay perfil persistido en la base ni endpoint de preferencias: el tema, la
+ * densidad, el ámbito predeterminado y las opciones de notificación se guardan
+ * en `localStorage` de este navegador con la misma mecánica (una clave por
+ * preferencia). El tema reutiliza el mecanismo real de la aplicación
+ * (`data-theme` en `<html>`, clave `avisa-theme`) y la densidad usa el atributo
+ * `data-density` que ya estiliza `global.css`. El tamaño de página no se
+ * guarda: ningún listado lo lee.
  */
 @Component({
   selector: 'app-preferencias',
@@ -148,6 +231,13 @@ function densidadInicial(plataforma: object): Densidad {
       color: var(--red);
     }
 
+    /* El control de ámbito conserva su ancho natural y puede partirse en
+       pantallas estrechas; .segmented no envuelve por sí solo. */
+    .pref-scope {
+      align-self: flex-start;
+      flex-wrap: wrap;
+    }
+
     .pref-size-row {
       display: flex;
       align-items: center;
@@ -178,6 +268,14 @@ export class PreferenciasPage {
 
   readonly tema = signal<Tema>(temaInicial(this.plataforma));
   readonly densidad = signal<Densidad>(densidadInicial(this.plataforma));
+  readonly alcance = signal<AlcancePreferido>(alcanceInicial(this.plataforma));
+  readonly avisos = signal<PreferenciasAviso>(avisosIniciales(this.plataforma));
+
+  readonly avisosDisponibles = AVISOS_DISPONIBLES;
+  readonly opcionesAlcance: readonly { valor: AlcancePreferido; etiqueta: string }[] = [
+    { valor: 'auto', etiqueta: 'Sesión' },
+    ...ALCANCES.map((alcance) => ({ valor: alcance, etiqueta: alcance })),
+  ];
 
   readonly mensaje = signal<string | null>(null);
   readonly guardado = signal(false);
@@ -209,6 +307,21 @@ export class PreferenciasPage {
     this.olvidarAviso();
   }
 
+  cambiarAlcance(alcance: AlcancePreferido): void {
+    if (this.alcance() === alcance) return;
+    this.alcance.set(alcance);
+    this.olvidarAviso();
+  }
+
+  alternarAviso(categoria: CategoriaAviso): void {
+    this.avisos.update((actuales) => {
+      const siguiente: PreferenciasAviso = { ...actuales };
+      siguiente[categoria] = !siguiente[categoria];
+      return siguiente;
+    });
+    this.olvidarAviso();
+  }
+
   /** Guarda las claves reales y aplica el resultado sin recargar la página. */
   guardar(): void {
     if (!isPlatformBrowser(this.plataforma)) return;
@@ -218,6 +331,8 @@ export class PreferenciasPage {
     try {
       window.localStorage.setItem(CLAVE_TEMA, resuelto);
       window.localStorage.setItem(CLAVE_DENSIDAD, this.densidad());
+      window.localStorage.setItem(CLAVE_ALCANCE, this.alcance());
+      window.localStorage.setItem(CLAVE_AVISOS, JSON.stringify(this.avisos()));
     } catch {
       this.guardado.set(false);
       this.mensaje.set(

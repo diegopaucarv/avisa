@@ -282,8 +282,8 @@ export class ResumenPage {
   readonly indicadores = computed<Indicador[]>(() => [
     this.indicador(
       'casos',
-      'Casos activos',
-      'Abiertos: Activo o En seguimiento',
+      'Casos abiertos',
+      'Estado Abierto',
       'casos',
       '',
       '/casos',

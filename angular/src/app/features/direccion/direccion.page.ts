@@ -162,7 +162,7 @@ export class DireccionPage {
 
   private readonly casosTotal = this.contarCasos({});
 
-  private readonly casosActivosRec = this.contarCasos({ abiertos: 'true' });
+  private readonly casosAbiertosRec = this.contarCasos({ abiertos: 'true' });
 
   private readonly alertasRec = consulta<number>({
     fuente: () => urlConParametros(urlApi('/v1/alerts'), paramsDePagina({ pagina: 1, tamano: 1 })),
@@ -203,7 +203,7 @@ export class DireccionPage {
     recurso: this.contarCasos({ tematica: valor }),
   }));
 
-  readonly casosActivos = computed(() => this.casosActivosRec.valor() ?? null);
+  readonly casosAbiertos = computed(() => this.casosAbiertosRec.valor() ?? null);
   readonly alertas = computed(() => this.alertasRec.valor() ?? null);
   readonly compromisos = computed(() => this.compromisosRec.valor() ?? null);
   readonly demandasSinCaso = computed(() => this.demandasRec.valor() ?? null);
@@ -215,7 +215,7 @@ export class DireccionPage {
 
   private readonly recursos = computed<Consulta<number>[]>(() => [
     this.casosTotal,
-    this.casosActivosRec,
+    this.casosAbiertosRec,
     this.alertasRec,
     this.compromisosRec,
     this.demandasRec,

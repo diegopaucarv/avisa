@@ -69,7 +69,8 @@ export type CaseListQuery = {
   anulados?: boolean;
   /**
    * `true` se queda con los estados abiertos del catálogo (`es_activo`), no con
-   * una etiqueta concreta: `Activo` y `En seguimiento` cuentan igual.
+   * una etiqueta concreta: tras la migración 33 sólo `Abierto` lo es, pero la
+   * regla no depende de su grafía.
    */
   abiertos?: boolean;
   /**
@@ -126,7 +127,7 @@ export type CaseListItem = {
 export type CaseConteos = {
   /** Filas visibles no anuladas con los filtros vigentes. */
   todos: number;
-  /** Estados con `es_activo = true` (hoy `Activo` y `En seguimiento`). */
+  /** Estados con `es_activo = true` (tras la migración 33, sólo `Abierto`). */
   abiertos: number;
   /** Casos en el estado canónico `Resuelto`. */
   resueltos: number;
@@ -199,9 +200,9 @@ async function construirWhere(
   if (query.anulados) where.push("c.anulado_en is not null");
 
   if (!opciones.sinEstado) {
-    // «Abiertos» se define por catálogo, no por una etiqueta: un caso nuevo nace
-    // en `Activo` y los del legado quedaron en `En seguimiento`. Ambos tienen
-    // `es_activo = true`, así que el indicador no cambia al reclasificar.
+    // «Abiertos» se define por catálogo, no por una etiqueta: la migración 33
+    // unificó `Activo` y `En seguimiento` en `Abierto` con `es_activo = true`,
+    // así que el indicador no depende del nombre que tome el estado abierto.
     if (esVerdadero(query.abiertos)) where.push("ec.es_activo is true");
 
     // Cada filtro de catálogo se resuelve a su id y se compara la columna FK, no

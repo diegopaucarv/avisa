@@ -2215,11 +2215,11 @@
                         la RLS del rol que consulta se aplica: el caso anulado
                         (<code>CS-MI-ITE-2026-02</code>) no se ve con
                         <code>avisa_app</code>. Columnas del mockup ausentes en
-                        la vista: <code>estado</code>, <code>fecha_inicio</code>,
-                        <code>ultimo_hecho</code>, <code>compromisos</code>,
-                        <code>tipo_compromiso</code> y <code>documentos</code>.
-                        Propuesta de <code>CREATE OR REPLACE VIEW</code> (<b
-                            >no ejecutada</b
+                        la vista: <code>estado</code>,
+                        <code>fecha_inicio</code>, <code>ultimo_hecho</code>,
+                        <code>compromisos</code>, <code>tipo_compromiso</code> y
+                        <code>documentos</code>. Propuesta de
+                        <code>CREATE OR REPLACE VIEW</code> (<b>no ejecutada</b
                         >):
                         <pre
                             class="code-block"
@@ -2266,15 +2266,14 @@ SELECT
       WHERE d.caso_id = c.id AND d.anulado_en IS NULL) AS documentos
   FROM core.casos c
   LEFT JOIN core.usuarios pf                 ON pf.id = c.punto_focal_usuario_id
-  JOIN analytics.vw_geo_distrito g           ON g.distrito_id = c.distrito_principal_id
-  JOIN core.cat_subsectores s                ON s.id = c.subsector_id
-  JOIN core.cat_tematicas tm                 ON tm.id = c.tematica_id
-  JOIN core.cat_unidades_organicas uo        ON uo.id = c.unidad_responsable_id
-  JOIN core.cat_niveles_conflicto nc         ON nc.id = c.nivel_conflicto_id
-  JOIN core.cat_niveles_riesgo nr            ON nr.id = c.nivel_riesgo_id
+  LEFT JOIN analytics.vw_geo_distrito g      ON g.distrito_id = c.distrito_principal_id
+  LEFT JOIN core.cat_subsectores s           ON s.id = c.subsector_id
+  LEFT JOIN core.cat_tematicas tm            ON tm.id = c.tematica_id
+  LEFT JOIN core.cat_unidades_organicas uo   ON uo.id = c.unidad_responsable_id
+  LEFT JOIN core.cat_niveles_conflicto nc    ON nc.id = c.nivel_conflicto_id
+  LEFT JOIN core.cat_niveles_riesgo nr       ON nr.id = c.nivel_riesgo_id
   LEFT JOIN core.cat_alcances_geograficos al ON al.id = core.alcance_caso(c.id)
-  LEFT JOIN core.cat_prioridades_atencion pa ON pa.id = c.prioridad_id
-  LEFT JOIN core.cat_estados_caso ec         ON ec.id = c.estado_id;</code></pre>
+  LEFT JOIN core.cat_prioridades_atencion pa ON pa.id = c.prioridad_id;</code></pre>
                     </li>
                     <li>
                         El alcance <b>nunca</b> se elige a mano: lo deriva
@@ -2339,15 +2338,17 @@ SELECT
                     </li>
                 </ul>
 
-                <h3>Pendiente de decisión</h3>
+                <h3>Estado de la cobertura</h3>
                 <ul>
                     <li>
-                        <b>Cobertura de filas:</b> la vista devuelve 21 de los
-                        34 casos no anulados; 13 quedan fuera por sus
-                        <code>INNER JOIN</code> (sin distrito, conflicto,
-                        riesgo, subsector o temática). ¿El Anexo 15 los lista
-                        con «—» o los excluye? Es decisión de OAIPCS/producto;
-                        el pie dice 21 porque es lo que devuelve la vista.
+                        <b>Cobertura de filas:</b> la vista ya devuelve todas
+                        las filas. Con <code>LEFT JOIN</code> en distrito,
+                        subsector, temática, unidad, conflicto, riesgo, alcance
+                        y prioridad, un caso sin dato aparece con «—» en esa
+                        columna en lugar de desaparecer. Decisión aplicada en
+                        <code>migration/32_anexo15_left_join.sql</code>: 35
+                        filas como propietario (12 sin región) y 34 vigentes
+                        visibles para un rol sujeto a RLS.
                     </li>
                     <li>
                         <b>Clasificación del compromiso:</b> el item 16 pide
@@ -2370,26 +2371,26 @@ SELECT
 
         <script>
             (function () {
-                'use strict';
-                var tbody = document.getElementById('matrix-rows');
+                "use strict";
+                var tbody = document.getElementById("matrix-rows");
                 var rows = Array.prototype.slice.call(
-                    tbody.querySelectorAll('tr'),
+                    tbody.querySelectorAll("tr"),
                 );
-                var rangeLabel = document.getElementById('range-label');
-                var pageLabel = document.getElementById('page-label');
-                var prevBtn = document.getElementById('prev');
-                var nextBtn = document.getElementById('next');
+                var rangeLabel = document.getElementById("range-label");
+                var pageLabel = document.getElementById("page-label");
+                var prevBtn = document.getElementById("prev");
+                var nextBtn = document.getElementById("next");
                 var PAGE = 10;
                 var state = {
-                    q: '',
-                    estado: 'Todos',
-                    prioridad: 'Todas',
-                    alcance: 'Todos',
-                    tematica: 'Todas',
-                    subsector: 'Todos',
-                    region: 'Todas',
-                    unidad: 'Todas',
-                    orden: 'inicio',
+                    q: "",
+                    estado: "Todos",
+                    prioridad: "Todas",
+                    alcance: "Todos",
+                    tematica: "Todas",
+                    subsector: "Todos",
+                    region: "Todas",
+                    unidad: "Todas",
+                    orden: "inicio",
                     page: 1,
                 };
 
@@ -2425,38 +2426,38 @@ SELECT
 
                 function matches(row) {
                     var d = row.dataset;
-                    if (state.estado !== 'Todos' && d.estado !== state.estado)
+                    if (state.estado !== "Todos" && d.estado !== state.estado)
                         return false;
                     if (
-                        state.prioridad !== 'Todas' &&
+                        state.prioridad !== "Todas" &&
                         d.prioridad !== state.prioridad
                     )
                         return false;
                     if (
-                        state.alcance !== 'Todos' &&
+                        state.alcance !== "Todos" &&
                         d.alcance !== state.alcance
                     )
                         return false;
                     if (
-                        state.tematica !== 'Todas' &&
+                        state.tematica !== "Todas" &&
                         d.tematica !== state.tematica
                     )
                         return false;
                     if (
-                        state.subsector !== 'Todos' &&
+                        state.subsector !== "Todos" &&
                         d.subsector !== state.subsector
                     )
                         return false;
-                    if (state.region !== 'Todas' && d.region !== state.region)
+                    if (state.region !== "Todas" && d.region !== state.region)
                         return false;
-                    if (state.unidad !== 'Todas' && d.unidad !== state.unidad)
+                    if (state.unidad !== "Todas" && d.unidad !== state.unidad)
                         return false;
                     if (state.q) {
                         var hay = (
                             d.codigo +
-                            ' ' +
+                            " " +
                             d.nombre +
-                            ' ' +
+                            " " +
                             d.region
                         ).toLowerCase();
                         if (hay.indexOf(state.q.toLowerCase()) === -1)
@@ -2477,20 +2478,20 @@ SELECT
                         tbody.removeChild(tbody.firstChild);
 
                     if (total === 0) {
-                        var trEmpty = document.createElement('tr');
-                        trEmpty.className = 'empty-row';
-                        var tdEmpty = document.createElement('td');
+                        var trEmpty = document.createElement("tr");
+                        trEmpty.className = "empty-row";
+                        var tdEmpty = document.createElement("td");
                         tdEmpty.colSpan = 18;
-                        var divEmpty = document.createElement('div');
-                        divEmpty.className = 'empty-state';
+                        var divEmpty = document.createElement("div");
+                        divEmpty.className = "empty-state";
                         divEmpty.textContent =
-                            'Ningún caso coincide con los filtros.';
+                            "Ningún caso coincide con los filtros.";
                         tdEmpty.appendChild(divEmpty);
                         trEmpty.appendChild(tdEmpty);
                         tbody.appendChild(trEmpty);
                     } else {
                         list.slice(start, end).forEach(function (row, i) {
-                            var n = row.querySelector('.col-n');
+                            var n = row.querySelector(".col-n");
                             if (n) n.textContent = String(start + i + 1);
                             tbody.appendChild(row);
                         });
@@ -2498,43 +2499,43 @@ SELECT
 
                     var rango =
                         total === 0
-                            ? '0 de 0'
-                            : start + 1 + '–' + end + ' de ' + total;
+                            ? "0 de 0"
+                            : start + 1 + "–" + end + " de " + total;
                     rangeLabel.textContent =
-                        rango + ' · el caso anulado no aparece';
+                        rango + " · el caso anulado no aparece";
                     pageLabel.textContent =
-                        'Página ' + state.page + ' de ' + pages;
+                        "Página " + state.page + " de " + pages;
                     prevBtn.disabled = state.page <= 1;
                     nextBtn.disabled = state.page >= pages;
                 }
 
                 document
-                    .getElementById('q')
-                    .addEventListener('input', function (e) {
+                    .getElementById("q")
+                    .addEventListener("input", function (e) {
                         state.q = e.target.value.trim();
                         state.page = 1;
                         render();
                     });
 
                 var chips = Array.prototype.slice.call(
-                    document.querySelectorAll('.status-chip'),
+                    document.querySelectorAll(".status-chip"),
                 );
                 chips.forEach(function (chip) {
-                    chip.addEventListener('click', function () {
+                    chip.addEventListener("click", function () {
                         state.estado = chip.dataset.estado;
                         state.page = 1;
                         chips.forEach(function (c) {
-                            c.setAttribute('aria-pressed', String(c === chip));
+                            c.setAttribute("aria-pressed", String(c === chip));
                         });
                         render();
                     });
                 });
 
                 var selects = Array.prototype.slice.call(
-                    document.querySelectorAll('select[data-filter]'),
+                    document.querySelectorAll("select[data-filter]"),
                 );
                 selects.forEach(function (sel) {
-                    sel.addEventListener('change', function () {
+                    sel.addEventListener("change", function () {
                         state[sel.dataset.filter] = sel.value;
                         state.page = 1;
                         render();
@@ -2542,48 +2543,48 @@ SELECT
                 });
 
                 document
-                    .getElementById('clear')
-                    .addEventListener('click', function () {
-                        state.q = '';
-                        state.estado = 'Todos';
-                        state.prioridad = 'Todas';
-                        state.alcance = 'Todos';
-                        state.tematica = 'Todas';
-                        state.subsector = 'Todos';
-                        state.region = 'Todas';
-                        state.unidad = 'Todas';
-                        state.orden = 'inicio';
+                    .getElementById("clear")
+                    .addEventListener("click", function () {
+                        state.q = "";
+                        state.estado = "Todos";
+                        state.prioridad = "Todas";
+                        state.alcance = "Todos";
+                        state.tematica = "Todas";
+                        state.subsector = "Todos";
+                        state.region = "Todas";
+                        state.unidad = "Todas";
+                        state.orden = "inicio";
                         state.page = 1;
-                        document.getElementById('q').value = '';
+                        document.getElementById("q").value = "";
                         chips.forEach(function (c) {
                             c.setAttribute(
-                                'aria-pressed',
-                                String(c.dataset.estado === 'Todos'),
+                                "aria-pressed",
+                                String(c.dataset.estado === "Todos"),
                             );
                         });
                         selects.forEach(function (sel) {
                             var key = sel.dataset.filter;
                             sel.value =
-                                key === 'orden' ? 'inicio' : defaultOption(key);
+                                key === "orden" ? "inicio" : defaultOption(key);
                         });
                         render();
                     });
 
                 function defaultOption(key) {
-                    if (key === 'alcance' || key === 'subsector')
-                        return 'Todos';
-                    if (key === 'region') return 'Todas';
-                    return 'Todas';
+                    if (key === "alcance" || key === "subsector")
+                        return "Todos";
+                    if (key === "region") return "Todas";
+                    return "Todas";
                 }
 
-                prevBtn.addEventListener('click', function () {
+                prevBtn.addEventListener("click", function () {
                     if (state.page > 1) {
                         state.page -= 1;
                         render();
                     }
                 });
 
-                nextBtn.addEventListener('click', function () {
+                nextBtn.addEventListener("click", function () {
                     state.page += 1;
                     render();
                 });

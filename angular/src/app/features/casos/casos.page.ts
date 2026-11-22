@@ -30,7 +30,7 @@ type VerRegistros = 'activos' | 'anulados';
 type FiltrosCasos = {
   q: string;
   estado: string;
-  /** `abiertos=true`: estados con `es_activo` (hoy `Activo` y `En seguimiento`). */
+  /** `abiertos=true`: estados del catálogo con `es_activo` (hoy sólo `Abierto`). */
   abiertos: boolean;
   prioridad: string;
   alcance: string;
@@ -95,7 +95,8 @@ function opcionesDe(catalogo: Record<string, unknown>, clave: string): OpcionFil
  * No se codifican etiquetas en el cliente: el mismo valor que ofrece el
  * catálogo es el que valida la API (`tematica` por nombre, `unidad` por
  * siglas). El estado ya no sale del catálogo: la barra usa cuatro chips
- * operativos (`Todos`, `Abiertos`, `Resueltos`, `Archivados`).
+ * operativos (`Todos`, `Abiertos`, `Resueltos`, `Archivados`), y `Abiertos`
+ * viaja como `abiertos=true` porque el estado se define por `es_activo`.
  */
 function aCatalogosCasos(bruto: unknown): CatalogosCasos {
   const registro = esRegistro(bruto) ? bruto : {};
