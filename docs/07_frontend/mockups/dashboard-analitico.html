@@ -1957,6 +1957,18 @@
                     caso, compromisos con plazo) y la
                     <b>capacidad del equipo</b>, no la lectura institucional.
                 </p>
+                <p class="meta-line">
+                    Las vistas de agregación de este panel
+                    (<code>vw_carga_especialista</code>,
+                    <code>vw_alertas_sin_triage</code>,
+                    <code>vw_cobertura_regional</code>,
+                    <code>vw_primera_respuesta</code> y
+                    <code>vw_anexo_14_seguimiento_compromisos</code>) se
+                    declaran en el contrato de series; salvo la última, todas
+                    <b>requiere</b> crearse. Los números que se ven aquí son el
+                    recuento directo del snapshot, no la salida de la vista, y
+                    no hay una serie dibujada por encima de ellas.
+                </p>
             </section>
 
             <!-- ─────────────────── CONTRATO DE SERIES ─────────────────── -->
@@ -2223,7 +2235,10 @@
                     Las tres rutas de lectura de cada tarjeta, para que el
                     diseño no se evalúe solo con datos. El endpoint de agregados
                     <code>GET /api/v1/analitica/resumen</code>
-                    <b>requiere</b> ser creado; hoy no existe.
+                    <b>requiere</b> ser creado; hoy no existe. Esta vista es de
+                    <b>solo lectura</b>: no hay acción destructiva que confirmar
+                    (ni borrado, ni anulación de caso); el único control que
+                    escribe algo es la hoja de impresión, marcada como borrador.
                 </p>
                 <div class="grid three-col">
                     <article class="card">

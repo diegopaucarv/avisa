@@ -3153,11 +3153,16 @@
                             <tr>
                                 <td>Permisos por pestaña y acción</td>
                                 <td>
-                                    RLS <code>core.puede_editar()</code> ·
-                                    <code>puede_eliminar()</code> (item 49)
+                                    RLS general
+                                    <code>core.puede_editar()</code> ·
+                                    <code>puede_eliminar()</code> existe, pero
+                                    no distingue pestañas de ETL
                                 </td>
                                 <td>
-                                    <span class="flag flag-ok">Existe</span>
+                                    <span class="flag flag-bad"
+                                        ><span class="req">requiere</span> RLS
+                                        por pestaña</span
+                                    >
                                 </td>
                             </tr>
                             <tr>
