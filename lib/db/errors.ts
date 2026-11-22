@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { ConfigError } from "./config-error";
 
 export class ApiError extends Error {
   constructor(
@@ -21,6 +22,13 @@ export function jsonError(error: unknown): NextResponse {
     return NextResponse.json(
       { detail: error.message, code: error.code },
       { status: error.status },
+    );
+  }
+
+  if (error instanceof ConfigError) {
+    return NextResponse.json(
+      { detail: error.message, code: "CONFIG" },
+      { status: 503 },
     );
   }
 

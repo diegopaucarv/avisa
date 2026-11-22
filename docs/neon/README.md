@@ -374,10 +374,11 @@ avisa_app`, que en Neon no aplica; hay que cortar en `-- 1 · Comprobación` y
   `neondb_owner` la vista devuelve 35 filas; como `avisa_api` con
   `set_config('app.rol_codigo', ...)` devuelve 34; sin variables de sesión, 0.
 
-`migration/` contiene dos archivos numerados `32`. Se aplicó
-`32_anexo15_left_join.sql`; `32_exigir_anulacion_puede_eliminar.sql` (endurecer
-`core.exigir_anulacion` para exigir `puede_eliminar`) sigue **sin aplicar** en
-ninguna de las dos bases.
+`migration/` contiene dos archivos numerados `32`, y **ambos están aplicados**:
+`32_anexo15_left_join.sql` (la vista del Anexo 15) y
+`32_exigir_anulacion_puede_eliminar.sql` (la guarda `core.exigir_anulacion`). En
+Neon lo confirma `pg_proc`: la función llama a `core.puede_eliminar()`. Es una
+colisión de numeración heredada, no un pendiente de ejecución.
 
 ---
 

@@ -1,4 +1,5 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
+import { ConfigError } from "./config-error";
 
 export const SESSION_COOKIE = "avisa_session";
 export const SESSION_MAX_AGE_SECONDS = 60 * 60 * 8;
@@ -19,8 +20,8 @@ export type SessionPayload = {
 function sessionSecret(): string {
   const value = process.env.APP_SESSION_SECRET;
   if (!value || value.length < 32) {
-    throw new Error(
-      "APP_SESSION_SECRET debe existir y tener al menos 32 caracteres.",
+    throw new ConfigError(
+      "Falta la variable de entorno APP_SESSION_SECRET en el servidor (mínimo 32 caracteres).",
     );
   }
   return value;

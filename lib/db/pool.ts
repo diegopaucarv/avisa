@@ -1,12 +1,13 @@
 import { Pool } from "pg";
+import { ConfigError } from "./config-error";
 
 type PoolGlobal = typeof globalThis & { __avisaPool?: Pool };
 
 function resolveConnectionString(): string {
   const url = process.env.APP_DATABASE_URL ?? process.env.DATABASE_URL;
   if (!url) {
-    throw new Error(
-      "Falta APP_DATABASE_URL. Usa el rol avisa_api (nunca el superusuario avisa).",
+    throw new ConfigError(
+      "Falta la variable de entorno APP_DATABASE_URL en el servidor. Debe usar el rol avisa_api (nunca el superusuario avisa).",
     );
   }
   return url;

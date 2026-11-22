@@ -223,7 +223,7 @@ su ruta es contrato de `compose.yaml` (ver §5.c).
 | `avisa_actual/CLASIFICACION_BASE_V9_EN_VIVO.md`      | **eliminado**                                                 | inventario de las 279 tablas (255 lógicas) / 26 esquemas                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | absorbido en `BRECHA` §12–§13 y retirado el 2026-11-18              |
 | `AVISA_PRODUCE_v9(1).md`                             | **eliminado**                                                 | texto íntegro contenido en v10 (283/284 encabezados; sólo difiere el título y 57 líneas)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | absorbido en `AVISA_PRODUCE_v10.md`; retirado el 2026-11-18         |
 
-### 2.1 · Migraciones de alineación con la Guía (12–32)
+### 2.1 · Migraciones de alineación con la Guía (12–35)
 
 Se aplican a mano, en orden, sobre la base ya cargada y con los parches 6–24 puestos. Todas van en una
 transacción y traen su bloque de reversión comentado.
@@ -251,6 +251,19 @@ transacción y traen su bloque de reversión comentado.
 | 30  | `migration/30_alcance_derivado.sql`                   | alcance derivado de `core.caso_regiones` (`core.alcance_caso`), `regiones.alcance_id` y `security_invoker` del Anexo 15        | **aplicada** |
 | 31  | `migration/31_casos_en_seguimiento.sql`               | los 35 casos del legado pasan de `Activo` a `En seguimiento`, con su tramo de historial                                        | **aplicada** |
 | 32  | `migration/32_exigir_anulacion_puede_eliminar.sql`    | `core.exigir_anulacion` exige `puede_eliminar`, no `puede_editar`: anular y restaurar quedan en `administrador` + `sectorista` | **aplicada** |
+| 32b | `migration/32_anexo15_left_join.sql`                  | Anexo 15: los ocho `JOIN` de catálogo pasan a `LEFT JOIN` y las columnas sin dato publican `—` en lugar de perder la fila      | **aplicada** |
+| 33  | `migration/33_estado_abierto_unico.sql`               | `Activo` y `En seguimiento` se unifican en `Abierto`; el catálogo queda en 1, 3 y 4                                            | **aplicada** |
+| 34  | `migration/34_historial_tramo_unico.sql`              | retira los tramos sintéticos del historial y deja un solo tramo abierto por caso                                               | **aplicada** |
+| 35  | `migration/35_fecha_inicio_real.sql`                  | `core.casos.fecha_inicio` toma la fecha del legado, no la del día de carga                                                     | **aplicada** |
+
+Hay dos archivos numerados `32`: `32_exigir_anulacion_puede_eliminar.sql` (fila 32) y
+`32_anexo15_left_join.sql` (fila 32b). Es una colisión de numeración heredada; ambos están aplicados y
+no se renombró ninguno para no romper los enlaces que ya los citan.
+
+Las migraciones 32b y 33–35 se aplicaron también en **Neon** el 2026-11-22 con `neondb_owner` desde el
+host directo. Verificado allí: 35 casos como dueño y 34 como `avisa_api` con `app.rol_codigo`
+(RLS intacta: 0 filas sin sesión), tres estados en el catálogo, 35 tramos de historial abiertos y 35
+filas en la vista del Anexo 15. El detalle está en `docs/neon/README.md` §7.1.
 
 El detalle de lo que cada una resolvió, y lo que sigue abierto, está en
 `01_requisitos/GAPS_GUIA_SQL_UI.md` y en `04_migracion/DECISIONES_D3_D4_D7_D9_D10.md`.
