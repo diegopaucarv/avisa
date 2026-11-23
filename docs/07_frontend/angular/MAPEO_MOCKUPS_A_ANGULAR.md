@@ -27,8 +27,8 @@ Los mockups son referencias de presentación, no fuentes para copiar registros d
 ### Lista temporal, asistencia y fichas
 
 - **Mockup canónico:** `actores_ventana_flotante_centrada_con_lista_de_asistencia_y_fichas.html`. Integra el directorio con acciones por fila, estado seleccionado, ventana flotante centrada/arrastrable, minimización/cierre, lista vacía, padrón de asistencia y exportación de fichas.
-- **Punto Angular existente:** `ActoresPage` (`features/directorio/actores.page.{ts,html}`) contiene tabla paginada, filtros y apertura de la ficha. No hay lista temporal ni padrón de asistencia en la SPA.
-- **Componente nuevo propuesto:** `ListaTemporalComponent`, montado desde `ActoresPage`; el botón por fila añade/quita actores, el contador y la lista sobreviven a paginación mientras se permanece en la pantalla. La selección es temporal; no se ha identificado un recurso API para persistirla. No introducir `localStorage` o una tabla de base de datos para este flujo sin requerimiento.
+- **Punto Angular existente:** `ActoresPage` (`features/directorio/actores.page.{ts,html}`) contiene tabla paginada, filtros y apertura de la ficha.
+- **Estado:** implementada lista temporal en `ActoresPage`; permite agregar/quitar actores, ver la selección y conservarla al paginar o filtrar mientras la vista permanece montada. La selección vive sólo en memoria, sin `localStorage` ni tabla, porque no hay requerimiento de persistencia. Siguen pendientes el padrón de asistencia y sus exportaciones.
 - **Exportación:** `app-exportar-menu` exporta la entidad/listado existente, pero no genera el formato de asistencia o un dossier de fichas. Esas dos salidas requieren especificar los formatos y comprobar qué campos están disponibles. No tratar el `alert()` del mockup como una exportación implementada.
 
 ### Tarjetas de casos
@@ -72,7 +72,7 @@ Los mockups son referencias de presentación, no fuentes para copiar registros d
 | --- | --- | --- |
 | Perfil del actor | `ActoresPage` + `ActorPanelComponent` | Rediseño del drawer; preservar acceso PII auditado |
 | Edición del actor | `ActoresPage`; nuevo `ActorEdicionPanelComponent` | No existe escritura Angular ni endpoint de actores |
-| Lista temporal | `ActoresPage`; nuevo `ListaTemporalComponent` | No existe selección persistente entre páginas ni exportación de asistencia |
+| Lista temporal | `ActoresPage` | ✔ Selección temporal en memoria entre filtros/páginas; padrón de asistencia y exportación siguen pendientes |
 | Tarjetas de casos | `CasosPage` + `CasoVistaPreviaComponent` | Base existente; aplicar presentación sin alterar filtros/datos |
 | Detalle de alerta | `AlertasPage` + `AlertaPanelComponent` | Base de detalle/flujo existente; actualizar composición |
 | Panorama territorial | `MapaPage` + `PanoramaService` + `panorama.agregados.ts` | Las dos variantes describían la misma superficie, ya hay mapa/bandas/tabla/cajón |
@@ -96,4 +96,4 @@ Se eliminaron 12 alternativas después de conservar ocho fuentes canónicas:
 - `alertas_tempranas_solicitar_modificaci_n_2.html`
 - `casos_modal_detalle_y_mapa_de_actores.html`
 
-**No se portó ningún mockup a Angular en este cambio.** La siguiente etapa de implementación debe resolver primero los dos bloqueos de contrato: escritura de actores y solicitud/auditoría/notificación de modificación de alertas.
+**Avance de implementación (2026-11-23).** La lista temporal del mockup de actores ya está integrada en Angular y probada. Las restantes superficies siguen parciales o bloqueadas por contrato: escritura de actores y solicitud/auditoría/notificación de modificación de alertas requieren endpoints, autorización y auditoría antes de habilitar sus acciones.

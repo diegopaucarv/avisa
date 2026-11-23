@@ -8,6 +8,15 @@
       </p>
     </div>
     <div class="view-actions">
+      <button
+        type="button"
+        class="button-secondary"
+        [attr.aria-expanded]="listaTemporalAbierta()"
+        aria-controls="lista-temporal-actores"
+        (click)="listaTemporalAbierta.set(!listaTemporalAbierta())"
+      >
+        Lista temporal <span class="lista-contador">{{ listaTemporal().length }}</span>
+      </button>
       <app-exportar-menu entidad="actores" (fallo)="alFallarExportacion($event)" />
       <p class="result-count" aria-live="polite">{{ total() }} actores</p>
     </div>
@@ -68,6 +77,43 @@
     <button type="button" class="button-secondary" (click)="limpiar()">Limpiar filtros</button>
   </div>
 
+  @if (listaTemporalAbierta()) {
+  <section class="lista-temporal-panel" id="lista-temporal-actores" aria-labelledby="titulo-lista-temporal">
+    <header class="lista-temporal-cabecera">
+      <div>
+        <h2 id="titulo-lista-temporal">Lista temporal de actores</h2>
+        <p>Selección de trabajo de esta sesión; se conserva al cambiar los filtros y las páginas.</p>
+      </div>
+      <div class="lista-temporal-acciones">
+        @if (listaTemporal().length > 0) {
+        <button type="button" class="button-secondary" (click)="vaciarLista()">Vaciar lista</button>
+        }
+        <button type="button" class="button-secondary" (click)="listaTemporalAbierta.set(false)">Cerrar</button>
+      </div>
+    </header>
+    @if (listaTemporal().length === 0) {
+    <p class="lista-temporal-vacia">Aún no agregaste actores. Usa «Agregar» en cualquier fila del directorio.</p>
+    } @else {
+    <ul class="lista-temporal-items">
+      @for (actor of listaTemporal(); track actor.id) {
+      <li>
+        <div>
+          <strong>{{ actor.nombre }}</strong>
+          <span>{{ actor.tipo || actor.naturaleza }} · {{ actor.region || 'Región no registrada' }}</span>
+        </div>
+        <button
+          type="button"
+          class="lista-quitar"
+          [attr.aria-label]="'Quitar ' + actor.nombre + ' de la lista temporal'"
+          (click)="quitarDeLista(actor.id)"
+        >Quitar</button>
+      </li>
+      }
+    </ul>
+    }
+  </section>
+  }
+
   @if (estado() === "error") {
   <div class="empty-state" role="alert">
     <strong>No se pudieron cargar los actores</strong>
@@ -102,6 +148,7 @@
           <th scope="col">Función</th>
           <th scope="col">Región</th>
           <th scope="col">Organización ancla</th>
+          <th scope="col"><span class="sr-only">Lista temporal</span></th>
         </tr>
       </thead>
       <tbody>
@@ -129,6 +176,17 @@
           <td>{{ actor.funcion || "No determinado" }}</td>
           <td>{{ actor.region || "—" }}</td>
           <td class="actor-organizacion">{{ actor.organizacionAncla || "—" }}</td>
+          <td>
+            <button
+              type="button"
+              class="button-secondary button-lista"
+              [attr.aria-pressed]="estaEnLista(actor)"
+              [attr.aria-label]="(estaEnLista(actor) ? 'Quitar de' : 'Agregar a') + ' lista temporal: ' + actor.nombre"
+              (click)="alternarLista(actor, $event)"
+            >
+              {{ estaEnLista(actor) ? 'Quitar' : 'Agregar' }}
+            </button>
+          </td>
         </tr>
         }
       </tbody>

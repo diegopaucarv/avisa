@@ -27,6 +27,7 @@ import {
   type OpcionTerritorio,
 } from '../../shared/ui/territorio-buscador.component';
 import { ActorPanelComponent } from './actor-panel.component';
+import { alternarActorLista, quitarActorLista } from './lista-temporal';
 import {
   NATURALEZAS,
   aActorDirectorio,
@@ -148,6 +149,95 @@ const FILTROS_INICIALES: FiltrosActores = {
       font-size: 9.5px;
     }
 
+    .lista-contador {
+      display: inline-grid;
+      min-width: 18px;
+      height: 18px;
+      margin-left: 4px;
+      place-items: center;
+      border-radius: 999px;
+      background: #eaf1fb;
+      color: #2455a2;
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    .button-lista {
+      min-height: 27px;
+      padding: 0 8px;
+    }
+
+    .lista-temporal-panel {
+      padding: 14px 16px;
+      border: 1px solid #dce5ef;
+      border-radius: 9px;
+      background: #fff;
+      box-shadow: 0 4px 16px rgb(25 45 68 / 5%);
+    }
+
+    .lista-temporal-cabecera,
+    .lista-temporal-acciones,
+    .lista-temporal-items li {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .lista-temporal-cabecera h2 {
+      margin: 0;
+      color: #1a2b3e;
+      font: 700 14px/1.4 var(--font-display);
+    }
+
+    .lista-temporal-cabecera p,
+    .lista-temporal-vacia {
+      margin: 4px 0 0;
+      color: #7b8896;
+      font-size: 11px;
+      line-height: 1.5;
+    }
+
+    .lista-temporal-items {
+      display: grid;
+      gap: 0;
+      margin: 12px 0 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .lista-temporal-items li {
+      min-width: 0;
+      padding: 9px 0;
+      border-top: 1px solid #edf0f2;
+    }
+
+    .lista-temporal-items li > div {
+      display: grid;
+      gap: 3px;
+      min-width: 0;
+    }
+
+    .lista-temporal-items strong {
+      color: #465a6c;
+      font-size: 11px;
+    }
+
+    .lista-temporal-items span {
+      color: #8a98a5;
+      font-size: 10px;
+    }
+
+    .lista-quitar {
+      flex: none;
+      padding: 5px 8px;
+      border: 1px solid #dce3e8;
+      border-radius: 5px;
+      background: #fff;
+      color: #526577;
+      font-size: 10px;
+    }
+
     @media (max-width: 720px) {
       .view-body {
         padding: 18px 16px 40px;
@@ -223,6 +313,10 @@ export class ActoresPage {
   /** Actor cuya ficha está abierta en el panel lateral. */
   readonly seleccionado = signal<ActorDirectorio | null>(null);
 
+  /** Selección de trabajo en memoria, conservada al cambiar página o filtros. */
+  readonly listaTemporal = signal<ActorDirectorio[]>([]);
+  readonly listaTemporalAbierta = signal(false);
+
   /** Último fallo del botón de exportación; vacío si no hubo. */
   readonly exportarError = signal<string | null>(null);
 
@@ -236,6 +330,23 @@ export class ActoresPage {
 
   abrir(actor: ActorDirectorio): void {
     this.seleccionado.set(actor);
+  }
+
+  estaEnLista(actor: ActorDirectorio): boolean {
+    return this.listaTemporal().some((seleccionado) => seleccionado.id === actor.id);
+  }
+
+  alternarLista(actor: ActorDirectorio, evento?: Event): void {
+    evento?.stopPropagation();
+    this.listaTemporal.update((actual) => alternarActorLista(actual, actor));
+  }
+
+  quitarDeLista(id: string): void {
+    this.listaTemporal.update((actual) => quitarActorLista(actual, id));
+  }
+
+  vaciarLista(): void {
+    this.listaTemporal.set([]);
   }
 
   cerrarPanel(): void {
