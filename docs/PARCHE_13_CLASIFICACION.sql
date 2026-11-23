@@ -1,6 +1,6 @@
 -- =============================================================================
 -- PARCHE 13 - NIVEL DE CLASIFICACION: UNA SOLA FORMA DE ESCRIBIRLO
--- AVISA / SIPRECS - OAIPCS, Ministerio de la Produccion del Peru
+-- AVISA / SIPRECS - OAIPCS, PRODUCE
 -- =============================================================================
 --
 -- QUE HACE

@@ -1995,7 +1995,7 @@ function generarPDFAnalisis(idAnalisis, codigoCaso) {
     t.setHeading(DocumentApp.ParagraphHeading.TITLE);
     t.editAsText().setForegroundColor(AZUL).setBold(true);
     t.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
-    var sub = body.appendParagraph('OAIPCS - Ministerio de la Produccion');
+    var sub = body.appendParagraph('OAIPCS - PRODUCE');
     sub.editAsText().setForegroundColor(GRIS).setItalic(true).setFontSize(10);
     sub.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
     body.appendParagraph('');
@@ -2652,7 +2652,7 @@ function _generarDocSimpleYGuardarLink(nombreDoc, titulo, campos, hoja, filaNum)
     t.setHeading(DocumentApp.ParagraphHeading.TITLE);
     t.editAsText().setForegroundColor(AZUL).setBold(true);
     t.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
-    var sub = body.appendParagraph('OAIPCS - Ministerio de la Produccion');
+    var sub = body.appendParagraph('OAIPCS - PRODUCE');
     sub.editAsText().setForegroundColor(GRIS).setItalic(true).setFontSize(10);
     sub.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
     body.appendParagraph('');
@@ -4458,7 +4458,7 @@ function generarReporteAlerta(datos, hojaAlertas, filaAlerta) {
         MailApp.sendEmail({
           to: dest,
           subject: 'REPORTE DE ALERTA TEMPRANA: '+(datos.Titulo_Alerta||idAlerta),
-          body: 'Alerta: '+idAlerta+'\nAmbito: '+ambito+'\nFecha: '+fechaHoy+'\nNivel: '+nivelUp+'\n\nVer: '+urlDoc+'\n\nOAIPCS - Ministerio de Produccion del Peru',
+          body: 'Alerta: '+idAlerta+'\nAmbito: '+ambito+'\nFecha: '+fechaHoy+'\nNivel: '+nivelUp+'\n\nVer: '+urlDoc+'\n\nOAIPCS - PRODUCE',
           attachments: [pdfBlob]
         });
         if (hojaAlertas && filaAlerta) {
@@ -5845,7 +5845,7 @@ function analizarConsultaGeneral(tipo) {
           datosTxt.push('Alerta ' + dA[j][cIdA] + ' - ' + (dA[j][cTitA]||'') + ' | Riesgo: ' + (dA[j][cRieA]||''));
         }
       }
-      prompt = 'Eres un analista de riesgos de conflictividad social del Ministerio de la Produccion del Peru (OAIPCS). '
+      prompt = 'Eres un analista de riesgos de conflictividad social del PRODUCE (OAIPCS). '
         + 'A partir de la siguiente lista de casos y alertas activas con su nivel de riesgo registrado, identifica: '
         + '1) los 5 casos/alertas de mayor riesgo y por que, 2) patrones comunes entre los de mayor riesgo (sector, departamento, tipo de demanda), '
         + '3) una recomendacion general de priorizacion para la oficina. Se conciso, en espanol, tono institucional. No inventes datos que no esten en la lista.\\n\\n'
@@ -5857,7 +5857,7 @@ function analizarConsultaGeneral(tipo) {
       demandas.forEach(function(d){
         datosTxt.push('[' + (d.ID_TEMATICA||'') + '] ' + (d.Descripcion_Demanda||'') + ' (Doc: ' + (d.Evidencia||'') + ', Depto: ' + (d.ID_Ubigeo_Resuelto||'') + ')');
       });
-      prompt = 'Eres un analista de conflictividad social del Ministerio de la Produccion del Peru (OAIPCS). '
+      prompt = 'Eres un analista de conflictividad social del PRODUCE (OAIPCS). '
         + 'A partir de esta lista de demandas actualmente registradas en el sistema, identifica: '
         + '1) las tematicas mas frecuentes y que representan, 2) las 3-5 demandas que parecen mas urgentes o graves y por que, '
         + '3) una sintesis general de que estan pidiendo los actores sociales en este momento. Se conciso, en espanol, tono institucional.\\n\\n'
@@ -5878,7 +5878,7 @@ function analizarConsultaGeneral(tipo) {
         datosTxt.push('--- ' + mes + ' (' + porMes[mes].length + ' demandas) ---');
         porMes[mes].forEach(function(l){ datosTxt.push('  ' + l); });
       });
-      prompt = 'Eres un analista de conflictividad social del Ministerio de la Produccion del Peru (OAIPCS). '
+      prompt = 'Eres un analista de conflictividad social del PRODUCE (OAIPCS). '
         + 'A partir de este historico de demandas organizado por mes, identifica: '
         + '1) la tendencia general (aumenta, disminuye o se mantiene estable el numero de demandas), '
         + '2) si hay tematicas que se repiten o escalan mes a mes, 3) algun periodo con un pico inusual y una hipotesis de por que. '
@@ -5896,7 +5896,7 @@ function analizarConsultaGeneral(tipo) {
           datosTxt.push(dCP[k][cCodP] + ' - ' + (dCP[k][cNomP]||'') + ' | Sector: ' + (dCP[k][cSecP]||'') + ' | Depto: ' + (dCP[k][cUbiP]||'') + ' | Estado: ' + (dCP[k][cEstP]||'') + ' | Avance: ' + (dCP[k][cAvaP]||''));
         }
       }
-      prompt = 'Eres un analista de conflictividad social del Ministerio de la Produccion del Peru (OAIPCS). '
+      prompt = 'Eres un analista de conflictividad social del PRODUCE (OAIPCS). '
         + 'A partir de este listado general de casos registrados, elabora un panorama ejecutivo breve que incluya: '
         + '1) distribucion aproximada por sector y por departamento, 2) cuantos casos estan activos vs cerrados/avanzados, '
         + '3) cualquier concentracion geografica o sectorial que valga la pena resaltar para la gestion de la oficina. '
@@ -5953,7 +5953,7 @@ function buscarConIA(consulta) {
 
     coincidencias.forEach(function(c){ contexto.push('[' + c.tipo + ' ' + c.id + '] ' + c.texto); });
 
-    var prompt = 'Eres el asistente de busqueda del sistema AVISA del Ministerio de la Produccion del Peru (OAIPCS), '
+    var prompt = 'Eres el asistente de busqueda del sistema AVISA del PRODUCE (OAIPCS), '
       + 'especializado en informacion de conflictividad social. Un usuario busco: "' + consulta + '". '
       + 'A continuacion tienes los registros del sistema que contienen ese termino. Redacta una respuesta breve y util en espanol, '
       + 'de tipo "resumen de resultados de busqueda", explicando que se encontro y destacando lo mas relevante. '
@@ -6478,7 +6478,7 @@ function analizarCasoConIA(codigoCaso) {
     datosTxt.push('COMPROMISOS / ACCIONES (' + ficha.acciones.length + '):');
     ficha.acciones.forEach(function(a,idx){ datosTxt.push('  '+(idx+1)+'. '+a.Descripcion+' - Responsable: '+a.Responsable); });
 
-    var prompt = 'Eres un analista experto en prevencion y gestion de conflictos sociales del Ministerio de la Produccion del Peru (OAIPCS). ' +
+    var prompt = 'Eres un analista experto en prevencion y gestion de conflictos sociales del PRODUCE (OAIPCS). ' +
       'A partir de la informacion registrada a continuacion sobre un caso de conflictividad social, redacta una FICHA DE REPORTE DE DEMANDAS SOCIALES ' +
       'profesional, objetiva y tecnica, en espanol, usando EXACTAMENTE esta estructura con estos encabezados numerados en mayusculas:\n\n' +
       '1. IDENTIFICACION DEL CASO\n' +
@@ -7426,7 +7426,7 @@ function generarReporteDatosActores(idsActores, formato) {
     t.setHeading(DocumentApp.ParagraphHeading.TITLE);
     t.editAsText().setForegroundColor(AZUL).setBold(true);
     t.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
-    var sub = body.appendParagraph('OAIPCS - Ministerio de la Produccion');
+    var sub = body.appendParagraph('OAIPCS - PRODUCE');
     sub.editAsText().setForegroundColor(GRIS).setItalic(true).setFontSize(10);
     sub.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
     var fp = body.appendParagraph('Fecha de reporte: ' + Utilities.formatDate(new Date(), tz, 'dd/MM/yyyy'));
@@ -7513,7 +7513,7 @@ function generarReporteOrganizaciones(idsOrgs, formato) {
     t.setHeading(DocumentApp.ParagraphHeading.TITLE);
     t.editAsText().setForegroundColor(AZUL).setBold(true);
     t.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
-    var sub = body.appendParagraph('OAIPCS - Ministerio de la Produccion');
+    var sub = body.appendParagraph('OAIPCS - PRODUCE');
     sub.editAsText().setForegroundColor(GRIS).setItalic(true).setFontSize(10);
     sub.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
     var fp = body.appendParagraph('Fecha: ' + Utilities.formatDate(new Date(), tz, 'dd/MM/yyyy'));
@@ -7672,7 +7672,7 @@ function generarReporteLocales(idsLocales, formato) {
     t.setHeading(DocumentApp.ParagraphHeading.TITLE);
     t.editAsText().setForegroundColor(AZUL).setBold(true);
     t.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
-    var sub = body.appendParagraph('OAIPCS - Ministerio de la Produccion');
+    var sub = body.appendParagraph('OAIPCS - PRODUCE');
     sub.editAsText().setForegroundColor(GRIS).setItalic(true).setFontSize(10);
     sub.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
     var fp = body.appendParagraph('Fecha: ' + Utilities.formatDate(new Date(), tz, 'dd/MM/yyyy'));

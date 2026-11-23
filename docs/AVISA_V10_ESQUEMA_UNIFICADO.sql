@@ -11713,7 +11713,7 @@ SELECT string_agg(column_name, ', ' ORDER BY ordinal_position) AS columnas_vista
 -- ---------------------------------------------------------------------
 -- =============================================================================
 -- PARCHE 10 - FLUJO POR PASOS: DECISION DE MIGRACION D17
--- AVISA / SIPRECS - OAIPCS, Ministerio de la Produccion del Peru
+-- AVISA / SIPRECS - OAIPCS, PRODUCE
 -- =============================================================================
 --
 -- QUE HACE
@@ -12742,7 +12742,7 @@ COMMIT;
 -- ---------------------------------------------------------------------
 -- =============================================================================
 -- PARCHE 13 - NIVEL DE CLASIFICACION: UNA SOLA FORMA DE ESCRIBIRLO
--- AVISA / SIPRECS - OAIPCS, Ministerio de la Produccion del Peru
+-- AVISA / SIPRECS - OAIPCS, PRODUCE
 -- =============================================================================
 --
 -- QUE HACE

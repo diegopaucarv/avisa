@@ -532,7 +532,7 @@ CREATE INDEX ix_distritos_provincia ON core.distritos(provincia_id);
 
 CREATE TABLE core.roles (
     id SMALLINT PRIMARY KEY, codigo VARCHAR(30) NOT NULL UNIQUE,
-    max_clasificacion SMALLINT NOT NULL 
+    max_clasificacion SMALLINT NOT NULL
 );
 INSERT INTO core.roles VALUES   -- RF-03 (OGTI): sectorista, administrador, consulta/lectura, Alta Dirección
  (1,'sectorista',3),(2,'administrador',3),(3,'consulta_lectura',2),(4,'alta_direccion',3),
@@ -560,7 +560,7 @@ CREATE TABLE core.actores (
     origen_dato VARCHAR(20) NOT NULL DEFAULT 'MANUAL' CHECK (origen_dato IN ('MANUAL','KAG','WORKFLOW','AVISA_HISTORICO','WHATSAPP')),
     confidence NUMERIC(3,2) CHECK (confidence BETWEEN 0 AND 1),
     es_validado_humano BOOLEAN NOT NULL DEFAULT FALSE,
-    nivel_clasificacion SMALLINT NOT NULL DEFAULT 2 
+    nivel_clasificacion SMALLINT NOT NULL DEFAULT 2
 );
 CREATE TABLE core.actor_datos_personales (          -- Ley 29733 / Convenio 169: aislar y proteger
     actor_uid UUID PRIMARY KEY ,
@@ -649,7 +649,7 @@ CREATE TABLE core.casos (
     origen_dato VARCHAR(20) NOT NULL DEFAULT 'MANUAL' CHECK (origen_dato IN ('MANUAL','KAG','WORKFLOW','AVISA_HISTORICO','WHATSAPP')),
     confidence NUMERIC(3,2) CHECK (confidence BETWEEN 0 AND 1),
     es_validado_humano BOOLEAN NOT NULL DEFAULT FALSE,
-    nivel_clasificacion SMALLINT NOT NULL DEFAULT 2 
+    nivel_clasificacion SMALLINT NOT NULL DEFAULT 2
 );
 CREATE INDEX ix_casos_distrito ON core.casos(distrito_principal_id);
 CREATE INDEX ix_casos_activos ON core.casos(nivel_riesgo_id, fecha_ultima_actualizacion DESC) WHERE estado_id IN (1,2);
@@ -698,7 +698,7 @@ CREATE TABLE core.alertas_tempranas (
     origen_dato VARCHAR(20) NOT NULL DEFAULT 'MANUAL' CHECK (origen_dato IN ('MANUAL','KAG','WORKFLOW','AVISA_HISTORICO','WHATSAPP')),
     confidence NUMERIC(3,2) CHECK (confidence BETWEEN 0 AND 1),
     es_validado_humano BOOLEAN NOT NULL DEFAULT FALSE,
-    nivel_clasificacion SMALLINT NOT NULL DEFAULT 2 
+    nivel_clasificacion SMALLINT NOT NULL DEFAULT 2
 );
 CREATE INDEX ix_alertas_caso ON core.alertas_tempranas(caso_id);
 CREATE TABLE core.alertas_actores (
@@ -724,7 +724,7 @@ CREATE TABLE core.reuniones_dialogo (
     origen_dato VARCHAR(20) NOT NULL DEFAULT 'MANUAL' CHECK (origen_dato IN ('MANUAL','KAG','WORKFLOW','AVISA_HISTORICO','WHATSAPP')),
     confidence NUMERIC(3,2) CHECK (confidence BETWEEN 0 AND 1),
     es_validado_humano BOOLEAN NOT NULL DEFAULT FALSE,
-    nivel_clasificacion SMALLINT NOT NULL DEFAULT 2 
+    nivel_clasificacion SMALLINT NOT NULL DEFAULT 2
 );
 CREATE INDEX ix_reuniones_caso ON core.reuniones_dialogo(caso_id, fecha DESC);
 CREATE TABLE core.reunion_participantes (
@@ -742,7 +742,7 @@ CREATE TABLE core.documentos (
     origen_dato VARCHAR(20) NOT NULL DEFAULT 'MANUAL' CHECK (origen_dato IN ('MANUAL','KAG','WORKFLOW','AVISA_HISTORICO','WHATSAPP')),
     confidence NUMERIC(3,2) CHECK (confidence BETWEEN 0 AND 1),
     es_validado_humano BOOLEAN NOT NULL DEFAULT FALSE,
-    nivel_clasificacion SMALLINT NOT NULL DEFAULT 2 
+    nivel_clasificacion SMALLINT NOT NULL DEFAULT 2
 );
 CREATE INDEX ix_documentos_caso ON core.documentos(caso_id, tipo_id, fecha DESC);
 CREATE INDEX ix_documentos_reunion ON core.documentos(reunion_id) WHERE reunion_id IS NOT NULL;
@@ -766,7 +766,7 @@ CREATE TABLE core.caso_cronologia (
     origen_dato VARCHAR(20) NOT NULL DEFAULT 'MANUAL' CHECK (origen_dato IN ('MANUAL','KAG','WORKFLOW','AVISA_HISTORICO','WHATSAPP')),
     confidence NUMERIC(3,2) CHECK (confidence BETWEEN 0 AND 1),
     es_validado_humano BOOLEAN NOT NULL DEFAULT FALSE,
-    nivel_clasificacion SMALLINT NOT NULL DEFAULT 2 
+    nivel_clasificacion SMALLINT NOT NULL DEFAULT 2
 );
 CREATE INDEX ix_cronologia_caso ON core.caso_cronologia(caso_id, fecha_evento DESC);
 CREATE TABLE core.fuentes_evidencia (           -- triangulación: Medios / Institucional / Relacionamiento
@@ -789,7 +789,7 @@ CREATE TABLE core.demandas (
     origen_dato VARCHAR(20) NOT NULL DEFAULT 'MANUAL' CHECK (origen_dato IN ('MANUAL','KAG','WORKFLOW','AVISA_HISTORICO','WHATSAPP')),
     confidence NUMERIC(3,2) CHECK (confidence BETWEEN 0 AND 1),
     es_validado_humano BOOLEAN NOT NULL DEFAULT FALSE,
-    nivel_clasificacion SMALLINT NOT NULL DEFAULT 2 
+    nivel_clasificacion SMALLINT NOT NULL DEFAULT 2
 );
 CREATE INDEX ix_demandas_caso ON core.demandas(caso_id);
 CREATE TABLE core.demandas_actores (
@@ -819,7 +819,7 @@ CREATE TABLE core.compromisos (
     origen_dato VARCHAR(20) NOT NULL DEFAULT 'MANUAL' CHECK (origen_dato IN ('MANUAL','KAG','WORKFLOW','AVISA_HISTORICO','WHATSAPP')),
     confidence NUMERIC(3,2) CHECK (confidence BETWEEN 0 AND 1),
     es_validado_humano BOOLEAN NOT NULL DEFAULT FALSE,
-    nivel_clasificacion SMALLINT NOT NULL DEFAULT 2 
+    nivel_clasificacion SMALLINT NOT NULL DEFAULT 2
 );
 CREATE INDEX ix_compromisos_caso ON core.compromisos(caso_id);
 CREATE TABLE core.compromiso_distritos (
@@ -852,7 +852,7 @@ CREATE TABLE core.hitos_compromiso_estado_historico (
 CREATE TABLE kag.documento_fuente (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(), core_documento_id UUID ,
     titulo VARCHAR(255) NOT NULL, tipo VARCHAR(60) NOT NULL, url VARCHAR(500), hash_contenido CHAR(64),
-    fecha_ingesta TIMESTAMPTZ NOT NULL DEFAULT now(), nivel_clasificacion SMALLINT NOT NULL DEFAULT 2 
+    fecha_ingesta TIMESTAMPTZ NOT NULL DEFAULT now(), nivel_clasificacion SMALLINT NOT NULL DEFAULT 2
 );
 CREATE TABLE kag.documento_fragmento (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(), documento_id UUID NOT NULL ,
@@ -1000,7 +1000,7 @@ CREATE TABLE agent.run_log (
 CREATE INDEX ix_runlog_query ON agent.run_log(query_id);
 CREATE TABLE agent.feedback_log (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(), ts TIMESTAMPTZ NOT NULL DEFAULT now(), agente VARCHAR(30) NOT NULL,
-    input_ref JSONB, output_agente JSONB, correccion_humano JSONB, justificacion TEXT, revisado_por UUID 
+    input_ref JSONB, output_agente JSONB, correccion_humano JSONB, justificacion TEXT, revisado_por UUID
 );
 CREATE INDEX ix_feedback_pendiente ON agent.feedback_log(ts) WHERE correccion_humano IS NULL;
 CREATE TABLE agent.lessons_learned (     -- absorbe agent.correction_patterns (era redundante)
@@ -1450,7 +1450,7 @@ CREATE TABLE community.encuestas_percepcion (
     percepcion_seguridad_likert SMALLINT CHECK (percepcion_seguridad_likert BETWEEN 1 AND 5),
     percepcion_servicios_likert SMALLINT CHECK (percepcion_servicios_likert BETWEEN 1 AND 5),
     comentario_texto TEXT,
-    encuestador_id UUID 
+    encuestador_id UUID
 );
 
 CREATE SCHEMA IF NOT EXISTS consultation;
@@ -1743,7 +1743,7 @@ CREATE TABLE ind.variante (
     requiere_campo BOOLEAN NOT NULL DEFAULT FALSE, horas_estimadas NUMERIC(6,1) CHECK (horas_estimadas >= 0),
     estado VARCHAR(12) NOT NULL DEFAULT 'propuesta' CHECK (estado IN ('propuesta','activa','retirada')),
     es_validado_humano BOOLEAN NOT NULL DEFAULT FALSE,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT now(), created_by UUID 
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(), created_by UUID
 );
 CREATE TABLE ind.proxy_justificacion (
     variante_id UUID PRIMARY KEY ,
@@ -1778,7 +1778,7 @@ CREATE TABLE ind.seleccion (
     variante_id UUID NOT NULL , alternativas_mostradas JSONB NOT NULL,
     seleccionada_por UUID NOT NULL , motivo TEXT,
     valid_from TIMESTAMPTZ NOT NULL DEFAULT now(), valid_to TIMESTAMPTZ,
-    recorded_at TIMESTAMPTZ NOT NULL DEFAULT now(), superseded_at TIMESTAMPTZ, supersedes_id UUID 
+    recorded_at TIMESTAMPTZ NOT NULL DEFAULT now(), superseded_at TIMESTAMPTZ, supersedes_id UUID
 );
 CREATE INDEX ix_seleccion_vigente ON ind.seleccion (slot_id, periodo) WHERE superseded_at IS NULL;
 CREATE TABLE ind.resultado (
@@ -1898,7 +1898,7 @@ CREATE TABLE qda.proyecto (
     archivo_uri VARCHAR(500), hash CHAR(64), plan_paso_id UUID ,
     importado_por UUID , importado_en TIMESTAMPTZ,
     estado VARCHAR(10) NOT NULL DEFAULT 'staging' CHECK (estado IN ('staging','validado','rechazado','anulado')),
-    nivel_clasificacion SMALLINT NOT NULL DEFAULT 2 
+    nivel_clasificacion SMALLINT NOT NULL DEFAULT 2
 );
 CREATE TABLE qda.libro_codigos (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(), proyecto_id UUID ,
@@ -1936,7 +1936,7 @@ CREATE TABLE qda.memo (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(), proyecto_id UUID NOT NULL ,
     ambito VARCHAR(10) NOT NULL CHECK (ambito IN ('proyecto','documento','codigo','segmento','caso')), objeto_id UUID,
     texto TEXT NOT NULL, autor UUID , created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-    nivel_clasificacion SMALLINT NOT NULL DEFAULT 2 
+    nivel_clasificacion SMALLINT NOT NULL DEFAULT 2
 );
 CREATE TABLE qda.mapeo_pseudonimo (      -- nivel 3: legible solo por la función de importación
     proyecto_id UUID NOT NULL , token VARCHAR(40) NOT NULL,
@@ -2042,7 +2042,7 @@ CREATE TABLE lex.coocurrencia (           -- dispersa: solo pares observados
 );
 CREATE TABLE lex.diccionario (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(), nombre VARCHAR(160) NOT NULL UNIQUE, descripcion TEXT,
-    version INT NOT NULL DEFAULT 1, autor UUID 
+    version INT NOT NULL DEFAULT 1, autor UUID
 );
 CREATE TABLE lex.diccionario_entrada (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(), diccionario_id UUID NOT NULL ,
@@ -2142,7 +2142,7 @@ CREATE TABLE ctx.captura (                -- evidencia inmutable de cada página
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(), trabajo_id UUID NOT NULL ,
     url VARCHAR(2000) NOT NULL, obtenido_en TIMESTAMPTZ NOT NULL DEFAULT now(), hash CHAR(64) NOT NULL,
     uri_archivo VARCHAR(500) NOT NULL, tipo_contenido VARCHAR(80), corpus_id SMALLINT ,
-    nivel_clasificacion SMALLINT NOT NULL DEFAULT 1 
+    nivel_clasificacion SMALLINT NOT NULL DEFAULT 1
 );
 CREATE FUNCTION ctx.captura_guard() RETURNS trigger LANGUAGE plpgsql AS $$
 DECLARE v_host TEXT; v_ok BOOLEAN;
@@ -2163,7 +2163,7 @@ CREATE TABLE kag.hipotesis (
     estado VARCHAR(12) NOT NULL DEFAULT 'propuesta' CHECK (estado IN ('propuesta','en_contraste','sostenida','refutada','archivada')),
     nivel_confianza VARCHAR(5) CHECK (nivel_confianza IN ('baja','media','alta')),
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(), created_by UUID ,
-    nivel_clasificacion SMALLINT NOT NULL DEFAULT 2 
+    nivel_clasificacion SMALLINT NOT NULL DEFAULT 2
 );
 CREATE TABLE kag.hipotesis_evidencia (
     hipotesis_id UUID NOT NULL ,
@@ -2207,7 +2207,7 @@ CREATE TABLE kag.comunidad_miembro (
 CREATE TABLE kag.comunidad_resumen (
     comunidad_id UUID PRIMARY KEY , texto TEXT NOT NULL,
     modelo VARCHAR(80) NOT NULL, version_modelo VARCHAR(40) NOT NULL, es_validado_humano BOOLEAN NOT NULL DEFAULT FALSE,
-    nivel_clasificacion SMALLINT NOT NULL 
+    nivel_clasificacion SMALLINT NOT NULL
 );
 CREATE FUNCTION kag.hereda_nivel_corrida() RETURNS trigger LANGUAGE plpgsql AS $$
 DECLARE v_nivel SMALLINT;
@@ -2263,7 +2263,7 @@ CREATE TABLE agent.llm_call_fragmento (
 CREATE TABLE agent.sesion (               -- estado de la sesión conversacional del Generador de Pautas (A2)
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(), usuario_id UUID NOT NULL ,
     plan_id UUID , estado VARCHAR(10) NOT NULL DEFAULT 'abierta' CHECK (estado IN ('abierta','cerrada')),
-    created_at TIMESTAMPTZ NOT NULL DEFAULT now(), nivel_clasificacion SMALLINT NOT NULL DEFAULT 2 
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(), nivel_clasificacion SMALLINT NOT NULL DEFAULT 2
 );
 CREATE TABLE agent.sesion_paso (
     sesion_id UUID NOT NULL , n INT NOT NULL,
@@ -3162,7 +3162,7 @@ CREATE TABLE pesca.licencia_cites_denp (
     CHECK (estado_permiso <> 'emitido' OR fecha_emision_permiso IS NOT NULL),
     -- mismo vínculo de inventario que mype.ejecucion_nec (edición quirúrgica; mismo motivo:
     -- sin subconsulta en DEFAULT, se completa con un trigger, no con DEFAULT)
-    tipo_artefacto_id UUID 
+    tipo_artefacto_id UUID
 );
 CREATE INDEX ix_licencia_exportador ON pesca.licencia_cites_denp(exportador_actor_uid);
 CREATE INDEX ix_licencia_especie ON pesca.licencia_cites_denp(especie_id);
@@ -3204,7 +3204,7 @@ CREATE TABLE pesca.trazabilidad_qr (
     fecha_escaneo TIMESTAMPTZ NOT NULL,
     etapa VARCHAR(20) NOT NULL CHECK (etapa IN ('desembarque','procesamiento','exportacion')),
     valido BOOLEAN NOT NULL DEFAULT TRUE,
-    nivel_clasificacion SMALLINT NOT NULL DEFAULT 2 
+    nivel_clasificacion SMALLINT NOT NULL DEFAULT 2
 );
 CREATE INDEX ix_qr_licencia ON pesca.trazabilidad_qr(licencia_id);
 CREATE INDEX ix_qr_code ON pesca.trazabilidad_qr(qr_code);
@@ -3753,7 +3753,7 @@ CREATE TABLE chat.stash (
     creado_por UUID NOT NULL ,
     creado_en TIMESTAMPTZ NOT NULL DEFAULT now(),
     aplicado BOOLEAN NOT NULL DEFAULT FALSE,
-    nivel_clasificacion SMALLINT NOT NULL DEFAULT 2 
+    nivel_clasificacion SMALLINT NOT NULL DEFAULT 2
 );
 
 -- 6.12 chat.remote
@@ -4727,7 +4727,7 @@ CREATE INDEX ix_distritos_provincia ON core.distritos(provincia_id);
 
 CREATE TABLE core.roles (
     id SMALLINT PRIMARY KEY, codigo VARCHAR(30) NOT NULL UNIQUE,
-    max_clasificacion SMALLINT NOT NULL 
+    max_clasificacion SMALLINT NOT NULL
 );
 INSERT INTO core.roles VALUES   -- RF-03 (OGTI): sectorista, administrador, consulta/lectura, Alta Dirección
  (1,'sectorista',3),(2,'administrador',3),(3,'consulta_lectura',2),(4,'alta_direccion',3),
@@ -4755,7 +4755,7 @@ CREATE TABLE core.actores (
     origen_dato VARCHAR(20) NOT NULL DEFAULT 'MANUAL' CHECK (origen_dato IN ('MANUAL','KAG','WORKFLOW','AVISA_HISTORICO','WHATSAPP')),
     confidence NUMERIC(3,2) CHECK (confidence BETWEEN 0 AND 1),
     es_validado_humano BOOLEAN NOT NULL DEFAULT FALSE,
-    nivel_clasificacion SMALLINT NOT NULL DEFAULT 2 
+    nivel_clasificacion SMALLINT NOT NULL DEFAULT 2
 );
 CREATE TABLE core.actor_datos_personales (          -- Ley 29733 / Convenio 169: aislar y proteger
     actor_uid UUID PRIMARY KEY ,
@@ -4844,7 +4844,7 @@ CREATE TABLE core.casos (
     origen_dato VARCHAR(20) NOT NULL DEFAULT 'MANUAL' CHECK (origen_dato IN ('MANUAL','KAG','WORKFLOW','AVISA_HISTORICO','WHATSAPP')),
     confidence NUMERIC(3,2) CHECK (confidence BETWEEN 0 AND 1),
     es_validado_humano BOOLEAN NOT NULL DEFAULT FALSE,
-    nivel_clasificacion SMALLINT NOT NULL DEFAULT 2 
+    nivel_clasificacion SMALLINT NOT NULL DEFAULT 2
 );
 CREATE INDEX ix_casos_distrito ON core.casos(distrito_principal_id);
 CREATE INDEX ix_casos_activos ON core.casos(nivel_riesgo_id, fecha_ultima_actualizacion DESC) WHERE estado_id IN (1,2);
@@ -4893,7 +4893,7 @@ CREATE TABLE core.alertas_tempranas (
     origen_dato VARCHAR(20) NOT NULL DEFAULT 'MANUAL' CHECK (origen_dato IN ('MANUAL','KAG','WORKFLOW','AVISA_HISTORICO','WHATSAPP')),
     confidence NUMERIC(3,2) CHECK (confidence BETWEEN 0 AND 1),
     es_validado_humano BOOLEAN NOT NULL DEFAULT FALSE,
-    nivel_clasificacion SMALLINT NOT NULL DEFAULT 2 
+    nivel_clasificacion SMALLINT NOT NULL DEFAULT 2
 );
 CREATE INDEX ix_alertas_caso ON core.alertas_tempranas(caso_id);
 CREATE TABLE core.alertas_actores (
@@ -4919,7 +4919,7 @@ CREATE TABLE core.reuniones_dialogo (
     origen_dato VARCHAR(20) NOT NULL DEFAULT 'MANUAL' CHECK (origen_dato IN ('MANUAL','KAG','WORKFLOW','AVISA_HISTORICO','WHATSAPP')),
     confidence NUMERIC(3,2) CHECK (confidence BETWEEN 0 AND 1),
     es_validado_humano BOOLEAN NOT NULL DEFAULT FALSE,
-    nivel_clasificacion SMALLINT NOT NULL DEFAULT 2 
+    nivel_clasificacion SMALLINT NOT NULL DEFAULT 2
 );
 CREATE INDEX ix_reuniones_caso ON core.reuniones_dialogo(caso_id, fecha DESC);
 CREATE TABLE core.reunion_participantes (
@@ -4937,7 +4937,7 @@ CREATE TABLE core.documentos (
     origen_dato VARCHAR(20) NOT NULL DEFAULT 'MANUAL' CHECK (origen_dato IN ('MANUAL','KAG','WORKFLOW','AVISA_HISTORICO','WHATSAPP')),
     confidence NUMERIC(3,2) CHECK (confidence BETWEEN 0 AND 1),
     es_validado_humano BOOLEAN NOT NULL DEFAULT FALSE,
-    nivel_clasificacion SMALLINT NOT NULL DEFAULT 2 
+    nivel_clasificacion SMALLINT NOT NULL DEFAULT 2
 );
 CREATE INDEX ix_documentos_caso ON core.documentos(caso_id, tipo_id, fecha DESC);
 CREATE INDEX ix_documentos_reunion ON core.documentos(reunion_id) WHERE reunion_id IS NOT NULL;
@@ -4961,7 +4961,7 @@ CREATE TABLE core.caso_cronologia (
     origen_dato VARCHAR(20) NOT NULL DEFAULT 'MANUAL' CHECK (origen_dato IN ('MANUAL','KAG','WORKFLOW','AVISA_HISTORICO','WHATSAPP')),
     confidence NUMERIC(3,2) CHECK (confidence BETWEEN 0 AND 1),
     es_validado_humano BOOLEAN NOT NULL DEFAULT FALSE,
-    nivel_clasificacion SMALLINT NOT NULL DEFAULT 2 
+    nivel_clasificacion SMALLINT NOT NULL DEFAULT 2
 );
 CREATE INDEX ix_cronologia_caso ON core.caso_cronologia(caso_id, fecha_evento DESC);
 CREATE TABLE core.fuentes_evidencia (           -- triangulación: Medios / Institucional / Relacionamiento
@@ -4984,7 +4984,7 @@ CREATE TABLE core.demandas (
     origen_dato VARCHAR(20) NOT NULL DEFAULT 'MANUAL' CHECK (origen_dato IN ('MANUAL','KAG','WORKFLOW','AVISA_HISTORICO','WHATSAPP')),
     confidence NUMERIC(3,2) CHECK (confidence BETWEEN 0 AND 1),
     es_validado_humano BOOLEAN NOT NULL DEFAULT FALSE,
-    nivel_clasificacion SMALLINT NOT NULL DEFAULT 2 
+    nivel_clasificacion SMALLINT NOT NULL DEFAULT 2
 );
 CREATE INDEX ix_demandas_caso ON core.demandas(caso_id);
 CREATE TABLE core.demandas_actores (
@@ -5014,7 +5014,7 @@ CREATE TABLE core.compromisos (
     origen_dato VARCHAR(20) NOT NULL DEFAULT 'MANUAL' CHECK (origen_dato IN ('MANUAL','KAG','WORKFLOW','AVISA_HISTORICO','WHATSAPP')),
     confidence NUMERIC(3,2) CHECK (confidence BETWEEN 0 AND 1),
     es_validado_humano BOOLEAN NOT NULL DEFAULT FALSE,
-    nivel_clasificacion SMALLINT NOT NULL DEFAULT 2 
+    nivel_clasificacion SMALLINT NOT NULL DEFAULT 2
 );
 CREATE INDEX ix_compromisos_caso ON core.compromisos(caso_id);
 CREATE TABLE core.compromiso_distritos (
@@ -5047,7 +5047,7 @@ CREATE TABLE core.hitos_compromiso_estado_historico (
 CREATE TABLE kag.documento_fuente (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(), core_documento_id UUID ,
     titulo VARCHAR(255) NOT NULL, tipo VARCHAR(60) NOT NULL, url VARCHAR(500), hash_contenido CHAR(64),
-    fecha_ingesta TIMESTAMPTZ NOT NULL DEFAULT now(), nivel_clasificacion SMALLINT NOT NULL DEFAULT 2 
+    fecha_ingesta TIMESTAMPTZ NOT NULL DEFAULT now(), nivel_clasificacion SMALLINT NOT NULL DEFAULT 2
 );
 CREATE TABLE kag.documento_fragmento (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(), documento_id UUID NOT NULL ,
@@ -5195,7 +5195,7 @@ CREATE TABLE agent.run_log (
 CREATE INDEX ix_runlog_query ON agent.run_log(query_id);
 CREATE TABLE agent.feedback_log (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(), ts TIMESTAMPTZ NOT NULL DEFAULT now(), agente VARCHAR(30) NOT NULL,
-    input_ref JSONB, output_agente JSONB, correccion_humano JSONB, justificacion TEXT, revisado_por UUID 
+    input_ref JSONB, output_agente JSONB, correccion_humano JSONB, justificacion TEXT, revisado_por UUID
 );
 CREATE INDEX ix_feedback_pendiente ON agent.feedback_log(ts) WHERE correccion_humano IS NULL;
 CREATE TABLE agent.lessons_learned (     -- absorbe agent.correction_patterns (era redundante)
@@ -5645,7 +5645,7 @@ CREATE TABLE community.encuestas_percepcion (
     percepcion_seguridad_likert SMALLINT CHECK (percepcion_seguridad_likert BETWEEN 1 AND 5),
     percepcion_servicios_likert SMALLINT CHECK (percepcion_servicios_likert BETWEEN 1 AND 5),
     comentario_texto TEXT,
-    encuestador_id UUID 
+    encuestador_id UUID
 );
 
 CREATE SCHEMA IF NOT EXISTS consultation;
@@ -5938,7 +5938,7 @@ CREATE TABLE ind.variante (
     requiere_campo BOOLEAN NOT NULL DEFAULT FALSE, horas_estimadas NUMERIC(6,1) CHECK (horas_estimadas >= 0),
     estado VARCHAR(12) NOT NULL DEFAULT 'propuesta' CHECK (estado IN ('propuesta','activa','retirada')),
     es_validado_humano BOOLEAN NOT NULL DEFAULT FALSE,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT now(), created_by UUID 
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(), created_by UUID
 );
 CREATE TABLE ind.proxy_justificacion (
     variante_id UUID PRIMARY KEY ,
@@ -5973,7 +5973,7 @@ CREATE TABLE ind.seleccion (
     variante_id UUID NOT NULL , alternativas_mostradas JSONB NOT NULL,
     seleccionada_por UUID NOT NULL , motivo TEXT,
     valid_from TIMESTAMPTZ NOT NULL DEFAULT now(), valid_to TIMESTAMPTZ,
-    recorded_at TIMESTAMPTZ NOT NULL DEFAULT now(), superseded_at TIMESTAMPTZ, supersedes_id UUID 
+    recorded_at TIMESTAMPTZ NOT NULL DEFAULT now(), superseded_at TIMESTAMPTZ, supersedes_id UUID
 );
 CREATE INDEX ix_seleccion_vigente ON ind.seleccion (slot_id, periodo) WHERE superseded_at IS NULL;
 CREATE TABLE ind.resultado (
@@ -6093,7 +6093,7 @@ CREATE TABLE qda.proyecto (
     archivo_uri VARCHAR(500), hash CHAR(64), plan_paso_id UUID ,
     importado_por UUID , importado_en TIMESTAMPTZ,
     estado VARCHAR(10) NOT NULL DEFAULT 'staging' CHECK (estado IN ('staging','validado','rechazado','anulado')),
-    nivel_clasificacion SMALLINT NOT NULL DEFAULT 2 
+    nivel_clasificacion SMALLINT NOT NULL DEFAULT 2
 );
 CREATE TABLE qda.libro_codigos (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(), proyecto_id UUID ,
@@ -6131,7 +6131,7 @@ CREATE TABLE qda.memo (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(), proyecto_id UUID NOT NULL ,
     ambito VARCHAR(10) NOT NULL CHECK (ambito IN ('proyecto','documento','codigo','segmento','caso')), objeto_id UUID,
     texto TEXT NOT NULL, autor UUID , created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-    nivel_clasificacion SMALLINT NOT NULL DEFAULT 2 
+    nivel_clasificacion SMALLINT NOT NULL DEFAULT 2
 );
 CREATE TABLE qda.mapeo_pseudonimo (      -- nivel 3: legible solo por la función de importación
     proyecto_id UUID NOT NULL , token VARCHAR(40) NOT NULL,
@@ -6237,7 +6237,7 @@ CREATE TABLE lex.coocurrencia (           -- dispersa: solo pares observados
 );
 CREATE TABLE lex.diccionario (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(), nombre VARCHAR(160) NOT NULL UNIQUE, descripcion TEXT,
-    version INT NOT NULL DEFAULT 1, autor UUID 
+    version INT NOT NULL DEFAULT 1, autor UUID
 );
 CREATE TABLE lex.diccionario_entrada (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(), diccionario_id UUID NOT NULL ,
@@ -6337,7 +6337,7 @@ CREATE TABLE ctx.captura (                -- evidencia inmutable de cada página
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(), trabajo_id UUID NOT NULL ,
     url VARCHAR(2000) NOT NULL, obtenido_en TIMESTAMPTZ NOT NULL DEFAULT now(), hash CHAR(64) NOT NULL,
     uri_archivo VARCHAR(500) NOT NULL, tipo_contenido VARCHAR(80), corpus_id SMALLINT ,
-    nivel_clasificacion SMALLINT NOT NULL DEFAULT 1 
+    nivel_clasificacion SMALLINT NOT NULL DEFAULT 1
 );
 CREATE FUNCTION ctx.captura_guard() RETURNS trigger LANGUAGE plpgsql AS $$
 DECLARE v_host TEXT; v_ok BOOLEAN;
@@ -6358,7 +6358,7 @@ CREATE TABLE kag.hipotesis (
     estado VARCHAR(12) NOT NULL DEFAULT 'propuesta' CHECK (estado IN ('propuesta','en_contraste','sostenida','refutada','archivada')),
     nivel_confianza VARCHAR(5) CHECK (nivel_confianza IN ('baja','media','alta')),
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(), created_by UUID ,
-    nivel_clasificacion SMALLINT NOT NULL DEFAULT 2 
+    nivel_clasificacion SMALLINT NOT NULL DEFAULT 2
 );
 CREATE TABLE kag.hipotesis_evidencia (
     hipotesis_id UUID NOT NULL ,
@@ -6402,7 +6402,7 @@ CREATE TABLE kag.comunidad_miembro (
 CREATE TABLE kag.comunidad_resumen (
     comunidad_id UUID PRIMARY KEY , texto TEXT NOT NULL,
     modelo VARCHAR(80) NOT NULL, version_modelo VARCHAR(40) NOT NULL, es_validado_humano BOOLEAN NOT NULL DEFAULT FALSE,
-    nivel_clasificacion SMALLINT NOT NULL 
+    nivel_clasificacion SMALLINT NOT NULL
 );
 CREATE FUNCTION kag.hereda_nivel_corrida() RETURNS trigger LANGUAGE plpgsql AS $$
 DECLARE v_nivel SMALLINT;
@@ -6458,7 +6458,7 @@ CREATE TABLE agent.llm_call_fragmento (
 CREATE TABLE agent.sesion (               -- estado de la sesión conversacional del Generador de Pautas (A2)
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(), usuario_id UUID NOT NULL ,
     plan_id UUID , estado VARCHAR(10) NOT NULL DEFAULT 'abierta' CHECK (estado IN ('abierta','cerrada')),
-    created_at TIMESTAMPTZ NOT NULL DEFAULT now(), nivel_clasificacion SMALLINT NOT NULL DEFAULT 2 
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(), nivel_clasificacion SMALLINT NOT NULL DEFAULT 2
 );
 CREATE TABLE agent.sesion_paso (
     sesion_id UUID NOT NULL , n INT NOT NULL,
@@ -7357,7 +7357,7 @@ CREATE TABLE pesca.licencia_cites_denp (
     CHECK (estado_permiso <> 'emitido' OR fecha_emision_permiso IS NOT NULL),
     -- mismo vínculo de inventario que mype.ejecucion_nec (edición quirúrgica; mismo motivo:
     -- sin subconsulta en DEFAULT, se completa con un trigger, no con DEFAULT)
-    tipo_artefacto_id UUID 
+    tipo_artefacto_id UUID
 );
 CREATE INDEX ix_licencia_exportador ON pesca.licencia_cites_denp(exportador_actor_uid);
 CREATE INDEX ix_licencia_especie ON pesca.licencia_cites_denp(especie_id);
@@ -7399,7 +7399,7 @@ CREATE TABLE pesca.trazabilidad_qr (
     fecha_escaneo TIMESTAMPTZ NOT NULL,
     etapa VARCHAR(20) NOT NULL CHECK (etapa IN ('desembarque','procesamiento','exportacion')),
     valido BOOLEAN NOT NULL DEFAULT TRUE,
-    nivel_clasificacion SMALLINT NOT NULL DEFAULT 2 
+    nivel_clasificacion SMALLINT NOT NULL DEFAULT 2
 );
 CREATE INDEX ix_qr_licencia ON pesca.trazabilidad_qr(licencia_id);
 CREATE INDEX ix_qr_code ON pesca.trazabilidad_qr(qr_code);
@@ -7948,7 +7948,7 @@ CREATE TABLE chat.stash (
     creado_por UUID NOT NULL ,
     creado_en TIMESTAMPTZ NOT NULL DEFAULT now(),
     aplicado BOOLEAN NOT NULL DEFAULT FALSE,
-    nivel_clasificacion SMALLINT NOT NULL DEFAULT 2 
+    nivel_clasificacion SMALLINT NOT NULL DEFAULT 2
 );
 
 -- 6.12 chat.remote
@@ -9175,7 +9175,7 @@ CREATE TABLE IF NOT EXISTS core.mesas_dialogo (
     origen_dato               VARCHAR(20) NOT NULL DEFAULT 'AVISA_HISTORICO'
         CHECK (origen_dato IN ('MANUAL','KAG','WORKFLOW','AVISA_HISTORICO','WHATSAPP')),
     nivel_clasificacion       SMALLINT NOT NULL DEFAULT 2
-        
+
 );
 CREATE INDEX IF NOT EXISTS ix_mesas_tipo ON core.mesas_dialogo(tipo_espacio_id);
 CREATE INDEX IF NOT EXISTS ix_mesas_vigencia ON core.mesas_dialogo(fecha_fin_vigencia);
@@ -9220,7 +9220,7 @@ CREATE TABLE IF NOT EXISTS core.capacitaciones (
     origen_dato      VARCHAR(20) NOT NULL DEFAULT 'AVISA_HISTORICO'
         CHECK (origen_dato IN ('MANUAL','KAG','WORKFLOW','AVISA_HISTORICO','WHATSAPP')),
     nivel_clasificacion SMALLINT NOT NULL DEFAULT 2
-        
+
 );
 
 CREATE TABLE IF NOT EXISTS core.capacitacion_participantes (
@@ -9245,7 +9245,7 @@ CREATE TABLE IF NOT EXISTS core.log_accesos (
     usuario_id          UUID ,
     origen              VARCHAR(20) NOT NULL DEFAULT 'AVISA_HISTORICO',
     nivel_clasificacion SMALLINT NOT NULL DEFAULT 3
-        
+
 );
 CREATE INDEX IF NOT EXISTS ix_log_accesos_fecha ON core.log_accesos(fecha DESC);
 CREATE INDEX IF NOT EXISTS ix_log_accesos_dni   ON core.log_accesos(dni);
@@ -11715,7 +11715,7 @@ SELECT string_agg(column_name, ', ' ORDER BY ordinal_position) AS columnas_vista
 -- ---------------------------------------------------------------------
 -- =============================================================================
 -- PARCHE 10 - FLUJO POR PASOS: DECISION DE MIGRACION D17
--- AVISA / SIPRECS - OAIPCS, Ministerio de la Produccion del Peru
+-- AVISA / SIPRECS - OAIPCS, PRODUCE
 -- =============================================================================
 --
 -- QUE HACE
@@ -12728,7 +12728,7 @@ COMMIT;
 -- ---------------------------------------------------------------------
 -- =============================================================================
 -- PARCHE 13 - NIVEL DE CLASIFICACION: UNA SOLA FORMA DE ESCRIBIRLO
--- AVISA / SIPRECS - OAIPCS, Ministerio de la Produccion del Peru
+-- AVISA / SIPRECS - OAIPCS, PRODUCE
 -- =============================================================================
 --
 -- QUE HACE

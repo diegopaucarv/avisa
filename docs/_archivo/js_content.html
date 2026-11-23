@@ -1584,7 +1584,7 @@ function generarPDFAnalisis(idAnalisis, codigoCaso) {
     // Encabezado
     var t = body.appendParagraph('ANALISIS DE CASO DE CONFLICTIVIDAD');
     t.setHeading(DocumentApp.ParagraphHeading.HEADING1);
-    body.appendParagraph('OAIPCS - Ministerio de la Produccion del Peru').setItalic(true);
+    body.appendParagraph('OAIPCS - PRODUCE').setItalic(true);
     body.appendHorizontalRule();
 
     // Datos generales
@@ -2673,7 +2673,7 @@ function generarReporteAlerta(datos, hojaAlertas, filaAlerta) {
       MailApp.sendEmail({
         to: dest,
         subject: 'REPORTE DE ALERTA TEMPRANA: '+(datos.Titulo_Alerta||idAlerta),
-        body: 'Alerta: '+idAlerta+'\nAmbito: '+ambito+'\nFecha: '+fechaHoy+'\nNivel: '+nivelUp+'\n\nVer: '+urlDoc+'\n\nOAIPCS - Ministerio de Produccion del Peru',
+        body: 'Alerta: '+idAlerta+'\nAmbito: '+ambito+'\nFecha: '+fechaHoy+'\nNivel: '+nivelUp+'\n\nVer: '+urlDoc+'\n\nOAIPCS - PRODUCE',
         attachments: [pdfBlob]
       });
       if (hojaAlertas && filaAlerta) {

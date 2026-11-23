@@ -1,6 +1,6 @@
 -- =============================================================================
 -- PARCHE 10 - FLUJO POR PASOS: DECISION DE MIGRACION D17
--- AVISA / SIPRECS - OAIPCS, Ministerio de la Produccion del Peru
+-- AVISA / SIPRECS - OAIPCS, PRODUCE
 -- =============================================================================
 --
 -- QUE HACE
