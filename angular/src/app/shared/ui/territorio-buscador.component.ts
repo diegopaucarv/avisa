@@ -131,7 +131,7 @@ const ESPERA_TECLEO_MS = 250;
           role="combobox"
           autocomplete="off"
           aria-autocomplete="list"
-          aria-controls="territorio-lista"
+          [attr.aria-controls]="'territorio-lista-' + identidad()"
           [id]="'territorio-' + identidad()"
           [attr.aria-label]="etiqueta()"
           [attr.aria-expanded]="listaVisible()"
@@ -155,7 +155,7 @@ const ESPERA_TECLEO_MS = 250;
       </div>
 
       @if (listaVisible()) {
-        <div class="territorio-lista" id="territorio-lista" role="listbox">
+        <div class="territorio-lista" [attr.id]="'territorio-lista-' + identidad()" role="listbox">
           @if (distritos().length > 0) {
             <p class="territorio-grupo" aria-hidden="true">Distritos</p>
             @for (opcion of distritos(); track opcion.id; let i = $index) {
@@ -199,7 +199,11 @@ const ESPERA_TECLEO_MS = 250;
 
       @if (sinResultados()) {
         <p class="form-hint" role="status">
-          No hay distritos ni lugares que coincidan con «{{ consultaTexto() }}».
+          @if (soloDistritos()) {
+            No hay distritos que coincidan con «{{ consultaTexto() }}».
+          } @else {
+            No hay distritos ni lugares que coincidan con «{{ consultaTexto() }}».
+          }
         </p>
       } @else if (!compacto()) {
         @if (cargando()) {

@@ -1080,8 +1080,9 @@ El payload del caso guarda `distrito_principal_id` (FK a `core.distritos`) y, si
 un lugar, lo enlaza en `core.caso_lugares` (FK a `territorio.lugares`). **No existe una columna
 `lugar_id` en `core.casos`**: el lugar es un conjunto —un caso puede señalar el puerto y la caleta
 donde ocurrió—, y guardar sólo el distrito de Matarani (Islay) sería escribir una ubicación que
-nadie eligió. El mockup de «Registrar ▾ → Caso» (fila 12) es el que debe mostrar este buscador; el
-resto de formularios con territorio (alertas, actores, locales) reutilizan el mismo componente.
+nadie eligió. El mockup de «Registrar ▾ → Caso» (fila 12) es el que debe mostrar este buscador. El
+resto de pantallas con territorio lo reutilizan con el mismo componente, con el grano que cada tabla
+admite: ver «Reutilización del buscador territorial».
 
 ### Implementación (2026-11-23)
 
@@ -1095,22 +1096,31 @@ resto de formularios con territorio (alertas, actores, locales) reutilizan el mi
   un id inexistente es 422 `DISTRITO_INVALIDO`, no un 500 de clave ajena) y `lugarId` o `lugares[]`
   (validados contra `territorio.lugares`; 422 `LUGAR_INVALIDO`). `PATCH /api/v1/cases/{codigo}` los
   acepta con la misma forma: `null` limpia el distrito y un arreglo vacío vacía los lugares.
-- **`angular/src/app/features/casos/territorio-buscador.component.ts`** — autocompletar único con
+- **`angular/src/app/shared/ui/territorio-buscador.component.ts`** — autocompletar único con
   grupos «Distritos» y «Lugares operativos», navegable con teclado, que distingue el lugar con un
-  sello de tipo (`PUERTO`). Es autónomo en HTTP: el panel de alta sigue sin conocer la API.
+  sello de tipo (`PUERTO`). Es autónomo en HTTP: el panel de alta sigue sin conocer la API. Vive en
+  `shared/ui` porque lo usan casos, alertas y actores. Tiene tres entradas para adaptarse al destino:
+  `soloDistritos` (oculta lugares cuando la tabla de destino no los admite), `compacto` (barra de
+  filtros: sin etiqueta visible ni ayudas, con `aria-label`) e `inicial` (etiqueta de un filtro
+  restaurado desde la URL; el id viaja aparte y no se emite).
 - **`caso-panel.component.ts`** — al elegir un distrito marca su región si no estaba seleccionada:
   un caso no debe quedar con un distrito de una región que no figura entre las del expediente.
 
-**Hallazgo que destapa el alta (2026-11-23): `core.casos.tematica_id` es `NOT NULL`.** La base lo
-declara `integer NOT NULL` **sin valor por defecto**, mientras `createCase` lo trataba como opcional
-(«la temática puede faltar»). Consecuencia medida: un alta sin temática no quedaba «pendiente de
-clasificar», salía como **500** por violación `23502` — y el panel ofrecía «Sin especificar» en el
-desplegable. Los **35** casos existentes tienen temática y `core.cat_tematicas` no tiene un valor
-«sin clasificar», así que el `NOT NULL` es coherente con los datos y el código era el que se
-desviaba. **Corregido en el borde, sin tocar el esquema:** `POST /v1/cases` responde
-**422 `TEMATICA_REQUERIDA`** y el panel exige la temática antes de enviar. Queda **pendiente de
-decisión** si el producto quiere poder registrar un caso sin clasificar: eso exige migración (columna
-anulable o un valor `Sin_clasificar` en el catálogo), y no se hizo por no inventar datos.
+**Resuelto (2026-11-23): `core.casos.tematica_id` pasa a anulable.** El hallazgo era que la base lo
+declaraba `integer NOT NULL` sin valor por defecto mientras el panel ofrecía «Sin especificar»: un
+alta sin temática salía como **500** por violación `23502`. La decisión no fue exigirla, sino
+representar «pendiente» como `NULL`, porque el generador de código ya la contempla:
+`core.codigo_tematica(NULL) = 'GEN'`, así que `core.siguiente_codigo_caso(sub, NULL)` emite
+`CS-<sub>-GEN-<AAAA>-NN`. **No se siembra un «Sin clasificar» en `core.cat_tematicas`**: el sufijo
+del código es inmutable y quedaría marcado para siempre.
+
+- Migración `gis/derived/0003_casos_tematica_anulable.sql`: `alter column tematica_id drop not null`,
+  respaldo en `core.casos_tematica_backup_20261123` (35 filas) y fila `casos_tematica_anulable` en
+  `core.migracion_log`. Reversa documentada en el propio archivo (exige que no queden `NULL`).
+- `POST /v1/cases` y `PATCH /v1/cases/{codigo}` guardan `NULL` si la temática falta o llega vacía, y
+  siguen respondiendo 422 si el valor no existe en el catálogo (`resolveOptionalCatalog`).
+- El panel muestra «Sin especificar» y el envío omite la temática vacía; el comentario de
+  obligatoriedad se retiró.
 
 **Cómo se verificó.** La búsqueda se ejecutó contra la base local —`matarani` devuelve **0 distritos y
 1 lugar** (puerto de Islay); `mejia` encuentra `Mejía`; `nunoa` encuentra `Nuñoa`; `0407` lista los
@@ -1118,6 +1128,50 @@ de Islay— y el alta se evaluó dentro de una transacción con `rollback`: cre�
 `distrito_principal_id = 3303` y `core.caso_lugares` con Matarani, cambió el distrito, lo limpió con
 `null`, vació los lugares y recibió los tres 422 esperados. Al revertir, `core.casos` volvió a **35**
 filas: la prueba no dejó rastro.
+
+**Alta sin temática (2026-11-23).** En la misma base, dentro de una transacción con `rollback`, se
+insertó un caso con `tematica_id = null` usando el propio generador: el código salió
+`CS-PA-GEN-2026-01` y la columna quedó `NULL`. `core.casos` siguió en **35** filas y no quedó fila en
+`core.secuencia_codigo`. La prueba usó `core.siguiente_codigo_caso` dos veces (una sola, y otra en
+el `insert`), de ahí que la primera lectura sea `…-01` y el caso insertado `…-02`.
+
+### Reutilización del buscador territorial (2026-11-23)
+
+El componente es el mismo; lo que cambia es el grano que cada tabla puede guardar. Esto es lo
+medido en la base local, no una aspiración:
+
+| Pantalla | Columna de destino                                       | Poblado hoy                                     | Uso del buscador                                                                                                                                            |
+| -------- | -------------------------------------------------------- | ----------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Casos    | `core.casos.distrito_principal_id` + `core.caso_lugares` | **23 de 35** casos con distrito                 | Alta y edición: distrito **y** lugares operativos (Matarani)                                                                                                |
+| Alertas  | `core.alertas_tempranas.distrito_id`                     | **41 de 83** alertas                            | Alta (`soloDistritos`) **y** filtro del listado (compacto, con `distritoId` en la URL)                                                                      |
+| Actores  | `core.actores.region_id`                                 | **0 de 1 160** con distrito; **355** con región | Filtro: el distrito elegido se traduce a su **región**, que es el grano real de la tabla                                                                    |
+| Locales  | `core.locales.distrito_id`                               | **0 de 27**                                     | Sin control visible: el filtro daría 0 filas siempre. El parámetro `distritoId` ya existe en `GET /v1/locales`, listo para cuando se complete el inventario |
+
+- **Alertas.** `GET /v1/alerts` acepta `distritoId` (id exacto; un valor no numérico es 422
+  `DISTRITO_INVALIDO`). La exportación reenvía el filtro (`FILTROS_ALERTAS`). El alta envía
+  `distritoId` sólo si lo elegido es distrito: la tabla no tiene lugares y degradar un puerto a su
+  distrito escribiría una ubicación que nadie eligió. El filtro viaja en la URL como `distritoId` +
+  `distritoNombre` (el segundo sólo pinta la etiqueta al recargar). **Pendiente:** la edición de una
+  alerta aún no permite cambiar el distrito; la ficha lo muestra de sólo lectura y `updateAlert` no
+  acepta todavía `distritoId` (sí `createAlert`).
+- **Actores.** Se retiró el campo «Región (nombre exacto)», que obligaba a acertar la grafía de
+  `core.regiones.nombre` (y convive con las formas sin tilde `Ancash`, `Apurimac`, `Huanuco`,
+  `Junin`). Ahora se elige un distrito o lugar y se envía su **región** —`r.nombre` sale del mismo
+  join (`distritos → provincias → regiones`) que usa `/v1/territorio`, así que la comparación exacta
+  del repositorio se cumple—. Un distrito del Callao o de Lima funciona igual.
+- **Locales / auditorios.** No se ofrece el control a propósito. Los 27 auditorios de `core.locales`
+  tienen `distrito_id` en `NULL` y su `direccion` es texto libre: emparejar «Ica» contra esa cadena
+  marcaría también el auditorio de Tacna (la subcadena aparece en apellidos y calles) y la regla del
+  proyecto es declarar el dato ausente, no estimarlo. **Pendiente:** asignar `distrito_id` a los 27
+  auditorios; con eso el filtro y el punto en el mapa (petición de la Dirección) funcionan sin tocar
+  la interfaz, porque el componente y el parámetro de API ya están.
+
+**Cómo se verificó (reutilización).** `distritos` no tiene región directa —va por `provincia_id`— y
+una búsqueda `Arequipa` devuelve la región exacta `Arequipa`, que es la misma cadena que filtra
+`listActors`. El filtro de alertas se comprobó con distritos que sí tienen alertas: `424` (Lima) →
+**10**, `425` (Ancón) → **5**, `545` (Ilo) → **4**. Islay (`3303`) devuelve **0**, coherente con que
+ninguna alerta de las 41 tenga ese distrito. `npx tsc --noEmit` y `npm --prefix angular run build`
+pasan; el build es el único que valida las plantillas.
 
 **Evidencia y artefactos.** `gis/derived/maestro_resumen.txt` fija las cifras; `distritos_maestro.csv`
 es el catálogo final con centroide y área; `reconciliacion_distritos.csv` lista, fila por fila, qué
