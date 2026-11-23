@@ -5,6 +5,9 @@ Standalone: no depende de `migration/loader/run.py` ni del xlsx del legado.
 Aplica `migration/39_gis_infraestructuras.sql` (idempotente), trunca la tabla y
 recarga desde el CSV con `COPY` a una tabla temporal. El `distrito_id` se resuelve
 sólo para los ubigeos presentes en `core.distritos`; el resto queda en NULL.
+Después aplica `gis/derived/0004_revincular_infraestructuras_por_nombre.sql`,
+que corrige los ubigeos corridos del KML (Tayacaja y otros) re-vinculando por el
+nombre del globo. Sin ese paso la tabla queda con NULLs y distritos vecinos.
 
 Uso:
     python migration/loader/cargar_gis.py
@@ -30,6 +33,9 @@ from pathlib import Path
 RAIZ = Path(__file__).resolve().parent.parent.parent
 CSV_POR_DEFECTO = RAIZ / "gis" / "derived" / "infraestructuras_puntos.csv"
 SQL_ESQUEMA = RAIZ / "migration" / "39_gis_infraestructuras.sql"
+SQL_REVINCULAR = (
+    RAIZ / "gis" / "derived" / "0004_revincular_infraestructuras_por_nombre.sql"
+)
 TABLA = "gis.infraestructuras_puntos"
 
 # Columnas del CSV, en el orden de la tabla temporal. `distrito_id` y `geom` se
@@ -247,6 +253,18 @@ async def cargar(dsn: str, csv_ruta: Path, solo_esquema: bool) -> None:
             )
             await conexion.execute(INSERTAR)
 
+        # La resolución por ubigeo asigna el distrito vecino cuando el ubigeo del
+        # KML está corrido; 0004 re-vincula por nombre. Va fuera de la transacción
+        # anterior porque el archivo trae su propio BEGIN/COMMIT.
+        if SQL_REVINCULAR.exists():
+            print(f"Re-vinculando por nombre: {SQL_REVINCULAR.name}")
+            await conexion.execute(SQL_REVINCULAR.read_text(encoding="utf-8"))
+        else:
+            print(
+                f"AVISO: falta {SQL_REVINCULAR.name}; el distrito_id queda resuelto "
+                "sólo por ubigeo"
+            )
+
         total = await conexion.fetchval(f"select count(*) from {TABLA}")
         resolubles = await conexion.fetchval(
             "select count(*) from core.distritos where ubigeo::text in "
@@ -275,7 +293,7 @@ async def resumen(dsn: str) -> None:
             group by tipo_registro order by tipo_registro
             """
         ):
-            print("  " + " · ".join(f"{k}={fila[k]}" for k in fila))
+            print("  " + " · ".join(f"{k}={v}" for k, v in fila.items()))
         print(
             "  total:",
             await conexion.fetchval(f"select count(*) from {TABLA}"),

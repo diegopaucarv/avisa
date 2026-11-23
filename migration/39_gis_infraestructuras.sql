@@ -164,4 +164,18 @@ GROUP BY d.id, d.ubigeo, d.nombre, p.nombre, r.nombre;
 COMMENT ON VIEW gis.v_infraestructuras_por_distrito IS
     'Resumen por distrito de la capa GIS. Sólo cubre los ubigeos presentes en core.distritos.';
 
+-- Privilegios para el rol de la aplicación. `avisa_api` hereda de `avisa_app`.
+-- Se guarda la existencia del rol para no romper la carga standalone en una base
+-- donde los roles todavía no se crearon.
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'avisa_app') THEN
+    EXECUTE 'GRANT USAGE ON SCHEMA gis TO avisa_app';
+    EXECUTE 'GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA gis TO avisa_app';
+    EXECUTE 'ALTER DEFAULT PRIVILEGES IN SCHEMA gis '
+            'GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO avisa_app';
+  ELSE
+    RAISE NOTICE 'rol avisa_app ausente: no se otorgaron privilegios sobre gis';
+  END IF;
+END $$;
+
 COMMIT;

@@ -1,0 +1,1892 @@
+ubigeo,id_local,id_neon,nombre_local,nombre_neon,estado
+010101,1,1,Chachapoyas,Chachapoyas,ambos
+010102,2,2,Asunción,Asunción,ambos
+010103,3,3,Balsas,Balsas,ambos
+010104,4,4,Cheto,Cheto,ambos
+010105,5,5,Chiliquín,Chiliquín,ambos
+010106,6,6,Chuquibamba,Chuquibamba,ambos
+010107,7,7,Granada,Granada,ambos
+010108,8,8,Huancas,Huancas,ambos
+010109,9,9,La Jalca,La Jalca,ambos
+010110,10,10,Leimebamba,Leimebamba,ambos
+010111,11,11,Levanto,Levanto,ambos
+010112,12,12,Magdalena,Magdalena,ambos
+010113,13,13,Mariscal Castilla,Mariscal Castilla,ambos
+010114,14,14,Molinopampa,Molinopampa,ambos
+010115,15,15,Montevideo,Montevideo,ambos
+010116,16,16,Olleros,Olleros,ambos
+010117,17,17,Quinjalca,Quinjalca,ambos
+010118,18,18,San Francisco de Daguas,San Francisco de Daguas,ambos
+010119,19,19,San Isidro de Maino,San Isidro de Maino,ambos
+010120,20,20,Soloco,Soloco,ambos
+010121,21,21,Sonche,Sonche,ambos
+010201,22,22,Bagua,Bagua,ambos
+010202,23,23,Aramango,Aramango,ambos
+010203,24,24,Copallín,Copallín,ambos
+010204,25,25,El Parco,El Parco,ambos
+010205,26,26,Imaza,Imaza,ambos
+010206,27,27,La Peca,La Peca,ambos
+010301,28,28,Jumbilla,Jumbilla,ambos
+010302,29,29,Chisquilla,Chisquilla,ambos
+010303,30,30,Churuja,Churuja,ambos
+010304,31,31,Corosha,Corosha,ambos
+010305,32,32,Cuispes,Cuispes,ambos
+010306,33,33,Florida,Florida,ambos
+010307,34,34,Jazán,Jazán,ambos
+010308,35,35,Recta,Recta,ambos
+010309,36,36,San Carlos,San Carlos,ambos
+010310,37,37,Shipasbamba,Shipasbamba,ambos
+010311,38,38,Valera,Valera,ambos
+010312,39,39,Yambrasbamba,Yambrasbamba,ambos
+010401,40,40,Nieva,Nieva,ambos
+010402,41,41,El Cenepa,El Cenepa,ambos
+010403,42,42,Río Santiago,Río Santiago,ambos
+010501,43,43,Lámud,Lámud,ambos
+010502,44,44,Camporredondo,Camporredondo,ambos
+010503,45,45,Cocabamba,Cocabamba,ambos
+010504,46,46,Colcamar,Colcamar,ambos
+010505,47,47,Conila,Conila,ambos
+010506,48,48,Inguilpata,Inguilpata,ambos
+010507,49,49,Longuita,Longuita,ambos
+010508,50,50,Lonya Chico,Lonya Chico,ambos
+010509,51,51,Luya,Luya,ambos
+010510,52,52,Luya Viejo,Luya Viejo,ambos
+010511,53,53,María,María,ambos
+010512,54,54,Ocalli,Ocalli,ambos
+010513,55,55,Ocumal,Ocumal,ambos
+010514,56,56,Pisuquia,Pisuquia,ambos
+010515,57,57,Providencia,Providencia,ambos
+010516,58,58,San Cristóbal,San Cristóbal,ambos
+010517,59,59,San Francisco del Yeso,San Francisco del Yeso,ambos
+010518,60,60,San Jerónimo,San Jerónimo,ambos
+010519,61,61,San Juan de Lopecancha,San Juan de Lopecancha,ambos
+010520,62,62,Santa Catalina,Santa Catalina,ambos
+010521,63,63,Santo Tomás,Santo Tomás,ambos
+010522,64,64,Tingo,Tingo,ambos
+010523,65,65,Trita,Trita,ambos
+010601,66,66,San Nicolás,San Nicolás,ambos
+010602,67,67,Chirimoto,Chirimoto,ambos
+010603,68,68,Cochamal,Cochamal,ambos
+010604,69,69,Huambo,Huambo,ambos
+010605,70,70,Limabamba,Limabamba,ambos
+010606,71,71,Longar,Longar,ambos
+010607,72,72,Mariscal Benavides,Mariscal Benavides,ambos
+010608,73,73,Milpuc,Milpuc,ambos
+010609,74,74,Omia,Omia,ambos
+010610,75,75,Santa Rosa,Santa Rosa,ambos
+010611,76,76,Totora,Totora,ambos
+010612,77,77,Vista Alegre,Vista Alegre,ambos
+010701,78,78,Bagua Grande,Bagua Grande,ambos
+010702,79,79,Cajaruro,Cajaruro,ambos
+010703,80,80,Cumba,Cumba,ambos
+010704,81,81,El Milagro,El Milagro,ambos
+010705,82,82,Jamalca,Jamalca,ambos
+010706,83,83,Lonya Grande,Lonya Grande,ambos
+010707,84,84,Yamón,Yamón,ambos
+020101,85,85,Huaraz,Huaraz,ambos
+020102,86,86,Cochabamba,Cochabamba,ambos
+020103,87,87,Colcabamba,Colcabamba,ambos
+020104,88,88,Huanchay,Huanchay,ambos
+020105,89,89,Independencia,Independencia,ambos
+020106,90,90,Jangas,Jangas,ambos
+020107,91,91,La Libertad,La Libertad,ambos
+020108,92,92,Olleros,Olleros,ambos
+020109,93,93,Pampas Grande,Pampas Grande,ambos
+020110,3102,699,Pariacoto,Pariacoto,ambos
+020111,3101,700,Pira,Pira,ambos
+020112,98,98,Tarica,Tarica,ambos
+020201,99,99,Aija,Aija,ambos
+020202,100,100,Coris,Coris,ambos
+020203,101,101,Huacllán,Huacllán,ambos
+020204,102,102,La Merced,La Merced,ambos
+020205,103,103,Succha,Succha,ambos
+020301,104,104,Llamellín,Llamellín,ambos
+020302,105,105,Aczo,Aczo,ambos
+020303,106,106,Chaccho,Chaccho,ambos
+020304,107,107,Chingas,Chingas,ambos
+020305,108,108,Mirgas,Mirgas,ambos
+020306,109,109,San Juan de Rontoy,San Juan de Rontoy,ambos
+020401,110,110,Chacas,Chacas,ambos
+020402,111,111,Acochaca,Acochaca,ambos
+020501,112,112,Chiquián,Chiquián,ambos
+020502,113,113,Abelardo Pardo Lezameta,Abelardo Pardo Lezameta,ambos
+020503,114,114,Antonio Raymondi,Antonio Raymondi,ambos
+020504,115,115,Aquia,Aquia,ambos
+020505,116,116,Cajacay,Cajacay,ambos
+020506,117,117,Canis,Canis,ambos
+020507,118,118,Colquioc,Colquioc,ambos
+020508,119,119,Huallanca,Huallanca,ambos
+020509,120,120,Huasta,Huasta,ambos
+020510,121,121,Huayllacayán,Huayllacayán,ambos
+020511,122,122,La Primavera,La Primavera,ambos
+020512,123,123,Mangas,Mangas,ambos
+020513,124,124,Pacllón,Pacllón,ambos
+020514,125,125,San Miguel de Corpanqui,San Miguel de Corpanqui,ambos
+020515,126,126,Ticllos,Ticllos,ambos
+020601,127,127,Carhuaz,Carhuaz,ambos
+020602,128,128,Acopampa,Acopampa,ambos
+020603,129,129,Amashca,Amashca,ambos
+020604,130,130,Anta,Anta,ambos
+020605,131,131,Ataquero,Ataquero,ambos
+020606,132,132,Marcará,Marcará,ambos
+020607,3103,701,Pariahuanca,Pariahuanca,ambos
+020608,135,135,San Miguel de Aco,San Miguel de Aco,ambos
+020609,136,136,Shilla,Shilla,ambos
+020610,137,137,Tinco,Tinco,ambos
+020611,138,138,Yungar,Yungar,ambos
+020701,139,139,San Luis,San Luis,ambos
+020702,140,140,San Nicolás,San Nicolás,ambos
+020703,141,141,Yauya,Yauya,ambos
+020801,142,142,Casma,Casma,ambos
+020802,143,143,Buena Vista Alta,Buena Vista Alta,ambos
+020803,144,144,Comandante Noél,Comandante Noél,ambos
+020804,145,145,Yaután,Yaután,ambos
+020901,146,146,Corongo,Corongo,ambos
+020902,147,147,Aco,Aco,ambos
+020903,148,148,Bambas,Bambas,ambos
+020904,149,149,Cusca,Cusca,ambos
+020905,150,150,La Pampa,La Pampa,ambos
+020906,152,152,Yánac,Yánac,ambos
+020907,3104,702,Yupán,Yupán,ambos
+021001,153,153,Huari,Huari,ambos
+021002,154,154,Anra,Anra,ambos
+021003,155,155,Cajay,Cajay,ambos
+021004,156,156,Chavín de Huántar,Chavín de Huántar,ambos
+021005,157,157,Huacachi,Huacachi,ambos
+021006,158,158,Huacchis,Huacchis,ambos
+021007,159,159,Huachis,Huachis,ambos
+021008,160,160,Huántar,Huántar,ambos
+021009,161,161,Masín,Masín,ambos
+021010,162,162,Paucas,Paucas,ambos
+021011,163,163,Ponto,Ponto,ambos
+021012,164,164,Rahuapampa,Rahuapampa,ambos
+021013,165,165,Rapayan,Rapayan,ambos
+021014,166,166,San Marcos,San Marcos,ambos
+021015,167,167,San Pedro de Chana,San Pedro de Chana,ambos
+021016,168,168,Uco,Uco,ambos
+021101,3109,703,Huarmey,Huarmey,ambos
+021102,3108,704,Cochapeti,Cochapeti,ambos
+021103,3107,705,Culebras,Culebras,ambos
+021104,3106,706,Huayán,Huayán,ambos
+021105,3105,707,Malvas,Malvas,ambos
+021201,3119,708,Caraz,Caraz,ambos
+021202,3118,709,Huallanca,Huallanca,ambos
+021203,3117,710,Huata,Huata,ambos
+021204,3116,711,Huaylas,Huaylas,ambos
+021205,3115,712,Mato,Mato,ambos
+021206,3114,713,Pamparomás,Pamparomás,ambos
+021207,3113,714,Pueblo Libre,Pueblo Libre,ambos
+021208,3112,715,Santa Cruz,Santa Cruz,ambos
+021209,3111,716,Santo Toribio,Santo Toribio,ambos
+021210,3110,717,Yuracmarca,Yuracmarca,ambos
+021301,3127,718,Piscobamba,Piscobamba,ambos
+021302,3126,719,Casca,Casca,ambos
+021303,3125,720,Eleazar Guzmán Barrón,Eleazar Guzmán Barrón,ambos
+021304,3124,721,Fidel Olivas Escudero,Fidel Olivas Escudero,ambos
+021305,3123,722,Llama,Llama,ambos
+021306,3122,723,Llumpa,Llumpa,ambos
+021307,3121,724,Lucma,Lucma,ambos
+021308,3120,725,Musga,Musga,ambos
+021401,3137,726,Ocros,Ocros,ambos
+021402,3136,727,Acas,Acas,ambos
+021403,3135,728,Cajamarquilla,Cajamarquilla,ambos
+021404,3134,729,Carhuapampa,Carhuapampa,ambos
+021405,3133,730,Cochas,Cochas,ambos
+021406,3132,731,Congas,Congas,ambos
+021407,3131,732,Llipa,Llipa,ambos
+021408,3130,733,San Cristóbal de Raján,San Cristóbal de Raján,ambos
+021409,3129,734,San Pedro,San Pedro,ambos
+021410,3128,735,Santiago de Chilcas,Santiago de Chilcas,ambos
+021501,3148,736,Cabana,Cabana,ambos
+021502,3147,737,Bolognesi,Bolognesi,ambos
+021503,3146,738,Conchucos,Conchucos,ambos
+021504,3145,739,Huacaschuque,Huacaschuque,ambos
+021505,3144,740,Huandoval,Huandoval,ambos
+021506,3143,741,Lacabamba,Lacabamba,ambos
+021507,3142,742,Llapo,Llapo,ambos
+021508,3141,743,Pallasca,Pallasca,ambos
+021509,3140,744,Pampas,Pampas,ambos
+021510,3139,745,Santa Rosa,Santa Rosa,ambos
+021511,3138,746,Tauca,Tauca,ambos
+021601,3152,747,Pomabamba,Pomabamba,ambos
+021602,3151,748,Huayllán,Huayllán,ambos
+021603,3150,749,Parobamba,Parobamba,ambos
+021604,3149,750,Quinuabamba,Quinuabamba,ambos
+021701,3162,751,Recuay,Recuay,ambos
+021702,3161,752,Cátac,Cátac,ambos
+021703,3160,753,Cotaparaco,Cotaparaco,ambos
+021704,3159,754,Huayllapampa,Huayllapampa,ambos
+021705,3158,755,Llacllin,Llacllin,ambos
+021706,3157,756,Marca,Marca,ambos
+021707,3156,757,Pampas Chico,Pampas Chico,ambos
+021708,3155,758,Pararín,Pararín,ambos
+021709,3154,759,Tapacocha,Tapacocha,ambos
+021710,3153,760,Ticapampa,Ticapampa,ambos
+021801,3171,761,Chimbote,Chimbote,ambos
+021802,3170,762,Cáceres del Perú,Cáceres del Perú,ambos
+021803,3169,763,Coishco,Coishco,ambos
+021804,3168,764,Macate,Macate,ambos
+021805,3167,765,Moro,Moro,ambos
+021806,3166,766,Nepeña,Nepeña,ambos
+021807,3165,767,Samanco,Samanco,ambos
+021808,3164,768,Santa,Santa,ambos
+021809,3163,769,Nuevo Chimbote,Nuevo Chimbote,ambos
+021901,3181,770,Sihuas,Sihuas,ambos
+021902,3180,771,Acobamba,Acobamba,ambos
+021903,3179,772,Alfonso Ugarte,Alfonso Ugarte,ambos
+021904,3178,773,Cashapampa,Cashapampa,ambos
+021905,3177,774,Chingalpo,Chingalpo,ambos
+021906,3176,775,Huayllabamba,Huayllabamba,ambos
+021907,3175,776,Quiches,Quiches,ambos
+021908,3174,777,Ragash,Ragash,ambos
+021909,3173,778,San Juan,San Juan,ambos
+021910,3172,779,Sicsibamba,Sicsibamba,ambos
+022001,3189,780,Yungay,Yungay,ambos
+022002,3188,781,Cascapara,Cascapara,ambos
+022003,3187,782,Mancos,Mancos,ambos
+022004,3186,783,Matacoto,Matacoto,ambos
+022005,3185,784,Quillo,Quillo,ambos
+022006,3184,785,Ranrahirca,Ranrahirca,ambos
+022007,3183,786,Shupluy,Shupluy,ambos
+022008,3182,787,Yanama,Yanama,ambos
+030101,169,169,Abancay,Abancay,ambos
+030102,170,170,Chacoche,Chacoche,ambos
+030103,171,171,Circa,Circa,ambos
+030104,172,172,Curahuasi,Curahuasi,ambos
+030105,173,173,Huanipaca,Huanipaca,ambos
+030106,174,174,Lambrama,Lambrama,ambos
+030107,175,175,Pichirhua,Pichirhua,ambos
+030108,176,176,San Pedro de Cachora,San Pedro de Cachora,ambos
+030109,177,177,Tamburco,Tamburco,ambos
+030201,178,178,Andahuaylas,Andahuaylas,ambos
+030202,179,179,Andarapa,Andarapa,ambos
+030203,180,180,Chiara,Chiara,ambos
+030204,181,181,Huancarama,Huancarama,ambos
+030205,182,182,Huancaray,Huancaray,ambos
+030206,183,183,Huayana,Huayana,ambos
+030207,184,184,Kishuara,Kishuara,ambos
+030208,185,185,Pacobamba,Pacobamba,ambos
+030209,186,186,Pacucha,Pacucha,ambos
+030210,187,187,Pampachiri,Pampachiri,ambos
+030211,188,188,Pomacocha,Pomacocha,ambos
+030212,189,189,San Antonio de Cachi,San Antonio de Cachi,ambos
+030213,190,190,San Jerónimo,San Jerónimo,ambos
+030214,191,191,San Miguel de Chaccrampa,San Miguel de Chaccrampa,ambos
+030215,192,192,Santa María de Chicmo,Santa María de Chicmo,ambos
+030216,193,193,Talavera,Talavera,ambos
+030217,194,194,Tumay Huaraca,Tumay Huaraca,ambos
+030218,195,195,Turpo,Turpo,ambos
+030219,196,196,Kaquiabamba,Kaquiabamba,ambos
+030220,197,197,José María Arguedas,José María Arguedas,ambos
+030301,3196,788,Antabamba,Antabamba,ambos
+030302,3195,789,El Oro,El Oro,ambos
+030303,3194,790,Huaquirca,Huaquirca,ambos
+030304,3193,791,Juan Espinoza Medrano,Juan Espinoza Medrano,ambos
+030305,3192,792,Oropesa,Oropesa,ambos
+030306,3191,793,Pachaconas,Pachaconas,ambos
+030307,3190,794,Sabaino,Sabaino,ambos
+030401,3213,795,Chalhuanca,Chalhuanca,ambos
+030402,3212,796,Capaya,Capaya,ambos
+030403,3211,797,Caraybamba,Caraybamba,ambos
+030404,3210,798,Chapimarca,Chapimarca,ambos
+030405,3209,799,Colcabamba,Colcabamba,ambos
+030406,3208,800,Cotaruse,Cotaruse,ambos
+030407,3207,801,Ihuayllo,Ihuayllo,ambos
+030408,3206,802,Justo Apu Sahuaraura,Justo Apu Sahuaraura,ambos
+030409,3205,803,Lucre,Lucre,ambos
+030410,3204,804,Pocohuanca,Pocohuanca,ambos
+030411,3203,805,San Juan de Chacña,San Juan de Chacña,ambos
+030412,3202,806,Sañayca,Sañayca,ambos
+030413,3201,807,Soraya,Soraya,ambos
+030414,3200,808,Tapairihua,Tapairihua,ambos
+030415,3199,809,Tintay,Tintay,ambos
+030416,3198,810,Toraya,Toraya,ambos
+030417,3197,811,Yanaca,Yanaca,ambos
+030501,3219,812,Tambobamba,Tambobamba,ambos
+030502,3218,813,Cotabambas,Cotabambas,ambos
+030503,3217,814,Coyllurqui,Coyllurqui,ambos
+030504,3216,815,Haquira,Haquira,ambos
+030505,3215,816,Mara,Mara,ambos
+030506,3214,817,Challhuahuacho,Challhuahuacho,ambos
+030601,3231,818,Chincheros,Chincheros,ambos
+030602,3230,819,Anco-Huallo,Anco-Huallo,ambos
+030603,3229,820,Cocharcas,Cocharcas,ambos
+030604,3228,821,Huaccana,Huaccana,ambos
+030605,3227,822,Ocobamba,Ocobamba,ambos
+030606,3226,823,Ongoy,Ongoy,ambos
+030607,3225,824,Uranmarca,Uranmarca,ambos
+030608,3224,825,Ranracancha,Ranracancha,ambos
+030609,3223,826,Rocchacc,Rocchacc,ambos
+030610,3222,827,El Porvenir,El Porvenir,ambos
+030611,3221,828,Los Chankas,Los Chankas,ambos
+030612,3220,829,Ahuayro,Ahuayro,ambos
+030701,3245,830,Chuquibambilla,Chuquibambilla,ambos
+030702,3244,831,Curpahuasi,Curpahuasi,ambos
+030703,3243,832,Gamarra,Gamarra,ambos
+030704,3242,833,Huayllati,Huayllati,ambos
+030705,3241,834,Mamara,Mamara,ambos
+030706,3240,835,Micaela Bastidas,Micaela Bastidas,ambos
+030707,3239,836,Pataypampa,Pataypampa,ambos
+030708,3238,837,Progreso,Progreso,ambos
+030709,3237,838,San Antonio,San Antonio,ambos
+030710,3236,839,Santa Rosa,Santa Rosa,ambos
+030711,3235,840,Turpay,Turpay,ambos
+030712,3234,841,Vilcabamba,Vilcabamba,ambos
+030713,3233,842,Virundo,Virundo,ambos
+030714,3232,843,Curasco,Curasco,ambos
+040101,198,198,Arequipa,Arequipa,ambos
+040102,199,199,Alto Selva Alegre,Alto Selva Alegre,ambos
+040103,200,200,Cayma,Cayma,ambos
+040104,201,201,Cerro Colorado,Cerro Colorado,ambos
+040105,202,202,Characato,Characato,ambos
+040106,203,203,Chiguata,Chiguata,ambos
+040107,204,204,Jacobo Hunter,Jacobo Hunter,ambos
+040108,205,205,La Joya,La Joya,ambos
+040109,206,206,Mariano Melgar,Mariano Melgar,ambos
+040110,207,207,Miraflores,Miraflores,ambos
+040111,208,208,Mollebaya,Mollebaya,ambos
+040112,209,209,Paucarpata,Paucarpata,ambos
+040113,210,210,Pocsi,Pocsi,ambos
+040114,211,211,Polobaya,Polobaya,ambos
+040115,212,212,Quequeña,Quequeña,ambos
+040116,213,213,Sabandia,Sabandia,ambos
+040117,214,214,Sachaca,Sachaca,ambos
+040118,215,215,San Juan de Siguas,San Juan de Siguas,ambos
+040119,216,216,San Juan de Tarucani,San Juan de Tarucani,ambos
+040120,217,217,Santa Isabel de Siguas,Santa Isabel de Siguas,ambos
+040121,218,218,Santa Rita de Siguas,Santa Rita de Siguas,ambos
+040122,219,219,Socabaya,Socabaya,ambos
+040123,220,220,Tiabaya,Tiabaya,ambos
+040124,221,221,Uchumayo,Uchumayo,ambos
+040125,222,222,Vitor,Vitor,ambos
+040126,223,223,Yanahuara,Yanahuara,ambos
+040127,224,224,Yarabamba,Yarabamba,ambos
+040128,225,225,Yura,Yura,ambos
+040129,226,226,José Luis Bustamante y Rivero,José Luis Bustamante y Rivero,ambos
+040201,227,227,Camaná,Camaná,ambos
+040202,228,228,José María Quimper,José María Quimper,ambos
+040203,229,229,Mariano Nicolás Valcárcel,Mariano Nicolás Valcárcel,ambos
+040204,230,230,Mariscal Cáceres,Mariscal Cáceres,ambos
+040205,231,231,Nicolás de Piérola,Nicolás de Piérola,ambos
+040206,232,232,Ocoña,Ocoña,ambos
+040207,233,233,Quilca,Quilca,ambos
+040208,234,234,Samuel Pastor,Samuel Pastor,ambos
+040301,3258,844,Caravelí,Caravelí,ambos
+040302,3257,845,Acarí,Acarí,ambos
+040303,3256,846,Atico,Atico,ambos
+040304,3255,847,Atiquipa,Atiquipa,ambos
+040305,3254,848,Bella Unión,Bella Unión,ambos
+040306,3253,849,Cahuacho,Cahuacho,ambos
+040307,3252,850,Chala,Chala,ambos
+040308,3251,851,Chaparra,Chaparra,ambos
+040309,3250,852,Huanuhuanu,Huanuhuanu,ambos
+040310,3249,853,Jaqui,Jaqui,ambos
+040311,3248,854,Lomas,Lomas,ambos
+040312,3247,855,Quicacha,Quicacha,ambos
+040313,3246,856,Yauca,Yauca,ambos
+040401,3272,857,Aplao,Aplao,ambos
+040402,3271,858,Andagua,Andagua,ambos
+040403,3270,859,Ayo,Ayo,ambos
+040404,3269,860,Chachas,Chachas,ambos
+040405,3268,861,Chilcaymarca,Chilcaymarca,ambos
+040406,3267,862,Choco,Choco,ambos
+040407,3266,863,Huancarqui,Huancarqui,ambos
+040408,3265,864,Machaguay,Machaguay,ambos
+040409,3264,865,Orcopampa,Orcopampa,ambos
+040410,3263,866,Pampacolca,Pampacolca,ambos
+040411,3262,867,Tipán,Tipán,ambos
+040412,3261,868,Uñón,Uñón,ambos
+040413,3260,869,Uraca,Uraca,ambos
+040414,3259,870,Viraco,Viraco,ambos
+040501,3292,871,Chivay,Chivay,ambos
+040502,3291,872,Achoma,Achoma,ambos
+040503,3290,873,Cabanaconde,Cabanaconde,ambos
+040504,3289,874,Callalli,Callalli,ambos
+040505,3288,875,Caylloma,Caylloma,ambos
+040506,3287,876,Coporaque,Coporaque,ambos
+040507,3286,877,Huambo,Huambo,ambos
+040508,3285,878,Huanca,Huanca,ambos
+040509,3284,879,Ichupampa,Ichupampa,ambos
+040510,3283,880,Lari,Lari,ambos
+040511,3282,881,Lluta,Lluta,ambos
+040512,3281,882,Maca,Maca,ambos
+040513,3280,883,Madrigal,Madrigal,ambos
+040514,3279,884,San Antonio de Chuca,San Antonio de Chuca,ambos
+040515,3278,885,Sibayo,Sibayo,ambos
+040516,3277,886,Tapay,Tapay,ambos
+040517,3276,887,Tisco,Tisco,ambos
+040518,3275,888,Tuti,Tuti,ambos
+040519,3274,889,Yanque,Yanque,ambos
+040520,3273,890,Majes,Majes,ambos
+040601,3300,891,Chuquibamba,Chuquibamba,ambos
+040602,3299,892,Andaray,Andaray,ambos
+040603,3298,893,Cayarani,Cayarani,ambos
+040604,3297,894,Chichas,Chichas,ambos
+040605,3296,895,Iray,Iray,ambos
+040606,3295,896,Río Grande,Río Grande,ambos
+040607,3294,897,Salamanca,Salamanca,ambos
+040608,3293,898,Yanaquihua,Yanaquihua,ambos
+040701,3306,899,Mollendo,Mollendo,ambos
+040702,3305,900,Cocachacra,Cocachacra,ambos
+040703,3304,901,Dean Valdivia,Dean Valdivia,ambos
+040704,3303,902,Islay,Islay,ambos
+040705,3302,903,Mejía,Mejía,ambos
+040706,3301,904,Punta de Bombón,Punta de Bombón,ambos
+040801,3317,905,Cotahuasi,Cotahuasi,ambos
+040802,3316,906,Alca,Alca,ambos
+040803,3315,907,Charcana,Charcana,ambos
+040804,3314,908,Huaynacotas,Huaynacotas,ambos
+040805,3313,909,Pampamarca,Pampamarca,ambos
+040806,3312,910,Puyca,Puyca,ambos
+040807,3311,911,Quechualla,Quechualla,ambos
+040808,3310,912,Sayla,Sayla,ambos
+040809,3309,913,Tauria,Tauria,ambos
+040810,3308,914,Tomepampa,Tomepampa,ambos
+040811,3307,915,Toro,Toro,ambos
+050101,235,235,Ayacucho,Ayacucho,ambos
+050102,236,236,Acocro,Acocro,ambos
+050103,237,237,Acos Vinchos,Acos Vinchos,ambos
+050104,238,238,Carmen Alto,Carmen Alto,ambos
+050105,239,239,Chiara,Chiara,ambos
+050106,240,240,Ocros,Ocros,ambos
+050107,241,241,Pacaycasa,Pacaycasa,ambos
+050108,242,242,Quinua,Quinua,ambos
+050109,243,243,San José de Ticllas,San José de Ticllas,ambos
+050110,244,244,San Juan Bautista,San Juan Bautista,ambos
+050111,245,245,Santiago de Pischa,Santiago de Pischa,ambos
+050112,246,246,Socos,Socos,ambos
+050113,247,247,Tambillo,Tambillo,ambos
+050114,248,248,Vinchos,Vinchos,ambos
+050115,249,249,Jesús Nazareno,Jesús Nazareno,ambos
+050116,250,250,Andrés Avelino Cáceres Dorregaray,Andrés Avelino Cáceres Dorregaray,ambos
+050201,3323,916,Cangallo,Cangallo,ambos
+050202,3322,917,Chuschi,Chuschi,ambos
+050203,3321,918,Los Morochucos,Los Morochucos,ambos
+050204,3320,919,María Parado de Bellido,María Parado de Bellido,ambos
+050205,3319,920,Paras,Paras,ambos
+050206,3318,921,Totos,Totos,ambos
+050301,3327,922,Sancos,Sancos,ambos
+050302,3326,923,Carapo,Carapo,ambos
+050303,3325,924,Sacsamarca,Sacsamarca,ambos
+050304,3324,925,Santiago de Lucanamarca,Santiago de Lucanamarca,ambos
+050401,3340,926,Huanta,Huanta,ambos
+050402,3339,927,Ayahuanco,Ayahuanco,ambos
+050403,3338,928,Huamanguilla,Huamanguilla,ambos
+050404,3337,929,Iguain,Iguain,ambos
+050405,3336,930,Luricocha,Luricocha,ambos
+050406,3335,931,Santillana,Santillana,ambos
+050407,3334,932,Sivia,Sivia,ambos
+050408,3333,933,Llochegua,Llochegua,ambos
+050409,3332,934,Canayre,Canayre,ambos
+050410,3331,935,Uchuraccay,Uchuraccay,ambos
+050411,3330,936,Pucacolpa,Pucacolpa,ambos
+050412,3329,937,Chaca,Chaca,ambos
+050413,3328,938,Putis,Putis,ambos
+050501,3355,939,San Miguel,San Miguel,ambos
+050502,3354,940,Anco,Anco,ambos
+050503,3353,941,Ayna,Ayna,ambos
+050504,3352,942,Chilcas,Chilcas,ambos
+050505,3351,943,Chungui,Chungui,ambos
+050506,3350,944,Luis Carranza,Luis Carranza,ambos
+050507,3349,945,Santa Rosa,Santa Rosa,ambos
+050508,3348,946,Tambo,Tambo,ambos
+050509,3347,947,Samugari,Samugari,ambos
+050510,3346,948,Anchihuay,Anchihuay,ambos
+050511,3345,949,Oronccoy,Oronccoy,ambos
+050512,3344,950,Unión Progreso,Unión Progreso,ambos
+050513,3343,951,Río Magdalena,Río Magdalena,ambos
+050514,3342,952,Ninabamba,Ninabamba,ambos
+050515,3341,953,Patibamba,Patibamba,ambos
+050601,3376,954,Puquio,Puquio,ambos
+050602,3375,955,Aucara,Aucara,ambos
+050603,3374,956,Cabana,Cabana,ambos
+050604,3373,957,Carmen Salcedo,Carmen Salcedo,ambos
+050605,3372,958,Chaviña,Chaviña,ambos
+050606,3371,959,Chipao,Chipao,ambos
+050607,3370,960,Huac-Huas,Huac-Huas,ambos
+050608,3369,961,Laramate,Laramate,ambos
+050609,3368,962,Leoncio Prado,Leoncio Prado,ambos
+050610,3367,963,Llauta,Llauta,ambos
+050611,3366,964,Lucanas,Lucanas,ambos
+050612,3365,965,Ocaña,Ocaña,ambos
+050613,3364,966,Otoca,Otoca,ambos
+050614,3363,967,Saisa,Saisa,ambos
+050615,3362,968,San Cristóbal,San Cristóbal,ambos
+050616,3361,969,San Juan,San Juan,ambos
+050617,3360,970,San Pedro,San Pedro,ambos
+050618,3359,971,San Pedro de Palco,San Pedro de Palco,ambos
+050619,3358,972,Sancos,Sancos,ambos
+050620,3357,973,Santa Ana de Huaycahuacho,Santa Ana de Huaycahuacho,ambos
+050621,3356,974,Santa Lucia,Santa Lucia,ambos
+050701,3384,975,Coracora,Coracora,ambos
+050702,3383,976,Chumpi,Chumpi,ambos
+050703,3382,977,Coronel Castañeda,Coronel Castañeda,ambos
+050704,3381,978,Pacapausa,Pacapausa,ambos
+050705,3380,979,Pullo,Pullo,ambos
+050706,3379,980,Puyusca,Puyusca,ambos
+050707,3378,981,San Francisco de Rivacayco,San Francisco de Rivacayco,ambos
+050708,3377,982,Upahuacho,Upahuacho,ambos
+050801,3394,983,Pausa,Pausa,ambos
+050802,3393,984,Colta,Colta,ambos
+050803,3392,985,Corculla,Corculla,ambos
+050804,3391,986,Lampa,Lampa,ambos
+050805,3390,987,Marcabamba,Marcabamba,ambos
+050806,3389,988,Oyolo,Oyolo,ambos
+050807,3388,989,Pararca,Pararca,ambos
+050808,3387,990,San Javier de Alpabamba,San Javier de Alpabamba,ambos
+050809,3386,991,San José de Ushua,San José de Ushua,ambos
+050810,3385,992,Sara Sara,Sara Sara,ambos
+050901,3405,993,Querobamba,Querobamba,ambos
+050902,3404,994,Belén,Belén,ambos
+050903,3403,995,Chalcos,Chalcos,ambos
+050904,3402,996,Chilcayoc,Chilcayoc,ambos
+050905,3401,997,Huacaña,Huacaña,ambos
+050906,3400,998,Morcolla,Morcolla,ambos
+050907,3399,999,Paico,Paico,ambos
+050908,3398,1000,San Pedro de Larcay,San Pedro de Larcay,ambos
+050909,3397,1001,San Salvador de Quije,San Salvador de Quije,ambos
+050910,3396,1002,Santiago de Paucaray,Santiago de Paucaray,ambos
+050911,3395,1003,Soras,Soras,ambos
+051001,3417,1004,Huancapi,Huancapi,ambos
+051002,3416,1005,Alcamenca,Alcamenca,ambos
+051003,3415,1006,Apongo,Apongo,ambos
+051004,3414,1007,Asquipata,Asquipata,ambos
+051005,3413,1008,Canaria,Canaria,ambos
+051006,3412,1009,Cayara,Cayara,ambos
+051007,3411,1010,Colca,Colca,ambos
+051008,3410,1011,Huamanquiquia,Huamanquiquia,ambos
+051009,3409,1012,Huancaraylla,Huancaraylla,ambos
+051010,3408,1013,Hualla,Hualla,ambos
+051011,3407,1014,Sarhua,Sarhua,ambos
+051012,3406,1015,Vilcanchos,Vilcanchos,ambos
+051101,3425,1016,Vilcas Huamán,Vilcas Huamán,ambos
+051102,3424,1017,Accomarca,Accomarca,ambos
+051103,3423,1018,Carhuanca,Carhuanca,ambos
+051104,3422,1019,Concepción,Concepción,ambos
+051105,3421,1020,Huambalpa,Huambalpa,ambos
+051106,3420,1021,Independencia,Independencia,ambos
+051107,3419,1022,Saurama,Saurama,ambos
+051108,3418,1023,Vischongo,Vischongo,ambos
+060101,251,251,Cajamarca,Cajamarca,ambos
+060102,252,252,Asunción,Asunción,ambos
+060103,253,253,Chetilla,Chetilla,ambos
+060104,254,254,Cospán,Cospán,ambos
+060105,255,255,Encañada,Encañada,ambos
+060106,256,256,Jesús,Jesús,ambos
+060107,257,257,Llacanora,Llacanora,ambos
+060108,258,258,Los Baños del Inca,Los Baños del Inca,ambos
+060109,259,259,Magdalena,Magdalena,ambos
+060110,260,260,Matara,Matara,ambos
+060111,261,261,Namora,Namora,ambos
+060112,262,262,San Juan,San Juan,ambos
+060201,263,263,Cajabamba,Cajabamba,ambos
+060202,264,264,Cachachi,Cachachi,ambos
+060203,265,265,Condebamba,Condebamba,ambos
+060204,266,266,Sitacocha,Sitacocha,ambos
+060301,3437,1024,Celendín,Celendín,ambos
+060302,3436,1025,Chumuch,Chumuch,ambos
+060303,3435,1026,Cortegana,Cortegana,ambos
+060304,3434,1027,Huasmín,Huasmín,ambos
+060305,3433,1028,Jorge Chávez,Jorge Chávez,ambos
+060306,3432,1029,José Gálvez,José Gálvez,ambos
+060307,3431,1030,Miguel Iglesias,Miguel Iglesias,ambos
+060308,3430,1031,Oxamarca,Oxamarca,ambos
+060309,3429,1032,Sorochuco,Sorochuco,ambos
+060310,3428,1033,Sucre,Sucre,ambos
+060311,3427,1034,Utco,Utco,ambos
+060312,3426,1035,La Libertad de Pallán,La Libertad de Pallán,ambos
+060401,3456,1036,Chota,Chota,ambos
+060402,3455,1037,Anguia,Anguia,ambos
+060403,3454,1038,Chadin,Chadin,ambos
+060404,3453,1039,Chiguirip,Chiguirip,ambos
+060405,3452,1040,Chimbán,Chimbán,ambos
+060406,3451,1041,Choropampa,Choropampa,ambos
+060407,3450,1042,Cochabamba,Cochabamba,ambos
+060408,3449,1043,Conchán,Conchán,ambos
+060409,3448,1044,Huambos,Huambos,ambos
+060410,3447,1045,Lajas,Lajas,ambos
+060411,3446,1046,Llama,Llama,ambos
+060412,3445,1047,Miracosta,Miracosta,ambos
+060413,3444,1048,Paccha,Paccha,ambos
+060414,3443,1049,Pion,Pion,ambos
+060415,3442,1050,Querocoto,Querocoto,ambos
+060416,3441,1051,San Juan de Licupis,San Juan de Licupis,ambos
+060417,3440,1052,Tacabamba,Tacabamba,ambos
+060418,3439,1053,Tocmoche,Tocmoche,ambos
+060419,3438,1054,Chalamarca,Chalamarca,ambos
+060501,3464,1055,Contumazá,Contumazá,ambos
+060502,3463,1056,Chilete,Chilete,ambos
+060503,3462,1057,Cupisnique,Cupisnique,ambos
+060504,3461,1058,Guzmango,Guzmango,ambos
+060505,3460,1059,San Benito,San Benito,ambos
+060506,3459,1060,Santa Cruz de Toled,Santa Cruz de Toled,ambos
+060507,3458,1061,Tantarica,Tantarica,ambos
+060508,3457,1062,Yonán,Yonán,ambos
+060601,3479,1063,Cutervo,Cutervo,ambos
+060602,3478,1064,Callayuc,Callayuc,ambos
+060603,3477,1065,Choros,Choros,ambos
+060604,3476,1066,Cujillo,Cujillo,ambos
+060605,3475,1067,La Ramada,La Ramada,ambos
+060606,3474,1068,Pimpingos,Pimpingos,ambos
+060607,3473,1069,Querocotillo,Querocotillo,ambos
+060608,3472,1070,San Andrés de Cutervo,San Andrés de Cutervo,ambos
+060609,3471,1071,San Juan de Cutervo,San Juan de Cutervo,ambos
+060610,3470,1072,San Luis de Lucma,San Luis de Lucma,ambos
+060611,3469,1073,Santa Cruz,Santa Cruz,ambos
+060612,3468,1074,Santo Domingo de La Capilla,Santo Domingo de La Capilla,ambos
+060613,3467,1075,Santo Tomás,Santo Tomás,ambos
+060614,3466,1076,Socota,Socota,ambos
+060615,3465,1077,Toribio Casanova,Toribio Casanova,ambos
+060701,3482,1078,Bambamarca,Bambamarca,ambos
+060702,3481,1079,Chugur,Chugur,ambos
+060703,3480,1080,Hualgayoc,Hualgayoc,ambos
+060801,3494,1081,Jaén,Jaén,ambos
+060802,3493,1082,Bellavista,Bellavista,ambos
+060803,3492,1083,Chontali,Chontali,ambos
+060804,3491,1084,Colasay,Colasay,ambos
+060805,3490,1085,Huabal,Huabal,ambos
+060806,3489,1086,Las Pirias,Las Pirias,ambos
+060807,3488,1087,Pomahuaca,Pomahuaca,ambos
+060808,3487,1088,Pucará,Pucará,ambos
+060809,3486,1089,Sallique,Sallique,ambos
+060810,3485,1090,San Felipe,San Felipe,ambos
+060811,3484,1091,San José del Alto,San José del Alto,ambos
+060812,3483,1092,Santa Rosa,Santa Rosa,ambos
+060901,3500,1093,San Ignacio,San Ignacio,ambos
+060902,3499,1094,Chirinos,Chirinos,ambos
+060903,3498,1095,Huarango,Huarango,ambos
+060904,3497,1096,La Coipa,La Coipa,ambos
+060905,3496,1097,Namballe,Namballe,ambos
+060906,3495,1098,San José de Lourdes,San José de Lourdes,ambos
+060907,3501,1099,Tabaconas,Tabaconas,ambos
+061001,3508,1100,Pedro Gálvez,Pedro Gálvez,ambos
+061002,3507,1101,Chancay,Chancay,ambos
+061003,3506,1102,Eduardo Villanueva,Eduardo Villanueva,ambos
+061004,3505,1103,Gregorio Pita,Gregorio Pita,ambos
+061005,3504,1104,Ichocán,Ichocán,ambos
+061006,3503,1105,José Manuel Quiroz,José Manuel Quiroz,ambos
+061007,3502,1106,José Sabogal,José Sabogal,ambos
+061101,3521,1107,San Miguel,San Miguel,ambos
+061102,3520,1108,Bolívar,Bolívar,ambos
+061103,3519,1109,Calquis,Calquis,ambos
+061104,3518,1110,Catilluc,Catilluc,ambos
+061105,3517,1111,El Prado,El Prado,ambos
+061106,3516,1112,La Florida,La Florida,ambos
+061107,3515,1113,Llapa,Llapa,ambos
+061108,3514,1114,Nanchoc,Nanchoc,ambos
+061109,3513,1115,Niepos,Niepos,ambos
+061110,3512,1116,San Gregorio,San Gregorio,ambos
+061111,3511,1117,San Silvestre de Cochán,San Silvestre de Cochán,ambos
+061112,3510,1118,Tongod,Tongod,ambos
+061113,3509,1119,Unión Agua Blanca,Unión Agua Blanca,ambos
+061201,3525,1120,San Pablo,San Pablo,ambos
+061202,3524,1121,San Bernardino,San Bernardino,ambos
+061203,3523,1122,San Luis,San Luis,ambos
+061204,3522,1123,Tumbadén,Tumbadén,ambos
+061301,3536,1124,Santa Cruz,Santa Cruz,ambos
+061302,3535,1125,Andabamba,Andabamba,ambos
+061303,3534,1126,Catache,Catache,ambos
+061304,3533,1127,Chancaybaños,Chancaybaños,ambos
+061305,3532,1128,La Esperanza,La Esperanza,ambos
+061306,3531,1129,Ninabamba,Ninabamba,ambos
+061307,3530,1130,Pulán,Pulán,ambos
+061308,3529,1131,Saucepampa,Saucepampa,ambos
+061309,3528,1132,Sexi,Sexi,ambos
+061310,3527,1133,Uticyacu,Uticyacu,ambos
+061311,3526,1134,Yauyucán,Yauyucán,ambos
+070101,267,267,Callao,Callao,ambos
+070102,268,268,Bellavista,Bellavista,ambos
+070103,269,269,Carmen de La Legua Reynoso,Carmen de La Legua Reynoso,ambos
+070104,270,270,La Perla,La Perla,ambos
+070105,271,271,La Punta,La Punta,ambos
+070106,273,273,Ventanilla,Ventanilla,ambos
+070107,272,272,Mi Perú,Mi Perú,ambos
+080101,274,274,Cusco,Cusco,ambos
+080102,275,275,Ccorca,Ccorca,ambos
+080103,276,276,Poroy,Poroy,ambos
+080104,277,277,San Jerónimo,San Jerónimo,ambos
+080105,278,278,San Sebastián,San Sebastián,ambos
+080106,279,279,Santiago,Santiago,ambos
+080107,280,280,Saylla,Saylla,ambos
+080108,281,281,Wanchaq,Wanchaq,ambos
+080201,282,282,Acomayo,Acomayo,ambos
+080202,283,283,Acopia,Acopia,ambos
+080203,284,284,Acos,Acos,ambos
+080204,285,285,Mosoc Llacta,Mosoc Llacta,ambos
+080205,286,286,Pomacanchi,Pomacanchi,ambos
+080206,287,287,Rondocán,Rondocán,ambos
+080207,288,288,Sangarara,Sangarara,ambos
+080301,3545,1135,Anta,Anta,ambos
+080302,3544,1136,Ancahuasi,Ancahuasi,ambos
+080303,3543,1137,Cachimayo,Cachimayo,ambos
+080304,3542,1138,Chinchaypujio,Chinchaypujio,ambos
+080305,3541,1139,Huarocondo,Huarocondo,ambos
+080306,3540,1140,Limatambo,Limatambo,ambos
+080307,3539,1141,Mollepata,Mollepata,ambos
+080308,3538,1142,Pucyura,Pucyura,ambos
+080309,3537,1143,Zurite,Zurite,ambos
+080401,3553,1144,Calca,Calca,ambos
+080402,3552,1145,Coya,Coya,ambos
+080403,3551,1146,Lamay,Lamay,ambos
+080404,3550,1147,Lares,Lares,ambos
+080405,3549,1148,Pisac,Pisac,ambos
+080406,3548,1149,San Salvador,San Salvador,ambos
+080407,3547,1150,Taray,Taray,ambos
+080408,3546,1151,Yanatile,Yanatile,ambos
+080501,3561,1152,Yanaoca,Yanaoca,ambos
+080502,3560,1153,Checca,Checca,ambos
+080503,3559,1154,Kunturkanki,Kunturkanki,ambos
+080504,3558,1155,Langui,Langui,ambos
+080505,3557,1156,Layo,Layo,ambos
+080506,3556,1157,Pampamarca,Pampamarca,ambos
+080507,3555,1158,Quehue,Quehue,ambos
+080508,3554,1159,Túpac Amaru,Túpac Amaru,ambos
+080601,3569,1160,Sicuani,Sicuani,ambos
+080602,3568,1161,Checacupe,Checacupe,ambos
+080603,3567,1162,Combapata,Combapata,ambos
+080604,3566,1163,Marangani,Marangani,ambos
+080605,3565,1164,Pitumarca,Pitumarca,ambos
+080606,3564,1165,San Pablo,San Pablo,ambos
+080607,3563,1166,San Pedro,San Pedro,ambos
+080608,3562,1167,Tinta,Tinta,ambos
+080701,3577,1168,Santo Tomás,Santo Tomás,ambos
+080702,3576,1169,Capacmarca,Capacmarca,ambos
+080703,3575,1170,Chamaca,Chamaca,ambos
+080704,3574,1171,Colquemarca,Colquemarca,ambos
+080705,3573,1172,Livitaca,Livitaca,ambos
+080706,3572,1173,Llusco,Llusco,ambos
+080707,3571,1174,Quiñota,Quiñota,ambos
+080708,3570,1175,Velille,Velille,ambos
+080801,3585,1176,Espinar,Espinar,ambos
+080802,3584,1177,Condoroma,Condoroma,ambos
+080803,3583,1178,Coporaque,Coporaque,ambos
+080804,3582,1179,Ocoruro,Ocoruro,ambos
+080805,3581,1180,Pallpata,Pallpata,ambos
+080806,3580,1181,Pichigua,Pichigua,ambos
+080807,3579,1182,Suyckutambo,Suyckutambo,ambos
+080808,3578,1183,Alto Pichigua,Alto Pichigua,ambos
+080901,3603,1184,Santa Ana,Santa Ana,ambos
+080902,3602,1185,Echarate,Echarate,ambos
+080903,3601,1186,Huayopata,Huayopata,ambos
+080904,3600,1187,Maranura,Maranura,ambos
+080905,3599,1188,Ocobamba,Ocobamba,ambos
+080906,3598,1189,Quellouno,Quellouno,ambos
+080907,3597,1190,Kimbiri,Kimbiri,ambos
+080908,3596,1191,Santa Teresa,Santa Teresa,ambos
+080909,3595,1192,Vilcabamba,Vilcabamba,ambos
+080910,3594,1193,Pichari,Pichari,ambos
+080911,3593,1194,Inkawasi,Inkawasi,ambos
+080912,3592,1195,Villa Virgen,Villa Virgen,ambos
+080913,3591,1196,Villa Kintiarina,Villa Kintiarina,ambos
+080914,3590,1197,Megantoni,Megantoni,ambos
+080915,3589,1198,Kumpirushiato,Kumpirushiato,ambos
+080916,3588,1199,Cielo Punco,Cielo Punco,ambos
+080917,3587,1200,Manitea,Manitea,ambos
+080918,3586,1201,Unión Ashaninka,Unión Ashaninka,ambos
+081001,3612,1202,Paruro,Paruro,ambos
+081002,3611,1203,Accha,Accha,ambos
+081003,3610,1204,Ccapi,Ccapi,ambos
+081004,3609,1205,Colcha,Colcha,ambos
+081005,3608,1206,Huanoquite,Huanoquite,ambos
+081006,3607,1207,Omacha,Omacha,ambos
+081007,3606,1208,Paccaritambo,Paccaritambo,ambos
+081008,3605,1209,Pillpinto,Pillpinto,ambos
+081009,3604,1210,Yaurisque,Yaurisque,ambos
+081101,3618,1211,Paucartambo,Paucartambo,ambos
+081102,3617,1212,Caicay,Caicay,ambos
+081103,3616,1213,Challabamba,Challabamba,ambos
+081104,3615,1214,Colquepata,Colquepata,ambos
+081105,3614,1215,Huancarani,Huancarani,ambos
+081106,3613,1216,Kosñipata,Kosñipata,ambos
+081201,3630,1217,Urcos,Urcos,ambos
+081202,3629,1218,Andahuaylillas,Andahuaylillas,ambos
+081203,3628,1219,Camanti,Camanti,ambos
+081204,3627,1220,Ccarhuayo,Ccarhuayo,ambos
+081205,3626,1221,Ccatca,Ccatca,ambos
+081206,3625,1222,Cusipata,Cusipata,ambos
+081207,3624,1223,Huaro,Huaro,ambos
+081208,3623,1224,Lucre,Lucre,ambos
+081209,3622,1225,Marcapata,Marcapata,ambos
+081210,3621,1226,Ocongate,Ocongate,ambos
+081211,3620,1227,Oropesa,Oropesa,ambos
+081212,3619,1228,Quiquijana,Quiquijana,ambos
+081301,3637,1229,Urubamba,Urubamba,ambos
+081302,3636,1230,Chinchero,Chinchero,ambos
+081303,3635,1231,Huayllabamba,Huayllabamba,ambos
+081304,3634,1232,Machupicchu,Machupicchu,ambos
+081305,3633,1233,Maras,Maras,ambos
+081306,3632,1234,Ollantaytambo,Ollantaytambo,ambos
+081307,3631,1235,Yucay,Yucay,ambos
+090101,289,289,Huancavelica,Huancavelica,ambos
+090102,290,290,Acobambilla,Acobambilla,ambos
+090103,291,291,Acoria,Acoria,ambos
+090104,292,292,Conayca,Conayca,ambos
+090105,293,293,Cuenca,Cuenca,ambos
+090106,294,294,Huachocolpa,Huachocolpa,ambos
+090107,295,295,Huayllahuara,Huayllahuara,ambos
+090108,296,296,Izcuchaca,Izcuchaca,ambos
+090109,297,297,Laria,Laria,ambos
+090110,298,298,Manta,Manta,ambos
+090111,299,299,Mariscal Cáceres,Mariscal Cáceres,ambos
+090112,300,300,Moya,Moya,ambos
+090113,301,301,Nuevo Occoro,Nuevo Occoro,ambos
+090114,302,302,Palca,Palca,ambos
+090115,303,303,Pilchaca,Pilchaca,ambos
+090116,304,304,Vilca,Vilca,ambos
+090117,305,305,Yauli,Yauli,ambos
+090118,306,306,Ascensión,Ascensión,ambos
+090119,307,307,Huando,Huando,ambos
+090201,3645,1236,Acobamba,Acobamba,ambos
+090202,3644,1237,Andabamba,Andabamba,ambos
+090203,3643,1238,Anta,Anta,ambos
+090204,3642,1239,Caja,Caja,ambos
+090205,3641,1240,Marcas,Marcas,ambos
+090206,3640,1241,Paucara,Paucara,ambos
+090207,3639,1242,Pomacocha,Pomacocha,ambos
+090208,3638,1243,Rosario,Rosario,ambos
+090301,3657,1244,Lircay,Lircay,ambos
+090302,3656,1245,Anchonga,Anchonga,ambos
+090303,3655,1246,Callanmarca,Callanmarca,ambos
+090304,3654,1247,Ccochaccasa,Ccochaccasa,ambos
+090305,3653,1248,Chincho,Chincho,ambos
+090306,3652,1249,Congalla,Congalla,ambos
+090307,3651,1250,Huanca-Huanca,Huanca-Huanca,ambos
+090308,3650,1251,Huayllay Grande,Huayllay Grande,ambos
+090309,3649,1252,Julcamarca,Julcamarca,ambos
+090310,3648,1253,San Antonio de Antaparco,San Antonio de Antaparco,ambos
+090311,3647,1254,Santo Tomás de Pata,Santo Tomás de Pata,ambos
+090312,3646,1255,Secclla,Secclla,ambos
+090401,3670,1256,Castrovirreyna,Castrovirreyna,ambos
+090402,3669,1257,Arma,Arma,ambos
+090403,3668,1258,Aurahua,Aurahua,ambos
+090404,3667,1259,Capillas,Capillas,ambos
+090405,3666,1260,Chupamarca,Chupamarca,ambos
+090406,3665,1261,Cocas,Cocas,ambos
+090407,3664,1262,Huachos,Huachos,ambos
+090408,3663,1263,Huamatambo,Huamatambo,ambos
+090409,3662,1264,Mollepampa,Mollepampa,ambos
+090410,3661,1265,San Juan,San Juan,ambos
+090411,3660,1266,Santa Ana,Santa Ana,ambos
+090412,3659,1267,Tantara,Tantara,ambos
+090413,3658,1268,Ticrapo,Ticrapo,ambos
+090501,3681,1269,Churcampa,Churcampa,ambos
+090502,3680,1270,Anco,Anco,ambos
+090503,3679,1271,Chinchihuasi,Chinchihuasi,ambos
+090504,3678,1272,El Carmen,El Carmen,ambos
+090505,3677,1273,La Merced,La Merced,ambos
+090506,3676,1274,Locroja,Locroja,ambos
+090507,3675,1275,Paucarbamba,Paucarbamba,ambos
+090508,3674,1276,San Miguel de Mayocc,San Miguel de Mayocc,ambos
+090509,3673,1277,San Pedro de Coris,San Pedro de Coris,ambos
+090510,3672,1278,Pachamarca,Pachamarca,ambos
+090511,3671,1279,Cosme,Cosme,ambos
+090601,3697,1280,Huaytará,Huaytará,ambos
+090602,3696,1281,Ayavi,Ayavi,ambos
+090603,3695,1282,Córdova,Córdova,ambos
+090604,3694,1283,Huayacundo Arma,Huayacundo Arma,ambos
+090605,3693,1284,Laramarca,Laramarca,ambos
+090606,3692,1285,Ocoyo,Ocoyo,ambos
+090607,3691,1286,Pilpichaca,Pilpichaca,ambos
+090608,3690,1287,Querco,Querco,ambos
+090609,3689,1288,Quito-Arma,Quito-Arma,ambos
+090610,3688,1289,San Antonio de Cusicancha,San Antonio de Cusicancha,ambos
+090611,3687,1290,San Francisco de Sangayaico,San Francisco de Sangayaico,ambos
+090612,3686,1291,San Isidro,San Isidro,ambos
+090613,3685,1292,Santiago de Chocorvos,Santiago de Chocorvos,ambos
+090614,3684,1293,Santiago de Quirahuara,Santiago de Quirahuara,ambos
+090615,3683,1294,Santo Domingo de Capillas,Santo Domingo de Capillas,ambos
+090616,3682,1295,Tambo,Tambo,ambos
+090701,3720,1296,Pampas,Pampas,ambos
+090702,3719,1297,Acostambo,Acostambo,ambos
+090703,3718,1298,Acraquia,Acraquia,ambos
+090704,3717,1299,Ahuaycha,Ahuaycha,ambos
+090705,3716,1300,Colcabamba,Colcabamba,ambos
+090706,3715,1301,Daniel Hernández,Daniel Hernández,ambos
+090707,3714,1302,Huachocolpa,Huachocolpa,ambos
+090709,3713,1303,Huaribamba,Huaribamba,ambos
+090710,3712,1304,Ñahuimpuquio,Ñahuimpuquio,ambos
+090711,3711,1305,Pazos,Pazos,ambos
+090713,3710,1306,Quishuar,Quishuar,ambos
+090714,3709,1307,Salcabamba,Salcabamba,ambos
+090715,3708,1308,Salcahuasi,Salcahuasi,ambos
+090716,3707,1309,San Marcos de Rocchac,San Marcos de Rocchac,ambos
+090717,3706,1310,Surcubamba,Surcubamba,ambos
+090718,3705,1311,Tintay Puncu,Tintay Puncu,ambos
+090719,3704,1312,Quichuas,Quichuas,ambos
+090720,3703,1313,Andaymarca,Andaymarca,ambos
+090721,3702,1314,Roble,Roble,ambos
+090722,3701,1315,Pichos,Pichos,ambos
+090723,3700,1316,Santiago de Tucuma,Santiago de Tucuma,ambos
+090724,3699,1317,Lambras,Lambras,ambos
+090725,3698,1318,Cochabamba,Cochabamba,ambos
+100101,308,308,Huánuco,Huánuco,ambos
+100102,309,309,Amarilis,Amarilis,ambos
+100103,310,310,Chinchao,Chinchao,ambos
+100104,311,311,Churubamba,Churubamba,ambos
+100105,312,312,Margos,Margos,ambos
+100106,313,313,Quisqui,Quisqui,ambos
+100107,314,314,San Francisco de Cayrán,San Francisco de Cayrán,ambos
+100108,315,315,San Pedro de Chaulan,San Pedro de Chaulan,ambos
+100109,316,316,Santa María del Valle,Santa María del Valle,ambos
+100110,317,317,Yarumayo,Yarumayo,ambos
+100111,318,318,Pillco Marca,Pillco Marca,ambos
+100112,319,319,Yacus,Yacus,ambos
+100113,320,320,San Pablo de Pillao,San Pablo de Pillao,ambos
+100201,3728,1319,Ambo,Ambo,ambos
+100202,3727,1320,Cayna,Cayna,ambos
+100203,3726,1321,Colpas,Colpas,ambos
+100204,3725,1322,Conchamarca,Conchamarca,ambos
+100205,3724,1323,Huacar,Huacar,ambos
+100206,3723,1324,San Francisco,San Francisco,ambos
+100207,3722,1325,San Rafael,San Rafael,ambos
+100208,3721,1326,Tomay Kichwa,Tomay Kichwa,ambos
+100301,3737,1327,La Unión,La Unión,ambos
+100307,3736,1328,Chuquis,Chuquis,ambos
+100311,3735,1329,Marías,Marías,ambos
+100313,3734,1330,Pachas,Pachas,ambos
+100316,3733,1331,Quivilla,Quivilla,ambos
+100317,3732,1332,Ripan,Ripan,ambos
+100321,3731,1333,Shunqui,Shunqui,ambos
+100322,3730,1334,Sillapata,Sillapata,ambos
+100323,3729,1335,Yanas,Yanas,ambos
+100401,3741,1336,Huacaybamba,Huacaybamba,ambos
+100402,3740,1337,Canchabamba,Canchabamba,ambos
+100403,3739,1338,Cochabamba,Cochabamba,ambos
+100404,3738,1339,Pinra,Pinra,ambos
+100501,3752,1340,Llata,Llata,ambos
+100502,3751,1341,Arancay,Arancay,ambos
+100503,3750,1342,Chavín de Pariarca,Chavín de Pariarca,ambos
+100504,3749,1343,Jacas Grande,Jacas Grande,ambos
+100505,3748,1344,Jircan,Jircan,ambos
+100506,3747,1345,Miraflores,Miraflores,ambos
+100507,3746,1346,Monzón,Monzón,ambos
+100508,3745,1347,Punchao,Punchao,ambos
+100509,3744,1348,Puños,Puños,ambos
+100510,3743,1349,Singa,Singa,ambos
+100511,3742,1350,Tantamayo,Tantamayo,ambos
+100601,3762,1351,Rupa-Rupa,Rupa-Rupa,ambos
+100602,3761,1352,Daniel Alomia Robles,Daniel Alomia Robles,ambos
+100603,3760,1353,Hermilio Valdizán,Hermilio Valdizán,ambos
+100604,3759,1354,José Crespo y Castillo,José Crespo y Castillo,ambos
+100605,3758,1355,Luyando,Luyando,ambos
+100606,3757,1356,Mariano Damaso Beraún,Mariano Damaso Beraún,ambos
+100607,3756,1357,Pucayacu,Pucayacu,ambos
+100608,3755,1358,Castillo Grande,Castillo Grande,ambos
+100609,3754,1359,Pueblo Nuevo,Pueblo Nuevo,ambos
+100610,3753,1360,Santo Domingo de Anda,Santo Domingo de Anda,ambos
+100701,3767,1361,Huacrachuco,Huacrachuco,ambos
+100702,3766,1362,Cholón,Cholón,ambos
+100703,3765,1363,San Buenaventura,San Buenaventura,ambos
+100704,3764,1364,La Morada,La Morada,ambos
+100705,3763,1365,Santa Rosa de Alto Yanajanca,Santa Rosa de Alto Yanajanca,ambos
+100801,3771,1366,Panao,Panao,ambos
+100802,3770,1367,Chaglla,Chaglla,ambos
+100803,3769,1368,Molino,Molino,ambos
+100804,3768,1369,Umari,Umari,ambos
+100901,3776,1370,Puerto Inca,Puerto Inca,ambos
+100902,3775,1371,Codo del Pozuzo,Codo del Pozuzo,ambos
+100903,3774,1372,Honoria,Honoria,ambos
+100904,3773,1373,Tournavista,Tournavista,ambos
+100905,3772,1374,Yuyapichis,Yuyapichis,ambos
+101001,3783,1375,Jesús,Jesús,ambos
+101002,3782,1376,Baños,Baños,ambos
+101003,3781,1377,Jivia,Jivia,ambos
+101004,3780,1378,Queropalca,Queropalca,ambos
+101005,3779,1379,Rondos,Rondos,ambos
+101006,3778,1380,San Francisco de Asis,San Francisco de Asis,ambos
+101007,3777,1381,San Miguel de Cauri,San Miguel de Cauri,ambos
+101101,3791,1382,Chavinillo,Chavinillo,ambos
+101102,3790,1383,Cahuac,Cahuac,ambos
+101103,3789,1384,Chacabamba,Chacabamba,ambos
+101104,3788,1385,Aparicio Pomares,Aparicio Pomares,ambos
+101105,3787,1386,Jacas Chico,Jacas Chico,ambos
+101106,3786,1387,Obas,Obas,ambos
+101107,3785,1388,Pampamarca,Pampamarca,ambos
+101108,3784,1389,Choras,Choras,ambos
+110101,321,321,Ica,Ica,ambos
+110102,322,322,La Tinguiña,La Tinguiña,ambos
+110103,323,323,Los Aquijes,Los Aquijes,ambos
+110104,324,324,Ocucaje,Ocucaje,ambos
+110105,325,325,Pachacútec,Pachacútec,ambos
+110106,326,326,Parcona,Parcona,ambos
+110107,327,327,Pueblo Nuevo,Pueblo Nuevo,ambos
+110108,328,328,Salas,Salas,ambos
+110109,329,329,San José de Los Molinos,San José de Los Molinos,ambos
+110110,330,330,San Juan Bautista,San Juan Bautista,ambos
+110111,331,331,Santiago,Santiago,ambos
+110112,332,332,Subtanjalla,Subtanjalla,ambos
+110113,333,333,Tate,Tate,ambos
+110114,334,334,Yauca Del Rosario,Yauca Del Rosario,ambos
+110201,335,335,Chincha Alta,Chincha Alta,ambos
+110202,336,336,Alto Laran,Alto Laran,ambos
+110203,337,337,Chavín,Chavín,ambos
+110204,338,338,Chincha Baja,Chincha Baja,ambos
+110205,339,339,El Carmen,El Carmen,ambos
+110206,340,340,Grocio Prado,Grocio Prado,ambos
+110207,341,341,Pueblo Nuevo,Pueblo Nuevo,ambos
+110208,342,342,San Juan de Yánac,San Juan de Yánac,ambos
+110209,343,343,San Pedro de Huacarpana,San Pedro de Huacarpana,ambos
+110210,344,344,Sunampe,Sunampe,ambos
+110211,345,345,Tambo de Mora,Tambo de Mora,ambos
+110301,3796,1390,Nasca,Nasca,ambos
+110302,3795,1391,Changuillo,Changuillo,ambos
+110303,3794,1392,El Ingenio,El Ingenio,ambos
+110304,3793,1393,Marcona,Marcona,ambos
+110305,3792,1394,Vista Alegre,Vista Alegre,ambos
+110401,3801,1395,Palpa,Palpa,ambos
+110402,3800,1396,Llipata,Llipata,ambos
+110403,3799,1397,Río Grande,Río Grande,ambos
+110404,3798,1398,Santa Cruz,Santa Cruz,ambos
+110405,3797,1399,Tibillo,Tibillo,ambos
+110501,3809,1400,Pisco,Pisco,ambos
+110502,3808,1401,Huancano,Huancano,ambos
+110503,3807,1402,Humay,Humay,ambos
+110504,3806,1403,Independencia,Independencia,ambos
+110505,3805,1404,Paracas,Paracas,ambos
+110506,3804,1405,San Andrés,San Andrés,ambos
+110507,3803,1406,San Clemente,San Clemente,ambos
+110508,3802,1407,Túpac Amaru Inca,Túpac Amaru Inca,ambos
+120101,346,346,Huancayo,Huancayo,ambos
+120104,347,347,Carhuacallanga,Carhuacallanga,ambos
+120105,348,348,Chacapampa,Chacapampa,ambos
+120106,349,349,Chicche,Chicche,ambos
+120107,350,350,Chilca,Chilca,ambos
+120108,351,351,Chongos Alto,Chongos Alto,ambos
+120111,352,352,Chupuro,Chupuro,ambos
+120112,353,353,Colca,Colca,ambos
+120113,354,354,Cullhuas,Cullhuas,ambos
+120114,355,355,El Tambo,El Tambo,ambos
+120116,356,356,Huacrapuquio,Huacrapuquio,ambos
+120117,357,357,Hualhuas,Hualhuas,ambos
+120119,358,358,Huancán,Huancán,ambos
+120120,359,359,Huasicancha,Huasicancha,ambos
+120121,360,360,Huayucachi,Huayucachi,ambos
+120122,361,361,Ingenio,Ingenio,ambos
+120124,362,362,Pariahuanca,Pariahuanca,ambos
+120125,363,363,Pilcomayo,Pilcomayo,ambos
+120126,364,364,Pucará,Pucará,ambos
+120127,365,365,Quichuay,Quichuay,ambos
+120128,366,366,Quilcas,Quilcas,ambos
+120129,367,367,San Agustín,San Agustín,ambos
+120130,368,368,San Jerónimo de Tunán,San Jerónimo de Tunán,ambos
+120132,369,369,Saño,Saño,ambos
+120133,370,370,Sapallanga,Sapallanga,ambos
+120134,371,371,Sicaya,Sicaya,ambos
+120135,372,372,Santo Domingo de Acobamba,Santo Domingo de Acobamba,ambos
+120136,373,373,Viques,Viques,ambos
+120201,3824,1408,Concepción,Concepción,ambos
+120202,3823,1409,Aco,Aco,ambos
+120203,3822,1410,Andamarca,Andamarca,ambos
+120204,3821,1411,Chambará,Chambará,ambos
+120205,3820,1412,Cochas,Cochas,ambos
+120206,3819,1413,Comas,Comas,ambos
+120207,3818,1414,Heroínas Toledo,Heroínas Toledo,ambos
+120208,3817,1415,Manzanares,Manzanares,ambos
+120209,3816,1416,Mariscal Castilla,Mariscal Castilla,ambos
+120210,3815,1417,Matahuasi,Matahuasi,ambos
+120211,3814,1418,Mito,Mito,ambos
+120212,3813,1419,Nueve de Julio,Nueve de Julio,ambos
+120213,3812,1420,Orcotuna,Orcotuna,ambos
+120214,3811,1421,San José de Quero,San José de Quero,ambos
+120215,3810,1422,Santa Rosa de Ocopa,Santa Rosa de Ocopa,ambos
+120301,3830,1423,Chanchamayo,Chanchamayo,ambos
+120302,3829,1424,Perené,Perené,ambos
+120303,3828,1425,Pichanaqui,Pichanaqui,ambos
+120304,3827,1426,San Luis de Shuaro,San Luis de Shuaro,ambos
+120305,3826,1427,San Ramón,San Ramón,ambos
+120306,3825,1428,Vitoc,Vitoc,ambos
+120401,3864,1429,Jauja,Jauja,ambos
+120402,3863,1430,Acolla,Acolla,ambos
+120403,3862,1431,Apata,Apata,ambos
+120404,3861,1432,Ataura,Ataura,ambos
+120405,3860,1433,Canchayllo,Canchayllo,ambos
+120406,3859,1434,Curicaca,Curicaca,ambos
+120407,3858,1435,El Mantaro,El Mantaro,ambos
+120408,3857,1436,Huamalí,Huamalí,ambos
+120409,3856,1437,Huaripampa,Huaripampa,ambos
+120410,3855,1438,Huertas,Huertas,ambos
+120411,3854,1439,Janjaillo,Janjaillo,ambos
+120412,3853,1440,Julcán,Julcán,ambos
+120413,3852,1441,Leonor Ordóñez,Leonor Ordóñez,ambos
+120414,3851,1442,Llocllapampa,Llocllapampa,ambos
+120415,3850,1443,Marco,Marco,ambos
+120416,3849,1444,Masma,Masma,ambos
+120417,3848,1445,Masma Chicche,Masma Chicche,ambos
+120418,3847,1446,Molinos,Molinos,ambos
+120419,3846,1447,Monobamba,Monobamba,ambos
+120420,3845,1448,Muqui,Muqui,ambos
+120421,3844,1449,Muquiyauyo,Muquiyauyo,ambos
+120422,3843,1450,Paca,Paca,ambos
+120423,3842,1451,Paccha,Paccha,ambos
+120424,3841,1452,Pancán,Pancán,ambos
+120425,3840,1453,Parco,Parco,ambos
+120426,3839,1454,Pomacancha,Pomacancha,ambos
+120427,3838,1455,Ricrán,Ricrán,ambos
+120428,3837,1456,San Lorenzo,San Lorenzo,ambos
+120429,3836,1457,San Pedro de Chunán,San Pedro de Chunán,ambos
+120430,3835,1458,Sausa,Sausa,ambos
+120431,3834,1459,Sincos,Sincos,ambos
+120432,3833,1460,Tunan Marca,Tunan Marca,ambos
+120433,3832,1461,Yauli,Yauli,ambos
+120434,3831,1462,Yauyos,Yauyos,ambos
+120501,3868,1463,Junín,Junín,ambos
+120502,3867,1464,Carhuamayo,Carhuamayo,ambos
+120503,3866,1465,Ondores,Ondores,ambos
+120504,3865,1466,Ulcumayo,Ulcumayo,ambos
+120601,3877,1467,Satipo,Satipo,ambos
+120602,3876,1468,Coviriali,Coviriali,ambos
+120603,3875,1469,Llaylla,Llaylla,ambos
+120604,3874,1470,Mazamari,Mazamari,ambos
+120605,3873,1471,Pampa Hermosa,Pampa Hermosa,ambos
+120606,3872,1472,Pangoa,Pangoa,ambos
+120607,3871,1473,Río Negro,Río Negro,ambos
+120608,3870,1474,Río Tambo,Río Tambo,ambos
+120609,3869,1475,Vizcatán del Ene,Vizcatán del Ene,ambos
+120701,3886,1476,Tarma,Tarma,ambos
+120702,3885,1477,Acobamba,Acobamba,ambos
+120703,3884,1478,Huaricolca,Huaricolca,ambos
+120704,3883,1479,Huasahuasi,Huasahuasi,ambos
+120705,3882,1480,La Unión,La Unión,ambos
+120706,3881,1481,Palca,Palca,ambos
+120707,3880,1482,Palcamayo,Palcamayo,ambos
+120708,3879,1483,San Pedro de Cajas,San Pedro de Cajas,ambos
+120709,3878,1484,Tapo,Tapo,ambos
+120801,3896,1485,La Oroya,La Oroya,ambos
+120802,3895,1486,Chacapalpa,Chacapalpa,ambos
+120803,3894,1487,Huay-Huay,Huay-Huay,ambos
+120804,3893,1488,Marcapomacocha,Marcapomacocha,ambos
+120805,3892,1489,Morococha,Morococha,ambos
+120806,3891,1490,Paccha,Paccha,ambos
+120807,3890,1491,Santa Bárbara de Carhuacayán,Santa Bárbara de Carhuacayán,ambos
+120808,3889,1492,Santa Rosa de Sacco,Santa Rosa de Sacco,ambos
+120809,3888,1493,Suitucancha,Suitucancha,ambos
+120810,3887,1494,Yauli,Yauli,ambos
+120901,3900,1495,Chupaca,Chupaca,ambos
+120902,3899,1496,Ahuac,Ahuac,ambos
+120903,3898,1497,Chongos Bajo,Chongos Bajo,ambos
+120904,3897,1498,Huáchac,Huáchac,ambos
+120905,3909,1499,Huamancaca Chico,Huamancaca Chico,ambos
+120906,3908,1500,San Juan de Iscos,San Juan de Iscos,ambos
+120907,3907,1501,San Juan de Jarpa,San Juan de Jarpa,ambos
+120908,3906,1502,Tres de Diciembre,Tres de Diciembre,ambos
+120909,3905,1503,Yanacancha,Yanacancha,ambos
+130101,374,374,Trujillo,Trujillo,ambos
+130102,375,375,El Porvenir,El Porvenir,ambos
+130103,376,376,Florencia de Mora,Florencia de Mora,ambos
+130104,377,377,Huanchaco,Huanchaco,ambos
+130105,378,378,La Esperanza,La Esperanza,ambos
+130106,379,379,Laredo,Laredo,ambos
+130107,380,380,Moche,Moche,ambos
+130108,381,381,Poroto,Poroto,ambos
+130109,382,382,Salaverry,Salaverry,ambos
+130110,383,383,Simbal,Simbal,ambos
+130111,384,384,Victor Larco Herrera,Victor Larco Herrera,ambos
+130112,3901,1504,Alto Trujillo,Alto Trujillo,ambos
+130201,3917,1505,Ascope,Ascope,ambos
+130202,3916,1506,Chicama,Chicama,ambos
+130203,3915,1507,Chocope,Chocope,ambos
+130204,3914,1508,Magdalena de Cao,Magdalena de Cao,ambos
+130205,3913,1509,Paiján,Paiján,ambos
+130206,3912,1510,Rázuri,Rázuri,ambos
+130207,3911,1511,Santiago de Cao,Santiago de Cao,ambos
+130208,3910,1512,Casa Grande,Casa Grande,ambos
+130301,3923,1513,Bolívar,Bolívar,ambos
+130302,3922,1514,Bambamarca,Bambamarca,ambos
+130303,3921,1515,Condormarca,Condormarca,ambos
+130304,3920,1516,Longotea,Longotea,ambos
+130305,3919,1517,Uchumarca,Uchumarca,ambos
+130306,3918,1518,Ucuncha,Ucuncha,ambos
+130401,3926,1519,Chepén,Chepén,ambos
+130402,3925,1520,Pacanga,Pacanga,ambos
+130403,3924,1521,Pueblo Nuevo,Pueblo Nuevo,ambos
+130501,3930,1522,Julcán,Julcán,ambos
+130502,3929,1523,Calamarca,Calamarca,ambos
+130503,3928,1524,Carabamba,Carabamba,ambos
+130504,3927,1525,Huaso,Huaso,ambos
+130601,3940,1526,Otuzco,Otuzco,ambos
+130602,3939,1527,Agallpampa,Agallpampa,ambos
+130604,3938,1528,Charat,Charat,ambos
+130605,3937,1529,Huaranchal,Huaranchal,ambos
+130606,3936,1530,La Cuesta,La Cuesta,ambos
+130608,3935,1531,Mache,Mache,ambos
+130610,3934,1532,Paranday,Paranday,ambos
+130611,3933,1533,Salpo,Salpo,ambos
+130613,3932,1534,Sinsicap,Sinsicap,ambos
+130614,3931,1535,Usquil,Usquil,ambos
+130701,3945,1536,San Pedro de Lloc,San Pedro de Lloc,ambos
+130702,3944,1537,Guadalupe,Guadalupe,ambos
+130703,3943,1538,Jequetepeque,Jequetepeque,ambos
+130704,3942,1539,Pacasmayo,Pacasmayo,ambos
+130705,3941,1540,San José,San José,ambos
+130801,3958,1541,Tayabamba,Tayabamba,ambos
+130802,3957,1542,Buldibuyo,Buldibuyo,ambos
+130803,3956,1543,Chillia,Chillia,ambos
+130804,3955,1544,Huancaspata,Huancaspata,ambos
+130805,3954,1545,Huaylillas,Huaylillas,ambos
+130806,3953,1546,Huayo,Huayo,ambos
+130807,3952,1547,Ongon,Ongon,ambos
+130808,3951,1548,Parcoy,Parcoy,ambos
+130809,3950,1549,Pataz,Pataz,ambos
+130810,3949,1550,Pias,Pias,ambos
+130811,3948,1551,Santiago de Challas,Santiago de Challas,ambos
+130812,3947,1552,Taurija,Taurija,ambos
+130813,3946,1553,Urpay,Urpay,ambos
+130901,3966,1554,Huamachuco,Huamachuco,ambos
+130902,3965,1555,Chugay,Chugay,ambos
+130903,3964,1556,Cochorco,Cochorco,ambos
+130904,3963,1557,Curgos,Curgos,ambos
+130905,3962,1558,Marcabal,Marcabal,ambos
+130906,3961,1559,Sanagoran,Sanagoran,ambos
+130907,3960,1560,Sarín,Sarín,ambos
+130908,3959,1561,Sartimbamba,Sartimbamba,ambos
+131001,3974,1562,Santiago de Chuco,Santiago de Chuco,ambos
+131002,3973,1563,Angasmarca,Angasmarca,ambos
+131003,3972,1564,Cachicadan,Cachicadan,ambos
+131004,3971,1565,Mollebamba,Mollebamba,ambos
+131005,3970,1566,Mollepata,Mollepata,ambos
+131006,3969,1567,Quiruvilca,Quiruvilca,ambos
+131007,3968,1568,Santa Cruz de Chuca,Santa Cruz de Chuca,ambos
+131008,3967,1569,Sitabamba,Sitabamba,ambos
+131101,3978,1570,Cascas,Cascas,ambos
+131102,3977,1571,Lucma,Lucma,ambos
+131103,3976,1572,Marmot,Marmot,ambos
+131104,3975,1573,Sayapullo,Sayapullo,ambos
+131201,3981,1574,Virú,Virú,ambos
+131202,3980,1575,Chao,Chao,ambos
+131203,3979,1576,Guadalupito,Guadalupito,ambos
+140101,385,385,Chiclayo,Chiclayo,ambos
+140102,387,387,Chongoyape,Chongoyape,ambos
+140103,388,388,Etén,Etén,ambos
+140104,389,389,Etén Puerto,Etén Puerto,ambos
+140105,390,390,José Leonardo Ortiz,José Leonardo Ortiz,ambos
+140106,391,391,La Victoria,La Victoria,ambos
+140107,392,392,Lagunas,Lagunas,ambos
+140108,393,393,Monsefú,Monsefú,ambos
+140109,394,394,Nueva Arica,Nueva Arica,ambos
+140110,395,395,Oyotun,Oyotun,ambos
+140111,397,397,Picsi,Picsi,ambos
+140112,398,398,Pimentel,Pimentel,ambos
+140113,399,399,Reque,Reque,ambos
+140114,400,400,Santa Rosa,Santa Rosa,ambos
+140115,401,401,Saña,Saña,ambos
+140116,386,386,Cayaltí,Cayaltí,ambos
+140117,396,396,Patapo,Patapo,ambos
+140118,403,403,Pomalca,Pomalca,ambos
+140119,404,404,Pucala,Pucala,ambos
+140120,405,405,Tumán,Tumán,ambos
+140201,406,406,Ferreñafe,Ferreñafe,ambos
+140202,407,407,Cañaris,Cañaris,ambos
+140203,408,408,Incahuasi,Incahuasi,ambos
+140204,409,409,Manuel Antonio Mesones Muro,Manuel Antonio Mesones Muro,ambos
+140205,410,410,Pitipo,Pitipo,ambos
+140206,411,411,Pueblo Nuevo,Pueblo Nuevo,ambos
+140301,412,412,Lambayeque,Lambayeque,ambos
+140302,413,413,Chochope,Chochope,ambos
+140303,414,414,Illimo,Illimo,ambos
+140304,415,415,Jayanca,Jayanca,ambos
+140305,416,416,Mochumi,Mochumi,ambos
+140306,417,417,Mórrope,Mórrope,ambos
+140307,418,418,Motupe,Motupe,ambos
+140308,419,419,Olmos,Olmos,ambos
+140309,420,420,Pacora,Pacora,ambos
+140310,421,421,Salas,Salas,ambos
+140311,422,422,San José,San José,ambos
+140312,423,423,Tucume,Tucume,ambos
+150101,424,424,Lima,Lima,ambos
+150102,425,425,Ancón,Ancón,ambos
+150103,426,426,Ate,Ate,ambos
+150104,427,427,Barranco,Barranco,ambos
+150105,428,428,Breña,Breña,ambos
+150106,429,429,Carabayllo,Carabayllo,ambos
+150107,430,430,Chaclacayo,Chaclacayo,ambos
+150108,431,431,Chorrillos,Chorrillos,ambos
+150109,432,432,Cieneguilla,Cieneguilla,ambos
+150110,433,433,Comas,Comas,ambos
+150111,434,434,El Agustino,El Agustino,ambos
+150112,435,435,Independencia,Independencia,ambos
+150113,436,436,Jesús María,Jesús María,ambos
+150114,437,437,La Molina,La Molina,ambos
+150115,438,438,La Victoria,La Victoria,ambos
+150116,439,439,Lince,Lince,ambos
+150117,440,440,Los Olivos,Los Olivos,ambos
+150118,441,441,Lurigancho,Lurigancho,ambos
+150119,442,442,Lurín,Lurín,ambos
+150120,443,443,Magdalena Del Mar,Magdalena Del Mar,ambos
+150121,447,447,Pueblo Libre,Pueblo Libre,ambos
+150122,444,444,Miraflores,Miraflores,ambos
+150123,445,445,Pachacámac,Pachacámac,ambos
+150124,446,446,Pucusana,Pucusana,ambos
+150125,448,448,Puente Piedra,Puente Piedra,ambos
+150126,449,449,Punta Hermosa,Punta Hermosa,ambos
+150127,450,450,Punta Negra,Punta Negra,ambos
+150128,451,451,Rímac,Rímac,ambos
+150129,452,452,San Bartolo,San Bartolo,ambos
+150130,453,453,San Borja,San Borja,ambos
+150131,454,454,San Isidro,San Isidro,ambos
+150132,455,455,San Juan de Lurigancho,San Juan de Lurigancho,ambos
+150133,456,456,San Juan de Miraflores,San Juan de Miraflores,ambos
+150134,457,457,San Luis,San Luis,ambos
+150135,458,458,San Martin de Porres,San Martin de Porres,ambos
+150136,459,459,San Miguel,San Miguel,ambos
+150137,460,460,Santa Anita,Santa Anita,ambos
+150138,461,461,Santa María del Mar,Santa María del Mar,ambos
+150139,462,462,Santa Rosa,Santa Rosa,ambos
+150140,463,463,Santiago de Surco,Santiago de Surco,ambos
+150141,464,464,Surquillo,Surquillo,ambos
+150142,465,465,Villa El Salvador,Villa El Salvador,ambos
+150143,466,466,Villa María Del Triunfo,Villa María Del Triunfo,ambos
+150201,467,467,Barranca,Barranca,ambos
+150202,468,468,Paramonga,Paramonga,ambos
+150203,469,469,Pativilca,Pativilca,ambos
+150204,470,470,Supe,Supe,ambos
+150205,471,471,Supe Puerto,Supe Puerto,ambos
+150301,472,472,Cajatambo,Cajatambo,ambos
+150302,473,473,Copa,Copa,ambos
+150303,474,474,Gorgor,Gorgor,ambos
+150304,475,475,Huancapón,Huancapón,ambos
+150305,476,476,Manas,Manas,ambos
+150401,477,477,Canta,Canta,ambos
+150402,478,478,Arahuay,Arahuay,ambos
+150403,479,479,Huamantanga,Huamantanga,ambos
+150404,480,480,Huaros,Huaros,ambos
+150405,481,481,Lachaqui,Lachaqui,ambos
+150406,482,482,San Buenaventura,San Buenaventura,ambos
+150407,483,483,Santa Rosa de Quives,Santa Rosa de Quives,ambos
+150501,484,484,San Vicente de Cañete,San Vicente de Cañete,ambos
+150502,485,485,Asia,Asia,ambos
+150503,486,486,Calango,Calango,ambos
+150504,487,487,Cerro Azul,Cerro Azul,ambos
+150505,488,488,Chilca,Chilca,ambos
+150506,489,489,Coayllo,Coayllo,ambos
+150507,490,490,Imperial,Imperial,ambos
+150508,491,491,Lunahuana,Lunahuana,ambos
+150509,492,492,Mala,Mala,ambos
+150510,493,493,Nuevo Imperial,Nuevo Imperial,ambos
+150511,494,494,Pacarán,Pacarán,ambos
+150512,495,495,Quilmana,Quilmana,ambos
+150513,496,496,San Antonio,San Antonio,ambos
+150514,497,497,San Luis,San Luis,ambos
+150515,498,498,Santa Cruz de Flores,Santa Cruz de Flores,ambos
+150516,499,499,Zuñiga,Zuñiga,ambos
+150601,3993,1577,Huaral,Huaral,ambos
+150602,3992,1578,Atavillos Alto,Atavillos Alto,ambos
+150603,3991,1579,Atavillos Bajo,Atavillos Bajo,ambos
+150604,3990,1580,Aucallama,Aucallama,ambos
+150605,3989,1581,Chancay,Chancay,ambos
+150606,3988,1582,Ihuari,Ihuari,ambos
+150607,3987,1583,Lampián,Lampián,ambos
+150608,3986,1584,Pacaraos,Pacaraos,ambos
+150609,3985,1585,San Miguel de Acos,San Miguel de Acos,ambos
+150610,3984,1586,Santa Cruz de Andamarca,Santa Cruz de Andamarca,ambos
+150611,3983,1587,Sumbilca,Sumbilca,ambos
+150612,3982,1588,Veintisiete de Noviembre,Veintisiete de Noviembre,ambos
+150701,4025,1589,Matucana,Matucana,ambos
+150702,4024,1590,Antioquía,Antioquía,ambos
+150703,4023,1591,Callahuanca,Callahuanca,ambos
+150704,4022,1592,Carampoma,Carampoma,ambos
+150705,4021,1593,Chicla,Chicla,ambos
+150706,4020,1594,Cuenca,Cuenca,ambos
+150707,4019,1595,Huachupampa,Huachupampa,ambos
+150708,4018,1596,Huanza,Huanza,ambos
+150709,4017,1597,Huarochirí,Huarochirí,ambos
+150710,4016,1598,Lahuaytambo,Lahuaytambo,ambos
+150711,4015,1599,Langa,Langa,ambos
+150712,4014,1600,San Pedro de Laraos,San Pedro de Laraos,ambos
+150713,4013,1601,Mariatana,Mariatana,ambos
+150714,4012,1602,Ricardo Palma,Ricardo Palma,ambos
+150715,4011,1603,San Andrés de Tupicocha,San Andrés de Tupicocha,ambos
+150716,4010,1604,San Antonio,San Antonio,ambos
+150717,4009,1605,San Bartolomé,San Bartolomé,ambos
+150718,4008,1606,San Damian,San Damian,ambos
+150719,4007,1607,San Juan de Iris,San Juan de Iris,ambos
+150720,4006,1608,San Juan de Tantaranche,San Juan de Tantaranche,ambos
+150721,4005,1609,San Lorenzo de Quinti,San Lorenzo de Quinti,ambos
+150722,4004,1610,San Mateo,San Mateo,ambos
+150723,4003,1611,San Mateo de Otao,San Mateo de Otao,ambos
+150724,4002,1612,San Pedro de Casta,San Pedro de Casta,ambos
+150725,4001,1613,San Pedro de Huancayre,San Pedro de Huancayre,ambos
+150726,4000,1614,Sangallaya,Sangallaya,ambos
+150727,3999,1615,Santa Cruz de Cocachacra,Santa Cruz de Cocachacra,ambos
+150728,3998,1616,Santa Eulalia,Santa Eulalia,ambos
+150729,3997,1617,Santiago de Anchucaya,Santiago de Anchucaya,ambos
+150730,3996,1618,Santiago de Tuna,Santiago de Tuna,ambos
+150731,3995,1619,Santo Domingo de Los Olleros,Santo Domingo de Los Olleros,ambos
+150732,3994,1620,Surco,Surco,ambos
+150801,4037,1621,Huacho,Huacho,ambos
+150802,4036,1622,Ambar,Ambar,ambos
+150803,4035,1623,Caleta de Carquín,Caleta de Carquín,ambos
+150804,4034,1624,Checras,Checras,ambos
+150805,4033,1625,Hualmay,Hualmay,ambos
+150806,4032,1626,Huaura,Huaura,ambos
+150807,4031,1627,Leoncio Prado,Leoncio Prado,ambos
+150808,4030,1628,Paccho,Paccho,ambos
+150809,4029,1629,Santa Leonor,Santa Leonor,ambos
+150810,4028,1630,Santa María,Santa María,ambos
+150811,4027,1631,Sayán,Sayán,ambos
+150812,4026,1632,Vegueta,Vegueta,ambos
+150901,4043,1633,Oyón,Oyón,ambos
+150902,4042,1634,Andajes,Andajes,ambos
+150903,4041,1635,Caujul,Caujul,ambos
+150904,4040,1636,Cochamarca,Cochamarca,ambos
+150905,4039,1637,Naván,Naván,ambos
+150906,4038,1638,Pachangara,Pachangara,ambos
+151001,4076,1639,Yauyos,Yauyos,ambos
+151002,4075,1640,Alis,Alis,ambos
+151003,4074,1641,Allauca,Allauca,ambos
+151004,4073,1642,Ayaviri,Ayaviri,ambos
+151005,4072,1643,Azángaro,Azángaro,ambos
+151006,4071,1644,Cacra,Cacra,ambos
+151007,4070,1645,Carania,Carania,ambos
+151008,4069,1646,Catahuasi,Catahuasi,ambos
+151009,4068,1647,Chocos,Chocos,ambos
+151010,4067,1648,Cochas,Cochas,ambos
+151011,4066,1649,Colonia,Colonia,ambos
+151012,4065,1650,Hongos,Hongos,ambos
+151013,4064,1651,Huampara,Huampara,ambos
+151014,4063,1652,Huancaya,Huancaya,ambos
+151015,4062,1653,Huangascar,Huangascar,ambos
+151016,4061,1654,Huantan,Huantan,ambos
+151017,4060,1655,Huañec,Huañec,ambos
+151018,4059,1656,Laraos,Laraos,ambos
+151019,4058,1657,Lincha,Lincha,ambos
+151020,4057,1658,Madean,Madean,ambos
+151021,4056,1659,Miraflores,Miraflores,ambos
+151022,4055,1660,Omas,Omas,ambos
+151023,4054,1661,Putinza,Putinza,ambos
+151024,4053,1662,Quinches,Quinches,ambos
+151025,4052,1663,Quinocay,Quinocay,ambos
+151026,4051,1664,San Joaquín,San Joaquín,ambos
+151027,4050,1665,San Pedro de Pilas,San Pedro de Pilas,ambos
+151028,4049,1666,Tanta,Tanta,ambos
+151029,4048,1667,Tauripampa,Tauripampa,ambos
+151030,4047,1668,Tomás,Tomás,ambos
+151031,4046,1669,Tupe,Tupe,ambos
+151032,4045,1670,Viñac,Viñac,ambos
+151033,4044,1671,Vitis,Vitis,ambos
+160101,500,500,Iquitos,Iquitos,ambos
+160102,501,501,Alto Nanay,Alto Nanay,ambos
+160103,502,502,Fernando Lores,Fernando Lores,ambos
+160104,503,503,Indiana,Indiana,ambos
+160105,504,504,Las Amazonas,Las Amazonas,ambos
+160106,505,505,Mazan,Mazan,ambos
+160107,506,506,Napo,Napo,ambos
+160108,507,507,Punchana,Punchana,ambos
+160110,508,508,Torres Causana,Torres Causana,ambos
+160112,509,509,Belén,Belén,ambos
+160113,510,510,San Juan Bautista,San Juan Bautista,ambos
+160201,511,511,Yurimaguas,Yurimaguas,ambos
+160202,512,512,Balsapuerto,Balsapuerto,ambos
+160205,513,513,Jeberos,Jeberos,ambos
+160206,514,514,Lagunas,Lagunas,ambos
+160210,515,515,Santa Cruz,Santa Cruz,ambos
+160211,516,516,Teniente César López Rojas,Teniente César López Rojas,ambos
+160301,4081,1672,Nauta,Nauta,ambos
+160302,4080,1673,Parinari,Parinari,ambos
+160303,4079,1674,Tigre,Tigre,ambos
+160304,4078,1675,Trompeteros,Trompeteros,ambos
+160305,4077,1676,Urarinas,Urarinas,ambos
+160401,4085,1677,Ramón Castilla,Ramón Castilla,ambos
+160402,4084,1678,Pebas,Pebas,ambos
+160403,4083,1679,Yavari,Yavari,ambos
+160404,4082,1680,San Pablo,San Pablo,ambos
+160501,4096,1681,Requena,Requena,ambos
+160502,4095,1682,Alto Tapiche,Alto Tapiche,ambos
+160503,4094,1683,Capelo,Capelo,ambos
+160504,4093,1684,Emilio San Martín,Emilio San Martín,ambos
+160505,4092,1685,Maquia,Maquia,ambos
+160506,4091,1686,Puinahua,Puinahua,ambos
+160507,4090,1687,Saquena,Saquena,ambos
+160508,4089,1688,Soplin,Soplin,ambos
+160509,4088,1689,Tapiche,Tapiche,ambos
+160510,4087,1690,Jenaro Herrera,Jenaro Herrera,ambos
+160511,4086,1691,Yaquerana,Yaquerana,ambos
+160601,4102,1692,Contamana,Contamana,ambos
+160602,4101,1693,Inahuaya,Inahuaya,ambos
+160603,4100,1694,Padre Márquez,Padre Márquez,ambos
+160604,4099,1695,Pampa Hermosa,Pampa Hermosa,ambos
+160605,4098,1696,Sarayacu,Sarayacu,ambos
+160606,4097,1697,Vargas Guerra,Vargas Guerra,ambos
+160701,4108,1698,Barranca,Barranca,ambos
+160702,4107,1699,Cahuapanas,Cahuapanas,ambos
+160703,4106,1700,Manseriche,Manseriche,ambos
+160704,4105,1701,Morona,Morona,ambos
+160705,4104,1702,Pastaza,Pastaza,ambos
+160706,4103,1703,Andoas,Andoas,ambos
+160801,4112,1704,Putumayo,Putumayo,ambos
+160802,4111,1705,Rosa Panduro,Rosa Panduro,ambos
+160803,4110,1706,Teniente Manuel Clavero,Teniente Manuel Clavero,ambos
+160804,4109,1707,Yaguas,Yaguas,ambos
+170101,517,517,Tambopata,Tambopata,ambos
+170102,518,518,Inambari,Inambari,ambos
+170103,519,519,Las Piedras,Las Piedras,ambos
+170104,520,520,Laberinto,Laberinto,ambos
+170201,521,521,Manu,Manu,ambos
+170202,522,522,Fitzcarrald,Fitzcarrald,ambos
+170203,523,523,Madre de Dios,Madre de Dios,ambos
+170204,524,524,Huepetuhe,Huepetuhe,ambos
+170301,525,525,Iñapari,Iñapari,ambos
+170302,526,526,Iberia,Iberia,ambos
+170303,527,527,Tahuamanu,Tahuamanu,ambos
+180101,528,528,Moquegua,Moquegua,ambos
+180102,529,529,Carumas,Carumas,ambos
+180103,530,530,Cuchumbaya,Cuchumbaya,ambos
+180104,531,531,Samegua,Samegua,ambos
+180105,532,532,San Cristóbal,San Cristóbal,ambos
+180106,533,533,Torata,Torata,ambos
+180107,3902,1708,San Antonio,San Antonio,ambos
+180201,534,534,Omate,Omate,ambos
+180202,535,535,Chojata,Chojata,ambos
+180203,536,536,Coalaque,Coalaque,ambos
+180204,537,537,Ichuña,Ichuña,ambos
+180205,538,538,La Capilla,La Capilla,ambos
+180206,539,539,Lloque,Lloque,ambos
+180207,540,540,Matalaque,Matalaque,ambos
+180208,541,541,Puquina,Puquina,ambos
+180209,542,542,Quinistaquillas,Quinistaquillas,ambos
+180210,543,543,Ubinas,Ubinas,ambos
+180211,544,544,Yunga,Yunga,ambos
+180301,545,545,Ilo,Ilo,ambos
+180302,546,546,El Algarrobal,El Algarrobal,ambos
+180303,547,547,Pacocha,Pacocha,ambos
+190101,548,548,Chaupimarca,Chaupimarca,ambos
+190102,549,549,Huachón,Huachón,ambos
+190103,550,550,Huariaca,Huariaca,ambos
+190104,551,551,Huayllay,Huayllay,ambos
+190105,552,552,Ninacaca,Ninacaca,ambos
+190106,553,553,Pallanchacra,Pallanchacra,ambos
+190107,554,554,Paucartambo,Paucartambo,ambos
+190108,555,555,San Francisco de Asís de Yarusyacán,San Francisco de Asís de Yarusyacán,ambos
+190109,556,556,Simón Bolívar,Simón Bolívar,ambos
+190110,557,557,Ticlacayan,Ticlacayan,ambos
+190111,558,558,Tinyahuarco,Tinyahuarco,ambos
+190112,559,559,Vicco,Vicco,ambos
+190113,560,560,Yanacancha,Yanacancha,ambos
+190201,4120,1709,Yanahuanca,Yanahuanca,ambos
+190202,4119,1710,Chacayan,Chacayan,ambos
+190203,4118,1711,Goyllarisquizga,Goyllarisquizga,ambos
+190204,4117,1712,Paucar,Paucar,ambos
+190205,4116,1713,San Pedro de Pillao,San Pedro de Pillao,ambos
+190206,4115,1714,Santa Ana de Tusi,Santa Ana de Tusi,ambos
+190207,4114,1715,Tapuc,Tapuc,ambos
+190208,4113,1716,Vilcabamba,Vilcabamba,ambos
+190301,4128,1717,Oxapampa,Oxapampa,ambos
+190302,4127,1718,Chontabamba,Chontabamba,ambos
+190303,4126,1719,Huancabamba,Huancabamba,ambos
+190304,4125,1720,Palcazu,Palcazu,ambos
+190305,4124,1721,Pozuzo,Pozuzo,ambos
+190306,4123,1722,Puerto Bermúdez,Puerto Bermúdez,ambos
+190307,4122,1723,Villa Rica,Villa Rica,ambos
+190308,4121,1724,Constitución,Constitución,ambos
+200101,561,561,Piura,Piura,ambos
+200104,562,562,Castilla,Castilla,ambos
+200105,563,563,Catacaos,Catacaos,ambos
+200107,564,564,Cura Mori,Cura Mori,ambos
+200108,565,565,El Tallán,El Tallán,ambos
+200109,566,566,La Arena,La Arena,ambos
+200110,567,567,La Unión,La Unión,ambos
+200111,568,568,Las Lomas,Las Lomas,ambos
+200114,569,569,Tambo Grande,Tambo Grande,ambos
+200115,570,570,Veintiséis de Octubre,Veintiséis de Octubre,ambos
+200201,571,571,Ayabaca,Ayabaca,ambos
+200202,572,572,Frías,Frías,ambos
+200203,573,573,Jilili,Jilili,ambos
+200204,574,574,Lagunas,Lagunas,ambos
+200205,575,575,Montero,Montero,ambos
+200206,576,576,Pacaipampa,Pacaipampa,ambos
+200207,577,577,Paimas,Paimas,ambos
+200208,578,578,Sapillica,Sapillica,ambos
+200209,579,579,Sicchez,Sicchez,ambos
+200210,580,580,Suyo,Suyo,ambos
+200301,581,581,Huancabamba,Huancabamba,ambos
+200302,582,582,Canchaque,Canchaque,ambos
+200303,583,583,El Carmen de La Frontera,El Carmen de La Frontera,ambos
+200304,584,584,Huarmaca,Huarmaca,ambos
+200305,585,585,Lalaquiz,Lalaquiz,ambos
+200306,586,586,San Miguel de El Faique,San Miguel de El Faique,ambos
+200307,587,587,Sondor,Sondor,ambos
+200308,588,588,Sondorillo,Sondorillo,ambos
+200401,589,589,Chulucanas,Chulucanas,ambos
+200402,590,590,Buenos Aires,Buenos Aires,ambos
+200403,591,591,Chalaco,Chalaco,ambos
+200404,592,592,La Matanza,La Matanza,ambos
+200405,593,593,Morropón,Morropón,ambos
+200406,594,594,Salitral,Salitral,ambos
+200407,595,595,San Juan de Bigote,San Juan de Bigote,ambos
+200408,596,596,Santa Catalina de Mossa,Santa Catalina de Mossa,ambos
+200409,597,597,Santo Domingo,Santo Domingo,ambos
+200410,598,598,Yamango,Yamango,ambos
+200501,599,599,Paita,Paita,ambos
+200502,600,600,Amotape,Amotape,ambos
+200503,601,601,Arenal,Arenal,ambos
+200504,602,602,Colan,Colan,ambos
+200505,603,603,La Huaca,La Huaca,ambos
+200506,604,604,Tamarindo,Tamarindo,ambos
+200507,605,605,Vichayal,Vichayal,ambos
+200601,606,606,Sullana,Sullana,ambos
+200602,607,607,Bellavista,Bellavista,ambos
+200603,608,608,Ignacio Escudero,Ignacio Escudero,ambos
+200604,609,609,Lancones,Lancones,ambos
+200605,610,610,Marcavelica,Marcavelica,ambos
+200606,611,611,Miguel Checa,Miguel Checa,ambos
+200607,612,612,Querecotillo,Querecotillo,ambos
+200608,613,613,Salitral,Salitral,ambos
+200701,614,614,Pariñas,Pariñas,ambos
+200702,615,615,El Alto,El Alto,ambos
+200703,616,616,La Brea,La Brea,ambos
+200704,617,617,Lobitos,Lobitos,ambos
+200705,618,618,Los Órganos,Los Órganos,ambos
+200706,619,619,Máncora,Máncora,ambos
+200801,620,620,Sechura,Sechura,ambos
+200802,3903,1725,Bellavista de La Unión,Bellavista de La Unión,ambos
+200803,621,621,Bernal,Bernal,ambos
+200804,622,622,Cristo Nos Valga,Cristo Nos Valga,ambos
+200805,623,623,Vice,Vice,ambos
+200806,624,624,Rinconada Llicuar,Rinconada Llicuar,ambos
+210101,625,625,Puno,Puno,ambos
+210102,626,626,Acora,Acora,ambos
+210103,627,627,Amantani,Amantani,ambos
+210104,628,628,Atuncolla,Atuncolla,ambos
+210105,629,629,Capachica,Capachica,ambos
+210106,630,630,Chucuito,Chucuito,ambos
+210107,631,631,Coata,Coata,ambos
+210108,632,632,Huata,Huata,ambos
+210109,633,633,Mañazo,Mañazo,ambos
+210110,634,634,Paucarcolla,Paucarcolla,ambos
+210111,635,635,Pichacani,Pichacani,ambos
+210112,636,636,Platería,Platería,ambos
+210113,637,637,San Antonio,San Antonio,ambos
+210114,638,638,Tiquillaca,Tiquillaca,ambos
+210115,639,639,Vilque,Vilque,ambos
+210201,4143,1726,Azángaro,Azángaro,ambos
+210202,4142,1727,Achaya,Achaya,ambos
+210203,4141,1728,Arapa,Arapa,ambos
+210204,4140,1729,Asillo,Asillo,ambos
+210205,4139,1730,Caminaca,Caminaca,ambos
+210206,4138,1731,Chupa,Chupa,ambos
+210207,4137,1732,José Domingo Choquehuanca,José Domingo Choquehuanca,ambos
+210208,4136,1733,Muñani,Muñani,ambos
+210209,4135,1734,Potoni,Potoni,ambos
+210210,4134,1735,Saman,Saman,ambos
+210211,4133,1736,San Antón,San Antón,ambos
+210212,4132,1737,San José,San José,ambos
+210213,4131,1738,San Juan de Salinas,San Juan de Salinas,ambos
+210214,4130,1739,Santiago de Pupuja,Santiago de Pupuja,ambos
+210215,4129,1740,Tirapata,Tirapata,ambos
+210301,4153,1741,Macusani,Macusani,ambos
+210302,4152,1742,Ajoyani,Ajoyani,ambos
+210303,4151,1743,Ayapata,Ayapata,ambos
+210304,4150,1744,Coasa,Coasa,ambos
+210305,4149,1745,Corani,Corani,ambos
+210306,4148,1746,Crucero,Crucero,ambos
+210307,4147,1747,Ituata,Ituata,ambos
+210308,4146,1748,Ollachea,Ollachea,ambos
+210309,4145,1749,San Gabán,San Gabán,ambos
+210310,4144,1750,Usicayos,Usicayos,ambos
+210401,4160,1751,Juli,Juli,ambos
+210402,4159,1752,Desaguadero,Desaguadero,ambos
+210403,4158,1753,Huacullani,Huacullani,ambos
+210404,4157,1754,Kelluyo,Kelluyo,ambos
+210405,4156,1755,Pisacoma,Pisacoma,ambos
+210406,4155,1756,Pomata,Pomata,ambos
+210407,4154,1757,Zepita,Zepita,ambos
+210501,4165,1758,Ilave,Ilave,ambos
+210502,4164,1759,Capazo,Capazo,ambos
+210503,4163,1760,Pilcuyo,Pilcuyo,ambos
+210504,4162,1761,Santa Rosa,Santa Rosa,ambos
+210505,4161,1762,Conduriri,Conduriri,ambos
+210601,4173,1763,Huancané,Huancané,ambos
+210602,4172,1764,Cojata,Cojata,ambos
+210603,4171,1765,Huatasani,Huatasani,ambos
+210604,4170,1766,Inchupalla,Inchupalla,ambos
+210605,4169,1767,Pusi,Pusi,ambos
+210606,4168,1768,Rosaspata,Rosaspata,ambos
+210607,4167,1769,Taraco,Taraco,ambos
+210608,4166,1770,Vilque Chico,Vilque Chico,ambos
+210701,4183,1771,Lampa,Lampa,ambos
+210702,4182,1772,Cabanilla,Cabanilla,ambos
+210703,4181,1773,Calapuja,Calapuja,ambos
+210704,4180,1774,Nicasio,Nicasio,ambos
+210705,4179,1775,Ocuviri,Ocuviri,ambos
+210706,4178,1776,Palca,Palca,ambos
+210707,4177,1777,Paratia,Paratia,ambos
+210708,4176,1778,Pucará,Pucará,ambos
+210709,4175,1779,Santa Lucía,Santa Lucía,ambos
+210710,4174,1780,Vilavila,Vilavila,ambos
+210801,4192,1781,Ayaviri,Ayaviri,ambos
+210802,4191,1782,Antauta,Antauta,ambos
+210803,4190,1783,Cupi,Cupi,ambos
+210804,4189,1784,Llalli,Llalli,ambos
+210805,4188,1785,Macari,Macari,ambos
+210806,4187,1786,Nuñoa,Nuñoa,ambos
+210807,4186,1787,Orurillo,Orurillo,ambos
+210808,4185,1788,Santa Rosa,Santa Rosa,ambos
+210809,4184,1789,Umachiri,Umachiri,ambos
+210901,4196,1790,Moho,Moho,ambos
+210902,4195,1791,Conima,Conima,ambos
+210903,4194,1792,Huayrapata,Huayrapata,ambos
+210904,4193,1793,Tilali,Tilali,ambos
+211001,4201,1794,Putina,Putina,ambos
+211002,4200,1795,Ananea,Ananea,ambos
+211003,4199,1796,Pedro Vilca Apaza,Pedro Vilca Apaza,ambos
+211004,4198,1797,Quilcapuncu,Quilcapuncu,ambos
+211005,4197,1798,Sina,Sina,ambos
+211101,4206,1799,Juliaca,Juliaca,ambos
+211102,4205,1800,Cabana,Cabana,ambos
+211103,4204,1801,Cabanillas,Cabanillas,ambos
+211104,4203,1802,Caracoto,Caracoto,ambos
+211105,4202,1803,San Miguel,San Miguel,ambos
+211201,4216,1804,Sandia,Sandia,ambos
+211202,4215,1805,Cuyocuyo,Cuyocuyo,ambos
+211203,4214,1806,Limbani,Limbani,ambos
+211204,4213,1807,Patambuco,Patambuco,ambos
+211205,4212,1808,Phara,Phara,ambos
+211206,4211,1809,Quiaca,Quiaca,ambos
+211207,4210,1810,San Juan del Oro,San Juan del Oro,ambos
+211208,4209,1811,Yanahuaya,Yanahuaya,ambos
+211209,4208,1812,Alto Inambari,Alto Inambari,ambos
+211210,4207,1813,San Pedro de Putina Punco,San Pedro de Putina Punco,ambos
+211301,4223,1814,Yunguyo,Yunguyo,ambos
+211302,4222,1815,Anapia,Anapia,ambos
+211303,4221,1816,Copani,Copani,ambos
+211304,4220,1817,Cuturapi,Cuturapi,ambos
+211305,4219,1818,Ollaraya,Ollaraya,ambos
+211306,4218,1819,Tinicachi,Tinicachi,ambos
+211307,4217,1820,Unicachi,Unicachi,ambos
+220101,640,640,Moyobamba,Moyobamba,ambos
+220102,641,641,Calzada,Calzada,ambos
+220103,642,642,Habana,Habana,ambos
+220104,643,643,Jepelacio,Jepelacio,ambos
+220105,644,644,Soritor,Soritor,ambos
+220106,645,645,Yantalo,Yantalo,ambos
+220201,646,646,Bellavista,Bellavista,ambos
+220202,647,647,Alto Biavo,Alto Biavo,ambos
+220203,648,648,Bajo Biavo,Bajo Biavo,ambos
+220204,649,649,Huallaga,Huallaga,ambos
+220205,650,650,San Pablo,San Pablo,ambos
+220206,651,651,San Rafael,San Rafael,ambos
+220301,4228,1821,San José de Sisa,San José de Sisa,ambos
+220302,4227,1822,Agua Blanca,Agua Blanca,ambos
+220303,4226,1823,San Martín,San Martín,ambos
+220304,4225,1824,Santa Rosa,Santa Rosa,ambos
+220305,4224,1825,Shatoja,Shatoja,ambos
+220401,4234,1826,Saposoa,Saposoa,ambos
+220402,4233,1827,Alto Saposoa,Alto Saposoa,ambos
+220403,4232,1828,El Eslabón,El Eslabón,ambos
+220404,4231,1829,Piscoyacu,Piscoyacu,ambos
+220405,4230,1830,Sacanche,Sacanche,ambos
+220406,4229,1831,Tingo de Saposoa,Tingo de Saposoa,ambos
+220501,4245,1832,Lamas,Lamas,ambos
+220502,4244,1833,Alonso de Alvarado,Alonso de Alvarado,ambos
+220503,4243,1834,Barranquita,Barranquita,ambos
+220504,4242,1835,Caynarachi,Caynarachi,ambos
+220505,4241,1836,Cuñumbuqui,Cuñumbuqui,ambos
+220506,4240,1837,Pinto Recodo,Pinto Recodo,ambos
+220507,4239,1838,Rumisapa,Rumisapa,ambos
+220508,4238,1839,San Roque de Cumbaza,San Roque de Cumbaza,ambos
+220509,4237,1840,Shanao,Shanao,ambos
+220510,4236,1841,Tabalosos,Tabalosos,ambos
+220511,4235,1842,Zapatero,Zapatero,ambos
+220601,4250,1843,Juanjuí,Juanjuí,ambos
+220602,4249,1844,Campanilla,Campanilla,ambos
+220603,4248,1845,Huicungo,Huicungo,ambos
+220604,4247,1846,Pachiza,Pachiza,ambos
+220605,4246,1847,Pajarillo,Pajarillo,ambos
+220701,4260,1848,Picota,Picota,ambos
+220702,4259,1849,Buenos Aires,Buenos Aires,ambos
+220703,4258,1850,Caspisapa,Caspisapa,ambos
+220704,4257,1851,Pilluana,Pilluana,ambos
+220705,4256,1852,Pucacaca,Pucacaca,ambos
+220706,4255,1853,San Cristóbal,San Cristóbal,ambos
+220707,4254,1854,San Hilarión,San Hilarión,ambos
+220708,4253,1855,Shamboyacu,Shamboyacu,ambos
+220709,4252,1856,Tingo de Ponasa,Tingo de Ponasa,ambos
+220710,4251,1857,Tres Unidos,Tres Unidos,ambos
+220801,4269,1858,Rioja,Rioja,ambos
+220802,4268,1859,Awajun,Awajun,ambos
+220803,4267,1860,Elias Soplín Vargas,Elias Soplín Vargas,ambos
+220804,4266,1861,Nueva Cajamarca,Nueva Cajamarca,ambos
+220805,4265,1862,Pardo Miguel,Pardo Miguel,ambos
+220806,4264,1863,Posic,Posic,ambos
+220807,4263,1864,San Fernando,San Fernando,ambos
+220808,4262,1865,Yorongos,Yorongos,ambos
+220809,4261,1866,Yuracyacu,Yuracyacu,ambos
+220901,4283,1867,Tarapoto,Tarapoto,ambos
+220902,4282,1868,Alberto Leveau,Alberto Leveau,ambos
+220903,4281,1869,Cacatachi,Cacatachi,ambos
+220904,4280,1870,Chazuta,Chazuta,ambos
+220905,4279,1871,Chipurana,Chipurana,ambos
+220906,4278,1872,El Porvenir,El Porvenir,ambos
+220907,4277,1873,Huimbayoc,Huimbayoc,ambos
+220908,4276,1874,Juan Guerra,Juan Guerra,ambos
+220909,4275,1875,La Banda de Shilcayo,La Banda de Shilcayo,ambos
+220910,4274,1876,Morales,Morales,ambos
+220911,4273,1877,Papaplaya,Papaplaya,ambos
+220912,4272,1878,San Antonio,San Antonio,ambos
+220913,4271,1879,Sauce,Sauce,ambos
+220914,4270,1880,Shapaja,Shapaja,ambos
+221001,4289,1881,Tocache,Tocache,ambos
+221002,4288,1882,Nuevo Progreso,Nuevo Progreso,ambos
+221003,4287,1883,Pólvora,Pólvora,ambos
+221004,4286,1884,Shunte,Shunte,ambos
+221005,4285,1885,Uchiza,Uchiza,ambos
+221006,4284,1886,Santa Lucia,Santa Lucia,ambos
+230101,652,652,Tacna,Tacna,ambos
+230102,653,653,Alto de La Alianza,Alto de La Alianza,ambos
+230103,654,654,Calana,Calana,ambos
+230104,655,655,Ciudad Nueva,Ciudad Nueva,ambos
+230105,656,656,Inclán,Inclán,ambos
+230106,657,657,Pachia,Pachia,ambos
+230107,658,658,Palca,Palca,ambos
+230108,659,659,Pocollay,Pocollay,ambos
+230109,660,660,Sama,Sama,ambos
+230110,661,661,Coronel Gregorio Albarracin Lanchipa,Coronel Gregorio Albarracin Lanchipa,ambos
+230111,662,662,La Yarada los Palos,La Yarada los Palos,ambos
+230201,663,663,Candarave,Candarave,ambos
+230202,664,664,Cairani,Cairani,ambos
+230203,665,665,Camilaca,Camilaca,ambos
+230204,666,666,Curibaya,Curibaya,ambos
+230205,667,667,Huanuara,Huanuara,ambos
+230206,668,668,Quilahuani,Quilahuani,ambos
+230301,4292,1887,Locumba,Locumba,ambos
+230302,4291,1888,Ilabaya,Ilabaya,ambos
+230303,4290,1889,Ite,Ite,ambos
+230401,4300,1890,Tarata,Tarata,ambos
+230402,4299,1891,Héroes Albarracín,Héroes Albarracín,ambos
+230403,4298,1892,Estique,Estique,ambos
+230404,4297,1893,Estique-Pampa,Estique-Pampa,ambos
+230405,4296,1894,Sitajara,Sitajara,ambos
+230406,4295,1895,Susapaya,Susapaya,ambos
+230407,4294,1896,Tarucachi,Tarucachi,ambos
+230408,4293,1897,Ticaco,Ticaco,ambos
+240101,669,669,Tumbes,Tumbes,ambos
+240102,670,670,Corrales,Corrales,ambos
+240103,671,671,La Cruz,La Cruz,ambos
+240104,672,672,Pampas de Hospital,Pampas de Hospital,ambos
+240105,673,673,San Jacinto,San Jacinto,ambos
+240106,674,674,San Juan de La Virgen,San Juan de La Virgen,ambos
+240201,675,675,Zorritos,Zorritos,ambos
+240202,676,676,Casitas,Casitas,ambos
+240203,677,677,Canoas de Punta Sal,Canoas de Punta Sal,ambos
+240301,678,678,Zarumilla,Zarumilla,ambos
+240302,679,679,Aguas Verdes,Aguas Verdes,ambos
+240303,680,680,Matapalo,Matapalo,ambos
+240304,681,681,Papayal,Papayal,ambos
+250101,682,682,Calleria,Calleria,ambos
+250102,683,683,Campoverde,Campoverde,ambos
+250103,684,684,Iparia,Iparia,ambos
+250104,685,685,Masisea,Masisea,ambos
+250105,686,686,Yarinacocha,Yarinacocha,ambos
+250106,687,687,Nueva Requena,Nueva Requena,ambos
+250107,688,688,Manantay,Manantay,ambos
+250201,689,689,Raimondi,Raimondi,ambos
+250202,690,690,Sepahua,Sepahua,ambos
+250203,691,691,Tahuania,Tahuania,ambos
+250204,692,692,Yurua,Yurua,ambos
+250301,693,693,Padre Abad,Padre Abad,ambos
+250302,694,694,Irazola,Irazola,ambos
+250303,695,695,Curimaná,Curimaná,ambos
+250304,696,696,Neshuya,Neshuya,ambos
+250305,697,697,Alexander Von Humboldt,Alexander Von Humboldt,ambos
+250306,3904,1898,Huipoca,Huipoca,ambos
+250307,4301,1899,Boquerón,Boquerón,ambos
+250401,698,698,Purús,Purús,ambos

@@ -86,10 +86,10 @@ Si hace falta reconstruir a mano, el orden es:
 No viene del xlsx del legado: carga `gis/derived/infraestructuras_puntos.csv`, extraído
 por `scripts/kml_infraestructuras.py` desde `gis/Infraestructuras.kml`.
 
-| Pieza                         | Qué hace                                                                                                                                     |
-| ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| `39_gis_infraestructuras.sql` | Crea el esquema `gis`, la tabla `infraestructuras_puntos` y las vistas `v_desembarcaderos` y `v_infraestructuras_por_distrito`. Idempotente. |
-| `loader/cargar_gis.py`        | Aplica el SQL, trunca y recarga desde el CSV con `COPY`. Resuelve `distrito_id` contra `core.distritos` cuando el ubigeo existe.             |
+| Pieza                         | Qué hace                                                                                                                                                                                                                                               |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `39_gis_infraestructuras.sql` | Crea el esquema `gis`, la tabla `infraestructuras_puntos` y las vistas `v_desembarcaderos` y `v_infraestructuras_por_distrito`. Idempotente.                                                                                                           |
+| `loader/cargar_gis.py`        | Aplica el SQL, trunca y recarga desde el CSV con `COPY`. Resuelve `distrito_id` contra `core.distritos` cuando el ubigeo existe; luego aplica `gis/derived/0004_revincular_infraestructuras_por_nombre.sql`, que corrige los ubigeos corridos del KML. |
 
 ```sh
 python migration/loader/cargar_gis.py                # esquema + carga + verificación

@@ -214,6 +214,8 @@ python scripts/generar_migracion_distritos.py # emite el SQL (no lo ejecuta)
 | `maestro_resumen.txt`                             | cifras que se citan arriba                                            |
 | `0001_distritos_inei_2025.sql`                    | migración aplicada, transaccional, con respaldo y guardas             |
 | `0002_territorio_lugares_matarani.sql`            | seed de Matarani como lugar de Islay                                  |
+| `0004_revincular_infraestructuras_por_nombre.sql` | re-vincula la capa por nombre; se aplica tras cada carga (ver abajo)  |
+| `mapa_ids_distritos_local_vs_neon.csv`            | `ubigeo → id_local → id_neon` para los 1 891 distritos                |
 
 La migración deja respaldo en `core.distritos_backup_20261123` y
 `core.provincias_backup_20261123` y registra su aplicación en
@@ -234,6 +236,33 @@ sí es correcto. Resolver por ubigeo ahí habría movido los puntos al distrito
 vecino. Quedan sin distrito **2** puntos, y ninguno es un distrito: `MATARANI`
 (puerto de Islay, hoy sembrado como `territorio.lugares`) y `MAZAMARI - PANGOA`
 (dos distritos en una celda).
+
+Ese recálculo vive en `0004_revincular_infraestructuras_por_nombre.sql`
+(extraído del bloque §7 de `0001`; se regenera con
+`python scripts/extraer_revinculacion_gis.py`) y es **idempotente**.
+`migration/loader/cargar_gis.py` lo aplica después de cada carga: el loader
+resuelve `distrito_id` con `LEFT JOIN core.distritos ON ubigeo`, y sin el paso 7
+una recarga volvería a dejar NULLs y distritos vecinos.
+
+### Identidad entre entornos: el `ubigeo`, no el `id`
+
+`id` **no** es estable entre el PostgreSQL local y Neon; `ubigeo` sí (es único y
+el mismo en ambos). Tras aplicar `0001` en Neon (2026-11-23):
+
+| Población                             | Filas | `id`                                              |
+| ------------------------------------- | ----: | ------------------------------------------------- |
+| Distritos conservados (re-anclados)   |   690 | idéntico en local y Neon                          |
+| Distritos insertados por la migración | 1 201 | local `3101–4301` · Neon `699–1899`               |
+| Total                                 | 1 891 | 1 891 `ubigeo` emparejados, 0 sin correspondencia |
+
+Consecuencia práctica: **nunca copiar filas entre entornos por `id`**. Para
+exportar, importar o comparar, usar `ubigeo` y resolver el `id` en el destino.
+El archivo `mapa_ids_distritos_local_vs_neon.csv` trae el mapeo completo
+(`ubigeo`, `id_local`, `id_neon`, nombres y `estado`).
+
+Los 1 201 ids nuevos de Neon no tienen referencias en ninguna tabla (nacieron
+con la migración); los 8 fantasmas borrados tenían **0** referencias y sus ids
+no se reutilizan.
 
 ## Regenerar
 

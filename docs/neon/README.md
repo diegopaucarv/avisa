@@ -1,7 +1,7 @@
 # AVISA en Neon
 
 Esta carpeta contiene la variante del esquema unificado preparada para
-ejecutarse en un proyecto **Neon (PostgreSQL 16)**.
+ejecutarse en un proyecto **Neon (PostgreSQL 18)**.
 
 | Archivo                           | Qué es                                                                           |
 | --------------------------------- | -------------------------------------------------------------------------------- |
@@ -40,11 +40,25 @@ que consulta datos. Es el mismo comportamiento que en local.
 
 ## 2. Prerrequisitos
 
-- Proyecto Neon con **PostgreSQL 16** y una base llamada `avisa`
+- Proyecto Neon con **PostgreSQL 18** y una base llamada `avisa`
   (creada por `neondb_owner`, que es el dueño por defecto).
 - El rol **`neondb_owner`** (miembro de `neon_superuser`).
-- **psql / pg_restore de la misma versión mayor** que el servidor (16).
-  En este repositorio sirve el que ya está en el contenedor `avisa-db`.
+- **psql / pg_dump / pg_restore de la misma versión mayor** que el servidor.
+  `pg_dump` se niega a volcar un servidor más nuevo («server version mismatch»):
+  con el contenedor `avisa-db` (16.14) y un servidor 18.7 **no sirve**. Usar un
+  contenedor efímero de la misma versión y montar `backups/`:
+
+  ```bash
+  docker run --rm -v "$PWD/backups:/backup" \
+    -e PGHOST=<endpoint>.<region>.aws.neon.tech -e PGPORT=5432 \
+    -e PGDATABASE=avisa -e PGUSER=neondb_owner -e PGPASSWORD=<clave> \
+    -e PGSSLMODE=verify-full postgres:18-alpine \
+    pg_dump -Fc --no-owner --no-acl -f /backup/avisa_neon.dump
+  ```
+
+  `--no-acl` sólo es aceptable para un respaldo de seguridad; para el camino A
+  (restaurar conservando los 276 `GRANT`) hay que omitirlo.
+
 - La clave de cifrado `APP_CRYPTO_KEY` (32 bytes en base64), para el parche 9.
 - Para el camino B, además: `backups/backend/BASE_CONFLICTOS_SOCIALES_2026.xlsx`
   y las dependencias de Python del loader (`openpyxl`, `asyncpg`).
@@ -143,17 +157,18 @@ docker cp avisa-db:/tmp/avisa_neon.dump backups/avisa_neon.dump
 Formato `-Fc` (custom) y **sin** `--no-acl`: los ~276 `GRANT` a `avisa_app`
 hay que conservarlos.
 
-### 4.2 Restauración (contenedor `avisa-db` → Neon)
+### 4.2 Restauración (cliente de la misma versión mayor → Neon)
 
-Se usa el `pg_restore` del contenedor (ya es 16.14), que sí llega a Internet:
+Se usa un contenedor `postgres:18-alpine` (el `pg_restore` 16.14 de `avisa-db`
+no puede restaurar contra un servidor 18). Montar `backups/` en vez de copiar:
 
 ```bash
-docker cp backups/avisa_neon.dump avisa-db:/tmp/avisa_neon.dump
-
-MSYS_NO_PATHCONV=1 docker exec -i avisa-db pg_restore \
-  --no-owner --no-tablespaces --verbose \
-  -d "postgresql://neondb_owner:<clave>@<endpoint>.<region>.aws.neon.tech/avisa?sslmode=verify-full" \
-  /tmp/avisa_neon.dump
+docker run --rm -v "$PWD/backups:/backup" \
+  -e PGHOST=<endpoint>.<region>.aws.neon.tech -e PGPORT=5432 \
+  -e PGDATABASE=avisa -e PGUSER=neondb_owner -e PGPASSWORD=<clave> \
+  -e PGSSLMODE=verify-full postgres:18-alpine \
+  pg_restore --no-owner --no-tablespaces --verbose \
+  -d avisa /backup/avisa_neon.dump
 ```
 
 - `--no-owner`: omite los ~507 `OWNER TO avisa` (el rol `avisa` no existe en Neon).
@@ -420,3 +435,48 @@ secciones A y B.
 | `permission denied for schema public` al crear extensiones | rol sin privilegios de administrador          | ejecutar como `neondb_owner`                         |
 | El script falla en la Sección B                            | base sin legado cargado                       | ejecutar el loader entre A y B (§5.2)                |
 | `\restrict` desconocido al usar `psql -f plain.sql`        | volcado en texto plano con cliente psql viejo | restaurar con `pg_restore` o actualizar psql         |
+
+---
+
+## 10. Estado aplicado en Neon (2026-11-23)
+
+Base `avisa`, servidor **18.7**, host directo, rol `neondb_owner`. Se aplicaron,
+en este orden: `migration/39_gis_infraestructuras.sql`,
+`gis/derived/0001_distritos_inei_2025.sql`,
+`migration/loader/cargar_gis.py`,
+`gis/derived/0004_revincular_infraestructuras_por_nombre.sql`,
+`gis/derived/0002_territorio_lugares_matarani.sql`,
+`gis/derived/0003_casos_tematica_anulable.sql`,
+`migration/40_casos_naturaleza.sql` y los `GRANT` del esquema `gis`.
+
+| Comprobación                                 |                                                          Valor esperado |
+| -------------------------------------------- | ----------------------------------------------------------------------: |
+| `core.distritos` / `provincias` / `regiones` |                                                        1 891 / 196 / 25 |
+| `gis.infraestructuras_puntos`                |                                                                  13 456 |
+| filas con `distrito_id`                      |          13 454 (2 sin distrito por diseño: Matarani y Mazamari-Pangoa) |
+| `core.migracion_log`                         | `distritos_inei_2025`, `casos_tematica_anulable`, `40_casos_naturaleza` |
+| `core.casos` con naturaleza declarada        |                            7 «Nacional o sectorial» + 27 «Sin declarar» |
+| `territorio.lugares`                         |                                           1 (Matarani, puerto de Islay) |
+
+Verificación rápida (como `neondb_owner`, host directo):
+
+```sql
+select (select count(*) from core.distritos) as distritos,
+       (select count(*) from core.provincias) as provincias,
+       (select count(*) from gis.infraestructuras_puntos) as gis,
+       (select count(*) from gis.infraestructuras_puntos where distrito_id is not null) as gis_con_distrito;
+```
+
+**Cuidado con el RLS al verificar.** `avisa_api` no tiene `BYPASSRLS`: sin
+`set_config('app.rol_codigo', …)` las tablas con `FORCE ROW LEVEL SECURITY`
+devuelven **0 filas en silencio** (no es un error de permisos). Con
+`app.rol_codigo = 'administrador'` y `app.ver_anulados = 'off'` se ven 34 casos,
+76 alertas y 306 demandas; con la papelera abierta, 35 / 83 / 325.
+
+Respaldos: `backups/avisa_neon_20261123.dump` (volcado completo previo, 3,2 MB)
+y las tablas `core.distritos_backup_20261123`, `core.provincias_backup_20261123`,
+`core.casos_tematica_backup_20261123` y `core.casos_naturaleza_backup_20261123`.
+
+**Identidad entre entornos:** `id` no es estable entre local y Neon; el
+invariante es `ubigeo`. Ver `gis/derived/README.md` y
+`gis/derived/mapa_ids_distritos_local_vs_neon.csv`.
