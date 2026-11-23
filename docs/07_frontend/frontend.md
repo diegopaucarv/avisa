@@ -38,7 +38,7 @@ Ordené los cambios por dificultad creciente y los aterricé en la arquitectura 
 18. **◐ Parcial (2026-11-22).** **Ficha: edición explícita.** Presentaría cada campo editable dentro de un recuadro con contenido centrado y comentario asociado cuando corresponda (por ejemplo, distrito). El clic fuera no cerraría ni cancelaría el formulario: solo los botones Cancelar y Guardar cambios finalizarían la edición. Aplicaría el mismo patrón a los drawers de edición pertinentes, incluidos la línea de tiempo y las alertas, donde la edición se abre en panel lateral en lugar de navegar a otra vista. Falta: la edición por campo en la ficha del caso; la cronología y las alertas ya se editan en panel lateral con Cancelar/Guardar.
 19. **✔ Hecho (2026-11-22).** (`features/casos/proximo-paso.ts` + sección «Próximo paso» de la ficha) **Ficha: Próximo paso.** Sustituiría el texto genérico por una regla basada en el riesgo del caso y la Tabla 3 de la guía; por ejemplo, para riesgo Moderado, “Activar prevención y articulación intergubernamental”. Mostraría qué regla y qué valor de riesgo del caso originaron la recomendación.
 20. **✔ Hecho (2026-11-22).** (SPA `features/casos/casos.page.ts|html`; `GET /api/v1/cases?conteos=true`) **Casos: listado.** Mantendría la cuadrícula existente y añadiría conmutador tabla/cuadrícula, orden por fecha/riesgo/prioridad, paginación en servidor y exportación —el endpoint ya existe (gap E5, cerrado) y el menú está en la cabecera de la lista—. Incorporaría filtros de estado, prioridad, alcance, temática y unidad además del filtro actual por riesgo, y una vista “Sin caso” para las demandas que aún no tienen caso vinculado, como vista dentro de Casos y no como ruta de primer nivel (ya cableada en `/casos/sin-caso` y enlazada desde la propia lista). Hecho (2026-11-22): los filtros de estado, prioridad, alcance, temática y unidad se resuelven en SQL y se validan contra catálogo (un valor inexistente devuelve `422 FILTRO_INVALIDO`), la vista los lleva a la URL y reinicia a página 1; el conmutador tabla/cuadrícula, el orden, la paginación en servidor, la exportación y la ruta «Sin caso» ya estaban. En la misma pasada se reordenó la barra —buscador, estado, prioridad, alcance, temática, unidad, orden—, el estado pasó de desplegable a **cuatro chips operativos con conteo** (`Todos · Abiertos · Resueltos · Archivados`). El catálogo tiene ahora tres valores (`Abierto · Resuelto · Archivado`, migración 33), así que los cuatro chips se corresponden uno a uno con la realidad del catálogo; `Abiertos` sigue filtrando por `es_activo` para que el indicador no dependa de la grafía del estado abierto. `GET /api/v1/cases?conteos=true` devuelve `{ todos, abiertos, resueltos, archivados }` en una sola consulta agregada que aplica los filtros vigentes —salvo `estado`/`abiertos`— y la RLS; cada chip lleva su número, se atenúa cuando es 0 pero sigue siendo clicable, y la exportación reenvía `abiertos` para no exportar un conjunto distinto del visible. La pestaña del registro pasó de «Activos · Anulados» a «Vigentes · Anulados». Las etiquetas se alinearon con la ficha: «Prioridad de atención», «Unidad responsable», «Ordenar por». La lista y la tabla muestran «Inicio» desde `fecha_inicio` (hallazgo 10). **Actualizado (2026-11-23):** el botón «Demandas sin caso» salió de la barra de Casos (item 93, X5); la ruta `/casos/sin-caso` sigue viva y se alcanza desde Bandeja, la búsqueda global y Resumen, ya no desde la propia lista.
-21. **◐ Parcial (2026-11-22).** **Casos: formulario y selección territorial.** Incluiría Archivado en el formulario porque ya está en el tipo pero no en la interfaz. Reemplazaría territorio libre por un selector de distrito basado en ubigeo; validaría formato de código (CS-<PA|MI>-<INF|OAT|NOR|DBE|GOB|ITE>-<AAAA>-<NN>) y duplicados antes de guardar. **Hecho (2026-11-22):** alta de caso en panel lateral (`caso-panel.component.*`, `POST /v1/cases`) con título y regiones obligatorios y temática, subsector, riesgo, unidad responsable, resumen y fecha de inicio opcionales; el catálogo `regiones` se añadió a `/v1/catalogs` (`id`, `codigo`, `etiqueta`, `ubigeo`, `alcance_id`) y la vista previa del alcance replica `core.alcance_caso`. El formulario no pide código —lo emite `core.siguiente_codigo_caso()`— ni estado: `createCase` lo fija en servidor. Siguen bloqueados la deduplicación y la validación de formato del código en cliente, que dejó de tener sentido al generarlo el servidor. El **selector de distrito por ubigeo** dejó de estar bloqueado el 2026-11-23: la capa distrital trae los 1 892 ubigeos (item 128), así que falta cargarla, no conseguir el dataset.
+21. **◐ Parcial (2026-11-22).** **Casos: formulario y selección territorial.** Incluiría Archivado en el formulario porque ya está en el tipo pero no en la interfaz. Reemplazaría territorio libre por un selector de distrito basado en ubigeo; validaría formato de código (CS-<PA|MI>-<INF|OAT|NOR|DBE|GOB|ITE>-<AAAA>-<NN>) y duplicados antes de guardar. **Hecho (2026-11-22):** alta de caso en panel lateral (`caso-panel.component.*`, `POST /v1/cases`) con título y regiones obligatorios y temática, subsector, riesgo, unidad responsable, resumen y fecha de inicio opcionales; el catálogo `regiones` se añadió a `/v1/catalogs` (`id`, `codigo`, `etiqueta`, `ubigeo`, `alcance_id`) y la vista previa del alcance replica `core.alcance_caso`. El formulario no pide código —lo emite `core.siguiente_codigo_caso()`— ni estado: `createCase` lo fija en servidor. Siguen bloqueados la deduplicación y la validación de formato del código en cliente, que dejó de tener sentido al generarlo el servidor. El **selector de distrito por ubigeo** dejó de estar bloqueado el 2026-11-23: la capa distrital trae los 1 892 ubigeos (item 128), así que falta cargarla, no conseguir el dataset. **Hecho (2026-11-23):** el selector ya está en el alta —ver «Catálogo territorial corregido y alta de caso por distrito»—, con los 1 891 distritos del INEI más los lugares operativos (Matarani entra como puerto de Islay).
 22. **◐ Parcial (2026-11-22).** **Bandeja de trabajo.** Reemplazaría la concatenación actual de alertas, compromisos y casos de alto riesgo por una lista ordenada realmente por plazo, riesgo y revisión pendiente. Agregaría cuenta regresiva/SLA, filtro por tipo y vista del usuario; las acciones asignar, posponer y completar cambiarían estado con confirmación y quedarían registradas. Falta: la lista única ordenada por plazo/riesgo/revisión, el filtro por tipo, la vista del usuario y esas acciones; hoy son tres bloques con datos reales y SLA visible.
 23. **◐ Parcial (2026-11-22).** **Alertas: controles de revisión.** Pediría confirmación al aprobar; permitiría volver a abrir una alerta descartada y deshacer una acción con permisos adecuados. Añadiría estados “Atendida” y visibilidad de la derivación, evitando que `derivacion` quede solo en los tipos de datos. Falta: confirmación al aprobar, reapertura de una alerta descartada, deshacer y visibilidad de `derivacion`; el estado «Atendida» ya está en el filtro y el flujo de cinco pasos se opera en panel lateral.
 24. **◐ Parcial (2026-11-22).** **Compromisos: formulario y calendario.** Cambiaría la fecha de texto libre por selector de fecha y derivaría el estado según fechas y avance en vez de pedirlo como texto. La fecha de vencimiento se derivaría del próximo hito cuando no se ingrese a mano; si no hay hito, la interfaz abriría un popup para ingresarla. Añadiría los hitos en la ficha/formulario, clasificación formal/verbal, enlace al documento de origen y recordatorios; evidencias dejarían de ser solo un campo de texto y pasarían a archivos adjuntos. Falta: la clasificación formal/verbal, los recordatorios, los adjuntos (la evidencia es una URI) y el popup cuando no hay hito; el selector de fecha, el vencimiento derivado del próximo hito y el alta de hitos ya están. **Hecho (2026-11-22):** alta de compromiso completa desde la lista (`compromiso-panel.component.*` en modo alta, `POST /v1/commitments`): el caso se busca por código con `GET /v1/cases?q=` y el cuerpo no envía `estado`, que fija el servidor.
@@ -231,7 +231,7 @@ ampliación ordenaban las mismas piezas con dos criterios distintos y dibujaban 
 veces (ficha, bandeja, directorio). El criterio único es **impacto visual por unidad de esfuerzo de
 dibujo**, no esfuerzo de implementación.
 
-Los ocho archivos están en `docs/07_frontend/mockups/`, con su índice en
+Los archivos están en `docs/07_frontend/mockups/`, con su índice en
 `docs/07_frontend/mockups/index.html`. Cada mockup declara arriba qué items cubre, qué dato necesita y
 qué parte es solo forma; ninguno se integra al build de la SPA.
 
@@ -748,6 +748,8 @@ Ninguna bloquea al equipo de .NET: dos se resuelven solo en la SPA (F1, F4), tre
 | 123 | `N` Compromisos asumidos por el Señor Ministro | Dimensión de «asumido por» (Despacho Ministerial) separada de la unidad responsable, por región y arte.                                                                                                                               | D8            | Requiere dato            |
 | 124 | `N` Conflictos por región y recurso            | Cerrar el puente caso–recurso del legado: hoy sólo 6 de 35 casos tienen especie, y siempre por la alerta, nunca por el caso.                                                                                                          | D9            | Mockup                   |
 
+Los items **119–124** están dibujados en `docs/07_frontend/mockups/perfil-territorial.html` (2026-11-23): tres artboards con el catálogo de artes, el directorio con OSPA y caleta, y la matriz región × recurso. Los valores de ejemplo van marcados `≈`, cada artboard declara qué campo falta y las cifras citadas se midieron en la base ese día.
+
 ### A5 · Integraciones y operación (items 125–127)
 
 | #   | Item                                              | Qué cambia                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | Origen | Estado                                                        |
@@ -790,14 +792,14 @@ un ubigeo inventado para cuadrar el total es peor que el descuadre.
 
 **Lo que la medición cambió respecto de la primera lectura.** Cuatro items bajan de dificultad porque el dato ya está cargado, y dos suben porque no existe:
 
-| Item                       | Primera lectura  | Medición                                                                                                                                                       |
-| -------------------------- | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 115 Auditorios             | catálogo nuevo   | `core.locales` tiene **27 filas, 23 con aforo y contacto**, y la pantalla `/directorio/locales` existe: sólo faltan el rename y la capa del mapa.              |
-| 117 Ayuda memoria          | mockup           | `legacy.dim_redaccion` tiene **51 filas** sin cargar: es trabajo de cargador, no de dibujo.                                                                    |
-| 121 OSPA por región        | mockup           | Con la migración 38 las 224 organizaciones ya tienen región donde el origen la trae (**119**); falta la marca OSPA y el maestro de caletas, que sí son mockup. |
-| 114 Autoridades            | directorio nuevo | `legacy.dim_autoridades` tiene **2 filas**: no hay fuente. Los 15 sectoristas sí existen como usuarios con territorio (`usuario_territorio`, 25).              |
-| 116 Clima social           | reporte mensual  | `legacy.dim_climasocial` **7** y `dim_climasocial_focalizado` **6**: existe pero es demasiado ralo para una pantalla; se dibuja.                               |
-| 124 Conflictos por recurso | puente a cerrar  | `legacy.bridge_caso_recurso` tiene **0 filas**: no hay puente que cerrar. Sólo `alerta_especies` (6 casos) sostiene el corte por recurso.                      |
+| Item                       | Primera lectura  | Medición                                                                                                                                                                                                                                                                                                           |
+| -------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 115 Auditorios             | catálogo nuevo   | `core.locales` tiene **27 filas, 23 con aforo y contacto**, y la pantalla `/directorio/locales` existe: sólo faltan el rename y la capa del mapa.                                                                                                                                                                  |
+| 117 Ayuda memoria          | mockup           | `legacy.dim_redaccion` tiene **51 filas** sin cargar: es trabajo de cargador, no de dibujo.                                                                                                                                                                                                                        |
+| 121 OSPA por región        | mockup           | Con la migración 38 las 224 organizaciones ya tienen región donde el origen la trae (**119**); la marca OSPA (`expediente_ospa`/`estado_ospa`) y el maestro de caletas (`territorio.caleta_detalle`) **existen como estructura pero están vacíos** (0 de 224 y 0 filas), así que su contenido sigue siendo mockup. |
+| 114 Autoridades            | directorio nuevo | `legacy.dim_autoridades` tiene **2 filas**: no hay fuente. Los 15 sectoristas sí existen como usuarios con territorio (`usuario_territorio`, 25).                                                                                                                                                                  |
+| 116 Clima social           | reporte mensual  | `legacy.dim_climasocial` **7** y `dim_climasocial_focalizado` **6**: existe pero es demasiado ralo para una pantalla; se dibuja.                                                                                                                                                                                   |
+| 124 Conflictos por recurso | puente a cerrar  | `legacy.bridge_caso_recurso` tiene **0 filas**: no hay puente que cerrar. Sólo `alerta_especies` (6 casos) sostiene el corte por recurso.                                                                                                                                                                          |
 
 **Diseño por lote.** Los cambios se agrupan por pantalla para que un mismo componente no se toque dos veces.
 
@@ -883,7 +885,7 @@ la dificultad de implementación, el costo de dibujo y el lote de «Diseño por 
 | 7   | Anexo 15 · matriz de conflictividad             | vista 15 · 42                    | D3    | 4       | B      | —         | Sí      | Se imprime y se lleva a una reunión. La vista ya no omite casos (migración 32), así que el mockup explica la celda vacía, no una pantalla ausente.                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | 8   | Ficha del caso (dos artboards)                  | 12–18, 41, 67–68, 95–99, 102–103 | D2–D3 | 5       | A      | A–Reunión | Sí      | Es la pantalla más visitada y hoy es un scroll de nueve tablas apiladas. Sin «Próximo paso» ni «Ruta de atención» (95–96, X1 resuelto) y con la completitud fuera del expediente (X4). Reuniones (72), Historial (41) y Canva (103) se dibujan sin dato.                                                                                                                                                                                                                                                                                                                                                               |
 | 9   | Mapa con activos, RADAR y desembarcaderos       | 125–126                          | D2–D5 | 4       | A      | Reunión   | Sí      | Es lo que la dirección quiere ver, sobre el mismo artboard de la fila 1. `gis/Infraestructuras.kml` da **13 456 puntos** reales —13 229 derechos acuícolas privados y 227 sedes institucionales— con departamento, provincia y distrito y, en las sedes, la institución dueña; el ubigeo INEI ya está resuelto en 13 404 de 13 456 (`gis/derived/infraestructuras_puntos.csv`); los polígonos distritales ya existen como archivo (`gis/Poblacion Censo 2025 geogpsperu/`, 1 892) y los de infraestructura no. Los 31 desembarcaderos (`IDENTI DPA - GORE`, uno con la errata `DPA -GORE`) ya salen del mismo archivo. |
-| 10  | Perfil territorial: arte de pesca, OSPA, caleta | 119–124                          | D4    | 3       | M      | C         | Sí      | Necesita catálogo ratificado. Con la migración 38 las 224 organizaciones ya tienen región donde el origen la trae (119); falta la marca OSPA y el maestro de caletas. `bridge_caso_recurso` tiene **0 filas**.                                                                                                                                                                                                                                                                                                                                                                                                         |
+| 10  | Perfil territorial: arte de pesca, OSPA, caleta | 119–124                          | D4    | 3       | M      | C         | Sí      | Necesita catálogo ratificado. Con la migración 38 las 224 organizaciones ya tienen región donde el origen la trae (119); la marca OSPA y el maestro de caletas existen como columna y tabla pero están vacíos (0 de 224 y 0 filas). `bridge_caso_recurso` tiene **0 filas**. Dibujado en `mockups/perfil-territorial.html`.                                                                                                                                                                                                                                                                                            |
 | 11  | Autoridades, clima social y DPA                 | 114, 116–117, 127                | D4–D5 | 2       | M      | C–Reunión | Sí      | Mixta: **117 es carga real** (`legacy.dim_redaccion`, 51 filas) y se implementa al cargar; 114 (`dim_autoridades`, 2 filas), 116 (7 y 6) y 127 no tienen masa crítica y se quedan en mockup.                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | 12  | Registrar ▾ en el shell                         | 65–66, 72                        | D2    | 4       | B      | —         | No      | El archivo ya existe. Es el cuello de botella del registro: sin alta en contexto, cada registro obliga a cambiar de pantalla. La opción «Reunión» se dibuja deshabilitada hasta el item 72.                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | 13  | RED/RADAR, notificaciones y derivación          | 31, 76, 23                       | D3    | 3       | M      | —         | No      | El archivo ya existe. La campana sin centro es el hueco más visible del shell, pero el punto se retiró: el mockup no puede reintroducirlo ni mostrar un contador sin `PATCH`.                                                                                                                                                                                                                                                                                                                                                                                                                                          |
@@ -935,7 +937,7 @@ dimensionar backend sin preguntar:
 composición de la capa ya no están entre ellas:
 
 - **Polígonos de infraestructura** si se quieren áreas: `Infraestructuras.kml` trae puntos y la capa distrital trae polígonos de distritos, no de instalaciones; el requisito de polígonos del item 125 sigue sin cumplirse.
-- ~~Los distritos que la tabla de equivalencias no trae~~ **Resuelto (2026-11-23) por la capa distrital.** De los 52 puntos del KML sin ubigeo, **50 se resuelven por nombre** contra `gis/Poblacion Censo 2025 geogpsperu/`: Boquerón `250307` (25 puntos), Huipoca `250306` (22), San Antonio `180107` (1), Hualla `051010` (1) y Unión Progreso `050512` (1). Quedan **2** que no son distrito: `MATARANI` (puerto de Islay) y `MAZAMARI - PANGOA` (dos distritos en una celda). Falta ratificar el emparejamiento y regenerar el CSV, no adivinar.
+- ~~Los distritos que la tabla de equivalencias no trae~~ **Resuelto (2026-11-23) por la capa distrital.** De los 52 puntos del KML sin ubigeo, **50 se resuelven por nombre** contra `gis/Poblacion Censo 2025 geogpsperu/`: Boquerón `250307` (25 puntos), Huipoca `250306` (22), San Antonio `180107` (1), Hualla `051010` (1) y Unión Progreso `050512` (1). Quedan **2** que no son distrito: `MATARANI` (puerto de Islay) y `MAZAMARI - PANGOA` (dos distritos en una celda). **Resuelto y aplicado (2026-11-23):** el catálogo se reconstruyó desde el INEI y las 13 456 infraestructuras se re-vincularon por nombre; Matarani quedó sembrado como `lugar` de Islay. Ver «Catálogo territorial corregido y alta de caso por distrito».
 - **Decisión sobre los 13 229 titulares**: la capa es mayoritariamente privada y `titular` es dato
   personal (Ley 29733). El GeoJSON ya los omite; falta decidir si la API pública agrega por distrito o
   aplica RLS.
@@ -947,7 +949,7 @@ columna `metodo_ubigeo` que dice qué se resolvió por corrección de `scripts/t
 resolvió a propósito. También está resuelta la composición: no son 13 456 instalaciones de PRODUCE,
 sino 13 229 derechos acuícolas privados y 227 sedes institucionales, y el extractor ya separa ambas en
 `tipo_registro`. La capa quedó cargada en `gis.infraestructuras_puntos` (13 456 filas), con
-`distrito_id` resuelto para los ubigeos que existen en `core.distritos` (313 de 854). Eso desbloquea
+`distrito_id` resuelto en **13 454 de 13 456** (2026-11-23; antes 313 de 854, medido contra el catálogo roto). Eso desbloquea
 21, 27, 33, 35–36 y 53 para construir, aunque el modelo todavía tenga que adoptar el código como llave
 en lugar del texto libre. El **límite distrital** tampoco hay que pedirlo: la capa distrital lo trae (1 892 polígonos), con la salvedad del catálogo de distritos que se detalla más abajo.
 
@@ -1028,3 +1030,99 @@ de ella se separa 117, que es carga real, del resto, que no tiene fuente.
 social) no tienen tabla ni endpoint, y 79–84 (triangulación, recurrencia, memoria institucional,
 argumentario) son capacidad analítica, no pantalla. Dibujarlos sería fijar una forma sin saber qué la
 alimenta.
+
+## Catálogo territorial corregido y alta de caso por distrito (2026-11-23)
+
+**Qué estaba mal.** `core.distritos` tenía **698 filas** con el `ubigeo` asignado en secuencia
+**alfabética y contigua** dentro de cada provincia, sin respetar los huecos de numeración del INEI.
+El resultado: 68 nombres desalineados (`120104` decía `Chicche` cuando el INEI dice
+`Carhuacallanga`), 14 ubigeos que el INEI nunca asignó, provincias corridas (Huancayo +2, Chiclayo
++2 con `Saña` y `Zaña` duplicadas, Callao con `Ventanilla`/`Mi Perú` invertidos, Lima con
+`Miraflores`/`Pueblo Libre` invertidos) y sólo **70 de las 196 provincias** cargadas.
+
+**Qué se hizo.** Se reconstruyó el catálogo desde el registro **INEI 2025**
+(`gis/ubigeo_inei_2025.csv`, 1 891 distritos), conservando los `id` existentes para no romper las
+claves ajenas:
+
+| Acción                               | Filas | Regla                                                                                                                                                     |
+| ------------------------------------ | ----: | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Distritos re-anclados por **nombre** |   690 | nombre normalizado dentro de la provincia; nunca por ubigeo ni por posición                                                                               |
+| Distritos fantasma borrados          |     8 | `Paria`, `Patay`, `Piruro`, `Poca`, `Pampashca`, `Puco` (centros poblados), `Zaña` (duplicado de `Saña`), `Pampas` de Corongo; **0 referencias** cada uno |
+| Distritos insertados                 | 1 201 | el resto del registro INEI                                                                                                                                |
+| Distritos re-numerados o acentuados  |   152 | p. ej. `020114→020112 Tarica`, `070106↔070107`, `120102→120104`…                                                                                          |
+
+Resultado verificado contra el propio CSV del INEI: **1 891 distritos · 196 provincias · 25
+regiones**, y **0** distritos con nombre distinto al INEI (la única provincia que difiere es
+`061306`, donde el CSV crudo trae `Ninabamba` y la base ya tiene el correcto `Santa Cruz`).
+
+**Tayacaja, la trampa.** La columna `ubigeo` del KML de infraestructuras está **corrida** en
+`0907`: dice `090710 Pazos` cuando el INEI asigna `Pazos` a `090711`, y `090714 San Marcos de
+Rocchac` cuando es `090716`. Por eso las **13 456** infraestructuras se re-vincularon por **nombre**
+(región, luego provincia, luego ubigeo), no por el código del KML: 13 454 quedaron resueltas y las
+**2** que no son distrito se dejan declaradas (`MATARANI`, puerto de Islay; `MAZAMARI - PANGOA`, dos
+distritos en una celda). Los `distrito_id` previos se habían asignado con el catálogo roto, así que
+se recalcularon todos, no sólo los nulos.
+
+**Alta de caso: un solo buscador de territorio.** El formulario de crear caso deja de ser un select
+plano y pasa a un buscador que consulta **dos** fuentes y las agrupa en la misma lista:
+
+- **Distritos** — los 1 891 de `core.distritos`, con su departamento y provincia para desambiguar
+  (hay 15 distritos llamados `Santa Rosa`). El input debe permitir buscar por nombre de distrito,
+  de provincia o de departamento, y mostrar siempre la ruta completa («Santa Rosa · Chiclayo ·
+  Lambayeque»).
+- **Lugares** — `territorio.lugares`, para lo que no es distrito pero se nombra en los casos. Es
+  donde entra **Matarani**: no es distrito, es un **puerto del distrito de Islay** (`040704`,
+  provincia Islay, Arequipa). Se sembró como lugar `puerto` con las coordenadas del KML
+  (−16,9997383 / −72,0966519) tomadas de `gis.infraestructuras_puntos` (`ID_100015`). El buscador lo
+  muestra bajo «Islay» con la etiqueta `lugar · puerto`, para que nadie lo confunda con un distrito.
+
+El payload del caso guarda `distrito_principal_id` (FK a `core.distritos`) y, si lo elegido fue
+un lugar, lo enlaza en `core.caso_lugares` (FK a `territorio.lugares`). **No existe una columna
+`lugar_id` en `core.casos`**: el lugar es un conjunto —un caso puede señalar el puerto y la caleta
+donde ocurrió—, y guardar sólo el distrito de Matarani (Islay) sería escribir una ubicación que
+nadie eligió. El mockup de «Registrar ▾ → Caso» (fila 12) es el que debe mostrar este buscador; el
+resto de formularios con territorio (alertas, actores, locales) reutilizan el mismo componente.
+
+### Implementación (2026-11-23)
+
+- **`GET /api/v1/territorio?q=<texto>&limite=20`** — devuelve dos colecciones, `distritos` y `lugares`,
+  cada una con su `ruta` («Santa Rosa · Chiclayo · Lambayeque»). Busca por nombre de distrito,
+  provincia, región y prefijo de `ubigeo` (`04` → Arequipa, `0407` → Islay). Compara con
+  `core.normalizar_ref`, que quita tildes y mayúsculas, así que `mejia` encuentra `Mejía` y `nunoa`
+  encuentra `Nuñoa`. Con menos de 2 letras responde `aplicada: false` y listas vacías en vez de
+  devolver los 1 891 distritos.
+- **`POST /api/v1/cases`** acepta `distritoPrincipalId` (entero validado contra `core.distritos`;
+  un id inexistente es 422 `DISTRITO_INVALIDO`, no un 500 de clave ajena) y `lugarId` o `lugares[]`
+  (validados contra `territorio.lugares`; 422 `LUGAR_INVALIDO`). `PATCH /api/v1/cases/{codigo}` los
+  acepta con la misma forma: `null` limpia el distrito y un arreglo vacío vacía los lugares.
+- **`angular/src/app/features/casos/territorio-buscador.component.ts`** — autocompletar único con
+  grupos «Distritos» y «Lugares operativos», navegable con teclado, que distingue el lugar con un
+  sello de tipo (`PUERTO`). Es autónomo en HTTP: el panel de alta sigue sin conocer la API.
+- **`caso-panel.component.ts`** — al elegir un distrito marca su región si no estaba seleccionada:
+  un caso no debe quedar con un distrito de una región que no figura entre las del expediente.
+
+**Hallazgo que destapa el alta (2026-11-23): `core.casos.tematica_id` es `NOT NULL`.** La base lo
+declara `integer NOT NULL` **sin valor por defecto**, mientras `createCase` lo trataba como opcional
+(«la temática puede faltar»). Consecuencia medida: un alta sin temática no quedaba «pendiente de
+clasificar», salía como **500** por violación `23502` — y el panel ofrecía «Sin especificar» en el
+desplegable. Los **35** casos existentes tienen temática y `core.cat_tematicas` no tiene un valor
+«sin clasificar», así que el `NOT NULL` es coherente con los datos y el código era el que se
+desviaba. **Corregido en el borde, sin tocar el esquema:** `POST /v1/cases` responde
+**422 `TEMATICA_REQUERIDA`** y el panel exige la temática antes de enviar. Queda **pendiente de
+decisión** si el producto quiere poder registrar un caso sin clasificar: eso exige migración (columna
+anulable o un valor `Sin_clasificar` en el catálogo), y no se hizo por no inventar datos.
+
+**Cómo se verificó.** La búsqueda se ejecutó contra la base local —`matarani` devuelve **0 distritos y
+1 lugar** (puerto de Islay); `mejia` encuentra `Mejía`; `nunoa` encuentra `Nuñoa`; `0407` lista los
+de Islay— y el alta se evaluó dentro de una transacción con `rollback`: creó el caso con
+`distrito_principal_id = 3303` y `core.caso_lugares` con Matarani, cambió el distrito, lo limpió con
+`null`, vació los lugares y recibió los tres 422 esperados. Al revertir, `core.casos` volvió a **35**
+filas: la prueba no dejó rastro.
+
+**Evidencia y artefactos.** `gis/derived/maestro_resumen.txt` fija las cifras; `distritos_maestro.csv`
+es el catálogo final con centroide y área; `reconciliacion_distritos.csv` lista, fila por fila, qué
+se mantuvo, borró o insertó; la migración es `gis/derived/0001_distritos_inei_2025.sql` y el seed de
+Matarani `gis/derived/0002_territorio_lugares_matarani.sql`. Ambas dejaron respaldo en
+`core.distritos_backup_20261123` y `core.provincias_backup_20261123`. Las regiones conservan su
+nombre sin tilde (`Ancash`, `Apurimac`, `Huanuco`, `Junin`); si se acentúan (como en el INEI
+`Áncash`…) hay que hacerlo en las 25 a la vez y revisar las cadenas fijas del frontend, no a medias.

@@ -861,6 +861,7 @@ const CASE_WRITE_COLUMNS = [
   "subsector_id",
   "unidad_responsable_id",
   "region_principal_id",
+  "distrito_principal_id",
   "origen_dato",
 ] as const;
 
@@ -1120,21 +1121,6 @@ async function resolveCatalogOrDefault(
   );
 }
 
-/**
- * Para catálogos donde «no informado» es un valor legítimo: la Guía pide una
- * única temática principal, pero admite registrar un caso antes de
- * clasificarlo. Devuelve `null` en vez de inventar una categoría.
- */
-async function resolveOptionalCatalog(
-  client: PoolClient,
-  key: CatalogKey,
-  raw: unknown,
-): Promise<number | null> {
-  if (raw === null || raw === undefined) return null;
-  if (typeof raw === "string" && !raw.trim()) return null;
-  return resolveCatalog(client, key, raw);
-}
-
 function readRegionNames(
   body: Record<string, unknown>,
   required: boolean,
@@ -1201,6 +1187,142 @@ async function resolveRegions(
     if (!found) invalid();
     return found;
   });
+}
+
+function enteroCrudo(raw: unknown): number {
+  const numero =
+    typeof raw === "number"
+      ? raw
+      : typeof raw === "string" && raw.trim()
+        ? Number(raw)
+        : Number.NaN;
+  if (!Number.isInteger(numero) || numero <= 0) invalid();
+  return numero;
+}
+
+/**
+ * El distrito se valida contra `core.distritos` (1 891 filas del INEI): un id
+ * inexistente es 422 y no una clave ajena que reviente con un 500.
+ */
+async function resolveDistritoId(
+  client: PoolClient,
+  raw: unknown,
+): Promise<number> {
+  const id = enteroCrudo(raw);
+  const found = await client.query(
+    `select id from core.distritos where id = $1`,
+    [id],
+  );
+  if (!found.rows[0]) {
+    throw new ApiError(
+      422,
+      "El distrito indicado no existe en el catálogo del INEI.",
+      "DISTRITO_INVALIDO",
+    );
+  }
+  return id;
+}
+
+/**
+ * Un lugar operativo —puerto, caleta, desembarcadero— no es un distrito aunque
+ * esté dentro de uno: Matarani es puerto del distrito de Islay. Se guarda en
+ * `core.caso_lugares` y nunca se degrada al distrito que lo contiene.
+ */
+async function resolveLugarId(
+  client: PoolClient,
+  raw: unknown,
+): Promise<string> {
+  if (typeof raw !== "string" || !raw.trim()) invalid();
+  const id = raw.trim();
+  // Sin castear a uuid: un id mal formado debe ser 422, no un error de tipo.
+  const found = await client.query(
+    `select id::text as id from territorio.lugares where id::text = $1`,
+    [id],
+  );
+  const lugar = found.rows[0]?.id;
+  if (!lugar) {
+    throw new ApiError(
+      422,
+      "El lugar indicado no existe en el catálogo de territorios.",
+      "LUGAR_INVALIDO",
+    );
+  }
+  return String(lugar);
+}
+
+async function linkCaseLugar(
+  client: PoolClient,
+  casoId: string,
+  lugarId: string,
+): Promise<void> {
+  await client.query(
+    `insert into core.caso_lugares (caso_id, lugar_id) values ($1, $2)
+     on conflict do nothing`,
+    [casoId, lugarId],
+  );
+}
+
+/**
+ * `core.caso_lugares` es un conjunto, no una columna: un caso puede señalar el
+ * puerto y la caleta donde ocurrió. El cuerpo admite una forma corta (`lugarId`,
+ * la que usa el alta de la SPA) y una completa (`lugares`).
+ */
+function readLugarIds(body: Record<string, unknown>): {
+  present: boolean;
+  values: unknown[];
+} {
+  const multiple = readField(body, ["lugares", "lugarIds", "lugar_ids"]);
+  const single = readField(body, ["lugarId", "lugar_id"]);
+  if (!multiple.present && !single.present) {
+    return { present: false, values: [] };
+  }
+
+  const values: unknown[] = [];
+  if (multiple.present && multiple.value !== null) {
+    if (!Array.isArray(multiple.value)) invalid();
+    values.push(...multiple.value);
+  }
+  if (single.present && single.value !== null) values.push(single.value);
+  return { present: true, values };
+}
+
+async function resolveLugarIds(
+  client: PoolClient,
+  values: readonly unknown[],
+): Promise<string[]> {
+  const out: string[] = [];
+  const vistos = new Set<string>();
+  for (const value of values) {
+    const id = await resolveLugarId(client, value);
+    if (vistos.has(id)) continue;
+    vistos.add(id);
+    out.push(id);
+  }
+  return out;
+}
+
+async function replaceCaseLugares(
+  client: PoolClient,
+  casoId: string,
+  lugarIds: readonly string[],
+): Promise<void> {
+  await client.query(`delete from core.caso_lugares where caso_id = $1`, [
+    casoId,
+  ]);
+  for (const lugarId of lugarIds) {
+    await linkCaseLugar(client, casoId, lugarId);
+  }
+}
+
+async function listCaseLugares(
+  client: PoolClient,
+  casoId: string,
+): Promise<string[]> {
+  const result = await client.query(
+    `select lugar_id::text as id from core.caso_lugares where caso_id = $1 order by 1`,
+    [casoId],
+  );
+  return result.rows.map((row) => String(row.id));
 }
 
 async function replaceCaseRegions(
@@ -1289,13 +1411,25 @@ export async function createCase(
   const regions = await resolveRegions(client, regionNames);
 
   // El código del caso se compone con estos dos catálogos, así que se resuelven
-  // antes de construir las columnas. La temática puede faltar: la Guía pide una
-  // temática principal, pero un caso se puede registrar antes de clasificarlo.
-  const tematicaId = await resolveOptionalCatalog(
-    client,
-    "tematica",
-    readField(body, ["tematica"]).value,
-  );
+  // antes de construir las columnas.
+  //
+  // `core.casos.tematica_id` es NOT NULL y `core.cat_tematicas` no tiene un
+  // valor «sin clasificar»: omitir la temática no es «dejarla pendiente», es un
+  // alta inválida. Se responde 422 con un código propio en vez de dejar que la
+  // restricción NOT NULL salga como 500, que es lo que ocurría antes.
+  const tematica = readField(body, ["tematica"]);
+  if (
+    !tematica.present ||
+    tematica.value === null ||
+    (typeof tematica.value === "string" && !tematica.value.trim())
+  ) {
+    throw new ApiError(
+      422,
+      "El caso necesita una temática: el catálogo no tiene un valor «sin clasificar».",
+      "TEMATICA_REQUERIDA",
+    );
+  }
+  const tematicaId = await resolveCatalog(client, "tematica", tematica.value);
   const subsectorId = await resolveCatalogOrDefault(
     client,
     "subsector",
@@ -1404,12 +1538,34 @@ export async function createCase(
     fields.push({ column: "origen_dato", value: origenValue(origen.value) });
   }
 
+  // Ubicación del caso. El distrito es del catálogo INEI y el lugar es un punto
+  // operativo dentro de un distrito (Matarani es puerto de Islay): se guardan en
+  // columnas distintas para no confundir un puerto con un distrito.
+  const distrito = readField(body, [
+    "distritoPrincipalId",
+    "distrito_principal_id",
+    "distritoId",
+    "distrito_id",
+  ]);
+  if (distrito.present && distrito.value !== null) {
+    fields.push({
+      column: "distrito_principal_id",
+      value: await resolveDistritoId(client, distrito.value),
+    });
+  }
+
+  const lugar = readLugarIds(body);
+  const lugarIds = lugar.present
+    ? await resolveLugarIds(client, lugar.values)
+    : null;
+
   const row = await insertCaseRow(client, subsectorId, tematicaId, (codigo) => [
     { column: "codigo_caso", value: codigo },
     ...fields,
   ]);
 
   await replaceCaseRegions(client, String(row.id), regions);
+  if (lugarIds) await replaceCaseLugares(client, String(row.id), lugarIds);
 
   await auditChange(client, {
     tabla: "core.casos",
@@ -1421,6 +1577,7 @@ export async function createCase(
     despues: {
       ...pick(row, CASE_WRITE_COLUMNS),
       regiones: regions.map((region) => region.nombre),
+      ...(lugarIds ? { lugares: lugarIds } : {}),
     },
   });
 
@@ -1556,6 +1713,30 @@ export async function updateCase(
   const origen = readField(body, ["origenDato", "origen_dato"]);
   if (origen.present) add("origen_dato", origenValue(origen.value));
 
+  // Ubicación: `null` limpia la relación, igual que `prioridad` o `ciclo`.
+  const distrito = readField(body, [
+    "distritoPrincipalId",
+    "distrito_principal_id",
+    "distritoId",
+    "distrito_id",
+  ]);
+  if (distrito.present) {
+    add(
+      "distrito_principal_id",
+      distrito.value === null
+        ? null
+        : await resolveDistritoId(client, distrito.value),
+    );
+  }
+
+  const lugares = readLugarIds(body);
+  let lugarIds: string[] | null = null;
+  let previousLugares: string[] = [];
+  if (lugares.present) {
+    previousLugares = await listCaseLugares(client, String(row.id));
+    lugarIds = await resolveLugarIds(client, lugares.values);
+  }
+
   const regionNames = readRegionNames(body, false);
   let regions: RegionRow[] | null = null;
   let previousRegions: string[] = [];
@@ -1585,12 +1766,17 @@ export async function updateCase(
   if (!updatedRow) throw new ApiError(404, "El caso no existe.", "NOT_FOUND");
 
   if (regions) await replaceCaseRegions(client, String(row.id), regions);
+  if (lugarIds) await replaceCaseLugares(client, String(row.id), lugarIds);
 
   const antes: Record<string, unknown> = pick(row, CASE_WRITE_COLUMNS);
   const despues: Record<string, unknown> = pick(updatedRow, CASE_WRITE_COLUMNS);
   if (regions) {
     antes.regiones = previousRegions;
     despues.regiones = regions.map((region) => region.nombre);
+  }
+  if (lugarIds) {
+    antes.lugares = previousLugares;
+    despues.lugares = lugarIds;
   }
 
   await auditChange(client, {

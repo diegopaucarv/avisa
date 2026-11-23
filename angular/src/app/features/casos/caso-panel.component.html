@@ -52,9 +52,7 @@
           @if (cargandoCatalogos() && regiones().length === 0) {
             <p class="form-hint" role="status">Cargando regiones…</p>
           } @else if (regiones().length === 0) {
-            <p class="form-error" role="alert">
-              No se pudieron cargar las regiones del catálogo.
-            </p>
+            <p class="form-error" role="alert">No se pudieron cargar las regiones del catálogo.</p>
           } @else {
             <div class="caso-regiones-lista" role="group" aria-label="Regiones del caso">
               @for (region of regiones(); track region.valor) {
@@ -72,12 +70,17 @@
           <p class="form-hint">Obligatorio: seleccione al menos una región.</p>
         </fieldset>
 
+        <app-territorio-buscador
+          etiqueta="Ubicación (distrito o lugar)"
+          (elegido)="alElegirTerritorio($event)"
+        />
+
         <div class="form-field">
           <span class="form-label">Alcance (derivado)</span>
           <p class="caso-alcance" aria-live="polite">{{ alcanceDerivado() }}</p>
           <p class="form-hint">
-            El alcance se deriva de las regiones y no se elige: una región toma su alcance;
-            varias regiones de alcances distintos pasan a Nacional.
+            El alcance se deriva de las regiones y no se elige: una región toma su alcance; varias
+            regiones de alcances distintos pasan a Nacional.
           </p>
         </div>
 
@@ -86,14 +89,16 @@
           <select
             id="caso-campo-tematica"
             class="form-select"
+            required
             [value]="borrador().tematica"
             (change)="campo('tematica', $event)"
           >
-            <option value="">Sin especificar</option>
+            <option value="">Seleccione una temática</option>
             @for (opcion of tematicas(); track opcion.valor) {
               <option [value]="opcion.valor">{{ opcion.etiqueta }}</option>
             }
           </select>
+          <p class="form-hint">Obligatoria: el catálogo no tiene un valor «sin clasificar».</p>
         </div>
 
         <div class="form-field">

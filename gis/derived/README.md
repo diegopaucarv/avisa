@@ -164,6 +164,77 @@ una publicación del INEI. El `.dbf` viene en UTF-8 con un `.cpg` que declara
 latin-1, y trae campos de contacto de terceros (`descargar`, `contacto`,
 `whatsapp`) que conviene descartar al derivar.
 
+## Catálogo distrital reconstruido desde el INEI 2025
+
+`core.distritos` tenía **698 filas** con el `ubigeo` asignado **alfabéticamente**
+(CCDI consecutivo por nombre, sin respetar los huecos del INEI) y sólo **70 de
+las 196 provincias**. Se reconstruyó el catálogo completo y se cargó el 2026-11-23.
+
+| Fuente                           | Rol                                                                 |
+| -------------------------------- | ------------------------------------------------------------------- |
+| `gis/ubigeo_inei_2025.csv`       | **verdad** de nombres, ubigeo, provincia, capital, altitud, lat/lon |
+| `gis/derived/distritos_capa.csv` | geometría: centroide, área, anillos, población censal               |
+| `gis/derived/distritos_db.csv`   | foto del catálogo anterior (698 filas), para reconciliar            |
+
+Regla: **el nombre manda**. Los distritos existentes se re-anclaron por nombre
+normalizado dentro de su provincia, nunca por ubigeo (que estaba corrido) ni por
+posición. Alias de grafía resuelven variantes: `RAYMONDI`→`RAIMONDI`,
+`PAMPAS`→`PAMPAS GRANDE`.
+
+| Resultado                         | Cifra |
+| --------------------------------- | ----: |
+| Distritos (INEI 2025)             | 1 891 |
+| Provincias                        |   196 |
+| Regiones                          |    25 |
+| Re-anclados conservando `id`      |   690 |
+| Fantasma borrados (0 referencias) |     8 |
+| Insertados                        | 1 201 |
+| Re-numerados o acentuados         |   152 |
+
+Los 8 borrados fueron `Paria`, `Patay`, `Piruro`, `Poca`, `Pampashca` y `Puco`
+(nombres de centros poblados, no de distritos), más `Zaña` (duplicado de `Saña`,
+que conservó las 5 referencias) y `Pampas` de Corongo (duplicado de `La Pampa`).
+Verificación: **0 distritos** con nombre distinto al INEI; la única provincia que
+difiere es `061306`, donde el CSV crudo trae `Ninabamba` y la base tiene el
+correcto `Santa Cruz` (el CSV asigna mal la provincia de ese distrito; se repara
+por mayoría del prefijo de 4 dígitos).
+
+### Scripts y artefactos
+
+```sh
+python scripts/distritos_maestro.py          # analiza, reconcilia y emite CSV
+python scripts/generar_migracion_distritos.py # emite el SQL (no lo ejecuta)
+```
+
+| Archivo                                           | Qué es                                                                |
+| ------------------------------------------------- | --------------------------------------------------------------------- |
+| `distritos_maestro.csv`                           | catálogo final: ubigeo, nombre, provincia, población, centroide, área |
+| `provincias_maestro.csv` / `regiones_maestro.csv` | catálogos de nivel superior                                           |
+| `reconciliacion_distritos.csv`                    | fila por fila: `MANTENER`/`BORRAR`/`INSERTAR`, con referencias        |
+| `maestro_resumen.txt`                             | cifras que se citan arriba                                            |
+| `0001_distritos_inei_2025.sql`                    | migración aplicada, transaccional, con respaldo y guardas             |
+| `0002_territorio_lugares_matarani.sql`            | seed de Matarani como lugar de Islay                                  |
+
+La migración deja respaldo en `core.distritos_backup_20261123` y
+`core.provincias_backup_20261123` y registra su aplicación en
+`core.migracion_log` (guardas: aborta si ya se aplicó o si el conteo inicial no
+es 698).
+
+### Re-vincular infraestructuras: por nombre, no por ubigeo
+
+Los `distrito_id` de `gis.infraestructuras_puntos` se habían asignado con el
+catálogo roto y apuntaban a nombres equivocados en las provincias corridas
+(Huancayo, Carhuaz, Callao, Lima). Se recalcularon **todos** (13 454 de 13 456)
+usando el **nombre** del globo, en el orden región → provincia → ubigeo.
+
+El motivo para no usar el ubigeo del KML está en Tayacaja (`0907`): su columna
+`ubigeo` está corrida (`090710 Pazos` cuando el INEI da `Pazos` en `090711`;
+`090714 San Marcos de Rocchac` cuando es `090716`), pero el **nombre** del globo
+sí es correcto. Resolver por ubigeo ahí habría movido los puntos al distrito
+vecino. Quedan sin distrito **2** puntos, y ninguno es un distrito: `MATARANI`
+(puerto de Islay, hoy sembrado como `territorio.lugares`) y `MAZAMARI - PANGOA`
+(dos distritos en una celda).
+
 ## Regenerar
 
 ```sh

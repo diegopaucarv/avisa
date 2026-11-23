@@ -1,0 +1,12 @@
+Maestro territorial INEI 2025
+regiones            : 25
+provincias          : 196
+distritos           : 1891
+base actual         : 698
+mantener (re-ancla) : 690
+borrar              : 8
+insertar            : 1201
+revisar             : 0
+
+provincias reparadas en el CSV INEI:
+  061306 Ninabamba: 'Ninabamba' -> 'Santa Cruz'

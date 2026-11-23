@@ -16,6 +16,10 @@ import { urlApi } from '../../core/config/entorno';
 import { consulta } from '../../core/http/consulta';
 import { esRegistro, leer, lista, texto } from '../../dominio/mapeo';
 import { IconoComponent } from '../../shared/ui/icono.component';
+import {
+  TerritorioBuscadorComponent,
+  type OpcionTerritorio,
+} from './territorio-buscador.component';
 
 /** Cuerpo de `POST /api/v1/cases`. El código lo emite el servidor. */
 export type CuerpoCasoAlta = {
@@ -27,6 +31,10 @@ export type CuerpoCasoAlta = {
   unidadResponsable?: string;
   resumen?: string;
   fechaInicio?: string;
+  /** `core.distritos.id`: distrito principal del catálogo INEI. */
+  distritoPrincipalId?: number;
+  /** `territorio.lugares.id`: puerto, caleta o desembarcadero, no un distrito. */
+  lugarId?: string;
 };
 
 /** Opción de un catálogo simple (`codigo` = valor que valida la API). */
@@ -143,7 +151,7 @@ const CATALOGOS_VACIOS: CatalogosAlta = {
  */
 @Component({
   selector: 'app-caso-panel',
-  imports: [IconoComponent],
+  imports: [IconoComponent, TerritorioBuscadorComponent],
   templateUrl: './caso-panel.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
@@ -259,6 +267,13 @@ export class CasoPanelComponent {
   });
   readonly mensajeLocal = signal<string | null>(null);
 
+  /**
+   * Ubicación elegida: distrito del INEI o lugar operativo. Se guarda aparte
+   * del borrador de texto porque son dos tipos distintos y el payload los
+   * envía a columnas distintas (`distrito_principal_id` vs `core.caso_lugares`).
+   */
+  readonly territorio = signal<OpcionTerritorio | null>(null);
+
   private readonly catalogoRecurso = consulta<CatalogosAlta>({
     fuente: () => urlApi('/v1/catalogs'),
     esquema: aCatalogosAlta,
@@ -361,6 +376,13 @@ export class CasoPanelComponent {
       return;
     }
 
+    // `core.casos.tematica_id` es NOT NULL y el catálogo no tiene un valor
+    // «sin clasificar»: el alta se detiene aquí en vez de esperar un 422.
+    if (!borrador.tematica) {
+      this.mensajeLocal.set('Seleccione la temática.');
+      return;
+    }
+
     // El código no se pide ni se valida: lo emite `core.siguiente_codigo_caso`.
     // Los opcionales vacíos se omiten para que el servidor aplique su valor por
     // defecto en vez de recibir una cadena vacía (que rechazaría con 422).
@@ -368,12 +390,16 @@ export class CasoPanelComponent {
       titulo,
       regiones: [...borrador.regiones],
     };
-    if (borrador.tematica) cuerpo.tematica = borrador.tematica;
+    cuerpo.tematica = borrador.tematica;
     if (borrador.subsector) cuerpo.subsector = borrador.subsector;
     if (borrador.riesgo) cuerpo.riesgo = borrador.riesgo;
     if (borrador.unidadResponsable) cuerpo.unidadResponsable = borrador.unidadResponsable;
     if (borrador.resumen.trim()) cuerpo.resumen = borrador.resumen.trim();
     if (borrador.fechaInicio) cuerpo.fechaInicio = borrador.fechaInicio;
+
+    const territorio = this.territorio();
+    if (territorio?.tipo === 'distrito') cuerpo.distritoPrincipalId = territorio.id;
+    if (territorio?.tipo === 'lugar') cuerpo.lugarId = territorio.id;
 
     this.mensajeLocal.set(null);
     this.guardar.emit(cuerpo);
@@ -385,6 +411,24 @@ export class CasoPanelComponent {
 
   alTecla(evento: KeyboardEvent): void {
     if (evento.key === 'Tab') this.atraparFoco(evento);
+  }
+
+  /**
+   * Elegir un distrito marca su región si no estaba: un caso no debería quedar
+   * con un distrito de una región que no figura entre las regiones del
+   * expediente, y exigir que se marque a mano invita al descuadre.
+   */
+  alElegirTerritorio(opcion: OpcionTerritorio | null): void {
+    this.territorio.set(opcion);
+    this.mensajeLocal.set(null);
+    if (!opcion) return;
+
+    const region = opcion.region.trim();
+    if (!region || this.borrador().regiones.includes(region)) return;
+    this.borrador.update((actual) => ({
+      ...actual,
+      regiones: [...actual.regiones, region],
+    }));
   }
 
   /** El panel es modal: Tab y Shift+Tab ciclan dentro de él. */

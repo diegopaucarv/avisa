@@ -1,0 +1,2000 @@
+<!doctype html>
+<html lang="es">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Perfil territorial · artes, OSPA y caleta · Mockup AVISA</title>
+        <style>
+            /* Tokens copiados de angular/src/styles/global.css. Sin webfonts, sin JS, sin CDN:
+               el archivo se abre por doble clic. */
+            :root {
+                --ink: #17283a;
+                --ink-2: #33475b;
+                --muted: #778797;
+                --line: #e6ebef;
+                --paper: #fff;
+                --canvas: #f5f7f8;
+                --blue: #2455a2;
+                --blue-dark: #1d427f;
+                --blue-pale: #eaf1fb;
+                --teal: #397c79;
+                --amber: #aa6a11;
+                --amber-pale: #fff4e2;
+                --red: #ad4d46;
+                --red-pale: #fbeceb;
+                --green: #34785b;
+                --green-pale: #e9f5ef;
+                --font-sans:
+                    "DM Sans", system-ui, -apple-system, "Segoe UI", Arial,
+                    sans-serif;
+                --font-display:
+                    "Manrope", "DM Sans", system-ui, -apple-system, "Segoe UI",
+                    sans-serif;
+            }
+            * {
+                box-sizing: border-box;
+            }
+            html {
+                min-height: 100%;
+                background: var(--canvas);
+            }
+            body {
+                margin: 0;
+                color: var(--ink);
+                font-family: var(--font-sans);
+                font-size: 13px;
+                -webkit-font-smoothing: antialiased;
+            }
+
+            /* ── Lienzo y cabecera de página ─────────────────────────── */
+            .view-body {
+                display: flex;
+                flex-direction: column;
+                gap: 16px;
+                width: 100%;
+                max-width: 1420px;
+                margin: 0 auto;
+                padding: 27px 34px 56px;
+            }
+            .view-head {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: flex-start;
+                justify-content: space-between;
+                gap: 16px;
+            }
+            .view-head h1 {
+                margin: 0;
+                font: 700 22px/1.3 var(--font-display);
+                letter-spacing: -0.65px;
+            }
+            .view-subtitle {
+                max-width: 860px;
+                margin: 6px 0 0;
+                color: var(--muted);
+                font-size: 11px;
+                line-height: 1.6;
+            }
+            .badge {
+                display: inline-flex;
+                align-items: center;
+                height: 26px;
+                padding: 0 10px;
+                border: 1px solid #cddcef;
+                border-radius: 999px;
+                background: var(--blue-pale);
+                color: var(--blue);
+                font-size: 9px;
+                font-weight: 700;
+                letter-spacing: 0.05em;
+                text-transform: uppercase;
+                white-space: nowrap;
+            }
+            .lede {
+                padding: 12px 14px;
+                border: 1px solid #cddcef;
+                border-radius: 9px;
+                background: var(--blue-pale);
+                color: var(--blue-dark);
+                font-size: 10.5px;
+                line-height: 1.65;
+            }
+            .lede b {
+                color: var(--blue-dark);
+            }
+            .lede code,
+            .notes code,
+            .ann-card code {
+                padding: 0 3px;
+                border-radius: 3px;
+                background: #eef1f4;
+                font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+                font-size: 9px;
+            }
+            .lede code {
+                background: #dae5f6;
+            }
+            .ex {
+                color: var(--amber);
+                font-weight: 700;
+            }
+
+            /* ── Artboard ────────────────────────────────────────────── */
+            .artboard {
+                border: 1px solid var(--line);
+                border-radius: 12px;
+                background: var(--paper);
+                overflow: hidden;
+            }
+            .art-head {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: flex-start;
+                justify-content: space-between;
+                gap: 14px;
+                padding: 14px 16px;
+                border-bottom: 1px solid var(--line);
+                background: #fbfcfd;
+            }
+            .kicker {
+                display: inline-block;
+                color: var(--blue);
+                font: 700 8.5px/1.3 var(--font-display);
+                letter-spacing: 0.1em;
+                text-transform: uppercase;
+            }
+            .art-head h2 {
+                margin: 4px 0 0;
+                font: 700 16px/1.3 var(--font-display);
+                letter-spacing: -0.3px;
+            }
+            .art-head p {
+                max-width: 820px;
+                margin: 5px 0 0;
+                color: var(--muted);
+                font-size: 10px;
+                line-height: 1.6;
+            }
+            .flag {
+                display: inline-flex;
+                align-items: flex-start;
+                gap: 6px;
+                max-width: 240px;
+                padding: 6px 9px;
+                border: 1px solid #f0d9b5;
+                border-radius: 7px;
+                background: var(--amber-pale);
+                color: var(--amber);
+                font-size: 9px;
+                font-weight: 700;
+                line-height: 1.45;
+            }
+            .flag::before {
+                content: "▲";
+                flex: 0 0 auto;
+                font-size: 8px;
+                line-height: 1.6;
+            }
+            .art-body {
+                display: flex;
+                flex-direction: column;
+                gap: 14px;
+                padding: 16px;
+            }
+
+            /* ── Filtros (estáticos) ─────────────────────────────────── */
+            .toolbar {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: flex-end;
+                gap: 9px;
+            }
+            .seg {
+                display: inline-flex;
+                overflow: hidden;
+                border: 1px solid #cddcef;
+                border-radius: 7px;
+                background: #fff;
+            }
+            .seg span {
+                padding: 5px 10px;
+                border-right: 1px solid #e3ebf5;
+                color: var(--muted);
+                font-size: 9.5px;
+                font-weight: 600;
+                white-space: nowrap;
+            }
+            .seg span:last-child {
+                border-right: 0;
+            }
+            .seg span.on {
+                background: var(--blue-pale);
+                color: var(--blue);
+            }
+            .field {
+                display: inline-flex;
+                flex-direction: column;
+                gap: 3px;
+            }
+            .field > label {
+                color: #97a1aa;
+                font-size: 8px;
+                font-weight: 600;
+                letter-spacing: 0.5px;
+                text-transform: uppercase;
+            }
+            .pick {
+                display: inline-flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 14px;
+                min-width: 128px;
+                height: 28px;
+                padding: 0 9px;
+                border: 1px solid #d8e0e8;
+                border-radius: 6px;
+                background: #fff;
+                color: var(--ink-2);
+                font-size: 9.5px;
+            }
+            .pick::after {
+                content: "▾";
+                color: #9aa6b1;
+                font-size: 8px;
+            }
+            .pick.ph {
+                color: #9aa6b1;
+            }
+            .toolbar .hint {
+                margin-left: auto;
+                padding-bottom: 5px;
+                color: var(--muted);
+                font-size: 9px;
+            }
+
+            /* ── Grupos y fichas ────────────────────────────────────── */
+            .groups {
+                display: grid;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: 12px;
+            }
+            @media (max-width: 1080px) {
+                .groups {
+                    grid-template-columns: 1fr;
+                }
+            }
+            .group {
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+                padding: 11px 12px 12px;
+                border: 1px solid var(--line);
+                border-radius: 9px;
+                background: #fff;
+            }
+            .group h3 {
+                margin: 0;
+                font: 700 12px/1.3 var(--font-display);
+            }
+            .g-meta {
+                margin: 0;
+                color: var(--muted);
+                font-size: 9px;
+                line-height: 1.45;
+            }
+            .chips {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                gap: 5px;
+            }
+            .chip {
+                padding: 2px 7px;
+                border: 1px solid #e3e9ef;
+                border-radius: 999px;
+                background: #f7f9fb;
+                color: var(--ink-2);
+                font-size: 8.5px;
+                white-space: nowrap;
+            }
+            .chip.tipo {
+                border-color: #cddcef;
+                background: var(--blue-pale);
+                color: var(--blue);
+                font-weight: 700;
+            }
+            .chip.tipo.act {
+                border-color: #cfe4d9;
+                background: var(--green-pale);
+                color: var(--green);
+            }
+
+            .card {
+                display: flex;
+                flex-direction: column;
+                gap: 9px;
+                padding: 12px 13px;
+                border: 1px solid var(--line);
+                border-radius: 9px;
+                background: #fff;
+            }
+            .card-head {
+                display: flex;
+                align-items: flex-start;
+                justify-content: space-between;
+                gap: 10px;
+            }
+            .card-title {
+                margin: 0;
+                font: 700 12px/1.3 var(--font-display);
+                letter-spacing: -0.1px;
+            }
+            .card-sub {
+                margin: 2px 0 0;
+                color: var(--muted);
+                font-size: 9px;
+                line-height: 1.5;
+            }
+            .split {
+                display: grid;
+                grid-template-columns: minmax(0, 2.1fr) minmax(0, 1fr);
+                gap: 12px;
+                align-items: start;
+            }
+            @media (max-width: 1080px) {
+                .split {
+                    grid-template-columns: 1fr;
+                }
+            }
+
+            .data-table {
+                width: 100%;
+                border-collapse: collapse;
+                text-align: left;
+            }
+            .data-table th {
+                height: 32px;
+                padding: 0 8px;
+                border-bottom: 1px solid #edf0f2;
+                color: #97a1aa;
+                font-size: 8px;
+                font-weight: 600;
+                letter-spacing: 0.5px;
+                text-transform: uppercase;
+                white-space: nowrap;
+            }
+            .data-table td {
+                padding: 6px 8px;
+                border-bottom: 1px solid #f0f2f4;
+                color: #687988;
+                font-size: 9.5px;
+                line-height: 1.45;
+                vertical-align: middle;
+            }
+            .data-table tbody tr:last-child td {
+                border-bottom: 0;
+            }
+            .data-table tbody tr:hover td {
+                background: #fafbfc;
+            }
+            .data-table td.num,
+            .data-table th.num {
+                text-align: right;
+                font-variant-numeric: tabular-nums;
+            }
+            .data-table td.strong {
+                color: var(--ink);
+                font-weight: 600;
+            }
+            .miss {
+                color: #b3bcc4;
+            }
+            .link {
+                border: 0;
+                padding: 0;
+                background: none;
+                color: #4c7099;
+                font: inherit;
+                font-size: 9.5px;
+                white-space: nowrap;
+            }
+
+            /* ── Indicadores ────────────────────────────────────────── */
+            .kpis {
+                display: grid;
+                grid-template-columns: repeat(6, minmax(0, 1fr));
+                gap: 9px;
+            }
+            @media (max-width: 1080px) {
+                .kpis {
+                    grid-template-columns: repeat(3, 1fr);
+                }
+            }
+            .kpi {
+                padding: 10px 12px;
+                border: 1px solid var(--line);
+                border-radius: 9px;
+                background: #fff;
+            }
+            .kpi b {
+                display: block;
+                font: 700 20px/1.1 var(--font-display);
+                font-variant-numeric: tabular-nums;
+                letter-spacing: -0.4px;
+            }
+            .kpi span {
+                display: block;
+                margin-top: 3px;
+                color: var(--muted);
+                font-size: 9px;
+                line-height: 1.35;
+            }
+            .kpi.zero b {
+                color: #9aa6b1;
+            }
+
+            /* ── Personas y estados ─────────────────────────────────── */
+            .actor {
+                display: flex;
+                align-items: center;
+                gap: 7px;
+            }
+            .avatar {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                flex: 0 0 auto;
+                width: 22px;
+                height: 22px;
+                border-radius: 50%;
+                background: var(--blue-pale);
+                color: var(--blue);
+                font-size: 8px;
+                font-weight: 700;
+            }
+            .avatar.none {
+                background: #f1f4f6;
+                color: #b3bcc4;
+            }
+            .pill {
+                display: inline-block;
+                padding: 1px 7px;
+                border-radius: 999px;
+                font-size: 8px;
+                font-weight: 700;
+                white-space: nowrap;
+            }
+            .pill.empty {
+                background: #f1f4f6;
+                color: #8b97a1;
+            }
+            .pill.warn {
+                background: var(--amber-pale);
+                color: var(--amber);
+            }
+            .pill.ok {
+                background: var(--green-pale);
+                color: var(--green);
+            }
+            .pill.bad {
+                background: var(--red-pale);
+                color: var(--red);
+            }
+            .pill.soft {
+                border: 1px solid #e3e9ef;
+                background: #f7f9fb;
+                color: #7d8a96;
+                font-weight: 600;
+            }
+
+            .dl {
+                display: grid;
+                grid-template-columns: auto minmax(0, 1fr);
+                gap: 6px 12px;
+                margin: 0;
+                font-size: 9.5px;
+            }
+            .dl dt {
+                color: #97a1aa;
+                white-space: nowrap;
+            }
+            .dl dd {
+                margin: 0;
+                color: var(--ink-2);
+                line-height: 1.45;
+            }
+
+            /* ── Matriz de conflictividad ───────────────────────────── */
+            .matrix-wrap {
+                overflow-x: auto;
+                border: 1px solid var(--line);
+                border-radius: 9px;
+            }
+            .matrix {
+                width: 100%;
+                border-collapse: collapse;
+                font-size: 9px;
+            }
+            .matrix th,
+            .matrix td {
+                padding: 6px 7px;
+                border-bottom: 1px solid #f0f2f4;
+                border-right: 1px solid #f4f6f8;
+                text-align: center;
+                white-space: nowrap;
+            }
+            .matrix tr th:last-child,
+            .matrix tr td:last-child {
+                border-right: 0;
+            }
+            .matrix thead th {
+                background: #fbfcfd;
+                color: #97a1aa;
+                font-size: 8px;
+                font-weight: 600;
+                letter-spacing: 0.04em;
+                text-transform: uppercase;
+            }
+            .matrix th.rowh,
+            .matrix td.rowh {
+                position: sticky;
+                left: 0;
+                z-index: 1;
+                background: #fff;
+                color: var(--ink);
+                font-weight: 600;
+                text-align: left;
+            }
+            .matrix thead th.rowh {
+                z-index: 2;
+                background: #fbfcfd;
+            }
+            .matrix tbody tr:last-child td {
+                border-bottom: 0;
+            }
+            .sema {
+                display: inline-block;
+                width: 13px;
+                height: 13px;
+                border-radius: 4px;
+                vertical-align: -2px;
+            }
+            .sema.d1 {
+                background: #dbe8f6;
+            }
+            .sema.d2 {
+                background: #f3e2bf;
+            }
+            .sema.d3 {
+                background: #f0c9c5;
+            }
+            .sema.d4 {
+                background: #c9544c;
+            }
+            .legend {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 12px;
+                color: var(--muted);
+                font-size: 9px;
+            }
+            .legend .k {
+                display: inline-flex;
+                align-items: center;
+                gap: 5px;
+            }
+            .banner {
+                display: flex;
+                align-items: flex-start;
+                gap: 9px;
+                padding: 10px 12px;
+                border: 1px solid #f0d9b5;
+                border-radius: 8px;
+                background: var(--amber-pale);
+                color: #7a4f0d;
+                font-size: 9.5px;
+                line-height: 1.55;
+            }
+            .banner b {
+                color: #6b450b;
+            }
+            .banner.neutral {
+                border-color: #dbe4ec;
+                background: #f6f9fb;
+                color: var(--ink-2);
+            }
+            .banner.neutral b {
+                color: var(--ink);
+            }
+            .banner code {
+                padding: 0 3px;
+                border-radius: 3px;
+                background: #eee3cd;
+                font-family: ui-monospace, Menlo, monospace;
+                font-size: 8.5px;
+            }
+            .banner.neutral code {
+                background: #e9eef2;
+            }
+
+            .bars {
+                display: flex;
+                flex-direction: column;
+                gap: 6px;
+            }
+            .bar-row {
+                display: grid;
+                grid-template-columns: 132px minmax(0, 1fr) 34px;
+                align-items: center;
+                gap: 9px;
+                font-size: 9.5px;
+            }
+            .bar-row .lbl {
+                overflow: hidden;
+                color: var(--ink-2);
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+            .bar-track {
+                display: block;
+                height: 9px;
+                overflow: hidden;
+                border-radius: 5px;
+                background: #f0f3f6;
+            }
+            .bar-fill {
+                display: block;
+                height: 100%;
+                border-radius: 5px;
+                background: var(--teal);
+            }
+            .bar-row .v {
+                text-align: right;
+                color: var(--ink);
+                font-variant-numeric: tabular-nums;
+                font-weight: 600;
+            }
+
+            /* ── Anotaciones ────────────────────────────────────────── */
+            .ann {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 8px;
+                padding: 12px 14px;
+                border-top: 1px solid var(--line);
+                background: #fbfcfd;
+            }
+            @media (max-width: 980px) {
+                .ann {
+                    grid-template-columns: 1fr;
+                }
+            }
+            .ann-card {
+                padding: 9px 11px;
+                border: 1px solid #eef1f4;
+                border-radius: 7px;
+                background: #fff;
+                color: var(--ink-2);
+                font-size: 9.5px;
+                line-height: 1.55;
+            }
+            .ann-card.wide {
+                grid-column: 1 / -1;
+            }
+            .ann-card h3 {
+                margin: 0 0 5px;
+                color: var(--ink);
+                font: 700 8.5px/1.3 var(--font-display);
+                letter-spacing: 0.07em;
+                text-transform: uppercase;
+            }
+            .ann-card b {
+                color: var(--ink);
+            }
+            .ann-table {
+                width: 100%;
+                border-collapse: collapse;
+                font-size: 8.5px;
+            }
+            .ann-table th {
+                padding: 2px 6px 3px;
+                border-bottom: 1px solid #edf0f2;
+                color: #97a1aa;
+                font-size: 7.5px;
+                font-weight: 600;
+                letter-spacing: 0.04em;
+                text-align: left;
+                text-transform: uppercase;
+            }
+            .ann-table td {
+                padding: 3px 6px;
+                border-bottom: 1px solid #f4f6f8;
+                color: var(--ink-2);
+                vertical-align: top;
+            }
+            .ann-table tr:last-child td {
+                border-bottom: 0;
+            }
+
+            /* ── Notas finales ──────────────────────────────────────── */
+            .notes {
+                padding: 18px 20px;
+                border: 1px solid var(--line);
+                border-radius: 12px;
+                background: #fff;
+            }
+            .notes h2 {
+                margin: 0 0 4px;
+                font: 700 15px/1.3 var(--font-display);
+            }
+            .notes h3 {
+                margin: 15px 0 5px;
+                font: 700 11px/1.3 var(--font-display);
+                color: var(--ink);
+            }
+            .notes p,
+            .notes li {
+                color: var(--ink-2);
+                font-size: 10px;
+                line-height: 1.7;
+            }
+            .notes ul {
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+                margin: 0;
+                padding-left: 16px;
+            }
+            .notes .rule {
+                margin-top: 14px;
+                padding: 10px 12px;
+                border: 1px solid #cddcef;
+                border-radius: 8px;
+                background: var(--blue-pale);
+                color: var(--blue-dark);
+                font-size: 10px;
+                line-height: 1.6;
+            }
+        </style>
+    </head>
+    <body>
+        <main class="view-body">
+            <header class="view-head">
+                <div>
+                    <h1>Perfil territorial: arte de pesca, OSPA y caleta</h1>
+                    <p class="view-subtitle">
+                        Tres artboards sobre el corte que pide la dirección:
+                        quién está en cada región y caleta, con qué arte de
+                        pesca, y qué conflictos se concentran por recurso. El
+                        corte es real en su estructura y <b>vacío</b> en varios
+                        campos: las columnas existen en el modelo, pero no están
+                        pobladas. Lo dibujado con valores de ejemplo va marcado
+                        con <span class="ex">≈</span>.
+                    </p>
+                </div>
+                <div>
+                    <span class="badge"
+                        >Ola 4 · artboard 3 · items 119–124</span
+                    >
+                </div>
+            </header>
+
+            <p class="lede">
+                <b>Estado del dato, medido en la base.</b> El directorio tiene
+                <b>1 160 actores</b> (936 personas y 224 organizaciones) y las
+                <b>224 organizaciones</b> ya traen región donde el origen la
+                tiene. Lo que falta es el eje de arte de pesca —no existe
+                catálogo en ninguna tabla— y la marca OSPA, que existe como
+                columna (<code>expediente_ospa</code>, <code>estado_ospa</code>)
+                pero está <b>vacía en 0 de 224</b>. El maestro de caletas
+                (<code>territorio.caleta_detalle</code>) existe y tiene
+                <b>0 filas</b>. Por eso los tres artboards declaran el hueco en
+                vez de rellenarlo.
+            </p>
+
+            <!-- ═══════════════════ ARTBOARD 1 ═══════════════════ -->
+            <section class="artboard" id="arte-1">
+                <div class="art-head">
+                    <div>
+                        <span class="kicker">Artboard 1 · ítem 119</span>
+                        <h2>Catálogo de artes de pesca</h2>
+                        <p>
+                            Tres grupos de primer nivel —selectivos, cerco y
+                            buzos— con sus precisiones dentro. Cada arte lleva
+                            tipo (pasiva o activa), para qué se usa, dónde se
+                            usa y nivel de impacto al ecosistema. La eslora se
+                            modela como
+                            <b>dimensión aparte</b> del arte, nunca como un
+                            nivel más de la jerarquía.
+                        </p>
+                    </div>
+                    <span class="flag"
+                        >Catálogo de ejemplo · pendiente de ratificación por
+                        OAIPCS</span
+                    >
+                </div>
+
+                <div class="art-body">
+                    <div class="toolbar">
+                        <div class="field">
+                            <label>Agrupar por</label>
+                            <div class="seg">
+                                <span class="on">Grupo</span>
+                                <span>Tipo (pasiva / activa)</span>
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label>Impacto al ecosistema</label>
+                            <div class="pick">Todos</div>
+                        </div>
+                        <div class="field">
+                            <label>Eslora</label>
+                            <div class="pick">Todas</div>
+                        </div>
+                        <span class="hint"
+                            >El segundo agrupamiento responde a cómo se discute
+                            en las reuniones: pasiva frente a activa.</span
+                        >
+                    </div>
+
+                    <div class="groups">
+                        <div class="group">
+                            <h3>Selectivos</h3>
+                            <p class="g-meta">
+                                Captura dirigida a una especie o talla.
+                                <span class="ex">≈ 6 precisiones</span>
+                            </p>
+                            <div class="chips">
+                                <span class="chip tipo">Pasiva</span>
+                                <span class="chip">Espinel</span>
+                                <span class="chip">Línea de mano</span>
+                                <span class="chip">Pinta</span>
+                                <span class="chip">+ 3 más</span>
+                            </div>
+                        </div>
+                        <div class="group">
+                            <h3>Cerco</h3>
+                            <p class="g-meta">
+                                Captura envolviendo el cardumen.
+                                <span class="ex">≈ 4 precisiones</span>
+                            </p>
+                            <div class="chips">
+                                <span class="chip tipo act">Activa</span>
+                                <span class="chip">Macaco</span>
+                                <span class="chip">Cerco mecanizado</span>
+                                <span class="chip">+ 2 más</span>
+                            </div>
+                        </div>
+                        <div class="group">
+                            <h3>Buzos</h3>
+                            <p class="g-meta">
+                                Extracción manual en el fondo.
+                                <span class="ex">≈ 4 precisiones</span>
+                            </p>
+                            <div class="chips">
+                                <span class="chip tipo act">Activa</span>
+                                <span class="chip">Buceo con compresora</span>
+                                <span class="chip">Buceo a pulmón</span>
+                                <span class="chip">+ 2 más</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-head">
+                            <div>
+                                <h3 class="card-title">Atributos por arte</h3>
+                                <p class="card-sub">
+                                    Los cinco atributos que pidió la dirección.
+                                    Todos los valores son
+                                    <span class="ex">≈ ejemplo</span>: no hay
+                                    tabla de la que leerlos.
+                                </p>
+                            </div>
+                            <span class="pill warn">Sin fuente</span>
+                        </div>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Arte (precisión)</th>
+                                    <th scope="col">Grupo</th>
+                                    <th scope="col">Tipo</th>
+                                    <th scope="col">Para qué se usa</th>
+                                    <th scope="col">Dónde se usa</th>
+                                    <th scope="col">Impacto</th>
+                                    <th scope="col">Eslora típica</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="strong">
+                                        Pinta <span class="ex">≈</span>
+                                    </td>
+                                    <td>Selectivos</td>
+                                    <td>Pasiva</td>
+                                    <td>Peces demersales</td>
+                                    <td>Litoral norte y centro</td>
+                                    <td><span class="pill ok">Bajo</span></td>
+                                    <td>0–10 m</td>
+                                </tr>
+                                <tr>
+                                    <td class="strong">
+                                        Espinel <span class="ex">≈</span>
+                                    </td>
+                                    <td>Selectivos</td>
+                                    <td>Pasiva</td>
+                                    <td>Tiburones y peces de fondo</td>
+                                    <td>Litoral y altura</td>
+                                    <td>
+                                        <span class="pill warn">Medio</span>
+                                    </td>
+                                    <td>0–10 m</td>
+                                </tr>
+                                <tr>
+                                    <td class="strong">
+                                        Macaco <span class="ex">≈</span>
+                                    </td>
+                                    <td>Cerco</td>
+                                    <td>Activa</td>
+                                    <td>Cardúmenes costeros</td>
+                                    <td>Bahías y caletas</td>
+                                    <td>
+                                        <span class="pill warn">Medio</span>
+                                    </td>
+                                    <td>10–20 m</td>
+                                </tr>
+                                <tr>
+                                    <td class="strong">
+                                        Cerco mecanizado
+                                        <span class="ex">≈</span>
+                                    </td>
+                                    <td>Cerco</td>
+                                    <td>Activa</td>
+                                    <td>Anchoveta y jurel</td>
+                                    <td>Litoral centro-sur</td>
+                                    <td>
+                                        <span class="pill warn">Medio</span>
+                                    </td>
+                                    <td>20–32 m</td>
+                                </tr>
+                                <tr>
+                                    <td class="strong">
+                                        Buceo con compresora
+                                        <span class="ex">≈</span>
+                                    </td>
+                                    <td>Buzos</td>
+                                    <td>Activa</td>
+                                    <td>Concha de abanico y erizo</td>
+                                    <td>Bahías someras</td>
+                                    <td><span class="pill bad">Alto</span></td>
+                                    <td>0–10 m</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-head">
+                            <div>
+                                <h3 class="card-title">
+                                    Eslora: dimensión aparte
+                                </h3>
+                                <p class="card-sub">
+                                    La eslora describe la <b>embarcación</b>, no
+                                    el arte. Un mismo arte se opera en más de un
+                                    rango, así que la relación es muchos a
+                                    muchos y va en su propia tabla de cruce.
+                                </p>
+                            </div>
+                            <span class="pill soft">No es jerarquía</span>
+                        </div>
+                        <div class="groups">
+                            <div class="group">
+                                <h3>0–10 m</h3>
+                                <p class="g-meta">
+                                    Flota artesanal de caleta.
+                                    <span class="ex">≈ 61 %</span>
+                                </p>
+                                <div class="chips">
+                                    <span class="chip">Pinta</span>
+                                    <span class="chip">Espinel</span>
+                                    <span class="chip">Buceo</span>
+                                </div>
+                            </div>
+                            <div class="group">
+                                <h3>10–20 m</h3>
+                                <p class="g-meta">
+                                    Artesanal de mayor porte.
+                                    <span class="ex">≈ 27 %</span>
+                                </p>
+                                <div class="chips">
+                                    <span class="chip">Macaco</span>
+                                    <span class="chip">Cerco</span>
+                                </div>
+                            </div>
+                            <div class="group">
+                                <h3>20–32 m</h3>
+                                <p class="g-meta">
+                                    Cerco de mayor capacidad.
+                                    <span class="ex">≈ 12 %</span>
+                                </p>
+                                <div class="chips">
+                                    <span class="chip">Cerco mecanizado</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ann" aria-label="Anotaciones del artboard 1">
+                    <div class="ann-card">
+                        <h3>① Items que cubre</h3>
+                        <b>119</b> · catálogo de artes de pesca.
+                        <b>Estado: mockup puro.</b> Los grupos y las precisiones
+                        del artboard son el diseño, no un catálogo ratificado.
+                        <b>Diseño por lote:</b>
+                        lote A4 · modelo de datos nuevo.
+                    </div>
+                    <div class="ann-card">
+                        <h3>② No existe hoy</h3>
+                        No hay tabla de artes en ningún esquema: una búsqueda
+                        <code>%arte%</code> sólo devuelve
+                        <code>domain.artefacto</code>, sin relación con pesca.
+                        <code>legacy.dim_recurso_pesca</code> (37 filas) es
+                        <b>especie/recurso</b>, no arte: sirve para el artboard
+                        3, no para éste.
+                    </div>
+                    <div class="ann-card">
+                        <h3>③ Qué hay que ratificar</h3>
+                        (a) la lista de precisiones de cada grupo; (b) la escala
+                        de impacto al ecosistema (Bajo · Medio · Alto) y qué la
+                        determina; (c) si el arte se asocia a la
+                        <b>embarcación</b>, al <b>permiso</b> o a ambos —hoy no
+                        hay ninguno de los dos modelado—.
+                    </div>
+                    <div class="ann-card">
+                        <h3>④ Decisión de diseño</h3>
+                        Dos ejes en la misma pantalla: la jerarquía
+                        <b>grupo → precisión</b> y el eje operativo
+                        <b>pasiva / activa</b>, que es como se discute en
+                        reunión. La eslora queda fuera de la jerarquía, en su
+                        propio bloque y su propia tabla de cruce.
+                    </div>
+                    <div class="ann-card wide">
+                        <h3>⑤ Cómo se cierra</h3>
+                        OAIPCS entrega el listado de artes con sus atributos; se
+                        carga en <code>core.cat_artes_pesca</code> (o el nombre
+                        que fije el equipo .NET) con <code>grupo</code>,
+                        <code>tipo_pasiva_activa</code>, <code>uso</code>,
+                        <code>ambito</code> e <code>impacto</code>, y una tabla
+                        de cruce arte–eslora. Hasta entonces el catálogo se
+                        muestra como aquí, con el flag visible y sin pretender
+                        ser dato institucional.
+                    </div>
+                </div>
+            </section>
+
+            <!-- ═══════════════════ ARTBOARD 2 ═══════════════════ -->
+            <section class="artboard" id="arte-2">
+                <div class="art-head">
+                    <div>
+                        <span class="kicker"
+                            >Artboard 2 · ítems 120 · 121 · 122</span
+                        >
+                        <h2>Actores y OSPA por región y caleta</h2>
+                        <p>
+                            El corte que pidió la directora: quién es quién por
+                            región y arte de pesca, con datos de contacto,
+                            perfil de diálogo y foto. Debajo, la marca OSPA
+                            sobre la organización y la atribución de la demanda
+                            a su solicitante, que es la llave para cortar por
+                            organización.
+                        </p>
+                    </div>
+                    <span class="flag"
+                        >Dirección: 3 campos poblados de 224
+                        organizaciones</span
+                    >
+                </div>
+
+                <div class="art-body">
+                    <div class="toolbar">
+                        <div class="field">
+                            <label>Región</label>
+                            <div class="pick">Todas</div>
+                        </div>
+                        <div class="field">
+                            <label>Arte de pesca</label>
+                            <div class="pick ph">Sin catálogo</div>
+                        </div>
+                        <div class="field">
+                            <label>Caleta</label>
+                            <div class="pick">Todas</div>
+                        </div>
+                        <div class="field">
+                            <label>OSPA</label>
+                            <div class="pick">Todas</div>
+                        </div>
+                        <div class="field">
+                            <label>Subsector</label>
+                            <div class="pick">
+                                Pesca y Acuicultura · MYPE e Industria
+                            </div>
+                        </div>
+                        <span class="hint"
+                            >El subsector no se elige: lo fija el rol. La
+                            Dirección y la Secretaría General ven ambos; cada
+                            Viceministerio ve sólo el suyo.</span
+                        >
+                    </div>
+
+                    <div class="kpis">
+                        <div class="kpi">
+                            <b>1 160</b><span>Actores en el directorio</span>
+                        </div>
+                        <div class="kpi">
+                            <b>224</b
+                            ><span>Organizaciones (OSPAS incluidas)</span>
+                        </div>
+                        <div class="kpi zero">
+                            <b>0</b><span>con expediente OSPA</span>
+                        </div>
+                        <div class="kpi zero">
+                            <b>0</b><span>caletas en el maestro</span>
+                        </div>
+                        <div class="kpi">
+                            <b>20</b><span>organizaciones con foto</span>
+                        </div>
+                        <div class="kpi">
+                            <b>24</b><span>con flota declarada</span>
+                        </div>
+                    </div>
+
+                    <div class="split">
+                        <div class="card" style="overflow-x: auto">
+                            <div class="card-head">
+                                <div>
+                                    <h3 class="card-title">
+                                        Directorio filtrado
+                                    </h3>
+                                    <p class="card-sub">
+                                        Orden por región y apellidos. Teléfono y
+                                        correo son PII: se enmascaran salvo para
+                                        <code>administrador</code>.
+                                    </p>
+                                </div>
+                                <span class="pill soft">Máscara activa</span>
+                            </div>
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Apellidos y nombres</th>
+                                        <th scope="col">Organización</th>
+                                        <th scope="col">OSPA</th>
+                                        <th scope="col">Región</th>
+                                        <th scope="col">Caleta</th>
+                                        <th scope="col">Arte</th>
+                                        <th scope="col">Teléfono</th>
+                                        <th scope="col">Correo</th>
+                                        <th scope="col">Perfil</th>
+                                        <th scope="col">Foto</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="strong">
+                                            <span class="actor"
+                                                ><span class="avatar">SM</span
+                                                >Salas Salas, María Luisa</span
+                                            >
+                                        </td>
+                                        <td>OSPAS del Norte</td>
+                                        <td>
+                                            <span class="pill empty"
+                                                >Sin expediente</span
+                                            >
+                                        </td>
+                                        <td>Piura</td>
+                                        <td>Paita</td>
+                                        <td>Cerco</td>
+                                        <td>
+                                            999 <span class="miss">***</span>
+                                            <span class="miss">***</span>
+                                        </td>
+                                        <td>
+                                            m<span class="miss">***</span
+                                            >@gmail.com
+                                        </td>
+                                        <td><span class="miss">—</span></td>
+                                        <td><span class="avatar">ML</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="strong">
+                                            <span class="actor"
+                                                ><span class="avatar">CF</span
+                                                >Chunga Fiestas, Julio</span
+                                            >
+                                        </td>
+                                        <td>OSPAS San José</td>
+                                        <td>
+                                            <span class="pill empty"
+                                                >Sin expediente</span
+                                            >
+                                        </td>
+                                        <td>Piura</td>
+                                        <td>La Islilla</td>
+                                        <td>Buzos</td>
+                                        <td>
+                                            9<span class="miss">**</span>
+                                            <span class="miss">***</span>
+                                            <span class="miss">***</span>
+                                        </td>
+                                        <td><span class="miss">—</span></td>
+                                        <td><span class="miss">—</span></td>
+                                        <td>
+                                            <span class="avatar none">—</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="strong">
+                                            <span class="actor"
+                                                ><span class="avatar">VR</span
+                                                >Vílchez Ramos, Ana</span
+                                            >
+                                        </td>
+                                        <td>OSPAS Cabo Blanco</td>
+                                        <td>
+                                            <span class="pill empty"
+                                                >Sin expediente</span
+                                            >
+                                        </td>
+                                        <td>Tumbes</td>
+                                        <td>Zorritos</td>
+                                        <td>Selectivos</td>
+                                        <td>
+                                            9<span class="miss">**</span>
+                                            <span class="miss">***</span>
+                                            <span class="miss">***</span>
+                                        </td>
+                                        <td>
+                                            a<span class="miss">***</span
+                                            >@hotmail.com
+                                        </td>
+                                        <td><span class="miss">—</span></td>
+                                        <td><span class="avatar">VR</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="strong">
+                                            <span class="actor"
+                                                ><span class="avatar">AP</span
+                                                >Asociación de Pescadores San
+                                                José
+                                                <span class="pill soft"
+                                                    >Organización</span
+                                                ></span
+                                            >
+                                        </td>
+                                        <td>
+                                            <span class="miss">—</span>
+                                            <span class="pill empty"
+                                                >es la organización</span
+                                            >
+                                        </td>
+                                        <td>
+                                            <span class="pill empty"
+                                                >Sin expediente</span
+                                            >
+                                        </td>
+                                        <td>Áncash</td>
+                                        <td>Chimbote</td>
+                                        <td><span class="miss">—</span></td>
+                                        <td>
+                                            9<span class="miss">**</span>
+                                            <span class="miss">***</span>
+                                            <span class="miss">***</span>
+                                        </td>
+                                        <td>
+                                            a<span class="miss">***</span
+                                            >@gmail.com
+                                        </td>
+                                        <td>Colaborativo</td>
+                                        <td><span class="avatar">AP</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="strong">
+                                            <span class="actor"
+                                                ><span class="avatar">QH</span
+                                                >Quispe Huamán, Rosa</span
+                                            >
+                                        </td>
+                                        <td><span class="miss">—</span></td>
+                                        <td>
+                                            <span class="pill empty"
+                                                >Sin expediente</span
+                                            >
+                                        </td>
+                                        <td>Lima</td>
+                                        <td><span class="miss">—</span></td>
+                                        <td>Selectivos</td>
+                                        <td><span class="miss">—</span></td>
+                                        <td><span class="miss">—</span></td>
+                                        <td><span class="miss">—</span></td>
+                                        <td>
+                                            <span class="avatar none">—</span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-head">
+                                <div>
+                                    <h3 class="card-title">
+                                        Ficha de la organización
+                                    </h3>
+                                    <p class="card-sub">
+                                        OSPAS del Norte · Piura · Paita
+                                    </p>
+                                </div>
+                                <span class="pill empty">0 de 224</span>
+                            </div>
+                            <dl class="dl">
+                                <dt>Expediente OSPA</dt>
+                                <dd><span class="miss">—</span></dd>
+                                <dt>Estado OSPA</dt>
+                                <dd><span class="miss">—</span></dd>
+                                <dt>Vigencia</dt>
+                                <dd>
+                                    <span class="miss">—</span> a
+                                    <span class="miss">—</span>
+                                </dd>
+                                <dt>Inscripción SUNARP</dt>
+                                <dd><span class="miss">—</span></dd>
+                                <dt>Caleta</dt>
+                                <dd><span class="miss">—</span></dd>
+                                <dt>Embarcaciones</dt>
+                                <dd><span class="miss">—</span></dd>
+                                <dt>Armadores</dt>
+                                <dd><span class="miss">—</span></dd>
+                                <dt>Integrantes</dt>
+                                <dd><span class="miss">—</span></dd>
+                                <dt>Perfil de diálogo</dt>
+                                <dd><span class="miss">—</span></dd>
+                                <dt>Foto</dt>
+                                <dd><span class="avatar">ML</span></dd>
+                            </dl>
+                            <p class="card-sub">
+                                Las diez filas existen como columnas en
+                                <code>core.organizaciones</code>. Se dibujan
+                                vacías porque lo están: sólo 20 organizaciones
+                                tienen <code>foto_url</code>, 24 tienen cifras
+                                de flota y <b>1</b> tiene <code>perfil</code>.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-head">
+                            <div>
+                                <h3 class="card-title">
+                                    Demandas por OSPA
+                                    <span class="pill warn">ítem 122</span>
+                                </h3>
+                                <p class="card-sub">
+                                    El corte por organización exige que cada
+                                    demanda declare a quién pertenece. Hoy no
+                                    hay ese vínculo:
+                                    <code>core.demandas</code> no tiene columna
+                                    de solicitante-organización.
+                                </p>
+                            </div>
+                            <span class="pill bad">0 con atribución</span>
+                        </div>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">OSPA</th>
+                                    <th scope="col">Región</th>
+                                    <th scope="col">Arte</th>
+                                    <th scope="col" class="num">Demandas</th>
+                                    <th scope="col" class="num">
+                                        Con solicitante
+                                    </th>
+                                    <th scope="col">Estado de la atribución</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="strong">
+                                        OSPAS del Norte
+                                        <span class="ex">≈</span>
+                                    </td>
+                                    <td>Piura</td>
+                                    <td>Cerco</td>
+                                    <td class="num">
+                                        <span class="miss">—</span>
+                                    </td>
+                                    <td class="num">0</td>
+                                    <td>
+                                        <span class="pill empty"
+                                            >Sin vínculo</span
+                                        >
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="strong">
+                                        OSPAS San José <span class="ex">≈</span>
+                                    </td>
+                                    <td>Piura</td>
+                                    <td>Buzos</td>
+                                    <td class="num">
+                                        <span class="miss">—</span>
+                                    </td>
+                                    <td class="num">0</td>
+                                    <td>
+                                        <span class="pill empty"
+                                            >Sin vínculo</span
+                                        >
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="strong">
+                                        OSPAS Cabo Blanco
+                                        <span class="ex">≈</span>
+                                    </td>
+                                    <td>Tumbes</td>
+                                    <td>Selectivos</td>
+                                    <td class="num">
+                                        <span class="miss">—</span>
+                                    </td>
+                                    <td class="num">0</td>
+                                    <td>
+                                        <span class="pill empty"
+                                            >Sin vínculo</span
+                                        >
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="ann" aria-label="Anotaciones del artboard 2">
+                    <div class="ann-card">
+                        <h3>① Items que cubre</h3>
+                        <b>120</b> actores por región × arte · <b>121</b> OSPA
+                        por región y caleta · <b>122</b> demandas por OSPA. El
+                        primero y el tercero <b>requieren dato</b>; el segundo
+                        es implementable en parte y mockup en el resto.
+                    </div>
+                    <div class="ann-card">
+                        <h3>② Cifras reales de hoy</h3>
+                        <table class="ann-table">
+                            <tr>
+                                <th>Campo</th>
+                                <th>Valor</th>
+                            </tr>
+                            <tr>
+                                <td><code>core.actores</code></td>
+                                <td>
+                                    1 160 (936 personas · 224 organizaciones)
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <code>expediente_ospa</code> /
+                                    <code>estado_ospa</code>
+                                </td>
+                                <td>existen · 0 de 224 con valor</td>
+                            </tr>
+                            <tr>
+                                <td><code>territorio.caleta_detalle</code></td>
+                                <td>existe · 0 filas</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <code>foto_url</code> · <code>perfil</code>
+                                </td>
+                                <td>20 de 224 · 1 de 224</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <code>n_embarcaciones</code> ·
+                                    <code>n_armadores</code> ·
+                                    <code>numero_integrantes</code>
+                                </td>
+                                <td>24 de 224 cada uno</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="ann-card">
+                        <h3>③ Qué falta exactamente</h3>
+                        <b>120:</b> el catálogo de artes (artboard 1) y el
+                        vínculo actor–arte. <b>121:</b> poblar la marca OSPA y
+                        el maestro de caletas; la estructura ya existe.
+                        <b>122:</b> una columna de solicitante-organización en
+                        <code>core.demandas</code>; sin ella no hay corte por
+                        OSPA ni por arte.
+                    </div>
+                    <div class="ann-card">
+                        <h3>④ Permisos y PII</h3>
+                        Teléfono y correo se enmascaran para todo rol salvo
+                        <code>administrador</code>: son 642 DNI, 606 teléfonos y
+                        141 correos con base legal aún sin sustituir (P3). El
+                        filtro de subsector no es un control de usuario: lo
+                        impone el rol del perfil.
+                    </div>
+                    <div class="ann-card wide">
+                        <h3>⑤ Cómo se cierra</h3>
+                        Poblar
+                        <code>core.organizaciones.expediente_ospa</code> /
+                        <code>estado_ospa</code> desde el registro de OSPAS,
+                        cargar <code>territorio.caleta_detalle</code> con el
+                        maestro de caletas y añadir el vínculo
+                        organización–caleta. Para el corte por arte, crear el
+                        catálogo 119 y una tabla actor–arte. Para 122, modelar
+                        el solicitante en la demanda. Los cuatro son cambios de
+                        modelo, no de pantalla.
+                    </div>
+                </div>
+            </section>
+
+            <!-- ═══════════════════ ARTBOARD 3 ═══════════════════ -->
+            <section class="artboard" id="arte-3">
+                <div class="art-head">
+                    <div>
+                        <span class="kicker">Artboard 3 · ítem 124</span>
+                        <h2>Conflictos por región y recurso</h2>
+                        <p>
+                            Matriz región por recurso con el semáforo de
+                            <b>conflictividad</b> —Diferencia, Controversia,
+                            Conflicto social, Crisis social—, nunca con el
+                            semáforo de riesgo. Es el tablero que pide la
+                            dirección, dibujado con su estructura real y sus
+                            celdas vacías.
+                        </p>
+                    </div>
+                    <span class="flag">Puente caso–recurso sin poblar</span>
+                </div>
+
+                <div class="art-body">
+                    <div class="banner">
+                        <span aria-hidden="true">▲</span>
+                        <div>
+                            <b>El corte caso × recurso no existe todavía.</b>
+                            <code>legacy.bridge_caso_recurso</code> tiene
+                            <b>0 filas</b>: ningún caso declara su recurso. Seis
+                            de los 35 casos heredan una o varias especies de sus
+                            alertas, pero eso no es una llave caso–recurso. Las
+                            celdas con <span class="ex">≈</span> son de ejemplo
+                            para mostrar el diseño; el resto está vacío porque
+                            no hay dato, no porque el valor sea cero.
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-head">
+                            <div>
+                                <h3 class="card-title">Matriz objetivo</h3>
+                                <p class="card-sub">
+                                    Encabezados tomados de la capa distrital (25
+                                    departamentos); se muestran siete. Filas,
+                                    del catálogo
+                                    <code>legacy.dim_recurso_pesca</code>
+                                    (37 recursos).
+                                </p>
+                            </div>
+                            <span class="pill bad"
+                                >0 de 35 declaran recurso</span
+                            >
+                        </div>
+                        <div class="matrix-wrap">
+                            <table class="matrix">
+                                <thead>
+                                    <tr>
+                                        <th class="rowh" scope="col">
+                                            Recurso
+                                        </th>
+                                        <th scope="col">Tumbes</th>
+                                        <th scope="col">Piura</th>
+                                        <th scope="col">Lambayeque</th>
+                                        <th scope="col">La Libertad</th>
+                                        <th scope="col">Áncash</th>
+                                        <th scope="col">Lima</th>
+                                        <th scope="col">Arequipa</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <th class="rowh" scope="row">
+                                            Anchoveta
+                                        </th>
+                                        <td><span class="miss">—</span></td>
+                                        <td><span class="miss">—</span></td>
+                                        <td><span class="miss">—</span></td>
+                                        <td><span class="miss">—</span></td>
+                                        <td>
+                                            <span class="sema d2"></span>
+                                            <span class="ex">≈</span>
+                                        </td>
+                                        <td><span class="miss">—</span></td>
+                                        <td><span class="miss">—</span></td>
+                                    </tr>
+                                    <tr>
+                                        <th class="rowh" scope="row">Jurel</th>
+                                        <td><span class="miss">—</span></td>
+                                        <td><span class="miss">—</span></td>
+                                        <td><span class="miss">—</span></td>
+                                        <td><span class="miss">—</span></td>
+                                        <td><span class="miss">—</span></td>
+                                        <td><span class="miss">—</span></td>
+                                        <td><span class="miss">—</span></td>
+                                    </tr>
+                                    <tr>
+                                        <th class="rowh" scope="row">Bonito</th>
+                                        <td><span class="miss">—</span></td>
+                                        <td><span class="miss">—</span></td>
+                                        <td><span class="miss">—</span></td>
+                                        <td><span class="miss">—</span></td>
+                                        <td><span class="miss">—</span></td>
+                                        <td>
+                                            <span class="sema d1"></span>
+                                            <span class="ex">≈</span>
+                                        </td>
+                                        <td><span class="miss">—</span></td>
+                                    </tr>
+                                    <tr>
+                                        <th class="rowh" scope="row">Pota</th>
+                                        <td><span class="miss">—</span></td>
+                                        <td><span class="miss">—</span></td>
+                                        <td><span class="miss">—</span></td>
+                                        <td><span class="miss">—</span></td>
+                                        <td><span class="miss">—</span></td>
+                                        <td><span class="miss">—</span></td>
+                                        <td><span class="miss">—</span></td>
+                                    </tr>
+                                    <tr>
+                                        <th class="rowh" scope="row">Perico</th>
+                                        <td><span class="miss">—</span></td>
+                                        <td><span class="miss">—</span></td>
+                                        <td><span class="miss">—</span></td>
+                                        <td><span class="miss">—</span></td>
+                                        <td><span class="miss">—</span></td>
+                                        <td><span class="miss">—</span></td>
+                                        <td><span class="miss">—</span></td>
+                                    </tr>
+                                    <tr>
+                                        <th class="rowh" scope="row">
+                                            Concha de abanico
+                                        </th>
+                                        <td><span class="miss">—</span></td>
+                                        <td>
+                                            <span class="sema d3"></span>
+                                            <span class="ex">≈</span>
+                                        </td>
+                                        <td><span class="miss">—</span></td>
+                                        <td><span class="miss">—</span></td>
+                                        <td><span class="miss">—</span></td>
+                                        <td><span class="miss">—</span></td>
+                                        <td><span class="miss">—</span></td>
+                                    </tr>
+                                    <tr>
+                                        <th class="rowh" scope="row">
+                                            Erizo rojo
+                                        </th>
+                                        <td><span class="miss">—</span></td>
+                                        <td><span class="miss">—</span></td>
+                                        <td><span class="miss">—</span></td>
+                                        <td><span class="miss">—</span></td>
+                                        <td><span class="miss">—</span></td>
+                                        <td><span class="miss">—</span></td>
+                                        <td><span class="miss">—</span></td>
+                                    </tr>
+                                    <tr>
+                                        <th class="rowh" scope="row">
+                                            Trucha arcoíris
+                                        </th>
+                                        <td><span class="miss">—</span></td>
+                                        <td><span class="miss">—</span></td>
+                                        <td><span class="miss">—</span></td>
+                                        <td><span class="miss">—</span></td>
+                                        <td><span class="miss">—</span></td>
+                                        <td><span class="miss">—</span></td>
+                                        <td><span class="miss">—</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="legend">
+                            <span class="k"
+                                ><span class="sema d1"></span>Diferencia</span
+                            >
+                            <span class="k"
+                                ><span class="sema d2"></span>Controversia</span
+                            >
+                            <span class="k"
+                                ><span class="sema d3"></span>Conflicto
+                                social</span
+                            >
+                            <span class="k"
+                                ><span class="sema d4"></span>Crisis
+                                social</span
+                            >
+                            <span class="k"
+                                ><span class="miss">—</span> sin dato
+                                declarado</span
+                            >
+                        </div>
+                    </div>
+
+                    <div class="split">
+                        <div class="card">
+                            <div class="card-head">
+                                <div>
+                                    <h3 class="card-title">
+                                        Lo único que sí se puede cortar hoy:
+                                        alertas por especie
+                                    </h3>
+                                    <p class="card-sub">
+                                        <code>core.alerta_especies</code>: 30
+                                        vínculos, 24 alertas, 12 especies. Es un
+                                        corte por <b>alerta</b>, no por caso, y
+                                        no lleva región.
+                                    </p>
+                                </div>
+                                <span class="pill soft">30 vínculos</span>
+                            </div>
+                            <div class="bars">
+                                <div class="bar-row">
+                                    <span class="lbl">Bonito</span
+                                    ><span class="bar-track"
+                                        ><span
+                                            class="bar-fill"
+                                            style="display: block; width: 100%"
+                                        ></span></span
+                                    ><span class="v">7</span>
+                                </div>
+                                <div class="bar-row">
+                                    <span class="lbl">Erizo rojo</span
+                                    ><span class="bar-track"
+                                        ><span
+                                            class="bar-fill"
+                                            style="display: block; width: 71%"
+                                        ></span></span
+                                    ><span class="v">5</span>
+                                </div>
+                                <div class="bar-row">
+                                    <span class="lbl">Jurel</span
+                                    ><span class="bar-track"
+                                        ><span
+                                            class="bar-fill"
+                                            style="display: block; width: 57%"
+                                        ></span></span
+                                    ><span class="v">4</span>
+                                </div>
+                                <div class="bar-row">
+                                    <span class="lbl">Pota</span
+                                    ><span class="bar-track"
+                                        ><span
+                                            class="bar-fill"
+                                            style="display: block; width: 43%"
+                                        ></span></span
+                                    ><span class="v">3</span>
+                                </div>
+                                <div class="bar-row">
+                                    <span class="lbl">Trucha arcoíris</span
+                                    ><span class="bar-track"
+                                        ><span
+                                            class="bar-fill"
+                                            style="display: block; width: 29%"
+                                        ></span></span
+                                    ><span class="v">2</span>
+                                </div>
+                                <div class="bar-row">
+                                    <span class="lbl">Perico</span
+                                    ><span class="bar-track"
+                                        ><span
+                                            class="bar-fill"
+                                            style="display: block; width: 29%"
+                                        ></span></span
+                                    ><span class="v">2</span>
+                                </div>
+                                <div class="bar-row">
+                                    <span class="lbl">Anchoveta</span
+                                    ><span class="bar-track"
+                                        ><span
+                                            class="bar-fill"
+                                            style="display: block; width: 29%"
+                                        ></span></span
+                                    ><span class="v">2</span>
+                                </div>
+                                <div class="bar-row">
+                                    <span class="lbl">5 especies más</span
+                                    ><span class="bar-track"
+                                        ><span
+                                            class="bar-fill"
+                                            style="display: block; width: 14%"
+                                        ></span></span
+                                    ><span class="v">5</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-head">
+                                <div>
+                                    <h3 class="card-title">
+                                        Qué hay en cada puente
+                                    </h3>
+                                </div>
+                            </div>
+                            <dl class="dl">
+                                <dt><code>bridge_caso_recurso</code></dt>
+                                <dd>
+                                    0 filas ·
+                                    <span class="pill bad">vacío</span>
+                                </dd>
+                                <dt><code>bridge_alerta_recurso</code></dt>
+                                <dd>
+                                    32 filas ·
+                                    <span class="pill ok">con dato</span>
+                                </dd>
+                                <dt><code>alerta_especies</code></dt>
+                                <dd>30 filas · 24 alertas · 12 especies</dd>
+                                <dt><code>dim_recurso_pesca</code></dt>
+                                <dd>37 recursos en 11 grupos biológicos</dd>
+                            </dl>
+                            <p class="card-sub">
+                                El catálogo de recursos está listo. Lo que falta
+                                es la llave del caso: mientras siga en 0, la
+                                matriz se dibuja vacía.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ann" aria-label="Anotaciones del artboard 3">
+                    <div class="ann-card">
+                        <h3>① Item que cubre</h3>
+                        <b>124</b> · conflictos por región y recurso.
+                        <b>Estado: mockup.</b> El diseño es final; los datos no
+                        existen a nivel de caso.
+                    </div>
+                    <div class="ann-card">
+                        <h3>② Por qué no se puede calcular</h3>
+                        El recurso sólo aparece por la vía de la alerta
+                        (<code>alerta_especies</code>), nunca por el caso: hoy
+                        <b>6 de los 35 casos</b> tienen especie, y siempre así.
+                        Derivar el recurso del caso a partir de sus alertas
+                        sería inventar la regla: un caso puede tener varias
+                        alertas y varias especies. No se hace.
+                    </div>
+                    <div class="ann-card">
+                        <h3>③ Qué escala usa</h3>
+                        Sólo <b>nivel de conflictividad</b> (Diferencia ·
+                        Controversia · Conflicto social · Crisis social). El
+                        riesgo (Bajo · Moderado · Alto) es otra escala y no se
+                        mezcla: no hay semáforo de riesgo en esta matriz.
+                    </div>
+                    <div class="ann-card">
+                        <h3>④ Cómo se cierra</h3>
+                        Cargar <code>bridge_caso_recurso</code> desde el
+                        expediente —qué recurso discute cada caso— y recién
+                        entonces la matriz se puebla. Es un cambio de datos con
+                        captura en la ficha (ítem 37), no de esta pantalla.
+                    </div>
+                    <div class="ann-card wide">
+                        <h3>⑤ Lo que el mockup no promete</h3>
+                        No hay cifra por celda, ni total por región, ni color de
+                        riesgo. La matriz no sirve todavía para tomar
+                        decisiones: sirve para acordar la forma. Cuando el
+                        puente tenga filas, el color de cada celda sale del caso
+                        de mayor conflictividad de ese cruce, y la regla de
+                        agregación se pide a OAIPCS antes de fijarla.
+                    </div>
+                </div>
+            </section>
+
+            <!-- ═══════════════════ NOTAS PARA .NET ═══════════════════ -->
+            <section class="notes">
+                <h2>Notas para el equipo .NET</h2>
+                <p>
+                    Este archivo no entra en la SPA: es HTML autónomo, sin
+                    <code>&lt;script&gt;</code>, sin CDN y sin llamadas a la
+                    API. Sirve para acordar la forma de tres pantallas antes de
+                    escribir su lógica. Las cifras en <b>negrita</b> se midieron
+                    en la base el 2026-11-23; lo marcado
+                    <span class="ex">≈</span> es ejemplo.
+                </p>
+
+                <h3>Fuentes por artboard</h3>
+                <ul>
+                    <li>
+                        <b>Arte 1 (119).</b> Sin fuente: no hay tabla de artes
+                        en ningún esquema.
+                        <code>legacy.dim_recurso_pesca</code> es recurso, no
+                        arte, y no sirve aquí.
+                    </li>
+                    <li>
+                        <b>Arte 2 (120–122).</b> <code>core.actores</code> (1
+                        160), <code>core.organizaciones</code> (224),
+                        <code>territorio.caleta_detalle</code> (0 filas),
+                        <code>core.demandas</code> (sin columna de solicitante).
+                    </li>
+                    <li>
+                        <b>Arte 3 (124).</b>
+                        <code>legacy.dim_recurso_pesca</code> (37),
+                        <code>legacy.bridge_alerta_recurso</code> (32),
+                        <code>core.alerta_especies</code> (30),
+                        <code>legacy.bridge_caso_recurso</code> (0).
+                    </li>
+                </ul>
+
+                <h3>Endpoints propuestos</h3>
+                <ul>
+                    <li>
+                        <code>GET /v1/artes-pesca</code> — catálogo, agrupable
+                        por grupo o por tipo.
+                    </li>
+                    <li>
+                        <code
+                            >GET
+                            /v1/actores?region=&amp;arte=&amp;caleta=&amp;ospa=&amp;subsector=</code
+                        >
+                        — directorio filtrado.
+                    </li>
+                    <li>
+                        <code>GET /v1/organizaciones/{id}/ospa</code> — marca
+                        OSPA y caleta.
+                    </li>
+                    <li>
+                        <code>GET /v1/demandas/agregado?por=ospa</code> — sólo
+                        posible tras el vínculo.
+                    </li>
+                    <li>
+                        <code
+                            >GET
+                            /v1/conflictos/matriz?filas=region&amp;columnas=recurso</code
+                        >
+                        — vacío hasta poblar el puente.
+                    </li>
+                </ul>
+
+                <h3>Reglas que la interfaz no puede relajar</h3>
+                <ul>
+                    <li>
+                        <b>Escalas separadas.</b> Conflictividad, riesgo y
+                        prioridad de atención nunca comparten semáforo ni se
+                        promedian.
+                    </li>
+                    <li>
+                        <b>PII enmascarada.</b> Teléfono y correo sólo para
+                        <code>administrador</code>; la exportación hereda la
+                        máscara.
+                    </li>
+                    <li>
+                        <b>Subsector por rol.</b> Dirección y Secretaría General
+                        ven Pesca y Acuicultura y MYPE e Industria; cada
+                        Viceministerio ve sólo el suyo. No es un filtro de
+                        pantalla.
+                    </li>
+                    <li>
+                        <b>Ausente no es cero.</b> Una celda sin dato muestra
+                        <code>—</code> y, cuando aplica, una etiqueta que
+                        explica por qué falta.
+                    </li>
+                </ul>
+
+                <div class="rule">
+                    <b>Regla de oro.</b> El dato ausente se declara, no se
+                    estima. Ninguno de los tres artboards rellena un hueco con
+                    un valor verosímil: los valores de ejemplo están marcados y
+                    separados del dato medido. Si el equipo .NET recibe un campo
+                    vacío, la decisión correcta es mostrarlo vacío y decir por
+                    qué.
+                </div>
+            </section>
+        </main>
+    </body>
+</html>

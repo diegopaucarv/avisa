@@ -1,0 +1,699 @@
+distrito_id,ubigeo,distrito,provincia_id,provincia,region_id,region,en_oti,en_capa,nombre_oficial,provincia_oficial,departamento_oficial,estado
+1,010101,Chachapoyas,1,Chachapoyas,1,Amazonas,True,True,CHACHAPOYAS,CHACHAPOYAS,AMAZONAS,ok
+2,010102,Asuncion,1,Chachapoyas,1,Amazonas,True,True,ASUNCION,CHACHAPOYAS,AMAZONAS,ok
+3,010103,Balsas,1,Chachapoyas,1,Amazonas,True,True,BALSAS,CHACHAPOYAS,AMAZONAS,ok
+4,010104,Cheto,1,Chachapoyas,1,Amazonas,True,True,CHETO,CHACHAPOYAS,AMAZONAS,ok
+5,010105,Chiliquin,1,Chachapoyas,1,Amazonas,True,True,CHILIQUIN,CHACHAPOYAS,AMAZONAS,ok
+6,010106,Chuquibamba,1,Chachapoyas,1,Amazonas,True,True,CHUQUIBAMBA,CHACHAPOYAS,AMAZONAS,ok
+7,010107,Granada,1,Chachapoyas,1,Amazonas,True,True,GRANADA,CHACHAPOYAS,AMAZONAS,ok
+8,010108,Huancas,1,Chachapoyas,1,Amazonas,True,True,HUANCAS,CHACHAPOYAS,AMAZONAS,ok
+9,010109,La Jalca,1,Chachapoyas,1,Amazonas,True,True,LA JALCA,CHACHAPOYAS,AMAZONAS,ok
+10,010110,Leimebamba,1,Chachapoyas,1,Amazonas,True,True,LEIMEBAMBA,CHACHAPOYAS,AMAZONAS,ok
+11,010111,Levanto,1,Chachapoyas,1,Amazonas,True,True,LEVANTO,CHACHAPOYAS,AMAZONAS,ok
+12,010112,Magdalena,1,Chachapoyas,1,Amazonas,True,True,MAGDALENA,CHACHAPOYAS,AMAZONAS,ok
+13,010113,Mariscal Castilla,1,Chachapoyas,1,Amazonas,True,True,MARISCAL CASTILLA,CHACHAPOYAS,AMAZONAS,ok
+14,010114,Molinopampa,1,Chachapoyas,1,Amazonas,True,True,MOLINOPAMPA,CHACHAPOYAS,AMAZONAS,ok
+15,010115,Montevideo,1,Chachapoyas,1,Amazonas,True,True,MONTEVIDEO,CHACHAPOYAS,AMAZONAS,ok
+16,010116,Olleros,1,Chachapoyas,1,Amazonas,True,True,OLLEROS,CHACHAPOYAS,AMAZONAS,ok
+17,010117,Quinjalca,1,Chachapoyas,1,Amazonas,True,True,QUINJALCA,CHACHAPOYAS,AMAZONAS,ok
+18,010118,San Francisco de Daguas,1,Chachapoyas,1,Amazonas,True,True,SAN FRANCISCO DE DAGUAS,CHACHAPOYAS,AMAZONAS,ok
+19,010119,San Isidro de Maino,1,Chachapoyas,1,Amazonas,True,True,SAN ISIDRO DE MAINO,CHACHAPOYAS,AMAZONAS,ok
+20,010120,Soloco,1,Chachapoyas,1,Amazonas,True,True,SOLOCO,CHACHAPOYAS,AMAZONAS,ok
+21,010121,Sonche,1,Chachapoyas,1,Amazonas,True,True,SONCHE,CHACHAPOYAS,AMAZONAS,ok
+22,010201,Bagua,2,Bagua,1,Amazonas,True,True,BAGUA,BAGUA,AMAZONAS,ok
+23,010202,Aramango,2,Bagua,1,Amazonas,True,True,ARAMANGO,BAGUA,AMAZONAS,ok
+24,010203,Copallin,2,Bagua,1,Amazonas,True,True,COPALLIN,BAGUA,AMAZONAS,ok
+25,010204,El Parco,2,Bagua,1,Amazonas,True,True,EL PARCO,BAGUA,AMAZONAS,ok
+26,010205,Imaza,2,Bagua,1,Amazonas,True,True,IMAZA,BAGUA,AMAZONAS,ok
+27,010206,La Peca,2,Bagua,1,Amazonas,True,True,LA PECA,BAGUA,AMAZONAS,ok
+28,010301,Jumbilla,3,Bongara,1,Amazonas,True,True,JUMBILLA,BONGARA,AMAZONAS,ok
+29,010302,Chisquilla,3,Bongara,1,Amazonas,True,True,CHISQUILLA,BONGARA,AMAZONAS,ok
+30,010303,Churuja,3,Bongara,1,Amazonas,True,True,CHURUJA,BONGARA,AMAZONAS,ok
+31,010304,Corosha,3,Bongara,1,Amazonas,True,True,COROSHA,BONGARA,AMAZONAS,ok
+32,010305,Cuispes,3,Bongara,1,Amazonas,True,True,CUISPES,BONGARA,AMAZONAS,ok
+33,010306,Florida,3,Bongara,1,Amazonas,True,True,FLORIDA,BONGARA,AMAZONAS,ok
+34,010307,Jazan,3,Bongara,1,Amazonas,True,True,JAZAN,BONGARA,AMAZONAS,ok
+35,010308,Recta,3,Bongara,1,Amazonas,True,True,RECTA,BONGARA,AMAZONAS,ok
+36,010309,San Carlos,3,Bongara,1,Amazonas,True,True,SAN CARLOS,BONGARA,AMAZONAS,ok
+37,010310,Shipasbamba,3,Bongara,1,Amazonas,True,True,SHIPASBAMBA,BONGARA,AMAZONAS,ok
+38,010311,Valera,3,Bongara,1,Amazonas,True,True,VALERA,BONGARA,AMAZONAS,ok
+39,010312,Yambrasbamba,3,Bongara,1,Amazonas,True,True,YAMBRASBAMBA,BONGARA,AMAZONAS,ok
+40,010401,Nieva,4,Condorcanqui,1,Amazonas,True,True,NIEVA,CONDORCANQUI,AMAZONAS,ok
+41,010402,El Cenepa,4,Condorcanqui,1,Amazonas,True,True,EL CENEPA,CONDORCANQUI,AMAZONAS,ok
+42,010403,Rio Santiago,4,Condorcanqui,1,Amazonas,True,True,RIO SANTIAGO,CONDORCANQUI,AMAZONAS,ok
+43,010501,Lamud,5,Luya,1,Amazonas,True,True,LAMUD,LUYA,AMAZONAS,ok
+44,010502,Camporredondo,5,Luya,1,Amazonas,True,True,CAMPORREDONDO,LUYA,AMAZONAS,ok
+45,010503,Cocabamba,5,Luya,1,Amazonas,True,True,COCABAMBA,LUYA,AMAZONAS,ok
+46,010504,Colcamar,5,Luya,1,Amazonas,True,True,COLCAMAR,LUYA,AMAZONAS,ok
+47,010505,Conila,5,Luya,1,Amazonas,True,True,CONILA,LUYA,AMAZONAS,ok
+48,010506,Inguilpata,5,Luya,1,Amazonas,True,True,INGUILPATA,LUYA,AMAZONAS,ok
+49,010507,Longuita,5,Luya,1,Amazonas,True,True,LONGUITA,LUYA,AMAZONAS,ok
+50,010508,Lonya Chico,5,Luya,1,Amazonas,True,True,LONYA CHICO,LUYA,AMAZONAS,ok
+51,010509,Luya,5,Luya,1,Amazonas,True,True,LUYA,LUYA,AMAZONAS,ok
+52,010510,Luya Viejo,5,Luya,1,Amazonas,True,True,LUYA VIEJO,LUYA,AMAZONAS,ok
+53,010511,Maria,5,Luya,1,Amazonas,True,True,MARIA,LUYA,AMAZONAS,ok
+54,010512,Ocalli,5,Luya,1,Amazonas,True,True,OCALLI,LUYA,AMAZONAS,ok
+55,010513,Ocumal,5,Luya,1,Amazonas,True,True,OCUMAL,LUYA,AMAZONAS,ok
+56,010514,Pisuquia,5,Luya,1,Amazonas,True,True,PISUQUIA,LUYA,AMAZONAS,ok
+57,010515,Providencia,5,Luya,1,Amazonas,True,True,PROVIDENCIA,LUYA,AMAZONAS,ok
+58,010516,San Cristobal,5,Luya,1,Amazonas,True,True,SAN CRISTOBAL,LUYA,AMAZONAS,ok
+59,010517,San Francisco del Yeso,5,Luya,1,Amazonas,True,True,SAN FRANCISCO DE YESO,LUYA,AMAZONAS,nombre desalineado
+60,010518,San Jeronimo,5,Luya,1,Amazonas,True,True,SAN JERONIMO,LUYA,AMAZONAS,ok
+61,010519,San Juan de Lopecancha,5,Luya,1,Amazonas,True,True,SAN JUAN DE LOPECANCHA,LUYA,AMAZONAS,ok
+62,010520,Santa Catalina,5,Luya,1,Amazonas,True,True,SANTA CATALINA,LUYA,AMAZONAS,ok
+63,010521,Santo Tomas,5,Luya,1,Amazonas,True,True,SANTO TOMAS,LUYA,AMAZONAS,ok
+64,010522,Tingo,5,Luya,1,Amazonas,True,True,TINGO,LUYA,AMAZONAS,ok
+65,010523,Trita,5,Luya,1,Amazonas,True,True,TRITA,LUYA,AMAZONAS,ok
+66,010601,San Nicolas,6,Rodriguez de Mendoza,1,Amazonas,True,True,SAN NICOLAS,RODRIGUEZ DE MENDOZA,AMAZONAS,ok
+67,010602,Chirimoto,6,Rodriguez de Mendoza,1,Amazonas,True,True,CHIRIMOTO,RODRIGUEZ DE MENDOZA,AMAZONAS,ok
+68,010603,Cochamal,6,Rodriguez de Mendoza,1,Amazonas,True,True,COCHAMAL,RODRIGUEZ DE MENDOZA,AMAZONAS,ok
+69,010604,Huambo,6,Rodriguez de Mendoza,1,Amazonas,True,True,HUAMBO,RODRIGUEZ DE MENDOZA,AMAZONAS,ok
+70,010605,Limabamba,6,Rodriguez de Mendoza,1,Amazonas,True,True,LIMABAMBA,RODRIGUEZ DE MENDOZA,AMAZONAS,ok
+71,010606,Longar,6,Rodriguez de Mendoza,1,Amazonas,True,True,LONGAR,RODRIGUEZ DE MENDOZA,AMAZONAS,ok
+72,010607,Mariscal Benavides,6,Rodriguez de Mendoza,1,Amazonas,True,True,MARISCAL BENAVIDES,RODRIGUEZ DE MENDOZA,AMAZONAS,ok
+73,010608,Milpuc,6,Rodriguez de Mendoza,1,Amazonas,True,True,MILPUC,RODRIGUEZ DE MENDOZA,AMAZONAS,ok
+74,010609,Omia,6,Rodriguez de Mendoza,1,Amazonas,True,True,OMIA,RODRIGUEZ DE MENDOZA,AMAZONAS,ok
+75,010610,Santa Rosa,6,Rodriguez de Mendoza,1,Amazonas,True,True,SANTA ROSA,RODRIGUEZ DE MENDOZA,AMAZONAS,ok
+76,010611,Totora,6,Rodriguez de Mendoza,1,Amazonas,True,True,TOTORA,RODRIGUEZ DE MENDOZA,AMAZONAS,ok
+77,010612,Vista Alegre,6,Rodriguez de Mendoza,1,Amazonas,True,True,VISTA ALEGRE,RODRIGUEZ DE MENDOZA,AMAZONAS,ok
+78,010701,Bagua Grande,7,Utcubamba,1,Amazonas,True,True,BAGUA GRANDE,UTCUBAMBA,AMAZONAS,ok
+79,010702,Cajaruro,7,Utcubamba,1,Amazonas,True,True,CAJARURO,UTCUBAMBA,AMAZONAS,ok
+80,010703,Cumba,7,Utcubamba,1,Amazonas,True,True,CUMBA,UTCUBAMBA,AMAZONAS,ok
+81,010704,El Milagro,7,Utcubamba,1,Amazonas,True,True,EL MILAGRO,UTCUBAMBA,AMAZONAS,ok
+82,010705,Jamalca,7,Utcubamba,1,Amazonas,True,True,JAMALCA,UTCUBAMBA,AMAZONAS,ok
+83,010706,Lonya Grande,7,Utcubamba,1,Amazonas,True,True,LONYA GRANDE,UTCUBAMBA,AMAZONAS,ok
+84,010707,Yamon,7,Utcubamba,1,Amazonas,True,True,YAMON,UTCUBAMBA,AMAZONAS,ok
+85,020101,Huaraz,8,Huaraz,2,Ancash,True,True,HUARAZ,HUARAZ,ANCASH,ok
+86,020102,Cochabamba,8,Huaraz,2,Ancash,True,True,COCHABAMBA,HUARAZ,ANCASH,ok
+87,020103,Colcabamba,8,Huaraz,2,Ancash,True,True,COLCABAMBA,HUARAZ,ANCASH,ok
+88,020104,Huanchay,8,Huaraz,2,Ancash,True,True,HUANCHAY,HUARAZ,ANCASH,ok
+89,020105,Independencia,8,Huaraz,2,Ancash,True,True,INDEPENDENCIA,HUARAZ,ANCASH,ok
+90,020106,Jangas,8,Huaraz,2,Ancash,True,True,JANGAS,HUARAZ,ANCASH,ok
+91,020107,La Libertad,8,Huaraz,2,Ancash,True,True,LA LIBERTAD,HUARAZ,ANCASH,ok
+92,020108,Olleros,8,Huaraz,2,Ancash,True,True,OLLEROS,HUARAZ,ANCASH,ok
+93,020109,Pampas,8,Huaraz,2,Ancash,True,True,PAMPAS GRANDE,HUARAZ,ANCASH,nombre desalineado
+94,020110,Paria,8,Huaraz,2,Ancash,True,True,PARIACOTO,HUARAZ,ANCASH,nombre desalineado
+95,020111,Patay,8,Huaraz,2,Ancash,True,True,PIRA,HUARAZ,ANCASH,nombre desalineado
+96,020112,Piruro,8,Huaraz,2,Ancash,True,True,TARICA,HUARAZ,ANCASH,nombre desalineado
+97,020113,Poca,8,Huaraz,2,Ancash,False,False,,,,ubigeo inexistente
+98,020114,Tarica,8,Huaraz,2,Ancash,False,False,,,,ubigeo inexistente
+99,020201,Aija,9,Aija,2,Ancash,True,True,AIJA,AIJA,ANCASH,ok
+100,020202,Coris,9,Aija,2,Ancash,True,True,CORIS,AIJA,ANCASH,ok
+101,020203,Huacllan,9,Aija,2,Ancash,True,True,HUACLLAN,AIJA,ANCASH,ok
+102,020204,La Merced,9,Aija,2,Ancash,True,True,LA MERCED,AIJA,ANCASH,ok
+103,020205,Succha,9,Aija,2,Ancash,True,True,SUCCHA,AIJA,ANCASH,ok
+104,020301,Llamellin,10,Antonio Raymondi,2,Ancash,True,True,LLAMELLIN,ANTONIO RAYMONDI,ANCASH,ok
+105,020302,Aczo,10,Antonio Raymondi,2,Ancash,True,True,ACZO,ANTONIO RAYMONDI,ANCASH,ok
+106,020303,Chaccho,10,Antonio Raymondi,2,Ancash,True,True,CHACCHO,ANTONIO RAYMONDI,ANCASH,ok
+107,020304,Chingas,10,Antonio Raymondi,2,Ancash,True,True,CHINGAS,ANTONIO RAYMONDI,ANCASH,ok
+108,020305,Mirgas,10,Antonio Raymondi,2,Ancash,True,True,MIRGAS,ANTONIO RAYMONDI,ANCASH,ok
+109,020306,San Juan de Rontoy,10,Antonio Raymondi,2,Ancash,True,True,SAN JUAN DE RONTOY,ANTONIO RAYMONDI,ANCASH,ok
+110,020401,Chacas,11,Asuncion,2,Ancash,True,True,CHACAS,ASUNCION,ANCASH,ok
+111,020402,Acochaca,11,Asuncion,2,Ancash,True,True,ACOCHACA,ASUNCION,ANCASH,ok
+112,020501,Chiquian,12,Bolognesi,2,Ancash,True,True,CHIQUIAN,BOLOGNESI,ANCASH,ok
+113,020502,Abelardo Pardo Lezameta,12,Bolognesi,2,Ancash,True,True,ABELARDO PARDO LEZAMETA,BOLOGNESI,ANCASH,ok
+114,020503,Antonio Raymondi,12,Bolognesi,2,Ancash,True,True,ANTONIO RAYMONDI,BOLOGNESI,ANCASH,ok
+115,020504,Aquia,12,Bolognesi,2,Ancash,True,True,AQUIA,BOLOGNESI,ANCASH,ok
+116,020505,Cajacay,12,Bolognesi,2,Ancash,True,True,CAJACAY,BOLOGNESI,ANCASH,ok
+117,020506,Canis,12,Bolognesi,2,Ancash,True,True,CANIS,BOLOGNESI,ANCASH,ok
+118,020507,Colquioc,12,Bolognesi,2,Ancash,True,True,COLQUIOC,BOLOGNESI,ANCASH,ok
+119,020508,Huallanca,12,Bolognesi,2,Ancash,True,True,HUALLANCA,BOLOGNESI,ANCASH,ok
+120,020509,Huasta,12,Bolognesi,2,Ancash,True,True,HUASTA,BOLOGNESI,ANCASH,ok
+121,020510,Huayllacayan,12,Bolognesi,2,Ancash,True,True,HUAYLLACAYAN,BOLOGNESI,ANCASH,ok
+122,020511,La Primavera,12,Bolognesi,2,Ancash,True,True,LA PRIMAVERA,BOLOGNESI,ANCASH,ok
+123,020512,Mangas,12,Bolognesi,2,Ancash,True,True,MANGAS,BOLOGNESI,ANCASH,ok
+124,020513,Pacllon,12,Bolognesi,2,Ancash,True,True,PACLLON,BOLOGNESI,ANCASH,ok
+125,020514,San Miguel de Corpanqui,12,Bolognesi,2,Ancash,True,True,SAN MIGUEL DE CORPANQUI,BOLOGNESI,ANCASH,ok
+126,020515,Ticllos,12,Bolognesi,2,Ancash,True,True,TICLLOS,BOLOGNESI,ANCASH,ok
+127,020601,Carhuaz,13,Carhuaz,2,Ancash,True,True,CARHUAZ,CARHUAZ,ANCASH,ok
+128,020602,Acopampa,13,Carhuaz,2,Ancash,True,True,ACOPAMPA,CARHUAZ,ANCASH,ok
+129,020603,Amashca,13,Carhuaz,2,Ancash,True,True,AMASHCA,CARHUAZ,ANCASH,ok
+130,020604,Anta,13,Carhuaz,2,Ancash,True,True,ANTA,CARHUAZ,ANCASH,ok
+131,020605,Ataquero,13,Carhuaz,2,Ancash,True,True,ATAQUERO,CARHUAZ,ANCASH,ok
+132,020606,Marcara,13,Carhuaz,2,Ancash,True,True,MARCARA,CARHUAZ,ANCASH,ok
+133,020607,Pampashca,13,Carhuaz,2,Ancash,True,True,PARIAHUANCA,CARHUAZ,ANCASH,nombre desalineado
+134,020608,Puco,13,Carhuaz,2,Ancash,True,True,SAN MIGUEL DE ACO,CARHUAZ,ANCASH,nombre desalineado
+135,020609,San Miguel de Aco,13,Carhuaz,2,Ancash,True,True,SHILLA,CARHUAZ,ANCASH,nombre desalineado
+136,020610,Shilla,13,Carhuaz,2,Ancash,True,True,TINCO,CARHUAZ,ANCASH,nombre desalineado
+137,020611,Tinco,13,Carhuaz,2,Ancash,True,True,YUNGAR,CARHUAZ,ANCASH,nombre desalineado
+138,020612,Yungar,13,Carhuaz,2,Ancash,False,False,,,,ubigeo inexistente
+139,020701,San Luis,14,Carlos Fermin Fitzcarrald,2,Ancash,True,True,SAN LUIS,CARLOS FERMIN FITZCARRALD,ANCASH,ok
+140,020702,San Nicolas,14,Carlos Fermin Fitzcarrald,2,Ancash,True,True,SAN NICOLAS,CARLOS FERMIN FITZCARRALD,ANCASH,ok
+141,020703,Yauya,14,Carlos Fermin Fitzcarrald,2,Ancash,True,True,YAUYA,CARLOS FERMIN FITZCARRALD,ANCASH,ok
+142,020801,Casma,15,Casma,2,Ancash,True,True,CASMA,CASMA,ANCASH,ok
+143,020802,Buena Vista Alta,15,Casma,2,Ancash,True,True,BUENA VISTA ALTA,CASMA,ANCASH,ok
+144,020803,Comandante Noel,15,Casma,2,Ancash,True,True,COMANDANTE NOEL,CASMA,ANCASH,ok
+145,020804,Yautan,15,Casma,2,Ancash,True,True,YAUTAN,CASMA,ANCASH,ok
+146,020901,Corongo,16,Corongo,2,Ancash,True,True,CORONGO,CORONGO,ANCASH,ok
+147,020902,Aco,16,Corongo,2,Ancash,True,True,ACO,CORONGO,ANCASH,ok
+148,020903,Bambas,16,Corongo,2,Ancash,True,True,BAMBAS,CORONGO,ANCASH,ok
+149,020904,Cusca,16,Corongo,2,Ancash,True,True,CUSCA,CORONGO,ANCASH,ok
+150,020905,La Pampa,16,Corongo,2,Ancash,True,True,LA PAMPA,CORONGO,ANCASH,ok
+151,020906,Pampas,16,Corongo,2,Ancash,True,True,YANAC,CORONGO,ANCASH,nombre desalineado
+152,020907,Yanac,16,Corongo,2,Ancash,True,True,YUPAN,CORONGO,ANCASH,nombre desalineado
+153,021001,Huari,17,Huari,2,Ancash,True,True,HUARI,HUARI,ANCASH,ok
+154,021002,Anra,17,Huari,2,Ancash,True,True,ANRA,HUARI,ANCASH,ok
+155,021003,Cajay,17,Huari,2,Ancash,True,True,CAJAY,HUARI,ANCASH,ok
+156,021004,Chavin de Huantar,17,Huari,2,Ancash,True,True,CHAVIN DE HUANTAR,HUARI,ANCASH,ok
+157,021005,Huacachi,17,Huari,2,Ancash,True,True,HUACACHI,HUARI,ANCASH,ok
+158,021006,Huacchis,17,Huari,2,Ancash,True,True,HUACCHIS,HUARI,ANCASH,ok
+159,021007,Huachis,17,Huari,2,Ancash,True,True,HUACHIS,HUARI,ANCASH,ok
+160,021008,Huantar,17,Huari,2,Ancash,True,True,HUANTAR,HUARI,ANCASH,ok
+161,021009,Masin,17,Huari,2,Ancash,True,True,MASIN,HUARI,ANCASH,ok
+162,021010,Paucas,17,Huari,2,Ancash,True,True,PAUCAS,HUARI,ANCASH,ok
+163,021011,Ponto,17,Huari,2,Ancash,True,True,PONTO,HUARI,ANCASH,ok
+164,021012,Rahuapampa,17,Huari,2,Ancash,True,True,RAHUAPAMPA,HUARI,ANCASH,ok
+165,021013,Rapayan,17,Huari,2,Ancash,True,True,RAPAYAN,HUARI,ANCASH,ok
+166,021014,San Marcos,17,Huari,2,Ancash,True,True,SAN MARCOS,HUARI,ANCASH,ok
+167,021015,San Pedro de Chana,17,Huari,2,Ancash,True,True,SAN PEDRO DE CHANA,HUARI,ANCASH,ok
+168,021016,Uco,17,Huari,2,Ancash,True,True,UCO,HUARI,ANCASH,ok
+169,030101,Abancay,18,Abancay,3,Apurimac,True,True,ABANCAY,ABANCAY,APURIMAC,ok
+170,030102,Chacoche,18,Abancay,3,Apurimac,True,True,CHACOCHE,ABANCAY,APURIMAC,ok
+171,030103,Circa,18,Abancay,3,Apurimac,True,True,CIRCA,ABANCAY,APURIMAC,ok
+172,030104,Curahuasi,18,Abancay,3,Apurimac,True,True,CURAHUASI,ABANCAY,APURIMAC,ok
+173,030105,Huanipaca,18,Abancay,3,Apurimac,True,True,HUANIPACA,ABANCAY,APURIMAC,ok
+174,030106,Lambrama,18,Abancay,3,Apurimac,True,True,LAMBRAMA,ABANCAY,APURIMAC,ok
+175,030107,Pichirhua,18,Abancay,3,Apurimac,True,True,PICHIRHUA,ABANCAY,APURIMAC,ok
+176,030108,San Pedro de Cachora,18,Abancay,3,Apurimac,True,True,SAN PEDRO DE CACHORA,ABANCAY,APURIMAC,ok
+177,030109,Tamburco,18,Abancay,3,Apurimac,True,True,TAMBURCO,ABANCAY,APURIMAC,ok
+178,030201,Andahuaylas,19,Andahuaylas,3,Apurimac,True,True,ANDAHUAYLAS,ANDAHUAYLAS,APURIMAC,ok
+179,030202,Andarapa,19,Andahuaylas,3,Apurimac,True,True,ANDARAPA,ANDAHUAYLAS,APURIMAC,ok
+180,030203,Chiara,19,Andahuaylas,3,Apurimac,True,True,CHIARA,ANDAHUAYLAS,APURIMAC,ok
+181,030204,Huancarama,19,Andahuaylas,3,Apurimac,True,True,HUANCARAMA,ANDAHUAYLAS,APURIMAC,ok
+182,030205,Huancaray,19,Andahuaylas,3,Apurimac,True,True,HUANCARAY,ANDAHUAYLAS,APURIMAC,ok
+183,030206,Huayana,19,Andahuaylas,3,Apurimac,True,True,HUAYANA,ANDAHUAYLAS,APURIMAC,ok
+184,030207,Kishuara,19,Andahuaylas,3,Apurimac,True,True,KISHUARA,ANDAHUAYLAS,APURIMAC,ok
+185,030208,Pacobamba,19,Andahuaylas,3,Apurimac,True,True,PACOBAMBA,ANDAHUAYLAS,APURIMAC,ok
+186,030209,Pacucha,19,Andahuaylas,3,Apurimac,True,True,PACUCHA,ANDAHUAYLAS,APURIMAC,ok
+187,030210,Pampachiri,19,Andahuaylas,3,Apurimac,True,True,PAMPACHIRI,ANDAHUAYLAS,APURIMAC,ok
+188,030211,Pomacocha,19,Andahuaylas,3,Apurimac,True,True,POMACOCHA,ANDAHUAYLAS,APURIMAC,ok
+189,030212,San Antonio de Cachi,19,Andahuaylas,3,Apurimac,True,True,SAN ANTONIO DE CACHI,ANDAHUAYLAS,APURIMAC,ok
+190,030213,San Jeronimo,19,Andahuaylas,3,Apurimac,True,True,SAN JERONIMO,ANDAHUAYLAS,APURIMAC,ok
+191,030214,San Miguel de Chaccrampa,19,Andahuaylas,3,Apurimac,True,True,SAN MIGUEL DE CHACCRAMPA,ANDAHUAYLAS,APURIMAC,ok
+192,030215,Santa Maria de Chicmo,19,Andahuaylas,3,Apurimac,True,True,SANTA MARIA DE CHICMO,ANDAHUAYLAS,APURIMAC,ok
+193,030216,Talavera,19,Andahuaylas,3,Apurimac,True,True,TALAVERA,ANDAHUAYLAS,APURIMAC,ok
+194,030217,Tumay Huaraca,19,Andahuaylas,3,Apurimac,True,True,TUMAY HUARACA,ANDAHUAYLAS,APURIMAC,ok
+195,030218,Turpo,19,Andahuaylas,3,Apurimac,True,True,TURPO,ANDAHUAYLAS,APURIMAC,ok
+196,030219,Kaquiabamba,19,Andahuaylas,3,Apurimac,True,True,KAQUIABAMBA,ANDAHUAYLAS,APURIMAC,ok
+197,030220,Jose Maria Arguedas,19,Andahuaylas,3,Apurimac,True,True,JOSE MARIA ARGUEDAS,ANDAHUAYLAS,APURIMAC,ok
+198,040101,Arequipa,20,Arequipa,4,Arequipa,True,True,AREQUIPA,AREQUIPA,AREQUIPA,ok
+199,040102,Alto Selva Alegre,20,Arequipa,4,Arequipa,True,True,ALTO SELVA ALEGRE,AREQUIPA,AREQUIPA,ok
+200,040103,Cayma,20,Arequipa,4,Arequipa,True,True,CAYMA,AREQUIPA,AREQUIPA,ok
+201,040104,Cerro Colorado,20,Arequipa,4,Arequipa,True,True,CERRO COLORADO,AREQUIPA,AREQUIPA,ok
+202,040105,Characato,20,Arequipa,4,Arequipa,True,True,CHARACATO,AREQUIPA,AREQUIPA,ok
+203,040106,Chiguata,20,Arequipa,4,Arequipa,True,True,CHIGUATA,AREQUIPA,AREQUIPA,ok
+204,040107,Jacobo Hunter,20,Arequipa,4,Arequipa,True,True,JACOBO HUNTER,AREQUIPA,AREQUIPA,ok
+205,040108,La Joya,20,Arequipa,4,Arequipa,True,True,LA JOYA,AREQUIPA,AREQUIPA,ok
+206,040109,Mariano Melgar,20,Arequipa,4,Arequipa,True,True,MARIANO MELGAR,AREQUIPA,AREQUIPA,ok
+207,040110,Miraflores,20,Arequipa,4,Arequipa,True,True,MIRAFLORES,AREQUIPA,AREQUIPA,ok
+208,040111,Mollebaya,20,Arequipa,4,Arequipa,True,True,MOLLEBAYA,AREQUIPA,AREQUIPA,ok
+209,040112,Paucarpata,20,Arequipa,4,Arequipa,True,True,PAUCARPATA,AREQUIPA,AREQUIPA,ok
+210,040113,Pocsi,20,Arequipa,4,Arequipa,True,True,POCSI,AREQUIPA,AREQUIPA,ok
+211,040114,Polobaya,20,Arequipa,4,Arequipa,True,True,POLOBAYA,AREQUIPA,AREQUIPA,ok
+212,040115,Quequeña,20,Arequipa,4,Arequipa,True,True,QUEQUEÑA,AREQUIPA,AREQUIPA,ok
+213,040116,Sabandia,20,Arequipa,4,Arequipa,True,True,SABANDIA,AREQUIPA,AREQUIPA,ok
+214,040117,Sachaca,20,Arequipa,4,Arequipa,True,True,SACHACA,AREQUIPA,AREQUIPA,ok
+215,040118,San Juan de Siguas,20,Arequipa,4,Arequipa,True,True,SAN JUAN DE SIGUAS,AREQUIPA,AREQUIPA,ok
+216,040119,San Juan de Tarucani,20,Arequipa,4,Arequipa,True,True,SAN JUAN DE TARUCANI,AREQUIPA,AREQUIPA,ok
+217,040120,Santa Isabel de Siguas,20,Arequipa,4,Arequipa,True,True,SANTA ISABEL DE SIGUAS,AREQUIPA,AREQUIPA,ok
+218,040121,Santa Rita de Siguas,20,Arequipa,4,Arequipa,True,True,SANTA RITA DE SIGUAS,AREQUIPA,AREQUIPA,ok
+219,040122,Socabaya,20,Arequipa,4,Arequipa,True,True,SOCABAYA,AREQUIPA,AREQUIPA,ok
+220,040123,Tiabaya,20,Arequipa,4,Arequipa,True,True,TIABAYA,AREQUIPA,AREQUIPA,ok
+221,040124,Uchumayo,20,Arequipa,4,Arequipa,True,True,UCHUMAYO,AREQUIPA,AREQUIPA,ok
+222,040125,Vitor,20,Arequipa,4,Arequipa,True,True,VITOR,AREQUIPA,AREQUIPA,ok
+223,040126,Yanahuara,20,Arequipa,4,Arequipa,True,True,YANAHUARA,AREQUIPA,AREQUIPA,ok
+224,040127,Yarabamba,20,Arequipa,4,Arequipa,True,True,YARABAMBA,AREQUIPA,AREQUIPA,ok
+225,040128,Yura,20,Arequipa,4,Arequipa,True,True,YURA,AREQUIPA,AREQUIPA,ok
+226,040129,Jose Luis Bustamante Y Rivero,20,Arequipa,4,Arequipa,True,True,JOSE LUIS BUSTAMANTE Y RIVERO,AREQUIPA,AREQUIPA,ok
+227,040201,Camana,21,Camana,4,Arequipa,True,True,CAMANA,CAMANA,AREQUIPA,ok
+228,040202,Jose Maria Quimper,21,Camana,4,Arequipa,True,True,JOSE MARIA QUIMPER,CAMANA,AREQUIPA,ok
+229,040203,Mariano Nicolas Valcarcel,21,Camana,4,Arequipa,True,True,MARIANO NICOLAS VALCARCEL,CAMANA,AREQUIPA,ok
+230,040204,Mariscal Caceres,21,Camana,4,Arequipa,True,True,MARISCAL CACERES,CAMANA,AREQUIPA,ok
+231,040205,Nicolas de Pierola,21,Camana,4,Arequipa,True,True,NICOLAS DE PIEROLA,CAMANA,AREQUIPA,ok
+232,040206,Ocoña,21,Camana,4,Arequipa,True,True,OCOÑA,CAMANA,AREQUIPA,ok
+233,040207,Quilca,21,Camana,4,Arequipa,True,True,QUILCA,CAMANA,AREQUIPA,ok
+234,040208,Samuel Pastor,21,Camana,4,Arequipa,True,True,SAMUEL PASTOR,CAMANA,AREQUIPA,ok
+235,050101,Ayacucho,22,Huamanga,5,Ayacucho,True,True,AYACUCHO,HUAMANGA,AYACUCHO,ok
+236,050102,Acocro,22,Huamanga,5,Ayacucho,True,True,ACOCRO,HUAMANGA,AYACUCHO,ok
+237,050103,Acos Vinchos,22,Huamanga,5,Ayacucho,True,True,ACOS VINCHOS,HUAMANGA,AYACUCHO,ok
+238,050104,Carmen Alto,22,Huamanga,5,Ayacucho,True,True,CARMEN ALTO,HUAMANGA,AYACUCHO,ok
+239,050105,Chiara,22,Huamanga,5,Ayacucho,True,True,CHIARA,HUAMANGA,AYACUCHO,ok
+240,050106,Ocros,22,Huamanga,5,Ayacucho,True,True,OCROS,HUAMANGA,AYACUCHO,ok
+241,050107,Pacaycasa,22,Huamanga,5,Ayacucho,True,True,PACAYCASA,HUAMANGA,AYACUCHO,ok
+242,050108,Quinua,22,Huamanga,5,Ayacucho,True,True,QUINUA,HUAMANGA,AYACUCHO,ok
+243,050109,San Jose de Ticllas,22,Huamanga,5,Ayacucho,True,True,SAN JOSE DE TICLLAS,HUAMANGA,AYACUCHO,ok
+244,050110,San Juan Bautista,22,Huamanga,5,Ayacucho,True,True,SAN JUAN BAUTISTA,HUAMANGA,AYACUCHO,ok
+245,050111,Santiago de Pischa,22,Huamanga,5,Ayacucho,True,True,SANTIAGO DE PISCHA,HUAMANGA,AYACUCHO,ok
+246,050112,Socos,22,Huamanga,5,Ayacucho,True,True,SOCOS,HUAMANGA,AYACUCHO,ok
+247,050113,Tambillo,22,Huamanga,5,Ayacucho,True,True,TAMBILLO,HUAMANGA,AYACUCHO,ok
+248,050114,Vinchos,22,Huamanga,5,Ayacucho,True,True,VINCHOS,HUAMANGA,AYACUCHO,ok
+249,050115,Jesus Nazareno,22,Huamanga,5,Ayacucho,True,True,JESUS NAZARENO,HUAMANGA,AYACUCHO,ok
+250,050116,Andres Avelino Caceres Dorregaray,22,Huamanga,5,Ayacucho,True,True,ANDRES AVELINO CACERES DORREGARAY,HUAMANGA,AYACUCHO,ok
+251,060101,Cajamarca,23,Cajamarca,6,Cajamarca,True,True,CAJAMARCA,CAJAMARCA,CAJAMARCA,ok
+252,060102,Asuncion,23,Cajamarca,6,Cajamarca,True,True,ASUNCION,CAJAMARCA,CAJAMARCA,ok
+253,060103,Chetilla,23,Cajamarca,6,Cajamarca,True,True,CHETILLA,CAJAMARCA,CAJAMARCA,ok
+254,060104,Cospan,23,Cajamarca,6,Cajamarca,True,True,COSPAN,CAJAMARCA,CAJAMARCA,ok
+255,060105,Encañada,23,Cajamarca,6,Cajamarca,True,True,ENCAÑADA,CAJAMARCA,CAJAMARCA,ok
+256,060106,Jesus,23,Cajamarca,6,Cajamarca,True,True,JESUS,CAJAMARCA,CAJAMARCA,ok
+257,060107,Llacanora,23,Cajamarca,6,Cajamarca,True,True,LLACANORA,CAJAMARCA,CAJAMARCA,ok
+258,060108,Los Baños del Inca,23,Cajamarca,6,Cajamarca,True,True,LOS BAÑOS DEL INCA,CAJAMARCA,CAJAMARCA,ok
+259,060109,Magdalena,23,Cajamarca,6,Cajamarca,True,True,MAGDALENA,CAJAMARCA,CAJAMARCA,ok
+260,060110,Matara,23,Cajamarca,6,Cajamarca,True,True,MATARA,CAJAMARCA,CAJAMARCA,ok
+261,060111,Namora,23,Cajamarca,6,Cajamarca,True,True,NAMORA,CAJAMARCA,CAJAMARCA,ok
+262,060112,San Juan,23,Cajamarca,6,Cajamarca,True,True,SAN JUAN,CAJAMARCA,CAJAMARCA,ok
+263,060201,Cajabamba,24,Cajabamba,6,Cajamarca,True,True,CAJABAMBA,CAJABAMBA,CAJAMARCA,ok
+264,060202,Cachachi,24,Cajabamba,6,Cajamarca,True,True,CACHACHI,CAJABAMBA,CAJAMARCA,ok
+265,060203,Condebamba,24,Cajabamba,6,Cajamarca,True,True,CONDEBAMBA,CAJABAMBA,CAJAMARCA,ok
+266,060204,Sitacocha,24,Cajabamba,6,Cajamarca,True,True,SITACOCHA,CAJABAMBA,CAJAMARCA,ok
+267,070101,Callao,25,Callao,7,Callao,True,True,CALLAO,PROV. CONST. DEL CALLAO,CALLAO,provincia desalineada
+268,070102,Bellavista,25,Callao,7,Callao,True,True,BELLAVISTA,PROV. CONST. DEL CALLAO,CALLAO,provincia desalineada
+269,070103,Carmen de La Legua Reynoso,25,Callao,7,Callao,True,True,CARMEN DE LA LEGUA REYNOSO,PROV. CONST. DEL CALLAO,CALLAO,provincia desalineada
+270,070104,La Perla,25,Callao,7,Callao,True,True,LA PERLA,PROV. CONST. DEL CALLAO,CALLAO,provincia desalineada
+271,070105,La Punta,25,Callao,7,Callao,True,True,LA PUNTA,PROV. CONST. DEL CALLAO,CALLAO,provincia desalineada
+272,070106,Mi Peru,25,Callao,7,Callao,True,True,VENTANILLA,PROV. CONST. DEL CALLAO,CALLAO,nombre desalineado
+273,070107,Ventanilla,25,Callao,7,Callao,True,True,MI PERU,PROV. CONST. DEL CALLAO,CALLAO,nombre desalineado
+274,080101,Cusco,26,Cusco,8,Cusco,True,True,CUSCO,CUSCO,CUSCO,ok
+275,080102,Ccorca,26,Cusco,8,Cusco,True,True,CCORCA,CUSCO,CUSCO,ok
+276,080103,Poroy,26,Cusco,8,Cusco,True,True,POROY,CUSCO,CUSCO,ok
+277,080104,San Jeronimo,26,Cusco,8,Cusco,True,True,SAN JERONIMO,CUSCO,CUSCO,ok
+278,080105,San Sebastian,26,Cusco,8,Cusco,True,True,SAN SEBASTIAN,CUSCO,CUSCO,ok
+279,080106,Santiago,26,Cusco,8,Cusco,True,True,SANTIAGO,CUSCO,CUSCO,ok
+280,080107,Saylla,26,Cusco,8,Cusco,True,True,SAYLLA,CUSCO,CUSCO,ok
+281,080108,Wanchaq,26,Cusco,8,Cusco,True,True,WANCHAQ,CUSCO,CUSCO,ok
+282,080201,Acomayo,27,Acomayo,8,Cusco,True,True,ACOMAYO,ACOMAYO,CUSCO,ok
+283,080202,Acopia,27,Acomayo,8,Cusco,True,True,ACOPIA,ACOMAYO,CUSCO,ok
+284,080203,Acos,27,Acomayo,8,Cusco,True,True,ACOS,ACOMAYO,CUSCO,ok
+285,080204,Mosoc Llacta,27,Acomayo,8,Cusco,True,True,MOSOC LLACTA,ACOMAYO,CUSCO,ok
+286,080205,Pomacanchi,27,Acomayo,8,Cusco,True,True,POMACANCHI,ACOMAYO,CUSCO,ok
+287,080206,Rondocan,27,Acomayo,8,Cusco,True,True,RONDOCAN,ACOMAYO,CUSCO,ok
+288,080207,Sangarara,27,Acomayo,8,Cusco,True,True,SANGARARA,ACOMAYO,CUSCO,ok
+289,090101,Huancavelica,28,Huancavelica,9,Huancavelica,True,True,HUANCAVELICA,HUANCAVELICA,HUANCAVELICA,ok
+290,090102,Acobambilla,28,Huancavelica,9,Huancavelica,True,True,ACOBAMBILLA,HUANCAVELICA,HUANCAVELICA,ok
+291,090103,Acoria,28,Huancavelica,9,Huancavelica,True,True,ACORIA,HUANCAVELICA,HUANCAVELICA,ok
+292,090104,Conayca,28,Huancavelica,9,Huancavelica,True,True,CONAYCA,HUANCAVELICA,HUANCAVELICA,ok
+293,090105,Cuenca,28,Huancavelica,9,Huancavelica,True,True,CUENCA,HUANCAVELICA,HUANCAVELICA,ok
+294,090106,Huachocolpa,28,Huancavelica,9,Huancavelica,True,True,HUACHOCOLPA,HUANCAVELICA,HUANCAVELICA,ok
+295,090107,Huayllahuara,28,Huancavelica,9,Huancavelica,True,True,HUAYLLAHUARA,HUANCAVELICA,HUANCAVELICA,ok
+296,090108,Izcuchaca,28,Huancavelica,9,Huancavelica,True,True,IZCUCHACA,HUANCAVELICA,HUANCAVELICA,ok
+297,090109,Laria,28,Huancavelica,9,Huancavelica,True,True,LARIA,HUANCAVELICA,HUANCAVELICA,ok
+298,090110,Manta,28,Huancavelica,9,Huancavelica,True,True,MANTA,HUANCAVELICA,HUANCAVELICA,ok
+299,090111,Mariscal Caceres,28,Huancavelica,9,Huancavelica,True,True,MARISCAL CACERES,HUANCAVELICA,HUANCAVELICA,ok
+300,090112,Moya,28,Huancavelica,9,Huancavelica,True,True,MOYA,HUANCAVELICA,HUANCAVELICA,ok
+301,090113,Nuevo Occoro,28,Huancavelica,9,Huancavelica,True,True,NUEVO OCCORO,HUANCAVELICA,HUANCAVELICA,ok
+302,090114,Palca,28,Huancavelica,9,Huancavelica,True,True,PALCA,HUANCAVELICA,HUANCAVELICA,ok
+303,090115,Pilchaca,28,Huancavelica,9,Huancavelica,True,True,PILCHACA,HUANCAVELICA,HUANCAVELICA,ok
+304,090116,Vilca,28,Huancavelica,9,Huancavelica,True,True,VILCA,HUANCAVELICA,HUANCAVELICA,ok
+305,090117,Yauli,28,Huancavelica,9,Huancavelica,True,True,YAULI,HUANCAVELICA,HUANCAVELICA,ok
+306,090118,Ascension,28,Huancavelica,9,Huancavelica,True,True,ASCENSION,HUANCAVELICA,HUANCAVELICA,ok
+307,090119,Huando,28,Huancavelica,9,Huancavelica,True,True,HUANDO,HUANCAVELICA,HUANCAVELICA,ok
+308,100101,Huanuco,29,Huanuco,10,Huanuco,True,True,HUANUCO,HUANUCO,HUANUCO,ok
+309,100102,Amarilis,29,Huanuco,10,Huanuco,True,True,AMARILIS,HUANUCO,HUANUCO,ok
+310,100103,Chinchao,29,Huanuco,10,Huanuco,True,True,CHINCHAO,HUANUCO,HUANUCO,ok
+311,100104,Churubamba,29,Huanuco,10,Huanuco,True,True,CHURUBAMBA,HUANUCO,HUANUCO,ok
+312,100105,Margos,29,Huanuco,10,Huanuco,True,True,MARGOS,HUANUCO,HUANUCO,ok
+313,100106,Quisqui,29,Huanuco,10,Huanuco,True,True,QUISQUI (KICHKI),HUANUCO,HUANUCO,nombre desalineado
+314,100107,San Francisco de Cayran,29,Huanuco,10,Huanuco,True,True,SAN FRANCISCO DE CAYRAN,HUANUCO,HUANUCO,ok
+315,100108,San Pedro de Chaulan,29,Huanuco,10,Huanuco,True,True,SAN PEDRO DE CHAULAN,HUANUCO,HUANUCO,ok
+316,100109,Santa Maria del Valle,29,Huanuco,10,Huanuco,True,True,SANTA MARIA DEL VALLE,HUANUCO,HUANUCO,ok
+317,100110,Yarumayo,29,Huanuco,10,Huanuco,True,True,YARUMAYO,HUANUCO,HUANUCO,ok
+318,100111,Pillco Marca,29,Huanuco,10,Huanuco,True,True,PILLCO MARCA,HUANUCO,HUANUCO,ok
+319,100112,Yacus,29,Huanuco,10,Huanuco,True,True,YACUS,HUANUCO,HUANUCO,ok
+320,100113,San Pablo de Pillao,29,Huanuco,10,Huanuco,True,True,SAN PABLO DE PILLAO,HUANUCO,HUANUCO,ok
+321,110101,Ica,30,Ica,11,Ica,True,True,ICA,ICA,ICA,ok
+322,110102,La Tinguiña,30,Ica,11,Ica,True,True,LA TINGUIÑA,ICA,ICA,ok
+323,110103,Los Aquijes,30,Ica,11,Ica,True,True,LOS AQUIJES,ICA,ICA,ok
+324,110104,Ocucaje,30,Ica,11,Ica,True,True,OCUCAJE,ICA,ICA,ok
+325,110105,Pachacutec,30,Ica,11,Ica,True,True,PACHACUTEC,ICA,ICA,ok
+326,110106,Parcona,30,Ica,11,Ica,True,True,PARCONA,ICA,ICA,ok
+327,110107,Pueblo Nuevo,30,Ica,11,Ica,True,True,PUEBLO NUEVO,ICA,ICA,ok
+328,110108,Salas,30,Ica,11,Ica,True,True,SALAS,ICA,ICA,ok
+329,110109,San Jose de Los Molinos,30,Ica,11,Ica,True,True,SAN JOSE DE LOS MOLINOS,ICA,ICA,ok
+330,110110,San Juan Bautista,30,Ica,11,Ica,True,True,SAN JUAN BAUTISTA,ICA,ICA,ok
+331,110111,Santiago,30,Ica,11,Ica,True,True,SANTIAGO,ICA,ICA,ok
+332,110112,Subtanjalla,30,Ica,11,Ica,True,True,SUBTANJALLA,ICA,ICA,ok
+333,110113,Tate,30,Ica,11,Ica,True,True,TATE,ICA,ICA,ok
+334,110114,Yauca del Rosario,30,Ica,11,Ica,True,True,YAUCA DEL ROSARIO,ICA,ICA,ok
+335,110201,Chincha Alta,31,Chincha,11,Ica,True,True,CHINCHA ALTA,CHINCHA,ICA,ok
+336,110202,Alto Laran,31,Chincha,11,Ica,True,True,ALTO LARAN,CHINCHA,ICA,ok
+337,110203,Chavin,31,Chincha,11,Ica,True,True,CHAVIN,CHINCHA,ICA,ok
+338,110204,Chincha Baja,31,Chincha,11,Ica,True,True,CHINCHA BAJA,CHINCHA,ICA,ok
+339,110205,El Carmen,31,Chincha,11,Ica,True,True,EL CARMEN,CHINCHA,ICA,ok
+340,110206,Grocio Prado,31,Chincha,11,Ica,True,True,GROCIO PRADO,CHINCHA,ICA,ok
+341,110207,Pueblo Nuevo,31,Chincha,11,Ica,True,True,PUEBLO NUEVO,CHINCHA,ICA,ok
+342,110208,San Juan de Yanac,31,Chincha,11,Ica,True,True,SAN JUAN DE YANAC,CHINCHA,ICA,ok
+343,110209,San Pedro de Huacarpana,31,Chincha,11,Ica,True,True,SAN PEDRO DE HUACARPANA,CHINCHA,ICA,ok
+344,110210,Sunampe,31,Chincha,11,Ica,True,True,SUNAMPE,CHINCHA,ICA,ok
+345,110211,Tambo de Mora,31,Chincha,11,Ica,True,True,TAMBO DE MORA,CHINCHA,ICA,ok
+346,120101,Huancayo,32,Huancayo,12,Junin,True,True,HUANCAYO,HUANCAYO,JUNIN,ok
+347,120102,Carhuacallanga,32,Huancayo,12,Junin,False,False,,,,ubigeo inexistente
+348,120103,Chacapampa,32,Huancayo,12,Junin,False,False,,,,ubigeo inexistente
+349,120104,Chicche,32,Huancayo,12,Junin,True,True,CARHUACALLANGA,HUANCAYO,JUNIN,nombre desalineado
+350,120105,Chilca,32,Huancayo,12,Junin,True,True,CHACAPAMPA,HUANCAYO,JUNIN,nombre desalineado
+351,120106,Chongos Alto,32,Huancayo,12,Junin,True,True,CHICCHE,HUANCAYO,JUNIN,nombre desalineado
+352,120107,Chupuro,32,Huancayo,12,Junin,True,True,CHILCA,HUANCAYO,JUNIN,nombre desalineado
+353,120108,Colca,32,Huancayo,12,Junin,True,True,CHONGOS ALTO,HUANCAYO,JUNIN,nombre desalineado
+354,120109,Cullhuas,32,Huancayo,12,Junin,False,False,,,,ubigeo inexistente
+355,120110,El Tambo,32,Huancayo,12,Junin,False,False,,,,ubigeo inexistente
+356,120111,Huacrapuquio,32,Huancayo,12,Junin,True,True,CHUPURO,HUANCAYO,JUNIN,nombre desalineado
+357,120112,Hualhuas,32,Huancayo,12,Junin,True,True,COLCA,HUANCAYO,JUNIN,nombre desalineado
+358,120113,Huancan,32,Huancayo,12,Junin,True,True,CULLHUAS,HUANCAYO,JUNIN,nombre desalineado
+359,120114,Huasicancha,32,Huancayo,12,Junin,True,True,EL TAMBO,HUANCAYO,JUNIN,nombre desalineado
+360,120115,Huayucachi,32,Huancayo,12,Junin,False,False,,,,ubigeo inexistente
+361,120116,Ingenio,32,Huancayo,12,Junin,True,True,HUACRAPUQUIO,HUANCAYO,JUNIN,nombre desalineado
+362,120117,Pariahuanca,32,Huancayo,12,Junin,True,True,HUALHUAS,HUANCAYO,JUNIN,nombre desalineado
+363,120118,Pilcomayo,32,Huancayo,12,Junin,False,False,,,,ubigeo inexistente
+364,120119,Pucara,32,Huancayo,12,Junin,True,True,HUANCAN,HUANCAYO,JUNIN,nombre desalineado
+365,120120,Quichuay,32,Huancayo,12,Junin,True,True,HUASICANCHA,HUANCAYO,JUNIN,nombre desalineado
+366,120121,Quilcas,32,Huancayo,12,Junin,True,True,HUAYUCACHI,HUANCAYO,JUNIN,nombre desalineado
+367,120122,San Agustin,32,Huancayo,12,Junin,True,True,INGENIO,HUANCAYO,JUNIN,nombre desalineado
+368,120123,San Jeronimo de Tunan,32,Huancayo,12,Junin,False,False,,,,ubigeo inexistente
+369,120124,Saño,32,Huancayo,12,Junin,True,True,PARIAHUANCA,HUANCAYO,JUNIN,nombre desalineado
+370,120125,Sapallanga,32,Huancayo,12,Junin,True,True,PILCOMAYO,HUANCAYO,JUNIN,nombre desalineado
+371,120126,Sicaya,32,Huancayo,12,Junin,True,True,PUCARA,HUANCAYO,JUNIN,nombre desalineado
+372,120127,Santo Domingo de Acobamba,32,Huancayo,12,Junin,True,True,QUICHUAY,HUANCAYO,JUNIN,nombre desalineado
+373,120128,Viques,32,Huancayo,12,Junin,True,True,QUILCAS,HUANCAYO,JUNIN,nombre desalineado
+374,130101,Trujillo,33,Trujillo,13,La Libertad,True,True,TRUJILLO,TRUJILLO,LA LIBERTAD,ok
+375,130102,El Porvenir,33,Trujillo,13,La Libertad,True,True,EL PORVENIR,TRUJILLO,LA LIBERTAD,ok
+376,130103,Florencia de Mora,33,Trujillo,13,La Libertad,True,True,FLORENCIA DE MORA,TRUJILLO,LA LIBERTAD,ok
+377,130104,Huanchaco,33,Trujillo,13,La Libertad,True,True,HUANCHACO,TRUJILLO,LA LIBERTAD,ok
+378,130105,La Esperanza,33,Trujillo,13,La Libertad,True,True,LA ESPERANZA,TRUJILLO,LA LIBERTAD,ok
+379,130106,Laredo,33,Trujillo,13,La Libertad,True,True,LAREDO,TRUJILLO,LA LIBERTAD,ok
+380,130107,Moche,33,Trujillo,13,La Libertad,True,True,MOCHE,TRUJILLO,LA LIBERTAD,ok
+381,130108,Poroto,33,Trujillo,13,La Libertad,True,True,POROTO,TRUJILLO,LA LIBERTAD,ok
+382,130109,Salaverry,33,Trujillo,13,La Libertad,True,True,SALAVERRY,TRUJILLO,LA LIBERTAD,ok
+383,130110,Simbal,33,Trujillo,13,La Libertad,True,True,SIMBAL,TRUJILLO,LA LIBERTAD,ok
+384,130111,Victor Larco Herrera,33,Trujillo,13,La Libertad,True,True,VICTOR LARCO HERRERA,TRUJILLO,LA LIBERTAD,ok
+385,140101,Chiclayo,34,Chiclayo,14,Lambayeque,True,True,CHICLAYO,CHICLAYO,LAMBAYEQUE,ok
+386,140102,Cayalti,34,Chiclayo,14,Lambayeque,True,True,CHONGOYAPE,CHICLAYO,LAMBAYEQUE,nombre desalineado
+387,140103,Chongoyape,34,Chiclayo,14,Lambayeque,True,True,ETEN,CHICLAYO,LAMBAYEQUE,nombre desalineado
+388,140104,Eten,34,Chiclayo,14,Lambayeque,True,True,ETEN PUERTO,CHICLAYO,LAMBAYEQUE,nombre desalineado
+389,140105,Eten Puerto,34,Chiclayo,14,Lambayeque,True,True,JOSE LEONARDO ORTIZ,CHICLAYO,LAMBAYEQUE,nombre desalineado
+390,140106,Jose Leonardo Ortiz,34,Chiclayo,14,Lambayeque,True,True,LA VICTORIA,CHICLAYO,LAMBAYEQUE,nombre desalineado
+391,140107,La Victoria,34,Chiclayo,14,Lambayeque,True,True,LAGUNAS,CHICLAYO,LAMBAYEQUE,nombre desalineado
+392,140108,Lagunas,34,Chiclayo,14,Lambayeque,True,True,MONSEFU,CHICLAYO,LAMBAYEQUE,nombre desalineado
+393,140109,Monsefu,34,Chiclayo,14,Lambayeque,True,True,NUEVA ARICA,CHICLAYO,LAMBAYEQUE,nombre desalineado
+394,140110,Nueva Arica,34,Chiclayo,14,Lambayeque,True,True,OYOTUN,CHICLAYO,LAMBAYEQUE,nombre desalineado
+395,140111,Oyotun,34,Chiclayo,14,Lambayeque,True,True,PICSI,CHICLAYO,LAMBAYEQUE,nombre desalineado
+396,140112,Patapo,34,Chiclayo,14,Lambayeque,True,True,PIMENTEL,CHICLAYO,LAMBAYEQUE,nombre desalineado
+397,140113,Picsi,34,Chiclayo,14,Lambayeque,True,True,REQUE,CHICLAYO,LAMBAYEQUE,nombre desalineado
+398,140114,Pimentel,34,Chiclayo,14,Lambayeque,True,True,SANTA ROSA,CHICLAYO,LAMBAYEQUE,nombre desalineado
+399,140115,Reque,34,Chiclayo,14,Lambayeque,True,True,SAÑA,CHICLAYO,LAMBAYEQUE,nombre desalineado
+400,140116,Santa Rosa,34,Chiclayo,14,Lambayeque,True,True,CAYALTI,CHICLAYO,LAMBAYEQUE,nombre desalineado
+401,140117,Saña,34,Chiclayo,14,Lambayeque,True,True,PATAPO,CHICLAYO,LAMBAYEQUE,nombre desalineado
+402,140118,Zaña,34,Chiclayo,14,Lambayeque,True,True,POMALCA,CHICLAYO,LAMBAYEQUE,nombre desalineado
+403,140119,Pomalca,34,Chiclayo,14,Lambayeque,True,True,PUCALA,CHICLAYO,LAMBAYEQUE,nombre desalineado
+404,140120,Pucala,34,Chiclayo,14,Lambayeque,True,True,TUMAN,CHICLAYO,LAMBAYEQUE,nombre desalineado
+405,140121,Tuman,34,Chiclayo,14,Lambayeque,False,False,,,,ubigeo inexistente
+406,140201,Ferreñafe,35,Ferreñafe,14,Lambayeque,True,True,FERREÑAFE,FERREÑAFE,LAMBAYEQUE,ok
+407,140202,Cañaris,35,Ferreñafe,14,Lambayeque,True,True,CAÑARIS,FERREÑAFE,LAMBAYEQUE,ok
+408,140203,Incahuasi,35,Ferreñafe,14,Lambayeque,True,True,INCAHUASI,FERREÑAFE,LAMBAYEQUE,ok
+409,140204,Manuel Antonio Mesones Muro,35,Ferreñafe,14,Lambayeque,True,True,MANUEL ANTONIO MESONES MURO,FERREÑAFE,LAMBAYEQUE,ok
+410,140205,Pitipo,35,Ferreñafe,14,Lambayeque,True,True,PITIPO,FERREÑAFE,LAMBAYEQUE,ok
+411,140206,Pueblo Nuevo,35,Ferreñafe,14,Lambayeque,True,True,PUEBLO NUEVO,FERREÑAFE,LAMBAYEQUE,ok
+412,140301,Lambayeque,36,Lambayeque,14,Lambayeque,True,True,LAMBAYEQUE,LAMBAYEQUE,LAMBAYEQUE,ok
+413,140302,Chochope,36,Lambayeque,14,Lambayeque,True,True,CHOCHOPE,LAMBAYEQUE,LAMBAYEQUE,ok
+414,140303,Illimo,36,Lambayeque,14,Lambayeque,True,True,ILLIMO,LAMBAYEQUE,LAMBAYEQUE,ok
+415,140304,Jayanca,36,Lambayeque,14,Lambayeque,True,True,JAYANCA,LAMBAYEQUE,LAMBAYEQUE,ok
+416,140305,Mochumi,36,Lambayeque,14,Lambayeque,True,True,MOCHUMI,LAMBAYEQUE,LAMBAYEQUE,ok
+417,140306,Morrope,36,Lambayeque,14,Lambayeque,True,True,MORROPE,LAMBAYEQUE,LAMBAYEQUE,ok
+418,140307,Motupe,36,Lambayeque,14,Lambayeque,True,True,MOTUPE,LAMBAYEQUE,LAMBAYEQUE,ok
+419,140308,Olmos,36,Lambayeque,14,Lambayeque,True,True,OLMOS,LAMBAYEQUE,LAMBAYEQUE,ok
+420,140309,Pacora,36,Lambayeque,14,Lambayeque,True,True,PACORA,LAMBAYEQUE,LAMBAYEQUE,ok
+421,140310,Salas,36,Lambayeque,14,Lambayeque,True,True,SALAS,LAMBAYEQUE,LAMBAYEQUE,ok
+422,140311,San Jose,36,Lambayeque,14,Lambayeque,True,True,SAN JOSE,LAMBAYEQUE,LAMBAYEQUE,ok
+423,140312,Tucume,36,Lambayeque,14,Lambayeque,True,True,TUCUME,LAMBAYEQUE,LAMBAYEQUE,ok
+424,150101,Lima,37,Lima,15,Lima,True,True,LIMA,LIMA,LIMA,ok
+425,150102,Ancon,37,Lima,15,Lima,True,True,ANCON,LIMA,LIMA,ok
+426,150103,Ate,37,Lima,15,Lima,True,True,ATE,LIMA,LIMA,ok
+427,150104,Barranco,37,Lima,15,Lima,True,True,BARRANCO,LIMA,LIMA,ok
+428,150105,Breña,37,Lima,15,Lima,True,True,BREÑA,LIMA,LIMA,ok
+429,150106,Carabayllo,37,Lima,15,Lima,True,True,CARABAYLLO,LIMA,LIMA,ok
+430,150107,Chaclacayo,37,Lima,15,Lima,True,True,CHACLACAYO,LIMA,LIMA,ok
+431,150108,Chorrillos,37,Lima,15,Lima,True,True,CHORRILLOS,LIMA,LIMA,ok
+432,150109,Cieneguilla,37,Lima,15,Lima,True,True,CIENEGUILLA,LIMA,LIMA,ok
+433,150110,Comas,37,Lima,15,Lima,True,True,COMAS,LIMA,LIMA,ok
+434,150111,El Agustino,37,Lima,15,Lima,True,True,EL AGUSTINO,LIMA,LIMA,ok
+435,150112,Independencia,37,Lima,15,Lima,True,True,INDEPENDENCIA,LIMA,LIMA,ok
+436,150113,Jesus Maria,37,Lima,15,Lima,True,True,JESUS MARIA,LIMA,LIMA,ok
+437,150114,La Molina,37,Lima,15,Lima,True,True,LA MOLINA,LIMA,LIMA,ok
+438,150115,La Victoria,37,Lima,15,Lima,True,True,LA VICTORIA,LIMA,LIMA,ok
+439,150116,Lince,37,Lima,15,Lima,True,True,LINCE,LIMA,LIMA,ok
+440,150117,Los Olivos,37,Lima,15,Lima,True,True,LOS OLIVOS,LIMA,LIMA,ok
+441,150118,Lurigancho,37,Lima,15,Lima,True,True,LURIGANCHO,LIMA,LIMA,ok
+442,150119,Lurin,37,Lima,15,Lima,True,True,LURIN,LIMA,LIMA,ok
+443,150120,Magdalena del Mar,37,Lima,15,Lima,True,True,MAGDALENA DEL MAR,LIMA,LIMA,ok
+444,150121,Miraflores,37,Lima,15,Lima,True,True,PUEBLO LIBRE,LIMA,LIMA,nombre desalineado
+445,150122,Pachacamac,37,Lima,15,Lima,True,True,MIRAFLORES,LIMA,LIMA,nombre desalineado
+446,150123,Pucusana,37,Lima,15,Lima,True,True,PACHACAMAC,LIMA,LIMA,nombre desalineado
+447,150124,Pueblo Libre,37,Lima,15,Lima,True,True,PUCUSANA,LIMA,LIMA,nombre desalineado
+448,150125,Puente Piedra,37,Lima,15,Lima,True,True,PUENTE PIEDRA,LIMA,LIMA,ok
+449,150126,Punta Hermosa,37,Lima,15,Lima,True,True,PUNTA HERMOSA,LIMA,LIMA,ok
+450,150127,Punta Negra,37,Lima,15,Lima,True,True,PUNTA NEGRA,LIMA,LIMA,ok
+451,150128,Rimac,37,Lima,15,Lima,True,True,RIMAC,LIMA,LIMA,ok
+452,150129,San Bartolo,37,Lima,15,Lima,True,True,SAN BARTOLO,LIMA,LIMA,ok
+453,150130,San Borja,37,Lima,15,Lima,True,True,SAN BORJA,LIMA,LIMA,ok
+454,150131,San Isidro,37,Lima,15,Lima,True,True,SAN ISIDRO,LIMA,LIMA,ok
+455,150132,San Juan de Lurigancho,37,Lima,15,Lima,True,True,SAN JUAN DE LURIGANCHO,LIMA,LIMA,ok
+456,150133,San Juan de Miraflores,37,Lima,15,Lima,True,True,SAN JUAN DE MIRAFLORES,LIMA,LIMA,ok
+457,150134,San Luis,37,Lima,15,Lima,True,True,SAN LUIS,LIMA,LIMA,ok
+458,150135,San Martin de Porres,37,Lima,15,Lima,True,True,SAN MARTIN DE PORRES,LIMA,LIMA,ok
+459,150136,San Miguel,37,Lima,15,Lima,True,True,SAN MIGUEL,LIMA,LIMA,ok
+460,150137,Santa Anita,37,Lima,15,Lima,True,True,SANTA ANITA,LIMA,LIMA,ok
+461,150138,Santa Maria del Mar,37,Lima,15,Lima,True,True,SANTA MARIA DEL MAR,LIMA,LIMA,ok
+462,150139,Santa Rosa,37,Lima,15,Lima,True,True,SANTA ROSA,LIMA,LIMA,ok
+463,150140,Santiago de Surco,37,Lima,15,Lima,True,True,SANTIAGO DE SURCO,LIMA,LIMA,ok
+464,150141,Surquillo,37,Lima,15,Lima,True,True,SURQUILLO,LIMA,LIMA,ok
+465,150142,Villa El Salvador,37,Lima,15,Lima,True,True,VILLA EL SALVADOR,LIMA,LIMA,ok
+466,150143,Villa Maria del Triunfo,37,Lima,15,Lima,True,True,VILLA MARIA DEL TRIUNFO,LIMA,LIMA,ok
+467,150201,Barranca,38,Barranca,15,Lima,True,True,BARRANCA,BARRANCA,LIMA,ok
+468,150202,Paramonga,38,Barranca,15,Lima,True,True,PARAMONGA,BARRANCA,LIMA,ok
+469,150203,Pativilca,38,Barranca,15,Lima,True,True,PATIVILCA,BARRANCA,LIMA,ok
+470,150204,Supe,38,Barranca,15,Lima,True,True,SUPE,BARRANCA,LIMA,ok
+471,150205,Supe Puerto,38,Barranca,15,Lima,True,True,SUPE PUERTO,BARRANCA,LIMA,ok
+472,150301,Cajatambo,39,Cajatambo,15,Lima,True,True,CAJATAMBO,CAJATAMBO,LIMA,ok
+473,150302,Copa,39,Cajatambo,15,Lima,True,True,COPA,CAJATAMBO,LIMA,ok
+474,150303,Gorgor,39,Cajatambo,15,Lima,True,True,GORGOR,CAJATAMBO,LIMA,ok
+475,150304,Huancapon,39,Cajatambo,15,Lima,True,True,HUANCAPON,CAJATAMBO,LIMA,ok
+476,150305,Manas,39,Cajatambo,15,Lima,True,True,MANAS,CAJATAMBO,LIMA,ok
+477,150401,Canta,40,Canta,15,Lima,True,True,CANTA,CANTA,LIMA,ok
+478,150402,Arahuay,40,Canta,15,Lima,True,True,ARAHUAY,CANTA,LIMA,ok
+479,150403,Huamantanga,40,Canta,15,Lima,True,True,HUAMANTANGA,CANTA,LIMA,ok
+480,150404,Huaros,40,Canta,15,Lima,True,True,HUAROS,CANTA,LIMA,ok
+481,150405,Lachaqui,40,Canta,15,Lima,True,True,LACHAQUI,CANTA,LIMA,ok
+482,150406,San Buenaventura,40,Canta,15,Lima,True,True,SAN BUENAVENTURA,CANTA,LIMA,ok
+483,150407,Santa Rosa de Quives,40,Canta,15,Lima,True,True,SANTA ROSA DE QUIVES,CANTA,LIMA,ok
+484,150501,San Vicente de Cañete,41,Cañete,15,Lima,True,True,SAN VICENTE DE CAÑETE,CAÑETE,LIMA,ok
+485,150502,Asia,41,Cañete,15,Lima,True,True,ASIA,CAÑETE,LIMA,ok
+486,150503,Calango,41,Cañete,15,Lima,True,True,CALANGO,CAÑETE,LIMA,ok
+487,150504,Cerro Azul,41,Cañete,15,Lima,True,True,CERRO AZUL,CAÑETE,LIMA,ok
+488,150505,Chilca,41,Cañete,15,Lima,True,True,CHILCA,CAÑETE,LIMA,ok
+489,150506,Coayllo,41,Cañete,15,Lima,True,True,COAYLLO,CAÑETE,LIMA,ok
+490,150507,Imperial,41,Cañete,15,Lima,True,True,IMPERIAL,CAÑETE,LIMA,ok
+491,150508,Lunahuana,41,Cañete,15,Lima,True,True,LUNAHUANA,CAÑETE,LIMA,ok
+492,150509,Mala,41,Cañete,15,Lima,True,True,MALA,CAÑETE,LIMA,ok
+493,150510,Nuevo Imperial,41,Cañete,15,Lima,True,True,NUEVO IMPERIAL,CAÑETE,LIMA,ok
+494,150511,Pacaran,41,Cañete,15,Lima,True,True,PACARAN,CAÑETE,LIMA,ok
+495,150512,Quilmana,41,Cañete,15,Lima,True,True,QUILMANA,CAÑETE,LIMA,ok
+496,150513,San Antonio,41,Cañete,15,Lima,True,True,SAN ANTONIO,CAÑETE,LIMA,ok
+497,150514,San Luis,41,Cañete,15,Lima,True,True,SAN LUIS,CAÑETE,LIMA,ok
+498,150515,Santa Cruz de Flores,41,Cañete,15,Lima,True,True,SANTA CRUZ DE FLORES,CAÑETE,LIMA,ok
+499,150516,Zuñiga,41,Cañete,15,Lima,True,True,ZUÑIGA,CAÑETE,LIMA,ok
+500,160101,Iquitos,42,Maynas,16,Loreto,True,True,IQUITOS,MAYNAS,LORETO,ok
+501,160102,Alto Nanay,42,Maynas,16,Loreto,True,True,ALTO NANAY,MAYNAS,LORETO,ok
+502,160103,Fernando Lores,42,Maynas,16,Loreto,True,True,FERNANDO LORES,MAYNAS,LORETO,ok
+503,160104,Indiana,42,Maynas,16,Loreto,True,True,INDIANA,MAYNAS,LORETO,ok
+504,160105,Las Amazonas,42,Maynas,16,Loreto,True,True,LAS AMAZONAS,MAYNAS,LORETO,ok
+505,160106,Mazan,42,Maynas,16,Loreto,True,True,MAZAN,MAYNAS,LORETO,ok
+506,160107,Napo,42,Maynas,16,Loreto,True,True,NAPO,MAYNAS,LORETO,ok
+507,160108,Punchana,42,Maynas,16,Loreto,True,True,PUNCHANA,MAYNAS,LORETO,ok
+508,160110,Torres Causana,42,Maynas,16,Loreto,True,True,TORRES CAUSANA,MAYNAS,LORETO,ok
+509,160112,Belen,42,Maynas,16,Loreto,True,True,BELEN,MAYNAS,LORETO,ok
+510,160113,San Juan Bautista,42,Maynas,16,Loreto,True,True,SAN JUAN BAUTISTA,MAYNAS,LORETO,ok
+511,160201,Yurimaguas,43,Alto Amazonas,16,Loreto,True,True,YURIMAGUAS,ALTO AMAZONAS,LORETO,ok
+512,160202,Balsapuerto,43,Alto Amazonas,16,Loreto,True,True,BALSAPUERTO,ALTO AMAZONAS,LORETO,ok
+513,160205,Jeberos,43,Alto Amazonas,16,Loreto,True,True,JEBEROS,ALTO AMAZONAS,LORETO,ok
+514,160206,Lagunas,43,Alto Amazonas,16,Loreto,True,True,LAGUNAS,ALTO AMAZONAS,LORETO,ok
+515,160210,Santa Cruz,43,Alto Amazonas,16,Loreto,True,True,SANTA CRUZ,ALTO AMAZONAS,LORETO,ok
+516,160211,Teniente Cesar Lopez Rojas,43,Alto Amazonas,16,Loreto,True,True,TENIENTE CESAR LOPEZ ROJAS,ALTO AMAZONAS,LORETO,ok
+517,170101,Tambopata,44,Tambopata,17,Madre de Dios,True,True,TAMBOPATA,TAMBOPATA,MADRE DE DIOS,ok
+518,170102,Inambari,44,Tambopata,17,Madre de Dios,True,True,INAMBARI,TAMBOPATA,MADRE DE DIOS,ok
+519,170103,Las Piedras,44,Tambopata,17,Madre de Dios,True,True,LAS PIEDRAS,TAMBOPATA,MADRE DE DIOS,ok
+520,170104,Laberinto,44,Tambopata,17,Madre de Dios,True,True,LABERINTO,TAMBOPATA,MADRE DE DIOS,ok
+521,170201,Manu,45,Manu,17,Madre de Dios,True,True,MANU,MANU,MADRE DE DIOS,ok
+522,170202,Fitzcarrald,45,Manu,17,Madre de Dios,True,True,FITZCARRALD,MANU,MADRE DE DIOS,ok
+523,170203,Madre de Dios,45,Manu,17,Madre de Dios,True,True,MADRE DE DIOS,MANU,MADRE DE DIOS,ok
+524,170204,Huepetuhe,45,Manu,17,Madre de Dios,True,True,HUEPETUHE,MANU,MADRE DE DIOS,ok
+525,170301,Iñapari,46,Tahuamanu,17,Madre de Dios,True,True,IÑAPARI,TAHUAMANU,MADRE DE DIOS,ok
+526,170302,Iberia,46,Tahuamanu,17,Madre de Dios,True,True,IBERIA,TAHUAMANU,MADRE DE DIOS,ok
+527,170303,Tahuamanu,46,Tahuamanu,17,Madre de Dios,True,True,TAHUAMANU,TAHUAMANU,MADRE DE DIOS,ok
+528,180101,Moquegua,47,Mariscal Nieto,18,Moquegua,True,True,MOQUEGUA,MARISCAL NIETO,MOQUEGUA,ok
+529,180102,Carumas,47,Mariscal Nieto,18,Moquegua,True,True,CARUMAS,MARISCAL NIETO,MOQUEGUA,ok
+530,180103,Cuchumbaya,47,Mariscal Nieto,18,Moquegua,True,True,CUCHUMBAYA,MARISCAL NIETO,MOQUEGUA,ok
+531,180104,Samegua,47,Mariscal Nieto,18,Moquegua,True,True,SAMEGUA,MARISCAL NIETO,MOQUEGUA,ok
+532,180105,San Cristobal,47,Mariscal Nieto,18,Moquegua,True,True,SAN CRISTOBAL,MARISCAL NIETO,MOQUEGUA,ok
+533,180106,Torata,47,Mariscal Nieto,18,Moquegua,True,True,TORATA,MARISCAL NIETO,MOQUEGUA,ok
+534,180201,Omate,48,General Sanchez Cerro,18,Moquegua,True,True,OMATE,GENERAL SANCHEZ CERRO,MOQUEGUA,ok
+535,180202,Chojata,48,General Sanchez Cerro,18,Moquegua,True,True,CHOJATA,GENERAL SANCHEZ CERRO,MOQUEGUA,ok
+536,180203,Coalaque,48,General Sanchez Cerro,18,Moquegua,True,True,COALAQUE,GENERAL SANCHEZ CERRO,MOQUEGUA,ok
+537,180204,Ichuña,48,General Sanchez Cerro,18,Moquegua,True,True,ICHUÑA,GENERAL SANCHEZ CERRO,MOQUEGUA,ok
+538,180205,La Capilla,48,General Sanchez Cerro,18,Moquegua,True,True,LA CAPILLA,GENERAL SANCHEZ CERRO,MOQUEGUA,ok
+539,180206,Lloque,48,General Sanchez Cerro,18,Moquegua,True,True,LLOQUE,GENERAL SANCHEZ CERRO,MOQUEGUA,ok
+540,180207,Matalaque,48,General Sanchez Cerro,18,Moquegua,True,True,MATALAQUE,GENERAL SANCHEZ CERRO,MOQUEGUA,ok
+541,180208,Puquina,48,General Sanchez Cerro,18,Moquegua,True,True,PUQUINA,GENERAL SANCHEZ CERRO,MOQUEGUA,ok
+542,180209,Quinistaquillas,48,General Sanchez Cerro,18,Moquegua,True,True,QUINISTAQUILLAS,GENERAL SANCHEZ CERRO,MOQUEGUA,ok
+543,180210,Ubinas,48,General Sanchez Cerro,18,Moquegua,True,True,UBINAS,GENERAL SANCHEZ CERRO,MOQUEGUA,ok
+544,180211,Yunga,48,General Sanchez Cerro,18,Moquegua,True,True,YUNGA,GENERAL SANCHEZ CERRO,MOQUEGUA,ok
+545,180301,Ilo,49,Ilo,18,Moquegua,True,True,ILO,ILO,MOQUEGUA,ok
+546,180302,El Algarrobal,49,Ilo,18,Moquegua,True,True,EL ALGARROBAL,ILO,MOQUEGUA,ok
+547,180303,Pacocha,49,Ilo,18,Moquegua,True,True,PACOCHA,ILO,MOQUEGUA,ok
+548,190101,Chaupimarca,50,Pasco,19,Pasco,True,True,CHAUPIMARCA,PASCO,PASCO,ok
+549,190102,Huachon,50,Pasco,19,Pasco,True,True,HUACHON,PASCO,PASCO,ok
+550,190103,Huariaca,50,Pasco,19,Pasco,True,True,HUARIACA,PASCO,PASCO,ok
+551,190104,Huayllay,50,Pasco,19,Pasco,True,True,HUAYLLAY,PASCO,PASCO,ok
+552,190105,Ninacaca,50,Pasco,19,Pasco,True,True,NINACACA,PASCO,PASCO,ok
+553,190106,Pallanchacra,50,Pasco,19,Pasco,True,True,PALLANCHACRA,PASCO,PASCO,ok
+554,190107,Paucartambo,50,Pasco,19,Pasco,True,True,PAUCARTAMBO,PASCO,PASCO,ok
+555,190108,San Francisco de Asis de Yarusyacan,50,Pasco,19,Pasco,True,True,SAN FRANCISCO DE ASIS DE YARUSYACAN,PASCO,PASCO,ok
+556,190109,Simon Bolivar,50,Pasco,19,Pasco,True,True,SIMON BOLIVAR,PASCO,PASCO,ok
+557,190110,Ticlacayan,50,Pasco,19,Pasco,True,True,TICLACAYAN,PASCO,PASCO,ok
+558,190111,Tinyahuarco,50,Pasco,19,Pasco,True,True,TINYAHUARCO,PASCO,PASCO,ok
+559,190112,Vicco,50,Pasco,19,Pasco,True,True,VICCO,PASCO,PASCO,ok
+560,190113,Yanacancha,50,Pasco,19,Pasco,True,True,YANACANCHA,PASCO,PASCO,ok
+561,200101,Piura,51,Piura,20,Piura,True,True,PIURA,PIURA,PIURA,ok
+562,200102,Castilla,51,Piura,20,Piura,False,False,,,,ubigeo inexistente
+563,200103,Catacaos,51,Piura,20,Piura,False,False,,,,ubigeo inexistente
+564,200104,Cura Mori,51,Piura,20,Piura,True,True,CASTILLA,PIURA,PIURA,nombre desalineado
+565,200105,El Tallan,51,Piura,20,Piura,True,True,CATACAOS,PIURA,PIURA,nombre desalineado
+566,200106,La Arena,51,Piura,20,Piura,False,False,,,,ubigeo inexistente
+567,200107,La Union,51,Piura,20,Piura,True,True,CURA MORI,PIURA,PIURA,nombre desalineado
+568,200108,Las Lomas,51,Piura,20,Piura,True,True,EL TALLAN,PIURA,PIURA,nombre desalineado
+569,200109,Tambo Grande,51,Piura,20,Piura,True,True,LA ARENA,PIURA,PIURA,nombre desalineado
+570,200110,Veintiseis de Octubre,51,Piura,20,Piura,True,True,LA UNION,PIURA,PIURA,nombre desalineado
+571,200201,Ayabaca,52,Ayabaca,20,Piura,True,True,AYABACA,AYABACA,PIURA,ok
+572,200202,Frias,52,Ayabaca,20,Piura,True,True,FRIAS,AYABACA,PIURA,ok
+573,200203,Jilili,52,Ayabaca,20,Piura,True,True,JILILI,AYABACA,PIURA,ok
+574,200204,Lagunas,52,Ayabaca,20,Piura,True,True,LAGUNAS,AYABACA,PIURA,ok
+575,200205,Montero,52,Ayabaca,20,Piura,True,True,MONTERO,AYABACA,PIURA,ok
+576,200206,Pacaipampa,52,Ayabaca,20,Piura,True,True,PACAIPAMPA,AYABACA,PIURA,ok
+577,200207,Paimas,52,Ayabaca,20,Piura,True,True,PAIMAS,AYABACA,PIURA,ok
+578,200208,Sapillica,52,Ayabaca,20,Piura,True,True,SAPILLICA,AYABACA,PIURA,ok
+579,200209,Sicchez,52,Ayabaca,20,Piura,True,True,SICCHEZ,AYABACA,PIURA,ok
+580,200210,Suyo,52,Ayabaca,20,Piura,True,True,SUYO,AYABACA,PIURA,ok
+581,200301,Huancabamba,53,Huancabamba,20,Piura,True,True,HUANCABAMBA,HUANCABAMBA,PIURA,ok
+582,200302,Canchaque,53,Huancabamba,20,Piura,True,True,CANCHAQUE,HUANCABAMBA,PIURA,ok
+583,200303,El Carmen de la Frontera,53,Huancabamba,20,Piura,True,True,EL CARMEN DE LA FRONTERA,HUANCABAMBA,PIURA,ok
+584,200304,Huarmaca,53,Huancabamba,20,Piura,True,True,HUARMACA,HUANCABAMBA,PIURA,ok
+585,200305,Lalaquiz,53,Huancabamba,20,Piura,True,True,LALAQUIZ,HUANCABAMBA,PIURA,ok
+586,200306,San Miguel de El Faique,53,Huancabamba,20,Piura,True,True,SAN MIGUEL DE EL FAIQUE,HUANCABAMBA,PIURA,ok
+587,200307,Sondor,53,Huancabamba,20,Piura,True,True,SONDOR,HUANCABAMBA,PIURA,ok
+588,200308,Sondorillo,53,Huancabamba,20,Piura,True,True,SONDORILLO,HUANCABAMBA,PIURA,ok
+589,200401,Chulucanas,54,Morropon,20,Piura,True,True,CHULUCANAS,MORROPON,PIURA,ok
+590,200402,Buenos Aires,54,Morropon,20,Piura,True,True,BUENOS AIRES,MORROPON,PIURA,ok
+591,200403,Chalaco,54,Morropon,20,Piura,True,True,CHALACO,MORROPON,PIURA,ok
+592,200404,La Matanza,54,Morropon,20,Piura,True,True,LA MATANZA,MORROPON,PIURA,ok
+593,200405,Morropon,54,Morropon,20,Piura,True,True,MORROPON,MORROPON,PIURA,ok
+594,200406,Salitral,54,Morropon,20,Piura,True,True,SALITRAL,MORROPON,PIURA,ok
+595,200407,San Juan de Bigote,54,Morropon,20,Piura,True,True,SAN JUAN DE BIGOTE,MORROPON,PIURA,ok
+596,200408,Santa Catalina de Mossa,54,Morropon,20,Piura,True,True,SANTA CATALINA DE MOSSA,MORROPON,PIURA,ok
+597,200409,Santo Domingo,54,Morropon,20,Piura,True,True,SANTO DOMINGO,MORROPON,PIURA,ok
+598,200410,Yamango,54,Morropon,20,Piura,True,True,YAMANGO,MORROPON,PIURA,ok
+599,200501,Paita,55,Paita,20,Piura,True,True,PAITA,PAITA,PIURA,ok
+600,200502,Amotape,55,Paita,20,Piura,True,True,AMOTAPE,PAITA,PIURA,ok
+601,200503,Arenal,55,Paita,20,Piura,True,True,ARENAL,PAITA,PIURA,ok
+602,200504,Colan,55,Paita,20,Piura,True,True,COLAN,PAITA,PIURA,ok
+603,200505,La Huaca,55,Paita,20,Piura,True,True,LA HUACA,PAITA,PIURA,ok
+604,200506,Tamarindo,55,Paita,20,Piura,True,True,TAMARINDO,PAITA,PIURA,ok
+605,200507,Vichayal,55,Paita,20,Piura,True,True,VICHAYAL,PAITA,PIURA,ok
+606,200601,Sullana,56,Sullana,20,Piura,True,True,SULLANA,SULLANA,PIURA,ok
+607,200602,Bellavista,56,Sullana,20,Piura,True,True,BELLAVISTA,SULLANA,PIURA,ok
+608,200603,Ignacio Escudero,56,Sullana,20,Piura,True,True,IGNACIO ESCUDERO,SULLANA,PIURA,ok
+609,200604,Lancones,56,Sullana,20,Piura,True,True,LANCONES,SULLANA,PIURA,ok
+610,200605,Marcavelica,56,Sullana,20,Piura,True,True,MARCAVELICA,SULLANA,PIURA,ok
+611,200606,Miguel Checa,56,Sullana,20,Piura,True,True,MIGUEL CHECA,SULLANA,PIURA,ok
+612,200607,Querecotillo,56,Sullana,20,Piura,True,True,QUERECOTILLO,SULLANA,PIURA,ok
+613,200608,Salitral,56,Sullana,20,Piura,True,True,SALITRAL,SULLANA,PIURA,ok
+614,200701,Pariñas,57,Talara,20,Piura,True,True,PARIÑAS,TALARA,PIURA,ok
+615,200702,El Alto,57,Talara,20,Piura,True,True,EL ALTO,TALARA,PIURA,ok
+616,200703,La Brea,57,Talara,20,Piura,True,True,LA BREA,TALARA,PIURA,ok
+617,200704,Lobitos,57,Talara,20,Piura,True,True,LOBITOS,TALARA,PIURA,ok
+618,200705,Los Organos,57,Talara,20,Piura,True,True,LOS ORGANOS,TALARA,PIURA,ok
+619,200706,Mancora,57,Talara,20,Piura,True,True,MANCORA,TALARA,PIURA,ok
+620,200801,Sechura,58,Sechura,20,Piura,True,True,SECHURA,SECHURA,PIURA,ok
+621,200802,Bernal,58,Sechura,20,Piura,True,True,BELLAVISTA DE LA UNION,SECHURA,PIURA,nombre desalineado
+622,200803,Cristo Nos Valga,58,Sechura,20,Piura,True,True,BERNAL,SECHURA,PIURA,nombre desalineado
+623,200804,Vice,58,Sechura,20,Piura,True,True,CRISTO NOS VALGA,SECHURA,PIURA,nombre desalineado
+624,200805,Rinconada Llicuar,58,Sechura,20,Piura,True,True,VICE,SECHURA,PIURA,nombre desalineado
+625,210101,Puno,59,Puno,21,Puno,True,True,PUNO,PUNO,PUNO,ok
+626,210102,Acora,59,Puno,21,Puno,True,True,ACORA,PUNO,PUNO,ok
+627,210103,Amantani,59,Puno,21,Puno,True,True,AMANTANI,PUNO,PUNO,ok
+628,210104,Atuncolla,59,Puno,21,Puno,True,True,ATUNCOLLA,PUNO,PUNO,ok
+629,210105,Capachica,59,Puno,21,Puno,True,True,CAPACHICA,PUNO,PUNO,ok
+630,210106,Chucuito,59,Puno,21,Puno,True,True,CHUCUITO,PUNO,PUNO,ok
+631,210107,Coata,59,Puno,21,Puno,True,True,COATA,PUNO,PUNO,ok
+632,210108,Huata,59,Puno,21,Puno,True,True,HUATA,PUNO,PUNO,ok
+633,210109,Mañazo,59,Puno,21,Puno,True,True,MAÑAZO,PUNO,PUNO,ok
+634,210110,Paucarcolla,59,Puno,21,Puno,True,True,PAUCARCOLLA,PUNO,PUNO,ok
+635,210111,Pichacani,59,Puno,21,Puno,True,True,PICHACANI,PUNO,PUNO,ok
+636,210112,Plateria,59,Puno,21,Puno,True,True,PLATERIA,PUNO,PUNO,ok
+637,210113,San Antonio,59,Puno,21,Puno,True,True,SAN ANTONIO,PUNO,PUNO,ok
+638,210114,Tiquillaca,59,Puno,21,Puno,True,True,TIQUILLACA,PUNO,PUNO,ok
+639,210115,Vilque,59,Puno,21,Puno,True,True,VILQUE,PUNO,PUNO,ok
+640,220101,Moyobamba,60,Moyobamba,22,San Martín,True,True,MOYOBAMBA,MOYOBAMBA,SAN MARTIN,ok
+641,220102,Calzada,60,Moyobamba,22,San Martín,True,True,CALZADA,MOYOBAMBA,SAN MARTIN,ok
+642,220103,Habana,60,Moyobamba,22,San Martín,True,True,HABANA,MOYOBAMBA,SAN MARTIN,ok
+643,220104,Jepelacio,60,Moyobamba,22,San Martín,True,True,JEPELACIO,MOYOBAMBA,SAN MARTIN,ok
+644,220105,Soritor,60,Moyobamba,22,San Martín,True,True,SORITOR,MOYOBAMBA,SAN MARTIN,ok
+645,220106,Yantalo,60,Moyobamba,22,San Martín,True,True,YANTALO,MOYOBAMBA,SAN MARTIN,ok
+646,220201,Bellavista,61,Bellavista,22,San Martín,True,True,BELLAVISTA,BELLAVISTA,SAN MARTIN,ok
+647,220202,Alto Biavo,61,Bellavista,22,San Martín,True,True,ALTO BIAVO,BELLAVISTA,SAN MARTIN,ok
+648,220203,Bajo Biavo,61,Bellavista,22,San Martín,True,True,BAJO BIAVO,BELLAVISTA,SAN MARTIN,ok
+649,220204,Huallaga,61,Bellavista,22,San Martín,True,True,HUALLAGA,BELLAVISTA,SAN MARTIN,ok
+650,220205,San Pablo,61,Bellavista,22,San Martín,True,True,SAN PABLO,BELLAVISTA,SAN MARTIN,ok
+651,220206,San Rafael,61,Bellavista,22,San Martín,True,True,SAN RAFAEL,BELLAVISTA,SAN MARTIN,ok
+652,230101,Tacna,62,Tacna,23,Tacna,True,True,TACNA,TACNA,TACNA,ok
+653,230102,Alto de La Alianza,62,Tacna,23,Tacna,True,True,ALTO DE LA ALIANZA,TACNA,TACNA,ok
+654,230103,Calana,62,Tacna,23,Tacna,True,True,CALANA,TACNA,TACNA,ok
+655,230104,Ciudad Nueva,62,Tacna,23,Tacna,True,True,CIUDAD NUEVA,TACNA,TACNA,ok
+656,230105,Inclan,62,Tacna,23,Tacna,True,True,INCLAN,TACNA,TACNA,ok
+657,230106,Pachia,62,Tacna,23,Tacna,True,True,PACHIA,TACNA,TACNA,ok
+658,230107,Palca,62,Tacna,23,Tacna,True,True,PALCA,TACNA,TACNA,ok
+659,230108,Pocollay,62,Tacna,23,Tacna,True,True,POCOLLAY,TACNA,TACNA,ok
+660,230109,Sama,62,Tacna,23,Tacna,True,True,SAMA,TACNA,TACNA,ok
+661,230110,Coronel Gregorio Albarracin Lanchipa,62,Tacna,23,Tacna,True,True,CORONEL GREGORIO ALBARRACIN LANCHIPA,TACNA,TACNA,ok
+662,230111,La Yarada Los Palos,62,Tacna,23,Tacna,True,True,LA YARADA LOS PALOS,TACNA,TACNA,ok
+663,230201,Candarave,63,Candarave,23,Tacna,True,True,CANDARAVE,CANDARAVE,TACNA,ok
+664,230202,Cairani,63,Candarave,23,Tacna,True,True,CAIRANI,CANDARAVE,TACNA,ok
+665,230203,Camilaca,63,Candarave,23,Tacna,True,True,CAMILACA,CANDARAVE,TACNA,ok
+666,230204,Curibaya,63,Candarave,23,Tacna,True,True,CURIBAYA,CANDARAVE,TACNA,ok
+667,230205,Huanuara,63,Candarave,23,Tacna,True,True,HUANUARA,CANDARAVE,TACNA,ok
+668,230206,Quilahuani,63,Candarave,23,Tacna,True,True,QUILAHUANI,CANDARAVE,TACNA,ok
+669,240101,Tumbes,64,Tumbes,24,Tumbes,True,True,TUMBES,TUMBES,TUMBES,ok
+670,240102,Corrales,64,Tumbes,24,Tumbes,True,True,CORRALES,TUMBES,TUMBES,ok
+671,240103,La Cruz,64,Tumbes,24,Tumbes,True,True,LA CRUZ,TUMBES,TUMBES,ok
+672,240104,Pampas de Hospital,64,Tumbes,24,Tumbes,True,True,PAMPAS DE HOSPITAL,TUMBES,TUMBES,ok
+673,240105,San Jacinto,64,Tumbes,24,Tumbes,True,True,SAN JACINTO,TUMBES,TUMBES,ok
+674,240106,San Juan de La Virgen,64,Tumbes,24,Tumbes,True,True,SAN JUAN DE LA VIRGEN,TUMBES,TUMBES,ok
+675,240201,Zorritos,65,Contralmirante Villar,24,Tumbes,True,True,ZORRITOS,CONTRALMIRANTE VILLAR,TUMBES,ok
+676,240202,Casitas,65,Contralmirante Villar,24,Tumbes,True,True,CASITAS,CONTRALMIRANTE VILLAR,TUMBES,ok
+677,240203,Canoas de Punta Sal,65,Contralmirante Villar,24,Tumbes,True,True,CANOAS DE PUNTA SAL,CONTRALMIRANTE VILLAR,TUMBES,ok
+678,240301,Zarumilla,66,Zarumilla,24,Tumbes,True,True,ZARUMILLA,ZARUMILLA,TUMBES,ok
+679,240302,Aguas Verdes,66,Zarumilla,24,Tumbes,True,True,AGUAS VERDES,ZARUMILLA,TUMBES,ok
+680,240303,Matapalo,66,Zarumilla,24,Tumbes,True,True,MATAPALO,ZARUMILLA,TUMBES,ok
+681,240304,Papayal,66,Zarumilla,24,Tumbes,True,True,PAPAYAL,ZARUMILLA,TUMBES,ok
+682,250101,Calleria,67,Coronel Portillo,25,Ucayali,True,True,CALLERIA,CORONEL PORTILLO,UCAYALI,ok
+683,250102,Campoverde,67,Coronel Portillo,25,Ucayali,True,True,CAMPOVERDE,CORONEL PORTILLO,UCAYALI,ok
+684,250103,Iparia,67,Coronel Portillo,25,Ucayali,True,True,IPARIA,CORONEL PORTILLO,UCAYALI,ok
+685,250104,Masisea,67,Coronel Portillo,25,Ucayali,True,True,MASISEA,CORONEL PORTILLO,UCAYALI,ok
+686,250105,Yarinacocha,67,Coronel Portillo,25,Ucayali,True,True,YARINACOCHA,CORONEL PORTILLO,UCAYALI,ok
+687,250106,Nueva Requena,67,Coronel Portillo,25,Ucayali,True,True,NUEVA REQUENA,CORONEL PORTILLO,UCAYALI,ok
+688,250107,Manantay,67,Coronel Portillo,25,Ucayali,True,True,MANANTAY,CORONEL PORTILLO,UCAYALI,ok
+689,250201,Raymondi,68,Atalaya,25,Ucayali,True,True,RAYMONDI,ATALAYA,UCAYALI,ok
+690,250202,Sepahua,68,Atalaya,25,Ucayali,True,True,SEPAHUA,ATALAYA,UCAYALI,ok
+691,250203,Tahuania,68,Atalaya,25,Ucayali,True,True,TAHUANIA,ATALAYA,UCAYALI,ok
+692,250204,Yurua,68,Atalaya,25,Ucayali,True,True,YURUA,ATALAYA,UCAYALI,ok
+693,250301,Padre Abad,69,Padre Abad,25,Ucayali,True,True,PADRE ABAD,PADRE ABAD,UCAYALI,ok
+694,250302,Irazola,69,Padre Abad,25,Ucayali,True,True,IRAZOLA,PADRE ABAD,UCAYALI,ok
+695,250303,Curimana,69,Padre Abad,25,Ucayali,True,True,CURIMANA,PADRE ABAD,UCAYALI,ok
+696,250304,Neshuya,69,Padre Abad,25,Ucayali,True,True,NESHUYA,PADRE ABAD,UCAYALI,ok
+697,250305,Alexander Von Humboldt,69,Padre Abad,25,Ucayali,True,True,ALEXANDER VON HUMBOLDT,PADRE ABAD,UCAYALI,ok
+698,250401,Purus,70,Purus,25,Ucayali,True,True,PURUS,PURUS,UCAYALI,ok
