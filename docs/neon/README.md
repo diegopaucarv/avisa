@@ -351,19 +351,27 @@ SELECT * FROM core.autenticar_usuario('11111111', 'demo');
 Si `core.casos` devuelve 35 en vez de 0, la app está conectada con un rol con
 `BYPASSRLS` (probablemente `neondb_owner`).
 
-### 7.1 Migraciones 32–35 aplicadas en Neon (2026-11-22)
+### 7.1 Migraciones 32–36 aplicadas en Neon (2026-11-22)
 
-El esquema de Neon quedó por detrás del local: las migraciones `32` a `35` se
-ejecutaron primero contra `avisa-db` y después contra Neon, con `neondb_owner`
-por el **host directo** (el pooler no conserva la sesión). Cada archivo se aplicó
-en su propia transacción, cortado antes de sus comprobaciones finales.
+El esquema de Neon quedó por detrás del local: las migraciones `32` a `36` se
+ejecutaron primero contra `avisa-db` y después contra Neon, con `neondb_owner`. El
+DDL de 32–35 exigió el **host directo** (el pooler no conserva la sesión entre
+sentencias); la `36`, que solo actualiza datos dentro de una transacción, se aplicó
+por la cadena del `.env`. Cada archivo se aplicó en su propia transacción, cortado
+antes de sus comprobaciones finales.
 
-| Archivo                        | Efecto en Neon                                              |
-| ------------------------------ | ----------------------------------------------------------- |
-| `32_anexo15_left_join.sql`     | `CREATE` + `ALTER`: ocho `LEFT JOIN`, `security_invoker`    |
-| `33_estado_abierto_unico.sql`  | 35 casos a `Abierto`, estado 2 retirado del catálogo        |
-| `34_historial_tramo_unico.sql` | 35 tramos sintéticos eliminados, 35 tramos reabiertos       |
-| `35_fecha_inicio_real.sql`     | Sin cambios (`0` filas): la fecha del legado ya era la real |
+| Archivo                               | Efecto en Neon                                              |
+| ------------------------------------- | ----------------------------------------------------------- |
+| `32_anexo15_left_join.sql`            | `CREATE` + `ALTER`: ocho `LEFT JOIN`, `security_invoker`    |
+| `33_estado_abierto_unico.sql`         | 35 casos a `Abierto`, estado 2 retirado del catálogo        |
+| `34_historial_tramo_unico.sql`        | 35 tramos sintéticos eliminados, 35 tramos reabiertos       |
+| `35_fecha_inicio_real.sql`            | Sin cambios (`0` filas): la fecha del legado ya era la real |
+| `36_historial_desde_fecha_inicio.sql` | `UPDATE 32`: el tramo abierto toma la fecha real del caso   |
+
+Estado del historial tras la 36: **35 tramos, 35 abiertos, 32 alineados con
+`fecha_inicio` y 3 en la fecha de carga** (los casos que no tienen fecha de
+inicio: `desde` no admite nulos y no se inventa un valor). Ningún tramo cerrado
+queda con `hasta < desde`.
 
 Dos avisos al replicar:
 

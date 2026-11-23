@@ -256,7 +256,7 @@
       <div class="case-card-bottom">
         <span>{{ caso.etapa }}</span>
         <span>
-          {{ caso.inicio ? 'Inicio ' + fechaTexto(caso.inicio) : 'Sin fecha de inicio registrada' }}
+          {{ caso.inicio ? 'Inicio ' + fechaTexto(caso.inicio) : 'Inicio —' }}
           <app-icono nombre="chevron-derecha" [tamano]="14" />
         </span>
       </div>
@@ -288,7 +288,9 @@
           <td>
             <a class="table-link" [routerLink]="['/casos', caso.codigo]">{{ caso.codigo }}</a>
           </td>
-          <td>{{ caso.inicio ? fechaTexto(caso.inicio) : 'Sin fecha de inicio registrada' }}</td>
+          <td [attr.title]="caso.inicio ? null : 'Sin fecha de inicio registrada'">
+            {{ caso.inicio ? fechaTexto(caso.inicio) : '—' }}
+          </td>
           <td>{{ caso.region || '—' }}</td>
           <td>{{ caso.tematica || '—' }}</td>
           <td>{{ caso.estado }}</td>
