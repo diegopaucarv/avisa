@@ -1,0 +1,1949 @@
+<!doctype html>
+<html lang="es">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Gobierno de las sugerencias · Mockup AVISA</title>
+        <style>
+            /* Tokens copiados de panorama-territorial.html. Sin webfonts, sin JS,
+               sin CDN: el archivo se abre por doble clic. */
+            :root {
+                --ink: #17283a;
+                --ink-2: #33475b;
+                --muted: #778797;
+                --line: #e6ebef;
+                --paper: #fff;
+                --canvas: #f5f7f8;
+                --blue: #2455a2;
+                --blue-dark: #1d427f;
+                --blue-pale: #eaf1fb;
+                --teal: #397c79;
+                --amber: #aa6a11;
+                --amber-pale: #fff4e2;
+                --red: #ad4d46;
+                --red-pale: #fbeceb;
+                --green: #34785b;
+                --green-pale: #e9f5ef;
+                --font-sans:
+                    "DM Sans", system-ui, -apple-system, "Segoe UI", Arial,
+                    sans-serif;
+                --font-display:
+                    "Manrope", "DM Sans", system-ui, -apple-system, "Segoe UI",
+                    sans-serif;
+                /* Derivados para texto pequeño: --muted (#778797) no llega a
+                   4.5:1 sobre blanco. Los cinco pasan AA sobre su fondo. */
+                --ink-3: #5f7183;
+                --th: #5f7182;
+                --amber-ink: #8a5a0e;
+                --red-ink: #8f3b35;
+                --green-ink: #2b6349;
+                --grey-ink: #55677a;
+            }
+            * {
+                box-sizing: border-box;
+            }
+            html {
+                min-height: 100%;
+                background: var(--canvas);
+            }
+            body {
+                margin: 0;
+                color: var(--ink);
+                font-family: var(--font-sans);
+                font-size: 13.5px;
+                line-height: 1.55;
+                -webkit-font-smoothing: antialiased;
+            }
+            h1,
+            h2,
+            h3,
+            h4 {
+                margin: 0;
+                font-family: var(--font-display);
+                font-weight: 700;
+                letter-spacing: -0.01em;
+                color: var(--ink);
+            }
+            p {
+                margin: 0;
+            }
+            code {
+                padding: 0 3px;
+                border: 1px solid var(--line);
+                border-radius: 4px;
+                background: var(--canvas);
+                color: var(--ink-2);
+                font-family: ui-monospace, "Cascadia Mono", "Consolas", monospace;
+                font-size: 0.92em;
+            }
+            :focus-visible {
+                outline: 2px solid var(--blue);
+                outline-offset: 2px;
+                border-radius: 4px;
+            }
+            .sr {
+                position: absolute;
+                width: 1px;
+                height: 1px;
+                overflow: hidden;
+                clip: rect(0 0 0 0);
+                white-space: nowrap;
+            }
+
+            /* ── Barra superior de la propuesta ───────────────────────────── */
+            .topbar {
+                position: sticky;
+                top: 0;
+                z-index: 6;
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                gap: 16px;
+                min-height: 58px;
+                padding: 9px 30px;
+                border-bottom: 1px solid var(--line);
+                background: var(--paper);
+            }
+            .brand {
+                display: flex;
+                flex-direction: column;
+                gap: 1px;
+                padding-right: 18px;
+                border-right: 1px solid var(--line);
+            }
+            .brand b {
+                font-family: var(--font-display);
+                font-size: 15px;
+                letter-spacing: 0.06em;
+            }
+            .brand span {
+                color: var(--ink-3);
+                font-size: 10.5px;
+                line-height: 1.25;
+            }
+            .crumbs {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                gap: 7px;
+                color: var(--ink-3);
+                font-size: 12.5px;
+            }
+            .crumbs .sep {
+                color: var(--ink-3);
+            }
+            .crumbs b {
+                color: var(--ink-2);
+            }
+            .topbar-right {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                gap: 8px;
+                margin-left: auto;
+            }
+            .badge {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                padding: 3px 9px;
+                border: 1px solid var(--line);
+                border-radius: 999px;
+                background: var(--canvas);
+                color: var(--ink-3);
+                font-size: 11px;
+                font-weight: 600;
+                letter-spacing: 0.02em;
+                white-space: nowrap;
+            }
+            .badge.blue {
+                border-color: #cdddf3;
+                background: var(--blue-pale);
+                color: var(--blue-dark);
+            }
+            .badge.amber {
+                border-color: #f0dfc0;
+                background: var(--amber-pale);
+                color: var(--amber-ink);
+            }
+            .badge .dot {
+                width: 6px;
+                height: 6px;
+                border-radius: 50%;
+                background: currentColor;
+            }
+
+            /* ── Lienzo ───────────────────────────────────────────────────── */
+            .view-body {
+                display: flex;
+                flex-direction: column;
+                gap: 14px;
+                width: 100%;
+                max-width: 1440px;
+                margin: 0 auto;
+                padding: 26px 32px 60px;
+            }
+            .view-head {
+                display: flex;
+                align-items: flex-start;
+                justify-content: space-between;
+                gap: 24px;
+            }
+            .view-head h1 {
+                font-size: 29px;
+                line-height: 1.15;
+            }
+            .view-subtitle {
+                max-width: 890px;
+                margin-top: 7px;
+                color: var(--ink-2);
+                font-size: 13.5px;
+            }
+            .view-subtitle b {
+                color: var(--ink);
+            }
+            .ex {
+                display: inline-block;
+                padding: 0 4px;
+                border-radius: 4px;
+                background: var(--amber-pale);
+                color: var(--amber-ink);
+                font-weight: 700;
+            }
+            .head-badges {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-end;
+                gap: 6px;
+                padding-top: 4px;
+            }
+            .route {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: baseline;
+                gap: 8px 10px;
+                padding: 10px 15px;
+                border: 1px solid #cdddf3;
+                border-left: 3px solid var(--blue);
+                border-radius: 8px;
+                background: var(--blue-pale);
+                color: var(--ink-2);
+                font-size: 12.5px;
+            }
+            .route b {
+                color: var(--blue-dark);
+            }
+            .route .path {
+                padding: 1px 6px;
+                border: 1px solid #c3d6ef;
+                border-radius: 4px;
+                background: var(--paper);
+                color: var(--blue-dark);
+                font-weight: 600;
+                white-space: nowrap;
+            }
+
+            /* ── Cabecera obligatoria ─────────────────────────────────────── */
+            .ann {
+                display: grid;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                grid-auto-flow: dense;
+                gap: 10px;
+            }
+            .ann-card {
+                padding: 13px 15px 14px;
+                border: 1px solid var(--line);
+                border-radius: 10px;
+                background: var(--paper);
+                color: var(--ink-2);
+                font-size: 12.5px;
+            }
+            .ann-card.wide {
+                grid-column: span 2;
+            }
+            .ann-card h3 {
+                display: flex;
+                align-items: center;
+                gap: 7px;
+                margin-bottom: 7px;
+                font-size: 13px;
+                letter-spacing: 0.01em;
+            }
+            .ann-card h3 .n {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 19px;
+                height: 19px;
+                border-radius: 5px;
+                background: var(--blue-pale);
+                color: var(--blue-dark);
+                font-family: var(--font-sans);
+                font-size: 11px;
+                font-weight: 700;
+            }
+            .ann-card b {
+                color: var(--ink);
+            }
+            table.ann-table {
+                width: 100%;
+                border-collapse: collapse;
+                font-size: 12px;
+            }
+            table.ann-table th code {
+                letter-spacing: 0;
+                text-transform: none;
+            }
+            table.ann-table th {
+                padding: 5px 8px;
+                border-bottom: 1px solid var(--line);
+                color: var(--th);
+                font-size: 10px;
+                font-weight: 700;
+                letter-spacing: 0.05em;
+                text-align: left;
+                text-transform: uppercase;
+            }
+            table.ann-table td {
+                padding: 5px 8px;
+                border-bottom: 1px solid var(--line);
+                font-size: 11.5px;
+                vertical-align: top;
+            }
+            table.ann-table tr:last-child td {
+                border-bottom: 0;
+            }
+
+            /* ── Regla de oro ─────────────────────────────────────────────── */
+            .golden {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                gap: 12px 16px;
+                padding: 13px 16px;
+                border: 1px solid #cfdff2;
+                border-left: 4px solid var(--blue);
+                border-radius: 10px;
+                background: linear-gradient(90deg, var(--blue-pale), #f7fafe);
+            }
+            .golden-key {
+                flex: none;
+                padding: 4px 9px;
+                border-radius: 6px;
+                background: var(--blue);
+                color: #fff;
+                font-size: 10.5px;
+                font-weight: 700;
+                letter-spacing: 0.07em;
+                text-transform: uppercase;
+            }
+            .golden p {
+                flex: 1 1 380px;
+                color: var(--ink-2);
+                font-size: 12.5px;
+            }
+            .golden p b {
+                color: var(--ink);
+                font-size: 13.5px;
+            }
+            .golden-stats {
+                display: flex;
+                gap: 18px;
+                padding-left: 18px;
+                border-left: 1px solid #cfdff2;
+            }
+            .golden-stats div {
+                display: flex;
+                flex-direction: column;
+                gap: 1px;
+                white-space: nowrap;
+            }
+            .golden-stats b {
+                color: var(--ink);
+                font-family: var(--font-display);
+                font-size: 16px;
+                line-height: 1.2;
+            }
+            .golden-stats span {
+                color: var(--ink-3);
+                font-size: 10.5px;
+            }
+
+            /* ── Tarjetas de indicadores ──────────────────────────────────── */
+            .kpis {
+                display: grid;
+                grid-template-columns: repeat(4, minmax(0, 1fr));
+                gap: 12px;
+            }
+            .kpi {
+                display: flex;
+                flex-direction: column;
+                gap: 6px;
+                padding: 14px 15px 12px;
+                border: 1px solid var(--line);
+                border-radius: 11px;
+                background: var(--paper);
+                box-shadow: 0 1px 2px rgba(23, 40, 58, 0.04);
+            }
+            .kpi-top {
+                display: flex;
+                align-items: flex-start;
+                justify-content: space-between;
+                gap: 8px;
+            }
+            .kpi .label {
+                color: var(--ink-2);
+                font-size: 11.5px;
+                font-weight: 600;
+                line-height: 1.3;
+            }
+            .tag-example {
+                flex: none;
+                padding: 1px 6px;
+                border: 1px solid #f0dfc0;
+                border-radius: 4px;
+                background: var(--amber-pale);
+                color: var(--amber-ink);
+                font-size: 9.5px;
+                font-weight: 700;
+                letter-spacing: 0.05em;
+                text-transform: uppercase;
+            }
+            .kpi .val {
+                color: var(--ink);
+                font-family: var(--font-display);
+                font-size: 26px;
+                font-weight: 700;
+                line-height: 1.1;
+                letter-spacing: -0.02em;
+            }
+            .kpi .val .approx {
+                color: var(--amber-ink);
+                font-size: 18px;
+                font-weight: 700;
+            }
+            .kpi .unit {
+                color: var(--ink-2);
+                font-family: var(--font-sans);
+                font-size: 12.5px;
+                font-weight: 600;
+                letter-spacing: 0;
+            }
+            .kpi .hint {
+                color: var(--ink-3);
+                font-size: 11px;
+            }
+            .kpi .foot {
+                margin-top: auto;
+                padding-top: 7px;
+                border-top: 1px dashed var(--line);
+                color: var(--ink-3);
+                font-size: 10.5px;
+                line-height: 1.4;
+            }
+            .kpi .warn {
+                display: block;
+                margin-top: 4px;
+                color: var(--amber-ink);
+                font-weight: 600;
+            }
+
+            /* ── Paneles ──────────────────────────────────────────────────── */
+            .workspace {
+                display: grid;
+                grid-template-columns: minmax(0, 1fr) 422px;
+                gap: 14px;
+                align-items: start;
+            }
+            .panel {
+                border: 1px solid var(--line);
+                border-radius: 12px;
+                background: var(--paper);
+                box-shadow: 0 1px 3px rgba(23, 40, 58, 0.05);
+                overflow: hidden;
+            }
+            .panel-head {
+                display: flex;
+                align-items: baseline;
+                justify-content: space-between;
+                gap: 12px;
+                padding: 12px 16px;
+                border-bottom: 1px solid var(--line);
+            }
+            .panel-title {
+                display: flex;
+                align-items: baseline;
+                gap: 9px;
+            }
+            .panel-title h2 {
+                font-size: 15px;
+            }
+            .panel-title .count {
+                color: var(--ink-3);
+                font-size: 11.5px;
+            }
+            .panel-note {
+                color: var(--ink-3);
+                font-size: 10.5px;
+                text-align: right;
+            }
+            .panel-body {
+                padding: 12px 16px 14px;
+            }
+            .eyebrow {
+                display: block;
+                color: var(--ink-3);
+                font-size: 9.5px;
+                font-weight: 700;
+                letter-spacing: 0.07em;
+                text-transform: uppercase;
+            }
+
+            /* ── Bandeja ──────────────────────────────────────────────────── */
+            .table-wrap {
+                overflow-x: auto;
+            }
+            table.tray {
+                width: 100%;
+                min-width: 900px;
+                border-collapse: collapse;
+            }
+            table.tray caption {
+                padding: 9px 16px 0;
+                color: var(--ink-3);
+                font-size: 10.5px;
+                text-align: left;
+            }
+            table.tray th {
+                padding: 9px 10px 8px;
+                border-bottom: 1px solid var(--line);
+                color: var(--th);
+                font-size: 10px;
+                font-weight: 700;
+                letter-spacing: 0.055em;
+                text-align: left;
+                text-transform: uppercase;
+                vertical-align: bottom;
+                white-space: nowrap;
+            }
+            .colsrc {
+                display: block;
+                margin-top: 3px;
+                color: var(--ink-3);
+                font-size: 9.5px;
+                font-weight: 500;
+                letter-spacing: 0;
+                text-transform: none;
+                white-space: normal;
+            }
+            .todo {
+                color: var(--amber-ink);
+                font-weight: 700;
+            }
+            table.tray td {
+                height: 44px;
+                padding: 6px 10px;
+                border-bottom: 1px solid var(--line);
+                color: var(--ink-2);
+                font-size: 12px;
+                vertical-align: middle;
+            }
+            table.tray tr:last-child td {
+                border-bottom: 0;
+            }
+            table.tray tr.selected td {
+                background: #f4f8fd;
+            }
+            table.tray tr.selected td:first-child {
+                box-shadow: inset 3px 0 0 var(--blue);
+            }
+            .entity {
+                color: var(--ink);
+                font-weight: 600;
+                white-space: nowrap;
+            }
+            .open-tag {
+                display: inline-block;
+                margin-top: 2px;
+                padding: 0 5px;
+                border-radius: 3px;
+                background: var(--blue-pale);
+                color: var(--blue-dark);
+                font-size: 9px;
+                font-weight: 700;
+                letter-spacing: 0.04em;
+                text-transform: uppercase;
+            }
+            .conf {
+                display: flex;
+                align-items: center;
+                gap: 7px;
+            }
+            .bar {
+                display: block;
+                width: 58px;
+                height: 6px;
+                overflow: hidden;
+                border-radius: 999px;
+                background: #edf1f4;
+            }
+            .bar .fill {
+                display: block;
+                height: 100%;
+                border-radius: inherit;
+                background: var(--blue);
+            }
+            .conf b {
+                color: var(--ink-2);
+                font-size: 11.5px;
+                font-variant-numeric: tabular-nums;
+            }
+            .chip {
+                display: inline-flex;
+                align-items: center;
+                gap: 4px;
+                padding: 2px 7px;
+                border: 1px solid transparent;
+                border-radius: 999px;
+                font-size: 10.5px;
+                font-weight: 600;
+                white-space: nowrap;
+            }
+            .chip .g {
+                font-size: 10px;
+            }
+            .chip.pending {
+                border-color: #f0dfc0;
+                background: var(--amber-pale);
+                color: var(--amber-ink);
+            }
+            .chip.accepted {
+                border-color: #cfe4d9;
+                background: var(--green-pale);
+                color: var(--green-ink);
+            }
+            .chip.changed,
+            .chip.info {
+                border-color: #cdddf3;
+                background: var(--blue-pale);
+                color: var(--blue-dark);
+            }
+            .chip.rejected {
+                border-color: #efd3d0;
+                background: var(--red-pale);
+                color: var(--red-ink);
+            }
+            .chip.expired,
+            .chip.grey {
+                border-color: #dfe5ea;
+                background: #eef1f3;
+                color: var(--grey-ink);
+            }
+            .who {
+                display: block;
+                color: var(--ink);
+                font-weight: 600;
+                white-space: nowrap;
+            }
+            .when {
+                display: block;
+                color: var(--ink-3);
+                font-size: 10px;
+                white-space: nowrap;
+            }
+            .none {
+                color: var(--ink-3);
+                font-style: italic;
+            }
+            table.tray tfoot td {
+                padding: 9px 12px;
+                border-top: 1px solid var(--line);
+                background: #fbfcfd;
+                color: var(--ink-3);
+                font-size: 10.5px;
+                line-height: 1.45;
+            }
+            .legend {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 6px;
+                padding: 9px 16px 11px;
+                border-top: 1px solid var(--line);
+                background: #fbfcfd;
+            }
+
+            /* ── Panel de detalle ─────────────────────────────────────────── */
+            .detail-head {
+                align-items: flex-start;
+            }
+            .detail-head h2 {
+                margin-top: 2px;
+                font-size: 15.5px;
+                line-height: 1.25;
+            }
+            .detail-sub {
+                display: block;
+                margin-top: 2px;
+                color: var(--ink-3);
+                font-size: 11px;
+            }
+            .detail-body {
+                display: flex;
+                flex-direction: column;
+                gap: 13px;
+                padding: 13px 16px 16px;
+            }
+            .meta {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 7px 12px;
+                margin: 0;
+                padding: 9px 11px;
+                border: 1px solid var(--line);
+                border-radius: 8px;
+                background: #fbfcfd;
+            }
+            .meta div {
+                min-width: 0;
+            }
+            .meta dt {
+                color: var(--ink-3);
+                font-size: 9.5px;
+                font-weight: 700;
+                letter-spacing: 0.05em;
+                text-transform: uppercase;
+            }
+            .meta dd {
+                margin: 1px 0 0;
+                color: var(--ink-2);
+                font-size: 11.5px;
+                overflow-wrap: anywhere;
+            }
+            .dsec h3 {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                margin-bottom: 5px;
+                color: var(--ink);
+                font-family: var(--font-sans);
+                font-size: 11.5px;
+                font-weight: 700;
+                letter-spacing: 0.02em;
+            }
+            .dsec h3::before {
+                content: "";
+                width: 3px;
+                height: 12px;
+                border-radius: 2px;
+                background: var(--blue);
+            }
+            .dsec p {
+                color: var(--ink-2);
+                font-size: 12px;
+            }
+            .src-line {
+                margin-top: 5px;
+                color: var(--ink-3);
+                font-size: 10px;
+                line-height: 1.4;
+            }
+            .decision-box {
+                padding: 9px 11px;
+                border: 1px solid var(--line);
+                border-radius: 8px;
+                background: var(--canvas);
+            }
+            .decision-box b {
+                color: var(--ink);
+            }
+            .decision-box p {
+                margin-top: 4px;
+            }
+            .diff-legend {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 4px 12px;
+                margin-bottom: 6px;
+                color: var(--ink-3);
+                font-size: 10px;
+            }
+            .diff-legend .k-del {
+                padding: 0 4px;
+                border-radius: 3px;
+                background: var(--red-pale);
+                color: var(--red-ink);
+                text-decoration: line-through;
+            }
+            .diff-legend .k-ins {
+                padding: 0 4px;
+                border-radius: 3px;
+                background: var(--blue-pale);
+                color: var(--blue-dark);
+                text-decoration: underline;
+            }
+            .diff {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 1px;
+                overflow: hidden;
+                border: 1px solid var(--line);
+                border-radius: 8px;
+                background: var(--line);
+            }
+            .diff-col {
+                min-width: 0;
+                padding: 8px 10px 10px;
+                background: var(--paper);
+            }
+            .diff-col h4 {
+                margin-bottom: 5px;
+                color: var(--ink-3);
+                font-family: var(--font-sans);
+                font-size: 9.5px;
+                font-weight: 700;
+                letter-spacing: 0.06em;
+                text-transform: uppercase;
+            }
+            .diff-col p {
+                color: var(--ink-2);
+                font-size: 11.5px;
+                line-height: 1.6;
+            }
+            .diff-col del {
+                border-radius: 3px;
+                background: var(--red-pale);
+                color: var(--red-ink);
+                text-decoration: line-through;
+            }
+            .diff-col ins {
+                border-radius: 3px;
+                background: var(--blue-pale);
+                color: var(--blue-dark);
+                text-decoration: underline;
+            }
+            .callout {
+                margin-top: 6px;
+                padding: 8px 10px;
+                border: 1px solid #f0dfc0;
+                border-radius: 7px;
+                background: var(--amber-pale);
+                color: var(--ink-2);
+                font-size: 11px;
+            }
+            .callout b {
+                color: var(--amber-ink);
+            }
+            .linkrow {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 6px 14px;
+            }
+            .linkish {
+                border-bottom: 1px solid currentColor;
+                color: var(--blue);
+                font-size: 11.5px;
+                font-weight: 600;
+                cursor: not-allowed;
+            }
+            .linkish[aria-disabled="true"] {
+                color: var(--blue-dark);
+            }
+            .note {
+                color: var(--ink-3);
+                font-size: 10px;
+                line-height: 1.45;
+            }
+
+            /* ── Lecciones aprendidas ────────────────────────────────────── */
+            .panel-intro {
+                margin-bottom: 10px;
+                color: var(--ink-3);
+                font-size: 11px;
+            }
+            .lesson-grid {
+                display: grid;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: 10px;
+            }
+            .lesson {
+                display: flex;
+                flex-direction: column;
+                gap: 6px;
+                padding: 11px 12px;
+                border: 1px solid var(--line);
+                border-radius: 9px;
+                background: #fbfcfd;
+            }
+            .lesson-top {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 8px;
+            }
+            .lesson-top code {
+                background: var(--paper);
+            }
+            .lesson h3 {
+                font-size: 12.5px;
+                line-height: 1.35;
+            }
+            .lesson p {
+                color: var(--ink-2);
+                font-size: 11px;
+            }
+            .lesson .origin {
+                color: var(--ink-3);
+                font-size: 10.5px;
+            }
+            .lesson .origin b {
+                color: var(--ink-2);
+            }
+            .lesson-act {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                margin-top: auto;
+                padding-top: 7px;
+                border-top: 1px dashed var(--line);
+            }
+            .btn {
+                padding: 5px 11px;
+                border: 1px solid var(--blue);
+                border-radius: 6px;
+                background: var(--blue);
+                color: #fff;
+                font-family: var(--font-sans);
+                font-size: 11px;
+                font-weight: 700;
+                cursor: pointer;
+            }
+            .btn[disabled] {
+                border-color: #d7dee5;
+                background: #eef1f3;
+                color: var(--grey-ink);
+                cursor: not-allowed;
+            }
+            .lock {
+                color: var(--ink-3);
+                font-size: 9.5px;
+                line-height: 1.3;
+            }
+            .lock b {
+                color: var(--amber-ink);
+            }
+
+            /* ── Gobierno de prompts y modelos ───────────────────────────── */
+            .gov-top {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 10px;
+                margin-bottom: 12px;
+            }
+            .gov-item {
+                display: flex;
+                flex-direction: column;
+                gap: 3px;
+                padding: 10px 12px;
+                border: 1px solid var(--line);
+                border-radius: 9px;
+                background: #fbfcfd;
+            }
+            .gov-item h3 {
+                display: flex;
+                align-items: center;
+                gap: 7px;
+                color: var(--th);
+                font-family: var(--font-sans);
+                font-size: 10px;
+                font-weight: 700;
+                letter-spacing: 0.055em;
+                text-transform: uppercase;
+            }
+            .gov-item .gval {
+                color: var(--ink);
+                font-family: var(--font-display);
+                font-size: 16px;
+                font-weight: 700;
+            }
+            .gov-item p {
+                color: var(--ink-2);
+                font-size: 11px;
+            }
+            .gov-sub {
+                margin-bottom: 4px;
+                color: var(--th);
+                font-family: var(--font-sans);
+                font-size: 11px;
+                font-weight: 700;
+                letter-spacing: 0.05em;
+                text-transform: uppercase;
+            }
+            table.hist {
+                width: 100%;
+                border-collapse: collapse;
+            }
+            table.hist th {
+                padding: 7px 9px;
+                border-bottom: 1px solid var(--line);
+                color: var(--th);
+                font-size: 9.5px;
+                font-weight: 700;
+                letter-spacing: 0.05em;
+                text-align: left;
+                text-transform: uppercase;
+            }
+            table.hist td {
+                padding: 7px 9px;
+                border-bottom: 1px solid var(--line);
+                color: var(--ink-2);
+                font-size: 11px;
+                vertical-align: top;
+            }
+            table.hist tr:last-child td {
+                border-bottom: 0;
+            }
+            table.hist td b {
+                color: var(--ink);
+            }
+            .foot {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 6px 22px;
+                padding: 2px 2px 0;
+                color: var(--ink-3);
+                font-size: 10.5px;
+            }
+            .foot b {
+                color: var(--ink-2);
+            }
+
+            @media (max-width: 1240px) {
+                .workspace {
+                    grid-template-columns: minmax(0, 1fr) 392px;
+                }
+                .kpis {
+                    grid-template-columns: repeat(2, minmax(0, 1fr));
+                }
+            }
+            @media (max-width: 1120px) {
+                .workspace {
+                    grid-template-columns: minmax(0, 1fr);
+                }
+                .lesson-grid {
+                    grid-template-columns: 1fr;
+                }
+            }
+            @media (max-width: 1024px) {
+                .view-body {
+                    padding: 20px 18px 44px;
+                }
+                .view-head {
+                    flex-direction: column;
+                }
+                .head-badges {
+                    align-items: flex-start;
+                    flex-direction: row;
+                    flex-wrap: wrap;
+                }
+                .ann {
+                    grid-template-columns: 1fr;
+                }
+                .ann-card.wide {
+                    grid-column: auto;
+                }
+                .golden-stats {
+                    padding-left: 0;
+                    border-left: 0;
+                }
+                .gov-top {
+                    grid-template-columns: 1fr;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="topbar">
+            <div class="brand">
+                <b>AVISA</b>
+                <span>Aplicativo de apoyo a la gestión<br />de conflictos sociales</span>
+            </div>
+            <nav class="crumbs" aria-label="Ubicación propuesta">
+                <span>Administración</span>
+                <span class="sep" aria-hidden="true">›</span>
+                <b>Gobierno de las sugerencias</b>
+                <span class="sep" aria-hidden="true">·</span>
+                <span>pestaña propuesta</span>
+            </nav>
+            <div class="topbar-right">
+                <span class="badge amber"><span class="dot" aria-hidden="true"></span>sin ruta · no está en el menú</span>
+                <span class="badge blue">Administrador · Dirección</span>
+                <span class="badge">Item 87 · toca 56 y 66</span>
+            </div>
+        </div>
+
+        <main class="view-body">
+            <header class="view-head">
+                <div>
+                    <h1>Gobierno de las sugerencias</h1>
+                    <p class="view-subtitle">
+                        Registro, evaluación y aprendizaje de cada propuesta
+                        automática: <b>qué propuso el agente</b>, con qué
+                        confianza, <b>quién decidió</b> y por qué. Es pantalla de
+                        administración y supervisión, no de trabajo de campo.
+                        Cubre el <b>item 87</b> y toca <b>56</b> y <b>66</b>. Los
+                        nombres de tabla del esquema <code>agent</code> son
+                        reales; las columnas que no se conocen se declaran
+                        <span class="todo">por confirmar</span>. Toda cifra con
+                        <span class="ex">≈</span> es <b>ejemplo</b>.
+                    </p>
+                </div>
+                <div class="head-badges">
+                    <span class="badge amber">Vista previa · artboard 1440 px</span>
+                    <span class="badge">Administración · sólo lectura</span>
+                </div>
+            </header>
+
+            <div class="route" role="note">
+                <b>Ubicación propuesta</b>
+                <span class="path">Administración › Gobierno de las sugerencias</span>
+                <span>
+                    — no se agrega al menú del shell ni a las 22 rutas. Viviría
+                    bajo <b>Administración</b> (item <b>56</b>), visible sólo
+                    para <b>Administrador</b> y <b>Dirección</b>. Los rótulos de
+                    tipo y estado, y el vínculo a la entidad afectada, salen del
+                    descriptor del item <b>66</b>, no de listas propias.
+                </span>
+            </div>
+
+            <div class="golden" role="note">
+                <span class="golden-key">Regla de oro</span>
+                <p>
+                    <b>El sistema nunca aplica una sugerencia sin decisión humana.</b><br />
+                    Toda fila con efecto registra persona y fecha en
+                    <code>Decisión de</code>. Las dos filas sin decisión —Pendiente
+                    y Expirada— quedan inertes: no tocan el caso ni la alerta.
+                </p>
+                <div class="golden-stats">
+                    <div>
+                        <b>0 de 8</b>
+                        <span>filas aplicadas en automático</span>
+                    </div>
+                    <div>
+                        <b>4 de 4</b>
+                        <span>filas con efecto llevan persona y fecha</span>
+                    </div>
+                    <div>
+                        <b>2</b>
+                        <span>filas sin decisión, sin efecto</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══════════ Cabecera obligatoria · cinco apartados ═══════════ -->
+            <section class="ann" aria-label="Cabecera obligatoria del artboard">
+                <div class="ann-card">
+                    <h3><span class="n">1</span>Cubre</h3>
+                    <b>87</b> · gobierno de las sugerencias: registro y
+                    evaluación de cada propuesta automática (pieza de «Lo que no
+                    es una pantalla» en <code>frontend.md</code>). <br />
+                    <b>Toca 56</b>: la pantalla vive bajo <b>Administración</b>,
+                    con sus permisos y su auditoría de cambios. <br />
+                    <b>Toca 66</b>: los rótulos de tipo, estado y entidad, y el
+                    vínculo a la entidad afectada, salen de un descriptor único
+                    por entidad. <br />
+                    <b>Pantalla:</b> administración y supervisión; no es una de
+                    las 22 rutas del mapa del sitio. <br />
+                    <b>Tipos registrados:</b> alerta propuesta · clasificación de
+                    nivel · borrador de ayuda memoria · vínculo caso–demanda ·
+                    duplicado detectado.
+                </div>
+
+                <div class="ann-card wide">
+                    <h3><span class="n">2</span>Dato por bloque</h3>
+                    <table class="ann-table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Bloque o celda</th>
+                                <th scope="col">Tabla del esquema <code>agent</code></th>
+                                <th scope="col">Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Tarjetas de indicadores</td>
+                                <td><code>run_log</code> · <code>feedback_log</code></td>
+                                <td>tablas existen · columnas <span class="todo">por confirmar</span></td>
+                            </tr>
+                            <tr>
+                                <td>Bandeja: fecha, tipo y confianza</td>
+                                <td><code>run_log</code> (+ partición <code>run_log_202611</code>)</td>
+                                <td>existe · columnas <span class="todo">por confirmar</span></td>
+                            </tr>
+                            <tr>
+                                <td>Bandeja: origen</td>
+                                <td><code>modelo_registro</code> · <code>plantilla_prompt</code></td>
+                                <td>existen · columnas <span class="todo">por confirmar</span></td>
+                            </tr>
+                            <tr>
+                                <td>Bandeja: estado y decisión de</td>
+                                <td><code>feedback_log</code></td>
+                                <td>existe · <b>sin filas</b> · columnas <span class="todo">por confirmar</span></td>
+                            </tr>
+                            <tr>
+                                <td>Detalle: propuesta y fragmentos</td>
+                                <td><code>llm_call</code> · <code>llm_call_fragmento</code></td>
+                                <td>existen · columnas <span class="todo">por confirmar</span></td>
+                            </tr>
+                            <tr>
+                                <td>Detalle: sesión y pasos</td>
+                                <td><code>sesion</code> · <code>sesion_paso</code></td>
+                                <td>existen · columnas <span class="todo">por confirmar</span></td>
+                            </tr>
+                            <tr>
+                                <td>Lecciones aprendidas</td>
+                                <td><code>lessons_learned</code></td>
+                                <td>existe · no hay columna confirmada de «rechazos origen»</td>
+                            </tr>
+                            <tr>
+                                <td>Gobierno de prompts y modelos</td>
+                                <td><code>plantilla_prompt</code> · <code>modelo_registro</code></td>
+                                <td>existen · lectura, sin endpoint</td>
+                            </tr>
+                            <tr>
+                                <td>Entidad afectada</td>
+                                <td><code>run_log</code> → caso o alerta</td>
+                                <td>falta confirmar la columna de vínculo · <span class="todo">por confirmar</span></td>
+                            </tr>
+                            <tr>
+                                <td>Rótulos y catálogos de tipo</td>
+                                <td><code>cat_detalle_schema</code></td>
+                                <td>existe · sostiene el descriptor del item 66</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="ann-card">
+                    <h3><span class="n">3</span>Sólo forma · no implementar</h3>
+                    La bandeja como tabla principal, el panel de detalle
+                    <b>dibujado abierto</b> sobre la fila 3, el diff en dos
+                    columnas, las cuatro tarjetas, la barra de confianza y la
+                    lectura de sólo gobierno son decisiones de forma. No se
+                    inventan reglas de agregación ni campos: cada hueco se
+                    declara y cada columna desconocida queda
+                    <span class="todo">por confirmar</span>.
+                </div>
+
+                <div class="ann-card">
+                    <h3><span class="n">4</span>Bloqueado</h3>
+                    <b>Escritura:</b> «Convertir en regla» escribe en
+                    <code>plantilla_prompt</code>; no hay endpoint, y el botón se
+                    dibuja deshabilitado. <br />
+                    <b>Cálculo:</b> la tasa de aceptación y el tiempo medio hasta
+                    la decisión no se pueden calcular con
+                    <code>feedback_log</code> vacío. <br />
+                    <b>Vínculos:</b> <code>run_log</code> y la entidad afectada no
+                    tienen endpoint de consulta por id; los enlaces no navegan.
+                    <br />
+                    <b>Automatización:</b> aplicar una sugerencia sin decisión
+                    humana no es un pendiente técnico, es una prohibición de
+                    diseño.
+                </div>
+
+                <div class="ann-card">
+                    <h3><span class="n">5</span>Roles</h3>
+                    <b>Administrador:</b> ve todo; cuando exista endpoint es quien
+                    convierte una lección en regla y publica una versión de
+                    plantilla. <br />
+                    <b>Dirección:</b> lectura completa, incluidas métricas,
+                    motivos y versiones. <br />
+                    <b>Sin acceso:</b> Secretaría General, Viceministerios,
+                    Sectoristas y Especialistas OAIPCS. Deciden sus sugerencias
+                    en la pantalla donde se las proponen, no acá.
+                </div>
+            </section>
+
+            <!-- ═══════════ Indicadores · valores de ejemplo ═══════════ -->
+            <div class="kpis">
+                <div class="kpi">
+                    <div class="kpi-top">
+                        <span class="label">Sugerencias del período</span>
+                        <span class="tag-example">ejemplo</span>
+                    </div>
+                    <div class="val"><span class="approx">≈</span> 128</div>
+                    <div class="hint">1–22 nov 2026 · todas las fuentes</div>
+                    <div class="foot">
+                        Saldría de <code>agent.run_log</code> (partición
+                        <code>run_log_202611</code>). Columna de tipo y de
+                        origen: <span class="todo">por confirmar</span>.
+                    </div>
+                </div>
+
+                <div class="kpi">
+                    <div class="kpi-top">
+                        <span class="label">Tasa de aceptación</span>
+                        <span class="tag-example">ejemplo</span>
+                    </div>
+                    <div class="val">
+                        <span class="approx">≈</span> 71,8 <span class="unit">%</span>
+                    </div>
+                    <div class="hint">(aceptadas + con cambios) ÷ decididas</div>
+                    <div class="foot">
+                        Saldría de <code>agent.feedback_log</code> ⋈
+                        <code>agent.run_log</code>; columnas
+                        <span class="todo">por confirmar</span>.
+                        <span class="warn">No calculable hoy: <code>feedback_log</code> está vacío; la cifra es de ejemplo.</span>
+                    </div>
+                </div>
+
+                <div class="kpi">
+                    <div class="kpi-top">
+                        <span class="label">Tiempo medio hasta la decisión</span>
+                        <span class="tag-example">ejemplo</span>
+                    </div>
+                    <div class="val">
+                        <span class="approx">≈</span> 9 <span class="unit">h 40 min</span>
+                    </div>
+                    <div class="hint">de la propuesta a la decisión humana</div>
+                    <div class="foot">
+                        Saldría de <code>agent.run_log</code> (propuesta) +
+                        <code>agent.feedback_log</code> (decisión); marcas de
+                        tiempo <span class="todo">por confirmar</span>.
+                    </div>
+                </div>
+
+                <div class="kpi">
+                    <div class="kpi-top">
+                        <span class="label">Ahorro estimado de trabajo</span>
+                        <span class="tag-example">ejemplo</span>
+                    </div>
+                    <div class="val">
+                        <span class="approx">≈</span> 41 <span class="unit">h</span>
+                    </div>
+                    <div class="hint">tiempo estimado por sugerencia aceptada</div>
+                    <div class="foot">
+                        Saldría de <code>agent.feedback_log</code>. Es una
+                        <b>estimación declarada</b>, no una medición: no se
+                        presenta como cifra oficial.
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══════════ Bandeja + detalle abierto ═══════════ -->
+            <div class="workspace">
+                <section class="panel" aria-labelledby="tray-title">
+                    <div class="panel-head">
+                        <div class="panel-title">
+                            <h2 id="tray-title">Bandeja de sugerencias</h2>
+                            <span class="count">8 visibles · 128 en el período · 2 sin decisión</span>
+                        </div>
+                        <span class="panel-note">
+                            Datos de ejemplo · la fila 3 está abierta en el detalle
+                        </span>
+                    </div>
+                    <div class="table-wrap">
+                        <table class="tray">
+                            <caption>
+                                Cada columna declara su tabla de origen y marca
+                                <span class="todo">por confirmar</span> cuando la
+                                columna no se conoce. Ninguna sugerencia tiene
+                                efecto sin «Decisión de» y fecha.
+                            </caption>
+                            <thead>
+                                <tr>
+                                    <th scope="col">
+                                        Fecha
+                                        <span class="colsrc"><code>agent.run_log</code> · <span class="todo">por confirmar</span></span>
+                                    </th>
+                                    <th scope="col">
+                                        Origen
+                                        <span class="colsrc"><code>modelo_registro</code> / <code>plantilla_prompt</code> · <span class="todo">por confirmar</span></span>
+                                    </th>
+                                    <th scope="col">
+                                        Tipo de sugerencia
+                                        <span class="colsrc"><code>agent.run_log</code> · <span class="todo">por confirmar</span></span>
+                                    </th>
+                                    <th scope="col">
+                                        Entidad afectada
+                                        <span class="colsrc">vínculo en <code>run_log</code> · <span class="todo">por confirmar</span></span>
+                                    </th>
+                                    <th scope="col">
+                                        Confianza
+                                        <span class="colsrc"><code>agent.run_log</code> · <span class="todo">por confirmar</span></span>
+                                    </th>
+                                    <th scope="col">
+                                        Estado
+                                        <span class="colsrc"><code>agent.feedback_log</code> · <span class="todo">por confirmar</span></span>
+                                    </th>
+                                    <th scope="col">
+                                        Decisión de
+                                        <span class="colsrc"><code>agent.feedback_log</code> · <span class="todo">por confirmar</span></span>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>22 nov 2026</td>
+                                    <td>
+                                        Modelo · <b>M-2026-11</b>
+                                        <span class="when">modelo_registro</span>
+                                    </td>
+                                    <td>Alerta propuesta</td>
+                                    <td><span class="entity">AL-2026-0311</span></td>
+                                    <td>
+                                        <div class="conf">
+                                            <span class="bar" role="img" aria-label="Confianza 88 por ciento"><span class="fill" style="width:88%"></span></span>
+                                            <b>88 %</b>
+                                        </div>
+                                    </td>
+                                    <td><span class="chip pending"><span class="g" aria-hidden="true">○</span>Pendiente</span></td>
+                                    <td><span class="none">— sin decisión</span></td>
+                                </tr>
+                                <tr>
+                                    <td>22 nov 2026</td>
+                                    <td>
+                                        Modelo · <b>M-2026-11</b>
+                                        <span class="when">modelo_registro</span>
+                                    </td>
+                                    <td>Clasificación de nivel</td>
+                                    <td><span class="entity">CAS-2026-0184</span></td>
+                                    <td>
+                                        <div class="conf">
+                                            <span class="bar" role="img" aria-label="Confianza 74 por ciento"><span class="fill" style="width:74%"></span></span>
+                                            <b>74 %</b>
+                                        </div>
+                                    </td>
+                                    <td><span class="chip accepted"><span class="g" aria-hidden="true">✓</span>Aceptada</span></td>
+                                    <td>
+                                        <span class="who">A. Rojas</span>
+                                        <span class="when">22 nov · 15:12</span>
+                                    </td>
+                                </tr>
+                                <tr class="selected">
+                                    <td>21 nov 2026</td>
+                                    <td>
+                                        Modelo · <b>M-2026-11</b>
+                                        <span class="when">modelo_registro</span>
+                                    </td>
+                                    <td>Borrador de ayuda memoria</td>
+                                    <td>
+                                        <span class="entity">CAS-2026-0171</span><br />
+                                        <span class="open-tag">detalle abierto</span>
+                                    </td>
+                                    <td>
+                                        <div class="conf">
+                                            <span class="bar" role="img" aria-label="Confianza 63 por ciento"><span class="fill" style="width:63%"></span></span>
+                                            <b>63 %</b>
+                                        </div>
+                                    </td>
+                                    <td><span class="chip changed"><span class="g" aria-hidden="true">✎</span>Aceptada con cambios</span></td>
+                                    <td>
+                                        <span class="who">L. Paredes</span>
+                                        <span class="when">21 nov · 18:40</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>21 nov 2026</td>
+                                    <td>
+                                        Plantilla · <b>v1.4.2</b>
+                                        <span class="when">plantilla_prompt</span>
+                                    </td>
+                                    <td>Vínculo caso–demanda</td>
+                                    <td><span class="entity">CAS-2026-0158 ↔ D-2026-0402</span></td>
+                                    <td>
+                                        <div class="conf">
+                                            <span class="bar" role="img" aria-label="Confianza 91 por ciento"><span class="fill" style="width:91%"></span></span>
+                                            <b>91 %</b>
+                                        </div>
+                                    </td>
+                                    <td><span class="chip accepted"><span class="g" aria-hidden="true">✓</span>Aceptada</span></td>
+                                    <td>
+                                        <span class="who">L. Paredes</span>
+                                        <span class="when">21 nov · 11:03</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>20 nov 2026</td>
+                                    <td>
+                                        Modelo · <b>M-2026-10</b>
+                                        <span class="when">modelo_registro</span>
+                                    </td>
+                                    <td>Vínculo caso–demanda</td>
+                                    <td><span class="entity">CAS-2026-0132 ↔ D-2026-0377</span></td>
+                                    <td>
+                                        <div class="conf">
+                                            <span class="bar" role="img" aria-label="Confianza 52 por ciento"><span class="fill" style="width:52%"></span></span>
+                                            <b>52 %</b>
+                                        </div>
+                                    </td>
+                                    <td><span class="chip rejected"><span class="g" aria-hidden="true">✕</span>Rechazada</span></td>
+                                    <td>
+                                        <span class="who">A. Rojas</span>
+                                        <span class="when">20 nov · 16:55</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>20 nov 2026</td>
+                                    <td>
+                                        Modelo · <b>M-2026-10</b>
+                                        <span class="when">modelo_registro</span>
+                                    </td>
+                                    <td>Duplicado detectado</td>
+                                    <td><span class="entity">CAS-2026-0128 = CAS-2026-0125</span></td>
+                                    <td>
+                                        <div class="conf">
+                                            <span class="bar" role="img" aria-label="Confianza 83 por ciento"><span class="fill" style="width:83%"></span></span>
+                                            <b>83 %</b>
+                                        </div>
+                                    </td>
+                                    <td><span class="chip rejected"><span class="g" aria-hidden="true">✕</span>Rechazada</span></td>
+                                    <td>
+                                        <span class="who">M. Quispe</span>
+                                        <span class="when">20 nov · 10:21</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>19 nov 2026</td>
+                                    <td>
+                                        Modelo · <b>M-2026-10</b>
+                                        <span class="when">modelo_registro</span>
+                                    </td>
+                                    <td>Clasificación de nivel</td>
+                                    <td><span class="entity">CAS-2026-0119</span></td>
+                                    <td>
+                                        <div class="conf">
+                                            <span class="bar" role="img" aria-label="Confianza 68 por ciento"><span class="fill" style="width:68%"></span></span>
+                                            <b>68 %</b>
+                                        </div>
+                                    </td>
+                                    <td><span class="chip changed"><span class="g" aria-hidden="true">✎</span>Aceptada con cambios</span></td>
+                                    <td>
+                                        <span class="who">M. Quispe</span>
+                                        <span class="when">19 nov · 17:02</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>18 nov 2026</td>
+                                    <td>
+                                        Modelo · <b>M-2026-10</b>
+                                        <span class="when">modelo_registro</span>
+                                    </td>
+                                    <td>Alerta propuesta</td>
+                                    <td><span class="entity">AL-2026-0296</span></td>
+                                    <td>
+                                        <div class="conf">
+                                            <span class="bar" role="img" aria-label="Confianza 47 por ciento"><span class="fill" style="width:47%"></span></span>
+                                            <b>47 %</b>
+                                        </div>
+                                    </td>
+                                    <td><span class="chip expired"><span class="g" aria-hidden="true">◷</span>Expirada</span></td>
+                                    <td>
+                                        <span class="none">— sin decisión</span>
+                                        <span class="when">venció 21 nov</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="7">
+                                        <b>0 de 8</b> filas se aplicaron sin
+                                        persona y fecha. Las 2 filas sin decisión
+                                        (Pendiente y Expirada) no tocaron el caso
+                                        ni la alerta. El estado nunca se lee sólo
+                                        por color: cada chip lleva texto y símbolo.
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    <div class="legend" role="group" aria-label="Leyenda de estados">
+                        <span class="chip pending"><span class="g" aria-hidden="true">○</span>Pendiente = espera decisión</span>
+                        <span class="chip accepted"><span class="g" aria-hidden="true">✓</span>Aceptada = aplicada como se propuso</span>
+                        <span class="chip changed"><span class="g" aria-hidden="true">✎</span>Aceptada con cambios = aplicada con texto revisado</span>
+                        <span class="chip rejected"><span class="g" aria-hidden="true">✕</span>Rechazada = no se aplica; motivo obligatorio</span>
+                        <span class="chip expired"><span class="g" aria-hidden="true">◷</span>Expirada = venció sin decisión</span>
+                    </div>
+                </section>
+
+                <!-- Detalle dibujado abierto sobre la fila 3 -->
+                <aside class="panel detail" aria-labelledby="det-title">
+                    <div class="panel-head detail-head">
+                        <div>
+                            <span class="eyebrow">Panel lateral · dibujado abierto</span>
+                            <h2 id="det-title">Borrador de ayuda memoria</h2>
+                            <span class="detail-sub">CAS-2026-0171 · fila 3 de la bandeja</span>
+                        </div>
+                        <span class="chip changed"><span class="g" aria-hidden="true">✎</span>Aceptada con cambios</span>
+                    </div>
+                    <div class="detail-body">
+                        <dl class="meta">
+                            <div>
+                                <dt>Origen</dt>
+                                <dd>Modelo M-2026-11 · plantilla v1.4.2</dd>
+                            </div>
+                            <div>
+                                <dt>Confianza</dt>
+                                <dd>63 %</dd>
+                            </div>
+                            <div>
+                                <dt>Propuesta</dt>
+                                <dd>21 nov 2026, 09:18</dd>
+                            </div>
+                            <div>
+                                <dt>Decidida</dt>
+                                <dd>21 nov 2026, 18:40</dd>
+                            </div>
+                            <div>
+                                <dt>run_log</dt>
+                                <dd>id <span class="todo">por confirmar</span></dd>
+                            </div>
+                            <div>
+                                <dt>Entidad</dt>
+                                <dd>CAS-2026-0171</dd>
+                            </div>
+                        </dl>
+
+                        <section class="dsec">
+                            <h3>Qué propuso el sistema</h3>
+                            <p>
+                                Un borrador de ayuda memoria para la reunión del
+                                14 nov 2026 en el auditorio de la Municipalidad
+                                Provincial de Talara, con tres acuerdos y una
+                                recomendación de seguimiento al acuerdo 2.
+                            </p>
+                            <p class="src-line">
+                                Texto generado en <code>agent.llm_call</code> y
+                                <code>agent.llm_call_fragmento</code>; la sesión y
+                                sus pasos están en <code>agent.sesion</code> y
+                                <code>agent.sesion_paso</code>. Columnas
+                                <span class="todo">por confirmar</span>.
+                            </p>
+                        </section>
+
+                        <section class="dsec">
+                            <h3>Qué decidió la persona</h3>
+                            <div class="decision-box">
+                                <p>
+                                    <b>L. Paredes</b> · Especialista OAIPCS · 21 nov
+                                    2026, 18:40
+                                </p>
+                                <p>
+                                    «Aceptar con cambios: corregir la fecha, el
+                                    número de acta y el número de asistentes;
+                                    ampliar el plazo a 90 días.»
+                                </p>
+                                <p class="src-line">
+                                    Registrado en <code>agent.feedback_log</code> ·
+                                    columnas <span class="todo">por confirmar</span>.
+                                </p>
+                            </div>
+                        </section>
+
+                        <section class="dsec">
+                            <h3>Diff · texto propuesto y texto aceptado</h3>
+                            <div class="diff-legend">
+                                <span><span class="k-del">texto retirado</span> · rojo y tachado</span>
+                                <span><span class="k-ins">texto añadido</span> · azul y subrayado</span>
+                            </div>
+                            <div class="diff">
+                                <div class="diff-col">
+                                    <h4>Texto propuesto</h4>
+                                    <p>
+                                        Se sostuvo una reunión el
+                                        <del>14 nov 2026</del> en el auditorio de
+                                        la Municipalidad Provincial de Talara con
+                                        <del>32</del> participantes. El
+                                        <del>acta 44</del> registra tres acuerdos:
+                                        (1) conformar una mesa técnica; (2)
+                                        actualizar el padrón de pescadores
+                                        artesanales; (3) fijar un plazo de
+                                        <del>60 días</del> para la entrega del
+                                        informe. Se recomienda dar seguimiento al
+                                        acuerdo 2.
+                                    </p>
+                                </div>
+                                <div class="diff-col">
+                                    <h4>Texto aceptado</h4>
+                                    <p>
+                                        Se sostuvo una reunión el
+                                        <ins>18 nov 2026</ins> en el auditorio de
+                                        la Municipalidad Provincial de Talara con
+                                        <ins>27</ins> participantes. El
+                                        <ins>acta 47</ins> registra tres acuerdos:
+                                        (1) conformar una mesa técnica; (2)
+                                        actualizar el padrón de pescadores
+                                        artesanales; (3) fijar un plazo de
+                                        <ins>90 días</ins> para la entrega del
+                                        informe. Se recomienda dar seguimiento al
+                                        acuerdo 2 <ins>y al acuerdo 1</ins>.
+                                    </p>
+                                </div>
+                            </div>
+                            <p class="src-line">
+                                El diff no es una columna: se compone del texto
+                                propuesto (<code>llm_call</code>) y el aceptado
+                                (<code>feedback_log</code>). Columnas
+                                <span class="todo">por confirmar</span>.
+                            </p>
+                        </section>
+
+                        <section class="dsec">
+                            <h3>Motivo del rechazo</h3>
+                            <p>
+                                <b>En esta fila no hubo rechazo:</b> se aceptó con
+                                cambios. El motivo del cambio fue «el borrador
+                                citaba el acta 44 y 32 asistentes; la revisión
+                                contra el acta 47 corrigió fecha, número de acta y
+                                asistentes, y amplió el plazo a 90 días».
+                            </p>
+                            <div class="callout">
+                                <b>Motivo del rechazo · obligatorio</b> cuando el
+                                estado es Rechazada. Ejemplo de la fila 6: «el
+                                vínculo se sostiene sólo por nombre de
+                                organización; el ubigeo no coincide».
+                            </div>
+                            <p class="src-line">
+                                Campo de <code>agent.feedback_log</code>,
+                                obligatorio al rechazar · columna
+                                <span class="todo">por confirmar</span>. Sin él,
+                                la sugerencia no puede cerrarse como rechazada.
+                            </p>
+                        </section>
+
+                        <section class="dsec">
+                            <h3>Traza y entidad</h3>
+                            <div class="linkrow">
+                                <span class="linkish" role="link" tabindex="0" aria-disabled="true">Ver run_log de esta sugerencia</span>
+                                <span class="linkish" role="link" tabindex="0" aria-disabled="true">Abrir CAS-2026-0171</span>
+                            </div>
+                            <p class="note">
+                                Enlaces dibujados: <code>run_log</code> existe
+                                (partición <code>run_log_202611</code>), pero no
+                                hay endpoint de consulta por id ni de apertura de
+                                la entidad desde acá. No navegan.
+                            </p>
+                        </section>
+                    </div>
+                </aside>
+            </div>
+
+            <!-- ═══════════ Lecciones aprendidas ═══════════ -->
+            <section class="panel" aria-labelledby="les-title">
+                <div class="panel-head">
+                    <div class="panel-title">
+                        <h2 id="les-title">Lecciones aprendidas</h2>
+                        <span class="count">3 reglas candidatas · cada una declara sus rechazos de origen</span>
+                    </div>
+                    <span class="badge amber"><span class="dot" aria-hidden="true"></span>Escritura bloqueada</span>
+                </div>
+                <div class="panel-body">
+                    <p class="panel-intro">
+                        Reglas destiladas de rechazos con el mismo motivo.
+                        «Convertir en regla» escribiría en
+                        <code>agent.plantilla_prompt</code>; como no hay endpoint,
+                        la acción se dibuja deshabilitada. La versión vigente y el
+                        historial están en el bloque de gobierno, abajo.
+                    </p>
+                    <div class="lesson-grid">
+                        <article class="lesson">
+                            <div class="lesson-top">
+                                <code>L-07</code>
+                                <span class="chip grey">Candidata</span>
+                            </div>
+                            <h3>Revisar el ubigeo antes de proponer un duplicado</h3>
+                            <p>
+                                Si dos casos coinciden en nombre de actor pero
+                                están en distritos distintos, el par no es
+                                duplicado.
+                            </p>
+                            <p class="origin">
+                                <b>Origen:</b> 6 rechazos entre el 4 y el 20 nov
+                                2026, todos con el motivo «el ubigeo no coincide».
+                            </p>
+                            <div class="lesson-act">
+                                <button type="button" class="btn" disabled aria-disabled="true">Convertir en regla</button>
+                                <span class="lock"><b>bloqueada</b> · escribe en <code>plantilla_prompt</code></span>
+                            </div>
+                        </article>
+
+                        <article class="lesson">
+                            <div class="lesson-top">
+                                <code>L-08</code>
+                                <span class="chip grey">Candidata</span>
+                            </div>
+                            <h3>Citar el acta con fecha y folio</h3>
+                            <p>
+                                Toda ayuda memoria debe citar el número de acta,
+                                su fecha y el folio del documento que la respalda.
+                            </p>
+                            <p class="origin">
+                                <b>Origen:</b> 4 rechazos y 3 aceptaciones con
+                                cambios entre el 11 y el 21 nov 2026.
+                            </p>
+                            <div class="lesson-act">
+                                <button type="button" class="btn" disabled aria-disabled="true">Convertir en regla</button>
+                                <span class="lock"><b>bloqueada</b> · escribe en <code>plantilla_prompt</code></span>
+                            </div>
+                        </article>
+
+                        <article class="lesson">
+                            <div class="lesson-top">
+                                <code>L-09</code>
+                                <span class="chip grey">Candidata</span>
+                            </div>
+                            <h3>Exigir dos coincidencias de actor para vincular una demanda</h3>
+                            <p>
+                                No proponer un vínculo caso–demanda con una sola
+                                coincidencia de nombre de organización.
+                            </p>
+                            <p class="origin">
+                                <b>Origen:</b> 3 rechazos entre el 12 y el 20 nov
+                                2026. Requiere umbral de confianza y visto bueno
+                                de Dirección antes de ser regla.
+                            </p>
+                            <div class="lesson-act">
+                                <button type="button" class="btn" disabled aria-disabled="true">Convertir en regla</button>
+                                <span class="lock"><b>bloqueada</b> · escribe en <code>plantilla_prompt</code></span>
+                            </div>
+                        </article>
+                    </div>
+                    <p class="src-line">
+                        Fuente: <code>agent.lessons_learned</code>. La columna que
+                        cuenta los rechazos que originaron cada regla no está
+                        confirmada: <span class="todo">por confirmar</span>.
+                    </p>
+                </div>
+            </section>
+
+            <!-- ═══════════ Gobierno de prompts y modelos ═══════════ -->
+            <section class="panel" aria-labelledby="gov-title">
+                <div class="panel-head">
+                    <div class="panel-title">
+                        <h2 id="gov-title">Gobierno de prompts y modelos</h2>
+                        <span class="count">versión vigente, modelo en uso e historial con autor</span>
+                    </div>
+                    <span class="badge">Sólo lectura · sin endpoints</span>
+                </div>
+                <div class="panel-body">
+                    <div class="gov-top">
+                        <div class="gov-item">
+                            <h3>
+                                Versión vigente de la plantilla
+                                <span class="chip info"><span class="g" aria-hidden="true">●</span>vigente</span>
+                            </h3>
+                            <span class="gval">v1.4.2</span>
+                            <p>
+                                Vigente desde el <b>12 nov 2026</b> · autor
+                                <b>M. Quispe</b> (Administrador).
+                            </p>
+                            <p class="note">
+                                <code>agent.plantilla_prompt</code> · columnas
+                                <span class="todo">por confirmar</span>.
+                            </p>
+                        </div>
+                        <div class="gov-item">
+                            <h3>
+                                Modelo en uso
+                                <span class="chip changed"><span class="g" aria-hidden="true">●</span>en uso</span>
+                            </h3>
+                            <span class="gval">M-2026-11</span>
+                            <p>
+                                En uso desde el <b>1 nov 2026</b> · registro de
+                                <b>M. Quispe</b> (Administrador).
+                            </p>
+                            <p class="note">
+                                <code>agent.modelo_registro</code> · columnas
+                                <span class="todo">por confirmar</span>.
+                            </p>
+                        </div>
+                    </div>
+
+                    <h3 class="gov-sub">Historial de cambios</h3>
+                    <p class="note" style="margin-bottom: 6px">
+                        Ejemplo de historial: versiones, fechas y autores son
+                        ilustrativos; los nombres de tabla sí son reales.
+                    </p>
+                    <table class="hist">
+                        <thead>
+                            <tr>
+                                <th scope="col">
+                                    Versión
+                                    <span class="colsrc"><code>plantilla_prompt</code> · <span class="todo">por confirmar</span></span>
+                                </th>
+                                <th scope="col">
+                                    Vigente desde
+                                    <span class="colsrc"><code>plantilla_prompt</code> · <span class="todo">por confirmar</span></span>
+                                </th>
+                                <th scope="col">
+                                    Autor
+                                    <span class="colsrc"><code>plantilla_prompt</code> · <span class="todo">por confirmar</span></span>
+                                </th>
+                                <th scope="col">
+                                    Qué cambió
+                                    <span class="colsrc">texto de la versión · <span class="todo">por confirmar</span></span>
+                                </th>
+                                <th scope="col">Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><b>v1.4.2</b></td>
+                                <td>12 nov 2026</td>
+                                <td>M. Quispe · Administrador</td>
+                                <td>
+                                    Restringe el borrador de ayuda memoria a actas
+                                    con folio verificable.
+                                </td>
+                                <td><span class="chip info"><span class="g" aria-hidden="true">●</span>Vigente</span></td>
+                            </tr>
+                            <tr>
+                                <td><b>v1.4.1</b></td>
+                                <td>4 nov 2026</td>
+                                <td>M. Quispe · Administrador</td>
+                                <td>
+                                    Añade el ubigeo al ejemplo de duplicados
+                                    (lección L-07).
+                                </td>
+                                <td><span class="chip grey">Reemplazada</span></td>
+                            </tr>
+                            <tr>
+                                <td><b>v1.3.0</b></td>
+                                <td>21 oct 2026</td>
+                                <td>A. Rojas · Dirección</td>
+                                <td>
+                                    Sube el umbral de vínculo caso–demanda de 0,70
+                                    a 0,80.
+                                </td>
+                                <td><span class="chip grey">Reemplazada</span></td>
+                            </tr>
+                            <tr>
+                                <td><b>v1.2.0</b></td>
+                                <td>2 oct 2026</td>
+                                <td>M. Quispe · Administrador</td>
+                                <td>Plantilla inicial de clasificación de nivel.</td>
+                                <td><span class="chip grey">Reemplazada</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <p class="note" style="margin-top: 9px">
+                        Sólo lectura: no hay endpoint para publicar una versión ni
+                        para cambiar el modelo. Todo cambio es un acto auditado de
+                        Administración (item 56) y esta pantalla no lo ejecuta.
+                    </p>
+                </div>
+            </section>
+
+            <footer class="foot">
+                <span>
+                    <b>Fuente:</b> esquema <code>agent</code> — <code>run_log</code>
+                    (y sus particiones), <code>feedback_log</code>,
+                    <code>lessons_learned</code>, <code>plantilla_prompt</code>,
+                    <code>modelo_registro</code>, <code>llm_call</code>,
+                    <code>sesion</code>, <code>cat_detalle_schema</code>.
+                </span>
+                <span><b>Forma:</b> artboard de 1440 px; se abre sin servidor.</span>
+                <span><b>Regla:</b> ninguna sugerencia con efecto sin decisión humana.</span>
+            </footer>
+        </main>
+    </body>
+</html>

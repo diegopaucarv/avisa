@@ -24,9 +24,11 @@ import {
 import { consulta } from '../../core/http/consulta';
 import { aErrorApi } from '../../core/http/errores';
 import { CapacidadesService } from '../../core/permisos/capacidades.service';
+import { BarraSeleccionComponent } from '../../shared/ui/barra-seleccion.component';
 import { IconoComponent } from '../../shared/ui/icono.component';
-import { ExportarMenuComponent } from '../../shared/ui/exportar-menu.component';
+
 import { PaginacionComponent } from '../../shared/ui/paginacion.component';
+import { SeleccionTabla } from '../../shared/ui/seleccion-tabla';
 import {
   AnularPanelComponent,
   type ModoAnulacion,
@@ -92,7 +94,7 @@ function totalDe(bruto: unknown): number {
     PaginacionComponent,
     DocumentoPanelComponent,
     AnularPanelComponent,
-    ExportarMenuComponent,
+    BarraSeleccionComponent,
   ],
   templateUrl: './documentos.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -343,6 +345,15 @@ export class DocumentosPage {
   /** El alta se ofrece a quien tiene permiso de escritura. */
   readonly puedeRegistrar = this.capacidades.puedeEditar;
 
+  /** Selección de la tabla (página visible) para exportar o anular en lote. */
+  readonly seleccion = new SeleccionTabla();
+
+  idsVisibles(): string[] {
+    return this.documentos()
+      .map((documento) => documento.id)
+      .filter((id): id is string => !!id);
+  }
+
   /** Último fallo del botón de exportación; vacío si no hubo. */
   readonly exportarError = signal<string | null>(null);
 
@@ -438,6 +449,14 @@ export class DocumentosPage {
 
   recargarListado(): void {
     this.listado.recargar();
+  }
+
+  alAnularLote(cantidad: number): void {
+    this.seleccion.limpiar();
+    this.avisoAnulacion.set(
+      cantidad === 1 ? '1 registro anulado.' : `${cantidad} registros anulados.`,
+    );
+    this.alActualizar();
   }
 
   alFallarExportacion(mensaje: string): void {

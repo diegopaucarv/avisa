@@ -114,6 +114,8 @@ import { IconoComponent } from './icono.component';
 export class ExportarMenuComponent {
   readonly entidad = input.required<string>();
   readonly id = input<string | null>(null);
+  /** Exporta sólo estos registros; tiene prioridad sobre la vista completa. */
+  readonly ids = input<readonly string[] | null>(null);
   readonly etiqueta = input('Exportar');
   /** Filtros vigentes de la vista; se omiten al exportar la base completa. */
   readonly consulta = input<Record<string, string> | null>(null);
@@ -131,6 +133,9 @@ export class ExportarMenuComponent {
   private readonly permitidos = computed(
     () => this.formatos() ?? this.capacidades.formatosExportacion(),
   );
+
+  /** «vista» o «selección», para el encabezado y las etiquetas del menú. */
+  readonly alcance = computed(() => (this.ids()?.length ? 'selección' : 'vista'));
 
   permite(formato: FormatoExportacion): boolean {
     return this.permitidos().includes(formato);
@@ -170,9 +175,10 @@ export class ExportarMenuComponent {
       await descargarExportacion({
         entidad,
         formato,
-        // El `id` y los filtros sólo aplican a una entidad suelta, nunca al
-        // respaldo completo.
+        // El `id`, los `ids` y los filtros sólo aplican a una entidad suelta,
+        // nunca al respaldo completo.
         id: entidad === 'base' ? null : this.id(),
+        ids: entidad === 'base' ? null : this.ids(),
         consulta: entidad === 'base' ? null : this.consulta(),
       });
     } catch (error) {

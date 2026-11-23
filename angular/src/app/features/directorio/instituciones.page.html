@@ -8,10 +8,18 @@
       </p>
     </div>
     <div class="view-actions">
-      <app-exportar-menu entidad="actores" (fallo)="alFallarExportacion($event)" />
       <p class="result-count" aria-live="polite">{{ total() }} instituciones</p>
     </div>
   </header>
+
+  <div class="view-toolbar">
+    <app-barra-seleccion
+      entidad="actores"
+      [cantidad]="seleccion.cantidad()"
+      [idsSeleccionados]="seleccion.lista()"
+      (fallo)="alFallarExportacion($event)"
+    />
+  </div>
 
   @if (exportarError(); as mensaje) {
   <p class="form-error" role="alert">{{ mensaje }}</p>
@@ -87,6 +95,15 @@
       </caption>
       <thead>
         <tr>
+          <th scope="col" class="col-seleccion">
+            <input
+              type="checkbox"
+              aria-label="Seleccionar todos los registros de esta página"
+              [checked]="seleccion.todas(idsVisibles())"
+              [indeterminate]="seleccion.algunas(idsVisibles())"
+              (change)="seleccion.alternarPagina(idsVisibles(), $event)"
+            />
+          </th>
           <th scope="col">Nombre</th>
           <th scope="col">Naturaleza</th>
           <th scope="col">Tipo</th>
@@ -102,6 +119,15 @@
           [class.row-selected]="seleccionado()?.id === institucion.id"
           (click)="abrir(institucion)"
         >
+          <td class="col-seleccion" (click)="$event.stopPropagation()">
+            <input
+              type="checkbox"
+              [checked]="seleccion.esta(institucion.id)"
+              [attr.aria-label]="'Seleccionar a ' + institucion.nombre"
+              (click)="$event.stopPropagation()"
+              (change)="seleccion.alternar(institucion.id)"
+            />
+          </td>
           <td>
             <button
               type="button"

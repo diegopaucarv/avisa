@@ -12,16 +12,24 @@
       @if (capacidades.puedeEditar()) {
       <button type="button" class="button-primary" (click)="abrirAlta()">Nuevo caso</button>
       }
-      <app-exportar-menu
-        entidad="casos"
-        [consulta]="filtrosExportacion()"
-        (fallo)="alFallarExportacion($event)"
-      />
     </div>
     }
   </header>
 
-  @if (exportarError(); as mensaje) {
+  @if (!verPapelera()) {
+  <div class="view-toolbar">
+    <app-barra-seleccion
+      entidad="casos"
+      anulable="casos"
+      [consulta]="filtrosExportacion()"
+      [cantidad]="seleccion.cantidad()"
+      [idsSeleccionados]="seleccion.lista()"
+      [cascada]="true"
+      (anulado)="alAnularLote($event)"
+      (fallo)="alFallarExportacion($event)"
+    />
+  </div>
+  } @if (exportarError(); as mensaje) {
   <p class="form-error" role="alert">{{ mensaje }}</p>
   } @if (aviso(); as mensaje) {
   <p class="aviso-ok" role="status">{{ mensaje }}</p>
@@ -317,6 +325,15 @@
       </caption>
       <thead>
         <tr>
+          <th scope="col" class="col-seleccion">
+            <input
+              type="checkbox"
+              aria-label="Seleccionar todos los registros de esta página"
+              [checked]="seleccion.todas(idsVisibles())"
+              [indeterminate]="seleccion.algunas(idsVisibles())"
+              (change)="seleccion.alternarPagina(idsVisibles(), $event)"
+            />
+          </th>
           <th scope="col">Caso</th>
           <th scope="col">Región</th>
           <th scope="col">Temática</th>
@@ -331,6 +348,15 @@
       <tbody>
         @for (caso of casos(); track caso.codigo) {
         <tr class="case-row-clickable" [routerLink]="['/casos', caso.codigo]">
+          <td class="col-seleccion" (click)="$event.stopPropagation()">
+            <input
+              type="checkbox"
+              [checked]="seleccion.esta(caso.codigo)"
+              [attr.aria-label]="'Seleccionar el caso ' + caso.codigo"
+              (click)="$event.stopPropagation()"
+              (change)="seleccion.alternar(caso.codigo)"
+            />
+          </td>
           <td>
             <a class="table-link" [routerLink]="['/casos', caso.codigo]">{{ caso.codigo }}</a>
           </td>

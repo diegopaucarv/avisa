@@ -29,9 +29,11 @@ import {
   AnularPanelComponent,
   type ResultadoAnulacion,
 } from '../../shared/ui/anular-panel.component';
-import { ExportarMenuComponent } from '../../shared/ui/exportar-menu.component';
+import { BarraSeleccionComponent } from '../../shared/ui/barra-seleccion.component';
+
 import { IconoComponent } from '../../shared/ui/icono.component';
 import { PaginacionComponent } from '../../shared/ui/paginacion.component';
+import { SeleccionTabla } from '../../shared/ui/seleccion-tabla';
 import {
   TerritorioBuscadorComponent,
   type OpcionTerritorio,
@@ -115,7 +117,7 @@ function totalDe(bruto: unknown): number {
     PaginacionComponent,
     AlertaPanelComponent,
     AnularPanelComponent,
-    ExportarMenuComponent,
+    BarraSeleccionComponent,
     TerritorioBuscadorComponent,
   ],
   templateUrl: './alertas.page.html',
@@ -533,6 +535,15 @@ export class AlertasPage {
   /** Botón de alta: basta el permiso global de escritura. */
   readonly puedeRegistrar = this.capacidades.puedeEditar;
 
+  /** Selección de la tabla (página visible) para exportar o anular en lote. */
+  readonly seleccion = new SeleccionTabla();
+
+  idsVisibles(): string[] {
+    return this.alertas()
+      .map((alerta) => alerta.id)
+      .filter((id): id is string => !!id);
+  }
+
   private temporizador?: ReturnType<typeof setTimeout>;
 
   constructor() {
@@ -669,6 +680,14 @@ export class AlertasPage {
 
   recargarListado(): void {
     this.listado.recargar();
+  }
+
+  alAnularLote(cantidad: number): void {
+    this.seleccion.limpiar();
+    this.avisoAnulacion.set(
+      cantidad === 1 ? '1 registro anulado.' : `${cantidad} registros anulados.`,
+    );
+    this.recargarListado();
   }
 
   alFallarExportacion(mensaje: string): void {

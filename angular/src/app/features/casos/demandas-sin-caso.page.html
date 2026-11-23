@@ -8,16 +8,23 @@
       </p>
     </div>
     <div class="view-actions">
-      <app-exportar-menu
-        entidad="demandas"
-        [consulta]="filtrosExportacion()"
-        (fallo)="alFallarExportacion($event)"
-      />
       @if (total() > 0) {
       <p class="result-count" aria-live="polite">{{ sinCasoTotal() }} demandas sin caso</p>
       }
     </div>
   </header>
+
+  <div class="view-toolbar">
+    <app-barra-seleccion
+      entidad="demandas"
+      anulable="demandas"
+      [consulta]="filtrosExportacion()"
+      [cantidad]="seleccion.cantidad()"
+      [idsSeleccionados]="seleccion.lista()"
+      (anulado)="alAnularLote($event)"
+      (fallo)="alFallarExportacion($event)"
+    />
+  </div>
 
   @if (exportarError(); as mensaje) {
   <p class="form-error" role="alert">{{ mensaje }}</p>
@@ -78,6 +85,15 @@
       </caption>
       <thead>
         <tr>
+          <th scope="col" class="col-seleccion">
+            <input
+              type="checkbox"
+              aria-label="Seleccionar todos los registros de esta página"
+              [checked]="seleccion.todas(idsVisibles())"
+              [indeterminate]="seleccion.algunas(idsVisibles())"
+              (change)="seleccion.alternarPagina(idsVisibles(), $event)"
+            />
+          </th>
           <th scope="col">Descripción</th>
           <th scope="col">Problema · Propuesta · Pedido</th>
           <th scope="col">Estado</th>
@@ -92,6 +108,15 @@
       <tbody>
         @for (demanda of demandas(); track demanda.id) {
         <tr>
+          <td class="col-seleccion" (click)="$event.stopPropagation()">
+            <input
+              type="checkbox"
+              [checked]="seleccion.esta(demanda.id)"
+              [attr.aria-label]="'Seleccionar la demanda ' + (demanda.descripcion || demanda.id)"
+              (click)="$event.stopPropagation()"
+              (change)="seleccion.alternar(demanda.id)"
+            />
+          </td>
           <td class="celda-descripcion">
             {{ demanda.descripcion || 'Sin descripción registrada' }}
           </td>

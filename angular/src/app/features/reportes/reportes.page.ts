@@ -20,15 +20,12 @@ import {
   type Coleccion,
 } from '../../core/http/coleccion';
 import { consulta } from '../../core/http/consulta';
-import { ExportarMenuComponent } from '../../shared/ui/exportar-menu.component';
+import { BarraSeleccionComponent } from '../../shared/ui/barra-seleccion.component';
+
+import { SeleccionTabla } from '../../shared/ui/seleccion-tabla';
 import { IconoComponent } from '../../shared/ui/icono.component';
 import { PaginacionComponent } from '../../shared/ui/paginacion.component';
-import {
-  TIPOS_REPORTE,
-  aReporte,
-  formatearFecha,
-  type Reporte,
-} from './reportes.mapeo';
+import { TIPOS_REPORTE, aReporte, formatearFecha, type Reporte } from './reportes.mapeo';
 
 type FiltrosReportes = {
   q: string;
@@ -64,12 +61,7 @@ const FILTROS_INICIALES: FiltrosReportes = {
  */
 @Component({
   selector: 'app-reportes',
-  imports: [
-    RouterLink,
-    IconoComponent,
-    PaginacionComponent,
-    ExportarMenuComponent,
-  ],
+  imports: [RouterLink, IconoComponent, PaginacionComponent, BarraSeleccionComponent],
   templateUrl: './reportes.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
@@ -207,6 +199,15 @@ export class ReportesPage {
 
   readonly reportes = computed(() => this.listado.valor()?.elementos ?? []);
   readonly total = computed(() => this.listado.valor()?.total ?? 0);
+
+  /** Selección de la tabla (página visible) para exportar. */
+  readonly seleccion = new SeleccionTabla();
+
+  idsVisibles(): string[] {
+    return this.reportes()
+      .map((reporte) => reporte.codigoReporte)
+      .filter((codigo): codigo is string => !!codigo);
+  }
   readonly estadoListado = this.listado.estado;
   readonly errorListado = this.listado.error;
 

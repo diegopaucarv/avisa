@@ -21,7 +21,9 @@ import {
   type Coleccion,
 } from '../../core/http/coleccion';
 import { consulta } from '../../core/http/consulta';
-import { ExportarMenuComponent } from '../../shared/ui/exportar-menu.component';
+import { BarraSeleccionComponent } from '../../shared/ui/barra-seleccion.component';
+
+import { SeleccionTabla } from '../../shared/ui/seleccion-tabla';
 import { IconoComponent } from '../../shared/ui/icono.component';
 import { PaginacionComponent } from '../../shared/ui/paginacion.component';
 import {
@@ -79,7 +81,7 @@ const FILTROS_INICIALES: FiltrosActores = {
     IconoComponent,
     PaginacionComponent,
     ActorPanelComponent,
-    ExportarMenuComponent,
+    BarraSeleccionComponent,
     TerritorioBuscadorComponent,
   ],
   templateUrl: './actores.page.html',
@@ -365,6 +367,15 @@ export class ActoresPage {
 
   readonly actores = computed(() => this.listado.valor()?.elementos ?? []);
   readonly total = computed(() => this.listado.valor()?.total ?? 0);
+
+  /** Selección de la tabla (página visible) para exportar. */
+  readonly seleccion = new SeleccionTabla();
+
+  idsVisibles(): string[] {
+    return this.actores()
+      .map((actor) => actor.id)
+      .filter((id): id is string => !!id);
+  }
   readonly estado = this.listado.estado;
   readonly error = this.listado.error;
 

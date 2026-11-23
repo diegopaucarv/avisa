@@ -8,10 +8,18 @@
       </p>
     </div>
     <div class="view-actions">
-      <app-exportar-menu entidad="notificaciones" (fallo)="alFallarExportacion($event)" />
       <button type="button" class="button-secondary" (click)="recargar()">Recargar</button>
     </div>
   </header>
+
+  <div class="view-toolbar">
+    <app-barra-seleccion
+      entidad="notificaciones"
+      [cantidad]="seleccion.cantidad()"
+      [idsSeleccionados]="seleccion.lista()"
+      (fallo)="alFallarExportacion($event)"
+    />
+  </div>
 
   @if (exportarError(); as mensaje) {
   <p class="form-error" role="alert">{{ mensaje }}</p>
@@ -41,6 +49,15 @@
       </caption>
       <thead>
         <tr>
+          <th scope="col" class="col-seleccion">
+            <input
+              type="checkbox"
+              aria-label="Seleccionar todos los registros de esta página"
+              [checked]="seleccion.todas(idsVisibles())"
+              [indeterminate]="seleccion.algunas(idsVisibles())"
+              (change)="seleccion.alternarPagina(idsVisibles(), $event)"
+            />
+          </th>
           <th scope="col">Notificación</th>
           <th scope="col">Categoría</th>
           <th scope="col">Lectura</th>
@@ -52,6 +69,15 @@
       <tbody>
         @for (notificacion of notificaciones(); track notificacion.id) {
         <tr [class.sin-leer]="!notificacion.leida">
+          <td class="col-seleccion" (click)="$event.stopPropagation()">
+            <input
+              type="checkbox"
+              [checked]="seleccion.esta(notificacion.id)"
+              [attr.aria-label]="'Seleccionar la notificación ' + notificacion.titulo"
+              (click)="$event.stopPropagation()"
+              (change)="seleccion.alternar(notificacion.id)"
+            />
+          </td>
           <td>
             <span class="notificacion">
               <span class="notificacion-icono" aria-hidden="true">

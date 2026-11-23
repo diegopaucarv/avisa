@@ -14,14 +14,21 @@
         Registrar alerta
       </button>
       }
-      <app-exportar-menu
-        entidad="alertas"
-        [consulta]="filtrosExportacion()"
-        (fallo)="alFallarExportacion($event)"
-      />
       <p class="result-count" aria-live="polite">{{ total() }} alertas</p>
     </div>
   </header>
+
+  <div class="view-toolbar">
+    <app-barra-seleccion
+      entidad="alertas"
+      anulable="alertas"
+      [consulta]="filtrosExportacion()"
+      [cantidad]="seleccion.cantidad()"
+      [idsSeleccionados]="seleccion.lista()"
+      (anulado)="alAnularLote($event)"
+      (fallo)="alFallarExportacion($event)"
+    />
+  </div>
 
   @if (exportarError(); as mensaje) {
   <p class="form-error" role="alert">{{ mensaje }}</p>
@@ -168,6 +175,7 @@
   <div class="table-wrap">
     <table class="data-table">
       <colgroup>
+        <col class="col-seleccion" />
         <col class="col-codigo" />
         <col />
         <col class="col-caso" />
@@ -179,6 +187,15 @@
       </colgroup>
       <thead>
         <tr>
+          <th scope="col" class="col-seleccion">
+            <input
+              type="checkbox"
+              aria-label="Seleccionar todos los registros de esta página"
+              [checked]="seleccion.todas(idsVisibles())"
+              [indeterminate]="seleccion.algunas(idsVisibles())"
+              (change)="seleccion.alternarPagina(idsVisibles(), $event)"
+            />
+          </th>
           <th scope="col">Código</th>
           <th scope="col">Título</th>
           <th scope="col">Caso</th>
@@ -196,6 +213,15 @@
           [class.row-selected]="seleccionadaId() === alerta.id"
           (click)="abrir(alerta)"
         >
+          <td class="col-seleccion" (click)="$event.stopPropagation()">
+            <input
+              type="checkbox"
+              [checked]="seleccion.esta(alerta.id)"
+              [attr.aria-label]="'Seleccionar ' + (alerta.codigo || alerta.id)"
+              (click)="$event.stopPropagation()"
+              (change)="seleccion.alternar(alerta.id)"
+            />
+          </td>
           <td>
             <button
               type="button"

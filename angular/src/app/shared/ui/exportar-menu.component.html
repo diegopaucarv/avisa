@@ -14,12 +14,12 @@
 
   @if (abierto()) {
     <div class="menu" role="menu" aria-label="Formatos de exportación">
-      <p class="menu-titulo" role="presentation">Esta vista</p>
+      <p class="menu-titulo" role="presentation">Esta {{ alcance() }}</p>
       @if (permite('json')) {
         <button
           type="button"
           role="menuitem"
-          aria-label="Exportar esta vista en JSON"
+          [attr.aria-label]="'Exportar esta ' + alcance() + ' en JSON'"
           (click)="descargar('json')"
         >
           JSON
@@ -30,7 +30,7 @@
         <button
           type="button"
           role="menuitem"
-          aria-label="Exportar esta vista en Excel"
+          [attr.aria-label]="'Exportar esta ' + alcance() + ' en Excel'"
           (click)="descargar('excel')"
         >
           Excel
@@ -41,7 +41,7 @@
         <button
           type="button"
           role="menuitem"
-          aria-label="Exportar esta vista en PDF"
+          [attr.aria-label]="'Exportar esta ' + alcance() + ' en PDF'"
           (click)="descargar('pdf')"
         >
           PDF

@@ -12,17 +12,23 @@
       <button type="button" class="button-primary" (click)="abrirAlta()">
         Registrar compromiso
       </button>
-      } @if (!verPapelera()) {
-      <app-exportar-menu
-        entidad="compromisos"
-        [consulta]="filtrosExportacion()"
-        (fallo)="alFallarExportacion($event)"
-      />
       }
     </div>
   </header>
 
-  @if (exportarError(); as mensaje) {
+  @if (!verPapelera()) {
+  <div class="view-toolbar">
+    <app-barra-seleccion
+      entidad="compromisos"
+      anulable="compromisos"
+      [consulta]="filtrosExportacion()"
+      [cantidad]="seleccion.cantidad()"
+      [idsSeleccionados]="seleccion.lista()"
+      (anulado)="alAnularLote($event)"
+      (fallo)="alFallarExportacion($event)"
+    />
+  </div>
+  } @if (exportarError(); as mensaje) {
   <p class="form-error" role="alert">{{ mensaje }}</p>
   } @if (avisoAnulacion(); as aviso) {
   <p class="form-hint aviso-ok" role="status">{{ aviso }}</p>
@@ -272,6 +278,15 @@
       </caption>
       <thead>
         <tr>
+          <th scope="col" class="col-seleccion">
+            <input
+              type="checkbox"
+              aria-label="Seleccionar todos los registros de esta página"
+              [checked]="seleccion.todas(idsVisibles())"
+              [indeterminate]="seleccion.algunas(idsVisibles())"
+              (change)="seleccion.alternarPagina(idsVisibles(), $event)"
+            />
+          </th>
           <th scope="col">Código</th>
           <th scope="col">Compromiso</th>
           <th scope="col">Caso</th>
@@ -285,6 +300,15 @@
       <tbody>
         @for (compromiso of compromisos(); track compromiso.id) {
         <tr class="fila-compromiso" (click)="abrir(compromiso)">
+          <td class="col-seleccion" (click)="$event.stopPropagation()">
+            <input
+              type="checkbox"
+              [checked]="seleccion.esta(compromiso.id)"
+              [attr.aria-label]="'Seleccionar el compromiso ' + compromiso.codigo"
+              (click)="$event.stopPropagation()"
+              (change)="seleccion.alternar(compromiso.id)"
+            />
+          </td>
           <td>
             <button
               type="button"

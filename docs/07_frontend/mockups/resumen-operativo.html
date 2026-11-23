@@ -22,6 +22,9 @@
                 --red-pale: #fbeceb;
                 --green: #34785b;
                 --green-pale: #e9f5ef;
+                /* Gris de texto: el mismo tono de --muted, oscurecido para
+                   cumplir AA (4.5:1) en textos de 8,5–11 px. */
+                --muted-aa: #5f6f7d;
                 --font-sans:
                     "DM Sans", system-ui, -apple-system, "Segoe UI", Arial,
                     sans-serif;
@@ -43,6 +46,22 @@
                 font-size: 13px;
                 -webkit-font-smoothing: antialiased;
             }
+            :focus-visible {
+                outline: 2px solid var(--blue);
+                outline-offset: 2px;
+                border-radius: 4px;
+            }
+            .sr-only {
+                position: absolute;
+                width: 1px;
+                height: 1px;
+                margin: -1px;
+                padding: 0;
+                overflow: hidden;
+                clip: rect(0 0 0 0);
+                white-space: nowrap;
+                border: 0;
+            }
             .view-body {
                 display: flex;
                 flex-direction: column;
@@ -59,17 +78,22 @@
                 justify-content: space-between;
                 gap: 16px;
             }
+            .head-main {
+                max-width: 700px;
+            }
             .view-head h1 {
                 margin: 0;
                 font: 700 22px/1.3 var(--font-display);
                 letter-spacing: -0.65px;
             }
             .view-subtitle {
-                max-width: 840px;
                 margin: 6px 0 0;
-                color: var(--muted);
+                color: var(--muted-aa);
                 font-size: 11px;
-                line-height: 1.6;
+                line-height: 1.65;
+            }
+            .view-subtitle b {
+                color: var(--ink-2);
             }
             .badge {
                 display: inline-flex;
@@ -85,6 +109,71 @@
                 letter-spacing: 0.05em;
                 text-transform: uppercase;
                 white-space: nowrap;
+            }
+
+            /* ── Conmutador de rol (esquina) ──────────────────────────── */
+            .role-wrap {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-end;
+                gap: 6px;
+                max-width: 470px;
+            }
+            .rolebar {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                gap: 8px;
+                padding: 6px 8px 6px 11px;
+                border: 1px solid var(--line);
+                border-radius: 10px;
+                background: #fff;
+                box-shadow: 0 1px 2px rgba(23, 40, 58, 0.04);
+            }
+            .rolebar-label,
+            .range-label {
+                color: var(--muted-aa);
+                font-size: 9px;
+                font-weight: 700;
+                letter-spacing: 0.07em;
+                text-transform: uppercase;
+            }
+            .seg {
+                display: inline-flex;
+                flex-wrap: wrap;
+                padding: 2px;
+                border: 1px solid var(--line);
+                border-radius: 8px;
+                background: var(--canvas);
+            }
+            .seg button {
+                appearance: none;
+                border: 0;
+                padding: 5px 10px;
+                border-radius: 6px;
+                background: transparent;
+                color: var(--ink-2);
+                font: 600 10.5px/1.2 var(--font-sans);
+                cursor: pointer;
+            }
+            .seg button[aria-pressed="true"] {
+                background: #fff;
+                color: var(--blue-dark);
+                box-shadow: 0 1px 3px rgba(23, 40, 58, 0.14);
+            }
+            .role-note {
+                margin: 0;
+                color: var(--muted-aa);
+                font-size: 9px;
+                line-height: 1.55;
+                text-align: right;
+            }
+            .role-note b {
+                color: var(--ink-2);
+            }
+            .role-note .x {
+                color: var(--amber);
+                font-weight: 700;
             }
 
             /* ── Cinco bloques de anotación ───────────────────────────── */
@@ -107,9 +196,9 @@
                 border: 1px solid #eef1f4;
                 border-radius: 7px;
                 background: #fff;
+                color: var(--ink-2);
                 font-size: 10px;
                 line-height: 1.5;
-                color: var(--ink-2);
             }
             .ann-card.wide {
                 grid-column: 1 / -1;
@@ -154,7 +243,7 @@
                 font-size: 9.5px;
             }
             .ann-table th {
-                color: #97a1aa;
+                color: var(--muted-aa);
                 font-weight: 600;
                 text-transform: uppercase;
                 letter-spacing: 0.04em;
@@ -162,9 +251,24 @@
             .ann-table tr:last-child td {
                 border-bottom: 0;
             }
+            .ann-table td:first-child {
+                white-space: nowrap;
+            }
+            .ann-table .ok {
+                color: var(--green);
+                font-weight: 600;
+            }
+            .ann-table .bad {
+                color: var(--red);
+                font-weight: 600;
+            }
+            .ann-table .gap {
+                color: var(--amber);
+                font-weight: 600;
+            }
 
-            /* ── Aviso de definición compartida ──────────────────────── */
-            .shared {
+            /* ── Ruta y definición compartida ─────────────────────────── */
+            .route {
                 display: flex;
                 flex-wrap: wrap;
                 align-items: center;
@@ -173,12 +277,133 @@
                 border: 1px solid #cddcef;
                 border-radius: 8px;
                 background: #f7faff;
-                color: #6b86a8;
+                color: #4c7099;
                 font-size: 9.5px;
-                line-height: 1.5;
+                line-height: 1.55;
             }
-            .shared b {
+            .route b {
                 color: var(--blue-dark);
+            }
+            .route code {
+                padding: 0 3px;
+                border-radius: 3px;
+                background: #e6eef9;
+                font-family: ui-monospace, Menlo, monospace;
+                font-size: 9.5px;
+                color: var(--blue-dark);
+            }
+
+            /* ── Barra superior ───────────────────────────────────────── */
+            .topbar {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                justify-content: space-between;
+                gap: 10px;
+                padding: 8px 12px;
+                border: 1px solid var(--line);
+                border-radius: 9px;
+                background: #fff;
+                box-shadow: 0 1px 2px rgba(23, 40, 58, 0.04);
+            }
+            .sync {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                gap: 7px;
+                color: var(--ink-2);
+                font-size: 9.5px;
+            }
+            .sync b {
+                font-size: 10px;
+            }
+            .sync .note {
+                color: var(--muted-aa);
+            }
+            .dot {
+                width: 7px;
+                height: 7px;
+                border-radius: 50%;
+                background: #b3bcc4;
+                flex: none;
+            }
+            .dot.rojo {
+                background: var(--red);
+            }
+            .dot.ambar {
+                background: var(--amber);
+            }
+            .dot.verde {
+                background: var(--green);
+            }
+            .topbar-right {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                gap: 10px;
+            }
+            .range {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                gap: 7px;
+            }
+            .range .note {
+                color: var(--muted-aa);
+                font-size: 8.5px;
+            }
+            .export-menu {
+                position: relative;
+            }
+            .export-menu summary {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                padding: 6px 11px;
+                border: 1px solid var(--line);
+                border-radius: 8px;
+                background: #fff;
+                color: var(--ink-2);
+                font-size: 10px;
+                font-weight: 600;
+                cursor: pointer;
+                list-style: none;
+            }
+            .export-menu summary::-webkit-details-marker {
+                display: none;
+            }
+            .export-menu[open] summary {
+                border-color: #cddcef;
+                background: var(--blue-pale);
+                color: var(--blue-dark);
+            }
+            .export-list {
+                position: absolute;
+                right: 0;
+                top: calc(100% + 4px);
+                z-index: 20;
+                display: flex;
+                flex-direction: column;
+                min-width: 130px;
+                padding: 4px;
+                border: 1px solid var(--line);
+                border-radius: 8px;
+                background: #fff;
+                box-shadow: 0 6px 18px rgba(23, 40, 58, 0.14);
+            }
+            .export-list button {
+                appearance: none;
+                border: 0;
+                padding: 6px 8px;
+                border-radius: 6px;
+                background: transparent;
+                color: var(--ink-2);
+                font: 500 10px/1.3 var(--font-sans);
+                text-align: left;
+                cursor: pointer;
+            }
+            .export-list button:hover {
+                background: var(--canvas);
             }
 
             /* ── Tres dimensiones ────────────────────────────────────── */
@@ -186,7 +411,7 @@
                 display: grid;
                 grid-template-columns: repeat(3, minmax(0, 1fr));
                 gap: 14px;
-                align-items: start;
+                align-items: stretch;
             }
             @media (max-width: 1080px) {
                 .dims {
@@ -197,9 +422,9 @@
                 display: flex;
                 flex-direction: column;
                 gap: 10px;
-                padding: 14px 15px 14px;
+                padding: 14px 15px;
                 border: 1px solid var(--line);
-                border-radius: 9px;
+                border-radius: 10px;
                 background: #fff;
             }
             .dim-head {
@@ -212,8 +437,8 @@
             }
             .dim-head h2 {
                 margin: 0;
-                font: 700 13.5px/1.3 var(--font-display);
-                letter-spacing: -0.2px;
+                font: 700 14px/1.3 var(--font-display);
+                letter-spacing: -0.25px;
             }
             .dim-head .num {
                 color: #c2ccd4;
@@ -221,12 +446,11 @@
                 font-variant-numeric: tabular-nums;
             }
             .dim-sub {
-                margin: -4px 0 0;
-                color: var(--muted);
+                margin: -2px 0 0;
+                color: var(--muted-aa);
                 font-size: 9.5px;
-                line-height: 1.5;
+                line-height: 1.55;
             }
-
             .metric {
                 padding: 10px 11px;
                 border: 1px solid #eef1f4;
@@ -251,18 +475,24 @@
                 line-height: 1.4;
             }
             .metric-top .val {
+                color: var(--ink);
                 font: 700 20px/1 var(--font-display);
                 font-variant-numeric: tabular-nums;
                 letter-spacing: -0.4px;
-                color: var(--ink);
                 white-space: nowrap;
+            }
+            .metric-top .val.sm {
+                font-size: 14px;
+                letter-spacing: -0.2px;
+                white-space: normal;
+                text-align: right;
             }
             .metric.missing .metric-top .val {
                 color: #b3bcc4;
             }
             .q {
                 margin-top: 6px;
-                color: #6b86a8;
+                color: #4c7099;
                 font-size: 8.5px;
                 line-height: 1.5;
                 word-break: break-word;
@@ -281,7 +511,7 @@
             }
             .empty {
                 margin-top: 5px;
-                color: #8b97a1;
+                color: var(--muted-aa);
                 font-size: 8.5px;
                 line-height: 1.5;
             }
@@ -289,9 +519,15 @@
                 color: #687988;
                 font-weight: 600;
             }
+            .meta {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                gap: 5px;
+                margin-top: 6px;
+            }
             .pill {
                 display: inline-block;
-                margin-top: 5px;
                 padding: 1px 7px;
                 border-radius: 999px;
                 font-size: 7.5px;
@@ -299,23 +535,320 @@
                 letter-spacing: 0.05em;
                 text-transform: uppercase;
             }
-            .pill.nodata {
-                background: #eef1f4;
-                color: #687988;
-            }
             .pill.real {
                 background: var(--green-pale);
                 color: var(--green);
             }
-            .pill.zero {
+            .pill.example {
+                border: 1px dashed #d9e0e6;
                 background: #f4f6f8;
-                color: #8b97a1;
+                color: #52616e;
             }
+            .pill.nodata {
+                background: #eef1f4;
+                color: #52616e;
+            }
+            .pill.warn {
+                background: var(--amber-pale);
+                color: var(--amber);
+            }
+            .pill.blocked {
+                background: var(--red-pale);
+                color: var(--red);
+            }
+            .stack {
+                display: block;
+                width: 100%;
+                height: 8px;
+                margin: 7px 0 3px;
+                border-radius: 3px;
+                overflow: hidden;
+            }
+            .legend {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+            .legend span {
+                display: inline-flex;
+                align-items: center;
+                gap: 5px;
+                color: var(--ink-2);
+                font-size: 8.5px;
+            }
+            .legend i {
+                width: 8px;
+                height: 8px;
+                border-radius: 2px;
+            }
+            .dim-link {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                margin-top: auto;
+                padding-top: 9px;
+                border-top: 1px solid #eef1f4;
+                color: var(--blue-dark);
+                font-size: 10px;
+                font-weight: 600;
+                text-decoration: none;
+            }
+            .dim-link:hover {
+                text-decoration: underline;
+            }
+            .dim-link::after {
+                content: "→";
+                font-weight: 400;
+            }
+
+            /* ── Franjas de tabla ─────────────────────────────────────── */
+            .card {
+                display: flex;
+                flex-direction: column;
+                gap: 9px;
+                padding: 13px 15px 12px;
+                border: 1px solid var(--line);
+                border-radius: 10px;
+                background: #fff;
+            }
+            .card-head {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: baseline;
+                justify-content: space-between;
+                gap: 10px;
+            }
+            .card-head h2 {
+                margin: 0;
+                font: 700 15px/1.3 var(--font-display);
+                letter-spacing: -0.3px;
+            }
+            .card-sub {
+                max-width: 900px;
+                margin: 0;
+                color: var(--muted-aa);
+                font-size: 9.5px;
+                line-height: 1.55;
+            }
+            .card-sub b {
+                color: var(--ink-2);
+            }
+            .chip {
+                display: inline-flex;
+                align-items: center;
+                gap: 5px;
+                padding: 2px 8px;
+                border-radius: 999px;
+                background: var(--blue-pale);
+                color: var(--blue-dark);
+                font-size: 8.5px;
+                font-weight: 700;
+                letter-spacing: 0.04em;
+                text-transform: uppercase;
+                white-space: nowrap;
+            }
+            .table-wrap {
+                overflow-x: auto;
+            }
+            .data {
+                width: 100%;
+                border-collapse: collapse;
+            }
+            .data th[scope="col"] {
+                padding: 0 10px 6px;
+                border-bottom: 1px solid var(--line);
+                color: var(--ink-2);
+                font-size: 9px;
+                font-weight: 700;
+                letter-spacing: 0.07em;
+                text-align: left;
+                text-transform: uppercase;
+                white-space: nowrap;
+            }
+            .data th[scope="col"].num {
+                text-align: right;
+            }
+            .data td {
+                height: 44px;
+                padding: 8px 10px;
+                border-bottom: 1px solid #f1f3f5;
+                color: var(--ink-2);
+                font-size: 11px;
+                vertical-align: middle;
+            }
+            .data td.num {
+                text-align: right;
+                font-variant-numeric: tabular-nums;
+            }
+            .data tbody tr:last-child td {
+                border-bottom: 0;
+            }
+            .data tr.group th {
+                padding: 9px 10px 5px;
+                border-bottom: 1px solid var(--line);
+                background: #fbfcfd;
+                color: var(--ink);
+                font-size: 9px;
+                font-weight: 700;
+                letter-spacing: 0.06em;
+                text-align: left;
+                text-transform: uppercase;
+            }
+            .data tr.group .count {
+                margin-left: 6px;
+                padding: 1px 6px;
+                border-radius: 999px;
+                background: #eef1f4;
+                color: var(--ink-2);
+                font-size: 8.5px;
+                letter-spacing: 0;
+            }
+            .data tr.total td {
+                border-top: 1px solid var(--line);
+                background: #fcfdfe;
+                color: var(--ink);
+                font-weight: 700;
+            }
+            .data .nodata {
+                color: var(--muted-aa);
+                font-style: italic;
+            }
+            .data code,
+            .card-sub code,
+            .qtile code,
+            .note-box code {
+                padding: 0 3px;
+                border-radius: 3px;
+                background: #eef1f4;
+                font-family: ui-monospace, Menlo, monospace;
+                font-size: 9.5px;
+            }
+            .tag {
+                display: inline-flex;
+                align-items: center;
+                padding: 2px 8px;
+                border-radius: 999px;
+                font-size: 8.5px;
+                font-weight: 700;
+                letter-spacing: 0.03em;
+                text-transform: uppercase;
+                white-space: nowrap;
+            }
+            .tag.crit {
+                background: var(--red-pale);
+                color: var(--red);
+            }
+            .tag.urg {
+                background: var(--amber-pale);
+                color: var(--amber);
+            }
+            .tag.temp {
+                background: var(--blue-pale);
+                color: var(--blue);
+            }
+            .tag.mon {
+                background: #eef1f4;
+                color: #52616e;
+            }
+            .tag.pend {
+                background: var(--amber-pale);
+                color: var(--amber);
+            }
+            .tag.ok {
+                background: var(--green-pale);
+                color: var(--green);
+            }
+            .sema {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                font-size: 10px;
+                font-weight: 600;
+            }
+            .sema.rojo {
+                color: var(--red);
+            }
+            .sema.ambar {
+                color: var(--amber);
+            }
+            .sema.verde {
+                color: var(--green);
+            }
+            .note-box {
+                margin: 0;
+                padding: 8px 10px;
+                border: 1px dashed #e2e7eb;
+                border-radius: 8px;
+                background: #fbfcfd;
+                color: var(--muted-aa);
+                font-size: 9px;
+                line-height: 1.55;
+            }
+            .note-box b {
+                color: var(--ink-2);
+            }
+            .note-box.alert {
+                border-color: #f0dcc4;
+                background: #fffaf2;
+            }
+
+            /* ── Calidad del dato ─────────────────────────────────────── */
+            .qtiles {
+                display: grid;
+                grid-template-columns: repeat(4, minmax(0, 1fr));
+                gap: 10px;
+            }
+            @media (max-width: 1080px) {
+                .qtiles {
+                    grid-template-columns: repeat(2, minmax(0, 1fr));
+                }
+            }
+            @media (max-width: 620px) {
+                .qtiles {
+                    grid-template-columns: 1fr;
+                }
+            }
+            .qtile {
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+                padding: 10px 11px;
+                border: 1px solid #eef1f4;
+                border-radius: 9px;
+                background: #fcfdfe;
+            }
+            .qtile .qt {
+                color: var(--ink);
+                font-size: 10px;
+                font-weight: 600;
+                line-height: 1.4;
+            }
+            .qtile .qv {
+                color: var(--ink-2);
+                font: 700 19px/1 var(--font-display);
+                font-variant-numeric: tabular-nums;
+                letter-spacing: -0.4px;
+            }
+            .qtile .qv.sm {
+                font-size: 14px;
+            }
+            .qtile .qsrc {
+                color: #4c7099;
+                font-size: 8.5px;
+                line-height: 1.45;
+                word-break: break-word;
+            }
+            .qtile .qwhy {
+                color: var(--muted-aa);
+                font-size: 8.5px;
+                line-height: 1.5;
+            }
+
             .foot {
                 margin: 0;
-                color: #94a0a8;
+                color: var(--muted-aa);
                 font-size: 9px;
-                line-height: 1.6;
+                line-height: 1.65;
             }
             .foot code {
                 padding: 0 3px;
@@ -329,157 +862,342 @@
     <body>
         <main class="view-body">
             <header class="view-head">
-                <div>
+                <div class="head-main">
                     <h1>Resumen operativo</h1>
                     <p class="view-subtitle">
-                        Portada analítica del día en tres dimensiones:
-                        <b>Prevención</b>, <b>Gestión</b> y
-                        <b>Seguimiento de compromisos</b>. Reemplaza los KPI
-                        sueltos del item 10. Cada métrica declara su
-                        <b>consulta</b> y su <b>estado vacío</b>; donde no hay
-                        fuente se muestra «—» y se declara <b>no existe</b>. No
-                        se inventa ninguna cifra.
+                        La portada de trabajo diario de OAIPCS, ordenada por las
+                        tres dimensiones de la Guía: <b>Prevención</b>,
+                        <b>Gestión</b> y <b>Seguimiento de compromisos</b>. El
+                        <b>panel de operación (item 85) se integra aquí</b>:
+                        carga por especialista, compromisos vencidos y tiempo de
+                        primera respuesta caen en esta misma pantalla, así que
+                        <b>no se dibuja una ruta nueva</b>. Las cifras con
+                        <b>≈</b> son de ejemplo y lo dicen; las que llevan su
+                        fuente son las del corte del 22 nov 2026. Donde el dato
+                        no existe se declara, no se estima.
                     </p>
                 </div>
-                <div>
-                    <span class="badge">Ola 1 · artboard 6 · item 110</span>
+                <div class="role-wrap">
+                    <div
+                        class="rolebar"
+                        role="group"
+                        aria-label="Rol de sesión"
+                    >
+                        <span class="rolebar-label">Rol de sesión</span>
+                        <div class="seg" role="group" aria-label="Cambiar rol">
+                            <button type="button" aria-pressed="true">
+                                Dirección
+                            </button>
+                            <button type="button" aria-pressed="false">
+                                Secretaría General
+                            </button>
+                            <button type="button" aria-pressed="false">
+                                Viceministerio
+                            </button>
+                        </div>
+                    </div>
+                    <p class="role-note">
+                        Dibujado en <b>Dirección</b>. <b>Regla X6:</b> Dirección
+                        y Secretaría General ven ambos subsectores; cada
+                        Viceministerio, sólo el suyo. Es ámbito de sesión, no un
+                        filtro de pantalla.
+                        <span class="x"
+                            >Hoy no existe el rol de viceministerio (item 113,
+                            bloqueado):</span
+                        >
+                        el tercer estado es forma y no se puede cablear.
+                    </p>
+                    <span class="badge"
+                        >Ola 1 · artboard 6 · 110 · 85 · 46</span
+                    >
                 </div>
             </header>
 
             <!-- ═══════════ Cinco bloques de anotación (obligatorios) ═══════════ -->
             <section class="ann" aria-label="Anotaciones del artboard">
-                <div class="ann-card">
-                    <h3><span class="n">1</span>Items que cubre</h3>
-                    <b>110</b> (resumen operativo en tres dimensiones; reemplaza
-                    los KPI sueltos del item 10). <br /><b>Diseño por lote:</b>
-                    <b>Reunión</b> · pantallas sin fuente ratificada (110). No es
-                    Lote B: se presenta como mockup parcial hasta que OAIPCS
-                    ratifique las definiciones que hoy no tienen origen.
+                <div class="ann-card wide">
+                    <h3><span class="n">1</span>Cubre</h3>
+                    <b>110</b> — resumen operativo en tres dimensiones
+                    (reemplaza los KPI sueltos del item 10). <b>85</b> — panel
+                    de operación OAIPCS, que no tenía ruta ni mockup:
+                    <b>se absorbe aquí</b>, en la franja de operación, sin
+                    pantalla nueva. <b>46</b> — «última sincronización», hoy
+                    texto fijo en la barra superior. Toca <b>29</b> (rango de
+                    fechas compartido), <b>57</b> (registro de tiempos y series)
+                    y <b>113 / X6</b> (ámbito de subsector por rol).
+                    <b>Ruta:</b> <code>/resumen</code>; archivo
+                    <code>resumen-operativo.html</code>.
                 </div>
-                <div class="ann-card">
-                    <h3>
-                        <span class="n">2</span>Dato que necesita cada celda
-                    </h3>
+                <div class="ann-card wide">
+                    <h3><span class="n">2</span>Dato por bloque</h3>
                     <table class="ann-table">
-                        <tr>
-                            <th>Métrica</th>
-                            <th>Campo</th>
-                            <th>Ruta</th>
-                        </tr>
-                        <tr>
-                            <td>Casos abiertos</td>
-                            <td><code>conteos.abiertos</code></td>
-                            <td>
-                                <code
-                                    >GET
-                                    /v1/cases?abiertos=true&amp;conteos=true</code
-                                >
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Demandas sin caso</td>
-                            <td><code>sinCasoTotal</code></td>
-                            <td><code>GET /v1/demandas?sinCaso=true</code></td>
-                        </tr>
-                        <tr>
-                            <td>Alertas registradas</td>
-                            <td>total paginado</td>
-                            <td><code>GET /v1/alerts?tamano=1</code></td>
-                        </tr>
-                        <tr>
-                            <td>Compromisos</td>
-                            <td>total paginado</td>
-                            <td><code>GET /v1/commitments?tamano=1</code></td>
-                        </tr>
-                        <tr>
-                            <td>Compromisos vencidos / próximos 30 d</td>
-                            <td><code>fechaVencimiento</code></td>
-                            <td>
-                                <code
-                                    >GET
-                                    /v1/commitments?vencimiento_desde=…&amp;vencimiento_hasta=…</code
-                                >
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Acciones previstas</td>
-                            <td>—</td>
-                            <td><b>no existe</b> (ni tabla ni campo)</td>
-                        </tr>
-                        <tr>
-                            <td>Intervenciones / planes de acción</td>
-                            <td>—</td>
-                            <td>
-                                <b>no existe</b> (los «planes de acción» del item
-                                103 tampoco tienen tabla)
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Alertas con aprobación</td>
-                            <td><code>aprobada_por</code></td>
-                            <td>
-                                <b>no existe</b> endpoint (item 105) ·
-                                <code>core.permiso_aprobacion</code> vacía
-                            </td>
-                        </tr>
+                        <thead>
+                            <tr>
+                                <th scope="col">Bloque · cifra</th>
+                                <th scope="col">Fuente</th>
+                                <th scope="col">Estado del corte</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Prevención · alertas registradas</td>
+                                <td><code>core.alertas_tempranas</code></td>
+                                <td class="ok">real · 83</td>
+                            </tr>
+                            <tr>
+                                <td>Prevención · alertas por prioridad</td>
+                                <td>
+                                    <code>alertas_tempranas.prioridad_id</code>
+                                    → <code>cat_prioridades_alerta</code> (1–4,
+                                    <code>sla_horas</code>)
+                                </td>
+                                <td>
+                                    real por prioridad; el reparto por
+                                    especialista es ≈ ejemplo
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Prevención · demandas sin caso</td>
+                                <td>
+                                    <code>GET /v1/demandas?sinCaso=true</code> →
+                                    <code>sinCasoTotal</code>
+                                </td>
+                                <td class="ok">real · 107 (81 + 26)</td>
+                            </tr>
+                            <tr>
+                                <td>Prevención · acciones previstas</td>
+                                <td>ni tabla ni campo</td>
+                                <td class="bad">no existe</td>
+                            </tr>
+                            <tr>
+                                <td>Gestión · casos vigentes</td>
+                                <td>
+                                    <code>core.casos</code> ×
+                                    <code>cat_estados_caso.es_activo</code>
+                                </td>
+                                <td class="ok">real · 34 (35, 1 anulado)</td>
+                            </tr>
+                            <tr>
+                                <td>Gestión · latente / manifiesto</td>
+                                <td>
+                                    <code>casos.nivel_conflicto_id</code> →
+                                    <code>cat_niveles_conflicto</code> (1–4)
+                                </td>
+                                <td>
+                                    agregación real; el reparto es ≈ ejemplo
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Gestión · planes de acción</td>
+                                <td>
+                                    el bloque del item 103 tampoco tiene tabla
+                                </td>
+                                <td class="bad">no existe</td>
+                            </tr>
+                            <tr>
+                                <td>Seguimiento · compromisos</td>
+                                <td><code>core.compromisos</code></td>
+                                <td class="ok">real · 8</td>
+                            </tr>
+                            <tr>
+                                <td>Seguimiento · hitos</td>
+                                <td><code>core.hitos_compromiso</code></td>
+                                <td class="ok">real · 12</td>
+                            </tr>
+                            <tr>
+                                <td>Seguimiento · vencidos / por vencer</td>
+                                <td>
+                                    <code
+                                        >analytics.vw_anexo_14_seguimiento_compromisos</code
+                                    >
+                                    → <code>semaforo</code> ROJO / AMARILLO
+                                </td>
+                                <td class="gap">
+                                    real · 0 y 0 (1 de 12 hitos con fecha)
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Operación · carga por especialista</td>
+                                <td>
+                                    <code
+                                        >core.casos.punto_focal_usuario_id</code
+                                    >
+                                    → <code>core.usuarios</code>
+                                </td>
+                                <td>≈ ejemplo (columna nullable)</td>
+                            </tr>
+                            <tr>
+                                <td>Operación · primera respuesta</td>
+                                <td>
+                                    sin campo de primera acción; sólo
+                                    <code
+                                        >derivaciones_alerta.fecha_derivacion</code
+                                    >
+                                    y <code>fecha_atencion</code>
+                                </td>
+                                <td class="bad">sin dato · bloqueado (57)</td>
+                            </tr>
+                            <tr>
+                                <td>Calidad · antigüedad del dato</td>
+                                <td>
+                                    <code
+                                        >casos.fecha_ultima_actualizacion</code
+                                    >
+                                </td>
+                                <td>≈ ejemplo</td>
+                            </tr>
+                            <tr>
+                                <td>Calidad · sin coordenada</td>
+                                <td>
+                                    <code>casos.latitud</code>,
+                                    <code>longitud</code>
+                                </td>
+                                <td>≈ ejemplo (ambas nullable)</td>
+                            </tr>
+                            <tr>
+                                <td>Calidad · sin nivel declarado</td>
+                                <td>
+                                    <code>casos.nivel_conflicto_id</code> NOT
+                                    NULL
+                                </td>
+                                <td class="ok">
+                                    real · 0: el hueco no puede existir
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Calidad · compromisos sin hito</td>
+                                <td>
+                                    LEFT JOIN <code>core.hitos_compromiso</code>
+                                </td>
+                                <td>≈ ejemplo</td>
+                            </tr>
+                            <tr>
+                                <td>Barra · última sincronización</td>
+                                <td>texto fijo «hace menos de 1 min»</td>
+                                <td class="bad">sin dato · bloqueado (46)</td>
+                            </tr>
+                            <tr>
+                                <td>Barra · rango de fechas</td>
+                                <td>7 / 30 / 90 días + personalizado</td>
+                                <td>sólo forma (29)</td>
+                            </tr>
+                        </tbody>
                     </table>
                 </div>
                 <div class="ann-card">
                     <h3><span class="n">3</span>Sólo forma · no implementar</h3>
-                    La retícula de tres columnas, las fichas de métrica y las
-                    etiquetas de estado son <b>forma</b>. La definición de cada
-                    métrica <b>no se inventa</b>: se copia de la que fije el
-                    item 51 para el dashboard. Las cifras que aparecen son las
-                    del corte documentado; cualquier periodo, serie o
-                    comparación no se dibuja porque no hay fuente.
+                    La composición en <b>tres columnas</b> (Prevención · Gestión
+                    · Seguimiento), la <b>franja de operación</b> con su última
+                    columna vacía, el agrupador por prioridad de alertas, el
+                    semáforo de compromisos y la franja de calidad. El
+                    conmutador de rol y el rango de fechas son <b>forma</b>: no
+                    cambian la consulta, cambian la sesión o el periodo. Ninguna
+                    métrica crea definición propia: se copia la del dashboard
+                    (item 51) cuando la fije.
                 </div>
                 <div class="ann-card">
                     <h3><span class="n">4</span>Bloqueado y por qué</h3>
-                    <b>Ningún X de producto aplica</b> (X1–X5 son de otras
-                    pantallas). El bloqueo es de <b>fuente</b>: «acciones
-                    previstas», «intervenciones» y «planes de acción» no tienen
-                    tabla ni endpoint, así que se dibujan con «—» y
-                    <code>no existe</code>. Los compromisos existen (8) pero
-                    <b>ninguno tiene <code>fecha_vencimiento</code></b>: por eso
-                    «vencidos» y «próximos 30 días» valen 0 sin inventar una
-                    fecha. La aprobación de alertas (item 105) tampoco tiene
-                    flujo. La pantalla se presenta como <b>mockup parcial</b>
-                    hasta que OAIPCS ratifique las definiciones faltantes.
+                    <b>Tiempo de primera respuesta:</b> no hay campo que
+                    registre la primera acción;
+                    <code>core.derivaciones_alerta</code> sólo guarda derivación
+                    y atención, y existe únicamente cuando alguien deriva la
+                    alerta. Depende del item 57.
+                    <b>Última sincronización real:</b> hoy es un texto fijo;
+                    falta el registro por fuente (item 46).
+                    <b>Ámbito por subsector:</b>
+                    la regla X6 está ratificada, pero el rol de viceministerio
+                    no existe (item 113): el tercer estado del conmutador no
+                    tiene de dónde leer el ámbito.
                 </div>
                 <div class="ann-card wide">
                     <h3><span class="n">5</span>Roles que ven cada bloque</h3>
-                    <b>Dirección OAIPCS y Secretaría General:</b> las tres
-                    dimensiones con alcance nacional (ambos subsectores).
-                    <b>Sectorista:</b> las mismas métricas recortadas a sus
-                    regiones y, con el item 113, a su subsector; una métrica sin
-                    filas en su ámbito muestra su estado vacío, no un cero
-                    heredado de otra región. <b>Alta dirección:</b> lectura
-                    completa, sin acciones. La exportación usa el mismo menú de
-                    la SPA; esta portada no añade botones propios.
+                    <b>Dirección y Secretaría General:</b> los tres bloques con
+                    ambos subsectores (X6). <b>Viceministerio:</b> los mismos
+                    bloques recortados a su subsector cuando exista el rol
+                    (113). <b>Sectorista:</b> sólo su ámbito y, en la franja de
+                    operación, <b>sólo su carga</b>. <b>Especialista OAIPCS:</b>
+                    su fila de la franja y las alertas y compromisos de sus
+                    casos.
+                    <b>Administrador:</b> sin datos operativos. Un bloque sin
+                    filas en el ámbito muestra su estado vacío, no un cero
+                    heredado de otro subsector.
                 </div>
             </section>
 
-            <div class="shared">
-                <b>Definición compartida con el dashboard (item 51).</b>
+            <div class="route">
+                <b
+                    >Ruta <code>/resumen</code> · archivo
+                    <code>resumen-operativo.html</code>.</b
+                >
                 <span
-                    >Cada métrica de esta portada usa la misma consulta y el
-                    mismo estado vacío que su gemela en el dashboard. Si las dos
-                    definiciones divergen, manda la del dashboard: aquí no se
-                    crea una segunda regla.</span
+                    >El panel de operación OAIPCS (item 85) figuraba como «sin
+                    ruta · no está en el menú»: se integra en esta pantalla y
+                    <b>no se crea una ruta nueva</b>. Se retira la lista de
+                    indicadores suelta: las cifras siguen siendo las mismas
+                    agregaciones del corte, sólo cambian de orden.</span
                 >
             </div>
 
-            <!-- Tres dimensiones -->
+            <!-- ═══════════ Barra superior ═══════════ -->
+            <div class="topbar" role="region" aria-label="Barra de la portada">
+                <div class="sync">
+                    <span class="dot" aria-hidden="true"></span>
+                    <span>Última sincronización</span>
+                    <b>sin dato</b>
+                    <span class="note"
+                        >· hoy es el texto fijo «hace menos de 1 min»: no hay
+                        registro por fuente (item 46)</span
+                    >
+                </div>
+                <div class="topbar-right">
+                    <div
+                        class="range"
+                        role="group"
+                        aria-label="Rango de fechas"
+                    >
+                        <span class="range-label">Rango</span>
+                        <div class="seg" role="group" aria-label="Días">
+                            <button type="button" aria-pressed="false">
+                                7 d
+                            </button>
+                            <button type="button" aria-pressed="true">
+                                30 d
+                            </button>
+                            <button type="button" aria-pressed="false">
+                                90 d
+                            </button>
+                            <button type="button" aria-pressed="false">
+                                Personalizado
+                            </button>
+                        </div>
+                        <span class="note"
+                            >item 29 · el mismo rango viaja a la
+                            exportación</span
+                        >
+                    </div>
+                    <details class="export-menu">
+                        <summary>Exportar ▾</summary>
+                        <div class="export-list" role="menu">
+                            <button type="button" role="menuitem">JSON</button>
+                            <button type="button" role="menuitem">Excel</button>
+                            <button type="button" role="menuitem">PDF</button>
+                        </div>
+                    </details>
+                </div>
+            </div>
+
+            <!-- ═══════════ Tres dimensiones ═══════════ -->
             <div class="dims">
                 <!-- Prevención -->
-                <section class="dim" aria-label="Dimensión Prevención">
+                <section class="dim" aria-labelledby="dim-prev">
                     <div class="dim-head">
-                        <h2>Prevención</h2>
-                        <span class="num">1</span>
+                        <h2 id="dim-prev">Prevención</h2>
+                        <span class="num" aria-hidden="true">1</span>
                     </div>
                     <p class="dim-sub">
-                        Acciones previstas y alertas tempranas, antes de que el
-                        conflicto se exteriorice.
+                        Acciones preventivas previstas y alertas tempranas: lo
+                        que se anticipa antes de que el conflicto se
+                        exteriorice.
                     </p>
 
                     <div class="metric">
@@ -488,76 +1206,30 @@
                             <span class="val">83</span>
                         </div>
                         <div class="q">
-                            <code>GET /v1/alerts?tamano=1</code>
+                            <code>core.alertas_tempranas</code> · 83 filas
                         </div>
-                        <div class="empty">
-                            <b>Vacío:</b> «Sin alertas registradas para el
-                            período»; no se dibuja un gráfico de cero.
-                        </div>
-                        <span class="pill real">cifra del corte</span>
-                    </div>
-
-                    <div class="metric missing">
-                        <div class="metric-top">
-                            <b>Acciones previstas</b>
-                            <span class="val">—</span>
-                        </div>
-                        <div class="q">
-                            <span class="no">no existe</span> · ni tabla ni
-                            campo
-                        </div>
-                        <div class="empty">
-                            <b>Vacío:</b> la tarjeta queda en «—» con la
-                            leyenda «dato no disponible». No se estima.
-                        </div>
-                        <span class="pill nodata">no existe</span>
-                    </div>
-
-                    <div class="metric">
-                        <div class="metric-top">
-                            <b>Alertas con aprobación</b>
-                            <span class="val">0</span>
-                        </div>
-                        <div class="q">
-                            <code>GET /v1/alerts</code> · campo
-                            <code>aprobada_por</code>
-                        </div>
-                        <div class="empty">
-                            <b>Vacío:</b> el flujo de aprobación no existe (item
-                            105); el cero es real, no un error de consulta.
-                        </div>
-                        <span class="pill zero">bloqueado · item 105</span>
-                    </div>
-                </section>
-
-                <!-- Gestión -->
-                <section class="dim" aria-label="Dimensión Gestión">
-                    <div class="dim-head">
-                        <h2>Gestión</h2>
-                        <span class="num">2</span>
-                    </div>
-                    <p class="dim-sub">
-                        Intervenciones en curso y planes de acción sobre los
-                        conflictos ya abiertos.
-                    </p>
-
-                    <div class="metric">
-                        <div class="metric-top">
-                            <b>Casos abiertos</b>
-                            <span class="val">34</span>
-                        </div>
-                        <div class="q">
-                            <code
-                                >GET
-                                /v1/cases?abiertos=true&amp;conteos=true</code
+                        <div class="meta">
+                            <span class="pill real"
+                                >real · corte 22 nov 2026</span
                             >
                         </div>
-                        <div class="empty">
-                            <b>Vacío:</b> «0 casos abiertos» con el enlace a la
-                            lista; no se sustituye por el total histórico (35,
-                            con 1 anulado).
+                    </div>
+
+                    <div class="metric">
+                        <div class="metric-top">
+                            <b>Alertas por atender</b>
+                            <span class="val">≈ 27</span>
                         </div>
-                        <span class="pill real">cifra del corte</span>
+                        <div class="q">
+                            <code>core.alertas_tempranas</code> sin derivación
+                            atendida (<code
+                                >derivaciones_alerta.estado_atencion</code
+                            >
+                            ≠ <code>Atendida</code>)
+                        </div>
+                        <div class="meta">
+                            <span class="pill example">ejemplo</span>
+                        </div>
                     </div>
 
                     <div class="metric">
@@ -570,54 +1242,179 @@
                             <code>sinCasoTotal</code>
                         </div>
                         <div class="empty">
-                            <b>Vacío:</b> «Ninguna demanda pendiente de
-                            vincular». El desglose es 81 con alerta y 26 sin
-                            alerta.
+                            <b>Desglose:</b> 81 con alerta y 26 sin alerta. Es
+                            la cola que alimenta Prevención, no un indicador de
+                            Gestión.
                         </div>
-                        <span class="pill real">cifra del corte</span>
+                        <div class="meta">
+                            <span class="pill real"
+                                >real · corte 22 nov 2026</span
+                            >
+                        </div>
                     </div>
 
                     <div class="metric missing">
                         <div class="metric-top">
-                            <b>Intervenciones en curso</b>
+                            <b>Acciones preventivas previstas</b>
+                            <span class="val">—</span>
+                        </div>
+                        <div class="q">
+                            <span class="no">no existe</span> · ni tabla ni
+                            campo
+                        </div>
+                        <div class="empty">
+                            <b>Vacío:</b> la tarjeta queda en «—» con «dato no
+                            disponible». La Guía las pide; la base no las
+                            guarda.
+                        </div>
+                        <div class="meta">
+                            <span class="pill nodata">no existe</span>
+                        </div>
+                    </div>
+
+                    <a
+                        class="dim-link"
+                        href="/alertas?prioridad=Critica_Inmediata&amp;estado=pendiente"
+                        >Ver alertas tempranas filtradas</a
+                    >
+                </section>
+
+                <!-- Gestión -->
+                <section class="dim" aria-labelledby="dim-gest">
+                    <div class="dim-head">
+                        <h2 id="dim-gest">Gestión</h2>
+                        <span class="num" aria-hidden="true">2</span>
+                    </div>
+                    <p class="dim-sub">
+                        Intervenciones y planes de acción sobre los conflictos
+                        ya manifiestos. El nivel de conflictividad va como
+                        etiqueta (latente o manifiesto), nunca como un estado
+                        del listado.
+                    </p>
+
+                    <div class="metric">
+                        <div class="metric-top">
+                            <b>Casos vigentes</b>
+                            <span class="val">34</span>
+                        </div>
+                        <div class="q">
+                            <code>core.casos</code> ×
+                            <code>core.cat_estados_caso.es_activo</code> (35 con
+                            1 anulado)
+                        </div>
+                        <div class="empty">
+                            <b>Vacío:</b> «0 casos vigentes» con enlace a la
+                            lista; no se sustituye por el total histórico.
+                        </div>
+                        <div class="meta">
+                            <span class="pill real"
+                                >real · corte 22 nov 2026</span
+                            >
+                        </div>
+                    </div>
+
+                    <div class="metric">
+                        <div class="metric-top">
+                            <b>Nivel de conflictividad</b>
+                            <span class="val sm"
+                                >≈ 21 latentes · ≈ 13 manifiestos</span
+                            >
+                        </div>
+                        <svg
+                            class="stack"
+                            viewBox="0 0 100 8"
+                            preserveAspectRatio="none"
+                            role="img"
+                            aria-label="Reparto de ejemplo: 21 casos latentes y 13 manifiestos sobre 34 casos vigentes"
+                        >
+                            <rect
+                                x="0"
+                                y="0"
+                                width="61.8"
+                                height="8"
+                                fill="#397c79"
+                            ></rect>
+                            <rect
+                                x="61.8"
+                                y="0"
+                                width="38.2"
+                                height="8"
+                                fill="#17283a"
+                            ></rect>
+                        </svg>
+                        <div class="legend">
+                            <span
+                                ><i style="background: #397c79"></i> latente ·
+                                Diferencia + Controversia</span
+                            >
+                            <span
+                                ><i style="background: #17283a"></i> manifiesto
+                                · Conflicto social + Crisis social</span
+                            >
+                        </div>
+                        <div class="q">
+                            <code>casos.nivel_conflicto_id</code> →
+                            <code>cat_niveles_conflicto</code> (4 filas, X3)
+                        </div>
+                        <div class="empty">
+                            <b>El total es real; el reparto no se publica:</b>
+                            34 es la cifra del corte, pero la suma por nivel
+                            todavía no se agrega en la consulta. Nunca se usa
+                            «activo» como sinónimo de manifiesto.
+                        </div>
+                        <div class="meta">
+                            <span class="pill example">reparto de ejemplo</span>
+                        </div>
+                    </div>
+
+                    <div class="metric">
+                        <div class="metric-top">
+                            <b>Casos con riesgo alto</b>
+                            <span class="val">≈ 9</span>
+                        </div>
+                        <div class="q">
+                            <code>casos.nivel_riesgo_id</code> →
+                            <code>cat_niveles_riesgo</code> (3 filas)
+                        </div>
+                        <div class="meta">
+                            <span class="pill example">ejemplo</span>
+                        </div>
+                    </div>
+
+                    <div class="metric missing">
+                        <div class="metric-top">
+                            <b>Planes de acción e intervenciones</b>
                             <span class="val">—</span>
                         </div>
                         <div class="q">
                             <span class="no">no existe</span> · sin tabla de
-                            intervenciones
+                            intervenciones ni de planes de acción
                         </div>
                         <div class="empty">
-                            <b>Vacío:</b> «—» con leyenda «dato no disponible»;
-                            no se infiere de los casos.
+                            <b>Vacío:</b> «—» con «dato no disponible»; no se
+                            infiere de los casos.
                         </div>
-                        <span class="pill nodata">no existe</span>
+                        <div class="meta">
+                            <span class="pill nodata">no existe</span>
+                        </div>
                     </div>
 
-                    <div class="metric missing">
-                        <div class="metric-top">
-                            <b>Planes de acción</b>
-                            <span class="val">—</span>
-                        </div>
-                        <div class="q">
-                            <span class="no">no existe</span> · el bloque del
-                            item 103 tampoco tiene tabla
-                        </div>
-                        <div class="empty">
-                            <b>Vacío:</b> «—» con leyenda «dato no disponible».
-                        </div>
-                        <span class="pill nodata">no existe</span>
-                    </div>
+                    <a
+                        class="dim-link"
+                        href="/casos?abiertos=true&amp;riesgo=Alto"
+                        >Ver casos vigentes filtrados</a
+                    >
                 </section>
 
                 <!-- Seguimiento de compromisos -->
-                <section class="dim" aria-label="Dimensión Seguimiento de compromisos">
+                <section class="dim" aria-labelledby="dim-cp">
                     <div class="dim-head">
-                        <h2>Seguimiento de compromisos</h2>
-                        <span class="num">3</span>
+                        <h2 id="dim-cp">Seguimiento de compromisos</h2>
+                        <span class="num" aria-hidden="true">3</span>
                     </div>
                     <p class="dim-sub">
-                        Compromisos asumidos en mesas de diálogo, con su
-                        vencimiento cuando lo tienen.
+                        Cumplimiento de lo asumido en mesas de diálogo: qué se
+                        pactó, en qué hito se mide y qué plazo lo hace exigible.
                     </p>
 
                     <div class="metric">
@@ -626,81 +1423,616 @@
                             <span class="val">8</span>
                         </div>
                         <div class="q">
-                            <code>GET /v1/commitments?tamano=1</code>
+                            <code>core.compromisos</code> · 8 filas
                         </div>
-                        <div class="empty">
-                            <b>Vacío:</b> «Sin compromisos registrados para el
-                            período».
+                        <div class="meta">
+                            <span class="pill real"
+                                >real · corte 22 nov 2026</span
+                            >
                         </div>
-                        <span class="pill real">cifra del corte</span>
                     </div>
 
                     <div class="metric">
                         <div class="metric-top">
-                            <b>Vencidos</b>
-                            <span class="val">0</span>
+                            <b>Hitos registrados</b>
+                            <span class="val">12</span>
                         </div>
                         <div class="q">
-                            <code
-                                >GET
-                                /v1/commitments?vencimiento_hasta=…&amp;estado=…</code
+                            <code>core.hitos_compromiso</code> · 12 filas
+                        </div>
+                        <div class="meta">
+                            <span class="pill real"
+                                >real · corte 22 nov 2026</span
                             >
                         </div>
-                        <div class="empty">
-                            <b>Vacío:</b> cero real: <b>ninguno de los 8 tiene
-                            <code>fecha_vencimiento</code></b>, así que no hay
-                            vencido que calcular.
-                        </div>
-                        <span class="pill zero">sin fecha · 8 de 8</span>
                     </div>
 
                     <div class="metric">
                         <div class="metric-top">
-                            <b>Próximos 30 días</b>
-                            <span class="val">0</span>
+                            <b>Compromisos con plazo calculable</b>
+                            <span class="val sm">1 de 8</span>
+                        </div>
+                        <div class="q">
+                            <code>core.compromisos</code> no tiene
+                            <code>fecha_vencimiento</code>: el plazo vive en
+                            <code>hitos_compromiso.fecha_vencimiento</code>
+                        </div>
+                        <div class="empty">
+                            <b>Sólo 1 de los 12 hitos tiene fecha</b> (y está
+                            Cumplido). Los otros 11 no pueden vencer ni
+                            cumplirse en la vista: es hueco de dato, no de
+                            pantalla.
+                        </div>
+                        <div class="meta">
+                            <span class="pill warn">plazo incompleto</span>
+                        </div>
+                    </div>
+
+                    <div class="metric">
+                        <div class="metric-top">
+                            <b>Cumplimiento agregado</b>
+                            <span class="val">≈ 62 %</span>
                         </div>
                         <div class="q">
                             <code
-                                >GET
-                                /v1/commitments?vencimiento_desde=…&amp;vencimiento_hasta=…</code
+                                >analytics.vw_anexo_14_seguimiento_compromisos</code
                             >
+                            · <code>semaforo</code> sobre hitos con estado
+                            terminal
                         </div>
                         <div class="empty">
-                            <b>Vacío:</b> cero real por la misma causa; se rotula
-                            «sin fechas» en lugar de «no hay vencimientos».
+                            <b>Denominador:</b> hitos con fecha. Hoy es 1 de 12,
+                            así que el porcentaje es de forma, no una tasa
+                            institucional.
                         </div>
-                        <span class="pill zero">sin fecha · 8 de 8</span>
+                        <div class="meta">
+                            <span class="pill example">ejemplo</span>
+                        </div>
                     </div>
 
-                    <div class="metric missing">
-                        <div class="metric-top">
-                            <b>Compromisos con fecha de vencimiento</b>
-                            <span class="val">0</span>
-                        </div>
-                        <div class="q">
-                            <code>GET /v1/commitments</code> ·
-                            <code>fechaVencimiento</code> nulo en las 8 filas
-                        </div>
-                        <div class="empty">
-                            <b>Vacío:</b> se declara el hueco de dato; cargar la
-                            fecha es trabajo de fuente, no de pantalla.
-                        </div>
-                        <span class="pill nodata">dato ausente · 8 de 8</span>
-                    </div>
+                    <a class="dim-link" href="/compromisos?semaforo=ROJO"
+                        >Ver compromisos por semáforo</a
+                    >
                 </section>
             </div>
 
+            <!-- ═══════════ Franja de operación · item 85 ═══════════ -->
+            <section class="card" aria-labelledby="op-title">
+                <div class="card-head">
+                    <h2 id="op-title">
+                        Franja de operación · carga del equipo
+                    </h2>
+                    <span class="chip">item 85 · integrado aquí</span>
+                </div>
+                <p class="card-sub">
+                    La unidad de análisis es la
+                    <b>cola de trabajo y la capacidad del equipo</b>, no el
+                    panorama institucional (eso es el item 52). No repite el
+                    resumen de Dirección: mide dónde se atasca la atención.
+                    <b>Especialista</b> sale de
+                    <code>core.casos.punto_focal_usuario_id</code>; la columna
+                    nullable produce una fila «Sin asignar» que no se puede
+                    esconder. De los cortes que pedía el item 85, aquí se queda
+                    la capacidad del equipo: <b>señales sin triage</b> vive en
+                    la Bandeja RED-RADAR y <b>cobertura regional</b>, en el
+                    Panorama territorial; no se duplican.
+                </p>
+                <div class="table-wrap">
+                    <table class="data">
+                        <caption class="sr-only">
+                            Carga por especialista: casos asignados, alertas
+                            abiertas, compromisos vencidos y tiempo medio de
+                            primera respuesta
+                        </caption>
+                        <thead>
+                            <tr>
+                                <th scope="col">Especialista</th>
+                                <th scope="col" class="num">Casos asignados</th>
+                                <th scope="col" class="num">
+                                    Alertas abiertas
+                                </th>
+                                <th scope="col" class="num">
+                                    Compromisos vencidos
+                                </th>
+                                <th scope="col">
+                                    Tiempo medio de primera respuesta
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>ESP-01 · Piura · Pesca y acuicultura</td>
+                                <td class="num">≈ 9</td>
+                                <td class="num">≈ 6</td>
+                                <td class="num">0</td>
+                                <td class="nodata">sin dato</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    ESP-02 · La Libertad · Pesca y acuicultura
+                                </td>
+                                <td class="num">≈ 8</td>
+                                <td class="num">≈ 5</td>
+                                <td class="num">0</td>
+                                <td class="nodata">sin dato</td>
+                            </tr>
+                            <tr>
+                                <td>ESP-03 · Lima · MYPE e industria</td>
+                                <td class="num">≈ 7</td>
+                                <td class="num">≈ 6</td>
+                                <td class="num">0</td>
+                                <td class="nodata">sin dato</td>
+                            </tr>
+                            <tr>
+                                <td>ESP-04 · Arequipa · MYPE e industria</td>
+                                <td class="num">≈ 5</td>
+                                <td class="num">≈ 4</td>
+                                <td class="num">0</td>
+                                <td class="nodata">sin dato</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Sin asignar ·
+                                    <span class="nodata"
+                                        ><code>punto_focal_usuario_id</code>
+                                        nulo</span
+                                    >
+                                </td>
+                                <td class="num">≈ 5</td>
+                                <td class="num">≈ 6</td>
+                                <td class="num">0</td>
+                                <td class="nodata">sin dato</td>
+                            </tr>
+                            <tr class="total">
+                                <td>Total</td>
+                                <td class="num">34</td>
+                                <td class="num">≈ 27</td>
+                                <td class="num">0</td>
+                                <td class="nodata">sin dato</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="note-box alert">
+                    <b
+                        >El hueco de la última columna es el dato, no el
+                        diseño.</b
+                    >
+                    El tiempo medio de primera respuesta
+                    <b>no se puede calcular hoy</b>: no existe un campo de
+                    primera acción sobre el caso ni sobre la alerta.
+                    <code>core.derivaciones_alerta</code> guarda
+                    <code>fecha_derivacion</code> y <code>fecha_atencion</code>,
+                    pero sólo existe cuando alguien deriva la alerta: el reloj
+                    arranca en la derivación, no en el reporte, y el denominador
+                    no es el universo de casos. Lo resuelve el item 57 (registro
+                    de tiempos), no esta pantalla.
+                </p>
+                <p class="note-box">
+                    <b>De dónde sale cada número.</b> Casos asignados:
+                    <code>core.casos</code> agrupado por
+                    <code>punto_focal_usuario_id</code> (los 34 vigentes son
+                    reales; el reparto es ≈ porque la asignación no está
+                    normalizada). Alertas abiertas:
+                    <code>core.alertas_tempranas</code> cuyo caso tiene ese
+                    punto focal y que no registran atención cerrada. Compromisos
+                    vencidos: <b>0 real</b>, porque
+                    <code>core.compromisos</code> no tiene
+                    <code>fecha_vencimiento</code> y sólo 1 de los 12 hitos
+                    tiene fecha, ya cumplida.
+                </p>
+            </section>
+
+            <!-- ═══════════ Alertas tempranas por atender ═══════════ -->
+            <section class="card" aria-labelledby="al-title">
+                <div class="card-head">
+                    <h2 id="al-title">Alertas tempranas por atender</h2>
+                    <span class="chip">prioridad y plazo</span>
+                </div>
+                <p class="card-sub">
+                    Ordenadas por prioridad y, dentro de cada una, por plazo.
+                    Las cuatro etiquetas son las del catálogo
+                    <code>core.cat_prioridades_alerta</code> (1–4) con su
+                    <code>sla_horas</code>: 24, 48 y 72 horas;
+                    <b>Seguimiento no tiene plazo</b>. «Por atender» = alerta
+                    sin
+                    <code>derivaciones_alerta.estado_atencion = 'Atendida'</code
+                    >.
+                </p>
+                <div class="table-wrap">
+                    <table class="data">
+                        <caption class="sr-only">
+                            Alertas tempranas por atender, agrupadas por
+                            prioridad
+                        </caption>
+                        <thead>
+                            <tr>
+                                <th scope="col">Alerta</th>
+                                <th scope="col">Caso</th>
+                                <th scope="col">Territorio</th>
+                                <th scope="col">Vence</th>
+                                <th scope="col">Especialista</th>
+                                <th scope="col">Estado de atención</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="group">
+                                <th scope="colgroup" colspan="6">
+                                    Crítica inmediata (24 h)
+                                    <span class="count">≈ 5</span>
+                                </th>
+                            </tr>
+                            <tr>
+                                <td>AT-PA-2026-0412</td>
+                                <td>CS-PA-INF-2026-07</td>
+                                <td>Piura / Talara</td>
+                                <td>19 nov 2026</td>
+                                <td>ESP-01</td>
+                                <td>
+                                    <span class="tag pend">Sin derivar</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>AT-PA-2026-0409</td>
+                                <td>CS-PA-ORM-2026-03</td>
+                                <td>Tumbes / Zarumilla</td>
+                                <td>19 nov 2026</td>
+                                <td>ESP-01</td>
+                                <td>
+                                    <span class="tag temp">En atención</span>
+                                </td>
+                            </tr>
+                            <tr class="group">
+                                <th scope="colgroup" colspan="6">
+                                    Urgente (48 h)
+                                    <span class="count">≈ 7</span>
+                                </th>
+                            </tr>
+                            <tr>
+                                <td>AT-MI-2026-0177</td>
+                                <td>CS-MI-NOR-2026-11</td>
+                                <td>La Libertad / Ascope</td>
+                                <td>20 nov 2026</td>
+                                <td>ESP-02</td>
+                                <td><span class="tag urg">Derivada</span></td>
+                            </tr>
+                            <tr>
+                                <td>AT-MI-2026-0170</td>
+                                <td>CS-MI-GOB-2025-09</td>
+                                <td>Lima / Callao</td>
+                                <td>21 nov 2026</td>
+                                <td>ESP-03</td>
+                                <td>
+                                    <span class="tag pend">Sin derivar</span>
+                                </td>
+                            </tr>
+                            <tr class="group">
+                                <th scope="colgroup" colspan="6">
+                                    Temprana (72 h)
+                                    <span class="count">≈ 9</span>
+                                </th>
+                            </tr>
+                            <tr>
+                                <td>AT-PA-2026-0401</td>
+                                <td>CS-PA-DBE-2026-02</td>
+                                <td>Áncash / Santa</td>
+                                <td>23 nov 2026</td>
+                                <td>ESP-04</td>
+                                <td><span class="tag temp">Derivada</span></td>
+                            </tr>
+                            <tr class="group">
+                                <th scope="colgroup" colspan="6">
+                                    Seguimiento (sin plazo)
+                                    <span class="count">≈ 6</span>
+                                </th>
+                            </tr>
+                            <tr>
+                                <td>AT-MI-2026-0158</td>
+                                <td>CS-MI-ITE-2026-05</td>
+                                <td>Moquegua / Ilo</td>
+                                <td class="nodata">sin plazo</td>
+                                <td>ESP-02</td>
+                                <td>
+                                    <span class="tag pend">Sin derivar</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="note-box">
+                    <b>Filas de ejemplo:</b> los códigos de caso siguen la
+                    máscara del item 21 y los de alerta son de forma; los
+                    conteos por grupo son ≈. Real del corte:
+                    <b>83 alertas registradas</b> y <b>≈ 27</b> sin atención
+                    cerrada. El plazo no se escribe: se calcula como
+                    <code>fecha_derivacion + sla_horas</code>, y sólo existe
+                    cuando la alerta se ha derivado (por eso «Seguimiento» queda
+                    sin plazo por catálogo, no por falta de dato).
+                </p>
+            </section>
+
+            <!-- ═══════════ Compromisos vencidos y por vencer ═══════════ -->
+            <section class="card" aria-labelledby="cp-title">
+                <div class="card-head">
+                    <h2 id="cp-title">Compromisos vencidos y por vencer</h2>
+                    <span class="chip">semáforo del Anexo 14</span>
+                </div>
+                <p class="card-sub">
+                    Días de atraso sobre la fecha del <b>hito</b>, no sobre el
+                    compromiso: <code>core.compromisos</code> no tiene
+                    <code>fecha_vencimiento</code>. El semáforo es el de
+                    <code>analytics.vw_anexo_14_seguimiento_compromisos</code>:
+                    <b>ROJO</b> vencido, <b>AMARILLO</b> a 15 días o menos,
+                    <b>VERDE</b> al día. La unidad responsable llega como
+                    <code>area_responsable</code> (<code>uo.siglas</code>).
+                </p>
+                <div class="table-wrap">
+                    <table class="data">
+                        <caption class="sr-only">
+                            Compromisos vencidos y por vencer, con días de
+                            atraso y unidad responsable
+                        </caption>
+                        <thead>
+                            <tr>
+                                <th scope="col">Compromiso</th>
+                                <th scope="col">Hito</th>
+                                <th scope="col">Unidad responsable</th>
+                                <th scope="col">Vence</th>
+                                <th scope="col" class="num">Días de atraso</th>
+                                <th scope="col">Semáforo</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="group">
+                                <th scope="colgroup" colspan="6">
+                                    Vencidos
+                                    <span class="count">ejemplo</span>
+                                </th>
+                            </tr>
+                            <tr>
+                                <td>CS-PA-INF-2026-07_COMP002</td>
+                                <td>Acta de acuerdo de pesca artesanal</td>
+                                <td>DIREPRO Piura</td>
+                                <td>14 nov 2026</td>
+                                <td class="num">9</td>
+                                <td>
+                                    <span class="sema rojo"
+                                        ><span
+                                            class="dot rojo"
+                                            aria-hidden="true"
+                                        ></span>
+                                        Vencido</span
+                                    >
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>CS-PA-DBE-2026-02_COMP003</td>
+                                <td>Informe técnico de desembarcadero</td>
+                                <td>FONDEPES</td>
+                                <td>18 nov 2026</td>
+                                <td class="num">5</td>
+                                <td>
+                                    <span class="sema rojo"
+                                        ><span
+                                            class="dot rojo"
+                                            aria-hidden="true"
+                                        ></span>
+                                        Vencido</span
+                                    >
+                                </td>
+                            </tr>
+                            <tr class="group">
+                                <th scope="colgroup" colspan="6">
+                                    Por vencer (≤ 15 días)
+                                    <span class="count">ejemplo</span>
+                                </th>
+                            </tr>
+                            <tr>
+                                <td>CS-MI-NOR-2026-11_COMP001</td>
+                                <td>Padrón de beneficiarios validado</td>
+                                <td>DIREPRO La Libertad</td>
+                                <td>2 dic 2026</td>
+                                <td class="num">0 · 9 d</td>
+                                <td>
+                                    <span class="sema ambar"
+                                        ><span
+                                            class="dot ambar"
+                                            aria-hidden="true"
+                                        ></span>
+                                        Por vencer</span
+                                    >
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="note-box alert">
+                    <b>Real del corte: 0 vencidos y 0 por vencer.</b> No es un
+                    error de la tabla: los 8 compromisos no tienen fecha propia
+                    y
+                    <b
+                        >sólo 1 de los 12 hitos tiene
+                        <code>fecha_vencimiento</code></b
+                    >, con estado Cumplido. Las filas de arriba son
+                    <b>forma</b> —enseñan las columnas y el orden por semáforo—,
+                    no datos del corte. Cargar la fecha de los hitos es trabajo
+                    de fuente: hasta entonces, «vencido» no se puede calcular y
+                    no se simula.
+                </p>
+            </section>
+
+            <!-- ═══════════ Calidad del dato ═══════════ -->
+            <section class="card" aria-labelledby="cd-title">
+                <div class="card-head">
+                    <h2 id="cd-title">Calidad del dato</h2>
+                    <span class="chip">dónde está roto el dato</span>
+                </div>
+                <p class="card-sub">
+                    Es la franja que convierte el panel en herramienta: dice qué
+                    falta para que las cifras de arriba sean confiables. Cada
+                    hueco es trabajo de fuente, no de pantalla, y no se compensa
+                    con otro.
+                </p>
+                <div class="qtiles">
+                    <div class="qtile">
+                        <span class="qt"
+                            >Casos sin actualización &gt; 30 días</span
+                        >
+                        <span class="qv">≈ 11</span>
+                        <svg
+                            viewBox="0 0 120 8"
+                            preserveAspectRatio="none"
+                            role="img"
+                            aria-label="11 de 34 casos vigentes"
+                            style="display: block; width: 100%; height: 6px"
+                        >
+                            <rect
+                                x="0"
+                                y="0"
+                                width="120"
+                                height="8"
+                                fill="#eef1f4"
+                            ></rect>
+                            <rect
+                                x="0"
+                                y="0"
+                                width="38.8"
+                                height="8"
+                                fill="#aa6a11"
+                            ></rect>
+                        </svg>
+                        <span class="qsrc"
+                            ><code>core.casos.fecha_ultima_actualizacion</code>
+                            · sobre 34 vigentes</span
+                        >
+                        <span class="qwhy"
+                            >La columna tiene <code>DEFAULT now()</code>; el
+                            esquema no muestra un trigger que la refresque en
+                            cada <code>UPDATE</code>, así que el aging puede
+                            medir la antigüedad de la fila y no la de la
+                            gestión.</span
+                        >
+                    </div>
+                    <div class="qtile">
+                        <span class="qt"
+                            >Casos sin nivel de conflictividad declarado</span
+                        >
+                        <span class="qv">0</span>
+                        <svg
+                            viewBox="0 0 120 8"
+                            preserveAspectRatio="none"
+                            role="img"
+                            aria-label="Ninguno de los 34 casos vigentes"
+                            style="display: block; width: 100%; height: 6px"
+                        >
+                            <rect
+                                x="0"
+                                y="0"
+                                width="120"
+                                height="8"
+                                fill="#eef1f4"
+                            ></rect>
+                        </svg>
+                        <span class="qsrc"
+                            ><code>core.casos.nivel_conflicto_id</code> es
+                            <b>NOT NULL</b>;
+                            <code>cat_niveles_conflicto</code> tiene 4 valores y
+                            ninguno es «sin declarar»</span
+                        >
+                        <span class="qwhy"
+                            >El hueco no puede existir: si la etiqueta
+                            latente/manifiesto no aparece, es error de consulta,
+                            no dato ausente.</span
+                        >
+                    </div>
+                    <div class="qtile">
+                        <span class="qt">Casos sin coordenada</span>
+                        <span class="qv">≈ 17</span>
+                        <svg
+                            viewBox="0 0 120 8"
+                            preserveAspectRatio="none"
+                            role="img"
+                            aria-label="17 de 34 casos vigentes"
+                            style="display: block; width: 100%; height: 6px"
+                        >
+                            <rect
+                                x="0"
+                                y="0"
+                                width="120"
+                                height="8"
+                                fill="#eef1f4"
+                            ></rect>
+                            <rect
+                                x="0"
+                                y="0"
+                                width="60"
+                                height="8"
+                                fill="#2455a2"
+                            ></rect>
+                        </svg>
+                        <span class="qsrc"
+                            ><code>core.casos.latitud</code> y
+                            <code>longitud</code> · ambas nullable</span
+                        >
+                        <span class="qwhy"
+                            >Sin punto, el caso cae al centroide del distrito en
+                            el mapa (item 130) y el panorama cuenta un distrito
+                            como si tuviera geometría propia.</span
+                        >
+                    </div>
+                    <div class="qtile">
+                        <span class="qt">Compromisos sin hito</span>
+                        <span class="qv">≈ 2</span>
+                        <svg
+                            viewBox="0 0 120 8"
+                            preserveAspectRatio="none"
+                            role="img"
+                            aria-label="2 de 8 compromisos registrados"
+                            style="display: block; width: 100%; height: 6px"
+                        >
+                            <rect
+                                x="0"
+                                y="0"
+                                width="120"
+                                height="8"
+                                fill="#eef1f4"
+                            ></rect>
+                            <rect
+                                x="0"
+                                y="0"
+                                width="30"
+                                height="8"
+                                fill="#ad4d46"
+                            ></rect>
+                        </svg>
+                        <span class="qsrc"
+                            >LEFT JOIN <code>core.hitos_compromiso</code> sobre
+                            los 8 compromisos</span
+                        >
+                        <span class="qwhy"
+                            >Sin hito no hay plazo ni semáforo: el compromiso no
+                            puede vencerse ni cumplirse en la vista, y queda
+                            fuera de los dos bloques de seguimiento.</span
+                        >
+                    </div>
+                </div>
+            </section>
+
             <p class="foot">
-                Cifras del corte del 22.11.2026 y sólo ésas: <b>34 casos
-                abiertos</b> (35 con 1 anulado), <b>107 demandas sin caso</b> (81
-                con alerta, 26 sin alerta), <b>83 alertas registradas</b> y
-                <b>8 compromisos</b> con <b>0 fechas de vencimiento</b>. Cada
-                tarjeta muestra la consulta que la alimenta; «acciones
-                previstas», «intervenciones» y «planes de acción» se declaran
-                <b>no existe</b>. La pantalla no crea definiciones propias:
+                Cifras reales del corte del 22 nov 2026 y sólo ésas:
+                <b>34 casos vigentes</b> (35 con 1 anulado),
+                <b>107 demandas sin caso</b> (81 con alerta, 26 sin alerta),
+                <b>83 alertas registradas</b>, <b>8 compromisos</b> y
+                <b>12 hitos</b> (1 con fecha). Todo lo marcado con <b>≈</b> es
+                reparto de ejemplo y se rotula como tal; lo que no tiene fuente
+                dice <b>no existe</b> (acciones preventivas previstas, planes de
+                acción) o <b>sin dato</b> (tiempo de primera respuesta, última
+                sincronización). La pantalla no crea definiciones propias:
                 cuando el dashboard (item 51) fije una métrica, se copia aquí.
-                El endpoint <code>GET /v1/export?entidad=casos</code> sigue
-                disponible para la exportación de la portada.
+                El panel de operación (item 85) y el resumen (item 110)
+                comparten esta ruta <code>/resumen</code>; el rango de fechas es
+                el compartido del item 29 y la exportación sigue siendo
+                <code>GET /v1/export</code>.
             </p>
         </main>
     </body>

@@ -3,39 +3,59 @@
     <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>Bandeja RED-RADAR y notificaciones · Mockup AVISA</title>
+        <title>Señales RED-RADAR · mockup AVISA</title>
+        <!--
+            Tokens copiados de panorama-territorial.html (a su vez de
+            angular/src/styles/global.css). Sin webfonts, sin JS, sin CDN:
+            el archivo se abre por doble clic.
+        -->
         <style>
             :root {
-                --bg: #f4f6f8;
-                --panel: #fff;
-                --ink: #16202b;
-                --muted: #5d6b7a;
-                --line: #dfe4ea;
-                --accent: #1f4e79;
-                --accent-soft: #eaf1f8;
-                --alto: #b42318;
-                --medio: #b54708;
-                --bajo: #2f6f52;
+                --ink: #17283a;
+                --ink-2: #33475b;
+                --muted: #778797;
+                --line: #e6ebef;
+                --paper: #fff;
+                --canvas: #f5f7f8;
+                --blue: #2455a2;
+                --blue-dark: #1d427f;
+                --blue-pale: #eaf1fb;
+                --teal: #397c79;
+                --amber: #aa6a11;
+                --amber-pale: #fff4e2;
+                --red: #ad4d46;
+                --red-pale: #fbeceb;
+                --green: #34785b;
+                --green-pale: #e9f5ef;
+                --font-sans:
+                    "DM Sans", system-ui, -apple-system, "Segoe UI", Arial,
+                    sans-serif;
+                --font-display:
+                    "Manrope", "DM Sans", system-ui, -apple-system, "Segoe UI",
+                    sans-serif;
             }
             * {
                 box-sizing: border-box;
             }
+            html {
+                min-height: 100%;
+                background: var(--canvas);
+            }
             body {
                 margin: 0;
-                background: var(--bg);
                 color: var(--ink);
-                font:
-                    13px/1.5 -apple-system,
-                    "Segoe UI",
-                    Roboto,
-                    Helvetica,
-                    Arial,
-                    sans-serif;
+                font-family: var(--font-sans);
+                font-size: 13px;
+                -webkit-font-smoothing: antialiased;
             }
             main {
                 max-width: 1180px;
                 margin: 0 auto;
-                padding: 28px 24px 56px;
+                padding: 26px 24px 56px;
+            }
+            :focus-visible {
+                outline: 2px solid var(--blue);
+                outline-offset: 2px;
             }
             .eyebrow {
                 margin: 0 0 4px;
@@ -45,36 +65,152 @@
                 text-transform: uppercase;
             }
             h1 {
-                margin: 0 0 6px;
-                font-size: 24px;
+                margin: 0;
+                font: 700 22px/1.3 var(--font-display);
+                letter-spacing: -0.65px;
             }
             h2 {
-                margin: 0 0 4px;
-                font-size: 15px;
+                margin: 0 0 3px;
+                font: 700 14px/1.35 var(--font-display);
             }
-            .view-subtitle {
-                margin: 0;
-                max-width: 72ch;
-                color: var(--muted);
+            h3 {
+                margin: 0 0 4px;
+                font: 700 9px/1.3 var(--font-display);
+                letter-spacing: 0.07em;
+                text-transform: uppercase;
+                color: var(--ink);
             }
             .view-head {
                 display: flex;
                 align-items: flex-start;
                 justify-content: space-between;
                 gap: 16px;
-                margin-bottom: 18px;
+                margin-bottom: 12px;
+            }
+            .view-subtitle {
+                max-width: 78ch;
+                margin: 6px 0 0;
+                color: var(--ink-2);
+                font-size: 11.5px;
+                line-height: 1.6;
             }
             .badge {
-                padding: 3px 9px;
-                border: 1px solid var(--line);
+                display: inline-flex;
+                align-items: center;
+                height: 26px;
+                padding: 0 10px;
+                border: 1px solid #cddcef;
                 border-radius: 999px;
-                background: var(--panel);
-                color: var(--muted);
-                font-size: 10px;
-                letter-spacing: 0.08em;
+                background: var(--blue-pale);
+                color: var(--blue);
+                font-size: 9px;
+                font-weight: 700;
+                letter-spacing: 0.05em;
                 text-transform: uppercase;
                 white-space: nowrap;
             }
+            .badge.warn {
+                border-color: #f0cfcb;
+                background: var(--red-pale);
+                color: var(--red);
+            }
+            /* ── Declaración de ruta ─────────────────────────────────── */
+            .route {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: baseline;
+                gap: 6px 10px;
+                margin: 0 0 14px;
+                padding: 9px 12px;
+                border: 1px solid #f0cfcb;
+                border-radius: 9px;
+                background: var(--red-pale);
+                font-size: 11px;
+                line-height: 1.55;
+                color: #7d3a35;
+            }
+            .route b {
+                color: #7d3a35;
+            }
+            .route .lbl {
+                font-weight: 700;
+                letter-spacing: 0.04em;
+                text-transform: uppercase;
+                font-size: 9px;
+            }
+            /* ── Cinco bloques de anotación ──────────────────────────── */
+            .ann {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 8px;
+                padding: 10px 12px 12px;
+                margin-bottom: 24px;
+                border: 1px solid var(--line);
+                border-radius: 9px;
+                background: #fbfcfd;
+            }
+            @media (max-width: 980px) {
+                .ann {
+                    grid-template-columns: 1fr;
+                }
+            }
+            .ann-card {
+                padding: 8px 10px;
+                border: 1px solid #eef1f4;
+                border-radius: 7px;
+                background: #fff;
+                font-size: 10px;
+                line-height: 1.5;
+                color: var(--ink-2);
+            }
+            .ann-card.wide {
+                grid-column: 1 / -1;
+            }
+            .ann-card b {
+                color: var(--ink);
+            }
+            .ann-card code {
+                padding: 0 3px;
+                border-radius: 3px;
+                background: #eef1f4;
+                font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+                font-size: 9.5px;
+            }
+            .ann-card .n {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 15px;
+                height: 15px;
+                margin-right: 5px;
+                border-radius: 50%;
+                background: var(--blue);
+                color: #fff;
+                font-size: 9px;
+                font-weight: 700;
+            }
+            .ann-table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+            .ann-table th,
+            .ann-table td {
+                padding: 2px 6px 2px 0;
+                border-bottom: 1px solid #f1f3f5;
+                text-align: left;
+                vertical-align: top;
+                font-size: 9.5px;
+            }
+            .ann-table th {
+                color: #6d7a88;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 0.04em;
+            }
+            .ann-table tr:last-child td {
+                border-bottom: 0;
+            }
+            /* ── Secciones ───────────────────────────────────────────── */
             .section {
                 margin-bottom: 26px;
             }
@@ -87,15 +223,121 @@
             }
             .section-head p {
                 margin: 0;
+                max-width: 84ch;
                 color: var(--muted);
-                font-size: 12px;
+                font-size: 11.5px;
+                line-height: 1.55;
             }
             .panel {
                 border: 1px solid var(--line);
                 border-radius: 10px;
-                background: var(--panel);
+                background: var(--paper);
                 overflow: hidden;
             }
+            /* ── Tarjetas de estado de la fuente ─────────────────────── */
+            .src-cards {
+                display: grid;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: 10px;
+            }
+            @media (max-width: 860px) {
+                .src-cards {
+                    grid-template-columns: 1fr;
+                }
+            }
+            .src-card {
+                padding: 12px 14px;
+                border: 1px solid var(--line);
+                border-radius: 10px;
+                background: var(--paper);
+            }
+            .src-card .lab {
+                display: block;
+                color: var(--ink-2);
+                font-size: 10px;
+                font-weight: 700;
+                letter-spacing: 0.05em;
+                text-transform: uppercase;
+            }
+            .src-card .val {
+                display: flex;
+                align-items: baseline;
+                gap: 6px;
+                margin: 4px 0 3px;
+                font: 700 24px/1.1 var(--font-display);
+                font-variant-numeric: tabular-nums;
+                letter-spacing: -0.5px;
+                color: var(--ink);
+            }
+            .src-card .val .sig {
+                color: var(--muted);
+                font-size: 15px;
+                font-weight: 600;
+            }
+            .src-card .ori {
+                margin: 0;
+                color: var(--muted);
+                font-size: 10px;
+                line-height: 1.45;
+            }
+            .src-card .ori code {
+                padding: 0 3px;
+                border-radius: 3px;
+                background: #eef1f4;
+                font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+                font-size: 9.5px;
+            }
+            .src-card .ori .sin {
+                color: var(--red);
+                font-weight: 700;
+            }
+            /* ── Estado vacío principal ──────────────────────────────── */
+            .empty-state {
+                display: grid;
+                grid-template-columns: 46px 1fr;
+                gap: 14px;
+                padding: 22px 22px;
+                border: 1px dashed #c6d0da;
+                border-radius: 10px;
+                background: #fbfcfd;
+            }
+            .empty-state .ico {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 46px;
+                height: 46px;
+                border-radius: 12px;
+                background: var(--amber-pale);
+                color: var(--amber);
+            }
+            .empty-state h3 {
+                font: 700 14px/1.4 var(--font-display);
+                letter-spacing: 0;
+                text-transform: none;
+                color: var(--ink);
+            }
+            .empty-state p {
+                margin: 0 0 6px;
+                color: var(--ink-2);
+                font-size: 11.5px;
+                line-height: 1.55;
+            }
+            .empty-state ul {
+                margin: 0;
+                padding-left: 18px;
+                color: var(--ink-2);
+                font-size: 11px;
+                line-height: 1.55;
+            }
+            .empty-state code {
+                padding: 0 3px;
+                border-radius: 3px;
+                background: #eef1f4;
+                font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+                font-size: 10px;
+            }
+            /* ── Barra de filtros y tabla de cola ────────────────────── */
             .toolbar {
                 display: flex;
                 flex-wrap: wrap;
@@ -104,208 +346,590 @@
                 border-bottom: 1px solid var(--line);
                 background: #fafbfc;
             }
-            .toolbar button,
             .chip {
                 padding: 5px 11px;
                 border: 1px solid var(--line);
                 border-radius: 999px;
                 background: #fff;
-                color: var(--muted);
+                color: var(--ink-2);
                 font: inherit;
                 font-size: 11px;
                 cursor: pointer;
             }
-            .toolbar button[aria-pressed="true"] {
-                border-color: var(--accent);
-                background: var(--accent-soft);
-                color: var(--accent);
+            .chip[aria-pressed="true"] {
+                border-color: var(--blue);
+                background: var(--blue-pale);
+                color: var(--blue-dark);
+                font-weight: 600;
             }
-            table {
+            .count {
+                margin-left: 5px;
+                color: var(--muted);
+                font-variant-numeric: tabular-nums;
+            }
+            table.q {
                 width: 100%;
                 border-collapse: collapse;
-                font-size: 12px;
+                font-size: 11.5px;
             }
-            th {
-                padding: 8px 12px;
+            table.q caption {
+                padding: 9px 12px;
+                caption-side: top;
                 border-bottom: 1px solid var(--line);
+                background: #fafbfc;
                 color: var(--muted);
+                font-size: 10.5px;
+                text-align: left;
+            }
+            table.q th {
+                padding: 8px 10px;
+                border-bottom: 1px solid var(--line);
+                color: var(--ink-2);
                 font-size: 10px;
-                letter-spacing: 0.07em;
+                font-weight: 700;
+                letter-spacing: 0.05em;
                 text-align: left;
                 text-transform: uppercase;
+                white-space: nowrap;
             }
-            td {
-                padding: 11px 12px;
+            table.q td {
+                padding: 10px;
                 border-bottom: 1px solid #eef1f4;
                 vertical-align: top;
+                line-height: 1.45;
             }
-            tr:last-child td {
+            table.q tbody tr:last-child td {
                 border-bottom: 0;
+            }
+            table.q tbody tr.sel td {
+                background: var(--blue-pale);
+                box-shadow: inset 3px 0 0 var(--blue);
             }
             .code {
                 font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-                font-size: 11px;
+                font-size: 10.5px;
+                color: var(--ink);
+            }
+            .sub {
+                display: block;
+                margin-top: 2px;
+                color: var(--muted);
+                font-size: 10px;
             }
             .tag {
-                display: inline-block;
+                display: inline-flex;
+                align-items: center;
                 padding: 1px 7px;
                 border: 1px solid var(--line);
                 border-radius: 999px;
-                font-size: 10px;
+                background: #fff;
+                font-size: 9.5px;
+                font-weight: 600;
                 white-space: nowrap;
             }
-            .t-alto {
-                color: var(--alto);
-                border-color: #f3c3bd;
-                background: #fdf1ef;
+            .t-crit {
+                border-color: #f0cfcb;
+                background: var(--red-pale);
+                color: var(--red);
             }
-            .t-medio {
-                color: var(--medio);
+            .t-alta {
                 border-color: #f5d6b3;
-                background: #fdf6ec;
+                background: var(--amber-pale);
+                color: var(--amber);
             }
-            .t-bajo {
-                color: var(--bajo);
+            .t-media {
+                border-color: #cddcef;
+                background: var(--blue-pale);
+                color: var(--blue-dark);
+            }
+            .t-baja {
+                border-color: var(--line);
+                background: #f4f6f8;
+                color: var(--muted);
+            }
+            .t-pend {
+                border-color: #f5d6b3;
+                background: var(--amber-pale);
+                color: var(--amber);
+            }
+            .t-triage {
+                border-color: #cddcef;
+                background: var(--blue-pale);
+                color: var(--blue-dark);
+            }
+            .t-conv {
                 border-color: #c9e3d5;
-                background: #eef7f2;
+                background: var(--green-pale);
+                color: var(--green);
             }
-            .acciones {
+            .t-desc,
+            .t-dup {
+                border-color: var(--line);
+                background: #f4f6f8;
+                color: var(--ink-2);
+            }
+            .ej {
+                display: inline-flex;
+                align-items: center;
+                padding: 0 6px;
+                border: 1px solid #f3e0c2;
+                border-radius: 4px;
+                background: #fdf7ec;
+                color: #8a5a00;
+                font-size: 8.5px;
+                font-weight: 700;
+                letter-spacing: 0.06em;
+                text-transform: uppercase;
+                white-space: nowrap;
+            }
+            .motivo {
+                display: block;
+                margin-top: 3px;
+                padding-top: 3px;
+                border-top: 1px dotted #d5dde4;
+                color: var(--ink-2);
+                font-size: 10px;
+            }
+            .motivo b {
+                color: var(--ink);
+            }
+            .nd {
+                color: var(--muted);
+                font-style: italic;
+            }
+            /* ── Split cola + panel de triage ────────────────────────── */
+            .split {
+                display: grid;
+                grid-template-columns: 250px minmax(0, 1fr);
+                gap: 12px;
+                align-items: start;
+            }
+            @media (max-width: 860px) {
+                .split {
+                    grid-template-columns: 1fr;
+                }
+            }
+            .ctx {
+                border: 1px solid var(--line);
+                border-radius: 10px;
+                background: var(--paper);
+                overflow: hidden;
+            }
+            .ctx h3 {
+                padding: 9px 12px;
+                margin: 0;
+                border-bottom: 1px solid var(--line);
+                background: #fafbfc;
+            }
+            .ctx ul {
+                margin: 0;
+                padding: 6px;
+                list-style: none;
+            }
+            .ctx li {
+                margin: 0 0 4px;
+            }
+            .ctx button {
+                display: block;
+                width: 100%;
+                padding: 7px 9px;
+                border: 1px solid transparent;
+                border-radius: 7px;
+                background: transparent;
+                color: var(--ink);
+                font: inherit;
+                font-size: 11px;
+                text-align: left;
+                cursor: pointer;
+            }
+            .ctx button[aria-current="true"] {
+                border-color: var(--blue);
+                background: var(--blue-pale);
+                box-shadow: inset 3px 0 0 var(--blue);
+            }
+            .ctx button .cd {
+                font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+                font-size: 10px;
+            }
+            .ctx button .st {
+                display: block;
+                margin-top: 2px;
+                color: var(--muted);
+                font-size: 9.5px;
+            }
+            .drawer {
+                border: 1px solid var(--line);
+                border-radius: 10px;
+                background: var(--paper);
+                overflow: hidden;
+            }
+            .drawer-head {
                 display: flex;
-                flex-wrap: wrap;
-                gap: 6px;
+                align-items: flex-start;
+                justify-content: space-between;
+                gap: 12px;
+                padding: 11px 14px;
+                border-bottom: 1px solid var(--line);
+                background: #fafbfc;
             }
-            .acciones button {
-                padding: 4px 9px;
+            .drawer-head .t {
+                font: 700 13px/1.3 var(--font-display);
+            }
+            .drawer-head .s {
+                display: block;
+                margin-top: 2px;
+                color: var(--muted);
+                font-size: 10.5px;
+            }
+            .x {
+                flex: none;
+                width: 26px;
+                height: 26px;
                 border: 1px solid var(--line);
                 border-radius: 6px;
                 background: #fff;
                 color: var(--muted);
-                font-size: 11px;
-                cursor: not-allowed;
+                font-size: 14px;
+                line-height: 1;
+                cursor: pointer;
             }
-            .acciones button.primario {
-                border-color: var(--accent);
-                color: var(--accent);
-            }
-            .empty {
-                padding: 20px 16px;
-                color: var(--muted);
-                text-align: center;
-            }
-            .empty strong {
-                display: block;
-                margin-bottom: 3px;
-                color: var(--ink);
-            }
-            .estados {
-                display: grid;
-                grid-template-columns: repeat(3, minmax(0, 1fr));
-                gap: 10px;
-            }
-            @media (max-width: 860px) {
-                .estados {
-                    grid-template-columns: 1fr;
-                }
-            }
-            .card {
+            .drawer-body {
                 padding: 12px 14px;
-                border: 1px solid var(--line);
-                border-radius: 10px;
-                background: var(--panel);
-                font-size: 12px;
             }
-            .card strong {
-                display: block;
-                margin-bottom: 3px;
+            .block + .block {
+                margin-top: 14px;
+                padding-top: 12px;
+                border-top: 1px solid var(--line);
             }
-            .card p {
-                margin: 0;
-                color: var(--muted);
-            }
-            .flow {
-                display: flex;
-                flex-wrap: wrap;
-                align-items: center;
-                gap: 8px;
-                padding: 14px 16px;
-                font-size: 12px;
-            }
-            .flow span {
-                padding: 5px 10px;
-                border: 1px solid var(--line);
-                border-radius: 8px;
-                background: #fafbfc;
-            }
-            .flow i {
-                color: var(--muted);
-                font-style: normal;
-            }
-            .sub {
-                margin-top: 2px;
-                color: #97a3b0;
-                font-size: 11px;
-            }
-            .req {
-                color: var(--medio);
-                border-color: #f5d6b3;
-                background: #fdf6ec;
-            }
-            .ok {
-                color: var(--bajo);
-                border-color: #c9e3d5;
-                background: #eef7f2;
-            }
-            .grid {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 16px;
-            }
-            @media (max-width: 860px) {
-                .grid {
-                    grid-template-columns: 1fr;
-                }
+            .block h3 {
+                margin-bottom: 6px;
             }
             .kv {
                 display: grid;
-                grid-template-columns: 150px 1fr;
-                gap: 6px 12px;
-                padding: 14px 16px;
-                font-size: 12px;
+                grid-template-columns: 132px minmax(0, 1fr);
+                gap: 4px 12px;
+                margin: 0;
+                font-size: 11px;
+                line-height: 1.45;
             }
             .kv dt {
                 color: var(--muted);
             }
             .kv dd {
                 margin: 0;
+                color: var(--ink);
+                overflow-wrap: anywhere;
             }
-            .notes {
-                padding: 16px 18px;
-                border: 1px solid #f1d9a8;
-                border-radius: 10px;
-                background: #fffaf0;
-                font-size: 12px;
-            }
-            .notes h2 {
-                color: #8a5a00;
-            }
-            .notes ul {
-                margin: 0;
-                padding-left: 20px;
-            }
-            .notes li {
-                margin-bottom: 5px;
-            }
-            code {
+            .kv dd code {
                 padding: 0 3px;
                 border-radius: 3px;
                 background: #eef1f4;
                 font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+                font-size: 10px;
+            }
+            .suggest {
+                padding: 10px 12px;
+                border: 1px solid #f3e0c2;
+                border-radius: 8px;
+                background: var(--amber-pale);
+            }
+            .suggest .tag-sug {
+                display: inline-flex;
+                align-items: center;
+                padding: 1px 7px;
+                margin-bottom: 6px;
+                border: 1px solid #e7c88a;
+                border-radius: 999px;
+                background: #fff;
+                color: #8a5a00;
+                font-size: 9px;
+                font-weight: 700;
+                letter-spacing: 0.05em;
+                text-transform: uppercase;
+            }
+            .suggest p {
+                margin: 0 0 6px;
+                color: #7a5108;
+                font-size: 10.5px;
+                line-height: 1.5;
+            }
+            .suggest ul {
+                margin: 0;
+                padding-left: 18px;
+                color: #7a5108;
+                font-size: 10.5px;
+                line-height: 1.55;
+            }
+            .suggest code {
+                padding: 0 3px;
+                border-radius: 3px;
+                background: #fff;
+                font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+                font-size: 9.5px;
+            }
+            /* ── Decisiones de triage ────────────────────────────────── */
+            .decisions {
+                display: grid;
+                gap: 10px;
+            }
+            .decision {
+                padding: 11px 12px;
+                border: 1px solid var(--line);
+                border-radius: 9px;
+                background: #fff;
+            }
+            .decision.on {
+                border-color: var(--blue);
+                box-shadow: 0 0 0 1px var(--blue) inset;
+            }
+            .decision h4 {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                margin: 0 0 8px;
+                font-size: 11.5px;
+                color: var(--ink);
+            }
+            .decision h4 .num {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 18px;
+                height: 18px;
+                border-radius: 50%;
+                background: var(--blue);
+                color: #fff;
+                font-size: 9.5px;
+                font-weight: 700;
+            }
+            .form {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 10px 12px;
+            }
+            @media (max-width: 620px) {
+                .form {
+                    grid-template-columns: 1fr;
+                }
+            }
+            .field {
+                display: grid;
+                gap: 3px;
+            }
+            .field.wide {
+                grid-column: 1 / -1;
+            }
+            .field label {
+                color: var(--ink-2);
+                font-size: 10px;
+                font-weight: 700;
+                letter-spacing: 0.03em;
+            }
+            .field .hint {
+                color: var(--muted);
+                font-size: 9.5px;
+            }
+            .field input,
+            .field select,
+            .field textarea {
+                width: 100%;
+                padding: 6px 8px;
+                border: 1px solid #cfd8e0;
+                border-radius: 6px;
+                background: #fff;
+                color: var(--ink);
+                font: inherit;
                 font-size: 11px;
             }
-            .count {
-                margin-left: 5px;
-                font-variant-numeric: tabular-nums;
-                opacity: 0.7;
+            .field textarea {
+                min-height: 52px;
+                resize: vertical;
+            }
+            .btn {
+                display: inline-flex;
+                align-items: center;
+                width: fit-content;
+                padding: 6px 12px;
+                border: 1px solid var(--line);
+                border-radius: 7px;
+                background: #fff;
+                color: var(--ink-2);
+                font: inherit;
+                font-size: 11px;
+                font-weight: 600;
+                cursor: pointer;
+            }
+            .btn.primary {
+                border-color: var(--blue);
+                background: var(--blue);
+                color: #fff;
+            }
+            .btn:disabled {
+                cursor: not-allowed;
+                opacity: 0.55;
+            }
+            .blocked-note {
+                display: flex;
+                align-items: flex-start;
+                gap: 6px;
+                margin: 9px 0 0;
+                padding: 7px 9px;
+                border: 1px solid #f0cfcb;
+                border-radius: 6px;
+                background: var(--red-pale);
+                color: #7d3a35;
+                font-size: 10px;
+                line-height: 1.45;
+            }
+            .blocked-note b {
+                color: #7d3a35;
+            }
+            /* ── Ubicación (items 125 / 126) ─────────────────────────── */
+            .loc {
+                display: grid;
+                grid-template-columns: minmax(0, 1fr) 320px;
+                gap: 14px;
+                align-items: stretch;
+            }
+            @media (max-width: 860px) {
+                .loc {
+                    grid-template-columns: 1fr;
+                }
+            }
+            .loc .panel-body {
+                padding: 12px 14px;
+            }
+            .loc p {
+                margin: 0 0 8px;
+                color: var(--ink-2);
+                font-size: 11px;
+                line-height: 1.55;
+            }
+            .loc ul {
+                margin: 0;
+                padding-left: 18px;
+                color: var(--ink-2);
+                font-size: 11px;
+                line-height: 1.55;
+            }
+            .loc code {
+                padding: 0 3px;
+                border-radius: 3px;
+                background: #eef1f4;
+                font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+                font-size: 10px;
+            }
+            .map {
+                display: flex;
+                flex-direction: column;
+                border: 1px solid var(--line);
+                border-radius: 10px;
+                background: var(--paper);
+                overflow: hidden;
+            }
+            .map svg {
+                display: block;
+                width: 100%;
+                height: auto;
+                background: #f8fafb;
+            }
+            .map figcaption {
+                padding: 8px 12px;
+                border-top: 1px solid var(--line);
+                color: var(--muted);
+                font-size: 9.5px;
+                line-height: 1.45;
+            }
+            .legend {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 4px 12px;
+                padding: 8px 12px;
+                border-top: 1px solid var(--line);
+                color: var(--ink-2);
+                font-size: 9.5px;
+            }
+            .legend span {
+                display: inline-flex;
+                align-items: center;
+                gap: 5px;
+            }
+            .legend i {
+                display: inline-block;
+                width: 9px;
+                height: 9px;
+                border-radius: 50%;
+            }
+            /* ── Qué falta ───────────────────────────────────────────── */
+            .gap-grid {
+                display: grid;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: 10px;
+            }
+            @media (max-width: 860px) {
+                .gap-grid {
+                    grid-template-columns: 1fr;
+                }
+            }
+            .gap-card {
+                padding: 12px 14px;
+                border: 1px solid #f1d9a8;
+                border-radius: 10px;
+                background: #fffaf0;
+            }
+            .gap-card .k {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 20px;
+                height: 20px;
+                margin-bottom: 6px;
+                border-radius: 50%;
+                background: var(--amber);
+                color: #fff;
+                font-size: 10px;
+                font-weight: 700;
+            }
+            .gap-card strong {
+                display: block;
+                margin-bottom: 4px;
+                color: var(--ink);
+                font-size: 12px;
+            }
+            .gap-card p {
+                margin: 0 0 6px;
+                color: var(--ink-2);
+                font-size: 10.5px;
+                line-height: 1.5;
+            }
+            .gap-card code {
+                padding: 0 3px;
+                border-radius: 3px;
+                background: #fff;
+                font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+                font-size: 9.5px;
+            }
+            .gap-card .item {
+                color: #8a5a00;
+                font-size: 9.5px;
+                font-weight: 700;
+                letter-spacing: 0.04em;
+                text-transform: uppercase;
+            }
+            .foot {
+                margin-top: 22px;
+                padding-top: 12px;
+                border-top: 1px solid var(--line);
+                color: var(--muted);
+                font-size: 10px;
+                line-height: 1.5;
+            }
+            .foot code {
+                padding: 0 3px;
+                border-radius: 3px;
+                background: #eef1f4;
+                font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+                font-size: 9.5px;
             }
         </style>
     </head>
@@ -313,554 +937,486 @@
         <main>
             <header class="view-head">
                 <div>
-                    <p class="eyebrow">Señales tempranas · mockup</p>
-                    <h1>Bandeja RED-RADAR</h1>
+                    <p class="eyebrow">Alertas tempranas · pestaña propuesta</p>
+                    <h1>Bandeja RED-RADAR · señales</h1>
                     <p class="view-subtitle">
-                        Cola de señales tempranas con triage: agrupa por caso y
-                        Región, ordena por riesgo, permite descartar con motivo
-                        y convertir la señal en alerta. La señal no es un
-                        registro nuevo: es una alerta en su estado inicial. La
-                        Región se deriva; el eje RED/NODO aún no tiene modelo en
-                        <code>territorio.*</code> (<code>requiere</code>).
+                        Cola de <b>señales candidatas</b> con triage. Una señal
+                        no es una alerta: es un indicio que alguien valida y
+                        <b>convierte</b> en una fila de
+                        <code>core.alertas_tempranas</code>, o descarta con
+                        motivo. La red RED-RADAR produce las señales; sin fuente
+                        conectada, la cola está vacía.
                     </p>
                 </div>
-                <div><span class="badge">Mockup · no implementado</span></div>
+                <div>
+                    <span class="badge warn"
+                        >sin ruta · no está en el menú</span
+                    >
+                </div>
             </header>
 
-            <!-- Declaración: qué cubre, qué dato necesita y qué es solo forma. -->
-            <div
-                style="
-                    font-size: 11.5px;
-                    line-height: 1.5;
-                    color: #4a5b6c;
-                    border: 1px solid #e6ebef;
-                    border-radius: 6px;
-                    background: #f8fafb;
-                    padding: 8px 11px;
-                "
-            >
-                <p style="margin: 0 0 3px">
-                    <b>Items que cubre:</b> 23 · 31 · 76.
-                </p>
-                <p style="margin: 0 0 3px">
-                    <b>Dato que necesita:</b> <code>core.alertas</code> (83
-                    registradas, 76 vivas, 33 sin caso, 0 validadas) y
-                    <code>core.cat_niveles_alerta</code> /
-                    <code>core.cat_prioridades_alerta</code> con sus SLA. El
-                    estado de triage y el motivo de descarte requieren
-                    persistirse.
-                </p>
-                <p style="margin: 0">
-                    <b>Solo forma (sin dato):</b> triage, descarte, conversión
-                    en alerta, notificaciones (item 31) y eje RED/NODO (<code
-                        >territorio.red</code
-                    >
-                    y <code>territorio.nodo</code>
-                    no existen).
-                </p>
-            </div>
+            <!-- Declaración de ruta -->
+            <p class="route">
+                <span class="lbl">Ruta</span>
+                <b>No tiene ruta propia.</b> Vive como pestaña
+                <b>«Señales RED-RADAR»</b> dentro de <code>/alertas</code>.
+                Visibilidad: <b>Especialista OAIPCS</b> y
+                <b>Sectorista</b> (hacen triage) y <b>Dirección</b> (lee).
+                Archivo:
+                <code>docs/07_frontend/mockups/bandeja-red-radar.html</code>.
+            </p>
 
-            <section class="section" aria-labelledby="triage">
+            <!-- ═══════════ Cinco bloques de anotación (obligatorios) ═══════════ -->
+            <section class="ann" aria-label="Anotaciones del artboard">
+                <div class="ann-card">
+                    <h3><span class="n">1</span>Cubre</h3>
+                    <b>76</b> (cola de señales con triage, descarte con motivo y
+                    «convertir en alerta») · <b>126</b> (redes RADAR sin fuente
+                    y los 31 desembarcaderos DPA) · <b>125</b> (nube de puntos
+                    donde se ubicaría la señal) · toca <b>38</b> (motivo de
+                    descarte y búsqueda de duplicados). <b>Pantalla:</b> pestaña
+                    «Señales RED-RADAR» de <code>/alertas</code>. <br /><b
+                        >Diseño por lote:</b
+                    >
+                    Lote B · Panorama, alertas y directorios.
+                </div>
+                <div class="ann-card">
+                    <h3><span class="n">2</span>Dato por bloque</h3>
+                    <table class="ann-table">
+                        <tr>
+                            <th scope="col">Celda / bloque</th>
+                            <th scope="col">Campo</th>
+                            <th scope="col">Estado</th>
+                        </tr>
+                        <tr>
+                            <td>Señales recibidas (KPI)</td>
+                            <td>
+                                conector RED-RADAR (no hay tabla de señales)
+                            </td>
+                            <td>no existe</td>
+                        </tr>
+                        <tr>
+                            <td>Pendientes de triage (KPI)</td>
+                            <td>estado de triage por señal</td>
+                            <td>no existe</td>
+                        </tr>
+                        <tr>
+                            <td>Convertidas en alerta (KPI)</td>
+                            <td>
+                                <code
+                                    >alertas_tempranas.fuente_tipo = RADAR</code
+                                >
+                            </td>
+                            <td>columna existe; sin filas RADAR → sin dato</td>
+                        </tr>
+                        <tr>
+                            <td>Código / origen</td>
+                            <td>
+                                <code>codigo_alerta</code> ·
+                                <code>fuente_tipo</code>,
+                                <code>fuente_descripcion</code>
+                            </td>
+                            <td>no existe el código de señal</td>
+                        </tr>
+                        <tr>
+                            <td>Fecha</td>
+                            <td><code>fecha_reporte</code></td>
+                            <td>existe</td>
+                        </tr>
+                        <tr>
+                            <td>Distrito + ubigeo</td>
+                            <td>
+                                <code>distrito_id</code> ·
+                                <code>core.distritos.ubigeo</code>
+                            </td>
+                            <td>existe (join; 1 891 distritos)</td>
+                        </tr>
+                        <tr>
+                            <td>Tipo de señal</td>
+                            <td>no hay catálogo de tipos de señal</td>
+                            <td>no existe</td>
+                        </tr>
+                        <tr>
+                            <td>Extracto</td>
+                            <td>
+                                <code>titulo</code>,
+                                <code>descripcion_riesgo</code>,
+                                <code>hechos_recientes</code>
+                            </td>
+                            <td>existe</td>
+                        </tr>
+                        <tr>
+                            <td>Prioridad propuesta</td>
+                            <td>
+                                <code>prioridad_id</code> ·
+                                <code>core.cat_prioridades_alerta</code>
+                            </td>
+                            <td>columna existe; la «propuesta» no</td>
+                        </tr>
+                        <tr>
+                            <td>Duplicado de</td>
+                            <td>—</td>
+                            <td>no existe</td>
+                        </tr>
+                        <tr>
+                            <td>Estado de triage</td>
+                            <td><code>paso_actual</code> (parcial)</td>
+                            <td>no existe triage / descarte</td>
+                        </tr>
+                        <tr>
+                            <td>Motivo de descarte</td>
+                            <td>—</td>
+                            <td>no existe (item 38)</td>
+                        </tr>
+                        <tr>
+                            <td>Fuente (panel)</td>
+                            <td>
+                                <code>fuente_tipo</code>,
+                                <code>fuente_descripcion</code>,
+                                <code>fuente_url</code>
+                            </td>
+                            <td>existe</td>
+                        </tr>
+                        <tr>
+                            <td>Sugerencia del sistema</td>
+                            <td>
+                                <code>riesgos_json</code>,
+                                <code>acciones_sugeridas_json</code>
+                            </td>
+                            <td>existe el contenido; no la validación</td>
+                        </tr>
+                        <tr>
+                            <td>Convertir en alerta (formulario)</td>
+                            <td>
+                                escribe <code>titulo</code>,
+                                <code>prioridad_id</code>, <code>caso_id</code>,
+                                <code>nivel_alerta_id</code>,
+                                <code>distrito_id</code>, <code>fuente_*</code>
+                            </td>
+                            <td>existe el destino; falta el endpoint</td>
+                        </tr>
+                        <tr>
+                            <td>Ámbito / responsable (panel)</td>
+                            <td>
+                                <code>sectorista_usuario_id</code>,
+                                <code>subsector_id</code>,
+                                <code>visibilidad</code>
+                            </td>
+                            <td>columnas existen; la señal no las trae</td>
+                        </tr>
+                        <tr>
+                            <td>Acciones OAIPCS</td>
+                            <td><code>acciones_oaipcs</code></td>
+                            <td>columna existe; se llena al convertir</td>
+                        </tr>
+                        <tr>
+                            <td>Fechas de validación y remisión</td>
+                            <td>
+                                <code>fecha_validacion</code>,
+                                <code>fecha_remision</code>
+                            </td>
+                            <td>existen; se llenan al convertir</td>
+                        </tr>
+                        <tr>
+                            <td>Ubicación (mapa)</td>
+                            <td>
+                                <code>distrito_id</code> ·
+                                <code>gis.v_infraestructuras_por_distrito</code>
+                            </td>
+                            <td>columna existe; capa RADAR sin fuente</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="ann-card">
+                    <h3><span class="n">3</span>Sólo forma</h3>
+                    La <b>cola</b>, el <b>panel de triage</b> y el
+                    <b>estado vacío</b> son decisiones de diseño. Las 4 filas,
+                    los códigos, los ubigeos y las cifras con <code>≈</code> son
+                    <b>ejemplo</b>: no hay fuente RADAR cargada. El dibujo del
+                    mapa es <b>referencial</b>, sin geometría real. La forma del
+                    formulario de conversión imita lo que el registro necesita,
+                    no una regla de negocio nueva.
+                </div>
+                <div class="ann-card">
+                    <h3><span class="n">4</span>Bloqueado</h3>
+                    <b>Toda la pieza</b> está bloqueada hasta que exista (a) el
+                    <b>conector de fuente RADAR</b> y (b) la
+                    <b
+                        >persistencia del estado de triage y del motivo de
+                        descarte</b
+                    >. Las redes RADAR no tienen fuente cargada; los 31
+                    desembarcaderos DPA sí. Sin fuente, la cola solo puede
+                    mostrar el estado vacío y filas de ejemplo.
+                </div>
+                <div class="ann-card wide">
+                    <h3><span class="n">5</span>Roles</h3>
+                    <b>Especialista OAIPCS</b> y <b>Sectorista</b>: hacen triage
+                    (convertir en alerta, descartar con motivo, marcar
+                    duplicada). El Sectorista sólo ve las regiones de su sesión.
+                    <b>Dirección</b>: lee la cola y el resultado del triage, sin
+                    acciones de escritura. El ámbito de subsector es de sesión
+                    (X6), no un filtro de pantalla.
+                </div>
+            </section>
+
+            <!-- ═══════════ 1 · Estado de la fuente ═══════════ -->
+            <section class="section" aria-labelledby="fuente">
                 <div class="section-head">
                     <div>
-                        <h2 id="triage">Señales sin triage</h2>
+                        <h2 id="fuente">Estado de la fuente</h2>
                         <p>
-                            Agrupadas por caso y Región. Nivel y prioridad son
-                            ejes distintos; el plazo vive en el SLA y no forma
-                            parte de la etiqueta. La prioridad de esta columna
-                            es la de la alerta; la prioridad de atención del
-                            caso es otro valor almacenado, sin regla definida.
+                            Cada tarjeta declara de dónde sale su número, o
+                            <b>sin dato</b>. Los valores con <code>≈</code> son
+                            ejemplo: la fuente RED-RADAR no está conectada.
                         </p>
                     </div>
-                    <span class="chip">0 pendientes</span>
                 </div>
+                <div class="src-cards">
+                    <div class="src-card">
+                        <span class="lab">Señales recibidas</span>
+                        <div class="val"><span class="sig">≈</span> 12</div>
+                        <p class="ori">
+                            <span class="sin">sin dato</span> · origen: conector
+                            RED-RADAR, que hoy <b>no existe</b>. No hay tabla de
+                            señales.
+                        </p>
+                    </div>
+                    <div class="src-card">
+                        <span class="lab">Pendientes de triage</span>
+                        <div class="val"><span class="sig">≈</span> 5</div>
+                        <p class="ori">
+                            <span class="sin">sin dato</span> · origen: estado
+                            de triage por señal, que <b>no se persiste</b>.
+                        </p>
+                    </div>
+                    <div class="src-card">
+                        <span class="lab">Convertidas en alerta</span>
+                        <div class="val"><span class="sig">≈</span> 7</div>
+                        <p class="ori">
+                            <span class="sin">sin dato</span> · origen:
+                            <code>alertas_tempranas.fuente_tipo</code> (la
+                            columna existe; no hay filas RADAR identificadas).
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ═══════════ 2 · Cola de señales ═══════════ -->
+            <section class="section" aria-labelledby="cola">
+                <div class="section-head">
+                    <div>
+                        <h2 id="cola">Cola de señales</h2>
+                        <p>
+                            Estado principal: la cola está vacía porque no hay
+                            fuente RED-RADAR conectada. Debajo, 4 filas de
+                            <b>ejemplo</b> que sólo fijan el formato de la
+                            tabla.
+                        </p>
+                    </div>
+                    <span class="badge warn">fuente no conectada</span>
+                </div>
+
+                <div class="panel" style="margin-bottom: 12px">
+                    <div class="empty-state" role="note">
+                        <span class="ico" aria-hidden="true">
+                            <svg
+                                width="24"
+                                height="24"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="1.8"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                                <path d="M3 12h4l2 5 4-11 2 6h6" />
+                            </svg>
+                        </span>
+                        <div>
+                            <h3>
+                                La cola está vacía: no hay fuente RED-RADAR
+                                conectada.
+                            </h3>
+                            <p>
+                                Sin conector no llega ninguna señal, así que no
+                                hay nada que triar. Esta es la vista real de la
+                                pantalla hoy, no un error.
+                            </p>
+                            <ul>
+                                <li>
+                                    Falta el <b>conector de fuente RADAR</b>: la
+                                    red no tiene fuente cargada, a diferencia de
+                                    los 31 desembarcaderos DPA.
+                                </li>
+                                <li>
+                                    Sin tabla de señales no hay
+                                    <b>código, tipo ni fecha</b> que mostrar por
+                                    fila; la conversión sólo crea una
+                                    <code>core.alertas_tempranas</code>.
+                                </li>
+                                <li>
+                                    Sin persistencia no hay
+                                    <b>estado de triage</b> ni
+                                    <b>motivo de descarte</b> que guardar.
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="panel">
                     <div
                         class="toolbar"
                         role="group"
                         aria-label="Filtros de la cola"
                     >
-                        <button type="button" aria-pressed="true">
-                            Todas <span class="count">76</span>
+                        <button type="button" class="chip" aria-pressed="true">
+                            Todas <span class="count">—</span>
                         </button>
-                        <button type="button" aria-pressed="false">
-                            Inmediato <span class="count">—</span>
+                        <button type="button" class="chip" aria-pressed="false">
+                            Pendientes <span class="count">—</span>
                         </button>
-                        <button type="button" aria-pressed="false">
-                            Táctico <span class="count">—</span>
+                        <button type="button" class="chip" aria-pressed="false">
+                            En triage <span class="count">—</span>
                         </button>
-                        <button type="button" aria-pressed="false">
-                            Preventivo <span class="count">—</span>
+                        <button type="button" class="chip" aria-pressed="false">
+                            Convertidas <span class="count">—</span>
                         </button>
-                        <button type="button" aria-pressed="false">
-                            Monitoreo <span class="count">—</span>
+                        <button type="button" class="chip" aria-pressed="false">
+                            Descartadas <span class="count">—</span>
                         </button>
-                        <button type="button" aria-pressed="false">
-                            Sin vínculo a caso
+                        <button type="button" class="chip" aria-pressed="false">
+                            Duplicadas <span class="count">—</span>
                         </button>
                     </div>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th scope="col">Señal</th>
-                                <th scope="col">Nivel</th>
-                                <th scope="col">Prioridad de alerta</th>
-                                <th scope="col">SLA</th>
-                                <th scope="col">Reporte</th>
-                                <th scope="col">Caso / Región</th>
-                                <th scope="col">Estado</th>
-                                <th scope="col">Triage</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>
-                                    <div class="code">AT-2026-43</div>
-                                    <div style="color: var(--muted)">
-                                        Bloqueo de…
-                                    </div>
-                                </td>
-                                <td>
-                                    <span class="tag t-alto">Inmediato</span>
-                                </td>
-                                <td>
-                                    <span class="tag t-alto"
-                                        >Crítica inmediata</span
-                                    >
-                                </td>
-                                <td>24 h</td>
-                                <td>20/07/2026</td>
-                                <td style="color: #97a3b0">Sin vínculo</td>
-                                <td>Completado</td>
-                                <td>
-                                    <div class="acciones">
-                                        <button
-                                            type="button"
-                                            class="primario"
-                                            disabled
-                                        >
-                                            Convertir en alerta
-                                        </button>
-                                        <button type="button" disabled>
-                                            Descartar
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="code">AT-2026-25</div>
-                                    <div style="color: var(--muted)">
-                                        Intentos…
-                                    </div>
-                                </td>
-                                <td>
-                                    <span class="tag t-alto">Inmediato</span>
-                                </td>
-                                <td>
-                                    <span class="tag t-alto"
-                                        >Crítica inmediata</span
-                                    >
-                                </td>
-                                <td>24 h</td>
-                                <td>20/07/2026</td>
-                                <td style="color: #97a3b0">Sin vínculo</td>
-                                <td>Completado</td>
-                                <td>
-                                    <div class="acciones">
-                                        <button
-                                            type="button"
-                                            class="primario"
-                                            disabled
-                                        >
-                                            Convertir en alerta
-                                        </button>
-                                        <button type="button" disabled>
-                                            Descartar
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="code">AT-2026-42</div>
-                                    <div style="color: var(--muted)">
-                                        Movilización…
-                                    </div>
-                                </td>
-                                <td>
-                                    <span class="tag t-alto">Inmediato</span>
-                                </td>
-                                <td>
-                                    <span class="tag t-alto"
-                                        >Crítica inmediata</span
-                                    >
-                                </td>
-                                <td>24 h</td>
-                                <td>03/07/2026</td>
-                                <td style="color: #97a3b0">Sin vínculo</td>
-                                <td>Completado</td>
-                                <td>
-                                    <div class="acciones">
-                                        <button
-                                            type="button"
-                                            class="primario"
-                                            disabled
-                                        >
-                                            Convertir en alerta
-                                        </button>
-                                        <button type="button" disabled>
-                                            Descartar
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="code">AT-2026-89</div>
-                                    <div style="color: var(--muted)">
-                                        FREDEMYPE…
-                                    </div>
-                                </td>
-                                <td>
-                                    <span class="tag t-medio">Preventivo</span>
-                                </td>
-                                <td>
-                                    <span class="tag t-medio">Temprana</span>
-                                </td>
-                                <td>72 h</td>
-                                <td>30/07/2026</td>
-                                <td style="color: #97a3b0">Sin vínculo</td>
-                                <td>Completado</td>
-                                <td>
-                                    <div class="acciones">
-                                        <button
-                                            type="button"
-                                            class="primario"
-                                            disabled
-                                        >
-                                            Convertir en alerta
-                                        </button>
-                                        <button type="button" disabled>
-                                            Descartar
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="code">AT-2026-86</div>
-                                    <div style="color: var(--muted)">
-                                        Escalada…
-                                    </div>
-                                </td>
-                                <td>
-                                    <span class="tag t-medio">Preventivo</span>
-                                </td>
-                                <td>
-                                    <span class="tag t-medio">Temprana</span>
-                                </td>
-                                <td>72 h</td>
-                                <td>03/07/2026</td>
-                                <td style="color: #97a3b0">Sin vínculo</td>
-                                <td>Completado</td>
-                                <td>
-                                    <div class="acciones">
-                                        <button
-                                            type="button"
-                                            class="primario"
-                                            disabled
-                                        >
-                                            Convertir en alerta
-                                        </button>
-                                        <button type="button" disabled>
-                                            Descartar
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="code">AT-2026-46</div>
-                                    <div style="color: var(--muted)">
-                                        Enfrentamiento…
-                                    </div>
-                                </td>
-                                <td>
-                                    <span class="tag t-bajo">Monitoreo</span>
-                                </td>
-                                <td>
-                                    <span class="tag t-bajo">Seguimiento</span>
-                                </td>
-                                <td style="color: #97a3b0">Sin plazo</td>
-                                <td>13/08/2026</td>
-                                <td style="color: #97a3b0">Sin vínculo</td>
-                                <td>Completado</td>
-                                <td>
-                                    <div class="acciones">
-                                        <button
-                                            type="button"
-                                            class="primario"
-                                            disabled
-                                        >
-                                            Convertir en alerta
-                                        </button>
-                                        <button type="button" disabled>
-                                            Descartar
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <div class="empty" role="note">
-                        <strong>Cola de triage vacía.</strong>
-                        Las 76 alertas vivas ya están en paso «Completado»:
-                        ninguna quedó en el estado inicial que define la señal.
-                        Las filas de arriba son históricas y solo fijan el
-                        formato; las acciones están deshabilitadas porque no
-                        existe aún el estado de triage persistido.
-                    </div>
-                </div>
-            </section>
-
-            <section class="section" aria-labelledby="eje-red">
-                <div class="section-head">
-                    <div>
-                        <h2 id="eje-red">Eje RED · NODO (requiere modelo)</h2>
-                        <p>
-                            Solo <code>legacy.dim_tipo_actor_radar</code> existe
-                            hoy: clasifica al actor (Titular · Alterno ·
-                            Participante Institucional), no la RED ni el NODO.
-                            <code>territorio.*</code> no modela RED ni NODO y
-                            los módulos 2027 dependen de ese modelo (D18
-                            diferido). Por eso se muestra la interacción y la
-                            derivación, sin afirmar un catálogo que no existe.
-                        </p>
-                    </div>
-                    <span class="chip">requiere modelo</span>
-                </div>
-                <div class="panel">
-                    <div class="flow" aria-label="Flujo de derivación">
-                        <span>Actor</span><i>→</i> <span>RED / NODO</span
-                        ><i>→</i> <span>Región</span><i>→</i> <span>Caso</span
-                        ><i>→</i> <span>Señal</span>
-                    </div>
-                    <table>
+                    <table class="q">
                         <caption>
-                            La derivación lee el actor y su RED/NODO para llegar
-                            a la Región del caso. Cada salto nombra su fuente o
-                            su
-                            <code>requiere</code
-                            >.
+                            Los contadores muestran «—» porque no hay fuente.
+                            Las 4 filas siguientes son
+                            <b>ejemplo</b
+                            >; cada una declara su estado de triage y, si está
+                            descartada, su motivo.
                         </caption>
                         <thead>
                             <tr>
-                                <th scope="col">Salto</th>
-                                <th scope="col">Fuente exacta</th>
-                                <th scope="col">Estado</th>
+                                <th scope="col">Código / origen</th>
+                                <th scope="col">Fecha</th>
+                                <th scope="col">Distrito · ubigeo</th>
+                                <th scope="col">Tipo de señal</th>
+                                <th scope="col">Extracto</th>
+                                <th scope="col">Prioridad propuesta</th>
+                                <th scope="col">Duplicado de</th>
+                                <th scope="col">Estado de triage</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td>Actor → RED / NODO</td>
+                            <tr class="sel">
                                 <td>
-                                    <code>legacy.dim_tipo_actor_radar</code>
-                                    (solo tipo de actor)
-                                </td>
-                                <td>
-                                    <span class="tag req">requiere</span>
-                                    <code>territorio.red</code> y
-                                    <code>territorio.nodo</code>, y las columnas
-                                    <code>red_id</code>, <code>nodo_id</code>,
-                                    <code>tipo_actor_radar_id</code> en el actor
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>RED / NODO → Región</td>
-                                <td>
-                                    <code>core.alcance_caso(uuid)</code> para el
-                                    caso
-                                </td>
-                                <td>
-                                    <span class="tag ok">existe</span> para el
-                                    caso; <span class="tag req">requiere</span>
-                                    la relación RED/NODO → Región
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Región → Caso</td>
-                                <td>
-                                    <code>alerts.caso_id</code> →
-                                    <code>core.alcance_caso</code>
-                                </td>
-                                <td><span class="tag ok">existe</span></td>
-                            </tr>
-                            <tr>
-                                <td>Caso → Señal</td>
-                                <td>
-                                    <code>alerts.caso_id</code>; hoy NULL, se
-                                    muestra «Sin vínculo»
-                                </td>
-                                <td><span class="tag ok">existe</span></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-
-            <section class="section" aria-labelledby="contrato-radar">
-                <div class="section-head">
-                    <div>
-                        <h2 id="contrato-radar">
-                            Contrato de datos de la cola
-                        </h2>
-                        <p>
-                            Cada columna, badge, KPI y acción nombra su campo o
-                            endpoint. «—» es ausente, nunca 0.
-                        </p>
-                    </div>
-                </div>
-                <div class="panel">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th scope="col">Elemento</th>
-                                <th scope="col">Fuente exacta</th>
-                                <th scope="col">Estado</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>Chip «0 pendientes»</td>
-                                <td>Cómputo de alertas con triage pendiente</td>
-                                <td>
-                                    <span class="tag req">requiere</span>
-                                    estado de triage persistido
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    Chips Todas · Inmediato · Táctico ·
-                                    Preventivo · Monitoreo · Sin vínculo a caso
-                                </td>
-                                <td>
-                                    <code>alerts.nivel</code> de
-                                    <code>core.cat_niveles_alerta</code>; «Sin
-                                    vínculo a caso» filtra
-                                    <code>caso_id IS NULL</code>
-                                </td>
-                                <td>
-                                    <span class="tag ok">existe</span>; conteo
-                                    por nivel
-                                    <span class="tag req">requiere</span>
-                                    agregado
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Señal</td>
-                                <td>
-                                    <code>alerts.codigo</code> +
-                                    <code>alerts.titulo</code>
-                                </td>
-                                <td><span class="tag ok">existe</span></td>
-                            </tr>
-                            <tr>
-                                <td>Nivel</td>
-                                <td>
-                                    <code>alerts.nivel</code> de
-                                    <code>core.cat_niveles_alerta</code>
-                                </td>
-                                <td><span class="tag ok">existe</span></td>
-                            </tr>
-                            <tr>
-                                <td>Prioridad de alerta</td>
-                                <td>
-                                    <code>alerts.prioridad</code> de
-                                    <code>core.cat_prioridades_alerta</code>
-                                </td>
-                                <td><span class="tag ok">existe</span></td>
-                            </tr>
-                            <tr>
-                                <td>SLA</td>
-                                <td>
-                                    <code
-                                        >core.cat_niveles_alerta.sla_horas</code
+                                    <div class="code">
+                                        S-0001 <span class="ej">ejemplo</span>
+                                    </div>
+                                    <span class="sub"
+                                        >RED-RADAR · parte de campo</span
                                     >
-                                    (24 / 48 / 72 h o NULL)
                                 </td>
-                                <td><span class="tag ok">existe</span></td>
-                            </tr>
-                            <tr>
-                                <td>Reporte</td>
-                                <td><code>alerts.fecha_reporte</code></td>
-                                <td><span class="tag ok">existe</span></td>
-                            </tr>
-                            <tr>
-                                <td>Caso / Región</td>
+                                <td>04 nov 2026</td>
                                 <td>
-                                    <code>alerts.casoCode</code>; Región
-                                    derivada de
-                                    <code>core.alcance_caso(uuid)</code>
+                                    Piura
+                                    <span class="sub code">200101</span>
                                 </td>
+                                <td class="nd">no existe</td>
                                 <td>
-                                    <span class="tag req">requiere</span>
-                                    exponer <code>region</code> por fila de
-                                    alerta (el mapper hoy solo trae
-                                    <code>distrito</code>)
+                                    Concentración de transportistas en el acceso
+                                    al mercado.
+                                </td>
+                                <td><span class="tag t-alta">Alta</span></td>
+                                <td class="nd">—</td>
+                                <td>
+                                    <span class="tag t-pend">Pendiente</span>
                                 </td>
                             </tr>
                             <tr>
-                                <td>Estado</td>
                                 <td>
-                                    <code>alerts.paso_actual</code> /
-                                    <code>alerts.estado</code>
+                                    <div class="code">
+                                        S-0002 <span class="ej">ejemplo</span>
+                                    </div>
+                                    <span class="sub"
+                                        >RED-RADAR · nota de nodo</span
+                                    >
                                 </td>
-                                <td><span class="tag ok">existe</span></td>
-                            </tr>
-                            <tr>
-                                <td>Acciones de triage</td>
+                                <td>02 nov 2026</td>
                                 <td>
-                                    Convertir en alerta · Descartar (con motivo)
+                                    Paita
+                                    <span class="sub code">200501</span>
                                 </td>
+                                <td class="nd">no existe</td>
                                 <td>
-                                    <span class="tag req">requiere</span>
-                                    <code>alerts.estado_triage</code> +
-                                    <code
-                                        >POST
-                                        /api/v1/alerts/{id}/{convertir|descartar}</code
+                                    Reclamo de pescadores artesanales por cuota
+                                    de captura.
+                                </td>
+                                <td><span class="tag t-media">Media</span></td>
+                                <td class="nd">—</td>
+                                <td>
+                                    <span class="tag t-conv">Convertida</span>
+                                    <span class="sub"
+                                        >→ alerta AT-2026-101</span
                                     >
                                 </td>
                             </tr>
                             <tr>
-                                <td>Notificaciones</td>
                                 <td>
-                                    <code>core.notificaciones</code>:
-                                    <code>id</code>, <code>tipo</code>,
-                                    <code>entidadTipo</code>,
-                                    <code>entidadId</code>,
-                                    <code>venceEn</code>, <code>estado</code>,
-                                    <code>createdAt</code>
+                                    <div class="code">
+                                        S-0003 <span class="ej">ejemplo</span>
+                                    </div>
+                                    <span class="sub">RED-RADAR · rumor</span>
                                 </td>
+                                <td>01 nov 2026</td>
                                 <td>
-                                    <span class="tag req">requiere</span>
-                                    <code>titulo</code> / <code>detalle</code> y
-                                    <code
-                                        >PATCH /api/v1/notificaciones/{id}</code
+                                    Sullana
+                                    <span class="sub code">200601</span>
+                                </td>
+                                <td class="nd">no existe</td>
+                                <td>
+                                    Comentario sin respaldo sobre un paro
+                                    indefinido.
+                                </td>
+                                <td><span class="tag t-baja">Baja</span></td>
+                                <td class="nd">—</td>
+                                <td>
+                                    <span class="tag t-desc">Descartada</span>
+                                    <span class="motivo"
+                                        ><b>Motivo:</b> rumor sin evidencia
+                                        verificable ni segunda fuente.</span
                                     >
-                                    para marcar leída
                                 </td>
                             </tr>
                             <tr>
-                                <td>Derivación y destinatarios</td>
                                 <td>
-                                    <code>alerts.derivacion</code>
-                                    (visibilidad interna · ejecutiva ·
-                                    sectorial)
+                                    <div class="code">
+                                        S-0004 <span class="ej">ejemplo</span>
+                                    </div>
+                                    <span class="sub"
+                                        >RED-RADAR · parte repetido</span
+                                    >
                                 </td>
+                                <td>31 oct 2026</td>
                                 <td>
-                                    <span class="tag req">requiere</span> tabla
-                                    de destinatarios + endpoints de derivación
+                                    Talara
+                                    <span class="sub code">200701</span>
+                                </td>
+                                <td class="nd">no existe</td>
+                                <td>
+                                    Mismo bloqueo ya reportado por otra vía en
+                                    el lote industrial.
+                                </td>
+                                <td><span class="tag t-alta">Alta</span></td>
+                                <td><span class="code">AT-2026-088</span></td>
+                                <td>
+                                    <span class="tag t-dup">Duplicada</span>
+                                    <span class="motivo"
+                                        ><b>Motivo:</b> mismo hecho y misma
+                                        fuente que la alerta AT-2026-088.</span
+                                    >
                                 </td>
                             </tr>
                         </tbody>
@@ -868,232 +1424,566 @@
                 </div>
             </section>
 
-            <section class="section" aria-labelledby="estados-radar">
+            <!-- ═══════════ 3 · Triage (panel lateral abierto) ═══════════ -->
+            <section class="section" aria-labelledby="triage">
                 <div class="section-head">
                     <div>
-                        <h2 id="estados-radar">Estados de la pantalla</h2>
+                        <h2 id="triage">Triage · panel lateral abierto</h2>
                         <p>
-                            Carga, error y parcial, tanto en la cola como en el
-                            centro de notificaciones.
+                            La señal completa, su fuente y la sugerencia del
+                            sistema —presentada como
+                            <b>sugerencia, no como hecho</b>— y las tres
+                            decisiones. Convertir abre el formulario mínimo que
+                            crea una <code>core.alertas_tempranas</code>.
                         </p>
                     </div>
+                    <span class="badge">señal de ejemplo S-0001</span>
                 </div>
-                <div class="estados">
-                    <div class="card">
-                        <strong>Cargando</strong>
-                        <p>
-                            Chip «0 pendientes» en «…» y filas esqueleto; el
-                            triage permanece deshabilitado.
-                        </p>
-                    </div>
-                    <div class="card">
-                        <strong>Error</strong>
-                        <p>
-                            Contadores «No disponible», nunca 0, con Reintentar;
-                            el centro de notificaciones falla por separado.
-                        </p>
-                    </div>
-                    <div class="card">
-                        <strong>Parcial</strong>
-                        <p>
-                            Si cae la fuente de notificaciones, la cola sigue
-                            visible y el centro muestra «—» con aviso.
-                        </p>
-                    </div>
-                </div>
-            </section>
 
-            <div class="grid">
-                <section class="section" aria-labelledby="notificaciones">
-                    <div class="section-head">
-                        <div>
-                            <h2 id="notificaciones">
-                                Centro de notificaciones
-                            </h2>
-                            <p>
-                                Categoría, fecha, estado de lectura y enlace al
-                                registro concreto. Hoy el aviso se deriva del
-                                trabajo pendiente, no de un bus de mensajes.
-                            </p>
+                <div class="split">
+                    <nav class="ctx" aria-label="Señales de la cola (ejemplo)">
+                        <h3>Cola · contexto</h3>
+                        <ul>
+                            <li>
+                                <button type="button" aria-current="true">
+                                    <span class="cd">S-0001</span> · Piura
+                                    <span class="st">Pendiente</span>
+                                </button>
+                            </li>
+                            <li>
+                                <button type="button">
+                                    <span class="cd">S-0002</span> · Paita
+                                    <span class="st"
+                                        >Convertida → AT-2026-101</span
+                                    >
+                                </button>
+                            </li>
+                            <li>
+                                <button type="button">
+                                    <span class="cd">S-0003</span> · Sullana
+                                    <span class="st"
+                                        >Descartada (con motivo)</span
+                                    >
+                                </button>
+                            </li>
+                            <li>
+                                <button type="button">
+                                    <span class="cd">S-0004</span> · Talara
+                                    <span class="st"
+                                        >Duplicada de AT-2026-088</span
+                                    >
+                                </button>
+                            </li>
+                        </ul>
+                    </nav>
+
+                    <aside class="drawer" aria-label="Panel de triage">
+                        <div class="drawer-head">
+                            <div>
+                                <div class="t">
+                                    S-0001
+                                    <span class="ej">ejemplo</span>
+                                </div>
+                                <span class="s"
+                                    >Señal RED-RADAR · Piura · 04 nov 2026</span
+                                >
+                            </div>
+                            <button
+                                class="x"
+                                type="button"
+                                aria-label="Cerrar panel de triage"
+                            >
+                                ×
+                            </button>
                         </div>
-                        <span class="chip">0 sin leer</span>
-                    </div>
-                    <div class="panel">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th scope="col">Notificación</th>
-                                    <th scope="col">Categoría</th>
-                                    <th scope="col">Fecha</th>
-                                    <th scope="col">Estado</th>
-                                </tr>
-                            </thead>
-                            <tbody></tbody>
-                        </table>
-                        <div class="empty" role="note">
-                            <strong>Sin notificaciones.</strong>
-                            <code>core.notificaciones</code> tiene 0 filas: el
-                            aviso se deriva hoy del trabajo pendiente, no de un
-                            bus de eventos. La campana no debe mostrar un punto
-                            ni un contador mientras siga así.
-                            <div class="sub" style="margin-top: 6px">
-                                <code>requiere</code> columnas
-                                <code>titulo</code> / <code>detalle</code> y
-                                <code>PATCH /api/v1/notificaciones/{id}</code>
-                                para marcar leída; el enlace al registro
-                                necesita
-                                <code>entidadTipo</code> +
-                                <code>entidadId</code>
-                                resueltos.
+                        <div class="drawer-body">
+                            <!-- Señal completa -->
+                            <div class="block">
+                                <h3>La señal</h3>
+                                <dl class="kv">
+                                    <dt>Código</dt>
+                                    <dd>
+                                        S-0001 ·
+                                        <span class="nd">no existe</span>
+                                        (no hay tabla de señales)
+                                    </dd>
+                                    <dt>Distrito</dt>
+                                    <dd>
+                                        Piura ·
+                                        <code>200101</code>
+                                        <span class="sub"
+                                            >vía <code>distrito_id</code> +
+                                            <code
+                                                >core.distritos.ubigeo</code
+                                            ></span
+                                        >
+                                    </dd>
+                                    <dt>Tipo de señal</dt>
+                                    <dd class="nd">no existe</dd>
+                                    <dt>Fecha</dt>
+                                    <dd>
+                                        04 nov 2026 ·
+                                        <code>fecha_reporte</code>
+                                    </dd>
+                                    <dt>Extracto</dt>
+                                    <dd>
+                                        Concentración de transportistas en el
+                                        acceso al mercado ·
+                                        <code>titulo</code> /
+                                        <code>hechos_recientes</code>
+                                    </dd>
+                                    <dt>Situación</dt>
+                                    <dd>
+                                        <code>situacion_actual</code> · sin dato
+                                        en la señal
+                                    </dd>
+                                    <dt>Caso</dt>
+                                    <dd>
+                                        <span class="nd">sin caso</span>
+                                        (<code>caso_id</code> NULL)
+                                    </dd>
+                                    <dt>Nivel (si hay caso)</dt>
+                                    <dd>
+                                        <code>nivel_alerta_id</code> ·
+                                        <span class="nd"
+                                            >no declarado (latente /
+                                            manifiesto)</span
+                                        >
+                                    </dd>
+                                </dl>
+                            </div>
+
+                            <!-- Fuente -->
+                            <div class="block">
+                                <h3>Fuente</h3>
+                                <dl class="kv">
+                                    <dt>Tipo</dt>
+                                    <dd>
+                                        <code>fuente_tipo</code> · parte de
+                                        campo RED-RADAR
+                                    </dd>
+                                    <dt>Descripción</dt>
+                                    <dd>
+                                        <code>fuente_descripcion</code> ·
+                                        reporte de nodo, 04 nov 2026
+                                    </dd>
+                                    <dt>URL</dt>
+                                    <dd>
+                                        <code>fuente_url</code> ·
+                                        <span class="nd"
+                                            >sin URL registrada</span
+                                        >
+                                    </dd>
+                                </dl>
+                            </div>
+
+                            <!-- Sugerencia -->
+                            <div class="block">
+                                <h3>Sugerencia del sistema</h3>
+                                <div class="suggest">
+                                    <span class="tag-sug"
+                                        >Sugerencia · no validada</span
+                                    >
+                                    <p>
+                                        Calculada a partir de
+                                        <code>riesgos_json</code> y
+                                        <code>acciones_sugeridas_json</code>. Es
+                                        una propuesta: no afirma el riesgo ni la
+                                        acción hasta que una persona la valide.
+                                    </p>
+                                    <ul>
+                                        <li>
+                                            Riesgo sugerido: interrupción del
+                                            acceso al mercado (prioridad
+                                            propuesta <b>Alta</b>).
+                                        </li>
+                                        <li>
+                                            Acción sugerida: verificar con la
+                                            segunda fuente antes de convertir.
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <!-- Decisiones -->
+                            <div class="block">
+                                <h3>Decisiones de triage</h3>
+                                <div class="decisions">
+                                    <!-- Convertir -->
+                                    <div class="decision on">
+                                        <h4>
+                                            <span class="num">1</span>Convertir
+                                            en alerta
+                                        </h4>
+                                        <div class="form">
+                                            <div class="field">
+                                                <label for="f-prio"
+                                                    >Prioridad</label
+                                                >
+                                                <select id="f-prio">
+                                                    <option>Alta</option>
+                                                    <option>Media</option>
+                                                    <option>Baja</option>
+                                                </select>
+                                                <span class="hint"
+                                                    ><code>prioridad_id</code> ·
+                                                    <code
+                                                        >core.cat_prioridades_alerta</code
+                                                    ></span
+                                                >
+                                            </div>
+                                            <div class="field">
+                                                <label for="f-caso">Caso</label>
+                                                <select id="f-caso">
+                                                    <option>
+                                                        Sin caso (se vincula
+                                                        luego)
+                                                    </option>
+                                                </select>
+                                                <span class="hint"
+                                                    ><code>caso_id</code> · hoy
+                                                    NULL en la señal</span
+                                                >
+                                            </div>
+                                            <div class="field wide">
+                                                <label for="f-titulo"
+                                                    >Título</label
+                                                >
+                                                <input
+                                                    id="f-titulo"
+                                                    type="text"
+                                                    value="Concentración de transportistas en el acceso al mercado"
+                                                />
+                                                <span class="hint"
+                                                    ><code>titulo</code> · es lo
+                                                    que crea la
+                                                    <code
+                                                        >core.alertas_tempranas</code
+                                                    ></span
+                                                >
+                                            </div>
+                                        </div>
+                                        <p class="blocked-note">
+                                            <b>Bloqueado.</b> El botón se
+                                            deshabilita hasta que exista la
+                                            fuente RADAR y el endpoint que
+                                            persiste la alerta.
+                                        </p>
+                                        <button
+                                            class="btn primary"
+                                            type="button"
+                                            disabled
+                                        >
+                                            Convertir en alerta
+                                        </button>
+                                    </div>
+
+                                    <!-- Descartar -->
+                                    <div class="decision">
+                                        <h4>
+                                            <span class="num">2</span>Descartar
+                                            con motivo
+                                        </h4>
+                                        <div class="form">
+                                            <div class="field">
+                                                <label for="f-motivo"
+                                                    >Motivo</label
+                                                >
+                                                <select id="f-motivo">
+                                                    <option>
+                                                        Sin evidencia
+                                                        verificable
+                                                    </option>
+                                                    <option>
+                                                        Fuera de subsector
+                                                    </option>
+                                                    <option>
+                                                        Fuera de plazo
+                                                    </option>
+                                                </select>
+                                            </div>
+                                            <div class="field wide">
+                                                <label for="f-detalle"
+                                                    >Detalle</label
+                                                >
+                                                <textarea
+                                                    id="f-detalle"
+                                                ></textarea>
+                                                <span class="hint"
+                                                    >El motivo es
+                                                    <b>obligatorio</b>: ninguna
+                                                    fila se descarta sin él
+                                                    (item 38).</span
+                                                >
+                                            </div>
+                                        </div>
+                                        <p class="blocked-note">
+                                            <b>Bloqueado.</b> El motivo no tiene
+                                            dónde persistirse todavía.
+                                        </p>
+                                        <button
+                                            class="btn"
+                                            type="button"
+                                            disabled
+                                        >
+                                            Descartar con motivo
+                                        </button>
+                                    </div>
+
+                                    <!-- Duplicada -->
+                                    <div class="decision">
+                                        <h4>
+                                            <span class="num">3</span>Marcar
+                                            duplicada de…
+                                        </h4>
+                                        <div class="form">
+                                            <div class="field wide">
+                                                <label for="f-dup"
+                                                    >Señal o alerta
+                                                    existente</label
+                                                >
+                                                <input
+                                                    id="f-dup"
+                                                    type="text"
+                                                    placeholder="Buscar por código (p. ej. AT-2026-088)"
+                                                />
+                                                <span class="hint"
+                                                    >Búsqueda de duplicados
+                                                    contra alertas existentes
+                                                    (item 38).</span
+                                                >
+                                            </div>
+                                        </div>
+                                        <p class="blocked-note">
+                                            <b>Bloqueado.</b> La regla de
+                                            deduplicación y su persistencia no
+                                            existen.
+                                        </p>
+                                        <button
+                                            class="btn"
+                                            type="button"
+                                            disabled
+                                        >
+                                            Marcar duplicada
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </section>
+                    </aside>
+                </div>
+            </section>
 
-                <section class="section" aria-labelledby="derivacion">
-                    <div class="section-head">
-                        <div>
-                            <h2 id="derivacion">Derivación y destinatarios</h2>
-                            <p>
-                                Lo que hoy solo existe en el tipo de datos,
-                                visible en la alerta.
-                            </p>
-                        </div>
-                        <span class="chip">Item 23</span>
+            <!-- ═══════════ 4 · Ubicación (items 125 / 126) ═══════════ -->
+            <section class="section" aria-labelledby="ubicacion">
+                <div class="section-head">
+                    <div>
+                        <h2 id="ubicacion">Ubicación de la señal</h2>
+                        <p>
+                            La señal se ubica por <b>distrito</b> (no por
+                            coordenada). Comparte la nube de puntos del item 125
+                            y la capa RADAR/DPA del item 126.
+                        </p>
                     </div>
+                    <span class="badge">referencial</span>
+                </div>
+                <div class="loc">
                     <div class="panel">
-                        <dl class="kv">
-                            <dt>Alerta</dt>
-                            <dd class="code">AT-2026-43</dd>
-                            <dt>Visibilidad</dt>
-                            <dd>interna · ejecutiva · sectorial</dd>
-                            <dt>Derivada a</dt>
-                            <dd>— (sin destinatarios registrados)</dd>
-                            <dt>Destinatarios</dt>
-                            <dd>
-                                0 · <code>requiere</code> tabla de destinatarios
-                                y endpoints de derivación
-                            </dd>
-                            <dt>Aprobación</dt>
-                            <dd>
-                                Requiere <code>direccion_oaipcs</code> o
-                                suplencia vigente
-                            </dd>
-                            <dt>Reapertura</dt>
-                            <dd>
-                                Permitida con motivo y permiso; queda registrada
-                                en el historial de pasos
-                            </dd>
-                            <dt>Deshacer</dt>
-                            <dd>
-                                Volver al paso anterior con motivo obligatorio
-                            </dd>
-                        </dl>
+                        <div class="panel-body">
+                            <p>
+                                El distrito de la señal se resuelve con
+                                <code>distrito_id</code> contra
+                                <code>core.distritos</code> (<b>1 891 filas</b>,
+                                ubigeo INEI) y sus infraestructuras con
+                                <code>gis.v_infraestructuras_por_distrito</code
+                                >.
+                            </p>
+                            <ul>
+                                <li>
+                                    <b>Item 125.</b> Nube de
+                                    <b>13 456</b> puntos: 13 229 derechos
+                                    acuícolas y 227 sedes institucionales. Es el
+                                    fondo sobre el que se ubicaría la señal.
+                                </li>
+                                <li>
+                                    <b>Item 126.</b> Redes RADAR y 31
+                                    desembarcaderos DPA. Los 31 desembarcaderos
+                                    <b>sí</b> tienen coordenada y distrito en el
+                                    KML; las
+                                    <b>redes RADAR no tienen fuente cargada</b>.
+                                    Ese es el hueco central de esta pieza.
+                                </li>
+                            </ul>
+                        </div>
                     </div>
-                </section>
-            </div>
+                    <figure class="map">
+                        <svg
+                            viewBox="0 0 320 160"
+                            role="img"
+                            aria-label="Esquema referencial: puntos de infraestructura, un desembarcadero DPA, marcadores RADAR sin fuente y la señal ubicada por distrito"
+                        >
+                            <rect
+                                x="0"
+                                y="0"
+                                width="320"
+                                height="160"
+                                fill="#f8fafb"
+                            />
+                            <path
+                                d="M18 44 L118 22 L208 40 L300 26"
+                                fill="none"
+                                stroke="#dbe2e8"
+                                stroke-width="1.5"
+                                stroke-dasharray="4 4"
+                            />
+                            <path
+                                d="M12 108 L96 92 L190 116 L306 96"
+                                fill="none"
+                                stroke="#dbe2e8"
+                                stroke-width="1.5"
+                                stroke-dasharray="4 4"
+                            />
+                            <g fill="#b7c3cd">
+                                <circle cx="52" cy="62" r="2.5" />
+                                <circle cx="84" cy="76" r="2.5" />
+                                <circle cx="120" cy="54" r="2.5" />
+                                <circle cx="150" cy="88" r="2.5" />
+                                <circle cx="196" cy="62" r="2.5" />
+                                <circle cx="232" cy="82" r="2.5" />
+                                <circle cx="262" cy="58" r="2.5" />
+                                <circle cx="286" cy="110" r="2.5" />
+                                <circle cx="70" cy="128" r="2.5" />
+                                <circle cx="170" cy="134" r="2.5" />
+                                <circle cx="244" cy="132" r="2.5" />
+                            </g>
+                            <!-- Desembarcadero DPA (item 126) -->
+                            <path
+                                d="M104 102 l7 7 -7 7 -7 -7 z"
+                                fill="#397c79"
+                            />
+                            <!-- RADAR sin fuente: marcadores huecos -->
+                            <circle
+                                cx="204"
+                                cy="104"
+                                r="7"
+                                fill="none"
+                                stroke="#ad4d46"
+                                stroke-width="1.6"
+                                stroke-dasharray="3 3"
+                            />
+                            <circle
+                                cx="140"
+                                cy="118"
+                                r="7"
+                                fill="none"
+                                stroke="#ad4d46"
+                                stroke-width="1.6"
+                                stroke-dasharray="3 3"
+                            />
+                            <!-- Señal ubicada por distrito -->
+                            <circle cx="150" cy="72" r="6.5" fill="#2455a2" />
+                            <circle
+                                cx="150"
+                                cy="72"
+                                r="12"
+                                fill="none"
+                                stroke="#2455a2"
+                                stroke-width="1.4"
+                                opacity="0.5"
+                            />
+                        </svg>
+                        <div class="legend">
+                            <span
+                                ><i style="background: #2455a2"></i>Señal
+                                (distrito)</span
+                            >
+                            <span
+                                ><i style="background: #b7c3cd"></i>Puntos
+                                125</span
+                            >
+                            <span
+                                ><i
+                                    style="
+                                        background: #397c79;
+                                        border-radius: 2px;
+                                    "
+                                ></i
+                                >DPA (126)</span
+                            >
+                            <span
+                                ><i style="border: 1.6px dashed #ad4d46"></i
+                                >RADAR sin fuente</span
+                            >
+                        </div>
+                        <figcaption>
+                            Esquema <b>referencial</b>: no hay geometría
+                            distrital cargada en la base (item 128 pendiente).
+                            Los marcadores RADAR aparecen huecos porque la red
+                            no tiene fuente.
+                        </figcaption>
+                    </figure>
+                </div>
+            </section>
 
-            <aside class="notes">
-                <h2>Qué debe construir el equipo</h2>
-                <ul>
-                    <li>
-                        <b>Item 76.</b> Un estado de señal (inicial / en triage
-                        / convertida / descartada) con motivo de descarte
-                        obligatorio, y el botón «Convertir en alerta»
-                        precargando los seis bloques del Anexo 3. No se crea
-                        entidad nueva: la señal es una alerta en estado inicial.
-                    </li>
-                    <li>
-                        <b>Item 31.</b> Tabla de notificaciones por usuario, con
-                        lectura, categoría y enlace al registro. Hoy el aviso se
-                        deriva del trabajo pendiente, no de un bus de mensajes;
-                        el punto y el contador deben depender de pendientes
-                        reales, no de un valor fijo.
-                    </li>
-                    <li>
-                        <b>Item 23.</b> Visibilidad de la derivación y de los
-                        destinatarios en el panel de la alerta, con la regla de
-                        aprobación por <code>direccion_oaipcs</code>.
-                    </li>
-                    <li>
-                        <b>Modelo RED/NODO.</b> <code>territorio.*</code> no
-                        modela RED ni NODO; solo existe
-                        <code>legacy.dim_tipo_actor_radar</code>. Sin
-                        <code>territorio.red</code> /
-                        <code>territorio.nodo</code> y las columnas
-                        <code>red_id</code>, <code>nodo_id</code>,
-                        <code>tipo_actor_radar_id</code>, el eje no se puede
-                        persistir ni afirmar.
-                    </li>
-                    <li>
-                        Datos que faltan y no se estiman: ninguna alerta tiene
-                        vínculo a caso en la muestra, 0 destinatarios
-                        registrados y 0 notificaciones. Se declaran «—».
-                    </li>
-                </ul>
-                <p style="margin: 10px 0 0; color: #8a5a00">
-                    Items 23, 31 y 76 de
-                    <code>docs/07_frontend/frontend.md</code>. Cifras reales del
-                    22.11.2026: 76 alertas vivas, 0 sin validar, 0
-                    notificaciones. Niveles y prioridades provienen de
-                    <code>core.cat_niveles_alerta</code> y
-                    <code>core.cat_prioridades_alerta</code>, con sus SLA de 24
-                    / 48 / 72 h y sin plazo.
-                </p>
-            </aside>
+            <!-- ═══════════ 5 · Qué falta ═══════════ -->
+            <section class="section" aria-labelledby="falta">
+                <div class="section-head">
+                    <div>
+                        <h2 id="falta">
+                            Qué falta para que esta pantalla funcione
+                        </h2>
+                        <p>
+                            Tres puntos concretos. Mientras ninguno exista, la
+                            pieza se queda en el estado vacío y en las filas de
+                            ejemplo.
+                        </p>
+                    </div>
+                </div>
+                <div class="gap-grid">
+                    <div class="gap-card">
+                        <span class="k">a</span>
+                        <strong>Conector de fuente RADAR</strong>
+                        <p>
+                            Las redes RADAR no tienen fuente cargada. Sin
+                            conector no llega ninguna señal y no hay filas
+                            reales que mostrar.
+                        </p>
+                        <span class="item">Item 76 · Item 126</span>
+                    </div>
+                    <div class="gap-card">
+                        <span class="k">b</span>
+                        <strong>Regla de deduplicación</strong>
+                        <p>
+                            Falta la regla que compara una señal con las alertas
+                            existentes y decide si es duplicada de una alerta o
+                            de otra señal.
+                        </p>
+                        <span class="item">Item 76 · Item 38</span>
+                    </div>
+                    <div class="gap-card">
+                        <span class="k">c</span>
+                        <strong>Persistencia del motivo de descarte</strong>
+                        <p>
+                            El descarte exige motivo, pero no hay columna donde
+                            guardarlo. Un descarte siempre lleva motivo visible;
+                            hoy no se puede registrar.
+                        </p>
+                        <span class="item">Item 76 · Item 38</span>
+                    </div>
+                </div>
+            </section>
 
-            <aside class="notes" style="margin-top: 12px">
-                <h2>Fuera de alcance de este mockup</h2>
-                <ul>
-                    <li>
-                        Modelo y catálogo RED/NODO: se muestra el flujo, no se
-                        fija una lista que no existe.
-                    </li>
-                    <li>
-                        Bus de notificaciones: el aviso se deriva de trabajo
-                        pendiente, no de eventos publicados.
-                    </li>
-                    <li>Persistencia de destinatarios y de la derivación.</li>
-                    <li>
-                        Persistencia del triage (estado y motivo de descarte).
-                    </li>
-                    <li>
-                        Derivar la prioridad de atención desde el riesgo: está
-                        prohibido; requiere la regla que OAIPCS no ha definido.
-                    </li>
-                    <li>
-                        Cambios de aging o de SLA: los plazos son los del
-                        catálogo de niveles, no una regla nueva.
-                    </li>
-                </ul>
-                <h2 style="margin-top: 14px">Vocabulario congelado</h2>
-                <ul>
-                    <li>
-                        Estados de caso:
-                        <code>Abierto · Resuelto · Archivado</code>.
-                    </li>
-                    <li>
-                        Conflictividad:
-                        <code
-                            >Diferencia · Controversia · Conflicto social ·
-                            Crisis social</code
-                        >.
-                    </li>
-                    <li>
-                        Riesgo <code>Bajo · Moderado · Alto</code>; prioridad
-                        <code>Urgente · Moderado · Bajo</code>.
-                    </li>
-                    <li>
-                        «Región», nunca «Territorio»; «GORE», nunca «Gobierno
-                        regional».
-                    </li>
-                    <li>
-                        «Tipo de compromiso», nunca «tipo de acuerdo»; «Unidad
-                        responsable». La prioridad de la columna es «prioridad
-                        de alerta», distinta de la prioridad de atención.
-                    </li>
-                </ul>
-            </aside>
+            <p class="foot">
+                Vocabulario: nivel de conflictividad <b>latente</b> (Diferencia
+                · Controversia) y <b>manifiesto</b> (Conflicto social · Crisis
+                social); nunca «activo». Prioridad <b>Alta · Media · Baja</b>.
+                Cifras con <code>≈</code> son ejemplo; celdas sin columna dicen
+                <b>no existe</b> o <b>sin dato</b>. Datos verificados:
+                <code>core.alertas_tempranas</code> con 83 filas,
+                <code>core.cat_prioridades_alerta</code> y
+                <code>core.distritos</code> (1 891). Las redes RADAR no tienen
+                fuente cargada; los 31 desembarcaderos, sí.
+            </p>
         </main>
     </body>
 </html>

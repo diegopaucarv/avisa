@@ -1,5 +1,12 @@
 import { HttpClient } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  inject,
+  signal,
+} from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
@@ -28,9 +35,11 @@ import {
 } from '../../dominio/mapeo';
 import type { Caso } from '../../dominio/modelos';
 import { formatearFechaHora } from '../../shared/formato-fecha';
-import { ExportarMenuComponent } from '../../shared/ui/exportar-menu.component';
+import { BarraSeleccionComponent } from '../../shared/ui/barra-seleccion.component';
+
 import { IconoComponent } from '../../shared/ui/icono.component';
 import { PaginacionComponent } from '../../shared/ui/paginacion.component';
+import { SeleccionTabla } from '../../shared/ui/seleccion-tabla';
 import { CasoPanelComponent, type CuerpoCasoAlta } from './caso-panel.component';
 import { CasoVistaPreviaComponent } from './caso-vista-previa.component';
 
@@ -227,7 +236,7 @@ function aConteos(bruto: unknown): ConteosCasos {
     RouterLink,
     IconoComponent,
     PaginacionComponent,
-    ExportarMenuComponent,
+    BarraSeleccionComponent,
     CasoPanelComponent,
     CasoVistaPreviaComponent,
   ],
@@ -294,6 +303,15 @@ export class CasosPage {
   /** Caso en curso de restauración (por código) y aviso del resultado. */
   readonly restaurando = signal<string | null>(null);
   readonly aviso = signal<string | null>(null);
+
+  /** Selección de la tabla (página visible) para exportar o anular en lote. */
+  readonly seleccion = new SeleccionTabla();
+
+  idsVisibles(): string[] {
+    return this.casos()
+      .map((caso) => caso.codigo)
+      .filter((codigo): codigo is string => !!codigo);
+  }
 
   /** Alta de caso: el panel emite el cuerpo y esta página hace el `POST`. */
   readonly panelAbierto = signal(false);
@@ -624,6 +642,12 @@ export class CasosPage {
 
   recargar(): void {
     this.recurso.recargar();
+  }
+
+  alAnularLote(cantidad: number): void {
+    this.seleccion.limpiar();
+    this.aviso.set(cantidad === 1 ? '1 registro anulado.' : `${cantidad} registros anulados.`);
+    this.recargar();
   }
 
   constructor() {

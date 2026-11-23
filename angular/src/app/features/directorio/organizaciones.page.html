@@ -9,10 +9,18 @@
       </p>
     </div>
     <div class="view-actions">
-      <app-exportar-menu entidad="organizaciones" (fallo)="alFallarExportacion($event)" />
       <p class="result-count" aria-live="polite">{{ total() }} organizaciones</p>
     </div>
   </header>
+
+  <div class="view-toolbar">
+    <app-barra-seleccion
+      entidad="organizaciones"
+      [cantidad]="seleccion.cantidad()"
+      [idsSeleccionados]="seleccion.lista()"
+      (fallo)="alFallarExportacion($event)"
+    />
+  </div>
 
   @if (exportarError(); as mensaje) {
   <p class="form-error" role="alert">{{ mensaje }}</p>
@@ -91,6 +99,15 @@
       </caption>
       <thead>
         <tr>
+          <th scope="col" class="col-seleccion">
+            <input
+              type="checkbox"
+              aria-label="Seleccionar todos los registros de esta página"
+              [checked]="seleccion.todas(idsVisibles())"
+              [indeterminate]="seleccion.algunas(idsVisibles())"
+              (change)="seleccion.alternarPagina(idsVisibles(), $event)"
+            />
+          </th>
           <th scope="col">Nombre</th>
           <th scope="col">Tipo</th>
           <th scope="col">RUC / razón social</th>
@@ -106,6 +123,15 @@
           [class.row-selected]="seleccionado()?.id === organizacion.id"
           (click)="abrir(organizacion)"
         >
+          <td class="col-seleccion" (click)="$event.stopPropagation()">
+            <input
+              type="checkbox"
+              [checked]="seleccion.esta(organizacion.id)"
+              [attr.aria-label]="'Seleccionar la organización ' + organizacion.nombre"
+              (click)="$event.stopPropagation()"
+              (change)="seleccion.alternar(organizacion.id)"
+            />
+          </td>
           <td>
             <button
               type="button"
@@ -281,11 +307,14 @@
                 } @else { — }
               </dd>
             </div>
-            <div>
+            <div class="ficha-ancho">
               <dt>Fotografía</dt>
               <dd>
                 @if (org.fotoUrl; as enlace) {
-                <a [href]="enlace" target="_blank" rel="noopener">{{ enlace }}</a>
+                <app-foto-ficha
+                  [src]="enlace"
+                  [alt]="'Fotografía de la organización ' + org.nombre"
+                />
                 } @else { — }
               </dd>
             </div>

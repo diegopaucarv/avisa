@@ -13,7 +13,9 @@ import {
 } from '../../core/http/coleccion';
 import { consulta } from '../../core/http/consulta';
 import { esRegistro, texto, type Registro } from '../../dominio/mapeo';
-import { ExportarMenuComponent } from '../../shared/ui/exportar-menu.component';
+import { BarraSeleccionComponent } from '../../shared/ui/barra-seleccion.component';
+
+import { SeleccionTabla } from '../../shared/ui/seleccion-tabla';
 import { IconoComponent } from '../../shared/ui/icono.component';
 import { PaginacionComponent } from '../../shared/ui/paginacion.component';
 
@@ -179,7 +181,7 @@ const FILTROS_INICIALES: FiltrosNotificaciones = {
  */
 @Component({
   selector: 'app-notificaciones',
-  imports: [RouterLink, IconoComponent, PaginacionComponent, ExportarMenuComponent],
+  imports: [RouterLink, IconoComponent, PaginacionComponent, BarraSeleccionComponent],
   templateUrl: './notificaciones.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
@@ -306,6 +308,15 @@ export class NotificacionesPage {
 
   readonly notificaciones = computed(() => this.listado.valor()?.elementos ?? []);
   readonly total = computed(() => this.listado.valor()?.total ?? 0);
+
+  /** Selección de la tabla (página visible) para exportar. */
+  readonly seleccion = new SeleccionTabla();
+
+  idsVisibles(): string[] {
+    return this.notificaciones()
+      .map((notificacion) => notificacion.id)
+      .filter((id): id is string => !!id);
+  }
   readonly sinLeerEnPagina = computed(
     () => this.notificaciones().filter((notificacion) => !notificacion.leida).length,
   );

@@ -19,7 +19,9 @@ import {
   type Coleccion,
 } from '../../core/http/coleccion';
 import { consulta } from '../../core/http/consulta';
-import { ExportarMenuComponent } from '../../shared/ui/exportar-menu.component';
+import { BarraSeleccionComponent } from '../../shared/ui/barra-seleccion.component';
+
+import { SeleccionTabla } from '../../shared/ui/seleccion-tabla';
 import { IconoComponent } from '../../shared/ui/icono.component';
 import { PaginacionComponent } from '../../shared/ui/paginacion.component';
 import { ActorPanelComponent } from './actor-panel.component';
@@ -59,7 +61,7 @@ const FILTROS_INICIALES: FiltrosInstituciones = {
  */
 @Component({
   selector: 'app-instituciones',
-  imports: [IconoComponent, PaginacionComponent, ActorPanelComponent, ExportarMenuComponent],
+  imports: [IconoComponent, PaginacionComponent, ActorPanelComponent, BarraSeleccionComponent],
   templateUrl: './instituciones.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
@@ -175,6 +177,15 @@ export class InstitucionesPage {
 
   readonly instituciones = computed(() => this.listado.valor()?.elementos ?? []);
   readonly total = computed(() => this.listado.valor()?.total ?? 0);
+
+  /** Selección de la tabla (página visible) para exportar. */
+  readonly seleccion = new SeleccionTabla();
+
+  idsVisibles(): string[] {
+    return this.instituciones()
+      .map((institucion) => institucion.id)
+      .filter((id): id is string => !!id);
+  }
   readonly estado = this.listado.estado;
   readonly error = this.listado.error;
 

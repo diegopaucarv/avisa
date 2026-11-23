@@ -24,9 +24,11 @@ import { aErrorApi } from '../../core/http/errores';
 import { CapacidadesService } from '../../core/permisos/capacidades.service';
 import { aCaso } from '../../dominio/mapeo';
 import type { Caso } from '../../dominio/modelos';
-import { ExportarMenuComponent } from '../../shared/ui/exportar-menu.component';
+import { BarraSeleccionComponent } from '../../shared/ui/barra-seleccion.component';
+
 import { IconoComponent } from '../../shared/ui/icono.component';
 import { PaginacionComponent } from '../../shared/ui/paginacion.component';
+import { SeleccionTabla } from '../../shared/ui/seleccion-tabla';
 import {
   ESTADOS_DEMANDA,
   aColeccionDemandas,
@@ -64,7 +66,7 @@ const FILTROS_INICIALES: FiltrosDemandas = {
  */
 @Component({
   selector: 'app-demandas-sin-caso',
-  imports: [IconoComponent, PaginacionComponent, ExportarMenuComponent],
+  imports: [IconoComponent, PaginacionComponent, BarraSeleccionComponent],
   templateUrl: './demandas-sin-caso.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
@@ -325,6 +327,15 @@ export class DemandasSinCasoPage {
   /** Último fallo del botón de exportación; vacío si no hubo. */
   readonly exportarError = signal<string | null>(null);
 
+  /** Selección de la tabla (página visible) para exportar o anular en lote. */
+  readonly seleccion = new SeleccionTabla();
+
+  idsVisibles(): string[] {
+    return this.demandas()
+      .map((demanda) => demanda.id)
+      .filter((id): id is string => !!id);
+  }
+
   private readonly busquedaCaso = signal('');
 
   /** Página del buscador de casos; también se pagina en servidor. */
@@ -400,6 +411,12 @@ export class DemandasSinCasoPage {
 
   recargar(): void {
     this.listado.recargar();
+  }
+
+  alAnularLote(cantidad: number): void {
+    this.seleccion.limpiar();
+    this.aviso.set(cantidad === 1 ? '1 registro anulado.' : `${cantidad} registros anulados.`);
+    this.recargar();
   }
 
   alFallarExportacion(mensaje: string): void {

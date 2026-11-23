@@ -1,8 +1,12 @@
 import { HttpClient } from '@angular/common/http';
-import {   ChangeDetectionStrategy,
+import {
+  ChangeDetectionStrategy,
   Component,
   computed,
-  effect, inject, signal } from '@angular/core';
+  effect,
+  inject,
+  signal,
+} from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { map } from 'rxjs';
@@ -25,10 +29,12 @@ import {
   type ModoAnulacion,
   type ResultadoAnulacion,
 } from '../../shared/ui/anular-panel.component';
-import { ExportarMenuComponent } from '../../shared/ui/exportar-menu.component';
+import { BarraSeleccionComponent } from '../../shared/ui/barra-seleccion.component';
+
 import { GlosarioComponent } from '../../shared/ui/glosario.component';
 import { IconoComponent } from '../../shared/ui/icono.component';
 import { PaginacionComponent } from '../../shared/ui/paginacion.component';
+import { SeleccionTabla } from '../../shared/ui/seleccion-tabla';
 import {
   ESTADOS_COMPROMISO,
   NIVELES_GOBIERNO,
@@ -192,7 +198,7 @@ function totalDe(bruto: unknown): number {
     PaginacionComponent,
     CompromisoPanelComponent,
     AnularPanelComponent,
-    ExportarMenuComponent,
+    BarraSeleccionComponent,
   ],
   templateUrl: './compromisos.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -475,6 +481,15 @@ export class CompromisosPage {
 
   /** El alta se ofrece a quien tiene permiso de escritura. */
   readonly puedeRegistrar = this.capacidades.puedeEditar;
+
+  /** Selección de la tabla (página visible) para exportar o anular en lote. */
+  readonly seleccion = new SeleccionTabla();
+
+  idsVisibles(): string[] {
+    return this.compromisos()
+      .map((compromiso) => compromiso.id)
+      .filter((id): id is string => !!id);
+  }
 
   /** Compromiso que se está anulando en el panel compartido. */
   readonly compromisoAnulacion = signal<Compromiso | null>(null);
@@ -919,6 +934,14 @@ export class CompromisosPage {
 
   recargar(): void {
     this.recurso.recargar();
+  }
+
+  alAnularLote(cantidad: number): void {
+    this.seleccion.limpiar();
+    this.avisoAnulacion.set(
+      cantidad === 1 ? '1 registro anulado.' : `${cantidad} registros anulados.`,
+    );
+    this.alActualizar();
   }
 
   alFallarExportacion(mensaje: string): void {

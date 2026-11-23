@@ -14,18 +14,24 @@
         Registrar documento
       </button>
       }
-      <app-exportar-menu
-        entidad="documentos"
-        etiqueta="Exportar"
-        (fallo)="alFallarExportacion($event)"
-      />
       <p class="result-count" aria-live="polite">
         {{ total() }} {{ verPapelera() ? 'documentos anulados' : 'documentos' }}
       </p>
     </div>
   </header>
 
-  @if (exportarError(); as mensaje) {
+  @if (!verPapelera()) {
+  <div class="view-toolbar">
+    <app-barra-seleccion
+      entidad="documentos"
+      anulable="documentos"
+      [cantidad]="seleccion.cantidad()"
+      [idsSeleccionados]="seleccion.lista()"
+      (anulado)="alAnularLote($event)"
+      (fallo)="alFallarExportacion($event)"
+    />
+  </div>
+  } @if (exportarError(); as mensaje) {
   <p class="exportar-error" role="alert">{{ mensaje }}</p>
   } @if (avisoAnulacion(); as aviso) {
   <p class="form-hint aviso-ok" role="status">{{ aviso }}</p>
@@ -202,6 +208,15 @@
       </caption>
       <thead>
         <tr>
+          <th scope="col" class="col-seleccion">
+            <input
+              type="checkbox"
+              aria-label="Seleccionar todos los registros de esta página"
+              [checked]="seleccion.todas(idsVisibles())"
+              [indeterminate]="seleccion.algunas(idsVisibles())"
+              (change)="seleccion.alternarPagina(idsVisibles(), $event)"
+            />
+          </th>
           <th scope="col">Código</th>
           <th scope="col">Título</th>
           <th scope="col">Tipo</th>
@@ -217,6 +232,15 @@
           [class.row-selected]="seleccionadaId() === documento.id"
           (click)="abrir(documento)"
         >
+          <td class="col-seleccion" (click)="$event.stopPropagation()">
+            <input
+              type="checkbox"
+              [checked]="seleccion.esta(documento.id)"
+              [attr.aria-label]="'Seleccionar el documento ' + (documento.codigo || documento.titulo || documento.id)"
+              (click)="$event.stopPropagation()"
+              (change)="seleccion.alternar(documento.id)"
+            />
+          </td>
           <td>
             <button
               type="button"

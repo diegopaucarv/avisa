@@ -23,7 +23,10 @@ import {
   type Coleccion,
 } from '../../core/http/coleccion';
 import { consulta } from '../../core/http/consulta';
-import { ExportarMenuComponent } from '../../shared/ui/exportar-menu.component';
+import { BarraSeleccionComponent } from '../../shared/ui/barra-seleccion.component';
+
+import { SeleccionTabla } from '../../shared/ui/seleccion-tabla';
+import { FotoFichaComponent } from '../../shared/ui/foto-ficha.component';
 import { IconoComponent } from '../../shared/ui/icono.component';
 import { PaginacionComponent } from '../../shared/ui/paginacion.component';
 import {
@@ -63,7 +66,7 @@ const FILTROS_INICIALES: FiltrosOrganizaciones = {
  */
 @Component({
   selector: 'app-organizaciones',
-  imports: [IconoComponent, PaginacionComponent, ExportarMenuComponent],
+  imports: [IconoComponent, PaginacionComponent, BarraSeleccionComponent, FotoFichaComponent],
   templateUrl: './organizaciones.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
@@ -204,6 +207,11 @@ const FILTROS_INICIALES: FiltrosOrganizaciones = {
       min-width: 0;
     }
 
+    /* La fotografía ocupa las columnas de la cuadrícula, no una sola. */
+    .ficha-datos > div.ficha-ancho {
+      grid-column: 1 / -1;
+    }
+
     .ficha-datos dt {
       color: #97a1aa;
       font-size: 8.5px;
@@ -288,6 +296,15 @@ export class OrganizacionesPage {
 
   readonly organizaciones = computed(() => this.listado.valor()?.elementos ?? []);
   readonly total = computed(() => this.listado.valor()?.total ?? 0);
+
+  /** Selección de la tabla (página visible) para exportar. */
+  readonly seleccion = new SeleccionTabla();
+
+  idsVisibles(): string[] {
+    return this.organizaciones()
+      .map((organizacion) => organizacion.id)
+      .filter((id): id is string => !!id);
+  }
   readonly estado = this.listado.estado;
   readonly error = this.listado.error;
 

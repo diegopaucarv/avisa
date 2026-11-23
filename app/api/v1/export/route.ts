@@ -102,6 +102,7 @@ const PARAMETROS_CONTROL = new Set([
   "entidad",
   "formato",
   "id",
+  "ids",
   "pagina",
   "page",
   "tamano",
@@ -331,6 +332,48 @@ function filtrarPorId(filas: readonly unknown[], id: string | null): unknown[] {
   );
 }
 
+/**
+ * Campos que identifican una fila al exportar sólo la selección.
+ *
+ * Se compara contra una lista explícita y no contra cualquier campo de texto:
+ * el id de una organización aparece también como `organizacionAnclaUid` en
+ * sus actores y los incluiría por error.
+ */
+const CLAVES_SELECCION: Record<string, readonly string[]> = {
+  casos: ["code", "codigo", "id"],
+  reportes: ["codigoReporte", "codigo_reporte"],
+  alertas: ["id", "codigo"],
+  compromisos: ["id", "codigo"],
+  documentos: ["id", "codigo"],
+  demandas: ["id"],
+  actores: ["id"],
+  organizaciones: ["id"],
+  locales: ["id"],
+  notificaciones: ["id"],
+};
+
+/**
+ * Recorta la exportación a los registros seleccionados en la tabla.
+ *
+ * Cada entidad expone su identificador con otro nombre (`id`, `code`,
+ * `codigoReporte`…), de ahí el mapa de claves.
+ */
+function filtrarPorIds(
+  filas: readonly unknown[],
+  ids: ReadonlySet<string>,
+  claves: readonly string[],
+): unknown[] {
+  if (ids.size === 0) return [...filas];
+  return filas.filter(
+    (fila) =>
+      esFila(fila) &&
+      claves.some((clave) => {
+        const valor = fila[clave];
+        return typeof valor === "string" && ids.has(valor);
+      }),
+  );
+}
+
 function filasObjeto(filas: readonly unknown[]): Record<string, unknown>[] {
   return filas.filter(esFila);
 }
@@ -414,6 +457,12 @@ export async function GET(request: Request) {
     const esBase = entidadBruta.toLowerCase() === "base";
     const claveEntidad = esBase ? "base" : claveDeEntidad(entidadBruta);
     const id = params.get("id")?.trim() || null;
+    const ids = new Set(
+      (params.get("ids") ?? "")
+        .split(",")
+        .map((valor) => valor.trim())
+        .filter(Boolean),
+    );
 
     const { tablas, titulo } = await withSession(
       { usuarioId: sesion.uid, rolCodigo: sesion.rol },
@@ -444,9 +493,10 @@ export async function GET(request: Request) {
         const filtros = recogerFiltros(params, definicion);
         validarRangoVencimiento(filtros);
 
-        const filas = filtrarPorId(
-          await leerTodas(client, definicion.listar, filtros),
-          id,
+        const filas = filtrarPorIds(
+          filtrarPorId(await leerTodas(client, definicion.listar, filtros), id),
+          ids,
+          CLAVES_SELECCION[claveEntidad] ?? ["id"],
         );
         return {
           tablas: [
