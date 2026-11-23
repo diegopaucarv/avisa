@@ -550,7 +550,7 @@ export class MapaPage {
 
     L.tileLayer(TESELAS_OSM, {
       maxZoom: 19,
-      attribution: '© OpenStreetMap',
+      attribution: '<a href="https://www.openstreetmap.org/copyright">© OpenStreetMap</a>',
     }).addTo(mapa);
 
     mapa.fitBounds(LIMITES_PERU, { padding: [12, 12] });
