@@ -19,6 +19,7 @@ export type Catalogs = {
   prioridadesAtencion: CatalogItem[];
   prioridadesAlerta: CatalogItem[];
   alcances: CatalogItem[];
+  regiones: CatalogItem[];
   tematicas: CatalogItem[];
   subsectores: CatalogItem[];
   ciclos: CatalogItem[];
@@ -44,6 +45,7 @@ export async function getCatalogs(): Promise<Catalogs> {
     prioridadesAtencion,
     prioridadesAlerta,
     alcances,
+    regiones,
     tematicas,
     subsectores,
     ciclos,
@@ -87,6 +89,13 @@ export async function getCatalogs(): Promise<Catalogs> {
       `select id, codigo, codigo as etiqueta
          from core.cat_alcances_geograficos
         order by id`,
+    ),
+    // Vocabulario geográfico, no un catálogo de estado: se ordena por nombre
+    // para que el selector de regiones sea estable entre cargas.
+    query(
+      `select id, nombre as codigo, nombre as etiqueta, ubigeo, alcance_id
+         from core.regiones
+        order by nombre`,
     ),
     query(
       `select id, nombre as codigo, nombre as etiqueta
@@ -155,6 +164,7 @@ export async function getCatalogs(): Promise<Catalogs> {
     prioridadesAtencion,
     prioridadesAlerta,
     alcances,
+    regiones,
     tematicas,
     subsectores,
     ciclos,

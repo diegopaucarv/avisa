@@ -21,7 +21,9 @@ import {
   OPCIONES_NIVEL,
   type AccionFlujo,
   type Alerta,
+  type AltaAlerta,
   type DemandaAlerta,
+  type OpcionPrioridadAlerta,
   type PatchAlerta,
   accionesDeFlujo,
   aJsonLineas,
@@ -45,6 +47,28 @@ type BorradorAlerta = {
 
 type CampoBorrador = keyof BorradorAlerta;
 
+type BorradorAlta = {
+  titulo: string;
+  prioridad: string;
+  casoCode: string;
+  descripcionRiesgo: string;
+  hechosRecientes: string;
+  situacionActual: string;
+  accionesOaipcs: string;
+};
+
+type CampoAlta = keyof BorradorAlta;
+
+const BORRADOR_ALTA_VACIO: BorradorAlta = {
+  titulo: '',
+  prioridad: '',
+  casoCode: '',
+  descripcionRiesgo: '',
+  hechosRecientes: '',
+  situacionActual: '',
+  accionesOaipcs: '',
+};
+
 /** `undefined` = no cambió; `null` = se vació a propósito. */
 function diferenciaTexto(valor: string, original: string | null): string | null | undefined {
   const limpio = valor.trim();
@@ -59,7 +83,9 @@ function diferenciaTexto(valor: string, original: string | null): string | null 
  * de cinco pasos y la edición ocurren aquí. Es un diálogo modal (`role="dialog"`,
  * `aria-modal`), se cierra con Escape o con el fondo y encierra el foco con Tab.
  *
- * No conoce HTTP: emite el cuerpo parcial ya diffado y el paso de destino.
+ * Sirve también de alta: `alerta === null` abre el formulario de registro en
+ * lugar de la ficha. En ambos casos no conoce HTTP: emite el cuerpo ya armado
+ * (alta) o el diff parcial y el paso de destino (edición).
  */
 @Component({
   selector: 'app-alerta-panel',
@@ -345,6 +371,55 @@ function diferenciaTexto(valor: string, original: string | null): string | null 
       color: #97a1aa;
       font-size: 9px;
     }
+
+    .alerta-alta-ayuda {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 10.5px;
+      line-height: 1.5;
+    }
+
+    .alerta-alta-formulario {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .alerta-alta-plazo {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+      margin: 0;
+      padding: 7px 10px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--canvas);
+      color: var(--muted);
+      font-size: 10.5px;
+      line-height: 1.4;
+    }
+
+    .alerta-alta-plazo strong {
+      color: var(--ink);
+      font-weight: 700;
+    }
+
+    .alerta-alta-grave {
+      padding: 1px 7px;
+      border-radius: 10px;
+      background: var(--red-pale);
+      color: var(--red);
+      font-size: 9px;
+      font-weight: 700;
+    }
+
+    .alerta-alta-catalogo {
+      margin: 0;
+      color: var(--muted);
+      font-size: 10px;
+      line-height: 1.4;
+    }
   `,
 })
 export class AlertaPanelComponent {
@@ -356,10 +431,17 @@ export class AlertaPanelComponent {
   readonly guardando = input(false);
   readonly errorGuardado = input<string | null>(null);
   readonly aviso = input<string | null>(null);
+  /** Código del caso con el que se presiembra el alta (pantalla filtrada por caso). */
+  readonly casoInicial = input('');
+  /** Prioridades de `GET /api/v1/catalogs` → `catalogs.prioridadesAlerta`. */
+  readonly prioridadesCatalogo = input<readonly OpcionPrioridadAlerta[]>([]);
+  readonly cargandoPrioridades = input(false);
+  readonly errorPrioridades = input<ErrorApi | null>(null);
 
   readonly cerrar = output<void>();
   readonly reintentar = output<void>();
   readonly guardar = output<PatchAlerta>();
+  readonly registrar = output<AltaAlerta>();
   readonly accion = output<number>();
 
   readonly prioridades = PRIORIDADES_ALERTA;
@@ -374,9 +456,33 @@ export class AlertaPanelComponent {
 
   readonly editando = signal(false);
   readonly borrador = signal<BorradorAlerta | null>(null);
+  readonly borradorAlta = signal<BorradorAlta>(BORRADOR_ALTA_VACIO);
   readonly mensajeLocal = signal<string | null>(null);
 
   readonly formulario = computed(() => (this.editando() ? this.borrador() : null));
+
+  /** `alerta === null` significa alta. */
+  readonly esAlta = computed(() => this.alerta() === null);
+
+  /**
+   * Prioridades del alta: el catálogo manda; si aún no llegó (o falló) se cae al
+   * vocabulario congelado, que `createAlert` resuelve por `normalizar_ref`.
+   */
+  readonly opcionesPrioridad = computed<readonly OpcionPrioridadAlerta[]>(() => {
+    const catalogo = this.prioridadesCatalogo();
+    if (catalogo.length > 0) return catalogo;
+    return PRIORIDADES_ALERTA.map((prioridad) => ({
+      valor: prioridad,
+      etiqueta: prioridad,
+      slaHoras: null,
+      grave: false,
+    }));
+  });
+
+  readonly prioridadElegida = computed(() => {
+    const valor = this.borradorAlta().prioridad;
+    return this.opcionesPrioridad().find((opcion) => opcion.valor === valor) ?? null;
+  });
 
   readonly etapa = computed(() => {
     const alerta = this.alerta();
@@ -410,6 +516,13 @@ export class AlertaPanelComponent {
         this.editando.set(false);
         this.borrador.set(null);
       }
+    });
+
+    // El alta se siembra limpia y con el caso del contexto, si lo hay.
+    effect(() => {
+      if (!this.esAlta()) return;
+      this.borradorAlta.set({ ...BORRADOR_ALTA_VACIO, casoCode: this.casoInicial().trim() });
+      this.mensajeLocal.set(null);
     });
   }
 
@@ -458,6 +571,59 @@ export class AlertaPanelComponent {
     const objetivo = evento.target as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
     const valor = objetivo.value;
     this.borrador.update((actual) => (actual ? { ...actual, [clave]: valor } : actual));
+  }
+
+  campoAlta(clave: CampoAlta, evento: Event): void {
+    const objetivo = evento.target as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
+    const valor = objetivo.value;
+    this.borradorAlta.update((actual) => ({ ...actual, [clave]: valor }));
+  }
+
+  alEnviarAlta(evento: Event): void {
+    evento.preventDefault();
+    this.guardarAlta();
+  }
+
+  /**
+   * Alta: sólo se valida lo que `createAlert` exige (título y prioridad). Los
+   * opcionales vacíos se omiten para que el repositorio aplique sus valores por
+   * defecto (`visibilidad` interna, `pasoActual` 1).
+   */
+  guardarAlta(): void {
+    if (!this.puedeModificar() || this.guardando()) return;
+
+    const borrador = this.borradorAlta();
+    const titulo = borrador.titulo.trim();
+    if (!titulo) {
+      this.mensajeLocal.set('El título es obligatorio para registrar la alerta.');
+      return;
+    }
+
+    const prioridad = borrador.prioridad.trim();
+    if (!prioridad) {
+      this.mensajeLocal.set('La prioridad es obligatoria para registrar la alerta.');
+      return;
+    }
+
+    const cuerpo: AltaAlerta = { titulo, prioridad };
+
+    const casoCode = borrador.casoCode.trim();
+    if (casoCode) cuerpo.casoCode = casoCode;
+
+    const descripcion = borrador.descripcionRiesgo.trim();
+    if (descripcion) cuerpo.descripcionRiesgo = descripcion;
+
+    const hechos = borrador.hechosRecientes.trim();
+    if (hechos) cuerpo.hechosRecientes = hechos;
+
+    const situacion = borrador.situacionActual.trim();
+    if (situacion) cuerpo.situacionActual = situacion;
+
+    const acciones = borrador.accionesOaipcs.trim();
+    if (acciones) cuerpo.accionesOaipcs = acciones;
+
+    this.mensajeLocal.set(null);
+    this.registrar.emit(cuerpo);
   }
 
   alEnviarFormulario(evento: Event): void {

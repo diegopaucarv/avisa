@@ -25,7 +25,11 @@
                 "input": "public"
               }
             ],
-            "styles": ["src/styles/global.css", "src/styles/theme-dark.generated.css"],
+            "styles": [
+              "src/styles/global.css",
+              "src/styles/theme-dark.generated.css",
+              "node_modules/leaflet/dist/leaflet.css"
+            ],
             "outputPath": "dist/avisa"
           },
           "configurations": {

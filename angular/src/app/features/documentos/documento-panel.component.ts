@@ -15,9 +15,17 @@ import {
 } from '@angular/core';
 
 import { urlApi } from '../../core/config/entorno';
+import {
+  normalizarColeccion,
+  paramsDePagina,
+  urlConParametros,
+  type Coleccion,
+} from '../../core/http/coleccion';
 import { consulta } from '../../core/http/consulta';
 import { aErrorApi } from '../../core/http/errores';
 import { CapacidadesService } from '../../core/permisos/capacidades.service';
+import { aCaso } from '../../dominio/mapeo';
+import type { Caso } from '../../dominio/modelos';
 import { IconoComponent } from '../../shared/ui/icono.component';
 import {
   aDetalleDocumento,
@@ -26,6 +34,7 @@ import {
   formatearConfianza,
   formatearFecha,
   nombreArchivo,
+  type AltaDocumento,
   type DetalleDocumento,
   type Documento,
   type OpcionCatalogo,
@@ -40,6 +49,23 @@ type BorradorDocumento = {
   archivo: string;
   casoCode: string;
 };
+
+/** Campos del alta; el caso se elige con el buscador (`casoElegido`). */
+type BorradorAlta = {
+  titulo: string;
+  tipo: string;
+  fecha: string;
+  resumen: string;
+  archivo: string;
+  urlLista: string;
+  urlFoto: string;
+};
+
+type CampoAlta = keyof BorradorAlta;
+
+function borradorAltaVacio(): BorradorAlta {
+  return { titulo: '', tipo: '', fecha: '', resumen: '', archivo: '', urlLista: '', urlFoto: '' };
+}
 
 /** Estados de flujo que el repositorio acepta al validar o rechazar. */
 type EstadoDecision = 'Validado' | 'Rechazado';
@@ -283,6 +309,63 @@ function diferenciaTexto(valor: string, original: string | null): string | null 
       color: #97a1aa;
       font-size: 9px;
     }
+
+    .panel-caso-lista {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin: 8px 0 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .panel-caso-opcion {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fff;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .panel-caso-opcion:hover {
+      border-color: var(--blue);
+      background: #fafcfe;
+    }
+
+    .panel-caso-codigo {
+      color: var(--ink);
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    .panel-caso-titulo {
+      color: var(--muted);
+      font-size: 9.5px;
+      line-height: 1.45;
+    }
+
+    .panel-caso-elegido {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fbfcfd;
+    }
+
+    .panel-caso-elegido-copia {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      min-width: 0;
+    }
   `,
 })
 export class DocumentoPanelComponent {
@@ -290,17 +373,20 @@ export class DocumentoPanelComponent {
   private readonly capacidades = inject(CapacidadesService);
   private readonly destruccion = inject(DestroyRef);
 
-  readonly documento = input.required<Documento>();
+  /** `null` abre el panel en modo alta; con documento, muestra la ficha de siempre. */
+  readonly documento = input<Documento | null>(null);
   /** Tipos de `GET /api/v1/catalogs`, para el formulario y su «Anexo N° X». */
   readonly tipos = input<readonly OpcionCatalogo[]>([]);
 
   readonly cerrado = output<void>();
   readonly actualizado = output<void>();
   readonly anular = output<void>();
+  /** Alta correcta: el contenedor cierra el panel, recarga y avisa. */
+  readonly creado = output<Documento>();
 
   private readonly detalleRecurso = consulta<DetalleDocumento>({
     fuente: () => {
-      const id = this.documento().id;
+      const id = this.documento()?.id;
       return id ? urlApi(`/v1/documents/${encodeURIComponent(id)}`) : null;
     },
     esquema: aDetalleDocumento,
@@ -309,11 +395,15 @@ export class DocumentoPanelComponent {
   /** El detalle sólo se usa si corresponde al documento abierto. */
   private readonly detalle = computed<DetalleDocumento | null>(() => {
     const valor = this.detalleRecurso.valor();
-    if (!valor) return null;
-    return valor.documento.id === this.documento().id ? valor : null;
+    const id = this.documento()?.id;
+    if (!valor || !id) return null;
+    return valor.documento.id === id ? valor : null;
   });
 
-  readonly cabecera = computed<Documento>(() => this.detalle()?.documento ?? this.documento());
+  readonly modoAlta = computed(() => this.documento() === null);
+  readonly cabecera = computed<Documento | null>(
+    () => this.detalle()?.documento ?? this.documento(),
+  );
   readonly fuentes = computed(() => this.detalle()?.fuentes ?? []);
   readonly errorDetalle = this.detalleRecurso.error;
   readonly cargandoDetalle = computed(
@@ -321,7 +411,7 @@ export class DocumentoPanelComponent {
   );
 
   readonly puedeModificar = computed(() =>
-    this.capacidades.puedeModificar(this.cabecera().clasificacion),
+    this.capacidades.puedeModificar(this.cabecera()?.clasificacion ?? 1),
   );
 
   /** Anular exige, además de escritura sobre la clasificación, el privilegio de anulación. */
@@ -336,6 +426,11 @@ export class DocumentoPanelComponent {
 
   readonly formulario = computed(() => (this.editando() ? this.borrador() : null));
 
+  readonly borradorAlta = signal<BorradorAlta>(borradorAltaVacio());
+  readonly busquedaCaso = signal('');
+  readonly casoElegido = signal<Caso | null>(null);
+  private temporizadorCaso?: ReturnType<typeof setTimeout>;
+
   /**
    * Validar / Rechazar no pasan por el formulario: son acciones explícitas
    * sobre el estado de flujo del documento (`PATCH /api/v1/documents/:id`).
@@ -347,18 +442,43 @@ export class DocumentoPanelComponent {
 
   readonly opcionesTipo = computed<readonly OpcionCatalogo[]>(() => {
     const base = this.tipos();
-    const actual = this.cabecera().tipo;
+    const actual = this.cabecera()?.tipo ?? null;
     if (!actual || base.some((opcion) => opcion.valor === actual)) return base;
 
     return [
       {
         valor: actual,
-        etiqueta: this.cabecera().tipoNombre ?? actual,
-        anexoNumero: this.cabecera().anexoNumero,
+        etiqueta: this.cabecera()?.tipoNombre ?? actual,
+        anexoNumero: this.cabecera()?.anexoNumero ?? null,
       },
       ...base,
     ];
   });
+
+  /**
+   * Casos para el alta: sólo se consulta en modo alta y con un término escrito.
+   * `GET /api/v1/cases?q=` busca por código, título y resumen.
+   */
+  private readonly casosRecurso = consulta<Coleccion<Caso>>({
+    fuente: () => {
+      if (!this.modoAlta()) return null;
+      const q = this.busquedaCaso().trim();
+      if (!q) return null;
+      return urlConParametros(urlApi('/v1/cases'), {
+        ...paramsDePagina({ pagina: 1, tamano: 6 }),
+        q,
+        sort: 'recent',
+      });
+    },
+    esquema: (bruto) => {
+      const coleccion = normalizarColeccion<unknown>(bruto);
+      return { ...coleccion, elementos: coleccion.elementos.map(aCaso) };
+    },
+  });
+
+  readonly casosEncontrados = computed(() => this.casosRecurso.valor()?.elementos ?? []);
+  readonly estadoCasos = this.casosRecurso.estado;
+  readonly errorCasos = this.casosRecurso.error;
 
   private readonly panel = viewChild<ElementRef<HTMLElement>>('panel');
 
@@ -381,13 +501,14 @@ export class DocumentoPanelComponent {
       document.addEventListener('keydown', alEscape);
       this.destruccion.onDestroy(() => {
         document.removeEventListener('keydown', alEscape);
+        clearTimeout(this.temporizadorCaso);
         this.focoPrevio?.focus?.();
       });
     }
 
     // Al cambiar de documento abierto, el borrador anterior no se reutiliza.
     effect(() => {
-      const id = this.documento().id;
+      const id = this.documento()?.id ?? null;
       if (id === this.idAnterior) return;
       this.idAnterior = id;
       this.editando.set(false);
@@ -398,6 +519,9 @@ export class DocumentoPanelComponent {
       this.estadoPendiente.set(null);
       this.errorEstado.set(null);
       this.avisoEstado.set(null);
+      this.borradorAlta.set(borradorAltaVacio());
+      this.busquedaCaso.set('');
+      this.casoElegido.set(null);
     });
   }
 
@@ -425,6 +549,96 @@ export class DocumentoPanelComponent {
     return valor ? /^https?:\/\//i.test(valor) : false;
   }
 
+  /** Debounce de ~300 ms para el buscador de casos del alta. */
+  buscarCaso(evento: Event): void {
+    const valor = (evento.target as HTMLInputElement).value;
+    this.casoElegido.set(null);
+    clearTimeout(this.temporizadorCaso);
+    this.temporizadorCaso = setTimeout(() => this.busquedaCaso.set(valor), 300);
+  }
+
+  elegirCaso(caso: Caso): void {
+    if (!caso.codigo) return;
+    this.casoElegido.set(caso);
+    this.busquedaCaso.set('');
+  }
+
+  quitarCaso(): void {
+    this.casoElegido.set(null);
+    this.busquedaCaso.set('');
+    clearTimeout(this.temporizadorCaso);
+  }
+
+  campoAlta(clave: CampoAlta, evento: Event): void {
+    const objetivo = evento.target as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
+    this.borradorAlta.update((actual) => ({ ...actual, [clave]: objetivo.value }));
+  }
+
+  alEnviarAlta(evento: Event): void {
+    evento.preventDefault();
+    this.registrarDocumento();
+  }
+
+  /**
+   * `POST /api/v1/documents`: registra metadatos y enlace, sin subir archivos.
+   * Sólo viajan las claves que lee `createDocument`; los opcionales vacíos se
+   * omiten porque el repositorio rechaza la cadena vacía (422).
+   */
+  registrarDocumento(): void {
+    if (this.guardando()) return;
+
+    if (!this.capacidades.puedeEditar()) {
+      this.errorGuardado.set('Su rol no permite registrar documentos.');
+      return;
+    }
+
+    const borrador = this.borradorAlta();
+    const titulo = borrador.titulo.trim();
+    if (!titulo) {
+      this.mensajeLocal.set('El título es obligatorio.');
+      return;
+    }
+
+    const tipo = borrador.tipo.trim();
+    if (!tipo) {
+      this.mensajeLocal.set('El tipo es obligatorio; elija uno del catálogo.');
+      return;
+    }
+
+    const cuerpo: AltaDocumento = { titulo, tipo };
+
+    const casoCode = this.casoElegido()?.codigo ?? '';
+    if (casoCode) cuerpo.casoCode = casoCode;
+    if (borrador.fecha) cuerpo.fecha = borrador.fecha;
+
+    const resumen = borrador.resumen.trim();
+    if (resumen) cuerpo.resumen = resumen;
+
+    const archivo = borrador.archivo.trim();
+    if (archivo) cuerpo.archivo = archivo;
+
+    const urlLista = borrador.urlLista.trim();
+    if (urlLista) cuerpo.urlLista = urlLista;
+
+    const urlFoto = borrador.urlFoto.trim();
+    if (urlFoto) cuerpo.urlFoto = urlFoto;
+
+    this.guardando.set(true);
+    this.errorGuardado.set(null);
+    this.mensajeLocal.set(null);
+
+    this.http.post<unknown>(urlApi('/v1/documents'), cuerpo).subscribe({
+      next: (bruto) => {
+        this.guardando.set(false);
+        this.creado.emit(aDetalleDocumento(bruto).documento);
+      },
+      error: (fallo: unknown) => {
+        this.guardando.set(false);
+        this.errorGuardado.set(aErrorApi(fallo).message);
+      },
+    });
+  }
+
   recargarDetalle(): void {
     this.detalleRecurso.recargar();
   }
@@ -433,6 +647,7 @@ export class DocumentoPanelComponent {
     if (!this.puedeModificar()) return;
 
     const documento = this.cabecera();
+    if (!documento) return;
     this.borrador.set({
       titulo: documento.titulo ?? '',
       tipo: documento.tipo ?? '',
@@ -468,7 +683,7 @@ export class DocumentoPanelComponent {
   guardarCambios(): void {
     const documento = this.cabecera();
     const borrador = this.borrador();
-    if (!borrador) return;
+    if (!documento || !borrador) return;
 
     if (!this.puedeModificar()) {
       this.errorGuardado.set('Su rol no permite modificar este documento.');
@@ -542,7 +757,7 @@ export class DocumentoPanelComponent {
   confirmarCambioEstado(): void {
     const objetivo = this.estadoPendiente();
     const documento = this.cabecera();
-    if (!objetivo) return;
+    if (!objetivo || !documento) return;
 
     if (!documento.id) {
       this.errorEstado.set('El documento no tiene identificador.');

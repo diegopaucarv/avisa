@@ -7,7 +7,168 @@
     aria-modal="true"
     aria-labelledby="alerta-panel-titulo"
   >
-    @if (alerta(); as a) {
+    @if (esAlta()) {
+      <header class="drawer-head">
+        <div class="alerta-panel-cabecera">
+          <p class="alerta-panel-codigo">Alerta temprana</p>
+          <h2 id="alerta-panel-titulo">Registrar alerta</h2>
+          <p class="alerta-alta-ayuda" id="alerta-alta-ayuda">
+            El título y la prioridad son obligatorios; el resto puede completarse después.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          class="icon-button"
+          aria-label="Cerrar el panel de alta de alerta"
+          (click)="cerrar.emit()"
+        >
+          <app-icono nombre="cerrar" [tamano]="18" />
+        </button>
+      </header>
+
+      <div class="drawer-body alerta-panel-cuerpo">
+        @if (errorGuardado()) {
+          <p class="form-error" role="alert">{{ errorGuardado() }}</p>
+        }
+        @if (mensajeLocal()) {
+          <p class="form-error" role="alert">{{ mensajeLocal() }}</p>
+        }
+        @if (errorPrioridades(); as fallo) {
+          <p class="alerta-alta-catalogo" role="alert">
+            No se pudo leer el catálogo de prioridades ({{ fallo.message }}). Se muestran las
+            prioridades del vocabulario congelado.
+          </p>
+        }
+
+        <form
+          class="alerta-formulario alerta-alta-formulario"
+          aria-describedby="alerta-alta-ayuda"
+          (submit)="alEnviarAlta($event)"
+        >
+          <div class="form-field">
+            <label class="form-label" for="alerta-alta-titulo">Título</label>
+            <input
+              id="alerta-alta-titulo"
+              class="form-input"
+              type="text"
+              required
+              autocomplete="off"
+              placeholder="Resumen del riesgo detectado"
+              [value]="borradorAlta().titulo"
+              (input)="campoAlta('titulo', $event)"
+            />
+          </div>
+
+          <div class="form-field">
+            <label class="form-label" for="alerta-alta-prioridad">Prioridad</label>
+            <select
+              id="alerta-alta-prioridad"
+              class="form-select"
+              required
+              [value]="borradorAlta().prioridad"
+              [disabled]="cargandoPrioridades()"
+              (change)="campoAlta('prioridad', $event)"
+            >
+              <option value="">Seleccione una prioridad</option>
+              @for (opcion of opcionesPrioridad(); track opcion.valor) {
+                <option [value]="opcion.valor">{{ opcion.etiqueta }}</option>
+              }
+            </select>
+            @if (cargandoPrioridades()) {
+              <span class="form-hint">Cargando el catálogo de prioridades…</span>
+            } @else if (prioridadElegida(); as prioridad) {
+              <span class="alerta-alta-plazo">
+                Plazo de atención: <strong>{{ formatearPlazo(prioridad.slaHoras) }}</strong>
+                @if (prioridad.grave) {
+                  <span class="alerta-alta-grave">Grave</span>
+                }
+              </span>
+            }
+          </div>
+
+          <div class="form-field">
+            <label class="form-label" for="alerta-alta-caso">Caso vinculado</label>
+            <input
+              id="alerta-alta-caso"
+              class="form-input"
+              type="text"
+              autocomplete="off"
+              placeholder="Código de un caso existente"
+              [value]="borradorAlta().casoCode"
+              (input)="campoAlta('casoCode', $event)"
+            />
+            <span class="form-hint">
+              Opcional. Si la pantalla viene filtrada por caso, se preselecciona.
+            </span>
+          </div>
+
+          <div class="form-field">
+            <label class="form-label" for="alerta-alta-riesgo">Descripción del riesgo</label>
+            <textarea
+              id="alerta-alta-riesgo"
+              class="form-textarea"
+              rows="3"
+              [value]="borradorAlta().descripcionRiesgo"
+              (input)="campoAlta('descripcionRiesgo', $event)"
+            ></textarea>
+          </div>
+
+          <div class="form-field">
+            <label class="form-label" for="alerta-alta-hechos">
+              Hechos recientes y acciones en curso
+            </label>
+            <textarea
+              id="alerta-alta-hechos"
+              class="form-textarea"
+              rows="3"
+              [value]="borradorAlta().hechosRecientes"
+              (input)="campoAlta('hechosRecientes', $event)"
+            ></textarea>
+          </div>
+
+          <div class="form-field">
+            <label class="form-label" for="alerta-alta-situacion">Situación actual</label>
+            <textarea
+              id="alerta-alta-situacion"
+              class="form-textarea"
+              rows="3"
+              [value]="borradorAlta().situacionActual"
+              (input)="campoAlta('situacionActual', $event)"
+            ></textarea>
+          </div>
+
+          <div class="form-field">
+            <label class="form-label" for="alerta-alta-oaipcs">Acciones de la OAIPCS</label>
+            <textarea
+              id="alerta-alta-oaipcs"
+              class="form-textarea"
+              rows="3"
+              [value]="borradorAlta().accionesOaipcs"
+              (input)="campoAlta('accionesOaipcs', $event)"
+            ></textarea>
+          </div>
+
+          <div class="alerta-formulario-acciones">
+            <button
+              type="submit"
+              class="button-primary"
+              [disabled]="guardando() || !puedeModificar()"
+            >
+              {{ guardando() ? 'Registrando…' : 'Registrar alerta' }}
+            </button>
+            <button
+              type="button"
+              class="button-secondary"
+              [disabled]="guardando()"
+              (click)="cerrar.emit()"
+            >
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
+    } @else if (alerta(); as a) {
       <header class="drawer-head">
         <div class="alerta-panel-cabecera">
           <p class="alerta-panel-codigo">{{ a.codigo }}</p>

@@ -293,6 +293,15 @@ export class DocumentosPage {
   /** Documento mostrado al abrir la fila; `null` cierra el panel. */
   readonly seleccionadaId = signal<string | null>(null);
 
+  /** Alta abierta en el panel; sin documento, el panel entra en modo alta. */
+  readonly altaAbierta = signal(false);
+
+  /** Aviso posterior a un alta correcta. */
+  readonly avisoCreacion = signal<string | null>(null);
+
+  /** El alta se ofrece a quien tiene permiso de escritura. */
+  readonly puedeRegistrar = this.capacidades.puedeEditar;
+
   /** Último fallo del botón de exportación; vacío si no hubo. */
   readonly exportarError = signal<string | null>(null);
 
@@ -342,8 +351,33 @@ export class DocumentosPage {
 
   abrir(documento: Documento): void {
     if (!documento.id) return;
+    this.cerrarAlta();
     this.respaldo.set(documento);
     this.seleccionadaId.set(documento.id);
+  }
+
+  abrirAlta(): void {
+    if (!this.puedeRegistrar()) return;
+    this.cerrarPanel();
+    this.cerrarAnulacion();
+    this.avisoCreacion.set(null);
+    this.altaAbierta.set(true);
+  }
+
+  cerrarAlta(): void {
+    this.altaAbierta.set(false);
+  }
+
+  /** Tras el `POST` correcto: cierra el panel, recarga el listado y avisa. */
+  alCrearDocumento(documento: Documento): void {
+    this.altaAbierta.set(false);
+    const etiqueta = documento.codigo || documento.titulo || 'nuevo';
+    this.avisoCreacion.set(`Documento ${etiqueta} registrado.`);
+    if (this.verPapelera()) {
+      void this.actualizar({ ver: 'activos', pagina: 1 });
+      return;
+    }
+    this.alActualizar();
   }
 
   cerrarPanel(): void {
@@ -372,6 +406,7 @@ export class DocumentosPage {
 
   abrirAnulacion(documento: Documento): void {
     if (!documento.id || !this.puedeAnular(documento)) return;
+    this.cerrarAlta();
     this.errorAnulacion.set(null);
     this.avisoAnulacion.set(null);
     // El panel del documento y el de anulación escuchan Escape en `document`:
@@ -388,6 +423,7 @@ export class DocumentosPage {
    */
   abrirRestauracion(documento: Documento): void {
     if (!documento.id || !this.puedeVerPapelera()) return;
+    this.cerrarAlta();
     this.errorAnulacion.set(null);
     this.avisoAnulacion.set(null);
     this.cerrarPanel();
@@ -461,6 +497,7 @@ export class DocumentosPage {
   /** Cambia entre activos y papelera; reinicia a la primera página y cierra el panel. */
   cambiarVer(ver: VerRegistros): void {
     this.cerrarPanel();
+    this.cerrarAlta();
     this.cerrarAnulacion();
     void this.actualizar({ ver, pagina: 1 });
   }

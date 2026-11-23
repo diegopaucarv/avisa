@@ -9,6 +9,9 @@
     </div>
     @if (!verPapelera()) {
     <div class="view-actions">
+      @if (capacidades.puedeEditar()) {
+      <button type="button" class="button-primary" (click)="abrirAlta()">Nuevo caso</button>
+      }
       <app-exportar-menu
         entidad="casos"
         [consulta]="filtrosExportacion()"
@@ -310,6 +313,13 @@
     [total]="total()"
     (paginaCambia)="cambiarPagina($event)"
     (tamanoCambia)="cambiarTamano($event)"
+  />
+  } @if (panelAbierto()) {
+  <app-caso-panel
+    [guardando]="guardando()"
+    [errorGuardado]="errorAlta()"
+    (cerrar)="cerrarAlta()"
+    (guardar)="registrarCaso($event)"
   />
   }
 </section>

@@ -131,8 +131,8 @@
     </div>
 
     <p class="panel-nota">
-      La capa cartográfica requiere el dataset ubigeo/centroide, aún aplazado; esta vista no inventa
-      geometría.
+      La capa cartográfica institucional requiere el dataset ubigeo/centroide, aún aplazado; el mapa
+      de abajo es referencial y no dibuja distritos.
     </p>
 
     <div class="ambitos">
@@ -161,6 +161,44 @@
     </div>
   </section>
 
+  @if (filasRegion().length > 0) {
+  <section class="surface panel" aria-labelledby="titulo-mapa">
+    <div class="surface-heading">
+      <div>
+        <p class="section-eyebrow">MAPA</p>
+        <h3 id="titulo-mapa">Regiones con casos en el ámbito</h3>
+        <p>Un círculo por región visible; el radio sigue el número de casos.</p>
+      </div>
+      @if (filaSeleccionada(); as seleccion) {
+      <span class="region-chip region-chip-activa">
+        {{ seleccion.region }} · {{ seleccion.total }} {{ seleccion.total === 1 ? 'caso' : 'casos'
+        }}
+        <button type="button" class="quitar-seleccion" (click)="quitarSeleccion()">
+          Quitar selección
+        </button>
+      </span>
+      }
+    </div>
+
+    <p class="mapa-rotulo">Mapa referencial · sin ubigeo distrital</p>
+
+    <div
+      #lienzo
+      class="mapa-lienzo"
+      role="region"
+      aria-label="Mapa referencial de las regiones con casos abiertos"
+    ></div>
+
+    <ul class="mapa-leyenda" aria-label="Leyenda del mapa">
+      <li>
+        <span class="leyenda-punto" aria-hidden="true"></span>Tamaño del círculo = número de casos
+      </li>
+      <li><span class="leyenda-anillo" aria-hidden="true"></span>Región seleccionada</li>
+      <li>Sólo se dibujan regiones con casos visibles</li>
+    </ul>
+  </section>
+  }
+
   <section class="surface panel" aria-labelledby="titulo-regiones">
     <div class="surface-heading">
       <div>
@@ -183,7 +221,7 @@
         </thead>
         <tbody>
           @for (fila of filasRegion(); track fila.region) {
-          <tr>
+          <tr [class.row-selected]="esSeleccionada(fila)">
             <td><strong>{{ fila.region }}</strong></td>
             <td>{{ etiquetaAmbitos(fila.ambitos) }}</td>
             <td>{{ fila.total }}</td>

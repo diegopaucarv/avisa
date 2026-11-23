@@ -1,0 +1,184 @@
+<div class="drawer-scrim" (click)="alFondo($event)" (keydown)="alTecla($event)">
+  <aside
+    #panel
+    class="drawer"
+    tabindex="-1"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="caso-panel-titulo"
+  >
+    <header class="drawer-head">
+      <div class="caso-panel-cabecera">
+        <p class="caso-panel-codigo">Nuevo caso</p>
+        <h2 id="caso-panel-titulo">Alta de caso</h2>
+        <p class="caso-panel-sub">
+          El código del expediente lo asigna el servidor al registrar el caso.
+        </p>
+      </div>
+
+      <button
+        type="button"
+        class="icon-button"
+        aria-label="Cerrar el panel de alta de caso"
+        (click)="cerrar.emit()"
+      >
+        <app-icono nombre="cerrar" [tamano]="18" />
+      </button>
+    </header>
+
+    <div class="drawer-body">
+      @if (errorGuardado(); as fallo) {
+        <p class="form-error" role="alert">{{ fallo }}</p>
+      }
+      @if (mensajeLocal(); as mensaje) {
+        <p class="form-error" role="alert">{{ mensaje }}</p>
+      }
+
+      <form class="caso-formulario" (submit)="alEnviarFormulario($event)">
+        <div class="form-field">
+          <label class="form-label" for="caso-campo-titulo">Título</label>
+          <input
+            id="caso-campo-titulo"
+            class="form-input"
+            type="text"
+            required
+            [value]="borrador().titulo"
+            (input)="campo('titulo', $event)"
+          />
+        </div>
+
+        <fieldset class="form-field caso-regiones">
+          <legend class="form-label">Regiones</legend>
+          @if (cargandoCatalogos() && regiones().length === 0) {
+            <p class="form-hint" role="status">Cargando regiones…</p>
+          } @else if (regiones().length === 0) {
+            <p class="form-error" role="alert">
+              No se pudieron cargar las regiones del catálogo.
+            </p>
+          } @else {
+            <div class="caso-regiones-lista" role="group" aria-label="Regiones del caso">
+              @for (region of regiones(); track region.valor) {
+                <label class="caso-region-opcion">
+                  <input
+                    type="checkbox"
+                    [checked]="estaRegion(region.valor)"
+                    (change)="alternarRegion(region.valor, $event)"
+                  />
+                  <span>{{ region.etiqueta }}</span>
+                </label>
+              }
+            </div>
+          }
+          <p class="form-hint">Obligatorio: seleccione al menos una región.</p>
+        </fieldset>
+
+        <div class="form-field">
+          <span class="form-label">Alcance (derivado)</span>
+          <p class="caso-alcance" aria-live="polite">{{ alcanceDerivado() }}</p>
+          <p class="form-hint">
+            El alcance se deriva de las regiones y no se elige: una región toma su alcance;
+            varias regiones de alcances distintos pasan a Nacional.
+          </p>
+        </div>
+
+        <div class="form-field">
+          <label class="form-label" for="caso-campo-tematica">Temática</label>
+          <select
+            id="caso-campo-tematica"
+            class="form-select"
+            [value]="borrador().tematica"
+            (change)="campo('tematica', $event)"
+          >
+            <option value="">Sin especificar</option>
+            @for (opcion of tematicas(); track opcion.valor) {
+              <option [value]="opcion.valor">{{ opcion.etiqueta }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="form-field">
+          <label class="form-label" for="caso-campo-subsector">Subsector</label>
+          <select
+            id="caso-campo-subsector"
+            class="form-select"
+            [value]="borrador().subsector"
+            (change)="campo('subsector', $event)"
+          >
+            <option value="">Sin especificar</option>
+            @for (opcion of subsectores(); track opcion.valor) {
+              <option [value]="opcion.valor">{{ opcion.etiqueta }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="form-field">
+          <label class="form-label" for="caso-campo-riesgo">Riesgo</label>
+          <select
+            id="caso-campo-riesgo"
+            class="form-select"
+            [value]="borrador().riesgo"
+            (change)="campo('riesgo', $event)"
+          >
+            <option value="">Bajo (por defecto)</option>
+            @for (opcion of riesgos(); track opcion.valor) {
+              <option [value]="opcion.valor">{{ opcion.etiqueta }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="form-field">
+          <label class="form-label" for="caso-campo-unidad">Unidad responsable</label>
+          <select
+            id="caso-campo-unidad"
+            class="form-select"
+            [value]="borrador().unidadResponsable"
+            (change)="campo('unidadResponsable', $event)"
+          >
+            <option value="">Sin especificar</option>
+            @for (opcion of unidades(); track opcion.valor) {
+              <option [value]="opcion.valor" [title]="opcion.etiqueta">
+                {{ opcion.valor }}
+              </option>
+            }
+          </select>
+        </div>
+
+        <div class="form-field">
+          <label class="form-label" for="caso-campo-resumen">Resumen ejecutivo</label>
+          <textarea
+            id="caso-campo-resumen"
+            class="form-textarea"
+            rows="3"
+            [value]="borrador().resumen"
+            (input)="campo('resumen', $event)"
+          ></textarea>
+        </div>
+
+        <div class="form-field">
+          <label class="form-label" for="caso-campo-inicio">Inicio</label>
+          <input
+            id="caso-campo-inicio"
+            class="form-input"
+            type="date"
+            [value]="borrador().fechaInicio"
+            (input)="campo('fechaInicio', $event)"
+          />
+        </div>
+
+        <div class="caso-formulario-acciones">
+          <button type="submit" class="button-primary" [disabled]="guardando()">
+            {{ guardando() ? 'Registrando…' : 'Registrar caso' }}
+          </button>
+          <button
+            type="button"
+            class="button-secondary"
+            [disabled]="guardando()"
+            (click)="cerrar.emit()"
+          >
+            Cancelar
+          </button>
+        </div>
+      </form>
+    </div>
+  </aside>
+</div>

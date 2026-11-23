@@ -149,6 +149,30 @@ export type PatchDocumento = {
   casoCode?: string | null;
 };
 
+/**
+ * Cuerpo de `POST /api/v1/documents` (alta de metadatos).
+ *
+ * Sólo las claves que lee `createDocument` (`lib/db/repos/documents.ts`):
+ * `titulo` y `tipo` son obligatorios; el código lo genera el servidor.
+ * `estado` se omite porque el repositorio lo deriva a «Cargado», y `codigo` y
+ * `contenido` no se piden en el alta. Los opcionales que quedan vacíos no
+ * viajan: el repositorio rechaza la cadena vacía (422).
+ */
+export type AltaDocumento = {
+  titulo: string;
+  tipo: string;
+  casoCode?: string;
+  /** `YYYY-MM-DD`; si se omite, el servidor usa la fecha del alta. */
+  fecha?: string;
+  resumen?: string;
+  /** Enlace o ruta del PDF (`url_pdf`). */
+  archivo?: string;
+  /** Listado o índice enlazado (`url_lista`). */
+  urlLista?: string;
+  /** Fotografía enlazada (`url_foto`). */
+  urlFoto?: string;
+};
+
 /* ------------------------------------------------------------------------- *
  * Lectura del payload
  * ------------------------------------------------------------------------- */

@@ -8,21 +8,26 @@
       </p>
     </div>
     <div class="view-actions">
-      @if (!verPapelera()) {
-        <app-exportar-menu
-          entidad="compromisos"
-          [consulta]="filtrosExportacion()"
-          (fallo)="alFallarExportacion($event)"
-        />
+      @if (puedeRegistrar()) {
+      <button type="button" class="button-primary" (click)="abrirAlta()">
+        Registrar compromiso
+      </button>
+      } @if (!verPapelera()) {
+      <app-exportar-menu
+        entidad="compromisos"
+        [consulta]="filtrosExportacion()"
+        (fallo)="alFallarExportacion($event)"
+      />
       }
     </div>
   </header>
 
   @if (exportarError(); as mensaje) {
-    <p class="form-error" role="alert">{{ mensaje }}</p>
-  }
-  @if (avisoAnulacion(); as aviso) {
-    <p class="form-hint aviso-ok" role="status">{{ aviso }}</p>
+  <p class="form-error" role="alert">{{ mensaje }}</p>
+  } @if (avisoAnulacion(); as aviso) {
+  <p class="form-hint aviso-ok" role="status">{{ aviso }}</p>
+  } @if (avisoCreacion(); as aviso) {
+  <p class="form-hint aviso-ok" role="status">{{ aviso }}</p>
   }
 
   <div class="filter-bar">
@@ -42,7 +47,7 @@
       <select aria-label="Filtrar por estado" (change)="filtrarEstado($event)">
         <option value="" [selected]="!filtros().estado">Todos</option>
         @for (estado of estados; track estado) {
-          <option [value]="estado" [selected]="estado === filtros().estado">{{ estado }}</option>
+        <option [value]="estado" [selected]="estado === filtros().estado">{{ estado }}</option>
         }
       </select>
     </label>
@@ -52,7 +57,7 @@
       <select aria-label="Filtrar por tipo de compromiso" (change)="filtrarTipo($event)">
         <option value="" [selected]="!filtros().tipo">Todos</option>
         @for (tipo of tipos; track tipo) {
-          <option [value]="tipo" [selected]="tipo === filtros().tipo">{{ tipo }}</option>
+        <option [value]="tipo" [selected]="tipo === filtros().tipo">{{ tipo }}</option>
         }
       </select>
     </label>
@@ -62,9 +67,9 @@
       <select aria-label="Filtrar por nivel de gobierno" (change)="filtrarNivel($event)">
         <option value="" [selected]="!filtros().nivelGobierno">Todos</option>
         @for (nivel of niveles; track nivel) {
-          <option [value]="nivel" [selected]="nivel === filtros().nivelGobierno">
-            {{ nivelTexto(nivel) }}
-          </option>
+        <option [value]="nivel" [selected]="nivel === filtros().nivelGobierno">
+          {{ nivelTexto(nivel) }}
+        </option>
         }
       </select>
     </label>
@@ -73,9 +78,9 @@
       Brecha de género
       <select aria-label="Filtrar por atención a brecha de género" (change)="filtrarGenero($event)">
         @for (genero of generos; track genero.valor) {
-          <option [value]="genero.valor" [selected]="genero.valor === filtros().atiendeGenero">
-            {{ genero.etiqueta }}
-          </option>
+        <option [value]="genero.valor" [selected]="genero.valor === filtros().atiendeGenero">
+          {{ genero.etiqueta }}
+        </option>
         }
       </select>
     </label>
@@ -85,381 +90,355 @@
 
   <div class="view-toolbar">
     @if (puedeVerPapelera()) {
-      <div class="segmented" role="group" aria-label="Registros activos o anulados">
-        <button type="button" [attr.aria-pressed]="!verPapelera()" (click)="cambiarVer('activos')">
-          Activos
-        </button>
-        <button type="button" [attr.aria-pressed]="verPapelera()" (click)="cambiarVer('anulados')">
-          Anulados
-        </button>
-      </div>
-    }
-    @if (!verPapelera()) {
-      <div class="segmented" role="group" aria-label="Vista de compromisos">
-        <button
-          type="button"
-          [attr.aria-pressed]="modo() === 'tabla'"
-          (click)="cambiarModo('tabla')"
-        >
-          Tabla
-        </button>
-        <button
-          type="button"
-          [attr.aria-pressed]="modo() === 'calendario'"
-          (click)="cambiarModo('calendario')"
-        >
-          Calendario
-        </button>
-        <button
-          type="button"
-          [attr.aria-pressed]="modo() === 'resumen'"
-          (click)="cambiarModo('resumen')"
-        >
-          Resumen
-        </button>
-      </div>
+    <div class="segmented" role="group" aria-label="Registros activos o anulados">
+      <button type="button" [attr.aria-pressed]="!verPapelera()" (click)="cambiarVer('activos')">
+        Activos
+      </button>
+      <button type="button" [attr.aria-pressed]="verPapelera()" (click)="cambiarVer('anulados')">
+        Anulados
+      </button>
+    </div>
+    } @if (!verPapelera()) {
+    <div class="segmented" role="group" aria-label="Vista de compromisos">
+      <button type="button" [attr.aria-pressed]="modo() === 'tabla'" (click)="cambiarModo('tabla')">
+        Tabla
+      </button>
+      <button
+        type="button"
+        [attr.aria-pressed]="modo() === 'calendario'"
+        (click)="cambiarModo('calendario')"
+      >
+        Calendario
+      </button>
+      <button
+        type="button"
+        [attr.aria-pressed]="modo() === 'resumen'"
+        (click)="cambiarModo('resumen')"
+      >
+        Resumen
+      </button>
+    </div>
     }
   </div>
 
-  @if (vistaResumen()) {
-    @if (estadoResumen() === 'inactivo' || estadoResumen() === 'cargando') {
-      <div class="empty-state" role="status">Cargando el desglose…</div>
-    } @else if (estadoResumen() === 'error') {
-      <div class="empty-state" role="alert">
-        <p>{{ errorResumen()?.message }}</p>
-        <button type="button" class="button-secondary" (click)="recargarResumen()">
-          Reintentar
-        </button>
-      </div>
-    } @else if (compromisosResumen().length === 0) {
-      <div class="empty-state">
-        <strong>Sin compromisos</strong>
-        <p>No hay compromisos para los filtros seleccionados.</p>
-      </div>
-    } @else {
-      @if (desgloseTruncado()) {
-        <p class="calendario-aviso" role="status">
-          El desglose cuenta {{ compromisosResumen().length }} de {{ totalResumen() }} compromisos
-          del filtro. Acote los filtros para ver el resto.
-        </p>
-      }
-      <div class="desglose-grid">
-        <section class="desglose-card" aria-labelledby="desglose-responsable">
-          <h3 id="desglose-responsable">Por responsable</h3>
-          <ul class="desglose-lista">
-            @for (fila of desgloseResponsable(); track fila.etiqueta) {
-              <li class="desglose-fila">
-                <span class="desglose-etiqueta">{{ fila.etiqueta }}</span>
-                <span class="desglose-cuenta">
-                  {{ fila.total }}<small>{{ porcentaje(fila.total) }}%</small>
-                </span>
-                <span class="desglose-barra" aria-hidden="true">
-                  <i [style.width.%]="porcentaje(fila.total)"></i>
-                </span>
-              </li>
-            }
-          </ul>
-        </section>
-        <section class="desglose-card" aria-labelledby="desglose-nivel">
-          <h3 id="desglose-nivel">Por nivel de gobierno</h3>
-          <ul class="desglose-lista">
-            @for (fila of desgloseNivel(); track fila.etiqueta) {
-              <li class="desglose-fila">
-                <span class="desglose-etiqueta">{{ fila.etiqueta }}</span>
-                <span class="desglose-cuenta">
-                  {{ fila.total }}<small>{{ porcentaje(fila.total) }}%</small>
-                </span>
-                <span class="desglose-barra" aria-hidden="true">
-                  <i [style.width.%]="porcentaje(fila.total)"></i>
-                </span>
-              </li>
-            }
-          </ul>
-        </section>
-      </div>
-      <p class="desglose-nota">
-        Conteo sobre {{ compromisosResumen().length }} compromisos con los filtros activos; «GORE»
-        corresponde al nivel regional.
-      </p>
-    }
-  } @else if (!vistaCalendario()) {
-    @if (estado() === 'inactivo' || estado() === 'cargando') {
-      <div class="empty-state" role="status">
-        {{ verPapelera() ? 'Cargando la papelera…' : 'Cargando compromisos…' }}
-      </div>
-    } @else if (estado() === 'error') {
-      <div class="empty-state" role="alert">
-        <p>{{ error()?.message }}</p>
-        <button type="button" class="button-secondary" (click)="recargar()">Reintentar</button>
-      </div>
-    } @else if (compromisos().length === 0) {
-      @if (verPapelera()) {
-        <div class="empty-state">
-          <strong>No hay compromisos anulados</strong>
-          <p>No hay compromisos anulados para los filtros seleccionados.</p>
-        </div>
-      } @else {
-        <div class="empty-state">
-          <strong>Sin compromisos</strong>
-          <p>No hay compromisos para los filtros seleccionados.</p>
-        </div>
-      }
-    } @else if (verPapelera()) {
-      <div class="table-wrap">
-        <table class="data-table">
-          <caption class="table-caption">
-            {{
-              resumenPapelera()
-            }}
-          </caption>
-          <thead>
-            <tr>
-              <th scope="col">Código</th>
-              <th scope="col">Compromiso</th>
-              <th scope="col">Caso</th>
-              <th scope="col">Fecha de anulación</th>
-              <th scope="col">Acción</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (compromiso of compromisos(); track compromiso.id) {
-              <tr>
-                <td>{{ compromiso.codigo }}</td>
-                <td class="celda-compromiso">{{ compromiso.accion }}</td>
-                <td>{{ compromiso.casoCodigo || '—' }}</td>
-                <td>{{ fechaHoraTexto(compromiso.anuladoEn) }}</td>
-                <td>
-                  <button
-                    type="button"
-                    class="button-secondary"
-                    [attr.aria-label]="'Restaurar el compromiso ' + compromiso.codigo"
-                    (click)="abrirRestauracion(compromiso)"
-                  >
-                    Restaurar
-                  </button>
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
-    } @else {
-      <div class="table-wrap">
-        <table class="data-table">
-          <caption class="table-caption">
-            {{
-              resumenTabla()
-            }}
-          </caption>
-          <thead>
-            <tr>
-              <th scope="col">Código</th>
-              <th scope="col">Compromiso</th>
-              <th scope="col">Caso</th>
-              <th scope="col">Tipo de compromiso <app-glosario termino="tipo-compromiso" /></th>
-              <th scope="col">Unidad responsable</th>
-              <th scope="col">Estado</th>
-              <th scope="col">Vencimiento</th>
-              <th scope="col">Situación</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (compromiso of compromisos(); track compromiso.id) {
-              <tr class="fila-compromiso" (click)="abrir(compromiso)">
-                <td>
-                  <button
-                    type="button"
-                    class="table-link"
-                    [attr.aria-label]="
+  @if (vistaResumen()) { @if (estadoResumen() === 'inactivo' || estadoResumen() === 'cargando') {
+  <div class="empty-state" role="status">Cargando el desglose…</div>
+  } @else if (estadoResumen() === 'error') {
+  <div class="empty-state" role="alert">
+    <p>{{ errorResumen()?.message }}</p>
+    <button type="button" class="button-secondary" (click)="recargarResumen()">Reintentar</button>
+  </div>
+  } @else if (compromisosResumen().length === 0) {
+  <div class="empty-state">
+    <strong>Sin compromisos</strong>
+    <p>No hay compromisos para los filtros seleccionados.</p>
+  </div>
+  } @else { @if (desgloseTruncado()) {
+  <p class="calendario-aviso" role="status">
+    El desglose cuenta {{ compromisosResumen().length }} de {{ totalResumen() }} compromisos del
+    filtro. Acote los filtros para ver el resto.
+  </p>
+  }
+  <div class="desglose-grid">
+    <section class="desglose-card" aria-labelledby="desglose-responsable">
+      <h3 id="desglose-responsable">Por responsable</h3>
+      <ul class="desglose-lista">
+        @for (fila of desgloseResponsable(); track fila.etiqueta) {
+        <li class="desglose-fila">
+          <span class="desglose-etiqueta">{{ fila.etiqueta }}</span>
+          <span class="desglose-cuenta">
+            {{ fila.total }}<small>{{ porcentaje(fila.total) }}%</small>
+          </span>
+          <span class="desglose-barra" aria-hidden="true">
+            <i [style.width.%]="porcentaje(fila.total)"></i>
+          </span>
+        </li>
+        }
+      </ul>
+    </section>
+    <section class="desglose-card" aria-labelledby="desglose-nivel">
+      <h3 id="desglose-nivel">Por nivel de gobierno</h3>
+      <ul class="desglose-lista">
+        @for (fila of desgloseNivel(); track fila.etiqueta) {
+        <li class="desglose-fila">
+          <span class="desglose-etiqueta">{{ fila.etiqueta }}</span>
+          <span class="desglose-cuenta">
+            {{ fila.total }}<small>{{ porcentaje(fila.total) }}%</small>
+          </span>
+          <span class="desglose-barra" aria-hidden="true">
+            <i [style.width.%]="porcentaje(fila.total)"></i>
+          </span>
+        </li>
+        }
+      </ul>
+    </section>
+  </div>
+  <p class="desglose-nota">
+    Conteo sobre {{ compromisosResumen().length }} compromisos con los filtros activos; «GORE»
+    corresponde al nivel regional.
+  </p>
+  } } @else if (!vistaCalendario()) { @if (estado() === 'inactivo' || estado() === 'cargando') {
+  <div class="empty-state" role="status">
+    {{ verPapelera() ? 'Cargando la papelera…' : 'Cargando compromisos…' }}
+  </div>
+  } @else if (estado() === 'error') {
+  <div class="empty-state" role="alert">
+    <p>{{ error()?.message }}</p>
+    <button type="button" class="button-secondary" (click)="recargar()">Reintentar</button>
+  </div>
+  } @else if (compromisos().length === 0) { @if (verPapelera()) {
+  <div class="empty-state">
+    <strong>No hay compromisos anulados</strong>
+    <p>No hay compromisos anulados para los filtros seleccionados.</p>
+  </div>
+  } @else {
+  <div class="empty-state">
+    <strong>Sin compromisos</strong>
+    <p>No hay compromisos para los filtros seleccionados.</p>
+  </div>
+  } } @else if (verPapelera()) {
+  <div class="table-wrap">
+    <table class="data-table">
+      <caption class="table-caption">
+        {{ resumenPapelera() }}
+      </caption>
+      <thead>
+        <tr>
+          <th scope="col">Código</th>
+          <th scope="col">Compromiso</th>
+          <th scope="col">Caso</th>
+          <th scope="col">Fecha de anulación</th>
+          <th scope="col">Acción</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (compromiso of compromisos(); track compromiso.id) {
+        <tr>
+          <td>{{ compromiso.codigo }}</td>
+          <td class="celda-compromiso">{{ compromiso.accion }}</td>
+          <td>{{ compromiso.casoCodigo || '—' }}</td>
+          <td>{{ fechaHoraTexto(compromiso.anuladoEn) }}</td>
+          <td>
+            <button
+              type="button"
+              class="button-secondary"
+              [attr.aria-label]="'Restaurar el compromiso ' + compromiso.codigo"
+              (click)="abrirRestauracion(compromiso)"
+            >
+              Restaurar
+            </button>
+          </td>
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  } @else {
+  <div class="table-wrap">
+    <table class="data-table">
+      <caption class="table-caption">
+        {{ resumenTabla() }}
+      </caption>
+      <thead>
+        <tr>
+          <th scope="col">Código</th>
+          <th scope="col">Compromiso</th>
+          <th scope="col">Caso</th>
+          <th scope="col">Tipo de compromiso <app-glosario termino="tipo-compromiso" /></th>
+          <th scope="col">Unidad responsable</th>
+          <th scope="col">Estado</th>
+          <th scope="col">Vencimiento</th>
+          <th scope="col">Situación</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (compromiso of compromisos(); track compromiso.id) {
+        <tr class="fila-compromiso" (click)="abrir(compromiso)">
+          <td>
+            <button
+              type="button"
+              class="table-link"
+              [attr.aria-label]="
                       'Abrir el compromiso ' + compromiso.codigo + ': ' + compromiso.accion
                     "
-                    (click)="abrir(compromiso); $event.stopPropagation()"
-                  >
-                    {{ compromiso.codigo }}
-                  </button>
-                </td>
-                <td class="celda-compromiso">{{ compromiso.accion }}</td>
-                <td>{{ compromiso.casoCodigo || '—' }}</td>
-                <td>{{ compromiso.tipo }}</td>
-                <td>{{ compromiso.unidad || '—' }}</td>
-                <td>
-                  <span
-                    class="commit-status"
-                    [class.commit-cumplido]="compromiso.estado === 'Cumplido'"
-                    [class.commit-en-curso]="compromiso.estado === 'En proceso'"
-                  >
-                    {{ compromiso.estado }}
-                  </span>
-                </td>
-                <td class="celda-vencimiento">
-                  @if (vencimiento(compromiso).fecha; as fechaVenc) {
-                    {{ fechaTexto(fechaVenc) }}
-                    <small>{{ origenTexto(vencimiento(compromiso).origen) }}</small>
-                  } @else {
-                    <span class="due-state due-sin-fecha">Sin fecha</span>
-                    <small class="aviso-fecha"> Añada una fecha de vencimiento manual </small>
-                  }
-                </td>
-                <td>
-                  <span [class]="'due-state ' + situacion(compromiso).clase">
-                    {{ situacion(compromiso).etiqueta }}
-                  </span>
-                </td>
-              </tr>
+              (click)="abrir(compromiso); $event.stopPropagation()"
+            >
+              {{ compromiso.codigo }}
+            </button>
+          </td>
+          <td class="celda-compromiso">{{ compromiso.accion }}</td>
+          <td>{{ compromiso.casoCodigo || '—' }}</td>
+          <td>{{ compromiso.tipo }}</td>
+          <td>{{ compromiso.unidad || '—' }}</td>
+          <td>
+            <span
+              class="commit-status"
+              [class.commit-cumplido]="compromiso.estado === 'Cumplido'"
+              [class.commit-en-curso]="compromiso.estado === 'En proceso'"
+            >
+              {{ compromiso.estado }}
+            </span>
+          </td>
+          <td class="celda-vencimiento">
+            @if (vencimiento(compromiso).fecha; as fechaVenc) { {{ fechaTexto(fechaVenc) }}
+            <small>{{ origenTexto(vencimiento(compromiso).origen) }}</small>
+            } @else {
+            <span class="due-state due-sin-fecha">Sin fecha</span>
+            <small class="aviso-fecha"> Añada una fecha de vencimiento manual </small>
             }
-          </tbody>
-        </table>
-      </div>
-    }
-    @if (total() > 0) {
-      <app-paginacion
-        [pagina]="filtros().pagina"
-        [tamano]="filtros().tamano"
-        [total]="total()"
-        (paginaCambia)="cambiarPagina($event)"
-        (tamanoCambia)="cambiarTamano($event)"
-      />
-    }
-  } @else {
-    <div class="calendario-barra">
-      <div class="calendario-nav">
-        <button
-          type="button"
-          class="button-secondary"
-          aria-label="Mes anterior"
-          (click)="mesAnterior()"
-        >
-          <app-icono nombre="chevron-izquierda" [tamano]="14" />
-        </button>
-        <button type="button" class="button-secondary" (click)="irAHoy()">Hoy</button>
-        <button
-          type="button"
-          class="button-secondary"
-          aria-label="Mes siguiente"
-          (click)="mesSiguiente()"
-        >
-          <app-icono nombre="chevron-derecha" [tamano]="14" />
-        </button>
-      </div>
-      <h2 class="calendario-titulo" aria-live="polite">{{ calendario().titulo }}</h2>
-      <p class="calendario-resumen">
-        {{ calendario().totalMes }} compromisos con vencimiento en el mes.
-      </p>
+          </td>
+          <td>
+            <span [class]="'due-state ' + situacion(compromiso).clase">
+              {{ situacion(compromiso).etiqueta }}
+            </span>
+          </td>
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  } @if (total() > 0) {
+  <app-paginacion
+    [pagina]="filtros().pagina"
+    [tamano]="filtros().tamano"
+    [total]="total()"
+    (paginaCambia)="cambiarPagina($event)"
+    (tamanoCambia)="cambiarTamano($event)"
+  />
+  } } @else {
+  <div class="calendario-barra">
+    <div class="calendario-nav">
+      <button
+        type="button"
+        class="button-secondary"
+        aria-label="Mes anterior"
+        (click)="mesAnterior()"
+      >
+        <app-icono nombre="chevron-izquierda" [tamano]="14" />
+      </button>
+      <button type="button" class="button-secondary" (click)="irAHoy()">Hoy</button>
+      <button
+        type="button"
+        class="button-secondary"
+        aria-label="Mes siguiente"
+        (click)="mesSiguiente()"
+      >
+        <app-icono nombre="chevron-derecha" [tamano]="14" />
+      </button>
     </div>
+    <h2 class="calendario-titulo" aria-live="polite">{{ calendario().titulo }}</h2>
+    <p class="calendario-resumen">
+      {{ calendario().totalMes }} compromisos con vencimiento en el mes.
+    </p>
+  </div>
 
-    @if (estadoCalendario() === 'inactivo' || estadoCalendario() === 'cargando') {
-      <div class="empty-state" role="status">Cargando el calendario…</div>
-    } @else if (estadoCalendario() === 'error') {
-      <div class="empty-state" role="alert">
-        <p>{{ errorCalendario()?.message }}</p>
-        <button type="button" class="button-secondary" (click)="recargarCalendario()">
-          Reintentar
-        </button>
-      </div>
-    } @else {
-      @if (calendario().truncado) {
-        <p class="calendario-aviso" role="status">
-          Se muestran {{ compromisosCalendario().length }} de {{ totalCalendario() }} compromisos
-          del rango. Acote los filtros para ver el resto.
-        </p>
-      }
-      @if (calendario().totalMes === 0) {
-        <div class="empty-state">
-          <strong>Sin compromisos en {{ calendario().titulo }}</strong>
-          <p>No hay vencimientos para los filtros seleccionados en este mes.</p>
-        </div>
-      } @else {
-        <div class="calendario-wrap">
-          <table
-            class="data-table calendario-rejilla"
-            [attr.aria-label]="'Calendario de vencimientos de ' + calendario().titulo"
+  @if (estadoCalendario() === 'inactivo' || estadoCalendario() === 'cargando') {
+  <div class="empty-state" role="status">Cargando el calendario…</div>
+  } @else if (estadoCalendario() === 'error') {
+  <div class="empty-state" role="alert">
+    <p>{{ errorCalendario()?.message }}</p>
+    <button type="button" class="button-secondary" (click)="recargarCalendario()">
+      Reintentar
+    </button>
+  </div>
+  } @else { @if (calendario().truncado) {
+  <p class="calendario-aviso" role="status">
+    Se muestran {{ compromisosCalendario().length }} de {{ totalCalendario() }} compromisos del
+    rango. Acote los filtros para ver el resto.
+  </p>
+  } @if (calendario().totalMes === 0) {
+  <div class="empty-state">
+    <strong>Sin compromisos en {{ calendario().titulo }}</strong>
+    <p>No hay vencimientos para los filtros seleccionados en este mes.</p>
+  </div>
+  } @else {
+  <div class="calendario-wrap">
+    <table
+      class="data-table calendario-rejilla"
+      [attr.aria-label]="'Calendario de vencimientos de ' + calendario().titulo"
+    >
+      <thead>
+        <tr>
+          @for (dia of diasSemana; track dia.corto) {
+          <th scope="col">
+            <abbr [attr.title]="dia.largo" aria-hidden="true">{{ dia.corto }}</abbr>
+            <span class="sr-only">{{ dia.largo }}</span>
+          </th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        @for (semana of semanas(); track $index) {
+        <tr>
+          @for (dia of semana; track dia.fecha) {
+          <td
+            class="calendario-dia"
+            [class.calendario-dia-ajeno]="!dia.delMes"
+            [class.calendario-dia-hoy]="dia.esHoy"
+            [attr.aria-current]="dia.esHoy ? 'date' : null"
+            [attr.aria-label]="dia.etiqueta"
+            tabindex="0"
           >
-            <thead>
-              <tr>
-                @for (dia of diasSemana; track dia.corto) {
-                  <th scope="col">
-                    <abbr [attr.title]="dia.largo" aria-hidden="true">{{ dia.corto }}</abbr>
-                    <span class="sr-only">{{ dia.largo }}</span>
-                  </th>
-                }
-              </tr>
-            </thead>
-            <tbody>
-              @for (semana of semanas(); track $index) {
-                <tr>
-                  @for (dia of semana; track dia.fecha) {
-                    <td
-                      class="calendario-dia"
-                      [class.calendario-dia-ajeno]="!dia.delMes"
-                      [class.calendario-dia-hoy]="dia.esHoy"
-                      [attr.aria-current]="dia.esHoy ? 'date' : null"
-                      [attr.aria-label]="dia.etiqueta"
-                      tabindex="0"
-                    >
-                      <span class="calendario-numero">{{ dia.dia }}</span>
-                      <div class="calendario-pastillas">
-                        @for (item of dia.visibles; track item.compromiso.id) {
-                          <button
-                            type="button"
-                            [class]="'calendario-pastilla ' + item.plazo.clase"
-                            [attr.aria-label]="item.etiqueta"
-                            (click)="abrir(item.compromiso)"
-                          >
-                            <span class="calendario-pastilla-codigo">{{
-                              item.compromiso.codigo
-                            }}</span>
-                            <span class="calendario-pastilla-plazo">{{ item.plazo.texto }}</span>
-                          </button>
-                        }
-                        @if (dia.total > maxPastillas) {
-                          <button
-                            type="button"
-                            class="calendario-mas"
-                            [attr.aria-expanded]="dia.expandido"
-                            [attr.aria-label]="
+            <span class="calendario-numero">{{ dia.dia }}</span>
+            <div class="calendario-pastillas">
+              @for (item of dia.visibles; track item.compromiso.id) {
+              <button
+                type="button"
+                [class]="'calendario-pastilla ' + item.plazo.clase"
+                [attr.aria-label]="item.etiqueta"
+                (click)="abrir(item.compromiso)"
+              >
+                <span class="calendario-pastilla-codigo">{{ item.compromiso.codigo }}</span>
+                <span class="calendario-pastilla-plazo">{{ item.plazo.texto }}</span>
+              </button>
+              } @if (dia.total > maxPastillas) {
+              <button
+                type="button"
+                class="calendario-mas"
+                [attr.aria-expanded]="dia.expandido"
+                [attr.aria-label]="
                               dia.expandido
                                 ? 'Contraer los compromisos del ' + dia.nombreFecha
                                 : 'Ver ' + dia.restantes + ' compromisos más del ' + dia.nombreFecha
                             "
-                            (click)="alternarDia(dia.fecha)"
-                          >
-                            {{ dia.expandido ? 'Ver menos' : '+' + dia.restantes + ' más' }}
-                          </button>
-                        }
-                      </div>
-                    </td>
-                  }
-                </tr>
+                (click)="alternarDia(dia.fecha)"
+              >
+                {{ dia.expandido ? 'Ver menos' : '+' + dia.restantes + ' más' }}
+              </button>
               }
-            </tbody>
-          </table>
-        </div>
-      }
-    }
-  }
+            </div>
+          </td>
+          }
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  } } }
 </section>
 
-@if (seleccionado(); as compromisoSel) {
-  <app-compromiso-panel
-    [compromiso]="compromisoSel"
-    (cerrado)="cerrarPanel()"
-    (actualizado)="alActualizar()"
-    (anular)="abrirAnulacion(compromisoSel)"
-  />
-}
-@if (compromisoAnulacion(); as compromisoAnular) {
-  <app-anular-panel
-    [modo]="modoAnulacion()"
-    entidad="compromiso"
-    [codigo]="compromisoAnular.codigo"
-    [cascada]="true"
-    detalleCascada="sus hitos"
-    [enviando]="enviandoAnulacion()"
-    [errorEnvio]="errorAnulacion()"
-    [puedeConfirmar]="
+@if (altaAbierta()) {
+<app-compromiso-panel (cerrado)="cerrarAlta()" (creado)="alCrear()" />
+} @if (seleccionado(); as compromisoSel) {
+<app-compromiso-panel
+  [compromiso]="compromisoSel"
+  (cerrado)="cerrarPanel()"
+  (actualizado)="alActualizar()"
+  (anular)="abrirAnulacion(compromisoSel)"
+/>
+} @if (compromisoAnulacion(); as compromisoAnular) {
+<app-anular-panel
+  [modo]="modoAnulacion()"
+  entidad="compromiso"
+  [codigo]="compromisoAnular.codigo"
+  [cascada]="true"
+  detalleCascada="sus hitos"
+  [enviando]="enviandoAnulacion()"
+  [errorEnvio]="errorAnulacion()"
+  [puedeConfirmar]="
       modoAnulacion() === 'anular' ? puedeAnular(compromisoAnular) : puedeVerPapelera()
     "
-    (cerrar)="cerrarAnulacion()"
-    (hecho)="confirmarAnulacion($event)"
-  />
+  (cerrar)="cerrarAnulacion()"
+  (hecho)="confirmarAnulacion($event)"
+/>
 }

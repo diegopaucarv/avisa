@@ -1,18 +1,25 @@
-<div class="drawer-scrim" (click)="cerrar()">
+<div class="drawer-scrim" (click)="alFondo($event)" (keydown)="alTecla($event)">
   <aside
+    #panel
     class="drawer"
+    tabindex="-1"
     role="dialog"
     aria-modal="true"
     aria-labelledby="panel-compromiso-titulo"
-    (click)="$event.stopPropagation()"
   >
     <header class="drawer-head">
       <div>
-        <p class="micro-label">{{ cabecera().codigo }}</p>
-        <h2 id="panel-compromiso-titulo">{{ cabecera().accion }}</h2>
+        <p class="micro-label">{{ modoAlta() ? 'Nuevo compromiso' : cabecera().codigo }}</p>
+        <h2 id="panel-compromiso-titulo">
+          {{ modoAlta() ? 'Registrar compromiso' : cabecera().accion }}
+        </h2>
         <p>
-          Caso {{ cabecera().casoCodigo || '—' }} ·
-          {{ cabecera().casoTitulo || 'Sin caso asociado' }}
+          @if (modoAlta()) {
+            El código lo genera el servidor al guardar.
+          } @else {
+            Caso {{ cabecera().casoCodigo || '—' }} ·
+            {{ cabecera().casoTitulo || 'Sin caso asociado' }}
+          }
         </p>
       </div>
       <button
@@ -26,121 +33,183 @@
     </header>
 
     <div class="drawer-body">
-      @if (estadoCarga() === 'cargando' || estadoCarga() === 'inactivo') {
-        <p class="form-hint" role="status">Cargando el detalle del compromiso…</p>
-      } @else if (estadoCarga() === 'error') {
-        <div class="panel-aviso" role="alert">
-          <p>{{ errorCarga()?.message }}</p>
-          <button type="button" class="button-secondary" (click)="recargarDetalle()">
-            Reintentar
-          </button>
-        </div>
-      }
-
-      <div class="panel-badges">
-        <span
-          class="commit-status"
-          [class.commit-cumplido]="cabecera().estado === 'Cumplido'"
-          [class.commit-en-curso]="cabecera().estado === 'En proceso'"
-        >
-          {{ cabecera().estado }}
-        </span>
-        <span class="badge">{{ cabecera().tipo }}</span>
-        @if (cabecera().nivelGobierno) {
-          <span class="badge">{{ nivelTexto(cabecera().nivelGobierno) }}</span>
+      @if (!modoAlta()) {
+        @if (estadoCarga() === 'cargando' || estadoCarga() === 'inactivo') {
+          <p class="form-hint" role="status">Cargando el detalle del compromiso…</p>
+        } @else if (estadoCarga() === 'error') {
+          <div class="panel-aviso" role="alert">
+            <p>{{ errorCarga()?.message }}</p>
+            <button type="button" class="button-secondary" (click)="recargarDetalle()">
+              Reintentar
+            </button>
+          </div>
         }
-        @if (cabecera().terminal) {
-          <span class="badge badge-archived">Estado terminal</span>
-        }
-        @if (cabecera().vencido) {
-          <span class="due-state due-vencido">Vencido</span>
-        }
-      </div>
 
-      <section class="detail-section" aria-labelledby="datos-compromiso">
-        <h3 id="datos-compromiso">Datos del compromiso</h3>
-        <div class="detail-data-row">
-          <div>
-            <span>Tipo de compromiso <app-glosario termino="tipo-compromiso" /></span>
-            <strong>{{ cabecera().tipo }}</strong>
-          </div>
-          <div>
-            <span>Unidad responsable</span>
-            <strong>{{ cabecera().unidad || '—' }}</strong>
-          </div>
-          <div>
-            <span>Alcance (registrado)</span>
-            <strong>{{ cabecera().alcance || '—' }}</strong>
-            <small class="form-hint">Se registra a mano; no se deriva de la región.</small>
-          </div>
-          <div>
-            <span>Temática</span>
-            <strong>{{ cabecera().tematica || '—' }}</strong>
-          </div>
-          <div>
-            <span>Nivel de gobierno <app-glosario termino="nivel-gobierno" /></span>
-            <strong>{{ nivelTexto(cabecera().nivelGobierno) }}</strong>
-          </div>
-          <div>
-            <span>Brecha de género</span>
-            <strong>{{ cabecera().atiendeGenero ? 'Sí' : 'No' }}</strong>
-          </div>
-          <div>
-            <span>Fecha de inicio</span>
-            <strong>{{ fechaTexto(cabecera().fechaInicio) }}</strong>
-          </div>
-          <div>
-            <span>Clasificación</span>
-            <strong>{{ cabecera().clasificacion }}</strong>
-          </div>
-          <div>
-            <span>Origen del dato</span>
-            <strong>{{ cabecera().origen || '—' }}</strong>
-          </div>
-        </div>
-
-        <div class="panel-linea">
-          <span class="form-label">Evidencia</span>
-          @if (cabecera().evidenciaUri; as evidencia) {
-            @if (esEnlace(evidencia)) {
-              <a [href]="evidencia" target="_blank" rel="noopener">{{ evidencia }}</a>
-            } @else {
-              <span>{{ evidencia }}</span>
-            }
-          } @else {
-            <span class="form-hint">Sin evidencia registrada.</span>
+        <div class="panel-badges">
+          <span
+            class="commit-status"
+            [class.commit-cumplido]="cabecera().estado === 'Cumplido'"
+            [class.commit-en-curso]="cabecera().estado === 'En proceso'"
+          >
+            {{ cabecera().estado }}
+          </span>
+          <span class="badge">{{ cabecera().tipo }}</span>
+          @if (cabecera().nivelGobierno) {
+            <span class="badge">{{ nivelTexto(cabecera().nivelGobierno) }}</span>
+          }
+          @if (cabecera().terminal) {
+            <span class="badge badge-archived">Estado terminal</span>
+          }
+          @if (cabecera().vencido) {
+            <span class="due-state due-vencido">Vencido</span>
           }
         </div>
 
-        @if (detalle()?.documento; as documentoOrigen) {
-          <div class="panel-linea">
-            <span class="form-label">Documento de origen</span>
-            <span>
-              {{ documentoOrigen.codigo || '—' }} · {{ documentoOrigen.titulo || 'Sin título' }} ·
-              {{ fechaTexto(documentoOrigen.fecha) }}
-            </span>
+        <section class="detail-section" aria-labelledby="datos-compromiso">
+          <h3 id="datos-compromiso">Datos del compromiso</h3>
+          <div class="detail-data-row">
+            <div>
+              <span>Tipo de compromiso <app-glosario termino="tipo-compromiso" /></span>
+              <strong>{{ cabecera().tipo }}</strong>
+            </div>
+            <div>
+              <span>Unidad responsable</span>
+              <strong>{{ cabecera().unidad || '—' }}</strong>
+            </div>
+            <div>
+              <span>Alcance (registrado)</span>
+              <strong>{{ cabecera().alcance || '—' }}</strong>
+              <small class="form-hint">Se registra a mano; no se deriva de la región.</small>
+            </div>
+            <div>
+              <span>Temática</span>
+              <strong>{{ cabecera().tematica || '—' }}</strong>
+            </div>
+            <div>
+              <span>Nivel de gobierno <app-glosario termino="nivel-gobierno" /></span>
+              <strong>{{ nivelTexto(cabecera().nivelGobierno) }}</strong>
+            </div>
+            <div>
+              <span>Brecha de género</span>
+              <strong>{{ cabecera().atiendeGenero ? 'Sí' : 'No' }}</strong>
+            </div>
+            <div>
+              <span>Fecha de inicio</span>
+              <strong>{{ fechaTexto(cabecera().fechaInicio) }}</strong>
+            </div>
+            <div>
+              <span>Clasificación</span>
+              <strong>{{ cabecera().clasificacion }}</strong>
+            </div>
+            <div>
+              <span>Origen del dato</span>
+              <strong>{{ cabecera().origen || '—' }}</strong>
+            </div>
           </div>
-        }
 
-        @if (criteriosJson(); as criteriosVista) {
           <div class="panel-linea">
-            <span class="form-label">Criterios SMART</span>
-            <pre class="criterios">{{ criteriosVista }}</pre>
+            <span class="form-label">Evidencia</span>
+            @if (cabecera().evidenciaUri; as evidencia) {
+              @if (esEnlace(evidencia)) {
+                <a [href]="evidencia" target="_blank" rel="noopener">{{ evidencia }}</a>
+              } @else {
+                <span>{{ evidencia }}</span>
+              }
+            } @else {
+              <span class="form-hint">Sin evidencia registrada.</span>
+            }
           </div>
-        }
-      </section>
 
-      @if (editando()) {
+          @if (detalle()?.documento; as documentoOrigen) {
+            <div class="panel-linea">
+              <span class="form-label">Documento de origen</span>
+              <span>
+                {{ documentoOrigen.codigo || '—' }} · {{ documentoOrigen.titulo || 'Sin título' }} ·
+                {{ fechaTexto(documentoOrigen.fecha) }}
+              </span>
+            </div>
+          }
+
+          @if (criteriosJson(); as criteriosVista) {
+            <div class="panel-linea">
+              <span class="form-label">Criterios SMART</span>
+              <pre class="criterios">{{ criteriosVista }}</pre>
+            </div>
+          }
+        </section>
+      }
+
+      @if (formularioVisible()) {
         <section class="detail-section" aria-labelledby="editar-compromiso">
           <div class="detail-section-title">
             <div>
-              <h3 id="editar-compromiso">Modificar compromiso</h3>
-              <p>Sólo se envían los campos del PATCH.</p>
+              <h3 id="editar-compromiso">
+                {{ modoAlta() ? 'Datos del nuevo compromiso' : 'Modificar compromiso' }}
+              </h3>
+              <p>
+                @if (modoAlta()) {
+                  El código y el estado inicial los asigna el servidor.
+                } @else {
+                  Sólo se envían los campos del PATCH.
+                }
+              </p>
             </div>
           </div>
 
           @if (editError(); as errorEdicion) {
             <p class="form-error" role="alert">{{ errorEdicion }}</p>
+          }
+
+          @if (modoAlta()) {
+            <div class="form-field panel-campo-ancho">
+              <label class="form-label" for="comp-caso">Caso</label>
+              @if (casoElegido(); as casoSel) {
+                <div class="panel-caso-elegido">
+                  <div class="panel-caso-elegido-copia">
+                    <span class="panel-caso-codigo">{{ casoSel.codigo }}</span>
+                    <span class="panel-caso-titulo">{{ casoSel.titulo }}</span>
+                    <span class="panel-caso-region">{{ casoSel.region || 'Sin región' }}</span>
+                  </div>
+                  <button type="button" class="button-secondary" (click)="quitarCaso()">
+                    Quitar
+                  </button>
+                </div>
+              } @else {
+                <input
+                  id="comp-caso"
+                  class="form-input"
+                  type="search"
+                  placeholder="Buscar caso por código o título"
+                  [value]="busquedaCaso()"
+                  (input)="buscarCaso($event)"
+                />
+                @if (estadoCasos() === 'cargando' || estadoCasos() === 'inactivo') {
+                  <p class="form-hint" role="status">Buscando casos…</p>
+                } @else if (estadoCasos() === 'error') {
+                  <p class="form-error" role="alert">{{ errorCasos()?.message }}</p>
+                } @else if (casosEncontrados().length === 0) {
+                  <p class="form-hint">Sin casos para la búsqueda.</p>
+                } @else {
+                  <ul class="panel-caso-lista">
+                    @for (casoSugerido of casosEncontrados(); track casoSugerido.id) {
+                      <li>
+                        <button
+                          type="button"
+                          class="panel-caso-opcion"
+                          (click)="elegirCaso(casoSugerido)"
+                        >
+                          <span class="panel-caso-codigo">{{ casoSugerido.codigo }}</span>
+                          <span class="panel-caso-titulo">{{ casoSugerido.titulo }}</span>
+                          <span class="panel-caso-region">
+                            {{ casoSugerido.region || 'Sin región' }}
+                          </span>
+                        </button>
+                      </li>
+                    }
+                  </ul>
+                }
+              }
+            </div>
           }
 
           <div class="form-grid">
@@ -175,14 +244,19 @@
                 [value]="formulario().fechaVencimiento"
                 (input)="actualizarTexto('fechaVencimiento', $event)"
               />
-              @if (avisoFecha(); as avisoVencimiento) {
-                <p class="panel-aviso" role="alert">{{ avisoVencimiento }}</p>
-              } @else if (proximoHito(); as siguienteHito) {
-                <p class="form-hint">
-                  Vacío: se usará la fecha del próximo hito ({{ fechaTexto(siguienteHito.fecha) }}).
-                </p>
+              @if (!modoAlta()) {
+                @if (avisoFecha(); as avisoVencimiento) {
+                  <p class="panel-aviso" role="alert">{{ avisoVencimiento }}</p>
+                } @else if (proximoHito(); as siguienteHito) {
+                  <p class="form-hint">
+                    Vacío: se usará la fecha del próximo hito ({{ fechaTexto(siguienteHito.fecha) }}
+                    ).
+                  </p>
+                } @else {
+                  <p class="form-hint">Sin fecha manual no hay próximo hito del que derivarla.</p>
+                }
               } @else {
-                <p class="form-hint">Sin fecha manual no hay próximo hito del que derivarla.</p>
+                <p class="form-hint">Opcional; no se deriva de ningún hito.</p>
               }
             </div>
 
@@ -221,20 +295,22 @@
               </select>
             </div>
 
-            <div class="form-field">
-              <label class="form-label" for="comp-estado">Estado</label>
-              <select
-                id="comp-estado"
-                class="form-select"
-                (change)="actualizarTexto('estado', $event)"
-              >
-                @for (estado of estadosCompromiso; track estado) {
-                  <option [value]="estado" [selected]="estado === formulario().estado">
-                    {{ estado }}
-                  </option>
-                }
-              </select>
-            </div>
+            @if (!modoAlta()) {
+              <div class="form-field">
+                <label class="form-label" for="comp-estado">Estado</label>
+                <select
+                  id="comp-estado"
+                  class="form-select"
+                  (change)="actualizarTexto('estado', $event)"
+                >
+                  @for (estado of estadosCompromiso; track estado) {
+                    <option [value]="estado" [selected]="estado === formulario().estado">
+                      {{ estado }}
+                    </option>
+                  }
+                </select>
+              </div>
+            }
 
             <div class="form-field">
               <label class="form-label" for="comp-unidad">Unidad responsable</label>
@@ -263,6 +339,9 @@
                   placeholder="Siglas de la unidad"
                 />
               }
+              @if (modoAlta()) {
+                <p class="form-hint">Opcional: vacío usa la unidad responsable del caso.</p>
+              }
             </div>
 
             <div class="form-field">
@@ -273,12 +352,15 @@
                 (change)="actualizarTexto('alcance', $event)"
               >
                 <option value="" [selected]="!formulario().alcance">Sin especificar</option>
-                @for (alcance of alcances; track alcance) {
-                  <option [value]="alcance" [selected]="alcance === formulario().alcance">
-                    {{ alcance }}
+                @for (alcance of alcancesFormulario(); track alcance.valor) {
+                  <option
+                    [value]="alcance.valor"
+                    [selected]="alcance.valor === formulario().alcance"
+                  >
+                    {{ alcance.etiqueta }}
                   </option>
                 }
-                @if (formulario().alcance && !alcances.includes(formulario().alcance)) {
+                @if (formulario().alcance && !esAlcanceConocido(formulario().alcance)) {
                   <option [value]="formulario().alcance" selected>
                     {{ formulario().alcance }}
                   </option>
@@ -347,196 +429,208 @@
                 [value]="formulario().criteriosSmart"
                 (input)="actualizarTexto('criteriosSmart', $event)"
               ></textarea>
-              <p class="form-hint">Objeto JSON, o vacío para quitarlos del compromiso.</p>
+              @if (modoAlta()) {
+                <p class="form-hint">Objeto JSON opcional.</p>
+              } @else {
+                <p class="form-hint">Objeto JSON, o vacío para quitarlos del compromiso.</p>
+              }
             </div>
           </div>
         </section>
       }
 
-      <section class="detail-section" aria-labelledby="vencimiento-compromiso">
-        <h3 id="vencimiento-compromiso">Vencimiento</h3>
-        @if (vencimiento().fecha; as fechaVencimiento) {
-          <p class="panel-fecha">
-            <strong>{{ fechaTexto(fechaVencimiento) }}</strong>
-            <span class="badge">
-              {{ vencimiento().origen === 'manual' ? 'Fecha manual' : 'Derivada del próximo hito' }}
-            </span>
-            @if (cabecera().vencido) {
-              <span class="due-state due-vencido">Vencido</span>
-            }
-          </p>
-          <p class="form-hint">
-            @if (vencimiento().origen === 'manual') {
-              La fecha manual prevalece sobre la del próximo hito.
-            } @else {
-              No hay fecha manual: se muestra la del próximo hito con fecha.
-            }
-          </p>
-        } @else {
-          <p>
-            <span class="due-state due-sin-fecha">Sin fecha</span>
-          </p>
-          <p class="panel-aviso">Añada una fecha de vencimiento manual.</p>
-        }
-      </section>
+      @if (!modoAlta()) {
+        <section class="detail-section" aria-labelledby="vencimiento-compromiso">
+          <h3 id="vencimiento-compromiso">Vencimiento</h3>
+          @if (vencimiento().fecha; as fechaVencimiento) {
+            <p class="panel-fecha">
+              <strong>{{ fechaTexto(fechaVencimiento) }}</strong>
+              <span class="badge">
+                {{
+                  vencimiento().origen === 'manual' ? 'Fecha manual' : 'Derivada del próximo hito'
+                }}
+              </span>
+              @if (cabecera().vencido) {
+                <span class="due-state due-vencido">Vencido</span>
+              }
+            </p>
+            <p class="form-hint">
+              @if (vencimiento().origen === 'manual') {
+                La fecha manual prevalece sobre la del próximo hito.
+              } @else {
+                No hay fecha manual: se muestra la del próximo hito con fecha.
+              }
+            </p>
+          } @else {
+            <p>
+              <span class="due-state due-sin-fecha">Sin fecha</span>
+            </p>
+            <p class="panel-aviso">Añada una fecha de vencimiento manual.</p>
+          }
+        </section>
 
-      <section class="detail-section" aria-labelledby="proximo-hito">
-        <h3 id="proximo-hito">Próximo hito</h3>
-        @if (proximoHito(); as siguienteHito) {
-          <p class="panel-fecha">
-            <strong>{{ siguienteHito.descripcion || 'Sin descripción' }}</strong>
-            <span class="commit-status">{{ siguienteHito.estado }}</span>
-          </p>
-          <p class="form-hint">Planificado para {{ fechaTexto(siguienteHito.fecha) }}.</p>
-        } @else {
-          <p class="form-hint">Sin próximo hito con fecha.</p>
-        }
-      </section>
+        <section class="detail-section" aria-labelledby="proximo-hito">
+          <h3 id="proximo-hito">Próximo hito</h3>
+          @if (proximoHito(); as siguienteHito) {
+            <p class="panel-fecha">
+              <strong>{{ siguienteHito.descripcion || 'Sin descripción' }}</strong>
+              <span class="commit-status">{{ siguienteHito.estado }}</span>
+            </p>
+            <p class="form-hint">Planificado para {{ fechaTexto(siguienteHito.fecha) }}.</p>
+          } @else {
+            <p class="form-hint">Sin próximo hito con fecha.</p>
+          }
+        </section>
 
-      <section class="detail-section" aria-labelledby="hitos-compromiso">
-        <div class="detail-section-title">
-          <div>
-            <h3 id="hitos-compromiso">Hitos ({{ hitos().length }})</h3>
-            <p>Estados vigentes del Anexo 14.</p>
+        <section class="detail-section" aria-labelledby="hitos-compromiso">
+          <div class="detail-section-title">
+            <div>
+              <h3 id="hitos-compromiso">Hitos ({{ hitos().length }})</h3>
+              <p>Estados vigentes del Anexo 14.</p>
+            </div>
           </div>
-        </div>
 
-        @if (hitos().length === 0) {
-          <p class="form-hint">Sin hitos registrados.</p>
-        } @else {
-          <ol class="timeline">
-            @for (hito of hitos(); track hito.id) {
-              <li class="timeline-event">
-                <span
-                  class="timeline-dot"
-                  [class.dot-validated]="hito.estado === 'Cumplido'"
-                  [class.dot-pending]="hito.estado !== 'Cumplido'"
-                ></span>
-                <div>
-                  <div class="timeline-meta">
-                    <strong>{{ hito.codigo || 'Hito' }}</strong>
-                    <time>{{ fechaTexto(hito.fecha) }}</time>
-                  </div>
-                  <p>{{ hito.descripcion || 'Sin descripción' }}</p>
-                  <div class="timeline-actions">
-                    <span
-                      class="commit-status"
-                      [class.commit-cumplido]="hito.estado === 'Cumplido'"
-                      [class.commit-paralizado]="hito.estado === 'Paralizado'"
-                    >
-                      {{ hito.estado }}
-                    </span>
-                    @if (hito.terminal) {
-                      <span class="badge">Terminal</span>
-                    }
-                    @if (hito.fechaReal) {
-                      <span class="badge badge-formal">
-                        Real: {{ fechaTexto(hito.fechaReal) }}
+          @if (hitos().length === 0) {
+            <p class="form-hint">Sin hitos registrados.</p>
+          } @else {
+            <ol class="timeline">
+              @for (hito of hitos(); track hito.id) {
+                <li class="timeline-event">
+                  <span
+                    class="timeline-dot"
+                    [class.dot-validated]="hito.estado === 'Cumplido'"
+                    [class.dot-pending]="hito.estado !== 'Cumplido'"
+                  ></span>
+                  <div>
+                    <div class="timeline-meta">
+                      <strong>{{ hito.codigo || 'Hito' }}</strong>
+                      <time>{{ fechaTexto(hito.fecha) }}</time>
+                    </div>
+                    <p>{{ hito.descripcion || 'Sin descripción' }}</p>
+                    <div class="timeline-actions">
+                      <span
+                        class="commit-status"
+                        [class.commit-cumplido]="hito.estado === 'Cumplido'"
+                        [class.commit-paralizado]="hito.estado === 'Paralizado'"
+                      >
+                        {{ hito.estado }}
                       </span>
-                    } @else {
-                      <span class="badge badge-unclassified">Sin fecha real</span>
-                    }
-                    @if (puedeModificar()) {
-                      <label class="hito-estado">
-                        <span class="sr-only">
-                          Cambiar estado del hito {{ hito.codigo || '' }}
+                      @if (hito.terminal) {
+                        <span class="badge">Terminal</span>
+                      }
+                      @if (hito.fechaReal) {
+                        <span class="badge badge-formal">
+                          Real: {{ fechaTexto(hito.fechaReal) }}
                         </span>
-                        <select
-                          class="form-select hito-select"
-                          [disabled]="hitoCambiando() === hito.id"
-                          (change)="cambiarEstadoHito(hito, $event)"
-                        >
-                          @for (estado of estadosHito; track estado) {
-                            <option [value]="estado" [selected]="estado === hito.estado">
-                              {{ estado }}
-                            </option>
-                          }
-                        </select>
-                      </label>
-                    }
+                      } @else {
+                        <span class="badge badge-unclassified">Sin fecha real</span>
+                      }
+                      @if (puedeModificar()) {
+                        <label class="hito-estado">
+                          <span class="sr-only">
+                            Cambiar estado del hito {{ hito.codigo || '' }}
+                          </span>
+                          <select
+                            class="form-select hito-select"
+                            [disabled]="hitoCambiando() === hito.id"
+                            (change)="cambiarEstadoHito(hito, $event)"
+                          >
+                            @for (estado of estadosHito; track estado) {
+                              <option [value]="estado" [selected]="estado === hito.estado">
+                                {{ estado }}
+                              </option>
+                            }
+                          </select>
+                        </label>
+                      }
+                    </div>
                   </div>
+                </li>
+              }
+            </ol>
+          }
+
+          @if (puedeModificar()) {
+            <div class="panel-hito-form">
+              <h4>Nuevo hito</h4>
+              <div class="form-field">
+                <label class="form-label" for="hito-descripcion">Descripción</label>
+                <textarea
+                  id="hito-descripcion"
+                  class="form-textarea"
+                  rows="2"
+                  [value]="hitoNuevo().descripcion"
+                  (input)="actualizarHito('descripcion', $event)"
+                ></textarea>
+              </div>
+              <div class="form-grid">
+                <div class="form-field">
+                  <label class="form-label" for="hito-fecha"> Fecha planificada </label>
+                  <input
+                    id="hito-fecha"
+                    class="form-input"
+                    type="date"
+                    [value]="hitoNuevo().fecha"
+                    (input)="actualizarHito('fecha', $event)"
+                  />
                 </div>
-              </li>
-            }
-          </ol>
-        }
-
-        @if (puedeModificar()) {
-          <div class="panel-hito-form">
-            <h4>Nuevo hito</h4>
-            <div class="form-field">
-              <label class="form-label" for="hito-descripcion">Descripción</label>
-              <textarea
-                id="hito-descripcion"
-                class="form-textarea"
-                rows="2"
-                [value]="hitoNuevo().descripcion"
-                (input)="actualizarHito('descripcion', $event)"
-              ></textarea>
-            </div>
-            <div class="form-grid">
-              <div class="form-field">
-                <label class="form-label" for="hito-fecha"> Fecha planificada </label>
-                <input
-                  id="hito-fecha"
-                  class="form-input"
-                  type="date"
-                  [value]="hitoNuevo().fecha"
-                  (input)="actualizarHito('fecha', $event)"
-                />
+                <div class="form-field">
+                  <label class="form-label" for="hito-estado">Estado</label>
+                  <select
+                    id="hito-estado"
+                    class="form-select"
+                    (change)="actualizarEstadoHitoNuevo($event)"
+                  >
+                    @for (estado of estadosHito; track estado) {
+                      <option [value]="estado" [selected]="estado === hitoNuevo().estado">
+                        {{ estado }}
+                      </option>
+                    }
+                  </select>
+                </div>
               </div>
-              <div class="form-field">
-                <label class="form-label" for="hito-estado">Estado</label>
-                <select
-                  id="hito-estado"
-                  class="form-select"
-                  (change)="actualizarEstadoHitoNuevo($event)"
-                >
-                  @for (estado of estadosHito; track estado) {
-                    <option [value]="estado" [selected]="estado === hitoNuevo().estado">
-                      {{ estado }}
-                    </option>
-                  }
-                </select>
-              </div>
+
+              @if (hitosError(); as errorHito) {
+                <p class="form-error" role="alert">{{ errorHito }}</p>
+              }
+
+              <button
+                type="button"
+                class="button-secondary"
+                [disabled]="hitoGuardando()"
+                (click)="anadirHito()"
+              >
+                {{ hitoGuardando() ? 'Añadiendo…' : 'Añadir hito' }}
+              </button>
             </div>
-
-            @if (hitosError(); as errorHito) {
-              <p class="form-error" role="alert">{{ errorHito }}</p>
-            }
-
-            <button
-              type="button"
-              class="button-secondary"
-              [disabled]="hitoGuardando()"
-              (click)="anadirHito()"
-            >
-              {{ hitoGuardando() ? 'Añadiendo…' : 'Añadir hito' }}
-            </button>
-          </div>
-        } @else if (hitosError(); as errorHito) {
-          <p class="form-error" role="alert">{{ errorHito }}</p>
-        }
-      </section>
+          } @else if (hitosError(); as errorHito) {
+            <p class="form-error" role="alert">{{ errorHito }}</p>
+          }
+        </section>
+      }
     </div>
 
     <footer class="drawer-foot">
       @if (!puedeModificar()) {
         <p class="form-hint panel-permiso">
-          Sólo lectura: su rol no puede modificar este compromiso.
+          @if (modoAlta()) {
+            Su rol no permite registrar compromisos.
+          } @else {
+            Sólo lectura: su rol no puede modificar este compromiso.
+          }
         </p>
       }
-      @if (editando()) {
+      @if (formularioVisible()) {
         <button
           type="button"
           class="button-secondary"
           [disabled]="guardando()"
-          (click)="cancelarEdicion()"
+          (click)="cancelar()"
         >
           Cancelar
         </button>
         <button type="button" class="button-primary" [disabled]="guardando()" (click)="guardar()">
-          {{ guardando() ? 'Guardando…' : 'Guardar cambios' }}
+          {{ guardando() ? 'Guardando…' : modoAlta() ? 'Registrar compromiso' : 'Guardar cambios' }}
         </button>
       } @else {
         <button type="button" class="button-secondary" (click)="cerrar()">Cerrar</button>

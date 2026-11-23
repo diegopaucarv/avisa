@@ -455,6 +455,15 @@ export class CompromisosPage {
 
   readonly seleccionado = signal<Compromiso | null>(null);
 
+  /** Alta abierta en el panel; el panel sin compromiso es el modo alta. */
+  readonly altaAbierta = signal(false);
+
+  /** Aviso posterior a un alta correcta. */
+  readonly avisoCreacion = signal<string | null>(null);
+
+  /** El alta se ofrece a quien tiene permiso de escritura. */
+  readonly puedeRegistrar = this.capacidades.puedeEditar;
+
   /** Compromiso que se está anulando en el panel compartido. */
   readonly compromisoAnulacion = signal<Compromiso | null>(null);
   readonly enviandoAnulacion = signal(false);
@@ -813,6 +822,7 @@ export class CompromisosPage {
   /** Cambia entre activos y papelera; reinicia a la primera página. */
   cambiarVer(ver: VerRegistros): void {
     this.cerrarPanel();
+    this.cerrarAlta();
     this.cerrarAnulacion();
     void this.actualizar({ ver, pagina: 1 });
   }
@@ -872,11 +882,35 @@ export class CompromisosPage {
   }
 
   abrir(compromiso: Compromiso): void {
+    this.cerrarAlta();
     this.seleccionado.set(compromiso);
   }
 
   cerrarPanel(): void {
     this.seleccionado.set(null);
+  }
+
+  abrirAlta(): void {
+    if (!this.puedeRegistrar()) return;
+    this.cerrarPanel();
+    this.cerrarAnulacion();
+    this.avisoCreacion.set(null);
+    this.altaAbierta.set(true);
+  }
+
+  cerrarAlta(): void {
+    this.altaAbierta.set(false);
+  }
+
+  /** Tras el `POST` correcto: cierra el panel, recarga el listado y avisa. */
+  alCrear(): void {
+    this.altaAbierta.set(false);
+    this.avisoCreacion.set('Compromiso registrado.');
+    if (this.verPapelera()) {
+      void this.actualizar({ ver: 'activos', pagina: 1 });
+      return;
+    }
+    this.alActualizar();
   }
 
   alActualizar(): void {

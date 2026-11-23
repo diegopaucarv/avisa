@@ -144,6 +144,7 @@ export type OpcionCatalogo = {
 export type CatalogosCompromiso = {
   unidades: OpcionCatalogo[];
   tematicas: OpcionCatalogo[];
+  alcances: OpcionCatalogo[];
 };
 
 /** Resultado de aplicar la regla de vencimiento manual → próximo hito → nada. */
@@ -326,6 +327,7 @@ export function aCatalogosCompromiso(bruto: unknown): CatalogosCompromiso {
   return {
     unidades: aOpciones(leer(catalogo, ['unidades'])),
     tematicas: aOpciones(leer(catalogo, ['tematicas'])),
+    alcances: aOpciones(leer(catalogo, ['alcances'])),
   };
 }
 

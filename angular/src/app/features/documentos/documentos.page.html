@@ -9,6 +9,11 @@
       </p>
     </div>
     <div class="view-acciones">
+      @if (puedeRegistrar()) {
+      <button type="button" class="button-primary" (click)="abrirAlta()">
+        Registrar documento
+      </button>
+      }
       <app-exportar-menu
         entidad="documentos"
         etiqueta="Exportar"
@@ -23,6 +28,8 @@
   @if (exportarError(); as mensaje) {
   <p class="exportar-error" role="alert">{{ mensaje }}</p>
   } @if (avisoAnulacion(); as aviso) {
+  <p class="form-hint aviso-ok" role="status">{{ aviso }}</p>
+  } @if (avisoCreacion(); as aviso) {
   <p class="form-hint aviso-ok" role="status">{{ aviso }}</p>
   }
 
@@ -234,7 +241,14 @@
   }
 </section>
 
-@if (documentoAbierto(); as documentoActual) {
+@if (altaAbierta()) {
+<app-documento-panel
+  [documento]="null"
+  [tipos]="tipos()"
+  (cerrado)="cerrarAlta()"
+  (creado)="alCrearDocumento($event)"
+/>
+} @else if (documentoAbierto(); as documentoActual) {
 <app-documento-panel
   [documento]="documentoActual"
   [tipos]="tipos()"

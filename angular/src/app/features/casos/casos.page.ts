@@ -23,6 +23,18 @@ import { formatearFechaHora } from '../../shared/formato-fecha';
 import { ExportarMenuComponent } from '../../shared/ui/exportar-menu.component';
 import { IconoComponent } from '../../shared/ui/icono.component';
 import { PaginacionComponent } from '../../shared/ui/paginacion.component';
+import { CasoPanelComponent, type CuerpoCasoAlta } from './caso-panel.component';
+
+/**
+ * Código del caso recién creado. `POST /api/v1/cases` devuelve el `CaseDetail`
+ * completo (`{ case: {...} }`), no una fila suelta.
+ */
+function codigoDeCasoCreado(bruto: unknown): string | null {
+  const registro = esRegistro(bruto) ? bruto : {};
+  const detalle = leer(registro, ['caso', 'case']);
+  const fila = esRegistro(detalle) ? detalle : registro;
+  return texto(fila, ['codigo', 'code', 'codigoCaso']);
+}
 
 type ModoVista = 'tarjetas' | 'tabla';
 type VerRegistros = 'activos' | 'anulados';
@@ -171,7 +183,13 @@ function aConteos(bruto: unknown): ConteosCasos {
  */
 @Component({
   selector: 'app-casos',
-  imports: [RouterLink, IconoComponent, PaginacionComponent, ExportarMenuComponent],
+  imports: [
+    RouterLink,
+    IconoComponent,
+    PaginacionComponent,
+    ExportarMenuComponent,
+    CasoPanelComponent,
+  ],
   templateUrl: './casos.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
@@ -222,6 +240,11 @@ export class CasosPage {
   /** Caso en curso de restauración (por código) y aviso del resultado. */
   readonly restaurando = signal<string | null>(null);
   readonly aviso = signal<string | null>(null);
+
+  /** Alta de caso: el panel emite el cuerpo y esta página hace el `POST`. */
+  readonly panelAbierto = signal(false);
+  readonly guardando = signal(false);
+  readonly errorAlta = signal<string | null>(null);
 
   private readonly parametros = toSignal(
     this.ruta.queryParamMap.pipe(
@@ -427,6 +450,48 @@ export class CasosPage {
 
   recargar(): void {
     this.recurso.recargar();
+  }
+
+  abrirAlta(): void {
+    if (!this.capacidades.puedeEditar()) return;
+    this.errorAlta.set(null);
+    this.aviso.set(null);
+    this.panelAbierto.set(true);
+  }
+
+  cerrarAlta(): void {
+    if (this.guardando()) return;
+    this.panelAbierto.set(false);
+    this.errorAlta.set(null);
+  }
+
+  /**
+   * `POST /api/v1/cases`: el código lo asigna el servidor. Si la respuesta lo
+   * trae, se abre la ficha; si no, se recarga el listado. Un fallo deja el panel
+   * abierto con el mensaje de la API.
+   */
+  registrarCaso(cuerpo: CuerpoCasoAlta): void {
+    if (this.guardando()) return;
+    this.guardando.set(true);
+    this.errorAlta.set(null);
+
+    this.http.post<unknown>(urlApi('/v1/cases'), cuerpo).subscribe({
+      next: (bruto) => {
+        this.guardando.set(false);
+        const codigo = codigoDeCasoCreado(bruto);
+        this.panelAbierto.set(false);
+        if (codigo) {
+          void this.router.navigate(['/casos', codigo]);
+          return;
+        }
+        this.aviso.set('Caso registrado. Se actualizó el listado.');
+        this.recargar();
+      },
+      error: (fallo: unknown) => {
+        this.guardando.set(false);
+        this.errorAlta.set(aErrorApi(fallo).message);
+      },
+    });
   }
 
   alFallarExportacion(mensaje: string): void {

@@ -38,11 +38,14 @@ import {
   PRIORIDADES_ALERTA,
   aAlerta,
   aDetalleAlerta,
+  aPrioridadesAlerta,
   claseEstado as claseEstadoDe,
   clavePrioridad as clavePrioridadDe,
   formatearPlazo as formatearPlazoDe,
   type Alerta,
+  type AltaAlerta,
   type DetalleAlerta,
+  type OpcionPrioridadAlerta,
   type PatchAlerta,
 } from './alerta.mapeo';
 
@@ -54,6 +57,8 @@ type FiltrosAlertas = {
   orden: string;
   pagina: number;
   tamano: number;
+  /** Sólo llega por URL; no hay control visible. Filtra el listado y presiembra el alta. */
+  caso: string;
 };
 
 const FILTROS_INICIALES: FiltrosAlertas = {
@@ -64,6 +69,7 @@ const FILTROS_INICIALES: FiltrosAlertas = {
   orden: 'recent',
   pagina: 1,
   tamano: TAMANO_PAGINA,
+  caso: '',
 };
 
 /**
@@ -76,7 +82,8 @@ const FILTROS_INICIALES: FiltrosAlertas = {
  * Los filtros se envían tal como los acepta `GET /api/v1/alerts`: `q`,
  * `prioridad` (`cat_prioridades_alerta.codigo`), `nivel`
  * (`cat_niveles_alerta.codigo_legado`, es decir `NA-00x`), `estado` (sólo los
- * cuatro valores que el repositorio reconoce) y `sort`.
+ * cuatro valores que el repositorio reconoce), `sort` y `caso` (código de caso,
+ * sin control visible: llega por URL y también presiembra el alta).
  */
 @Component({
   selector: 'app-alertas',
@@ -258,6 +265,7 @@ export class AlertasPage {
         orden: params.get('orden') ?? 'recent',
         pagina: Math.max(1, Number(params.get('pagina') ?? '1') || 1),
         tamano: Math.max(1, Number(params.get('tamano') ?? String(TAMANO_PAGINA)) || TAMANO_PAGINA),
+        caso: params.get('caso') ?? '',
       })),
     ),
     { initialValue: FILTROS_INICIALES },
@@ -277,6 +285,7 @@ export class AlertasPage {
       nivel: filtros.nivel,
       estado: filtros.estado,
       sort: filtros.orden,
+      caso: filtros.caso,
     });
   });
 
@@ -290,6 +299,7 @@ export class AlertasPage {
         nivel: filtros.nivel,
         estado: filtros.estado,
         sort: filtros.orden,
+        caso: filtros.caso,
       });
     },
     esquema: (bruto) => {
@@ -305,6 +315,9 @@ export class AlertasPage {
 
   /** Alerta abierta en el panel; `null` cierra el panel. */
   readonly alertaAbierta = signal<Alerta | null>(null);
+
+  /** `true` mientras el panel muestra el formulario de alta. */
+  readonly altaAbierta = signal(false);
 
   /** Identificador de la fila abierta; se usa para resaltarla en la tabla. */
   readonly seleccionadaId = signal<string | null>(null);
@@ -337,9 +350,39 @@ export class AlertasPage {
   );
   readonly errorDetalle = this.detalle.error;
 
+  /**
+   * Prioridades del alta desde `GET /api/v1/catalogs` (`catalogs.prioridadesAlerta`).
+   * Se pide sólo al abrir el alta: el listado no necesita tráfico adicional.
+   */
+  private readonly catalogoPrioridades = consulta<readonly OpcionPrioridadAlerta[]>({
+    fuente: () => (this.altaAbierta() ? urlApi('/v1/catalogs') : null),
+    esquema: aPrioridadesAlerta,
+  });
+
+  readonly prioridadesCatalogo = computed(() => this.catalogoPrioridades.valor() ?? []);
+  readonly errorPrioridades = this.catalogoPrioridades.error;
+  readonly cargandoPrioridades = computed(() => {
+    const estado = this.catalogoPrioridades.estado();
+    return estado === 'inactivo' || estado === 'cargando';
+  });
+
+  /** Código de caso con el que se presiembra el alta, si la URL trae `caso`. */
+  readonly casoInicial = computed(() => this.filtros().caso);
+
+  /** El panel se abre para editar una alerta o para registrar una nueva. */
+  readonly panelAbierto = computed(() => this.altaAbierta() || this.alertaPanel() !== null);
+
+  /** Registrar exige el permiso global de escritura; editar, además, la clasificación. */
+  readonly puedePanel = computed(() =>
+    this.altaAbierta() ? this.capacidades.puedeEditar() : this.puedeModificarAbierta(),
+  );
+
   readonly guardando = signal(false);
   readonly errorGuardado = signal<string | null>(null);
   readonly aviso = signal<string | null>(null);
+
+  /** Confirmación del alta en el listado (el panel se cierra al guardar). */
+  readonly avisoAlta = signal<string | null>(null);
 
   /** Alerta que se está anulando en el panel compartido. */
   readonly alertaAnulacion = signal<Alerta | null>(null);
@@ -354,6 +397,9 @@ export class AlertasPage {
     const alerta = this.alertaPanel();
     return alerta ? this.capacidades.puedeModificar(alerta.clasificacion) : false;
   });
+
+  /** Botón de alta: basta el permiso global de escritura. */
+  readonly puedeRegistrar = this.capacidades.puedeEditar;
 
   private temporizador?: ReturnType<typeof setTimeout>;
 
@@ -375,10 +421,22 @@ export class AlertasPage {
 
   abrir(alerta: Alerta): void {
     if (!alerta.id) return;
+    this.altaAbierta.set(false);
     this.errorGuardado.set(null);
     this.aviso.set(null);
     this.alertaAbierta.set(alerta);
     this.seleccionadaId.set(alerta.id);
+  }
+
+  /** Abre el alta (panel con `alerta === null`). */
+  abrirAlta(): void {
+    if (!this.capacidades.puedeEditar()) return;
+    this.errorGuardado.set(null);
+    this.aviso.set(null);
+    this.avisoAlta.set(null);
+    this.alertaAbierta.set(null);
+    this.seleccionadaId.set(null);
+    this.altaAbierta.set(true);
   }
 
   /** Las alertas se anulan con el privilegio de anulación y sobre su clasificación. */
@@ -435,6 +493,7 @@ export class AlertasPage {
   }
 
   cerrarPanel(): void {
+    this.altaAbierta.set(false);
     this.seleccionadaId.set(null);
     this.alertaAbierta.set(null);
     this.errorGuardado.set(null);
@@ -472,6 +531,37 @@ export class AlertasPage {
     }
 
     this.enviar(alerta.id, cuerpo);
+  }
+
+  /**
+   * `POST /api/v1/alerts` (alta). Al guardar se cierra el panel, se recarga el
+   * listado y se deja un aviso con `role="status"`. En error, el panel sigue
+   * abierto y muestra `aErrorApi(fallo).message`.
+   */
+  registrarAlerta(cuerpo: AltaAlerta): void {
+    if (!this.capacidades.puedeEditar()) {
+      this.errorGuardado.set('Su rol no permite registrar alertas.');
+      return;
+    }
+
+    this.guardando.set(true);
+    this.errorGuardado.set(null);
+    this.aviso.set(null);
+    this.avisoAlta.set(null);
+
+    this.http.post<unknown>(urlApi('/v1/alerts'), cuerpo).subscribe({
+      next: () => {
+        this.guardando.set(false);
+        this.altaAbierta.set(false);
+        this.errorGuardado.set(null);
+        this.listado.recargar();
+        this.avisoAlta.set('Alerta registrada. El listado se actualizó.');
+      },
+      error: (fallo: unknown) => {
+        this.guardando.set(false);
+        this.errorGuardado.set(aErrorApi(fallo).message);
+      },
+    });
   }
 
   accionFlujo(paso: number): void {

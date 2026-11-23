@@ -7,7 +7,200 @@
     aria-modal="true"
     aria-labelledby="documento-panel-titulo"
   >
-    @if (cabecera(); as d) {
+    @if (modoAlta()) {
+      <header class="drawer-head">
+        <div class="panel-cabecera">
+          <p class="panel-codigo">Nuevo documento</p>
+          <h2 id="documento-panel-titulo">Registrar documento</h2>
+          <p class="panel-nota">
+            El título y el tipo son obligatorios. Se registran los metadatos y el enlace; no se sube
+            ningún archivo.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          class="icon-button"
+          aria-label="Cerrar el panel del documento"
+          (click)="cerrado.emit()"
+        >
+          <app-icono nombre="cerrar" [tamano]="18" />
+        </button>
+      </header>
+
+      <div class="drawer-body panel-cuerpo">
+        @if (errorGuardado(); as errorGuardar) {
+          <p class="form-error" role="alert">{{ errorGuardar }}</p>
+        }
+        @if (mensajeLocal(); as mensaje) {
+          <p class="form-error" role="alert">{{ mensaje }}</p>
+        }
+
+        <form class="panel-formulario" (submit)="alEnviarAlta($event)">
+          <div class="form-field">
+            <label class="form-label" for="documento-alta-titulo">Título</label>
+            <input
+              id="documento-alta-titulo"
+              class="form-input"
+              type="text"
+              required
+              [value]="borradorAlta().titulo"
+              (input)="campoAlta('titulo', $event)"
+            />
+          </div>
+
+          <div class="form-field">
+            <label class="form-label" for="documento-alta-tipo">Tipo</label>
+            <select
+              id="documento-alta-tipo"
+              class="form-select"
+              required
+              [value]="borradorAlta().tipo"
+              (change)="campoAlta('tipo', $event)"
+            >
+              <option value="" [selected]="borradorAlta().tipo === ''">
+                Seleccione un tipo del catálogo
+              </option>
+              @for (tipo of tipos(); track tipo.valor) {
+                <option [value]="tipo.valor" [selected]="borradorAlta().tipo === tipo.valor">
+                  {{ tipo.etiqueta }}
+                  @if (tipo.anexoNumero !== null) {
+                    · {{ etiquetaAnexo(tipo.anexoNumero) }}
+                  }
+                </option>
+              }
+            </select>
+          </div>
+
+          <div class="form-field">
+            <label class="form-label" for="documento-alta-fecha">Fecha</label>
+            <input
+              id="documento-alta-fecha"
+              class="form-input"
+              type="date"
+              [value]="borradorAlta().fecha"
+              (input)="campoAlta('fecha', $event)"
+            />
+            <span class="form-hint">
+              Opcional. Si queda vacía, el servidor usa la fecha del alta.
+            </span>
+          </div>
+
+          <div class="form-field">
+            <label class="form-label" for="documento-alta-caso">Caso vinculado</label>
+            @if (casoElegido(); as casoSel) {
+              <div class="panel-caso-elegido">
+                <div class="panel-caso-elegido-copia">
+                  <span class="panel-caso-codigo">{{ casoSel.codigo }}</span>
+                  <span class="panel-caso-titulo">{{ casoSel.titulo }}</span>
+                </div>
+                <button type="button" class="button-secondary" (click)="quitarCaso()">
+                  Quitar
+                </button>
+              </div>
+            } @else {
+              <input
+                id="documento-alta-caso"
+                class="form-input"
+                type="search"
+                placeholder="Buscar caso por código o título"
+                [value]="busquedaCaso()"
+                (input)="buscarCaso($event)"
+              />
+              @if (estadoCasos() === 'cargando') {
+                <p class="form-hint" role="status">Buscando casos…</p>
+              } @else if (estadoCasos() === 'error') {
+                <p class="form-error" role="alert">{{ errorCasos()?.message }}</p>
+              } @else if (!busquedaCaso().trim()) {
+                <p class="form-hint">Opcional. Escriba un código o parte del título del caso.</p>
+              } @else if (casosEncontrados().length === 0) {
+                <p class="form-hint">Sin casos para la búsqueda.</p>
+              } @else {
+                <ul class="panel-caso-lista">
+                  @for (casoSugerido of casosEncontrados(); track casoSugerido.id) {
+                    <li>
+                      <button
+                        type="button"
+                        class="panel-caso-opcion"
+                        (click)="elegirCaso(casoSugerido)"
+                      >
+                        <span class="panel-caso-codigo">{{ casoSugerido.codigo }}</span>
+                        <span class="panel-caso-titulo">{{ casoSugerido.titulo }}</span>
+                      </button>
+                    </li>
+                  }
+                </ul>
+              }
+            }
+          </div>
+
+          <div class="form-field">
+            <label class="form-label" for="documento-alta-resumen">Resumen ejecutivo</label>
+            <textarea
+              id="documento-alta-resumen"
+              class="form-textarea"
+              rows="3"
+              [value]="borradorAlta().resumen"
+              (input)="campoAlta('resumen', $event)"
+            ></textarea>
+          </div>
+
+          <div class="form-field">
+            <label class="form-label" for="documento-alta-archivo">Archivo (enlace al PDF)</label>
+            <input
+              id="documento-alta-archivo"
+              class="form-input"
+              type="text"
+              [value]="borradorAlta().archivo"
+              (input)="campoAlta('archivo', $event)"
+            />
+            <span class="form-hint">
+              Enlace o ruta del PDF. Opcional; no se sube ningún archivo.
+            </span>
+          </div>
+
+          <div class="form-field">
+            <label class="form-label" for="documento-alta-url-lista">
+              Listado o índice (enlace)
+            </label>
+            <input
+              id="documento-alta-url-lista"
+              class="form-input"
+              type="text"
+              [value]="borradorAlta().urlLista"
+              (input)="campoAlta('urlLista', $event)"
+            />
+            <span class="form-hint">Opcional.</span>
+          </div>
+
+          <div class="form-field">
+            <label class="form-label" for="documento-alta-url-foto">Fotografía (enlace)</label>
+            <input
+              id="documento-alta-url-foto"
+              class="form-input"
+              type="text"
+              [value]="borradorAlta().urlFoto"
+              (input)="campoAlta('urlFoto', $event)"
+            />
+            <span class="form-hint">Opcional.</span>
+          </div>
+
+          <div class="panel-formulario-acciones">
+            <button type="submit" class="button-primary" [disabled]="guardando()">
+              {{ guardando() ? 'Registrando…' : 'Registrar documento' }}
+            </button>
+            <button
+              type="button"
+              class="button-secondary"
+              [disabled]="guardando()"
+              (click)="cerrado.emit()"
+            >
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
+    } @else if (cabecera(); as d) {
       <header class="drawer-head">
         <div class="panel-cabecera">
           <p class="panel-codigo">{{ d.codigo || 'Sin código' }}</p>

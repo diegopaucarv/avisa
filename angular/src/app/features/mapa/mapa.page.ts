@@ -1,6 +1,17 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  ElementRef,
+  computed,
+  effect,
+  inject,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import * as L from 'leaflet';
 import { map } from 'rxjs';
 
 import { AlcanceService, esAlcance } from '../../core/alcance/alcance.service';
@@ -21,14 +32,18 @@ import {
   regionDe,
   type FilaRegion,
 } from './panorama.agregados';
+import { coordenadaDeRegion } from './centroides.regiones';
 import { PanoramaService } from './panorama.service';
 
 /**
  * Panorama territorial (ventana principal de la aplicación).
  *
- * Distribuye los casos abiertos reales por ámbito y región. No dibuja un mapa:
- * el dataset ubigeo/centroide está aplazado, así que el esquema usa bandas y
- * chips, con el tamaño y el orden derivados del conteo y nunca de coordenadas.
+ * Distribuye los casos abiertos reales por ámbito y región. El esquema usa
+ * bandas, chips y una tabla derivados del conteo, y suma un mapa referencial de
+ * OpenStreetMap: cada región con casos visibles se ubica en su centroide
+ * referencial (`centroides.regiones.ts`). El ubigeo distrital y los límites
+ * administrativos siguen aplazados, así que el mapa es una referencia y no una
+ * capa institucional.
  *
  * El recorte por `usuario().regiones` es de presentación: hoy la RLS entrega el
  * conjunto completo y `lib/db/scope.ts` documenta que el bloqueo por territorio
@@ -233,6 +248,83 @@ import { PanoramaService } from './panorama.service';
       line-height: 1.5;
     }
 
+    .mapa-rotulo {
+      display: inline-flex;
+      align-items: center;
+      margin: 9px 0 0;
+      padding: 2px 8px;
+      border: 1px dashed var(--line);
+      border-radius: 999px;
+      color: var(--ink-2);
+      font-size: 9.5px;
+      font-weight: 600;
+    }
+
+    .mapa-lienzo {
+      height: 360px;
+      min-height: 320px;
+      margin-top: 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--canvas);
+      overflow: hidden;
+      isolation: isolate;
+    }
+
+    .mapa-leyenda {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 14px;
+      margin: 8px 0 0;
+      padding: 0;
+      list-style: none;
+      color: var(--muted);
+      font-size: 9.5px;
+      line-height: 1.5;
+    }
+
+    .mapa-leyenda li {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .leyenda-punto,
+    .leyenda-anillo {
+      flex: none;
+      width: 10px;
+      height: 10px;
+      border: 1.5px solid var(--blue);
+      border-radius: 50%;
+      background: var(--blue-pale);
+    }
+
+    .leyenda-anillo {
+      border: 2px solid var(--blue-dark);
+    }
+
+    .region-chip-activa {
+      border-color: var(--blue);
+      background: var(--blue-pale);
+      color: var(--blue-dark);
+    }
+
+    .quitar-seleccion {
+      margin-left: 2px;
+      padding: 0;
+      border: 0;
+      background: none;
+      color: var(--blue-dark);
+      font: inherit;
+      font-weight: 700;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    .quitar-seleccion:hover {
+      color: var(--red);
+    }
+
     @media (max-width: 760px) {
       .executive-kpis {
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -252,6 +344,39 @@ export class MapaPage {
   private readonly sesion = inject(SesionStore);
   private readonly alcanceService = inject(AlcanceService);
   private readonly panorama = inject(PanoramaService);
+  private readonly destruccion = inject(DestroyRef);
+
+  private readonly lienzo = viewChild<ElementRef<HTMLElement>>('lienzo');
+
+  /** Clave normalizada de la región seleccionada en el mapa. */
+  private readonly claveSeleccionada = signal<string | null>(null);
+  /** Cambia en cada montaje para redibujar los círculos sobre el mapa nuevo. */
+  private readonly versionMapa = signal(0);
+
+  private mapa: L.Map | null = null;
+  private readonly capasRegion = new Map<string, L.CircleMarker>();
+
+  constructor() {
+    // Leaflet necesita el contenedor ya en el DOM. El `@if` de la plantilla lo
+    // crea al haber datos; si la sección desaparece (recarga o cambio de
+    // ámbito), el mismo efecto desmonta el mapa.
+    effect((onCleanup) => {
+      const contenedor = this.lienzo()?.nativeElement;
+      if (!contenedor) return;
+
+      this.montarMapa(contenedor);
+      onCleanup(() => this.desmontarMapa());
+    });
+
+    // Recalcula los círculos al cambiar los casos visibles o la selección, sin
+    // recrear el mapa ni sus teselas.
+    effect(() => {
+      this.versionMapa();
+      this.sincronizarCirculos(this.filasRegion(), this.claveSeleccionada());
+    });
+
+    this.destruccion.onDestroy(() => this.desmontarMapa());
+  }
 
   readonly estado = this.panorama.estado;
   readonly error = this.panorama.error;
@@ -311,6 +436,13 @@ export class MapaPage {
   readonly bandas = computed(() => bandasPorAlcance(this.visibles()));
   readonly filasRegion = computed(() => filasPorRegion(this.visibles()));
 
+  /** Región resaltada por el mapa, sólo si sigue teniendo casos visibles. */
+  readonly filaSeleccionada = computed<FilaRegion | null>(() => {
+    const clave = this.claveSeleccionada();
+    if (clave === null) return null;
+    return this.filasRegion().find((fila) => normalizarRegion(fila.region) === clave) ?? null;
+  });
+
   readonly regionesConCasos = computed(() => contarRegiones(this.visibles()));
   readonly sinRegion = computed(() => contarSinRegion(this.visibles()));
   readonly riesgoAltoSinRegion = computed(() => contarRiesgoAltoSinRegion(this.visibles()));
@@ -346,7 +478,128 @@ export class MapaPage {
     return ambitos.length ? ambitos.join(' · ') : '—';
   }
 
+  esSeleccionada(fila: FilaRegion): boolean {
+    const seleccion = this.filaSeleccionada();
+    return (
+      seleccion !== null && normalizarRegion(seleccion.region) === normalizarRegion(fila.region)
+    );
+  }
+
+  quitarSeleccion(): void {
+    this.claveSeleccionada.set(null);
+  }
+
   recargar(): void {
     this.panorama.recargar();
   }
+
+  private seleccionarRegion(region: string): void {
+    this.claveSeleccionada.set(normalizarRegion(region));
+  }
+
+  private montarMapa(contenedor: HTMLElement): void {
+    if (this.mapa) return;
+
+    const mapa = L.map(contenedor, {
+      scrollWheelZoom: false,
+      zoomControl: true,
+      minZoom: 3,
+      maxZoom: 11,
+    });
+
+    L.tileLayer(TESELAS_OSM, {
+      maxZoom: 19,
+      attribution: '© OpenStreetMap',
+    }).addTo(mapa);
+
+    mapa.fitBounds(LIMITES_PERU, { padding: [12, 12] });
+    this.mapa = mapa;
+    this.versionMapa.update((version) => version + 1);
+  }
+
+  private desmontarMapa(): void {
+    this.capasRegion.clear();
+    const mapa = this.mapa;
+    this.mapa = null;
+    mapa?.remove();
+  }
+
+  private sincronizarCirculos(filas: readonly FilaRegion[], seleccion: string | null): void {
+    const mapa = this.mapa;
+    if (!mapa) return;
+
+    const maximo = filas.reduce((tope, fila) => Math.max(tope, fila.total), 0);
+    const vigentes = new Set<string>();
+
+    for (const fila of filas) {
+      const coordenada = coordenadaDeRegion(fila.region);
+      if (!coordenada) continue; // Sin centroide conocido no se ubica: no se inventa.
+
+      const clave = normalizarRegion(fila.region);
+      const activa = clave === seleccion;
+      const radio = radioCirculo(fila.total, maximo);
+      const estilo = activa ? ESTILO_CIRCULO_ACTIVO : ESTILO_CIRCULO;
+      vigentes.add(clave);
+
+      const existente = this.capasRegion.get(clave);
+      if (existente) {
+        existente.setLatLng(coordenada);
+        existente.setRadius(radio);
+        existente.setStyle(estilo);
+        existente.setTooltipContent(etiquetaCirculo(fila));
+        if (activa) existente.bringToFront();
+        continue;
+      }
+
+      const capa = L.circleMarker(coordenada, { ...estilo, radius: radio })
+        .addTo(mapa)
+        .bindTooltip(etiquetaCirculo(fila), { direction: 'top', offset: [0, -4] })
+        .on('click', () => this.seleccionarRegion(fila.region));
+
+      this.capasRegion.set(clave, capa);
+    }
+
+    for (const [clave, capa] of this.capasRegion) {
+      if (vigentes.has(clave)) continue;
+      capa.remove();
+      this.capasRegion.delete(clave);
+    }
+  }
+}
+
+/** Teselas públicas de OpenStreetMap: el mapa es referencial, no oficial. */
+const TESELAS_OSM = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
+
+/** Encuadre inicial: extensión continental del Perú. */
+const LIMITES_PERU: [number, number][] = [
+  [-18.4, -81.4],
+  [-0.05, -68.6],
+];
+
+/** Radio en píxeles: acotado por diseño y escalado por la raíz del conteo. */
+const RADIO_MIN = 11;
+const RADIO_MAX = 34;
+
+const ESTILO_CIRCULO: L.PathOptions = {
+  color: '#1d4b86',
+  weight: 1.5,
+  fillColor: '#2455a2',
+  fillOpacity: 0.3,
+};
+
+const ESTILO_CIRCULO_ACTIVO: L.PathOptions = {
+  color: '#173f73',
+  weight: 2.5,
+  fillColor: '#2455a2',
+  fillOpacity: 0.55,
+};
+
+function radioCirculo(total: number, maximo: number): number {
+  if (maximo <= 1) return RADIO_MIN;
+  const proporcion = Math.sqrt((Math.max(1, total) - 1) / (maximo - 1));
+  return RADIO_MIN + (RADIO_MAX - RADIO_MIN) * proporcion;
+}
+
+function etiquetaCirculo(fila: FilaRegion): string {
+  return `${fila.region} · ${fila.total} ${fila.total === 1 ? 'caso' : 'casos'}`;
 }

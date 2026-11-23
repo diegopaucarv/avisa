@@ -164,6 +164,61 @@ export type PatchAlerta = {
   casoCode?: string | null;
 };
 
+/**
+ * Cuerpo de `POST /api/v1/alerts` (alta).
+ *
+ * `createAlert` (`lib/db/repos/alerts.ts`) exige `titulo` y `prioridad`; el
+ * resto son opcionales. No se incluye `nivel`: `/api/v1/catalogs` no expone
+ * `cat_niveles_alerta`, así que el cliente no puede ofrecer sus opciones sin
+ * inventarlas.
+ */
+export type AltaAlerta = {
+  titulo: string;
+  /** `cat_prioridades_alerta.codigo` tal como lo devuelve `/v1/catalogs`. */
+  prioridad: string;
+  casoCode?: string;
+  descripcionRiesgo?: string;
+  hechosRecientes?: string;
+  situacionActual?: string;
+  accionesOaipcs?: string;
+};
+
+/**
+ * Opción de `catalogs.prioridadesAlerta` (`GET /api/v1/catalogs`).
+ *
+ * El catálogo usa `codigo` con espacios (`Critica inmediata`), pero
+ * `createAlert` lo resuelve con `core.normalizar_ref`, así que se reenvía tal
+ * cual. `slaHoras` y `grave` sólo alimentan el formulario: el plazo no se edita
+ * ni se concatena a la etiqueta.
+ */
+export type OpcionPrioridadAlerta = {
+  valor: string;
+  etiqueta: string;
+  slaHoras: number | null;
+  grave: boolean;
+};
+
+/** `GET /api/v1/catalogs` → `catalogs.prioridadesAlerta`. */
+export function aPrioridadesAlerta(bruto: unknown): OpcionPrioridadAlerta[] {
+  const registro = esRegistro(bruto) ? bruto : {};
+  const crudo = leer(registro, ['catalogs', 'catalogos']);
+  const catalogo = esRegistro(crudo) ? crudo : {};
+
+  const opciones: OpcionPrioridadAlerta[] = [];
+  for (const item of lista(catalogo, ['prioridadesAlerta'])) {
+    const fila = esRegistro(item) ? item : {};
+    const valor = texto(fila, ['codigo']);
+    if (!valor) continue;
+    opciones.push({
+      valor,
+      etiqueta: texto(fila, ['etiqueta', 'codigo']) ?? valor,
+      slaHoras: numero(fila, ['slaHoras', 'sla_horas']),
+      grave: booleano(fila, ['esGrave', 'es_grave']),
+    });
+  }
+  return opciones;
+}
+
 /* ------------------------------------------------------------------------- *
  * Lectura del payload
  * ------------------------------------------------------------------------- */
