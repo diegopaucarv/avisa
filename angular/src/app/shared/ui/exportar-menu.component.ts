@@ -3,6 +3,7 @@ import {
   Component,
   DestroyRef,
   ElementRef,
+  computed,
   inject,
   input,
   output,
@@ -10,6 +11,7 @@ import {
 } from '@angular/core';
 
 import { descargarExportacion, type FormatoExportacion } from '../../core/http/descargas';
+import { CapacidadesService } from '../../core/permisos/capacidades.service';
 import { IconoComponent } from './icono.component';
 
 /**
@@ -22,6 +24,10 @@ import { IconoComponent } from './icono.component';
  * (`entidad=base`), que se exporta sin filtros y con los mismos tres formatos.
  * No conoce la API: delega en `descargarExportacion`, que se encarga de la
  * cookie de sesión y del nombre que propone el servidor.
+ *
+ * Las salidas visibles dependen del perfil (`CapacidadesService.formatosExportacion`,
+ * item 107): el sectorista en campo sólo ve Excel y PDF. Un componente puede
+ * recortarlas todavía más pasando `formatos`.
  */
 @Component({
   selector: 'app-exportar-menu',
@@ -111,12 +117,24 @@ export class ExportarMenuComponent {
   readonly etiqueta = input('Exportar');
   /** Filtros vigentes de la vista; se omiten al exportar la base completa. */
   readonly consulta = input<Record<string, string> | null>(null);
+  /** Recorte explícito de salidas; por defecto manda la regla del perfil. */
+  readonly formatos = input<readonly FormatoExportacion[] | null>(null);
 
   /** Mensaje legible para la pantalla que contiene el botón. */
   readonly fallo = output<string>();
 
   readonly abierto = signal(false);
   readonly descargando = signal<FormatoExportacion | null>(null);
+
+  private readonly capacidades = inject(CapacidadesService);
+
+  private readonly permitidos = computed(
+    () => this.formatos() ?? this.capacidades.formatosExportacion(),
+  );
+
+  permite(formato: FormatoExportacion): boolean {
+    return this.permitidos().includes(formato);
+  }
 
   private readonly elemento = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly destruccion = inject(DestroyRef);

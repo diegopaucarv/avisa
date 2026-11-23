@@ -1,0 +1,699 @@
+distrito_id,ubigeo,distrito,provincia_id,provincia,region_id,region
+1,010101,Chachapoyas,1,Chachapoyas,1,Amazonas
+2,010102,Asuncion,1,Chachapoyas,1,Amazonas
+3,010103,Balsas,1,Chachapoyas,1,Amazonas
+4,010104,Cheto,1,Chachapoyas,1,Amazonas
+5,010105,Chiliquin,1,Chachapoyas,1,Amazonas
+6,010106,Chuquibamba,1,Chachapoyas,1,Amazonas
+7,010107,Granada,1,Chachapoyas,1,Amazonas
+8,010108,Huancas,1,Chachapoyas,1,Amazonas
+9,010109,La Jalca,1,Chachapoyas,1,Amazonas
+10,010110,Leimebamba,1,Chachapoyas,1,Amazonas
+11,010111,Levanto,1,Chachapoyas,1,Amazonas
+12,010112,Magdalena,1,Chachapoyas,1,Amazonas
+13,010113,Mariscal Castilla,1,Chachapoyas,1,Amazonas
+14,010114,Molinopampa,1,Chachapoyas,1,Amazonas
+15,010115,Montevideo,1,Chachapoyas,1,Amazonas
+16,010116,Olleros,1,Chachapoyas,1,Amazonas
+17,010117,Quinjalca,1,Chachapoyas,1,Amazonas
+18,010118,San Francisco de Daguas,1,Chachapoyas,1,Amazonas
+19,010119,San Isidro de Maino,1,Chachapoyas,1,Amazonas
+20,010120,Soloco,1,Chachapoyas,1,Amazonas
+21,010121,Sonche,1,Chachapoyas,1,Amazonas
+22,010201,Bagua,2,Bagua,1,Amazonas
+23,010202,Aramango,2,Bagua,1,Amazonas
+24,010203,Copallin,2,Bagua,1,Amazonas
+25,010204,El Parco,2,Bagua,1,Amazonas
+26,010205,Imaza,2,Bagua,1,Amazonas
+27,010206,La Peca,2,Bagua,1,Amazonas
+28,010301,Jumbilla,3,Bongara,1,Amazonas
+29,010302,Chisquilla,3,Bongara,1,Amazonas
+30,010303,Churuja,3,Bongara,1,Amazonas
+31,010304,Corosha,3,Bongara,1,Amazonas
+32,010305,Cuispes,3,Bongara,1,Amazonas
+33,010306,Florida,3,Bongara,1,Amazonas
+34,010307,Jazan,3,Bongara,1,Amazonas
+35,010308,Recta,3,Bongara,1,Amazonas
+36,010309,San Carlos,3,Bongara,1,Amazonas
+37,010310,Shipasbamba,3,Bongara,1,Amazonas
+38,010311,Valera,3,Bongara,1,Amazonas
+39,010312,Yambrasbamba,3,Bongara,1,Amazonas
+40,010401,Nieva,4,Condorcanqui,1,Amazonas
+41,010402,El Cenepa,4,Condorcanqui,1,Amazonas
+42,010403,Rio Santiago,4,Condorcanqui,1,Amazonas
+43,010501,Lamud,5,Luya,1,Amazonas
+44,010502,Camporredondo,5,Luya,1,Amazonas
+45,010503,Cocabamba,5,Luya,1,Amazonas
+46,010504,Colcamar,5,Luya,1,Amazonas
+47,010505,Conila,5,Luya,1,Amazonas
+48,010506,Inguilpata,5,Luya,1,Amazonas
+49,010507,Longuita,5,Luya,1,Amazonas
+50,010508,Lonya Chico,5,Luya,1,Amazonas
+51,010509,Luya,5,Luya,1,Amazonas
+52,010510,Luya Viejo,5,Luya,1,Amazonas
+53,010511,Maria,5,Luya,1,Amazonas
+54,010512,Ocalli,5,Luya,1,Amazonas
+55,010513,Ocumal,5,Luya,1,Amazonas
+56,010514,Pisuquia,5,Luya,1,Amazonas
+57,010515,Providencia,5,Luya,1,Amazonas
+58,010516,San Cristobal,5,Luya,1,Amazonas
+59,010517,San Francisco del Yeso,5,Luya,1,Amazonas
+60,010518,San Jeronimo,5,Luya,1,Amazonas
+61,010519,San Juan de Lopecancha,5,Luya,1,Amazonas
+62,010520,Santa Catalina,5,Luya,1,Amazonas
+63,010521,Santo Tomas,5,Luya,1,Amazonas
+64,010522,Tingo,5,Luya,1,Amazonas
+65,010523,Trita,5,Luya,1,Amazonas
+66,010601,San Nicolas,6,Rodriguez de Mendoza,1,Amazonas
+67,010602,Chirimoto,6,Rodriguez de Mendoza,1,Amazonas
+68,010603,Cochamal,6,Rodriguez de Mendoza,1,Amazonas
+69,010604,Huambo,6,Rodriguez de Mendoza,1,Amazonas
+70,010605,Limabamba,6,Rodriguez de Mendoza,1,Amazonas
+71,010606,Longar,6,Rodriguez de Mendoza,1,Amazonas
+72,010607,Mariscal Benavides,6,Rodriguez de Mendoza,1,Amazonas
+73,010608,Milpuc,6,Rodriguez de Mendoza,1,Amazonas
+74,010609,Omia,6,Rodriguez de Mendoza,1,Amazonas
+75,010610,Santa Rosa,6,Rodriguez de Mendoza,1,Amazonas
+76,010611,Totora,6,Rodriguez de Mendoza,1,Amazonas
+77,010612,Vista Alegre,6,Rodriguez de Mendoza,1,Amazonas
+78,010701,Bagua Grande,7,Utcubamba,1,Amazonas
+79,010702,Cajaruro,7,Utcubamba,1,Amazonas
+80,010703,Cumba,7,Utcubamba,1,Amazonas
+81,010704,El Milagro,7,Utcubamba,1,Amazonas
+82,010705,Jamalca,7,Utcubamba,1,Amazonas
+83,010706,Lonya Grande,7,Utcubamba,1,Amazonas
+84,010707,Yamon,7,Utcubamba,1,Amazonas
+85,020101,Huaraz,8,Huaraz,2,Ancash
+86,020102,Cochabamba,8,Huaraz,2,Ancash
+87,020103,Colcabamba,8,Huaraz,2,Ancash
+88,020104,Huanchay,8,Huaraz,2,Ancash
+89,020105,Independencia,8,Huaraz,2,Ancash
+90,020106,Jangas,8,Huaraz,2,Ancash
+91,020107,La Libertad,8,Huaraz,2,Ancash
+92,020108,Olleros,8,Huaraz,2,Ancash
+93,020109,Pampas,8,Huaraz,2,Ancash
+94,020110,Paria,8,Huaraz,2,Ancash
+95,020111,Patay,8,Huaraz,2,Ancash
+96,020112,Piruro,8,Huaraz,2,Ancash
+97,020113,Poca,8,Huaraz,2,Ancash
+98,020114,Tarica,8,Huaraz,2,Ancash
+99,020201,Aija,9,Aija,2,Ancash
+100,020202,Coris,9,Aija,2,Ancash
+101,020203,Huacllan,9,Aija,2,Ancash
+102,020204,La Merced,9,Aija,2,Ancash
+103,020205,Succha,9,Aija,2,Ancash
+104,020301,Llamellin,10,Antonio Raymondi,2,Ancash
+105,020302,Aczo,10,Antonio Raymondi,2,Ancash
+106,020303,Chaccho,10,Antonio Raymondi,2,Ancash
+107,020304,Chingas,10,Antonio Raymondi,2,Ancash
+108,020305,Mirgas,10,Antonio Raymondi,2,Ancash
+109,020306,San Juan de Rontoy,10,Antonio Raymondi,2,Ancash
+110,020401,Chacas,11,Asuncion,2,Ancash
+111,020402,Acochaca,11,Asuncion,2,Ancash
+112,020501,Chiquian,12,Bolognesi,2,Ancash
+113,020502,Abelardo Pardo Lezameta,12,Bolognesi,2,Ancash
+114,020503,Antonio Raymondi,12,Bolognesi,2,Ancash
+115,020504,Aquia,12,Bolognesi,2,Ancash
+116,020505,Cajacay,12,Bolognesi,2,Ancash
+117,020506,Canis,12,Bolognesi,2,Ancash
+118,020507,Colquioc,12,Bolognesi,2,Ancash
+119,020508,Huallanca,12,Bolognesi,2,Ancash
+120,020509,Huasta,12,Bolognesi,2,Ancash
+121,020510,Huayllacayan,12,Bolognesi,2,Ancash
+122,020511,La Primavera,12,Bolognesi,2,Ancash
+123,020512,Mangas,12,Bolognesi,2,Ancash
+124,020513,Pacllon,12,Bolognesi,2,Ancash
+125,020514,San Miguel de Corpanqui,12,Bolognesi,2,Ancash
+126,020515,Ticllos,12,Bolognesi,2,Ancash
+127,020601,Carhuaz,13,Carhuaz,2,Ancash
+128,020602,Acopampa,13,Carhuaz,2,Ancash
+129,020603,Amashca,13,Carhuaz,2,Ancash
+130,020604,Anta,13,Carhuaz,2,Ancash
+131,020605,Ataquero,13,Carhuaz,2,Ancash
+132,020606,Marcara,13,Carhuaz,2,Ancash
+133,020607,Pampashca,13,Carhuaz,2,Ancash
+134,020608,Puco,13,Carhuaz,2,Ancash
+135,020609,San Miguel de Aco,13,Carhuaz,2,Ancash
+136,020610,Shilla,13,Carhuaz,2,Ancash
+137,020611,Tinco,13,Carhuaz,2,Ancash
+138,020612,Yungar,13,Carhuaz,2,Ancash
+139,020701,San Luis,14,Carlos Fermin Fitzcarrald,2,Ancash
+140,020702,San Nicolas,14,Carlos Fermin Fitzcarrald,2,Ancash
+141,020703,Yauya,14,Carlos Fermin Fitzcarrald,2,Ancash
+142,020801,Casma,15,Casma,2,Ancash
+143,020802,Buena Vista Alta,15,Casma,2,Ancash
+144,020803,Comandante Noel,15,Casma,2,Ancash
+145,020804,Yautan,15,Casma,2,Ancash
+146,020901,Corongo,16,Corongo,2,Ancash
+147,020902,Aco,16,Corongo,2,Ancash
+148,020903,Bambas,16,Corongo,2,Ancash
+149,020904,Cusca,16,Corongo,2,Ancash
+150,020905,La Pampa,16,Corongo,2,Ancash
+151,020906,Pampas,16,Corongo,2,Ancash
+152,020907,Yanac,16,Corongo,2,Ancash
+153,021001,Huari,17,Huari,2,Ancash
+154,021002,Anra,17,Huari,2,Ancash
+155,021003,Cajay,17,Huari,2,Ancash
+156,021004,Chavin de Huantar,17,Huari,2,Ancash
+157,021005,Huacachi,17,Huari,2,Ancash
+158,021006,Huacchis,17,Huari,2,Ancash
+159,021007,Huachis,17,Huari,2,Ancash
+160,021008,Huantar,17,Huari,2,Ancash
+161,021009,Masin,17,Huari,2,Ancash
+162,021010,Paucas,17,Huari,2,Ancash
+163,021011,Ponto,17,Huari,2,Ancash
+164,021012,Rahuapampa,17,Huari,2,Ancash
+165,021013,Rapayan,17,Huari,2,Ancash
+166,021014,San Marcos,17,Huari,2,Ancash
+167,021015,San Pedro de Chana,17,Huari,2,Ancash
+168,021016,Uco,17,Huari,2,Ancash
+169,030101,Abancay,18,Abancay,3,Apurimac
+170,030102,Chacoche,18,Abancay,3,Apurimac
+171,030103,Circa,18,Abancay,3,Apurimac
+172,030104,Curahuasi,18,Abancay,3,Apurimac
+173,030105,Huanipaca,18,Abancay,3,Apurimac
+174,030106,Lambrama,18,Abancay,3,Apurimac
+175,030107,Pichirhua,18,Abancay,3,Apurimac
+176,030108,San Pedro de Cachora,18,Abancay,3,Apurimac
+177,030109,Tamburco,18,Abancay,3,Apurimac
+178,030201,Andahuaylas,19,Andahuaylas,3,Apurimac
+179,030202,Andarapa,19,Andahuaylas,3,Apurimac
+180,030203,Chiara,19,Andahuaylas,3,Apurimac
+181,030204,Huancarama,19,Andahuaylas,3,Apurimac
+182,030205,Huancaray,19,Andahuaylas,3,Apurimac
+183,030206,Huayana,19,Andahuaylas,3,Apurimac
+184,030207,Kishuara,19,Andahuaylas,3,Apurimac
+185,030208,Pacobamba,19,Andahuaylas,3,Apurimac
+186,030209,Pacucha,19,Andahuaylas,3,Apurimac
+187,030210,Pampachiri,19,Andahuaylas,3,Apurimac
+188,030211,Pomacocha,19,Andahuaylas,3,Apurimac
+189,030212,San Antonio de Cachi,19,Andahuaylas,3,Apurimac
+190,030213,San Jeronimo,19,Andahuaylas,3,Apurimac
+191,030214,San Miguel de Chaccrampa,19,Andahuaylas,3,Apurimac
+192,030215,Santa Maria de Chicmo,19,Andahuaylas,3,Apurimac
+193,030216,Talavera,19,Andahuaylas,3,Apurimac
+194,030217,Tumay Huaraca,19,Andahuaylas,3,Apurimac
+195,030218,Turpo,19,Andahuaylas,3,Apurimac
+196,030219,Kaquiabamba,19,Andahuaylas,3,Apurimac
+197,030220,Jose Maria Arguedas,19,Andahuaylas,3,Apurimac
+198,040101,Arequipa,20,Arequipa,4,Arequipa
+199,040102,Alto Selva Alegre,20,Arequipa,4,Arequipa
+200,040103,Cayma,20,Arequipa,4,Arequipa
+201,040104,Cerro Colorado,20,Arequipa,4,Arequipa
+202,040105,Characato,20,Arequipa,4,Arequipa
+203,040106,Chiguata,20,Arequipa,4,Arequipa
+204,040107,Jacobo Hunter,20,Arequipa,4,Arequipa
+205,040108,La Joya,20,Arequipa,4,Arequipa
+206,040109,Mariano Melgar,20,Arequipa,4,Arequipa
+207,040110,Miraflores,20,Arequipa,4,Arequipa
+208,040111,Mollebaya,20,Arequipa,4,Arequipa
+209,040112,Paucarpata,20,Arequipa,4,Arequipa
+210,040113,Pocsi,20,Arequipa,4,Arequipa
+211,040114,Polobaya,20,Arequipa,4,Arequipa
+212,040115,Quequeña,20,Arequipa,4,Arequipa
+213,040116,Sabandia,20,Arequipa,4,Arequipa
+214,040117,Sachaca,20,Arequipa,4,Arequipa
+215,040118,San Juan de Siguas,20,Arequipa,4,Arequipa
+216,040119,San Juan de Tarucani,20,Arequipa,4,Arequipa
+217,040120,Santa Isabel de Siguas,20,Arequipa,4,Arequipa
+218,040121,Santa Rita de Siguas,20,Arequipa,4,Arequipa
+219,040122,Socabaya,20,Arequipa,4,Arequipa
+220,040123,Tiabaya,20,Arequipa,4,Arequipa
+221,040124,Uchumayo,20,Arequipa,4,Arequipa
+222,040125,Vitor,20,Arequipa,4,Arequipa
+223,040126,Yanahuara,20,Arequipa,4,Arequipa
+224,040127,Yarabamba,20,Arequipa,4,Arequipa
+225,040128,Yura,20,Arequipa,4,Arequipa
+226,040129,Jose Luis Bustamante Y Rivero,20,Arequipa,4,Arequipa
+227,040201,Camana,21,Camana,4,Arequipa
+228,040202,Jose Maria Quimper,21,Camana,4,Arequipa
+229,040203,Mariano Nicolas Valcarcel,21,Camana,4,Arequipa
+230,040204,Mariscal Caceres,21,Camana,4,Arequipa
+231,040205,Nicolas de Pierola,21,Camana,4,Arequipa
+232,040206,Ocoña,21,Camana,4,Arequipa
+233,040207,Quilca,21,Camana,4,Arequipa
+234,040208,Samuel Pastor,21,Camana,4,Arequipa
+235,050101,Ayacucho,22,Huamanga,5,Ayacucho
+236,050102,Acocro,22,Huamanga,5,Ayacucho
+237,050103,Acos Vinchos,22,Huamanga,5,Ayacucho
+238,050104,Carmen Alto,22,Huamanga,5,Ayacucho
+239,050105,Chiara,22,Huamanga,5,Ayacucho
+240,050106,Ocros,22,Huamanga,5,Ayacucho
+241,050107,Pacaycasa,22,Huamanga,5,Ayacucho
+242,050108,Quinua,22,Huamanga,5,Ayacucho
+243,050109,San Jose de Ticllas,22,Huamanga,5,Ayacucho
+244,050110,San Juan Bautista,22,Huamanga,5,Ayacucho
+245,050111,Santiago de Pischa,22,Huamanga,5,Ayacucho
+246,050112,Socos,22,Huamanga,5,Ayacucho
+247,050113,Tambillo,22,Huamanga,5,Ayacucho
+248,050114,Vinchos,22,Huamanga,5,Ayacucho
+249,050115,Jesus Nazareno,22,Huamanga,5,Ayacucho
+250,050116,Andres Avelino Caceres Dorregaray,22,Huamanga,5,Ayacucho
+251,060101,Cajamarca,23,Cajamarca,6,Cajamarca
+252,060102,Asuncion,23,Cajamarca,6,Cajamarca
+253,060103,Chetilla,23,Cajamarca,6,Cajamarca
+254,060104,Cospan,23,Cajamarca,6,Cajamarca
+255,060105,Encañada,23,Cajamarca,6,Cajamarca
+256,060106,Jesus,23,Cajamarca,6,Cajamarca
+257,060107,Llacanora,23,Cajamarca,6,Cajamarca
+258,060108,Los Baños del Inca,23,Cajamarca,6,Cajamarca
+259,060109,Magdalena,23,Cajamarca,6,Cajamarca
+260,060110,Matara,23,Cajamarca,6,Cajamarca
+261,060111,Namora,23,Cajamarca,6,Cajamarca
+262,060112,San Juan,23,Cajamarca,6,Cajamarca
+263,060201,Cajabamba,24,Cajabamba,6,Cajamarca
+264,060202,Cachachi,24,Cajabamba,6,Cajamarca
+265,060203,Condebamba,24,Cajabamba,6,Cajamarca
+266,060204,Sitacocha,24,Cajabamba,6,Cajamarca
+267,070101,Callao,25,Callao,7,Callao
+268,070102,Bellavista,25,Callao,7,Callao
+269,070103,Carmen de La Legua Reynoso,25,Callao,7,Callao
+270,070104,La Perla,25,Callao,7,Callao
+271,070105,La Punta,25,Callao,7,Callao
+272,070106,Mi Peru,25,Callao,7,Callao
+273,070107,Ventanilla,25,Callao,7,Callao
+274,080101,Cusco,26,Cusco,8,Cusco
+275,080102,Ccorca,26,Cusco,8,Cusco
+276,080103,Poroy,26,Cusco,8,Cusco
+277,080104,San Jeronimo,26,Cusco,8,Cusco
+278,080105,San Sebastian,26,Cusco,8,Cusco
+279,080106,Santiago,26,Cusco,8,Cusco
+280,080107,Saylla,26,Cusco,8,Cusco
+281,080108,Wanchaq,26,Cusco,8,Cusco
+282,080201,Acomayo,27,Acomayo,8,Cusco
+283,080202,Acopia,27,Acomayo,8,Cusco
+284,080203,Acos,27,Acomayo,8,Cusco
+285,080204,Mosoc Llacta,27,Acomayo,8,Cusco
+286,080205,Pomacanchi,27,Acomayo,8,Cusco
+287,080206,Rondocan,27,Acomayo,8,Cusco
+288,080207,Sangarara,27,Acomayo,8,Cusco
+289,090101,Huancavelica,28,Huancavelica,9,Huancavelica
+290,090102,Acobambilla,28,Huancavelica,9,Huancavelica
+291,090103,Acoria,28,Huancavelica,9,Huancavelica
+292,090104,Conayca,28,Huancavelica,9,Huancavelica
+293,090105,Cuenca,28,Huancavelica,9,Huancavelica
+294,090106,Huachocolpa,28,Huancavelica,9,Huancavelica
+295,090107,Huayllahuara,28,Huancavelica,9,Huancavelica
+296,090108,Izcuchaca,28,Huancavelica,9,Huancavelica
+297,090109,Laria,28,Huancavelica,9,Huancavelica
+298,090110,Manta,28,Huancavelica,9,Huancavelica
+299,090111,Mariscal Caceres,28,Huancavelica,9,Huancavelica
+300,090112,Moya,28,Huancavelica,9,Huancavelica
+301,090113,Nuevo Occoro,28,Huancavelica,9,Huancavelica
+302,090114,Palca,28,Huancavelica,9,Huancavelica
+303,090115,Pilchaca,28,Huancavelica,9,Huancavelica
+304,090116,Vilca,28,Huancavelica,9,Huancavelica
+305,090117,Yauli,28,Huancavelica,9,Huancavelica
+306,090118,Ascension,28,Huancavelica,9,Huancavelica
+307,090119,Huando,28,Huancavelica,9,Huancavelica
+308,100101,Huanuco,29,Huanuco,10,Huanuco
+309,100102,Amarilis,29,Huanuco,10,Huanuco
+310,100103,Chinchao,29,Huanuco,10,Huanuco
+311,100104,Churubamba,29,Huanuco,10,Huanuco
+312,100105,Margos,29,Huanuco,10,Huanuco
+313,100106,Quisqui,29,Huanuco,10,Huanuco
+314,100107,San Francisco de Cayran,29,Huanuco,10,Huanuco
+315,100108,San Pedro de Chaulan,29,Huanuco,10,Huanuco
+316,100109,Santa Maria del Valle,29,Huanuco,10,Huanuco
+317,100110,Yarumayo,29,Huanuco,10,Huanuco
+318,100111,Pillco Marca,29,Huanuco,10,Huanuco
+319,100112,Yacus,29,Huanuco,10,Huanuco
+320,100113,San Pablo de Pillao,29,Huanuco,10,Huanuco
+321,110101,Ica,30,Ica,11,Ica
+322,110102,La Tinguiña,30,Ica,11,Ica
+323,110103,Los Aquijes,30,Ica,11,Ica
+324,110104,Ocucaje,30,Ica,11,Ica
+325,110105,Pachacutec,30,Ica,11,Ica
+326,110106,Parcona,30,Ica,11,Ica
+327,110107,Pueblo Nuevo,30,Ica,11,Ica
+328,110108,Salas,30,Ica,11,Ica
+329,110109,San Jose de Los Molinos,30,Ica,11,Ica
+330,110110,San Juan Bautista,30,Ica,11,Ica
+331,110111,Santiago,30,Ica,11,Ica
+332,110112,Subtanjalla,30,Ica,11,Ica
+333,110113,Tate,30,Ica,11,Ica
+334,110114,Yauca del Rosario,30,Ica,11,Ica
+335,110201,Chincha Alta,31,Chincha,11,Ica
+336,110202,Alto Laran,31,Chincha,11,Ica
+337,110203,Chavin,31,Chincha,11,Ica
+338,110204,Chincha Baja,31,Chincha,11,Ica
+339,110205,El Carmen,31,Chincha,11,Ica
+340,110206,Grocio Prado,31,Chincha,11,Ica
+341,110207,Pueblo Nuevo,31,Chincha,11,Ica
+342,110208,San Juan de Yanac,31,Chincha,11,Ica
+343,110209,San Pedro de Huacarpana,31,Chincha,11,Ica
+344,110210,Sunampe,31,Chincha,11,Ica
+345,110211,Tambo de Mora,31,Chincha,11,Ica
+346,120101,Huancayo,32,Huancayo,12,Junin
+347,120102,Carhuacallanga,32,Huancayo,12,Junin
+348,120103,Chacapampa,32,Huancayo,12,Junin
+349,120104,Chicche,32,Huancayo,12,Junin
+350,120105,Chilca,32,Huancayo,12,Junin
+351,120106,Chongos Alto,32,Huancayo,12,Junin
+352,120107,Chupuro,32,Huancayo,12,Junin
+353,120108,Colca,32,Huancayo,12,Junin
+354,120109,Cullhuas,32,Huancayo,12,Junin
+355,120110,El Tambo,32,Huancayo,12,Junin
+356,120111,Huacrapuquio,32,Huancayo,12,Junin
+357,120112,Hualhuas,32,Huancayo,12,Junin
+358,120113,Huancan,32,Huancayo,12,Junin
+359,120114,Huasicancha,32,Huancayo,12,Junin
+360,120115,Huayucachi,32,Huancayo,12,Junin
+361,120116,Ingenio,32,Huancayo,12,Junin
+362,120117,Pariahuanca,32,Huancayo,12,Junin
+363,120118,Pilcomayo,32,Huancayo,12,Junin
+364,120119,Pucara,32,Huancayo,12,Junin
+365,120120,Quichuay,32,Huancayo,12,Junin
+366,120121,Quilcas,32,Huancayo,12,Junin
+367,120122,San Agustin,32,Huancayo,12,Junin
+368,120123,San Jeronimo de Tunan,32,Huancayo,12,Junin
+369,120124,Saño,32,Huancayo,12,Junin
+370,120125,Sapallanga,32,Huancayo,12,Junin
+371,120126,Sicaya,32,Huancayo,12,Junin
+372,120127,Santo Domingo de Acobamba,32,Huancayo,12,Junin
+373,120128,Viques,32,Huancayo,12,Junin
+374,130101,Trujillo,33,Trujillo,13,La Libertad
+375,130102,El Porvenir,33,Trujillo,13,La Libertad
+376,130103,Florencia de Mora,33,Trujillo,13,La Libertad
+377,130104,Huanchaco,33,Trujillo,13,La Libertad
+378,130105,La Esperanza,33,Trujillo,13,La Libertad
+379,130106,Laredo,33,Trujillo,13,La Libertad
+380,130107,Moche,33,Trujillo,13,La Libertad
+381,130108,Poroto,33,Trujillo,13,La Libertad
+382,130109,Salaverry,33,Trujillo,13,La Libertad
+383,130110,Simbal,33,Trujillo,13,La Libertad
+384,130111,Victor Larco Herrera,33,Trujillo,13,La Libertad
+385,140101,Chiclayo,34,Chiclayo,14,Lambayeque
+386,140102,Cayalti,34,Chiclayo,14,Lambayeque
+387,140103,Chongoyape,34,Chiclayo,14,Lambayeque
+388,140104,Eten,34,Chiclayo,14,Lambayeque
+389,140105,Eten Puerto,34,Chiclayo,14,Lambayeque
+390,140106,Jose Leonardo Ortiz,34,Chiclayo,14,Lambayeque
+391,140107,La Victoria,34,Chiclayo,14,Lambayeque
+392,140108,Lagunas,34,Chiclayo,14,Lambayeque
+393,140109,Monsefu,34,Chiclayo,14,Lambayeque
+394,140110,Nueva Arica,34,Chiclayo,14,Lambayeque
+395,140111,Oyotun,34,Chiclayo,14,Lambayeque
+396,140112,Patapo,34,Chiclayo,14,Lambayeque
+397,140113,Picsi,34,Chiclayo,14,Lambayeque
+398,140114,Pimentel,34,Chiclayo,14,Lambayeque
+399,140115,Reque,34,Chiclayo,14,Lambayeque
+400,140116,Santa Rosa,34,Chiclayo,14,Lambayeque
+401,140117,Saña,34,Chiclayo,14,Lambayeque
+402,140118,Zaña,34,Chiclayo,14,Lambayeque
+403,140119,Pomalca,34,Chiclayo,14,Lambayeque
+404,140120,Pucala,34,Chiclayo,14,Lambayeque
+405,140121,Tuman,34,Chiclayo,14,Lambayeque
+406,140201,Ferreñafe,35,Ferreñafe,14,Lambayeque
+407,140202,Cañaris,35,Ferreñafe,14,Lambayeque
+408,140203,Incahuasi,35,Ferreñafe,14,Lambayeque
+409,140204,Manuel Antonio Mesones Muro,35,Ferreñafe,14,Lambayeque
+410,140205,Pitipo,35,Ferreñafe,14,Lambayeque
+411,140206,Pueblo Nuevo,35,Ferreñafe,14,Lambayeque
+412,140301,Lambayeque,36,Lambayeque,14,Lambayeque
+413,140302,Chochope,36,Lambayeque,14,Lambayeque
+414,140303,Illimo,36,Lambayeque,14,Lambayeque
+415,140304,Jayanca,36,Lambayeque,14,Lambayeque
+416,140305,Mochumi,36,Lambayeque,14,Lambayeque
+417,140306,Morrope,36,Lambayeque,14,Lambayeque
+418,140307,Motupe,36,Lambayeque,14,Lambayeque
+419,140308,Olmos,36,Lambayeque,14,Lambayeque
+420,140309,Pacora,36,Lambayeque,14,Lambayeque
+421,140310,Salas,36,Lambayeque,14,Lambayeque
+422,140311,San Jose,36,Lambayeque,14,Lambayeque
+423,140312,Tucume,36,Lambayeque,14,Lambayeque
+424,150101,Lima,37,Lima,15,Lima
+425,150102,Ancon,37,Lima,15,Lima
+426,150103,Ate,37,Lima,15,Lima
+427,150104,Barranco,37,Lima,15,Lima
+428,150105,Breña,37,Lima,15,Lima
+429,150106,Carabayllo,37,Lima,15,Lima
+430,150107,Chaclacayo,37,Lima,15,Lima
+431,150108,Chorrillos,37,Lima,15,Lima
+432,150109,Cieneguilla,37,Lima,15,Lima
+433,150110,Comas,37,Lima,15,Lima
+434,150111,El Agustino,37,Lima,15,Lima
+435,150112,Independencia,37,Lima,15,Lima
+436,150113,Jesus Maria,37,Lima,15,Lima
+437,150114,La Molina,37,Lima,15,Lima
+438,150115,La Victoria,37,Lima,15,Lima
+439,150116,Lince,37,Lima,15,Lima
+440,150117,Los Olivos,37,Lima,15,Lima
+441,150118,Lurigancho,37,Lima,15,Lima
+442,150119,Lurin,37,Lima,15,Lima
+443,150120,Magdalena del Mar,37,Lima,15,Lima
+444,150121,Miraflores,37,Lima,15,Lima
+445,150122,Pachacamac,37,Lima,15,Lima
+446,150123,Pucusana,37,Lima,15,Lima
+447,150124,Pueblo Libre,37,Lima,15,Lima
+448,150125,Puente Piedra,37,Lima,15,Lima
+449,150126,Punta Hermosa,37,Lima,15,Lima
+450,150127,Punta Negra,37,Lima,15,Lima
+451,150128,Rimac,37,Lima,15,Lima
+452,150129,San Bartolo,37,Lima,15,Lima
+453,150130,San Borja,37,Lima,15,Lima
+454,150131,San Isidro,37,Lima,15,Lima
+455,150132,San Juan de Lurigancho,37,Lima,15,Lima
+456,150133,San Juan de Miraflores,37,Lima,15,Lima
+457,150134,San Luis,37,Lima,15,Lima
+458,150135,San Martin de Porres,37,Lima,15,Lima
+459,150136,San Miguel,37,Lima,15,Lima
+460,150137,Santa Anita,37,Lima,15,Lima
+461,150138,Santa Maria del Mar,37,Lima,15,Lima
+462,150139,Santa Rosa,37,Lima,15,Lima
+463,150140,Santiago de Surco,37,Lima,15,Lima
+464,150141,Surquillo,37,Lima,15,Lima
+465,150142,Villa El Salvador,37,Lima,15,Lima
+466,150143,Villa Maria del Triunfo,37,Lima,15,Lima
+467,150201,Barranca,38,Barranca,15,Lima
+468,150202,Paramonga,38,Barranca,15,Lima
+469,150203,Pativilca,38,Barranca,15,Lima
+470,150204,Supe,38,Barranca,15,Lima
+471,150205,Supe Puerto,38,Barranca,15,Lima
+472,150301,Cajatambo,39,Cajatambo,15,Lima
+473,150302,Copa,39,Cajatambo,15,Lima
+474,150303,Gorgor,39,Cajatambo,15,Lima
+475,150304,Huancapon,39,Cajatambo,15,Lima
+476,150305,Manas,39,Cajatambo,15,Lima
+477,150401,Canta,40,Canta,15,Lima
+478,150402,Arahuay,40,Canta,15,Lima
+479,150403,Huamantanga,40,Canta,15,Lima
+480,150404,Huaros,40,Canta,15,Lima
+481,150405,Lachaqui,40,Canta,15,Lima
+482,150406,San Buenaventura,40,Canta,15,Lima
+483,150407,Santa Rosa de Quives,40,Canta,15,Lima
+484,150501,San Vicente de Cañete,41,Cañete,15,Lima
+485,150502,Asia,41,Cañete,15,Lima
+486,150503,Calango,41,Cañete,15,Lima
+487,150504,Cerro Azul,41,Cañete,15,Lima
+488,150505,Chilca,41,Cañete,15,Lima
+489,150506,Coayllo,41,Cañete,15,Lima
+490,150507,Imperial,41,Cañete,15,Lima
+491,150508,Lunahuana,41,Cañete,15,Lima
+492,150509,Mala,41,Cañete,15,Lima
+493,150510,Nuevo Imperial,41,Cañete,15,Lima
+494,150511,Pacaran,41,Cañete,15,Lima
+495,150512,Quilmana,41,Cañete,15,Lima
+496,150513,San Antonio,41,Cañete,15,Lima
+497,150514,San Luis,41,Cañete,15,Lima
+498,150515,Santa Cruz de Flores,41,Cañete,15,Lima
+499,150516,Zuñiga,41,Cañete,15,Lima
+500,160101,Iquitos,42,Maynas,16,Loreto
+501,160102,Alto Nanay,42,Maynas,16,Loreto
+502,160103,Fernando Lores,42,Maynas,16,Loreto
+503,160104,Indiana,42,Maynas,16,Loreto
+504,160105,Las Amazonas,42,Maynas,16,Loreto
+505,160106,Mazan,42,Maynas,16,Loreto
+506,160107,Napo,42,Maynas,16,Loreto
+507,160108,Punchana,42,Maynas,16,Loreto
+508,160110,Torres Causana,42,Maynas,16,Loreto
+509,160112,Belen,42,Maynas,16,Loreto
+510,160113,San Juan Bautista,42,Maynas,16,Loreto
+511,160201,Yurimaguas,43,Alto Amazonas,16,Loreto
+512,160202,Balsapuerto,43,Alto Amazonas,16,Loreto
+513,160205,Jeberos,43,Alto Amazonas,16,Loreto
+514,160206,Lagunas,43,Alto Amazonas,16,Loreto
+515,160210,Santa Cruz,43,Alto Amazonas,16,Loreto
+516,160211,Teniente Cesar Lopez Rojas,43,Alto Amazonas,16,Loreto
+517,170101,Tambopata,44,Tambopata,17,Madre de Dios
+518,170102,Inambari,44,Tambopata,17,Madre de Dios
+519,170103,Las Piedras,44,Tambopata,17,Madre de Dios
+520,170104,Laberinto,44,Tambopata,17,Madre de Dios
+521,170201,Manu,45,Manu,17,Madre de Dios
+522,170202,Fitzcarrald,45,Manu,17,Madre de Dios
+523,170203,Madre de Dios,45,Manu,17,Madre de Dios
+524,170204,Huepetuhe,45,Manu,17,Madre de Dios
+525,170301,Iñapari,46,Tahuamanu,17,Madre de Dios
+526,170302,Iberia,46,Tahuamanu,17,Madre de Dios
+527,170303,Tahuamanu,46,Tahuamanu,17,Madre de Dios
+528,180101,Moquegua,47,Mariscal Nieto,18,Moquegua
+529,180102,Carumas,47,Mariscal Nieto,18,Moquegua
+530,180103,Cuchumbaya,47,Mariscal Nieto,18,Moquegua
+531,180104,Samegua,47,Mariscal Nieto,18,Moquegua
+532,180105,San Cristobal,47,Mariscal Nieto,18,Moquegua
+533,180106,Torata,47,Mariscal Nieto,18,Moquegua
+534,180201,Omate,48,General Sanchez Cerro,18,Moquegua
+535,180202,Chojata,48,General Sanchez Cerro,18,Moquegua
+536,180203,Coalaque,48,General Sanchez Cerro,18,Moquegua
+537,180204,Ichuña,48,General Sanchez Cerro,18,Moquegua
+538,180205,La Capilla,48,General Sanchez Cerro,18,Moquegua
+539,180206,Lloque,48,General Sanchez Cerro,18,Moquegua
+540,180207,Matalaque,48,General Sanchez Cerro,18,Moquegua
+541,180208,Puquina,48,General Sanchez Cerro,18,Moquegua
+542,180209,Quinistaquillas,48,General Sanchez Cerro,18,Moquegua
+543,180210,Ubinas,48,General Sanchez Cerro,18,Moquegua
+544,180211,Yunga,48,General Sanchez Cerro,18,Moquegua
+545,180301,Ilo,49,Ilo,18,Moquegua
+546,180302,El Algarrobal,49,Ilo,18,Moquegua
+547,180303,Pacocha,49,Ilo,18,Moquegua
+548,190101,Chaupimarca,50,Pasco,19,Pasco
+549,190102,Huachon,50,Pasco,19,Pasco
+550,190103,Huariaca,50,Pasco,19,Pasco
+551,190104,Huayllay,50,Pasco,19,Pasco
+552,190105,Ninacaca,50,Pasco,19,Pasco
+553,190106,Pallanchacra,50,Pasco,19,Pasco
+554,190107,Paucartambo,50,Pasco,19,Pasco
+555,190108,San Francisco de Asis de Yarusyacan,50,Pasco,19,Pasco
+556,190109,Simon Bolivar,50,Pasco,19,Pasco
+557,190110,Ticlacayan,50,Pasco,19,Pasco
+558,190111,Tinyahuarco,50,Pasco,19,Pasco
+559,190112,Vicco,50,Pasco,19,Pasco
+560,190113,Yanacancha,50,Pasco,19,Pasco
+561,200101,Piura,51,Piura,20,Piura
+562,200102,Castilla,51,Piura,20,Piura
+563,200103,Catacaos,51,Piura,20,Piura
+564,200104,Cura Mori,51,Piura,20,Piura
+565,200105,El Tallan,51,Piura,20,Piura
+566,200106,La Arena,51,Piura,20,Piura
+567,200107,La Union,51,Piura,20,Piura
+568,200108,Las Lomas,51,Piura,20,Piura
+569,200109,Tambo Grande,51,Piura,20,Piura
+570,200110,Veintiseis de Octubre,51,Piura,20,Piura
+571,200201,Ayabaca,52,Ayabaca,20,Piura
+572,200202,Frias,52,Ayabaca,20,Piura
+573,200203,Jilili,52,Ayabaca,20,Piura
+574,200204,Lagunas,52,Ayabaca,20,Piura
+575,200205,Montero,52,Ayabaca,20,Piura
+576,200206,Pacaipampa,52,Ayabaca,20,Piura
+577,200207,Paimas,52,Ayabaca,20,Piura
+578,200208,Sapillica,52,Ayabaca,20,Piura
+579,200209,Sicchez,52,Ayabaca,20,Piura
+580,200210,Suyo,52,Ayabaca,20,Piura
+581,200301,Huancabamba,53,Huancabamba,20,Piura
+582,200302,Canchaque,53,Huancabamba,20,Piura
+583,200303,El Carmen de la Frontera,53,Huancabamba,20,Piura
+584,200304,Huarmaca,53,Huancabamba,20,Piura
+585,200305,Lalaquiz,53,Huancabamba,20,Piura
+586,200306,San Miguel de El Faique,53,Huancabamba,20,Piura
+587,200307,Sondor,53,Huancabamba,20,Piura
+588,200308,Sondorillo,53,Huancabamba,20,Piura
+589,200401,Chulucanas,54,Morropon,20,Piura
+590,200402,Buenos Aires,54,Morropon,20,Piura
+591,200403,Chalaco,54,Morropon,20,Piura
+592,200404,La Matanza,54,Morropon,20,Piura
+593,200405,Morropon,54,Morropon,20,Piura
+594,200406,Salitral,54,Morropon,20,Piura
+595,200407,San Juan de Bigote,54,Morropon,20,Piura
+596,200408,Santa Catalina de Mossa,54,Morropon,20,Piura
+597,200409,Santo Domingo,54,Morropon,20,Piura
+598,200410,Yamango,54,Morropon,20,Piura
+599,200501,Paita,55,Paita,20,Piura
+600,200502,Amotape,55,Paita,20,Piura
+601,200503,Arenal,55,Paita,20,Piura
+602,200504,Colan,55,Paita,20,Piura
+603,200505,La Huaca,55,Paita,20,Piura
+604,200506,Tamarindo,55,Paita,20,Piura
+605,200507,Vichayal,55,Paita,20,Piura
+606,200601,Sullana,56,Sullana,20,Piura
+607,200602,Bellavista,56,Sullana,20,Piura
+608,200603,Ignacio Escudero,56,Sullana,20,Piura
+609,200604,Lancones,56,Sullana,20,Piura
+610,200605,Marcavelica,56,Sullana,20,Piura
+611,200606,Miguel Checa,56,Sullana,20,Piura
+612,200607,Querecotillo,56,Sullana,20,Piura
+613,200608,Salitral,56,Sullana,20,Piura
+614,200701,Pariñas,57,Talara,20,Piura
+615,200702,El Alto,57,Talara,20,Piura
+616,200703,La Brea,57,Talara,20,Piura
+617,200704,Lobitos,57,Talara,20,Piura
+618,200705,Los Organos,57,Talara,20,Piura
+619,200706,Mancora,57,Talara,20,Piura
+620,200801,Sechura,58,Sechura,20,Piura
+621,200802,Bernal,58,Sechura,20,Piura
+622,200803,Cristo Nos Valga,58,Sechura,20,Piura
+623,200804,Vice,58,Sechura,20,Piura
+624,200805,Rinconada Llicuar,58,Sechura,20,Piura
+625,210101,Puno,59,Puno,21,Puno
+626,210102,Acora,59,Puno,21,Puno
+627,210103,Amantani,59,Puno,21,Puno
+628,210104,Atuncolla,59,Puno,21,Puno
+629,210105,Capachica,59,Puno,21,Puno
+630,210106,Chucuito,59,Puno,21,Puno
+631,210107,Coata,59,Puno,21,Puno
+632,210108,Huata,59,Puno,21,Puno
+633,210109,Mañazo,59,Puno,21,Puno
+634,210110,Paucarcolla,59,Puno,21,Puno
+635,210111,Pichacani,59,Puno,21,Puno
+636,210112,Plateria,59,Puno,21,Puno
+637,210113,San Antonio,59,Puno,21,Puno
+638,210114,Tiquillaca,59,Puno,21,Puno
+639,210115,Vilque,59,Puno,21,Puno
+640,220101,Moyobamba,60,Moyobamba,22,San Martín
+641,220102,Calzada,60,Moyobamba,22,San Martín
+642,220103,Habana,60,Moyobamba,22,San Martín
+643,220104,Jepelacio,60,Moyobamba,22,San Martín
+644,220105,Soritor,60,Moyobamba,22,San Martín
+645,220106,Yantalo,60,Moyobamba,22,San Martín
+646,220201,Bellavista,61,Bellavista,22,San Martín
+647,220202,Alto Biavo,61,Bellavista,22,San Martín
+648,220203,Bajo Biavo,61,Bellavista,22,San Martín
+649,220204,Huallaga,61,Bellavista,22,San Martín
+650,220205,San Pablo,61,Bellavista,22,San Martín
+651,220206,San Rafael,61,Bellavista,22,San Martín
+652,230101,Tacna,62,Tacna,23,Tacna
+653,230102,Alto de La Alianza,62,Tacna,23,Tacna
+654,230103,Calana,62,Tacna,23,Tacna
+655,230104,Ciudad Nueva,62,Tacna,23,Tacna
+656,230105,Inclan,62,Tacna,23,Tacna
+657,230106,Pachia,62,Tacna,23,Tacna
+658,230107,Palca,62,Tacna,23,Tacna
+659,230108,Pocollay,62,Tacna,23,Tacna
+660,230109,Sama,62,Tacna,23,Tacna
+661,230110,Coronel Gregorio Albarracin Lanchipa,62,Tacna,23,Tacna
+662,230111,La Yarada Los Palos,62,Tacna,23,Tacna
+663,230201,Candarave,63,Candarave,23,Tacna
+664,230202,Cairani,63,Candarave,23,Tacna
+665,230203,Camilaca,63,Candarave,23,Tacna
+666,230204,Curibaya,63,Candarave,23,Tacna
+667,230205,Huanuara,63,Candarave,23,Tacna
+668,230206,Quilahuani,63,Candarave,23,Tacna
+669,240101,Tumbes,64,Tumbes,24,Tumbes
+670,240102,Corrales,64,Tumbes,24,Tumbes
+671,240103,La Cruz,64,Tumbes,24,Tumbes
+672,240104,Pampas de Hospital,64,Tumbes,24,Tumbes
+673,240105,San Jacinto,64,Tumbes,24,Tumbes
+674,240106,San Juan de La Virgen,64,Tumbes,24,Tumbes
+675,240201,Zorritos,65,Contralmirante Villar,24,Tumbes
+676,240202,Casitas,65,Contralmirante Villar,24,Tumbes
+677,240203,Canoas de Punta Sal,65,Contralmirante Villar,24,Tumbes
+678,240301,Zarumilla,66,Zarumilla,24,Tumbes
+679,240302,Aguas Verdes,66,Zarumilla,24,Tumbes
+680,240303,Matapalo,66,Zarumilla,24,Tumbes
+681,240304,Papayal,66,Zarumilla,24,Tumbes
+682,250101,Calleria,67,Coronel Portillo,25,Ucayali
+683,250102,Campoverde,67,Coronel Portillo,25,Ucayali
+684,250103,Iparia,67,Coronel Portillo,25,Ucayali
+685,250104,Masisea,67,Coronel Portillo,25,Ucayali
+686,250105,Yarinacocha,67,Coronel Portillo,25,Ucayali
+687,250106,Nueva Requena,67,Coronel Portillo,25,Ucayali
+688,250107,Manantay,67,Coronel Portillo,25,Ucayali
+689,250201,Raymondi,68,Atalaya,25,Ucayali
+690,250202,Sepahua,68,Atalaya,25,Ucayali
+691,250203,Tahuania,68,Atalaya,25,Ucayali
+692,250204,Yurua,68,Atalaya,25,Ucayali
+693,250301,Padre Abad,69,Padre Abad,25,Ucayali
+694,250302,Irazola,69,Padre Abad,25,Ucayali
+695,250303,Curimana,69,Padre Abad,25,Ucayali
+696,250304,Neshuya,69,Padre Abad,25,Ucayali
+697,250305,Alexander Von Humboldt,69,Padre Abad,25,Ucayali
+698,250401,Purus,70,Purus,25,Ucayali

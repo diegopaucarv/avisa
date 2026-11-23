@@ -37,6 +37,18 @@ export const PRIORIDADES_ALERTA = [
 
 export type PrioridadAlerta = (typeof PRIORIDADES_ALERTA)[number];
 
+/**
+ * Plazo de atención congelado de cada prioridad. Es el mismo dato que
+ * `sla_horas` en `cat_prioridades_alerta`; se declara aquí para que el filtro y
+ * la tabla lo muestren sin pedir el catálogo en cada pantalla.
+ */
+export const PLAZO_POR_PRIORIDAD: Record<PrioridadAlerta, string> = {
+  'Crítica inmediata': '24 h',
+  Urgente: '48 h',
+  Temprana: '72 h',
+  Seguimiento: 'sin plazo',
+};
+
 /** Niveles de alerta: vocabulario heredado del catálogo `cat_niveles_alerta`. */
 export const NIVELES_ALERTA = ['Inmediato', 'Táctico', 'Preventivo', 'Monitoreo'] as const;
 
@@ -398,6 +410,16 @@ export function aDetalleAlerta(bruto: unknown): DetalleAlerta {
 /** «48 h» o «Sin plazo». El SLA nunca se mete dentro de la prioridad. */
 export function formatearPlazo(horas: number | null): string {
   return horas === null ? 'Sin plazo' : `${horas} h`;
+}
+
+/**
+ * Prioridad con su plazo entre paréntesis: «Crítica inmediata (24 h)»,
+ * «Seguimiento (sin plazo)». Es la forma que pide la tabla del item 106 y la
+ * misma que ofrece el filtro de prioridad del item 104.
+ */
+export function etiquetaPrioridadConPlazo(prioridad: PrioridadAlerta | null): string {
+  if (!prioridad) return 'Sin prioridad';
+  return `${prioridad} (${PLAZO_POR_PRIORIDAD[prioridad]})`;
 }
 
 export function clavePrioridad(prioridad: PrioridadAlerta | null): string {

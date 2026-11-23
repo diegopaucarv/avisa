@@ -28,6 +28,37 @@
   <p class="form-hint aviso-ok" role="status">{{ aviso }}</p>
   } @if (avisoCreacion(); as aviso) {
   <p class="form-hint aviso-ok" role="status">{{ aviso }}</p>
+  } @if (!verPapelera()) {
+  <div class="executive-kpis">
+    <div class="stat-card">
+      <span class="stat-icon"><app-icono nombre="compromisos" [tamano]="16" /></span>
+      <span class="stat-copy">
+        <span>Compromisos</span>
+        <strong>{{ total() }}</strong>
+      </span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon green"><app-icono nombre="check" [tamano]="16" /></span>
+      <span class="stat-copy">
+        <span>Cumplidos</span>
+        <strong>{{ cumplidos() ?? '—' }}</strong>
+      </span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon amber"><app-icono nombre="reloj" [tamano]="16" /></span>
+      <span class="stat-copy">
+        <span>En proceso</span>
+        <strong>{{ enProceso() ?? '—' }}</strong>
+      </span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon"><app-icono nombre="bandeja" [tamano]="16" /></span>
+      <span class="stat-copy">
+        <span>Por iniciar</span>
+        <strong>{{ porIniciar() ?? '—' }}</strong>
+      </span>
+    </div>
+  </div>
   }
 
   <div class="filter-bar">

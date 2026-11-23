@@ -44,6 +44,11 @@ Otras reglas:
   `Sí`) queda NULL (D12).
 * `distrito_id` queda NULL siempre: `ID_Ubigeo` es un departamento (`DEP-xx`),
   no un distrito.
+* La `region_id` de las **personas** la completa el parche post-carga (PARCHE
+  14) desde su departamento; la de las **organizaciones** se resuelve aquí
+  desde `ID_Ubigeo` por el prefijo INEI de sus provincias. 103 organizaciones
+  no traen ubigeo y 2 traen `DEP-20` («Más de Uno»): quedan sin región y se
+  declaran.
 * DNI y teléfonos se conservan tal cual (decisión e). No hay fusión por DNI:
   los 45 valores repetidos (100 filas) se cargan sin unir y se encolan como
   `DNI_DUPLICADO` para revisión humana (D43).
@@ -66,6 +71,7 @@ from ...decisions import (
     normalize_dni,
     normalize_telefono,
     parse_fecha,
+    region_ubigeo_from_provincia,
     text,
 )
 from .. import legacy
@@ -107,7 +113,11 @@ _E_ACTIVO = 15
 # DIM_ORGANIZACION
 _O_CODIGO = 1
 _O_NOMBRE = 2
-_O_UBIGEO = 3  # DEP-xx, no se usa
+_O_UBIGEO = 3  # DEP-xx: única fuente de la región de la organización
+
+# DIM_Provincias (sólo para traducir DEP-xx a región por su prefijo INEI)
+_PROV_COD_INEI = 2
+_PROV_DEPARTAMENTO = 4
 _O_DIRECCION = 4
 _O_FECHA = 5
 _O_TIPO = 6
@@ -191,6 +201,8 @@ class _Organizacion:
     perfil: str | None
     ruc: str | None
     representante_codigo: str | None
+    ubigeo: str | None = None
+    region_id: int | None = None
     actor_uid: str | None = None
 
 
@@ -260,6 +272,30 @@ async def _perfiles(ctx: LoadContext) -> dict[str, int]:
     return {
         fila["codigo_legado"]: fila["id"] for fila in filas if fila["codigo_legado"]
     }
+
+
+async def _regiones_por_departamento(ctx: LoadContext) -> dict[str, int]:
+    """{DEP-xx -> id de `core.regiones`} por el prefijo INEI de sus provincias.
+
+    `DIM_Departamentos.Codigo_Depto` es secuencial (DEP-20 = «Más de Uno»), no
+    INEI, así que la región sólo se deriva de `DIM_Provincias.Cod_INEI`, igual
+    que en la fase 1 y en la fase 6. DEP-15 y DEP-16 caen en la misma región.
+    """
+    regiones = {
+        fila["ubigeo"]: fila["id"]
+        for fila in await ctx.conn.fetch("SELECT id, ubigeo FROM core.regiones")
+    }
+    provincias = legacy.sheet_of(ctx.sheets, "DIM_Provincias")
+    mapa: dict[str, int] = {}
+    for indice in range(provincias.filas):
+        departamento = provincias.cell(indice, _PROV_DEPARTAMENTO)
+        codigo = provincias.cell(indice, _PROV_COD_INEI)
+        if not departamento or not codigo:
+            continue
+        region_id = regiones.get(region_ubigeo_from_provincia(codigo))
+        if region_id is not None:
+            mapa.setdefault(departamento.strip(), region_id)
+    return mapa
 
 
 async def _tipos_organizacion(ctx: LoadContext) -> dict[str, int]:
@@ -360,9 +396,9 @@ def _leer_personas(ctx: LoadContext, perfiles: dict[str, int]) -> list[_Persona]
 
 
 def _leer_organizaciones(
-    ctx: LoadContext, tipos: dict[str, int]
+    ctx: LoadContext, tipos: dict[str, int], region_por_dep: dict[str, int]
 ) -> list[_Organizacion]:
-    """`DIM_ORGANIZACION` (224), con el tipo de organización resuelto."""
+    """`DIM_ORGANIZACION` (224), con tipo y región resueltos."""
     hoja = "DIM_ORGANIZACION"
     sheet = legacy.sheet_of(ctx.sheets, hoja)
     organizaciones: list[_Organizacion] = []
@@ -378,6 +414,12 @@ def _leer_organizaciones(
         # inventa un gremio ni una asociación.
         tipo_organizacion_id = tipos.get(norm_key(tipo_raw)) if tipo_raw else None
         es_gremio = (norm_key(tipo_raw) or "").startswith("gremio")
+
+        # 103 organizaciones no traen `ID_Ubigeo` y no se les inventa región;
+        # DEP-20 («Más de Uno») tampoco es una región y se reporta.
+        ubigeo = text(sheet.cell(indice, _O_UBIGEO))
+        ubigeo = ubigeo.strip() if ubigeo else None
+        region_id = region_por_dep.get(ubigeo) if ubigeo else None
 
         organizaciones.append(
             _Organizacion(
@@ -400,6 +442,8 @@ def _leer_organizaciones(
                 perfil=text(sheet.cell(indice, _O_PERFIL)),
                 ruc=_ruc(text(sheet.cell(indice, _O_RUC))),
                 representante_codigo=text(sheet.cell(indice, _O_REPRESENTANTE)),
+                ubigeo=ubigeo,
+                region_id=region_id,
             )
         )
 
@@ -460,8 +504,8 @@ async def _insertar_actores(
             INSERT INTO core.actores
                 (nombre_actual, naturaleza, tipo_actor_id, rol_actor_id,
                  origen_dato, confidence, es_validado_humano,
-                 nivel_clasificacion, abreviatura, codigo_legado)
-            VALUES ($1, 'organizacion', $2, $3, $4, 1.00, true, 2, $5, $6)
+                 nivel_clasificacion, abreviatura, codigo_legado, region_id)
+            VALUES ($1, 'organizacion', $2, $3, $4, 1.00, true, 2, $5, $6, $7)
             RETURNING actor_uid
             """,
             organizacion.nombre,
@@ -470,6 +514,7 @@ async def _insertar_actores(
             _ORIGEN,
             organizacion.abreviatura,
             codigo_unico(organizacion.codigo),
+            organizacion.region_id,
         )
         organizacion.actor_uid = actor_uid
         por_codigo.setdefault(organizacion.codigo, actor_uid)
@@ -712,9 +757,27 @@ async def _membresias(
 async def run(ctx: LoadContext) -> None:
     perfiles = await _perfiles(ctx)
     tipos_organizacion = await _tipos_organizacion(ctx)
+    region_por_dep = await _regiones_por_departamento(ctx)
 
     personas = _leer_personas(ctx, perfiles)
-    organizaciones = _leer_organizaciones(ctx, tipos_organizacion)
+    organizaciones = _leer_organizaciones(ctx, tipos_organizacion, region_por_dep)
+
+    # Las organizaciones con código de departamento que no es una región
+    # (DEP-20, «Más de Uno») quedan declaradas, no estimadas. Las 103 sin
+    # ubigeo ya quedan declaradas por su `region_id` nulo.
+    for organizacion in organizaciones:
+        if organizacion.region_id is not None or not organizacion.ubigeo:
+            continue
+        await ctx.conflicto(
+            "TERRITORIO_NO_RESUELTO",
+            hoja=organizacion.hoja,
+            fila=organizacion.fila,
+            codigo=organizacion.codigo,
+            detalle={
+                "ubigeo": organizacion.ubigeo,
+                "razon_social": organizacion.nombre,
+            },
+        )
 
     por_codigo = await _insertar_actores(ctx, personas, organizaciones)
     await _cargar_organizaciones(ctx, organizaciones, por_codigo)

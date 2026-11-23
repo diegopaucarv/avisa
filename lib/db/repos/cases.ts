@@ -61,6 +61,8 @@ export type CaseListQuery = {
   estado?: string;
   riesgo?: string;
   prioridad?: string;
+  /** Nivel de conflictividad (`core.cat_niveles_conflicto.codigo`). */
+  nivel?: string;
   alcance?: string;
   tematica?: string;
   unidad?: string;
@@ -242,6 +244,15 @@ async function construirWhere(
     "prioridad",
     "c.prioridad_id",
     query.prioridad,
+  );
+  await filtrarPorCatalogo(
+    client,
+    where,
+    bind,
+    "nivel",
+    "nivelConflicto",
+    "c.nivel_conflicto_id",
+    query.nivel,
   );
   await filtrarPorCatalogo(
     client,

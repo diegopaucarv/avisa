@@ -8,8 +8,13 @@ export type EnlaceRiel = {
   etiqueta: string;
   /** Id del encabezado de la sección a la que salta el enlace. */
   ancla: string;
-  contador: number;
+  /** `null` cuando la sección no tiene contador propio (p. ej. un enlace externo). */
+  contador: number | null;
   icono: string;
+  /** `false` dibuja el enlace como no disponible en lugar de navegable. */
+  disponible?: boolean;
+  /** Motivo que se muestra como `title` cuando `disponible` es `false`. */
+  nota?: string | null;
 };
 
 /**
@@ -84,6 +89,18 @@ export type EnlaceRiel = {
       font-size: 9px;
       font-weight: 700;
       text-align: center;
+    }
+
+    .riel-no-disponible {
+      border: 1px dashed var(--line);
+      color: var(--muted);
+      cursor: not-allowed;
+    }
+
+    .riel-no-disponible:hover,
+    .riel-no-disponible:focus-visible {
+      background: transparent;
+      color: var(--muted);
     }
 
     @media (max-width: 1120px) {

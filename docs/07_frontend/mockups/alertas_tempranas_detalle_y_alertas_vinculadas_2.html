@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="web_dashboard" name="shell-type"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<style>
+    @layer base {
+      html, body { margin: 0; padding: 0; }
+      body { overscroll-behavior: none; }
+      main > :first-child { margin-top: 0 !important; }
+      main > :last-child { margin-bottom: 0 !important; }
+    }
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: #0c141d; }
+    ::-webkit-scrollbar-thumb { background: #232b34; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #424751; }
+  </style>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "on-primary-fixed": "#001b3c",
+            "primary-container": "#6ea8fe",
+            "inverse-primary": "#115eaf",
+            "outline-variant": "#424751",
+            "on-error": "#690005",
+            "primary-fixed-dim": "#a8c8ff",
+            "background": "#0c141d",
+            "on-surface": "#dbe3f0",
+            "surface-variant": "#2d353f",
+            "surface-tint": "#a8c8ff",
+            "secondary-container": "#00bd85",
+            "error-container": "#93000a",
+            "surface-container-high": "#232b34",
+            "inverse-on-surface": "#29313b",
+            "on-surface-variant": "#c2c6d3",
+            "on-background": "#dbe3f0",
+            "tertiary-fixed": "#e8ddff",
+            "on-primary-container": "#003c76",
+            "tertiary-container": "#b196ff",
+            "error": "#ffb4ab",
+            "on-secondary-container": "#00452e",
+            "on-tertiary-fixed": "#21005e",
+            "on-tertiary-fixed-variant": "#4f319c",
+            "tertiary-fixed-dim": "#cebdff",
+            "secondary": "#45dfa4",
+            "on-secondary-fixed": "#002114",
+            "surface-container-lowest": "#070f18",
+            "surface-container-low": "#141c25",
+            "surface-bright": "#323a44",
+            "primary": "#a8c8ff",
+            "on-primary": "#003061",
+            "surface": "#0c141d",
+            "on-secondary": "#003825",
+            "on-secondary-fixed-variant": "#005137",
+            "surface-container-highest": "#2d353f",
+            "on-tertiary": "#381385",
+            "inverse-surface": "#dbe3f0",
+            "secondary-fixed": "#68fcbf",
+            "surface-dim": "#0c141d",
+            "secondary-fixed-dim": "#45dfa4",
+            "primary-fixed": "#d5e3ff",
+            "on-primary-fixed-variant": "#004689",
+            "tertiary": "#cebdff",
+            "on-error-container": "#ffdad6",
+            "surface-container": "#18202a",
+            "outline": "#8c919d",
+            "on-tertiary-container": "#442491"
+          },
+          borderRadius: {
+            DEFAULT: "0.125rem",
+            lg: "0.25rem",
+            xl: "0.5rem",
+            full: "0.75rem"
+          },
+          spacing: {
+            "margin-desktop": "2rem",
+            "space-xs": "0.25rem",
+            margin: "1rem",
+            "space-md": "0.75rem",
+            "space-xl": "1.5rem",
+            "space-sm": "0.5rem",
+            "gutter-desktop": "1.5rem",
+            gutter: "1rem",
+            "space-lg": "1rem"
+          },
+          fontFamily: {
+            "label-md": ["Inter"],
+            "body-lg": ["Inter"],
+            "headline-lg": ["Inter"],
+            "headline-md": ["Inter"],
+            "display-lg-mobile": ["Inter"],
+            "body-sm": ["Inter"],
+            "label-sm": ["Inter"],
+            "title-md": ["Inter"],
+            "display-lg": ["Inter"],
+            "body-md": ["Inter"],
+            "data-tabular": ["Inter"],
+            "headline-sm": ["Inter"]
+          },
+          fontSize: {
+            "label-md": ["12px", { lineHeight: "16px", letterSpacing: "0.02em", fontWeight: "600" }],
+            "body-lg": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+            "headline-lg": ["24px", { lineHeight: "32px", letterSpacing: "-0.01em", fontWeight: "600" }],
+            "headline-md": ["20px", { lineHeight: "28px", fontWeight: "600" }],
+            "display-lg-mobile": ["24px", { lineHeight: "32px", letterSpacing: "-0.01em", fontWeight: "700" }],
+            "body-sm": ["13px", { lineHeight: "18px", fontWeight: "400" }],
+            "label-sm": ["11px", { lineHeight: "14px", letterSpacing: "0.03em", fontWeight: "500" }],
+            "title-md": ["14px", { lineHeight: "20px", fontWeight: "600" }],
+            "display-lg": ["32px", { lineHeight: "40px", letterSpacing: "-0.02em", fontWeight: "700" }],
+            "body-md": ["14px", { lineHeight: "20px", fontWeight: "400" }],
+            "data-tabular": ["13px", { lineHeight: "18px", letterSpacing: "0", fontWeight: "500" }],
+            "headline-sm": ["16px", { lineHeight: "24px", fontWeight: "600" }]
+          }
+        }
+      }
+    };
+  </script>
+</head>
+<body class="bg-background font-body-md text-on-surface antialiased min-h-screen overflow-x-hidden">
+<!-- ============================================================== -->
+<!-- 1. UNDERLYING BACKGROUND SCREEN (VARIANTE 1 CON SIDEBAR COLAPSADO) -->
+<!-- ============================================================== -->
+<div class="relative min-h-screen flex flex-col pointer-events-none select-none filter blur-[3px] opacity-35 transition-all duration-300" id="underlyingApp">
+<!-- Collapsed Minimalist Sidebar (Claude / ChatGPT style) -->
+<aside class="fixed left-0 top-0 h-full w-16 bg-surface-container-low z-30 flex flex-col justify-between items-center py-3 border-r border-surface-container-high/50 shadow-lg">
+<div class="flex flex-col items-center gap-4 w-full">
+<!-- Brand / Toggle Header -->
+<div class="flex flex-col items-center gap-2">
+<div class="w-10 h-10 rounded-lg bg-surface-container-lowest flex items-center justify-center text-primary shadow-sm" title="AVISA OAIPCS">
+<span class="material-symbols-outlined text-[22px]">shield</span>
+</div>
+<button class="w-8 h-8 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="Expandir barra lateral" type="button">
+<span class="material-symbols-outlined text-[18px]">dock_to_right</span>
+</button>
+</div>
+<div class="w-8 h-px bg-surface-container-high"></div>
+<!-- Main Navigation Icons -->
+<nav class="flex flex-col items-center gap-1.5 w-full px-2">
+<div class="relative group flex items-center justify-center w-full">
+<a class="w-10 h-10 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">map</span>
+</a>
+</div>
+<div class="relative group flex items-center justify-center w-full">
+<a class="w-10 h-10 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">analytics</span>
+</a>
+</div>
+<div class="relative group flex items-center justify-center w-full">
+<a class="w-10 h-10 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">inbox</span>
+</a>
+</div>
+<div class="relative group flex items-center justify-center w-full">
+<a class="w-10 h-10 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">folder_shared</span>
+</a>
+</div>
+<!-- Alertas Tempranas (ACTIVA) -->
+<div class="relative group flex items-center justify-center w-full">
+<a aria-current="page" class="w-10 h-10 rounded-lg flex items-center justify-center bg-primary-container text-on-primary-container shadow-sm font-semibold transition-colors relative" href="#">
+<span class="material-symbols-outlined text-[20px]">warning</span>
+<span class="absolute left-0 top-2 bottom-2 w-1 bg-primary rounded-r"></span>
+</a>
+</div>
+<div class="w-6 h-px bg-surface-container-high my-1"></div>
+<div class="relative group flex items-center justify-center w-full">
+<a class="w-10 h-10 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">contacts</span>
+</a>
+</div>
+<div class="relative group flex items-center justify-center w-full">
+<a class="w-10 h-10 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">description</span>
+</a>
+</div>
+<div class="relative group flex items-center justify-center w-full">
+<a class="w-10 h-10 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">summarize</span>
+</a>
+</div>
+</nav>
+</div>
+<div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center">
+<span class="w-2.5 h-2.5 rounded-full bg-secondary"></span>
+</div>
+</aside>
+<!-- Main Container with Expanded Horizontal Space (pl-16) -->
+<div class="pl-16 flex flex-col min-h-screen">
+<!-- Header limpio Director OAIPCS -->
+<header class="h-14 bg-surface-container-low/95 border-b border-surface-container-high/40 flex items-center justify-between px-margin-desktop">
+<div class="flex items-center gap-space-sm">
+<span class="font-headline-sm text-headline-sm text-on-surface font-semibold tracking-tight">AVISA OAIPCS</span>
+<span class="text-outline text-label-sm font-label-sm">|</span>
+<span class="text-on-surface-variant text-label-md font-label-md">Sistema de Alerta Temprana</span>
+</div>
+<div class="flex items-center gap-space-lg">
+<button class="w-9 h-9 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined text-[20px]">notifications</span>
+</button>
+<button class="w-9 h-9 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined text-[20px]">settings</span>
+</button>
+<div class="flex items-center gap-space-md pl-space-sm border-l border-surface-container-high">
+<div class="flex flex-col text-right">
+<span class="font-title-md text-title-md text-on-surface font-semibold leading-tight">Director OAIPCS</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant leading-none">Alta Dirección</span>
+</div>
+<div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-on-primary text-[18px]">person</span>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Content / Table Area -->
+<main class="w-full pt-4 px-margin-desktop pb-margin-desktop flex-1 bg-background">
+<div class="flex flex-col w-full">
+<!-- Top Command & Action Bar -->
+<div class="flex items-center justify-between gap-space-lg my-space-sm">
+<div class="flex items-center gap-space-md">
+<h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight font-semibold">Alertas tempranas</h1>
+<span class="inline-flex items-center px-2 py-0.5 rounded text-label-sm font-label-sm bg-surface-container-high text-primary font-semibold">
+                76 alertas
+              </span>
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-label-sm font-label-sm bg-surface-container text-on-surface-variant">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+                Vista: Alta Dirección
+              </span>
+</div>
+<div class="flex items-center gap-space-sm">
+<button class="inline-flex items-center gap-space-xs bg-primary text-on-primary font-title-md text-title-md font-semibold px-3.5 py-2 rounded-lg">
+<span class="material-symbols-outlined text-[18px]">add_alert</span>
+<span>Registrar alerta</span>
+</button>
+<button class="inline-flex items-center gap-space-xs bg-surface-container-high text-on-surface font-title-md text-title-md px-3.5 py-2 rounded-lg">
+<span class="material-symbols-outlined text-[18px]">download</span>
+<span>Exportar</span>
+</button>
+</div>
+</div>
+<!-- Table Container -->
+<div class="bg-surface-container-low rounded-lg shadow-sm border border-surface-container-high/50 flex flex-col mt-4">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-lowest text-outline text-label-md font-label-md uppercase tracking-wider h-11 border-b border-surface-container-high">
+<th class="w-28 pl-4 pr-2 font-semibold">Código</th>
+<th class="px-3 font-semibold min-w-[340px]">Título</th>
+<th class="px-3 font-semibold w-48">Caso vinculado</th>
+<th class="px-3 font-semibold w-48">Prioridad (plazo)</th>
+<th class="px-3 font-semibold w-36">Estado</th>
+<th class="px-3 font-semibold w-32 font-mono">FECHA REPORTE</th>
+<th class="pr-4 pl-3 font-semibold text-right w-44">ACCIONES</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-container-high/60 text-body-sm font-body-sm">
+<!-- Row 1: Active with Open Menu -->
+<tr class="bg-surface-container/90 ring-1 ring-primary/40">
+<td class="pl-4 pr-2 py-3.5 font-mono text-data-tabular text-primary font-semibold align-top whitespace-nowrap">AT-2026-46</td>
+<td class="px-3 py-3.5 align-top">
+<div class="flex flex-col">
+<span class="font-title-md text-title-md text-on-surface font-semibold">🔔 Paro preventivo de pescadores artesanales en Paita por cuota asignada de merluza</span>
+<div class="flex items-center gap-2 mt-1 text-label-sm font-label-sm text-outline">
+<span>Piura / Paita</span> • <span class="text-error font-medium">Riesgo Alto</span>
+</div>
+</div>
+</td>
+<td class="px-3 py-3.5 align-top">
+<div class="flex flex-col">
+<span class="font-mono text-data-tabular text-primary font-semibold">CS-PIU-2024-03</span>
+<span class="text-label-sm font-label-sm text-outline">Mesa concertación Paita</span>
+</div>
+</td>
+<td class="px-3 py-3.5 align-top whitespace-nowrap">
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-label-sm font-label-sm bg-error-container/40 text-error font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-error"></span> Crítica inmediata (24 h)
+                    </span>
+</td>
+<td class="px-3 py-3.5 align-top whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-label-sm font-label-sm bg-surface-variant text-primary font-medium">En validación</span>
+</td>
+<td class="px-3 py-3.5 align-top font-mono text-data-tabular text-on-surface-variant font-medium whitespace-nowrap">18NOV2026</td>
+<td class="pr-4 pl-3 py-3.5 align-top text-right whitespace-nowrap">
+<div class="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-primary text-on-primary font-label-md font-semibold">
+<span>Acciones</span>
+<span class="material-symbols-outlined text-[16px]">arrow_drop_down</span>
+</div>
+<!-- Visible dropdown mockup -->
+<div class="mt-1 w-48 rounded-lg bg-surface-container-lowest border border-surface-container-high shadow-2xl p-1.5 text-left text-xs">
+<div class="px-2 py-1 text-outline uppercase font-semibold text-[10px]">Acciones Dirección</div>
+<div class="px-2 py-1 text-secondary font-medium flex items-center gap-1.5"><span>✔️</span> Aprobar alerta</div>
+<div class="px-2 py-1 text-on-surface flex items-center gap-1.5"><span>✏️</span> Solicitar modificación</div>
+<div class="px-2 py-1 text-error flex items-center gap-1.5"><span>🚫</span> Anular</div>
+</div>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr>
+<td class="pl-4 pr-2 py-3.5 font-mono text-data-tabular text-on-surface font-semibold align-top">AT-2026-25</td>
+<td class="px-3 py-3.5 align-top">
+<span class="font-title-md text-title-md text-on-surface font-semibold">🔔 Bloqueo temporal de muelle artesanal Morro Sama por tarifas de atraque DIRCETUR</span>
+</td>
+<td class="px-3 py-3.5 align-top text-outline italic">Sin caso</td>
+<td class="px-3 py-3.5 align-top"><span class="px-2 py-0.5 rounded bg-surface-container-high text-tertiary text-label-sm">Urgente (48 h)</span></td>
+<td class="px-3 py-3.5 align-top"><span class="px-2 py-0.5 rounded bg-primary/15 text-primary text-label-sm">Aprobada</span></td>
+<td class="px-3 py-3.5 align-top font-mono text-data-tabular">20JUL2026</td>
+<td class="pr-4 pl-3 py-3.5 align-top text-right text-outline">•••</td>
+</tr>
+<!-- Row 3 -->
+<tr>
+<td class="pl-4 pr-2 py-3.5 font-mono text-data-tabular text-on-surface font-semibold align-top">AT-2026-19</td>
+<td class="px-3 py-3.5 align-top">
+<span class="font-title-md text-title-md text-on-surface font-semibold">🔔 MYPEs de calzado El Porvenir solicitan mesa técnica por acceso a licitaciones compras a MYPErú</span>
+</td>
+<td class="px-3 py-3.5 align-top text-primary">CS-LAL-2025-08</td>
+<td class="px-3 py-3.5 align-top"><span class="px-2 py-0.5 rounded bg-surface-container text-on-surface-variant text-label-sm">Temprana (72 h)</span></td>
+<td class="px-3 py-3.5 align-top"><span class="px-2 py-0.5 rounded bg-secondary-container/20 text-secondary text-label-sm">Atendida</span></td>
+<td class="px-3 py-3.5 align-top font-mono text-data-tabular">13AGO2026</td>
+<td class="pr-4 pl-3 py-3.5 align-top text-right text-outline">•••</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</main>
+</div>
+</div>
+<!-- ============================================================== -->
+<!-- 2. BACKDROP OVERLAY TRANSLÚCIDO & CLICK-DISMISS AREA          -->
+<!-- ============================================================== -->
+<div class="fixed inset-0 z-40 bg-background/65 backdrop-blur-[4px] flex justify-end transition-opacity duration-300" id="drawerOverlay">
+<!-- Click dismiss trigger covering left side -->
+<div class="flex-1 cursor-pointer flex items-center justify-start pl-8 group" id="dismissZone" title="Haga clic aquí para cerrar el panel">
+<div class="px-3 py-1.5 rounded-lg bg-surface-container-high/90 text-on-surface-variant font-label-sm text-label-sm opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1.5 shadow-xl border border-surface-container-highest">
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+<span>Clic en el fondo para minimizar el panel</span>
+<kbd class="ml-1 px-1.5 py-0.5 bg-surface-container-lowest rounded text-[10px] text-outline border border-outline/30 font-mono">ESC</kbd>
+</div>
+</div>
+<!-- ============================================================== -->
+<!-- 3. DRAWER LATERAL DERECHO (~640px) CON ENFOQUE EJECUTIVO       -->
+<!-- Fondo oscuro profundo (#0f1722 / #111a26) + Borde sutil        -->
+<!-- ============================================================== -->
+<aside class="relative w-full max-w-[660px] h-full bg-[#101925] border-l border-surface-container-highest/80 flex flex-col shadow-[-12px_0_40px_rgba(0,0,0,0.65)] overflow-hidden z-50 animate-in slide-in-from-right duration-200" id="executiveDrawer">
+<!-- TOP EXECUTIVE CONTROL BAR -->
+<div class="px-6 py-3.5 bg-[#0b121b] border-b border-surface-container-high/60 shrink-0 flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-error animate-pulse"></span>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline font-semibold">Expediente de Alerta Prioritaria</span>
+<span class="text-outline text-label-sm">•</span>
+<span class="font-data-tabular text-label-sm text-primary font-bold">AT-2026-46</span>
+</div>
+<div class="flex items-center gap-1.5">
+<button class="h-8 px-2.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface text-label-sm font-label-sm flex items-center gap-1 transition-colors" title="Descargar expediente técnico completo en PDF">
+<span class="material-symbols-outlined text-[16px]">download</span>
+<span>PDF Ficha</span>
+</button>
+<button class="w-8 h-8 rounded-lg flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors" title="Copiar enlace de alerta">
+<span class="material-symbols-outlined text-[17px]">link</span>
+</button>
+<button class="w-8 h-8 rounded-lg flex items-center justify-center text-on-surface-variant hover:text-error hover:bg-surface-container-high transition-colors ml-1" id="closeDrawerIcon" title="Cerrar panel (Esc)">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+</div>
+<!-- DRAWER HEADER WITH TITLE & QUICK METADATA CHIPS -->
+<div class="px-6 pt-5 pb-4 bg-[#0f1723] border-b border-surface-container-high/50 flex flex-col gap-3 shrink-0">
+<!-- Title and Priority Badges -->
+<div class="flex flex-col gap-2">
+<div class="flex items-center gap-2 flex-wrap">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-error-container/30 text-error font-label-sm text-label-sm font-bold border border-error/20">
+<span class="w-1.5 h-1.5 rounded-full bg-error"></span>
+              Prioridad Crítica (24 h)
+            </span>
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-primary/15 text-primary font-label-sm text-label-sm font-semibold border border-primary/20">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+              En validación
+            </span>
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-data-tabular text-label-sm font-medium">
+<span class="material-symbols-outlined text-[13px]">calendar_today</span>
+              18.NOV.2026
+            </span>
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-surface-container-high text-outline font-data-tabular text-label-sm">
+<span class="material-symbols-outlined text-[13px]">schedule</span>
+              11:42 hrs
+            </span>
+</div>
+<h2 class="font-headline-sm text-headline-sm font-bold text-on-surface leading-snug tracking-tight">
+            Paro preventivo de pescadores artesanales en Paita por cuota asignada de merluza
+          </h2>
+<div class="flex items-center gap-2 text-label-sm text-outline">
+<span class="flex items-center gap-1 text-on-surface-variant font-medium">
+<span class="material-symbols-outlined text-[15px] text-primary">location_on</span>
+              Piura / Paita • Caleta Tierra Colorada
+            </span>
+<span>•</span>
+<span class="text-error font-semibold flex items-center gap-1">
+<span class="material-symbols-outlined text-[15px]">crisis_alert</span>
+              Riesgo Nivel Alto
+            </span>
+</div>
+</div>
+<!-- Gold / Amber Warning Banner: Lock & Exclusive Director Reopening -->
+<div class="mt-1 p-2.5 rounded-lg bg-[#271d0c] border border-[#eab308]/40 flex items-center justify-between gap-3 shadow-inner">
+<div class="flex items-center gap-2 min-w-0">
+<div class="w-7 h-7 rounded bg-[#eab308]/20 flex items-center justify-center text-[#eab308] shrink-0 font-bold">
+<span class="material-symbols-outlined text-[18px]">lock</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-label-sm text-label-sm text-[#fef08a] font-bold tracking-tight uppercase">
+                🔒 BLOQUEADO EN CASO SE HAYA CERRADO · SOLO DIRECTOR PUEDE REABRIR
+              </span>
+<span class="text-[11px] text-[#fef08a]/80 leading-tight truncate">
+                El protocolo de integridad restringe cambios retroactivos sin firma digital de la Dirección OAIPCS.
+              </span>
+</div>
+</div>
+<button class="shrink-0 h-7 px-2.5 rounded bg-[#eab308]/20 hover:bg-[#eab308]/30 text-[#fef08a] hover:text-white font-label-sm text-label-sm font-semibold flex items-center gap-1 border border-[#eab308]/50 transition-colors" id="btnDirectorUnlock">
+<span class="material-symbols-outlined text-[14px]">key</span>
+<span>Reabrir</span>
+</button>
+</div>
+</div>
+<!-- DRAWER BODY - SCROLLABLE EXECUTIVE REPORT -->
+<div class="flex-1 overflow-y-auto px-6 py-5 flex flex-col gap-4 bg-[#0d1520]">
+<!-- FICHA TÉCNICA Y PARÁMETROS CON SELLO DE DIRECCIÓN -->
+<div class="p-3.5 rounded-xl bg-surface-container-low/70 border border-surface-container-high/60 flex flex-col gap-2.5">
+<div class="flex items-center justify-between border-b border-surface-container-high/50 pb-2">
+<span class="font-label-sm text-label-sm text-outline uppercase tracking-wider font-semibold">Parámetros Operativos del Caso</span>
+<!-- SELLO OFICIAL DE VALIDACIÓN -->
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded bg-primary/10 text-primary border border-primary/30 font-label-sm text-[10px] font-bold tracking-wider uppercase">
+<span class="material-symbols-outlined text-[14px]">verified_user</span>
+              VALIDADO POR DIRECCIÓN OAIPCS
+            </span>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-body-sm">
+<div class="flex flex-col">
+<span class="text-[11px] text-outline font-label-sm">Caso Vinculado</span>
+<span class="font-mono text-data-tabular font-semibold text-primary mt-0.5 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">folder</span> CS-PIU-2024-03
+              </span>
+<span class="text-[11px] text-on-surface-variant truncate">Mesa Paita Concertación</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[11px] text-outline font-label-sm">Subsector Productivo</span>
+<span class="font-title-md text-title-md font-semibold text-on-surface mt-0.5 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-secondary">sailing</span> Pesca Artesanal
+              </span>
+<span class="text-[11px] text-outline">Recurso: Merluza</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[11px] text-outline font-label-sm">Sectorista Asignado</span>
+<span class="font-title-md text-title-md font-semibold text-on-surface mt-0.5">Lic. M. Valdivia</span>
+<span class="text-[11px] text-secondary flex items-center gap-0.5">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> Desplegado en zona
+              </span>
+</div>
+<div class="flex flex-col">
+<span class="text-[11px] text-outline font-label-sm">Nivel de Impacto</span>
+<span class="font-title-md text-title-md font-bold text-error mt-0.5">Riesgo Alto (N3)</span>
+<span class="text-[11px] text-outline">Potencial afectación vial</span>
+</div>
+</div>
+</div>
+<!-- 📌 1. SITUACIÓN ACTUAL -->
+<div class="p-4 rounded-xl bg-surface-container/60 border border-surface-container-high/60 flex flex-col gap-2 hover:border-primary/40 transition-colors">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2 text-primary font-headline-sm text-headline-sm font-semibold">
+<span class="text-[18px]">📌</span>
+<span class="text-on-surface">1. Situación actual</span>
+</div>
+<span class="px-2 py-0.5 rounded text-[11px] bg-surface-container-high text-outline font-mono">Actualizado hace 35 min</span>
+</div>
+<p class="text-body-md text-body-md text-on-surface leading-relaxed text-justify mt-1">
+            La Asociación de Pescadores Artesanales Merluceros de Paita (ASPERMAP) se encuentra en sesión permanente y ha decretado una paralización preventiva de 48 horas en el puerto de Paita. Denuncian que la cuota de captura de merluza aprobada por la resolución ministerial reciente resulta insuficiente frente a la incursión de embarcaciones industriales foráneas y solicitan redistribución equitativa y auditoría inmediata a las descargas en desembarcaderos autorizados.
+          </p>
+</div>
+<!-- 🗓️ 2. HECHOS RECIENTES Y ACCIONES EN CURSO (LÍNEA DE TIEMPO VERTICAL VISUAL) -->
+<div class="p-4 rounded-xl bg-surface-container/60 border border-surface-container-high/60 flex flex-col gap-3 hover:border-primary/40 transition-colors">
+<div class="flex items-center gap-2 text-primary font-headline-sm text-headline-sm font-semibold">
+<span class="text-[18px]">🗓️</span>
+<span class="text-on-surface">2. Hechos recientes y acciones en curso</span>
+</div>
+<!-- Vertical Timeline Track -->
+<div class="relative pl-6 space-y-4 before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-surface-container-highest">
+<!-- Timeline Item 1 -->
+<div class="relative">
+<div class="absolute -left-[29px] top-1.5 w-3 h-3 rounded-full bg-secondary ring-4 ring-background"></div>
+<div class="p-2.5 rounded-lg bg-surface-container-low border border-surface-container-high/40">
+<div class="flex items-center justify-between gap-2">
+<span class="font-data-tabular text-label-sm font-bold text-primary">08.SET.2025</span>
+<span class="text-[10px] text-outline uppercase font-semibold">Antecedente</span>
+</div>
+<p class="text-body-sm text-on-surface-variant mt-1 leading-snug">
+                  Remisión de memorial formal de 12 gremios de Paita al Despacho Viceministerial de Pesquería exigiendo mesa de diálogo sobre cálculo del TAC (Total Admisible de Captura).
+                </p>
+</div>
+</div>
+<!-- Timeline Item 2 -->
+<div class="relative">
+<div class="absolute -left-[29px] top-1.5 w-3 h-3 rounded-full bg-primary ring-4 ring-background"></div>
+<div class="p-2.5 rounded-lg bg-surface-container-low border border-surface-container-high/40">
+<div class="flex items-center justify-between gap-2">
+<span class="font-data-tabular text-label-sm font-bold text-primary">03.AGO.2026</span>
+<span class="text-[10px] text-outline uppercase font-semibold">Tensión detectada</span>
+</div>
+<p class="text-body-sm text-on-surface-variant mt-1 leading-snug">
+                  Conato de enfrentamiento entre tripulantes artesanales y fiscalizadores de PRODUCE durante la inspección de tallas mínimas en muelle fiscal; asamblea convoca a movilización preventiva.
+                </p>
+</div>
+</div>
+<!-- Timeline Item 3 -->
+<div class="relative">
+<div class="absolute -left-[29px] top-1.5 w-3 h-3 rounded-full bg-error ring-4 ring-background animate-pulse"></div>
+<div class="p-2.5 rounded-lg bg-surface-container-low border border-error/30">
+<div class="flex items-center justify-between gap-2">
+<span class="font-data-tabular text-label-sm font-bold text-error">13.AGO.2026</span>
+<span class="text-[10px] text-error font-bold uppercase">Medida de fuerza</span>
+</div>
+<p class="text-body-sm text-on-surface-variant mt-1 leading-snug">
+                  Inicio del paro de 48 horas con bloqueo parcial del acceso vehicular al Terminal Portuario Euroandino y advertencia de huelga indefinida si no asiste comitiva ministerial.
+                </p>
+</div>
+</div>
+</div>
+</div>
+<!-- ⚠️ 3. DESCRIPCIÓN DEL RIESGO (CRITICIDAD ALTA) -->
+<div class="p-4 rounded-xl bg-error-container/15 border border-error/30 flex flex-col gap-2.5">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2 text-error font-headline-sm text-headline-sm font-semibold">
+<span class="text-[18px]">⚠️</span>
+<span class="text-error">3. Descripción del riesgo</span>
+</div>
+<span class="px-2 py-0.5 rounded bg-error/20 text-error font-label-sm text-[11px] font-bold uppercase tracking-wider">
+              Nivel Crítico Inmediato
+            </span>
+</div>
+<p class="text-body-md text-body-md text-on-surface leading-relaxed text-justify">
+            Riesgo inminente de paralización de las exportaciones de productos hidrobiológicos congelados en el puerto de Paita, afectando a más de 40 plantas procesadoras y 12,000 trabajadores indirectos. Existe amenaza explícita de toma de carretera Piura-Paita (km 54) y quema de neumáticos en rotondas de acceso, lo cual desencadenaría intervención de la USE PNP con potencial escalada violenta.
+          </p>
+</div>
+<!-- 🏛️ 4. ACCIONES DE LA OAIPCS -->
+<div class="p-4 rounded-xl bg-surface-container/60 border border-surface-container-high/60 flex flex-col gap-2 hover:border-primary/40 transition-colors">
+<div class="flex items-center gap-2 text-primary font-headline-sm text-headline-sm font-semibold">
+<span class="text-[18px]">🏛️</span>
+<span class="text-on-surface">4. Acciones ejecutadas por la OAIPCS</span>
+</div>
+<ul class="space-y-2 mt-1">
+<li class="flex items-start gap-2.5 text-body-md text-on-surface">
+<span class="material-symbols-outlined text-[18px] text-secondary shrink-0 mt-0.5">check_circle</span>
+<span>Emisión de Nota de Alerta Temprana <strong>NAT-046-2026/OAIPCS</strong> dirigida a la Alta Dirección del Despacho Viceministerial de Pesquería y al Viceministerio de Gobernanza Territorial (PCM).</span>
+</li>
+<li class="flex items-start gap-2.5 text-body-md text-on-surface">
+<span class="material-symbols-outlined text-[18px] text-secondary shrink-0 mt-0.5">check_circle</span>
+<span>Contacto de enlace territorial con el Prefecto Regional de Piura y el Comisario Sectorial PNP Paita para monitorear cordones de seguridad sin uso desmedido de la fuerza.</span>
+</li>
+</ul>
+</div>
+<!-- 💡 5. ACCIONES SUGERIDAS -->
+<div class="p-4 rounded-xl bg-surface-container/60 border border-surface-container-high/60 flex flex-col gap-2 hover:border-primary/40 transition-colors">
+<div class="flex items-center gap-2 text-primary font-headline-sm text-headline-sm font-semibold">
+<span class="text-[18px]">💡</span>
+<span class="text-on-surface">5. Acciones sugeridas a Alta Dirección</span>
+</div>
+<div class="grid grid-cols-1 gap-2.5 mt-1">
+<div class="p-3 rounded-lg bg-surface-container-low border border-primary/30 flex items-start gap-3">
+<span class="w-6 h-6 rounded-full bg-primary/20 text-primary font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">1</span>
+<p class="text-body-sm text-on-surface leading-snug">
+                Autorizar el desplazamiento inmediato de una comisión técnica de la Dirección General de Políticas Pesqueras e IMARPE a la Subprefectura de Paita para instalar mesa de diálogo técnica antes de las 18:00 hrs.
+              </p>
+</div>
+<div class="p-3 rounded-lg bg-surface-container-low border border-surface-container-high/50 flex items-start gap-3">
+<span class="w-6 h-6 rounded-full bg-surface-container-high text-outline font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">2</span>
+<p class="text-body-sm text-on-surface leading-snug">
+                Coordinar con la Secretaría de Gestión Social y Diálogo (SGSD-PCM) para liderar facilitación neutral y distender amenaza de bloqueo vial en la carretera panamericana norte.
+              </p>
+</div>
+</div>
+</div>
+<!-- 🔗 ALERTAS PREVIAS DEL CASO / VINCULADAS (ESTILO ACORDEÓN / LISTA CONSOLIDADA) -->
+<div class="p-4 rounded-xl bg-surface-container-low/90 border border-surface-container-high/70 flex flex-col gap-3">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2 text-primary font-headline-sm text-headline-sm font-semibold">
+<span class="text-[18px]">🔗</span>
+<span class="text-on-surface">Alertas previas del caso / Vinculadas</span>
+</div>
+<span class="px-2.5 py-0.5 rounded-full bg-primary/20 text-primary font-data-tabular text-label-sm font-bold">
+              3 vinculadas
+            </span>
+</div>
+<!-- Accordion / Linked List Items -->
+<div class="flex flex-col gap-2">
+<!-- Linked Item 1 -->
+<div class="p-3 rounded-lg bg-[#141f2e] border border-surface-container-high/60 hover:border-primary/40 transition-colors flex flex-col gap-1.5 cursor-pointer">
+<div class="flex items-start justify-between gap-2">
+<span class="font-title-md text-title-md text-on-surface font-semibold leading-tight hover:text-primary">
+                  Solicitud gremial de cuota social de merluza exclusiva para botes artesanales de hasta 10 m³
+                </span>
+<span class="shrink-0 px-2 py-0.5 rounded text-[11px] font-bold bg-secondary-container/20 text-secondary border border-secondary/30">
+                  En proceso
+                </span>
+</div>
+<div class="flex items-center gap-3 text-label-sm text-outline font-data-tabular">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[13px] text-primary">description</span> Pedido: DGSFS-2026-88</span>
+<span>•</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[13px]">calendar_month</span> 2026-10-14</span>
+</div>
+</div>
+<!-- Linked Item 2 -->
+<div class="p-3 rounded-lg bg-[#141f2e] border border-surface-container-high/60 hover:border-primary/40 transition-colors flex flex-col gap-1.5 cursor-pointer">
+<div class="flex items-start justify-between gap-2">
+<span class="font-title-md text-title-md text-on-surface font-semibold leading-tight hover:text-primary">
+                  Denuncia por hostigamiento en altamar de embarcaciones vikingas con descarte de fauna acompañante
+                </span>
+<span class="shrink-0 px-2 py-0.5 rounded text-[11px] font-bold bg-error-container/30 text-error border border-error/30">
+                  Pendiente
+                </span>
+</div>
+<div class="flex items-center gap-3 text-label-sm text-outline font-data-tabular">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[13px]">label_off</span> Sin pedido formal</span>
+<span>•</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[13px]">calendar_month</span> 2026-09-02</span>
+</div>
+</div>
+<!-- Linked Item 3 -->
+<div class="p-3 rounded-lg bg-[#141f2e] border border-surface-container-high/60 hover:border-primary/40 transition-colors flex flex-col gap-1.5 cursor-pointer">
+<div class="flex items-start justify-between gap-2">
+<span class="font-title-md text-title-md text-on-surface font-semibold leading-tight hover:text-primary">
+                  Reclamo de armadores por lentitud en trámites de carnet de patrón artesanal ante DICAPI Paita
+                </span>
+<span class="shrink-0 px-2 py-0.5 rounded text-[11px] font-bold bg-secondary-container/20 text-secondary border border-secondary/30">
+                  Atendida
+                </span>
+</div>
+<div class="flex items-center gap-3 text-label-sm text-outline font-data-tabular">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[13px] text-secondary">verified</span> Resuelto con Capitanía</span>
+<span>•</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[13px]">calendar_month</span> 2026-07-19</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- ============================================================== -->
+<!-- 4. FIXED BOTTOM EXECUTIVE BAR (ALTA DIRECCIÓN OAIPCS)          -->
+<!-- ============================================================== -->
+<div class="px-6 py-4 bg-[#0a1018] border-t border-surface-container-high shrink-0 flex items-center justify-between gap-3 shadow-2xl">
+<!-- Botón Enviar por WhatsApp (Verde Oficial WhatsApp) -->
+<button class="h-10 px-4 rounded-lg bg-[#25D366] hover:bg-[#20ba59] text-[#052b14] font-title-md text-title-md font-bold flex items-center gap-2 transition-all shadow-md active:scale-95" id="btnExecutiveWhatsapp" title="Enviar formato pre-redactado para Alta Dirección por WhatsApp">
+<span class="material-symbols-outlined text-[20px]">chat</span>
+<span>Enviar por WhatsApp</span>
+</button>
+<div class="flex items-center gap-2.5">
+<!-- Botón Modificar (Secundario estilizado) -->
+<button class="h-10 px-4 rounded-lg bg-surface-container-high hover:bg-surface-variant text-on-surface border border-outline/30 font-title-md text-title-md font-semibold flex items-center gap-1.5 transition-colors" id="btnExecutiveModificar" title="Devolver expediente con observaciones técnicas">
+<span class="material-symbols-outlined text-[18px]">edit_note</span>
+<span>Modificar</span>
+</button>
+<!-- Botón Aprobar Alerta (Azul Marino Institucional Sólido) -->
+<button class="h-10 px-5 rounded-lg bg-[#004689] hover:bg-[#00366b] text-white font-title-md text-title-md font-bold flex items-center gap-2 transition-all shadow-lg shadow-primary/10 border border-[#6ea8fe]/30 active:scale-95" id="btnExecutiveAprobar" title="Validar formalmente la alerta y notificar a PCM / Despacho">
+<span class="material-symbols-outlined text-[20px] text-primary">verified</span>
+<span>Aprobar alerta</span>
+</button>
+</div>
+</div>
+</aside>
+</div>
+<!-- INTERACTIVE TOAST NOTIFICATION FOR REAL-TIME FEEDBACK -->
+<div class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none flex items-center gap-3 px-5 py-3 rounded-xl bg-surface-bright text-on-surface shadow-2xl border border-surface-container-highest" id="liveToast">
+<span class="material-symbols-outlined text-secondary text-[22px]" id="liveToastIcon">check_circle</span>
+<span class="font-title-md text-title-md font-medium" id="liveToastMsg">Acción procesada con éxito</span>
+</div>
+<!-- CLIENT-SIDE SCRIPT FOR INTERACTION -->
+<script>
+    (function() {
+      const overlay = document.getElementById('drawerOverlay');
+      const drawer = document.getElementById('executiveDrawer');
+      const dismissZone = document.getElementById('dismissZone');
+      const closeIcon = document.getElementById('closeDrawerIcon');
+      const underlying = document.getElementById('underlyingApp');
+
+      const btnAprobar = document.getElementById('btnExecutiveAprobar');
+      const btnModificar = document.getElementById('btnExecutiveModificar');
+      const btnWhatsapp = document.getElementById('btnExecutiveWhatsapp');
+      const btnUnlock = document.getElementById('btnDirectorUnlock');
+
+      const toast = document.getElementById('liveToast');
+      const toastMsg = document.getElementById('liveToastMsg');
+      const toastIcon = document.getElementById('liveToastIcon');
+
+      function notify(msg, icon = 'check_circle', isError = false) {
+        toastMsg.textContent = msg;
+        toastIcon.textContent = icon;
+        toastIcon.className = `material-symbols-outlined text-[22px] ${isError ? 'text-error' : 'text-secondary'}`;
+        toast.classList.remove('translate-y-24', 'opacity-0');
+        toast.classList.add('translate-y-0', 'opacity-100');
+        setTimeout(() => {
+          toast.classList.add('translate-y-24', 'opacity-0');
+          toast.classList.remove('translate-y-0', 'opacity-100');
+        }, 3000);
+      }
+
+      function dismissPanel() {
+        notify('Panel lateral cerrado. Haga clic en la tabla para volver a abrir.', 'visibility_off');
+        overlay.classList.add('hidden');
+        underlying.classList.remove('filter', 'blur-[3px]', 'opacity-35', 'pointer-events-none', 'select-none');
+      }
+
+      if (dismissZone) dismissZone.addEventListener('click', dismissPanel);
+      if (closeIcon) closeIcon.addEventListener('click', dismissPanel);
+
+      if (btnAprobar) {
+        btnAprobar.addEventListener('click', () => {
+          notify('Alerta AT-2026-46 formalmente aprobada por el Director OAIPCS y notificada a PCM.', 'verified');
+        });
+      }
+
+      if (btnModificar) {
+        btnModificar.addEventListener('click', () => {
+          notify('Pliego de observaciones remitido al sectorista Lic. Marco Valdivia.', 'send');
+        });
+      }
+
+      if (btnWhatsapp) {
+        btnWhatsapp.addEventListener('click', () => {
+          notify('Reporte ejecutivo estructurado copiado al portapapeles listo para WhatsApp.', 'chat');
+        });
+      }
+
+      if (btnUnlock) {
+        btnUnlock.addEventListener('click', () => {
+          notify('Credenciales de Director verificadas: Se habilitó la edición del expediente.', 'lock_open');
+        });
+      }
+
+      // Keyboard ESC
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !overlay.classList.contains('hidden')) {
+          dismissPanel();
+        }
+      });
+    })();
+  </script>
+</body></html>

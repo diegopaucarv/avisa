@@ -39,41 +39,47 @@
       />
     </label>
 
-    <div class="segmented status-chips" role="group" aria-label="Filtrar casos por estado">
-      <button
-        type="button"
-        [attr.aria-pressed]="!filtros().abiertos && filtros().estado === ''"
-        [class.chip-vacia]="conteos().todos === 0"
-        (click)="cambiarChip('', false)"
+    <label class="select-filter">
+      Estado
+      <select
+        aria-label="Filtrar casos por estado"
+        [value]="estadoSeleccionado()"
+        (change)="cambiarEstado($event)"
       >
-        Todos <span class="chip-count">{{ conteos().todos }}</span>
-      </button>
-      <button
-        type="button"
-        [attr.aria-pressed]="filtros().abiertos"
-        [class.chip-vacia]="conteos().abiertos === 0"
-        (click)="cambiarChip('', true)"
-      >
-        Abiertos <span class="chip-count">{{ conteos().abiertos }}</span>
-      </button>
-      <button
-        type="button"
-        [attr.aria-pressed]="!filtros().abiertos && filtros().estado === 'Resuelto'"
-        [class.chip-vacia]="conteos().resueltos === 0"
-        (click)="cambiarChip('Resuelto', false)"
-      >
-        Resueltos <span class="chip-count">{{ conteos().resueltos }}</span>
-      </button>
-      <button
-        type="button"
-        [attr.aria-pressed]="!filtros().abiertos && filtros().estado === 'Archivado'"
-        [class.chip-vacia]="conteos().archivados === 0"
-        (click)="cambiarChip('Archivado', false)"
-      >
-        Archivados <span class="chip-count">{{ conteos().archivados }}</span>
-      </button>
-    </div>
+        <option value="todos">Todos ({{ conteos().todos }})</option>
+        <option value="abiertos">Abiertos ({{ conteos().abiertos }})</option>
+        <option value="Resuelto">Resueltos ({{ conteos().resueltos }})</option>
+        <option value="Archivado">Archivados ({{ conteos().archivados }})</option>
+      </select>
+    </label>
 
+    <label class="select-filter">
+      Nivel de conflictividad
+      <select
+        aria-label="Filtrar casos por nivel de conflictividad"
+        [value]="filtros().nivel"
+        (change)="cambiarNivel($event)"
+      >
+        <option value="">Todos</option>
+        @for (opcion of conflictividades(); track opcion.valor) {
+        <option [value]="opcion.valor">{{ opcion.etiqueta }}</option>
+        }
+      </select>
+    </label>
+
+    <button
+      type="button"
+      class="button-secondary"
+      [attr.aria-expanded]="avanzado()"
+      aria-controls="filtros-avanzados"
+      (click)="alternarAvanzado()"
+    >
+      Búsqueda avanzada @if (filtrosAvanzadosActivos()) {<strong>· activos</strong>}
+    </button>
+  </div>
+
+  @if (avanzado() || filtrosAvanzadosActivos()) {
+  <div class="filter-bar filter-bar-wrap" id="filtros-avanzados">
     <label class="select-filter">
       Prioridad de atención
       <select
@@ -158,6 +164,7 @@
 
     <button type="button" class="button-secondary" (click)="limpiar()">Limpiar filtros</button>
   </div>
+  }
 
   <div class="view-toolbar">
     @if (puedeVerPapelera()) {
@@ -170,28 +177,18 @@
       </button>
     </div>
     } @if (!verPapelera()) {
-    <div class="segmented" role="group" aria-label="Vista de casos">
-      <button
-        type="button"
-        [attr.aria-pressed]="modo() === 'tarjetas'"
-        (click)="cambiarModo('tarjetas')"
+    <label class="select-filter">
+      Vista
+      <select
+        aria-label="Formato de la lista de casos"
+        [value]="modo()"
+        (change)="cambiarModoDesde($event)"
       >
-        Tarjetas
-      </button>
-      <button type="button" [attr.aria-pressed]="modo() === 'tabla'" (click)="cambiarModo('tabla')">
-        Tabla
-      </button>
-    </div>
+        <option value="tarjetas">Tarjetas</option>
+        <option value="tabla">Tabla</option>
+      </select>
+    </label>
     }
-
-    <a
-      class="table-link"
-      routerLink="/casos/sin-caso"
-      aria-label="Ver las demandas que aún no tienen caso"
-    >
-      Demandas sin caso
-      <app-icono nombre="chevron-derecha" [tamano]="12" />
-    </a>
   </div>
 
   @if (estado() === 'cargando') {
@@ -252,33 +249,34 @@
   } @else if (modo() === 'tarjetas') {
   <div class="case-grid">
     @for (caso of casos(); track caso.codigo) {
-    <a
+    <button
+      type="button"
       class="case-card"
-      [routerLink]="['/casos', caso.codigo]"
-      [attr.aria-label]="'Abrir el caso ' + caso.codigo + ': ' + caso.titulo"
+      [attr.aria-label]="'Abrir la vista previa del caso ' + caso.codigo + ': ' + caso.titulo"
+      (click)="abrirVistaPrevia(caso, $event)"
     >
       <div class="case-card-top">
         <span class="case-code">{{ caso.codigo }}</span>
         <span class="status-badge" [class]="'status-badge risk-' + caso.riesgo.toLowerCase()">
           <span class="status-dot"></span>
-          {{ caso.riesgo }}
+          Nivel de riesgo: {{ caso.riesgo }}
         </span>
       </div>
       <h3>{{ caso.titulo }}</h3>
       <div class="case-location">
         <app-icono nombre="mapa" [tamano]="14" />
-        {{ caso.region || 'Sin región' }} @if (caso.tematica) {
-        <span>·</span> {{ caso.tematica }} }
+        {{ caso.region || 'Sin región' }}
       </div>
-      <p>{{ caso.resumen || 'Sin resumen registrado.' }}</p>
+      <p class="case-summary">{{ caso.resumen || 'Sin resumen registrado.' }}</p>
       <div class="case-card-bottom">
         <span>{{ caso.etapa }}</span>
-        <span>
-          {{ caso.inicio ? 'Inicio ' + fechaTexto(caso.inicio) : 'Inicio —' }}
-          <app-icono nombre="chevron-derecha" [tamano]="14" />
+        <span
+          title="Fecha de última actualización del registro; en los casos del legado es la fecha en que se cargaron."
+        >
+          Actualización: {{ fechaCorta(caso.actualizado) }}
         </span>
       </div>
-    </a>
+    </button>
     }
   </div>
   } @else {
@@ -290,7 +288,6 @@
       <thead>
         <tr>
           <th scope="col">Caso</th>
-          <th scope="col">Inicio</th>
           <th scope="col">Región</th>
           <th scope="col">Temática</th>
           <th scope="col">Estado</th>
@@ -298,6 +295,7 @@
           <th scope="col">Riesgo</th>
           <th scope="col">Unidad</th>
           <th scope="col">Etapa</th>
+          <th scope="col">Inicio</th>
         </tr>
       </thead>
       <tbody>
@@ -306,9 +304,6 @@
           <td>
             <a class="table-link" [routerLink]="['/casos', caso.codigo]">{{ caso.codigo }}</a>
           </td>
-          <td [attr.title]="caso.inicio ? null : 'Sin fecha de inicio registrada'">
-            {{ caso.inicio ? fechaTexto(caso.inicio) : '—' }}
-          </td>
           <td>{{ caso.region || '—' }}</td>
           <td>{{ caso.tematica || '—' }}</td>
           <td>{{ caso.estado }}</td>
@@ -316,6 +311,9 @@
           <td>{{ caso.riesgo }}</td>
           <td>{{ caso.unidadResponsable || '—' }}</td>
           <td>{{ caso.etapa }}</td>
+          <td [attr.title]="caso.inicio ? null : 'Sin fecha de inicio registrada'">
+            {{ caso.inicio ? fechaTexto(caso.inicio) : '—' }}
+          </td>
         </tr>
         }
       </tbody>
@@ -329,6 +327,8 @@
     (paginaCambia)="cambiarPagina($event)"
     (tamanoCambia)="cambiarTamano($event)"
   />
+  } @if (casoPrevio(); as caso) {
+  <app-caso-vista-previa [caso]="caso" (cerrar)="cerrarVistaPrevia()" />
   } @if (panelAbierto()) {
   <app-caso-panel
     [guardando]="guardando()"

@@ -15,64 +15,76 @@
   @if (abierto()) {
     <div class="menu" role="menu" aria-label="Formatos de exportación">
       <p class="menu-titulo" role="presentation">Esta vista</p>
-      <button
-        type="button"
-        role="menuitem"
-        aria-label="Exportar esta vista en JSON"
-        (click)="descargar('json')"
-      >
-        JSON
-        <small>Datos estructurados (.json)</small>
-      </button>
-      <button
-        type="button"
-        role="menuitem"
-        aria-label="Exportar esta vista en Excel"
-        (click)="descargar('excel')"
-      >
-        Excel
-        <small>Hoja de cálculo (.xlsx)</small>
-      </button>
-      <button
-        type="button"
-        role="menuitem"
-        aria-label="Exportar esta vista en PDF"
-        (click)="descargar('pdf')"
-      >
-        PDF
-        <small>Tabla imprimible (.pdf)</small>
-      </button>
+      @if (permite('json')) {
+        <button
+          type="button"
+          role="menuitem"
+          aria-label="Exportar esta vista en JSON"
+          (click)="descargar('json')"
+        >
+          JSON
+          <small>Datos estructurados (.json)</small>
+        </button>
+      }
+      @if (permite('excel')) {
+        <button
+          type="button"
+          role="menuitem"
+          aria-label="Exportar esta vista en Excel"
+          (click)="descargar('excel')"
+        >
+          Excel
+          <small>Hoja de cálculo (.xlsx)</small>
+        </button>
+      }
+      @if (permite('pdf')) {
+        <button
+          type="button"
+          role="menuitem"
+          aria-label="Exportar esta vista en PDF"
+          (click)="descargar('pdf')"
+        >
+          PDF
+          <small>Tabla imprimible (.pdf)</small>
+        </button>
+      }
 
       <div class="menu-separador" role="separator"></div>
 
       <p class="menu-titulo" role="presentation">Base completa</p>
-      <button
-        type="button"
-        role="menuitem"
-        aria-label="Exportar la base completa en JSON"
-        (click)="descargar('json', 'base')"
-      >
-        JSON
-        <small>Todas las entidades (.json)</small>
-      </button>
-      <button
-        type="button"
-        role="menuitem"
-        aria-label="Exportar la base completa en Excel"
-        (click)="descargar('excel', 'base')"
-      >
-        Excel
-        <small>Una hoja por entidad (.xlsx)</small>
-      </button>
-      <button
-        type="button"
-        role="menuitem"
-        aria-label="Exportar la base completa en PDF"
-        (click)="descargar('pdf', 'base')"
-      >
-        PDF
-        <small>Respaldo imprimible (.pdf)</small>
-      </button>
+      @if (permite('json')) {
+        <button
+          type="button"
+          role="menuitem"
+          aria-label="Exportar la base completa en JSON"
+          (click)="descargar('json', 'base')"
+        >
+          JSON
+          <small>Todas las entidades (.json)</small>
+        </button>
+      }
+      @if (permite('excel')) {
+        <button
+          type="button"
+          role="menuitem"
+          aria-label="Exportar la base completa en Excel"
+          (click)="descargar('excel', 'base')"
+        >
+          Excel
+          <small>Una hoja por entidad (.xlsx)</small>
+        </button>
+      }
+      @if (permite('pdf')) {
+        <button
+          type="button"
+          role="menuitem"
+          aria-label="Exportar la base completa en PDF"
+          (click)="descargar('pdf', 'base')"
+        >
+          PDF
+          <small>Respaldo imprimible (.pdf)</small>
+        </button>
+      }
     </div>
   }
 </div>

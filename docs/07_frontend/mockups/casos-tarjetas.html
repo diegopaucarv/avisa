@@ -1,0 +1,1204 @@
+<!doctype html>
+<html lang="es">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Casos · tarjetas y ventana emergente · Mockup AVISA</title>
+        <style>
+            :root {
+                --ink: #17283a;
+                --ink-2: #33475b;
+                --muted: #778797;
+                --line: #e6ebef;
+                --paper: #fff;
+                --canvas: #f5f7f8;
+                --blue: #2455a2;
+                --blue-dark: #1d427f;
+                --blue-pale: #eaf1fb;
+                --teal: #397c79;
+                --amber: #aa6a11;
+                --amber-pale: #fff4e2;
+                --red: #ad4d46;
+                --red-pale: #fbeceb;
+                --green: #34785b;
+                --green-pale: #e9f5ef;
+                --font-sans:
+                    "DM Sans", system-ui, -apple-system, "Segoe UI", Arial,
+                    sans-serif;
+                --font-display:
+                    "Manrope", "DM Sans", system-ui, -apple-system, "Segoe UI",
+                    sans-serif;
+            }
+            * {
+                box-sizing: border-box;
+            }
+            html {
+                min-height: 100%;
+                background: var(--canvas);
+            }
+            body {
+                margin: 0;
+                color: var(--ink);
+                font-family: var(--font-sans);
+                font-size: 13px;
+                -webkit-font-smoothing: antialiased;
+            }
+            .view-body {
+                display: flex;
+                flex-direction: column;
+                gap: 14px;
+                width: 100%;
+                max-width: 1420px;
+                margin: 0 auto;
+                padding: 27px 34px 56px;
+            }
+            .view-head {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: flex-start;
+                justify-content: space-between;
+                gap: 16px;
+            }
+            .view-head h1 {
+                margin: 0;
+                font: 700 22px/1.3 var(--font-display);
+                letter-spacing: -0.65px;
+            }
+            .view-subtitle {
+                max-width: 820px;
+                margin: 6px 0 0;
+                color: var(--muted);
+                font-size: 11px;
+                line-height: 1.6;
+            }
+            .badge {
+                display: inline-flex;
+                align-items: center;
+                height: 26px;
+                padding: 0 10px;
+                border: 1px solid #cddcef;
+                border-radius: 999px;
+                background: var(--blue-pale);
+                color: var(--blue);
+                font-size: 9px;
+                font-weight: 700;
+                letter-spacing: 0.05em;
+                text-transform: uppercase;
+                white-space: nowrap;
+            }
+
+            .ann {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 8px;
+                padding: 10px 12px 12px;
+                border: 1px solid var(--line);
+                border-radius: 9px;
+                background: #fbfcfd;
+            }
+            @media (max-width: 980px) {
+                .ann {
+                    grid-template-columns: 1fr;
+                }
+            }
+            .ann-card {
+                padding: 8px 10px;
+                border: 1px solid #eef1f4;
+                border-radius: 7px;
+                background: #fff;
+                font-size: 10px;
+                line-height: 1.5;
+                color: var(--ink-2);
+            }
+            .ann-card.wide {
+                grid-column: 1 / -1;
+            }
+            .ann-card h3 {
+                margin: 0 0 4px;
+                color: var(--ink);
+                font: 700 9px/1.3 var(--font-display);
+                letter-spacing: 0.07em;
+                text-transform: uppercase;
+            }
+            .ann-card code {
+                padding: 0 3px;
+                border-radius: 3px;
+                background: #eef1f4;
+                font-family: ui-monospace, Menlo, monospace;
+                font-size: 9.5px;
+            }
+            .ann-card .n {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 15px;
+                height: 15px;
+                margin-right: 5px;
+                border-radius: 50%;
+                background: var(--blue);
+                color: #fff;
+                font-size: 9px;
+                font-weight: 700;
+            }
+            .ann-table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+            .ann-table th,
+            .ann-table td {
+                padding: 2px 6px 2px 0;
+                border-bottom: 1px solid #f1f3f5;
+                text-align: left;
+                vertical-align: top;
+                font-size: 9.5px;
+            }
+            .ann-table th {
+                color: #97a1aa;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.04em;
+            }
+            .ann-table tr:last-child td {
+                border-bottom: 0;
+            }
+
+            .filterbar {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: flex-end;
+                gap: 9px;
+            }
+            .field {
+                display: grid;
+                gap: 3px;
+            }
+            .field > span {
+                color: #97a1aa;
+                font-size: 8.5px;
+                font-weight: 700;
+                letter-spacing: 0.07em;
+                text-transform: uppercase;
+            }
+            .search {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                min-width: 260px;
+                flex: 1;
+                height: 32px;
+                padding: 0 10px;
+                border: 1px solid var(--line);
+                border-radius: 7px;
+                background: #fff;
+                color: var(--muted);
+            }
+            .search input {
+                width: 100%;
+                border: 0;
+                outline: none;
+                background: none;
+                font: inherit;
+                color: var(--ink);
+            }
+            select {
+                height: 32px;
+                min-width: 160px;
+                padding: 0 8px;
+                border: 1px solid var(--line);
+                border-radius: 7px;
+                background: #fff;
+                color: var(--ink);
+                font: inherit;
+                font-size: 11px;
+            }
+            .btn {
+                height: 32px;
+                padding: 0 12px;
+                border: 1px solid var(--line);
+                border-radius: 7px;
+                background: #fff;
+                color: var(--ink-2);
+                font: inherit;
+                font-size: 11px;
+            }
+            .btn.primary {
+                border-color: var(--blue);
+                background: var(--blue);
+                color: #fff;
+            }
+            .btn.ghost {
+                border-style: dashed;
+                color: var(--blue);
+            }
+            .count-pill {
+                margin-left: auto;
+                align-self: center;
+                color: var(--muted);
+                font-size: 10px;
+            }
+
+            .adv {
+                display: grid;
+                grid-template-columns: repeat(4, minmax(0, 1fr));
+                gap: 9px;
+                padding: 10px 12px;
+                border: 1px solid #cddcef;
+                border-radius: 8px;
+                background: #f7faff;
+            }
+            @media (max-width: 900px) {
+                .adv {
+                    grid-template-columns: repeat(2, 1fr);
+                }
+            }
+            .adv .field > span {
+                color: #6b86a8;
+            }
+            .adv-note {
+                grid-column: 1 / -1;
+                color: #6b86a8;
+                font-size: 9px;
+            }
+
+            .cards {
+                display: grid;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: 12px;
+            }
+            @media (max-width: 1100px) {
+                .cards {
+                    grid-template-columns: repeat(2, 1fr);
+                }
+            }
+            @media (max-width: 720px) {
+                .cards {
+                    grid-template-columns: 1fr;
+                }
+            }
+            .case-card {
+                display: flex;
+                flex-direction: column;
+                gap: 7px;
+                padding: 12px 13px 10px;
+                border: 1px solid var(--line);
+                border-radius: 9px;
+                background: #fff;
+            }
+            .case-card:hover {
+                border-color: #cddcef;
+                box-shadow: 0 2px 8px rgba(23, 40, 58, 0.06);
+            }
+            .case-top {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 8px;
+            }
+            .code {
+                font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+                font-size: 9px;
+                color: #4c7099;
+            }
+            .case-card h3 {
+                margin: 0;
+                color: var(--ink);
+                font: 700 12px/1.35 var(--font-display);
+                letter-spacing: -0.1px;
+            }
+            .summary {
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+                height: 30px;
+                margin: 0;
+                color: #687988;
+                font-size: 9.5px;
+                line-height: 15px;
+            }
+            .case-foot {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                gap: 8px;
+                padding-top: 6px;
+                border-top: 1px solid #f0f2f4;
+                color: var(--muted);
+                font-size: 9px;
+            }
+            .risk-label {
+                color: var(--ink-2);
+                font-weight: 600;
+            }
+            .risk-dot {
+                display: inline-block;
+                width: 7px;
+                height: 7px;
+                margin-right: 4px;
+                border-radius: 50%;
+                vertical-align: 0;
+            }
+            .risk-dot.alto {
+                background: var(--red);
+            }
+            .risk-dot.mod {
+                background: var(--amber);
+            }
+            .risk-dot.bajo {
+                background: var(--green);
+            }
+            .sep {
+                color: #d5dde4;
+            }
+            .case-foot .region::before {
+                content: "◉";
+                margin-right: 3px;
+                color: #9fb1c2;
+                font-size: 8px;
+            }
+
+            .stage {
+                position: relative;
+                border: 1px solid var(--line);
+                border-radius: 9px;
+                background: #e8eef3;
+                padding: 12px;
+            }
+            .stage::before {
+                content: "fondo desenfocado · la lista queda detrás de la ventana";
+                position: absolute;
+                left: 12px;
+                bottom: 9px;
+                color: #93a2ae;
+                font-size: 8.5px;
+            }
+            .stage .ghost {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 10px;
+                filter: blur(2.5px);
+                opacity: 0.55;
+            }
+            .stage .ghost div {
+                height: 96px;
+                border-radius: 8px;
+                background: #fff;
+                border: 1px solid #d8e0e7;
+            }
+
+            .modal {
+                position: relative;
+                z-index: 2;
+                max-width: 760px;
+                margin: 0 auto;
+                border: 1px solid #d5dee6;
+                border-radius: 10px;
+                background: #fff;
+                box-shadow: 0 18px 44px rgba(23, 40, 58, 0.22);
+                overflow: hidden;
+            }
+            .modal-head {
+                display: flex;
+                align-items: flex-start;
+                justify-content: space-between;
+                gap: 12px;
+                padding: 14px 16px 11px;
+                border-bottom: 1px solid #eef1f4;
+            }
+            .modal-head h3 {
+                margin: 0;
+                font: 700 15px/1.3 var(--font-display);
+                letter-spacing: -0.3px;
+            }
+            .modal-head .meta {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+                margin-top: 5px;
+                color: var(--muted);
+                font-size: 9px;
+            }
+            .modal-head .conflict {
+                padding: 1px 7px;
+                border: 1px solid #f5d6b3;
+                border-radius: 999px;
+                background: var(--amber-pale);
+                color: var(--amber);
+                font-weight: 600;
+            }
+            .modal-body {
+                padding: 12px 16px;
+            }
+            .modal-body h4 {
+                margin: 0 0 4px;
+                color: #97a1aa;
+                font-size: 8.5px;
+                letter-spacing: 0.06em;
+                text-transform: uppercase;
+            }
+            .modal-body p {
+                margin: 0;
+                color: var(--ink-2);
+                font-size: 10.5px;
+                line-height: 1.6;
+            }
+            .actions {
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 9px;
+                margin-top: 14px;
+            }
+            @media (max-width: 720px) {
+                .actions {
+                    grid-template-columns: repeat(2, 1fr);
+                }
+            }
+            .action {
+                display: flex;
+                flex-direction: column;
+                gap: 3px;
+                padding: 11px 10px;
+                border: 1px solid var(--line);
+                border-radius: 8px;
+                background: #fff;
+                text-align: left;
+            }
+            .action b {
+                color: var(--ink);
+                font-size: 11px;
+            }
+            .action span {
+                color: var(--muted);
+                font-size: 8.5px;
+                line-height: 1.35;
+            }
+            .action.missing {
+                border-style: dashed;
+                background: #fbfcfd;
+            }
+            .action.missing b {
+                color: #97a1aa;
+            }
+            .action .no {
+                justify-self: start;
+                margin-top: 2px;
+                padding: 1px 6px;
+                border-radius: 999px;
+                background: #eef1f4;
+                color: #687988;
+                font-size: 7.5px;
+                font-weight: 700;
+                letter-spacing: 0.05em;
+                text-transform: uppercase;
+            }
+            .modal-foot {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 10px;
+                padding: 9px 16px;
+                border-top: 1px solid #eef1f4;
+                color: var(--muted);
+                font-size: 8.5px;
+            }
+            .btn-sm {
+                height: 26px;
+                padding: 0 10px;
+                border: 1px solid var(--line);
+                border-radius: 6px;
+                background: #fff;
+                color: var(--ink-2);
+                font: inherit;
+                font-size: 10px;
+            }
+
+            .card {
+                padding: 14px 15px 12px;
+                border: 1px solid var(--line);
+                border-radius: 9px;
+                background: #fff;
+            }
+            .card-head {
+                display: flex;
+                align-items: flex-start;
+                justify-content: space-between;
+                gap: 10px;
+                margin-bottom: 8px;
+            }
+            .card-title {
+                margin: 0;
+                font: 700 12.5px/1.3 var(--font-display);
+            }
+            .card-sub {
+                margin: 3px 0 0;
+                color: var(--muted);
+                font-size: 9.5px;
+            }
+            .tag {
+                display: inline-flex;
+                padding: 2px 7px;
+                border: 1px solid var(--line);
+                border-radius: 999px;
+                color: #8b97a1;
+                font-size: 7.5px;
+                font-weight: 700;
+                letter-spacing: 0.05em;
+                text-transform: uppercase;
+                white-space: nowrap;
+            }
+            table.data {
+                width: 100%;
+                border-collapse: collapse;
+                text-align: left;
+            }
+            table.data th {
+                height: 30px;
+                padding: 0 9px;
+                border-bottom: 1px solid #edf0f2;
+                color: #97a1aa;
+                font-size: 8px;
+                font-weight: 600;
+                letter-spacing: 0.5px;
+                text-transform: uppercase;
+            }
+            table.data td {
+                padding: 7px 9px;
+                border-bottom: 1px solid #f0f2f4;
+                color: #687988;
+                font-size: 9.5px;
+            }
+            table.data tbody tr:last-child td {
+                border-bottom: 0;
+            }
+            .foot {
+                margin: 0;
+                color: #94a0a8;
+                font-size: 9px;
+                line-height: 1.6;
+            }
+            .foot code {
+                padding: 0 3px;
+                border-radius: 3px;
+                background: #eef1f4;
+                font-family: ui-monospace, Menlo, monospace;
+                font-size: 9px;
+            }
+        </style>
+    </head>
+    <body>
+        <main class="view-body">
+            <header class="view-head">
+                <div>
+                    <h1>Casos · tarjetas y ventana emergente</h1>
+                    <p class="view-subtitle">
+                        Flujo diario del especialista. La fila de chips de
+                        estado desaparece: la <b>conflictividad</b> pasa a un
+                        desplegable y el <b>estado</b> se conserva dentro de
+                        «Búsqueda avanzada». El conmutador tarjetas/tabla pasa a
+                        un desplegable a la izquierda. Cada tarjeta es un
+                        <i>small multiple</i> con resumen a dos líneas y la
+                        etiqueta rotulada del riesgo.
+                    </p>
+                </div>
+                <div>
+                    <span class="badge"
+                        >Ola 1 · artboard 2 · items 93–94 · 100–102</span
+                    >
+                </div>
+            </header>
+
+            <section class="ann" aria-label="Anotaciones del artboard">
+                <div class="ann-card">
+                    <h3><span class="n">1</span>Items que cubre</h3>
+                    <b>93</b> (limpieza de cabecera y filtros; fuera «Demandas
+                    sin caso») · <b>94</b> (tarjetas normalizadas) ·
+                    <b>100</b> (desplegables de conflictividad y de formato, más
+                    «Búsqueda avanzada») · <b>101</b> (tarjeta y ventana
+                    emergente con cuatro accesos) · <b>102</b> (mapa de actores
+                    como tabla exportable). <br /><b>Diseño por lote:</b> Lote A
+                    · Casos y ficha (93, 94, 100, 101, 102).
+                </div>
+                <div class="ann-card">
+                    <h3>
+                        <span class="n">2</span>Dato que necesita cada celda
+                    </h3>
+                    <table class="ann-table">
+                        <tr>
+                            <th>Celda</th>
+                            <th>Campo</th>
+                            <th>Ruta</th>
+                        </tr>
+                        <tr>
+                            <td>Tarjeta</td>
+                            <td>
+                                <code>code</code>, <code>title</code>,
+                                <code>summary</code>
+                            </td>
+                            <td><code>GET /v1/cases</code></td>
+                        </tr>
+                        <tr>
+                            <td>Riesgo</td>
+                            <td><code>risk</code></td>
+                            <td>
+                                <code>GET /v1/cases</code> · filtro
+                                <code>riesgo</code>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Conflictividad</td>
+                            <td><code>nivelConflicto</code></td>
+                            <td>
+                                <code>GET /v1/cases</code> ·
+                                <code>GET /v1/catalogs</code>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Región</td>
+                            <td><code>region</code></td>
+                            <td><code>GET /v1/cases</code></td>
+                        </tr>
+                        <tr>
+                            <td>Actualización</td>
+                            <td><code>updated</code></td>
+                            <td><code>GET /v1/cases</code></td>
+                        </tr>
+                        <tr>
+                            <td>Ventana</td>
+                            <td>ficha compuesta</td>
+                            <td><code>GET /v1/cases/{codigo}</code></td>
+                        </tr>
+                        <tr>
+                            <td>Actores (tabla)</td>
+                            <td>
+                                <code>nombre</code>, <code>tipo</code>,
+                                <code>funcion</code>,
+                                <code>posicionamiento</code>,
+                                <code>correo</code>
+                            </td>
+                            <td>
+                                <code>GET /v1/cases/{codigo}</code> →
+                                <code>actores</code>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Apellidos, Nombres</td>
+                            <td>
+                                <code>apellidos</code>, <code>nombres</code>
+                            </td>
+                            <td>
+                                <b>no existe</b>: <code>core.actores</code> sólo
+                                tiene <code>nombre_actual</code> (item 98)
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Teléfono del actor</td>
+                            <td><code>telefono</code></td>
+                            <td>
+                                <b>no existe</b> en el payload; es PII y exige
+                                <code>GET /v1/actors/{uid}/pii?motivo=</code>
+                                (item 99)
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Exportar la tabla</td>
+                            <td>
+                                <code>formato=excel</code>,
+                                <code>entidad=actores</code>
+                            </td>
+                            <td><code>GET /v1/export</code></td>
+                        </tr>
+                        <tr>
+                            <td>Acceso Canva</td>
+                            <td>—</td>
+                            <td><b>no existe</b> (ni campo ni enlace)</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="ann-card">
+                    <h3><span class="n">3</span>Sólo forma · no implementar</h3>
+                    El resumen de las tarjetas y la fecha «18 nov 2026» son
+                    <b>contenido de ejemplo</b> para fijar la forma. El borde,
+                    la elipsis a dos líneas, la etiqueta rotulada y el orden de
+                    los cuatro accesos sí se implementan. El grafo del mapa de
+                    actores no se dibuja aquí: sólo su lectura tabular.
+                </div>
+                <div class="ann-card">
+                    <h3><span class="n">4</span>Bloqueado y por qué</h3>
+                    <b>X5:</b> «Demandas sin caso» se retira de esta barra y se
+                    queda en la pantalla de demandas; el hueco no se cierra.
+                    <b>X1 / X4:</b> no aplican a esta pantalla. <b>Canva</b> no
+                    es bloqueo: es ausencia de dato y por eso el acceso se
+                    dibuja deshabilitado.
+                </div>
+                <div class="ann-card wide">
+                    <h3><span class="n">5</span>Roles que ven cada bloque</h3>
+                    Todos los roles de consulta ven la lista y la ventana.
+                    <b>Sectorista:</b> sólo las regiones de su sesión (y, cuando
+                    exista el item 113, sólo su subsector). El botón «Nuevo
+                    caso» se muestra si el rol tiene capacidad de escritura. Los
+                    cuatro accesos de la ventana son de lectura y los ve
+                    cualquier rol con acceso al caso. La columna de contacto de
+                    la tabla de actores respeta <code>puedeVerPii</code>: sólo
+                    <b>administrador, Dirección, Alta Dirección y sectorista</b>
+                    ven el teléfono; el correo sí viaja en el payload.
+                </div>
+            </section>
+
+            <!-- Barra de filtros: conflictividad + formato -->
+            <div class="filterbar">
+                <label class="search">
+                    <span aria-hidden="true">⌕</span>
+                    <input
+                        type="search"
+                        placeholder="Buscar por código o título"
+                    />
+                </label>
+                <div class="field">
+                    <span>Nivel de conflictividad</span>
+                    <select>
+                        <option>Todas</option>
+                        <option>Diferencia</option>
+                        <option>Controversia</option>
+                        <option>Conflicto social</option>
+                        <option>Crisis social</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <span>Formato</span>
+                    <select>
+                        <option>Tarjetas</option>
+                        <option>Tabla</option>
+                    </select>
+                </div>
+                <button class="btn ghost" type="button">
+                    Búsqueda avanzada ▾
+                </button>
+                <button class="btn primary" type="button">Nuevo caso</button>
+                <span class="count-pill"
+                    >34 casos abiertos · 6 visibles en el mockup</span
+                >
+            </div>
+
+            <!-- Búsqueda avanzada: conserva el estado, que salió de los chips -->
+            <div
+                class="adv"
+                aria-label="Búsqueda avanzada con el estado conservado"
+            >
+                <div class="field">
+                    <span>Estado</span>
+                    <select>
+                        <option>Todos</option>
+                        <option>Abierto</option>
+                        <option>Resuelto</option>
+                        <option>Archivado</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <span>Nivel de riesgo</span>
+                    <select>
+                        <option>Todos</option>
+                        <option>Bajo</option>
+                        <option>Moderado</option>
+                        <option>Alto</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <span>Prioridad de atención</span>
+                    <select>
+                        <option>Todas</option>
+                        <option>Urgente</option>
+                        <option>Moderado</option>
+                        <option>Bajo</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <span>Temática</span>
+                    <select>
+                        <option>Todas</option>
+                        <option>Infraestructura</option>
+                        <option>Ordenamiento y acceso territorial</option>
+                        <option>Gobernanza</option>
+                    </select>
+                </div>
+                <p class="adv-note">
+                    «Búsqueda avanzada» es el desplegable que absorbe el estado:
+                    los cuatro valores congelados siguen aquí y dejan de ocupar
+                    la barra principal (item 100).
+                </p>
+            </div>
+
+            <!-- Tarjetas normalizadas -->
+            <div class="cards">
+                <article class="case-card">
+                    <div class="case-top">
+                        <span class="code">CS-MI-INF-2025-01</span
+                        ><span class="tag">Alto</span>
+                    </div>
+                    <h3>
+                        Ocupación informal de terreno del Parque Industrial de
+                        Ancón (AAMEC)
+                    </h3>
+                    <p class="summary">
+                        Ocupación del predio del parque industrial por
+                        comerciantes informales; la empresa solicita el desalojo
+                        y el GORE media sin acuerdo.
+                    </p>
+                    <div class="case-foot">
+                        <span class="risk-label"
+                            ><i class="risk-dot alto"></i>Nivel de riesgo:
+                            Alto</span
+                        >
+                        <span class="sep">|</span>
+                        <span class="region">Lima</span>
+                        <span class="sep">|</span>
+                        <span>Actualizado 18 nov 2026</span>
+                    </div>
+                </article>
+
+                <article class="case-card">
+                    <div class="case-top">
+                        <span class="code">CS-PA-OAT-2024-02</span
+                        ><span class="tag">Conflicto social</span>
+                    </div>
+                    <h3>
+                        Uso de red de cortina de fondo en Cabo Blanco y Los
+                        Órganos
+                    </h3>
+                    <p class="summary">
+                        Pescadores de Cabo Blanco denuncian extracción con red
+                        cortina de fondo dentro de su área de reserva; el
+                        conflicto escaló con bloqueo de la Panamericana.
+                    </p>
+                    <div class="case-foot">
+                        <span class="risk-label"
+                            ><i class="risk-dot bajo"></i>Nivel de riesgo:
+                            Bajo</span
+                        >
+                        <span class="sep">|</span>
+                        <span class="region">Piura</span>
+                        <span class="sep">|</span>
+                        <span>Actualizado 18 nov 2026</span>
+                    </div>
+                </article>
+
+                <article class="case-card">
+                    <div class="case-top">
+                        <span class="code">CS-MI-ITE-2025-02</span
+                        ><span class="tag">Conflicto social</span>
+                    </div>
+                    <h3>
+                        Presunta contaminación por plomo de la empresa Baterías
+                        ETNA
+                    </h3>
+                    <p class="summary">
+                        Vecinos de Mi Perú reportan contaminación por plomo; se
+                        exige monitoreo ambiental independiente y la reubicación
+                        de la planta.
+                    </p>
+                    <div class="case-foot">
+                        <span class="risk-label"
+                            ><i class="risk-dot mod"></i>Nivel de riesgo:
+                            Moderado</span
+                        >
+                        <span class="sep">|</span>
+                        <span class="region">Lima</span>
+                        <span class="sep">|</span>
+                        <span>Actualizado 18 nov 2026</span>
+                    </div>
+                </article>
+
+                <article class="case-card">
+                    <div class="case-top">
+                        <span class="code">CS-PA-INF-2012-01</span
+                        ><span class="tag">Conflicto social</span>
+                    </div>
+                    <h3>
+                        Reubicación de embarcaciones del Muelle 5E · Terminal
+                        Norte del Callao
+                    </h3>
+                    <p class="summary">
+                        Pescadores artesanales resisten la reubicación de sus
+                        embarcaciones por la ampliación del terminal; el caso
+                        arrastra más de una década.
+                    </p>
+                    <div class="case-foot">
+                        <span class="risk-label"
+                            ><i class="risk-dot bajo"></i>Nivel de riesgo:
+                            Bajo</span
+                        >
+                        <span class="sep">|</span>
+                        <span class="region">Callao</span>
+                        <span class="sep">|</span>
+                        <span>Actualizado 18 nov 2026</span>
+                    </div>
+                </article>
+
+                <article class="case-card">
+                    <div class="case-top">
+                        <span class="code">CS-PA-DBE-2025-01</span
+                        ><span class="tag">Controversia</span>
+                    </div>
+                    <h3>
+                        Habilitación de áreas acuáticas y fortalecimiento de la
+                        maricultura en Sechura
+                    </h3>
+                    <p class="summary">
+                        Solicitud de habilitación de áreas acuáticas para
+                        maricultura; las asociaciones locales piden
+                        participación en la asignación.
+                    </p>
+                    <div class="case-foot">
+                        <span class="risk-label"
+                            ><i class="risk-dot mod"></i>Nivel de riesgo:
+                            Moderado</span
+                        >
+                        <span class="sep">|</span>
+                        <span class="region">Piura</span>
+                        <span class="sep">|</span>
+                        <span>Actualizado 18 nov 2026</span>
+                    </div>
+                </article>
+
+                <article class="case-card">
+                    <div class="case-top">
+                        <span class="code">CS-PA-GOB-2026-01</span
+                        ><span class="tag">Controversia</span>
+                    </div>
+                    <h3>
+                        Seguridad y fiscalización pesquera en el litoral de
+                        Tumbes
+                    </h3>
+                    <p class="summary">
+                        Pescadores artesanales denuncian inseguridad y falta de
+                        fiscalización en el litoral; se pide coordinación con la
+                        Marina y el GORE.
+                    </p>
+                    <div class="case-foot">
+                        <span class="risk-label"
+                            ><i class="risk-dot mod"></i>Nivel de riesgo:
+                            Moderado</span
+                        >
+                        <span class="sep">|</span>
+                        <span class="region">Tumbes</span>
+                        <span class="sep">|</span>
+                        <span>Actualizado 18 nov 2026</span>
+                    </div>
+                </article>
+            </div>
+
+            <p class="foot">
+                Códigos, región, conflictividad y riesgo provienen del corte
+                real de 34 casos abiertos. Los resúmenes y la fecha de
+                actualización son de
+                <b>ejemplo</b>: fijan la elipsis a dos líneas y el formato «18
+                nov 2026»; en la SPA llegan de <code>summary</code> y
+                <code>updated</code>. La tarjeta muestra <b>sólo la región</b>,
+                sin subsector (item 94).
+            </p>
+
+            <!-- Ventana emergente del caso (item 101) -->
+            <div class="card">
+                <div class="card-head">
+                    <div>
+                        <h2 class="card-title">
+                            Ventana emergente del caso · item 101
+                        </h2>
+                        <p class="card-sub">
+                            Cabecera con código, título, conflictividad y
+                            actualización; resumen y cuatro accesos. Canva se
+                            declara ausente, no se inventa.
+                        </p>
+                    </div>
+                    <span class="tag">estado abierto</span>
+                </div>
+                <div class="stage">
+                    <div class="ghost" aria-hidden="true">
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                    </div>
+                    <div
+                        class="modal"
+                        role="dialog"
+                        aria-label="Vista previa del caso"
+                    >
+                        <div class="modal-head">
+                            <div>
+                                <h3>
+                                    Uso de red de cortina de fondo en Cabo
+                                    Blanco y Los Órganos
+                                </h3>
+                                <div class="meta">
+                                    <span class="code">CS-PA-OAT-2024-02</span>
+                                    <span class="conflict"
+                                        >Conflicto social</span
+                                    >
+                                    <span>Actualizado 18 nov 2026</span>
+                                    <span>Piura</span>
+                                </div>
+                            </div>
+                            <button class="btn-sm" type="button">Cerrar</button>
+                        </div>
+                        <div class="modal-body">
+                            <h4>Resumen</h4>
+                            <p>
+                                Los pescadores de Cabo Blanco denuncian que
+                                pescadores de Los Órganos extraen recursos con
+                                red cortina de fondo dentro de sus áreas de
+                                reserva. El conflicto escaló en octubre de 2024
+                                con un bloqueo de la Panamericana; PRODUCE abrió
+                                diálogo y tres compromisos.
+                            </p>
+                            <div class="actions">
+                                <div class="action">
+                                    <b>Línea de tiempo</b
+                                    ><span>Cronología de hechos validados</span>
+                                </div>
+                                <div class="action">
+                                    <b>Mapa de actores</b
+                                    ><span
+                                        >Grafo y lectura tabular
+                                        exportable</span
+                                    >
+                                </div>
+                                <div class="action">
+                                    <b>Acuerdos</b
+                                    ><span>Compromisos e hitos del caso</span>
+                                </div>
+                                <div class="action missing">
+                                    <b>Canva</b><span>Caso de análisis</span
+                                    ><span class="no">no existe</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-foot">
+                            <span
+                                >El acceso «Canva» no tiene campo ni enlace en
+                                la API.</span
+                            >
+                            <button
+                                class="btn-sm primary"
+                                type="button"
+                                style="
+                                    border-color: var(--blue);
+                                    background: var(--blue);
+                                    color: #fff;
+                                "
+                            >
+                                Abrir ficha
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mapa de actores como tabla (item 102) -->
+            <div class="card">
+                <div class="card-head">
+                    <div>
+                        <h2 class="card-title">
+                            Mapa de actores · lectura tabular exportable · item
+                            102
+                        </h2>
+                        <p class="card-sub">
+                            El grafo se puede leer como tabla y exportar a
+                            Excel. Es la misma tabla de actores de la ficha, con
+                            columnas añadidas: no una segunda tabla. Filas de
+                            ejemplo.
+                        </p>
+                    </div>
+                    <div style="display: flex; gap: 6px; align-items: center">
+                        <span class="tag">exportable</span>
+                        <button class="btn-sm" type="button">
+                            Exportar a Excel
+                        </button>
+                    </div>
+                </div>
+                <table class="data">
+                    <caption
+                        style="
+                            caption-side: top;
+                            padding: 0 0 6px;
+                            color: #94a0a8;
+                            font-size: 9px;
+                            text-align: left;
+                        "
+                    >
+                        Filas de formato. El campo 3P de la demanda y los
+                        códigos de organización son de ejemplo; el botón
+                        «Exportar» junto al título y el bloque «Demandas (0)» se
+                        retiran (item 98).
+                    </caption>
+                    <thead>
+                        <tr>
+                            <th>Apellidos, Nombres</th>
+                            <th>Tipo</th>
+                            <th>Función</th>
+                            <th>Posicionamiento</th>
+                            <th>Organización</th>
+                            <th>Contacto</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                —
+                                <span style="color: #9aa6b1"
+                                    >(apellidos y nombres separados: no
+                                    existe)</span
+                                >
+                            </td>
+                            <td>Actor social</td>
+                            <td>Principal</td>
+                            <td>Dialogante</td>
+                            <td>Asociación de pescadores de Cabo Blanco</td>
+                            <td>
+                                correo — · teléfono: no existe en el payload
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                —
+                                <span style="color: #9aa6b1"
+                                    >(apellidos y nombres separados: no
+                                    existe)</span
+                                >
+                            </td>
+                            <td>Actor público</td>
+                            <td>Secundario</td>
+                            <td>Legitimante</td>
+                            <td>DIREPRO Piura</td>
+                            <td>
+                                correo — · teléfono: no existe en el payload
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                —
+                                <span style="color: #9aa6b1"
+                                    >(apellidos y nombres separados: no
+                                    existe)</span
+                                >
+                            </td>
+                            <td>Actor social</td>
+                            <td>Tercero imparcial</td>
+                            <td>Conflictivo</td>
+                            <td>Asociación de pescadores de Los Órganos</td>
+                            <td>
+                                correo — · teléfono: no existe en el payload
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p class="foot" style="margin-top: 8px">
+                    Columnas nuevas exigen <code>core.actores</code> con
+                    apellidos y nombres separados y el teléfono en
+                    <code>ActorCaso</code>: hoy
+                    <code>nombreActor()</code> concatena y el teléfono no viaja
+                    (item 98). El botón Exportar junto al título y el bloque
+                    «Demandas (0)» se retiran.
+                </p>
+            </div>
+        </main>
+    </body>
+</html>

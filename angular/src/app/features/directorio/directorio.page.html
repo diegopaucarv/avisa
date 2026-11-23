@@ -1,0 +1,33 @@
+<section class="view-body" aria-labelledby="titulo-directorio">
+  <header class="view-head">
+    <div>
+      <h1 id="titulo-directorio">Directorio</h1>
+      <p class="view-subtitle">
+        Elija el directorio que desea consultar. Cada matriz conserva su propia pantalla y sus
+        enlaces directos.
+      </p>
+    </div>
+  </header>
+
+  <div class="directorio-grid">
+    @for (acceso of accesos; track acceso.ruta) {
+    <a
+      class="directorio-card"
+      [routerLink]="acceso.ruta"
+      [attr.aria-label]="'Abrir el directorio de ' + acceso.etiqueta"
+    >
+      <span class="directorio-icono">
+        <app-icono [nombre]="acceso.icono" [tamano]="22" />
+      </span>
+      <span class="directorio-copy">
+        <strong>{{ acceso.etiqueta }}</strong>
+        <span>{{ acceso.descripcion }}</span>
+      </span>
+      <span class="directorio-boton">
+        Abrir
+        <app-icono nombre="chevron-derecha" [tamano]="13" />
+      </span>
+    </a>
+    }
+  </div>
+</section>

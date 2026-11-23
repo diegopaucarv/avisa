@@ -147,6 +147,18 @@ DESGLOSE: tuple[tuple[str, str, int], ...] = (
         224,
     ),
     (
+        "actores organización con región",
+        "SELECT count(*) FROM core.actores "
+        "WHERE naturaleza = 'organizacion' AND region_id IS NOT NULL",
+        119,
+    ),
+    (
+        "actores organización sin región (sin ubigeo o DEP-20)",
+        "SELECT count(*) FROM core.actores "
+        "WHERE naturaleza = 'organizacion' AND region_id IS NULL",
+        105,
+    ),
+    (
         "casos con nivel de conflicto NULL (decisión b)",
         "SELECT count(*) FROM core.casos WHERE nivel_conflicto_id IS NULL",
         1,

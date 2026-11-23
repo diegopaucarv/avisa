@@ -1,0 +1,1140 @@
+<!doctype html>
+<html lang="es">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Alertas · filtros y acciones · Mockup AVISA</title>
+        <style>
+            :root {
+                --ink: #17283a;
+                --ink-2: #33475b;
+                --muted: #778797;
+                --line: #e6ebef;
+                --paper: #fff;
+                --canvas: #f5f7f8;
+                --blue: #2455a2;
+                --blue-dark: #1d427f;
+                --blue-pale: #eaf1fb;
+                --teal: #397c79;
+                --amber: #aa6a11;
+                --amber-pale: #fff4e2;
+                --red: #ad4d46;
+                --red-pale: #fbeceb;
+                --green: #34785b;
+                --green-pale: #e9f5ef;
+                --font-sans:
+                    "DM Sans", system-ui, -apple-system, "Segoe UI", Arial,
+                    sans-serif;
+                --font-display:
+                    "Manrope", "DM Sans", system-ui, -apple-system, "Segoe UI",
+                    sans-serif;
+            }
+            * {
+                box-sizing: border-box;
+            }
+            html {
+                min-height: 100%;
+                background: var(--canvas);
+            }
+            body {
+                margin: 0;
+                color: var(--ink);
+                font-family: var(--font-sans);
+                font-size: 13px;
+                -webkit-font-smoothing: antialiased;
+            }
+            .view-body {
+                display: flex;
+                flex-direction: column;
+                gap: 14px;
+                width: 100%;
+                max-width: 1420px;
+                margin: 0 auto;
+                padding: 27px 34px 56px;
+            }
+            .view-head {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: flex-start;
+                justify-content: space-between;
+                gap: 16px;
+            }
+            .view-head h1 {
+                margin: 0;
+                font: 700 22px/1.3 var(--font-display);
+                letter-spacing: -0.65px;
+            }
+            .view-subtitle {
+                max-width: 840px;
+                margin: 6px 0 0;
+                color: var(--muted);
+                font-size: 11px;
+                line-height: 1.6;
+            }
+            .badge {
+                display: inline-flex;
+                align-items: center;
+                height: 26px;
+                padding: 0 10px;
+                border: 1px solid #cddcef;
+                border-radius: 999px;
+                background: var(--blue-pale);
+                color: var(--blue);
+                font-size: 9px;
+                font-weight: 700;
+                letter-spacing: 0.05em;
+                text-transform: uppercase;
+                white-space: nowrap;
+            }
+
+            /* ── Cinco bloques de anotación ───────────────────────────── */
+            .ann {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 8px;
+                padding: 10px 12px 12px;
+                border: 1px solid var(--line);
+                border-radius: 9px;
+                background: #fbfcfd;
+            }
+            @media (max-width: 980px) {
+                .ann {
+                    grid-template-columns: 1fr;
+                }
+            }
+            .ann-card {
+                padding: 8px 10px;
+                border: 1px solid #eef1f4;
+                border-radius: 7px;
+                background: #fff;
+                font-size: 10px;
+                line-height: 1.5;
+                color: var(--ink-2);
+            }
+            .ann-card.wide {
+                grid-column: 1 / -1;
+            }
+            .ann-card h3 {
+                margin: 0 0 4px;
+                color: var(--ink);
+                font: 700 9px/1.3 var(--font-display);
+                letter-spacing: 0.07em;
+                text-transform: uppercase;
+            }
+            .ann-card code {
+                padding: 0 3px;
+                border-radius: 3px;
+                background: #eef1f4;
+                font-family: ui-monospace, Menlo, monospace;
+                font-size: 9.5px;
+            }
+            .ann-card .n {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 15px;
+                height: 15px;
+                margin-right: 5px;
+                border-radius: 50%;
+                background: var(--blue);
+                color: #fff;
+                font-size: 9px;
+                font-weight: 700;
+            }
+            .ann-table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+            .ann-table th,
+            .ann-table td {
+                padding: 2px 6px 2px 0;
+                border-bottom: 1px solid #f1f3f5;
+                text-align: left;
+                vertical-align: top;
+                font-size: 9.5px;
+            }
+            .ann-table th {
+                color: #97a1aa;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.04em;
+            }
+            .ann-table tr:last-child td {
+                border-bottom: 0;
+            }
+
+            /* ── Barra de filtros ────────────────────────────────────── */
+            .filterbar {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: flex-end;
+                gap: 9px;
+            }
+            .field {
+                display: grid;
+                gap: 3px;
+            }
+            .field > span {
+                color: #97a1aa;
+                font-size: 8.5px;
+                font-weight: 700;
+                letter-spacing: 0.07em;
+                text-transform: uppercase;
+            }
+            .search {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                min-width: 250px;
+                flex: 1;
+                height: 32px;
+                padding: 0 10px;
+                border: 1px solid var(--line);
+                border-radius: 7px;
+                background: #fff;
+                color: var(--muted);
+            }
+            .search input {
+                width: 100%;
+                border: 0;
+                outline: none;
+                background: none;
+                font: inherit;
+                color: var(--ink);
+            }
+            select {
+                height: 32px;
+                min-width: 168px;
+                padding: 0 8px;
+                border: 1px solid var(--line);
+                border-radius: 7px;
+                background: #fff;
+                color: var(--ink);
+                font: inherit;
+                font-size: 11px;
+            }
+            .btn {
+                height: 32px;
+                padding: 0 12px;
+                border: 1px solid var(--line);
+                border-radius: 7px;
+                background: #fff;
+                color: var(--ink-2);
+                font: inherit;
+                font-size: 11px;
+            }
+            .btn.primary {
+                border-color: var(--blue);
+                background: var(--blue);
+                color: #fff;
+            }
+            .btn.off {
+                color: #aab4bd;
+                border-style: dashed;
+            }
+            .check {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                height: 32px;
+                padding: 0 10px;
+                border: 1px dashed #cdd6de;
+                border-radius: 7px;
+                background: #fbfcfd;
+                color: #8b97a1;
+                font-size: 10.5px;
+            }
+            .check i {
+                display: inline-block;
+                width: 12px;
+                height: 12px;
+                border: 1px solid #c3ccd4;
+                border-radius: 3px;
+                background: #fff;
+            }
+            .count-pill {
+                margin-left: auto;
+                align-self: center;
+                color: var(--muted);
+                font-size: 10px;
+            }
+            .off-note {
+                color: #a0aab3;
+                font-size: 8.5px;
+            }
+
+            /* ── Aviso sobre la tabla ────────────────────────────────── */
+            .hint-row {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                padding: 7px 11px;
+                border: 1px solid #cddcef;
+                border-radius: 8px;
+                background: #f7faff;
+                color: #6b86a8;
+                font-size: 9.5px;
+            }
+            .hint-row b {
+                color: var(--blue-dark);
+            }
+
+            /* ── Tabla de alertas ────────────────────────────────────── */
+            .card {
+                padding: 14px 15px 12px;
+                border: 1px solid var(--line);
+                border-radius: 9px;
+                background: #fff;
+            }
+            .card-head {
+                display: flex;
+                align-items: flex-start;
+                justify-content: space-between;
+                gap: 10px;
+                margin-bottom: 8px;
+            }
+            .card-title {
+                margin: 0;
+                font: 700 12.5px/1.3 var(--font-display);
+            }
+            .card-sub {
+                margin: 3px 0 0;
+                color: var(--muted);
+                font-size: 9.5px;
+                line-height: 1.5;
+            }
+            .tag {
+                display: inline-flex;
+                padding: 2px 7px;
+                border: 1px solid var(--line);
+                border-radius: 999px;
+                color: #8b97a1;
+                font-size: 7.5px;
+                font-weight: 700;
+                letter-spacing: 0.05em;
+                text-transform: uppercase;
+                white-space: nowrap;
+            }
+            table.data {
+                width: 100%;
+                border-collapse: collapse;
+                text-align: left;
+                table-layout: fixed;
+            }
+            table.data th {
+                height: 30px;
+                padding: 0 9px;
+                border-bottom: 1px solid #edf0f2;
+                color: #97a1aa;
+                font-size: 8px;
+                font-weight: 600;
+                letter-spacing: 0.5px;
+                text-transform: uppercase;
+                white-space: nowrap;
+            }
+            table.data td {
+                padding: 8px 9px;
+                border-bottom: 1px solid #f0f2f4;
+                color: #687988;
+                font-size: 9.5px;
+                line-height: 1.45;
+                vertical-align: top;
+            }
+            table.data tbody tr:last-child td {
+                border-bottom: 0;
+            }
+            table.data tbody tr:hover td {
+                background: #fafbfc;
+            }
+            table.data td.code,
+            table.data th.code {
+                font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+                font-size: 9px;
+                color: #4c7099;
+                white-space: nowrap;
+            }
+            table.data td.title {
+                color: var(--ink);
+                font-weight: 600;
+            }
+            table.data td.case {
+                font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+                font-size: 8.5px;
+                color: #4c7099;
+            }
+            table.data td.case.none {
+                font-family: var(--font-sans);
+                color: #a0aab3;
+                font-style: italic;
+            }
+            .prio {
+                display: inline-block;
+                padding: 1px 7px;
+                border: 1px solid var(--line);
+                border-radius: 999px;
+                color: #687988;
+                font-size: 8.5px;
+                font-weight: 600;
+                white-space: nowrap;
+            }
+            .prio.critica {
+                border-color: #f0cfcb;
+                background: var(--red-pale);
+                color: var(--red);
+            }
+            .prio.urgente {
+                border-color: #f5d6b3;
+                background: var(--amber-pale);
+                color: var(--amber);
+            }
+            .plazo {
+                color: #9aa6b1;
+                font-size: 8.5px;
+            }
+            .risk {
+                display: inline-block;
+                padding: 1px 6px;
+                border-radius: 999px;
+                font-size: 8px;
+                font-weight: 600;
+            }
+            .risk.alto {
+                background: var(--red-pale);
+                color: var(--red);
+            }
+            .risk.mod {
+                background: var(--amber-pale);
+                color: var(--amber);
+            }
+            .risk.bajo {
+                background: var(--green-pale);
+                color: var(--green);
+            }
+            .state {
+                color: #687988;
+                font-size: 9px;
+            }
+            .state.atendida {
+                padding: 1px 6px;
+                border-radius: 999px;
+                background: var(--green-pale);
+                color: var(--green);
+                font-weight: 600;
+            }
+            .date {
+                color: #8b97a1;
+                font-size: 9px;
+                white-space: nowrap;
+                font-variant-numeric: tabular-nums;
+            }
+            .col-actions {
+                border-left: 1px solid #eef1f4;
+                background: #fcfdfe;
+            }
+
+            /* ── Columna de acciones de Alta Dirección ───────────────── */
+            .ad-only {
+                display: inline-flex;
+                align-items: center;
+                gap: 4px;
+                margin-bottom: 6px;
+                padding: 1px 7px;
+                border-radius: 999px;
+                background: var(--blue-pale);
+                color: var(--blue);
+                font-size: 7.5px;
+                font-weight: 700;
+                letter-spacing: 0.05em;
+                text-transform: uppercase;
+            }
+            .act-btns {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 5px;
+            }
+            .act-btns .btn-sm {
+                height: 24px;
+                padding: 0 8px;
+            }
+            .act-btns .btn-sm[disabled] {
+                color: #aab4bd;
+                border-style: dashed;
+                background: #fbfcfd;
+            }
+            .btn-sm {
+                height: 26px;
+                padding: 0 10px;
+                border: 1px solid var(--line);
+                border-radius: 6px;
+                background: #fff;
+                color: var(--ink-2);
+                font: inherit;
+                font-size: 10px;
+            }
+            .btn-sm.wa {
+                border-color: #bfe0cd;
+                background: var(--green-pale);
+                color: var(--green);
+                font-weight: 600;
+            }
+
+            /* ── Vista previa del envío por WhatsApp ─────────────────── */
+            .wa {
+                display: grid;
+                grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+                gap: 12px;
+            }
+            @media (max-width: 900px) {
+                .wa {
+                    grid-template-columns: 1fr;
+                }
+            }
+            .wa-preview {
+                padding: 12px 14px;
+                border: 1px solid #d8e6dd;
+                border-radius: 9px;
+                background: #f3faf6;
+                color: var(--ink-2);
+                font-size: 10px;
+                line-height: 1.65;
+            }
+            .wa-preview p {
+                margin: 0 0 6px;
+            }
+            .wa-preview p:last-child {
+                margin-bottom: 0;
+            }
+            .wa-preview .wa-label {
+                color: #6fa287;
+                font-size: 8.5px;
+                font-weight: 700;
+                letter-spacing: 0.05em;
+                text-transform: uppercase;
+            }
+            .wa-preview b {
+                color: var(--ink);
+            }
+            .wa-notes {
+                font-size: 9.5px;
+                line-height: 1.6;
+                color: var(--ink-2);
+            }
+            .wa-notes ul {
+                margin: 4px 0 0;
+                padding-left: 16px;
+            }
+            .wa-notes li {
+                margin-bottom: 3px;
+            }
+
+            /* ── Exportación por perfil ──────────────────────────────── */
+            .profiles {
+                display: grid;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: 10px;
+            }
+            @media (max-width: 900px) {
+                .profiles {
+                    grid-template-columns: 1fr;
+                }
+            }
+            .profile {
+                padding: 11px 12px;
+                border: 1px solid var(--line);
+                border-radius: 8px;
+                background: #fff;
+                font-size: 9.5px;
+                line-height: 1.55;
+                color: var(--ink-2);
+            }
+            .profile h4 {
+                margin: 0 0 5px;
+                font: 700 10.5px/1.3 var(--font-display);
+                color: var(--ink);
+            }
+            .profile .fmt {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 5px;
+                margin-top: 6px;
+            }
+            .fmt span {
+                padding: 1px 7px;
+                border: 1px solid #cddcef;
+                border-radius: 999px;
+                background: var(--blue-pale);
+                color: var(--blue);
+                font-size: 8px;
+                font-weight: 600;
+            }
+            .fmt span.no {
+                border-color: #e2e7eb;
+                background: #f4f6f8;
+                color: #a0aab3;
+                text-decoration: line-through;
+            }
+
+            .callout {
+                padding: 10px 12px;
+                border: 1px solid #f0cfcb;
+                border-radius: 8px;
+                background: var(--red-pale);
+                color: #7c3f3a;
+                font-size: 9.5px;
+                line-height: 1.6;
+            }
+            .callout b {
+                color: var(--red);
+            }
+            .foot {
+                margin: 0;
+                color: #94a0a8;
+                font-size: 9px;
+                line-height: 1.6;
+            }
+            .foot code {
+                padding: 0 3px;
+                border-radius: 3px;
+                background: #eef1f4;
+                font-family: ui-monospace, Menlo, monospace;
+                font-size: 9px;
+            }
+        </style>
+    </head>
+    <body>
+        <main class="view-body">
+            <header class="view-head">
+                <div>
+                    <h1>Alertas · filtros y acciones</h1>
+                    <p class="view-subtitle">
+                        Bandeja de alertas tempranas. La barra de filtros pierde
+                        «Nivel», gana «Riesgo» y «Sin caso asignado», y la
+                        prioridad viaja con su plazo. La columna
+                        <b>Acciones</b> sólo existe para la Alta Dirección:
+                        Aprobar · Solicitar modificación · Anular, más un
+                        «Enviar» por WhatsApp. Ese flujo
+                        <b>todavía no tiene endpoint</b> (item 105): se dibuja y
+                        se declara bloqueado.
+                    </p>
+                </div>
+                <div>
+                    <span class="badge"
+                        >Ola 1 · artboard 4 · items 104–107</span
+                    >
+                </div>
+            </header>
+
+            <!-- ═══════════ Cinco bloques de anotación (obligatorios) ═══════════ -->
+            <section class="ann" aria-label="Anotaciones del artboard">
+                <div class="ann-card">
+                    <h3><span class="n">1</span>Items que cubre</h3>
+                    <b>104</b> (filtros: buscador, prioridad con plazo, fuera
+                    «Nivel», «Riesgo» y «Sin caso asignado») · <b>105</b>
+                    (acciones de Alta Dirección y «Enviar» por WhatsApp) ·
+                    <b>106</b> (anchos de columna, aviso sobre la tabla,
+                    prioridad con plazo, fecha «18 nov 2026», «Atendida» en
+                    verde) · <b>107</b> (exportación por perfil). <br /><b
+                        >Diseño por lote:</b
+                    >
+                    Lote A · Casos y ficha (106) · Lote B · Panorama, alertas y
+                    directorios (107) · Lote C · Datos y permisos (104, 105).
+                </div>
+                <div class="ann-card">
+                    <h3>
+                        <span class="n">2</span>Dato que necesita cada celda
+                    </h3>
+                    <table class="ann-table">
+                        <tr>
+                            <th>Celda</th>
+                            <th>Campo</th>
+                            <th>Ruta</th>
+                        </tr>
+                        <tr>
+                            <td>Código</td>
+                            <td><code>codigo_alerta</code></td>
+                            <td><code>GET /v1/alerts</code></td>
+                        </tr>
+                        <tr>
+                            <td>Título</td>
+                            <td><code>titulo</code></td>
+                            <td><code>GET /v1/alerts</code></td>
+                        </tr>
+                        <tr>
+                            <td>Prioridad</td>
+                            <td>
+                                <code>prioridad</code> +
+                                <code>cat_prioridades_alerta.plazo_horas</code>
+                            </td>
+                            <td>
+                                <code>GET /v1/alerts</code> ·
+                                <code>GET /v1/catalogs</code> →
+                                <code>prioridadesAlerta</code>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Riesgo</td>
+                            <td><code>nivel</code></td>
+                            <td>
+                                <code>GET /v1/alerts?nivel=…</code> — es el
+                                <b>mismo campo</b> que el retirado «Nivel»
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Caso</td>
+                            <td><code>casoCode</code></td>
+                            <td><code>GET /v1/alerts</code></td>
+                        </tr>
+                        <tr>
+                            <td>Estado</td>
+                            <td><code>pasoActual</code> (derivado)</td>
+                            <td>
+                                <code>GET /v1/alerts</code> — no hay columna
+                                <code>estado</code>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Actualizada</td>
+                            <td><code>updatedAt</code></td>
+                            <td><code>GET /v1/alerts</code></td>
+                        </tr>
+                        <tr>
+                            <td>Filtro «Sin caso asignado»</td>
+                            <td><code>sinCaso</code></td>
+                            <td>
+                                <b>no existe</b>: hay que añadirlo en
+                                <code>lib/db/repos/alerts.ts</code> y
+                                <code>app/api/v1/alerts</code>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Aprobar / modificar / anular</td>
+                            <td>
+                                <code>aprobada_por</code>,
+                                <code>aprobada_en</code>
+                            </td>
+                            <td>
+                                <b>no existe</b> endpoint de aprobación (<code
+                                    >core.permiso_aprobacion</code
+                                >
+                                vacío; gate <code>G21_SIN_APROBACION</code>)
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Enviar por WhatsApp</td>
+                            <td>texto con negritas</td>
+                            <td><b>no existe</b> (ni ruta ni plantilla)</td>
+                        </tr>
+                        <tr>
+                            <td>Exportar</td>
+                            <td>
+                                <code>formato</code>,
+                                <code>entidad=alertas</code>
+                            </td>
+                            <td>
+                                <code>GET /v1/export</code> — existe; la regla
+                                por perfil es de interfaz
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="ann-card">
+                    <h3><span class="n">3</span>Sólo forma · no implementar</h3>
+                    Los anchos de columna, el aviso «Pulse una fila…», el
+                    formato «18 nov 2026», el verde de «Atendida» y el
+                    agrupamiento de botones son <b>forma</b>. La maqueta del
+                    envío por WhatsApp (negritas del texto) fija el formato de
+                    salida, no un canal integrado: no hay API de mensajería. El
+                    filtro «Sin caso asignado» se dibuja inerte porque el
+                    parámetro no existe.
+                </div>
+                <div class="ann-card">
+                    <h3><span class="n">4</span>Bloqueado y por qué</h3>
+                    <b>Ningún X de producto aplica aquí</b> (X1–X5 son de otras
+                    pantallas). El bloqueo es de dato: el <b>item 105</b> exige
+                    un flujo de aprobación que <b>no existe</b> —
+                    <code>core.alertas_tempranas</code> tiene
+                    <code>aprobada_por</code>/<code>aprobada_en</code> (parche
+                    21) pero ningún endpoint, y el rol
+                    <code>alta_direccion</code> tiene
+                    <code>puede_editar = false</code>. «Anular» se dibuja
+                    deshabilitado; «Aprobar» y «Solicitar modificación» se
+                    dibujan declarados, sin efecto. El filtro «Sin caso
+                    asignado» (item 104) depende de un parámetro que hay que
+                    crear.
+                </div>
+                <div class="ann-card wide">
+                    <h3><span class="n">5</span>Roles que ven cada bloque</h3>
+                    <b>Dirección OAIPCS y Secretaría General:</b> lista y
+                    exportación en todos los formatos (JSON, Excel, PDF).
+                    <b>Sectorista:</b> sólo las alertas de sus regiones (y, con
+                    el item 113, de su subsector); exporta únicamente
+                    <b>Excel y PDF</b>. <b>Alta dirección:</b> es la única que
+                    ve la columna <b>Acciones</b>; lectura completa y, cuando
+                    exista el item 105, escritura de aprobación. El resto de
+                    roles de consulta ve la tabla sin la columna de acciones. La
+                    exportación por perfil (item 107) reutiliza el menú único de
+                    los items 42 y 70: no hay un segundo botón.
+                </div>
+            </section>
+
+            <!-- Barra de filtros: sin «Nivel», con «Riesgo» y «Sin caso asignado» -->
+            <div class="filterbar">
+                <label class="search">
+                    <span aria-hidden="true">⌕</span>
+                    <input
+                        type="search"
+                        placeholder="Buscar por código o palabra clave"
+                    />
+                </label>
+                <div class="field">
+                    <span>Prioridad</span>
+                    <select>
+                        <option>Todas</option>
+                        <option>Crítica inmediata (24 h)</option>
+                        <option>Urgente (48 h)</option>
+                        <option>Temprana (72 h)</option>
+                        <option>Seguimiento (sin plazo)</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <span>Riesgo</span>
+                    <select>
+                        <option>Todos</option>
+                        <option>Alto</option>
+                        <option>Moderado</option>
+                        <option>Bajo</option>
+                    </select>
+                </div>
+                <span class="check" aria-disabled="true"
+                    ><i aria-hidden="true"></i>Sin caso asignado
+                    <span class="off-note">· parámetro no existe</span></span
+                >
+                <button class="btn" type="button">Excel</button>
+                <button class="btn" type="button">PDF</button>
+                <button class="btn off" type="button" disabled>
+                    JSON · sólo Dirección
+                </button>
+                <span class="count-pill"
+                    >83 alertas registradas · 6 visibles en el mockup</span
+                >
+            </div>
+
+            <div class="hint-row">
+                <b>Pulse una fila</b> para abrir el detalle de la alerta.
+                <span
+                    >Prioridad con plazo entre paréntesis; «Atendida» en verde y
+                    el resto de estados sin color (item 106).</span
+                >
+            </div>
+
+            <!-- Tabla de alertas -->
+            <div class="card">
+                <div class="card-head">
+                    <div>
+                        <h2 class="card-title">Alertas tempranas</h2>
+                        <p class="card-sub">
+                            Anchos fijos: código estrecho, título ancho, caso
+                            estrecho. El estado se deriva de
+                            <code>paso_actual</code>, no de una columna propia.
+                        </p>
+                    </div>
+                    <span class="tag">Corte 22.11.2026</span>
+                </div>
+                <table class="data">
+                    <caption
+                        style="
+                            caption-side: top;
+                            padding: 0 0 7px;
+                            color: #94a0a8;
+                            font-size: 9px;
+                            text-align: left;
+                        "
+                    >
+                        Filas de formato. Los códigos
+                        <b>AT-2026-43</b
+                        >,
+                        <b>AT-2026-46</b
+                        >,
+                        <b>AT-2026-82</b>
+                        y
+                        <b>AT-2026-83</b>
+                        existen en el corte; la combinación de título,
+                        prioridad, caso y estado por fila es de
+                        <b>ejemplo</b>
+                        para fijar la forma. El filtro «Sin caso asignado» aún
+                        no tiene parámetro.
+                    </caption>
+                    <colgroup>
+                        <col style="width: 118px" />
+                        <col />
+                        <col style="width: 132px" />
+                        <col style="width: 96px" />
+                        <col style="width: 150px" />
+                        <col style="width: 128px" />
+                        <col style="width: 104px" />
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <th class="code">Código</th>
+                            <th>Título</th>
+                            <th>Prioridad</th>
+                            <th>Riesgo</th>
+                            <th>Caso</th>
+                            <th>Estado</th>
+                            <th>Actualizada</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="code">AT-2026-43</td>
+                            <td class="title">
+                                Bloqueo de la Panamericana en Cabo Blanco
+                            </td>
+                            <td>
+                                <span class="prio critica"
+                                    >Crítica inmediata</span
+                                >
+                                <div class="plazo">plazo 24 h</div>
+                            </td>
+                            <td><span class="risk alto">Alto</span></td>
+                            <td class="case none">Sin caso asignado</td>
+                            <td><span class="state">En revisión</span></td>
+                            <td class="date">18 nov 2026</td>
+                        </tr>
+                        <tr>
+                            <td class="code">AT-2026-46</td>
+                            <td class="title">
+                                Enfrentamiento en el litoral de Tumbes
+                            </td>
+                            <td>
+                                <span class="prio urgente">Urgente</span>
+                                <div class="plazo">plazo 48 h</div>
+                            </td>
+                            <td><span class="risk mod">Moderado</span></td>
+                            <td class="case none">Sin caso asignado</td>
+                            <td><span class="state">Validada</span></td>
+                            <td class="date">18 nov 2026</td>
+                        </tr>
+                        <tr>
+                            <td class="code">AT-2026-82</td>
+                            <td class="title">
+                                Rechazo al proyecto de exploración de
+                                hidrocarburos
+                            </td>
+                            <td>
+                                <span class="prio">Temprana</span>
+                                <div class="plazo">plazo 72 h</div>
+                            </td>
+                            <td><span class="risk mod">Moderado</span></td>
+                            <td class="case none">Sin caso asignado</td>
+                            <td>
+                                <span class="state">Pendiente de revisión</span>
+                            </td>
+                            <td class="date">18 nov 2026</td>
+                        </tr>
+                        <tr>
+                            <td class="code">AT-2026-83</td>
+                            <td class="title">
+                                Seguridad y fiscalización pesquera en el litoral
+                            </td>
+                            <td>
+                                <span class="prio">Seguimiento</span>
+                                <div class="plazo">sin plazo</div>
+                            </td>
+                            <td><span class="risk bajo">Bajo</span></td>
+                            <td class="case">CS-PA-GOB-2026-01</td>
+                            <td>
+                                <span class="state atendida">Atendida</span>
+                            </td>
+                            <td class="date">18 nov 2026</td>
+                        </tr>
+                        <tr>
+                            <td class="code">AT-2026-59</td>
+                            <td class="title">
+                                Habilitación de áreas acuáticas en Sechura
+                            </td>
+                            <td>
+                                <span class="prio">Seguimiento</span>
+                                <div class="plazo">sin plazo</div>
+                            </td>
+                            <td>
+                                <span style="color: #a0aab3"
+                                    >— sin nivel en el origen</span
+                                >
+                            </td>
+                            <td class="case">CS-PA-DBE-2025-01</td>
+                            <td><span class="state">Aprobada</span></td>
+                            <td class="date">18 nov 2026</td>
+                        </tr>
+                        <tr>
+                            <td class="code">AT-2026-71</td>
+                            <td class="title">
+                                Presunta contaminación por plomo en Mi Perú
+                            </td>
+                            <td>
+                                <span class="prio urgente">Urgente</span>
+                                <div class="plazo">plazo 48 h</div>
+                            </td>
+                            <td><span class="risk alto">Alto</span></td>
+                            <td class="case none">Sin caso asignado</td>
+                            <td><span class="state">En revisión</span></td>
+                            <td class="date">18 nov 2026</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Columna Acciones: sólo Alta Dirección -->
+            <div class="card">
+                <div class="card-head">
+                    <div>
+                        <h2 class="card-title">
+                            Columna «Acciones» · sólo Alta Dirección · item 105
+                        </h2>
+                        <p class="card-sub">
+                            Tres acciones de decisión y el envío por WhatsApp.
+                            El flujo de aprobación no existe todavía: se dibuja
+                            declarado y bloqueado.
+                        </p>
+                    </div>
+                    <span class="tag">bloqueado</span>
+                </div>
+                <div class="wa">
+                    <div>
+                        <span class="ad-only"
+                            >visible sólo para alta dirección</span
+                        >
+                        <div class="act-btns">
+                            <button class="btn-sm" type="button">
+                                Aprobar
+                            </button>
+                            <button class="btn-sm" type="button">
+                                Solicitar modificación
+                            </button>
+                            <button class="btn-sm" type="button" disabled>
+                                Anular
+                            </button>
+                            <button class="btn-sm wa" type="button">
+                                Enviar ▾
+                            </button>
+                        </div>
+                        <div class="callout" style="margin-top: 10px">
+                            <b>Bloqueado por el item 105.</b> No hay endpoint de
+                            aprobación:
+                            <code>core.alertas_tempranas</code> guarda
+                            <code>aprobada_por</code> y
+                            <code>aprobada_en</code>, pero
+                            <code>core.permiso_aprobacion</code> está vacía por
+                            diseño y el gate <code>G21_SIN_APROBACION</code>
+                            impide cerrar el paso. El rol
+                            <code>alta_direccion</code> tiene
+                            <code>core.roles.puede_editar = false</code>, así
+                            que hoy no puede escribir. «Anular» queda
+                            deshabilitado; «Aprobar» y «Solicitar modificación»
+                            son forma hasta que exista el flujo. El contrato
+                            está en <code>DISENO_LOTE_C.md</code>, item 105.
+                        </div>
+                    </div>
+                    <div>
+                        <div
+                            class="wa-preview"
+                            aria-label="Vista previa del envío por WhatsApp"
+                        >
+                            <p class="wa-label">
+                                Enviar ▾ · WhatsApp · texto con negritas
+                            </p>
+                            <p><b>ALERTA TEMPRANA AT-2026-46</b></p>
+                            <p>
+                                <b>Prioridad:</b> Crítica inmediata · plazo 24 h
+                            </p>
+                            <p><b>Caso:</b> CS-PA-OAT-2024-02</p>
+                            <p>
+                                <b>Hecho:</b> bloqueo de la Panamericana en Cabo
+                                Blanco; se solicita intervención de la
+                                Dirección.
+                            </p>
+                            <p style="color: #6fa287">
+                                texto de ejemplo · formato de salida
+                            </p>
+                        </div>
+                        <div class="wa-notes">
+                            <ul>
+                                <li>
+                                    El «Enviar» abre WhatsApp con el texto ya
+                                    formateado; <b>no</b> hay integración con la
+                                    API de mensajería.
+                                </li>
+                                <li>
+                                    La plantilla y el endpoint
+                                    <b>no existen</b>: se declaran para que el
+                                    equipo .NET los dimensione.
+                                </li>
+                                <li>
+                                    Es una sola barra de acciones: el item 23 y
+                                    el item 105 no pintan dos.
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Exportación por perfil -->
+            <div class="card">
+                <div class="card-head">
+                    <div>
+                        <h2 class="card-title">
+                            Exportación por perfil · item 107
+                        </h2>
+                        <p class="card-sub">
+                            Reutiliza el menú único de los items 42 y 70. La
+                            restricción por rol es de interfaz; el endpoint
+                            responde a todos.
+                        </p>
+                    </div>
+                    <span class="tag">forma</span>
+                </div>
+                <div class="profiles">
+                    <div class="profile">
+                        <h4>Dirección OAIPCS · Secretaría General</h4>
+                        Conserva todas las salidas.
+                        <div class="fmt">
+                            <span>JSON</span><span>Excel</span><span>PDF</span>
+                        </div>
+                    </div>
+                    <div class="profile">
+                        <h4>Sectorista</h4>
+                        Sólo hojas de cálculo y documento.
+                        <div class="fmt">
+                            <span class="no">JSON</span><span>Excel</span
+                            ><span>PDF</span>
+                        </div>
+                    </div>
+                    <div class="profile">
+                        <h4>Alta Dirección</h4>
+                        Lectura y exportación completa; escribe sólo cuando
+                        exista el item 105.
+                        <div class="fmt">
+                            <span>JSON</span><span>Excel</span><span>PDF</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <p class="foot">
+                El corte tiene <b>83 alertas</b> registradas, de
+                <code>AT-2026-01</code> a <code>AT-2026-90</code>, todas
+                heredadas del legado en estado «Archivado» (se documenta como
+                «Atendida» mientras la migración de estado no las reclasifique).
+                Los estados de la tabla derivan de <code>paso_actual</code>:
+                Pendiente de revisión · En revisión · Validada · Aprobada ·
+                Atendida. «Riesgo» y el retirado «Nivel» son el mismo campo
+                (<code>cat_niveles_alerta</code>): cambiar la etiqueta no cambia
+                la fila. La exportación usa
+                <code>GET /v1/export?formato=…&amp;entidad=alertas</code>; la
+                restricción por perfil y el envío por WhatsApp son forma y
+                contrato pendiente.
+            </p>
+        </main>
+    </body>
+</html>

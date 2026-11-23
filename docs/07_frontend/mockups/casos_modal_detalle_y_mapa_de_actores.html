@@ -1,0 +1,385 @@
+<!DOCTYPE html><html class="dark" lang="es"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><meta content="web_dashboard" name="shell-type"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{colors:{"on-secondary-container":"#00452e","secondary-container":"#00bd85","tertiary-fixed-dim":"#cebdff","surface-container-high":"#232b34","inverse-surface":"#dbe3f0","surface-dim":"#0c141d","primary-fixed-dim":"#a8c8ff","surface-variant":"#2d353f","tertiary":"#cebdff","primary-container":"#6ea8fe","on-tertiary-fixed":"#21005e","surface-bright":"#323a44","surface-container-lowest":"#070f18","on-primary-container":"#003c76","surface-container-low":"#141c25","on-surface-variant":"#c2c6d3","on-primary-fixed":"#001b3c","background":"#0c141d","on-surface":"#dbe3f0","inverse-on-surface":"#29313b","on-primary":"#003061","on-secondary":"#003825","inverse-primary":"#115eaf","outline":"#8c919d","surface-container":"#18202a","primary":"#a8c8ff","secondary":"#45dfa4","secondary-fixed-dim":"#45dfa4","surface":"#0c141d","on-tertiary-fixed-variant":"#4f319c","tertiary-fixed":"#e8ddff","on-tertiary":"#381385","on-tertiary-container":"#442491","tertiary-container":"#b196ff","on-error-container":"#ffdad6","on-secondary-fixed":"#002114","surface-tint":"#a8c8ff","on-primary-fixed-variant":"#004689","primary-fixed":"#d5e3ff","outline-variant":"#424751","on-secondary-fixed-variant":"#005137","error":"#ffb4ab","error-container":"#93000a","secondary-fixed":"#68fcbf","on-error":"#690005","on-background":"#dbe3f0","surface-container-highest":"#2d353f"},borderRadius:{DEFAULT:"0.125rem",lg:"0.25rem",xl:"0.5rem",full:"0.75rem"},spacing:{"space-sm":"0.5rem","space-lg":"1rem","space-xl":"1.5rem",gutter:"1rem","margin-desktop":"2rem","gutter-desktop":"1.5rem","space-xs":"0.25rem",margin:"1rem","space-md":"0.75rem"},fontFamily:{"headline-lg":["Inter"],"label-sm":["Inter"],"data-tabular":["Inter"],"headline-md":["Inter"],"display-lg-mobile":["Inter"],"headline-sm":["Inter"],"body-md":["Inter"],"title-md":["Inter"],"display-lg":["Inter"],"body-lg":["Inter"],"body-sm":["Inter"],"label-md":["Inter"]},fontSize:{"headline-lg":["24px",{lineHeight:"32px",letterSpacing:"-0.01em",fontWeight:"600"}],"label-sm":["11px",{lineHeight:"14px",letterSpacing:"0.03em",fontWeight:"500"}],"data-tabular":["13px",{lineHeight:"18px",letterSpacing:"0",fontWeight:"500"}],"headline-md":["20px",{lineHeight:"28px",fontWeight:"600"}],"display-lg-mobile":["24px",{lineHeight:"32px",letterSpacing:"-0.01em",fontWeight:"700"}],"headline-sm":["16px",{lineHeight:"24px",fontWeight:"600"}],"body-md":["14px",{lineHeight:"20px",fontWeight:"400"}],"title-md":["14px",{lineHeight:"20px",fontWeight:"600"}],"display-lg":["32px",{lineHeight:"40px",letterSpacing:"-0.02em",fontWeight:"700"}],"body-lg":["16px",{lineHeight:"24px",fontWeight:"400"}],"body-sm":["13px",{lineHeight:"18px",fontWeight:"400"}],"label-md":["12px",{lineHeight:"16px",letterSpacing:"0.02em",fontWeight:"600"}]}}}}</script></head><body class="bg-surface font-body-md text-on-surface antialiased"><aside class="fixed left-0 top-0 h-full w-64 bg-surface-container-low z-50 flex flex-col justify-between border-r border-outline-variant/40"><div class="flex flex-col"><div class="px-space-lg py-space-lg flex items-center gap-space-md border-b border-outline-variant/30"><div class="w-9 h-9 rounded-lg bg-primary-container flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-on-primary-container text-[22px]">shield_with_house</span></div><div class="flex flex-col min-w-0"><div class="flex items-center gap-space-xs"><span class="font-headline-sm text-headline-sm text-primary-container tracking-wider font-bold">AVISA</span><span class="px-1.5 py-0.5 rounded bg-surface-container-high text-label-sm font-label-sm text-secondary">v2.4</span></div><span class="font-label-sm text-label-sm text-on-surface-variant truncate">OAIPCS · PRODUCE - Perú</span></div></div><div class="px-space-md pt-space-md pb-space-xs"><span class="font-label-sm text-label-sm uppercase tracking-wider text-outline px-space-sm">Monitoreo Sectorial</span></div><nav class="flex flex-col gap-0.5 px-space-sm" data-active-classes="bg-surface-container-high text-primary font-title-md border-l-2 border-primary-container"><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-body-md font-body-md text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="panorama-territorial" href="#"><span class="material-symbols-outlined text-[20px]">map</span><span>Panorama territorial</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-body-md font-body-md text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="resumen-operativo" href="#"><span class="material-symbols-outlined text-[20px]">analytics</span><span>Resumen operativo</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-body-md font-body-md text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="bandeja-de-trabajo" href="#"><span class="material-symbols-outlined text-[20px]">inbox</span><span>Bandeja de trabajo</span></a><a aria-current="page" class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg transition-colors bg-surface-container-high text-primary font-title-md border-l-2 border-primary-container" data-path="casos" href="#"><span class="material-symbols-outlined text-[20px]">folder_open</span><span>Casos</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-body-md font-body-md text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="alertas-tempranas" href="#"><span class="material-symbols-outlined text-[20px]">notification_important</span><span>Alertas tempranas</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-body-md font-body-md text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="compromisos" href="#"><span class="material-symbols-outlined text-[20px]">fact_check</span><span>Compromisos</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-body-md font-body-md text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="documentos" href="#"><span class="material-symbols-outlined text-[20px]">description</span><span>Documentos</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-body-md font-body-md text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="reportes" href="#"><span class="material-symbols-outlined text-[20px]">assessment</span><span>Reportes</span></a></nav></div><div class="p-space-md border-t border-outline-variant/30 bg-surface-container-lowest/50"><div class="flex items-center gap-space-sm"><div class="relative"><div class="w-8 h-8 rounded-full bg-surface-container-highest flex items-center justify-center"><span class="material-symbols-outlined text-primary text-[18px]">badge</span></div><span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-secondary ring-2 ring-surface-container-low"></span></div><div class="flex flex-col min-w-0 flex-1"><span class="font-label-md text-label-md text-on-surface truncate">Especialista OAIPCS</span><span class="font-label-sm text-label-sm text-on-surface-variant truncate">PRODUCE · En línea</span></div></div></div></aside><div class="pl-64 flex flex-col min-h-screen"><header class="fixed top-0 left-64 right-0 h-14 bg-surface/90 backdrop-blur-xl border-b border-outline-variant/30 z-40"><div class="h-14 w-full px-gutter-desktop flex items-center justify-between"><div class="flex items-center gap-space-md"><span class="font-label-sm text-label-sm uppercase tracking-wider text-outline">Sistema Nacional de Información de Conflictos</span><span class="text-outline-variant">|</span><div class="flex items-center gap-space-xs text-secondary font-label-sm text-label-sm"><span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span><span>Red de Monitoreo Activa</span></div></div><div class="flex items-center gap-space-lg"><div class="flex items-center bg-surface-container-lowest border border-outline-variant/40 rounded px-space-md py-1 w-64"><span class="material-symbols-outlined text-outline text-[18px] mr-space-xs">search</span><span class="font-body-sm text-body-sm text-outline">Buscar caso, ubigeo o sector...</span></div><div class="flex items-center gap-space-sm"><button class="w-8 h-8 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">tune</span></button><button class="w-8 h-8 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors relative" type="button"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-error rounded-full"></span></button></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="w-full pt-14 bg-surface flex-1"><div class="flex flex-col w-full relative">
+<!-- PANTALLA 1 BASE (Casos - Monitoreo Sectorial) -->
+<div class="w-full px-gutter-desktop py-space-lg flex flex-col gap-space-lg select-none filter blur-[1.5px] opacity-40 pointer-events-none">
+<!-- Breadcrumb & Cabecera de Página de fondo -->
+<div class="flex items-center justify-between">
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center gap-space-xs text-label-sm font-label-sm text-outline">
+<span>Monitoreo Territorial</span>
+<span class="material-symbols-outlined text-[14px]">chevron_right</span>
+<span>Casos Registrados</span>
+<span class="material-symbols-outlined text-[14px]">chevron_right</span>
+<span class="text-primary">Expediente Territorial</span>
+</div>
+<h1 class="text-headline-lg font-headline-lg text-on-surface">Gestión Integral de Casos y Conflictividad Social</h1>
+</div>
+<div class="flex items-center gap-space-md">
+<div class="flex items-center gap-space-xs px-space-md py-space-sm bg-surface-container rounded-lg text-on-surface-variant font-label-md text-label-md">
+<span class="material-symbols-outlined text-[18px]">calendar_today</span>
+<span>Noviembre 2026</span>
+</div>
+<div class="px-space-lg py-space-sm bg-primary-container text-on-primary-container rounded-lg font-title-md text-title-md flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[18px]">add_circle</span>
+<span>Nuevo Registro</span>
+</div>
+</div>
+</div>
+<!-- KPIs Rápidos de Fondo -->
+<div class="grid grid-cols-4 gap-space-lg">
+<div class="bg-surface-container p-space-lg rounded-xl flex flex-col gap-space-xs">
+<span class="text-label-sm font-label-sm text-outline uppercase tracking-wider">Total Casos Activos</span>
+<div class="flex items-baseline justify-between">
+<span class="text-display-lg font-display-lg text-on-surface">42</span>
+<span class="text-label-sm font-label-sm text-secondary bg-surface-container-high px-2 py-0.5 rounded">+4 este mes</span>
+</div>
+</div>
+<div class="bg-surface-container p-space-lg rounded-xl flex flex-col gap-space-xs">
+<span class="text-label-sm font-label-sm text-outline uppercase tracking-wider">Nivel Alto / Crisis</span>
+<div class="flex items-baseline justify-between">
+<span class="text-display-lg font-display-lg text-error">07</span>
+<span class="text-label-sm font-label-sm text-error bg-error-container/30 px-2 py-0.5 rounded">Atención prioritaria</span>
+</div>
+</div>
+<div class="bg-surface-container p-space-lg rounded-xl flex flex-col gap-space-xs">
+<span class="text-label-sm font-label-sm text-outline uppercase tracking-wider">Mesas de Diálogo</span>
+<div class="flex items-baseline justify-between">
+<span class="text-display-lg font-display-lg text-primary">19</span>
+<span class="text-label-sm font-label-sm text-primary bg-primary-container/20 px-2 py-0.5 rounded">En proceso</span>
+</div>
+</div>
+<div class="bg-surface-container p-space-lg rounded-xl flex flex-col gap-space-xs">
+<span class="text-label-sm font-label-sm text-outline uppercase tracking-wider">Compromisos Vigentes</span>
+<div class="flex items-baseline justify-between">
+<span class="text-display-lg font-display-lg text-secondary">88%</span>
+<span class="text-label-sm font-label-sm text-secondary bg-surface-container-high px-2 py-0.5 rounded">Cumplimiento</span>
+</div>
+</div>
+</div>
+<!-- Registro Mock de Casos de Fondo -->
+<div class="bg-surface-container rounded-xl p-space-md flex flex-col gap-space-md">
+<div class="flex items-center justify-between py-space-xs">
+<span class="text-headline-sm font-headline-sm text-on-surface">Matriz Territorial Operativa</span>
+<div class="flex items-center gap-space-sm">
+<div class="w-60 h-8 bg-surface-container-lowest rounded px-3 flex items-center gap-2 text-outline">
+<span class="material-symbols-outlined text-[16px]">filter_list</span>
+<span class="text-label-sm font-label-sm">Filtrar por macroregión...</span>
+</div>
+</div>
+</div>
+<div class="w-full h-72 rounded bg-surface-container-low flex flex-col justify-around px-space-lg">
+<div class="h-8 bg-surface-container-high/40 rounded w-full"></div>
+<div class="h-8 bg-surface-container-high/30 rounded w-full"></div>
+<div class="h-8 bg-surface-container-high/20 rounded w-full"></div>
+<div class="h-8 bg-surface-container-high/30 rounded w-full"></div>
+</div>
+</div>
+</div>
+<!-- BACKDROP TRANSLÚCIDO OSCURO PROFESIONAL -->
+<div class="fixed inset-0 z-50 flex items-center justify-center p-6 bg-surface-container-lowest/80 backdrop-blur-sm overflow-y-auto" id="modal-container">
+<!-- MODAL CENTRADO (900px exacto) -->
+<div class="relative w-[900px] max-w-full bg-surface-container rounded-xl shadow-2xl overflow-hidden flex flex-col my-auto transition-transform duration-200">
+<!-- LÍNEA SUTIL DE ACENTO SUPERIOR -->
+<div class="h-1 w-full bg-primary-container"></div>
+<div class="p-space-xl flex flex-col gap-0">
+<!-- 1. ENCABEZADO DEL MODAL -->
+<div class="flex flex-col">
+<!-- Fila superior: Código y Controles de Cierre -->
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-primary-container text-[18px]">folder_special</span>
+<span class="font-data-tabular text-data-tabular text-on-surface-variant font-semibold tracking-wide">CS-PA-OAT-2026-04</span>
+<span class="inline-flex w-1.5 h-1.5 rounded-full bg-outline-variant"></span>
+<span class="font-label-sm text-label-sm text-outline">Sector Pesquería · Consumo Humano Indirecto</span>
+</div>
+<div class="flex items-center gap-space-md">
+<div class="flex items-center gap-1.5 text-outline">
+<span class="material-symbols-outlined text-[16px]">history</span>
+<span class="font-label-sm text-label-sm">Última actualización: 18/11/2026</span>
+</div>
+<button class="p-1.5 rounded-lg text-outline hover:text-on-surface hover:bg-surface-container-high transition-colors focus:outline-none focus:ring-1 focus:ring-primary-container" onclick="document.getElementById('modal-container').classList.add('hidden')" title="Cerrar ventana" type="button">
+<span class="material-symbols-outlined text-[20px] block">close</span>
+</button>
+</div>
+</div>
+<!-- Título del Caso -->
+<h2 class="text-headline-md font-headline-md text-on-surface leading-snug mt-space-sm tracking-tight">
+            Demanda de cancelación de la temporada de anchoveta por captura juvenil
+          </h2>
+<!-- Badges de Nivel y Riesgo -->
+<div class="flex flex-wrap items-center gap-space-xs mt-space-sm">
+<!-- Badge Controversia (Nivel de conflictividad) -->
+<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-primary-container/15 text-primary-container font-label-md text-label-md">
+<span class="w-1.5 h-1.5 rounded-full bg-primary-container"></span>
+<span>Nivel de conflictividad: <strong class="font-semibold">Controversia</strong></span>
+</div>
+<!-- Badge Riesgo Moderado -->
+<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-surface-container-high text-[#FBBF24] font-label-md text-label-md">
+<span class="w-1.5 h-1.5 rounded-full bg-[#F59E0B]"></span>
+<span>Riesgo: <strong class="font-semibold">Moderado</strong></span>
+</div>
+<!-- Badge Región / Sector -->
+<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-surface-container-low text-on-surface-variant font-label-md text-label-md">
+<span class="material-symbols-outlined text-[14px] text-outline">location_on</span>
+<span>Región: <strong class="font-semibold text-on-surface">Piura · Pesca artesanal</strong></span>
+</div>
+<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-surface-container-lowest text-secondary font-label-md text-label-md ml-auto">
+<span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
+<span class="text-label-sm font-label-sm">Expediente en Mesa Activa</span>
+</div>
+</div>
+</div>
+<!-- 2. BLOQUE "RESUMEN DEL CASO" -->
+<div class="bg-surface-container-lowest rounded-lg p-space-md mt-space-md">
+<div class="flex items-center justify-between mb-space-xs">
+<span class="text-primary-container text-label-sm font-label-sm font-semibold tracking-wider uppercase flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">subject</span>
+              Resumen del caso
+            </span>
+<span class="text-label-sm font-label-sm text-outline">Acta DGSFS-PA-088-26</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant text-justify leading-relaxed">
+            Diversos gremios del sector pesquero (SUMOPP, SUPNEP) exigen la cancelación inmediata de la primera temporada de pesca de anchoveta ante la presunta depredación del recurso por una elevada incidencia de captura juvenil reportada por IMARPE. En reunión de trabajo con el Viceministerio de Pesquería, los dirigentes expusieron la urgencia de medidas precautorias mientras se evalúa el levantamiento de observaciones biológicas de biomasa marina y cuotas permisibles.
+          </p>
+</div>
+<!-- 3. FILA DE 4 BOTONES-PESTAÑA (TABS) CON SELECTOR SUPERIOR -->
+<div class="mt-space-lg flex items-center justify-between bg-surface-container-low px-space-md pt-space-xs rounded-t-lg">
+<!-- Contenedor de pestañas -->
+<div class="flex items-center gap-space-xs">
+<!-- Tab 1: Línea de tiempo -->
+<button class="flex items-center gap-1.5 text-on-surface-variant hover:text-on-surface pb-2.5 pt-2 px-space-sm text-title-md font-title-md transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">timeline</span>
+<span>Línea de tiempo</span>
+</button>
+<!-- Tab 2: Mapa de actores (ACTIVO) -->
+<button class="flex items-center gap-1.5 text-primary-container font-title-md text-title-md pb-2 pt-2 px-space-sm relative transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">groups</span>
+<span>Mapa de actores</span>
+<span class="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-container rounded-t"></span>
+</button>
+<!-- Tab 3: Compromisos -->
+<button class="flex items-center gap-1.5 text-on-surface-variant hover:text-on-surface pb-2.5 pt-2 px-space-sm text-title-md font-title-md transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">task_alt</span>
+<span>Compromisos</span>
+<span class="px-1.5 py-0.2 rounded-full bg-surface-container-high text-on-surface text-label-sm font-label-sm">4</span>
+</button>
+<!-- Tab 4: Enlace a Canva -->
+<a class="flex items-center gap-1 text-on-surface-variant hover:text-primary-container pb-2.5 pt-2 px-space-sm text-title-md font-title-md transition-colors" href="https://canva.com" rel="noopener noreferrer" target="_blank">
+<span>Enlace a Canva</span>
+<span class="material-symbols-outlined text-[15px]">open_in_new</span>
+</a>
+</div>
+<!-- Selector y Exportación a la derecha -->
+<div class="flex items-center gap-space-sm pb-2">
+<!-- Conmutador Segmentado: [ Tabla | Mapa gráfico ] -->
+<div class="flex items-center bg-surface-container-lowest p-0.5 rounded-lg">
+<button class="px-2.5 py-1 text-label-md font-label-md rounded bg-surface-container-high text-on-surface flex items-center gap-1 transition-all" type="button">
+<span class="material-symbols-outlined text-[14px]">table_rows</span>
+<span>Tabla</span>
+</button>
+<button class="px-2.5 py-1 text-label-md font-label-md rounded text-outline hover:text-on-surface flex items-center gap-1 transition-all" type="button">
+<span class="material-symbols-outlined text-[14px]">bubble_chart</span>
+<span>Mapa gráfico</span>
+</button>
+</div>
+<!-- Botón Exportar a Excel -->
+<button class="flex items-center gap-1.5 px-space-sm py-1 bg-surface-container-high hover:bg-surface-variant text-on-surface text-label-md font-label-md rounded transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px] text-secondary">file_download</span>
+<span>Exportar a Excel</span>
+</button>
+</div>
+</div>
+<!-- 4. CONTENIDO DE LA PESTAÑA: TABLA "MAPA DE ACTORES" -->
+<div class="w-full bg-surface-container-lowest overflow-hidden rounded-b-lg">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-high h-10">
+<th class="px-3 py-2 text-label-sm font-label-sm uppercase tracking-wider text-outline">Organización / Institución</th>
+<th class="px-3 py-2 text-label-sm font-label-sm uppercase tracking-wider text-outline">Representante</th>
+<th class="px-3 py-2 text-label-sm font-label-sm uppercase tracking-wider text-outline">Cargo</th>
+<th class="px-3 py-2 text-label-sm font-label-sm uppercase tracking-wider text-outline">Tipo</th>
+<th class="px-3 py-2 text-label-sm font-label-sm uppercase tracking-wider text-outline">Función</th>
+<th class="px-3 py-2 text-label-sm font-label-sm uppercase tracking-wider text-outline text-center">Posicionamiento</th>
+<th class="px-3 py-2 text-label-sm font-label-sm uppercase tracking-wider text-outline">Correo Institucional</th>
+</tr>
+</thead>
+<tbody class="divide-y-0 text-body-sm font-body-sm">
+<!-- Fila 1 -->
+<tr class="bg-surface-container-low hover:bg-surface-container-high/60 transition-colors h-11">
+<td class="px-3 py-2 font-title-md text-title-md text-on-surface whitespace-nowrap">
+<div class="flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-error"></span>
+<span class="font-semibold">SUMOPP</span>
+</div>
+<span class="block text-label-sm font-label-sm text-outline truncate max-w-[190px]">Sindicato Único de Motoristas y Oficiales</span>
+</td>
+<td class="px-3 py-2 text-on-surface font-medium whitespace-nowrap">Fiestas Fiestas, Juan Carlos</td>
+<td class="px-3 py-2 text-on-surface-variant whitespace-nowrap">Secretario General</td>
+<td class="px-3 py-2 text-on-surface-variant whitespace-nowrap">
+<span class="px-2 py-0.5 rounded bg-surface-container text-label-sm font-label-sm text-on-surface-variant">Social</span>
+</td>
+<td class="px-3 py-2 text-on-surface-variant whitespace-nowrap font-medium text-primary-container">Principal</td>
+<td class="px-3 py-2 text-center whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded bg-error-container/40 text-error font-label-md text-label-md font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-error"></span>
+                      Conflictivo
+                    </span>
+</td>
+<td class="px-3 py-2 font-data-tabular text-data-tabular text-outline hover:text-primary-container transition-colors whitespace-nowrap">
+                    jfiestas@sumopp.org.pe
+                  </td>
+</tr>
+<!-- Fila 2 -->
+<tr class="bg-surface-container hover:bg-surface-container-high/60 transition-colors h-11">
+<td class="px-3 py-2 font-title-md text-title-md text-on-surface whitespace-nowrap">
+<div class="flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-primary-container"></span>
+<span class="font-semibold">SUPNEP</span>
+</div>
+<span class="block text-label-sm font-label-sm text-outline truncate max-w-[190px]">Sindicato Único de Pescadores Nuevas Embarcaciones</span>
+</td>
+<td class="px-3 py-2 text-on-surface font-medium whitespace-nowrap">Querevalú Periche, Santos</td>
+<td class="px-3 py-2 text-on-surface-variant whitespace-nowrap">Dirigente Nacional</td>
+<td class="px-3 py-2 text-on-surface-variant whitespace-nowrap">
+<span class="px-2 py-0.5 rounded bg-surface-container-high text-label-sm font-label-sm text-on-surface-variant">Social</span>
+</td>
+<td class="px-3 py-2 text-on-surface-variant whitespace-nowrap font-medium text-primary-container">Principal</td>
+<td class="px-3 py-2 text-center whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded bg-primary-container/20 text-primary-container font-label-md text-label-md font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-primary-container"></span>
+                      Dialogante
+                    </span>
+</td>
+<td class="px-3 py-2 font-data-tabular text-data-tabular text-outline hover:text-primary-container transition-colors whitespace-nowrap">
+                    presidencia@supnep.pe
+                  </td>
+</tr>
+<!-- Fila 3 -->
+<tr class="bg-surface-container-low hover:bg-surface-container-high/60 transition-colors h-11">
+<td class="px-3 py-2 font-title-md text-title-md text-on-surface whitespace-nowrap">
+<div class="flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+<span class="font-semibold">PRODUCE - DGSFS-PA</span>
+</div>
+<span class="block text-label-sm font-label-sm text-outline truncate max-w-[190px]">Dirección Gral. Supervisión y Fiscalización</span>
+</td>
+<td class="px-3 py-2 text-on-surface font-medium whitespace-nowrap">Mendoza Alarcón, Patricia</td>
+<td class="px-3 py-2 text-on-surface-variant whitespace-nowrap">Directora General</td>
+<td class="px-3 py-2 text-on-surface-variant whitespace-nowrap">
+<span class="px-2 py-0.5 rounded bg-surface-container text-label-sm font-label-sm text-primary">Público</span>
+</td>
+<td class="px-3 py-2 text-on-surface-variant whitespace-nowrap font-medium text-primary-container">Principal</td>
+<td class="px-3 py-2 text-center whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded bg-primary-container/20 text-primary-container font-label-md text-label-md font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-primary-container"></span>
+                      Dialogante
+                    </span>
+</td>
+<td class="px-3 py-2 font-data-tabular text-data-tabular text-outline hover:text-primary-container transition-colors whitespace-nowrap">
+                    pmendoza@produce.gob.pe
+                  </td>
+</tr>
+<!-- Fila 4 -->
+<tr class="bg-surface-container hover:bg-surface-container-high/60 transition-colors h-11">
+<td class="px-3 py-2 font-title-md text-title-md text-on-surface whitespace-nowrap">
+<div class="flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>
+<span class="font-semibold">IMARPE</span>
+</div>
+<span class="block text-label-sm font-label-sm text-outline truncate max-w-[190px]">Instituto del Mar del Perú</span>
+</td>
+<td class="px-3 py-2 text-on-surface font-medium whitespace-nowrap">Carhuapoma Ramos, Hernán</td>
+<td class="px-3 py-2 text-on-surface-variant whitespace-nowrap">Coordinador Científico Pelágicos</td>
+<td class="px-3 py-2 text-on-surface-variant whitespace-nowrap">
+<span class="px-2 py-0.5 rounded bg-surface-container-high text-label-sm font-label-sm text-primary">Público</span>
+</td>
+<td class="px-3 py-2 text-on-surface-variant whitespace-nowrap text-outline">Secundario</td>
+<td class="px-3 py-2 text-center whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded bg-tertiary-container/30 text-tertiary font-label-md text-label-md font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>
+                      Legitimante
+                    </span>
+</td>
+<td class="px-3 py-2 font-data-tabular text-data-tabular text-outline hover:text-primary-container transition-colors whitespace-nowrap">
+                    hcarhuapoma@imarpe.gob.pe
+                  </td>
+</tr>
+<!-- Fila 5 -->
+<tr class="bg-surface-container-low hover:bg-surface-container-high/60 transition-colors h-11">
+<td class="px-3 py-2 font-title-md text-title-md text-on-surface whitespace-nowrap">
+<div class="flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-primary-container"></span>
+<span class="font-semibold">GORE Piura - DIREPRO</span>
+</div>
+<span class="block text-label-sm font-label-sm text-outline truncate max-w-[190px]">Gobierno Regional de Piura</span>
+</td>
+<td class="px-3 py-2 text-on-surface font-medium whitespace-nowrap">Seminario Morales, Luis Alberto</td>
+<td class="px-3 py-2 text-on-surface-variant whitespace-nowrap">Director Regional Producción</td>
+<td class="px-3 py-2 text-on-surface-variant whitespace-nowrap">
+<span class="px-2 py-0.5 rounded bg-surface-container text-label-sm font-label-sm text-primary">Público</span>
+</td>
+<td class="px-3 py-2 text-on-surface-variant whitespace-nowrap text-outline">Secundario</td>
+<td class="px-3 py-2 text-center whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded bg-primary-container/20 text-primary-container font-label-md text-label-md font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-primary-container"></span>
+                      Dialogante
+                    </span>
+</td>
+<td class="px-3 py-2 font-data-tabular text-data-tabular text-outline hover:text-primary-container transition-colors whitespace-nowrap">
+                    lseminario@regionpiura.gob.pe
+                  </td>
+</tr>
+<!-- Fila 6 -->
+<tr class="bg-surface-container hover:bg-surface-container-high/60 transition-colors h-11">
+<td class="px-3 py-2 font-title-md text-title-md text-on-surface whitespace-nowrap">
+<div class="flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span class="font-semibold">Defensoría del Pueblo</span>
+</div>
+<span class="block text-label-sm font-label-sm text-outline truncate max-w-[190px]">Oficina Defensorial de Piura</span>
+</td>
+<td class="px-3 py-2 text-on-surface font-medium whitespace-nowrap">Chunga Vite, Rosa Elena</td>
+<td class="px-3 py-2 text-on-surface-variant whitespace-nowrap">Comisionada Conflictos Sociales</td>
+<td class="px-3 py-2 text-on-surface-variant whitespace-nowrap">
+<span class="px-2 py-0.5 rounded bg-surface-container-high text-label-sm font-label-sm text-primary">Público</span>
+</td>
+<td class="px-3 py-2 text-secondary whitespace-nowrap font-medium">Tercero imparcial</td>
+<td class="px-3 py-2 text-center whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded bg-primary-container/20 text-primary-container font-label-md text-label-md font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-primary-container"></span>
+                      Dialogante
+                    </span>
+</td>
+<td class="px-3 py-2 font-data-tabular text-data-tabular text-outline hover:text-primary-container transition-colors whitespace-nowrap">
+                    rchunga@defensoria.gob.pe
+                  </td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- 5. PIE DEL MODAL -->
+<div class="mt-space-md pt-space-md flex items-center justify-between bg-surface-container">
+<!-- Conteo de actores -->
+<div class="flex items-center gap-space-xs text-outline text-body-sm font-body-sm">
+<span class="material-symbols-outlined text-[18px] text-primary-container">info</span>
+<span>Mostrando <strong class="text-on-surface font-semibold">6 actores</strong> vinculados a la controversia activa</span>
+</div>
+<!-- Acciones de cierre y navegación -->
+<div class="flex items-center gap-space-sm">
+<button class="px-space-lg py-2 rounded-lg bg-surface-container-high hover:bg-surface-variant text-on-surface font-title-md text-title-md transition-colors focus:ring-1 focus:ring-primary-container" onclick="document.getElementById('modal-container').classList.add('hidden')" type="button">
+              Cerrar
+            </button>
+<button class="px-space-lg py-2 rounded-lg bg-primary-container hover:bg-primary-fixed-dim text-on-primary-container font-title-md text-title-md flex items-center gap-space-xs transition-colors shadow-sm" type="button">
+<span>Abrir ficha completa</span>
+<span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div></main></div>
+
+</body></html>

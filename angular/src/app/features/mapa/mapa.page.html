@@ -5,7 +5,7 @@
       <h1 id="titulo-panorama">Panorama territorial</h1>
       <p class="view-subtitle">
         Distribución de los casos abiertos por ámbito y región, con el riesgo alto de cada
-        territorio. El tamaño de cada banda refleja el número de casos, no la geografía.
+        territorio.
       </p>
       <p class="view-meta">
         @if (corte(); as sello) {
@@ -53,7 +53,6 @@
       <span class="stat-copy">
         <span>Casos abiertos</span>
         <strong>{{ visibles().length }}</strong>
-        <small>{{ alcanceTexto() }}</small>
       </span>
     </div>
 
@@ -62,31 +61,28 @@
         <app-icono nombre="mapa" [tamano]="16" />
       </span>
       <span class="stat-copy">
-        <span>Regiones con casos</span>
+        <span>Regiones con al menos un caso</span>
         <strong>{{ regionesConCasos() }}</strong>
-        <small>Regiones distintas con al menos un caso</small>
       </span>
     </div>
 
     <div class="stat-card">
-      <span class="stat-icon amber">
+      <span class="stat-icon">
         <app-icono nombre="info" [tamano]="16" />
       </span>
       <span class="stat-copy">
         <span>Sin región</span>
         <strong>{{ sinRegion() }}</strong>
-        <small>Casos sin región principal asignada</small>
       </span>
     </div>
 
     <div class="stat-card">
-      <span class="stat-icon red">
+      <span class="stat-icon">
         <app-icono nombre="alerta" [tamano]="16" />
       </span>
       <span class="stat-copy">
         <span>Riesgo alto</span>
         <strong>{{ riesgoAlto() }}</strong>
-        <small>Riesgo propio del caso en nivel Alto</small>
       </span>
     </div>
   </div>
@@ -155,21 +151,67 @@
     </p>
   </div>
   } @else {
-  <section class="surface panel" aria-labelledby="titulo-vista-esquematica">
+  <section class="surface panel" aria-labelledby="titulo-casos-prioritarios">
     <div class="surface-heading">
       <div>
-        <p class="section-eyebrow">ÁMBITOS</p>
-        <h3 id="titulo-vista-esquematica">Vista esquemática por ámbito</h3>
+        <p class="section-eyebrow">CONFLICTIVIDAD</p>
+        <h3 id="titulo-casos-prioritarios">Casos abiertos por antigüedad y gravedad</h3>
         <p>
-          Cada banda agrupa las regiones del ámbito; el orden y el ancho siguen el conteo de casos.
+          Primero la gravedad del riesgo propio del caso y, dentro de ella, el inicio más antiguo.
         </p>
       </div>
     </div>
 
-    <p class="panel-nota">
-      La capa cartográfica institucional requiere el dataset ubigeo/centroide, aún aplazado; el mapa
-      es referencial y no dibuja distritos.
+    @if (casosPrioritarios().length === 0) {
+    <p class="panel-vacio">No hay casos visibles con estos criterios.</p>
+    } @else {
+    <div class="table-wrap">
+      <table class="data-table" aria-label="Casos abiertos ordenados por antigüedad y gravedad">
+        <thead>
+          <tr>
+            <th scope="col">Caso</th>
+            <th scope="col">Región</th>
+            <th scope="col">Conflictividad</th>
+            <th scope="col">Riesgo</th>
+            <th scope="col">Inicio</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (caso of casosPrioritarios(); track caso.id) {
+          <tr>
+            <td class="celda-caso">
+              <a class="table-link" [routerLink]="['/casos', caso.codigo]">{{ caso.codigo }}</a>
+              <small>{{ caso.titulo }}</small>
+            </td>
+            <td>{{ caso.region || 'Sin región' }}</td>
+            <td>{{ caso.nivelConflicto }}</td>
+            <td>{{ caso.riesgo }}</td>
+            <td>{{ fechaInicio(caso.inicio) }}</td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <p class="tabla-nota">
+      Se listan {{ casosPrioritarios().length }} de {{ visibles().length }} casos visibles. @if
+      (sinInicio() > 0) {
+      <span>
+        {{ sinInicio() }} {{ sinInicio() === 1 ? 'caso no tiene' : 'casos no tienen' }} fecha de
+        inicio registrada: se ordenan al final porque la API no devuelve ese dato, sin inventar una
+        fecha.
+      </span>
+      }
     </p>
+    }
+  </section>
+
+  <section class="surface panel" aria-labelledby="titulo-vista-esquematica">
+    <div class="surface-heading">
+      <div>
+        <p class="section-eyebrow">ÁMBITOS</p>
+        <h3 id="titulo-vista-esquematica">Alcance geográfico</h3>
+      </div>
+    </div>
 
     <div class="ambitos">
       @for (banda of bandas(); track banda.alcance) {
@@ -212,7 +254,14 @@
           <tr>
             <th scope="col">Región</th>
             <th scope="col">Ámbito</th>
-            <th scope="col">Casos abiertos</th>
+            <th scope="col" [attr.aria-sort]="ordenTotal() === 'desc' ? 'descending' : 'ascending'">
+              <button type="button" class="th-orden" (click)="alternarOrdenTotal()">
+                Casos abiertos
+                <span class="th-orden-flecha" aria-hidden="true"
+                  >{{ ordenTotal() === 'desc' ? '↓' : '↑' }}</span
+                >
+              </button>
+            </th>
             <th scope="col">Riesgo alto</th>
             <th scope="col">Listado</th>
           </tr>
@@ -225,9 +274,7 @@
             <td>{{ fila.total }}</td>
             <td>{{ fila.riesgoAlto }}</td>
             <td>
-              <a class="table-link" routerLink="/casos" [queryParams]="verCasos(fila)">
-                Ver casos
-              </a>
+              <button type="button" class="table-link" (click)="abrirCasos(fila)">Ver casos</button>
             </td>
           </tr>
           } @if (sinRegion() > 0) {
@@ -237,9 +284,9 @@
             <td>{{ sinRegion() }}</td>
             <td>{{ riesgoAltoSinRegion() }}</td>
             <td>
-              <a class="table-link" routerLink="/casos" [queryParams]="verCasosSinRegion()">
+              <button type="button" class="table-link" (click)="abrirCasosSinRegion()">
                 Ver casos
-              </a>
+              </button>
             </td>
           </tr>
           }
@@ -253,11 +300,76 @@
 
     <p class="tabla-nota">
       Los casos sin región se muestran en su propia fila: suman al total de casos abiertos, no a
-      ninguna región. La región contada es la principal del caso. «Ver casos» abre el listado con
-      esa región o, en la fila sin región, con el criterio «Sin región» del filtro, más el ámbito
-      vigente y «Abiertos» ya aplicados, de modo que el número de la fila y el del listado
-      coinciden.
+      ninguna región. La región contada es la principal del caso. «Ver casos» abre un cajón con los
+      casos de esa fila, con la región y el ámbito vigente ya aplicados, de modo que el número de la
+      fila y el del cajón coinciden; desde el cajón se puede abrir el listado completo con el mismo
+      recorte.
     </p>
   </section>
-  } }
+  } } @if (drawerAbierto()) {
+  <div class="casos-scrim" (click)="cerrarDrawer()">
+    <aside
+      class="casos-drawer"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="drawer-casos-titulo"
+      (click)="$event.stopPropagation()"
+    >
+      <header class="casos-drawer-cabeza">
+        <div>
+          <p class="section-eyebrow">CASOS ABIERTOS</p>
+          <h3 id="drawer-casos-titulo">{{ drawerTitulo() }}</h3>
+          <p class="casos-drawer-sub">
+            {{ drawerCasos().length }} {{ drawerCasos().length === 1 ? 'caso' : 'casos' }} · ámbito
+            {{ alcanceTexto() }}
+          </p>
+        </div>
+        <button
+          type="button"
+          class="icon-button"
+          aria-label="Cerrar el cajón de casos"
+          (click)="cerrarDrawer()"
+        >
+          <app-icono nombre="cerrar" [tamano]="17" />
+        </button>
+      </header>
+
+      <div class="casos-drawer-cuerpo">
+        @if (drawerCasos().length === 0) {
+        <p class="panel-vacio">No hay casos visibles en esta fila con el ámbito vigente.</p>
+        } @else {
+        <table class="data-table" aria-label="Casos abiertos de la fila seleccionada">
+          <thead>
+            <tr>
+              <th scope="col">Caso</th>
+              <th scope="col">Conflictividad</th>
+              <th scope="col">Riesgo</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (caso of drawerCasos(); track caso.id) {
+            <tr>
+              <td class="celda-caso">
+                <button type="button" class="table-link" (click)="abrirCaso(caso)">
+                  {{ caso.codigo }}
+                </button>
+                <small>{{ caso.titulo }}</small>
+              </td>
+              <td>{{ caso.nivelConflicto }}</td>
+              <td>{{ caso.riesgo }}</td>
+            </tr>
+            }
+          </tbody>
+        </table>
+        }
+      </div>
+
+      <footer class="casos-drawer-pie">
+        <a class="button-secondary" routerLink="/casos" [queryParams]="drawerEnlace()">
+          Abrir en el listado de casos
+        </a>
+      </footer>
+    </aside>
+  </div>
+  }
 </section>

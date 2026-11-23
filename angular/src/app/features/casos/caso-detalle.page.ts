@@ -27,7 +27,6 @@ import { formatearFecha } from '../../shared/formato-fecha';
 import { GlosarioComponent } from '../../shared/ui/glosario.component';
 import { IconoComponent } from '../../shared/ui/icono.component';
 import { etiquetaNivelGobierno } from '../compromisos/compromiso.mapeo';
-import { COMPONENTES_CICLO } from './ciclo.contenido';
 import { CuerpoDemanda, DemandaPanelComponent } from './demanda-panel.component';
 import {
   CuerpoEvento,
@@ -35,8 +34,6 @@ import {
   OpcionTipoHecho,
   aTiposHecho,
 } from './evento-panel.component';
-import { ExpedienteCompletitudComponent } from './expediente-completitud.component';
-import { orientacionPorRiesgo } from './proximo-paso';
 import { EnlaceRiel, RielRelacionesComponent } from './riel-relaciones.component';
 
 @Component({
@@ -50,7 +47,6 @@ import { EnlaceRiel, RielRelacionesComponent } from './riel-relaciones.component
     DemandaPanelComponent,
     AnularPanelComponent,
     RielRelacionesComponent,
-    ExpedienteCompletitudComponent,
   ],
   templateUrl: './caso-detalle.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -118,15 +114,11 @@ import { EnlaceRiel, RielRelacionesComponent } from './riel-relaciones.component
       top: 14px;
     }
 
-    .pasos-riesgo {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      margin: 8px 0 0;
-      padding-left: 16px;
-      color: var(--ink-2);
-      font-size: 10.5px;
-      line-height: 1.6;
+    /* Acciones del encabezado de Actores (WhatsApp / CSV), item 102. */
+    .actores-acciones {
+      display: inline-flex;
+      flex-wrap: wrap;
+      gap: 6px;
     }
 
     .timeline-meta {
@@ -228,9 +220,6 @@ export class CasoDetallePage {
     initialValue: '',
   });
 
-  /** Componentes del ciclo de intervención sectorial, en el orden de la Guía. */
-  readonly componentesCiclo = COMPONENTES_CICLO;
-
   private readonly recurso = consulta<DetalleCaso>({
     fuente: () => {
       const codigo = this.codigo();
@@ -271,60 +260,45 @@ export class CasoDetallePage {
   });
 
   /**
-   * Contadores del riel (item 67). Sólo lee lo que ya está en el detalle: no
-   * lanza consultas adicionales por relación.
+   * Riel del expediente (items 67 y 97). El expediente se reduce a cuatro
+   * piezas: línea de tiempo, mapeo de actores, caso de análisis y documentos
+   * vinculados. «Caso de análisis (Canva)» se declara no disponible porque el
+   * caso no guarda un tablero asociado; no se inventa un enlace.
+   *
+   * Sólo lee lo que ya está en el detalle: no lanza consultas adicionales.
    */
   readonly enlacesRiel = computed<readonly EnlaceRiel[]>(() => {
     const ficha = this.ficha();
     if (!ficha) return [];
     return [
       {
-        etiqueta: 'Actores',
-        ancla: 'actores-caso',
-        contador: ficha.actores.length,
-        icono: 'actores',
-      },
-      {
-        etiqueta: 'Hechos',
+        etiqueta: 'Línea de tiempo',
         ancla: 'eventos-caso',
         contador: ficha.eventos.length,
         icono: 'actividad',
       },
       {
-        etiqueta: 'Demandas',
-        ancla: 'demandas-caso',
-        contador: ficha.demandas.length,
-        icono: 'bandeja',
+        etiqueta: 'Mapeo de actores',
+        ancla: 'actores-caso',
+        contador: ficha.actores.length,
+        icono: 'actores',
       },
       {
-        etiqueta: 'Alertas',
-        ancla: 'alertas-caso',
-        contador: ficha.alertas.length,
-        icono: 'alertas',
+        etiqueta: 'Caso de análisis (Canva)',
+        ancla: 'analisis-caso',
+        contador: null,
+        icono: 'documentos',
+        disponible: false,
+        nota: 'El caso no guarda un tablero de Canva: no hay enlace que abrir.',
       },
       {
-        etiqueta: 'Compromisos',
-        ancla: 'compromisos-caso',
-        contador: ficha.compromisos.length,
-        icono: 'compromisos',
-      },
-      {
-        etiqueta: 'Documentos',
+        etiqueta: 'Documentos vinculados',
         ancla: 'documentos-caso',
         contador: ficha.documentos.length,
         icono: 'documentos',
       },
-      {
-        etiqueta: 'Historial',
-        ancla: 'historial-caso',
-        contador: ficha.historial.length,
-        icono: 'reloj',
-      },
     ];
   });
-
-  /** «Próximo paso» (item 19): orientación literal de la Tabla 3 de la Guía. */
-  readonly orientacion = computed(() => orientacionPorRiesgo(this.caso()?.riesgo ?? 'Bajo'));
 
   /** Mismo criterio que la ficha de alerta: el rol debe poder escribir el caso. */
   readonly puedeModificar = computed(() => {
@@ -473,6 +447,75 @@ export class CasoDetallePage {
 
   alFallarExportacion(mensaje: string): void {
     this.exportarError.set(mensaje);
+  }
+
+  /** Aviso del bloque de actores tras copiar o descargar (items 99 y 102). */
+  readonly avisoActores = signal<string | null>(null);
+
+  /** El administrador imprime; el resto sólo guarda el PDF de la ficha. */
+  readonly esAdmin = this.capacidades.esAdmin;
+
+  /**
+   * Línea de WhatsApp por actor (item 99), con el formato pedido:
+   * `- Apellidos, Nombres - Organización - teléfono - correo`.
+   *
+   * `core.actores` sólo guarda `nombre_actual` y la API no expone organización
+   * ni teléfono en el actor del caso, así que esos dos huecos se escriben con un
+   * guion: el dato ausente se declara, no se rellena.
+   */
+  private lineaWhatsApp(actor: ActorCaso): string {
+    const campos = [this.nombreActor(actor), '—', '—', actor.correo || '—'];
+    return `- ${campos.join(' - ')}`;
+  }
+
+  async copiarActoresWhatsApp(actores: readonly ActorCaso[]): Promise<void> {
+    this.avisoActores.set(null);
+    if (actores.length === 0) return;
+
+    const texto = actores.map((actor) => this.lineaWhatsApp(actor)).join('\n');
+    try {
+      await navigator.clipboard.writeText(texto);
+      this.avisoActores.set(
+        `Se copiaron ${actores.length} actores con el formato de WhatsApp. La organización y el teléfono no llegan todavía por la API: se copian como «—».`,
+      );
+    } catch {
+      this.avisoActores.set(
+        'El navegador no permitió copiar al portapapeles. Use «Exportar CSV» y comparta el archivo.',
+      );
+    }
+  }
+
+  /**
+   * Exportación local de la tabla de actores (item 102).
+   *
+   * `/v1/export` no acepta `caso` para la entidad `actores`, así que el archivo
+   * se arma con las filas que la ficha ya tiene en pantalla: exporta lo que se
+   * ve, sin una consulta nueva. Separador `;` y BOM porque es lo que Excel en
+   * es-PE abre de una pasada.
+   */
+  exportarActoresCsv(actores: readonly ActorCaso[]): void {
+    this.avisoActores.set(null);
+    if (actores.length === 0) return;
+    if (!isPlatformBrowser(this.plataforma)) return;
+
+    const escapar = (valor: string | null | undefined): string =>
+      `"${(valor ?? '').replace(/"/g, '""')}"`;
+    const filas = [
+      ['Actor', 'Tipo', 'Función', 'Posicionamiento', 'Correo'].map(escapar).join(';'),
+      ...actores.map((actor) =>
+        [this.nombreActor(actor), actor.tipo, actor.funcion, actor.posicionamiento, actor.correo]
+          .map(escapar)
+          .join(';'),
+      ),
+    ];
+    const contenido = `\uFEFF${filas.join('\r\n')}`;
+    const archivo = new Blob([contenido], { type: 'text/csv;charset=utf-8' });
+    const enlace = document.createElement('a');
+    enlace.href = URL.createObjectURL(archivo);
+    enlace.download = `${this.caso()?.codigo ?? 'caso'}-actores.csv`;
+    enlace.click();
+    URL.revokeObjectURL(enlace.href);
+    this.avisoActores.set(`Se descargaron ${actores.length} actores de la ficha.`);
   }
 
   /**

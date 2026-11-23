@@ -176,6 +176,11 @@ function isoHoy(): string {
   return `${anio}-${mes}-${dia}`;
 }
 
+/** `total` del sobre paginado sin construir las filas (consultas de indicadores). */
+function totalDe(bruto: unknown): number {
+  return normalizarColeccion<unknown>(bruto).total;
+}
+
 @Component({
   selector: 'app-compromisos',
   imports: [
@@ -606,6 +611,38 @@ export class CompromisosPage {
     const rango = this.rango();
     return `${this.total()} compromisos anulados · ${rango.desde}–${rango.hasta}`;
   });
+
+  /**
+   * Indicadores de la pantalla (item 112): totales del servidor, no de la página
+   * visible. Cada tarjeta repite el recorte de filtros con un `estado` adicional
+   * y lee `total` con `pageSize=1`. Se ocultan en la papelera.
+   */
+  private contar(extra: Record<string, string>) {
+    return consulta<number>({
+      fuente: () => {
+        const filtros = this.parametros();
+        return urlConParametros(urlApi('/v1/commitments'), {
+          ...paramsDePagina({ pagina: 1, tamano: 1 }),
+          anulados: filtros.ver === 'anulados' ? 'true' : '',
+          q: filtros.q,
+          estado: filtros.estado,
+          tipo: filtros.tipo,
+          nivelGobierno: filtros.nivelGobierno,
+          atiendeGenero: filtros.atiendeGenero,
+          ...extra,
+        });
+      },
+      esquema: totalDe,
+    });
+  }
+
+  private readonly cumplidosRec = this.contar({ estado: 'Cumplido' });
+  private readonly enProcesoRec = this.contar({ estado: 'En proceso' });
+  private readonly porIniciarRec = this.contar({ estado: 'Por iniciar' });
+
+  readonly cumplidos = computed(() => this.cumplidosRec.valor() ?? null);
+  readonly enProceso = computed(() => this.enProcesoRec.valor() ?? null);
+  readonly porIniciar = computed(() => this.porIniciarRec.valor() ?? null);
 
   /**
    * El calendario no pagina de 25 en 25: pide el rango completo de la rejilla

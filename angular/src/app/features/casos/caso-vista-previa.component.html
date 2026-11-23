@@ -1,0 +1,108 @@
+<div class="drawer-scrim" (click)="alFondo($event)" (keydown)="alTecla($event)">
+  <aside
+    #panel
+    class="drawer"
+    tabindex="-1"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="vista-previa-titulo"
+  >
+    <header class="drawer-head">
+      <div>
+        <p class="previa-codigo">{{ caso().codigo }}</p>
+        <h2 id="vista-previa-titulo">{{ caso().titulo }}</h2>
+        <p class="previa-sub">
+          Actualización: {{ fechaCorta(caso().actualizado) }} · Región:
+          {{ caso().region || 'sin región' }}
+        </p>
+      </div>
+
+      <button
+        type="button"
+        class="icon-button"
+        aria-label="Cerrar la vista previa del caso"
+        (click)="cerrar.emit()"
+      >
+        <app-icono nombre="cerrar" [tamano]="18" />
+      </button>
+    </header>
+
+    <div class="drawer-body">
+      <div class="previa-badges">
+        <span class="status-badge">{{ caso().nivelConflicto }}</span>
+        <span class="status-badge" [class]="'status-badge risk-' + caso().riesgo.toLowerCase()">
+          <span class="status-dot"></span>
+          Nivel de riesgo: {{ caso().riesgo }}
+        </span>
+        <span class="status-badge">{{ caso().estado }}</span>
+      </div>
+
+      <p class="previa-resumen">{{ caso().resumen || 'Sin resumen registrado.' }}</p>
+
+      <dl class="previa-meta">
+        <div>
+          <dt>Temática</dt>
+          <dd>{{ caso().tematica || '—' }}</dd>
+        </div>
+        <div>
+          <dt>Componente del ciclo</dt>
+          <dd>{{ caso().etapa }}</dd>
+        </div>
+        <div>
+          <dt>Prioridad de atención</dt>
+          <dd>{{ caso().prioridad }}</dd>
+        </div>
+        <div>
+          <dt>Inicio</dt>
+          <dd>{{ fechaCorta(caso().inicio) }}</dd>
+        </div>
+      </dl>
+
+      <ul class="previa-accesos">
+        <li>
+          <a class="previa-acceso" [routerLink]="['/casos', caso().codigo]" fragment="eventos-caso">
+            <app-icono nombre="actividad" [tamano]="14" />
+            Línea de tiempo
+          </a>
+        </li>
+        <li>
+          <a class="previa-acceso" [routerLink]="['/casos', caso().codigo]" fragment="actores-caso">
+            <app-icono nombre="actores" [tamano]="14" />
+            Mapa de actores
+          </a>
+        </li>
+        <li>
+          <a
+            class="previa-acceso"
+            [routerLink]="['/casos', caso().codigo]"
+            fragment="compromisos-caso"
+          >
+            <app-icono nombre="compromisos" [tamano]="14" />
+            Acuerdos
+          </a>
+        </li>
+        <li>
+          <span class="previa-acceso" aria-disabled="true">
+            <app-icono nombre="documentos" [tamano]="14" />
+            <span>
+              Caso de análisis (Canva)
+              <small>Sin enlace: el caso no guarda un tablero asociado.</small>
+            </span>
+          </span>
+        </li>
+      </ul>
+
+      <p class="previa-nota">
+        La línea de tiempo, el mapa de actores y los acuerdos abren la sección correspondiente del
+        expediente del caso.
+      </p>
+    </div>
+
+    <footer class="drawer-foot">
+      <button type="button" class="button-secondary" (click)="cerrar.emit()">Cerrar</button>
+      <a class="button-primary" [routerLink]="['/casos', caso().codigo]">
+        Abrir expediente completo
+      </a>
+    </footer>
+  </aside>
+</div>

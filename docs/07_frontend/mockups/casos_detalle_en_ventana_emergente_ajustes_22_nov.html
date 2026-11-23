@@ -1,0 +1,470 @@
+<!DOCTYPE html><html class="dark" lang="es"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><meta content="web_dashboard" name="shell-type"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;display=swap" rel="stylesheet"><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={"darkMode":"class","theme":{"extend":{"colors":{"error-container":"#93000a","surface-container-highest":"#2d353f","primary":"#a8c8ff","secondary":"#45dfa4","secondary-fixed-dim":"#45dfa4","surface-dim":"#0c141d","inverse-primary":"#115eaf","primary-fixed-dim":"#a8c8ff","on-primary-container":"#003c76","tertiary":"#cebdff","on-error":"#690005","error":"#ffb4ab","primary-container":"#6ea8fe","tertiary-container":"#b196ff","surface-container-low":"#141c25","on-primary-fixed-variant":"#004689","on-tertiary-container":"#442491","surface-container-lowest":"#070f18","on-tertiary":"#381385","on-tertiary-fixed-variant":"#4f319c","inverse-on-surface":"#29313b","on-background":"#dbe3f0","on-secondary-fixed":"#002114","inverse-surface":"#dbe3f0","on-secondary-fixed-variant":"#005137","surface-container-high":"#232b34","surface-tint":"#a8c8ff","primary-fixed":"#d5e3ff","outline":"#8c919d","surface":"#0c141d","surface-container":"#18202a","on-secondary":"#003825","secondary-container":"#00bd85","on-primary":"#003061","background":"#0c141d","outline-variant":"#424751","on-tertiary-fixed":"#21005e","on-surface-variant":"#c2c6d3","tertiary-fixed-dim":"#cebdff","on-surface":"#dbe3f0","on-secondary-container":"#00452e","surface-variant":"#2d353f","surface-bright":"#323a44","on-error-container":"#ffdad6","secondary-fixed":"#68fcbf","tertiary-fixed":"#e8ddff","on-primary-fixed":"#001b3c"},"borderRadius":{"DEFAULT":"0.125rem","lg":"0.25rem","xl":"0.5rem","full":"0.75rem"},"spacing":{"space-md":"0.75rem","space-sm":"0.5rem","margin-desktop":"2rem","gutter-desktop":"1.5rem","gutter":"1rem","space-lg":"1rem","space-xs":"0.25rem","margin":"1rem","space-xl":"1.5rem"},"fontFamily":{"display-lg-mobile":["Inter"],"label-sm":["Inter"],"headline-lg":["Inter"],"body-sm":["Inter"],"headline-md":["Inter"],"headline-sm":["Inter"],"title-md":["Inter"],"display-lg":["Inter"],"body-md":["Inter"],"body-lg":["Inter"],"data-tabular":["Inter"],"label-md":["Inter"]},"fontSize":{"display-lg-mobile":["24px",{"lineHeight":"32px","letterSpacing":"-0.01em","fontWeight":"700"}],"label-sm":["11px",{"lineHeight":"14px","letterSpacing":"0.03em","fontWeight":"500"}],"headline-lg":["24px",{"lineHeight":"32px","letterSpacing":"-0.01em","fontWeight":"600"}],"body-sm":["13px",{"lineHeight":"18px","fontWeight":"400"}],"headline-md":["20px",{"lineHeight":"28px","fontWeight":"600"}],"headline-sm":["16px",{"lineHeight":"24px","fontWeight":"600"}],"title-md":["14px",{"lineHeight":"20px","fontWeight":"600"}],"display-lg":["32px",{"lineHeight":"40px","letterSpacing":"-0.02em","fontWeight":"700"}],"body-md":["14px",{"lineHeight":"20px","fontWeight":"400"}],"body-lg":["16px",{"lineHeight":"24px","fontWeight":"400"}],"data-tabular":["13px",{"lineHeight":"18px","letterSpacing":"0","fontWeight":"500"}],"label-md":["12px",{"lineHeight":"16px","letterSpacing":"0.02em","fontWeight":"600"}]}}}};</script></head><body class="bg-background font-body-md text-on-surface antialiased min-h-screen"><aside class="fixed left-0 top-0 h-screen w-72 bg-surface-container-low z-50 flex flex-col justify-between shadow-[0_1px_8px_rgba(0,0,0,0.4)]"><div class="flex flex-col flex-1 overflow-y-auto"><div class="p-space-lg bg-surface-container-lowest"><div class="flex items-center gap-space-sm"><div class="w-8 h-8 rounded-lg bg-primary-container text-on-primary-container flex items-center justify-center font-headline-sm text-headline-sm font-bold">A</div><div><div class="font-headline-sm text-headline-sm font-semibold text-on-surface tracking-tight leading-none">AVISA <span class="text-primary font-label-sm text-label-sm">v2.4</span></div><div class="font-label-sm text-label-sm text-on-surface-variant truncate mt-space-xs">OAIPCS · PRODUCE - Perú</div></div></div></div><nav class="flex-1 px-space-md py-space-md space-y-space-md" data-active-classes="bg-surface-container-highest text-primary font-title-md"><div class="space-y-space-xs"><div class="px-space-sm py-space-xs font-label-md text-label-md text-outline uppercase tracking-wider">MI ESPACIO</div><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg font-body-sm text-body-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="panorama-territorial" href="#"><span class="material-symbols-outlined text-[18px]">public</span><span>Panorama territorial</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg font-body-sm text-body-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="resumen-operativo" href="#"><span class="material-symbols-outlined text-[18px]">insights</span><span>Resumen operativo</span></a><a class="flex items-center justify-between px-space-md py-space-sm rounded-lg font-body-sm text-body-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="bandeja-de-trabajo" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-[18px]">inbox</span><span>Bandeja de trabajo</span></div><span class="px-space-xs py-0.5 rounded font-label-sm text-label-sm bg-error text-on-error font-medium">12</span></a></div><div class="space-y-space-xs"><div class="px-space-sm py-space-xs font-label-md text-label-md text-outline uppercase tracking-wider">SEGUIMIENTO</div><a aria-current="page" class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg transition-colors bg-surface-container-highest text-primary font-title-md" data-path="casos" href="#"><span class="material-symbols-outlined text-[18px]">gavel</span><span>Casos</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg font-body-sm text-body-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="alertas-tempranas" href="#"><span class="material-symbols-outlined text-[18px]">warning</span><span>Alertas tempranas</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg font-body-sm text-body-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="compromisos" href="#"><span class="material-symbols-outlined text-[18px]">handshake</span><span>Compromisos</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg font-body-sm text-body-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="documentos" href="#"><span class="material-symbols-outlined text-[18px]">description</span><span>Documentos</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg font-body-sm text-body-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="reportes" href="#"><span class="material-symbols-outlined text-[18px]">bar_chart</span><span>Reportes</span></a></div><div class="space-y-space-xs"><div class="px-space-sm py-space-xs font-label-md text-label-md text-outline uppercase tracking-wider">DIRECTORIO</div><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg font-body-sm text-body-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="actores" href="#"><span class="material-symbols-outlined text-[18px]">groups</span><span>Actores</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg font-body-sm text-body-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="locales" href="#"><span class="material-symbols-outlined text-[18px]">location_city</span><span>Locales</span></a></div></nav></div><div class="p-space-md bg-surface-container-lowest"><div class="flex items-center justify-between text-on-surface-variant font-label-sm text-label-sm"><span>Servidor Sede Central</span><span class="w-2 h-2 rounded-full bg-secondary"></span></div><div class="font-label-sm text-label-sm text-outline mt-space-xs">OAIPCS • PRODUCE © 2025</div></div></aside><div class="pl-72 flex flex-col min-h-screen"><header class="fixed top-0 left-72 right-0 h-16 bg-surface-container/90 backdrop-blur-xl z-40 shadow-[0_1px_8px_rgba(0,0,0,0.3)]"><div class="h-16 w-full px-gutter-desktop flex items-center justify-between gap-space-lg"><div class="flex items-center gap-space-lg min-w-max"><div class="flex flex-col"></div><div class="flex items-center gap-space-xs px-space-sm py-0.5 rounded-full bg-surface-container-highest text-secondary font-label-sm text-label-sm"><span class="inline-block w-2 h-2 rounded-full bg-secondary animate-pulse"></span></div></div><div class="flex-1 max-w-xl mx-auto"><div class="relative flex items-center w-full"><span class="material-symbols-outlined absolute left-space-md text-outline text-[18px] pointer-events-none">search</span></div></div><div class="flex items-center gap-space-md"><button class="p-space-xs text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high rounded transition-colors" title="Configuración y Filtros" type="button"><span class="material-symbols-outlined text-[20px]">tune</span></button><button class="relative p-space-xs text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high rounded transition-colors" title="Notificaciones" type="button"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-1 right-1 w-2 h-2 rounded-full bg-error"></span></button><div class="h-6 w-px bg-outline-variant"></div><div class="flex items-center gap-space-sm pl-space-xs"><div class="text-right hidden xl:block"><div class="font-title-md text-title-md text-on-surface leading-tight">Ing. R. Huamán</div><div class="font-label-sm text-label-sm text-on-surface-variant leading-tight">Especialista OAIPCS</div></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></div></header><main class="w-full pt-16 flex-1 bg-surface"><div class="flex flex-col w-full relative">
+<!-- Dynamic Operational Background View (Simulated underlying cases board with backdrop blur) -->
+<div aria-hidden="true" class="w-full px-gutter-desktop py-space-lg select-none opacity-40 blur-sm pointer-events-none">
+<div class="flex items-center justify-between pb-space-lg">
+<div class="flex flex-col gap-space-xs">
+<span class="font-label-md text-label-md text-outline uppercase tracking-wider">MÓDULO DE SEGUIMIENTO</span>
+<h1 class="font-headline-lg text-headline-lg text-on-surface">Gestión Integral de Casos y Conflictividad Social</h1>
+</div>
+<div class="flex items-center gap-space-md">
+<div class="px-space-md py-space-sm bg-surface-container rounded-lg text-on-surface-variant font-body-sm text-body-sm">
+          Total Casos Activos: <span class="text-primary font-bold">28</span>
+</div>
+</div>
+</div>
+<!-- Ghost table rows to represent the app underneath -->
+<div class="space-y-space-sm">
+<div class="h-14 bg-surface-container rounded-lg flex items-center px-space-md gap-space-lg">
+<span class="w-32 h-4 bg-surface-container-highest rounded"></span>
+<span class="flex-1 h-4 bg-surface-container-highest rounded"></span>
+<span class="w-24 h-6 bg-error-container rounded"></span>
+</div>
+<div class="h-14 bg-surface-container-low rounded-lg flex items-center px-space-md gap-space-lg">
+<span class="w-32 h-4 bg-surface-container-highest rounded"></span>
+<span class="flex-1 h-4 bg-surface-container-highest rounded"></span>
+<span class="w-24 h-6 bg-surface-container-highest rounded"></span>
+</div>
+<div class="h-14 bg-surface-container rounded-lg flex items-center px-space-md gap-space-lg">
+<span class="w-32 h-4 bg-surface-container-highest rounded"></span>
+<span class="flex-1 h-4 bg-surface-container-highest rounded"></span>
+<span class="w-24 h-6 bg-surface-container-highest rounded"></span>
+</div>
+</div>
+</div>
+<!-- MODAL SCRIM OVERLAY -->
+<div class="fixed inset-0 top-16 left-0 xl:left-72 bg-surface-dim/80 backdrop-blur-md z-50 flex items-center justify-center p-space-sm lg:p-space-lg overflow-y-auto" id="modal-backdrop">
+<!-- MODAL CONTAINER (Ajustes 22 nov 2026) -->
+<div aria-labelledby="case-dialog-title" aria-modal="true" class="w-full max-w-6xl max-h-[92vh] bg-surface-container-low rounded-xl shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200" role="dialog">
+<!-- 1. ENCABEZADO DEL CASO -->
+<header class="bg-surface-container-lowest px-space-lg lg:px-space-xl py-space-md flex flex-col gap-space-sm shrink-0">
+<div class="flex items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-sm flex-wrap">
+<span class="flex items-center gap-space-xs text-primary font-data-tabular text-data-tabular bg-surface-container px-space-sm py-0.5 rounded">
+<span class="material-symbols-outlined text-[16px]">folder_open</span>
+              CS-PA-OAT-2026-04
+            </span>
+<span class="text-outline text-label-sm font-label-sm">•</span>
+<span class="text-on-surface-variant font-label-md text-label-md flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[15px] text-outline">schedule</span>
+              Última actualización: 18/11/2026
+            </span>
+</div>
+<div class="flex items-center gap-space-md">
+<!-- Non-admin action: Imprimir / Guardar PDF only -->
+<button class="flex items-center gap-space-xs px-space-md py-1.5 bg-surface-container hover:bg-surface-container-high text-on-surface rounded-lg font-label-md text-label-md transition-colors" onclick="window.print()" title="Exportar ficha en formato PDF" type="button">
+<span class="material-symbols-outlined text-[16px] text-primary">picture_as_pdf</span>
+<span>Guardar PDF</span>
+</button>
+<button aria-label="Cerrar modal" class="p-1.5 rounded-lg text-outline hover:text-on-surface hover:bg-surface-container-highest transition-colors" id="btn-close-modal" type="button">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+</div>
+<!-- Case Title -->
+<h2 class="font-headline-md text-headline-md text-on-surface font-semibold tracking-tight" id="case-dialog-title">
+          Demanda de cancelación de la temporada de pesca de anchoveta por captura juvenil
+        </h2>
+<!-- Retained Status Badges & Info Tags (Cleaned per spec: No "Sector pesquería", No "Pesca artesanal", No "Expediente en mesa activa") -->
+<div class="flex items-center gap-space-sm flex-wrap pt-space-xs">
+<!-- Nivel de conflictividad -->
+<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-primary/10 text-primary font-label-sm text-label-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+<span>Nivel de conflictividad: <strong>Controversia</strong></span>
+</div>
+<!-- Nivel de riesgo con tooltip ⓘ inmediatamente pegado -->
+<div class="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-secondary-container/20 text-secondary-fixed font-label-sm text-label-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary-fixed"></span>
+<span>Riesgo: <strong>Moderado</strong></span>
+<span class="material-symbols-outlined text-[14px] text-on-surface-variant cursor-pointer hover:text-on-surface ml-0.5" title="Calificación derivada de la matriz de alerta temprana vigente OAIPCS.">info</span>
+</div>
+<!-- Región -->
+<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-surface-container-highest text-on-surface font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[14px] text-outline">location_on</span>
+<span>Región: <strong>Piura</strong></span>
+</div>
+</div>
+</header>
+<!-- 2. CUERPO MODAL CON SCROLL -->
+<div class="flex-1 overflow-y-auto px-space-lg lg:px-space-xl py-space-lg space-y-space-xl">
+<!-- RESUMEN DEL CASO (Sin etiqueta 'Acta') -->
+<section class="bg-surface-container rounded-xl p-space-lg flex flex-col gap-space-xs">
+<div class="flex items-center gap-space-xs text-primary font-title-md text-title-md">
+<span class="material-symbols-outlined text-[18px]">subject</span>
+<span class="uppercase tracking-wider font-semibold">Resumen del caso</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface leading-relaxed text-justify">
+            Diversos gremios del sector pesquero (SUMOPP, SUPNEP) exigen la cancelación inmediata de la primera temporada de pesca de anchoveta ante la presunta depredación del recurso por una elevada incidencia de captura juvenil reportada por IMARPE. En reunión de trabajo con el Viceministerio de Pesquería, los dirigentes expusieron la urgencia de medidas precautorias mientras se evalúa el levantamiento de observaciones biológicas de biomasa marina y cuotas permisibles.
+          </p>
+</section>
+<!-- NAVEGACIÓN Y ACCIONES DEL CASO -->
+<div class="flex items-center justify-between gap-space-md flex-wrap">
+<div class="flex items-center gap-space-xs bg-surface-container-lowest p-1 rounded-xl">
+<button class="flex items-center gap-space-xs px-space-md py-1.5 rounded-lg text-outline hover:text-on-surface font-label-md text-label-md transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px]">show_chart</span>
+<span>Línea de tiempo</span>
+</button>
+<button class="flex items-center gap-space-xs px-space-md py-1.5 rounded-lg bg-surface-container-highest text-primary font-label-md text-label-md" type="button">
+<span class="material-symbols-outlined text-[16px]">group</span>
+<span>Mapa de actores</span>
+</button>
+<button class="flex items-center gap-space-xs px-space-md py-1.5 rounded-lg text-outline hover:text-on-surface font-label-md text-label-md transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px]">check_circle</span>
+<span>Compromisos</span>
+<span class="ml-1 px-1.5 py-0.2 bg-primary/20 text-primary rounded font-label-sm text-label-sm">4</span>
+</button>
+<a class="flex items-center gap-space-xs px-space-md py-1.5 rounded-lg text-outline hover:text-primary font-label-md text-label-md transition-colors" href="https://canva.com" rel="noopener noreferrer" target="_blank">
+<span class="material-symbols-outlined text-[16px]">open_in_new</span>
+<span>Enlace a Canva</span>
+</a>
+</div>
+<!-- Secondary Quick Status Indicator -->
+<div class="flex items-center gap-space-xs text-on-surface-variant font-label-sm text-label-sm bg-surface-container px-space-md py-1.5 rounded-lg">
+<span class="material-symbols-outlined text-[16px] text-secondary">verified_user</span>
+<span>Mapeo validado por OAIPCS</span>
+</div>
+</div>
+<!-- 3. MAPA DE ACTORES -->
+<section class="space-y-space-md">
+<!-- Control Bar for Actor Mapping -->
+<div class="flex items-center justify-between gap-space-md flex-wrap bg-surface-container-lowest p-space-sm rounded-xl">
+<div class="flex items-center gap-space-xs">
+<button class="flex items-center gap-space-xs px-space-md py-1.5 rounded-lg bg-primary-container text-on-primary-container font-label-md text-label-md font-semibold" type="button">
+<span class="material-symbols-outlined text-[16px]">table_chart</span>
+<span>Tabla</span>
+</button>
+<button class="flex items-center gap-space-xs px-space-md py-1.5 rounded-lg text-outline hover:text-on-surface hover:bg-surface-container font-label-md text-label-md transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px]">hub</span>
+<span>Mapa gráfico</span>
+</button>
+<a class="flex items-center gap-space-xs px-space-md py-1.5 rounded-lg text-outline hover:text-on-surface hover:bg-surface-container font-label-md text-label-md transition-colors" href="https://canva.com" rel="noopener noreferrer" target="_blank">
+<span class="material-symbols-outlined text-[16px]">link</span>
+<span>Enlace a Canva</span>
+</a>
+</div>
+<!-- EXPORT DROPDOWN (Excel, PDF, Copiar para WhatsApp) -->
+<div class="relative inline-block text-left" id="export-dropdown-container">
+<button class="flex items-center gap-space-xs px-space-md py-1.5 bg-surface-container-high hover:bg-surface-container-highest text-on-surface rounded-lg font-label-md text-label-md font-medium transition-colors" id="btn-export-dropdown" type="button">
+<span class="material-symbols-outlined text-[16px] text-primary">download</span>
+<span>Exportar</span>
+<span class="material-symbols-outlined text-[16px]">arrow_drop_down</span>
+</button>
+<div class="hidden absolute right-0 mt-1 w-64 rounded-xl bg-surface-container-high shadow-2xl py-1 z-30 focus:outline-none" id="export-menu">
+<button class="w-full text-left flex items-center gap-space-sm px-space-md py-2 font-body-sm text-body-sm text-on-surface hover:bg-surface-container-highest transition-colors" onclick="alert('Exportando registro de actores a Microsoft Excel (.xlsx)...')" type="button">
+<span class="material-symbols-outlined text-secondary text-[18px]">table_view</span>
+<span>1. Excel (.xlsx)</span>
+</button>
+<button class="w-full text-left flex items-center gap-space-sm px-space-md py-2 font-body-sm text-body-sm text-on-surface hover:bg-surface-container-highest transition-colors" onclick="alert('Generando reporte de actores en PDF...')" type="button">
+<span class="material-symbols-outlined text-primary text-[18px]">picture_as_pdf</span>
+<span>2. PDF (.pdf)</span>
+</button>
+<button class="w-full text-left flex items-center gap-space-sm px-space-md py-2 font-body-sm text-body-sm text-on-surface hover:bg-surface-container-highest transition-colors" id="btn-copy-whatsapp" type="button">
+<span class="material-symbols-outlined text-secondary text-[18px]">chat</span>
+<span>3. Copiar para WhatsApp</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Notification toast for copy action -->
+<div class="hidden bg-secondary text-on-secondary px-space-md py-1.5 rounded-lg font-label-md text-label-md flex items-center gap-space-sm shadow-md animate-in fade-in duration-150" id="toast-copy">
+<span class="material-symbols-outlined text-[18px]">switch_account</span>
+<span>¡Lista de actores copiada al portapapeles en formato WhatsApp!</span>
+</div>
+<!-- ACTORS TABLE (Columns: Actor [Apellidos, Nombres], Pertenencia, Teléfono, Correo, Tipo, Función) -->
+<div class="overflow-x-auto rounded-xl bg-surface-container">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-lowest text-outline font-label-md text-label-md uppercase tracking-wider">
+<th class="py-space-md px-space-md font-semibold">Actor (Apellidos, Nombres)</th>
+<th class="py-space-md px-space-md font-semibold">Pertenencia</th>
+<th class="py-space-md px-space-md font-semibold">Teléfono</th>
+<th class="py-space-md px-space-md font-semibold">Correo</th>
+<th class="py-space-md px-space-md font-semibold">Tipo</th>
+<th class="py-space-md px-space-md font-semibold">Función</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-transparent font-body-sm text-body-sm">
+<!-- Row 1 -->
+<tr class="hover:bg-surface-container-high transition-colors bg-surface-container/70">
+<td class="py-2.5 px-space-md text-on-surface font-semibold">Fiestas Fiestas, Juan Carlos</td>
+<td class="py-2.5 px-space-md text-on-surface-variant">SUMOPP (Sindicato Único Motoristas)</td>
+<td class="py-2.5 px-space-md font-data-tabular text-data-tabular text-on-surface">+51 969 412 803</td>
+<td class="py-2.5 px-space-md font-data-tabular text-data-tabular text-primary truncate max-w-[160px]">jfiestas@sumopp.org.pe</td>
+<td class="py-2.5 px-space-md">
+<span class="px-2 py-0.5 rounded font-label-sm text-label-sm bg-primary/10 text-primary">Social</span>
+</td>
+<td class="py-2.5 px-space-md">
+<span class="px-2 py-0.5 rounded font-label-sm text-label-sm bg-error/15 text-error font-medium">Principal</span>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-surface-container-high transition-colors bg-surface-container-low">
+<td class="py-2.5 px-space-md text-on-surface font-semibold">Querevalú Periche, Santos</td>
+<td class="py-2.5 px-space-md text-on-surface-variant">SUPNEP (Sindicato Pescadores)</td>
+<td class="py-2.5 px-space-md font-data-tabular text-data-tabular text-on-surface">+51 973 881 294</td>
+<td class="py-2.5 px-space-md font-data-tabular text-data-tabular text-primary truncate max-w-[160px]">squerevalu@supnep.pe</td>
+<td class="py-2.5 px-space-md">
+<span class="px-2 py-0.5 rounded font-label-sm text-label-sm bg-primary/10 text-primary">Social</span>
+</td>
+<td class="py-2.5 px-space-md">
+<span class="px-2 py-0.5 rounded font-label-sm text-label-sm bg-error/15 text-error font-medium">Principal</span>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-surface-container-high transition-colors bg-surface-container/70">
+<td class="py-2.5 px-space-md text-on-surface font-semibold">Mendoza Alarcón, Patricia</td>
+<td class="py-2.5 px-space-md text-on-surface-variant">PRODUCE - DGSFS-PA</td>
+<td class="py-2.5 px-space-md font-data-tabular text-data-tabular text-on-surface">+51 945 002 119</td>
+<td class="py-2.5 px-space-md font-data-tabular text-data-tabular text-primary truncate max-w-[160px]">pmendoza@produce.gob.pe</td>
+<td class="py-2.5 px-space-md">
+<span class="px-2 py-0.5 rounded font-label-sm text-label-sm bg-surface-container-highest text-on-surface">Público</span>
+</td>
+<td class="py-2.5 px-space-md">
+<span class="px-2 py-0.5 rounded font-label-sm text-label-sm bg-error/15 text-error font-medium">Principal</span>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-surface-container-high transition-colors bg-surface-container-low">
+<td class="py-2.5 px-space-md text-on-surface font-semibold">Carhuapoma Ramos, Hernán</td>
+<td class="py-2.5 px-space-md text-on-surface-variant">IMARPE Sede Paita</td>
+<td class="py-2.5 px-space-md font-data-tabular text-data-tabular text-on-surface">+51 988 334 102</td>
+<td class="py-2.5 px-space-md font-data-tabular text-data-tabular text-primary truncate max-w-[160px]">hcarhuapoma@imarpe.gob.pe</td>
+<td class="py-2.5 px-space-md">
+<span class="px-2 py-0.5 rounded font-label-sm text-label-sm bg-surface-container-highest text-on-surface">Público</span>
+</td>
+<td class="py-2.5 px-space-md">
+<span class="px-2 py-0.5 rounded font-label-sm text-label-sm bg-surface-container-highest text-outline">Secundario</span>
+</td>
+</tr>
+<!-- Row 5 -->
+<tr class="hover:bg-surface-container-high transition-colors bg-surface-container/70">
+<td class="py-2.5 px-space-md text-on-surface font-semibold">Seminario Morales, Luis Alberto</td>
+<td class="py-2.5 px-space-md text-on-surface-variant">GORE Piura - DIREPRO</td>
+<td class="py-2.5 px-space-md font-data-tabular text-data-tabular text-on-surface">+51 969 110 445</td>
+<td class="py-2.5 px-space-md font-data-tabular text-data-tabular text-primary truncate max-w-[160px]">lseminario@regionpiura.gob.pe</td>
+<td class="py-2.5 px-space-md">
+<span class="px-2 py-0.5 rounded font-label-sm text-label-sm bg-surface-container-highest text-on-surface">Público</span>
+</td>
+<td class="py-2.5 px-space-md">
+<span class="px-2 py-0.5 rounded font-label-sm text-label-sm bg-surface-container-highest text-outline">Secundario</span>
+</td>
+</tr>
+<!-- Row 6 -->
+<tr class="hover:bg-surface-container-high transition-colors bg-surface-container-low">
+<td class="py-2.5 px-space-md text-on-surface font-semibold">Chunga Vite, Rosa Elena</td>
+<td class="py-2.5 px-space-md text-on-surface-variant">Defensoría del Pueblo - Módulo Piura</td>
+<td class="py-2.5 px-space-md font-data-tabular text-data-tabular text-on-surface">+51 999 556 781</td>
+<td class="py-2.5 px-space-md font-data-tabular text-data-tabular text-primary truncate max-w-[160px]">rchunga@defensoria.gob.pe</td>
+<td class="py-2.5 px-space-md">
+<span class="px-2 py-0.5 rounded font-label-sm text-label-sm bg-surface-container-highest text-on-surface">Público</span>
+</td>
+<td class="py-2.5 px-space-md">
+<span class="px-2 py-0.5 rounded font-label-sm text-label-sm bg-secondary/15 text-secondary font-medium">Tercero imparcial</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="text-right text-on-surface-variant font-label-sm text-label-sm">
+            Total registrados: <span class="text-on-surface font-semibold">6 actores vinculados a la controversia activa</span>
+</div>
+</section>
+<!-- 4. NUEVA SECCIÓN: DOCUMENTOS DEL CASO -->
+<section class="space-y-space-md bg-surface-container-lowest p-space-lg rounded-xl">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs text-on-surface font-title-md text-title-md">
+<span class="material-symbols-outlined text-[20px] text-primary">folder_special</span>
+<span class="font-semibold">Documentos del caso</span>
+</div>
+<span class="font-label-sm text-label-sm text-outline">OAIPCS Archivo Digital</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-space-md">
+<!-- Grupo 1: Documentos de PRODUCE -->
+<div class="bg-surface-container rounded-lg p-space-md space-y-space-sm">
+<div class="flex items-center justify-between pb-space-xs">
+<span class="font-label-md text-label-md text-primary font-semibold uppercase tracking-wider flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[16px]">account_balance</span>
+                  Documentos de PRODUCE
+                </span>
+<span class="font-label-sm text-label-sm text-outline">Oficios, actas e informes</span>
+</div>
+<div class="space-y-space-xs">
+<div class="flex items-center justify-between p-2 bg-surface-container-low hover:bg-surface-container-highest rounded transition-colors group">
+<div class="flex items-center gap-space-sm min-w-0">
+<span class="material-symbols-outlined text-[20px] text-error">picture_as_pdf</span>
+<div class="flex flex-col min-w-0">
+<span class="text-on-surface font-body-sm text-body-sm font-medium truncate">Acta Reunión Extraordinaria N° 014-2026-PRODUCE/DGSFS</span>
+<span class="text-outline font-label-sm text-label-sm">16/11/2026 • 2.4 MB</span>
+</div>
+</div>
+<button class="p-1 text-on-surface-variant hover:text-primary transition-colors" title="Descargar documento" type="button">
+<span class="material-symbols-outlined text-[18px]">download</span>
+</button>
+</div>
+<div class="flex items-center justify-between p-2 bg-surface-container-low hover:bg-surface-container-highest rounded transition-colors group">
+<div class="flex items-center gap-space-sm min-w-0">
+<span class="material-symbols-outlined text-[20px] text-error">picture_as_pdf</span>
+<div class="flex flex-col min-w-0">
+<span class="text-on-surface font-body-sm text-body-sm font-medium truncate">Informe Técnico de Evaluación de Incidencia IMARPE IT-089-2026</span>
+<span class="text-outline font-label-sm text-label-sm">14/11/2026 • 5.1 MB</span>
+</div>
+</div>
+<button class="p-1 text-on-surface-variant hover:text-primary transition-colors" title="Descargar documento" type="button">
+<span class="material-symbols-outlined text-[18px]">download</span>
+</button>
+</div>
+<div class="flex items-center justify-between p-2 bg-surface-container-low hover:bg-surface-container-highest rounded transition-colors group">
+<div class="flex items-center gap-space-sm min-w-0">
+<span class="material-symbols-outlined text-[20px] text-primary">description</span>
+<div class="flex flex-col min-w-0">
+<span class="text-on-surface font-body-sm text-body-sm font-medium truncate">Oficio Múltiple N° 033-2026-PRODUCE/DVPA a Gremios de Paita</span>
+<span class="text-outline font-label-sm text-label-sm">11/11/2026 • 840 KB</span>
+</div>
+</div>
+<button class="p-1 text-on-surface-variant hover:text-primary transition-colors" title="Descargar documento" type="button">
+<span class="material-symbols-outlined text-[18px]">download</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Grupo 2: Normativa Relacionada -->
+<div class="bg-surface-container rounded-lg p-space-md space-y-space-sm">
+<div class="flex items-center justify-between pb-space-xs">
+<span class="font-label-md text-label-md text-secondary font-semibold uppercase tracking-wider flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[16px]">gavel</span>
+                  Normativa relacionada
+                </span>
+<span class="font-label-sm text-label-sm text-outline">RM, DS y Directivas</span>
+</div>
+<div class="space-y-space-xs">
+<div class="flex items-center justify-between p-2 bg-surface-container-low hover:bg-surface-container-highest rounded transition-colors group">
+<div class="flex items-center gap-space-sm min-w-0">
+<span class="material-symbols-outlined text-[20px] text-secondary">verified</span>
+<div class="flex flex-col min-w-0">
+<span class="text-on-surface font-body-sm text-body-sm font-medium truncate">Resolución Ministerial N° 00312-2026-PRODUCE (Límites Máximos)</span>
+<span class="text-outline font-label-sm text-label-sm">Publicado en El Peruano • 02/10/2026</span>
+</div>
+</div>
+<a class="p-1 text-on-surface-variant hover:text-secondary transition-colors" href="#" title="Ver norma en línea">
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+</a>
+</div>
+<div class="flex items-center justify-between p-2 bg-surface-container-low hover:bg-surface-container-highest rounded transition-colors group">
+<div class="flex items-center gap-space-sm min-w-0">
+<span class="material-symbols-outlined text-[20px] text-secondary">verified</span>
+<div class="flex flex-col min-w-0">
+<span class="text-on-surface font-body-sm text-body-sm font-medium truncate">Decreto Supremo N° 017-2020-PRODUCE - Reglamento Pesquero</span>
+<span class="text-outline font-label-sm text-label-sm">Marco General • Consolidado</span>
+</div>
+</div>
+<a class="p-1 text-on-surface-variant hover:text-secondary transition-colors" href="#" title="Ver norma en línea">
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+</a>
+</div>
+<div class="flex items-center justify-between p-2 bg-surface-container-low hover:bg-surface-container-highest rounded transition-colors group">
+<div class="flex items-center gap-space-sm min-w-0">
+<span class="material-symbols-outlined text-[20px] text-secondary">verified</span>
+<div class="flex flex-col min-w-0">
+<span class="text-on-surface font-body-sm text-body-sm font-medium truncate">Directiva OAIPCS N° 002-2025: Protocolo de Intervención Temprana</span>
+<span class="text-outline font-label-sm text-label-sm">Vigente • Directiva Institucional</span>
+</div>
+</div>
+<a class="p-1 text-on-surface-variant hover:text-secondary transition-colors" href="#" title="Ver norma en línea">
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- 5. PIE DEL MODAL -->
+<footer class="bg-surface-container-lowest px-space-lg lg:px-space-xl py-space-md flex items-center justify-between gap-space-md shrink-0">
+<div class="flex items-center gap-space-xs text-on-surface-variant font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[16px] text-outline">lock</span>
+<span>Expediente en custodia de OAIPCS</span>
+</div>
+<div class="flex items-center gap-space-md">
+<button class="px-space-lg py-2 rounded-lg bg-surface-container hover:bg-surface-container-highest text-on-surface font-title-md text-title-md transition-colors" id="btn-footer-close" type="button">
+            Cerrar
+          </button>
+<button class="flex items-center gap-space-xs px-space-xl py-2 rounded-lg bg-primary-container hover:bg-primary-container/90 text-on-primary-container font-title-md text-title-md font-semibold transition-colors shadow-lg" onclick="alert('Abriendo ficha maestra completa del caso CS-PA-OAT-2026-04...')" type="button">
+<span>Abrir ficha completa</span>
+<span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</button>
+</div>
+</footer>
+</div>
+</div>
+<!-- Inline Script for modal interactions and WhatsApp clipboard formatting -->
+<script>
+    (function initCaseDetailModal() {
+      const exportBtn = document.getElementById('btn-export-dropdown');
+      const exportMenu = document.getElementById('export-menu');
+      const whatsappBtn = document.getElementById('btn-copy-whatsapp');
+      const toastCopy = document.getElementById('toast-copy');
+      const closeBtn = document.getElementById('btn-close-modal');
+      const footerCloseBtn = document.getElementById('btn-footer-close');
+      const modalBackdrop = document.getElementById('modal-backdrop');
+
+      // Toggle Export dropdown
+      if (exportBtn && exportMenu) {
+        exportBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          exportMenu.classList.toggle('hidden');
+        });
+
+        document.addEventListener('click', () => {
+          exportMenu.classList.add('hidden');
+        });
+      }
+
+      // WhatsApp Copy handler with exact format specified in prompt:
+      // "- Salas Salas, Maria Luisa - OSPA Del norte - 999 888 777 - marialuisa@gmail.com"
+      if (whatsappBtn) {
+        whatsappBtn.addEventListener('click', async () => {
+          const actors = [
+            "- Fiestas Fiestas, Juan Carlos - SUMOPP - +51 969 412 803 - jfiestas@sumopp.org.pe",
+            "- Querevalú Periche, Santos - SUPNEP - +51 973 881 294 - squerevalu@supnep.pe",
+            "- Mendoza Alarcón, Patricia - PRODUCE DGSFS-PA - +51 945 002 119 - pmendoza@produce.gob.pe",
+            "- Carhuapoma Ramos, Hernán - IMARPE Paita - +51 988 334 102 - hcarhuapoma@imarpe.gob.pe",
+            "- Seminario Morales, Luis Alberto - GORE Piura DIREPRO - +51 969 110 445 - lseminario@regionpiura.gob.pe",
+            "- Chunga Vite, Rosa Elena - Defensoría del Pueblo - +51 999 556 781 - rchunga@defensoria.gob.pe"
+          ];
+
+          const formattedText = "*MAPA DE ACTORES - CASO CS-PA-OAT-2026-04*\n" + actors.join("\n");
+
+          try {
+            await navigator.clipboard.writeText(formattedText);
+            if (toastCopy) {
+              toastCopy.classList.remove('hidden');
+              setTimeout(() => {
+                toastCopy.classList.add('hidden');
+              }, 4000);
+            }
+          } catch (err) {
+            console.error('Error al copiar al portapapeles:', err);
+          }
+          if (exportMenu) exportMenu.classList.add('hidden');
+        });
+      }
+
+      // Dismissal actions
+      function closeModal() {
+        if (modalBackdrop) {
+          modalBackdrop.style.opacity = '0';
+          modalBackdrop.style.transition = 'opacity 0.2s ease';
+          setTimeout(() => {
+            modalBackdrop.classList.add('hidden');
+          }, 200);
+        }
+      }
+
+      if (closeBtn) closeBtn.addEventListener('click', closeModal);
+      if (footerCloseBtn) footerCloseBtn.addEventListener('click', closeModal);
+    })();
+  </script>
+</div></main></div>
+
+</body></html>

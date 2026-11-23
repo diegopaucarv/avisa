@@ -31,6 +31,37 @@
   <p class="form-hint aviso-ok" role="status">{{ aviso }}</p>
   } @if (avisoCreacion(); as aviso) {
   <p class="form-hint aviso-ok" role="status">{{ aviso }}</p>
+  } @if (!verPapelera()) {
+  <div class="executive-kpis">
+    <div class="stat-card">
+      <span class="stat-icon"><app-icono nombre="documentos" [tamano]="16" /></span>
+      <span class="stat-copy">
+        <span>Documentos</span>
+        <strong>{{ total() }}</strong>
+      </span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon"><app-icono nombre="check" [tamano]="16" /></span>
+      <span class="stat-copy">
+        <span>Con estado registrado</span>
+        <strong>{{ conEstado() ?? '—' }}</strong>
+      </span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon amber"><app-icono nombre="reloj" [tamano]="16" /></span>
+      <span class="stat-copy">
+        <span>Sin estado registrado</span>
+        <strong>{{ sinEstado() ?? '—' }}</strong>
+      </span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon green"><app-icono nombre="check" [tamano]="16" /></span>
+      <span class="stat-copy">
+        <span>Validados</span>
+        <strong>{{ validados() ?? '—' }}</strong>
+      </span>
+    </div>
+  </div>
   }
 
   <div class="filter-bar filter-bar-wrap">

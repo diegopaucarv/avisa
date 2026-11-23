@@ -1,0 +1,100 @@
+KML: C:\Users\Julia\Downloads\avisa\gis\Infraestructuras.kml
+Puntos: 13456
+
+Tipos de registro:
+  derecho_acuicola: 13229
+  institucional: 227
+
+Instituciones (IDENTI):
+  ITP: 34
+  DPA - GORE: 30
+  TUEMPRESA: 29
+  PNACP: 27
+  FONDEPES: 27
+  DIREPRO: 26
+  SANIPES: 18
+  IMARPE: 17
+  anexas: 9
+  INACAL: 5
+  RACSO: 1
+  PROINNOVATE: 1
+  PNDP: 1
+  COMP MY PERU: 1
+  DPA -GORE: 1
+
+Derechos acuícolas por ámbito:
+  CONTINENTAL: 12696
+  MARICULTURA: 533
+Por tipo de derecho:
+  AUTORIZACION: 11823
+  CONCESION: 1386
+  CONCESION ESPECIAL: 20
+Por categoría productiva:
+  AREL: 10057
+  AMYPE: 2996
+  AMYGE: 176
+
+Cobertura:
+  Con distrito: 13456
+  Con ubigeo: 13404 de 13456
+  Con titular (PII): 13256
+  Sin geometría: 0
+  Distritos (nombre): 835
+  Distritos (dpto+prov+dist): 872
+  Coordenadas repetidas: 158
+  Lat/lon del globo != Point: 10
+
+Métodos de emparejamiento de ubigeo:
+  exacto: 13372
+  fuera del ubigeo: 51
+  provincia aproximada: 21
+  distrito corregido: 10
+  parecido descartado: 1
+  truncado: 1
+
+Nombres corregidos o canonizados (19):
+  BARRANCA / PUERTO SUPE  ->  BARRANCA / SUPE PUERTO  (distrito corregido)
+  CAJAMARCA / CAJAMRCA  ->  CAJAMARCA / CAJAMARCA  (distrito corregido)
+  CALLAO / BELLAVISTA  ->  PROV. CONST. DEL CALLAO / BELLAVISTA  (provincia aproximada)
+  CALLAO / CALLAO  ->  PROV. CONST. DEL CALLAO / CALLAO  (provincia aproximada)
+  CALLAO / LA PUNTA  ->  PROV. CONST. DEL CALLAO / LA PUNTA  (provincia aproximada)
+  CALLAO / VENTANILLA  ->  PROV. CONST. DEL CALLAO / VENTANILLA  (provincia aproximada)
+  CAMANA / QUILLCA  ->  CAMANA / QUILCA  (distrito corregido)
+  CONTR. VILLAR / ZORRITOS  ->  CONTRALMIRANTE VILLAR / ZORRITOS  (provincia aproximada)
+  HUANUCO / QUISQUI  ->  HUANUCO / QUISQUI (KICHKI)  (truncado)
+  HUAURA / CALETA CARQUIN  ->  HUAURA / CALETA DE CARQUIN  (distrito corregido)
+  LIMA / CERCADO DE LIMA  ->  LIMA / LIMA  (distrito corregido)
+  LMABAYEQUE / SAN JOSE  ->  LAMBAYEQUE / SAN JOSE  (provincia aproximada)
+  LUYA / SAN FRANCISCO DEL YESO  ->  LUYA / SAN FRANCISCO DE YESO  (distrito corregido)
+  NAZCA / MARCONA  ->  NASCA / MARCONA  (provincia aproximada)
+  PASCO / SAN FCO.DE ASIS DE YARUSYACAN  ->  PASCO / SAN FRANCISCO DE ASIS DE YARUSYACAN  (distrito corregido)
+  PIURA / VENTISEIS DE OCTUBRE  ->  PIURA / VEINTISEIS DE OCTUBRE  (distrito corregido)
+  SAN MARTIN / BANDA DE SHILCAYO  ->  SAN MARTIN / LA BANDA DE SHILCAYO  (distrito corregido)
+  TAMBOPATA / PUERTO MALDONADO  ->  TAMBOPATA / TAMBOPATA  (distrito corregido)
+  TARAPOTO / TARAPOTO  ->  SAN MARTIN / TARAPOTO  (provincia aproximada)
+
+Sin ubigeo (7 distritos, 52 puntos):
+  UCAYALI / PADRE ABAD / BOQUERON  (25 puntos)
+  UCAYALI / PADRE ABAD / HUIPOCA  (22 puntos)
+  MOQUEGUA / MARISCAL NIETO / SAN ANTONIO  (1 puntos)
+  AREQUIPA / MATARANI / MATARANI  (1 puntos)
+  JUNIN / SATIPO / MAZAMARI - PANGOA  (1 puntos)
+  AYACUCHO / VICTOR FAJARDO / HUALLA  (1 puntos)
+  AYACUCHO / LA MAR / UNION PROGRESO  (1 puntos)
+
+Especies más frecuentes:
+  TRUCHA: 3155
+  GAMITANA, PACO: 1296
+  PACO: 1292
+  BOQUICHICO, GAMITANA, PACO: 1104
+  BOQUICHICO, GAMITANA, PACO, PAICHE: 984
+  BOQUICHICO, GAMITANA, PACO, TILAPIA DEL NILO: 599
+  BOQUICHICO, GAMITANA, SABALO COLA ROJA: 482
+  CONCHA DE ABANICO: 408
+  GAMITANA, PACO, TILAPIA DEL NILO: 388
+  TILAPIA DEL NILO: 234
+  BOQUICHICO: 210
+  ACARAHUAZU, GAMITANA: 165
+  BOQUICHICO, GAMITANA, PACO, SABALO COLA ROJA: 163
+  GAMITANA, PACO, TILAPIA: 131
+  BOQUICHICO, GAMITANA: 128

@@ -1,6 +1,7 @@
 import { Injectable, computed, inject } from '@angular/core';
 
 import { SesionStore } from '../auth/sesion.store';
+import type { FormatoExportacion } from '../http/descargas';
 
 /**
  * Roles de la base (`core.roles.codigo`).
@@ -61,6 +62,23 @@ const VEN_PII = new Set<string>([
 ]);
 
 /**
+ * Perfiles que conservan las tres salidas de exportación (item 107).
+ *
+ * «Dirección» incluye a quien dirige la oficina y a la alta dirección; el
+ * administrador acumula todos los códigos, así que también cae aquí.
+ */
+const EXPORTA_COMPLETO = new Set<string>([
+  ROL.administrador,
+  ROL.altaDireccion,
+  ROL.direccionOaipcs,
+]);
+
+const FORMATOS_COMPLETOS: readonly FormatoExportacion[] = ['json', 'excel', 'pdf'];
+
+/** El sectorista en campo descarga hoja y PDF; el JSON queda para Dirección. */
+const FORMATOS_SECTORISTA: readonly FormatoExportacion[] = ['excel', 'pdf'];
+
+/**
  * Clasificación de información máxima por rol (1 reservado … 3 confidencial).
  *
  * Réplica de `core.roles.max_clasificacion`. El nivel 3 es el que exige
@@ -94,6 +112,19 @@ export class CapacidadesService {
   readonly puedeEliminar = computed(() => this.roles().some((rol) => ANULAN.has(rol)));
 
   readonly puedeVerPii = computed(() => this.roles().some((rol) => VEN_PII.has(rol)));
+
+  /**
+   * Salidas de exportación que ofrece el perfil (item 107).
+   *
+   * El recorte alcanza al sectorista que no acumula un perfil de dirección: un
+   * usuario con ambos papeles se queda con el conjunto amplio, porque el ADMIN
+   * de la base acumula todos los códigos y no debe perder salidas.
+   */
+  readonly formatosExportacion = computed<readonly FormatoExportacion[]>(() =>
+    this.roles().includes(ROL.sectorista) && !this.roles().some((rol) => EXPORTA_COMPLETO.has(rol))
+      ? FORMATOS_SECTORISTA
+      : FORMATOS_COMPLETOS,
+  );
 
   readonly maxClasificacion = computed(() => {
     const valores = this.roles()

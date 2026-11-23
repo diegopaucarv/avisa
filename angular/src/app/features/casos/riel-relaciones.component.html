@@ -3,11 +3,27 @@
   <ul class="riel-lista">
     @for (enlace of enlaces(); track enlace.ancla) {
       <li>
-        <a class="riel-enlace" [routerLink]="[]" [fragment]="enlace.ancla">
-          <app-icono [nombre]="enlace.icono" [tamano]="14" />
-          <span class="riel-etiqueta">{{ enlace.etiqueta }}</span>
-          <span class="riel-contador">{{ enlace.contador }}</span>
-        </a>
+        @if (enlace.disponible === false) {
+          <span
+            class="riel-enlace riel-no-disponible"
+            aria-disabled="true"
+            [attr.title]="enlace.nota ?? null"
+          >
+            <app-icono [nombre]="enlace.icono" [tamano]="14" />
+            <span class="riel-etiqueta">{{ enlace.etiqueta }}</span>
+            @if (enlace.contador !== null) {
+              <span class="riel-contador">{{ enlace.contador }}</span>
+            }
+          </span>
+        } @else {
+          <a class="riel-enlace" [routerLink]="[]" [fragment]="enlace.ancla">
+            <app-icono [nombre]="enlace.icono" [tamano]="14" />
+            <span class="riel-etiqueta">{{ enlace.etiqueta }}</span>
+            @if (enlace.contador !== null) {
+              <span class="riel-contador">{{ enlace.contador }}</span>
+            }
+          </a>
+        }
       </li>
     }
   </ul>

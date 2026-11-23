@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="es"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{colors:{"on-secondary-container":"#00452e","secondary-container":"#00bd85","tertiary-fixed-dim":"#cebdff","surface-container-high":"#232b34","inverse-surface":"#dbe3f0","surface-dim":"#0c141d","primary-fixed-dim":"#a8c8ff","surface-variant":"#2d353f","tertiary":"#cebdff","primary-container":"#6ea8fe","on-tertiary-fixed":"#21005e","surface-bright":"#323a44","surface-container-lowest":"#070f18","on-primary-container":"#003c76","surface-container-low":"#141c25","on-surface-variant":"#c2c6d3","on-primary-fixed":"#001b3c","background":"#0c141d","on-surface":"#dbe3f0","inverse-on-surface":"#29313b","on-primary":"#003061","on-secondary":"#003825","inverse-primary":"#115eaf","outline":"#8c919d","surface-container":"#18202a","primary":"#a8c8ff","secondary":"#45dfa4","secondary-fixed-dim":"#45dfa4","surface":"#0c141d","on-tertiary-fixed-variant":"#4f319c","tertiary-fixed":"#e8ddff","on-tertiary":"#381385","on-tertiary-container":"#442491","tertiary-container":"#b196ff","on-error-container":"#ffdad6","on-secondary-fixed":"#002114","surface-tint":"#a8c8ff","on-primary-fixed-variant":"#004689","primary-fixed":"#d5e3ff","outline-variant":"#424751","on-secondary-fixed-variant":"#005137","error":"#ffb4ab","error-container":"#93000a","secondary-fixed":"#68fcbf","on-error":"#690005","on-background":"#dbe3f0","surface-container-highest":"#2d353f"},borderRadius:{DEFAULT:"0.125rem",lg:"0.25rem",xl:"0.5rem",full:"0.75rem"},spacing:{"space-sm":"0.5rem","space-lg":"1rem","space-xl":"1.5rem",gutter:"1rem","margin-desktop":"2rem","gutter-desktop":"1.5rem","space-xs":"0.25rem",margin:"1rem","space-md":"0.75rem"},fontFamily:{"headline-lg":["Inter"],"label-sm":["Inter"],"data-tabular":["Inter"],"headline-md":["Inter"],"display-lg-mobile":["Inter"],"headline-sm":["Inter"],"body-md":["Inter"],"title-md":["Inter"],"display-lg":["Inter"],"body-lg":["Inter"],"body-sm":["Inter"],"label-md":["Inter"]},fontSize:{"headline-lg":["24px",{lineHeight:"32px",letterSpacing:"-0.01em",fontWeight:"600"}],"label-sm":["11px",{lineHeight:"14px",letterSpacing:"0.03em",fontWeight:"500"}],"data-tabular":["13px",{lineHeight:"18px",letterSpacing:"0",fontWeight:"500"}],"headline-md":["20px",{lineHeight:"28px",fontWeight:"600"}],"display-lg-mobile":["24px",{lineHeight:"32px",letterSpacing:"-0.01em",fontWeight:"700"}],"headline-sm":["16px",{lineHeight:"24px",fontWeight:"600"}],"body-md":["14px",{lineHeight:"20px",fontWeight:"400"}],"title-md":["14px",{lineHeight:"20px",fontWeight:"600"}],"display-lg":["32px",{lineHeight:"40px",letterSpacing:"-0.02em",fontWeight:"700"}],"body-lg":["16px",{lineHeight:"24px",fontWeight:"400"}],"body-sm":["13px",{lineHeight:"18px",fontWeight:"400"}],"label-md":["12px",{lineHeight:"16px",letterSpacing:"0.02em",fontWeight:"600"}]}}}}</script></head><body class="bg-surface font-body-md text-on-surface antialiased selection:bg-primary-container selection:text-on-primary-container relative min-h-screen overflow-x-hidden"><aside class="fixed left-0 top-0 h-full w-64 bg-surface-container-low z-50 flex flex-col justify-between border-r border-outline-variant/40"><div class="flex flex-col"><div class="px-space-lg py-space-lg flex items-center gap-space-md border-b border-outline-variant/30"><div class="w-9 h-9 rounded-lg bg-primary-container flex items-center justify-center shrink-0 shadow-sm"><span class="material-symbols-outlined text-on-primary-container text-[22px]">shield_with_house</span></div><div class="flex flex-col min-w-0"><div class="flex items-center gap-space-xs"><span class="font-headline-sm text-headline-sm text-primary-container tracking-wider font-bold">AVISA</span><span class="px-1.5 py-0.5 rounded bg-surface-container-high text-label-sm font-label-sm text-secondary">v2.4</span></div><span class="font-label-sm text-label-sm text-on-surface-variant truncate">OAIPCS · PRODUCE - Perú</span></div></div><div class="px-space-md pt-space-md pb-space-xs"><span class="font-label-sm text-label-sm uppercase tracking-wider text-outline px-space-sm font-semibold">Monitoreo Sectorial</span></div><nav class="flex flex-col gap-0.5 px-space-sm" data-active-classes="bg-surface-container-high text-primary font-title-md border-l-2 border-primary-container"><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-body-md font-body-md text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="panorama-territorial" href="#"><span class="material-symbols-outlined text-[20px]">map</span><span>Panorama territorial</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-body-md font-body-md text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="resumen-operativo" href="#"><span class="material-symbols-outlined text-[20px]">analytics</span><span>Resumen operativo</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-body-md font-body-md text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="bandeja-de-trabajo" href="#"><span class="material-symbols-outlined text-[20px]">inbox</span><span>Bandeja de trabajo</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-body-md font-body-md text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="casos" href="#"><span class="material-symbols-outlined text-[20px]">folder_open</span><span>Casos</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-body-md font-body-md text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="alertas-tempranas" href="#"><span class="material-symbols-outlined text-[20px]">notification_important</span><span>Alertas tempranas</span></a><a aria-current="page" class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg transition-colors bg-surface-container-high text-primary font-title-md border-l-2 border-primary-container" data-path="actores" href="#"><span class="material-symbols-outlined text-[20px] text-primary">groups</span><span class="text-white font-medium">Actores</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-body-md font-body-md text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="compromisos" href="#"><span class="material-symbols-outlined text-[20px]">fact_check</span><span>Compromisos</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-body-md font-body-md text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="documentos" href="#"><span class="material-symbols-outlined text-[20px]">description</span><span>Documentos</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-body-md font-body-md text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="reportes" href="#"><span class="material-symbols-outlined text-[20px]">assessment</span><span>Reportes</span></a></nav></div><div class="p-space-md border-t border-outline-variant/30 bg-surface-container-lowest/50"><div class="flex items-center gap-space-sm"><div class="relative"><div class="w-8 h-8 rounded-full bg-surface-container-highest flex items-center justify-center"><span class="material-symbols-outlined text-primary text-[18px]">badge</span></div><span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-secondary ring-2 ring-surface-container-low"></span></div><div class="flex flex-col min-w-0 flex-1"><span class="font-label-md text-label-md text-on-surface truncate">Ing. R. Huamán</span><span class="font-label-sm text-label-sm text-on-surface-variant truncate">Especialista OAIPCS · PRODUCE</span></div></div></div></aside><div class="pl-64 flex flex-col min-h-screen"><header class="fixed top-0 left-64 right-0 h-14 bg-surface/90 backdrop-blur-xl border-b border-outline-variant/30 z-40"><div class="h-14 w-full px-gutter-desktop flex items-center justify-between"><div class="flex items-center gap-space-md"><span class="font-label-sm text-label-sm uppercase tracking-wider text-outline">Ministerio de la Producción • Perú</span><span class="text-outline-variant">|</span><div class="flex items-center gap-space-xs text-secondary font-label-sm text-label-sm"><span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span><span>Vigía Operativo Activo</span></div></div><div class="flex items-center gap-space-lg"><div class="flex items-center bg-surface-container-lowest border border-outline-variant/40 rounded px-space-md py-1 w-72"><span class="material-symbols-outlined text-outline text-[18px] mr-space-xs">search</span><span class="font-body-sm text-body-sm text-outline truncate">Buscar alerta, caso o RUC...</span></div><div class="flex items-center gap-space-sm"><button class="w-8 h-8 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">tune</span></button><button class="w-8 h-8 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors relative" type="button"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-error rounded-full"></span></button></div><div class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-semibold"><span class="material-symbols-outlined text-[18px]">person</span></div></div></div></header><main class="w-full pt-14 bg-surface flex-1"><div class="flex flex-col w-full relative"><div class="w-full max-w-[1520px] mx-auto px-margin-desktop py-space-xl flex flex-col gap-space-lg">
+<!-- 1. ENCABEZADO INSTITUCIONAL -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm">
+<div class="flex flex-col gap-0.5">
+<div class="flex items-center gap-space-sm">
+<h1 class="font-headline-lg text-headline-lg text-white font-bold tracking-tight">Actores</h1>
+<span class="px-2 py-0.5 rounded bg-surface-container-high text-primary font-data-tabular text-label-sm">1,160 actores</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">Directorio sectorial y actores clave de la conflictividad socioambiental pesquera e industrial</p>
+</div>
+<div class="flex items-center gap-space-sm self-start sm:self-auto">
+<div class="relative">
+<button class="h-9 px-space-md rounded bg-surface-container hover:bg-surface-variant text-on-surface font-title-md text-body-sm flex items-center gap-1.5 transition-colors shadow-sm" id="btn-export-main" type="button">
+<span class="material-symbols-outlined text-[18px] text-outline">file_download</span>
+<span>Exportar</span>
+<span class="material-symbols-outlined text-[16px] text-outline -mr-1">arrow_drop_down</span>
+</button>
+</div>
+<button class="h-9 px-space-md rounded bg-primary-container hover:bg-[#8ebbfe] text-on-primary-container font-title-md text-body-sm flex items-center gap-1.5 transition-colors shadow-sm font-semibold" id="btn-toggle-drawer" type="button">
+<span class="material-symbols-outlined text-[19px]">checklist</span>
+<span>Lista temporal (3)</span>
+<span class="w-2 h-2 rounded-full bg-primary-container ring-2 ring-white"></span>
+</button>
+</div>
+</div>
+<!-- 2. BARRA DE FILTROS EN FILA ÚNICA -->
+<div class="w-full bg-surface-container-low rounded-lg p-space-sm flex flex-col sm:flex-row items-stretch sm:items-center gap-space-sm shadow-sm border border-outline-variant/30">
+<!-- Buscador -->
+<div class="relative flex-1">
+<div class="h-9 w-full bg-surface-container-lowest rounded px-space-md flex items-center gap-space-xs text-body-sm text-on-surface border border-outline-variant/30 focus-within:border-primary-container transition-colors">
+<span class="material-symbols-outlined text-outline text-[18px] shrink-0">search</span>
+<input class="w-full bg-transparent text-white placeholder-outline text-body-sm focus:outline-none" placeholder="Buscar por nombre, organización o cargo..." type="text"/>
+</div>
+</div>
+<!-- Selector de Región -->
+<div class="relative sm:w-60 shrink-0">
+<div class="relative h-9 w-full bg-surface-container-lowest rounded border border-outline-variant/30 flex items-center">
+<select class="w-full h-full px-space-md appearance-none bg-transparent text-body-sm text-on-surface focus:outline-none cursor-pointer pr-8 font-body-md">
+<option class="bg-surface-container-low text-white" value="">Región: Todas</option>
+<option class="bg-surface-container-low text-white" value="callao">Callao</option>
+<option class="bg-surface-container-low text-white" value="lima">Lima</option>
+<option class="bg-surface-container-low text-white" value="piura">Piura</option>
+<option class="bg-surface-container-low text-white" value="tacna">Tacna</option>
+<option class="bg-surface-container-low text-white" value="tumbes">Tumbes</option>
+</select>
+<span class="material-symbols-outlined absolute right-2.5 top-2 pointer-events-none text-outline text-[18px]">arrow_drop_down</span>
+</div>
+</div>
+<!-- Botón Limpiar filtros -->
+<button class="h-9 px-space-md text-label-md font-label-md text-outline hover:text-primary rounded transition-colors whitespace-nowrap flex items-center justify-center gap-1" type="button">
+<span class="material-symbols-outlined text-[16px]">restart_alt</span>
+<span>Limpiar filtros</span>
+</button>
+</div>
+<!-- 3. INDICADORES SUPERIORES DE TABLA -->
+<div class="flex items-center justify-between px-space-xs text-outline text-body-sm">
+<span class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-primary">touch_app</span>
+        Pulse una fila para abrir la ficha del actor.
+      </span>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline">Orden: Alfabético por apellidos</span>
+</div>
+<!-- 4. TABLA PRINCIPAL DE ACTORES CON CONTACTO UNIFICADO Y MÁS AIRE -->
+<div class="w-full bg-surface-container-low rounded-lg border border-outline-variant/30 overflow-hidden shadow-sm">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container border-b border-outline-variant/30 text-on-surface-variant font-label-md text-label-md uppercase tracking-wider">
+<th class="py-3 pl-space-md pr-2 w-14 font-semibold text-outline" scope="col">Foto</th>
+<th class="py-3 px-space-md font-semibold text-outline" scope="col">Apellidos y Nombres</th>
+<th class="py-3 px-space-md font-semibold text-outline" scope="col">Teléfono / Correo</th>
+<th class="py-3 px-space-md font-semibold text-outline" scope="col">Organización / Institución</th>
+<th class="py-3 px-space-md font-semibold text-outline" scope="col">Región</th>
+<th class="py-3 pl-space-md pr-space-lg text-right font-semibold text-outline" scope="col">Acciones</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/20 text-body-md font-body-md">
+<!-- FILA 1: Quispe Ramos (En lista temporal) -->
+<tr class="hover:bg-surface-container/60 transition-colors cursor-pointer group bg-surface-container/20">
+<td class="py-3.5 pl-space-md pr-2 align-middle">
+<img class="w-10 h-10 rounded-full object-cover ring-1 ring-primary/40 shadow-sm" data-alt="Retrato fotográfico de pescador artesanal peruano de 50 años con camisa azul marino y expresión atenta, iluminación natural sobria de oficina institucional PRODUCE." src="https://lh3.googleusercontent.com/aida-public/AB6AXuADVaxRaD5ntm_70TCjrN8TaAcll21PgeftCvirUnxfkRVS3vZW1AwNY6BhCmFbtR-D7-9Imz_OQavRFMMqFvn2JS4loxk0QSQIoPFg-rpUlljR6xh2hddIRT2eQpC62dCfyNZLKge-65_WREMRDuKDAcBmbYpxD_8peEO0VUcnPbjFK4Il2YC3yV0smYtUXoaSZgqgvW4VyBSSvsxD55OLwVQXeH-mKXzrapT7GQ1P"/>
+</td>
+<td class="py-3.5 px-space-md align-middle">
+<div class="text-[15px] font-bold text-white group-hover:text-primary transition-colors leading-tight">Quispe Ramos,</div>
+<div class="text-[14px] font-semibold text-on-surface leading-tight">Juan Carlos</div>
+</td>
+<td class="py-3.5 px-space-md align-middle">
+<div class="font-data-tabular font-medium text-white text-[13px] tracking-wide">+51 952 841 029</div>
+<div class="text-[12px] text-primary/80 font-normal truncate max-w-[220px]" title="jcquispe@pescavila.pe">jcquispe@pescavila.pe</div>
+</td>
+<td class="py-3.5 px-space-md align-middle leading-tight">
+<div class="font-medium text-white max-w-sm truncate" title="Asoc. de Propietarios de Embarcaciones de Pesca Artesanal de Vila Vila">
+                    Asoc. de Propietarios de Embarcaciones de Vila Vila
+                  </div>
+<div class="text-label-sm text-outline mt-0.5">Presidente</div>
+</td>
+<td class="py-3.5 px-space-md align-middle whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded bg-surface-container text-on-surface text-[12px] font-medium border border-outline-variant/30">Tacna</span>
+</td>
+<td class="py-3.5 pl-space-md pr-space-lg align-middle text-right whitespace-nowrap">
+<div class="inline-flex items-center gap-1.5" onclick="event.stopPropagation()">
+<button class="w-8 h-8 flex items-center justify-center rounded bg-surface-container-lowest/60 text-outline hover:text-white hover:bg-surface-container transition-colors" title="Ver ficha" type="button">
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+</button>
+<button class="w-8 h-8 flex items-center justify-center rounded bg-surface-container-lowest/60 text-outline hover:text-white hover:bg-surface-container transition-colors" title="Editar" type="button">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<button class="w-8 h-8 flex items-center justify-center rounded bg-primary-container text-on-primary-container font-bold shadow-sm" title="En lista temporal" type="button">
+<span class="material-symbols-outlined text-[18px]">check</span>
+</button>
+<button class="w-8 h-8 flex items-center justify-center rounded bg-surface-container-lowest/60 text-outline hover:text-error hover:bg-error-container/30 transition-colors" title="Eliminar" type="button">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- FILA 2: Fiestas Fiestas (En lista temporal) -->
+<tr class="hover:bg-surface-container/60 transition-colors cursor-pointer group bg-surface-container/20">
+<td class="py-3.5 pl-space-md pr-2 align-middle">
+<div class="w-10 h-10 rounded-full bg-surface-container-high ring-1 ring-primary/40 flex items-center justify-center text-primary font-title-md font-bold text-sm shadow-sm">
+                    SF
+                  </div>
+</td>
+<td class="py-3.5 px-space-md align-middle">
+<div class="text-[15px] font-bold text-white group-hover:text-primary transition-colors leading-tight">Fiestas Fiestas,</div>
+<div class="text-[14px] font-semibold text-on-surface leading-tight">Santos Alberto</div>
+</td>
+<td class="py-3.5 px-space-md align-middle">
+<div class="font-data-tabular font-medium text-white text-[13px] tracking-wide">+51 969 412 803</div>
+<div class="text-[12px] text-primary/80 font-normal truncate max-w-[220px]" title="sfiestas@sumopp.org.pe">sfiestas@sumopp.org.pe</div>
+</td>
+<td class="py-3.5 px-space-md align-middle leading-tight">
+<div class="font-medium text-white max-w-sm truncate" title="Sindicato Único de Motoristas y Oficiales de Pesca del Perú - SUMOPP">
+                    Sindicato Único de Motoristas y Oficiales (SUMOPP)
+                  </div>
+<div class="text-label-sm text-outline mt-0.5">Secretario General</div>
+</td>
+<td class="py-3.5 px-space-md align-middle whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded bg-surface-container text-on-surface text-[12px] font-medium border border-outline-variant/30">Piura</span>
+</td>
+<td class="py-3.5 pl-space-md pr-space-lg align-middle text-right whitespace-nowrap">
+<div class="inline-flex items-center gap-1.5" onclick="event.stopPropagation()">
+<button class="w-8 h-8 flex items-center justify-center rounded bg-surface-container-lowest/60 text-outline hover:text-white hover:bg-surface-container transition-colors" title="Ver ficha" type="button">
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+</button>
+<button class="w-8 h-8 flex items-center justify-center rounded bg-surface-container-lowest/60 text-outline hover:text-white hover:bg-surface-container transition-colors" title="Editar" type="button">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<button class="w-8 h-8 flex items-center justify-center rounded bg-primary-container text-on-primary-container font-bold shadow-sm" title="En lista temporal" type="button">
+<span class="material-symbols-outlined text-[18px]">check</span>
+</button>
+<button class="w-8 h-8 flex items-center justify-center rounded bg-surface-container-lowest/60 text-outline hover:text-error hover:bg-error-container/30 transition-colors" title="Eliminar" type="button">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- FILA 3: Mendoza Alarcón (En lista temporal) -->
+<tr class="hover:bg-surface-container/60 transition-colors cursor-pointer group bg-surface-container/20">
+<td class="py-3.5 pl-space-md pr-2 align-middle">
+<img class="w-10 h-10 rounded-full object-cover ring-1 ring-primary/40 shadow-sm" data-alt="Retrato formal de mujer profesional peruana de 42 años vestida con saco sastre azul marino, fondo sobrio institucional gris claro del Ministerio de la Producción." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC7r1V4Msaa7Y38mf0k3LAljZOyU3ACffV8bjYqHtu80ID3UkA3V9R8Jc-bs0O-1uLa66HoKbPNlhvR_LKvKRONWFOQS4sN37FdxWcJnvUTj92ggRcjRt4D6zc3bMlFCgqgGNTmIjX6_ZNLKL-IrAcoSpM0vmopXKcf0LgJi1gzYNdlbbuTPrFsub1El9kIYSmS6WcLwZ0gg-u0stDYwWafJ-oq2Y97pjNfrCOaJD_N"/>
+</td>
+<td class="py-3.5 px-space-md align-middle">
+<div class="text-[15px] font-bold text-white group-hover:text-primary transition-colors leading-tight">Mendoza Alarcón,</div>
+<div class="text-[14px] font-semibold text-on-surface leading-tight">Patricia Elena</div>
+</td>
+<td class="py-3.5 px-space-md align-middle">
+<div class="font-data-tabular font-medium text-white text-[13px] tracking-wide">+51 945 102 774</div>
+<div class="text-[12px] text-primary/80 font-normal truncate max-w-[220px]" title="pmendoza@regionpiura.gob.pe">pmendoza@regionpiura.gob.pe</div>
+</td>
+<td class="py-3.5 px-space-md align-middle leading-tight">
+<div class="font-medium text-white max-w-sm truncate" title="GORE Piura - DIREPRO">
+                    GORE Piura - DIREPRO
+                  </div>
+<div class="text-label-sm text-outline mt-0.5">Directora Regional</div>
+</td>
+<td class="py-3.5 px-space-md align-middle whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded bg-surface-container text-on-surface text-[12px] font-medium border border-outline-variant/30">Piura</span>
+</td>
+<td class="py-3.5 pl-space-md pr-space-lg align-middle text-right whitespace-nowrap">
+<div class="inline-flex items-center gap-1.5" onclick="event.stopPropagation()">
+<button class="w-8 h-8 flex items-center justify-center rounded bg-surface-container-lowest/60 text-outline hover:text-white hover:bg-surface-container transition-colors" title="Ver ficha" type="button">
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+</button>
+<button class="w-8 h-8 flex items-center justify-center rounded bg-surface-container-lowest/60 text-outline hover:text-white hover:bg-surface-container transition-colors" title="Editar" type="button">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<button class="w-8 h-8 flex items-center justify-center rounded bg-primary-container text-on-primary-container font-bold shadow-sm" title="En lista temporal" type="button">
+<span class="material-symbols-outlined text-[18px]">check</span>
+</button>
+<button class="w-8 h-8 flex items-center justify-center rounded bg-surface-container-lowest/60 text-outline hover:text-error hover:bg-error-container/30 transition-colors" title="Eliminar" type="button">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- FILA 4: Carhuapoma Ramos -->
+<tr class="hover:bg-surface-container/60 transition-colors cursor-pointer group">
+<td class="py-3.5 pl-space-md pr-2 align-middle">
+<div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-primary font-title-md font-bold text-sm shadow-sm">
+                    HC
+                  </div>
+</td>
+<td class="py-3.5 px-space-md align-middle">
+<div class="text-[15px] font-bold text-white group-hover:text-primary transition-colors leading-tight">Carhuapoma Ramos,</div>
+<div class="text-[14px] font-semibold text-on-surface leading-tight">Hernán Darío</div>
+</td>
+<td class="py-3.5 px-space-md align-middle">
+<div class="font-data-tabular font-medium text-white text-[13px] tracking-wide">+51 987 334 912</div>
+<div class="text-[12px] text-outline font-normal truncate max-w-[220px]" title="hcarhuapoma@imarpe.gob.pe">hcarhuapoma@imarpe.gob.pe</div>
+</td>
+<td class="py-3.5 px-space-md align-middle leading-tight">
+<div class="font-medium text-white max-w-sm truncate" title="IMARPE - Sede Central Callao">
+                    IMARPE - Sede Central Callao
+                  </div>
+<div class="text-label-sm text-outline mt-0.5">Investigador Científico Senior</div>
+</td>
+<td class="py-3.5 px-space-md align-middle whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded bg-surface-container text-on-surface text-[12px] font-medium border border-outline-variant/30">Callao</span>
+</td>
+<td class="py-3.5 pl-space-md pr-space-lg align-middle text-right whitespace-nowrap">
+<div class="inline-flex items-center gap-1.5" onclick="event.stopPropagation()">
+<button class="w-8 h-8 flex items-center justify-center rounded bg-surface-container-lowest/60 text-outline hover:text-white hover:bg-surface-container transition-colors" title="Ver ficha" type="button">
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+</button>
+<button class="w-8 h-8 flex items-center justify-center rounded bg-surface-container-lowest/60 text-outline hover:text-white hover:bg-surface-container transition-colors" title="Editar" type="button">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<button class="w-8 h-8 flex items-center justify-center rounded bg-surface-container-lowest/60 text-outline hover:text-primary hover:bg-surface-container transition-colors" title="Agregar a lista temporal" type="button">
+<span class="material-symbols-outlined text-[18px]">more_time</span>
+</button>
+<button class="w-8 h-8 flex items-center justify-center rounded bg-surface-container-lowest/60 text-outline hover:text-error hover:bg-error-container/30 transition-colors" title="Eliminar" type="button">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- FILA 5: Seminario Morales -->
+<tr class="hover:bg-surface-container/60 transition-colors cursor-pointer group">
+<td class="py-3.5 pl-space-md pr-2 align-middle">
+<img class="w-10 h-10 rounded-full object-cover ring-1 ring-outline-variant/30 shadow-sm" data-alt="Fotografía tipo carnet institucional de funcionario público peruano de 48 años con corbata sobria y camisa blanca, iluminación difusa suave de estudio gubernamental." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD2RcrWkB3kQqn75vujH_RxpmHeokv3aFc3fgY2yAMVjioCmqbu2daKouMNW0BI-tfwlEN2n84pwmBr-ZcgdsqN_Yg2BcltXHfAI2qchxYv6hz2aVYZgAUN8vuLnJzF1ZjCv0NMpBp_-giHpwLVdjCRN6E8eGQR4G3u60f-j_KrRw-BjDG3dYTERcar6MhEsrDJjccpgySxOq-vm9fKmVTMGAV_INQyD04XgDe9g-sm"/>
+</td>
+<td class="py-3.5 px-space-md align-middle">
+<div class="text-[15px] font-bold text-white group-hover:text-primary transition-colors leading-tight">Seminario Morales,</div>
+<div class="text-[14px] font-semibold text-on-surface leading-tight">Luis Alberto</div>
+</td>
+<td class="py-3.5 px-space-md align-middle">
+<div class="font-data-tabular font-medium text-white text-[13px] tracking-wide">+51 971 650 348</div>
+<div class="text-[12px] text-outline font-normal truncate max-w-[220px]" title="lseminario@defensoria.gob.pe">lseminario@defensoria.gob.pe</div>
+</td>
+<td class="py-3.5 px-space-md align-middle leading-tight">
+<div class="font-medium text-white max-w-sm truncate" title="Defensoría del Pueblo - Oficina Defensorial de Piura">
+                    Defensoría del Pueblo - O.D. Piura
+                  </div>
+<div class="text-label-sm text-outline mt-0.5">Comisionado para Conflictos Sociales</div>
+</td>
+<td class="py-3.5 px-space-md align-middle whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded bg-surface-container text-on-surface text-[12px] font-medium border border-outline-variant/30">Piura</span>
+</td>
+<td class="py-3.5 pl-space-md pr-space-lg align-middle text-right whitespace-nowrap">
+<div class="inline-flex items-center gap-1.5" onclick="event.stopPropagation()">
+<button class="w-8 h-8 flex items-center justify-center rounded bg-surface-container-lowest/60 text-outline hover:text-white hover:bg-surface-container transition-colors" title="Ver ficha" type="button">
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+</button>
+<button class="w-8 h-8 flex items-center justify-center rounded bg-surface-container-lowest/60 text-outline hover:text-white hover:bg-surface-container transition-colors" title="Editar" type="button">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<button class="w-8 h-8 flex items-center justify-center rounded bg-surface-container-lowest/60 text-outline hover:text-primary hover:bg-surface-container transition-colors" title="Agregar a lista temporal" type="button">
+<span class="material-symbols-outlined text-[18px]">more_time</span>
+</button>
+<button class="w-8 h-8 flex items-center justify-center rounded bg-surface-container-lowest/60 text-outline hover:text-error hover:bg-error-container/30 transition-colors" title="Eliminar" type="button">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- FILA 6: Chunga Vite -->
+<tr class="hover:bg-surface-container/60 transition-colors cursor-pointer group">
+<td class="py-3.5 pl-space-md pr-2 align-middle">
+<div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-primary font-title-md font-bold text-sm shadow-sm">
+                    RC
+                  </div>
+</td>
+<td class="py-3.5 px-space-md align-middle">
+<div class="text-[15px] font-bold text-white group-hover:text-primary transition-colors leading-tight">Chunga Vite,</div>
+<div class="text-[14px] font-semibold text-on-surface leading-tight">Rosa Elena</div>
+</td>
+<td class="py-3.5 px-space-md align-middle">
+<div class="font-data-tabular font-medium text-white text-[13px] tracking-wide">+51 972 581 290</div>
+<div class="text-[12px] text-outline font-normal truncate max-w-[220px]" title="echunga@federacionnacional.pe">echunga@federacionnacional.pe</div>
+</td>
+<td class="py-3.5 px-space-md align-middle leading-tight">
+<div class="font-medium text-white max-w-sm truncate" title="Federación de Pescadores Artesanales de la Región Tumbes">
+                    Federación de Pescadores Artesanales de Tumbes
+                  </div>
+<div class="text-label-sm text-outline mt-0.5">Secretaria de Actas</div>
+</td>
+<td class="py-3.5 px-space-md align-middle whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded bg-surface-container text-on-surface text-[12px] font-medium border border-outline-variant/30">Tumbes</span>
+</td>
+<td class="py-3.5 pl-space-md pr-space-lg align-middle text-right whitespace-nowrap">
+<div class="inline-flex items-center gap-1.5" onclick="event.stopPropagation()">
+<button class="w-8 h-8 flex items-center justify-center rounded bg-surface-container-lowest/60 text-outline hover:text-white hover:bg-surface-container transition-colors" title="Ver ficha" type="button">
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+</button>
+<button class="w-8 h-8 flex items-center justify-center rounded bg-surface-container-lowest/60 text-outline hover:text-white hover:bg-surface-container transition-colors" title="Editar" type="button">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<button class="w-8 h-8 flex items-center justify-center rounded bg-surface-container-lowest/60 text-outline hover:text-primary hover:bg-surface-container transition-colors" title="Agregar a lista temporal" type="button">
+<span class="material-symbols-outlined text-[18px]">more_time</span>
+</button>
+<button class="w-8 h-8 flex items-center justify-center rounded bg-surface-container-lowest/60 text-outline hover:text-error hover:bg-error-container/30 transition-colors" title="Eliminar" type="button">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- PAGINACIÓN INFERIOR INSTITUCIONAL -->
+<footer class="p-space-sm bg-surface-container flex flex-col sm:flex-row items-center justify-between gap-space-sm border-t border-outline-variant/30">
+<div class="flex items-center gap-space-md">
+<span class="font-body-sm text-body-sm text-on-surface-variant">
+            Mostrando <strong class="text-white font-medium">1 a 6</strong> de <strong class="text-white font-medium">1,160</strong> registros
+          </span>
+</div>
+<div class="flex items-center gap-1">
+<button class="w-8 h-8 rounded bg-surface-container-lowest text-outline hover:text-white flex items-center justify-center transition-colors disabled:opacity-40" disabled="" type="button">
+<span class="material-symbols-outlined text-[18px]">chevron_left</span>
+</button>
+<button class="w-8 h-8 rounded bg-primary-container text-on-primary-container font-title-md text-label-md flex items-center justify-center font-bold" type="button">1</button>
+<button class="w-8 h-8 rounded bg-surface-container-lowest text-on-surface-variant hover:text-white font-title-md text-label-md flex items-center justify-center transition-colors" type="button">2</button>
+<button class="w-8 h-8 rounded bg-surface-container-lowest text-on-surface-variant hover:text-white font-title-md text-label-md flex items-center justify-center transition-colors" type="button">3</button>
+<span class="px-1.5 text-outline text-body-sm">...</span>
+<button class="w-8 h-8 rounded bg-surface-container-lowest text-on-surface-variant hover:text-white font-title-md text-label-md flex items-center justify-center transition-colors" type="button">194</button>
+<button class="w-8 h-8 rounded bg-surface-container-lowest text-outline hover:text-white flex items-center justify-center transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">chevron_right</span>
+</button>
+</div>
+</footer>
+</div>
+</div>
+<!-- 5. VENTANA FLOTANTE (FLOATING WINDOW / OVERLAY CARD) PARA 'LISTA TEMPORAL' -->
+<div class="fixed top-20 right-8 w-96 max-w-[calc(100vw-2rem)] bg-[#141c25]/95 backdrop-blur-xl border border-outline-variant/60 rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.6)] z-50 flex flex-col transition-all duration-300 transform" id="panel-lista-temporal">
+<!-- Header Ventana Flotante -->
+<div class="p-space-md border-b border-outline-variant/40 flex items-center justify-between bg-surface-container-low/70 rounded-t-xl">
+<div class="flex items-center gap-space-xs">
+<div class="w-7 h-7 rounded bg-primary-container/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-[18px]">checklist</span>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<h2 class="font-headline-sm text-headline-sm text-white font-bold tracking-tight text-[15px]">Lista temporal</h2>
+<span class="font-label-sm text-label-sm bg-primary-container text-on-primary-container px-2 py-0.2 rounded-full font-bold">3</span>
+</div>
+<p class="font-label-sm text-label-sm text-outline">Selección activa para convocatoria</p>
+</div>
+</div>
+<button class="w-7 h-7 flex items-center justify-center rounded-lg text-outline hover:text-white hover:bg-surface-container transition-colors" id="btn-close-drawer" title="Cerrar ventana" type="button">
+<span class="material-symbols-outlined text-[18px]">close</span>
+</button>
+</div>
+<!-- Cuerpo: Lista de actores en tarjeta flotante -->
+<div class="p-space-sm space-y-space-xs max-h-[380px] overflow-y-auto">
+<!-- Actor 1 -->
+<div class="p-2.5 rounded-lg bg-surface-container/60 hover:bg-surface-container border border-outline-variant/30 flex items-start gap-space-sm group transition-colors">
+<div class="w-5 h-5 rounded-full bg-surface-container-high flex items-center justify-center text-primary font-label-sm text-label-sm font-bold shrink-0 mt-0.5">
+            1
+          </div>
+<div class="flex-1 min-w-0">
+<div class="font-semibold text-white text-[13px] truncate" title="Quispe Ramos, Juan Carlos">
+              Quispe Ramos, Juan Carlos
+            </div>
+<div class="text-[12px] text-on-surface font-medium truncate">
+              Presidente
+            </div>
+<div class="text-[11px] text-outline truncate" title="Asoc. de Propietarios de Embarcaciones de Pesca Artesanal de Vila Vila">
+              Asoc. de Propietarios de Embarcaciones...
+            </div>
+</div>
+<button class="w-6 h-6 flex items-center justify-center rounded text-outline hover:text-error hover:bg-surface-container-highest transition-colors shrink-0" title="Quitar de la lista" type="button">
+<span class="material-symbols-outlined text-[16px]">close</span>
+</button>
+</div>
+<!-- Actor 2 -->
+<div class="p-2.5 rounded-lg bg-surface-container/60 hover:bg-surface-container border border-outline-variant/30 flex items-start gap-space-sm group transition-colors">
+<div class="w-5 h-5 rounded-full bg-surface-container-high flex items-center justify-center text-primary font-label-sm text-label-sm font-bold shrink-0 mt-0.5">
+            2
+          </div>
+<div class="flex-1 min-w-0">
+<div class="font-semibold text-white text-[13px] truncate" title="Fiestas Fiestas, Santos Alberto">
+              Fiestas Fiestas, Santos Alberto
+            </div>
+<div class="text-[12px] text-on-surface font-medium truncate">
+              Secretario General
+            </div>
+<div class="text-[11px] text-outline truncate" title="Sindicato Único de Motoristas y Oficiales de Pesca del Perú - SUMOPP">
+              Sindicato Único de Motoristas (SUMOPP)
+            </div>
+</div>
+<button class="w-6 h-6 flex items-center justify-center rounded text-outline hover:text-error hover:bg-surface-container-highest transition-colors shrink-0" title="Quitar de la lista" type="button">
+<span class="material-symbols-outlined text-[16px]">close</span>
+</button>
+</div>
+<!-- Actor 3 -->
+<div class="p-2.5 rounded-lg bg-surface-container/60 hover:bg-surface-container border border-outline-variant/30 flex items-start gap-space-sm group transition-colors">
+<div class="w-5 h-5 rounded-full bg-surface-container-high flex items-center justify-center text-primary font-label-sm text-label-sm font-bold shrink-0 mt-0.5">
+            3
+          </div>
+<div class="flex-1 min-w-0">
+<div class="font-semibold text-white text-[13px] truncate" title="Mendoza Alarcón, Patricia Elena">
+              Mendoza Alarcón, Patricia Elena
+            </div>
+<div class="text-[12px] text-on-surface font-medium truncate">
+              Directora Regional
+            </div>
+<div class="text-[11px] text-outline truncate" title="GORE Piura - DIREPRO">
+              GORE Piura - DIREPRO
+            </div>
+</div>
+<button class="w-6 h-6 flex items-center justify-center rounded text-outline hover:text-error hover:bg-surface-container-highest transition-colors shrink-0" title="Quitar de la lista" type="button">
+<span class="material-symbols-outlined text-[16px]">close</span>
+</button>
+</div>
+</div>
+<!-- Footer Ventana Flotante con Exportar desplegado -->
+<div class="p-space-md bg-surface-container-lowest/80 border-t border-outline-variant/30 space-y-space-sm rounded-b-xl">
+<div class="flex items-center justify-between text-body-sm">
+<button class="text-outline hover:text-error text-label-sm font-label-sm inline-flex items-center gap-1 transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px]">delete_sweep</span>
+<span>Vaciar lista</span>
+</button>
+<span class="font-label-sm text-label-sm text-outline">3 seleccionados</span>
+</div>
+<div class="relative w-full">
+<button class="w-full h-9 px-space-md rounded bg-primary-container hover:bg-[#8ebbfe] text-on-primary-container font-title-md text-label-md flex items-center justify-between shadow-sm transition-colors font-semibold" type="button">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[18px]">output</span>
+<span>Exportar selección</span>
+</div>
+<span class="material-symbols-outlined text-[18px]">arrow_drop_up</span>
+</button>
+<!-- Menú de opciones de exportación -->
+<div class="mt-2 w-full bg-surface-container rounded-lg border border-outline-variant/40 shadow-xl py-1 divide-y divide-outline-variant/20 overflow-hidden">
+<a class="flex items-center justify-between px-space-md py-2 hover:bg-surface-container-high transition-colors group" href="#">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-primary">table_view</span>
+<span class="text-[13px] text-white font-medium">Lista de asistencia</span>
+</div>
+<span class="text-[11px] font-semibold text-primary bg-surface-container-highest px-2 py-0.5 rounded border border-outline-variant/30">Excel</span>
+</a>
+<a class="flex items-center justify-between px-space-md py-2 hover:bg-surface-container-high transition-colors group" href="#">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-primary">picture_as_pdf</span>
+<span class="text-[13px] text-white font-medium">Lista de asistencia</span>
+</div>
+<span class="text-[11px] font-semibold text-primary bg-surface-container-highest px-2 py-0.5 rounded border border-outline-variant/30">PDF</span>
+</a>
+<a class="flex items-center justify-between px-space-md py-2 hover:bg-surface-container-high transition-colors group" href="#">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-primary">article</span>
+<span class="text-[13px] text-white font-medium">Ficha de actores con perfil</span>
+</div>
+<span class="text-[11px] font-semibold text-primary bg-surface-container-highest px-2 py-0.5 rounded border border-outline-variant/30">Word</span>
+</a>
+<a class="flex items-center justify-between px-space-md py-2 hover:bg-surface-container-high transition-colors group" href="#">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-primary">contact_page</span>
+<span class="text-[13px] text-white font-medium">Ficha de actores con perfil</span>
+</div>
+<span class="text-[11px] font-semibold text-primary bg-surface-container-highest px-2 py-0.5 rounded border border-outline-variant/30">PDF</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+</div>
+<script>
+  // Control interactivo de la ventana flotante 'Lista temporal'
+  const toggleBtn = document.getElementById('btn-toggle-drawer');
+  const closeBtn = document.getElementById('btn-close-drawer');
+  const panel = document.getElementById('panel-lista-temporal');
+
+  if (toggleBtn && panel) {
+    toggleBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      panel.classList.toggle('hidden');
+    });
+  }
+
+  if (closeBtn && panel) {
+    closeBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      panel.classList.add('hidden');
+    });
+  }
+</script></main></div></body></html>

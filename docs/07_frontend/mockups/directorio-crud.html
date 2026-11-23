@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>Directorio de actores · CRUD · mockup AVISA</title>
+        <title>Directorios con portada visual · mockup AVISA</title>
         <style>
             /* ─────────────────────────────────────────────────────────────────────────
          Tokens y clases copiados de angular/src/styles/global.css (sin cambios).
@@ -1120,56 +1120,475 @@
                 white-space: nowrap;
                 border: 0;
             }
+
+            /* ── Cinco bloques de anotación (obligatorios) ───────────── */
+            .ann {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 8px;
+                padding: 10px 12px 12px;
+                border: 1px solid var(--line);
+                border-radius: 9px;
+                background: #fbfcfd;
+            }
+            @media (max-width: 980px) {
+                .ann {
+                    grid-template-columns: 1fr;
+                }
+            }
+            .ann-card {
+                padding: 8px 10px;
+                border: 1px solid #eef1f4;
+                border-radius: 7px;
+                background: #fff;
+                font-size: 10px;
+                line-height: 1.5;
+                color: var(--ink-2);
+            }
+            .ann-card.wide {
+                grid-column: 1 / -1;
+            }
+            .ann-card h3 {
+                margin: 0 0 4px;
+                color: var(--ink);
+                font: 700 9px/1.3 var(--font-display);
+                letter-spacing: 0.07em;
+                text-transform: uppercase;
+            }
+            .ann-card code {
+                padding: 0 3px;
+                border-radius: 3px;
+                background: #eef1f4;
+                font-family: ui-monospace, Menlo, monospace;
+                font-size: 9.5px;
+            }
+            .ann-card .n {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 15px;
+                height: 15px;
+                margin-right: 5px;
+                border-radius: 50%;
+                background: var(--blue);
+                color: #fff;
+                font-size: 9px;
+                font-weight: 700;
+            }
+            .ann-table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+            .ann-table th,
+            .ann-table td {
+                padding: 2px 6px 2px 0;
+                border-bottom: 1px solid #f1f3f5;
+                text-align: left;
+                vertical-align: top;
+                font-size: 9.5px;
+            }
+            .ann-table th {
+                color: #97a1aa;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.04em;
+            }
+            .ann-table tr:last-child td {
+                border-bottom: 0;
+            }
+
+            /* ── Portada de directorios ──────────────────────────────── */
+            .hub {
+                padding: 14px 15px;
+                border: 1px solid var(--line);
+                border-radius: 9px;
+                background: #fff;
+            }
+            .hub-head {
+                display: flex;
+                align-items: flex-start;
+                justify-content: space-between;
+                gap: 10px;
+                margin-bottom: 12px;
+            }
+            .hub-head h2 {
+                margin: 0;
+                font: 700 13px/1.3 var(--font-display);
+                letter-spacing: -0.2px;
+            }
+            .hub-head p {
+                margin: 3px 0 0;
+                color: var(--muted);
+                font-size: 9.5px;
+                line-height: 1.5;
+            }
+            .hub-grid {
+                display: grid;
+                grid-template-columns: repeat(4, minmax(0, 1fr));
+                gap: 10px;
+            }
+            @media (max-width: 900px) {
+                .hub-grid {
+                    grid-template-columns: repeat(2, 1fr);
+                }
+            }
+            .hub-card {
+                display: flex;
+                flex-direction: column;
+                gap: 6px;
+                padding: 14px 13px 12px;
+                border: 1px solid var(--line);
+                border-radius: 9px;
+                background: #fff;
+                text-align: left;
+            }
+            .hub-card:hover {
+                border-color: #cddcef;
+                box-shadow: 0 2px 8px rgba(23, 40, 58, 0.06);
+            }
+            .hub-icon {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 34px;
+                height: 34px;
+                border-radius: 9px;
+                background: var(--blue-pale);
+                color: var(--blue);
+                font-size: 16px;
+                line-height: 1;
+            }
+            .hub-card.is-new .hub-icon {
+                background: #eef3f1;
+                color: var(--teal);
+            }
+            .hub-card b {
+                color: var(--ink);
+                font: 700 11.5px/1.3 var(--font-display);
+            }
+            .hub-card span {
+                color: var(--muted);
+                font-size: 9px;
+                line-height: 1.45;
+            }
+            .hub-card .go {
+                margin-top: 3px;
+                color: var(--blue);
+                font-size: 8.5px;
+                font-weight: 700;
+                letter-spacing: 0.04em;
+                text-transform: uppercase;
+            }
+            .hub-note {
+                margin: 10px 0 0;
+                color: #94a0a8;
+                font-size: 8.5px;
+                line-height: 1.55;
+            }
+            .hub-note code {
+                padding: 0 3px;
+                border-radius: 3px;
+                background: #eef1f4;
+                font-family: ui-monospace, Menlo, monospace;
+                font-size: 8.5px;
+            }
+
+            /* ── Auditorios (item 115) ───────────────────────────────── */
+            .aud-kpis {
+                display: grid;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: 10px;
+                margin-bottom: 12px;
+            }
+            @media (max-width: 720px) {
+                .aud-kpis {
+                    grid-template-columns: 1fr;
+                }
+            }
+            .aud-kpi {
+                padding: 10px 12px;
+                border: 1px solid var(--line);
+                border-radius: 8px;
+                background: #fcfdfe;
+            }
+            .aud-kpi b {
+                display: block;
+                font: 700 20px/1.1 var(--font-display);
+                font-variant-numeric: tabular-nums;
+                letter-spacing: -0.4px;
+            }
+            .aud-kpi span {
+                display: block;
+                margin-top: 3px;
+                color: var(--muted);
+                font-size: 9px;
+                line-height: 1.4;
+            }
+            .aud-kpi.zero b {
+                color: #9aa6b1;
+            }
+            table.aud {
+                width: 100%;
+                border-collapse: collapse;
+                text-align: left;
+            }
+            table.aud th {
+                padding: 5px 8px;
+                border-bottom: 1px solid #edf0f2;
+                color: #97a1aa;
+                font-size: 8px;
+                font-weight: 600;
+                letter-spacing: 0.05em;
+                text-transform: uppercase;
+            }
+            table.aud td {
+                padding: 6px 8px;
+                border-bottom: 1px solid #f0f2f4;
+                color: #687988;
+                font-size: 9px;
+                vertical-align: top;
+            }
+            table.aud td.field {
+                font-family: ui-monospace, Menlo, monospace;
+                font-size: 8.5px;
+                color: #4c7099;
+                white-space: nowrap;
+            }
+            table.aud tr:last-child td {
+                border-bottom: 0;
+            }
+            .aud-empty {
+                padding: 16px;
+                border: 1px dashed #d7dee4;
+                border-radius: 7px;
+                background: #fafbfc;
+                color: #8b97a1;
+                font-size: 9px;
+                line-height: 1.5;
+                text-align: center;
+            }
+            .aud-empty b {
+                display: block;
+                margin-bottom: 3px;
+                color: #5a6c7d;
+                font-size: 9.5px;
+            }
         </style>
     </head>
     <body>
         <main class="view-body">
             <header class="view-head">
                 <div>
-                    <h1>Directorio de actores</h1>
+                    <h1>Directorios con portada visual</h1>
                     <p class="view-subtitle">
-                        Registro único de personas, organizaciones,
-                        instituciones y locales que participan en los casos.
-                        Esta pantalla resuelve el detalle en panel lateral, el
-                        alta, la edición, la fusión de duplicados, la baja
-                        lógica y la exportación con campos permitidos por rol
-                        (item 43), y separa lo público de lo restringido por
-                        rol. La PII se consulta bajo demanda con motivo
-                        auditado.
+                        La pantalla de entrada <code>/directorio</code> abre en
+                        una <b>portada de cuatro íconos</b> —Actores,
+                        Organizaciones, Instituciones y Auditorios— y cada uno
+                        lleva a su matriz, que ya no ocupa la primera pantalla
+                        (item 108). Debajo se conserva el CRUD de actores con su
+                        detalle lateral, PII bajo demanda y exportación por rol
+                        (items 43–45 y 71). <b>Locales</b> se renombra a
+                        <b>Auditorios</b>, con capacidad y contacto (item 115).
                     </p>
                 </div>
                 <div class="view-actions">
-                    <span class="anexo-badge">Items 43 · 44 · 45 · 71</span>
+                    <span class="anexo-badge"
+                        >Ola 1 · artboard 3 · items 43–45 · 71 · 108 · 115</span
+                    >
                 </div>
             </header>
 
-            <!-- Declaración: qué cubre, qué dato necesita y qué es solo forma. -->
-            <div
-                style="
-                    font-size: 11.5px;
-                    line-height: 1.5;
-                    color: #4a5b6c;
-                    border: 1px solid #e6ebef;
-                    border-radius: 6px;
-                    background: #f8fafb;
-                    padding: 8px 11px;
-                "
-            >
-                <p style="margin: 0 0 3px">
-                    <b>Items que cubre:</b> 43 · 44 · 45 · 71.
+            <!-- ═══════════ Cinco bloques de anotación (obligatorios) ═══════════ -->
+            <section class="ann" aria-label="Anotaciones del artboard">
+                <div class="ann-card">
+                    <h3><span class="n">1</span>Items que cubre</h3>
+                    <b>43</b> (detalle lateral y exportación por rol) ·
+                    <b>44</b> y <b>45</b> (alta, edición, fusión y baja lógica
+                    del directorio) · <b>71</b> (PII bajo demanda con motivo) ·
+                    <b>108</b> (portada visual con cuatro directorios) ·
+                    <b>115</b> (Locales → Auditorios, con capacidad y contacto).
+                    <br /><b>Diseño por lote:</b> Lote B · Panorama, alertas y
+                    directorios (108, 115). Los items 43–45 y 71 son el CRUD
+                    previo que se conserva.
+                </div>
+                <div class="ann-card">
+                    <h3>
+                        <span class="n">2</span>Dato que necesita cada celda
+                    </h3>
+                    <table class="ann-table">
+                        <tr>
+                            <th>Celda</th>
+                            <th>Campo</th>
+                            <th>Ruta</th>
+                        </tr>
+                        <tr>
+                            <td>Portada</td>
+                            <td>navegación local</td>
+                            <td>
+                                no es API · rutas
+                                <code>/directorio/actores</code>,
+                                <code>/directorio/organizaciones</code>,
+                                <code>/directorio/instituciones</code>,
+                                <code>/directorio/locales</code>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Actores</td>
+                            <td>
+                                <code>nombre</code>, <code>tipo</code>,
+                                <code>region</code>
+                            </td>
+                            <td>
+                                <code>GET /v1/actors</code>
+                                (<code>q, naturaleza, tipo, region</code>)
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Organizaciones</td>
+                            <td><code>nombre</code>, <code>tipo</code></td>
+                            <td><code>GET /v1/organizaciones</code></td>
+                        </tr>
+                        <tr>
+                            <td>Instituciones</td>
+                            <td>filtro fijo</td>
+                            <td>
+                                <code>GET /v1/actors?tipo=Actor público</code>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Auditorios</td>
+                            <td>
+                                <code>nombre</code>, <code>aforo</code>,
+                                <code>contacto_*</code>, <code>activo</code>
+                            </td>
+                            <td>
+                                <code>GET /v1/locales</code> (<code
+                                    >q, activo</code
+                                >)
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Distrito del auditorio</td>
+                            <td><code>distrito_id</code></td>
+                            <td>
+                                <b>no existe</b> hoy: el vínculo exige ubigeo
+                                (<code>territorio.caleta_detalle</code>, P10)
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>PII del actor</td>
+                            <td>
+                                <code>dni</code>, <code>email</code>,
+                                <code>telefono</code>
+                            </td>
+                            <td>
+                                <code>GET /v1/actors/{uid}/pii?motivo=…</code>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Alta, edición, fusión, baja</td>
+                            <td>—</td>
+                            <td>
+                                <b>no existe</b> (<code>POST</code>,
+                                <code>PATCH</code>, <code>DELETE</code>)
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="ann-card">
+                    <h3><span class="n">3</span>Sólo forma · no implementar</h3>
+                    La portada y sus cuatro tarjetas son <b>navegación</b>:
+                    saltan a las matrices de abajo, no consultan nada. Los
+                    botones de alta, edición, fusión y baja siguen
+                    deshabilitados porque la API es de sólo lectura. La capa de
+                    auditorios en el mapa no se dibuja: sin ubigeo no hay punto
+                    que situar. Los nombres de los 27 locales no se reproducen
+                    aquí para no inventarlos; se leen de
+                    <code>GET /v1/locales</code>.
+                </div>
+                <div class="ann-card">
+                    <h3><span class="n">4</span>Bloqueado y por qué</h3>
+                    <b>Escritura:</b> no hay endpoints de alta, edición, fusión
+                    ni baja; es bloqueo de API, no de diseño.
+                    <b>Auditorios en el mapa:</b> el salto de región a distrito
+                    exige el ubigeo que hoy falta (P10); la capa queda
+                    pendiente, no descartada. <b>Item 113:</b> el ámbito de
+                    subsector no se dibuja como filtro de esta pantalla: es
+                    sesión + RLS. Ningún X de producto (X1–X5) aplica aquí.
+                </div>
+                <div class="ann-card wide">
+                    <h3><span class="n">5</span>Roles que ven cada bloque</h3>
+                    <b>Dirección OAIPCS y Secretaría General:</b> los cuatro
+                    directorios completos, con PII bajo motivo.
+                    <b>Sectorista:</b> sólo las regiones de su sesión.
+                    <b>Alta dirección:</b> lectura completa.
+                    <b>Administrador:</b> único rol con
+                    <code>puedeVerPii</code> junto a los tres anteriores; la
+                    escritura se habilitará cuando exista el endpoint. La
+                    portada no cambia permisos: sólo reordena la entrada al
+                    mismo CRUD.
+                </div>
+            </section>
+
+            <!-- Portada visual: cuatro directorios (item 108) -->
+            <section class="hub" aria-labelledby="hub-titulo">
+                <div class="hub-head">
+                    <div>
+                        <h2 id="hub-titulo">Directorios</h2>
+                        <p>
+                            Cuatro puertas de entrada; cada una abre su matriz
+                            debajo. La portada no repite la tabla: la anuncia.
+                        </p>
+                    </div>
+                    <span class="anexo-badge">portada · item 108</span>
+                </div>
+                <div class="hub-grid">
+                    <a class="hub-card" href="#tbody">
+                        <span class="hub-icon" aria-hidden="true">◎</span>
+                        <b>Actores</b>
+                        <span
+                            >1 160 actores: 936 personas y 224
+                            organizaciones.</span
+                        >
+                        <span class="go">Abrir matriz →</span>
+                    </a>
+                    <a class="hub-card" href="#tbody">
+                        <span class="hub-icon" aria-hidden="true">▤</span>
+                        <b>Organizaciones</b>
+                        <span
+                            >224 organizaciones; 119 con región en el
+                            origen.</span
+                        >
+                        <span class="go">Abrir matriz →</span>
+                    </a>
+                    <a class="hub-card" href="#tbody">
+                        <span class="hub-icon" aria-hidden="true">◈</span>
+                        <b>Instituciones</b>
+                        <span
+                            >Actores públicos: ministerios, OPD y
+                            gobiernos.</span
+                        >
+                        <span class="go">Abrir matriz →</span>
+                    </a>
+                    <a class="hub-card is-new" href="#auditorios">
+                        <span class="hub-icon" aria-hidden="true">▣</span>
+                        <b>Auditorios</b>
+                        <span
+                            >27 sedes de reunión; 23 con aforo y contacto (antes
+                            «Locales»).</span
+                        >
+                        <span class="go">Abrir matriz →</span>
+                    </a>
+                </div>
+                <p class="hub-note">
+                    Rutas de la SPA: <code>/directorio/actores</code> ·
+                    <code>/directorio/organizaciones</code> ·
+                    <code>/directorio/instituciones</code> ·
+                    <code>/directorio/locales</code>. El renombrado «Locales →
+                    Auditorios» es de interfaz: la ruta y la tabla
+                    <code>core.locales</code> no cambian (item 115).
                 </p>
-                <p style="margin: 0 0 3px">
-                    <b>Dato que necesita:</b> <code>core.actores</code> (1 160:
-                    936 personas y 224 organizaciones) y los <code>GET</code> de
-                    actores, organizaciones, instituciones y locales.
-                </p>
-                <p style="margin: 0">
-                    <b>Solo forma (sin dato):</b> alta, edición, fusión de
-                    duplicados, baja lógica y exportación; no hay
-                    <code>POST</code>, <code>PATCH</code> ni
-                    <code>DELETE</code>.
-                </p>
-            </div>
+            </section>
 
             <div class="banner" role="note">
                 <span>
@@ -1452,6 +1871,114 @@
                     </div>
                 </aside>
             </div>
+
+            <section class="hub" id="auditorios" aria-labelledby="aud-titulo">
+                <div class="hub-head">
+                    <div>
+                        <h2 id="aud-titulo">Auditorios · antes «Locales»</h2>
+                        <p>
+                            Inventario de sedes donde se hacen reuniones, con
+                            capacidad y contacto (item 115). Es la misma tabla
+                            <code>core.locales</code> y la misma ruta
+                            <code>/directorio/locales</code>: cambia el nombre,
+                            no el modelo.
+                        </p>
+                    </div>
+                    <span class="anexo-badge">item 115 · rename</span>
+                </div>
+
+                <div class="aud-kpis">
+                    <div class="aud-kpi">
+                        <b>27</b
+                        ><span>Auditorios registrados en core.locales</span>
+                    </div>
+                    <div class="aud-kpi">
+                        <b>23</b><span>Con aforo y contacto declarados</span>
+                    </div>
+                    <div class="aud-kpi zero">
+                        <b>4</b><span>Por completar aforo o contacto</span>
+                    </div>
+                </div>
+
+                <table class="aud">
+                    <caption
+                        style="
+                            caption-side: top;
+                            padding: 0 0 6px;
+                            color: #94a0a8;
+                            font-size: 9px;
+                            text-align: left;
+                        "
+                    >
+                        Contrato de columnas de
+                        <code>GET /v1/locales</code
+                        >. Los nombres de los 27 auditorios no se reproducen en
+                        el mockup para no inventarlos; se leen del endpoint.
+                    </caption>
+                    <thead>
+                        <tr>
+                            <th>Columna</th>
+                            <th>Campo</th>
+                            <th>Estado hoy</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="field">nombre</td>
+                            <td>Nombre de la sede</td>
+                            <td>presente en 27 de 27</td>
+                        </tr>
+                        <tr>
+                            <td class="field">distrito_id</td>
+                            <td>Distrito (ubigeo)</td>
+                            <td>
+                                <b>nulo</b>: falta el ubigeo bajo región (P10)
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="field">aforo</td>
+                            <td>Capacidad declarada</td>
+                            <td>presente en 23 de 27</td>
+                        </tr>
+                        <tr>
+                            <td class="field">contacto_nombre</td>
+                            <td>Persona de contacto</td>
+                            <td>23 de 27</td>
+                        </tr>
+                        <tr>
+                            <td class="field">contacto_celular</td>
+                            <td>Teléfono · PII</td>
+                            <td>23 de 27 · tras <code>puedeVerPii</code></td>
+                        </tr>
+                        <tr>
+                            <td class="field">contacto_email</td>
+                            <td>Correo</td>
+                            <td>23 de 27</td>
+                        </tr>
+                        <tr>
+                            <td class="field">activo</td>
+                            <td>Vigencia</td>
+                            <td>tri-estado en los locales</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="aud-empty" style="margin-top: 12px">
+                    <b>Estado vacío de las 4 filas incompletas</b>
+                    Se muestran con «—» en aforo o contacto y una marca «por
+                    completar»; no se rellenan con valores estimados. La ficha
+                    del auditorio indica qué campo falta y quién puede
+                    completarlo.
+                </div>
+
+                <p class="hub-note">
+                    <b>Capa del mapa pendiente.</b> Situar cada auditorio exige
+                    <code>distrito_id</code>; hoy el vínculo no existe bajo
+                    región (P10). Sin ubigeo no hay centroide que dibujar, así
+                    que la capa se declara pendiente y no se simula sobre el
+                    lienzo.
+                </p>
+            </section>
 
             <section class="notes" aria-labelledby="matriz-titulo">
                 <h2 id="matriz-titulo">Visibilidad y acciones por rol</h2>

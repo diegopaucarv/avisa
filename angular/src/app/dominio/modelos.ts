@@ -46,9 +46,10 @@ export type Caso = {
   avance: number | null;
   /**
    * Instante de la última actualización (`fecha_ultima_actualizacion`). Es la
-   * hora de carga del legado para casi todas las filas, así que **no** debe
-   * rotularse como «Actualizado» en la UI. Queda reservado al historial de
-   * estados (item 41); hoy ninguna plantilla lo consume.
+   * hora de carga del legado para casi todas las filas, así que **no** es la
+   * fecha real de actualización. El listado y la vista previa lo muestran con
+   * el rótulo «Actualizado» (item 94) declarando esa limitación; sigue sin
+   * servir para el historial de estados (item 41).
    */
   actualizado: string | null;
   /** Fecha real del caso (`fecha_inicio`), no la de carga del legado. */

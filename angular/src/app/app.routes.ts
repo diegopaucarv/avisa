@@ -88,6 +88,11 @@ export const routes: Routes = [
       },
 
       {
+        path: 'directorio',
+        loadComponent: () =>
+          import('./features/directorio/directorio.page').then((m) => m.DirectorioPage),
+      },
+      {
         path: 'directorio/actores',
         loadComponent: () =>
           import('./features/directorio/actores.page').then((m) => m.ActoresPage),

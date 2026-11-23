@@ -1,0 +1,1362 @@
+<!doctype html>
+<html lang="es">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>
+            Ficha del caso · Reportes de monitoreo y documentos · Mockup AVISA
+        </title>
+        <style>
+            /* Tokens copiados de angular/src/styles/global.css. Sin webfonts, sin JS, sin CDN:
+               el archivo se abre por doble clic. */
+            :root {
+                --ink: #17283a;
+                --ink-2: #33475b;
+                --muted: #778797;
+                --line: #e6ebef;
+                --paper: #fff;
+                --canvas: #f5f7f8;
+                --blue: #2455a2;
+                --blue-dark: #1d427f;
+                --blue-pale: #eaf1fb;
+                --teal: #397c79;
+                --amber: #aa6a11;
+                --amber-pale: #fff4e2;
+                --red: #ad4d46;
+                --red-pale: #fbeceb;
+                --green: #34785b;
+                --green-pale: #e9f5ef;
+                --font-sans:
+                    "DM Sans", system-ui, -apple-system, "Segoe UI", Arial,
+                    sans-serif;
+                --font-display:
+                    "Manrope", "DM Sans", system-ui, -apple-system, "Segoe UI",
+                    sans-serif;
+            }
+            * {
+                box-sizing: border-box;
+            }
+            html {
+                min-height: 100%;
+                background: var(--canvas);
+            }
+            body {
+                margin: 0;
+                color: var(--ink);
+                font-family: var(--font-sans);
+                font-size: 13px;
+                -webkit-font-smoothing: antialiased;
+            }
+            .view-body {
+                display: flex;
+                flex-direction: column;
+                gap: 14px;
+                width: 100%;
+                max-width: 1420px;
+                margin: 0 auto;
+                padding: 27px 34px 56px;
+            }
+            .view-head {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: flex-start;
+                justify-content: space-between;
+                gap: 16px;
+            }
+            .view-head h1 {
+                margin: 0;
+                font: 700 22px/1.3 var(--font-display);
+                letter-spacing: -0.65px;
+            }
+            .view-subtitle {
+                max-width: 820px;
+                margin: 6px 0 0;
+                color: var(--muted);
+                font-size: 11px;
+                line-height: 1.6;
+            }
+            .badge {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                height: 26px;
+                padding: 0 10px;
+                border: 1px solid #cddcef;
+                border-radius: 999px;
+                background: var(--blue-pale);
+                color: var(--blue);
+                font-size: 9px;
+                font-weight: 700;
+                letter-spacing: 0.05em;
+                text-transform: uppercase;
+                white-space: nowrap;
+            }
+            .tag {
+                display: inline-flex;
+                align-items: center;
+                padding: 2px 7px;
+                border: 1px solid var(--line);
+                border-radius: 999px;
+                color: #8b97a1;
+                font-size: 7.5px;
+                font-weight: 700;
+                letter-spacing: 0.05em;
+                text-transform: uppercase;
+                white-space: nowrap;
+            }
+
+            /* ── Lámina de impresión (artboard) ──────────────────────── */
+            .artboard {
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+                padding: 18px 20px 16px;
+                border: 1px solid var(--line);
+                border-radius: 10px;
+                background: var(--paper);
+            }
+            .artboard-head {
+                display: flex;
+                align-items: flex-start;
+                gap: 12px;
+                padding-bottom: 11px;
+                border-bottom: 1px solid var(--line);
+            }
+            .ab-num {
+                flex: none;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 30px;
+                height: 30px;
+                border: 1px solid #cddcef;
+                border-radius: 8px;
+                background: var(--blue-pale);
+                color: var(--blue);
+                font: 700 13px/1 var(--font-display);
+            }
+            .artboard-head h2 {
+                margin: 0;
+                color: var(--ink);
+                font: 700 17px/1.25 var(--font-display);
+                letter-spacing: -0.35px;
+            }
+            .artboard-head .view-subtitle {
+                margin-top: 4px;
+                font-size: 10px;
+            }
+            .artboard-head .tag {
+                margin-left: auto;
+            }
+
+            /* ── Avisos: bandera y llamada ───────────────────────────── */
+            .flag {
+                display: flex;
+                align-items: flex-start;
+                gap: 7px;
+                padding: 7px 10px;
+                border: 1px solid #f3e0c2;
+                border-radius: 7px;
+                background: var(--amber-pale);
+                color: var(--amber);
+                font-size: 9.5px;
+                font-weight: 600;
+                line-height: 1.45;
+            }
+            .flag::before {
+                content: "⚑";
+                font-size: 11px;
+                line-height: 1.25;
+            }
+            .flag-bad {
+                border-color: #f0d2cf;
+                background: var(--red-pale);
+                color: var(--red);
+            }
+            .flag-info {
+                border-color: #cddcef;
+                background: var(--blue-pale);
+                color: var(--blue);
+            }
+            .flag-mini {
+                display: inline-flex;
+                padding: 2px 6px;
+                font-size: 8.5px;
+                font-weight: 600;
+            }
+            .flag-mini::before {
+                font-size: 9px;
+            }
+
+            /* ── Marco de contexto: la ficha alrededor (atenuada) ────── */
+            .ctx {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                padding: 13px 15px 12px;
+                border: 1px dashed #d7dee5;
+                border-radius: 9px;
+                background: #fbfcfd;
+                color: #7c8b98;
+            }
+            .ctx-head {
+                display: flex;
+                align-items: flex-start;
+                justify-content: space-between;
+                gap: 12px;
+            }
+            .ctx-code {
+                margin: 0;
+                color: var(--muted);
+                font-size: 9px;
+                font-weight: 700;
+                letter-spacing: 0.09em;
+                text-transform: uppercase;
+                font-variant-numeric: tabular-nums;
+            }
+            .ctx-title {
+                margin: 2px 0 0;
+                color: #465a6c;
+                font: 700 14px/1.3 var(--font-display);
+                letter-spacing: -0.25px;
+            }
+            .state {
+                flex: none;
+                display: inline-flex;
+                align-items: center;
+                height: 22px;
+                padding: 0 9px;
+                border: 1px solid #cddcef;
+                border-radius: 999px;
+                background: #f4f8fd;
+                color: #5b7fa8;
+                font-size: 8.5px;
+                font-weight: 700;
+                letter-spacing: 0.06em;
+                text-transform: uppercase;
+            }
+            .ctx-meta {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 6px 18px;
+                font-size: 9.5px;
+            }
+            .ctx-meta b {
+                color: #8b97a1;
+                font-weight: 700;
+                letter-spacing: 0.05em;
+                text-transform: uppercase;
+                font-size: 8px;
+                margin-right: 5px;
+            }
+            .ctx-summary {
+                margin: 0;
+                max-width: 900px;
+                color: #8b97a1;
+                font-size: 9.5px;
+                line-height: 1.55;
+            }
+            .ctx-access {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                gap: 7px;
+                padding-top: 9px;
+                border-top: 1px solid #eef1f4;
+            }
+            .ctx-label {
+                margin-right: 4px;
+                color: #a1acb6;
+                font-size: 8px;
+                font-weight: 700;
+                letter-spacing: 0.06em;
+                text-transform: uppercase;
+            }
+            .btn {
+                display: inline-flex;
+                align-items: center;
+                height: 26px;
+                padding: 0 11px;
+                border: 1px solid #d7e2ee;
+                border-radius: 7px;
+                background: #fff;
+                color: #4d6d8e;
+                font: 600 9.5px/1 var(--font-sans);
+                white-space: nowrap;
+            }
+            .btn-off {
+                border-style: dashed;
+                border-color: #dfe5ea;
+                background: #f7f9fa;
+                color: #a9b4be;
+            }
+            .btn-off-note {
+                margin-left: 6px;
+                padding-left: 7px;
+                border-left: 1px solid #e6ebef;
+                font-size: 7.5px;
+                font-weight: 700;
+                letter-spacing: 0.05em;
+                text-transform: uppercase;
+            }
+            .ctx-decl {
+                flex-basis: 100%;
+                margin: 1px 0 0;
+                color: #a1acb6;
+                font-size: 8.5px;
+                line-height: 1.5;
+            }
+            .ctx-decl b {
+                color: var(--red);
+                font-weight: 700;
+            }
+            .ctx-rest {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                gap: 6px;
+                padding-top: 9px;
+                border-top: 1px solid #eef1f4;
+            }
+            .ctx-rest span {
+                padding: 2px 7px;
+                border: 1px dashed #dfe5ea;
+                border-radius: 5px;
+                color: #b0b9c1;
+                font-size: 8.5px;
+            }
+            .ctx-rest em {
+                color: #b0b9c1;
+                font-size: 8.5px;
+                font-style: normal;
+            }
+
+            /* ── Tarjetas ────────────────────────────────────────────── */
+            .blocks {
+                display: grid;
+                grid-template-columns: 1.12fr 1fr;
+                gap: 12px;
+                align-items: start;
+            }
+            @media (max-width: 1080px) {
+                .blocks {
+                    grid-template-columns: 1fr;
+                }
+            }
+            .card {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                padding: 14px 15px 13px;
+                border: 1px solid var(--line);
+                border-radius: 9px;
+                background: #fff;
+            }
+            .card.hl {
+                border-color: #c6d8ee;
+                box-shadow: 0 0 0 3px #f4f8fd;
+            }
+            .card-head {
+                display: flex;
+                align-items: flex-start;
+                justify-content: space-between;
+                gap: 10px;
+            }
+            .kicker {
+                margin: 0 0 3px;
+                color: var(--blue);
+                font-size: 7.5px;
+                font-weight: 700;
+                letter-spacing: 0.09em;
+                text-transform: uppercase;
+            }
+            .card-title {
+                margin: 0;
+                font: 700 12.5px/1.3 var(--font-display);
+                letter-spacing: -0.15px;
+            }
+            .card-sub {
+                margin: 3px 0 0;
+                color: var(--muted);
+                font-size: 9.5px;
+                line-height: 1.5;
+            }
+            .card code,
+            .notes code,
+            .ann-card code {
+                padding: 1px 4px;
+                border: 1px solid var(--line);
+                border-radius: 4px;
+                background: #f2f5f8;
+                color: var(--ink-2);
+                font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+                font-size: 9px;
+            }
+
+            /* ── Grupos internos: alertas, clima, PAE, documentos ────── */
+            .group {
+                display: flex;
+                flex-direction: column;
+                gap: 6px;
+            }
+            .group + .group {
+                padding-top: 10px;
+                border-top: 1px solid #f1f3f5;
+            }
+            .group-head {
+                display: flex;
+                align-items: center;
+                gap: 7px;
+            }
+            .group-head h4 {
+                margin: 0;
+                color: var(--ink-2);
+                font: 700 10px/1.3 var(--font-display);
+                letter-spacing: 0.01em;
+            }
+            .count {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                min-width: 17px;
+                height: 16px;
+                padding: 0 4px;
+                border: 1px solid var(--line);
+                border-radius: 999px;
+                background: #f7f9fa;
+                color: var(--muted);
+                font-size: 8.5px;
+                font-weight: 700;
+                font-variant-numeric: tabular-nums;
+            }
+            .count.zero {
+                border-style: dashed;
+                color: #a9b4be;
+            }
+            .group-src {
+                margin: -1px 0 0;
+                color: var(--muted);
+                font-size: 8.5px;
+                line-height: 1.45;
+            }
+
+            /* Lista corta de reportes */
+            .mlist {
+                display: flex;
+                flex-direction: column;
+            }
+            .mrow {
+                display: grid;
+                grid-template-columns: 88px minmax(0, 1fr) auto auto;
+                align-items: baseline;
+                gap: 8px;
+                padding: 6px 0;
+                border-bottom: 1px solid #f1f3f5;
+                font-size: 9.5px;
+            }
+            .mrow:last-child {
+                border-bottom: 0;
+                padding-bottom: 2px;
+            }
+            .mcode {
+                color: #6d8296;
+                font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+                font-size: 8.5px;
+                font-variant-numeric: tabular-nums;
+            }
+            .mtitle {
+                color: var(--ink-2);
+                line-height: 1.4;
+            }
+            .mnote {
+                color: var(--muted);
+                font-size: 8.5px;
+                white-space: nowrap;
+            }
+            .chip {
+                display: inline-flex;
+                align-items: center;
+                height: 17px;
+                padding: 0 7px;
+                border: 1px solid var(--line);
+                border-radius: 999px;
+                font-size: 8px;
+                font-weight: 700;
+                letter-spacing: 0.04em;
+                text-transform: uppercase;
+                white-space: nowrap;
+            }
+            .c-red {
+                border-color: #f0d2cf;
+                background: var(--red-pale);
+                color: var(--red);
+            }
+            .c-amber {
+                border-color: #f3e0c2;
+                background: var(--amber-pale);
+                color: var(--amber);
+            }
+            .c-neutral {
+                background: #f4f6f8;
+                color: #7c8b98;
+            }
+            .plazo {
+                color: #7c8b98;
+                font-size: 8.5px;
+                white-space: nowrap;
+                font-variant-numeric: tabular-nums;
+            }
+            .empty {
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+                padding: 9px 11px;
+                border: 1px dashed #dfe5ea;
+                border-radius: 7px;
+                background: #fbfcfd;
+                color: var(--muted);
+                font-size: 9px;
+                line-height: 1.5;
+            }
+            .empty b {
+                color: var(--ink-2);
+            }
+            .empty p {
+                margin: 0;
+            }
+            .group-foot {
+                margin: 1px 0 0;
+                color: #a1acb6;
+                font-size: 8.5px;
+                line-height: 1.45;
+            }
+
+            /* ── Tabla de documentos ─────────────────────────────────── */
+            .docs {
+                width: 100%;
+                border-collapse: collapse;
+            }
+            .docs th {
+                padding: 3px 8px 3px 0;
+                border-bottom: 1px solid var(--line);
+                color: #97a1aa;
+                text-align: left;
+                font-size: 7.5px;
+                font-weight: 700;
+                letter-spacing: 0.06em;
+                text-transform: uppercase;
+            }
+            .docs td {
+                padding: 6px 8px 6px 0;
+                border-bottom: 1px solid #f1f3f5;
+                color: var(--ink-2);
+                font-size: 9px;
+                line-height: 1.45;
+                vertical-align: top;
+            }
+            .docs tr:last-child td {
+                border-bottom: 0;
+            }
+            .docs .tipo {
+                display: inline-flex;
+                align-items: center;
+                height: 16px;
+                padding: 0 6px;
+                border: 1px solid var(--line);
+                border-radius: 4px;
+                background: #f7f9fa;
+                color: #6d8296;
+                font-size: 7.5px;
+                font-weight: 700;
+                letter-spacing: 0.05em;
+                text-transform: uppercase;
+                white-space: nowrap;
+            }
+            .docs .mono {
+                color: #5c7285;
+                font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+                font-size: 8.5px;
+                font-variant-numeric: tabular-nums;
+            }
+            .docs .fecha {
+                color: var(--muted);
+                font-variant-numeric: tabular-nums;
+                white-space: nowrap;
+            }
+            .doc-link {
+                color: var(--blue);
+                font-size: 8.5px;
+                font-weight: 600;
+                text-decoration: none;
+                white-space: nowrap;
+            }
+            .docs tr.missing td {
+                background: #fdf6f5;
+            }
+            .docs tr.missing td:first-child {
+                box-shadow: inset 2px 0 0 var(--red);
+            }
+
+            /* ── Anotaciones ─────────────────────────────────────────── */
+            .ann {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 8px;
+                padding: 10px 12px 12px;
+                border: 1px solid var(--line);
+                border-radius: 9px;
+                background: #fbfcfd;
+            }
+            @media (max-width: 980px) {
+                .ann {
+                    grid-template-columns: 1fr;
+                }
+            }
+            .ann-card {
+                padding: 8px 10px;
+                border: 1px solid #eef1f4;
+                border-radius: 7px;
+                background: #fff;
+                font-size: 10px;
+                line-height: 1.5;
+                color: var(--ink-2);
+            }
+            .ann-card.wide {
+                grid-column: 1 / -1;
+            }
+            .ann-card h3 {
+                margin: 0 0 4px;
+                color: var(--ink);
+                font: 700 9px/1.3 var(--font-display);
+                letter-spacing: 0.07em;
+                text-transform: uppercase;
+            }
+            .ann-card b {
+                color: var(--ink);
+            }
+            .ann-card .n {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 15px;
+                height: 15px;
+                margin-right: 5px;
+                border-radius: 50%;
+                background: var(--blue);
+                color: #fff;
+                font-size: 9px;
+                font-weight: 700;
+            }
+            .ann-table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+            .ann-table th,
+            .ann-table td {
+                padding: 2px 6px 2px 0;
+                border-bottom: 1px solid #f1f3f5;
+                text-align: left;
+                vertical-align: top;
+                font-size: 9.5px;
+            }
+            .ann-table th {
+                color: #97a1aa;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.04em;
+            }
+            .ann-table tr:last-child td {
+                border-bottom: 0;
+            }
+
+            /* ── Notas para implementación ───────────────────────────── */
+            .notes {
+                margin-top: 4px;
+                padding: 18px 20px;
+                border: 1px solid var(--line);
+                border-radius: 8px;
+                background: #fff;
+            }
+            .notes h2 {
+                margin: 0 0 10px;
+                color: var(--ink);
+                font: 700 16px/1.3 var(--font-display);
+                letter-spacing: -0.3px;
+            }
+            .notes h3 {
+                margin: 18px 0 6px;
+                color: #465a6c;
+                font: 700 11px/1.3 var(--font-display);
+                letter-spacing: 0.03em;
+                text-transform: uppercase;
+            }
+            .notes ol,
+            .notes ul {
+                margin: 0;
+                padding-left: 20px;
+                color: #526577;
+                font-size: 10.5px;
+                line-height: 1.6;
+            }
+            .notes li {
+                margin: 0 0 7px;
+            }
+            .notes li:last-child {
+                margin-bottom: 0;
+            }
+            .notes p {
+                margin: 0 0 8px;
+                color: #526577;
+                font-size: 10.5px;
+                line-height: 1.6;
+            }
+            .notes b {
+                color: #33475b;
+            }
+            .contract-table {
+                width: 100%;
+                margin: 8px 0 0;
+                border-collapse: collapse;
+            }
+            .contract-table th,
+            .contract-table td {
+                padding: 4px 8px 4px 0;
+                border-bottom: 1px solid var(--line);
+                text-align: left;
+                vertical-align: top;
+                color: #526577;
+                font-size: 10px;
+                line-height: 1.45;
+            }
+            .contract-table th {
+                color: #97a1aa;
+                font-size: 8px;
+                font-weight: 700;
+                letter-spacing: 0.06em;
+                text-transform: uppercase;
+            }
+            .contract-table code {
+                font-size: 9px;
+            }
+
+            /* ── Impresión A4 horizontal ─────────────────────────────── */
+            @page {
+                size: A4 landscape;
+                margin: 10mm;
+            }
+            @media print {
+                html,
+                body {
+                    background: #fff;
+                }
+                .view-body {
+                    max-width: none;
+                    padding: 0;
+                    gap: 10px;
+                }
+                .artboard {
+                    border: 0;
+                    padding: 0;
+                }
+                .card,
+                .ann-card,
+                .ctx {
+                    break-inside: avoid;
+                }
+                .doc-link {
+                    color: inherit;
+                    text-decoration: underline;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="view-body">
+            <header class="view-head">
+                <div>
+                    <span class="badge">Ítem 103 · Mockup</span>
+                    <h1>Ficha del caso: reportes de monitoreo y documentos</h1>
+                    <p class="view-subtitle">
+                        Detalle de un caso (no una lista) con los dos bloques
+                        nuevos de la ventana. El resto de la ficha se dibuja
+                        atenuado, sólo para mostrar dónde se sientan los
+                        bloques.
+                    </p>
+                </div>
+                <span class="tag">Lámina única · A4 horizontal</span>
+            </header>
+
+            <section class="artboard">
+                <div class="artboard-head">
+                    <div class="ab-num">103</div>
+                    <div>
+                        <h2>Ventana del caso: dos bloques nuevos</h2>
+                        <p class="view-subtitle">
+                            Menú «Reportes de monitoreo» y bloque «Documentos
+                            del caso». Todo el contenido de la lámina es
+                            <b>dato de ejemplo</b>: fija la forma, no el número.
+                        </p>
+                    </div>
+                    <span class="tag">Imprimible</span>
+                </div>
+
+                <div class="flag flag-bad">
+                    <span
+                        >Caso, fechas, códigos de alerta y de documento son
+                        <b>ejemplo</b>. Sólo son reales los estados, niveles y
+                        clases de documento (vocabulario congelado). Ninguna
+                        cifra de esta lámina debe tomarse como dato de
+                        producción.</span
+                    >
+                </div>
+
+                <!-- ── Contexto: la ficha alrededor, atenuada ─────────── -->
+                <div class="ctx">
+                    <div class="ctx-head">
+                        <div>
+                            <p class="ctx-code">CS-2026-014</p>
+                            <h3 class="ctx-title">
+                                Controversia por acceso al recurso concha de
+                                abanico
+                            </h3>
+                        </div>
+                        <span class="state">Abierto</span>
+                    </div>
+                    <div class="ctx-meta">
+                        <span><b>Región</b>Piura</span>
+                        <span><b>Conflictividad</b>Controversia</span>
+                        <span><b>Riesgo</b>Moderado</span>
+                        <span><b>Actualizado</b>18 nov 2026</span>
+                    </div>
+                    <p class="ctx-summary">
+                        Resumen del caso: pescadores artesanales de la bahía
+                        reclaman acceso al recurso frente a la ampliación de una
+                        zona de extracción. El texto completo vive en la ficha;
+                        aquí sólo ocupa el lugar que le corresponde.
+                    </p>
+                    <div class="ctx-access">
+                        <span class="ctx-label"
+                            >Cuatro accesos de la ventana</span
+                        >
+                        <button class="btn" type="button">
+                            Línea de tiempo
+                        </button>
+                        <button class="btn" type="button">
+                            Mapa de actores
+                        </button>
+                        <button class="btn" type="button">Compromisos</button>
+                        <button
+                            class="btn btn-off"
+                            type="button"
+                            disabled
+                            title="Enlace Canva no configurado"
+                            aria-disabled="true"
+                        >
+                            Caso de análisis (Canva)
+                            <span class="btn-off-note">no configurado</span>
+                        </button>
+                        <p class="ctx-decl">
+                            El cuarto acceso se dibuja <b>deshabilitado</b> y
+                            con su <code>title</code>: no existe enlace de
+                            Canva. No se inventa una URL ni se simula la
+                            pantalla.
+                        </p>
+                    </div>
+                    <div class="ctx-rest">
+                        <span>Historial</span>
+                        <span>Reuniones</span>
+                        <span>Compromisos</span>
+                        <span>Actores</span>
+                        <em
+                            >resto de la ficha, fuera del alcance de esta
+                            lámina</em
+                        >
+                    </div>
+                </div>
+
+                <!-- ── Bloques nuevos ─────────────────────────────────── -->
+                <div class="blocks">
+                    <!-- Bloque A -->
+                    <section class="card hl">
+                        <div class="card-head">
+                            <div>
+                                <p class="kicker">Bloque A · menú nuevo</p>
+                                <h3 class="card-title">
+                                    Reportes de monitoreo
+                                </h3>
+                                <p class="card-sub">
+                                    Una sola entrada para tres fuentes distintas
+                                    del mismo caso. Las que no tienen dato
+                                    cargado lo dicen, no se rellenan.
+                                </p>
+                            </div>
+                            <span class="badge">3 fuentes</span>
+                        </div>
+
+                        <div class="group">
+                            <div class="group-head">
+                                <h4>Alertas tempranas vinculadas al caso</h4>
+                                <span class="count">4</span>
+                            </div>
+                            <p class="group-src">
+                                <code>core.alertas</code> filtrado por
+                                <code>caso_id</code> · prioridad y plazo tal
+                                como los fija el item 104
+                            </p>
+                            <div class="mlist">
+                                <div class="mrow">
+                                    <span class="mcode">AL-2026-0412</span>
+                                    <span class="mtitle"
+                                        >Convocatoria a medida de fuerza en el
+                                        desembarcadero de Parachique</span
+                                    >
+                                    <span class="chip c-red">Urgente</span>
+                                    <span class="plazo"
+                                        >Crítica inmediata (24 h)</span
+                                    >
+                                </div>
+                                <div class="mrow">
+                                    <span class="mcode">AL-2026-0398</span>
+                                    <span class="mtitle"
+                                        >Restricción de acceso al recurso en la
+                                        bahía de Sechura</span
+                                    >
+                                    <span class="chip c-red">Urgente</span>
+                                    <span class="plazo">Urgente (48 h)</span>
+                                </div>
+                                <div class="mrow">
+                                    <span class="mcode">AL-2026-0371</span>
+                                    <span class="mtitle"
+                                        >Reunión no anunciada de la asociación
+                                        de armadores</span
+                                    >
+                                    <span class="chip c-amber">Moderado</span>
+                                    <span class="plazo">Temprana (72 h)</span>
+                                </div>
+                                <div class="mrow">
+                                    <span class="mcode">AL-2026-0355</span>
+                                    <span class="mtitle"
+                                        >Solicitud de información sobre cuota de
+                                        captura</span
+                                    >
+                                    <span class="chip c-neutral">Bajo</span>
+                                    <span class="plazo"
+                                        >Seguimiento (sin plazo)</span
+                                    >
+                                </div>
+                            </div>
+                            <p class="group-foot">
+                                Prioridad y plazo son escalas distintas: la
+                                primera es Urgente · Moderado · Bajo; el plazo
+                                es la etiqueta de atención de la alerta. No se
+                                mezclan en una sola columna.
+                            </p>
+                        </div>
+
+                        <div class="group">
+                            <div class="group-head">
+                                <h4>
+                                    Clima social del período (mensual, externo)
+                                </h4>
+                                <span class="count zero">0</span>
+                            </div>
+                            <p class="group-src">
+                                Reporte por período y región, con autor y
+                                archivo (item 116) · período mostrado: noviembre
+                                2026
+                            </p>
+                            <div class="empty">
+                                <p>
+                                    <b
+                                        >Sin reporte cargado para noviembre
+                                        2026.</b
+                                    >
+                                </p>
+                                <p>
+                                    El clima social no es un índice que AVISA
+                                    calcule: es el reporte mensual que producen
+                                    áreas externas. Si el período no tiene
+                                    archivo, la lista queda vacía y lo declara.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="group">
+                            <div class="group-head">
+                                <h4>Planes de acción (PAE)</h4>
+                                <span class="count">1</span>
+                            </div>
+                            <p class="group-src">
+                                Planes vinculados al caso · código y unidad
+                                responsable
+                            </p>
+                            <div class="mlist">
+                                <div class="mrow">
+                                    <span class="mcode">PAE-2026-007</span>
+                                    <span class="mtitle"
+                                        >Mesa de diálogo con la asociación de
+                                        pescadores artesanales de Sechura</span
+                                    >
+                                    <span class="mnote">DIREPRO Piura</span>
+                                    <span class="plazo">Avance no medido</span>
+                                </div>
+                            </div>
+                            <p class="group-foot">
+                                La lámina no dibuja avance del PAE: todavía no
+                                hay regla de hitos cumplidos, así que se declara
+                                «no medido» en lugar de estimarlo.
+                            </p>
+                        </div>
+                    </section>
+
+                    <!-- Bloque B -->
+                    <section class="card hl">
+                        <div class="card-head">
+                            <div>
+                                <p class="kicker">Bloque B · bloque nuevo</p>
+                                <h3 class="card-title">Documentos del caso</h3>
+                                <p class="card-sub">
+                                    Dos grupos separados a propósito: lo que
+                                    produce el sector y la norma que lo ampara.
+                                </p>
+                            </div>
+                            <span class="badge">2 grupos</span>
+                        </div>
+
+                        <div class="group">
+                            <div class="group-head">
+                                <h4>Documentos PRODUCE</h4>
+                                <span class="count">3</span>
+                            </div>
+                            <p class="group-src">
+                                Oficios, actas e informes del expediente
+                            </p>
+                            <table class="docs">
+                                <thead>
+                                    <tr>
+                                        <th>Tipo</th>
+                                        <th>Código / número</th>
+                                        <th>Fecha</th>
+                                        <th>Enlace</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <span class="tipo">Oficio</span>
+                                        </td>
+                                        <td class="mono">
+                                            OF-0871-2026-PRODUCE/DIREPRO-PIU
+                                        </td>
+                                        <td class="fecha">14 nov 2026</td>
+                                        <td>
+                                            <a class="doc-link" href="#"
+                                                >Ver archivo</a
+                                            >
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <span class="tipo">Informe</span>
+                                        </td>
+                                        <td class="mono">
+                                            INF-0224-2026-PRODUCE/DGPA
+                                        </td>
+                                        <td class="fecha">11 nov 2026</td>
+                                        <td>
+                                            <a class="doc-link" href="#"
+                                                >Ver archivo</a
+                                            >
+                                        </td>
+                                    </tr>
+                                    <tr class="missing">
+                                        <td><span class="tipo">Acta</span></td>
+                                        <td class="mono">
+                                            ACTA-0031-2026-PRODUCE/DIREPRO-PIU
+                                        </td>
+                                        <td class="fecha">05 nov 2026</td>
+                                        <td>
+                                            <span class="flag flag-mini"
+                                                >Archivo no adjunto
+                                                (declarado)</span
+                                            >
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="group">
+                            <div class="group-head">
+                                <h4>Normativa relacionada</h4>
+                                <span class="count">3</span>
+                            </div>
+                            <p class="group-src">
+                                Resoluciones ministeriales, decretos supremos y
+                                leyes citadas por el caso
+                            </p>
+                            <table class="docs">
+                                <thead>
+                                    <tr>
+                                        <th>Tipo</th>
+                                        <th>Código / número</th>
+                                        <th>Fecha</th>
+                                        <th>Enlace</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><span class="tipo">RM</span></td>
+                                        <td class="mono">
+                                            RM N.º 00214-2026-PRODUCE
+                                        </td>
+                                        <td class="fecha">03 nov 2026</td>
+                                        <td>
+                                            <a class="doc-link" href="#"
+                                                >Ver archivo</a
+                                            >
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="tipo">DS</span></td>
+                                        <td class="mono">
+                                            DS N.º 007-2026-PRODUCE
+                                        </td>
+                                        <td class="fecha">21 set 2026</td>
+                                        <td>
+                                            <a class="doc-link" href="#"
+                                                >Ver archivo</a
+                                            >
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="tipo">Ley</span></td>
+                                        <td class="mono">Ley N.º 31745</td>
+                                        <td class="fecha">12 may 2026</td>
+                                        <td>
+                                            <a class="doc-link" href="#"
+                                                >Ver archivo</a
+                                            >
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="flag flag-info">
+                            <span
+                                >La fila sin archivo queda en la tabla, marcada:
+                                el documento existe en el registro y falta el
+                                adjunto. Ocultarla haría creer que no fue
+                                emitido.</span
+                            >
+                        </div>
+                    </section>
+                </div>
+
+                <!-- ── Anotaciones ────────────────────────────────────── -->
+                <div class="ann">
+                    <div class="ann-card">
+                        <h3>
+                            <span class="n">1</span>Canva: declarado, no
+                            simulado
+                        </h3>
+                        <p>
+                            El acceso «Caso de análisis (Canva)» se dibuja
+                            <b>deshabilitado</b>, con
+                            <code>title="Enlace Canva no configurado"</code>. No
+                            hay URL, no hay vista previa y no se inventa un
+                            tablero: la ausencia es parte del diseño.
+                        </p>
+                    </div>
+                    <div class="ann-card">
+                        <h3>
+                            <span class="n">2</span>Tres fuentes, una entrada
+                        </h3>
+                        <p>
+                            «Reportes de monitoreo» agrupa
+                            <b>alertas</b> (<code>core.alertas</code>),
+                            <b>clima social mensual</b> (reporte externo) y
+                            <b>planes de acción (PAE)</b>. Cada grupo tiene su
+                            conteo y su origen visible; el menú no fusiona los
+                            datos.
+                        </p>
+                    </div>
+                    <div class="ann-card">
+                        <h3>
+                            <span class="n">3</span>El clima social puede no
+                            existir
+                        </h3>
+                        <p>
+                            Es un reporte que áreas externas producen una vez al
+                            mes (item 116). Para un período puede no haber
+                            archivo: el bloque se dibuja con
+                            <b>0 y su vacío explicado</b>, nunca con un valor
+                            deducido de las alertas.
+                        </p>
+                    </div>
+                    <div class="ann-card">
+                        <h3><span class="n">4</span>Documentos: dos grupos</h3>
+                        <p>
+                            <b>PRODUCE</b> (oficios, actas, informes) y
+                            <b>normativa</b> (RM, DS, leyes) se separan porque
+                            se firman distinto y se buscan distinto. La fila sin
+                            adjunto se conserva y se declara.
+                        </p>
+                    </div>
+                    <div class="ann-card wide">
+                        <h3>
+                            <span class="n">5</span>Endpoint propuesto:
+                            <code>GET /v1/cases/:id/monitoreo</code>
+                        </h3>
+                        <table class="ann-table">
+                            <thead>
+                                <tr>
+                                    <th>Campo</th>
+                                    <th>Tipo</th>
+                                    <th>Origen</th>
+                                    <th>Si no hay dato</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>alertas[]</code></td>
+                                    <td>lista</td>
+                                    <td><code>core.alertas</code> por caso</td>
+                                    <td>lista vacía + <code>total: 0</code></td>
+                                </tr>
+                                <tr>
+                                    <td><code>clima_social</code></td>
+                                    <td>objeto o <code>null</code></td>
+                                    <td>reporte mensual externo</td>
+                                    <td>
+                                        <code>null</code> y
+                                        <code>periodo</code> consultado
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><code>planes_accion[]</code></td>
+                                    <td>lista</td>
+                                    <td>PAE del caso</td>
+                                    <td>
+                                        lista vacía; avance <code>null</code>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ── Notas para el equipo .NET ─────────────────────────── -->
+            <section class="notes">
+                <h2>Notas para el equipo .NET</h2>
+
+                <h3>Endpoints</h3>
+                <table class="contract-table">
+                    <thead>
+                        <tr>
+                            <th>Método</th>
+                            <th>Ruta</th>
+                            <th>Devuelve</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>GET</code></td>
+                            <td><code>/v1/cases/:id/monitoreo</code></td>
+                            <td>
+                                <code
+                                    >{ alertas[], clima_social, planes_accion[]
+                                    }</code
+                                >
+                            </td>
+                            <td>Propuesto en esta lámina</td>
+                        </tr>
+                        <tr>
+                            <td><code>GET</code></td>
+                            <td><code>/v1/cases/:id/documentos</code></td>
+                            <td>
+                                Documentos agrupados por
+                                <code>tipo</code>: <code>produce</code> ·
+                                <code>normativa</code>
+                            </td>
+                            <td>Propuesto</td>
+                        </tr>
+                        <tr>
+                            <td><code>GET</code></td>
+                            <td><code>/v1/cases/:id</code></td>
+                            <td>
+                                Cabecera de la ficha (código, título, nivel,
+                                riesgo)
+                            </td>
+                            <td>Reutilizado (item 101)</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p>
+                    Si los tres bloques se piden por separado, el cliente hace
+                    tres llamadas y la ficha parpadea en partes. Conviene una
+                    sola respuesta de <code>monitoreo</code> y una de
+                    <code>documentos</code>, ambas con sus listas vacías
+                    explícitas.
+                </p>
+
+                <h3>Qué es ejemplo y qué es real</h3>
+                <ul>
+                    <li>
+                        <b>Ejemplo:</b> el caso <code>CS-2026-014</code>, su
+                        región, los cuatro códigos de alerta, el
+                        <code>PAE-2026-007</code>, todos los códigos y fechas de
+                        documento y el autor del clima social.
+                    </li>
+                    <li>
+                        <b>Real:</b> el vocabulario congelado (estado
+                        <b>Abierto</b>, conflictividad <b>Controversia</b>,
+                        riesgo <b>Moderado</b>, prioridad
+                        <b>Urgente · Moderado · Bajo</b>), los cuatro plazos de
+                        alerta del item 104 y las clases de documento (oficio,
+                        acta, informe, RM, DS, ley).
+                    </li>
+                    <li>
+                        <b>Real:</b> que Canva no tiene enlace configurado y que
+                        el clima social es un reporte externo que puede no
+                        existir para el período.
+                    </li>
+                </ul>
+
+                <h3>Reglas de dibujo que no se negocian</h3>
+                <ol>
+                    <li>
+                        Lista vacía = conteo <code>0</code> + texto que explica
+                        por qué está vacía. Nunca un cero sin explicación ni una
+                        estimación.
+                    </li>
+                    <li>
+                        Documento sin adjunto: fila presente, marca
+                        <code>Archivo no adjunto (declarado)</code>, sin enlace.
+                    </li>
+                    <li>
+                        Acceso sin destino: <code>disabled</code> +
+                        <code>title</code>. Ni <code>href="#"</code> silencioso
+                        ni una pantalla de relleno.
+                    </li>
+                    <li>
+                        Prioridad y plazo no se combinan en una sola etiqueta:
+                        son dos columnas, dos escalas.
+                    </li>
+                </ol>
+
+                <h3>Relación con otros items</h3>
+                <p>
+                    101 (cabecera y cuatro accesos) · 102 (mapa de actores) ·
+                    104 y 106 (prioridad con plazo) · 112 (alertas, compromisos
+                    y documentos con el mismo patrón de indicadores + matriz) ·
+                    116 (clima social como reporte mensual externo) · 117 (ayuda
+                    memoria y relatoría como documentos tipo 10 y 11).
+                </p>
+            </section>
+        </div>
+    </body>
+</html>

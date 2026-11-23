@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="es"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{colors:{"on-secondary-container":"#00452e","secondary-container":"#00bd85","tertiary-fixed-dim":"#cebdff","surface-container-high":"#232b34","inverse-surface":"#dbe3f0","surface-dim":"#0c141d","primary-fixed-dim":"#a8c8ff","surface-variant":"#2d353f","tertiary":"#cebdff","primary-container":"#6ea8fe","on-tertiary-fixed":"#21005e","surface-bright":"#323a44","surface-container-lowest":"#070f18","on-primary-container":"#003c76","surface-container-low":"#141c25","on-surface-variant":"#c2c6d3","on-primary-fixed":"#001b3c","background":"#0c141d","on-surface":"#dbe3f0","inverse-on-surface":"#29313b","on-primary":"#003061","on-secondary":"#003825","inverse-primary":"#115eaf","outline":"#8c919d","surface-container":"#18202a","primary":"#a8c8ff","secondary":"#45dfa4","secondary-fixed-dim":"#45dfa4","surface":"#0c141d","on-tertiary-fixed-variant":"#4f319c","tertiary-fixed":"#e8ddff","on-tertiary":"#381385","on-tertiary-container":"#442491","tertiary-container":"#b196ff","on-error-container":"#ffdad6","on-secondary-fixed":"#002114","surface-tint":"#a8c8ff","on-primary-fixed-variant":"#004689","primary-fixed":"#d5e3ff","outline-variant":"#424751","on-secondary-fixed-variant":"#005137","error":"#ffb4ab","error-container":"#93000a","secondary-fixed":"#68fcbf","on-error":"#690005","on-background":"#dbe3f0","surface-container-highest":"#2d353f"},borderRadius:{DEFAULT:"0.125rem",lg:"0.25rem",xl:"0.5rem",full:"0.75rem"},spacing:{"space-sm":"0.5rem","space-lg":"1rem","space-xl":"1.5rem",gutter:"1rem","margin-desktop":"2rem","gutter-desktop":"1.5rem","space-xs":"0.25rem",margin:"1rem","space-md":"0.75rem"},fontFamily:{"headline-lg":["Inter"],"label-sm":["Inter"],"data-tabular":["Inter"],"headline-md":["Inter"],"display-lg-mobile":["Inter"],"headline-sm":["Inter"],"body-md":["Inter"],"title-md":["Inter"],"display-lg":["Inter"],"body-lg":["Inter"],"body-sm":["Inter"],"label-md":["Inter"]},fontSize:{"headline-lg":["24px",{lineHeight:"32px",letterSpacing:"-0.01em",fontWeight:"600"}],"label-sm":["11px",{lineHeight:"14px",letterSpacing:"0.03em",fontWeight:"500"}],"data-tabular":["13px",{lineHeight:"18px",letterSpacing:"0",fontWeight:"500"}],"headline-md":["20px",{lineHeight:"28px",fontWeight:"600"}],"display-lg-mobile":["24px",{lineHeight:"32px",letterSpacing:"-0.01em",fontWeight:"700"}],"headline-sm":["16px",{lineHeight:"24px",fontWeight:"600"}],"body-md":["14px",{lineHeight:"20px",fontWeight:"400"}],"title-md":["14px",{lineHeight:"20px",fontWeight:"600"}],"display-lg":["32px",{lineHeight:"40px",letterSpacing:"-0.02em",fontWeight:"700"}],"body-lg":["16px",{lineHeight:"24px",fontWeight:"400"}],"body-sm":["13px",{lineHeight:"18px",fontWeight:"400"}],"label-md":["12px",{lineHeight:"16px",letterSpacing:"0.02em",fontWeight:"600"}]}}}}</script></head><body class="bg-surface font-body-md text-on-surface antialiased"><aside class="fixed left-0 top-0 h-full w-64 bg-surface-container-low z-50 flex flex-col justify-between border-r border-outline-variant/40"><div class="flex flex-col"><div class="px-space-lg py-space-lg flex items-center gap-space-md border-b border-outline-variant/30"><div class="w-9 h-9 rounded-lg bg-primary-container flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-on-primary-container text-[22px]">shield_with_house</span></div><div class="flex flex-col min-w-0"><div class="flex items-center gap-space-xs"><span class="font-headline-sm text-headline-sm text-primary-container tracking-wider font-bold">AVISA</span><span class="px-1.5 py-0.5 rounded bg-surface-container-high text-label-sm font-label-sm text-secondary">v2.4</span></div><span class="font-label-sm text-label-sm text-on-surface-variant truncate">OAIPCS · PRODUCE - Perú</span></div></div><div class="px-space-md pt-space-md pb-space-xs"><span class="font-label-sm text-label-sm uppercase tracking-wider text-outline px-space-sm">Monitoreo Sectorial</span></div><nav class="flex flex-col gap-0.5 px-space-sm" data-active-classes="bg-surface-container-high text-primary font-title-md border-l-2 border-primary-container"><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-body-md font-body-md text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="panorama-territorial" href="#"><span class="material-symbols-outlined text-[20px]">map</span><span>Panorama territorial</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-body-md font-body-md text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="resumen-operativo" href="#"><span class="material-symbols-outlined text-[20px]">analytics</span><span>Resumen operativo</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-body-md font-body-md text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="bandeja-de-trabajo" href="#"><span class="material-symbols-outlined text-[20px]">inbox</span><span>Bandeja de trabajo</span></a><a aria-current="page" class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg transition-colors bg-surface-container-high text-primary font-title-md border-l-2 border-primary-container" data-path="casos" href="#"><span class="material-symbols-outlined text-[20px]">folder_open</span><span>Casos</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-body-md font-body-md text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="alertas-tempranas" href="#"><span class="material-symbols-outlined text-[20px]">notification_important</span><span>Alertas tempranas</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-body-md font-body-md text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="compromisos" href="#"><span class="material-symbols-outlined text-[20px]">fact_check</span><span>Compromisos</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-body-md font-body-md text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="documentos" href="#"><span class="material-symbols-outlined text-[20px]">description</span><span>Documentos</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-body-md font-body-md text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="reportes" href="#"><span class="material-symbols-outlined text-[20px]">assessment</span><span>Reportes</span></a></nav></div><div class="p-space-md border-t border-outline-variant/30 bg-surface-container-lowest/50"><div class="flex items-center gap-space-sm"><div class="relative"><div class="w-8 h-8 rounded-full bg-surface-container-highest flex items-center justify-center"><span class="material-symbols-outlined text-primary text-[18px]">badge</span></div><span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-secondary ring-2 ring-surface-container-low"></span></div><div class="flex flex-col min-w-0 flex-1"><span class="font-label-md text-label-md text-on-surface truncate">Especialista OAIPCS</span><span class="font-label-sm text-label-sm text-on-surface-variant truncate">PRODUCE · En línea</span></div></div></div></aside><div class="pl-64 flex flex-col min-h-screen"><header class="fixed top-0 left-64 right-0 h-14 bg-surface/90 backdrop-blur-xl border-b border-outline-variant/30 z-40"><div class="h-14 w-full px-gutter-desktop flex items-center justify-between"><div class="flex items-center gap-space-md"><span class="font-label-sm text-label-sm uppercase tracking-wider text-outline">Sistema Nacional de Información de Conflictos</span><span class="text-outline-variant">|</span><div class="flex items-center gap-space-xs text-secondary font-label-sm text-label-sm"><span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span><span>Red de Monitoreo Activa</span></div></div><div class="flex items-center gap-space-lg"><div class="flex items-center bg-surface-container-lowest border border-outline-variant/40 rounded px-space-md py-1 w-64"><span class="material-symbols-outlined text-outline text-[18px] mr-space-xs">search</span><span class="font-body-sm text-body-sm text-outline">Buscar caso, ubigeo o sector...</span></div><div class="flex items-center gap-space-sm"><button class="w-8 h-8 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">tune</span></button><button class="w-8 h-8 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors relative" type="button"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-error rounded-full"></span></button></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="w-full pt-14 bg-surface flex-1"><div class="flex flex-col w-full">
+<div class="w-full max-w-[1440px] mx-auto px-margin-desktop py-space-xl flex flex-col gap-space-lg">
+<!-- 1. ENCABEZADO DE PÁGINA -->
+<section class="flex flex-col md:flex-row md:items-center justify-between gap-space-md">
+<div class="flex flex-col gap-0.5">
+<div class="flex items-center gap-space-sm">
+<h1 class="font-headline-lg text-headline-lg text-white font-bold tracking-tight">Casos</h1>
+<span class="px-2 py-0.5 rounded bg-surface-container-high text-primary font-data-tabular text-label-sm">34 Registrados</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">Seguimiento y gestión preventiva de la conflictividad socioambiental y sectorial</p>
+</div>
+<div class="flex items-center gap-space-sm self-start md:self-auto">
+<button class="h-9 px-space-md rounded bg-surface-container hover:bg-surface-variant text-on-surface font-title-md text-body-sm flex items-center gap-1.5 transition-colors shadow-sm" type="button">
+<span class="material-symbols-outlined text-[18px] text-outline">file_download</span>
+<span>Exportar</span>
+<span class="material-symbols-outlined text-[16px] text-outline -mr-1">arrow_drop_down</span>
+</button>
+<button class="h-9 px-space-md rounded bg-primary-container hover:bg-[#8ebbfe] text-on-primary-container font-title-md text-body-sm flex items-center gap-1.5 transition-colors shadow-sm font-semibold" type="button">
+<span class="material-symbols-outlined text-[19px]">add</span>
+<span>Nuevo caso</span>
+</button>
+</div>
+</section>
+<!-- 2. FILA ÚNICA DE CONTROLES Y FILTROS -->
+<section class="w-full bg-surface-container-low rounded-lg p-space-sm flex flex-col xl:flex-row items-center gap-space-sm shadow-sm">
+<!-- Selector de vista -->
+<div class="relative w-full xl:w-44 shrink-0">
+<div class="h-9 w-full bg-surface-container-lowest rounded px-space-sm flex items-center justify-between text-body-sm text-on-surface">
+<div class="flex items-center gap-1.5 truncate">
+<span class="material-symbols-outlined text-primary text-[18px]">grid_view</span>
+<span class="font-title-md text-body-sm truncate">Vista: Tarjetas</span>
+</div>
+<span class="material-symbols-outlined text-outline text-[16px]">arrow_drop_down</span>
+</div>
+</div>
+<!-- Buscador -->
+<div class="relative flex-1 w-full min-w-[260px]">
+<div class="h-9 w-full bg-surface-container-lowest rounded px-space-md flex items-center gap-space-xs text-body-sm text-on-surface">
+<span class="material-symbols-outlined text-outline text-[18px] shrink-0">search</span>
+<input class="w-full bg-transparent text-white placeholder-outline text-body-sm focus:outline-none" placeholder="Buscar por código o título..." type="text"/>
+</div>
+</div>
+<!-- Selectores de filtrado -->
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-space-xs w-full xl:w-auto shrink-0">
+<!-- Nivel de conflictividad -->
+<div class="h-9 bg-surface-container-lowest rounded px-space-sm flex items-center justify-between text-body-sm text-on-surface-variant min-w-[170px] cursor-pointer hover:text-on-surface transition-colors">
+<span class="truncate font-body-sm">Conflictividad: <strong class="text-white font-medium">Todos</strong></span>
+<span class="material-symbols-outlined text-outline text-[16px] ml-1">arrow_drop_down</span>
+</div>
+<!-- Región -->
+<div class="h-9 bg-surface-container-lowest rounded px-space-sm flex items-center justify-between text-body-sm text-on-surface-variant min-w-[130px] cursor-pointer hover:text-on-surface transition-colors">
+<span class="truncate font-body-sm">Región</span>
+<span class="material-symbols-outlined text-outline text-[16px] ml-1">arrow_drop_down</span>
+</div>
+<!-- Temática -->
+<div class="h-9 bg-surface-container-lowest rounded px-space-sm flex items-center justify-between text-body-sm text-on-surface-variant min-w-[140px] cursor-pointer hover:text-on-surface transition-colors">
+<span class="truncate font-body-sm">Temática</span>
+<span class="material-symbols-outlined text-outline text-[16px] ml-1">arrow_drop_down</span>
+</div>
+</div>
+<!-- Reset -->
+<button class="h-9 px-space-sm rounded text-outline hover:text-primary transition-colors text-label-md font-label-md flex items-center gap-1 shrink-0 self-end xl:self-center" type="button">
+<span class="material-symbols-outlined text-[16px]">restart_alt</span>
+<span>Limpiar filtros</span>
+</button>
+</section>
+<!-- 3. GRILLA DE 3 COLUMNAS CON 9 TARJETAS COMPACTAS -->
+<section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-space-md w-full">
+<!-- CASO 1 -->
+<article class="bg-surface-container hover:bg-surface-variant rounded-lg p-space-md flex flex-col justify-between h-[170px] transition-all duration-150 shadow-sm group cursor-pointer">
+<div class="flex flex-col gap-1 min-w-0">
+<div class="flex items-center justify-between text-label-sm font-label-sm text-outline min-w-0">
+<span class="font-data-tabular text-primary truncate">CS-PA-OAT-2026-04</span>
+<div class="flex items-center gap-1 truncate text-on-surface-variant">
+<span>Piura</span>
+<span class="text-surface-variant group-hover:text-outline">•</span>
+<span class="truncate">Pesca artesanal</span>
+</div>
+</div>
+<h2 class="font-title-md text-title-md text-white line-clamp-2 leading-snug group-hover:text-primary transition-colors">
+            Demanda de cancelación de la temporada de anchoveta por captura juvenil
+          </h2>
+</div>
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center gap-1 overflow-hidden">
+<span class="px-1.5 py-0.5 rounded bg-surface-container-lowest text-on-surface-variant text-[11px] font-label-sm whitespace-nowrap truncate">
+              Conflictividad: Controversia
+            </span>
+<span class="px-1.5 py-0.5 rounded bg-[#F59E0B]/15 text-[#FBBF24] text-[11px] font-label-sm flex items-center gap-1 whitespace-nowrap">
+<span class="w-1.5 h-1.5 rounded-full bg-[#F59E0B]"></span>
+              Riesgo: Moderado
+            </span>
+<span class="px-1.5 py-0.5 rounded bg-surface-container-lowest text-on-surface-variant text-[11px] font-label-sm whitespace-nowrap truncate">
+              Prioridad: Urgente
+            </span>
+</div>
+<p class="text-[12px] leading-4 text-outline line-clamp-2">
+            Diversos gremios del sector pesquero exigen la suspensión preventiva ante reportes de alta incidencia de juveniles en litoral norte…
+          </p>
+</div>
+<div class="flex items-center justify-between text-[11px] font-label-sm text-outline/80 pt-1 mt-auto">
+<span class="flex items-center gap-1 text-on-surface-variant truncate">
+<span class="material-symbols-outlined text-[14px] text-secondary">checklist</span>
+            Monitoreo de compromisos
+          </span>
+<span class="font-data-tabular shrink-0">Act. 18/11/2026</span>
+</div>
+</article>
+<!-- CASO 2 -->
+<article class="bg-surface-container hover:bg-surface-variant rounded-lg p-space-md flex flex-col justify-between h-[170px] transition-all duration-150 shadow-sm group cursor-pointer">
+<div class="flex flex-col gap-1 min-w-0">
+<div class="flex items-center justify-between text-label-sm font-label-sm text-outline min-w-0">
+<span class="font-data-tabular text-primary truncate">CS-MI-ITE-2026-03</span>
+<div class="flex items-center gap-1 truncate text-on-surface-variant">
+<span>Lima</span>
+<span class="text-surface-variant group-hover:text-outline">•</span>
+<span class="truncate">MYPE e Industria</span>
+</div>
+</div>
+<h2 class="font-title-md text-title-md text-white line-clamp-2 leading-snug group-hover:text-primary transition-colors">
+            Participación ciudadana en el EIA-d del proyecto Aceros Americanos (Chilca)
+          </h2>
+</div>
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center gap-1 overflow-hidden">
+<span class="px-1.5 py-0.5 rounded bg-surface-container-lowest text-on-surface-variant text-[11px] font-label-sm whitespace-nowrap truncate">
+              Conflictividad: Controversia
+            </span>
+<span class="px-1.5 py-0.5 rounded bg-[#34D399]/15 text-[#34D399] text-[11px] font-label-sm flex items-center gap-1 whitespace-nowrap">
+<span class="w-1.5 h-1.5 rounded-full bg-[#34D399]"></span>
+              Riesgo: Bajo
+            </span>
+<span class="px-1.5 py-0.5 rounded bg-surface-container-lowest text-on-surface-variant text-[11px] font-label-sm whitespace-nowrap truncate">
+              Prioridad: Media
+            </span>
+</div>
+<p class="text-[12px] leading-4 text-outline line-clamp-2">
+            Vecinos y organizaciones sociales de Chilca manifiestan disconformidad con los horarios y alcances de las audiencias públicas…
+          </p>
+</div>
+<div class="flex items-center justify-between text-[11px] font-label-sm text-outline/80 pt-1 mt-auto">
+<span class="flex items-center gap-1 text-on-surface-variant truncate">
+<span class="material-symbols-outlined text-[14px] text-secondary">checklist</span>
+            Monitoreo de compromisos
+          </span>
+<span class="font-data-tabular shrink-0">Act. 15/11/2026</span>
+</div>
+</article>
+<!-- CASO 3 -->
+<article class="bg-surface-container hover:bg-surface-variant rounded-lg p-space-md flex flex-col justify-between h-[170px] transition-all duration-150 shadow-sm group cursor-pointer">
+<div class="flex flex-col gap-1 min-w-0">
+<div class="flex items-center justify-between text-label-sm font-label-sm text-outline min-w-0">
+<span class="font-data-tabular text-primary truncate">CS-PA-ITE-2026-03</span>
+<div class="flex items-center gap-1 truncate text-on-surface-variant">
+<span>Junín</span>
+<span class="text-surface-variant group-hover:text-outline">•</span>
+<span class="truncate">Acuicultura</span>
+</div>
+</div>
+<h2 class="font-title-md text-title-md text-white line-clamp-2 leading-snug group-hover:text-primary transition-colors">
+            Mortandad masiva de truchas en piscigranjas de Pariahuanca
+          </h2>
+</div>
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center gap-1 overflow-hidden">
+<span class="px-1.5 py-0.5 rounded bg-surface-container-lowest text-on-surface-variant text-[11px] font-label-sm whitespace-nowrap truncate">
+              Conflictividad: Conflicto social
+            </span>
+<span class="px-1.5 py-0.5 rounded bg-[#EF4444]/15 text-[#F87171] text-[11px] font-label-sm flex items-center gap-1 whitespace-nowrap">
+<span class="w-1.5 h-1.5 rounded-full bg-[#EF4444]"></span>
+              Riesgo: Alto
+            </span>
+<span class="px-1.5 py-0.5 rounded bg-surface-container-lowest text-on-surface-variant text-[11px] font-label-sm whitespace-nowrap truncate">
+              Prioridad: Urgente
+            </span>
+</div>
+<p class="text-[12px] leading-4 text-outline line-clamp-2">
+            Productores acuícolas denuncian afectación hídrica por efluentes y exigen fiscalización multisectorial inmediata de PRODUCE y OEFA…
+          </p>
+</div>
+<div class="flex items-center justify-between text-[11px] font-label-sm text-outline/80 pt-1 mt-auto">
+<span class="flex items-center gap-1 text-on-surface-variant truncate">
+<span class="material-symbols-outlined text-[14px] text-secondary">checklist</span>
+            Monitoreo de compromisos
+          </span>
+<span class="font-data-tabular shrink-0">Act. 12/11/2026</span>
+</div>
+</article>
+<!-- CASO 4 -->
+<article class="bg-surface-container hover:bg-surface-variant rounded-lg p-space-md flex flex-col justify-between h-[170px] transition-all duration-150 shadow-sm group cursor-pointer">
+<div class="flex flex-col gap-1 min-w-0">
+<div class="flex items-center justify-between text-label-sm font-label-sm text-outline min-w-0">
+<span class="font-data-tabular text-primary truncate">CS-PA-OAT-2026-03</span>
+<div class="flex items-center gap-1 truncate text-on-surface-variant">
+<span>Tumbes</span>
+<span class="text-surface-variant group-hover:text-outline">•</span>
+<span class="truncate">Pesca artesanal</span>
+</div>
+</div>
+<h2 class="font-title-md text-title-md text-white line-clamp-2 leading-snug group-hover:text-primary transition-colors">
+            Delimitación de las 5 millas marinas y pesca ilegal de arrastre de fondo
+          </h2>
+</div>
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center gap-1 overflow-hidden">
+<span class="px-1.5 py-0.5 rounded bg-surface-container-lowest text-on-surface-variant text-[11px] font-label-sm whitespace-nowrap truncate">
+              Conflictividad: Conflicto social
+            </span>
+<span class="px-1.5 py-0.5 rounded bg-[#EF4444]/15 text-[#F87171] text-[11px] font-label-sm flex items-center gap-1 whitespace-nowrap">
+<span class="w-1.5 h-1.5 rounded-full bg-[#EF4444]"></span>
+              Riesgo: Alto
+            </span>
+<span class="px-1.5 py-0.5 rounded bg-surface-container-lowest text-on-surface-variant text-[11px] font-label-sm whitespace-nowrap truncate">
+              Prioridad: Urgente
+            </span>
+</div>
+<p class="text-[12px] leading-4 text-outline line-clamp-2">
+            Gremios artesanales de Puerto Pizarro y Cancas denuncian invasión reiterada de bolicheras en zona exclusiva de protección…
+          </p>
+</div>
+<div class="flex items-center justify-between text-[11px] font-label-sm text-outline/80 pt-1 mt-auto">
+<span class="flex items-center gap-1 text-on-surface-variant truncate">
+<span class="material-symbols-outlined text-[14px] text-secondary">checklist</span>
+            Monitoreo de compromisos
+          </span>
+<span class="font-data-tabular shrink-0">Act. 10/11/2026</span>
+</div>
+</article>
+<!-- CASO 5 -->
+<article class="bg-surface-container hover:bg-surface-variant rounded-lg p-space-md flex flex-col justify-between h-[170px] transition-all duration-150 shadow-sm group cursor-pointer">
+<div class="flex flex-col gap-1 min-w-0">
+<div class="flex items-center justify-between text-label-sm font-label-sm text-outline min-w-0">
+<span class="font-data-tabular text-primary truncate">CS-IN-NOR-2026-01</span>
+<div class="flex items-center gap-1 truncate text-on-surface-variant">
+<span>Ica</span>
+<span class="text-surface-variant group-hover:text-outline">•</span>
+<span class="truncate">Industria conservera</span>
+</div>
+</div>
+<h2 class="font-title-md text-title-md text-white line-clamp-2 leading-snug group-hover:text-primary transition-colors">
+            Actualización del protocolo sanitario de descargas en bahía de Paracas
+          </h2>
+</div>
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center gap-1 overflow-hidden">
+<span class="px-1.5 py-0.5 rounded bg-surface-container-lowest text-on-surface-variant text-[11px] font-label-sm whitespace-nowrap truncate">
+              Conflictividad: Diferencia
+            </span>
+<span class="px-1.5 py-0.5 rounded bg-[#34D399]/15 text-[#34D399] text-[11px] font-label-sm flex items-center gap-1 whitespace-nowrap">
+<span class="w-1.5 h-1.5 rounded-full bg-[#34D399]"></span>
+              Riesgo: Bajo
+            </span>
+<span class="px-1.5 py-0.5 rounded bg-surface-container-lowest text-on-surface-variant text-[11px] font-label-sm whitespace-nowrap truncate">
+              Prioridad: Programada
+            </span>
+</div>
+<p class="text-[12px] leading-4 text-outline line-clamp-2">
+            Mesas de trabajo técnicas con plantas procesadoras para implementar nuevos límites permisibles de emisión y recirculación hídrica…
+          </p>
+</div>
+<div class="flex items-center justify-between text-[11px] font-label-sm text-outline/80 pt-1 mt-auto">
+<span class="flex items-center gap-1 text-on-surface-variant truncate">
+<span class="material-symbols-outlined text-[14px] text-secondary">checklist</span>
+            Monitoreo de compromisos
+          </span>
+<span class="font-data-tabular shrink-0">Act. 08/11/2026</span>
+</div>
+</article>
+<!-- CASO 6 -->
+<article class="bg-surface-container hover:bg-surface-variant rounded-lg p-space-md flex flex-col justify-between h-[170px] transition-all duration-150 shadow-sm group cursor-pointer">
+<div class="flex flex-col gap-1 min-w-0">
+<div class="flex items-center justify-between text-label-sm font-label-sm text-outline min-w-0">
+<span class="font-data-tabular text-primary truncate">CS-PA-INF-2026-02</span>
+<div class="flex items-center gap-1 truncate text-on-surface-variant">
+<span>Piura</span>
+<span class="text-surface-variant group-hover:text-outline">•</span>
+<span class="truncate">Infraestructura pesquera</span>
+</div>
+</div>
+<h2 class="font-title-md text-title-md text-white line-clamp-2 leading-snug group-hover:text-primary transition-colors">
+            Retraso en la entrega del Desembarcadero Pesquero Artesanal (DPA) Yacila
+          </h2>
+</div>
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center gap-1 overflow-hidden">
+<span class="px-1.5 py-0.5 rounded bg-surface-container-lowest text-on-surface-variant text-[11px] font-label-sm whitespace-nowrap truncate">
+              Conflictividad: Controversia
+            </span>
+<span class="px-1.5 py-0.5 rounded bg-[#F59E0B]/15 text-[#FBBF24] text-[11px] font-label-sm flex items-center gap-1 whitespace-nowrap">
+<span class="w-1.5 h-1.5 rounded-full bg-[#F59E0B]"></span>
+              Riesgo: Moderado
+            </span>
+<span class="px-1.5 py-0.5 rounded bg-surface-container-lowest text-on-surface-variant text-[11px] font-label-sm whitespace-nowrap truncate">
+              Prioridad: Alta
+            </span>
+</div>
+<p class="text-[12px] leading-4 text-outline line-clamp-2">
+            Pescadores agremiados solicitan auditoría técnica de FONDEPES por ampliación de plazos de obras civiles en el muelle de descarga…
+          </p>
+</div>
+<div class="flex items-center justify-between text-[11px] font-label-sm text-outline/80 pt-1 mt-auto">
+<span class="flex items-center gap-1 text-on-surface-variant truncate">
+<span class="material-symbols-outlined text-[14px] text-secondary">checklist</span>
+            Monitoreo de compromisos
+          </span>
+<span class="font-data-tabular shrink-0">Act. 05/11/2026</span>
+</div>
+</article>
+<!-- CASO 7 -->
+<article class="bg-surface-container hover:bg-surface-variant rounded-lg p-space-md flex flex-col justify-between h-[170px] transition-all duration-150 shadow-sm group cursor-pointer">
+<div class="flex flex-col gap-1 min-w-0">
+<div class="flex items-center justify-between text-label-sm font-label-sm text-outline min-w-0">
+<span class="font-data-tabular text-primary truncate">CS-MI-OAT-2026-05</span>
+<div class="flex items-center gap-1 truncate text-on-surface-variant">
+<span>Lima</span>
+<span class="text-surface-variant group-hover:text-outline">•</span>
+<span class="truncate">Parque industrial</span>
+</div>
+</div>
+<h2 class="font-title-md text-title-md text-white line-clamp-2 leading-snug group-hover:text-primary transition-colors">
+            Reubicación de fundiciones informales en el Parque Industrial de Ancón
+          </h2>
+</div>
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center gap-1 overflow-hidden">
+<span class="px-1.5 py-0.5 rounded bg-surface-container-lowest text-on-surface-variant text-[11px] font-label-sm whitespace-nowrap truncate">
+              Conflictividad: Diferencia
+            </span>
+<span class="px-1.5 py-0.5 rounded bg-[#F59E0B]/15 text-[#FBBF24] text-[11px] font-label-sm flex items-center gap-1 whitespace-nowrap">
+<span class="w-1.5 h-1.5 rounded-full bg-[#F59E0B]"></span>
+              Riesgo: Moderado
+            </span>
+<span class="px-1.5 py-0.5 rounded bg-surface-container-lowest text-on-surface-variant text-[11px] font-label-sm whitespace-nowrap truncate">
+              Prioridad: Media
+            </span>
+</div>
+<p class="text-[12px] leading-4 text-outline line-clamp-2">
+            Diálogo interinstitucional para la formalización y traslado de talleres metalmecánicos hacia áreas zonificadas con servicios básicos…
+          </p>
+</div>
+<div class="flex items-center justify-between text-[11px] font-label-sm text-outline/80 pt-1 mt-auto">
+<span class="flex items-center gap-1 text-on-surface-variant truncate">
+<span class="material-symbols-outlined text-[14px] text-secondary">checklist</span>
+            Monitoreo de compromisos
+          </span>
+<span class="font-data-tabular shrink-0">Act. 02/11/2026</span>
+</div>
+</article>
+<!-- CASO 8 -->
+<article class="bg-surface-container hover:bg-surface-variant rounded-lg p-space-md flex flex-col justify-between h-[170px] transition-all duration-150 shadow-sm group cursor-pointer">
+<div class="flex flex-col gap-1 min-w-0">
+<div class="flex items-center justify-between text-label-sm font-label-sm text-outline min-w-0">
+<span class="font-data-tabular text-primary truncate">CS-PA-NOR-2026-04</span>
+<div class="flex items-center gap-1 truncate text-on-surface-variant">
+<span>Tumbes</span>
+<span class="text-surface-variant group-hover:text-outline">•</span>
+<span class="truncate">Extracción de conchas negras</span>
+</div>
+</div>
+<h2 class="font-title-md text-title-md text-white line-clamp-2 leading-snug group-hover:text-primary transition-colors">
+            Implementación de veda biológica extraordinaria de conchas negras y cangrejo
+          </h2>
+</div>
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center gap-1 overflow-hidden">
+<span class="px-1.5 py-0.5 rounded bg-surface-container-lowest text-on-surface-variant text-[11px] font-label-sm whitespace-nowrap truncate">
+              Conflictividad: Controversia
+            </span>
+<span class="px-1.5 py-0.5 rounded bg-[#F59E0B]/15 text-[#FBBF24] text-[11px] font-label-sm flex items-center gap-1 whitespace-nowrap">
+<span class="w-1.5 h-1.5 rounded-full bg-[#F59E0B]"></span>
+              Riesgo: Moderado
+            </span>
+<span class="px-1.5 py-0.5 rounded bg-surface-container-lowest text-on-surface-variant text-[11px] font-label-sm whitespace-nowrap truncate">
+              Prioridad: Alta
+            </span>
+</div>
+<p class="text-[12px] leading-4 text-outline line-clamp-2">
+            Extractores de los manglares de Tumbes reclaman bono de compensación social ante la ampliación de la veda por disminución de biomasa…
+          </p>
+</div>
+<div class="flex items-center justify-between text-[11px] font-label-sm text-outline/80 pt-1 mt-auto">
+<span class="flex items-center gap-1 text-on-surface-variant truncate">
+<span class="material-symbols-outlined text-[14px] text-secondary">checklist</span>
+            Monitoreo de compromisos
+          </span>
+<span class="font-data-tabular shrink-0">Act. 29/10/2026</span>
+</div>
+</article>
+<!-- CASO 9 -->
+<article class="bg-surface-container hover:bg-surface-variant rounded-lg p-space-md flex flex-col justify-between h-[170px] transition-all duration-150 shadow-sm group cursor-pointer">
+<div class="flex flex-col gap-1 min-w-0">
+<div class="flex items-center justify-between text-label-sm font-label-sm text-outline min-w-0">
+<span class="font-data-tabular text-primary truncate">CS-IN-INF-2026-03</span>
+<div class="flex items-center gap-1 truncate text-on-surface-variant">
+<span>Ica</span>
+<span class="text-surface-variant group-hover:text-outline">•</span>
+<span class="truncate">Cadena de frío</span>
+</div>
+</div>
+<h2 class="font-title-md text-title-md text-white line-clamp-2 leading-snug group-hover:text-primary transition-colors">
+            Reactivación del complejo frigorífico pesquero de San Andrés
+          </h2>
+</div>
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center gap-1 overflow-hidden">
+<span class="px-1.5 py-0.5 rounded bg-surface-container-lowest text-on-surface-variant text-[11px] font-label-sm whitespace-nowrap truncate">
+              Conflictividad: Diferencia
+            </span>
+<span class="px-1.5 py-0.5 rounded bg-[#34D399]/15 text-[#34D399] text-[11px] font-label-sm flex items-center gap-1 whitespace-nowrap">
+<span class="w-1.5 h-1.5 rounded-full bg-[#34D399]"></span>
+              Riesgo: Bajo
+            </span>
+<span class="px-1.5 py-0.5 rounded bg-surface-container-lowest text-on-surface-variant text-[11px] font-label-sm whitespace-nowrap truncate">
+              Prioridad: Media
+            </span>
+</div>
+<p class="text-[12px] leading-4 text-outline line-clamp-2">
+            Asociación de armadores artesanales solicita transferencia de administración del módulo de congelado a cooperativa local fiscalizada…
+          </p>
+</div>
+<div class="flex items-center justify-between text-[11px] font-label-sm text-outline/80 pt-1 mt-auto">
+<span class="flex items-center gap-1 text-on-surface-variant truncate">
+<span class="material-symbols-outlined text-[14px] text-secondary">checklist</span>
+            Monitoreo de compromisos
+          </span>
+<span class="font-data-tabular shrink-0">Act. 25/10/2026</span>
+</div>
+</article>
+</section>
+<!-- 4. PAGINACIÓN Y RESUMEN INFERIOR -->
+<footer class="w-full bg-surface-container-low rounded-lg p-space-sm flex flex-col sm:flex-row items-center justify-between gap-space-sm mt-space-sm shadow-sm">
+<div class="flex items-center gap-space-md">
+<span class="font-body-sm text-body-sm text-on-surface-variant">
+          Mostrando <strong class="text-white font-medium">9</strong> de <strong class="text-white font-medium">34</strong> casos vigentes
+        </span>
+<div class="hidden md:flex items-center gap-space-xs text-label-sm font-label-sm text-outline">
+<span class="w-2 h-2 rounded-full bg-error"></span>
+<span>2 Alto</span>
+<span class="mx-1">•</span>
+<span class="w-2 h-2 rounded-full bg-[#F59E0B]"></span>
+<span>4 Moderado</span>
+<span class="mx-1">•</span>
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span>3 Bajo</span>
+</div>
+</div>
+<div class="flex items-center gap-space-xs">
+<button class="w-8 h-8 rounded bg-surface-container-lowest text-outline hover:text-white flex items-center justify-center transition-colors disabled:opacity-40" disabled="" type="button">
+<span class="material-symbols-outlined text-[18px]">chevron_left</span>
+</button>
+<div class="flex items-center gap-1 px-1">
+<button class="w-8 h-8 rounded bg-primary-container text-on-primary-container font-title-md text-label-md flex items-center justify-center" type="button">1</button>
+<button class="w-8 h-8 rounded bg-surface-container-lowest text-on-surface-variant hover:text-white font-title-md text-label-md flex items-center justify-center transition-colors" type="button">2</button>
+<button class="w-8 h-8 rounded bg-surface-container-lowest text-on-surface-variant hover:text-white font-title-md text-label-md flex items-center justify-center transition-colors" type="button">3</button>
+<button class="w-8 h-8 rounded bg-surface-container-lowest text-on-surface-variant hover:text-white font-title-md text-label-md flex items-center justify-center transition-colors" type="button">4</button>
+</div>
+<button class="w-8 h-8 rounded bg-surface-container-lowest text-outline hover:text-white flex items-center justify-center transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">chevron_right</span>
+</button>
+</div>
+</footer>
+</div>
+</div></main></div></body></html>

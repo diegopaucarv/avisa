@@ -1,0 +1,510 @@
+<!DOCTYPE html><html class="dark" lang="es"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><meta content="web_standard" name="shell-type"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;display=swap" rel="stylesheet"><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+          "primary": "#a8c8ff",
+          "on-secondary-container": "#00452e",
+          "error": "#ffb4ab",
+          "tertiary-container": "#b196ff",
+          "error-container": "#93000a",
+          "surface-container-lowest": "#070f18",
+          "on-tertiary-fixed-variant": "#4f319c",
+          "surface-container-high": "#232b34",
+          "outline": "#8c919d",
+          "tertiary": "#cebdff",
+          "primary-fixed-dim": "#a8c8ff",
+          "surface-bright": "#323a44",
+          "on-primary-container": "#003c76",
+          "on-tertiary-container": "#442491",
+          "surface-container-highest": "#2d353f",
+          "on-primary-fixed": "#001b3c",
+          "on-secondary-fixed": "#002114",
+          "on-surface-variant": "#c2c6d3",
+          "on-primary-fixed-variant": "#004689",
+          "tertiary-fixed-dim": "#cebdff",
+          "on-surface": "#dbe3f0",
+          "inverse-primary": "#115eaf",
+          "inverse-on-surface": "#29313b",
+          "surface": "#0c141d",
+          "on-error": "#690005",
+          "surface-variant": "#2d353f",
+          "on-primary": "#003061",
+          "secondary": "#45dfa4",
+          "secondary-fixed-dim": "#45dfa4",
+          "secondary-fixed": "#68fcbf",
+          "primary-container": "#6ea8fe",
+          "tertiary-fixed": "#e8ddff",
+          "surface-container": "#18202a",
+          "outline-variant": "#424751",
+          "inverse-surface": "#dbe3f0",
+          "surface-tint": "#a8c8ff",
+          "primary-fixed": "#d5e3ff",
+          "secondary-container": "#00bd85",
+          "on-secondary": "#003825",
+          "background": "#0c141d",
+          "on-background": "#dbe3f0",
+          "on-error-container": "#ffdad6",
+          "on-tertiary-fixed": "#21005e",
+          "on-secondary-fixed-variant": "#005137",
+          "on-tertiary": "#381385",
+          "surface-container-low": "#141c25",
+          "surface-dim": "#0c141d"
+        },
+        "borderRadius": {
+          "DEFAULT": "0.125rem",
+          "lg": "0.25rem",
+          "xl": "0.5rem",
+          "full": "0.75rem"
+        },
+        "spacing": {
+          "space-xl": "1.5rem",
+          "space-lg": "1rem",
+          "margin-desktop": "2rem",
+          "space-sm": "0.5rem",
+          "space-xs": "0.25rem",
+          "gutter": "1rem",
+          "gutter-desktop": "1.5rem",
+          "margin": "1rem",
+          "space-md": "0.75rem"
+        },
+        "fontFamily": {
+          "headline-md": ["Inter"],
+          "body-lg": ["Inter"],
+          "label-md": ["Inter"],
+          "title-md": ["Inter"],
+          "headline-sm": ["Inter"],
+          "body-md": ["Inter"],
+          "data-tabular": ["Inter"],
+          "body-sm": ["Inter"],
+          "display-lg": ["Inter"],
+          "display-lg-mobile": ["Inter"],
+          "label-sm": ["Inter"],
+          "headline-lg": ["Inter"]
+        },
+        "fontSize": {
+          "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+          "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+          "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600"}],
+          "title-md": ["14px", {"lineHeight": "20px", "fontWeight": "600"}],
+          "headline-sm": ["16px", {"lineHeight": "24px", "fontWeight": "600"}],
+          "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+          "data-tabular": ["13px", {"lineHeight": "18px", "letterSpacing": "0", "fontWeight": "500"}],
+          "body-sm": ["13px", {"lineHeight": "18px", "fontWeight": "400"}],
+          "display-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+          "display-lg-mobile": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+          "label-sm": ["11px", {"lineHeight": "14px", "letterSpacing": "0.03em", "fontWeight": "500"}],
+          "headline-lg": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}]
+        }
+      }
+    }
+  }</script></head><body class="bg-surface font-body-md text-body-md text-on-surface antialiased"><header class="fixed top-0 w-full z-50 bg-surface-container-low/95 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.4)]"><div class="h-16 w-full px-margin-desktop flex items-center justify-between gap-space-lg"><div class="flex items-center gap-space-xl"><div class="flex items-center gap-space-md"><div class="w-9 h-9 rounded bg-primary-container text-on-primary-container flex items-center justify-center font-display-lg text-title-md font-bold">A</div><div class="flex flex-col"><div class="flex items-center gap-space-xs"><span class="font-title-md text-title-md font-bold tracking-tight text-on-surface">AVISA</span><span class="px-1.5 py-0.5 rounded text-label-sm font-label-sm uppercase bg-surface-container-high text-primary tracking-wider">OAIPCS</span></div><span class="font-label-sm text-label-sm text-on-surface-variant truncate max-w-[280px]">Vigilancia de Conflictos Sociales | PRODUCE</span></div></div><div class="h-6 w-[1px] bg-surface-container-highest hidden lg:block"></div><div class="hidden xl:flex items-center gap-space-xs px-space-sm py-1 rounded bg-surface-container text-on-surface-variant font-label-sm text-label-sm"><span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span><span>Entorno: Producción Nacional</span><span class="material-symbols-outlined text-sm text-outline">arrow_drop_down</span></div><nav class="hidden md:flex items-center gap-space-xs" data-active-classes="bg-primary-container text-on-primary-container font-bold rounded"><a class="px-space-md py-space-xs text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors text-title-md font-title-md rounded" data-path="directorio-estrategico" href="#">Directorio Estratégico</a><a class="px-space-md py-space-xs text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors text-title-md font-title-md rounded" data-path="actores-sociales" href="#">Actores Sociales</a><a class="px-space-md py-space-xs text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors text-title-md font-title-md rounded" data-path="lista-temporal" href="#">Lista Temporal</a><a class="px-space-md py-space-xs text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors text-title-md font-title-md rounded" data-path="vistas-previas-de-exportacion" href="#">Vistas Previas de Exportación</a></nav></div><div class="flex items-center gap-space-md"><button class="relative p-2 rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors flex items-center justify-center" type="button"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-error"></span></button><button class="p-2 rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors flex items-center justify-center" type="button"><span class="material-symbols-outlined text-[20px]">settings</span></button><div class="h-6 w-[1px] bg-surface-container-highest"></div><div class="flex items-center gap-space-md"><div class="text-right hidden sm:block"><div class="font-label-md text-label-md text-on-surface">Director OAIPCS</div><div class="font-label-sm text-label-sm text-primary">Alta Dirección PRODUCE</div></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></div></header><main class="w-full pt-16 bg-surface min-h-[calc(100vh-56px)]"><div class="flex flex-col w-full">
+<!-- Top Command Toolbar for Export Viewer -->
+<div class="w-full bg-surface-container-low shadow-sm px-margin-desktop py-space-sm flex flex-col gap-space-sm">
+<!-- Breadcrumb & Status Row -->
+<div class="flex flex-wrap items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-sm">
+<a class="inline-flex items-center gap-space-xs text-primary hover:text-primary-fixed-dim transition-colors font-title-md text-title-md" href="#">
+<span class="material-symbols-outlined text-sm">arrow_back</span>
+<span>Volver a Lista Temporal de Actores</span>
+</a>
+<span class="text-outline">/</span>
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-surface-container-highest text-on-surface-variant font-label-sm text-label-sm">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span>3 Actores en cola de exportación</span>
+</span>
+<span class="px-2 py-0.5 rounded bg-primary/10 text-primary font-label-sm text-label-sm uppercase">
+          Módulo OAIPCS-DIR
+        </span>
+</div>
+<div class="flex items-center gap-space-sm">
+<span class="text-on-surface-variant font-label-sm text-label-sm hidden sm:inline">Modo Vista:</span>
+<div class="flex items-center bg-surface-container rounded p-0.5">
+<button class="px-space-sm py-1 rounded bg-primary-container text-on-primary-container font-label-md text-label-md flex items-center gap-1 transition-colors" id="viewSplitBtn" type="button">
+<span class="material-symbols-outlined text-[16px]">splitscreen</span>
+<span class="hidden md:inline">Paralelo (2 Hojas)</span>
+</button>
+<button class="px-space-sm py-1 rounded text-on-surface-variant hover:text-on-surface font-label-md text-label-md flex items-center gap-1 transition-colors" id="viewTabAsistenciaBtn" type="button">
+<span class="material-symbols-outlined text-[16px]">fact_check</span>
+<span>Lista Asistencia</span>
+</button>
+<button class="px-space-sm py-1 rounded text-on-surface-variant hover:text-on-surface font-label-md text-label-md flex items-center gap-1 transition-colors" id="viewTabPerfilBtn" type="button">
+<span class="material-symbols-outlined text-[16px]">badge</span>
+<span>Ficha Actores</span>
+</button>
+</div>
+<button class="h-9 px-3 rounded bg-surface-container-high hover:bg-surface-bright text-on-surface font-title-md text-title-md inline-flex items-center gap-1.5 transition-colors" onclick="window.print()" type="button">
+<span class="material-symbols-outlined text-[18px]">print</span>
+<span class="hidden lg:inline">Imprimir</span>
+</button>
+<div class="relative group">
+<button class="h-9 px-4 rounded bg-primary-container hover:bg-primary text-on-primary-container font-headline-sm text-headline-sm inline-flex items-center gap-2 transition-all shadow-sm" type="button">
+<span class="material-symbols-outlined text-[18px]">download</span>
+<span>Descargar Oficial</span>
+<span class="material-symbols-outlined text-[16px]">expand_more</span>
+</button>
+<div class="absolute right-0 mt-1 w-56 rounded bg-surface-container-highest shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all z-30 p-1 flex flex-col gap-0.5">
+<a class="px-3 py-2 rounded text-on-surface hover:bg-surface-bright flex items-center justify-between text-body-sm font-body-sm" href="#">
+<span class="flex items-center gap-2"><span class="material-symbols-outlined text-secondary text-[18px]">table_view</span>Matriz Excel (.xlsx)</span>
+<span class="text-label-sm font-label-sm text-outline">v2.4</span>
+</a>
+<a class="px-3 py-2 rounded text-on-surface hover:bg-surface-bright flex items-center justify-between text-body-sm font-body-sm" href="#">
+<span class="flex items-center gap-2"><span class="material-symbols-outlined text-primary text-[18px]">description</span>Ficha Word (.docx)</span>
+<span class="text-label-sm font-label-sm text-outline">A4</span>
+</a>
+<a class="px-3 py-2 rounded text-on-surface hover:bg-surface-bright flex items-center justify-between text-body-sm font-body-sm" href="#">
+<span class="flex items-center gap-2"><span class="material-symbols-outlined text-error text-[18px]">picture_as_pdf</span>Compilado PDF (.pdf)</span>
+<span class="text-label-sm font-label-sm text-outline">Firma</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+<!-- Contextual Parameter Bar (Editable metadata for formal document header) -->
+<div class="w-full bg-surface-container rounded p-space-md flex flex-wrap items-center justify-between gap-space-md">
+<div class="flex flex-wrap items-center gap-space-lg flex-1 min-w-[280px]">
+<div class="flex flex-col gap-1 min-w-[240px] flex-1">
+<label class="text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wide flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-primary">location_on</span>
+<span>Lugar de la convocatoria</span>
+</label>
+<input class="bg-surface-container-low text-on-surface px-3 py-1.5 rounded font-body-sm text-body-sm focus:outline-none focus:ring-1 focus:ring-primary w-full shadow-inner" id="docLocationInput" type="text" value="Sede Gremial OSPA Bahía de Casma, Áncash">
+</div>
+<div class="flex flex-col gap-1 w-48">
+<label class="text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wide flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-primary">calendar_today</span>
+<span>Fecha oficial</span>
+</label>
+<input class="bg-surface-container-low text-on-surface px-3 py-1.5 rounded font-body-sm text-body-sm focus:outline-none focus:ring-1 focus:ring-primary w-full shadow-inner" id="docDateInput" type="text" value="19 de octubre de 2026">
+</div>
+<div class="flex flex-col gap-1">
+<label class="text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wide">Ámbito Sectorial</label>
+<div class="flex items-center gap-1.5 text-on-surface font-title-md text-title-md h-[34px]">
+<span class="px-2 py-0.5 rounded bg-surface-container-high text-on-surface text-label-md font-label-md">Pesca Artesanal OSPAS</span>
+<span class="px-2 py-0.5 rounded bg-secondary-container/20 text-secondary text-label-sm font-label-sm font-bold">Z-67 / Z-68</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-space-sm pl-space-md">
+<div class="text-right">
+<div class="text-label-sm font-label-sm text-on-surface-variant">Convocados directos</div>
+<div class="text-title-md font-title-md font-bold text-on-surface font-data-tabular">3 Representantes</div>
+</div>
+<div class="w-10 h-10 rounded bg-primary/10 text-primary flex items-center justify-center font-bold">
+<span class="material-symbols-outlined">group</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Document Workstation & Preview Screen -->
+<div class="w-full px-margin-desktop py-space-xl flex flex-col gap-space-xl">
+<!-- Document Canvas Container -->
+<div class="grid grid-cols-1 xl:grid-cols-2 gap-space-xl items-start transition-all" id="viewerGrid">
+<!-- ========================================== -->
+<!-- DOCUMENT 1: HOJA OFICIAL LISTA DE ASISTENCIA -->
+<!-- ========================================== -->
+<div class="flex flex-col gap-space-sm" id="sheetAsistencia">
+<div class="flex items-center justify-between px-space-xs text-on-surface-variant font-label-md text-label-md">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[18px] text-primary">description</span>
+<span class="text-on-surface font-bold uppercase tracking-wider">Formato 01: Padrón y Asistencia</span>
+<span class="px-1.5 py-0.5 rounded bg-surface-container-high text-primary text-label-sm font-label-sm">F-01-OAIPCS</span>
+</div>
+<span class="font-data-tabular text-label-sm">Hoja A4 Horizontal Imprimible</span>
+</div>
+<!-- The White Physical Sheet Canvas for Asistencia -->
+<div class="w-full bg-[#FFFFFF] text-[#0f172a] rounded p-8 md:p-10 shadow-2xl relative select-none">
+<!-- Institutional Official Letterhead (PRODUCE - OAIPCS) -->
+<div class="w-full pb-4 mb-5 flex flex-wrap items-center justify-between gap-4">
+<div class="flex items-center gap-3">
+<div class="flex items-center gap-2">
+<div class="w-7 h-7 bg-[#dc2626] rounded flex items-center justify-center text-white font-black text-xs tracking-tighter">
+                  PERÚ
+                </div>
+<div class="flex flex-col leading-none">
+<span class="text-[10px] uppercase font-bold text-[#dc2626] tracking-tight">Ministerio</span>
+<span class="text-[11px] font-semibold text-[#1e293b] tracking-tight">de la Producción</span>
+</div>
+</div>
+<div class="h-8 w-[1.5px] bg-[#cbd5e1] hidden sm:block"></div>
+<div class="flex flex-col">
+<span class="text-[10px] font-bold uppercase tracking-wide text-[#334155] leading-tight max-w-[320px]">
+                  Oficina de Articulación Intergubernamental y Prevención de Conflictos Sociales
+                </span>
+<span class="text-[9px] text-[#64748b]">Sistema Integral AVISA · Vigilancia Preventiva</span>
+</div>
+</div>
+<div class="text-right flex flex-col items-end">
+
+
+</div>
+</div>
+<!-- Document Main Header -->
+<div class="text-center my-4">
+<h1 class="text-[18px] md:text-[20px] font-bold uppercase tracking-tight text-[#0f172a]">
+              Lista de Asistencia
+            </h1>
+
+</div>
+<!-- Fill-in Metadata Row -->
+<div class="w-full bg-[#f8fafc] rounded p-3 mb-5 flex flex-col md:flex-row gap-3 md:gap-8 text-[12px] font-medium text-[#334155]">
+<div class="flex-1 flex items-center gap-2">
+<span class="font-bold text-[#0f172a] uppercase text-[11px] tracking-wide">LUGAR:</span>
+<span class="text-[#0f172a] font-semibold underline decoration-dotted decoration-[#94a3b8] underline-offset-4" id="renderedLocation">
+                Sede Gremial OSPA Bahía de Casma, Áncash
+              </span>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-bold text-[#0f172a] uppercase text-[11px] tracking-wide">FECHA:</span>
+<span class="text-[#0f172a] font-semibold underline decoration-dotted decoration-[#94a3b8] underline-offset-4" id="renderedDate">
+                19 de Octubre de 2026
+              </span>
+</div>
+</div>
+<!-- Table: Exact to https://lh3.googleusercontent.com/aida-public/AB6AXuDa4lpRrzXGdBlYPqzi1TaPK3JDr4lINQH7YGexVUj40gIANG6BQL-Nq7msJxrtQVEJ7cpaNYYHK-p8eaaUw8AxfHD8WaE8Yez8JTxXQwO12UNkvDy2uPUAbYlHh9LXmjjg3tuUatE_f0ygnWyn33L3Nhlxas5Kr0FCLupJGnrLXifQL0R9-li_wLDscaY0jfbTu5a8sbDfVqGuw-X-2Kl4VK16GNtZ0zxI8439nFL05gvQmkQIyT1hTA & https://lh3.googleusercontent.com/aida-public/AB6AXuB-P6OJQaGyaNrr0krm6eNzRBU2n_L785Fzy_KU6262_1OfYWK3ZEe2b2U81U_w_iGy33mzzPmbEWUHLxGExDHw3Oayd0pH5Isys0MYR4b2T6raS-Rz00muV9o7xRtdhZMvsbJAq4ayKF_3sNdD735TLhwnr8mGdDRahYQ7JZQpelW1EeIuY-Bmq8Z-7dFSuECdVDSL3QExBsFsJCnbJSUfipqvQ3mFIL5KtvlZkld9NfmpGE4n5-VxIg -->
+<div class="w-full overflow-x-auto rounded">
+<table class="w-full text-left text-[11px] leading-tight">
+<thead>
+<tr class="bg-[#1e293b] text-[#f8fafc] font-semibold uppercase text-[10px] tracking-wider">
+<th class="py-2.5 px-2 text-center w-8">N°</th>
+<th class="py-2.5 px-2">Apellidos</th>
+<th class="py-2.5 px-2">Nombres</th>
+<th class="py-2.5 px-2">Cargo</th>
+<th class="py-2.5 px-2 font-mono">DNI</th>
+<th class="py-2.5 px-2 font-mono">Celular</th>
+<th class="py-2.5 px-2">Organización / OSPA</th>
+<th class="py-2.5 px-2">Provincia / Distrito</th>
+<th class="py-2.5 px-3 text-center w-28">Firma</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-[#e2e8f0] text-[#1e293b]">
+<tr class="hover:bg-[#f8fafc] transition-colors">
+<td class="py-3 px-2 text-center font-bold text-[#64748b]">1</td>
+<td class="py-3 px-2 font-bold uppercase">ALEGRE LANDAVERY</td>
+<td class="py-3 px-2 uppercase">CARLOS</td>
+<td class="py-3 px-2 text-[#475569]">Presidente</td>
+<td class="py-3 px-2 font-mono text-[#0f172a]">32945812</td>
+<td class="py-3 px-2 font-mono text-[#0f172a]">943 128 481</td>
+<td class="py-3 px-2 text-[10px] font-semibold uppercase text-[#334155] leading-tight">
+                    PLANTAS ARTESANALES PESQUERAS DE CORTE PRIMARIO - ARPROARA
+                  </td>
+<td class="py-3 px-2 text-[10px] font-medium text-[#475569]">SANTA / CHIMBOTE</td>
+<td class="py-3 px-3 text-center text-[10px] text-[#94a3b8] italic bg-[#fbfcfe]">
+<div class="h-7 rounded flex items-center justify-center font-serif text-[11px] text-[#cbd5e1]">Espacio para rúbrica</div>
+</td>
+</tr>
+<tr class="bg-[#f8fafc]/50 hover:bg-[#f8fafc] transition-colors">
+<td class="py-3 px-2 text-center font-bold text-[#64748b]">2</td>
+<td class="py-3 px-2 font-bold uppercase">ALMAZAN RAZA</td>
+<td class="py-3 px-2 uppercase">JULIO</td>
+<td class="py-3 px-2 text-[#475569]">Secretario General</td>
+<td class="py-3 px-2 font-mono text-[#0f172a]">08472910</td>
+<td class="py-3 px-2 font-mono text-[#0f172a]">971 845 281</td>
+<td class="py-3 px-2 text-[10px] font-semibold uppercase text-[#334155] leading-tight">
+                    PLANTAS ARTESANALES PESQUERAS DE CORTE PRIMARIO - ARPROARA
+                  </td>
+<td class="py-3 px-2 text-[10px] font-medium text-[#475569]">SANTA / CHIMBOTE</td>
+<td class="py-3 px-3 text-center text-[10px] text-[#94a3b8] italic bg-[#fbfcfe]">
+<div class="h-7 rounded flex items-center justify-center font-serif text-[11px] text-[#cbd5e1]">Espacio para rúbrica</div>
+</td>
+</tr>
+<tr class="hover:bg-[#f8fafc] transition-colors">
+<td class="py-3 px-2 text-center font-bold text-[#64748b]">3</td>
+<td class="py-3 px-2 font-bold uppercase">QUISPE RAMOS</td>
+<td class="py-3 px-2 uppercase">JUAN CARLOS</td>
+<td class="py-3 px-2 text-[#475569]">Presidente Regional</td>
+<td class="py-3 px-2 font-mono text-[#0f172a]">74558302</td>
+<td class="py-3 px-2 font-mono text-[#0f172a]">952 841 029</td>
+<td class="py-3 px-2 text-[10px] font-semibold uppercase text-[#334155] leading-tight">
+                    ASOCIACIÓN UNIFICADA DE PESCADORES ARTESANALES - ASUPAPS
+                  </td>
+<td class="py-3 px-2 text-[10px] font-medium text-[#475569]">PAITA / PIURA</td>
+<td class="py-3 px-3 text-center text-[10px] text-[#94a3b8] italic bg-[#fbfcfe]">
+<div class="h-7 rounded flex items-center justify-center font-serif text-[11px] text-[#cbd5e1]">Espacio para rúbrica</div>
+</td>
+</tr>
+<tr class="bg-[#f8fafc]/50 hover:bg-[#f8fafc] transition-colors">
+
+
+
+
+
+
+
+
+
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Official Document Footer -->
+<div class="w-full mt-10 pt-4 flex items-center justify-between text-[10px] text-[#64748b] uppercase tracking-wide">
+<div class="flex items-center gap-2">
+<span class="font-bold text-[#334155]">DOCUMENTO OFICIAL OAIPCS</span>
+<span>•</span>
+<span>SISTEMA AVISA PRODUCE</span>
+</div>
+<div class="font-mono">Página 1 de 1</div>
+</div>
+</div>
+</div>
+<!-- ========================================== -->
+<!-- DOCUMENT 2: HOJA OFICIAL FICHA DE PERFILES -->
+<!-- ========================================== -->
+<div class="flex flex-col gap-space-sm" id="sheetPerfil">
+<div class="flex items-center justify-between px-space-xs text-on-surface-variant font-label-md text-label-md">
+<div class="flex items-center gap-space-xs">
+
+
+
+</div>
+
+</div>
+<!-- The White Physical Sheet Canvas for Perfiles -->
+
+</div>
+</div>
+<!-- Bottom Download Cards Section (Identical to Sheet 1 layout) -->
+<div class="w-full bg-surface-container rounded p-space-lg flex flex-col gap-space-md">
+<div class="flex flex-wrap items-center justify-between gap-space-xs">
+<div class="flex items-center gap-space-xs text-on-surface">
+<span class="material-symbols-outlined text-primary text-[20px]">inventory_2</span>
+<span class="font-title-md text-title-md font-bold uppercase tracking-wide">
+            Formatos oficiales requeridos para descarga inmediata
+          </span>
+</div>
+<div class="text-on-surface-variant font-label-sm text-label-sm">
+          Plantillas validadas para el ciclo de campo OAIPCS · Versión 2026
+        </div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-space-md">
+<!-- Download Card 1: Excel Matrix -->
+<div class="rounded bg-surface-container-low hover:bg-surface-container-high transition-all p-space-md flex flex-col justify-between gap-space-md group">
+<div class="flex items-start gap-space-md">
+<div class="w-12 h-12 rounded bg-secondary-container/20 text-secondary flex items-center justify-center font-bold text-headline-sm shrink-0">
+              XLSX
+            </div>
+<div class="flex flex-col min-w-0">
+<span class="font-title-md text-title-md font-bold text-on-surface group-hover:text-primary transition-colors">
+                1. Lista de asistencia
+              </span>
+<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2 mt-0.5">
+                Plantilla Excel .xlsx con celdas nativas, filtros por puerto y validación de DNI/Celular.
+              </p>
+</div>
+</div>
+<a class="inline-flex items-center gap-1 font-label-md text-label-md text-secondary hover:underline self-start" href="#">
+<span>Descargar plantilla matriz (.xlsx)</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</a>
+</div>
+<!-- Download Card 2: Word Imprimible -->
+<div class="rounded bg-surface-container-low hover:bg-surface-container-high transition-all p-space-md flex flex-col justify-between gap-space-md group">
+<div class="flex items-start gap-space-md">
+<div class="w-12 h-12 rounded bg-primary/20 text-primary flex items-center justify-center font-bold text-headline-sm shrink-0">
+              DOCX
+            </div>
+<div class="flex flex-col min-w-0">
+<span class="font-title-md text-title-md font-bold text-on-surface group-hover:text-primary transition-colors">
+                2. Lista de asistencia
+              </span>
+<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2 mt-0.5">
+                Documento Word .docx imprimible con márgenes optimizados para toma de firmas en campo.
+              </p>
+</div>
+</div>
+<a class="inline-flex items-center gap-1 font-label-md text-label-md text-primary hover:underline self-start" href="#">
+<span>Descargar plantilla imprimible (.docx)</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</a>
+</div>
+<!-- Download Card 3: Word Ficha de Perfiles -->
+<div class="rounded bg-surface-container-low hover:bg-surface-container-high transition-all p-space-md flex flex-col justify-between gap-space-md group">
+<div class="flex items-start gap-space-md">
+<div class="w-12 h-12 rounded bg-tertiary-container/30 text-tertiary flex items-center justify-center font-bold text-headline-sm shrink-0">
+              DOCX
+            </div>
+<div class="flex flex-col min-w-0">
+<span class="font-title-md text-title-md font-bold text-on-surface group-hover:text-tertiary transition-colors">
+                3. Ficha y Perfil de actores
+              </span>
+<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2 mt-0.5">
+                Documento Word .docx oficial con codificación cromática (Dialogante, Legitimante, Disruptivo).
+              </p>
+</div>
+</div>
+<a class="inline-flex items-center gap-1 font-label-md text-label-md text-tertiary hover:underline self-start" href="#">
+<span>Descargar ficha técnica (.docx)</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+</div>
+<script>
+  // Simple client-side toggles for layout view modes & live parameter binding
+  (function () {
+    const splitBtn = document.getElementById('viewSplitBtn');
+    const tabAsistenciaBtn = document.getElementById('viewTabAsistenciaBtn');
+    const tabPerfilBtn = document.getElementById('viewTabPerfilBtn');
+
+    const viewerGrid = document.getElementById('viewerGrid');
+    const sheetAsistencia = document.getElementById('sheetAsistencia');
+    const sheetPerfil = document.getElementById('sheetPerfil');
+
+    const locInput = document.getElementById('docLocationInput');
+    const dateInput = document.getElementById('docDateInput');
+    const renderedLoc = document.getElementById('renderedLocation');
+    const renderedDate = document.getElementById('renderedDate');
+
+    function setActiveBtn(activeBtn) {
+      [splitBtn, tabAsistenciaBtn, tabPerfilBtn].forEach((btn) => {
+        if (!btn) return;
+        btn.classList.remove('bg-primary-container', 'text-on-primary-container');
+        btn.classList.add('text-on-surface-variant');
+      });
+      activeBtn.classList.remove('text-on-surface-variant');
+      activeBtn.classList.add('bg-primary-container', 'text-on-primary-container');
+    }
+
+    if (splitBtn && tabAsistenciaBtn && tabPerfilBtn) {
+      splitBtn.addEventListener('click', () => {
+        setActiveBtn(splitBtn);
+        viewerGrid.className = 'grid grid-cols-1 xl:grid-cols-2 gap-space-xl items-start transition-all';
+        sheetAsistencia.style.display = 'flex';
+        sheetPerfil.style.display = 'flex';
+      });
+
+      tabAsistenciaBtn.addEventListener('click', () => {
+        setActiveBtn(tabAsistenciaBtn);
+        viewerGrid.className = 'grid grid-cols-1 max-w-5xl mx-auto w-full gap-space-xl items-start transition-all';
+        sheetAsistencia.style.display = 'flex';
+        sheetPerfil.style.display = 'none';
+      });
+
+      tabPerfilBtn.addEventListener('click', () => {
+        setActiveBtn(tabPerfilBtn);
+        viewerGrid.className = 'grid grid-cols-1 max-w-5xl mx-auto w-full gap-space-xl items-start transition-all';
+        sheetAsistencia.style.display = 'none';
+        sheetPerfil.style.display = 'flex';
+      });
+    }
+
+    // Live binding for editable document parameters
+    if (locInput && renderedLoc) {
+      locInput.addEventListener('input', (e) => {
+        renderedLoc.textContent = e.target.value || 'Sede Gremial OSPA Bahía de Casma, Áncash';
+      });
+    }
+    if (dateInput && renderedDate) {
+      dateInput.addEventListener('input', (e) => {
+        renderedDate.textContent = e.target.value || '19 de Octubre de 2026';
+      });
+    }
+  })();
+</script></main><footer class="w-full bg-surface-container-lowest py-space-md shadow-[0_-1px_4px_rgba(0,0,0,0.3)]"><div class="w-full px-margin-desktop flex flex-col md:flex-row items-center justify-between gap-space-xs text-on-surface-variant font-label-sm text-label-sm"><div>Ministerio de la Producción del Perú (PRODUCE) • Oficina de Articulación Intergubernamental y Prevención de Conflictos Sociales</div><div class="flex items-center gap-space-md"><span>Sistema AVISA v2.4</span><span>Confidencialidad: Nivel Seguridad Alta Dirección</span></div></div></footer>
+
+</body></html>

@@ -1,0 +1,2729 @@
+<!doctype html>
+<html lang="es">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>
+            Mapa de activos · capas, RADAR y desembarcaderos DPA · Mockup AVISA
+        </title>
+        <style>
+            /* Tokens y clases copiados de angular/src/styles/global.css.
+               Sin webfonts, sin CDN, sin teselas y sin JS: el archivo se abre
+               por doble clic y se imprime sin conexión. */
+            :root {
+                --ink: #17283a;
+                --ink-2: #33475b;
+                --muted: #778797;
+                --line: #e6ebef;
+                --paper: #fff;
+                --canvas: #f5f7f8;
+                --blue: #2455a2;
+                --blue-dark: #1d427f;
+                --blue-pale: #eaf1fb;
+                --teal: #397c79;
+                --amber: #aa6a11;
+                --amber-pale: #fff4e2;
+                --red: #ad4d46;
+                --red-pale: #fbeceb;
+                --green: #34785b;
+                --green-pale: #e9f5ef;
+                --font-sans:
+                    "DM Sans", system-ui, -apple-system, "Segoe UI", Arial,
+                    sans-serif;
+                --font-display:
+                    "Manrope", "DM Sans", system-ui, -apple-system, "Segoe UI",
+                    sans-serif;
+
+                /* Escala de conflictividad: no se mezcla con riesgo ni prioridad */
+                --c-diferencia: #6f8fa8;
+                --c-controversia: #4c7099;
+                --c-conflicto: #a6732d;
+                --c-crisis: #a84f49;
+            }
+            * {
+                box-sizing: border-box;
+            }
+            html {
+                min-height: 100%;
+                background: var(--canvas);
+            }
+            body {
+                margin: 0;
+                color: var(--ink);
+                font-family: var(--font-sans);
+                font-size: 13px;
+                -webkit-font-smoothing: antialiased;
+                print-color-adjust: exact;
+                -webkit-print-color-adjust: exact;
+            }
+            .view-body {
+                display: flex;
+                flex-direction: column;
+                gap: 14px;
+                width: 100%;
+                max-width: 1420px;
+                margin: 0 auto;
+                padding: 27px 34px 56px;
+            }
+            .view-head {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: flex-start;
+                justify-content: space-between;
+                gap: 16px;
+            }
+            .view-head h1 {
+                margin: 0;
+                font: 700 22px/1.3 var(--font-display);
+                letter-spacing: -0.65px;
+            }
+            .view-subtitle {
+                max-width: 880px;
+                margin: 6px 0 0;
+                color: var(--muted);
+                font-size: 11px;
+                line-height: 1.6;
+            }
+            .badge {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                height: 26px;
+                padding: 0 10px;
+                border: 1px solid #cddcef;
+                border-radius: 999px;
+                background: var(--blue-pale);
+                color: var(--blue);
+                font-size: 9px;
+                font-weight: 700;
+                letter-spacing: 0.05em;
+                text-transform: uppercase;
+                white-space: nowrap;
+            }
+
+            /* ── Bloque de anotación ─────────────────────────────────── */
+            .ann {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 8px;
+                padding: 10px 12px 12px;
+                border: 1px solid var(--line);
+                border-radius: 9px;
+                background: #fbfcfd;
+            }
+            @media (max-width: 980px) {
+                .ann {
+                    grid-template-columns: 1fr;
+                }
+            }
+            .ann-card {
+                padding: 8px 10px;
+                border: 1px solid #eef1f4;
+                border-radius: 7px;
+                background: #fff;
+                font-size: 10px;
+                line-height: 1.5;
+                color: var(--ink-2);
+            }
+            .ann-card.wide {
+                grid-column: 1 / -1;
+            }
+            .ann-card h3 {
+                margin: 0 0 4px;
+                color: var(--ink);
+                font: 700 9px/1.3 var(--font-display);
+                letter-spacing: 0.07em;
+                text-transform: uppercase;
+            }
+            .ann-card b {
+                color: var(--ink);
+            }
+            .ann-card code {
+                padding: 0 3px;
+                border-radius: 3px;
+                background: #eef1f4;
+                font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+                font-size: 9.5px;
+            }
+            .ann-card .n {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 15px;
+                height: 15px;
+                margin-right: 5px;
+                border-radius: 50%;
+                background: var(--blue);
+                color: #fff;
+                font-size: 9px;
+                font-weight: 700;
+            }
+            .ann-table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+            .ann-table th,
+            .ann-table td {
+                padding: 2px 6px 2px 0;
+                border-bottom: 1px solid #f1f3f5;
+                text-align: left;
+                vertical-align: top;
+                font-size: 9.5px;
+            }
+            .ann-table th {
+                color: #97a1aa;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.04em;
+            }
+            .ann-table tr:last-child td {
+                border-bottom: 0;
+            }
+            .ann-card ul {
+                margin: 0;
+                padding-left: 16px;
+            }
+            .ann-card li {
+                margin: 0 0 3px;
+            }
+            .ann-card li:last-child {
+                margin-bottom: 0;
+            }
+
+            /* ── Correcciones aplicadas ──────────────────────────────── */
+            .fixes {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 6px;
+            }
+            .fix {
+                display: inline-flex;
+                align-items: center;
+                gap: 5px;
+                padding: 3px 8px;
+                border: 1px solid #c9e3d5;
+                border-radius: 999px;
+                background: var(--green-pale);
+                color: var(--green);
+                font-size: 9px;
+                font-weight: 600;
+            }
+            .fix::before {
+                content: "✔";
+            }
+
+            /* ── Cifras de cabecera ──────────────────────────────────── */
+            .stat-row {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+            .stat {
+                display: inline-flex;
+                align-items: baseline;
+                gap: 6px;
+                padding: 6px 10px;
+                border: 1px solid var(--line);
+                border-radius: 7px;
+                background: #fff;
+                color: #8b97a1;
+                font-size: 9px;
+            }
+            .stat b {
+                color: var(--ink);
+                font: 700 15px/1 var(--font-display);
+                letter-spacing: -0.3px;
+                font-variant-numeric: tabular-nums;
+            }
+            .stat.dash b {
+                color: #a3b0ba;
+            }
+
+            /* ── Tarjetas ────────────────────────────────────────────── */
+            .card {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                padding: 14px 15px 12px;
+                border: 1px solid var(--line);
+                border-radius: 9px;
+                background: #fff;
+            }
+            .card-head {
+                display: flex;
+                align-items: flex-start;
+                justify-content: space-between;
+                gap: 10px;
+            }
+            .card-title {
+                margin: 0;
+                font: 700 12.5px/1.3 var(--font-display);
+                letter-spacing: -0.15px;
+            }
+            .card-sub {
+                margin: 3px 0 0;
+                color: var(--muted);
+                font-size: 9.5px;
+                line-height: 1.5;
+            }
+            .tag {
+                display: inline-flex;
+                align-items: center;
+                padding: 2px 7px;
+                border: 1px solid var(--line);
+                border-radius: 999px;
+                color: #8b97a1;
+                font-size: 7.5px;
+                font-weight: 700;
+                letter-spacing: 0.05em;
+                text-transform: uppercase;
+                white-space: nowrap;
+            }
+            .tag.ref {
+                border-color: #cddcef;
+                background: var(--blue-pale);
+                color: var(--blue);
+            }
+            .tag-mini {
+                flex: none;
+                padding: 2px 6px;
+                border: 1px solid #e6ebef;
+                border-radius: 999px;
+                color: #8b97a1;
+                font-size: 7px;
+                font-weight: 700;
+                letter-spacing: 0.06em;
+                text-transform: uppercase;
+                white-space: nowrap;
+            }
+
+            /* ── Escenario: capas · lienzo · detalle ─────────────────── */
+            .mapstage {
+                display: grid;
+                grid-template-columns: 252px minmax(0, 1fr) 302px;
+                gap: 12px;
+                align-items: stretch;
+            }
+            @media (max-width: 1240px) {
+                .mapstage {
+                    grid-template-columns: 1fr;
+                }
+            }
+            .panel {
+                display: flex;
+                flex-direction: column;
+                gap: 9px;
+                height: 672px;
+                padding: 12px 13px;
+                overflow: auto;
+                border: 1px solid var(--line);
+                border-radius: 9px;
+                background: #fff;
+            }
+            @media (max-width: 1240px) {
+                .panel {
+                    height: auto;
+                }
+            }
+            .panel-head {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 8px;
+            }
+            .panel-title {
+                margin: 0;
+                font: 700 11.5px/1.3 var(--font-display);
+                letter-spacing: 0.02em;
+                text-transform: uppercase;
+                color: #465a6c;
+            }
+            .panel-sub {
+                margin: -4px 0 0;
+                color: #94a0a8;
+                font-size: 8px;
+                line-height: 1.45;
+            }
+
+            .layer {
+                display: grid;
+                grid-template-columns: 13px minmax(0, 1fr) auto;
+                gap: 8px;
+                align-items: start;
+                padding: 7px 0;
+                border-bottom: 1px solid #f2f4f6;
+                cursor: pointer;
+            }
+            .layer:last-of-type {
+                border-bottom: 0;
+            }
+            .layer input {
+                position: absolute;
+                width: 1px;
+                height: 1px;
+                opacity: 0;
+            }
+            .cbox {
+                position: relative;
+                width: 13px;
+                height: 13px;
+                margin-top: 1px;
+                border: 1px solid #c9d3dc;
+                border-radius: 3px;
+                background: #fff;
+            }
+            .layer input:checked + .cbox {
+                border-color: var(--blue);
+                background: var(--blue);
+            }
+            .layer input:checked + .cbox::after {
+                content: "";
+                position: absolute;
+                left: 3.6px;
+                top: 1px;
+                width: 3px;
+                height: 6px;
+                border: solid #fff;
+                border-width: 0 1.5px 1.5px 0;
+                transform: rotate(42deg);
+            }
+            .layer input:focus-visible + .cbox {
+                outline: 2px solid #7aa2e8;
+                outline-offset: 2px;
+            }
+            .lname {
+                display: flex;
+                align-items: center;
+                gap: 5px;
+                color: var(--ink);
+                font-size: 10px;
+                font-weight: 600;
+                line-height: 1.35;
+            }
+            .lsub {
+                display: block;
+                margin-top: 2px;
+                color: var(--muted);
+                font-size: 8.4px;
+                line-height: 1.45;
+            }
+            .lnum {
+                color: var(--blue-dark);
+                font: 700 11px/1.2 var(--font-display);
+                font-variant-numeric: tabular-nums;
+                white-space: nowrap;
+            }
+            .lnum.dash {
+                color: #a3b0ba;
+            }
+            .sym {
+                display: inline-flex;
+                flex: none;
+                align-items: center;
+                gap: 2px;
+                height: 9px;
+            }
+            .sym i {
+                display: block;
+                width: 5px;
+                height: 5px;
+                border-radius: 50%;
+            }
+            .sym i.hollow {
+                width: 6px;
+                height: 6px;
+                border: 1.1px solid var(--blue);
+                background: none;
+            }
+            .lico {
+                width: 11px;
+                height: 12px;
+                margin-right: 3px;
+                vertical-align: -2px;
+            }
+            .mini {
+                margin-top: 5px;
+                border-top: 1px dashed #eef1f4;
+            }
+            .mini > summary {
+                padding: 5px 0 2px;
+                color: #8b97a1;
+                font-size: 8px;
+                font-weight: 600;
+                cursor: pointer;
+            }
+            .mini table {
+                width: 100%;
+                border-collapse: collapse;
+                color: #687988;
+                font-size: 8px;
+            }
+            .mini td {
+                padding: 1px 0;
+                border-bottom: 1px solid #f4f6f7;
+                vertical-align: top;
+            }
+            .mini td:last-child {
+                text-align: right;
+                font-variant-numeric: tabular-nums;
+                color: #526577;
+            }
+            .mini tr.errata td {
+                color: var(--amber);
+            }
+
+            .panel-sep {
+                margin: 3px 0 0;
+                padding-top: 8px;
+                border-top: 1px solid var(--line);
+            }
+            .scope-label {
+                display: block;
+                margin-bottom: 5px;
+                color: #97a1aa;
+                font-size: 8px;
+                font-weight: 700;
+                letter-spacing: 0.07em;
+                text-transform: uppercase;
+            }
+            .seg {
+                display: flex;
+                padding: 2px;
+                border: 1px solid var(--line);
+                border-radius: 7px;
+                background: #fff;
+            }
+            .seg span {
+                flex: 1;
+                padding: 4px 2px;
+                border-radius: 5px;
+                color: var(--muted);
+                font-size: 9px;
+                text-align: center;
+            }
+            .seg span[aria-current="true"] {
+                background: var(--blue);
+                color: #fff;
+            }
+            .base-note {
+                margin: 6px 0 0;
+                color: #8b97a1;
+                font-size: 8px;
+                line-height: 1.5;
+            }
+            .base-note b {
+                color: #465a6c;
+            }
+
+            /* ── Lienzo ──────────────────────────────────────────────── */
+            .canvas-card {
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+                height: 672px;
+                padding: 12px 13px 10px;
+                border: 1px solid var(--line);
+                border-radius: 9px;
+                background: #fff;
+            }
+            @media (max-width: 1240px) {
+                .canvas-card {
+                    height: auto;
+                }
+            }
+            .map {
+                position: relative;
+                flex: 1 1 auto;
+                min-height: 0;
+                overflow: hidden;
+                border: 1px solid #dbe4ec;
+                border-radius: 8px;
+                background: #eef4f8;
+            }
+            @media (max-width: 1240px) {
+                .map {
+                    height: 440px;
+                }
+            }
+            .map svg {
+                display: block;
+                width: 100%;
+                height: 100%;
+            }
+            .map-label {
+                position: absolute;
+                left: 10px;
+                bottom: 10px;
+                padding: 4px 8px;
+                border: 1px solid #cddcef;
+                border-radius: 6px;
+                background: rgba(255, 255, 255, 0.92);
+                color: var(--blue-dark);
+                font-size: 8.5px;
+                font-weight: 700;
+                letter-spacing: 0.03em;
+            }
+            .map-tools {
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                display: flex;
+                flex-direction: column;
+                gap: 5px;
+                text-align: right;
+            }
+            .map-tool {
+                padding: 3px 8px;
+                border: 1px solid #cddcef;
+                border-radius: 5px;
+                background: rgba(255, 255, 255, 0.94);
+                color: var(--ink-2);
+                font-size: 8.5px;
+            }
+            .map-tool.off {
+                color: #9aa6b1;
+                border-style: dashed;
+            }
+            .legend {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                gap: 5px 12px;
+                color: var(--muted);
+                font-size: 8.5px;
+            }
+            .legend span {
+                display: inline-flex;
+                align-items: center;
+                gap: 4px;
+            }
+            .legend i {
+                display: inline-block;
+                width: 8px;
+                height: 8px;
+                border-radius: 50%;
+                background: var(--blue);
+            }
+            .legend i.teal {
+                background: var(--teal);
+                opacity: 0.55;
+            }
+            .legend i.hollow {
+                width: 8px;
+                height: 8px;
+                border: 1.2px solid var(--blue);
+                background: none;
+            }
+            .legend i.rel {
+                width: 10px;
+                height: 10px;
+                border: 1.4px solid var(--c-crisis);
+                background: none;
+            }
+            .legend b {
+                color: var(--ink-2);
+            }
+
+            /* Símbolos del lienzo */
+            .grat line {
+                stroke: #c9dbe6;
+                stroke-width: 0.5;
+                stroke-dasharray: 2 3;
+            }
+            .grat-lab text {
+                fill: #93a4b1;
+                font-size: 6.2px;
+                font-family: system-ui, sans-serif;
+                letter-spacing: 0.04em;
+            }
+            .burbujas circle {
+                fill: var(--teal);
+                fill-opacity: 0.17;
+                stroke: #397c79;
+                stroke-opacity: 0.38;
+                stroke-width: 0.6;
+            }
+            .sedes circle {
+                fill: #2455a2;
+                fill-opacity: 0.82;
+            }
+            .dep-lab text {
+                fill: #66798a;
+                font-size: 6.4px;
+                font-weight: 600;
+                font-family: system-ui, sans-serif;
+                letter-spacing: 0.05em;
+                paint-order: stroke;
+                stroke: #eef4f8;
+                stroke-width: 2.2px;
+                stroke-linejoin: round;
+            }
+            .casos circle {
+                stroke: #fff;
+                stroke-width: 0.7;
+            }
+            .g-radar {
+                color: var(--c-crisis);
+            }
+            .g-radar .ring {
+                fill: none;
+                stroke: currentColor;
+                stroke-width: 1.3;
+            }
+            .g-radar .core {
+                fill: currentColor;
+            }
+            .radar-halo {
+                fill: none;
+                stroke: currentColor;
+                stroke-width: 1;
+                transform-box: fill-box;
+                transform-origin: center;
+                animation: radar-pulse 2.6s ease-out infinite;
+            }
+            .g-radar .radar-halo:nth-of-type(2n) {
+                animation-delay: 1.3s;
+            }
+            @keyframes radar-pulse {
+                0% {
+                    transform: scale(0.75);
+                    opacity: 0.5;
+                }
+                70% {
+                    transform: scale(2.2);
+                    opacity: 0;
+                }
+                100% {
+                    transform: scale(2.2);
+                    opacity: 0;
+                }
+            }
+            @media (prefers-reduced-motion: reduce) {
+                .radar-halo {
+                    animation: none;
+                    opacity: 0.3;
+                    transform: scale(1.6);
+                }
+            }
+            .g-dpa {
+                color: #a6732d;
+            }
+            .sel-ring {
+                fill: none;
+                stroke: #a6732d;
+                stroke-width: 1;
+                stroke-dasharray: 2.4 2;
+            }
+            .sel-dot {
+                fill: #a6732d;
+            }
+            .callout text {
+                font-family: system-ui, sans-serif;
+                font-size: 7.2px;
+                font-weight: 700;
+                fill: #1d427f;
+                paint-order: stroke;
+                stroke: #eef4f8;
+                stroke-width: 2.4px;
+                stroke-linejoin: round;
+            }
+            .callout .sub {
+                font-size: 6.2px;
+                font-weight: 500;
+                fill: #5a6c7d;
+            }
+            .leader {
+                stroke: #8fa4b6;
+                stroke-width: 0.6;
+                stroke-dasharray: 1.5 2;
+                fill: none;
+            }
+            .scale line {
+                stroke: #8fa4b6;
+                stroke-width: 0.9;
+            }
+            .scale text {
+                fill: #7b8b99;
+                font-size: 6px;
+                font-family: system-ui, sans-serif;
+            }
+
+            /* ── Cajón de detalle ────────────────────────────────────── */
+            .drawers {
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+                height: 672px;
+                overflow: auto;
+            }
+            @media (max-width: 1240px) {
+                .drawers {
+                    height: auto;
+                }
+            }
+            .dcard {
+                border: 1px solid var(--line);
+                border-radius: 9px;
+                background: #fff;
+            }
+            .dcard-head {
+                display: flex;
+                align-items: flex-start;
+                justify-content: space-between;
+                gap: 8px;
+                padding: 10px 12px 8px;
+                border-bottom: 1px solid #eef1f4;
+            }
+            .dcard-head h3 {
+                margin: 0;
+                font: 700 11.5px/1.3 var(--font-display);
+            }
+            .dcard-head p {
+                margin: 2px 0 0;
+                color: var(--muted);
+                font-size: 8.5px;
+                line-height: 1.4;
+            }
+            .kv {
+                display: grid;
+                grid-template-columns: 92px minmax(0, 1fr);
+                gap: 5px 8px;
+                margin: 0;
+                padding: 9px 12px;
+            }
+            .kv dt {
+                padding-top: 1px;
+                color: #94a0a8;
+                font-size: 7.6px;
+                font-weight: 700;
+                letter-spacing: 0.05em;
+                text-transform: uppercase;
+            }
+            .kv dd {
+                margin: 0;
+                color: var(--ink-2);
+                font-size: 9.5px;
+                line-height: 1.45;
+                overflow-wrap: anywhere;
+            }
+            .kv dd.gap {
+                color: #a3b0ba;
+            }
+            .kv dd code {
+                padding: 0 3px;
+                border-radius: 3px;
+                background: #f2f5f8;
+                color: #4c7099;
+                font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+                font-size: 8.5px;
+            }
+            .kv dd small {
+                display: block;
+                margin-top: 2px;
+                color: var(--muted);
+                font-size: 8.2px;
+            }
+            .count-line {
+                display: flex;
+                align-items: baseline;
+                gap: 6px;
+                color: var(--ink);
+                font: 700 17px/1 var(--font-display);
+                letter-spacing: -0.4px;
+                font-variant-numeric: tabular-nums;
+            }
+            .count-line span {
+                color: var(--muted);
+                font: 400 8.5px/1.3 var(--font-sans);
+                letter-spacing: 0;
+            }
+            .dcard-foot {
+                padding: 8px 12px;
+                border-top: 1px solid #eef1f4;
+                color: var(--muted);
+                font-size: 8px;
+                line-height: 1.5;
+            }
+            .dcard-foot code {
+                padding: 0 3px;
+                border-radius: 3px;
+                background: #f2f5f8;
+                color: #4c7099;
+                font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+                font-size: 7.8px;
+            }
+            .flag {
+                display: inline-flex;
+                align-items: center;
+                gap: 5px;
+                padding: 2px 7px;
+                border-radius: 999px;
+                background: var(--amber-pale);
+                color: #93621d;
+                font-size: 7px;
+                font-weight: 700;
+                letter-spacing: 0.03em;
+                text-transform: uppercase;
+            }
+            .flag.off {
+                background: #eef1f4;
+                color: #687988;
+            }
+            .proj {
+                margin: 0 12px 10px;
+                padding: 8px 10px;
+                border: 1px solid #f1d9a8;
+                border-radius: 7px;
+                background: #fffaf2;
+            }
+            .proj-head {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 6px;
+                margin-bottom: 6px;
+            }
+            .proj-head h4 {
+                margin: 0;
+                color: #8a5a00;
+                font: 700 9px/1.3 var(--font-display);
+                letter-spacing: 0.05em;
+                text-transform: uppercase;
+            }
+            .proj .kv {
+                padding: 0;
+                grid-template-columns: 68px minmax(0, 1fr);
+                gap: 4px 6px;
+            }
+            .proj .kv dt {
+                color: #b08a52;
+            }
+            .pbar {
+                height: 4px;
+                margin-top: 3px;
+                overflow: hidden;
+                border-radius: 999px;
+                background: #f0e3c8;
+            }
+            .pbar i {
+                display: block;
+                width: 62%;
+                height: 100%;
+                background: var(--amber);
+            }
+            .proj .flag {
+                margin-top: 7px;
+                display: flex;
+                font-size: 6.8px;
+                line-height: 1.35;
+                text-transform: none;
+                letter-spacing: 0;
+            }
+
+            /* ── Tabla ───────────────────────────────────────────────── */
+            .data-table {
+                width: 100%;
+                border-collapse: collapse;
+                text-align: left;
+            }
+            .data-table th {
+                height: 30px;
+                padding: 0 8px;
+                border-bottom: 1px solid #edf0f2;
+                color: #97a1aa;
+                font-size: 7.6px;
+                font-weight: 600;
+                letter-spacing: 0.5px;
+                text-transform: uppercase;
+                white-space: nowrap;
+            }
+            .data-table td {
+                padding: 6px 8px;
+                border-bottom: 1px solid #f0f2f4;
+                color: #687988;
+                font-size: 9.2px;
+                line-height: 1.45;
+                vertical-align: middle;
+            }
+            .data-table tbody tr:last-child td {
+                border-bottom: 0;
+            }
+            .data-table td.num,
+            .data-table th.num {
+                text-align: right;
+                font-variant-numeric: tabular-nums;
+            }
+            .data-table td.strong {
+                color: var(--ink);
+                font-weight: 600;
+            }
+            .data-table tbody tr:hover td {
+                background: #fafbfc;
+            }
+            .data-table td code {
+                font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+                font-size: 8.4px;
+                color: #4c7099;
+            }
+            .ej {
+                display: inline-block;
+                margin-left: 3px;
+                padding: 0 3px;
+                border: 1px dashed #d9c49a;
+                border-radius: 3px;
+                color: #b08a52;
+                font-size: 6.6px;
+                font-weight: 700;
+                letter-spacing: 0.04em;
+                text-transform: uppercase;
+                vertical-align: 1px;
+            }
+            .dash {
+                color: #a3b0ba;
+            }
+
+            /* ── Pie y notas ─────────────────────────────────────────── */
+            .footnote {
+                margin: 8px 2px 0;
+                color: #94a0a8;
+                font-size: 9px;
+                line-height: 1.6;
+            }
+            .footnote strong {
+                color: #687988;
+                font-weight: 600;
+            }
+            .footnote code,
+            .notes code {
+                padding: 1px 4px;
+                border: 1px solid #e6ebef;
+                border-radius: 4px;
+                background: #f2f5f8;
+                color: #33475b;
+                font-family:
+                    ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+                font-size: 9px;
+            }
+            .notes {
+                margin-top: 4px;
+                padding: 18px 20px;
+                border: 1px solid var(--line);
+                border-radius: 8px;
+                background: #fff;
+            }
+            .notes h2 {
+                margin: 0 0 10px;
+                color: var(--ink);
+                font: 700 16px/1.3 var(--font-display);
+                letter-spacing: -0.3px;
+            }
+            .notes h3 {
+                margin: 18px 0 6px;
+                color: #465a6c;
+                font: 700 11px/1.3 var(--font-display);
+                letter-spacing: 0.03em;
+                text-transform: uppercase;
+            }
+            .notes ol,
+            .notes ul {
+                margin: 0;
+                padding-left: 20px;
+                color: #526577;
+                font-size: 10.5px;
+                line-height: 1.6;
+            }
+            .notes li {
+                margin: 0 0 7px;
+            }
+            .notes li:last-child {
+                margin-bottom: 0;
+            }
+            .notes p {
+                margin: 0 0 8px;
+                color: #526577;
+                font-size: 10.5px;
+                line-height: 1.6;
+            }
+            .notes b {
+                color: #33475b;
+            }
+            .notes table {
+                width: 100%;
+                margin: 4px 0 2px;
+                border-collapse: collapse;
+                font-size: 9.5px;
+            }
+            .notes th,
+            .notes td {
+                padding: 5px 8px;
+                border-bottom: 1px solid #eef1f4;
+                text-align: left;
+                vertical-align: top;
+                color: #526577;
+            }
+            .notes th {
+                color: #8b97a1;
+                font-size: 8px;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+            }
+            .notes td:first-child {
+                white-space: nowrap;
+            }
+            .notes td code {
+                white-space: nowrap;
+            }
+            .notes .sm {
+                font-size: 9.5px;
+                color: #94a0a8;
+            }
+
+            .sprite {
+                position: absolute;
+                width: 0;
+                height: 0;
+                overflow: hidden;
+            }
+
+            /* ── Impresión ───────────────────────────────────────────── */
+            @page {
+                size: A4 landscape;
+                margin: 8mm;
+            }
+            @media print {
+                html,
+                body {
+                    background: #fff;
+                }
+                .view-body {
+                    max-width: none;
+                    padding: 0;
+                    gap: 10px;
+                }
+                .radar-halo {
+                    animation: none;
+                    opacity: 0.32;
+                    transform: scale(1.6);
+                }
+                .card,
+                .dcard,
+                .notes,
+                .ann {
+                    break-inside: avoid;
+                }
+                .mapstage {
+                    grid-template-columns: 220px minmax(0, 1fr) 260px;
+                }
+                .panel,
+                .canvas-card,
+                .drawers {
+                    height: 560px;
+                    overflow: hidden;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <svg class="sprite" aria-hidden="true" focusable="false">
+            <defs>
+                <g id="glyph-dpa">
+                    <circle
+                        cx="0"
+                        cy="-4.6"
+                        r="1.5"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.2"
+                    />
+                    <path
+                        d="M0 -3.1 V5.4 M-2.9 2.6 A3.4 3.4 0 0 0 2.9 2.6"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.2"
+                        stroke-linecap="round"
+                    />
+                    <path
+                        d="M-1.9 -1.1 H1.9"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.1"
+                        stroke-linecap="round"
+                    />
+                </g>
+                <g id="glyph-radar">
+                    <circle
+                        r="4.1"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.4"
+                    />
+                    <circle r="1.1" fill="currentColor" />
+                </g>
+            </defs>
+        </svg>
+
+        <main class="view-body">
+            <header class="view-head">
+                <div>
+                    <h1>Mapa de activos</h1>
+                    <p class="view-subtitle">
+                        Capa de puntos de <b>gis/Infraestructuras.kml</b> sobre
+                        un lienzo esquemático: 13 229 derechos acuícolas, 227
+                        sedes institucionales y 31 desembarcaderos DPA. El KML
+                        <b>no trae geometría de área</b>, así que los círculos
+                        son simbólicos y no representan superficie. RADAR y el
+                        estado de proyectos DPA se dibujan <b>sin fuente</b> y
+                        se declaran como tales. Desde el 2026-11-23 existe
+                        además la <b>capa distrital</b>
+                        (1 892 polígonos, item 129): al cargarla, este lienzo
+                        esquemático se sustituye por límites reales y estos
+                        puntos se dibujan dentro de su distrito.
+                    </p>
+                </div>
+                <div>
+                    <span class="badge"
+                        >A5 · items 125–127 · mockup estático</span
+                    >
+                </div>
+            </header>
+
+            <!-- ═══════════ Anotación obligatoria para el equipo .NET ═══════════ -->
+            <section class="ann" aria-label="Anotaciones para el equipo .NET">
+                <div class="ann-card">
+                    <h3>
+                        <span class="n">1</span>Fuente y cobertura verificada
+                    </h3>
+                    <table class="ann-table">
+                        <tr>
+                            <th>Qué</th>
+                            <th>Dato</th>
+                        </tr>
+                        <tr>
+                            <td><code>gis/Infraestructuras.kml</code></td>
+                            <td>
+                                37 MB, 13 456 <code>&lt;Placemark&gt;</code>;
+                                publicado en
+                                <code>gis.infraestructuras_puntos</code>
+                                (13 456 filas verificadas)
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Derechos acuícolas</td>
+                            <td>
+                                <b>13 229</b> · AREL 10 057 · AMYPE 2 996 ·
+                                AMYGE 176
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Sedes institucionales</td>
+                            <td><b>227</b> con <code>IDENTI</code></td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <code>DEPARTAMEN</code> /
+                                <code>PROVINCIA</code> / <code>DISTRITO</code>
+                            </td>
+                            <td>en las <b>13 456</b> filas</td>
+                        </tr>
+                        <tr>
+                            <td><code>DIRECCION</code></td>
+                            <td>
+                                <b>168</b> = 150 con la etiqueta
+                                <code>DIRECCION</code> + 18 con
+                                <code>DIRECCIÓN</code> (tilde). Otras 16 filas
+                                traen <code>DIREC_PRED</code>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Ubigeo INEI</td>
+                            <td>
+                                resuelto en <b>13 404</b>; los
+                                <b>52</b> restantes documentados en
+                                <code>gis/derived/README.md</code>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Geometría</td>
+                            <td>
+                                <code>Point</code> en las 13 456 ·
+                                <b>cero polígonos</b>
+                            </td>
+                        </tr>
+                    </table>
+                    <p style="margin: 5px 0 0">
+                        Calidad de la fuente: 158 coordenadas repetidas, 10
+                        globos cuya lat/lon no coincide con el
+                        <code>&lt;Point&gt;</code>, provincias con errata
+                        (<code>LMABAYEQUE</code>, <code>NAZCA</code>,
+                        <code>CONTR. VILLAR</code>) y
+                        <code>DEPARTAMEN</code> que alterna <code>LIMA</code> y
+                        <code>Lima</code>.
+                    </p>
+                </div>
+
+                <div class="ann-card">
+                    <h3><span class="n">2</span>Lo que el archivo no trae</h3>
+                    <ul>
+                        <li>
+                            <b>No hay <code>ExtendedData</code>.</b> Los
+                            atributos viven en el HTML de
+                            <code>&lt;description&gt;</code> y ya fueron
+                            tabulados en 35 columnas (<code>id</code>,
+                            <code>tipo_registro</code>, <code>identi</code>,
+                            <code>distrito</code>, <code>ubigeo</code>,
+                            <code>latitud</code>, <code>longitud</code>…).
+                        </li>
+                        <li>
+                            <b>Faltan los polígonos.</b> Los derechos acuícolas
+                            describen cuatro vértices como texto en
+                            <code>LATITUD</code>/<code>LONGITUD</code> del
+                            globo, pero la geometría guardada es un solo
+                            <code>Point</code>: no hay área calculable sin
+                            reprocesar la fuente.
+                        </li>
+                        <li>
+                            <b>RADAR no tiene fuente.</b> Ni redes instaladas ni
+                            estado: la capa se dibuja con seis posiciones de
+                            ejemplo y se marca «sin fuente».
+                        </li>
+                        <li>
+                            <b
+                                >El estado de los proyectos DPA no tiene
+                                fuente.</b
+                            >
+                            Etapa, expediente y avance son de ejemplo; FONDEPES
+                            / Invierte.pe están pendientes.
+                        </li>
+                        <li>
+                            <b>Privacidad:</b> <code>titular</code> y
+                            <code>nombre</code> son datos personales (Ley
+                            29733); el GeoJSON publicado expone
+                            <code>etiqueta</code> en su lugar.
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="ann-card wide">
+                    <h3>
+                        <span class="n">3</span>Contrato propuesto · 4 endpoints
+                    </h3>
+                    <table class="ann-table">
+                        <tr>
+                            <th>Endpoint</th>
+                            <th>Qué devuelve</th>
+                        </tr>
+                        <tr>
+                            <td>
+                                <code
+                                    >GET
+                                    /v1/gis/infraestructuras?bbox=minLon,minLat,maxLon,maxLat</code
+                                >
+                                <br /><code
+                                    >+
+                                    capa=derechos|sedes|dpa&amp;identi=&amp;distrito=&amp;q=&amp;limit=&amp;cursor=</code
+                                >
+                            </td>
+                            <td>
+                                Puntos dentro del recuadro (el
+                                <code>bbox</code> recorta puntos: no hay
+                                polígonos que intersectar). Devuelve
+                                <code>tipo_registro</code>, <code>identi</code>,
+                                <code>nombre_infraestructura</code>,
+                                <code>departamento</code>,
+                                <code>provincia</code>, <code>distrito</code>,
+                                <code>ubigeo</code>, <code>latitud</code>,
+                                <code>longitud</code>,
+                                <code>categoria_codigo</code>. Sin
+                                <code>titular</code> ni
+                                <code>nombre</code> salvo rol con
+                                <code>puedeVerPii</code>.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><code>GET /v1/gis/dpa</code></td>
+                            <td>
+                                Los <b>31</b> desembarcaderos (<code
+                                    >identi LIKE 'DPA%'</code
+                                >) con nombre, ubigeo y coordenada.
+                                <code>total: 31</code>. No incluye estado de
+                                proyecto.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><code>GET /v1/gis/radar</code></td>
+                            <td>
+                                Red RADAR. Hoy sin fuente:
+                                <code>200 {items: [], sin_fuente: true}</code>
+                                (o <code>501</code>). Contrato futuro:
+                                <code
+                                    >id, nombre, latitud, longitud, estado,
+                                    fuente</code
+                                >.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><code>GET /v1/gis/dpa/:id/proyecto</code></td>
+                            <td>
+                                Estado del proyecto. Hoy <code>501</code> con
+                                <code>sin_fuente: true</code>. Contrato futuro:
+                                <code
+                                    >etapa, expediente, avance_pct,
+                                    fecha_actualizacion, fuente</code
+                                >
+                                (<code>FONDEPES</code> |
+                                <code>Invierte.pe</code>), con
+                                <code>fuente</code> obligatoria.
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="ann-card wide">
+                    <h3>
+                        <span class="n">4</span>Correcciones al brief, con la
+                        fuente en la mano
+                    </h3>
+                    <ul>
+                        <li>
+                            <b>«ITP Paita» no existe.</b> El KML no tiene
+                            ninguna sede ITP en el distrito de Paita: allí hay
+                            FONDEPES (Centro de Entrenamiento Pesquero),
+                            SANIPES, IMARPE y tres DPA. La ITP real más cercana
+                            al ejemplo es <b>CITEpesquero Piura</b> (distrito
+                            Piura), que es la que dibuja el estado A.
+                        </li>
+                        <li>
+                            <b>Los 31 desembarcaderos no son «FONDEPES».</b> Son
+                            los puntos con <code>IDENTI</code> =
+                            <code>DPA - GORE</code> (30) más uno con la errata
+                            <code>DPA -GORE</code> (DPA Los Chimus). Las 27
+                            sedes con <code>IDENTI</code> =
+                            <code>FONDEPES</code> son otra población: centros de
+                            entrenamiento, almacenes y algunos DPA que no están
+                            en la lista GORE.
+                        </li>
+                        <li>
+                            <b
+                                >«168 direcciones» se sostiene sólo contando la
+                                tilde:</b
+                            >
+                            150 con <code>DIRECCION</code> + 18 con
+                            <code>DIRECCIÓN</code>. Un
+                            <code>LIKE 'DIRECCION'</code>
+                            devuelve 150 y pierde 18 sedes.
+                        </li>
+                        <li>
+                            <b>No se mezclan escalas.</b> Esta pantalla sólo usa
+                            la escala de <b>conflictividad</b> (Diferencia ·
+                            Controversia · Conflicto social · Crisis social). No
+                            hay riesgo ni prioridad en ninguna celda.
+                        </li>
+                    </ul>
+                </div>
+            </section>
+
+            <div class="fixes" aria-label="Correcciones aplicadas">
+                <span class="fix">«ITP Paita» declarada inexistente</span>
+                <span class="fix"
+                    >31 DPA = <code>DPA - GORE</code> + 1 errata</span
+                >
+                <span class="fix"
+                    >KML sin polígonos · capa distrital aparte</span
+                >
+                <span class="fix">RADAR con posiciones de ejemplo</span>
+                <span class="fix">Estado DPA de ejemplo</span>
+                <span class="fix">168 direcciones: 150 + 18 con tilde</span>
+                <span class="fix">Ubigeo 13 404 · 52 documentados</span>
+                <span class="fix">Círculos simbólicos, no área</span>
+            </div>
+
+            <div class="stat-row" aria-label="Cifras de la capa">
+                <span class="stat"><b>13 456</b> puntos en el KML</span>
+                <span class="stat"><b>13 229</b> derechos acuícolas</span>
+                <span class="stat"
+                    ><b>227</b> sedes con <code>IDENTI</code></span
+                >
+                <span class="stat"><b>31</b> desembarcaderos DPA</span>
+                <span class="stat"
+                    ><b>1 892</b> polígonos distritales (capa aparte)</span
+                >
+                <span class="stat dash"><b>2</b> capas sin fuente</span>
+            </div>
+
+            <!-- ═══════════ Escenario principal ═══════════ -->
+            <section
+                class="mapstage"
+                aria-label="Lienzo de activos con capas y detalle"
+            >
+                <!-- ── Control de capas ── -->
+                <aside class="panel" aria-label="Control de capas">
+                    <div class="panel-head">
+                        <h2 class="panel-title">Capas</h2>
+                        <span class="tag">5 · puntos</span>
+                    </div>
+                    <p class="panel-sub">
+                        Los checks son de apariencia: el mockup es estático y no
+                        filtra el lienzo.
+                    </p>
+
+                    <label class="layer">
+                        <input type="checkbox" checked />
+                        <span class="cbox" aria-hidden="true"></span>
+                        <span>
+                            <span class="lname">
+                                <span class="sym">
+                                    <i style="background: #6f8fa8"></i>
+                                    <i style="background: #4c7099"></i>
+                                    <i style="background: #a6732d"></i>
+                                    <i style="background: #a84f49"></i>
+                                </span>
+                                Casos por conflictividad
+                            </span>
+                            <span class="lsub">
+                                Diferencia · Controversia · Conflicto social ·
+                                Crisis social. Sin coordenada: el caso se ubica
+                                por región.
+                            </span>
+                        </span>
+                        <span class="lnum dash" title="Conteo desde /v1/cases"
+                            >—</span
+                        >
+                    </label>
+
+                    <label class="layer">
+                        <input type="checkbox" checked />
+                        <span class="cbox" aria-hidden="true"></span>
+                        <span>
+                            <span class="lname">
+                                <span class="sym">
+                                    <i
+                                        style="
+                                            background: #397c79;
+                                            opacity: 0.75;
+                                        "
+                                    ></i>
+                                    <i
+                                        style="
+                                            background: #397c79;
+                                            opacity: 0.45;
+                                        "
+                                    ></i>
+                                    <i
+                                        style="
+                                            background: #397c79;
+                                            opacity: 0.22;
+                                        "
+                                    ></i>
+                                </span>
+                                Derechos acuícolas privados
+                            </span>
+                            <span class="lsub">
+                                AREL 10 057 · AMYPE 2 996 · AMYGE 176. Burbuja
+                                por departamento; el punto fino es la sede.
+                            </span>
+                        </span>
+                        <span class="lnum">13 229</span>
+                    </label>
+
+                    <label class="layer">
+                        <input type="checkbox" checked />
+                        <span class="cbox" aria-hidden="true"></span>
+                        <span>
+                            <span class="lname">
+                                <span class="sym">
+                                    <i class="hollow"></i>
+                                </span>
+                                Sedes institucionales
+                            </span>
+                            <span class="lsub">
+                                ITP 34 · <code>DPA - GORE</code> 30 + 1 errata
+                                <code>DPA -GORE</code> · TUEMPRESA 29 · PNACP 27
+                                · FONDEPES 27 · DIREPRO 26 · SANIPES 18 · IMARPE
+                                17 · anexas 9 · INACAL 5 · otras 4.
+                            </span>
+                        </span>
+                        <span class="lnum">227</span>
+                    </label>
+                    <details class="mini">
+                        <summary>Ver reparto por <code>IDENTI</code></summary>
+                        <table>
+                            <tr>
+                                <td>ITP</td>
+                                <td>34</td>
+                            </tr>
+                            <tr>
+                                <td>DPA - GORE</td>
+                                <td>30</td>
+                            </tr>
+                            <tr class="errata">
+                                <td>DPA -GORE (errata)</td>
+                                <td>1</td>
+                            </tr>
+                            <tr>
+                                <td>TUEMPRESA</td>
+                                <td>29</td>
+                            </tr>
+                            <tr>
+                                <td>PNACP</td>
+                                <td>27</td>
+                            </tr>
+                            <tr>
+                                <td>FONDEPES</td>
+                                <td>27</td>
+                            </tr>
+                            <tr>
+                                <td>DIREPRO</td>
+                                <td>26</td>
+                            </tr>
+                            <tr>
+                                <td>SANIPES</td>
+                                <td>18</td>
+                            </tr>
+                            <tr>
+                                <td>IMARPE</td>
+                                <td>17</td>
+                            </tr>
+                            <tr>
+                                <td>anexas</td>
+                                <td>9</td>
+                            </tr>
+                            <tr>
+                                <td>INACAL</td>
+                                <td>5</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    RACSO · PROINNOVATE · PNDP · COMP MY PERU
+                                </td>
+                                <td>4</td>
+                            </tr>
+                            <tr>
+                                <td><b>Total</b></td>
+                                <td><b>227</b></td>
+                            </tr>
+                        </table>
+                    </details>
+
+                    <label class="layer">
+                        <input type="checkbox" checked />
+                        <span class="cbox" aria-hidden="true"></span>
+                        <span>
+                            <span class="lname">
+                                <svg
+                                    class="lico"
+                                    viewBox="-8 -8 16 16"
+                                    style="color: #a84f49"
+                                >
+                                    <use href="#glyph-radar" />
+                                </svg>
+                                Redes RADAR instaladas
+                            </span>
+                            <span class="lsub">
+                                Anillo hueco con pulso, distinto del resto.
+                                <b>Sin fuente cargada</b>: el lienzo usa seis
+                                posiciones de ejemplo.
+                            </span>
+                        </span>
+                        <span class="lnum dash" title="Sin fuente">—</span>
+                    </label>
+
+                    <label class="layer">
+                        <input type="checkbox" checked />
+                        <span class="cbox" aria-hidden="true"></span>
+                        <span>
+                            <span class="lname">
+                                <svg
+                                    class="lico"
+                                    viewBox="-7 -8 14 16"
+                                    style="color: #a6732d"
+                                >
+                                    <use href="#glyph-dpa" />
+                                </svg>
+                                Desembarcaderos artesanales (DPA)
+                            </span>
+                            <span class="lsub">
+                                31 con nombre propio y distrito (La Islilla,
+                                Paita, Chimbote…);
+                                <code>IDENTI DPA - GORE</code>, 30 más 1 con
+                                errata. Símbolo de ancla.
+                            </span>
+                        </span>
+                        <span class="lnum">31</span>
+                    </label>
+
+                    <div class="panel-sep">
+                        <span class="scope-label">Capa base</span>
+                        <div class="seg" role="group" aria-label="Capa base">
+                            <span aria-current="true">nacional</span>
+                            <span>región</span>
+                            <span>distrito</span>
+                        </div>
+                        <p class="base-note">
+                            <b>nacional:</b> silueta y retícula, sin límites.
+                            <b>región:</b> rótulos sobre el centro de la nube,
+                            no centroides oficiales. <b>distrito:</b> sin
+                            geometría; el KML trae <b>835</b> nombres y
+                            <b>872</b> combinaciones, y el ubigeo se resuelve en
+                            13 404 de 13 456. El recorte por distrito es por
+                            atributo, no por polígono.
+                        </p>
+                    </div>
+                </aside>
+
+                <!-- ── Lienzo ── -->
+                <div class="canvas-card">
+                    <div class="card-head">
+                        <div>
+                            <h2 class="card-title">Lienzo de activos</h2>
+                            <p class="card-sub">
+                                Retícula geográfica (WGS 84, equirectangular
+                                simple) con las posiciones reales del
+                                <code>&lt;Point&gt;</code>. Burbuja por
+                                departamento para los 13 229 derechos; punto
+                                fino para las 227 sedes; ancla para los 31 DPA.
+                            </p>
+                        </div>
+                        <span class="tag ref">cero polígonos</span>
+                    </div>
+
+                    <div class="map">
+                        <svg
+                            viewBox="0 0 560 660"
+                            preserveAspectRatio="xMidYMid meet"
+                            role="img"
+                            aria-label="Lienzo esquemático de Perú con burbujas por departamento para 13 229 derechos acuícolas, 227 sedes institucionales como puntos, 31 desembarcaderos DPA como anclas y 6 redes RADAR de ejemplo. El KML no tiene polígonos ni áreas reales; la capa distrital de 1 892 polígonos es aparte y aún no se dibuja aquí."
+                        >
+                            <title>
+                                Lienzo de activos: puntos y burbujas simbólicas
+                                sobre retícula, sin polígonos
+                            </title>
+                            <rect width="560" height="660" fill="#eef4f8" />
+
+                            <!-- Retícula cada 2° -->
+                            <g class="grat">
+                                <line x1="93" y1="26" x2="93" y2="634" />
+                                <line x1="169" y1="26" x2="169" y2="634" />
+                                <line x1="244" y1="26" x2="244" y2="634" />
+                                <line x1="319" y1="26" x2="319" y2="634" />
+                                <line x1="395" y1="26" x2="395" y2="634" />
+                                <line x1="470" y1="26" x2="470" y2="634" />
+                                <line x1="545" y1="26" x2="545" y2="634" />
+                                <line x1="26" y1="86" x2="534" y2="86" />
+                                <line x1="26" y1="162" x2="534" y2="162" />
+                                <line x1="26" y1="239" x2="534" y2="239" />
+                                <line x1="26" y1="315" x2="534" y2="315" />
+                                <line x1="26" y1="392" x2="534" y2="392" />
+                                <line x1="26" y1="468" x2="534" y2="468" />
+                                <line x1="26" y1="545" x2="534" y2="545" />
+                                <line x1="26" y1="622" x2="534" y2="622" />
+                            </g>
+                            <g class="grat-lab" text-anchor="middle">
+                                <text x="93" y="21">80°O</text>
+                                <text x="169" y="21">78°O</text>
+                                <text x="244" y="21">76°O</text>
+                                <text x="319" y="21">74°O</text>
+                                <text x="395" y="21">72°O</text>
+                                <text x="470" y="21">70°O</text>
+                                <text x="545" y="21">68°O</text>
+                                <text x="34" y="88">4°S</text>
+                                <text x="34" y="164">6°S</text>
+                                <text x="34" y="241">8°S</text>
+                                <text x="34" y="317">10°S</text>
+                                <text x="34" y="394">12°S</text>
+                                <text x="34" y="470">14°S</text>
+                                <text x="34" y="547">16°S</text>
+                                <text x="34" y="624">18°S</text>
+                            </g>
+
+                            <!-- Burbujas por departamento: 13 229 derechos -->
+                            <g class="burbujas">
+                                <circle cx="158" cy="121" r="21.7" />
+                                <circle cx="221" cy="182" r="20.3" />
+                                <circle cx="345" cy="78" r="20.2" />
+                                <circle cx="242" cy="284" r="20.1" />
+                                <circle cx="289" cy="258" r="18.3" />
+                                <circle cx="375" cy="422" r="18.1" />
+                                <circle cx="288" cy="365" r="14.8" />
+                                <circle cx="477" cy="538" r="13.7" />
+                                <circle cx="486" cy="417" r="11.7" />
+                                <circle cx="363" cy="468" r="10.8" />
+                                <circle cx="141" cy="170" r="10.8" />
+                                <circle cx="321" cy="430" r="10.8" />
+                                <circle cx="59" cy="151" r="10.6" />
+                                <circle cx="280" cy="423" r="8.9" />
+                                <circle cx="170" cy="237" r="8.8" />
+                                <circle cx="253" cy="335" r="8.4" />
+                                <circle cx="390" cy="513" r="8.2" />
+                                <circle cx="218" cy="363" r="7.2" />
+                                <circle cx="153" cy="289" r="7.1" />
+                                <circle cx="79" cy="66" r="6.9" />
+                                <circle cx="233" cy="461" r="6.5" />
+                                <circle cx="109" cy="181" r="6.2" />
+                                <circle cx="458" cy="602" r="4.5" />
+                                <circle cx="458" cy="570" r="4.4" />
+                                <circle cx="200" cy="396" r="3.5" />
+                            </g>
+                            <g class="dep-lab" text-anchor="middle">
+                                <text x="79" y="53">TUMBES</text>
+                                <text x="59" y="166">PIURA</text>
+                                <text x="158" y="121">AMAZONAS</text>
+                                <text x="345" y="62">LORETO</text>
+                                <text x="221" y="197">SAN MARTÍN</text>
+                                <text x="170" y="250">LA LIBERTAD</text>
+                                <text x="289" y="258">UCAYALI</text>
+                                <text x="288" y="378">JUNÍN</text>
+                                <text x="218" y="352">LIMA</text>
+                                <text x="375" y="422">CUSCO</text>
+                                <text x="486" y="417">MADRE DE DIOS</text>
+                                <text x="477" y="527">PUNO</text>
+                                <text x="390" y="500">AREQUIPA</text>
+                                <text x="458" y="614">TACNA</text>
+                            </g>
+
+                            <!-- 227 sedes: posición real del Point -->
+                            <g class="sedes" fill="#2455a2" fill-opacity="0.82">
+                                <circle cx="149" cy="281.8" r="1.7" />
+                                <circle cx="325.8" cy="411.7" r="1.7" />
+                                <circle cx="282.7" cy="422" r="1.7" />
+                                <circle cx="244.1" cy="288.3" r="1.7" />
+                                <circle cx="273.9" cy="394.4" r="1.7" />
+                                <circle cx="205.9" cy="395.6" r="1.7" />
+                                <circle cx="347.9" cy="75.9" r="1.7" />
+                                <circle cx="152.4" cy="152.8" r="1.7" />
+                                <circle cx="138.4" cy="150.7" r="1.7" />
+                                <circle cx="151.3" cy="206.6" r="1.7" />
+                                <circle cx="130.1" cy="243" r="1.7" />
+                                <circle cx="500.7" cy="414.6" r="1.7" />
+                                <circle cx="434.8" cy="590.6" r="1.7" />
+                                <circle cx="468.9" cy="538.8" r="1.7" />
+                                <circle cx="229.7" cy="180.4" r="1.7" />
+                                <circle cx="460.2" cy="622.4" r="1.7" />
+                                <circle cx="361.4" cy="454.5" r="1.7" />
+                                <circle cx="412.1" cy="560.3" r="1.7" />
+                                <circle cx="311" cy="436.4" r="1.7" />
+                                <circle cx="396.1" cy="450.1" r="1.7" />
+                                <circle cx="266.7" cy="337.3" r="1.7" />
+                                <circle cx="254.3" cy="471.1" r="1.7" />
+                                <circle cx="464.8" cy="525.4" r="1.7" />
+                                <circle cx="99.4" cy="191.6" r="1.7" />
+                                <circle cx="70" cy="131.5" r="1.7" />
+                                <circle cx="76.4" cy="68.6" r="1.7" />
+                                <circle cx="311.1" cy="436.9" r="1.7" />
+                                <circle cx="419.3" cy="607.9" r="1.7" />
+                                <circle cx="299.3" cy="253.4" r="1.7" />
+                                <circle cx="205.9" cy="395.6" r="1.7" />
+                                <circle cx="205.7" cy="395.5" r="1.7" />
+                                <circle cx="206.7" cy="394.6" r="1.7" />
+                                <circle cx="205.7" cy="395.4" r="1.7" />
+                                <circle cx="205.9" cy="395.3" r="1.7" />
+                                <circle cx="205.9" cy="395.5" r="1.7" />
+                                <circle cx="205.9" cy="395.6" r="1.7" />
+                                <circle cx="205.5" cy="395.4" r="1.7" />
+                                <circle cx="201.6" cy="391.4" r="1.7" />
+                                <circle cx="205.3" cy="395.3" r="1.7" />
+                                <circle cx="148.8" cy="281.7" r="1.7" />
+                                <circle cx="368" cy="568.8" r="1.7" />
+                                <circle cx="236.1" cy="457.5" r="1.7" />
+                                <circle cx="274.4" cy="393.6" r="1.7" />
+                                <circle cx="347.8" cy="75.9" r="1.7" />
+                                <circle cx="500.7" cy="414.5" r="1.7" />
+                                <circle cx="419.6" cy="607.5" r="1.7" />
+                                <circle cx="52.2" cy="127.4" r="1.7" />
+                                <circle cx="62.6" cy="145.6" r="1.7" />
+                                <circle cx="468.9" cy="538.4" r="1.7" />
+                                <circle cx="230" cy="180.5" r="1.7" />
+                                <circle cx="460.6" cy="622.2" r="1.7" />
+                                <circle cx="76.2" cy="69.1" r="1.7" />
+                                <circle cx="485.9" cy="351.8" r="1.7" />
+                                <circle cx="505.3" cy="567.3" r="1.7" />
+                                <circle cx="84.1" cy="66.8" r="1.7" />
+                                <circle cx="205.9" cy="384.1" r="1.7" />
+                                <circle cx="204.7" cy="395.2" r="1.7" />
+                                <circle cx="205.9" cy="395.3" r="1.7" />
+                                <circle cx="173.8" cy="170.9" r="1.7" />
+                                <circle cx="186.2" cy="295" r="1.7" />
+                                <circle cx="361.4" cy="454.5" r="1.7" />
+                                <circle cx="412.2" cy="560.6" r="1.7" />
+                                <circle cx="311.3" cy="436.3" r="1.7" />
+                                <circle cx="149.1" cy="206.4" r="1.7" />
+                                <circle cx="201.4" cy="394.2" r="1.7" />
+                                <circle cx="396.4" cy="450.4" r="1.7" />
+                                <circle cx="282.6" cy="421.8" r="1.7" />
+                                <circle cx="234.6" cy="313.1" r="1.7" />
+                                <circle cx="254" cy="470.5" r="1.7" />
+                                <circle cx="273.3" cy="394.2" r="1.7" />
+                                <circle cx="130.4" cy="242.5" r="1.7" />
+                                <circle cx="99.4" cy="191.7" r="1.7" />
+                                <circle cx="205.3" cy="395.4" r="1.7" />
+                                <circle cx="183.5" cy="357.9" r="1.7" />
+                                <circle cx="205.4" cy="395.6" r="1.7" />
+                                <circle cx="347.8" cy="75.6" r="1.7" />
+                                <circle cx="500.3" cy="413.9" r="1.7" />
+                                <circle cx="434.3" cy="591.2" r="1.7" />
+                                <circle cx="234.4" cy="340.6" r="1.7" />
+                                <circle cx="68.7" cy="131.2" r="1.7" />
+                                <circle cx="468.9" cy="538.9" r="1.7" />
+                                <circle cx="230.4" cy="181.1" r="1.7" />
+                                <circle cx="460.1" cy="622.2" r="1.7" />
+                                <circle cx="76.2" cy="69.2" r="1.7" />
+                                <circle cx="299.5" cy="253.3" r="1.7" />
+                                <circle cx="205.7" cy="395.5" r="1.7" />
+                                <circle cx="205.6" cy="395.5" r="1.7" />
+                                <circle cx="201.6" cy="391.4" r="1.7" />
+                                <circle cx="231.6" cy="181.8" r="1.7" />
+                                <circle cx="141.5" cy="254.5" r="1.7" />
+                                <circle cx="241.8" cy="280" r="1.7" />
+                                <circle cx="247.6" cy="465.8" r="1.7" />
+                                <circle cx="387.7" cy="557.4" r="1.7" />
+                                <circle cx="419.9" cy="609.4" r="1.7" />
+                                <circle cx="271.3" cy="343.6" r="1.7" />
+                                <circle cx="325.9" cy="411.6" r="1.7" />
+                                <circle cx="409.9" cy="558.5" r="1.7" />
+                                <circle cx="204.8" cy="393" r="1.7" />
+                                <circle cx="130.8" cy="241.1" r="1.7" />
+                                <circle cx="345.1" cy="78.3" r="1.7" />
+                                <circle cx="298.3" cy="253.5" r="1.7" />
+                                <circle cx="208.8" cy="399.4" r="1.7" />
+                                <circle cx="201.6" cy="391.4" r="1.7" />
+                                <circle cx="418.7" cy="608.8" r="1.7" />
+                                <circle cx="69.7" cy="130.7" r="1.7" />
+                                <circle cx="297.8" cy="254" r="1.7" />
+                                <circle cx="469" cy="538.7" r="1.7" />
+                                <circle cx="496.8" cy="416.7" r="1.7" />
+                                <circle cx="345.5" cy="77.8" r="1.7" />
+                                <circle cx="409.9" cy="558.5" r="1.7" />
+                                <circle cx="396.9" cy="450.4" r="1.7" />
+                                <circle cx="469" cy="538.7" r="1.7" />
+                                <circle cx="235.5" cy="316.8" r="1.7" />
+                                <circle cx="184.5" cy="356.8" r="1.7" />
+                                <circle cx="150.2" cy="207.3" r="1.7" />
+                                <circle cx="204.8" cy="393" r="1.7" />
+                                <circle cx="282.7" cy="421.9" r="1.7" />
+                                <circle cx="201.7" cy="391.4" r="1.7" />
+                                <circle cx="468.4" cy="538" r="1.7" />
+                                <circle cx="130" cy="242.9" r="1.7" />
+                                <circle cx="205.4" cy="395.5" r="1.7" />
+                                <circle cx="206.2" cy="395.1" r="1.7" />
+                                <circle cx="129.8" cy="242.9" r="1.7" />
+                                <circle cx="231.6" cy="181.8" r="1.7" />
+                                <circle cx="205.3" cy="395.5" r="1.7" />
+                                <circle cx="200.5" cy="394.3" r="1.7" />
+                                <circle cx="201.9" cy="393.7" r="1.7" />
+                                <circle cx="146.2" cy="279.8" r="1.7" />
+                                <circle cx="182.8" cy="356.8" r="1.7" />
+                                <circle cx="234.6" cy="462.2" r="1.7" />
+                                <circle cx="369.6" cy="569.9" r="1.7" />
+                                <circle cx="469.4" cy="539.4" r="1.7" />
+                                <circle cx="70.7" cy="71.7" r="1.7" />
+                                <circle cx="51.2" cy="126.8" r="1.7" />
+                                <circle cx="96.2" cy="195.6" r="1.7" />
+                                <circle cx="126.6" cy="241.7" r="1.7" />
+                                <circle cx="114.7" cy="227.1" r="1.7" />
+                                <circle cx="348.7" cy="560.2" r="1.7" />
+                                <circle cx="419.3" cy="607.9" r="1.7" />
+                                <circle cx="200.3" cy="394.5" r="1.7" />
+                                <circle cx="391.1" cy="583.2" r="1.7" />
+                                <circle cx="299.1" cy="253.2" r="1.7" />
+                                <circle cx="205.1" cy="394.2" r="1.7" />
+                                <circle cx="202.4" cy="393.7" r="1.7" />
+                                <circle cx="234.7" cy="461.4" r="1.7" />
+                                <circle cx="51" cy="126.5" r="1.7" />
+                                <circle cx="418.7" cy="608.8" r="1.7" />
+                                <circle cx="214.2" cy="410.6" r="1.7" />
+                                <circle cx="339.5" cy="90.5" r="1.7" />
+                                <circle cx="436.6" cy="621.5" r="1.7" />
+                                <circle cx="152.8" cy="290.6" r="1.7" />
+                                <circle cx="61.4" cy="155.6" r="1.7" />
+                                <circle cx="78.6" cy="66.8" r="1.7" />
+                                <circle cx="70.2" cy="130.7" r="1.7" />
+                                <circle cx="178.3" cy="346.5" r="1.7" />
+                                <circle cx="183.2" cy="358.2" r="1.7" />
+                                <circle cx="199.5" cy="385.4" r="1.7" />
+                                <circle cx="378.3" cy="572.3" r="1.7" />
+                                <circle cx="348.7" cy="560.5" r="1.7" />
+                                <circle cx="390.6" cy="583.8" r="1.7" />
+                                <circle cx="201.1" cy="393.5" r="1.7" />
+                                <circle cx="135" cy="253.9" r="1.7" />
+                                <circle cx="94.4" cy="191.2" r="1.7" />
+                                <circle cx="205.3" cy="398.1" r="1.7" />
+                                <circle cx="214" cy="410.2" r="1.7" />
+                                <circle cx="196.1" cy="375.9" r="1.7" />
+                                <circle cx="335.1" cy="105.2" r="1.7" />
+                                <circle cx="419.3" cy="607.8" r="1.7" />
+                                <circle cx="348" cy="75.2" r="1.7" />
+                                <circle cx="48.5" cy="131.9" r="1.7" />
+                                <circle cx="235.6" cy="458.1" r="1.7" />
+                                <circle cx="275.7" cy="520.4" r="1.7" />
+                                <circle cx="442.6" cy="625.9" r="1.7" />
+                                <circle cx="47.1" cy="95.1" r="1.7" />
+                                <circle cx="64.4" cy="75.6" r="1.7" />
+                                <circle cx="330.9" cy="553.7" r="1.7" />
+                                <circle cx="58.1" cy="83.4" r="1.7" />
+                                <circle cx="154.2" cy="294.4" r="1.7" />
+                                <circle cx="310" cy="539.8" r="1.7" />
+                                <circle cx="146.1" cy="279.9" r="1.7" />
+                                <circle cx="160.2" cy="313.3" r="1.7" />
+                                <circle cx="234.7" cy="461.9" r="1.7" />
+                                <circle cx="49" cy="93.9" r="1.7" />
+                                <circle cx="232.3" cy="464.4" r="1.7" />
+                                <circle cx="61.3" cy="151.5" r="1.7" />
+                                <circle cx="287.2" cy="528.4" r="1.7" />
+                                <circle cx="151" cy="289.5" r="1.7" />
+                                <circle cx="50.8" cy="92.4" r="1.7" />
+                                <circle cx="53.3" cy="89.8" r="1.7" />
+                                <circle cx="436.7" cy="621.2" r="1.7" />
+                                <circle cx="51.2" cy="126.7" r="1.7" />
+                                <circle cx="78.8" cy="66.4" r="1.7" />
+                                <circle cx="114.7" cy="227" r="1.7" />
+                                <circle cx="236.9" cy="448.1" r="1.7" />
+                                <circle cx="45.5" cy="107.4" r="1.7" />
+                                <circle cx="49.4" cy="128.8" r="1.7" />
+                                <circle cx="131.9" cy="247.2" r="1.7" />
+                                <circle cx="60.8" cy="153.3" r="1.7" />
+                                <circle cx="45.3" cy="102.8" r="1.7" />
+                                <circle cx="233.9" cy="474" r="1.7" />
+                                <circle cx="76.4" cy="68.6" r="1.7" />
+                                <circle cx="460.4" cy="621.9" r="1.7" />
+                                <circle cx="206.9" cy="162.9" r="1.7" />
+                                <circle cx="69.8" cy="130.9" r="1.7" />
+                                <circle cx="183.9" cy="357.6" r="1.7" />
+                                <circle cx="98.1" cy="192" r="1.7" />
+                                <circle cx="129.7" cy="242.4" r="1.7" />
+                                <circle cx="254.1" cy="471.2" r="1.7" />
+                                <circle cx="235" cy="312.4" r="1.7" />
+                                <circle cx="310.9" cy="436.2" r="1.7" />
+                                <circle cx="413.2" cy="561.1" r="1.7" />
+                                <circle cx="299.4" cy="253.4" r="1.7" />
+                                <circle cx="465.3" cy="526" r="1.7" />
+                                <circle cx="234.6" cy="340.7" r="1.7" />
+                                <circle cx="435.3" cy="590.5" r="1.7" />
+                                <circle cx="500.9" cy="414.5" r="1.7" />
+                                <circle cx="347.8" cy="76.1" r="1.7" />
+                                <circle cx="205.3" cy="393.5" r="1.7" />
+                                <circle cx="273.9" cy="394.5" r="1.7" />
+                                <circle cx="282.7" cy="422" r="1.7" />
+                                <circle cx="396.1" cy="450.2" r="1.7" />
+                                <circle cx="202.2" cy="392.2" r="1.7" />
+                                <circle cx="361.6" cy="454.5" r="1.7" />
+                                <circle cx="149.6" cy="206" r="1.7" />
+                                <circle cx="186.2" cy="295.9" r="1.7" />
+                                <circle cx="173.5" cy="171.1" r="1.7" />
+                            </g>
+
+                            <!-- Casos por conflictividad: posiciones de ejemplo -->
+                            <g class="casos">
+                                <circle
+                                    cx="210.2"
+                                    cy="395.6"
+                                    r="3.4"
+                                    fill="#4c7099"
+                                />
+                                <circle
+                                    cx="206.4"
+                                    cy="387.9"
+                                    r="3.2"
+                                    fill="#6f8fa8"
+                                />
+                                <circle
+                                    cx="48.3"
+                                    cy="108.5"
+                                    r="3.2"
+                                    fill="#a6732d"
+                                />
+                                <circle
+                                    cx="127.4"
+                                    cy="242.5"
+                                    r="3.4"
+                                    fill="#4c7099"
+                                />
+                                <circle
+                                    cx="232.8"
+                                    cy="460.7"
+                                    r="3.2"
+                                    fill="#6f8fa8"
+                                />
+                                <circle
+                                    cx="413.5"
+                                    cy="606.1"
+                                    r="3.2"
+                                    fill="#a84f49"
+                                />
+                                <circle
+                                    cx="255.4"
+                                    cy="177.4"
+                                    r="3.2"
+                                    fill="#a6732d"
+                                />
+                                <circle
+                                    cx="323.2"
+                                    cy="211.9"
+                                    r="3.2"
+                                    fill="#4c7099"
+                                />
+                                <circle
+                                    cx="183.8"
+                                    cy="296.1"
+                                    r="3.2"
+                                    fill="#6f8fa8"
+                                />
+                                <circle
+                                    cx="149.9"
+                                    cy="208"
+                                    r="3.2"
+                                    fill="#4c7099"
+                                />
+                            </g>
+
+                            <!-- RADAR: 6 posiciones de ejemplo, sin fuente -->
+                            <g class="g-radar">
+                                <circle
+                                    class="radar-halo"
+                                    cx="80.3"
+                                    cy="68.3"
+                                    r="4.1"
+                                />
+                                <use href="#glyph-radar" x="80.3" y="68.3" />
+                                <circle
+                                    class="radar-halo"
+                                    cx="52.1"
+                                    cy="129.6"
+                                    r="4.1"
+                                />
+                                <use href="#glyph-radar" x="52.1" y="129.6" />
+                                <circle
+                                    class="radar-halo"
+                                    cx="133"
+                                    cy="240.6"
+                                    r="4.1"
+                                />
+                                <use href="#glyph-radar" x="133" y="240.6" />
+                                <circle
+                                    class="radar-halo"
+                                    cx="200.8"
+                                    cy="393.7"
+                                    r="4.1"
+                                />
+                                <use href="#glyph-radar" x="200.8" y="393.7" />
+                                <circle
+                                    class="radar-halo"
+                                    cx="419.2"
+                                    cy="606.9"
+                                    r="4.1"
+                                />
+                                <use href="#glyph-radar" x="419.2" y="606.9" />
+                                <circle
+                                    class="radar-halo"
+                                    cx="223.4"
+                                    cy="294.2"
+                                    r="4.1"
+                                />
+                                <use href="#glyph-radar" x="223.4" y="294.2" />
+                            </g>
+
+                            <!-- 31 desembarcaderos DPA: ancla -->
+                            <g class="g-dpa">
+                                <use href="#glyph-dpa" x="48.5" y="131.9" />
+                                <use href="#glyph-dpa" x="235.6" y="458.1" />
+                                <use href="#glyph-dpa" x="275.7" y="520.4" />
+                                <use href="#glyph-dpa" x="442.6" y="625.9" />
+                                <use href="#glyph-dpa" x="47.1" y="95.1" />
+                                <use href="#glyph-dpa" x="64.4" y="75.6" />
+                                <use href="#glyph-dpa" x="330.9" y="553.7" />
+                                <use href="#glyph-dpa" x="58.1" y="83.4" />
+                                <use href="#glyph-dpa" x="154.2" y="294.4" />
+                                <use href="#glyph-dpa" x="310" y="539.8" />
+                                <use href="#glyph-dpa" x="146.1" y="279.9" />
+                                <use href="#glyph-dpa" x="160.2" y="313.3" />
+                                <use href="#glyph-dpa" x="234.7" y="461.9" />
+                                <use href="#glyph-dpa" x="49" y="93.9" />
+                                <use href="#glyph-dpa" x="232.3" y="464.4" />
+                                <use href="#glyph-dpa" x="61.3" y="151.5" />
+                                <use href="#glyph-dpa" x="287.2" y="528.4" />
+                                <use href="#glyph-dpa" x="151" y="289.5" />
+                                <use href="#glyph-dpa" x="50.8" y="92.4" />
+                                <use href="#glyph-dpa" x="53.3" y="89.8" />
+                                <use href="#glyph-dpa" x="436.7" y="621.2" />
+                                <use href="#glyph-dpa" x="51.2" y="126.7" />
+                                <use href="#glyph-dpa" x="78.8" y="66.4" />
+                                <use href="#glyph-dpa" x="114.7" y="227" />
+                                <use href="#glyph-dpa" x="236.9" y="448.1" />
+                                <use href="#glyph-dpa" x="45.5" y="107.4" />
+                                <use href="#glyph-dpa" x="49.4" y="128.8" />
+                                <use href="#glyph-dpa" x="131.9" y="247.2" />
+                                <use href="#glyph-dpa" x="60.8" y="153.3" />
+                                <use href="#glyph-dpa" x="45.3" y="102.8" />
+                                <use href="#glyph-dpa" x="233.9" y="474" />
+                            </g>
+
+                            <!-- Selecciones dibujadas (estados A y B) -->
+                            <g>
+                                <circle
+                                    class="sel-ring"
+                                    cx="70"
+                                    cy="131"
+                                    r="7.4"
+                                />
+                                <line
+                                    class="leader"
+                                    x1="77"
+                                    y1="127"
+                                    x2="85"
+                                    y2="120"
+                                />
+                                <circle
+                                    class="sel-dot"
+                                    cx="70"
+                                    cy="131"
+                                    r="2"
+                                />
+
+                                <circle
+                                    class="sel-ring"
+                                    cx="146.1"
+                                    cy="279.9"
+                                    r="7.4"
+                                />
+                                <line
+                                    class="leader"
+                                    x1="152"
+                                    y1="275"
+                                    x2="161"
+                                    y2="266"
+                                />
+                            </g>
+                            <g class="callout">
+                                <text x="87" y="120">
+                                    ITP · CITEpesquero Piura
+                                </text>
+                                <text class="sub" x="87" y="128">
+                                    estado A · 0 derechos en el distrito
+                                </text>
+                                <text x="163" y="265">DPA Chimbote</text>
+                                <text class="sub" x="163" y="273">
+                                    estado B · proyecto sin fuente
+                                </text>
+                            </g>
+
+                            <!-- Escala aproximada y norte -->
+                            <g class="scale">
+                                <line x1="42" y1="644" x2="111" y2="644" />
+                                <line x1="42" y1="640" x2="42" y2="648" />
+                                <line x1="111" y1="640" x2="111" y2="648" />
+                                <text x="42" y="657">0</text>
+                                <text x="111" y="657">200 km</text>
+                                <text x="508" y="44" text-anchor="middle">
+                                    N
+                                </text>
+                                <line x1="508" y1="48" x2="508" y2="60" />
+                                <path
+                                    d="M508 48 l-2.6 5 h5.2 Z"
+                                    fill="#8fa4b6"
+                                />
+                            </g>
+                        </svg>
+
+                        <div class="map-tools">
+                            <span class="map-tool">Sin teselas · sin CDN</span>
+                            <span class="map-tool off">RADAR sin fuente</span>
+                            <span class="map-tool off"
+                                >Estado DPA sin fuente</span
+                            >
+                        </div>
+                        <span class="map-label">
+                            Puntos, no polígonos · círculos simbólicos
+                        </span>
+                    </div>
+
+                    <div class="legend" aria-label="Leyenda del lienzo">
+                        <span
+                            ><i style="background: #6f8fa8"></i>Diferencia</span
+                        >
+                        <span
+                            ><i style="background: #4c7099"></i
+                            >Controversia</span
+                        >
+                        <span
+                            ><i style="background: #a6732d"></i>Conflicto
+                            social</span
+                        >
+                        <span
+                            ><i style="background: #a84f49"></i>Crisis
+                            social</span
+                        >
+                        <span><i class="teal"></i>Burbuja · derechos</span>
+                        <span><i class="hollow"></i>Sede (227)</span>
+                        <span
+                            ><svg
+                                class="lico"
+                                viewBox="-7 -8 14 16"
+                                style="color: #a6732d"
+                            >
+                                <use href="#glyph-dpa" />
+                            </svg>
+                            DPA (31)</span
+                        >
+                        <span><i class="rel"></i>RADAR · ejemplo</span>
+                        <span
+                            ><b>Círculos simbólicos</b>: no representan
+                            área</span
+                        >
+                    </div>
+                </div>
+
+                <!-- ── Cajón de detalle: dos estados apilados ── -->
+                <div
+                    class="drawers"
+                    aria-label="Detalle del punto seleccionado"
+                >
+                    <div class="dcard">
+                        <div class="dcard-head">
+                            <div>
+                                <h3>CITEpesquero Piura</h3>
+                                <p>
+                                    Sede institucional · <code>IDENTI</code> ITP
+                                    · estado A
+                                </p>
+                            </div>
+                            <span class="tag-mini">ID_80018</span>
+                        </div>
+                        <dl class="kv">
+                            <dt>Institución</dt>
+                            <dd>
+                                ITP · Instituto Tecnológico de la Producción
+                            </dd>
+                            <dt>Departamento</dt>
+                            <dd>PIURA</dd>
+                            <dt>Provincia</dt>
+                            <dd>PIURA</dd>
+                            <dt>Distrito</dt>
+                            <dd>
+                                PIURA
+                                <small
+                                    >ubigeo INEI 200101 · método: exacto</small
+                                >
+                            </dd>
+                            <dt>Dirección</dt>
+                            <dd>
+                                Calle Fortunato Chirichigno A-2, of. 305-306,
+                                Urb. San Eduardo, Piura
+                                <small
+                                    >Viene de <code>DIRECCION</code>, presente
+                                    en 168 de 13 456 puntos</small
+                                >
+                            </dd>
+                            <dt>Coordenada</dt>
+                            <dd>
+                                <code>-5.17990, -80.63210</code>
+                                <small>WGS 84</small>
+                            </dd>
+                            <dt>Derechos del distrito</dt>
+                            <dd>
+                                <span class="count-line"
+                                    >0 <span>derechos acuícolas</span></span
+                                >
+                                <small
+                                    >provincia PIURA: 34 · departamento PIURA:
+                                    322. El grueso está en Sechura (272).</small
+                                >
+                            </dd>
+                        </dl>
+                        <div class="dcard-foot">
+                            Equivalente:
+                            <code
+                                >GET /v1/gis/infraestructuras?id=ID_80018</code
+                            >
+                            + conteo por <code>ubigeo=200101</code>.<br />
+                            <b>No existe «ITP Paita»</b>: en el distrito de
+                            Paita sólo hay FONDEPES, SANIPES, IMARPE y tres DPA.
+                            Esta es la ITP real más cercana al ejemplo del
+                            brief.
+                        </div>
+                    </div>
+
+                    <div class="dcard">
+                        <div class="dcard-head">
+                            <div>
+                                <h3>DPA Chimbote</h3>
+                                <p>
+                                    Desembarcadero artesanal ·
+                                    <code>IDENTI</code> DPA - GORE · estado B
+                                </p>
+                            </div>
+                            <span class="tag-mini">ID_120010</span>
+                        </div>
+                        <dl class="kv">
+                            <dt>Nombre</dt>
+                            <dd>DPA Chimbote</dd>
+                            <dt>Distrito</dt>
+                            <dd>
+                                CHIMBOTE
+                                <small
+                                    >provincia SANTA · ANCASH · ubigeo
+                                    021801</small
+                                >
+                            </dd>
+                            <dt>Coordenada</dt>
+                            <dd>
+                                <code>-9.076111, -78.601111</code>
+                                <small>WGS 84 · <code>Point</code></small>
+                            </dd>
+                            <dt>Dirección</dt>
+                            <dd class="gap">
+                                —
+                                <small
+                                    >Sin <code>DIRECCION</code> ni
+                                    <code>DIREC_PRED</code> para este
+                                    punto</small
+                                >
+                            </dd>
+                        </dl>
+
+                        <div class="proj">
+                            <div class="proj-head">
+                                <h4>Estado del proyecto · item 127</h4>
+                                <span class="tag-mini">ejemplo</span>
+                            </div>
+                            <dl class="kv">
+                                <dt>Etapa</dt>
+                                <dd>Ejecución física</dd>
+                                <dt>Expediente</dt>
+                                <dd><code>PI-DPA-021801-2025-01</code></dd>
+                                <dt>Avance</dt>
+                                <dd>
+                                    62 %
+                                    <div class="pbar"><i></i></div>
+                                </dd>
+                                <dt>Fuente</dt>
+                                <dd class="gap">— sin fuente</dd>
+                            </dl>
+                            <span class="flag">
+                                Estado del proyecto sin fuente: FONDEPES /
+                                Invierte.pe pendiente. Datos de ejemplo
+                            </span>
+                        </div>
+
+                        <div class="dcard-foot">
+                            Equivalente:
+                            <code>GET /v1/gis/dpa/ID_120010/proyecto</code>
+                            (hoy <code>501</code>,
+                            <code>sin_fuente: true</code>). Nombre, distrito y
+                            coordenada sí salen del KML.
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ═══════════ Tabla: los 31 desembarcaderos ═══════════ -->
+            <section class="card" aria-label="Desembarcaderos artesanales">
+                <div class="card-head">
+                    <div>
+                        <h2 class="card-title">
+                            Desembarcaderos artesanales (31)
+                        </h2>
+                        <p class="card-sub">
+                            Nombre, distrito, provincia, región y coordenada
+                            salen del KML. Etapa, expediente, avance y fuente
+                            son de ejemplo: no hay fuente todavía.
+                        </p>
+                    </div>
+                    <span class="flag"
+                        >Etapa, expediente y avance: datos de ejemplo · sin
+                        fuente</span
+                    >
+                </div>
+
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Distrito</th>
+                            <th>Provincia</th>
+                            <th>Región</th>
+                            <th>Coordenada</th>
+                            <th>Etapa del proyecto</th>
+                            <th>Expediente</th>
+                            <th class="num">Avance</th>
+                            <th>Fuente</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="strong">DPA La Islilla</td>
+                            <td>PAITA</td>
+                            <td>PAITA</td>
+                            <td>PIURA</td>
+                            <td><code>-5.211389, -81.195000</code></td>
+                            <td>Perfil <span class="ej">ej.</span></td>
+                            <td><code>PI-DPA-200501-01</code></td>
+                            <td class="num">15 %</td>
+                            <td class="dash">— sin fuente</td>
+                        </tr>
+                        <tr>
+                            <td class="strong">DPA Paita</td>
+                            <td>PAITA</td>
+                            <td>PAITA</td>
+                            <td>PIURA</td>
+                            <td><code>-5.074897, -81.122381</code></td>
+                            <td>
+                                Expediente técnico <span class="ej">ej.</span>
+                            </td>
+                            <td><code>PI-DPA-200501-02</code></td>
+                            <td class="num">40 %</td>
+                            <td class="dash">— sin fuente</td>
+                        </tr>
+                        <tr>
+                            <td class="strong">DPA Yacila</td>
+                            <td>PAITA</td>
+                            <td>PAITA</td>
+                            <td>PIURA</td>
+                            <td><code>-5.131178, -81.171611</code></td>
+                            <td>Perfil <span class="ej">ej.</span></td>
+                            <td><code>PI-DPA-200501-03</code></td>
+                            <td class="num">10 %</td>
+                            <td class="dash">— sin fuente</td>
+                        </tr>
+                        <tr>
+                            <td class="strong">DPA Talara</td>
+                            <td>PARIÑAS</td>
+                            <td>TALARA</td>
+                            <td>PIURA</td>
+                            <td><code>-4.571131, -81.274306</code></td>
+                            <td>En ejecución <span class="ej">ej.</span></td>
+                            <td><code>PI-DPA-200701-04</code></td>
+                            <td class="num">78 %</td>
+                            <td class="dash">— sin fuente</td>
+                        </tr>
+                        <tr>
+                            <td class="strong">DPA Parachique</td>
+                            <td>SECHURA</td>
+                            <td>SECHURA</td>
+                            <td>PIURA</td>
+                            <td><code>-5.770958, -80.867204</code></td>
+                            <td>En ejecución <span class="ej">ej.</span></td>
+                            <td><code>PI-DPA-200801-05</code></td>
+                            <td class="num">92 %</td>
+                            <td class="dash">— sin fuente</td>
+                        </tr>
+                        <tr>
+                            <td class="strong">DPA Chimbote</td>
+                            <td>CHIMBOTE</td>
+                            <td>SANTA</td>
+                            <td>ANCASH</td>
+                            <td><code>-9.076111, -78.601111</code></td>
+                            <td>En ejecución <span class="ej">ej.</span></td>
+                            <td><code>PI-DPA-021801-01</code></td>
+                            <td class="num">62 %</td>
+                            <td class="dash">— sin fuente</td>
+                        </tr>
+                        <tr>
+                            <td class="strong">DPA Casma</td>
+                            <td>COMANDANTE NOEL</td>
+                            <td>CASMA</td>
+                            <td>ANCASH</td>
+                            <td><code>-9.456186, -78.385842</code></td>
+                            <td>
+                                Expediente técnico <span class="ej">ej.</span>
+                            </td>
+                            <td><code>PI-DPA-020801-02</code></td>
+                            <td class="num">35 %</td>
+                            <td class="dash">— sin fuente</td>
+                        </tr>
+                        <tr>
+                            <td class="strong">DPA Salaverry</td>
+                            <td>SALAVERRY</td>
+                            <td>TRUJILLO</td>
+                            <td>LA LIBERTAD</td>
+                            <td><code>-8.223769, -78.980606</code></td>
+                            <td>En operación <span class="ej">ej.</span></td>
+                            <td><code>PI-DPA-130101-03</code></td>
+                            <td class="num">100 %</td>
+                            <td class="dash">— sin fuente</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <p class="footnote">
+                    Se muestran <strong>8 de 31</strong> filas. La lista
+                    completa son los 31 puntos con <code>IDENTI</code> =
+                    <code>DPA - GORE</code> (30) más
+                    <strong>DPA Los Chimus</strong>, que trae la errata
+                    <code>DPA -GORE</code>; nombre, distrito, provincia y
+                    coordenada se leen del KML y de
+                    <code>gis.infraestructuras_puntos</code>. Etapa, expediente,
+                    avance y fuente <strong>no tienen origen</strong>: se
+                    dibujan para fijar el contrato y se marcan «ej.». Ninguna
+                    cifra de avance es real.
+                </p>
+            </section>
+
+            <!-- ═══════════ Notas para el equipo .NET ═══════════ -->
+            <section class="notes" aria-label="Notas para el equipo .NET">
+                <h2>Notas para el equipo .NET</h2>
+                <p>
+                    Todo lo que sigue se verificó sobre
+                    <code>gis/Infraestructuras.kml</code> y su salida en
+                    <code>gis/derived/</code> el 2026-11-23. La regla de la
+                    pantalla es una:
+                    <b>el dato ausente se declara, no se estima</b>.
+                </p>
+
+                <h3>Endpoints propuestos</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Ruta</th>
+                            <th>Semántica</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <code>GET /v1/gis/infraestructuras</code><br />
+                                <span class="sm"
+                                    ><code>?bbox=</code> ·
+                                    <code>capa=derechos|sedes|dpa</code> ·
+                                    <code>identi=</code> ·
+                                    <code>distrito=</code> · <code>q=</code> ·
+                                    <code>limit=</code> ·
+                                    <code>cursor=</code></span
+                                >
+                            </td>
+                            <td>
+                                Puntos dentro de <code>bbox</code> (recorta
+                                puntos: no hay polígonos que intersectar). Orden
+                                estable por <code>id</code>; tope sugerido 1 000
+                                por página. <code>capa=dpa</code> equivale a
+                                <code>identi LIKE 'DPA%'</code>. Proyecta
+                                <code>tipo_registro</code>, <code>identi</code>,
+                                <code>nombre_infraestructura</code>,
+                                <code>departamento</code>,
+                                <code>provincia</code>, <code>distrito</code>,
+                                <code>ubigeo</code>, <code>latitud</code>,
+                                <code>longitud</code> y
+                                <code>categoria_codigo</code>. Nunca
+                                <code>titular</code> ni <code>nombre</code> sin
+                                <code>puedeVerPii</code>.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><code>GET /v1/gis/dpa</code></td>
+                            <td>
+                                Los 31 desembarcaderos con nombre, ubigeo,
+                                distrito, provincia, departamento y coordenada.
+                                <code>total: 31</code>. No expone etapa ni
+                                avance: eso es otro recurso.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><code>GET /v1/gis/radar</code></td>
+                            <td>
+                                Red RADAR instalada. Sin fuente: responder
+                                <code>200 {items: [], sin_fuente: true}</code> o
+                                <code>501</code> con el mismo objeto. Nunca
+                                devolver posiciones inventadas. Contrato futuro:
+                                <code
+                                    >id, nombre, latitud, longitud, estado,
+                                    fuente</code
+                                >.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><code>GET /v1/gis/dpa/:id/proyecto</code></td>
+                            <td>
+                                Estado del proyecto. Hoy <code>501</code> con
+                                <code>sin_fuente: true</code>. Contrato futuro:
+                                <code
+                                    >etapa, expediente, avance_pct,
+                                    fecha_actualizacion, fuente</code
+                                >. <code>fuente</code> es obligatoria (<code
+                                    >FONDEPES</code
+                                >
+                                | <code>Invierte.pe</code>); si falta, el campo
+                                <code>etapa</code> se omite en vez de
+                                rellenarse.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>Lo que falta y no se puede simular</h3>
+                <ul>
+                    <li>
+                        <b>Polígonos.</b> El KML guarda <code>Point</code> en
+                        las 13 456 filas: no hay límites de distrito, región ni
+                        área de derecho, y un <code>ST_Area</code> sobre esta
+                        capa no existe.
+                        <b>La capa vectorial ya no hay que pedirla:</b> desde el
+                        2026-11-23 está
+                        <code>gis/Poblacion Censo 2025 geogpsperu/</code> con
+                        <b>1 892 polígonos distritales</b> y <code>UBIGEO</code>
+                        INEI. Exige cargarla (item 128) antes de sustituir el
+                        lienzo esquemático de este artboard.
+                    </li>
+                    <li>
+                        <b>Redes RADAR.</b> Sin archivo, sin tabla y sin
+                        coordenadas. La capa se dibuja con seis anillos de
+                        ejemplo y se marca «sin fuente».
+                    </li>
+                    <li>
+                        <b>Estado de proyectos DPA.</b> FONDEPES e Invierte.pe
+                        están pendientes. Etapa, expediente y avance del cajón y
+                        de la tabla son de ejemplo.
+                    </li>
+                    <li>
+                        <b>52 puntos sin ubigeo.</b> Boquerón (25) y Huipoca
+                        (22) son distritos creados en 2015 y 2016 que la tabla
+                        de equivalencias no trae; los otros 5 están documentados
+                        con su motivo en <code>gis/derived/README.md</code>. No
+                        inventar el código: se agregan a
+                        <code>toponimos.json</code> y se resuelven solos.
+                    </li>
+                    <li>
+                        <b>Direcciones.</b> 168 con <code>DIRECCION</code> (150)
+                        o <code>DIRECCIÓN</code> (18), más 16 con
+                        <code>DIREC_PRED</code>. Un filtro por la etiqueta sin
+                        tilde pierde 18 filas.
+                    </li>
+                    <li>
+                        <b>PII.</b> <code>titular</code> (13 256 filas) y
+                        <code>nombre</code> identifican personas naturales. El
+                        GeoJSON publicado expone <code>etiqueta</code>;
+                        cualquier endpoint que los devuelva necesita rol y
+                        registro de acceso.
+                    </li>
+                </ul>
+
+                <h3>Reglas de la capa</h3>
+                <ul>
+                    <li>
+                        <b>Una sola escala.</b> Conflictividad = Diferencia ·
+                        Controversia · Conflicto social · Crisis social. Riesgo
+                        = Bajo · Moderado · Alto. Prioridad = Urgente · Moderado
+                        · Bajo. En esta pantalla sólo aparece la primera; no se
+                        reutilizan sus colores para riesgo ni prioridad.
+                    </li>
+                    <li>
+                        <b>Identificación de desembarcaderos.</b> Usar
+                        <code>identi LIKE 'DPA%'</code>: cubre las 30 filas
+                        <code>DPA - GORE</code> y la errata
+                        <code>DPA -GORE</code> (DPA Los Chimus). Filtrar por la
+                        cadena exacta devuelve 30 de 31.
+                    </li>
+                    <li>
+                        <b>Normalización.</b> <code>DEPARTAMEN</code> alterna
+                        <code>LIMA</code> y <code>Lima</code>; las provincias
+                        traen erratas (<code>LMABAYEQUE</code>,
+                        <code>NAZCA</code>, <code>CONTR. VILLAR</code>). Al
+                        agrupar, normalizar caja y tildes antes de contar.
+                    </li>
+                    <li>
+                        <b>Coordenadas.</b> 158 están repetidas y 10 globos no
+                        coinciden con el <code>&lt;Point&gt;</code>. La
+                        geometría válida es la del <code>&lt;Point&gt;</code>;
+                        el texto del globo sirve sólo como referencia.
+                    </li>
+                </ul>
+            </section>
+        </main>
+    </body>
+</html>

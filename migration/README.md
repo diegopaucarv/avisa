@@ -81,6 +81,27 @@ Si hace falta reconstruir a mano, el orden es:
 ./scripts/db.sh apply
 ```
 
+## Capa GIS de infraestructuras (`gis/`)
+
+No viene del xlsx del legado: carga `gis/derived/infraestructuras_puntos.csv`, extraído
+por `scripts/kml_infraestructuras.py` desde `gis/Infraestructuras.kml`.
+
+| Pieza                         | Qué hace                                                                                                                                     |
+| ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `39_gis_infraestructuras.sql` | Crea el esquema `gis`, la tabla `infraestructuras_puntos` y las vistas `v_desembarcaderos` y `v_infraestructuras_por_distrito`. Idempotente. |
+| `loader/cargar_gis.py`        | Aplica el SQL, trunca y recarga desde el CSV con `COPY`. Resuelve `distrito_id` contra `core.distritos` cuando el ubigeo existe.             |
+
+```sh
+python migration/loader/cargar_gis.py                # esquema + carga + verificación
+python migration/loader/cargar_gis.py --solo-esquema # sólo DDL
+python migration/loader/cargar_gis.py --dsn postgresql://…   # otro destino
+```
+
+Es **standalone**: no importa `loader/run.py` ni exige el xlsx. El destino sale de
+`--dsn`, `DATABASE_URL` o `.env`, en ese orden; revisar a dónde apunta antes de
+ejecutarlo contra Neón. `titular` es dato personal (Ley 29733) y por eso no se
+expone en el GeoJSON derivado.
+
 ## Sesión obligatoria del cargador
 
 ```sql

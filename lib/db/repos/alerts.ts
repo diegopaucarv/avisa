@@ -79,6 +79,11 @@ const ALERT_FROM = `
 export type AlertListQuery = {
   q?: string;
   caso?: string;
+  /**
+   * `true` sólo alertas sin caso asignado; `false`, sólo con caso. Mismo
+   * parámetro que el listado de demandas, para no inventar otro vocabulario.
+   */
+  sinCaso?: string;
   prioridad?: string;
   nivel?: string;
   estado?: string;
@@ -261,6 +266,8 @@ export async function listAlerts(
     );
   }
   if (query.caso) where.push(`c.codigo_caso = ${bind(query.caso)}`);
+  if (query.sinCaso === "true") where.push("a.caso_id is null");
+  else if (query.sinCaso === "false") where.push("a.caso_id is not null");
   if (query.prioridad) where.push(`pa.codigo = ${bind(query.prioridad)}`);
   if (query.nivel) where.push(`na.codigo_legado = ${bind(query.nivel)}`);
   const estado = query.estado?.trim();

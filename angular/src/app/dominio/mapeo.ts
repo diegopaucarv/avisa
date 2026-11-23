@@ -87,6 +87,29 @@ export function formatearFechaCaso(valor: string | null | undefined): string {
   return `${dia}/${mes}/${anio}`;
 }
 
+/**
+ * Formato corto de las tarjetas: `2026-11-18` → `18 nov 2026`.
+ *
+ * Se construye a medianoche UTC para que el día no se desplace en zonas al
+ * oeste de UTC (no se parsea la cadena `YYYY-MM-DD`, que `Date` leería como UTC
+ * y luego mostraría en hora local). `es-PE` abrevia el mes con punto («nov.»);
+ * el punto se retira porque la etiqueta de la tarjeta no lo lleva.
+ */
+const FECHA_CORTA = new Intl.DateTimeFormat('es-PE', {
+  day: 'numeric',
+  month: 'short',
+  year: 'numeric',
+  timeZone: 'UTC',
+});
+
+/** `2026-11-18` → `18 nov 2026`; sin fecha → `—`. */
+export function formatearFechaCorta(valor: string | null | undefined): string {
+  const iso = fechaIso(valor);
+  if (!iso) return '—';
+  const [anio, mes, dia] = iso.split('-').map(Number);
+  return FECHA_CORTA.format(new Date(Date.UTC(anio, mes - 1, dia))).replace(/\./g, '');
+}
+
 export const NIVELES_CONFLICTO = [
   'Diferencia',
   'Controversia',
@@ -535,7 +558,9 @@ export function aCaso(bruto: unknown): Caso {
     resumen: texto(registro, ['resumen', 'summary']),
     avance: numero(registro, ['avance', 'progress']),
     // `fecha_ultima_actualizacion`: instante de carga del legado, no la fecha del
-    // caso. Reservado al historial (item 41); no rotular como «Actualizado».
+    // caso. La tarjeta del listado y la vista previa son los únicos lugares que
+    // lo muestran, rotulado «Actualizado» por pedido del item 94 y con la
+    // advertencia de `Caso.actualizado` a la vista (hallazgo #10).
     actualizado:
       texto(registro, ['actualizado', 'updated']) ??
       texto(registro, ['actualizadoEn', 'updatedAt']),

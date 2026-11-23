@@ -68,6 +68,11 @@ const FILTROS_INICIALES: FiltrosDocumentos = {
   ver: 'activos',
 };
 
+/** `total` del sobre paginado sin construir las filas (consultas de indicadores). */
+function totalDe(bruto: unknown): number {
+  return normalizarColeccion<unknown>(bruto).total;
+}
+
 /**
  * Documentos: anexos y formatos de la Guía (§7.7.1, §8.3.3; Anexos 1–17).
  *
@@ -278,6 +283,37 @@ export class DocumentosPage {
     const rango = this.rango();
     return `${this.total()} documentos anulados · ${rango.desde}–${rango.hasta}`;
   });
+
+  /**
+   * Indicadores de la pantalla (item 112): totales del servidor, no de la página
+   * visible. Cada tarjeta repite el recorte de filtros con un `estado` adicional
+   * y lee `total` con `pageSize=1`. Se ocultan en la papelera.
+   */
+  private contar(extra: Record<string, string>) {
+    return consulta<number>({
+      fuente: () => {
+        const filtros = this.parametros();
+        return urlConParametros(urlApi('/v1/documents'), {
+          ...paramsDePagina({ pagina: 1, tamano: 1 }),
+          anulados: filtros.ver === 'anulados' ? 'true' : '',
+          q: filtros.q,
+          tipo: filtros.tipo,
+          estado: filtros.estado,
+          sort: filtros.orden,
+          ...extra,
+        });
+      },
+      esquema: totalDe,
+    });
+  }
+
+  private readonly conEstadoRec = this.contar({ estado: 'con_estado' });
+  private readonly sinEstadoRec = this.contar({ estado: 'sin_estado' });
+  private readonly validadosRec = this.contar({ estado: 'Validado' });
+
+  readonly conEstado = computed(() => this.conEstadoRec.valor() ?? null);
+  readonly sinEstado = computed(() => this.sinEstadoRec.valor() ?? null);
+  readonly validados = computed(() => this.validadosRec.valor() ?? null);
 
   /**
    * Tipos del catálogo, no una lista escrita a mano: el filtro y el formulario

@@ -717,54 +717,275 @@
                     grid-template-columns: 1fr;
                 }
             }
+
+            /* ── Cinco bloques de anotación (obligatorios) ───────────── */
+            .ann {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 8px;
+                padding: 10px 12px 12px;
+                margin-bottom: 14px;
+                border: 1px solid var(--line);
+                border-radius: 9px;
+                background: #fbfcfd;
+            }
+            @media (max-width: 980px) {
+                .ann {
+                    grid-template-columns: 1fr;
+                }
+            }
+            .ann-card {
+                padding: 8px 10px;
+                border: 1px solid #eef1f4;
+                border-radius: 7px;
+                background: #fff;
+                font-size: 10px;
+                line-height: 1.5;
+                color: #4a5b6c;
+            }
+            .ann-card.wide {
+                grid-column: 1 / -1;
+            }
+            .ann-card h3 {
+                margin: 0 0 4px;
+                color: var(--ink);
+                font: 700 9px/1.3 var(--font-display, inherit);
+                letter-spacing: 0.07em;
+                text-transform: uppercase;
+            }
+            .ann-card b {
+                color: var(--ink);
+            }
+            .ann-card code {
+                font-size: 9.5px;
+            }
+            .ann-card .n {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 15px;
+                height: 15px;
+                margin-right: 5px;
+                border-radius: 50%;
+                background: var(--blue);
+                color: #fff;
+                font-size: 9px;
+                font-weight: 700;
+            }
+            .ann-table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+            .ann-table th,
+            .ann-table td {
+                padding: 2px 6px 2px 0;
+                border-bottom: 1px solid #f1f3f5;
+                text-align: left;
+                vertical-align: top;
+                font-size: 9.5px;
+            }
+            .ann-table th {
+                color: #97a1aa;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.04em;
+            }
+            .ann-table tr:last-child td {
+                border-bottom: 0;
+            }
+
+            /* ── Explicador de la celda vacía ────────────────────────── */
+            .cell-explainer {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: flex-start;
+                gap: 12px;
+                padding: 10px 12px;
+                margin-bottom: 14px;
+                border: 1px solid #cddcef;
+                border-radius: 8px;
+                background: #f7faff;
+                color: #4a5b6c;
+                font-size: 9.5px;
+                line-height: 1.55;
+            }
+            .cell-explainer .sample {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                min-width: 26px;
+                height: 20px;
+                padding: 0 6px;
+                border: 1px dashed #c7d3de;
+                border-radius: 5px;
+                background: #fff;
+                color: #8b97a1;
+                font-size: 10px;
+            }
+            .cell-explainer b {
+                color: var(--blue-dark);
+            }
         </style>
     </head>
     <body>
         <main class="view-body">
             <header class="view-head">
                 <div>
-                    <h1>Matriz de conflictividad</h1>
+                    <h1>Matriz de conflictividad · Anexo 15</h1>
                     <p class="view-subtitle">
                         Herramienta central de seguimiento de casos que organiza
                         información estructurada sobre actores, evolución, nivel
                         de riesgo, responsables y estado de los compromisos,
                         para clasificar y conservar el registro histórico y
-                        facilitar la coordinación (Guía §8.3.1).
+                        facilitar la coordinación (Guía §8.3.1). Se imprime y se
+                        lleva a una reunión: por eso el mockup explica la
+                        <b>celda vacía</b>, no una pantalla ausente.
                     </p>
                 </div>
                 <div class="view-actions">
-                    <span class="anexo-badge">Anexo 15</span>
+                    <span class="anexo-badge"
+                        >Anexo 15 · items 15 · 52 · 75</span
+                    >
                 </div>
             </header>
 
-            <!-- Declaración: qué cubre, qué dato necesita y qué es solo forma. -->
-            <div
-                style="
-                    font-size: 11.5px;
-                    line-height: 1.5;
-                    color: #4a5b6c;
-                    border: 1px solid #e6ebef;
-                    border-radius: 6px;
-                    background: #f8fafb;
-                    padding: 8px 11px;
-                "
-            >
-                <p style="margin: 0 0 3px">
-                    <b>Items que cubre:</b> 6 · 7 · 42 · 70.
-                </p>
-                <p style="margin: 0 0 3px">
-                    <b>Dato que necesita:</b>
-                    <code>analytics.vw_anexo_15_matriz_conflictividad</code>
-                    (8 <code>LEFT JOIN</code>,
-                    <code>security_invoker = true</code>): 35 filas como
-                    propietario, 34 vigentes y 12 sin región. El endpoint
-                    <code>GET /api/v1/anexos/15</code> requiere crearse.
-                </p>
-                <p style="margin: 0">
-                    <b>Solo forma (sin dato):</b> búsqueda, filtros, orden,
-                    paginación, menú «Exportar» y los estados vacío, de carga y
-                    de error.
-                </p>
+            <!-- ═══════════ Cinco bloques de anotación (obligatorios) ═══════════ -->
+            <section class="ann" aria-label="Anotaciones del artboard">
+                <div class="ann-card">
+                    <h3><span class="n">1</span>Items que cubre</h3>
+                    <b>15</b> (alertas vinculadas con código y estado; falta la
+                    categoría AT/RR/PAR) · <b>52</b> (resumen de Dirección con
+                    desglose regional y hoja de impresión) ·
+                    <b>75</b> (generador de anexos con contrato). Se conservan
+                    los items previos del mockup: <b>6</b> (dashboard),
+                    <b>7</b> (directorio), <b>42</b> y <b>70</b> (exportación
+                    con filtros). <br /><b>Diseño por lote:</b> Lote B ·
+                    Panorama, alertas y directorios (Anexo 15). Es una de las
+                    siete piezas de la Ola 1.
+                </div>
+                <div class="ann-card">
+                    <h3>
+                        <span class="n">2</span>Dato que necesita cada celda
+                    </h3>
+                    <table class="ann-table">
+                        <tr>
+                            <th>Celda</th>
+                            <th>Campo</th>
+                            <th>Ruta</th>
+                        </tr>
+                        <tr>
+                            <td>Filas de la matriz</td>
+                            <td>
+                                15 columnas de
+                                <code>vw_anexo_15_matriz_conflictividad</code>
+                            </td>
+                            <td>
+                                <b>no existe</b> endpoint: la vista existe
+                                (<code>security_invoker</code>) pero no se
+                                expone
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Alerta vinculada</td>
+                            <td>
+                                <code>codigo</code>, <code>paso_actual</code>
+                            </td>
+                            <td>
+                                <code>GET /v1/alerts</code> · categoría
+                                AT/RR/PAR <b>no existe</b> (item 15)
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Prioridad de atención</td>
+                            <td><code>casos.prioridad_id</code></td>
+                            <td>
+                                valor almacenado; la regla que la calcula
+                                <b>no está definida</b>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Región</td>
+                            <td>
+                                <code>region</code> · <code>sinregion</code>
+                            </td>
+                            <td><code>GET /v1/cases</code></td>
+                        </tr>
+                        <tr>
+                            <td>Distrito</td>
+                            <td><code>distrito_id</code></td>
+                            <td><b>no existe</b> bajo región (P10)</td>
+                        </tr>
+                        <tr>
+                            <td>Compromisos</td>
+                            <td>
+                                <code>estado</code>,
+                                <code>fecha_vencimiento</code>
+                            </td>
+                            <td>
+                                <code>GET /v1/commitments</code> · 8 filas, 0
+                                con fecha
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Exportar</td>
+                            <td><code>entidad=casos</code></td>
+                            <td>
+                                <code>GET /v1/export</code> existe; los filtros
+                                del anexo (F1) están pendientes
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Documento imprimible</td>
+                            <td>esquema JSON del anexo</td>
+                            <td>
+                                <b>no existe</b>
+                                <code>POST /api/v1/anexos/{n}</code> (item 75)
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="ann-card">
+                    <h3><span class="n">3</span>Sólo forma · no implementar</h3>
+                    Las 15 columnas y su orden vienen de la Guía §8.3.1 (no se
+                    reinterpretan). La búsqueda, los filtros, el orden, la
+                    paginación, el menú «Exportar» y los estados vacío, de carga
+                    y de error son <b>forma</b>, ya existentes en la pantalla.
+                    La hoja de impresión es del item 52; el documento firmado
+                    del anexo (item 75) es contrato pendiente.
+                </div>
+                <div class="ann-card">
+                    <h3><span class="n">4</span>Bloqueado y por qué</h3>
+                    La matriz <b>no tiene endpoint</b>: la vista
+                    <code>analytics.vw_anexo_15_matriz_conflictividad</code> es
+                    <code>security_invoker</code> y devuelve 35 filas (34
+                    vigentes, 1 anulada, 12 sin región), pero hay que exponerla.
+                    La <b>categoría AT/RR/PAR</b> (item 15) y la
+                    <b>regla de prioridad</b> no existen, así que no se
+                    inventan. Los <b>filtros de exportación (F1)</b> están
+                    pendientes. Ningún X de producto (X1–X5) aplica aquí.
+                </div>
+                <div class="ann-card wide">
+                    <h3><span class="n">5</span>Roles que ven cada bloque</h3>
+                    <b>Dirección OAIPCS y Secretaría General:</b> la matriz
+                    completa y su exportación. <b>Sectorista:</b> sólo las
+                    regiones de su sesión y, con el item 113, su subsector; las
+                    filas fuera de su ámbito no se cuentan como «vacías».
+                    <b>Alta dirección:</b> lectura completa e impresión. La
+                    matriz se imprime con fecha de corte y trazabilidad a la
+                    consulta que la originó.
+                </div>
+            </section>
+
+            <div class="cell-explainer" role="note">
+                <span class="sample">—</span>
+                <span>
+                    <b>Celda vacía no es caso omitido.</b> Desde la migración 32
+                    la vista usa <code>LEFT JOIN</code> y muestra «—»: los 34
+                    casos vigentes vuelven a la matriz. Una celda vacía
+                    significa que la <b>fuente no trae ese dato</b> (por
+                    ejemplo, <code>distrito_id</code> nulo o un compromiso sin
+                    <code>fecha_vencimiento</code>), no que el caso falte.
+                </span>
             </div>
 
             <div class="filter-bar filter-bar-wrap">

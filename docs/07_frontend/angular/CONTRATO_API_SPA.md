@@ -151,21 +151,24 @@ La SPA oculta controles por rol, pero eso es cosmético: **la API debe seguir re
 
 **Filtros de `GET /v1/cases`**
 
-| Clave                                        | Origen                     | ¿La envía la SPA?            |
-| -------------------------------------------- | -------------------------- | ---------------------------- |
-| `q`                                          | input de búsqueda (300 ms) | sí                           |
-| `estado`                                     | chips de estado            | sí                           |
-| `abiertos`                                   | chip «Abiertos»            | sí                           |
-| `prioridad`, `alcance`, `tematica`, `unidad` | selects de catálogo        | sí                           |
-| `sort`                                       | select de orden            | sí                           |
-| `anulados`                                   | pestaña de papelera        | sí (`true` solo en papelera) |
-| `conteos`                                    | barra de estados           | sí (`true`)                  |
-| `riesgo`                                     | —                          | **no** (solo `/direccion`)   |
-| `region`                                     | —                          | **no** hoy                   |
+| Clave                                        | Origen                        | ¿La envía la SPA?            |
+| -------------------------------------------- | ----------------------------- | ---------------------------- |
+| `q`                                          | input de búsqueda (300 ms)    | sí                           |
+| `estado`                                     | desplegable de estado         | sí                           |
+| `abiertos`                                   | opción «Abiertos»             | sí                           |
+| `nivel`                                      | desplegable de conflictividad | sí (item 100)                |
+| `prioridad`, `alcance`, `tematica`, `unidad` | selects de búsqueda avanzada  | sí                           |
+| `region`                                     | select de búsqueda avanzada   | sí                           |
+| `sort`                                       | select de orden               | sí                           |
+| `anulados`                                   | pestaña de papelera           | sí (`true` solo en papelera) |
+| `conteos`                                    | desplegable de estado         | sí (`true`)                  |
+| `riesgo`                                     | —                             | **no** (solo `/direccion`)   |
 
 Archivo: `angular/src/app/features/casos/casos.page.ts:293-313`; servidor: `app/api/v1/cases/route.ts:40-80`.
 
-`abiertos=true` no es una etiqueta de `estado`: se resuelve con `es_activo` del catálogo. `conteos=true` no filtra: añade el bloque `conteos` calculado **sin** `estado` ni `abiertos`, para que los chips no se muevan al pulsarlos.
+`abiertos=true` no es una etiqueta de `estado`: se resuelve con `es_activo` del catálogo. `nivel` viaja con el **`codigo` de `core.cat_niveles_conflicto`**, que en esta base coincide con el nombre visible (`Diferencia`, `Controversia`, `Conflicto social`, `Crisis social`, con acentos y espacios); el repositorio lo resuelve con `core.normalizar_ref` contra `codigo` y `nombre`, igual que `riesgo`, y responde `422` si el valor no existe. No se filtra en cliente para que `conteos` y la paginación sigan siendo ciertos. `conteos=true` no filtra: añade el bloque `conteos` calculado **sin** `estado` ni `abiertos`, para que las opciones del desplegable no se muevan al elegirlas.
+
+> **Requiere redeploy.** `nivel` es superficie nueva en `lib/db/repos/cases.ts`, `app/api/v1/cases/route.ts` y `app/api/v1/export/route.ts`. Hasta desplegar, la SPA puede enviar `nivel` y el servidor antiguo lo ignora (la lista llega sin recortar); no rompe la pantalla, pero el filtro no surte efecto.
 
 **Forma de la ficha** —claves de primer nivel (`angular/src/app/dominio/mapeo.ts:451-506`):
 
@@ -181,15 +184,15 @@ historial | stateHistory | state_history, completitud | completeness
 
 ### 4.2 · Alertas
 
-| Método   | Ruta                        | Query / cuerpo                                | Respuesta                         |
-| -------- | --------------------------- | --------------------------------------------- | --------------------------------- |
-| `GET`    | `/v1/alerts`                | `q, prioridad, nivel, estado, sort, anulados` | sobre paginado                    |
-| `GET`    | `/v1/alerts/{id}`           | —                                             | `{ alert \| alerta, demandas[] }` |
-| `PATCH`  | `/v1/alerts/{id}`           | campos de edición (abajo)                     | —                                 |
-| `DELETE` | `/v1/alerts/{id}`           | `{ motivo }` **en el cuerpo**                 | —                                 |
-| `POST`   | `/v1/alerts/{id}/restaurar` | `{}`                                          | —                                 |
+| Método   | Ruta                        | Query / cuerpo                                         | Respuesta                         |
+| -------- | --------------------------- | ------------------------------------------------------ | --------------------------------- |
+| `GET`    | `/v1/alerts`                | `q, prioridad, nivel, estado, sinCaso, sort, anulados` | sobre paginado                    |
+| `GET`    | `/v1/alerts/{id}`           | —                                                      | `{ alert \| alerta, demandas[] }` |
+| `PATCH`  | `/v1/alerts/{id}`           | campos de edición (abajo)                              | —                                 |
+| `DELETE` | `/v1/alerts/{id}`           | `{ motivo }` **en el cuerpo**                          | —                                 |
+| `POST`   | `/v1/alerts/{id}/restaurar` | `{}`                                                   | —                                 |
 
-Servidor admite además `caso` (`app/api/v1/alerts/route.ts:20`), que la SPA no envía.
+Servidor admite además `caso` (`app/api/v1/alerts/route.ts:20`), que la SPA envía solo cuando llega por URL. `sinCaso` (`true` = sin caso, `false` = con caso) usa el mismo vocabulario que `/v1/demandas`; el repositorio lo resuelve con `a.caso_id is null` / `is not null` (`lib/db/repos/alerts.ts`).
 
 **Cuerpo de `PATCH`** (`alerta-panel.component.ts:473-511`): `titulo`, `prioridad`, `nivel` (código `NA-001…NA-004`), `situacionActual`, `hechosRecientes`, `descripcionRiesgo`, `accionesOaipcs`, `accionesSugeridas` (`string[] | null`), `casoCode`, y `{ pasoActual }` en las acciones de flujo. Solo viajan los campos cambiados.
 
@@ -295,7 +298,8 @@ El servidor expone además `estadosCaso`, `nivelesRiesgo`, `nivelesConflicto`, `
 - Entidades: `casos`, `alertas`, `compromisos`, `documentos`, `demandas`, `actores`, `organizaciones`, `locales`, `notificaciones`, `reportes` y `base` (respaldo completo). Se aceptan alias en singular (`caso`, `alerta`…). Un valor desconocido es `400 ENTIDAD_INVALIDA`; un formato desconocido, `400 FORMATO_INVALIDO`.
 - La respuesta es **binaria** con `Content-Type` por formato y `Content-Disposition` (`filename*=UTF-8''…` preferido, `filename="…"` como respaldo). Si no hay cabecera, el cliente nombra `avisa_{entidad}_{YYYY-MM-DD}.{json|xlsx|pdf}` (`core/http/descargas.ts:20-54,109-124`).
 - La descarga usa `fetch` propio, **no** el interceptor: un 401 aquí no limpia la sesión. Mantener `credentials` y CORS con credenciales si el origen deja de ser el mismo.
-- El servidor reenvía solo los filtros que la entidad declara (`app/api/v1/export/route.ts:214-236`). Hoy **solo Compromisos** envía filtros; en las demás pantallas «esta vista» exporta la entidad completa.
+- El servidor reenvía solo los filtros que la entidad declara (`app/api/v1/export/route.ts:214-236`). En 2026-11-23 **Casos, Alertas y Compromisos** envían `[consulta]` con los filtros activos (`q`, `estado`, `nivel`, `prioridad`, `alcance`, `region`, `tematica`, `unidad`, `sort`); Demandas sin caso envía `sinCaso=true`. Las demás pantallas siguen exportando la entidad completa.
+- **Formatos por perfil (item 107).** `app-exportar-menu` decide qué formatos ofrece según `CapacidadesService.formatosExportacion`: Alta Dirección, Dirección OAIPCS y administración conservan JSON/Excel/PDF; el resto de perfiles ve solo Excel y PDF. Es una regla **de cliente**: el endpoint sigue aceptando los tres formatos para cualquier rol autorizado, así que .NET debe decidir si replica el recorte en servidor.
 
 ### 4.12 · Salud
 
@@ -370,15 +374,15 @@ Aprobadas el 2026-11-22. No se reabren al escribir la API nueva; si alguna debe 
 
 Deudas reales. Ninguna bloquea al equipo de .NET: tres se resuelven solo en la SPA (F1, F2, F4), tres dependen de la SPA y de la API a la vez (F3, F5, F6) y una es solo de la API (F7).
 
-| #   | Falta                                                         | Dónde                                    | Acción                                                                             | ¿Bloquea a .NET?                                               |
-| --- | ------------------------------------------------------------- | ---------------------------------------- | ---------------------------------------------------------------------------------- | -------------------------------------------------------------- |
-| F1  | «Esta vista» exporta la entidad completa fuera de Compromisos | SPA (`app-exportar-menu` en las páginas) | pasar `[consulta]` con los filtros activos (item 42)                               | No: `/v1/export` ya reenvía los filtros que la entidad declara |
-| F2  | La exportación de «demandas sin caso» no envía `sinCaso=true` | SPA (`demandas-sin-caso.page.html`)      | añadir el filtro al `consulta`                                                     | No                                                             |
-| F3  | La papelera se puede forzar por URL sin permiso               | SPA + API                                | la API ya responde 403; la SPA debería no construir la consulta si el rol no puede | No: no relajar el 403                                          |
-| F4  | `consulta()` declara `mantener` y no lo implementa            | SPA (`core/http/consulta.ts`)            | retirar la opción o implementarla; no cambia el comportamiento actual              | No                                                             |
-| F5  | `expiresAt` se recibe y no se usa                             | SPA / API                                | se depende del 401; revisar solo si .NET implanta cookie deslizante                | No                                                             |
-| F6  | El panorama del mapa pagina en cliente con tope 100           | SPA / API                                | conservar el tope y un `total` exacto                                              | No: el contrato ya exige `total` exacto (§3.1)                 |
-| F7  | La descarga no queda en auditoría                             | API                                      | registrar quién exportó qué y con qué filtros (item 42)                            | No, pero es requisito del item 42                              |
+| #   | Falta                                                         | Dónde                                    | Acción                                                                                                             | ¿Bloquea a .NET?                                               |
+| --- | ------------------------------------------------------------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------- |
+| F1  | «Esta vista» exporta la entidad completa fuera de Compromisos | SPA (`app-exportar-menu` en las páginas) | ◐ Hecho en Casos, Alertas, Compromisos y Demandas sin caso (2026-11-23); faltan Documentos, Directorios y Reportes | No: `/v1/export` ya reenvía los filtros que la entidad declara |
+| F2  | La exportación de «demandas sin caso» no envía `sinCaso=true` | SPA (`demandas-sin-caso.page.html`)      | ✔ Hecho 2026-11-23: `filtrosExportacion` declara `sinCaso=true`                                                    | No                                                             |
+| F3  | La papelera se puede forzar por URL sin permiso               | SPA + API                                | la API ya responde 403; la SPA debería no construir la consulta si el rol no puede                                 | No: no relajar el 403                                          |
+| F4  | `consulta()` declara `mantener` y no lo implementa            | SPA (`core/http/consulta.ts`)            | retirar la opción o implementarla; no cambia el comportamiento actual                                              | No                                                             |
+| F5  | `expiresAt` se recibe y no se usa                             | SPA / API                                | se depende del 401; revisar solo si .NET implanta cookie deslizante                                                | No                                                             |
+| F6  | El panorama del mapa pagina en cliente con tope 100           | SPA / API                                | conservar el tope y un `total` exacto                                                                              | No: el contrato ya exige `total` exacto (§3.1)                 |
+| F7  | La descarga no queda en auditoría                             | API                                      | registrar quién exportó qué y con qué filtros (item 42)                                                            | No, pero es requisito del item 42                              |
 
 **Lo que no falta.** Las 34 rutas del §4 existen y están verificadas contra `app/api/**`; no hay ninguna llamada de la SPA sin implementación ni ninguna ruta documentada sin uso. Las parciales de la §«Entrega: implementable ahora» de `frontend.md` (items 11, 12, 13, 15, 26, 30, 31, 42) son trabajo de interfaz o de columnas concretas, no huecos del contrato.
 

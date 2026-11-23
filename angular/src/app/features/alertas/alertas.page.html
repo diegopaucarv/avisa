@@ -4,8 +4,7 @@
       <h1 id="titulo-alertas">Alertas tempranas</h1>
       <p class="view-subtitle">
         Candidatos de conflicto social del sistema RED-RADAR. Cada alerta recorre elaboración,
-        validación previa, aprobación definitiva de la Dirección OAIPCS, remisión y archivo. El
-        plazo se deriva de la prioridad y se muestra aparte de la etiqueta.
+        validación previa, aprobación definitiva de la Dirección OAIPCS, remisión y archivo.
       </p>
     </div>
     <div class="view-actions">
@@ -32,12 +31,43 @@
   <p class="form-hint aviso-ok" role="status">{{ avisoRegistro }}</p>
   }
 
+  <div class="executive-kpis">
+    <div class="stat-card">
+      <span class="stat-icon"><app-icono nombre="alertas" [tamano]="16" /></span>
+      <span class="stat-copy">
+        <span>Alertas</span>
+        <strong>{{ total() }}</strong>
+      </span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon green"><app-icono nombre="check" [tamano]="16" /></span>
+      <span class="stat-copy">
+        <span>Atendidas</span>
+        <strong>{{ atendidas() ?? '—' }}</strong>
+      </span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon amber"><app-icono nombre="reloj" [tamano]="16" /></span>
+      <span class="stat-copy">
+        <span>Pendientes de revisión</span>
+        <strong>{{ pendientes() ?? '—' }}</strong>
+      </span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon"><app-icono nombre="bandeja" [tamano]="16" /></span>
+      <span class="stat-copy">
+        <span>Sin caso asignado</span>
+        <strong>{{ sinCasoTotales() ?? '—' }}</strong>
+      </span>
+    </div>
+  </div>
+
   <div class="filter-bar filter-bar-wrap">
     <label class="search-field">
       <app-icono nombre="buscar" [tamano]="14" />
       <input
         type="search"
-        placeholder="Buscar por código, título o caso"
+        placeholder="Buscar por código o palabra clave"
         [value]="filtros().q"
         aria-label="Buscar alertas"
         (input)="buscar($event)"
@@ -50,21 +80,33 @@
         <option value="" [selected]="filtros().prioridad === ''">Todas</option>
         @for (prioridad of prioridades; track prioridad) {
         <option [value]="prioridad" [selected]="filtros().prioridad === prioridad">
-          {{ prioridad }}
+          {{ etiquetaPrioridad(prioridad) }}
         </option>
         }
       </select>
     </label>
 
     <label class="select-filter">
-      Nivel
-      <select aria-label="Filtrar por nivel de la alerta" (change)="cambiarNivel($event)">
+      Riesgo
+      <select aria-label="Filtrar por riesgo (nivel de alerta)" (change)="cambiarNivel($event)">
         <option value="" [selected]="filtros().nivel === ''">Todos</option>
         @for (nivel of niveles; track nivel.valor) {
         <option [value]="nivel.valor" [selected]="filtros().nivel === nivel.valor">
           {{ nivel.etiqueta }}
         </option>
         }
+      </select>
+    </label>
+
+    <label class="select-filter">
+      Sin caso asignado
+      <select
+        aria-label="Filtrar alertas con o sin caso asignado"
+        (change)="cambiarSinCaso($event)"
+      >
+        <option value="" [selected]="filtros().sinCaso === ''">Todos</option>
+        <option value="true" [selected]="filtros().sinCaso === 'true'">Sí</option>
+        <option value="false" [selected]="filtros().sinCaso === 'false'">No</option>
       </select>
     </label>
 
@@ -110,20 +152,27 @@
   <p class="alerta-actualizando" role="status">Actualizando el listado…</p>
   }
 
+  <p class="tabla-nota">Pulse una fila para abrir la ficha en el panel lateral.</p>
+
   <div class="table-wrap">
     <table class="data-table">
-      <caption class="table-caption">
-        Pulse una fila para abrir la ficha en el panel lateral. El plazo se deriva de la prioridad
-        en el catálogo y no forma parte de su etiqueta.
-      </caption>
+      <colgroup>
+        <col class="col-codigo" />
+        <col />
+        <col class="col-caso" />
+        <col class="col-prioridad" />
+        <col class="col-riesgo" />
+        <col class="col-fecha" />
+        <col class="col-estado" />
+        <col class="col-acciones" />
+      </colgroup>
       <thead>
         <tr>
           <th scope="col">Código</th>
           <th scope="col">Título</th>
           <th scope="col">Caso</th>
           <th scope="col">Prioridad</th>
-          <th scope="col">Plazo</th>
-          <th scope="col">Nivel</th>
+          <th scope="col">Riesgo</th>
           <th scope="col">Fecha de reporte</th>
           <th scope="col">Estado</th>
           <th scope="col">Acciones</th>
@@ -158,7 +207,7 @@
           <td>
             <span [class]="'status-badge alerta-prioridad--' + clavePrioridad(alerta.prioridad)">
               <span class="status-dot"></span>
-              {{ alerta.prioridad || 'Sin prioridad' }}
+              {{ etiquetaPrioridad(alerta.prioridad) }}
             </span>
             @if (alerta.grave) {
             <span class="alerta-grave">
@@ -167,14 +216,8 @@
             </span>
             }
           </td>
-          <td>
-            <span class="alerta-plazo" [class.alerta-plazo--sin]="alerta.plazoHoras === null">
-              <app-icono nombre="reloj" [tamano]="12" />
-              {{ formatearPlazo(alerta.plazoHoras) }}
-            </span>
-          </td>
           <td>{{ alerta.nivel || '—' }}</td>
-          <td>{{ alerta.fechaReporte || '—' }}</td>
+          <td>{{ fechaReporte(alerta.fechaReporte) }}</td>
           <td>
             <span [class]="'status-badge ' + claseEstado(alerta.estado)">
               <span class="status-dot"></span>

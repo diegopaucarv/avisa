@@ -46,6 +46,7 @@ const FILTERS = [
   "estado",
   "riesgo",
   "prioridad",
+  "nivel",
   "alcance",
   "tematica",
   "unidad",

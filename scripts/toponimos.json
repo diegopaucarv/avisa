@@ -11,7 +11,10 @@
     "Mariscal de Luzuriaga": "Mariscal Luzuriaga",
     "Carlos Fermin Fitzcarrald": "Carlos Fermín Fitzcarrald",
     "Carlos Fermin Fitzca": "Carlos Fermín Fitzcarrald",
-    "Chimbote": "Santa"
+    "Chimbote": "Santa",
+    "Contr Villar": "Contralmirante Villar",
+    "Tarapoto": "San Martin",
+    "Callao": "Prov. Const. Del Callao"
   },
   "distritos": {
     "Bolognesi": {
@@ -74,6 +77,36 @@
     "Mariscal Luzuriaga": {
       "Eleazar Guzman Baron": "Eleazar Guzmán Barrón",
       "Eleazar Guzman Barron": "Eleazar Guzmán Barrón"
+    },
+    "Luya": {
+      "San Francisco Del Yeso": "San Francisco De Yeso"
+    },
+    "Camana": {
+      "Quillca": "Quilca"
+    },
+    "Cajamarca": {
+      "Cajamrca": "Cajamarca"
+    },
+    "Barranca": {
+      "Puerto Supe": "Supe Puerto"
+    },
+    "Huaura": {
+      "Caleta Carquin": "Caleta De Carquin"
+    },
+    "Lima": {
+      "Cercado De Lima": "Lima"
+    },
+    "Piura": {
+      "Ventiseis De Octubre": "Veintiseis De Octubre"
+    },
+    "Pasco": {
+      "San Fco.De Asis De Yarusyacan": "San Francisco De Asis De Yarusyacan"
+    },
+    "San Martin": {
+      "Banda De Shilcayo": "La Banda De Shilcayo"
+    },
+    "Tambopata": {
+      "Puerto Maldonado": "Tambopata"
     }
   },
   "equivalencias_provincia": {

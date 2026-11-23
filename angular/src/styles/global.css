@@ -1381,10 +1381,14 @@ select:focus-visible {
 .case-card {
   padding: 15px;
   display: block;
+  width: 100%;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: #fff;
+  color: inherit;
+  font: inherit;
   text-align: left;
+  cursor: pointer;
   transition:
     box-shadow 0.15s,
     border 0.15s;
@@ -1399,6 +1403,9 @@ select:focus-visible {
   align-items: center;
   justify-content: space-between;
   gap: 8px;
+}
+.case-card-top {
+  flex-wrap: wrap;
 }
 .case-code {
   color: #87939d;
@@ -1427,12 +1434,21 @@ select:focus-visible {
   padding: 0 2px;
   color: #c1c8ce;
 }
-.case-card > p {
+.case-card > p,
+.case-card > .case-summary {
   min-height: 35px;
   margin: 13px 0;
   color: #788794;
   font-size: 10px;
   line-height: 1.65;
+}
+/* El resumen de la tarjeta se corta a dos líneas con puntos suspensivos
+   (item 94): todas las tarjetas conservan la misma altura. */
+.case-card > .case-summary {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
 }
 .case-card-bottom {
   margin-top: 11px;

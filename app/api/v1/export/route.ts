@@ -62,6 +62,7 @@ const FILTROS_CASOS = [
   "estado",
   "riesgo",
   "prioridad",
+  "nivel",
   "alcance",
   "tematica",
   "unidad",
@@ -74,6 +75,7 @@ const FILTROS_CASOS = [
 const FILTROS_ALERTAS = [
   "q",
   "caso",
+  "sinCaso",
   "prioridad",
   "nivel",
   "estado",

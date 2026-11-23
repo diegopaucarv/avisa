@@ -18,7 +18,8 @@ import { AlcanceService, esAlcance } from '../../core/alcance/alcance.service';
 import { SesionStore } from '../../core/auth/sesion.store';
 import { formatearFechaHora } from '../../shared/formato-fecha';
 import { IconoComponent } from '../../shared/ui/icono.component';
-import type { Alcance, Caso } from '../../dominio/modelos';
+import { formatearFechaCorta } from '../../dominio/mapeo';
+import type { Alcance, Caso, Riesgo } from '../../dominio/modelos';
 import { coordenadaDeRegion } from './centroides.regiones';
 import {
   ambitosSinRegion,
@@ -72,6 +73,17 @@ function etiquetaCirculo(fila: FilaRegion): string {
   return `${fila.region} · ${fila.total} ${fila.total === 1 ? 'caso' : 'casos'}`;
 }
 
+/** Gravedad declarada del caso: ordena de más a menos grave. */
+const ORDEN_RIESGO: Record<Riesgo, number> = { Alto: 0, Moderado: 1, Bajo: 2 };
+
+/** Antigüedad: el inicio más antiguo primero; sin fecha declarada, al final. */
+function compararInicio(a: string | null, b: string | null): number {
+  if (!a && !b) return 0;
+  if (!a) return 1;
+  if (!b) return -1;
+  return a < b ? -1 : a > b ? 1 : 0;
+}
+
 /**
  * Panorama territorial (ventana principal de la aplicación).
  *
@@ -93,6 +105,9 @@ function etiquetaCirculo(fila: FilaRegion): string {
   templateUrl: './mapa.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [PanoramaService],
+  host: {
+    '(document:keydown.escape)': 'cerrarDrawer()',
+  },
   styles: `
     :host {
       display: block;
@@ -127,6 +142,13 @@ function etiquetaCirculo(fila: FilaRegion): string {
 
     .ambito-chips {
       flex-wrap: wrap;
+      /* El selector de ámbito queda fijo bajo la cabecera (64 px; 58 px en móvil). */
+      position: sticky;
+      top: 64px;
+      z-index: 20;
+      margin: 0;
+      padding: 8px 0;
+      background: var(--canvas);
     }
 
     .chip-count {
@@ -289,6 +311,111 @@ function etiquetaCirculo(fila: FilaRegion): string {
       flex-wrap: wrap;
     }
 
+    .th-orden {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 0;
+      border: 0;
+      background: none;
+      color: inherit;
+      font: inherit;
+      letter-spacing: inherit;
+      text-transform: inherit;
+      cursor: pointer;
+    }
+
+    .th-orden:hover {
+      color: var(--blue-dark);
+    }
+
+    .th-orden-flecha {
+      font-size: 10px;
+      line-height: 1;
+    }
+
+    .celda-caso small {
+      display: block;
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 9px;
+      line-height: 1.4;
+    }
+
+    /* Cajón lateral izquierdo: medio ancho y fondo desenfocado. */
+    .casos-scrim {
+      position: fixed;
+      inset: 0;
+      z-index: 90;
+      display: flex;
+      justify-content: flex-start;
+      background: rgba(17, 32, 45, 0.34);
+      backdrop-filter: blur(6px);
+    }
+
+    .casos-drawer {
+      width: min(52vw, 760px);
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      background: #fff;
+      border-right: 1px solid #e2e8ee;
+      box-shadow: 22px 0 48px rgba(17, 32, 45, 0.18);
+      animation: casos-drawer-in 0.22s ease;
+    }
+
+    @keyframes casos-drawer-in {
+      from {
+        transform: translateX(-100%);
+      }
+      to {
+        transform: none;
+      }
+    }
+
+    .casos-drawer-cabeza {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 20px 22px 14px;
+      border-bottom: 1px solid #eef2f6;
+    }
+
+    .casos-drawer-cabeza h3 {
+      margin: 2px 0 0;
+      color: #1c2a38;
+      font: 700 16px/1.35 var(--font-display);
+    }
+
+    .casos-drawer-sub {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 10.5px;
+      line-height: 1.5;
+    }
+
+    .casos-drawer-cuerpo {
+      flex: 1;
+      min-height: 0;
+      padding: 14px 22px 22px;
+      overflow-y: auto;
+    }
+
+    .casos-drawer-pie {
+      display: flex;
+      justify-content: flex-end;
+      padding: 13px 22px;
+      border-top: 1px solid #eef2f6;
+      background: #fafbfc;
+    }
+
+    @media (max-width: 900px) {
+      .casos-drawer {
+        width: 100%;
+      }
+    }
+
     .mapa-rotulo {
       display: inline-flex;
       align-items: center;
@@ -370,6 +497,10 @@ function etiquetaCirculo(fila: FilaRegion): string {
       .executive-kpis {
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
+
+      .ambito-chips {
+        top: 58px;
+      }
     }
 
     @media (max-width: 480px) {
@@ -393,6 +524,14 @@ export class MapaPage {
   private readonly claveSeleccionada = signal<string | null>(null);
   /** Cambia en cada montaje para redibujar los círculos sobre el mapa nuevo. */
   private readonly versionMapa = signal(0);
+
+  /** Orden de la columna «Casos abiertos»: por defecto, el mayor primero. */
+  readonly ordenTotal = signal<'desc' | 'asc'>('desc');
+
+  /** Fila abierta en el cajón «Ver casos»; `null` cuando el cajón está cerrado. */
+  private readonly filaDrawer = signal<FilaRegion | null>(null);
+  /** El cajón también sirve para la fila «Sin región». */
+  private readonly sinRegionDrawer = signal(false);
 
   private mapa: L.Map | null = null;
   private readonly capasRegion = new Map<string, L.CircleMarker>();
@@ -475,7 +614,57 @@ export class MapaPage {
 
   readonly conteos = computed(() => conteosPorAlcance(this.base()));
   readonly bandas = computed(() => bandasPorAlcance(this.visibles()));
-  readonly filasRegion = computed(() => filasPorRegion(this.visibles()));
+  readonly filasRegion = computed(() => {
+    const filas = filasPorRegion(this.visibles());
+    if (this.ordenTotal() === 'desc') return filas;
+    return [...filas].sort((a, b) => a.total - b.total || a.region.localeCompare(b.region, 'es'));
+  });
+
+  /**
+   * Entrada de conflictividad (item 118): los casos visibles antes que el
+   * desglose territorial, ordenados por gravedad del riesgo propio y, dentro de
+   * cada nivel, por el inicio más antiguo. Los casos sin `fecha_inicio` se
+   * declaran y se ordenan al final; no se inventa una fecha.
+   */
+  private readonly casosOrdenados = computed<Caso[]>(() =>
+    [...this.visibles()].sort(
+      (a, b) =>
+        (ORDEN_RIESGO[a.riesgo] ?? 3) - (ORDEN_RIESGO[b.riesgo] ?? 3) ||
+        compararInicio(a.inicio, b.inicio) ||
+        a.codigo.localeCompare(b.codigo, 'es'),
+    ),
+  );
+
+  readonly casosPrioritarios = computed(() => this.casosOrdenados().slice(0, 50));
+  readonly sinInicio = computed(() => this.visibles().filter((caso) => !caso.inicio).length);
+
+  readonly drawerAbierto = computed(() => this.filaDrawer() !== null || this.sinRegionDrawer());
+
+  readonly drawerTitulo = computed(() =>
+    this.sinRegionDrawer() ? 'Sin región' : (this.filaDrawer()?.region ?? ''),
+  );
+
+  /** Casos del cajón: el mismo recorte con el que se contó la fila. */
+  readonly drawerCasos = computed<Caso[]>(() => {
+    if (this.sinRegionDrawer()) {
+      return this.casosOrdenados().filter((caso) => regionDe(caso) === null);
+    }
+
+    const fila = this.filaDrawer();
+    if (!fila) return [];
+
+    const clave = normalizarRegion(fila.region);
+    return this.casosOrdenados().filter((caso) => {
+      const region = regionDe(caso);
+      return region !== null && normalizarRegion(region) === clave;
+    });
+  });
+
+  readonly drawerEnlace = computed<Record<string, string>>(() => {
+    if (this.sinRegionDrawer()) return this.verCasosSinRegion();
+    const fila = this.filaDrawer();
+    return fila ? this.verCasos(fila) : this.recorteListado();
+  });
 
   /** Región resaltada por el mapa, sólo si sigue teniendo casos visibles. */
   readonly filaSeleccionada = computed<FilaRegion | null>(() => {
@@ -549,6 +738,34 @@ export class MapaPage {
 
   quitarSeleccion(): void {
     this.claveSeleccionada.set(null);
+  }
+
+  alternarOrdenTotal(): void {
+    this.ordenTotal.update((valor) => (valor === 'desc' ? 'asc' : 'desc'));
+  }
+
+  abrirCasos(fila: FilaRegion): void {
+    this.sinRegionDrawer.set(false);
+    this.filaDrawer.set(fila);
+  }
+
+  abrirCasosSinRegion(): void {
+    this.filaDrawer.set(null);
+    this.sinRegionDrawer.set(true);
+  }
+
+  cerrarDrawer(): void {
+    this.filaDrawer.set(null);
+    this.sinRegionDrawer.set(false);
+  }
+
+  abrirCaso(caso: Caso): void {
+    this.cerrarDrawer();
+    void this.router.navigate(['/casos', caso.codigo]);
+  }
+
+  fechaInicio(valor: string | null): string {
+    return formatearFechaCorta(valor);
   }
 
   recargar(): void {

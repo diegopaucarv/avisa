@@ -347,6 +347,232 @@
                 font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
                 font-size: 11px;
             }
+
+            /* ── Cinco bloques de anotación (obligatorios) ───────────── */
+            .ann {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 8px;
+                padding: 10px 12px 12px;
+                margin-bottom: 14px;
+                border: 1px solid var(--line);
+                border-radius: 9px;
+                background: #fbfcfd;
+            }
+            @media (max-width: 980px) {
+                .ann {
+                    grid-template-columns: 1fr;
+                }
+            }
+            .ann-card {
+                padding: 8px 10px;
+                border: 1px solid #eef1f4;
+                border-radius: 7px;
+                background: #fff;
+                font-size: 10px;
+                line-height: 1.5;
+                color: var(--muted);
+            }
+            .ann-card.wide {
+                grid-column: 1 / -1;
+            }
+            .ann-card h3 {
+                margin: 0 0 4px;
+                color: var(--ink);
+                font: 700 9px/1.3 var(--font-display, inherit);
+                letter-spacing: 0.07em;
+                text-transform: uppercase;
+            }
+            .ann-card b {
+                color: var(--ink);
+            }
+            .ann-card code {
+                font-size: 9.5px;
+            }
+            .ann-card .n {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 15px;
+                height: 15px;
+                margin-right: 5px;
+                border-radius: 50%;
+                background: var(--accent);
+                color: #fff;
+                font-size: 9px;
+                font-weight: 700;
+            }
+            .ann-table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+            .ann-table th,
+            .ann-table td {
+                padding: 2px 6px 2px 0;
+                border-bottom: 1px solid #f1f3f5;
+                text-align: left;
+                vertical-align: top;
+                font-size: 9.5px;
+            }
+            .ann-table th {
+                color: #97a1aa;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.04em;
+            }
+            .ann-table tr:last-child td {
+                border-bottom: 0;
+            }
+
+            /* ── Tablero (items 111 y 112) ───────────────────────────── */
+            .board {
+                padding: 14px 15px;
+                margin-bottom: 14px;
+                border: 1px solid var(--line);
+                border-radius: 9px;
+                background: var(--panel);
+            }
+            .board-head {
+                display: flex;
+                align-items: flex-start;
+                justify-content: space-between;
+                gap: 10px;
+                margin-bottom: 10px;
+            }
+            .board-head h2 {
+                margin: 0;
+            }
+            .board-head p {
+                margin: 3px 0 0;
+                color: var(--muted);
+                font-size: 10px;
+                line-height: 1.5;
+            }
+            .board-tabs {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 6px;
+                margin-bottom: 12px;
+            }
+            .board-tabs span {
+                padding: 6px 12px;
+                border: 1px solid var(--line);
+                border-radius: 999px;
+                background: var(--panel);
+                color: var(--muted);
+                font-size: 11px;
+            }
+            .board-tabs span[aria-current="true"] {
+                border-color: var(--accent);
+                background: var(--accent);
+                color: #fff;
+                font-weight: 600;
+            }
+            .board-tabs b {
+                font-weight: 700;
+            }
+            .board-grid {
+                display: grid;
+                grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+                gap: 12px;
+                align-items: start;
+            }
+            @media (max-width: 900px) {
+                .board-grid {
+                    grid-template-columns: 1fr;
+                }
+            }
+            .mini {
+                position: relative;
+                border: 1px solid #dbe4ec;
+                border-radius: 8px;
+                background: #eaf2f7;
+                overflow: hidden;
+            }
+            .mini svg {
+                display: block;
+                width: 100%;
+                height: auto;
+            }
+            .mini .mini-label {
+                position: absolute;
+                left: 9px;
+                bottom: 8px;
+                padding: 3px 7px;
+                border: 1px solid #cddcef;
+                border-radius: 6px;
+                background: rgba(255, 255, 255, 0.92);
+                color: var(--accent);
+                font-size: 8px;
+                font-weight: 700;
+            }
+            .ind-grid {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 8px;
+                margin-bottom: 10px;
+            }
+            .ind {
+                padding: 8px 10px;
+                border: 1px solid var(--line);
+                border-radius: 8px;
+                background: #fcfdfe;
+            }
+            .ind b {
+                display: block;
+                font-size: 19px;
+                line-height: 1.1;
+                font-variant-numeric: tabular-nums;
+                letter-spacing: -0.5px;
+            }
+            .ind span {
+                display: block;
+                margin-top: 2px;
+                color: var(--muted);
+                font-size: 9px;
+                line-height: 1.35;
+            }
+            .ind.none b {
+                color: #9aa6b1;
+            }
+            .reg-table {
+                width: 100%;
+                border-collapse: collapse;
+                text-align: left;
+            }
+            .reg-table caption {
+                padding: 0 0 5px;
+                color: #94a0a8;
+                font-size: 8.5px;
+                text-align: left;
+            }
+            .reg-table th {
+                padding: 4px 7px;
+                border-bottom: 1px solid #edf0f2;
+                color: #97a1aa;
+                font-size: 8px;
+                font-weight: 600;
+                letter-spacing: 0.05em;
+                text-transform: uppercase;
+            }
+            .reg-table td {
+                padding: 4px 7px;
+                border-bottom: 1px solid #f0f2f4;
+                color: var(--muted);
+                font-size: 9.5px;
+            }
+            .reg-table td.num {
+                text-align: right;
+                font-variant-numeric: tabular-nums;
+                color: var(--ink);
+                font-weight: 600;
+            }
+            .reg-table tr.total td {
+                border-top: 1px solid var(--line);
+                border-bottom: 0;
+                font-weight: 700;
+                color: var(--ink);
+            }
         </style>
     </head>
     <body>
@@ -354,48 +580,309 @@
             <header class="view-head">
                 <div>
                     <p class="eyebrow">Bandeja de trabajo · mockup</p>
-                    <h1>Bandeja de trabajo</h1>
+                    <h1>Bandeja de trabajo · tablero</h1>
                     <p class="view-subtitle">
-                        Consolida demandas sin caso, compromisos vencidos y
-                        alertas pendientes en una sola cola ordenada por plazo,
-                        riesgo y revisión pendiente. Cada fila declara de qué
-                        tipo es, qué campo la respalda y qué acción admite. La
-                        región se deriva del caso: no hay selector de alcance
+                        De lista a <b>tablero</b>: indicadores arriba, mapa
+                        mínimo y resumen de casos por región; debajo, la matriz
+                        de consulta y edición. El mismo patrón se repite para
+                        <b>Casos, Alertas, Compromisos y Documentos</b> (item
+                        112), así que un componente sirve a las cuatro pestañas.
+                        La región se deriva del caso: no hay selector de alcance
                         geográfico.
                     </p>
                 </div>
-                <div><span class="badge">Mockup · no implementado</span></div>
+                <div>
+                    <span class="badge"
+                        >Ola 1 · artboard 5 · items 22 · 50 · 111 · 112</span
+                    >
+                </div>
             </header>
 
-            <!-- Declaración: qué cubre, qué dato necesita y qué es solo forma. -->
-            <div
-                style="
-                    font-size: 11.5px;
-                    line-height: 1.5;
-                    color: #4a5b6c;
-                    border: 1px solid #e6ebef;
-                    border-radius: 6px;
-                    background: #f8fafb;
-                    padding: 8px 11px;
-                "
-            >
-                <p style="margin: 0 0 3px"><b>Items que cubre:</b> 22 · 50.</p>
-                <p style="margin: 0 0 3px">
-                    <b>Dato que necesita:</b>
-                    <code>GET /api/v1/demandas?sinCaso=true</code> (226 ·
-                    <code>sinCasoTotal</code>), <code>GET /api/v1/alerts</code>
-                    (0 pendientes de 76 vivas) y
-                    <code>GET /api/v1/commitments?excluir_terminales=true</code>
-                    (0 vencidos, 8 sin fecha), más
-                    <code>GET /api/v1/cases</code> → <code>abiertos</code> (34).
-                    El endpoint único <code>GET /api/v1/bandeja</code> requiere
-                    crearse (item 50).
-                </p>
-                <p style="margin: 0">
-                    <b>Solo forma (sin dato):</b> orden por plazo y las acciones
-                    de asignar, posponer, completar y vincular.
-                </p>
-            </div>
+            <!-- ═══════════ Cinco bloques de anotación (obligatorios) ═══════════ -->
+            <section class="ann" aria-label="Anotaciones del artboard">
+                <div class="ann-card">
+                    <h3><span class="n">1</span>Items que cubre</h3>
+                    <b>22</b> (reordenar y filtrar alertas: mismo catálogo y
+                    consulta) · <b>50</b> (asignar, posponer, completar y
+                    vincular; <b>no persistido</b>) · <b>111</b> (de lista a
+                    tablero: mapa, indicadores y resumen de casos más la matriz)
+                    · <b>112</b> (Alertas, Compromisos y Documentos con el mismo
+                    patrón). <br /><b>Diseño por lote:</b> Lote B · Panorama,
+                    alertas y directorios (112). El tablero es la pieza que fija
+                    el patrón que copian los demás módulos.
+                </div>
+                <div class="ann-card">
+                    <h3>
+                        <span class="n">2</span>Dato que necesita cada celda
+                    </h3>
+                    <table class="ann-table">
+                        <tr>
+                            <th>Celda</th>
+                            <th>Campo</th>
+                            <th>Ruta</th>
+                        </tr>
+                        <tr>
+                            <td>Indicadores</td>
+                            <td>
+                                <code>abiertos</code>, <code>total</code>,
+                                <code>sinCasoTotal</code>
+                            </td>
+                            <td>
+                                <code>GET /v1/cases?conteos=true</code> ·
+                                <code>GET /v1/alerts</code> ·
+                                <code>GET /v1/commitments</code> ·
+                                <code>GET /v1/demandas?sinCaso=true</code>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Resumen por región</td>
+                            <td><code>region</code></td>
+                            <td>
+                                <code>GET /v1/cases?abiertos=true</code> —
+                                <code>region</code> por fila, hoy derivada de
+                                <code>core.alcance_caso(uuid)</code>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Mapa mínimo</td>
+                            <td>centroide por región</td>
+                            <td>
+                                no es API · teselas OSM;
+                                <b>sin ubigeo distrital</b> (P10)
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Sin responsable</td>
+                            <td><code>responsable_usuario_id</code></td>
+                            <td><b>no existe</b> (columnas del item 50)</td>
+                        </tr>
+                        <tr>
+                            <td>Cola unificada</td>
+                            <td><code>plazo_efectivo</code></td>
+                            <td>
+                                <b>no existe</b> <code>GET /v1/bandeja</code>
+                                (item 50)
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Asignar · posponer · completar · vincular</td>
+                            <td>—</td>
+                            <td>
+                                <b>no existe</b> endpoint ni columnas
+                                (<code>fecha_limite</code>,
+                                <code>posposiciones</code>,
+                                <code>cerrado_por</code>)
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Pestañas por tipo</td>
+                            <td>unión en cliente</td>
+                            <td>
+                                los cuatro <code>GET</code> existen; la pestaña
+                                no es un endpoint nuevo
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="ann-card">
+                    <h3><span class="n">3</span>Sólo forma · no implementar</h3>
+                    El <b>mapa mínimo</b> (círculos y líneas) es arte del
+                    mockup: en la SPA son teselas OSM. El orden «por plazo» no
+                    se inventa: sin <code>plazo_efectivo</code> la cola se
+                    ordena sólo por lo que existe. Los botones Asignar,
+                    Posponer, Completar y Vincular se dibujan deshabilitados
+                    porque no hay persistencia.
+                </div>
+                <div class="ann-card">
+                    <h3><span class="n">4</span>Bloqueado y por qué</h3>
+                    <b>Item 50:</b> asignar, posponer, completar y vincular no
+                    están persistidos; faltan
+                    <code>responsable_usuario_id</code>,
+                    <code>fecha_limite</code>, <code>posposiciones</code> y
+                    <code>cerrado_por</code>, y el endpoint de cola. Por eso
+                    «Sin responsable» se declara <b>no existe</b> y no se
+                    muestra un cero. Ningún X de producto (X1–X5) aplica aquí;
+                    el tablero no retira pantallas.
+                </div>
+                <div class="ann-card wide">
+                    <h3><span class="n">5</span>Roles que ven cada bloque</h3>
+                    <b>Dirección OAIPCS y Secretaría General:</b> todas las
+                    pestañas y alcance nacional. <b>Sectorista:</b> sólo las
+                    regiones de su sesión y, con el item 113, su subsector; el
+                    tablero hereda ese recorte. <b>Alta dirección:</b> lectura
+                    completa, sin acciones de escritura. «Mi bandeja / Toda la
+                    unidad» depende de la asignación persistida (item 50): hoy
+                    no puede filtrar por responsable real.
+                </div>
+            </section>
+
+            <!-- Tablero (items 111 y 112): indicadores arriba, matriz debajo -->
+            <section class="board" aria-labelledby="tablero-titulo">
+                <div class="board-head">
+                    <div>
+                        <h2 id="tablero-titulo">Tablero</h2>
+                        <p>
+                            Indicadores y mapa arriba; la matriz de consulta y
+                            edición, debajo. Las cuatro pestañas comparten el
+                            mismo patrón (item 112).
+                        </p>
+                    </div>
+                    <span class="badge">patrón 112</span>
+                </div>
+
+                <div
+                    class="board-tabs"
+                    role="tablist"
+                    aria-label="Pestañas del tablero"
+                >
+                    <span aria-current="true">Casos <b>34</b></span>
+                    <span>Alertas <b>83</b></span>
+                    <span>Compromisos <b>8</b></span>
+                    <span>Documentos <b>143</b></span>
+                </div>
+
+                <div class="board-grid">
+                    <div class="mini">
+                        <svg
+                            viewBox="0 0 420 250"
+                            role="img"
+                            aria-label="Mapa mínimo referencial con un punto por región, sin geometría propia"
+                        >
+                            <rect
+                                x="0"
+                                y="0"
+                                width="420"
+                                height="250"
+                                fill="#eaf2f7"
+                            />
+                            <g stroke="#d3e0e9" stroke-width="0.7">
+                                <line x1="0" y1="62" x2="420" y2="62" />
+                                <line x1="0" y1="125" x2="420" y2="125" />
+                                <line x1="0" y1="188" x2="420" y2="188" />
+                                <line x1="105" y1="0" x2="105" y2="250" />
+                                <line x1="210" y1="0" x2="210" y2="250" />
+                                <line x1="315" y1="0" x2="315" y2="250" />
+                            </g>
+                            <path
+                                d="M95 12 C78 60 96 96 80 130 C66 164 92 196 78 232 C72 246 88 250 98 250 L0 250 L0 12 Z"
+                                fill="#dcebdd"
+                                stroke="#c4dbc5"
+                            />
+                            <g fill="#1f4e79" opacity="0.85">
+                                <circle cx="96" cy="82" r="9" />
+                                <circle cx="104" cy="146" r="9" />
+                                <circle cx="150" cy="196" r="6" />
+                                <circle cx="188" cy="120" r="7" />
+                                <circle cx="236" cy="74" r="8" />
+                                <circle cx="262" cy="150" r="6" />
+                                <circle cx="196" cy="212" r="5" />
+                                <circle cx="300" cy="196" r="4" />
+                            </g>
+                            <g fill="#fff" font-size="7" text-anchor="middle">
+                                <text x="96" y="85">5</text>
+                                <text x="104" y="149">5</text>
+                                <text x="150" y="198">3</text>
+                                <text x="188" y="123">2</text>
+                                <text x="236" y="77">2</text>
+                                <text x="262" y="152">2</text>
+                                <text x="196" y="214">1</text>
+                                <text x="300" y="198">1</text>
+                            </g>
+                        </svg>
+                        <span class="mini-label"
+                            >Mapa mínimo · referencial · sin ubigeo
+                            distrital</span
+                        >
+                    </div>
+
+                    <div>
+                        <div class="ind-grid">
+                            <div class="ind">
+                                <b>34</b><span>Casos abiertos</span>
+                            </div>
+                            <div class="ind">
+                                <b>83</b><span>Alertas registradas</span>
+                            </div>
+                            <div class="ind">
+                                <b>8</b><span>Compromisos</span>
+                            </div>
+                            <div class="ind">
+                                <b>107</b><span>Demandas sin caso</span>
+                            </div>
+                            <div class="ind none">
+                                <b>—</b>
+                                <span
+                                    >Sin responsable · no existe (item 50)</span
+                                >
+                            </div>
+                            <div class="ind none">
+                                <b>—</b>
+                                <span
+                                    >Plazo efectivo · no existe (item 50)</span
+                                >
+                            </div>
+                        </div>
+
+                        <table class="reg-table">
+                            <caption>
+                                Casos abiertos por región · suma 34
+                            </caption>
+                            <thead>
+                                <tr>
+                                    <th>Región</th>
+                                    <th style="text-align: right">Casos</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Lima</td>
+                                    <td class="num">5</td>
+                                </tr>
+                                <tr>
+                                    <td>Piura</td>
+                                    <td class="num">5</td>
+                                </tr>
+                                <tr>
+                                    <td>Callao</td>
+                                    <td class="num">3</td>
+                                </tr>
+                                <tr>
+                                    <td>Ica</td>
+                                    <td class="num">2</td>
+                                </tr>
+                                <tr>
+                                    <td>Arequipa</td>
+                                    <td class="num">2</td>
+                                </tr>
+                                <tr>
+                                    <td>Loreto</td>
+                                    <td class="num">2</td>
+                                </tr>
+                                <tr>
+                                    <td>Lambayeque</td>
+                                    <td class="num">1</td>
+                                </tr>
+                                <tr>
+                                    <td>Moquegua</td>
+                                    <td class="num">1</td>
+                                </tr>
+                                <tr>
+                                    <td>Tumbes</td>
+                                    <td class="num">1</td>
+                                </tr>
+                                <tr>
+                                    <td>Sin región</td>
+                                    <td class="num">12</td>
+                                </tr>
+                                <tr class="total">
+                                    <td>Total</td>
+                                    <td class="num">34</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
 
             <div class="filter-bar">
                 <label class="search-field">
@@ -440,7 +927,7 @@
                 aria-label="Filtrar por tipo de registro"
             >
                 <button type="button" aria-pressed="true">
-                    Todas <b>226</b>
+                    Todas <b>107</b>
                 </button>
                 <button type="button" aria-pressed="false">
                     Alertas pendientes <b>0</b>
@@ -449,15 +936,15 @@
                     Compromisos vencidos <b>0</b>
                 </button>
                 <button type="button" aria-pressed="false">
-                    Demandas sin caso <b>226</b>
+                    Demandas sin caso <b>107</b>
                 </button>
             </div>
 
             <div class="strip" role="status">
-                <span><b>226</b> demandas sin caso</span>
+                <span><b>107</b> demandas sin caso</span>
                 <span
-                    ><b>0</b> alertas pendientes · <b>76</b> en
-                    «Completado»</span
+                    ><b>0</b> alertas pendientes · <b>76</b> vivas de 83
+                    registradas</span
                 >
                 <span
                     ><b>0</b> compromisos vencidos · <b>8</b> sin fecha (no se
@@ -699,13 +1186,14 @@
                     </tbody>
                 </table>
                 <div class="empty-state" role="note">
-                    <strong>226 demandas sin caso esperan vínculo.</strong>
+                    <strong>107 demandas sin caso esperan vínculo.</strong>
                     Las filas de compromiso y alerta de arriba son muestras de
-                    formato: las 76 alertas vivas están en paso «Completado» y
-                    los 8 compromisos no tienen fecha de vencimiento (el hueco
-                    se declara, no se estima), así que no hay plazos próximos
-                    que ordenar. Asignar, posponer, completar y vincular siguen
-                    deshabilitadas hasta que existan los endpoints del item 50.
+                    formato: las <b>76 alertas vivas</b> (de 83 registradas)
+                    están en paso «Completado» y los 8 compromisos no tienen
+                    fecha de vencimiento (el hueco se declara, no se estima),
+                    así que no hay plazos próximos que ordenar. Asignar,
+                    posponer, completar y vincular siguen deshabilitadas hasta
+                    que existan los endpoints del item 50.
                 </div>
             </section>
 
@@ -733,9 +1221,10 @@
                                     <code
                                         >GET /api/v1/demandas?sinCaso=true</code
                                     >
-                                    → <code>sinCasoTotal</code> (226);
+                                    → <code>sinCasoTotal</code> (107);
                                     <code>GET /api/v1/alerts</code> →
-                                    <code>total</code> (76);
+                                    <code>total</code> (76 vivas de 83
+                                    registradas);
                                     <code
                                         >GET
                                         /api/v1/commitments?excluir_terminales=true&amp;vencimiento_hasta=&lt;hoy&gt;</code
@@ -836,7 +1325,7 @@
                                     <span class="tag ok">existe</span>
                                     <div class="sub">
                                         en demandas <code>caso_id</code> es NULL
-                                        (226 filas) y se muestra «Sin caso»
+                                        (107 filas) y se muestra «Sin caso»
                                     </div>
                                 </td>
                             </tr>
@@ -999,10 +1488,12 @@
                 </ol>
                 <p style="margin: 10px 0 0; color: #8a5a00">
                     Items 22 y 50 de <code>docs/07_frontend/frontend.md</code>.
-                    Ninguna cifra de esta página es inventada: 226 demandas sin
-                    caso, 76 alertas vivas, 8 compromisos (todos «En proceso»,
-                    sin vencimiento), 34 casos abiertos y 143 documentos, leídos
-                    de la base el 22.11.2026.
+                    Ninguna cifra de esta página es inventada: 107 demandas sin
+                    caso, 76 alertas vivas (de 83 registradas), 8 compromisos
+                    (todos «En proceso», sin vencimiento), 34 casos abiertos y
+                    143 documentos, leídos de la base el 22.11.2026. La cifra
+                    226 era la del corte previo a la migración 37 y ya no
+                    aplica.
                 </p>
             </aside>
 

@@ -34,7 +34,7 @@
         (click)="imprimir()"
       >
         <app-icono nombre="documentos" [tamano]="14" />
-        Imprimir / Guardar PDF
+        {{ esAdmin() ? 'Imprimir / Guardar PDF' : 'Guardar PDF' }}
       </button>
       <span
         [class]="
@@ -106,49 +106,33 @@
         </div>
       </dl>
 
-      <section class="detail-section" aria-labelledby="proximo-paso-titulo">
-        <div class="detail-section-title">
-          <h2 id="proximo-paso-titulo">Próximo paso</h2>
-          <span
-            [class]="
-              riesgoInactivo()
-                ? 'status-badge risk-inactivo'
-                : 'status-badge risk-' + d.caso.riesgo.toLowerCase()
-            "
-          >
-            <span class="status-dot"></span>
-            Riesgo {{ d.caso.riesgo }}
-          </span>
-        </div>
-        <ul class="pasos-riesgo">
-          @for (paso of orientacion().pasos; track paso) {
-          <li>{{ paso }}</li>
-          }
-        </ul>
-        <p class="detail-hint">
-          Regla: {{ orientacion().regla }} ({{ orientacion().fuente }}). Valor del caso: Riesgo {{
-          d.caso.riesgo }}.
-        </p>
-      </section>
-
-      <section class="detail-section" aria-labelledby="ruta-caso">
-        <h2 id="ruta-caso">Ruta de atención</h2>
-        <p class="cycle-note">
-          Los cinco componentes pueden ocurrir simultáneamente: no son etapas rígidas ni sucesivas.
-        </p>
-        <ol class="cycle-list">
-          @for (componente of componentesCiclo; track componente.nombre) {
-          <li>
-            <strong>{{ componente.nombre }}</strong>
-            <p>{{ componente.definicion }}</p>
-          </li>
-          }
-        </ol>
-      </section>
-
       <section class="detail-section" aria-labelledby="actores-caso">
-        <h2 id="actores-caso">Actores ({{ d.actores.length }})</h2>
-        @if (d.actores.length === 0) {
+        <div class="detail-section-title">
+          <h2 id="actores-caso">Actores ({{ d.actores.length }})</h2>
+          @if (d.actores.length > 0) {
+          <div class="actores-acciones">
+            <button
+              type="button"
+              class="button-secondary"
+              title="Copia una línea por actor: - Nombre - Organización - teléfono - correo"
+              (click)="copiarActoresWhatsApp(d.actores)"
+            >
+              Copiar para WhatsApp
+            </button>
+            <button
+              type="button"
+              class="button-secondary"
+              title="Descarga las filas de esta tabla en un archivo CSV"
+              (click)="exportarActoresCsv(d.actores)"
+            >
+              Exportar CSV
+            </button>
+          </div>
+          }
+        </div>
+        @if (avisoActores(); as aviso) {
+        <p class="form-hint aviso-ok" role="status">{{ aviso }}</p>
+        } @if (d.actores.length === 0) {
         <p class="empty-inline">Sin actores registrados.</p>
         } @else {
         <div class="table-wrap">
@@ -486,9 +470,12 @@
       </section>
     </div>
 
-    <aside class="ficha-lateral" aria-label="Resumen del expediente">
-      <app-expediente-completitud [completitud]="d.completitud" />
+    <aside class="ficha-lateral" aria-label="Expediente del caso">
       <app-riel-relaciones [enlaces]="enlacesRiel()" />
+      <p class="detail-hint">
+        El expediente se compone de la línea de tiempo, el mapeo de actores, el caso de análisis y
+        los documentos vinculados.
+      </p>
     </aside>
   </div>
 

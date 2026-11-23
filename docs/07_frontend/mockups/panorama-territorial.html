@@ -1,0 +1,1361 @@
+<!doctype html>
+<html lang="es">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Panorama territorial · Mockup AVISA</title>
+        <style>
+            /* Tokens copiados de angular/src/styles/global.css. Sin webfonts, sin JS, sin CDN:
+               el archivo se abre por doble clic. */
+            :root {
+                --ink: #17283a;
+                --ink-2: #33475b;
+                --muted: #778797;
+                --line: #e6ebef;
+                --paper: #fff;
+                --canvas: #f5f7f8;
+                --blue: #2455a2;
+                --blue-dark: #1d427f;
+                --blue-pale: #eaf1fb;
+                --teal: #397c79;
+                --amber: #aa6a11;
+                --amber-pale: #fff4e2;
+                --red: #ad4d46;
+                --red-pale: #fbeceb;
+                --green: #34785b;
+                --green-pale: #e9f5ef;
+                --font-sans:
+                    "DM Sans", system-ui, -apple-system, "Segoe UI", Arial,
+                    sans-serif;
+                --font-display:
+                    "Manrope", "DM Sans", system-ui, -apple-system, "Segoe UI",
+                    sans-serif;
+            }
+            * {
+                box-sizing: border-box;
+            }
+            html {
+                min-height: 100%;
+                background: var(--canvas);
+            }
+            body {
+                margin: 0;
+                color: var(--ink);
+                font-family: var(--font-sans);
+                font-size: 13px;
+                -webkit-font-smoothing: antialiased;
+            }
+            .view-body {
+                display: flex;
+                flex-direction: column;
+                gap: 14px;
+                width: 100%;
+                max-width: 1420px;
+                margin: 0 auto;
+                padding: 27px 34px 56px;
+            }
+            .view-head {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: flex-start;
+                justify-content: space-between;
+                gap: 16px;
+            }
+            .view-head h1 {
+                margin: 0;
+                font: 700 22px/1.3 var(--font-display);
+                letter-spacing: -0.65px;
+            }
+            .view-subtitle {
+                max-width: 820px;
+                margin: 6px 0 0;
+                color: var(--muted);
+                font-size: 11px;
+                line-height: 1.6;
+            }
+            .badge {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                height: 26px;
+                padding: 0 10px;
+                border: 1px solid #cddcef;
+                border-radius: 999px;
+                background: var(--blue-pale);
+                color: var(--blue);
+                font-size: 9px;
+                font-weight: 700;
+                letter-spacing: 0.05em;
+                text-transform: uppercase;
+                white-space: nowrap;
+            }
+
+            /* ── Cinco bloques de anotación ───────────────────────────── */
+            .ann {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 8px;
+                padding: 10px 12px 12px;
+                border: 1px solid var(--line);
+                border-radius: 9px;
+                background: #fbfcfd;
+            }
+            @media (max-width: 980px) {
+                .ann {
+                    grid-template-columns: 1fr;
+                }
+            }
+            .ann-card {
+                padding: 8px 10px;
+                border: 1px solid #eef1f4;
+                border-radius: 7px;
+                background: #fff;
+                font-size: 10px;
+                line-height: 1.5;
+                color: var(--ink-2);
+            }
+            .ann-card.wide {
+                grid-column: 1 / -1;
+            }
+            .ann-card h3 {
+                margin: 0 0 4px;
+                color: var(--ink);
+                font: 700 9px/1.3 var(--font-display);
+                letter-spacing: 0.07em;
+                text-transform: uppercase;
+            }
+            .ann-card b {
+                color: var(--ink);
+            }
+            .ann-card code {
+                padding: 0 3px;
+                border-radius: 3px;
+                background: #eef1f4;
+                font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+                font-size: 9.5px;
+            }
+            .ann-card .n {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 15px;
+                height: 15px;
+                margin-right: 5px;
+                border-radius: 50%;
+                background: var(--blue);
+                color: #fff;
+                font-size: 9px;
+                font-weight: 700;
+            }
+            .ann-table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+            .ann-table th,
+            .ann-table td {
+                padding: 2px 6px 2px 0;
+                border-bottom: 1px solid #f1f3f5;
+                text-align: left;
+                vertical-align: top;
+                font-size: 9.5px;
+            }
+            .ann-table th {
+                color: #97a1aa;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.04em;
+            }
+            .ann-table tr:last-child td {
+                border-bottom: 0;
+            }
+
+            /* ── Correcciones aplicadas ──────────────────────────────── */
+            .fixes {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 6px;
+            }
+            .fix {
+                display: inline-flex;
+                align-items: center;
+                gap: 5px;
+                padding: 3px 8px;
+                border: 1px solid #c9e3d5;
+                border-radius: 999px;
+                background: var(--green-pale);
+                color: var(--green);
+                font-size: 9px;
+                font-weight: 600;
+            }
+            .fix::before {
+                content: "✔";
+            }
+
+            /* ── Barra de alcance fija ───────────────────────────────── */
+            .scope {
+                position: sticky;
+                top: 0;
+                z-index: 5;
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                gap: 10px;
+                padding: 9px 12px;
+                border: 1px solid var(--line);
+                border-radius: 9px;
+                background: rgba(255, 255, 255, 0.96);
+                box-shadow: 0 2px 8px rgba(23, 40, 58, 0.06);
+                backdrop-filter: blur(3px);
+            }
+            .scope-label {
+                color: #97a1aa;
+                font-size: 9px;
+                font-weight: 700;
+                letter-spacing: 0.07em;
+                text-transform: uppercase;
+            }
+            .seg {
+                display: inline-flex;
+                padding: 2px;
+                border: 1px solid var(--line);
+                border-radius: 8px;
+                background: #fff;
+            }
+            .seg span {
+                padding: 5px 11px;
+                border-radius: 6px;
+                color: var(--muted);
+                font-size: 11px;
+            }
+            .seg span[aria-current="true"] {
+                background: var(--blue);
+                color: #fff;
+            }
+            .scope-note {
+                margin-left: auto;
+                color: var(--muted);
+                font-size: 10px;
+            }
+
+            /* ── Tarjetas KPI ────────────────────────────────────────── */
+            .kpis {
+                display: grid;
+                grid-template-columns: repeat(5, minmax(0, 1fr));
+                gap: 10px;
+            }
+            @media (max-width: 980px) {
+                .kpis {
+                    grid-template-columns: repeat(2, 1fr);
+                }
+            }
+            .kpi {
+                padding: 12px 14px;
+                border: 1px solid var(--line);
+                border-radius: 9px;
+                background: #fff;
+            }
+            .kpi b {
+                display: block;
+                font: 700 24px/1.1 var(--font-display);
+                font-variant-numeric: tabular-nums;
+                letter-spacing: -0.5px;
+            }
+            .kpi span {
+                display: block;
+                margin-top: 4px;
+                color: var(--muted);
+                font-size: 10px;
+                line-height: 1.35;
+            }
+            .kpi.zero b {
+                color: #9aa6b1;
+            }
+
+            /* ── Lienzo y tabla ──────────────────────────────────────── */
+            .grid-main {
+                display: grid;
+                grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+                gap: 14px;
+                align-items: start;
+            }
+            @media (max-width: 1080px) {
+                .grid-main {
+                    grid-template-columns: 1fr;
+                }
+            }
+            .card {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                padding: 14px 15px 12px;
+                border: 1px solid var(--line);
+                border-radius: 9px;
+                background: #fff;
+            }
+            .card-head {
+                display: flex;
+                align-items: flex-start;
+                justify-content: space-between;
+                gap: 10px;
+            }
+            .card-title {
+                margin: 0;
+                font: 700 12.5px/1.3 var(--font-display);
+                letter-spacing: -0.15px;
+            }
+            .card-sub {
+                margin: 3px 0 0;
+                color: var(--muted);
+                font-size: 9.5px;
+                line-height: 1.5;
+            }
+            .tag {
+                display: inline-flex;
+                align-items: center;
+                padding: 2px 7px;
+                border: 1px solid var(--line);
+                border-radius: 999px;
+                color: #8b97a1;
+                font-size: 7.5px;
+                font-weight: 700;
+                letter-spacing: 0.05em;
+                text-transform: uppercase;
+                white-space: nowrap;
+            }
+            .tag.ref {
+                border-color: #cddcef;
+                background: var(--blue-pale);
+                color: var(--blue);
+            }
+
+            .map {
+                position: relative;
+                border: 1px solid #dbe4ec;
+                border-radius: 8px;
+                background: #eaf2f7;
+                overflow: hidden;
+            }
+            .map svg {
+                display: block;
+                width: 100%;
+                height: auto;
+            }
+            .map-label {
+                position: absolute;
+                left: 10px;
+                bottom: 10px;
+                padding: 4px 8px;
+                border: 1px solid #cddcef;
+                border-radius: 6px;
+                background: rgba(255, 255, 255, 0.92);
+                color: var(--blue-dark);
+                font-size: 8.5px;
+                font-weight: 700;
+                letter-spacing: 0.03em;
+            }
+            .map-tools {
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                display: flex;
+                flex-direction: column;
+                gap: 5px;
+            }
+            .map-tool {
+                padding: 3px 8px;
+                border: 1px solid #cddcef;
+                border-radius: 5px;
+                background: rgba(255, 255, 255, 0.94);
+                color: var(--ink-2);
+                font-size: 8.5px;
+            }
+            .map-tool.off {
+                color: #9aa6b1;
+            }
+            .legend {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 12px;
+                color: var(--muted);
+                font-size: 9px;
+            }
+            .legend i {
+                display: inline-block;
+                width: 9px;
+                height: 9px;
+                margin-right: 4px;
+                border-radius: 50%;
+                background: var(--blue);
+                vertical-align: -1px;
+            }
+            .legend i.big {
+                width: 13px;
+                height: 13px;
+            }
+            .legend i.dot {
+                width: 5px;
+                height: 5px;
+                background: var(--teal);
+            }
+
+            .data-table {
+                width: 100%;
+                border-collapse: collapse;
+                text-align: left;
+            }
+            .data-table th {
+                height: 32px;
+                padding: 0 9px;
+                border-bottom: 1px solid #edf0f2;
+                color: #97a1aa;
+                font-size: 8px;
+                font-weight: 600;
+                letter-spacing: 0.5px;
+                text-transform: uppercase;
+                white-space: nowrap;
+            }
+            .data-table td {
+                padding: 7px 9px;
+                border-bottom: 1px solid #f0f2f4;
+                color: #687988;
+                font-size: 9.5px;
+                line-height: 1.45;
+                vertical-align: middle;
+            }
+            .data-table tbody tr:last-child td {
+                border-bottom: 0;
+            }
+            .data-table td.num,
+            .data-table th.num {
+                text-align: right;
+                font-variant-numeric: tabular-nums;
+            }
+            .data-table td.strong {
+                color: var(--ink);
+                font-weight: 600;
+            }
+            .data-table th.sortable {
+                color: var(--blue);
+                cursor: default;
+            }
+            .data-table th.sortable .arrow {
+                font-size: 9px;
+            }
+            .data-table tbody tr:hover td {
+                background: #fafbfc;
+            }
+            .link {
+                border: 0;
+                background: none;
+                padding: 0;
+                color: #4c7099;
+                font: inherit;
+                font-size: 9.5px;
+                white-space: nowrap;
+            }
+            .risk {
+                display: inline-block;
+                padding: 1px 6px;
+                border-radius: 999px;
+                font-size: 8px;
+                font-weight: 600;
+            }
+            .risk.alto {
+                background: var(--red-pale);
+                color: var(--red);
+            }
+            .risk.mod {
+                background: var(--amber-pale);
+                color: var(--amber);
+            }
+            .risk.bajo {
+                background: var(--green-pale);
+                color: var(--green);
+            }
+            .conf {
+                color: var(--ink-2);
+                font-weight: 600;
+            }
+
+            /* ── Cajón «Ver casos» ───────────────────────────────────── */
+            .drawer-stage {
+                position: relative;
+                height: 250px;
+                border: 1px solid var(--line);
+                border-radius: 8px;
+                background:
+                    repeating-linear-gradient(
+                        0deg,
+                        #dfe9f0 0 1px,
+                        transparent 1px 26px
+                    ),
+                    repeating-linear-gradient(
+                        90deg,
+                        #dfe9f0 0 1px,
+                        transparent 1px 26px
+                    ),
+                    #eef3f7;
+                overflow: hidden;
+            }
+            .drawer-stage::after {
+                content: "fondo desenfocado · lienzo con el alcance y el territorio ya aplicados";
+                position: absolute;
+                left: 12px;
+                bottom: 10px;
+                color: #93a2ae;
+                font-size: 8.5px;
+            }
+            .drawer {
+                position: absolute;
+                top: 0;
+                right: 0;
+                display: flex;
+                flex-direction: column;
+                width: 52%;
+                height: 100%;
+                border-left: 1px solid #d5dee6;
+                background: #fff;
+                box-shadow: -10px 0 26px rgba(23, 40, 58, 0.13);
+            }
+            .drawer-head {
+                display: flex;
+                align-items: flex-start;
+                justify-content: space-between;
+                gap: 8px;
+                padding: 11px 13px 9px;
+                border-bottom: 1px solid #eef1f4;
+            }
+            .drawer-head h4 {
+                margin: 0;
+                font: 700 11.5px/1.3 var(--font-display);
+            }
+            .drawer-head p {
+                margin: 2px 0 0;
+                color: var(--muted);
+                font-size: 8.5px;
+            }
+            .drawer-body {
+                padding: 6px 13px;
+                overflow: hidden;
+            }
+            .drawer-row {
+                display: grid;
+                grid-template-columns: 1fr auto;
+                gap: 8px;
+                padding: 6px 0;
+                border-bottom: 1px solid #f2f4f6;
+                font-size: 9px;
+            }
+            .drawer-row:last-child {
+                border-bottom: 0;
+            }
+            .drawer-row .c {
+                font-family: ui-monospace, Menlo, monospace;
+                font-size: 8.5px;
+                color: #4c7099;
+            }
+            .drawer-row .t {
+                color: var(--ink-2);
+            }
+            .drawer-foot {
+                margin-top: auto;
+                padding: 8px 13px;
+                border-top: 1px solid #eef1f4;
+                color: var(--muted);
+                font-size: 8.5px;
+                line-height: 1.4;
+            }
+            .foot {
+                margin: 0;
+                color: #94a0a8;
+                font-size: 9px;
+                line-height: 1.6;
+            }
+            .foot code {
+                padding: 0 3px;
+                border-radius: 3px;
+                background: #eef1f4;
+                font-family: ui-monospace, Menlo, monospace;
+                font-size: 9px;
+            }
+        </style>
+    </head>
+    <body>
+        <main class="view-body">
+            <header class="view-head">
+                <div>
+                    <h1>Panorama territorial</h1>
+                    <p class="view-subtitle">
+                        Pantalla de entrada de la SPA. Círculos por región sobre
+                        un lienzo referencial, alcance geográfico y casos
+                        abiertos por ámbito y región. El lienzo OSM
+                        <b>se conserva</b> (X2 resuelto) y se rotula «Mapa
+                        referencial · sin ubigeo distrital». Debajo del mapa,
+                        los casos priorizados por gravedad y antigüedad.
+                    </p>
+                </div>
+                <div>
+                    <span class="badge"
+                        >Ola 1 · artboard 1 · items 89–92 · 109 · 118</span
+                    >
+                </div>
+            </header>
+
+            <!-- ═══════════ Cinco bloques de anotación (obligatorios) ═══════════ -->
+            <section class="ann" aria-label="Anotaciones del artboard">
+                <div class="ann-card">
+                    <h3><span class="n">1</span>Items que cubre</h3>
+                    <b>89</b> (tarjetas y «Regiones con al menos un caso», sin
+                    textos de apoyo) · <b>90</b> (X2 resuelto: el lienzo se
+                    conserva y el mapa no se retira) · <b>91</b> («Alcance
+                    geográfico», notas fuera) · <b>92</b> (selector fijo y
+                    «Casos abiertos» ordenable) · <b>109</b> («Ver casos» en
+                    cajón) · <b>118</b> (casos priorizados bajo el mapa).
+                    <br /><b>Diseño por lote:</b>
+                    Lote B · Panorama, alertas y directorios (89, 90, 91, 92,
+                    109, 118).
+                </div>
+                <div class="ann-card">
+                    <h3>
+                        <span class="n">2</span>Dato que necesita cada celda
+                    </h3>
+                    <table class="ann-table">
+                        <tr>
+                            <th>Celda</th>
+                            <th>Campo</th>
+                            <th>Ruta</th>
+                        </tr>
+                        <tr>
+                            <td>Tarjetas y tabla</td>
+                            <td>
+                                <code>conteos.abiertos</code>,
+                                <code>region</code>
+                            </td>
+                            <td>
+                                <code
+                                    >GET
+                                    /v1/cases?conteos=true&amp;abiertos=true</code
+                                >
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Fila por región</td>
+                            <td><code>region</code>, <code>sinregion</code></td>
+                            <td>
+                                <code
+                                    >GET
+                                    /v1/cases?region=…&amp;abiertos=true</code
+                                >
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Ámbito</td>
+                            <td><code>alcance</code></td>
+                            <td><code>GET /v1/cases?alcance=…</code></td>
+                        </tr>
+                        <tr>
+                            <td>Catálogo de regiones</td>
+                            <td>
+                                <code
+                                    >id, codigo, etiqueta, ubigeo,
+                                    alcance_id</code
+                                >
+                            </td>
+                            <td>
+                                <code>GET /v1/catalogs</code> →
+                                <code>regiones</code>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Casos priorizados</td>
+                            <td>
+                                <code>riesgo</code>, <code>prioridad</code>,
+                                <code>fecha_inicio</code>
+                            </td>
+                            <td>
+                                <code>GET /v1/cases?riesgo=Alto</code> +
+                                <code>sort</code>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Lienzo</td>
+                            <td>teselas públicas</td>
+                            <td>no es API · <code>TESELAS_OSM</code></td>
+                        </tr>
+                        <tr>
+                            <td>Nube KML</td>
+                            <td>
+                                <code>DEPARTAMEN</code>, <code>IDENTI</code>
+                            </td>
+                            <td>
+                                <b>no existe</b> (parser de
+                                <code>gis/Infraestructuras.kml</code>)
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="ann-card">
+                    <h3><span class="n">3</span>Sólo forma · no implementar</h3>
+                    El dibujo del lienzo SVG, la leyenda, la posición de los
+                    círculos y el cajón abierto son <b>arte del mockup</b>: en
+                    la SPA el lienzo son teselas OSM con un círculo por
+                    centroide. No se implementa geometría propia ni límites. El
+                    orden de la tabla se marca como descendente; la regla de
+                    priorización de los casos no se inventa.
+                </div>
+                <div class="ann-card">
+                    <h3><span class="n">4</span>Bloqueado y por qué</h3>
+                    <b>X2 — resuelto:</b> el lienzo se conserva; el item 90
+                    (retirar el mapa) <b>no se hace</b>. Sin bloqueo de
+                    escritura en esta pantalla. La nube de 13 456 puntos y el
+                    recorte por distrito quedan <b>pendientes del parser</b> del
+                    KML, no bloqueados: el archivo ya tiene los atributos.
+                </div>
+                <div class="ann-card wide">
+                    <h3><span class="n">5</span>Roles que ven cada bloque</h3>
+                    <b>Dirección OAIPCS y Secretaría General:</b> ambos
+                    subsectores y todas las regiones. <b>Sectorista:</b> sólo
+                    las regiones de su sesión; el selector de ámbito queda fijo
+                    en su alcance y no ofrece «Todos».
+                    <b>Alta dirección:</b> lectura completa, sin acciones de
+                    escritura. El ámbito de subsector (item 113) no se dibuja
+                    como filtro: es sesión + RLS.
+                </div>
+            </section>
+
+            <div
+                class="fixes"
+                aria-label="Correcciones aplicadas en esta pasada"
+            >
+                <span class="fix">«Regiones con al menos un caso»</span>
+                <span class="fix">Textos de apoyo fuera</span>
+                <span class="fix">«Alcance geográfico»</span>
+                <span class="fix">Selector de ámbito fijo</span>
+                <span class="fix">«Casos abiertos» ordenable</span>
+                <span class="fix"
+                    >«Ver casos» en cajón con fondo desenfocado</span
+                >
+                <span class="fix">Casos priorizados bajo el mapa</span>
+                <span class="fix">Lienzo OSM conservado (X2)</span>
+            </div>
+
+            <!-- Barra de alcance fija -->
+            <div class="scope" role="group" aria-label="Alcance geográfico">
+                <span class="scope-label">Alcance geográfico</span>
+                <div class="seg">
+                    <span aria-current="true">Todos</span>
+                    <span>Norte</span>
+                    <span>Centro</span>
+                    <span>Sur</span>
+                    <span>Oriente</span>
+                </div>
+                <span class="scope-note">
+                    Fijo al desplazar · aplica a tarjetas, mapa, tabla y «Ver
+                    casos»
+                </span>
+            </div>
+
+            <!-- Tarjetas: sin textos de apoyo -->
+            <div class="kpis">
+                <div class="kpi"><b>34</b><span>Casos abiertos</span></div>
+                <div class="kpi">
+                    <b>9</b><span>Regiones con al menos un caso</span>
+                </div>
+                <div class="kpi">
+                    <b>1</b><span>Casos con riesgo alto</span>
+                </div>
+                <div class="kpi zero">
+                    <b>0</b><span>En Crisis social</span>
+                </div>
+                <div class="kpi"><b>12</b><span>Casos sin región</span></div>
+            </div>
+
+            <div class="grid-main">
+                <!-- Lienzo + casos priorizados -->
+                <div class="card">
+                    <div class="card-head">
+                        <div>
+                            <h2 class="card-title">Mapa referencial</h2>
+                            <p class="card-sub">
+                                Círculos por región sobre el lienzo OSM; el
+                                tamaño es el número de casos abiertos.
+                            </p>
+                        </div>
+                        <span class="tag ref">OSM · referencial</span>
+                    </div>
+
+                    <div class="map">
+                        <svg
+                            viewBox="0 0 640 330"
+                            role="img"
+                            aria-label="Lienzo referencial con un círculo por región, sin geometría propia"
+                        >
+                            <defs>
+                                <linearGradient
+                                    id="sea"
+                                    x1="0"
+                                    y1="0"
+                                    x2="0"
+                                    y2="1"
+                                >
+                                    <stop offset="0" stop-color="#dfeef7" />
+                                    <stop offset="1" stop-color="#cfe6f2" />
+                                </linearGradient>
+                            </defs>
+                            <rect
+                                x="0"
+                                y="0"
+                                width="640"
+                                height="330"
+                                fill="url(#sea)"
+                            />
+                            <g
+                                stroke="#c3d6e2"
+                                stroke-width="0.6"
+                                opacity="0.7"
+                            >
+                                <line x1="0" y1="55" x2="640" y2="55" />
+                                <line x1="0" y1="110" x2="640" y2="110" />
+                                <line x1="0" y1="165" x2="640" y2="165" />
+                                <line x1="0" y1="220" x2="640" y2="220" />
+                                <line x1="0" y1="275" x2="640" y2="275" />
+                                <line x1="110" y1="0" x2="110" y2="330" />
+                                <line x1="220" y1="0" x2="220" y2="330" />
+                                <line x1="330" y1="0" x2="330" y2="330" />
+                                <line x1="440" y1="0" x2="440" y2="330" />
+                                <line x1="550" y1="0" x2="550" y2="330" />
+                            </g>
+                            <!-- silueta referencial del litoral, sin pretensión de geometría -->
+                            <path
+                                d="M150 20 C120 70 140 110 118 150 C96 190 130 220 112 260
+                                     C100 290 130 315 150 330 L0 330 L0 20 Z"
+                                fill="#d6e7d6"
+                                stroke="#b9d3b9"
+                                stroke-width="1"
+                            />
+                            <path
+                                d="M150 20 C300 40 470 60 640 70 L640 0 L150 0 Z"
+                                fill="#d6e7d6"
+                                stroke="#b9d3b9"
+                                stroke-width="1"
+                                opacity="0.6"
+                            />
+                            <!-- círculos por región (tamaño = casos abiertos) -->
+                            <g
+                                fill="#2455a2"
+                                fill-opacity="0.72"
+                                stroke="#1d427f"
+                                stroke-width="1"
+                            >
+                                <circle cx="205" cy="78" r="15" />
+                                <circle cx="235" cy="150" r="7" />
+                                <circle cx="205" cy="172" r="9" />
+                                <circle cx="262" cy="208" r="7" />
+                                <circle cx="300" cy="255" r="7" />
+                                <circle cx="360" cy="190" r="7" />
+                                <circle cx="430" cy="120" r="6" />
+                                <circle cx="470" cy="250" r="6" />
+                                <circle cx="410" cy="300" r="6" />
+                                <circle
+                                    cx="330"
+                                    cy="105"
+                                    r="5"
+                                    fill="#8b97a1"
+                                    stroke="#778797"
+                                />
+                            </g>
+                            <g
+                                fill="#fff"
+                                font-size="9"
+                                font-family="system-ui"
+                                text-anchor="middle"
+                                font-weight="600"
+                            >
+                                <text x="205" y="81">Piura 5</text>
+                                <text x="205" y="195">Lima 5</text>
+                            </g>
+                            <g
+                                fill="#33475b"
+                                font-size="8"
+                                font-family="system-ui"
+                                text-anchor="middle"
+                            >
+                                <text x="235" y="167">Callao 3</text>
+                                <text x="262" y="196">Ica 2</text>
+                                <text x="300" y="243">Arequipa 2</text>
+                                <text x="360" y="178">Loreto 2</text>
+                                <text x="430" y="108">Lambayeque 1</text>
+                                <text x="470" y="238">Moquegua 1</text>
+                                <text x="410" y="288">Tumbes 1</text>
+                                <text x="330" y="93">Sin región 12</text>
+                            </g>
+                            <!-- nube KML opcional (puntos) -->
+                            <g fill="#397c79" fill-opacity="0.55">
+                                <circle cx="180" cy="60" r="1.6" />
+                                <circle cx="196" cy="66" r="1.4" />
+                                <circle cx="212" cy="58" r="1.4" />
+                                <circle cx="224" cy="72" r="1.3" />
+                                <circle cx="188" cy="88" r="1.5" />
+                                <circle cx="240" cy="90" r="1.3" />
+                                <circle cx="252" cy="132" r="1.4" />
+                                <circle cx="220" cy="140" r="1.3" />
+                                <circle cx="210" cy="158" r="1.5" />
+                                <circle cx="270" cy="150" r="1.4" />
+                                <circle cx="286" cy="168" r="1.3" />
+                                <circle cx="300" cy="180" r="1.4" />
+                                <circle cx="320" cy="150" r="1.2" />
+                                <circle cx="340" cy="170" r="1.3" />
+                                <circle cx="356" cy="140" r="1.2" />
+                                <circle cx="376" cy="158" r="1.4" />
+                                <circle cx="400" cy="130" r="1.2" />
+                                <circle cx="420" cy="150" r="1.3" />
+                                <circle cx="444" cy="140" r="1.2" />
+                                <circle cx="290" cy="220" r="1.4" />
+                                <circle cx="312" cy="236" r="1.3" />
+                                <circle cx="336" cy="250" r="1.2" />
+                                <circle cx="360" cy="262" r="1.4" />
+                                <circle cx="388" cy="272" r="1.2" />
+                                <circle cx="420" cy="262" r="1.3" />
+                                <circle cx="446" cy="278" r="1.2" />
+                                <circle cx="180" cy="196" r="1.4" />
+                                <circle cx="196" cy="214" r="1.2" />
+                                <circle cx="252" cy="184" r="1.2" />
+                                <circle cx="238" cy="226" r="1.3" />
+                            </g>
+                        </svg>
+                        <div class="map-tools">
+                            <span class="map-tool">Nube KML</span>
+                            <span class="map-tool off">RADAR (sin dato)</span>
+                        </div>
+                        <span class="map-label"
+                            >Mapa referencial · sin ubigeo distrital</span
+                        >
+                    </div>
+
+                    <div class="legend">
+                        <span
+                            ><i class="big"></i>Casos abiertos por región</span
+                        >
+                        <span><i class="dot"></i>Activos PRODUCE · KML</span>
+                        <span
+                            ><i style="background: #8b97a1"></i>Sin región</span
+                        >
+                        <span
+                            >Nube KML: <b>13 456</b> puntos · <b>227</b> con
+                            <code>IDENTI</code></span
+                        >
+                    </div>
+
+                    <hr
+                        style="
+                            width: 100%;
+                            border: 0;
+                            border-top: 1px solid #eef1f4;
+                        "
+                    />
+
+                    <div class="card-head">
+                        <div>
+                            <h2 class="card-title">Casos priorizados</h2>
+                            <p class="card-sub">
+                                Orden: gravedad (riesgo Alto → Bajo, luego
+                                prioridad Urgente → Bajo) y, a igualdad,
+                                antigüedad de
+                                <code>fecha_inicio</code>.
+                            </p>
+                        </div>
+                        <span class="tag">item 118</span>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Caso</th>
+                                <th>Región</th>
+                                <th>Conflictividad</th>
+                                <th>Riesgo</th>
+                                <th>Prioridad</th>
+                                <th>Inicio</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <span
+                                        style="
+                                            font-family:
+                                                ui-monospace, Menlo, monospace;
+                                            font-size: 8.5px;
+                                            color: #4c7099;
+                                        "
+                                        >CS-MI-INF-2025-01</span
+                                    ><br />Ocupación informal del Parque
+                                    Industrial de Ancón
+                                </td>
+                                <td>Lima</td>
+                                <td class="conf">Controversia</td>
+                                <td><span class="risk alto">Alto</span></td>
+                                <td>Moderado</td>
+                                <td>1 jul 2025</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <span
+                                        style="
+                                            font-family:
+                                                ui-monospace, Menlo, monospace;
+                                            font-size: 8.5px;
+                                            color: #4c7099;
+                                        "
+                                        >CS-PA-INF-2012-01</span
+                                    ><br />Reubicación de embarcaciones del
+                                    Muelle 5E · Callao
+                                </td>
+                                <td>Callao</td>
+                                <td class="conf">Conflicto social</td>
+                                <td><span class="risk bajo">Bajo</span></td>
+                                <td>Urgente</td>
+                                <td>1 ago 2012</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <span
+                                        style="
+                                            font-family:
+                                                ui-monospace, Menlo, monospace;
+                                            font-size: 8.5px;
+                                            color: #4c7099;
+                                        "
+                                        >CS-PA-OAT-2024-02</span
+                                    ><br />Uso de red de cortina de fondo en
+                                    Cabo Blanco y Los Órganos
+                                </td>
+                                <td>Piura</td>
+                                <td class="conf">Conflicto social</td>
+                                <td><span class="risk bajo">Bajo</span></td>
+                                <td>Urgente</td>
+                                <td>15 oct 2024</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <span
+                                        style="
+                                            font-family:
+                                                ui-monospace, Menlo, monospace;
+                                            font-size: 8.5px;
+                                            color: #4c7099;
+                                        "
+                                        >CS-PA-INF-2022-01</span
+                                    ><br />Ocupación informal del predio del PIP
+                                    de desembarcadero
+                                </td>
+                                <td>Piura</td>
+                                <td class="conf">Controversia</td>
+                                <td><span class="risk mod">Moderado</span></td>
+                                <td>Moderado</td>
+                                <td>1 ene 2022</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <span
+                                        style="
+                                            font-family:
+                                                ui-monospace, Menlo, monospace;
+                                            font-size: 8.5px;
+                                            color: #4c7099;
+                                        "
+                                        >CS-PA-DBE-2025-01</span
+                                    ><br />Habilitación de áreas acuáticas y
+                                    maricultura en Sechura
+                                </td>
+                                <td>Piura</td>
+                                <td class="conf">Controversia</td>
+                                <td><span class="risk mod">Moderado</span></td>
+                                <td>Moderado</td>
+                                <td>1 ene 2025</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Tabla por región -->
+                <div style="display: flex; flex-direction: column; gap: 14px">
+                    <div class="card">
+                        <div class="card-head">
+                            <div>
+                                <h2 class="card-title">
+                                    Casos abiertos por región
+                                </h2>
+                                <p class="card-sub">
+                                    Regiones con al menos un caso · orden
+                                    descendente aplicado.
+                                </p>
+                            </div>
+                        </div>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Región</th>
+                                    <th>Ámbito</th>
+                                    <th class="num sortable">
+                                        Casos abiertos
+                                        <span class="arrow">▼</span>
+                                    </th>
+                                    <th class="num">Riesgo alto</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="strong">Lima</td>
+                                    <td>Centro</td>
+                                    <td class="num strong">5</td>
+                                    <td class="num">1</td>
+                                    <td>
+                                        <button class="link" type="button">
+                                            Ver casos
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="strong">Piura</td>
+                                    <td>Norte</td>
+                                    <td class="num strong">5</td>
+                                    <td class="num">0</td>
+                                    <td>
+                                        <button class="link" type="button">
+                                            Ver casos
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="strong">Callao</td>
+                                    <td>Centro</td>
+                                    <td class="num strong">3</td>
+                                    <td class="num">0</td>
+                                    <td>
+                                        <button class="link" type="button">
+                                            Ver casos
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="strong">Ica</td>
+                                    <td>Centro</td>
+                                    <td class="num strong">2</td>
+                                    <td class="num">0</td>
+                                    <td>
+                                        <button class="link" type="button">
+                                            Ver casos
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="strong">Arequipa</td>
+                                    <td>Sur</td>
+                                    <td class="num strong">2</td>
+                                    <td class="num">0</td>
+                                    <td>
+                                        <button class="link" type="button">
+                                            Ver casos
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="strong">Loreto</td>
+                                    <td>Oriente</td>
+                                    <td class="num strong">2</td>
+                                    <td class="num">0</td>
+                                    <td>
+                                        <button class="link" type="button">
+                                            Ver casos
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="strong">Lambayeque</td>
+                                    <td>Norte</td>
+                                    <td class="num strong">1</td>
+                                    <td class="num">0</td>
+                                    <td>
+                                        <button class="link" type="button">
+                                            Ver casos
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="strong">Moquegua</td>
+                                    <td>Sur</td>
+                                    <td class="num strong">1</td>
+                                    <td class="num">0</td>
+                                    <td>
+                                        <button class="link" type="button">
+                                            Ver casos
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="strong">Tumbes</td>
+                                    <td>Norte</td>
+                                    <td class="num strong">1</td>
+                                    <td class="num">0</td>
+                                    <td>
+                                        <button class="link" type="button">
+                                            Ver casos
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr style="background: #fbfcfd">
+                                    <td class="strong">Sin región</td>
+                                    <td>—</td>
+                                    <td class="num strong">12</td>
+                                    <td class="num">0</td>
+                                    <td>
+                                        <button class="link" type="button">
+                                            Ver casos
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-head">
+                            <div>
+                                <h2 class="card-title">
+                                    Casos abiertos por ámbito
+                                </h2>
+                                <p class="card-sub">
+                                    Alcance calculado desde las regiones del
+                                    caso (item 6).
+                                </p>
+                            </div>
+                        </div>
+                        <table class="data-table">
+                            <tr>
+                                <td class="strong">Norte</td>
+                                <td class="num">7</td>
+                            </tr>
+                            <tr>
+                                <td class="strong">Centro</td>
+                                <td class="num">10</td>
+                            </tr>
+                            <tr>
+                                <td class="strong">Sur</td>
+                                <td class="num">3</td>
+                            </tr>
+                            <tr>
+                                <td class="strong">Oriente</td>
+                                <td class="num">2</td>
+                            </tr>
+                            <tr>
+                                <td class="strong">Sin ámbito (sin región)</td>
+                                <td class="num">12</td>
+                            </tr>
+                            <tr style="background: #fbfcfd">
+                                <td class="strong">Total</td>
+                                <td class="num strong">34</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cajón «Ver casos» dibujado en estado abierto -->
+            <div class="card">
+                <div class="card-head">
+                    <div>
+                        <h2 class="card-title">
+                            «Ver casos» · cajón lateral (item 109)
+                        </h2>
+                        <p class="card-sub">
+                            Abre de izquierda a derecha con medio ancho y fondo
+                            desenfocado; hereda el territorio de la fila y el
+                            ámbito vigente. Ejemplo: fila <b>Piura</b>.
+                        </p>
+                    </div>
+                    <span class="tag">estado abierto</span>
+                </div>
+                <div class="drawer-stage">
+                    <div
+                        class="drawer"
+                        role="dialog"
+                        aria-label="Casos de Piura"
+                    >
+                        <div class="drawer-head">
+                            <div>
+                                <h4>Piura · 5 casos abiertos</h4>
+                                <p>Ámbito Norte · sólo lectura</p>
+                            </div>
+                            <span class="tag">Cerrar</span>
+                        </div>
+                        <div class="drawer-body">
+                            <div class="drawer-row">
+                                <div>
+                                    <span class="c">CS-PA-OAT-2024-02</span>
+                                    <div class="t">
+                                        Red de cortina de fondo en Cabo Blanco y
+                                        Los Órganos
+                                    </div>
+                                </div>
+                                <span class="risk bajo">Bajo</span>
+                            </div>
+                            <div class="drawer-row">
+                                <div>
+                                    <span class="c">CS-PA-INF-2022-01</span>
+                                    <div class="t">
+                                        Ocupación informal del predio del PIP
+                                    </div>
+                                </div>
+                                <span class="risk mod">Moderado</span>
+                            </div>
+                            <div class="drawer-row">
+                                <div>
+                                    <span class="c">CS-PA-DBE-2025-01</span>
+                                    <div class="t">
+                                        Áreas acuáticas y maricultura en Sechura
+                                    </div>
+                                </div>
+                                <span class="risk mod">Moderado</span>
+                            </div>
+                            <div class="drawer-row">
+                                <div>
+                                    <span class="c">CS-PA-INF-2024-01</span>
+                                    <div class="t">Rehabilitación del DPA</div>
+                                </div>
+                                <span class="risk bajo">Bajo</span>
+                            </div>
+                            <div class="drawer-row">
+                                <div>
+                                    <span class="c">CS-PA-OAT-2024-01</span>
+                                    <div class="t">
+                                        Rechazo al proyecto de exploración de
+                                        hidrocarburos
+                                    </div>
+                                </div>
+                                <span class="risk mod">Moderado</span>
+                            </div>
+                        </div>
+                        <div class="drawer-foot">
+                            Enlace equivalente:
+                            <code
+                                >GET
+                                /v1/cases?region=Piura&amp;abiertos=true</code
+                            >
+                            con el ámbito vigente. Sin región usa
+                            <code>sinregion=true</code>.
+                        </div>
+                    </div>
+                </div>
+                <p class="foot">
+                    Cifras del corte del 22.11.2026 sobre los 34 casos abiertos
+                    usados en el catálogo. En producción cada tarjeta y cada
+                    fila se leen de <code>GET /v1/cases?conteos=true</code> por
+                    región; el mockup no estima ninguna. El lienzo reproduce la
+                    decisión de producto: se conserva y se sustituye por la capa
+                    distrital cuando exista el ubigeo.
+                </p>
+            </div>
+        </main>
+    </body>
+</html>

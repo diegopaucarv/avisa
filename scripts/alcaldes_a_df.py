@@ -1462,9 +1462,12 @@ def _distrito_contenido(a, b) -> bool:
 
 
 def leer_ubigeo(ruta, departamento: str | None = None) -> pd.DataFrame:
-    """Lee el CSV de ubigeo (RENIEC): un departamento o el país entero si es None.
+    """Lee el CSV de ubigeo: un departamento o el país entero si es None.
 
-    Sin departamento se devuelve el ubigeo completo, que es la línea base de nombres
+    Acepta el directorio geográfico de RENIEC y la tabla de equivalencias
+    OTI/CONCYTEC (`gis/equivalencia-ubigeos-oti-concytec.csv`), de la que se usan
+    las columnas `*_inei`, que son las que rigen el resto del sistema. Sin
+    departamento se devuelve el ubigeo completo, que es la línea base de nombres
     oficiales para cualquier salida.
     """
     ruta = Path(ruta) if ruta else RUTA_UBIGEO_POR_DEFECTO
@@ -1498,12 +1501,17 @@ def leer_ubigeo(ruta, departamento: str | None = None) -> pd.DataFrame:
 
     tabla = pd.DataFrame(
         {
-            "ubigeo": crudo[columna("ubigeo")].map(limpiar),
-            "distrito": crudo[columna("distrito")].map(limpiar),
-            "provincia": crudo[columna("provincia")].map(limpiar),
-            "departamento": crudo[columna("departamento", "region")].map(limpiar),
+            "ubigeo": crudo[columna("ubigeo", "cod_ubigeo_inei")].map(limpiar),
+            "distrito": crudo[columna("distrito", "desc_ubigeo_inei")].map(limpiar),
+            "provincia": crudo[columna("provincia", "desc_prov_inei")].map(limpiar),
+            "departamento": crudo[
+                columna("departamento", "region", "desc_dep_inei")
+            ].map(limpiar),
         }
     )
+    # La tabla de equivalencias trae filas de relleno sin código INEI ('NA'): no
+    # son distritos y, si se cuelan, se comen el nombre de un distrito real.
+    tabla = tabla[tabla["ubigeo"].str.fullmatch(r"\d{6}", na=False)]
     if departamento:
         tabla = tabla[tabla["departamento"].map(clave) == clave(departamento)]
         if tabla.empty:

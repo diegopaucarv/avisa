@@ -15,7 +15,10 @@
       </span>
       <span class="brand-name">AVISA</span>
       <span class="brand-divider"></span>
-      <small>Producción · OAIPCS</small>
+      <small class="brand-org" title="Aplicativo de apoyo a la gestión de conflictos sociales">
+        <span class="brand-org-largo">Aplicativo de apoyo a la gestión de conflictos sociales</span>
+        <span class="brand-org-corta">Gestión de conflictos sociales</span>
+      </small>
     </div>
 
     <div class="header-right">
@@ -144,6 +147,7 @@
               class="side-nav"
               [routerLink]="enlace.ruta"
               routerLinkActive="selected"
+              [routerLinkActiveOptions]="{ exact: true }"
               (click)="menuAbierto.set(false)"
             >
               <app-icono [nombre]="enlace.icono" [tamano]="17" />

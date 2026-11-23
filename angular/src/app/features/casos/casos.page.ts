@@ -17,13 +17,22 @@ import {
 import { consulta } from '../../core/http/consulta';
 import { aErrorApi } from '../../core/http/errores';
 import { CapacidadesService } from '../../core/permisos/capacidades.service';
-import { ALCANCES, aCaso, esRegistro, formatearFechaCaso, leer, texto } from '../../dominio/mapeo';
+import {
+  ALCANCES,
+  aCaso,
+  esRegistro,
+  formatearFechaCaso,
+  formatearFechaCorta,
+  leer,
+  texto,
+} from '../../dominio/mapeo';
 import type { Caso } from '../../dominio/modelos';
 import { formatearFechaHora } from '../../shared/formato-fecha';
 import { ExportarMenuComponent } from '../../shared/ui/exportar-menu.component';
 import { IconoComponent } from '../../shared/ui/icono.component';
 import { PaginacionComponent } from '../../shared/ui/paginacion.component';
 import { CasoPanelComponent, type CuerpoCasoAlta } from './caso-panel.component';
+import { CasoVistaPreviaComponent } from './caso-vista-previa.component';
 
 /**
  * Código del caso recién creado. `POST /api/v1/cases` devuelve el `CaseDetail`
@@ -44,6 +53,8 @@ type FiltrosCasos = {
   estado: string;
   /** `abiertos=true`: estados del catálogo con `es_activo` (hoy sólo `Abierto`). */
   abiertos: boolean;
+  /** Código de `core.cat_niveles_conflicto`; la API lo valida contra el catálogo. */
+  nivel: string;
   prioridad: string;
   alcance: string;
   /** Nombre canónico de `core.regiones`; la API lo normaliza y lo valida. */
@@ -66,6 +77,7 @@ const FILTROS_INICIALES: FiltrosCasos = {
   q: '',
   estado: '',
   abiertos: false,
+  nivel: '',
   prioridad: '',
   alcance: '',
   region: '',
@@ -115,6 +127,7 @@ type OpcionFiltro = {
 };
 
 type CatalogosCasos = {
+  conflictividades: OpcionFiltro[];
   prioridades: OpcionFiltro[];
   alcances: OpcionFiltro[];
   regiones: OpcionFiltro[];
@@ -151,6 +164,7 @@ function aCatalogosCasos(bruto: unknown): CatalogosCasos {
   const catalogo = esRegistro(crudo) ? crudo : {};
 
   return {
+    conflictividades: opcionesDe(catalogo, 'nivelesConflicto'),
     prioridades: opcionesDe(catalogo, 'prioridadesAtencion'),
     alcances: opcionesDe(catalogo, 'alcances'),
     regiones: opcionesDe(catalogo, 'regiones'),
@@ -207,6 +221,7 @@ function aConteos(bruto: unknown): ConteosCasos {
     PaginacionComponent,
     ExportarMenuComponent,
     CasoPanelComponent,
+    CasoVistaPreviaComponent,
   ],
   templateUrl: './casos.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -216,30 +231,8 @@ function aConteos(bruto: unknown): ConteosCasos {
       font-size: 11.5px;
     }
 
-    .status-chips {
-      flex-wrap: wrap;
-    }
-
-    .status-chips button {
-      white-space: nowrap;
-    }
-
-    .chip-count {
-      margin-left: 4px;
-      padding: 0 5px;
-      border-radius: 999px;
-      background: rgba(100, 116, 135, 0.14);
-      font-size: 10px;
-      font-variant-numeric: tabular-nums;
-    }
-
-    .segmented > button[aria-pressed='true'] .chip-count {
-      background: rgba(29, 75, 134, 0.14);
-    }
-
-    /* Un chip sin resultados sigue siendo clicable; sólo se atenúa. */
-    .chip-vacia {
-      opacity: 0.55;
+    .vista-previa-aviso {
+      margin: 0 0 10px;
     }
   `,
 })
@@ -251,6 +244,16 @@ export class CasosPage {
 
   readonly ordenes = ORDENES;
   readonly modo = signal<ModoVista>('tarjetas');
+
+  /**
+   * Filtros secundarios (prioridad, región, temática, unidad, orden). Se
+   * despliegan con «Búsqueda avanzada» para que la barra de entrada quede en tres
+   * controles: búsqueda, estado y conflictividad (item 100).
+   */
+  readonly avanzado = signal(false);
+
+  /** Caso abierto en la ventana de vista previa (item 101); `null` = cerrada. */
+  readonly casoPrevio = signal<Caso | null>(null);
 
   /** Último fallo del botón de exportación; vacío si no hubo. */
   readonly exportarError = signal<string | null>(null);
@@ -272,6 +275,7 @@ export class CasosPage {
           q: params.get('q') ?? '',
           estado: params.get('estado') ?? '',
           abiertos: params.get('abiertos') === 'true',
+          nivel: params.get('nivel') ?? '',
           prioridad: params.get('prioridad') ?? '',
           // Sin `alcance` rige Preferencias; `todos` es la limpieza explícita.
           alcance: alcance === null ? alcancePreferido() : alcance === 'todos' ? '' : alcance,
@@ -295,6 +299,33 @@ export class CasosPage {
   readonly filtros = computed(() => this.parametros());
 
   /**
+   * Valor del desplegable de estado. Codifica en un solo control lo que antes
+   * eran cuatro chips: `todos`, `abiertos` (por `es_activo`) o el código
+   * canónico del estado.
+   */
+  readonly estadoSeleccionado = computed(() => {
+    const filtros = this.filtros();
+    if (filtros.abiertos) return 'abiertos';
+    return filtros.estado || 'todos';
+  });
+
+  /**
+   * ¿Hay algún filtro secundario puesto? El ámbito no cuenta: llega de
+   * Preferencias y estaría siempre activo.
+   */
+  readonly filtrosAvanzadosActivos = computed(() => {
+    const filtros = this.filtros();
+    return Boolean(
+      filtros.prioridad ||
+      filtros.region ||
+      filtros.sinRegion ||
+      filtros.tematica ||
+      filtros.unidad ||
+      filtros.orden !== 'recent',
+    );
+  });
+
+  /**
    * Filtros, búsqueda y orden vigentes, con los nombres que acepta
    * `GET /api/v1/cases`. Es lo que la exportación reenvía para no volcar el
    * conjunto completo cuando la pantalla muestra un subconjunto.
@@ -305,6 +336,7 @@ export class CasosPage {
       q: filtros.q,
       estado: filtros.estado,
       abiertos: filtros.abiertos ? 'true' : '',
+      nivel: filtros.nivel,
       prioridad: filtros.prioridad,
       alcance: filtros.alcance,
       region: filtros.region,
@@ -335,6 +367,7 @@ export class CasosPage {
   });
 
   readonly prioridades = computed(() => this.catalogoRecurso.valor()?.prioridades ?? []);
+  readonly conflictividades = computed(() => this.catalogoRecurso.valor()?.conflictividades ?? []);
   readonly alcances = computed(() => this.catalogoRecurso.valor()?.alcances ?? []);
   readonly regiones = computed(() => this.catalogoRecurso.valor()?.regiones ?? []);
   readonly tematicas = computed(() => this.catalogoRecurso.valor()?.tematicas ?? []);
@@ -348,6 +381,7 @@ export class CasosPage {
         q: filtros.q,
         estado: filtros.estado,
         abiertos: filtros.abiertos ? 'true' : '',
+        nivel: filtros.nivel,
         prioridad: filtros.prioridad,
         alcance: filtros.alcance,
         region: filtros.region,
@@ -384,6 +418,12 @@ export class CasosPage {
     this.modo.set(modo);
   }
 
+  /** El formato de la lista es un desplegable a la izquierda (item 100). */
+  cambiarModoDesde(evento: Event): void {
+    const valor = (evento.target as HTMLSelectElement).value;
+    this.modo.set(valor === 'tabla' ? 'tabla' : 'tarjetas');
+  }
+
   /** Cambia entre vigentes y papelera; al entrar en la papelera fuerza tabla. */
   cambiarVer(valor: VerRegistros): void {
     if (valor === 'anulados') this.modo.set('tabla');
@@ -400,11 +440,46 @@ export class CasosPage {
   }
 
   /**
-   * Chip operativo de estado. `Abiertos` viaja como `abiertos=true`; `Resueltos`
-   * y `Archivados` como `estado=<código canónico>`; `Todos` limpia ambos.
+   * Estado desde el desplegable único (item 100). `abiertos` viaja como
+   * `abiertos=true` porque el estado abierto se define por `es_activo`, no por
+   * una etiqueta.
    */
-  cambiarChip(estado: string, abiertos = false): void {
-    void this.actualizar({ estado, abiertos, pagina: 1 });
+  cambiarEstado(evento: Event): void {
+    const valor = (evento.target as HTMLSelectElement).value;
+    if (valor === 'abiertos') {
+      void this.actualizar({ estado: '', abiertos: true, pagina: 1 });
+      return;
+    }
+    void this.actualizar({ estado: valor === 'todos' ? '' : valor, abiertos: false, pagina: 1 });
+  }
+
+  /**
+   * Nivel de conflictividad (item 100). Viaja como `nivel=<codigo>` y lo valida
+   * el repositorio contra `core.cat_niveles_conflicto`: no se filtra en cliente,
+   * así los conteos y la paginación siguen siendo ciertos.
+   */
+  cambiarNivel(evento: Event): void {
+    const valor = (evento.target as HTMLSelectElement).value;
+    void this.actualizar({ nivel: valor, pagina: 1 });
+  }
+
+  alternarAvanzado(): void {
+    this.avanzado.update((abierto) => !abierto);
+  }
+
+  /** Abre la ventana de vista previa en lugar de saltar a la ficha (item 101). */
+  abrirVistaPrevia(caso: Caso, evento?: Event): void {
+    evento?.preventDefault();
+    this.casoPrevio.set(caso);
+  }
+
+  cerrarVistaPrevia(): void {
+    this.casoPrevio.set(null);
+  }
+
+  /** Fecha abreviada «18 nov 2026», sin el punto que añade `es-PE`. */
+  fechaCorta(valor: string | null | undefined): string {
+    return formatearFechaCorta(valor);
   }
 
   cambiarPrioridad(evento: Event): void {
@@ -566,6 +641,7 @@ export class CasosPage {
         q: siguiente.q || null,
         estado: siguiente.estado || null,
         abiertos: siguiente.abiertos ? 'true' : null,
+        nivel: siguiente.nivel || null,
         prioridad: siguiente.prioridad || null,
         alcance,
         region: siguiente.region || null,

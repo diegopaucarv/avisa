@@ -22,6 +22,7 @@ import {
 } from '../../core/http/coleccion';
 import { consulta } from '../../core/http/consulta';
 import { aErrorApi } from '../../core/http/errores';
+import { formatearFechaCorta } from '../../dominio/mapeo';
 import { CapacidadesService } from '../../core/permisos/capacidades.service';
 import {
   AnularPanelComponent,
@@ -39,8 +40,8 @@ import {
   aAlerta,
   aDetalleAlerta,
   aPrioridadesAlerta,
-  claseEstado as claseEstadoDe,
   clavePrioridad as clavePrioridadDe,
+  etiquetaPrioridadConPlazo,
   formatearPlazo as formatearPlazoDe,
   type Alerta,
   type AltaAlerta,
@@ -54,6 +55,8 @@ type FiltrosAlertas = {
   prioridad: string;
   nivel: string;
   estado: string;
+  /** `true` sólo sin caso asignado; `false`, sólo con caso. */
+  sinCaso: string;
   orden: string;
   pagina: number;
   tamano: number;
@@ -66,11 +69,17 @@ const FILTROS_INICIALES: FiltrosAlertas = {
   prioridad: '',
   nivel: '',
   estado: '',
+  sinCaso: '',
   orden: 'recent',
   pagina: 1,
   tamano: TAMANO_PAGINA,
   caso: '',
 };
+
+/** `total` del sobre paginado sin construir las filas (consultas de indicadores). */
+function totalDe(bruto: unknown): number {
+  return normalizarColeccion<unknown>(bruto).total;
+}
 
 /**
  * Alertas tempranas (RED-RADAR PRODUCE).
@@ -236,6 +245,53 @@ const FILTROS_INICIALES: FiltrosAlertas = {
       font-size: 9.5px;
     }
 
+    .tabla-nota {
+      margin: 0 0 8px;
+      color: #8d99a6;
+      font-size: 9.5px;
+    }
+
+    .col-codigo {
+      width: 100px;
+    }
+    .col-caso {
+      width: 170px;
+    }
+    .col-prioridad {
+      width: 160px;
+    }
+    .col-riesgo {
+      width: 96px;
+    }
+    .col-fecha {
+      width: 120px;
+    }
+    .col-estado {
+      width: 120px;
+    }
+    .col-acciones {
+      width: 92px;
+    }
+
+    /* Sólo «Atendida» en verde; el resto en ámbar o azul (item 106). */
+    .estado-alerta--atendida {
+      background: #edf6f0;
+      color: #2f6f52;
+    }
+
+    .estado-alerta--aprobada,
+    .estado-alerta--validada,
+    .estado-alerta--revision,
+    .estado-alerta--pendiente {
+      background: #fff4e6;
+      color: #9d702e;
+    }
+
+    .estado-alerta--revision {
+      background: #eef3fa;
+      color: #4a6b93;
+    }
+
     @media (max-width: 720px) {
       .view-body {
         padding: 18px 16px 40px;
@@ -262,6 +318,7 @@ export class AlertasPage {
         prioridad: params.get('prioridad') ?? '',
         nivel: params.get('nivel') ?? '',
         estado: params.get('estado') ?? '',
+        sinCaso: params.get('sinCaso') ?? '',
         orden: params.get('orden') ?? 'recent',
         pagina: Math.max(1, Number(params.get('pagina') ?? '1') || 1),
         tamano: Math.max(1, Number(params.get('tamano') ?? String(TAMANO_PAGINA)) || TAMANO_PAGINA),
@@ -284,6 +341,7 @@ export class AlertasPage {
       prioridad: filtros.prioridad,
       nivel: filtros.nivel,
       estado: filtros.estado,
+      sinCaso: filtros.sinCaso,
       sort: filtros.orden,
       caso: filtros.caso,
     });
@@ -298,6 +356,7 @@ export class AlertasPage {
         prioridad: filtros.prioridad,
         nivel: filtros.nivel,
         estado: filtros.estado,
+        sinCaso: filtros.sinCaso,
         sort: filtros.orden,
         caso: filtros.caso,
       });
@@ -312,6 +371,39 @@ export class AlertasPage {
   readonly total = computed(() => this.listado.valor()?.total ?? 0);
   readonly estadoListado = this.listado.estado;
   readonly errorListado = this.listado.error;
+
+  /**
+   * Indicadores de la pantalla (item 112). Son totales del servidor, no de la
+   * página visible: cada tarjeta cuenta el mismo recorte de filtros con un
+   * `estado` o `sinCaso` adicional, y se lee `total` con `pageSize=1`.
+   */
+  private contar(extra: Record<string, string>) {
+    return consulta<number>({
+      fuente: () => {
+        const filtros = this.parametros();
+        return urlConParametros(urlApi('/v1/alerts'), {
+          ...paramsDePagina({ pagina: 1, tamano: 1 }),
+          q: filtros.q,
+          prioridad: filtros.prioridad,
+          nivel: filtros.nivel,
+          estado: filtros.estado,
+          sort: filtros.orden,
+          caso: filtros.caso,
+          sinCaso: filtros.sinCaso,
+          ...extra,
+        });
+      },
+      esquema: totalDe,
+    });
+  }
+
+  private readonly atendidasRec = this.contar({ estado: 'Atendida' });
+  private readonly pendientesRec = this.contar({ estado: 'Pendiente de revisión' });
+  private readonly sinCasoRec = this.contar({ sinCaso: 'true' });
+
+  readonly atendidas = computed(() => this.atendidasRec.valor() ?? null);
+  readonly pendientes = computed(() => this.pendientesRec.valor() ?? null);
+  readonly sinCasoTotales = computed(() => this.sinCasoRec.valor() ?? null);
 
   /** Alerta abierta en el panel; `null` cierra el panel. */
   readonly alertaAbierta = signal<Alerta | null>(null);
@@ -411,8 +503,33 @@ export class AlertasPage {
     return formatearPlazoDe(horas);
   }
 
+  /** Prioridad con su plazo entre paréntesis (item 106). */
+  etiquetaPrioridad(prioridad: Alerta['prioridad']): string {
+    return etiquetaPrioridadConPlazo(prioridad);
+  }
+
+  /** Fecha de reporte en «18 nov 2026», sin el punto que añade `es-PE`. */
+  fechaReporte(valor: string | null): string {
+    return formatearFechaCorta(valor);
+  }
+
+  /**
+   * Clases de estado propias de la tabla: «Atendida» en verde y ningún otro
+   * estado en verde (item 106).
+   */
   claseEstado(estado: string): string {
-    return claseEstadoDe(estado);
+    switch (estado) {
+      case 'Atendida':
+        return 'estado-alerta--atendida';
+      case 'Aprobada':
+        return 'estado-alerta--aprobada';
+      case 'Validada':
+        return 'estado-alerta--validada';
+      case 'En revisión':
+        return 'estado-alerta--revision';
+      default:
+        return 'estado-alerta--pendiente';
+    }
   }
 
   clavePrioridad(prioridad: Alerta['prioridad']): string {
@@ -592,6 +709,11 @@ export class AlertasPage {
     void this.actualizar({ nivel: valor, pagina: 1 });
   }
 
+  cambiarSinCaso(evento: Event): void {
+    const valor = (evento.target as HTMLSelectElement).value;
+    void this.actualizar({ sinCaso: valor, pagina: 1 });
+  }
+
   cambiarEstado(evento: Event): void {
     const valor = (evento.target as HTMLSelectElement).value;
     void this.actualizar({ estado: valor, pagina: 1 });
@@ -659,6 +781,7 @@ export class AlertasPage {
         prioridad: siguiente.prioridad || null,
         nivel: siguiente.nivel || null,
         estado: siguiente.estado || null,
+        sinCaso: siguiente.sinCaso || null,
         orden: siguiente.orden !== 'recent' ? siguiente.orden : null,
         pagina: siguiente.pagina > 1 ? siguiente.pagina : null,
         tamano: siguiente.tamano !== TAMANO_PAGINA ? siguiente.tamano : null,

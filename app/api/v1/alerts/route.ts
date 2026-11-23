@@ -17,13 +17,21 @@ import { puedeAnularRegistros, withSession } from "@/lib/db/tenant";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const FILTERS = ["q", "caso", "prioridad", "nivel", "estado", "sort"] as const;
+const FILTERS = [
+  "q",
+  "caso",
+  "sinCaso",
+  "prioridad",
+  "nivel",
+  "estado",
+  "sort",
+] as const;
 
 /**
  * Alertas tempranas.
  *
  * `GET` devuelve el sobre paginado y acepta los filtros `q`, `caso`,
- * `prioridad`, `nivel`, `estado` y `sort`.
+ * `sinCaso`, `prioridad`, `nivel`, `estado` y `sort`.
  *
  * `anulados=true` lista la **papelera** (alertas anuladas). Sólo se sirve a un
  * rol con capacidad de anulación; si no la tiene, responde 403. La consulta se

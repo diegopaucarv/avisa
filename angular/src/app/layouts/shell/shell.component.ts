@@ -53,6 +53,41 @@ type EnlaceNav = { etiqueta: string; ruta: string; icono: string };
       outline: 3px solid #7aa2e8;
       outline-offset: 2px;
     }
+
+    /*
+     * El nombre institucional es mucho más largo que «Producción · OAIPCS».
+     * La marca no debe empujar ni envolver la barra: se recorta con puntos
+     * suspensivos y, en anchos cortos, se usa la forma abreviada. Por debajo de
+     * 760 px la regla global ya oculta este elemento small.
+     */
+    .header-brand {
+      min-width: 0;
+    }
+
+    .brand-org {
+      min-width: 0;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .brand-org-corta {
+      display: none;
+    }
+
+    .header-right {
+      flex: none;
+    }
+
+    @media (max-width: 1120px) {
+      .brand-org-largo {
+        display: none;
+      }
+
+      .brand-org-corta {
+        display: inline;
+      }
+    }
   `,
 })
 export class ShellComponent {
@@ -124,10 +159,11 @@ export class ShellComponent {
   ];
 
   readonly enlacesDirectorio: EnlaceNav[] = [
+    { etiqueta: 'Portada', ruta: '/directorio', icono: 'cuadricula' },
     { etiqueta: 'Actores', ruta: '/directorio/actores', icono: 'actores' },
     { etiqueta: 'Organizaciones', ruta: '/directorio/organizaciones', icono: 'organizaciones' },
     { etiqueta: 'Instituciones', ruta: '/directorio/instituciones', icono: 'instituciones' },
-    { etiqueta: 'Locales', ruta: '/directorio/locales', icono: 'mapa' },
+    { etiqueta: 'Auditorios', ruta: '/directorio/locales', icono: 'mapa' },
   ];
 
   readonly iniciales = computed(() => {

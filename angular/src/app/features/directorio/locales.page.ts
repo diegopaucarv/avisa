@@ -230,6 +230,22 @@ const FILTROS_INICIALES: FiltrosLocales = {
       line-height: 1.5;
     }
 
+    .celda-contacto {
+      white-space: normal;
+    }
+
+    .celda-contacto small {
+      display: block;
+      margin-top: 2px;
+      color: #96a1aa;
+      font-size: 9px;
+    }
+
+    .sin-dato {
+      color: #a0aab3;
+      font-style: italic;
+    }
+
     @media (max-width: 720px) {
       .view-body {
         padding: 18px 16px 40px;
