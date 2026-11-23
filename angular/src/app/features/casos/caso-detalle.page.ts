@@ -58,6 +58,23 @@ import { EnlaceRiel, RielRelacionesComponent } from './riel-relaciones.component
       font-size: 10px;
     }
 
+    /* «Sin declarar» es un hueco, no un valor: se distingue del chip lleno. */
+    .naturaleza-chip {
+      display: inline-block;
+      padding: 1px 8px;
+      border: 1px solid #dbe3ea;
+      border-radius: 10px;
+      color: #47566a;
+      font-size: 10px;
+      font-weight: 600;
+    }
+
+    .naturaleza-chip.sin-declarar {
+      border-style: dashed;
+      color: #8a98a5;
+      font-weight: 500;
+    }
+
     /* Los botones de un hecho comparten fila y se ocultan al imprimir con
        la regla timeline-edit, que ya está fuera de la hoja de impresión. */
     .timeline-acciones {

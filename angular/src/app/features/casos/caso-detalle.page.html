@@ -97,6 +97,17 @@
           </dd>
         </div>
         <div>
+          <dt>Naturaleza del caso <app-glosario termino="naturaleza-caso" /></dt>
+          <dd>
+            @if (d.caso.naturaleza; as naturaleza) {
+            <span class="naturaleza-chip">{{ naturaleza }}</span>
+            } @else {
+            <span class="naturaleza-chip sin-declarar">Sin declarar</span>
+            <small class="detail-hint">Se declara a mano; no se deriva del alcance</small>
+            }
+          </dd>
+        </div>
+        <div>
           <dt>Componente del ciclo</dt>
           <dd>{{ d.caso.etapa }}</dd>
         </div>

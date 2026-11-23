@@ -467,12 +467,64 @@ export class AlertaPanelComponent {
    * nativos.
    */
   readonly distritoAlta = signal<OpcionTerritorio | null>(null);
+  /**
+   * Distrito de la alerta en edición. Se siembra con el que ya está guardado para
+   * que el buscador no arranque vacío; cualquier edición de texto lo invalida
+   * (el componente emite `null`) para que lo guardado no contradiga lo visible.
+   */
+  readonly distritoEdicion = signal<OpcionTerritorio | null>(null);
+  /**
+   * El usuario ya confirmó guardar un distrito distinto del caso. Sin esto, el
+   * formulario pide la confirmación explícita en vez de pisar la diferencia.
+   */
+  readonly divergenciaAceptada = signal(false);
   readonly mensajeLocal = signal<string | null>(null);
 
   readonly formulario = computed(() => (this.editando() ? this.borrador() : null));
 
   /** `alerta === null` significa alta. */
   readonly esAlta = computed(() => this.alerta() === null);
+
+  /** Semilla del buscador en edición: el distrito ya guardado. */
+  readonly inicialDistritoEdicion = computed(() => {
+    const distrito = this.distritoEdicion();
+    if (distrito?.tipo !== 'distrito') return null;
+    return { id: distrito.id, nombre: distrito.nombre, ruta: distrito.ruta };
+  });
+
+  /** Distrito que se enviaría al guardar; `null` si la caja no tiene uno válido. */
+  readonly distritoEdicionId = computed(() => {
+    const distrito = this.distritoEdicion();
+    return distrito?.tipo === 'distrito' ? distrito.id : null;
+  });
+
+  /**
+   * Hay diferencia cuando ambos lados declaran distrito y no es el mismo. Es
+   * información, no error: la alerta puede ocurrir en otro punto del territorio
+   * que el expediente (una movilización en Lima por un proyecto en Chilca).
+   */
+  readonly distritoDivergente = computed(() => {
+    const alerta = this.alerta();
+    const id = this.distritoEdicionId();
+    return Boolean(
+      alerta &&
+      this.editando() &&
+      id !== null &&
+      alerta.casoDistritoId !== null &&
+      id !== alerta.casoDistritoId,
+    );
+  });
+
+  /** Semilla del buscador en el alta: se ofrece el distrito del caso, si lo hay. */
+  readonly distritoDelCaso = computed(() => {
+    const alerta = this.alerta();
+    if (!alerta || alerta.casoDistritoId === null || !alerta.casoDistrito) return null;
+    return {
+      id: alerta.casoDistritoId,
+      nombre: alerta.casoDistrito,
+      ruta: alerta.casoDistritoRuta ?? alerta.casoDistrito,
+    };
+  });
 
   /**
    * Prioridades del alta: el catálogo manda; si aún no llegó (o falló) se cae al
@@ -568,6 +620,18 @@ export class AlertaPanelComponent {
       accionesSugeridas: alerta.accionesSugeridas.join('\n'),
       casoCode: alerta.casoCodigo ?? '',
     });
+    this.distritoEdicion.set(
+      alerta.distritoId !== null && alerta.distrito
+        ? {
+            tipo: 'distrito',
+            id: alerta.distritoId,
+            nombre: alerta.distrito,
+            region: '',
+            ruta: alerta.distritoRuta ?? alerta.distrito,
+          }
+        : null,
+    );
+    this.divergenciaAceptada.set(false);
     this.mensajeLocal.set(null);
     this.editando.set(true);
   }
@@ -575,6 +639,8 @@ export class AlertaPanelComponent {
   cancelarEdicion(): void {
     this.editando.set(false);
     this.borrador.set(null);
+    this.distritoEdicion.set(null);
+    this.divergenciaAceptada.set(false);
     this.mensajeLocal.set(null);
   }
 
@@ -592,6 +658,37 @@ export class AlertaPanelComponent {
 
   alElegirDistrito(opcion: OpcionTerritorio | null): void {
     this.distritoAlta.set(opcion);
+  }
+
+  alElegirDistritoEdicion(opcion: OpcionTerritorio | null): void {
+    this.distritoEdicion.set(opcion);
+    this.divergenciaAceptada.set(false);
+    this.mensajeLocal.set(null);
+  }
+
+  /**
+   * Copia el distrito principal del caso al formulario. Es un botón y no una
+   * herencia silenciosa: en la base hay alertas que ocurren en otro territorio
+   * que el expediente y ese dato no se debe perder.
+   */
+  usarDistritoDelCaso(): void {
+    const caso = this.distritoDelCaso();
+    if (!caso) return;
+    this.distritoEdicion.set({
+      tipo: 'distrito',
+      id: caso.id,
+      nombre: caso.nombre,
+      region: '',
+      ruta: caso.ruta,
+    });
+    this.divergenciaAceptada.set(false);
+    this.mensajeLocal.set('Distrito fijado al del caso. Guarde para aplicarlo.');
+  }
+
+  /** Acepta la diferencia actual para que el guardado no vuelva a preguntar. */
+  mantenerDistritoDeLaAlerta(): void {
+    this.divergenciaAceptada.set(true);
+    this.mensajeLocal.set('Se conservará el distrito de la alerta, distinto del caso.');
   }
 
   alEnviarAlta(evento: Event): void {
@@ -695,6 +792,25 @@ export class AlertaPanelComponent {
 
     const caso = borrador.casoCode.trim();
     if (caso !== (alerta.casoCodigo ?? '')) cambios.casoCode = caso || null;
+
+    const distritoNuevo = this.distritoEdicionId();
+    if (distritoNuevo !== alerta.distritoId) {
+      // `null` limpia el distrito; un id lo fija. Ausente en el cuerpo = sin
+      // cambio, y así el repositorio puede heredar el del caso sin pisarlo.
+      if (
+        !this.divergenciaAceptada() &&
+        distritoNuevo !== null &&
+        alerta.casoDistritoId !== null &&
+        distritoNuevo !== alerta.casoDistritoId
+      ) {
+        const nombreNuevo = this.distritoEdicion()?.nombre ?? 'el elegido';
+        this.mensajeLocal.set(
+          `El distrito de la alerta (${nombreNuevo}) no coincide con el del caso (${alerta.casoDistrito}). Use «Usar el del caso» o confirme con «Mantener el de la alerta».`,
+        );
+        return;
+      }
+      cambios.distritoId = distritoNuevo;
+    }
 
     if (Object.keys(cambios).length === 0) {
       this.mensajeLocal.set('No hay cambios que guardar.');

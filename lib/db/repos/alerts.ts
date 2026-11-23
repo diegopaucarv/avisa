@@ -49,7 +49,16 @@ const ALERT_SELECT = `
   a.fuente_tipo,
   a.fuente_descripcion,
   a.fuente_url,
+  a.distrito_id as distrito_id,
   d.nombre as distrito,
+  concat_ws(' · ', d.nombre, pd.nombre, rd.nombre) as distrito_ruta,
+  c.distrito_principal_id as caso_distrito_id,
+  cd.nombre as caso_distrito,
+  concat_ws(' · ', cd.nombre, pcd.nombre, rcd.nombre) as caso_distrito_ruta,
+  case
+    when a.distrito_id is null or c.distrito_principal_id is null then null
+    else a.distrito_id = c.distrito_principal_id
+  end as distrito_coincide_con_caso,
   ss.nombre as subsector,
   a.mesa_id,
   a.sectorista_usuario_id,
@@ -72,6 +81,11 @@ const ALERT_FROM = `
   left join core.cat_prioridades_alerta pa on pa.id = a.prioridad_id
   left join core.cat_niveles_alerta na on na.id = a.nivel_alerta_id
   left join core.distritos d on d.id = a.distrito_id
+  left join core.provincias pd on pd.id = d.provincia_id
+  left join core.regiones rd on rd.id = pd.region_id
+  left join core.distritos cd on cd.id = c.distrito_principal_id
+  left join core.provincias pcd on pcd.id = cd.provincia_id
+  left join core.regiones rcd on rcd.id = pcd.region_id
   left join core.cat_subsectores ss on ss.id = a.subsector_id
   left join core.usuarios ua on ua.id = a.anulado_por
 `;
@@ -132,7 +146,22 @@ export type AlertItem = {
   fuenteTipo: string | null;
   fuenteDescripcion: string | null;
   fuenteUrl: string | null;
+  /** `core.alertas_tempranas.distrito_id`; `null` si la alerta no declara distrito. */
+  distritoId: number | null;
   distrito: string | null;
+  /** «Distrito · Provincia · Región», para desambiguar nombres repetidos. */
+  distritoRuta: string | null;
+  /** Distrito principal del caso vinculado (`core.casos.distrito_principal_id`). */
+  casoDistritoId: number | null;
+  casoDistrito: string | null;
+  casoDistritoRuta: string | null;
+  /**
+   * `null` cuando falta uno de los dos distritos: no hay coincidencia que
+   * afirmar. `false` no es un error de carga por sí mismo —una alerta puede
+   * ocurrir en otro punto del territorio que el expediente—, pero sí exige
+   * confirmación antes de guardar un cambio de distrito.
+   */
+  distritoCoincideConCaso: boolean | null;
   subsector: string | null;
   mesaId: string | null;
   sectoristaUsuarioId: string | null;
@@ -224,7 +253,13 @@ function mapAlert(row: Record<string, any>): AlertItem {
     fuenteTipo: row.fuente_tipo,
     fuenteDescripcion: row.fuente_descripcion,
     fuenteUrl: row.fuente_url,
+    distritoId: row.distrito_id,
     distrito: row.distrito,
+    distritoRuta: row.distrito_ruta,
+    casoDistritoId: row.caso_distrito_id,
+    casoDistrito: row.caso_distrito,
+    casoDistritoRuta: row.caso_distrito_ruta,
+    distritoCoincideConCaso: row.distrito_coincide_con_caso,
     subsector: row.subsector,
     mesaId: row.mesa_id,
     sectoristaUsuarioId: row.sectorista_usuario_id,
@@ -574,6 +609,27 @@ async function resolveDistritoId(
   return raw;
 }
 
+/**
+ * Distrito principal del caso, para heredarlo cuando la alerta no declara uno.
+ *
+ * La herencia sólo cubre el hueco real. Medición sobre la carga local (76
+ * alertas vivas, 18 con caso y sin distrito): 4 se benefician y las otras 14
+ * pertenecen a casos de alcance nacional que tampoco tienen distrito, de modo
+ * que heredar no inventaría dato. Nunca se sobrescribe un distrito declarado:
+ * las alertas que ocurren en otro territorio que el expediente son legítimas
+ * (movilización en la sede central frente a proyecto en Chilca).
+ */
+async function caseDistritoId(
+  client: PoolClient,
+  casoId: string,
+): Promise<number | null> {
+  const result = await client.query(
+    `select distrito_principal_id as distrito_id from core.casos where id = $1`,
+    [casoId],
+  );
+  return result.rows[0]?.distrito_id ?? null;
+}
+
 async function findAlert(
   client: PoolClient,
   idOrCode: string,
@@ -677,11 +733,10 @@ export async function createAlert(
   ];
 
   const caso = readField(body, ["casoCode", "caso", "caso_codigo"]);
+  let casoId: string | null = null;
   if (caso.present && caso.value !== null) {
-    fields.push({
-      column: "caso_id",
-      value: await resolveCaseId(client, caso.value),
-    });
+    casoId = await resolveCaseId(client, caso.value);
+    fields.push({ column: "caso_id", value: casoId });
   }
 
   const nivel = readField(body, ["nivel", "nivelAlerta"]);
@@ -776,11 +831,22 @@ export async function createAlert(
   }
 
   const distrito = readField(body, ["distritoId", "distrito_id"]);
-  if (distrito.present && distrito.value !== null) {
-    fields.push({
-      column: "distrito_id",
-      value: await resolveDistritoId(client, distrito.value),
-    });
+  if (distrito.present) {
+    // Un `null` explícito significa «sin distrito»: no se hereda nada.
+    if (distrito.value !== null) {
+      fields.push({
+        column: "distrito_id",
+        value: await resolveDistritoId(client, distrito.value),
+      });
+    }
+  } else if (casoId) {
+    // Sin distrito declarado y con caso vinculado: se hereda el del caso, que
+    // es el único dato que ya existe. Si el caso tampoco lo tiene, se guarda
+    // sin distrito y la interfaz lo declara vacío.
+    const heredado = await caseDistritoId(client, casoId);
+    if (heredado !== null) {
+      fields.push({ column: "distrito_id", value: heredado });
+    }
   }
 
   const subsector = readField(body, ["subsector"]);
@@ -920,11 +986,26 @@ export async function updateAlert(
   }
 
   const caso = readField(body, ["casoCode", "caso", "caso_codigo"]);
+  let casoVinculado: string | null = null;
   if (caso.present) {
+    casoVinculado =
+      caso.value === null ? null : await resolveCaseId(client, caso.value);
+    add("caso_id", casoVinculado);
+  }
+
+  const distrito = readField(body, ["distritoId", "distrito_id"]);
+  if (distrito.present) {
     add(
-      "caso_id",
-      caso.value === null ? null : await resolveCaseId(client, caso.value),
+      "distrito_id",
+      distrito.value === null
+        ? null
+        : await resolveDistritoId(client, distrito.value),
     );
+  } else if (casoVinculado && row.distrito_id === null) {
+    // Al vincular un caso a una alerta que no tenía distrito se aplica la
+    // misma herencia que en el alta. Un distrito ya declarado no se toca.
+    const heredado = await caseDistritoId(client, casoVinculado);
+    if (heredado !== null) add("distrito_id", heredado);
   }
 
   if (sets.length === 0) invalid();

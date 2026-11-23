@@ -679,7 +679,7 @@ export const SECCIONES_AYUDA: readonly SeccionAyuda[] = [
   },
   {
     id: 'alcance',
-    titulo: 'Alcance territorial',
+    titulo: 'Alcance territorial y naturaleza del caso',
     fuente: 'Glosario §1.9',
     entradas: [
       {
@@ -688,6 +688,16 @@ export const SECCIONES_AYUDA: readonly SeccionAyuda[] = [
         definicion:
           'Se deriva de la región; no se elige a mano. En las etiquetas de interfaz, «Territorio» se muestra como «Región».',
         detalles: ['Norte', 'Centro', 'Sur', 'Oriente', 'Nacional'],
+      },
+      {
+        id: 'naturaleza-caso',
+        termino: 'Naturaleza del caso',
+        definicion:
+          'Eje declarado, distinto del alcance. «Territorial»: la causa nace en un territorio concreto. «Nacional o sectorial»: la causa es una medida de alcance nacional o de todo el sector (norma, cuota, temporada, ordenamiento).',
+        detalles: [
+          'No se deriva de las regiones: un caso con alcance «Nacional» puede ser territorial multirregional.',
+          '«Sin declarar» significa que aún no se definió; la interfaz no inventa un valor.',
+        ],
       },
     ],
   },

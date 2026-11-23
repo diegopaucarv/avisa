@@ -3,6 +3,7 @@ import type {
   Caso,
   EstadoCaso,
   EtapaCiclo,
+  NaturalezaCaso,
   NivelConflicto,
   OrigenDato,
   PrioridadAtencion,
@@ -160,6 +161,17 @@ export const ALCANCES = [
   'Oriente',
   'Nacional',
 ] as const satisfies readonly Alcance[];
+
+/**
+ * Naturalezas declarables. El eje es independiente del alcance geográfico
+ * (`ALCANCES`): «Nacional» de alcance significa «toca varias regiones»;
+ * «Nacional o sectorial» de naturaleza significa «su causa es una medida de
+ * alcance nacional o de todo el sector».
+ */
+export const NATURALEZAS_CASO = [
+  'Territorial',
+  'Nacional o sectorial',
+] as const satisfies readonly NaturalezaCaso[];
 
 export const ETAPAS = [
   'Prevención estratégica',
@@ -542,6 +554,18 @@ function riesgoDe(valor: string | null): Riesgo {
 }
 
 /**
+ * Naturaleza declarada → dominio. A diferencia del resto de catálogos, aquí no
+ * hay respaldo: un valor ausente o desconocido es «sin declarar» (`null`) y no
+ * un valor verosímil. Se acepta la forma con guion bajo porque el catálogo
+ * podría escribirse así sin que cambie el significado.
+ */
+function naturalezaDe(valor: string | null): NaturalezaCaso | null {
+  if (!valor) return null;
+  const limpio = valor.trim().replace(/_/g, ' ').toLowerCase();
+  return NATURALEZAS_CASO.find((opcion) => opcion.toLowerCase() === limpio) ?? null;
+}
+
+/**
  * Caso de la API → dominio.
  *
  * `riesgo` es atributo del caso (recalculable). Si el payload aún no lo trae,
@@ -575,6 +599,7 @@ export function aCaso(bruto: unknown): Caso {
       NIVELES_CONFLICTO,
       'Diferencia',
     ),
+    naturaleza: naturalezaDe(texto(registro, ['naturaleza'])),
     etapa: etapaDe(texto(registro, ['etapa', 'stage'])),
     tematica: texto(registro, ['tematica']),
     subsector: texto(registro, ['subsector']),

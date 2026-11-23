@@ -31,6 +31,11 @@ export type CuerpoCasoAlta = {
   unidadResponsable?: string;
   resumen?: string;
   fechaInicio?: string;
+  /**
+   * Naturaleza declarada (`Territorial` / `Nacional o sectorial`). Omitirla
+   * guarda NULL («sin declarar»).
+   */
+  naturaleza?: string;
   /** `core.distritos.id`: distrito principal del catálogo INEI. */
   distritoPrincipalId?: number;
   /** `territorio.lugares.id`: puerto, caleta o desembarcadero, no un distrito. */
@@ -56,6 +61,7 @@ type AlcanceCatalogo = {
 type CatalogosAlta = {
   regiones: OpcionRegion[];
   tematicas: OpcionCatalogo[];
+  naturalezas: OpcionCatalogo[];
   subsectores: OpcionCatalogo[];
   riesgos: OpcionCatalogo[];
   unidades: OpcionCatalogo[];
@@ -66,6 +72,7 @@ type BorradorCaso = {
   titulo: string;
   regiones: string[];
   tematica: string;
+  naturaleza: string;
   subsector: string;
   riesgo: string;
   unidadResponsable: string;
@@ -122,6 +129,7 @@ export function aCatalogosAlta(bruto: unknown): CatalogosAlta {
   return {
     regiones,
     tematicas: opcionesDe(catalogo, 'tematicas'),
+    naturalezas: opcionesDe(catalogo, 'naturalezasCaso'),
     subsectores: opcionesDe(catalogo, 'subsectores'),
     riesgos: opcionesDe(catalogo, 'nivelesRiesgo'),
     unidades: opcionesDe(catalogo, 'unidades'),
@@ -132,6 +140,7 @@ export function aCatalogosAlta(bruto: unknown): CatalogosAlta {
 const CATALOGOS_VACIOS: CatalogosAlta = {
   regiones: [],
   tematicas: [],
+  naturalezas: [],
   subsectores: [],
   riesgos: [],
   unidades: [],
@@ -259,6 +268,7 @@ export class CasoPanelComponent {
     titulo: '',
     regiones: [],
     tematica: '',
+    naturaleza: '',
     subsector: '',
     riesgo: '',
     unidadResponsable: '',
@@ -283,6 +293,7 @@ export class CasoPanelComponent {
 
   readonly regiones = computed(() => this.catalogos().regiones);
   readonly tematicas = computed(() => this.catalogos().tematicas);
+  readonly naturalezas = computed(() => this.catalogos().naturalezas);
   readonly subsectores = computed(() => this.catalogos().subsectores);
   readonly riesgos = computed(() => this.catalogos().riesgos);
   readonly unidades = computed(() => this.catalogos().unidades);
@@ -386,6 +397,8 @@ export class CasoPanelComponent {
     // La temática es opcional (migración 0003): vacía se omite y el servidor
     // guarda NULL, con el sufijo `GEN` en el código del caso.
     if (borrador.tematica) cuerpo.tematica = borrador.tematica;
+    // Naturaleza declarada: opcional. Vacía se omite y el servidor guarda NULL.
+    if (borrador.naturaleza) cuerpo.naturaleza = borrador.naturaleza;
     if (borrador.subsector) cuerpo.subsector = borrador.subsector;
     if (borrador.riesgo) cuerpo.riesgo = borrador.riesgo;
     if (borrador.unidadResponsable) cuerpo.unidadResponsable = borrador.unidadResponsable;

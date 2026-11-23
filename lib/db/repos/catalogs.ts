@@ -21,6 +21,7 @@ export type Catalogs = {
   alcances: CatalogItem[];
   regiones: CatalogItem[];
   tematicas: CatalogItem[];
+  naturalezasCaso: CatalogItem[];
   subsectores: CatalogItem[];
   ciclos: CatalogItem[];
   unidades: CatalogItem[];
@@ -47,6 +48,7 @@ export async function getCatalogs(): Promise<Catalogs> {
     alcances,
     regiones,
     tematicas,
+    naturalezasCaso,
     subsectores,
     ciclos,
     unidades,
@@ -101,6 +103,14 @@ export async function getCatalogs(): Promise<Catalogs> {
       `select id, nombre as codigo, nombre as etiqueta
          from core.cat_tematicas
         order by nombre`,
+    ),
+    // Eje declarado, independiente del alcance geográfico derivado. `codigo`
+    // lleva el texto visible («Nacional o sectorial») porque el catálogo no
+    // tiene una columna de nombre.
+    query(
+      `select id, codigo, codigo as etiqueta, descripcion
+         from core.cat_naturalezas_caso
+        order by id`,
     ),
     query(
       `select id, nombre as codigo, nombre as etiqueta
@@ -166,6 +176,7 @@ export async function getCatalogs(): Promise<Catalogs> {
     alcances,
     regiones,
     tematicas,
+    naturalezasCaso,
     subsectores,
     ciclos,
     unidades,

@@ -104,6 +104,26 @@
         </div>
 
         <div class="form-field">
+          <label class="form-label" for="caso-campo-naturaleza">Naturaleza del caso</label>
+          <select
+            id="caso-campo-naturaleza"
+            class="form-select"
+            [value]="borrador().naturaleza"
+            (change)="campo('naturaleza', $event)"
+          >
+            <option value="">Sin declarar</option>
+            @for (opcion of naturalezas(); track opcion.valor) {
+              <option [value]="opcion.valor">{{ opcion.etiqueta }}</option>
+            }
+          </select>
+          <p class="form-hint">
+            Eje declarado, distinto del alcance. «Territorial» si la causa nace en un territorio;
+            «Nacional o sectorial» si es una norma, cuota, temporada u otra medida sectorial.
+            Opcional: «Sin declarar» se guarda como pendiente.
+          </p>
+        </div>
+
+        <div class="form-field">
           <label class="form-label" for="caso-campo-subsector">Subsector</label>
           <select
             id="caso-campo-subsector"

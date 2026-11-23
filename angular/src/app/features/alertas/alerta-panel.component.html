@@ -110,6 +110,12 @@
             (elegido)="alElegirDistrito($event)"
           />
 
+          @if (borradorAlta().casoCode.trim() && !distritoAlta()) {
+            <p class="form-hint">
+              Sin distrito se usará el del caso vinculado al guardar, si lo tiene.
+            </p>
+          }
+
           <div class="form-field">
             <label class="form-label" for="alerta-alta-riesgo">Descripción del riesgo</label>
             <textarea
@@ -421,6 +427,40 @@
                 </span>
               </div>
 
+              <app-territorio-buscador
+                etiqueta="Distrito de la alerta"
+                marcador="Distrito: Islay, Piura, Contralmirante Villar…"
+                [soloDistritos]="true"
+                [inicial]="inicialDistritoEdicion()"
+                (elegido)="alElegirDistritoEdicion($event)"
+              />
+
+              @if (distritoDivergente()) {
+                <div class="alerta-error">
+                  <p>
+                    La alerta ocurre en <strong>{{ distritoEdicion()?.nombre }}</strong
+                    >; el caso vinculado está en <strong>{{ alerta()?.casoDistrito }}</strong
+                    >.
+                  </p>
+                  <div class="alerta-formulario-acciones">
+                    <button type="button" class="button-secondary" (click)="usarDistritoDelCaso()">
+                      Usar el del caso
+                    </button>
+                    <button
+                      type="button"
+                      class="button-secondary"
+                      (click)="mantenerDistritoDeLaAlerta()"
+                    >
+                      Mantener el de la alerta
+                    </button>
+                  </div>
+                </div>
+              } @else if (distritoDelCaso()) {
+                <button type="button" class="button-secondary" (click)="usarDistritoDelCaso()">
+                  Usar el distrito del caso ({{ distritoDelCaso()?.nombre }})
+                </button>
+              }
+
               <div class="alerta-formulario-acciones">
                 <button type="submit" class="button-primary" [disabled]="guardando()">
                   {{ guardando() ? 'Guardando…' : 'Guardar cambios' }}
@@ -512,9 +552,20 @@
               </dd>
             </div>
             <div>
-              <dt>Distrito</dt>
-              <dd>{{ a.distrito || '—' }}</dd>
+              <dt>Distrito de la alerta</dt>
+              <dd>{{ a.distritoRuta || a.distrito || '—' }}</dd>
             </div>
+            @if (a.casoDistrito) {
+              <div>
+                <dt>Distrito del caso</dt>
+                <dd>
+                  {{ a.casoDistritoRuta || a.casoDistrito }}
+                  @if (a.distritoCoincideConCaso === false) {
+                    · distinto del de la alerta
+                  }
+                </dd>
+              </div>
+            }
             <div>
               <dt>Subsector</dt>
               <dd>{{ a.subsector || '—' }}</dd>

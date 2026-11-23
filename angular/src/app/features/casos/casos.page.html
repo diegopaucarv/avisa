@@ -135,6 +135,24 @@
     </label>
 
     <label class="select-filter">
+      Naturaleza
+      <select
+        aria-label="Filtrar casos por naturaleza: territorial o nacional o sectorial"
+        (change)="cambiarNaturaleza($event)"
+      >
+        <option value="" [selected]="filtros().naturaleza === ''">Todas</option>
+        @for (opcion of naturalezas(); track opcion.valor) {
+        <option [value]="opcion.valor" [selected]="filtros().naturaleza === opcion.valor">
+          {{ opcion.etiqueta }}
+        </option>
+        }
+        <option value="Sin declarar" [selected]="filtros().naturaleza === 'Sin declarar'">
+          Sin declarar
+        </option>
+      </select>
+    </label>
+
+    <label class="select-filter">
       Unidad responsable
       <select
         aria-label="Filtrar casos por unidad orgánica responsable"
@@ -267,6 +285,18 @@
         <app-icono nombre="mapa" [tamano]="14" />
         {{ caso.region || 'Sin región' }}
       </div>
+      @if (caso.naturaleza; as naturaleza) {
+      <span class="case-naturaleza" [title]="'Naturaleza declarada: ' + naturaleza">
+        {{ naturaleza }}
+      </span>
+      } @else {
+      <span
+        class="case-naturaleza sin-declarar"
+        title="La naturaleza del caso aún no se declaró (Territorial o Nacional o sectorial)."
+      >
+        Sin declarar
+      </span>
+      }
       <p class="case-summary">{{ caso.resumen || 'Sin resumen registrado.' }}</p>
       <div class="case-card-bottom">
         <span>{{ caso.etapa }}</span>

@@ -33,6 +33,9 @@ export const dynamic = "force-dynamic";
  * (`es_activo`): tras la migración 33 sólo `Abierto`. No se filtra por etiqueta
  * para que el indicador no dependa de la grafía del catálogo.
  *
+ * `naturaleza=<código>` filtra por la naturaleza declarada del caso; el literal
+ * «Sin declarar» aísla los casos con `naturaleza_id` nulo.
+ *
  * `region=<nombre>` filtra por región principal y se resuelve contra
  * `core.regiones` (422 si no existe); `sinregion=true` es su complemento y
  * alimenta la fila «Sin región» del panorama territorial.
@@ -49,6 +52,7 @@ const FILTERS = [
   "nivel",
   "alcance",
   "tematica",
+  "naturaleza",
   "unidad",
   "region",
   "sort",

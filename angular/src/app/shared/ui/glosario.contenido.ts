@@ -40,6 +40,14 @@ export const GLOSARIO: Record<string, EntradaGlosario> = {
     fuente: 'Guía §7.6',
     ayudaId: 'tematicas',
   },
+  'naturaleza-caso': {
+    id: 'naturaleza-caso',
+    termino: 'Naturaleza del caso',
+    definicion:
+      'Eje declarado, distinto del alcance geográfico. «Territorial» si la causa nace en un territorio concreto; «Nacional o sectorial» si la causa es una medida de alcance nacional o de todo el sector. Se declara a mano: «sin declarar» no se estima.',
+    fuente: 'Criterio OAIPCS · ver Alcance territorial',
+    ayudaId: 'alcance',
+  },
   subsector: {
     id: 'subsector',
     termino: 'Subsector',

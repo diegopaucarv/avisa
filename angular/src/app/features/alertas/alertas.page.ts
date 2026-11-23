@@ -690,6 +690,22 @@ export class AlertasPage {
    * listado y se deja un aviso con `role="status"`. En error, el panel sigue
    * abierto y muestra `aErrorApi(fallo).message`.
    */
+  /**
+   * Aviso del alta. Si la alerta quedó en un distrito distinto del caso, se
+   * declara aquí: el formulario no puede preguntarlo antes de guardar porque no
+   * conoce el distrito del caso, y la alerta pudo heredarlo o elegirlo a mano.
+   */
+  private mensajeAlta(respuesta: unknown): string {
+    const { alerta } = aDetalleAlerta(respuesta);
+    if (alerta.distritoCoincideConCaso === false) {
+      return `Alerta ${alerta.codigo} registrada. El distrito de la alerta (${alerta.distrito}) no coincide con el del caso (${alerta.casoDistrito}): revise la vinculación.`;
+    }
+    if (alerta.distrito) {
+      return `Alerta ${alerta.codigo} registrada en ${alerta.distrito}.`;
+    }
+    return 'Alerta registrada. El listado se actualizó.';
+  }
+
   registrarAlerta(cuerpo: AltaAlerta): void {
     if (!this.capacidades.puedeEditar()) {
       this.errorGuardado.set('Su rol no permite registrar alertas.');
@@ -702,12 +718,12 @@ export class AlertasPage {
     this.avisoAlta.set(null);
 
     this.http.post<unknown>(urlApi('/v1/alerts'), cuerpo).subscribe({
-      next: () => {
+      next: (respuesta) => {
         this.guardando.set(false);
         this.altaAbierta.set(false);
         this.errorGuardado.set(null);
         this.listado.recargar();
-        this.avisoAlta.set('Alerta registrada. El listado se actualizó.');
+        this.avisoAlta.set(this.mensajeAlta(respuesta));
       },
       error: (fallo: unknown) => {
         this.guardando.set(false);

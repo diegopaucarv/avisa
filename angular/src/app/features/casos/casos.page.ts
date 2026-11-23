@@ -66,6 +66,11 @@ type FiltrosCasos = {
    */
   sinRegion: boolean;
   tematica: string;
+  /**
+   * Naturaleza declarada (`Territorial` / `Nacional o sectorial`) o el literal
+   * «Sin declarar», que la API traduce a `naturaleza_id is null`.
+   */
+  naturaleza: string;
   unidad: string;
   pagina: number;
   tamano: number;
@@ -83,6 +88,7 @@ const FILTROS_INICIALES: FiltrosCasos = {
   region: '',
   sinRegion: false,
   tematica: '',
+  naturaleza: '',
   unidad: '',
   pagina: 1,
   tamano: TAMANO_PAGINA,
@@ -132,6 +138,7 @@ type CatalogosCasos = {
   alcances: OpcionFiltro[];
   regiones: OpcionFiltro[];
   tematicas: OpcionFiltro[];
+  naturalezas: OpcionFiltro[];
   unidades: OpcionFiltro[];
 };
 
@@ -169,6 +176,7 @@ function aCatalogosCasos(bruto: unknown): CatalogosCasos {
     alcances: opcionesDe(catalogo, 'alcances'),
     regiones: opcionesDe(catalogo, 'regiones'),
     tematicas: opcionesDe(catalogo, 'tematicas'),
+    naturalezas: opcionesDe(catalogo, 'naturalezasCaso'),
     unidades: opcionesDe(catalogo, 'unidades'),
   };
 }
@@ -234,6 +242,27 @@ function aConteos(bruto: unknown): ConteosCasos {
     .vista-previa-aviso {
       margin: 0 0 10px;
     }
+
+    /* Chip de naturaleza declarada. «Sin declarar» se distingue a la vista
+       (borde discontinuo y color apagado): es un hueco, no un valor. */
+    .case-naturaleza {
+      display: inline-block;
+      margin: 8px 0 0;
+      padding: 2px 7px;
+      border: 1px solid #dbe3ea;
+      border-radius: 10px;
+      color: #47566a;
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+      line-height: 1.6;
+    }
+
+    .case-naturaleza.sin-declarar {
+      border-style: dashed;
+      color: #8a98a5;
+      font-weight: 500;
+    }
   `,
 })
 export class CasosPage {
@@ -282,6 +311,7 @@ export class CasosPage {
           region: params.get('region') ?? '',
           sinRegion: params.get('sinregion') === 'true',
           tematica: params.get('tematica') ?? '',
+          naturaleza: params.get('naturaleza') ?? '',
           unidad: params.get('unidad') ?? '',
           pagina: Math.max(1, Number(params.get('pagina') ?? '1') || 1),
           tamano: Math.max(
@@ -320,6 +350,7 @@ export class CasosPage {
       filtros.region ||
       filtros.sinRegion ||
       filtros.tematica ||
+      filtros.naturaleza ||
       filtros.unidad ||
       filtros.orden !== 'recent',
     );
@@ -342,6 +373,7 @@ export class CasosPage {
       region: filtros.region,
       sinregion: filtros.sinRegion ? 'true' : '',
       tematica: filtros.tematica,
+      naturaleza: filtros.naturaleza,
       unidad: filtros.unidad,
       sort: filtros.orden,
     });
@@ -371,6 +403,7 @@ export class CasosPage {
   readonly alcances = computed(() => this.catalogoRecurso.valor()?.alcances ?? []);
   readonly regiones = computed(() => this.catalogoRecurso.valor()?.regiones ?? []);
   readonly tematicas = computed(() => this.catalogoRecurso.valor()?.tematicas ?? []);
+  readonly naturalezas = computed(() => this.catalogoRecurso.valor()?.naturalezas ?? []);
   readonly unidades = computed(() => this.catalogoRecurso.valor()?.unidades ?? []);
 
   private readonly recurso = consulta<Coleccion<Caso> & { conteos: ConteosCasos }>({
@@ -387,6 +420,7 @@ export class CasosPage {
         region: filtros.region,
         sinregion: filtros.sinRegion ? 'true' : '',
         tematica: filtros.tematica,
+        naturaleza: filtros.naturaleza,
         unidad: filtros.unidad,
         sort: filtros.orden,
         anulados: filtros.ver === 'anulados' ? 'true' : '',
@@ -513,6 +547,17 @@ export class CasosPage {
   cambiarTematica(evento: Event): void {
     const valor = (evento.target as HTMLSelectElement).value;
     void this.actualizar({ tematica: valor, pagina: 1 });
+  }
+
+  /**
+   * Naturaleza declarada. Es un eje propio del caso, no el alcance geográfico:
+   * «Sin declarar» no es un valor del catálogo sino la ausencia de valor, y sólo
+   * el servidor puede resolverlo (`naturaleza_id is null`), así que nunca se
+   * filtra en cliente.
+   */
+  cambiarNaturaleza(evento: Event): void {
+    const valor = (evento.target as HTMLSelectElement).value;
+    void this.actualizar({ naturaleza: valor, pagina: 1 });
   }
 
   cambiarUnidad(evento: Event): void {
@@ -647,6 +692,7 @@ export class CasosPage {
         region: siguiente.region || null,
         sinregion: siguiente.sinRegion ? 'true' : null,
         tematica: siguiente.tematica || null,
+        naturaleza: siguiente.naturaleza || null,
         unidad: siguiente.unidad || null,
         pagina: siguiente.pagina > 1 ? siguiente.pagina : null,
         tamano: siguiente.tamano !== TAMANO_PAGINA ? siguiente.tamano : null,

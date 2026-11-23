@@ -120,7 +120,20 @@ export type Alerta = {
   fuenteTipo: string | null;
   fuenteDescripcion: string | null;
   fuenteUrl: string | null;
+  /** `core.distritos.id`; `null` si la alerta no declara distrito. */
+  distritoId: number | null;
   distrito: string | null;
+  /** «Distrito · Provincia · Región» para desambiguar nombres repetidos. */
+  distritoRuta: string | null;
+  /** Distrito principal del caso vinculado, si lo tiene. */
+  casoDistritoId: number | null;
+  casoDistrito: string | null;
+  casoDistritoRuta: string | null;
+  /**
+   * `null` si falta uno de los dos distritos. `false` no es un error: una
+   * alerta puede ocurrir en otro punto del territorio que el expediente.
+   */
+  distritoCoincideConCaso: boolean | null;
   subsector: string | null;
   origen: string | null;
   confianza: number | null;
@@ -174,6 +187,11 @@ export type PatchAlerta = {
   accionesOaipcs?: string | null;
   accionesSugeridas?: string[] | null;
   casoCode?: string | null;
+  /**
+   * `core.distritos.id`; `null` deja la alerta sin distrito. Ausente = sin
+   * cambio: el repositorio sólo hereda el del caso si la alerta no tenía uno.
+   */
+  distritoId?: number | null;
 };
 
 /**
@@ -337,6 +355,15 @@ export function aJsonLineas(lineas: readonly string[]): string[] | null {
   return limpias.length ? limpias : null;
 }
 
+/**
+ * Tri-estado: `null` cuando el backend no pudo comparar (falta uno de los dos
+ * distritos). `booleano` no sirve aquí porque colapsa «no sé» con «no».
+ */
+function booleanoONull(registro: Registro, claves: readonly string[]): boolean | null {
+  const valor = leer(registro, claves);
+  return typeof valor === 'boolean' ? valor : null;
+}
+
 /** Alerta de `items[]` o de `alert`. */
 export function aAlerta(bruto: unknown): Alerta {
   const registro = esRegistro(bruto) ? bruto : {};
@@ -371,7 +398,16 @@ export function aAlerta(bruto: unknown): Alerta {
     fuenteTipo: texto(registro, ['fuenteTipo', 'fuente_tipo']),
     fuenteDescripcion: texto(registro, ['fuenteDescripcion', 'fuente_descripcion']),
     fuenteUrl: texto(registro, ['fuenteUrl', 'fuente_url']),
+    distritoId: numero(registro, ['distritoId', 'distrito_id']),
     distrito: texto(registro, ['distrito']),
+    distritoRuta: texto(registro, ['distritoRuta', 'distrito_ruta']),
+    casoDistritoId: numero(registro, ['casoDistritoId', 'caso_distrito_id']),
+    casoDistrito: texto(registro, ['casoDistrito', 'caso_distrito']),
+    casoDistritoRuta: texto(registro, ['casoDistritoRuta', 'caso_distrito_ruta']),
+    distritoCoincideConCaso: booleanoONull(registro, [
+      'distritoCoincideConCaso',
+      'distrito_coincide_con_caso',
+    ]),
     subsector: texto(registro, ['subsector']),
     origen: texto(registro, ['origen']),
     confianza: numero(registro, ['confianza']),

@@ -24,6 +24,14 @@ export type EstadoCaso = 'Abierto' | 'Resuelto' | 'Archivado';
 export type Alcance = 'Norte' | 'Centro' | 'Sur' | 'Oriente' | 'Nacional';
 
 /**
+ * Naturaleza declarada del caso. Eje propio, **no** derivado del alcance
+ * geográfico: un caso puede tocar varias regiones (alcance «Nacional») y seguir
+ * siendo territorial si su causa nace en esos territorios. `null` = sin
+ * declarar; la interfaz lo pinta como tal y nunca inventa un valor.
+ */
+export type NaturalezaCaso = 'Territorial' | 'Nacional o sectorial';
+
+/**
  * Procedencia técnica de `core.casos.origen_dato`. `KAG` y `Workflow` son
  * códigos de ingesta automática y tienen etiqueta propia (gap D10); no deben
  * confundirse con un alta manual.
@@ -61,6 +69,8 @@ export type Caso = {
   prioridad: PrioridadAtencion;
   alcance: Alcance;
   nivelConflicto: NivelConflicto;
+  /** Naturaleza declarada; `null` mientras no se declare. */
+  naturaleza: NaturalezaCaso | null;
   etapa: EtapaCiclo;
   tematica: string | null;
   subsector: string | null;

@@ -3,6 +3,7 @@ import {
   Component,
   DestroyRef,
   ElementRef,
+  effect,
   inject,
   input,
   output,
@@ -425,22 +426,43 @@ export class TerritorioBuscadorComponent {
   /** Id estable por instancia: el panel puede abrirse más de una vez. */
   readonly identidad = signal(`buscador-${Math.random().toString(36).slice(2, 8)}`);
 
+  /** Último id aplicado desde `inicial`, para no repintar en cada lectura. */
+  private ultimoInicial: number | null = null;
+
   constructor() {
     this.destruccion.onDestroy(() => {
       if (this.temporizador) clearTimeout(this.temporizador);
+    });
+
+    // El padre puede fijar la ubicación por código (p. ej. «usar el distrito del
+    // caso»). Cuando el id de `inicial` cambia, la caja vuelve a mostrar esa
+    // ruta aunque el usuario hubiera editado antes. Un `null` no se aplica:
+    // el padre limpió el valor y la caja puede tener texto en curso.
+    effect(() => {
+      const id = this.inicial()?.id ?? null;
+      if (id === this.ultimoInicial) return;
+      this.ultimoInicial = id;
+      if (id === null) return;
+      this.texto.set('');
+      this.seleccion.set(null);
+      this.inicialIgnorada.set(false);
     });
   }
 
   alTeclear(evento: Event): void {
     const valor = (evento.target as HTMLInputElement).value;
+    // Antes de marcar la etiqueta inicial como ignorada: si la caja mostraba
+    // una selección (elegida o heredada del padre), el texto ya no la
+    // representa y el panel no debe conservar su id.
+    const mostrabaSeleccion =
+      this.seleccion() !== null || (this.inicial() !== null && !this.inicialIgnorada());
+
     this.texto.set(valor);
     this.inicialIgnorada.set(true);
     this.abierto.set(true);
     this.indice.set(0);
 
-    // Cualquier edición invalida la elección previa: el expediente no debe
-    // quedarse con un distrito mientras la caja muestra otro texto.
-    if (this.seleccion()) {
+    if (mostrabaSeleccion) {
       this.seleccion.set(null);
       this.elegido.emit(null);
     }

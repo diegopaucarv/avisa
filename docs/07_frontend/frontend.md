@@ -1143,7 +1143,7 @@ medido en la base local, no una aspiración:
 | Pantalla | Columna de destino                                       | Poblado hoy                                     | Uso del buscador                                                                                                                                            |
 | -------- | -------------------------------------------------------- | ----------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Casos    | `core.casos.distrito_principal_id` + `core.caso_lugares` | **23 de 35** casos con distrito                 | Alta y edición: distrito **y** lugares operativos (Matarani)                                                                                                |
-| Alertas  | `core.alertas_tempranas.distrito_id`                     | **41 de 83** alertas                            | Alta (`soloDistritos`) **y** filtro del listado (compacto, con `distritoId` en la URL)                                                                      |
+| Alertas  | `core.alertas_tempranas.distrito_id`                     | **41 de 83** alertas (**36 de 76** vivas)       | Alta, filtro del listado (compacto, con `distritoId` en la URL) **y edición** con `soloDistritos`                                                           |
 | Actores  | `core.actores.region_id`                                 | **0 de 1 160** con distrito; **355** con región | Filtro: el distrito elegido se traduce a su **región**, que es el grano real de la tabla                                                                    |
 | Locales  | `core.locales.distrito_id`                               | **0 de 27**                                     | Sin control visible: el filtro daría 0 filas siempre. El parámetro `distritoId` ya existe en `GET /v1/locales`, listo para cuando se complete el inventario |
 
@@ -1151,9 +1151,9 @@ medido en la base local, no una aspiración:
   `DISTRITO_INVALIDO`). La exportación reenvía el filtro (`FILTROS_ALERTAS`). El alta envía
   `distritoId` sólo si lo elegido es distrito: la tabla no tiene lugares y degradar un puerto a su
   distrito escribiría una ubicación que nadie eligió. El filtro viaja en la URL como `distritoId` +
-  `distritoNombre` (el segundo sólo pinta la etiqueta al recargar). **Pendiente:** la edición de una
-  alerta aún no permite cambiar el distrito; la ficha lo muestra de sólo lectura y `updateAlert` no
-  acepta todavía `distritoId` (sí `createAlert`).
+  `distritoNombre` (el segundo sólo pinta la etiqueta al recargar). **Hecho (2026-11-23):** la
+  edición permite cambiar el distrito con el mismo buscador y `updateAlert` acepta `distritoId`
+  (`null` lo limpia; ausente = sin cambio). Ver «Distrito de la alerta frente al distrito del caso».
 - **Actores.** Se retiró el campo «Región (nombre exacto)», que obligaba a acertar la grafía de
   `core.regiones.nombre` (y convive con las formas sin tilde `Ancash`, `Apurimac`, `Huanuco`,
   `Junin`). Ahora se elige un distrito o lugar y se envía su **región** —`r.nombre` sale del mismo
@@ -1165,6 +1165,70 @@ medido en la base local, no una aspiración:
   proyecto es declarar el dato ausente, no estimarlo. **Pendiente:** asignar `distrito_id` a los 27
   auditorios; con eso el filtro y el punto en el mapa (petición de la Dirección) funcionan sin tocar
   la interfaz, porque el componente y el parámetro de API ya están.
+
+### Distrito de la alerta frente al distrito del caso (2026-11-23)
+
+Antes de automatizar la herencia se midió qué contiene la base. Sobre las **76 alertas vivas**
+(7 de las 83 están anuladas):
+
+| Situación                                                      | Alertas |
+| -------------------------------------------------------------- | ------- |
+| Con caso vinculado                                             | **43**  |
+| Sin caso                                                       | **33**  |
+| Con distrito propio                                            | **36**  |
+| Con caso **y** distrito                                        | **25**  |
+| Distrito de la alerta **=** distrito principal del caso        | **13**  |
+| Distrito de la alerta **≠** distrito principal del caso        | **4**   |
+| Caso vinculado pero **sin** distrito principal (no comparable) | **8**   |
+| Alerta con caso pero **sin** distrito                          | **18**  |
+
+Las **4 divergencias** no son todas del mismo tipo, y por eso el automatismo no sirve como regla
+única:
+
+| Alerta           | Alerta en            | Caso vinculado                                     | Caso en          | Diagnóstico                                                                                                                 |
+| ---------------- | -------------------- | -------------------------------------------------- | ---------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `AT-2026-25`     | Ancón (Lima)         | `CS-PA-INF-2022-01` «Ocupación informal … Sechura» | Sechura (Piura)  | **Vínculo erróneo.** El título es AAMEC/Parque Industrial de Ancón; el caso correcto ya existe: `CS-MI-INF-2025-01`         |
+| `AT-2026-43`     | Ancón (Lima)         | `CS-PA-INF-2022-01`                                | Sechura (Piura)  | **Vínculo erróneo**, igual que la anterior; las otras tres alertas de Ancón ya apuntan a `CS-MI-INF-2025-01`                |
+| `AT-2026-84`     | Lima (Lima)          | `CS-MI-ITE-2026-03` «… Aceros Americanos (Chilca)» | Chilca (Cañete)  | **Diferencia legítima.** La movilización fue ante la sede central de PRODUCE en Lima; el proyecto está en Chilca            |
+| `AT-2026-49-bis` | Los Órganos (Talara) | `CS-PA-OAT-2024-02` «… Cabo Blanco y Los Órganos»  | El Alto (Talara) | **Diferencia de grano.** El caso cubre dos distritos y su `distrito_principal_id` es sólo uno (Cabo Blanco está en El Alto) |
+
+De las **18 alertas con caso y sin distrito**, **14** pertenecen a **7 casos de alcance nacional o
+sectorial que tampoco tienen distrito** (`CS-PA-OAT-2026-01`, `-02`, `-03`, `-04` y
+`CS-PA-NOR-2025-01`, entre otros): ordenamiento del calamar gigante, cuota de bonito, Ley 31749 de
+pesca artesanal. No hay distrito que heredar porque **el conflicto es de política sectorial** y las
+alertas son plantones y marchas. Las **4 restantes** (`AT-2026-01`, `-10`, `-14`, `-65`) sí tienen un
+caso con distrito: ahí el hueco lo dejó la carga, no el modelo. Las 76 vivas son
+`origen_dato = AVISA_HISTORICO` y el cargador sólo pudo resolver distrito en **36**: es un límite de la
+carga, no una decisión de negocio.
+
+**Regla implementada.**
+
+1. **La alerta conserva su propio `distrito_id`.** El caso no lo impone: hay alertas cuya señal
+   ocurre en otro punto del territorio que el expediente y ese dato es información, no ruido.
+2. **Herencia sólo si el hueco es real**: alerta **sin** distrito y caso **con** distrito, tanto en
+   `createAlert` como al vincular un caso en `updateAlert`. **Nunca** se sobrescribe un distrito
+   declarado, ni siquiera cuando difiere del caso.
+3. **La edición permite cambiarlo** con el buscador (`soloDistritos`). Si el distrito elegido difiere
+   del caso, el formulario **pide confirmación** antes de guardar: «Usar el del caso» o «Mantener el
+   de la alerta». Sin ese paso el guardado no se envía.
+4. **El alta no puede comparar antes de guardar** porque todavía no conoce el distrito del caso; el
+   aviso de éxito lo declara si difieren («El distrito de la alerta (Lima) no coincide con el del
+   caso (Chilca): revise la vinculación»). El formulario sí avisa de antemano que, sin distrito, se
+   usará el del caso al guardar.
+
+**Pendiente declarado, no automatizable.** `AT-2026-25` y `AT-2026-43` deben **re-vincularse** a
+`CS-MI-INF-2025-01`; es una corrección de dato que decide OAIPCS, no una regla de código. Las 14
+alertas de casos nacionales seguirán sin distrito hasta que el caso declare territorio, y eso no se
+estima.
+
+**Cómo se verificó (herencia).** Prueba transaccional con `rollback` sobre la base local, con el
+usuario `AUT-002` y rol `administrador`: (a) `AT-2026-84`, que ya tenía Lima, conservó `424` al
+re-vincular su caso (Chilca) —no se pisa—; (b) `AT-2026-01`, sin distrito, heredó `615` (El Alto) al
+re-vincular `CS-PA-OAT-2024-02`; (c) `distritoId: null` limpió el distrito y dejó el tri-estado en
+`null`; (d) un alta sin distrito con el caso de Ancón heredó `425`; (e) un alta con Lima `424` y el
+mismo caso conservó `424` con coincidencia `false`; (f) un alta con `CS-PA-OAT-2026-01` (caso sin
+distrito) quedó en `NULL`. Tras el rollback: **83** alertas, **0** filas de prueba, **0** registros de
+auditoría y el último código sigue en `AT-2026-90`.
 
 **Cómo se verificó (reutilización).** `distritos` no tiene región directa —va por `provincia_id`— y
 una búsqueda `Arequipa` devuelve la región exacta `Arequipa`, que es la misma cadena que filtra
@@ -1180,3 +1244,136 @@ Matarani `gis/derived/0002_territorio_lugares_matarani.sql`. Ambas dejaron respa
 `core.distritos_backup_20261123` y `core.provincias_backup_20261123`. Las regiones conservan su
 nombre sin tilde (`Ancash`, `Apurimac`, `Huanuco`, `Junin`); si se acentúan (como en el INEI
 `Áncash`…) hay que hacerlo en las 25 a la vez y revisar las cadenas fijas del frontend, no a medias.
+
+## Naturaleza del caso: territorial frente a nacional o sectorial (2026-11-23)
+
+**El hueco que resuelve.** El sistema tenía un solo eje de «alcance» y lo usaba para dos cosas
+distintas. `core.cat_alcances_geograficos` (Norte / Centro / Sur / Oriente / Nacional) es un dato
+**derivado**: `core.alcance_caso(uuid)` lo calcula a partir de las regiones del caso y, cuando hay
+varias, cae a «Nacional». Ese «Nacional» significa «toca más de una región», **no** «su causa es una
+norma, una cuota o una temporada». Son dos preguntas diferentes:
+
+- `CS-PA-OAT-2026-01` (calamar gigante) afecta 11 regiones por una medida de **ordenamiento**: es
+  nacional/sectorial en su naturaleza, no sólo en su alcance.
+- `CS-PA-GOB-2026-02` (formalización pesquera en Piura y Lambayeque) también deriva «Nacional»,
+  pero su causa está en dos territorios concretos: es **territorial multirregional**.
+
+La distinción importa porque evita pedirle un distrito a un caso cuya causa no está en ninguno:
+un caso sectorial no se «ubica» en un punto del territorio. También explica el hueco del distrito
+descrito en «Distrito de la alerta frente al distrito del caso».
+
+**Por qué se declara y no se deriva.** Derivarla del alcance repetiría el error que se está
+corrigiendo: «Nacional» ya es ambiguo. Derivarla de la temática tampoco sirve (`Ordenamiento y acceso
+territorial` agrupa casos de causa nacional y casos de un solo puerto). Se añade entonces un eje
+**declarado a mano**, y `NULL` significa **sin declarar**: el dato se declara, no se estima.
+
+### Lo que se creó
+
+- `core.cat_naturalezas_caso (id smallint pk, codigo varchar(40) unique, descripcion text)` con dos
+  filas: `1 · Territorial` y `2 · Nacional o sectorial`. La `descripcion` guarda el criterio, para
+  que nadie tenga que deducirlo del nombre.
+- `core.casos.naturaleza_id smallint` **anulable**, con FK `casos_naturaleza_id_fkey` e índice
+  `casos_naturaleza_idx`. `NULL` = sin declarar.
+- Respaldo `core.casos_naturaleza_backup_20261123` (**35 filas** = 28 previas + 7 sembradas; la
+  columna `origen` marca `previo` frente a `siembra_migracion_40`).
+- Migración `migration/40_casos_naturaleza.sql` (reejecutable, con verificaciones dentro de la
+  transacción y bloque de reversión comentado) y fila `40_casos_naturaleza` en `core.migracion_log`.
+- `core.alcance_caso()` y `core.cat_alcances_geograficos` quedan **intactos**: el alcance sigue siendo
+  geográfico y derivado. No se añadieron triggers: la naturaleza es un atributo, no una derivación.
+
+**No confundir** con `core.actores.naturaleza` (pública / privada / …), que ya existía en el
+directorio de actores y es otro concepto.
+
+### Evidencia de la siembra
+
+Se declararon **7 casos** de causa nacional/sectorial con evidencia inequívoca. Los 8 casos vivos sin
+`region_principal_id` son exactamente estos; el octavo queda fuera a propósito:
+
+| Caso                | Regiones | Alertas vivas | Demandas | Temática                          | Declarado            |
+| ------------------- | -------- | ------------- | -------- | --------------------------------- | -------------------- |
+| `CS-PA-ITE-2026-02` | 11       | 0             | 0        | Impactos de terceros              | Nacional o sectorial |
+| `CS-PA-NOR-2025-01` | 7        | 1             | 3        | Normatividad                      | Nacional o sectorial |
+| `CS-PA-OAT-2024-03` | 5        | 0             | 0        | Ordenamiento y acceso territorial | Nacional o sectorial |
+| `CS-PA-OAT-2026-01` | 11       | 6             | 81       | Ordenamiento y acceso territorial | Nacional o sectorial |
+| `CS-PA-OAT-2026-02` | 10       | 5             | 27       | Ordenamiento y acceso territorial | Nacional o sectorial |
+| `CS-PA-OAT-2026-03` | 4        | 1             | 4        | Ordenamiento y acceso territorial | Nacional o sectorial |
+| `CS-PA-OAT-2026-04` | 7        | 3             | 9        | Ordenamiento y acceso territorial | Nacional o sectorial |
+| `CS-PA-GOB-2026-02` | 2        | 0             | 0        | Gobernanza                        | **Sin declarar**     |
+
+- **Criterio de siembra.** Sólo se declara «Nacional o sectorial» cuando el **título** del caso nombra
+  un instrumento o medida de alcance nacional (ley, cuota, temporada, medida de ordenamiento,
+  DENP/CITES) y sus regiones son consecuencia de esa medida, no su causa. `CS-PA-GOB-2026-02`
+  («Ampliación del proceso de formalización pesquera en Piura y Lambayeque») nombra dos regiones
+  concretas: es territorial multirregional y se deja en `NULL`. Llamarlo nacional sin evidencia sería
+  justo lo que esta columna quiere evitar.
+- **`Territorial` está declarada en 0 casos.** No se sembró ninguno: el catálogo existe para que se
+  declare desde el alta o por `PATCH`. Por eso el filtro «Territorial» devuelve **0** hoy, y eso es
+  correcto, no un fallo.
+- **Los 7 siguen derivando «Nacional»** en `core.alcance_caso()`: la siembra no alteró el alcance ni
+  el Anexo 15.
+- **Reversible por OAIPCS sin migración**: basta un `UPDATE` para devolver cualquier fila a `NULL` o
+  cambiarla a `Territorial`; el respaldo conserva el punto de partida.
+
+### Efecto sobre el distrito de la alerta
+
+Los **7 casos** sembrados son los que explican **14 de las 18** alertas con caso y sin distrito
+citadas en «Distrito de la alerta frente al distrito del caso»: no hay distrito que heredar porque el
+conflicto es de política sectorial y las alertas son plantones y marchas. Las **4 restantes** sí
+tienen un caso con distrito; ahí el hueco lo dejó la carga. Declarar la naturaleza **no rellena** ese
+hueco: lo **documenta** y lo hace filtrable.
+
+### Contrato de API
+
+| Operación                  | Forma                                                                                                                                                    |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET /v1/cases`            | `?naturaleza=<código>` filtra por naturaleza declarada. El literal **«Sin declarar»** aísla los `naturaleza_id` nulos. Un código inexistente es **422**. |
+| `POST /v1/cases`           | `naturaleza` opcional; omitirla guarda `NULL` (estado legítimo, no un valor por defecto).                                                                |
+| `PATCH /v1/cases/{codigo}` | Campo con presencia: ausente = sin cambio; `null` o cadena vacía = limpia; valor inexistente = **422**.                                                  |
+| `GET /v1/catalogs`         | Nueva colección `naturalezasCaso` (id, codigo, etiqueta, descripcion).                                                                                   |
+
+`core.normalizar_ref` hace que `Nacional o sectorial` y `Nacional_o_sectorial` sean el mismo valor
+(quita espacios, guiones bajos, guiones, mayúsculas y tildes), así que la grafía de la URL no es
+frágil. La escritura pasa por `CASE_WRITE_COLUMNS`, de modo que el cambio queda en la auditoría del
+caso.
+
+### Interfaz
+
+- **Listado de casos** (`casos.page`): selector «Naturaleza» en la barra avanzada, con las opciones
+  del catálogo más una fija `Sin declarar`; el filtro viaja en la URL (`?naturaleza=`). Cada tarjeta
+  muestra un chip con la naturaleza y, si es `NULL`, «Sin declarar» con **borde discontinuo** para que
+  no se lea como un valor más.
+- **Alta de caso** (`caso-panel`): selector «Naturaleza del caso» con opción vacía «Sin declarar»,
+  colocado antes de Subsector. El envío incluye `naturaleza` sólo si se eligió un valor.
+- **Ficha del caso** (`caso-detalle`, `caso-vista-previa`): fila «Naturaleza del caso» con el chip y
+  la ayuda emergente (`app-glosario`). Si está sin declarar, el texto lo dice y aclara que se declara
+  a mano, no se deriva del alcance.
+- **Glosario y ayuda**: término `naturaleza-caso` y sección `alcance` retitulada «Alcance territorial
+  y naturaleza del caso», que explica la diferencia entre los dos ejes.
+
+### Cómo se verificó
+
+- Base: la evidencia de la tabla salió de la base local (`docker exec -i avisa-db psql ...`); el
+  reparto da **7 declarados / 27 sin declarar** sobre **34 casos vivos**, y el respaldo **28 + 7 = 35**.
+- Prueba transaccional con `rollback` sobre PostgreSQL local (**17 comprobaciones, 17 correctas**):
+  catálogo con 2 naturalezas; `Nacional o sectorial` = **7**; `Territorial` = **0**; `Sin declarar` =
+  el resto; filtro inventado → **422**; ficha de la pota → nacional; una ficha sin declarar → `NULL`;
+  alta con naturaleza → se declara y aparece en el filtro; `PATCH null` → sin declarar; `PATCH` a
+  nacional; `Nacional_o_sectorial` aceptado; `PATCH` inválido → **422**; alta sin naturaleza → `NULL`.
+  Al revertir: **34** casos vivos y **57** filas de auditoría, sin residuos.
+- Código: `npx tsc --noEmit`, `npm --prefix angular run typecheck` y `npm --prefix angular run build`
+  pasan. El `build` es obligatorio porque el `typecheck` no valida plantillas.
+
+**Nota de lectura de las cifras.** La prueba se ejecutó como rol `avisa`, que es superusuario con
+`rolbypassrls`: `listCases` sin filtro devuelve **35** (incluye el caso anulado) y «Sin declarar»
+**28**. En una conexión con RLS real serían **34** y **27**. Por eso la prueba usa el invariante
+`sinDeclarar = todos − nacionales − territoriales` en lugar de un número fijo.
+
+### Pendiente declarado
+
+- **No hay pantalla de edición de caso**: hoy la naturaleza se elige en el alta y se puede cambiar por
+  `PATCH`, pero no existe un formulario de edición que la exponga. Es el mismo hueco que tienen los
+  demás campos del caso, no uno nuevo.
+- **`Territorial` sigue en 0**: declarar los 27 restantes es una decisión de OAIPCS caso por caso; no
+  se sembraron desde el código porque exigiría adivinar la causa de cada conflicto.
+- Los 7 valores son una **propuesta documentada**, no un hecho del sistema: se pueden revertir a
+  `NULL` con un `UPDATE`, sin migración.

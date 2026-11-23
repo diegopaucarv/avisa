@@ -22,6 +22,7 @@ const CASE_SELECT = `
   nc.nombre as nivel_conflicto,
   ci.nombre as stage,
   te.nombre as tematica,
+  nat.codigo as naturaleza,
   su.nombre as subsector,
   uo.siglas as unidad_responsable,
   c.origen_dato as origen,
@@ -42,6 +43,7 @@ const CASE_FROM = `
   left join core.cat_niveles_conflicto nc on nc.id = c.nivel_conflicto_id
   left join core.cat_ciclos_intervencion ci on ci.id = c.ciclo_intervencion_id
   left join core.cat_tematicas te on te.id = c.tematica_id
+  left join core.cat_naturalezas_caso nat on nat.id = c.naturaleza_id
   left join core.cat_subsectores su on su.id = c.subsector_id
   left join core.cat_unidades_organicas uo on uo.id = c.unidad_responsable_id
   left join core.regiones rp on rp.id = c.region_principal_id
@@ -65,6 +67,11 @@ export type CaseListQuery = {
   nivel?: string;
   alcance?: string;
   tematica?: string;
+  /**
+   * Naturaleza declarada del caso (`core.cat_naturalezas_caso.codigo`) o el
+   * literal «Sin declarar», que aísla los casos con `naturaleza_id` nulo.
+   */
+  naturaleza?: string;
   unidad?: string;
   region?: string;
   /**
@@ -109,6 +116,11 @@ export type CaseListItem = {
   nivelConflicto: string | null;
   stage: string | null;
   tematica: string | null;
+  /**
+   * Naturaleza declarada (Territorial / Nacional o sectorial) o `null` si aún
+   * no se declaró. No se deriva del alcance geográfico.
+   */
+  naturaleza: string | null;
   subsector: string | null;
   unidadResponsable: string | null;
   origen: string | null;
@@ -272,6 +284,29 @@ async function construirWhere(
     "c.tematica_id",
     query.tematica,
   );
+
+  // «Sin declarar» no es un valor del catálogo sino la ausencia de valor: se
+  // reconoce aquí para poder aislar los casos con `naturaleza_id` nulo.
+  const naturaleza = query.naturaleza?.trim();
+  if (naturaleza) {
+    const sinDeclarar = await client.query<{ coincide: boolean }>(
+      `select core.normalizar_ref($1) = 'sindeclarar' as coincide`,
+      [naturaleza],
+    );
+    if (sinDeclarar.rows[0]?.coincide) {
+      where.push("c.naturaleza_id is null");
+    } else {
+      await filtrarPorCatalogo(
+        client,
+        where,
+        bind,
+        "naturaleza",
+        "naturaleza",
+        "c.naturaleza_id",
+        naturaleza,
+      );
+    }
+  }
   await filtrarPorCatalogo(
     client,
     where,
@@ -369,6 +404,7 @@ export async function listCases(
     nivelConflicto: row.nivel_conflicto,
     stage: row.stage,
     tematica: row.tematica,
+    naturaleza: row.naturaleza,
     subsector: row.subsector,
     unidadResponsable: row.unidad_responsable,
     origen: row.origen,
@@ -768,6 +804,7 @@ export async function getCaseByCode(
     nivelConflicto: row.nivel_conflicto,
     stage: row.stage,
     tematica: row.tematica,
+    naturaleza: row.naturaleza,
     subsector: row.subsector,
     unidadResponsable: row.unidad_responsable,
     origen: row.origen,
@@ -858,6 +895,7 @@ const CASE_WRITE_COLUMNS = [
   "nivel_conflicto_id",
   "ciclo_intervencion_id",
   "tematica_id",
+  "naturaleza_id",
   "subsector_id",
   "unidad_responsable_id",
   "region_principal_id",
@@ -873,6 +911,7 @@ type CatalogKey =
   | "nivelConflicto"
   | "ciclo"
   | "tematica"
+  | "naturaleza"
   | "subsector"
   | "unidadResponsable";
 
@@ -898,6 +937,10 @@ const CASE_CATALOGS: Record<
     table: "core.cat_tematicas",
     code: "codigo_legado",
     alt: "nombre",
+  },
+  naturaleza: {
+    table: "core.cat_naturalezas_caso",
+    code: "codigo",
   },
   subsector: {
     table: "core.cat_subsectores",
@@ -1113,8 +1156,9 @@ async function catalogValue(
  * y se guardan como NULL. Cualquier otro valor debe existir en el catálogo;
  * si no, es un dato inválido (422) y no un borrado encubierto.
  *
- * Sólo `tematica` es anulable hoy (`core.casos.tematica_id`, migración 0003).
- * El resto de columnas de catálogo de `core.casos` siguen siendo NOT NULL.
+ * `tematica` (migración 0003) y `naturaleza` (migración 40) son anulables: en
+ * ambas, NULL significa «pendiente» y la interfaz lo pinta como tal. El resto de
+ * columnas de catálogo de `core.casos` siguen siendo NOT NULL.
  */
 async function resolveOptionalCatalog(
   client: PoolClient,
@@ -1442,6 +1486,13 @@ export async function createCase(
     "tematica",
     tematica.value,
   );
+  // Naturaleza declarada: opcional. Omitirla guarda NULL («sin declarar»), que
+  // es un estado legítimo y no un valor por defecto.
+  const naturalezaId = await resolveOptionalCatalog(
+    client,
+    "naturaleza",
+    readField(body, ["naturaleza"]).value,
+  );
   const subsectorId = await resolveCatalogOrDefault(
     client,
     "subsector",
@@ -1462,6 +1513,7 @@ export async function createCase(
       ),
     },
     { column: "tematica_id", value: tematicaId },
+    { column: "naturaleza_id", value: naturalezaId },
     { column: "subsector_id", value: subsectorId },
     {
       column: "unidad_responsable_id",
@@ -1675,6 +1727,14 @@ export async function updateCase(
     add(
       "tematica_id",
       await resolveOptionalCatalog(client, "tematica", tematica.value),
+    );
+  }
+
+  const naturaleza = readField(body, ["naturaleza"]);
+  if (naturaleza.present) {
+    add(
+      "naturaleza_id",
+      await resolveOptionalCatalog(client, "naturaleza", naturaleza.value),
     );
   }
 
