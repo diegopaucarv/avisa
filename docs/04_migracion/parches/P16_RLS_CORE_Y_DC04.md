@@ -1,6 +1,6 @@
 # P16 — Seguridad por fila en core y registro del banco de datos
 
-**Proyecto:** AVISA / SIPRECS — OAIPCS, Ministerio de la Producción
+**Proyecto:** AVISA / SIPRECS — OAIPCS, PRODUCE
 **Marco:** ERS v0.6 RF-A03, Anexo D (Ley 29733, inscripción del banco de datos personales)
 **Entorno de aplicación:** contenedor `avisa-db`, PostgreSQL 16.14, esquema v10
 **Parche:** `docs/PARCHE_16_RLS_CORE_Y_DC04.sql` (idempotente)

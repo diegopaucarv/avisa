@@ -1,6 +1,6 @@
 # P14 — Cierre de brechas del ERS
 
-**Proyecto:** AVISA / SIPRECS — OAIPCS, Ministerio de la Producción
+**Proyecto:** AVISA / SIPRECS — OAIPCS, PRODUCE
 **Marco:** ERS v0.6 (`docs/01_requisitos/ERS_AVISA_PRODUCE_v0.6.md`), RF-A03, RF-A04, RF-D01, §12.4, §12.5
 **Entorno de aplicación:** contenedor `avisa-db`, PostgreSQL 16.14, esquema v10
 **Parche:** `docs/PARCHE_14_CIERRE_ERS.sql` (idempotente, 1 016 líneas)

@@ -1,6 +1,6 @@
 # P9 — Seguridad de nivel alto sobre datos personales de actores
 
-**Proyecto:** AVISA / SIPRECS — OAIPCS, Ministerio de la Producción
+**Proyecto:** AVISA / SIPRECS — OAIPCS, PRODUCE
 **Marco legal:** Ley 29733 (protección de datos personales), principios de
 finalidad (art. 6), seguridad (art. 9) y datos sensibles (art. 13).
 **Entorno de aplicación:** contenedor `avisa-db`, PostgreSQL 16.14,

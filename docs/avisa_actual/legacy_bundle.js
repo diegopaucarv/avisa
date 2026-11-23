@@ -1522,7 +1522,7 @@ function abrirWhatsAppCasoTabla(codigoCaso) {
   var hoy = new Date();
   var fechaStr = hoy.getDate() + '/' + (hoy.getMonth() + 1) + '/' + hoy.getFullYear();
   var deptNombre = (typeof DEPTO_MAP !== 'undefined' ? DEPTO_MAP[caso.ID_Departamento] : '') || caso.ID_Departamento || "\u2014";
-  var msg = "\uD83D\uDEE1\uFE0F *Seguimiento de Prevenci\u00F3n de Conflictos Sociales \u2014 Ministerio de Producci\u00F3n*\n";
+  var msg = "\uD83D\uDEE1\uFE0F *Seguimiento de Prevenci\u00F3n de Conflictos Sociales \u2014 PRODUCE*\n";
   msg += "_Oficina de Articulaci\u00F3n Intergubernamental y Prevenci\u00F3n de Conflictos Sociales - OAIPCS_\n\n";
   msg += "\uD83D\uDCC1 *CASO DE CONFLICTIVIDAD*\n\n";
   msg += "*C\u00F3digo:* " + (caso.Codigo_Caso || '') + '\n';
@@ -3967,7 +3967,7 @@ function mostrarBienvenida(usuario) {
   var h = '<div style="background:#fff;border-radius:16px;max-width:560px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.3);overflow:hidden">';
   h += "<div style=\"background:linear-gradient(135deg,#002d5a,#0057a8);padding:24px 28px;color:#fff\"><div style=\"font-size:28px\">\uD83D\uDEE1\uFE0F</div>";
   h += '<h2 style="font-size:18px;font-weight:700;margin:8px 0 0">Bienvenido/a al Sistema AVISA</h2>';
-  h += "<p style=\"font-size:13px;opacity:.8;margin:4px 0 0\">Ministerio de Producci\u00F3n &mdash; OAIPCS</p></div>";
+  h += "<p style=\"font-size:13px;opacity:.8;margin:4px 0 0\">PRODUCE &mdash; OAIPCS</p></div>";
   h += '<div style="padding:24px 28px">';
   h += '<p style="font-size:14px;color:#1a2332;margin-bottom:14px">Hola <strong>' + usuario + '</strong>, bienvenido/a al AVISA.</p>';
   h += '<div style="background:#f0f7ff;border-radius:10px;padding:14px;margin-bottom:12px;border-left:4px solid #0057a8">';
@@ -4181,7 +4181,7 @@ function mostrarBienvenida(usuario) {
   var h = '<div style="background:#fff;border-radius:16px;max-width:560px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.3);overflow:hidden">';
   h += "<div style=\"background:linear-gradient(135deg,#002d5a,#0057a8);padding:24px 28px;color:#fff\"><div style=\"font-size:28px\">\uD83D\uDEE1\uFE0F</div>";
   h += '<h2 style="font-size:18px;font-weight:700;margin:8px 0 0">Bienvenido/a al Sistema AVISA</h2>';
-  h += "<p style=\"font-size:13px;opacity:.8;margin:4px 0 0\">Ministerio de Producci\u00F3n &mdash; OAIPCS</p></div>";
+  h += "<p style=\"font-size:13px;opacity:.8;margin:4px 0 0\">PRODUCE &mdash; OAIPCS</p></div>";
   h += '<div style="padding:24px 28px">';
   h += '<p style="font-size:14px;color:#1a2332;margin-bottom:14px">Hola <strong>' + usuario + '</strong>, bienvenido/a al AVISA.</p>';
   h += '<div style="background:#f0f7ff;border-radius:10px;padding:14px;margin-bottom:12px;border-left:4px solid #0057a8">';

@@ -1,6 +1,6 @@
 # P22 — Visibilidad, G21 ejecutable y la suplencia
 
-**Proyecto:** AVISA / SIPRECS — OAIPCS, Ministerio de la Producción
+**Proyecto:** AVISA / SIPRECS — OAIPCS, PRODUCE
 **Marco:** ERS v0.6 — G21 (§11.8, §14.4), RN-04, RD-08 y §2.2 de `mvp.md`
 **Entorno de aplicación:** contenedor `avisa-db`, PostgreSQL 16, esquema v10
 **Parche:** `docs/PARCHE_22_VISIBILIDAD_Y_G21.sql` (idempotente, re-ejecutable)

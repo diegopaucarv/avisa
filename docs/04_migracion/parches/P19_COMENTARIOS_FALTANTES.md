@@ -1,6 +1,6 @@
 # P19 — Los 19 comentarios que faltaban
 
-**Proyecto:** AVISA / SIPRECS — OAIPCS, Ministerio de la Producción
+**Proyecto:** AVISA / SIPRECS — OAIPCS, PRODUCE
 **Marco:** modelo v10 y la regla de diccionario que fijó el parche 12 —ninguna columna del modelo sin descripción en la propia base—; trazabilidad RA-07, RF-D13, RA-08 y RN-17 de las tablas y columnas que creó el parche 17.
 **Entorno de aplicación:** contenedor `avisa-db`, PostgreSQL 16, esquema v10
 **Parche:** `docs/PARCHE_19_COMENTARIOS_FALTANTES.sql` (idempotente, montado como `109_patch_19.sql` en `compose.yaml`, bloque `B.14` del unificado)

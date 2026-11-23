@@ -1,6 +1,6 @@
 # P13 — Clasificación: una sola forma de escribirlo
 
-**Proyecto:** AVISA / SIPRECS — OAIPCS, Ministerio de la Producción
+**Proyecto:** AVISA / SIPRECS — OAIPCS, PRODUCE
 **Marco:** modelo v10; catálogo `core.cat_clasificacion`; curaduría de columnas
 (`migration/curacion_v10_columnas.py` y `PARCHE_12`); Ley N.° 29733, citada en
 `docs/_archivo/P13_CLASIFICACION.md` §8

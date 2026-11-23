@@ -1516,7 +1516,7 @@ function generarMensajeWA(tipo, doc) {
   const sitActual = doc.Situaci\\u00F3n_Actual || doc.Resumen_Ejecutivo ||
                     doc.Situaci\\u00F3n_Actual_Clima || '';
 
-  let msg = \`\\uD83D\\uDEE1\\uFE0F *SIPRECS \\u2014 Ministerio de Producci\\u00F3n*\\\\n\`;
+  let msg = \`\\uD83D\\uDEE1\\uFE0F *SIPRECS \\u2014 PRODUCE*\\\\n\`;
   msg += \`_Oficina de Articulaci\\u00F3n Intergubernamental_\\\\n\\\\n\`;
   msg += \`\${encabezado}\\\\n\`;
   msg += \`_\${titulo}_\\\\n\\\\n\`;
@@ -4001,7 +4001,7 @@ function mostrarBienvenida(usuario) {
   var h = '<div style="background:#fff;border-radius:16px;max-width:560px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.3);overflow:hidden">';
   h += '<div style="background:linear-gradient(135deg,#002d5a,#0057a8);padding:24px 28px;color:#fff"><div style="font-size:28px">\\uD83D\\uDEE1\\uFE0F</div>';
   h += '<h2 style="font-size:18px;font-weight:700;margin:8px 0 0">Bienvenido/a al Sistema SIPRECS</h2>';
-  h += '<p style="font-size:13px;opacity:.8;margin:4px 0 0">Ministerio de Producci\\u00F3n &mdash; OAIPCS</p></div>';
+  h += '<p style="font-size:13px;opacity:.8;margin:4px 0 0">PRODUCE &mdash; OAIPCS</p></div>';
   h += '<div style="padding:24px 28px">';
   h += '<p style="font-size:14px;color:#1a2332;margin-bottom:14px">Hola <strong>'+usuario+'</strong>, bienvenido/a al SIPRECS.</p>';
   h += '<div style="background:#f0f7ff;border-radius:10px;padding:14px;margin-bottom:12px;border-left:4px solid #0057a8">';
@@ -4161,7 +4161,7 @@ function mostrarBienvenida(usuario) {
   var h = '<div style="background:#fff;border-radius:16px;max-width:560px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.3);overflow:hidden">';
   h += '<div style="background:linear-gradient(135deg,#002d5a,#0057a8);padding:24px 28px;color:#fff"><div style="font-size:28px">\\uD83D\\uDEE1\\uFE0F</div>';
   h += '<h2 style="font-size:18px;font-weight:700;margin:8px 0 0">Bienvenido/a al Sistema SIPRECS</h2>';
-  h += '<p style="font-size:13px;opacity:.8;margin:4px 0 0">Ministerio de Producci\\u00F3n &mdash; OAIPCS</p></div>';
+  h += '<p style="font-size:13px;opacity:.8;margin:4px 0 0">PRODUCE &mdash; OAIPCS</p></div>';
   h += '<div style="padding:24px 28px">';
   h += '<p style="font-size:14px;color:#1a2332;margin-bottom:14px">Hola <strong>'+usuario+'</strong>, bienvenido/a al SIPRECS.</p>';
   h += '<div style="background:#f0f7ff;border-radius:10px;padding:14px;margin-bottom:12px;border-left:4px solid #0057a8">';

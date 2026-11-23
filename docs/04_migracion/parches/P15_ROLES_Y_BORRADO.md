@@ -1,6 +1,6 @@
 # P15 — El rol manda: nivel y capacidades
 
-**Proyecto:** AVISA / SIPRECS — OAIPCS, Ministerio de la Producción
+**Proyecto:** AVISA / SIPRECS — OAIPCS, PRODUCE
 **Marco:** ERS v0.6 §6 (roles y permisos), RA-02, RD-08
 **Entorno de aplicación:** contenedor `avisa-db`, PostgreSQL 16, esquema v10
 **Parche:** `docs/PARCHE_15_ROLES_Y_BORRADO.sql` (idempotente)

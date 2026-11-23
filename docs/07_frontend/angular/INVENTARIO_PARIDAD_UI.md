@@ -45,7 +45,7 @@
 - **Ubicación:** `components/avisa-login.tsx:8-10` (componente en una sola línea compacta);
   montada desde `app/page.tsx`.
 - **Datos:** formulario DNI (`maxLength=12`, solo dígitos) + contraseña. Marca «AVISA»,
-  «MINISTERIO DE PRODUCCIÓN · OAIPCS», panel lateral «AVISA · 2026».
+  «PRODUCE · OAIPCS», panel lateral «AVISA · 2026».
 - **Acciones:** «Ingresar al aplicativo» → `login(dni, password)` (`frontend/api.ts:3-12`),
   que hace `POST /api/auth/login` (`frontend/api.ts:4`). Éxito → `onSuccess(session)`.
 - **Estados:** error inline `role="alert"` («DNI o clave incorrectos. Verifique sus credenciales.»),

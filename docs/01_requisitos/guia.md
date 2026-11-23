@@ -1,6 +1,6 @@
 ![](_page_0_Figure_0.jpeg)
 
-## **MINISTERIO DE LA PRODUCCIÓN**
+## **PRODUCE**
 
 ## **Ministro de la Producción**
 
@@ -38,7 +38,7 @@ Consejo Directivode ProDiálogo, Gustavo Moreno, Iván Ormachea, Pastor Paredes,
 
 # **GUÍA DE PREVENCIÓN Y GESTIÓN DE CONFLICTOS SOCIALES EN EL SECTOR PRODUCCIÓN**
 
-## **Ministerio de la Producción**
+## **PRODUCE**
 
 Oficina de Articulación Intergubernamental y Prevención de Conflictos Sociales (OAIPCS)
 
@@ -46,7 +46,7 @@ Lima, 2026
 
 #### **RESUMEN EJECUTIVO**
 
-La presente Guía de Prevención y Gestión de Conflictos Sociales en el Sector Producción establece los lineamientos, procesos y herramientas para la prevención, gestión y transformación de controversias y conflictos sociales en el ámbito del Ministerio de la Producción (PRODUCE), a cargo de la Oficina de Articulación Intergubernamental y Prevención de Conflictos Sociales (OAIPCS). Su finalidad es fortalecer la capacidad institucional del sector para actuar de manera oportuna, articulada y sostenible, contribuyendo a la gobernanza sectorial, la continuidad de las actividades productivas y la paz social. Más allá de su función normativa, esta guía se concibe como un complemento metodológico al lineamiento sectorial vigente, con un propósito que trasciende la formalización de procesos, para especializar técnicamente la gestión de los conflictos, dotando a cualquier gestor público de una orientación conceptual clara y específica, adecuada a las características propias del Sector Producción y los tipos de conflictos que en él emergen.
+La presente Guía de Prevención y Gestión de Conflictos Sociales en el Sector Producción establece los lineamientos, procesos y herramientas para la prevención, gestión y transformación de controversias y conflictos sociales en el ámbito del PRODUCE (PRODUCE), a cargo de la Oficina de Articulación Intergubernamental y Prevención de Conflictos Sociales (OAIPCS). Su finalidad es fortalecer la capacidad institucional del sector para actuar de manera oportuna, articulada y sostenible, contribuyendo a la gobernanza sectorial, la continuidad de las actividades productivas y la paz social. Más allá de su función normativa, esta guía se concibe como un complemento metodológico al lineamiento sectorial vigente, con un propósito que trasciende la formalización de procesos, para especializar técnicamente la gestión de los conflictos, dotando a cualquier gestor público de una orientación conceptual clara y específica, adecuada a las características propias del Sector Producción y los tipos de conflictos que en él emergen.
 
 El marco conceptual de la guía se sustenta en una gestión adaptativa de los conflictos sociales, enfoque que reconoce la naturaleza dinámica y no lineal de la conflictividad en sectores como pesca, acuicultura, industria y MYPE. Frente a la variabilidad económica, territorial, ambiental e institucional, la gestión adaptativa propone procesos iterativos de toma de decisiones basados en monitoreo, aprendizaje continuo y ajuste progresivo. Sus principios orientadores —interacción y aprendizaje continuo, gestión basada en evidencia territorial, flexibilidad de la gobernanza, enfoque sistémico y orientación preventiva y transformativa configuran toda intervención sectorial y constituyen el núcleo articulador de los contenidos de esta guía.
 
@@ -145,7 +145,7 @@ La gestión de la conflictividad social en el Sector Producción es un proceso c
 
 #### *¿Para qué sirve esta guía?*
 
-La presente guía establece los lineamientos, procesos y herramientas para la prevención, gestión y transformación de controversias y conflictos sociales en el ámbito del Ministerio de la Producción. Su propósito es orientar la actuación articulada y estandarizada de sus unidades orgánicas, programas y organismos públicos adscritos, de modo que, frente a una tensión o conflicto, exista una manera común de entenderlo y responder a él.
+La presente guía establece los lineamientos, procesos y herramientas para la prevención, gestión y transformación de controversias y conflictos sociales en el ámbito del PRODUCE. Su propósito es orientar la actuación articulada y estandarizada de sus unidades orgánicas, programas y organismos públicos adscritos, de modo que, frente a una tensión o conflicto, exista una manera común de entenderlo y responder a él.
 
 ### **II. FINALIDAD**
 
@@ -157,7 +157,7 @@ Fortalecer la capacidad institucional del Sector Producción para prevenir y ges
 
 ### *¿A quiénes aplica?*
 
-Las disposiciones contenidas en la presente guía son de aplicación para las unidades orgánicas, programas y organismos públicos adscritos del Ministerio de la Producción (PRODUCE).
+Las disposiciones contenidas en la presente guía son de aplicación para las unidades orgánicas, programas y organismos públicos adscritos del PRODUCE (PRODUCE).
 
 # **IV. BASE LEGAL**
 
@@ -166,8 +166,8 @@ La presente guía se sustenta en el siguiente marco normativo:
 - Constitución Política del Perú.
 - Ley N° 29158, Ley Orgánica del Poder Ejecutivo.
 - Ley N° 27658, Ley Marco de Modernización de la Gestión del Estado.
-- Decreto Legislativo N° 1047, Ley de Organización y Funciones del Ministerio de la Producción.
-- Decreto Supremo N° 002-2017-PRODUCE, que aprueba el Reglamento de Organización y Funciones del Ministerio de la Producción.
+- Decreto Legislativo N° 1047, Ley de Organización y Funciones del PRODUCE.
+- Decreto Supremo N° 002-2017-PRODUCE, que aprueba el Reglamento de Organización y Funciones del PRODUCE.
 - Decreto Ley N° 25977, Ley General de Pesca y su Reglamento.- Decreto Legislativo N.° 1195, que aprueba la Ley General de Acuicultura.
 - Decreto Supremo N.° 003-2016-PRODUCE, que aprueba el Reglamento de la Ley General de Acuicultura.
 - Ley N° 28983, Ley de Igualdad de Oportunidades.
@@ -545,7 +545,7 @@ La gestión de la conflictividad se sustenta en el análisis continuo y sistemá
 ### **7.7.1.1. Fuentes primarias**
 
 - **Fuentes primarias de relacionamiento:** información obtenida mediante interacción directa con actores en territorio, espacios de diálogo, visitas de campo, coordinación interinstitucional y actividades de gestión social. Esta información refleja percepciones, posiciones, riesgos y dinámicas no necesariamente visibles en fuentes abiertas.
-- **Fuentes primarias institucionales:** información generada por las propias entidades del Estado, incluyendo reportes internos, sistemas administrativos, información técnica sectorial y datos provenientes de organismos públicos del Ministerio de la Producción y otras entidades del Ejecutivo.
+- **Fuentes primarias institucionales:** información generada por las propias entidades del Estado, incluyendo reportes internos, sistemas administrativos, información técnica sectorial y datos provenientes de organismos públicos del PRODUCE y otras entidades del Ejecutivo.
 
 #### **7.7.1.2. Fuentes secundarias**
 
@@ -755,7 +755,7 @@ El reporte regional de conflictividad y demandas se elabora según **Anexo N° 2
 
 ## *¿Cómo reconoce el sector indicios tempranos de conflictividad social?*
 
-La RED-RADAR PRODUCE es el mecanismo territorial de articulación multinivel y descentralizada orientado a identificar señales tempranas de tensión, discrepancias y controversias en el Sector Producción antes de que escalen a conflictos sociales abiertos. Opera de forma permanente y continua en el territorio nacional como sistema preventivo, articulando las capacidades institucionales del Ministerio de la Producción con actores territoriales públicos y privados, en complementariedad con otros mecanismos de coordinación territorial, como los Comités Regionales de Prevención y Gestión de Conflictos Sociales (COPREGESCON), en el marco de sus respectivas competencias, bajo un enfoque de coordinación intersectorial y construcción de confianza.
+La RED-RADAR PRODUCE es el mecanismo territorial de articulación multinivel y descentralizada orientado a identificar señales tempranas de tensión, discrepancias y controversias en el Sector Producción antes de que escalen a conflictos sociales abiertos. Opera de forma permanente y continua en el territorio nacional como sistema preventivo, articulando las capacidades institucionales del PRODUCE con actores territoriales públicos y privados, en complementariedad con otros mecanismos de coordinación territorial, como los Comités Regionales de Prevención y Gestión de Conflictos Sociales (COPREGESCON), en el marco de sus respectivas competencias, bajo un enfoque de coordinación intersectorial y construcción de confianza.
 
 ![](_page_2_Figure_4.jpeg)
 
@@ -1193,11 +1193,11 @@ Comprende las acciones orientadas a comunicar, compartir y transferir el conocim
 
 #### *¿Quién hace qué dentro del sector y cómo se coordinan?*
 
-La gestión de la conflictividad social en el Sector Producción comprende el conjunto de acciones orientadas a la identificación, monitoreo y gestión preventiva de controversias y conflictos sociales. Estas actuaciones se desarrollan de manera articulada entre la Oficina de Articulación Intergubernamental y Prevención de Conflictos Sociales (OAIPCS), las unidades orgánicas del Ministerio de la Producción, sus organismos adscritos y los niveles de gobierno, con la finalidad de anticipar riesgos, evitar el escalamiento de la conflictividad y facilitar una respuesta oportuna. Cuando el caso lo amerita, esta coordinación se extiende de manera intersectorial y multinivel a través de los mecanismos y canales institucionales correspondientes.
+La gestión de la conflictividad social en el Sector Producción comprende el conjunto de acciones orientadas a la identificación, monitoreo y gestión preventiva de controversias y conflictos sociales. Estas actuaciones se desarrollan de manera articulada entre la Oficina de Articulación Intergubernamental y Prevención de Conflictos Sociales (OAIPCS), las unidades orgánicas del PRODUCE, sus organismos adscritos y los niveles de gobierno, con la finalidad de anticipar riesgos, evitar el escalamiento de la conflictividad y facilitar una respuesta oportuna. Cuando el caso lo amerita, esta coordinación se extiende de manera intersectorial y multinivel a través de los mecanismos y canales institucionales correspondientes.
 
 ## **9.1. Oficina de Articulación Intergubernamental y Prevención de Conflictos Sociales - OAIPCS**
 
-- La OAIPCS lidera, coordina y articula las acciones de prevención, gestión y seguimiento de la conflictividad social en el ámbito de las competencias del Ministerio de la Producción.
+- La OAIPCS lidera, coordina y articula las acciones de prevención, gestión y seguimiento de la conflictividad social en el ámbito de las competencias del PRODUCE.
 - Articula las acciones entre las unidades orgánicas, programas, organismos adscritos y otros actores vinculados para la atención de situaciones de conflictividad social.
 - Gestiona mecanismos de alerta temprana, análisis y seguimiento de riesgos asociados a la conflictividad social.
 - Habilita y facilita espacios de coordinación, diálogo y articulación institucional cuando la naturaleza del caso lo requiere.
@@ -1230,13 +1230,13 @@ La prevención y gestión de los conflictos sociales requiere la actuación arti
 
 # **X. DISPOSICIONES COMPLEMENTARIAS**
 
-- **Primera.- Implementación de los Lineamientos:** Se realiza de manera progresiva por las unidades orgánicas, programas y organismos adscritos del Ministerio de la Producción según sus competencias y disponibilidad presupuestal, sin demandar recursos adicionales al Tesoro Público.
+- **Primera.- Implementación de los Lineamientos:** Se realiza de manera progresiva por las unidades orgánicas, programas y organismos adscritos del PRODUCE según sus competencias y disponibilidad presupuestal, sin demandar recursos adicionales al Tesoro Público.
 - **Segunda.- Articulación institucional:** Las unidades, programas y organismos adscritos deben brindar a la OAIPCS la información, asistencia técnica y coordinación necesarias para implementar estos Lineamientos en el ámbito de sus competencias.
 - **Tercera.- Instrumentos complementarios:** La OAIPCS puede elaborar, proponer, desarrollar, implementar y actualizar protocolos, guías, metodologías, formatos, herramientas, mecanismos y demás instrumentos técnicos necesarios para la adecuada implementación de los Lineamientos, así como para fortalecer los procesos de monitoreo, prevención, gestión y seguimiento de la conflictividad social, considerando las características territoriales, la naturaleza de los casos y las necesidades institucionales del Sector Producción.
 
 - **Cuarta.- Uso de medios digitales:** Las acciones de monitoreo, prevención, gestión y seguimiento de la conflictividad pueden realizarse por medios presenciales, virtuales o mixtos, garantizando la continuidad institucional y la trazabilidad de la información.
 - **Quinta.- Gestión de la información:** La información generada en aplicación de estos Lineamientos se usa exclusivamente para monitoreo, análisis y toma de decisiones, observando las normas de transparencia, acceso a la información pública y protección de datos personales.
-- **Sexta.- Implementación de la RED-RADAR PRODUCE:** Su organización y funcionamiento se desarrollan mediante documento normativo específico aprobado por el Ministerio de la Producción; en tanto ello ocurra, la OAIPCS puede implementar acciones de coordinación e intercambio de información para la alerta temprana, conforme al "Protocolo para la Elaboración y Gestión de Alertas Preventivas de la Secretaría de Gestión Social y Diálogo – SGSD", aprobado mediante Resolución de Secretaría de Gestión Social y Diálogo N.° 022-2023-PCM/SGSD.
+- **Sexta.- Implementación de la RED-RADAR PRODUCE:** Su organización y funcionamiento se desarrollan mediante documento normativo específico aprobado por el PRODUCE; en tanto ello ocurra, la OAIPCS puede implementar acciones de coordinación e intercambio de información para la alerta temprana, conforme al "Protocolo para la Elaboración y Gestión de Alertas Preventivas de la Secretaría de Gestión Social y Diálogo – SGSD", aprobado mediante Resolución de Secretaría de Gestión Social y Diálogo N.° 022-2023-PCM/SGSD.
 - **Séptima.- Interpretación y aplicación:** Las disposiciones de estos Lineamientos son interpretadas y aplicadas por la OAIPCS según sus competencias, pudiendo considerarse supletoriamente los lineamientos y protocolos emitidos por la PCM en materia de gestión social y diálogo.
 - **Octava.- Guía de Prevención y Gestión de Conflictos Sociales en el Sector Producción:** La Guía de Prevención y Gestión de Conflictos Sociales en el Sector Producción y sus anexos desarrolla, amplía y precisa metodológicamente las disposiciones contenidas en los presentes Lineamientos, con la finalidad de orientar su aplicación por parte de las unidades orgánicas, programas y organismos públicos adscritos del Sector Producción.
 
@@ -2459,7 +2459,7 @@ OAIPCS realizará seguimiento a [tema específico o articulación interinstituci
 
 #### **III. PARTICIPANTES**
 
-### **Por el Ministerio de la Producción y entidades técnicas**
+### **Por el PRODUCE y entidades técnicas**
 
 *→ Registrar nombre completo, cargo y dirección/institución de cada funcionario.*
 

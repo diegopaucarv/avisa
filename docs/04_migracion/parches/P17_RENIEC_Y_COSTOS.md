@@ -1,6 +1,6 @@
 # P17 — Consulta PIDE-RENIEC y control de costos
 
-**Proyecto:** AVISA / SIPRECS — OAIPCS, Ministerio de la Producción
+**Proyecto:** AVISA / SIPRECS — OAIPCS, PRODUCE
 **Marco:** ERS v0.6 RF-D13, RA-07, RA-08, RN-17 (RENIEC); RNF-13, RM-04, RM-06 a RM-21 (costos)
 **Entorno de aplicación:** contenedor `avisa-db`, PostgreSQL 16, esquema v10
 **Parche:** `docs/PARCHE_17_RENIEC_Y_COSTOS.sql` (idempotente)

@@ -1,6 +1,6 @@
 # P23 — Destinatarios nombrados, cuatro ojos y la escala de gravedad
 
-**Proyecto:** AVISA / SIPRECS — OAIPCS, Ministerio de la Producción
+**Proyecto:** AVISA / SIPRECS — OAIPCS, PRODUCE
 **Marco:** ERS v0.6 — §11.1 (tabla de gravedad), RN-02, RN-04, G21, RD-08 y §2.2 de `mvp.md`
 **Entorno de aplicación:** contenedor `avisa-db`, PostgreSQL 16, esquema v10
 **Parche:** `docs/PARCHE_23_DESTINATARIOS_Y_CUATRO_OJOS.sql` (idempotente, re-ejecutable)

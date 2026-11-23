@@ -1,6 +1,6 @@
 # P18 — Tope de gasto con aviso y RLS del catálogo de identidad
 
-**Proyecto:** AVISA / SIPRECS — OAIPCS, Ministerio de la Producción
+**Proyecto:** AVISA / SIPRECS — OAIPCS, PRODUCE
 **Marco:** ERS v0.6 — RNF-13 (consumo y tope con aviso), RM-04 (pago por uso), §6.3 y §6.5
 **Decisiones abiertas que lo condicionan:** H-65 (monto del tope), H-52 (identidad de sesión)
 **Entorno de aplicación:** contenedor `avisa-db`, PostgreSQL 16, esquema v10

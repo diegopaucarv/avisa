@@ -1,6 +1,6 @@
 # P6 — Cierre de cumplimiento y clasificación documental
 
-**Proyecto:** AVISA / SIPRECS — OAIPCS, Ministerio de la Producción
+**Proyecto:** AVISA / SIPRECS — OAIPCS, PRODUCE
 **Marco:** ERS v0.6 — guardrails G1–G25 (§16.1.quater y §16.1.quinquies del v10), decisión de migración D16 (`tipo_documento = 'Otro'` → tipo 15 `otro`) y bitácoras inmutables (`mvp.md` §2.5, DC-11 y DC-12)
 **Entorno de aplicación:** contenedor `avisa-db`, PostgreSQL 16, esquema v10
 **Parche:** `docs/PARCHE_6_CIERRE_CUMPLIMIENTO.sql` (idempotente, montado como `96_patch_06.sql` en `compose.yaml`, bloque `B.1` del unificado)

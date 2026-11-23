@@ -1,6 +1,6 @@
 # P24 — Los siete comentarios del destinatario
 
-**Proyecto:** AVISA / SIPRECS — OAIPCS, Ministerio de la Producción
+**Proyecto:** AVISA / SIPRECS — OAIPCS, PRODUCE
 **Marco:** modelo v10 y la regla de diccionario que fijó el parche 12 —ninguna columna del modelo sin descripción en la propia base—; cierre del hueco que abrió el parche 23 en `core.alerta_destinatario`.
 **Entorno de aplicación:** contenedor `avisa-db`, PostgreSQL 16, esquema v10
 **Parche:** `docs/PARCHE_24_COMENTARIOS_DESTINATARIO.sql` (idempotente, montado como `114_patch_24.sql` en `compose.yaml`, bloque `B.19` del unificado)

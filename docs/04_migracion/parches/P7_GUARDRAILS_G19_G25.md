@@ -1,6 +1,6 @@
 # P7 — Contrato de comportamiento de los guardrails G19–G25
 
-**Proyecto:** AVISA / SIPRECS — OAIPCS, Ministerio de la Producción
+**Proyecto:** AVISA / SIPRECS — OAIPCS, PRODUCE
 **Marco:** `AVISA_PRODUCE_v10.md` §16.1.quater (G19–G22), §16.1.quinquies (G23–G25) y §9.9 (contrato de test sintético por guardrail)
 **Entorno de aplicación:** contenedor `avisa-db`, PostgreSQL 16, esquema v10
 **Parche:** `docs/PARCHE_7_GUARDRAILS_G19_G25.sql` (idempotente, montado como `97_patch_07.sql` en `compose.yaml`, bloque `B.2` del unificado)

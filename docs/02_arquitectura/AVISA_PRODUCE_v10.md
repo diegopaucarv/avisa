@@ -203,7 +203,7 @@ v9 sitúa algunas piezas en el año 2 (Nivel 2). El TDR exige versiones iniciale
 ## 1. Contexto institucional y normativo
 
 La Oficina de Articulación Intergubernamental y Prevención de Conflictos
-Sociales (OAIPCS) del Ministerio de la Producción gestiona hoy su
+Sociales (OAIPCS) del PRODUCE gestiona hoy su
 información de conflictividad social sobre el prototipo AVISA (Google
 Workspace + Power BI). Funciona con 35 casos, 83 alertas, 931 actores y
 219 organizaciones, pero presenta limitaciones estructurales que esta
@@ -6705,7 +6705,7 @@ CREATE TABLE core.entidades (            -- tenant: permite que otro ministerio 
     siglas VARCHAR(20) NOT NULL UNIQUE,
     nombre VARCHAR(255) NOT NULL
 );
-INSERT INTO core.entidades VALUES (1,'PRODUCE','Ministerio de la Producción');
+INSERT INTO core.entidades VALUES (1,'PRODUCE','PRODUCE');
 
 CREATE TABLE core.cat_niveles_conflicto (   -- Guía §7.5.1: 4 niveles (los HECHOS observables)
     id SMALLINT PRIMARY KEY, codigo VARCHAR(30) NOT NULL UNIQUE, nombre VARCHAR(50) NOT NULL, orden SMALLINT NOT NULL

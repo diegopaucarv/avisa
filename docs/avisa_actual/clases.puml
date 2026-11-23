@@ -1,6 +1,6 @@
 @startuml AVISA_SIPRECS_Full_System
 ' ==================================================================
-' SISTEMA AVISA / SIPRECS — OAIPCS · Ministerio de la Producción
+' SISTEMA AVISA / SIPRECS — OAIPCS · PRODUCE
 ' Diagrama de Paquetes + Clases (atributos + métodos) UNIFICADO
 ' Cobertura: Code.gs 244 · AppJs 158 · AppFixes 292 · 86 tablas SQL
 ' ==================================================================

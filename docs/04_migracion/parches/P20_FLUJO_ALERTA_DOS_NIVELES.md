@@ -1,6 +1,6 @@
 # P20 — Los dos niveles de aprobación de la alerta temprana
 
-**Proyecto:** AVISA / SIPRECS — OAIPCS, Ministerio de la Producción
+**Proyecto:** AVISA / SIPRECS — OAIPCS, PRODUCE
 **Marco:** ERS v0.6 — RN-04, RF-D09, RN-02, CU-08 y §5.1 (H-25 cerrado)
 **Entorno de ensayo:** contenedor `avisa-db`, PostgreSQL 16, esquema v10
 **Parche:** `docs/PARCHE_20_FLUJO_ALERTA.sql` (idempotente, re-ejecutable)

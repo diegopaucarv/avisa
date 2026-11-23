@@ -1,6 +1,6 @@
 # P12 — Comentarios de tablas y columnas
 
-**Proyecto:** AVISA / SIPRECS — OAIPCS, Ministerio de la Producción
+**Proyecto:** AVISA / SIPRECS — OAIPCS, PRODUCE
 **Marco:** ERS v0.6 — regla de diccionario que fijó el parche 12 (ninguna tabla ni columna del modelo v10 sin descripción en la propia base) y cadena de artefactos de `docs/README.md` §6
 **Entorno de aplicación:** contenedor `avisa-db`, PostgreSQL 16, esquema v10
 **Parche:** `docs/PARCHE_12_COMENTARIOS_COLUMNAS.sql` (**artefacto generado**, montado como `102_patch_12.sql` en `compose.yaml`, bloque `B.13` del unificado)

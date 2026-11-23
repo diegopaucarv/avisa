@@ -324,7 +324,7 @@ CREATE TABLE core.entidades (            -- tenant: permite que otro ministerio 
     siglas VARCHAR(20) NOT NULL UNIQUE,
     nombre VARCHAR(255) NOT NULL
 );
-INSERT INTO core.entidades VALUES (1,'PRODUCE','Ministerio de la Producción');
+INSERT INTO core.entidades VALUES (1,'PRODUCE','PRODUCE');
 
 CREATE TABLE core.cat_niveles_conflicto (   -- Guía §7.5.1: 4 niveles (los HECHOS observables)
     id SMALLINT PRIMARY KEY, codigo VARCHAR(30) NOT NULL UNIQUE, nombre VARCHAR(50) NOT NULL, orden SMALLINT NOT NULL
@@ -4528,7 +4528,7 @@ CREATE TABLE core.entidades (            -- tenant: permite que otro ministerio 
     siglas VARCHAR(20) NOT NULL UNIQUE,
     nombre VARCHAR(255) NOT NULL
 );
-INSERT INTO core.entidades VALUES (1,'PRODUCE','Ministerio de la Producción');
+INSERT INTO core.entidades VALUES (1,'PRODUCE','PRODUCE');
 
 CREATE TABLE core.cat_niveles_conflicto (   -- Guía §7.5.1: 4 niveles (los HECHOS observables)
     id SMALLINT PRIMARY KEY, codigo VARCHAR(30) NOT NULL UNIQUE, nombre VARCHAR(50) NOT NULL, orden SMALLINT NOT NULL

@@ -1,6 +1,6 @@
 # P8 — ICD: tope de ±10 puntos del ajuste automático (Q40)
 
-**Proyecto:** AVISA / SIPRECS — OAIPCS, Ministerio de la Producción
+**Proyecto:** AVISA / SIPRECS — OAIPCS, PRODUCE
 **Marco:** `mvp.md` §4.1, K5 (ICD de 0 a 100 con seis condiciones y evidencia, más un ajuste automático acotado y mostrado aparte); `AVISA_PRODUCE_v10.md` §8.4.ter (decisión v10 sobre K5) y §18.ter, Q40
 **Entorno de aplicación:** contenedor `avisa-db`, PostgreSQL 16, esquema v10
 **Parche:** `docs/PARCHE_8_ICD_TOPE_Q40.sql` (idempotente, montado como `98_patch_08.sql` en `compose.yaml`, bloque `B.3` del unificado)

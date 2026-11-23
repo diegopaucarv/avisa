@@ -1,6 +1,6 @@
 # P21 — La Dirección y la normalización del flujo
 
-**Proyecto:** AVISA / SIPRECS — OAIPCS, Ministerio de la Producción
+**Proyecto:** AVISA / SIPRECS — OAIPCS, PRODUCE
 **Marco:** ERS v0.6 — RN-04, RF-D09, G21 (§11.8), RNF-10 y §5.1
 **Entorno de aplicación:** contenedor `avisa-db`, PostgreSQL 16, esquema v10
 **Parche:** `docs/PARCHE_21_DIRECCION_Y_FLUJO.sql` (idempotente, re-ejecutable)
