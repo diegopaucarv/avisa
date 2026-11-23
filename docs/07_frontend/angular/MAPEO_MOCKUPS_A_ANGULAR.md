@@ -28,7 +28,7 @@ Los mockups son referencias de presentación, no fuentes para copiar registros d
 
 - **Mockup canónico:** `actores_ventana_flotante_centrada_con_lista_de_asistencia_y_fichas.html`. Integra el directorio con acciones por fila, estado seleccionado, ventana flotante centrada/arrastrable, minimización/cierre, lista vacía, padrón de asistencia y exportación de fichas.
 - **Punto Angular existente:** `ActoresPage` (`features/directorio/actores.page.{ts,html}`) contiene tabla paginada, filtros y apertura de la ficha.
-- **Estado:** implementada lista temporal en `ActoresPage`; permite agregar/quitar actores, ver la selección y conservarla al paginar o filtrar mientras la vista permanece montada. La selección vive sólo en memoria, sin `localStorage` ni tabla, porque no hay requerimiento de persistencia. Siguen pendientes el padrón de asistencia y sus exportaciones.
+- **Estado:** implementada lista temporal en `ActoresPage`; permite agregar/quitar actores, ver la selección y conservarla al paginar o filtrar mientras la vista permanece montada. La selección vive sólo en memoria, sin `localStorage` ni tabla, porque no hay requerimiento de persistencia. El diálogo de padrón descarga CSV con metadatos del evento y campos públicos institucionales, sin DNI, teléfono ni correo; neutraliza valores que podrían interpretarse como fórmulas. Siguen pendientes PDF/Excel y la exportación de fichas de perfil.
 - **Exportación:** `app-exportar-menu` exporta la entidad/listado existente, pero no genera el formato de asistencia o un dossier de fichas. Esas dos salidas requieren especificar los formatos y comprobar qué campos están disponibles. No tratar el `alert()` del mockup como una exportación implementada.
 
 ### Tarjetas de casos

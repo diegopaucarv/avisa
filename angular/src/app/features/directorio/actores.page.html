@@ -86,6 +86,7 @@
       </div>
       <div class="lista-temporal-acciones">
         @if (listaTemporal().length > 0) {
+        <button type="button" class="button-secondary" (click)="abrirPadron()">Generar padrón</button>
         <button type="button" class="button-secondary" (click)="vaciarLista()">Vaciar lista</button>
         }
         <button type="button" class="button-secondary" (click)="listaTemporalAbierta.set(false)">Cerrar</button>
@@ -113,6 +114,48 @@
     }
   </section>
   }
+
+  <dialog #dialogoPadron class="padron-dialogo" aria-labelledby="titulo-padron">
+    <form class="padron-form" (submit)="$event.preventDefault(); descargarPadron()">
+      <h2 id="titulo-padron">Generar padrón de asistencia</h2>
+      <p>
+        El archivo incluye sólo datos institucionales públicos de la lista temporal; no incorpora DNI,
+        teléfonos ni correos personales.
+      </p>
+      <label>
+        Título de la sesión
+        <input
+          required
+          maxlength="180"
+          [value]="padronTitulo()"
+          (input)="padronTitulo.set($any($event.target).value)"
+        />
+      </label>
+      <label>
+        Lugar / sede
+        <input
+          required
+          maxlength="180"
+          [value]="padronLugar()"
+          (input)="padronLugar.set($any($event.target).value)"
+        />
+      </label>
+      <label>
+        Fecha
+        <input
+          required
+          type="date"
+          [value]="padronFecha()"
+          (input)="padronFecha.set($any($event.target).value)"
+        />
+      </label>
+      <p>{{ listaTemporal().length }} actores seleccionados. Las firmas se dejan en blanco.</p>
+      <div class="padron-actions">
+        <button type="button" class="button-secondary" (click)="dialogoPadron.close()">Cancelar</button>
+        <button type="submit" class="button-primary">Descargar CSV</button>
+      </div>
+    </form>
+  </dialog>
 
   @if (estado() === "error") {
   <div class="empty-state" role="alert">

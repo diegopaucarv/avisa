@@ -2,9 +2,11 @@ import {
   ChangeDetectionStrategy,
   Component,
   DestroyRef,
+  ElementRef,
   computed,
   inject,
   signal,
+  viewChild,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -28,6 +30,7 @@ import {
 } from '../../shared/ui/territorio-buscador.component';
 import { ActorPanelComponent } from './actor-panel.component';
 import { alternarActorLista, quitarActorLista } from './lista-temporal';
+import { crearCsvPadronAsistencia } from './padron-asistencia';
 import {
   NATURALEZAS,
   aActorDirectorio,
@@ -238,6 +241,72 @@ const FILTROS_INICIALES: FiltrosActores = {
       font-size: 10px;
     }
 
+    .padron-dialogo {
+      width: min(520px, calc(100vw - 32px));
+      padding: 0;
+      border: 1px solid #dce5ef;
+      border-radius: 12px;
+      color: #26384a;
+      box-shadow: 0 24px 70px rgb(10 20 30 / 28%);
+    }
+
+    .padron-dialogo::backdrop {
+      background: rgb(12 20 29 / 62%);
+      backdrop-filter: blur(3px);
+    }
+
+    .padron-form {
+      display: grid;
+      gap: 14px;
+      padding: 20px;
+    }
+
+    .padron-form h2,
+    .padron-form p {
+      margin: 0;
+    }
+
+    .padron-form h2 {
+      font: 700 17px/1.35 var(--font-display);
+    }
+
+    .padron-form p {
+      color: #68798a;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .padron-form label {
+      display: grid;
+      gap: 5px;
+      color: #465a6c;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .padron-form input {
+      min-width: 0;
+      min-height: 38px;
+      padding: 0 10px;
+      border: 1px solid #cfd9e2;
+      border-radius: 6px;
+      background: #fff;
+      color: #26384a;
+      font: inherit;
+    }
+
+    .padron-form input:focus-visible {
+      outline: 2px solid #3576c5;
+      outline-offset: 2px;
+    }
+
+    .padron-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 2px;
+    }
+
     @media (max-width: 720px) {
       .view-body {
         padding: 18px 16px 40px;
@@ -316,6 +385,10 @@ export class ActoresPage {
   /** Selección de trabajo en memoria, conservada al cambiar página o filtros. */
   readonly listaTemporal = signal<ActorDirectorio[]>([]);
   readonly listaTemporalAbierta = signal(false);
+  readonly padronTitulo = signal('');
+  readonly padronLugar = signal('');
+  readonly padronFecha = signal(new Date().toLocaleDateString('en-CA'));
+  private readonly dialogoPadron = viewChild<ElementRef<HTMLDialogElement>>('dialogoPadron');
 
   /** Último fallo del botón de exportación; vacío si no hubo. */
   readonly exportarError = signal<string | null>(null);
@@ -347,6 +420,37 @@ export class ActoresPage {
 
   vaciarLista(): void {
     this.listaTemporal.set([]);
+  }
+
+  abrirPadron(): void {
+    if (!this.listaTemporal().length) return;
+    this.padronTitulo.set('');
+    this.padronLugar.set('');
+    this.padronFecha.set(new Date().toISOString().slice(0, 10));
+    this.listaTemporalAbierta.set(true);
+    this.dialogoPadron()?.nativeElement.showModal();
+  }
+
+  descargarPadron(): void {
+    const titulo = this.padronTitulo().trim();
+    const lugar = this.padronLugar().trim();
+    const fecha = this.padronFecha();
+    if (!titulo || !lugar || !fecha) return;
+
+    const contenido = crearCsvPadronAsistencia({
+      titulo,
+      lugar,
+      fecha,
+      actores: this.listaTemporal(),
+    });
+    const archivo = new Blob([contenido], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(archivo);
+    const enlace = document.createElement('a');
+    enlace.href = url;
+    enlace.download = 'padron-asistencia.csv';
+    enlace.click();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+    this.dialogoPadron()?.nativeElement.close();
   }
 
   cerrarPanel(): void {
