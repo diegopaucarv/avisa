@@ -8,7 +8,11 @@
       </p>
     </div>
     <div class="view-actions">
-      <app-exportar-menu entidad="demandas" (fallo)="alFallarExportacion($event)" />
+      <app-exportar-menu
+        entidad="demandas"
+        [consulta]="filtrosExportacion()"
+        (fallo)="alFallarExportacion($event)"
+      />
       @if (total() > 0) {
       <p class="result-count" aria-live="polite">{{ sinCasoTotal() }} demandas sin caso</p>
       }
@@ -68,15 +72,16 @@
   <div class="table-wrap">
     <table class="data-table">
       <caption class="table-caption">
-        {{ total() }} demandas sin caso con los filtros aplicados. La vinculación exige permiso de
-        edición.
+        {{ total() }} demandas sin caso con los filtros aplicados. La fecha es la del hecho
+        reportado en la alerta; cuando la demanda no tiene alerta se muestra la de registro, marcada
+        como tal. La vinculación exige permiso de edición.
       </caption>
       <thead>
         <tr>
           <th scope="col">Descripción</th>
           <th scope="col">Problema · Propuesta · Pedido</th>
           <th scope="col">Estado</th>
-          <th scope="col">Registro</th>
+          <th scope="col">Fecha del hecho</th>
           <th scope="col">Temática</th>
           <th scope="col">Afecta a mujeres</th>
           @if (puedeVincular()) {
@@ -103,7 +108,22 @@
               {{ demanda.estado }}
             </span>
           </td>
-          <td class="celda-fecha">{{ fecha(demanda.fechaRegistro) }}</td>
+          <td class="celda-fecha">
+            @if (demanda.fechaHecho) {
+            <span [attr.title]="'Fecha del hecho reportado en la alerta vinculada.'">
+              {{ fecha(demanda.fechaHecho) }}
+            </span>
+            } @else if (demanda.fechaRegistro) {
+            <span
+              [attr.title]="'La demanda no tiene alerta: se muestra la fecha en que se registró, no la del hecho.'"
+            >
+              {{ fecha(demanda.fechaRegistro) }}
+              <span class="fecha-origen">registro</span>
+            </span>
+            } @else {
+            <span class="sin-dato">—</span>
+            }
+          </td>
           <td>{{ demanda.tematica || '—' }}</td>
           <td>
             @if (demanda.afectaMujeres) {

@@ -263,6 +263,13 @@ Ninguno bloquea la carga; todos entraron marcados y revisables, y por eso la int
 
 Regla común: **el dato ausente se declara, no se estima.** El indicador de completitud (item 68) es el lugar donde eso se ve; ninguna pantalla debe rellenar un hueco con un valor verosímil.
 
+**Refinado (2026-11-22).** «Demandas sin caso» pasó de **226 a 107** filas tras la
+migración 37 y el hallazgo 14. De las 226, **119 sí tenían caso**: su alerta ya apuntaba a
+uno y la carga no lo heredó. Las 107 restantes no lo tienen en ninguna fuente y se declaran:
+**81** con alerta sin caso (por ejemplo `AT-2026-82/83`, hechos de 2022 que en el Excel no
+tienen `ID_Caso_Vinculado`) y **26** sin alerta. Las 12 de P4 siguen dentro de ese grupo y no
+se mapean.
+
 ### 2 · Reglas que la interfaz no puede inventar
 
 **Prioridad de atención.** La Guía la lista como columna 10 del Anexo 15 (§8.3.1) pero no define cómo se calcula. Derivarla de la conflictividad o del riesgo sería inventar una regla institucional. Acción: pedir la regla a OAIPCS y, hasta entonces, mostrar el valor almacenado marcado como «sin regla definida» en la ficha y en la bandeja (items 5 y 22).
@@ -535,6 +542,56 @@ del caso. En la SPA, `estadoDeCaso()`
 una base siga sin migrar la interfaz sigue mostrando un solo nombre. `lib/api-mappers.ts` traduce
 `Abierto → Activo` para el espejo Next congelado, sin editarlo.
 
+### 14. 119 demandas tenían caso y se mostraban como «sin caso»
+
+**Comprobado.** `migration/loader/phases/p09_demandas.py` resolvió `caso_id` **sólo** desde
+`DIM_Demandas.ID_Caso` (decisión D1: 99 de 325) y nunca lo heredó de la alerta, aunque
+`core.demandas.alerta_id` ya existía. Medido en local y en Neon, idénticos:
+
+| situación de las 226 sin caso   | filas |
+| ------------------------------- | ----: |
+| su alerta tiene un caso vigente |   100 |
+| su alerta tiene un caso anulado |    19 |
+| su alerta no tiene caso         |    81 |
+| no tienen alerta                |    26 |
+
+No había un solo conflicto (`demandas.caso_id` distinto del de su alerta): la relación es
+unívoca, así que heredar no fuerza ninguna equivalencia entre series (D19).
+
+**Por qué importa.** La ficha del caso lista las demandas por `d.caso_id = c.id`, así que 119
+demandas **no aparecían en la ficha de su caso** y sí en «Demandas sin caso», que las
+presentaba como trabajo pendiente. Las 19 del caso anulado (`CS-MI-ITE-2026-02`) seguían
+contando porque `core.anular_caso` cascada por `caso_id` y no las alcanzó al no estar
+vinculadas.
+
+**Resuelto (2026-11-22).** `migration/37_demandas_caso_desde_alerta.sql` vincula las 100 y
+sella las 19 con **el mismo lote del caso** —no reejecuta `anular_caso`, que exige un caso
+vigente y emitiría un lote nuevo—. Resultado: **107 sin caso · 218 con caso · 19 anuladas**.
+`p09_demandas.py` hereda el caso de la alerta en cada carga y `checks.py` fija las nuevas
+cifras (218 / 81 / 26) con una comprobación de que ninguna demanda contradice el caso de su
+alerta. La ficha de `CS-PA-OAT-2026-01`, por ejemplo, pasó de 64 a 81 demandas visibles.
+
+### 15. La fecha de «Demandas sin caso» era el día de la carga
+
+**Comprobado.** La columna «Registro» mostraba `core.demandas.fecha_registro`, que se cargó
+desde `DIM_Demandas` (columna 7) y es el **instante de la importación**: 2026-09-04 y
+2026-09-18, idéntico para bloques enteros de filas. La fecha real del hecho está en la
+alerta: `core.alertas_tempranas.fecha_reporte` (columna 4 del legado), que va de 2012 a 2026.
+De las 107 demandas que siguen sin caso, **81** tienen alerta con fecha y **26** no tienen
+alerta.
+
+**Por qué importa.** Una lista donde todas las filas dicen «18/09/2026» afirma que todas las
+demandas surgieron el mismo día, y oculta que la mayoría son hechos de 2022. Es el mismo
+defecto que el hallazgo 10 en la ficha del caso, y la misma regla: una fecha de carga no se
+presenta como fecha del hecho.
+
+**Resuelto (2026-11-22).** `listDemandas` (`lib/db/repos/demandas.ts`) une
+`core.alertas_tempranas` y publica `fechaHecho`; la columna de la SPA pasa a «Fecha del hecho»
+y muestra `fechaRegistro` marcada con la etiqueta «registro» cuando la demanda no tiene
+alerta, para no confundirla con la del hecho. `recent`/`oldest` ordenan por `fecha_reporte`
+con `nulls last` y desempatan por registro. No se reescribe `fecha_registro`: sigue siendo el
+instante de alta y conserva su uso de auditoría.
+
 ### Falsos positivos descartados
 
 El inventario traía dos hallazgos que no lo son; los descarto dejando la comprobación:
@@ -544,21 +601,23 @@ El inventario traía dos hallazgos que no lo son; los descarto dejando la compro
 
 ### Resumen
 
-| #   | Hallazgo                                         | Tipo                   | ¿Requiere tu decisión?                                           |
-| --- | ------------------------------------------------ | ---------------------- | ---------------------------------------------------------------- |
-| 1   | `cat_roles_actor` 7 vs 4                         | Modelo / artefacto v10 | Parcial: v10 y diccionario alineados; falta el SQL unificado     |
-| 2   | `demandas.caso_id` `NOT NULL`                    | Artefacto v10          | Resuelto: v10 y diccionario anulables                            |
-| 3   | Sobrecarga de `siguiente_codigo_caso()`          | Esquema vivo           | Resuelto: migración 25 (retirada)                                |
-| 4   | Literales obsoletos en el diccionario            | Artefacto generado     | Parcial: diccionario limpio; queda el parche 23                  |
-| 5   | Usuario demo en `backend/`                       | Autenticación paralela | Resuelto: retirado                                               |
-| 6   | `log_envios` a dos tablas                        | Artefacto generado     | Resuelto: `core.envios_comunicacion`                             |
-| 7   | Numeración duplicada                             | Documento              | No: corregido                                                    |
-| 8   | Calendario de compromisos                        | Vista pendiente        | Resuelto en código; el calendario está vacío por falta de fechas |
-| 9   | `estado_atencion` con `En_proceso`               | Vocabulario / esquema  | Resuelto: migración 24                                           |
-| 10  | «Actualizado» era la fecha de carga              | Dato heredado / vista  | Resuelto en código: se muestra `fecha_inicio`                    |
-| 11  | Los 34 abiertos estaban en `Activo`              | Datos / vocabulario    | Resuelto: migración 31 y filtro `abiertos`                       |
-| 12  | El Anexo 15 oculta 13 de 34 casos                | Vista / `INNER JOIN`   | Resuelto: migración 32 en local y en Neon (`LEFT JOIN` + «—»)    |
-| 13  | `Activo` y `En seguimiento` eran el mismo estado | Datos / vocabulario    | Resuelto: migraciones 33–34, aplicadas en local y en Neon        |
+| #   | Hallazgo                                         | Tipo                   | ¿Requiere tu decisión?                                             |
+| --- | ------------------------------------------------ | ---------------------- | ------------------------------------------------------------------ |
+| 1   | `cat_roles_actor` 7 vs 4                         | Modelo / artefacto v10 | Parcial: v10 y diccionario alineados; falta el SQL unificado       |
+| 2   | `demandas.caso_id` `NOT NULL`                    | Artefacto v10          | Resuelto: v10 y diccionario anulables                              |
+| 3   | Sobrecarga de `siguiente_codigo_caso()`          | Esquema vivo           | Resuelto: migración 25 (retirada)                                  |
+| 4   | Literales obsoletos en el diccionario            | Artefacto generado     | Parcial: diccionario limpio; queda el parche 23                    |
+| 5   | Usuario demo en `backend/`                       | Autenticación paralela | Resuelto: retirado                                                 |
+| 6   | `log_envios` a dos tablas                        | Artefacto generado     | Resuelto: `core.envios_comunicacion`                               |
+| 7   | Numeración duplicada                             | Documento              | No: corregido                                                      |
+| 8   | Calendario de compromisos                        | Vista pendiente        | Resuelto en código; el calendario está vacío por falta de fechas   |
+| 9   | `estado_atencion` con `En_proceso`               | Vocabulario / esquema  | Resuelto: migración 24                                             |
+| 10  | «Actualizado» era la fecha de carga              | Dato heredado / vista  | Resuelto en código: se muestra `fecha_inicio`                      |
+| 11  | Los 34 abiertos estaban en `Activo`              | Datos / vocabulario    | Resuelto: migración 31 y filtro `abiertos`                         |
+| 12  | El Anexo 15 oculta 13 de 34 casos                | Vista / `INNER JOIN`   | Resuelto: migración 32 en local y en Neon (`LEFT JOIN` + «—»)      |
+| 13  | `Activo` y `En seguimiento` eran el mismo estado | Datos / vocabulario    | Resuelto: migraciones 33–34, aplicadas en local y en Neon          |
+| 14  | 119 demandas con caso listadas como «sin caso»   | Carga / vínculo        | Resuelto: migración 37, cargador y `checks` actualizados           |
+| 15  | La fecha de la demanda era la de la carga        | Dato heredado / vista  | Resuelto: `fechaHecho` desde la alerta y columna «Fecha del hecho» |
 
 ## Orden recomendado de entrega
 
@@ -587,16 +646,16 @@ Este catálogo decide **qué construir en la interfaz**. La costura entre la SPA
 
 ### Lo que sigue faltando
 
-Ninguna bloquea al equipo de .NET: tres se resuelven solo en la SPA (F1, F2, F4), tres dependen de la SPA y de la API a la vez (F3, F5, F6) y una es solo de la API (F7).
+Ninguna bloquea al equipo de .NET: dos se resuelven solo en la SPA (F1, F4), tres dependen de la SPA y de la API a la vez (F3, F5, F6) y una es solo de la API (F7).
 
-| #   | Falta                                                         | Dónde                               | Acción                                                                             |
-| --- | ------------------------------------------------------------- | ----------------------------------- | ---------------------------------------------------------------------------------- |
-| F1  | «Esta vista» exporta la entidad completa fuera de Compromisos | SPA (`app-exportar-menu`)           | pasar `[consulta]` con los filtros activos; `/v1/export` ya los reenvía (item 42)  |
-| F2  | La exportación de «demandas sin caso» no envía `sinCaso=true` | SPA (`demandas-sin-caso.page.html`) | añadir el filtro al `consulta` para que el archivo coincida con la tabla           |
-| F3  | La papelera se puede forzar por URL sin permiso               | SPA + API                           | la API ya responde 403; la SPA no debería construir la consulta si el rol no puede |
-| F4  | `consulta()` declara `mantener` y no lo implementa            | SPA (`core/http/consulta.ts`)       | retirar la opción o implementarla; hoy no cambia el comportamiento                 |
-| F5  | `expiresAt` se recibe y no se usa                             | SPA / API                           | se depende del 401; revisar solo si .NET implanta cookie deslizante                |
-| F6  | El panorama del mapa pagina en cliente con tope 100           | SPA / API                           | conservar el tope y un `total` exacto; un total desalineado trunca el mapa         |
-| F7  | La descarga no queda en auditoría                             | API                                 | registrar quién exportó qué y con qué filtros (item 42)                            |
+| #   | Falta                                                         | Dónde                         | Acción                                                                                   |
+| --- | ------------------------------------------------------------- | ----------------------------- | ---------------------------------------------------------------------------------------- |
+| F1  | «Esta vista» exporta la entidad completa fuera de Compromisos | SPA (`app-exportar-menu`)     | pasar `[consulta]` con los filtros activos; `/v1/export` ya los reenvía (item 42)        |
+| F2  | ✔ La exportación de «demandas sin caso» no filtraba           | SPA + API                     | Hecho: la SPA envía `sinCaso`, `q`, `estado` y `sort`; `/v1/export` publica esos filtros |
+| F3  | La papelera se puede forzar por URL sin permiso               | SPA + API                     | la API ya responde 403; la SPA no debería construir la consulta si el rol no puede       |
+| F4  | `consulta()` declara `mantener` y no lo implementa            | SPA (`core/http/consulta.ts`) | retirar la opción o implementarla; hoy no cambia el comportamiento                       |
+| F5  | `expiresAt` se recibe y no se usa                             | SPA / API                     | se depende del 401; revisar solo si .NET implanta cookie deslizante                      |
+| F6  | El panorama del mapa pagina en cliente con tope 100           | SPA / API                     | conservar el tope y un `total` exacto; un total desalineado trunca el mapa               |
+| F7  | La descarga no queda en auditoría                             | API                           | registrar quién exportó qué y con qué filtros (item 42)                                  |
 
 **Regla de cambio.** Toda modificación del contrato se hace primero en `app/api/**` y se refleja el mismo día en `CONTRATO_API_SPA.md`; la SPA no se toca si el contrato se respeta. **Lo que no falta:** las 34 rutas del contrato existen y están verificadas contra `app/api/**`; no hay llamadas de la SPA sin implementación ni rutas documentadas sin uso. Las parciales de la sección «Entrega: implementable ahora» (items 11, 12, 15, 21, 24, 26, 30, 31, 38 y 42) son trabajo de interfaz o columnas concretas, no huecos de contrato. Las cuatro altas nuevas (caso, alerta, compromiso y documento) usan rutas que ya estaban en el contrato y no lo amplían.

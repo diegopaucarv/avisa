@@ -126,6 +126,12 @@ INTEGRIDAD: tuple[tuple[str, str], ...] = (
         "SELECT count(*) FROM core.alertas_tempranas a WHERE a.caso_id IS NOT NULL "
         "AND NOT EXISTS (SELECT 1 FROM core.casos c WHERE c.id = a.caso_id)",
     ),
+    (
+        "ninguna demanda con caso distinto al de su alerta",
+        "SELECT count(*) FROM core.demandas d "
+        "JOIN core.alertas_tempranas a ON a.id = d.alerta_id "
+        "WHERE a.caso_id IS NOT NULL AND d.caso_id IS DISTINCT FROM a.caso_id",
+    ),
 )
 
 # Cifras que reflejan decisiones concretas y no deben moverse sin revisarlas.
@@ -174,13 +180,13 @@ DESGLOSE: tuple[tuple[str, str, int], ...] = (
     (
         "demandas con caso",
         "SELECT count(*) FROM core.demandas WHERE caso_id IS NOT NULL",
-        99,
+        218,
     ),
     (
         "demandas sin caso pero con alerta",
         "SELECT count(*) FROM core.demandas "
         "WHERE caso_id IS NULL AND alerta_id IS NOT NULL",
-        200,
+        81,
     ),
     (
         "demandas sin caso ni alerta",

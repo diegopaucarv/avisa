@@ -15,6 +15,7 @@ const DEMANDA_SELECT = `
   c.codigo_caso as caso_code,
   c.nombre_caso as caso_titulo,
   d.alerta_id,
+  to_char(ah.fecha_reporte, 'YYYY-MM-DD') as fecha_hecho,
   to_char(d.fecha_registro, 'YYYY-MM-DD') as fecha_registro,
   to_char(d.fecha_vencimiento_respuesta, 'YYYY-MM-DD') as fecha_vencimiento,
   te.nombre as tematica,
@@ -34,6 +35,7 @@ const DEMANDA_SELECT = `
 const DEMANDA_FROM = `
   from core.demandas d
   left join core.casos c on c.id = d.caso_id
+  left join core.alertas_tempranas ah on ah.id = d.alerta_id
   left join core.cat_tematicas te on te.id = d.tematica_id
   left join core.usuarios ua on ua.id = d.anulado_por
 `;
@@ -66,6 +68,12 @@ export type DemandaListItem = {
   casoCode: string | null;
   casoTitulo: string | null;
   alertaId: string | null;
+  /**
+   * Fecha del hecho que originó la demanda: la de su alerta (`fecha_reporte`).
+   * Es la única fecha real del legado; `fechaRegistro` es el instante de carga.
+   * `null` cuando la demanda no tiene alerta.
+   */
+  fechaHecho: string | null;
   fechaRegistro: string | null;
   fechaVencimiento: string | null;
   tematica: string | null;
@@ -98,8 +106,13 @@ export type DemandaListResult = {
 };
 
 const SORTS: Record<string, string> = {
-  recent: "d.fecha_registro desc nulls last, d.created_at desc, d.id asc",
-  oldest: "d.fecha_registro asc nulls last, d.created_at desc, d.id asc",
+  // La fecha del hecho manda: `fecha_registro` es el instante de la carga y no
+  // distingue un expediente de otro. Las demandas sin alerta van al final, con
+  // su fecha de registro como criterio de desempate.
+  recent:
+    "ah.fecha_reporte desc nulls last, d.fecha_registro desc nulls last, d.id asc",
+  oldest:
+    "ah.fecha_reporte asc nulls last, d.fecha_registro asc nulls last, d.id asc",
 };
 
 function mapDemanda(row: Record<string, unknown>): DemandaListItem {
@@ -115,6 +128,7 @@ function mapDemanda(row: Record<string, unknown>): DemandaListItem {
     casoCode: row.caso_code as string | null,
     casoTitulo: row.caso_titulo as string | null,
     alertaId: row.alerta_id as string | null,
+    fechaHecho: row.fecha_hecho as string | null,
     fechaRegistro: row.fecha_registro as string | null,
     fechaVencimiento: row.fecha_vencimiento as string | null,
     tematica: row.tematica as string | null,

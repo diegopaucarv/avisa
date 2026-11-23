@@ -92,6 +92,8 @@ const FILTROS_COMPROMISOS = [
   "vencimiento_hasta",
 ] as const;
 
+const FILTROS_DEMANDAS = ["q", "caso", "sinCaso", "estado", "sort"] as const;
+
 /** Parámetros de control: nunca viajan como filtros del listado. */
 const PARAMETROS_CONTROL = new Set([
   "entidad",
@@ -183,7 +185,11 @@ function registro(sesion: {
       },
     },
     documentos: { titulo: "Documentos", listar: lector(listDocuments) },
-    demandas: { titulo: "Demandas", listar: lector(listDemandas) },
+    demandas: {
+      titulo: "Demandas",
+      listar: lector(listDemandas),
+      filtros: FILTROS_DEMANDAS,
+    },
     actores: { titulo: "Actores", listar: lector(listActors) },
     organizaciones: {
       titulo: "Organizaciones",

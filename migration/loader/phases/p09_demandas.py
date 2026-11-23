@@ -17,8 +17,12 @@ Decisiones que esta fase aplica:
   verificado: **222** demandas con alerta existente.
 * **Formato de alerta.** `DIM_Alertas` usa 2 dígitos (`AT-2026-01`), pero los
   bridges mezclan 2 y 3; se canoniza con `canon_alerta`.
-* **D1.** `ID_Caso` se resuelve cuando el código existe (99 de 325); el resto
-  queda NULL.
+* **D1 (revisada, 2026-11-22).** `ID_Caso` se resuelve primero por el código
+  propio de la demanda (99 de 325) y, cuando viene vacío, la demanda **hereda
+  el caso de su alerta** (100 más). La alerta ya traía el vínculo y la relación
+  es unívoca: 0 conflictos entre `demandas.caso_id` y `alertas.caso_id`. Tras
+  la herencia quedan 107 demandas sin caso, y sólo ésas no tienen caso en
+  ninguna fuente (81 con alerta sin caso + 26 sin alerta).
 * **3P.** `problema_3p`, `propuesta_3p` y `pedido_3p` quedan NULL: el legado no
   trae la estructura y no se fabrica (parche 1 los relajó).
 * `ID_TEMATICA` incluye un timestamp (`2026-09-18 14:05:58`): sólo se resuelve
@@ -272,8 +276,31 @@ async def _actores_demanda(ctx: LoadContext, idx: dict, ids: dict[str, str]) -> 
         ctx.add("core.demandas_actores")
 
 
+async def _heredar_caso(ctx: LoadContext) -> None:
+    """D1 revisada: la demanda hereda el caso de su alerta.
+
+    Sólo alcanza a las demandas cuyo `ID_Caso` propio venía vacío: el vínculo
+    directo del legado siempre gana. La carga no produce registros anulados, así
+    que aquí no hay rama de sellado; el estado heredado que ya tuviera un caso
+    anulado lo repara `migration/37_demandas_caso_desde_alerta.sql`.
+    """
+    etiqueta = await ctx.conn.execute(
+        """
+        UPDATE core.demandas d
+           SET caso_id = a.caso_id
+          FROM core.alertas_tempranas a
+         WHERE a.id = d.alerta_id
+           AND d.caso_id IS NULL
+           AND a.caso_id IS NOT NULL
+           AND a.anulado_en IS NULL
+        """
+    )
+    ctx.add("core.demandas (caso heredado)", int(etiqueta.split()[-1]))
+
+
 async def run(ctx: LoadContext) -> None:
     idx = await _indices(ctx)
     ids = await _demandas(ctx, idx)
+    await _heredar_caso(ctx)
     await _evidencias(ctx, ids)
     await _actores_demanda(ctx, idx, ids)

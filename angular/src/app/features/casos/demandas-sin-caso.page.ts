@@ -137,6 +137,15 @@ const FILTROS_INICIALES: FiltrosDemandas = {
       white-space: nowrap;
     }
 
+    .fecha-origen {
+      margin-left: 4px;
+      color: #a0aab3;
+      font-size: 8px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+    }
+
     .sin-dato {
       color: #a0aab3;
     }
@@ -288,6 +297,19 @@ export class DemandasSinCasoPage {
   readonly demandas = computed(() => this.listado.valor()?.elementos ?? []);
   readonly total = computed(() => this.listado.valor()?.total ?? 0);
   readonly sinCasoTotal = computed(() => this.listado.valor()?.sinCasoTotal ?? 0);
+
+  /**
+   * Filtros de la exportación. `sinCaso=true` no viaja en la URL de la vista
+   * (es la condición de la pantalla), así que se declara aquí: sin él, el
+   * archivo exportaba las 325 demandas en vez de las que se están viendo.
+   */
+  readonly filtrosExportacion = computed<Record<string, string>>(() => {
+    const filtros = this.filtros();
+    const consulta: Record<string, string> = { sinCaso: 'true', sort: 'recent' };
+    if (filtros.q) consulta['q'] = filtros.q;
+    if (filtros.estado) consulta['estado'] = filtros.estado;
+    return consulta;
+  });
   readonly estado = this.listado.estado;
   readonly error = this.listado.error;
 

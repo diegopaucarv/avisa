@@ -29,6 +29,9 @@ export type Demanda = {
   casoCodigo: string | null;
   casoTitulo: string | null;
   alertaId: string | null;
+  /** Fecha del hecho reportado en la alerta; `null` si la demanda no tiene alerta. */
+  fechaHecho: string | null;
+  /** Instante en que se registró la fila (en el legado, el de la carga). */
   fechaRegistro: string | null;
   fechaVencimiento: string | null;
   tematica: string | null;
@@ -92,6 +95,7 @@ export function aDemanda(bruto: unknown): Demanda {
     casoCodigo: texto(registro, ['casoCode', 'caso_code']),
     casoTitulo: texto(registro, ['casoTitulo', 'caso_titulo']),
     alertaId: texto(registro, ['alertaId', 'alerta_id']),
+    fechaHecho: texto(registro, ['fechaHecho', 'fecha_hecho']),
     fechaRegistro: texto(registro, ['fechaRegistro', 'fecha_registro']),
     fechaVencimiento: texto(registro, ['fechaVencimiento', 'fecha_vencimiento']),
     tematica: texto(registro, ['tematica']),
