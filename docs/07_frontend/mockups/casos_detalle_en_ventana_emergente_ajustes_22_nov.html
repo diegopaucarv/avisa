@@ -171,17 +171,20 @@
 <span class="material-symbols-outlined text-[18px]">switch_account</span>
 <span>¡Lista de actores copiada al portapapeles en formato WhatsApp!</span>
 </div>
-<!-- ACTORS TABLE (Columns: Actor [Apellidos, Nombres], Pertenencia, Teléfono, Correo, Tipo, Función) -->
+<!-- Tabla de actores consolidada: incorpora cargo y posicionamiento de la variante con mapa de actores. -->
+<p class="px-space-sm py-space-xs text-right text-outline font-label-sm text-label-sm">Deslice horizontalmente para revisar todos los campos en pantallas estrechas.</p>
 <div class="overflow-x-auto rounded-xl bg-surface-container">
-<table class="w-full text-left border-collapse">
+<table class="w-full min-w-[980px] text-left border-collapse">
 <thead>
 <tr class="bg-surface-container-lowest text-outline font-label-md text-label-md uppercase tracking-wider">
 <th class="py-space-md px-space-md font-semibold">Actor (Apellidos, Nombres)</th>
 <th class="py-space-md px-space-md font-semibold">Pertenencia</th>
+<th class="py-space-md px-space-md font-semibold">Cargo / representación</th>
 <th class="py-space-md px-space-md font-semibold">Teléfono</th>
 <th class="py-space-md px-space-md font-semibold">Correo</th>
 <th class="py-space-md px-space-md font-semibold">Tipo</th>
 <th class="py-space-md px-space-md font-semibold">Función</th>
+<th class="py-space-md px-space-md font-semibold">Posicionamiento</th>
 </tr>
 </thead>
 <tbody class="divide-y divide-transparent font-body-sm text-body-sm">
@@ -189,6 +192,7 @@
 <tr class="hover:bg-surface-container-high transition-colors bg-surface-container/70">
 <td class="py-2.5 px-space-md text-on-surface font-semibold">Fiestas Fiestas, Juan Carlos</td>
 <td class="py-2.5 px-space-md text-on-surface-variant">SUMOPP (Sindicato Único Motoristas)</td>
+<td class="py-2.5 px-space-md text-on-surface-variant">Secretario General</td>
 <td class="py-2.5 px-space-md font-data-tabular text-data-tabular text-on-surface">+51 969 412 803</td>
 <td class="py-2.5 px-space-md font-data-tabular text-data-tabular text-primary truncate max-w-[160px]">jfiestas@sumopp.org.pe</td>
 <td class="py-2.5 px-space-md">
@@ -197,11 +201,13 @@
 <td class="py-2.5 px-space-md">
 <span class="px-2 py-0.5 rounded font-label-sm text-label-sm bg-error/15 text-error font-medium">Principal</span>
 </td>
+<td class="py-2.5 px-space-md"><span class="px-2 py-0.5 rounded font-label-sm text-label-sm bg-error/15 text-error font-medium">Conflictivo</span></td>
 </tr>
 <!-- Row 2 -->
 <tr class="hover:bg-surface-container-high transition-colors bg-surface-container-low">
 <td class="py-2.5 px-space-md text-on-surface font-semibold">Querevalú Periche, Santos</td>
 <td class="py-2.5 px-space-md text-on-surface-variant">SUPNEP (Sindicato Pescadores)</td>
+<td class="py-2.5 px-space-md text-on-surface-variant">Dirigente Nacional</td>
 <td class="py-2.5 px-space-md font-data-tabular text-data-tabular text-on-surface">+51 973 881 294</td>
 <td class="py-2.5 px-space-md font-data-tabular text-data-tabular text-primary truncate max-w-[160px]">squerevalu@supnep.pe</td>
 <td class="py-2.5 px-space-md">
@@ -210,11 +216,13 @@
 <td class="py-2.5 px-space-md">
 <span class="px-2 py-0.5 rounded font-label-sm text-label-sm bg-error/15 text-error font-medium">Principal</span>
 </td>
+<td class="py-2.5 px-space-md"><span class="px-2 py-0.5 rounded font-label-sm text-label-sm bg-primary/10 text-primary font-medium">Dialogante</span></td>
 </tr>
 <!-- Row 3 -->
 <tr class="hover:bg-surface-container-high transition-colors bg-surface-container/70">
 <td class="py-2.5 px-space-md text-on-surface font-semibold">Mendoza Alarcón, Patricia</td>
 <td class="py-2.5 px-space-md text-on-surface-variant">PRODUCE - DGSFS-PA</td>
+<td class="py-2.5 px-space-md text-on-surface-variant">Directora General</td>
 <td class="py-2.5 px-space-md font-data-tabular text-data-tabular text-on-surface">+51 945 002 119</td>
 <td class="py-2.5 px-space-md font-data-tabular text-data-tabular text-primary truncate max-w-[160px]">pmendoza@produce.gob.pe</td>
 <td class="py-2.5 px-space-md">
@@ -223,11 +231,13 @@
 <td class="py-2.5 px-space-md">
 <span class="px-2 py-0.5 rounded font-label-sm text-label-sm bg-error/15 text-error font-medium">Principal</span>
 </td>
+<td class="py-2.5 px-space-md"><span class="px-2 py-0.5 rounded font-label-sm text-label-sm bg-primary/10 text-primary font-medium">Dialogante</span></td>
 </tr>
 <!-- Row 4 -->
 <tr class="hover:bg-surface-container-high transition-colors bg-surface-container-low">
 <td class="py-2.5 px-space-md text-on-surface font-semibold">Carhuapoma Ramos, Hernán</td>
 <td class="py-2.5 px-space-md text-on-surface-variant">IMARPE Sede Paita</td>
+<td class="py-2.5 px-space-md text-on-surface-variant">Coordinador Científico Pelágicos</td>
 <td class="py-2.5 px-space-md font-data-tabular text-data-tabular text-on-surface">+51 988 334 102</td>
 <td class="py-2.5 px-space-md font-data-tabular text-data-tabular text-primary truncate max-w-[160px]">hcarhuapoma@imarpe.gob.pe</td>
 <td class="py-2.5 px-space-md">
@@ -236,11 +246,13 @@
 <td class="py-2.5 px-space-md">
 <span class="px-2 py-0.5 rounded font-label-sm text-label-sm bg-surface-container-highest text-outline">Secundario</span>
 </td>
+<td class="py-2.5 px-space-md"><span class="px-2 py-0.5 rounded font-label-sm text-label-sm bg-tertiary-container/30 text-tertiary font-medium">Legitimante</span></td>
 </tr>
 <!-- Row 5 -->
 <tr class="hover:bg-surface-container-high transition-colors bg-surface-container/70">
 <td class="py-2.5 px-space-md text-on-surface font-semibold">Seminario Morales, Luis Alberto</td>
 <td class="py-2.5 px-space-md text-on-surface-variant">GORE Piura - DIREPRO</td>
+<td class="py-2.5 px-space-md text-on-surface-variant">Director Regional Producción</td>
 <td class="py-2.5 px-space-md font-data-tabular text-data-tabular text-on-surface">+51 969 110 445</td>
 <td class="py-2.5 px-space-md font-data-tabular text-data-tabular text-primary truncate max-w-[160px]">lseminario@regionpiura.gob.pe</td>
 <td class="py-2.5 px-space-md">
@@ -249,11 +261,13 @@
 <td class="py-2.5 px-space-md">
 <span class="px-2 py-0.5 rounded font-label-sm text-label-sm bg-surface-container-highest text-outline">Secundario</span>
 </td>
+<td class="py-2.5 px-space-md"><span class="px-2 py-0.5 rounded font-label-sm text-label-sm bg-primary/10 text-primary font-medium">Dialogante</span></td>
 </tr>
 <!-- Row 6 -->
 <tr class="hover:bg-surface-container-high transition-colors bg-surface-container-low">
 <td class="py-2.5 px-space-md text-on-surface font-semibold">Chunga Vite, Rosa Elena</td>
 <td class="py-2.5 px-space-md text-on-surface-variant">Defensoría del Pueblo - Módulo Piura</td>
+<td class="py-2.5 px-space-md text-on-surface-variant">Comisionada Conflictos Sociales</td>
 <td class="py-2.5 px-space-md font-data-tabular text-data-tabular text-on-surface">+51 999 556 781</td>
 <td class="py-2.5 px-space-md font-data-tabular text-data-tabular text-primary truncate max-w-[160px]">rchunga@defensoria.gob.pe</td>
 <td class="py-2.5 px-space-md">
@@ -262,6 +276,7 @@
 <td class="py-2.5 px-space-md">
 <span class="px-2 py-0.5 rounded font-label-sm text-label-sm bg-secondary/15 text-secondary font-medium">Tercero imparcial</span>
 </td>
+<td class="py-2.5 px-space-md"><span class="px-2 py-0.5 rounded font-label-sm text-label-sm bg-primary/10 text-primary font-medium">Dialogante</span></td>
 </tr>
 </tbody>
 </table>
