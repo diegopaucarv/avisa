@@ -35,6 +35,43 @@ import {
 } from './panorama.agregados';
 import { PanoramaService } from './panorama.service';
 
+/** Teselas públicas de OpenStreetMap: el mapa es referencial, no oficial. */
+const TESELAS_OSM = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
+
+/** Encuadre inicial: extensión continental del Perú. */
+const LIMITES_PERU: [number, number][] = [
+  [-18.4, -81.4],
+  [-0.05, -68.6],
+];
+
+/** Radio en píxeles: acotado por diseño y escalado por la raíz del conteo. */
+const RADIO_MIN = 11;
+const RADIO_MAX = 34;
+
+const ESTILO_CIRCULO: L.PathOptions = {
+  color: '#1d4b86',
+  weight: 1.5,
+  fillColor: '#2455a2',
+  fillOpacity: 0.3,
+};
+
+const ESTILO_CIRCULO_ACTIVO: L.PathOptions = {
+  color: '#173f73',
+  weight: 2.5,
+  fillColor: '#2455a2',
+  fillOpacity: 0.55,
+};
+
+function radioCirculo(total: number, maximo: number): number {
+  if (maximo <= 1) return RADIO_MIN;
+  const proporcion = Math.sqrt((Math.max(1, total) - 1) / (maximo - 1));
+  return RADIO_MIN + (RADIO_MAX - RADIO_MIN) * proporcion;
+}
+
+function etiquetaCirculo(fila: FilaRegion): string {
+  return `${fila.region} · ${fila.total} ${fila.total === 1 ? 'caso' : 'casos'}`;
+}
+
 /**
  * Panorama territorial (ventana principal de la aplicación).
  *
@@ -246,6 +283,10 @@ import { PanoramaService } from './panorama.service';
       color: var(--muted);
       font-size: 9.5px;
       line-height: 1.5;
+    }
+
+    .mapa-cabeza {
+      flex-wrap: wrap;
     }
 
     .mapa-rotulo {
@@ -565,41 +606,4 @@ export class MapaPage {
       this.capasRegion.delete(clave);
     }
   }
-}
-
-/** Teselas públicas de OpenStreetMap: el mapa es referencial, no oficial. */
-const TESELAS_OSM = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
-
-/** Encuadre inicial: extensión continental del Perú. */
-const LIMITES_PERU: [number, number][] = [
-  [-18.4, -81.4],
-  [-0.05, -68.6],
-];
-
-/** Radio en píxeles: acotado por diseño y escalado por la raíz del conteo. */
-const RADIO_MIN = 11;
-const RADIO_MAX = 34;
-
-const ESTILO_CIRCULO: L.PathOptions = {
-  color: '#1d4b86',
-  weight: 1.5,
-  fillColor: '#2455a2',
-  fillOpacity: 0.3,
-};
-
-const ESTILO_CIRCULO_ACTIVO: L.PathOptions = {
-  color: '#173f73',
-  weight: 2.5,
-  fillColor: '#2455a2',
-  fillOpacity: 0.55,
-};
-
-function radioCirculo(total: number, maximo: number): number {
-  if (maximo <= 1) return RADIO_MIN;
-  const proporcion = Math.sqrt((Math.max(1, total) - 1) / (maximo - 1));
-  return RADIO_MIN + (RADIO_MAX - RADIO_MIN) * proporcion;
-}
-
-function etiquetaCirculo(fila: FilaRegion): string {
-  return `${fila.region} · ${fila.total} ${fila.total === 1 ? 'caso' : 'casos'}`;
 }
