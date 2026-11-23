@@ -188,6 +188,12 @@ export type AltaAlerta = {
   titulo: string;
   /** `cat_prioridades_alerta.codigo` tal como lo devuelve `/v1/catalogs`. */
   prioridad: string;
+  /**
+   * `core.distritos.id` del catálogo INEI. `core.alertas_tempranas` sólo tiene
+   * `distrito_id` (sin lugares operativos), por eso el buscador de la alerta se
+   * restringe a distritos.
+   */
+  distritoId?: number;
   casoCode?: string;
   descripcionRiesgo?: string;
   hechosRecientes?: string;

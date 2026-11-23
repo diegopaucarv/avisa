@@ -24,6 +24,7 @@ const FILTERS = [
   "prioridad",
   "nivel",
   "estado",
+  "distritoId",
   "sort",
 ] as const;
 
@@ -31,7 +32,7 @@ const FILTERS = [
  * Alertas tempranas.
  *
  * `GET` devuelve el sobre paginado y acepta los filtros `q`, `caso`,
- * `sinCaso`, `prioridad`, `nivel`, `estado` y `sort`.
+ * `sinCaso`, `prioridad`, `nivel`, `estado`, `distritoId` y `sort`.
  *
  * `anulados=true` lista la **papelera** (alertas anuladas). Sólo se sirve a un
  * rol con capacidad de anulación; si no la tiene, responde 403. La consulta se

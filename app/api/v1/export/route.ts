@@ -79,6 +79,7 @@ const FILTROS_ALERTAS = [
   "prioridad",
   "nivel",
   "estado",
+  "distritoId",
   "sort",
 ] as const;
 

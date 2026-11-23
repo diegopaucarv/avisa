@@ -13,7 +13,7 @@ import {
 import { urlApi } from '../../core/config/entorno';
 import { consulta } from '../../core/http/consulta';
 import { booleano, esRegistro, lista, numero, texto } from '../../dominio/mapeo';
-import { IconoComponent } from '../../shared/ui/icono.component';
+import { IconoComponent } from './icono.component';
 
 /** Un distrito del catálogo INEI (1 891 filas). */
 export type DistritoTerritorio = {
@@ -115,9 +115,11 @@ const ESPERA_TECLEO_MS = 250;
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="territorio">
-      <label class="form-label" [attr.for]="'territorio-' + identidad()">
-        {{ etiqueta() }}
-      </label>
+      @if (!compacto()) {
+        <label class="form-label" [attr.for]="'territorio-' + identidad()">
+          {{ etiqueta() }}
+        </label>
+      }
 
       <div class="territorio-campo">
         <span class="territorio-lupa" aria-hidden="true">
@@ -131,15 +133,16 @@ const ESPERA_TECLEO_MS = 250;
           aria-autocomplete="list"
           aria-controls="territorio-lista"
           [id]="'territorio-' + identidad()"
+          [attr.aria-label]="etiqueta()"
           [attr.aria-expanded]="listaVisible()"
           [attr.aria-activedescendant]="activaId()"
           [placeholder]="marcador()"
-          [value]="texto()"
+          [value]="textoVisible()"
           (input)="alTeclear($event)"
           (keydown)="alTecla($event)"
           (focus)="alEnfocar()"
         />
-        @if (seleccion()) {
+        @if (seleccion() || (inicial() && !inicialIgnorada())) {
           <button
             type="button"
             class="territorio-quitar"
@@ -198,18 +201,22 @@ const ESPERA_TECLEO_MS = 250;
         <p class="form-hint" role="status">
           No hay distritos ni lugares que coincidan con «{{ consultaTexto() }}».
         </p>
-      } @else if (cargando()) {
-        <p class="form-hint" role="status">Buscando en el catálogo territorial…</p>
-      } @else if (seleccion(); as elegido) {
-        <p class="form-hint">
-          {{ elegido.tipo === 'distrito' ? 'Distrito del catálogo INEI' : 'Lugar operativo' }}
-          en {{ elegido.region }}.
-        </p>
-      } @else {
-        <p class="form-hint">
-          Escriba al menos {{ MINIMO_CARACTERES }} letras. Los distritos salen del catálogo INEI;
-          Matarani aparece como puerto de Islay, no como distrito.
-        </p>
+      } @else if (!compacto()) {
+        @if (cargando()) {
+          <p class="form-hint" role="status">Buscando en el catálogo territorial…</p>
+        } @else if (seleccion(); as elegido) {
+          <p class="form-hint">
+            {{ elegido.tipo === 'distrito' ? 'Distrito del catálogo INEI' : 'Lugar operativo' }}
+            en {{ elegido.region }}.
+          </p>
+        } @else {
+          <p class="form-hint">
+            Escriba al menos {{ MINIMO_CARACTERES }} letras. Los distritos salen del catálogo INEI.
+            @if (!soloDistritos()) {
+              Matarani aparece como puerto de Islay, no como distrito.
+            }
+          </p>
+        }
       }
     </div>
   `,
@@ -338,6 +345,23 @@ const ESPERA_TECLEO_MS = 250;
 export class TerritorioBuscadorComponent {
   readonly etiqueta = input('Ubicación');
   readonly marcador = input('Distrito o lugar: Islay, Matarani…');
+  /**
+   * `true` oculta los lugares operativos y sólo ofrece distritos. Se usa donde
+   * el destino guarda una clave ajena a `core.distritos` (alertas) y no puede
+   * distinguir un puerto de un distrito.
+   */
+  readonly soloDistritos = input(false);
+  /**
+   * Modo de barra de filtros: oculta la etiqueta y las ayudas y deja sólo el
+   * campo con su lista. El nombre accesible sigue saliendo de `etiqueta`.
+   */
+  readonly compacto = input(false);
+  /**
+   * Etiqueta de una selección que ya existe fuera del componente (por ejemplo,
+   * un filtro restaurado desde la URL). Sólo se pinta: el id viaja aparte y el
+   * componente no emite nada hasta que el usuario elige o limpia.
+   */
+  readonly inicial = input<{ id: number; nombre: string; ruta?: string } | null>(null);
 
   readonly elegido = output<OpcionTerritorio | null>();
 
@@ -349,8 +373,17 @@ export class TerritorioBuscadorComponent {
   readonly abierto = signal(false);
   readonly seleccion = signal<OpcionTerritorio | null>(null);
 
+  /** Lo escrito manda; si no hay nada, se muestra la etiqueta inicial. */
+  readonly textoVisible = computed(
+    () =>
+      this.texto() ||
+      (this.inicialIgnorada() ? '' : this.inicial()?.ruta || this.inicial()?.nombre || ''),
+  );
+
   private readonly elemento = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly destruccion = inject(DestroyRef);
+  /** Una vez el usuario edita o limpia, la etiqueta inicial deja de mostrarse. */
+  readonly inicialIgnorada = signal(false);
   private temporizador: ReturnType<typeof setTimeout> | null = null;
 
   private readonly recurso = consulta<ResultadoTerritorio>({
@@ -365,7 +398,7 @@ export class TerritorioBuscadorComponent {
   private readonly resultado = computed(() => this.recurso.valor() ?? RESULTADO_VACIO);
 
   readonly distritos = computed(() => this.resultado().distritos);
-  readonly lugares = computed(() => this.resultado().lugares);
+  readonly lugares = computed(() => (this.soloDistritos() ? [] : this.resultado().lugares));
   readonly cargando = computed(() => this.recurso.estado() === 'cargando');
 
   private readonly total = computed(() => this.distritos().length + this.lugares().length);
@@ -397,6 +430,7 @@ export class TerritorioBuscadorComponent {
   alTeclear(evento: Event): void {
     const valor = (evento.target as HTMLInputElement).value;
     this.texto.set(valor);
+    this.inicialIgnorada.set(true);
     this.abierto.set(true);
     this.indice.set(0);
 
@@ -458,6 +492,7 @@ export class TerritorioBuscadorComponent {
   limpiar(): void {
     this.seleccion.set(null);
     this.texto.set('');
+    this.inicialIgnorada.set(true);
     this.consultaTexto.set('');
     this.abierto.set(false);
     this.indice.set(0);

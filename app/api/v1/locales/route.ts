@@ -12,7 +12,7 @@ import { withSession } from "@/lib/db/tenant";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const FILTERS = ["q", "activo"] as const;
+const FILTERS = ["q", "activo", "distritoId"] as const;
 
 // Sólo lectura: este directorio no expone POST/PATCH/DELETE.
 

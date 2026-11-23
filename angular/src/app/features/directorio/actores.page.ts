@@ -22,6 +22,10 @@ import { consulta } from '../../core/http/consulta';
 import { ExportarMenuComponent } from '../../shared/ui/exportar-menu.component';
 import { IconoComponent } from '../../shared/ui/icono.component';
 import { PaginacionComponent } from '../../shared/ui/paginacion.component';
+import {
+  TerritorioBuscadorComponent,
+  type OpcionTerritorio,
+} from '../../shared/ui/territorio-buscador.component';
 import { ActorPanelComponent } from './actor-panel.component';
 import {
   NATURALEZAS,
@@ -56,13 +60,24 @@ const FILTROS_INICIALES: FiltrosActores = {
  * el repositorio: `q`, `naturaleza`, `tipo` y `region`. Los filtros viven en la
  * URL con `replaceUrl` para que el historial no se llene de estados intermedios.
  *
+ * La región se elige con el buscador territorial, no escribiendo el nombre: la
+ * API compara `core.regiones.nombre` de forma exacta y `core.actores` tiene
+ * región (355 de 1 160) pero no distrito (0 de 1 160), así que el grano honesto
+ * del filtro es la región del distrito elegido.
+ *
  * Al pulsar una fila no se navega: se abre `ActorPanelComponent` con la ficha.
  * Los datos personales NO forman parte de la carga del listado; sólo el panel
  * los pide, a demanda y con motivo auditado.
  */
 @Component({
   selector: 'app-actores',
-  imports: [IconoComponent, PaginacionComponent, ActorPanelComponent, ExportarMenuComponent],
+  imports: [
+    IconoComponent,
+    PaginacionComponent,
+    ActorPanelComponent,
+    ExportarMenuComponent,
+    TerritorioBuscadorComponent,
+  ],
   templateUrl: './actores.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
@@ -102,6 +117,12 @@ const FILTROS_INICIALES: FiltrosActores = {
       color: #7b8896;
       font-size: 11px;
       line-height: 1.6;
+    }
+
+    /* El buscador territorial entra en la barra como un filtro más. */
+    .territorio-filtro {
+      width: 240px;
+      min-width: 0;
     }
 
     .actor-nombre {
@@ -160,6 +181,12 @@ export class ActoresPage {
 
   readonly filtros = computed(() => this.parametros());
 
+  /** Región activa como etiqueta del buscador territorial restaurado. */
+  readonly regionFiltroInicial = computed(() => {
+    const region = this.filtros().region;
+    return region ? { id: 0, nombre: region } : null;
+  });
+
   private readonly listado = consulta<Coleccion<ActorDirectorio>>({
     fuente: () => {
       const filtros = this.parametros();
@@ -200,12 +227,10 @@ export class ActoresPage {
   readonly exportarError = signal<string | null>(null);
 
   private temporizadorBusqueda?: ReturnType<typeof setTimeout>;
-  private temporizadorRegion?: ReturnType<typeof setTimeout>;
 
   constructor() {
     this.destruccion.onDestroy(() => {
       clearTimeout(this.temporizadorBusqueda);
-      clearTimeout(this.temporizadorRegion);
     });
   }
 
@@ -236,15 +261,12 @@ export class ActoresPage {
   }
 
   /**
-   * La API compara `core.regiones.nombre` de forma exacta, así que el texto se
-   * envía tal cual; el estado vacío avisa de que el nombre debe coincidir.
+   * El buscador entrega un distrito (o lugar) y aquí se usa su **región**: es el
+   * único grano territorial que `core.actores` guarda hoy. Un distrito del
+   * Callao o de Lima sigue funcionando porque la región viene resuelta.
    */
-  cambiarRegion(evento: Event): void {
-    const valor = (evento.target as HTMLInputElement).value;
-    clearTimeout(this.temporizadorRegion);
-    this.temporizadorRegion = setTimeout(() => {
-      void this.actualizar({ region: valor, pagina: 1 });
-    }, 300);
+  alElegirTerritorio(opcion: OpcionTerritorio | null): void {
+    void this.actualizar({ region: opcion?.region ?? '', pagina: 1 });
   }
 
   cambiarPagina(pagina: number): void {
@@ -257,7 +279,6 @@ export class ActoresPage {
 
   limpiar(): void {
     clearTimeout(this.temporizadorBusqueda);
-    clearTimeout(this.temporizadorRegion);
     this.cerrarPanel();
     void this.router.navigate([], {
       relativeTo: this.ruta,

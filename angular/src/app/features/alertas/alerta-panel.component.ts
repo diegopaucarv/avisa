@@ -16,6 +16,10 @@ import {
 import type { ErrorApi } from '../../core/http/errores';
 import { IconoComponent } from '../../shared/ui/icono.component';
 import {
+  TerritorioBuscadorComponent,
+  type OpcionTerritorio,
+} from '../../shared/ui/territorio-buscador.component';
+import {
   PRIORIDADES_ALERTA,
   NIVELES_ALERTA,
   OPCIONES_NIVEL,
@@ -89,7 +93,7 @@ function diferenciaTexto(valor: string, original: string | null): string | null 
  */
 @Component({
   selector: 'app-alerta-panel',
-  imports: [IconoComponent],
+  imports: [IconoComponent, TerritorioBuscadorComponent],
   templateUrl: './alerta-panel.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
@@ -457,6 +461,12 @@ export class AlertaPanelComponent {
   readonly editando = signal(false);
   readonly borrador = signal<BorradorAlerta | null>(null);
   readonly borradorAlta = signal<BorradorAlta>(BORRADOR_ALTA_VACIO);
+  /**
+   * Distrito elegido en el alta. Se guarda aparte del borrador porque el
+   * buscador emite un objeto y `BorradorAlta` sólo guarda texto de campos
+   * nativos.
+   */
+  readonly distritoAlta = signal<OpcionTerritorio | null>(null);
   readonly mensajeLocal = signal<string | null>(null);
 
   readonly formulario = computed(() => (this.editando() ? this.borrador() : null));
@@ -522,6 +532,7 @@ export class AlertaPanelComponent {
     effect(() => {
       if (!this.esAlta()) return;
       this.borradorAlta.set({ ...BORRADOR_ALTA_VACIO, casoCode: this.casoInicial().trim() });
+      this.distritoAlta.set(null);
       this.mensajeLocal.set(null);
     });
   }
@@ -579,6 +590,10 @@ export class AlertaPanelComponent {
     this.borradorAlta.update((actual) => ({ ...actual, [clave]: valor }));
   }
 
+  alElegirDistrito(opcion: OpcionTerritorio | null): void {
+    this.distritoAlta.set(opcion);
+  }
+
   alEnviarAlta(evento: Event): void {
     evento.preventDefault();
     this.guardarAlta();
@@ -606,6 +621,11 @@ export class AlertaPanelComponent {
     }
 
     const cuerpo: AltaAlerta = { titulo, prioridad };
+
+    // El buscador está restringido a distritos: `core.alertas_tempranas` no
+    // tiene lugares operativos y un lugar no se puede degradar a un distrito.
+    const distrito = this.distritoAlta();
+    if (distrito?.tipo === 'distrito') cuerpo.distritoId = distrito.id;
 
     const casoCode = borrador.casoCode.trim();
     if (casoCode) cuerpo.casoCode = casoCode;

@@ -19,7 +19,7 @@ import { IconoComponent } from '../../shared/ui/icono.component';
 import {
   TerritorioBuscadorComponent,
   type OpcionTerritorio,
-} from './territorio-buscador.component';
+} from '../../shared/ui/territorio-buscador.component';
 
 /** Cuerpo de `POST /api/v1/cases`. El código lo emite el servidor. */
 export type CuerpoCasoAlta = {
@@ -376,13 +376,6 @@ export class CasoPanelComponent {
       return;
     }
 
-    // `core.casos.tematica_id` es NOT NULL y el catálogo no tiene un valor
-    // «sin clasificar»: el alta se detiene aquí en vez de esperar un 422.
-    if (!borrador.tematica) {
-      this.mensajeLocal.set('Seleccione la temática.');
-      return;
-    }
-
     // El código no se pide ni se valida: lo emite `core.siguiente_codigo_caso`.
     // Los opcionales vacíos se omiten para que el servidor aplique su valor por
     // defecto en vez de recibir una cadena vacía (que rechazaría con 422).
@@ -390,7 +383,9 @@ export class CasoPanelComponent {
       titulo,
       regiones: [...borrador.regiones],
     };
-    cuerpo.tematica = borrador.tematica;
+    // La temática es opcional (migración 0003): vacía se omite y el servidor
+    // guarda NULL, con el sufijo `GEN` en el código del caso.
+    if (borrador.tematica) cuerpo.tematica = borrador.tematica;
     if (borrador.subsector) cuerpo.subsector = borrador.subsector;
     if (borrador.riesgo) cuerpo.riesgo = borrador.riesgo;
     if (borrador.unidadResponsable) cuerpo.unidadResponsable = borrador.unidadResponsable;

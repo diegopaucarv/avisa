@@ -41,6 +41,12 @@ export type LocalListQuery = {
   q?: string;
   /** `true`/`false` en texto; se ignora cualquier otro valor. */
   activo?: string;
+  /**
+   * `core.distritos.id` exacto. Preparado para cuando el inventario tenga
+   * `distrito_id`: hoy los 27 locales lo tienen en NULL, así que el filtro
+   * devuelve 0 filas. La UI no lo ofrece todavía por eso.
+   */
+  distritoId?: string;
   page?: number;
   pageSize?: number;
 };
@@ -128,6 +134,13 @@ export async function listLocales(
 
   const activo = leerBooleano(query.activo);
   if (activo !== undefined) where.push(`l.activo = ${bind(activo)}`);
+
+  const distritoId = query.distritoId?.trim();
+  if (distritoId) {
+    const id = Number(distritoId);
+    if (Number.isInteger(id) && id > 0)
+      where.push(`l.distrito_id = ${bind(id)}`);
+  }
 
   const page = Math.max(1, Math.trunc(query.page ?? 1));
   const pageSize = Math.min(100, Math.max(1, Math.trunc(query.pageSize ?? 25)));

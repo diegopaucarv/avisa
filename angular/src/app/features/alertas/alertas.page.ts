@@ -31,6 +31,10 @@ import {
 import { ExportarMenuComponent } from '../../shared/ui/exportar-menu.component';
 import { IconoComponent } from '../../shared/ui/icono.component';
 import { PaginacionComponent } from '../../shared/ui/paginacion.component';
+import {
+  TerritorioBuscadorComponent,
+  type OpcionTerritorio,
+} from '../../shared/ui/territorio-buscador.component';
 import { AlertaPanelComponent } from './alerta-panel.component';
 import {
   ESTADOS_ALERTA,
@@ -62,6 +66,13 @@ type FiltrosAlertas = {
   tamano: number;
   /** Sólo llega por URL; no hay control visible. Filtra el listado y presiembra el alta. */
   caso: string;
+  /**
+   * `core.distritos.id` exacto. No hay `<select>`: lo fija el buscador
+   * territorial, que garantiza un id del catálogo INEI y no un nombre libre.
+   */
+  distritoId: string;
+  /** Sólo para pintar la etiqueta del filtro restaurado desde la URL. */
+  distritoNombre: string;
 };
 
 const FILTROS_INICIALES: FiltrosAlertas = {
@@ -74,6 +85,8 @@ const FILTROS_INICIALES: FiltrosAlertas = {
   pagina: 1,
   tamano: TAMANO_PAGINA,
   caso: '',
+  distritoId: '',
+  distritoNombre: '',
 };
 
 /** `total` del sobre paginado sin construir las filas (consultas de indicadores). */
@@ -102,6 +115,7 @@ function totalDe(bruto: unknown): number {
     AlertaPanelComponent,
     AnularPanelComponent,
     ExportarMenuComponent,
+    TerritorioBuscadorComponent,
   ],
   templateUrl: './alertas.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -251,6 +265,12 @@ function totalDe(bruto: unknown): number {
       font-size: 9.5px;
     }
 
+    /* El buscador territorial entra en la barra como un filtro más. */
+    .territorio-filtro {
+      width: 220px;
+      min-width: 0;
+    }
+
     .col-codigo {
       width: 100px;
     }
@@ -323,12 +343,24 @@ export class AlertasPage {
         pagina: Math.max(1, Number(params.get('pagina') ?? '1') || 1),
         tamano: Math.max(1, Number(params.get('tamano') ?? String(TAMANO_PAGINA)) || TAMANO_PAGINA),
         caso: params.get('caso') ?? '',
+        distritoId: params.get('distritoId') ?? '',
+        distritoNombre: params.get('distritoNombre') ?? '',
       })),
     ),
     { initialValue: FILTROS_INICIALES },
   );
 
   readonly filtros = computed(() => this.parametros());
+
+  /** Etiqueta del filtro territorial restaurado desde la URL, si lo hay. */
+  readonly distritoFiltroInicial = computed(() => {
+    const filtros = this.filtros();
+    if (!filtros.distritoId) return null;
+    return {
+      id: Number(filtros.distritoId),
+      nombre: filtros.distritoNombre || `Distrito ${filtros.distritoId}`,
+    };
+  });
 
   /**
    * Filtros, búsqueda y orden vigentes, con los nombres que acepta
@@ -344,6 +376,7 @@ export class AlertasPage {
       sinCaso: filtros.sinCaso,
       sort: filtros.orden,
       caso: filtros.caso,
+      distritoId: filtros.distritoId,
     });
   });
 
@@ -359,6 +392,7 @@ export class AlertasPage {
         sinCaso: filtros.sinCaso,
         sort: filtros.orden,
         caso: filtros.caso,
+        distritoId: filtros.distritoId,
       });
     },
     esquema: (bruto) => {
@@ -390,6 +424,7 @@ export class AlertasPage {
           sort: filtros.orden,
           caso: filtros.caso,
           sinCaso: filtros.sinCaso,
+          distritoId: filtros.distritoId,
           ...extra,
         });
       },
@@ -724,6 +759,20 @@ export class AlertasPage {
     void this.actualizar({ orden: valor, pagina: 1 });
   }
 
+  /**
+   * El buscador sólo emite distritos: `core.alertas_tempranas.distrito_id` no
+   * admite lugares operativos. Un lugar limpia el filtro en vez de degradarse a
+   * su distrito.
+   */
+  alElegirDistrito(opcion: OpcionTerritorio | null): void {
+    const distrito = opcion?.tipo === 'distrito' ? opcion : null;
+    void this.actualizar({
+      distritoId: distrito ? String(distrito.id) : '',
+      distritoNombre: distrito ? distrito.nombre : '',
+      pagina: 1,
+    });
+  }
+
   cambiarPagina(pagina: number): void {
     void this.actualizar({ pagina });
   }
@@ -783,6 +832,8 @@ export class AlertasPage {
         estado: siguiente.estado || null,
         sinCaso: siguiente.sinCaso || null,
         orden: siguiente.orden !== 'recent' ? siguiente.orden : null,
+        distritoId: siguiente.distritoId || null,
+        distritoNombre: siguiente.distritoNombre || null,
         pagina: siguiente.pagina > 1 ? siguiente.pagina : null,
         tamano: siguiente.tamano !== TAMANO_PAGINA ? siguiente.tamano : null,
       },

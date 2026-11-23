@@ -87,6 +87,11 @@ export type AlertListQuery = {
   prioridad?: string;
   nivel?: string;
   estado?: string;
+  /**
+   * `core.distritos.id` exacto. A diferencia de `q`, no busca por prefijo: el
+   * filtro llega del buscador territorial y ya trae el id resuelto.
+   */
+  distritoId?: string;
   sort?: string;
   /**
    * `true` lista la papelera: añade `anulado_en is not null`. Requiere abrir
@@ -270,6 +275,18 @@ export async function listAlerts(
   else if (query.sinCaso === "false") where.push("a.caso_id is not null");
   if (query.prioridad) where.push(`pa.codigo = ${bind(query.prioridad)}`);
   if (query.nivel) where.push(`na.codigo_legado = ${bind(query.nivel)}`);
+  const distritoId = query.distritoId?.trim();
+  if (distritoId) {
+    const id = Number(distritoId);
+    if (!Number.isInteger(id) || id <= 0) {
+      throw new ApiError(
+        422,
+        "El filtro de distrito debe ser un id numérico del catálogo INEI.",
+        "DISTRITO_INVALIDO",
+      );
+    }
+    where.push(`a.distrito_id = ${bind(id)}`);
+  }
   const estado = query.estado?.trim();
   if (estado && ESTADOS.has(estado)) {
     where.push(`${ALERT_STATE} = ${bind(estado)}`);

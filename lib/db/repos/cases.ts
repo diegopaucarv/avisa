@@ -1108,6 +1108,24 @@ async function catalogValue(
   return resolveCatalog(client, key, raw);
 }
 
+/**
+ * Catálogo anulable: `null`, `undefined` o cadena vacía significan «pendiente»
+ * y se guardan como NULL. Cualquier otro valor debe existir en el catálogo;
+ * si no, es un dato inválido (422) y no un borrado encubierto.
+ *
+ * Sólo `tematica` es anulable hoy (`core.casos.tematica_id`, migración 0003).
+ * El resto de columnas de catálogo de `core.casos` siguen siendo NOT NULL.
+ */
+async function resolveOptionalCatalog(
+  client: PoolClient,
+  key: CatalogKey,
+  raw: unknown,
+): Promise<number | null> {
+  if (raw === null || raw === undefined) return null;
+  if (typeof raw === "string" && !raw.trim()) return null;
+  return resolveCatalog(client, key, raw);
+}
+
 async function resolveCatalogOrDefault(
   client: PoolClient,
   key: CatalogKey,
@@ -1413,23 +1431,17 @@ export async function createCase(
   // El código del caso se compone con estos dos catálogos, así que se resuelven
   // antes de construir las columnas.
   //
-  // `core.casos.tematica_id` es NOT NULL y `core.cat_tematicas` no tiene un
-  // valor «sin clasificar»: omitir la temática no es «dejarla pendiente», es un
-  // alta inválida. Se responde 422 con un código propio en vez de dejar que la
-  // restricción NOT NULL salga como 500, que es lo que ocurría antes.
+  // `core.casos.tematica_id` es anulable (migración 0003): omitir la temática
+  // guarda NULL y `core.siguiente_codigo_caso` emite el sufijo `GEN`
+  // (`core.codigo_tematica(NULL) = 'GEN'`). No se siembra un «sin clasificar»
+  // en el catálogo: el código del caso es inmutable y quedaría marcado para
+  // siempre.
   const tematica = readField(body, ["tematica"]);
-  if (
-    !tematica.present ||
-    tematica.value === null ||
-    (typeof tematica.value === "string" && !tematica.value.trim())
-  ) {
-    throw new ApiError(
-      422,
-      "El caso necesita una temática: el catálogo no tiene un valor «sin clasificar».",
-      "TEMATICA_REQUERIDA",
-    );
-  }
-  const tematicaId = await resolveCatalog(client, "tematica", tematica.value);
+  const tematicaId = await resolveOptionalCatalog(
+    client,
+    "tematica",
+    tematica.value,
+  );
   const subsectorId = await resolveCatalogOrDefault(
     client,
     "subsector",
@@ -1660,7 +1672,10 @@ export async function updateCase(
 
   const tematica = readField(body, ["tematica"]);
   if (tematica.present) {
-    add("tematica_id", await catalogValue(client, "tematica", tematica.value));
+    add(
+      "tematica_id",
+      await resolveOptionalCatalog(client, "tematica", tematica.value),
+    );
   }
 
   const subsector = readField(body, ["subsector"]);

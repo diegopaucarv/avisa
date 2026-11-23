@@ -103,6 +103,13 @@
             </span>
           </div>
 
+          <app-territorio-buscador
+            etiqueta="Distrito (opcional)"
+            marcador="Distrito: Islay, Piura, Contralmirante Villar…"
+            [soloDistritos]="true"
+            (elegido)="alElegirDistrito($event)"
+          />
+
           <div class="form-field">
             <label class="form-label" for="alerta-alta-riesgo">Descripción del riesgo</label>
             <textarea

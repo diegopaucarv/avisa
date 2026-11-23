@@ -86,6 +86,17 @@
       </select>
     </label>
 
+    <div class="territorio-filtro">
+      <app-territorio-buscador
+        etiqueta="Distrito"
+        marcador="Distrito: Islay, Piura…"
+        [soloDistritos]="true"
+        [compacto]="true"
+        [inicial]="distritoFiltroInicial()"
+        (elegido)="alElegirDistrito($event)"
+      />
+    </div>
+
     <label class="select-filter">
       Riesgo
       <select aria-label="Filtrar por riesgo (nivel de alerta)" (change)="cambiarNivel($event)">

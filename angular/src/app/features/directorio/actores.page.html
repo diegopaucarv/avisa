@@ -55,16 +55,15 @@
     </label>
     }
 
-    <label class="search-field">
-      <app-icono nombre="mapa" [tamano]="14" />
-      <input
-        type="search"
-        placeholder="Región (nombre exacto)"
-        [value]="filtros().region"
-        aria-label="Filtrar por región"
-        (input)="cambiarRegion($event)"
+    <div class="territorio-filtro">
+      <app-territorio-buscador
+        etiqueta="Región por distrito"
+        marcador="Distrito o lugar: Islay, Piura…"
+        [compacto]="true"
+        [inicial]="regionFiltroInicial()"
+        (elegido)="alElegirTerritorio($event)"
       />
-    </label>
+    </div>
 
     <button type="button" class="button-secondary" (click)="limpiar()">Limpiar filtros</button>
   </div>
