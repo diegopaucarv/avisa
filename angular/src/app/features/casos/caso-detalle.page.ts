@@ -5,11 +5,12 @@ import {
   Component,
   PLATFORM_ID,
   computed,
+  effect,
   inject,
   signal,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
 
 import { urlApi } from '../../core/config/entorno';
@@ -212,6 +213,7 @@ import { EnlaceRiel, RielRelacionesComponent } from './riel-relaciones.component
 })
 export class CasoDetallePage {
   private readonly ruta = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly http = inject(HttpClient);
   private readonly capacidades = inject(CapacidadesService);
   private readonly plataforma = inject(PLATFORM_ID);
@@ -219,6 +221,10 @@ export class CasoDetallePage {
   readonly codigo = toSignal(this.ruta.paramMap.pipe(map((params) => params.get('codigo') ?? '')), {
     initialValue: '',
   });
+  private readonly registroSolicitado = toSignal(
+    this.ruta.queryParamMap.pipe(map((params) => params.get('registrar'))),
+    { initialValue: null },
+  );
 
   private readonly recurso = consulta<DetalleCaso>({
     fuente: () => {
@@ -554,6 +560,19 @@ export class CasoDetallePage {
   imprimir(): void {
     if (!isPlatformBrowser(this.plataforma)) return;
     window.print();
+  }
+
+  constructor() {
+    effect(() => {
+      if (this.registroSolicitado() !== 'demanda' || !this.caso()) return;
+      if (this.puedeModificar()) this.altaDemanda();
+      void this.router.navigate([], {
+        relativeTo: this.ruta,
+        queryParams: { registrar: null },
+        queryParamsHandling: 'merge',
+        replaceUrl: true,
+      });
+    });
   }
 
   altaDemanda(): void {

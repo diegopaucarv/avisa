@@ -353,6 +353,14 @@ export class ActoresPage {
     this.seleccionado.set(null);
   }
 
+  alActualizarActor(actor: ActorDirectorio): void {
+    this.seleccionado.set(actor);
+    this.listaTemporal.update((actual) =>
+      actual.map((seleccionado) => (seleccionado.id === actor.id ? actor : seleccionado)),
+    );
+    this.listado.recargar();
+  }
+
   buscar(evento: Event): void {
     const valor = (evento.target as HTMLInputElement).value;
     clearTimeout(this.temporizadorBusqueda);

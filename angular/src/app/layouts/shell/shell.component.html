@@ -46,6 +46,52 @@
         <app-icono nombre="buscar" [tamano]="18" />
       </a>
 
+      @if (puedeRegistrar()) {
+        <div class="registrar-wrap" (click)="$event.stopPropagation()">
+          <button
+            type="button"
+            class="registrar-trigger"
+            [attr.aria-expanded]="registrarAbierto()"
+            aria-controls="menu-registrar"
+            (click)="alternarRegistrar()"
+          >Registrar</button>
+          @if (registrarAbierto()) {
+            <div class="registrar-panel" id="menu-registrar" aria-label="Opciones de registro">
+              <p class="registrar-titulo">Nuevo registro</p>
+              <button type="button" class="registrar-opcion" (click)="abrirRegistro('caso')">
+                <span>Caso</span><span class="registrar-ayuda">CS-…</span>
+              </button>
+              <button type="button" class="registrar-opcion" (click)="abrirRegistro('alerta')">
+                <span>Alerta</span><span class="registrar-ayuda">AT-…</span>
+              </button>
+              <button
+                type="button"
+                class="registrar-opcion"
+                [disabled]="!codigoCasoActual()"
+                [attr.title]="codigoCasoActual() ? 'Registrar demanda en el caso actual' : 'Abre un caso para registrar una demanda'"
+                (click)="abrirRegistro('demanda')"
+              >
+                <span>Demanda</span><span class="registrar-ayuda">{{ codigoCasoActual() ? 'del caso' : 'requiere caso' }}</span>
+              </button>
+              <button type="button" class="registrar-opcion" (click)="abrirRegistro('compromiso')">
+                <span>Compromiso</span>
+              </button>
+              <button type="button" class="registrar-opcion" (click)="abrirRegistro('documento')">
+                <span>Documento</span>
+              </button>
+              <div class="registrar-separador"></div>
+              <p class="registrar-titulo">Sin capa de datos · no registrable</p>
+              <button type="button" class="registrar-opcion" disabled title="Requiere tabla y endpoint">
+                <span>Reunión</span><span class="registrar-ayuda">requiere endpoint</span>
+              </button>
+              <button type="button" class="registrar-opcion" disabled title="Requiere reuniones y endpoint">
+                <span>Acta y relatoría</span><span class="registrar-ayuda">requiere reunión</span>
+              </button>
+            </div>
+          }
+        </div>
+      }
+
       <a
         class="header-icon-button"
         routerLink="/notificaciones"

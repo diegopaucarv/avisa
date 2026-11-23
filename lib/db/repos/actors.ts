@@ -1,4 +1,6 @@
 import type { PoolClient } from "pg";
+import { ApiError } from "../errors";
+import { auditChange } from "../audit";
 import { DEFAULT_PII_MOTIVO, getActorPii, type ActorPii } from "./pii";
 
 const ACTOR_SELECT = `
@@ -106,6 +108,207 @@ function mapActor(row: Record<string, unknown>): ActorListItem {
     codigo: row.codigo as string | null,
     perfilDescripcion: row.perfil_descripcion as string | null,
   };
+}
+
+export type ActorUpdateInput = {
+  nombre?: unknown;
+  abreviatura?: unknown;
+  naturaleza?: unknown;
+  tipo?: unknown;
+  funcion?: unknown;
+  posicionamiento?: unknown;
+  cargo?: unknown;
+  nivelGobierno?: unknown;
+  categoria?: unknown;
+  perfilDescripcion?: unknown;
+  activo?: unknown;
+};
+
+const ACTOR_UPDATE_FIELDS = new Set([
+  "nombre",
+  "abreviatura",
+  "naturaleza",
+  "tipo",
+  "funcion",
+  "posicionamiento",
+  "cargo",
+  "nivelGobierno",
+  "categoria",
+  "perfilDescripcion",
+  "activo",
+]);
+
+function optionalText(
+  input: ActorUpdateInput,
+  key: keyof ActorUpdateInput,
+  maxLength: number,
+  nullable = true,
+): string | null | undefined {
+  if (!(key in input)) return undefined;
+  const value = input[key];
+  if (value === null && nullable) return null;
+  if (typeof value !== "string") {
+    throw new ApiError(422, `El campo ${key} debe ser texto.`, "FIELD_INVALID");
+  }
+  const trimmed = value.trim();
+  if ((!nullable && !trimmed) || trimmed.length > maxLength) {
+    throw new ApiError(422, `El campo ${key} no cumple el formato permitido.`, "FIELD_INVALID");
+  }
+  return trimmed;
+}
+
+/**
+ * Actualiza sólo atributos públicos del padrón. DNI, correo y teléfonos
+ * permanecen en la vía de PII cifrada y no forman parte de esta mutación.
+ */
+export async function updateActor(
+  client: PoolClient,
+  scope: { usuarioId: string; rolCodigo: string },
+  uid: string,
+  input: ActorUpdateInput,
+): Promise<ActorListItem> {
+  const unknown = Object.keys(input).filter((key) => !ACTOR_UPDATE_FIELDS.has(key));
+  if (unknown.length) {
+    throw new ApiError(422, `Campo no editable: ${unknown[0]}.`, "FIELD_NOT_EDITABLE");
+  }
+  if (!Object.keys(input).length) {
+    throw new ApiError(422, "Indique al menos un campo para actualizar.", "EMPTY_UPDATE");
+  }
+
+  const antesResult = await client.query(
+    `select a.actor_uid::text as id, a.nombre_actual, a.abreviatura, a.naturaleza,
+            a.cargo_actual, a.nivel_gobierno, a.categoria, a.perfil_descripcion,
+            a.activo, a.tipo_actor_id, a.rol_actor_id, a.perfil_id,
+            ta.nombre as tipo, ra.nombre as funcion, pf.nombre as posicionamiento
+       from core.actores a
+       left join core.cat_tipos_actor ta on ta.id = a.tipo_actor_id
+       left join core.cat_roles_actor ra on ra.id = a.rol_actor_id
+       left join core.cat_perfiles_actor pf on pf.id = a.perfil_id
+      where a.actor_uid::text = $1 or a.codigo_legado = $1
+      limit 1`,
+    [uid],
+  );
+  const antes = antesResult.rows[0] as Record<string, unknown> | undefined;
+  if (!antes) throw new ApiError(404, "El actor no existe.", "NOT_FOUND");
+
+  const values: unknown[] = [];
+  const sets: string[] = [];
+  const bind = (value: unknown): string => {
+    values.push(value);
+    return `$${values.length}`;
+  };
+  const auditKeys: Array<[string, string]> = [];
+  const set = (column: string, key: string, value: unknown) => {
+    sets.push(`${column} = ${bind(value)}`);
+    auditKeys.push([key, column]);
+  };
+
+  const nombre = optionalText(input, "nombre", 255, false);
+  if (nombre !== undefined) set("nombre_actual", "nombre_actual", nombre);
+  const abreviatura = optionalText(input, "abreviatura", 150);
+  if (abreviatura !== undefined) set("abreviatura", "abreviatura", abreviatura);
+  const naturaleza = optionalText(input, "naturaleza", 12, false);
+  if (naturaleza !== undefined) {
+    if (naturaleza === null || !new Set(["persona", "organizacion"]).has(naturaleza)) {
+      throw new ApiError(422, "La naturaleza no está en el catálogo.", "CATALOG_VALUE_INVALID");
+    }
+    set("naturaleza", "naturaleza", naturaleza);
+  }
+  const cargo = optionalText(input, "cargo", 150);
+  if (cargo !== undefined) set("cargo_actual", "cargo_actual", cargo);
+  const nivelGobierno = optionalText(input, "nivelGobierno", 15);
+  if (nivelGobierno !== undefined) {
+    const niveles = new Set(["Nacional", "Regional", "Local", "Empresa", "Sociedad_Civil"]);
+    if (nivelGobierno !== null && !niveles.has(nivelGobierno)) {
+      throw new ApiError(422, "El nivel de gobierno no está en el catálogo.", "CATALOG_VALUE_INVALID");
+    }
+    set("nivel_gobierno", "nivel_gobierno", nivelGobierno);
+  }
+  const categoria = optionalText(input, "categoria", 40);
+  if (categoria !== undefined) set("categoria", "categoria", categoria);
+  const perfil = optionalText(input, "perfilDescripcion", 5000);
+  if (perfil !== undefined) set("perfil_descripcion", "perfil_descripcion", perfil);
+  if ("activo" in input) {
+    if (typeof input.activo !== "boolean") {
+      throw new ApiError(422, "El estado activo debe ser booleano.", "FIELD_INVALID");
+    }
+    set("activo", "activo", input.activo);
+  }
+
+  const tipo = optionalText(input, "tipo", 100, false);
+  const funcion = optionalText(input, "funcion", 100, false);
+  const posicionamiento = optionalText(input, "posicionamiento", 100);
+  if (tipo !== undefined || funcion !== undefined || posicionamiento !== undefined) {
+    const funcionActual = typeof antes.funcion === "string"
+      ? antes.funcion.replace(/_/g, " ")
+      : "";
+    const catalogos = await client.query(
+      `select (select id from core.cat_tipos_actor where nombre = $1 limit 1) as tipo_id,
+              (select id from core.cat_roles_actor where replace(nombre, '_', ' ') = $2 limit 1) as funcion_id,
+              (select id from core.cat_perfiles_actor where nombre = $3 limit 1) as perfil_id`,
+      [
+        tipo !== undefined ? tipo : antes.tipo,
+        funcion !== undefined ? funcion : funcionActual,
+        posicionamiento !== undefined ? posicionamiento : antes.posicionamiento,
+      ],
+    );
+    const ids = catalogos.rows[0] as Record<string, number | null>;
+    if (tipo !== undefined) {
+      if (ids.tipo_id === null) throw new ApiError(422, "El tipo de actor no está en el catálogo.", "CATALOG_VALUE_INVALID");
+      set("tipo_actor_id", "tipo_actor_id", ids.tipo_id);
+    }
+    if (funcion !== undefined) {
+      if (ids.funcion_id === null) throw new ApiError(422, "La función no está en el catálogo.", "CATALOG_VALUE_INVALID");
+      set("rol_actor_id", "rol_actor_id", ids.funcion_id);
+    }
+    if (posicionamiento !== undefined) {
+      if (posicionamiento !== null && ids.perfil_id === null) {
+        throw new ApiError(422, "El posicionamiento no está en el catálogo.", "CATALOG_VALUE_INVALID");
+      }
+      set("perfil_id", "perfil_id", ids.perfil_id);
+    }
+  }
+
+  if (!sets.length) throw new ApiError(422, "Indique al menos un campo editable.", "EMPTY_UPDATE");
+  sets.push(`updated_by = ${bind(scope.usuarioId)}`);
+  const actorId = antes.id as string;
+  const idParam = bind(actorId);
+  const actualizado = await client.query(
+    `update core.actores a
+        set ${sets.join(", ")}
+      where a.actor_uid::text = ${idParam}
+      returning a.actor_uid::text as id, a.nombre_actual, a.abreviatura, a.naturaleza,
+                a.tipo_actor_id, a.rol_actor_id, a.perfil_id, a.cargo_actual,
+                a.nivel_gobierno, a.categoria, a.perfil_descripcion, a.activo`,
+    values,
+  );
+  const after = actualizado.rows[0] as Record<string, unknown> | undefined;
+  if (!after) throw new ApiError(404, "El actor no existe o no puede editarse.", "NOT_FOUND");
+
+  const detalle = await client.query(
+    `select ${ACTOR_SELECT} ${ACTOR_FROM} where a.actor_uid::text = $1`,
+    [actorId],
+  );
+  const fila = detalle.rows[0] as Record<string, unknown> | undefined;
+  if (!fila) throw new ApiError(404, "El actor no existe o no puede editarse.", "NOT_FOUND");
+
+  const auditBefore: Record<string, unknown> = {};
+  const auditAfter: Record<string, unknown> = {};
+  for (const [key, column] of auditKeys) {
+    auditBefore[key] = antes[column];
+    auditAfter[key] = after[column];
+  }
+  await auditChange(client, {
+    tabla: "core.actores",
+    registroId: actorId,
+    accion: "UPDATE",
+    usuarioId: scope.usuarioId,
+    rolCodigo: scope.rolCodigo,
+    antes: auditBefore,
+    despues: auditAfter,
+  });
+
+  return mapActor(fila);
 }
 
 export async function listActors(

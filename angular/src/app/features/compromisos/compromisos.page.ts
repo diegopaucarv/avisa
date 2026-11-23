@@ -1,5 +1,8 @@
 import { HttpClient } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import {   ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { map } from 'rxjs';
@@ -447,6 +450,10 @@ function totalDe(bruto: unknown): number {
 export class CompromisosPage {
   private readonly ruta = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly registroSolicitado = toSignal(
+    this.ruta.queryParamMap.pipe(map((params) => params.get('registrar'))),
+    { initialValue: null },
+  );
   private readonly http = inject(HttpClient);
   private readonly capacidades = inject(CapacidadesService);
 
@@ -925,6 +932,19 @@ export class CompromisosPage {
 
   cerrarPanel(): void {
     this.seleccionado.set(null);
+  }
+
+  constructor() {
+    effect(() => {
+      if (this.registroSolicitado() !== 'compromiso') return;
+      this.abrirAlta();
+      void this.router.navigate([], {
+        relativeTo: this.ruta,
+        queryParams: { registrar: null },
+        queryParamsHandling: 'merge',
+        replaceUrl: true,
+      });
+    });
   }
 
   abrirAlta(): void {

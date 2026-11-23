@@ -21,7 +21,7 @@ Los mockups son referencias de presentación, no fuentes para copiar registros d
 
 - **Mockup canónico:** `actores_editar_actor_modo_oscuro_2.html`.
 - **Punto de entrada futuro:** acciones de `ActoresPage` (`actores.page.html` / `.ts`) y un componente separado —por ejemplo `ActorEdicionPanelComponent`— junto a `ActorPanelComponent`.
-- **Estado Angular:** no hay edición en el directorio actual. `ActorPanelComponent` es de lectura; el template de `ActoresPage` no ofrece acción de editar. `app/api/v1/actors/[uid]/route.ts` solo exporta `GET`, y no se encontró `POST`, `PUT` ni `PATCH` en `app/api/v1/actors/`.
+- **Estado Angular (2026-11-23):** `ActorPanelComponent` ofrece edición de atributos públicos para roles autorizados. `PATCH /api/v1/actors/[uid]` valida campos y catálogos, actualiza con la sesión/RLS vigente y registra auditoría en la misma transacción. No recibe DNI, correo ni teléfono: la PII permanece en su canal cifrado y con motivo auditado. Sigue sin existir alta de actores, captura de PII, fusión ni baja lógica.
 - **Implicación:** el mockup define una futura superficie de formulario; para que guarde de verdad hacen falta contrato/ruta de escritura, autorización y mapeo de campos. No conviene convertir el panel de lectura en un formulario ficticio ni conectar los campos de muestra a una mutación inexistente. DNI/RENIEC e imagen también requieren contratos explícitos.
 
 ### Lista temporal, asistencia y fichas
@@ -71,7 +71,7 @@ Los mockups son referencias de presentación, no fuentes para copiar registros d
 | Mockup canónico | Angular existente a actualizar | Estado / trabajo faltante |
 | --- | --- | --- |
 | Perfil del actor | `ActoresPage` + `ActorPanelComponent` | Rediseño del drawer; preservar acceso PII auditado |
-| Edición del actor | `ActoresPage`; nuevo `ActorEdicionPanelComponent` | No existe escritura Angular ni endpoint de actores |
+| Edición del actor | `ActoresPage` + `ActorPanelComponent` | ✔ Edición de atributos públicos y PATCH auditado; PII, alta, fusión y baja lógica pendientes |
 | Lista temporal | `ActoresPage` | ✔ Selección temporal en memoria entre filtros/páginas; padrón de asistencia y exportación siguen pendientes |
 | Tarjetas de casos | `CasosPage` + `CasoVistaPreviaComponent` | Base existente; aplicar presentación sin alterar filtros/datos |
 | Detalle de alerta | `AlertasPage` + `AlertaPanelComponent` | Base de detalle/flujo existente; actualizar composición |
@@ -96,4 +96,4 @@ Se eliminaron 12 alternativas después de conservar ocho fuentes canónicas:
 - `alertas_tempranas_solicitar_modificaci_n_2.html`
 - `casos_modal_detalle_y_mapa_de_actores.html`
 
-**Avance de implementación (2026-11-23).** La lista temporal del mockup de actores ya está integrada en Angular y probada. Las restantes superficies siguen parciales o bloqueadas por contrato: escritura de actores y solicitud/auditoría/notificación de modificación de alertas requieren endpoints, autorización y auditoría antes de habilitar sus acciones.
+**Avance de implementación (2026-11-23).** La lista temporal y la edición de atributos públicos del mockup de actores ya están integradas en Angular; el `PATCH` aplica RLS y audita la mutación. Siguen pendientes la creación/captura de PII/fusión/baja de actores y la solicitud/auditoría/notificación de modificación de alertas, que requieren completar sus contratos antes de habilitar sus flujos.

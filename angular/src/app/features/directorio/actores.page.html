@@ -201,6 +201,10 @@
     (tamanoCambia)="cambiarTamano($event)"
   />
   } @if (seleccionado(); as actorAbierto) {
-  <app-actor-panel [actor]="actorAbierto" (cerrar)="cerrarPanel()" />
+  <app-actor-panel
+    [actor]="actorAbierto"
+    (cerrar)="cerrarPanel()"
+    (actualizado)="alActualizarActor($event)"
+  />
   }
 </section>

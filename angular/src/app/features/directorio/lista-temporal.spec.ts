@@ -20,6 +20,7 @@ function actor(id: string): ActorDirectorio {
     organizacionAncla: null,
     validado: false,
     activo: true,
+    clasificacion: 2,
     perfil: null,
   };
 }
