@@ -7,7 +7,7 @@ import {
   type SessionPayload,
 } from "@/lib/db/auth";
 import { jsonError } from "@/lib/db/errors";
-import type { Role } from "@/frontend/types";
+import { UI_ROLE } from "@/lib/api/roles";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -22,18 +22,6 @@ type AuthRow = {
   rol_codigo: string | null;
   roles: string[] | null;
   regiones: string[] | null;
-};
-
-/**
- * Los códigos de rol de la base no son etiquetas de interfaz. La base decide el
- * rol vigente (ya ordenado por precedencia); aquí sólo se traduce para la UI.
- */
-const UI_ROLE: Record<string, Role> = {
-  direccion_oaipcs: "Directora",
-  administrador: "Admin",
-  alta_direccion: "Autoridad",
-  sectorista: "Sectorista",
-  consulta_lectura: "PuntoFocal",
 };
 
 export async function POST(request: Request) {

@@ -1,13 +1,20 @@
 # =============================================================================
-#  AVISA · interfaz (Next.js 16)
+#  AVISA · API (Next.js 16) y consola Angular
 #
 #  Contexto de construcción: la RAÍZ del repositorio (ver compose.yaml).
-#  Las dependencias se instalan en la imagen; en tiempo de ejecución el
-#  código se monta desde el disco y `node_modules` vive en un volumen que
+#  Las dependencias de la API se instalan en la imagen; en tiempo de ejecución
+#  el código se monta desde el disco y `node_modules` vive en un volumen que
 #  Docker siembra con lo ya instalado. Así se edita con recarga en caliente
 #  sin reinstalar en cada arranque.
 #
-#  Reconstruir sólo hace falta cuando cambia `package.json` o el candado:
+#  La consola Angular NO se construye aquí: `angular/` queda fuera del contexto
+#  (`.dockerignore`) y el montaje de `.:/app` taparía cualquier `public/` de la
+#  imagen. Se compila en el host y Next la sirve desde el `public/` montado:
+#      npm --prefix angular ci      # una vez
+#      pnpm build:spa               # cada cambio de Angular
+#
+#  Reconstruir la imagen sólo hace falta cuando cambia `package.json` o el
+#  candado de la API:
 #      docker compose build ui
 #  Y, si el volumen ya existía, hay que vaciarlo para que se vuelva a
 #  sembrar:  docker volume rm avisa_node_modules

@@ -1,6 +1,10 @@
 # Contexto de construcción = raíz del repositorio.
-# Se deja fuera lo que no hace falta para construir la interfaz ni la API:
-# dependencias instaladas, caché de Next, historial y documentación.
+# Se deja fuera lo que no hace falta para construir la API: dependencias
+# instaladas, caché de Next, historial y documentación.
+#
+# `angular` también queda fuera a propósito: la consola se compila en el host
+# con `pnpm build:spa` y Next la sirve desde el `public/` montado (ver
+# docker/ui/Dockerfile). Los datos, las migraciones y el SQL tampoco se copian.
 
 node_modules
 .next

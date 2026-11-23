@@ -180,7 +180,18 @@ services:
       - log_min_duration_statement=1000
 
   # ===========================================================================
-  #  UI · Next.js 16 en modo desarrollo
+  #  UI + API · Next.js 16 en modo desarrollo
+  #
+  #  Sirve la API (`/api/**`) y la consola Angular, que Next publica desde
+  #  `public/`. La consola se compila en el host —no en la imagen— porque el
+  #  montaje `.:/app` tapa lo que la imagen traiga en `public/`:
+  #
+  #      npm --prefix angular ci      # una vez
+  #      pnpm build:spa               # cada cambio de la consola
+  #      docker compose up -d
+  #
+  #  Para desarrollar la consola con recarga rápida, `npm --prefix angular
+  #  start` la levanta en :4200 con `proxy.conf.json` hacia esta API en :3000.
   #
   #  El código entra por un montaje desde el disco y los dos volúmenes evitan
   #  que ese montaje tape `node_modules` y `.next`. Docker siembra

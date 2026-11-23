@@ -9,6 +9,13 @@
 > **Regla de evidencia:** toda afirmación sobre el repo se apoya en una lectura del archivo citado.
 > Lo que no pude verificar está marcado como **supuesto** (§0.4) o **inferencia**.
 
+> **Estado (2026-11-22): ejecutado y superado en parte.** Las citas a `app/page.tsx`,
+> `components/`, `frontend/` y `lib/api-*` describen el repositorio del 2026-11-21 y se
+> conservan como registro de las decisiones. La UI React se retiró: hoy `app/` sólo tiene
+> rutas de API, `lib/api/roles.ts` guarda el vocabulario de rol y la consola Angular se
+> sirve desde `public/` en el mismo despliegue. El estado vigente está en
+> `docs/06_operacion/DESPLIEGUE_VERCEL_NEON.md`.
+
 ---
 
 ## 0. Diagnóstico verificado (base de las decisiones)
@@ -343,9 +350,10 @@ eso sería un rediseño encubierto y rompería la paridad visual (§10).
 
 ```
 avisa/
-├─ app/ components/ lib/            # Next.js actual — se CONGELA, solo recibe el rename de API
+├─ app/ lib/                        # Next.js: sólo la API (`app/api/**`, `lib/db/**`)
+├─ lib/api/roles.ts                 # vocabulario de rol que publica el login (antes en frontend/)
 ├─ docs/07_frontend/angular/        # este documento + el inventario
-├─ scripts/generate_dark_theme.mjs  # se reutiliza desde angular/ (ver §8.4)
+├─ scripts/generate_dark_theme.mjs  # se reutilizó para generar el tema de la consola
 └─ angular/                         # workspace Angular independiente
    ├─ angular.json
    ├─ package.json                  # deps propias; versiones EXACTAS

@@ -5,6 +5,21 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  // La consola es una SPA Angular publicada en `public/` (ver
+  // `scripts/copiar-spa.mjs`). Estas reglas devuelven `index.html` para que el
+  // router del cliente resuelva `/` y las rutas profundas, sin tocar
+  // `/api/**`, `/_next/**` ni los archivos con extensión.
+  async rewrites() {
+    return {
+      beforeFiles: [
+        { source: '/', destination: '/index.html' },
+        {
+          source: '/:ruta((?!api/|_next/|.*\\..*).*)',
+          destination: '/index.html',
+        },
+      ],
+    }
+  },
   async headers() {
     return [
       {
