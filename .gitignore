@@ -21,6 +21,9 @@ node_modules
 # Artefacto incremental de `tsc`: cambia en cada type-check, no se versiona.
 *.tsbuildinfo
 
+# Archivos temporales de scripts sueltos (se crean y se borran en la raíz).
+.tmp-*
+
 # Python
 __pycache__/
 *.pyc
