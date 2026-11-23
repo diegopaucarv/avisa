@@ -66,6 +66,7 @@ const FILTROS_CASOS = [
   "tematica",
   "unidad",
   "region",
+  "sinregion",
   "abiertos",
   "sort",
 ] as const;

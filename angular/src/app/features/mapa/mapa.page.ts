@@ -508,11 +508,32 @@ export class MapaPage {
     });
   }
 
-  /** El listado de Casos no filtra por región; se conserva «abiertos» y el ámbito. */
+  /**
+   * Recorte común a todos los enlaces «Ver casos»: el ámbito bajo el que se
+   * contaron los casos de la tabla y «Abiertos». Cuando no hay ámbito vigente se
+   * envía `todos` de forma explícita, porque si se omitiera el listado
+   * reaplicaría la preferencia guardada y los números de la fila y del listado
+   * dejarían de coincidir.
+   */
+  private recorteListado(): Record<string, string> {
+    return { abiertos: 'true', alcance: this.alcanceActivo() ?? 'todos' };
+  }
+
+  /**
+   * «Ver casos» abre el listado con el mismo recorte que esta tabla: la región
+   * principal de la fila y el ámbito bajo el que se contaron sus casos.
+   */
   verCasos(fila: FilaRegion): Record<string, string> {
-    return fila.ambitos.length === 1
-      ? { abiertos: 'true', alcance: fila.ambitos[0] }
-      : { abiertos: 'true' };
+    return { ...this.recorteListado(), region: fila.region };
+  }
+
+  /**
+   * La fila «Sin región» usa el complemento `sinregion`, no un nombre de región:
+   * no existe en `core.regiones` y el listado lo resuelve como ausencia de
+   * región principal.
+   */
+  verCasosSinRegion(): Record<string, string> {
+    return { ...this.recorteListado(), sinregion: 'true' };
   }
 
   etiquetaAmbitos(ambitos: readonly Alcance[]): string {

@@ -33,6 +33,10 @@ export const dynamic = "force-dynamic";
  * (`es_activo`): tras la migración 33 sólo `Abierto`. No se filtra por etiqueta
  * para que el indicador no dependa de la grafía del catálogo.
  *
+ * `region=<nombre>` filtra por región principal y se resuelve contra
+ * `core.regiones` (422 si no existe); `sinregion=true` es su complemento y
+ * alimenta la fila «Sin región» del panorama territorial.
+ *
  * `conteos=true` no es un filtro: pide que la respuesta incluya los conteos de
  * los chips de estado (`todos`, `abiertos`, `resueltos`, `archivados`), que se
  * calculan con los filtros vigentes pero ignorando el propio estado.
@@ -73,6 +77,9 @@ export async function GET(request: Request) {
     }
 
     if (leerBooleano(params.get("abiertos"))) query.abiertos = true;
+
+    // `sinregion=true` es el complemento de `region`: casos sin región principal.
+    if (leerBooleano(params.get("sinregion"))) query.sinRegion = true;
 
     // `conteos=true` añade al sobre el bloque `conteos` de la barra de estados.
     // No cambia el listado ni el `total`; sin el parámetro la respuesta es la

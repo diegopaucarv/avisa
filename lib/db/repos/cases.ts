@@ -65,6 +65,11 @@ export type CaseListQuery = {
   tematica?: string;
   unidad?: string;
   region?: string;
+  /**
+   * `true` deja sólo los casos sin región principal: es el complemento de
+   * `region` y alimenta la fila «Sin región» del panorama territorial.
+   */
+  sinRegion?: boolean;
   /** `true` lista la papelera: sólo casos con `anulado_en` no nulo. */
   anulados?: boolean;
   /**
@@ -266,7 +271,11 @@ async function construirWhere(
     query.unidad,
   );
 
-  if (query.region) {
+  // «Sin región» complementa el filtro por región: un caso no puede estar en
+  // ambos conjuntos, así que si llegaran los dos manda `sinregion`.
+  if (esVerdadero(query.sinRegion)) {
+    where.push(`coalesce(reg.nombre, rp.nombre) is null`);
+  } else if (query.region) {
     const nombre = await resolverRegion(client, query.region);
     where.push(
       `core.normalizar_ref(coalesce(reg.nombre, rp.nombre)) = core.normalizar_ref(${bind(nombre)})`,

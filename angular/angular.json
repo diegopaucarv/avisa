@@ -30,6 +30,7 @@
               "src/styles/theme-dark.generated.css",
               "node_modules/leaflet/dist/leaflet.css"
             ],
+            "allowedCommonJsDependencies": ["leaflet"],
             "outputPath": "dist/avisa"
           },
           "configurations": {

@@ -236,7 +236,11 @@
             <td>{{ etiquetaAmbitos(alcancesSinRegion()) }}</td>
             <td>{{ sinRegion() }}</td>
             <td>{{ riesgoAltoSinRegion() }}</td>
-            <td>—</td>
+            <td>
+              <a class="table-link" routerLink="/casos" [queryParams]="verCasosSinRegion()">
+                Ver casos
+              </a>
+            </td>
           </tr>
           }
         </tbody>
@@ -249,8 +253,10 @@
 
     <p class="tabla-nota">
       Los casos sin región se muestran en su propia fila: suman al total de casos abiertos, no a
-      ninguna región. La región contada es la principal del caso. El listado de Casos no acepta
-      filtro por región; «Ver casos» lleva al ámbito del registro y conserva «abiertos».
+      ninguna región. La región contada es la principal del caso. «Ver casos» abre el listado con
+      esa región o, en la fila sin región, con el criterio «Sin región» del filtro, más el ámbito
+      vigente y «Abiertos» ya aplicados, de modo que el número de la fila y el del listado
+      coinciden.
     </p>
   </section>
   } }

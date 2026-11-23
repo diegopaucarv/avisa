@@ -79,7 +79,7 @@
     <div class="surface-heading">
       <div>
         <p class="section-eyebrow">Panorama de casos</p>
-        <h3 id="titulo-desglose">Desglose por prioridad, riesgo y temática</h3>
+        <h3 id="titulo-desglose">Desglose por prioridad, riesgo, temática y región</h3>
         <p>{{ notaBase() }}</p>
       </div>
     </div>
@@ -132,6 +132,37 @@
         </ul>
         <a class="link-button" routerLink="/casos">Abrir casos</a>
       </div>
+
+      <div class="breakdown-card">
+        <h3>Por región</h3>
+        @if (cargandoRegiones()) {
+        <p class="empty-inline">Cargando regiones…</p>
+        } @else if (porRegion().length === 0) {
+        <p class="empty-inline">Sin casos con región registrada.</p>
+        } @else {
+        <ul class="breakdown-list">
+          @for (grupo of porRegion(); track grupo.etiqueta) {
+          <li>
+            @if (grupo.enlace; as enlace) {
+            <a
+              routerLink="/casos"
+              [queryParams]="enlace"
+              [attr.aria-label]="'Ver los casos de ' + grupo.etiqueta"
+              >{{ grupo.etiqueta }}</a
+            >
+            } @else {
+            <span>{{ grupo.etiqueta }}</span>
+            }
+            <span class="breakdown-bar"><i [style.width.%]="grupo.porcentaje"></i></span>
+            <span class="breakdown-count">
+              {{ grupo.total }} <small>{{ grupo.porcentaje }}%</small>
+            </span>
+          </li>
+          }
+        </ul>
+        }
+        <a class="link-button" routerLink="/casos">Abrir casos</a>
+      </div>
     </div>
   </section>
 
@@ -140,9 +171,8 @@
     <span>
       Este resumen ordena datos operativos; no reemplaza el Reporte Regional de Conflictividad y
       Demandas (Anexo 2), que distingue hechos confirmados de percepciones y añade el perfil de
-      actores y la relevancia de cada caso. La API no acepta filtro por nivel de conflicto ni
-      publica un catálogo de regiones; por eso el desglose se agrupa por prioridad, riesgo y
-      temática con los totales del servidor.
+      actores y la relevancia de cada caso. La API no acepta filtro por nivel de conflicto, así que
+      el desglose se agrupa por prioridad, riesgo, temática y región con los totales del servidor.
     </span>
   </div>
   }

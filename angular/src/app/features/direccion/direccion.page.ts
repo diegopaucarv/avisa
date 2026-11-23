@@ -15,6 +15,7 @@ import { consulta, type Consulta } from '../../core/http/consulta';
 import { PRIORIDADES, RIESGOS, esRegistro, numero } from '../../dominio/mapeo';
 import { ExportarMenuComponent } from '../../shared/ui/exportar-menu.component';
 import { IconoComponent } from '../../shared/ui/icono.component';
+import { DesgloseRegionesService, SIN_REGION } from './desglose-regiones.service';
 
 const SIN_TEMATICA = 'Sin temática';
 const SIN_CLASIFICAR = 'Sin clasificar';
@@ -32,6 +33,11 @@ type Grupo = {
   etiqueta: string;
   total: number;
   porcentaje: number;
+  /**
+   * Filtros que reproducen el grupo en el listado de Casos. `null` cuando el
+   * grupo no se corresponde con un filtro del servidor (el resto sin clasificar).
+   */
+  enlace: Record<string, string> | null;
 };
 
 /** `total` del sobre paginado (`{items,total,...}`), sin construir filas. */
@@ -54,9 +60,11 @@ function totalDemandas(bruto: unknown): number {
  * `/api/v1/dashboard` y no se crea.
  *
  * El desglose agrupa por los filtros que el servidor expone de forma exacta
- * (`prioridad`, `riesgo`, `tematica`). La API no acepta filtro por nivel de
- * conflicto ni publica un catálogo de regiones, así que esas dimensiones no se
- * estiman con una muestra: se omiten.
+ * (`prioridad`, `riesgo`, `tematica`, `region`). La API no acepta filtro por
+ * nivel de conflicto, así que esa dimensión no se estima con una muestra: se
+ * omite. La región sí se desglosa: `GET /api/v1/catalogs` publica `regiones` y
+ * cada grupo se cuenta con el `total` de `region=<nombre>` (o `sinregion=true`
+ * para los casos sin región principal), sin traer filas.
  *
  * Base normativa: Guía §8.1.2.3 (Reportes de clima social) y Anexo 2 (Reporte
  * Regional de Conflictividad y Demandas).
@@ -66,6 +74,7 @@ function totalDemandas(bruto: unknown): number {
   imports: [RouterLink, IconoComponent, ExportarMenuComponent],
   templateUrl: './direccion.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [DesgloseRegionesService],
   styles: `
     :host {
       display: block;
@@ -152,6 +161,7 @@ function totalDemandas(bruto: unknown): number {
 })
 export class DireccionPage {
   private readonly plataforma = inject(PLATFORM_ID);
+  private readonly desgloseRegiones = inject(DesgloseRegionesService);
 
   /** Último fallo del botón de exportación; vacío si no hubo. */
   readonly exportarError = signal<string | null>(null);
@@ -213,6 +223,25 @@ export class DireccionPage {
   readonly porRiesgo = computed(() => this.desglosar(this.riesgo, SIN_CLASIFICAR));
   readonly porTematica = computed(() => this.desglosar(this.tematica, SIN_TEMATICA));
 
+  /**
+   * Desglose por región principal. Cada fila enlaza al listado con el mismo
+   * recorte: `region` (o `sinregion`) y `alcance=todos`, porque este resumen
+   * cuenta sin filtrar por ámbito y, sin ese parámetro, la lista reaplicaría la
+   * preferencia guardada y el número dejaría de coincidir con la fila.
+   */
+  readonly porRegion = computed(() =>
+    this.desglosarTotales(
+      this.desgloseRegiones.grupos().map(({ etiqueta, total }) => {
+        const enlace: Record<string, string> =
+          etiqueta === SIN_REGION
+            ? { sinregion: 'true', alcance: 'todos' }
+            : { region: etiqueta, alcance: 'todos' };
+        return { etiqueta, total, enlace };
+      }),
+      SIN_CLASIFICAR,
+    ),
+  );
+
   private readonly recursos = computed<Consulta<number>[]>(() => [
     this.casosTotal,
     this.casosAbiertosRec,
@@ -224,15 +253,24 @@ export class DireccionPage {
     ...this.tematica.map(({ recurso }) => recurso),
   ]);
 
+  /**
+   * La tarjeta de región tiene su propio estado: el desglose necesita el catálogo
+   * más una consulta por región, así que no debe retrasar el «cargando» de los
+   * totales principales.
+   */
+  readonly cargandoRegiones = computed(() => this.desgloseRegiones.estado() === 'cargando');
+
   readonly cargando = computed(() =>
     this.recursos().some((fuente) => fuente.estado() === 'cargando'),
   );
 
   readonly error = computed(
     () =>
+      this.desgloseRegiones.error() ??
       this.recursos()
         .map((fuente) => fuente.error())
-        .find((fallo) => fallo !== null) ?? null,
+        .find((fallo) => fallo !== null) ??
+      null,
   );
 
   readonly notaBase = computed(() => {
@@ -250,6 +288,7 @@ export class DireccionPage {
   }
 
   recargar(): void {
+    this.desgloseRegiones.recargar();
     for (const fuente of this.recursos()) fuente.recargar();
   }
 
@@ -268,16 +307,37 @@ export class DireccionPage {
     entradas: readonly { etiqueta: string; recurso: Consulta<number> }[],
     vacio: string,
   ): Grupo[] {
+    return this.desglosarTotales(
+      entradas.map(({ etiqueta, recurso }) => ({
+        etiqueta,
+        total: recurso.valor() ?? 0,
+        enlace: null,
+      })),
+      vacio,
+    );
+  }
+
+  /**
+   * Convierte totales ya resueltos en grupos con porcentaje sobre el total de
+   * casos. El resto que no cubre ningún grupo se declara como `vacio` en lugar
+   * de repartirse: si la suma no alcanza la base, falta una clasificación y eso
+   * se muestra.
+   */
+  private desglosarTotales(
+    entradas: readonly { etiqueta: string; total: number; enlace: Record<string, string> | null }[],
+    vacio: string,
+  ): Grupo[] {
     const base = this.casosTotales();
-    const grupos = entradas.map(({ etiqueta, recurso }) => ({
+    const grupos: Grupo[] = entradas.map(({ etiqueta, total, enlace }) => ({
       etiqueta,
-      total: recurso.valor() ?? 0,
+      total,
       porcentaje: 0,
+      enlace,
     }));
 
     const sumados = grupos.reduce((acumulado, grupo) => acumulado + grupo.total, 0);
     const resto = Math.max(0, base - sumados);
-    if (resto > 0) grupos.push({ etiqueta: vacio, total: resto, porcentaje: 0 });
+    if (resto > 0) grupos.push({ etiqueta: vacio, total: resto, porcentaje: 0, enlace: null });
 
     return grupos.map((grupo) => ({
       ...grupo,

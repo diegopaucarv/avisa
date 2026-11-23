@@ -46,6 +46,14 @@ type FiltrosCasos = {
   abiertos: boolean;
   prioridad: string;
   alcance: string;
+  /** Nombre canónico de `core.regiones`; la API lo normaliza y lo valida. */
+  region: string;
+  /**
+   * Complemento de `region`: casos sin región principal. Excluyentes entre sí
+   * (`sinRegion` gana en el repositorio), por eso la barra los trata como una
+   * sola lista desplegable.
+   */
+  sinRegion: boolean;
   tematica: string;
   unidad: string;
   pagina: number;
@@ -60,6 +68,8 @@ const FILTROS_INICIALES: FiltrosCasos = {
   abiertos: false,
   prioridad: '',
   alcance: '',
+  region: '',
+  sinRegion: false,
   tematica: '',
   unidad: '',
   pagina: 1,
@@ -76,6 +86,12 @@ const ORDENES = [
 
 /** Clave de `localStorage` que guarda el ámbito predeterminado (item 28). */
 const CLAVE_ALCANCE = 'avisa-alcance';
+
+/**
+ * Centinela de la lista de regiones para «sin región principal». No es un valor
+ * de `core.regiones`: la barra lo traduce a `sinregion=true`.
+ */
+const SIN_REGION = '__sin_region__';
 
 /**
  * Ámbito predeterminado elegido en Preferencias. Es un filtro de presentación,
@@ -101,6 +117,7 @@ type OpcionFiltro = {
 type CatalogosCasos = {
   prioridades: OpcionFiltro[];
   alcances: OpcionFiltro[];
+  regiones: OpcionFiltro[];
   tematicas: OpcionFiltro[];
   unidades: OpcionFiltro[];
 };
@@ -136,6 +153,7 @@ function aCatalogosCasos(bruto: unknown): CatalogosCasos {
   return {
     prioridades: opcionesDe(catalogo, 'prioridadesAtencion'),
     alcances: opcionesDe(catalogo, 'alcances'),
+    regiones: opcionesDe(catalogo, 'regiones'),
     tematicas: opcionesDe(catalogo, 'tematicas'),
     unidades: opcionesDe(catalogo, 'unidades'),
   };
@@ -257,6 +275,8 @@ export class CasosPage {
           prioridad: params.get('prioridad') ?? '',
           // Sin `alcance` rige Preferencias; `todos` es la limpieza explícita.
           alcance: alcance === null ? alcancePreferido() : alcance === 'todos' ? '' : alcance,
+          region: params.get('region') ?? '',
+          sinRegion: params.get('sinregion') === 'true',
           tematica: params.get('tematica') ?? '',
           unidad: params.get('unidad') ?? '',
           pagina: Math.max(1, Number(params.get('pagina') ?? '1') || 1),
@@ -287,6 +307,8 @@ export class CasosPage {
       abiertos: filtros.abiertos ? 'true' : '',
       prioridad: filtros.prioridad,
       alcance: filtros.alcance,
+      region: filtros.region,
+      sinregion: filtros.sinRegion ? 'true' : '',
       tematica: filtros.tematica,
       unidad: filtros.unidad,
       sort: filtros.orden,
@@ -299,6 +321,13 @@ export class CasosPage {
   /** `?ver=anulados`: la vista pinta la papelera de casos. */
   readonly verPapelera = computed(() => this.filtros().ver === 'anulados');
 
+  /**
+   * Valor centinela de la lista de regiones para «sin región principal».
+   * `core.regiones` no tiene un nombre vacío, así que no colisiona con ninguna
+   * región real; el enlace del panorama territorial envía `sinregion`.
+   */
+  readonly valorSinRegion = SIN_REGION;
+
   /** Opciones de los selects; si el catálogo falla, se muestran sólo «Todos». */
   private readonly catalogoRecurso = consulta<CatalogosCasos>({
     fuente: () => urlApi('/v1/catalogs'),
@@ -307,6 +336,7 @@ export class CasosPage {
 
   readonly prioridades = computed(() => this.catalogoRecurso.valor()?.prioridades ?? []);
   readonly alcances = computed(() => this.catalogoRecurso.valor()?.alcances ?? []);
+  readonly regiones = computed(() => this.catalogoRecurso.valor()?.regiones ?? []);
   readonly tematicas = computed(() => this.catalogoRecurso.valor()?.tematicas ?? []);
   readonly unidades = computed(() => this.catalogoRecurso.valor()?.unidades ?? []);
 
@@ -320,6 +350,8 @@ export class CasosPage {
         abiertos: filtros.abiertos ? 'true' : '',
         prioridad: filtros.prioridad,
         alcance: filtros.alcance,
+        region: filtros.region,
+        sinregion: filtros.sinRegion ? 'true' : '',
         tematica: filtros.tematica,
         unidad: filtros.unidad,
         sort: filtros.orden,
@@ -383,6 +415,24 @@ export class CasosPage {
   cambiarAlcance(evento: Event): void {
     const valor = (evento.target as HTMLSelectElement).value;
     void this.actualizar({ alcance: valor, pagina: 1 });
+  }
+
+  /**
+   * Región principal del caso. Es el filtro que aplica «Ver casos» en el
+   * panorama territorial, así que la barra lo muestra y lo deja limpiar: sin
+   * esto el listado llegaría recortado sin un control visible que lo explique.
+   *
+   * «Sin región» es el complemento, no una región: se elige en el mismo control
+   * y al cambiar de opción se limpia el otro criterio para que nunca viajen
+   * juntos (el repositorio daría prioridad a `sinRegion`).
+   */
+  cambiarRegion(evento: Event): void {
+    const valor = (evento.target as HTMLSelectElement).value;
+    if (valor === SIN_REGION) {
+      void this.actualizar({ region: '', sinRegion: true, pagina: 1 });
+      return;
+    }
+    void this.actualizar({ region: valor, sinRegion: false, pagina: 1 });
   }
 
   cambiarTematica(evento: Event): void {
@@ -518,6 +568,8 @@ export class CasosPage {
         abiertos: siguiente.abiertos ? 'true' : null,
         prioridad: siguiente.prioridad || null,
         alcance,
+        region: siguiente.region || null,
+        sinregion: siguiente.sinRegion ? 'true' : null,
         tematica: siguiente.tematica || null,
         unidad: siguiente.unidad || null,
         pagina: siguiente.pagina > 1 ? siguiente.pagina : null,
