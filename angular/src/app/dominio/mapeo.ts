@@ -228,6 +228,10 @@ export type DemandaCaso = {
   descripcion: string | null;
   estado: string;
   motivo: string | null;
+  /** Documento que originó la demanda; `null` si no quedó vinculada. */
+  documentoOrigenId: string | null;
+  documentoOrigenCodigo: string | null;
+  documentoOrigenTitulo: string | null;
   /** `true` cuando la demanda todavía no está vinculada a un caso. */
   sinCaso: boolean;
 };
@@ -351,6 +355,9 @@ function aDemandaCaso(bruto: unknown): DemandaCaso {
     descripcion: texto(registro, ['descripcion', 'descripción']),
     estado: texto(registro, ['estado']) ?? 'Registrada',
     motivo: texto(registro, ['motivo']),
+    documentoOrigenId: texto(registro, ['documento_origen_id', 'documentoOrigenId']),
+    documentoOrigenCodigo: texto(registro, ['documento_origen_codigo', 'documentoOrigenCodigo']),
+    documentoOrigenTitulo: texto(registro, ['documento_origen_titulo', 'documentoOrigenTitulo']),
     sinCaso: !texto(registro, ['casoCode', 'codigoCaso', 'caso_codigo']),
   };
 }

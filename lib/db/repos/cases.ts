@@ -461,6 +461,9 @@ export type CaseDemanda = {
   descripcion: string | null;
   estado: string;
   motivo: string | null;
+  documento_origen_id: string | null;
+  documento_origen_codigo: string | null;
+  documento_origen_titulo: string | null;
 };
 
 export type CaseHito = {
@@ -588,8 +591,12 @@ export async function getCaseByCode(
               d.pedido_3p as pedido,
               d.descripcion_demanda as descripcion,
               replace(d.estado_atencion, '_', ' ') as estado,
-              d.motivo_no_atencion as motivo
+              d.motivo_no_atencion as motivo,
+              d.documento_origen_id as documento_origen_id,
+              doc.codigo as documento_origen_codigo,
+              doc.titulo as documento_origen_titulo
          from core.demandas d
+         left join core.documentos doc on doc.id = d.documento_origen_id
         where d.caso_id = $1
         order by d.fecha_registro desc nulls last`,
       [row.id],

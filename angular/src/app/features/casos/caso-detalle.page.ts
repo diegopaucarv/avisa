@@ -62,6 +62,14 @@ import { EnlaceRiel, RielRelacionesComponent } from './riel-relaciones.component
       font-size: 10px;
     }
 
+    /* Los botones de un hecho comparten fila y se ocultan al imprimir con
+       la regla timeline-edit, que ya está fuera de la hoja de impresión. */
+    .timeline-acciones {
+      display: inline-flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
     .aviso-ok {
       color: #2f6f52;
       font-size: 11.5px;
@@ -343,6 +351,11 @@ export class CasoDetallePage {
   readonly guardandoEvento = signal(false);
   readonly errorEvento = signal<string | null>(null);
 
+  /** Hecho cuya validación se está enviando; `null` si no hay envío en curso. */
+  readonly validandoEvento = signal<string | null>(null);
+  readonly errorValidacion = signal<string | null>(null);
+  readonly avisoValidacion = signal<string | null>(null);
+
   /** Demanda abierta en el panel; `null` significa alta. */
   readonly demandaEditada = signal<DemandaCaso | null>(null);
   readonly panelDemandaAbierto = signal(false);
@@ -402,6 +415,14 @@ export class CasoDetallePage {
     return texto.length > 60 ? `${texto.slice(0, 57)}…` : texto;
   }
 
+  /** Etiqueta accesible del enlace al documento que originó la demanda. */
+  etiquetaDocumentoOrigen(demanda: DemandaCaso): string {
+    const codigo = demanda.documentoOrigenCodigo ?? '';
+    return demanda.documentoOrigenTitulo
+      ? `Ver el documento ${codigo}: ${demanda.documentoOrigenTitulo} en Documentos`
+      : `Ver el documento ${codigo} en Documentos`;
+  }
+
   registrarHecho(): void {
     if (!this.puedeModificar()) return;
     this.errorEvento.set(null);
@@ -452,6 +473,38 @@ export class CasoDetallePage {
 
   alFallarExportacion(mensaje: string): void {
     this.exportarError.set(mensaje);
+  }
+
+  /**
+   * `PATCH /v1/cases/{codigo}/events/{id}` con `{ validado }`.
+   *
+   * La validación es un acto humano explícito: se alterna sobre el valor actual
+   * del hecho y nunca se deduce al registrar. El servidor audita el cambio.
+   */
+  alternarValidacion(evento: EventoCaso): void {
+    const codigo = this.codigo();
+    if (!codigo || !this.puedeModificar() || this.validandoEvento() !== null) return;
+
+    const url = urlApi(
+      `/v1/cases/${encodeURIComponent(codigo)}/events/${encodeURIComponent(evento.id)}`,
+    );
+    const validado = !evento.validado;
+
+    this.validandoEvento.set(evento.id);
+    this.errorValidacion.set(null);
+    this.avisoValidacion.set(null);
+
+    this.http.patch<unknown>(url, { validado }).subscribe({
+      next: () => {
+        this.validandoEvento.set(null);
+        this.recargar();
+        this.avisoValidacion.set(validado ? 'Hecho validado.' : 'Validación retirada.');
+      },
+      error: (fallo: unknown) => {
+        this.validandoEvento.set(null);
+        this.errorValidacion.set(this.mensajeDeErrorValidacion(fallo));
+      },
+    });
   }
 
   /** Impresión de la ficha (item 42): usa la hoja `@media print` del componente. */
@@ -584,6 +637,12 @@ export class CasoDetallePage {
     const error = aErrorApi(fallo);
     if (error.esProhibido) return 'Su rol no permite modificar la cronología de este caso.';
     if (error.codigo === 'SIN_CAMBIOS') return 'No hay cambios que guardar.';
+    return error.message;
+  }
+
+  private mensajeDeErrorValidacion(fallo: unknown): string {
+    const error = aErrorApi(fallo);
+    if (error.esProhibido) return 'Su rol no permite validar hechos en este caso.';
     return error.message;
   }
 

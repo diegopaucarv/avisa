@@ -110,57 +110,6 @@
     }
   </div>
 
-  @if (sinCoincidenciasAlcance()) {
-  <div class="surface panel vacio">
-    <h3>{{ alcanceTexto() }} sin casos visibles</h3>
-    <p>
-      No hay casos abiertos en ese ámbito para el recorte de la sesión. Elige «Todos» para volver al
-      conjunto visible.
-    </p>
-  </div>
-  } @else {
-  <section class="surface panel" aria-labelledby="titulo-vista-esquematica">
-    <div class="surface-heading">
-      <div>
-        <p class="section-eyebrow">ÁMBITOS</p>
-        <h3 id="titulo-vista-esquematica">Vista esquemática por ámbito</h3>
-        <p>
-          Cada banda agrupa las regiones del ámbito; el orden y el ancho siguen el conteo de casos.
-        </p>
-      </div>
-    </div>
-
-    <p class="panel-nota">
-      La capa cartográfica institucional requiere el dataset ubigeo/centroide, aún aplazado; el mapa
-      de abajo es referencial y no dibuja distritos.
-    </p>
-
-    <div class="ambitos">
-      @for (banda of bandas(); track banda.alcance) {
-      <article class="ambito">
-        <header class="ambito-cabeza">
-          <span class="ambito-nombre">{{ banda.alcance }}</span>
-          <span class="ambito-total">
-            {{ banda.total }} {{ banda.total === 1 ? 'caso' : 'casos' }}
-          </span>
-        </header>
-        <div class="ambito-barra" aria-hidden="true">
-          <span [style.width.%]="banda.proporcion"></span>
-        </div>
-        <div class="ambito-regiones">
-          @for (region of banda.regiones; track region.region) {
-          <span class="region-chip">{{ region.region }} <strong>{{ region.total }}</strong></span>
-          } @if (banda.sinRegion > 0) {
-          <span class="region-chip region-chip-vacia">
-            Sin región <strong>{{ banda.sinRegion }}</strong>
-          </span>
-          }
-        </div>
-      </article>
-      }
-    </div>
-  </section>
-
   @if (filasRegion().length > 0) {
   <section class="surface panel" aria-labelledby="titulo-mapa">
     <div class="surface-heading mapa-cabeza">
@@ -197,7 +146,56 @@
       <li>Sólo se dibujan regiones con casos visibles</li>
     </ul>
   </section>
-  }
+  } @if (sinCoincidenciasAlcance()) {
+  <div class="surface panel vacio">
+    <h3>{{ alcanceTexto() }} sin casos visibles</h3>
+    <p>
+      No hay casos abiertos en ese ámbito para el recorte de la sesión. Elige «Todos» para volver al
+      conjunto visible.
+    </p>
+  </div>
+  } @else {
+  <section class="surface panel" aria-labelledby="titulo-vista-esquematica">
+    <div class="surface-heading">
+      <div>
+        <p class="section-eyebrow">ÁMBITOS</p>
+        <h3 id="titulo-vista-esquematica">Vista esquemática por ámbito</h3>
+        <p>
+          Cada banda agrupa las regiones del ámbito; el orden y el ancho siguen el conteo de casos.
+        </p>
+      </div>
+    </div>
+
+    <p class="panel-nota">
+      La capa cartográfica institucional requiere el dataset ubigeo/centroide, aún aplazado; el mapa
+      es referencial y no dibuja distritos.
+    </p>
+
+    <div class="ambitos">
+      @for (banda of bandas(); track banda.alcance) {
+      <article class="ambito">
+        <header class="ambito-cabeza">
+          <span class="ambito-nombre">{{ banda.alcance }}</span>
+          <span class="ambito-total">
+            {{ banda.total }} {{ banda.total === 1 ? 'caso' : 'casos' }}
+          </span>
+        </header>
+        <div class="ambito-barra" aria-hidden="true">
+          <span [style.width.%]="banda.proporcion"></span>
+        </div>
+        <div class="ambito-regiones">
+          @for (region of banda.regiones; track region.region) {
+          <span class="region-chip">{{ region.region }} <strong>{{ region.total }}</strong></span>
+          } @if (banda.sinRegion > 0) {
+          <span class="region-chip region-chip-vacia">
+            Sin región <strong>{{ banda.sinRegion }}</strong>
+          </span>
+          }
+        </div>
+      </article>
+      }
+    </div>
+  </section>
 
   <section class="surface panel" aria-labelledby="titulo-regiones">
     <div class="surface-heading">

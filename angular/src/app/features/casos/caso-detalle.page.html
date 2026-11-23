@@ -197,9 +197,14 @@
           }
         </div>
         <p class="detail-hint">
-          Estado de validación en solo lectura: la ficha todavía no permite cambiarlo.
+          La validación es una acción humana explícita, no automática: use «Validar» para
+          acreditarla y «Quitar validación» para retirarla.
         </p>
-        @if (d.eventos.length === 0) {
+        @if (avisoValidacion(); as aviso) {
+        <p class="form-hint aviso-ok" role="status">{{ aviso }}</p>
+        } @if (errorValidacion(); as error) {
+        <p class="form-error" role="alert">{{ error }}</p>
+        } @if (d.eventos.length === 0) {
         <p class="empty-inline">Sin hechos registrados.</p>
         } @else {
         <ol class="timeline-list">
@@ -226,14 +231,28 @@
               }
               <p>{{ evento.descripcion }}</p>
               @if (puedeModificar()) {
-              <button
-                type="button"
-                class="button-secondary timeline-edit"
-                [attr.aria-label]="'Editar el hecho del ' + (evento.fecha || 'sin fecha')"
-                (click)="editarHecho(evento)"
-              >
-                Editar
-              </button>
+              <div class="timeline-acciones">
+                <button
+                  type="button"
+                  class="button-secondary timeline-edit"
+                  [attr.aria-label]="'Editar el hecho del ' + (evento.fecha || 'sin fecha')"
+                  (click)="editarHecho(evento)"
+                >
+                  Editar
+                </button>
+                <button
+                  type="button"
+                  class="button-secondary timeline-edit"
+                  [disabled]="validandoEvento() === evento.id"
+                  [attr.aria-label]="
+                    (evento.validado ? 'Quitar la validación del hecho del ' : 'Validar el hecho del ') +
+                    (evento.fecha || 'sin fecha')
+                  "
+                  (click)="alternarValidacion(evento)"
+                >
+                  {{ evento.validado ? 'Quitar validación' : 'Validar' }}
+                </button>
+              </div>
               }
             </div>
           </li>
@@ -267,6 +286,7 @@
                 <th scope="col">Propuesta</th>
                 <th scope="col">Pedido</th>
                 <th scope="col">Estado de atención</th>
+                <th scope="col">Documento de origen</th>
                 @if (puedeModificar()) {
                 <th scope="col">Acciones</th>
                 }
@@ -279,6 +299,22 @@
                 <td>{{ demanda.propuesta || '—' }}</td>
                 <td>{{ demanda.pedido || '—' }}</td>
                 <td>{{ demanda.estado || '—' }}</td>
+                <td class="celda-larga">
+                  @if (demanda.documentoOrigenCodigo; as codigoOrigen) {
+                  <a
+                    [routerLink]="['/documentos']"
+                    [queryParams]="{ q: codigoOrigen }"
+                    [attr.title]="demanda.documentoOrigenTitulo || null"
+                    [attr.aria-label]="etiquetaDocumentoOrigen(demanda)"
+                  >
+                    {{ codigoOrigen }}
+                  </a>
+                  @if (demanda.documentoOrigenTitulo) {
+                  <span class="detail-hint">{{ demanda.documentoOrigenTitulo }}</span>
+                  } } @else {
+                  <span aria-hidden="true">—</span>
+                  }
+                </td>
                 @if (puedeModificar()) {
                 <td>
                   <button
