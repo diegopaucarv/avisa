@@ -4,6 +4,7 @@ import {
   Component,
   DestroyRef,
   computed,
+  effect,
   inject,
   signal,
 } from '@angular/core';
@@ -213,6 +214,10 @@ export class DocumentosPage {
   private readonly ruta = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly destruccion = inject(DestroyRef);
+  private readonly registroSolicitado = toSignal(
+    this.ruta.queryParamMap.pipe(map((params) => params.get('registrar'))),
+    { initialValue: null },
+  );
   private readonly http = inject(HttpClient);
   private readonly capacidades = inject(CapacidadesService);
 
@@ -367,6 +372,16 @@ export class DocumentosPage {
 
   constructor() {
     this.destruccion.onDestroy(() => clearTimeout(this.temporizador));
+    effect(() => {
+      if (this.registroSolicitado() !== 'documento') return;
+      this.abrirAlta();
+      void this.router.navigate([], {
+        relativeTo: this.ruta,
+        queryParams: { registrar: null },
+        queryParamsHandling: 'merge',
+        replaceUrl: true,
+      });
+    });
   }
 
   formatearFecha(valor: string | null | undefined): string {

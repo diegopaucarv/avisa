@@ -2,9 +2,11 @@ import {
   ChangeDetectionStrategy,
   Component,
   DestroyRef,
+  ElementRef,
   computed,
   inject,
   signal,
+  viewChild,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -27,6 +29,8 @@ import {
   type OpcionTerritorio,
 } from '../../shared/ui/territorio-buscador.component';
 import { ActorPanelComponent } from './actor-panel.component';
+import { alternarActorLista, quitarActorLista } from './lista-temporal';
+import { crearCsvPadronAsistencia } from './padron-asistencia';
 import {
   NATURALEZAS,
   aActorDirectorio,
@@ -148,6 +152,161 @@ const FILTROS_INICIALES: FiltrosActores = {
       font-size: 9.5px;
     }
 
+    .lista-contador {
+      display: inline-grid;
+      min-width: 18px;
+      height: 18px;
+      margin-left: 4px;
+      place-items: center;
+      border-radius: 999px;
+      background: #eaf1fb;
+      color: #2455a2;
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    .button-lista {
+      min-height: 27px;
+      padding: 0 8px;
+    }
+
+    .lista-temporal-panel {
+      padding: 14px 16px;
+      border: 1px solid #dce5ef;
+      border-radius: 9px;
+      background: #fff;
+      box-shadow: 0 4px 16px rgb(25 45 68 / 5%);
+    }
+
+    .lista-temporal-cabecera,
+    .lista-temporal-acciones,
+    .lista-temporal-items li {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .lista-temporal-cabecera h2 {
+      margin: 0;
+      color: #1a2b3e;
+      font: 700 14px/1.4 var(--font-display);
+    }
+
+    .lista-temporal-cabecera p,
+    .lista-temporal-vacia {
+      margin: 4px 0 0;
+      color: #7b8896;
+      font-size: 11px;
+      line-height: 1.5;
+    }
+
+    .lista-temporal-items {
+      display: grid;
+      gap: 0;
+      margin: 12px 0 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .lista-temporal-items li {
+      min-width: 0;
+      padding: 9px 0;
+      border-top: 1px solid #edf0f2;
+    }
+
+    .lista-temporal-items li > div {
+      display: grid;
+      gap: 3px;
+      min-width: 0;
+    }
+
+    .lista-temporal-items strong {
+      color: #465a6c;
+      font-size: 11px;
+    }
+
+    .lista-temporal-items span {
+      color: #8a98a5;
+      font-size: 10px;
+    }
+
+    .lista-quitar {
+      flex: none;
+      padding: 5px 8px;
+      border: 1px solid #dce3e8;
+      border-radius: 5px;
+      background: #fff;
+      color: #526577;
+      font-size: 10px;
+    }
+
+    .padron-dialogo {
+      width: min(520px, calc(100vw - 32px));
+      padding: 0;
+      border: 1px solid #dce5ef;
+      border-radius: 12px;
+      color: #26384a;
+      box-shadow: 0 24px 70px rgb(10 20 30 / 28%);
+    }
+
+    .padron-dialogo::backdrop {
+      background: rgb(12 20 29 / 62%);
+      backdrop-filter: blur(3px);
+    }
+
+    .padron-form {
+      display: grid;
+      gap: 14px;
+      padding: 20px;
+    }
+
+    .padron-form h2,
+    .padron-form p {
+      margin: 0;
+    }
+
+    .padron-form h2 {
+      font: 700 17px/1.35 var(--font-display);
+    }
+
+    .padron-form p {
+      color: #68798a;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .padron-form label {
+      display: grid;
+      gap: 5px;
+      color: #465a6c;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .padron-form input {
+      min-width: 0;
+      min-height: 38px;
+      padding: 0 10px;
+      border: 1px solid #cfd9e2;
+      border-radius: 6px;
+      background: #fff;
+      color: #26384a;
+      font: inherit;
+    }
+
+    .padron-form input:focus-visible {
+      outline: 2px solid #3576c5;
+      outline-offset: 2px;
+    }
+
+    .padron-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 2px;
+    }
+
     @media (max-width: 720px) {
       .view-body {
         padding: 18px 16px 40px;
@@ -223,6 +382,14 @@ export class ActoresPage {
   /** Actor cuya ficha está abierta en el panel lateral. */
   readonly seleccionado = signal<ActorDirectorio | null>(null);
 
+  /** Selección de trabajo en memoria, conservada al cambiar página o filtros. */
+  readonly listaTemporal = signal<ActorDirectorio[]>([]);
+  readonly listaTemporalAbierta = signal(false);
+  readonly padronTitulo = signal('');
+  readonly padronLugar = signal('');
+  readonly padronFecha = signal(new Date().toLocaleDateString('en-CA'));
+  private readonly dialogoPadron = viewChild<ElementRef<HTMLDialogElement>>('dialogoPadron');
+
   /** Último fallo del botón de exportación; vacío si no hubo. */
   readonly exportarError = signal<string | null>(null);
 
@@ -238,8 +405,64 @@ export class ActoresPage {
     this.seleccionado.set(actor);
   }
 
+  estaEnLista(actor: ActorDirectorio): boolean {
+    return this.listaTemporal().some((seleccionado) => seleccionado.id === actor.id);
+  }
+
+  alternarLista(actor: ActorDirectorio, evento?: Event): void {
+    evento?.stopPropagation();
+    this.listaTemporal.update((actual) => alternarActorLista(actual, actor));
+  }
+
+  quitarDeLista(id: string): void {
+    this.listaTemporal.update((actual) => quitarActorLista(actual, id));
+  }
+
+  vaciarLista(): void {
+    this.listaTemporal.set([]);
+  }
+
+  abrirPadron(): void {
+    if (!this.listaTemporal().length) return;
+    this.padronTitulo.set('');
+    this.padronLugar.set('');
+    this.padronFecha.set(new Date().toISOString().slice(0, 10));
+    this.listaTemporalAbierta.set(true);
+    this.dialogoPadron()?.nativeElement.showModal();
+  }
+
+  descargarPadron(): void {
+    const titulo = this.padronTitulo().trim();
+    const lugar = this.padronLugar().trim();
+    const fecha = this.padronFecha();
+    if (!titulo || !lugar || !fecha) return;
+
+    const contenido = crearCsvPadronAsistencia({
+      titulo,
+      lugar,
+      fecha,
+      actores: this.listaTemporal(),
+    });
+    const archivo = new Blob([contenido], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(archivo);
+    const enlace = document.createElement('a');
+    enlace.href = url;
+    enlace.download = 'padron-asistencia.csv';
+    enlace.click();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+    this.dialogoPadron()?.nativeElement.close();
+  }
+
   cerrarPanel(): void {
     this.seleccionado.set(null);
+  }
+
+  alActualizarActor(actor: ActorDirectorio): void {
+    this.seleccionado.set(actor);
+    this.listaTemporal.update((actual) =>
+      actual.map((seleccionado) => (seleccionado.id === actor.id ? actor : seleccionado)),
+    );
+    this.listado.recargar();
   }
 
   buscar(evento: Event): void {

@@ -4,6 +4,7 @@ import {
   Component,
   DestroyRef,
   computed,
+  effect,
   inject,
   signal,
 } from '@angular/core';
@@ -322,6 +323,10 @@ function totalDe(bruto: unknown): number {
 export class AlertasPage {
   private readonly ruta = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly registroSolicitado = toSignal(
+    this.ruta.queryParamMap.pipe(map((params) => params.get('registrar'))),
+    { initialValue: null },
+  );
   private readonly http = inject(HttpClient);
   private readonly destruccion = inject(DestroyRef);
   private readonly capacidades = inject(CapacidadesService);
@@ -532,6 +537,16 @@ export class AlertasPage {
 
   constructor() {
     this.destruccion.onDestroy(() => clearTimeout(this.temporizador));
+    effect(() => {
+      if (this.registroSolicitado() !== 'alerta') return;
+      this.abrirAlta();
+      void this.router.navigate([], {
+        relativeTo: this.ruta,
+        queryParams: { registrar: null },
+        queryParamsHandling: 'merge',
+        replaceUrl: true,
+      });
+    });
   }
 
   formatearPlazo(horas: number | null): string {

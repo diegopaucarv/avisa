@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   DestroyRef,
+  computed,
   ElementRef,
   afterNextRender,
   effect,
@@ -19,7 +20,16 @@ import { urlConParametros } from '../../core/http/coleccion';
 import { aErrorApi } from '../../core/http/errores';
 import { CapacidadesService } from '../../core/permisos/capacidades.service';
 import { IconoComponent } from '../../shared/ui/icono.component';
-import { aDatosPersonales, type ActorDirectorio, type DatosPersonales } from './directorio.mapeo';
+import {
+  aActorDirectorio,
+  aDatosPersonales,
+  FUNCIONES_ACTOR,
+  NATURALEZAS,
+  POSICIONAMIENTOS_ACTOR,
+  TIPOS_ACTOR,
+  type ActorDirectorio,
+  type DatosPersonales,
+} from './directorio.mapeo';
 
 /**
  * Motivo que se envía con la solicitud de PII. La base lo registra en
@@ -29,6 +39,18 @@ import { aDatosPersonales, type ActorDirectorio, type DatosPersonales } from './
 const MOTIVO_PII = 'Consulta de datos personales desde el directorio';
 
 type EstadoPii = 'inactivo' | 'cargando' | 'listo' | 'prohibido' | 'error';
+type CampoActorEdicion =
+  | 'nombre'
+  | 'abreviatura'
+  | 'naturaleza'
+  | 'tipo'
+  | 'funcion'
+  | 'posicionamiento'
+  | 'cargo'
+  | 'nivelGobierno'
+  | 'categoria'
+  | 'perfilDescripcion';
+type ActorEdicion = Record<CampoActorEdicion, string> & { activo: boolean };
 
 /**
  * Ficha lateral de un actor del directorio.
@@ -210,6 +232,83 @@ type EstadoPii = 'inactivo' | 'cargando' | 'listo' | 'prohibido' | 'error';
       margin-top: 1px;
       color: #96a3af;
     }
+
+    .actor-editar-boton {
+      align-self: flex-start;
+      margin-bottom: 4px;
+    }
+
+    .actor-editor {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .actor-editor h3,
+    .actor-editor > p,
+    .actor-editor-ancho {
+      grid-column: 1 / -1;
+    }
+
+    .actor-editor h3 {
+      margin: 0;
+      color: #33475b;
+      font: 700 12px var(--font-display);
+    }
+
+    .actor-editor label {
+      display: grid;
+      gap: 5px;
+      color: #596c7e;
+      font-size: 10px;
+      font-weight: 600;
+    }
+
+    .actor-editor input:not([type='checkbox']),
+    .actor-editor select,
+    .actor-editor textarea {
+      width: 100%;
+      min-height: 34px;
+      padding: 7px 9px;
+      border: 1px solid #dce3e8;
+      border-radius: 6px;
+      background: #fff;
+      color: #33475b;
+      font: inherit;
+      font-weight: 400;
+    }
+
+    .actor-editor textarea {
+      resize: vertical;
+    }
+
+    .actor-editor-estado {
+      display: flex !important;
+      grid-column: 1 / -1;
+      align-items: center;
+      gap: 8px !important;
+    }
+
+    .actor-editor-acciones {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      padding-top: 8px;
+      border-top: 1px solid #edf0f2;
+    }
+
+    @media (max-width: 520px) {
+      .actor-editor {
+        grid-template-columns: 1fr;
+      }
+
+      .actor-editor h3,
+      .actor-editor > p,
+      .actor-editor-ancho,
+      .actor-editor-estado {
+        grid-column: 1;
+      }
+    }
   `,
 })
 export class ActorPanelComponent {
@@ -223,6 +322,31 @@ export class ActorPanelComponent {
 
   /** El botón de PII sólo existe si el rol tiene el permiso. */
   readonly puedeVerPii = this.capacidades.puedeVerPii;
+  readonly puedeEditar = computed(() =>
+    this.capacidades.puedeModificar(this.actor()?.clasificacion),
+  );
+  readonly tiposActor = TIPOS_ACTOR;
+  readonly funcionesActor = FUNCIONES_ACTOR;
+  readonly posicionamientos = POSICIONAMIENTOS_ACTOR;
+  readonly naturalezas = NATURALEZAS;
+  readonly actualizado = output<ActorDirectorio>();
+
+  readonly editando = signal(false);
+  readonly guardandoEdicion = signal(false);
+  readonly errorEdicion = signal<string | null>(null);
+  readonly borrador = signal<ActorEdicion>({
+    nombre: '',
+    abreviatura: '',
+    naturaleza: 'persona',
+    tipo: '',
+    funcion: '',
+    posicionamiento: '',
+    cargo: '',
+    nivelGobierno: '',
+    categoria: '',
+    perfilDescripcion: '',
+    activo: true,
+  });
 
   readonly estadoPii = signal<EstadoPii>('inactivo');
   readonly errorPii = signal<string | null>(null);
@@ -262,6 +386,83 @@ export class ActorPanelComponent {
       this.focoPrevio?.focus?.();
       this.reiniciarPii();
     });
+  }
+
+  iniciarEdicion(): void {
+    const actor = this.actor();
+    if (!actor || !this.puedeEditar()) return;
+    this.borrador.set({
+      nombre: actor.nombre,
+      abreviatura: actor.abreviatura ?? '',
+      naturaleza: actor.naturaleza === 'Organización' ? 'organizacion' : 'persona',
+      tipo: actor.tipo ?? '',
+      funcion: actor.funcion ?? '',
+      posicionamiento: actor.posicionamiento ?? '',
+      cargo: actor.cargo ?? '',
+      nivelGobierno: actor.nivelGobierno ?? '',
+      categoria: actor.categoria ?? '',
+      perfilDescripcion: actor.perfil ?? '',
+      activo: actor.activo,
+    });
+    this.errorEdicion.set(null);
+    this.editando.set(true);
+  }
+
+  cancelarEdicion(): void {
+    this.errorEdicion.set(null);
+    this.editando.set(false);
+  }
+
+  actualizarTexto(campo: CampoActorEdicion, evento: Event): void {
+    const valor = (evento.target as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement).value;
+    this.borrador.update((actual) => ({ ...actual, [campo]: valor }));
+  }
+
+  actualizarActivo(evento: Event): void {
+    this.borrador.update((actual) => ({
+      ...actual,
+      activo: (evento.target as HTMLInputElement).checked,
+    }));
+  }
+
+  guardarEdicion(evento: Event): void {
+    evento.preventDefault();
+    const actor = this.actor();
+    const draft = this.borrador();
+    if (!actor || !this.puedeEditar() || this.guardandoEdicion()) return;
+    if (!draft.nombre.trim()) {
+      this.errorEdicion.set('El nombre del actor es obligatorio.');
+      return;
+    }
+
+    this.guardandoEdicion.set(true);
+    this.errorEdicion.set(null);
+    const payload = {
+      ...draft,
+      nivelGobierno: draft.nivelGobierno.replace(/ /g, '_') || null,
+      abreviatura: draft.abreviatura || null,
+      cargo: draft.cargo || null,
+      categoria: draft.categoria || null,
+      perfilDescripcion: draft.perfilDescripcion || null,
+      tipo: draft.tipo || undefined,
+      funcion: draft.funcion || undefined,
+      posicionamiento: draft.posicionamiento || null,
+    };
+
+    this.http
+      .patch<unknown>(urlApi(`/v1/actors/${encodeURIComponent(actor.id)}`), payload)
+      .pipe(takeUntilDestroyed(this.destruccion))
+      .subscribe({
+        next: (respuesta) => {
+          this.actualizado.emit(aActorDirectorio(respuesta));
+          this.editando.set(false);
+          this.guardandoEdicion.set(false);
+        },
+        error: (fallo: unknown) => {
+          this.errorEdicion.set(aErrorApi(fallo).message);
+          this.guardandoEdicion.set(false);
+        },
+      });
   }
 
   /**

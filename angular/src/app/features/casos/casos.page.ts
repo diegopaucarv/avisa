@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
@@ -268,6 +268,10 @@ function aConteos(bruto: unknown): ConteosCasos {
 export class CasosPage {
   private readonly ruta = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly registroSolicitado = toSignal(
+    this.ruta.queryParamMap.pipe(map((params) => params.get('registrar'))),
+    { initialValue: null },
+  );
   private readonly http = inject(HttpClient);
   readonly capacidades = inject(CapacidadesService);
 
@@ -620,6 +624,19 @@ export class CasosPage {
 
   recargar(): void {
     this.recurso.recargar();
+  }
+
+  constructor() {
+    effect(() => {
+      if (this.registroSolicitado() !== 'caso') return;
+      this.abrirAlta();
+      void this.router.navigate([], {
+        relativeTo: this.ruta,
+        queryParams: { registrar: null },
+        queryParamsHandling: 'merge',
+        replaceUrl: true,
+      });
+    });
   }
 
   abrirAlta(): void {

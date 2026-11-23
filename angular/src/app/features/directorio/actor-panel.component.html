@@ -48,6 +48,80 @@
       </header>
 
       <div class="drawer-body">
+        @if (editando()) {
+          <form class="actor-editor" (submit)="guardarEdicion($event)" aria-labelledby="actor-editor-titulo">
+            <h3 id="actor-editor-titulo">Editar datos del actor</h3>
+            <p class="actor-nota">DNI, correo personal y teléfonos se gestionan por separado y no se editan aquí.</p>
+            <label>Nombre completo
+              <input required maxlength="255" [value]="borrador().nombre" (input)="actualizarTexto('nombre', $event)" />
+            </label>
+            <label>Naturaleza
+              <select [value]="borrador().naturaleza" (change)="actualizarTexto('naturaleza', $event)">
+                @for (opcion of naturalezas; track opcion.valor) {
+                  <option [value]="opcion.valor">{{ opcion.etiqueta }}</option>
+                }
+              </select>
+            </label>
+            <label>Tipo de actor
+              <select [value]="borrador().tipo" (change)="actualizarTexto('tipo', $event)">
+                @for (opcion of tiposActor; track opcion) {
+                  <option [value]="opcion">{{ opcion }}</option>
+                }
+              </select>
+            </label>
+            <label>Función
+              <select [value]="borrador().funcion" (change)="actualizarTexto('funcion', $event)">
+                @for (opcion of funcionesActor; track opcion) {
+                  <option [value]="opcion">{{ opcion }}</option>
+                }
+              </select>
+            </label>
+            <label>Posicionamiento
+              <select [value]="borrador().posicionamiento" (change)="actualizarTexto('posicionamiento', $event)">
+                <option value="">Sin posicionamiento</option>
+                @for (opcion of posicionamientos; track opcion) {
+                  <option [value]="opcion">{{ opcion }}</option>
+                }
+              </select>
+            </label>
+            <label>Abreviatura
+              <input maxlength="150" [value]="borrador().abreviatura" (input)="actualizarTexto('abreviatura', $event)" />
+            </label>
+            <label>Cargo
+              <input maxlength="150" [value]="borrador().cargo" (input)="actualizarTexto('cargo', $event)" />
+            </label>
+            <label>Nivel de gobierno
+              <select [value]="borrador().nivelGobierno" (change)="actualizarTexto('nivelGobierno', $event)">
+                <option value="">Sin especificar</option>
+                @for (nivel of ['Nacional', 'Regional', 'Local', 'Empresa', 'Sociedad Civil']; track nivel) {
+                  <option [value]="nivel">{{ nivel }}</option>
+                }
+              </select>
+            </label>
+            <label>Categoría
+              <input maxlength="40" [value]="borrador().categoria" (input)="actualizarTexto('categoria', $event)" />
+            </label>
+            <label class="actor-editor-ancho">Descripción del perfil
+              <textarea rows="4" maxlength="5000" [value]="borrador().perfilDescripcion" (input)="actualizarTexto('perfilDescripcion', $event)"></textarea>
+            </label>
+            <label class="actor-editor-estado">
+              <input type="checkbox" [checked]="borrador().activo" (change)="actualizarActivo($event)" />
+              Actor activo
+            </label>
+            @if (errorEdicion(); as error) {
+              <p class="actor-error actor-editor-ancho" role="alert">{{ error }}</p>
+            }
+            <div class="actor-editor-acciones actor-editor-ancho">
+              <button type="button" class="button-secondary" [disabled]="guardandoEdicion()" (click)="cancelarEdicion()">Cancelar</button>
+              <button type="submit" class="button-primary" [disabled]="guardandoEdicion() || !borrador().nombre.trim()">
+                {{ guardandoEdicion() ? 'Guardando…' : 'Guardar cambios' }}
+              </button>
+            </div>
+          </form>
+        } @else {
+        @if (puedeEditar()) {
+          <button type="button" class="button-secondary actor-editar-boton" (click)="iniciarEdicion()">Editar perfil</button>
+        }
         <section class="actor-seccion" aria-labelledby="actor-panel-caracterizacion">
           <h3 id="actor-panel-caracterizacion">Caracterización</h3>
           <dl class="actor-datos">
@@ -189,6 +263,7 @@
             </div>
           }
         </section>
+        }
       </div>
     }
   </aside>

@@ -11,7 +11,7 @@
  * evita que un correo de contacto se confunda con la PII protegida.
  */
 
-import { booleano, esRegistro, leer, texto, type Registro } from '../../dominio/mapeo';
+import { booleano, esRegistro, leer, numero, texto, type Registro } from '../../dominio/mapeo';
 
 /** `core.cat_tipos_actor.nombre`. Los tres valores del catálogo, congelados. */
 export const TIPO_ACTOR_PUBLICO = 'Actor público';
@@ -58,6 +58,7 @@ export type ActorDirectorio = {
   organizacionAncla: string | null;
   validado: boolean;
   activo: boolean;
+  clasificacion: number;
   perfil: string | null;
 };
 
@@ -135,6 +136,7 @@ export function aActorDirectorio(bruto: unknown): ActorDirectorio {
     organizacionAncla: texto(registro, ['organizacionAncla', 'organizacion_ancla']),
     validado: booleano(registro, ['validado']),
     activo: booleano(registro, ['activo']),
+    clasificacion: numero(registro, ['clasificacion']) ?? 1,
     perfil: texto(registro, ['perfilDescripcion', 'perfil_descripcion']),
   };
 }

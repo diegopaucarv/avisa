@@ -2,11 +2,12 @@ import {
   ChangeDetectionStrategy,
   Component,
   DestroyRef,
+  HostListener,
   computed,
   inject,
   signal,
 } from '@angular/core';
-import { Router, NavigationEnd, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, map, startWith } from 'rxjs';
 
@@ -79,6 +80,102 @@ type EnlaceNav = { etiqueta: string; ruta: string; icono: string };
       flex: none;
     }
 
+    .registrar-wrap {
+      position: relative;
+    }
+
+    .registrar-trigger {
+      min-height: 34px;
+      padding: 0 11px;
+      border: 1px solid #2455a2;
+      border-radius: 6px;
+      background: #2455a2;
+      color: #fff;
+      font: 600 10px/1 var(--font-sans);
+      white-space: nowrap;
+    }
+
+    .registrar-trigger:hover,
+    .registrar-trigger[aria-expanded='true'] {
+      background: #1d427f;
+    }
+
+    .registrar-panel {
+      position: absolute;
+      z-index: 50;
+      top: calc(100% + 9px);
+      right: 0;
+      width: min(280px, calc(100vw - 24px));
+      padding: 7px;
+      border: 1px solid #e1e7ed;
+      border-radius: 9px;
+      background: #fff;
+      box-shadow: 0 12px 30px rgb(23 40 58 / 16%);
+    }
+
+    .registrar-titulo {
+      margin: 0;
+      padding: 7px 9px 5px;
+      color: #8a98a5;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .registrar-separador {
+      height: 1px;
+      margin: 6px 4px;
+      background: #edf0f2;
+    }
+
+    .registrar-opcion {
+      display: flex;
+      width: 100%;
+      min-height: 36px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 0 9px;
+      border: 0;
+      border-radius: 6px;
+      background: transparent;
+      color: #33475b;
+      font-size: 11px;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .registrar-opcion:hover:not(:disabled),
+    .registrar-opcion:focus-visible:not(:disabled) {
+      background: #f0f5fb;
+      color: #1d427f;
+    }
+
+    .registrar-opcion:disabled {
+      color: #9ca8b3;
+      cursor: not-allowed;
+    }
+
+    .registrar-ayuda {
+      color: #99a4ad;
+      font-size: 9px;
+    }
+
+    @media (max-width: 620px) {
+      .registrar-trigger {
+        width: 34px;
+        padding: 0;
+        overflow: hidden;
+        font-size: 0;
+      }
+
+      .registrar-trigger::before {
+        content: '+';
+        font-size: 20px;
+      }
+    }
+
     @media (max-width: 1120px) {
       .brand-org-largo {
         display: none;
@@ -114,6 +211,28 @@ export class ShellComponent {
     ),
     { initialValue: this.router.url.startsWith('/mapa') },
   );
+
+  private readonly urlActual = toSignal(
+    this.router.events.pipe(
+      filter((evento): evento is NavigationEnd => evento instanceof NavigationEnd),
+      map((evento) => evento.urlAfterRedirects),
+      startWith(this.router.url),
+    ),
+    { initialValue: this.router.url },
+  );
+
+  readonly puedeRegistrar = this.capacidades.puedeEditar;
+  readonly registrarAbierto = signal(false);
+  readonly codigoCasoActual = computed(() => {
+    const coincidencia = this.urlActual().match(/^\/casos\/([^/?#]+)/);
+    if (!coincidencia) return null;
+    try {
+      const codigo = decodeURIComponent(coincidencia[1]);
+      return codigo === 'sin-caso' ? null : codigo;
+    } catch {
+      return null;
+    }
+  });
 
   /**
    * Ámbito que la interfaz está aplicando: el elegido en Preferencias o, en
@@ -187,6 +306,43 @@ export class ShellComponent {
 
   alternarPerfil(): void {
     this.perfilAbierto.update((abierto) => !abierto);
+  }
+
+  alternarRegistrar(): void {
+    this.registrarAbierto.update((abierto) => !abierto);
+  }
+
+  abrirRegistro(tipo: 'caso' | 'alerta' | 'demanda' | 'compromiso' | 'documento'): void {
+    this.registrarAbierto.set(false);
+    this.perfilAbierto.set(false);
+    if (!this.puedeRegistrar()) return;
+
+    if (tipo === 'demanda') {
+      const codigo = this.codigoCasoActual();
+      if (!codigo) return;
+      void this.router.navigate(['/casos', codigo], { queryParams: { registrar: tipo } });
+      return;
+    }
+
+    const rutas = {
+      caso: '/casos',
+      alerta: '/alertas',
+      compromiso: '/compromisos',
+      documento: '/documentos',
+    } as const;
+    void this.router.navigate([rutas[tipo]], { queryParams: { registrar: tipo } });
+  }
+
+  @HostListener('document:click')
+  cerrarRegistrarAlHacerClicFuera(): void {
+    this.registrarAbierto.set(false);
+  }
+
+  @HostListener('document:keydown.escape', ['$event'])
+  cerrarRegistrarConEscape(evento: Event): void {
+    if (!this.registrarAbierto()) return;
+    evento.preventDefault();
+    this.registrarAbierto.set(false);
   }
 
   cerrarSesion(): void {
