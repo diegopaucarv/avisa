@@ -39,15 +39,25 @@ extensión. No hay ningún proxy entre dominios: la regla vive en la propia app.
 `pnpm build` (raíz) encadena cuatro pasos:
 
 ```json
-"build": "npm --prefix angular ci --no-audit --no-fund && npm --prefix angular run build && node scripts/copiar-spa.mjs && next build"
+"build": "npm --prefix angular ci --include=dev --no-audit --no-fund && npm --prefix angular run build && node scripts/copiar-spa.mjs && next build"
 ```
 
-| Paso                             | Qué hace                                                            |
-| -------------------------------- | ------------------------------------------------------------------- |
-| `npm --prefix angular ci`        | instala la consola con su propio `package-lock.json` (npm, no pnpm) |
-| `npm --prefix angular run build` | compila la SPA en `angular/dist/avisa/browser`                      |
-| `node scripts/copiar-spa.mjs`    | borra `public/` y la copia allí; sin dist, falla con mensaje claro  |
-| `next build`                     | compila las rutas de API; el resultado incluye `public/`            |
+| Paso                                    | Qué hace                                                            |
+| --------------------------------------- | ------------------------------------------------------------------- |
+| `npm --prefix angular ci --include=dev` | instala la consola con su propio `package-lock.json` (npm, no pnpm) |
+| `npm --prefix angular run build`        | compila la SPA en `angular/dist/avisa/browser`                      |
+| `node scripts/copiar-spa.mjs`           | borra `public/` y la copia allí; sin dist, falla con mensaje claro  |
+| `next build`                            | compila las rutas de API; el resultado incluye `public/`            |
+
+**`--include=dev` no es decorativo.** Vercel construye con `NODE_ENV=production`,
+y con eso npm omite las `devDependencies`… entre ellas `@angular/cli`, que es
+quien aporta el binario `ng`. Sin la bandera el paso instala 12 paquetes y el
+siguiente falla con `sh: line 1: ng: command not found` (exit 127). Para
+comprobarlo: `NODE_ENV=production npm --prefix angular ci --dry-run` reporta
+«removed 297 packages»; con `--include=dev`, «up to date».
+
+`ng build` no depende de `NODE_ENV`: `angular.json` fija
+`defaultConfiguration: "production"`.
 
 Consecuencias que hay que tener presentes:
 
@@ -56,8 +66,9 @@ Consecuencias que hay que tener presentes:
   Angular copia a su salida. El nombre `public/` en la raíz es de Next.
 - **`angular/` y `scripts/` son fuente del despliegue.** Un cambio en la consola
   o en el script de copia debe construir, aunque no toque Next (§3).
-- **`engines.node` fija `22.x`** en `package.json`. Angular 22 exige Node
-  `^20.19 || ^22.12 || >=24`; 22.x es la versión con la que se verificó.
+- **`engines.node` es `>=22.12`** en `package.json`. Angular 22 exige Node
+  `^20.19 || ^22.12 || >=24`; el rango deja mandar al panel de Vercel (hoy
+  `26.x`) y evita cambiar de runtime sin motivo.
 - El `tsconfig.json` de la raíz **excluye `angular/`**: la consola tipa con su
   propio `tsconfig.app.json` y sus propias dependencias. Si entra al programa de
   Next, el build aborta con `TS2307` en todo `angular/src/**`.
@@ -108,7 +119,7 @@ nunca más y el último despliegue queda en pie hasta que se borre el proyecto.
 ### 4.1 API y consola en un solo puerto
 
 ```bash
-npm --prefix angular ci     # una vez, o cuando cambie angular/package-lock.json
+npm --prefix angular ci --include=dev   # una vez, o cuando cambie angular/package-lock.json
 pnpm build:spa              # cada cambio de la consola
 docker compose up -d        # API + consola en http://localhost:3000
 ```
@@ -308,12 +319,13 @@ y su propio lockfile.
 
 ## 10 · Trampas ya vistas
 
-| Síntoma                                                             | Causa                                                                                    | Arreglo                                                                      |
-| ------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| `TS2307: Cannot find module '@angular/core'` en el build de Vercel  | el `tsconfig.json` raíz incluía `angular/`, sin sus dependencias                         | `"exclude": ["node_modules", "angular"]` (ya aplicado)                       |
-| `/` devuelve 404 en local                                           | clon limpio sin `public/`                                                                | `pnpm build:spa`                                                             |
-| `/` devuelve el HTML de la consola React vieja                      | el deployment en pie es anterior al retiro de la UI                                      | redeploy desde `main` y comprobar el commit                                  |
-| Login `500` con `Error interno.`                                    | falta `APP_DATABASE_URL` o el rol es `neondb_owner` con una cadena del pooler mal armada | revisar variables (§5) y que el rol sea `avisa_api`                          |
-| Login `503`                                                         | falta `APP_SESSION_SECRET` (mínimo 32 caracteres)                                        | definirla en Production, Preview y Development                               |
-| `npm ci` falla en `angular/` con «lock file's X does not satisfy Y» | `package.json` pinneado y lockfile viejo                                                 | `npm --prefix angular install` y versionar el lockfile                       |
-| Los datos desaparecen con `avisa_api`                               | RLS activo sin `app.rol_codigo` en la sesión                                             | la API lo fija por petición (`lib/db/tenant.ts`); no consultar a mano sin él |
+| Síntoma                                                             | Causa                                                                                           | Arreglo                                                                      |
+| ------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| `TS2307: Cannot find module '@angular/core'` en el build de Vercel  | el `tsconfig.json` raíz incluía `angular/`, sin sus dependencias                                | `"exclude": ["node_modules", "angular"]` (ya aplicado)                       |
+| `/` devuelve 404 en local                                           | clon limpio sin `public/`                                                                       | `pnpm build:spa`                                                             |
+| `/` devuelve el HTML de la consola React vieja                      | el deployment en pie es anterior al retiro de la UI                                             | redeploy desde `main` y comprobar el commit                                  |
+| Login `500` con `Error interno.`                                    | falta `APP_DATABASE_URL` o el rol es `neondb_owner` con una cadena del pooler mal armada        | revisar variables (§5) y que el rol sea `avisa_api`                          |
+| Login `503`                                                         | falta `APP_SESSION_SECRET` (mínimo 32 caracteres)                                               | definirla en Production, Preview y Development                               |
+| `sh: line 1: ng: command not found` en el build de Vercel           | `NODE_ENV=production` hace que `npm ci` omita `devDependencies`; `@angular/cli` es una de ellas | `--include=dev` en el `npm ci` de `angular/` (ya aplicado)                   |
+| `npm ci` falla en `angular/` con «lock file's X does not satisfy Y» | `package.json` pinneado y lockfile viejo                                                        | `npm --prefix angular install` y versionar el lockfile                       |
+| Los datos desaparecen con `avisa_api`                               | RLS activo sin `app.rol_codigo` en la sesión                                                    | la API lo fija por petición (`lib/db/tenant.ts`); no consultar a mano sin él |

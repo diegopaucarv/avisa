@@ -4,11 +4,11 @@
   "private": true,
   "packageManager": "pnpm@12.3.4",
   "engines": {
-    "node": "22.x"
+    "node": ">=22.12"
   },
   "scripts": {
     "dev": "next dev",
-    "build": "npm --prefix angular ci --no-audit --no-fund && npm --prefix angular run build && node scripts/copiar-spa.mjs && next build",
+    "build": "npm --prefix angular ci --include=dev --no-audit --no-fund && npm --prefix angular run build && node scripts/copiar-spa.mjs && next build",
     "build:spa": "npm --prefix angular run build && node scripts/copiar-spa.mjs",
     "start": "next start"
   },
