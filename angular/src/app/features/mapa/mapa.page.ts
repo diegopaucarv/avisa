@@ -19,6 +19,7 @@ import { SesionStore } from '../../core/auth/sesion.store';
 import { formatearFechaHora } from '../../shared/formato-fecha';
 import { IconoComponent } from '../../shared/ui/icono.component';
 import type { Alcance, Caso } from '../../dominio/modelos';
+import { coordenadaDeRegion } from './centroides.regiones';
 import {
   ambitosSinRegion,
   bandasPorAlcance,
@@ -32,7 +33,6 @@ import {
   regionDe,
   type FilaRegion,
 } from './panorama.agregados';
-import { coordenadaDeRegion } from './centroides.regiones';
 import { PanoramaService } from './panorama.service';
 
 /**
