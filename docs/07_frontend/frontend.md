@@ -288,8 +288,9 @@ forma.
 Sin pendientes de interfaz. La vista existe y sigue viva en su ruta propia; el acceso se
 retiró de la barra de Casos a propósito (X5).
 
-**Nota de dato.** Hoy hay **107 demandas sin caso**. Ocultar el hueco no lo cierra:
-vincularlas es una decisión de OAIPCS, no una pantalla.
+**Nota de dato.** Hoy hay **123 demandas sin caso** (202 con caso), tras la
+migración 54 del 2026-11-24. Ocultar el hueco no lo cierra: vincularlas es una
+decisión de OAIPCS, no una pantalla.
 
 ---
 

@@ -11,6 +11,8 @@ export type NotificationItem = {
   entidadCodigo: string | null;
   venceEn: string | null;
   estado: string | null;
+  /** Momento en que se marcó como leída; `null` si nunca se leyó. */
+  leidoEn: string | Date | null;
   createdAt: string | Date | null;
 };
 
@@ -55,6 +57,11 @@ export type NotificationListResult = {
   total: number;
   page: number;
   pageSize: number;
+  /**
+   * Avisos sin leer con el mismo alcance que el listado, **sin** aplicar el
+   * filtro `estado`: es el contador de la bandeja, no el de la página.
+   */
+  noLeidas: number;
   generatedAt: string;
 };
 
@@ -80,6 +87,7 @@ const NOTIFICATION_SELECT = `
   c.codigo_caso as entidad_codigo,
   to_char(n.vence_en, 'YYYY-MM-DD') as vence_en,
   n.estado,
+  n.leido_en,
   n.created_at
 `;
 
@@ -103,6 +111,7 @@ function mapNotificationRow(row: Record<string, any>): NotificationItem {
     entidadCodigo: row.entidad_codigo as string | null,
     venceEn: row.vence_en as string | null,
     estado: row.estado as string | null,
+    leidoEn: row.leido_en as string | Date | null,
     createdAt: row.created_at as string | Date | null,
   };
 }
@@ -113,13 +122,18 @@ export async function listNotifications(
   query: NotificationListQuery = {},
 ): Promise<NotificationListResult> {
   const unrestricted = UNRESTRICTED_ROLES.has(session.rolCodigo);
-  const params: unknown[] = [];
-  const conditions: string[] = [];
 
+  // Alcance base (dueño o bandeja completa), compartido por el listado y el
+  // contador de no leídas. El filtro `estado` se añade sólo al listado.
+  const baseParams: unknown[] = [];
+  const baseConditions: string[] = [];
   if (!unrestricted) {
-    params.push(session.usuarioId);
-    conditions.push(`n.usuario_id = $${params.length}`);
+    baseParams.push(session.usuarioId);
+    baseConditions.push(`n.usuario_id = $${baseParams.length}`);
   }
+
+  const params = [...baseParams];
+  const conditions = [...baseConditions];
   if (query.estado !== undefined) {
     if (!esEstadoNotificacion(query.estado)) {
       throw new ApiError(
@@ -138,8 +152,7 @@ export async function listNotifications(
   const offset = params.push((page - 1) * pageSize);
   const where = conditions.length ? `where ${conditions.join(" and ")}` : "";
 
-  // `count(*) over()` cuenta sólo las filas que pasan el filtro; con
-  // `pageSize=1` el `total` del sobre sirve de contador de pendientes.
+  // `count(*) over()` cuenta sólo las filas que pasan el filtro.
   const sql = `
     select ${NOTIFICATION_SELECT},
            count(*) over()::int as total
@@ -150,14 +163,32 @@ export async function listNotifications(
      limit $${limit} offset $${offset}
   `;
 
-  const result = await client.query(sql, params);
+  // «Sin leer» es el complemento de leída: ni `estado = 'leida'` ni `leido_en`
+  // fijado. Se cuenta con el alcance base para que el número no dependa del
+  // filtro de la lista.
+  const baseWhere = baseConditions.length
+    ? `${baseConditions.join(" and ")} and `
+    : "";
+  const pendientesSql = `
+    select count(*)::int as n
+      from core.notificaciones n
+     where ${baseWhere}coalesce(n.estado, '') <> 'leida'
+       and n.leido_en is null
+  `;
+
+  const [result, pendientes] = await Promise.all([
+    client.query(sql, params),
+    client.query(pendientesSql, baseParams),
+  ]);
   const total = (result.rows[0]?.total as number | undefined) ?? 0;
+  const noLeidas = (pendientes.rows[0]?.n as number | undefined) ?? 0;
 
   return {
     items: result.rows.map(mapNotificationRow),
     total,
     page,
     pageSize,
+    noLeidas,
     generatedAt: new Date().toISOString(),
   };
 }
@@ -188,10 +219,16 @@ export async function updateNotificationState(
     ownership = `and usuario_id = $${params.length}`;
   }
 
+  // `leido_en` se sincroniza con el estado: marca el instante la primera vez
+  // que se lee (no lo reescribe) y se limpia al deshacer.
   const sql = `
     with actualizada as (
       update core.notificaciones
-         set estado = $1
+         set estado = $1,
+             leido_en = case
+               when $1::text = 'leida' then coalesce(leido_en, now())
+               else null
+             end
        where id = $2::uuid
          ${ownership}
       returning *
@@ -208,4 +245,49 @@ export async function updateNotificationState(
   }
 
   return mapNotificationRow(row);
+}
+
+/**
+ * Marca una notificación como leída.
+ *
+ * Es el `POST /api/v1/notifications/{id}/leer`: mismo alcance y mismos errores
+ * que `updateNotificationState`, pero con el estado fijado. Devuelve el aviso
+ * con `leidoEn` ya sincronizado.
+ */
+export async function markNotificationRead(
+  client: PoolClient,
+  session: DbSession,
+  id: string,
+): Promise<NotificationItem> {
+  return updateNotificationState(client, session, id, "leida");
+}
+
+/**
+ * Marca como leídas todas las notificaciones sin leer del alcance de la sesión.
+ *
+ * No falla si no hay ninguna: responde `{ actualizadas: 0 }`. Es idempotente y
+ * no toca los avisos ya leídos (`leido_en` se conserva).
+ */
+export async function markAllNotificationsRead(
+  client: PoolClient,
+  session: DbSession,
+): Promise<{ actualizadas: number }> {
+  const params: unknown[] = [];
+  let ownership = "";
+  if (!UNRESTRICTED_ROLES.has(session.rolCodigo)) {
+    params.push(session.usuarioId);
+    ownership = `and usuario_id = $${params.length}`;
+  }
+
+  const sql = `
+    update core.notificaciones
+       set estado = 'leida',
+           leido_en = coalesce(leido_en, now())
+     where coalesce(estado, '') <> 'leida'
+       and leido_en is null
+       ${ownership}
+  `;
+
+  const result = await client.query(sql, params);
+  return { actualizadas: result.rowCount ?? 0 };
 }

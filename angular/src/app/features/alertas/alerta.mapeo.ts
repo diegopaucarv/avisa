@@ -647,16 +647,24 @@ export function geografiaAlerta(alerta: Alerta): string {
   return alerta.region ?? alerta.provincia ?? alerta.distrito ?? 'Sin geografía';
 }
 
-/** «Local · distrito», «Regional · región» o «Nacional · …» según el alcance. */
+/**
+ * «Local · distrito», «Regional · región» o «Nacional · …» según el alcance.
+ * Usa un solo nombre de lugar (no «región / provincia») y degrada al nivel
+ * territorial cuando la alerta no tiene geografía cargada.
+ */
 export function ambitoAlerta(alerta: Alerta): string {
-  const lugar = geografiaAlerta(alerta);
+  const lugar =
+    alerta.alcance === 'Distrito'
+      ? (alerta.distrito ?? alerta.provincia ?? alerta.region ?? '')
+      : (alerta.region ?? alerta.provincia ?? alerta.distrito ?? '');
+
   switch (alerta.alcance) {
     case 'Distrito':
-      return `Local · ${lugar}`;
+      return lugar ? `Local · ${lugar}` : 'Local';
     case 'Región':
-      return `Regional · ${lugar}`;
+      return lugar ? `Regional · ${lugar}` : 'Regional';
     default:
-      return `Nacional · ${lugar}`;
+      return lugar ? `Nacional · ${lugar}` : 'Nacional';
   }
 }
 
@@ -674,8 +682,9 @@ function bloque(titulo: string, lineas: readonly string[]): string {
  * se lea desde el móvil sin formato. Las fechas van en forma compacta
  * (`05NOV2026`).
  *
- * Las seis secciones aparecen siempre: `bloque` conserva el encabezado aunque no
- * haya contenido, para que el reporte no pierda su esqueleto.
+ * Las secciones aparecen siempre: `bloque` conserva el encabezado aunque no
+ * haya contenido, para que el reporte no pierda su esqueleto. Los encabezados
+ * son los del reporte de alerta temprana, en ese orden y con esos emojis.
  *
  * No incorpora `plantillaWhatsapp`: si la alerta tiene una plantilla guardada,
  * es ella la que manda (la decide quien llama).
@@ -686,30 +695,33 @@ export function plantillaWhatsapp(alerta: Alerta): string {
   const descripcion = (alerta.descripcionRiesgo ?? '').trim();
   const riesgos = alerta.riesgos.filter((riesgo) => riesgo.trim() !== descripcion);
 
+  const acciones = [
+    'De considerarlo pertinente, se sugiere:',
+    ...alerta.accionesSugeridas
+      .map((accion) => accion.trim())
+      .map((accion) => accion.replace(/^de\s+considerarlo\s+pertinente,?\s*se\s+sugiere:?\s*/i, ''))
+      .filter((accion) => accion.length > 0)
+      .map((accion) => `- ${accion}`),
+  ];
+
   const partes = [
     [
-      `🔔 *REPORTE DE ALERTA TEMPRANA | ${titulo}*`,
-      `📅 *Fecha de emisión*: ${fecha}`,
-      `🌍 *Ámbito*: ${geografiaAlerta(alerta)}`,
+      `*🔔 REPORTE DE ALERTA TEMPRANA | ${titulo}*`,
+      `📅 _*Fecha de emisión*: ${fecha}_`,
+      `🌍 _*Ámbito*: ${ambitoAlerta(alerta)}_`,
     ].join('\n'),
     bloque('🔍 1. SITUACIÓN ACTUAL', [alerta.situacionActual ?? '']),
     bloque('🏗️ 2. HECHOS RECIENTES Y ACCIONES EN CURSO', [alerta.hechosRecientes ?? '']),
     bloque(
       '👥 3. ACTORES CLAVE',
-      alerta.actoresClave.map((actor) => `• ${actor}`),
+      alerta.actoresClave.map((actor) => `- ${actor}`),
     ),
     bloque(
       '📌 4. DEMANDAS INMEDIATAS',
-      alerta.demandasInmediatas.map((demanda) => `• ${demanda}`),
+      alerta.demandasInmediatas.map((demanda) => `- ${demanda}`),
     ),
-    bloque('⚠️ 5. DESCRIPCIÓN DEL RIESGO', [
-      descripcion,
-      ...riesgos.map((riesgo) => `• ${riesgo}`),
-    ]),
-    bloque(
-      '🧭 6. ACCIONES SUGERIDAS',
-      alerta.accionesSugeridas.map((accion) => `• ${accion}`),
-    ),
+    bloque('⚠️ RIESGOS', [descripcion, ...riesgos.map((riesgo) => `- ${riesgo}`)]),
+    bloque('🧭 ACCIONES SUGERIDAS', acciones),
   ];
   return partes.filter((parte) => parte.trim()).join('\n\n');
 }

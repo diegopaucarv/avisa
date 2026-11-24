@@ -3459,7 +3459,11 @@
                         ¿La pestaña Demandas cuenta las demandas del caso
                         (<code>caso_id</code>) o también las heredadas de sus
                         alertas (<code>alerta_id</code>)? El mockup usa el
-                        segundo criterio y lo marca.
+                        segundo criterio y lo marca. <b>2026-11-24:</b> la
+                        herencia automática se retiró del importador (migración
+                        54), así que la pestaña debe contar por
+                        <code>caso_id</code>; listar por alerta reintroduce el
+                        cruce de temas que motivó la corrección.
                     </li>
                     <li>
                         ¿Se parte <code>nombre_actual</code> en Apellidos |

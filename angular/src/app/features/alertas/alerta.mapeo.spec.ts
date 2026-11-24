@@ -81,8 +81,8 @@ describe('plantillaWhatsapp', () => {
     '🏗️ 2. HECHOS RECIENTES Y ACCIONES EN CURSO',
     '👥 3. ACTORES CLAVE',
     '📌 4. DEMANDAS INMEDIATAS',
-    '⚠️ 5. DESCRIPCIÓN DEL RIESGO',
-    '🧭 6. ACCIONES SUGERIDAS',
+    '⚠️ RIESGOS',
+    '🧭 ACCIONES SUGERIDAS',
   ];
 
   function alertaBase(cambios: Partial<Alerta> = {}): Alerta {
@@ -155,8 +155,14 @@ describe('plantillaWhatsapp', () => {
 
   it('empieza con el encabezado del reporte y el título limpio', () => {
     const mensaje = plantillaWhatsapp(alertaBase());
-    expect(mensaje.startsWith('🔔 *REPORTE DE ALERTA TEMPRANA | ')).toBe(true);
-    expect(mensaje.split('\n')[0]).toBe('🔔 *REPORTE DE ALERTA TEMPRANA | Protesta en Puno*');
+    expect(mensaje.startsWith('*🔔 REPORTE DE ALERTA TEMPRANA | ')).toBe(true);
+    expect(mensaje.split('\n')[0]).toBe('*🔔 REPORTE DE ALERTA TEMPRANA | Protesta en Puno*');
+  });
+
+  it('rotula fecha y ámbito en cursiva con el nivel territorial', () => {
+    const mensaje = plantillaWhatsapp(alertaBase());
+    expect(mensaje).toContain('📅 _*Fecha de emisión*: 05NOV2026_');
+    expect(mensaje).toContain('🌍 _*Ámbito*: Regional · Puno_');
   });
 
   it('mantiene las seis secciones aunque una alerta vacía no tenga contenido', () => {
@@ -168,7 +174,7 @@ describe('plantillaWhatsapp', () => {
 
   it('emite la fecha en formato G1', () => {
     const mensaje = plantillaWhatsapp(alertaBase({ fechaReporte: '2026-11-05' }));
-    expect(mensaje).toContain('📅 *Fecha de emisión*: 05NOV2026');
+    expect(mensaje).toContain('📅 _*Fecha de emisión*: 05NOV2026_');
   });
 
   it('no usa encabezados obsoletos', () => {
@@ -176,19 +182,29 @@ describe('plantillaWhatsapp', () => {
     expect(mensaje).not.toContain('🚨');
     expect(mensaje).not.toContain('🗓️');
     expect(mensaje).not.toContain('📌 1.');
+    expect(mensaje).not.toContain('⚠️ 5. DESCRIPCIÓN DEL RIESGO');
   });
 
-  it('coloca los riesgos dentro de la sección 5', () => {
+  it('coloca los riesgos dentro de la sección RIESGOS', () => {
     const mensaje = plantillaWhatsapp(
       alertaBase({
         descripcionRiesgo: 'La conflictividad puede escalar.',
         riesgos: ['Incremento de conflictividad', 'Bloqueo de vías'],
       }),
     );
-    const seccion = mensaje.split('*⚠️ 5. DESCRIPCIÓN DEL RIESGO*')[1] ?? '';
+    const seccion = mensaje.split('*⚠️ RIESGOS*')[1] ?? '';
     expect(seccion).toContain('La conflictividad puede escalar.');
-    expect(seccion).toContain('• Incremento de conflictividad');
-    expect(seccion).toContain('• Bloqueo de vías');
+    expect(seccion).toContain('- Incremento de conflictividad');
+    expect(seccion).toContain('- Bloqueo de vías');
+  });
+
+  it('abre las acciones sugeridas con la fórmula institucional', () => {
+    const mensaje = plantillaWhatsapp(
+      alertaBase({ accionesSugeridas: ['Reunión con dirigentes'] }),
+    );
+    const seccion = mensaje.split('*🧭 ACCIONES SUGERIDAS*')[1] ?? '';
+    expect(seccion).toContain('De considerarlo pertinente, se sugiere:');
+    expect(seccion).toContain('- Reunión con dirigentes');
   });
 });
 

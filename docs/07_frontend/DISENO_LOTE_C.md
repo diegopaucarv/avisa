@@ -32,21 +32,21 @@ documento dice qué tiene que existir para cerrarlo.
 
 ### Resumen del lote
 
-| Item | Qué falta                                                  | Tipo de artefacto                          | Rol que puede escribir                                         | Qué se ve hoy en la SPA                                   | Dónde se declara el hueco           |
-| ---- | ---------------------------------------------------------- | ------------------------------------------ | -------------------------------------------------------------- | --------------------------------------------------------- | ----------------------------------- |
-| 98   | Apellidos y nombres separados en el actor                  | 2 columnas en `core.actores`               | `sectorista`, `direccion_oaipcs`, `administrador`              | `nombre_actual` concatenado; columnas vacías               | `casos-tarjetas.html` (tabla de actores) |
-| 99   | Teléfono en el actor del caso y formato WhatsApp           | Campo en la respuesta + endpoint de PII    | Sólo roles con `puedeVerPii`                                   | `correo`; el teléfono no viaja                            | `casos-tarjetas.html`               |
-| 104  | Filtro «Sin caso asignado» y filtro «Riesgo» en alertas    | Parámetros en `GET /api/v1/alerts`         | Lectura (todos)                                                | `q, prioridad, nivel, estado, sort, anulados`             | `alertas-operativas.html`           |
-| 105  | Flujo de aprobación de Alta Dirección y envío por WhatsApp | Endpoint + permiso (la tabla ya tiene las columnas) | `alta_direccion` y suplentes de `core.permiso_aprobacion` | Ninguna escritura: el rol no puede editar                | `alertas-operativas.html`           |
-| 113  | Ámbito de subsector por rol                                | Columna, roles, `resolveDataScope` y RLS   | No aplica: es sesión, no pantalla                              | `resolveDataScope` devuelve siempre `{mode:"all"}`        | Este documento, §113                |
-| 117  | Carga de `legacy.dim_redaccion` (51 filas)                 | Carga + endpoint de reuniones              | `sectorista`, `direccion_oaipcs`                               | `core.reuniones_dialogo` sin filas                        | Este documento, §117                |
-| 119  | Catálogo de artes de pesca y esloras                       | 2 catálogos                               | `administrador`, `curador_politica`                            | No existe                                                 | Este documento, §119                |
-| 120  | Actores por región × arte de pesca                         | Tabla de vínculo + contacto                | `sectorista`, `direccion_oaipcs`                               | No existe el eje arte                                  | Este documento, §120                |
-| 121  | Marca OSPA y vínculo organización–caleta                   | 1 tabla de vínculo + maestro de caletas    | `administrador`                                                | Las columnas OSPA existen, el vínculo no                  | Este documento, §121                |
-| 122  | Demandas atribuidas a su OSPA                              | Columna de solicitante                     | `sectorista`                                                   | `core.demandas_actores` sin dimensión de organización     | Este documento, §122                |
-| 123  | Compromisos «asumidos por» el Despacho Ministerial         | 1 columna + 1 dimensión de arte            | `direccion_oaipcs`, `sectorista`                               | `unidad_responsable_id` sin «asumido por»                 | Este documento, §123                |
-| 124  | Conflictos por región y recurso                            | Tabla puente caso–recurso                  | `sectorista`                                                   | No existe; sólo 6 casos llegan por la alerta              | Este documento, §124                |
-| 125  | Parser del KML de infraestructuras                         | Parser + endpoint o GeoJSON estático       | No aplica: es ETL                                              | No existe                                                 | Este documento, §KML                |
+| Item | Qué falta                                                  | Tipo de artefacto                                   | Rol que puede escribir                                    | Qué se ve hoy en la SPA                               | Dónde se declara el hueco                |
+| ---- | ---------------------------------------------------------- | --------------------------------------------------- | --------------------------------------------------------- | ----------------------------------------------------- | ---------------------------------------- |
+| 98   | Apellidos y nombres separados en el actor                  | 2 columnas en `core.actores`                        | `sectorista`, `direccion_oaipcs`, `administrador`         | `nombre_actual` concatenado; columnas vacías          | `casos-tarjetas.html` (tabla de actores) |
+| 99   | Teléfono en el actor del caso y formato WhatsApp           | Campo en la respuesta + endpoint de PII             | Sólo roles con `puedeVerPii`                              | `correo`; el teléfono no viaja                        | `casos-tarjetas.html`                    |
+| 104  | Filtro «Sin caso asignado» y filtro «Riesgo» en alertas    | Parámetros en `GET /api/v1/alerts`                  | Lectura (todos)                                           | `q, prioridad, nivel, estado, sort, anulados`         | `alertas-operativas.html`                |
+| 105  | Flujo de aprobación de Alta Dirección y envío por WhatsApp | Endpoint + permiso (la tabla ya tiene las columnas) | `alta_direccion` y suplentes de `core.permiso_aprobacion` | Ninguna escritura: el rol no puede editar             | `alertas-operativas.html`                |
+| 113  | Ámbito de subsector por rol                                | Columna, roles, `resolveDataScope` y RLS            | No aplica: es sesión, no pantalla                         | `resolveDataScope` devuelve siempre `{mode:"all"}`    | Este documento, §113                     |
+| 117  | Carga de `legacy.dim_redaccion` (51 filas)                 | Carga + endpoint de reuniones                       | `sectorista`, `direccion_oaipcs`                          | `core.reuniones_dialogo` sin filas                    | Este documento, §117                     |
+| 119  | Catálogo de artes de pesca y esloras                       | 2 catálogos                                         | `administrador`, `curador_politica`                       | No existe                                             | Este documento, §119                     |
+| 120  | Actores por región × arte de pesca                         | Tabla de vínculo + contacto                         | `sectorista`, `direccion_oaipcs`                          | No existe el eje arte                                 | Este documento, §120                     |
+| 121  | Marca OSPA y vínculo organización–caleta                   | 1 tabla de vínculo + maestro de caletas             | `administrador`                                           | Las columnas OSPA existen, el vínculo no              | Este documento, §121                     |
+| 122  | Demandas atribuidas a su OSPA                              | Columna de solicitante                              | `sectorista`                                              | `core.demandas_actores` sin dimensión de organización | Este documento, §122                     |
+| 123  | Compromisos «asumidos por» el Despacho Ministerial         | 1 columna + 1 dimensión de arte                     | `direccion_oaipcs`, `sectorista`                          | `unidad_responsable_id` sin «asumido por»             | Este documento, §123                     |
+| 124  | Conflictos por región y recurso                            | Tabla puente caso–recurso                           | `sectorista`                                              | No existe; sólo 6 casos llegan por la alerta          | Este documento, §124                     |
+| 125  | Parser del KML de infraestructuras                         | Parser + endpoint o GeoJSON estático                | No aplica: es ETL                                         | No existe                                             | Este documento, §KML                     |
 
 ---
 
@@ -165,16 +165,16 @@ cuya salida por WhatsApp lleva negritas.
 **Lo que ya existe (y no es poco).** La base tiene el modelo completo, no así
 la API:
 
-| Objeto                                  | Estado                                                                 |
-| --------------------------------------- | ---------------------------------------------------------------------- |
-| `core.alertas_tempranas.aprobada_por`   | Existe (parche 21), FK a `core.usuarios` con `ON DELETE RESTRICT`       |
-| `core.alertas_tempranas.aprobada_en`    | Existe (parche 21), con `CHECK` que no admite fecha sin aprobador      |
-| `core.alertas_tempranas.validada_por`   | Existe (parche 23), con `CHECK` de cuatro ojos contra `aprobada_por`    |
-| `core.alertas_tempranas.visibilidad`    | Existe (parche 22): `interna · ejecutiva · sectorial`                   |
-| Gate `core.tg_alerta_g21_visibilidad`   | Existe: rechaza con `G21_SIN_APROBACION` una visibilidad sin las firmas |
+| Objeto                                                      | Estado                                                                         |
+| ----------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| `core.alertas_tempranas.aprobada_por`                       | Existe (parche 21), FK a `core.usuarios` con `ON DELETE RESTRICT`              |
+| `core.alertas_tempranas.aprobada_en`                        | Existe (parche 21), con `CHECK` que no admite fecha sin aprobador              |
+| `core.alertas_tempranas.validada_por`                       | Existe (parche 23), con `CHECK` de cuatro ojos contra `aprobada_por`           |
+| `core.alertas_tempranas.visibilidad`                        | Existe (parche 22): `interna · ejecutiva · sectorial`                          |
+| Gate `core.tg_alerta_g21_visibilidad`                       | Existe: rechaza con `G21_SIN_APROBACION` una visibilidad sin las firmas        |
 | `core.permiso_aprobacion` / `core.puede_aprobar(uuid,text)` | Existen; la tabla está vacía a propósito (la suplencia es acto administrativo) |
-| `core.proceso_instancia`                | Existe; registra los pasos del flujo                                   |
-| `core.envios_comunicacion`              | Existe; es el registro de la remisión                                  |
+| `core.proceso_instancia`                                    | Existe; registra los pasos del flujo                                           |
+| `core.envios_comunicacion`                                  | Existe; es el registro de la remisión                                          |
 
 **Lo que falta.** Un endpoint que ejecute la aprobación, y el permiso para que
 Alta Dirección escriba. Hoy `core.roles.puede_editar` es **falso** para
@@ -250,16 +250,16 @@ primeros corresponden a los vice-ministerios; el tercero es el área de la
 propia OAIPCS y **no** es un ámbito de vice-ministerio.
 
 2. **Roles de vice-ministerio.** Hoy `core.roles` tiene 10 códigos
-(`sectorista`, `administrador`, `consulta_lectura`, `alta_direccion`,
-`servicio_agente`, `auditor`, `externo_publico`, `analista_cualitativo`,
-`curador_politica`, `direccion_oaipcs`). No hay ninguno de vice-ministerio.
-Propuesta, con código explícito y `puede_editar = false`:
+   (`sectorista`, `administrador`, `consulta_lectura`, `alta_direccion`,
+   `servicio_agente`, `auditor`, `externo_publico`, `analista_cualitativo`,
+   `curador_politica`, `direccion_oaipcs`). No hay ninguno de vice-ministerio.
+   Propuesta, con código explícito y `puede_editar = false`:
 
-| Rol propuesto                    | `subsector_id` | Alcance            |
-| -------------------------------- | -------------- | ------------------ |
-| `viceministerio_pesca`           | 1              | Sólo Pesca y Acuicultura |
-| `viceministerio_mype_industria`  | 2              | Sólo Mype e Industria    |
-| `secretaria_general`             | `NULL`         | Ambos              |
+| Rol propuesto                   | `subsector_id` | Alcance                  |
+| ------------------------------- | -------------- | ------------------------ |
+| `viceministerio_pesca`          | 1              | Sólo Pesca y Acuicultura |
+| `viceministerio_mype_industria` | 2              | Sólo Mype e Industria    |
+| `secretaria_general`            | `NULL`         | Ambos                    |
 
 Los códigos son **propuesta**, no inventario: hoy no existen. Si OAIPCS
 prefiere un único rol `viceministerio` con el subsector en la sesión, el efecto
@@ -542,8 +542,8 @@ ALTER TABLE core.demandas
 **Rol que puede escribir.** `sectorista` (es quien registra demandas y vincula
 casos). `direccion_oaipcs` también edita.
 
-**Qué puede mostrar la SPA hoy.** Las 107 demandas sin caso (81 con alerta, 26
-sin alerta) y las 218 con caso, sin atribución a organización. El corte por
+**Qué puede mostrar la SPA hoy.** Las 123 demandas sin caso (97 con alerta, 26
+sin alerta) y las 202 con caso, sin atribución a organización. El corte por
 OSPA no existe.
 
 **Qué se declara faltante.** `core.demandas.solicitante_uid`, los filtros y la
@@ -644,15 +644,15 @@ especie en ninguna fuente.
 **Archivo.** `gis/Infraestructuras.kml` — KML, **no KMZ**. Verificado el
 2026-11-23 sobre el archivo del repositorio:
 
-| Hecho                                      | Valor    |
-| ------------------------------------------ | -------- |
-| `<Placemark>`                              | 13 456   |
-| `<Polygon>`                                | 0        |
-| Puntos con `DEPARTAMEN`, `PROVINCIA`, `DISTRITO` | 13 456 |
-| Puntos con `DIRECCION`                     | 150      |
-| Puntos con `IDENTI` (institución)          | 227      |
-| Distritos distintos, por nombre y sin código | 836    |
-| Desembarcaderos con nombre propio (`IDENTI = DPA - GORE`) | 30 |
+| Hecho                                                     | Valor  |
+| --------------------------------------------------------- | ------ |
+| `<Placemark>`                                             | 13 456 |
+| `<Polygon>`                                               | 0      |
+| Puntos con `DEPARTAMEN`, `PROVINCIA`, `DISTRITO`          | 13 456 |
+| Puntos con `DIRECCION`                                    | 150    |
+| Puntos con `IDENTI` (institución)                         | 227    |
+| Distritos distintos, por nombre y sin código              | 836    |
+| Desembarcaderos con nombre propio (`IDENTI = DPA - GORE`) | 30     |
 
 `IDENTI` se reparte así: ITP 34, DPA-GORE 30, PNACP 27, FONDEPES 27,
 DIREPRO 26, SANIPES 18, IMARPE 17, INACAL 5.
@@ -714,7 +714,7 @@ se pueden unir a `core.distritos` (698 de 1 874 cargados).
 
 ---
 
-*Este documento no modifica la SPA ni la API. Es el contrato que ambas partes
+_Este documento no modifica la SPA ni la API. Es el contrato que ambas partes
 leen antes de escribir código. Cualquier cambio de ruta se hace primero en
 `app/api/**` y se refleja el mismo día en
-`docs/07_frontend/angular/CONTRATO_API_SPA.md`.*
+`docs/07_frontend/angular/CONTRATO_API_SPA.md`._
