@@ -125,7 +125,7 @@ const ENLACES_NAV: readonly EnlaceNav[] = [
     grupo: 'MI ESPACIO',
     etiqueta: 'Archivo',
     ruta: '/archivo',
-    icono: 'papelera',
+    icono: 'archivo',
     soloSiPuedeEliminar: true,
   },
 ];

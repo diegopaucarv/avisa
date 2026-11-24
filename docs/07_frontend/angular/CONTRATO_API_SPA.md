@@ -276,17 +276,18 @@ El `caso` existe como filtro de servidor y la pantalla no lo expone (`app/api/v1
 
 ### 4.6 · Directorio
 
-| Método  | Ruta                   | Query                                 | Escritura                    |
-| ------- | ---------------------- | ------------------------------------- | ---------------------------- |
-| `GET`   | `/v1/actors`           | `q, naturaleza, tipo, region`         | no                           |
-| `GET`   | `/v1/actors/{uid}`     | —                                     | no (la SPA no lo llama)      |
-| `PATCH` | `/v1/actors/{uid}`     | JSON con atributos públicos editables | sí, sujeta a RLS y auditoría |
-| `GET`   | `/v1/actors/{uid}/pii` | `motivo=<texto>`                      | no                           |
-| `GET`   | `/v1/organizaciones`   | `q, tipo, activo, vigente`            | no                           |
-| `GET`   | `/v1/locales`          | `q, activo`                           | no                           |
+| Método  | Ruta                   | Query                                                            | Escritura                    |
+| ------- | ---------------------- | ---------------------------------------------------------------- | ---------------------------- |
+| `GET`   | `/v1/actors`           | `q, naturaleza, tipo, region`                                    | no                           |
+| `GET`   | `/v1/actors/{uid}`     | —                                                                | no (la SPA no lo llama)      |
+| `PATCH` | `/v1/actors/{uid}`     | JSON con atributos públicos; con `pii`, `dni`/`telefono`/`email` | sí, sujeta a RLS y auditoría |
+| `GET`   | `/v1/actors/{uid}/pii` | `motivo=<texto>`                                                 | no                           |
+| `GET`   | `/v1/organizaciones`   | `q, tipo, activo, vigente`                                       | no                           |
+| `GET`   | `/v1/locales`          | `q, activo`                                                      | no                           |
 
 - `PATCH /v1/actors/{uid}` admite `nombre`, `abreviatura`, `naturaleza`, `tipo`, `funcion`, `posicionamiento`, `cargo`, `nivelGobierno`, `categoria`, `perfilDescripcion` y `activo`. Los catálogos se validan en servidor; la clasificación se conserva y RLS aplica el permiso de edición. Cada cambio registra `audit.cambios` en la misma transacción.
-- La mutación no acepta DNI, correo, teléfono, membresías ni ubicación por ID. Esos datos requieren su flujo separado de PII o relaciones y no deben añadirse a este payload.
+- Con privilegio `pii`, la misma mutación acepta además `dni`, `telefono` y `email`. Sin ese privilegio responde `403 PII_NO_AUTORIZADO` (no un `422`). Se guardan cifrados en `core.actor_datos_personales` y la auditoría sólo registra «cifrado», nunca el valor en claro. Enviar un valor lo fija, `null` lo borra y omitir el campo no lo toca. El `email` cifrado sólo aplica a personas: para una organización responde `422 EMAIL_SOLO_PERSONA` (su correo público es `email_contacto`).
+- El listado y el detalle resuelven `organizacionAncla` desde `actores.organizacion_ancla_uid`; cuando está vacío —el ETL no lo escribe— se cae a la membresía vigente más reciente en `core.actor_membresia`. `organizacionAnclaUid` sigue reflejando sólo el ancla fijada y puede ser `null` aunque el nombre se resuelva por membresía.
 - El directorio conserva lectura en organizaciones, instituciones y locales; solo Actores ofrece edición de los campos públicos enumerados.
 - El servidor admite además `sort` en actores y organizaciones; la SPA no lo envía hoy.
 - **PII**: `GET /v1/actors/{uid}/pii?motivo=…` responde `{ pii: { dni, email, telefono }, generatedAt }`. Un actor sin ficha devuelve **200 con los tres en `null`**, no 404. `motivo` es obligatorio (principio de finalidad): sin él, `422` por `22023`. El rol sin privilegio recibe `403` por `42501`.
