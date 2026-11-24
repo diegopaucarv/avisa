@@ -481,19 +481,19 @@ export class CasoDetallePage {
     if (!ficha) return [];
     return [
       {
-        etiqueta: 'Línea de tiempo',
-        ancla: 'eventos-caso',
-        contador: ficha.eventos.length,
-        icono: 'actividad',
-      },
-      {
         etiqueta: 'Mapeo de actores',
         ancla: 'actores-caso',
         contador: ficha.actores.length,
         icono: 'actores',
       },
       {
-        etiqueta: 'Caso de análisis (Canva)',
+        etiqueta: 'Línea de tiempo',
+        ancla: 'eventos-caso',
+        contador: ficha.eventos.length,
+        icono: 'actividad',
+      },
+      {
+        etiqueta: 'Demandas',
         ancla: 'analisis-caso',
         contador: null,
         icono: 'documentos',
@@ -501,10 +501,27 @@ export class CasoDetallePage {
         nota: 'El caso no guarda un tablero de Canva: no hay enlace que abrir.',
       },
       {
-        etiqueta: 'Documentos vinculados',
+        etiqueta: 'Acuerdos y compromisos',
+        ancla: 'analisis-caso',
+        contador: null,
+        icono: 'documentos',
+        disponible: false,
+        nota: 'El caso no guarda un tablero de Canva: no hay enlace que abrir.',
+      },
+
+      {
+        etiqueta: 'Documentos',
         ancla: 'documentos-caso',
         contador: ficha.documentos.length,
         icono: 'documentos',
+      },
+      {
+        etiqueta: 'Análisis de caso (Canva)',
+        ancla: 'analisis-caso',
+        contador: null,
+        icono: 'documentos',
+        disponible: false,
+        nota: 'El caso no guarda un tablero de Canva: no hay enlace que abrir.',
       },
     ];
   });
