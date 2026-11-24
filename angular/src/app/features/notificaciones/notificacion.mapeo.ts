@@ -238,7 +238,7 @@ export function aColeccionNotificaciones(bruto: unknown): ColeccionNotificacione
 export type GrupoDia = {
   /** `YYYY-MM-DD`, o `sin-fecha` cuando el aviso no trae `created_at`. */
   clave: string;
-  /** Rótulo `DD/MM/YYYY`. */
+  /** Rótulo con el formato único de la SPA (`02NOV2025`). */
   etiqueta: string;
   notificaciones: Notificacion[];
 };

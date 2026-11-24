@@ -48,7 +48,7 @@ import type { ResultadoEnlazado } from './busqueda.mapeo';
             <p class="panel-codigo">{{ fila().codigo ?? 'Sin código' }}</p>
             <h2 id="busqueda-ficha-titulo">{{ fila().titulo }}</h2>
             @if (fila().subtitulo) {
-            <p>{{ fila().subtitulo }}</p>
+              <p>{{ fila().subtitulo }}</p>
             }
             <div class="panel-badges">
               <span class="status-badge panel-entidad">{{ fila().etiquetaTipo }}</span>
@@ -72,29 +72,29 @@ import type { ResultadoEnlazado } from './busqueda.mapeo';
           <section class="detail-section" aria-labelledby="busqueda-ficha-territorio">
             <h3 id="busqueda-ficha-territorio">Territorio</h3>
             @if (tieneTerritorio()) {
-            <dl class="panel-datos">
-              <div>
-                <dt>Región</dt>
-                <dd>{{ fila().region ?? '—' }}</dd>
-              </div>
-              <div>
-                <dt>Provincia</dt>
-                <dd>{{ fila().provincia ?? '—' }}</dd>
-              </div>
-              <div>
-                <dt>Distrito</dt>
-                <dd>{{ fila().distrito ?? '—' }}</dd>
-              </div>
-              <div>
-                <dt>Ubigeo</dt>
-                <dd class="panel-lote">{{ fila().ubigeo ?? '—' }}</dd>
-              </div>
-            </dl>
+              <dl class="panel-datos">
+                <div>
+                  <dt>Región</dt>
+                  <dd>{{ fila().region ?? '—' }}</dd>
+                </div>
+                <div>
+                  <dt>Provincia</dt>
+                  <dd>{{ fila().provincia ?? '—' }}</dd>
+                </div>
+                <div>
+                  <dt>Distrito</dt>
+                  <dd>{{ fila().distrito ?? '—' }}</dd>
+                </div>
+                <div>
+                  <dt>Ubigeo</dt>
+                  <dd class="panel-lote">{{ fila().ubigeo ?? '—' }}</dd>
+                </div>
+              </dl>
             } @else {
-            <p class="panel-vacio">
-              El registro no tiene territorio asociado en la búsqueda: no declara
-              distrito propio ni pertenece a un caso con distrito principal.
-            </p>
+              <p class="panel-vacio">
+                El registro no tiene territorio asociado en la búsqueda: no declara distrito propio
+                ni pertenece a un caso con distrito principal.
+              </p>
             }
           </section>
 
@@ -118,7 +118,7 @@ import type { ResultadoEnlazado } from './busqueda.mapeo';
               [routerLink]="fila().ruta"
               [queryParams]="fila().parametros"
               [attr.aria-label]="
-                (fila().abreFicha ? 'Abrir la ficha del ' : 'Ver en el listado el ') +
+                (fila().abreFicha ? 'Abrir la ficha de ' : 'Ver en el listado de ') +
                 fila().etiquetaTipo.toLowerCase() +
                 ': ' +
                 fila().titulo
@@ -126,9 +126,7 @@ import type { ResultadoEnlazado } from './busqueda.mapeo';
             >
               {{ fila().abreFicha ? 'Abrir ficha' : 'Ver en el listado' }}
             </a>
-            <button type="button" class="button-secondary" (click)="cerrar.emit()">
-              Cerrar
-            </button>
+            <button type="button" class="button-secondary" (click)="cerrar.emit()">Cerrar</button>
           </div>
         </div>
       </aside>

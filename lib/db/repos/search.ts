@@ -47,7 +47,9 @@ const MAX_PAGE_SIZE = 100;
 //
 // El territorio (`provincia`, `distrito`, `ubigeo`) sigue la misma regla: el
 // distrito propio del registro cuando el modelo lo tiene (alerta y actor) y,
-// si no, el distrito principal del caso. La SPA lo muestra en la ficha que se
+// si no, el distrito principal del caso. La provincia y la región que faltan se
+// derivan de la jerarquía `distrito → provincia → región`: es el territorio
+// real del registro, no una estimación. La SPA lo muestra en la ficha que se
 // abre desde la búsqueda; nunca se inventa un valor faltante.
 const REGION_DEL_CASO = `
     left join core.regiones rp on rp.id = c.region_principal_id
@@ -60,10 +62,11 @@ const REGION_DEL_CASO = `
        limit 1
     ) reg on true`;
 
-/** Distrito principal del caso y su provincia, para las ramas que lo heredan. */
+/** Distrito principal del caso, su provincia y la región de esa provincia. */
 const DISTRITO_DEL_CASO = `
     left join core.distritos cd on cd.id = c.distrito_principal_id
-    left join core.provincias cpv on cpv.id = cd.provincia_id`;
+    left join core.provincias cpv on cpv.id = cd.provincia_id
+    left join core.regiones cpr on cpr.id = cpv.region_id`;
 
 const SEARCH_UNION = `
   select 1 as ord, 'case'::text as type, 'cases'::text as view,
@@ -71,7 +74,7 @@ const SEARCH_UNION = `
          c.codigo_caso as code,
          c.nombre_caso as title,
          replace(ec.codigo, '_', ' ') as subtitle,
-         coalesce(reg.nombre, rp.nombre) as region,
+         coalesce(reg.nombre, rp.nombre, cpr.nombre) as region,
          cpv.nombre as provincia,
          cd.nombre as distrito,
          cd.ubigeo::text as ubigeo
@@ -88,15 +91,18 @@ ${REGION_DEL_CASO}
          al.codigo_alerta,
          al.titulo,
          na.nombre,
-         coalesce(reg.nombre, rp.nombre),
-         coalesce(apv.nombre, cpv.nombre),
+         coalesce(ar.nombre, apr.nombre, reg.nombre, rp.nombre),
+         coalesce(ap.nombre, apv.nombre, cpv.nombre),
          coalesce(ad.nombre, cd.nombre),
          coalesce(ad.ubigeo, cd.ubigeo)::text
     from core.alertas_tempranas al
     left join core.cat_niveles_alerta na on na.id = al.nivel_alerta_id
     left join core.casos c on c.id = al.caso_id
+    left join core.regiones ar on ar.id = al.region_id
+    left join core.provincias ap on ap.id = al.provincia_id
     left join core.distritos ad on ad.id = al.distrito_id
     left join core.provincias apv on apv.id = ad.provincia_id
+    left join core.regiones apr on apr.id = apv.region_id
 ${DISTRITO_DEL_CASO}
 ${REGION_DEL_CASO}
    where core.normalizar_ref(al.codigo_alerta) like core.normalizar_ref($1)
@@ -107,7 +113,7 @@ ${REGION_DEL_CASO}
          d.codigo,
          d.titulo,
          coalesce(td.nombre, d.estado),
-         coalesce(reg.nombre, rp.nombre),
+         coalesce(reg.nombre, rp.nombre, cpr.nombre),
          cpv.nombre,
          cd.nombre,
          cd.ubigeo::text
@@ -124,7 +130,7 @@ ${REGION_DEL_CASO}
          a.codigo_legado,
          a.nombre_actual,
          coalesce(rg.nombre, nullif(a.cargo_actual, '')),
-         coalesce(rg.nombre, pd.nombre),
+         coalesce(rg.nombre, pr.nombre),
          pd.nombre,
          d.nombre,
          d.ubigeo::text
@@ -132,6 +138,7 @@ ${REGION_DEL_CASO}
     left join core.regiones rg on rg.id = a.region_id
     left join core.distritos d on d.id = a.distrito_id
     left join core.provincias pd on pd.id = d.provincia_id
+    left join core.regiones pr on pr.id = pd.region_id
    where core.normalizar_ref(a.nombre_actual) like core.normalizar_ref($1)
       or core.normalizar_ref(coalesce(a.abreviatura, '')) like core.normalizar_ref($1)
   union all
@@ -140,7 +147,7 @@ ${REGION_DEL_CASO}
          cmp.codigo_compromiso,
          cmp.accion_compromiso,
          replace(ec.codigo, '_', ' '),
-         coalesce(reg.nombre, rp.nombre),
+         coalesce(reg.nombre, rp.nombre, cpr.nombre),
          cpv.nombre,
          cd.nombre,
          cd.ubigeo::text
@@ -157,7 +164,7 @@ ${REGION_DEL_CASO}
          dm.codigo_legado,
          coalesce(dm.descripcion_demanda, ''),
          replace(dm.estado_atencion, '_', ' '),
-         coalesce(reg.nombre, rp.nombre),
+         coalesce(reg.nombre, rp.nombre, cpr.nombre),
          cpv.nombre,
          cd.nombre,
          cd.ubigeo::text

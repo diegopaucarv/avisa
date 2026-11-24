@@ -210,7 +210,7 @@
 
     <button type="button" class="button-secondary" (click)="limpiar()">Limpiar filtros</button>
   </div>
-  } @if (!verPapelera()) {
+  <!--} @if (!verPapelera()) {
   <section class="nudos-semana" aria-labelledby="nudos-semana-titulo">
     <div class="nudos-semana-head">
       <h2 id="nudos-semana-titulo">Nudos de la semana</h2>
@@ -275,7 +275,7 @@
       }
     </ul>
     } }
-  </section>
+  </section>-->
   } @if (estado() === 'cargando') {
   <div class="empty-state" role="status">Cargando casos…</div>
   } @else if (estado() === 'error') {
