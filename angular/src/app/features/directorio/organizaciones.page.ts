@@ -31,6 +31,11 @@ import {
   type Foto,
 } from '../../dominio/medios';
 import { BarraSeleccionComponent } from '../../shared/ui/barra-seleccion.component';
+import {
+  formatearFechaCompacta,
+  formatearFechaHora,
+  partesFecha,
+} from '../../shared/formato-fecha';
 
 import { SeleccionTabla } from '../../shared/ui/seleccion-tabla';
 import { GaleriaFotosComponent } from '../../shared/ui/galeria-fotos.component';
@@ -454,25 +459,15 @@ export class OrganizacionesPage {
     this.exportarError.set(mensaje);
   }
 
-  /** `YYYY-MM-DD` → `DD/MM/AAAA`; cualquier otro valor se deja tal cual. */
+  /** `YYYY-MM-DD` → `02NOV2025`; cualquier otro valor se deja tal cual. */
   fecha(valor: string | null): string {
     if (!valor) return '—';
-    const iso = valor.slice(0, 10);
-    const [anio, mes, dia] = iso.split('-');
-    if (!anio || !mes || !dia) return valor;
-    return `${dia}/${mes}/${anio}`;
+    return partesFecha(valor) ? formatearFechaCompacta(valor) : valor;
   }
 
-  /** Marca de tiempo ISO → fecha y hora en horario de Lima. */
+  /** Marca de tiempo ISO → fecha compacta y hora: `02NOV2025 16:00`. */
   fechaHora(valor: string | null): string {
-    if (!valor) return '—';
-    const instante = new Date(valor);
-    if (Number.isNaN(instante.getTime())) return this.fecha(valor);
-    return new Intl.DateTimeFormat('es-PE', {
-      dateStyle: 'short',
-      timeStyle: 'short',
-      timeZone: 'America/Lima',
-    }).format(instante);
+    return formatearFechaHora(valor);
   }
 
   /** Vigencia con el dato disponible; nunca completa lo que la base no tiene. */
