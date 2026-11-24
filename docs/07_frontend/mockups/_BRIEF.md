@@ -59,7 +59,7 @@ Si un artboard no corresponde a ninguna ruta, se dice explícitamente en su cabe
 | **manifiesto**                                              | activo (para el nivel de conflicto)  |
 | caso **abierto**                                            | — (sí es válido para el estado)      |
 | **Pesca y acuicultura** / **MYPE e industria**              | Pesca / MYPE                         |
-| **Aplicativo de apoyo a la gestión de conflictos sociales** | PRODUCCION - OAIPCS                  |
+| **Aplicativo de Vigilancia y Sistematización de Información en Prevención y Gestión de Conflictos Sociales** | PRODUCCION - OAIPCS                  |
 | **Auditorios**                                              | locales                              |
 | **Nivel de conflictividad**                                 | nivel / conflictividad (a secas)     |
 

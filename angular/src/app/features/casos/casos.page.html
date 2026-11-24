@@ -288,28 +288,16 @@
       </div>
       <h3>{{ caso.titulo }}</h3>
       <p class="case-summary">{{ caso.resumen || 'Sin resumen registrado.' }}</p>
-      @if (caso.naturaleza; as naturaleza) {
-      <span class="case-naturaleza" [title]="'Naturaleza declarada: ' + naturaleza">
-        {{ naturaleza }}
-      </span>
-      } @else {
-      <span
-        class="case-naturaleza sin-declarar"
-        title="La naturaleza del caso aún no se declaró (Territorial o Nacional o sectorial)."
-      >
-        Sin declarar
-      </span>
-      }
+
       <div class="case-card-bottom">
         <span class="status-badge" [class]="'status-badge risk-' + caso.riesgo.toLowerCase()">
           <span class="status-dot"></span>
-          Riesgo: {{ caso.riesgo }}
+          R: {{ caso.riesgo }}
         </span>
-        <span>{{ caso.etapa }}</span>
         <span
           title="Fecha de última actualización del registro; en los casos del legado es la fecha en que se cargaron."
         >
-          Actualización: {{ fechaCorta(caso.actualizado) }}
+          Act. {{ fechaCorta(caso.actualizado) }}
         </span>
       </div>
     </button>

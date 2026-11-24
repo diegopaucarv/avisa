@@ -108,7 +108,10 @@ export function formatearFechaCorta(valor: string | null | undefined): string {
   const iso = fechaIso(valor);
   if (!iso) return '—';
   const [anio, mes, dia] = iso.split('-').map(Number);
-  return FECHA_CORTA.format(new Date(Date.UTC(anio, mes - 1, dia))).replace(/\./g, '');
+
+  return FECHA_CORTA.format(new Date(Date.UTC(anio, mes - 1, dia)))
+    .replace(/[\.\s]/g, '') // Elimina puntos y espacios
+    .toUpperCase(); // Convierte a mayúsculas
 }
 
 export const NIVELES_CONFLICTO = [

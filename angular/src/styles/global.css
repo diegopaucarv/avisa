@@ -1216,8 +1216,8 @@ select:focus-visible {
   color: #a6732d;
 }
 .risk-bajo {
-  background: #edf4ef;
-  color: #557a64;
+  background: #eef3fa;
+  color: #1f5597;
 }
 .mini-progress {
   display: flex;
@@ -1447,7 +1447,7 @@ select:focus-visible {
 .case-card > .case-summary {
   display: -webkit-box;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 3;
   overflow: hidden;
 }
 .case-card-bottom {
@@ -4489,8 +4489,8 @@ textarea {
   color: #93621d;
 }
 .risk-bajo {
-  background: #e9f5ef;
-  color: #34785b;
+  background: #eef3fa;
+  color: #1f5597;
 }
 .timeline-actor {
   display: block;
@@ -6349,7 +6349,7 @@ textarea {
   background: #b8944f;
 }
 .legend-swatch.risk-bajo {
-  background: #5a8b78;
+  background: #eef3fa;
 }
 .legend-swatch.layer-casos {
   border-radius: 50%;

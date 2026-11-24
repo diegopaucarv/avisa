@@ -1,6 +1,6 @@
 # Nudos críticos · Conducta funcional
 
-**Aplicativo de apoyo a la gestión de conflictos sociales** · PRODUCE · OAIPCS
+**Aplicativo de Vigilancia y Sistematización de Información en Prevención y Gestión de Conflictos Sociales** · PRODUCE · OAIPCS
 **Estado:** propuesta funcional para OAIPCS · 23 nov 2026
 **Base del diseño:** `migration/41` y `migration/43`, propuestas y no ejecutadas.
 **Alcance:** conducta funcional. No describe pantallas, colores ni componentes.

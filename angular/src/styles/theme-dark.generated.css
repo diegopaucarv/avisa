@@ -309,8 +309,8 @@ html[data-theme="dark"] .risk-moderado {
     color: #d5b890;
 }
 html[data-theme="dark"] .risk-bajo {
-    background: #12161b;
-    color: #a5c3b1;
+    background: #eef3fa;
+    color: #1f5597;
 }
 html[data-theme="dark"] .mini-progress {
     color: #96a8b9;
@@ -1125,8 +1125,8 @@ html[data-theme="dark"] .risk-moderado {
     color: #dcc5a4;
 }
 html[data-theme="dark"] .risk-bajo {
-    background: #1e2722;
-    color: #abd9c5;
+    background: #eef3fa;
+    color: #1f5597;
 }
 html[data-theme="dark"] .timeline-actor {
     color: #90a0b1;
