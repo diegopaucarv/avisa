@@ -8,16 +8,18 @@
           <button
             type="button"
             role="menuitem"
-            disabled
-            title="La creación de actores no está disponible en este entorno"
+            [disabled]="!capacidades.puedeEditar()"
+            [title]="capacidades.puedeEditar() ? 'Registrar un actor persona' : 'Su rol no permite crear actores'"
+            (click)="abrirAlta('persona')"
           >
             Nuevo actor
           </button>
           <button
             type="button"
             role="menuitem"
-            disabled
-            title="La creación de organizaciones no está disponible en este entorno"
+            [disabled]="!capacidades.puedeEditar()"
+            [title]="capacidades.puedeEditar() ? 'Registrar una organización' : 'Su rol no permite crear organizaciones'"
+            (click)="abrirAlta('organizacion')"
           >
             Nueva organización
           </button>
@@ -27,16 +29,28 @@
       <button
         type="button"
         class="button-secondary"
-        disabled
-        title="La fusión de duplicados no está disponible en este entorno"
+        [disabled]="!capacidades.puedeEliminar() || capacidades.maxClasificacion() < 3 || !seleccionado()"
+        [title]="
+          !seleccionado()
+            ? 'Seleccione un actor para fusionar'
+            : !capacidades.puedeEliminar() || capacidades.maxClasificacion() < 3
+              ? 'Su rol no permite fusionar actores'
+              : 'Fusionar el actor abierto con otro registro'
+        "
+        (click)="abrirFusion()"
       >
         Fusionar duplicados
       </button>
       <button
         type="button"
         class="button-secondary"
-        disabled
-        title="La baja lógica no está disponible en este entorno"
+        [disabled]="!seleccionado() || !capacidades.puedeEditar()"
+        [title]="
+          !seleccionado()
+            ? 'Seleccione un actor para dar de baja'
+            : 'Dar de baja lógica al actor abierto'
+        "
+        (click)="abrirBajaSeleccionado()"
       >
         Baja lógica
       </button>
@@ -261,6 +275,7 @@
         <tr
           class="case-row-clickable"
           [class.row-selected]="seleccionado()?.id === actor.id"
+          [class.fila-inactiva]="!actor.activo"
           (click)="abrir(actor)"
         >
           <td class="col-seleccion" (click)="$event.stopPropagation()">
@@ -296,6 +311,8 @@
               <strong>{{ actor.nombre }}</strong>
               @if (actor.abreviatura) {
               <small>{{ actor.abreviatura }}</small>
+              } @if (!actor.activo) {
+              <small class="actor-inactivo">Inactivo</small>
               }
             </button>
           </td>
@@ -313,7 +330,7 @@
               </button>
             </span>
             } @else {
-            <span class="sin-dato">—</span>
+            <span class="sin-dato">{{ sinDato }}</span>
             }
           </td>
           <td>
@@ -330,7 +347,7 @@
               </button>
             </span>
             } @else {
-            <span class="sin-dato">—</span>
+            <span class="sin-dato">{{ sinDato }}</span>
             }
           </td>
           <td class="actor-organizacion">
@@ -338,13 +355,13 @@
             <span>{{ actor.organizacionAncla }}</span>
             } @if (actor.cargo) {
             <small>{{ actor.cargo }}</small>
-            } @if (!actor.organizacionAncla && !actor.cargo) { — }
+            } @if (!actor.organizacionAncla && !actor.cargo) { {{ sinDato }} }
           </td>
           <td>
             @if (actor.region) {
             <span class="region-chip">{{ actor.region }}</span>
             } @else {
-            <span class="sin-dato">—</span>
+            <span class="sin-dato">{{ sinDato }}</span>
             }
           </td>
           <td class="col-acciones" (click)="$event.stopPropagation()">
@@ -378,11 +395,13 @@
               <button
                 type="button"
                 class="accion"
-                disabled
-                title="La eliminación de actores no está disponible en este entorno"
-                [attr.aria-label]="'Eliminar a ' + actor.nombre + ' (no disponible)'"
+                [disabled]="!capacidades.puedeEditar()"
+                [attr.aria-label]="
+                  (actor.activo ? 'Dar de baja a ' : 'Restaurar a ') + actor.nombre
+                "
+                (click)="abrirBaja(actor, actor.activo ? 'anular' : 'restaurar')"
               >
-                Eliminar
+                {{ actor.activo ? "Baja" : "Restaurar" }}
               </button>
             </div>
           </td>
@@ -407,6 +426,30 @@
     (cerrar)="cerrarPanel()"
     (actualizado)="alActualizarActor($event)"
     (alternarLista)="alternarLista(actorAbierto)"
+    (solicitarBaja)="abrirBaja(actorAbierto, 'anular')"
+    (solicitarRestaurar)="abrirBaja(actorAbierto, 'restaurar')"
+  />
+  } @if (altaNaturaleza(); as naturaleza) {
+  <app-actor-panel-alta
+    [naturalezaInicial]="naturaleza"
+    (cerrar)="cerrarAlta()"
+    (creado)="alCrearActor($event)"
+  />
+  } @if (fusionOrigen(); as origenFusion) {
+  <app-actor-panel-fusion
+    [origen]="origenFusion"
+    (cerrar)="cerrarFusion()"
+    (fusionado)="alFusionar()"
+  />
+  } @if (bajaAbierta(); as baja) {
+  <app-anular-panel
+    [modo]="baja.modo"
+    entidad="actor"
+    [codigo]="baja.actor.abreviatura"
+    [enviando]="enviandoBaja()"
+    [errorEnvio]="errorBaja()"
+    (cerrar)="cerrarBaja()"
+    (hecho)="alConfirmarBaja($event)"
   />
   }
 </section>

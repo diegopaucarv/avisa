@@ -9,7 +9,7 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { map } from 'rxjs';
+import { catchError, forkJoin, map, of } from 'rxjs';
 
 import { urlApi } from '../../core/config/entorno';
 import {
@@ -45,6 +45,8 @@ import { SeleccionTabla } from '../../shared/ui/seleccion-tabla';
 import { ThOrdenDirective } from '../../shared/ui/th-orden.directive';
 import { CasoPanelComponent, type CuerpoCasoAlta } from './caso-panel.component';
 import { CasoVistaPreviaComponent } from './caso-vista-previa.component';
+import { aDuplicados, type DuplicadoCandidatoFila } from './duplicados.mapeo';
+import { aNudosSemana, type NudosSemanaTablero } from './nudos-matriz.mapeo';
 
 /**
  * Código del caso recién creado. `POST /api/v1/cases` devuelve el `CaseDetail`
@@ -278,6 +280,103 @@ function aConteos(bruto: unknown): ConteosCasos {
       color: #8a98a5;
       font-weight: 500;
     }
+
+    /* Indicador operativo de la semana: tira de cifras con la jerarquía del
+       mockup (cifra grande, leyenda debajo) y lista de casos con nudo. */
+    .nudos-semana {
+      padding: 12px 14px;
+      border: 1px solid #dbe3ea;
+      border-radius: 8px;
+      background: #fbfcfd;
+    }
+
+    .nudos-semana-head {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .nudos-semana-head h2 {
+      margin: 0;
+      color: #22303f;
+      font: 700 15px var(--font-display);
+    }
+
+    .nudos-semana-head span {
+      color: #647487;
+      font-size: 12.5px;
+    }
+
+    .nudos-semana-cifras {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .nudos-semana-cifras div {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      padding: 8px 10px;
+      border: 1px solid #e4eaf0;
+      border-radius: 6px;
+      background: #fff;
+    }
+
+    .nudos-semana-cifras b {
+      color: #22303f;
+      font: 700 17px/1.2 var(--font-display);
+    }
+
+    .nudos-semana-cifras span {
+      color: #647487;
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .nudos-semana-lista {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin: 10px 0 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .nudos-semana-lista li {
+      padding: 8px 10px;
+      border: 1px solid #e4eaf0;
+      border-radius: 6px;
+      background: #fff;
+    }
+
+    .nudos-semana-caso {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 7px;
+    }
+
+    .nudos-semana-titulo {
+      color: #22303f;
+      font-size: 13.5px;
+      font-weight: 600;
+    }
+
+    .nudos-semana-region {
+      color: #8a98a5;
+      font-size: 12px;
+    }
+
+    .nudos-semana-nudo {
+      margin: 4px 0 0;
+      color: #47566a;
+      font-size: 12.5px;
+      line-height: 1.45;
+    }
   `,
 })
 export class CasosPage {
@@ -474,6 +573,37 @@ export class CasosPage {
     totalPaginas(this.recurso.valor() ?? { total: 0, tamanoPagina: TAMANO_PAGINA }),
   );
 
+  /**
+   * Nudos de la semana del ámbito de la sesión (`GET /api/v1/cases/nudos`). Es el
+   * indicador «X de Y casos con nudo abierto» del tablero; no depende de la
+   * página ni de los filtros de la lista. En la papelera no aplica: `fuente`
+   * devuelve `null` y el recurso queda inactivo.
+   */
+  private readonly nudosRecurso = consulta<NudosSemanaTablero>({
+    fuente: () => (this.filtros().ver === 'anulados' ? null : urlApi('/v1/cases/nudos')),
+    esquema: aNudosSemana,
+  });
+
+  readonly nudosSemana = this.nudosRecurso.valor;
+  readonly estadoNudos = this.nudosRecurso.estado;
+  readonly errorNudos = this.nudosRecurso.error;
+
+  /**
+   * Aviso de duplicados del alta. `cuerpoVerificado` guarda el cuerpo ya
+   * comprobado: el mismo cuerpo con el aviso a la vista es la confirmación; si
+   * el usuario cambia el título o el distrito, se vuelve a comprobar.
+   */
+  readonly duplicadosAlta = signal<readonly DuplicadoCandidatoFila[]>([]);
+  readonly verificandoDuplicados = signal(false);
+  readonly descartesDuplicados = signal<readonly string[]>([]);
+  readonly errorDuplicadosAlta = signal<string | null>(null);
+  private cuerpoVerificado: string | null = null;
+  /**
+   * Turno de la comprobación en curso. Cerrar el panel o volver a enviar lo
+   * invalida: una respuesta tardía no debe registrar un caso ya abandonado.
+   */
+  private turnoDuplicados = 0;
+
   /** Orden local de la página visible. */
   readonly orden = new OrdenTabla<Caso>();
 
@@ -666,6 +796,7 @@ export class CasosPage {
 
   recargar(): void {
     this.recurso.recargar();
+    this.nudosRecurso.recargar();
   }
 
   alAnularLote(cantidad: number): void {
@@ -691,6 +822,7 @@ export class CasosPage {
     if (!this.capacidades.puedeEditar()) return;
     this.errorAlta.set(null);
     this.aviso.set(null);
+    this.limpiarDuplicados();
     this.panelAbierto.set(true);
   }
 
@@ -698,15 +830,79 @@ export class CasosPage {
     if (this.guardando()) return;
     this.panelAbierto.set(false);
     this.errorAlta.set(null);
+    this.limpiarDuplicados();
+  }
+
+  /** «No es duplicado»: se recuerda el código para registrar el descarte al crear. */
+  marcarNoDuplicado(codigo: string): void {
+    this.descartesDuplicados.update((actuales) =>
+      actuales.includes(codigo) ? actuales : [...actuales, codigo],
+    );
+  }
+
+  /**
+   * Alta de caso en dos pasos. El primer envío comprueba duplicados; si hay
+   * candidatos se muestran y no se registra nada. El segundo envío con el mismo
+   * cuerpo confirma el registro; si el cuerpo cambió, se vuelve a comprobar.
+   */
+  registrarCaso(cuerpo: CuerpoCasoAlta): void {
+    if (this.guardando()) return;
+
+    const clave = JSON.stringify(cuerpo);
+    if (this.duplicadosAlta().length > 0 && this.cuerpoVerificado === clave) {
+      this.enviarAlta(cuerpo);
+      return;
+    }
+
+    this.errorAlta.set(null);
+    this.verificarDuplicados(cuerpo, clave);
+  }
+
+  private verificarDuplicados(cuerpo: CuerpoCasoAlta, clave: string): void {
+    const turno = ++this.turnoDuplicados;
+    this.verificandoDuplicados.set(true);
+    this.errorDuplicadosAlta.set(null);
+    this.duplicadosAlta.set([]);
+    this.descartesDuplicados.set([]);
+    this.cuerpoVerificado = null;
+
+    const parametros: Record<string, string> = { titulo: cuerpo.titulo };
+    if (cuerpo.distritoPrincipalId !== undefined) {
+      parametros['distritoId'] = String(cuerpo.distritoPrincipalId);
+    }
+
+    this.http.get<unknown>(urlConParametros(urlApi('/v1/cases/duplicados'), parametros)).subscribe({
+      next: (bruto) => {
+        if (turno !== this.turnoDuplicados) return;
+        this.verificandoDuplicados.set(false);
+        this.cuerpoVerificado = clave;
+        const candidatos = aDuplicados(bruto).candidatos;
+        if (candidatos.length === 0) {
+          this.enviarAlta(cuerpo);
+          return;
+        }
+        this.duplicadosAlta.set(candidatos);
+      },
+      error: (fallo: unknown) => {
+        if (turno !== this.turnoDuplicados) return;
+        // Sin la comprobación no se bloquea el alta: se registra y se declara
+        // que el aviso no pudo aplicarse.
+        this.verificandoDuplicados.set(false);
+        this.errorDuplicadosAlta.set(
+          `No se pudo verificar duplicados: ${aErrorApi(fallo).message}`,
+        );
+        this.enviarAlta(cuerpo);
+      },
+    });
   }
 
   /**
    * `POST /api/v1/cases`: el código lo asigna el servidor. Si la respuesta lo
    * trae, se abre la ficha; si no, se recarga el listado. Un fallo deja el panel
-   * abierto con el mensaje de la API.
+   * abierto con el mensaje de la API. Los descartes marcados se envían después
+   * del alta, porque necesitan el código del caso recién creado.
    */
-  registrarCaso(cuerpo: CuerpoCasoAlta): void {
-    if (this.guardando()) return;
+  private enviarAlta(cuerpo: CuerpoCasoAlta): void {
     this.guardando.set(true);
     this.errorAlta.set(null);
 
@@ -714,19 +910,62 @@ export class CasosPage {
       next: (bruto) => {
         this.guardando.set(false);
         const codigo = codigoDeCasoCreado(bruto);
+        const descartes = [...this.descartesDuplicados()];
         this.panelAbierto.set(false);
-        if (codigo) {
+        this.limpiarDuplicados();
+        if (!codigo) {
+          this.aviso.set('Caso registrado. Se actualizó el listado.');
+          this.recargar();
+          return;
+        }
+        if (descartes.length === 0) {
           void this.router.navigate(['/casos', codigo]);
           return;
         }
-        this.aviso.set('Caso registrado. Se actualizó el listado.');
-        this.recargar();
+        this.registrarDescartes(codigo, descartes);
       },
       error: (fallo: unknown) => {
         this.guardando.set(false);
         this.errorAlta.set(aErrorApi(fallo).message);
       },
     });
+  }
+
+  private registrarDescartes(codigo: string, descartes: readonly string[]): void {
+    const motivo = 'Descartado en el alta: el usuario indicó que no es duplicado.';
+    const peticiones = descartes.map((candidato) =>
+      this.http
+        .post<unknown>(urlApi('/v1/cases/duplicados'), {
+          casoA: codigo,
+          casoB: candidato,
+          motivo,
+        })
+        .pipe(
+          map(() => null),
+          catchError((fallo: unknown) => of(aErrorApi(fallo).message)),
+        ),
+    );
+
+    forkJoin(peticiones).subscribe((resultados) => {
+      const fallo = resultados.find((resultado): resultado is string => resultado !== null);
+      if (fallo) {
+        this.aviso.set(
+          `Caso ${codigo} registrado, pero no se guardó el descarte de duplicado: ${fallo}`,
+        );
+        this.recargar();
+        return;
+      }
+      void this.router.navigate(['/casos', codigo]);
+    });
+  }
+
+  private limpiarDuplicados(): void {
+    this.turnoDuplicados += 1;
+    this.duplicadosAlta.set([]);
+    this.descartesDuplicados.set([]);
+    this.errorDuplicadosAlta.set(null);
+    this.verificandoDuplicados.set(false);
+    this.cuerpoVerificado = null;
   }
 
   alFallarExportacion(mensaje: string): void {

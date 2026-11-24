@@ -12,6 +12,8 @@ import {
   viewChild,
 } from '@angular/core';
 
+import { RouterLink } from '@angular/router';
+
 import { urlApi } from '../../core/config/entorno';
 import { consulta } from '../../core/http/consulta';
 import { esRegistro, leer, lista, texto } from '../../dominio/mapeo';
@@ -20,6 +22,11 @@ import {
   TerritorioBuscadorComponent,
   type OpcionTerritorio,
 } from '../../shared/ui/territorio-buscador.component';
+
+import {
+  etiquetaCriterio as etiquetaDeCriterio,
+  type DuplicadoCandidatoFila,
+} from './duplicados.mapeo';
 
 /** Cuerpo de `POST /api/v1/cases`. El código lo emite el servidor. */
 export type CuerpoCasoAlta = {
@@ -160,7 +167,7 @@ const CATALOGOS_VACIOS: CatalogosAlta = {
  */
 @Component({
   selector: 'app-caso-panel',
-  imports: [IconoComponent, TerritorioBuscadorComponent],
+  imports: [RouterLink, IconoComponent, TerritorioBuscadorComponent],
   templateUrl: './caso-panel.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
@@ -254,14 +261,101 @@ const CATALOGOS_VACIOS: CatalogosAlta = {
       gap: 8px;
       margin-top: 2px;
     }
+
+    /* Aviso de duplicados: se lee antes de confirmar, no después. */
+    .duplicados-aviso {
+      margin: 0 0 12px;
+      padding: 11px 12px;
+      border: 1px solid #e8d3a3;
+      border-radius: 7px;
+      background: #fdf8ec;
+    }
+
+    .duplicados-aviso h3 {
+      margin: 0 0 3px;
+      color: #7a5a16;
+      font: 700 14px var(--font-display);
+    }
+
+    .duplicados-lista {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin: 10px 0 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .duplicado-item {
+      padding: 8px 9px;
+      border: 1px solid #e6e0cd;
+      border-radius: 6px;
+      background: #fff;
+    }
+
+    .duplicado-item.descartado {
+      border-style: dashed;
+      background: rgba(100, 116, 135, 0.05);
+    }
+
+    .duplicado-cabecera {
+      display: flex;
+      align-items: baseline;
+      gap: 7px;
+    }
+
+    .duplicado-titulo {
+      color: #22303f;
+      font-size: 13.5px;
+      line-height: 1.35;
+    }
+
+    .duplicado-meta {
+      margin: 3px 0 0;
+      color: #647487;
+      font-size: 12.5px;
+    }
+
+    .duplicado-criterios {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin: 6px 0 0;
+    }
+
+    .duplicado-chip {
+      padding: 1px 7px;
+      border: 1px solid #e8d3a3;
+      border-radius: 10px;
+      background: #fff;
+      color: #7a5a16;
+      font-size: 11.5px;
+      font-weight: 600;
+    }
+
+    .duplicado-item .button-secondary {
+      margin-top: 7px;
+    }
   `,
 })
 export class CasoPanelComponent {
   readonly guardando = input(false);
   readonly errorGuardado = input<string | null>(null);
 
+  /**
+   * Posibles duplicados del título/distrito en curso. El contenedor los pide
+   * antes de confirmar; el panel sólo los muestra y permite descartarlos.
+   */
+  readonly duplicados = input<readonly DuplicadoCandidatoFila[]>([]);
+  readonly verificando = input(false);
+  /** Códigos de los candidatos ya marcados como «no es duplicado». */
+  readonly descartes = input<readonly string[]>([]);
+  readonly errorDuplicados = input<string | null>(null);
+
   readonly cerrar = output<void>();
   readonly guardar = output<CuerpoCasoAlta>();
+  /** Pide registrar que el candidato (por código) no es un duplicado. */
+  readonly descartar = output<string>();
 
   readonly borrador = signal<BorradorCaso>({
     titulo: '',
@@ -366,13 +460,31 @@ export class CasoPanelComponent {
     this.mensajeLocal.set(null);
   }
 
+  /**
+   * Texto del botón de envío. Con el aviso a la vista, el segundo envío confirma
+   * el registro («Registrar igualmente»): nunca se envía dos veces sin avisar.
+   */
+  readonly textoEnviar = computed(() => {
+    if (this.guardando()) return 'Registrando…';
+    if (this.verificando()) return 'Verificando duplicados…';
+    return this.duplicados().length > 0 ? 'Registrar igualmente' : 'Registrar caso';
+  });
+
+  etiquetaCriterio(criterio: DuplicadoCandidatoFila['coincidencias'][number]): string {
+    return etiquetaDeCriterio(criterio);
+  }
+
+  estaDescartado(candidato: DuplicadoCandidatoFila): boolean {
+    return this.descartes().includes(candidato.codigo);
+  }
+
   alEnviarFormulario(evento: Event): void {
     evento.preventDefault();
     this.guardarCambios();
   }
 
   guardarCambios(): void {
-    if (this.guardando()) return;
+    if (this.guardando() || this.verificando()) return;
 
     const borrador = this.borrador();
     const titulo = borrador.titulo.trim();

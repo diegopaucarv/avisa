@@ -9,7 +9,7 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { map } from 'rxjs';
 
@@ -22,6 +22,8 @@ import {
   type Coleccion,
 } from '../../core/http/coleccion';
 import { consulta } from '../../core/http/consulta';
+import { aErrorApi } from '../../core/http/errores';
+import { CapacidadesService } from '../../core/permisos/capacidades.service';
 import {
   aFoto,
   esFotoPintable,
@@ -36,15 +38,23 @@ import { OrdenTabla } from '../../shared/ui/orden-tabla';
 import { PaginacionComponent } from '../../shared/ui/paginacion.component';
 import { SeleccionTabla } from '../../shared/ui/seleccion-tabla';
 import { ThOrdenDirective } from '../../shared/ui/th-orden.directive';
+import {
+  AnularPanelComponent,
+  type ResultadoAnulacion,
+} from '../../shared/ui/anular-panel.component';
 import { ActorPanelComponent } from './actor-panel.component';
+import { ActorPanelAltaComponent, type NaturalezaAlta } from './actor-panel-alta.component';
+import { ActorPanelFusionComponent } from './actor-panel-fusion.component';
 import { alternarActorLista, quitarActorLista } from './lista-temporal';
 import { crearCsvPadronAsistencia } from './padron-asistencia';
 import {
   aActorDirectorio,
   aCatalogosDirectorio,
+  SIN_DATO,
   type ActorDirectorio,
   type CatalogosDirectorio,
 } from './directorio.mapeo';
+import { HttpClient } from '@angular/common/http';
 
 type VistaActores = 'persona' | 'organizacion';
 
@@ -87,6 +97,9 @@ const FILTROS_INICIALES: FiltrosActores = {
     IconoComponent,
     PaginacionComponent,
     ActorPanelComponent,
+    ActorPanelAltaComponent,
+    ActorPanelFusionComponent,
+    AnularPanelComponent,
     BarraSeleccionComponent,
     ThOrdenDirective,
   ],
@@ -337,6 +350,36 @@ const FILTROS_INICIALES: FiltrosActores = {
       color: #2f7a52;
     }
 
+    /* «sin dato» es información, no un error: tono apagado y sin icono de fallo. */
+    .sin-dato {
+      color: #97a1aa;
+      font-size: 12.5px;
+      font-style: italic;
+    }
+
+    .fila-inactiva .actor-nombre strong {
+      color: #8a98a5;
+    }
+
+    .fila-inactiva {
+      background: #fafbfc;
+    }
+
+    .actor-inactivo {
+      display: inline-block;
+      margin-left: 6px;
+      padding: 1px 6px;
+      border: 1px solid #e2e7ec;
+      border-radius: 999px;
+      background: #f3f5f7;
+      color: #7b8896;
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+      vertical-align: middle;
+    }
+
     .actor-actualizando {
       margin: 0;
       color: #8d99a6;
@@ -497,6 +540,13 @@ export class ActoresPage {
   private readonly ruta = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly destruccion = inject(DestroyRef);
+  private readonly http = inject(HttpClient);
+
+  /** Permisos de la sesión: escribir, anular y nivel de clasificación máximo. */
+  readonly capacidades = inject(CapacidadesService);
+
+  /** Texto único para un dato ausente; nunca se presenta como error. */
+  readonly sinDato = SIN_DATO;
 
   /**
    * Naturaleza por defecto de la ruta (por ejemplo `/directorio/personas`). Ya
@@ -626,6 +676,18 @@ export class ActoresPage {
   /** `true` cuando la ficha debe abrirse directamente en modo edición. */
   readonly editarAlAbrir = signal(false);
 
+  /** `null` = cerrado; la naturaleza fija el bloque inicial del alta. */
+  readonly altaNaturaleza = signal<NaturalezaAlta | null>(null);
+  /** Actor abierto que se propone fusionar con otro. */
+  readonly fusionOrigen = signal<ActorDirectorio | null>(null);
+  /** Confirmación de baja o restauración pendiente. */
+  readonly bajaAbierta = signal<{
+    actor: ActorDirectorio;
+    modo: 'anular' | 'restaurar';
+  } | null>(null);
+  readonly enviandoBaja = signal(false);
+  readonly errorBaja = signal<string | null>(null);
+
   /** Selección de trabajo en memoria, conservada al cambiar página o filtros. */
   readonly listaTemporal = signal<ActorDirectorio[]>([]);
   readonly listaTemporalAbierta = signal(false);
@@ -731,6 +793,86 @@ export class ActoresPage {
       actual.map((seleccionado) => (seleccionado.id === actor.id ? actor : seleccionado)),
     );
     this.listado.recargar();
+  }
+
+  /** Abre el alta con la naturaleza elegida en el menú «Nuevo». */
+  abrirAlta(naturaleza: NaturalezaAlta): void {
+    this.altaNaturaleza.set(naturaleza);
+  }
+
+  cerrarAlta(): void {
+    this.altaNaturaleza.set(null);
+  }
+
+  alCrearActor(actor: ActorDirectorio): void {
+    this.altaNaturaleza.set(null);
+    this.listado.recargar();
+    this.abrir(actor);
+  }
+
+  /** La fusión necesita un actor de origen: el que está abierto en el panel. */
+  abrirFusion(): void {
+    const origen = this.seleccionado();
+    if (!origen) return;
+    this.fusionOrigen.set(origen);
+  }
+
+  cerrarFusion(): void {
+    this.fusionOrigen.set(null);
+  }
+
+  alFusionar(): void {
+    this.fusionOrigen.set(null);
+    // El origen queda inactivo: se cierra su ficha y se refresca el listado.
+    this.cerrarPanel();
+    this.listado.recargar();
+  }
+
+  /** Abre la baja lógica del actor seleccionado, si hay uno. */
+  abrirBajaSeleccionado(): void {
+    const actor = this.seleccionado();
+    if (actor) this.abrirBaja(actor, 'anular');
+  }
+
+  abrirBaja(actor: ActorDirectorio, modo: 'anular' | 'restaurar'): void {
+    this.errorBaja.set(null);
+    this.bajaAbierta.set({ actor, modo });
+  }
+
+  cerrarBaja(): void {
+    this.bajaAbierta.set(null);
+    this.errorBaja.set(null);
+  }
+
+  /** Ejecuta `POST …/baja` o `POST …/restaurar` según lo confirmado en el panel. */
+  alConfirmarBaja(resultado: ResultadoAnulacion): void {
+    const abierta = this.bajaAbierta();
+    if (!abierta || this.enviandoBaja()) return;
+
+    const { actor } = abierta;
+    const esAnular = resultado.modo === 'anular';
+    const url = urlApi(
+      `/v1/actors/${encodeURIComponent(actor.id)}/${esAnular ? 'baja' : 'restaurar'}`,
+    );
+
+    this.enviandoBaja.set(true);
+    this.errorBaja.set(null);
+
+    const peticion = esAnular
+      ? this.http.post<unknown>(url, { motivo: resultado.motivo })
+      : this.http.post<unknown>(url, {});
+
+    peticion.pipe(takeUntilDestroyed(this.destruccion)).subscribe({
+      next: (bruto) => {
+        this.enviandoBaja.set(false);
+        this.bajaAbierta.set(null);
+        this.alActualizarActor(aActorDirectorio(bruto));
+      },
+      error: (fallo: unknown) => {
+        this.enviandoBaja.set(false);
+        this.errorBaja.set(aErrorApi(fallo).message);
+      },
+    });
   }
 
   buscar(evento: Event): void {

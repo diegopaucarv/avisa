@@ -30,6 +30,64 @@
       @if (mensajeLocal(); as mensaje) {
         <p class="form-error" role="alert">{{ mensaje }}</p>
       }
+      @if (errorDuplicados(); as fallo) {
+        <p class="form-error" role="alert">{{ fallo }}</p>
+      }
+
+      @if (verificando()) {
+        <p class="form-hint" role="status">Buscando posibles duplicados…</p>
+      }
+
+      @if (duplicados().length > 0) {
+        <section class="duplicados-aviso" aria-labelledby="duplicados-titulo">
+          <h3 id="duplicados-titulo">Posibles duplicados</h3>
+          <p class="form-hint">
+            Antes de registrar, revise estos casos. Si no es un duplicado, descártelo con «No es
+            duplicado» o registre igualmente: no se borra ni se fusiona nada.
+          </p>
+          <ul class="duplicados-lista">
+            @for (candidato of duplicados(); track candidato.id) {
+              <li class="duplicado-item" [class.descartado]="estaDescartado(candidato)">
+                <div class="duplicado-cabecera">
+                  <a
+                    class="table-link"
+                    [routerLink]="['/casos', candidato.codigo]"
+                    target="_blank"
+                    rel="noopener"
+                    >{{ candidato.codigo }}</a
+                  >
+                  <strong class="duplicado-titulo">{{ candidato.titulo }}</strong>
+                </div>
+                <p class="duplicado-meta">
+                  {{ candidato.estado || 'Sin estado' }} ·
+                  {{ candidato.distrito || 'Sin distrito' }}
+                </p>
+                @if (candidato.coincidencias.length > 0) {
+                  <p class="duplicado-criterios">
+                    @for (criterio of candidato.coincidencias; track criterio) {
+                      <span class="duplicado-chip">{{ etiquetaCriterio(criterio) }}</span>
+                    }
+                  </p>
+                }
+                @if (estaDescartado(candidato)) {
+                  <span class="detail-hint">
+                    Descartado: se registrará como «no es duplicado».
+                  </span>
+                } @else {
+                  <button
+                    type="button"
+                    class="button-secondary"
+                    [disabled]="guardando()"
+                    (click)="descartar.emit(candidato.codigo)"
+                  >
+                    No es duplicado
+                  </button>
+                }
+              </li>
+            }
+          </ul>
+        </section>
+      }
 
       <form class="caso-formulario" (submit)="alEnviarFormulario($event)">
         <div class="form-field">
@@ -190,8 +248,8 @@
         </div>
 
         <div class="caso-formulario-acciones">
-          <button type="submit" class="button-primary" [disabled]="guardando()">
-            {{ guardando() ? 'Registrando…' : 'Registrar caso' }}
+          <button type="submit" class="button-primary" [disabled]="guardando() || verificando()">
+            {{ textoEnviar() }}
           </button>
           <button
             type="button"

@@ -500,8 +500,15 @@ export async function createActor(
   scope: ActorScope,
   input: Json,
 ): Promise<ActorListItem> {
-  const naturaleza = leerTexto(input, "naturaleza", 12, "La naturaleza", true);
-  if (naturaleza === null || !NATURALEZAS.has(naturaleza)) {
+  // `obligatorio` garantiza un texto no vacío; el cast sólo refleja eso.
+  const naturaleza = leerTexto(
+    input,
+    "naturaleza",
+    12,
+    "La naturaleza",
+    true,
+  ) as string;
+  if (!NATURALEZAS.has(naturaleza)) {
     throw new ApiError(
       422,
       "La naturaleza debe ser persona u organización.",

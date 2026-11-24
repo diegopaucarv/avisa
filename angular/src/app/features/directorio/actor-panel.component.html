@@ -33,6 +33,9 @@
                 {{ a.organizacionAncla }}
               </span>
             }
+            @if (!a.activo) {
+              <span class="panel-linea panel-inactivo">Dado de baja lógica</span>
+            }
           </div>
         </div>
 
@@ -54,8 +57,8 @@
             aria-labelledby="actor-editor-titulo"
           >
             <p class="panel-nota" id="actor-editor-titulo">
-              Los cambios se guardan en la ficha del actor. DNI, teléfono y fotografía se gestionan
-              por canales auditados y no se editan aquí.
+              Los cambios se guardan en la ficha del actor. El DNI se edita sólo con la consulta de
+              datos personales abierta y queda cifrado; la fotografía se gestiona por otro canal.
             </p>
 
             <section class="actor-bloque" aria-labelledby="bloque-datos">
@@ -71,17 +74,34 @@
               </label>
               <label>
                 DNI
-                <input [value]="datos()?.dni ?? ''" placeholder="—" disabled />
-                <span class="actor-pista">Se edita por el canal de datos personales.</span>
+                <input
+                  maxlength="8"
+                  inputmode="numeric"
+                  autocomplete="off"
+                  [value]="borrador().dni"
+                  [disabled]="!piiVisible()"
+                  (input)="actualizarTexto('dni', $event)"
+                />
+                @if (piiVisible()) {
+                  <span class="actor-pista">Se guarda cifrado; debe tener 8 dígitos.</span>
+                } @else {
+                  <span class="actor-pista">
+                    Solicite «Ver datos personales» para editar el DNI.
+                  </span>
+                }
               </label>
               <label>
                 Teléfono
-                <input [value]="telefonoContacto() ?? ''" placeholder="—" disabled />
+                <input [value]="telefonoContacto() ?? ''" placeholder="sin dato" disabled />
                 <span class="actor-pista">Se edita por el canal de datos personales.</span>
               </label>
               <label>
                 Correo
-                <input [value]="correoContacto() ?? ''" placeholder="—" disabled />
+                <input
+                  [value]="correoContacto() ?? correoOrganizacion() ?? ''"
+                  placeholder="sin dato"
+                  disabled
+                />
                 <span class="actor-pista">Correo de contacto de la ficha.</span>
               </label>
               <label class="ancho">
@@ -113,10 +133,60 @@
               </label>
               <label class="ancho">
                 Organización / Institución
-                <input [value]="a.organizacionAncla ?? ''" placeholder="—" disabled />
+                <input [value]="a.organizacionAncla ?? ''" placeholder="sin dato" disabled />
                 <span class="actor-pista">El vínculo institucional se edita en el padrón.</span>
               </label>
             </section>
+
+            @if (esOrganizacion()) {
+              <section class="actor-bloque" aria-labelledby="bloque-ospa">
+                <h3 id="bloque-ospa">Identificación OSPA</h3>
+                <label>
+                  RUC
+                  <input
+                    maxlength="11"
+                    inputmode="numeric"
+                    autocomplete="off"
+                    [value]="borrador().ruc"
+                    (input)="actualizarTexto('ruc', $event)"
+                  />
+                  <span class="actor-pista">11 dígitos; no es dato personal cifrado.</span>
+                </label>
+                <label>
+                  Expediente OSPA
+                  <input
+                    maxlength="50"
+                    [value]="borrador().expedienteOspa"
+                    (input)="actualizarTexto('expedienteOspa', $event)"
+                  />
+                  <span class="actor-pista">Se captura; no se valida contra padrón.</span>
+                </label>
+                <label>
+                  Estado OSPA
+                  <input
+                    maxlength="50"
+                    [value]="borrador().estadoOspa"
+                    (input)="actualizarTexto('estadoOspa', $event)"
+                  />
+                </label>
+                <label>
+                  Vigencia desde
+                  <input
+                    type="date"
+                    [value]="borrador().vigenciaDesde"
+                    (input)="actualizarTexto('vigenciaDesde', $event)"
+                  />
+                </label>
+                <label>
+                  Vigencia hasta
+                  <input
+                    type="date"
+                    [value]="borrador().vigenciaHasta"
+                    (input)="actualizarTexto('vigenciaHasta', $event)"
+                  />
+                </label>
+              </section>
+            }
 
             <section class="actor-bloque" aria-labelledby="bloque-clasificacion">
               <h3 id="bloque-clasificacion">Clasificación territorial y rol</h3>
@@ -172,7 +242,7 @@
               </label>
               <label>
                 Región
-                <input [value]="a.region ?? ''" placeholder="—" disabled />
+                <input [value]="a.region ?? ''" placeholder="sin dato" disabled />
                 <span class="actor-pista">La región viene del registro territorial.</span>
               </label>
               <label class="ancho actor-estado">
@@ -225,43 +295,91 @@
             <div class="panel-col">
               <div class="panel-campo">
                 <span class="panel-etiqueta">DNI</span>
-                @if (datos()?.dni; as dni) {
-                  <span class="panel-dato">
-                    <span class="panel-valor">{{ dni }}</span>
-                    <button type="button" class="boton-copiar" (click)="copiar(dni, $event)">
-                      {{ copiado() === dni ? 'Copiado' : 'Copiar' }}
-                    </button>
-                  </span>
+                @if (piiVisible()) {
+                  @if (datos()?.dni; as dni) {
+                    <span class="panel-dato">
+                      <span class="panel-valor">{{ dni }}</span>
+                      <button type="button" class="boton-copiar" (click)="copiar(dni, $event)">
+                        {{ copiado() === dni ? 'Copiado' : 'Copiar' }}
+                      </button>
+                    </span>
+                  } @else {
+                    <span class="panel-vacio">{{ sinDato }}</span>
+                  }
+                } @else if (sinAutorizacionPii()) {
+                  <span class="panel-vacio">sin autorización</span>
+                } @else if (estadoPii() === 'sin_ficha') {
+                  <span class="panel-vacio">{{ sinDato }}</span>
                 } @else {
-                  <span class="panel-vacio">—</span>
+                  <span
+                    class="panel-valor panel-enmascarado"
+                    [attr.title]="'Solicite «Ver datos personales» para ver el DNI'"
+                  >
+                    {{ mascaraDni }}
+                  </span>
                 }
               </div>
 
               <div class="panel-campo">
                 <span class="panel-etiqueta">Teléfono</span>
-                @if (telefonoContacto(); as tel) {
-                  <span class="panel-dato">
-                    <span class="panel-valor">{{ tel }}</span>
-                    <button type="button" class="boton-copiar" (click)="copiar(tel, $event)">
-                      {{ copiado() === tel ? 'Copiado' : 'Copiar' }}
-                    </button>
-                  </span>
+                @if (piiVisible()) {
+                  @if (telefonoContacto(); as tel) {
+                    <span class="panel-dato">
+                      <span class="panel-valor">{{ tel }}</span>
+                      <button type="button" class="boton-copiar" (click)="copiar(tel, $event)">
+                        {{ copiado() === tel ? 'Copiado' : 'Copiar' }}
+                      </button>
+                    </span>
+                  } @else {
+                    <span class="panel-vacio">{{ sinDato }}</span>
+                  }
+                } @else if (sinAutorizacionPii()) {
+                  <span class="panel-vacio">sin autorización</span>
+                } @else if (estadoPii() === 'sin_ficha') {
+                  <span class="panel-vacio">{{ sinDato }}</span>
                 } @else {
-                  <span class="panel-vacio">—</span>
+                  <span
+                    class="panel-valor panel-enmascarado"
+                    [attr.title]="'Solicite «Ver datos personales» para ver el teléfono'"
+                  >
+                    •••• ••• •••
+                  </span>
                 }
               </div>
 
               <div class="panel-campo">
                 <span class="panel-etiqueta">Correo</span>
-                @if (correoContacto(); as correo) {
+                @if (piiVisible() && datos()?.email; as correo) {
                   <span class="panel-dato">
                     <span class="panel-valor" [attr.title]="correo">{{ correo }}</span>
                     <button type="button" class="boton-copiar" (click)="copiar(correo, $event)">
                       {{ copiado() === correo ? 'Copiado' : 'Copiar' }}
                     </button>
                   </span>
+                } @else if (correoOrganizacion(); as correoPublico) {
+                  <span class="panel-dato">
+                    <span class="panel-valor" [attr.title]="correoPublico">{{
+                      correoPublico
+                    }}</span>
+                    <button
+                      type="button"
+                      class="boton-copiar"
+                      (click)="copiar(correoPublico, $event)"
+                    >
+                      {{ copiado() === correoPublico ? 'Copiado' : 'Copiar' }}
+                    </button>
+                  </span>
+                } @else if (piiVisible() || estadoPii() === 'sin_ficha') {
+                  <span class="panel-vacio">{{ sinDato }}</span>
+                } @else if (sinAutorizacionPii()) {
+                  <span class="panel-vacio">sin autorización</span>
                 } @else {
-                  <span class="panel-vacio">—</span>
+                  <span
+                    class="panel-valor panel-enmascarado"
+                    [attr.title]="'Solicite «Ver datos personales» para ver el correo'"
+                  >
+                    {{ mascaraCorreo }}
+                  </span>
                 }
               </div>
             </div>
@@ -269,19 +387,101 @@
             <div class="panel-col">
               <div class="panel-campo">
                 <span class="panel-etiqueta">Organización</span>
-                <span class="panel-valor">{{ a.organizacionAncla || '—' }}</span>
+                @if (a.organizacionAncla) {
+                  <span class="panel-valor">{{ a.organizacionAncla }}</span>
+                } @else {
+                  <span class="panel-vacio">{{ sinDato }}</span>
+                }
               </div>
               <div class="panel-campo">
                 <span class="panel-etiqueta">Región</span>
-                <span class="panel-valor">{{ a.region || '—' }}</span>
+                @if (a.region) {
+                  <span class="panel-valor">{{ a.region }}</span>
+                } @else {
+                  <span class="panel-vacio">{{ sinDato }}</span>
+                }
+              </div>
+              <div class="panel-campo">
+                <span class="panel-etiqueta">Nivel de identificación</span>
+                @if (nivelIdentificacion(); as nivel) {
+                  <span class="panel-valor">{{ nivel }}</span>
+                } @else {
+                  <span class="panel-vacio">{{ sinDato }}</span>
+                }
               </div>
             </div>
           </div>
+
+          @if (esOrganizacion()) {
+            <section class="panel-seccion" aria-labelledby="actor-panel-ospa">
+              <h3 id="actor-panel-ospa">Identificación OSPA</h3>
+              <div class="panel-grid">
+                <div class="panel-col">
+                  <div class="panel-campo">
+                    <span class="panel-etiqueta">RUC</span>
+                    @if (a.ruc) {
+                      <span class="panel-valor">{{ a.ruc }}</span>
+                    } @else {
+                      <span class="panel-vacio">{{ sinDato }}</span>
+                    }
+                  </div>
+                  <div class="panel-campo">
+                    <span class="panel-etiqueta">Expediente OSPA</span>
+                    @if (a.expedienteOspa) {
+                      <span class="panel-valor">{{ a.expedienteOspa }}</span>
+                    } @else {
+                      <span class="panel-vacio">{{ sinDato }}</span>
+                    }
+                  </div>
+                </div>
+                <div class="panel-col">
+                  <div class="panel-campo">
+                    <span class="panel-etiqueta">Estado OSPA</span>
+                    @if (a.estadoOspa) {
+                      <span class="panel-valor">{{ a.estadoOspa }}</span>
+                    } @else {
+                      <span class="panel-vacio">{{ sinDato }}</span>
+                    }
+                  </div>
+                  <div class="panel-campo">
+                    <span class="panel-etiqueta">Vigencia</span>
+                    @if (vigenciaDesdeTexto() || vigenciaHastaTexto()) {
+                      <span class="panel-valor">
+                        {{ vigenciaDesdeTexto() || sinDato }} —
+                        {{ vigenciaHastaTexto() || sinDato }}
+                      </span>
+                    } @else {
+                      <span class="panel-vacio">{{ sinDato }}</span>
+                    }
+                  </div>
+                </div>
+              </div>
+              <p class="panel-nota">
+                <app-icono nombre="info" [tamano]="12" />
+                <span>Los datos OSPA se capturan en la ficha; no se validan contra padrón.</span>
+              </p>
+            </section>
+          }
 
           @if (!piiVisible()) {
             <div class="panel-pii">
               @if (!puedeVerPii()) {
                 <p class="panel-nota">Su rol no permite ver datos personales.</p>
+              } @else if (estadoPii() === 'sin_ficha') {
+                <p class="panel-vacio">
+                  El actor no tiene ficha de datos personales: los campos quedan como «sin dato».
+                </p>
+                <button
+                  type="button"
+                  class="button-secondary panel-pii-boton"
+                  (click)="ocultarPii()"
+                >
+                  Ocultar aviso
+                </button>
+              } @else if (estadoPii() === 'prohibido') {
+                <div class="panel-error" role="alert">
+                  <p>{{ errorPii() }}</p>
+                </div>
               } @else {
                 <button
                   type="button"
@@ -310,14 +510,10 @@
               }
             </div>
           } @else {
-            @if (datos()?.vacio) {
-              <p class="panel-vacio">El actor no tiene ficha de datos personales.</p>
-            } @else {
-              <button type="button" class="button-secondary panel-pii-boton" (click)="ocultarPii()">
-                <app-icono nombre="cerrar" [tamano]="12" />
-                Ocultar datos personales
-              </button>
-            }
+            <button type="button" class="button-secondary panel-pii-boton" (click)="ocultarPii()">
+              <app-icono nombre="cerrar" [tamano]="12" />
+              Ocultar datos personales
+            </button>
           }
 
           <section class="panel-seccion" aria-labelledby="actor-panel-perfil">
@@ -341,6 +537,17 @@
             {{ enLista() ? 'Quitar de lista' : 'Agregar a lista temporal' }}
           </button>
           <div class="panel-pie-acciones">
+            @if (puedeEditar()) {
+              @if (a.activo) {
+                <button type="button" class="button-secondary" (click)="solicitarBaja.emit()">
+                  Dar de baja
+                </button>
+              } @else {
+                <button type="button" class="button-secondary" (click)="solicitarRestaurar.emit()">
+                  Restaurar
+                </button>
+              }
+            }
             <button type="button" class="button-secondary" (click)="cerrar.emit()">Cerrar</button>
             @if (puedeEditar()) {
               <button type="button" class="button-primary" (click)="iniciarEdicion()">

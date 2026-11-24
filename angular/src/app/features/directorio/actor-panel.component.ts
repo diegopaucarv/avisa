@@ -25,8 +25,16 @@ import { IconoComponent } from '../../shared/ui/icono.component';
 import {
   aActorDirectorio,
   aDatosPersonales,
+  errorDeDni,
+  errorDeExpedienteOspa,
+  errorDeRuc,
+  formatearFechaDdMmAaaa,
   FUNCIONES_ACTOR,
+  MASCARA_CORREO,
+  MASCARA_DNI,
+  nivelIdentificacionDe,
   POSICIONAMIENTOS_ACTOR,
+  SIN_DATO,
   TIPOS_ACTOR,
   type ActorDirectorio,
   type DatosPersonales,
@@ -41,7 +49,16 @@ const MOTIVO_PII = 'Consulta de datos personales desde el directorio';
 
 const NIVELES_GOBIERNO = ['Nacional', 'Regional', 'Local', 'Empresa', 'Sociedad Civil'] as const;
 
-type EstadoPii = 'inactivo' | 'cargando' | 'listo' | 'prohibido' | 'error';
+type EstadoPii =
+  | 'inactivo'
+  | 'cargando'
+  /** Los campos descifrados ya están en pantalla. */
+  | 'listo'
+  /** 200 con `tieneFicha: false`: el actor no tiene fila de datos personales. */
+  | 'sin_ficha'
+  /** 403: el rol no autoriza PII (no se ofrece reintento). */
+  | 'prohibido'
+  | 'error';
 type CampoActorEdicion =
   | 'nombre'
   | 'abreviatura'
@@ -52,7 +69,13 @@ type CampoActorEdicion =
   | 'cargo'
   | 'nivelGobierno'
   | 'categoria'
-  | 'perfilDescripcion';
+  | 'perfilDescripcion'
+  | 'dni'
+  | 'ruc'
+  | 'expedienteOspa'
+  | 'estadoOspa'
+  | 'vigenciaDesde'
+  | 'vigenciaHasta';
 type ActorEdicion = Record<CampoActorEdicion, string> & { activo: boolean };
 
 /**
@@ -141,6 +164,18 @@ type ActorEdicion = Record<CampoActorEdicion, string> & { activo: boolean };
       -webkit-box-orient: vertical;
       -webkit-line-clamp: 2;
       line-clamp: 2;
+    }
+
+    /* Estado de baja lógica: ámbar, nunca verde (no es «cumplido»). */
+    .panel-inactivo {
+      color: #aa6a11;
+      font-weight: 700;
+    }
+
+    /* Valor restringido por PII: máscara, no un hueco ni una cifra inventada. */
+    .panel-enmascarado {
+      color: #97a1aa;
+      letter-spacing: 0.08em;
     }
 
     /* Dos columnas: contacto a la izquierda, organización y región a la derecha. */
@@ -435,6 +470,10 @@ export class ActorPanelComponent {
   readonly cerrar = output<void>();
   readonly actualizado = output<ActorDirectorio>();
   readonly alternarLista = output<void>();
+  /** El contenedor abre el panel de baja lógica con el motivo. */
+  readonly solicitarBaja = output<void>();
+  /** El contenedor restaura el actor (activo = true). */
+  readonly solicitarRestaurar = output<void>();
 
   private readonly http = inject(HttpClient);
   private readonly capacidades = inject(CapacidadesService);
@@ -464,6 +503,12 @@ export class ActorPanelComponent {
     nivelGobierno: '',
     categoria: '',
     perfilDescripcion: '',
+    dni: '',
+    ruc: '',
+    expedienteOspa: '',
+    estadoOspa: '',
+    vigenciaDesde: '',
+    vigenciaHasta: '',
     activo: true,
   });
 
@@ -509,10 +554,42 @@ export class ActorPanelComponent {
   /** `true` cuando el DNI y el teléfono auditados ya están en pantalla. */
   readonly piiVisible = computed(() => this.estadoPii() === 'listo');
 
-  readonly correoContacto = computed(() => this.datos()?.email ?? this.actor()?.email ?? null);
-  readonly telefonoContacto = computed(
-    () => this.datos()?.telefono ?? this.actor()?.telefono ?? null,
+  /**
+   * `true` cuando la UI sabe que no hay PII que mostrar por falta de permiso:
+   * el rol no puede descifrar o la API respondió 403. Se distingue de «sin
+   * dato», que es una fila existente con el campo vacío.
+   */
+  readonly sinAutorizacionPii = computed(
+    () => !this.puedeVerPii() || this.estadoPii() === 'prohibido',
   );
+
+  /** Organización: la ficha muestra RUC y OSPA en lugar de membresía. */
+  readonly esOrganizacion = computed(() => this.actor()?.naturaleza === 'Organización');
+
+  readonly nivelIdentificacion = computed(() =>
+    nivelIdentificacionDe(this.actor()?.nivelIdentificacion),
+  );
+
+  readonly vigenciaDesdeTexto = computed(() => formatearFechaDdMmAaaa(this.actor()?.vigenciaDesde));
+  readonly vigenciaHastaTexto = computed(() => formatearFechaDdMmAaaa(this.actor()?.vigenciaHasta));
+
+  /** Correo de una organización: contacto institucional público del listado. */
+  readonly correoOrganizacion = computed(() =>
+    this.esOrganizacion() ? (this.actor()?.email ?? null) : null,
+  );
+
+  readonly correoContacto = computed(() => this.datos()?.email ?? null);
+  readonly telefonoContacto = computed(() => this.datos()?.telefono ?? null);
+
+  /** Texto de dato ausente y máscara, expuestos a la plantilla. */
+  readonly sinDato = SIN_DATO;
+  readonly mascaraDni = MASCARA_DNI;
+  readonly mascaraCorreo = MASCARA_CORREO;
+
+  /** `dd/mm/aaaa` de una fecha ISO; `null` si no se reconoce. */
+  fechaDe(valor: string | null | undefined): string | null {
+    return formatearFechaDdMmAaaa(valor);
+  }
 
   /** Clase de color del posicionamiento; `sin` cuando la base no lo declara. */
   readonly clasePosicionamiento = computed(() => {
@@ -587,6 +664,14 @@ export class ActorPanelComponent {
       nivelGobierno: actor.nivelGobierno ?? '',
       categoria: actor.categoria ?? '',
       perfilDescripcion: actor.perfil ?? '',
+      // El DNI sólo se precarga cuando ya se descifró con motivo: escribir a
+      // ciegas sobre el campo no debe borrar el valor cifrado existente.
+      dni: this.piiVisible() ? (this.datos()?.dni ?? '') : '',
+      ruc: actor.ruc ?? '',
+      expedienteOspa: actor.expedienteOspa ?? '',
+      estadoOspa: actor.estadoOspa ?? '',
+      vigenciaDesde: actor.vigenciaDesde ?? '',
+      vigenciaHasta: actor.vigenciaHasta ?? '',
       activo: actor.activo,
     });
     this.errorEdicion.set(null);
@@ -621,21 +706,70 @@ export class ActorPanelComponent {
       return;
     }
 
+    const esOrganizacion = draft.naturaleza === 'organizacion';
+
+    // El DNI sólo viaja si hay autorización PII y el usuario escribió uno: un
+    // campo vacío no debe borrar el valor cifrado almacenado.
+    const dni = draft.dni.trim();
+    if (dni) {
+      if (!this.piiVisible() || !this.puedeVerPii()) {
+        this.errorEdicion.set('Solicite «Ver datos personales» antes de editar el DNI.');
+        return;
+      }
+      const error = errorDeDni(dni);
+      if (error) {
+        this.errorEdicion.set(error);
+        return;
+      }
+    }
+
+    const ruc = draft.ruc.trim();
+    if (esOrganizacion && ruc) {
+      const error = errorDeRuc(ruc);
+      if (error) {
+        this.errorEdicion.set(error);
+        return;
+      }
+    }
+
+    const expedienteError = errorDeExpedienteOspa(draft.expedienteOspa);
+    if (esOrganizacion && expedienteError) {
+      this.errorEdicion.set(expedienteError);
+      return;
+    }
+
+    if (esOrganizacion && draft.vigenciaDesde && draft.vigenciaHasta) {
+      if (draft.vigenciaHasta < draft.vigenciaDesde) {
+        this.errorEdicion.set('La vigencia OSPA no puede terminar antes de empezar.');
+        return;
+      }
+    }
+
     this.guardandoEdicion.set(true);
     this.errorEdicion.set(null);
-    // Sólo los campos que acepta el PATCH: DNI, teléfono y foto se gestionan
-    // por canales auditados y no forman parte de esta actualización.
-    const payload = {
-      ...draft,
-      nivelGobierno: draft.nivelGobierno.replace(/ /g, '_') || null,
+
+    const payload: Record<string, unknown> = {
+      nombre: draft.nombre,
       abreviatura: draft.abreviatura || null,
       cargo: draft.cargo || null,
       categoria: draft.categoria || null,
       perfilDescripcion: draft.perfilDescripcion || null,
+      nivelGobierno: draft.nivelGobierno.replace(/ /g, '_') || null,
       tipo: draft.tipo || undefined,
       funcion: draft.funcion || undefined,
       posicionamiento: draft.posicionamiento || null,
+      activo: draft.activo,
     };
+
+    if (dni) payload['dni'] = dni;
+
+    if (esOrganizacion) {
+      payload['ruc'] = ruc || null;
+      payload['expedienteOspa'] = draft.expedienteOspa.trim() || null;
+      payload['estadoOspa'] = draft.estadoOspa.trim() || null;
+      payload['vigenciaDesde'] = draft.vigenciaDesde || null;
+      payload['vigenciaHasta'] = draft.vigenciaHasta || null;
+    }
 
     this.http
       .patch<unknown>(urlApi(`/v1/actors/${encodeURIComponent(actor.id)}`), payload)
@@ -683,8 +817,11 @@ export class ActorPanelComponent {
       .pipe(takeUntilDestroyed(this.destruccion))
       .subscribe({
         next: (bruto) => {
-          this.datos.set(aDatosPersonales(bruto));
-          this.estadoPii.set('listo');
+          const datos = aDatosPersonales(bruto);
+          this.datos.set(datos);
+          // «sin ficha» no es un error ni «sin autorización»: el actor existe y
+          // su rol alcanza, pero no registró datos personales.
+          this.estadoPii.set(datos.tieneFicha ? 'listo' : 'sin_ficha');
         },
         error: (fallo: unknown) => {
           const error = aErrorApi(fallo);
