@@ -25,7 +25,6 @@ import {
   DocumentoCaso,
   EventoCaso,
   TramoEstadoCaso,
-  formatearFechaCorta,
 } from '../../dominio/mapeo';
 import {
   AnularPanelComponent,
@@ -33,7 +32,8 @@ import {
   type ModoAnulacion,
 } from '../../shared/ui/anular-panel.component';
 import { ExportarMenuComponent } from '../../shared/ui/exportar-menu.component';
-import { formatearFecha } from '../../shared/formato-fecha';
+import { formatearFecha, formatearFechaCompacta } from '../../shared/formato-fecha';
+import { copiarAlPortapapeles } from '../alertas/portapapeles';
 import { GlosarioComponent } from '../../shared/ui/glosario.component';
 import { IconoComponent } from '../../shared/ui/icono.component';
 import { OrdenTabla } from '../../shared/ui/orden-tabla';
@@ -262,11 +262,14 @@ function datosHitosCrudos(bruto: unknown): Map<string, DatosHitoCrudos> {
  */
 const CAMPOS_OCULTOS: ReadonlySet<CampoEditable> = new Set<CampoEditable>([
   'titulo',
-  'resumenEjecutivo',
   'naturaleza',
   'ciclo',
   'pctAvance',
   'fechaCierre',
+  'prioridad',
+  'riesgo',
+  'nivelConflicto',
+  'unidadResponsable',
 ]);
 
 /**
@@ -326,6 +329,11 @@ export function aDetalleCasoConCompromisos(bruto: unknown): DetalleCasoConCompro
       font-size: 13.5px;
     }
 
+    .view-actions {
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
     /* Tira de cifras de la matriz, con la jerarquía del mockup:
        cifra grande y leyenda corta debajo. */
     .reality-strip {
@@ -374,6 +382,146 @@ export function aDetalleCasoConCompromisos(bruto: unknown): DetalleCasoConCompro
       font-size: 13px;
       font-weight: 400;
       color: #8d99a6;
+    }
+
+    /* Encabezado: código y última actualización juntos (items 24). */
+    .view-actualizacion {
+      margin-left: 4px;
+      color: var(--muted);
+      font-size: 12.5px;
+    }
+
+    /* Resumen del caso al inicio de la ficha (item 27). */
+    .resumen-caso {
+      margin-bottom: 2px;
+    }
+
+    .resumen-caso h2 {
+      margin: 0 0 6px;
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .resumen-texto {
+      margin: 0;
+      color: var(--ink-2);
+      font-size: 13px;
+      line-height: 1.6;
+      text-align: justify;
+    }
+
+    /* Edición en línea de las etiquetas de riesgo y conflictividad (item 26). */
+    .badge-edit {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .badge-edit .form-select {
+      height: 30px;
+      min-width: 150px;
+    }
+
+    .badge-edit .button-primary,
+    .badge-edit .button-secondary {
+      min-height: 30px;
+      padding: 0 10px;
+      font-size: 12.5px;
+    }
+
+    .badge-edit-btn {
+      margin-left: 4px;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: var(--blue-dark);
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .anular-sep {
+      margin-left: 8px;
+      padding-left: 16px;
+      border-left: 1px solid var(--line);
+    }
+
+    /* Acceso al tablero de Canva en el riel (item 29). */
+    .canva-riel {
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--paper);
+    }
+
+    .canva-titulo {
+      margin: 0 0 8px;
+      color: var(--muted);
+      font: 700 12px var(--font-display);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .canva-enlace {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--blue-dark);
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .canva-enlace:hover,
+    .canva-enlace:focus-visible {
+      text-decoration: underline;
+    }
+
+    .canva-editor {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .canva-editor input {
+      flex: 1 1 100%;
+      min-width: 0;
+      height: 32px;
+      padding: 0 9px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      color: var(--ink);
+      font-size: 12.5px;
+    }
+
+    .canva-vacio {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      padding: 7px 8px;
+      border: 1px dashed var(--line);
+      border-radius: 6px;
+      background: var(--canvas);
+      color: #a1abb4;
+      font-size: 12.5px;
+      cursor: pointer;
+    }
+
+    .canva-vacio:disabled {
+      cursor: default;
+      opacity: 0.7;
+    }
+
+    .canva-mas {
+      margin-left: auto;
+      font-size: 14px;
+      line-height: 1;
+    }
+
+    /* Los saltos por fragment deben dejar visible el título de la sección. */
+    h2[id] {
+      scroll-margin-top: 16px;
     }
 
     /* Item 18: cada recuadro editable centra su valor; la edición en línea
@@ -467,8 +615,9 @@ export function aDetalleCasoConCompromisos(bruto: unknown): DetalleCasoConCompro
       font-size: 12.5px;
     }
 
-    /* Cronología compacta del ajuste del 22 nov: una viñeta por hecho, con la
-       fecha corta y el texto en una sola línea («15NOV2026 - SE APROBÓ …»). */
+    /* Cronología: una viñeta por hecho, con la fecha en negrita y el texto en
+       peso normal. La fecha ocupa su propia columna para que el texto largo no
+       vuelva a quedar debajo de ella (sangría francesa). */
     .timeline-list {
       display: flex;
       flex-direction: column;
@@ -480,10 +629,11 @@ export function aDetalleCasoConCompromisos(bruto: unknown): DetalleCasoConCompro
 
     .timeline-list li {
       position: relative;
-      display: flex;
-      flex-wrap: wrap;
+      display: grid;
+      grid-template-columns: auto 1fr;
       align-items: baseline;
-      gap: 6px 10px;
+      column-gap: 8px;
+      row-gap: 4px;
       padding: 0 0 0 16px;
       border-left: 0;
     }
@@ -499,11 +649,27 @@ export function aDetalleCasoConCompromisos(bruto: unknown): DetalleCasoConCompro
       background: var(--blue, #1a4f8b);
     }
 
-    .timeline-linea {
+    .tl-fecha {
       font-size: 13px;
-      font-weight: 600;
-      letter-spacing: 0.02em;
-      text-transform: uppercase;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .tl-texto {
+      font-size: 13px;
+      font-weight: 400;
+      text-transform: none;
+    }
+
+    .timeline-list .timeline-edit {
+      grid-column: 1 / -1;
+      justify-self: start;
+    }
+
+    .cronologia-acciones {
+      display: inline-flex;
+      flex-wrap: wrap;
+      gap: 6px;
     }
 
     /* Interruptor de edición: apagado, la ficha se lee; encendido, se edita. */
@@ -951,16 +1117,75 @@ export class CasoDetallePage {
         contador: ficha.documentos.length,
         icono: 'documentos',
       },
-      {
-        etiqueta: 'Análisis de caso (Canva)',
-        ancla: 'analisis-caso',
-        contador: null,
-        icono: 'documentos',
-        disponible: false,
-        nota: 'El caso no guarda un tablero de Canva: no hay enlace que abrir.',
-      },
     ];
   });
+
+  /** Edición del enlace del tablero de Canva desde el riel (item 29). */
+  readonly editandoCanva = signal(false);
+  readonly borradorCanva = signal('');
+  readonly guardandoCanva = signal(false);
+  readonly errorCanva = signal<string | null>(null);
+
+  abrirCanva(): void {
+    if (!this.puedeModificar() || !this.modoEdicion()) return;
+    this.errorCanva.set(null);
+    this.borradorCanva.set(this.caso()?.enlaceAnalisis ?? '');
+    this.editandoCanva.set(true);
+  }
+
+  cancelarCanva(): void {
+    if (this.guardandoCanva()) return;
+    this.editandoCanva.set(false);
+    this.borradorCanva.set('');
+    this.errorCanva.set(null);
+  }
+
+  alEscribirCanva(evento: Event): void {
+    this.borradorCanva.set((evento.target as HTMLInputElement).value);
+  }
+
+  guardarCanva(evento: Event): void {
+    evento.preventDefault();
+    const codigo = this.codigo();
+    const url = this.borradorCanva().trim();
+    if (!codigo || !url || this.guardandoCanva()) return;
+
+    this.guardandoCanva.set(true);
+    this.errorCanva.set(null);
+    this.http
+      .patch<unknown>(urlApi(`/v1/cases/${encodeURIComponent(codigo)}`), { enlaceAnalisis: url })
+      .subscribe({
+        next: (respuesta) => {
+          this.guardandoCanva.set(false);
+          this.detalleActualizado.set(aDetalleCasoConCompromisos(respuesta));
+          this.editandoCanva.set(false);
+          this.borradorCanva.set('');
+        },
+        error: (fallo: unknown) => {
+          this.guardandoCanva.set(false);
+          this.errorCanva.set(this.mensajeDeErrorCampo(fallo));
+        },
+      });
+  }
+
+  /**
+   * Copia la cronología completa en formato WhatsApp (`*05NOV2026* - texto`)
+   * sin abrir ningún editor (item 34).
+   */
+  async copiarCronologia(eventos: readonly EventoCaso[]): Promise<void> {
+    if (eventos.length === 0) return;
+    const texto = eventos
+      .map((evento) => `*${this.fechaCorta(evento.fecha)}* - ${evento.descripcion}`)
+      .join('\n');
+    const ok = await copiarAlPortapapeles(texto);
+    this.avisoCronologia.set(
+      ok
+        ? 'Cronología copiada al portapapeles.'
+        : 'No se pudo copiar. Seleccione el texto y use Ctrl + C.',
+    );
+  }
+
+  readonly avisoCronologia = signal<string | null>(null);
 
   /** Mismo criterio que la ficha de alerta: el rol debe poder escribir el caso. */
   readonly puedeModificar = computed(() => {
@@ -1341,7 +1566,7 @@ export class CasoDetallePage {
    * 22 nov para la línea de tiempo.
    */
   fechaCorta(valor: string | null | undefined): string {
-    return formatearFechaCorta(valor);
+    return formatearFechaCompacta(valor);
   }
 
   /** Institución del actor; la API aún no la entrega, así que se declara «—». */

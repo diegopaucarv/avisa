@@ -25,6 +25,7 @@ import {
   type Registro,
 } from '../../dominio/mapeo';
 import type { Riesgo } from '../../dominio/modelos';
+import { formatearFechaCompacta } from '../../shared/formato-fecha';
 
 /* ------------------------------------------------------------------------- *
  * Vocabulario congelado
@@ -646,6 +647,19 @@ export function geografiaAlerta(alerta: Alerta): string {
   return alerta.region ?? alerta.provincia ?? alerta.distrito ?? 'Sin geografía';
 }
 
+/** «Local · distrito», «Regional · región» o «Nacional · …» según el alcance. */
+export function ambitoAlerta(alerta: Alerta): string {
+  const lugar = geografiaAlerta(alerta);
+  switch (alerta.alcance) {
+    case 'Distrito':
+      return `Local · ${lugar}`;
+    case 'Región':
+      return `Regional · ${lugar}`;
+    default:
+      return `Nacional · ${lugar}`;
+  }
+}
+
 function bloque(titulo: string, lineas: readonly string[]): string {
   const contenido = lineas
     .map((linea) => linea.trim())
@@ -655,38 +669,44 @@ function bloque(titulo: string, lineas: readonly string[]): string {
 }
 
 /**
- * Mensaje de WhatsApp con la estructura de los mockups. `*` es negrita en
- * WhatsApp y los encabezados llevan emoji para que el mensaje se lea desde el
- * móvil sin formato.
+ * Mensaje de WhatsApp con la estructura del «Reporte de alerta temprana».
+ * `*` es negrita en WhatsApp y los encabezados llevan emoji para que el mensaje
+ * se lea desde el móvil sin formato. Las fechas van en forma compacta
+ * (`05NOV2026`).
  *
  * No incorpora `plantillaWhatsapp`: si la alerta tiene una plantilla guardada,
  * es ella la que manda (la decide quien llama).
  */
 export function plantillaWhatsapp(alerta: Alerta): string {
+  const titulo = tituloLimpio(alerta.titulo) || alerta.codigo;
+  const fecha = alerta.fechaReporte ? formatearFechaCompacta(alerta.fechaReporte) : 'Sin fecha';
+
+  const acciones = alerta.accionesSugeridas.length
+    ? ['De considerarlo pertinente, se sugiere:', ...alerta.accionesSugeridas]
+    : [];
+
   const partes = [
-    `🚨 *REPORTE DE ALERTA TEMPRANA | ${tituloLimpio(alerta.titulo) || alerta.codigo}*`,
-    [
-      `📅 *Fecha:* ${alerta.fechaReporte ?? 'Sin fecha'}`,
-      `📍 *Ámbito:* ${geografiaAlerta(alerta)}`,
-      `⚠️ *Riesgo:* ${alerta.riesgo}`,
-    ].join('\n'),
-    bloque('1. 📌 SITUACIÓN ACTUAL', [alerta.situacionActual ?? '']),
-    bloque('2. 🗓️ HECHOS RECIENTES Y ACCIONES EN CURSO', [alerta.hechosRecientes ?? '']),
+    `*🔔 REPORTE DE ALERTA TEMPRANA | ${titulo}*`,
+    [`📅 _*Fecha de emisión*: ${fecha}_`, `🌍 _*Ámbito*: ${ambitoAlerta(alerta)}_`].join('\n'),
+    bloque('🔍 1. SITUACIÓN ACTUAL', [alerta.situacionActual ?? '']),
+    bloque('🏗️ 2. HECHOS RECIENTES Y ACCIONES EN CURSO', [alerta.hechosRecientes ?? '']),
     bloque(
-      '3. 👥 ACTORES CLAVE',
-      alerta.actoresClave.map((actor) => `• ${actor}`),
+      '👥 3. ACTORES CLAVE',
+      alerta.actoresClave.map((actor) => `- ${actor}`),
     ),
     bloque(
-      '4. 📋 DEMANDAS INMEDIATAS',
-      alerta.demandasInmediatas.map((demanda) => `• ${demanda}`),
+      '📌 4. DEMANDAS INMEDIATAS',
+      alerta.demandasInmediatas.map((demanda) => `- ${demanda}`),
     ),
     bloque(
-      '5. ⚠️ RIESGOS',
-      alerta.riesgos.map((riesgo) => `• ${riesgo}`),
+      '⚠️ RIESGOS',
+      alerta.riesgos.map((riesgo) => `- ${riesgo}`),
     ),
     bloque(
-      '6. 💡 ACCIONES SUGERIDAS',
-      alerta.accionesSugeridas.map((accion) => `• ${accion}`),
+      '🧭 ACCIONES SUGERIDAS',
+      acciones.map((accion, indice) =>
+        indice === 0 && alerta.accionesSugeridas.length ? accion : `- ${accion}`,
+      ),
     ),
   ];
   return partes.filter((parte) => parte.trim()).join('\n\n');

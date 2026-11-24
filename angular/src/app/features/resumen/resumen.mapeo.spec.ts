@@ -140,6 +140,19 @@ describe('aMarcaMasReciente', () => {
     expect(aMarcaMasReciente(sobre)).toBe('2026-11-20T12:00:00.000Z');
   });
 
+  it('lee ultimaModificacion, la marca de fila del listado de alertas', () => {
+    const sobre = {
+      items: [
+        { id: '1', ultimaModificacion: '2026-11-10T08:00:00.000Z', fechaReporte: '2026-11-22' },
+        { id: '2', ultimaModificacion: '2026-11-21T17:45:00.000Z', fechaReporte: '2026-11-01' },
+      ],
+      total: 2,
+    };
+
+    // La fecha de reporte no se lee: manda la marca de modificación.
+    expect(aMarcaMasReciente(sobre)).toBe('2026-11-21T17:45:00.000Z');
+  });
+
   it('prefiere la marca de fila sobre una fecha de evento', () => {
     const sobre = {
       items: [{ fecha_reporte: '2026-11-22', updatedAt: '2026-11-10T10:00:00.000Z' }],

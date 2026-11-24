@@ -13,10 +13,12 @@
       <div class="breadcrumb-current">
         <a routerLink="/casos">Casos</a>
         <app-icono nombre="chevron-derecha" [tamano]="13" />
-        <strong>{{ d.caso.codigo }}</strong>
+        <strong>📁 {{ d.caso.codigo }}</strong>
+        <span class="view-actualizacion"
+          >🕒 Última actualización: {{ fechaTexto(d.caso.actualizado) }}</span
+        >
       </div>
       <h1 id="titulo-caso">{{ d.caso.titulo }}</h1>
-      <p class="view-meta">Última actualización: {{ fechaTexto(d.caso.actualizado) }}</p>
     </div>
     <div class="view-actions">
       <label
@@ -43,7 +45,104 @@
       <button type="button" class="button-secondary" (click)="abrirRestauracion()">
         Restaurar caso
       </button>
-      } } @else {
+      } } @else { @if (editando() === 'nivelConflicto') {
+      <div class="badge-edit">
+        <select class="form-select" (change)="alCambiarCampo($event)">
+          <option value="" [selected]="!valorControl()">Sin declarar</option>
+          @if (opcionDesconocida('nivelConflicto'); as desconocida) {
+          <option [value]="desconocida" [selected]="desconocida === valorControl()">
+            {{ desconocida }}
+          </option>
+          } @for (opcion of opcionesDe('nivelConflicto'); track opcion.valor) {
+          <option [value]="opcion.valor" [selected]="opcion.valor === valorControl()">
+            {{ opcion.etiqueta }}
+          </option>
+          }
+        </select>
+        <button
+          type="button"
+          class="button-primary"
+          [disabled]="guardandoCampo()"
+          (click)="guardarCampo()"
+        >
+          {{ guardandoCampo() ? 'Guardando…' : 'Guardar' }}
+        </button>
+        <button
+          type="button"
+          class="button-secondary"
+          [disabled]="guardandoCampo()"
+          (click)="cancelarEdicion()"
+        >
+          Cancelar
+        </button>
+      </div>
+      } @else {
+      <span class="status-badge">
+        Nivel de conflictividad: {{ d.caso.nivelConflicto || 'Sin declarar' }} @if (puedeModificar()
+        && modoEdicion()) {
+        <button
+          type="button"
+          class="badge-edit-btn"
+          aria-label="Editar el nivel de conflictividad"
+          (click)="abrirEdicion('nivelConflicto')"
+        >
+          ✎
+        </button>
+        }
+      </span>
+      } @if (editando() === 'riesgo') {
+      <div class="badge-edit">
+        <select class="form-select" (change)="alCambiarCampo($event)">
+          @if (opcionDesconocida('riesgo'); as desconocida) {
+          <option [value]="desconocida" [selected]="desconocida === valorControl()">
+            {{ desconocida }}
+          </option>
+          } @for (opcion of opcionesDe('riesgo'); track opcion.valor) {
+          <option [value]="opcion.valor" [selected]="opcion.valor === valorControl()">
+            {{ opcion.etiqueta }}
+          </option>
+          }
+        </select>
+        <button
+          type="button"
+          class="button-primary"
+          [disabled]="guardandoCampo()"
+          (click)="guardarCampo()"
+        >
+          {{ guardandoCampo() ? 'Guardando…' : 'Guardar' }}
+        </button>
+        <button
+          type="button"
+          class="button-secondary"
+          [disabled]="guardandoCampo()"
+          (click)="cancelarEdicion()"
+        >
+          Cancelar
+        </button>
+      </div>
+      } @else {
+      <span
+        [class]="
+          riesgoInactivo()
+            ? 'status-badge risk-inactivo'
+            : 'status-badge risk-' + d.caso.riesgo.toLowerCase()
+        "
+      >
+        <span class="status-dot"></span>
+        Nivel de riesgo: {{ d.caso.riesgo }} @if (puedeModificar() && modoEdicion()) {
+        <button
+          type="button"
+          class="badge-edit-btn"
+          aria-label="Editar el nivel de riesgo"
+          (click)="abrirEdicion('riesgo')"
+        >
+          ✎
+        </button>
+        }
+      </span>
+      }
+      <span class="status-badge">📍 Región: {{ d.caso.region || 'Sin región' }}</span>
+      <span class="status-badge">Estado: {{ d.caso.estado }}</span>
       <app-exportar-menu entidad="casos" [id]="d.caso.id" (fallo)="alFallarExportacion($event)" />
       <button
         type="button"
@@ -54,23 +153,6 @@
         <app-icono nombre="documentos" [tamano]="14" />
         {{ esAdmin() ? 'Imprimir / Guardar PDF' : 'Guardar PDF' }}
       </button>
-      <span
-        [class]="
-          riesgoInactivo()
-            ? 'status-badge risk-inactivo'
-            : 'status-badge risk-' + d.caso.riesgo.toLowerCase()
-        "
-      >
-        <span class="status-dot"></span>
-        Riesgo: {{ d.caso.riesgo }}
-      </span>
-      <app-glosario termino="nivel-riesgo" [alineacion]="'fin'" />
-      <span class="status-badge"
-        >Nivel de conflictividad: {{ d.caso.nivelConflicto || 'Sin declarar' }}</span
-      >
-      <app-glosario termino="nivel-conflictividad" [alineacion]="'fin'" />
-      <span class="status-badge">Estado: {{ d.caso.estado }}</span>
-      <span class="status-badge">Región: {{ d.caso.region || 'Sin región' }}</span>
       @if (puedeModificar()) { @if (accionEstado(); as accion) {
       <button
         type="button"
@@ -81,7 +163,9 @@
         {{ accion.etiqueta }}
       </button>
       } } @if (puedeAnular()) {
-      <button type="button" class="button-danger" (click)="abrirAnulacion()">Anular caso</button>
+      <button type="button" class="button-danger anular-sep" (click)="abrirAnulacion()">
+        Anular caso
+      </button>
       } }
     </div>
   </div>
@@ -127,27 +211,48 @@
       @if (avisoCampo(); as aviso) {
       <p class="form-hint aviso-ok" role="status">{{ aviso }}</p>
       }
+      <section class="resumen-caso" aria-labelledby="resumen-caso-titulo">
+        <h2 id="resumen-caso-titulo">☰ Resumen del caso</h2>
+        @if (editando() === 'resumenEjecutivo') {
+        <div class="edit-form">
+          <textarea
+            class="form-textarea"
+            rows="5"
+            [attr.maxlength]="20000"
+            [value]="borrador()"
+            (input)="alCambiarCampo($event)"
+          ></textarea>
+          @if (errorCampo(); as error) {
+          <p class="form-error" role="alert">{{ error }}</p>
+          }
+          <div>
+            <button
+              type="button"
+              class="button-secondary"
+              [disabled]="guardandoCampo()"
+              (click)="cancelarEdicion()"
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              class="button-primary"
+              [disabled]="guardandoCampo()"
+              (click)="guardarCampo()"
+            >
+              {{ guardandoCampo() ? 'Guardando…' : 'Guardar cambios' }}
+            </button>
+          </div>
+        </div>
+        } @else {
+        <p class="resumen-texto">{{ d.caso.resumen || 'Sin resumen registrado.' }}</p>
+        @if (puedeModificar() && modoEdicion() && !editando()) {
+        <button type="button" class="link-button" (click)="abrirEdicion('resumenEjecutivo')">
+          Editar
+        </button>
+        } }
+      </section>
       <dl class="detail-grid" id="datos-caso">
-        <div>
-          <dt>Región</dt>
-          <dd>{{ d.caso.region || '—' }}</dd>
-        </div>
-        <div>
-          <dt>Alcance</dt>
-          <dd>
-            {{ d.caso.alcance }}
-            <small class="detail-hint">Derivado de las regiones del caso</small>
-          </dd>
-        </div>
-        <div>
-          <dt>Geografía</dt>
-          <dd>
-            {{ d.completitud?.geografia.distrito || '—' }}
-            <small class="detail-hint">
-              Región, distrito y lugares no se editan desde esta ficha: quedan fuera de alcance.
-            </small>
-          </dd>
-        </div>
         @for (def of campos; track def.campo) {
         <div class="campo-editable">
           <dt>
@@ -213,9 +318,7 @@
                 El clic fuera no cierra ni cancela: sólo «Cancelar» o «Guardar cambios» terminan la
                 edición.
               </p>
-              @if (def.ayuda; as ayuda) {
-              <p class="form-hint">{{ ayuda }}</p>
-              } @if (errorCampo(); as error) {
+              @if (errorCampo(); as error) {
               <p class="form-error" role="alert">{{ error }}</p>
               }
               <div>
@@ -239,9 +342,7 @@
             </div>
             } @else {
             <span class="campo-valor">{{ valorMostrado(def.campo) }}</span>
-            @if (def.ayuda; as ayuda) {
-            <small class="detail-hint">{{ ayuda }}</small>
-            } @if (puedeModificar() && modoEdicion() && !editando()) {
+            @if (puedeModificar() && modoEdicion() && !editando()) {
             <button type="button" class="link-button" (click)="abrirEdicion(def.campo)">
               Editar
             </button>
@@ -403,22 +504,35 @@
       <section class="detail-section" aria-labelledby="eventos-caso">
         <div class="detail-section-title">
           <h2 id="eventos-caso">Cronología ({{ d.eventos.length }})</h2>
-          @if (puedeModificar()) {
-          <button type="button" class="button-secondary" (click)="registrarHecho()">
-            <app-icono nombre="documentos" [tamano]="14" />
-            Registrar hecho
-          </button>
-          }
+          <div class="cronologia-acciones">
+            @if (puedeModificar()) {
+            <button type="button" class="button-secondary" (click)="registrarHecho()">
+              <app-icono nombre="documentos" [tamano]="14" />
+              Registrar hecho
+            </button>
+            } @if (d.eventos.length > 0) {
+            <button
+              type="button"
+              class="button-secondary"
+              title="Copia la cronología completa en formato WhatsApp"
+              (click)="copiarCronologia(d.eventos)"
+            >
+              <app-icono nombre="copiar" [tamano]="14" />
+              Copiar
+            </button>
+            }
+          </div>
         </div>
-        @if (d.eventos.length === 0) {
+        @if (avisoCronologia(); as aviso) {
+        <p class="form-hint aviso-ok" role="status">{{ aviso }}</p>
+        } @if (d.eventos.length === 0) {
         <p class="empty-inline">Sin hechos registrados.</p>
         } @else {
         <ol class="timeline-list">
           @for (evento of d.eventos; track evento.id) {
           <li>
-            <span class="timeline-linea"
-              >{{ fechaCorta(evento.fecha) }} - {{ evento.descripcion }}</span
-            >
+            <span class="tl-fecha">{{ fechaCorta(evento.fecha) }} -</span>
+            <span class="tl-texto">{{ evento.descripcion }}</span>
             @if (modoEdicion() && puedeModificar()) {
             <button
               type="button"
@@ -904,6 +1018,54 @@
 
     <aside class="ficha-lateral" aria-label="Expediente del caso">
       <app-riel-relaciones [enlaces]="enlacesRiel()" />
+      <section class="canva-riel" aria-labelledby="analisis-caso">
+        <h2 id="analisis-caso" class="canva-titulo">📊 Análisis de caso (Canva)</h2>
+        @if (d.caso.enlaceAnalisis; as enlace) {
+        <a class="canva-enlace" [href]="enlace" target="_blank" rel="noopener noreferrer">
+          <app-icono nombre="ojo" [tamano]="14" />
+          Abrir tablero
+        </a>
+        } @else if (editandoCanva()) {
+        <form class="canva-editor" (submit)="guardarCanva($event)">
+          <input
+            type="url"
+            [value]="borradorCanva()"
+            placeholder="https://www.canva.com/design/…"
+            aria-label="URL del tablero de Canva"
+            (input)="alEscribirCanva($event)"
+          />
+          <button
+            type="submit"
+            class="button-primary"
+            [disabled]="!borradorCanva().trim() || guardandoCanva()"
+          >
+            Guardar
+          </button>
+          <button
+            type="button"
+            class="button-secondary"
+            [disabled]="guardandoCanva()"
+            (click)="cancelarCanva()"
+          >
+            Cancelar
+          </button>
+        </form>
+        } @else {
+        <button
+          type="button"
+          class="canva-vacio"
+          [disabled]="!puedeModificar() || !modoEdicion()"
+          (click)="abrirCanva()"
+        >
+          <span class="canva-vacio-texto">Vacío</span>
+          @if (puedeModificar() && modoEdicion()) {
+          <span class="canva-mas" aria-hidden="true">＋</span>
+          }
+        </button>
+        } @if (errorCanva(); as error) {
+        <p class="form-error" role="alert">{{ error }}</p>
+        }
+      </section>
     </aside>
   </div>
 

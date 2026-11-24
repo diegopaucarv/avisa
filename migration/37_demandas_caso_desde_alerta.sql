@@ -1,3 +1,5 @@
+-- SUPERSEDIDA por 54_demandas_desvinculo_caso_2026_11_24.sql: la herencia
+-- automática desde la alerta deja de ser la regla (2026-11-24).
 -- =============================================================================
 -- 37 · La demanda hereda el caso de la alerta que la originó
 --

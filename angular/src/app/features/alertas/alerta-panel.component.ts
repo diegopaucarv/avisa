@@ -444,7 +444,6 @@ export class AlertaPanelComponent {
     afterNextRender(() => this.panel()?.nativeElement.focus());
 
     this.destruccion.onDestroy(() => this.focoPrevio?.focus?.());
-  }
 
     // Tras un guardado correcto se cierra el modo edición para mostrar lo ya persistido.
     effect(() => {

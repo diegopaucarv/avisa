@@ -33,14 +33,21 @@ export const ETAPAS_RESUMEN: readonly EtapaResumen[] = [
   { clave: 'seguimiento', titulo: 'Seguimiento', numero: 3 },
 ];
 
-const CAMPOS_MARCA = ['updatedAt', 'updated_at', 'createdAt', 'created_at'] as const;
+const CAMPOS_MARCA = [
+  'ultimaModificacion',
+  'updatedAt',
+  'updated_at',
+  'createdAt',
+  'created_at',
+] as const;
 
 /**
  * Marca de fila más reciente de un listado de la API.
  *
- * Sólo se aceptan las marcas de fila que la API publica (`updatedAt`/
- * `createdAt` y sus grafías en snake_case). Una fecha de evento (por ejemplo el
- * `fecha_reporte` de una alerta) no es una marca de sincronización y por eso no
+ * Sólo se aceptan las marcas de fila que la API publica: `ultimaModificacion`
+ * (el `a.updated_at` de las alertas), `updatedAt`/`createdAt` y sus grafías en
+ * snake_case. Una fecha de evento (por ejemplo el `fecha_reporte` de una alerta
+ * o el `fecha` de un documento) no es una marca de sincronización y por eso no
  * se lee aquí. Si la colección no expone ninguna marca —o viene vacía— devuelve
  * `null`: la vista escribe «sin dato» en vez de completar con la fecha de hoy.
  */

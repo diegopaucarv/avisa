@@ -191,8 +191,7 @@ function compararInicio(a: string | null, b: string | null): number {
   templateUrl: './mapa.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [PanoramaService, CapasMapaService],
-  styles:
-    `
+  styles: `
     :host {
       display: block;
     }
@@ -429,8 +428,7 @@ function compararInicio(a: string | null, b: string | null): number {
     }
 
     /*
-     * La primera celda de `.data -
-    table` mide 205px por regla global; aquí la
+     * La primera celda de .data-table mide 205px por regla global; aquí la
      * Región va un 40 % más estrecha y el Caso, un 30 %.
      */
     .data-table th.col-region,
@@ -1239,8 +1237,6 @@ export class MapaPage {
   readonly riesgoAltoSinRegion = computed(() => contarRiesgoAltoSinRegion(this.visibles()));
   readonly riesgoAlto = computed(() => contarRiesgoAlto(this.visibles()));
 
-  readonly alcancesSinRegion = computed(() => ambitosSinRegion(this.visibles()));
-
   /** Conteo latente/manifiesto de los casos visibles; los sin nivel se declaran. */
   readonly conteoSituacion = computed(() => conteosPorSituacion(this.visibles()));
 
@@ -1296,7 +1292,7 @@ export class MapaPage {
     return { ...this.recorteListado(), sinregion: 'true' };
   }
 
-  etiquetaAmbitos(ambitos: readonly Alcance[]): string {
+  etiquetaAmbitos(ambitos: readonly string[]): string {
     return ambitos.length ? ambitos.join(' · ') : '—';
   }
 

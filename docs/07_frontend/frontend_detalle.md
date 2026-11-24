@@ -269,8 +269,11 @@ Ninguno bloquea la carga; todos entraron marcados y revisables, y por eso la int
 Regla común: **el dato ausente se declara, no se estima.** El indicador de completitud (item 68) es el lugar donde eso se ve; ninguna pantalla debe rellenar un hueco con un valor verosímil.
 
 **Refinado (2026-11-22).** «Demandas sin caso» pasó de **226 a 107** filas tras la
-migración 37 y el hallazgo 14. De las 226, **119 sí tenían caso**: su alerta ya apuntaba a
-uno y la carga no lo heredó. Las 107 restantes no lo tienen en ninguna fuente y se declaran:
+migración 37 y el hallazgo 14. **Revisado (2026-11-24):** la herencia automática se retiró
+(ver hallazgo 14); las cifras vigentes de una carga limpia son 99 con caso · 200 con alerta
+sin caso · 26 sin alerta. De las 226 originales, **119 sí tenían caso** por herencia; la 54
+desvincula sólo las 16 que la fuente no declaraba. Las 107 restantes no lo tienen en ninguna
+fuente y se declaran:
 **81** con alerta sin caso (por ejemplo `AT-2026-82/83`, hechos de 2022 que en el Excel no
 tienen `ID_Caso_Vinculado`) y **26** sin alerta. Las 12 de P4 siguen dentro de ese grupo y no
 se mapean.
@@ -568,12 +571,17 @@ presentaba como trabajo pendiente. Las 19 del caso anulado (`CS-MI-ITE-2026-02`)
 contando porque `core.anular_caso` cascada por `caso_id` y no las alcanzó al no estar
 vinculadas.
 
-**Resuelto (2026-11-22).** `migration/37_demandas_caso_desde_alerta.sql` vincula las 100 y
-sella las 19 con **el mismo lote del caso** —no reejecuta `anular_caso`, que exige un caso
-vigente y emitiría un lote nuevo—. Resultado: **107 sin caso · 218 con caso · 19 anuladas**.
-`p09_demandas.py` hereda el caso de la alerta en cada carga y `checks.py` fija las nuevas
-cifras (218 / 81 / 26) con una comprobación de que ninguna demanda contradice el caso de su
-alerta. La ficha de `CS-PA-OAT-2026-01`, por ejemplo, pasó de 64 a 81 demandas visibles.
+**Resuelto (2026-11-22), corregido (2026-11-24).** `migration/37_demandas_caso_desde_alerta.sql`
+vinculó las 100 heredadas y selló las 19 del caso anulado con **el mismo lote del caso** —no
+reejecuta `anular_caso`, que exige un caso vigente y emitiría un lote nuevo—. La herencia
+automática resultó ser la regla equivocada: la fuente no declaraba esos casos y llegó a
+vincular 16 demandas al caso de Aceros Americanos (`CS-MI-ITE-2026-03`), seis de ellas de
+pota. `migration/54_demandas_desvinculo_caso_2026_11_24.sql` desvincula esas 16, y
+`p09_demandas.py` ya **sólo** resuelve `caso_id` desde `DIM_Demandas.ID_Caso` (99 de 325);
+nada se hereda de la alerta. Cifras de una **carga limpia**: **99 con caso · 200 con alerta
+sin caso · 26 sin alerta**. Una base **reparada sólo con la 54** conserva las otras 103
+heredadas: **202 con caso · 123 sin caso**. `checks.py` fija las cifras de la carga limpia y
+deja dicha la divergencia.
 
 ### 15. La fecha de «Demandas sin caso» era el día de la carga
 
@@ -605,23 +613,23 @@ El inventario traía dos hallazgos que no lo son; los descarto dejando la compro
 
 ### Resumen
 
-| #   | Hallazgo                                         | Tipo                   | ¿Requiere tu decisión?                                             |
-| --- | ------------------------------------------------ | ---------------------- | ------------------------------------------------------------------ |
-| 1   | `cat_roles_actor` 7 vs 4                         | Modelo / artefacto v10 | Parcial: v10 y diccionario alineados; falta el SQL unificado       |
-| 2   | `demandas.caso_id` `NOT NULL`                    | Artefacto v10          | Resuelto: v10 y diccionario anulables                              |
-| 3   | Sobrecarga de `siguiente_codigo_caso()`          | Esquema vivo           | Resuelto: migración 25 (retirada)                                  |
-| 4   | Literales obsoletos en el diccionario            | Artefacto generado     | Parcial: diccionario limpio; queda el parche 23                    |
-| 5   | Usuario demo en `backend/`                       | Autenticación paralela | Resuelto: retirado                                                 |
-| 6   | `log_envios` a dos tablas                        | Artefacto generado     | Resuelto: `core.envios_comunicacion`                               |
-| 7   | Numeración duplicada                             | Documento              | No: corregido                                                      |
-| 8   | Calendario de compromisos                        | Vista pendiente        | Resuelto en código; el calendario está vacío por falta de fechas   |
-| 9   | `estado_atencion` con `En_proceso`               | Vocabulario / esquema  | Resuelto: migración 24                                             |
-| 10  | «Actualizado» era la fecha de carga              | Dato heredado / vista  | Resuelto en código: se muestra `fecha_inicio`                      |
-| 11  | Los 34 abiertos estaban en `Activo`              | Datos / vocabulario    | Resuelto: migración 31 y filtro `abiertos`                         |
-| 12  | El Anexo 15 oculta 13 de 34 casos                | Vista / `INNER JOIN`   | Resuelto: migración 32 en local y en Neon (`LEFT JOIN` + «—»)      |
-| 13  | `Activo` y `En seguimiento` eran el mismo estado | Datos / vocabulario    | Resuelto: migraciones 33–34, aplicadas en local y en Neon          |
-| 14  | 119 demandas con caso listadas como «sin caso»   | Carga / vínculo        | Resuelto: migración 37, cargador y `checks` actualizados           |
-| 15  | La fecha de la demanda era la de la carga        | Dato heredado / vista  | Resuelto: `fechaHecho` desde la alerta y columna «Fecha del hecho» |
+| #   | Hallazgo                                         | Tipo                   | ¿Requiere tu decisión?                                                                                  |
+| --- | ------------------------------------------------ | ---------------------- | ------------------------------------------------------------------------------------------------------- |
+| 1   | `cat_roles_actor` 7 vs 4                         | Modelo / artefacto v10 | Parcial: v10 y diccionario alineados; falta el SQL unificado                                            |
+| 2   | `demandas.caso_id` `NOT NULL`                    | Artefacto v10          | Resuelto: v10 y diccionario anulables                                                                   |
+| 3   | Sobrecarga de `siguiente_codigo_caso()`          | Esquema vivo           | Resuelto: migración 25 (retirada)                                                                       |
+| 4   | Literales obsoletos en el diccionario            | Artefacto generado     | Parcial: diccionario limpio; queda el parche 23                                                         |
+| 5   | Usuario demo en `backend/`                       | Autenticación paralela | Resuelto: retirado                                                                                      |
+| 6   | `log_envios` a dos tablas                        | Artefacto generado     | Resuelto: `core.envios_comunicacion`                                                                    |
+| 7   | Numeración duplicada                             | Documento              | No: corregido                                                                                           |
+| 8   | Calendario de compromisos                        | Vista pendiente        | Resuelto en código; el calendario está vacío por falta de fechas                                        |
+| 9   | `estado_atencion` con `En_proceso`               | Vocabulario / esquema  | Resuelto: migración 24                                                                                  |
+| 10  | «Actualizado» era la fecha de carga              | Dato heredado / vista  | Resuelto en código: se muestra `fecha_inicio`                                                           |
+| 11  | Los 34 abiertos estaban en `Activo`              | Datos / vocabulario    | Resuelto: migración 31 y filtro `abiertos`                                                              |
+| 12  | El Anexo 15 oculta 13 de 34 casos                | Vista / `INNER JOIN`   | Resuelto: migración 32 en local y en Neon (`LEFT JOIN` + «—»)                                           |
+| 13  | `Activo` y `En seguimiento` eran el mismo estado | Datos / vocabulario    | Resuelto: migraciones 33–34, aplicadas en local y en Neon                                               |
+| 14  | 119 demandas con caso listadas como «sin caso»   | Carga / vínculo        | Corregido: migración 37 (vinculó) y 54 (desvincula las 16 mal asignadas); sin herencia desde 2026-11-24 |
+| 15  | La fecha de la demanda era la de la carga        | Dato heredado / vista  | Resuelto: `fechaHecho` desde la alerta y columna «Fecha del hecho»                                      |
 
 ## Orden recomendado de entrega
 
@@ -707,7 +715,7 @@ Ninguna bloquea al equipo de .NET: dos se resuelven solo en la SPA (F1, F4), tre
 
 | #   | Item                                      | Qué cambia                                                                                                                                                                                              | Origen | Estado                                                                                                      |
 | --- | ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ | ----------------------------------------------------------------------------------------------------------- |
-| 88  | `N` Encabezado global                     | «Producción · OAIPCS» pasa a «Aplicativo de Vigilancia y Sistematización de Información en Prevención y Gestión de Conflictos Sociales».                                                                                                                 | E6     | ✔ Hecho 2026-11-23                                                                                          |
+| 88  | `N` Encabezado global                     | «Producción · OAIPCS» pasa a «Aplicativo de Vigilancia y Sistematización de Información en Prevención y Gestión de Conflictos Sociales».                                                                | E6     | ✔ Hecho 2026-11-23                                                                                          |
 | 89  | `R` Panorama: tarjetas                    | «Regiones con casos» → «Regiones con al menos un caso»; se borran los textos de apoyo de las tarjetas; se revisa la tarjeta «Riesgo alto».                                                              | P2     | ✔ Hecho 2026-11-23                                                                                          |
 | 90  | `C` Panorama: el mapa central             | Retirar el lienzo del panorama. Contradice X2.                                                                                                                                                          | P2     | No se hace (X2)                                                                                             |
 | 91  | `R` Panorama: título y notas              | «Vista esquemática por ámbito» → «alcance geográfico»; se borran las dos notas que explican el ancho de banda y el aplazamiento del ubigeo.                                                             | P3     | ✔ Hecho 2026-11-23                                                                                          |

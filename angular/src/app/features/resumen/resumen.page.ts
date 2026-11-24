@@ -542,10 +542,11 @@ export class ResumenPage {
    * ------------------------------------------------------------------ */
 
   /**
-   * Casos es la única fuente que publica una marca de fila (`updatedAt`, desde
-   * `core.casos.fecha_ultima_actualizacion`). Se pide la página más amplia que
-   * admite la API para tomar el máximo real del listado, no la marca de una
-   * fila cualquiera.
+   * Casos y alertas publican una marca de fila: `updatedAt` (desde
+   * `core.casos.fecha_ultima_actualizacion`) y `ultimaModificacion` (desde
+   * `core.alertas.updated_at`). Se pide la página más amplia que admite la API
+   * para tomar el máximo real del conjunto consultado, no la marca de una fila
+   * cualquiera.
    */
   private readonly syncCasos = consulta<string | null>({
     fuente: () =>
@@ -556,16 +557,22 @@ export class ResumenPage {
     esquema: aMarcaMasReciente,
   });
 
-  /**
-   * Alertas, compromisos, documentos y territorio no exponen `updated_at` ni
-   * `created_at` en su contrato actual. Se consulta una fila: si el contrato
-   * cambia, el mapeador ya leería la marca; hoy devuelve `null` y el bloque
-   * declara «sin dato».
-   */
   private readonly syncAlertas = consulta<string | null>({
-    fuente: () => urlConParametros(urlApi('/v1/alerts'), paramsDePagina({ pagina: 1, tamano: 1 })),
+    fuente: () =>
+      urlConParametros(urlApi('/v1/alerts'), {
+        ...paramsDePagina({ pagina: 1, tamano: 100 }),
+        sort: 'recent',
+      }),
     esquema: aMarcaMasReciente,
   });
+
+  /**
+   * Compromisos, documentos y territorio no publican marca de fila en su
+   * contrato actual: sus listados sólo traen fechas de evento (`fecha`,
+   * `fechaVencimiento`) o de anulación, que no son una marca de sincronización.
+   * Se consulta una fila: si el contrato cambia, el mapeador ya leería la marca;
+   * hoy devuelve `null` y el bloque declara «sin dato».
+   */
 
   private readonly syncCompromisos = consulta<string | null>({
     fuente: () =>

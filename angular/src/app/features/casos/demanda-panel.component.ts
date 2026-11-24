@@ -166,7 +166,6 @@ export class DemandaPanelComponent {
 
     // El panel sólo se cierra con Cancelar o Registrar: Escape no lo descarta.
     this.destruccion.onDestroy(() => this.focoPrevio?.focus?.());
-  }
 
     // El borrador se precarga con la demanda abierta (vacío en el alta) y se
     // reinicia si el contenedor cambia de demanda. La ficha heredada puede

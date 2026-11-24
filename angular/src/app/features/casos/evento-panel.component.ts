@@ -180,7 +180,6 @@ export class EventoPanelComponent {
 
     // El panel sólo se cierra con Cancelar o Registrar: Escape no lo descarta.
     this.destruccion.onDestroy(() => this.focoPrevio?.focus?.());
-  }
 
     // El borrador se precarga con el hecho abierto (vacío en el alta) y se
     // reinicia si el contenedor cambia de hecho.

@@ -42,6 +42,7 @@ const ACTOR_SELECT = `
   replace(a.nivel_gobierno, '_', ' ') as nivel_gobierno,
   a.categoria,
   a.email_contacto as email,
+  a.telefono_contacto as telefono,
   rg.nombre as region,
   d.nombre as distrito,
   oa.nombre_actual as organizacion_ancla,
@@ -95,6 +96,7 @@ export type ActorListItem = {
   nivelGobierno: string | null;
   categoria: string | null;
   email: string | null;
+  telefono: string | null;
   region: string | null;
   distrito: string | null;
   organizacionAncla: string | null;
@@ -155,6 +157,7 @@ function mapActor(row: Record<string, unknown>): ActorListItem {
     nivelGobierno: row.nivel_gobierno as string | null,
     categoria: row.categoria as string | null,
     email: row.email as string | null,
+    telefono: row.telefono as string | null,
     region: row.region as string | null,
     distrito: row.distrito as string | null,
     organizacionAncla: row.organizacion_ancla as string | null,

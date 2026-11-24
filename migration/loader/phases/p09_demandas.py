@@ -17,12 +17,15 @@ Decisiones que esta fase aplica:
   verificado: **222** demandas con alerta existente.
 * **Formato de alerta.** `DIM_Alertas` usa 2 dígitos (`AT-2026-01`), pero los
   bridges mezclan 2 y 3; se canoniza con `canon_alerta`.
-* **D1 (revisada, 2026-11-22).** `ID_Caso` se resuelve primero por el código
-  propio de la demanda (99 de 325) y, cuando viene vacío, la demanda **hereda
-  el caso de su alerta** (100 más). La alerta ya traía el vínculo y la relación
-  es unívoca: 0 conflictos entre `demandas.caso_id` y `alertas.caso_id`. Tras
-  la herencia quedan 107 demandas sin caso, y sólo ésas no tienen caso en
-  ninguna fuente (81 con alerta sin caso + 26 sin alerta).
+* **D1 (revisada, 2026-11-24).** `caso_id` se resuelve **sólo** desde
+  `DIM_Demandas.ID_Caso`: **99 de 325**. Las 226 restantes quedan con
+  `caso_id` NULL y se leen como «demanda sin caso» (200 con alerta y 26 sin
+  alerta). No se hereda el caso de la alerta: la herencia automática
+  (2026-11-22) asignaba casos que la fuente no declaraba y llegó a vincular
+  demandas de pota al caso de Aceros Americanos (`CS-MI-ITE-2026-03`) porque su
+  alerta —mal pegada en el Excel— apuntaba allí. La regla vigente es que una
+  demanda o alerta se vincula a un caso sólo si se registra en él o si el
+  documento fuente declara ese caso de forma explícita; nunca por inferencia.
 * **3P.** `problema_3p`, `propuesta_3p` y `pedido_3p` quedan NULL: el legado no
   trae la estructura y no se fabrica (parche 1 los relajó).
 * `ID_TEMATICA` incluye un timestamp (`2026-09-18 14:05:58`): sólo se resuelve
@@ -61,6 +64,7 @@ _D_TIPO_EVIDENCIA = 8
 _D_LINK_EVIDENCIA = 9
 
 # -- BRIDGE_Alerta_Demandas ---------------------------------------------------
+_BD_CLAVE = 1
 _BD_ALERTA = 3
 _BD_DEMANDA = 5
 
@@ -133,12 +137,17 @@ async def _indices(ctx: LoadContext) -> dict:
     }
 
 
-def _pares_alerta(
+async def _pares_alerta(
     ctx: LoadContext, idx: dict
 ) -> tuple[dict[str, str], dict[str, tuple[str, str]], set[tuple[str, str]]]:
     """Une la columna denormalizada con el bridge (D31/D44).
 
     Devuelve `(alerta_por_demanda, padre_por_demanda, descartados)`.
+
+    Además registra `BRIDGE_CLAVE_DUPLICADA` por cada fila cuya clave `c01`
+    aparece más de una vez. El identificador de la relación deja de ser único y
+    suele delatar un bloque de filas pegado en la hoja equivocada (las claves
+    reinician su numeración en `-01`).
     """
     demandas = legacy.sheet_of(ctx.sheets, "DIM_Demandas")
     pares_columna: set[tuple[str, str]] = set()
@@ -155,11 +164,37 @@ def _pares_alerta(
 
     bridge = legacy.sheet_of(ctx.sheets, "BRIDGE_Alerta_Demandas")
     pares_bridge: set[tuple[str, str]] = set()
+    filas_por_clave: dict[str, list[int]] = {}
+    registro_por_fila: dict[int, tuple[str | None, str | None]] = {}
     for indice in range(bridge.filas):
+        clave = bridge.cell(indice, _BD_CLAVE)
         demanda = bridge.cell(indice, _BD_DEMANDA)
         alerta = canon_alerta(bridge.cell(indice, _BD_ALERTA))
+        if clave:
+            fila = indice + 1
+            filas_por_clave.setdefault(clave, []).append(fila)
+            registro_por_fila[fila] = (demanda, alerta)
         if demanda and alerta:
             pares_bridge.add((demanda, alerta))
+
+    for clave in sorted(filas_por_clave):
+        filas = filas_por_clave[clave]
+        if len(filas) < 2:
+            continue
+        for fila in filas:
+            demanda, alerta = registro_por_fila[fila]
+            await ctx.conflicto(
+                "BRIDGE_CLAVE_DUPLICADA",
+                hoja="BRIDGE_Alerta_Demandas",
+                fila=fila,
+                codigo=clave,
+                detalle={
+                    "clave": clave,
+                    "demanda": demanda,
+                    "alerta": alerta,
+                    "filas": filas,
+                },
+            )
 
     asignados, descartados, _stats = union_alerta_demanda(
         pares_columna, pares_bridge, set(idx["alertas"])
@@ -171,7 +206,7 @@ def _pares_alerta(
 async def _demandas(ctx: LoadContext, idx: dict) -> dict[str, str]:
     """Inserta las 325 demandas. Devuelve {código legado -> id}."""
     demandas = legacy.sheet_of(ctx.sheets, "DIM_Demandas")
-    alerta_por_demanda, padre, descartados = _pares_alerta(ctx, idx)
+    alerta_por_demanda, padre, descartados = await _pares_alerta(ctx, idx)
 
     for demanda, alerta in sorted(descartados):
         await ctx.conflicto(
@@ -276,31 +311,8 @@ async def _actores_demanda(ctx: LoadContext, idx: dict, ids: dict[str, str]) -> 
         ctx.add("core.demandas_actores")
 
 
-async def _heredar_caso(ctx: LoadContext) -> None:
-    """D1 revisada: la demanda hereda el caso de su alerta.
-
-    Sólo alcanza a las demandas cuyo `ID_Caso` propio venía vacío: el vínculo
-    directo del legado siempre gana. La carga no produce registros anulados, así
-    que aquí no hay rama de sellado; el estado heredado que ya tuviera un caso
-    anulado lo repara `migration/37_demandas_caso_desde_alerta.sql`.
-    """
-    etiqueta = await ctx.conn.execute(
-        """
-        UPDATE core.demandas d
-           SET caso_id = a.caso_id
-          FROM core.alertas_tempranas a
-         WHERE a.id = d.alerta_id
-           AND d.caso_id IS NULL
-           AND a.caso_id IS NOT NULL
-           AND a.anulado_en IS NULL
-        """
-    )
-    ctx.add("core.demandas (caso heredado)", int(etiqueta.split()[-1]))
-
-
 async def run(ctx: LoadContext) -> None:
     idx = await _indices(ctx)
     ids = await _demandas(ctx, idx)
-    await _heredar_caso(ctx)
     await _evidencias(ctx, ids)
     await _actores_demanda(ctx, idx, ids)
