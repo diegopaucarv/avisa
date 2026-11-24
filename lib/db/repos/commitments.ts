@@ -1486,3 +1486,377 @@ export async function getCommitmentsSummary(
     generatedAt: new Date().toISOString(),
   };
 }
+
+/* ------------------------------------------------------------------ */
+/* Historial: eventos, hitos y adjuntos de un compromiso               */
+/* ------------------------------------------------------------------ */
+
+/** Evento declarado en `core.compromiso_evento` (migración 49). */
+export type CommitmentEvento = {
+  id: string;
+  /** Slug libre y corto: `nota`, `cambio_estado`, `hito_creado`… */
+  tipo: string;
+  /** Cuerpo libre del evento; la forma la decide quien lo escribe. */
+  detalle: unknown;
+  /** Nombre legible de quien registró el evento; `null` si no se resuelve. */
+  autor: string | null;
+  usuarioId: string | null;
+  createdAt: string | null;
+};
+
+/** Hito dentro de la línea de tiempo, con su conteo de adjuntos vigentes. */
+export type CommitmentHistorialHito = {
+  id: string;
+  codigo: string | null;
+  descripcion: string | null;
+  fecha: string | null;
+  fechaReal: string | null;
+  estado: string | null;
+  terminal: boolean | null;
+  responsableTexto: string | null;
+  adjuntos: number;
+};
+
+/** Adjunto vigente de un compromiso o de uno de sus hitos. */
+export type CommitmentHistorialAdjunto = {
+  id: string;
+  entidadTipo: "compromiso" | "hito";
+  entidadId: string;
+  nombre: string;
+  mime: string | null;
+  tamanoBytes: number | null;
+  descripcion: string | null;
+  subidoPor: string | null;
+  createdAt: string | null;
+  /** Código del hito cuando el adjunto cuelga de uno; `null` si es del compromiso. */
+  hitoCodigo: string | null;
+};
+
+/**
+ * Ítem de la línea de tiempo unificada. `evento`, `hito` y `adjunto` son
+ * opcionales a propósito: la plantilla discrimina por `tipo` sin uniones
+ * anidadas que TypeScript no pueda estrechar.
+ */
+export type CommitmentHistorialItem = {
+  tipo: "evento" | "hito" | "adjunto";
+  id: string;
+  /** ISO 8601 para ordenar; `null` si el hito no declara fecha. */
+  fecha: string | null;
+  evento?: CommitmentEvento;
+  hito?: CommitmentHistorialHito;
+  adjunto?: CommitmentHistorialAdjunto;
+};
+
+export type CommitmentHistorial = {
+  compromisoId: string;
+  codigo: string | null;
+  eventos: CommitmentEvento[];
+  hitos: CommitmentHistorialHito[];
+  adjuntos: CommitmentHistorialAdjunto[];
+  /** Eventos, hitos y adjuntos en una sola secuencia ascendente. */
+  linea: CommitmentHistorialItem[];
+  generatedAt: string;
+};
+
+const ORDEN_TIPO_HISTORIAL: Record<CommitmentHistorialItem["tipo"], number> = {
+  evento: 0,
+  hito: 1,
+  adjunto: 2,
+};
+
+/**
+ * Historial completo de un compromiso en cuatro lecturas constantes (sin
+ * N+1): el compromiso, sus eventos con autor, sus hitos con el conteo de
+ * adjuntos y los adjuntos del compromiso y de sus hitos.
+ *
+ * La tabla `core.compromiso_evento` puede estar vacía: se devuelve `[]` y la
+ * línea sigue mostrando hitos y adjuntos. El orden es cronológico ascendente;
+ * dentro del mismo instante, evento → hito → adjunto y luego por id.
+ */
+export async function getCommitmentHistorial(
+  client: PoolClient,
+  ref: string,
+): Promise<CommitmentHistorial | null> {
+  const target = await client.query<{ id: string; codigo: string | null }>(
+    `select id, codigo_compromiso as codigo
+       from core.compromisos
+      where id::text = $1 or codigo_compromiso = $1
+      limit 1`,
+    [ref],
+  );
+  const compromiso = target.rows[0];
+  if (!compromiso) return null;
+
+  const [eventosResult, hitosResult, adjuntosResult] = await Promise.all([
+    // Eventos con el nombre del autor resuelto en el mismo viaje.
+    client.query<{
+      id: string;
+      tipo: string;
+      detalle: unknown;
+      usuario_id: string | null;
+      created_at: Date | string | null;
+      autor: string | null;
+    }>(
+      `select e.id,
+              e.tipo,
+              e.detalle,
+              e.usuario_id,
+              e.created_at,
+              u.nombre as autor
+         from core.compromiso_evento e
+         left join core.usuarios u on u.id = e.usuario_id
+        where e.compromiso_id = $1::uuid
+        order by e.created_at asc, e.id`,
+      [compromiso.id],
+    ),
+
+    // Hitos vigentes con el estado del Anexo 14 y cuántos adjuntos tienen.
+    client.query<{
+      id: string;
+      codigo: string | null;
+      descripcion: string | null;
+      fecha: string | null;
+      fecha_real: string | null;
+      estado: string | null;
+      terminal: boolean | null;
+      responsable_texto: string | null;
+      adjuntos: number;
+    }>(
+      `select h.id,
+              h.codigo_hito as codigo,
+              h.descripcion_hito as descripcion,
+              to_char(h.fecha_vencimiento, 'YYYY-MM-DD') as fecha,
+              to_char(h.fecha_real, 'YYYY-MM-DD') as fecha_real,
+              replace(eh.codigo, '_', ' ') as estado,
+              eh.es_terminal as terminal,
+              h.responsable_texto as responsable_texto,
+              coalesce((
+                select count(*)::int
+                  from core.adjunto a
+                 where a.entidad_tipo = 'hito'
+                   and a.entidad_id = h.id
+                   and a.anulado_en is null
+              ), 0) as adjuntos
+         from core.hitos_compromiso h
+         left join core.cat_estados_hito eh on eh.id = h.estado_id
+        where h.compromiso_id = $1::uuid
+          and h.anulado_en is null
+        order by h.fecha_vencimiento asc nulls last, h.codigo_hito`,
+      [compromiso.id],
+    ),
+
+    // Adjuntos del compromiso y de sus hitos vigentes.
+    client.query<{
+      id: string;
+      entidad_tipo: "compromiso" | "hito";
+      entidad_id: string;
+      nombre: string;
+      mime: string | null;
+      tamano_bytes: string | number | null;
+      descripcion: string | null;
+      subido_por: string | null;
+      created_at: Date | string | null;
+      hito_codigo: string | null;
+    }>(
+      `select a.id,
+              a.entidad_tipo,
+              a.entidad_id,
+              a.nombre,
+              a.mime,
+              a.tamano_bytes,
+              a.descripcion,
+              a.subido_por,
+              a.created_at,
+              h.codigo_hito as hito_codigo
+         from core.adjunto a
+         left join core.hitos_compromiso h
+                on h.id = a.entidad_id
+               and a.entidad_tipo = 'hito'
+               and h.compromiso_id = $1::uuid
+               and h.anulado_en is null
+        where a.anulado_en is null
+          and (
+            (a.entidad_tipo = 'compromiso' and a.entidad_id = $1::uuid)
+            or (a.entidad_tipo = 'hito' and h.compromiso_id = $1::uuid)
+          )
+        order by a.created_at asc, a.id`,
+      [compromiso.id],
+    ),
+  ]);
+
+  const eventos: CommitmentEvento[] = eventosResult.rows.map((row) => ({
+    id: row.id,
+    tipo: row.tipo,
+    detalle: row.detalle ?? null,
+    autor: row.autor ?? null,
+    usuarioId: row.usuario_id ?? null,
+    createdAt: isoOrNull(row.created_at),
+  }));
+
+  const hitos: CommitmentHistorialHito[] = hitosResult.rows.map((row) => ({
+    id: row.id,
+    codigo: row.codigo ?? null,
+    descripcion: row.descripcion ?? null,
+    fecha: row.fecha ?? null,
+    fechaReal: row.fecha_real ?? null,
+    estado: row.estado ?? null,
+    terminal: row.terminal ?? null,
+    responsableTexto: row.responsable_texto ?? null,
+    adjuntos: Number(row.adjuntos ?? 0),
+  }));
+
+  const adjuntos: CommitmentHistorialAdjunto[] = adjuntosResult.rows.map(
+    (row) => ({
+      id: row.id,
+      entidadTipo: row.entidad_tipo,
+      entidadId: row.entidad_id,
+      nombre: row.nombre,
+      mime: row.mime ?? null,
+      tamanoBytes: row.tamano_bytes === null ? null : Number(row.tamano_bytes),
+      descripcion: row.descripcion ?? null,
+      subidoPor: row.subido_por ?? null,
+      createdAt: isoOrNull(row.created_at),
+      hitoCodigo: row.hito_codigo ?? null,
+    }),
+  );
+
+  const linea: CommitmentHistorialItem[] = [
+    ...eventos.map<CommitmentHistorialItem>((evento) => ({
+      tipo: "evento",
+      id: evento.id,
+      fecha: evento.createdAt,
+      evento,
+    })),
+    ...hitos.map<CommitmentHistorialItem>((hito) => {
+      const fecha = hito.fechaReal ?? hito.fecha;
+      return {
+        tipo: "hito",
+        id: hito.id,
+        // La fecha del hito es un día sin hora: se fija a medianoche UTC.
+        fecha: fecha ? `${fecha}T00:00:00.000Z` : null,
+        hito,
+      };
+    }),
+    ...adjuntos.map<CommitmentHistorialItem>((adjunto) => ({
+      tipo: "adjunto",
+      id: adjunto.id,
+      fecha: adjunto.createdAt,
+      adjunto,
+    })),
+  ];
+
+  linea.sort((izquierda, derecha) => {
+    if (izquierda.fecha === null && derecha.fecha === null) {
+      return ordenarEmpate(izquierda, derecha);
+    }
+    if (izquierda.fecha === null) return 1;
+    if (derecha.fecha === null) return -1;
+    const porFecha = izquierda.fecha.localeCompare(derecha.fecha);
+    return porFecha !== 0 ? porFecha : ordenarEmpate(izquierda, derecha);
+  });
+
+  return {
+    compromisoId: compromiso.id,
+    codigo: compromiso.codigo ?? null,
+    eventos,
+    hitos,
+    adjuntos,
+    linea,
+    generatedAt: new Date().toISOString(),
+  };
+}
+
+/** Desempate estable dentro del mismo instante: tipo y luego id. */
+function ordenarEmpate(
+  izquierda: CommitmentHistorialItem,
+  derecha: CommitmentHistorialItem,
+): number {
+  const porTipo =
+    ORDEN_TIPO_HISTORIAL[izquierda.tipo] - ORDEN_TIPO_HISTORIAL[derecha.tipo];
+  return porTipo !== 0 ? porTipo : izquierda.id.localeCompare(derecha.id);
+}
+
+/** Slugs aceptados en `core.compromiso_evento.tipo` (varchar(30)). */
+const TIPO_EVENTO = /^[a-z0-9][a-z0-9_-]{0,29}$/;
+
+/**
+ * Registra un evento manual en `core.compromiso_evento`.
+ *
+ * La tabla no tiene RLS propia, así que la autorización se replica en un CTE:
+ * sólo se inserta si el compromiso existe bajo la RLS vigente, el rol puede
+ * editar y su nivel de clasificación alcanza el del compromiso. Si no se
+ * inserta, se distingue 404 (no existe) de 403 (sin permiso) sin exponer datos.
+ */
+export async function createCommitmentEvento(
+  client: PoolClient,
+  ctx: CommitmentWriteContext,
+  ref: string,
+  body: unknown,
+): Promise<CommitmentEvento> {
+  const input = asObject(body);
+  const tipo = requiredText(input, "tipo").toLowerCase();
+  if (!TIPO_EVENTO.test(tipo)) invalid();
+  const detalle = has(input, "detalle")
+    ? optionalJson(input, "detalle")
+    : undefined;
+  // El detalle es un objeto libre; un arreglo o un escalar no es un evento.
+  if (Array.isArray(detalle)) invalid();
+
+  const inserted = await client.query<{
+    id: string;
+    tipo: string;
+    detalle: unknown;
+    usuario_id: string | null;
+    created_at: Date | string | null;
+    autor: string | null;
+  }>(
+    `with autorizado as (
+       select id
+         from core.compromisos
+        where (id::text = $1 or codigo_compromiso = $1)
+          and core.puede_editar()
+          and core.clasificacion_max() >= 2
+          and nivel_clasificacion <= core.clasificacion_max()
+     ), creado as (
+       insert into core.compromiso_evento (compromiso_id, tipo, detalle, usuario_id)
+       select id, $2, $3::jsonb, $4::uuid from autorizado
+       returning id, tipo, detalle, usuario_id, created_at
+     )
+     select c.id,
+            c.tipo,
+            c.detalle,
+            c.usuario_id,
+            c.created_at,
+            u.nombre as autor
+       from creado c
+       left join core.usuarios u on u.id = c.usuario_id`,
+    [ref, tipo, jsonParam(detalle), ctx.usuarioId],
+  );
+
+  const row = inserted.rows[0];
+  if (!row) {
+    const existe = await client.query<{ id: string }>(
+      `select id from core.compromisos
+        where id::text = $1 or codigo_compromiso = $1
+        limit 1`,
+      [ref],
+    );
+    if (existe.rowCount === 0) {
+      throw new ApiError(404, "El compromiso no existe.", "NOT_FOUND");
+    }
+    throw new ApiError(
+      403,
+      "Sin permiso para registrar eventos en este compromiso.",
+      "SIN_PERMISO",
+    );
+  }
+
+  return {
+    id: row.id,
+    tipo: row.tipo,
+    detalle: row.detalle ?? null,
+    autor: row.autor ?? null,
+    usuarioId: row.usuario_id ?? null,
+    createdAt: isoOrNull(row.created_at),
+  };
+}

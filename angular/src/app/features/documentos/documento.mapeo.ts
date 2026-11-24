@@ -403,8 +403,23 @@ export type RamaDocumental = {
 };
 
 /**
+ * Orden alfanumérico por código y, si no hay, por título. Los códigos mezclan
+ * letras y números (`ACTA-2` / `ACTA-10`), por eso la comparación es numérica.
+ */
+export function ordenarAlfabetico<T extends { codigo: string | null; titulo: string | null }>(
+  filas: readonly T[],
+): T[] {
+  const clave = (fila: T): string =>
+    (fila.codigo?.trim() || fila.titulo?.trim() || '').toLowerCase();
+  return [...filas].sort((a, b) =>
+    clave(a).localeCompare(clave(b), 'es', { numeric: true, sensitivity: 'base' }),
+  );
+}
+
+/**
  * Agrupa los documentos de la página por tipo documental para el árbol del RAG.
- * No añade filas ni tipos que la página no traiga.
+ * No añade filas ni tipos que la página no traiga; las hojas van en orden
+ * alfanumérico dentro de cada rama.
  */
 export function agruparDocumentosPorTipo(documentos: readonly Documento[]): RamaDocumental[] {
   const mapa = new Map<string, RamaDocumental>();
@@ -415,7 +430,9 @@ export function agruparDocumentosPorTipo(documentos: readonly Documento[]): Rama
     rama.documentos.push(documento);
     mapa.set(clave, rama);
   }
-  return [...mapa.values()].sort((a, b) => a.etiqueta.localeCompare(b.etiqueta, 'es'));
+  return [...mapa.values()]
+    .sort((a, b) => a.etiqueta.localeCompare(b.etiqueta, 'es'))
+    .map((rama) => ({ ...rama, documentos: ordenarAlfabetico(rama.documentos) }));
 }
 
 /** Nombre legible de un archivo o enlace: el último segmento de la ruta. */

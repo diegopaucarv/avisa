@@ -31,6 +31,8 @@
   </p>
   } @if (avisoAlta(); as avisoRegistro) {
   <p class="form-hint aviso-ok" role="status">{{ avisoRegistro }}</p>
+  } @if (avisoArchivo(); as avisoArchivo) {
+  <p class="form-hint aviso-ok" role="status">{{ avisoArchivo }}</p>
   }
 
   <div class="executive-kpis">
@@ -53,6 +55,13 @@
       <span class="stat-copy">
         <span>Pendientes</span>
         <strong>{{ pendientes() ?? '—' }}</strong>
+      </span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon"><app-icono nombre="alertas" [tamano]="16" /></span>
+      <span class="stat-copy">
+        <span>Sin caso</span>
+        <strong>{{ sinCaso() ?? '—' }}</strong>
       </span>
     </div>
   </div>
@@ -92,6 +101,29 @@
     </label>
 
     <label class="select-filter">
+      Caso
+      <select aria-label="Filtrar por caso asignado" (change)="cambiarCaso($event)">
+        <option value="" [selected]="filtros().sinCaso === ''">
+          Todos los registros ({{ totalActivas() ?? '—' }})
+        </option>
+        <option value="false" [selected]="filtros().sinCaso === 'false'">
+          Con caso asignado ({{ conCaso() ?? '—' }})
+        </option>
+        <option value="true" [selected]="filtros().sinCaso === 'true'">
+          Sin caso asignado ({{ sinCaso() ?? '—' }})
+        </option>
+      </select>
+    </label>
+
+    <label class="select-filter">
+      Archivo
+      <select aria-label="Ver alertas archivadas" (change)="cambiarArchivados($event)">
+        <option value="" [selected]="filtros().archivados === ''">Activas</option>
+        <option value="true" [selected]="filtros().archivados === 'true'">Archivadas</option>
+      </select>
+    </label>
+
+    <label class="select-filter">
       Orden
       <select aria-label="Ordenar las alertas" (change)="cambiarOrden($event)">
         @for (orden of ordenes; track orden.valor) {
@@ -104,6 +136,8 @@
 
     <button type="button" class="button-secondary" (click)="limpiar()">Limpiar filtros</button>
   </div>
+
+  <p class="alerta-guia">Pulse una fila para abrir la ficha en el panel lateral.</p>
 
   @if (estadoListado() === 'error') {
   <div class="empty-state" role="alert">
@@ -232,7 +266,13 @@
             <span [class]="claseRiesgo(alerta)">{{ alerta.riesgo }}</span>
           </td>
           <td class="alerta-caso">
-            <strong>{{ alerta.casoCodigo || 'SIN CASO' }}</strong>
+            @if (alerta.casoCodigo) {
+            <strong>{{ alerta.casoCodigo }}</strong>
+            @if (alerta.casoTitulo) {
+            <small>{{ alerta.casoTitulo }}</small>
+            } } @else {
+            <span class="sin-caso">Sin caso</span>
+            }
           </td>
           <td>
             <div class="alerta-revisor">
@@ -246,6 +286,9 @@
               <span class="status-dot"></span>
               {{ etiquetaEstadoAlerta(alerta) }}
             </span>
+            @if (alerta.archivadoEn) {
+            <span class="alerta-archivada">Archivada</span>
+            }
           </td>
           <td class="celda-acciones" (click)="$event.stopPropagation()">
             <app-acciones-fila
@@ -316,6 +359,18 @@
     [puedeConfirmar]="puedeAnular(alertaAnular)"
     (cerrar)="cerrarAnulacion()"
     (hecho)="confirmarAnulacion($event)"
+  />
+  } @if (alertaArchivo(); as alertaArchivar) {
+  <app-alerta-archivo
+    [modo]="alertaArchivar.archivadoEn ? 'desarchivar' : 'archivar'"
+    [codigo]="alertaArchivar.codigo"
+    [titulo]="tituloAlerta(alertaArchivar)"
+    [sitio]="geografia(alertaArchivar)"
+    [motivoActual]="alertaArchivar.motivoArchivo"
+    [enviando]="enviandoArchivo()"
+    [errorEnvio]="errorArchivo()"
+    (cerrar)="cerrarArchivo()"
+    (confirmar)="confirmarArchivo($event)"
   />
   }
 </section>

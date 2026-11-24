@@ -50,6 +50,7 @@ import {
   etiquetaAnexo,
   formatearFecha,
   formatearFechaHora,
+  ordenarAlfabetico,
   type Documento,
   type Normativa,
   type OpcionCatalogo,
@@ -93,6 +94,11 @@ type ArbolDocumentos = {
 /** `total` del sobre paginado sin construir las filas (consultas de indicadores). */
 function totalDe(bruto: unknown): number {
   return normalizarColeccion<unknown>(bruto).total;
+}
+
+/** «Otro (sin clasificar)» es la bolsa del catálogo: se lista al final. */
+function esBolsaOtros(opcion: OpcionCatalogo): boolean {
+  return opcion.valor === 'otro' || /^otros?\b/i.test(opcion.etiqueta.trim());
 }
 
 /**
@@ -144,9 +150,10 @@ function totalDe(bruto: unknown): number {
 
     .view-actions {
       display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      gap: 6px;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
     }
 
     .exportar-error {
@@ -423,9 +430,24 @@ export class DocumentosPage {
     },
   });
 
-  readonly documentosArbol = computed(() => this.arbolListado.valor()?.documentos ?? []);
-  readonly normativas = computed(() => this.arbolListado.valor()?.normativas ?? []);
-  readonly otrosDocumentos = computed(() => this.arbolListado.valor()?.otros ?? []);
+  readonly documentosArbol = computed(() =>
+    ordenarAlfabetico(this.arbolListado.valor()?.documentos ?? []),
+  );
+  readonly normativas = computed(() =>
+    ordenarAlfabetico(this.arbolListado.valor()?.normativas ?? []),
+  );
+  readonly otrosDocumentos = computed(() =>
+    ordenarAlfabetico(this.arbolListado.valor()?.otros ?? []),
+  );
+
+  /** El árbol se pagina en el cliente: el sobre del RAG llega completo. */
+  readonly documentosArbolPagina = computed(() => {
+    const documentos = this.documentosArbol();
+    const { pagina, tamano } = this.parametros();
+    const inicio = (pagina - 1) * tamano;
+    return documentos.slice(inicio, inicio + tamano);
+  });
+
   readonly estadoArbol = this.arbolListado.estado;
   readonly errorArbol = this.arbolListado.error;
 
@@ -441,18 +463,18 @@ export class DocumentosPage {
 
   /**
    * Árbol del RAG: una rama por tipo documental, más «Normativas» y «Otros
-   * documentos» tal como los devuelve el sobre del endpoint. En la vista de
-   * árbol se lee del endpoint sin paginar (`/v1/documents/arbol`), de modo que
-   * incluye todos los documentos y no sólo la página visible de la tabla.
+   * documentos» tal como los devuelve el sobre del endpoint. El sobre llega
+   * completo y se pagina en cliente (ver `documentosArbolPagina`), así que cada
+   * página agrupa sus hojas y la navegación inferior recorre el árbol entero.
    */
   readonly arbol = computed(() =>
-    agruparDocumentosPorTipo(this.enArbol() ? this.documentosArbol() : this.documentos()),
+    agruparDocumentosPorTipo(this.enArbol() ? this.documentosArbolPagina() : this.documentos()),
   );
 
   /** Hojas del árbol, sumando todas las ramas. */
   readonly totalArbol = computed(
     () =>
-      this.arbol().reduce((suma, rama) => suma + rama.documentos.length, 0) +
+      (this.enArbol() ? this.documentosArbol().length : this.documentos().length) +
       this.normativas().length +
       this.otrosDocumentos().length,
   );
@@ -465,12 +487,6 @@ export class DocumentosPage {
   readonly hayFiltroDocumental = computed(() => {
     const filtros = this.parametros();
     return Boolean(filtros.tipo || filtros.estado || filtros.caso);
-  });
-
-  /** Pie del árbol: documentos por tipo, más las dos ramas no documentales. */
-  readonly resumenArbol = computed(() => {
-    const ramas = this.arbol().length;
-    return `${this.totalArbol()} registros · ${ramas} ramas de documentos más normativas y otros documentos · árbol del RAG de la OAIPCS.`;
   });
 
   /** Pie de la papelera: sólo lo que devuelve la API, sin estimar nada. */
@@ -512,14 +528,31 @@ export class DocumentosPage {
 
   /**
    * Tipos del catálogo, no una lista escrita a mano: el filtro y el formulario
-   * del panel usan el mismo vocabulario que la API.
+   * del panel usan el mismo vocabulario que la API. Se ordenan por etiqueta y
+   * «Otro» queda al final, como bolsa del resto de categorías.
    */
   private readonly catalogo = consulta<readonly OpcionCatalogo[]>({
     fuente: () => urlApi('/v1/catalogs'),
     esquema: aTiposDocumento,
   });
 
-  readonly tipos = computed(() => this.catalogo.valor() ?? []);
+  readonly tipos = computed(() => {
+    const opciones = [...(this.catalogo.valor() ?? [])];
+    return opciones.sort((a, b) => {
+      const aBolsa = esBolsaOtros(a);
+      const bBolsa = esBolsaOtros(b);
+      if (aBolsa !== bBolsa) return aBolsa ? 1 : -1;
+      return a.etiqueta.localeCompare(b.etiqueta, 'es', { sensitivity: 'base' });
+    });
+  });
+
+  /**
+   * Categorías del filtro. «Reporte de Actividad» no se ofrece aquí: esos
+   * reportes se consultan en su propia pantalla (`/reportes`).
+   */
+  readonly tiposFiltro = computed(() =>
+    this.tipos().filter((tipo) => tipo.valor !== 'reporte_actividad'),
+  );
 
   /** Documento mostrado al abrir la fila; `null` cierra el panel. */
   readonly seleccionadaId = signal<string | null>(null);

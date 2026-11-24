@@ -17,6 +17,7 @@ import type { ErrorApi } from '../../core/http/errores';
 import { RIESGOS, formatearFechaCorta } from '../../dominio/mapeo';
 import type { Riesgo } from '../../dominio/modelos';
 import { IconoComponent } from '../../shared/ui/icono.component';
+import { AdjuntosPanelComponent } from '../../shared/ui/adjuntos-panel.component';
 import {
   TerritorioBuscadorComponent,
   type OpcionTerritorio,
@@ -125,7 +126,7 @@ function partesDeRuta(ruta: string | null | undefined): { provincia: string; reg
  */
 @Component({
   selector: 'app-alerta-panel',
-  imports: [IconoComponent, TerritorioBuscadorComponent],
+  imports: [IconoComponent, TerritorioBuscadorComponent, AdjuntosPanelComponent],
   templateUrl: './alerta-panel.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `

@@ -64,11 +64,18 @@ const PESTANAS: readonly { codigo: Pestana; etiqueta: string; descripcion: strin
           <h1 id="titulo-resultados">Resultados</h1>
         </div>
         <div class="view-actions">
+          <a
+            class="button-secondary"
+            routerLink="/directorio/actores"
+            title="Abre el directorio para preparar y cargar la lista de asistencia"
+          >
+            Cargar lista de asistencia
+          </a>
           <a class="button-secondary" routerLink="/documentos">Ver todos los documentos</a>
         </div>
       </header>
 
-      <section class="surface panel cargar-resultado" aria-labelledby="titulo-cargar">
+      <section class="surface panel" aria-labelledby="titulo-cargar">
         <div class="surface-heading">
           <div>
             <h3 id="titulo-cargar">Cargar un resultado</h3>
@@ -142,7 +149,9 @@ const PESTANAS: readonly { codigo: Pestana; etiqueta: string; descripcion: strin
           <table class="data-table" [attr.aria-label]="etiquetaActiva()">
             <thead>
               <tr>
-                <th scope="col" [appThOrden]="'codigo'" [orden]="orden">Código</th>
+                <th scope="col" class="col-codigo" [appThOrden]="'codigo'" [orden]="orden">
+                  Código
+                </th>
                 <th scope="col" [appThOrden]="'titulo'" [orden]="orden">Título</th>
                 <th scope="col" [appThOrden]="'fecha'" [orden]="orden">Fecha de reunión</th>
                 <th scope="col" [appThOrden]="'caso'" [orden]="orden">Caso vinculado</th>
@@ -152,12 +161,18 @@ const PESTANAS: readonly { codigo: Pestana; etiqueta: string; descripcion: strin
             <tbody>
               @for (documento of filasVisibles(); track documento.id) {
                 <tr>
-                  <td>{{ documento.codigo || 'Sin código' }}</td>
+                  <td class="col-codigo" [attr.title]="documento.codigo">
+                    {{ documento.codigo || 'Sin código' }}
+                  </td>
                   <td class="celda-titulo">{{ documento.titulo || 'Sin título' }}</td>
                   <td>{{ formatearFecha(documento.fecha) }}</td>
                   <td>
                     @if (documento.casoCode) {
-                      <a class="table-link" [routerLink]="['/casos', documento.casoCode]">
+                      <a
+                        class="table-link"
+                        [routerLink]="['/casos', documento.casoCode]"
+                        [attr.title]="documento.casoTitulo"
+                      >
                         {{ documento.casoCode }}
                       </a>
                     } @else {
@@ -204,8 +219,15 @@ const PESTANAS: readonly { codigo: Pestana; etiqueta: string; descripcion: strin
       white-space: normal;
     }
 
-    .cargar-resultado {
-      margin-top: 4px;
+    /* El global fija min-width 205px a la primera celda; el código no lo necesita. */
+    .data-table th.col-codigo,
+    .data-table td.col-codigo {
+      width: 120px;
+      min-width: 96px;
+      max-width: 140px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .carga-cuerpo {

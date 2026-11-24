@@ -620,3 +620,285 @@ export async function poblacionPorRegion(
     generadoEn: new Date().toISOString(),
   };
 }
+
+/* -------------------------------------------------------------------------- */
+/* Capas opcionales del mapa (`gis.infraestructuras_puntos` y auditorios)      */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Página de la capa de puntos. 13 456 filas no entran con holgura en una sola
+ * respuesta, así que se pagina; el tope es alto porque el mapa necesita los
+ * puntos para dibujarlos con el renderer canvas y el cliente recorre las
+ * páginas igual que hace con `GET /api/v1/cases`.
+ */
+export const CAPAS_PAGE_SIZE = 5_000;
+export const CAPAS_PAGE_SIZE_MAX = 10_000;
+
+/** Las dos poblaciones que mezcla `gis/Infraestructuras.kml`. */
+export type TipoInfraestructura = "derecho_acuicola" | "institucional";
+
+export function esTipoInfraestructuraValido(valor: string): boolean {
+  return valor === "derecho_acuicola" || valor === "institucional";
+}
+
+/**
+ * Punto de la capa GIS. No se proyecta `titular` ni `nombre`: son datos
+ * personales (Ley 29733) y el KML los repite en los derechos acuícolas. El
+ * nombre de la instalación sólo se sirve cuando el punto es una sede.
+ */
+export type InfraestructuraPunto = {
+  id: string;
+  tipo: TipoInfraestructura;
+  lat: number;
+  lon: number;
+  ubigeo: string | null;
+  distrito: string | null;
+  provincia: string | null;
+  region: string | null;
+  /** Institución dueña, sólo en sedes (`null` en derechos acuícolas). */
+  identi: string | null;
+  /** Nombre de la instalación, sólo en sedes. */
+  nombreInfraestructura: string | null;
+};
+
+/** Conteos de la tabla completa, independientes del filtro y de la página. */
+export type InfraestructurasResumen = {
+  /** Filas totales de la capa, con y sin coordenada. */
+  total: number;
+  derechosAcuicolas: number;
+  sedes: number;
+  /** Puntos que no se pueden dibujar: se declaran, no se descartan en silencio. */
+  sinCoordenada: number;
+};
+
+export type InfraestructurasQuery = {
+  tipo?: TipoInfraestructura;
+  page?: number;
+  pageSize?: number;
+};
+
+export type InfraestructurasResult = {
+  recurso: "infraestructuras";
+  tipo: TipoInfraestructura | null;
+  items: InfraestructuraPunto[];
+  /** Filas con coordenada que cumplen el filtro. */
+  total: number;
+  page: number;
+  pageSize: number;
+  resumen: InfraestructurasResumen;
+  generadoEn: string;
+};
+
+type InfraestructuraFila = {
+  id: string;
+  tipo_registro: string;
+  latitud: number | string | null;
+  longitud: number | string | null;
+  ubigeo: string | null;
+  distrito: string | null;
+  provincia: string | null;
+  departamento: string | null;
+  identi: string | null;
+  nombre_infraestructura: string | null;
+};
+
+/**
+ * Puntos de `gis.infraestructuras_puntos` (13 456 en la carga vigente).
+ *
+ * La capa no son instalaciones de PRODUCE: mezcla derechos acuícolas privados y
+ * sedes institucionales. El tipo se filtra en servidor; el mapa además lo usa
+ * para distinguir el símbolo. Se pagina con orden estable por `id`.
+ */
+export async function listarInfraestructurasPuntos(
+  client: PoolClient,
+  query: InfraestructurasQuery,
+): Promise<InfraestructurasResult> {
+  const page = Math.max(1, Math.trunc(query.page ?? 1));
+  const pageSize = Math.min(
+    CAPAS_PAGE_SIZE_MAX,
+    Math.max(1, Math.trunc(query.pageSize ?? CAPAS_PAGE_SIZE)),
+  );
+  const tipo = query.tipo ?? null;
+
+  const resumen = await client.query<{
+    total: number | string;
+    derechos: number | string;
+    sedes: number | string;
+    sin_coordenada: number | string;
+  }>(
+    `select count(*)::int as total,
+            count(*) filter (where tipo_registro = 'derecho_acuicola')::int as derechos,
+            count(*) filter (where tipo_registro = 'institucional')::int as sedes,
+            count(*) filter (where latitud is null or longitud is null)::int as sin_coordenada
+       from gis.infraestructuras_puntos`,
+  );
+
+  const conteo = await client.query<{ total: number | string }>(
+    `select count(*)::int as total
+       from gis.infraestructuras_puntos i
+      where i.latitud is not null
+        and i.longitud is not null
+        and ($1::text is null or i.tipo_registro = $1)`,
+    [tipo],
+  );
+
+  const resultado = await client.query<InfraestructuraFila>(
+    `select i.id,
+            i.tipo_registro,
+            i.latitud,
+            i.longitud,
+            i.ubigeo::text as ubigeo,
+            i.distrito,
+            i.provincia,
+            i.departamento,
+            i.identi,
+            case when i.tipo_registro = 'institucional'
+                 then i.nombre_infraestructura
+            end as nombre_infraestructura
+       from gis.infraestructuras_puntos i
+      where i.latitud is not null
+        and i.longitud is not null
+        and ($1::text is null or i.tipo_registro = $1)
+      order by i.id asc
+      limit $2 offset $3`,
+    [tipo, pageSize, (page - 1) * pageSize],
+  );
+
+  const items: InfraestructuraPunto[] = [];
+  for (const fila of resultado.rows) {
+    const lat = aNumero(fila.latitud);
+    const lon = aNumero(fila.longitud);
+    if (lat === null || lon === null) continue;
+    items.push({
+      id: fila.id,
+      tipo:
+        fila.tipo_registro === "institucional"
+          ? "institucional"
+          : "derecho_acuicola",
+      lat,
+      lon,
+      ubigeo: fila.ubigeo,
+      distrito: fila.distrito,
+      provincia: fila.provincia,
+      region: fila.departamento,
+      identi: fila.identi,
+      nombreInfraestructura: fila.nombre_infraestructura,
+    });
+  }
+
+  const resumenFila = resumen.rows[0];
+
+  return {
+    recurso: "infraestructuras",
+    tipo,
+    items,
+    total: Number(conteo.rows[0]?.total ?? 0),
+    page,
+    pageSize,
+    resumen: {
+      total: Number(resumenFila?.total ?? 0),
+      derechosAcuicolas: Number(resumenFila?.derechos ?? 0),
+      sedes: Number(resumenFila?.sedes ?? 0),
+      sinCoordenada: Number(resumenFila?.sin_coordenada ?? 0),
+    },
+    generadoEn: new Date().toISOString(),
+  };
+}
+
+/**
+ * Auditorio ubicado por el centroide de su distrito (`core.locales.distrito_id`
+ * → `core.distritos.ubigeo` → `territorio.distrito.centroide`).
+ *
+ * La precisión es «distrito», nunca «dirección»: es una ubicación referencial,
+ * no la puerta del local. Si el distrito no tiene centroide, el campo queda
+ * `null` y el mapa no inventa un punto.
+ */
+export type AuditorioMapa = {
+  id: string;
+  codigo: string;
+  nombre: string;
+  aforo: number | null;
+  activo: boolean;
+  ubigeo: string | null;
+  distrito: string | null;
+  provincia: string | null;
+  region: string | null;
+  centroide: Centroide | null;
+};
+
+export type AuditoriosResult = {
+  recurso: "auditorios";
+  items: AuditorioMapa[];
+  /** Filas del catálogo (27 en la carga vigente). */
+  total: number;
+  conCentroide: number;
+  /** Declarados: no se dibujan porque su distrito no tiene centroide. */
+  sinCentroide: number;
+  /** Declarados: no se dibujan porque no tienen distrito asignado. */
+  sinDistrito: number;
+  generadoEn: string;
+};
+
+type AuditorioFila = {
+  id: string;
+  codigo: string;
+  nombre: string;
+  aforo: number | null;
+  activo: boolean;
+  ubigeo: string | null;
+  distrito: string | null;
+  provincia: string | null;
+  region: string | null;
+  lat: number | string | null;
+  lon: number | string | null;
+};
+
+export async function listarAuditoriosMapa(
+  client: PoolClient,
+): Promise<AuditoriosResult> {
+  const resultado = await client.query<AuditorioFila>(
+    `select l.id::text as id,
+            l.codigo,
+            l.nombre,
+            l.aforo,
+            l.activo,
+            d.ubigeo::text as ubigeo,
+            d.nombre as distrito,
+            p.nombre as provincia,
+            rg.nombre as region,
+            ST_Y(t.centroide) as lat,
+            ST_X(t.centroide) as lon
+       from core.locales l
+       left join core.distritos d on d.id = l.distrito_id
+       left join core.provincias p on p.id = d.provincia_id
+       left join core.regiones rg on rg.id = p.region_id
+       left join territorio.distrito t on t.ubigeo = d.ubigeo
+      order by l.nombre asc, l.id asc`,
+  );
+
+  const items: AuditorioMapa[] = resultado.rows.map((fila) => ({
+    id: fila.id,
+    codigo: fila.codigo,
+    nombre: fila.nombre,
+    aforo: aNumero(fila.aforo),
+    activo: fila.activo,
+    ubigeo: fila.ubigeo,
+    distrito: fila.distrito,
+    provincia: fila.provincia,
+    region: fila.region,
+    centroide: centroideDe(fila.lat, fila.lon),
+  }));
+
+  const sinDistrito = items.filter((item) => item.ubigeo === null).length;
+  const sinCentroide = items.filter((item) => item.centroide === null).length;
+
+  return {
+    recurso: "auditorios",
+    items,
+    total: items.length,
+    conCentroide: items.length - sinCentroide,
+    sinCentroide,
+    sinDistrito,
+    generadoEn: new Date().toISOString(),
+  };
+}

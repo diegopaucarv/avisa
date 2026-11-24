@@ -6,6 +6,7 @@ import {
   ElementRef,
   afterNextRender,
   computed,
+  effect,
   inject,
   input,
   output,
@@ -28,6 +29,8 @@ import { aCaso } from '../../dominio/mapeo';
 import type { Caso } from '../../dominio/modelos';
 import { GlosarioComponent } from '../../shared/ui/glosario.component';
 import { IconoComponent } from '../../shared/ui/icono.component';
+import { AdjuntosPanelComponent } from '../../shared/ui/adjuntos-panel.component';
+import { formatearFechaHora } from '../../shared/formato-fecha';
 import {
   ALCANCES,
   CLASIFICACIONES_ALCANCE,
@@ -40,6 +43,7 @@ import {
   aCatalogosCompromiso,
   aCompromiso,
   aDetalleCompromiso,
+  aHistorialCompromiso,
   etiquetaClasificacionAlcance,
   etiquetaFormalVerbal,
   etiquetaNivelGobierno,
@@ -49,7 +53,9 @@ import {
   type Compromiso,
   type DetalleCompromiso,
   type EstadoHito,
+  type EventoCompromiso,
   type Hito,
+  type HistorialCompromiso,
   type OpcionCatalogo,
   type ResolucionVencimiento,
 } from './compromiso.mapeo';
@@ -138,7 +144,7 @@ const COMPROMISO_VACIO: Compromiso = aCompromiso({});
 
 @Component({
   selector: 'app-compromiso-panel',
-  imports: [IconoComponent, GlosarioComponent],
+  imports: [IconoComponent, GlosarioComponent, AdjuntosPanelComponent],
   templateUrl: './compromiso-panel.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
@@ -162,6 +168,10 @@ const COMPROMISO_VACIO: Compromiso = aCompromiso({});
     .drawer-body .detail-section:first-of-type {
       padding-top: 0;
       border-top: 0;
+    }
+    .drawer-body .detail-section h3 {
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
     }
     .panel-fecha {
       display: flex;
@@ -207,10 +217,52 @@ const COMPROMISO_VACIO: Compromiso = aCompromiso({});
       padding-top: 12px;
       border-top: 1px dashed #e2e8ee;
     }
+    .panel-hito-adjuntos {
+      margin-top: 10px;
+    }
+    .panel-hito-toggle {
+      min-height: 24px;
+      padding: 0 8px;
+      border: 1px solid #dbe3ea;
+      border-radius: 6px;
+      background: #fff;
+      color: #1d427f;
+      font: 600 11.5px/1 var(--font-body, system-ui);
+      cursor: pointer;
+    }
+    .panel-hito-toggle:hover {
+      background: #eaf1fb;
+    }
+    .panel-hito-toggle:focus-visible {
+      outline: 2px solid #2455a2;
+      outline-offset: 1px;
+    }
+    .panel-evento-form {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px dashed #e2e8ee;
+    }
+    .panel-evento-form h4 {
+      margin: 0;
+      color: #3c4a59;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .panel-evento-form .form-field {
+      padding: 0;
+      border: 0;
+      background: transparent;
+    }
     .panel-hito-form h4 {
       margin: 0;
       color: #3c4a59;
       font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
     }
     .panel-hito-form .form-field {
       padding: 0;
@@ -349,6 +401,15 @@ export class CompromisoPanelComponent {
   readonly hitoCambiando = signal<string | null>(null);
   readonly hitosError = signal<string | null>(null);
 
+  /** Último compromiso cuyo historial se pintó; sirve para reiniciar la UI. */
+  private ultimoCompromisoId = '';
+
+  /** Hitos con el panel de adjuntos desplegado; se monta sólo al expandir. */
+  readonly adjuntosHito = signal<ReadonlySet<string>>(new Set());
+  readonly eventoTexto = signal('');
+  readonly eventoGuardando = signal(false);
+  readonly eventoError = signal<string | null>(null);
+
   private readonly recurso = consulta<DetalleCompromiso>({
     fuente: () => {
       const id = this.compromiso()?.id;
@@ -385,6 +446,24 @@ export class CompromisoPanelComponent {
   readonly detalle = this.recurso.valor;
   readonly estadoCarga = this.recurso.estado;
   readonly errorCarga = this.recurso.error;
+
+  /**
+   * Historia del compromiso: eventos de `core.compromiso_evento`, hitos con su
+   * estado y adjuntos del compromiso y de sus hitos, en una sola respuesta.
+   */
+  private readonly historialRecurso = consulta<HistorialCompromiso>({
+    fuente: () => {
+      const id = this.compromiso()?.id;
+      return id ? urlApi(`/v1/commitments/${encodeURIComponent(id)}/historial`) : null;
+    },
+    esquema: aHistorialCompromiso,
+  });
+
+  readonly historial = this.historialRecurso.valor;
+  readonly estadoHistorial = this.historialRecurso.estado;
+  readonly errorHistorial = this.historialRecurso.error;
+  readonly eventosHistorial = computed(() => this.historial()?.eventos ?? []);
+  readonly lineaHistorial = computed(() => this.historial()?.linea ?? []);
 
   readonly modoAlta = computed(() => this.compromiso() === null);
   readonly formularioVisible = computed(() => this.modoAlta() || this.editando());
@@ -448,6 +527,18 @@ export class CompromisoPanelComponent {
   constructor() {
     afterNextRender(() => this.panel()?.nativeElement.focus());
 
+    // Al cambiar de compromiso se cierran los paneles de adjuntos por hito y se
+    // limpia el borrador de evento; el recurso de historial ya se refresca por
+    // la URL, así que aquí sólo se restablece la UI.
+    effect(() => {
+      const id = this.compromiso()?.id ?? '';
+      if (id === this.ultimoCompromisoId) return;
+      this.ultimoCompromisoId = id;
+      this.adjuntosHito.set(new Set());
+      this.eventoTexto.set('');
+      this.eventoError.set(null);
+    });
+
     // Escape cierra el panel aunque el foco esté dentro de un campo de texto.
     const alEscape = (evento: KeyboardEvent): void => {
       if (evento.key !== 'Escape') return;
@@ -496,6 +587,96 @@ export class CompromisoPanelComponent {
 
   recargarDetalle(): void {
     this.recurso.recargar();
+  }
+
+  recargarHistorial(): void {
+    this.historialRecurso.recargar();
+  }
+
+  /** Expande o contrae los adjuntos de un hito; el panel se monta bajo `@if`. */
+  alternarAdjuntosHito(id: string): void {
+    this.adjuntosHito.update((actual) => {
+      const siguiente = new Set(actual);
+      if (siguiente.has(id)) siguiente.delete(id);
+      else siguiente.add(id);
+      return siguiente;
+    });
+  }
+
+  adjuntosHitoAbiertos(id: string): boolean {
+    return this.adjuntosHito().has(id);
+  }
+
+  actualizarEventoTexto(evento: Event): void {
+    this.eventoTexto.set((evento.target as HTMLTextAreaElement).value);
+  }
+
+  /**
+   * `POST /v1/commitments/{id}/historial` con `{ tipo: 'nota', detalle }`.
+   * Sólo se ofrece a quien puede modificar; la API vuelve a autorizar.
+   */
+  async registrarEvento(): Promise<void> {
+    if (!this.puedeModificar()) {
+      this.eventoError.set('No tiene permisos para registrar eventos en este compromiso.');
+      return;
+    }
+
+    const texto = this.eventoTexto().trim();
+    if (!texto) {
+      this.eventoError.set('Escriba el detalle del evento.');
+      return;
+    }
+
+    const id = this.cabecera().id;
+    if (!id) {
+      this.eventoError.set('El compromiso no tiene identificador.');
+      return;
+    }
+
+    this.eventoGuardando.set(true);
+    this.eventoError.set(null);
+
+    try {
+      await firstValueFrom(
+        this.http.post<unknown>(urlApi(`/v1/commitments/${encodeURIComponent(id)}/historial`), {
+          tipo: 'nota',
+          detalle: { texto },
+        }),
+      );
+      this.eventoTexto.set('');
+      this.historialRecurso.recargar();
+    } catch (fallo) {
+      this.eventoError.set(this.mensajeDeError(fallo));
+    } finally {
+      this.eventoGuardando.set(false);
+    }
+  }
+
+  /** Etiqueta legible de un slug de evento; el slug se conserva si no hay traducción. */
+  etiquetaEvento(tipo: string): string {
+    const etiquetas: Record<string, string> = {
+      nota: 'Nota',
+      cambio_estado: 'Cambio de estado',
+      hito_creado: 'Hito registrado',
+      hito_actualizado: 'Hito actualizado',
+      adjunto: 'Adjunto',
+    };
+    return etiquetas[tipo] ?? tipo.replace(/[_-]+/g, ' ');
+  }
+
+  /** Sólo se pinta el texto declarado en `detalle.texto`; no se resume un JSON. */
+  detalleEvento(evento: EventoCompromiso): string {
+    const detalle = evento.detalle;
+    if (detalle && typeof detalle === 'object' && !Array.isArray(detalle)) {
+      const valor = (detalle as Record<string, unknown>)['texto'];
+      if (typeof valor === 'string' && valor.trim()) return valor.trim();
+    }
+    if (typeof detalle === 'string' && detalle.trim()) return detalle.trim();
+    return '';
+  }
+
+  fechaHoraTexto(valor: string | null | undefined): string {
+    return formatearFechaHora(valor);
   }
 
   abrirEdicion(): void {
@@ -636,6 +817,7 @@ export class CompromisoPanelComponent {
         );
         this.editando.set(false);
         this.recurso.recargar();
+        this.historialRecurso.recargar();
         this.actualizado.emit();
       }
     } catch (fallo) {
@@ -727,6 +909,7 @@ export class CompromisoPanelComponent {
         responsableTexto: '',
       });
       this.recurso.recargar();
+      this.historialRecurso.recargar();
       this.actualizado.emit();
     } catch (fallo) {
       this.hitosError.set(this.mensajeDeError(fallo));
@@ -765,6 +948,7 @@ export class CompromisoPanelComponent {
         ),
       );
       this.recurso.recargar();
+      this.historialRecurso.recargar();
       this.actualizado.emit();
     } catch (fallo) {
       select.value = hito.estado;
@@ -805,6 +989,7 @@ export class CompromisoPanelComponent {
         ),
       );
       this.recurso.recargar();
+      this.historialRecurso.recargar();
       this.actualizado.emit();
     } catch (fallo) {
       input.value = actual;

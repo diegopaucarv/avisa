@@ -221,20 +221,24 @@ Servidor admite además `caso` (`app/api/v1/alerts/route.ts:20`), que la SPA env
 
 ### 4.3 · Compromisos
 
-| Método   | Ruta                                  | Query / cuerpo                                                                                                                                |
-| -------- | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GET`    | `/v1/commitments`                     | `q, estado, tipo, nivelGobierno, atiendeGenero, anulados, excluir_terminales, vencimiento_desde, vencimiento_hasta`                           |
-| `GET`    | `/v1/commitments/resumen`             | — (sobre de conteos; ignora la query)                                                                                                         |
-| `GET`    | `/v1/commitments/{id}`                | — → `{ commitment \| compromiso, caso, documentoOrigen }`                                                                                     |
-| `PATCH`  | `/v1/commitments/{id}`                | `accion, tipo, estado, unidad, nivelGobierno, alcance, tematica, atiendeGenero, criteriosSmart, evidenciaUri, fechaVencimiento, fechaInicio?` |
-| `POST`   | `/v1/commitments/{id}/hitos`          | `{ descripcion, estado, fecha? }`                                                                                                             |
-| `PATCH`  | `/v1/commitments/{id}/hitos/{hitoId}` | `{ estado }`                                                                                                                                  |
-| `DELETE` | `/v1/commitments/{id}`                | `{ motivo }`                                                                                                                                  |
-| `POST`   | `/v1/commitments/{id}/restaurar`      | `{}`                                                                                                                                          |
+| Método   | Ruta                                            | Query / cuerpo                                                                                                                                |
+| -------- | ----------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET`    | `/v1/commitments`                               | `q, estado, tipo, nivelGobierno, atiendeGenero, anulados, excluir_terminales, vencimiento_desde, vencimiento_hasta`                           |
+| `GET`    | `/v1/commitments/resumen`                       | — (sobre de conteos; ignora la query)                                                                                                         |
+| `GET`    | `/v1/commitments/{id}`                          | — → `{ commitment \| compromiso, caso, documentoOrigen }`                                                                                     |
+| `PATCH`  | `/v1/commitments/{id}`                          | `accion, tipo, estado, unidad, nivelGobierno, alcance, tematica, atiendeGenero, criteriosSmart, evidenciaUri, fechaVencimiento, fechaInicio?` |
+| `POST`   | `/v1/commitments/{id}/hitos`                    | `{ descripcion, estado, fecha? }`                                                                                                             |
+| `PATCH`  | `/v1/commitments/{id}/hitos/{hitoId}`           | `{ descripcion?, fecha?, fechaTexto?, estado?, fechaReal?, fechaRealTexto?, evidencia?, responsableTexto? }`                                  |
+| `DELETE` | `/v1/commitments/{id}/hitos/{hitoId}`           | `{ motivo }`                                                                                                                                  |
+| `DELETE` | `/v1/commitments/{id}`                          | `{ motivo }`                                                                                                                                  |
+| `POST`   | `/v1/commitments/{id}/restaurar`                | `{}`                                                                                                                                          |
+| `POST`   | `/v1/commitments/{id}/hitos/{hitoId}/restaurar` | — (no existe: el `DELETE` del hito es baja lógica y no tiene contraparte)                                                                     |
 
 Servidor admite además `caso` y `unidad` en el listado, que la SPA no envía hoy (`app/api/v1/commitments/route.ts:19-27`).
 
 `criteriosSmart` es **JSON libre**: se lee como objeto y se reenvía tal cual, sin transformar. Los hitos sin `fecha` se descartan en el mapeo y `proximoHito` exige fecha (`compromiso.mapeo.ts:219-228`).
+
+El `PATCH` del hito acepta ocho campos y basta uno: sin ninguno responde 400 (`lib/db/repos/commitments.ts:1308-1342`). `responsableTexto` y `responsable_usuario_id` son mutuamente excluyentes (`chk_hitos_compromiso_responsable_excl`): declarar el texto retira la resolución a usuario, y `responsableUsuarioId` no se acepta todavía en la escritura. El hito se identifica por `id` o por `codigo_hito` (`commitments.ts:1292`).
 
 `/v1/commitments/resumen` devuelve un sobre de conteos, no de filas: `{ compromisos, hitos, hitosConFecha, hitosCumplidos, hitosCumplidosConFecha, compromisosConPlazo, generatedAt }` (`lib/db/repos/commitments.ts:1440-1487`). Cuenta compromisos e hitos vigentes (`anulado_en is null` en ambos) y mide el plazo por hitos, porque `core.compromisos` no guarda vencimiento propio: `compromisosConPlazo` es el número de compromisos con al menos un hito vigente con `fecha_vencimiento`. `hitosCumplidos` usa `cat_estados_hito.codigo = 'Cumplido'`. La SPA lo normaliza con `aResumenCompromisos` y, si el cuerpo no cumple el contrato, publica «No disponible» en vez de ceros (`resumen.mapeo.ts:34-64`).
 

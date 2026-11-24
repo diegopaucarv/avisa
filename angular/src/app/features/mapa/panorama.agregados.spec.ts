@@ -3,14 +3,19 @@ import { describe, expect, it } from 'vitest';
 import { aCaso } from '../../dominio/mapeo';
 import type { Caso, NivelConflicto } from '../../dominio/modelos';
 import {
+  bandasPorAlcance,
   casosDeRegion,
   casosPorDistritoUbigeo,
   casosSinDistrito,
   claseCoropleta,
+  claseManifiesto,
+  conteosPorAlcance,
   conteosPorSituacion,
+  ESCALA_MANIFIESTO,
   filasPorRegion,
   indicePoblacionPorRegion,
   poblacionDeRegion,
+  proporcionLatenteDe,
   situacionDe,
   tasaPor100k,
 } from './panorama.agregados';
@@ -59,15 +64,41 @@ describe('situacionDe', () => {
     expect(situacionDe(nivel)).toBe(esperado);
   });
 
-  it('no etiqueta un caso sin nivel declarado', () => {
-    expect(situacionDe(null)).toBeNull();
-    expect(situacionDe(undefined)).toBeNull();
-    expect(situacionDe('Otro' as NivelConflicto)).toBeNull();
+  // OVERRIDE 2026-11-24: el caso sin nivel declarado es latente, no una
+  // tercera situación. Así latente + manifiesto siempre suma el total.
+  it('cuenta el caso sin nivel declarado como latente', () => {
+    expect(situacionDe(null)).toBe('latente');
+    expect(situacionDe(undefined)).toBe('latente');
+    expect(situacionDe('Otro' as NivelConflicto)).toBe('latente');
+  });
+});
+
+describe('proporcionLatenteDe', () => {
+  it('divide latentes entre el total', () => {
+    expect(proporcionLatenteDe(3, 4)).toBe(0.75);
+    expect(proporcionLatenteDe(0, 4)).toBe(0);
+    expect(proporcionLatenteDe(4, 4)).toBe(1);
+  });
+
+  it('devuelve 0 con total 0 en vez de inventar una proporción', () => {
+    expect(proporcionLatenteDe(0, 0)).toBe(0);
+    expect(proporcionLatenteDe(2, 0)).toBe(0);
+  });
+});
+
+describe('claseManifiesto', () => {
+  it('va de verde (todo latente) a rojo (todo manifiesto)', () => {
+    expect(claseManifiesto(1)).toBe(0);
+    expect(claseManifiesto(0.9)).toBe(0);
+    expect(claseManifiesto(0.7)).toBe(1);
+    expect(claseManifiesto(0.5)).toBe(2);
+    expect(claseManifiesto(0.3)).toBe(3);
+    expect(claseManifiesto(0)).toBe(ESCALA_MANIFIESTO.length - 1);
   });
 });
 
 describe('conteosPorSituacion', () => {
-  it('separa latentes, manifiestos y sin nivel declarado', () => {
+  it('cuenta latentes y manifiestos sin dejar casos fuera', () => {
     const conteo = conteosPorSituacion([
       caso({ nivelConflicto: 'Diferencia' }),
       caso({ nivelConflicto: 'Controversia' }),
@@ -76,7 +107,40 @@ describe('conteosPorSituacion', () => {
       caso({ nivelConflicto: null }),
     ]);
 
-    expect(conteo).toEqual({ latente: 2, manifiesto: 2, sinNivel: 1 });
+    expect(conteo).toMatchObject({
+      latentes: 3,
+      manifiestos: 2,
+      total: 5,
+      proporcionLatente: 0.6,
+      sinNivel: 1,
+    });
+  });
+
+  it('declara la proporción 0 cuando no hay casos', () => {
+    expect(conteosPorSituacion([])).toMatchObject({
+      latentes: 0,
+      manifiestos: 0,
+      total: 0,
+      proporcionLatente: 0,
+    });
+  });
+});
+
+describe('conteosPorAlcance', () => {
+  it('expone latentes, manifiestos, total y proporción por ámbito', () => {
+    const [norte] = conteosPorAlcance([
+      caso({ alcance: 'Norte', nivelConflicto: 'Diferencia' }),
+      caso({ alcance: 'Norte', nivelConflicto: null }),
+      caso({ alcance: 'Norte', nivelConflicto: 'Crisis social' }),
+    ]);
+
+    expect(norte).toMatchObject({
+      alcance: 'Norte',
+      latentes: 2,
+      manifiestos: 1,
+      total: 3,
+    });
+    expect(norte?.proporcionLatente).toBeCloseTo(2 / 3, 6);
   });
 });
 
@@ -91,9 +155,39 @@ describe('filasPorRegion', () => {
     expect(fila).toMatchObject({
       region: 'Piura',
       total: 3,
-      latente: 1,
-      manifiesto: 1,
+      latentes: 2,
+      manifiestos: 1,
       sinNivel: 1,
+    });
+    expect(fila?.proporcionLatente).toBeCloseTo(2 / 3, 6);
+  });
+
+  it('marca proporción 1 cuando todos los casos de la región son latentes', () => {
+    const [fila] = filasPorRegion([caso({ nivelConflicto: null })]);
+    expect(fila?.proporcionLatente).toBe(1);
+  });
+});
+
+describe('bandasPorAlcance', () => {
+  it('expone la situación en la banda y en cada región', () => {
+    const [banda] = bandasPorAlcance([
+      caso({ alcance: 'Norte', region: 'Piura', nivelConflicto: 'Diferencia' }),
+      caso({ alcance: 'Norte', region: 'Piura', nivelConflicto: 'Crisis social' }),
+      caso({ alcance: 'Norte', region: null, nivelConflicto: null }),
+    ]);
+
+    expect(banda).toMatchObject({
+      alcance: 'Norte',
+      latentes: 2,
+      manifiestos: 1,
+      total: 3,
+      sinRegion: 1,
+    });
+    expect(banda?.regiones[0]).toMatchObject({
+      region: 'Piura',
+      latentes: 1,
+      manifiestos: 1,
+      total: 2,
     });
   });
 });
@@ -153,15 +247,30 @@ describe('aCaso', () => {
 });
 
 describe('casosPorDistritoUbigeo', () => {
-  it('cuenta por ubigeo y no por nombre', () => {
+  it('cuenta por ubigeo y no por nombre, con su situación', () => {
     const conteo = casosPorDistritoUbigeo([
       caso({ id: 'a', distrito: 'Santa Rosa', distritoUbigeo: '150101' }),
-      caso({ id: 'b', distrito: 'Santa Rosa', distritoUbigeo: '060101' }),
-      caso({ id: 'c', distrito: 'Santa Rosa', distritoUbigeo: '150101' }),
+      caso({
+        id: 'b',
+        distrito: 'Santa Rosa',
+        distritoUbigeo: '060101',
+        nivelConflicto: 'Crisis social',
+      }),
+      caso({ id: 'c', distrito: 'Santa Rosa', distritoUbigeo: '150101', nivelConflicto: null }),
     ]);
 
-    expect(conteo.get('150101')).toBe(2);
-    expect(conteo.get('060101')).toBe(1);
+    expect(conteo.get('150101')).toMatchObject({
+      latentes: 2,
+      manifiestos: 0,
+      total: 2,
+      proporcionLatente: 1,
+    });
+    expect(conteo.get('060101')).toMatchObject({
+      latentes: 0,
+      manifiestos: 1,
+      total: 1,
+      proporcionLatente: 0,
+    });
   });
 
   it('deja fuera los casos sin ubigeo y los declara aparte', () => {

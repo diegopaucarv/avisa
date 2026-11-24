@@ -10,7 +10,32 @@
  * la ficha muestre «—» en vez de afirmar «No».
  */
 
-import { booleano, esRegistro, leer, numero, texto, type Registro } from '../../dominio/mapeo';
+import {
+  booleano,
+  esRegistro,
+  leer,
+  lista,
+  numero,
+  texto,
+  type Registro,
+} from '../../dominio/mapeo';
+
+/**
+ * Tabla fantasma «responsables del local» (`local_responsables`).
+ *
+ * El contacto deja de vivir en columnas propias del local y pasa a colgar de
+ * una tabla relacionada 1→N: cada local puede tener varios responsables con
+ * nombre, correo y teléfono. La migración aún no se aplica en la base; el
+ * frontend anticipa la relación y, mientras la API no la devuelva, rellena la
+ * lista con el contacto heredado (`contacto_*`) para no perder lo que hoy se
+ * muestra en la ficha.
+ */
+export type ResponsableLocal = {
+  id: string;
+  nombre: string | null;
+  correo: string | null;
+  telefono: string | null;
+};
 
 export type LocalDirectorio = {
   id: string;
@@ -31,13 +56,22 @@ export type LocalDirectorio = {
   tieneProyector: boolean | null;
   tieneEquiposComputo: boolean | null;
   tieneAudioMicro: boolean | null;
+  /** Responsables relacionados (`local_responsables`); nunca vacío si hay contacto. */
+  responsables: ResponsableLocal[];
+  /** JOIN aplanado del primer responsable: lo que pinta la tabla. */
+  responsable: string | null;
+  correo: string | null;
+  telefono: string | null;
+  /** Contacto heredado del contrato anterior; se conserva para no perderlo. */
   contactoNombre: string | null;
   contactoCelular: string | null;
   contactoEmail: string | null;
   recomendacion: string | null;
   fotoUrl: string | null;
-  activo: boolean;
+  disponible: boolean;
 };
+
+const CLAVES_RESPONSABLES = ['responsables', 'responsablesLocal', 'responsables_local'];
 
 /** Igual que `booleano`, pero distingue «no» de «no registrado» (`null`). */
 function booleanoOpcional(objeto: Registro, claves: readonly string[]): boolean | null {
@@ -45,12 +79,66 @@ function booleanoOpcional(objeto: Registro, claves: readonly string[]): boolean 
   return typeof valor === 'boolean' ? valor : null;
 }
 
-/** Registro de `GET /api/v1/locales` → dominio del directorio. */
-export function aLocalDirectorio(bruto: unknown): LocalDirectorio {
+/** Fila de la tabla relacionada de responsables → dominio. */
+function aResponsableLocal(bruto: unknown): ResponsableLocal {
   const registro: Registro = esRegistro(bruto) ? bruto : {};
 
   return {
     id: texto(registro, ['id']) ?? '',
+    nombre: texto(registro, ['nombre', 'responsable']),
+    correo: texto(registro, ['correo', 'email', 'correoElectronico', 'correo_electronico']),
+    telefono: texto(registro, ['telefono', 'teléfono', 'celular', 'contactoCelular']),
+  };
+}
+
+/** Una fila sin ningún dato no es un responsable: se descarta. */
+function conDatos(responsable: ResponsableLocal): boolean {
+  return Boolean(responsable.nombre || responsable.correo || responsable.telefono);
+}
+
+/** JOIN del contacto del local: responsable · teléfono · correo. */
+export function contactoDeLocal(local: LocalDirectorio): string | null {
+  const partes = [local.responsable, local.telefono, local.correo].filter(
+    (parte): parte is string => Boolean(parte),
+  );
+
+  return partes.length > 0 ? partes.join(' · ') : null;
+}
+
+/** Dirección, distrito, provincia y región en una sola línea. */
+export function ubicacionDeLocal(local: LocalDirectorio): string | null {
+  const partes = [local.direccion, local.distrito, local.provincia, local.region].filter(
+    (parte): parte is string => Boolean(parte),
+  );
+
+  return partes.length > 0 ? partes.join(', ') : null;
+}
+
+/** Registro de `GET /api/v1/locales` → dominio del directorio. */
+export function aLocalDirectorio(bruto: unknown): LocalDirectorio {
+  const registro: Registro = esRegistro(bruto) ? bruto : {};
+
+  const id = texto(registro, ['id']) ?? '';
+  const contactoNombre = texto(registro, ['contactoNombre', 'contacto_nombre']);
+  const contactoCelular = texto(registro, ['contactoCelular', 'contacto_celular']);
+  const contactoEmail = texto(registro, ['contactoEmail', 'contacto_email']);
+
+  const relacionados = lista(registro, CLAVES_RESPONSABLES).map(aResponsableLocal).filter(conDatos);
+
+  // Sin tabla relacionada en la respuesta, el contacto heredado se presenta
+  // como único responsable: la vista lee siempre de una sola fuente.
+  const heredado: ResponsableLocal = {
+    id: `${id}-contacto`,
+    nombre: contactoNombre,
+    correo: contactoEmail,
+    telefono: contactoCelular,
+  };
+  const responsables =
+    relacionados.length > 0 ? relacionados : conDatos(heredado) ? [heredado] : [];
+  const principal = responsables[0];
+
+  return {
+    id,
     codigo: texto(registro, ['codigo']) ?? '',
     nombre: texto(registro, ['nombre']) ?? 'Sin nombre',
     distritoId: numero(registro, ['distritoId', 'distrito_id']),
@@ -67,11 +155,18 @@ export function aLocalDirectorio(bruto: unknown): LocalDirectorio {
       'tiene_equipos_computo',
     ]),
     tieneAudioMicro: booleanoOpcional(registro, ['tieneAudioMicro', 'tiene_audio_micro']),
-    contactoNombre: texto(registro, ['contactoNombre', 'contacto_nombre']),
-    contactoCelular: texto(registro, ['contactoCelular', 'contacto_celular']),
-    contactoEmail: texto(registro, ['contactoEmail', 'contacto_email']),
+    responsables,
+    responsable:
+      texto(registro, ['responsable', 'responsableNombre', 'responsable_nombre']) ??
+      principal?.nombre ??
+      contactoNombre,
+    correo: texto(registro, ['correo']) ?? principal?.correo ?? contactoEmail,
+    telefono: texto(registro, ['telefono', 'teléfono']) ?? principal?.telefono ?? contactoCelular,
+    contactoNombre,
+    contactoCelular,
+    contactoEmail,
     recomendacion: texto(registro, ['recomendacion']),
     fotoUrl: texto(registro, ['fotoUrl', 'foto_url']),
-    activo: booleano(registro, ['activo']),
+    disponible: booleano(registro, ['disponible', 'activo']),
   };
 }

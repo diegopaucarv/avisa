@@ -39,18 +39,24 @@ import { IconoComponent } from '../../shared/ui/icono.component';
 import { OrdenTabla } from '../../shared/ui/orden-tabla';
 import { PaginacionComponent } from '../../shared/ui/paginacion.component';
 import { ThOrdenDirective } from '../../shared/ui/th-orden.directive';
-import { aLocalDirectorio, type LocalDirectorio } from './local.mapeo';
+import {
+  aLocalDirectorio,
+  contactoDeLocal,
+  ubicacionDeLocal,
+  type LocalDirectorio,
+} from './local.mapeo';
 
 type FiltrosLocales = {
   q: string;
-  activo: string;
+  /** La UI lo llama «disponible»; el backend filtra por la clave `activo`. */
+  disponible: string;
   pagina: number;
   tamano: number;
 };
 
 const FILTROS_INICIALES: FiltrosLocales = {
   q: '',
-  activo: '',
+  disponible: '',
   pagina: 1,
   tamano: TAMANO_PAGINA,
 };
@@ -60,11 +66,15 @@ const FILTROS_INICIALES: FiltrosLocales = {
  *
  * Sedes donde se reúnen los espacios de diálogo (Guía §8.2.5 y Anexo 16,
  * columna «Lugar»). Listado paginado en servidor (`GET /api/v1/locales`) con
- * búsqueda y filtro de estado activo, en la URL con `replaceUrl`.
+ * búsqueda y filtro de disponibilidad, en la URL con `replaceUrl`.
  *
- * La ficha muestra dirección, referencia de ubicación y evaluación (comentario de
- * conveniencia). El contacto del local —dato operativo, no PII de actores— sólo
- * se muestra a los roles con `puedeVerPii()`.
+ * La tabla muestra código y nombre en la misma celda (código arriba, sin
+ * recortar) y una columna de contacto que une responsable, teléfono y correo.
+ * La ficha ordena código/disponible, título, foto y ubicación en una sola línea,
+ * y desde ella se genera el mensaje de WhatsApp en una ventana propia.
+ *
+ * El contacto del local —dato operativo, no PII de actores— sólo se muestra a
+ * los roles con `puedeVerPii()`.
  */
 @Component({
   selector: 'app-locales',
@@ -101,8 +111,21 @@ const FILTROS_INICIALES: FiltrosLocales = {
       gap: 16px;
     }
 
+    /* El nombre ocupa media tabla: dos líneas y sin recorte del texto. */
+    .tabla-locales {
+      table-layout: fixed;
+    }
+
+    .tabla-locales .col-nombre {
+      width: 50%;
+      white-space: normal;
+      overflow-wrap: anywhere;
+    }
+
     .local-nombre {
-      display: block;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
       width: 100%;
       padding: 0;
       border: 0;
@@ -113,8 +136,24 @@ const FILTROS_INICIALES: FiltrosLocales = {
       cursor: pointer;
     }
 
+    .local-codigo {
+      color: #8a98a5;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .local-titulo {
+      color: inherit;
+      font-weight: 600;
+      line-height: 1.35;
+      white-space: normal;
+      overflow-wrap: anywhere;
+    }
+
     .col-foto {
-      width: 46px;
+      width: 52px;
     }
 
     .tabla-foto {
@@ -157,22 +196,47 @@ const FILTROS_INICIALES: FiltrosLocales = {
       flex-wrap: wrap;
       align-items: center;
       gap: 6px;
-      margin-top: 8px;
     }
 
-    .ficha-chip {
-      background: #f0f3f5;
-      color: #657684;
-    }
-
-    .ficha-activo {
+    .ficha-disponible {
       background: #edf4ef;
       color: #557a64;
     }
 
-    .ficha-inactivo {
+    .ficha-no-disponible {
       background: #fff3e5;
       color: #a6732d;
+    }
+
+    .whatsapp-boton {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      width: 100%;
+    }
+
+    .ficha-foto {
+      margin: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 176px;
+      border-radius: 10px;
+      background: #f4f7f9;
+      overflow: hidden;
+    }
+
+    .ficha-foto img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .ficha-foto-vacia {
+      color: #a0aab3;
+      font-size: 12.5px;
+      font-style: italic;
     }
 
     .ficha-seccion {
@@ -184,7 +248,9 @@ const FILTROS_INICIALES: FiltrosLocales = {
     .ficha-seccion h3 {
       margin: 0;
       color: #33475b;
-      font: 700 13px var(--font-display);
+      font: 700 12px var(--font-display);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
     }
 
     .ficha-datos {
@@ -222,6 +288,11 @@ const FILTROS_INICIALES: FiltrosLocales = {
       overflow-wrap: anywhere;
     }
 
+    .ficha-responsable + .ficha-responsable {
+      padding-top: 8px;
+      border-top: 1px solid #eef2f6;
+    }
+
     .ficha-recomendacion {
       margin: 0;
       color: #52677a;
@@ -246,18 +317,196 @@ const FILTROS_INICIALES: FiltrosLocales = {
 
     .celda-contacto {
       white-space: normal;
-    }
-
-    .celda-contacto small {
-      display: block;
-      margin-top: 2px;
-      color: #96a1aa;
-      font-size: 12px;
+      overflow-wrap: anywhere;
+      line-height: 1.4;
     }
 
     .sin-dato {
       color: #a0aab3;
       font-style: italic;
+    }
+
+    /* ── Ventana «mensaje para WhatsApp» ─────────────────────────────────── */
+
+    .modal-scrim {
+      position: fixed;
+      inset: 0;
+      z-index: 120;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgb(16 28 40 / 45%);
+    }
+
+    .modal {
+      display: flex;
+      flex-direction: column;
+      width: min(900px, 100%);
+      max-height: calc(100vh - 40px);
+      border-radius: 14px;
+      background: #fff;
+      box-shadow: 0 24px 60px rgb(16 28 40 / 28%);
+      overflow: hidden;
+    }
+
+    .modal-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 18px 20px 14px;
+      border-bottom: 1px solid #e8edf1;
+    }
+
+    .modal-cabecera {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .modal-icono {
+      display: inline-flex;
+      flex: none;
+      align-items: center;
+      justify-content: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 9px;
+      background: #e6f7ef;
+      color: #1f7a58;
+    }
+
+    .modal-head h2 {
+      margin: 0;
+      color: #1a2b3e;
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .modal-subtitulo {
+      margin: 3px 0 0;
+      color: #647487;
+      font-size: 12.5px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .modal-cuerpo {
+      display: grid;
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+      gap: 16px;
+      padding: 16px 20px;
+      overflow-y: auto;
+    }
+
+    .modal-foto,
+    .modal-mensaje {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .modal-etiqueta,
+    .modal-sintaxis {
+      color: #647487;
+      font-size: 11.5px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .modal-foto-caja {
+      display: flex;
+      flex: 1;
+      align-items: center;
+      justify-content: center;
+      min-height: 260px;
+      border-radius: 10px;
+      background: #f4f7f9;
+      overflow: hidden;
+    }
+
+    .modal-foto-caja img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .modal-mensaje-cabecera {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .whatsapp-texto {
+      width: 100%;
+      flex: 1;
+      min-height: 240px;
+      padding: 12px 14px;
+      border: 1px solid #e0e6ec;
+      border-radius: 10px;
+      background: #f9fbfd;
+      color: #1a2b3e;
+      font:
+        500 13px/22px ui-monospace,
+        'SFMono-Regular',
+        'Menlo',
+        'Consolas',
+        monospace;
+      resize: vertical;
+    }
+
+    .whatsapp-texto:focus {
+      outline: 2px solid #c9d8ea;
+      outline-offset: 1px;
+      background: #fff;
+    }
+
+    .modal-nota {
+      margin: 0;
+      color: #97a1aa;
+      font-size: 11.5px;
+    }
+
+    .modal-pie {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 14px 20px;
+      border-top: 1px solid #e8edf1;
+      background: #fafbfc;
+    }
+
+    .modal-pie-grupo {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .modal-pie button {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .modal-aviso {
+      flex-basis: 100%;
+      margin: 0;
+      color: #2f6f52;
+      font-size: 12.5px;
+    }
+
+    @media (max-width: 860px) {
+      .modal-cuerpo {
+        grid-template-columns: minmax(0, 1fr);
+      }
     }
 
     @media (max-width: 720px) {
@@ -281,7 +530,7 @@ export class LocalesPage {
     this.ruta.queryParamMap.pipe(
       map((params) => ({
         q: params.get('q') ?? '',
-        activo: params.get('activo') ?? '',
+        disponible: params.get('activo') ?? '',
         pagina: Math.max(1, Number(params.get('pagina') ?? '1') || 1),
         tamano: Math.min(
           100,
@@ -300,7 +549,7 @@ export class LocalesPage {
       return urlConParametros(urlApi('/v1/locales'), {
         ...paramsDePagina({ pagina: filtros.pagina, tamano: filtros.tamano }),
         q: filtros.q,
-        activo: filtros.activo,
+        activo: filtros.disponible,
       });
     },
     esquema: (bruto) => {
@@ -320,14 +569,11 @@ export class LocalesPage {
 
   private readonly accesores: Record<string, (fila: LocalDirectorio) => unknown> = {
     nombre: (fila) => fila.nombre,
-    region: (fila) => fila.region,
-    distrito: (fila) => fila.distrito,
-    aforo: (fila) => fila.aforo,
-    contacto: (fila) => fila.contactoNombre ?? fila.contactoCelular,
+    contacto: (fila) => contactoDeLocal(fila),
     proyector: (fila) => fila.tieneProyector,
     computo: (fila) => fila.tieneEquiposComputo,
     audio: (fila) => fila.tieneAudioMicro,
-    activo: (fila) => fila.activo,
+    disponible: (fila) => fila.disponible,
   };
 
   readonly filasVisibles = computed(() => this.orden.ordenar(this.locales(), this.accesores));
@@ -368,13 +614,26 @@ export class LocalesPage {
   /** Local cuya ficha está abierta en el panel lateral. */
   readonly seleccionado = signal<LocalDirectorio | null>(null);
 
+  /** Local de la ventana de WhatsApp; `null` = ventana cerrada. */
+  readonly whatsappLocal = signal<LocalDirectorio | null>(null);
+
+  /** Texto editable del mensaje de WhatsApp. */
+  readonly mensajeWhatsapp = signal('');
+
+  /** Aviso de copia en la ventana de WhatsApp; vacío si no hubo. */
+  readonly avisoCopia = signal<string | null>(null);
+
   /** Último fallo del botón de exportación; vacío si no hubo. */
   readonly exportarError = signal<string | null>(null);
 
   private readonly panel = viewChild<ElementRef<HTMLElement>>('panel');
+  private readonly whatsappDialogo = viewChild<ElementRef<HTMLElement>>('whatsappDialogo');
 
   /** Elemento que tenía el foco al abrir, para devolvérselo al cerrar. */
   private focoPrevio: HTMLElement | null = null;
+
+  /** Elemento que abrió la ventana de WhatsApp, para devolverle el foco. */
+  private focoWhatsapp: HTMLElement | null = null;
 
   private temporizadorBusqueda?: ReturnType<typeof setTimeout>;
 
@@ -383,7 +642,15 @@ export class LocalesPage {
 
     if (typeof document !== 'undefined') {
       const alEscape = (evento: KeyboardEvent): void => {
-        if (evento.key !== 'Escape' || !this.seleccionado()) return;
+        if (evento.key !== 'Escape') return;
+
+        if (this.whatsappLocal()) {
+          evento.preventDefault();
+          this.cerrarWhatsapp();
+          return;
+        }
+
+        if (!this.seleccionado()) return;
         evento.preventDefault();
         this.cerrarPanel();
       };
@@ -408,6 +675,7 @@ export class LocalesPage {
   cerrarPanel(): void {
     if (this.seleccionado() === null) return;
 
+    this.cerrarWhatsapp();
     this.seleccionado.set(null);
     const previo = this.focoPrevio;
     this.focoPrevio = null;
@@ -422,8 +690,8 @@ export class LocalesPage {
     }, 300);
   }
 
-  cambiarActivo(evento: Event): void {
-    void this.actualizar({ activo: (evento.target as HTMLSelectElement).value, pagina: 1 });
+  cambiarDisponible(evento: Event): void {
+    void this.actualizar({ disponible: (evento.target as HTMLSelectElement).value, pagina: 1 });
   }
 
   cambiarPagina(pagina: number): void {
@@ -458,21 +726,101 @@ export class LocalesPage {
     return valor ? 'Sí' : 'No';
   }
 
+  /** Contacto unido del local (responsable · teléfono · correo). */
+  contacto(local: LocalDirectorio): string | null {
+    return contactoDeLocal(local);
+  }
+
+  /** Dirección, distrito, provincia y región en una sola línea. */
+  ubicacion(local: LocalDirectorio): string | null {
+    return ubicacionDeLocal(local);
+  }
+
+  /** Abre la ventana con el mensaje de WhatsApp ya generado. */
+  abrirWhatsapp(local: LocalDirectorio): void {
+    if (typeof document !== 'undefined') {
+      const activo = document.activeElement;
+      this.focoWhatsapp = activo instanceof HTMLElement ? activo : null;
+    }
+
+    this.avisoCopia.set(null);
+    this.mensajeWhatsapp.set(this.mensajeDeWhatsapp(local));
+    this.whatsappLocal.set(local);
+    afterNextRender(() => this.whatsappDialogo()?.nativeElement.focus(), {
+      injector: this.injector,
+    });
+  }
+
+  cerrarWhatsapp(): void {
+    if (this.whatsappLocal() === null) return;
+
+    this.whatsappLocal.set(null);
+    this.avisoCopia.set(null);
+    const previo = this.focoWhatsapp;
+    this.focoWhatsapp = null;
+    afterNextRender(() => previo?.focus(), { injector: this.injector });
+  }
+
+  editarMensaje(evento: Event): void {
+    this.mensajeWhatsapp.set((evento.target as HTMLTextAreaElement).value);
+    this.avisoCopia.set(null);
+  }
+
+  async copiarMensaje(): Promise<void> {
+    const texto = this.mensajeWhatsapp();
+
+    if (typeof navigator === 'undefined' || !navigator.clipboard) {
+      this.avisoCopia.set('No se pudo copiar. Seleccione el texto y use Ctrl + C.');
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(texto);
+      this.avisoCopia.set('Mensaje copiado al portapapeles para WhatsApp.');
+    } catch {
+      this.avisoCopia.set('No se pudo copiar. Seleccione el texto y use Ctrl + C.');
+    }
+  }
+
+  compartirWhatsapp(): void {
+    if (typeof window === 'undefined') return;
+    const url = `https://wa.me/?text=${encodeURIComponent(this.mensajeWhatsapp())}`;
+    window.open(url, '_blank', 'noopener,noreferrer');
+  }
+
+  descargarFoto(local: LocalDirectorio): void {
+    const foto = this.fotoDe(local.id);
+    if (!foto || typeof document === 'undefined') return;
+
+    const enlace = document.createElement('a');
+    enlace.href = foto.url;
+    enlace.download = (local.codigo || local.nombre).trim().replace(/\s+/g, '-').toLowerCase();
+    enlace.rel = 'noopener';
+    enlace.click();
+  }
+
   alFondo(evento: MouseEvent): void {
     if (evento.target === evento.currentTarget) this.cerrarPanel();
   }
 
-  alTecla(evento: KeyboardEvent): void {
-    if (evento.key === 'Tab') this.atraparFoco(evento);
+  alFondoWhatsapp(evento: MouseEvent): void {
+    if (evento.target === evento.currentTarget) this.cerrarWhatsapp();
   }
 
-  /** El panel es modal: Tab y Shift+Tab ciclan dentro de él. */
-  private atraparFoco(evento: KeyboardEvent): void {
-    const panel = this.panel()?.nativeElement;
-    if (!panel) return;
+  alTecla(evento: KeyboardEvent): void {
+    if (evento.key === 'Tab') this.atraparFoco(evento, this.panel()?.nativeElement);
+  }
+
+  alTeclaWhatsapp(evento: KeyboardEvent): void {
+    if (evento.key === 'Tab') this.atraparFoco(evento, this.whatsappDialogo()?.nativeElement);
+  }
+
+  /** La ventana abierta es modal: Tab y Shift+Tab ciclan dentro de ella. */
+  private atraparFoco(evento: KeyboardEvent, contenedor: HTMLElement | undefined): void {
+    if (!contenedor) return;
 
     const enfocables = Array.from(
-      panel.querySelectorAll<HTMLElement>(
+      contenedor.querySelectorAll<HTMLElement>(
         'button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])',
       ),
     );
@@ -489,10 +837,47 @@ export class LocalesPage {
       return;
     }
 
-    if (evento.shiftKey && (activo === primero || !panel.contains(activo))) {
+    if (evento.shiftKey && (activo === primero || !contenedor.contains(activo))) {
       evento.preventDefault();
       ultimo.focus();
     }
+  }
+
+  /**
+   * Mensaje de WhatsApp con la sintaxis del mockup: negritas `*`, emojis y sin
+   * líneas vacías para los datos que la base no registra.
+   */
+  private mensajeDeWhatsapp(local: LocalDirectorio): string {
+    const lineas: string[] = [`📍 *LOCAL | ${local.nombre.toUpperCase()}*`];
+
+    if (local.codigo) lineas.push(`*Código:* ${local.codigo}`);
+    lineas.push(`*Disponible:* ${local.disponible ? 'Sí' : 'No'}`);
+
+    const ubicacion = ubicacionDeLocal(local);
+    if (ubicacion) lineas.push(`*Ubicación:* ${ubicacion}`);
+    if (local.ubicacionRef) lineas.push(`*Referencia:* ${local.ubicacionRef}`);
+
+    const condiciones: string[] = [];
+    if (local.aforo !== null) condiciones.push(`✅ Aforo: ${local.aforo} personas`);
+    if (local.ingresos) condiciones.push(`✅ Accesos: ${local.ingresos}`);
+    condiciones.push(...this.equipamiento('Proyector / pantalla', local.tieneProyector));
+    condiciones.push(...this.equipamiento('Equipos de cómputo', local.tieneEquiposComputo));
+    condiciones.push(...this.equipamiento('Audio y micrófonos', local.tieneAudioMicro));
+
+    if (condiciones.length > 0) lineas.push('*Condiciones del local:*', ...condiciones);
+
+    if (local.recomendacion) lineas.push(`🟡 *EVALUACIÓN:* ${local.recomendacion}`);
+
+    const contacto = this.puedeVerPii() ? contactoDeLocal(local) : null;
+    if (contacto) lineas.push(`*Contacto:* ${contacto}`);
+
+    return lineas.join('\n');
+  }
+
+  /** Línea ✅/❌ del equipamiento; vacía cuando la base no registra el dato. */
+  private equipamiento(etiqueta: string, valor: boolean | null): string[] {
+    if (valor === null) return [];
+    return [`${valor ? '✅' : '❌'} ${etiqueta}`];
   }
 
   private actualizar(cambios: Partial<FiltrosLocales>): void {
@@ -504,7 +889,7 @@ export class LocalesPage {
       relativeTo: this.ruta,
       queryParams: {
         q: siguiente.q || null,
-        activo: siguiente.activo || null,
+        activo: siguiente.disponible || null,
         pagina: siguiente.pagina > 1 ? siguiente.pagina : null,
         tamano: siguiente.tamano !== TAMANO_PAGINA ? siguiente.tamano : null,
       },

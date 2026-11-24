@@ -210,6 +210,14 @@ export type Alerta = {
   anuladoPor: string | null;
   anuladoPorNombre: string | null;
   anulacionId: string | null;
+  /** Marca de archivo (ISO 8601). Archivada no es anulada. */
+  archivadoEn: string | null;
+  /** Motivo declarado al archivar. */
+  motivoArchivo: string | null;
+  /** Usuario que archivó (id). */
+  archivadoPor: string | null;
+  /** Nombre legible de quien archivó. */
+  archivadoPorNombre: string | null;
 };
 
 export type DemandaAlerta = {
@@ -520,6 +528,10 @@ export function aAlerta(bruto: unknown): Alerta {
     anuladoPor: texto(registro, ['anuladoPor', 'anulado_por']),
     anuladoPorNombre: texto(registro, ['anuladoPorNombre', 'anulado_por_nombre']),
     anulacionId: texto(registro, ['anulacionId', 'anulacion_id']),
+    archivadoEn: texto(registro, ['archivadoEn', 'archivado_en']),
+    motivoArchivo: texto(registro, ['motivoArchivo', 'motivo_archivo']),
+    archivadoPor: texto(registro, ['archivadoPor', 'archivado_por']),
+    archivadoPorNombre: texto(registro, ['archivadoPorNombre', 'archivado_por_nombre']),
   };
 }
 

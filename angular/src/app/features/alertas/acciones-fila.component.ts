@@ -20,7 +20,8 @@ export type IdAccionAlerta =
   | 'enviar-revision'
   | 'modificar'
   | 'historial'
-  | 'whatsapp';
+  | 'whatsapp'
+  | 'archivar';
 
 /** Acción ya rotulada; `seccion` agrupa el menú con su encabezado. */
 export type AccionMenu = {

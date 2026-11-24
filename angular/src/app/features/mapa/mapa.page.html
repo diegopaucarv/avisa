@@ -36,7 +36,7 @@
       </span>
       <span class="stat-copy">
         <span>Casos latentes</span>
-        <strong>{{ conteoSituacion().latente }}</strong>
+        <strong>{{ conteoSituacion().latentes }}</strong>
       </span>
     </div>
 
@@ -46,7 +46,7 @@
       </span>
       <span class="stat-copy">
         <span>Casos manifiestos</span>
-        <strong>{{ conteoSituacion().manifiesto }}</strong>
+        <strong>{{ conteoSituacion().manifiestos }}</strong>
       </span>
     </div>
 
@@ -56,7 +56,7 @@
         <app-icono nombre="info" [tamano]="16" />
       </span>
       <span class="stat-copy">
-        <span>Sin nivel declarado</span>
+        <span>Sin nivel declarado · cuenta como latente</span>
         <strong>{{ conteoSituacion().sinNivel }}</strong>
       </span>
     </div>
@@ -83,7 +83,11 @@
     </div>
   </div>
 
-  @if (conteoSituacion().sinNivel > 0) { }
+  <p class="tabla-nota">
+    {{ porcentajeLatente(conteoSituacion().proporcionLatente) }} de los {{ conteoSituacion().total
+    }} casos visibles son latentes. Manifiesto = Conflicto social + Crisis social; latente = todo lo
+    demás, incluidos los casos sin nivel declarado.
+  </p>
 
   <div class="segmented ambito-chips" role="group" aria-label="Filtrar por ámbito">
     <button
@@ -116,10 +120,6 @@
       <div class="surface-heading mapa-cabeza">
         <div>
           <h3 id="titulo-mapa">Mapa referencial</h3>
-          <p>
-            Círculos por región y límites distritales sobre teselas OSM, que son referenciales; el
-            tamaño del círculo es el número de casos abiertos.
-          </p>
         </div>
         <div class="mapa-controles" role="group" aria-label="Capas del mapa">
           <button
@@ -137,8 +137,8 @@
         </div>
         @if (filaSeleccionada(); as seleccion) {
         <span class="region-chip region-chip-activa">
-          {{ seleccion.region }} · {{ seleccion.total }} {{ seleccion.total === 1 ? 'caso' : 'casos'
-          }}
+          {{ seleccion.region }} · {{ seleccion.latentes }} lat. / {{ seleccion.manifiestos }} man.
+          · {{ seleccion.total }} {{ seleccion.total === 1 ? 'caso' : 'casos' }}
           <button type="button" class="quitar-seleccion" (click)="quitarSeleccion()">
             Quitar selección
           </button>
@@ -171,9 +171,34 @@
       <ul class="mapa-leyenda" aria-label="Leyenda del mapa">
         <li>
           <span class="leyenda-punto" aria-hidden="true"></span>Tamaño del círculo = número de casos
+          (latentes y manifiestos)
         </li>
         <li><span class="leyenda-anillo" aria-hidden="true"></span>Región seleccionada</li>
         <li>Sólo se dibujan regiones con casos visibles</li>
+      </ul>
+
+      <ul
+        class="mapa-leyenda leyenda-escala"
+        aria-label="Color de los círculos según la proporción latente y manifiesta"
+      >
+        <li class="leyenda-titulo">Color = proporción manifiesta</li>
+        @for (tramo of escalaManifiesto; track tramo.etiqueta) {
+        <li>
+          <span
+            class="leyenda-escala-tramo"
+            [style.background]="tramo.relleno"
+            aria-hidden="true"
+          ></span
+          >{{ tramo.etiqueta }}
+        </li>
+        }
+        <li class="leyenda-extremos">
+          <span class="punto-situacion" style="background: #34785b" aria-hidden="true"></span>Más
+          latente ({{ conteoSituacion().latentes }})
+          <span class="punto-situacion" style="background: #ad4d46" aria-hidden="true"></span>Más
+          manifiesto ({{ conteoSituacion().manifiestos }}) · {{
+          porcentajeLatente(conteoSituacion().proporcionLatente) }} latente del total
+        </li>
       </ul>
 
       <ul
@@ -193,6 +218,121 @@
         }
       </ul>
 
+      <div class="mapa-capas" role="group" aria-labelledby="titulo-capas">
+        <h4 id="titulo-capas">Capas opcionales</h4>
+
+        <label class="capa-fila">
+          <input
+            type="checkbox"
+            [checked]="capaInfraVisible()"
+            (change)="alternarCapaInfraestructura()"
+          />
+          <span class="capa-texto">
+            <span class="capa-nombre">
+              <span class="punto-situacion" style="background: #397c79" aria-hidden="true"></span>
+              <span
+                class="punto-situacion"
+                style="background: #eaf1fb; border: 1.5px solid #1d427f"
+                aria-hidden="true"
+              ></span>
+              Infraestructuras · derechos acuícolas y sedes
+            </span>
+            <span class="capa-sub">
+              Puntos de <code>gis.infraestructuras_puntos</code>: derechos acuícolas en burbuja teal
+              y sedes en anillo azul.
+            </span>
+          </span>
+          <span class="capa-conteo">
+            @if (resumenInfra().total > 0) { {{ formatearNumero(resumenInfra().total) }} } @else { —
+            }
+          </span>
+        </label>
+
+        @if (capaInfraVisible()) {
+        <div class="capa-filtro" role="group" aria-label="Filtrar infraestructuras por tipo">
+          <button
+            type="button"
+            [attr.aria-pressed]="filtroInfra() === 'todos'"
+            (click)="elegirFiltroInfra('todos')"
+          >
+            Todas
+          </button>
+          <button
+            type="button"
+            [attr.aria-pressed]="filtroInfra() === 'derecho_acuicola'"
+            (click)="elegirFiltroInfra('derecho_acuicola')"
+          >
+            Derechos acuícolas ({{ formatearNumero(resumenInfra().derechosAcuicolas) }})
+          </button>
+          <button
+            type="button"
+            [attr.aria-pressed]="filtroInfra() === 'institucional'"
+            (click)="elegirFiltroInfra('institucional')"
+          >
+            Sedes ({{ formatearNumero(resumenInfra().sedes) }})
+          </button>
+        </div>
+        @if (estadoInfra() === 'cargando') {
+        <p class="mapa-estado-capas" role="status">Cargando los puntos de infraestructuras…</p>
+        } @if (errorInfra(); as fallo) {
+        <p class="mapa-estado-capas" role="alert">
+          No se pudo cargar la capa ({{ fallo.estado === 0 ? 'sin conexión' : 'error ' +
+          fallo.estado }}).
+          <button type="button" class="button-secondary" (click)="reintentarInfraestructura()">
+            Reintentar
+          </button>
+        </p>
+        } @if (resumenInfra().sinCoordenada > 0) {
+        <p class="mapa-estado-capas">
+          {{ formatearNumero(resumenInfra().sinCoordenada) }} puntos no traen coordenada y no se
+          dibujan.
+        </p>
+        } }
+
+        <label class="capa-fila">
+          <input
+            type="checkbox"
+            [checked]="capaAuditoriosVisible()"
+            (change)="alternarCapaAuditorios()"
+          />
+          <span class="capa-texto">
+            <span class="capa-nombre">
+              <span
+                class="punto-situacion"
+                style="background: #fff; border: 2px solid #1d427f"
+                aria-hidden="true"
+              ></span>
+              Auditorios
+            </span>
+            <span class="capa-sub">
+              Ubicados por centroide del distrito (precisión «distrito, no dirección»).
+            </span>
+          </span>
+          <span class="capa-conteo">
+            @if (resumenAuditorios().total > 0) { {{ formatearNumero(resumenAuditorios().total) }} }
+            @else { — }
+          </span>
+        </label>
+
+        @if (capaAuditoriosVisible()) { @if (estadoAuditorios() === 'cargando') {
+        <p class="mapa-estado-capas" role="status">Cargando los auditorios…</p>
+        } @if (errorAuditorios(); as fallo) {
+        <p class="mapa-estado-capas" role="alert">
+          No se pudo cargar la capa ({{ fallo.estado === 0 ? 'sin conexión' : 'error ' +
+          fallo.estado }}).
+          <button type="button" class="button-secondary" (click)="reintentarAuditorios()">
+            Reintentar
+          </button>
+        </p>
+        } @if (resumenAuditorios().conCentroide > 0) {
+        <p class="mapa-estado-capas">
+          {{ formatearNumero(resumenAuditorios().conCentroide) }} se ubican por centroide; {{
+          formatearNumero(resumenAuditorios().sinCentroide) }} sin centroide y {{
+          formatearNumero(resumenAuditorios().sinDistrito) }} sin distrito no se dibujan.
+        </p>
+        } }
+      </div>
+
       <p class="mapa-nota">
         «Sin casos» va sin relleno. {{ casosSinDistritoTotal() }} {{ casosSinDistritoTotal() === 1 ?
         'caso visible no declara' : 'casos visibles no declaran' }} distrito y no se ubican en el
@@ -206,23 +346,7 @@
       <div class="surface-heading regiones-cabeza">
         <div>
           <h3 id="titulo-regiones">Casos por región</h3>
-          <p>
-            Cada cabecera reordena las filas: el primer clic ordena de menor a mayor, el segundo de
-            mayor a menor y el tercero vuelve al orden por total. El riesgo alto y el nivel de
-            conflictividad son atributos propios de cada caso; la fila «Sin región» queda siempre al
-            final. Pulse el nombre de la región para abrir el listado filtrado por esa región o «Ver
-            casos» para revisarlos en el cajón con el territorio y el ámbito aplicados.
-          </p>
         </div>
-        <button
-          type="button"
-          class="button-secondary"
-          aria-haspopup="dialog"
-          (click)="abrirCajon($event)"
-        >
-          <app-icono nombre="casos" [tamano]="14" />
-          Ver casos
-        </button>
       </div>
 
       <div class="table-wrap">
@@ -231,7 +355,10 @@
             <tr>
               <th scope="col" [appThOrden]="'region'" [orden]="ordenRegiones">Región</th>
               <th scope="col" [appThOrden]="'ambitos'" [orden]="ordenRegiones">Ámbito</th>
-              <th scope="col" [appThOrden]="'situacion'" [orden]="ordenRegiones">Lat/Man</th>
+              <th scope="col" [appThOrden]="'situacion'" [orden]="ordenRegiones">
+                Latentes / manifiestos
+              </th>
+              <th scope="col" [appThOrden]="'proporcion'" [orden]="ordenRegiones">% latente</th>
               <th scope="col" [appThOrden]="'total'" [orden]="ordenRegiones">Total</th>
               <th scope="col" [appThOrden]="'tasa'" [orden]="ordenRegiones">Tasa</th>
               <th scope="col" [appThOrden]="'riesgoAlto'" [orden]="ordenRegiones">Riesgo alto</th>
@@ -246,7 +373,15 @@
                 </a>
               </td>
               <td>{{ etiquetaAmbitos(fila.ambitos) }}</td>
-              <td>{{ fila.latente }} / {{ fila.manifiesto }}</td>
+              <td>{{ fila.latentes }} / {{ fila.manifiestos }}</td>
+              <td>
+                <span
+                  class="punto-situacion"
+                  [style.background]="colorManifiesto(fila.proporcionLatente)"
+                  aria-hidden="true"
+                ></span
+                >{{ porcentajeLatente(fila.proporcionLatente) }}
+              </td>
               <td>{{ fila.total }}</td>
               <td class="celda-tasa">{{ formatearTasa(tasaFila(fila)) }}</td>
               <td>{{ fila.riesgoAlto }}</td>
@@ -259,7 +394,15 @@
                 </a>
               </td>
               <td>{{ etiquetaAmbitos(alcancesSinRegion()) }}</td>
-              <td>{{ situacionSinRegion().latente }} / {{ situacionSinRegion().manifiesto }}</td>
+              <td>{{ situacionSinRegion().latentes }} / {{ situacionSinRegion().manifiestos }}</td>
+              <td>
+                <span
+                  class="punto-situacion"
+                  [style.background]="colorManifiesto(situacionSinRegion().proporcionLatente)"
+                  aria-hidden="true"
+                ></span
+                >{{ porcentajeLatente(situacionSinRegion().proporcionLatente) }}
+              </td>
               <td>{{ sinRegion() }}</td>
               <td class="celda-tasa">—</td>
               <td>{{ riesgoAltoSinRegion() }}</td>
@@ -299,7 +442,14 @@
         </div>
         <div class="ambito-regiones">
           @for (region of banda.regiones; track region.region) {
-          <span class="region-chip">{{ region.region }} <strong>{{ region.total }}</strong></span>
+          <span class="region-chip">
+            <span
+              class="punto-situacion"
+              [style.background]="colorManifiesto(region.proporcionLatente)"
+              aria-hidden="true"
+            ></span>
+            {{ region.region }} <strong>{{ region.total }}</strong>
+          </span>
           } @if (banda.sinRegion > 0) {
           <span class="region-chip region-chip-vacia">
             Sin región <strong>{{ banda.sinRegion }}</strong>
@@ -315,10 +465,6 @@
     <div class="surface-heading">
       <div>
         <h3 id="titulo-casos-prioritarios">Casos priorizados</h3>
-        <p>
-          Orden: gravedad (riesgo Alto → Bajo, luego prioridad Urgente → Bajo) y, a igualdad, la
-          antigüedad de la fecha de inicio.
-        </p>
       </div>
     </div>
 
@@ -412,6 +558,13 @@
             <tr>
               <th scope="row">Casos abiertos</th>
               <td>{{ fichaCasos() }}</td>
+            </tr>
+            <tr>
+              <th scope="row">Latentes / manifiestos</th>
+              <td>
+                @if (fichaConteo(); as conteo) { {{ conteo.latentes }} latentes · {{
+                conteo.manifiestos }} manifiestos } @else { — }
+              </td>
             </tr>
             <tr>
               <th scope="row">Casos por 100 000 hab.</th>

@@ -1,0 +1,90 @@
+<div class="modal-scrim" (click)="alFondo($event)">
+  <section
+    #dialogo
+    class="modal"
+    tabindex="-1"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="archivo-titulo"
+    (click)="$event.stopPropagation()"
+  >
+    <header class="modal-head">
+      <div>
+        <p class="modal-codigo">{{ codigo() || 'Alerta sin código' }}</p>
+        <h2 id="archivo-titulo">
+          {{ esArchivar() ? 'Archivar alerta sin caso' : 'Quitar del archivo' }}
+        </h2>
+        @if (titulo()) {
+          <span class="modal-sitio">{{ titulo() }}</span>
+        }
+      </div>
+      <button
+        type="button"
+        class="icon-button"
+        aria-label="Cerrar la ventana de archivo"
+        (click)="cerrar.emit()"
+      >
+        <app-icono nombre="cerrar" [tamano]="18" />
+      </button>
+    </header>
+
+    <div class="modal-body">
+      @if (esArchivar()) {
+        <p class="modal-texto">
+          La alerta no tiene caso vinculado. Al archivarla sale de las colas de trabajo, pero
+          <strong>no se anula ni se borra</strong>: se conserva su estado y se consulta desde el
+          archivo.
+        </p>
+
+        @if (motivoActual()) {
+          <p class="modal-texto">Motivo registrado: {{ motivoActual() }}</p>
+        }
+
+        <div class="form-field">
+          <label class="form-label" for="archivo-motivo">Motivo del archivo *</label>
+          <textarea
+            id="archivo-motivo"
+            class="form-textarea"
+            rows="4"
+            [attr.maxlength]="maximo"
+            [value]="motivo()"
+            [attr.aria-describedby]="errorMotivo() ? 'archivo-contador archivo-error' : 'archivo-contador'"
+            (input)="campo($event)"
+          ></textarea>
+          <span id="archivo-contador" class="contador">
+            {{ motivo().length }} / {{ maximo }} caracteres · mínimo {{ minimo }}
+          </span>
+          @if (errorMotivo(); as fallo) {
+            <p id="archivo-error" class="campo-error" role="alert">{{ fallo }}</p>
+          }
+        </div>
+
+        <p class="modal-aviso">
+          Archivar no es anular. Queda registrado quién archiva y con qué motivo.
+        </p>
+      } @else {
+        <p class="modal-texto">
+          La alerta vuelve a las colas de trabajo. Su estado y su trazabilidad no cambian.
+        </p>
+      }
+
+      @if (errorEnvio(); as fallo) {
+        <p class="form-error" role="alert">{{ fallo }}</p>
+      }
+    </div>
+
+    <footer class="modal-foot">
+      <button type="button" class="button-secondary" [disabled]="enviando()" (click)="cerrar.emit()">
+        Cancelar
+      </button>
+      <button
+        type="button"
+        class="button-primary"
+        [disabled]="enviando() || !valido()"
+        (click)="alConfirmar()"
+      >
+        {{ enviando() ? 'Guardando…' : esArchivar() ? 'Archivar alerta' : 'Quitar del archivo' }}
+      </button>
+    </footer>
+  </section>
+</div>

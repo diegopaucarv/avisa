@@ -604,6 +604,17 @@
             <p>
               Visibilidad: <b>{{ a.visibilidad || '—' }}</b>
             </p>
+            @if (a.archivadoEn) {
+              <p>
+                Archivo: <b>{{ fecha(a.archivadoEn) }}</b>
+                @if (a.archivadoPorNombre) {
+                  · {{ a.archivadoPorNombre }}
+                }
+                @if (a.motivoArchivo) {
+                  · {{ a.motivoArchivo }}
+                }
+              </p>
+            }
           </section>
 
           <section class="alerta-seccion">
@@ -623,6 +634,15 @@
                 <a [href]="a.fuenteUrl" target="_blank" rel="noopener">Abrir la fuente</a>
               </p>
             }
+          </section>
+
+          <section class="alerta-seccion">
+            <app-adjuntos-panel
+              entidadTipo="alerta"
+              titulo="Adjuntos de la alerta"
+              [entidadId]="a.id"
+              [editable]="puedeModificar()"
+            />
           </section>
 
           <section class="alerta-seccion">

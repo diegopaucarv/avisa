@@ -38,6 +38,7 @@ import { PaginacionComponent } from '../../shared/ui/paginacion.component';
 import { SeleccionTabla } from '../../shared/ui/seleccion-tabla';
 import { ThOrdenDirective } from '../../shared/ui/th-orden.directive';
 import { AccionesFilaComponent, type AccionMenu } from './acciones-fila.component';
+import { AlertaArchivoComponent } from './alerta-archivo.component';
 import { AlertaModificacionComponent } from './alerta-modificacion.component';
 import {
   AlertaPanelComponent,
@@ -74,6 +75,10 @@ type FiltrosAlertas = {
   tamano: number;
   /** Sólo llega por URL: filtra el listado y presiembra el alta. */
   caso: string;
+  /** `true` sólo sin caso, `false` sólo con caso; vacío, todos. */
+  sinCaso: string;
+  /** `true` muestra las archivadas; vacío, la cola de trabajo. */
+  archivados: string;
 };
 
 const FILTROS_INICIALES: FiltrosAlertas = {
@@ -84,6 +89,8 @@ const FILTROS_INICIALES: FiltrosAlertas = {
   pagina: 1,
   tamano: TAMANO_PAGINA,
   caso: '',
+  sinCaso: '',
+  archivados: '',
 };
 
 /**
@@ -119,6 +126,7 @@ function totalDe(bruto: unknown): number {
     PaginacionComponent,
     AccionesFilaComponent,
     AlertaPanelComponent,
+    AlertaArchivoComponent,
     AlertaModificacionComponent,
     AlertaWhatsappComponent,
     AnularPanelComponent,
@@ -206,6 +214,25 @@ function totalDe(bruto: unknown): number {
       font-size: 12px;
     }
 
+    .sin-caso {
+      color: #99a3aa;
+      font-size: 12.5px;
+      font-style: italic;
+    }
+
+    .alerta-archivada {
+      display: block;
+      margin-top: 4px;
+      width: fit-content;
+      padding: 1px 7px;
+      border-radius: 999px;
+      background: #eef1f4;
+      color: #526577;
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
     .alerta-revisor {
       display: flex;
       flex-direction: column;
@@ -233,6 +260,12 @@ function totalDe(bruto: unknown): number {
       margin: 0;
       color: #8d99a6;
       font-size: 12px;
+    }
+
+    .alerta-guia {
+      margin: 2px 0 0;
+      color: #8d99a6;
+      font-size: 12.5px;
     }
 
     .aviso-ok {
@@ -266,7 +299,7 @@ function totalDe(bruto: unknown): number {
       width: 120px;
     }
     .col-estado {
-      width: 110px;
+      width: 130px;
     }
     .col-acciones {
       width: 72px;
@@ -305,6 +338,8 @@ export class AlertasPage {
         pagina: Math.max(1, Number(params.get('pagina') ?? '1') || 1),
         tamano: Math.max(1, Number(params.get('tamano') ?? String(TAMANO_PAGINA)) || TAMANO_PAGINA),
         caso: params.get('caso') ?? '',
+        sinCaso: params.get('sinCaso') ?? '',
+        archivados: params.get('archivados') ?? '',
       })),
     ),
     { initialValue: FILTROS_INICIALES },
@@ -321,6 +356,7 @@ export class AlertasPage {
       estado: filtros.estado,
       sort: filtros.orden,
       caso: filtros.caso,
+      sinCaso: filtros.sinCaso,
     });
   });
 
@@ -334,6 +370,8 @@ export class AlertasPage {
         estado: filtros.estado,
         sort: filtros.orden,
         caso: filtros.caso,
+        sinCaso: filtros.sinCaso,
+        archivados: filtros.archivados,
       });
     },
     esquema: (bruto) => {
@@ -359,6 +397,8 @@ export class AlertasPage {
           estado: filtros.estado,
           sort: filtros.orden,
           caso: filtros.caso,
+          sinCaso: filtros.sinCaso,
+          archivados: filtros.archivados,
           ...extra,
         });
       },
@@ -369,8 +409,22 @@ export class AlertasPage {
   private readonly atendidasRec = this.contar({ estado: 'Atendida' });
   private readonly pendientesRec = this.contar({ estado: 'Pendiente de revisión' });
 
+  // Segmento «Con caso» / «Sin caso»: respeta el resto de filtros y el archivo
+  // vigente; el propio segmento se ignora para que los conteos sean comparables.
+  private readonly conCasoRec = this.contar({ sinCaso: 'false' });
+  private readonly sinCasoRec = this.contar({ sinCaso: 'true' });
+
   readonly atendidas = computed(() => this.atendidasRec.valor() ?? null);
   readonly pendientes = computed(() => this.pendientesRec.valor() ?? null);
+  readonly conCaso = computed(() => this.conCasoRec.valor() ?? null);
+  readonly sinCaso = computed(() => this.sinCasoRec.valor() ?? null);
+
+  /** Total del segmento «Todos»: con caso + sin caso bajo los filtros vigentes. */
+  readonly totalActivas = computed(() => {
+    const conCaso = this.conCaso();
+    const sinCaso = this.sinCaso();
+    return conCaso === null || sinCaso === null ? null : conCaso + sinCaso;
+  });
 
   /** Alerta abierta en el panel; `null` cierra el panel. */
   readonly alertaAbierta = signal<Alerta | null>(null);
@@ -473,6 +527,12 @@ export class AlertasPage {
   readonly enviandoAnulacion = signal(false);
   readonly errorAnulacion = signal<string | null>(null);
   readonly avisoAnulacion = signal<string | null>(null);
+
+  /** Alerta que se está archivando o devolviendo a las colas de trabajo. */
+  readonly alertaArchivo = signal<Alerta | null>(null);
+  readonly enviandoArchivo = signal(false);
+  readonly errorArchivo = signal<string | null>(null);
+  readonly avisoArchivo = signal<string | null>(null);
 
   /** Último fallo del botón de exportación; vacío si no hubo. */
   readonly exportarError = signal<string | null>(null);
@@ -608,6 +668,14 @@ export class AlertasPage {
       { id: 'whatsapp', etiqueta: 'Enviar por WhatsApp', seccion: 'Gestión' },
     );
 
+    if (this.puedeArchivar(alerta)) {
+      acciones.push({
+        id: 'archivar',
+        etiqueta: alerta.archivadoEn ? 'Quitar del archivo' : 'Archivar sin caso',
+        seccion: 'Gestión',
+      });
+    }
+
     return acciones;
   }
 
@@ -632,6 +700,9 @@ export class AlertasPage {
         break;
       case 'whatsapp':
         this.abrirWhatsapp(alerta);
+        break;
+      case 'archivar':
+        this.abrirArchivo(alerta);
         break;
     }
   }
@@ -673,6 +744,18 @@ export class AlertasPage {
     return (
       this.capacidades.puedeEliminar() && this.capacidades.puedeModificar(alerta.clasificacion)
     );
+  }
+
+  /**
+   * Archivar sólo aplica a alertas sin caso vinculado y vigentes (no anuladas).
+   * Desarchivar siempre se permite: devuelve la fila a las colas aunque mientras
+   * tanto haya ganado un caso. Archivar no es anular: no exige el privilegio de
+   * borrado, sino de escritura.
+   */
+  puedeArchivar(alerta: Alerta): boolean {
+    if (!this.capacidades.puedeModificar(alerta.clasificacion)) return false;
+    if (alerta.archivadoEn) return !alerta.anuladoEn;
+    return !alerta.casoId && !alerta.anuladoEn;
   }
 
   /* ---------------------------------------------------------------------- *
@@ -845,6 +928,67 @@ export class AlertasPage {
     const plantilla = texto.trim() || null;
     this.alertaWhatsapp.set(null);
     this.enviar(alerta.id, { plantillaWhatsapp: plantilla });
+  }
+
+  /* ---------------------------------------------------------------------- *
+   * Archivo (sin caso, sin anular)
+   * ---------------------------------------------------------------------- */
+
+  abrirArchivo(alerta: Alerta): void {
+    if (!alerta.id || !this.puedeArchivar(alerta)) return;
+    this.aprobacionFila.set(null);
+    this.deshacerFila.set(null);
+    this.errorArchivo.set(null);
+    this.avisoArchivo.set(null);
+    this.alertaArchivo.set(alerta);
+  }
+
+  cerrarArchivo(): void {
+    if (this.enviandoArchivo()) return;
+    this.alertaArchivo.set(null);
+    this.errorArchivo.set(null);
+  }
+
+  confirmarArchivo(motivo: string | null): void {
+    const alerta = this.alertaArchivo();
+    if (!alerta || !alerta.id) return;
+
+    const archivar = !alerta.archivadoEn;
+    if (archivar && !(motivo ?? '').trim()) return;
+
+    this.enviandoArchivo.set(true);
+    this.errorArchivo.set(null);
+
+    const ruta = urlApi(`/v1/alerts/${encodeURIComponent(alerta.id)}/archivar`);
+    const peticion = archivar
+      ? this.http.post<unknown>(ruta, { motivo: (motivo ?? '').trim() })
+      : this.http.delete<unknown>(ruta);
+
+    peticion.subscribe({
+      next: () => {
+        this.enviandoArchivo.set(false);
+        this.alertaArchivo.set(null);
+        if (this.alertaAbierta()?.id === alerta.id) this.cerrarPanel();
+        this.avisoArchivo.set(
+          archivar
+            ? `Alerta ${alerta.codigo || 'seleccionada'} archivada. No se anuló: puede consultarse en las archivadas.`
+            : `Alerta ${alerta.codigo || 'seleccionada'} devuelta a las colas de trabajo.`,
+        );
+        this.recargarIndicadores();
+        this.listado.recargar();
+      },
+      error: (fallo: unknown) => {
+        this.enviandoArchivo.set(false);
+        this.errorArchivo.set(this.mensajeDeError(fallo));
+      },
+    });
+  }
+
+  private recargarIndicadores(): void {
+    this.atendidasRec.recargar();
+    this.pendientesRec.recargar();
+    this.conCasoRec.recargar();
+    this.sinCasoRec.recargar();
   }
 
   /* ---------------------------------------------------------------------- *
@@ -1024,6 +1168,16 @@ export class AlertasPage {
     void this.actualizar({ estado: valor, pagina: 1 });
   }
 
+  cambiarCaso(evento: Event): void {
+    const valor = (evento.target as HTMLSelectElement).value;
+    void this.actualizar({ sinCaso: valor, pagina: 1 });
+  }
+
+  cambiarArchivados(evento: Event): void {
+    const valor = (evento.target as HTMLSelectElement).value;
+    void this.actualizar({ archivados: valor, pagina: 1 });
+  }
+
   cambiarOrden(evento: Event): void {
     const valor = (evento.target as HTMLSelectElement).value;
     void this.actualizar({ orden: valor, pagina: 1 });
@@ -1117,6 +1271,8 @@ export class AlertasPage {
         estado: siguiente.estado || null,
         orden: siguiente.orden !== 'recent' ? siguiente.orden : null,
         caso: siguiente.caso || null,
+        sinCaso: siguiente.sinCaso || null,
+        archivados: siguiente.archivados || null,
         pagina: siguiente.pagina > 1 ? siguiente.pagina : null,
         tamano: siguiente.tamano !== TAMANO_PAGINA ? siguiente.tamano : null,
       },

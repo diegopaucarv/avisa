@@ -78,6 +78,20 @@ import {
   OpcionTipoHecho,
   aTiposHecho,
 } from './evento-panel.component';
+import {
+  type CasoActorFila,
+  type CasoActoresCaso,
+  type CuerpoVincularActor,
+  type MatrizCaso,
+  type MatrizCelda,
+  type MatrizFila,
+  type NudosCaso,
+  aCasoActores,
+  aMatrizCaso,
+  aNudosCaso,
+  etiquetaPosicion,
+} from './nudos-matriz.mapeo';
+import { VincularActorComponent } from './vincular-actor.component';
 import { EnlaceRiel, RielRelacionesComponent } from './riel-relaciones.component';
 
 /**
@@ -267,14 +281,11 @@ type ActorCasoConContacto = ActorCaso & {
 };
 
 /**
- * El mapeo compartido del caso descarta la clasificación, el carácter, la
- * bandera del Ministro y el responsable del hito; se recuperan del bruto sin
- * tocar `dominio/mapeo.ts`.
- */
-/**
  * Esquema de `GET /api/v1/cases/{codigo}` (y del `PATCH`, mismo contrato):
  * suma al mapeo del caso los hitos con su código, fecha real y bandera de
- * terminal, que la sección «Hitos del caso» necesita.
+ * terminal, que la sección «Hitos del caso» necesita. El mapeo compartido
+ * descarta la clasificación, el carácter, la bandera del Ministro y el
+ * responsable del hito; se recuperan del bruto sin tocar `dominio/mapeo.ts`.
  */
 export function aDetalleCasoConCompromisos(bruto: unknown): DetalleCasoConCompromisos {
   const detalle = aDetalleCasoConCierre(bruto);
@@ -298,6 +309,7 @@ export function aDetalleCasoConCompromisos(bruto: unknown): DetalleCasoConCompro
     AnularPanelComponent,
     RielRelacionesComponent,
     ThOrdenDirective,
+    VincularActorComponent,
   ],
   templateUrl: './caso-detalle.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -312,6 +324,48 @@ export function aDetalleCasoConCompromisos(bruto: unknown): DetalleCasoConCompro
     .aviso-ok {
       color: #2f6f52;
       font-size: 13.5px;
+    }
+
+    /* Tira de cifras de la matriz, con la jerarquía del mockup:
+       cifra grande y leyenda corta debajo. */
+    .reality-strip {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 1px;
+      margin-bottom: 12px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--line);
+      overflow: hidden;
+    }
+
+    .reality-strip div {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      padding: 10px 12px;
+      background: var(--canvas);
+    }
+
+    .reality-strip b {
+      font-size: 18px;
+      line-height: 1.2;
+    }
+
+    .reality-strip span {
+      font-size: 12.5px;
+      color: var(--muted);
+    }
+
+    .baja-inline {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      gap: 8px;
+    }
+
+    .baja-inline .form-campo {
+      flex: 1 1 260px;
     }
 
     .detail-hint {
@@ -627,6 +681,74 @@ export class CasoDetallePage {
   readonly detalle = this.recurso.valor;
   readonly estado = this.recurso.estado;
   readonly error = this.recurso.error;
+
+  /* ----------------------------------------------------------------------- *
+   * Soportes de la ficha (2026-11-24)
+   *
+   * `GET /cases/{codigo}` se mapea con `aDetalleCasoConCierre`, que no conoce
+   * nudos, matriz ni vínculo de actores. Cada soporte se pide aparte, con su
+   * propia `consulta`, para no tocar el mapeo compartido del dominio.
+   * --------------------------------------------------------------------- */
+
+  private readonly nudosRecurso = consulta<NudosCaso>({
+    fuente: () => {
+      const codigo = this.codigo();
+      if (!codigo) return null;
+      return urlApi(`/v1/cases/${encodeURIComponent(codigo)}/nudos`);
+    },
+    esquema: aNudosCaso,
+  });
+
+  readonly nudos = this.nudosRecurso.valor;
+  readonly estadoNudos = this.nudosRecurso.estado;
+  readonly errorNudos = this.nudosRecurso.error;
+
+  private readonly matrizRecurso = consulta<MatrizCaso>({
+    fuente: () => {
+      const codigo = this.codigo();
+      if (!codigo) return null;
+      return urlApi(`/v1/cases/${encodeURIComponent(codigo)}/matriz`);
+    },
+    esquema: aMatrizCaso,
+  });
+
+  readonly matriz = this.matrizRecurso.valor;
+  readonly estadoMatriz = this.matrizRecurso.estado;
+  readonly errorMatriz = this.matrizRecurso.error;
+
+  private readonly actoresRecurso = consulta<CasoActoresCaso>({
+    fuente: () => {
+      const codigo = this.codigo();
+      if (!codigo) return null;
+      return urlApi(`/v1/cases/${encodeURIComponent(codigo)}/actores`);
+    },
+    esquema: aCasoActores,
+  });
+
+  readonly actoresVinculo = this.actoresRecurso.valor;
+  readonly estadoActoresVinculo = this.actoresRecurso.estado;
+  readonly errorActoresVinculo = this.actoresRecurso.error;
+
+  /** Actor del vínculo por id; alimenta posición, nivel y vigencia de la tabla. */
+  readonly mapaActores = computed(() => {
+    const mapa = new Map<string, CasoActorFila>();
+    for (const actor of this.actoresVinculo()?.actores ?? []) {
+      mapa.set(actor.id, actor);
+    }
+    return mapa;
+  });
+
+  readonly semanasNudos = computed(() => this.nudos()?.semanas ?? []);
+  readonly coberturaNudos = computed(() => this.nudos()?.cobertura ?? null);
+  readonly columnasMatriz = computed(() => this.matriz()?.columnas ?? []);
+  readonly filasMatriz = computed(() => this.matriz()?.filas ?? []);
+
+  /** Ids de los actores con vínculo vigente; el panel no los vuelve a ofrecer. */
+  readonly idsActoresVinculados = computed<readonly string[]>(() =>
+    (this.actoresVinculo()?.actores ?? [])
+      .filter((actor) => actor.vigente)
+      .map((actor) => actor.id),
+  );
 
   /**
    * Hitos de todos los acuerdos y compromisos del caso, aplanados. Cada fila
@@ -970,6 +1092,9 @@ export class CasoDetallePage {
   recargar(): void {
     this.detalleActualizado.set(null);
     this.recurso.recargar();
+    this.nudosRecurso.recargar();
+    this.matrizRecurso.recargar();
+    this.actoresRecurso.recargar();
   }
 
   /** Opciones de un desplegable según el catálogo ya cargado. */
@@ -1416,6 +1541,161 @@ export class CasoDetallePage {
     enlace.click();
     URL.revokeObjectURL(enlace.href);
     this.avisoActores.set(`Se descargaron ${actores.length} actores de la ficha.`);
+  }
+
+  /* ----------------------------------------------------------------------- *
+   * Vínculo de actores: alta y baja lógica
+   * --------------------------------------------------------------------- */
+
+  readonly panelVincularAbierto = signal(false);
+  readonly guardandoVinculo = signal(false);
+  readonly errorVinculo = signal<string | null>(null);
+
+  readonly actorADesvincular = signal<string | null>(null);
+  readonly motivoBaja = signal('');
+  readonly enviandoBaja = signal(false);
+  readonly errorBaja = signal<string | null>(null);
+  readonly avisoBaja = signal<string | null>(null);
+
+  actorVinculo(id: string): CasoActorFila | undefined {
+    return this.mapaActores().get(id);
+  }
+
+  posicionDe(id: string): string {
+    return etiquetaPosicion(this.actorVinculo(id)?.posicion ?? null);
+  }
+
+  nivelDe(id: string): string {
+    const nivel = this.actorVinculo(id)?.nivelInfluencia;
+    return nivel === null || nivel === undefined ? '—' : String(nivel);
+  }
+
+  estaVigente(id: string): boolean {
+    return this.actorVinculo(id)?.vigente ?? true;
+  }
+
+  rolDe(id: string): string {
+    return this.actorVinculo(id)?.rolEnCaso ?? '—';
+  }
+
+  abrirVincularActor(): void {
+    if (!this.puedeModificar()) return;
+    this.errorVinculo.set(null);
+    this.avisoBaja.set(null);
+    this.panelVincularAbierto.set(true);
+  }
+
+  cerrarVincularActor(): void {
+    this.panelVincularAbierto.set(false);
+    this.errorVinculo.set(null);
+  }
+
+  guardarVincularActor(cuerpo: CuerpoVincularActor): void {
+    const codigo = this.codigo();
+    if (!codigo) return;
+
+    this.guardandoVinculo.set(true);
+    this.errorVinculo.set(null);
+
+    const url = urlApi(`/v1/cases/${encodeURIComponent(codigo)}/actores`);
+    this.http.post<unknown>(url, cuerpo).subscribe({
+      next: () => {
+        this.guardandoVinculo.set(false);
+        this.panelVincularAbierto.set(false);
+        this.actoresRecurso.recargar();
+        this.recurso.recargar();
+        this.avisoActores.set('Actor vinculado al caso.');
+      },
+      error: (fallo: unknown) => {
+        this.guardandoVinculo.set(false);
+        this.errorVinculo.set(this.mensajeDeErrorVinculo(fallo));
+      },
+    });
+  }
+
+  pedirDesvincular(actorId: string): void {
+    if (!this.puedeModificar()) return;
+    this.actorADesvincular.set(actorId);
+    this.motivoBaja.set('');
+    this.errorBaja.set(null);
+    this.avisoBaja.set(null);
+    this.avisoActores.set(null);
+  }
+
+  cancelarDesvincular(): void {
+    this.actorADesvincular.set(null);
+    this.motivoBaja.set('');
+    this.errorBaja.set(null);
+  }
+
+  alCambiarMotivoBaja(evento: Event): void {
+    this.motivoBaja.set((evento.target as HTMLInputElement).value);
+  }
+
+  confirmarDesvincular(): void {
+    const actorId = this.actorADesvincular();
+    const codigo = this.codigo();
+    const motivo = this.motivoBaja().trim();
+    if (!actorId || !codigo) return;
+    if (!motivo) {
+      this.errorBaja.set('El motivo de la desvinculación es obligatorio.');
+      return;
+    }
+
+    const url = urlApi(
+      `/v1/cases/${encodeURIComponent(codigo)}/actores/${encodeURIComponent(actorId)}?motivo=${encodeURIComponent(motivo)}`,
+    );
+    this.enviandoBaja.set(true);
+    this.errorBaja.set(null);
+
+    this.http.delete<unknown>(url).subscribe({
+      next: () => {
+        this.enviandoBaja.set(false);
+        this.actorADesvincular.set(null);
+        this.motivoBaja.set('');
+        this.actoresRecurso.recargar();
+        this.avisoActores.set('Actor desvinculado del caso. El histórico se conserva.');
+      },
+      error: (fallo: unknown) => {
+        this.enviandoBaja.set(false);
+        this.errorBaja.set(this.mensajeDeErrorVinculo(fallo));
+      },
+    });
+  }
+
+  private mensajeDeErrorVinculo(fallo: unknown): string {
+    const error = aErrorApi(fallo);
+    if (error.esProhibido) {
+      return 'Su rol no permite modificar los actores de este caso.';
+    }
+    // El mensaje de `503 MIGRACION_PENDIENTE` se muestra tal cual: explica qué
+    // migración falta y evita que el usuario crea que el fallo es suyo.
+    return error.message;
+  }
+
+  /* ----------------------------------------------------------------------- *
+   * Matriz demandas — intervenciones
+   * --------------------------------------------------------------------- */
+
+  celdaMatriz(fila: MatrizFila, clave: string): MatrizCelda {
+    return fila.celdas[clave] ?? { total: null, declaracion: 'Sin vínculo declarado' };
+  }
+
+  totalCelda(fila: MatrizFila, clave: string): string {
+    const celda = this.celdaMatriz(fila, clave);
+    return celda.total === null ? '—' : String(celda.total);
+  }
+
+  descargarMatrizCsv(): void {
+    const codigo = this.codigo();
+    if (!codigo) return;
+    if (!isPlatformBrowser(this.plataforma)) return;
+
+    const url = urlApi(`/v1/cases/${encodeURIComponent(codigo)}/matriz/csv`);
+    const enlace = document.createElement('a');
+    enlace.href = url;
+    enlace.rel = 'noopener';
+    enlace.click();
   }
 
   /** Impresión de la ficha (item 42): usa la hoja `@media print` del componente. */

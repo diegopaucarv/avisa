@@ -1,0 +1,50 @@
+<section class="adjuntos" [attr.aria-label]="titulo()">
+  <header class="adjuntos-head">
+    <h3>
+      {{ titulo() }}
+      <span class="cuenta">{{ adjuntos().length }}</span>
+    </h3>
+    @if (editable()) {
+      <button
+        type="button"
+        class="adjuntar"
+        [disabled]="subiendo()"
+        (click)="archivoInput.click()"
+      >
+        {{ subiendo() ? 'Subiendo…' : 'Adjuntar archivo' }}
+      </button>
+      <input
+        #archivoInput
+        type="file"
+        class="oculto"
+        [accept]="aceptados"
+        (change)="alSeleccionar($event)"
+      />
+    }
+  </header>
+
+  @if (error(); as mensaje) {
+    <p class="error" role="alert">{{ mensaje }}</p>
+  }
+
+  @if (cargando()) {
+    <p class="nota" aria-live="polite">Cargando adjuntos…</p>
+  } @else if (adjuntos().length === 0) {
+    <p class="nota">Sin adjuntos registrados.</p>
+  } @else {
+    <ul class="lista">
+      @for (adjunto of adjuntos(); track adjunto.id) {
+        <li>
+          <span class="nombre" [title]="adjunto.nombre">{{ adjunto.nombre }}</span>
+          <span class="meta">{{ tamano(adjunto) }} · {{ fecha(adjunto.createdAt) }}</span>
+          <span class="acciones">
+            <button type="button" (click)="descargar(adjunto)">Ver</button>
+            @if (editable()) {
+              <button type="button" (click)="eliminar(adjunto)">Eliminar</button>
+            }
+          </span>
+        </li>
+      }
+    </ul>
+  }
+</section>

@@ -27,12 +27,18 @@ import { formatearFechaCorta } from '../../dominio/mapeo';
 import type { Alcance, Caso, PrioridadAtencion, Riesgo } from '../../dominio/modelos';
 import { coordenadaDeRegion } from './centroides.regiones';
 import {
+  CapasMapaService,
+  type PuntoInfraestructura,
+  type TipoInfraestructura,
+} from './capas.service';
+import {
   ambitosSinRegion,
   bandasPorAlcance,
   casosDeRegion,
   casosPorDistritoUbigeo,
   casosSinDistrito,
   claseCoropleta,
+  claseManifiesto,
   conteosPorAlcance,
   conteosPorSituacion,
   contarRegiones,
@@ -40,12 +46,14 @@ import {
   contarRiesgoAltoSinRegion,
   contarSinRegion,
   ESCALA_COROPLETA,
+  ESCALA_MANIFIESTO,
   filasPorRegion,
   indicePoblacionPorRegion,
   normalizarRegion,
   poblacionDeRegion,
   regionDe,
   tasaPor100k,
+  type ConteoDistrito,
   type FilaRegion,
 } from './panorama.agregados';
 import { PanoramaService } from './panorama.service';
@@ -63,19 +71,21 @@ const LIMITES_PERU: [number, number][] = [
 const RADIO_MIN = 11;
 const RADIO_MAX = 34;
 
-const ESTILO_CIRCULO: L.PathOptions = {
-  color: '#1d4b86',
-  weight: 1.5,
-  fillColor: '#2455a2',
-  fillOpacity: 0.3,
-};
-
-const ESTILO_CIRCULO_ACTIVO: L.PathOptions = {
-  color: '#173f73',
-  weight: 2.5,
-  fillColor: '#2455a2',
-  fillOpacity: 0.55,
-};
+/**
+ * Color del círculo por composición del agregado, no por el nivel de conflicto
+ * de un caso suelto. `ESCALA_MANIFIESTO` va de verde (todo latente) a rojo (todo
+ * manifiesto) en cinco tramos; el borde es un tono más oscuro del relleno.
+ * El tamaño sigue representando el volumen: sólo el color cambia de eje.
+ */
+function estiloCirculo(fila: FilaRegion, activa: boolean): L.PathOptions {
+  const tramo = ESCALA_MANIFIESTO[claseManifiesto(fila.proporcionLatente)];
+  return {
+    color: tramo.borde,
+    weight: activa ? 2.5 : 1.5,
+    fillColor: tramo.relleno,
+    fillOpacity: activa ? 0.9 : 0.7,
+  };
+}
 
 /** Relleno de la coropleta: un tono por tramo de `ESCALA_COROPLETA`. */
 const COLORES_COROPLETA = ['#e3e9f0', '#cfe0f5', '#9dc0e8', '#5f92cd', '#2455a2'];
@@ -126,7 +136,8 @@ function radioCirculo(total: number, maximo: number): number {
 }
 
 function etiquetaCirculo(fila: FilaRegion): string {
-  return `${fila.region} · ${fila.total} ${fila.total === 1 ? 'caso' : 'casos'}`;
+  const porcentaje = Math.round(fila.proporcionLatente * 100);
+  return `${fila.region} · ${fila.latentes} latentes · ${fila.manifiestos} manifiestos · ${fila.total} ${fila.total === 1 ? 'caso' : 'casos'} · ${porcentaje} % latente`;
 }
 
 /** Gravedad declarada del caso: ordena de más a menos grave. */
@@ -148,17 +159,24 @@ function compararInicio(a: string | null, b: string | null): number {
  *
  * Distribuye los casos reales por ámbito y región y agrupa su conflictividad en
  * situación latente (Diferencia + Controversia) y manifiesta (Conflicto social +
- * Crisis social), según la Guía §7.5.1; los casos sin nivel declarado se cuentan
- * aparte, sin estimarlos. La cabecera resume la situación con seis tarjetas
- * —latentes, manifiestos, sin nivel declarado (sólo si existe), regiones, riesgo
- * alto y sin región— y el panel «Casos por región» abre un cajón lateral «Ver
+ * Crisis social), según la Guía §7.5.1. OVERRIDE (decisión expresa del usuario,
+ * 2026-11-24): los casos sin nivel declarado cuentan como latentes, de modo que
+ * latente + manifiesto siempre suma el total. El conteo de «sin nivel» se
+ * conserva como declaración, no como tercera situación. La cabecera resume la
+ * situación con cuatro tarjetas fijas —latentes, manifiestos, regiones con casos
+ * y riesgo alto— más la de casos sin nivel declarado cuando existe, y el panel
+ * «Casos por región» abre un cajón lateral «Ver
  * casos» (item 109) con el territorio de la fila y el ámbito vigente, enlazado
  * al listado completo. El esquema usa
  * bandas, chips y una tabla derivados del conteo, y suma un mapa referencial de
  * OpenStreetMap con dos capas: un círculo por región con casos visibles, ubicado
  * en su centroide referencial (`centroides.regiones.ts`), y los límites
  * distritales coropléticos de `territorio.distrito` (item 129), cuyo relleno es
- * el número de casos abiertos por ubigeo. Al pulsar un polígono se abre su ficha
+ * el número de casos abiertos por ubigeo. El radio del círculo representa el
+ * volumen y el color, la proporción latente/manifiesta (`ESCALA_MANIFIESTO`); no
+ * codifica el nivel de conflicto de un caso suelto. Sobre el mismo mapa se
+ * encienden capas opcionales de infraestructuras y auditorios. Al pulsar un
+ * polígono se abre su ficha
  * territorial con población, casos y tasa por 100 000 habitantes. La tabla suma
  * esa tasa por región (item 131); la población sólo es denominador y nunca
  * interviene en el riesgo ni en la prioridad (Guía §7.5.2, Tabla 3).
@@ -173,15 +191,15 @@ function compararInicio(a: string | null, b: string | null): number {
   imports: [RouterLink, IconoComponent, ThOrdenDirective],
   templateUrl: './mapa.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [PanoramaService],
+  providers: [PanoramaService, CapasMapaService],
   styles: `
     :host {
       display: block;
     }
 
-    /* Hasta seis tarjetas (latentes, manifiestos, sin nivel, regiones, riesgo
-       alto y sin región); la rejilla global es de cuatro y aquí se fija. Con
-       auto-fit cinco o seis tarjetas reparten el ancho sin dejar un hueco. */
+    /* Hasta cinco tarjetas (latentes, manifiestos, sin nivel declarado, regiones
+       con casos y riesgo alto); la rejilla global es de cuatro y aquí se fija.
+       Con auto-fit las cinco reparten el ancho sin dejar un hueco. */
     .executive-kpis {
       grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     }
@@ -745,6 +763,120 @@ function compararInicio(a: string | null, b: string | null): number {
         grid-template-columns: 1fr;
       }
     }
+
+    /* ── Escala de color y capas opcionales ── */
+    .leyenda-escala {
+      align-items: center;
+    }
+
+    .leyenda-escala-tramo {
+      display: inline-block;
+      width: 16px;
+      height: 10px;
+      margin-right: 5px;
+      border-radius: 2px;
+      vertical-align: middle;
+    }
+
+    .leyenda-extremos {
+      color: #33475b;
+    }
+
+    .punto-situacion {
+      display: inline-block;
+      width: 9px;
+      height: 9px;
+      margin-right: 6px;
+      border-radius: 50%;
+      vertical-align: baseline;
+    }
+
+    .mapa-capas {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin: 12px 0 4px;
+      padding: 12px 14px;
+      border: 1px solid #e6ebef;
+      border-radius: 10px;
+      background: #fafbfc;
+    }
+
+    .mapa-capas h4 {
+      margin: 0;
+      font-size: 13px;
+      color: #33475b;
+    }
+
+    .capa-fila {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 9px 0;
+      border-top: 1px solid #eef2f6;
+      cursor: pointer;
+    }
+
+    .capa-fila input {
+      margin-top: 2px;
+    }
+
+    .capa-texto {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .capa-nombre {
+      font-size: 13px;
+      font-weight: 600;
+      color: #17283a;
+    }
+
+    .capa-sub {
+      font-size: 12px;
+      color: #778797;
+    }
+
+    .capa-conteo {
+      margin-left: auto;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+      color: #33475b;
+    }
+
+    .capa-filtro {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin: 2px 0 0 24px;
+    }
+
+    .capa-filtro button {
+      border: 1px solid #e6ebef;
+      border-radius: 999px;
+      background: #fff;
+      color: #33475b;
+      font-size: 12px;
+      padding: 3px 10px;
+      cursor: pointer;
+    }
+
+    .capa-filtro button[aria-pressed='true'] {
+      border-color: #2455a2;
+      background: #eaf1fb;
+      color: #1d427f;
+    }
+
+    .mapa-estado-capas {
+      margin: 0;
+      font-size: 12px;
+      color: #778797;
+    }
+
+    .mapa-estado-capas[role='alert'] {
+      color: #ad4d46;
+    }
   `,
 })
 export class MapaPage {
@@ -754,6 +886,7 @@ export class MapaPage {
   private readonly alcanceService = inject(AlcanceService);
   private readonly panorama = inject(PanoramaService);
   private readonly territorio = inject(TerritorioService);
+  private readonly capas = inject(CapasMapaService);
   private readonly destruccion = inject(DestroyRef);
 
   private readonly lienzo = viewChild<ElementRef<HTMLElement>>('lienzo');
@@ -788,13 +921,33 @@ export class MapaPage {
   readonly casosPorUbigeo = computed(() => casosPorDistritoUbigeo(this.visibles()));
   readonly casosSinDistritoTotal = computed(() => casosSinDistrito(this.visibles()));
 
+  /** Escala del color de los círculos: verde (latente) → rojo (manifiesto). */
+  readonly escalaManifiesto = ESCALA_MANIFIESTO;
+
+  // ── Capas opcionales (se encienden sobre el mapa principal) ──
+  readonly capaInfraVisible = signal(false);
+  readonly capaAuditoriosVisible = signal(false);
+  readonly filtroInfra = signal<'todos' | TipoInfraestructura>('todos');
+  readonly estadoInfra = this.capas.estadoInfra;
+  readonly errorInfra = this.capas.errorInfra;
+  readonly resumenInfra = this.capas.resumenInfra;
+  readonly estadoAuditorios = this.capas.estadoAuditorios;
+  readonly errorAuditorios = this.capas.errorAuditorios;
+  readonly resumenAuditorios = this.capas.resumenAuditorios;
+
+  private infraDerechos: L.LayerGroup | null = null;
+  private infraSedes: L.LayerGroup | null = null;
+  private capaAuditorios: L.LayerGroup | null = null;
+
   /** Ficha territorial del distrito pulsado (paso 3). */
   private readonly distritoActivo = signal<DistritoGeo | null>(null);
   readonly fichaDistrito = this.distritoActivo.asReadonly();
-  readonly fichaCasos = computed(() => {
+  readonly fichaConteo = computed<ConteoDistrito | null>(() => {
     const distrito = this.distritoActivo();
-    return distrito ? (this.casosPorUbigeo().get(distrito.ubigeo) ?? 0) : 0;
+    if (!distrito) return null;
+    return this.casosPorUbigeo().get(distrito.ubigeo) ?? null;
   });
+  readonly fichaCasos = computed(() => this.fichaConteo()?.total ?? 0);
   readonly fichaTasa = computed(() =>
     tasaPor100k(this.fichaCasos(), this.distritoActivo()?.poblacion ?? null),
   );
@@ -845,6 +998,47 @@ export class MapaPage {
       this.aplicarVisibilidadDistritos(mapa, visible);
       this.refrescarDistritos(conteo);
       void this.asegurarDistritos(mapa, region);
+    });
+
+    // Capa de infraestructuras: se pide la primera vez que se enciende y se
+    // dibuja con renderer canvas, porque son ~13 456 puntos. El filtro por tipo
+    // oculta un grupo sin volver a pedir los datos.
+    effect(() => {
+      this.versionMapa();
+      const mapa = this.mapa;
+      const visible = this.capaInfraVisible();
+      const filtro = this.filtroInfra();
+      const puntos = this.capas.puntosInfra();
+      if (!mapa) return;
+
+      if (!visible) {
+        this.infraDerechos?.remove();
+        this.infraSedes?.remove();
+        return;
+      }
+
+      if (puntos.length > 0 && !this.infraDerechos) this.construirInfra();
+
+      this.alternarGrupo(mapa, this.infraDerechos, filtro !== 'institucional');
+      this.alternarGrupo(mapa, this.infraSedes, filtro !== 'derecho_acuicola');
+    });
+
+    // Capa de auditorios: un marcador por distrito en su centroide, rotulado con
+    // el nombre del distrito. Se agrupa para no dibujar 27 chinchetas encimadas.
+    effect(() => {
+      this.versionMapa();
+      const mapa = this.mapa;
+      const visible = this.capaAuditoriosVisible();
+      const auditorios = this.capas.auditorios();
+      if (!mapa) return;
+
+      if (!visible) {
+        this.capaAuditorios?.remove();
+        return;
+      }
+
+      if (auditorios.length > 0 && !this.capaAuditorios) this.construirAuditorios();
+      this.alternarGrupo(mapa, this.capaAuditorios, true);
     });
 
     // El cajón de «Ver casos» se enfoca en cuanto `viewChild` resuelve el panel
@@ -952,7 +1146,8 @@ export class MapaPage {
   private readonly accesoresRegiones: Record<string, (fila: FilaRegion) => unknown> = {
     region: (fila) => fila.region,
     ambitos: (fila) => this.etiquetaAmbitos(fila.ambitos),
-    situacion: (fila) => [fila.latente, fila.manifiesto],
+    situacion: (fila) => [fila.latentes, fila.manifiestos],
+    proporcion: (fila) => fila.proporcionLatente,
     total: (fila) => fila.total,
     tasa: (fila) => this.tasasRegion().get(normalizarRegion(fila.region)) ?? null,
     riesgoAlto: (fila) => fila.riesgoAlto,
@@ -1220,6 +1415,150 @@ export class MapaPage {
     this.reintentoDistritos.update((valor) => valor + 1);
   }
 
+  /** Enciende/apaga la capa de infraestructuras y pide los puntos la 1.ª vez. */
+  alternarCapaInfraestructura(): void {
+    const siguiente = !this.capaInfraVisible();
+    this.capaInfraVisible.set(siguiente);
+    if (siguiente) void this.capas.cargarInfraestructuras();
+  }
+
+  /** Enciende/apaga la capa de auditorios y pide la lista la 1.ª vez. */
+  alternarCapaAuditorios(): void {
+    const siguiente = !this.capaAuditoriosVisible();
+    this.capaAuditoriosVisible.set(siguiente);
+    if (siguiente) void this.capas.cargarAuditorios();
+  }
+
+  elegirFiltroInfra(filtro: 'todos' | TipoInfraestructura): void {
+    this.filtroInfra.set(filtro);
+  }
+
+  /** El servicio no cachea los fallos: un reintento vuelve a pedir la capa. */
+  reintentarInfraestructura(): void {
+    void this.capas.cargarInfraestructuras();
+  }
+
+  reintentarAuditorios(): void {
+    void this.capas.cargarAuditorios();
+  }
+
+  /** Porcentaje latente redondeado, para leyenda y tabla («60 %»). */
+  porcentajeLatente(proporcion: number): string {
+    return `${Math.round(proporcion * 100)} %`;
+  }
+
+  /** Color del tramo de `ESCALA_MANIFIESTO` para una proporción latente (0..1). */
+  colorManifiesto(proporcion: number): string {
+    return ESCALA_MANIFIESTO[claseManifiesto(proporcion)].relleno;
+  }
+
+  /**
+   * Puntos de infraestructuras en dos grupos: derechos acuícolas (miles, sin
+   * interacción y sobre canvas) y sedes (pocas, con tooltip). Construir una vez
+   * y alternar grupos evita rehacer 13 456 marcadores al cambiar el filtro.
+   */
+  private construirInfra(): void {
+    const derechos = L.layerGroup();
+    const sedes = L.layerGroup();
+    const renderer = L.canvas({ padding: 0.3 });
+
+    for (const punto of this.capas.puntosInfra()) {
+      if (punto.tipo === 'institucional') {
+        L.circleMarker([punto.lat, punto.lon], {
+          radius: 4,
+          color: '#1d427f',
+          weight: 1.6,
+          fillColor: '#eaf1fb',
+          fillOpacity: 0.95,
+        })
+          .bindTooltip(this.etiquetaSede(punto), { direction: 'top', sticky: true })
+          .addTo(sedes);
+        continue;
+      }
+
+      L.circleMarker([punto.lat, punto.lon], {
+        radius: 2.4,
+        color: '#397c79',
+        weight: 0,
+        fillColor: '#397c79',
+        fillOpacity: 0.55,
+        interactive: false,
+        renderer,
+      }).addTo(derechos);
+    }
+
+    this.infraDerechos = derechos;
+    this.infraSedes = sedes;
+  }
+
+  /**
+   * Auditorios agrupados por distrito: un marcador por centroide, rotulado con
+   * el nombre del distrito y cuántos auditorios contiene. La precisión es
+   * «distrito», nunca la puerta del local.
+   */
+  private construirAuditorios(): void {
+    const grupo = L.layerGroup();
+    const porDistrito = new Map<
+      string,
+      { nombre: string; lat: number; lon: number; total: number }
+    >();
+
+    for (const auditorio of this.capas.auditorios()) {
+      const centroide = auditorio.centroide;
+      if (!centroide) continue;
+
+      const clave = auditorio.ubigeo ?? `${centroide.lat},${centroide.lon}`;
+      const actual = porDistrito.get(clave);
+      if (actual) {
+        actual.total += 1;
+        continue;
+      }
+      porDistrito.set(clave, {
+        nombre: auditorio.distrito ?? 'Distrito sin declarar',
+        lat: centroide.lat,
+        lon: centroide.lon,
+        total: 1,
+      });
+    }
+
+    for (const distrito of porDistrito.values()) {
+      const etiqueta = `${distrito.nombre} · ${distrito.total} ${
+        distrito.total === 1 ? 'auditorio' : 'auditorios'
+      }`;
+      L.circleMarker([distrito.lat, distrito.lon], {
+        radius: 6,
+        color: '#1d427f',
+        weight: 2,
+        fillColor: '#ffffff',
+        fillOpacity: 0.95,
+      })
+        .bindTooltip(etiqueta, {
+          permanent: true,
+          direction: 'right',
+          className: 'etiqueta-auditorio',
+        })
+        .addTo(grupo);
+    }
+
+    this.capaAuditorios = grupo;
+  }
+
+  private etiquetaSede(punto: PuntoInfraestructura): string {
+    const nombre = punto.nombreInfraestructura ?? 'Sede institucional';
+    const institucion = punto.identi ?? 'Sin IDENTI';
+    const distrito = punto.distrito ?? 'distrito sin declarar';
+    return `${nombre} · ${institucion} · ${distrito}`;
+  }
+
+  private alternarGrupo(mapa: L.Map, grupo: L.LayerGroup | null, visible: boolean): void {
+    if (!grupo) return;
+    if (visible) {
+      if (!mapa.hasLayer(grupo)) grupo.addTo(mapa);
+    } else if (mapa.hasLayer(grupo)) {
+      grupo.remove();
+    }
+  }
+
   fechaInicio(valor: string | null): string {
     return formatearFechaCorta(valor);
   }
@@ -1265,6 +1604,9 @@ export class MapaPage {
     this.claveDistritos = '';
     this.distritosEnCurso = null;
     this.distritoSeleccionadoUbigeo = null;
+    this.infraDerechos = null;
+    this.infraSedes = null;
+    this.capaAuditorios = null;
     const mapa = this.mapa;
     this.mapa = null;
     mapa?.remove();
@@ -1334,7 +1676,7 @@ export class MapaPage {
       style: (rasgo) => {
         const ubigeo = ubigeoDelRasgo(rasgo);
         return estiloDistrito(
-          claseCoropleta(conteo.get(ubigeo ?? '') ?? 0),
+          claseCoropleta(conteo.get(ubigeo ?? '')?.total ?? 0),
           ubigeo === this.distritoSeleccionadoUbigeo,
         );
       },
@@ -1343,10 +1685,14 @@ export class MapaPage {
         const distrito = ubigeo ? porUbigeo.get(ubigeo) : undefined;
         if (!distrito) return;
 
-        const casos = conteo.get(distrito.ubigeo) ?? 0;
+        const registro = conteo.get(distrito.ubigeo);
+        const casos = registro?.total ?? 0;
+        const desglose = registro
+          ? ` · ${registro.latentes} lat. / ${registro.manifiestos} man.`
+          : '';
         const ruta = subcapa as L.Path;
         ruta.bindTooltip(
-          `${distrito.nombre} · ${casos} ${casos === 1 ? 'caso abierto' : 'casos abiertos'}`,
+          `${distrito.nombre} · ${casos} ${casos === 1 ? 'caso abierto' : 'casos abiertos'}${desglose}`,
           { direction: 'top', sticky: true },
         );
         ruta.on('click', () => this.abrirFichaDistrito(distrito, ruta));
@@ -1379,7 +1725,7 @@ export class MapaPage {
   }
 
   /** Reaplica el relleno y el resaltado sin reconstruir la geometría. */
-  private refrescarDistritos(conteo: ReadonlyMap<string, number>): void {
+  private refrescarDistritos(conteo: ReadonlyMap<string, ConteoDistrito>): void {
     const capa = this.capaDistritos;
     if (!capa) return;
 
@@ -1389,7 +1735,7 @@ export class MapaPage {
       if (!ubigeo) return;
       ruta.setStyle(
         estiloDistrito(
-          claseCoropleta(conteo.get(ubigeo) ?? 0),
+          claseCoropleta(conteo.get(ubigeo)?.total ?? 0),
           ubigeo === this.distritoSeleccionadoUbigeo,
         ),
       );
@@ -1423,7 +1769,7 @@ export class MapaPage {
       const clave = normalizarRegion(fila.region);
       const activa = clave === seleccion;
       const radio = radioCirculo(fila.total, maximo);
-      const estilo = activa ? ESTILO_CIRCULO_ACTIVO : ESTILO_CIRCULO;
+      const estilo = estiloCirculo(fila, activa);
       vigentes.add(clave);
 
       const existente = this.capasRegion.get(clave);

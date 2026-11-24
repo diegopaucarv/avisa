@@ -31,7 +31,6 @@ import {
 } from '../../shared/ui/anular-panel.component';
 import { BarraSeleccionComponent } from '../../shared/ui/barra-seleccion.component';
 
-import { GlosarioComponent } from '../../shared/ui/glosario.component';
 import { IconoComponent } from '../../shared/ui/icono.component';
 import { OrdenTabla } from '../../shared/ui/orden-tabla';
 import { PaginacionComponent } from '../../shared/ui/paginacion.component';
@@ -39,7 +38,6 @@ import { SeleccionTabla } from '../../shared/ui/seleccion-tabla';
 import { ThOrdenDirective } from '../../shared/ui/th-orden.directive';
 import {
   ESTADOS_COMPROMISO,
-  NIVELES_GOBIERNO,
   TIPOS_COMPROMISO,
   aCompromiso,
   etiquetaNivelGobierno,
@@ -50,7 +48,6 @@ import {
   type Compromiso,
   type OrigenVencimiento,
   type ResolucionVencimiento,
-  type Situacion,
 } from './compromiso.mapeo';
 import { CompromisoPanelComponent } from './compromiso-panel.component';
 import { MatrizEquipoComponent } from './matriz-equipo.component';
@@ -66,13 +63,7 @@ type FiltrosCompromisos = {
   ver: VerRegistros;
 };
 
-const GENERO = [
-  { valor: '', etiqueta: 'Todos' },
-  { valor: 'true', etiqueta: 'Sí atiende brecha de género' },
-  { valor: 'false', etiqueta: 'No atiende brecha de género' },
-] as const;
-
-type ModoVista = 'tabla' | 'calendario' | 'resumen' | 'matriz';
+type ModoVista = 'tabla' | 'calendario' | 'resumen' | 'matriz' | 'anexo14';
 
 /** Una fila del desglose: la etiqueta agrupada y cuántos compromisos suma. */
 type FilaDesglose = { etiqueta: string; total: number };
@@ -197,7 +188,6 @@ function totalDe(bruto: unknown): number {
   selector: 'app-compromisos',
   imports: [
     IconoComponent,
-    GlosarioComponent,
     PaginacionComponent,
     CompromisoPanelComponent,
     AnularPanelComponent,
@@ -210,6 +200,10 @@ function totalDe(bruto: unknown): number {
   styles: `
     .filter-bar {
       flex-wrap: wrap;
+    }
+    /* La pantalla tiene tres indicadores: no deja una cuarta celda vacía. */
+    .executive-kpis {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
     }
     .aviso-ok {
       margin: 0;
@@ -230,6 +224,14 @@ function totalDe(bruto: unknown): number {
       max-width: 320px;
       white-space: normal;
     }
+    .celda-compromiso .compromiso-codigo {
+      display: block;
+      margin: 0 0 2px;
+      font-size: 12px;
+    }
+    .compromiso-accion {
+      display: block;
+    }
     .celda-vencimiento {
       white-space: normal;
     }
@@ -244,6 +246,16 @@ function totalDe(bruto: unknown): number {
     }
     .aviso-fecha {
       color: #a27435 !important;
+    }
+    .anexo-avance {
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
+    }
+    .anexo-observaciones {
+      min-width: 220px;
+      color: #778797;
+      font-size: 12px;
+      line-height: 1.4;
     }
     .calendario-barra {
       display: flex;
@@ -260,11 +272,6 @@ function totalDe(bruto: unknown): number {
       margin: 0;
       font-size: 16px;
       color: #1c2a38;
-    }
-    .calendario-resumen {
-      margin: 0 0 0 auto;
-      color: #647487;
-      font-size: 12.5px;
     }
     .calendario-aviso {
       margin: 0 0 10px;
@@ -473,8 +480,6 @@ export class CompromisosPage {
 
   readonly estados = ESTADOS_COMPROMISO as readonly string[];
   readonly tipos = TIPOS_COMPROMISO as readonly string[];
-  readonly niveles = NIVELES_GOBIERNO as readonly string[];
-  readonly generos = GENERO;
 
   readonly seleccionado = signal<Compromiso | null>(null);
 
@@ -497,12 +502,10 @@ export class CompromisosPage {
     codigo: (compromiso) => compromiso.codigo,
     compromiso: (compromiso) => compromiso.accion,
     caso: (compromiso) => compromiso.casoCodigo,
-    tipo: (compromiso) => compromiso.tipo,
     unidad: (compromiso) => compromiso.unidad,
     estado: (compromiso) => compromiso.estado,
     vencimiento: (compromiso) => compromiso.fechaVencimiento,
     anulado: (compromiso) => compromiso.anuladoEn,
-    situacion: (compromiso) => this.situacion(compromiso).etiqueta,
   };
 
   readonly filasVisibles = computed(() =>
@@ -605,6 +608,9 @@ export class CompromisosPage {
   /** La matriz del equipo (Anexo 15 × Anexo 14, formato A..X) tampoco lista la papelera. */
   readonly vistaMatriz = computed(() => !this.verPapelera() && this.modo() === 'matriz');
 
+  /** La matriz del Anexo 14 lista los compromisos con sus columnas de seguimiento. */
+  readonly vistaAnexo14 = computed(() => !this.verPapelera() && this.modo() === 'anexo14');
+
   /**
    * Rejilla del mes visible, de lunes a domingo. Incluye los días de los meses
    * vecinos que completan la primera y la última semana, para que el rango
@@ -687,11 +693,9 @@ export class CompromisosPage {
 
   private readonly cumplidosRec = this.contar({ estado: 'Cumplido' });
   private readonly enProcesoRec = this.contar({ estado: 'En proceso' });
-  private readonly porIniciarRec = this.contar({ estado: 'Por iniciar' });
 
   readonly cumplidos = computed(() => this.cumplidosRec.valor() ?? null);
   readonly enProceso = computed(() => this.enProcesoRec.valor() ?? null);
-  readonly porIniciar = computed(() => this.porIniciarRec.valor() ?? null);
 
   /**
    * El calendario no pagina de 25 en 25: pide el rango completo de la rejilla
@@ -883,14 +887,6 @@ export class CompromisosPage {
 
   filtrarTipo(evento: Event): void {
     void this.actualizar({ tipo: this.valorDe(evento), pagina: 1 });
-  }
-
-  filtrarNivel(evento: Event): void {
-    void this.actualizar({ nivelGobierno: this.valorDe(evento), pagina: 1 });
-  }
-
-  filtrarGenero(evento: Event): void {
-    void this.actualizar({ atiendeGenero: this.valorDe(evento), pagina: 1 });
   }
 
   cambiarPagina(pagina: number): void {
@@ -1129,23 +1125,36 @@ export class CompromisosPage {
     return resolverVencimiento(compromiso);
   }
 
+  /**
+   * Avance del Anexo 14: hitos cumplidos sobre hitos registrados del
+   * compromiso. Sin hitos no se estima nada: se declara «Sin hitos».
+   */
+  avanceTexto(compromiso: Compromiso): string {
+    const total = compromiso.hitos.length;
+    if (total === 0) return 'Sin hitos';
+    const cumplidos = compromiso.hitos.filter((hito) => hito.estado === 'Cumplido').length;
+    return `${cumplidos}/${total} hitos cumplidos`;
+  }
+
+  /**
+   * La matriz del Anexo 14 no tiene columna de observaciones y AVISA no guarda
+   * texto libre por compromiso: se muestra sólo lo declarado, sin inventar.
+   */
+  observacionesTexto(compromiso: Compromiso): string {
+    const partes = [`Vencimiento: ${situacionDe(compromiso).etiqueta}`];
+    if (compromiso.tematica) partes.push(`Temática: ${compromiso.tematica}`);
+    if (compromiso.alcance) partes.push(`Alcance: ${compromiso.alcance}`);
+    return partes.join(' · ');
+  }
+
   origenTexto(origen: OrigenVencimiento): string {
     if (origen === 'manual') return 'Fecha manual';
     if (origen === 'hito') return 'Derivada del próximo hito';
     return 'Sin fecha';
   }
 
-  situacion(compromiso: Compromiso): Situacion {
-    return situacionDe(compromiso);
-  }
-
   fechaTexto(valor: string | null | undefined): string {
     return formatearFecha(valor);
-  }
-
-  /** «Regional» se muestra como GORE; a la API sigue viajando el valor del catálogo. */
-  nivelTexto(valor: string | null | undefined): string {
-    return etiquetaNivelGobierno(valor ?? null);
   }
 
   fechaHoraTexto(valor: string | null | undefined): string {

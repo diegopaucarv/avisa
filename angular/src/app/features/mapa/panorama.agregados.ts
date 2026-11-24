@@ -12,27 +12,43 @@ import type { Alcance, Caso, NivelConflicto } from '../../dominio/modelos';
 
 export type ConteoAlcance = {
   alcance: Alcance;
+  latentes: number;
+  manifiestos: number;
   total: number;
+  /** Casos latentes sobre el total del agregado (0..1). */
+  proporcionLatente: number;
+};
+
+/** Región dentro de una banda de ámbito: mismo contrato que cualquier agregado. */
+export type FilaBandaRegion = {
+  region: string;
+  latentes: number;
+  manifiestos: number;
+  total: number;
+  proporcionLatente: number;
 };
 
 export type BandaAmbito = {
   alcance: Alcance;
+  latentes: number;
+  manifiestos: number;
   total: number;
+  proporcionLatente: number;
   /** Porcentaje sobre el ámbito con más casos (0–100), sólo para la barra. */
   proporcion: number;
-  regiones: { region: string; total: number }[];
+  regiones: FilaBandaRegion[];
   /** Casos del ámbito sin región principal: no se suman a ninguna región. */
   sinRegion: number;
 };
 
 export type FilaRegion = {
   region: string;
+  latentes: number;
+  manifiestos: number;
   total: number;
-  /** Casos de situación latente (Diferencia + Controversia). */
-  latente: number;
-  /** Casos de situación manifiesta (Conflicto social + Crisis social). */
-  manifiesto: number;
-  /** Casos sin nivel declarado: no se cuentan como latentes ni manifiestos. */
+  /** Casos latentes sobre el total de la región (0..1). */
+  proporcionLatente: number;
+  /** Casos sin nivel declarado dentro de la región: cuentan como latentes. */
   sinNivel: number;
   riesgoAlto: number;
   /** Ámbitos presentes en los casos de la región, en orden de catálogo. */
@@ -45,45 +61,116 @@ export type FilaRegion = {
  */
 export type SituacionConflicto = 'latente' | 'manifiesto';
 
-/** Latente = Diferencia + Controversia; manifiesto = Conflicto y Crisis social. */
-export function situacionDe(nivel: NivelConflicto | null | undefined): SituacionConflicto | null {
+/**
+ * Manifiesto = Conflicto social + Crisis social.
+ *
+ * OVERRIDE (decisión expresa del usuario, 2026-11-24): **latente es todo lo
+ * demás, incluidos los casos sin nivel declarado**. La regla anterior dejaba
+ * esos casos fuera de las dos situaciones, de modo que latente + manifiesto no
+ * sumaba el total y la proporción no cerraba. Aquí todo caso cae en una de las
+ * dos situaciones; el conteo de «sin nivel» se conserva como declaración
+ * (`sinNivel`), no como tercera situación.
+ */
+export function situacionDe(nivel: NivelConflicto | null | undefined): SituacionConflicto {
   switch (nivel) {
-    case 'Diferencia':
-    case 'Controversia':
-      return 'latente';
     case 'Conflicto social':
     case 'Crisis social':
       return 'manifiesto';
     default:
-      return null;
+      return 'latente';
   }
 }
 
+/**
+ * Proporción latente de un agregado, en 0..1.
+ *
+ * Con `total` 0 no hay proporción que informar: devuelve 0 y la interfaz lo
+ * declara («—») en vez de inventar un 50 % o un 100 %.
+ */
+export function proporcionLatenteDe(latentes: number, total: number): number {
+  if (!Number.isFinite(latentes) || !Number.isFinite(total) || total <= 0) return 0;
+  return Math.min(1, Math.max(0, latentes / total));
+}
+
+/**
+ * Escala secuencial del color de los círculos del mapa.
+ *
+ * El color NO es el nivel de conflicto de un caso: representa la composición
+ * del agregado, de verde (todo latente) a rojo (todo manifiesto). Los tramos se
+ * declaran en la leyenda y se cortan por la proporción manifiesta
+ * (`1 - proporcionLatente`).
+ */
+export const ESCALA_MANIFIESTO: readonly {
+  /** Etiqueta del tramo, en % manifiesto. */
+  etiqueta: string;
+  hasta: number;
+  /** Relleno del círculo (tokens del brief: verde → ámbar → rojo). */
+  relleno: string;
+  /** Borde del círculo, un tono más oscuro que el relleno. */
+  borde: string;
+}[] = [
+  { etiqueta: '0–20 %', hasta: 0.2, relleno: '#34785b', borde: '#245c43' },
+  { etiqueta: '20–40 %', hasta: 0.4, relleno: '#6f9464', borde: '#527047' },
+  { etiqueta: '40–60 %', hasta: 0.6, relleno: '#b98a2a', borde: '#8a6518' },
+  { etiqueta: '60–80 %', hasta: 0.8, relleno: '#c4703f', borde: '#97502b' },
+  { etiqueta: '80–100 %', hasta: 1, relleno: '#ad4d46', borde: '#7f342f' },
+];
+
+/** Tramo de `ESCALA_MANIFIESTO` para una proporción latente (0..1). */
+export function claseManifiesto(proporcionLatente: number): number {
+  const latente = Number.isFinite(proporcionLatente)
+    ? Math.min(1, Math.max(0, proporcionLatente))
+    : 0;
+  const manifiesto = 1 - latente;
+  for (let indice = 0; indice < ESCALA_MANIFIESTO.length; indice += 1) {
+    if (manifiesto <= (ESCALA_MANIFIESTO[indice]?.hasta ?? 1)) return indice;
+  }
+  return ESCALA_MANIFIESTO.length - 1;
+}
+
 export type ConteoSituacion = {
+  latentes: number;
+  manifiestos: number;
+  total: number;
+  /** Casos latentes sobre el total (0..1); 0 cuando no hay casos. */
+  proporcionLatente: number;
+  /**
+   * Casos sin nivel declarado: subconjunto de `latentes`, no una tercera
+   * situación. Se declara para que el hueco de dato siga siendo visible.
+   */
+  sinNivel: number;
+  /**
+   * Alias singulares de `latentes`/`manifiestos`. Los consume
+   * `features/clima-social`, que queda fuera de este alcance; mismo valor, para
+   * no romper su compilación.
+   */
   latente: number;
   manifiesto: number;
-  /** Sin nivel declarado: se declara, no se reparte entre las dos situaciones. */
-  sinNivel: number;
 };
 
-/** Conteo de latentes y manifiestos; los casos sin nivel no se estiman. */
+/** Conteo de latentes y manifiestos; todo caso cae en una de las dos. */
 export function conteosPorSituacion(casos: readonly Caso[]): ConteoSituacion {
-  const conteo: ConteoSituacion = { latente: 0, manifiesto: 0, sinNivel: 0 };
+  let latentes = 0;
+  let manifiestos = 0;
+  let sinNivel = 0;
 
   for (const caso of casos) {
-    switch (situacionDe(caso.nivelConflicto)) {
-      case 'latente':
-        conteo.latente += 1;
-        break;
-      case 'manifiesto':
-        conteo.manifiesto += 1;
-        break;
-      default:
-        conteo.sinNivel += 1;
-    }
+    if (situacionDe(caso.nivelConflicto) === 'manifiesto') manifiestos += 1;
+    else latentes += 1;
+    if (!caso.nivelConflicto) sinNivel += 1;
   }
 
-  return conteo;
+  const total = latentes + manifiestos;
+
+  return {
+    latentes,
+    manifiestos,
+    total,
+    proporcionLatente: proporcionLatenteDe(latentes, total),
+    sinNivel,
+    latente: latentes,
+    manifiesto: manifiestos,
+  };
 }
 
 const ORDEN_ALCANCE = new Map<Alcance, number>(
@@ -118,15 +205,25 @@ function compararTexto(a: string, b: string): number {
 
 /** Ámbitos presentes en el conjunto, en el orden del catálogo. */
 export function conteosPorAlcance(casos: readonly Caso[]): ConteoAlcance[] {
-  const conteo = new Map<Alcance, number>();
+  const conteo = new Map<Alcance, { latentes: number; manifiestos: number; total: number }>();
   for (const caso of casos) {
-    conteo.set(caso.alcance, (conteo.get(caso.alcance) ?? 0) + 1);
+    const actual = conteo.get(caso.alcance) ?? { latentes: 0, manifiestos: 0, total: 0 };
+    if (situacionDe(caso.nivelConflicto) === 'manifiesto') actual.manifiestos += 1;
+    else actual.latentes += 1;
+    actual.total += 1;
+    conteo.set(caso.alcance, actual);
   }
 
-  return ordenarAlcances(conteo.keys()).map((alcance) => ({
-    alcance,
-    total: conteo.get(alcance) ?? 0,
-  }));
+  return ordenarAlcances(conteo.keys()).map((alcance) => {
+    const actual = conteo.get(alcance) ?? { latentes: 0, manifiestos: 0, total: 0 };
+    return {
+      alcance,
+      latentes: actual.latentes,
+      manifiestos: actual.manifiestos,
+      total: actual.total,
+      proporcionLatente: proporcionLatenteDe(actual.latentes, actual.total),
+    };
+  });
 }
 
 /**
@@ -137,17 +234,26 @@ export function conteosPorAlcance(casos: readonly Caso[]): ConteoAlcance[] {
 export function bandasPorAlcance(casos: readonly Caso[]): BandaAmbito[] {
   const bandas = new Map<
     Alcance,
-    { total: number; regiones: Map<string, { region: string; total: number }>; sinRegion: number }
+    {
+      latentes: number;
+      manifiestos: number;
+      total: number;
+      regiones: Map<string, FilaBandaRegion>;
+      sinRegion: number;
+    }
   >();
 
   for (const caso of casos) {
     let banda = bandas.get(caso.alcance);
     if (!banda) {
-      banda = { total: 0, regiones: new Map(), sinRegion: 0 };
+      banda = { latentes: 0, manifiestos: 0, total: 0, regiones: new Map(), sinRegion: 0 };
       bandas.set(caso.alcance, banda);
     }
 
     banda.total += 1;
+    const manifiesto = situacionDe(caso.nivelConflicto) === 'manifiesto';
+    if (manifiesto) banda.manifiestos += 1;
+    else banda.latentes += 1;
 
     const region = regionDe(caso);
     if (!region) {
@@ -157,8 +263,20 @@ export function bandasPorAlcance(casos: readonly Caso[]): BandaAmbito[] {
 
     const clave = normalizarRegion(region);
     const previa = banda.regiones.get(clave);
-    if (previa) previa.total += 1;
-    else banda.regiones.set(clave, { region, total: 1 });
+    if (previa) {
+      previa.total += 1;
+      if (manifiesto) previa.manifiestos += 1;
+      else previa.latentes += 1;
+      previa.proporcionLatente = proporcionLatenteDe(previa.latentes, previa.total);
+    } else {
+      banda.regiones.set(clave, {
+        region,
+        latentes: manifiesto ? 0 : 1,
+        manifiestos: manifiesto ? 1 : 0,
+        total: 1,
+        proporcionLatente: proporcionLatenteDe(manifiesto ? 0 : 1, 1),
+      });
+    }
   }
 
   const maximo = Math.max(0, ...[...bandas.values()].map((banda) => banda.total));
@@ -166,7 +284,10 @@ export function bandasPorAlcance(casos: readonly Caso[]): BandaAmbito[] {
   return [...bandas.entries()]
     .map(([alcance, banda]) => ({
       alcance,
+      latentes: banda.latentes,
+      manifiestos: banda.manifiestos,
       total: banda.total,
+      proporcionLatente: proporcionLatenteDe(banda.latentes, banda.total),
       proporcion: maximo > 0 ? Math.round((banda.total / maximo) * 100) : 0,
       regiones: [...banda.regiones.values()].sort(
         (a, b) => b.total - a.total || compararTexto(a.region, b.region),
@@ -186,9 +307,9 @@ export function filasPorRegion(casos: readonly Caso[]): FilaRegion[] {
     string,
     {
       region: string;
+      latentes: number;
+      manifiestos: number;
       total: number;
-      latente: number;
-      manifiesto: number;
       sinNivel: number;
       riesgoAlto: number;
       ambitos: Set<Alcance>;
@@ -204,9 +325,9 @@ export function filasPorRegion(casos: readonly Caso[]): FilaRegion[] {
     if (!fila) {
       fila = {
         region,
+        latentes: 0,
+        manifiestos: 0,
         total: 0,
-        latente: 0,
-        manifiesto: 0,
         sinNivel: 0,
         riesgoAlto: 0,
         ambitos: new Set(),
@@ -215,16 +336,9 @@ export function filasPorRegion(casos: readonly Caso[]): FilaRegion[] {
     }
 
     fila.total += 1;
-    switch (situacionDe(caso.nivelConflicto)) {
-      case 'latente':
-        fila.latente += 1;
-        break;
-      case 'manifiesto':
-        fila.manifiesto += 1;
-        break;
-      default:
-        fila.sinNivel += 1;
-    }
+    if (situacionDe(caso.nivelConflicto) === 'manifiesto') fila.manifiestos += 1;
+    else fila.latentes += 1;
+    if (!caso.nivelConflicto) fila.sinNivel += 1;
     if (caso.riesgo === 'Alto') fila.riesgoAlto += 1;
     fila.ambitos.add(caso.alcance);
   }
@@ -232,9 +346,10 @@ export function filasPorRegion(casos: readonly Caso[]): FilaRegion[] {
   return [...filas.values()]
     .map((fila) => ({
       region: fila.region,
+      latentes: fila.latentes,
+      manifiestos: fila.manifiestos,
       total: fila.total,
-      latente: fila.latente,
-      manifiesto: fila.manifiesto,
+      proporcionLatente: proporcionLatenteDe(fila.latentes, fila.total),
       sinNivel: fila.sinNivel,
       riesgoAlto: fila.riesgoAlto,
       ambitos: ordenarAlcances(fila.ambitos),
@@ -324,18 +439,38 @@ export function claseCoropleta(total: number): number {
 }
 
 /**
- * Casos abiertos por ubigeo de distrito.
+ * Casos del mapa por ubigeo de distrito.
  *
  * La llave es `distritoUbigeo`, nunca el nombre: la capa trae quince «Santa
  * Rosa» y el nombre no distingue provincia. Los casos sin ubigeo no se
  * atribuyen a ningún polígono y se declaran aparte con `casosSinDistrito`.
+ * Cada distrito expone latentes, manifiestos, total y `proporcionLatente`
+ * (0..1), igual que el resto de agregados.
  */
-export function casosPorDistritoUbigeo(casos: readonly Caso[]): Map<string, number> {
-  const conteo = new Map<string, number>();
+export type ConteoDistrito = {
+  latentes: number;
+  manifiestos: number;
+  total: number;
+  proporcionLatente: number;
+};
+
+export function casosPorDistritoUbigeo(casos: readonly Caso[]): Map<string, ConteoDistrito> {
+  const conteo = new Map<string, ConteoDistrito>();
   for (const caso of casos) {
     const ubigeo = caso.distritoUbigeo?.trim();
     if (!ubigeo) continue;
-    conteo.set(ubigeo, (conteo.get(ubigeo) ?? 0) + 1);
+
+    const actual = conteo.get(ubigeo) ?? {
+      latentes: 0,
+      manifiestos: 0,
+      total: 0,
+      proporcionLatente: 0,
+    };
+    if (situacionDe(caso.nivelConflicto) === 'manifiesto') actual.manifiestos += 1;
+    else actual.latentes += 1;
+    actual.total += 1;
+    actual.proporcionLatente = proporcionLatenteDe(actual.latentes, actual.total);
+    conteo.set(ubigeo, actual);
   }
   return conteo;
 }

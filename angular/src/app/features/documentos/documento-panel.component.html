@@ -254,7 +254,6 @@
 
         @if (formulario(); as b) {
           <form class="panel-formulario" (submit)="alEnviarFormulario($event)">
-
             <div class="form-field">
               <label class="form-label" for="documento-campo-titulo">Título</label>
               <input
@@ -413,8 +412,7 @@
               <button type="button" class="button-secondary" (click)="iniciarEdicion()">
                 Modificar
               </button>
-            } @else {
-            }
+            } @else {}
             @if (puedeAnular()) {
               <button type="button" class="button-danger" (click)="anular.emit()">
                 Anular documento
@@ -533,7 +531,7 @@
 
         @if (fuentes().length > 0) {
           <section class="detail-section" aria-labelledby="documento-panel-fuentes">
-            <h3 id="documento-panel-fuentes">Fuentes de la evidencia ({{ fuentes().length }})</h3>
+            <h3 id="documento-panel-fuentes">Fuentes de la evidencia</h3>
             <ol class="panel-fuentes">
               @for (fuente of fuentes(); track fuente.id) {
                 <li>

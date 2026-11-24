@@ -71,6 +71,10 @@ const ALERT_SELECT = `
   a.anulado_por as anulado_por,
   ua.nombre as anulado_por_nombre,
   a.anulacion_id as anulacion_id,
+  a.archivado_en as archivado_en,
+  a.motivo_archivo as motivo_archivo,
+  a.archivado_por as archivado_por,
+  ur.nombre as archivado_por_nombre,
   ${ALERT_STATE} as estado,
   ${ALERT_ATENDIDA} as atendida
 `;
@@ -88,6 +92,7 @@ const ALERT_FROM = `
   left join core.regiones rcd on rcd.id = pcd.region_id
   left join core.cat_subsectores ss on ss.id = a.subsector_id
   left join core.usuarios ua on ua.id = a.anulado_por
+  left join core.usuarios ur on ur.id = a.archivado_por
 `;
 
 export type AlertListQuery = {
@@ -113,6 +118,11 @@ export type AlertListQuery = {
    * sigue ocultando las filas y el listado sale vacío.
    */
   incluirAnulados?: boolean;
+  /**
+   * `true` lista sólo las alertas archivadas; por omisión el listado de trabajo
+   * oculta las archivadas (`archivado_en is null`). Archivar no es anular.
+   */
+  incluirArchivados?: boolean;
   page?: number;
   pageSize?: number;
 };
@@ -181,6 +191,17 @@ export type AlertItem = {
   anuladoPorNombre: string | null;
   /** Lote de anulación al que pertenece la fila. */
   anulacionId: string | null;
+  /**
+   * Marca de archivo (ISO 8601). Archivada no es anulada: la fila se conserva
+   * y sigue siendo consultable, pero sale de las colas de trabajo.
+   */
+  archivadoEn: string | null;
+  /** Motivo declarado al archivar; sólo se puebla en las archivadas. */
+  motivoArchivo: string | null;
+  /** Usuario que archivó (id). */
+  archivadoPor: string | null;
+  /** Nombre legible de quien archivó; `null` si no se puede resolver. */
+  archivadoPorNombre: string | null;
 };
 
 export type AlertListResult = {
@@ -274,6 +295,10 @@ function mapAlert(row: Record<string, any>): AlertItem {
     anuladoPor: row.anulado_por,
     anuladoPorNombre: row.anulado_por_nombre,
     anulacionId: row.anulacion_id,
+    archivadoEn: isoOrNull(row.archivado_en),
+    motivoArchivo: row.motivo_archivo,
+    archivadoPor: row.archivado_por,
+    archivadoPorNombre: row.archivado_por_nombre,
   };
 }
 
@@ -332,6 +357,15 @@ export async function listAlerts(
   // `anulado_en is null`: `p_clasificacion` ya lo impone.
   if (query.incluirAnulados) {
     where.push("a.anulado_en is not null");
+  }
+
+  // Archivo: no es un estado ni un borrado lógico. Por omisión las archivadas
+  // salen de la cola de trabajo; `archivados=true` las lista. La papelera las
+  // sigue mostrando porque ya está acotada a las anuladas.
+  if (query.incluirArchivados) {
+    where.push("a.archivado_en is not null");
+  } else if (!query.incluirAnulados) {
+    where.push("a.archivado_en is null");
   }
 
   const page = Math.max(1, Math.trunc(query.page ?? 1));
@@ -415,6 +449,7 @@ export type WriteSession = {
 };
 
 const MAX_TITLE_LENGTH = 500;
+const MAX_MOTIVO_LENGTH = 500;
 const MAX_TEXT_LENGTH = 20000;
 const MAX_SOURCE_TYPE_LENGTH = 120;
 const MAX_URL_LENGTH = 500;
@@ -449,6 +484,9 @@ const ALERT_WRITE_COLUMNS = [
   "paso_actual",
   "visibilidad",
   "estado_legado",
+  "archivado_en",
+  "archivado_por",
+  "motivo_archivo",
 ] as const;
 
 type AlertCatalogKey = "prioridad" | "nivel" | "subsector";
@@ -1088,4 +1126,165 @@ export async function restoreAlert(
 ): Promise<void> {
   const row = await findAlert(client, idOrCode);
   await restaurarRegistro(client, "alertas_tempranas", String(row.id));
+}
+
+/**
+ * Archiva una alerta que no tiene caso vinculado.
+ *
+ * Archivar no es anular: sólo fija `archivado_en`/`archivado_por`/`motivo_archivo`
+ * para sacar la fila de las colas de trabajo. La alerta sigue existiendo y se
+ * consulta con `archivados=true`. La regla «sólo sin caso» es la del archivo de
+ * la matriz: una alerta ya vinculada se trabaja desde su caso.
+ */
+export async function archiveAlert(
+  client: PoolClient,
+  session: WriteSession,
+  idOrCode: string,
+  motivo: string | undefined,
+): Promise<AlertDetail> {
+  const row = await findAlert(client, idOrCode);
+
+  if (row.anulado_en) {
+    throw new ApiError(
+      409,
+      "Una alerta anulada no se archiva; primero debe restaurarse.",
+      "ALERT_ANULADA",
+    );
+  }
+  if (row.caso_id) {
+    throw new ApiError(
+      409,
+      "Sólo se archivan alertas sin caso vinculado.",
+      "ALERT_CON_CASO",
+    );
+  }
+
+  const razon = (motivo ?? "").trim();
+  if (!razon) {
+    throw new ApiError(
+      400,
+      "El motivo del archivo es obligatorio.",
+      "MOTIVO_REQUERIDO",
+    );
+  }
+
+  const updated = await archiveUpdate(client, row.id, session.usuarioId, razon);
+
+  const updatedRow = updated.rows[0];
+  if (!updatedRow) throw new ApiError(404, "La alerta no existe.", "NOT_FOUND");
+
+  await auditChange(client, {
+    tabla: "core.alertas_tempranas",
+    registroId: String(row.id),
+    accion: "UPDATE",
+    usuarioId: session.usuarioId,
+    rolCodigo: session.rolCodigo,
+    antes: pick(row, ALERT_WRITE_COLUMNS),
+    despues: pick(updatedRow, ALERT_WRITE_COLUMNS),
+  });
+
+  const detail = await getAlertById(client, String(updatedRow.id));
+  if (!detail) {
+    throw new ApiError(
+      500,
+      "No se pudo leer la alerta archivada.",
+      "READ_BACK_FAILED",
+    );
+  }
+  return detail;
+}
+
+/** Quita una alerta del archivo sin tocar su estado ni su trazabilidad. */
+export async function unarchiveAlert(
+  client: PoolClient,
+  session: WriteSession,
+  idOrCode: string,
+): Promise<AlertDetail> {
+  const row = await findAlert(client, idOrCode);
+
+  const updated = await unarchiveUpdate(client, row.id);
+
+  const updatedRow = updated.rows[0];
+  if (!updatedRow) throw new ApiError(404, "La alerta no existe.", "NOT_FOUND");
+
+  await auditChange(client, {
+    tabla: "core.alertas_tempranas",
+    registroId: String(row.id),
+    accion: "UPDATE",
+    usuarioId: session.usuarioId,
+    rolCodigo: session.rolCodigo,
+    antes: pick(row, ALERT_WRITE_COLUMNS),
+    despues: pick(updatedRow, ALERT_WRITE_COLUMNS),
+  });
+
+  const detail = await getAlertById(client, String(updatedRow.id));
+  if (!detail) {
+    throw new ApiError(
+      500,
+      "No se pudo leer la alerta desarchivada.",
+      "READ_BACK_FAILED",
+    );
+  }
+  return detail;
+}
+
+/**
+ * Fija las columnas de archivo. El trigger G21 (`P0001`) se traduce igual que en
+ * `updateAlert`: una alerta publicada sin sus firmas no puede archivarse.
+ */
+async function archiveUpdate(
+  client: PoolClient,
+  id: unknown,
+  usuarioId: string,
+  motivo: string,
+): Promise<{ rows: Record<string, any>[] }> {
+  try {
+    return await client.query(
+      `update core.alertas_tempranas
+          set archivado_en = coalesce(archivado_en, now()),
+              archivado_por = coalesce(archivado_por, $2::uuid),
+              motivo_archivo = $3,
+              updated_at = now()
+        where id = $1::uuid
+        returning *`,
+      [id, usuarioId, motivo.slice(0, MAX_MOTIVO_LENGTH)],
+    );
+  } catch (error) {
+    if ((error as { code?: string }).code === "P0001") {
+      throw new ApiError(
+        409,
+        "La alerta no cumple las condiciones de visibilidad.",
+        "ALERT_VISIBILITY",
+      );
+    }
+    throw error;
+  }
+}
+
+/** Limpia las columnas de archivo sin tocar estado, visibilidad ni trazabilidad. */
+async function unarchiveUpdate(
+  client: PoolClient,
+  id: unknown,
+): Promise<{ rows: Record<string, any>[] }> {
+  try {
+    return await client.query(
+      `update core.alertas_tempranas
+          set archivado_en = null,
+              archivado_por = null,
+              motivo_archivo = null,
+              updated_at = now()
+        where id = $1::uuid
+        returning *`,
+      [id],
+    );
+  } catch (error) {
+    if ((error as { code?: string }).code === "P0001") {
+      throw new ApiError(
+        409,
+        "La alerta no cumple las condiciones de visibilidad.",
+        "ALERT_VISIBILITY",
+      );
+    }
+    throw error;
+  }
 }

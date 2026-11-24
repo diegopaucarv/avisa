@@ -8,23 +8,21 @@
       <button type="button" class="button-primary" (click)="abrirAlta()">
         Registrar compromiso
       </button>
+      } @if (!verPapelera() && !vistaMatriz()) {
+      <app-barra-seleccion
+        entidad="compromisos"
+        anulable="compromisos"
+        [consulta]="filtrosExportacion()"
+        [cantidad]="seleccion.cantidad()"
+        [idsSeleccionados]="seleccion.lista()"
+        (anulado)="alAnularLote($event)"
+        (fallo)="alFallarExportacion($event)"
+      />
       }
     </div>
   </header>
 
-  @if (!verPapelera() && !vistaMatriz()) {
-  <div class="view-toolbar">
-    <app-barra-seleccion
-      entidad="compromisos"
-      anulable="compromisos"
-      [consulta]="filtrosExportacion()"
-      [cantidad]="seleccion.cantidad()"
-      [idsSeleccionados]="seleccion.lista()"
-      (anulado)="alAnularLote($event)"
-      (fallo)="alFallarExportacion($event)"
-    />
-  </div>
-  } @if (exportarError(); as mensaje) {
+  @if (exportarError(); as mensaje) {
   <p class="form-error" role="alert">{{ mensaje }}</p>
   } @if (avisoAnulacion(); as aviso) {
   <p class="form-hint aviso-ok" role="status">{{ aviso }}</p>
@@ -51,13 +49,6 @@
       <span class="stat-copy">
         <span>En proceso</span>
         <strong>{{ enProceso() ?? '—' }}</strong>
-      </span>
-    </div>
-    <div class="stat-card">
-      <span class="stat-icon"><app-icono nombre="bandeja" [tamano]="16" /></span>
-      <span class="stat-copy">
-        <span>Por iniciar</span>
-        <strong>{{ porIniciar() ?? '—' }}</strong>
       </span>
     </div>
   </div>
@@ -90,29 +81,6 @@
         <option value="" [selected]="!filtros().tipo">Todos</option>
         @for (tipo of tipos; track tipo) {
         <option [value]="tipo" [selected]="tipo === filtros().tipo">{{ tipo }}</option>
-        }
-      </select>
-    </label>
-
-    <label class="select-filter">
-      Nivel de gobierno
-      <select aria-label="Filtrar por nivel de gobierno" (change)="filtrarNivel($event)">
-        <option value="" [selected]="!filtros().nivelGobierno">Todos</option>
-        @for (nivel of niveles; track nivel) {
-        <option [value]="nivel" [selected]="nivel === filtros().nivelGobierno">
-          {{ nivelTexto(nivel) }}
-        </option>
-        }
-      </select>
-    </label>
-
-    <label class="select-filter">
-      Brecha de género
-      <select aria-label="Filtrar por atención a brecha de género" (change)="filtrarGenero($event)">
-        @for (genero of generos; track genero.valor) {
-        <option [value]="genero.valor" [selected]="genero.valor === filtros().atiendeGenero">
-          {{ genero.etiqueta }}
-        </option>
         }
       </select>
     </label>
@@ -157,13 +125,92 @@
       >
         Matriz del equipo
       </button>
+      <button
+        type="button"
+        [attr.aria-pressed]="modo() === 'anexo14'"
+        (click)="cambiarModo('anexo14')"
+      >
+        Matriz Anexo 14
+      </button>
     </div>
     }
   </div>
 
   @if (vistaMatriz()) {
   <app-matriz-equipo />
-  } @else if (vistaResumen()) { @if (estadoResumen() === 'inactivo' || estadoResumen() ===
+  } @else if (vistaAnexo14()) { @if (estado() === 'inactivo' || estado() === 'cargando') {
+  <div class="empty-state" role="status">Cargando la matriz del Anexo 14…</div>
+  } @else if (estado() === 'error') {
+  <div class="empty-state" role="alert">
+    <p>{{ error()?.message }}</p>
+    <button type="button" class="button-secondary" (click)="recargar()">Reintentar</button>
+  </div>
+  } @else if (compromisos().length === 0) {
+  <div class="empty-state">
+    <strong>Sin compromisos</strong>
+    <p>No hay compromisos para los filtros seleccionados.</p>
+  </div>
+  } @else {
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th scope="col" [appThOrden]="'compromiso'" [orden]="orden">Compromiso</th>
+          <th scope="col" [appThOrden]="'unidad'" [orden]="orden">Responsable</th>
+          <th scope="col">Fecha de inicio</th>
+          <th scope="col" [appThOrden]="'estado'" [orden]="orden">Estado</th>
+          <th scope="col">Avance</th>
+          <th scope="col">Observaciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (compromiso of filasVisibles(); track compromiso.id) {
+        <tr class="fila-compromiso" (click)="abrir(compromiso)">
+          <td class="celda-compromiso">
+            <button
+              type="button"
+              class="table-link compromiso-codigo"
+              [attr.aria-label]="
+                      'Abrir el compromiso ' + compromiso.codigo + ': ' + compromiso.accion
+                    "
+              (click)="abrir(compromiso); $event.stopPropagation()"
+            >
+              {{ compromiso.codigo }}
+            </button>
+            <span class="compromiso-accion">{{ compromiso.accion }}</span>
+          </td>
+          <td>{{ compromiso.unidad || '—' }}</td>
+          <td>{{ fechaTexto(compromiso.fechaInicio) }}</td>
+          <td>
+            <span
+              class="commit-status"
+              [class.commit-cumplido]="compromiso.estado === 'Cumplido'"
+              [class.commit-en-curso]="compromiso.estado === 'En proceso'"
+            >
+              {{ compromiso.estado }}
+            </span>
+          </td>
+          <td class="anexo-avance">{{ avanceTexto(compromiso) }}</td>
+          <td class="anexo-observaciones">{{ observacionesTexto(compromiso) }}</td>
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  <p class="desglose-nota">
+    Compromiso (columnas 1 y 10), Responsable (11), Fecha de inicio (8) y Estado (14) del Anexo 14.
+    «Avance» cuenta los hitos cumplidos y «Observaciones» resume lo declarado; ninguna de las dos es
+    una columna de la matriz.
+  </p>
+  @if (total() > 0) {
+  <app-paginacion
+    [pagina]="filtros().pagina"
+    [tamano]="filtros().tamano"
+    [total]="total()"
+    (paginaCambia)="cambiarPagina($event)"
+    (tamanoCambia)="cambiarTamano($event)"
+  />
+  } } } @else if (vistaResumen()) { @if (estadoResumen() === 'inactivo' || estadoResumen() ===
   'cargando') {
   <div class="empty-state" role="status">Cargando el desglose…</div>
   } @else if (estadoResumen() === 'error') {
@@ -256,7 +303,7 @@
         <tr>
           <td>{{ compromiso.codigo }}</td>
           <td class="celda-compromiso">{{ compromiso.accion }}</td>
-          <td>{{ compromiso.casoCodigo || '—' }}</td>
+          <td [attr.title]="compromiso.casoTitulo">{{ compromiso.casoCodigo || '—' }}</td>
           <td>{{ fechaHoraTexto(compromiso.anuladoEn) }}</td>
           <td>
             <button
@@ -287,16 +334,11 @@
               (change)="seleccion.alternarPagina(idsVisibles(), $event)"
             />
           </th>
-          <th scope="col" [appThOrden]="'codigo'" [orden]="orden">Código</th>
           <th scope="col" [appThOrden]="'compromiso'" [orden]="orden">Compromiso</th>
           <th scope="col" [appThOrden]="'caso'" [orden]="orden">Caso</th>
-          <th scope="col" [appThOrden]="'tipo'" [orden]="orden">
-            Tipo de compromiso <app-glosario termino="tipo-compromiso" />
-          </th>
           <th scope="col" [appThOrden]="'unidad'" [orden]="orden">Unidad responsable</th>
           <th scope="col" [appThOrden]="'estado'" [orden]="orden">Estado</th>
           <th scope="col" [appThOrden]="'vencimiento'" [orden]="orden">Vencimiento</th>
-          <th scope="col" [appThOrden]="'situacion'" [orden]="orden">Situación</th>
         </tr>
       </thead>
       <tbody>
@@ -311,10 +353,10 @@
               (change)="seleccion.alternar(compromiso.id)"
             />
           </td>
-          <td>
+          <td class="celda-compromiso">
             <button
               type="button"
-              class="table-link"
+              class="table-link compromiso-codigo"
               [attr.aria-label]="
                       'Abrir el compromiso ' + compromiso.codigo + ': ' + compromiso.accion
                     "
@@ -322,10 +364,9 @@
             >
               {{ compromiso.codigo }}
             </button>
+            <span class="compromiso-accion">{{ compromiso.accion }}</span>
           </td>
-          <td class="celda-compromiso">{{ compromiso.accion }}</td>
-          <td>{{ compromiso.casoCodigo || '—' }}</td>
-          <td>{{ compromiso.tipo }}</td>
+          <td [attr.title]="compromiso.casoTitulo">{{ compromiso.casoCodigo || '—' }}</td>
           <td>{{ compromiso.unidad || '—' }}</td>
           <td>
             <span
@@ -343,11 +384,6 @@
             <span class="due-state due-sin-fecha">Sin fecha</span>
             <small class="aviso-fecha"> Añada una fecha de vencimiento manual </small>
             }
-          </td>
-          <td>
-            <span [class]="'due-state ' + situacion(compromiso).clase">
-              {{ situacion(compromiso).etiqueta }}
-            </span>
           </td>
         </tr>
         }
@@ -384,9 +420,6 @@
       </button>
     </div>
     <h2 class="calendario-titulo" aria-live="polite">{{ calendario().titulo }}</h2>
-    <p class="calendario-resumen">
-      {{ calendario().totalMes }} compromisos con vencimiento en el mes.
-    </p>
   </div>
 
   @if (estadoCalendario() === 'inactivo' || estadoCalendario() === 'cargando') {

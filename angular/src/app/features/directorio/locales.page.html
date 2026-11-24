@@ -1,24 +1,18 @@
 <section class="view-body" aria-labelledby="titulo-locales">
   <header class="view-head">
-    <div>
-      <h1 id="titulo-locales">Locales</h1>
-    </div>
+    <h1 id="titulo-locales">Locales</h1>
     <div class="view-actions">
-      <p class="result-count" aria-live="polite">{{ total() }} locales</p>
+      <app-barra-seleccion
+        entidad="locales"
+        [cantidad]="seleccion.cantidad()"
+        [idsSeleccionados]="seleccion.lista()"
+        (fallo)="alFallarExportacion($event)"
+      />
     </div>
   </header>
 
-  <div class="view-toolbar">
-    <app-barra-seleccion
-      entidad="locales"
-      [cantidad]="seleccion.cantidad()"
-      [idsSeleccionados]="seleccion.lista()"
-      (fallo)="alFallarExportacion($event)"
-    />
-  </div>
-
   @if (exportarError(); as mensaje) {
-  <p class="form-error" role="alert">{{ mensaje }}</p>
+    <p class="form-error" role="alert">{{ mensaje }}</p>
   }
 
   <div class="filter-bar filter-bar-wrap">
@@ -34,268 +28,364 @@
     </label>
 
     <label class="select-filter">
-      Activo
-      <select aria-label="Filtrar locales por estado activo" (change)="cambiarActivo($event)">
-        <option value="" [selected]="filtros().activo === ''">Todos</option>
-        <option value="true" [selected]="filtros().activo === 'true'">Sí</option>
-        <option value="false" [selected]="filtros().activo === 'false'">No</option>
+      Disponible
+      <select aria-label="Filtrar locales por disponibilidad" (change)="cambiarDisponible($event)">
+        <option value="" [selected]="filtros().disponible === ''">Todos</option>
+        <option value="true" [selected]="filtros().disponible === 'true'">Sí</option>
+        <option value="false" [selected]="filtros().disponible === 'false'">No</option>
       </select>
     </label>
 
     <button type="button" class="button-secondary" (click)="limpiar()">Limpiar filtros</button>
   </div>
 
-  @if (estado() === "error") {
-  <div class="empty-state" role="alert">
-    <strong>No se pudieron cargar los locales</strong>
-    <p>{{ error()?.message }}</p>
-    <button type="button" class="button-secondary" (click)="recargar()">Reintentar</button>
-  </div>
-  } @else if (locales().length === 0) { @if (estado() === "cargando" || estado() === "inactivo") {
-  <div class="empty-state" role="status">Cargando locales…</div>
+  @if (estado() === 'error') {
+    <div class="empty-state" role="alert">
+      <strong>No se pudieron cargar los locales</strong>
+      <p>{{ error()?.message }}</p>
+      <button type="button" class="button-secondary" (click)="recargar()">Reintentar</button>
+    </div>
+  } @else if (locales().length === 0) {
+    @if (estado() === 'cargando' || estado() === 'inactivo') {
+      <div class="empty-state" role="status">Cargando locales…</div>
+    } @else {
+      <div class="empty-state">
+        <strong>Sin locales para estos filtros</strong>
+        <p>No hay locales que coincidan con la búsqueda registrada.</p>
+      </div>
+    }
   } @else {
-  <div class="empty-state">
-    <strong>Sin locales para estos filtros</strong>
-    <p>No hay locales que coincidan con la búsqueda registrada.</p>
-  </div>
-  } } @else { @if (estado() === "cargando") {
-  <p class="local-actualizando" role="status">Actualizando el listado…</p>
-  }
+    @if (estado() === 'cargando') {
+      <p class="local-actualizando" role="status">Actualizando el listado…</p>
+    }
 
-  <div class="table-wrap">
-    <table class="data-table">
-      <thead>
-        <tr>
-          <th scope="col" class="col-seleccion">
-            <input
-              type="checkbox"
-              aria-label="Seleccionar todos los registros de esta página"
-              [checked]="seleccion.todas(idsVisibles())"
-              [indeterminate]="seleccion.algunas(idsVisibles())"
-              (change)="seleccion.alternarPagina(idsVisibles(), $event)"
-            />
-          </th>
-          <th scope="col" class="col-foto">Foto</th>
-          <th scope="col" [appThOrden]="'nombre'" [orden]="orden">Nombre</th>
-          <th scope="col" [appThOrden]="'region'" [orden]="orden">Región</th>
-          <th scope="col" [appThOrden]="'distrito'" [orden]="orden">Distrito</th>
-          <th scope="col" [appThOrden]="'aforo'" [orden]="orden">Aforo</th>
-          <th scope="col" [appThOrden]="'contacto'" [orden]="orden">Contacto</th>
-          <th scope="col" [appThOrden]="'proyector'" [orden]="orden">Proyector</th>
-          <th scope="col" [appThOrden]="'computo'" [orden]="orden">Cómputo</th>
-          <th scope="col" [appThOrden]="'audio'" [orden]="orden">Audio</th>
-          <th scope="col" [appThOrden]="'activo'" [orden]="orden">Activo</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (local of filasVisibles(); track local.id) {
-        <tr
-          class="case-row-clickable"
-          [class.row-selected]="seleccionado()?.id === local.id"
-          (click)="abrir(local)"
-        >
-          <td class="col-seleccion" (click)="$event.stopPropagation()">
-            <input
-              type="checkbox"
-              [checked]="seleccion.esta(local.id)"
-              [attr.aria-label]="'Seleccionar el local ' + local.nombre"
-              (click)="$event.stopPropagation()"
-              (change)="seleccion.alternar(local.id)"
-            />
-          </td>
-          <td class="col-foto">
-            @if (fotoDe(local.id); as foto) {
-            <img
-              class="tabla-foto"
-              [src]="foto.url"
-              [alt]="foto.alt || foto.titulo || local.nombre"
-              loading="lazy"
-              decoding="async"
-              referrerpolicy="no-referrer"
-            />
-            } @else {
-            <span class="sin-dato">—</span>
-            }
-          </td>
-          <td>
-            <button
-              type="button"
-              class="table-link local-nombre"
-              [attr.aria-label]="'Abrir la ficha de ' + local.nombre"
-              (click)="abrir(local); $event.stopPropagation()"
+    <div class="table-wrap">
+      <table class="data-table tabla-locales">
+        <thead>
+          <tr>
+            <th scope="col" class="col-seleccion">
+              <input
+                type="checkbox"
+                aria-label="Seleccionar todos los registros de esta página"
+                [checked]="seleccion.todas(idsVisibles())"
+                [indeterminate]="seleccion.algunas(idsVisibles())"
+                (change)="seleccion.alternarPagina(idsVisibles(), $event)"
+              />
+            </th>
+            <th scope="col" class="col-foto">Foto</th>
+            <th scope="col" class="col-nombre" [appThOrden]="'nombre'" [orden]="orden">Nombre</th>
+            <th scope="col" [appThOrden]="'contacto'" [orden]="orden">Contacto</th>
+            <th scope="col" [appThOrden]="'proyector'" [orden]="orden">Proyector</th>
+            <th scope="col" [appThOrden]="'computo'" [orden]="orden">Cómputo</th>
+            <th scope="col" [appThOrden]="'audio'" [orden]="orden">Audio</th>
+            <th scope="col" [appThOrden]="'disponible'" [orden]="orden">Disponible</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (local of filasVisibles(); track local.id) {
+            <tr
+              class="case-row-clickable"
+              [class.row-selected]="seleccionado()?.id === local.id"
+              (click)="abrir(local)"
             >
-              <strong>{{ local.nombre }}</strong>
-              <small>{{ local.codigo }}</small>
-            </button>
-          </td>
-          <td>
-            @if (local.region) {
-            <span>{{ local.region }}</span>
+              <td class="col-seleccion" (click)="$event.stopPropagation()">
+                <input
+                  type="checkbox"
+                  [checked]="seleccion.esta(local.id)"
+                  [attr.aria-label]="'Seleccionar el local ' + local.nombre"
+                  (click)="$event.stopPropagation()"
+                  (change)="seleccion.alternar(local.id)"
+                />
+              </td>
+              <td class="col-foto">
+                @if (fotoDe(local.id); as foto) {
+                  <img
+                    class="tabla-foto"
+                    [src]="foto.url"
+                    [alt]="foto.alt || foto.titulo || local.nombre"
+                    loading="lazy"
+                    decoding="async"
+                    referrerpolicy="no-referrer"
+                  />
+                } @else {
+                  <span class="sin-dato">—</span>
+                }
+              </td>
+              <td class="col-nombre">
+                <button
+                  type="button"
+                  class="table-link local-nombre"
+                  [attr.aria-label]="'Abrir la ficha de ' + local.nombre"
+                  (click)="abrir(local); $event.stopPropagation()"
+                >
+                  <small class="local-codigo">{{ local.codigo || 'Sin código' }}</small>
+                  <strong class="local-titulo">{{ local.nombre }}</strong>
+                </button>
+              </td>
+              <td class="celda-contacto">
+                @if (!puedeVerPii()) {
+                  <span class="sin-dato">—</span>
+                } @else if (contacto(local); as contactoLocal) {
+                  <span>{{ contactoLocal }}</span>
+                } @else {
+                  <span class="sin-dato">Sin contacto registrado</span>
+                }
+              </td>
+              <td>{{ siNo(local.tieneProyector) }}</td>
+              <td>{{ siNo(local.tieneEquiposComputo) }}</td>
+              <td>{{ siNo(local.tieneAudioMicro) }}</td>
+              <td>{{ local.disponible ? 'Sí' : 'No' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+  @if (total() > 0 && estado() !== 'error') {
+    <app-paginacion
+      [pagina]="filtros().pagina"
+      [tamano]="filtros().tamano"
+      [total]="total()"
+      (paginaCambia)="cambiarPagina($event)"
+      (tamanoCambia)="cambiarTamano($event)"
+    />
+  }
+  @if (seleccionado(); as local) {
+    <div class="drawer-scrim" (click)="alFondo($event)" (keydown)="alTecla($event)">
+      <aside
+        #panel
+        class="drawer"
+        tabindex="-1"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="local-panel-titulo"
+      >
+        <header class="drawer-head">
+          <div class="ficha-cabecera">
+            <div class="ficha-badges">
+              <p class="ficha-etiqueta">{{ local.codigo || 'Sin código' }}</p>
+              @if (local.disponible) {
+                <span class="status-badge ficha-disponible">
+                  <app-icono nombre="check" [tamano]="11" />
+                  Disponible
+                </span>
+              } @else {
+                <span class="status-badge ficha-no-disponible">
+                  <app-icono nombre="reloj" [tamano]="11" />
+                  No disponible
+                </span>
+              }
+            </div>
+            <h2 id="local-panel-titulo">{{ local.nombre }}</h2>
+          </div>
+
+          <button
+            type="button"
+            class="icon-button"
+            aria-label="Cerrar la ficha del local"
+            (click)="cerrarPanel()"
+          >
+            <app-icono nombre="cerrar" [tamano]="18" />
+          </button>
+        </header>
+
+        <div class="drawer-body">
+          <button
+            type="button"
+            class="button-primary whatsapp-boton"
+            (click)="abrirWhatsapp(local)"
+          >
+            <app-icono nombre="bandeja" [tamano]="16" />
+            Generar mensaje para WhatsApp
+          </button>
+
+          <figure class="ficha-foto">
+            @if (fotoDe(local.id); as foto) {
+              <img
+                [src]="foto.url"
+                [alt]="foto.alt || foto.titulo || local.nombre"
+                loading="lazy"
+                decoding="async"
+                referrerpolicy="no-referrer"
+              />
             } @else {
-            <span class="sin-dato">—</span>
+              <span class="ficha-foto-vacia">Sin fotografía del local</span>
             }
-          </td>
-          <td>{{ local.distrito || "—" }}</td>
-          <td>{{ local.aforo ?? "—" }}</td>
-          <td class="celda-contacto">
+          </figure>
+
+          <section class="ficha-seccion" aria-labelledby="local-panel-ubicacion">
+            <h3 id="local-panel-ubicacion">Ubicación</h3>
+            <dl class="ficha-datos">
+              <div class="ficha-ancho">
+                <dt>Ubicación</dt>
+                <dd>{{ ubicacion(local) || '—' }}</dd>
+              </div>
+              <div class="ficha-ancho">
+                <dt>Referencia de ubicación</dt>
+                <dd>{{ local.ubicacionRef || '—' }}</dd>
+              </div>
+            </dl>
+          </section>
+
+          <section class="ficha-seccion" aria-labelledby="local-panel-capacidad">
+            <h3 id="local-panel-capacidad">Capacidad y equipamiento</h3>
+            <dl class="ficha-datos">
+              <div>
+                <dt>Aforo</dt>
+                <dd>{{ local.aforo ?? '—' }}</dd>
+              </div>
+              <div>
+                <dt>Accesos</dt>
+                <dd>{{ local.ingresos || '—' }}</dd>
+              </div>
+              <div>
+                <dt>Proyector / pantalla</dt>
+                <dd>{{ siNo(local.tieneProyector) }}</dd>
+              </div>
+              <div>
+                <dt>Equipos de cómputo</dt>
+                <dd>{{ siNo(local.tieneEquiposComputo) }}</dd>
+              </div>
+              <div>
+                <dt>Audio y micrófonos</dt>
+                <dd>{{ siNo(local.tieneAudioMicro) }}</dd>
+              </div>
+            </dl>
+          </section>
+
+          <section class="ficha-seccion" aria-labelledby="local-panel-contacto">
+            <h3 id="local-panel-contacto">Contacto del local</h3>
             @if (!puedeVerPii()) {
-            <span class="sin-dato">—</span>
-            } @else if (local.contactoNombre || local.contactoCelular) {
-            <span>{{ local.contactoNombre || "Sin nombre" }}</span>
-            <small>{{ local.contactoCelular || "—" }}</small>
+              <p class="ficha-nota">Su rol no permite ver los datos de contacto del local.</p>
+            } @else if (local.responsables.length === 0) {
+              <p class="ficha-vacio">Sin responsable registrado.</p>
             } @else {
-            <span class="sin-dato">—</span>
+              <dl class="ficha-datos ficha-responsables">
+                @for (responsable of local.responsables; track $index) {
+                  <div class="ficha-ancho ficha-responsable">
+                    <dt>Responsable</dt>
+                    <dd>{{ responsable.nombre || 'Sin nombre' }}</dd>
+                    <dt>Teléfono</dt>
+                    <dd>{{ responsable.telefono || '—' }}</dd>
+                    <dt>Correo</dt>
+                    <dd>{{ responsable.correo || '—' }}</dd>
+                  </div>
+                }
+              </dl>
             }
-          </td>
-          <td>{{ siNo(local.tieneProyector) }}</td>
-          <td>{{ siNo(local.tieneEquiposComputo) }}</td>
-          <td>{{ siNo(local.tieneAudioMicro) }}</td>
-          <td>{{ local.activo ? "Sí" : "No" }}</td>
-        </tr>
-        }
-      </tbody>
-    </table>
-  </div>
-  } @if (total() > 0 && estado() !== "error") {
-  <app-paginacion
-    [pagina]="filtros().pagina"
-    [tamano]="filtros().tamano"
-    [total]="total()"
-    (paginaCambia)="cambiarPagina($event)"
-    (tamanoCambia)="cambiarTamano($event)"
-  />
-  } @if (seleccionado(); as local) {
-  <div class="drawer-scrim" (click)="alFondo($event)" (keydown)="alTecla($event)">
-    <aside
-      #panel
-      class="drawer"
-      tabindex="-1"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="local-panel-titulo"
-    >
-      <header class="drawer-head">
-        <div class="ficha-cabecera">
-          <p class="ficha-etiqueta">{{ local.codigo }}</p>
-          <h2 id="local-panel-titulo">{{ local.nombre }}</h2>
-          <div class="ficha-badges">
-            @if (local.distrito) {
-            <span class="status-badge ficha-chip">{{ local.distrito }}</span>
-            } @if (local.activo) {
-            <span class="status-badge ficha-activo">
-              <app-icono nombre="check" [tamano]="11" />
-              Activo
-            </span>
+          </section>
+
+          <section class="ficha-seccion" aria-labelledby="local-panel-galeria">
+            <h3 id="local-panel-galeria">Galería fotográfica</h3>
+            <app-galeria-fotos entidadTipo="local" [entidadId]="local.id" />
+          </section>
+
+          <section class="ficha-seccion" aria-labelledby="local-panel-recomendacion">
+            <h3 id="local-panel-recomendacion">Evaluación</h3>
+            @if (local.recomendacion) {
+              <p class="ficha-recomendacion">{{ local.recomendacion }}</p>
             } @else {
-            <span class="status-badge ficha-inactivo">
-              <app-icono nombre="reloj" [tamano]="11" />
-              Inactivo
-            </span>
+              <p class="ficha-vacio">Sin evaluación registrada.</p>
             }
+          </section>
+        </div>
+      </aside>
+    </div>
+  }
+  @if (whatsappLocal(); as local) {
+    <div class="modal-scrim" (click)="alFondoWhatsapp($event)" (keydown)="alTeclaWhatsapp($event)">
+      <section
+        #whatsappDialogo
+        class="modal"
+        tabindex="-1"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="whatsapp-titulo"
+        (click)="$event.stopPropagation()"
+      >
+        <header class="modal-head">
+          <div class="modal-cabecera">
+            <span class="modal-icono"><app-icono nombre="bandeja" [tamano]="18" /></span>
+            <div>
+              <h2 id="whatsapp-titulo">Mensaje para WhatsApp</h2>
+              <p class="modal-subtitulo">
+                {{ local.nombre }} · Vista previa de envío institucional
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            class="icon-button"
+            aria-label="Cerrar la ventana de WhatsApp"
+            (click)="cerrarWhatsapp()"
+          >
+            <app-icono nombre="cerrar" [tamano]="18" />
+          </button>
+        </header>
+
+        <div class="modal-cuerpo">
+          <div class="modal-foto">
+            <span class="modal-etiqueta">Fotografía del local</span>
+            <div class="modal-foto-caja">
+              @if (fotoDe(local.id); as foto) {
+                <img
+                  [src]="foto.url"
+                  [alt]="foto.alt || foto.titulo || local.nombre"
+                  loading="lazy"
+                  decoding="async"
+                  referrerpolicy="no-referrer"
+                />
+              } @else {
+                <span class="sin-dato">Sin fotografía del local</span>
+              }
+            </div>
+          </div>
+
+          <div class="modal-mensaje">
+            <div class="modal-mensaje-cabecera">
+              <label class="modal-etiqueta" for="whatsapp-texto"
+                >Texto del mensaje (editable)</label
+              >
+              <span class="modal-sintaxis">Formato WhatsApp</span>
+            </div>
+            <textarea
+              id="whatsapp-texto"
+              class="whatsapp-texto"
+              rows="12"
+              spellcheck="false"
+              aria-label="Mensaje para WhatsApp"
+              [value]="mensajeWhatsapp()"
+              (input)="editarMensaje($event)"
+            ></textarea>
+            <p class="modal-nota">Las líneas sin dato no se incluyen.</p>
           </div>
         </div>
 
-        <button
-          type="button"
-          class="icon-button"
-          aria-label="Cerrar la ficha del local"
-          (click)="cerrarPanel()"
-        >
-          <app-icono nombre="cerrar" [tamano]="18" />
-        </button>
-      </header>
-
-      <div class="drawer-body">
-        <section class="ficha-seccion" aria-labelledby="local-panel-ubicacion">
-          <h3 id="local-panel-ubicacion">Ubicación</h3>
-          <dl class="ficha-datos">
-            <div>
-              <dt>Distrito</dt>
-              <dd>{{ local.distrito || "—" }}</dd>
-            </div>
-            <div>
-              <dt>Provincia</dt>
-              <dd>{{ local.provincia || "—" }}</dd>
-            </div>
-            <div>
-              <dt>Región</dt>
-              <dd>{{ local.region || "—" }}</dd>
-            </div>
-            <div>
-              <dt>Dirección</dt>
-              <dd>{{ local.direccion || "—" }}</dd>
-            </div>
-            <div>
-              <dt>Referencia de ubicación</dt>
-              <dd>{{ local.ubicacionRef || "—" }}</dd>
-            </div>
-            <div class="ficha-ancho">
-              <dt>Galería fotográfica</dt>
-              <dd>
-                <app-galeria-fotos entidadTipo="local" [entidadId]="local.id" />
-              </dd>
-            </div>
-          </dl>
-        </section>
-
-        <section class="ficha-seccion" aria-labelledby="local-panel-capacidad">
-          <h3 id="local-panel-capacidad">Capacidad y equipamiento</h3>
-          <dl class="ficha-datos">
-            <div>
-              <dt>Aforo</dt>
-              <dd>{{ local.aforo ?? "—" }}</dd>
-            </div>
-            <div>
-              <dt>Accesos</dt>
-              <dd>{{ local.ingresos || "—" }}</dd>
-            </div>
-            <div>
-              <dt>Proyector / pantalla</dt>
-              <dd>{{ siNo(local.tieneProyector) }}</dd>
-            </div>
-            <div>
-              <dt>Equipos de cómputo</dt>
-              <dd>{{ siNo(local.tieneEquiposComputo) }}</dd>
-            </div>
-            <div>
-              <dt>Audio y micrófonos</dt>
-              <dd>{{ siNo(local.tieneAudioMicro) }}</dd>
-            </div>
-          </dl>
-        </section>
-
-        <section class="ficha-seccion" aria-labelledby="local-panel-contacto">
-          <h3 id="local-panel-contacto">Contacto del local</h3>
-          @if (!puedeVerPii()) {
-          <p class="ficha-nota">Su rol no permite ver los datos de contacto del local.</p>
-          } @else {
-          <dl class="ficha-datos">
-            <div>
-              <dt>Nombre</dt>
-              <dd>{{ local.contactoNombre || "—" }}</dd>
-            </div>
-            <div>
-              <dt>Celular</dt>
-              <dd>{{ local.contactoCelular || "—" }}</dd>
-            </div>
-            <div>
-              <dt>Correo</dt>
-              <dd>{{ local.contactoEmail || "—" }}</dd>
-            </div>
-          </dl>
+        <footer class="modal-pie">
+          @if (avisoCopia(); as aviso) {
+            <p class="modal-aviso" role="status">{{ aviso }}</p>
           }
-        </section>
-
-        <section class="ficha-seccion" aria-labelledby="local-panel-recomendacion">
-          <h3 id="local-panel-recomendacion">Evaluación</h3>
-          @if (local.recomendacion) {
-          <p class="ficha-recomendacion">{{ local.recomendacion }}</p>
-          } @else {
-          <p class="ficha-vacio">Sin evaluación registrada.</p>
-          }
-        </section>
-      </div>
-    </aside>
-  </div>
+          <div class="modal-pie-grupo">
+            <button type="button" class="button-secondary" (click)="descargarFoto(local)">
+              <app-icono nombre="documentos" [tamano]="14" />
+              Descargar foto
+            </button>
+            <button type="button" class="button-secondary" (click)="compartirWhatsapp()">
+              <app-icono nombre="salir" [tamano]="14" />
+              Compartir en WhatsApp
+            </button>
+          </div>
+          <div class="modal-pie-grupo">
+            <button type="button" class="button-secondary" (click)="cerrarWhatsapp()">
+              Cerrar
+            </button>
+            <button type="button" class="button-primary" (click)="copiarMensaje()">
+              <app-icono nombre="documentos" [tamano]="14" />
+              Copiar texto
+            </button>
+          </div>
+        </footer>
+      </section>
+    </div>
   }
 </section>

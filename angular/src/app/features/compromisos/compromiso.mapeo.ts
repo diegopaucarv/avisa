@@ -532,6 +532,159 @@ export function situacionDe(compromiso: Compromiso, hoy: Date = new Date()): Sit
   return { etiqueta: 'En plazo', clase: 'due-en-plazo' };
 }
 
+/* ------------------------------------------------------------------ */
+/* Historia: eventos, hitos y adjuntos de un compromiso                */
+/* ------------------------------------------------------------------ */
+
+/** Evento de `core.compromiso_evento` tal como lo devuelve el historial. */
+export type EventoCompromiso = {
+  id: string;
+  tipo: string;
+  /** Cuerpo libre; se muestra sólo el texto declarado en `detalle.texto`. */
+  detalle: unknown;
+  autor: string | null;
+  usuarioId: string | null;
+  createdAt: string | null;
+};
+
+/** Hito dentro de la línea de tiempo, con el conteo de adjuntos vigentes. */
+export type HitoHistorial = {
+  id: string;
+  codigo: string | null;
+  descripcion: string | null;
+  fecha: string | null;
+  fechaReal: string | null;
+  estado: EstadoHito;
+  terminal: boolean;
+  responsableTexto: string | null;
+  adjuntos: number;
+};
+
+/** Adjunto vigente del compromiso o de uno de sus hitos. */
+export type AdjuntoHistorial = {
+  id: string;
+  entidadTipo: 'compromiso' | 'hito';
+  entidadId: string;
+  nombre: string;
+  mime: string | null;
+  tamanoBytes: number | null;
+  descripcion: string | null;
+  subidoPor: string | null;
+  createdAt: string | null;
+  /** Código del hito cuando el adjunto cuelga de uno. */
+  hitoCodigo: string | null;
+};
+
+export type TipoItemHistorial = 'evento' | 'hito' | 'adjunto';
+
+/**
+ * Ítem de la línea de tiempo. Los campos son opcionales a propósito: la
+ * plantilla discrimina por `tipo` y lee `evento`, `hito` o `adjunto` bajo `@if`.
+ */
+export type ItemHistorial = {
+  tipo: TipoItemHistorial;
+  id: string;
+  fecha: string | null;
+  evento?: EventoCompromiso;
+  hito?: HitoHistorial;
+  adjunto?: AdjuntoHistorial;
+};
+
+export type HistorialCompromiso = {
+  compromisoId: string;
+  codigo: string | null;
+  eventos: EventoCompromiso[];
+  hitos: HitoHistorial[];
+  adjuntos: AdjuntoHistorial[];
+  linea: ItemHistorial[];
+};
+
+function tipoItemHistorial(valor: string | null): TipoItemHistorial | null {
+  if (valor === 'evento' || valor === 'hito' || valor === 'adjunto') return valor;
+  return null;
+}
+
+function aEventoCompromiso(bruto: unknown): EventoCompromiso {
+  const registro = esRegistro(bruto) ? bruto : {};
+  return {
+    id: texto(registro, ['id']) ?? '',
+    tipo: texto(registro, ['tipo']) ?? 'evento',
+    detalle: leer(registro, ['detalle']) ?? null,
+    autor: texto(registro, ['autor']),
+    usuarioId: texto(registro, ['usuarioId', 'usuario_id']),
+    createdAt: texto(registro, ['createdAt', 'created_at']),
+  };
+}
+
+function aHitoHistorial(bruto: unknown): HitoHistorial {
+  const registro = esRegistro(bruto) ? bruto : {};
+  return {
+    id: texto(registro, ['id']) ?? '',
+    codigo: texto(registro, ['codigo']),
+    descripcion: texto(registro, ['descripcion']),
+    fecha: texto(registro, ['fecha']),
+    fechaReal: texto(registro, ['fechaReal', 'fecha_real']),
+    estado: estadoHitoDe(texto(registro, ['estado'])),
+    terminal: booleano(registro, ['terminal']),
+    responsableTexto: texto(registro, ['responsableTexto', 'responsable_texto']),
+    adjuntos: numero(registro, ['adjuntos']) ?? 0,
+  };
+}
+
+function aAdjuntoHistorial(bruto: unknown): AdjuntoHistorial {
+  const registro = esRegistro(bruto) ? bruto : {};
+  const entidadTipo = texto(registro, ['entidadTipo', 'entidad_tipo']);
+  return {
+    id: texto(registro, ['id']) ?? '',
+    entidadTipo: entidadTipo === 'hito' ? 'hito' : 'compromiso',
+    entidadId: texto(registro, ['entidadId', 'entidad_id']) ?? '',
+    nombre: texto(registro, ['nombre']) ?? 'Sin nombre',
+    mime: texto(registro, ['mime']),
+    tamanoBytes: numero(registro, ['tamanoBytes', 'tamano_bytes']),
+    descripcion: texto(registro, ['descripcion']),
+    subidoPor: texto(registro, ['subidoPor', 'subido_por']),
+    createdAt: texto(registro, ['createdAt', 'created_at']),
+    hitoCodigo: texto(registro, ['hitoCodigo', 'hito_codigo']),
+  };
+}
+
+function aItemHistorial(bruto: unknown): ItemHistorial | null {
+  const registro = esRegistro(bruto) ? bruto : {};
+  const tipo = tipoItemHistorial(texto(registro, ['tipo']));
+  const id = texto(registro, ['id']);
+  if (!tipo || !id) return null;
+
+  const item: ItemHistorial = {
+    tipo,
+    id,
+    fecha: texto(registro, ['fecha']),
+  };
+
+  const evento = leer(registro, ['evento']);
+  const hito = leer(registro, ['hito']);
+  const adjunto = leer(registro, ['adjunto']);
+  if (tipo === 'evento' && esRegistro(evento)) item.evento = aEventoCompromiso(evento);
+  if (tipo === 'hito' && esRegistro(hito)) item.hito = aHitoHistorial(hito);
+  if (tipo === 'adjunto' && esRegistro(adjunto)) item.adjunto = aAdjuntoHistorial(adjunto);
+
+  return item;
+}
+
+/** `GET /api/v1/commitments/{id}/historial`, defensivo ante campos ausentes. */
+export function aHistorialCompromiso(bruto: unknown): HistorialCompromiso {
+  const registro = esRegistro(bruto) ? bruto : {};
+  return {
+    compromisoId: texto(registro, ['compromisoId', 'compromiso_id']) ?? '',
+    codigo: texto(registro, ['codigo']),
+    eventos: lista(registro, ['eventos']).map(aEventoCompromiso),
+    hitos: lista(registro, ['hitos']).map(aHitoHistorial),
+    adjuntos: lista(registro, ['adjuntos']).map(aAdjuntoHistorial),
+    linea: lista(registro, ['linea'])
+      .map(aItemHistorial)
+      .filter((item): item is ItemHistorial => item !== null),
+  };
+}
+
 /**
  * `YYYY-MM-DD` → `DD/MM/YYYY` y anulación como timestamp. Se movieron a
  * `shared/formato-fecha.ts` y se reexportan para no romper los imports que ya

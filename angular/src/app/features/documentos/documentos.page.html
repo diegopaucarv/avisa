@@ -8,25 +8,20 @@
       <button type="button" class="button-primary" (click)="abrirAlta()">
         Registrar documento
       </button>
+      } @if (!verPapelera()) {
+      <app-barra-seleccion
+        entidad="documentos"
+        anulable="documentos"
+        [cantidad]="seleccion.cantidad()"
+        [idsSeleccionados]="seleccion.lista()"
+        (anulado)="alAnularLote($event)"
+        (fallo)="alFallarExportacion($event)"
+      />
       }
-      <p class="result-count" aria-live="polite">
-        {{ total() }} {{ verPapelera() ? 'documentos anulados' : 'documentos' }}
-      </p>
     </div>
   </header>
 
-  @if (!verPapelera()) {
-  <div class="view-toolbar">
-    <app-barra-seleccion
-      entidad="documentos"
-      anulable="documentos"
-      [cantidad]="seleccion.cantidad()"
-      [idsSeleccionados]="seleccion.lista()"
-      (anulado)="alAnularLote($event)"
-      (fallo)="alFallarExportacion($event)"
-    />
-  </div>
-  } @if (exportarError(); as mensaje) {
+  @if (exportarError(); as mensaje) {
   <p class="exportar-error" role="alert">{{ mensaje }}</p>
   } @if (avisoAnulacion(); as aviso) {
   <p class="form-hint aviso-ok" role="status">{{ aviso }}</p>
@@ -81,7 +76,7 @@
       Tipo
       <select aria-label="Filtrar documentos por tipo" (change)="cambiarTipo($event)">
         <option value="" [selected]="filtros().tipo === ''">Todos</option>
-        @for (tipo of tipos(); track tipo.valor) {
+        @for (tipo of tiposFiltro(); track tipo.valor) {
         <option [value]="tipo.valor" [selected]="filtros().tipo === tipo.valor">
           {{ tipo.etiqueta }}
         </option>
@@ -210,7 +205,6 @@
   </div>
   } @else if (!verPapelera() && vista() === 'arbol') {
   <div class="panel arbol-documentos">
-    <p class="table-caption">{{ resumenArbol() }}</p>
     @if (estadoArbol() === 'cargando') {
     <p class="actualizando" role="status">Cargando el árbol completo…</p>
     } @else if (estadoArbol() === 'error') {
@@ -219,13 +213,13 @@
       <button type="button" class="link-button" (click)="recargarArbol()">Reintentar</button>
     </p>
     }
-    <details class="arbol-rama" open>
+    <details class="arbol-rama">
       <summary>
         <span>Todo</span>
         <span class="arbol-cuenta">{{ totalArbol() }}</span>
       </summary>
       @for (rama of arbol(); track rama.clave) {
-      <details class="arbol-rama arbol-subrama" open>
+      <details class="arbol-rama arbol-subrama">
         <summary>
           <span>{{ rama.etiqueta }}</span>
           <span class="arbol-cuenta">{{ rama.documentos.length }}</span>
@@ -248,7 +242,7 @@
       }
     </details>
     @if (hayFiltroDocumental()) { } @else {
-    <details class="arbol-rama" open>
+    <details class="arbol-rama">
       <summary>
         <span>Normativas</span>
         <span class="arbol-cuenta">{{ normativas().length }}</span>
@@ -266,7 +260,7 @@
       </ul>
       }
     </details>
-    <details class="arbol-rama" open>
+    <details class="arbol-rama">
       <summary>
         <span>Otros documentos</span>
         <span class="arbol-cuenta">{{ otrosDocumentos().length }}</span>
@@ -286,7 +280,15 @@
     </details>
     }
   </div>
-  } @else {
+  @if (documentosArbol().length > filtros().tamano) {
+  <app-paginacion
+    [pagina]="filtros().pagina"
+    [tamano]="filtros().tamano"
+    [total]="documentosArbol().length"
+    (paginaCambia)="cambiarPagina($event)"
+    (tamanoCambia)="cambiarTamano($event)"
+  />
+  } } @else {
   <div class="table-wrap">
     <table class="data-table">
       <thead>

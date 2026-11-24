@@ -106,7 +106,6 @@ function diferenciaTexto(valor: string, original: string | null): string | null 
       width: min(640px, 100%);
     }
 
-
     .panel-cabecera {
       display: flex;
       flex-direction: column;
@@ -158,6 +157,11 @@ function diferenciaTexto(valor: string, original: string | null): string | null 
     .drawer-body .detail-section:first-of-type {
       padding-top: 0;
       border-top: 0;
+    }
+
+    .drawer-body .detail-section h3 {
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
     }
 
     .panel-datos {
