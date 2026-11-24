@@ -562,42 +562,6 @@
         }
       </section>
 
-      <section class="detail-section" aria-labelledby="hitos-caso">
-        <h2 id="hitos-caso">Hitos ({{ hitosDelCaso().length }})</h2>
-        @if (hitosDelCaso().length === 0) {
-        <p class="empty-inline">Sin hitos registrados.</p>
-        } @else {
-        <div class="table-wrap">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th scope="col" [appThOrden]="'compromiso'" [orden]="ordenHitos">Compromiso</th>
-                <th scope="col" [appThOrden]="'hito'" [orden]="ordenHitos">Hito</th>
-                <th scope="col" [appThOrden]="'fecha'" [orden]="ordenHitos">Fecha planificada</th>
-                <th scope="col" [appThOrden]="'estado'" [orden]="ordenHitos">Estado</th>
-                <th scope="col" [appThOrden]="'responsable'" [orden]="ordenHitos">Responsable</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (hito of filasHitos(); track hito.id) {
-              <tr>
-                <td><strong>{{ hito.compromiso }}</strong></td>
-                <td class="celda-larga">{{ hito.descripcion || 'Sin descripción' }}</td>
-                <td>
-                  {{ fechaTexto(hito.fecha) }} @if (hito.fechaTexto && !hito.fecha) {
-                  <small class="detail-hint">{{ hito.fechaTexto }}</small>
-                  }
-                </td>
-                <td>{{ hito.estado || 'Sin estado' }}</td>
-                <td>{{ hito.responsableTexto || '—' }}</td>
-              </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-        }
-      </section>
-
       <section class="detail-section" aria-labelledby="documentos-caso">
         <h2 id="documentos-caso">Documentos ({{ d.documentos.length }})</h2>
         @if (d.documentos.length === 0) {
