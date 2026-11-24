@@ -83,7 +83,6 @@ const CAMPOS: readonly DefinicionCampo[] = [
   { campo: "actoresEstado", alias: ["actores_del_estado"] },
   { campo: "actoresSociedadCivil", alias: ["actores_sociedad_civil"] },
   { campo: "demandas", alias: ["demandas"] },
-  { campo: "tematica", alias: ["tematica"] },
   {
     campo: "accion",
     alias: [
@@ -155,7 +154,6 @@ const ARRASTRA: readonly CampoImportado[] = [
   "actoresEstado",
   "actoresSociedadCivil",
   "demandas",
-  "tematica",
   "accion",
   "mediosVerificacion",
   "areaResponsable",
@@ -170,7 +168,7 @@ for (const definicion of CAMPOS) {
   }
 }
 
-/** Cabecera exacta del CSV de exportación (A..X, en el orden del Excel). */
+/** Cabecera exacta del CSV de exportación (A..W, en el orden del Excel). */
 export const CABECERA_MATRIZ: readonly string[] = COLUMNAS_MATRIZ.map(
   (columna) => columna.etiqueta,
 );
@@ -371,7 +369,7 @@ export function construirFilas(
 }
 
 /**
- * Fila del repositorio → celdas en el orden A..X. Las columnas sin dato salen
+ * Fila del repositorio → celdas en el orden A..W. Las columnas sin dato salen
  * vacías: nunca se rellenan con un guion ni con un cero.
  */
 export function filaAMatriz(fila: MatrizFila): string[] {

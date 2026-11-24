@@ -47,24 +47,14 @@
 
   <div class="scope-bar">
     <span class="scope-label">Ventana</span>
-    <label class="select-filter">
-      <span>Desde</span>
-      <input
-        type="date"
-        [value]="filtros().desde"
-        (change)="cambiarDesde($event)"
-        aria-label="Fecha desde"
-      />
-    </label>
-    <label class="select-filter">
-      <span>Hasta</span>
-      <input
-        type="date"
-        [value]="filtros().hasta"
-        (change)="cambiarHasta($event)"
-        aria-label="Fecha hasta"
-      />
-    </label>
+    <app-rango-fechas
+      [desde]="filtros().desde || null"
+      [hasta]="filtros().hasta || null"
+      [atajos]="false"
+      etiquetaGrupo="Ventana de fechas del dashboard"
+      idBase="dashboard-ventana"
+      (cambio)="cambiarRango($event)"
+    />
 
     <span class="scope-label">Agregación</span>
     <div class="segmented" role="group" aria-label="Granularidad de la serie">

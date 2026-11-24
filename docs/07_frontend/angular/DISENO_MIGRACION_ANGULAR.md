@@ -492,11 +492,19 @@ presentar esos valores como si fueran manuales.
 | 14    | `executive`                    | `/direccion`                 | `loadComponent`              | `sesionGuard`                              | `?region&ventana`                                                        |
 | —     | (fallback)                     | `**` → `/resumen`            | —                            | —                                          | —                                                                        |
 
-**Estado de implementación (2026-11-22).** Cableadas: `casos`, `casos/:codigo`, `alertas`,
-`compromisos`, `documentos`, `directorio/actores` y `directorio/instituciones`. Siguen en marcador
-`EnMigracionComponent`: `resumen`, `bandeja`, `directorio/organizaciones`, `directorio/locales`,
-`direccion`, `ayuda`, `preferencias` y `mapa`; `mapa` está aplazado. `casos/sin-caso`, `busqueda` y
-`notificaciones` **no tienen ruta todavía**.
+> **Superado (2026-11-24).** Esta tabla es el **plan** de rutas, no el estado. Hoy hay **33
+> pantallas con componente** (32 hijas del shell y `/acceso`): `casos/sin-caso`, `busqueda` y
+> `notificaciones` tienen ruta, `mapa` dejó de estar aplazado y ninguna pantalla queda en
+> `EnMigracionComponent`. Dos rutas de esta tabla redirigen en vez de pintar: `/directorio/instituciones`
+> → `/directorio/organizaciones` y `/papelera` → `/archivo`. Ocho rutas que el plan no preveía existen
+> ya: `/dashboard`, `/red-radar`, `/matriz-conflictividad`, `/gobierno-sugerencias`,
+> `/exportaciones`, `/administracion`, `/administracion/etl` y `/directorio/autoridades`. El estado
+> vigente está en `ESTADO_MIGRACION_ANGULAR.md` §6–§7 y en `../frontend.md`.
+>
+> **Estado de implementación (2026-11-22, histórico).** Cableadas: `casos`, `casos/:codigo`,
+> `alertas`, `compromisos`, `documentos`, `directorio/actores` y `directorio/instituciones`. Siguen
+> en marcador `EnMigracionComponent`: `resumen`, `bandeja`, `directorio/organizaciones`,
+> `directorio/locales`, `direccion`, `ayuda`, `preferencias` y `mapa`; `mapa` está aplazado.
 
 ### 4.2 Paneles, drawers y modales → ruta (para que sean enlazables)
 

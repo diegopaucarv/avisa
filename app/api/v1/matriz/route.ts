@@ -20,7 +20,7 @@ export const dynamic = "force-dynamic";
 const FILTROS = ["region", "caso", "estado", "q"] as const;
 
 /**
- * Matriz de conflictos del equipo (Anexo 15 × Anexo 14) en el formato A..X.
+ * Matriz de conflictos del equipo (Anexo 15 × Anexo 14) en el formato A..W.
  *
  * Una fila por compromiso × hito. Si falta la migración 45 (o la 41), el
  * repositorio corta con 503 `ESQUEMA_PENDIENTE` antes de devolver nada: no se

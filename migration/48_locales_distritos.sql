@@ -44,7 +44,9 @@
 --   de la aplicación ni otras tablas. Se resuelve siempre por `ubigeo` del
 --   catálogo `core.distritos`, nunca por nombre de distrito.
 --
---   PENDIENTE: esta migración NO ha sido aplicada. Se ejecuta a mano.
+--   ESTADO: aplicada. Los 27 locales tienen `distrito_id` y la migración figura
+--   en `core.migracion_log` (verificación de sólo lectura del 2026-11-24). El
+--   repositorio no la aplica en ningún automatismo: se ejecuta a mano.
 
 begin;
 

@@ -618,7 +618,6 @@
         </div>
         }
       </section>
-      <!--
       <section class="detail-section" aria-labelledby="nudos-caso">
         <div class="detail-section-title">
           <h2 id="nudos-caso">Nudos de la semana</h2>
@@ -634,7 +633,9 @@
         } @else if (estadoNudos() === 'cargando') {
         <p class="empty-inline">Cargando nudos…</p>
         } @else if (semanasNudos().length === 0) {
-        <p class="empty-inline">Sin nudos registrados para este caso.</p>
+        <p class="empty-inline">
+          Sin nudos registrados: no hay nudos declarados en esta semana ni en el historial del caso.
+        </p>
         } @else {
         <p class="form-hint">
           Historial completo, más reciente primero. Cada semana conserva sus dos mitades por
@@ -677,7 +678,7 @@
           </table>
         </div>
         }
-      </section>-->
+      </section>
 
       <section class="detail-section" aria-labelledby="matriz-caso">
         <div class="detail-section-title">
@@ -720,11 +721,7 @@
               @for (fila of tabla.filas; track fila.demandaId) {
               <tr>
                 <td>{{ fila.numero }}</td>
-                <td class="celda-larga">
-                  {{ fila.demanda || '—' }} @if (fila.tematica) {
-                  <span class="detail-hint">{{ fila.tematica }}</span>
-                  }
-                </td>
+                <td class="celda-larga">{{ fila.demanda || '—' }}</td>
                 <td>{{ fila.estado || '—' }}</td>
                 @for (columna of tabla.columnas; track columna.clave) {
                 <td>

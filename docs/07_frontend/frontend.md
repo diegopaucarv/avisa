@@ -377,7 +377,9 @@ registradas». No hay endpoint de alta de reunión y la lectura sólo existe por
 
 **Nota de esquema.** Las cuatro banderas están en `migration/42_reuniones_sin_caso.sql`,
 cuyo encabezado la marca como **propuesta, no ejecutada**; el archivo de reuniones está en
-`migration/44_decisiones_2026_11_24.sql`. Ninguna de las dos tiene endpoint ni pantalla.
+`migration/44_decisiones_2026_11_24.sql`. Ni las banderas ni el archivo tienen endpoint ni
+pantalla: `/v1/resultados/reuniones` es sólo el listado para elegir a qué reunión cargar la
+asistencia.
 
 ---
 
@@ -756,8 +758,9 @@ un documento, un trabajo en lote o un método.
 | X6    | Dirección y Secretaría General ven ambos subsectores; cada Vice-ministerio, sólo el suyo. Es ámbito de sesión.                                                    |
 | X7    | La temática no se muestra en la interfaz (2026-11-24). Se conserva en la base porque el segmento temático está impreso en `codigo_caso`.                          |
 
-**Pendiente de X7.** La ficha del caso todavía pinta la columna `tematica`: al aplicar la
-regla hay que retirarla de esa tabla, no del modelo.
+**X7 aplicado (2026-11-24).** La matriz demandas–intervenciones de la ficha del caso ya no
+pinta la temática bajo la demanda (`caso-detalle.page.html`); el modelo y el selector de
+alta se conservan, porque el segmento temático compone `codigo_caso`.
 
 ---
 

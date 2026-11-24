@@ -1,5 +1,5 @@
 /**
- * Utilidades puras de la matriz del equipo (formato A..X) para la SPA.
+ * Utilidades puras de la matriz del equipo (formato A..W) para la SPA.
  *
  * Repiten el criterio del endpoint (`app/api/v1/matriz/csv.ts`) sin depender de
  * Angular ni de la red: parsing y generación RFC 4180, normalización de
@@ -22,7 +22,6 @@ export type MatrizFila = {
   actoresEstado: string | null;
   actoresSociedadCivil: string | null;
   demandas: string | null;
-  tematica: string | null;
   accion: string | null;
   mediosVerificacion: string | null;
   areaResponsable: string | null;
@@ -40,7 +39,7 @@ export type MatrizFila = {
   bloqueFila: number | null;
 };
 
-/** Las 24 columnas del formato del equipo, en su orden. */
+/** Las 23 columnas del formato del equipo, en su orden. */
 export const COLUMNAS_MATRIZ: readonly {
   letra: string;
   clave: keyof MatrizFila;
@@ -58,22 +57,21 @@ export const COLUMNAS_MATRIZ: readonly {
   { letra: 'J', clave: 'actoresEstado', etiqueta: 'Actores del Estado' },
   { letra: 'K', clave: 'actoresSociedadCivil', etiqueta: 'Actores Sociedad Civil' },
   { letra: 'L', clave: 'demandas', etiqueta: 'Demandas' },
-  { letra: 'M', clave: 'tematica', etiqueta: 'Temática' },
-  { letra: 'N', clave: 'accion', etiqueta: 'Acciones/Compromisos/Acuerdos' },
-  { letra: 'O', clave: 'mediosVerificacion', etiqueta: 'Medios de Verificaciones' },
+  { letra: 'M', clave: 'accion', etiqueta: 'Acciones/Compromisos/Acuerdos' },
+  { letra: 'N', clave: 'mediosVerificacion', etiqueta: 'Medios de Verificaciones' },
   {
-    letra: 'P',
+    letra: 'O',
     clave: 'areaResponsable',
     etiqueta: 'Área Responsable de Monitoreo de Acción',
   },
-  { letra: 'Q', clave: 'puntoFocal', etiqueta: 'Punto Focal Monitoreo' },
-  { letra: 'R', clave: 'documentos', etiqueta: 'Documentos / Archivos / Otros' },
-  { letra: 'S', clave: 'hito', etiqueta: 'Hito' },
-  { letra: 'T', clave: 'descripcionHito', etiqueta: 'Descripción del Hito' },
-  { letra: 'U', clave: 'responsableHito', etiqueta: 'Responsable del Hito' },
-  { letra: 'V', clave: 'fechaPlanificada', etiqueta: 'Fecha Planificada' },
-  { letra: 'W', clave: 'fechaReal', etiqueta: 'Fecha Real' },
-  { letra: 'X', clave: 'estado', etiqueta: 'Estado Actual' },
+  { letra: 'P', clave: 'puntoFocal', etiqueta: 'Punto Focal Monitoreo' },
+  { letra: 'Q', clave: 'documentos', etiqueta: 'Documentos / Archivos / Otros' },
+  { letra: 'R', clave: 'hito', etiqueta: 'Hito' },
+  { letra: 'S', clave: 'descripcionHito', etiqueta: 'Descripción del Hito' },
+  { letra: 'T', clave: 'responsableHito', etiqueta: 'Responsable del Hito' },
+  { letra: 'U', clave: 'fechaPlanificada', etiqueta: 'Fecha Planificada' },
+  { letra: 'V', clave: 'fechaReal', etiqueta: 'Fecha Real' },
+  { letra: 'W', clave: 'estado', etiqueta: 'Estado Actual' },
 ];
 
 export const CABECERA_MATRIZ: readonly string[] = COLUMNAS_MATRIZ.map(
@@ -501,7 +499,6 @@ export function aMatrizFila(bruto: unknown): MatrizFila {
     actoresEstado: textoDe(fila, 'actoresEstado'),
     actoresSociedadCivil: textoDe(fila, 'actoresSociedadCivil'),
     demandas: textoDe(fila, 'demandas'),
-    tematica: textoDe(fila, 'tematica'),
     accion: textoDe(fila, 'accion'),
     mediosVerificacion: textoDe(fila, 'mediosVerificacion'),
     areaResponsable: textoDe(fila, 'areaResponsable'),

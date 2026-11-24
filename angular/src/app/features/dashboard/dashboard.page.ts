@@ -13,6 +13,7 @@ import { urlConParametros } from '../../core/http/coleccion';
 import { consulta } from '../../core/http/consulta';
 import { aErrorApi } from '../../core/http/errores';
 import { IconoComponent } from '../../shared/ui/icono.component';
+import { RangoFechasComponent, type RangoFechas } from '../../shared/ui/rango-fechas.component';
 
 import {
   ANALITICA_VACIA,
@@ -54,7 +55,7 @@ type Preset = 'todo' | '12m' | '5a';
  */
 @Component({
   selector: 'app-dashboard-page',
-  imports: [IconoComponent],
+  imports: [IconoComponent, RangoFechasComponent],
   templateUrl: './dashboard.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
@@ -816,12 +817,16 @@ export class DashboardPage {
     this.filtros.update((actuales) => ({ ...actuales, granularidad }));
   }
 
-  cambiarDesde(evento: Event): void {
-    this.filtros.update((actuales) => ({ ...actuales, desde: this.valorDe(evento) }));
-  }
-
-  cambiarHasta(evento: Event): void {
-    this.filtros.update((actuales) => ({ ...actuales, hasta: this.valorDe(evento) }));
+  /**
+   * El rango compartido entra y sale en ISO; los filtros del dashboard usan
+   * cadena vacía para «sin extremo», que `urlConParametros` omite.
+   */
+  cambiarRango(rango: RangoFechas): void {
+    this.filtros.update((actuales) => ({
+      ...actuales,
+      desde: rango.desde ?? '',
+      hasta: rango.hasta ?? '',
+    }));
   }
 
   filtrarRegion(evento: Event): void {

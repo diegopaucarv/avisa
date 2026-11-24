@@ -3,7 +3,7 @@ import type { PoolClient } from "pg";
 import { ApiError } from "../errors";
 
 /**
- * Matriz de conflictos del equipo (formato del Excel A..X).
+ * Matriz de conflictos del equipo (formato del Excel A..W).
  *
  * Dos vistas ya consolidadas son la fuente:
  *   · `analytics.vw_anexo_15_matriz_conflictividad` — una fila por caso.
@@ -53,38 +53,36 @@ export type MatrizFila = {
   actoresSociedadCivil: string | null;
   /** L · `Demandas`. La vista del Anexo 14 no trae demandas. */
   demandas: string | null;
-  /** M · `Temática`. */
-  tematica: string | null;
-  /** N · `Acciones/Compromisos/Acuerdos`. */
+  /** M · `Acciones/Compromisos/Acuerdos`. */
   accion: string | null;
-  /** O · `Medios de Verificaciones`. Es una instrucción, no un adjunto. */
+  /** N · `Medios de Verificaciones`. Es una instrucción, no un adjunto. */
   mediosVerificacion: string | null;
-  /** P · `Área Responsable de Monitoreo de Acción`. */
+  /** O · `Área Responsable de Monitoreo de Acción`. */
   areaResponsable: string | null;
-  /** Q · `Punto Focal Monitoreo`. */
+  /** P · `Punto Focal Monitoreo`. */
   puntoFocal: string | null;
-  /** R · `Documentos / Archivos / Otros`. */
+  /** Q · `Documentos / Archivos / Otros`. */
   documentos: string | null;
-  /** S · `Hito`. */
+  /** R · `Hito`. */
   hito: string | null;
-  /** T · `Descripción del Hito`. */
+  /** S · `Descripción del Hito`. */
   descripcionHito: string | null;
-  /** U · `Responsable del Hito` (texto o nombre del usuario vinculado). */
+  /** T · `Responsable del Hito` (texto o nombre del usuario vinculado). */
   responsableHito: string | null;
-  /** V · `Fecha Planificada` (ISO si es convertible; texto crudo si no). */
+  /** U · `Fecha Planificada` (ISO si es convertible; texto crudo si no). */
   fechaPlanificada: string | null;
-  /** W · `Fecha Real`. */
+  /** V · `Fecha Real`. */
   fechaReal: string | null;
-  /** X · `Estado Actual` (código con espacios, como en el catálogo). */
+  /** W · `Estado Actual` (código con espacios, como en el catálogo). */
   estado: string | null;
-  /** Trazabilidad AVISA (no forma parte de A..X). */
+  /** Trazabilidad AVISA (no forma parte de A..W). */
   codigoCaso: string | null;
   codigoCompromiso: string | null;
   codigoExcel: string | null;
   bloqueFila: number | null;
 };
 
-/** Definición de las 24 columnas del formato del equipo, en su orden. */
+/** Definición de las 23 columnas del formato del equipo, en su orden. */
 export const COLUMNAS_MATRIZ: readonly {
   letra: string;
   clave: keyof MatrizFila;
@@ -122,42 +120,41 @@ export const COLUMNAS_MATRIZ: readonly {
     etiqueta: "Actores Sociedad Civil",
   },
   { letra: "L", clave: "demandas", etiqueta: "Demandas" },
-  { letra: "M", clave: "tematica", etiqueta: "Temática" },
   {
-    letra: "N",
+    letra: "M",
     clave: "accion",
     etiqueta: "Acciones/Compromisos/Acuerdos",
   },
   {
-    letra: "O",
+    letra: "N",
     clave: "mediosVerificacion",
     etiqueta: "Medios de Verificaciones",
   },
   {
-    letra: "P",
+    letra: "O",
     clave: "areaResponsable",
     etiqueta: "Área Responsable de Monitoreo de Acción",
   },
-  { letra: "Q", clave: "puntoFocal", etiqueta: "Punto Focal Monitoreo" },
+  { letra: "P", clave: "puntoFocal", etiqueta: "Punto Focal Monitoreo" },
   {
-    letra: "R",
+    letra: "Q",
     clave: "documentos",
     etiqueta: "Documentos / Archivos / Otros",
   },
-  { letra: "S", clave: "hito", etiqueta: "Hito" },
+  { letra: "R", clave: "hito", etiqueta: "Hito" },
   {
-    letra: "T",
+    letra: "S",
     clave: "descripcionHito",
     etiqueta: "Descripción del Hito",
   },
   {
-    letra: "U",
+    letra: "T",
     clave: "responsableHito",
     etiqueta: "Responsable del Hito",
   },
-  { letra: "V", clave: "fechaPlanificada", etiqueta: "Fecha Planificada" },
-  { letra: "W", clave: "fechaReal", etiqueta: "Fecha Real" },
-  { letra: "X", clave: "estado", etiqueta: "Estado Actual" },
+  { letra: "U", clave: "fechaPlanificada", etiqueta: "Fecha Planificada" },
+  { letra: "V", clave: "fechaReal", etiqueta: "Fecha Real" },
+  { letra: "W", clave: "estado", etiqueta: "Estado Actual" },
 ];
 
 export type MatrizListQuery = {
@@ -384,7 +381,6 @@ function mapFila(row: Record<string, unknown>): MatrizFila {
     actoresEstado: texto(row.actores_estado),
     actoresSociedadCivil: null,
     demandas: null,
-    tematica: texto(row.tematica),
     accion: texto(row.accion),
     mediosVerificacion: null,
     areaResponsable: texto(row.area_responsable),
@@ -451,7 +447,7 @@ function construirWhere(
 }
 
 /**
- * Una fila por compromiso × hito, con las columnas A..X del formato del equipo.
+ * Una fila por compromiso × hito, con las columnas A..W del formato del equipo.
  *
  * El responsable del hito (U) sale del enlace por `codigo_hito` —único en
  * `core.hitos_compromiso`— prefiriendo el texto libre y cayendo al nombre del
@@ -481,7 +477,6 @@ export async function listarMatriz(
            v15.narracion_cronologica   as narracion,
            v15.descripcion_riesgo      as riesgo_actual,
            v15.actores_involucrados    as actores_estado,
-           v15.tematica,
            v14.accion_compromiso        as accion,
            v14.area_responsable,
            v15.punto_focal,

@@ -46,9 +46,10 @@ export type LocalListQuery = {
   /** `true`/`false` en texto; se ignora cualquier otro valor. */
   activo?: string;
   /**
-   * `core.distritos.id` exacto. Preparado para cuando el inventario tenga
-   * `distrito_id`: hoy los 27 locales lo tienen en NULL, así que el filtro
-   * devuelve 0 filas. La UI no lo ofrece todavía por eso.
+   * `core.distritos.id` exacto. Desde `migration/48_locales_distritos.sql` los
+   * 27 locales tienen `distrito_id`, así que el filtro devuelve filas. La UI no
+   * lo ofrece por falta de control, no de dato: `locales.page.ts` filtra por
+   * texto y disponibilidad.
    */
   distritoId?: string;
   page?: number;

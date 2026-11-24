@@ -536,8 +536,9 @@ servicio Angular + `localStorage`, con valor inicial seguro para SSR.
 ## 6.10 Mapa territorial
 
 > **Superado (2026-11-24).** El aplazamiento se levantó: `/mapa` está implementada y dibuja la capa
-> distrital cargada. La checklist queda como referencia de lo que aún no se hace (nube de puntos,
-> agrupación, cronología espacial); no se documenta fórmula de calibración de riesgo.
+> distrital cargada (1 892 polígonos) **y** la nube de los 13 456 puntos del KML. La checklist queda
+> como referencia de lo que aún no se hace (agrupación de puntos por distrito, cronología espacial,
+> simbología propia de las redes de la Red Radar); no se documenta fórmula de calibración de riesgo.
 >
 > **Aplazado por decisión del usuario (2026-11-22)** hasta que exista el dataset de ubigeo/centroide.
 > La ruta `/mapa` sigue en marcador; no se documentan coordenadas ni una fórmula de calibración de

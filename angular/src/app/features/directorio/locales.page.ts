@@ -569,8 +569,20 @@ export class LocalesPage {
    * 32 px estiraría toda la columna.
    */
   readonly columnas: readonly ColumnaTabla[] = [
-    { clave: 'nombre', titulo: 'Nombre', ancho: '50%', ordenable: true },
+    { clave: 'nombre', titulo: 'Nombre', ancho: '32%', ordenable: true },
     { clave: 'foto', titulo: 'Foto', ancho: '52px' },
+    {
+      clave: 'region',
+      titulo: 'Región',
+      ordenable: true,
+      formato: (valor) => (valor ? String(valor) : '—'),
+    },
+    {
+      clave: 'distrito',
+      titulo: 'Distrito',
+      ordenable: true,
+      formato: (valor) => (valor ? String(valor) : '—'),
+    },
     { clave: 'contacto', titulo: 'Contacto', ordenable: true },
     {
       clave: 'proyector',
@@ -609,6 +621,8 @@ export class LocalesPage {
 
   private readonly accesores: Record<string, (fila: LocalDirectorio) => unknown> = {
     nombre: (fila) => fila.nombre,
+    region: (fila) => fila.region,
+    distrito: (fila) => fila.distrito,
     contacto: (fila) => contactoDeLocal(fila),
     proyector: (fila) => fila.tieneProyector,
     computo: (fila) => fila.tieneEquiposComputo,
