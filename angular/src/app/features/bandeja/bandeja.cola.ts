@@ -35,7 +35,7 @@ export type ItemCola = {
   territorio: string | null;
   /** Fecha de vencimiento o plazo en `YYYY-MM-DD`; `null` si no hay dato. */
   fecha: string | null;
-  /** Etiqueta del plazo para la tabla: `dd/mm/aaaa` o «Sin fecha». */
+  /** Etiqueta del plazo para la tabla: `02NOV2025` o «Sin fecha». */
   plazo: string;
   /** Riesgo o prioridad declarados; «—» si el registro no los trae. */
   riesgo: string;

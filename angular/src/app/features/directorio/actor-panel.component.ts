@@ -585,7 +585,7 @@ export class ActorPanelComponent {
   readonly mascaraDni = MASCARA_DNI;
   readonly mascaraCorreo = MASCARA_CORREO;
 
-  /** `dd/mm/aaaa` de una fecha ISO; `null` si no se reconoce. */
+  /** `02NOV2025` de una fecha ISO; `null` si no se reconoce. */
   fechaDe(valor: string | null | undefined): string | null {
     return formatearFechaActor(valor);
   }
@@ -671,11 +671,41 @@ export class ActorPanelComponent {
     });
     this.errorEdicion.set(null);
     this.editando.set(true);
+    // El DNI sólo se edita con la PII descifrada. Al abrir la edición se pide una
+    // sola vez: si el rol no autoriza no se hace ninguna llamada y el campo queda
+    // deshabilitado, como antes.
+    this.asegurarPiiParaEdicion();
   }
 
   cancelarEdicion(): void {
     this.errorEdicion.set(null);
     this.editando.set(false);
+  }
+
+  /**
+   * Pide la PII al abrir la edición, en lugar de exigir el botón «Ver datos
+   * personales» (retirado). Cada apertura que llega a la API deja su fila en
+   * `audit.datos_personales_acceso`, así que el registro de quién consultó qué
+   * se mantiene. No reintenta cuando el rol no autoriza ni cuando ya se cargó.
+   */
+  private asegurarPiiParaEdicion(): void {
+    if (!this.puedeVerPii()) return;
+    const estado = this.estadoPii();
+    if (estado === 'inactivo' || estado === 'error') this.solicitarPii();
+  }
+
+  /**
+   * Completa el borrador con la PII recién descifrada. Sólo rellena campos
+   * vacíos: no pisa lo que el usuario ya escribió mientras llegaba la respuesta.
+   */
+  private completarBorradorConPii(datos: DatosPersonales): void {
+    if (!this.editando()) return;
+    this.borrador.update((actual) => ({
+      ...actual,
+      dni: actual.dni || datos.dni || '',
+      telefono: actual.telefono || datos.telefono || '',
+      email: actual.email || datos.email || '',
+    }));
   }
 
   actualizarTexto(campo: CampoActorEdicion, evento: Event): void {
@@ -708,7 +738,9 @@ export class ActorPanelComponent {
     const dni = draft.dni.trim();
     if (dni) {
       if (!this.piiVisible() || !this.puedeVerPii()) {
-        this.errorEdicion.set('El DNI cifrado sólo se edita con los datos personales abiertos.');
+        this.errorEdicion.set(
+          'El DNI aún no se descifró; espere un momento y vuelva a intentarlo.',
+        );
         return;
       }
       const error = errorDeDni(dni);
@@ -805,9 +837,9 @@ export class ActorPanelComponent {
   }
 
   /**
-   * Pide DNI, correo y teléfonos. Nunca se llama al cargar la ficha: sólo desde
-   * el botón, y una sola vez por pulsación (el estado `cargando` frena el doble
-   * envío para no duplicar el registro de auditoría).
+   * Pide DNI, correo y teléfonos. Se llama al abrir la edición (una sola vez por
+   * apertura) y no al cargar la ficha, para no auditar cada consulta del
+   * directorio. El estado `cargando` frena el doble envío.
    */
   solicitarPii(): void {
     const ficha = this.actor();
@@ -839,6 +871,7 @@ export class ActorPanelComponent {
           // «sin ficha» no es un error ni «sin autorización»: el actor existe y
           // su rol alcanza, pero no registró datos personales.
           this.estadoPii.set(datos.tieneFicha ? 'listo' : 'sin_ficha');
+          this.completarBorradorConPii(datos);
         },
         error: (fallo: unknown) => {
           const error = aErrorApi(fallo);
@@ -855,11 +888,6 @@ export class ActorPanelComponent {
           this.estadoPii.set('error');
         },
       });
-  }
-
-  /** Descarta lo mostrado sin cerrar el panel; un nuevo acceso vuelve a auditarse. */
-  ocultarPii(): void {
-    this.reiniciarPii();
   }
 
   /** Copia al portapapeles y confirma el valor copiado durante un instante. */

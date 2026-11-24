@@ -686,7 +686,7 @@ export function aHistorialCompromiso(bruto: unknown): HistorialCompromiso {
 }
 
 /**
- * `YYYY-MM-DD` → `DD/MM/YYYY` y anulación como timestamp. Se movieron a
+ * `YYYY-MM-DD` → `02NOV2025` y anulación como timestamp. Se movieron a
  * `shared/formato-fecha.ts` y se reexportan para no romper los imports que ya
  * apuntaban a este mapeo.
  */

@@ -56,8 +56,6 @@ import {
 } from './directorio.mapeo';
 import { HttpClient } from '@angular/common/http';
 
-type VistaActores = 'persona' | 'organizacion';
-
 type FiltrosActores = {
   q: string;
   naturaleza: string;
@@ -83,9 +81,11 @@ const FILTROS_INICIALES: FiltrosActores = {
  * el repositorio: `q`, `naturaleza`, `tipo` y `region`. Los filtros viven en la
  * URL con `replaceUrl` para que el historial no se llene de estados intermedios.
  *
- * La pantalla tiene dos vistas separadas —Personas y Organizaciones— que se
- * eligen con el parámetro `naturaleza`; sin parámetro se usa el valor por
- * defecto de la ruta (`/directorio/personas`) o, en su ausencia, «persona».
+ * El listado de organizaciones vive en su propia entrada de la barra lateral
+ * («Organizaciones», `organizaciones.page`): esta pantalla no alterna vistas ni
+ * muestra pestañas. El parámetro `naturaleza` de la URL se mantiene por los
+ * enlaces profundos y, sin él, se usa el valor por defecto de la ruta
+ * (`/directorio/personas`) o «persona».
  *
  * Al pulsar una fila no se navega: se abre `ActorPanelComponent` con la ficha.
  * Los datos personales NO forman parte de la carga del listado; sólo el panel
@@ -131,38 +131,6 @@ const FILTROS_INICIALES: FiltrosActores = {
 
     .view-actions {
       flex-wrap: wrap;
-    }
-
-    /* Vistas Personas / Organizaciones: pestañas de la misma matriz. */
-    .vistas {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      border-bottom: 1px solid #e6ebf0;
-    }
-
-    .vista-tab {
-      padding: 8px 14px;
-      border: 0;
-      border-bottom: 2px solid transparent;
-      background: transparent;
-      color: #64748b;
-      font: 600 13px/1.2 var(--font-display);
-      cursor: pointer;
-    }
-
-    .vista-tab:hover {
-      color: #33475b;
-    }
-
-    .vista-tab.activa {
-      border-bottom-color: var(--blue);
-      color: var(--blue-dark);
-    }
-
-    .vista-tab:focus-visible {
-      outline: 2px solid #5b8fd6;
-      outline-offset: -2px;
     }
 
     /* Menú «Nuevo»: alta no disponible en este entorno. */
@@ -548,9 +516,9 @@ export class ActoresPage {
   readonly sinDato = SIN_DATO;
 
   /**
-   * Naturaleza por defecto de la ruta (por ejemplo `/directorio/personas`). Ya
-   * no es una imposición: un `naturaleza` en la URL la adelanta, y así las
-   * pestañas Personas / Organizaciones funcionan en cualquier ruta.
+   * Naturaleza por defecto de la ruta (por ejemplo `/directorio/personas`). El
+   * `naturaleza` de la URL la adelanta, para que los enlaces profundos sigan
+   * resolviendo su listado tras retirar las pestañas.
    */
   readonly naturalezaFija = input('');
 
@@ -585,9 +553,6 @@ export class ActoresPage {
   readonly titulo = computed(() => 'Actores');
   readonly sustantivo = computed(() =>
     this.naturalezaActiva() === 'organizacion' ? 'organizaciones' : 'personas',
-  );
-  readonly vista = computed<VistaActores>(() =>
-    this.naturalezaActiva() === 'organizacion' ? 'organizacion' : 'persona',
   );
 
   private readonly listado = consulta<Coleccion<ActorDirectorio>>({
@@ -880,12 +845,6 @@ export class ActoresPage {
     this.temporizadorBusqueda = setTimeout(() => {
       void this.actualizar({ q: valor, pagina: 1 });
     }, 300);
-  }
-
-  /** Cambia entre la vista de Personas y la de Organizaciones. */
-  cambiarVista(vista: VistaActores): void {
-    if (this.vista() === vista) return;
-    void this.actualizar({ naturaleza: vista, pagina: 1 });
   }
 
   cambiarTipo(evento: Event): void {

@@ -55,27 +55,6 @@
   <p class="form-error" role="alert">{{ mensaje }}</p>
   }
 
-  <nav class="vistas" aria-label="Vistas del directorio">
-    <button
-      type="button"
-      class="vista-tab"
-      [class.activa]="vista() === 'persona'"
-      [attr.aria-current]="vista() === 'persona' ? 'page' : null"
-      (click)="cambiarVista('persona')"
-    >
-      Personas
-    </button>
-    <button
-      type="button"
-      class="vista-tab"
-      [class.activa]="vista() === 'organizacion'"
-      [attr.aria-current]="vista() === 'organizacion' ? 'page' : null"
-      (click)="cambiarVista('organizacion')"
-    >
-      Organizaciones
-    </button>
-  </nav>
-
   <div class="filter-bar filter-bar-wrap">
     <label class="search-field">
       <app-icono nombre="buscar" [tamano]="14" />

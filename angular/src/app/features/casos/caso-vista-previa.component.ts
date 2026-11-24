@@ -224,7 +224,7 @@ export class CasoVistaPreviaComponent {
     this.destruccion.onDestroy(() => this.focoPrevio?.focus?.());
   }
 
-  /** Fecha en formato corto (`05 nov 2026`). */
+  /** Fecha en formato compacto (`02NOV2025`). */
   fechaTexto(valor: string | null | undefined): string {
     return formatearFecha(valor) || '—';
   }

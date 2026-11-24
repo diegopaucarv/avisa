@@ -183,7 +183,7 @@ export function claseEstadoHito(
 }
 
 /**
- * Fecha planificada: la ISO pasa a `dd/mm/aaaa`; si sólo hay texto del origen
+ * Fecha planificada: la ISO pasa a `02NOV2025`; si sólo hay texto del origen
  * (`Julio 2026`), se muestra tal cual. Sin dato, «—».
  */
 export function textoFechaHito(
@@ -1556,7 +1556,7 @@ export class CasoDetallePage {
     }
   }
 
-  /** Fecha de inicio del caso en `dd/mm/aaaa`; `—` cuando no está registrada. */
+  /** Fecha de inicio del caso en `02NOV2025`; `—` cuando no está registrada. */
   fechaTexto(valor: string | null | undefined): string {
     return formatearFecha(valor) || '—';
   }

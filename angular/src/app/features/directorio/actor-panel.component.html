@@ -57,9 +57,9 @@
             aria-labelledby="actor-editor-titulo"
           >
             <p class="panel-nota" id="actor-editor-titulo">
-              Los cambios se guardan en la ficha del actor. El DNI sólo se edita con los datos
-              personales abiertos. Teléfono y correo se guardan cifrados; déjelos vacíos para no
-              cambiarlos. La fotografía se gestiona por otro canal.
+              Los cambios se guardan en la ficha del actor. El DNI se descifra al abrir esta edición
+              y la consulta queda auditada. Teléfono y correo se guardan cifrados; déjelos vacíos
+              para no cambiarlos. La fotografía se gestiona por otro canal.
             </p>
 
             <section class="actor-bloque" aria-labelledby="bloque-datos">
@@ -88,10 +88,23 @@
                 />
                 @if (piiVisible()) {
                   <span class="actor-pista">Se guarda cifrado; debe tener 8 dígitos.</span>
+                } @else if (estadoPii() === 'cargando') {
+                  <span class="actor-pista"
+                    >Descifrando el DNI para editarlo (consulta auditada)…</span
+                  >
+                } @else if (estadoPii() === 'sin_ficha') {
+                  <span class="actor-pista"
+                    >Este actor aún no tiene ficha de datos personales.</span
+                  >
+                } @else if (sinAutorizacionPii()) {
+                  <span class="actor-pista">Su rol no permite editar el DNI.</span>
+                } @else if (estadoPii() === 'error') {
+                  <span class="actor-pista">
+                    No se pudo descifrar el DNI; vuelva a abrir la edición para reintentar.
+                  </span>
                 } @else {
                   <span class="actor-pista">
-                    El DNI cifrado sólo se edita con los datos personales abiertos (consulta
-                    auditada).
+                    El DNI se descifra al abrir la edición (consulta auditada).
                   </span>
                 }
               </label>
@@ -324,7 +337,7 @@
                 } @else {
                   <span
                     class="panel-valor panel-enmascarado"
-                    [attr.title]="'Solicite «Ver datos personales» para ver el DNI'"
+                    [attr.title]="'Se descifra al editar la ficha del actor'"
                   >
                     {{ mascaraDni }}
                   </span>
@@ -351,7 +364,7 @@
                 } @else {
                   <span
                     class="panel-valor panel-enmascarado"
-                    [attr.title]="'Solicite «Ver datos personales» para ver el teléfono'"
+                    [attr.title]="'Se descifra al editar la ficha del actor'"
                   >
                     •••• ••• •••
                   </span>
@@ -387,7 +400,7 @@
                 } @else {
                   <span
                     class="panel-valor panel-enmascarado"
-                    [attr.title]="'Solicite «Ver datos personales» para ver el correo'"
+                    [attr.title]="'Se descifra al editar la ficha del actor'"
                   >
                     {{ mascaraCorreo }}
                   </span>
@@ -483,10 +496,10 @@
           }
 
           <!--
-            Eliminado a petición (ver 67): este botón era la única vía auditada
-            (audit.datos_personales_acceso) para leer DNI y teléfono (Ley 29733).
-            El endpoint GET /v1/actors/{uid}/pii queda sin consumidor en la SPA.
-            Decisión pendiente con la Dirección.
+            El botón «Ver datos personales» se retiró (ver 67). La lectura de DNI
+            y teléfono (Ley 29733) ya no se ofrece en modo ver: la PII se pide
+            únicamente al abrir la edición, y `audit.datos_personales_acceso`
+            sigue registrando cada consulta.
           -->
 
           <section class="panel-seccion" aria-labelledby="actor-panel-perfil">

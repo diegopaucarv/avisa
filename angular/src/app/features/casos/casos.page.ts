@@ -250,7 +250,8 @@ function aConteos(bruto: unknown): ConteosCasos {
   ],
   templateUrl: './casos.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  styles: `
+  styles:
+    `
     .aviso-ok {
       color: #2f6f52;
       font-size: 13.5px;
@@ -265,6 +266,49 @@ function aConteos(bruto: unknown): ConteosCasos {
     /* Estado cierra la fila de filtros, alineado a la derecha. */
     .estado-final {
       margin-left: auto;
+    }
+
+    /*
+     * Responsive de los filtros. Estos estilos viven aquí, y no en la hoja
+     * global, porque los del componente ganan por especificidad: una regla
+     * movil en global.css no puede anular `.search -
+    field -
+    angosta` ni
+     * `.estado -
+    final`.
+     * - Hasta 760 px: busqueda a todo el ancho y filtros en dos columnas.
+     * - Hasta 520 px: una sola columna, cada control a todo el ancho.
+     */
+    @media (max-width: 760px) {
+      .filter-bar {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px 10px;
+      }
+
+      .search-field-angosta {
+        grid-column: 1 / -1;
+        max-width: none;
+        flex: initial;
+      }
+
+      .filter-bar > .select-filter {
+        min-width: 0;
+      }
+
+      .filter-bar > .select-filter select {
+        min-width: 0;
+      }
+
+      .estado-final {
+        margin-left: 0;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .filter-bar {
+        grid-template-columns: minmax(0, 1fr);
+      }
     }
 
     .vista-previa-aviso {
@@ -698,7 +742,7 @@ export class CasosPage {
     this.casoPrevio.set(null);
   }
 
-  /** Fecha abreviada «18 nov 2026», sin el punto que añade `es-PE`. */
+  /** Fecha en formato compacto «18NOV2026». */
   fechaCorta(valor: string | null | undefined): string {
     return formatearFechaCorta(valor);
   }
