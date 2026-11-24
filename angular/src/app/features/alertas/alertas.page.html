@@ -183,6 +183,30 @@
       Cancelar
     </button>
   </div>
+  } @if (revisionFila(); as revision) {
+  <div class="form-hint view-actions" role="group" aria-label="Confirmación de envío a revisión">
+    <span>
+      ¿Desea enviar la alerta <strong>{{ tituloAlerta(revision.alerta) }}</strong> con nivel de
+      riesgo <strong>{{ etiquetaRiesgo(revision.alerta.riesgo) }}</strong> a la Dirección para su
+      revisión?
+    </span>
+    <button
+      type="button"
+      class="button-primary"
+      [disabled]="enviandoFila() !== null"
+      (click)="confirmarRevisionFila()"
+    >
+      Aceptar
+    </button>
+    <button
+      type="button"
+      class="button-secondary"
+      [disabled]="enviandoFila() !== null"
+      (click)="cancelarRevisionFila()"
+    >
+      Cancelar
+    </button>
+  </div>
   } @if (avisoFila(); as aviso) {
   <div
     [class]="aviso.tipo === 'ok' ? 'form-hint aviso-ok view-actions' : 'form-error view-actions'"
@@ -229,9 +253,11 @@
           <th scope="col" [appThOrden]="'titulo'" [orden]="orden">Título</th>
           <th scope="col" [appThOrden]="'caso'" [orden]="orden">Caso vinculado</th>
           <th scope="col" [appThOrden]="'revisor'" [orden]="orden">Último revisor</th>
-          <th scope="col" [appThOrden]="'fecha'" [orden]="orden">Fecha de reporte</th>
+          <th scope="col" class="col-fecha" [appThOrden]="'fecha'" [orden]="orden">
+            Fecha reporte
+          </th>
           <th scope="col" [appThOrden]="'estado'" [orden]="orden">Estado</th>
-          <th scope="col">Acciones</th>
+          <th scope="col" class="celda-acciones">Acciones</th>
         </tr>
       </thead>
       <tbody>
@@ -262,8 +288,11 @@
           </td>
           <td class="alerta-titulo">
             <strong>{{ tituloAlerta(alerta) }}</strong>
-            <span class="alerta-geografia">{{ geografia(alerta) }}</span>
-            <span [class]="claseRiesgo(alerta)">{{ alerta.riesgo }}</span>
+            <span class="alerta-meta">
+              <span class="alerta-geografia">{{ geografia(alerta) }}</span>
+              ·
+              <span [class]="claseRiesgo(alerta)">Riesgo {{ etiquetaRiesgo(alerta.riesgo) }}</span>
+            </span>
           </td>
           <td class="alerta-caso">
             @if (alerta.casoCodigo) {
@@ -280,7 +309,7 @@
               <small>{{ fechaReporte(alerta.ultimaModificacion) }}</small>
             </div>
           </td>
-          <td>{{ fechaReporte(alerta.fechaReporte) }}</td>
+          <td class="col-fecha">{{ fechaReporte(alerta.fechaReporte) }}</td>
           <td>
             <span [class]="claseEstadoAlerta(alerta)">
               <span class="status-dot"></span>
@@ -345,9 +374,9 @@
     [codigo]="wa.codigo"
     [titulo]="tituloAlerta(wa)"
     [sitio]="geografia(wa)"
+    [riesgo]="wa.riesgo"
     [mensaje]="mensajeWhatsapp(wa)"
     (cerrar)="cerrarWhatsapp()"
-    (guardarPlantilla)="guardarPlantillaWhatsapp($event)"
   />
   } @if (alertaAnulacion(); as alertaAnular) {
   <app-anular-panel

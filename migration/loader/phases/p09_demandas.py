@@ -187,7 +187,7 @@ async def _pares_alerta(
                 "BRIDGE_CLAVE_DUPLICADA",
                 hoja="BRIDGE_Alerta_Demandas",
                 fila=fila,
-                codigo=clave,
+                codigo=demanda,
                 detalle={
                     "clave": clave,
                     "demanda": demanda,

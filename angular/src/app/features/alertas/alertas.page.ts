@@ -178,26 +178,40 @@ function totalDe(bruto: unknown): number {
       line-height: 1.35;
     }
 
-    .alerta-geografia {
-      display: inline-flex;
-      align-items: center;
+    .alerta-meta {
+      display: block;
       margin-top: 4px;
-      padding: 1px 7px;
-      border-radius: 999px;
-      background: #eef3fa;
+      font-size: 11px;
+    }
+
+    .alerta-geografia {
+      display: inline;
       color: #4a6b93;
       font-size: 11px;
       font-weight: 700;
     }
 
     .alerta-riesgo {
-      display: inline-flex;
-      align-items: center;
-      margin-top: 5px;
-      padding: 2px 8px;
-      border-radius: 999px;
-      font-size: 11px;
+      display: inline;
+      padding: 0;
+      border-radius: 0;
       font-weight: 700;
+      font-size: 11px;
+    }
+
+    .alerta-riesgo.risk-bajo {
+      color: #1f5597;
+      background: none;
+    }
+
+    .alerta-riesgo.risk-medio {
+      color: #b8860b;
+      background: none;
+    }
+
+    .alerta-riesgo.risk-alto {
+      color: #d9661f;
+      background: none;
     }
 
     .alerta-caso strong {
@@ -275,7 +289,7 @@ function totalDe(bruto: unknown): number {
 
     .celda-acciones {
       white-space: nowrap;
-      text-align: right;
+      text-align: center;
     }
 
     .data-table tr.row-aviso-ok td {
@@ -297,6 +311,7 @@ function totalDe(bruto: unknown): number {
     }
     .col-fecha {
       width: 120px;
+      text-align: center;
     }
     .col-estado {
       width: 130px;
@@ -471,7 +486,7 @@ export class AlertasPage {
     esquema: (bruto) =>
       normalizarColeccion<unknown>(bruto)
         .elementos.map(aCaso)
-        .map((caso) => ({ codigo: caso.codigo, titulo: caso.titulo }))
+        .map((caso) => ({ codigo: caso.codigo, titulo: caso.titulo, subsector: caso.subsector }))
         .filter((caso) => caso.codigo.length > 0),
   });
 
@@ -503,6 +518,9 @@ export class AlertasPage {
 
   /** Aprobación disparada desde una fila que espera confirmación explícita. */
   readonly aprobacionFila = signal<{ alerta: Alerta; paso: number } | null>(null);
+
+  /** Envío a revisión disparado desde una fila que espera confirmación explícita. */
+  readonly revisionFila = signal<{ alerta: Alerta; paso: number } | null>(null);
 
   /** Paso al que puede volver una fila tras un cambio de flujo exitoso. */
   readonly deshacerFila = signal<{ id: string; pasoPrevio: number; codigo: string } | null>(null);
@@ -603,7 +621,7 @@ export class AlertasPage {
   }
 
   tituloAlerta(alerta: Alerta): string {
-    return tituloLimpio(alerta.titulo) || 'Sin título';
+    return `🔔 ${tituloLimpio(alerta.titulo) || 'Sin título'}`;
   }
 
   geografia(alerta: Alerta): string {
@@ -625,6 +643,10 @@ export class AlertasPage {
 
   claseRiesgo(alerta: Alerta): string {
     return `alerta-riesgo risk-${claveRiesgo(alerta.riesgo)}`;
+  }
+
+  etiquetaRiesgo(riesgo: Riesgo): string {
+    return riesgo === 'Alto' ? 'alto' : riesgo === 'Medio' ? 'moderado' : 'bajo';
   }
 
   private pesoRiesgo(riesgo: Riesgo): number {
@@ -664,8 +686,7 @@ export class AlertasPage {
 
     acciones.push(
       { id: 'modificar', etiqueta: 'Modificar', seccion: 'Gestión' },
-      { id: 'historial', etiqueta: 'Ver historial', seccion: 'Gestión' },
-      { id: 'whatsapp', etiqueta: 'Enviar por WhatsApp', seccion: 'Gestión' },
+      { id: 'whatsapp', etiqueta: 'Enviar por mensajería instantánea', seccion: 'Gestión' },
     );
 
     if (this.puedeArchivar(alerta)) {
@@ -690,13 +711,10 @@ export class AlertasPage {
         this.abrirModificacion(alerta);
         break;
       case 'enviar-revision':
-        this.enviarAccionFila(alerta, PASO_REVISION, alerta.pasoActual);
+        this.pedirRevisionFila(alerta);
         break;
       case 'modificar':
         this.abrir(alerta, 'editar');
-        break;
-      case 'historial':
-        this.abrir(alerta, 'historial');
         break;
       case 'whatsapp':
         this.abrirWhatsapp(alerta);
@@ -719,6 +737,7 @@ export class AlertasPage {
     this.errorGuardado.set(null);
     this.aviso.set(null);
     this.aprobacionFila.set(null);
+    this.revisionFila.set(null);
     this.deshacerFila.set(null);
     this.modoPanel.set(modo);
     this.alertaAbierta.set(alerta);
@@ -799,6 +818,46 @@ export class AlertasPage {
 
   cancelarAprobacionFila(): void {
     this.aprobacionFila.set(null);
+  }
+
+  private pedirRevisionFila(alerta: Alerta): void {
+    if (!this.capacidades.puedeModificar(alerta.clasificacion)) {
+      this.avisoFila.set({
+        id: alerta.id,
+        texto: 'Su rol no permite enviar esta alerta a revisión.',
+        tipo: 'error',
+      });
+      return;
+    }
+    this.deshacerFila.set(null);
+    this.avisoFila.set(null);
+    this.aprobacionFila.set(null);
+    this.revisionFila.set({ alerta, paso: PASO_REVISION });
+  }
+
+  confirmarRevisionFila(): void {
+    const pendiente = this.revisionFila();
+    if (!pendiente || this.enviandoFila()) return;
+
+    const { alerta } = pendiente;
+    this.revisionFila.set(null);
+    if (!alerta.id) return;
+
+    if (!this.capacidades.puedeModificar(alerta.clasificacion)) {
+      this.avisoFila.set({
+        id: alerta.id,
+        texto: 'Su rol no permite enviar esta alerta a revisión.',
+        tipo: 'error',
+      });
+      return;
+    }
+
+    this.deshacerFila.set(null);
+    this.enviarAccionFila(alerta, PASO_REVISION, alerta.pasoActual);
+  }
+
+  cancelarRevisionFila(): void {
+    this.revisionFila.set(null);
   }
 
   deshacerAccionFila(): void {
@@ -920,14 +979,6 @@ export class AlertasPage {
   /** Texto inicial de la ventana de WhatsApp: la plantilla guardada o la generada. */
   mensajeWhatsapp(alerta: Alerta): string {
     return alerta.plantillaWhatsapp ?? plantillaWhatsapp(alerta);
-  }
-
-  guardarPlantillaWhatsapp(texto: string): void {
-    const alerta = this.alertaWhatsapp();
-    if (!alerta) return;
-    const plantilla = texto.trim() || null;
-    this.alertaWhatsapp.set(null);
-    this.enviar(alerta.id, { plantillaWhatsapp: plantilla });
   }
 
   /* ---------------------------------------------------------------------- *

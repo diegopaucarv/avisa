@@ -11,18 +11,18 @@ import {
   viewChild,
 } from '@angular/core';
 
+import type { Riesgo } from '../../dominio/modelos';
 import { IconoComponent } from '../../shared/ui/icono.component';
 import { copiarAlPortapapeles } from './portapapeles';
 
 /**
- * Ventana dedicada «Enviar alerta por WhatsApp».
+ * Ventana «Enviar alerta por mensajería instantánea».
  *
- * Muestra el mensaje con la sintaxis de WhatsApp (negritas `*` y emojis) en un
- * área editable, permite regenerarlo desde la alerta, copiarlo y —cuando se
- * activa «editar como plantilla»— guardarlo como plantilla propia de la alerta.
+ * Muestra en sólo lectura el mensaje generado desde la alerta con la sintaxis
+ * de WhatsApp (negritas `*` y emojis) y permite copiarlo al portapapeles.
  *
- * No conoce HTTP: emite `guardarPlantilla` con el texto y la pantalla hace el
- * `PATCH`. Copiar al portapapeles es local y no requiere permiso del backend.
+ * No conoce HTTP ni persiste nada: el texto llega ya armado por `mensaje` y
+ * copiar es una operación local, sin permiso del backend.
  */
 @Component({
   selector: 'app-alerta-whatsapp',
@@ -65,6 +65,13 @@ import { copiarAlPortapapeles } from './portapapeles';
       border-bottom: 1px solid #e8edf1;
     }
 
+    .modal-head h2 {
+      margin: 0 0 8px;
+      color: #1a2b3e;
+      font-size: 16px;
+      font-weight: 700;
+    }
+
     .modal-codigo {
       margin: 0 0 4px;
       color: #8b97a1;
@@ -74,22 +81,21 @@ import { copiarAlPortapapeles } from './portapapeles';
       text-transform: uppercase;
     }
 
-    .modal-head h2 {
+    .modal-contexto {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 2px 8px;
       margin: 0;
-      color: #1a2b3e;
-      font-size: 16px;
-      font-weight: 700;
-    }
-
-    .modal-sitio {
-      display: inline-block;
-      margin-top: 6px;
-      padding: 2px 8px;
-      border-radius: 999px;
-      background: #eef3fa;
       color: #4a6b93;
       font-size: 11.5px;
-      font-weight: 700;
+      font-weight: 600;
+    }
+
+    .modal-contexto span:not(:first-child)::before {
+      content: '·';
+      margin-right: 8px;
+      color: #b6c2cd;
     }
 
     .modal-body {
@@ -100,6 +106,13 @@ import { copiarAlPortapapeles } from './portapapeles';
       overflow-y: auto;
     }
 
+    .modal-cabecera-cuerpo {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
     .modal-titulo {
       margin: 0;
       color: #1a2b3e;
@@ -107,14 +120,6 @@ import { copiarAlPortapapeles } from './portapapeles';
       font-weight: 700;
       letter-spacing: 0.05em;
       text-transform: uppercase;
-    }
-
-    .barra-herramientas {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
     }
 
     .contador {
@@ -150,21 +155,6 @@ import { copiarAlPortapapeles } from './portapapeles';
       background: #fff;
     }
 
-    .conmutador {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      color: #33475b;
-      font-size: 12.5px;
-      font-weight: 600;
-    }
-
-    .aviso-copia {
-      margin: 0;
-      color: #2f6f52;
-      font-size: 12.5px;
-    }
-
     .modal-foot {
       display: flex;
       justify-content: flex-end;
@@ -178,54 +168,47 @@ export class AlertaWhatsappComponent {
   readonly codigo = input('');
   readonly titulo = input('');
   readonly sitio = input('');
-  /** Texto inicial: plantilla guardada o la generada desde la alerta. */
+  readonly riesgo = input<Riesgo>('Bajo');
+  /** Texto de la alerta ya generado con la sintaxis de WhatsApp. */
   readonly mensaje = input('');
 
   readonly cerrar = output<void>();
-  readonly guardarPlantilla = output<string>();
 
   private readonly dialogo = viewChild<ElementRef<HTMLElement>>('dialogo');
 
   readonly texto = signal('');
-  readonly editarComoPlantilla = signal(false);
-  readonly avisoCopia = signal<string | null>(null);
+  readonly copiado = signal(false);
+  readonly errorCopia = signal<string | null>(null);
 
   readonly caracteres = computed(() => this.texto().length);
+  readonly etiquetaRiesgo = computed(() =>
+    this.riesgo() === 'Alto' ? 'alto' : this.riesgo() === 'Medio' ? 'moderado' : 'bajo',
+  );
 
   constructor() {
     afterNextRender(() => this.dialogo()?.nativeElement.focus());
 
-    // Sólo se resiembra cuando el mensaje de entrada cambia de verdad: editar a
-    // mano no debe ser pisado por cada ciclo de detección.
+    // Sólo se resiembra cuando el mensaje de entrada cambia de verdad: el
+    // cuerpo es de sólo lectura y la confirmación de copia caduca con el texto.
     let firma: string | null = null;
     effect(() => {
       const entrante = this.mensaje();
       if (entrante === firma) return;
       firma = entrante;
       this.texto.set(entrante);
+      this.copiado.set(false);
+      this.errorCopia.set(null);
     });
-  }
-
-  campo(evento: Event): void {
-    const area = evento.target as HTMLTextAreaElement;
-    this.texto.set(area.value);
-    this.avisoCopia.set(null);
-  }
-
-  alternarPlantilla(): void {
-    this.editarComoPlantilla.update((valor) => !valor);
   }
 
   async copiar(): Promise<void> {
     const ok = await copiarAlPortapapeles(this.texto());
-    this.avisoCopia.set(
-      ok
-        ? 'Mensaje copiado al portapapeles.'
-        : 'No se pudo copiar. Seleccione el texto y use Ctrl + C.',
-    );
-  }
-
-  guardar(): void {
-    this.guardarPlantilla.emit(this.texto());
+    if (ok) {
+      this.copiado.set(true);
+      this.errorCopia.set(null);
+      return;
+    }
+    this.copiado.set(false);
+    this.errorCopia.set('No se pudo copiar. Seleccione el texto y use Ctrl + C.');
   }
 }

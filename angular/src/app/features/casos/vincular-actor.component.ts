@@ -49,7 +49,8 @@ function aOpcion(valor: unknown): ActorOpcion | null {
   };
 }
 
-function aOpciones(bruto: unknown): readonly ActorOpcion[] {
+/** Normaliza la respuesta de `GET /api/v1/actors` a opciones del buscador. */
+export function aOpciones(bruto: unknown): readonly ActorOpcion[] {
   const registro = esRegistro(bruto) ? bruto : {};
   const items = Array.isArray(registro['items']) ? registro['items'] : [];
   const opciones: ActorOpcion[] = [];

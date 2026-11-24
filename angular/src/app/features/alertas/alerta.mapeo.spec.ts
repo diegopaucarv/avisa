@@ -5,6 +5,8 @@ import {
   accionesDeFlujo,
   claseEstado,
   etapaDeFlujo,
+  plantillaWhatsapp,
+  type Alerta,
 } from './alerta.mapeo';
 
 describe('transiciones del flujo de alertas', () => {
@@ -70,6 +72,123 @@ describe('etapaDeFlujo', () => {
   it('devuelve null para pasos que no existen en el flujo', () => {
     expect(etapaDeFlujo(0)).toBeNull();
     expect(etapaDeFlujo(6)).toBeNull();
+  });
+});
+
+describe('plantillaWhatsapp', () => {
+  const ENCABEZADOS = [
+    '🔍 1. SITUACIÓN ACTUAL',
+    '🏗️ 2. HECHOS RECIENTES Y ACCIONES EN CURSO',
+    '👥 3. ACTORES CLAVE',
+    '📌 4. DEMANDAS INMEDIATAS',
+    '⚠️ 5. DESCRIPCIÓN DEL RIESGO',
+    '🧭 6. ACCIONES SUGERIDAS',
+  ];
+
+  function alertaBase(cambios: Partial<Alerta> = {}): Alerta {
+    return {
+      id: 'alerta-1',
+      codigo: 'AL-2026-001',
+      titulo: '🔔 REPORTE DE ALERTA TEMPRANA | Protesta en Puno',
+      casoId: 'caso-1',
+      casoCodigo: 'CA-2026-001',
+      casoTitulo: 'Protesta en Puno',
+      riesgo: 'Alto',
+      alcance: 'Región',
+      region: 'Puno',
+      provincia: 'Puno',
+      prioridad: null,
+      plazoHoras: null,
+      grave: false,
+      nivel: 'Inmediato',
+      nivelCodigo: '1',
+      pasoActual: 1,
+      estadoLegado: null,
+      visibilidad: 'Interna',
+      fechaReporte: '2026-11-05',
+      fechaValidacion: null,
+      fechaAprobacion: null,
+      aprobadaPor: null,
+      validadaPor: null,
+      ultimoRevisor: null,
+      ultimaModificacion: '2026-11-05T09:00:00.000Z',
+      modificadoPor: null,
+      historial: [],
+      descripcionRiesgo: null,
+      hechosRecientes: null,
+      situacionActual: null,
+      accionesOaipcs: null,
+      riesgos: [],
+      accionesSugeridas: [],
+      actoresClave: [],
+      demandasInmediatas: [],
+      plantillaWhatsapp: null,
+      fuenteTipo: null,
+      fuenteDescripcion: null,
+      fuenteUrl: null,
+      distritoId: null,
+      distrito: null,
+      distritoRuta: null,
+      casoDistritoId: null,
+      casoDistrito: null,
+      casoDistritoRuta: null,
+      distritoCoincideConCaso: null,
+      subsector: null,
+      origen: null,
+      confianza: null,
+      validado: false,
+      clasificacion: 1,
+      estado: 'Registrada',
+      atendida: false,
+      anuladoEn: null,
+      motivoAnulacion: null,
+      anuladoPor: null,
+      anuladoPorNombre: null,
+      anulacionId: null,
+      archivadoEn: null,
+      motivoArchivo: null,
+      archivadoPor: null,
+      archivadoPorNombre: null,
+      ...cambios,
+    };
+  }
+
+  it('empieza con el encabezado del reporte y el título limpio', () => {
+    const mensaje = plantillaWhatsapp(alertaBase());
+    expect(mensaje.startsWith('🔔 *REPORTE DE ALERTA TEMPRANA | ')).toBe(true);
+    expect(mensaje.split('\n')[0]).toBe('🔔 *REPORTE DE ALERTA TEMPRANA | Protesta en Puno*');
+  });
+
+  it('mantiene las seis secciones aunque una alerta vacía no tenga contenido', () => {
+    const mensaje = plantillaWhatsapp(alertaBase());
+    for (const encabezado of ENCABEZADOS) {
+      expect(mensaje).toContain(`*${encabezado}*`);
+    }
+  });
+
+  it('emite la fecha en formato G1', () => {
+    const mensaje = plantillaWhatsapp(alertaBase({ fechaReporte: '2026-11-05' }));
+    expect(mensaje).toContain('📅 *Fecha de emisión*: 05NOV2026');
+  });
+
+  it('no usa encabezados obsoletos', () => {
+    const mensaje = plantillaWhatsapp(alertaBase());
+    expect(mensaje).not.toContain('🚨');
+    expect(mensaje).not.toContain('🗓️');
+    expect(mensaje).not.toContain('📌 1.');
+  });
+
+  it('coloca los riesgos dentro de la sección 5', () => {
+    const mensaje = plantillaWhatsapp(
+      alertaBase({
+        descripcionRiesgo: 'La conflictividad puede escalar.',
+        riesgos: ['Incremento de conflictividad', 'Bloqueo de vías'],
+      }),
+    );
+    const seccion = mensaje.split('*⚠️ 5. DESCRIPCIÓN DEL RIESGO*')[1] ?? '';
+    expect(seccion).toContain('La conflictividad puede escalar.');
+    expect(seccion).toContain('• Incremento de conflictividad');
+    expect(seccion).toContain('• Bloqueo de vías');
   });
 });
 

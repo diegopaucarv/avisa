@@ -1,3 +1,4 @@
+import { HttpClient } from '@angular/common/http';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -13,15 +14,18 @@ import {
   viewChild,
 } from '@angular/core';
 
+import { urlApi } from '../../core/config/entorno';
 import type { ErrorApi } from '../../core/http/errores';
 import { RIESGOS, formatearFechaCorta } from '../../dominio/mapeo';
 import type { Riesgo } from '../../dominio/modelos';
-import { IconoComponent } from '../../shared/ui/icono.component';
 import { AdjuntosPanelComponent } from '../../shared/ui/adjuntos-panel.component';
+import { IconoComponent } from '../../shared/ui/icono.component';
 import {
   TerritorioBuscadorComponent,
   type OpcionTerritorio,
 } from '../../shared/ui/territorio-buscador.component';
+import { aOpciones } from '../casos/vincular-actor.component';
+import type { ActorOpcion } from '../casos/vincular-actor.component';
 import {
   ALCANCES_ALERTA,
   REGIONES_PERU,
@@ -29,42 +33,34 @@ import {
   claveRiesgo,
   etiquetaEstado,
   geografiaAlerta,
-  plantillaWhatsapp,
   tituloLimpio,
   type Alerta,
   type AlcanceAlerta,
   type AltaAlerta,
   type PatchAlerta,
 } from './alerta.mapeo';
-import { copiarAlPortapapeles } from './portapapeles';
+import { CasoComboboxComponent } from './caso-combobox.component';
 
-/** Opción del selector de caso: código y título de `GET /api/v1/cases`. */
-export type CasoOpcion = { codigo: string; titulo: string };
+/** Opción del combobox de caso: código, título y subsector del caso. */
+export type CasoOpcion = { codigo: string; titulo: string; subsector: string | null };
 
 /** Modo con el que se abre el panel desde el listado. */
 export type ModoPanelAlerta = 'ver' | 'editar' | 'historial';
 
-type BorradorAlerta = {
-  titulo: string;
-  situacionActual: string;
-  hechosRecientes: string;
-  descripcionRiesgo: string;
-  actoresClave: string;
-  demandasInmediatas: string;
-  accionesSugeridas: string;
-};
+/** Una fila editable de las listas del formulario. */
+type Linea = { id: number; texto: string };
 
-type CampoBorrador = keyof BorradorAlerta;
+/** Campos del borrador que se editan como lista de filas con «＋». */
+type CampoLinea =
+  | 'situacionActual'
+  | 'hechosRecientes'
+  | 'descripcionRiesgo'
+  | 'actoresClave'
+  | 'demandasInmediatas'
+  | 'accionesSugeridas';
 
-type MetadatosAlerta = {
-  riesgo: Riesgo | '';
-  alcance: AlcanceAlerta | '';
-  region: string;
-  provincia: string;
-  casoCode: string;
-};
-
-type CampoMetadatos = 'region' | 'provincia' | 'casoCode';
+/** Campos del borrador que siguen siendo texto o selección simple. */
+type CampoAlta = 'titulo' | 'region' | 'provincia';
 
 type BorradorAlta = {
   titulo: string;
@@ -73,30 +69,37 @@ type BorradorAlta = {
   region: string;
   provincia: string;
   casoCode: string;
-  descripcionRiesgo: string;
-  hechosRecientes: string;
-  situacionActual: string;
-  actoresClave: string;
-  demandasInmediatas: string;
-  accionesSugeridas: string;
+  descripcionRiesgo: Linea[];
+  hechosRecientes: Linea[];
+  situacionActual: Linea[];
+  actoresClave: Linea[];
+  demandasInmediatas: Linea[];
+  accionesSugeridas: Linea[];
 };
 
-type CampoAlta = Exclude<keyof BorradorAlta, 'riesgo' | 'alcance'>;
-
-const BORRADOR_ALTA_VACIO: BorradorAlta = {
-  titulo: '',
-  riesgo: '',
-  alcance: '',
-  region: '',
-  provincia: '',
-  casoCode: '',
-  descripcionRiesgo: '',
-  hechosRecientes: '',
-  situacionActual: '',
-  actoresClave: '',
-  demandasInmediatas: '',
-  accionesSugeridas: '',
-};
+/**
+ * Borrador vacío del alta.
+ *
+ * Es una fábrica y no una constante: las listas son mutables y compartir los
+ * mismos arrays entre aperturas arrastraría las líneas de una alerta a la
+ * siguiente.
+ */
+function borradorAltaVacio(): BorradorAlta {
+  return {
+    titulo: '',
+    riesgo: '',
+    alcance: '',
+    region: '',
+    provincia: '',
+    casoCode: '',
+    descripcionRiesgo: [],
+    hechosRecientes: [],
+    situacionActual: [],
+    actoresClave: [],
+    demandasInmediatas: [],
+    accionesSugeridas: [],
+  };
+}
 
 /** `undefined` = no cambió; `null` = se vació a propósito. */
 function diferenciaTexto(valor: string, original: string | null): string | null | undefined {
@@ -117,16 +120,20 @@ function partesDeRuta(ruta: string | null | undefined): { provincia: string; reg
 /**
  * Panel lateral derecho de una alerta.
  *
- * Concentra la ficha y la edición. Los metadatos (riesgo, alcance geográfico,
- * caso vinculado y distrito) los puede editar cualquier perfil: viven en un
- * formulario siempre activo. El contenido narrativo sólo se abre con
- * «Modificar» y exige el permiso que decide la pantalla.
+ * Concentra la ficha y el registro. La ficha es de sólo lectura salvo por
+ * «Modificar contenido», que abre el mismo formulario del alta ya prellenado.
  *
- * No conoce HTTP: emite el `PatchAlerta` ya calculado o el `AltaAlerta`.
+ * No conoce HTTP de escritura: emite el `PatchAlerta` ya calculado o el
+ * `AltaAlerta`. La única lectura es la búsqueda en el Directorio de actores.
  */
 @Component({
   selector: 'app-alerta-panel',
-  imports: [IconoComponent, TerritorioBuscadorComponent, AdjuntosPanelComponent],
+  imports: [
+    IconoComponent,
+    TerritorioBuscadorComponent,
+    AdjuntosPanelComponent,
+    CasoComboboxComponent,
+  ],
   templateUrl: './alerta-panel.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
@@ -146,12 +153,25 @@ function partesDeRuta(ruta: string | null | undefined): { provincia: string; reg
     }
 
     .alerta-codigo {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 4px 10px;
       margin: 0;
       color: #8a98a5;
       font-size: 11px;
       font-weight: 700;
       letter-spacing: 0.08em;
       text-transform: uppercase;
+    }
+
+    .alerta-modificacion {
+      color: #8a98a5;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: normal;
+      text-transform: none;
     }
 
     .alerta-titulo {
@@ -167,43 +187,78 @@ function partesDeRuta(ruta: string | null | undefined): { provincia: string; reg
       display: flex;
       flex-wrap: wrap;
       align-items: center;
-      gap: 6px;
+      gap: 4px 6px;
+      color: #64748b;
+      font-size: 12.5px;
     }
 
     .alerta-geografia {
-      display: inline-flex;
-      align-items: center;
-      padding: 2px 8px;
-      border-radius: 999px;
-      background: #eef3fa;
       color: #4a6b93;
-      font-size: 11.5px;
+      font-weight: 600;
+    }
+
+    .alerta-fecha {
+      color: #8b97a1;
+    }
+
+    /* Sólo color: el encabezado no pinta la píldora de \`status-badge\`. */
+    .alerta-riesgo {
+      background: transparent;
       font-weight: 700;
     }
 
-    .alerta-trazabilidad {
+    /* Doble selector para vencer la píldora de \`global.css\`. */
+    .alerta-riesgo.risk-bajo {
+      background: transparent;
+      color: #1f5597;
+    }
+
+    .alerta-riesgo.risk-medio {
+      background: transparent;
+      color: #b8860b;
+    }
+
+    .alerta-riesgo.risk-alto {
+      background: transparent;
+      color: #d9661f;
+    }
+
+    .alerta-form {
       display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 10px 16px;
-      padding: 10px 12px;
+      flex-direction: column;
+      gap: 10px;
+      padding: 14px 15px;
       border: 1px solid #e8edf1;
-      border-radius: 9px;
-      background: #f9fbfd;
+      border-radius: 11px;
+      background: #fff;
+    }
+
+    .alerta-form h3 {
+      margin: 0;
+      color: #1a2b3e;
       font-size: 12.5px;
-      color: #526577;
-    }
-
-    .alerta-trazabilidad b {
-      color: #17283a;
       font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
     }
 
-    .alerta-trazabilidad button {
-      margin-left: auto;
-    }
-
+    /* Seis secciones: el título va fuera de la caja. */
     .alerta-seccion {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .alerta-seccion-titulo {
+      margin: 0;
+      color: #1a2b3e;
+      font-size: 12.5px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .alerta-seccion-cuerpo {
       display: flex;
       flex-direction: column;
       gap: 8px;
@@ -211,15 +266,6 @@ function partesDeRuta(ruta: string | null | undefined): { provincia: string; reg
       border: 1px solid #e8edf1;
       border-radius: 11px;
       background: #fff;
-    }
-
-    .alerta-seccion h3 {
-      margin: 0;
-      color: #1a2b3e;
-      font-size: 12.5px;
-      font-weight: 700;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
     }
 
     .alerta-seccion p {
@@ -246,23 +292,158 @@ function partesDeRuta(ruta: string | null | undefined): { provincia: string; reg
       font-style: italic;
     }
 
-    .bloque-metadatos {
+    /* Listas con «＋» del formulario. */
+    .bloque-lista {
       display: flex;
       flex-direction: column;
-      gap: 10px;
-      padding: 14px 15px;
-      border: 1px solid #e8edf1;
-      border-radius: 11px;
-      background: #f9fbfd;
+      gap: 8px;
+      padding: 12px;
+      border: 1px solid #e6ecf1;
+      border-radius: 7px;
+      background: #fbfcfd;
     }
 
-    .bloque-metadatos h3 {
-      margin: 0;
-      color: #1a2b3e;
+    .bloque-lista > .form-label {
+      text-align: center;
+    }
+
+    .linea-fila {
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+    }
+
+    .linea-fila textarea {
+      flex: 1;
+      min-width: 0;
+      min-height: 38px;
+      resize: vertical;
+    }
+
+    .alerta-agregar {
+      align-self: flex-start;
+      padding: 5px 10px;
+      border: 1px dashed #c8d6e4;
+      border-radius: 7px;
+      background: #fff;
+      color: #1f5597;
+      font: inherit;
       font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .alerta-agregar:hover {
+      border-color: #1f5597;
+    }
+
+    .actor-acciones {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .actor-buscador {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 10px;
+      border: 1px solid #e6ecf1;
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    .actor-buscador-input {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 8px;
+      border: 1px solid #dde5ec;
+      border-radius: 7px;
+      background: #f9fbfd;
+      color: #8b97a1;
+    }
+
+    .actor-buscador-input input {
+      flex: 1;
+      min-width: 0;
+      border: 0;
+      background: transparent;
+      color: #17283a;
+      font: inherit;
+      outline: none;
+    }
+
+    .actor-resultados {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      max-height: 200px;
+      overflow-y: auto;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .actor-opcion {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      width: 100%;
+      padding: 7px 9px;
+      border: 1px solid #e8edf1;
+      border-radius: 7px;
+      background: #fbfcfd;
+      text-align: left;
+      font: inherit;
+      cursor: pointer;
+    }
+
+    .actor-opcion:hover {
+      border-color: #1f5597;
+    }
+
+    .actor-nombre {
+      color: #17283a;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .actor-meta {
+      color: #8b97a1;
+      font-size: 11.5px;
+    }
+
+    /* Trazabilidad: fila discreta al final del panel. */
+    .alerta-traza {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 4px 8px;
+      padding: 8px 2px 0;
+      border-top: 1px solid #eef2f6;
+      color: #64748b;
+      font-size: 12px;
+    }
+
+    .alerta-traza b {
+      color: #33475b;
       font-weight: 700;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
+    }
+
+    .alerta-traza-boton {
+      margin-left: auto;
+      padding: 0;
+      border: 0;
+      background: none;
+      color: #1f5597;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .alerta-traza-boton:hover {
+      text-decoration: underline;
     }
 
     .rejilla-dos {
@@ -271,62 +452,11 @@ function partesDeRuta(ruta: string | null | undefined): { provincia: string; reg
       gap: 10px;
     }
 
-    .rejilla-metadatos {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-      gap: 10px;
-    }
-
     .acciones-form {
       display: flex;
       flex-wrap: wrap;
       justify-content: flex-end;
       gap: 8px;
-    }
-
-    .plantilla-mensaje {
-      width: 100%;
-      min-height: 240px;
-      padding: 12px 14px;
-      border: 1px solid #e0e6ec;
-      border-radius: 10px;
-      background: #f9fbfd;
-      color: #17283a;
-      font:
-        500 12.5px/21px ui-monospace,
-        'SFMono-Regular',
-        'Menlo',
-        'Consolas',
-        monospace;
-      white-space: pre-wrap;
-      resize: vertical;
-    }
-
-    .plantilla-mensaje[readonly] {
-      cursor: default;
-    }
-
-    .plantilla-mensaje:focus {
-      outline: 2px solid #c9d8ea;
-      outline-offset: 1px;
-      background: #fff;
-    }
-
-    .herramientas-plantilla {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-    }
-
-    .conmutador {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      color: #33475b;
-      font-size: 12.5px;
-      font-weight: 600;
     }
 
     .historial {
@@ -359,15 +489,8 @@ function partesDeRuta(ruta: string | null | undefined): { provincia: string; reg
       font-size: 12px;
     }
 
-    .aviso-copia {
-      margin: 0;
-      color: #2f6f52;
-      font-size: 12.5px;
-    }
-
     @media (max-width: 620px) {
-      .rejilla-dos,
-      .rejilla-metadatos {
+      .rejilla-dos {
         grid-template-columns: 1fr;
       }
     }
@@ -377,7 +500,7 @@ export class AlertaPanelComponent {
   readonly alerta = input<Alerta | null>(null);
   readonly cargando = input(false);
   readonly errorCarga = input<ErrorApi | null>(null);
-  /** Permiso para editar el contenido narrativo (los metadatos no lo exigen). */
+  /** Permiso para registrar y para modificar el contenido de una alerta. */
   readonly puedeModificar = input(false);
   readonly guardando = input(false);
   readonly errorGuardado = input<string | null>(null);
@@ -385,7 +508,7 @@ export class AlertaPanelComponent {
   readonly modoInicial = input<ModoPanelAlerta>('ver');
   /** Código del caso con el que se presiembra el alta. */
   readonly casoInicial = input('');
-  /** Casos disponibles para el selector «Caso vinculado». */
+  /** Casos disponibles para el combobox «Caso vinculado». */
   readonly casos = input<readonly CasoOpcion[]>([]);
 
   readonly cerrar = output<void>();
@@ -397,6 +520,7 @@ export class AlertaPanelComponent {
   readonly alcances = ALCANCES_ALERTA;
   readonly regiones = REGIONES_PERU;
 
+  private readonly http = inject(HttpClient);
   private readonly panel = viewChild<ElementRef<HTMLElement>>('panel');
   private readonly destruccion = inject(DestroyRef);
 
@@ -406,33 +530,22 @@ export class AlertaPanelComponent {
 
   readonly editando = signal(false);
   readonly verHistorial = signal(false);
-  readonly borrador = signal<BorradorAlerta | null>(null);
-  readonly metadatos = signal<MetadatosAlerta>({
-    riesgo: '',
-    alcance: '',
-    region: '',
-    provincia: '',
-    casoCode: '',
-  });
-  readonly distritoMetadatos = signal<OpcionTerritorio | null>(null);
-  readonly borradorAlta = signal<BorradorAlta>(BORRADOR_ALTA_VACIO);
+  readonly borradorAlta = signal<BorradorAlta>(borradorAltaVacio());
   readonly distritoAlta = signal<OpcionTerritorio | null>(null);
-  readonly mensaje = signal('');
-  readonly editarPlantilla = signal(false);
-  readonly avisoCopia = signal<string | null>(null);
   readonly mensajeLocal = signal<string | null>(null);
 
-  readonly formulario = computed(() => (this.editando() ? this.borrador() : null));
+  /** Búsqueda en el Directorio de actores para «Elegir del directorio». */
+  readonly buscandoActor = signal(false);
+  readonly consultaActor = signal('');
+  readonly resultadosActor = signal<readonly ActorOpcion[]>([]);
+  readonly buscandoDirectorio = signal(false);
+  readonly errorActor = signal<string | null>(null);
 
   /** `alerta === null` significa alta. */
   readonly esAlta = computed(() => this.alerta() === null);
 
-  /** Semilla del buscador en edición: el distrito ya guardado. */
-  readonly inicialDistritoMetadatos = computed(() => {
-    const distrito = this.distritoMetadatos();
-    if (distrito?.tipo !== 'distrito') return null;
-    return { id: distrito.id, nombre: distrito.nombre, ruta: distrito.ruta };
-  });
+  /** El formulario se muestra en el alta y también al modificar una alerta. */
+  readonly esFormulario = computed(() => this.esAlta() || this.editando());
 
   readonly inicialDistritoAlta = computed(() => {
     const distrito = this.distritoAlta();
@@ -440,17 +553,23 @@ export class AlertaPanelComponent {
     return { id: distrito.id, nombre: distrito.nombre, ruta: distrito.ruta };
   });
 
+  private secuenciaLinea = 0;
+  private timerActor: ReturnType<typeof setTimeout> | null = null;
+  private turnoActor = 0;
+
   constructor() {
     afterNextRender(() => this.panel()?.nativeElement.focus());
 
-    this.destruccion.onDestroy(() => this.focoPrevio?.focus?.());
+    this.destruccion.onDestroy(() => {
+      this.focoPrevio?.focus?.();
+      if (this.timerActor) clearTimeout(this.timerActor);
+    });
 
-    // Tras un guardado correcto se cierra el modo edición para mostrar lo ya persistido.
+    // Tras un guardado correcto se cierra el formulario para mostrar lo ya persistido.
     effect(() => {
       if (!this.aviso()) return;
       this.editando.set(false);
-      this.borrador.set(null);
-      this.editarPlantilla.set(false);
+      this.cerrarBuscadorActor();
     });
 
     // Siembra por alerta y modo. La firma evita reescribir lo que el usuario está
@@ -468,28 +587,41 @@ export class AlertaPanelComponent {
         return;
       }
       this.sembrar(alerta);
-      this.editando.set(modo === 'editar');
+      // El modo «editar» sólo aplica si el perfil puede modificar el contenido.
+      this.editando.set(modo === 'editar' && this.puedeModificar());
       this.verHistorial.set(modo === 'historial');
     });
 
-    // El alta se siembra limpia y con el caso del contexto, si lo hay.
+    // El alta se siembra limpia y con el caso del contexto, si lo hay. Nunca
+    // pisa el formulario de una alerta existente que se está modificando.
     effect(() => {
       if (!this.esAlta()) return;
-      this.borradorAlta.set({ ...BORRADOR_ALTA_VACIO, casoCode: this.casoInicial().trim() });
+      this.borradorAlta.set({ ...borradorAltaVacio(), casoCode: this.casoInicial().trim() });
       this.distritoAlta.set(null);
       this.mensajeLocal.set(null);
     });
   }
 
+  /**
+   * Prellena el borrador del formulario con la alerta abierta. Sirve tanto para
+   * abrir en modo «editar» como para «Modificar contenido».
+   */
   private sembrar(alerta: Alerta): void {
-    this.metadatos.set({
+    this.borradorAlta.set({
+      titulo: alerta.titulo ?? '',
       riesgo: alerta.riesgo,
       alcance: alerta.alcance,
       region: alerta.region ?? '',
       provincia: alerta.provincia ?? '',
       casoCode: alerta.casoCodigo ?? '',
+      situacionActual: this.lineasDesdeTexto(alerta.situacionActual),
+      hechosRecientes: this.lineasDesdeTexto(alerta.hechosRecientes),
+      descripcionRiesgo: this.lineasDesdeTexto(alerta.descripcionRiesgo),
+      actoresClave: this.lineasDesdeArray(alerta.actoresClave),
+      demandasInmediatas: this.lineasDesdeArray(alerta.demandasInmediatas),
+      accionesSugeridas: this.lineasDesdeArray(alerta.accionesSugeridas),
     });
-    this.distritoMetadatos.set(
+    this.distritoAlta.set(
       alerta.distritoId !== null && alerta.distrito
         ? {
             tipo: 'distrito',
@@ -500,10 +632,7 @@ export class AlertaPanelComponent {
           }
         : null,
     );
-    this.borrador.set(null);
-    this.mensaje.set(alerta.plantillaWhatsapp ?? plantillaWhatsapp(alerta));
-    this.editarPlantilla.set(false);
-    this.avisoCopia.set(null);
+    this.cerrarBuscadorActor();
     this.mensajeLocal.set(null);
   }
 
@@ -512,7 +641,15 @@ export class AlertaPanelComponent {
    * ---------------------------------------------------------------------- */
 
   tituloVisible(alerta: Alerta): string {
-    return tituloLimpio(alerta.titulo) || alerta.codigo || 'Alerta sin título';
+    // `tituloLimpio` ya quita el 🔔 del prefijo «🔔 REPORTE DE ALERTA TEMPRANA |»;
+    // el `replace` cubre un 🔔 inicial suelto para que el emoji no se duplique.
+    const base =
+      tituloLimpio(alerta.titulo)
+        .replace(/^🔔\s*/u, '')
+        .trim() ||
+      alerta.codigo ||
+      'Alerta sin título';
+    return `🔔 ${base}`;
   }
 
   geografia(alerta: Alerta): string {
@@ -523,8 +660,24 @@ export class AlertaPanelComponent {
     return etiquetaEstado(alerta.estado);
   }
 
-  claseRiesgo(riesgo: Riesgo): string {
-    return `status-badge risk-${claveRiesgo(riesgo)}`;
+  /** «Alto» → «alto»; se usa en el encabezado («Riesgo alto»). */
+  etiquetaRiesgo(riesgo: Riesgo): string {
+    switch (riesgo) {
+      case 'Alto':
+        return 'alto';
+      case 'Medio':
+        return 'moderado';
+      default:
+        return 'bajo';
+    }
+  }
+
+  /**
+   * Clases del texto de riesgo del encabezado. Sin `status-badge`: aquí no se
+   * pinta píldora, sólo color.
+   */
+  claseRiesgoTexto(riesgo: Riesgo): string {
+    return `alerta-riesgo risk-${claveRiesgo(riesgo)}`;
   }
 
   fecha(valor: string | null): string {
@@ -532,210 +685,11 @@ export class AlertaPanelComponent {
   }
 
   /* ---------------------------------------------------------------------- *
-   * Metadatos (siempre editables)
-   * ---------------------------------------------------------------------- */
-
-  cambiarRiesgo(evento: Event): void {
-    const valor = (evento.target as HTMLSelectElement).value as Riesgo;
-    this.metadatos.update((actual) => ({ ...actual, riesgo: valor }));
-    this.mensajeLocal.set(null);
-  }
-
-  cambiarAlcance(evento: Event): void {
-    const valor = (evento.target as HTMLSelectElement).value as AlcanceAlerta;
-    this.metadatos.update((actual) => ({ ...actual, alcance: valor }));
-    if (valor === 'Nacional') {
-      this.distritoMetadatos.set(null);
-      this.metadatos.update((actual) => ({ ...actual, region: '', provincia: '' }));
-    } else if (valor === 'Región') {
-      this.distritoMetadatos.set(null);
-    }
-    this.mensajeLocal.set(null);
-  }
-
-  campoMetadatos(clave: CampoMetadatos, evento: Event): void {
-    const valor = (evento.target as HTMLInputElement | HTMLSelectElement).value;
-    this.metadatos.update((actual) => ({ ...actual, [clave]: valor }));
-    this.mensajeLocal.set(null);
-  }
-
-  alElegirDistritoMetadatos(opcion: OpcionTerritorio | null): void {
-    const distrito = opcion?.tipo === 'distrito' ? opcion : null;
-    this.distritoMetadatos.set(distrito);
-    if (distrito) {
-      const partes = partesDeRuta(distrito.ruta);
-      this.metadatos.update((actual) => ({
-        ...actual,
-        region: distrito.region || partes.region || actual.region,
-        provincia: partes.provincia || actual.provincia,
-      }));
-    }
-    this.mensajeLocal.set(null);
-  }
-
-  guardarMetadatos(): void {
-    const alerta = this.alerta();
-    if (!alerta) return;
-
-    const metadatos = this.metadatos();
-    const cambios: PatchAlerta = {};
-
-    if (metadatos.riesgo && metadatos.riesgo !== alerta.riesgo) {
-      cambios.riesgo = metadatos.riesgo;
-    }
-
-    if (metadatos.alcance && metadatos.alcance !== alerta.alcance) {
-      cambios.alcance = metadatos.alcance;
-    }
-
-    const region = metadatos.region.trim() || null;
-    if (region !== (alerta.region ?? null)) cambios.region = region;
-
-    const provincia = metadatos.provincia.trim() || null;
-    if (provincia !== (alerta.provincia ?? null)) cambios.provincia = provincia;
-
-    const caso = metadatos.casoCode.trim() || null;
-    if (caso !== (alerta.casoCodigo ?? null)) cambios.casoCode = caso;
-
-    const distrito = this.distritoMetadatos();
-    const distritoId = distrito?.tipo === 'distrito' ? distrito.id : null;
-    if (distritoId !== alerta.distritoId) cambios.distritoId = distritoId;
-
-    if (Object.keys(cambios).length === 0) {
-      this.mensajeLocal.set('No hay cambios en los metadatos.');
-      return;
-    }
-
-    this.mensajeLocal.set(null);
-    this.guardar.emit(cambios);
-  }
-
-  /* ---------------------------------------------------------------------- *
-   * Contenido narrativo
-   * ---------------------------------------------------------------------- */
-
-  iniciarEdicion(): void {
-    const alerta = this.alerta();
-    if (!alerta || !this.puedeModificar()) return;
-
-    this.borrador.set({
-      titulo: alerta.titulo ?? '',
-      situacionActual: alerta.situacionActual ?? '',
-      hechosRecientes: alerta.hechosRecientes ?? '',
-      descripcionRiesgo: alerta.descripcionRiesgo ?? '',
-      actoresClave: alerta.actoresClave.join('\n'),
-      demandasInmediatas: alerta.demandasInmediatas.join('\n'),
-      accionesSugeridas: alerta.accionesSugeridas.join('\n'),
-    });
-    this.mensajeLocal.set(null);
-    this.editando.set(true);
-  }
-
-  cancelarEdicion(): void {
-    this.editando.set(false);
-    this.borrador.set(null);
-    this.mensajeLocal.set(null);
-  }
-
-  campo(clave: CampoBorrador, evento: Event): void {
-    const objetivo = evento.target as HTMLInputElement | HTMLTextAreaElement;
-    const valor = objetivo.value;
-    this.borrador.update((actual) => (actual ? { ...actual, [clave]: valor } : actual));
-  }
-
-  alEnviarFormulario(evento: Event): void {
-    evento.preventDefault();
-    this.guardarCambios();
-  }
-
-  guardarCambios(): void {
-    const alerta = this.alerta();
-    const borrador = this.borrador();
-    if (!alerta || !borrador) return;
-
-    const cambios: PatchAlerta = {};
-
-    const titulo = diferenciaTexto(borrador.titulo, alerta.titulo);
-    if (titulo !== undefined) cambios.titulo = titulo;
-
-    const situacion = diferenciaTexto(borrador.situacionActual, alerta.situacionActual);
-    if (situacion !== undefined) cambios.situacionActual = situacion;
-
-    const hechos = diferenciaTexto(borrador.hechosRecientes, alerta.hechosRecientes);
-    if (hechos !== undefined) cambios.hechosRecientes = hechos;
-
-    const descripcion = diferenciaTexto(borrador.descripcionRiesgo, alerta.descripcionRiesgo);
-    if (descripcion !== undefined) cambios.descripcionRiesgo = descripcion;
-
-    const actores = aJsonLineas(borrador.actoresClave.split('\n'));
-    if ((actores ?? []).join('\n') !== alerta.actoresClave.join('\n')) {
-      cambios.actoresClave = actores;
-    }
-
-    const demandas = aJsonLineas(borrador.demandasInmediatas.split('\n'));
-    if ((demandas ?? []).join('\n') !== alerta.demandasInmediatas.join('\n')) {
-      cambios.demandasInmediatas = demandas;
-    }
-
-    const sugeridas = aJsonLineas(borrador.accionesSugeridas.split('\n'));
-    if ((sugeridas ?? []).join('\n') !== alerta.accionesSugeridas.join('\n')) {
-      cambios.accionesSugeridas = sugeridas;
-    }
-
-    if (Object.keys(cambios).length === 0) {
-      this.mensajeLocal.set('No hay cambios que guardar.');
-      return;
-    }
-
-    this.mensajeLocal.set(null);
-    this.guardar.emit(cambios);
-  }
-
-  alternarHistorial(): void {
-    this.verHistorial.update((valor) => !valor);
-  }
-
-  /* ---------------------------------------------------------------------- *
-   * Plantilla de WhatsApp
-   * ---------------------------------------------------------------------- */
-
-  campoMensaje(evento: Event): void {
-    const area = evento.target as HTMLTextAreaElement;
-    this.mensaje.set(area.value);
-    this.avisoCopia.set(null);
-  }
-
-  alternarPlantilla(): void {
-    if (!this.editarPlantilla() && !this.puedeModificar()) return;
-    this.editarPlantilla.update((valor) => !valor);
-  }
-
-  regenerarMensaje(): void {
-    const alerta = this.alerta();
-    if (!alerta) return;
-    this.mensaje.set(plantillaWhatsapp(alerta));
-    this.avisoCopia.set(null);
-  }
-
-  async copiarMensaje(): Promise<void> {
-    const ok = await copiarAlPortapapeles(this.mensaje());
-    this.avisoCopia.set(
-      ok
-        ? 'Mensaje copiado al portapapeles.'
-        : 'No se pudo copiar. Seleccione el texto y use Ctrl + C.',
-    );
-  }
-
-  guardarPlantilla(): void {
-    this.guardar.emit({ plantillaWhatsapp: this.mensaje().trim() || null });
-  }
-
-  /* ---------------------------------------------------------------------- *
-   * Alta
+   * Formulario: campos simples
    * ---------------------------------------------------------------------- */
 
   campoAlta(clave: CampoAlta, evento: Event): void {
-    const objetivo = evento.target as HTMLInputElement | HTMLTextAreaElement;
+    const objetivo = evento.target as HTMLInputElement | HTMLSelectElement;
     const valor = objetivo.value;
     this.borradorAlta.update((actual) => ({ ...actual, [clave]: valor }));
     this.mensajeLocal.set(null);
@@ -744,6 +698,7 @@ export class AlertaPanelComponent {
   cambiarRiesgoAlta(evento: Event): void {
     const valor = (evento.target as HTMLSelectElement).value as Riesgo;
     this.borradorAlta.update((actual) => ({ ...actual, riesgo: valor }));
+    this.mensajeLocal.set(null);
   }
 
   cambiarAlcanceAlta(evento: Event): void {
@@ -753,6 +708,7 @@ export class AlertaPanelComponent {
     if (valor === 'Nacional') {
       this.borradorAlta.update((actual) => ({ ...actual, region: '', provincia: '' }));
     }
+    this.mensajeLocal.set(null);
   }
 
   alElegirDistritoAlta(opcion: OpcionTerritorio | null): void {
@@ -768,6 +724,161 @@ export class AlertaPanelComponent {
     }
     this.mensajeLocal.set(null);
   }
+
+  cambiarCasoAlta(codigo: string): void {
+    this.borradorAlta.update((actual) => ({ ...actual, casoCode: codigo }));
+    this.mensajeLocal.set(null);
+  }
+
+  /* ---------------------------------------------------------------------- *
+   * Formulario: listas con «＋»
+   * ---------------------------------------------------------------------- */
+
+  agregarLinea(campo: CampoLinea): void {
+    this.actualizarLineas(campo, (lineas) => [...lineas, this.nuevaLinea('')]);
+  }
+
+  quitarLinea(campo: CampoLinea, id: number): void {
+    this.actualizarLineas(campo, (lineas) => lineas.filter((linea) => linea.id !== id));
+  }
+
+  editarLinea(campo: CampoLinea, id: number, evento: Event): void {
+    const texto = (evento.target as HTMLTextAreaElement).value;
+    this.actualizarLineas(campo, (lineas) =>
+      lineas.map((linea) => (linea.id === id ? { ...linea, texto } : linea)),
+    );
+  }
+
+  private actualizarLineas(campo: CampoLinea, transformar: (lineas: Linea[]) => Linea[]): void {
+    const actual = this.borradorAlta();
+    const lineas = transformar(actual[campo]);
+    this.borradorAlta.set({
+      ...actual,
+      situacionActual: campo === 'situacionActual' ? lineas : actual.situacionActual,
+      hechosRecientes: campo === 'hechosRecientes' ? lineas : actual.hechosRecientes,
+      descripcionRiesgo: campo === 'descripcionRiesgo' ? lineas : actual.descripcionRiesgo,
+      actoresClave: campo === 'actoresClave' ? lineas : actual.actoresClave,
+      demandasInmediatas: campo === 'demandasInmediatas' ? lineas : actual.demandasInmediatas,
+      accionesSugeridas: campo === 'accionesSugeridas' ? lineas : actual.accionesSugeridas,
+    });
+    this.mensajeLocal.set(null);
+  }
+
+  private nuevaLinea(texto: string): Linea {
+    this.secuenciaLinea += 1;
+    return { id: this.secuenciaLinea, texto };
+  }
+
+  private lineasDesdeTexto(valor: string | null): Linea[] {
+    return (valor ?? '')
+      .split('\n')
+      .map((linea) => linea.trim())
+      .filter((linea) => linea.length > 0)
+      .map((linea) => this.nuevaLinea(linea));
+  }
+
+  private lineasDesdeArray(valores: readonly string[]): Linea[] {
+    return valores
+      .map((valor) => valor.trim())
+      .filter((valor) => valor.length > 0)
+      .map((valor) => this.nuevaLinea(valor));
+  }
+
+  private textoDesdeLineas(lineas: readonly Linea[]): string {
+    return lineas
+      .map((linea) => linea.texto.trim())
+      .filter((texto) => texto.length > 0)
+      .join('\n');
+  }
+
+  private jsonDesdeLineas(lineas: readonly Linea[]): string[] | null {
+    return aJsonLineas(lineas.map((linea) => linea.texto));
+  }
+
+  /* ---------------------------------------------------------------------- *
+   * Actores clave desde el Directorio
+   *
+   * AVISO: `core.alertas_tempranas.actores_clave` es `jsonb` de texto libre y
+   * la API no escribe `core.alertas_actores`, así que no hay FK. Convertirlo en
+   * vínculo real exigiría escribir `core.alertas_actores` (sólo roles
+   * `sectorista`/`administrador`) y los permisos `crear`/`pii` al dar de alta
+   * actores. Por eso aquí se sigue guardando texto libre.
+   * ---------------------------------------------------------------------- */
+
+  alternarBuscadorActor(): void {
+    if (this.buscandoActor()) {
+      this.cerrarBuscadorActor();
+      return;
+    }
+    this.buscandoActor.set(true);
+    this.errorActor.set(null);
+  }
+
+  cerrarBuscadorActor(): void {
+    if (this.timerActor) {
+      clearTimeout(this.timerActor);
+      this.timerActor = null;
+    }
+    this.buscandoActor.set(false);
+    this.consultaActor.set('');
+    this.resultadosActor.set([]);
+    this.buscandoDirectorio.set(false);
+    this.errorActor.set(null);
+  }
+
+  alBuscarActor(evento: Event): void {
+    const valor = (evento.target as HTMLInputElement).value;
+    this.consultaActor.set(valor);
+    this.errorActor.set(null);
+    if (this.timerActor) clearTimeout(this.timerActor);
+
+    const consulta = valor.trim();
+    if (consulta.length < 2) {
+      this.resultadosActor.set([]);
+      this.buscandoDirectorio.set(false);
+      return;
+    }
+
+    this.buscandoDirectorio.set(true);
+    this.timerActor = setTimeout(() => this.buscarActorEnDirectorio(consulta), 300);
+  }
+
+  private buscarActorEnDirectorio(consulta: string): void {
+    const turno = ++this.turnoActor;
+    const url = urlApi(`/v1/actors?q=${encodeURIComponent(consulta)}&pageSize=20`);
+
+    this.http.get<unknown>(url).subscribe({
+      next: (bruto) => {
+        if (turno !== this.turnoActor) return;
+        this.resultadosActor.set(aOpciones(bruto));
+        this.buscandoDirectorio.set(false);
+      },
+      error: () => {
+        if (turno !== this.turnoActor) return;
+        this.resultadosActor.set([]);
+        this.buscandoDirectorio.set(false);
+        this.errorActor.set('No se pudo consultar el Directorio de actores.');
+      },
+    });
+  }
+
+  /** Añade una línea «Nombre — Cargo / Organización» a partir del Directorio. */
+  elegirActorDirectorio(actor: ActorOpcion): void {
+    const detalle = actor.institucion ?? actor.tipo ?? '';
+    const texto = detalle ? `${actor.nombre} — ${detalle}` : actor.nombre;
+    this.actualizarLineas('actoresClave', (lineas) => [...lineas, this.nuevaLinea(texto)]);
+    this.cerrarBuscadorActor();
+  }
+
+  /** Añade una línea vacía editable, sin pasar por el Directorio. */
+  escribirActorNuevo(): void {
+    this.agregarLinea('actoresClave');
+    this.cerrarBuscadorActor();
+  }
+
+  /* ---------------------------------------------------------------------- *
+   * Guardado
+   * ---------------------------------------------------------------------- */
 
   alEnviarAlta(evento: Event): void {
     evento.preventDefault();
@@ -794,44 +905,143 @@ export class AlertaPanelComponent {
       return;
     }
 
-    const cuerpo: AltaAlerta = {
-      titulo,
-      riesgo: borrador.riesgo,
-      alcance: borrador.alcance,
-    };
+    if (this.esAlta()) {
+      const cuerpo: AltaAlerta = {
+        titulo,
+        riesgo: borrador.riesgo,
+        alcance: borrador.alcance,
+      };
 
-    const distrito = this.distritoAlta();
-    if (distrito?.tipo === 'distrito') cuerpo.distritoId = distrito.id;
+      const distrito = this.distritoAlta();
+      if (distrito?.tipo === 'distrito') cuerpo.distritoId = distrito.id;
 
-    const caso = borrador.casoCode.trim();
-    if (caso) cuerpo.casoCode = caso;
+      const caso = borrador.casoCode.trim();
+      if (caso) cuerpo.casoCode = caso;
 
-    const region = borrador.region.trim();
-    if (region) cuerpo.region = region;
+      const region = borrador.region.trim();
+      if (region) cuerpo.region = region;
 
-    const provincia = borrador.provincia.trim();
-    if (provincia) cuerpo.provincia = provincia;
+      const provincia = borrador.provincia.trim();
+      if (provincia) cuerpo.provincia = provincia;
 
-    const descripcion = borrador.descripcionRiesgo.trim();
-    if (descripcion) cuerpo.descripcionRiesgo = descripcion;
+      const descripcion = this.textoDesdeLineas(borrador.descripcionRiesgo);
+      if (descripcion) cuerpo.descripcionRiesgo = descripcion;
 
-    const hechos = borrador.hechosRecientes.trim();
-    if (hechos) cuerpo.hechosRecientes = hechos;
+      const hechos = this.textoDesdeLineas(borrador.hechosRecientes);
+      if (hechos) cuerpo.hechosRecientes = hechos;
 
-    const situacion = borrador.situacionActual.trim();
-    if (situacion) cuerpo.situacionActual = situacion;
+      const situacion = this.textoDesdeLineas(borrador.situacionActual);
+      if (situacion) cuerpo.situacionActual = situacion;
 
-    const actores = aJsonLineas(borrador.actoresClave.split('\n'));
-    if (actores) cuerpo.actoresClave = actores;
+      const actores = this.jsonDesdeLineas(borrador.actoresClave);
+      if (actores) cuerpo.actoresClave = actores;
 
-    const demandas = aJsonLineas(borrador.demandasInmediatas.split('\n'));
-    if (demandas) cuerpo.demandasInmediatas = demandas;
+      const demandas = this.jsonDesdeLineas(borrador.demandasInmediatas);
+      if (demandas) cuerpo.demandasInmediatas = demandas;
 
-    const sugeridas = aJsonLineas(borrador.accionesSugeridas.split('\n'));
-    if (sugeridas) cuerpo.accionesSugeridas = sugeridas;
+      const sugeridas = this.jsonDesdeLineas(borrador.accionesSugeridas);
+      if (sugeridas) cuerpo.accionesSugeridas = sugeridas;
+
+      this.mensajeLocal.set(null);
+      this.registrar.emit(cuerpo);
+      return;
+    }
+
+    const alerta = this.alerta();
+    if (!alerta) return;
+
+    const patch = this.patchDesdeBorrador(alerta, borrador, titulo);
+    if (Object.keys(patch).length === 0) {
+      this.mensajeLocal.set('No hay cambios que guardar.');
+      return;
+    }
 
     this.mensajeLocal.set(null);
-    this.registrar.emit(cuerpo);
+    this.guardar.emit(patch);
+  }
+
+  /** `PatchAlerta` con sólo las claves cuyo valor difiere de la alerta abierta. */
+  private patchDesdeBorrador(alerta: Alerta, borrador: BorradorAlta, titulo: string): PatchAlerta {
+    const patch: PatchAlerta = {};
+
+    const tituloCambio = diferenciaTexto(titulo, alerta.titulo);
+    if (tituloCambio !== undefined) patch.titulo = tituloCambio;
+
+    if (borrador.riesgo && borrador.riesgo !== alerta.riesgo) patch.riesgo = borrador.riesgo;
+    if (borrador.alcance && borrador.alcance !== alerta.alcance) {
+      patch.alcance = borrador.alcance;
+    }
+
+    const region = diferenciaTexto(borrador.region, alerta.region);
+    if (region !== undefined) patch.region = region;
+
+    const provincia = diferenciaTexto(borrador.provincia, alerta.provincia);
+    if (provincia !== undefined) patch.provincia = provincia;
+
+    const caso = diferenciaTexto(borrador.casoCode, alerta.casoCodigo);
+    if (caso !== undefined) patch.casoCode = caso;
+
+    const distrito = this.distritoAlta();
+    const distritoId = distrito?.tipo === 'distrito' ? distrito.id : null;
+    if (distritoId !== alerta.distritoId) patch.distritoId = distritoId;
+
+    const situacion = diferenciaTexto(
+      this.textoDesdeLineas(borrador.situacionActual),
+      alerta.situacionActual,
+    );
+    if (situacion !== undefined) patch.situacionActual = situacion;
+
+    const hechos = diferenciaTexto(
+      this.textoDesdeLineas(borrador.hechosRecientes),
+      alerta.hechosRecientes,
+    );
+    if (hechos !== undefined) patch.hechosRecientes = hechos;
+
+    const descripcion = diferenciaTexto(
+      this.textoDesdeLineas(borrador.descripcionRiesgo),
+      alerta.descripcionRiesgo,
+    );
+    if (descripcion !== undefined) patch.descripcionRiesgo = descripcion;
+
+    const actores = this.jsonDesdeLineas(borrador.actoresClave);
+    if ((actores ?? []).join('\n') !== alerta.actoresClave.join('\n')) {
+      patch.actoresClave = actores;
+    }
+
+    const demandas = this.jsonDesdeLineas(borrador.demandasInmediatas);
+    if ((demandas ?? []).join('\n') !== alerta.demandasInmediatas.join('\n')) {
+      patch.demandasInmediatas = demandas;
+    }
+
+    const sugeridas = this.jsonDesdeLineas(borrador.accionesSugeridas);
+    if ((sugeridas ?? []).join('\n') !== alerta.accionesSugeridas.join('\n')) {
+      patch.accionesSugeridas = sugeridas;
+    }
+
+    return patch;
+  }
+
+  /* ---------------------------------------------------------------------- *
+   * Contenido narrativo
+   * ---------------------------------------------------------------------- */
+
+  /** «Modificar contenido» reutiliza el formulario del alta ya prellenado. */
+  iniciarEdicion(): void {
+    const alerta = this.alerta();
+    if (!alerta || !this.puedeModificar()) return;
+
+    this.sembrar(alerta);
+    this.editando.set(true);
+  }
+
+  cancelarEdicion(): void {
+    this.editando.set(false);
+    this.cerrarBuscadorActor();
+    this.mensajeLocal.set(null);
+  }
+
+  alternarHistorial(): void {
+    this.verHistorial.update((valor) => !valor);
   }
 
   /* ---------------------------------------------------------------------- *

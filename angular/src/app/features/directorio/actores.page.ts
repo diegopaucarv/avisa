@@ -45,7 +45,7 @@ import {
 import { ActorPanelComponent } from './actor-panel.component';
 import { ActorPanelAltaComponent, type NaturalezaAlta } from './actor-panel-alta.component';
 import { ActorPanelFusionComponent } from './actor-panel-fusion.component';
-import { alternarActorLista, quitarActorLista } from './lista-temporal';
+import { alternarActorLista, quitarActorListaPorIndice } from './lista-temporal';
 import { crearCsvPadronAsistencia } from './padron-asistencia';
 import {
   aActorDirectorio,
@@ -176,6 +176,16 @@ const FILTROS_INICIALES: FiltrosActores = {
       user-select: none;
     }
 
+    /* «Nuevo» es un <summary>: se iguala al alto del resto de botones. */
+    .menu-nuevo-toggle {
+      padding: 0 11px;
+      line-height: 1;
+      font-size: 12.5px;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+    }
+
     .menu-nuevo summary::-webkit-details-marker {
       display: none;
     }
@@ -246,8 +256,9 @@ const FILTROS_INICIALES: FiltrosActores = {
 
     .actor-organizacion small {
       display: block;
-      color: #8d99a6;
+      color: inherit;
       font-size: 12px;
+      font-weight: 400;
     }
 
     .col-foto {
@@ -263,53 +274,38 @@ const FILTROS_INICIALES: FiltrosActores = {
       background: #f6f8fa;
     }
 
-    .dato-contacto {
-      display: inline-flex;
+    /* global.css fija white-space: nowrap en td; el contacto necesita dos líneas. */
+    .actor-contacto {
+      white-space: normal;
+    }
+
+    .contacto-linea {
+      display: flex;
       align-items: center;
       gap: 6px;
-      max-width: 210px;
     }
 
-    .dato-contacto span {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+    .contacto-linea > span {
+      min-width: 0;
+      overflow-wrap: anywhere;
     }
 
-    .boton-copiar {
+    .boton-copiar-icono {
+      display: inline-flex;
       flex: none;
-      padding: 2px 6px;
-      border: 1px solid #dce3e8;
-      border-radius: 5px;
-      background: #fff;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      padding: 0;
+      border: 0;
+      background: none;
       color: #526577;
-      font-size: 11.5px;
-      line-height: 1.4;
       cursor: pointer;
     }
 
-    .boton-copiar:hover {
-      background: #f5f7f8;
-    }
-
-    .region-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 2px 9px;
-      border-radius: 999px;
-      background: #f0f4f8;
-      color: #465a6c;
-      font-size: 12px;
-      white-space: nowrap;
-    }
-
-    .region-chip::before {
-      content: '';
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: #45c08a;
+    .boton-copiar-icono:hover {
+      color: #1f5597;
     }
 
     .col-acciones {
@@ -325,13 +321,16 @@ const FILTROS_INICIALES: FiltrosActores = {
     }
 
     .accion {
-      padding: 3px 8px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      padding: 0;
       border: 1px solid #dce3e8;
-      border-radius: 5px;
+      border-radius: 6px;
       background: #fff;
       color: #526577;
-      font-size: 12px;
-      line-height: 1.5;
       cursor: pointer;
     }
 
@@ -340,14 +339,14 @@ const FILTROS_INICIALES: FiltrosActores = {
     }
 
     .accion:disabled {
-      color: #b3bcc4;
+      opacity: 0.45;
       cursor: not-allowed;
     }
 
     .accion.activa {
-      border-color: #bcd6c4;
-      background: #edf6f0;
-      color: #2f7a52;
+      border-color: #1f5597;
+      color: #1f5597;
+      background: #eef3fa;
     }
 
     /* «sin dato» es información, no un error: tono apagado y sin icono de fallo. */
@@ -732,8 +731,8 @@ export class ActoresPage {
     this.listaTemporal.update((actual) => alternarActorLista(actual, actor));
   }
 
-  quitarDeLista(id: string): void {
-    this.listaTemporal.update((actual) => quitarActorLista(actual, id));
+  quitarDeListaPorIndice(indice: number): void {
+    this.listaTemporal.update((actual) => quitarActorListaPorIndice(actual, indice));
   }
 
   vaciarLista(): void {

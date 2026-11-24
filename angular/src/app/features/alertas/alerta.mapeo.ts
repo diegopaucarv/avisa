@@ -665,7 +665,7 @@ function bloque(titulo: string, lineas: readonly string[]): string {
     .map((linea) => linea.trim())
     .filter((linea) => linea.length > 0)
     .join('\n');
-  return contenido ? `*${titulo}*\n${contenido}` : '';
+  return contenido ? `*${titulo}*\n${contenido}` : `*${titulo}*`;
 }
 
 /**
@@ -674,39 +674,41 @@ function bloque(titulo: string, lineas: readonly string[]): string {
  * se lea desde el móvil sin formato. Las fechas van en forma compacta
  * (`05NOV2026`).
  *
+ * Las seis secciones aparecen siempre: `bloque` conserva el encabezado aunque no
+ * haya contenido, para que el reporte no pierda su esqueleto.
+ *
  * No incorpora `plantillaWhatsapp`: si la alerta tiene una plantilla guardada,
  * es ella la que manda (la decide quien llama).
  */
 export function plantillaWhatsapp(alerta: Alerta): string {
   const titulo = tituloLimpio(alerta.titulo) || alerta.codigo;
   const fecha = alerta.fechaReporte ? formatearFechaCompacta(alerta.fechaReporte) : 'Sin fecha';
-
-  const acciones = alerta.accionesSugeridas.length
-    ? ['De considerarlo pertinente, se sugiere:', ...alerta.accionesSugeridas]
-    : [];
+  const descripcion = (alerta.descripcionRiesgo ?? '').trim();
+  const riesgos = alerta.riesgos.filter((riesgo) => riesgo.trim() !== descripcion);
 
   const partes = [
-    `*🔔 REPORTE DE ALERTA TEMPRANA | ${titulo}*`,
-    [`📅 _*Fecha de emisión*: ${fecha}_`, `🌍 _*Ámbito*: ${ambitoAlerta(alerta)}_`].join('\n'),
+    [
+      `🔔 *REPORTE DE ALERTA TEMPRANA | ${titulo}*`,
+      `📅 *Fecha de emisión*: ${fecha}`,
+      `🌍 *Ámbito*: ${geografiaAlerta(alerta)}`,
+    ].join('\n'),
     bloque('🔍 1. SITUACIÓN ACTUAL', [alerta.situacionActual ?? '']),
     bloque('🏗️ 2. HECHOS RECIENTES Y ACCIONES EN CURSO', [alerta.hechosRecientes ?? '']),
     bloque(
       '👥 3. ACTORES CLAVE',
-      alerta.actoresClave.map((actor) => `- ${actor}`),
+      alerta.actoresClave.map((actor) => `• ${actor}`),
     ),
     bloque(
       '📌 4. DEMANDAS INMEDIATAS',
-      alerta.demandasInmediatas.map((demanda) => `- ${demanda}`),
+      alerta.demandasInmediatas.map((demanda) => `• ${demanda}`),
     ),
+    bloque('⚠️ 5. DESCRIPCIÓN DEL RIESGO', [
+      descripcion,
+      ...riesgos.map((riesgo) => `• ${riesgo}`),
+    ]),
     bloque(
-      '⚠️ RIESGOS',
-      alerta.riesgos.map((riesgo) => `- ${riesgo}`),
-    ),
-    bloque(
-      '🧭 ACCIONES SUGERIDAS',
-      acciones.map((accion, indice) =>
-        indice === 0 && alerta.accionesSugeridas.length ? accion : `- ${accion}`,
-      ),
+      '🧭 6. ACCIONES SUGERIDAS',
+      alerta.accionesSugeridas.map((accion) => `• ${accion}`),
     ),
   ];
   return partes.filter((parte) => parte.trim()).join('\n\n');

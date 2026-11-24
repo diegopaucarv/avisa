@@ -45,7 +45,7 @@ const ACTOR_SELECT = `
   a.telefono_contacto as telefono,
   rg.nombre as region,
   d.nombre as distrito,
-  oa.nombre_actual as organizacion_ancla,
+  coalesce(oa.nombre_actual, om.nombre_actual) as organizacion_ancla,
   a.organizacion_ancla_uid::text as organizacion_ancla_uid,
   a.activo,
   a.es_validado_humano as validado,
@@ -62,6 +62,9 @@ const ACTOR_SELECT = `
   o.ruc
 `;
 
+// El ETL no escribe `organizacion_ancla_uid`, así que el ancla se resuelve por
+// respaldo con la membresía vigente más reciente de la persona. El `LEFT JOIN
+// LATERAL` sólo lo evalúa donde `ACTOR_SELECT` ya proyecta el nombre.
 const ACTOR_FROM = `
   from core.actores a
   left join core.cat_tipos_actor ta on ta.id = a.tipo_actor_id
@@ -72,6 +75,16 @@ const ACTOR_FROM = `
   left join core.cat_nivel_identificacion ni on ni.id = a.nivel_identificacion_id
   left join core.organizaciones o on o.actor_uid = a.actor_uid
   left join core.actores oa on oa.actor_uid = a.organizacion_ancla_uid
+  left join lateral (
+    select org.nombre_actual
+      from core.actor_membresia m
+      join core.actores org on org.actor_uid = m.organizacion_uid
+     where m.persona_uid = a.actor_uid
+       and (m.valid_from is null or m.valid_from <= current_date)
+       and (m.valid_to   is null or m.valid_to   >= current_date)
+     order by m.valid_from desc nulls last
+     limit 1
+  ) om on true
 `;
 
 export type ActorListQuery = {
@@ -788,6 +801,8 @@ const ACTOR_UPDATE_FIELDS = new Set([
   "region",
   "activo",
   "dni",
+  "telefono",
+  "email",
   "ruc",
   "expedienteOspa",
   "estadoOspa",
@@ -796,11 +811,19 @@ const ACTOR_UPDATE_FIELDS = new Set([
 ]);
 
 /**
- * Actualiza atributos públicos y, con autorización PII, el DNI cifrado; con
- * autorización de edición, los campos OSPA de la organización.
+ * Actualiza atributos públicos y, con autorización PII, los datos personales
+ * cifrados (DNI, teléfono y correo); con autorización de edición, los campos
+ * OSPA de la organización.
  *
- * Ya no exige que haya un campo público: un cambio que sólo toca DNI u OSPA es
- * válido y se audita en su propia tabla.
+ * Semántica de los campos PII (`dni`, `telefono`, `email`): enviarlos con un
+ * valor los fija, `null` los borra y omitirlos no los toca. Se guardan cifrados
+ * (`pgp_sym_encrypt`) y la auditoría sólo registra «cifrado», nunca el valor en
+ * claro. El `email` es PII únicamente de personas: enviarlo para una
+ * organización devuelve `EMAIL_SOLO_PERSONA` (su correo público es
+ * `email_contacto`).
+ *
+ * Ya no exige que haya un campo público: un cambio que sólo toca DNI, teléfono,
+ * correo u OSPA es válido y se audita en su propia tabla.
  */
 export async function updateActor(
   client: PoolClient,
@@ -825,7 +848,8 @@ export async function updateActor(
     );
   }
 
-  const pidePii = tiene(input, "dni");
+  const pidePii =
+    tiene(input, "dni") || tiene(input, "telefono") || tiene(input, "email");
   const autoridad = await autorizar(
     client,
     scope,
@@ -841,7 +865,9 @@ export async function updateActor(
             (o.actor_uid is not null) as tiene_org,
             o.ruc, o.expediente_ospa, o.estado_ospa,
             o.vigencia_desde, o.vigencia_hasta,
-            (adp.dni_cifrado is not null) as tiene_dni
+            (adp.dni_cifrado is not null) as tiene_dni,
+            (adp.telefono_cifrado is not null) as tiene_telefono,
+            (adp.email_cifrado is not null) as tiene_email
        from core.actores a
        left join core.cat_tipos_actor ta on ta.id = a.tipo_actor_id
        left join core.cat_roles_actor ra on ra.id = a.rol_actor_id
@@ -956,6 +982,25 @@ export async function updateActor(
   // Identificación: DNI y RUC deciden el `nivel_identificacion_id` vigente.
   const dniSolicitado = tiene(input, "dni") ? validarDni(input.dni) : undefined;
   const rucSolicitado = tiene(input, "ruc") ? validarRuc(input.ruc) : undefined;
+  const telefonoSolicitado = tiene(input, "telefono")
+    ? validarTelefono(leerTexto(input, "telefono", 50, "El teléfono") ?? null)
+    : undefined;
+  const emailSolicitado = tiene(input, "email")
+    ? validarEmail(leerTexto(input, "email", 254, "El correo") ?? null)
+    : undefined;
+
+  // El correo de una organización es contacto público (`email_contacto`), no
+  // PII cifrada; se rechaza aquí para no cifrarlo ni duplicar el flujo.
+  const naturalezaFinal =
+    typeof naturaleza === "string" ? naturaleza : (antes.naturaleza as string);
+  if (emailSolicitado !== undefined && naturalezaFinal !== "persona") {
+    throw new ApiError(
+      422,
+      "El correo cifrado sólo aplica a personas. Para una organización use el correo de contacto.",
+      "EMAIL_SOLO_PERSONA",
+    );
+  }
+
   const cambiaIdentificacion =
     dniSolicitado !== undefined || rucSolicitado !== undefined;
 
@@ -1054,6 +1099,69 @@ export async function updateActor(
       rolCodigo: autoridad.codigo,
       antes: { dni: antes.tiene_dni ? "cifrado" : null },
       despues: { dni: dniSolicitado !== null ? "cifrado" : null },
+    });
+  }
+
+  if (telefonoSolicitado !== undefined || emailSolicitado !== undefined) {
+    await asegurarClaveCifrado(client);
+    // Un solo `insert … on conflict` cubre ambos caminos: si la ficha no existe
+    // la crea con sólo las columnas pedidas (el resto queda en NULL) y, si ya
+    // existe, actualiza únicamente ésas. El `excluded` no sirve para expresiones
+    // cifradas con parámetros, por eso cada columna usa su marcador explícito.
+    const piiValues: unknown[] = [actorId];
+    const columnas = [
+      "actor_uid",
+      "nivel_clasificacion",
+      "base_legal",
+      "updated_at",
+    ];
+    const valoresSql = ["$1", "3", "'LEGADO_AVISA_2026'", "now()"];
+    const conflictSets: string[] = [];
+    const cifrar = (indice: number): string => {
+      const marcador = `$${indice}`;
+      return `case when ${marcador}::text is null then null else ${SQL_CIFRAR(marcador)} end`;
+    };
+    if (telefonoSolicitado !== undefined) {
+      piiValues.push(telefonoSolicitado);
+      const expresion = cifrar(piiValues.length);
+      columnas.push("telefono_cifrado");
+      valoresSql.push(expresion);
+      conflictSets.push(`telefono_cifrado = ${expresion}`);
+    }
+    if (emailSolicitado !== undefined) {
+      piiValues.push(emailSolicitado);
+      const expresion = cifrar(piiValues.length);
+      columnas.push("email_cifrado");
+      valoresSql.push(expresion);
+      conflictSets.push(`email_cifrado = ${expresion}`);
+    }
+    conflictSets.push("nivel_clasificacion = 3", "updated_at = now()");
+    await client.query(
+      `insert into core.actor_datos_personales (${columnas.join(", ")})
+       values (${valoresSql.join(", ")})
+       on conflict (actor_uid) do update set ${conflictSets.join(", ")}`,
+      piiValues,
+    );
+
+    // Como en el DNI: la auditoría nunca guarda el valor, sólo su presencia.
+    const piiAntes: Record<string, unknown> = {};
+    const piiDespues: Record<string, unknown> = {};
+    if (telefonoSolicitado !== undefined) {
+      piiAntes.telefono = antes.tiene_telefono ? "cifrado" : null;
+      piiDespues.telefono = telefonoSolicitado ? "cifrado" : null;
+    }
+    if (emailSolicitado !== undefined) {
+      piiAntes.email = antes.tiene_email ? "cifrado" : null;
+      piiDespues.email = emailSolicitado ? "cifrado" : null;
+    }
+    await auditChange(client, {
+      tabla: "core.actor_datos_personales",
+      registroId: actorId,
+      accion: "UPDATE",
+      usuarioId: scope.usuarioId,
+      rolCodigo: autoridad.codigo,
+      antes: piiAntes,
+      despues: piiDespues,
     });
   }
 

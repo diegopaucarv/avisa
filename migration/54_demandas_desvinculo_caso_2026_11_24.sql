@@ -67,6 +67,35 @@
 -- mantienen tal como quedaron: retirarlas exige una decisión humana, porque el
 -- Excel no permite distinguir cuáles de esos vínculos quería declarar.
 --
+-- Alternativa NO aplicada: alinear con una carga limpia (99 con caso)
+-- -------------------------------------------------------------------
+-- El alcance decidido es sólo las 16 demandas que cruzaban de tema. Si más
+-- adelante se decide alinear la base con lo que produciría una carga limpia
+-- con el importador corregido (99 con caso de 325), el bloque siguiente
+-- desvincula las 119 que la 37 heredó desde su alerta —las 16 ya desvinculadas
+-- quedan fuera por el `caso_id IS NOT NULL`—. Se identifica la herencia con la
+-- misma evidencia que sostiene este diagnóstico: `legacy.dim_demandas.c04`
+-- (ID_Caso) vacío y `caso_id` igual al de la alerta.
+--
+-- Medido hoy: 119 filas cumplen la condición (103 vigentes + 16 de este parche
+-- + 19 anuladas). Tras aplicarla quedarían 99 con caso y 226 sin caso, como en
+-- una carga limpia. NO está aplicada: el Excel no permite distinguir cuáles de
+-- esos 119 vínculos quería declarar, así que exige decisión humana.
+--
+--   -- begin;
+--   -- select set_config('app.rol_codigo', 'administrador', true);
+--   -- select set_config('app.user_id',
+--   --                   '00000000-0000-0000-0000-000000000001', true);
+--   -- update core.demandas d
+--   --    set caso_id = null
+--   --   from core.alertas_tempranas a, legacy.dim_demandas ld
+--   --  where d.alerta_id = a.id
+--   --    and ld.c01 = d.codigo_legado
+--   --    and coalesce(btrim(ld.c04), '') = ''
+--   --    and d.caso_id is not null
+--   --    and d.caso_id = a.caso_id;
+--   -- commit;
+--
 -- Contexto de sesión
 -- ------------------
 -- `core.demandas` es `FORCE ROW LEVEL SECURITY` y `core.clasificacion_max()`

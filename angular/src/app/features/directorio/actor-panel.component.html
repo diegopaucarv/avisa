@@ -57,8 +57,9 @@
             aria-labelledby="actor-editor-titulo"
           >
             <p class="panel-nota" id="actor-editor-titulo">
-              Los cambios se guardan en la ficha del actor. El DNI se edita sólo con la consulta de
-              datos personales abierta y queda cifrado; la fotografía se gestiona por otro canal.
+              Los cambios se guardan en la ficha del actor. El DNI sólo se edita con los datos
+              personales abiertos. Teléfono y correo se guardan cifrados; déjelos vacíos para no
+              cambiarlos. La fotografía se gestiona por otro canal.
             </p>
 
             <section class="actor-bloque" aria-labelledby="bloque-datos">
@@ -89,31 +90,38 @@
                   <span class="actor-pista">Se guarda cifrado; debe tener 8 dígitos.</span>
                 } @else {
                   <span class="actor-pista">
-                    Solicite «Ver datos personales» para editar el DNI.
+                    El DNI cifrado sólo se edita con los datos personales abiertos (consulta
+                    auditada).
                   </span>
                 }
               </label>
               <label>
                 Teléfono
                 <input
-                  [value]="telefonoContacto() ?? ''"
+                  inputmode="tel"
+                  autocomplete="off"
+                  [value]="borrador().telefono"
                   [placeholder]="
                     piiVisible() || estadoPii() === 'sin_ficha' ? sinDato : '•••• ••• •••'
                   "
-                  disabled
+                  (input)="actualizarTexto('telefono', $event)"
                 />
-                <span class="actor-pista">Se edita por el canal de datos personales.</span>
+                <span class="actor-pista">Se guarda cifrado. Déjelo vacío para no cambiarlo.</span>
               </label>
               <label>
                 Correo
                 <input
-                  [value]="correoContacto() ?? correoOrganizacion() ?? ''"
+                  type="email"
+                  inputmode="email"
+                  autocomplete="off"
+                  [value]="borrador().email"
                   [placeholder]="
-                    piiVisible() || estadoPii() === 'sin_ficha' ? sinDato : mascaraCorreo
+                    correoOrganizacion() ??
+                    (piiVisible() || estadoPii() === 'sin_ficha' ? sinDato : mascaraCorreo)
                   "
-                  disabled
+                  (input)="actualizarTexto('email', $event)"
                 />
-                <span class="actor-pista">Correo de contacto de la ficha.</span>
+                <span class="actor-pista">Se guarda cifrado. Déjelo vacío para no cambiarlo.</span>
               </label>
               <label class="ancho">
                 Fotografía
@@ -388,12 +396,20 @@
             </div>
 
             <div class="panel-col">
+              <!--
+                Respaldo de 67: si el listado no trae `organizacionAncla` (el backend debe
+                resolverlo con coalesce(organizacion_ancla, membresía vigente) — ver
+                lib/db/repos/actors.ts), la abreviatura queda como texto visible.
+              -->
               <div class="panel-campo">
                 <span class="panel-etiqueta">Organización</span>
                 @if (a.organizacionAncla) {
                   <span class="panel-valor">{{ a.organizacionAncla }}</span>
                 } @else {
                   <span class="panel-vacio">{{ sinDato }}</span>
+                }
+                @if (a.abreviatura) {
+                  <span class="panel-pista">{{ a.abreviatura }}</span>
                 }
               </div>
               <div class="panel-campo">
@@ -466,58 +482,12 @@
             </section>
           }
 
-          @if (!piiVisible()) {
-            <div class="panel-pii">
-              @if (!puedeVerPii()) {
-                <p class="panel-nota">Su rol no permite ver datos personales.</p>
-              } @else if (estadoPii() === 'sin_ficha') {
-                <p class="panel-vacio">
-                  El actor no tiene ficha de datos personales: los campos quedan como «sin dato».
-                </p>
-                <button
-                  type="button"
-                  class="button-secondary panel-pii-boton"
-                  (click)="ocultarPii()"
-                >
-                  Ocultar aviso
-                </button>
-              } @else if (estadoPii() === 'prohibido') {
-                <div class="panel-error" role="alert">
-                  <p>{{ errorPii() }}</p>
-                </div>
-              } @else {
-                <button
-                  type="button"
-                  class="button-secondary panel-pii-boton"
-                  [disabled]="estadoPii() === 'cargando'"
-                  (click)="solicitarPii()"
-                >
-                  <app-icono nombre="candado" [tamano]="13" />
-                  {{ estadoPii() === 'cargando' ? 'Solicitando…' : 'Ver datos personales' }}
-                </button>
-                <p class="panel-nota">
-                  <app-icono nombre="candado" [tamano]="12" />
-                  <span>
-                    El acceso a DNI y teléfonos queda registrado con el usuario y el motivo de la
-                    consulta.
-                  </span>
-                </p>
-                @if (estadoPii() === 'error') {
-                  <div class="panel-error" role="alert">
-                    <p>{{ errorPii() }}</p>
-                    <button type="button" class="button-secondary" (click)="solicitarPii()">
-                      Reintentar
-                    </button>
-                  </div>
-                }
-              }
-            </div>
-          } @else {
-            <button type="button" class="button-secondary panel-pii-boton" (click)="ocultarPii()">
-              <app-icono nombre="cerrar" [tamano]="12" />
-              Ocultar datos personales
-            </button>
-          }
+          <!--
+            Eliminado a petición (ver 67): este botón era la única vía auditada
+            (audit.datos_personales_acceso) para leer DNI y teléfono (Ley 29733).
+            El endpoint GET /v1/actors/{uid}/pii queda sin consumidor en la SPA.
+            Decisión pendiente con la Dirección.
+          -->
 
           <section class="panel-seccion" aria-labelledby="actor-panel-perfil">
             <h3 id="actor-panel-perfil">Descripción del perfil</h3>
@@ -537,6 +507,7 @@
       @if (!editando()) {
         <footer class="drawer-foot panel-pie">
           <button type="button" class="button-secondary" (click)="alternarLista.emit()">
+            <app-icono nombre="reloj-mas" [tamano]="14" />
             {{ enLista() ? 'Quitar de lista' : 'Agregar a lista temporal' }}
           </button>
           <div class="panel-pie-acciones">

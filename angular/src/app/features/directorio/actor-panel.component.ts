@@ -25,9 +25,11 @@ import { IconoComponent } from '../../shared/ui/icono.component';
 import {
   aActorDirectorio,
   aDatosPersonales,
+  errorDeCorreo,
   errorDeDni,
   errorDeExpedienteOspa,
   errorDeRuc,
+  errorDeTelefono,
   formatearFechaActor,
   FUNCIONES_ACTOR,
   MASCARA_CORREO,
@@ -71,6 +73,8 @@ type CampoActorEdicion =
   | 'categoria'
   | 'perfilDescripcion'
   | 'dni'
+  | 'telefono'
+  | 'email'
   | 'ruc'
   | 'expedienteOspa'
   | 'estadoOspa'
@@ -216,6 +220,11 @@ type ActorEdicion = Record<CampoActorEdicion, string> & { activo: boolean };
       overflow-wrap: anywhere;
     }
 
+    .panel-pista {
+      font-size: 12px;
+      color: #8b97a1;
+    }
+
     .panel-dato {
       display: flex;
       align-items: center;
@@ -280,18 +289,6 @@ type ActorEdicion = Record<CampoActorEdicion, string> & { activo: boolean };
     .panel-nota app-icono {
       margin-top: 1px;
       color: #96a3af;
-    }
-
-    .panel-pii {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      align-items: flex-start;
-    }
-
-    .panel-pii-boton {
-      min-height: 30px;
-      padding: 0 10px;
     }
 
     .panel-error {
@@ -504,6 +501,8 @@ export class ActorPanelComponent {
     categoria: '',
     perfilDescripcion: '',
     dni: '',
+    telefono: '',
+    email: '',
     ruc: '',
     expedienteOspa: '',
     estadoOspa: '',
@@ -659,6 +658,10 @@ export class ActorPanelComponent {
       // El DNI sólo se precarga cuando ya se descifró con motivo: escribir a
       // ciegas sobre el campo no debe borrar el valor cifrado existente.
       dni: this.piiVisible() ? (this.datos()?.dni ?? '') : '',
+      // Teléfono y correo se precargan sólo con PII descifrada (o el correo
+      // institucional del listado); vacío significa «no lo cambie».
+      telefono: this.datos()?.telefono ?? '',
+      email: this.datos()?.email ?? this.correoOrganizacion() ?? '',
       ruc: actor.ruc ?? '',
       expedienteOspa: actor.expedienteOspa ?? '',
       estadoOspa: actor.estadoOspa ?? '',
@@ -705,7 +708,7 @@ export class ActorPanelComponent {
     const dni = draft.dni.trim();
     if (dni) {
       if (!this.piiVisible() || !this.puedeVerPii()) {
-        this.errorEdicion.set('Solicite «Ver datos personales» antes de editar el DNI.');
+        this.errorEdicion.set('El DNI cifrado sólo se edita con los datos personales abiertos.');
         return;
       }
       const error = errorDeDni(dni);
@@ -728,6 +731,24 @@ export class ActorPanelComponent {
     if (esOrganizacion && expedienteError) {
       this.errorEdicion.set(expedienteError);
       return;
+    }
+
+    const telefono = draft.telefono.trim();
+    if (telefono) {
+      const error = errorDeTelefono(telefono);
+      if (error) {
+        this.errorEdicion.set(error);
+        return;
+      }
+    }
+
+    const email = draft.email.trim();
+    if (email) {
+      const error = errorDeCorreo(email);
+      if (error) {
+        this.errorEdicion.set(error);
+        return;
+      }
     }
 
     if (esOrganizacion && draft.vigenciaDesde && draft.vigenciaHasta) {
@@ -755,6 +776,9 @@ export class ActorPanelComponent {
     };
 
     if (dni) payload['dni'] = dni;
+    // Un campo vacío no borra el valor cifrado almacenado: sólo se envía lo escrito.
+    if (telefono) payload['telefono'] = telefono;
+    if (email) payload['email'] = email;
 
     if (esOrganizacion) {
       payload['ruc'] = ruc || null;
