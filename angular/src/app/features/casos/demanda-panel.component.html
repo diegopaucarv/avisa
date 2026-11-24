@@ -13,7 +13,7 @@
           <p class="demanda-panel-codigo">{{ codigoCaso() }}</p>
         }
         <h2 id="demanda-panel-titulo">
-          {{ demanda() ? 'Editar demanda' : 'Alta de demanda' }}
+          {{ demanda() ? 'Editar demanda' : 'Registrar demanda' }}
         </h2>
       </div>
 
@@ -40,38 +40,30 @@
         <p class="form-error" role="alert">{{ mensaje }}</p>
       }
 
+      <div class="demanda-organizaciones">
+        <p class="demanda-organizaciones-titulo">Organizaciones solicitantes</p>
+        @if (organizaciones().length > 0) {
+          <div class="demanda-badges">
+            @for (organizacion of organizaciones(); track organizacion) {
+              <span class="status-badge">{{ organizacion }}</span>
+            }
+          </div>
+        } @else {
+          <p class="form-hint">El caso no tiene organizaciones registradas como actores.</p>
+        }
+        <p class="form-hint">Las demandas siempre provienen de organizaciones.</p>
+      </div>
+
       <form class="demanda-formulario" (submit)="alEnviarFormulario($event)">
         <div class="form-field">
-          <label class="form-label" for="demanda-campo-problema">Problema</label>
+          <label class="form-label" for="demanda-campo-demanda">Demanda</label>
           <textarea
-            id="demanda-campo-problema"
+            id="demanda-campo-demanda"
             class="form-textarea"
-            rows="3"
+            rows="5"
             required
-            [value]="borrador().problema"
-            (input)="campo('problema', $event)"
-          ></textarea>
-        </div>
-
-        <div class="form-field">
-          <label class="form-label" for="demanda-campo-propuesta">Propuesta</label>
-          <textarea
-            id="demanda-campo-propuesta"
-            class="form-textarea"
-            rows="3"
-            [value]="borrador().propuesta"
-            (input)="campo('propuesta', $event)"
-          ></textarea>
-        </div>
-
-        <div class="form-field">
-          <label class="form-label" for="demanda-campo-pedido">Pedido</label>
-          <textarea
-            id="demanda-campo-pedido"
-            class="form-textarea"
-            rows="3"
-            [value]="borrador().pedido"
-            (input)="campo('pedido', $event)"
+            [value]="borrador().demanda"
+            (input)="campo('demanda', $event)"
           ></textarea>
         </div>
 
@@ -88,15 +80,6 @@
             }
           </select>
         </div>
-
-        <p class="form-hint">
-          @if (demanda()) {
-            La descripción original del documento no se edita desde este panel: sólo los 3P y el
-            estado de atención.
-          } @else {
-            El problema se guarda también como descripción de la demanda.
-          }
-        </p>
 
         <div class="demanda-formulario-acciones">
           <button

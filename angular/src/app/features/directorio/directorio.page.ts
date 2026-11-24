@@ -32,8 +32,6 @@ import { IconoComponent } from '../../shared/ui/icono.component';
       box-sizing: border-box;
     }
 
-
-
     .directorio-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));

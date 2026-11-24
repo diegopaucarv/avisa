@@ -41,7 +41,6 @@ import type { FilaArchivo } from './archivo.tipos';
       width: min(540px, 100%);
     }
 
-
     .panel-cabecera {
       display: flex;
       flex-direction: column;
@@ -95,6 +94,11 @@ import type { FilaArchivo } from './archivo.tipos';
     .drawer-body .detail-section:first-of-type {
       padding-top: 0;
       border-top: 0;
+    }
+
+    /* Los títulos de subsección del panel modal van en mayúsculas. */
+    .drawer-body .detail-section h3 {
+      text-transform: uppercase;
     }
 
     .panel-datos {

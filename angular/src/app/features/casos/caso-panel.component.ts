@@ -184,7 +184,6 @@ const CATALOGOS_VACIOS: CatalogosAlta = {
       text-transform: uppercase;
     }
 
-
     .caso-panel-sub {
       margin: 4px 0 0;
       color: #647487;
@@ -196,6 +195,11 @@ const CATALOGOS_VACIOS: CatalogosAlta = {
       display: flex;
       flex-direction: column;
       gap: 12px;
+    }
+
+    /* Rótulos del modal en mayúsculas (ajuste del 22 nov). */
+    .form-label {
+      text-transform: uppercase;
     }
 
     .caso-regiones {

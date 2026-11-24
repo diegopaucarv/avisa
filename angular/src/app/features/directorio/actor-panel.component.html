@@ -9,29 +9,28 @@
   >
     @if (actor(); as a) {
       <header class="drawer-head">
-        <div class="actor-panel-cabecera">
-          <p class="actor-panel-etiqueta">{{ a.tipo || 'Sin tipo de actor' }}</p>
-          <h2 id="actor-panel-titulo">{{ a.nombre }}</h2>
-          <div class="actor-panel-badges">
-            @if (a.abreviatura) {
-              <span class="status-badge actor-chip">{{ a.abreviatura }}</span>
-            }
-            <span class="status-badge actor-chip">{{ a.naturaleza }}</span>
-            @if (a.funcion) {
-              <span class="status-badge actor-chip">{{ a.funcion }}</span>
-            }
-            @if (a.posicionamiento) {
-              <span class="status-badge actor-chip">{{ a.posicionamiento }}</span>
-            }
-            @if (a.validado) {
-              <span class="status-badge actor-validado">
-                <app-icono nombre="check" [tamano]="11" />
-                Validado por humano
-              </span>
+        <div class="panel-cabecera">
+          <span class="panel-foto">
+            @if (foto(); as f) {
+              <img
+                [src]="f.url"
+                [alt]="f.alt || f.titulo || a.nombre"
+                loading="lazy"
+                decoding="async"
+                referrerpolicy="no-referrer"
+              />
             } @else {
-              <span class="status-badge actor-pendiente">
-                <app-icono nombre="reloj" [tamano]="11" />
-                Pendiente de validación
+              {{ iniciales() }}
+            }
+          </span>
+          <div class="panel-identidad">
+            <h2 id="actor-panel-titulo" [attr.title]="a.nombre">{{ a.nombre }}</h2>
+            @if (a.cargo) {
+              <span class="panel-linea" [attr.title]="a.cargo">{{ a.cargo }}</span>
+            }
+            @if (a.organizacionAncla) {
+              <span class="panel-linea" [attr.title]="a.organizacionAncla">
+                {{ a.organizacionAncla }}
               </span>
             }
           </div>
@@ -54,118 +53,156 @@
             (submit)="guardarEdicion($event)"
             aria-labelledby="actor-editor-titulo"
           >
-            <h3 id="actor-editor-titulo">Editar datos del actor</h3>
-            <p class="actor-nota">
-              DNI, correo personal y teléfonos se gestionan por separado y no se editan aquí.
+            <p class="panel-nota" id="actor-editor-titulo">
+              Los cambios se guardan en la ficha del actor. DNI, teléfono y fotografía se gestionan
+              por canales auditados y no se editan aquí.
             </p>
-            <label
-              >Nombre completo
-              <input
-                required
-                maxlength="255"
-                [value]="borrador().nombre"
-                (input)="actualizarTexto('nombre', $event)"
-              />
-            </label>
-            <label
-              >Naturaleza
-              <select
-                [value]="borrador().naturaleza"
-                (change)="actualizarTexto('naturaleza', $event)"
-              >
-                @for (opcion of naturalezas; track opcion.valor) {
-                  <option [value]="opcion.valor">{{ opcion.etiqueta }}</option>
-                }
-              </select>
-            </label>
-            <label
-              >Tipo de actor
-              <select [value]="borrador().tipo" (change)="actualizarTexto('tipo', $event)">
-                @for (opcion of tiposActor; track opcion) {
-                  <option [value]="opcion">{{ opcion }}</option>
-                }
-              </select>
-            </label>
-            <label
-              >Función
-              <select [value]="borrador().funcion" (change)="actualizarTexto('funcion', $event)">
-                @for (opcion of funcionesActor; track opcion) {
-                  <option [value]="opcion">{{ opcion }}</option>
-                }
-              </select>
-            </label>
-            <label
-              >Posicionamiento
-              <select
-                [value]="borrador().posicionamiento"
-                (change)="actualizarTexto('posicionamiento', $event)"
-              >
-                <option value="">Sin posicionamiento</option>
-                @for (opcion of posicionamientos; track opcion) {
-                  <option [value]="opcion">{{ opcion }}</option>
-                }
-              </select>
-            </label>
-            <label
-              >Abreviatura
-              <input
-                maxlength="150"
-                [value]="borrador().abreviatura"
-                (input)="actualizarTexto('abreviatura', $event)"
-              />
-            </label>
-            <label
-              >Cargo
-              <input
-                maxlength="150"
-                [value]="borrador().cargo"
-                (input)="actualizarTexto('cargo', $event)"
-              />
-            </label>
-            <label
-              >Nivel de gobierno
-              <select
-                [value]="borrador().nivelGobierno"
-                (change)="actualizarTexto('nivelGobierno', $event)"
-              >
-                <option value="">Sin especificar</option>
-                @for (
-                  nivel of ['Nacional', 'Regional', 'Local', 'Empresa', 'Sociedad Civil'];
-                  track nivel
-                ) {
-                  <option [value]="nivel">{{ nivel }}</option>
-                }
-              </select>
-            </label>
-            <label
-              >Categoría
-              <input
-                maxlength="40"
-                [value]="borrador().categoria"
-                (input)="actualizarTexto('categoria', $event)"
-              />
-            </label>
-            <label class="actor-editor-ancho"
-              >Descripción del perfil
-              <textarea
-                rows="4"
-                maxlength="5000"
-                [value]="borrador().perfilDescripcion"
-                (input)="actualizarTexto('perfilDescripcion', $event)"
-              ></textarea>
-            </label>
-            <label class="actor-editor-estado">
-              <input
-                type="checkbox"
-                [checked]="borrador().activo"
-                (change)="actualizarActivo($event)"
-              />
-              Actor activo
-            </label>
+
+            <section class="actor-bloque" aria-labelledby="bloque-datos">
+              <h3 id="bloque-datos">Datos personales y filiación</h3>
+              <label class="ancho">
+                Nombre completo
+                <input
+                  required
+                  maxlength="255"
+                  [value]="borrador().nombre"
+                  (input)="actualizarTexto('nombre', $event)"
+                />
+              </label>
+              <label>
+                DNI
+                <input [value]="datos()?.dni ?? ''" placeholder="—" disabled />
+                <span class="actor-pista">Se edita por el canal de datos personales.</span>
+              </label>
+              <label>
+                Teléfono
+                <input [value]="telefonoContacto() ?? ''" placeholder="—" disabled />
+                <span class="actor-pista">Se edita por el canal de datos personales.</span>
+              </label>
+              <label>
+                Correo
+                <input [value]="correoContacto() ?? ''" placeholder="—" disabled />
+                <span class="actor-pista">Correo de contacto de la ficha.</span>
+              </label>
+              <label class="ancho">
+                Fotografía
+                <button type="button" class="button-secondary" disabled>
+                  Cambiar fotografía (no disponible)
+                </button>
+                <span class="actor-pista">La carga de imágenes no está habilitada aquí.</span>
+              </label>
+            </section>
+
+            <section class="actor-bloque" aria-labelledby="bloque-representatividad">
+              <h3 id="bloque-representatividad">Representatividad e institución</h3>
+              <label>
+                Cargo
+                <input
+                  maxlength="150"
+                  [value]="borrador().cargo"
+                  (input)="actualizarTexto('cargo', $event)"
+                />
+              </label>
+              <label>
+                Abreviatura
+                <input
+                  maxlength="150"
+                  [value]="borrador().abreviatura"
+                  (input)="actualizarTexto('abreviatura', $event)"
+                />
+              </label>
+              <label class="ancho">
+                Organización / Institución
+                <input [value]="a.organizacionAncla ?? ''" placeholder="—" disabled />
+                <span class="actor-pista">El vínculo institucional se edita en el padrón.</span>
+              </label>
+            </section>
+
+            <section class="actor-bloque" aria-labelledby="bloque-clasificacion">
+              <h3 id="bloque-clasificacion">Clasificación territorial y rol</h3>
+              <label>
+                Tipo de actor
+                <select [value]="borrador().tipo" (change)="actualizarTexto('tipo', $event)">
+                  <option value="">Sin tipo</option>
+                  @for (opcion of tiposActor; track opcion) {
+                    <option [value]="opcion">{{ opcion }}</option>
+                  }
+                </select>
+              </label>
+              <label>
+                Nivel de gobierno
+                <select
+                  [value]="borrador().nivelGobierno"
+                  (change)="actualizarTexto('nivelGobierno', $event)"
+                >
+                  <option value="">Sin especificar</option>
+                  @for (nivel of nivelesGobierno; track nivel) {
+                    <option [value]="nivel">{{ nivel }}</option>
+                  }
+                </select>
+              </label>
+              <label>
+                Función
+                <select [value]="borrador().funcion" (change)="actualizarTexto('funcion', $event)">
+                  <option value="">Sin función</option>
+                  @for (opcion of funcionesActor; track opcion) {
+                    <option [value]="opcion">{{ opcion }}</option>
+                  }
+                </select>
+              </label>
+              <label>
+                Posicionamiento
+                <select
+                  [value]="borrador().posicionamiento"
+                  (change)="actualizarTexto('posicionamiento', $event)"
+                >
+                  <option value="">Sin posicionamiento</option>
+                  @for (opcion of posicionamientos; track opcion) {
+                    <option [value]="opcion">{{ opcion }}</option>
+                  }
+                </select>
+              </label>
+              <label>
+                Categoría
+                <input
+                  maxlength="40"
+                  [value]="borrador().categoria"
+                  (input)="actualizarTexto('categoria', $event)"
+                />
+              </label>
+              <label>
+                Región
+                <input [value]="a.region ?? ''" placeholder="—" disabled />
+                <span class="actor-pista">La región viene del registro territorial.</span>
+              </label>
+              <label class="ancho actor-estado">
+                <input
+                  type="checkbox"
+                  [checked]="borrador().activo"
+                  (change)="actualizarActivo($event)"
+                />
+                Actor activo
+              </label>
+            </section>
+
+            <section class="actor-bloque" aria-labelledby="bloque-perfil">
+              <h3 id="bloque-perfil">Descripción del perfil</h3>
+              <label class="ancho">
+                Descripción
+                <textarea
+                  rows="4"
+                  maxlength="5000"
+                  [value]="borrador().perfilDescripcion"
+                  (input)="actualizarTexto('perfilDescripcion', $event)"
+                ></textarea>
+              </label>
+            </section>
+
             @if (errorEdicion(); as error) {
-              <p class="actor-error actor-editor-ancho" role="alert">{{ error }}</p>
+              <p class="panel-error" role="alert">{{ error }}</p>
             }
-            <div class="actor-editor-acciones actor-editor-ancho">
+
+            <div class="actor-editor-acciones">
               <button
                 type="button"
                 class="button-secondary"
@@ -179,167 +216,140 @@
                 class="button-primary"
                 [disabled]="guardandoEdicion() || !borrador().nombre.trim()"
               >
-                {{ guardandoEdicion() ? 'Guardando…' : 'Guardar cambios' }}
+                {{ guardandoEdicion() ? 'Guardando…' : 'Actualizar ficha' }}
               </button>
             </div>
           </form>
         } @else {
-          @if (puedeEditar()) {
-            <button
-              type="button"
-              class="button-secondary actor-editar-boton"
-              (click)="iniciarEdicion()"
-            >
-              Editar perfil
-            </button>
-          }
-          <section class="actor-seccion" aria-labelledby="actor-panel-fotografias">
-            <h3 id="actor-panel-fotografias">Galería fotográfica</h3>
-            <app-galeria-fotos entidadTipo="actor" [entidadId]="a.id" />
-          </section>
-          <section class="actor-seccion" aria-labelledby="actor-panel-caracterizacion">
-            <h3 id="actor-panel-caracterizacion">Caracterización</h3>
-            <dl class="actor-datos">
-              <div>
-                <dt>Naturaleza</dt>
-                <dd>{{ a.naturaleza }}</dd>
-              </div>
-              <div>
-                <dt>Tipo</dt>
-                <dd>{{ a.tipo || '—' }}</dd>
-              </div>
-              <div>
-                <dt>Función</dt>
-                <dd>{{ a.funcion || 'No determinado' }}</dd>
-              </div>
-              <div>
-                <dt>Posicionamiento</dt>
-                <dd>{{ a.posicionamiento || '—' }}</dd>
-              </div>
-              <div>
-                <dt>Cargo</dt>
-                <dd>{{ a.cargo || '—' }}</dd>
-              </div>
-              <div>
-                <dt>Nivel de gobierno</dt>
-                <dd>{{ a.nivelGobierno || '—' }}</dd>
-              </div>
-              <div>
-                <dt>Categoría</dt>
-                <dd>{{ a.categoria || '—' }}</dd>
-              </div>
-            </dl>
-          </section>
-
-          <section class="actor-seccion" aria-labelledby="actor-panel-territorio">
-            <h3 id="actor-panel-territorio">Ubicación y organización</h3>
-            <dl class="actor-datos">
-              <div>
-                <dt>Región</dt>
-                <dd>{{ a.region || '—' }}</dd>
-              </div>
-              <div>
-                <dt>Distrito</dt>
-                <dd>{{ a.distrito || '—' }}</dd>
-              </div>
-              <div>
-                <dt>Organización ancla</dt>
-                <dd>{{ a.organizacionAncla || '—' }}</dd>
-              </div>
-            </dl>
-          </section>
-
-          <section class="actor-seccion" aria-labelledby="actor-panel-registro">
-            <h3 id="actor-panel-registro">Registro</h3>
-            <dl class="actor-datos">
-              <div>
-                <dt>Validación</dt>
-                <dd>{{ a.validado ? 'Validado por humano' : 'Pendiente de validación' }}</dd>
-              </div>
-              <div>
-                <dt>Estado</dt>
-                <dd>{{ a.activo ? 'Activo' : 'Inactivo' }}</dd>
-              </div>
-            </dl>
-          </section>
-
-          <section class="actor-seccion" aria-labelledby="actor-panel-perfil">
-            <h3 id="actor-panel-perfil">Perfil</h3>
-            @if (a.perfil) {
-              <p class="actor-perfil">{{ a.perfil }}</p>
-            } @else {
-              <p class="actor-vacio">Sin descripción de perfil registrada.</p>
-            }
-          </section>
-
-          <section class="actor-seccion" aria-labelledby="actor-panel-pii">
-            <h3 id="actor-panel-pii">Datos personales</h3>
-
-            @if (!puedeVerPii()) {
-              <p class="actor-nota">Su rol no permite ver datos personales.</p>
-            } @else {
-              <div class="actor-pii">
-                <p class="actor-pii-aviso">
-                  <app-icono nombre="candado" [tamano]="13" />
-                  <span>
-                    El acceso a DNI y teléfonos queda registrado en la base con el usuario y el
-                    motivo de la consulta.
-                  </span>
-                </p>
-
-                @switch (estadoPii()) {
-                  @case ('inactivo') {
-                    <button type="button" class="button-secondary" (click)="solicitarPii()">
-                      <app-icono nombre="candado" [tamano]="14" />
-                      Ver DNI y teléfonos
+          <div class="panel-grid">
+            <div class="panel-col">
+              <div class="panel-campo">
+                <span class="panel-etiqueta">DNI</span>
+                @if (datos()?.dni; as dni) {
+                  <span class="panel-dato">
+                    <span class="panel-valor">{{ dni }}</span>
+                    <button type="button" class="boton-copiar" (click)="copiar(dni, $event)">
+                      {{ copiado() === dni ? 'Copiado' : 'Copiar' }}
                     </button>
-                  }
-                  @case ('cargando') {
-                    <p class="actor-nota" role="status">Solicitando los datos personales…</p>
-                  }
-                  @case ('prohibido') {
-                    <p class="actor-error" role="alert">Su rol no permite ver datos personales.</p>
-                  }
-                  @case ('error') {
-                    <div class="actor-error" role="alert">
-                      <p>{{ errorPii() }}</p>
-                      <button type="button" class="button-secondary" (click)="solicitarPii()">
-                        Reintentar
-                      </button>
-                    </div>
-                  }
-                  @case ('listo') {
-                    @if (datos(); as ficha) {
-                      @if (ficha.vacio) {
-                        <p class="actor-vacio">El actor no tiene ficha de datos personales.</p>
-                      } @else {
-                        <dl class="actor-datos">
-                          <div>
-                            <dt>DNI</dt>
-                            <dd>{{ ficha.dni || '—' }}</dd>
-                          </div>
-                          <div>
-                            <dt>Correo</dt>
-                            <dd>{{ ficha.email || '—' }}</dd>
-                          </div>
-                          <div>
-                            <dt>Teléfono</dt>
-                            <dd>{{ ficha.telefono || '—' }}</dd>
-                          </div>
-                        </dl>
-                        <button type="button" class="button-secondary" (click)="ocultarPii()">
-                          <app-icono nombre="cerrar" [tamano]="13" />
-                          Ocultar datos
-                        </button>
-                      }
-                    }
-                  }
+                  </span>
+                } @else {
+                  <span class="panel-vacio">—</span>
                 }
               </div>
+
+              <div class="panel-campo">
+                <span class="panel-etiqueta">Teléfono</span>
+                @if (telefonoContacto(); as tel) {
+                  <span class="panel-dato">
+                    <span class="panel-valor">{{ tel }}</span>
+                    <button type="button" class="boton-copiar" (click)="copiar(tel, $event)">
+                      {{ copiado() === tel ? 'Copiado' : 'Copiar' }}
+                    </button>
+                  </span>
+                } @else {
+                  <span class="panel-vacio">—</span>
+                }
+              </div>
+
+              <div class="panel-campo">
+                <span class="panel-etiqueta">Correo</span>
+                @if (correoContacto(); as correo) {
+                  <span class="panel-dato">
+                    <span class="panel-valor" [attr.title]="correo">{{ correo }}</span>
+                    <button type="button" class="boton-copiar" (click)="copiar(correo, $event)">
+                      {{ copiado() === correo ? 'Copiado' : 'Copiar' }}
+                    </button>
+                  </span>
+                } @else {
+                  <span class="panel-vacio">—</span>
+                }
+              </div>
+            </div>
+
+            <div class="panel-col">
+              <div class="panel-campo">
+                <span class="panel-etiqueta">Organización</span>
+                <span class="panel-valor">{{ a.organizacionAncla || '—' }}</span>
+              </div>
+              <div class="panel-campo">
+                <span class="panel-etiqueta">Región</span>
+                <span class="panel-valor">{{ a.region || '—' }}</span>
+              </div>
+            </div>
+          </div>
+
+          @if (!piiVisible()) {
+            <div class="panel-pii">
+              @if (!puedeVerPii()) {
+                <p class="panel-nota">Su rol no permite ver datos personales.</p>
+              } @else {
+                <button
+                  type="button"
+                  class="button-secondary panel-pii-boton"
+                  [disabled]="estadoPii() === 'cargando'"
+                  (click)="solicitarPii()"
+                >
+                  <app-icono nombre="candado" [tamano]="13" />
+                  {{ estadoPii() === 'cargando' ? 'Solicitando…' : 'Ver datos personales' }}
+                </button>
+                <p class="panel-nota">
+                  <app-icono nombre="candado" [tamano]="12" />
+                  <span>
+                    El acceso a DNI y teléfonos queda registrado con el usuario y el motivo de la
+                    consulta.
+                  </span>
+                </p>
+                @if (estadoPii() === 'error') {
+                  <div class="panel-error" role="alert">
+                    <p>{{ errorPii() }}</p>
+                    <button type="button" class="button-secondary" (click)="solicitarPii()">
+                      Reintentar
+                    </button>
+                  </div>
+                }
+              }
+            </div>
+          } @else {
+            @if (datos()?.vacio) {
+              <p class="panel-vacio">El actor no tiene ficha de datos personales.</p>
+            } @else {
+              <button type="button" class="button-secondary panel-pii-boton" (click)="ocultarPii()">
+                <app-icono nombre="cerrar" [tamano]="12" />
+                Ocultar datos personales
+              </button>
+            }
+          }
+
+          <section class="panel-seccion" aria-labelledby="actor-panel-perfil">
+            <h3 id="actor-panel-perfil">Descripción del perfil</h3>
+            @if (a.perfil) {
+              <p class="panel-perfil">{{ a.perfil }}</p>
+            } @else {
+              <p class="panel-vacio">Sin descripción de perfil registrada.</p>
             }
           </section>
+
+          <span [class]="'panel-posicionamiento ' + clasePosicionamiento()">
+            {{ a.posicionamiento || 'Sin posicionamiento registrado' }}
+          </span>
         }
       </div>
+
+      @if (!editando()) {
+        <footer class="drawer-foot panel-pie">
+          <button type="button" class="button-secondary" (click)="alternarLista.emit()">
+            {{ enLista() ? 'Quitar de lista' : 'Agregar a lista temporal' }}
+          </button>
+          <div class="panel-pie-acciones">
+            <button type="button" class="button-secondary" (click)="cerrar.emit()">Cerrar</button>
+            @if (puedeEditar()) {
+              <button type="button" class="button-primary" (click)="iniciarEdicion()">
+                Editar
+              </button>
+            }
+          </div>
+        </footer>
+      }
     }
   </aside>
 </div>

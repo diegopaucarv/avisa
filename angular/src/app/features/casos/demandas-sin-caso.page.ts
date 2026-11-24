@@ -26,6 +26,7 @@ import { aCaso } from '../../dominio/mapeo';
 import type { Caso } from '../../dominio/modelos';
 import { BarraSeleccionComponent } from '../../shared/ui/barra-seleccion.component';
 
+import { ExportarMenuComponent } from '../../shared/ui/exportar-menu.component';
 import { IconoComponent } from '../../shared/ui/icono.component';
 import { OrdenTabla } from '../../shared/ui/orden-tabla';
 import { PaginacionComponent } from '../../shared/ui/paginacion.component';
@@ -36,11 +37,9 @@ import {
   aColeccionDemandas,
   claseEstadoDemanda,
   formatearFecha,
-  partesDemanda,
   type ColeccionDemandas,
   type Demanda,
   type EstadoDemanda,
-  type ParteDemanda,
 } from './demanda-sin-caso.mapeo';
 
 type FiltrosDemandas = {
@@ -68,7 +67,13 @@ const FILTROS_INICIALES: FiltrosDemandas = {
  */
 @Component({
   selector: 'app-demandas-sin-caso',
-  imports: [IconoComponent, PaginacionComponent, BarraSeleccionComponent, ThOrdenDirective],
+  imports: [
+    IconoComponent,
+    PaginacionComponent,
+    BarraSeleccionComponent,
+    ExportarMenuComponent,
+    ThOrdenDirective,
+  ],
   templateUrl: './demandas-sin-caso.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
@@ -100,26 +105,6 @@ const FILTROS_INICIALES: FiltrosDemandas = {
       max-width: 320px;
       white-space: normal;
       line-height: 1.5;
-    }
-
-    .celda-3p {
-      min-width: 240px;
-      max-width: 380px;
-      white-space: normal;
-      line-height: 1.5;
-    }
-
-    .p3-linea {
-      display: block;
-    }
-
-    .p3-linea strong {
-      margin-right: 4px;
-      color: #4a6076;
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 0.4px;
-      text-transform: uppercase;
     }
 
     .celda-fecha {
@@ -278,7 +263,6 @@ export class DemandasSinCasoPage {
 
   readonly demandas = computed(() => this.listado.valor()?.elementos ?? []);
   readonly total = computed(() => this.listado.valor()?.total ?? 0);
-  readonly sinCasoTotal = computed(() => this.listado.valor()?.sinCasoTotal ?? 0);
 
   /**
    * Filtros de la exportación. `sinCaso=true` no viaja en la URL de la vista
@@ -315,7 +299,6 @@ export class DemandasSinCasoPage {
 
   private readonly accesores: Record<string, (demanda: Demanda) => unknown> = {
     descripcion: (demanda) => demanda.descripcion,
-    problema: (demanda) => demanda.problema,
     estado: (demanda) => demanda.estado,
     fecha: (demanda) => demanda.fechaHecho ?? demanda.fechaRegistro,
     mujeres: (demanda) => demanda.afectaMujeres,
@@ -494,10 +477,6 @@ export class DemandasSinCasoPage {
   /* ------------------------------------------------------------------ *
    * Helpers de plantilla
    * ------------------------------------------------------------------ */
-
-  partes(demanda: Demanda): ParteDemanda[] {
-    return partesDemanda(demanda);
-  }
 
   claseEstado(estado: EstadoDemanda): string {
     return claseEstadoDemanda(estado);

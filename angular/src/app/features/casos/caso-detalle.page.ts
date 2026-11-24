@@ -12,7 +12,7 @@ import {
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { map } from 'rxjs';
+import { firstValueFrom, map } from 'rxjs';
 
 import { urlApi } from '../../core/config/entorno';
 import { consulta } from '../../core/http/consulta';
@@ -25,6 +25,7 @@ import {
   DocumentoCaso,
   EventoCaso,
   TramoEstadoCaso,
+  formatearFechaCorta,
 } from '../../dominio/mapeo';
 import {
   AnularPanelComponent,
@@ -79,22 +80,210 @@ import {
 } from './evento-panel.component';
 import { EnlaceRiel, RielRelacionesComponent } from './riel-relaciones.component';
 
-/** Detalle del caso con las columnas nuevas de compromisos e hitos. */
-type DetalleCasoConCompromisos = Omit<DetalleCasoConCierre, 'compromisos'> & {
-  compromisos: CompromisoCasoConCaracteristicas[];
+/**
+ * Claves que `GET /api/v1/cases/{codigo}` entrega por hito y que el mapeo
+ * compartido de `dominio/mapeo.ts` no conserva: se releen del bruto en
+ * `datosHitosCrudos()` y se suman al hito ya mapeado.
+ */
+type DatosHitoCrudos = {
+  /** Código visible del hito (`COMP001_H001`). */
+  codigo: string | null;
+  /** Fecha real de cumplimiento, en `YYYY-MM-DD`. */
+  fechaReal: string | null;
+  /** El estado del hito cierra el compromiso. */
+  terminal: boolean;
 };
 
-/** Hito aplanado de la ficha: `hitosDelCaso()` añade el código del compromiso. */
-type HitoEnCaso = HitoCasoConResponsable & { compromiso: string };
+type HitoDetalle = HitoCasoConResponsable & DatosHitoCrudos;
+
+/** Compromiso del detalle con sus hitos ya enriquecidos. */
+type CompromisoCasoEnFicha = Omit<CompromisoCasoConCaracteristicas, 'hitos'> & {
+  hitos: HitoDetalle[];
+};
+
+/** Detalle del caso con las columnas nuevas de compromisos e hitos. */
+type DetalleCasoConCompromisos = Omit<DetalleCasoConCierre, 'compromisos'> & {
+  compromisos: CompromisoCasoEnFicha[];
+};
+
+/**
+ * Hito aplanado de la ficha: `hitosDelCaso()` añade el código del compromiso y
+ * su id, que las acciones necesitan para llamar a
+ * `PATCH /api/v1/commitments/{compromisoId}/hitos/{hitoId}`.
+ */
+type HitoEnCaso = HitoDetalle & {
+  compromiso: string;
+  compromisoId: string;
+};
+
+/** Estados del hito que edita la ficha: el catálogo completo, en su orden. */
+export const ESTADOS_HITO_FICHA = [
+  'Registrado',
+  'En ejecución',
+  'Paralizado',
+  'Cumplido',
+  'Desestimado',
+  'No cumplido',
+] as const;
+
+export type EstadoHitoFicha = (typeof ESTADOS_HITO_FICHA)[number];
+
+/**
+ * Orden de los controles de acción de cada hito. La plantilla los pinta
+ * recorriendo esta constante, así que reordenarla es suficiente para cambiar
+ * el orden de la fila.
+ */
+export const ACCIONES_HITO = [
+  'estado', // 1. Estado del hito → `PATCH { estado }`.
+  'fechaReal', // 2. Fecha real → `PATCH { fechaReal }`.
+  'responsable', // 3. Responsable → `PATCH { responsableTexto }`.
+] as const;
+
+export type AccionHito = (typeof ACCIONES_HITO)[number];
+
+/** Código del hito para la columna «Código»; sin dato, «—». */
+export function codigoHitoVisible(codigo: string | null | undefined): string {
+  return (codigo ?? '').trim() || '—';
+}
+
+/** Código del hito para las etiquetas accesibles de los controles. */
+export function referenciaHito(codigo: string | null | undefined): string {
+  return (codigo ?? '').trim() || 'sin código';
+}
+
+/** Insignia del estado del hito, con las clases que ya usa la ficha. */
+export function claseEstadoHito(
+  estado: string | null | undefined,
+): 'state-approved' | 'state-dismissed' | 'state-pending' {
+  const clave = (estado ?? '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim()
+    .toLowerCase();
+
+  if (clave === 'cumplido') return 'state-approved';
+  if (clave === 'desestimado' || clave === 'no cumplido' || clave === 'paralizado') {
+    return 'state-dismissed';
+  }
+  return 'state-pending';
+}
+
+/**
+ * Fecha planificada: la ISO pasa a `dd/mm/aaaa`; si sólo hay texto del origen
+ * (`Julio 2026`), se muestra tal cual. Sin dato, «—».
+ */
+export function textoFechaHito(
+  fecha: string | null | undefined,
+  fechaTexto: string | null | undefined,
+): string {
+  const limpia = (fecha ?? '').trim();
+  if (limpia) return formatearFecha(limpia);
+  return (fechaTexto ?? '').trim() || '—';
+}
+
+/** Fecha real: ISO, texto del origen o «Sin fecha real». Nunca se estima. */
+export function textoFechaRealHito(
+  fechaReal: string | null | undefined,
+  fechaRealTexto: string | null | undefined,
+): string {
+  const limpia = (fechaReal ?? '').trim();
+  if (limpia) return formatearFecha(limpia);
+  return (fechaRealTexto ?? '').trim() || 'Sin fecha real';
+}
+
+export function esEstadoHitoFicha(valor: string): valor is EstadoHitoFicha {
+  return (ESTADOS_HITO_FICHA as readonly string[]).includes(valor);
+}
+
+const SIN_DATOS_HITO: DatosHitoCrudos = { codigo: null, fechaReal: null, terminal: false };
+
+function esRegistro(valor: unknown): valor is Record<string, unknown> {
+  return typeof valor === 'object' && valor !== null && !Array.isArray(valor);
+}
+
+/** Primer valor de las claves indicadas que sea texto no vacío; `null` si no hay. */
+function textoDe(registro: Record<string, unknown>, ...claves: string[]): string | null {
+  for (const clave of claves) {
+    const valor = registro[clave];
+    if (typeof valor === 'string' && valor.trim() !== '') return valor;
+  }
+  return null;
+}
+
+/**
+ * `GET /api/v1/cases/{codigo}` entrega por hito `codigo`, `fechaReal` y
+ * `terminal`, pero el mapeo compartido sólo conserva id, descripción, fecha y
+ * estado. Se releen del bruto y se indexan por id: así `hitosDelCaso()` puede
+ * completarlos sin duplicar el mapeo de `dominio/`.
+ */
+function datosHitosCrudos(bruto: unknown): Map<string, DatosHitoCrudos> {
+  const datos = new Map<string, DatosHitoCrudos>();
+  const registro = esRegistro(bruto) ? bruto : {};
+  const compromisos = registro['compromisos'] ?? registro['commitments'];
+  if (!Array.isArray(compromisos)) return datos;
+
+  for (const compromiso of compromisos) {
+    if (!esRegistro(compromiso) || !Array.isArray(compromiso['hitos'])) continue;
+    for (const hito of compromiso['hitos'] as unknown[]) {
+      if (!esRegistro(hito)) continue;
+      const id = textoDe(hito, 'id');
+      if (!id) continue;
+      datos.set(id, {
+        codigo: textoDe(hito, 'codigo'),
+        fechaReal: textoDe(hito, 'fechaReal', 'fecha_real'),
+        // Bandera booleana de la consulta; cualquier otro valor se lee ausente.
+        terminal: hito['terminal'] === true,
+      });
+    }
+  }
+
+  return datos;
+}
+
+/**
+ * Campos retirados de la ficha por el ajuste de producto del 22 nov: la
+ * cabecera ya muestra el título, el resumen ejecutivo se quitó y el cierre, el
+ * ciclo, la naturaleza y el avance no se presentan. Siguen en
+ * `CAMPOS_EDITABLES` porque `PATCH` los admite, pero no se pintan.
+ */
+const CAMPOS_OCULTOS: ReadonlySet<CampoEditable> = new Set<CampoEditable>([
+  'titulo',
+  'resumenEjecutivo',
+  'naturaleza',
+  'ciclo',
+  'pctAvance',
+  'fechaCierre',
+]);
+
+/**
+ * Columnas que el ajuste del 22 nov pide en la tabla de actores y que el
+ * contrato de `GET /v1/cases/{codigo}` todavía no entrega. Se declaran
+ * opcionales para mostrarlas en cuanto la API los exponga, sin tocar el mapeo
+ * compartido de `dominio/`.
+ */
+type ActorCasoConContacto = ActorCaso & {
+  institucion?: string | null;
+  telefono?: string | null;
+};
 
 /**
  * El mapeo compartido del caso descarta la clasificación, el carácter, la
  * bandera del Ministro y el responsable del hito; se recuperan del bruto sin
  * tocar `dominio/mapeo.ts`.
  */
-function aDetalleCasoConCompromisos(bruto: unknown): DetalleCasoConCompromisos {
+/**
+ * Esquema de `GET /api/v1/cases/{codigo}` (y del `PATCH`, mismo contrato):
+ * suma al mapeo del caso los hitos con su código, fecha real y bandera de
+ * terminal, que la sección «Hitos del caso» necesita.
+ */
+export function aDetalleCasoConCompromisos(bruto: unknown): DetalleCasoConCompromisos {
   const detalle = aDetalleCasoConCierre(bruto);
-  return { ...detalle, compromisos: aCompromisosCaso(bruto, detalle.compromisos) };
+  const datos = datosHitosCrudos(bruto);
+  const compromisos = aCompromisosCaso(bruto, detalle.compromisos).map((compromiso) => ({
+    ...compromiso,
+    hitos: compromiso.hitos.map((hito) => ({ ...hito, ...(datos.get(hito.id) ?? SIN_DATOS_HITO) })),
+  }));
+  return { ...detalle, compromisos };
 }
 
 @Component({
@@ -118,14 +307,6 @@ function aDetalleCasoConCompromisos(bruto: unknown): DetalleCasoConCompromisos {
       margin-top: 4px;
       padding: 0 10px;
       font-size: 12.5px;
-    }
-
-    /* Los botones de un hecho comparten fila y se ocultan al imprimir con
-       la regla timeline-edit, que ya está fuera de la hoja de impresión. */
-    .timeline-acciones {
-      display: inline-flex;
-      flex-wrap: wrap;
-      gap: 6px;
     }
 
     .aviso-ok {
@@ -215,18 +396,127 @@ function aDetalleCasoConCompromisos(bruto: unknown): DetalleCasoConCompromisos {
       gap: 6px;
     }
 
-    .timeline-meta {
+    /* Acciones por hito (estado, fecha real y responsable), en el orden de
+       ACCIONES_HITO. Se apilan cuando la tabla no da ancho. */
+    .hitos-acciones {
       display: flex;
       flex-wrap: wrap;
       align-items: center;
       gap: 6px;
     }
 
-    /* Se anida para ganar a la regla del tema para párrafos del timeline. */
-    .timeline-list li .timeline-actor {
-      margin: 3px 0 0;
+    .hito-control {
+      width: auto;
+      min-width: 132px;
+      height: 28px;
+      padding: 2px 8px;
+      font-size: 12.5px;
+    }
+
+    /* Cronología compacta del ajuste del 22 nov: una viñeta por hecho, con la
+       fecha corta y el texto en una sola línea («15NOV2026 - SE APROBÓ …»). */
+    .timeline-list {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .timeline-list li {
+      position: relative;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 6px 10px;
+      padding: 0 0 0 16px;
+      border-left: 0;
+    }
+
+    .timeline-list li::before {
+      content: '';
+      position: absolute;
+      top: 0.42em;
+      left: 3px;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--blue, #1a4f8b);
+    }
+
+    .timeline-linea {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
+
+    /* Interruptor de edición: apagado, la ficha se lee; encendido, se edita. */
+    .edit-switch {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
       color: var(--muted);
-      font-size: 12px;
+      font: 600 13px var(--font-body);
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .edit-switch input {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      margin: -1px;
+      padding: 0;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .edit-switch-track {
+      position: relative;
+      display: inline-block;
+      width: 38px;
+      height: 22px;
+      border-radius: 999px;
+      background: #c9d5e0;
+      transition: background 0.15s ease;
+    }
+
+    .edit-switch-thumb {
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 1px 2px rgb(26 43 62 / 25%);
+      transition: transform 0.15s ease;
+    }
+
+    .edit-switch.activo {
+      color: var(--ink);
+    }
+
+    .edit-switch.activo .edit-switch-track {
+      background: var(--blue, #1a4f8b);
+    }
+
+    .edit-switch.activo .edit-switch-thumb {
+      transform: translateX(16px);
+    }
+
+    .edit-switch input:focus-visible + .edit-switch-track {
+      outline: 2px solid var(--blue, #1a4f8b);
+      outline-offset: 2px;
+    }
+
+    .edit-switch.deshabilitado {
+      opacity: 0.55;
+      cursor: not-allowed;
     }
 
     /* Se anida para ganar al white-space: nowrap de las celdas de la tabla. */
@@ -260,6 +550,7 @@ function aDetalleCasoConCompromisos(bruto: unknown): DetalleCasoConCompromisos {
      */
     @media print {
       .view-actions button,
+      .view-actions .edit-switch,
       .view-actions app-exportar-menu,
       .view-actions app-glosario,
       .detail-section-title button,
@@ -337,10 +628,18 @@ export class CasoDetallePage {
   readonly estado = this.recurso.estado;
   readonly error = this.recurso.error;
 
-  /** Hitos de todos los acuerdos y compromisos del caso, aplanados. */
-  readonly hitosDelCaso = computed(() =>
-    (this.detalle()?.compromisos ?? []).flatMap((compromiso) =>
-      compromiso.hitos.map((hito) => ({ ...hito, compromiso: compromiso.codigo })),
+  /**
+   * Hitos de todos los acuerdos y compromisos del caso, aplanados. Cada fila
+   * lleva el código del compromiso y su id: las acciones por hito necesitan
+   * ambos para armar `PATCH /v1/commitments/{compromisoId}/hitos/{hitoId}`.
+   */
+  readonly hitosDelCaso = computed<HitoEnCaso[]>(() =>
+    (this.ficha()?.compromisos ?? []).flatMap((compromiso) =>
+      compromiso.hitos.map((hito) => ({
+        ...hito,
+        compromiso: compromiso.codigo,
+        compromisoId: compromiso.id,
+      })),
     ),
   );
 
@@ -349,9 +648,9 @@ export class CasoDetallePage {
   readonly ordenActores = new OrdenTabla<ActorCaso>();
   private readonly accesoresActores: Record<string, (actor: ActorCaso) => unknown> = {
     actor: (actor) => this.nombreActor(actor),
+    institucion: (actor) => this.institucionActor(actor),
+    telefono: (actor) => this.telefonoActor(actor),
     correo: (actor) => actor.correo,
-    tipo: (actor) => actor.tipo,
-    funcion: (actor) => actor.funcion,
     posicionamiento: (actor) => actor.posicionamiento,
   };
   readonly filasActores = computed(() =>
@@ -360,9 +659,7 @@ export class CasoDetallePage {
 
   readonly ordenDemandas = new OrdenTabla<DemandaCaso>();
   private readonly accesoresDemandas: Record<string, (demanda: DemandaCaso) => unknown> = {
-    problema: (demanda) => demanda.problema ?? demanda.descripcion,
-    propuesta: (demanda) => demanda.propuesta,
-    pedido: (demanda) => demanda.pedido,
+    demanda: (demanda) => demanda.descripcion ?? demanda.problema,
     estado: (demanda) => demanda.estado,
     origen: (demanda) => demanda.documentoOrigenCodigo ?? demanda.documentoOrigenTitulo,
   };
@@ -401,15 +698,36 @@ export class CasoDetallePage {
 
   readonly ordenHitos = new OrdenTabla<HitoEnCaso>();
   private readonly accesoresHitos: Record<string, (hito: HitoEnCaso) => unknown> = {
-    compromiso: (hito) => hito.compromiso,
+    // El código visible es la pareja «compromiso + hito»; se ordena por ambos.
+    compromiso: (hito) => [hito.compromiso, hito.codigo ?? ''],
     hito: (hito) => hito.descripcion,
-    fecha: (hito) => hito.fecha ?? hito.fechaTexto,
     estado: (hito) => hito.estado,
+    fecha: (hito) => hito.fecha ?? hito.fechaTexto,
+    real: (hito) => hito.fechaReal ?? hito.fechaRealTexto,
     responsable: (hito) => hito.responsableTexto,
   };
   readonly filasHitos = computed(() =>
     this.ordenHitos.ordenar(this.hitosDelCaso(), this.accesoresHitos),
   );
+
+  /** Catálogo y orden de las acciones por hito (ver `ACCIONES_HITO`). */
+  readonly estadosHito: readonly EstadoHitoFicha[] = ESTADOS_HITO_FICHA;
+  readonly accionesHito: readonly AccionHito[] = ACCIONES_HITO;
+
+  /**
+   * Formateo de las columnas de hitos. Las funciones viven fuera de la clase
+   * para poder probarlas sin TestBed; aquí sólo se exponen a la plantilla.
+   */
+  readonly codigoHitoVisible = codigoHitoVisible;
+  readonly referenciaHito = referenciaHito;
+  readonly claseEstadoHito = claseEstadoHito;
+  readonly textoFechaHito = textoFechaHito;
+  readonly textoFechaRealHito = textoFechaRealHito;
+  readonly esEstadoHitoFicha = esEstadoHitoFicha;
+  /** Id del hito cuyo `PATCH` está en vuelo; bloquea sus tres controles. */
+  readonly guardandoHito = signal<string | null>(null);
+  /** Último fallo al editar un hito; se muestra sobre la tabla. */
+  readonly errorHitos = signal<string | null>(null);
 
   readonly ordenDocumentos = new OrdenTabla<DocumentoCaso>();
   private readonly accesoresDocumentos: Record<string, (documento: DocumentoCaso) => unknown> = {
@@ -494,19 +812,15 @@ export class CasoDetallePage {
       },
       {
         etiqueta: 'Demandas',
-        ancla: 'analisis-caso',
-        contador: null,
+        ancla: 'demandas-caso',
+        contador: ficha.demandas.length,
         icono: 'documentos',
-        disponible: false,
-        nota: 'El caso no guarda un tablero de Canva: no hay enlace que abrir.',
       },
       {
         etiqueta: 'Acuerdos y compromisos',
-        ancla: 'analisis-caso',
-        contador: null,
-        icono: 'documentos',
-        disponible: false,
-        nota: 'El caso no guarda un tablero de Canva: no hay enlace que abrir.',
+        ancla: 'compromisos-caso',
+        contador: ficha.compromisos.length,
+        icono: 'compromisos',
       },
 
       {
@@ -544,7 +858,17 @@ export class CasoDetallePage {
    * Edición explícita por campo (item 18). El estado no está aquí: se cambia
    * con Archivar/Reabrir, más abajo.
    */
-  readonly campos = CAMPOS_EDITABLES;
+  /**
+   * Campos visibles en la ficha. Los retirados por el ajuste del 22 nov no se
+   * pintan, aunque `PATCH` siga admitiéndolos.
+   */
+  readonly campos = CAMPOS_EDITABLES.filter((definicion) => !CAMPOS_OCULTOS.has(definicion.campo));
+
+  /**
+   * Interruptor de edición: sustituye a los botones «Editar» sueltos. Apagado,
+   * la ficha se lee; encendido, aparecen las acciones de edición.
+   */
+  readonly modoEdicion = signal(false);
   readonly editando = signal<CampoEditable | null>(null);
   readonly borrador = signal('');
   readonly guardandoCampo = signal(false);
@@ -617,11 +941,6 @@ export class CasoDetallePage {
   readonly guardandoEvento = signal(false);
   readonly errorEvento = signal<string | null>(null);
 
-  /** Hecho cuya validación se está enviando; `null` si no hay envío en curso. */
-  readonly validandoEvento = signal<string | null>(null);
-  readonly errorValidacion = signal<string | null>(null);
-  readonly avisoValidacion = signal<string | null>(null);
-
   /** Demanda abierta en el panel; `null` significa alta. */
   readonly demandaEditada = signal<DemandaCaso | null>(null);
   readonly panelDemandaAbierto = signal(false);
@@ -683,11 +1002,25 @@ export class CasoDetallePage {
 
   /** Abre un recuadro en línea. No hay cierre por clic fuera: ver plantilla. */
   abrirEdicion(campo: CampoEditable): void {
-    if (!this.puedeModificar()) return;
+    if (!this.puedeModificar() || !this.modoEdicion()) return;
     this.errorCampo.set(null);
     this.avisoCampo.set(null);
     this.borrador.set(this.valoresCaso()[campo]);
     this.editando.set(campo);
+  }
+
+  /**
+   * Interruptor de edición. Al apagarlo se cancela cualquier recuadro abierto:
+   * la ficha vuelve a modo lectura.
+   */
+  alternarModoEdicion(evento: Event): void {
+    const activo = (evento.target as HTMLInputElement).checked;
+    if (!activo || !this.puedeModificar()) {
+      this.modoEdicion.set(false);
+      this.cancelarEdicion();
+      return;
+    }
+    this.modoEdicion.set(true);
   }
 
   alCambiarCampo(evento: Event): void {
@@ -792,10 +1125,124 @@ export class CasoDetallePage {
       });
   }
 
+  /**
+   * Estado de un hito. Revierte el `select` si el valor no es del catálogo o no
+   * cambió, y delega el `PATCH` en `guardarCambioHito`.
+   */
+  async cambiarEstadoHito(hito: HitoEnCaso, evento: Event): Promise<void> {
+    const select = evento.target as HTMLSelectElement;
+    const estado = select.value;
+    const anterior = hito.estado ?? '';
+    if (!esEstadoHitoFicha(estado) || estado === anterior) return;
+    await this.guardarCambioHito(hito, { estado }, () => {
+      select.value = anterior;
+    });
+  }
+
+  /** Fecha real del hito (`fechaReal`); vaciarla envía `null`. */
+  async cambiarFechaRealHito(hito: HitoEnCaso, evento: Event): Promise<void> {
+    const input = evento.target as HTMLInputElement;
+    const fechaReal = input.value.trim();
+    const anterior = hito.fechaReal ?? '';
+    if (fechaReal === anterior) return;
+    await this.guardarCambioHito(hito, { fechaReal: fechaReal || null }, () => {
+      input.value = anterior;
+    });
+  }
+
+  /** Responsable del hito (`responsableTexto`); vaciarlo envía `null`. */
+  async cambiarResponsableHito(hito: HitoEnCaso, evento: Event): Promise<void> {
+    const input = evento.target as HTMLInputElement;
+    const nuevo = input.value.trim();
+    const anterior = (hito.responsableTexto ?? '').trim();
+    if (nuevo === anterior) return;
+    await this.guardarCambioHito(hito, { responsableTexto: nuevo || null }, () => {
+      input.value = anterior;
+    });
+  }
+
+  /**
+   * `PATCH /api/v1/commitments/{compromisoId}/hitos/{hitoId}` con una sola
+   * clave. Mismo manejo que el panel de compromisos: se bloquea el hito en
+   * vuelo, se revierte el control si falla y se recarga la ficha al terminar.
+   */
+  private async guardarCambioHito(
+    hito: HitoEnCaso,
+    cuerpo: Record<string, unknown>,
+    revertir: () => void,
+  ): Promise<void> {
+    if (!this.puedeModificar()) {
+      revertir();
+      this.errorHitos.set('No tiene permisos para modificar los hitos de este caso.');
+      return;
+    }
+
+    if (!hito.id || !hito.compromisoId) {
+      revertir();
+      this.errorHitos.set('El hito no tiene identificador; no se puede actualizar.');
+      return;
+    }
+
+    if (this.guardandoHito() === hito.id) return;
+
+    this.guardandoHito.set(hito.id);
+    this.errorHitos.set(null);
+
+    try {
+      await firstValueFrom(
+        this.http.patch<unknown>(
+          urlApi(
+            `/v1/commitments/${encodeURIComponent(hito.compromisoId)}/hitos/${encodeURIComponent(hito.id)}`,
+          ),
+          cuerpo,
+        ),
+      );
+      this.recargar();
+    } catch (fallo) {
+      revertir();
+      this.errorHitos.set(this.mensajeDeErrorHito(fallo));
+    } finally {
+      this.guardandoHito.set(null);
+    }
+  }
+
   /** Fecha de inicio del caso en `dd/mm/aaaa`; `—` cuando no está registrada. */
   fechaTexto(valor: string | null | undefined): string {
     return formatearFecha(valor) || '—';
   }
+
+  /**
+   * Formato compacto de la cronología (`15NOV2026`), el que pide el ajuste del
+   * 22 nov para la línea de tiempo.
+   */
+  fechaCorta(valor: string | null | undefined): string {
+    return formatearFechaCorta(valor);
+  }
+
+  /** Institución del actor; la API aún no la entrega, así que se declara «—». */
+  institucionActor(actor: ActorCaso): string {
+    const valor = (actor as ActorCasoConContacto).institucion;
+    return valor?.trim() || '—';
+  }
+
+  /** Teléfono del actor; hoy vive en PII y no viaja en el detalle del caso. */
+  telefonoActor(actor: ActorCaso): string {
+    const valor = (actor as ActorCasoConContacto).telefono;
+    return valor?.trim() || '—';
+  }
+
+  /**
+   * Organizaciones solicitantes: las demandas siempre provienen de personas
+   * jurídicas y el caso ya relaciona sus organizaciones como actores. Se
+   * deduplican nombres para no repetir el distintivo de una misma institución.
+   */
+  readonly organizacionesDelCaso = computed<readonly string[]>(() => {
+    const nombres = (this.ficha()?.actores ?? [])
+      .filter((actor) => actor.naturaleza === 'organizacion')
+      .map((actor) => this.nombreActor(actor).trim())
+      .filter((nombre) => nombre.length > 0);
+    return [...new Set(nombres)];
+  });
 
   /**
    * Nombre visible del actor. `core.actores` sólo guarda `nombre_actual`: hoy
@@ -826,8 +1273,8 @@ export class CasoDetallePage {
 
   /** Texto corto de la demanda para las etiquetas accesibles de la tabla. */
   referenciaDemanda(demanda: DemandaCaso): string {
-    const texto = (demanda.problema ?? demanda.descripcion ?? '').trim();
-    if (!texto) return 'sin problema';
+    const texto = (demanda.descripcion ?? demanda.problema ?? '').trim();
+    if (!texto) return 'sin demanda';
     return texto.length > 60 ? `${texto.slice(0, 57)}…` : texto;
   }
 
@@ -906,7 +1353,12 @@ export class CasoDetallePage {
    * guion: el dato ausente se declara, no se rellena.
    */
   private lineaWhatsApp(actor: ActorCaso): string {
-    const campos = [this.nombreActor(actor), '—', '—', actor.correo || '—'];
+    const campos = [
+      this.nombreActor(actor),
+      this.institucionActor(actor),
+      this.telefonoActor(actor),
+      actor.correo || '—',
+    ];
     return `- ${campos.join(' - ')}`;
   }
 
@@ -943,9 +1395,15 @@ export class CasoDetallePage {
     const escapar = (valor: string | null | undefined): string =>
       `"${(valor ?? '').replace(/"/g, '""')}"`;
     const filas = [
-      ['Actor', 'Tipo', 'Función', 'Posicionamiento', 'Correo'].map(escapar).join(';'),
+      ['Actor', 'Institución', 'Teléfono', 'Correo', 'Posicionamiento'].map(escapar).join(';'),
       ...actores.map((actor) =>
-        [this.nombreActor(actor), actor.tipo, actor.funcion, actor.posicionamiento, actor.correo]
+        [
+          this.nombreActor(actor),
+          this.institucionActor(actor),
+          this.telefonoActor(actor),
+          actor.correo,
+          actor.posicionamiento,
+        ]
           .map(escapar)
           .join(';'),
       ),
@@ -958,38 +1416,6 @@ export class CasoDetallePage {
     enlace.click();
     URL.revokeObjectURL(enlace.href);
     this.avisoActores.set(`Se descargaron ${actores.length} actores de la ficha.`);
-  }
-
-  /**
-   * `PATCH /v1/cases/{codigo}/events/{id}` con `{ validado }`.
-   *
-   * La validación es un acto humano explícito: se alterna sobre el valor actual
-   * del hecho y nunca se deduce al registrar. El servidor audita el cambio.
-   */
-  alternarValidacion(evento: EventoCaso): void {
-    const codigo = this.codigo();
-    if (!codigo || !this.puedeModificar() || this.validandoEvento() !== null) return;
-
-    const url = urlApi(
-      `/v1/cases/${encodeURIComponent(codigo)}/events/${encodeURIComponent(evento.id)}`,
-    );
-    const validado = !evento.validado;
-
-    this.validandoEvento.set(evento.id);
-    this.errorValidacion.set(null);
-    this.avisoValidacion.set(null);
-
-    this.http.patch<unknown>(url, { validado }).subscribe({
-      next: () => {
-        this.validandoEvento.set(null);
-        this.recargar();
-        this.avisoValidacion.set(validado ? 'Hecho validado.' : 'Validación retirada.');
-      },
-      error: (fallo: unknown) => {
-        this.validandoEvento.set(null);
-        this.errorValidacion.set(this.mensajeDeErrorValidacion(fallo));
-      },
-    });
   }
 
   /** Impresión de la ficha (item 42): usa la hoja `@media print` del componente. */
@@ -1017,6 +1443,7 @@ export class CasoDetallePage {
       this.detalleActualizado.set(null);
       this.editando.set(null);
       this.borrador.set('');
+      this.modoEdicion.set(false);
       this.confirmandoArchivo.set(null);
       this.errorCampo.set(null);
       this.errorArchivo.set(null);
@@ -1164,18 +1591,12 @@ export class CasoDetallePage {
     return error.message;
   }
 
-  private mensajeDeErrorValidacion(fallo: unknown): string {
-    const error = aErrorApi(fallo);
-    if (error.esProhibido) return 'Su rol no permite validar hechos en este caso.';
-    return error.message;
-  }
-
   private mensajeDeErrorDemanda(fallo: unknown): string {
     const error = aErrorApi(fallo);
     if (error.esProhibido) return 'Su rol no permite modificar las demandas de este caso.';
     if (error.codigo === 'SIN_CAMBIOS') return 'No hay cambios que guardar.';
     if (error.codigo === 'INVALID_INPUT' || error.estado === 422) {
-      return 'Datos inválidos: revise el problema (3P) y el estado de atención.';
+      return 'Datos inválidos: revise la demanda y el estado de atención.';
     }
     return error.message;
   }
@@ -1184,6 +1605,17 @@ export class CasoDetallePage {
     const error = aErrorApi(fallo);
     if (error.esProhibido) return 'Su rol no permite modificar este caso.';
     if (error.codigo === 'SIN_CAMBIOS') return 'No hay cambios que guardar.';
+    return error.message;
+  }
+
+  private mensajeDeErrorHito(fallo: unknown): string {
+    const error = aErrorApi(fallo);
+    if (error.esProhibido) return 'Su rol no permite modificar los hitos de este caso.';
+    if (error.codigo === 'SIN_CAMBIOS') return 'No hay cambios que guardar.';
+    if (error.estado === 404) return 'El hito o su compromiso ya no existe; recargue la ficha.';
+    if (error.codigo === 'INVALID_INPUT' || error.estado === 422) {
+      return `Datos inválidos: ${error.message}`;
+    }
     return error.message;
   }
 

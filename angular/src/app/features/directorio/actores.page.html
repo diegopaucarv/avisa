@@ -1,9 +1,46 @@
 <section class="view-body" aria-labelledby="titulo-actores">
   <header class="view-head">
-    <div>
-      <h1 id="titulo-actores">{{ titulo() }}</h1>
-    </div>
+    <h1 id="titulo-actores">{{ titulo() }}</h1>
     <div class="view-actions">
+      <details class="menu-nuevo">
+        <summary class="button-primary menu-nuevo-toggle">Nuevo</summary>
+        <div class="menu-nuevo-lista" role="menu" aria-label="Crear registro">
+          <button
+            type="button"
+            role="menuitem"
+            disabled
+            title="La creación de actores no está disponible en este entorno"
+          >
+            Nuevo actor
+          </button>
+          <button
+            type="button"
+            role="menuitem"
+            disabled
+            title="La creación de organizaciones no está disponible en este entorno"
+          >
+            Nueva organización
+          </button>
+        </div>
+      </details>
+
+      <button
+        type="button"
+        class="button-secondary"
+        disabled
+        title="La fusión de duplicados no está disponible en este entorno"
+      >
+        Fusionar duplicados
+      </button>
+      <button
+        type="button"
+        class="button-secondary"
+        disabled
+        title="La baja lógica no está disponible en este entorno"
+      >
+        Baja lógica
+      </button>
+
       <button
         type="button"
         class="button-secondary"
@@ -11,24 +48,42 @@
         aria-controls="lista-temporal-actores"
         (click)="listaTemporalAbierta.set(!listaTemporalAbierta())"
       >
-        Lista temporal <span class="lista-contador">{{ listaTemporal().length }}</span>
+        Lista temporal
       </button>
-      <p class="result-count" aria-live="polite">{{ total() }} {{ sustantivo() }}</p>
+
+      <app-barra-seleccion
+        entidad="actores"
+        [cantidad]="seleccion.cantidad()"
+        [idsSeleccionados]="seleccion.lista()"
+        (fallo)="alFallarExportacion($event)"
+      />
     </div>
   </header>
-
-  <div class="view-toolbar">
-    <app-barra-seleccion
-      entidad="actores"
-      [cantidad]="seleccion.cantidad()"
-      [idsSeleccionados]="seleccion.lista()"
-      (fallo)="alFallarExportacion($event)"
-    />
-  </div>
 
   @if (exportarError(); as mensaje) {
   <p class="form-error" role="alert">{{ mensaje }}</p>
   }
+
+  <nav class="vistas" aria-label="Vistas del directorio">
+    <button
+      type="button"
+      class="vista-tab"
+      [class.activa]="vista() === 'persona'"
+      [attr.aria-current]="vista() === 'persona' ? 'page' : null"
+      (click)="cambiarVista('persona')"
+    >
+      Personas
+    </button>
+    <button
+      type="button"
+      class="vista-tab"
+      [class.activa]="vista() === 'organizacion'"
+      [attr.aria-current]="vista() === 'organizacion' ? 'page' : null"
+      (click)="cambiarVista('organizacion')"
+    >
+      Organizaciones
+    </button>
+  </nav>
 
   <div class="filter-bar filter-bar-wrap">
     <label class="search-field">
@@ -42,19 +97,7 @@
       />
     </label>
 
-    @if (!esSoloPersonas()) {
-    <label class="select-filter">
-      Naturaleza
-      <select aria-label="Filtrar por naturaleza del actor" (change)="cambiarNaturaleza($event)">
-        <option value="" [selected]="filtros().naturaleza === ''">Todas</option>
-        @for (naturaleza of naturalezas; track naturaleza.valor) {
-        <option [value]="naturaleza.valor" [selected]="filtros().naturaleza === naturaleza.valor">
-          {{ naturaleza.etiqueta }}
-        </option>
-        }
-      </select>
-    </label>
-    } @if (tiposActor().length > 0) {
+    @if (tiposActor().length > 0) {
     <label class="select-filter">
       Tipo
       <select aria-label="Filtrar por tipo de actor" (change)="cambiarTipo($event)">
@@ -67,16 +110,6 @@
       </select>
     </label>
     }
-
-    <div class="territorio-filtro">
-      <app-territorio-buscador
-        etiqueta="Región por distrito"
-        marcador="Distrito o lugar: Islay, Piura…"
-        [compacto]="true"
-        [inicial]="regionFiltroInicial()"
-        (elegido)="alElegirTerritorio($event)"
-      />
-    </div>
 
     <button type="button" class="button-secondary" (click)="limpiar()">Limpiar filtros</button>
   </div>
@@ -117,8 +150,8 @@
         <div>
           <strong>{{ actor.nombre }}</strong>
           <span
-            >{{ actor.tipo || actor.naturaleza }} · {{ actor.region || 'Región no registrada'
-            }}</span
+            >{{ actor.cargo || actor.tipo || actor.naturaleza }} · {{ actor.region || 'Región no
+            registrada' }}</span
           >
         </div>
         <button
@@ -138,7 +171,7 @@
 
   <dialog #dialogoPadron class="padron-dialogo" aria-labelledby="titulo-padron">
     <form class="padron-form" (submit)="$event.preventDefault(); descargarPadron()">
-      <h2 id="titulo-padron">Generar padrón de asistencia</h2>
+      <h2 id="titulo-padron">Lista de asistencia</h2>
       <p>
         El archivo incluye sólo datos institucionales públicos de la lista temporal; no incorpora
         DNI, teléfonos ni correos personales.
@@ -170,7 +203,7 @@
           (input)="padronFecha.set($any($event.target).value)"
         />
       </label>
-      <p>{{ listaTemporal().length }} actores seleccionados. Las firmas se dejan en blanco.</p>
+      <p>Las firmas se dejan en blanco.</p>
       <div class="padron-actions">
         <button type="button" class="button-secondary" (click)="dialogoPadron.close()">
           Cancelar
@@ -182,7 +215,7 @@
 
   @if (estado() === "error") {
   <div class="empty-state" role="alert">
-    <strong>No se pudieron cargar los {{ sustantivo() }}</strong>
+    <strong>No se pudieron cargar las {{ sustantivo() }}</strong>
     <p>{{ error()?.message }}</p>
     <button type="button" class="button-secondary" (click)="recargar()">Reintentar</button>
   </div>
@@ -191,10 +224,7 @@
   } @else {
   <div class="empty-state">
     <strong>Sin {{ sustantivo() }} para estos filtros</strong>
-    <p>
-      No hay actores que coincidan con la búsqueda. La región se compara con el nombre registrado,
-      así que debe escribirse completo (por ejemplo, el departamento).
-    </p>
+    <p>No hay actores que coincidan con la búsqueda.</p>
   </div>
   } } @else { @if (estado() === "cargando") {
   <p class="actor-actualizando" role="status">Actualizando el listado…</p>
@@ -213,16 +243,17 @@
               (change)="seleccion.alternarPagina(idsVisibles(), $event)"
             />
           </th>
-          <th scope="col">Foto</th>
-          <th scope="col" [appThOrden]="'nombre'" [orden]="orden">
-            {{ esSoloPersonas() ? 'Apellidos y Nombres' : 'Nombre' }}
+          <th scope="col" class="col-foto">Foto</th>
+          <th scope="col" class="col-nombre" [appThOrden]="'nombre'" [orden]="orden">
+            Apellidos y Nombres
           </th>
-          <th scope="col" [appThOrden]="'naturaleza'" [orden]="orden">Naturaleza</th>
-          <th scope="col" [appThOrden]="'tipo'" [orden]="orden">Tipo</th>
-          <th scope="col" [appThOrden]="'funcion'" [orden]="orden">Función</th>
+          <th scope="col">Teléfono</th>
+          <th scope="col">Correo</th>
+          <th scope="col" [appThOrden]="'organizacion'" [orden]="orden">
+            Organización / Institución
+          </th>
           <th scope="col" [appThOrden]="'region'" [orden]="orden">Región</th>
-          <th scope="col" [appThOrden]="'organizacion'" [orden]="orden">Organización / Cargo</th>
-          <th scope="col">Acciones</th>
+          <th scope="col" class="col-acciones">Acciones</th>
         </tr>
       </thead>
       <tbody>
@@ -255,7 +286,7 @@
             <span class="sin-dato">—</span>
             }
           </td>
-          <td>
+          <td class="col-nombre">
             <button
               type="button"
               class="table-link actor-nombre"
@@ -268,27 +299,92 @@
               }
             </button>
           </td>
-          <td>{{ actor.naturaleza }}</td>
-          <td>{{ actor.tipo || "—" }}</td>
-          <td>{{ actor.funcion || "No determinado" }}</td>
-          <td>{{ actor.region || "—" }}</td>
+          <td>
+            @if (actor.telefono; as tel) {
+            <span class="dato-contacto">
+              <span>{{ tel }}</span>
+              <button
+                type="button"
+                class="boton-copiar"
+                [attr.aria-label]="'Copiar el teléfono de ' + actor.nombre"
+                (click)="copiar(tel, $event)"
+              >
+                {{ copiado() === tel ? "Copiado" : "Copiar" }}
+              </button>
+            </span>
+            } @else {
+            <span class="sin-dato">—</span>
+            }
+          </td>
+          <td>
+            @if (actor.email; as correo) {
+            <span class="dato-contacto">
+              <span>{{ correo }}</span>
+              <button
+                type="button"
+                class="boton-copiar"
+                [attr.aria-label]="'Copiar el correo de ' + actor.nombre"
+                (click)="copiar(correo, $event)"
+              >
+                {{ copiado() === correo ? "Copiado" : "Copiar" }}
+              </button>
+            </span>
+            } @else {
+            <span class="sin-dato">—</span>
+            }
+          </td>
           <td class="actor-organizacion">
-            @if (actor.organizacionAncla || actor.cargo) { @if (actor.organizacionAncla) {
+            @if (actor.organizacionAncla) {
             <span>{{ actor.organizacionAncla }}</span>
             } @if (actor.cargo) {
             <small>{{ actor.cargo }}</small>
-            } } @else { — }
+            } @if (!actor.organizacionAncla && !actor.cargo) { — }
           </td>
           <td>
-            <button
-              type="button"
-              class="button-secondary button-lista"
-              [attr.aria-pressed]="estaEnLista(actor)"
-              [attr.aria-label]="(estaEnLista(actor) ? 'Quitar de' : 'Agregar a') + ' lista temporal: ' + actor.nombre"
-              (click)="alternarLista(actor, $event)"
-            >
-              {{ estaEnLista(actor) ? 'Quitar' : 'Agregar' }}
-            </button>
+            @if (actor.region) {
+            <span class="region-chip">{{ actor.region }}</span>
+            } @else {
+            <span class="sin-dato">—</span>
+            }
+          </td>
+          <td class="col-acciones" (click)="$event.stopPropagation()">
+            <div class="acciones-fila">
+              <button
+                type="button"
+                class="accion"
+                [attr.aria-label]="'Ver la ficha de ' + actor.nombre"
+                (click)="abrir(actor)"
+              >
+                Ver
+              </button>
+              <button
+                type="button"
+                class="accion"
+                [attr.aria-label]="'Editar a ' + actor.nombre"
+                (click)="abrirEdicion(actor, $event)"
+              >
+                Editar
+              </button>
+              <button
+                type="button"
+                class="accion"
+                [class.activa]="estaEnLista(actor)"
+                [attr.aria-pressed]="estaEnLista(actor)"
+                [attr.aria-label]="(estaEnLista(actor) ? 'Quitar de' : 'Agregar a') + ' lista temporal: ' + actor.nombre"
+                (click)="alternarLista(actor, $event)"
+              >
+                {{ estaEnLista(actor) ? "Quitar" : "Agregar" }}
+              </button>
+              <button
+                type="button"
+                class="accion"
+                disabled
+                title="La eliminación de actores no está disponible en este entorno"
+                [attr.aria-label]="'Eliminar a ' + actor.nombre + ' (no disponible)'"
+              >
+                Eliminar
+              </button>
+            </div>
           </td>
         </tr>
         }
@@ -306,8 +402,11 @@
   } @if (seleccionado(); as actorAbierto) {
   <app-actor-panel
     [actor]="actorAbierto"
+    [editarInicial]="editarAlAbrir()"
+    [enLista]="estaEnLista(actorAbierto)"
     (cerrar)="cerrarPanel()"
     (actualizado)="alActualizarActor($event)"
+    (alternarLista)="alternarLista(actorAbierto)"
   />
   }
 </section>

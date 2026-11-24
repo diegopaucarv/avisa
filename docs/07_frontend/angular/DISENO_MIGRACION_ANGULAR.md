@@ -517,7 +517,7 @@ panel lateral.
 | Edición de alerta                     | `/alertas/:id/editar`                                   | Panel lateral                          |
 | Alta de compromiso                    | `/compromisos/nuevo`                                    | —                                      |
 | Edición de compromiso                 | `/compromisos/:id/editar`                               | —                                      |
-| Alta de demanda                       | `/casos/:codigo/demandas/nueva`                         | Dentro de la pestaña                   |
+| Registrar demanda                     | `/casos/:codigo/demandas/nueva`                         | Dentro de la pestaña                   |
 | Alta de hito                          | `/casos/:codigo/cronologia/nuevo`                       | Panel lateral sobre la línea de tiempo |
 | Carga de documento                    | `/documentos/nuevo` y `/casos/:codigo/documentos/nuevo` | —                                      |
 | Preferencias (`PreferencesDrawer`)    | `/preferencias`                                         | Drawer global                          |

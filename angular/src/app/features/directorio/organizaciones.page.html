@@ -1,21 +1,15 @@
 <section class="view-body" aria-labelledby="titulo-organizaciones">
   <header class="view-head">
-    <div>
-      <h1 id="titulo-organizaciones">Organizaciones</h1>
-    </div>
+    <h1 id="titulo-organizaciones">Organizaciones</h1>
     <div class="view-actions">
-      <p class="result-count" aria-live="polite">{{ total() }} organizaciones</p>
+      <app-barra-seleccion
+        entidad="organizaciones"
+        [cantidad]="seleccion.cantidad()"
+        [idsSeleccionados]="seleccion.lista()"
+        (fallo)="alFallarExportacion($event)"
+      />
     </div>
   </header>
-
-  <div class="view-toolbar">
-    <app-barra-seleccion
-      entidad="organizaciones"
-      [cantidad]="seleccion.cantidad()"
-      [idsSeleccionados]="seleccion.lista()"
-      (fallo)="alFallarExportacion($event)"
-    />
-  </div>
 
   @if (exportarError(); as mensaje) {
   <p class="form-error" role="alert">{{ mensaje }}</p>

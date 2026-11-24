@@ -6,7 +6,12 @@
       </h1>
     </div>
     <div class="view-actions">
-      <p class="result-count" aria-live="polite">{{ total() }} reportes</p>
+      <app-barra-seleccion
+        entidad="reportes"
+        [cantidad]="seleccion.cantidad()"
+        [idsSeleccionados]="seleccion.lista()"
+        (fallo)="alFallarExportacion($event)"
+      />
     </div>
   </header>
 
@@ -21,15 +26,6 @@
       {{ opcion.etiqueta }}
     </button>
     }
-  </div>
-
-  <div class="view-toolbar">
-    <app-barra-seleccion
-      entidad="reportes"
-      [cantidad]="seleccion.cantidad()"
-      [idsSeleccionados]="seleccion.lista()"
-      (fallo)="alFallarExportacion($event)"
-    />
   </div>
 
   @if (exportarError(); as mensaje) {

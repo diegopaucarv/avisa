@@ -20,11 +20,11 @@ Las líneas citadas corresponden al árbol de esta fecha. Si `archivo:línea` no
 
 ## 1 · Alcance
 
-Veintiséis pantallas, una sola API. Recursos consumidos: casos, alertas, compromisos, demandas, documentos, actores, organizaciones, locales, reportes, notificaciones, catálogos, búsqueda y exportación.
+Veintiséis pantallas, una sola API. Recursos consumidos: casos, alertas, compromisos, demandas, documentos, actores, organizaciones, locales, medios, reportes, notificaciones, catálogos, búsqueda y exportación.
 
 Prefijo: `urlApi()` antepone `ENTORNO.apiBase` (por defecto `/api`) —`angular/src/app/core/config/entorno.ts:41-46`. Las rutas de este documento ya lo incluyen.
 
-**Verificación de cobertura:** las 34 rutas documentadas existen como `route.ts` en `app/api/**`. No hay ninguna ruta inventada ni ninguna llamada de la SPA sin implementación.
+**Verificación de cobertura:** toda ruta documentada existe como `route.ts` en `app/api/**`. No hay ninguna ruta inventada ni ninguna llamada de la SPA sin implementación.
 
 ---
 
@@ -180,6 +180,27 @@ historial | stateHistory | state_history, completitud | completeness
 
 `completitud` es parte del contrato de facto: `hechos{total,validados}`, `actores{total,conTipoYFuncion}`, `demandas{total,con3PCompletos}`, `geografia{tieneGeografia,regiones,distrito}`, `marcoSituacional{consistencia,correspondencia,coherenciaContextual,saturacion,trazabilidad}`.
 
+**Hitos de cada compromiso** — `compromisos[].hitos[]` (`compromiso.mapeo.ts:301-316`; servidor `lib/db/repos/cases.ts:709-730`). Claves en camelCase, sin alias snake_case (decisión **C1**):
+
+| Campo                  | Origen del repositorio                         | Nulo |
+| ---------------------- | ---------------------------------------------- | :--: |
+| `id`                   | `core.hitos_compromiso.id`                     |  no  |
+| `codigo`               | `codigo_hito`                                  |  no  |
+| `descripcion`          | `descripcion_hito`                             |  no  |
+| `fecha`                | `fecha_vencimiento` como `YYYY-MM-DD`          |  sí  |
+| `fechaTexto`           | `fecha_vencimiento_texto`                      |  sí  |
+| `fechaReal`            | `fecha_real` como `YYYY-MM-DD`                 |  sí  |
+| `fechaRealTexto`       | `fecha_real_texto`                             |  sí  |
+| `estado`               | `replace(cat_estados_hito.codigo,'_',' ')`     |  sí  |
+| `terminal`             | `coalesce(cat_estados_hito.es_terminal,false)` |  no  |
+| `validacion`           | `validacion`                                   |  sí  |
+| `descripcionEvidencia` | `descripcion_evidencia`                        |  sí  |
+| `linkEvidencia`        | `link_evidencia`                               |  sí  |
+| `responsableTexto`     | `responsable_texto`                            |  sí  |
+| `responsableUsuarioId` | `responsable_usuario_id::text`                 |  sí  |
+
+`fecha` y `fechaTexto` conviven: cuando la matriz trae «No aplica» o «Julio 2026», el tipado es `null` y la SPA muestra el texto. Los hitos se ordenan por `fecha_vencimiento nulls last, codigo_hito` y excluyen los anulados (`anulado_en is null`): la papelera no se cuela en la ficha.
+
 **Campos de fila y de ficha** (`dominio/mapeo.ts:314-560`): cada campo acepta alias camelCase y snake_case (`codigo|code`, `nivelConflicto|nivel_conflicto`, `anuladoPorNombre|anulado_por_nombre`, `fechaInicio|fecha_inicio|inicio`, `actualizado|updated|actualizadoEn`…). Esa tolerancia **no es el contrato**: la grafía queda fijada en la decisión **C1** (§7.1) —la que cada repositorio emite hoy— y no se añade una segunda.
 
 ### 4.2 · Alertas
@@ -203,6 +224,7 @@ Servidor admite además `caso` (`app/api/v1/alerts/route.ts:20`), que la SPA env
 | Método   | Ruta                                  | Query / cuerpo                                                                                                                                |
 | -------- | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
 | `GET`    | `/v1/commitments`                     | `q, estado, tipo, nivelGobierno, atiendeGenero, anulados, excluir_terminales, vencimiento_desde, vencimiento_hasta`                           |
+| `GET`    | `/v1/commitments/resumen`             | — (sobre de conteos; ignora la query)                                                                                                         |
 | `GET`    | `/v1/commitments/{id}`                | — → `{ commitment \| compromiso, caso, documentoOrigen }`                                                                                     |
 | `PATCH`  | `/v1/commitments/{id}`                | `accion, tipo, estado, unidad, nivelGobierno, alcance, tematica, atiendeGenero, criteriosSmart, evidenciaUri, fechaVencimiento, fechaInicio?` |
 | `POST`   | `/v1/commitments/{id}/hitos`          | `{ descripcion, estado, fecha? }`                                                                                                             |
@@ -213,6 +235,8 @@ Servidor admite además `caso` (`app/api/v1/alerts/route.ts:20`), que la SPA env
 Servidor admite además `caso` y `unidad` en el listado, que la SPA no envía hoy (`app/api/v1/commitments/route.ts:19-27`).
 
 `criteriosSmart` es **JSON libre**: se lee como objeto y se reenvía tal cual, sin transformar. Los hitos sin `fecha` se descartan en el mapeo y `proximoHito` exige fecha (`compromiso.mapeo.ts:219-228`).
+
+`/v1/commitments/resumen` devuelve un sobre de conteos, no de filas: `{ compromisos, hitos, hitosConFecha, hitosCumplidos, hitosCumplidosConFecha, compromisosConPlazo, generatedAt }` (`lib/db/repos/commitments.ts:1440-1487`). Cuenta compromisos e hitos vigentes (`anulado_en is null` en ambos) y mide el plazo por hitos, porque `core.compromisos` no guarda vencimiento propio: `compromisosConPlazo` es el número de compromisos con al menos un hito vigente con `fecha_vencimiento`. `hitosCumplidos` usa `cat_estados_hito.codigo = 'Cumplido'`. La SPA lo normaliza con `aResumenCompromisos` y, si el cuerpo no cumple el contrato, publica «No disponible» en vez de ceros (`resumen.mapeo.ts:34-64`).
 
 Variantes de la misma ruta que la SPA usa para cambiar de petición, no de endpoint:
 
@@ -236,12 +260,15 @@ Variantes de la misma ruta que la SPA usa para cambiar de petición, no de endpo
 | Método   | Ruta                           | Query / cuerpo                                                                                                                 |
 | -------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------ |
 | `GET`    | `/v1/documents`                | `q, tipo, estado, sort, anulados`                                                                                              |
+| `GET`    | `/v1/documents/arbol`          | `q, caso, tipo, estado, sort` (sin `anulados`; sin paginar)                                                                    |
 | `GET`    | `/v1/documents/{id}`           | — → `{ document \| documento, fuentes[] }`                                                                                     |
 | `PATCH`  | `/v1/documents/{id}`           | `titulo, tipo, fecha` (no admiten `null`) · `resumen, archivo, casoCode` (`null` vacía) · `{ estado }` para Validado/Rechazado |
 | `DELETE` | `/v1/documents/{id}`           | `{ motivo }`                                                                                                                   |
 | `POST`   | `/v1/documents/{id}/restaurar` | `{}`                                                                                                                           |
 
 El `caso` existe como filtro de servidor y la pantalla no lo expone (`app/api/v1/documents/route.ts:19`). `estadoUi` cae a `estado` y luego a `Cargado` (`documento.mapeo.ts:173-181`).
+
+`/v1/documents/arbol` devuelve el árbol del RAG en una sola petición: `{ items, total, normativas, otros, generatedAt }` (`lib/db/repos/documents.ts:156-163,341-376`). `items[]` trae la misma fila del listado, `total` cuenta sólo documentos, y `normativas[]`/`otros[]` son las ramas vigentes. No pagina y no acepta `anulados`: la papelera sigue en `/v1/documents`. De los filtros del expediente —`q`, `caso`, `tipo`, `estado`, `sort` (`recent` por defecto, `code`)— sólo `q` se propaga a las ramas `normativas` y `otros`.
 
 ### 4.6 · Directorio
 
@@ -308,39 +335,50 @@ El servidor expone además `estadosCaso`, `nivelesRiesgo`, `nivelesConflicto`, `
 
 `GET /api/v1/health/db`. No lo consume ninguna pantalla; existe para verificar la conexión tras el despliegue.
 
+### 4.13 · Medios
+
+| Método | Ruta                       | Query                                               | Respuesta                        |
+| ------ | -------------------------- | --------------------------------------------------- | -------------------------------- |
+| `GET`  | `/v1/media`                | `entidadTipo, entidadId, entidadIds, rol, anulados` | sobre paginado (`items[]`)       |
+| `GET`  | `/v1/media/{id}/contenido` | —                                                   | binario (`Content-Type`, `ETag`) |
+
+`GET /v1/media` lista medios por entidad (`entidadTipo` + `entidadId`) o por lote (`entidadIds`, separados por coma), que es lo que usan las tablas del directorio para pintar la foto sin una petición por fila (`app/api/v1/media/route.ts:37-84`). La respuesta es el sobre paginado con `pagina`/`tamanoPagina` añadidos; cada fila se traduce en `dominio/medios.ts:50-69`. `entidadTipo` debe estar en el catálogo (`actor`, `organizacion`, `local`, `caso`, `documento`, `reunion`) y `rol` en `principal`, `galeria`, `adjunto` o `evidencia`; un valor fuera de catálogo responde `422 CATALOG_VALUE_INVALID`. `pageSize` vale 25 por defecto y 100 como tope. Con `entidadIds` el servidor devuelve una fila por entidad —la principal o la primera del orden— y fija `page=1`. `anulados=true` exige la capacidad de anulación (§3.6).
+
+`GET /v1/media/{id}/contenido` sirve los bytes guardados en `core.medios.contenido` (`app/api/v1/media/[id]/contenido/route.ts:55-101`): `200` con `Content-Type`, `ETag` fuerte y caché inmutable de un año; `304` si `If-None-Match` coincide; `404` si la fila no es visible por RLS, está anulada o no tiene bytes. La fila expone `tieneContenido` para saber si ese respaldo existe; la galería de la SPA pinta `url` y declara «Sin fotografías» cuando no hay filas (`dominio/medios.ts:71-74`).
+
 ---
 
 ## 5 · Matriz pantalla → endpoints
 
-| Pantalla                     | Endpoints                                                                                                                                               |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/mapa` (inicio)             | `GET /v1/cases?abiertos=true` paginado de 100 hasta agotar                                                                                              |
-| `/resumen`                   | `cases`, `alerts`, `commitments`, `demandas` (4 KPI con `tamano=1`) · `alerts` (5) · `commitments` ×3 (vencidos, próximos 30 d, lista) · export `casos` |
-| `/bandeja`                   | `alerts?estado=Pendiente de revisión` · `commitments` ×3 · `demandas?sinCaso=true`                                                                      |
-| `/casos`                     | `GET /v1/cases` (+`catalogs`) · `POST /v1/cases/{codigo}/restaurar`                                                                                     |
-| `/casos/sin-caso`            | `GET /v1/demandas?sinCaso=true` · `GET /v1/cases` (drawer) · `PATCH /v1/demandas/{id}`                                                                  |
-| `/casos/{codigo}`            | `GET /v1/cases/{codigo}` · `catalogs` (al abrir panel) · `events` `POST`/`PATCH` · `demandas` `POST`/`PATCH` · `anular`/`restaurar`                     |
-| `/alertas`                   | `GET /v1/alerts` · `GET /v1/alerts/{id}` · `PATCH` · `DELETE`                                                                                           |
-| `/compromisos`               | `GET /v1/commitments` (lista, calendario, desglose) · `GET /{id}` · `PATCH` · hitos `POST`/`PATCH` · `DELETE` · `restaurar`                             |
-| `/documentos`                | `GET /v1/documents` (+`catalogs`) · `GET /{id}` · `PATCH` · `DELETE` · `restaurar`                                                                      |
-| `/archivo`                   | `GET` de los 5 recursos con `anulados=true` · `POST …/restaurar`                                                                                        |
-| `/directorio/actores`        | `GET /v1/actors` (+`catalogs`) · `PATCH /v1/actors/{uid}` · `GET /v1/actors/{uid}/pii`                                                                  |
-| `/directorio/organizaciones` | `GET /v1/organizaciones`                                                                                                                                |
-| `/directorio/instituciones`  | `GET /v1/actors?tipo=Actor público`                                                                                                                     |
-| `/directorio/locales`        | `GET /v1/locales`                                                                                                                                       |
-| `/direccion`                 | 17 `GET` de `total`: `cases` (×7), `alerts`, `commitments`, `demandas` · export `casos`                                                                 |
-| `/notificaciones`            | `GET /v1/notifications` · export `notificaciones`                                                                                                       |
-| `/busqueda`                  | `GET /v1/search` + los 6 listados                                                                                                                       |
-| `/reportes`                  | `GET /v1/reportes`                                                                                                                                      |
-| `/ayuda`, `/preferencias`    | ninguna llamada                                                                                                                                         |
-| `/acceso`                    | `POST /api/auth/login`                                                                                                                                  |
-| shell                        | `GET /api/v1/session`, `POST /api/auth/logout`                                                                                                          |
+| Pantalla                     | Endpoints                                                                                                                                                                                                                                                                                                                       |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/mapa` (inicio)             | `GET /v1/cases?abiertos=true` paginado de 100 hasta agotar                                                                                                                                                                                                                                                                      |
+| `/resumen`                   | 3 dimensiones con `tamano=1`: Prevención (`alerts` ×2, `demandas?sinCaso=true`) · Gestión (`cases?abiertos=true`, ×4 con `nivel`, `riesgo=Alto`) · Seguimiento (`commitments/resumen`, `commitments` vencidos y por vencer) · franja de operación (sin llamada) · 2 paneles (`alerts`, `commitments`, 5 filas) · export `casos` |
+| `/bandeja`                   | `alerts?estado=Pendiente de revisión` · `commitments` ×3 · `demandas?sinCaso=true`                                                                                                                                                                                                                                              |
+| `/casos`                     | `GET /v1/cases` (+`catalogs`) · `POST /v1/cases/{codigo}/restaurar`                                                                                                                                                                                                                                                             |
+| `/casos/sin-caso`            | `GET /v1/demandas?sinCaso=true` · `GET /v1/cases` (drawer) · `PATCH /v1/demandas/{id}`                                                                                                                                                                                                                                          |
+| `/casos/{codigo}`            | `GET /v1/cases/{codigo}` · `catalogs` (al abrir panel) · `events` `POST`/`PATCH` · `demandas` `POST`/`PATCH` · `anular`/`restaurar`                                                                                                                                                                                             |
+| `/alertas`                   | `GET /v1/alerts` · `GET /v1/alerts/{id}` · `PATCH` · `DELETE`                                                                                                                                                                                                                                                                   |
+| `/compromisos`               | `GET /v1/commitments` (lista, calendario, desglose) · `GET /{id}` · `PATCH` · hitos `POST`/`PATCH` · `DELETE` · `restaurar`                                                                                                                                                                                                     |
+| `/documentos`                | `GET /v1/documents` (+`catalogs`) · `GET /{id}` · `PATCH` · `DELETE` · `restaurar`                                                                                                                                                                                                                                              |
+| `/archivo`                   | `GET` de los 5 recursos con `anulados=true` · `POST …/restaurar`                                                                                                                                                                                                                                                                |
+| `/directorio/actores`        | `GET /v1/actors` (+`catalogs`) · `PATCH /v1/actors/{uid}` · `GET /v1/actors/{uid}/pii` · `GET /v1/media` (fotos)                                                                                                                                                                                                                |
+| `/directorio/organizaciones` | `GET /v1/organizaciones` · `GET /v1/media` (fotos)                                                                                                                                                                                                                                                                              |
+| `/directorio/instituciones`  | `GET /v1/actors?tipo=Actor público`                                                                                                                                                                                                                                                                                             |
+| `/directorio/locales`        | `GET /v1/locales` · `GET /v1/media` (fotos)                                                                                                                                                                                                                                                                                     |
+| `/direccion`                 | 17 `GET` de `total`: `cases` (×7), `alerts`, `commitments`, `demandas` · export `casos`                                                                                                                                                                                                                                         |
+| `/notificaciones`            | `GET /v1/notifications` · export `notificaciones`                                                                                                                                                                                                                                                                               |
+| `/busqueda`                  | `GET /v1/search` + los 6 listados                                                                                                                                                                                                                                                                                               |
+| `/reportes`                  | `GET /v1/reportes`                                                                                                                                                                                                                                                                                                              |
+| `/ayuda`, `/preferencias`    | ninguna llamada                                                                                                                                                                                                                                                                                                                 |
+| `/acceso`                    | `POST /api/auth/login`                                                                                                                                                                                                                                                                                                          |
+| shell                        | `GET /api/v1/session`, `POST /api/auth/logout`                                                                                                                                                                                                                                                                                  |
 
 ---
 
 ## 6 · Lo que .NET debe preservar (lista de verificación)
 
-1. **Rutas y métodos** de las §4.1–4.12, incluido el prefijo `/api` y que `login`/`logout` cuelguen de `/api/auth/**`, no de `/v1`.
+1. **Rutas y métodos** de las §4.1–4.13, incluido el prefijo `/api` y que `login`/`logout` cuelguen de `/api/auth/**`, no de `/v1`.
 2. **Sobre paginado** con `items`/`total`/`page`/`pageSize`/`generatedAt`, y el bloque `conteos` cuando llega `conteos=true`.
 3. **Aceptar las dos grafías de paginación**, con la española prioritaria y `pageSize` acotado a 100.
 4. **Error `{detail, code}`** con los códigos de §3.5; 401 con `NO_SESSION`; 403 sin `code` para permisos.
@@ -387,7 +425,7 @@ Deudas reales. Ninguna bloquea al equipo de .NET: tres se resuelven solo en la S
 | F6  | El panorama del mapa pagina en cliente con tope 100           | SPA / API                                | conservar el tope y un `total` exacto                                                                              | No: el contrato ya exige `total` exacto (§3.1)                 |
 | F7  | La descarga no queda en auditoría                             | API                                      | registrar quién exportó qué y con qué filtros (item 42)                                                            | No, pero es requisito del item 42                              |
 
-**Lo que no falta.** Las 34 rutas del §4 existen y están verificadas contra `app/api/**`; no hay ninguna llamada de la SPA sin implementación ni ninguna ruta documentada sin uso. Las parciales de la §«Entrega: implementable ahora» de `frontend.md` (items 11, 12, 13, 15, 26, 30, 31, 42) son trabajo de interfaz o de columnas concretas, no huecos del contrato.
+**Lo que no falta.** Las rutas del §4 existen y están verificadas contra `app/api/**`; no hay ninguna llamada de la SPA sin implementación. Hay superficie publicada sin consumo actual (`/v1/actors/{uid}`, `/v1/media/{id}/contenido`): es capacidad disponible (§7.1 C2/C3), no hueco del contrato. Las parciales de la §«Entrega: implementable ahora» de `frontend.md` (items 11, 12, 13, 15, 26, 30, 31, 42) son trabajo de interfaz o de columnas concretas, no huecos del contrato.
 
 ---
 

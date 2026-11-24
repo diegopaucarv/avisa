@@ -16,10 +16,27 @@
         <strong>{{ d.caso.codigo }}</strong>
       </div>
       <h1 id="titulo-caso">{{ d.caso.titulo }}</h1>
-      <p class="case-resumen">{{ d.caso.resumen || 'Sin resumen registrado.' }}</p>
       <p class="view-meta">Última actualización: {{ fechaTexto(d.caso.actualizado) }}</p>
     </div>
     <div class="view-actions">
+      <label
+        class="edit-switch"
+        [class.activo]="modoEdicion()"
+        [class.deshabilitado]="!puedeModificar()"
+      >
+        <input
+          type="checkbox"
+          role="switch"
+          [checked]="modoEdicion()"
+          [disabled]="!puedeModificar()"
+          aria-label="Activar la edición de la ficha"
+          (change)="alternarModoEdicion($event)"
+        />
+        <span class="edit-switch-track" aria-hidden="true">
+          <span class="edit-switch-thumb"></span>
+        </span>
+        <span>Editar</span>
+      </label>
       @if (anulado()) {
       <span class="status-badge">Anulado</span>
       @if (puedeAnular()) {
@@ -107,9 +124,6 @@
 
   <div class="ficha-layout">
     <div class="ficha-principal">
-      <div class="detail-section-title">
-        <h2 id="resumen-caso">Resumen</h2>
-      </div>
       @if (avisoCampo(); as aviso) {
       <p class="form-hint aviso-ok" role="status">{{ aviso }}</p>
       }
@@ -227,7 +241,7 @@
             <span class="campo-valor">{{ valorMostrado(def.campo) }}</span>
             @if (def.ayuda; as ayuda) {
             <small class="detail-hint">{{ ayuda }}</small>
-            } @if (puedeModificar() && !editando()) {
+            } @if (puedeModificar() && modoEdicion() && !editando()) {
             <button type="button" class="link-button" (click)="abrirEdicion(def.campo)">
               Editar
             </button>
@@ -273,16 +287,15 @@
                 <th scope="col" [appThOrden]="'actor'" [orden]="ordenActores">
                   Actor (Apellidos, Nombres)
                 </th>
+                <th scope="col" [appThOrden]="'institucion'" [orden]="ordenActores">Institución</th>
+                <th scope="col" [appThOrden]="'telefono'" [orden]="ordenActores">Teléfono</th>
                 <th scope="col" [appThOrden]="'correo'" [orden]="ordenActores">Correo</th>
-                <th scope="col" [appThOrden]="'tipo'" [orden]="ordenActores">
-                  Tipo <app-glosario termino="tipo-actor" />
-                </th>
-                <th scope="col" [appThOrden]="'funcion'" [orden]="ordenActores">
-                  Función <app-glosario termino="funcion-actor" />
-                </th>
                 <th scope="col" [appThOrden]="'posicionamiento'" [orden]="ordenActores">
                   Posicionamiento
                 </th>
+                @if (puedeModificar() && modoEdicion()) {
+                <th scope="col">Acciones</th>
+                }
               </tr>
             </thead>
             <tbody>
@@ -297,10 +310,22 @@
                     {{ nombreActor(actor) }}
                   </a>
                 </td>
+                <td>{{ institucionActor(actor) }}</td>
+                <td>{{ telefonoActor(actor) }}</td>
                 <td>{{ actor.correo || '—' }}</td>
-                <td>{{ actor.tipo || '—' }}</td>
-                <td>{{ actor.funcion || '—' }}</td>
                 <td>{{ actor.posicionamiento || '—' }}</td>
+                @if (puedeModificar() && modoEdicion()) {
+                <td>
+                  <a
+                    class="button-secondary timeline-edit"
+                    [routerLink]="['/directorio/actores']"
+                    [queryParams]="{ q: nombreActor(actor) }"
+                    [attr.aria-label]="'Editar ' + nombreActor(actor) + ' en el directorio de actores'"
+                  >
+                    Editar
+                  </a>
+                </td>
+                }
               </tr>
               }
             </tbody>
@@ -319,61 +344,25 @@
           </button>
           }
         </div>
-        @if (avisoValidacion(); as aviso) {
-        <p class="form-hint aviso-ok" role="status">{{ aviso }}</p>
-        } @if (errorValidacion(); as error) {
-        <p class="form-error" role="alert">{{ error }}</p>
-        } @if (d.eventos.length === 0) {
+        @if (d.eventos.length === 0) {
         <p class="empty-inline">Sin hechos registrados.</p>
         } @else {
         <ol class="timeline-list">
           @for (evento of d.eventos; track evento.id) {
           <li>
-            <span class="timeline-date">{{ fechaTexto(evento.fecha) }}</span>
-            <div>
-              <div class="timeline-meta">
-                <strong>{{ evento.tipo || 'Hecho' }}</strong>
-                <span
-                  class="status-badge"
-                  [class]="
-                          evento.validado
-                            ? 'status-badge state-approved'
-                            : 'status-badge state-pending'
-                        "
-                >
-                  <span class="status-dot"></span>
-                  {{ evento.validado ? 'Validado' : 'Pendiente' }}
-                </span>
-              </div>
-              @if (evento.actor) {
-              <p class="timeline-actor">Actor: {{ evento.actor }}</p>
-              }
-              <p>{{ evento.descripcion }}</p>
-              @if (puedeModificar()) {
-              <div class="timeline-acciones">
-                <button
-                  type="button"
-                  class="button-secondary timeline-edit"
-                  [attr.aria-label]="'Editar el hecho del ' + (evento.fecha || 'sin fecha')"
-                  (click)="editarHecho(evento)"
-                >
-                  Editar
-                </button>
-                <button
-                  type="button"
-                  class="button-secondary timeline-edit"
-                  [disabled]="validandoEvento() === evento.id"
-                  [attr.aria-label]="
-                    (evento.validado ? 'Quitar la validación del hecho del ' : 'Validar el hecho del ') +
-                    (evento.fecha || 'sin fecha')
-                  "
-                  (click)="alternarValidacion(evento)"
-                >
-                  {{ evento.validado ? 'Quitar validación' : 'Validar' }}
-                </button>
-              </div>
-              }
-            </div>
+            <span class="timeline-linea"
+              >{{ fechaCorta(evento.fecha) }} - {{ evento.descripcion }}</span
+            >
+            @if (modoEdicion() && puedeModificar()) {
+            <button
+              type="button"
+              class="button-secondary timeline-edit"
+              [attr.aria-label]="'Editar el hecho del ' + fechaCorta(evento.fecha)"
+              (click)="editarHecho(evento)"
+            >
+              Editar
+            </button>
+            }
           </li>
           }
         </ol>
@@ -382,9 +371,7 @@
 
       <section class="detail-section" aria-labelledby="demandas-caso">
         <div class="detail-section-title">
-          <h2 id="demandas-caso">
-            Demandas ({{ d.demandas.length }}) <app-glosario termino="3p" />
-          </h2>
+          <h2 id="demandas-caso">Demandas ({{ d.demandas.length }})</h2>
           @if (puedeModificar()) {
           <button type="button" class="button-secondary" (click)="altaDemanda()">
             <app-icono nombre="bandeja" [tamano]="14" />
@@ -401,14 +388,12 @@
           <table class="data-table">
             <thead>
               <tr>
-                <th scope="col" [appThOrden]="'problema'" [orden]="ordenDemandas">Problema</th>
-                <th scope="col" [appThOrden]="'propuesta'" [orden]="ordenDemandas">Propuesta</th>
-                <th scope="col" [appThOrden]="'pedido'" [orden]="ordenDemandas">Pedido</th>
+                <th scope="col" [appThOrden]="'demanda'" [orden]="ordenDemandas">Demanda</th>
                 <th scope="col" [appThOrden]="'estado'" [orden]="ordenDemandas">
                   Estado de atención
                 </th>
                 <th scope="col" [appThOrden]="'origen'" [orden]="ordenDemandas">Origen</th>
-                @if (puedeModificar()) {
+                @if (puedeModificar() && modoEdicion()) {
                 <th scope="col">Acciones</th>
                 }
               </tr>
@@ -416,9 +401,7 @@
             <tbody>
               @for (demanda of filasDemandas(); track demanda.id) {
               <tr>
-                <td>{{ demanda.problema || demanda.descripcion || '—' }}</td>
-                <td>{{ demanda.propuesta || '—' }}</td>
-                <td>{{ demanda.pedido || '—' }}</td>
+                <td class="celda-larga">{{ demanda.descripcion || demanda.problema || '—' }}</td>
                 <td>{{ demanda.estado || '—' }}</td>
                 <td class="celda-larga">
                   @if (demanda.documentoOrigenCodigo; as codigoOrigen) {
@@ -436,7 +419,7 @@
                   <span aria-hidden="true">—</span>
                   }
                 </td>
-                @if (puedeModificar()) {
+                @if (puedeModificar() && modoEdicion()) {
                 <td>
                   <button
                     type="button"
@@ -562,6 +545,99 @@
         }
       </section>
 
+      <section class="detail-section" aria-labelledby="hitos-caso">
+        <h2 id="hitos-caso">Hitos del caso ({{ filasHitos().length }})</h2>
+        @if (errorHitos(); as error) {
+        <p class="form-error" role="alert">{{ error }}</p>
+        } @if (filasHitos().length === 0) {
+        <p class="empty-inline">Sin hitos registrados.</p>
+        } @else {
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th scope="col" [appThOrden]="'compromiso'" [orden]="ordenHitos">Código</th>
+                <th scope="col" [appThOrden]="'hito'" [orden]="ordenHitos">Hito</th>
+                <th scope="col" [appThOrden]="'estado'" [orden]="ordenHitos">Estado</th>
+                <th scope="col" [appThOrden]="'fecha'" [orden]="ordenHitos">Planificada</th>
+                <th scope="col" [appThOrden]="'real'" [orden]="ordenHitos">Real</th>
+                <th scope="col" [appThOrden]="'responsable'" [orden]="ordenHitos">Responsable</th>
+                @if (puedeModificar()) {
+                <th scope="col">Acciones</th>
+                }
+              </tr>
+            </thead>
+            <tbody>
+              @for (hito of filasHitos(); track hito.id) {
+              <tr>
+                <td>
+                  <strong>{{ hito.compromiso }}</strong>
+                  <small class="detail-hint">{{ codigoHitoVisible(hito.codigo) }}</small>
+                </td>
+                <td class="celda-larga">{{ hito.descripcion || '—' }}</td>
+                <td>
+                  <span [class]="'status-badge ' + claseEstadoHito(hito.estado)">
+                    {{ hito.estado || '—' }}
+                  </span>
+                  @if (hito.terminal) {
+                  <span class="status-badge">Terminal</span>
+                  }
+                </td>
+                <td>{{ textoFechaHito(hito.fecha, hito.fechaTexto) }}</td>
+                <td>{{ textoFechaRealHito(hito.fechaReal, hito.fechaRealTexto) }}</td>
+                <td>{{ hito.responsableTexto || '—' }}</td>
+                @if (puedeModificar()) {
+                <td>
+                  <div class="hitos-acciones">
+                    @for (accion of accionesHito; track accion) { @switch (accion) { @case
+                    ('estado') {
+                    <select
+                      class="form-select hito-control"
+                      [attr.aria-label]="'Estado del hito ' + referenciaHito(hito.codigo)"
+                      [disabled]="guardandoHito() === hito.id"
+                      (change)="cambiarEstadoHito(hito, $event)"
+                    >
+                      @if (hito.estado && !esEstadoHitoFicha(hito.estado)) {
+                      <option [value]="hito.estado" selected>{{ hito.estado }}</option>
+                      } @for (estado of estadosHito; track estado) {
+                      <option [value]="estado" [selected]="estado === hito.estado">
+                        {{ estado }}
+                      </option>
+                      }
+                    </select>
+                    } @case ('fechaReal') {
+                    <input
+                      class="form-input hito-control"
+                      type="date"
+                      [attr.aria-label]="'Fecha real del hito ' + referenciaHito(hito.codigo)"
+                      [value]="hito.fechaReal ?? ''"
+                      [disabled]="guardandoHito() === hito.id"
+                      (change)="cambiarFechaRealHito(hito, $event)"
+                    />
+                    } @case ('responsable') {
+                    <input
+                      class="form-input hito-control"
+                      type="text"
+                      maxlength="200"
+                      autocomplete="off"
+                      placeholder="Responsable"
+                      [attr.aria-label]="'Responsable del hito ' + referenciaHito(hito.codigo)"
+                      [value]="hito.responsableTexto ?? ''"
+                      [disabled]="guardandoHito() === hito.id"
+                      (change)="cambiarResponsableHito(hito, $event)"
+                    />
+                    } } }
+                  </div>
+                </td>
+                }
+              </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        }
+      </section>
+
       <section class="detail-section" aria-labelledby="documentos-caso">
         <h2 id="documentos-caso">Documentos ({{ d.documentos.length }})</h2>
         @if (d.documentos.length === 0) {
@@ -648,6 +724,7 @@
   <app-demanda-panel
     [demanda]="demandaEditada()"
     [codigoCaso]="d.caso.codigo"
+    [organizaciones]="organizacionesDelCaso()"
     [puedeModificar]="puedeModificar()"
     [guardando]="guardandoDemanda()"
     [errorGuardado]="errorDemanda()"

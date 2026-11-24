@@ -12,7 +12,7 @@
         <p class="previa-codigo">{{ caso().codigo }}</p>
         <h2 id="vista-previa-titulo">{{ caso().titulo }}</h2>
         <p class="previa-sub">
-          Actualización: {{ fechaCorta(caso().actualizado) }} · Región:
+          Actualización: {{ fechaTexto(caso().actualizado) }} · Región:
           {{ caso().region || 'sin región' }}
         </p>
       </div>
@@ -54,7 +54,7 @@
         </div>
         <div>
           <dt>Inicio</dt>
-          <dd>{{ fechaCorta(caso().inicio) }}</dd>
+          <dd>{{ fechaTexto(caso().inicio) }}</dd>
         </div>
       </dl>
 
@@ -66,9 +66,33 @@
           </a>
         </li>
         <li>
-          <a class="previa-acceso" [routerLink]="['/casos', caso().codigo]" fragment="actores-caso">
-            <app-icono nombre="actores" [tamano]="14" />
-            Mapa de actores
+          <a
+            class="previa-acceso"
+            [routerLink]="['/casos', caso().codigo]"
+            fragment="compromisos-caso"
+          >
+            <app-icono nombre="compromisos" [tamano]="14" />
+            Acuerdos
+          </a>
+        </li>
+        <li>
+          <a
+            class="previa-acceso"
+            [routerLink]="['/casos', caso().codigo]"
+            fragment="demandas-caso"
+          >
+            <app-icono nombre="bandeja" [tamano]="14" />
+            Demandas
+          </a>
+        </li>
+        <li>
+          <a
+            class="previa-acceso"
+            [routerLink]="['/casos', caso().codigo]"
+            fragment="documentos-caso"
+          >
+            <app-icono nombre="documentos" [tamano]="14" />
+            Documentos
           </a>
         </li>
         <li>
@@ -93,8 +117,8 @@
       </ul>
 
       <p class="previa-nota">
-        La línea de tiempo, el mapa de actores y los acuerdos abren la sección correspondiente del
-        expediente del caso.
+        La línea de tiempo, el mapa de actores, las demandas, los acuerdos y los documentos abren la
+        sección correspondiente del expediente del caso.
       </p>
     </div>
 

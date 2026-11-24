@@ -14,63 +14,87 @@ import {
 } from '@angular/core';
 
 import type { ErrorApi } from '../../core/http/errores';
+import { RIESGOS, formatearFechaCorta } from '../../dominio/mapeo';
+import type { Riesgo } from '../../dominio/modelos';
 import { IconoComponent } from '../../shared/ui/icono.component';
 import {
   TerritorioBuscadorComponent,
   type OpcionTerritorio,
 } from '../../shared/ui/territorio-buscador.component';
 import {
-  PRIORIDADES_ALERTA,
-  NIVELES_ALERTA,
-  OPCIONES_NIVEL,
-  PASO_APROBACION_DEFINITIVA,
-  type AccionFlujo,
-  type Alerta,
-  type AltaAlerta,
-  type OpcionPrioridadAlerta,
-  type PatchAlerta,
-  accionesDeFlujo,
+  ALCANCES_ALERTA,
+  REGIONES_PERU,
   aJsonLineas,
-  clavePrioridad as clavePrioridadDe,
-  claseEstado as claseEstadoDe,
-  etapaDeFlujo,
-  formatearPlazo as formatearPlazoDe,
+  claveRiesgo,
+  etiquetaEstado,
+  geografiaAlerta,
+  plantillaWhatsapp,
+  tituloLimpio,
+  type Alerta,
+  type AlcanceAlerta,
+  type AltaAlerta,
+  type PatchAlerta,
 } from './alerta.mapeo';
+import { copiarAlPortapapeles } from './portapapeles';
+
+/** Opción del selector de caso: código y título de `GET /api/v1/cases`. */
+export type CasoOpcion = { codigo: string; titulo: string };
+
+/** Modo con el que se abre el panel desde el listado. */
+export type ModoPanelAlerta = 'ver' | 'editar' | 'historial';
 
 type BorradorAlerta = {
   titulo: string;
-  prioridad: string;
-  nivel: string;
   situacionActual: string;
   hechosRecientes: string;
   descripcionRiesgo: string;
-  accionesOaipcs: string;
+  actoresClave: string;
+  demandasInmediatas: string;
   accionesSugeridas: string;
-  casoCode: string;
 };
 
 type CampoBorrador = keyof BorradorAlerta;
 
+type MetadatosAlerta = {
+  riesgo: Riesgo | '';
+  alcance: AlcanceAlerta | '';
+  region: string;
+  provincia: string;
+  casoCode: string;
+};
+
+type CampoMetadatos = 'region' | 'provincia' | 'casoCode';
+
 type BorradorAlta = {
   titulo: string;
-  prioridad: string;
+  riesgo: Riesgo | '';
+  alcance: AlcanceAlerta | '';
+  region: string;
+  provincia: string;
   casoCode: string;
   descripcionRiesgo: string;
   hechosRecientes: string;
   situacionActual: string;
-  accionesOaipcs: string;
+  actoresClave: string;
+  demandasInmediatas: string;
+  accionesSugeridas: string;
 };
 
-type CampoAlta = keyof BorradorAlta;
+type CampoAlta = Exclude<keyof BorradorAlta, 'riesgo' | 'alcance'>;
 
 const BORRADOR_ALTA_VACIO: BorradorAlta = {
   titulo: '',
-  prioridad: '',
+  riesgo: '',
+  alcance: '',
+  region: '',
+  provincia: '',
   casoCode: '',
   descripcionRiesgo: '',
   hechosRecientes: '',
   situacionActual: '',
-  accionesOaipcs: '',
+  actoresClave: '',
+  demandasInmediatas: '',
+  accionesSugeridas: '',
 };
 
 /** `undefined` = no cambió; `null` = se vació a propósito. */
@@ -80,16 +104,24 @@ function diferenciaTexto(valor: string, original: string | null): string | null 
   return limpio ? limpio : null;
 }
 
+/** `Distrito · Provincia · Región` → provincia y región. */
+function partesDeRuta(ruta: string | null | undefined): { provincia: string; region: string } {
+  const partes = (ruta ?? '')
+    .split('·')
+    .map((parte) => parte.trim())
+    .filter((parte) => parte.length > 0);
+  return { provincia: partes[1] ?? '', region: partes[2] ?? '' };
+}
+
 /**
  * Panel lateral derecho de una alerta.
  *
- * Reemplaza la navegación a otra vista: el listado queda detrás y el recorrido
- * de cinco pasos y la edición ocurren aquí. Es un diálogo modal (`role="dialog"`,
- * `aria-modal`), se cierra con Escape o con el fondo y encierra el foco con Tab.
+ * Concentra la ficha y la edición. Los metadatos (riesgo, alcance geográfico,
+ * caso vinculado y distrito) los puede editar cualquier perfil: viven en un
+ * formulario siempre activo. El contenido narrativo sólo se abre con
+ * «Modificar» y exige el permiso que decide la pantalla.
  *
- * Sirve también de alta: `alerta === null` abre el formulario de registro en
- * lugar de la ficha. En ambos casos no conoce HTTP: emite el cuerpo ya armado
- * (alta) o el diff parcial y el paso de destino (edición).
+ * No conoce HTTP: emite el `PatchAlerta` ya calculado o el `AltaAlerta`.
  */
 @Component({
   selector: 'app-alerta-panel',
@@ -101,325 +133,242 @@ function diferenciaTexto(valor: string, original: string | null): string | null 
       display: contents;
     }
 
-    /* El drawer global mide 600 px; la ficha necesita algo más de aire. */
     .drawer {
-      width: min(640px, 100%);
+      width: min(680px, 100%);
     }
 
-    .alerta-panel-cabecera {
+    .alerta-cabecera {
       display: flex;
       flex-direction: column;
-      gap: 3px;
+      gap: 6px;
       min-width: 0;
     }
 
-    .alerta-panel-codigo {
+    .alerta-codigo {
       margin: 0;
       color: #8a98a5;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 700;
-      letter-spacing: 0.7px;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
     }
 
+    .alerta-titulo {
+      margin: 0;
+      color: #17283a;
+      font-size: 17px;
+      font-weight: 700;
+      line-height: 1.35;
+      letter-spacing: -0.2px;
+    }
 
-    .alerta-panel-badges {
+    .alerta-insignias {
       display: flex;
       flex-wrap: wrap;
       align-items: center;
       gap: 6px;
-      margin-top: 8px;
     }
 
-    .alerta-prioridad--critica {
-      background: #f9ecea;
-      color: #a84f49;
-    }
-    .alerta-prioridad--urgente {
-      background: #fff3e5;
-      color: #a6732d;
-    }
-    .alerta-prioridad--temprana {
+    .alerta-geografia {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      border-radius: 999px;
       background: #eef3fa;
       color: #4a6b93;
-    }
-    .alerta-prioridad--seguimiento {
-      background: #f0f3f5;
-      color: #657684;
-    }
-    .alerta-prioridad--sin-prioridad {
-      background: #f6f7f8;
-      color: #8b97a1;
-    }
-
-    .alerta-plazo {
-      background: #f0f3f5;
-      color: #657684;
-    }
-    .alerta-plazo--sin {
-      background: #f6f7f8;
-      color: #8b97a1;
-    }
-
-    .alerta-nivel {
-      background: #eef3fa;
-      color: #4a6b93;
-    }
-
-    .alerta-grave {
-      background: #f9ecea;
-      color: #a84f49;
+      font-size: 11.5px;
       font-weight: 700;
     }
 
-    .alerta-panel-cuerpo {
-      gap: 16px;
+    .alerta-trazabilidad {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px 16px;
+      padding: 10px 12px;
+      border: 1px solid #e8edf1;
+      border-radius: 9px;
+      background: #f9fbfd;
+      font-size: 12.5px;
+      color: #526577;
+    }
+
+    .alerta-trazabilidad b {
+      color: #17283a;
+      font-weight: 700;
+    }
+
+    .alerta-trazabilidad button {
+      margin-left: auto;
     }
 
     .alerta-seccion {
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 8px;
+      padding: 14px 15px;
+      border: 1px solid #e8edf1;
+      border-radius: 11px;
+      background: #fff;
     }
 
     .alerta-seccion h3 {
       margin: 0;
-      color: #33475b;
-      font: 700 13px var(--font-display);
-    }
-
-    .alerta-texto {
-      margin: 0;
-      color: #52677a;
-      font-size: 13px;
-      line-height: 1.65;
-      white-space: pre-line;
-    }
-
-    .alerta-nota {
-      margin: 0;
-      color: #8d99a6;
+      color: #1a2b3e;
       font-size: 12.5px;
-      line-height: 1.5;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .alerta-seccion p {
+      margin: 0;
+      color: #33475b;
+      font-size: 13.5px;
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+
+    .alerta-seccion ul {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin: 0;
+      padding-left: 18px;
+      color: #33475b;
+      font-size: 13.5px;
+      line-height: 1.55;
     }
 
     .alerta-vacio {
-      margin: 0;
-      color: #a0aab3;
-      font-size: 13px;
+      color: #99a3aa;
       font-style: italic;
     }
 
-    .alerta-aviso {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin: 0;
-      padding: 8px 10px;
-      border-radius: 6px;
-      background: #edf6f0;
-      color: #52806a;
-      font-size: 13px;
-    }
-
-    .alerta-aviso span {
-      flex: 1;
-      min-width: 0;
-      line-height: 1.5;
-    }
-
-    .alerta-deshacer {
-      flex-shrink: 0;
-      height: auto;
-      padding: 2px 8px;
-      font-size: 12px;
-    }
-
-    .alerta-confirmacion {
+    .bloque-metadatos {
       display: flex;
       flex-direction: column;
       gap: 10px;
-      margin-top: 4px;
-      padding: 10px 12px;
-      border: 1px solid #e6e0cf;
-      border-radius: 8px;
-      background: #fdfaf1;
+      padding: 14px 15px;
+      border: 1px solid #e8edf1;
+      border-radius: 11px;
+      background: #f9fbfd;
     }
 
-    .alerta-confirmacion-titulo {
+    .bloque-metadatos h3 {
       margin: 0;
-      color: #7d6a35;
-      font-size: 12px;
+      color: #1a2b3e;
+      font-size: 12.5px;
       font-weight: 700;
-      letter-spacing: 0.6px;
+      letter-spacing: 0.06em;
       text-transform: uppercase;
     }
 
-    .alerta-error {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      padding: 10px;
-      border: 1px solid #f0d9d5;
-      border-radius: 6px;
-      background: #fdf6f5;
-      color: #a3402f;
-      font-size: 13px;
-    }
-    .alerta-error p {
-      margin: 0;
+    .rejilla-dos {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
     }
 
-    .alerta-etapa {
+    .rejilla-metadatos {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 10px;
+    }
+
+    .acciones-form {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    .plantilla-mensaje {
+      width: 100%;
+      min-height: 240px;
+      padding: 12px 14px;
+      border: 1px solid #e0e6ec;
+      border-radius: 10px;
+      background: #f9fbfd;
+      color: #17283a;
+      font:
+        500 12.5px/21px ui-monospace,
+        'SFMono-Regular',
+        'Menlo',
+        'Consolas',
+        monospace;
+      white-space: pre-wrap;
+      resize: vertical;
+    }
+
+    .plantilla-mensaje[readonly] {
+      cursor: default;
+    }
+
+    .plantilla-mensaje:focus {
+      outline: 2px solid #c9d8ea;
+      outline-offset: 1px;
+      background: #fff;
+    }
+
+    .herramientas-plantilla {
       display: flex;
       flex-wrap: wrap;
       align-items: center;
-      gap: 8px;
-      margin: 0;
-      color: #465a6c;
-      font-size: 13px;
+      justify-content: space-between;
+      gap: 10px;
     }
 
-    .alerta-etapa-estado {
-      padding: 2px 7px;
-      border-radius: 10px;
-      background: #eef3fa;
-      color: #4a6b93;
-      font-size: 12px;
+    .conmutador {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: #33475b;
+      font-size: 12.5px;
       font-weight: 600;
     }
 
-    .alerta-acciones {
+    .historial {
       display: flex;
       flex-direction: column;
       gap: 8px;
-      margin-top: 2px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
     }
 
-    .alerta-accion {
+    .historial li {
       display: flex;
       flex-direction: column;
-      align-items: flex-start;
       gap: 2px;
-      height: auto;
       padding: 8px 10px;
-      text-align: left;
-      white-space: normal;
+      border: 1px solid #eef2f6;
+      border-radius: 8px;
+      background: #fff;
     }
 
-    .alerta-accion small {
-      color: #8d99a6;
-      font-size: 12px;
-      font-weight: 400;
-      line-height: 1.4;
-    }
-
-    .alerta-formulario {
-      display: flex;
-      flex-direction: column;
-      gap: 11px;
-      padding-top: 12px;
-      border-top: 1px solid #eef2f6;
-    }
-
-    .alerta-formulario .form-textarea {
-      min-height: 68px;
-    }
-
-    .alerta-formulario-acciones {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    .alerta-datos {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 10px 16px;
-      margin: 0;
-    }
-
-    .alerta-datos > div {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-      min-width: 0;
-    }
-
-    .alerta-datos dt {
-      color: #97a1aa;
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-    }
-
-    .alerta-datos dd {
-      margin: 0;
-      color: #465a6c;
+    .historial .historial-autor {
+      color: #17283a;
       font-size: 13px;
-      line-height: 1.4;
-      overflow-wrap: anywhere;
-    }
-
-    .alerta-lista {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      margin: 0;
-      padding-left: 16px;
-      color: #52677a;
-      font-size: 13px;
-      line-height: 1.5;
-    }
-
-    .alerta-alta-ayuda {
-      margin: 4px 0 0;
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.5;
-    }
-
-    .alerta-alta-formulario {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .alerta-alta-plazo {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 6px;
-      margin: 0;
-      padding: 7px 10px;
-      border: 1px solid var(--line);
-      border-radius: 6px;
-      background: var(--canvas);
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.4;
-    }
-
-    .alerta-alta-plazo strong {
-      color: var(--ink);
       font-weight: 700;
     }
 
-    .alerta-alta-grave {
-      padding: 1px 7px;
-      border-radius: 10px;
-      background: var(--red-pale);
-      color: var(--red);
+    .historial .historial-meta {
+      color: #8b97a1;
       font-size: 12px;
-      font-weight: 700;
     }
 
-    .alerta-alta-catalogo {
+    .aviso-copia {
       margin: 0;
-      color: var(--muted);
+      color: #2f6f52;
       font-size: 12.5px;
-      line-height: 1.4;
+    }
+
+    @media (max-width: 620px) {
+      .rejilla-dos,
+      .rejilla-metadatos {
+        grid-template-columns: 1fr;
+      }
     }
   `,
 })
@@ -427,31 +376,27 @@ export class AlertaPanelComponent {
   readonly alerta = input<Alerta | null>(null);
   readonly cargando = input(false);
   readonly errorCarga = input<ErrorApi | null>(null);
+  /** Permiso para editar el contenido narrativo (los metadatos no lo exigen). */
   readonly puedeModificar = input(false);
   readonly guardando = input(false);
   readonly errorGuardado = input<string | null>(null);
   readonly aviso = input<string | null>(null);
-  /** Paso al que se puede volver tras un cambio exitoso; `null` oculta «Deshacer». */
-  readonly pasoDeshacer = input<number | null>(null);
-  /** Código del caso con el que se presiembra el alta (pantalla filtrada por caso). */
+  readonly modoInicial = input<ModoPanelAlerta>('ver');
+  /** Código del caso con el que se presiembra el alta. */
   readonly casoInicial = input('');
-  /** Prioridades de `GET /api/v1/catalogs` → `catalogs.prioridadesAlerta`. */
-  readonly prioridadesCatalogo = input<readonly OpcionPrioridadAlerta[]>([]);
-  readonly cargandoPrioridades = input(false);
-  readonly errorPrioridades = input<ErrorApi | null>(null);
+  /** Casos disponibles para el selector «Caso vinculado». */
+  readonly casos = input<readonly CasoOpcion[]>([]);
 
   readonly cerrar = output<void>();
   readonly reintentar = output<void>();
   readonly guardar = output<PatchAlerta>();
   readonly registrar = output<AltaAlerta>();
-  readonly accion = output<number>();
-  readonly deshacer = output<void>();
 
-  readonly prioridades = PRIORIDADES_ALERTA;
-  readonly niveles = NIVELES_ALERTA;
+  readonly riesgos = RIESGOS;
+  readonly alcances = ALCANCES_ALERTA;
+  readonly regiones = REGIONES_PERU;
 
   private readonly panel = viewChild<ElementRef<HTMLElement>>('panel');
-  private readonly botonConfirmar = viewChild<ElementRef<HTMLButtonElement>>('botonConfirmar');
   private readonly destruccion = inject(DestroyRef);
 
   /** Elemento que tenía el foco al abrir, para devolvérselo al cerrar. */
@@ -459,29 +404,22 @@ export class AlertaPanelComponent {
     typeof document === 'undefined' ? null : (document.activeElement as HTMLElement | null);
 
   readonly editando = signal(false);
+  readonly verHistorial = signal(false);
   readonly borrador = signal<BorradorAlerta | null>(null);
+  readonly metadatos = signal<MetadatosAlerta>({
+    riesgo: '',
+    alcance: '',
+    region: '',
+    provincia: '',
+    casoCode: '',
+  });
+  readonly distritoMetadatos = signal<OpcionTerritorio | null>(null);
   readonly borradorAlta = signal<BorradorAlta>(BORRADOR_ALTA_VACIO);
-  /**
-   * Distrito elegido en el alta. Se guarda aparte del borrador porque el
-   * buscador emite un objeto y `BorradorAlta` sólo guarda texto de campos
-   * nativos.
-   */
   readonly distritoAlta = signal<OpcionTerritorio | null>(null);
-  /**
-   * Distrito de la alerta en edición. Se siembra con el que ya está guardado para
-   * que el buscador no arranque vacío; cualquier edición de texto lo invalida
-   * (el componente emite `null`) para que lo guardado no contradiga lo visible.
-   */
-  readonly distritoEdicion = signal<OpcionTerritorio | null>(null);
-  /**
-   * El usuario ya confirmó guardar un distrito distinto del caso. Sin esto, el
-   * formulario pide la confirmación explícita en vez de pisar la diferencia.
-   */
-  readonly divergenciaAceptada = signal(false);
+  readonly mensaje = signal('');
+  readonly editarPlantilla = signal(false);
+  readonly avisoCopia = signal<string | null>(null);
   readonly mensajeLocal = signal<string | null>(null);
-
-  /** Acción de aprobación elegida que espera confirmación explícita (item 23). */
-  readonly aprobacionPendiente = signal<AccionFlujo | null>(null);
 
   readonly formulario = computed(() => (this.editando() ? this.borrador() : null));
 
@@ -489,80 +427,22 @@ export class AlertaPanelComponent {
   readonly esAlta = computed(() => this.alerta() === null);
 
   /** Semilla del buscador en edición: el distrito ya guardado. */
-  readonly inicialDistritoEdicion = computed(() => {
-    const distrito = this.distritoEdicion();
+  readonly inicialDistritoMetadatos = computed(() => {
+    const distrito = this.distritoMetadatos();
     if (distrito?.tipo !== 'distrito') return null;
     return { id: distrito.id, nombre: distrito.nombre, ruta: distrito.ruta };
   });
 
-  /** Distrito que se enviaría al guardar; `null` si la caja no tiene uno válido. */
-  readonly distritoEdicionId = computed(() => {
-    const distrito = this.distritoEdicion();
-    return distrito?.tipo === 'distrito' ? distrito.id : null;
-  });
-
-  /**
-   * Hay diferencia cuando ambos lados declaran distrito y no es el mismo. Es
-   * información, no error: la alerta puede ocurrir en otro punto del territorio
-   * que el expediente (una movilización en Lima por un proyecto en Chilca).
-   */
-  readonly distritoDivergente = computed(() => {
-    const alerta = this.alerta();
-    const id = this.distritoEdicionId();
-    return Boolean(
-      alerta &&
-      this.editando() &&
-      id !== null &&
-      alerta.casoDistritoId !== null &&
-      id !== alerta.casoDistritoId,
-    );
-  });
-
-  /** Semilla del buscador en el alta: se ofrece el distrito del caso, si lo hay. */
-  readonly distritoDelCaso = computed(() => {
-    const alerta = this.alerta();
-    if (!alerta || alerta.casoDistritoId === null || !alerta.casoDistrito) return null;
-    return {
-      id: alerta.casoDistritoId,
-      nombre: alerta.casoDistrito,
-      ruta: alerta.casoDistritoRuta ?? alerta.casoDistrito,
-    };
-  });
-
-  /**
-   * Prioridades del alta: el catálogo manda; si aún no llegó (o falló) se cae al
-   * vocabulario congelado, que `createAlert` resuelve por `normalizar_ref`.
-   */
-  readonly opcionesPrioridad = computed<readonly OpcionPrioridadAlerta[]>(() => {
-    const catalogo = this.prioridadesCatalogo();
-    if (catalogo.length > 0) return catalogo;
-    return PRIORIDADES_ALERTA.map((prioridad) => ({
-      valor: prioridad,
-      etiqueta: prioridad,
-      slaHoras: null,
-      grave: false,
-    }));
-  });
-
-  readonly prioridadElegida = computed(() => {
-    const valor = this.borradorAlta().prioridad;
-    return this.opcionesPrioridad().find((opcion) => opcion.valor === valor) ?? null;
-  });
-
-  readonly etapa = computed(() => {
-    const alerta = this.alerta();
-    return alerta ? etapaDeFlujo(alerta.pasoActual) : null;
-  });
-
-  readonly acciones = computed<readonly AccionFlujo[]>(() => {
-    const alerta = this.alerta();
-    return alerta ? accionesDeFlujo(alerta.pasoActual) : [];
+  readonly inicialDistritoAlta = computed(() => {
+    const distrito = this.distritoAlta();
+    if (distrito?.tipo !== 'distrito') return null;
+    return { id: distrito.id, nombre: distrito.nombre, ruta: distrito.ruta };
   });
 
   constructor() {
     afterNextRender(() => this.panel()?.nativeElement.focus());
 
-    // Escape cierra el panel aunque el foco se haya ido a un bloque de texto.
+    // Escape cierra el panel aunque el foco esté en un bloque de texto.
     const alEscape = (evento: KeyboardEvent): void => {
       if (evento.key !== 'Escape') return;
       evento.preventDefault();
@@ -574,31 +454,31 @@ export class AlertaPanelComponent {
       this.focoPrevio?.focus?.();
     });
 
-    // Tras un guardado correcto el contenedor publica un aviso: el formulario se
-    // cierra para mostrar lo ya persistido en lugar del borrador.
+    // Tras un guardado correcto se cierra el modo edición para mostrar lo ya persistido.
     effect(() => {
-      if (this.aviso()) {
-        this.editando.set(false);
-        this.borrador.set(null);
-        this.aprobacionPendiente.set(null);
-      }
+      if (!this.aviso()) return;
+      this.editando.set(false);
+      this.borrador.set(null);
+      this.editarPlantilla.set(false);
     });
 
-    // La confirmación pertenece a la alerta y a su paso actual: si cambia la
-    // fila o el paso, no se arrastra el diálogo anterior.
-    let firmaAbierta: string | null = null;
+    // Siembra por alerta y modo. La firma evita reescribir lo que el usuario está
+    // editando mientras la misma alerta sigue abierta.
+    let firma: string | null = null;
     effect(() => {
       const alerta = this.alerta();
-      const firma = alerta ? `${alerta.id}:${alerta.pasoActual}` : null;
-      if (firma === firmaAbierta) return;
-      firmaAbierta = firma;
-      this.aprobacionPendiente.set(null);
-    });
-
-    // Al aparecer la confirmación, el foco va al botón que la resuelve.
-    effect(() => {
-      if (!this.aprobacionPendiente()) return;
-      this.botonConfirmar()?.nativeElement.focus();
+      const modo = this.modoInicial();
+      const actual = alerta ? `${alerta.id}:${modo}` : null;
+      if (actual === firma) return;
+      firma = actual;
+      if (!alerta) {
+        this.editando.set(false);
+        this.verHistorial.set(false);
+        return;
+      }
+      this.sembrar(alerta);
+      this.editando.set(modo === 'editar');
+      this.verHistorial.set(modo === 'historial');
     });
 
     // El alta se siembra limpia y con el caso del contexto, si lo hay.
@@ -610,74 +490,152 @@ export class AlertaPanelComponent {
     });
   }
 
-  formatearPlazo(horas: number | null): string {
-    return formatearPlazoDe(horas);
-  }
-
-  clavePrioridad(prioridad: Alerta['prioridad']): string {
-    return clavePrioridadDe(prioridad);
-  }
-
-  claseEstado(estado: string): string {
-    return claseEstadoDe(estado);
-  }
-
-  porcentaje(valor: number | null): string {
-    return valor === null ? '—' : `${Math.round(valor * 100)} %`;
-  }
-
-  /**
-   * La aprobación definitiva no se envía al pulsar la acción: se pide
-   * confirmación en línea con el código, el título y el responsable.
-   */
-  elegirAccion(transicion: AccionFlujo): void {
-    if (transicion.paso === PASO_APROBACION_DEFINITIVA) {
-      this.aprobacionPendiente.set(transicion);
-      return;
-    }
-    this.aprobacionPendiente.set(null);
-    this.accion.emit(transicion.paso);
-  }
-
-  cancelarConfirmacion(): void {
-    if (this.guardando()) return;
-    this.aprobacionPendiente.set(null);
-  }
-
-  confirmarAprobacion(): void {
-    const aprobacion = this.aprobacionPendiente();
-    if (!aprobacion || this.guardando() || !this.puedeModificar()) return;
-    this.accion.emit(aprobacion.paso);
-    this.aprobacionPendiente.set(null);
-  }
-
-  iniciarEdicion(): void {
-    const alerta = this.alerta();
-    if (!alerta) return;
-
-    this.borrador.set({
-      titulo: alerta.titulo ?? '',
-      prioridad: alerta.prioridad ?? '',
-      nivel: alerta.nivel ?? '',
-      situacionActual: alerta.situacionActual ?? '',
-      hechosRecientes: alerta.hechosRecientes ?? '',
-      descripcionRiesgo: alerta.descripcionRiesgo ?? '',
-      accionesOaipcs: alerta.accionesOaipcs ?? '',
-      accionesSugeridas: alerta.accionesSugeridas.join('\n'),
+  private sembrar(alerta: Alerta): void {
+    this.metadatos.set({
+      riesgo: alerta.riesgo,
+      alcance: alerta.alcance,
+      region: alerta.region ?? '',
+      provincia: alerta.provincia ?? '',
       casoCode: alerta.casoCodigo ?? '',
     });
-    this.distritoEdicion.set(
+    this.distritoMetadatos.set(
       alerta.distritoId !== null && alerta.distrito
         ? {
             tipo: 'distrito',
             id: alerta.distritoId,
             nombre: alerta.distrito,
-            region: '',
+            region: alerta.region ?? '',
             ruta: alerta.distritoRuta ?? alerta.distrito,
           }
         : null,
     );
-    this.divergenciaAceptada.set(false);
+    this.borrador.set(null);
+    this.mensaje.set(alerta.plantillaWhatsapp ?? plantillaWhatsapp(alerta));
+    this.editarPlantilla.set(false);
+    this.avisoCopia.set(null);
+    this.mensajeLocal.set(null);
+  }
+
+  /* ---------------------------------------------------------------------- *
+   * Presentación
+   * ---------------------------------------------------------------------- */
+
+  tituloVisible(alerta: Alerta): string {
+    return tituloLimpio(alerta.titulo) || alerta.codigo || 'Alerta sin título';
+  }
+
+  geografia(alerta: Alerta): string {
+    return geografiaAlerta(alerta);
+  }
+
+  estadoVisible(alerta: Alerta): string {
+    return etiquetaEstado(alerta.estado);
+  }
+
+  claseRiesgo(riesgo: Riesgo): string {
+    return `status-badge risk-${claveRiesgo(riesgo)}`;
+  }
+
+  fecha(valor: string | null): string {
+    return formatearFechaCorta(valor);
+  }
+
+  /* ---------------------------------------------------------------------- *
+   * Metadatos (siempre editables)
+   * ---------------------------------------------------------------------- */
+
+  cambiarRiesgo(evento: Event): void {
+    const valor = (evento.target as HTMLSelectElement).value as Riesgo;
+    this.metadatos.update((actual) => ({ ...actual, riesgo: valor }));
+    this.mensajeLocal.set(null);
+  }
+
+  cambiarAlcance(evento: Event): void {
+    const valor = (evento.target as HTMLSelectElement).value as AlcanceAlerta;
+    this.metadatos.update((actual) => ({ ...actual, alcance: valor }));
+    if (valor === 'Nacional') {
+      this.distritoMetadatos.set(null);
+      this.metadatos.update((actual) => ({ ...actual, region: '', provincia: '' }));
+    } else if (valor === 'Región') {
+      this.distritoMetadatos.set(null);
+    }
+    this.mensajeLocal.set(null);
+  }
+
+  campoMetadatos(clave: CampoMetadatos, evento: Event): void {
+    const valor = (evento.target as HTMLInputElement | HTMLSelectElement).value;
+    this.metadatos.update((actual) => ({ ...actual, [clave]: valor }));
+    this.mensajeLocal.set(null);
+  }
+
+  alElegirDistritoMetadatos(opcion: OpcionTerritorio | null): void {
+    const distrito = opcion?.tipo === 'distrito' ? opcion : null;
+    this.distritoMetadatos.set(distrito);
+    if (distrito) {
+      const partes = partesDeRuta(distrito.ruta);
+      this.metadatos.update((actual) => ({
+        ...actual,
+        region: distrito.region || partes.region || actual.region,
+        provincia: partes.provincia || actual.provincia,
+      }));
+    }
+    this.mensajeLocal.set(null);
+  }
+
+  guardarMetadatos(): void {
+    const alerta = this.alerta();
+    if (!alerta) return;
+
+    const metadatos = this.metadatos();
+    const cambios: PatchAlerta = {};
+
+    if (metadatos.riesgo && metadatos.riesgo !== alerta.riesgo) {
+      cambios.riesgo = metadatos.riesgo;
+    }
+
+    if (metadatos.alcance && metadatos.alcance !== alerta.alcance) {
+      cambios.alcance = metadatos.alcance;
+    }
+
+    const region = metadatos.region.trim() || null;
+    if (region !== (alerta.region ?? null)) cambios.region = region;
+
+    const provincia = metadatos.provincia.trim() || null;
+    if (provincia !== (alerta.provincia ?? null)) cambios.provincia = provincia;
+
+    const caso = metadatos.casoCode.trim() || null;
+    if (caso !== (alerta.casoCodigo ?? null)) cambios.casoCode = caso;
+
+    const distrito = this.distritoMetadatos();
+    const distritoId = distrito?.tipo === 'distrito' ? distrito.id : null;
+    if (distritoId !== alerta.distritoId) cambios.distritoId = distritoId;
+
+    if (Object.keys(cambios).length === 0) {
+      this.mensajeLocal.set('No hay cambios en los metadatos.');
+      return;
+    }
+
+    this.mensajeLocal.set(null);
+    this.guardar.emit(cambios);
+  }
+
+  /* ---------------------------------------------------------------------- *
+   * Contenido narrativo
+   * ---------------------------------------------------------------------- */
+
+  iniciarEdicion(): void {
+    const alerta = this.alerta();
+    if (!alerta || !this.puedeModificar()) return;
+
+    this.borrador.set({
+      titulo: alerta.titulo ?? '',
+      situacionActual: alerta.situacionActual ?? '',
+      hechosRecientes: alerta.hechosRecientes ?? '',
+      descripcionRiesgo: alerta.descripcionRiesgo ?? '',
+      actoresClave: alerta.actoresClave.join('\n'),
+      demandasInmediatas: alerta.demandasInmediatas.join('\n'),
+      accionesSugeridas: alerta.accionesSugeridas.join('\n'),
+    });
     this.mensajeLocal.set(null);
     this.editando.set(true);
   }
@@ -685,108 +643,13 @@ export class AlertaPanelComponent {
   cancelarEdicion(): void {
     this.editando.set(false);
     this.borrador.set(null);
-    this.distritoEdicion.set(null);
-    this.divergenciaAceptada.set(false);
     this.mensajeLocal.set(null);
   }
 
   campo(clave: CampoBorrador, evento: Event): void {
-    const objetivo = evento.target as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
+    const objetivo = evento.target as HTMLInputElement | HTMLTextAreaElement;
     const valor = objetivo.value;
     this.borrador.update((actual) => (actual ? { ...actual, [clave]: valor } : actual));
-  }
-
-  campoAlta(clave: CampoAlta, evento: Event): void {
-    const objetivo = evento.target as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
-    const valor = objetivo.value;
-    this.borradorAlta.update((actual) => ({ ...actual, [clave]: valor }));
-  }
-
-  alElegirDistrito(opcion: OpcionTerritorio | null): void {
-    this.distritoAlta.set(opcion);
-  }
-
-  alElegirDistritoEdicion(opcion: OpcionTerritorio | null): void {
-    this.distritoEdicion.set(opcion);
-    this.divergenciaAceptada.set(false);
-    this.mensajeLocal.set(null);
-  }
-
-  /**
-   * Copia el distrito principal del caso al formulario. Es un botón y no una
-   * herencia silenciosa: en la base hay alertas que ocurren en otro territorio
-   * que el expediente y ese dato no se debe perder.
-   */
-  usarDistritoDelCaso(): void {
-    const caso = this.distritoDelCaso();
-    if (!caso) return;
-    this.distritoEdicion.set({
-      tipo: 'distrito',
-      id: caso.id,
-      nombre: caso.nombre,
-      region: '',
-      ruta: caso.ruta,
-    });
-    this.divergenciaAceptada.set(false);
-    this.mensajeLocal.set('Distrito fijado al del caso. Guarde para aplicarlo.');
-  }
-
-  /** Acepta la diferencia actual para que el guardado no vuelva a preguntar. */
-  mantenerDistritoDeLaAlerta(): void {
-    this.divergenciaAceptada.set(true);
-    this.mensajeLocal.set('Se conservará el distrito de la alerta, distinto del caso.');
-  }
-
-  alEnviarAlta(evento: Event): void {
-    evento.preventDefault();
-    this.guardarAlta();
-  }
-
-  /**
-   * Alta: sólo se valida lo que `createAlert` exige (título y prioridad). Los
-   * opcionales vacíos se omiten para que el repositorio aplique sus valores por
-   * defecto (`visibilidad` interna, `pasoActual` 1).
-   */
-  guardarAlta(): void {
-    if (!this.puedeModificar() || this.guardando()) return;
-
-    const borrador = this.borradorAlta();
-    const titulo = borrador.titulo.trim();
-    if (!titulo) {
-      this.mensajeLocal.set('El título es obligatorio para registrar la alerta.');
-      return;
-    }
-
-    const prioridad = borrador.prioridad.trim();
-    if (!prioridad) {
-      this.mensajeLocal.set('La prioridad es obligatoria para registrar la alerta.');
-      return;
-    }
-
-    const cuerpo: AltaAlerta = { titulo, prioridad };
-
-    // El buscador está restringido a distritos: `core.alertas_tempranas` no
-    // tiene lugares operativos y un lugar no se puede degradar a un distrito.
-    const distrito = this.distritoAlta();
-    if (distrito?.tipo === 'distrito') cuerpo.distritoId = distrito.id;
-
-    const casoCode = borrador.casoCode.trim();
-    if (casoCode) cuerpo.casoCode = casoCode;
-
-    const descripcion = borrador.descripcionRiesgo.trim();
-    if (descripcion) cuerpo.descripcionRiesgo = descripcion;
-
-    const hechos = borrador.hechosRecientes.trim();
-    if (hechos) cuerpo.hechosRecientes = hechos;
-
-    const situacion = borrador.situacionActual.trim();
-    if (situacion) cuerpo.situacionActual = situacion;
-
-    const acciones = borrador.accionesOaipcs.trim();
-    if (acciones) cuerpo.accionesOaipcs = acciones;
-
-    this.mensajeLocal.set(null);
-    this.registrar.emit(cuerpo);
   }
 
   alEnviarFormulario(evento: Event): void {
@@ -801,22 +664,8 @@ export class AlertaPanelComponent {
 
     const cambios: PatchAlerta = {};
 
-    const titulo = borrador.titulo.trim();
-    if (titulo && titulo !== (alerta.titulo ?? '')) cambios.titulo = titulo;
-
-    if (borrador.prioridad !== (alerta.prioridad ?? '')) {
-      cambios.prioridad = borrador.prioridad || null;
-    }
-
-    // El repositorio resuelve el nivel por `codigo_legado` o por `nombre`; se
-    // envía el código heredado porque no depende del rename de la migración 14.
-    const nivelActual =
-      alerta.nivelCodigo ??
-      OPCIONES_NIVEL.find((opcion) => opcion.etiqueta === alerta.nivel)?.valor ??
-      '';
-    const nivelElegido =
-      OPCIONES_NIVEL.find((opcion) => opcion.etiqueta === borrador.nivel)?.valor ?? '';
-    if (nivelElegido !== nivelActual) cambios.nivel = nivelElegido || null;
+    const titulo = diferenciaTexto(borrador.titulo, alerta.titulo);
+    if (titulo !== undefined) cambios.titulo = titulo;
 
     const situacion = diferenciaTexto(borrador.situacionActual, alerta.situacionActual);
     if (situacion !== undefined) cambios.situacionActual = situacion;
@@ -827,35 +676,19 @@ export class AlertaPanelComponent {
     const descripcion = diferenciaTexto(borrador.descripcionRiesgo, alerta.descripcionRiesgo);
     if (descripcion !== undefined) cambios.descripcionRiesgo = descripcion;
 
-    const acciones = diferenciaTexto(borrador.accionesOaipcs, alerta.accionesOaipcs);
-    if (acciones !== undefined) cambios.accionesOaipcs = acciones;
-
-    const sugeridas = aJsonLineas(borrador.accionesSugeridas.split('\n'));
-    const sugeridasPrevias = alerta.accionesSugeridas.length ? alerta.accionesSugeridas : null;
-    if ((sugeridas ?? []).join('\n') !== (sugeridasPrevias ?? []).join('\n')) {
-      cambios.accionesSugeridas = sugeridas;
+    const actores = aJsonLineas(borrador.actoresClave.split('\n'));
+    if ((actores ?? []).join('\n') !== alerta.actoresClave.join('\n')) {
+      cambios.actoresClave = actores;
     }
 
-    const caso = borrador.casoCode.trim();
-    if (caso !== (alerta.casoCodigo ?? '')) cambios.casoCode = caso || null;
+    const demandas = aJsonLineas(borrador.demandasInmediatas.split('\n'));
+    if ((demandas ?? []).join('\n') !== alerta.demandasInmediatas.join('\n')) {
+      cambios.demandasInmediatas = demandas;
+    }
 
-    const distritoNuevo = this.distritoEdicionId();
-    if (distritoNuevo !== alerta.distritoId) {
-      // `null` limpia el distrito; un id lo fija. Ausente en el cuerpo = sin
-      // cambio, y así el repositorio puede heredar el del caso sin pisarlo.
-      if (
-        !this.divergenciaAceptada() &&
-        distritoNuevo !== null &&
-        alerta.casoDistritoId !== null &&
-        distritoNuevo !== alerta.casoDistritoId
-      ) {
-        const nombreNuevo = this.distritoEdicion()?.nombre ?? 'el elegido';
-        this.mensajeLocal.set(
-          `El distrito de la alerta (${nombreNuevo}) no coincide con el del caso (${alerta.casoDistrito}). Use «Usar el del caso» o confirme con «Mantener el de la alerta».`,
-        );
-        return;
-      }
-      cambios.distritoId = distritoNuevo;
+    const sugeridas = aJsonLineas(borrador.accionesSugeridas.split('\n'));
+    if ((sugeridas ?? []).join('\n') !== alerta.accionesSugeridas.join('\n')) {
+      cambios.accionesSugeridas = sugeridas;
     }
 
     if (Object.keys(cambios).length === 0) {
@@ -866,6 +699,153 @@ export class AlertaPanelComponent {
     this.mensajeLocal.set(null);
     this.guardar.emit(cambios);
   }
+
+  alternarHistorial(): void {
+    this.verHistorial.update((valor) => !valor);
+  }
+
+  /* ---------------------------------------------------------------------- *
+   * Plantilla de WhatsApp
+   * ---------------------------------------------------------------------- */
+
+  campoMensaje(evento: Event): void {
+    const area = evento.target as HTMLTextAreaElement;
+    this.mensaje.set(area.value);
+    this.avisoCopia.set(null);
+  }
+
+  alternarPlantilla(): void {
+    if (!this.editarPlantilla() && !this.puedeModificar()) return;
+    this.editarPlantilla.update((valor) => !valor);
+  }
+
+  regenerarMensaje(): void {
+    const alerta = this.alerta();
+    if (!alerta) return;
+    this.mensaje.set(plantillaWhatsapp(alerta));
+    this.avisoCopia.set(null);
+  }
+
+  async copiarMensaje(): Promise<void> {
+    const ok = await copiarAlPortapapeles(this.mensaje());
+    this.avisoCopia.set(
+      ok
+        ? 'Mensaje copiado al portapapeles.'
+        : 'No se pudo copiar. Seleccione el texto y use Ctrl + C.',
+    );
+  }
+
+  guardarPlantilla(): void {
+    this.guardar.emit({ plantillaWhatsapp: this.mensaje().trim() || null });
+  }
+
+  /* ---------------------------------------------------------------------- *
+   * Alta
+   * ---------------------------------------------------------------------- */
+
+  campoAlta(clave: CampoAlta, evento: Event): void {
+    const objetivo = evento.target as HTMLInputElement | HTMLTextAreaElement;
+    const valor = objetivo.value;
+    this.borradorAlta.update((actual) => ({ ...actual, [clave]: valor }));
+    this.mensajeLocal.set(null);
+  }
+
+  cambiarRiesgoAlta(evento: Event): void {
+    const valor = (evento.target as HTMLSelectElement).value as Riesgo;
+    this.borradorAlta.update((actual) => ({ ...actual, riesgo: valor }));
+  }
+
+  cambiarAlcanceAlta(evento: Event): void {
+    const valor = (evento.target as HTMLSelectElement).value as AlcanceAlerta;
+    this.borradorAlta.update((actual) => ({ ...actual, alcance: valor }));
+    if (valor !== 'Distrito') this.distritoAlta.set(null);
+    if (valor === 'Nacional') {
+      this.borradorAlta.update((actual) => ({ ...actual, region: '', provincia: '' }));
+    }
+  }
+
+  alElegirDistritoAlta(opcion: OpcionTerritorio | null): void {
+    const distrito = opcion?.tipo === 'distrito' ? opcion : null;
+    this.distritoAlta.set(distrito);
+    if (distrito) {
+      const partes = partesDeRuta(distrito.ruta);
+      this.borradorAlta.update((actual) => ({
+        ...actual,
+        region: distrito.region || partes.region || actual.region,
+        provincia: partes.provincia || actual.provincia,
+      }));
+    }
+    this.mensajeLocal.set(null);
+  }
+
+  alEnviarAlta(evento: Event): void {
+    evento.preventDefault();
+    this.guardarAlta();
+  }
+
+  guardarAlta(): void {
+    if (!this.puedeModificar() || this.guardando()) return;
+
+    const borrador = this.borradorAlta();
+    const titulo = borrador.titulo.trim();
+    if (!titulo) {
+      this.mensajeLocal.set('El título es obligatorio para registrar la alerta.');
+      return;
+    }
+
+    if (!borrador.riesgo) {
+      this.mensajeLocal.set('El nivel de riesgo es obligatorio.');
+      return;
+    }
+
+    if (!borrador.alcance) {
+      this.mensajeLocal.set('El alcance geográfico es obligatorio.');
+      return;
+    }
+
+    const cuerpo: AltaAlerta = {
+      titulo,
+      riesgo: borrador.riesgo,
+      alcance: borrador.alcance,
+    };
+
+    const distrito = this.distritoAlta();
+    if (distrito?.tipo === 'distrito') cuerpo.distritoId = distrito.id;
+
+    const caso = borrador.casoCode.trim();
+    if (caso) cuerpo.casoCode = caso;
+
+    const region = borrador.region.trim();
+    if (region) cuerpo.region = region;
+
+    const provincia = borrador.provincia.trim();
+    if (provincia) cuerpo.provincia = provincia;
+
+    const descripcion = borrador.descripcionRiesgo.trim();
+    if (descripcion) cuerpo.descripcionRiesgo = descripcion;
+
+    const hechos = borrador.hechosRecientes.trim();
+    if (hechos) cuerpo.hechosRecientes = hechos;
+
+    const situacion = borrador.situacionActual.trim();
+    if (situacion) cuerpo.situacionActual = situacion;
+
+    const actores = aJsonLineas(borrador.actoresClave.split('\n'));
+    if (actores) cuerpo.actoresClave = actores;
+
+    const demandas = aJsonLineas(borrador.demandasInmediatas.split('\n'));
+    if (demandas) cuerpo.demandasInmediatas = demandas;
+
+    const sugeridas = aJsonLineas(borrador.accionesSugeridas.split('\n'));
+    if (sugeridas) cuerpo.accionesSugeridas = sugeridas;
+
+    this.mensajeLocal.set(null);
+    this.registrar.emit(cuerpo);
+  }
+
+  /* ---------------------------------------------------------------------- *
+   * Diálogo
+   * ---------------------------------------------------------------------- */
 
   alFondo(evento: MouseEvent): void {
     if (evento.target === evento.currentTarget) this.cerrar.emit();

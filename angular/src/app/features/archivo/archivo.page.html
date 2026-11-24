@@ -3,13 +3,6 @@
     <div>
       <h1 id="titulo-archivo">Archivo</h1>
     </div>
-    @if (puedeVer()) {
-    <div class="view-actions">
-      <p class="result-count" aria-live="polite">
-        {{ total() }} {{ configActual().plural }} en el archivo
-      </p>
-    </div>
-    }
   </header>
 
   @if (!puedeVer()) {

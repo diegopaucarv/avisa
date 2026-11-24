@@ -195,8 +195,10 @@ const FILTROS_INICIALES: FiltrosOrganizaciones = {
 
     .ficha-seccion h3 {
       margin: 0;
-      color: #33475b;
-      font: 700 13px var(--font-display);
+      color: #7b8896;
+      font: 700 11.5px var(--font-display);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
     }
 
     .ficha-datos {

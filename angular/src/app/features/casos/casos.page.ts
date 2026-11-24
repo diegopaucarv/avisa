@@ -37,6 +37,7 @@ import type { Caso } from '../../dominio/modelos';
 import { formatearFechaHora } from '../../shared/formato-fecha';
 import { BarraSeleccionComponent } from '../../shared/ui/barra-seleccion.component';
 
+import { ExportarMenuComponent } from '../../shared/ui/exportar-menu.component';
 import { IconoComponent } from '../../shared/ui/icono.component';
 import { OrdenTabla } from '../../shared/ui/orden-tabla';
 import { PaginacionComponent } from '../../shared/ui/paginacion.component';
@@ -242,6 +243,7 @@ function aConteos(bruto: unknown): ConteosCasos {
     BarraSeleccionComponent,
     CasoPanelComponent,
     CasoVistaPreviaComponent,
+    ExportarMenuComponent,
     ThOrdenDirective,
   ],
   templateUrl: './casos.page.html',

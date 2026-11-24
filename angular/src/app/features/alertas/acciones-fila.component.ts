@@ -13,8 +13,23 @@ import {
 
 import { IconoComponent } from '../../shared/ui/icono.component';
 
-/** Acción de flujo ya rotulada para la tabla. */
-export type AccionFila = { paso: number; etiqueta: string };
+/** Acciones que puede disparar el menú de una fila. */
+export type IdAccionAlerta =
+  | 'aprobar'
+  | 'solicitar-modificacion'
+  | 'enviar-revision'
+  | 'modificar'
+  | 'historial'
+  | 'whatsapp';
+
+/** Acción ya rotulada; `seccion` agrupa el menú con su encabezado. */
+export type AccionMenu = {
+  id: IdAccionAlerta;
+  etiqueta: string;
+  seccion?: string;
+};
+
+type GrupoMenu = { titulo: string | null; acciones: AccionMenu[] };
 
 type UbicacionMenu = { top: number; left: number; ancho: number };
 
@@ -114,10 +129,10 @@ type UbicacionMenu = { top: number; left: number; ancho: number };
     }
 
     .menu-titulo {
-      margin: 2px 0 3px;
+      margin: 4px 0 3px;
       padding: 0 10px;
       color: #8b97a1;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 700;
       letter-spacing: 0.06em;
       text-transform: uppercase;
@@ -131,13 +146,13 @@ type UbicacionMenu = { top: number; left: number; ancho: number };
   `,
 })
 export class AccionesFilaComponent {
-  readonly acciones = input<readonly AccionFila[]>([]);
+  readonly acciones = input<readonly AccionMenu[]>([]);
   readonly puedeAnular = input(false);
   /** Código o título de la alerta; sólo se usa en las etiquetas accesibles. */
   readonly codigo = input('');
   readonly ocupado = input(false);
 
-  readonly accion = output<number>();
+  readonly accion = output<IdAccionAlerta>();
   readonly anular = output<void>();
 
   private readonly disparador = viewChild<ElementRef<HTMLButtonElement>>('disparador');
@@ -147,6 +162,21 @@ export class AccionesFilaComponent {
   readonly posicion = signal<UbicacionMenu | null>(null);
   readonly abierto = computed(() => this.posicion() !== null);
   readonly hayAcciones = computed(() => this.acciones().length > 0 || this.puedeAnular());
+
+  /** Acciones agrupadas por sección, en el orden en que llegan. */
+  readonly grupos = computed<readonly GrupoMenu[]>(() => {
+    const grupos: GrupoMenu[] = [];
+    for (const accion of this.acciones()) {
+      const titulo = accion.seccion ?? null;
+      const ultimo = grupos[grupos.length - 1];
+      if (ultimo && ultimo.titulo === titulo) {
+        ultimo.acciones.push(accion);
+      } else {
+        grupos.push({ titulo, acciones: [accion] });
+      }
+    }
+    return grupos;
+  });
 
   private readonly cerrarFuera = (evento: MouseEvent): void => {
     const destino = evento.target as Node | null;
@@ -175,10 +205,10 @@ export class AccionesFilaComponent {
     this.abrir();
   }
 
-  elegir(paso: number, evento: MouseEvent): void {
+  elegir(id: IdAccionAlerta, evento: MouseEvent): void {
     evento.stopPropagation();
     this.cerrar(true);
-    this.accion.emit(paso);
+    this.accion.emit(id);
   }
 
   pedirAnular(evento: MouseEvent): void {
@@ -193,7 +223,7 @@ export class AccionesFilaComponent {
 
     const margen = 8;
     const rect = boton.getBoundingClientRect();
-    const ancho = Math.min(232, window.innerWidth - margen * 2);
+    const ancho = Math.min(248, window.innerWidth - margen * 2);
     const izquierda = Math.max(
       margen,
       Math.min(rect.right - ancho, window.innerWidth - ancho - margen),
@@ -217,10 +247,10 @@ export class AccionesFilaComponent {
   }
 
   private altoEstimado(): number {
-    const filas = this.acciones().length;
+    const secciones = this.grupos().filter((grupo) => grupo.titulo !== null).length;
     const anular = this.puedeAnular() ? 1 : 0;
-    const separador = filas > 0 && anular > 0 ? 1 : 0;
-    return 12 + (filas > 0 ? 22 : 0) + filas * 33 + separador * 11 + anular * 33;
+    const separador = this.acciones().length > 0 && anular > 0 ? 1 : 0;
+    return 12 + secciones * 22 + this.acciones().length * 33 + separador * 11 + anular * 33;
   }
 
   private escuchar(activo: boolean): void {

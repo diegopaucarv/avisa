@@ -20,15 +20,9 @@ import {
   type Documento,
 } from '../documentos/documento.mapeo';
 
-type Pestana = 'acta' | 'ayuda_memoria' | 'relatoria';
+type Pestana = 'ayuda_memoria' | 'relatoria' | 'reporte_actividad' | 'acta';
 
 const PESTANAS: readonly { codigo: Pestana; etiqueta: string; descripcion: string }[] = [
-  {
-    codigo: 'acta',
-    etiqueta: 'Actas',
-    descripcion:
-      'Actas de acuerdo de las reuniones de diálogo, incluidas las que elaboran otras oficinas.',
-  },
   {
     codigo: 'ayuda_memoria',
     etiqueta: 'Ayudas memoria',
@@ -38,6 +32,17 @@ const PESTANAS: readonly { codigo: Pestana; etiqueta: string; descripcion: strin
     codigo: 'relatoria',
     etiqueta: 'Relatorías',
     descripcion: 'Relatoría de la reunión con el registro de intervenciones.',
+  },
+  {
+    codigo: 'reporte_actividad',
+    etiqueta: 'Reportes de Actividad',
+    descripcion: 'Reporte rápido después de una reunión',
+  },
+  {
+    codigo: 'acta',
+    etiqueta: 'Actas',
+    descripcion:
+      'Actas de acuerdo de las reuniones de diálogo, incluidas las que elaboran otras oficinas.',
   },
 ];
 
@@ -139,8 +144,8 @@ const PESTANAS: readonly { codigo: Pestana; etiqueta: string; descripcion: strin
               <tr>
                 <th scope="col" [appThOrden]="'codigo'" [orden]="orden">Código</th>
                 <th scope="col" [appThOrden]="'titulo'" [orden]="orden">Título</th>
-                <th scope="col" [appThOrden]="'fecha'" [orden]="orden">Fecha</th>
-                <th scope="col" [appThOrden]="'caso'" [orden]="orden">Caso</th>
+                <th scope="col" [appThOrden]="'fecha'" [orden]="orden">Fecha de reunión</th>
+                <th scope="col" [appThOrden]="'caso'" [orden]="orden">Caso vinculado</th>
                 <th scope="col" [appThOrden]="'estado'" [orden]="orden">Estado</th>
               </tr>
             </thead>

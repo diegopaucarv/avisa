@@ -6,9 +6,11 @@
  * se normaliza la forma y se alinean las etiquetas con la Guía §7.4; la plantilla
  * no conoce variantes ni guiones bajos.
  *
- * El `email` del listado (`core.actores.email_contacto`) NO se mapea: la ficha
- * sólo expone los datos personales por el endpoint auditado `/pii`, y así se
- * evita que un correo de contacto se confunda con la PII protegida.
+ * El `email` del listado (`core.actores.email_contacto`) se mapea como dato de
+ * contacto de la tabla. No es la PII auditada: el DNI y el teléfono sólo salen
+ * por el endpoint `/pii`, y el correo de contacto se distingue del correo
+ * personal de esa ficha. El listado no devuelve teléfono, así que la columna
+ * correspondiente queda vacía hasta que la ficha pide la PII con motivo.
  */
 
 import { booleano, esRegistro, leer, numero, texto, type Registro } from '../../dominio/mapeo';
@@ -53,6 +55,10 @@ export type ActorDirectorio = {
   cargo: string | null;
   nivelGobierno: string | null;
   categoria: string | null;
+  /** Correo de contacto del listado (`email_contacto`); no es la PII auditada. */
+  email?: string | null;
+  /** Teléfono de contacto si el listado lo trae; suele llegar sólo por `/pii`. */
+  telefono?: string | null;
   region: string | null;
   distrito: string | null;
   organizacionAncla: string | null;
@@ -131,6 +137,8 @@ export function aActorDirectorio(bruto: unknown): ActorDirectorio {
     cargo: texto(registro, ['cargo']),
     nivelGobierno: nivelGobiernoDe(texto(registro, ['nivelGobierno', 'nivel_gobierno'])),
     categoria: texto(registro, ['categoria']),
+    email: texto(registro, ['email', 'emailContacto', 'email_contacto']),
+    telefono: texto(registro, ['telefono', 'telefonoContacto', 'telefono_contacto']),
     region: texto(registro, ['region']),
     distrito: texto(registro, ['distrito']),
     organizacionAncla: texto(registro, ['organizacionAncla', 'organizacion_ancla']),

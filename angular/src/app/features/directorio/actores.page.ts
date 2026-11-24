@@ -31,25 +31,22 @@ import {
 } from '../../dominio/medios';
 import { BarraSeleccionComponent } from '../../shared/ui/barra-seleccion.component';
 
-import { SeleccionTabla } from '../../shared/ui/seleccion-tabla';
 import { IconoComponent } from '../../shared/ui/icono.component';
 import { OrdenTabla } from '../../shared/ui/orden-tabla';
 import { PaginacionComponent } from '../../shared/ui/paginacion.component';
+import { SeleccionTabla } from '../../shared/ui/seleccion-tabla';
 import { ThOrdenDirective } from '../../shared/ui/th-orden.directive';
-import {
-  TerritorioBuscadorComponent,
-  type OpcionTerritorio,
-} from '../../shared/ui/territorio-buscador.component';
 import { ActorPanelComponent } from './actor-panel.component';
 import { alternarActorLista, quitarActorLista } from './lista-temporal';
 import { crearCsvPadronAsistencia } from './padron-asistencia';
 import {
-  NATURALEZAS,
   aActorDirectorio,
   aCatalogosDirectorio,
   type ActorDirectorio,
   type CatalogosDirectorio,
 } from './directorio.mapeo';
+
+type VistaActores = 'persona' | 'organizacion';
 
 type FiltrosActores = {
   q: string;
@@ -76,10 +73,9 @@ const FILTROS_INICIALES: FiltrosActores = {
  * el repositorio: `q`, `naturaleza`, `tipo` y `region`. Los filtros viven en la
  * URL con `replaceUrl` para que el historial no se llene de estados intermedios.
  *
- * La región se elige con el buscador territorial, no escribiendo el nombre: la
- * API compara `core.regiones.nombre` de forma exacta y `core.actores` tiene
- * región (355 de 1 160) pero no distrito (0 de 1 160), así que el grano honesto
- * del filtro es la región del distrito elegido.
+ * La pantalla tiene dos vistas separadas —Personas y Organizaciones— que se
+ * eligen con el parámetro `naturaleza`; sin parámetro se usa el valor por
+ * defecto de la ruta (`/directorio/personas`) o, en su ausencia, «persona».
  *
  * Al pulsar una fila no se navega: se abre `ActorPanelComponent` con la ficha.
  * Los datos personales NO forman parte de la carga del listado; sólo el panel
@@ -92,7 +88,6 @@ const FILTROS_INICIALES: FiltrosActores = {
     PaginacionComponent,
     ActorPanelComponent,
     BarraSeleccionComponent,
-    TerritorioBuscadorComponent,
     ThOrdenDirective,
   ],
   templateUrl: './actores.page.html',
@@ -116,19 +111,98 @@ const FILTROS_INICIALES: FiltrosActores = {
     .view-head {
       display: flex;
       flex-wrap: wrap;
-      align-items: flex-start;
+      align-items: center;
       justify-content: space-between;
       gap: 16px;
     }
 
-    /* El buscador territorial entra en la barra como un filtro más. */
-    .territorio-filtro {
-      width: 240px;
-      min-width: 0;
+    .view-actions {
+      flex-wrap: wrap;
+    }
+
+    /* Vistas Personas / Organizaciones: pestañas de la misma matriz. */
+    .vistas {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      border-bottom: 1px solid #e6ebf0;
+    }
+
+    .vista-tab {
+      padding: 8px 14px;
+      border: 0;
+      border-bottom: 2px solid transparent;
+      background: transparent;
+      color: #64748b;
+      font: 600 13px/1.2 var(--font-display);
+      cursor: pointer;
+    }
+
+    .vista-tab:hover {
+      color: #33475b;
+    }
+
+    .vista-tab.activa {
+      border-bottom-color: var(--blue);
+      color: var(--blue-dark);
+    }
+
+    .vista-tab:focus-visible {
+      outline: 2px solid #5b8fd6;
+      outline-offset: -2px;
+    }
+
+    /* Menú «Nuevo»: alta no disponible en este entorno. */
+    .menu-nuevo {
+      position: relative;
+    }
+
+    .menu-nuevo summary {
+      list-style: none;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .menu-nuevo summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .menu-nuevo-lista {
+      position: absolute;
+      right: 0;
+      z-index: 30;
+      display: grid;
+      gap: 2px;
+      min-width: 190px;
+      margin-top: 4px;
+      padding: 6px;
+      border: 1px solid #dce5ef;
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: 0 12px 32px rgb(25 45 68 / 14%);
+    }
+
+    .menu-nuevo-lista button {
+      padding: 7px 10px;
+      border: 0;
+      border-radius: 6px;
+      background: transparent;
+      color: #465a6c;
+      font: inherit;
+      text-align: left;
+    }
+
+    .menu-nuevo-lista button:disabled {
+      color: #aab4bd;
+      cursor: not-allowed;
+    }
+
+    .menu-nuevo-lista button:not(:disabled):hover {
+      background: #f5f7f8;
     }
 
     .actor-nombre {
-      display: block;
+      display: -webkit-box;
       width: 100%;
       padding: 0;
       border: 0;
@@ -136,11 +210,24 @@ const FILTROS_INICIALES: FiltrosActores = {
       color: inherit;
       font-family: inherit;
       text-align: left;
+      white-space: normal;
+      overflow: hidden;
       cursor: pointer;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 3;
+      line-clamp: 3;
+    }
+
+    /* «Apellidos y nombres» ocupa la mitad del ancho que antes: tres líneas. */
+    .col-nombre {
+      width: 210px;
+      min-width: 150px;
+      max-width: 210px;
+      white-space: normal;
     }
 
     .actor-organizacion {
-      max-width: 240px;
+      max-width: 230px;
       white-space: normal;
     }
 
@@ -163,28 +250,97 @@ const FILTROS_INICIALES: FiltrosActores = {
       background: #f6f8fa;
     }
 
+    .dato-contacto {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      max-width: 210px;
+    }
+
+    .dato-contacto span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .boton-copiar {
+      flex: none;
+      padding: 2px 6px;
+      border: 1px solid #dce3e8;
+      border-radius: 5px;
+      background: #fff;
+      color: #526577;
+      font-size: 11.5px;
+      line-height: 1.4;
+      cursor: pointer;
+    }
+
+    .boton-copiar:hover {
+      background: #f5f7f8;
+    }
+
+    .region-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 2px 9px;
+      border-radius: 999px;
+      background: #f0f4f8;
+      color: #465a6c;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .region-chip::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #45c08a;
+    }
+
+    .col-acciones {
+      width: 1%;
+    }
+
+    .acciones-fila {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 4px;
+      white-space: nowrap;
+    }
+
+    .accion {
+      padding: 3px 8px;
+      border: 1px solid #dce3e8;
+      border-radius: 5px;
+      background: #fff;
+      color: #526577;
+      font-size: 12px;
+      line-height: 1.5;
+      cursor: pointer;
+    }
+
+    .accion:hover:not(:disabled) {
+      background: #f5f7f8;
+    }
+
+    .accion:disabled {
+      color: #b3bcc4;
+      cursor: not-allowed;
+    }
+
+    .accion.activa {
+      border-color: #bcd6c4;
+      background: #edf6f0;
+      color: #2f7a52;
+    }
+
     .actor-actualizando {
       margin: 0;
       color: #8d99a6;
       font-size: 12px;
-    }
-
-    .lista-contador {
-      display: inline-grid;
-      min-width: 18px;
-      height: 18px;
-      margin-left: 4px;
-      place-items: center;
-      border-radius: 999px;
-      background: #eaf1fb;
-      color: #2455a2;
-      font-size: 12.5px;
-      font-weight: 700;
-    }
-
-    .button-lista {
-      min-height: 27px;
-      padding: 0 8px;
     }
 
     .lista-temporal-panel {
@@ -258,8 +414,14 @@ const FILTROS_INICIALES: FiltrosActores = {
       font-size: 12.5px;
     }
 
+    /* El diálogo nativo se centra en la ventana: margen automático y alto guiado. */
     .padron-dialogo {
+      position: fixed;
+      inset: 0;
       width: min(520px, calc(100vw - 32px));
+      height: fit-content;
+      max-height: calc(100vh - 40px);
+      margin: auto;
       padding: 0;
       border: 1px solid #dce5ef;
       border-radius: 12px;
@@ -337,12 +499,11 @@ export class ActoresPage {
   private readonly destruccion = inject(DestroyRef);
 
   /**
-   * La ruta `/directorio/personas` fija la naturaleza. Así el mismo listado
-   * sirve para personas sin duplicar la pantalla ni la paginación.
+   * Naturaleza por defecto de la ruta (por ejemplo `/directorio/personas`). Ya
+   * no es una imposición: un `naturaleza` en la URL la adelanta, y así las
+   * pestañas Personas / Organizaciones funcionan en cualquier ruta.
    */
   readonly naturalezaFija = input('');
-
-  readonly naturalezas = NATURALEZAS;
 
   private readonly parametros = toSignal(
     this.ruta.queryParamMap.pipe(
@@ -361,25 +522,28 @@ export class ActoresPage {
     { initialValue: FILTROS_INICIALES },
   );
 
-  readonly filtros = computed(() => {
-    const parametros = this.parametros();
-    const fija = this.naturalezaFija().trim();
-    return fija ? { ...parametros, naturaleza: fija } : parametros;
+  /** `persona` u `organizacion`: la URL manda; la ruta sólo aporta el defecto. */
+  private readonly naturalezaActiva = computed(() => {
+    const deUrl = this.parametros().naturaleza.trim();
+    return deUrl || this.naturalezaFija().trim() || 'persona';
   });
 
-  readonly esSoloPersonas = computed(() => this.naturalezaFija() === 'persona');
+  readonly filtros = computed<FiltrosActores>(() => ({
+    ...this.parametros(),
+    naturaleza: this.naturalezaActiva(),
+  }));
+
   readonly titulo = computed(() => 'Actores');
-  readonly sustantivo = computed(() => (this.esSoloPersonas() ? 'personas' : 'actores'));
-
-  /** Región activa como etiqueta del buscador territorial restaurado. */
-  readonly regionFiltroInicial = computed(() => {
-    const region = this.filtros().region;
-    return region ? { id: 0, nombre: region } : null;
-  });
+  readonly sustantivo = computed(() =>
+    this.naturalezaActiva() === 'organizacion' ? 'organizaciones' : 'personas',
+  );
+  readonly vista = computed<VistaActores>(() =>
+    this.naturalezaActiva() === 'organizacion' ? 'organizacion' : 'persona',
+  );
 
   private readonly listado = consulta<Coleccion<ActorDirectorio>>({
     fuente: () => {
-      const filtros = this.parametros();
+      const filtros = this.filtros();
       return urlConParametros(urlApi('/v1/actors'), {
         ...paramsDePagina({ pagina: filtros.pagina, tamano: filtros.tamano }),
         q: filtros.q,
@@ -405,9 +569,6 @@ export class ActoresPage {
 
   private readonly accesores: Record<string, (actor: ActorDirectorio) => unknown> = {
     nombre: (actor) => actor.nombre,
-    naturaleza: (actor) => actor.naturaleza,
-    tipo: (actor) => actor.tipo,
-    funcion: (actor) => actor.funcion,
     region: (actor) => actor.region,
     organizacion: (actor) => actor.organizacionAncla ?? actor.cargo,
   };
@@ -462,6 +623,8 @@ export class ActoresPage {
 
   /** Actor cuya ficha está abierta en el panel lateral. */
   readonly seleccionado = signal<ActorDirectorio | null>(null);
+  /** `true` cuando la ficha debe abrirse directamente en modo edición. */
+  readonly editarAlAbrir = signal(false);
 
   /** Selección de trabajo en memoria, conservada al cambiar página o filtros. */
   readonly listaTemporal = signal<ActorDirectorio[]>([]);
@@ -471,6 +634,10 @@ export class ActoresPage {
   readonly padronFecha = signal(new Date().toLocaleDateString('en-CA'));
   private readonly dialogoPadron = viewChild<ElementRef<HTMLDialogElement>>('dialogoPadron');
 
+  /** Valor copiado recientemente, para confirmar la acción en la fila. */
+  readonly copiado = signal<string | null>(null);
+  private temporizadorCopiado?: ReturnType<typeof setTimeout>;
+
   /** Último fallo del botón de exportación; vacío si no hubo. */
   readonly exportarError = signal<string | null>(null);
 
@@ -479,10 +646,18 @@ export class ActoresPage {
   constructor() {
     this.destruccion.onDestroy(() => {
       clearTimeout(this.temporizadorBusqueda);
+      clearTimeout(this.temporizadorCopiado);
     });
   }
 
   abrir(actor: ActorDirectorio): void {
+    this.editarAlAbrir.set(false);
+    this.seleccionado.set(actor);
+  }
+
+  abrirEdicion(actor: ActorDirectorio, evento?: Event): void {
+    evento?.stopPropagation();
+    this.editarAlAbrir.set(true);
     this.seleccionado.set(actor);
   }
 
@@ -501,6 +676,17 @@ export class ActoresPage {
 
   vaciarLista(): void {
     this.listaTemporal.set([]);
+  }
+
+  /** Copia al portapapeles y confirma el valor copiado durante un instante. */
+  copiar(valor: string | null | undefined, evento?: Event): void {
+    evento?.stopPropagation();
+    if (!valor) return;
+
+    void navigator.clipboard?.writeText(valor);
+    this.copiado.set(valor);
+    clearTimeout(this.temporizadorCopiado);
+    this.temporizadorCopiado = setTimeout(() => this.copiado.set(null), 1600);
   }
 
   abrirPadron(): void {
@@ -528,7 +714,7 @@ export class ActoresPage {
     const url = URL.createObjectURL(archivo);
     const enlace = document.createElement('a');
     enlace.href = url;
-    enlace.download = 'padron-asistencia.csv';
+    enlace.download = 'lista-de-asistencia.csv';
     enlace.click();
     window.setTimeout(() => URL.revokeObjectURL(url), 1000);
     this.dialogoPadron()?.nativeElement.close();
@@ -536,6 +722,7 @@ export class ActoresPage {
 
   cerrarPanel(): void {
     this.seleccionado.set(null);
+    this.editarAlAbrir.set(false);
   }
 
   alActualizarActor(actor: ActorDirectorio): void {
@@ -554,23 +741,15 @@ export class ActoresPage {
     }, 300);
   }
 
-  cambiarNaturaleza(evento: Event): void {
-    const valor = (evento.target as HTMLSelectElement).value;
-    void this.actualizar({ naturaleza: valor, pagina: 1 });
+  /** Cambia entre la vista de Personas y la de Organizaciones. */
+  cambiarVista(vista: VistaActores): void {
+    if (this.vista() === vista) return;
+    void this.actualizar({ naturaleza: vista, pagina: 1 });
   }
 
   cambiarTipo(evento: Event): void {
     const valor = (evento.target as HTMLSelectElement).value;
     void this.actualizar({ tipo: valor, pagina: 1 });
-  }
-
-  /**
-   * El buscador entrega un distrito (o lugar) y aquí se usa su **región**: es el
-   * único grano territorial que `core.actores` guarda hoy. Un distrito del
-   * Callao o de Lima sigue funcionando porque la región viene resuelta.
-   */
-  alElegirTerritorio(opcion: OpcionTerritorio | null): void {
-    void this.actualizar({ region: opcion?.region ?? '', pagina: 1 });
   }
 
   cambiarPagina(pagina: number): void {

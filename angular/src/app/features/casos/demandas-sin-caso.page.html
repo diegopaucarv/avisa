@@ -4,9 +4,11 @@
       <h1 id="titulo-demandas">Demandas sin caso</h1>
     </div>
     <div class="view-actions">
-      @if (total() > 0) {
-      <p class="result-count" aria-live="polite">{{ sinCasoTotal() }} demandas sin caso</p>
-      }
+      <app-exportar-menu
+        entidad="demandas"
+        [consulta]="filtrosExportacion()"
+        (fallo)="alFallarExportacion($event)"
+      />
     </div>
   </header>
 
@@ -33,7 +35,7 @@
       <app-icono nombre="buscar" [tamano]="14" />
       <input
         type="search"
-        placeholder="Buscar por descripción, problema o pedido"
+        placeholder="Buscar por descripción"
         [value]="filtros().q"
         aria-label="Buscar demandas sin caso"
         (input)="buscar($event)"
@@ -86,9 +88,6 @@
             />
           </th>
           <th scope="col" [appThOrden]="'descripcion'" [orden]="orden">Descripción</th>
-          <th scope="col" [appThOrden]="'problema'" [orden]="orden">
-            Problema · Propuesta · Pedido
-          </th>
           <th scope="col" [appThOrden]="'estado'" [orden]="orden">Estado</th>
           <th scope="col" [appThOrden]="'fecha'" [orden]="orden">Fecha del hecho</th>
           <th scope="col" [appThOrden]="'mujeres'" [orden]="orden">Afecta a mujeres</th>
@@ -111,13 +110,6 @@
           </td>
           <td class="celda-descripcion">
             {{ demanda.descripcion || 'Sin descripción registrada' }}
-          </td>
-          <td class="celda-3p">
-            @for (parte of partes(demanda); track parte.etiqueta) {
-            <span class="p3-linea"> <strong>{{ parte.etiqueta }}</strong>{{ parte.valor }} </span>
-            } @empty {
-            <span class="sin-dato">—</span>
-            }
           </td>
           <td>
             <span [class]="'status-badge ' + claseEstado(demanda.estado)">

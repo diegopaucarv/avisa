@@ -59,10 +59,8 @@ type AvisoLectura = {
  * Centro de notificaciones.
  *
  * Listado paginado en servidor con filtro por estado de lectura en la URL. Las
- * no leídas se resaltan y llevan la insignia «Sin leer»; la cabecera muestra el
- * contador de pendientes que entrega `GET /v1/notifications?estado=pendiente`
- * (`total` con `pageSize=1`). «Marcar como leída» y «Desmarcar» usan
- * `PATCH /v1/notifications/{id}` y recargan lista y contador.
+ * no leídas se resaltan y llevan la insignia «Sin leer». «Marcar como leída» y
+ * «Desmarcar» usan `PATCH /v1/notifications/{id}` y recargan lista y contador.
  *
  * El enlace abre la ficha del caso cuando la API entrega `entidadCodigo`; en
  * cualquier otro caso abre la sección y la nota lo declara.
@@ -100,10 +98,6 @@ type AvisoLectura = {
       align-items: flex-start;
       justify-content: space-between;
       gap: 16px;
-    }
-
-    .contador-sin-leer {
-      align-self: center;
     }
 
     .notificacion {

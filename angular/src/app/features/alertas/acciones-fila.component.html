@@ -1,38 +1,46 @@
 @if (hayAcciones()) {
-<button
-  #disparador
-  type="button"
-  class="acciones-boton"
-  aria-haspopup="menu"
-  [attr.aria-expanded]="abierto()"
-  [attr.aria-label]="'Acciones de la alerta ' + (codigo() || 'seleccionada')"
-  [disabled]="ocupado()"
-  (click)="alternar($event)"
->
-  <app-icono nombre="menu" [tamano]="14" />
-</button>
-} @if (posicion(); as ubicacion) {
-<div
-  class="menu-acciones"
-  role="menu"
-  [attr.aria-label]="'Acciones de la alerta ' + (codigo() || 'seleccionada')"
-  [style.top.px]="ubicacion.top"
-  [style.left.px]="ubicacion.left"
-  [style.width.px]="ubicacion.ancho"
-  (click)="$event.stopPropagation()"
->
-  @if (acciones().length) {
-  <p class="menu-titulo" role="presentation">Cambiar de paso</p>
-  @for (accion of acciones(); track accion.paso) {
-  <button type="button" role="menuitem" (click)="elegir(accion.paso, $event)">
-    {{ accion.etiqueta }}
+  <button
+    #disparador
+    type="button"
+    class="acciones-boton"
+    aria-haspopup="menu"
+    [attr.aria-expanded]="abierto()"
+    [attr.aria-label]="'Acciones de la alerta ' + (codigo() || 'seleccionada')"
+    [disabled]="ocupado()"
+    (click)="alternar($event)"
+  >
+    <app-icono nombre="menu" [tamano]="14" />
   </button>
-  } } @if (puedeAnular()) { @if (acciones().length) {
-  <div class="menu-separador" role="separator"></div>
-  }
-  <button type="button" role="menuitem" class="menu-anular" (click)="pedirAnular($event)">
-    Anular
-  </button>
-  }
-</div>
+}
+
+@if (posicion(); as ubicacion) {
+  <div
+    class="menu-acciones"
+    role="menu"
+    [attr.aria-label]="'Acciones de la alerta ' + (codigo() || 'seleccionada')"
+    [style.top.px]="ubicacion.top"
+    [style.left.px]="ubicacion.left"
+    [style.width.px]="ubicacion.ancho"
+    (click)="$event.stopPropagation()"
+  >
+    @for (grupo of grupos(); track $index) {
+      @if (grupo.titulo) {
+        <p class="menu-titulo" role="presentation">{{ grupo.titulo }}</p>
+      }
+      @for (accion of grupo.acciones; track accion.id) {
+        <button type="button" role="menuitem" (click)="elegir(accion.id, $event)">
+          {{ accion.etiqueta }}
+        </button>
+      }
+    }
+
+    @if (puedeAnular()) {
+      @if (acciones().length) {
+        <div class="menu-separador" role="separator"></div>
+      }
+      <button type="button" role="menuitem" class="menu-anular" (click)="pedirAnular($event)">
+        Anular
+      </button>
+    }
+  </div>
 }

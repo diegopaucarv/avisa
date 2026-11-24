@@ -4,17 +4,12 @@
       <h1 id="titulo-notificaciones">Notificaciones</h1>
     </div>
     <div class="view-actions">
-      <span
-        class="status-badge state-pending contador-sin-leer"
-        [attr.title]="
-          errorContador()
-            ? 'No se pudo leer el contador de pendientes'
-            : 'Notificaciones pendientes de lectura'
-        "
-      >
-        <span class="status-dot"></span>
-        {{ textoContador() }}
-      </span>
+      <app-barra-seleccion
+        entidad="notificaciones"
+        [cantidad]="seleccion.cantidad()"
+        [idsSeleccionados]="seleccion.lista()"
+        (fallo)="alFallarExportacion($event)"
+      />
       <button type="button" class="button-secondary" (click)="recargar()">Recargar</button>
     </div>
   </header>
@@ -36,15 +31,6 @@
     @if (filtros().estado) {
     <button type="button" class="button-secondary" (click)="limpiar()">Quitar filtro</button>
     }
-  </div>
-
-  <div class="view-toolbar">
-    <app-barra-seleccion
-      entidad="notificaciones"
-      [cantidad]="seleccion.cantidad()"
-      [idsSeleccionados]="seleccion.lista()"
-      (fallo)="alFallarExportacion($event)"
-    />
   </div>
 
   @if (exportarError(); as mensaje) {
@@ -179,10 +165,9 @@
   </div>
 
   <p class="notificaciones-nota">
-    Las no leídas se resaltan y llevan la insignia «Sin leer»; el contador de la cabecera es el
-    total de pendientes del servidor, no el de la página. «Marcar como leída» y «Desmarcar» usan
-    <code>PATCH /v1/notifications/&#123;id&#125;</code> y recargan lista y contador. El enlace abre
-    la ficha del caso cuando la API entrega su código; si el aviso no lo trae, abre la sección
+    Las no leídas se resaltan y llevan la insignia «Sin leer». «Marcar como leída» y «Desmarcar»
+    usan <code>PATCH /v1/notifications/&#123;id&#125;</code> y recargan lista y contador. El enlace
+    abre la ficha del caso cuando la API entrega su código; si el aviso no lo trae, abre la sección
     correspondiente. El punto de la campana del shell sigue pendiente de otro proceso.
   </p>
   } @if (estadoListado() === 'listo' && total() > 0) {

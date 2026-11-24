@@ -552,9 +552,19 @@ export type CaseDemanda = {
 
 export type CaseHito = {
   id: string;
+  codigo: string;
   descripcion: string;
   fecha: string | null;
+  fechaTexto: string | null;
+  fechaReal: string | null;
+  fechaRealTexto: string | null;
   estado: string | null;
+  terminal: boolean;
+  validacion: string | null;
+  descripcionEvidencia: string | null;
+  linkEvidencia: string | null;
+  responsableTexto: string | null;
+  responsableUsuarioId: string | null;
 };
 
 export type CaseCommitment = {
@@ -699,13 +709,24 @@ export async function getCaseByCode(
               coalesce((
                 select json_agg(json_build_object(
                          'id', h.id,
+                         'codigo', h.codigo_hito,
                          'descripcion', h.descripcion_hito,
                          'fecha', to_char(h.fecha_vencimiento, 'YYYY-MM-DD'),
-                         'estado', replace(eh.codigo, '_', ' ')
-                       ) order by h.fecha_vencimiento nulls last)
+                         'fechaTexto', h.fecha_vencimiento_texto,
+                         'fechaReal', to_char(h.fecha_real, 'YYYY-MM-DD'),
+                         'fechaRealTexto', h.fecha_real_texto,
+                         'estado', replace(eh.codigo, '_', ' '),
+                         'terminal', coalesce(eh.es_terminal, false),
+                         'validacion', h.validacion,
+                         'descripcionEvidencia', h.descripcion_evidencia,
+                         'linkEvidencia', h.link_evidencia,
+                         'responsableTexto', h.responsable_texto,
+                         'responsableUsuarioId', h.responsable_usuario_id::text
+                       ) order by h.fecha_vencimiento nulls last, h.codigo_hito)
                   from core.hitos_compromiso h
                   left join core.cat_estados_hito eh on eh.id = h.estado_id
                  where h.compromiso_id = cmp.id
+                   and h.anulado_en is null
               ), '[]'::json) as hitos
          from core.compromisos cmp
          left join core.cat_estados_compromiso ec on ec.id = cmp.estado_id

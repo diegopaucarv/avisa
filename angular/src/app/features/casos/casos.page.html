@@ -5,7 +5,11 @@
     </div>
     @if (!verPapelera()) {
     <div class="view-actions">
-      <p class="result-count" aria-live="polite">{{ total() }} registrados</p>
+      <app-exportar-menu
+        entidad="casos"
+        [consulta]="filtrosExportacion()"
+        (fallo)="alFallarExportacion($event)"
+      />
       @if (capacidades.puedeEditar()) {
       <button type="button" class="button-primary" (click)="abrirAlta()">Nuevo caso</button>
       }

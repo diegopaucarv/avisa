@@ -402,29 +402,6 @@ function compararInicio(a: string | null, b: string | null): number {
       flex-wrap: wrap;
     }
 
-    button.th-orden {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      padding: 0;
-      border: 0;
-      background: none;
-      color: inherit;
-      font: inherit;
-      letter-spacing: inherit;
-      text-transform: inherit;
-      cursor: pointer;
-    }
-
-    button.th-orden:hover {
-      color: var(--blue-dark);
-    }
-
-    .th-orden-flecha {
-      font-size: 12.5px;
-      line-height: 1;
-    }
-
     .celda-caso small {
       display: block;
       margin-top: 2px;
@@ -792,10 +769,11 @@ export class MapaPage {
   readonly cajonAbierto = signal(false);
   private focoCajonPrevio: HTMLElement | null = null;
 
-  /** Orden de la columna «Total»: por defecto, el mayor primero. */
-  readonly ordenTotal = signal<'desc' | 'asc'>('desc');
-  /** Orden de la tasa; `null` = manda «Total». */
-  readonly ordenTasa = signal<'desc' | 'asc' | null>(null);
+  /**
+   * Orden local de la tabla de regiones. Sin columna activa rige el orden de
+   * `filasPorRegion`: total de mayor a menor.
+   */
+  readonly ordenRegiones = new OrdenTabla<FilaRegion>();
 
   private mapa: L.Map | null = null;
   private readonly capasRegion = new Map<string, L.CircleMarker>();
@@ -961,28 +939,24 @@ export class MapaPage {
 
   readonly conteos = computed(() => conteosPorAlcance(this.base()));
   readonly bandas = computed(() => bandasPorAlcance(this.visibles()));
-  readonly filasRegion = computed(() => {
-    const filas = filasPorRegion(this.visibles());
-    const direccion = this.ordenTasa();
-    if (direccion !== null) {
-      const tasas = this.tasasRegion();
-      return [...filas].sort((a, b) => {
-        const tasaA = tasas.get(normalizarRegion(a.region)) ?? null;
-        const tasaB = tasas.get(normalizarRegion(b.region)) ?? null;
-        // Sin denominador declarado la fila va al final se ordene como se ordene.
-        if (tasaA === null || tasaB === null) {
-          if (tasaA === tasaB) return a.region.localeCompare(b.region, 'es');
-          return tasaA === null ? 1 : -1;
-        }
-        return (
-          (direccion === 'desc' ? tasaB - tasaA : tasaA - tasaB) ||
-          a.region.localeCompare(b.region, 'es')
-        );
-      });
-    }
-    if (this.ordenTotal() === 'desc') return filas;
-    return [...filas].sort((a, b) => a.total - b.total || a.region.localeCompare(b.region, 'es'));
-  });
+  readonly filasRegion = computed(() =>
+    this.ordenRegiones.ordenar(filasPorRegion(this.visibles()), this.accesoresRegiones),
+  );
+
+  /**
+   * Claves de orden de la tabla de regiones. «Lat/Man» usa una clave compuesta:
+   * primero los latentes y, a igualdad, los manifiestos. La tasa llega vacía
+   * cuando falta el denominador y esos huecos quedan al final, se ordene como
+   * se ordene.
+   */
+  private readonly accesoresRegiones: Record<string, (fila: FilaRegion) => unknown> = {
+    region: (fila) => fila.region,
+    ambitos: (fila) => this.etiquetaAmbitos(fila.ambitos),
+    situacion: (fila) => [fila.latente, fila.manifiesto],
+    total: (fila) => fila.total,
+    tasa: (fila) => this.tasasRegion().get(normalizarRegion(fila.region)) ?? null,
+    riesgoAlto: (fila) => fila.riesgoAlto,
+  };
 
   /**
    * Tasa por 100 000 habitantes de cada fila. La población sólo es el
@@ -1221,15 +1195,6 @@ export class MapaPage {
       evento.preventDefault();
       ultimo.focus();
     }
-  }
-
-  alternarOrdenTotal(): void {
-    this.ordenTasa.set(null);
-    this.ordenTotal.update((valor) => (valor === 'desc' ? 'asc' : 'desc'));
-  }
-
-  alternarOrdenTasa(): void {
-    this.ordenTasa.update((valor) => (valor === 'desc' ? 'asc' : 'desc'));
   }
 
   tasaFila(fila: FilaRegion): number | null {

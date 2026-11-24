@@ -2,17 +2,6 @@
   <header class="view-head">
     <div>
       <h1 id="titulo-panorama">Panorama territorial</h1>
-      <p class="view-meta">
-        @if (corte(); as sello) {
-        <span>Datos al {{ sello }}</span>
-        <span class="meta-separador" aria-hidden="true">·</span>
-        } @if (conRecorte()) {
-        <span class="sesion-chip">Mis regiones ({{ regionesSesion().length }})</span>
-        <span>{{ regionesSesion().join(' · ') }}</span>
-        } @else {
-        <span>Ámbito de sesión: Nacional</span>
-        }
-      </p>
     </div>
     <div class="view-actions">
       <button type="button" class="button-secondary" (click)="recargar()">Recargar</button>
@@ -90,16 +79,6 @@
       <span class="stat-copy">
         <span>Casos con riesgo alto</span>
         <strong>{{ riesgoAlto() }}</strong>
-      </span>
-    </div>
-
-    <div class="stat-card">
-      <span class="stat-icon">
-        <app-icono nombre="casos" [tamano]="16" />
-      </span>
-      <span class="stat-copy">
-        <span>Casos sin región</span>
-        <strong>{{ sinRegion() }}</strong>
       </span>
     </div>
   </div>
@@ -228,10 +207,11 @@
         <div>
           <h3 id="titulo-regiones">Casos por región</h3>
           <p>
-            Ordenables por total o por casos por 100 000 habitantes; el riesgo alto y el nivel de
-            conflictividad son atributos propios de cada caso. Pulse el nombre de la región para
-            abrir el listado filtrado por esa región o «Ver casos» para revisarlos en el cajón con
-            el territorio y el ámbito aplicados.
+            Cada cabecera reordena las filas: el primer clic ordena de menor a mayor, el segundo de
+            mayor a menor y el tercero vuelve al orden por total. El riesgo alto y el nivel de
+            conflictividad son atributos propios de cada caso; la fila «Sin región» queda siempre al
+            final. Pulse el nombre de la región para abrir el listado filtrado por esa región o «Ver
+            casos» para revisarlos en el cajón con el territorio y el ámbito aplicados.
           </p>
         </div>
         <button
@@ -249,44 +229,12 @@
         <table class="data-table" aria-label="Casos por región">
           <thead>
             <tr>
-              <th scope="col">Región</th>
-              <th scope="col">Ámbito</th>
-              <th scope="col">Latentes / manifiestos</th>
-              <th
-                scope="col"
-                [attr.aria-sort]="
-                  ordenTasa() === null
-                    ? ordenTotal() === 'desc'
-                      ? 'descending'
-                      : 'ascending'
-                    : 'none'
-                "
-              >
-                <button type="button" class="th-orden" (click)="alternarOrdenTotal()">
-                  Total
-                  <span class="th-orden-flecha" aria-hidden="true"
-                    >{{ ordenTasa() === null ? (ordenTotal() === 'desc' ? '↓' : '↑') : '↕' }}</span
-                  >
-                </button>
-              </th>
-              <th
-                scope="col"
-                [attr.aria-sort]="
-                  ordenTasa() === 'desc'
-                    ? 'descending'
-                    : ordenTasa() === 'asc'
-                      ? 'ascending'
-                      : 'none'
-                "
-              >
-                <button type="button" class="th-orden" (click)="alternarOrdenTasa()">
-                  Casos por 100 000 hab.
-                  <span class="th-orden-flecha" aria-hidden="true"
-                    >{{ ordenTasa() === 'desc' ? '↓' : ordenTasa() === 'asc' ? '↑' : '↕' }}</span
-                  >
-                </button>
-              </th>
-              <th scope="col">Riesgo alto</th>
+              <th scope="col" [appThOrden]="'region'" [orden]="ordenRegiones">Región</th>
+              <th scope="col" [appThOrden]="'ambitos'" [orden]="ordenRegiones">Ámbito</th>
+              <th scope="col" [appThOrden]="'situacion'" [orden]="ordenRegiones">Lat/Man</th>
+              <th scope="col" [appThOrden]="'total'" [orden]="ordenRegiones">Total</th>
+              <th scope="col" [appThOrden]="'tasa'" [orden]="ordenRegiones">Tasa</th>
+              <th scope="col" [appThOrden]="'riesgoAlto'" [orden]="ordenRegiones">Riesgo alto</th>
             </tr>
           </thead>
           <tbody>

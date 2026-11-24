@@ -14,12 +14,14 @@
   },
   "dependencies": {
     "next": "16.4.3",
+    "nodemailer": "^10.6.1",
     "pg": "^8.23.1",
     "react": "^19",
     "react-dom": "^19"
   },
   "devDependencies": {
     "@types/node": "^24",
+    "@types/nodemailer": "^8.0.2",
     "@types/pg": "^8.23.1",
     "@types/react": "^19",
     "@types/react-dom": "^19",

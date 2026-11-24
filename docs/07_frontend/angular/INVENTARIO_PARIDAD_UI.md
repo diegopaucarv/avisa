@@ -483,7 +483,7 @@ servicio Angular + `localStorage`, con valor inicial seguro para SSR.
 - [ ] Documentos normativos — **M**
 - [ ] Ruta de intervención — **M**
 - [ ] Anulación lógica con restauración: decidida; sin endpoint `anular`/`restaurar`, la UI **no** ofrece el botón (E2) — **M**
-- [ ] Alta de demanda / hito / documento desde la ficha — **L**
+- [ ] Registrar demanda / hito / documento desde la ficha — **L**
 
 ## 6.6 Alertas tempranas
 

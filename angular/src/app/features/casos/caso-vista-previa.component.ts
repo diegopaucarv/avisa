@@ -11,7 +11,7 @@ import {
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
-import { formatearFechaCorta } from '../../dominio/mapeo';
+import { formatearFecha } from '../../shared/formato-fecha';
 import type { Caso } from '../../dominio/modelos';
 import { IconoComponent } from '../../shared/ui/icono.component';
 
@@ -20,10 +20,11 @@ import { IconoComponent } from '../../shared/ui/icono.component';
  *
  * No es la ficha: la ficha tiene ocho secciones y nueve tablas. Esta tarjeta
  * expandida muestra lo que un evaluador necesita para reconocer el caso —código,
- * título, conflictividad, riesgo, región, resumen y actualización— y ofrece
- * cuatro accesos directos a las secciones de la ficha, que se abren por
- * `fragment`. «Caso de análisis (Canva)» se declara no disponible: el campo no
- * existe en `core.casos` y no se simula un enlace que nadie puede abrir.
+ * título, conflictividad, riesgo, región, resumen y actualización— y ofrece los
+ * accesos directos a las secciones de la ficha (línea de tiempo, actores,
+ * demandas, acuerdos y documentos), que se abren por `fragment`. «Caso de
+ * análisis (Canva)» se declara no disponible: el campo no existe en `core.casos`
+ * y no se simula un enlace que nadie puede abrir.
  *
  * Repite el patrón canónico del panel lateral: fondo clicable, Escape, foco
  * encerrado y devuelto al cerrar.
@@ -40,7 +41,6 @@ import { IconoComponent } from '../../shared/ui/icono.component';
     :host {
       display: contents;
     }
-
 
     .previa-codigo {
       margin: 0;
@@ -168,8 +168,9 @@ export class CasoVistaPreviaComponent {
     this.destruccion.onDestroy(() => this.focoPrevio?.focus?.());
   }
 
-  fechaCorta(valor: string | null | undefined): string {
-    return formatearFechaCorta(valor);
+  /** Fecha en `dd/mm/aaaa`, el formato canónico de la ficha. */
+  fechaTexto(valor: string | null | undefined): string {
+    return formatearFecha(valor) || '—';
   }
 
   alFondo(evento: MouseEvent): void {

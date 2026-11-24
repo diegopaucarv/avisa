@@ -1,0 +1,78 @@
+<div class="modal-scrim" (click)="alFondo($event)">
+  <section
+    #dialogo
+    class="modal"
+    tabindex="-1"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="whatsapp-titulo"
+    (click)="$event.stopPropagation()"
+  >
+    <header class="modal-head">
+      <div>
+        <p class="modal-codigo">{{ codigo() || 'Alerta sin código' }}</p>
+        <h2 id="whatsapp-titulo">{{ titulo() || 'Enviar alerta por WhatsApp' }}</h2>
+        @if (sitio()) {
+          <span class="modal-sitio">{{ sitio() }}</span>
+        }
+      </div>
+      <button
+        type="button"
+        class="icon-button"
+        aria-label="Cerrar la ventana de WhatsApp"
+        (click)="cerrar.emit()"
+      >
+        <app-icono nombre="cerrar" [tamano]="18" />
+      </button>
+    </header>
+
+    <div class="modal-body">
+      <p class="modal-titulo">Cuerpo del mensaje (sintaxis de WhatsApp)</p>
+
+      <div class="barra-herramientas">
+        <label class="conmutador">
+          <input
+            type="checkbox"
+            [checked]="editarComoPlantilla()"
+            (change)="alternarPlantilla()"
+          />
+          Editar como plantilla
+        </label>
+        <span class="contador">{{ caracteres() }} caracteres</span>
+      </div>
+
+      <textarea
+        class="mensaje"
+        rows="16"
+        spellcheck="false"
+        [readonly]="!editarComoPlantilla()"
+        [value]="texto()"
+        aria-label="Mensaje para WhatsApp"
+        (input)="campo($event)"
+      ></textarea>
+
+      <p class="modal-texto">
+        El mensaje conserva las negritas de WhatsApp (<code>*texto*</code>) y los emojis de cada
+        sección. Puede editarlo antes de copiarlo; si activa «editar como plantilla», se guardará
+        para esta alerta.
+      </p>
+
+      @if (avisoCopia(); as aviso) {
+        <p class="aviso-copia" role="status">{{ aviso }}</p>
+      }
+    </div>
+
+    <footer class="modal-foot">
+      <button type="button" class="button-secondary" (click)="cerrar.emit()">Cerrar</button>
+      @if (editarComoPlantilla()) {
+        <button type="button" class="button-secondary" (click)="guardar()">
+          Guardar plantilla
+        </button>
+      }
+      <button type="button" class="button-primary" (click)="copiar()">
+        <app-icono nombre="documentos" [tamano]="14" />
+        Copiar mensaje
+      </button>
+    </footer>
+  </section>
+</div>

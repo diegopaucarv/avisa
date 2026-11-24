@@ -102,13 +102,6 @@ const FILTROS_INICIALES: FiltrosReportes = {
       gap: 16px;
     }
 
-    .view-actions {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      gap: 6px;
-    }
-
     .exportar-error {
       margin: 0;
       color: #b42318;

@@ -48,7 +48,14 @@ export class OrdenTabla<T> implements ControlOrden {
     if (!acceso) return [...filas];
 
     const factor = this._direccion() === 'asc' ? 1 : -1;
-    return [...filas].sort((a, b) => factor * comparar(acceso(a), acceso(b)));
+    return [...filas].sort((a, b) => {
+      const valorA = acceso(a);
+      const valorB = acceso(b);
+      // Un hueco no es «lo más alto» ni «lo más bajo»: no se gira con la
+      // dirección y se queda al final en ambos sentidos.
+      if (esVacio(valorA) || esVacio(valorB)) return comparar(valorA, valorB);
+      return factor * comparar(valorA, valorB);
+    });
   }
 
   ariaSort(columna: string): 'ascending' | 'descending' | 'none' {
@@ -61,12 +68,26 @@ export class OrdenTabla<T> implements ControlOrden {
   }
 }
 
-/** Compara números, booleanos, fechas ISO y texto (español). Nulos al final. */
+function esVacio(valor: unknown): boolean {
+  return valor === null || valor === undefined || valor === '';
+}
+
+/**
+ * Compara números, booleanos, fechas ISO y texto (español). Nulos al final.
+ * Las claves compuestas son arrays: se comparan posición a posición.
+ */
 export function comparar(a: unknown, b: unknown): number {
-  const vacio = (valor: unknown) => valor === null || valor === undefined || valor === '';
-  if (vacio(a) && vacio(b)) return 0;
-  if (vacio(a)) return 1;
-  if (vacio(b)) return -1;
+  if (esVacio(a) && esVacio(b)) return 0;
+  if (esVacio(a)) return 1;
+  if (esVacio(b)) return -1;
+
+  if (Array.isArray(a) && Array.isArray(b)) {
+    for (let i = 0; i < Math.min(a.length, b.length); i += 1) {
+      const orden = comparar(a[i], b[i]);
+      if (orden !== 0) return orden;
+    }
+    return a.length - b.length;
+  }
 
   if (typeof a === 'number' && typeof b === 'number') return a - b;
   if (typeof a === 'boolean' && typeof b === 'boolean') return Number(a) - Number(b);
