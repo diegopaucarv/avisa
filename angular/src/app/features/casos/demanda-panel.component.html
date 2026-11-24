@@ -15,13 +15,6 @@
         <h2 id="demanda-panel-titulo">
           {{ demanda() ? 'Editar demanda' : 'Alta de demanda' }}
         </h2>
-        <p class="demanda-panel-sub">
-          @if (demanda()) {
-            Sólo se envían los campos que cambian.
-          } @else {
-            El problema (3P) es obligatorio; propuesta y pedido son opcionales.
-          }
-        </p>
       </div>
 
       <button

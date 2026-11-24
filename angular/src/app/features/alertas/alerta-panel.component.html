@@ -12,9 +12,6 @@
         <div class="alerta-panel-cabecera">
           <p class="alerta-panel-codigo">Alerta temprana</p>
           <h2 id="alerta-panel-titulo">Registrar alerta</h2>
-          <p class="alerta-alta-ayuda" id="alerta-alta-ayuda">
-            El título y la prioridad son obligatorios; el resto puede completarse después.
-          </p>
         </div>
 
         <button
@@ -230,7 +227,19 @@
 
       <div class="drawer-body alerta-panel-cuerpo">
         @if (aviso()) {
-          <p class="alerta-aviso" role="status">{{ aviso() }}</p>
+          <div class="alerta-aviso" role="status">
+            <span>{{ aviso() }}</span>
+            @if (pasoDeshacer() !== null) {
+              <button
+                type="button"
+                class="button-secondary alerta-deshacer"
+                [disabled]="!puedeModificar() || guardando()"
+                (click)="deshacer.emit()"
+              >
+                Deshacer
+              </button>
+            }
+          </div>
         }
         @if (errorGuardado()) {
           <p class="form-error" role="alert">{{ errorGuardado() }}</p>
@@ -257,22 +266,10 @@
               Paso {{ paso.paso }} de 5 · {{ paso.nombre }}
               <span class="alerta-etapa-estado">{{ paso.estado }}</span>
             </p>
-            <p class="alerta-nota">
-              Registra el paso: {{ paso.responsable }}. La gravedad no cambia el recorrido; cambia a
-              quién se avisa y con qué plazo.
-            </p>
           } @else {
-            <p class="alerta-nota">
-              El paso registrado ({{ a.pasoActual }}) no está en el flujo de cinco pasos del
-              catálogo.
-            </p>
           }
 
           @if (acciones().length === 0) {
-            <p class="alerta-nota">
-              No hay transiciones disponibles desde este paso. Reabrir exige una alerta nueva o una
-              suplencia autorizada.
-            </p>
           } @else {
             <div class="alerta-acciones">
               @for (transicion of acciones(); track transicion.paso) {
@@ -280,7 +277,7 @@
                   type="button"
                   class="button-secondary alerta-accion"
                   [disabled]="!puedeModificar() || guardando()"
-                  (click)="accion.emit(transicion.paso)"
+                  (click)="elegirAccion(transicion)"
                 >
                   <span>{{ transicion.etiqueta }}</span>
                   <small> {{ transicion.detalle }} Registra: {{ transicion.responsable }}. </small>
@@ -289,10 +286,92 @@
             </div>
           }
 
+          @if (aprobacionPendiente(); as aprobacion) {
+            <div
+              class="alerta-confirmacion"
+              role="group"
+              aria-labelledby="alerta-confirmacion-titulo"
+            >
+              <p class="alerta-confirmacion-titulo" id="alerta-confirmacion-titulo">
+                Confirmar aprobación definitiva
+              </p>
+              <dl class="alerta-datos">
+                <div>
+                  <dt>Alerta</dt>
+                  <dd>{{ a.codigo || 'Sin código' }}</dd>
+                </div>
+                <div>
+                  <dt>Título</dt>
+                  <dd>{{ a.titulo || 'Sin título' }}</dd>
+                </div>
+                <div>
+                  <dt>Acción</dt>
+                  <dd>{{ aprobacion.etiqueta }}</dd>
+                </div>
+                <div>
+                  <dt>Responsable</dt>
+                  <dd>{{ aprobacion.responsable }}</dd>
+                </div>
+              </dl>
+              <div class="alerta-formulario-acciones">
+                <button
+                  #botonConfirmar
+                  type="button"
+                  class="button-primary"
+                  [disabled]="guardando() || !puedeModificar()"
+                  (click)="confirmarAprobacion()"
+                >
+                  {{ guardando() ? 'Confirmando…' : 'Confirmar aprobación' }}
+                </button>
+                <button
+                  type="button"
+                  class="button-secondary"
+                  [disabled]="guardando()"
+                  (click)="cancelarConfirmacion()"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          }
+
           @if (!puedeModificar()) {
-            <p class="alerta-nota">Su rol no permite modificar esta alerta.</p>
           }
         </section>
+
+        @if (a.pasoActual >= 3) {
+          <section class="alerta-seccion" aria-labelledby="alerta-panel-derivacion">
+            <h3 id="alerta-panel-derivacion">Derivación</h3>
+            <dl class="alerta-datos">
+              <div>
+                <dt>Aprobada por</dt>
+                <dd>{{ a.aprobadaPor || 'Sin registrar' }}</dd>
+              </div>
+              <div>
+                <dt>Fecha de aprobación</dt>
+                <dd>{{ a.fechaAprobacion || 'Sin registrar' }}</dd>
+              </div>
+              <div>
+                <dt>Validada por</dt>
+                <dd>{{ a.validadaPor || 'Sin registrar' }}</dd>
+              </div>
+              <div>
+                <dt>Fecha de validación</dt>
+                <dd>{{ a.fechaValidacion || 'Sin registrar' }}</dd>
+              </div>
+              <div>
+                <dt>Etapa actual</dt>
+                <dd>
+                  @if (etapa(); as paso) {
+                    Paso {{ paso.paso }} de 5 · {{ paso.nombre }} · {{ paso.responsable }}
+                  } @else {
+                    Paso {{ a.pasoActual }} (fuera del catálogo de cinco pasos)
+                  }
+                </dd>
+              </div>
+            </dl>
+          </section>
+        }
 
         @if (!formulario()) {
           <div class="alerta-formulario-acciones">
@@ -309,10 +388,6 @@
         } @else {
           @if (formulario(); as b) {
             <form class="alerta-formulario" (submit)="alEnviarFormulario($event)">
-              <p class="alerta-nota">
-                Sólo se envían los campos que cambian. El plazo se deriva de la prioridad en el
-                catálogo y no se edita aquí.
-              </p>
 
               <div class="form-field">
                 <label class="form-label" for="alerta-campo-titulo">Título</label>
@@ -601,7 +676,6 @@
             <p class="alerta-vacio">Sin descripción de la fuente.</p>
           }
           @if (a.fuenteTipo) {
-            <p class="alerta-nota">Tipo: {{ a.fuenteTipo }}</p>
           }
           @if (a.fuenteUrl) {
             <a class="table-link" [href]="a.fuenteUrl" target="_blank" rel="noopener noreferrer">

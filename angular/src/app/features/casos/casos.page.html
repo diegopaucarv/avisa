@@ -2,13 +2,10 @@
   <header class="view-head">
     <div>
       <h1 id="titulo-casos">Casos</h1>
-      <p class="view-subtitle">
-        Seguimiento de la conflictividad registrada, con su nivel, prioridad y riesgo propio del
-        caso. @if (!verPapelera()) {<span class="result-count">{{ total() }} registrados</span>}
-      </p>
     </div>
     @if (!verPapelera()) {
     <div class="view-actions">
+      <p class="result-count" aria-live="polite">{{ total() }} registrados</p>
       @if (capacidades.puedeEditar()) {
       <button type="button" class="button-primary" (click)="abrirAlta()">Nuevo caso</button>
       }
@@ -86,18 +83,6 @@
         <option [value]="valorSinRegion">Sin región</option>
         @for (opcion of regiones(); track opcion.valor) {
         <option [value]="opcion.valor">{{ opcion.etiqueta }}</option>
-        }
-      </select>
-    </label>
-
-    <label class="select-filter">
-      Temática
-      <select aria-label="Filtrar casos por temática" (change)="cambiarTematica($event)">
-        <option value="" [selected]="filtros().tematica === ''">Todas</option>
-        @for (opcion of tematicas(); track opcion.valor) {
-        <option [value]="opcion.valor" [selected]="filtros().tematica === opcion.valor">
-          {{ opcion.etiqueta }}
-        </option>
         }
       </select>
     </label>
@@ -253,20 +238,17 @@
   } } @else if (verPapelera()) {
   <div class="table-wrap">
     <table class="data-table">
-      <caption class="table-caption">
-        {{ total() }} casos anulados · se restauran a la vista de vigentes.
-      </caption>
       <thead>
         <tr>
-          <th scope="col">Código</th>
-          <th scope="col">Caso</th>
-          <th scope="col">Región</th>
-          <th scope="col">Fecha de anulación</th>
+          <th scope="col" [appThOrden]="'codigo'" [orden]="orden">Código</th>
+          <th scope="col" [appThOrden]="'titulo'" [orden]="orden">Caso</th>
+          <th scope="col" [appThOrden]="'region'" [orden]="orden">Región</th>
+          <th scope="col" [appThOrden]="'anulado'" [orden]="orden">Fecha de anulación</th>
           <th scope="col">Acción</th>
         </tr>
       </thead>
       <tbody>
-        @for (caso of casos(); track caso.codigo) {
+        @for (caso of filasVisibles(); track caso.codigo) {
         <tr>
           <td>{{ caso.codigo }}</td>
           <td>{{ caso.titulo }}</td>
@@ -336,9 +318,6 @@
   } @else {
   <div class="table-wrap">
     <table class="data-table">
-      <caption class="table-caption">
-        {{ total() }} casos · el riesgo es atributo del caso y se recalcula en su ficha.
-      </caption>
       <thead>
         <tr>
           <th scope="col" class="col-seleccion">
@@ -350,19 +329,18 @@
               (change)="seleccion.alternarPagina(idsVisibles(), $event)"
             />
           </th>
-          <th scope="col">Caso</th>
-          <th scope="col">Región</th>
-          <th scope="col">Temática</th>
-          <th scope="col">Estado</th>
-          <th scope="col">Prioridad</th>
-          <th scope="col">Riesgo</th>
-          <th scope="col">Unidad</th>
-          <th scope="col">Etapa</th>
-          <th scope="col">Inicio</th>
+          <th scope="col" [appThOrden]="'codigo'" [orden]="orden">Caso</th>
+          <th scope="col" [appThOrden]="'region'" [orden]="orden">Región</th>
+          <th scope="col" [appThOrden]="'estado'" [orden]="orden">Estado</th>
+          <th scope="col" [appThOrden]="'prioridad'" [orden]="orden">Prioridad</th>
+          <th scope="col" [appThOrden]="'riesgo'" [orden]="orden">Riesgo</th>
+          <th scope="col" [appThOrden]="'unidad'" [orden]="orden">Unidad</th>
+          <th scope="col" [appThOrden]="'etapa'" [orden]="orden">Etapa</th>
+          <th scope="col" [appThOrden]="'inicio'" [orden]="orden">Inicio</th>
         </tr>
       </thead>
       <tbody>
-        @for (caso of casos(); track caso.codigo) {
+        @for (caso of filasVisibles(); track caso.codigo) {
         <tr class="case-row-clickable" [routerLink]="['/casos', caso.codigo]">
           <td class="col-seleccion" (click)="$event.stopPropagation()">
             <input
@@ -377,7 +355,6 @@
             <a class="table-link" [routerLink]="['/casos', caso.codigo]">{{ caso.codigo }}</a>
           </td>
           <td>{{ caso.region || '—' }}</td>
-          <td>{{ caso.tematica || '—' }}</td>
           <td>{{ caso.estado }}</td>
           <td>{{ caso.prioridad }}</td>
           <td>{{ caso.riesgo }}</td>

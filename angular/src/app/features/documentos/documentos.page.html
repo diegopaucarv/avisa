@@ -3,7 +3,7 @@
     <div>
       <h1 id="titulo-documentos">Documentos</h1>
     </div>
-    <div class="view-acciones">
+    <div class="view-actions">
       @if (puedeRegistrar()) {
       <button type="button" class="button-primary" (click)="abrirAlta()">
         Registrar documento
@@ -166,20 +166,17 @@
   } @if (verPapelera()) {
   <div class="table-wrap">
     <table class="data-table">
-      <caption class="table-caption">
-        {{ resumenPapelera() }}
-      </caption>
       <thead>
         <tr>
-          <th scope="col">Código</th>
-          <th scope="col">Título</th>
-          <th scope="col">Caso</th>
-          <th scope="col">Fecha de anulación</th>
+          <th scope="col" [appThOrden]="'codigo'" [orden]="orden">Código</th>
+          <th scope="col" [appThOrden]="'titulo'" [orden]="orden">Título</th>
+          <th scope="col" [appThOrden]="'caso'" [orden]="orden">Caso</th>
+          <th scope="col" [appThOrden]="'anulado'" [orden]="orden">Fecha de anulación</th>
           <th scope="col">Acción</th>
         </tr>
       </thead>
       <tbody>
-        @for (documento of documentos(); track documento.id) {
+        @for (documento of filasVisibles(); track documento.id) {
         <tr>
           <td>{{ documento.codigo || 'Sin código' }}</td>
           <td class="celda-titulo">{{ documento.titulo || 'Sin título' }}</td>
@@ -214,10 +211,18 @@
   } @else if (!verPapelera() && vista() === 'arbol') {
   <div class="panel arbol-documentos">
     <p class="table-caption">{{ resumenArbol() }}</p>
+    @if (estadoArbol() === 'cargando') {
+    <p class="actualizando" role="status">Cargando el árbol completo…</p>
+    } @else if (estadoArbol() === 'error') {
+    <p class="panel-nota" role="alert">
+      No se pudo cargar el árbol completo: {{ errorArbol()?.message }}
+      <button type="button" class="link-button" (click)="recargarArbol()">Reintentar</button>
+    </p>
+    }
     <details class="arbol-rama" open>
       <summary>
         <span>Todo</span>
-        <span class="arbol-cuenta">{{ documentos().length }}</span>
+        <span class="arbol-cuenta">{{ totalArbol() }}</span>
       </summary>
       @for (rama of arbol(); track rama.clave) {
       <details class="arbol-rama arbol-subrama" open>
@@ -242,23 +247,48 @@
       </details>
       }
     </details>
-    <details class="arbol-rama arbol-rama--pendiente">
+    @if (hayFiltroDocumental()) { } @else {
+    <details class="arbol-rama" open>
       <summary>
         <span>Normativas</span>
-        <span class="arbol-cuenta">sin dato</span>
+        <span class="arbol-cuenta">{{ normativas().length }}</span>
       </summary>
-      <p class="panel-nota">
-        Sin dato: todavía no existe una tabla de normativas conectada al RAG. Cuando exista, esta
-        rama listará el marco normativo.
-      </p>
+      @if (normativas().length === 0) { } @else {
+      <ul class="arbol-hojas">
+        @for (normativa of normativas(); track normativa.id || $index) {
+        <li class="arbol-hoja arbol-hoja--estatica">
+          <span class="arbol-hoja-codigo">{{ normativa.codigo || 'Sin código' }}</span>
+          <span class="arbol-hoja-titulo">{{ normativa.titulo || 'Sin título' }}</span>
+          <span class="arbol-hoja-dato">{{ normativa.tipoNorma || 'Sin tipo' }}</span>
+          <span class="arbol-hoja-fecha">{{ formatearFecha(normativa.fechaPublicacion) }}</span>
+        </li>
+        }
+      </ul>
+      }
     </details>
+    <details class="arbol-rama" open>
+      <summary>
+        <span>Otros documentos</span>
+        <span class="arbol-cuenta">{{ otrosDocumentos().length }}</span>
+      </summary>
+      @if (otrosDocumentos().length === 0) { } @else {
+      <ul class="arbol-hojas">
+        @for (otro of otrosDocumentos(); track otro.id || $index) {
+        <li class="arbol-hoja arbol-hoja--estatica">
+          <span class="arbol-hoja-codigo">{{ otro.codigo || 'Sin código' }}</span>
+          <span class="arbol-hoja-titulo">{{ otro.titulo || 'Sin título' }}</span>
+          <span class="arbol-hoja-dato">{{ otro.tipo || 'Sin tipo' }}</span>
+          <span class="arbol-hoja-fecha">{{ formatearFecha(otro.fecha) }}</span>
+        </li>
+        }
+      </ul>
+      }
+    </details>
+    }
   </div>
   } @else {
   <div class="table-wrap">
     <table class="data-table">
-      <caption class="table-caption">
-        {{ resumenTabla() }}
-      </caption>
       <thead>
         <tr>
           <th scope="col" class="col-seleccion">
@@ -270,17 +300,17 @@
               (change)="seleccion.alternarPagina(idsVisibles(), $event)"
             />
           </th>
-          <th scope="col">Código</th>
-          <th scope="col">Título</th>
-          <th scope="col">Tipo</th>
-          <th scope="col">Caso</th>
-          <th scope="col">Responsable</th>
-          <th scope="col">Fecha</th>
-          <th scope="col">Etapa</th>
+          <th scope="col" [appThOrden]="'codigo'" [orden]="orden">Código</th>
+          <th scope="col" [appThOrden]="'titulo'" [orden]="orden">Título</th>
+          <th scope="col" [appThOrden]="'tipo'" [orden]="orden">Tipo</th>
+          <th scope="col" [appThOrden]="'caso'" [orden]="orden">Caso</th>
+          <th scope="col" [appThOrden]="'responsable'" [orden]="orden">Responsable</th>
+          <th scope="col" [appThOrden]="'fecha'" [orden]="orden">Fecha</th>
+          <th scope="col" [appThOrden]="'etapa'" [orden]="orden">Etapa</th>
         </tr>
       </thead>
       <tbody>
-        @for (documento of documentos(); track documento.id) {
+        @for (documento of filasVisibles(); track documento.id) {
         <tr
           class="fila-documento case-row-clickable"
           [class.row-selected]="seleccionadaId() === documento.id"
@@ -340,7 +370,7 @@
       </tbody>
     </table>
   </div>
-  } } @if (total() > 0 && estadoListado() !== 'error') {
+  } } @if (total() > 0 && estadoListado() !== 'error' && !enArbol()) {
   <app-paginacion
     [pagina]="filtros().pagina"
     [tamano]="filtros().tamano"

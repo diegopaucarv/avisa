@@ -1071,31 +1071,40 @@
                                 <tr>
                                     <td>Responsable del hito</td>
                                     <td>
-                                        <strong>No existe columna</strong> en
-                                        <code>core.hitos_compromiso</code> (16
-                                        columnas). Se pinta y se declara.
+                                        <strong>No existe columna</strong> en la
+                                        base viva;
+                                        <code
+                                            >hitos_compromiso.responsable_usuario_id</code
+                                        >
+                                        / <code>responsable_texto</code> llega
+                                        con la migración 41 (propuesta).
                                     </td>
-                                    <td><span class="flag gap">hueco</span></td>
+                                    <td><span class="flag gap">41</span></td>
                                 </tr>
                                 <tr>
                                     <td>Análisis del caso (Canva)</td>
                                     <td>
-                                        <strong>No hay columna</strong>; lo más
-                                        cercano es
-                                        <code>core.casos.link_reporte_pdf</code>
-                                        /
-                                        <code>resumen_ejecutivo</code>
+                                        <strong>No hay columna</strong> en la
+                                        base viva;
+                                        <code>casos.link_analisis_caso</code>
+                                        llega con la migración 41, separado de
+                                        <code>link_reporte_pdf</code>
+                                        (documentos).
                                     </td>
-                                    <td><span class="flag gap">hueco</span></td>
+                                    <td><span class="flag gap">41</span></td>
                                 </tr>
                                 <tr>
                                     <td>
                                         Seguimiento semanal / nudos críticos
                                     </td>
                                     <td>
-                                        <strong>No existe ninguna tabla</strong>
+                                        <strong
+                                            >No existe tabla en la base
+                                            viva</strong
+                                        >; <code>core.caso_nudo_critico</code>
+                                        llega con la migración 43
                                     </td>
-                                    <td><span class="flag gap">hueco</span></td>
+                                    <td><span class="flag gap">43</span></td>
                                 </tr>
                                 <tr>
                                     <td>Desglose 3P</td>
@@ -1152,18 +1161,20 @@
                                     >Nudos críticos y seguimiento
                                     semanal:</strong
                                 >
-                                no existe tabla.
+                                no existe tabla en la base viva; la migración 43
+                                crea <code>core.caso_nudo_critico</code>.
                             </li>
                             <li>
                                 <strong>Responsable del hito:</strong> no hay
-                                columna en <code>core.hitos_compromiso</code>;
-                                el nombre es de ejemplo.
+                                columna en la base viva; la migración 41 añade
+                                <code>responsable_usuario_id</code> /
+                                <code>responsable_texto</code>.
                             </li>
                             <li>
                                 <strong>Análisis del caso (Canva):</strong> no
-                                hay columna; sólo la aproximación
-                                <code>link_reporte_pdf</code> /
-                                <code>resumen_ejecutivo</code>.
+                                hay columna en la base viva; la migración 41
+                                crea <code>casos.link_analisis_caso</code>,
+                                separado de <code>link_reporte_pdf</code>.
                             </li>
                             <li>
                                 <strong

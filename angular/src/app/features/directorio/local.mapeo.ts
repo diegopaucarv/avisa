@@ -10,22 +10,20 @@
  * la ficha muestre «—» en vez de afirmar «No».
  */
 
-import {
-  booleano,
-  esRegistro,
-  leer,
-  numero,
-  texto,
-  type Registro,
-} from '../../dominio/mapeo';
+import { booleano, esRegistro, leer, numero, texto, type Registro } from '../../dominio/mapeo';
 
 export type LocalDirectorio = {
   id: string;
   codigo: string;
   nombre: string;
   distritoId: number | null;
-  /** Nombre del distrito resuelto por la clave ajena; `null` si no tiene. */
+  /**
+   * Distrito, provincia y región se resuelven por la cadena local → distrito →
+   * provincia → región; `null` si el local no tiene distrito asignado.
+   */
   distrito: string | null;
+  provincia: string | null;
+  region: string | null;
   direccion: string | null;
   ubicacionRef: string | null;
   aforo: number | null;
@@ -57,6 +55,8 @@ export function aLocalDirectorio(bruto: unknown): LocalDirectorio {
     nombre: texto(registro, ['nombre']) ?? 'Sin nombre',
     distritoId: numero(registro, ['distritoId', 'distrito_id']),
     distrito: texto(registro, ['distrito']),
+    provincia: texto(registro, ['provincia']),
+    region: texto(registro, ['region']),
     direccion: texto(registro, ['direccion']),
     ubicacionRef: texto(registro, ['ubicacionRef', 'ubicacion_ref']),
     aforo: numero(registro, ['aforo']),

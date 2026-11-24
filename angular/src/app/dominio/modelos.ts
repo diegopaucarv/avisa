@@ -63,6 +63,13 @@ export type Caso = {
   /** Fecha real del caso (`fecha_inicio`), no la de carga del legado. */
   inicio: string | null;
   region: string | null;
+  /**
+   * Distrito principal declarado, por nombre (sólo para mostrar). La llave es
+   * `distritoUbigeo`: no se empareja por nombre porque hay quince «Santa Rosa».
+   */
+  distrito: string | null;
+  /** Ubigeo INEI de seis dígitos del distrito principal; `null` si no hay. */
+  distritoUbigeo: string | null;
   estado: EstadoCaso;
   /** Riesgo del caso. Se recalcula en el caso, no se hereda de la alerta. */
   riesgo: Riesgo;

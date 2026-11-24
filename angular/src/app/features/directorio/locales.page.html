@@ -2,11 +2,6 @@
   <header class="view-head">
     <div>
       <h1 id="titulo-locales">Locales</h1>
-      <p class="view-subtitle">
-        Sedes y locales disponibles para reuniones y espacios de diálogo, con su aforo, equipamiento
-        y contacto del local (Guía §8.2.5 y Anexo 16, columna «Lugar»). No se dibuja una capa en el
-        mapa: la base registra el distrito, no las coordenadas, y no se estiman posiciones.
-      </p>
     </div>
     <div class="view-actions">
       <p class="result-count" aria-live="polite">{{ total() }} locales</p>
@@ -69,10 +64,6 @@
 
   <div class="table-wrap">
     <table class="data-table">
-      <caption class="table-caption">
-        Pulse una fila para abrir la ficha del local en el panel lateral. El equipamiento se muestra
-        como «—» cuando la base no tiene el dato registrado.
-      </caption>
       <thead>
         <tr>
           <th scope="col" class="col-seleccion">
@@ -85,18 +76,19 @@
             />
           </th>
           <th scope="col" class="col-foto">Foto</th>
-          <th scope="col">Nombre</th>
-          <th scope="col">Distrito</th>
-          <th scope="col">Aforo</th>
-          <th scope="col">Contacto</th>
-          <th scope="col">Proyector</th>
-          <th scope="col">Cómputo</th>
-          <th scope="col">Audio</th>
-          <th scope="col">Activo</th>
+          <th scope="col" [appThOrden]="'nombre'" [orden]="orden">Nombre</th>
+          <th scope="col" [appThOrden]="'region'" [orden]="orden">Región</th>
+          <th scope="col" [appThOrden]="'distrito'" [orden]="orden">Distrito</th>
+          <th scope="col" [appThOrden]="'aforo'" [orden]="orden">Aforo</th>
+          <th scope="col" [appThOrden]="'contacto'" [orden]="orden">Contacto</th>
+          <th scope="col" [appThOrden]="'proyector'" [orden]="orden">Proyector</th>
+          <th scope="col" [appThOrden]="'computo'" [orden]="orden">Cómputo</th>
+          <th scope="col" [appThOrden]="'audio'" [orden]="orden">Audio</th>
+          <th scope="col" [appThOrden]="'activo'" [orden]="orden">Activo</th>
         </tr>
       </thead>
       <tbody>
-        @for (local of locales(); track local.id) {
+        @for (local of filasVisibles(); track local.id) {
         <tr
           class="case-row-clickable"
           [class.row-selected]="seleccionado()?.id === local.id"
@@ -135,6 +127,13 @@
               <strong>{{ local.nombre }}</strong>
               <small>{{ local.codigo }}</small>
             </button>
+          </td>
+          <td>
+            @if (local.region) {
+            <span>{{ local.region }}</span>
+            } @else {
+            <span class="sin-dato">—</span>
+            }
           </td>
           <td>{{ local.distrito || "—" }}</td>
           <td>{{ local.aforo ?? "—" }}</td>
@@ -215,6 +214,14 @@
               <dd>{{ local.distrito || "—" }}</dd>
             </div>
             <div>
+              <dt>Provincia</dt>
+              <dd>{{ local.provincia || "—" }}</dd>
+            </div>
+            <div>
+              <dt>Región</dt>
+              <dd>{{ local.region || "—" }}</dd>
+            </div>
+            <div>
               <dt>Dirección</dt>
               <dd>{{ local.direccion || "—" }}</dd>
             </div>
@@ -239,11 +246,11 @@
               <dd>{{ local.aforo ?? "—" }}</dd>
             </div>
             <div>
-              <dt>Ingresos</dt>
+              <dt>Accesos</dt>
               <dd>{{ local.ingresos || "—" }}</dd>
             </div>
             <div>
-              <dt>Proyector</dt>
+              <dt>Proyector / pantalla</dt>
               <dd>{{ siNo(local.tieneProyector) }}</dd>
             </div>
             <div>
@@ -251,7 +258,7 @@
               <dd>{{ siNo(local.tieneEquiposComputo) }}</dd>
             </div>
             <div>
-              <dt>Audio y micrófono</dt>
+              <dt>Audio y micrófonos</dt>
               <dd>{{ siNo(local.tieneAudioMicro) }}</dd>
             </div>
           </dl>
@@ -280,11 +287,11 @@
         </section>
 
         <section class="ficha-seccion" aria-labelledby="local-panel-recomendacion">
-          <h3 id="local-panel-recomendacion">Recomendación</h3>
+          <h3 id="local-panel-recomendacion">Evaluación</h3>
           @if (local.recomendacion) {
           <p class="ficha-recomendacion">{{ local.recomendacion }}</p>
           } @else {
-          <p class="ficha-vacio">Sin recomendación registrada.</p>
+          <p class="ficha-vacio">Sin evaluación registrada.</p>
           }
         </section>
       </div>

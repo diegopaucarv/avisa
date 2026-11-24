@@ -12,27 +12,40 @@ import {
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import * as L from 'leaflet';
+import type { FeatureCollection, MultiPolygon, Polygon } from 'geojson';
 import { map } from 'rxjs';
 
 import { AlcanceService, esAlcance } from '../../core/alcance/alcance.service';
 import { SesionStore } from '../../core/auth/sesion.store';
+import { TerritorioService } from '../../core/territorio/territorio.service';
+import type { DistritoGeo, PoblacionRegion } from '../../core/territorio/territorio.tipos';
 import { formatearFechaHora } from '../../shared/formato-fecha';
 import { IconoComponent } from '../../shared/ui/icono.component';
+import { OrdenTabla } from '../../shared/ui/orden-tabla';
+import { ThOrdenDirective } from '../../shared/ui/th-orden.directive';
 import { formatearFechaCorta } from '../../dominio/mapeo';
 import type { Alcance, Caso, PrioridadAtencion, Riesgo } from '../../dominio/modelos';
 import { coordenadaDeRegion } from './centroides.regiones';
 import {
   ambitosSinRegion,
   bandasPorAlcance,
+  casosDeRegion,
+  casosPorDistritoUbigeo,
+  casosSinDistrito,
+  claseCoropleta,
   conteosPorAlcance,
   conteosPorSituacion,
   contarRegiones,
   contarRiesgoAlto,
   contarRiesgoAltoSinRegion,
   contarSinRegion,
+  ESCALA_COROPLETA,
   filasPorRegion,
+  indicePoblacionPorRegion,
   normalizarRegion,
+  poblacionDeRegion,
   regionDe,
+  tasaPor100k,
   type FilaRegion,
 } from './panorama.agregados';
 import { PanoramaService } from './panorama.service';
@@ -64,6 +77,48 @@ const ESTILO_CIRCULO_ACTIVO: L.PathOptions = {
   fillOpacity: 0.55,
 };
 
+/** Relleno de la coropleta: un tono por tramo de `ESCALA_COROPLETA`. */
+const COLORES_COROPLETA = ['#e3e9f0', '#cfe0f5', '#9dc0e8', '#5f92cd', '#2455a2'];
+
+/** Borde fino para el distrito con casos; «Sin casos» queda transparente. */
+const ESTILO_DISTRITO: L.PathOptions = { color: '#22456f', weight: 0.8, fillOpacity: 0.55 };
+const ESTILO_DISTRITO_SIN_CASOS: L.PathOptions = {
+  color: '#8b97a1',
+  weight: 0.7,
+  fillOpacity: 0,
+};
+
+function estiloDistrito(clase: number, seleccionado: boolean): L.PathOptions {
+  const relleno = COLORES_COROPLETA[clase] ?? COLORES_COROPLETA[0];
+  if (seleccionado) {
+    return {
+      color: '#173f73',
+      weight: 2.2,
+      fillColor: relleno,
+      fillOpacity: clase > 0 ? 0.75 : 0.2,
+    };
+  }
+  if (clase <= 0) return ESTILO_DISTRITO_SIN_CASOS;
+  return { ...ESTILO_DISTRITO, fillColor: relleno };
+}
+
+const FORMATO_ENTERO = new Intl.NumberFormat('es-PE');
+const FORMATO_TASA = new Intl.NumberFormat('es-PE', {
+  minimumFractionDigits: 1,
+  maximumFractionDigits: 1,
+});
+
+type PropiedadesDistrito = { ubigeo: string; nombre: string };
+type RasgoDistrital = L.Path & { feature?: { properties?: unknown } };
+
+/** Ubigeo del rasgo GeoJSON, sin confiar en el tipo de `properties`. */
+function ubigeoDelRasgo(rasgo: { properties?: unknown } | null | undefined): string | null {
+  const propiedades = rasgo?.properties;
+  if (typeof propiedades !== 'object' || propiedades === null) return null;
+  const valor = (propiedades as Record<string, unknown>)['ubigeo'];
+  return typeof valor === 'string' ? valor : null;
+}
+
 function radioCirculo(total: number, maximo: number): number {
   if (maximo <= 1) return RADIO_MIN;
   const proporcion = Math.sqrt((Math.max(1, total) - 1) / (maximo - 1));
@@ -94,12 +149,19 @@ function compararInicio(a: string | null, b: string | null): number {
  * Distribuye los casos reales por ámbito y región y agrupa su conflictividad en
  * situación latente (Diferencia + Controversia) y manifiesta (Conflicto social +
  * Crisis social), según la Guía §7.5.1; los casos sin nivel declarado se cuentan
- * aparte, sin estimarlos. El esquema usa
+ * aparte, sin estimarlos. La cabecera resume la situación con seis tarjetas
+ * —latentes, manifiestos, sin nivel declarado (sólo si existe), regiones, riesgo
+ * alto y sin región— y el panel «Casos por región» abre un cajón lateral «Ver
+ * casos» (item 109) con el territorio de la fila y el ámbito vigente, enlazado
+ * al listado completo. El esquema usa
  * bandas, chips y una tabla derivados del conteo, y suma un mapa referencial de
- * OpenStreetMap: cada región con casos visibles se ubica en su centroide
- * referencial (`centroides.regiones.ts`). El ubigeo distrital y los límites
- * administrativos siguen aplazados, así que el mapa es una referencia y no una
- * capa institucional.
+ * OpenStreetMap con dos capas: un círculo por región con casos visibles, ubicado
+ * en su centroide referencial (`centroides.regiones.ts`), y los límites
+ * distritales coropléticos de `territorio.distrito` (item 129), cuyo relleno es
+ * el número de casos abiertos por ubigeo. Al pulsar un polígono se abre su ficha
+ * territorial con población, casos y tasa por 100 000 habitantes. La tabla suma
+ * esa tasa por región (item 131); la población sólo es denominador y nunca
+ * interviene en el riesgo ni en la prioridad (Guía §7.5.2, Tabla 3).
  *
  * El recorte por `usuario().regiones` es de presentación: hoy la RLS entrega el
  * conjunto completo y `lib/db/scope.ts` documenta que el bloqueo por territorio
@@ -108,7 +170,7 @@ function compararInicio(a: string | null, b: string | null): number {
  */
 @Component({
   selector: 'app-mapa',
-  imports: [RouterLink, IconoComponent],
+  imports: [RouterLink, IconoComponent, ThOrdenDirective],
   templateUrl: './mapa.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [PanoramaService],
@@ -117,22 +179,17 @@ function compararInicio(a: string | null, b: string | null): number {
       display: block;
     }
 
-    /* Cinco tarjetas: la rejilla global es de cuatro; aquí se fija la fila completa. */
+    /* Hasta seis tarjetas (latentes, manifiestos, sin nivel, regiones, riesgo
+       alto y sin región); la rejilla global es de cuatro y aquí se fija. Con
+       auto-fit cinco o seis tarjetas reparten el ancho sin dejar un hueco. */
     .executive-kpis {
-      grid-template-columns: repeat(5, minmax(0, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     }
 
     @media (max-width: 980px) {
       .executive-kpis {
         grid-template-columns: repeat(3, minmax(0, 1fr));
       }
-    }
-
-    /* «Sin nivel» es un hueco, no un valor: se distingue del conteo. */
-    .situacion-sin-nivel {
-      display: block;
-      color: #8995a0;
-      font-size: 9px;
     }
 
     .view-meta {
@@ -142,7 +199,7 @@ function compararInicio(a: string | null, b: string | null): number {
       gap: 7px;
       margin: 8px 0 0;
       color: var(--muted);
-      font-size: 10.5px;
+      font-size: 13px;
       line-height: 1.5;
     }
 
@@ -158,7 +215,7 @@ function compararInicio(a: string | null, b: string | null): number {
       border-radius: 999px;
       background: var(--blue-pale);
       color: var(--blue-dark);
-      font-size: 9.5px;
+      font-size: 12px;
       font-weight: 700;
     }
 
@@ -178,7 +235,7 @@ function compararInicio(a: string | null, b: string | null): number {
       padding: 0 5px;
       border-radius: 999px;
       background: rgba(100, 116, 135, 0.14);
-      font-size: 10px;
+      font-size: 12.5px;
       font-variant-numeric: tabular-nums;
     }
 
@@ -201,14 +258,14 @@ function compararInicio(a: string | null, b: string | null): number {
     .panel-nota {
       margin: 10px 0 0;
       color: var(--amber);
-      font-size: 10px;
+      font-size: 12.5px;
       line-height: 1.5;
     }
 
     .panel-vacio {
       margin: 10px 0 0;
       color: var(--muted);
-      font-size: 10.5px;
+      font-size: 13px;
       line-height: 1.5;
     }
 
@@ -216,7 +273,7 @@ function compararInicio(a: string | null, b: string | null): number {
       margin: 0;
       padding: 22px 2px;
       color: var(--muted);
-      font-size: 11px;
+      font-size: 13px;
     }
 
     .estado-error {
@@ -230,7 +287,7 @@ function compararInicio(a: string | null, b: string | null): number {
       flex: 1 1 240px;
       margin: 0;
       color: var(--red);
-      font-size: 11px;
+      font-size: 13px;
       line-height: 1.5;
     }
 
@@ -241,13 +298,13 @@ function compararInicio(a: string | null, b: string | null): number {
     .vacio h3 {
       margin: 0 0 6px;
       color: var(--ink);
-      font: 700 13px/1.35 var(--font-display);
+      font: 700 14.5px/1.35 var(--font-display);
     }
 
     .vacio p {
       margin: 0;
       color: var(--muted);
-      font-size: 10.5px;
+      font-size: 13px;
       line-height: 1.6;
     }
 
@@ -277,12 +334,12 @@ function compararInicio(a: string | null, b: string | null): number {
 
     .ambito-nombre {
       color: var(--ink);
-      font: 700 12px/1.3 var(--font-display);
+      font: 700 14px/1.3 var(--font-display);
     }
 
     .ambito-total {
       color: var(--muted);
-      font-size: 10px;
+      font-size: 12.5px;
       font-variant-numeric: tabular-nums;
     }
 
@@ -315,7 +372,7 @@ function compararInicio(a: string | null, b: string | null): number {
       border-radius: 999px;
       background: var(--canvas);
       color: var(--ink-2);
-      font-size: 9.5px;
+      font-size: 12px;
       white-space: nowrap;
     }
 
@@ -333,7 +390,7 @@ function compararInicio(a: string | null, b: string | null): number {
     .tabla-nota {
       margin: 10px 0 0;
       color: var(--muted);
-      font-size: 9.5px;
+      font-size: 12px;
       line-height: 1.5;
     }
 
@@ -341,7 +398,11 @@ function compararInicio(a: string | null, b: string | null): number {
       flex-wrap: wrap;
     }
 
-    .th-orden {
+    .regiones-cabeza {
+      flex-wrap: wrap;
+    }
+
+    button.th-orden {
       display: inline-flex;
       align-items: center;
       gap: 4px;
@@ -355,12 +416,12 @@ function compararInicio(a: string | null, b: string | null): number {
       cursor: pointer;
     }
 
-    .th-orden:hover {
+    button.th-orden:hover {
       color: var(--blue-dark);
     }
 
     .th-orden-flecha {
-      font-size: 10px;
+      font-size: 12.5px;
       line-height: 1;
     }
 
@@ -368,82 +429,8 @@ function compararInicio(a: string | null, b: string | null): number {
       display: block;
       margin-top: 2px;
       color: var(--muted);
-      font-size: 9px;
+      font-size: 12px;
       line-height: 1.4;
-    }
-
-    /* Cajón lateral izquierdo: medio ancho y fondo desenfocado. */
-    .casos-scrim {
-      position: fixed;
-      inset: 0;
-      z-index: 90;
-      display: flex;
-      justify-content: flex-start;
-      background: rgba(17, 32, 45, 0.34);
-      backdrop-filter: blur(6px);
-    }
-
-    .casos-drawer {
-      width: min(52vw, 760px);
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      background: #fff;
-      border-right: 1px solid #e2e8ee;
-      box-shadow: 22px 0 48px rgba(17, 32, 45, 0.18);
-      animation: casos-drawer-in 0.22s ease;
-    }
-
-    @keyframes casos-drawer-in {
-      from {
-        transform: translateX(-100%);
-      }
-      to {
-        transform: none;
-      }
-    }
-
-    .casos-drawer-cabeza {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 14px;
-      padding: 20px 22px 14px;
-      border-bottom: 1px solid #eef2f6;
-    }
-
-    .casos-drawer-cabeza h3 {
-      margin: 2px 0 0;
-      color: #1c2a38;
-      font: 700 16px/1.35 var(--font-display);
-    }
-
-    .casos-drawer-sub {
-      margin: 5px 0 0;
-      color: var(--muted);
-      font-size: 10.5px;
-      line-height: 1.5;
-    }
-
-    .casos-drawer-cuerpo {
-      flex: 1;
-      min-height: 0;
-      padding: 14px 22px 22px;
-      overflow-y: auto;
-    }
-
-    .casos-drawer-pie {
-      display: flex;
-      justify-content: flex-end;
-      padding: 13px 22px;
-      border-top: 1px solid #eef2f6;
-      background: #fafbfc;
-    }
-
-    @media (max-width: 900px) {
-      .casos-drawer {
-        width: 100%;
-      }
     }
 
     .mapa-rotulo {
@@ -454,7 +441,7 @@ function compararInicio(a: string | null, b: string | null): number {
       border: 1px dashed var(--line);
       border-radius: 999px;
       color: var(--ink-2);
-      font-size: 9.5px;
+      font-size: 12px;
       font-weight: 600;
     }
 
@@ -477,7 +464,7 @@ function compararInicio(a: string | null, b: string | null): number {
       padding: 0;
       list-style: none;
       color: var(--muted);
-      font-size: 9.5px;
+      font-size: 12px;
       line-height: 1.5;
     }
 
@@ -499,6 +486,88 @@ function compararInicio(a: string | null, b: string | null): number {
 
     .leyenda-anillo {
       border: 2px solid var(--blue-dark);
+    }
+
+    .mapa-controles {
+      display: inline-flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .mapa-estado {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .mapa-aviso {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin: 8px 0 0;
+      padding: 6px 9px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--canvas);
+      color: var(--red);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .mapa-aviso p {
+      flex: 1 1 220px;
+      margin: 0;
+    }
+
+    .mapa-nota {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .mapa-leyenda-coropleta {
+      margin-top: 4px;
+    }
+
+    .leyenda-titulo {
+      color: var(--ink-2);
+      font-weight: 600;
+    }
+
+    .leyenda-tramo {
+      flex: none;
+      width: 14px;
+      height: 8px;
+      border: 1px solid rgba(34, 69, 111, 0.35);
+      border-radius: 2px;
+      background: var(--canvas);
+    }
+
+    .mapa-lienzo:focus-visible {
+      outline: 2px solid var(--blue);
+      outline-offset: 2px;
+    }
+
+    .ficha-tabla th {
+      width: 42%;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .ficha-tabla td {
+      font-variant-numeric: tabular-nums;
+    }
+
+    .ficha-motivo {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .celda-tasa {
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
     }
 
     .region-chip-activa {
@@ -523,6 +592,163 @@ function compararInicio(a: string | null, b: string | null): number {
       color: var(--red);
     }
 
+    /* Cajón «Ver casos» (item 109): entra de izquierda a derecha. */
+    .casos-drawer-scrim {
+      position: fixed;
+      inset: 0;
+      z-index: 90;
+      display: flex;
+      justify-content: flex-start;
+      overflow: hidden;
+      background: rgba(17, 32, 45, 0.42);
+      -webkit-backdrop-filter: blur(3px);
+      backdrop-filter: blur(3px);
+    }
+
+    .casos-drawer {
+      display: flex;
+      flex-direction: column;
+      width: min(52%, 620px);
+      height: 100%;
+      border-right: 1px solid #dbe3ea;
+      background: #fff;
+      box-shadow: 18px 0 44px rgba(17, 32, 45, 0.2);
+      outline: none;
+      animation: casos-drawer-entrada 0.2s ease;
+    }
+
+    @keyframes casos-drawer-entrada {
+      from {
+        transform: translateX(-100%);
+      }
+      to {
+        transform: none;
+      }
+    }
+
+    .casos-drawer-cabeza {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 18px 20px 13px;
+      border-bottom: 1px solid #eef2f6;
+    }
+
+    .casos-drawer-cabeza h3 {
+      margin: 0;
+      color: #1c2a38;
+      font: 700 16px/1.3 var(--font-display);
+    }
+
+    .casos-drawer-sub {
+      margin: 4px 0 0;
+      color: #59697a;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .casos-drawer-cuerpo {
+      flex: 1;
+      min-height: 0;
+      padding: 12px 20px 16px;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+    }
+
+    .casos-drawer-lista {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .casos-drawer-caso {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px;
+      padding: 9px 11px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .casos-drawer-caso:hover,
+    .casos-drawer-caso:focus-visible {
+      border-color: #c9d5e0;
+      background: var(--blue-pale);
+    }
+
+    .casos-drawer-principal {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    .casos-drawer-codigo {
+      color: #35618f;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    .casos-drawer-titulo {
+      margin-top: 2px;
+      color: var(--ink);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .casos-drawer-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2px 10px;
+      margin-top: 5px;
+      color: #5a6b7b;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .casos-drawer-tags {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 4px;
+    }
+
+    .casos-drawer-vacio {
+      margin: 0;
+      padding: 24px 4px;
+      color: #59697a;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .casos-drawer-pie {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      padding: 12px 20px;
+      border-top: 1px solid #eef2f6;
+      background: #fafbfc;
+    }
+
+    .casos-drawer-pie a {
+      text-decoration: none;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .casos-drawer {
+        animation: none;
+      }
+    }
+
     @media (max-width: 760px) {
       .executive-kpis {
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -530,6 +756,10 @@ function compararInicio(a: string | null, b: string | null): number {
 
       .ambito-chips {
         top: 58px;
+      }
+
+      .casos-drawer {
+        width: 100%;
       }
     }
 
@@ -546,20 +776,61 @@ export class MapaPage {
   private readonly sesion = inject(SesionStore);
   private readonly alcanceService = inject(AlcanceService);
   private readonly panorama = inject(PanoramaService);
+  private readonly territorio = inject(TerritorioService);
   private readonly destruccion = inject(DestroyRef);
 
   private readonly lienzo = viewChild<ElementRef<HTMLElement>>('lienzo');
+  private readonly cajon = viewChild<ElementRef<HTMLElement>>('cajon');
+  private readonly ficha = viewChild<ElementRef<HTMLElement>>('ficha');
 
   /** Clave normalizada de la región seleccionada en el mapa. */
   private readonly claveSeleccionada = signal<string | null>(null);
   /** Cambia en cada montaje para redibujar los círculos sobre el mapa nuevo. */
   private readonly versionMapa = signal(0);
 
-  /** Orden de la columna «Casos abiertos»: por defecto, el mayor primero. */
+  /** Cajón lateral «Ver casos» (item 109). */
+  readonly cajonAbierto = signal(false);
+  private focoCajonPrevio: HTMLElement | null = null;
+
+  /** Orden de la columna «Total»: por defecto, el mayor primero. */
   readonly ordenTotal = signal<'desc' | 'asc'>('desc');
+  /** Orden de la tasa; `null` = manda «Total». */
+  readonly ordenTasa = signal<'desc' | 'asc' | null>(null);
 
   private mapa: L.Map | null = null;
   private readonly capasRegion = new Map<string, L.CircleMarker>();
+
+  /** Capa coroplética de límites distritales (item 129) y su control. */
+  readonly capaDistritosVisible = signal(true);
+  readonly escalaCoropleta = ESCALA_COROPLETA;
+  readonly coloresCoropleta = COLORES_COROPLETA;
+  readonly estadoDistritos = this.territorio.estadoDistritos;
+  readonly errorDistritos = this.territorio.errorDistritos;
+  readonly estadoPoblacion = this.territorio.estadoPoblacion;
+  readonly casosPorUbigeo = computed(() => casosPorDistritoUbigeo(this.visibles()));
+  readonly casosSinDistritoTotal = computed(() => casosSinDistrito(this.visibles()));
+
+  /** Ficha territorial del distrito pulsado (paso 3). */
+  private readonly distritoActivo = signal<DistritoGeo | null>(null);
+  readonly fichaDistrito = this.distritoActivo.asReadonly();
+  readonly fichaCasos = computed(() => {
+    const distrito = this.distritoActivo();
+    return distrito ? (this.casosPorUbigeo().get(distrito.ubigeo) ?? 0) : 0;
+  });
+  readonly fichaTasa = computed(() =>
+    tasaPor100k(this.fichaCasos(), this.distritoActivo()?.poblacion ?? null),
+  );
+  private focoFichaPrevio: HTMLElement | null = null;
+
+  /** Población por región, indexada por nombre normalizado (sólo denominador). */
+  private readonly poblacionIndice = signal<ReadonlyMap<string, PoblacionRegion> | null>(null);
+
+  private capaDistritos: L.GeoJSON | null = null;
+  private claveDistritos = '';
+  private distritosEnCurso: string | null = null;
+  private distritoSeleccionadoUbigeo: string | null = null;
+  /** Fuerza un nuevo intento de la capa tras un 503 o un fallo de red. */
+  private readonly reintentoDistritos = signal(0);
 
   constructor() {
     // Leaflet necesita el contenedor ya en el DOM. El `@if` de la plantilla lo
@@ -579,6 +850,57 @@ export class MapaPage {
       this.versionMapa();
       this.sincronizarCirculos(this.filasRegion(), this.claveSeleccionada());
     });
+
+    // Capa distrital (item 129): se pide al montar —acotada a la región de la
+    // fila seleccionada— y se recarga cuando esa región cambia. El relleno se
+    // recalcula con los casos visibles; un 503 deja la capa fuera y conserva
+    // los círculos por región.
+    effect(() => {
+      this.versionMapa();
+      this.reintentoDistritos();
+      const mapa = this.mapa;
+      const visible = this.capaDistritosVisible();
+      const region = this.filaSeleccionada()?.region ?? null;
+      const conteo = this.casosPorUbigeo();
+      if (!mapa) return;
+
+      this.aplicarVisibilidadDistritos(mapa, visible);
+      this.refrescarDistritos(conteo);
+      void this.asegurarDistritos(mapa, region);
+    });
+
+    // El cajón de «Ver casos» se enfoca en cuanto `viewChild` resuelve el panel
+    // recién renderizado; Escape lo cierra y devuelve el foco al disparador.
+    effect(() => {
+      const panel = this.cajon()?.nativeElement;
+      if (panel && this.cajonAbierto()) panel.focus();
+    });
+
+    // Misma pauta para la ficha distrital: se enfoca al abrirse y Escape la
+    // cierra devolviendo el foco al mapa, que es el disparador.
+    effect(() => {
+      const panel = this.ficha()?.nativeElement;
+      if (panel && this.distritoActivo()) panel.focus();
+    });
+
+    if (typeof document !== 'undefined') {
+      const alEscape = (evento: KeyboardEvent): void => {
+        if (evento.key !== 'Escape') return;
+        if (this.cajonAbierto()) {
+          evento.preventDefault();
+          this.cerrarCajon();
+          return;
+        }
+        if (this.distritoActivo()) {
+          evento.preventDefault();
+          this.cerrarFichaDistrito();
+        }
+      };
+      document.addEventListener('keydown', alEscape);
+      this.destruccion.onDestroy(() => document.removeEventListener('keydown', alEscape));
+    }
+
+    void this.cargarPoblacion();
 
     this.destruccion.onDestroy(() => this.desmontarMapa());
   }
@@ -641,8 +963,40 @@ export class MapaPage {
   readonly bandas = computed(() => bandasPorAlcance(this.visibles()));
   readonly filasRegion = computed(() => {
     const filas = filasPorRegion(this.visibles());
+    const direccion = this.ordenTasa();
+    if (direccion !== null) {
+      const tasas = this.tasasRegion();
+      return [...filas].sort((a, b) => {
+        const tasaA = tasas.get(normalizarRegion(a.region)) ?? null;
+        const tasaB = tasas.get(normalizarRegion(b.region)) ?? null;
+        // Sin denominador declarado la fila va al final se ordene como se ordene.
+        if (tasaA === null || tasaB === null) {
+          if (tasaA === tasaB) return a.region.localeCompare(b.region, 'es');
+          return tasaA === null ? 1 : -1;
+        }
+        return (
+          (direccion === 'desc' ? tasaB - tasaA : tasaA - tasaB) ||
+          a.region.localeCompare(b.region, 'es')
+        );
+      });
+    }
     if (this.ordenTotal() === 'desc') return filas;
     return [...filas].sort((a, b) => a.total - b.total || a.region.localeCompare(b.region, 'es'));
+  });
+
+  /**
+   * Tasa por 100 000 habitantes de cada fila. La población sólo es el
+   * denominador: no entra en el nivel de riesgo ni en la prioridad
+   * (Guía §7.5.2, Tabla 3).
+   */
+  private readonly tasasRegion = computed<Map<string, number | null>>(() => {
+    const indice = this.poblacionIndice();
+    const tasas = new Map<string, number | null>();
+    for (const fila of filasPorRegion(this.visibles())) {
+      const poblacion = indice ? poblacionDeRegion(fila.region, indice) : null;
+      tasas.set(normalizarRegion(fila.region), tasaPor100k(fila.total, poblacion));
+    }
+    return tasas;
   });
 
   /**
@@ -663,6 +1017,22 @@ export class MapaPage {
   );
 
   readonly casosPrioritarios = computed(() => this.casosOrdenados().slice(0, 50));
+
+  /** Orden local de la tabla «Casos priorizados» (independiente de la de regiones). */
+  readonly ordenPrioritarios = new OrdenTabla<Caso>();
+
+  private readonly accesoresPrioritarios: Record<string, (caso: Caso) => unknown> = {
+    codigo: (caso) => caso.codigo,
+    region: (caso) => caso.region,
+    conflictividad: (caso) => caso.nivelConflicto,
+    riesgo: (caso) => ORDEN_RIESGO[caso.riesgo] ?? 3,
+    prioridad: (caso) => ORDEN_PRIORIDAD[caso.prioridad] ?? 3,
+    inicio: (caso) => caso.inicio,
+  };
+
+  readonly casosPrioritariosVisibles = computed(() =>
+    this.ordenPrioritarios.ordenar(this.casosPrioritarios(), this.accesoresPrioritarios),
+  );
   readonly sinInicio = computed(() => this.visibles().filter((caso) => !caso.inicio).length);
 
   /** Región resaltada por el mapa, sólo si sigue teniendo casos visibles. */
@@ -672,18 +1042,34 @@ export class MapaPage {
     return this.filasRegion().find((fila) => normalizarRegion(fila.region) === clave) ?? null;
   });
 
+  /**
+   * Casos del cajón «Ver casos»: los de la región seleccionada o, si no hay
+   * fila activa, todos los visibles del ámbito vigente. Conserva el orden de
+   * gravedad y prioridad del resto de la vista.
+   */
+  readonly cajonCasos = computed(() =>
+    casosDeRegion(this.casosOrdenados(), this.filaSeleccionada()?.region ?? null),
+  );
+
+  readonly cajonTerritorio = computed(
+    () => this.filaSeleccionada()?.region ?? 'Todas las regiones',
+  );
+
+  /** Rótulo del cajón: territorio de la fila y ámbito aplicado. */
+  readonly cajonTitulo = computed(
+    () => `Casos · ${this.cajonTerritorio()} · ${this.alcanceActivo() ?? 'Todos'}`,
+  );
+
+  /** Mismos queryParams que la fila de la tabla, para que el listado coincida. */
+  readonly cajonEnlace = computed<Record<string, string>>(() => {
+    const fila = this.filaSeleccionada();
+    return fila ? this.verCasos(fila) : this.recorteListado();
+  });
+
   readonly regionesConCasos = computed(() => contarRegiones(this.visibles()));
   readonly sinRegion = computed(() => contarSinRegion(this.visibles()));
   readonly riesgoAltoSinRegion = computed(() => contarRiesgoAltoSinRegion(this.visibles()));
   readonly riesgoAlto = computed(() => contarRiesgoAlto(this.visibles()));
-
-  /** Casos con nivel de conflictividad «Crisis social» (Guía §7.5.1). */
-  readonly crisisSocial = computed(
-    () =>
-      this.visibles().filter(
-        (caso) => (caso.nivelConflicto ?? '').toLowerCase() === 'crisis social',
-      ).length,
-  );
 
   readonly alcancesSinRegion = computed(() => ambitosSinRegion(this.visibles()));
 
@@ -714,19 +1100,20 @@ export class MapaPage {
   }
 
   /**
-   * Recorte común a todos los enlaces «Ver casos»: el ámbito bajo el que se
-   * contaron los casos de la tabla y «Abiertos». Cuando no hay ámbito vigente se
-   * envía `todos` de forma explícita, porque si se omitiera el listado
-   * reaplicaría la preferencia guardada y los números de la fila y del listado
-   * dejarían de coincidir.
+   * Recorte común a los enlaces al listado («Ver casos» de la fila y «Abrir
+   * listado completo» del cajón): el ámbito bajo el que se contaron los casos y
+   * «Abiertos». Cuando no hay ámbito vigente se envía `todos` de forma
+   * explícita, porque si se omitiera el listado reaplicaría la preferencia
+   * guardada y los números de la fila y del listado dejarían de coincidir.
    */
   private recorteListado(): Record<string, string> {
     return { abiertos: 'true', alcance: this.alcanceActivo() ?? 'todos' };
   }
 
   /**
-   * «Ver casos» abre el listado con el mismo recorte que esta tabla: la región
-   * principal de la fila y el ámbito bajo el que se contaron sus casos.
+   * El enlace de la fila (y «Abrir listado completo» del cajón) abre el listado
+   * con el mismo recorte que esta tabla: la región principal de la fila y el
+   * ámbito bajo el que se contaron sus casos.
    */
   verCasos(fila: FilaRegion): Record<string, string> {
     return { ...this.recorteListado(), region: fila.region };
@@ -756,8 +1143,116 @@ export class MapaPage {
     this.claveSeleccionada.set(null);
   }
 
+  cerrarFichaDistrito(): void {
+    if (!this.distritoActivo()) return;
+    this.distritoActivo.set(null);
+    this.distritoSeleccionadoUbigeo = null;
+    this.refrescarDistritos(this.casosPorUbigeo());
+    this.focoFichaPrevio?.focus?.();
+    this.focoFichaPrevio = null;
+  }
+
+  alFondoFicha(evento: MouseEvent): void {
+    if (evento.target === evento.currentTarget) this.cerrarFichaDistrito();
+  }
+
+  alTeclaFicha(evento: KeyboardEvent): void {
+    if (evento.key === 'Tab') this.atraparFoco(this.ficha()?.nativeElement, evento);
+  }
+
+  abrirCajon(evento?: Event): void {
+    if (this.cajonAbierto()) return;
+    const disparador = evento?.currentTarget;
+    this.focoCajonPrevio =
+      disparador instanceof HTMLElement
+        ? disparador
+        : ((document.activeElement as HTMLElement | null) ?? null);
+    this.cajonAbierto.set(true);
+  }
+
+  cerrarCajon(): void {
+    if (!this.cajonAbierto()) return;
+    this.cajonAbierto.set(false);
+    this.focoCajonPrevio?.focus?.();
+    this.focoCajonPrevio = null;
+  }
+
+  alFondoCajon(evento: MouseEvent): void {
+    if (evento.target === evento.currentTarget) this.cerrarCajon();
+  }
+
+  alTeclaCajon(evento: KeyboardEvent): void {
+    if (evento.key === 'Tab') this.atraparFocoCajon(evento);
+  }
+
+  /** Mantiene el tabulador dentro del cajón mientras está abierto. */
+  private atraparFocoCajon(evento: KeyboardEvent): void {
+    this.atraparFoco(this.cajon()?.nativeElement, evento);
+  }
+
+  /** Mantiene el tabulador dentro del panel abierto (cajón o ficha). */
+  private atraparFoco(panel: HTMLElement | null | undefined, evento: KeyboardEvent): void {
+    if (!panel) return;
+
+    const enfocables = Array.from(
+      panel.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), input, select, textarea, [tabindex]:not([tabindex="-1"])',
+      ),
+    ).filter((elemento) => elemento.offsetParent !== null);
+    if (enfocables.length === 0) return;
+
+    const primero = enfocables[0];
+    const ultimo = enfocables[enfocables.length - 1];
+    const activo = document.activeElement;
+
+    // El foco inicial vive en el propio diálogo (`tabindex="-1"`): Shift+Tab
+    // desde ahí saltaría al contenido de detrás, así que se cierra el ciclo.
+    if (evento.shiftKey && activo === panel) {
+      evento.preventDefault();
+      ultimo.focus();
+      return;
+    }
+    if (!evento.shiftKey && activo === ultimo) {
+      evento.preventDefault();
+      primero.focus();
+      return;
+    }
+    if (evento.shiftKey && activo === primero) {
+      evento.preventDefault();
+      ultimo.focus();
+    }
+  }
+
   alternarOrdenTotal(): void {
+    this.ordenTasa.set(null);
     this.ordenTotal.update((valor) => (valor === 'desc' ? 'asc' : 'desc'));
+  }
+
+  alternarOrdenTasa(): void {
+    this.ordenTasa.update((valor) => (valor === 'desc' ? 'asc' : 'desc'));
+  }
+
+  tasaFila(fila: FilaRegion): number | null {
+    return this.tasasRegion().get(normalizarRegion(fila.region)) ?? null;
+  }
+
+  /** Una sola cifra decimal; «—» cuando falta el denominador. */
+  formatearTasa(valor: number | null): string {
+    return valor === null ? '—' : FORMATO_TASA.format(valor);
+  }
+
+  formatearNumero(valor: number | null): string {
+    return valor === null ? '—' : FORMATO_ENTERO.format(valor);
+  }
+
+  alternarCapaDistritos(): void {
+    this.capaDistritosVisible.update((valor) => !valor);
+  }
+
+  reintentarDistritos(): void {
+    this.claveDistritos = '';
+    this.distritosEnCurso = null;
+    this.reintentoDistritos.update((valor) => valor + 1);
   }
 
   fechaInicio(valor: string | null): string {
@@ -787,6 +1282,13 @@ export class MapaPage {
       attribution: '<a href="https://www.openstreetmap.org/copyright">© OpenStreetMap</a>',
     }).addTo(mapa);
 
+    // La capa distrital vive en un panel propio por debajo del `overlayPane`:
+    // así los círculos por región conservan sus clics y su relieve sobre el
+    // relleno, aunque los polígonos se añadan después.
+    mapa.createPane('distritos');
+    const panelDistritos = mapa.getPane('distritos');
+    if (panelDistritos) panelDistritos.style.zIndex = '390';
+
     mapa.fitBounds(LIMITES_PERU, { padding: [12, 12] });
     this.mapa = mapa;
     this.versionMapa.update((version) => version + 1);
@@ -794,9 +1296,152 @@ export class MapaPage {
 
   private desmontarMapa(): void {
     this.capasRegion.clear();
+    this.capaDistritos = null;
+    this.claveDistritos = '';
+    this.distritosEnCurso = null;
+    this.distritoSeleccionadoUbigeo = null;
     const mapa = this.mapa;
     this.mapa = null;
     mapa?.remove();
+  }
+
+  /**
+   * Denominadores por región. Se piden una vez y se indexan por nombre
+   * normalizado; un fallo deja las tasas en «—» sin inventar población.
+   */
+  private async cargarPoblacion(): Promise<void> {
+    try {
+      const porClave = await this.territorio.poblacionPorRegion();
+      this.poblacionIndice.set(indicePoblacionPorRegion([...porClave.values()]));
+    } catch {
+      this.poblacionIndice.set(null);
+    }
+  }
+
+  /**
+   * Pide la capa distrital una vez por ámbito: nacional al montar y acotada a la
+   * región cuando hay una fila seleccionada. El servicio cachea por región.
+   */
+  private async asegurarDistritos(mapa: L.Map, region: string | null): Promise<void> {
+    const clave = region ?? '';
+    if (this.claveDistritos === clave && this.capaDistritos) return;
+    if (this.distritosEnCurso === clave) return;
+    this.claveDistritos = clave;
+    this.distritosEnCurso = clave;
+
+    try {
+      const distritos = await this.territorio.distritos(region);
+      if (this.mapa !== mapa || this.claveDistritos !== clave) return;
+      this.dibujarDistritos(mapa, distritos, region);
+    } catch {
+      if (this.mapa !== mapa || this.claveDistritos !== clave) return;
+      // El servicio ya publica el 503 o el fallo de red en `errorDistritos`:
+      // la capa no se dibuja y los círculos por región siguen intactos.
+      this.claveDistritos = '';
+      this.quitarCapaDistritos();
+    } finally {
+      if (this.distritosEnCurso === clave) this.distritosEnCurso = null;
+    }
+  }
+
+  private dibujarDistritos(
+    mapa: L.Map,
+    distritos: readonly DistritoGeo[],
+    region: string | null,
+  ): void {
+    this.quitarCapaDistritos();
+
+    const conteo = this.casosPorUbigeo();
+    const porUbigeo = new Map(distritos.map((distrito) => [distrito.ubigeo, distrito]));
+    const coleccion: FeatureCollection<Polygon | MultiPolygon, PropiedadesDistrito> = {
+      type: 'FeatureCollection',
+      features: distritos.map((distrito) => ({
+        type: 'Feature',
+        id: distrito.ubigeo,
+        properties: { ubigeo: distrito.ubigeo, nombre: distrito.nombre },
+        geometry: distrito.geometria,
+      })),
+    };
+
+    const capa = L.geoJSON(coleccion, {
+      pane: 'distritos',
+      interactive: true,
+      style: (rasgo) => {
+        const ubigeo = ubigeoDelRasgo(rasgo);
+        return estiloDistrito(
+          claseCoropleta(conteo.get(ubigeo ?? '') ?? 0),
+          ubigeo === this.distritoSeleccionadoUbigeo,
+        );
+      },
+      onEachFeature: (rasgo, subcapa) => {
+        const ubigeo = ubigeoDelRasgo(rasgo);
+        const distrito = ubigeo ? porUbigeo.get(ubigeo) : undefined;
+        if (!distrito) return;
+
+        const casos = conteo.get(distrito.ubigeo) ?? 0;
+        const ruta = subcapa as L.Path;
+        ruta.bindTooltip(
+          `${distrito.nombre} · ${casos} ${casos === 1 ? 'caso abierto' : 'casos abiertos'}`,
+          { direction: 'top', sticky: true },
+        );
+        ruta.on('click', () => this.abrirFichaDistrito(distrito, ruta));
+      },
+    });
+
+    this.capaDistritos = capa;
+    this.claveDistritos = region ?? '';
+    if (this.capaDistritosVisible()) capa.addTo(mapa);
+
+    const limites = capa.getBounds();
+    if (region !== null && limites.isValid()) {
+      mapa.fitBounds(limites, { padding: [10, 10] });
+    }
+  }
+
+  private quitarCapaDistritos(): void {
+    this.capaDistritos?.remove();
+    this.capaDistritos = null;
+  }
+
+  private aplicarVisibilidadDistritos(mapa: L.Map, visible: boolean): void {
+    const capa = this.capaDistritos;
+    if (!capa) return;
+    if (visible) {
+      if (!mapa.hasLayer(capa)) capa.addTo(mapa);
+    } else if (mapa.hasLayer(capa)) {
+      capa.remove();
+    }
+  }
+
+  /** Reaplica el relleno y el resaltado sin reconstruir la geometría. */
+  private refrescarDistritos(conteo: ReadonlyMap<string, number>): void {
+    const capa = this.capaDistritos;
+    if (!capa) return;
+
+    capa.eachLayer((subcapa) => {
+      const ruta = subcapa as RasgoDistrital;
+      const ubigeo = ubigeoDelRasgo(ruta.feature);
+      if (!ubigeo) return;
+      ruta.setStyle(
+        estiloDistrito(
+          claseCoropleta(conteo.get(ubigeo) ?? 0),
+          ubigeo === this.distritoSeleccionadoUbigeo,
+        ),
+      );
+    });
+  }
+
+  private abrirFichaDistrito(distrito: DistritoGeo, ruta: L.Path): void {
+    const activo = document.activeElement;
+    this.focoFichaPrevio =
+      activo instanceof HTMLElement && activo !== document.body
+        ? activo
+        : (this.lienzo()?.nativeElement ?? null);
+
+    this.distritoSeleccionadoUbigeo = distrito.ubigeo;
+    ruta.bringToFront();
+    this.refrescarDistritos(this.casosPorUbigeo());
+    this.distritoActivo.set(distrito);
   }
 
   private sincronizarCirculos(filas: readonly FilaRegion[], seleccion: string | null): void {

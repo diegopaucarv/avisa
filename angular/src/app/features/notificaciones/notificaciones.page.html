@@ -2,15 +2,41 @@
   <header class="view-head">
     <div>
       <h1 id="titulo-notificaciones">Notificaciones</h1>
-      <p class="view-subtitle">
-        Avisos que el sistema registra para su usuario. El orden es el del servidor, del más
-        reciente al más antiguo.
-      </p>
     </div>
     <div class="view-actions">
+      <span
+        class="status-badge state-pending contador-sin-leer"
+        [attr.title]="
+          errorContador()
+            ? 'No se pudo leer el contador de pendientes'
+            : 'Notificaciones pendientes de lectura'
+        "
+      >
+        <span class="status-dot"></span>
+        {{ textoContador() }}
+      </span>
       <button type="button" class="button-secondary" (click)="recargar()">Recargar</button>
     </div>
   </header>
+
+  <div class="filter-bar filter-bar-wrap">
+    <label class="select-filter">
+      Estado de lectura
+      <select
+        aria-label="Filtrar las notificaciones por estado de lectura"
+        (change)="cambiarEstado($event)"
+      >
+        @for (opcion of estados; track opcion.valor) {
+        <option [value]="opcion.valor" [selected]="filtros().estado === opcion.valor">
+          {{ opcion.etiqueta }}
+        </option>
+        }
+      </select>
+    </label>
+    @if (filtros().estado) {
+    <button type="button" class="button-secondary" (click)="limpiar()">Quitar filtro</button>
+    }
+  </div>
 
   <div class="view-toolbar">
     <app-barra-seleccion
@@ -23,6 +49,23 @@
 
   @if (exportarError(); as mensaje) {
   <p class="form-error" role="alert">{{ mensaje }}</p>
+  } @if (aviso(); as avisoLectura) {
+  <div
+    [class]="avisoLectura.tipo === 'ok' ? 'form-hint aviso-ok aviso-lectura' : 'form-error aviso-lectura'"
+    [attr.role]="avisoLectura.tipo === 'ok' ? 'status' : 'alert'"
+  >
+    <span>{{ avisoLectura.texto }}</span>
+    @if (avisoLectura.tipo === 'error' && avisoLectura.reintento) {
+    <button
+      type="button"
+      class="button-secondary"
+      [disabled]="enviandoId() !== null"
+      (click)="reintentarLectura()"
+    >
+      Reintentar
+    </button>
+    }
+  </div>
   } @if (estadoListado() === 'error') {
   <div class="empty-state" role="alert">
     <strong>No se pudieron cargar las notificaciones</strong>
@@ -33,8 +76,14 @@
   <div class="empty-state" role="status">Cargando notificaciones…</div>
   } @else if (total() === 0) {
   <div class="empty-state" role="status">
+    @if (filtros().estado) {
+    <strong>Sin notificaciones «{{ estadoFiltroEtiqueta(filtros().estado) }}»</strong>
+    <p>No hay avisos en ese estado. Quite el filtro para ver toda la bandeja.</p>
+    <button type="button" class="button-secondary" (click)="limpiar()">Quitar filtro</button>
+    } @else {
     <strong>Sin notificaciones registradas</strong>
     <p>La bandeja está vacía. Cuando el sistema registre un aviso para usted, aparecerá aquí.</p>
+    }
   </div>
   } @else if (notificaciones().length === 0) {
   <div class="empty-state">
@@ -44,9 +93,6 @@
   } @else {
   <div class="table-wrap">
     <table class="data-table">
-      <caption class="table-caption">
-        {{ resumenTabla() }}
-      </caption>
       <thead>
         <tr>
           <th scope="col" class="col-seleccion">
@@ -58,16 +104,17 @@
               (change)="seleccion.alternarPagina(idsVisibles(), $event)"
             />
           </th>
-          <th scope="col">Notificación</th>
-          <th scope="col">Categoría</th>
-          <th scope="col">Lectura</th>
-          <th scope="col">Vence</th>
-          <th scope="col">Registrada</th>
-          <th scope="col">Sección</th>
+          <th scope="col" [appThOrden]="'notificacion'" [orden]="orden">Notificación</th>
+          <th scope="col" [appThOrden]="'categoria'" [orden]="orden">Categoría</th>
+          <th scope="col" [appThOrden]="'lectura'" [orden]="orden">Lectura</th>
+          <th scope="col" [appThOrden]="'vence'" [orden]="orden">Vence</th>
+          <th scope="col" [appThOrden]="'registrada'" [orden]="orden">Registrada</th>
+          <th scope="col" [appThOrden]="'registro'" [orden]="orden">Registro</th>
+          <th scope="col" class="col-acciones">Acciones</th>
         </tr>
       </thead>
       <tbody>
-        @for (notificacion of notificaciones(); track notificacion.id) {
+        @for (notificacion of filasVisibles(); track notificacion.id) {
         <tr [class.sin-leer]="!notificacion.leida">
           <td class="col-seleccion" (click)="$event.stopPropagation()">
             <input
@@ -102,17 +149,28 @@
           <td>{{ fecha(notificacion.venceEn) }}</td>
           <td>{{ fecha(notificacion.creadaEn) }}</td>
           <td>
-            @if (notificacion.seccion; as seccion) {
+            @if (enlace(notificacion); as destino) {
             <a
               class="table-link"
-              [routerLink]="seccion.ruta"
-              [attr.title]="'Abrir la sección ' + seccion.etiqueta + '; el aviso no permite enlazar la ficha concreta'"
+              [routerLink]="destino.ruta"
+              [attr.title]="pistaEnlace(notificacion)"
             >
-              {{ seccion.etiqueta }}
+              {{ destino.etiqueta }}
             </a>
             } @else {
-            <span class="sin-dato">Sin sección</span>
+            <span class="sin-dato">Sin registro</span>
             }
+          </td>
+          <td class="col-acciones">
+            <button
+              type="button"
+              class="button-secondary accion-leida"
+              [disabled]="enviandoId() !== null"
+              [attr.aria-label]="ariaAccion(notificacion)"
+              (click)="cambiarLectura(notificacion, !notificacion.leida)"
+            >
+              {{ enviandoId() === notificacion.id ? 'Guardando…' : etiquetaAccion(notificacion) }}
+            </button>
           </td>
         </tr>
         }
@@ -121,10 +179,11 @@
   </div>
 
   <p class="notificaciones-nota">
-    Las no leídas se resaltan y se muestran como «No leída»; sólo se pintan como «Leída» cuando el
-    aviso está en estado «Leída». Esta pantalla no ofrece «marcar como leída» porque la API no
-    expone esa acción. El identificador del recurso es un UUID interno que ninguna ruta acepta: el
-    enlace abre la sección, no la ficha concreta.
+    Las no leídas se resaltan y llevan la insignia «Sin leer»; el contador de la cabecera es el
+    total de pendientes del servidor, no el de la página. «Marcar como leída» y «Desmarcar» usan
+    <code>PATCH /v1/notifications/&#123;id&#125;</code> y recargan lista y contador. El enlace abre
+    la ficha del caso cuando la API entrega su código; si el aviso no lo trae, abre la sección
+    correspondiente. El punto de la campana del shell sigue pendiente de otro proceso.
   </p>
   } @if (estadoListado() === 'listo' && total() > 0) {
   <app-paginacion

@@ -11,7 +11,7 @@ Hojas que procesa
 - `Seguimiento de Alertas`      -> lista `alertas` (101 registros).
 - `Seguimiento de Reuniones`    -> lista `reuniones` (46 registros).
 - `Reporte de avance de casos punt` -> listas `nudos` (118 celdas con nudo)
-  y `bloques_reporte` (31 bloques, uno por caso).
+  y `bloques_reporte` (32 bloques, uno por caso; el último sin N°).
 
 Principio del proyecto: el dato ausente se declara, no se estima. Cuando un
 valor no se puede tipar, se devuelve crudo y se añade una advertencia a
@@ -446,11 +446,15 @@ def _leer_nudos(wb) -> tuple[list[dict], list[dict], list[dict]]:
     """
     ws = wb[HOJA_REPORTE]
 
-    # Bloques delimitados por la columna 1 (N°) con valor.
+    # Bloques delimitados por la columna 1 (N°) con valor **o** por la columna 4
+    # (Nombre de Caso) con valor. La segunda regla es necesaria: el último bloque
+    # (fila 105, «Restricciones internacionales a especies de tiburón») no trae N°
+    # y sin ella sus filas se atribuían al bloque anterior, que es otro caso.
     starts = [
         r
         for r in range(2, ws.max_row + 1)
         if numero_entero(_celda(ws, r, RP_N, "Reporte")) is not None
+        or limpiar(_celda(ws, r, RP_NOMBRE, "Reporte")) is not None
     ]
 
     # Rótulos de semana en el encabezado (fila 1), un par por semana.
@@ -493,6 +497,11 @@ def _leer_nudos(wb) -> tuple[list[dict], list[dict], list[dict]]:
         r1 = starts[idx + 1] - 1 if idx + 1 < len(starts) else ws.max_row
         n = numero_entero(_celda(ws, r0, RP_N, "Reporte"))
         nombre = limpiar(_celda(ws, r0, RP_NOMBRE, "Reporte"))
+        if n is None:
+            _advertir(
+                f"Reporte bloque fila {r0}: sin N° pero con nombre {nombre!r}. "
+                "Se trata como bloque propio (no se hereda el número del anterior)."
+            )
         alcance = limpiar(_celda(ws, r0, RP_ALCANCE, "Reporte"))
         subsector = limpiar(_celda(ws, r0, RP_SUBSECTOR, "Reporte"))
         tematica = limpiar(_celda(ws, r0, RP_TEMATICA, "Reporte"))
@@ -581,7 +590,7 @@ def _validar_conteos(
         "reuniones": 46,
         "nudos": 118,
         "seguimientos": 137,
-        "bloques_reporte": 31,
+        "bloques_reporte": 32,
         "pares_semana": 8,
     }
     obtenido = {
@@ -631,6 +640,14 @@ def leer_hojas_auxiliares(xlsx_path: str) -> dict:
 # Main
 # ---------------------------------------------------------------------------
 def main() -> int:
+    # La consola de Windows usa cp1252 y los textos de la matriz traen emojis
+    # (p. ej. «🔍 1. SITUACIÓN ACTUAL»). Sin esto, imprimir el resumen revienta
+    # con UnicodeEncodeError aunque el JSON ya se haya escrito bien.
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    except (AttributeError, ValueError):
+        pass
+
     if not os.path.exists(XLSX):
         print(f"NO SE ENCUENTRA EL XLSX: {XLSX}")
         return 2

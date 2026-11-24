@@ -1,0 +1,102 @@
+<div class="drawer-scrim" (click)="alFondo($event)" (keydown)="alTecla($event)">
+  <aside
+    #panel
+    class="drawer"
+    tabindex="-1"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="archivo-panel-titulo"
+  >
+    <header class="drawer-head">
+      <div class="panel-cabecera">
+        <p class="panel-codigo">{{ fila().codigo || 'Sin código' }}</p>
+        <h2 id="archivo-panel-titulo">{{ fila().titulo || 'Registro sin título' }}</h2>
+        <div class="panel-badges">
+          <span class="status-badge panel-anulado">Anulado</span>
+          <span class="status-badge panel-entidad">{{ entidad() }}</span>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        class="icon-button"
+        aria-label="Cerrar el panel del registro anulado"
+        (click)="cerrado.emit()"
+      >
+        <app-icono nombre="cerrar" [tamano]="18" />
+      </button>
+    </header>
+
+    <div class="drawer-body">
+      @if (advertencia(); as texto) {
+        <p class="panel-aviso-warn" role="note">{{ texto }}</p>
+      }
+      @if (error(); as texto) {
+        <p class="form-error" role="alert">{{ texto }}</p>
+      }
+
+      <section class="detail-section" aria-labelledby="archivo-panel-anulacion">
+        <h3 id="archivo-panel-anulacion">Anulación</h3>
+        <dl class="panel-datos">
+          <div>
+            <dt>Fecha</dt>
+            <dd>{{ formatearFechaHora(fila().anuladoEn) }}</dd>
+          </div>
+          <div>
+            <dt>Anuló</dt>
+            <dd>{{ autor() }}</dd>
+          </div>
+          <div>
+            <dt>Lote</dt>
+            <dd class="panel-lote">{{ lote() }}</dd>
+          </div>
+          <div>
+            <dt>Clasificación</dt>
+            <dd>Nivel {{ fila().clasificacion }}</dd>
+          </div>
+          @if (fila().casoCodigo) {
+            <div>
+              <dt>Caso</dt>
+              <dd>{{ fila().casoCodigo }} · {{ fila().casoTitulo || 'Sin título del caso' }}</dd>
+            </div>
+          }
+        </dl>
+      </section>
+
+      <section class="detail-section" aria-labelledby="archivo-panel-motivo">
+        <h3 id="archivo-panel-motivo">Motivo de la anulación</h3>
+        @if (fila().motivo) {
+          <p class="panel-texto">{{ fila().motivo }}</p>
+        } @else {
+          <p class="panel-vacio">—</p>
+        }
+      </section>
+
+      @if (fila().descripcion) {
+        <section class="detail-section" aria-labelledby="archivo-panel-descripcion">
+          <h3 id="archivo-panel-descripcion">Descripción</h3>
+          <p class="panel-texto">{{ fila().descripcion }}</p>
+        </section>
+      }
+
+      <div class="panel-acciones">
+        <button
+          type="button"
+          class="button-primary"
+          [disabled]="enviando()"
+          (click)="restaurar.emit()"
+        >
+          {{ enviando() ? 'Restaurando…' : 'Restaurar' }}
+        </button>
+        <button
+          type="button"
+          class="button-secondary"
+          [disabled]="enviando()"
+          (click)="cerrado.emit()"
+        >
+          Cerrar
+        </button>
+      </div>
+    </div>
+  </aside>
+</div>

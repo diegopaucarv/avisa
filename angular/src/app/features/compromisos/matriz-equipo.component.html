@@ -1,0 +1,144 @@
+<div class="matriz-cabecera">
+  <div>
+    <h2>Matriz del equipo</h2>
+  </div>
+  <div class="matriz-acciones">
+    <button type="button" class="button-secondary" (click)="descargarCsv()">Descargar CSV</button>
+    <button type="button" class="button-secondary" (click)="descargarMapeo()">
+      Descargar mapeo
+    </button>
+  </div>
+</div>
+
+@if (errorDescarga(); as mensaje) {
+  <p class="form-error" role="alert">{{ mensaje }}</p>
+}
+
+<div class="filter-bar">
+  <label class="search-field">
+    <app-icono nombre="buscar" [tamano]="14" />
+    <input
+      type="search"
+      placeholder="Buscar caso por código, nombre o código Excel"
+      [value]="filtros().caso"
+      aria-label="Buscar caso en la matriz"
+      (input)="buscarCaso($event)"
+    />
+  </label>
+
+  <label class="select-filter">
+    Región
+    <select aria-label="Filtrar por región" (change)="filtrarRegion($event)">
+      <option value="" [selected]="!filtros().region">Todas</option>
+      @for (region of regiones(); track region.valor) {
+        <option [value]="region.valor" [selected]="region.valor === filtros().region">
+          {{ region.etiqueta }}
+        </option>
+      }
+    </select>
+  </label>
+
+  <label class="select-filter">
+    Estado del hito
+    <select aria-label="Filtrar por estado del hito" (change)="filtrarEstado($event)">
+      <option value="" [selected]="!filtros().estado">Todos</option>
+      @for (estadoHito of estadosHito(); track estadoHito.valor) {
+        <option [value]="estadoHito.valor" [selected]="estadoHito.valor === filtros().estado">
+          {{ estadoHito.etiqueta }}
+        </option>
+      }
+    </select>
+  </label>
+
+  <button type="button" class="button-secondary" (click)="limpiar()">Limpiar filtros</button>
+</div>
+
+@if (estado() === 'inactivo' || estado() === 'cargando') {
+  <div class="empty-state" role="status">Cargando la matriz del equipo…</div>
+} @else if (estado() === 'error') {
+  @if (esquemaPendiente()) {
+    <div class="empty-state matriz-pendiente" role="alert">
+      <strong>La matriz todavía no está disponible</strong>
+      <p>{{ error()?.message }}</p>
+      <p class="matriz-nota">
+        Se necesita aplicar las migraciones que completan el esquema: la 41 (equivalencias Excel →
+        caso y responsable del hito) y la 45 (fechas planificada y real en la vista del Anexo 14).
+        Mientras falten, la plataforma no muestra filas de relleno.
+      </p>
+      <button type="button" class="button-secondary" (click)="recargar()">Reintentar</button>
+    </div>
+  } @else {
+    <div class="empty-state" role="alert">
+      <p>{{ error()?.message }}</p>
+      <button type="button" class="button-secondary" (click)="recargar()">Reintentar</button>
+    </div>
+  }
+} @else if (filas().length === 0) {
+  <div class="empty-state">
+    <strong>Sin filas</strong>
+    <p>No hay compromisos × hito para los filtros seleccionados.</p>
+  </div>
+} @else {
+  <div class="table-wrap">
+    <table class="data-table matriz-tabla">
+      <thead>
+        <tr>
+          @for (columna of columnas; track columna.letra) {
+            <th
+              scope="col"
+              [class]="'th-orden ' + claseColumna(columna.clave)"
+              [appThOrden]="columna.clave"
+              [orden]="orden"
+            >
+              <span class="matriz-letra">{{ columna.letra }}</span>
+              {{ columna.etiqueta }}
+            </th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        @for (fila of filasVisibles(); track $index) {
+          <tr>
+            @for (columna of columnas; track columna.letra) {
+              <td [class]="claseColumna(columna.clave)">
+                @switch (columna.clave) {
+                  @case ('nombreCaso') {
+                    {{ celda(fila, columna.clave) }}
+                    <small class="matriz-codigos">
+                      {{ fila.codigoCaso || 'sin código AVISA' }} ·
+                      {{ fila.codigoExcel || 'sin código Excel' }}
+                    </small>
+                  }
+                  @case ('estado') {
+                    @if (fila.estado) {
+                      <span [class]="'status-badge ' + estadoClase(fila.estado)">{{
+                        fila.estado
+                      }}</span>
+                    } @else {
+                      <span class="matriz-vacio">—</span>
+                    }
+                  }
+                  @default {
+                    {{ celda(fila, columna.clave) }}
+                  }
+                }
+              </td>
+            }
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  @if (total() > 0) {
+    <app-paginacion
+      [pagina]="filtros().pagina"
+      [tamano]="filtros().tamano"
+      [total]="total()"
+      (paginaCambia)="cambiarPagina($event)"
+      (tamanoCambia)="cambiarTamano($event)"
+    />
+  }
+}
+
+<app-matriz-importar />

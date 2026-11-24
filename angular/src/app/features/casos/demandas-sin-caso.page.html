@@ -2,10 +2,6 @@
   <header class="view-head">
     <div>
       <h1 id="titulo-demandas">Demandas sin caso</h1>
-      <p class="view-subtitle">
-        Demandas registradas que todavía no se vinculan a un caso. Se sistematizan con las 3P de la
-        Guía §8.1.2.1: problema, propuesta y pedido.
-      </p>
     </div>
     <div class="view-actions">
       @if (total() > 0) {
@@ -78,11 +74,6 @@
   } } @else {
   <div class="table-wrap">
     <table class="data-table">
-      <caption class="table-caption">
-        {{ total() }} demandas sin caso con los filtros aplicados. La fecha es la del hecho
-        reportado en la alerta; cuando la demanda no tiene alerta se muestra la de registro, marcada
-        como tal. La vinculación exige permiso de edición.
-      </caption>
       <thead>
         <tr>
           <th scope="col" class="col-seleccion">
@@ -94,19 +85,20 @@
               (change)="seleccion.alternarPagina(idsVisibles(), $event)"
             />
           </th>
-          <th scope="col">Descripción</th>
-          <th scope="col">Problema · Propuesta · Pedido</th>
-          <th scope="col">Estado</th>
-          <th scope="col">Fecha del hecho</th>
-          <th scope="col">Temática</th>
-          <th scope="col">Afecta a mujeres</th>
+          <th scope="col" [appThOrden]="'descripcion'" [orden]="orden">Descripción</th>
+          <th scope="col" [appThOrden]="'problema'" [orden]="orden">
+            Problema · Propuesta · Pedido
+          </th>
+          <th scope="col" [appThOrden]="'estado'" [orden]="orden">Estado</th>
+          <th scope="col" [appThOrden]="'fecha'" [orden]="orden">Fecha del hecho</th>
+          <th scope="col" [appThOrden]="'mujeres'" [orden]="orden">Afecta a mujeres</th>
           @if (puedeVincular()) {
           <th scope="col">Acción</th>
           }
         </tr>
       </thead>
       <tbody>
-        @for (demanda of demandas(); track demanda.id) {
+        @for (demanda of filasVisibles(); track demanda.id) {
         <tr>
           <td class="col-seleccion" (click)="$event.stopPropagation()">
             <input
@@ -149,7 +141,6 @@
             <span class="sin-dato">—</span>
             }
           </td>
-          <td>{{ demanda.tematica || '—' }}</td>
           <td>
             @if (demanda.afectaMujeres) {
             <span class="status-badge state-pending">Sí</span>

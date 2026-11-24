@@ -47,6 +47,12 @@ export type MediaListItem = {
   bytes: number | null;
   orden: number;
   esPrincipal: boolean;
+  /**
+   * `true` si la fila tiene los bytes cargados en `core.medios.contenido`.
+   * La galería lo usa para preferir `/api/v1/media/<id>/contenido` sobre la
+   * `url` estática. No implica que el archivo estático haya desaparecido.
+   */
+  tieneContenido: boolean;
   alt: string | null;
   credito: string | null;
   fuente: string;
@@ -84,6 +90,7 @@ const MEDIA_SELECT = `
   m.bytes,
   m.orden,
   m.es_principal,
+  (m.contenido is not null) as tiene_contenido,
   m.alt,
   m.credito,
   m.fuente,
@@ -120,6 +127,7 @@ function mapMedia(row: Record<string, unknown>): MediaListItem {
       row.bytes === null || row.bytes === undefined ? null : Number(row.bytes),
     orden: row.orden as number,
     esPrincipal: row.es_principal as boolean,
+    tieneContenido: row.tiene_contenido as boolean,
     alt: row.alt as string | null,
     credito: row.credito as string | null,
     fuente: row.fuente as string,
@@ -225,6 +233,94 @@ export async function listMedia(
     page,
     pageSize,
     generatedAt: new Date().toISOString(),
+  };
+}
+
+export type MediaContent = {
+  contenido: Buffer;
+  /** `content_type` guardado; si falta se deduce de la extensión de `url`. */
+  contentType: string | null;
+  hash: string | null;
+};
+
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+const MIME_POR_EXTENSION: Readonly<Record<string, string>> = {
+  jpg: "image/jpeg",
+  jpeg: "image/jpeg",
+  png: "image/png",
+  webp: "image/webp",
+  gif: "image/gif",
+  avif: "image/avif",
+  svg: "image/svg+xml",
+  bmp: "image/bmp",
+  tif: "image/tiff",
+  tiff: "image/tiff",
+  heic: "image/heic",
+  heif: "image/heif",
+};
+
+/**
+ * Tipo MIME deducido de la extensión de una URL o ruta.
+ *
+ * Se usa sólo cuando la fila no tiene `content_type` (por ejemplo, si los
+ * bytes se cargaron con otro proceso). Si la URL no trae extensión —caso de
+ * `/api/v1/media/<id>/contenido`— devuelve `null` y el endpoint responde con
+ * `application/octet-stream`.
+ */
+export function mimePorExtension(url: string): string | null {
+  const sinQuery = url.split(/[?#]/, 1)[0] ?? "";
+  const punto = sinQuery.lastIndexOf(".");
+  if (punto < 0 || punto === sinQuery.length - 1) return null;
+  return MIME_POR_EXTENSION[sinQuery.slice(punto + 1).toLowerCase()] ?? null;
+}
+
+/**
+ * Bytes de una fotografía para el endpoint de contenido.
+ *
+ * Se ejecuta dentro de `withSession`, así que la RLS de `core.medios` manda:
+ * una fila anulada o por encima del nivel del rol no se devuelve. Se filtra
+ * `anulado_en is null` de forma explícita, igual que `listMedia`, para que la
+ * intención no dependa sólo de la política.
+ *
+ * Un identificador mal formado no es un error de datos: no hay fila, y el
+ * endpoint responde 404 en vez de un 422 de PostgreSQL.
+ */
+export async function leerContenidoMedio(
+  client: PoolClient,
+  id: string,
+): Promise<MediaContent | null> {
+  if (!UUID_RE.test(id)) return null;
+
+  const result = await client.query(
+    `select m.contenido,
+            m.content_type,
+            m.hash,
+            m.url
+       from core.medios m
+      where m.id = $1::uuid
+        and m.anulado_en is null
+        and m.contenido is not null
+      limit 1`,
+    [id],
+  );
+
+  const row = result.rows[0] as Record<string, unknown> | undefined;
+  if (!row) return null;
+
+  const contenido = row.contenido;
+  if (!Buffer.isBuffer(contenido)) return null;
+
+  const guardado = row.content_type as string | null;
+
+  return {
+    contenido,
+    contentType:
+      guardado && guardado.trim()
+        ? guardado
+        : mimePorExtension((row.url as string | null) ?? ""),
+    hash: (row.hash as string | null) ?? null,
   };
 }
 

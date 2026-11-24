@@ -2,10 +2,6 @@
   <header class="view-head">
     <div>
       <h1 id="titulo-instituciones">Organizaciones públicas</h1>
-      <p class="view-subtitle">
-        Actores públicos: autoridades y organizaciones del Estado registradas en el directorio, con
-        su función, nivel de gobierno y ubicación (Guía §7.4).
-      </p>
     </div>
     <div class="view-actions">
       <p class="result-count" aria-live="polite">{{ total() }} organizaciones públicas</p>
@@ -89,10 +85,6 @@
 
   <div class="table-wrap">
     <table class="data-table">
-      <caption class="table-caption">
-        Sólo actores públicos. Pulse una fila para abrir la ficha en el panel lateral; los datos
-        personales se consultan desde ahí y quedan registrados en la auditoría de la base.
-      </caption>
       <thead>
         <tr>
           <th scope="col" class="col-seleccion">
@@ -104,16 +96,16 @@
               (change)="seleccion.alternarPagina(idsVisibles(), $event)"
             />
           </th>
-          <th scope="col">Nombre</th>
-          <th scope="col">Naturaleza</th>
-          <th scope="col">Tipo</th>
-          <th scope="col">Función</th>
-          <th scope="col">Región</th>
-          <th scope="col">Organización ancla</th>
+          <th scope="col" [appThOrden]="'nombre'" [orden]="orden">Nombre</th>
+          <th scope="col" [appThOrden]="'naturaleza'" [orden]="orden">Naturaleza</th>
+          <th scope="col" [appThOrden]="'tipo'" [orden]="orden">Tipo</th>
+          <th scope="col" [appThOrden]="'funcion'" [orden]="orden">Función</th>
+          <th scope="col" [appThOrden]="'region'" [orden]="orden">Región</th>
+          <th scope="col" [appThOrden]="'organizacion'" [orden]="orden">Organización ancla</th>
         </tr>
       </thead>
       <tbody>
-        @for (institucion of instituciones(); track institucion.id) {
+        @for (institucion of filasVisibles(); track institucion.id) {
         <tr
           class="case-row-clickable"
           [class.row-selected]="seleccionado()?.id === institucion.id"

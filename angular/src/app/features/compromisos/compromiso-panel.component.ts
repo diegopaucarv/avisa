@@ -30,13 +30,18 @@ import { GlosarioComponent } from '../../shared/ui/glosario.component';
 import { IconoComponent } from '../../shared/ui/icono.component';
 import {
   ALCANCES,
+  CLASIFICACIONES_ALCANCE,
   ESTADOS_COMPROMISO,
   ESTADOS_HITO,
+  ETIQUETA_ASUMIDO_MINISTRO,
+  FORMAS_VERBALES,
   NIVELES_GOBIERNO,
   TIPOS_COMPROMISO,
   aCatalogosCompromiso,
   aCompromiso,
   aDetalleCompromiso,
+  etiquetaClasificacionAlcance,
+  etiquetaFormalVerbal,
   etiquetaNivelGobierno,
   formatearFecha,
   resolverVencimiento,
@@ -54,22 +59,25 @@ type FormularioCompromiso = {
   fechaInicio: string;
   fechaVencimiento: string;
   tipo: string;
+  clasificacionAlcance: string;
+  formalVerbal: string;
+  asumidoMinistro: boolean;
   nivelGobierno: string;
   estado: string;
   unidad: string;
   alcance: string;
-  tematica: string;
   atiendeGenero: boolean;
   criteriosSmart: string;
   evidenciaUri: string;
 };
 
-type CampoTexto = Exclude<keyof FormularioCompromiso, 'atiendeGenero'>;
+type CampoTexto = Exclude<keyof FormularioCompromiso, 'atiendeGenero' | 'asumidoMinistro'>;
 
 type FormularioHito = {
   descripcion: string;
   fecha: string;
   estado: EstadoHito;
+  responsableTexto: string;
 };
 
 type ResultadoCriterios = { ok: true; valor: unknown } | { ok: false };
@@ -80,11 +88,13 @@ function formularioVacio(): FormularioCompromiso {
     fechaInicio: '',
     fechaVencimiento: '',
     tipo: 'Actividad',
+    clasificacionAlcance: '',
+    formalVerbal: '',
+    asumidoMinistro: false,
     nivelGobierno: '',
     estado: 'Por iniciar',
     unidad: '',
     alcance: '',
-    tematica: '',
     atiendeGenero: false,
     criteriosSmart: '',
     evidenciaUri: '',
@@ -106,11 +116,13 @@ function formularioDe(compromiso: Compromiso): FormularioCompromiso {
     fechaInicio: compromiso.fechaInicio ?? '',
     fechaVencimiento: compromiso.fechaVencimiento ?? '',
     tipo: compromiso.tipo,
+    clasificacionAlcance: compromiso.clasificacionAlcance ?? '',
+    formalVerbal: compromiso.formalVerbal ?? '',
+    asumidoMinistro: compromiso.asumidoMinistro,
     nivelGobierno: compromiso.nivelGobierno ?? '',
     estado: compromiso.estado,
     unidad: compromiso.unidad ?? '',
     alcance: compromiso.alcance ?? '',
-    tematica: compromiso.tematica ?? '',
     atiendeGenero: compromiso.atiendeGenero,
     criteriosSmart: criterios,
     evidenciaUri: compromiso.evidenciaUri ?? '',
@@ -132,12 +144,6 @@ const COMPROMISO_VACIO: Compromiso = aCompromiso({});
   styles: `
     :host {
       display: contents;
-    }
-    .drawer-head h2 {
-      margin: 0;
-      font-size: 15px;
-      line-height: 1.3;
-      color: #1c2a38;
     }
     .panel-badges {
       display: flex;
@@ -169,7 +175,7 @@ const COMPROMISO_VACIO: Compromiso = aCompromiso({});
       flex-direction: column;
       gap: 4px;
       margin-top: 12px;
-      font-size: 10px;
+      font-size: 12.5px;
       color: #52677a;
     }
     .panel-aviso {
@@ -179,7 +185,7 @@ const COMPROMISO_VACIO: Compromiso = aCompromiso({});
       border-radius: 6px;
       background: #fff8ec;
       color: #8a5a1f;
-      font-size: 10px;
+      font-size: 12.5px;
       line-height: 1.45;
     }
     .criterios {
@@ -189,7 +195,7 @@ const COMPROMISO_VACIO: Compromiso = aCompromiso({});
       border-radius: 6px;
       background: #fbfcfd;
       color: #52677a;
-      font-size: 9.5px;
+      font-size: 12px;
       white-space: pre-wrap;
       overflow-x: auto;
     }
@@ -204,7 +210,7 @@ const COMPROMISO_VACIO: Compromiso = aCompromiso({});
     .panel-hito-form h4 {
       margin: 0;
       color: #3c4a59;
-      font-size: 11px;
+      font-size: 13px;
     }
     .panel-hito-form .form-field {
       padding: 0;
@@ -214,6 +220,16 @@ const COMPROMISO_VACIO: Compromiso = aCompromiso({});
     .hito-estado {
       display: inline-flex;
     }
+    .hito-responsable {
+      display: inline-flex;
+    }
+    .hito-responsable-input {
+      min-width: 160px;
+      max-width: 220px;
+      height: 26px;
+      padding: 0 8px;
+      font-size: 13px;
+    }
     .panel-campo-ancho {
       grid-column: 1 / -1;
     }
@@ -222,7 +238,7 @@ const COMPROMISO_VACIO: Compromiso = aCompromiso({});
       align-items: center;
       gap: 7px;
       color: #52677a;
-      font-size: 10px;
+      font-size: 12.5px;
     }
     .panel-permiso {
       margin: 0 auto 0 0;
@@ -254,17 +270,17 @@ const COMPROMISO_VACIO: Compromiso = aCompromiso({});
     }
     .panel-caso-codigo {
       color: var(--ink);
-      font-size: 10px;
+      font-size: 12.5px;
       font-weight: 700;
     }
     .panel-caso-titulo {
       color: var(--muted);
-      font-size: 9.5px;
+      font-size: 12px;
       line-height: 1.45;
     }
     .panel-caso-region {
       color: var(--muted);
-      font-size: 8.5px;
+      font-size: 12px;
       font-weight: 600;
       letter-spacing: 0.4px;
       text-transform: uppercase;
@@ -302,6 +318,9 @@ export class CompromisoPanelComponent {
   readonly estadosHito: readonly string[] = ESTADOS_HITO;
   readonly tiposCompromiso: readonly string[] = TIPOS_COMPROMISO;
   readonly nivelesGobierno: readonly string[] = NIVELES_GOBIERNO;
+  readonly clasificacionesAlcance = CLASIFICACIONES_ALCANCE;
+  readonly formasVerbales = FORMAS_VERBALES;
+  readonly etiquetaAsumidoMinistro = ETIQUETA_ASUMIDO_MINISTRO;
 
   readonly editando = signal(false);
   readonly guardando = signal(false);
@@ -324,6 +343,7 @@ export class CompromisoPanelComponent {
     descripcion: '',
     fecha: '',
     estado: 'Registrado',
+    responsableTexto: '',
   });
   readonly hitoGuardando = signal(false);
   readonly hitoCambiando = signal<string | null>(null);
@@ -419,13 +439,6 @@ export class CompromisoPanelComponent {
     return [{ valor: actual, etiqueta: actual }, ...base];
   });
 
-  readonly tematicasFormulario = computed<OpcionCatalogo[]>(() => {
-    const base = this.catalogoRecurso.valor()?.tematicas ?? [];
-    const actual = this.formulario().tematica.trim();
-    if (!actual || base.some((opcion) => opcion.valor === actual)) return base;
-    return [{ valor: actual, etiqueta: actual }, ...base];
-  });
-
   readonly alcancesFormulario = computed<OpcionCatalogo[]>(() => {
     const base = this.catalogoRecurso.valor()?.alcances ?? [];
     if (base.length > 0) return base;
@@ -506,18 +519,26 @@ export class CompromisoPanelComponent {
     });
   }
 
-  actualizarBooleano(evento: Event): void {
+  actualizarBooleano(campo: 'atiendeGenero' | 'asumidoMinistro', evento: Event): void {
     const marcado = (evento.target as HTMLInputElement).checked;
-    this.formulario.update((actual) => ({ ...actual, atiendeGenero: marcado }));
+    this.formulario.update((actual) =>
+      campo === 'atiendeGenero'
+        ? { ...actual, atiendeGenero: marcado }
+        : { ...actual, asumidoMinistro: marcado },
+    );
   }
 
-  actualizarHito(campo: 'descripcion' | 'fecha', evento: Event): void {
+  actualizarHito(campo: 'descripcion' | 'fecha' | 'responsableTexto', evento: Event): void {
     const valor = leerValor(evento);
     if (campo === 'descripcion') {
       this.hitoNuevo.update((actual) => ({ ...actual, descripcion: valor }));
       return;
     }
-    this.hitoNuevo.update((actual) => ({ ...actual, fecha: valor }));
+    if (campo === 'fecha') {
+      this.hitoNuevo.update((actual) => ({ ...actual, fecha: valor }));
+      return;
+    }
+    this.hitoNuevo.update((actual) => ({ ...actual, responsableTexto: valor }));
   }
 
   actualizarEstadoHitoNuevo(evento: Event): void {
@@ -593,11 +614,13 @@ export class CompromisoPanelComponent {
         const cuerpo: Record<string, unknown> = {
           accion,
           tipo: form.tipo,
+          clasificacionAlcance: form.clasificacionAlcance || null,
+          formalVerbal: form.formalVerbal || null,
+          asumidoMinistro: form.asumidoMinistro,
           estado: form.estado,
           unidad: form.unidad.trim(),
           nivelGobierno: form.nivelGobierno || null,
           alcance: form.alcance || null,
-          tematica: form.tematica.trim() || null,
           atiendeGenero: form.atiendeGenero,
           criteriosSmart: criterios.valor,
           evidenciaUri: form.evidenciaUri.trim() || null,
@@ -638,15 +661,15 @@ export class CompromisoPanelComponent {
       accion: form.accion.trim(),
       tipo: form.tipo,
       atiendeGenero: form.atiendeGenero,
+      asumidoMinistro: form.asumidoMinistro,
     };
 
     const unidad = form.unidad.trim();
     if (unidad) cuerpo['unidad'] = unidad;
+    if (form.clasificacionAlcance) cuerpo['clasificacionAlcance'] = form.clasificacionAlcance;
+    if (form.formalVerbal) cuerpo['formalVerbal'] = form.formalVerbal;
     if (form.nivelGobierno) cuerpo['nivelGobierno'] = form.nivelGobierno;
     if (form.alcance) cuerpo['alcance'] = form.alcance;
-
-    const tematica = form.tematica.trim();
-    if (tematica) cuerpo['tematica'] = tematica;
 
     const evidenciaUri = form.evidenciaUri.trim();
     if (evidenciaUri) cuerpo['evidenciaUri'] = evidenciaUri;
@@ -686,6 +709,9 @@ export class CompromisoPanelComponent {
       estado: form.estado,
     };
     if (form.fecha.trim()) cuerpo['fecha'] = form.fecha.trim();
+    if (form.responsableTexto.trim()) {
+      cuerpo['responsableTexto'] = form.responsableTexto.trim();
+    }
 
     this.hitoGuardando.set(true);
     this.hitosError.set(null);
@@ -694,7 +720,12 @@ export class CompromisoPanelComponent {
       await firstValueFrom(
         this.http.post<unknown>(urlApi(`/v1/commitments/${encodeURIComponent(id)}/hitos`), cuerpo),
       );
-      this.hitoNuevo.set({ descripcion: '', fecha: '', estado: 'Registrado' });
+      this.hitoNuevo.set({
+        descripcion: '',
+        fecha: '',
+        estado: 'Registrado',
+        responsableTexto: '',
+      });
       this.recurso.recargar();
       this.actualizado.emit();
     } catch (fallo) {
@@ -743,6 +774,46 @@ export class CompromisoPanelComponent {
     }
   }
 
+  async cambiarResponsableHito(hito: Hito, evento: Event): Promise<void> {
+    const input = evento.target as HTMLInputElement;
+    const nuevo = input.value.trim();
+    const actual = (hito.responsableTexto ?? '').trim();
+
+    if (nuevo === actual) return;
+
+    if (!this.puedeModificar()) {
+      input.value = actual;
+      this.hitosError.set('No tiene permisos para modificar este compromiso.');
+      return;
+    }
+
+    const id = this.cabecera().id;
+    if (!id) {
+      input.value = actual;
+      this.hitosError.set('El compromiso no tiene identificador.');
+      return;
+    }
+
+    this.hitoCambiando.set(hito.id);
+    this.hitosError.set(null);
+
+    try {
+      await firstValueFrom(
+        this.http.patch<unknown>(
+          urlApi(`/v1/commitments/${encodeURIComponent(id)}/hitos/${encodeURIComponent(hito.id)}`),
+          { responsableTexto: nuevo || null },
+        ),
+      );
+      this.recurso.recargar();
+      this.actualizado.emit();
+    } catch (fallo) {
+      input.value = actual;
+      this.hitosError.set(this.mensajeDeError(fallo));
+    } finally {
+      this.hitoCambiando.set(null);
+    }
+  }
+
   fechaTexto(valor: string | null | undefined): string {
     return formatearFecha(valor);
   }
@@ -762,6 +833,16 @@ export class CompromisoPanelComponent {
   /** «Regional» se muestra como GORE; el valor del catálogo no cambia. */
   nivelTexto(valor: string | null | undefined): string {
     return etiquetaNivelGobierno(valor ?? null);
+  }
+
+  /** Item 16: etiqueta legible de la clasificación de alcance. */
+  clasificacionAlcanceTexto(valor: string | null | undefined): string {
+    return etiquetaClasificacionAlcance(valor);
+  }
+
+  /** Item 16: etiqueta legible del carácter formal o verbal. */
+  formalVerbalTexto(valor: string | null | undefined): string {
+    return etiquetaFormalVerbal(valor);
   }
 
   esAlcanceConocido(valor: string): boolean {
@@ -834,7 +915,7 @@ export class CompromisoPanelComponent {
       return 'No tiene permisos para modificar este compromiso (403).';
     }
     if (error.estado === 422) {
-      return `El servidor rechazó los datos (422): ${error.message} Revise la unidad, la temática, el alcance y las fechas.`;
+      return `El servidor rechazó los datos (422): ${error.message} Revise la unidad, el alcance y las fechas.`;
     }
     if (error.estado === 404) {
       return 'El compromiso ya no existe; actualice el listado.';

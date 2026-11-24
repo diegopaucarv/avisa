@@ -178,22 +178,17 @@ const CATALOGOS_VACIOS: CatalogosAlta = {
     .caso-panel-codigo {
       margin: 0;
       color: #8a98a5;
-      font-size: 9px;
+      font-size: 12px;
       font-weight: 700;
       letter-spacing: 0.7px;
       text-transform: uppercase;
     }
 
-    .drawer-head h2 {
-      margin: 0;
-      color: #1c2a38;
-      font: 700 16px/1.35 var(--font-display);
-    }
 
     .caso-panel-sub {
       margin: 4px 0 0;
       color: #647487;
-      font-size: 10.5px;
+      font-size: 13px;
       line-height: 1.5;
     }
 
@@ -228,7 +223,7 @@ const CATALOGOS_VACIOS: CatalogosAlta = {
       align-items: center;
       gap: 6px;
       color: #22303f;
-      font-size: 11.5px;
+      font-size: 13.5px;
       line-height: 1.4;
     }
 
@@ -244,7 +239,7 @@ const CATALOGOS_VACIOS: CatalogosAlta = {
       border-radius: 6px;
       background: rgba(100, 116, 135, 0.06);
       color: #47566a;
-      font-size: 12px;
+      font-size: 14px;
       font-weight: 600;
       text-align: center;
     }

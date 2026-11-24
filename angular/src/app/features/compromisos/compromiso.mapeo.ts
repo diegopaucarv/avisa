@@ -13,11 +13,17 @@ import {
   lista,
   numero,
   texto,
+  type CompromisoCaso,
+  type HitoCompromisoCaso,
   type Registro,
 } from '../../dominio/mapeo';
 
 export type EstadoCompromiso =
-  'Por iniciar' | 'En proceso' | 'Cumplido' | 'Redefinido' | 'Desestimado';
+  | 'Por iniciar'
+  | 'En proceso'
+  | 'Cumplido'
+  | 'Redefinido'
+  | 'Desestimado';
 
 export type EstadoHito = 'Registrado' | 'En ejecución' | 'Paralizado' | 'Cumplido' | 'Desestimado';
 
@@ -44,6 +50,30 @@ export const ESTADOS_HITO = [
 
 export const TIPOS_COMPROMISO = ['Actividad', 'PIP'] as const satisfies readonly TipoCompromiso[];
 
+/** Item 16: el compromiso puede ser progresivo y parcial, operativo o condicionado. */
+export type ClasificacionAlcance =
+  | 'progresivo_parcial'
+  | 'entendimiento_operativo'
+  | 'condicionado';
+
+export type FormalVerbal = 'formal' | 'verbal';
+
+export const CLASIFICACIONES_ALCANCE = [
+  { valor: 'progresivo_parcial', etiqueta: 'Progresivo y parcial' },
+  { valor: 'entendimiento_operativo', etiqueta: 'Entendimiento operativo' },
+  { valor: 'condicionado', etiqueta: 'Condicionado' },
+] as const satisfies readonly { valor: ClasificacionAlcance; etiqueta: string }[];
+
+export const FORMAS_VERBALES = [
+  { valor: 'formal', etiqueta: 'Formal' },
+  { valor: 'verbal', etiqueta: 'Verbal' },
+] as const satisfies readonly { valor: FormalVerbal; etiqueta: string }[];
+
+export const ETIQUETA_ASUMIDO_MINISTRO = 'Asumido por el Señor Ministro';
+
+/** Valor que la UI muestra cuando el dato no fue declarado. */
+export const ETIQUETA_SIN_DECLARAR = 'Sin declarar';
+
 export const NIVELES_GOBIERNO = [
   'Nacional',
   'Regional',
@@ -65,6 +95,12 @@ export type Hito = {
   validacion: string | null;
   descripcionEvidencia: string | null;
   linkEvidencia: string | null;
+  /** Nombre del responsable escrito en el origen, sin usuario resuelto. */
+  responsableTexto: string | null;
+  responsableUsuarioId: string | null;
+  /** Fecha sin tipar (`No aplica`, `Julio 2026`); convive con `fecha` nula. */
+  fechaTexto: string | null;
+  fechaRealTexto: string | null;
 };
 
 export type ProximoHito = {
@@ -82,6 +118,9 @@ export type Compromiso = {
   casoCodigo: string | null;
   casoTitulo: string | null;
   tipo: TipoCompromiso;
+  clasificacionAlcance: ClasificacionAlcance | null;
+  formalVerbal: FormalVerbal | null;
+  asumidoMinistro: boolean;
   nivelGobierno: string | null;
   estado: EstadoCompromiso;
   estadoCategoria: string | null;
@@ -180,6 +219,64 @@ function tipoDe(valor: string | null): TipoCompromiso {
   return normalizarClave(valor) === 'pip' ? 'PIP' : 'Actividad';
 }
 
+export function clasificacionAlcanceDe(valor: string | null): ClasificacionAlcance | null {
+  const clave = normalizarClave(valor);
+  const opcion = CLASIFICACIONES_ALCANCE.find(
+    (candidata) =>
+      normalizarClave(candidata.valor) === clave || normalizarClave(candidata.etiqueta) === clave,
+  );
+  return opcion?.valor ?? null;
+}
+
+export function formalVerbalDe(valor: string | null): FormalVerbal | null {
+  const clave = normalizarClave(valor);
+  const opcion = FORMAS_VERBALES.find(
+    (candidata) =>
+      normalizarClave(candidata.valor) === clave || normalizarClave(candidata.etiqueta) === clave,
+  );
+  return opcion?.valor ?? null;
+}
+
+/** Etiqueta visible de la clasificación de alcance; sin dato, «Sin declarar». */
+export function etiquetaClasificacionAlcance(valor: string | null | undefined): string {
+  const clasificacion = clasificacionAlcanceDe(valor ?? null);
+  const opcion = CLASIFICACIONES_ALCANCE.find((candidata) => candidata.valor === clasificacion);
+  return opcion?.etiqueta ?? ETIQUETA_SIN_DECLARAR;
+}
+
+/** Etiqueta visible del carácter formal o verbal; sin dato, «Sin declarar». */
+export function etiquetaFormalVerbal(valor: string | null | undefined): string {
+  const forma = formalVerbalDe(valor ?? null);
+  const opcion = FORMAS_VERBALES.find((candidata) => candidata.valor === forma);
+  return opcion?.etiqueta ?? ETIQUETA_SIN_DECLARAR;
+}
+
+function atributosCompromisoDe(
+  registro: Registro,
+): Pick<Compromiso, 'clasificacionAlcance' | 'formalVerbal' | 'asumidoMinistro'> {
+  return {
+    clasificacionAlcance: clasificacionAlcanceDe(
+      texto(registro, ['clasificacionAlcance', 'clasificacion_alcance']),
+    ),
+    formalVerbal: formalVerbalDe(texto(registro, ['formalVerbal', 'formal_verbal'])),
+    asumidoMinistro: booleano(registro, ['asumidoMinistro', 'asumido_ministro']),
+  };
+}
+
+type AtributosHito = Pick<
+  Hito,
+  'responsableTexto' | 'responsableUsuarioId' | 'fechaTexto' | 'fechaRealTexto'
+>;
+
+function atributosHitoDe(registro: Registro): AtributosHito {
+  return {
+    responsableTexto: texto(registro, ['responsableTexto', 'responsable_texto']),
+    responsableUsuarioId: texto(registro, ['responsableUsuarioId', 'responsable_usuario_id']),
+    fechaTexto: texto(registro, ['fechaTexto', 'fecha_texto']),
+    fechaRealTexto: texto(registro, ['fechaRealTexto', 'fecha_real_texto']),
+  };
+}
+
 function nivelGobiernoDe(valor: string | null): string | null {
   if (!valor) return null;
   const limpio = valor.replace(/_/g, ' ').trim();
@@ -214,6 +311,7 @@ function aHito(bruto: unknown): Hito {
     validacion: texto(registro, ['validacion']),
     descripcionEvidencia: texto(registro, ['descripcionEvidencia', 'descripcion_evidencia']),
     linkEvidencia: texto(registro, ['linkEvidencia', 'link_evidencia']),
+    ...atributosHitoDe(registro),
   };
 }
 
@@ -241,6 +339,7 @@ export function aCompromiso(bruto: unknown): Compromiso {
     casoCodigo: texto(registro, ['casoCode', 'caso_code']),
     casoTitulo: texto(registro, ['casoTitulo', 'caso_titulo']),
     tipo: tipoDe(texto(registro, ['tipo'])),
+    ...atributosCompromisoDe(registro),
     nivelGobierno: nivelGobiernoDe(texto(registro, ['nivelGobierno'])),
     estado: estadoCompromisoDe(texto(registro, ['estado'])),
     estadoCategoria: texto(registro, ['estadoCategoria', 'estado_categoria']),
@@ -302,6 +401,63 @@ export function aDetalleCompromiso(bruto: unknown): DetalleCompromiso {
         }
       : null,
   };
+}
+
+/** Hito del detalle del caso con las columnas nuevas (responsable y fechas en texto). */
+export type HitoCasoConResponsable = HitoCompromisoCaso & AtributosHito;
+
+/** Compromiso del detalle del caso con su clasificación, carácter y bandera. */
+export type CompromisoCasoConCaracteristicas = Omit<CompromisoCaso, 'hitos'> & {
+  clasificacionAlcance: ClasificacionAlcance | null;
+  formalVerbal: FormalVerbal | null;
+  asumidoMinistro: boolean;
+  hitos: HitoCasoConResponsable[];
+};
+
+function registroDe(valor: unknown): Registro {
+  return esRegistro(valor) ? valor : {};
+}
+
+function idDe(valor: unknown): string | null {
+  return texto(registroDe(valor), ['id']);
+}
+
+function atributosHitoCrudo(valor: unknown): AtributosHito {
+  return atributosHitoDe(registroDe(valor));
+}
+
+/**
+ * `GET /api/v1/cases/{codigo}` ya mapea los compromisos y sus hitos, pero
+ * `dominio/mapeo.ts` descarta las columnas nuevas. Se vuelven a leer del bruto
+ * para no tocar el mapeo compartido ni duplicar el panel de compromisos.
+ */
+export function aCompromisosCaso(
+  bruto: unknown,
+  compromisos: CompromisoCaso[],
+): CompromisoCasoConCaracteristicas[] {
+  const registro = registroDe(bruto);
+  const crudos = lista(registro, ['compromisos', 'commitments']);
+
+  return compromisos.map((compromiso, indice) => {
+    // El id manda; el índice sólo cubre una respuesta sin identificadores.
+    const porId = compromiso.id
+      ? crudos.find((candidato) => idDe(candidato) === compromiso.id)
+      : undefined;
+    const fila = registroDe(porId ?? crudos[indice]);
+    const hitosCrudos = lista(fila, ['hitos']);
+
+    return {
+      ...compromiso,
+      ...atributosCompromisoDe(fila),
+      hitos: compromiso.hitos.map((hito, posicion) => {
+        const hitoPorId = hito.id
+          ? hitosCrudos.find((candidato) => idDe(candidato) === hito.id)
+          : undefined;
+        const atributos = atributosHitoCrudo(hitoPorId ?? hitosCrudos[posicion]);
+        return { ...hito, ...atributos };
+      }),
+    };
+  });
 }
 
 function aOpciones(bruto: unknown): OpcionCatalogo[] {

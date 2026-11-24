@@ -24,7 +24,9 @@ import { BarraSeleccionComponent } from '../../shared/ui/barra-seleccion.compone
 
 import { SeleccionTabla } from '../../shared/ui/seleccion-tabla';
 import { IconoComponent } from '../../shared/ui/icono.component';
+import { OrdenTabla } from '../../shared/ui/orden-tabla';
 import { PaginacionComponent } from '../../shared/ui/paginacion.component';
+import { ThOrdenDirective } from '../../shared/ui/th-orden.directive';
 import { aReporte, formatearFecha, type Reporte } from './reportes.mapeo';
 
 /** Tipo literal de `core.cat_tipos_documento` para cada pestaña de IyC. */
@@ -67,7 +69,13 @@ const FILTROS_INICIALES: FiltrosReportes = {
  */
 @Component({
   selector: 'app-reportes',
-  imports: [RouterLink, IconoComponent, PaginacionComponent, BarraSeleccionComponent],
+  imports: [
+    RouterLink,
+    IconoComponent,
+    PaginacionComponent,
+    BarraSeleccionComponent,
+    ThOrdenDirective,
+  ],
   templateUrl: './reportes.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
@@ -94,22 +102,7 @@ const FILTROS_INICIALES: FiltrosReportes = {
       gap: 16px;
     }
 
-    .view-head h1 {
-      margin: 0;
-      color: #1a2b3e;
-      font: 700 22px/1.3 var(--font-display);
-      letter-spacing: -0.65px;
-    }
-
-    .view-subtitle {
-      max-width: 760px;
-      margin: 6px 0 0;
-      color: #7b8896;
-      font-size: 11px;
-      line-height: 1.6;
-    }
-
-    .view-acciones {
+    .view-actions {
       display: flex;
       flex-direction: column;
       align-items: flex-end;
@@ -119,7 +112,7 @@ const FILTROS_INICIALES: FiltrosReportes = {
     .exportar-error {
       margin: 0;
       color: #b42318;
-      font-size: 10px;
+      font-size: 12.5px;
     }
 
     .select-filter input[type='date'] {
@@ -127,7 +120,7 @@ const FILTROS_INICIALES: FiltrosReportes = {
       outline: 0;
       background: transparent;
       color: #536779;
-      font-size: 10px;
+      font-size: 12.5px;
       font-family: inherit;
     }
 
@@ -148,7 +141,7 @@ const FILTROS_INICIALES: FiltrosReportes = {
     .actualizando {
       margin: 0;
       color: #8d99a6;
-      font-size: 9.5px;
+      font-size: 12px;
     }
 
     @media (max-width: 720px) {
@@ -226,6 +219,25 @@ export class ReportesPage {
       .map((reporte) => reporte.codigoReporte)
       .filter((codigo): codigo is string => !!codigo);
   }
+
+  /** Orden local de la página visible. */
+  readonly orden = new OrdenTabla<Reporte>();
+
+  private readonly accesoresReporte: Record<string, (reporte: Reporte) => unknown> = {
+    tipo: (reporte) => reporte.tipo,
+    codigo: (reporte) => reporte.codigoReporte,
+    caso: (reporte) => reporte.codigoCaso,
+    responsable: (reporte) => reporte.responsable,
+    fecha: (reporte) => reporte.fecha,
+    region: (reporte) => reporte.region,
+    ubicacion: (reporte) => reporte.ubicacion,
+    titulo: (reporte) => reporte.titulo,
+  };
+
+  readonly filasVisibles = computed(() =>
+    this.orden.ordenar(this.reportes(), this.accesoresReporte),
+  );
+
   readonly estadoListado = this.listado.estado;
   readonly errorListado = this.listado.error;
 

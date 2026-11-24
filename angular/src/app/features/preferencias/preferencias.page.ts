@@ -187,20 +187,7 @@ function avisosIniciales(plataforma: object): PreferenciasAviso {
       gap: 16px;
     }
 
-    .view-head h1 {
-      margin: 0;
-      color: var(--ink);
-      font: 700 22px/1.3 var(--font-display);
-      letter-spacing: -0.65px;
-    }
 
-    .view-subtitle {
-      max-width: 760px;
-      margin: 6px 0 0;
-      color: var(--muted);
-      font-size: 11px;
-      line-height: 1.6;
-    }
 
     .pref-layout {
       display: grid;
@@ -218,7 +205,7 @@ function avisosIniciales(plataforma: object): PreferenciasAviso {
 
     .pref-hint {
       color: var(--muted);
-      font-size: 9.5px;
+      font-size: 12px;
     }
 
     /* Corrige el gris tenue de .detail-section > p (gana por encapsulación). */

@@ -1,13 +1,7 @@
 <section class="view-body" aria-labelledby="titulo-direccion">
   <header class="view-head">
     <div>
-      <p class="section-eyebrow">Alta Dirección · lectura ejecutiva</p>
       <h1 id="titulo-direccion">Resumen de Dirección</h1>
-      <p class="view-subtitle">
-        Panorama agregado de la conflictividad sectorial construido con los totales reales que
-        reporta el servidor en cada listado paginado. Base normativa: Guía §8.1.2.3 «Reportes de
-        clima social» y Anexo 2 «Reporte Regional de Conflictividad y Demandas».
-      </p>
     </div>
 
     <div class="view-actions">
@@ -78,9 +72,7 @@
   <section class="surface detail-section" aria-labelledby="titulo-desglose">
     <div class="surface-heading">
       <div>
-        <p class="section-eyebrow">Panorama de casos</p>
-        <h3 id="titulo-desglose">Desglose por prioridad, riesgo, temática y región</h3>
-        <p>{{ notaBase() }}</p>
+        <h3 id="titulo-desglose">Desglose por prioridad, riesgo y región</h3>
       </div>
     </div>
 
@@ -105,22 +97,6 @@
         <h3>Por riesgo</h3>
         <ul class="breakdown-list">
           @for (grupo of porRiesgo(); track grupo.etiqueta) {
-          <li>
-            <span>{{ grupo.etiqueta }}</span>
-            <span class="breakdown-bar"><i [style.width.%]="grupo.porcentaje"></i></span>
-            <span class="breakdown-count">
-              {{ grupo.total }} <small>{{ grupo.porcentaje }}%</small>
-            </span>
-          </li>
-          }
-        </ul>
-        <a class="link-button" routerLink="/casos">Abrir casos</a>
-      </div>
-
-      <div class="breakdown-card">
-        <h3>Por temática</h3>
-        <ul class="breakdown-list">
-          @for (grupo of porTematica(); track grupo.etiqueta) {
           <li>
             <span>{{ grupo.etiqueta }}</span>
             <span class="breakdown-bar"><i [style.width.%]="grupo.porcentaje"></i></span>
@@ -172,7 +148,7 @@
       Este resumen ordena datos operativos; no reemplaza el Reporte Regional de Conflictividad y
       Demandas (Anexo 2), que distingue hechos confirmados de percepciones y añade el perfil de
       actores y la relevancia de cada caso. La API no acepta filtro por nivel de conflicto, así que
-      el desglose se agrupa por prioridad, riesgo, temática y región con los totales del servidor.
+      el desglose se agrupa por prioridad, riesgo y región con los totales del servidor.
     </span>
   </div>
   }

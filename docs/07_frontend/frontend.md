@@ -3,7 +3,7 @@
 Este documento responde **una sola pregunta**: de todo lo acordado para la interfaz
 del sistema AVISA, ¿qué sigue pendiente y en qué pantalla se nota?
 
-**Fecha de corte:** 2026-11-23.
+**Fecha de corte:** 2026-11-24.
 **Dónde se construye:** la SPA Angular, en `angular/src/app`.
 **Dónde se dibuja:** `docs/07_frontend/mockups/`, con su índice en `mockups/index.html`.
 **De dónde sale:** del catálogo de 131 items. El detalle completo —hallazgos de base,
@@ -51,13 +51,17 @@ rellena una celda que la base no pueda sostener.
   /casos/sin-caso ·········· Demandas sin caso
   /casos/:codigo ··········· Ficha del caso
 /alertas ··················· Alertas tempranas
+/clima-social ·············· Clima social
+/reuniones ················· Reuniones
+/resultados ················ Resultados
 /compromisos ··············· Compromisos
 /documentos ················ Documentos
 /reportes ·················· Registro de reportes
-/papelera ·················· Papelera
+/archivo ··················· Archivo
 
 /directorio ················ Portada del directorio
   /directorio/actores ······ Actores
+  /directorio/personas ····· Actores (filtro personas)
   /directorio/organizaciones
   /directorio/instituciones
   /directorio/locales ······· Auditorios
@@ -70,8 +74,9 @@ rellena una celda que la base no pueda sostener.
 /preferencias ·············· Preferencias
 ```
 
-Son 22 rutas. El shell —cabecera, menú lateral y el botón «Registrar ▾»— no es una
-ruta y tiene su propio apartado al final.
+Son 26 rutas: 25 rutas hijas + `/acceso`; `/directorio/personas` comparte componente
+con `/directorio/actores`. El shell —cabecera, menú lateral y el botón «Registrar ▾»—
+no es una ruta y tiene su propio apartado al final.
 
 ---
 
@@ -81,11 +86,14 @@ Sólo las pantallas con algo pendiente. Lo más importante va primero.
 
 | Pantalla             | Pendientes | Lo más importante                                                        |
 | -------------------- | ---------: | ------------------------------------------------------------------------ |
-| Panorama territorial |          8 | Dibujar la capa real de puntos                                           |
-| Ficha del caso       |         10 | Edición por campo y documentos del caso                                  |
+| Panorama territorial |          5 | Dibujar la capa real de puntos                                           |
+| Ficha del caso       |         11 | Edición por campo y documentos del caso                                  |
 | Bandeja de trabajo   |          4 | Convertirla en tablero y persistir asignar/posponer                      |
 | Alertas tempranas    |          3 | Acciones de Alta Dirección                                               |
-| Compromisos          |          3 | Clasificación formal/verbal y adjuntos                                   |
+| Clima social         |          1 | El dato del reporte mensual                                              |
+| Reuniones            |          5 | Registro de reuniones con banderas y editor de ayuda memoria             |
+| Resultados           |          1 | Los productos documentales que agrupa                                    |
+| Compromisos          |          4 | Clasificación formal/verbal y adjuntos                                   |
 | Documentos           |          3 | Fragmentos, versiones y OCR                                              |
 | Resumen operativo    |          2 | Las tres dimensiones de la Guía                                          |
 | Casos                |          3 | Archivar, duplicados y matriz de demandas–intervenciones (import/export) |
@@ -99,7 +107,7 @@ Sólo las pantallas con algo pendiente. Lo más importante va primero.
 | Shell                |          1 | Registrar desde cualquier pantalla sin cambiar de ruta                   |
 | Transversal (todas)  |          9 | Permisos por territorio y pruebas                                        |
 
-**Sin pendientes de interfaz:** `/casos/sin-caso`, `/reportes`, `/papelera`,
+**Sin pendientes de interfaz:** `/casos/sin-caso`, `/reportes`, `/archivo`,
 `/directorio`, `/directorio/organizaciones`, `/directorio/instituciones` y `/ayuda`.
 En cada una se indica abajo si el hueco es de dato.
 
@@ -109,21 +117,21 @@ En cada una se indica abajo si el hueco es de dato.
 
 **Mockup:** `panorama-territorial.html` y su segundo estado `mapa-activos-radar-dpa.html`.
 Ya están hechos: las tarjetas sin textos de apoyo, «Regiones con al menos un caso»,
-«Alcance geográfico», el selector fijo, la columna ordenable, el cajón lateral de
-«Ver casos», la tabla de casos bajo el mapa y el vocabulario **latente / manifiesto**
-en las tarjetas, la columna de regiones y los casos priorizados, con los casos sin
-nivel declarados aparte.
+«Alcance geográfico», el selector de ámbito, la columna ordenable, la tabla de regiones
+bajo el mapa y sus enlaces a Casos (con `region`/`sinregion`, ámbito vigente y
+`abiertos=true`).
 
-| Item   | Qué falta                                                                                 | Por qué no está       | Mockup                        |
-| ------ | ----------------------------------------------------------------------------------------- | --------------------- | ----------------------------- |
-| 27, 53 | Leyenda, selector de capas, agrupación de puntos y filtro temporal sobre el mapa          | `Diseño`              | `mapa-activos-radar-dpa.html` |
-| 125    | Nube de los 13 456 puntos del KML: 13 229 derechos acuícolas y 227 sedes institucionales  | `Implementar`         | `mapa-activos-radar-dpa.html` |
-| 126    | Redes RADAR y los 31 desembarcaderos DPA, con símbolo propio y filtro                     | `Dato`                | `mapa-activos-radar-dpa.html` |
-| 127    | Estado de proyecto de cada DPA (etapa, expediente, avance)                                | `Dato`                | `mapa-activos-radar-dpa.html` |
-| 128    | Cargar los polígonos distritales en PostGIS (1 892 distritos, `UBIGEO` INEI)              | `Dato`                | —                             |
-| 129    | Coropletas por distrito sobre los polígonos, sin el rótulo «Mapa referencial»             | `Diseño` + `128`      | — (por dibujar)               |
-| 131    | Tasas por 100 000 habitantes (la población sólo como denominador)                         | `Dato` + `128`        | —                             |
-| 130    | Ubicar en el centroide de su distrito las sedes sin coordenada, rotuladas como «distrito» | `Implementar` + `128` | —                             |
+**Aplicado (2026-11-24).** El cajón lateral «Ver casos» y el vocabulario
+**latente / manifiesto** en tarjetas y columnas ya están en pantalla. Lo que sigue
+abierto es sólo el mapa de puntos (items 125–131).
+
+| Item   | Qué falta                                                                                    | Por qué no está | Mockup                        |
+| ------ | -------------------------------------------------------------------------------------------- | --------------- | ----------------------------- |
+| 27, 53 | Agrupación de puntos y filtro temporal sobre el mapa (leyenda y selector de capas ya hechos) | `Diseño`        | `mapa-activos-radar-dpa.html` |
+| 125    | Nube de los 13 456 puntos del KML: 13 229 derechos acuícolas y 227 sedes institucionales     | `Implementar`   | `mapa-activos-radar-dpa.html` |
+| 126    | Redes RADAR y los 31 desembarcaderos DPA, con símbolo propio y filtro                        | `Dato`          | `mapa-activos-radar-dpa.html` |
+| 127    | Estado de proyecto de cada DPA (etapa, expediente, avance)                                   | `Dato`          | `mapa-activos-radar-dpa.html` |
+| 130    | Asignar distrito a los 27 auditorios y ubicarlos en su centroide, rotulados «distrito»       | `Dato`          | —                             |
 
 **Lo que cambia el panorama.** La regla de latente/manifiesto ya está ratificada y no
 necesita ni columna nueva ni hechos públicos: **latente** = `Diferencia` + `Controversia`;
@@ -131,9 +139,19 @@ necesita ni columna nueva ni hechos públicos: **latente** = `Diferencia` + `Con
 nivel declarado, la etiqueta no se estima: se declara como «sin nivel». **Aplicada en
 pantalla** (2026-11-23): tarjetas, columna de regiones y tabla de casos priorizados.
 
-**El bloqueo del mapa.** Todo lo que usa geometría distrital (129, 130 y 131) espera la
-carga del item 128. Mientras tanto, la geometría existe como archivo
-(`gis/derived/distritos_capa.geojson`), pero no en la base.
+**Capa distrital cargada (2026-11-24).** El item 128 está hecho: `territorio.distrito`
+tiene **1 892 filas** con geometría (MultiPolygon 4326) y centroide (PointOnSurface), más
+la población censal de la capa. La regla no cambia: la población es **sólo denominador**
+(tasas por 100 000 habitantes), nunca un peso de riesgo.
+
+**Capa dibujada (2026-11-24).** Los items **129 y 131 están hechos**: el mapa pinta los
+polígonos distritales reales con coropleta por casos abiertos (relleno por `distritoUbigeo`,
+nunca por nombre), control «Límites distritales» con `aria-pressed`, leyenda con los tramos
+reales y el número de casos sin distrito, ficha territorial al pulsar un polígono (población
+con su procedencia y tasa por 100 000 con la fórmula escrita) y columna «Casos por 100 000
+hab.» en la tabla de regiones, con «—» cuando falta denominador. Se retiró el rótulo
+«sin ubigeo distrital». El **130 sigue pendiente de dato**: los 27 auditorios de
+`core.locales` no tienen `distrito_id`, así que no hay centroide que usar.
 
 **Nota de dato.** Las redes RADAR no tienen fuente cargada. Los 31 desembarcaderos, sí:
 ya están en el KML con nombre y distrito.
@@ -163,17 +181,19 @@ es esta ruta.
 ## Bandeja de trabajo · `/bandeja`
 
 **Mockup:** `bandeja-unificada.html`.
-Hoy son tres bloques: alertas pendientes, compromisos por vencer y demandas sin caso.
+Ya están hechos: una sola tabla ordenada por vencimiento, un filtro por tipo y los KPI
+(item 22).
 
 | Item    | Qué falta                                                                                      | Por qué no está | Mockup                   |
 | ------- | ---------------------------------------------------------------------------------------------- | --------------- | ------------------------ |
 | 111     | Convertirla en tablero: mapa, indicadores y resumen de casos, con la matriz de consulta debajo | `Implementar`   | `bandeja-unificada.html` |
-| 22      | Una sola lista ordenada por plazo, riesgo y revisión pendiente, con filtro por tipo            | `Implementar`   | `bandeja-unificada.html` |
 | 50      | Persistir asignación, posposición, finalización, fecha límite y responsable                    | `Dato`          | `bandeja-unificada.html` |
 | 68 · X4 | Traer aquí el indicador de completitud que se retiró del expediente                            | `API`           | —                        |
 
-Los contadores y el SLA se calculan desde esos datos. Sin el item 50 no hay bandeja
-individual: se declara, no se simula.
+La cola ordena hoy **la primera página de cada fuente** (5 filas por fuente): la API no
+tiene un listado único ordenado en servidor, y la pantalla lo declara. Los contadores y el
+SLA se calculan desde esos datos. Sin el item 50 no hay bandeja individual: se declara, no
+se simula.
 
 ---
 
@@ -184,56 +204,47 @@ Ya están hechos: el desplegable de estado con conteos, el de **Nivel de conflic
 el formato tarjetas/tabla, la búsqueda avanzada, las tarjetas a dos líneas, el filtro de
 **Naturaleza** y la vista previa del caso.
 
-| Item      | Qué falta                                                                            | Por qué no está | Mockup                            |
-| --------- | ------------------------------------------------------------------------------------ | --------------- | --------------------------------- |
-| 37, 21    | **Archivar** como transición visible, con anular y restaurar desde la ficha y motivo | `Implementar`   | `ficha-pestanas.html`             |
-| 71        | Aviso de duplicados al registrar, con opción de vincular al registro existente       | `API`           | —                                 |
-| — (nuevo) | **Matriz de demandas–intervenciones** por caso, con importación y exportación XLSX   | `API` + `Dato`  | `matriz-conflictividad-caso.html` |
+| Item      | Qué falta                                                                          | Por qué no está | Mockup                            |
+| --------- | ---------------------------------------------------------------------------------- | --------------- | --------------------------------- |
+| 71        | Aviso de duplicados al registrar, con opción de vincular al registro existente     | `API`           | —                                 |
+| — (nuevo) | **Matriz de demandas–intervenciones** por caso, con importación y exportación XLSX | `API` + `Dato`  | `matriz-conflictividad-caso.html` |
+
+**Ya está:** Archivar es una transición visible en la ficha (item 37), junto a anular y
+restaurar, que ya existían.
 
 **Matriz del equipo (lo nuevo).** El equipo compartió un Excel con varias filas por caso
 (demandas, acciones e hitos sobre el mismo eje) y quiere mover esa información **hacia y
 desde** AVISA. El mockup `matriz-conflictividad-caso.html` dibuja la matriz y la bandeja
-de importación; la anatomía del Excel, la regla de parseo y el contrato de endpoints están
-en [`MATRIZ_CONFLICTOS_EQUIPO.md`](MATRIZ_CONFLICTOS_EQUIPO.md).
+de importación; la anatomía del Excel, la regla de parseo, el mapeo y el contrato de
+endpoints están en [`MATRIZ_CONFLICTOS_EQUIPO.md`](MATRIZ_CONFLICTOS_EQUIPO.md).
 
-**Exportar sí; importar todavía no.** Verificado en Neon (corte 2026-11-23). Las dos
-mitades de la matriz **ya existen como vistas de `analytics`**, así que el export no
-necesita cambio de esquema:
+**Export: decidido y sencillo.** Un botón «Exportar» → XLSX con cuatro hojas (`Casos`,
+`Compromisos`, `Nudos`, `Sin datos`), apoyado en las vistas que ya existen
+(`analytics.vw_anexo_15_matriz_conflictividad` y
+`analytics.vw_anexo_14_seguimiento_compromisos`). **Falta un ajuste de vista**: ninguna
+trae `fecha_planificada` ni `fecha_real` (columnas V y W); hay que añadirlas a la vista,
+no sólo al export. Contrato en `MATRIZ_CONFLICTOS_EQUIPO.md §7.3`.
 
-- `analytics.vw_anexo_15_matriz_conflictividad` — una fila por **caso**, 15 columnas
-  (código, región, alcance, subsector, temática, responsable, nivel de conflicto, nivel de
-  riesgo, descripción del riesgo, prioridad, nombre, narración, alertas, actores, punto
-  focal).
-- `analytics.vw_anexo_14_seguimiento_compromisos` — una fila por **compromiso × hito**, 15
-  columnas (código de compromiso y de caso, región, provincia, distrito, alcance,
-  documento origen, fecha de inicio, temática, acción, área responsable, código y texto del
-  hito, estado, semáforo).
+**Import: planificado, pendiente de aplicar.** Las preguntas que lo bloqueaban están
+cerradas (`MATRIZ_CONFLICTOS_EQUIPO.md §9.1` y `§10`):
 
-Falta un ajuste: **ninguna de las dos trae `fecha_planificada` ni `fecha_real`**, las
-columnas V y W del Excel. Hay que añadirlas **a la vista**, no sólo al export. Con eso,
-exportar A..X con hoja «Sin datos» es un endpoint pequeño.
+- **Mapeo Excel → caso:** `core.mapa_matriz_excel` (migración 41) con 34 equivalencias; no
+  se comparan códigos.
+- **Responsable del hito:** `hitos_compromiso.responsable_usuario_id` / `responsable_texto`
+  (41).
+- **Catálogos:** `No cumplido` id 6 (41); riesgo de 4 valores (41, pendiente de
+  ratificación); la temática del equipo va a `casos.tematica_equipo` sin tocar
+  `cat_tematicas`.
+- **Nudos semanales:** `core.caso_nudo_critico` (43).
 
-Lo que el export no puede rellenar es contenido: el Excel trae 23 demandas, 56 compromisos
-y 111 hitos; AVISA tiene **325 demandas** (de otra fuente, `DEM-2026-XXXX`), **8
-compromisos** y **12 hitos**, y esos 8 están en **3 casos**. Un export hoy sale 7–9× más
-corto que el archivo del equipo.
+Nada de esto existe en la base viva hasta aplicar **41 → 42 → 43**; el importador
+(`scripts/matriz/importar_matriz.py`) se niega a `--apply` con bloqueantes abiertos.
 
-**Lo que bloquea el import.** Dos decisiones que no son de pantalla:
-
-1. **Mapeo Excel → `core.casos.codigo_caso`**: 2 de 31 códigos coinciden y ambos apuntan a
-   otro caso.
-2. **Responsable del hito**: `core.hitos_compromiso` no tiene columna;
-   `core.compromisos.unidad_responsable_id` es área, no persona.
-
-Y tres catálogos que no cuadran: `cat_estados_hito` no tiene **«No Cumplido»** (43 filas
-del Excel), `cat_tematicas` no cubre «Recursos y Regulación» (18), «Socio-Ambiental» ni
-«Mesas de Conflictos», y `cat_niveles_riesgo` tiene 3 valores frente a los 4 del equipo.
-
-**Lo que AVISA ya tiene.** El **3P** (`problema_3p`, `propuesta_3p`, `pedido_3p`) está en
-`core.demandas` y **no** en el Excel; `core.casos.link_reporte_pdf` puede alimentar la
-columna G (Canva) que el front declara no disponible; `fecha_ultima_actualizacion` cubre la
-fecha, no el estado «Actualizado / Pendiente / No aplica». Siguen sin tabla los **nudos
-críticos semanales** y las **capacidades 1–5 / postura** por actor.
+**Lo que el export no puede rellenar es contenido.** El Excel trae 23 demandas, 56
+compromisos y 111 hitos; AVISA tiene **325 demandas** (de otra fuente, `DEM-2026-XXXX`),
+**8 compromisos** y **12 hitos**, y esos 8 están en **3 casos**. Un export hoy sale 7–9×
+más corto que el archivo del equipo. El **3P** está en `core.demandas` y **no** en el
+Excel; las **capacidades 1–5** y la postura por actor siguen sin columna.
 
 **Nota de despliegue.** El filtro `nivel` es superficie nueva de API: hasta que se
 redespliegue el servidor, un backend antiguo lo ignora en silencio y la lista no se
@@ -249,20 +260,22 @@ una decisión de OAIPCS caso por caso, no un pendiente de pantalla.
 **Mockup:** `ficha-pestanas.html` y `ficha-reportes-monitoreo-documentos.html`.
 Ya están hechos: la retirada de «Próximo paso», «Ruta de atención» y «Demandas» de
 relaciones; el expediente de cuatro piezas; «Guardar PDF» para el perfil no
-administrador; el riel de relaciones; la tabla de actores con exportación local.
+administrador; el riel de relaciones; la tabla de actores con exportación local; la
+edición por campo con Cancelar/Guardar (item 18) y Archivar/Reabrir como transición
+visible (item 37).
 
-| Item   | Qué falta                                                                                     | Por qué no está        | Mockup                                     |
-| ------ | --------------------------------------------------------------------------------------------- | ---------------------- | ------------------------------------------ |
-| 11     | Acción para recalcular el nivel de riesgo desde la ficha                                      | `API`                  | —                                          |
-| 12     | **Apellidos** y **nombres** separados, y teléfono o móvil por actor                           | `Dato`                 | —                                          |
-| 15     | Categoría **AT / RR / PAR** en las alertas vinculadas                                         | `Dato`                 | —                                          |
-| 16     | Pestaña **Compromisos**, con la clasificación progresivo/parcial, operativo o condicionado    | `Implementar` + `Dato` | `ficha-pestanas.html`                      |
-| 18     | Edición por campo dentro de la ficha, con Cancelar y Guardar cambios                          | `Implementar`          | —                                          |
-| 40     | Alta y desvinculación de actores desde la ficha                                               | `API`                  | —                                          |
-| 41     | Pestañas **Reuniones**, **Productos/Envíos** e **Historial/Auditoría**                        | `API`                  | `ficha-pestanas.html`                      |
-| 97     | «Caso de análisis (Canva)»: hoy no existe como enlace ni como campo; se declara no disponible | `Diseño`               | `ficha-pestanas.html`                      |
-| 98, 99 | Exportar actores con organización y teléfono (Excel, PDF y WhatsApp)                          | `Dato`                 | `ficha-pestanas.html`                      |
-| 103    | Bloques **Reportes de monitoreo** y **Documentos del caso** (PRODUCE y normativa)             | `Diseño`               | `ficha-reportes-monitoreo-documentos.html` |
+| Item      | Qué falta                                                                                                                                                                 | Por qué no está | Mockup                                     |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- | ------------------------------------------ |
+| 11        | Acción para recalcular el nivel de riesgo desde la ficha                                                                                                                  | `API`           | —                                          |
+| 12        | **Apellidos** y **nombres** separados, y teléfono o móvil por actor                                                                                                       | `Dato`          | —                                          |
+| 15        | Categoría **AT / RR / PAR** en las alertas vinculadas                                                                                                                     | `Dato`          | —                                          |
+| 16        | Pestaña **Compromisos**, con la clasificación progresivo/parcial, operativo o condicionado (ya en el esquema)                                                             | `Implementar`   | `ficha-pestanas.html`                      |
+| 40        | Alta y desvinculación de actores desde la ficha                                                                                                                           | `API`           | —                                          |
+| 41        | Pestañas **Reuniones**, **Productos/Envíos** e **Historial/Auditoría**; en Reuniones, las 4 marcas (asistencia, acta/AM, relatoría, publicación) y las reuniones sin caso | `API`           | `ficha-pestanas.html`                      |
+| 97        | Separar **análisis de caso (Canva)** de los **documentos relacionados**: `link_analisis_caso` (41) y documentos del caso con autor (41)                                   | `Implementar`   | `ficha-pestanas.html`                      |
+| 98, 99    | Exportar actores con organización y teléfono (Excel, PDF y WhatsApp)                                                                                                      | `Dato`          | `ficha-pestanas.html`                      |
+| 103       | Bloques **Reportes de monitoreo** y **Documentos del caso** (PRODUCE y normativa)                                                                                         | `Diseño`        | `ficha-reportes-monitoreo-documentos.html` |
+| — (nuevo) | Bloque **Nudos de la semana**: 8 semanas con nudo y seguimiento, con cobertura declarada                                                                                  | `Implementar`   | —                                          |
 
 **Lo que ya está y no se toca.** La ventana emergente de la tarjeta, el mapa de actores
 como tabla y la exportación local funcionan; lo que falta es el dato de contacto, no la
@@ -284,13 +297,54 @@ vincularlas es una decisión de OAIPCS, no una pantalla.
 
 **Mockup:** `alertas-operativas.html`.
 Ya están hechos los filtros por código, prioridad, estado, riesgo y «Sin caso asignado»,
-los anchos de columna, la prioridad con plazo y la exportación por perfil.
+los anchos de columna, la prioridad con plazo, la exportación por perfil y los controles de
+revisión del item 23 (confirmación al aprobar, deshacer y visibilidad de la derivación).
 
-| Item | Qué falta                                                                                                 | Por qué no está | Mockup                    |
-| ---- | --------------------------------------------------------------------------------------------------------- | --------------- | ------------------------- |
-| 23   | Confirmación al aprobar, reapertura de una alerta descartada, deshacer y visibilidad de la derivación     | `Implementar`   | —                         |
-| 38   | Motivo de descarte, búsqueda de duplicados, adjuntos y conciliación con el documento original             | `API`           | —                         |
-| 105  | Columna **Acciones** para Alta Dirección (Aprobar · Solicitar modificación · Anular) y envío por WhatsApp | `API`           | `alertas-operativas.html` |
+| Item      | Qué falta                                                                                                 | Por qué no está | Mockup                    |
+| --------- | --------------------------------------------------------------------------------------------------------- | --------------- | ------------------------- |
+| 38        | Motivo de descarte, búsqueda de duplicados, adjuntos y conciliación con el documento original             | `API`           | —                         |
+| 105       | Columna **Acciones** para Alta Dirección (Aprobar · Solicitar modificación · Anular) y envío por WhatsApp | `API`           | `alertas-operativas.html` |
+| — (nuevo) | Archivar alertas sin caso, con motivo, distinto de anular                                                 | `Implementar`   | —                         |
+
+**Nota de archivo.** El esquema ya tiene `archivado_en`/`motivo_archivo` en
+`core.alertas_tempranas`: archivar no es anular.
+
+---
+
+## Clima social · `/clima-social`
+
+Reporte mensual de clima social por período y región, con autor y archivo.
+Ruta viva con componente real (`ClimaSocialPage`); mockup por dibujar.
+
+| Item | Qué falta                                                      | Por qué no está | Mockup |
+| ---- | -------------------------------------------------------------- | --------------- | ------ |
+| 116  | El dato del reporte mensual (período, región, autor y archivo) | `Dato`          | —      |
+
+---
+
+## Reuniones · `/reuniones`
+
+Registro de reuniones de diálogo.
+Ruta viva con componente real (`ReunionesPage`); mockup `reuniones-ayuda-memoria.html`.
+
+| Item           | Qué falta                                                                                                                 | Por qué no está | Mockup                         |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------- | --------------- | ------------------------------ |
+| 72–74, 77, 117 | Registro de reuniones con banderas (asistencia, AM, relatoría, publicación), reuniones sin caso y editor de ayuda memoria | `API`           | `reuniones-ayuda-memoria.html` |
+| — (nuevo)      | Archivar reuniones sin caso, con motivo, distinto de anular                                                               | `Implementar`   | —                              |
+
+**Nota de archivo.** El esquema ya tiene `archivado_en`/`motivo_archivo` en
+`core.reuniones_dialogo`: archivar no es anular.
+
+---
+
+## Resultados · `/resultados`
+
+Documentos que cierran la intervención: actas de acuerdo, ayudas memoria por temática
+y relatoría de las reuniones, con pestañas y enlace a `/documentos`.
+Ruta viva con componente real (`ResultadosPage`); sin mockup propio.
+
+**Pendiente.** Los productos documentales que agrupa. No tiene item propio en el
+catálogo: depende de los productos de Reuniones y de `/documentos`.
 
 ---
 
@@ -300,11 +354,12 @@ los anchos de columna, la prioridad con plazo y la exportación por perfil.
 Ya están hechos el calendario, el alta desde la lista, el estado calculado y la anulación
 con motivo.
 
-| Item | Qué falta                                                                                           | Por qué no está | Mockup |
-| ---- | --------------------------------------------------------------------------------------------------- | --------------- | ------ |
-| 24   | Clasificación **formal / verbal**, recordatorios, adjuntos como archivos y popup cuando no hay hito | `Dato`          | —      |
-| 39   | Recordatorios e historial visible por compromiso                                                    | `API`           | —      |
-| 123  | Dimensión «asumido por el Señor Ministro», separada de la unidad responsable                        | `Dato`          | —      |
+| Item      | Qué falta                                                                                                              | Por qué no está | Mockup |
+| --------- | ---------------------------------------------------------------------------------------------------------------------- | --------------- | ------ |
+| 24        | Clasificación **formal / verbal** (ya en el esquema); recordatorios, adjuntos como archivos y popup cuando no hay hito | `Implementar`   | —      |
+| 39        | Recordatorios e historial visible por compromiso                                                                       | `API`           | —      |
+| 123       | Dimensión «asumido por el Señor Ministro» (ya en el esquema), separada de la unidad responsable                        | `Implementar`   | —      |
+| — (nuevo) | Historial de **nudos críticos** del compromiso: semana, nudo, seguimiento, estado y autor                              | `Implementar`   | —      |
 
 **Nota de dato.** El calendario se pinta vacío porque los 8 compromisos no tienen
 `fecha_vencimiento` y el único hito con fecha está cumplido. Es un hueco de carga, no
@@ -331,13 +386,14 @@ documento.
 Sin pendientes de interfaz. La pantalla lista y filtra los reportes registrados.
 
 **Otra pantalla.** El dashboard analítico (item 51) no es esta vista: no tiene ruta
-todavía. Ver «Pantallas que aún no tienen ruta».
+todavía. Ver «Pantallas sin ruta o sin cerrar».
 
 ---
 
-## Papelera · `/papelera`
+## Archivo · `/archivo`
 
 Sin pendientes. Lista los registros anulados con su fecha y permite restaurar.
+`/papelera` redirige a `/archivo`.
 
 ---
 
@@ -352,6 +408,9 @@ Sin pendientes. La portada con tarjetas por matriz ya está hecha (item 108).
 **Mockup:** `directorio-crud.html`.
 Ya están hechos la lista temporal entre filtros, el padrón de asistencia en CSV, la
 edición de atributos públicos, la búsqueda por territorio y el detalle en panel lateral.
+
+El enlace del menú «Actores» abre `/directorio/personas` (mismo componente, filtro fijo
+de personas); `/directorio/actores` es la matriz completa fuera del menú.
 
 | Item | Qué falta                                                                                | Por qué no está | Mockup                 |
 | ---- | ---------------------------------------------------------------------------------------- | --------------- | ---------------------- |
@@ -406,11 +465,14 @@ enlazada al listado filtrado.
 
 ## Inicio de sesión · `/acceso`
 
-| Item | Qué falta                                                              | Por qué no está             | Mockup |
-| ---- | ---------------------------------------------------------------------- | --------------------------- | ------ |
-| 48   | Expiración por inactividad; segundo factor sólo tras definir proveedor | `Implementar` · `Bloqueado` | —      |
+| Item | Qué falta                                                     | Por qué no está | Mockup |
+| ---- | ------------------------------------------------------------- | --------------- | ------ |
+| 48   | Sólo el segundo factor; la expiración por inactividad ya está | `Bloqueado`     | —      |
 
 La sesión ya caduca a las 8 h, el login va contra la base y el cierre de sesión existe.
+La **inactividad** ya expira a los 30 minutos, avisa en el último minuto con «Seguir en
+sesión» y se coordina entre pestañas; al expirar lleva a `/acceso?motivo=inactividad`. El
+**segundo factor** sigue bloqueado hasta definir proveedor y flujo institucional.
 
 ---
 
@@ -427,12 +489,14 @@ lista pre-filtrada porque no tienen ficha propia.
 
 ## Centro de notificaciones · `/notificaciones`
 
-| Item | Qué falta                                             | Por qué no está | Mockup |
-| ---- | ----------------------------------------------------- | --------------- | ------ |
-| 31   | Marcar como leída y el contador o punto de la campana | `API`           | —      |
+| Item | Qué falta                                     | Por qué no está | Mockup |
+| ---- | --------------------------------------------- | --------------- | ------ |
+| 31   | El punto o contador de la campana en el shell | `API`           | —      |
 
-La pantalla ya existe con categoría, estado y fecha. El punto de la campana se retiró a
-propósito: sin `PATCH` ni conteo, un indicador sería falso.
+La pantalla muestra categoría, estado y fecha, **marca y desmarca lectura** por fila (`PATCH
+/api/v1/notifications/{id}`), resalta «Sin leer», lleva el contador «N sin leer» y filtra por
+estado en la URL. El `GET` acepta `?estado=` y `?estado=pendiente&pageSize=1` da el conteo.
+El punto de la campana sigue ausente porque `layouts/shell/**` lo edita otro proceso.
 
 ---
 
@@ -478,9 +542,9 @@ Pendientes que no pertenecen a una vista concreta.
 | Item     | Qué falta                                                                                           | Por qué no está |
 | -------- | --------------------------------------------------------------------------------------------------- | --------------- |
 | 29       | Rango de fechas compartido (7/30/90 días y personalizado) entre vistas y exportaciones              | `Implementar`   |
-| 32       | Pruebas de formularios, filtros, permisos y transiciones; auditoría de contraste                    | `Implementar`   |
+| 32       | Pruebas de formularios; corregir los contrastes AA detectados y auditar el tema oscuro              | `Implementar`   |
 | 35       | Recorte territorial real por región; hoy el alcance devuelve siempre «todo»                         | `Bloqueado`     |
-| 36       | Usar el ubigeo como clave donde todavía se casa por nombre de región, y normalizar tildes           | `Implementar`   |
+| 36       | Usar el ubigeo como clave donde todavía se casa por nombre de región                                | `Implementar`   |
 | 42, 43   | Registrar en auditoría cada descarga de datos sensibles                                             | `API`           |
 | 57       | Series temporales, aging y zona horaria para dashboards y bandeja                                   | `Dato`          |
 | 66       | Un descriptor por entidad que genere los formularios y lea los catálogos de la API                  | `Implementar`   |
@@ -493,24 +557,25 @@ permisos y en la seguridad por fila.
 
 ---
 
-## Pantallas que aún no tienen ruta
+## Pantallas sin ruta o sin cerrar
 
 Piezas acordadas que no están en el menú. Cada una necesita decidir primero si se
 convierte en pantalla propia o en una pestaña de otra.
 
-| Pantalla                  | Items          | Qué falta                                                                                                                                                                                                  | Por qué no está  | Mockup                            |
-| ------------------------- | -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------- | --------------------------------- |
-| Dashboard analítico       | 51, 57         | Biblioteca de gráficos dibujada; falta el endpoint de agregados y la serie histórica                                                                                                                       | `Diseño` + `API` | `dashboard-analitico.html`        |
-| ETL de tres pestañas      | 58–62, 86      | Ejecución, fuentes e historial con lector real, pipeline observable y conciliación                                                                                                                         | `API`            | `etl-tres-pestanas.html`          |
-| Bandeja RED-RADAR         | 76             | Cola de señales con triage, descarte con motivo y «convertir en alerta»                                                                                                                                    | `Dato`           | `bandeja-red-radar.html`          |
-| Autoridades y agendas     | 114            | Prefectos, subprefectos, sectoristas PCM, extensionistas, alcaldes y direpros                                                                                                                              | `Dato`           | — (por dibujar)                   |
-| Clima social              | 116            | Reporte mensual externo por período y región, con autor y archivo                                                                                                                                          | `Dato`           | — (por dibujar)                   |
-| Perfil territorial        | 119–124        | Catálogo de artes de pesca, OSPA por caleta, demandas por OSPA y región × recurso                                                                                                                          | `Dato`           | `perfil-territorial.html`         |
-| Reuniones y ayuda memoria | 72–74, 77, 117 | Registro de reuniones con banderas (asistencia, AM, relatoría, publicación) y editor de ayuda memoria                                                                                                      | `API`            | `reuniones-ayuda-memoria.html`    |
-| Gobierno de sugerencias   | 87             | Bandeja de propuestas automáticas, diff contra el registro y lecciones aprendidas                                                                                                                          | `Diseño`         | `gobierno-sugerencias.html`       |
-| Matriz de conflictividad  | — (nuevo)      | Matriz de demandas–intervenciones por caso, como pestaña de la ficha. Export viable hoy leyendo las vistas 14/15 (con V/W añadidas a la vista); import bloqueado por mapeo de casos y responsable del hito | `API` + `Dato`   | `matriz-conflictividad-caso.html` |
-| Envíos y auditoría        | 55             | Vistas de envíos con acuse y auditoría consultable                                                                                                                                                         | `Diseño`         | —                                 |
-| Administración            | 56             | Catálogos, unidades, roles, parámetros y usuarios, con cambios auditados                                                                                                                                   | `Diseño`         | —                                 |
+Ya tienen ruta: Clima social (`/clima-social`), Reuniones (`/reuniones`) y Resultados
+(`/resultados`); sus pendientes están en sus secciones. Siguen sin ruta las demás.
+
+| Pantalla                 | Items     | Qué falta                                                                                                                                                                                                                 | Por qué no está  | Mockup                            |
+| ------------------------ | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------- | --------------------------------- |
+| Dashboard analítico      | 51, 57    | Biblioteca de gráficos dibujada; falta el endpoint de agregados y la serie histórica                                                                                                                                      | `Diseño` + `API` | `dashboard-analitico.html`        |
+| ETL de tres pestañas     | 58–62, 86 | Ejecución, fuentes e historial con lector real, pipeline observable y conciliación                                                                                                                                        | `API`            | `etl-tres-pestanas.html`          |
+| Bandeja RED-RADAR        | 76        | Cola de señales con triage, descarte con motivo y «convertir en alerta»                                                                                                                                                   | `Dato`           | `bandeja-red-radar.html`          |
+| Autoridades y agendas    | 114       | Prefectos, subprefectos, sectoristas PCM, extensionistas, alcaldes y direpros                                                                                                                                             | `Dato`           | — (por dibujar)                   |
+| Perfil territorial       | 119–124   | Catálogo de artes de pesca, OSPA por caleta, demandas por OSPA y región × recurso                                                                                                                                         | `Dato`           | `perfil-territorial.html`         |
+| Gobierno de sugerencias  | 87        | Bandeja de propuestas automáticas, diff contra el registro y lecciones aprendidas                                                                                                                                         | `Diseño`         | `gobierno-sugerencias.html`       |
+| Matriz de conflictividad | — (nuevo) | Matriz de demandas–intervenciones por caso, como pestaña de la ficha. Export sencillo (4 hojas) sobre las vistas 14/15 con V/W añadidas; import planificado en las migraciones 41–43 (`MATRIZ_CONFLICTOS_EQUIPO.md §9.1`) | `API` + `Dato`   | `matriz-conflictividad-caso.html` |
+| Envíos y auditoría       | 55        | Vistas de envíos con acuse y auditoría consultable                                                                                                                                                                        | `Diseño`         | —                                 |
+| Administración           | 56        | Catálogos, unidades, roles, parámetros y usuarios, con cambios auditados                                                                                                                                                  | `Diseño`         | —                                 |
 
 **Nota de dato.** Las fuentes de tres de estas pantallas no tienen masa crítica:
 `dim_autoridades` tiene 2 filas, clima social 7 y 6, y el puente caso–recurso 0. El
@@ -556,6 +621,7 @@ salida es un documento, un trabajo en lote o un método.
 | X4    | La completitud sale del expediente y se muestra en bandeja y dirección.                                                                                           |
 | X5    | «Demandas sin caso» sale de la barra de Casos y vive en su ruta propia.                                                                                           |
 | X6    | Dirección y Secretaría General ven ambos subsectores; cada Vice-ministerio, sólo el suyo. Es ámbito de sesión.                                                    |
+| X7    | La temática no se muestra en la interfaz (2026-11-24). Se conserva en la base porque el segmento temático está impreso en `codigo_caso`.                          |
 
 ---
 

@@ -3,13 +3,27 @@
 -- con el modelo de datos del esquema `core`.
 --
 -- Fecha: 2026-11-24
--- Estado: PROPUESTA, no ejecutada. Requiere revisión de OAIPCS antes de aplicar.
+-- Estado: APLICABLE salvo la sección 5, que se aplaza hasta la ratificación de
+--         OAIPCS. Todo lo demás es aditivo y lo necesita el importador de la
+--         matriz (scripts/matriz/importar_matriz.py).
+--
+-- Sección 5 aplazada (2026-11-23)
+-- -------------------------------
+-- La sección 5 renombra core.cat_niveles_riesgo (Moderado -> Intermedio,
+-- Alto -> Inminente) y siembra «Crítico». Ese renombrado rompe la SPA —que
+-- compara los literales «Moderado» y «Alto»— y la equivalencia propuesta exige
+-- ratificación de OAIPCS; por eso el bloque queda COMENTADO. El resto de la
+-- migración (secciones 1–4 y 6–10, más la semilla del mapa) sí se aplica.
+-- Mientras siga aplazada no existe la fila «Crítico» (id 4) y un valor «Crítico»
+-- del Excel hará fallar la FK de core.casos.nivel_riesgo_inicial_id; esa fila se
+-- incorpora al ratificar, no antes.
 --
 -- Reglas de esta migración:
 --   * ADITIVA: no elimina ni renombra columnas/tablas existentes.
---   * NO toca core.cat_tematicas (6 filas, se respeta íntegramente). Decisión
---     del 2026-11-24: el vocabulario temático del equipo se guarda como texto
---     libre (tematica_equipo), no se fuerza al catálogo.
+--   * NO añade vocabulario temático: decisión del 2026-11-24 es eliminar la
+--     temática de todo el sistema. Las columnas heredadas tematica_id quedan
+--     marcadas como obsoletas en la migración 44, no se replican en tablas
+--     nuevas ni se añaden columnas tematica_equipo.
 --   * IDEMPOTENTE: puede re-ejecutarse sin efectos colaterales
 --     (IF NOT EXISTS / IF EXISTS / DO $$ guards / ON CONFLICT DO NOTHING).
 --   * NO carga datos de negocio: sólo estructura + semilla de mapeo.
@@ -125,51 +139,61 @@ COMMENT ON TABLE core.cat_estados_hito IS
     'Estado de avance de un hito de compromiso. Registrado, En ejecución y Paralizado son estados de trabajo; Cumplido, No cumplido y Desestimado cierran el hito. «No cumplido» se añadió el 2026-11-24 porque el equipo lo usa en 43 filas de su matriz.';
 
 -- ============================================================================
--- 5. core.cat_niveles_riesgo: cuatro niveles con vocabulario de la Guía
+-- 5. core.cat_niveles_riesgo: APLAZADA — este bloque NO se aplica (2026-11-23)
+--
 --    Antes: 1 Bajo · 2 Moderado · 3 Alto.
---    Maestros define exactamente cuatro:
---      Bajo (inicial y sin protestas) / Intermedio (acciones públicas de
---      protestas) / Inminente (Escala por decisión o hecho) / Crítico
---      (violencia, bloqueos, etc).
---    La equivalencia Moderado=Intermedio y Alto=Inminente es una PROPUESTA
---    derivada de la hoja Maestros: requiere ratificación de OAIPCS.
+--    Maestros define exactamente cuatro: Bajo (inicial y sin protestas) /
+--    Intermedio (acciones públicas de protestas) / Inminente (escala por
+--    decisión o hecho) / Crítico (violencia, bloqueos, etc.).
+--
+--    POR QUÉ QUEDA COMENTADA: renombra Moderado -> Intermedio y Alto -> Inminente
+--    y siembra «Crítico». El renombrado rompe la SPA, que compara los literales
+--    `Moderado` y `Alto`, y la equivalencia propuesta exige ratificación de
+--    OAIPCS. No se ejecuta nada de este bloque hasta esa ratificación; el resto
+--    de la migración (secciones 1–4 y 6–10, más la semilla del mapa) SÍ se
+--    aplica y es lo que necesita el importador.
+--
+--    CONSECUENCIA DECLARADA: mientras esto siga aplazado, no existe la fila
+--    «Crítico» (id 4) en core.cat_niveles_riesgo. Un valor «Crítico» del Excel se
+--    traduce a nivel_riesgo_inicial_id = 4 y falla la FK de core.casos. Esa fila
+--    se añade al ratificar la sección, no antes.
+--
+-- ALTER TABLE core.cat_niveles_riesgo
+--     ADD COLUMN IF NOT EXISTS descripcion   text,
+--     ADD COLUMN IF NOT EXISTS codigo_previo varchar(30);
+--
+-- UPDATE core.cat_niveles_riesgo
+-- SET codigo_previo = codigo,
+--     codigo        = 'Intermedio'
+-- WHERE id = 2 AND codigo = 'Moderado';
+--
+-- UPDATE core.cat_niveles_riesgo
+-- SET codigo_previo = codigo,
+--     codigo        = 'Inminente'
+-- WHERE id = 3 AND codigo = 'Alto';
+--
+-- UPDATE core.cat_niveles_riesgo SET descripcion = 'Inicial y sin protestas'        WHERE id = 1 AND descripcion IS NULL;
+-- UPDATE core.cat_niveles_riesgo SET descripcion = 'Acciones públicas de protestas' WHERE id = 2 AND descripcion IS NULL;
+-- UPDATE core.cat_niveles_riesgo SET descripcion = 'Escala por decisión o hecho'    WHERE id = 3 AND descripcion IS NULL;
+--
+-- DO $$
+-- BEGIN
+--     IF NOT EXISTS (SELECT 1 FROM core.cat_niveles_riesgo WHERE id = 4) THEN
+--         INSERT INTO core.cat_niveles_riesgo (id, codigo, orden, descripcion)
+--         VALUES (4, 'Crítico', 4, 'Violencia, bloqueos, etc.');
+--     END IF;
+-- END $$;
+--
+-- COMMENT ON TABLE core.cat_niveles_riesgo IS
+--     'Niveles de riesgo según la hoja Maestros del equipo (4 niveles). La equivalencia con los códigos anteriores (Moderado=Intermedio, Alto=Inminente) es una propuesta que requiere ratificación de OAIPCS.';
+-- COMMENT ON COLUMN core.cat_niveles_riesgo.descripcion IS
+--     'Texto literal del nivel tal como lo escribe la hoja Maestros.';
+-- COMMENT ON COLUMN core.cat_niveles_riesgo.codigo_previo IS
+--     'Código anterior al renombrado; conserva la trazabilidad de la equivalencia.';
 -- ============================================================================
-ALTER TABLE core.cat_niveles_riesgo
-    ADD COLUMN IF NOT EXISTS descripcion   text,
-    ADD COLUMN IF NOT EXISTS codigo_previo varchar(30);
-
-UPDATE core.cat_niveles_riesgo
-SET codigo_previo = codigo,
-    codigo        = 'Intermedio'
-WHERE id = 2 AND codigo = 'Moderado';
-
-UPDATE core.cat_niveles_riesgo
-SET codigo_previo = codigo,
-    codigo        = 'Inminente'
-WHERE id = 3 AND codigo = 'Alto';
-
-UPDATE core.cat_niveles_riesgo SET descripcion = 'Inicial y sin protestas'        WHERE id = 1 AND descripcion IS NULL;
-UPDATE core.cat_niveles_riesgo SET descripcion = 'Acciones públicas de protestas' WHERE id = 2 AND descripcion IS NULL;
-UPDATE core.cat_niveles_riesgo SET descripcion = 'Escala por decisión o hecho'    WHERE id = 3 AND descripcion IS NULL;
-
-DO $$
-BEGIN
-    IF NOT EXISTS (SELECT 1 FROM core.cat_niveles_riesgo WHERE id = 4) THEN
-        INSERT INTO core.cat_niveles_riesgo (id, codigo, orden, descripcion)
-        VALUES (4, 'Crítico', 4, 'Violencia, bloqueos, etc.');
-    END IF;
-END $$;
-
-COMMENT ON TABLE core.cat_niveles_riesgo IS
-    'Niveles de riesgo según la hoja Maestros del equipo (4 niveles). La equivalencia con los códigos anteriores (Moderado=Intermedio, Alto=Inminente) es una propuesta que requiere ratificación de OAIPCS.';
-COMMENT ON COLUMN core.cat_niveles_riesgo.descripcion IS
-    'Texto literal del nivel tal como lo escribe la hoja Maestros.';
-COMMENT ON COLUMN core.cat_niveles_riesgo.codigo_previo IS
-    'Código anterior al renombrado; conserva la trazabilidad de la equivalencia.';
 
 -- ============================================================================
--- 6. core.casos: estado de actualización, riesgo inicial, temática de equipo
---    y enlace de análisis.
+-- 6. core.casos: estado de actualización, riesgo inicial y enlace de análisis.
 --
 --    link_reporte_pdf mezclaba dos cosas distintas: el enlace del análisis de
 --    caso (Canva) y los documentos relacionados adicionales. Se separan:
@@ -187,15 +211,13 @@ ALTER TABLE core.casos
 
 ALTER TABLE core.casos
     ADD COLUMN IF NOT EXISTS nivel_riesgo_inicial_id smallint REFERENCES core.cat_niveles_riesgo(id),
-    ADD COLUMN IF NOT EXISTS tematica_equipo        varchar(120),
     ADD COLUMN IF NOT EXISTS link_analisis_caso     varchar(500);
 
 COMMENT ON COLUMN core.casos.estado_actualizacion IS
     'Estado de actualización del libro para este caso, tal como lo marca el equipo: Actualizado, En proceso, Pendiente o No aplica. Corresponde a la columna H del Excel, que no es una fecha.';
 COMMENT ON COLUMN core.casos.nivel_riesgo_inicial_id IS
     'Nivel de riesgo inicial del caso; se compara con nivel_riesgo_id (el actual) para mostrar la evolución.';
-COMMENT ON COLUMN core.casos.tematica_equipo IS
-    'Temática según la clasificación del equipo (texto libre). Complementa a tematica_id sin forzar core.cat_tematicas.';
+
 COMMENT ON COLUMN core.casos.link_analisis_caso IS
     'Enlace al análisis del caso (Canva). Sustituye al uso de link_reporte_pdf.';
 COMMENT ON COLUMN core.casos.link_reporte_pdf IS
@@ -229,15 +251,14 @@ COMMENT ON FUNCTION core.casos_touch_actualizacion() IS
     'Mantiene core.casos.fecha_ultima_actualizacion al día en cada UPDATE real de la fila.';
 
 -- ============================================================================
--- 8. core.compromisos: vínculo a la demanda, punto focal y temática de equipo
+-- 8. core.compromisos: vínculo a la demanda y punto focal
 --    En el Excel el punto focal se declara por acción; en la base vivía sólo
 --    por caso (core.casos.punto_focal_usuario_id). Aquí se baja al compromiso.
 -- ============================================================================
 ALTER TABLE core.compromisos
     ADD COLUMN IF NOT EXISTS demanda_id             uuid REFERENCES core.demandas(id),
     ADD COLUMN IF NOT EXISTS punto_focal_usuario_id uuid REFERENCES core.usuarios(id),
-    ADD COLUMN IF NOT EXISTS punto_focal_texto      varchar(200),
-    ADD COLUMN IF NOT EXISTS tematica_equipo        varchar(120);
+    ADD COLUMN IF NOT EXISTS punto_focal_texto      varchar(200);
 
 COMMENT ON COLUMN core.compromisos.demanda_id IS
     'Demanda del caso que este compromiso atiende. Permite ligar demanda -> compromiso -> área responsable -> documentos.';
@@ -245,8 +266,7 @@ COMMENT ON COLUMN core.compromisos.punto_focal_usuario_id IS
     'Punto focal del compromiso, cuando es un usuario de AVISA. En el Excel este dato es por acción, no por caso.';
 COMMENT ON COLUMN core.compromisos.punto_focal_texto IS
     'Punto focal en texto libre cuando no es un usuario del aplicativo.';
-COMMENT ON COLUMN core.compromisos.tematica_equipo IS
-    'Temática según la clasificación del equipo (texto libre).';
+
 
 -- ============================================================================
 -- 9. core.caso_nudo_critico
@@ -367,5 +387,11 @@ FROM (VALUES
 ) AS v(bloque_fila, codigo_excel, caso_codigo, confianza, nota)
 JOIN core.casos c ON c.codigo_caso = v.caso_codigo
 ON CONFLICT (fuente, bloque_fila) DO NOTHING;
+
+-- ============================================================================
+-- Registro de la migración
+-- ============================================================================
+INSERT INTO core.migracion_log (clave) VALUES ('41_matriz_equipo')
+ON CONFLICT (clave) DO NOTHING;
 
 COMMIT;

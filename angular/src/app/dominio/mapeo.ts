@@ -589,6 +589,9 @@ function naturalezaDe(valor: string | null): NaturalezaCaso | null {
  */
 export function aCaso(bruto: unknown): Caso {
   const registro = esRegistro(bruto) ? bruto : {};
+  // El bloque `geografia` trae el distrito principal: nombre para mostrar y
+  // ubigeo como llave. La API lo incluye en el listado y en la ficha.
+  const geografia = esRegistro(registro['geografia']) ? registro['geografia'] : {};
 
   return {
     id: texto(registro, ['id', 'uid']) ?? '',
@@ -605,6 +608,8 @@ export function aCaso(bruto: unknown): Caso {
       texto(registro, ['actualizadoEn', 'updatedAt']),
     inicio: fechaIso(texto(registro, ['fechaInicio', 'fecha_inicio', 'inicio'])),
     region: texto(registro, ['region']),
+    distrito: texto(geografia, ['distrito']),
+    distritoUbigeo: texto(geografia, ['distritoUbigeo', 'distrito_ubigeo']),
     estado: estadoDeCaso(texto(registro, ['estado'])),
     riesgo: riesgoDe(texto(registro, ['riesgo', 'risk'])),
     prioridad: unoDe(texto(registro, ['prioridad']), PRIORIDADES, 'Moderado'),

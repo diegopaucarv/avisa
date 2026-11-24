@@ -17,17 +17,7 @@ import { ExportarMenuComponent } from '../../shared/ui/exportar-menu.component';
 import { IconoComponent } from '../../shared/ui/icono.component';
 import { DesgloseRegionesService, SIN_REGION } from './desglose-regiones.service';
 
-const SIN_TEMATICA = 'Sin temática';
 const SIN_CLASIFICAR = 'Sin clasificar';
-
-const TEMATICAS = [
-  'Infraestructura',
-  'Ordenamiento y acceso territorial',
-  'Normatividad',
-  'Distribución de beneficios',
-  'Gobernanza',
-  'Impactos de terceros',
-] as const;
 
 type Grupo = {
   etiqueta: string;
@@ -60,7 +50,7 @@ function totalDemandas(bruto: unknown): number {
  * `/api/v1/dashboard` y no se crea.
  *
  * El desglose agrupa por los filtros que el servidor expone de forma exacta
- * (`prioridad`, `riesgo`, `tematica`, `region`). La API no acepta filtro por
+ * (`prioridad`, `riesgo`, `region`). La API no acepta filtro por
  * nivel de conflicto, así que esa dimensión no se estima con una muestra: se
  * omite. La región sí se desglosa: `GET /api/v1/catalogs` publica `regiones` y
  * cada grupo se cuenta con el `total` de `region=<nombre>` (o `sinregion=true`
@@ -99,20 +89,7 @@ function totalDemandas(bruto: unknown): number {
       gap: 16px;
     }
 
-    .view-head h1 {
-      margin: 0;
-      color: var(--ink);
-      font: 700 22px/1.3 var(--font-display);
-      letter-spacing: -0.65px;
-    }
 
-    .view-subtitle {
-      max-width: 760px;
-      margin: 6px 0 0;
-      color: var(--muted);
-      font-size: 11px;
-      line-height: 1.6;
-    }
 
     .executive-kpis {
       grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -208,11 +185,6 @@ export class DireccionPage {
     recurso: this.contarCasos({ riesgo: valor }),
   }));
 
-  private readonly tematica = TEMATICAS.map((valor) => ({
-    etiqueta: valor,
-    recurso: this.contarCasos({ tematica: valor }),
-  }));
-
   readonly casosAbiertos = computed(() => this.casosAbiertosRec.valor() ?? null);
   readonly alertas = computed(() => this.alertasRec.valor() ?? null);
   readonly compromisos = computed(() => this.compromisosRec.valor() ?? null);
@@ -221,7 +193,6 @@ export class DireccionPage {
 
   readonly porPrioridad = computed(() => this.desglosar(this.prioridad, SIN_CLASIFICAR));
   readonly porRiesgo = computed(() => this.desglosar(this.riesgo, SIN_CLASIFICAR));
-  readonly porTematica = computed(() => this.desglosar(this.tematica, SIN_TEMATICA));
 
   /**
    * Desglose por región principal. Cada fila enlaza al listado con el mismo
@@ -250,7 +221,6 @@ export class DireccionPage {
     this.demandasRec,
     ...this.prioridad.map(({ recurso }) => recurso),
     ...this.riesgo.map(({ recurso }) => recurso),
-    ...this.tematica.map(({ recurso }) => recurso),
   ]);
 
   /**

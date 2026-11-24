@@ -310,10 +310,10 @@
     },
     "nudos": {
       "cifras": {
-        "insertados": 148,
+        "insertados": 146,
         "actualizados": 0,
         "omitidos": 36,
-        "rechazados": 0,
+        "rechazados": 2,
         "total": 184
       },
       "motivos": {
@@ -323,14 +323,29 @@
           "compromiso_rechazado": 4,
           "caso_anulado": 4
         },
-        "rechazados": {}
+        "rechazados": {
+          "sin_numero_excel": 2
+        }
       },
-      "rechazos": [],
+      "rechazos": [
+        {
+          "clave": "nudo_fila_105",
+          "fila": 105,
+          "motivo": "sin_numero_excel",
+          "detalle": "Sin numero_excel no se puede resolver el caso."
+        },
+        {
+          "clave": "nudo_fila_106",
+          "fila": 106,
+          "motivo": "sin_numero_excel",
+          "detalle": "Sin numero_excel no se puede resolver el caso."
+        }
+      ],
       "advertencias": [
         {
           "codigo": "nudo_vinculo_posicional",
           "detalle": "Nudos vinculados por posición en el bloque del reporte (la fila del nudo no coincide con la del hito).",
-          "ocurrencias": 136,
+          "ocurrencias": 134,
           "filas": [
             2,
             14,
@@ -431,6 +446,15 @@
             89,
             89,
             89
+          ]
+        },
+        {
+          "codigo": "nudo_sin_numero",
+          "detalle": "Nudos sin numero_excel.",
+          "ocurrencias": 2,
+          "filas": [
+            105,
+            106
           ]
         }
       ]
@@ -591,10 +615,10 @@
     }
   },
   "total": {
-    "insertados": 421,
+    "insertados": 419,
     "actualizados": 28,
     "omitidos": 75,
-    "rechazados": 7,
+    "rechazados": 9,
     "total": 531
   },
   "decisiones_pendientes": [
@@ -646,7 +670,7 @@
     {
       "id": "D10",
       "titulo": "Vínculo nudo -> compromiso por posición",
-      "detalle": "El nudo se vincula al compromiso cuyo hito tiene la misma fila; si la acción no tiene hitos, a la acción con esa fila. Cuando esa coincidencia falla se aplica el respaldo posicional dentro del bloque del reporte (136 nudos). Es un vínculo por posición, no una clave del Excel: debe revisarse."
+      "detalle": "El nudo se vincula al compromiso cuyo hito tiene la misma fila; si la acción no tiene hitos, a la acción con esa fila. Cuando esa coincidencia falla se aplica el respaldo posicional dentro del bloque del reporte (134 nudos). Es un vínculo por posición, no una clave del Excel: debe revisarse."
     },
     {
       "id": "D11",

@@ -1,0 +1,137 @@
+<section class="view-body" aria-labelledby="titulo-archivo">
+  <header class="view-head">
+    <div>
+      <h1 id="titulo-archivo">Archivo</h1>
+    </div>
+    @if (puedeVer()) {
+    <div class="view-actions">
+      <p class="result-count" aria-live="polite">
+        {{ total() }} {{ configActual().plural }} en el archivo
+      </p>
+    </div>
+    }
+  </header>
+
+  @if (!puedeVer()) {
+  <div class="empty-state">
+    <strong>Sin permiso para consultar el archivo</strong>
+    <p>
+      Su rol no permite anular ni restaurar registros. Esta vista está reservada a administración y
+      sectoristas.
+    </p>
+  </div>
+  } @else {
+  <div class="view-toolbar">
+    <div class="segmented" role="group" aria-label="Tipo de registro anulado">
+      @for (p of pestanas; track p.valor) {
+      <button
+        type="button"
+        [attr.aria-pressed]="pestana() === p.valor"
+        (click)="cambiarPestana(p.valor)"
+      >
+        <app-icono [nombre]="p.icono" [tamano]="13" />
+        {{ p.etiqueta }}
+      </button>
+      }
+    </div>
+  </div>
+
+  @if (aviso(); as texto) {
+  <p class="form-hint aviso-ok" role="status">{{ texto }}</p>
+  } @if (errorRestauracion(); as texto) {
+  <p class="form-error" role="alert">{{ texto }}</p>
+  } @if (estadoListado() === 'error') {
+  <div class="empty-state" role="alert">
+    <strong>No se pudieron cargar los registros anulados</strong>
+    <p>{{ errorListado()?.message }}</p>
+    <button type="button" class="button-secondary" (click)="recargarListado()">Reintentar</button>
+  </div>
+  } @else if (filas().length === 0) { @if (estadoListado() === 'cargando' || estadoListado() ===
+  'inactivo') {
+  <div class="empty-state" role="status">Cargando registros anulados…</div>
+  } @else {
+  <div class="empty-state">
+    <strong>No hay {{ configActual().plural }} anulados</strong>
+    <p>No hay registros en el archivo para esta pestaña.</p>
+  </div>
+  } } @else { @if (estadoListado() === 'cargando') {
+  <p class="actualizando" role="status">Actualizando el listado…</p>
+  }
+
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th scope="col" [appThOrden]="'registro'" [orden]="orden">Registro</th>
+          <th scope="col" [appThOrden]="'caso'" [orden]="orden">Caso</th>
+          <th scope="col" [appThOrden]="'motivo'" [orden]="orden">Motivo de la anulación</th>
+          <th scope="col" [appThOrden]="'fecha'" [orden]="orden">Fecha de anulación</th>
+          <th scope="col" [appThOrden]="'anulo'" [orden]="orden">Anuló</th>
+          <th scope="col">Acción</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (fila of filasVisibles(); track fila.id) {
+        <tr
+          class="case-row-clickable"
+          [class.row-selected]="filaAbierta()?.id === fila.id"
+          (click)="abrir(fila)"
+        >
+          <td class="celda-registro">
+            <strong>{{ fila.codigo || 'Sin código' }}</strong>
+            @if (fila.titulo) {
+            <small>{{ fila.titulo }}</small>
+            }
+          </td>
+          <td class="celda-caso">
+            @if (fila.casoCodigo) {
+            <strong>{{ fila.casoCodigo }}</strong>
+            @if (fila.casoTitulo) {
+            <small>{{ fila.casoTitulo }}</small>
+            } } @else {
+            <span class="sin-dato">Sin caso</span>
+            }
+          </td>
+          <td class="celda-motivo">{{ fila.motivo || 'Sin motivo registrado' }}</td>
+          <td>{{ formatearFechaHora(fila.anuladoEn) }}</td>
+          <td>{{ fila.anuladoPorNombre || fila.anuladoPor || '—' }}</td>
+          <td>
+            <button
+              type="button"
+              class="button-secondary"
+              [disabled]="restaurando()"
+              [attr.aria-label]="
+                      'Restaurar ' + (fila.codigo || fila.titulo || 'el registro')
+                    "
+              (click)="restaurarFila(fila); $event.stopPropagation()"
+            >
+              Restaurar
+            </button>
+          </td>
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  } @if (total() > 0 && estadoListado() !== 'error') {
+  <app-paginacion
+    [pagina]="pagina()"
+    [tamano]="tamano()"
+    [total]="total()"
+    (paginaCambia)="cambiarPagina($event)"
+    (tamanoCambia)="cambiarTamano($event)"
+  />
+  } }
+</section>
+
+@if (filaAbierta(); as fila) {
+<app-archivo-panel
+  [fila]="fila"
+  [entidad]="configActual().singular"
+  [advertencia]="configActual().advertencia"
+  [enviando]="restaurando()"
+  [error]="errorRestauracion()"
+  (cerrado)="cerrarPanel()"
+  (restaurar)="restaurarFila(fila)"
+/>
+}

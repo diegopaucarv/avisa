@@ -59,9 +59,9 @@ const SEARCH_UNION = `
     from core.casos c
     left join core.cat_estados_caso ec on ec.id = c.estado_id
 ${REGION_DEL_CASO}
-   where c.codigo_caso ilike $1
-      or c.nombre_caso ilike $1
-      or coalesce(c.resumen_ejecutivo, '') ilike $1
+   where core.normalizar_ref(c.codigo_caso) like core.normalizar_ref($1)
+      or core.normalizar_ref(c.nombre_caso) like core.normalizar_ref($1)
+      or core.normalizar_ref(coalesce(c.resumen_ejecutivo, '')) like core.normalizar_ref($1)
   union all
   select 2, 'alert'::text, 'alerts'::text,
          al.id::text,
@@ -73,8 +73,8 @@ ${REGION_DEL_CASO}
     left join core.cat_niveles_alerta na on na.id = al.nivel_alerta_id
     left join core.casos c on c.id = al.caso_id
 ${REGION_DEL_CASO}
-   where al.codigo_alerta ilike $1
-      or al.titulo ilike $1
+   where core.normalizar_ref(al.codigo_alerta) like core.normalizar_ref($1)
+      or core.normalizar_ref(al.titulo) like core.normalizar_ref($1)
   union all
   select 3, 'document'::text, 'documents'::text,
          d.id::text,
@@ -86,8 +86,8 @@ ${REGION_DEL_CASO}
     left join core.cat_tipos_documento td on td.id = d.tipo_id
     left join core.casos c on c.id = d.caso_id
 ${REGION_DEL_CASO}
-   where d.codigo ilike $1
-      or d.titulo ilike $1
+   where core.normalizar_ref(d.codigo) like core.normalizar_ref($1)
+      or core.normalizar_ref(d.titulo) like core.normalizar_ref($1)
   union all
   select 4, 'actor'::text, 'directory'::text,
          a.actor_uid::text,
@@ -97,8 +97,8 @@ ${REGION_DEL_CASO}
          rg.nombre
     from core.actores a
     left join core.regiones rg on rg.id = a.region_id
-   where a.nombre_actual ilike $1
-      or coalesce(a.abreviatura, '') ilike $1
+   where core.normalizar_ref(a.nombre_actual) like core.normalizar_ref($1)
+      or core.normalizar_ref(coalesce(a.abreviatura, '')) like core.normalizar_ref($1)
   union all
   select 5, 'commitment'::text, 'commitments'::text,
          cmp.id::text,
@@ -110,8 +110,8 @@ ${REGION_DEL_CASO}
     left join core.cat_estados_compromiso ec on ec.id = cmp.estado_id
     left join core.casos c on c.id = cmp.caso_id
 ${REGION_DEL_CASO}
-   where cmp.codigo_compromiso ilike $1
-      or cmp.accion_compromiso ilike $1
+   where core.normalizar_ref(cmp.codigo_compromiso) like core.normalizar_ref($1)
+      or core.normalizar_ref(cmp.accion_compromiso) like core.normalizar_ref($1)
   union all
   select 6, 'demanda'::text, 'cases'::text,
          dm.id::text,
@@ -122,7 +122,7 @@ ${REGION_DEL_CASO}
     from core.demandas dm
     left join core.casos c on c.id = dm.caso_id
 ${REGION_DEL_CASO}
-   where dm.descripcion_demanda ilike $1
+   where core.normalizar_ref(dm.descripcion_demanda) like core.normalizar_ref($1)
 `;
 
 const SEARCH_PAGE_SQL = `

@@ -11,7 +11,7 @@ sin build, sin CDN. Nada de fuentes, scripts, iconos o imágenes remotas.
 
 La app real es la SPA Angular (`angular/src/app`). Los mockups no entran al build.
 
-## Las 22 rutas del mapa del sitio
+## Las 26 rutas del mapa del sitio
 
 ```
 /mapa ·········· Panorama territorial (entrada)
@@ -21,12 +21,16 @@ La app real es la SPA Angular (`angular/src/app`). Los mockups no entran al buil
   /casos/sin-caso ·· Demandas sin caso
   /casos/:codigo ··· Ficha del caso
 /alertas ······· Alertas tempranas
+/clima-social ··· Clima social
+/reuniones ····· Reuniones
+/resultados ····· Resultados
 /compromisos ··· Compromisos
 /documentos ···· Documentos
 /reportes ······ Registro de reportes
-/papelera ······ Papelera
+/archivo ······ Archivo
 /directorio ···· Portada del directorio
   /directorio/actores
+  /directorio/personas · Actores (filtro personas)
   /directorio/organizaciones
   /directorio/instituciones
   /directorio/locales ·· Auditorios
@@ -38,25 +42,26 @@ La app real es la SPA Angular (`angular/src/app`). Los mockups no entran al buil
 /preferencias ·· Preferencias
 ```
 
-Menú del shell: **Trabajo** (Panorama, Resumen, Bandeja) · **Seguimiento** (Casos,
-Alertas, Compromisos, Documentos, Reportes) · **Papelera** · **Directorio** (Portada,
-Actores, Organizaciones, Instituciones, Auditorios) · **Dirección** · **Ayuda** ·
-**Preferencias**. Botón «Registrar ▾».
+Menú del shell: **PANORAMA TERRITORIAL** (Panorama territorial) · **PREVENCIÓN** (Casos,
+Alertas tempranas, Clima social) · **INTERVENCIÓN** (Reuniones, Resultados) ·
+**SEGUIMIENTO** (Compromisos) · **GESTIÓN DE IYC** (Reporte de actividad, Documentos) ·
+**DIRECTORIOS** (Actores, Organizaciones, Locales) · **MI ESPACIO** (Resumen operativo,
+Bandeja de trabajo, Archivo). Botón «Registrar ▾».
 
 Si un artboard no corresponde a ninguna ruta, se dice explícitamente en su cabecera:
 **«sin ruta · no está en el menú»**, y se propone a qué pantalla pertenecería.
 
 ## Vocabulario obligatorio
 
-| Se escribe            | No se escribe                        |
-| --------------------- | ------------------------------------ |
-| **latente**           | abierto (para el nivel de conflicto) |
-| **manifiesto**        | activo (para el nivel de conflicto)  |
-| caso **abierto**      | — (sí es válido para el estado)      |
-| **Pesca y acuicultura** / **MYPE e industria** | Pesca / MYPE                    |
-| **Aplicativo de apoyo a la gestión de conflictos sociales** | PRODUCCION - OAIPCS |
-| **Auditorios**        | locales                              |
-| **Nivel de conflictividad** | nivel / conflictividad (a secas) |
+| Se escribe                                                  | No se escribe                        |
+| ----------------------------------------------------------- | ------------------------------------ |
+| **latente**                                                 | abierto (para el nivel de conflicto) |
+| **manifiesto**                                              | activo (para el nivel de conflicto)  |
+| caso **abierto**                                            | — (sí es válido para el estado)      |
+| **Pesca y acuicultura** / **MYPE e industria**              | Pesca / MYPE                         |
+| **Aplicativo de apoyo a la gestión de conflictos sociales** | PRODUCCION - OAIPCS                  |
+| **Auditorios**                                              | locales                              |
+| **Nivel de conflictividad**                                 | nivel / conflictividad (a secas)     |
 
 Regla X3, ratificada: **latente** = `Diferencia` + `Controversia`;
 **manifiesto** = `Conflicto social` + `Crisis social`. No es un estado nuevo: es una
@@ -97,14 +102,25 @@ Además: **ruta** (o «sin ruta») y el nombre del archivo.
 Copiar el `:root` de `panorama-territorial.html`. No inventar colores.
 
 ```css
---ink:#17283a; --ink-2:#33475b; --muted:#778797; --line:#e6ebef;
---paper:#fff; --canvas:#f5f7f8;
---blue:#2455a2; --blue-dark:#1d427f; --blue-pale:#eaf1fb;
---teal:#397c79; --amber:#aa6a11; --amber-pale:#fff4e2;
---red:#ad4d46; --red-pale:#fbeceb;
---green:#34785b; --green-pale:#e9f5ef;
---font-sans:"DM Sans",system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
---font-display:"Manrope","DM Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+--ink: #17283a;
+--ink-2: #33475b;
+--muted: #778797;
+--line: #e6ebef;
+--paper: #fff;
+--canvas: #f5f7f8;
+--blue: #2455a2;
+--blue-dark: #1d427f;
+--blue-pale: #eaf1fb;
+--teal: #397c79;
+--amber: #aa6a11;
+--amber-pale: #fff4e2;
+--red: #ad4d46;
+--red-pale: #fbeceb;
+--green: #34785b;
+--green-pale: #e9f5ef;
+--font-sans: "DM Sans", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+--font-display:
+  "Manrope", "DM Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
 ```
 
 Semántica de color: azul = estructura y enlace; verde = cumplido/atendida;

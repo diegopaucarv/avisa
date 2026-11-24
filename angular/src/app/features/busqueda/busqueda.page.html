@@ -2,11 +2,6 @@
   <header class="view-head">
     <div>
       <h1 id="titulo-busqueda">Búsqueda global</h1>
-      <p class="view-subtitle">
-        Busca a la vez en casos, alertas tempranas, compromisos, documentos, actores y demandas. Los
-        resultados se agrupan por tipo y cada grupo muestra hasta {{ topePorGrupo }} registros; el
-        resto queda a un clic en su listado.
-      </p>
     </div>
     @if (consultaValida() && total() > 0) {
       <p class="result-count" aria-live="polite">

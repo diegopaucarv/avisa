@@ -530,6 +530,12 @@ export type AccionFlujo = {
 };
 
 /**
+ * Paso 3: la aprobación definitiva de la Dirección OAIPCS no se envía al
+ * pulsar la acción; el panel pide una confirmación explícita (item 23).
+ */
+export const PASO_APROBACION_DEFINITIVA = 3;
+
+/**
  * Transiciones legales desde cada paso, según `docs/03_ejecucion/mvp.md` §3.4:
  *
  * 1 Elaboración → 2 Validación previa.

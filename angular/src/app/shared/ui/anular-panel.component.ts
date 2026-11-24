@@ -55,22 +55,17 @@ export type ResultadoAnulacion = {
     .anular-panel-codigo {
       margin: 0;
       color: #8a98a5;
-      font-size: 9px;
+      font-size: 12px;
       font-weight: 700;
       letter-spacing: 0.7px;
       text-transform: uppercase;
     }
 
-    .drawer-head h2 {
-      margin: 0;
-      color: #1c2a38;
-      font: 700 16px/1.35 var(--font-display);
-    }
 
     .anular-panel-sub {
       margin: 4px 0 0;
       color: #647487;
-      font-size: 10.5px;
+      font-size: 13px;
       line-height: 1.5;
     }
 
@@ -95,7 +90,7 @@ export type ResultadoAnulacion = {
     .anular-confirmacion {
       margin: 0;
       color: #465a6c;
-      font-size: 11.5px;
+      font-size: 13.5px;
       line-height: 1.6;
     }
 
@@ -108,7 +103,7 @@ export type ResultadoAnulacion = {
       margin: 0;
       padding: 9px 11px;
       border-radius: 6px;
-      font-size: 10.5px;
+      font-size: 13px;
       line-height: 1.55;
     }
 

@@ -16,7 +16,7 @@
         <strong>{{ d.caso.codigo }}</strong>
       </div>
       <h1 id="titulo-caso">{{ d.caso.titulo }}</h1>
-      <p class="view-subtitle">{{ d.caso.resumen || 'Sin resumen registrado.' }}</p>
+      <p class="case-resumen">{{ d.caso.resumen || 'Sin resumen registrado.' }}</p>
       <p class="view-meta">Última actualización: {{ fechaTexto(d.caso.actualizado) }}</p>
     </div>
     <div class="view-actions">
@@ -54,17 +54,52 @@
       <app-glosario termino="nivel-conflictividad" [alineacion]="'fin'" />
       <span class="status-badge">Estado: {{ d.caso.estado }}</span>
       <span class="status-badge">Región: {{ d.caso.region || 'Sin región' }}</span>
-      @if (puedeAnular()) {
+      @if (puedeModificar()) { @if (accionEstado(); as accion) {
+      <button
+        type="button"
+        class="button-secondary"
+        [title]="accion.ayuda"
+        (click)="abrirConfirmacionArchivo()"
+      >
+        {{ accion.etiqueta }}
+      </button>
+      } } @if (puedeAnular()) {
       <button type="button" class="button-danger" (click)="abrirAnulacion()">Anular caso</button>
       } }
     </div>
   </div>
 
-  <p class="detail-hint">
-    El nivel de riesgo proviene de la matriz del caso; la ficha no lo recalcula.
-  </p>
-
-  @if (avisoAnulacion(); as aviso) {
+  @if (confirmandoArchivo(); as modo) {
+  <div class="archivo-confirmacion" role="group" aria-label="Confirmación de cambio de estado">
+    <p class="form-hint">
+      @if (modo === 'archivar') { ¿Archivar el caso {{ d.caso.codigo }}? Pasará al estado
+      <strong>Archivado</strong>: el expediente sigue disponible y puede reabrirse. } @else {
+      ¿Reabrir el caso {{ d.caso.codigo }}? Volverá al estado <strong>Abierto</strong>. }
+    </p>
+    <div class="inline-form">
+      <button
+        type="button"
+        class="button-secondary"
+        [disabled]="enviandoArchivo()"
+        (click)="cancelarArchivo()"
+      >
+        Cancelar
+      </button>
+      <button
+        type="button"
+        class="button-primary"
+        [disabled]="enviandoArchivo()"
+        (click)="confirmarArchivo()"
+      >
+        {{ enviandoArchivo() ? 'Guardando…' : 'Confirmar' }}
+      </button>
+    </div>
+  </div>
+  } @if (errorArchivo(); as error) {
+  <p class="form-error" role="alert">{{ error }}</p>
+  } @if (avisoArchivo(); as aviso) {
+  <p class="form-hint aviso-ok" role="status">{{ aviso }}</p>
+  } @if (anulado()) { } @else if (accionEstado(); as accion) { } @if (avisoAnulacion(); as aviso) {
   <p class="form-hint aviso-ok" role="status">{{ aviso }}</p>
   } @if (exportarError(); as mensaje) {
   <p class="form-error" role="alert">{{ mensaje }}</p>
@@ -75,26 +110,13 @@
       <div class="detail-section-title">
         <h2 id="resumen-caso">Resumen</h2>
       </div>
+      @if (avisoCampo(); as aviso) {
+      <p class="form-hint aviso-ok" role="status">{{ aviso }}</p>
+      }
       <dl class="detail-grid" id="datos-caso">
         <div>
           <dt>Región</dt>
           <dd>{{ d.caso.region || '—' }}</dd>
-        </div>
-        <div>
-          <dt>Temática <app-glosario termino="tematica" /></dt>
-          <dd>{{ d.caso.tematica || '—' }}</dd>
-        </div>
-        <div>
-          <dt>Subsector <app-glosario termino="subsector" /></dt>
-          <dd>{{ d.caso.subsector || '—' }}</dd>
-        </div>
-        <div>
-          <dt>Unidad responsable</dt>
-          <dd>{{ d.caso.unidadResponsable || '—' }}</dd>
-        </div>
-        <div>
-          <dt>Prioridad de atención <app-glosario termino="prioridad-atencion" /></dt>
-          <dd>{{ d.caso.prioridad }}</dd>
         </div>
         <div>
           <dt>Alcance</dt>
@@ -104,24 +126,115 @@
           </dd>
         </div>
         <div>
-          <dt>Naturaleza del caso <app-glosario termino="naturaleza-caso" /></dt>
+          <dt>Geografía</dt>
           <dd>
-            @if (d.caso.naturaleza; as naturaleza) {
-            <span class="naturaleza-chip">{{ naturaleza }}</span>
-            } @else {
-            <span class="naturaleza-chip sin-declarar">Sin declarar</span>
-            <small class="detail-hint">Se declara a mano; no se deriva del alcance</small>
-            }
+            {{ d.completitud?.geografia.distrito || '—' }}
+            <small class="detail-hint">
+              Región, distrito y lugares no se editan desde esta ficha: quedan fuera de alcance.
+            </small>
           </dd>
         </div>
-        <div>
-          <dt>Componente del ciclo</dt>
-          <dd>{{ d.caso.etapa }}</dd>
+        @for (def of campos; track def.campo) {
+        <div class="campo-editable">
+          <dt>
+            {{ def.etiqueta }} @if (def.glosario; as termino) {
+            <app-glosario [termino]="termino" />
+            }
+          </dt>
+          <dd>
+            @if (editando() === def.campo) {
+            <div class="edit-form">
+              @switch (def.control) { @case ('select') { @if (cargandoCatalogos()) {
+              <p class="form-hint" role="status">Cargando catálogos…</p>
+              } @else {
+              <select class="form-select" (change)="alCambiarCampo($event)">
+                @if (def.obligatorio) { @if (!valorControl()) {
+                <option value="" selected disabled>Seleccione…</option>
+                } } @else {
+                <option value="" [selected]="!valorControl()">Sin declarar</option>
+                } @if (opcionDesconocida(def.campo); as desconocida) {
+                <option [value]="desconocida" [selected]="desconocida === valorControl()">
+                  {{ desconocida }}
+                </option>
+                } @for (opcion of opcionesDe(def.campo); track opcion.valor) {
+                <option [value]="opcion.valor" [selected]="opcion.valor === valorControl()">
+                  {{ opcion.etiqueta }}
+                </option>
+                }
+              </select>
+              } } @case ('textoLargo') {
+              <textarea
+                class="form-textarea"
+                rows="3"
+                [attr.maxlength]="def.longitudMaxima ?? null"
+                [value]="borrador()"
+                (input)="alCambiarCampo($event)"
+              ></textarea>
+              } @case ('numero') {
+              <input
+                class="form-input"
+                type="number"
+                min="0"
+                max="100"
+                [value]="borrador()"
+                (input)="alCambiarCampo($event)"
+              />
+              } @case ('fecha') {
+              <input
+                class="form-input"
+                type="date"
+                [value]="borrador()"
+                (input)="alCambiarCampo($event)"
+              />
+              } @default {
+              <input
+                class="form-input"
+                type="text"
+                [attr.maxlength]="def.longitudMaxima ?? null"
+                [value]="borrador()"
+                (input)="alCambiarCampo($event)"
+              />
+              } }
+              <p class="form-hint">
+                El clic fuera no cierra ni cancela: sólo «Cancelar» o «Guardar cambios» terminan la
+                edición.
+              </p>
+              @if (def.ayuda; as ayuda) {
+              <p class="form-hint">{{ ayuda }}</p>
+              } @if (errorCampo(); as error) {
+              <p class="form-error" role="alert">{{ error }}</p>
+              }
+              <div>
+                <button
+                  type="button"
+                  class="button-secondary"
+                  [disabled]="guardandoCampo()"
+                  (click)="cancelarEdicion()"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  class="button-primary"
+                  [disabled]="guardandoCampo()"
+                  (click)="guardarCampo()"
+                >
+                  {{ guardandoCampo() ? 'Guardando…' : 'Guardar cambios' }}
+                </button>
+              </div>
+            </div>
+            } @else {
+            <span class="campo-valor">{{ valorMostrado(def.campo) }}</span>
+            @if (def.ayuda; as ayuda) {
+            <small class="detail-hint">{{ ayuda }}</small>
+            } @if (puedeModificar() && !editando()) {
+            <button type="button" class="link-button" (click)="abrirEdicion(def.campo)">
+              Editar
+            </button>
+            } }
+          </dd>
         </div>
-        <div>
-          <dt>Inicio</dt>
-          <dd>{{ fechaTexto(d.caso.inicio) }}</dd>
-        </div>
+        }
       </dl>
 
       <section class="detail-section" aria-labelledby="actores-caso">
@@ -157,15 +270,23 @@
           <table class="data-table">
             <thead>
               <tr>
-                <th scope="col">Actor (Apellidos, Nombres)</th>
-                <th scope="col">Correo</th>
-                <th scope="col">Tipo <app-glosario termino="tipo-actor" /></th>
-                <th scope="col">Función <app-glosario termino="funcion-actor" /></th>
-                <th scope="col">Posicionamiento</th>
+                <th scope="col" [appThOrden]="'actor'" [orden]="ordenActores">
+                  Actor (Apellidos, Nombres)
+                </th>
+                <th scope="col" [appThOrden]="'correo'" [orden]="ordenActores">Correo</th>
+                <th scope="col" [appThOrden]="'tipo'" [orden]="ordenActores">
+                  Tipo <app-glosario termino="tipo-actor" />
+                </th>
+                <th scope="col" [appThOrden]="'funcion'" [orden]="ordenActores">
+                  Función <app-glosario termino="funcion-actor" />
+                </th>
+                <th scope="col" [appThOrden]="'posicionamiento'" [orden]="ordenActores">
+                  Posicionamiento
+                </th>
               </tr>
             </thead>
             <tbody>
-              @for (actor of d.actores; track actor.id) {
+              @for (actor of filasActores(); track actor.id) {
               <tr>
                 <td>
                   <a
@@ -198,10 +319,6 @@
           </button>
           }
         </div>
-        <p class="detail-hint">
-          La validación es una acción humana explícita, no automática: use «Validar» para
-          acreditarla y «Quitar validación» para retirarla.
-        </p>
         @if (avisoValidacion(); as aviso) {
         <p class="form-hint aviso-ok" role="status">{{ aviso }}</p>
         } @if (errorValidacion(); as error) {
@@ -284,18 +401,20 @@
           <table class="data-table">
             <thead>
               <tr>
-                <th scope="col">Problema</th>
-                <th scope="col">Propuesta</th>
-                <th scope="col">Pedido</th>
-                <th scope="col">Estado de atención</th>
-                <th scope="col">Origen</th>
+                <th scope="col" [appThOrden]="'problema'" [orden]="ordenDemandas">Problema</th>
+                <th scope="col" [appThOrden]="'propuesta'" [orden]="ordenDemandas">Propuesta</th>
+                <th scope="col" [appThOrden]="'pedido'" [orden]="ordenDemandas">Pedido</th>
+                <th scope="col" [appThOrden]="'estado'" [orden]="ordenDemandas">
+                  Estado de atención
+                </th>
+                <th scope="col" [appThOrden]="'origen'" [orden]="ordenDemandas">Origen</th>
                 @if (puedeModificar()) {
                 <th scope="col">Acciones</th>
                 }
               </tr>
             </thead>
             <tbody>
-              @for (demanda of d.demandas; track demanda.id) {
+              @for (demanda of filasDemandas(); track demanda.id) {
               <tr>
                 <td>{{ demanda.problema || demanda.descripcion || '—' }}</td>
                 <td>{{ demanda.propuesta || '—' }}</td>
@@ -346,15 +465,15 @@
           <table class="data-table">
             <thead>
               <tr>
-                <th scope="col">Código</th>
-                <th scope="col">Nivel</th>
-                <th scope="col">Prioridad</th>
-                <th scope="col">Estado</th>
-                <th scope="col">Fecha de reporte</th>
+                <th scope="col" [appThOrden]="'codigo'" [orden]="ordenAlertas">Código</th>
+                <th scope="col" [appThOrden]="'nivel'" [orden]="ordenAlertas">Nivel</th>
+                <th scope="col" [appThOrden]="'prioridad'" [orden]="ordenAlertas">Prioridad</th>
+                <th scope="col" [appThOrden]="'estado'" [orden]="ordenAlertas">Estado</th>
+                <th scope="col" [appThOrden]="'fecha'" [orden]="ordenAlertas">Fecha de reporte</th>
               </tr>
             </thead>
             <tbody>
-              @for (alerta of d.alertas; track alerta.id) {
+              @for (alerta of filasAlertas(); track alerta.id) {
               <tr>
                 <td>
                   <a
@@ -391,21 +510,41 @@
           <table class="data-table">
             <thead>
               <tr>
-                <th scope="col">Código</th>
-                <th scope="col">Compromiso</th>
-                <th scope="col">Estado</th>
-                <th scope="col">Nivel de gobierno <app-glosario termino="nivel-gobierno" /></th>
-                <th scope="col">Unidad</th>
-                <th scope="col">Vencimiento</th>
+                <th scope="col" [appThOrden]="'codigo'" [orden]="ordenCompromisos">Código</th>
+                <th scope="col" [appThOrden]="'compromiso'" [orden]="ordenCompromisos">
+                  Compromiso
+                </th>
+                <th scope="col" [appThOrden]="'clasificacion'" [orden]="ordenCompromisos">
+                  Clasificación
+                </th>
+                <th scope="col" [appThOrden]="'estado'" [orden]="ordenCompromisos">Estado</th>
+                <th scope="col" [appThOrden]="'nivel'" [orden]="ordenCompromisos">
+                  Nivel de gobierno <app-glosario termino="nivel-gobierno" />
+                </th>
+                <th scope="col" [appThOrden]="'unidad'" [orden]="ordenCompromisos">Unidad</th>
+                <th scope="col" [appThOrden]="'vencimiento'" [orden]="ordenCompromisos">
+                  Vencimiento
+                </th>
               </tr>
             </thead>
             <tbody>
-              @for (compromiso of d.compromisos; track compromiso.id) {
+              @for (compromiso of filasCompromisos(); track compromiso.id) {
               <tr>
                 <td>
                   <strong>{{ compromiso.codigo }}</strong>
                 </td>
                 <td class="celda-larga">{{ compromiso.accion }}</td>
+                <td>
+                  <span class="status-badge"
+                    >{{ clasificacionAlcanceTexto(compromiso.clasificacionAlcance) }}</span
+                  >
+                  <span class="status-badge">
+                    Carácter: {{ formalVerbalTexto(compromiso.formalVerbal) }}
+                  </span>
+                  @if (compromiso.asumidoMinistro) {
+                  <span class="status-badge">Asumido por el Señor Ministro</span>
+                  }
+                </td>
                 <td>{{ compromiso.estado || '—' }}</td>
                 <td>{{ nivelGobiernoTexto(compromiso.nivelGobierno) }}</td>
                 <td>{{ compromiso.unidad || '—' }}</td>
@@ -425,9 +564,6 @@
 
       <section class="detail-section" aria-labelledby="hitos-caso">
         <h2 id="hitos-caso">Hitos ({{ hitosDelCaso().length }})</h2>
-        <p class="detail-hint">
-          Un hito por cada fecha de seguimiento de los acuerdos y compromisos del caso.
-        </p>
         @if (hitosDelCaso().length === 0) {
         <p class="empty-inline">Sin hitos registrados.</p>
         } @else {
@@ -435,19 +571,25 @@
           <table class="data-table">
             <thead>
               <tr>
-                <th scope="col">Compromiso</th>
-                <th scope="col">Hito</th>
-                <th scope="col">Fecha planificada</th>
-                <th scope="col">Estado</th>
+                <th scope="col" [appThOrden]="'compromiso'" [orden]="ordenHitos">Compromiso</th>
+                <th scope="col" [appThOrden]="'hito'" [orden]="ordenHitos">Hito</th>
+                <th scope="col" [appThOrden]="'fecha'" [orden]="ordenHitos">Fecha planificada</th>
+                <th scope="col" [appThOrden]="'estado'" [orden]="ordenHitos">Estado</th>
+                <th scope="col" [appThOrden]="'responsable'" [orden]="ordenHitos">Responsable</th>
               </tr>
             </thead>
             <tbody>
-              @for (hito of hitosDelCaso(); track hito.id) {
+              @for (hito of filasHitos(); track hito.id) {
               <tr>
                 <td><strong>{{ hito.compromiso }}</strong></td>
                 <td class="celda-larga">{{ hito.descripcion || 'Sin descripción' }}</td>
-                <td>{{ fechaTexto(hito.fecha) }}</td>
+                <td>
+                  {{ fechaTexto(hito.fecha) }} @if (hito.fechaTexto && !hito.fecha) {
+                  <small class="detail-hint">{{ hito.fechaTexto }}</small>
+                  }
+                </td>
                 <td>{{ hito.estado || 'Sin estado' }}</td>
+                <td>{{ hito.responsableTexto || '—' }}</td>
               </tr>
               }
             </tbody>
@@ -465,14 +607,14 @@
           <table class="data-table">
             <thead>
               <tr>
-                <th scope="col">Código</th>
-                <th scope="col">Título</th>
-                <th scope="col">Tipo</th>
-                <th scope="col">Fecha</th>
+                <th scope="col" [appThOrden]="'codigo'" [orden]="ordenDocumentos">Código</th>
+                <th scope="col" [appThOrden]="'titulo'" [orden]="ordenDocumentos">Título</th>
+                <th scope="col" [appThOrden]="'tipo'" [orden]="ordenDocumentos">Tipo</th>
+                <th scope="col" [appThOrden]="'fecha'" [orden]="ordenDocumentos">Fecha</th>
               </tr>
             </thead>
             <tbody>
-              @for (documento of d.documentos; track documento.id) {
+              @for (documento of filasDocumentos(); track documento.id) {
               <tr>
                 <td>
                   <strong>{{ documento.codigo || 'Sin código' }}</strong>
@@ -497,15 +639,15 @@
           <table class="data-table">
             <thead>
               <tr>
-                <th scope="col">Estado</th>
-                <th scope="col">Desde</th>
-                <th scope="col">Hasta</th>
-                <th scope="col">Motivo</th>
-                <th scope="col">Usuario</th>
+                <th scope="col" [appThOrden]="'estado'" [orden]="ordenHistorial">Estado</th>
+                <th scope="col" [appThOrden]="'desde'" [orden]="ordenHistorial">Desde</th>
+                <th scope="col" [appThOrden]="'hasta'" [orden]="ordenHistorial">Hasta</th>
+                <th scope="col" [appThOrden]="'motivo'" [orden]="ordenHistorial">Motivo</th>
+                <th scope="col" [appThOrden]="'usuario'" [orden]="ordenHistorial">Usuario</th>
               </tr>
             </thead>
             <tbody>
-              @for (tramo of d.historial; track tramo.id) {
+              @for (tramo of filasHistorial(); track tramo.id) {
               <tr>
                 <td>{{ tramo.estado || '—' }}</td>
                 <td>{{ fechaTexto(tramo.desde) }}</td>
@@ -523,10 +665,6 @@
 
     <aside class="ficha-lateral" aria-label="Expediente del caso">
       <app-riel-relaciones [enlaces]="enlacesRiel()" />
-      <p class="detail-hint">
-        El expediente se compone de la línea de tiempo, el mapeo de actores, el caso de análisis y
-        los documentos vinculados.
-      </p>
     </aside>
   </div>
 

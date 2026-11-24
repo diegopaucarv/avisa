@@ -32,20 +32,7 @@ import { IconoComponent } from '../../shared/ui/icono.component';
       box-sizing: border-box;
     }
 
-    .view-head h1 {
-      margin: 0;
-      color: #1a2b3e;
-      font: 700 22px/1.3 var(--font-display);
-      letter-spacing: -0.65px;
-    }
 
-    .view-subtitle {
-      max-width: 760px;
-      margin: 6px 0 0;
-      color: #7b8896;
-      font-size: 11px;
-      line-height: 1.6;
-    }
 
     .directorio-grid {
       display: grid;
@@ -96,12 +83,12 @@ import { IconoComponent } from '../../shared/ui/icono.component';
 
     .directorio-copy strong {
       color: #1c2a38;
-      font: 700 15px/1.25 var(--font-display);
+      font: 700 16px/1.25 var(--font-display);
     }
 
     .directorio-copy span {
       color: #7b8896;
-      font-size: 10.5px;
+      font-size: 13px;
       line-height: 1.5;
     }
 
@@ -111,7 +98,7 @@ import { IconoComponent } from '../../shared/ui/icono.component';
       align-items: center;
       gap: 4px;
       color: var(--blue-dark);
-      font-size: 10.5px;
+      font-size: 13px;
       font-weight: 700;
     }
 
@@ -125,11 +112,11 @@ import { IconoComponent } from '../../shared/ui/icono.component';
 export class DirectorioPage {
   readonly accesos = [
     {
-      etiqueta: 'Personas',
+      etiqueta: 'Actores',
       ruta: '/directorio/personas',
       icono: 'actores',
       descripcion:
-        'Personas vinculadas a los casos, con su perfil de diálogo y galería fotográfica.',
+        'Actores vinculados a los casos, con su perfil de diálogo y galería fotográfica.',
     },
     {
       etiqueta: 'Organizaciones',

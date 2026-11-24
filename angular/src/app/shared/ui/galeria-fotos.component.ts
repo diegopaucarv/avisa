@@ -96,7 +96,7 @@ import {
     .galeria-vacia {
       margin: 0;
       color: #8d99a6;
-      font-size: 10px;
+      font-size: 12.5px;
       line-height: 1.5;
     }
 
@@ -129,7 +129,7 @@ import {
       flex-wrap: wrap;
       gap: 8px;
       color: #52677a;
-      font-size: 9.5px;
+      font-size: 12px;
     }
 
     .galeria-principal figcaption strong {

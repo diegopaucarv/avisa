@@ -247,33 +247,35 @@ Registrado ──► En ejecución ──► Cumplido
 
 **Volumen real de la fuente.**
 
-| Concepto                    | Cifra | Lectura                                                |
-| --------------------------- | ----- | ------------------------------------------------------ |
-| Pares de columnas semanales | 8     | Nudo y seguimiento por semana                          |
-| Celdas con nudo             | 118   | Incluye nudos repetidos y colisiones                   |
-| Celdas con seguimiento      | 136   | 137 si se cuenta una celda con sólo un espacio         |
-| Celdas no vacías            | 184   | Total real de filas a importar                         |
-| Celdas con ambas mitades    | 70    | Derivado: 118 + 136 − 184                              |
-| Nudos sin seguimiento       | 48    | Derivado: 118 − 70                                     |
-| Seguimientos sin nudo       | 66    | Derivado: 136 − 70                                     |
-| Colisiones reales           | 20    | Varios nudos distintos en la misma semana y compromiso |
-| Repeticiones literales      | 21    | Mismo texto en la misma semana y compromiso            |
+| Concepto                    | Cifra | Lectura                                                                                                                                  |
+| --------------------------- | ----- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| Pares de columnas semanales | 8     | Nudo y seguimiento por semana                                                                                                            |
+| Celdas con nudo             | 118   | Incluye nudos repetidos y colisiones                                                                                                     |
+| Celdas con seguimiento      | 136   | 137 si se cuenta una celda con sólo un espacio                                                                                           |
+| Celdas no vacías            | 254   | 118 nudo + 136 seguimiento; equivalen a 184 pares fila–semana                                                                            |
+| Celdas con ambas mitades    | 70    | Derivado: 118 + 136 − 184                                                                                                                |
+| Nudos sin seguimiento       | 48    | Derivado: 118 − 70                                                                                                                       |
+| Seguimientos sin nudo       | 66    | Derivado: 136 − 70                                                                                                                       |
+| Colisiones reales           | 20    | Varios nudos distintos en la misma semana y compromiso                                                                                   |
+| Repeticiones literales      | 24    | Mismo texto en la misma semana y compromiso (clave de 5 campos: caso + compromiso + semana + nudo normalizado + seguimiento normalizado) |
+
+**Resultado del dry-run (2026-11-24).** De los 184 pares: **146 filas insertadas**, **36 omitidas** (24 repetidas idénticas, 4 con caso sin destino, 4 con compromiso rechazado, 4 de caso anulado) y **2 rechazadas** por `sin_numero_excel`.
 
 **Reglas de fidelidad.**
 
-| Regla                  | Cómo se aplica                                                                                                                                | Resultado                                                         |
-| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
-| Una fila por celda     | Cada celda no vacía produce una fila; no se agrupa por caso ni por semana                                                                     | 184 filas, no 254                                                 |
-| Identidad de origen    | `origen_ref` con el formato `MATRIZ-N0002-C22`, único parcial                                                                                 | Reejecutar no duplica                                             |
-| Idempotencia           | Mismo `origen_ref` y mismo contenido: no hace nada. Mismo `origen_ref` y contenido distinto: conflicto declarado, no sobrescritura silenciosa | El informe distingue «sin cambio» de «conflicto»                  |
-| Dedupe literal         | Índice único por `(caso_id, compromiso_id, semana_desde, descripcion, seguimiento)`                                                           | Las 21 repeticiones literales producen una sola fila              |
-| Colisiones             | Varios nudos distintos en la misma semana y compromiso se conservan todos                                                                     | No se concatenan ni se elige uno                                  |
-| Semana 8               | Se conservan los dos periodos descuadrados, con nota de origen                                                                                | Nudo del 29 abr al 04 may 2026; seguimiento del 04 al 11 may 2026 |
-| Seguimiento sin nudo   | Se guarda con `descripcion` nula                                                                                                              | La interfaz declara «Sin nudo declarado»                          |
-| Nudo sin seguimiento   | Se guarda con `seguimiento` nulo                                                                                                              | La interfaz declara «Sin seguimiento declarado»                   |
-| Celda con sólo espacio | Se trata como vacía                                                                                                                           | No se importa; se informa                                         |
-| Caso no resuelto       | Si no se puede resolver el caso de la fila, la celda no se importa                                                                            | Se declara en el informe con su `origen_ref`                      |
-| Reejecución            | Se compara por `origen_ref`; nunca se borra lo importado                                                                                      | El informe es acumulativo por lote                                |
+| Regla                  | Cómo se aplica                                                                                                                                | Resultado                                                          |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| Una fila por celda     | Cada celda no vacía produce una fila; no se agrupa por caso ni por semana                                                                     | 254 celdas, no 184 filas: los 184 son pares fila–semana, no celdas |
+| Identidad de origen    | `origen_ref` con el formato `MATRIZ-N0002-C22`, único parcial                                                                                 | Reejecutar no duplica                                              |
+| Idempotencia           | Mismo `origen_ref` y mismo contenido: no hace nada. Mismo `origen_ref` y contenido distinto: conflicto declarado, no sobrescritura silenciosa | El informe distingue «sin cambio» de «conflicto»                   |
+| Dedupe literal         | Índice único por `(caso_id, compromiso_id, semana_desde, descripcion, seguimiento)`                                                           | Las 24 repeticiones literales producen una sola fila               |
+| Colisiones             | Varios nudos distintos en la misma semana y compromiso se conservan todos                                                                     | No se concatenan ni se elige uno                                   |
+| Semana 8               | Se conservan los dos periodos descuadrados, con nota de origen                                                                                | Nudo del 29 abr al 04 may 2026; seguimiento del 04 al 11 may 2026  |
+| Seguimiento sin nudo   | Se guarda con `descripcion` nula                                                                                                              | La interfaz declara «Sin nudo declarado»                           |
+| Nudo sin seguimiento   | Se guarda con `seguimiento` nulo                                                                                                              | La interfaz declara «Sin seguimiento declarado»                    |
+| Celda con sólo espacio | Se trata como vacía                                                                                                                           | No se importa; se informa                                          |
+| Caso no resuelto       | Si no se puede resolver el caso de la fila, la celda no se importa                                                                            | Se declara en el informe con su `origen_ref`                       |
+| Reejecución            | Se compara por `origen_ref`; nunca se borra lo importado                                                                                      | El informe es acumulativo por lote                                 |
 
 **Qué se rechaza y por qué.**
 

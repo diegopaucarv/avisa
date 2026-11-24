@@ -41,16 +41,11 @@ import { IconoComponent } from '../../shared/ui/icono.component';
       display: contents;
     }
 
-    .drawer-head h2 {
-      margin: 0;
-      color: #1c2a38;
-      font: 700 15px var(--font-display);
-    }
 
     .previa-codigo {
       margin: 0;
       color: #8a98a5;
-      font-size: 9px;
+      font-size: 12px;
       font-weight: 700;
       letter-spacing: 0.08em;
       text-transform: uppercase;
@@ -59,7 +54,7 @@ import { IconoComponent } from '../../shared/ui/icono.component';
     .previa-sub {
       margin: 4px 0 0;
       color: #647487;
-      font-size: 10px;
+      font-size: 12.5px;
     }
 
     .previa-meta {
@@ -78,7 +73,7 @@ import { IconoComponent } from '../../shared/ui/icono.component';
     .previa-meta dt {
       margin: 0;
       color: var(--muted);
-      font-size: 9px;
+      font-size: 12px;
       font-weight: 700;
       letter-spacing: 0.04em;
       text-transform: uppercase;
@@ -87,7 +82,7 @@ import { IconoComponent } from '../../shared/ui/icono.component';
     .previa-meta dd {
       margin: 0;
       color: var(--ink);
-      font-size: 11px;
+      font-size: 13px;
     }
 
     .previa-badges {
@@ -100,7 +95,7 @@ import { IconoComponent } from '../../shared/ui/icono.component';
     .previa-resumen {
       margin: 0 0 14px;
       color: var(--ink-2);
-      font-size: 11px;
+      font-size: 13px;
       line-height: 1.6;
     }
 
@@ -122,7 +117,7 @@ import { IconoComponent } from '../../shared/ui/icono.component';
       border-radius: 8px;
       background: #fff;
       color: var(--ink);
-      font: 600 10.5px var(--font-body);
+      font: 600 13px var(--font-body);
       text-align: left;
       text-decoration: none;
     }
@@ -144,14 +139,14 @@ import { IconoComponent } from '../../shared/ui/icono.component';
     .previa-acceso small {
       display: block;
       color: var(--muted);
-      font-size: 9px;
+      font-size: 12px;
       font-weight: 400;
     }
 
     .previa-nota {
       margin: 10px 0 0;
       color: var(--muted);
-      font-size: 9.5px;
+      font-size: 12px;
       line-height: 1.5;
     }
   `,

@@ -11,7 +11,7 @@
 -- es decir, «un nudo por caso y semana». El Excel no funciona así: los nudos
 -- se escriben a nivel de FILA (una fila por hito), de modo que un mismo caso
 -- puede tener varios nudos en la misma semana. El dry-run del 2026-11-24
--- encontró 20 colisiones reales y 21 celdas repetidas idénticas.
+-- encontró 20 colisiones reales y 24 celdas repetidas idénticas.
 --
 -- Además `descripcion` era NOT NULL, pero el Excel trae 66 celdas de
 -- «Seguimiento» sin «Nudo» (el par está descuadrado en origen). Rechazarlas
@@ -76,5 +76,11 @@ CREATE UNIQUE INDEX IF NOT EXISTS uq_caso_nudo_critico_dedupe
 
 COMMENT ON INDEX core.uq_caso_nudo_critico_dedupe IS
     'Evita duplicar el mismo nudo/seguimiento literal cuando el equipo copia la misma celda en dos semanas o la reimportación repite la fila.';
+
+-- ============================================================================
+-- Registro de la migración
+-- ============================================================================
+INSERT INTO core.migracion_log (clave) VALUES ('43_nudos_criticos_fieles')
+ON CONFLICT (clave) DO NOTHING;
 
 COMMIT;

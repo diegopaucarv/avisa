@@ -89,18 +89,12 @@ type ActorEdicion = Record<CampoActorEdicion, string> & { activo: boolean };
     .actor-panel-etiqueta {
       margin: 0;
       color: #8a98a5;
-      font-size: 9px;
+      font-size: 12px;
       font-weight: 700;
       letter-spacing: 0.7px;
       text-transform: uppercase;
     }
 
-    .drawer-head h2 {
-      margin: 0;
-      color: #1c2a38;
-      font: 700 16px/1.35 var(--font-display);
-      overflow-wrap: anywhere;
-    }
 
     .actor-panel-badges {
       display: flex;
@@ -134,7 +128,7 @@ type ActorEdicion = Record<CampoActorEdicion, string> & { activo: boolean };
     .actor-seccion h3 {
       margin: 0;
       color: #33475b;
-      font: 700 11px var(--font-display);
+      font: 700 13px var(--font-display);
     }
 
     .actor-datos {
@@ -153,7 +147,7 @@ type ActorEdicion = Record<CampoActorEdicion, string> & { activo: boolean };
 
     .actor-datos dt {
       color: #97a1aa;
-      font-size: 8.5px;
+      font-size: 12px;
       font-weight: 700;
       letter-spacing: 0.5px;
       text-transform: uppercase;
@@ -162,7 +156,7 @@ type ActorEdicion = Record<CampoActorEdicion, string> & { activo: boolean };
     .actor-datos dd {
       margin: 0;
       color: #465a6c;
-      font-size: 10.5px;
+      font-size: 13px;
       line-height: 1.45;
       overflow-wrap: anywhere;
     }
@@ -170,7 +164,7 @@ type ActorEdicion = Record<CampoActorEdicion, string> & { activo: boolean };
     .actor-perfil {
       margin: 0;
       color: #52677a;
-      font-size: 11px;
+      font-size: 13px;
       line-height: 1.65;
       white-space: pre-line;
     }
@@ -178,14 +172,14 @@ type ActorEdicion = Record<CampoActorEdicion, string> & { activo: boolean };
     .actor-nota {
       margin: 0;
       color: #8d99a6;
-      font-size: 10px;
+      font-size: 12.5px;
       line-height: 1.5;
     }
 
     .actor-vacio {
       margin: 0;
       color: #a0aab3;
-      font-size: 10.5px;
+      font-size: 13px;
       font-style: italic;
     }
 
@@ -198,7 +192,7 @@ type ActorEdicion = Record<CampoActorEdicion, string> & { activo: boolean };
       border-radius: 6px;
       background: #fdf6f5;
       color: #a3402f;
-      font-size: 10.5px;
+      font-size: 13px;
     }
 
     .actor-error p {
@@ -225,7 +219,7 @@ type ActorEdicion = Record<CampoActorEdicion, string> & { activo: boolean };
       gap: 6px;
       margin: 0;
       color: #7d8b98;
-      font-size: 9.5px;
+      font-size: 12px;
       line-height: 1.5;
     }
 
@@ -254,14 +248,14 @@ type ActorEdicion = Record<CampoActorEdicion, string> & { activo: boolean };
     .actor-editor h3 {
       margin: 0;
       color: #33475b;
-      font: 700 12px var(--font-display);
+      font: 700 14px var(--font-display);
     }
 
     .actor-editor label {
       display: grid;
       gap: 5px;
       color: #596c7e;
-      font-size: 10px;
+      font-size: 12.5px;
       font-weight: 600;
     }
 

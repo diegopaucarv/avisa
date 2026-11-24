@@ -73,7 +73,8 @@
                 border-radius: 4px;
                 background: var(--canvas);
                 color: var(--ink-2);
-                font-family: ui-monospace, "Cascadia Mono", "Consolas", monospace;
+                font-family:
+                    ui-monospace, "Cascadia Mono", "Consolas", monospace;
                 font-size: 0.92em;
             }
             :focus-visible {
@@ -1065,7 +1066,10 @@
         <div class="topbar">
             <div class="brand">
                 <b>AVISA</b>
-                <span>Aplicativo de apoyo a la gestión<br />de conflictos sociales</span>
+                <span
+                    >Aplicativo de apoyo a la gestión<br />de conflictos
+                    sociales</span
+                >
             </div>
             <nav class="crumbs" aria-label="Ubicación propuesta">
                 <span>Administración</span>
@@ -1075,7 +1079,10 @@
                 <span>pestaña propuesta</span>
             </nav>
             <div class="topbar-right">
-                <span class="badge amber"><span class="dot" aria-hidden="true"></span>sin ruta · no está en el menú</span>
+                <span class="badge amber"
+                    ><span class="dot" aria-hidden="true"></span>sin ruta · no
+                    está en el menú</span
+                >
                 <span class="badge blue">Administrador · Dirección</span>
                 <span class="badge">Item 87 · toca 56 y 66</span>
             </div>
@@ -1088,26 +1095,30 @@
                     <p class="view-subtitle">
                         Registro, evaluación y aprendizaje de cada propuesta
                         automática: <b>qué propuso el agente</b>, con qué
-                        confianza, <b>quién decidió</b> y por qué. Es pantalla de
-                        administración y supervisión, no de trabajo de campo.
-                        Cubre el <b>item 87</b> y toca <b>56</b> y <b>66</b>. Los
-                        nombres de tabla del esquema <code>agent</code> son
+                        confianza, <b>quién decidió</b> y por qué. Es pantalla
+                        de administración y supervisión, no de trabajo de campo.
+                        Cubre el <b>item 87</b> y toca <b>56</b> y <b>66</b>.
+                        Los nombres de tabla del esquema <code>agent</code> son
                         reales; las columnas que no se conocen se declaran
                         <span class="todo">por confirmar</span>. Toda cifra con
                         <span class="ex">≈</span> es <b>ejemplo</b>.
                     </p>
                 </div>
                 <div class="head-badges">
-                    <span class="badge amber">Vista previa · artboard 1440 px</span>
+                    <span class="badge amber"
+                        >Vista previa · artboard 1440 px</span
+                    >
                     <span class="badge">Administración · sólo lectura</span>
                 </div>
             </header>
 
             <div class="route" role="note">
                 <b>Ubicación propuesta</b>
-                <span class="path">Administración › Gobierno de las sugerencias</span>
+                <span class="path"
+                    >Administración › Gobierno de las sugerencias</span
+                >
                 <span>
-                    — no se agrega al menú del shell ni a las 22 rutas. Viviría
+                    — no se agrega al menú del shell ni a las 26 rutas. Viviría
                     bajo <b>Administración</b> (item <b>56</b>), visible sólo
                     para <b>Administrador</b> y <b>Dirección</b>. Los rótulos de
                     tipo y estado, y el vínculo a la entidad afectada, salen del
@@ -1118,10 +1129,14 @@
             <div class="golden" role="note">
                 <span class="golden-key">Regla de oro</span>
                 <p>
-                    <b>El sistema nunca aplica una sugerencia sin decisión humana.</b><br />
+                    <b
+                        >El sistema nunca aplica una sugerencia sin decisión
+                        humana.</b
+                    ><br />
                     Toda fila con efecto registra persona y fecha en
-                    <code>Decisión de</code>. Las dos filas sin decisión —Pendiente
-                    y Expirada— quedan inertes: no tocan el caso ni la alerta.
+                    <code>Decisión de</code>. Las dos filas sin decisión
+                    —Pendiente y Expirada— quedan inertes: no tocan el caso ni
+                    la alerta.
                 </p>
                 <div class="golden-stats">
                     <div>
@@ -1152,10 +1167,10 @@
                     vínculo a la entidad afectada, salen de un descriptor único
                     por entidad. <br />
                     <b>Pantalla:</b> administración y supervisión; no es una de
-                    las 22 rutas del mapa del sitio. <br />
-                    <b>Tipos registrados:</b> alerta propuesta · clasificación de
-                    nivel · borrador de ayuda memoria · vínculo caso–demanda ·
-                    duplicado detectado.
+                    las 26 rutas del mapa del sitio. <br />
+                    <b>Tipos registrados:</b> alerta propuesta · clasificación
+                    de nivel · borrador de ayuda memoria · vínculo caso–demanda
+                    · duplicado detectado.
                 </div>
 
                 <div class="ann-card wide">
@@ -1164,60 +1179,106 @@
                         <thead>
                             <tr>
                                 <th scope="col">Bloque o celda</th>
-                                <th scope="col">Tabla del esquema <code>agent</code></th>
+                                <th scope="col">
+                                    Tabla del esquema <code>agent</code>
+                                </th>
                                 <th scope="col">Estado</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
                                 <td>Tarjetas de indicadores</td>
-                                <td><code>run_log</code> · <code>feedback_log</code></td>
-                                <td>tablas existen · columnas <span class="todo">por confirmar</span></td>
+                                <td>
+                                    <code>run_log</code> ·
+                                    <code>feedback_log</code>
+                                </td>
+                                <td>
+                                    tablas existen · columnas
+                                    <span class="todo">por confirmar</span>
+                                </td>
                             </tr>
                             <tr>
                                 <td>Bandeja: fecha, tipo y confianza</td>
-                                <td><code>run_log</code> (+ partición <code>run_log_202611</code>)</td>
-                                <td>existe · columnas <span class="todo">por confirmar</span></td>
+                                <td>
+                                    <code>run_log</code> (+ partición
+                                    <code>run_log_202611</code>)
+                                </td>
+                                <td>
+                                    existe · columnas
+                                    <span class="todo">por confirmar</span>
+                                </td>
                             </tr>
                             <tr>
                                 <td>Bandeja: origen</td>
-                                <td><code>modelo_registro</code> · <code>plantilla_prompt</code></td>
-                                <td>existen · columnas <span class="todo">por confirmar</span></td>
+                                <td>
+                                    <code>modelo_registro</code> ·
+                                    <code>plantilla_prompt</code>
+                                </td>
+                                <td>
+                                    existen · columnas
+                                    <span class="todo">por confirmar</span>
+                                </td>
                             </tr>
                             <tr>
                                 <td>Bandeja: estado y decisión de</td>
                                 <td><code>feedback_log</code></td>
-                                <td>existe · <b>sin filas</b> · columnas <span class="todo">por confirmar</span></td>
+                                <td>
+                                    existe · <b>sin filas</b> · columnas
+                                    <span class="todo">por confirmar</span>
+                                </td>
                             </tr>
                             <tr>
                                 <td>Detalle: propuesta y fragmentos</td>
-                                <td><code>llm_call</code> · <code>llm_call_fragmento</code></td>
-                                <td>existen · columnas <span class="todo">por confirmar</span></td>
+                                <td>
+                                    <code>llm_call</code> ·
+                                    <code>llm_call_fragmento</code>
+                                </td>
+                                <td>
+                                    existen · columnas
+                                    <span class="todo">por confirmar</span>
+                                </td>
                             </tr>
                             <tr>
                                 <td>Detalle: sesión y pasos</td>
-                                <td><code>sesion</code> · <code>sesion_paso</code></td>
-                                <td>existen · columnas <span class="todo">por confirmar</span></td>
+                                <td>
+                                    <code>sesion</code> ·
+                                    <code>sesion_paso</code>
+                                </td>
+                                <td>
+                                    existen · columnas
+                                    <span class="todo">por confirmar</span>
+                                </td>
                             </tr>
                             <tr>
                                 <td>Lecciones aprendidas</td>
                                 <td><code>lessons_learned</code></td>
-                                <td>existe · no hay columna confirmada de «rechazos origen»</td>
+                                <td>
+                                    existe · no hay columna confirmada de
+                                    «rechazos origen»
+                                </td>
                             </tr>
                             <tr>
                                 <td>Gobierno de prompts y modelos</td>
-                                <td><code>plantilla_prompt</code> · <code>modelo_registro</code></td>
+                                <td>
+                                    <code>plantilla_prompt</code> ·
+                                    <code>modelo_registro</code>
+                                </td>
                                 <td>existen · lectura, sin endpoint</td>
                             </tr>
                             <tr>
                                 <td>Entidad afectada</td>
                                 <td><code>run_log</code> → caso o alerta</td>
-                                <td>falta confirmar la columna de vínculo · <span class="todo">por confirmar</span></td>
+                                <td>
+                                    falta confirmar la columna de vínculo ·
+                                    <span class="todo">por confirmar</span>
+                                </td>
                             </tr>
                             <tr>
                                 <td>Rótulos y catálogos de tipo</td>
                                 <td><code>cat_detalle_schema</code></td>
-                                <td>existe · sostiene el descriptor del item 66</td>
+                                <td>
+                                    existe · sostiene el descriptor del item 66
+                                </td>
                             </tr>
                         </tbody>
                     </table>
@@ -1237,13 +1298,14 @@
                 <div class="ann-card">
                     <h3><span class="n">4</span>Bloqueado</h3>
                     <b>Escritura:</b> «Convertir en regla» escribe en
-                    <code>plantilla_prompt</code>; no hay endpoint, y el botón se
-                    dibuja deshabilitado. <br />
-                    <b>Cálculo:</b> la tasa de aceptación y el tiempo medio hasta
-                    la decisión no se pueden calcular con
+                    <code>plantilla_prompt</code>; no hay endpoint, y el botón
+                    se dibuja deshabilitado. <br />
+                    <b>Cálculo:</b> la tasa de aceptación y el tiempo medio
+                    hasta la decisión no se pueden calcular con
                     <code>feedback_log</code> vacío. <br />
-                    <b>Vínculos:</b> <code>run_log</code> y la entidad afectada no
-                    tienen endpoint de consulta por id; los enlaces no navegan.
+                    <b>Vínculos:</b> <code>run_log</code> y la entidad afectada
+                    no tienen endpoint de consulta por id; los enlaces no
+                    navegan.
                     <br />
                     <b>Automatización:</b> aplicar una sugerencia sin decisión
                     humana no es un pendiente técnico, es una prohibición de
@@ -1252,9 +1314,9 @@
 
                 <div class="ann-card">
                     <h3><span class="n">5</span>Roles</h3>
-                    <b>Administrador:</b> ve todo; cuando exista endpoint es quien
-                    convierte una lección en regla y publica una versión de
-                    plantilla. <br />
+                    <b>Administrador:</b> ve todo; cuando exista endpoint es
+                    quien convierte una lección en regla y publica una versión
+                    de plantilla. <br />
                     <b>Dirección:</b> lectura completa, incluidas métricas,
                     motivos y versiones. <br />
                     <b>Sin acceso:</b> Secretaría General, Viceministerios,
@@ -1285,24 +1347,33 @@
                         <span class="tag-example">ejemplo</span>
                     </div>
                     <div class="val">
-                        <span class="approx">≈</span> 71,8 <span class="unit">%</span>
+                        <span class="approx">≈</span> 71,8
+                        <span class="unit">%</span>
                     </div>
-                    <div class="hint">(aceptadas + con cambios) ÷ decididas</div>
+                    <div class="hint">
+                        (aceptadas + con cambios) ÷ decididas
+                    </div>
                     <div class="foot">
                         Saldría de <code>agent.feedback_log</code> ⋈
                         <code>agent.run_log</code>; columnas
                         <span class="todo">por confirmar</span>.
-                        <span class="warn">No calculable hoy: <code>feedback_log</code> está vacío; la cifra es de ejemplo.</span>
+                        <span class="warn"
+                            >No calculable hoy: <code>feedback_log</code> está
+                            vacío; la cifra es de ejemplo.</span
+                        >
                     </div>
                 </div>
 
                 <div class="kpi">
                     <div class="kpi-top">
-                        <span class="label">Tiempo medio hasta la decisión</span>
+                        <span class="label"
+                            >Tiempo medio hasta la decisión</span
+                        >
                         <span class="tag-example">ejemplo</span>
                     </div>
                     <div class="val">
-                        <span class="approx">≈</span> 9 <span class="unit">h 40 min</span>
+                        <span class="approx">≈</span> 9
+                        <span class="unit">h 40 min</span>
                     </div>
                     <div class="hint">de la propuesta a la decisión humana</div>
                     <div class="foot">
@@ -1318,9 +1389,12 @@
                         <span class="tag-example">ejemplo</span>
                     </div>
                     <div class="val">
-                        <span class="approx">≈</span> 41 <span class="unit">h</span>
+                        <span class="approx">≈</span> 41
+                        <span class="unit">h</span>
                     </div>
-                    <div class="hint">tiempo estimado por sugerencia aceptada</div>
+                    <div class="hint">
+                        tiempo estimado por sugerencia aceptada
+                    </div>
                     <div class="foot">
                         Saldría de <code>agent.feedback_log</code>. Es una
                         <b>estimación declarada</b>, no una medición: no se
@@ -1335,49 +1409,90 @@
                     <div class="panel-head">
                         <div class="panel-title">
                             <h2 id="tray-title">Bandeja de sugerencias</h2>
-                            <span class="count">8 visibles · 128 en el período · 2 sin decisión</span>
+                            <span class="count"
+                                >8 visibles · 128 en el período · 2 sin
+                                decisión</span
+                            >
                         </div>
                         <span class="panel-note">
-                            Datos de ejemplo · la fila 3 está abierta en el detalle
+                            Datos de ejemplo · la fila 3 está abierta en el
+                            detalle
                         </span>
                     </div>
                     <div class="table-wrap">
                         <table class="tray">
                             <caption>
                                 Cada columna declara su tabla de origen y marca
-                                <span class="todo">por confirmar</span> cuando la
-                                columna no se conoce. Ninguna sugerencia tiene
-                                efecto sin «Decisión de» y fecha.
+                                <span class="todo">por confirmar</span>
+                                cuando la columna no se conoce. Ninguna
+                                sugerencia tiene efecto sin «Decisión de» y
+                                fecha.
                             </caption>
                             <thead>
                                 <tr>
                                     <th scope="col">
                                         Fecha
-                                        <span class="colsrc"><code>agent.run_log</code> · <span class="todo">por confirmar</span></span>
+                                        <span class="colsrc"
+                                            ><code>agent.run_log</code> ·
+                                            <span class="todo"
+                                                >por confirmar</span
+                                            ></span
+                                        >
                                     </th>
                                     <th scope="col">
                                         Origen
-                                        <span class="colsrc"><code>modelo_registro</code> / <code>plantilla_prompt</code> · <span class="todo">por confirmar</span></span>
+                                        <span class="colsrc"
+                                            ><code>modelo_registro</code> /
+                                            <code>plantilla_prompt</code> ·
+                                            <span class="todo"
+                                                >por confirmar</span
+                                            ></span
+                                        >
                                     </th>
                                     <th scope="col">
                                         Tipo de sugerencia
-                                        <span class="colsrc"><code>agent.run_log</code> · <span class="todo">por confirmar</span></span>
+                                        <span class="colsrc"
+                                            ><code>agent.run_log</code> ·
+                                            <span class="todo"
+                                                >por confirmar</span
+                                            ></span
+                                        >
                                     </th>
                                     <th scope="col">
                                         Entidad afectada
-                                        <span class="colsrc">vínculo en <code>run_log</code> · <span class="todo">por confirmar</span></span>
+                                        <span class="colsrc"
+                                            >vínculo en <code>run_log</code> ·
+                                            <span class="todo"
+                                                >por confirmar</span
+                                            ></span
+                                        >
                                     </th>
                                     <th scope="col">
                                         Confianza
-                                        <span class="colsrc"><code>agent.run_log</code> · <span class="todo">por confirmar</span></span>
+                                        <span class="colsrc"
+                                            ><code>agent.run_log</code> ·
+                                            <span class="todo"
+                                                >por confirmar</span
+                                            ></span
+                                        >
                                     </th>
                                     <th scope="col">
                                         Estado
-                                        <span class="colsrc"><code>agent.feedback_log</code> · <span class="todo">por confirmar</span></span>
+                                        <span class="colsrc"
+                                            ><code>agent.feedback_log</code> ·
+                                            <span class="todo"
+                                                >por confirmar</span
+                                            ></span
+                                        >
                                     </th>
                                     <th scope="col">
                                         Decisión de
-                                        <span class="colsrc"><code>agent.feedback_log</code> · <span class="todo">por confirmar</span></span>
+                                        <span class="colsrc"
+                                            ><code>agent.feedback_log</code> ·
+                                            <span class="todo"
+                                                >por confirmar</span
+                                            ></span
+                                        >
                                     </th>
                                 </tr>
                             </thead>
@@ -1386,34 +1501,74 @@
                                     <td>22 nov 2026</td>
                                     <td>
                                         Modelo · <b>M-2026-11</b>
-                                        <span class="when">modelo_registro</span>
+                                        <span class="when"
+                                            >modelo_registro</span
+                                        >
                                     </td>
                                     <td>Alerta propuesta</td>
-                                    <td><span class="entity">AL-2026-0311</span></td>
+                                    <td>
+                                        <span class="entity">AL-2026-0311</span>
+                                    </td>
                                     <td>
                                         <div class="conf">
-                                            <span class="bar" role="img" aria-label="Confianza 88 por ciento"><span class="fill" style="width:88%"></span></span>
+                                            <span
+                                                class="bar"
+                                                role="img"
+                                                aria-label="Confianza 88 por ciento"
+                                                ><span
+                                                    class="fill"
+                                                    style="width: 88%"
+                                                ></span
+                                            ></span>
                                             <b>88 %</b>
                                         </div>
                                     </td>
-                                    <td><span class="chip pending"><span class="g" aria-hidden="true">○</span>Pendiente</span></td>
-                                    <td><span class="none">— sin decisión</span></td>
+                                    <td>
+                                        <span class="chip pending"
+                                            ><span class="g" aria-hidden="true"
+                                                >○</span
+                                            >Pendiente</span
+                                        >
+                                    </td>
+                                    <td>
+                                        <span class="none">— sin decisión</span>
+                                    </td>
                                 </tr>
                                 <tr>
                                     <td>22 nov 2026</td>
                                     <td>
                                         Modelo · <b>M-2026-11</b>
-                                        <span class="when">modelo_registro</span>
+                                        <span class="when"
+                                            >modelo_registro</span
+                                        >
                                     </td>
                                     <td>Clasificación de nivel</td>
-                                    <td><span class="entity">CAS-2026-0184</span></td>
+                                    <td>
+                                        <span class="entity"
+                                            >CAS-2026-0184</span
+                                        >
+                                    </td>
                                     <td>
                                         <div class="conf">
-                                            <span class="bar" role="img" aria-label="Confianza 74 por ciento"><span class="fill" style="width:74%"></span></span>
+                                            <span
+                                                class="bar"
+                                                role="img"
+                                                aria-label="Confianza 74 por ciento"
+                                                ><span
+                                                    class="fill"
+                                                    style="width: 74%"
+                                                ></span
+                                            ></span>
                                             <b>74 %</b>
                                         </div>
                                     </td>
-                                    <td><span class="chip accepted"><span class="g" aria-hidden="true">✓</span>Aceptada</span></td>
+                                    <td>
+                                        <span class="chip accepted"
+                                            ><span class="g" aria-hidden="true"
+                                                >✓</span
+                                            >Aceptada</span
+                                        >
+                                    </td>
                                     <td>
                                         <span class="who">A. Rojas</span>
                                         <span class="when">22 nov · 15:12</span>
@@ -1423,20 +1578,39 @@
                                     <td>21 nov 2026</td>
                                     <td>
                                         Modelo · <b>M-2026-11</b>
-                                        <span class="when">modelo_registro</span>
+                                        <span class="when"
+                                            >modelo_registro</span
+                                        >
                                     </td>
                                     <td>Borrador de ayuda memoria</td>
                                     <td>
-                                        <span class="entity">CAS-2026-0171</span><br />
-                                        <span class="open-tag">detalle abierto</span>
+                                        <span class="entity">CAS-2026-0171</span
+                                        ><br />
+                                        <span class="open-tag"
+                                            >detalle abierto</span
+                                        >
                                     </td>
                                     <td>
                                         <div class="conf">
-                                            <span class="bar" role="img" aria-label="Confianza 63 por ciento"><span class="fill" style="width:63%"></span></span>
+                                            <span
+                                                class="bar"
+                                                role="img"
+                                                aria-label="Confianza 63 por ciento"
+                                                ><span
+                                                    class="fill"
+                                                    style="width: 63%"
+                                                ></span
+                                            ></span>
                                             <b>63 %</b>
                                         </div>
                                     </td>
-                                    <td><span class="chip changed"><span class="g" aria-hidden="true">✎</span>Aceptada con cambios</span></td>
+                                    <td>
+                                        <span class="chip changed"
+                                            ><span class="g" aria-hidden="true"
+                                                >✎</span
+                                            >Aceptada con cambios</span
+                                        >
+                                    </td>
                                     <td>
                                         <span class="who">L. Paredes</span>
                                         <span class="when">21 nov · 18:40</span>
@@ -1446,17 +1620,37 @@
                                     <td>21 nov 2026</td>
                                     <td>
                                         Plantilla · <b>v1.4.2</b>
-                                        <span class="when">plantilla_prompt</span>
+                                        <span class="when"
+                                            >plantilla_prompt</span
+                                        >
                                     </td>
                                     <td>Vínculo caso–demanda</td>
-                                    <td><span class="entity">CAS-2026-0158 ↔ D-2026-0402</span></td>
+                                    <td>
+                                        <span class="entity"
+                                            >CAS-2026-0158 ↔ D-2026-0402</span
+                                        >
+                                    </td>
                                     <td>
                                         <div class="conf">
-                                            <span class="bar" role="img" aria-label="Confianza 91 por ciento"><span class="fill" style="width:91%"></span></span>
+                                            <span
+                                                class="bar"
+                                                role="img"
+                                                aria-label="Confianza 91 por ciento"
+                                                ><span
+                                                    class="fill"
+                                                    style="width: 91%"
+                                                ></span
+                                            ></span>
                                             <b>91 %</b>
                                         </div>
                                     </td>
-                                    <td><span class="chip accepted"><span class="g" aria-hidden="true">✓</span>Aceptada</span></td>
+                                    <td>
+                                        <span class="chip accepted"
+                                            ><span class="g" aria-hidden="true"
+                                                >✓</span
+                                            >Aceptada</span
+                                        >
+                                    </td>
                                     <td>
                                         <span class="who">L. Paredes</span>
                                         <span class="when">21 nov · 11:03</span>
@@ -1466,17 +1660,37 @@
                                     <td>20 nov 2026</td>
                                     <td>
                                         Modelo · <b>M-2026-10</b>
-                                        <span class="when">modelo_registro</span>
+                                        <span class="when"
+                                            >modelo_registro</span
+                                        >
                                     </td>
                                     <td>Vínculo caso–demanda</td>
-                                    <td><span class="entity">CAS-2026-0132 ↔ D-2026-0377</span></td>
+                                    <td>
+                                        <span class="entity"
+                                            >CAS-2026-0132 ↔ D-2026-0377</span
+                                        >
+                                    </td>
                                     <td>
                                         <div class="conf">
-                                            <span class="bar" role="img" aria-label="Confianza 52 por ciento"><span class="fill" style="width:52%"></span></span>
+                                            <span
+                                                class="bar"
+                                                role="img"
+                                                aria-label="Confianza 52 por ciento"
+                                                ><span
+                                                    class="fill"
+                                                    style="width: 52%"
+                                                ></span
+                                            ></span>
                                             <b>52 %</b>
                                         </div>
                                     </td>
-                                    <td><span class="chip rejected"><span class="g" aria-hidden="true">✕</span>Rechazada</span></td>
+                                    <td>
+                                        <span class="chip rejected"
+                                            ><span class="g" aria-hidden="true"
+                                                >✕</span
+                                            >Rechazada</span
+                                        >
+                                    </td>
                                     <td>
                                         <span class="who">A. Rojas</span>
                                         <span class="when">20 nov · 16:55</span>
@@ -1486,17 +1700,37 @@
                                     <td>20 nov 2026</td>
                                     <td>
                                         Modelo · <b>M-2026-10</b>
-                                        <span class="when">modelo_registro</span>
+                                        <span class="when"
+                                            >modelo_registro</span
+                                        >
                                     </td>
                                     <td>Duplicado detectado</td>
-                                    <td><span class="entity">CAS-2026-0128 = CAS-2026-0125</span></td>
+                                    <td>
+                                        <span class="entity"
+                                            >CAS-2026-0128 = CAS-2026-0125</span
+                                        >
+                                    </td>
                                     <td>
                                         <div class="conf">
-                                            <span class="bar" role="img" aria-label="Confianza 83 por ciento"><span class="fill" style="width:83%"></span></span>
+                                            <span
+                                                class="bar"
+                                                role="img"
+                                                aria-label="Confianza 83 por ciento"
+                                                ><span
+                                                    class="fill"
+                                                    style="width: 83%"
+                                                ></span
+                                            ></span>
                                             <b>83 %</b>
                                         </div>
                                     </td>
-                                    <td><span class="chip rejected"><span class="g" aria-hidden="true">✕</span>Rechazada</span></td>
+                                    <td>
+                                        <span class="chip rejected"
+                                            ><span class="g" aria-hidden="true"
+                                                >✕</span
+                                            >Rechazada</span
+                                        >
+                                    </td>
                                     <td>
                                         <span class="who">M. Quispe</span>
                                         <span class="when">20 nov · 10:21</span>
@@ -1506,17 +1740,37 @@
                                     <td>19 nov 2026</td>
                                     <td>
                                         Modelo · <b>M-2026-10</b>
-                                        <span class="when">modelo_registro</span>
+                                        <span class="when"
+                                            >modelo_registro</span
+                                        >
                                     </td>
                                     <td>Clasificación de nivel</td>
-                                    <td><span class="entity">CAS-2026-0119</span></td>
+                                    <td>
+                                        <span class="entity"
+                                            >CAS-2026-0119</span
+                                        >
+                                    </td>
                                     <td>
                                         <div class="conf">
-                                            <span class="bar" role="img" aria-label="Confianza 68 por ciento"><span class="fill" style="width:68%"></span></span>
+                                            <span
+                                                class="bar"
+                                                role="img"
+                                                aria-label="Confianza 68 por ciento"
+                                                ><span
+                                                    class="fill"
+                                                    style="width: 68%"
+                                                ></span
+                                            ></span>
                                             <b>68 %</b>
                                         </div>
                                     </td>
-                                    <td><span class="chip changed"><span class="g" aria-hidden="true">✎</span>Aceptada con cambios</span></td>
+                                    <td>
+                                        <span class="chip changed"
+                                            ><span class="g" aria-hidden="true"
+                                                >✎</span
+                                            >Aceptada con cambios</span
+                                        >
+                                    </td>
                                     <td>
                                         <span class="who">M. Quispe</span>
                                         <span class="when">19 nov · 17:02</span>
@@ -1526,17 +1780,35 @@
                                     <td>18 nov 2026</td>
                                     <td>
                                         Modelo · <b>M-2026-10</b>
-                                        <span class="when">modelo_registro</span>
+                                        <span class="when"
+                                            >modelo_registro</span
+                                        >
                                     </td>
                                     <td>Alerta propuesta</td>
-                                    <td><span class="entity">AL-2026-0296</span></td>
+                                    <td>
+                                        <span class="entity">AL-2026-0296</span>
+                                    </td>
                                     <td>
                                         <div class="conf">
-                                            <span class="bar" role="img" aria-label="Confianza 47 por ciento"><span class="fill" style="width:47%"></span></span>
+                                            <span
+                                                class="bar"
+                                                role="img"
+                                                aria-label="Confianza 47 por ciento"
+                                                ><span
+                                                    class="fill"
+                                                    style="width: 47%"
+                                                ></span
+                                            ></span>
                                             <b>47 %</b>
                                         </div>
                                     </td>
-                                    <td><span class="chip expired"><span class="g" aria-hidden="true">◷</span>Expirada</span></td>
+                                    <td>
+                                        <span class="chip expired"
+                                            ><span class="g" aria-hidden="true"
+                                                >◷</span
+                                            >Expirada</span
+                                        >
+                                    </td>
                                     <td>
                                         <span class="none">— sin decisión</span>
                                         <span class="when">venció 21 nov</span>
@@ -1547,21 +1819,41 @@
                                 <tr>
                                     <td colspan="7">
                                         <b>0 de 8</b> filas se aplicaron sin
-                                        persona y fecha. Las 2 filas sin decisión
-                                        (Pendiente y Expirada) no tocaron el caso
-                                        ni la alerta. El estado nunca se lee sólo
-                                        por color: cada chip lleva texto y símbolo.
+                                        persona y fecha. Las 2 filas sin
+                                        decisión (Pendiente y Expirada) no
+                                        tocaron el caso ni la alerta. El estado
+                                        nunca se lee sólo por color: cada chip
+                                        lleva texto y símbolo.
                                     </td>
                                 </tr>
                             </tfoot>
                         </table>
                     </div>
-                    <div class="legend" role="group" aria-label="Leyenda de estados">
-                        <span class="chip pending"><span class="g" aria-hidden="true">○</span>Pendiente = espera decisión</span>
-                        <span class="chip accepted"><span class="g" aria-hidden="true">✓</span>Aceptada = aplicada como se propuso</span>
-                        <span class="chip changed"><span class="g" aria-hidden="true">✎</span>Aceptada con cambios = aplicada con texto revisado</span>
-                        <span class="chip rejected"><span class="g" aria-hidden="true">✕</span>Rechazada = no se aplica; motivo obligatorio</span>
-                        <span class="chip expired"><span class="g" aria-hidden="true">◷</span>Expirada = venció sin decisión</span>
+                    <div
+                        class="legend"
+                        role="group"
+                        aria-label="Leyenda de estados"
+                    >
+                        <span class="chip pending"
+                            ><span class="g" aria-hidden="true">○</span
+                            >Pendiente = espera decisión</span
+                        >
+                        <span class="chip accepted"
+                            ><span class="g" aria-hidden="true">✓</span>Aceptada
+                            = aplicada como se propuso</span
+                        >
+                        <span class="chip changed"
+                            ><span class="g" aria-hidden="true">✎</span>Aceptada
+                            con cambios = aplicada con texto revisado</span
+                        >
+                        <span class="chip rejected"
+                            ><span class="g" aria-hidden="true">✕</span
+                            >Rechazada = no se aplica; motivo obligatorio</span
+                        >
+                        <span class="chip expired"
+                            ><span class="g" aria-hidden="true">◷</span>Expirada
+                            = venció sin decisión</span
+                        >
                     </div>
                 </section>
 
@@ -1569,11 +1861,18 @@
                 <aside class="panel detail" aria-labelledby="det-title">
                     <div class="panel-head detail-head">
                         <div>
-                            <span class="eyebrow">Panel lateral · dibujado abierto</span>
+                            <span class="eyebrow"
+                                >Panel lateral · dibujado abierto</span
+                            >
                             <h2 id="det-title">Borrador de ayuda memoria</h2>
-                            <span class="detail-sub">CAS-2026-0171 · fila 3 de la bandeja</span>
+                            <span class="detail-sub"
+                                >CAS-2026-0171 · fila 3 de la bandeja</span
+                            >
                         </div>
-                        <span class="chip changed"><span class="g" aria-hidden="true">✎</span>Aceptada con cambios</span>
+                        <span class="chip changed"
+                            ><span class="g" aria-hidden="true">✎</span>Aceptada
+                            con cambios</span
+                        >
                     </div>
                     <div class="detail-body">
                         <dl class="meta">
@@ -1595,7 +1894,9 @@
                             </div>
                             <div>
                                 <dt>run_log</dt>
-                                <dd>id <span class="todo">por confirmar</span></dd>
+                                <dd>
+                                    id <span class="todo">por confirmar</span>
+                                </dd>
                             </div>
                             <div>
                                 <dt>Entidad</dt>
@@ -1613,8 +1914,8 @@
                             </p>
                             <p class="src-line">
                                 Texto generado en <code>agent.llm_call</code> y
-                                <code>agent.llm_call_fragmento</code>; la sesión y
-                                sus pasos están en <code>agent.sesion</code> y
+                                <code>agent.llm_call_fragmento</code>; la sesión
+                                y sus pasos están en <code>agent.sesion</code> y
                                 <code>agent.sesion_paso</code>. Columnas
                                 <span class="todo">por confirmar</span>.
                             </p>
@@ -1624,8 +1925,8 @@
                             <h3>Qué decidió la persona</h3>
                             <div class="decision-box">
                                 <p>
-                                    <b>L. Paredes</b> · Especialista OAIPCS · 21 nov
-                                    2026, 18:40
+                                    <b>L. Paredes</b> · Especialista OAIPCS · 21
+                                    nov 2026, 18:40
                                 </p>
                                 <p>
                                     «Aceptar con cambios: corregir la fecha, el
@@ -1633,8 +1934,9 @@
                                     ampliar el plazo a 90 días.»
                                 </p>
                                 <p class="src-line">
-                                    Registrado en <code>agent.feedback_log</code> ·
-                                    columnas <span class="todo">por confirmar</span>.
+                                    Registrado en
+                                    <code>agent.feedback_log</code> · columnas
+                                    <span class="todo">por confirmar</span>.
                                 </p>
                             </div>
                         </section>
@@ -1642,40 +1944,47 @@
                         <section class="dsec">
                             <h3>Diff · texto propuesto y texto aceptado</h3>
                             <div class="diff-legend">
-                                <span><span class="k-del">texto retirado</span> · rojo y tachado</span>
-                                <span><span class="k-ins">texto añadido</span> · azul y subrayado</span>
+                                <span
+                                    ><span class="k-del">texto retirado</span> ·
+                                    rojo y tachado</span
+                                >
+                                <span
+                                    ><span class="k-ins">texto añadido</span> ·
+                                    azul y subrayado</span
+                                >
                             </div>
                             <div class="diff">
                                 <div class="diff-col">
                                     <h4>Texto propuesto</h4>
                                     <p>
                                         Se sostuvo una reunión el
-                                        <del>14 nov 2026</del> en el auditorio de
-                                        la Municipalidad Provincial de Talara con
-                                        <del>32</del> participantes. El
-                                        <del>acta 44</del> registra tres acuerdos:
-                                        (1) conformar una mesa técnica; (2)
-                                        actualizar el padrón de pescadores
-                                        artesanales; (3) fijar un plazo de
-                                        <del>60 días</del> para la entrega del
-                                        informe. Se recomienda dar seguimiento al
-                                        acuerdo 2.
+                                        <del>14 nov 2026</del> en el auditorio
+                                        de la Municipalidad Provincial de Talara
+                                        con <del>32</del> participantes. El
+                                        <del>acta 44</del> registra tres
+                                        acuerdos: (1) conformar una mesa
+                                        técnica; (2) actualizar el padrón de
+                                        pescadores artesanales; (3) fijar un
+                                        plazo de <del>60 días</del> para la
+                                        entrega del informe. Se recomienda dar
+                                        seguimiento al acuerdo 2.
                                     </p>
                                 </div>
                                 <div class="diff-col">
                                     <h4>Texto aceptado</h4>
                                     <p>
                                         Se sostuvo una reunión el
-                                        <ins>18 nov 2026</ins> en el auditorio de
-                                        la Municipalidad Provincial de Talara con
-                                        <ins>27</ins> participantes. El
-                                        <ins>acta 47</ins> registra tres acuerdos:
-                                        (1) conformar una mesa técnica; (2)
-                                        actualizar el padrón de pescadores
-                                        artesanales; (3) fijar un plazo de
-                                        <ins>90 días</ins> para la entrega del
-                                        informe. Se recomienda dar seguimiento al
-                                        acuerdo 2 <ins>y al acuerdo 1</ins>.
+                                        <ins>18 nov 2026</ins> en el auditorio
+                                        de la Municipalidad Provincial de Talara
+                                        con <ins>27</ins> participantes. El
+                                        <ins>acta 47</ins> registra tres
+                                        acuerdos: (1) conformar una mesa
+                                        técnica; (2) actualizar el padrón de
+                                        pescadores artesanales; (3) fijar un
+                                        plazo de <ins>90 días</ins> para la
+                                        entrega del informe. Se recomienda dar
+                                        seguimiento al acuerdo 2
+                                        <ins>y al acuerdo 1</ins>.
                                     </p>
                                 </div>
                             </div>
@@ -1690,16 +1999,17 @@
                         <section class="dsec">
                             <h3>Motivo del rechazo</h3>
                             <p>
-                                <b>En esta fila no hubo rechazo:</b> se aceptó con
-                                cambios. El motivo del cambio fue «el borrador
-                                citaba el acta 44 y 32 asistentes; la revisión
-                                contra el acta 47 corrigió fecha, número de acta y
-                                asistentes, y amplió el plazo a 90 días».
+                                <b>En esta fila no hubo rechazo:</b> se aceptó
+                                con cambios. El motivo del cambio fue «el
+                                borrador citaba el acta 44 y 32 asistentes; la
+                                revisión contra el acta 47 corrigió fecha,
+                                número de acta y asistentes, y amplió el plazo a
+                                90 días».
                             </p>
                             <div class="callout">
-                                <b>Motivo del rechazo · obligatorio</b> cuando el
-                                estado es Rechazada. Ejemplo de la fila 6: «el
-                                vínculo se sostiene sólo por nombre de
+                                <b>Motivo del rechazo · obligatorio</b> cuando
+                                el estado es Rechazada. Ejemplo de la fila 6:
+                                «el vínculo se sostiene sólo por nombre de
                                 organización; el ubigeo no coincide».
                             </div>
                             <p class="src-line">
@@ -1713,14 +2023,26 @@
                         <section class="dsec">
                             <h3>Traza y entidad</h3>
                             <div class="linkrow">
-                                <span class="linkish" role="link" tabindex="0" aria-disabled="true">Ver run_log de esta sugerencia</span>
-                                <span class="linkish" role="link" tabindex="0" aria-disabled="true">Abrir CAS-2026-0171</span>
+                                <span
+                                    class="linkish"
+                                    role="link"
+                                    tabindex="0"
+                                    aria-disabled="true"
+                                    >Ver run_log de esta sugerencia</span
+                                >
+                                <span
+                                    class="linkish"
+                                    role="link"
+                                    tabindex="0"
+                                    aria-disabled="true"
+                                    >Abrir CAS-2026-0171</span
+                                >
                             </div>
                             <p class="note">
                                 Enlaces dibujados: <code>run_log</code> existe
                                 (partición <code>run_log_202611</code>), pero no
-                                hay endpoint de consulta por id ni de apertura de
-                                la entidad desde acá. No navegan.
+                                hay endpoint de consulta por id ni de apertura
+                                de la entidad desde acá. No navegan.
                             </p>
                         </section>
                     </div>
@@ -1732,17 +2054,24 @@
                 <div class="panel-head">
                     <div class="panel-title">
                         <h2 id="les-title">Lecciones aprendidas</h2>
-                        <span class="count">3 reglas candidatas · cada una declara sus rechazos de origen</span>
+                        <span class="count"
+                            >3 reglas candidatas · cada una declara sus rechazos
+                            de origen</span
+                        >
                     </div>
-                    <span class="badge amber"><span class="dot" aria-hidden="true"></span>Escritura bloqueada</span>
+                    <span class="badge amber"
+                        ><span class="dot" aria-hidden="true"></span>Escritura
+                        bloqueada</span
+                    >
                 </div>
                 <div class="panel-body">
                     <p class="panel-intro">
                         Reglas destiladas de rechazos con el mismo motivo.
                         «Convertir en regla» escribiría en
-                        <code>agent.plantilla_prompt</code>; como no hay endpoint,
-                        la acción se dibuja deshabilitada. La versión vigente y el
-                        historial están en el bloque de gobierno, abajo.
+                        <code>agent.plantilla_prompt</code>; como no hay
+                        endpoint, la acción se dibuja deshabilitada. La versión
+                        vigente y el historial están en el bloque de gobierno,
+                        abajo.
                     </p>
                     <div class="lesson-grid">
                         <article class="lesson">
@@ -1750,7 +2079,9 @@
                                 <code>L-07</code>
                                 <span class="chip grey">Candidata</span>
                             </div>
-                            <h3>Revisar el ubigeo antes de proponer un duplicado</h3>
+                            <h3>
+                                Revisar el ubigeo antes de proponer un duplicado
+                            </h3>
                             <p>
                                 Si dos casos coinciden en nombre de actor pero
                                 están en distritos distintos, el par no es
@@ -1758,11 +2089,22 @@
                             </p>
                             <p class="origin">
                                 <b>Origen:</b> 6 rechazos entre el 4 y el 20 nov
-                                2026, todos con el motivo «el ubigeo no coincide».
+                                2026, todos con el motivo «el ubigeo no
+                                coincide».
                             </p>
                             <div class="lesson-act">
-                                <button type="button" class="btn" disabled aria-disabled="true">Convertir en regla</button>
-                                <span class="lock"><b>bloqueada</b> · escribe en <code>plantilla_prompt</code></span>
+                                <button
+                                    type="button"
+                                    class="btn"
+                                    disabled
+                                    aria-disabled="true"
+                                >
+                                    Convertir en regla
+                                </button>
+                                <span class="lock"
+                                    ><b>bloqueada</b> · escribe en
+                                    <code>plantilla_prompt</code></span
+                                >
                             </div>
                         </article>
 
@@ -1774,15 +2116,26 @@
                             <h3>Citar el acta con fecha y folio</h3>
                             <p>
                                 Toda ayuda memoria debe citar el número de acta,
-                                su fecha y el folio del documento que la respalda.
+                                su fecha y el folio del documento que la
+                                respalda.
                             </p>
                             <p class="origin">
                                 <b>Origen:</b> 4 rechazos y 3 aceptaciones con
                                 cambios entre el 11 y el 21 nov 2026.
                             </p>
                             <div class="lesson-act">
-                                <button type="button" class="btn" disabled aria-disabled="true">Convertir en regla</button>
-                                <span class="lock"><b>bloqueada</b> · escribe en <code>plantilla_prompt</code></span>
+                                <button
+                                    type="button"
+                                    class="btn"
+                                    disabled
+                                    aria-disabled="true"
+                                >
+                                    Convertir en regla
+                                </button>
+                                <span class="lock"
+                                    ><b>bloqueada</b> · escribe en
+                                    <code>plantilla_prompt</code></span
+                                >
                             </div>
                         </article>
 
@@ -1791,26 +2144,40 @@
                                 <code>L-09</code>
                                 <span class="chip grey">Candidata</span>
                             </div>
-                            <h3>Exigir dos coincidencias de actor para vincular una demanda</h3>
+                            <h3>
+                                Exigir dos coincidencias de actor para vincular
+                                una demanda
+                            </h3>
                             <p>
                                 No proponer un vínculo caso–demanda con una sola
                                 coincidencia de nombre de organización.
                             </p>
                             <p class="origin">
-                                <b>Origen:</b> 3 rechazos entre el 12 y el 20 nov
-                                2026. Requiere umbral de confianza y visto bueno
-                                de Dirección antes de ser regla.
+                                <b>Origen:</b> 3 rechazos entre el 12 y el 20
+                                nov 2026. Requiere umbral de confianza y visto
+                                bueno de Dirección antes de ser regla.
                             </p>
                             <div class="lesson-act">
-                                <button type="button" class="btn" disabled aria-disabled="true">Convertir en regla</button>
-                                <span class="lock"><b>bloqueada</b> · escribe en <code>plantilla_prompt</code></span>
+                                <button
+                                    type="button"
+                                    class="btn"
+                                    disabled
+                                    aria-disabled="true"
+                                >
+                                    Convertir en regla
+                                </button>
+                                <span class="lock"
+                                    ><b>bloqueada</b> · escribe en
+                                    <code>plantilla_prompt</code></span
+                                >
                             </div>
                         </article>
                     </div>
                     <p class="src-line">
-                        Fuente: <code>agent.lessons_learned</code>. La columna que
-                        cuenta los rechazos que originaron cada regla no está
-                        confirmada: <span class="todo">por confirmar</span>.
+                        Fuente: <code>agent.lessons_learned</code>. La columna
+                        que cuenta los rechazos que originaron cada regla no
+                        está confirmada:
+                        <span class="todo">por confirmar</span>.
                     </p>
                 </div>
             </section>
@@ -1820,7 +2187,10 @@
                 <div class="panel-head">
                     <div class="panel-title">
                         <h2 id="gov-title">Gobierno de prompts y modelos</h2>
-                        <span class="count">versión vigente, modelo en uso e historial con autor</span>
+                        <span class="count"
+                            >versión vigente, modelo en uso e historial con
+                            autor</span
+                        >
                     </div>
                     <span class="badge">Sólo lectura · sin endpoints</span>
                 </div>
@@ -1829,7 +2199,10 @@
                         <div class="gov-item">
                             <h3>
                                 Versión vigente de la plantilla
-                                <span class="chip info"><span class="g" aria-hidden="true">●</span>vigente</span>
+                                <span class="chip info"
+                                    ><span class="g" aria-hidden="true">●</span
+                                    >vigente</span
+                                >
                             </h3>
                             <span class="gval">v1.4.2</span>
                             <p>
@@ -1844,7 +2217,10 @@
                         <div class="gov-item">
                             <h3>
                                 Modelo en uso
-                                <span class="chip changed"><span class="g" aria-hidden="true">●</span>en uso</span>
+                                <span class="chip changed"
+                                    ><span class="g" aria-hidden="true">●</span
+                                    >en uso</span
+                                >
                             </h3>
                             <span class="gval">M-2026-11</span>
                             <p>
@@ -1868,19 +2244,39 @@
                             <tr>
                                 <th scope="col">
                                     Versión
-                                    <span class="colsrc"><code>plantilla_prompt</code> · <span class="todo">por confirmar</span></span>
+                                    <span class="colsrc"
+                                        ><code>plantilla_prompt</code> ·
+                                        <span class="todo"
+                                            >por confirmar</span
+                                        ></span
+                                    >
                                 </th>
                                 <th scope="col">
                                     Vigente desde
-                                    <span class="colsrc"><code>plantilla_prompt</code> · <span class="todo">por confirmar</span></span>
+                                    <span class="colsrc"
+                                        ><code>plantilla_prompt</code> ·
+                                        <span class="todo"
+                                            >por confirmar</span
+                                        ></span
+                                    >
                                 </th>
                                 <th scope="col">
                                     Autor
-                                    <span class="colsrc"><code>plantilla_prompt</code> · <span class="todo">por confirmar</span></span>
+                                    <span class="colsrc"
+                                        ><code>plantilla_prompt</code> ·
+                                        <span class="todo"
+                                            >por confirmar</span
+                                        ></span
+                                    >
                                 </th>
                                 <th scope="col">
                                     Qué cambió
-                                    <span class="colsrc">texto de la versión · <span class="todo">por confirmar</span></span>
+                                    <span class="colsrc"
+                                        >texto de la versión ·
+                                        <span class="todo"
+                                            >por confirmar</span
+                                        ></span
+                                    >
                                 </th>
                                 <th scope="col">Estado</th>
                             </tr>
@@ -1891,10 +2287,16 @@
                                 <td>12 nov 2026</td>
                                 <td>M. Quispe · Administrador</td>
                                 <td>
-                                    Restringe el borrador de ayuda memoria a actas
-                                    con folio verificable.
+                                    Restringe el borrador de ayuda memoria a
+                                    actas con folio verificable.
                                 </td>
-                                <td><span class="chip info"><span class="g" aria-hidden="true">●</span>Vigente</span></td>
+                                <td>
+                                    <span class="chip info"
+                                        ><span class="g" aria-hidden="true"
+                                            >●</span
+                                        >Vigente</span
+                                    >
+                                </td>
                             </tr>
                             <tr>
                                 <td><b>v1.4.1</b></td>
@@ -1904,45 +2306,61 @@
                                     Añade el ubigeo al ejemplo de duplicados
                                     (lección L-07).
                                 </td>
-                                <td><span class="chip grey">Reemplazada</span></td>
+                                <td>
+                                    <span class="chip grey">Reemplazada</span>
+                                </td>
                             </tr>
                             <tr>
                                 <td><b>v1.3.0</b></td>
                                 <td>21 oct 2026</td>
                                 <td>A. Rojas · Dirección</td>
                                 <td>
-                                    Sube el umbral de vínculo caso–demanda de 0,70
-                                    a 0,80.
+                                    Sube el umbral de vínculo caso–demanda de
+                                    0,70 a 0,80.
                                 </td>
-                                <td><span class="chip grey">Reemplazada</span></td>
+                                <td>
+                                    <span class="chip grey">Reemplazada</span>
+                                </td>
                             </tr>
                             <tr>
                                 <td><b>v1.2.0</b></td>
                                 <td>2 oct 2026</td>
                                 <td>M. Quispe · Administrador</td>
-                                <td>Plantilla inicial de clasificación de nivel.</td>
-                                <td><span class="chip grey">Reemplazada</span></td>
+                                <td>
+                                    Plantilla inicial de clasificación de nivel.
+                                </td>
+                                <td>
+                                    <span class="chip grey">Reemplazada</span>
+                                </td>
                             </tr>
                         </tbody>
                     </table>
                     <p class="note" style="margin-top: 9px">
-                        Sólo lectura: no hay endpoint para publicar una versión ni
-                        para cambiar el modelo. Todo cambio es un acto auditado de
-                        Administración (item 56) y esta pantalla no lo ejecuta.
+                        Sólo lectura: no hay endpoint para publicar una versión
+                        ni para cambiar el modelo. Todo cambio es un acto
+                        auditado de Administración (item 56) y esta pantalla no
+                        lo ejecuta.
                     </p>
                 </div>
             </section>
 
             <footer class="foot">
                 <span>
-                    <b>Fuente:</b> esquema <code>agent</code> — <code>run_log</code>
-                    (y sus particiones), <code>feedback_log</code>,
-                    <code>lessons_learned</code>, <code>plantilla_prompt</code>,
-                    <code>modelo_registro</code>, <code>llm_call</code>,
-                    <code>sesion</code>, <code>cat_detalle_schema</code>.
+                    <b>Fuente:</b> esquema <code>agent</code> —
+                    <code>run_log</code> (y sus particiones),
+                    <code>feedback_log</code>, <code>lessons_learned</code>,
+                    <code>plantilla_prompt</code>, <code>modelo_registro</code>,
+                    <code>llm_call</code>, <code>sesion</code>,
+                    <code>cat_detalle_schema</code>.
                 </span>
-                <span><b>Forma:</b> artboard de 1440 px; se abre sin servidor.</span>
-                <span><b>Regla:</b> ninguna sugerencia con efecto sin decisión humana.</span>
+                <span
+                    ><b>Forma:</b> artboard de 1440 px; se abre sin
+                    servidor.</span
+                >
+                <span
+                    ><b>Regla:</b> ninguna sugerencia con efecto sin decisión
+                    humana.</span
+                >
             </footer>
         </main>
     </body>

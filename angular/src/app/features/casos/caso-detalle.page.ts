@@ -8,6 +8,7 @@ import {
   effect,
   inject,
   signal,
+  untracked,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -17,7 +18,14 @@ import { urlApi } from '../../core/config/entorno';
 import { consulta } from '../../core/http/consulta';
 import { aErrorApi } from '../../core/http/errores';
 import { CapacidadesService } from '../../core/permisos/capacidades.service';
-import { aDetalleCaso, ActorCaso, DemandaCaso, DetalleCaso, EventoCaso } from '../../dominio/mapeo';
+import {
+  ActorCaso,
+  AlertaCaso,
+  DemandaCaso,
+  DocumentoCaso,
+  EventoCaso,
+  TramoEstadoCaso,
+} from '../../dominio/mapeo';
 import {
   AnularPanelComponent,
   ResultadoAnulacion,
@@ -27,7 +35,41 @@ import { ExportarMenuComponent } from '../../shared/ui/exportar-menu.component';
 import { formatearFecha } from '../../shared/formato-fecha';
 import { GlosarioComponent } from '../../shared/ui/glosario.component';
 import { IconoComponent } from '../../shared/ui/icono.component';
-import { etiquetaNivelGobierno } from '../compromisos/compromiso.mapeo';
+import { OrdenTabla } from '../../shared/ui/orden-tabla';
+import { ThOrdenDirective } from '../../shared/ui/th-orden.directive';
+import {
+  aCompromisosCaso,
+  etiquetaClasificacionAlcance,
+  etiquetaFormalVerbal,
+  etiquetaNivelGobierno,
+  type ClasificacionAlcance,
+  type CompromisoCasoConCaracteristicas,
+  type FormalVerbal,
+  type HitoCasoConResponsable,
+} from '../compromisos/compromiso.mapeo';
+import {
+  AccionEstado,
+  aCatalogosEdicion,
+  accionDeEstado,
+  aDetalleCasoConCierre,
+  CAMPOS_EDITABLES,
+  CampoEditable,
+  CatalogosEdicion,
+  cuerpoPatchDeCampo,
+  definicionDe,
+  DetalleCasoConCierre,
+  ESTADO_ABIERTO,
+  ESTADO_ARCHIVADO,
+  etiquetaDeCatalogo,
+  OpcionCatalogo,
+  opcionesDeCampo,
+  resolverValorCatalogo,
+  sinCambios,
+  VALORES_VACIOS,
+  validarValorCampo,
+  valoresDeCaso,
+  type ValoresEditables,
+} from './caso-edicion.mapeo';
 import { CuerpoDemanda, DemandaPanelComponent } from './demanda-panel.component';
 import {
   CuerpoEvento,
@@ -36,6 +78,24 @@ import {
   aTiposHecho,
 } from './evento-panel.component';
 import { EnlaceRiel, RielRelacionesComponent } from './riel-relaciones.component';
+
+/** Detalle del caso con las columnas nuevas de compromisos e hitos. */
+type DetalleCasoConCompromisos = Omit<DetalleCasoConCierre, 'compromisos'> & {
+  compromisos: CompromisoCasoConCaracteristicas[];
+};
+
+/** Hito aplanado de la ficha: `hitosDelCaso()` añade el código del compromiso. */
+type HitoEnCaso = HitoCasoConResponsable & { compromiso: string };
+
+/**
+ * El mapeo compartido del caso descarta la clasificación, el carácter, la
+ * bandera del Ministro y el responsable del hito; se recuperan del bruto sin
+ * tocar `dominio/mapeo.ts`.
+ */
+function aDetalleCasoConCompromisos(bruto: unknown): DetalleCasoConCompromisos {
+  const detalle = aDetalleCasoConCierre(bruto);
+  return { ...detalle, compromisos: aCompromisosCaso(bruto, detalle.compromisos) };
+}
 
 @Component({
   selector: 'app-caso-detalle',
@@ -48,6 +108,7 @@ import { EnlaceRiel, RielRelacionesComponent } from './riel-relaciones.component
     DemandaPanelComponent,
     AnularPanelComponent,
     RielRelacionesComponent,
+    ThOrdenDirective,
   ],
   templateUrl: './caso-detalle.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -56,24 +117,7 @@ import { EnlaceRiel, RielRelacionesComponent } from './riel-relaciones.component
       min-height: 26px;
       margin-top: 4px;
       padding: 0 10px;
-      font-size: 10px;
-    }
-
-    /* «Sin declarar» es un hueco, no un valor: se distingue del chip lleno. */
-    .naturaleza-chip {
-      display: inline-block;
-      padding: 1px 8px;
-      border: 1px solid #dbe3ea;
-      border-radius: 10px;
-      color: #47566a;
-      font-size: 10px;
-      font-weight: 600;
-    }
-
-    .naturaleza-chip.sin-declarar {
-      border-style: dashed;
-      color: #8a98a5;
-      font-weight: 500;
+      font-size: 12.5px;
     }
 
     /* Los botones de un hecho comparten fila y se ocultan al imprimir con
@@ -86,15 +130,47 @@ import { EnlaceRiel, RielRelacionesComponent } from './riel-relaciones.component
 
     .aviso-ok {
       color: #2f6f52;
-      font-size: 11.5px;
+      font-size: 13.5px;
     }
 
     .detail-hint {
       display: block;
       margin-top: 2px;
-      font-size: 10.5px;
+      font-size: 13px;
       font-weight: 400;
       color: #8d99a6;
+    }
+
+    /* Item 18: cada recuadro editable centra su valor; la edición en línea
+       vuelve a alinear el control a la izquierda para poder escribir. */
+    .campo-editable dd {
+      text-align: center;
+    }
+
+    .campo-editable .campo-valor {
+      display: block;
+      font-weight: 600;
+    }
+
+    .campo-editable .edit-form {
+      text-align: left;
+    }
+
+    .campo-editable .link-button {
+      margin-top: 4px;
+    }
+
+    /* Item 37: confirmación de estado en línea, dentro de la cabecera. */
+    .archivo-confirmacion {
+      margin: 10px 0 0;
+      padding: 10px 12px;
+      border: 1px dashed var(--line);
+      border-radius: 6px;
+      background: var(--canvas);
+    }
+
+    .archivo-confirmacion .form-hint {
+      margin: 0;
     }
 
     .risk-inactivo {
@@ -150,7 +226,7 @@ import { EnlaceRiel, RielRelacionesComponent } from './riel-relaciones.component
     .timeline-list li .timeline-actor {
       margin: 3px 0 0;
       color: var(--muted);
-      font-size: 9.5px;
+      font-size: 12px;
     }
 
     /* Se anida para ganar al white-space: nowrap de las celdas de la tabla. */
@@ -188,6 +264,9 @@ import { EnlaceRiel, RielRelacionesComponent } from './riel-relaciones.component
       .view-actions app-glosario,
       .detail-section-title button,
       .timeline-edit,
+      .archivo-confirmacion,
+      .campo-editable .edit-form,
+      .campo-editable .link-button,
       app-glosario,
       app-demanda-panel,
       app-evento-panel,
@@ -208,7 +287,9 @@ import { EnlaceRiel, RielRelacionesComponent } from './riel-relaciones.component
         position: static;
       }
 
-      .detail-section > .detail-hint {
+      .detail-section > .detail-hint,
+      .ficha-principal > .detail-hint,
+      .view-body > .detail-hint {
         display: none;
       }
 
@@ -243,13 +324,13 @@ export class CasoDetallePage {
     { initialValue: null },
   );
 
-  private readonly recurso = consulta<DetalleCaso>({
+  private readonly recurso = consulta<DetalleCasoConCompromisos>({
     fuente: () => {
       const codigo = this.codigo();
       if (!codigo) return null;
       return urlApi(`/v1/cases/${encodeURIComponent(codigo)}`);
     },
-    esquema: aDetalleCaso,
+    esquema: aDetalleCasoConCompromisos,
   });
 
   readonly detalle = this.recurso.valor;
@@ -263,15 +344,113 @@ export class CasoDetallePage {
     ),
   );
 
+  /* Orden local de cada tabla de la ficha (asc → desc → sin orden). */
+
+  readonly ordenActores = new OrdenTabla<ActorCaso>();
+  private readonly accesoresActores: Record<string, (actor: ActorCaso) => unknown> = {
+    actor: (actor) => this.nombreActor(actor),
+    correo: (actor) => actor.correo,
+    tipo: (actor) => actor.tipo,
+    funcion: (actor) => actor.funcion,
+    posicionamiento: (actor) => actor.posicionamiento,
+  };
+  readonly filasActores = computed(() =>
+    this.ordenActores.ordenar(this.ficha()?.actores ?? [], this.accesoresActores),
+  );
+
+  readonly ordenDemandas = new OrdenTabla<DemandaCaso>();
+  private readonly accesoresDemandas: Record<string, (demanda: DemandaCaso) => unknown> = {
+    problema: (demanda) => demanda.problema ?? demanda.descripcion,
+    propuesta: (demanda) => demanda.propuesta,
+    pedido: (demanda) => demanda.pedido,
+    estado: (demanda) => demanda.estado,
+    origen: (demanda) => demanda.documentoOrigenCodigo ?? demanda.documentoOrigenTitulo,
+  };
+  readonly filasDemandas = computed(() =>
+    this.ordenDemandas.ordenar(this.ficha()?.demandas ?? [], this.accesoresDemandas),
+  );
+
+  readonly ordenAlertas = new OrdenTabla<AlertaCaso>();
+  private readonly accesoresAlertas: Record<string, (alerta: AlertaCaso) => unknown> = {
+    codigo: (alerta) => alerta.codigo,
+    nivel: (alerta) => alerta.nivel,
+    prioridad: (alerta) => alerta.prioridad,
+    estado: (alerta) => alerta.estado,
+    fecha: (alerta) => alerta.fechaReporte,
+  };
+  readonly filasAlertas = computed(() =>
+    this.ordenAlertas.ordenar(this.ficha()?.alertas ?? [], this.accesoresAlertas),
+  );
+
+  readonly ordenCompromisos = new OrdenTabla<CompromisoCasoConCaracteristicas>();
+  private readonly accesoresCompromisos: Record<
+    string,
+    (compromiso: CompromisoCasoConCaracteristicas) => unknown
+  > = {
+    codigo: (compromiso) => compromiso.codigo,
+    compromiso: (compromiso) => compromiso.accion,
+    clasificacion: (compromiso) => this.clasificacionAlcanceTexto(compromiso.clasificacionAlcance),
+    estado: (compromiso) => compromiso.estado,
+    nivel: (compromiso) => this.nivelGobiernoTexto(compromiso.nivelGobierno),
+    unidad: (compromiso) => compromiso.unidad,
+    vencimiento: (compromiso) => compromiso.vencimiento,
+  };
+  readonly filasCompromisos = computed(() =>
+    this.ordenCompromisos.ordenar(this.ficha()?.compromisos ?? [], this.accesoresCompromisos),
+  );
+
+  readonly ordenHitos = new OrdenTabla<HitoEnCaso>();
+  private readonly accesoresHitos: Record<string, (hito: HitoEnCaso) => unknown> = {
+    compromiso: (hito) => hito.compromiso,
+    hito: (hito) => hito.descripcion,
+    fecha: (hito) => hito.fecha ?? hito.fechaTexto,
+    estado: (hito) => hito.estado,
+    responsable: (hito) => hito.responsableTexto,
+  };
+  readonly filasHitos = computed(() =>
+    this.ordenHitos.ordenar(this.hitosDelCaso(), this.accesoresHitos),
+  );
+
+  readonly ordenDocumentos = new OrdenTabla<DocumentoCaso>();
+  private readonly accesoresDocumentos: Record<string, (documento: DocumentoCaso) => unknown> = {
+    codigo: (documento) => documento.codigo,
+    titulo: (documento) => documento.titulo,
+    tipo: (documento) => documento.tipoNombre ?? documento.tipo,
+    fecha: (documento) => documento.fecha,
+  };
+  readonly filasDocumentos = computed(() =>
+    this.ordenDocumentos.ordenar(this.ficha()?.documentos ?? [], this.accesoresDocumentos),
+  );
+
+  readonly ordenHistorial = new OrdenTabla<TramoEstadoCaso>();
+  private readonly accesoresHistorial: Record<string, (tramo: TramoEstadoCaso) => unknown> = {
+    estado: (tramo) => tramo.estado,
+    desde: (tramo) => tramo.desde,
+    hasta: (tramo) => tramo.hasta,
+    motivo: (tramo) => tramo.motivo,
+    usuario: (tramo) => tramo.usuario,
+  };
+  readonly filasHistorial = computed(() =>
+    this.ordenHistorial.ordenar(this.ficha()?.historial ?? [], this.accesoresHistorial),
+  );
+
   /**
    * Tras anular, la API deja de devolver el caso: la política RLS de `SELECT`
    * esconde lo anulado. Se retiene la última ficha para poder mostrar el estado
    * y ofrecer la restauración sin inventar una papelera.
    */
-  readonly snapshotAnulado = signal<DetalleCaso | null>(null);
+  readonly snapshotAnulado = signal<DetalleCasoConCompromisos | null>(null);
 
-  /** Ficha visible: la retenida tras anular o la que llega de la API. */
-  readonly ficha = computed(() => this.snapshotAnulado() ?? this.detalle() ?? null);
+  /**
+   * Última respuesta de un `PATCH` (campo o estado). Evita recargar la ficha y
+   * conserva el resto del expediente: la API devuelve el detalle completo.
+   */
+  readonly detalleActualizado = signal<DetalleCasoConCompromisos | null>(null);
+
+  /** Ficha visible: la retenida tras anular, la actualizada o la de la API. */
+  readonly ficha = computed(
+    () => this.snapshotAnulado() ?? this.detalleActualizado() ?? this.detalle() ?? null,
+  );
   readonly caso = computed(() => this.ficha()?.caso);
   readonly anulado = computed(
     () => this.snapshotAnulado() !== null || this.caso()?.anulado === true,
@@ -344,6 +523,72 @@ export class CasoDetallePage {
     return this.capacidades.puedeEliminar() && this.capacidades.puedeModificar(caso.clasificacion);
   });
 
+  /**
+   * Edición explícita por campo (item 18). El estado no está aquí: se cambia
+   * con Archivar/Reabrir, más abajo.
+   */
+  readonly campos = CAMPOS_EDITABLES;
+  readonly editando = signal<CampoEditable | null>(null);
+  readonly borrador = signal('');
+  readonly guardandoCampo = signal(false);
+  readonly errorCampo = signal<string | null>(null);
+  readonly avisoCampo = signal<string | null>(null);
+
+  /**
+   * Catálogos de los desplegables. Se piden sólo cuando el rol puede escribir:
+   * un lector no necesita este tráfico adicional.
+   */
+  private readonly catalogoEdicion = consulta<CatalogosEdicion>({
+    fuente: () => (this.puedeModificar() ? urlApi('/v1/catalogs') : null),
+    esquema: aCatalogosEdicion,
+  });
+
+  readonly cargandoCatalogos = computed(() => {
+    const estado = this.catalogoEdicion.estado();
+    return estado === 'inactivo' || estado === 'cargando';
+  });
+
+  /**
+   * Valores actuales del caso. Los campos de catálogo se resuelven a su valor
+   * canónico para que abrir y guardar sin cambios no envíe un `PATCH` espurio.
+   */
+  readonly valoresCaso = computed<ValoresEditables>(() => {
+    const caso = this.caso();
+    if (!caso) return VALORES_VACIOS;
+
+    const base = valoresDeCaso(caso);
+    const catalogo = this.catalogoEdicion.valor();
+    if (!catalogo) return base;
+
+    const resuelto: ValoresEditables = { ...base };
+    for (const definicion of CAMPOS_EDITABLES) {
+      if (!definicion.catalogo) continue;
+      const canonico = resolverValorCatalogo(catalogo[definicion.catalogo], base[definicion.campo]);
+      if (canonico) resuelto[definicion.campo] = canonico;
+    }
+    return resuelto;
+  });
+
+  /** Valor del control en línea: un `select` se pinta con el código canónico. */
+  readonly valorControl = computed(() => {
+    const campo = this.editando();
+    const valor = this.borrador();
+    if (!campo) return valor;
+    if (definicionDe(campo).control !== 'select') return valor;
+    return resolverValorCatalogo(this.opcionesDe(campo), valor) ?? valor;
+  });
+
+  /** Acción de estado disponible (item 37): archivar o reabrir. */
+  readonly accionEstado = computed<AccionEstado | null>(() => {
+    const caso = this.caso();
+    return caso ? accionDeEstado(caso.estado) : null;
+  });
+
+  readonly confirmandoArchivo = signal<'archivar' | 'reabrir' | null>(null);
+  readonly enviandoArchivo = signal(false);
+  readonly errorArchivo = signal<string | null>(null);
+  readonly avisoArchivo = signal<string | null>(null);
+
   readonly panelAnulacion = signal<ModoAnulacion | null>(null);
   readonly enviandoAnulacion = signal(false);
   readonly errorAnulacion = signal<string | null>(null);
@@ -387,7 +632,147 @@ export class CasoDetallePage {
   readonly exportarError = signal<string | null>(null);
 
   recargar(): void {
+    this.detalleActualizado.set(null);
     this.recurso.recargar();
+  }
+
+  /** Opciones de un desplegable según el catálogo ya cargado. */
+  opcionesDe(campo: CampoEditable): readonly OpcionCatalogo[] {
+    return opcionesDeCampo(this.catalogoEdicion.valor(), campo);
+  }
+
+  /**
+   * Valor que no existe en el catálogo (base sin migrar). Se conserva como
+   * opción para que el `select` no cambie de valor sin que el usuario lo pida.
+   */
+  opcionDesconocida(campo: CampoEditable): string | null {
+    const valor = this.valorControl();
+    const opciones = this.opcionesDe(campo);
+    if (!valor || opciones.length === 0) return null;
+    return opciones.some((opcion) => opcion.valor === valor) ? null : valor;
+  }
+
+  /** Texto de lectura del recuadro: fecha y número llevan formato propio. */
+  valorMostrado(campo: CampoEditable): string {
+    const valor = this.valoresCaso()[campo];
+    if (!valor) return '—';
+    if (campo === 'pctAvance') return `${valor} %`;
+    if (campo === 'fechaInicio' || campo === 'fechaCierre') return this.fechaTexto(valor);
+    // La unidad se rotula con sus siglas, como en la cabecera y el mockup; el
+    // catálogo aporta el nombre completo como etiqueta, que aquí no cabe.
+    if (campo === 'unidadResponsable') return valor;
+    return etiquetaDeCatalogo(this.opcionesDe(campo), valor) ?? valor;
+  }
+
+  /** Abre un recuadro en línea. No hay cierre por clic fuera: ver plantilla. */
+  abrirEdicion(campo: CampoEditable): void {
+    if (!this.puedeModificar()) return;
+    this.errorCampo.set(null);
+    this.avisoCampo.set(null);
+    this.borrador.set(this.valoresCaso()[campo]);
+    this.editando.set(campo);
+  }
+
+  alCambiarCampo(evento: Event): void {
+    const objetivo = evento.target as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
+    this.borrador.set(objetivo.value);
+    this.errorCampo.set(null);
+  }
+
+  cancelarEdicion(): void {
+    if (this.guardandoCampo()) return;
+    this.editando.set(null);
+    this.borrador.set('');
+    this.errorCampo.set(null);
+  }
+
+  /**
+   * `PATCH /api/v1/cases/{codigo}` con una sola clave. La respuesta es el
+   * detalle completo, así que se publica en `detalleActualizado` sin recargar
+   * la página ni perder el resto del expediente.
+   */
+  guardarCampo(): void {
+    const campo = this.editando();
+    const codigo = this.codigo();
+    if (!campo || !codigo || !this.puedeModificar() || this.guardandoCampo()) return;
+
+    const validado = validarValorCampo(campo, this.borrador());
+    if (!validado.valido) {
+      this.errorCampo.set(validado.mensaje);
+      return;
+    }
+
+    const cuerpo = cuerpoPatchDeCampo(campo, this.valoresCaso()[campo], this.borrador());
+    if (sinCambios(cuerpo)) {
+      this.errorCampo.set('No hay cambios que guardar.');
+      return;
+    }
+
+    this.guardandoCampo.set(true);
+    this.errorCampo.set(null);
+
+    this.http.patch<unknown>(urlApi(`/v1/cases/${encodeURIComponent(codigo)}`), cuerpo).subscribe({
+      next: (respuesta) => {
+        this.guardandoCampo.set(false);
+        this.detalleActualizado.set(aDetalleCasoConCompromisos(respuesta));
+        this.editando.set(null);
+        this.borrador.set('');
+        this.avisoCampo.set(`${definicionDe(campo).etiqueta} actualizado.`);
+      },
+      error: (fallo: unknown) => {
+        this.guardandoCampo.set(false);
+        this.errorCampo.set(this.mensajeDeErrorCampo(fallo));
+      },
+    });
+  }
+
+  /** Abre el aviso de confirmación dentro de la cabecera; nunca `window.confirm`. */
+  abrirConfirmacionArchivo(): void {
+    const accion = this.accionEstado();
+    if (!accion || !this.puedeModificar()) return;
+    this.errorArchivo.set(null);
+    this.avisoArchivo.set(null);
+    this.confirmandoArchivo.set(accion.modo);
+  }
+
+  cancelarArchivo(): void {
+    if (this.enviandoArchivo()) return;
+    this.confirmandoArchivo.set(null);
+    this.errorArchivo.set(null);
+  }
+
+  /**
+   * Item 37: Archivar/Reabrir como transición visible. Archivar es un estado
+   * del caso, no una baja: la anulación (papelera, con motivo) es otra acción y
+   * se conserva aparte.
+   */
+  confirmarArchivo(): void {
+    const modo = this.confirmandoArchivo();
+    const codigo = this.codigo();
+    if (!modo || !codigo || !this.puedeModificar() || this.enviandoArchivo()) return;
+
+    const destino = modo === 'archivar' ? ESTADO_ARCHIVADO : ESTADO_ABIERTO;
+    this.enviandoArchivo.set(true);
+    this.errorArchivo.set(null);
+
+    this.http
+      .patch<unknown>(urlApi(`/v1/cases/${encodeURIComponent(codigo)}`), { estado: destino })
+      .subscribe({
+        next: (respuesta) => {
+          this.enviandoArchivo.set(false);
+          this.confirmandoArchivo.set(null);
+          this.detalleActualizado.set(aDetalleCasoConCompromisos(respuesta));
+          this.avisoArchivo.set(
+            modo === 'archivar'
+              ? 'Caso archivado. Sigue disponible y puede reabrirse; anular es una operación distinta.'
+              : 'Caso reabierto: volvió al estado Abierto.',
+          );
+        },
+        error: (fallo: unknown) => {
+          this.enviandoArchivo.set(false);
+          this.errorArchivo.set(this.mensajeDeErrorArchivo(fallo));
+        },
+      });
   }
 
   /** Fecha de inicio del caso en `dd/mm/aaaa`; `—` cuando no está registrada. */
@@ -410,6 +795,16 @@ export class CasoDetallePage {
   /** `Regional` se muestra como «GORE», igual que en el módulo de Compromisos. */
   nivelGobiernoTexto(valor: string | null): string {
     return etiquetaNivelGobierno(valor);
+  }
+
+  /** Item 16: clasificación de alcance; sin dato, «Sin declarar». */
+  clasificacionAlcanceTexto(valor: ClasificacionAlcance | null): string {
+    return etiquetaClasificacionAlcance(valor);
+  }
+
+  /** Item 16: carácter formal o verbal; sin dato, «Sin declarar». */
+  formalVerbalTexto(valor: FormalVerbal | null): string {
+    return etiquetaFormalVerbal(valor);
   }
 
   /** Texto corto de la demanda para las etiquetas accesibles de la tabla. */
@@ -597,6 +992,32 @@ export class CasoDetallePage {
         replaceUrl: true,
       });
     });
+
+    // Al cambiar de caso en la ruta se reinician los estados de esta pantalla:
+    // la respuesta de un PATCH anterior no debe sobrevivir al nuevo expediente.
+    effect(() => {
+      this.codigo();
+      this.detalleActualizado.set(null);
+      this.editando.set(null);
+      this.borrador.set('');
+      this.confirmandoArchivo.set(null);
+      this.errorCampo.set(null);
+      this.errorArchivo.set(null);
+    });
+
+    // Si el catálogo llega después de abrir un `select`, el borrador se
+    // resuelve a su valor canónico para no enviar una etiqueta al PATCH.
+    effect(() => {
+      const campo = this.editando();
+      const catalogo = this.catalogoEdicion.valor();
+      if (!campo || !catalogo) return;
+      const definicion = definicionDe(campo);
+      if (!definicion.catalogo) return;
+
+      const actual = untracked(() => this.borrador());
+      const canonico = resolverValorCatalogo(catalogo[definicion.catalogo], actual);
+      if (canonico && canonico !== actual) this.borrador.set(canonico);
+    });
   }
 
   altaDemanda(): void {
@@ -696,7 +1117,7 @@ export class CasoDetallePage {
         this.panelAnulacion.set(null);
 
         if (resultado.modo === 'anular') {
-          const actual = this.detalle();
+          const actual = this.ficha();
           this.snapshotAnulado.set(
             actual ? { ...actual, caso: { ...actual.caso, anulado: true } } : null,
           );
@@ -739,6 +1160,19 @@ export class CasoDetallePage {
     if (error.codigo === 'INVALID_INPUT' || error.estado === 422) {
       return 'Datos inválidos: revise el problema (3P) y el estado de atención.';
     }
+    return error.message;
+  }
+
+  private mensajeDeErrorCampo(fallo: unknown): string {
+    const error = aErrorApi(fallo);
+    if (error.esProhibido) return 'Su rol no permite modificar este caso.';
+    if (error.codigo === 'SIN_CAMBIOS') return 'No hay cambios que guardar.';
+    return error.message;
+  }
+
+  private mensajeDeErrorArchivo(fallo: unknown): string {
+    const error = aErrorApi(fallo);
+    if (error.esProhibido) return 'Su rol no permite cambiar el estado de este caso.';
     return error.message;
   }
 }

@@ -27,6 +27,10 @@ const CASE_SELECT = `
   uo.siglas as unidad_responsable,
   c.origen_dato as origen,
   c.nivel_clasificacion as clasificacion,
+  -- Nombre para mostrar y ubigeo como llave: hay 15 «Santa Rosa» y sólo el
+  -- ubigeo empareja con «territorio.distrito» sin ambigüedad.
+  dp.nombre as distrito,
+  dp.ubigeo::text as distrito_ubigeo,
   c.anulado_en as anulado_en,
   c.motivo_anulacion as motivo_anulacion,
   c.anulado_por as anulado_por,
@@ -48,6 +52,9 @@ const CASE_FROM = `
   left join core.cat_unidades_organicas uo on uo.id = c.unidad_responsable_id
   left join core.regiones rp on rp.id = c.region_principal_id
   left join core.usuarios ua on ua.id = c.anulado_por
+  -- El distrito principal viaja con el caso para que la coropleta distrital
+  -- una por ubigeo y no por nombre. «dp.id» es PK: el join no duplica filas.
+  left join core.distritos dp on dp.id = c.distrito_principal_id
   left join lateral (
     select rg.nombre
       from core.caso_regiones cr
@@ -98,6 +105,16 @@ export type CaseListQuery = {
   sort?: string;
 };
 
+/**
+ * Geografía principal del caso. `distrito` es el nombre para mostrar;
+ * `distritoUbigeo` es la llave INEI de 6 dígitos. Ambos `null` cuando el caso
+ * no declara distrito principal.
+ */
+export type CaseGeografia = {
+  distrito: string | null;
+  distritoUbigeo: string | null;
+};
+
 export type CaseListItem = {
   id: string;
   code: string;
@@ -107,6 +124,11 @@ export type CaseListItem = {
   updated: string | null;
   updatedAt: string | Date | null;
   region: string | null;
+  /**
+   * Distrito principal: nombre para mostrar y ubigeo como llave. Hay 15 «Santa
+   * Rosa», así que sólo el ubigeo une con la capa GIS sin emparejar por nombre.
+   */
+  geografia: CaseGeografia;
   estado: string | null;
   risk: string | null;
   riskSource: "casos.nivel_riesgo_id";
@@ -209,8 +231,10 @@ async function construirWhere(
   const search = query.q?.trim();
   if (search) {
     const like = bind(`%${search}%`);
+    // Se normaliza la columna y el patrón para que la búsqueda ignore tildes
+    // («produccion» encuentra «Producción»); `normalizar_ref` conserva los `%`.
     where.push(
-      `(c.codigo_caso ilike ${like} or c.nombre_caso ilike ${like} or coalesce(c.resumen_ejecutivo, '') ilike ${like})`,
+      `(core.normalizar_ref(c.codigo_caso) like core.normalizar_ref(${like}) or core.normalizar_ref(c.nombre_caso) like core.normalizar_ref(${like}) or core.normalizar_ref(coalesce(c.resumen_ejecutivo, '')) like core.normalizar_ref(${like}))`,
     );
   }
 
@@ -395,6 +419,10 @@ export async function listCases(
     updated: row.updated,
     updatedAt: row.updated_at,
     region: row.region,
+    geografia: {
+      distrito: row.distrito,
+      distritoUbigeo: row.distrito_ubigeo,
+    },
     estado: row.estado,
     risk: row.risk,
     riskSource: "casos.nivel_riesgo_id",
@@ -795,6 +823,10 @@ export async function getCaseByCode(
     updated: row.updated,
     updatedAt: row.updated_at,
     region: row.region,
+    geografia: {
+      distrito: row.distrito,
+      distritoUbigeo: row.distrito_ubigeo,
+    },
     estado: row.estado,
     risk: row.risk,
     riskSource: "casos.nivel_riesgo_id",

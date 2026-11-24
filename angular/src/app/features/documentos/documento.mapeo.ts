@@ -14,7 +14,7 @@
  *   tipo no tiene anexo y no se fabrica ninguno.
  */
 
-import { booleano, esRegistro, leer, lista, numero, texto } from '../../dominio/mapeo';
+import { booleano, esRegistro, fechaIso, leer, lista, numero, texto } from '../../dominio/mapeo';
 
 /* ------------------------------------------------------------------------- *
  * Vocabulario
@@ -128,6 +128,36 @@ export type OpcionCatalogo = {
   valor: string;
   etiqueta: string;
   anexoNumero: number | null;
+};
+
+/**
+ * Norma del marco legal que el árbol del RAG publica aparte de los documentos.
+ * No es un documento del catálogo: no abre la ficha ni se pagina.
+ */
+export type Normativa = {
+  id: string;
+  codigo: string | null;
+  titulo: string;
+  tipoNorma: string;
+  ambito: string;
+  entidadEmisora: string | null;
+  /** `YYYY-MM-DD`; `null` si no viene o no es una fecha válida. */
+  fechaPublicacion: string | null;
+  url: string | null;
+  resumen: string | null;
+};
+
+/** Documento indexado en el árbol que no es un documento del RAG ni una norma. */
+export type OtroDocumento = {
+  id: string;
+  codigo: string | null;
+  titulo: string;
+  tipo: string | null;
+  /** `YYYY-MM-DD`; `null` si no viene o no es una fecha válida. */
+  fecha: string | null;
+  entidad: string | null;
+  url: string | null;
+  resumen: string | null;
 };
 
 /**
@@ -259,6 +289,39 @@ export function aTiposDocumento(bruto: unknown): readonly OpcionCatalogo[] {
       };
     })
     .filter((opcion): opcion is OpcionCatalogo => opcion !== null);
+}
+
+/** Normativa de `normativas[]` en `GET /api/v1/documents/arbol`. */
+export function aNormativa(bruto: unknown): Normativa {
+  const registro = esRegistro(bruto) ? bruto : {};
+
+  return {
+    id: texto(registro, ['id']) ?? '',
+    codigo: texto(registro, ['codigo']),
+    titulo: texto(registro, ['titulo']) ?? '',
+    tipoNorma: texto(registro, ['tipoNorma', 'tipo_norma']) ?? '',
+    ambito: texto(registro, ['ambito']) ?? '',
+    entidadEmisora: texto(registro, ['entidadEmisora', 'entidad_emisora']),
+    fechaPublicacion: fechaIso(texto(registro, ['fechaPublicacion', 'fecha_publicacion', 'fecha'])),
+    url: texto(registro, ['url']),
+    resumen: texto(registro, ['resumen']),
+  };
+}
+
+/** Otro documento de `otros[]` en `GET /api/v1/documents/arbol`. */
+export function aOtroDocumento(bruto: unknown): OtroDocumento {
+  const registro = esRegistro(bruto) ? bruto : {};
+
+  return {
+    id: texto(registro, ['id']) ?? '',
+    codigo: texto(registro, ['codigo']),
+    titulo: texto(registro, ['titulo']) ?? '',
+    tipo: texto(registro, ['tipo']),
+    fecha: fechaIso(texto(registro, ['fecha', 'fechaPublicacion', 'fecha_publicacion'])),
+    entidad: texto(registro, ['entidad']),
+    url: texto(registro, ['url']),
+    resumen: texto(registro, ['resumen']),
+  };
 }
 
 /* ------------------------------------------------------------------------- *

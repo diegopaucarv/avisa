@@ -29,6 +29,9 @@ const COMMITMENT_COLUMNS = `
   ag.codigo as alcance,
   te.nombre as tematica,
   cmp.atiende_brecha_genero as atiende_genero,
+  cmp.clasificacion_alcance as clasificacion_alcance,
+  cmp.formal_verbal as formal_verbal,
+  cmp.asumido_ministro as asumido_ministro,
   cmp.evidencia_cumplimiento_uri as evidencia_uri,
   cmp.criterios_smart as criterios_smart,
   cmp.documento_origen_id as documento_origen_id,
@@ -84,7 +87,11 @@ const HITOS_LIST_JSON = `
              'fecha', to_char(h.fecha_vencimiento, 'YYYY-MM-DD'),
              'fechaReal', to_char(h.fecha_real, 'YYYY-MM-DD'),
              'estado', replace(eh.codigo, '_', ' '),
-             'terminal', eh.es_terminal
+             'terminal', eh.es_terminal,
+             'responsableTexto', h.responsable_texto,
+             'responsableUsuarioId', h.responsable_usuario_id,
+             'fechaTexto', h.fecha_vencimiento_texto,
+             'fechaRealTexto', h.fecha_real_texto
            ) order by h.fecha_vencimiento nulls last, h.codigo_hito)
       from core.hitos_compromiso h
       left join core.cat_estados_hito eh on eh.id = h.estado_id
@@ -104,7 +111,11 @@ const HITOS_DETAIL_JSON = `
              'terminal', eh.es_terminal,
              'validacion', h.validacion,
              'descripcionEvidencia', h.descripcion_evidencia,
-             'linkEvidencia', h.link_evidencia
+             'linkEvidencia', h.link_evidencia,
+             'responsableTexto', h.responsable_texto,
+             'responsableUsuarioId', h.responsable_usuario_id,
+             'fechaTexto', h.fecha_vencimiento_texto,
+             'fechaRealTexto', h.fecha_real_texto
            ) order by h.fecha_vencimiento nulls last, h.codigo_hito)
       from core.hitos_compromiso h
       left join core.cat_estados_hito eh on eh.id = h.estado_id
@@ -144,6 +155,13 @@ export type CommitmentHito = {
   fechaReal: string | null;
   estado: string | null;
   terminal: boolean | null;
+  /** Responsable escrito en el origen, sin usuario resuelto. */
+  responsableTexto: string | null;
+  /** Usuario del equipo resuelto como responsable; excluyente con el texto. */
+  responsableUsuarioId: string | null;
+  /** Fecha sin tipar (`No aplica`, `Julio 2026`); convive con `fecha` nula. */
+  fechaTexto: string | null;
+  fechaRealTexto: string | null;
 };
 
 export type CommitmentHitoDetail = CommitmentHito & {
@@ -167,6 +185,12 @@ export type CommitmentListItem = {
   casoCode: string | null;
   casoTitulo: string | null;
   tipo: string | null;
+  /** Item 16: progresivo_parcial | entendimiento_operativo | condicionado. */
+  clasificacionAlcance: ClasificacionAlcance | null;
+  /** Item 24: formal | verbal. */
+  formalVerbal: FormalVerbal | null;
+  /** Item 123: dimensión «asumido por el Señor Ministro». */
+  asumidoMinistro: boolean;
   nivelGobierno: string | null;
   estado: string | null;
   estadoCategoria: string | null;
@@ -291,6 +315,9 @@ function mapItem(row: CommitmentRow): CommitmentListItem {
     casoCode: row.caso_code,
     casoTitulo: row.caso_titulo,
     tipo: row.tipo,
+    clasificacionAlcance: row.clasificacion_alcance ?? null,
+    formalVerbal: row.formal_verbal ?? null,
+    asumidoMinistro: Boolean(row.asumido_ministro),
     nivelGobierno: row.nivel_gobierno,
     estado: row.estado,
     estadoCategoria: row.estado_categoria,
@@ -343,7 +370,7 @@ export async function listCommitments(
   if (search) {
     const like = bind(`%${search}%`);
     where.push(
-      `(cmp.codigo_compromiso ilike ${like} or cmp.accion_compromiso ilike ${like})`,
+      `(core.normalizar_ref(cmp.codigo_compromiso) like core.normalizar_ref(${like}) or core.normalizar_ref(cmp.accion_compromiso) like core.normalizar_ref(${like}))`,
     );
   }
   if (query.caso) where.push(`c.codigo_caso = ${bind(query.caso)}`);
@@ -493,6 +520,34 @@ const NIVELES_GOBIERNO = [
   "Sociedad_Civil",
 ] as const;
 
+/** Item 16. Valores del CHECK de `core.compromisos.clasificacion_alcance`. */
+type ClasificacionAlcance =
+  "progresivo_parcial" | "entendimiento_operativo" | "condicionado";
+
+/** Item 24. Valores del CHECK de `core.compromisos.formal_verbal`. */
+type FormalVerbal = "formal" | "verbal";
+
+/**
+ * Clave tolerante para leer valores de la interfaz: sin acentos, sin mayúsculas
+ * y sin separadores. Así «Progresivo y parcial» y «progresivo_parcial» se
+ * aceptan como el mismo valor del CHECK.
+ */
+function claveEnum(value: string): string {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "");
+}
+
+const CLASIFICACION_ALCANCE_POR_CLAVE: Record<string, ClasificacionAlcance> = {
+  progresivoparcial: "progresivo_parcial",
+  progresivoyparcial: "progresivo_parcial",
+  progresivooparcial: "progresivo_parcial",
+  entendimientooperativo: "entendimiento_operativo",
+  condicionado: "condicionado",
+};
+
 function invalid(): never {
   throw new ApiError(422, "Datos inválidos.", "INVALID_INPUT");
 }
@@ -578,6 +633,57 @@ function optionalJson(body: Record<string, unknown>, key: string): unknown {
 
 function jsonParam(value: unknown): string | null {
   return value === undefined || value === null ? null : JSON.stringify(value);
+}
+
+/**
+ * Normaliza la clasificación de alcance contra el CHECK de la migración 45.
+ * Un valor fuera del vocabulario devuelve 422 con un código legible, no un
+ * error de base de datos.
+ */
+function clasificacionAlcanceValor(value: string): ClasificacionAlcance {
+  const valor = CLASIFICACION_ALCANCE_POR_CLAVE[claveEnum(value)];
+  if (!valor) {
+    throw new ApiError(
+      422,
+      "La clasificación de alcance debe ser «progresivo_parcial», «entendimiento_operativo» o «condicionado».",
+      "INVALID_CLASIFICACION_ALCANCE",
+    );
+  }
+  return valor;
+}
+
+/** Normaliza el carácter formal/verbal contra el CHECK de la migración 45. */
+function formalVerbalValor(value: string): FormalVerbal {
+  const clave = claveEnum(value);
+  if (clave === "formal") return "formal";
+  if (clave === "verbal") return "verbal";
+  throw new ApiError(
+    422,
+    "El carácter del compromiso debe ser «formal» o «verbal».",
+    "INVALID_FORMAL_VERBAL",
+  );
+}
+
+function optionalClasificacionAlcance(
+  body: Record<string, unknown>,
+  key: string,
+): ClasificacionAlcance | null | undefined {
+  if (!has(body, key)) return undefined;
+  const value = body[key];
+  if (value === null) return null;
+  if (typeof value !== "string" || !value.trim()) invalid();
+  return clasificacionAlcanceValor(value);
+}
+
+function optionalFormalVerbal(
+  body: Record<string, unknown>,
+  key: string,
+): FormalVerbal | null | undefined {
+  if (!has(body, key)) return undefined;
+  const value = body[key];
+  if (value === null) return null;
+  if (typeof value !== "string" || !value.trim()) invalid();
+  return formalVerbalValor(value);
 }
 
 /**
@@ -751,6 +857,11 @@ export async function createCommitment(
     invalid();
   }
 
+  const clasificacionAlcance =
+    optionalClasificacionAlcance(input, "clasificacionAlcance") ?? null;
+  const formalVerbal = optionalFormalVerbal(input, "formalVerbal") ?? null;
+  const asumidoMinistro = optionalBoolean(input, "asumidoMinistro") ?? false;
+
   const alcanceCodigo = optionalText(input, "alcance");
   const alcanceId = alcanceCodigo
     ? await resolveAlcance(client, alcanceCodigo)
@@ -776,9 +887,10 @@ export async function createCommitment(
        alcance_id, tematica_id, fecha_inicio, fecha_vencimiento,
        accion_compromiso, tipo_compromiso, nivel_gobierno, estado_id,
        evidencia_cumplimiento_uri, atiende_brecha_genero, criterios_smart,
-       origen_dato)
+       origen_dato, clasificacion_alcance, formal_verbal, asumido_ministro)
     values ($1, $2, $3, $4, $5, $6, coalesce($7::date, current_date), $8::date,
-            $9, $10, $11, $12, $13, $14, $15::jsonb, 'MANUAL')
+            $9, $10, $11, $12, $13, $14, $15::jsonb, 'MANUAL',
+            $16, $17, $18)
     returning *
   `;
 
@@ -806,6 +918,9 @@ export async function createCommitment(
       evidenciaUri ?? null,
       atiendeGenero,
       jsonParam(criteriosSmart),
+      clasificacionAlcance,
+      formalVerbal,
+      asumidoMinistro,
     ]);
     return result.rows[0] as Record<string, any>;
   });
@@ -899,6 +1014,24 @@ export async function updateCommitment(
       "tematica_id",
       tematicaRef === null ? null : await resolveTematica(client, tematicaRef),
     );
+  }
+
+  const clasificacionAlcance = optionalClasificacionAlcance(
+    input,
+    "clasificacionAlcance",
+  );
+  if (clasificacionAlcance !== undefined) {
+    add("clasificacion_alcance", clasificacionAlcance);
+  }
+
+  const formalVerbal = optionalFormalVerbal(input, "formalVerbal");
+  if (formalVerbal !== undefined) {
+    add("formal_verbal", formalVerbal);
+  }
+
+  const asumidoMinistro = optionalBoolean(input, "asumidoMinistro");
+  if (asumidoMinistro !== undefined) {
+    add("asumido_ministro", asumidoMinistro);
   }
 
   const atiendeGenero = optionalBoolean(input, "atiendeGenero");
@@ -1002,7 +1135,11 @@ const HITO_DETAIL_SELECT = `
          eh.es_terminal as terminal,
          h.validacion,
          h.descripcion_evidencia as descripcion_evidencia,
-         h.link_evidencia as link_evidencia
+         h.link_evidencia as link_evidencia,
+         h.responsable_texto as responsable_texto,
+         h.responsable_usuario_id as responsable_usuario_id,
+         h.fecha_vencimiento_texto as fecha_vencimiento_texto,
+         h.fecha_real_texto as fecha_real_texto
     from core.hitos_compromiso h
     left join core.cat_estados_hito eh on eh.id = h.estado_id
 `;
@@ -1019,6 +1156,10 @@ function mapHitoRow(row: Record<string, any>): CommitmentHitoDetail {
     validacion: row.validacion ?? null,
     descripcionEvidencia: row.descripcion_evidencia ?? null,
     linkEvidencia: row.link_evidencia ?? null,
+    responsableTexto: row.responsable_texto ?? null,
+    responsableUsuarioId: row.responsable_usuario_id ?? null,
+    fechaTexto: row.fecha_vencimiento_texto ?? null,
+    fechaRealTexto: row.fecha_real_texto ?? null,
   };
 }
 
@@ -1087,6 +1228,9 @@ export async function createHito(
     estadoCodigo ?? "Registrado",
   );
   const evidencia = optionalText(input, "evidencia");
+  const responsableTexto = optionalText(input, "responsableTexto");
+  const fechaTexto = optionalText(input, "fechaTexto");
+  const fechaRealTexto = optionalText(input, "fechaRealTexto");
 
   const inserted = await retryUnique(client, async () => {
     const codigo = await nextSequentialCode(
@@ -1099,8 +1243,9 @@ export async function createHito(
     const result = await client.query(
       `insert into core.hitos_compromiso
          (compromiso_id, codigo_hito, descripcion_hito, fecha_vencimiento,
-          estado_id, descripcion_evidencia, origen_dato)
-       values ($1, $2, $3, $4::date, $5, $6, 'MANUAL')
+          estado_id, descripcion_evidencia, origen_dato, responsable_texto,
+          fecha_vencimiento_texto, fecha_real_texto)
+       values ($1, $2, $3, $4::date, $5, $6, 'MANUAL', $7, $8, $9)
        returning *`,
       [
         compromisoId,
@@ -1109,6 +1254,9 @@ export async function createHito(
         fecha ?? null,
         estadoId,
         evidencia ?? null,
+        responsableTexto ?? null,
+        fechaTexto ?? null,
+        fechaRealTexto ?? null,
       ],
     );
     return result.rows[0] as Record<string, any>;
@@ -1175,6 +1323,21 @@ export async function updateHito(
 
   const evidencia = optionalText(input, "evidencia");
   if (evidencia !== undefined) add("descripcion_evidencia", evidencia);
+
+  const responsableTexto = optionalText(input, "responsableTexto");
+  if (responsableTexto !== undefined) {
+    add("responsable_texto", responsableTexto);
+    // Las dos columnas son mutuamente excluyentes
+    // (chk_hitos_compromiso_responsable_excl): declarar el responsable en texto
+    // retira la resolución a usuario.
+    if (responsableTexto !== null) add("responsable_usuario_id", null);
+  }
+
+  const fechaTexto = optionalText(input, "fechaTexto");
+  if (fechaTexto !== undefined) add("fecha_vencimiento_texto", fechaTexto);
+
+  const fechaRealTexto = optionalText(input, "fechaRealTexto");
+  if (fechaRealTexto !== undefined) add("fecha_real_texto", fechaRealTexto);
 
   if (sets.length === 0) invalid();
 
@@ -1243,4 +1406,83 @@ export async function deleteHito(
     antes: current,
     despues: { anuladoEn: anulacion.anuladoEn, motivo: anulacion.motivo },
   });
+}
+
+/**
+ * Sobre de conteos para el Resumen operativo. No devuelve filas: sólo los
+ * agregados que la vista necesita.
+ *
+ * El plazo se mide por hitos porque `core.compromisos` no tiene fecha de
+ * vencimiento propia: un compromiso "con plazo" es el que tiene al menos un
+ * hito vigente con `fecha_vencimiento`. Se usan subselects en una sola
+ * consulta para que todos los bloques se lean con la misma instantánea y
+ * bajo la misma RLS de la transacción.
+ */
+export type CommitmentSummary = {
+  compromisos: number;
+  hitos: number;
+  hitosConFecha: number;
+  hitosCumplidos: number;
+  hitosCumplidosConFecha: number;
+  compromisosConPlazo: number;
+  generatedAt: string;
+};
+
+type CommitmentSummaryRow = {
+  compromisos: number;
+  hitos: number;
+  hitos_con_fecha: number;
+  hitos_cumplidos: number;
+  hitos_cumplidos_con_fecha: number;
+  compromisos_con_plazo: number;
+};
+
+export async function getCommitmentsSummary(
+  client: PoolClient,
+): Promise<CommitmentSummary> {
+  const result = await client.query<CommitmentSummaryRow>(`
+    select
+      (select count(*)::int
+         from core.compromisos c
+        where c.anulado_en is null) as compromisos,
+      (select count(*)::int
+         from core.hitos_compromiso h
+         join core.compromisos c on c.id = h.compromiso_id
+        where h.anulado_en is null and c.anulado_en is null) as hitos,
+      (select count(*)::int
+         from core.hitos_compromiso h
+         join core.compromisos c on c.id = h.compromiso_id
+        where h.anulado_en is null and c.anulado_en is null
+          and h.fecha_vencimiento is not null) as hitos_con_fecha,
+      (select count(*)::int
+         from core.hitos_compromiso h
+         join core.compromisos c on c.id = h.compromiso_id
+         join core.cat_estados_hito e on e.id = h.estado_id
+        where h.anulado_en is null and c.anulado_en is null
+          and e.codigo = 'Cumplido') as hitos_cumplidos,
+      (select count(*)::int
+         from core.hitos_compromiso h
+         join core.compromisos c on c.id = h.compromiso_id
+         join core.cat_estados_hito e on e.id = h.estado_id
+        where h.anulado_en is null and c.anulado_en is null
+          and e.codigo = 'Cumplido'
+          and h.fecha_vencimiento is not null) as hitos_cumplidos_con_fecha,
+      (select count(distinct h.compromiso_id)::int
+         from core.hitos_compromiso h
+         join core.compromisos c on c.id = h.compromiso_id
+        where h.anulado_en is null and c.anulado_en is null
+          and h.fecha_vencimiento is not null) as compromisos_con_plazo
+  `);
+
+  const row = result.rows[0];
+
+  return {
+    compromisos: row?.compromisos ?? 0,
+    hitos: row?.hitos ?? 0,
+    hitosConFecha: row?.hitos_con_fecha ?? 0,
+    hitosCumplidos: row?.hitos_cumplidos ?? 0,
+    hitosCumplidosConFecha: row?.hitos_cumplidos_con_fecha ?? 0,
+    compromisosConPlazo: row?.compromisos_con_plazo ?? 0,
+    generatedAt: new Date().toISOString(),
+  };
 }

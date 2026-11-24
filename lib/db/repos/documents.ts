@@ -121,6 +121,47 @@ export type DocumentListResult = {
   generatedAt: string;
 };
 
+export type NormativaListItem = {
+  id: string;
+  codigo: string | null;
+  titulo: string;
+  tipoNorma: string;
+  ambito: string;
+  entidadEmisora: string | null;
+  /** Fecha en `YYYY-MM-DD`, o `null` si la norma no la declara. */
+  fechaPublicacion: string | null;
+  url: string | null;
+  resumen: string | null;
+};
+
+export type OtroDocumentoListItem = {
+  id: string;
+  codigo: string | null;
+  titulo: string;
+  tipo: string | null;
+  /** Fecha en `YYYY-MM-DD`, o `null` si el documento no la declara. */
+  fecha: string | null;
+  entidad: string | null;
+  url: string | null;
+  resumen: string | null;
+};
+
+/**
+ * Árbol del RAG: todos los documentos que pasan los filtros, sin paginar.
+ * Devuelve la misma fila que el listado para que el cliente reutilice el mapeo
+ * y la agrupación por tipo documental. Incluye además las otras dos ramas del
+ * árbol (normativas y otros documentos) para que la vista central las pinte
+ * con una sola petición.
+ */
+export type DocumentTreeResult = {
+  items: DocumentListItem[];
+  /** Sólo cuenta documentos: los consumidores previos dependen de ese valor. */
+  total: number;
+  normativas: NormativaListItem[];
+  otros: OtroDocumentoListItem[];
+  generatedAt: string;
+};
+
 const SORTS: Record<string, string> = {
   recent: "d.fecha desc nulls last, d.codigo",
   code: "d.codigo",
@@ -170,22 +211,21 @@ function isoOrNull(value: unknown): string | null {
   return Number.isNaN(date.getTime()) ? null : date.toISOString();
 }
 
-export async function listDocuments(
-  client: PoolClient,
+/**
+ * Condiciones de filtrado compartidas por el listado paginado y el árbol.
+ * `bind` acumula los parámetros y devuelve su marcador `$n`.
+ */
+function filtrosDocumento(
   query: DocumentListQuery,
-): Promise<DocumentListResult> {
-  const params: unknown[] = [];
+  bind: (value: unknown) => string,
+): string[] {
   const where: string[] = [];
-  const bind = (value: unknown) => {
-    params.push(value);
-    return `$${params.length}`;
-  };
 
   const search = query.q?.trim();
   if (search) {
     const like = bind(`%${search}%`);
     where.push(
-      `(d.codigo ilike ${like} or d.titulo ilike ${like} or coalesce(d.resumen_ejecutivo, '') ilike ${like})`,
+      `(core.normalizar_ref(d.codigo) like core.normalizar_ref(${like}) or core.normalizar_ref(d.titulo) like core.normalizar_ref(${like}) or core.normalizar_ref(coalesce(d.resumen_ejecutivo, '')) like core.normalizar_ref(${like}))`,
     );
   }
   if (query.caso) where.push(`c.codigo_caso = ${bind(query.caso)}`);
@@ -204,6 +244,69 @@ export async function listDocuments(
   if (query.incluirAnulados) {
     where.push("d.anulado_en is not null");
   }
+
+  return where;
+}
+
+/**
+ * Condición de búsqueda libre para los catálogos que no tienen caso, tipo ni
+ * estado (normativas y otros documentos). Replica el comportamiento de `q` en
+ * `filtrosDocumento` para que el buscador del árbol filtre las tres ramas con
+ * la misma semántica.
+ */
+function busquedaTexto(
+  alias: string,
+  columnaResumen: string,
+  q: string | undefined,
+  bind: (value: unknown) => string,
+): string[] {
+  const search = q?.trim();
+  if (!search) return [];
+
+  const like = bind(`%${search}%`);
+  return [
+    `(core.normalizar_ref(${alias}.codigo) like core.normalizar_ref(${like}) or core.normalizar_ref(${alias}.titulo) like core.normalizar_ref(${like}) or core.normalizar_ref(coalesce(${columnaResumen}, '')) like core.normalizar_ref(${like}))`,
+  ];
+}
+
+function mapNormativa(row: Record<string, unknown>): NormativaListItem {
+  return {
+    id: row.id as string,
+    codigo: row.codigo as string | null,
+    titulo: row.titulo as string,
+    tipoNorma: row.tipo_norma as string,
+    ambito: row.ambito as string,
+    entidadEmisora: row.entidad_emisora as string | null,
+    fechaPublicacion: row.fecha_publicacion as string | null,
+    url: row.url as string | null,
+    resumen: row.resumen as string | null,
+  };
+}
+
+function mapOtroDocumento(row: Record<string, unknown>): OtroDocumentoListItem {
+  return {
+    id: row.id as string,
+    codigo: row.codigo as string | null,
+    titulo: row.titulo as string,
+    tipo: row.tipo as string | null,
+    fecha: row.fecha as string | null,
+    entidad: row.entidad as string | null,
+    url: row.url as string | null,
+    resumen: row.resumen as string | null,
+  };
+}
+
+export async function listDocuments(
+  client: PoolClient,
+  query: DocumentListQuery,
+): Promise<DocumentListResult> {
+  const params: unknown[] = [];
+  const bind = (value: unknown) => {
+    params.push(value);
+    return `$${params.length}`;
+  };
+
+  const where = filtrosDocumento(query, bind);
 
   const page = Math.max(1, Math.trunc(query.page ?? 1));
   const pageSize = Math.min(100, Math.max(1, Math.trunc(query.pageSize ?? 25)));
@@ -228,6 +331,126 @@ export async function listDocuments(
     pageSize,
     generatedAt: new Date().toISOString(),
   };
+}
+
+/**
+ * Árbol documental completo. Misma consulta que `listDocuments`, sin `limit`:
+ * el RAG necesita ver todos los tipos y todas las hojas, no sólo la página.
+ * La RLS y los filtros se aplican igual.
+ */
+export async function listDocumentTree(
+  client: PoolClient,
+  query: DocumentListQuery,
+): Promise<DocumentTreeResult> {
+  const params: unknown[] = [];
+  const bind = (value: unknown) => {
+    params.push(value);
+    return `$${params.length}`;
+  };
+
+  const where = filtrosDocumento(query, bind);
+  const order = SORTS[query.sort ?? "recent"] ?? SORTS.recent;
+
+  const sql = `
+    select ${DOCUMENT_SELECT}
+    ${DOCUMENT_FROM}
+    ${where.length ? `where ${where.join(" and ")}` : ""}
+    order by ${order}
+  `;
+
+  const result = await client.query(sql, params);
+  const items = result.rows.map(mapDocument);
+
+  // Las tres ramas comparten el mismo `client` para quedar bajo la sesión de
+  // RLS que abre `withSession`. Van en secuencia porque `pg` no admite
+  // consultas concurrentes sobre una única conexión.
+  const normativas = await listNormativas(client, query.q);
+  const otros = await listOtrosDocumentos(client, query.q);
+
+  return {
+    items,
+    total: items.length,
+    normativas,
+    otros,
+    generatedAt: new Date().toISOString(),
+  };
+}
+
+/**
+ * Normativas vigentes para la rama correspondiente del árbol. Sólo se aplica
+ * `q`: caso, tipo y estado son filtros del expediente y no existen como
+ * columnas aquí, así que la rama se muestra completa salvo la búsqueda libre.
+ */
+export async function listNormativas(
+  client: PoolClient,
+  q?: string,
+): Promise<NormativaListItem[]> {
+  const params: unknown[] = [];
+  const bind = (value: unknown) => {
+    params.push(value);
+    return `$${params.length}`;
+  };
+
+  const where = [
+    "n.anulado_en is null",
+    ...busquedaTexto("n", "n.resumen", q, bind),
+  ];
+
+  const sql = `
+    select n.id,
+           n.codigo,
+           n.titulo,
+           n.tipo_norma,
+           n.ambito,
+           n.entidad_emisora,
+           to_char(n.fecha_publicacion, 'YYYY-MM-DD') as fecha_publicacion,
+           n.url,
+           n.resumen
+    from core.normativas n
+    where ${where.join(" and ")}
+    order by n.fecha_publicacion desc nulls last, n.codigo
+  `;
+
+  const result = await client.query(sql, params);
+  return result.rows.map(mapNormativa);
+}
+
+/**
+ * Otros documentos vigentes para su rama del árbol. Igual que en normativas,
+ * sólo `q` aplica: el resto de filtros del expediente no tiene equivalente en
+ * esta tabla.
+ */
+export async function listOtrosDocumentos(
+  client: PoolClient,
+  q?: string,
+): Promise<OtroDocumentoListItem[]> {
+  const params: unknown[] = [];
+  const bind = (value: unknown) => {
+    params.push(value);
+    return `$${params.length}`;
+  };
+
+  const where = [
+    "o.anulado_en is null",
+    ...busquedaTexto("o", "o.resumen", q, bind),
+  ];
+
+  const sql = `
+    select o.id,
+           o.codigo,
+           o.titulo,
+           o.tipo,
+           to_char(o.fecha, 'YYYY-MM-DD') as fecha,
+           o.entidad,
+           o.url,
+           o.resumen
+    from core.otros_documentos o
+    where ${where.join(" and ")}
+    order by o.fecha desc nulls last, o.codigo
+  `;
+
+  const result = await client.query(sql, params);
+  return result.rows.map(mapOtroDocumento);
 }
 
 export type DocumentDetail = {

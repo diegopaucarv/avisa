@@ -61,12 +61,12 @@ import { ChangeDetectionStrategy, Component, computed, input, signal } from '@an
       border-radius: 8px;
       background: #fafcfd;
       color: #8d99a6;
-      font-size: 10px;
+      font-size: 12.5px;
       line-height: 1.5;
     }
 
     figcaption {
-      font-size: 9.5px;
+      font-size: 12px;
     }
 
     figcaption a {

@@ -10,12 +10,7 @@
     @if (modoAlta()) {
       <header class="drawer-head">
         <div class="panel-cabecera">
-          <p class="panel-codigo">Nuevo documento</p>
           <h2 id="documento-panel-titulo">Registrar documento</h2>
-          <p class="panel-nota">
-            El título y el tipo son obligatorios. Se registran los metadatos y el enlace; no se sube
-            ningún archivo.
-          </p>
         </div>
 
         <button
@@ -259,10 +254,6 @@
 
         @if (formulario(); as b) {
           <form class="panel-formulario" (submit)="alEnviarFormulario($event)">
-            <p class="panel-nota">
-              Sólo se envían los campos que cambian. El título y la fecha no pueden quedar vacíos;
-              el resumen y el archivo se pueden retirar.
-            </p>
 
             <div class="form-field">
               <label class="form-label" for="documento-campo-titulo">Título</label>
@@ -379,11 +370,6 @@
                 Rechazar
               </button>
             </div>
-            <p class="panel-nota">
-              Validar y Rechazar cambian el estado de flujo con
-              <code>PATCH /api/v1/documents/:id</code>. El indicador «Validado por humano» es de
-              sólo lectura y no se modifica desde aquí.
-            </p>
           }
 
           @if (estadoPendiente(); as objetivo) {
@@ -428,7 +414,6 @@
                 Modificar
               </button>
             } @else {
-              <p class="panel-nota">Su rol no permite modificar este documento.</p>
             }
             @if (puedeAnular()) {
               <button type="button" class="button-danger" (click)="anular.emit()">

@@ -31,6 +31,60 @@ export function aSinCasoTotal(bruto: unknown): number {
   return aTotal(bruto);
 }
 
+/**
+ * Agregado de compromisos (`GET /api/v1/commitments/resumen`).
+ *
+ * El plazo de un compromiso vive en sus hitos, no en el compromiso: por eso el
+ * sobre separa el total de filas de las que tienen vencimiento calculable. No
+ * se deriva ninguna tasa; el consumidor decide cómo publicar el reparto.
+ */
+export type ResumenCompromisos = {
+  compromisos: number;
+  hitos: number;
+  hitosConFecha: number;
+  hitosCumplidos: number;
+  hitosCumplidosConFecha: number;
+  compromisosConPlazo: number;
+  generadoAt: string | null;
+};
+
+const CAMPOS_RESUMEN_COMPROMISOS = [
+  'compromisos',
+  'hitos',
+  'hitosConFecha',
+  'hitosCumplidos',
+  'hitosCumplidosConFecha',
+  'compromisosConPlazo',
+] as const;
+
+/**
+ * Normaliza el sobre de `/commitments/resumen`. Devuelve `null` si el cuerpo no
+ * cumple el contrato: la vista lo trata como «No disponible», en vez de rellenar
+ * con ceros un dato que la API no entregó.
+ */
+export function aResumenCompromisos(bruto: unknown): ResumenCompromisos | null {
+  if (!esRegistro(bruto)) return null;
+
+  const leido: Partial<ResumenCompromisos> = {};
+  for (const campo of CAMPOS_RESUMEN_COMPROMISOS) {
+    const valor = bruto[campo];
+    if (typeof valor !== 'number' || !Number.isFinite(valor)) return null;
+    leido[campo] = valor;
+  }
+
+  const generadoAt = bruto['generatedAt'];
+
+  return {
+    compromisos: leido.compromisos as number,
+    hitos: leido.hitos as number,
+    hitosConFecha: leido.hitosConFecha as number,
+    hitosCumplidos: leido.hitosCumplidos as number,
+    hitosCumplidosConFecha: leido.hitosCumplidosConFecha as number,
+    compromisosConPlazo: leido.compromisosConPlazo as number,
+    generadoAt: typeof generadoAt === 'string' ? generadoAt : null,
+  };
+}
+
 /** Horizonte de «por vencer»: hoy y los próximos 30 días, ambos inclusive. */
 export const HORIZONTE_POR_VENCER_DIAS = 30;
 

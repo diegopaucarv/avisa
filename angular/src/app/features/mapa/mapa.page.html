@@ -1,12 +1,7 @@
 <section class="view-body" aria-labelledby="titulo-panorama">
   <header class="view-head">
     <div>
-      <p class="section-eyebrow">TERRITORIO</p>
       <h1 id="titulo-panorama">Panorama territorial</h1>
-      <p class="view-subtitle">
-        Distribución de los casos visibles por ámbito y región, con su situación —latente o
-        manifiesta— y el riesgo alto de cada territorio.
-      </p>
       <p class="view-meta">
         @if (corte(); as sello) {
         <span>Datos al {{ sello }}</span>
@@ -48,13 +43,35 @@
   <div class="executive-kpis">
     <div class="stat-card">
       <span class="stat-icon">
-        <app-icono nombre="casos" [tamano]="16" />
+        <app-icono nombre="reloj" [tamano]="16" />
       </span>
       <span class="stat-copy">
-        <span>Casos abiertos</span>
-        <strong>{{ visibles().length }}</strong>
+        <span>Casos latentes</span>
+        <strong>{{ conteoSituacion().latente }}</strong>
       </span>
     </div>
+
+    <div class="stat-card">
+      <span class="stat-icon">
+        <app-icono nombre="actividad" [tamano]="16" />
+      </span>
+      <span class="stat-copy">
+        <span>Casos manifiestos</span>
+        <strong>{{ conteoSituacion().manifiesto }}</strong>
+      </span>
+    </div>
+
+    @if (conteoSituacion().sinNivel > 0) {
+    <div class="stat-card">
+      <span class="stat-icon">
+        <app-icono nombre="info" [tamano]="16" />
+      </span>
+      <span class="stat-copy">
+        <span>Sin nivel declarado</span>
+        <strong>{{ conteoSituacion().sinNivel }}</strong>
+      </span>
+    </div>
+    }
 
     <div class="stat-card">
       <span class="stat-icon">
@@ -78,17 +95,7 @@
 
     <div class="stat-card">
       <span class="stat-icon">
-        <app-icono nombre="analisis" [tamano]="16" />
-      </span>
-      <span class="stat-copy">
-        <span>En crisis social</span>
-        <strong>{{ crisisSocial() }}</strong>
-      </span>
-    </div>
-
-    <div class="stat-card">
-      <span class="stat-icon">
-        <app-icono nombre="info" [tamano]="16" />
+        <app-icono nombre="casos" [tamano]="16" />
       </span>
       <span class="stat-copy">
         <span>Casos sin región</span>
@@ -97,14 +104,8 @@
     </div>
   </div>
 
-  @if (conteoSituacion().sinNivel > 0) {
-  <p class="tabla-nota">
-    {{ conteoSituacion().sinNivel }} {{ conteoSituacion().sinNivel === 1 ? 'caso no tiene' : 'casos
-    no tienen' }} nivel de conflictividad declarado: no se cuentan como latentes ni manifiestos.
-  </p>
-  }
+  @if (conteoSituacion().sinNivel > 0) { }
 
-  <p class="section-eyebrow">ALCANCE GEOGRÁFICO</p>
   <div class="segmented ambito-chips" role="group" aria-label="Filtrar por ámbito">
     <button
       type="button"
@@ -135,9 +136,25 @@
     <section class="surface panel" aria-labelledby="titulo-mapa">
       <div class="surface-heading mapa-cabeza">
         <div>
-          <p class="section-eyebrow">MAPA</p>
           <h3 id="titulo-mapa">Mapa referencial</h3>
-          <p>Círculos por región sobre el lienzo OSM; el tamaño es el número de casos abiertos.</p>
+          <p>
+            Círculos por región y límites distritales sobre teselas OSM, que son referenciales; el
+            tamaño del círculo es el número de casos abiertos.
+          </p>
+        </div>
+        <div class="mapa-controles" role="group" aria-label="Capas del mapa">
+          <button
+            type="button"
+            class="button-secondary"
+            [attr.aria-pressed]="capaDistritosVisible()"
+            (click)="alternarCapaDistritos()"
+          >
+            <app-icono nombre="mapa" [tamano]="14" />
+            Límites distritales
+          </button>
+          @if (estadoDistritos() === 'cargando') {
+          <span class="mapa-estado" role="status">Cargando la capa distrital…</span>
+          }
         </div>
         @if (filaSeleccionada(); as seleccion) {
         <span class="region-chip region-chip-activa">
@@ -150,13 +167,26 @@
         }
       </div>
 
-      <p class="mapa-rotulo">OSM · referencial · sin ubigeo distrital</p>
+      <p class="mapa-rotulo">Límites distritales · capa censal 2025 · población como denominador</p>
+
+      @if (errorDistritos(); as fallo) {
+      <div class="mapa-aviso" role="alert">
+        <p>
+          La capa distrital no está disponible ({{ fallo.estado === 0 ? 'sin conexión' : 'error ' +
+          fallo.estado }}): {{ fallo.message }}. Los círculos por región siguen vigentes.
+        </p>
+        <button type="button" class="button-secondary" (click)="reintentarDistritos()">
+          Reintentar
+        </button>
+      </div>
+      }
 
       <div
         #lienzo
         class="mapa-lienzo"
         role="region"
-        aria-label="Mapa referencial de las regiones con casos visibles"
+        tabindex="0"
+        aria-label="Mapa referencial de las regiones con casos visibles y límites distritales"
       ></div>
 
       <ul class="mapa-leyenda" aria-label="Leyenda del mapa">
@@ -166,19 +196,53 @@
         <li><span class="leyenda-anillo" aria-hidden="true"></span>Región seleccionada</li>
         <li>Sólo se dibujan regiones con casos visibles</li>
       </ul>
+
+      <ul
+        class="mapa-leyenda mapa-leyenda-coropleta"
+        aria-label="Relleno de los límites distritales: casos abiertos por distrito"
+      >
+        <li class="leyenda-titulo">Casos abiertos por distrito</li>
+        @for (tramo of escalaCoropleta; track tramo.etiqueta; let i = $index) {
+        <li>
+          <span
+            class="leyenda-tramo"
+            [style.background]="coloresCoropleta[i]"
+            aria-hidden="true"
+          ></span
+          >{{ tramo.etiqueta }}
+        </li>
+        }
+      </ul>
+
+      <p class="mapa-nota">
+        «Sin casos» va sin relleno. {{ casosSinDistritoTotal() }} {{ casosSinDistritoTotal() === 1 ?
+        'caso visible no declara' : 'casos visibles no declaran' }} distrito y no se ubican en el
+        mapa. El fondo OSM es referencial y no oficial; la población sólo es denominador de la ficha
+        y de la tabla.
+      </p>
     </section>
     }
 
     <section class="surface panel" aria-labelledby="titulo-regiones">
-      <div class="surface-heading">
+      <div class="surface-heading regiones-cabeza">
         <div>
-          <p class="section-eyebrow">REGIONES</p>
-          <h3 id="titulo-regiones">Casos abiertos por región</h3>
+          <h3 id="titulo-regiones">Casos por región</h3>
           <p>
-            Ordenadas por número de casos; el riesgo alto y el nivel de conflictividad son atributos
-            propios de cada caso. Pulse una fila para abrir el listado filtrado por esa región.
+            Ordenables por total o por casos por 100 000 habitantes; el riesgo alto y el nivel de
+            conflictividad son atributos propios de cada caso. Pulse el nombre de la región para
+            abrir el listado filtrado por esa región o «Ver casos» para revisarlos en el cajón con
+            el territorio y el ámbito aplicados.
           </p>
         </div>
+        <button
+          type="button"
+          class="button-secondary"
+          aria-haspopup="dialog"
+          (click)="abrirCajon($event)"
+        >
+          <app-icono nombre="casos" [tamano]="14" />
+          Ver casos
+        </button>
       </div>
 
       <div class="table-wrap">
@@ -187,14 +251,38 @@
             <tr>
               <th scope="col">Región</th>
               <th scope="col">Ámbito</th>
+              <th scope="col">Latentes / manifiestos</th>
               <th
                 scope="col"
-                [attr.aria-sort]="ordenTotal() === 'desc' ? 'descending' : 'ascending'"
+                [attr.aria-sort]="
+                  ordenTasa() === null
+                    ? ordenTotal() === 'desc'
+                      ? 'descending'
+                      : 'ascending'
+                    : 'none'
+                "
               >
                 <button type="button" class="th-orden" (click)="alternarOrdenTotal()">
-                  Casos abiertos
+                  Total
                   <span class="th-orden-flecha" aria-hidden="true"
-                    >{{ ordenTotal() === 'desc' ? '↓' : '↑' }}</span
+                    >{{ ordenTasa() === null ? (ordenTotal() === 'desc' ? '↓' : '↑') : '↕' }}</span
+                  >
+                </button>
+              </th>
+              <th
+                scope="col"
+                [attr.aria-sort]="
+                  ordenTasa() === 'desc'
+                    ? 'descending'
+                    : ordenTasa() === 'asc'
+                      ? 'ascending'
+                      : 'none'
+                "
+              >
+                <button type="button" class="th-orden" (click)="alternarOrdenTasa()">
+                  Casos por 100 000 hab.
+                  <span class="th-orden-flecha" aria-hidden="true"
+                    >{{ ordenTasa() === 'desc' ? '↓' : ordenTasa() === 'asc' ? '↑' : '↕' }}</span
                   >
                 </button>
               </th>
@@ -210,7 +298,9 @@
                 </a>
               </td>
               <td>{{ etiquetaAmbitos(fila.ambitos) }}</td>
+              <td>{{ fila.latente }} / {{ fila.manifiesto }}</td>
               <td>{{ fila.total }}</td>
+              <td class="celda-tasa">{{ formatearTasa(tasaFila(fila)) }}</td>
               <td>{{ fila.riesgoAlto }}</td>
             </tr>
             } @if (sinRegion() > 0) {
@@ -220,8 +310,10 @@
                   <strong>Sin región</strong>
                 </a>
               </td>
-              <td>—</td>
+              <td>{{ etiquetaAmbitos(alcancesSinRegion()) }}</td>
+              <td>{{ situacionSinRegion().latente }} / {{ situacionSinRegion().manifiesto }}</td>
               <td>{{ sinRegion() }}</td>
+              <td class="celda-tasa">—</td>
               <td>{{ riesgoAltoSinRegion() }}</td>
             </tr>
             }
@@ -231,20 +323,15 @@
 
       @if (filasRegion().length === 0) {
       <p class="panel-vacio">No hay casos con región asignada en el conjunto visible.</p>
+      } @if (estadoPoblacion() === 'cargando') {
+      <p class="tabla-nota" role="status">Cargando los denominadores de población…</p>
       }
-
-      <p class="tabla-nota">
-        La cifra de cada fila es el número de casos abiertos. Los casos sin región van en su propia
-        fila: suman al conjunto visible, no a ninguna región. Pulse una fila (o «Ver casos») para
-        abrir el listado con el mismo recorte de la fila y del ámbito vigente.
-      </p>
     </section>
   </div>
 
   <section class="surface panel" aria-labelledby="titulo-vista-esquematica">
     <div class="surface-heading">
       <div>
-        <p class="section-eyebrow">ÁMBITOS</p>
         <h3 id="titulo-vista-esquematica">Casos abiertos por ámbito</h3>
         <p>Porcentaje de casos visibles por ámbito, con su desglose regional.</p>
       </div>
@@ -274,18 +361,11 @@
       </article>
       }
     </div>
-
-    <p class="tabla-nota">
-      Total del conjunto visible: {{ visibles().length }} {{ visibles().length === 1 ? 'caso' :
-      'casos' }} en {{ alcanceTexto() }}. El porcentaje se calcula sobre ese total; los casos sin
-      ámbito no se reparten.
-    </p>
   </section>
 
   <section class="surface panel" aria-labelledby="titulo-casos-prioritarios">
     <div class="surface-heading">
       <div>
-        <p class="section-eyebrow">CONFLICTIVIDAD</p>
         <h3 id="titulo-casos-prioritarios">Casos priorizados</h3>
         <p>
           Orden: gravedad (riesgo Alto → Bajo, luego prioridad Urgente → Bajo) y, a igualdad, la
@@ -301,16 +381,18 @@
       <table class="data-table" aria-label="Casos priorizados por gravedad, prioridad y antigüedad">
         <thead>
           <tr>
-            <th scope="col">Caso</th>
-            <th scope="col">Región</th>
-            <th scope="col">Conflictividad</th>
-            <th scope="col">Riesgo</th>
-            <th scope="col">Prioridad</th>
-            <th scope="col">Inicio</th>
+            <th scope="col" [appThOrden]="'codigo'" [orden]="ordenPrioritarios">Caso</th>
+            <th scope="col" [appThOrden]="'region'" [orden]="ordenPrioritarios">Región</th>
+            <th scope="col" [appThOrden]="'conflictividad'" [orden]="ordenPrioritarios">
+              Conflictividad
+            </th>
+            <th scope="col" [appThOrden]="'riesgo'" [orden]="ordenPrioritarios">Riesgo</th>
+            <th scope="col" [appThOrden]="'prioridad'" [orden]="ordenPrioritarios">Prioridad</th>
+            <th scope="col" [appThOrden]="'inicio'" [orden]="ordenPrioritarios">Inicio</th>
           </tr>
         </thead>
         <tbody>
-          @for (caso of casosPrioritarios(); track caso.id) {
+          @for (caso of casosPrioritariosVisibles(); track caso.id) {
           <tr>
             <td class="celda-caso">
               <a class="table-link" [routerLink]="['/casos', caso.codigo]">{{ caso.codigo }}</a>
@@ -326,17 +408,156 @@
         </tbody>
       </table>
     </div>
-    <p class="tabla-nota">
-      Se listan {{ casosPrioritarios().length }} de {{ visibles().length }} casos visibles. @if
-      (sinInicio() > 0) {
-      <span>
-        {{ sinInicio() }} {{ sinInicio() === 1 ? 'caso no tiene' : 'casos no tienen' }} fecha de
-        inicio registrada: se ordenan al final porque la API no devuelve ese dato, sin inventar una
-        fecha.
-      </span>
-      }
-    </p>
     }
   </section>
-  } }
+
+  @if (fichaDistrito(); as distrito) {
+  <div class="casos-drawer-scrim" (click)="alFondoFicha($event)" (keydown)="alTeclaFicha($event)">
+    <aside
+      #ficha
+      class="casos-drawer"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="ficha-distrito-titulo"
+      tabindex="-1"
+    >
+      <header class="casos-drawer-cabeza">
+        <div>
+          <h3 id="ficha-distrito-titulo">{{ distrito.nombre }}</h3>
+          <p class="casos-drawer-sub">
+            {{ distrito.provincia || 'Provincia sin declarar' }} · {{ distrito.region || 'Región sin
+            declarar' }} · ubigeo {{ distrito.ubigeo }}
+          </p>
+        </div>
+        <button
+          type="button"
+          class="icon-button"
+          aria-label="Cerrar la ficha distrital"
+          (click)="cerrarFichaDistrito()"
+        >
+          <app-icono nombre="cerrar" [tamano]="18" />
+        </button>
+      </header>
+
+      <div class="casos-drawer-cuerpo">
+        <table class="data-table ficha-tabla" aria-label="Datos del distrito">
+          <caption class="ficha-motivo">
+            Procedencia: capa distrital censal 2025 (límites y población) y casos abiertos del
+            recorte vigente.
+          </caption>
+          <tbody>
+            <tr>
+              <th scope="row">Provincia</th>
+              <td>{{ distrito.provincia || 'Sin declarar' }}</td>
+            </tr>
+            <tr>
+              <th scope="row">Región</th>
+              <td>{{ distrito.region || 'Sin declarar' }}</td>
+            </tr>
+            <tr>
+              <th scope="row">Población</th>
+              <td>
+                {{ formatearNumero(distrito.poblacion) }}
+                <span class="ficha-motivo">· Censo 2025, sólo denominador</span>
+              </td>
+            </tr>
+            <tr>
+              <th scope="row">Casos abiertos</th>
+              <td>{{ fichaCasos() }}</td>
+            </tr>
+            <tr>
+              <th scope="row">Casos por 100 000 hab.</th>
+              <td>
+                @if (fichaTasa() === null) { —
+                <span class="ficha-motivo">sin denominador declarado en la capa</span> } @else { {{
+                formatearTasa(fichaTasa()) }} }
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <footer class="casos-drawer-pie">
+        <button type="button" class="button-secondary" (click)="cerrarFichaDistrito()">
+          Cerrar
+        </button>
+      </footer>
+    </aside>
+  </div>
+  } @if (cajonAbierto()) {
+  <div class="casos-drawer-scrim" (click)="alFondoCajon($event)" (keydown)="alTeclaCajon($event)">
+    <aside
+      #cajon
+      class="casos-drawer"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="cajon-casos-titulo"
+      tabindex="-1"
+    >
+      <header class="casos-drawer-cabeza">
+        <div>
+          <h3 id="cajon-casos-titulo">{{ cajonTitulo() }}</h3>
+          <p class="casos-drawer-sub">
+            {{ cajonCasos().length }} {{ cajonCasos().length === 1 ? 'caso visible' : 'casos
+            visibles' }} · sólo lectura
+          </p>
+        </div>
+        <button
+          type="button"
+          class="icon-button"
+          aria-label="Cerrar el cajón de casos"
+          (click)="cerrarCajon()"
+        >
+          <app-icono nombre="cerrar" [tamano]="18" />
+        </button>
+      </header>
+
+      <div class="casos-drawer-cuerpo">
+        @if (cajonCasos().length === 0) {
+        <p class="casos-drawer-vacio">No hay casos visibles con este territorio y ámbito.</p>
+        } @else {
+        <ul class="casos-drawer-lista" aria-label="Casos del cajón">
+          @for (caso of cajonCasos(); track caso.id) {
+          <li>
+            <a
+              class="casos-drawer-caso"
+              [routerLink]="['/casos', caso.codigo]"
+              (click)="cerrarCajon()"
+            >
+              <span class="casos-drawer-principal">
+                <span class="casos-drawer-codigo">{{ caso.codigo }}</span>
+                <span class="casos-drawer-titulo">{{ caso.titulo }}</span>
+                <span class="casos-drawer-meta">
+                  <span>Región: {{ caso.region || 'Sin región' }}</span>
+                  <span>Conflictividad: {{ caso.nivelConflicto || 'Sin declarar' }}</span>
+                  <span>Estado: {{ caso.estado }}</span>
+                </span>
+              </span>
+              <span class="casos-drawer-tags">
+                <span [class]="'status-badge risk-' + caso.riesgo.toLowerCase()">
+                  <span class="status-dot"></span>
+                  Riesgo: {{ caso.riesgo }}
+                </span>
+              </span>
+            </a>
+          </li>
+          }
+        </ul>
+        }
+      </div>
+
+      <footer class="casos-drawer-pie">
+        <button type="button" class="button-secondary" (click)="cerrarCajon()">Cerrar</button>
+        <a
+          class="button-primary"
+          [routerLink]="['/casos']"
+          [queryParams]="cajonEnlace()"
+          (click)="cerrarCajon()"
+        >
+          Abrir listado completo
+        </a>
+      </footer>
+    </aside>
+  </div>
+  } } }
 </section>

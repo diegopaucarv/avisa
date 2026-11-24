@@ -93,7 +93,7 @@ const NOMBRES: Record<EntidadAnulableLote, string> = {
 
     .barra-cuenta {
       color: #7b8896;
-      font-size: 10px;
+      font-size: 12.5px;
       font-weight: 600;
       white-space: nowrap;
     }

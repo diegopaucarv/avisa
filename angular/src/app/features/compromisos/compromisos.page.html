@@ -2,10 +2,6 @@
   <header class="view-head">
     <div>
       <h1 id="titulo-compromisos">Compromisos</h1>
-      <p class="view-subtitle">
-        Matriz de seguimiento de compromisos (Guía §8.3.2 y Anexo 14): cumplimiento, hitos y
-        vencimientos derivados de la intervención.
-      </p>
     </div>
     <div class="view-actions">
       @if (puedeRegistrar()) {
@@ -16,7 +12,7 @@
     </div>
   </header>
 
-  @if (!verPapelera()) {
+  @if (!verPapelera() && !vistaMatriz()) {
   <div class="view-toolbar">
     <app-barra-seleccion
       entidad="compromisos"
@@ -34,7 +30,7 @@
   <p class="form-hint aviso-ok" role="status">{{ aviso }}</p>
   } @if (avisoCreacion(); as aviso) {
   <p class="form-hint aviso-ok" role="status">{{ aviso }}</p>
-  } @if (!verPapelera()) {
+  } @if (!verPapelera() && !vistaMatriz()) {
   <div class="executive-kpis">
     <div class="stat-card">
       <span class="stat-icon"><app-icono nombre="compromisos" [tamano]="16" /></span>
@@ -65,8 +61,7 @@
       </span>
     </div>
   </div>
-  }
-
+  } @if (!vistaMatriz()) {
   <div class="filter-bar">
     <label class="search-field">
       <app-icono nombre="buscar" [tamano]="14" />
@@ -124,9 +119,10 @@
 
     <button type="button" class="button-secondary" (click)="limpiar()">Limpiar filtros</button>
   </div>
+  }
 
   <div class="view-toolbar">
-    @if (puedeVerPapelera()) {
+    @if (puedeVerPapelera() && !vistaMatriz()) {
     <div class="segmented" role="group" aria-label="Registros activos o anulados">
       <button type="button" [attr.aria-pressed]="!verPapelera()" (click)="cambiarVer('activos')">
         Activos
@@ -154,11 +150,21 @@
       >
         Resumen
       </button>
+      <button
+        type="button"
+        [attr.aria-pressed]="modo() === 'matriz'"
+        (click)="cambiarModo('matriz')"
+      >
+        Matriz del equipo
+      </button>
     </div>
     }
   </div>
 
-  @if (vistaResumen()) { @if (estadoResumen() === 'inactivo' || estadoResumen() === 'cargando') {
+  @if (vistaMatriz()) {
+  <app-matriz-equipo />
+  } @else if (vistaResumen()) { @if (estadoResumen() === 'inactivo' || estadoResumen() ===
+  'cargando') {
   <div class="empty-state" role="status">Cargando el desglose…</div>
   } @else if (estadoResumen() === 'error') {
   <div class="empty-state" role="alert">
@@ -216,7 +222,7 @@
   </p>
   } } @else if (!vistaCalendario()) { @if (estado() === 'inactivo' || estado() === 'cargando') {
   <div class="empty-state" role="status">
-    {{ verPapelera() ? 'Cargando la papelera…' : 'Cargando compromisos…' }}
+    {{ verPapelera() ? 'Cargando el archivo…' : 'Cargando compromisos…' }}
   </div>
   } @else if (estado() === 'error') {
   <div class="empty-state" role="alert">
@@ -236,20 +242,17 @@
   } } @else if (verPapelera()) {
   <div class="table-wrap">
     <table class="data-table">
-      <caption class="table-caption">
-        {{ resumenPapelera() }}
-      </caption>
       <thead>
         <tr>
-          <th scope="col">Código</th>
-          <th scope="col">Compromiso</th>
-          <th scope="col">Caso</th>
-          <th scope="col">Fecha de anulación</th>
+          <th scope="col" [appThOrden]="'codigo'" [orden]="orden">Código</th>
+          <th scope="col" [appThOrden]="'compromiso'" [orden]="orden">Compromiso</th>
+          <th scope="col" [appThOrden]="'caso'" [orden]="orden">Caso</th>
+          <th scope="col" [appThOrden]="'anulado'" [orden]="orden">Fecha de anulación</th>
           <th scope="col">Acción</th>
         </tr>
       </thead>
       <tbody>
-        @for (compromiso of compromisos(); track compromiso.id) {
+        @for (compromiso of filasVisibles(); track compromiso.id) {
         <tr>
           <td>{{ compromiso.codigo }}</td>
           <td class="celda-compromiso">{{ compromiso.accion }}</td>
@@ -273,9 +276,6 @@
   } @else {
   <div class="table-wrap">
     <table class="data-table">
-      <caption class="table-caption">
-        {{ resumenTabla() }}
-      </caption>
       <thead>
         <tr>
           <th scope="col" class="col-seleccion">
@@ -287,18 +287,20 @@
               (change)="seleccion.alternarPagina(idsVisibles(), $event)"
             />
           </th>
-          <th scope="col">Código</th>
-          <th scope="col">Compromiso</th>
-          <th scope="col">Caso</th>
-          <th scope="col">Tipo de compromiso <app-glosario termino="tipo-compromiso" /></th>
-          <th scope="col">Unidad responsable</th>
-          <th scope="col">Estado</th>
-          <th scope="col">Vencimiento</th>
-          <th scope="col">Situación</th>
+          <th scope="col" [appThOrden]="'codigo'" [orden]="orden">Código</th>
+          <th scope="col" [appThOrden]="'compromiso'" [orden]="orden">Compromiso</th>
+          <th scope="col" [appThOrden]="'caso'" [orden]="orden">Caso</th>
+          <th scope="col" [appThOrden]="'tipo'" [orden]="orden">
+            Tipo de compromiso <app-glosario termino="tipo-compromiso" />
+          </th>
+          <th scope="col" [appThOrden]="'unidad'" [orden]="orden">Unidad responsable</th>
+          <th scope="col" [appThOrden]="'estado'" [orden]="orden">Estado</th>
+          <th scope="col" [appThOrden]="'vencimiento'" [orden]="orden">Vencimiento</th>
+          <th scope="col" [appThOrden]="'situacion'" [orden]="orden">Situación</th>
         </tr>
       </thead>
       <tbody>
-        @for (compromiso of compromisos(); track compromiso.id) {
+        @for (compromiso of filasVisibles(); track compromiso.id) {
         <tr class="fila-compromiso" (click)="abrir(compromiso)">
           <td class="col-seleccion" (click)="$event.stopPropagation()">
             <input

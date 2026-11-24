@@ -12,6 +12,13 @@
       <p>Ingresa tus credenciales para acceder al sistema de vigilancia.</p>
     </div>
 
+    @if (sesionExpirada) {
+      <div class="demo-notice" role="status">
+        <app-icono nombre="reloj" [tamano]="15" />
+        <span>Tu sesión se cerró por inactividad. Vuelve a iniciar sesión.</span>
+      </div>
+    }
+
     <form [formGroup]="formulario" (ngSubmit)="enviar()">
       <label for="dni">DNI</label>
       <input
@@ -41,7 +48,7 @@
       }
 
       <button class="login-button" type="submit" [disabled]="enviando()">
-        {{ enviando() ? "Validando..." : "Ingresar al aplicativo" }}
+        {{ enviando() ? 'Validando...' : 'Ingresar al aplicativo' }}
       </button>
     </form>
 
@@ -53,8 +60,8 @@
       <span class="aside-tag">AVISA · 2026</span>
       <h2>Información para una mejor decisión pública.</h2>
       <p>
-        Centraliza alertas, casos e intervenciones para anticipar riesgos y
-        fortalecer el diálogo territorial.
+        Centraliza alertas, casos e intervenciones para anticipar riesgos y fortalecer el diálogo
+        territorial.
       </p>
     </div>
     <span class="aside-bottom">

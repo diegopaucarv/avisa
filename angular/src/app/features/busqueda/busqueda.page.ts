@@ -82,20 +82,7 @@ const FILTROS_INICIALES = { q: '' };
       gap: 16px;
     }
 
-    .view-head h1 {
-      margin: 0;
-      color: #1a2b3e;
-      font: 700 22px/1.3 var(--font-display);
-      letter-spacing: -0.65px;
-    }
 
-    .view-subtitle {
-      max-width: 760px;
-      margin: 6px 0 0;
-      color: #7b8896;
-      font-size: 11px;
-      line-height: 1.6;
-    }
 
     .search-groups {
       display: flex;
@@ -125,7 +112,7 @@ const FILTROS_INICIALES = { q: '' };
     .search-group-head h2 {
       margin: 0;
       color: #5f7690;
-      font: 700 10px/1.3 var(--font-display);
+      font: 700 12.5px/1.3 var(--font-display);
       letter-spacing: 0.6px;
       text-transform: uppercase;
     }
@@ -134,7 +121,7 @@ const FILTROS_INICIALES = { q: '' };
       margin: 0;
       padding: 0 2px;
       color: #8b97a2;
-      font-size: 9px;
+      font-size: 12px;
     }
 
     .search-group-omitidos a {
@@ -197,14 +184,14 @@ const FILTROS_INICIALES = { q: '' };
 
     .search-result-titulo {
       color: #33465a;
-      font-size: 11px;
+      font-size: 13px;
       font-weight: 600;
       line-height: 1.4;
     }
 
     .search-result-subtitulo {
       color: #748391;
-      font-size: 10px;
+      font-size: 12.5px;
       line-height: 1.45;
     }
 
@@ -214,7 +201,7 @@ const FILTROS_INICIALES = { q: '' };
       align-items: center;
       gap: 8px;
       color: #8b97a2;
-      font-size: 9px;
+      font-size: 12px;
     }
 
     .search-result-tipo {
@@ -222,7 +209,7 @@ const FILTROS_INICIALES = { q: '' };
       border-radius: 12px;
       background: #f1f3f5;
       color: #687783;
-      font-size: 9px;
+      font-size: 12px;
       font-weight: 600;
       white-space: nowrap;
     }
@@ -242,7 +229,7 @@ const FILTROS_INICIALES = { q: '' };
 
     .search-result-dato-etiqueta {
       color: #a3aeb8;
-      font-size: 8px;
+      font-size: 12px;
       letter-spacing: 0.4px;
       text-transform: uppercase;
     }
@@ -257,7 +244,7 @@ const FILTROS_INICIALES = { q: '' };
       flex: none;
       margin-top: 6px;
       color: #9aa5ae;
-      font-size: 9px;
+      font-size: 12px;
       white-space: nowrap;
     }
 
@@ -278,7 +265,7 @@ const FILTROS_INICIALES = { q: '' };
       border-radius: 8px;
       background: #fdf8f1;
       color: #8a5a1f;
-      font-size: 10px;
+      font-size: 12.5px;
       line-height: 1.5;
     }
 

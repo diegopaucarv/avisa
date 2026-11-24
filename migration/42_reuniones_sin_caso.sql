@@ -76,4 +76,10 @@ CREATE UNIQUE INDEX IF NOT EXISTS uq_alertas_tempranas_codigo_alerta
 COMMENT ON INDEX core.uq_alertas_tempranas_codigo_alerta IS
     'Una alerta vigente no puede repetir código: es la clave de idempotencia del importador de la matriz.';
 
+-- ============================================================================
+-- Registro de la migración
+-- ============================================================================
+INSERT INTO core.migracion_log (clave) VALUES ('42_reuniones_sin_caso')
+ON CONFLICT (clave) DO NOTHING;
+
 COMMIT;

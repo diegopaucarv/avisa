@@ -296,7 +296,7 @@ const ESPERA_TECLEO_MS = 250;
     .territorio-grupo {
       margin: 6px 8px 3px;
       color: var(--muted);
-      font-size: 8.5px;
+      font-size: 12px;
       font-weight: 700;
       letter-spacing: 0.7px;
       text-transform: uppercase;
@@ -324,14 +324,14 @@ const ESPERA_TECLEO_MS = 250;
       display: flex;
       align-items: center;
       gap: 6px;
-      font-size: 12px;
+      font-size: 14px;
       font-weight: 600;
       line-height: 1.3;
     }
 
     .territorio-opcion-ruta {
       color: var(--muted);
-      font-size: 10px;
+      font-size: 12.5px;
       line-height: 1.35;
     }
 
@@ -340,7 +340,7 @@ const ESPERA_TECLEO_MS = 250;
       border-radius: 999px;
       background: var(--canvas);
       color: var(--ink-2);
-      font-size: 8.5px;
+      font-size: 12px;
       font-weight: 700;
       letter-spacing: 0.3px;
       text-transform: uppercase;

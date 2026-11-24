@@ -23,6 +23,7 @@ import {
   PRIORIDADES_ALERTA,
   NIVELES_ALERTA,
   OPCIONES_NIVEL,
+  PASO_APROBACION_DEFINITIVA,
   type AccionFlujo,
   type Alerta,
   type AltaAlerta,
@@ -115,17 +116,12 @@ function diferenciaTexto(valor: string, original: string | null): string | null 
     .alerta-panel-codigo {
       margin: 0;
       color: #8a98a5;
-      font-size: 9px;
+      font-size: 12px;
       font-weight: 700;
       letter-spacing: 0.7px;
       text-transform: uppercase;
     }
 
-    .drawer-head h2 {
-      margin: 0;
-      color: #1c2a38;
-      font: 700 16px/1.35 var(--font-display);
-    }
 
     .alerta-panel-badges {
       display: flex;
@@ -189,13 +185,13 @@ function diferenciaTexto(valor: string, original: string | null): string | null 
     .alerta-seccion h3 {
       margin: 0;
       color: #33475b;
-      font: 700 11px var(--font-display);
+      font: 700 13px var(--font-display);
     }
 
     .alerta-texto {
       margin: 0;
       color: #52677a;
-      font-size: 11px;
+      font-size: 13px;
       line-height: 1.65;
       white-space: pre-line;
     }
@@ -203,24 +199,60 @@ function diferenciaTexto(valor: string, original: string | null): string | null 
     .alerta-nota {
       margin: 0;
       color: #8d99a6;
-      font-size: 10px;
+      font-size: 12.5px;
       line-height: 1.5;
     }
 
     .alerta-vacio {
       margin: 0;
       color: #a0aab3;
-      font-size: 10.5px;
+      font-size: 13px;
       font-style: italic;
     }
 
     .alerta-aviso {
+      display: flex;
+      align-items: center;
+      gap: 10px;
       margin: 0;
       padding: 8px 10px;
       border-radius: 6px;
       background: #edf6f0;
       color: #52806a;
-      font-size: 10.5px;
+      font-size: 13px;
+    }
+
+    .alerta-aviso span {
+      flex: 1;
+      min-width: 0;
+      line-height: 1.5;
+    }
+
+    .alerta-deshacer {
+      flex-shrink: 0;
+      height: auto;
+      padding: 2px 8px;
+      font-size: 12px;
+    }
+
+    .alerta-confirmacion {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 4px;
+      padding: 10px 12px;
+      border: 1px solid #e6e0cf;
+      border-radius: 8px;
+      background: #fdfaf1;
+    }
+
+    .alerta-confirmacion-titulo {
+      margin: 0;
+      color: #7d6a35;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
     }
 
     .alerta-error {
@@ -232,7 +264,7 @@ function diferenciaTexto(valor: string, original: string | null): string | null 
       border-radius: 6px;
       background: #fdf6f5;
       color: #a3402f;
-      font-size: 10.5px;
+      font-size: 13px;
     }
     .alerta-error p {
       margin: 0;
@@ -245,7 +277,7 @@ function diferenciaTexto(valor: string, original: string | null): string | null 
       gap: 8px;
       margin: 0;
       color: #465a6c;
-      font-size: 11px;
+      font-size: 13px;
     }
 
     .alerta-etapa-estado {
@@ -253,7 +285,7 @@ function diferenciaTexto(valor: string, original: string | null): string | null 
       border-radius: 10px;
       background: #eef3fa;
       color: #4a6b93;
-      font-size: 9px;
+      font-size: 12px;
       font-weight: 600;
     }
 
@@ -277,7 +309,7 @@ function diferenciaTexto(valor: string, original: string | null): string | null 
 
     .alerta-accion small {
       color: #8d99a6;
-      font-size: 9.5px;
+      font-size: 12px;
       font-weight: 400;
       line-height: 1.4;
     }
@@ -316,7 +348,7 @@ function diferenciaTexto(valor: string, original: string | null): string | null 
 
     .alerta-datos dt {
       color: #97a1aa;
-      font-size: 8.5px;
+      font-size: 12px;
       font-weight: 700;
       letter-spacing: 0.5px;
       text-transform: uppercase;
@@ -325,7 +357,7 @@ function diferenciaTexto(valor: string, original: string | null): string | null 
     .alerta-datos dd {
       margin: 0;
       color: #465a6c;
-      font-size: 10.5px;
+      font-size: 13px;
       line-height: 1.4;
       overflow-wrap: anywhere;
     }
@@ -337,14 +369,14 @@ function diferenciaTexto(valor: string, original: string | null): string | null 
       margin: 0;
       padding-left: 16px;
       color: #52677a;
-      font-size: 10.5px;
+      font-size: 13px;
       line-height: 1.5;
     }
 
     .alerta-alta-ayuda {
       margin: 4px 0 0;
       color: var(--muted);
-      font-size: 10.5px;
+      font-size: 13px;
       line-height: 1.5;
     }
 
@@ -365,7 +397,7 @@ function diferenciaTexto(valor: string, original: string | null): string | null 
       border-radius: 6px;
       background: var(--canvas);
       color: var(--muted);
-      font-size: 10.5px;
+      font-size: 13px;
       line-height: 1.4;
     }
 
@@ -379,14 +411,14 @@ function diferenciaTexto(valor: string, original: string | null): string | null 
       border-radius: 10px;
       background: var(--red-pale);
       color: var(--red);
-      font-size: 9px;
+      font-size: 12px;
       font-weight: 700;
     }
 
     .alerta-alta-catalogo {
       margin: 0;
       color: var(--muted);
-      font-size: 10px;
+      font-size: 12.5px;
       line-height: 1.4;
     }
   `,
@@ -399,6 +431,8 @@ export class AlertaPanelComponent {
   readonly guardando = input(false);
   readonly errorGuardado = input<string | null>(null);
   readonly aviso = input<string | null>(null);
+  /** Paso al que se puede volver tras un cambio exitoso; `null` oculta «Deshacer». */
+  readonly pasoDeshacer = input<number | null>(null);
   /** Código del caso con el que se presiembra el alta (pantalla filtrada por caso). */
   readonly casoInicial = input('');
   /** Prioridades de `GET /api/v1/catalogs` → `catalogs.prioridadesAlerta`. */
@@ -411,11 +445,13 @@ export class AlertaPanelComponent {
   readonly guardar = output<PatchAlerta>();
   readonly registrar = output<AltaAlerta>();
   readonly accion = output<number>();
+  readonly deshacer = output<void>();
 
   readonly prioridades = PRIORIDADES_ALERTA;
   readonly niveles = NIVELES_ALERTA;
 
   private readonly panel = viewChild<ElementRef<HTMLElement>>('panel');
+  private readonly botonConfirmar = viewChild<ElementRef<HTMLButtonElement>>('botonConfirmar');
   private readonly destruccion = inject(DestroyRef);
 
   /** Elemento que tenía el foco al abrir, para devolvérselo al cerrar. */
@@ -443,6 +479,9 @@ export class AlertaPanelComponent {
    */
   readonly divergenciaAceptada = signal(false);
   readonly mensajeLocal = signal<string | null>(null);
+
+  /** Acción de aprobación elegida que espera confirmación explícita (item 23). */
+  readonly aprobacionPendiente = signal<AccionFlujo | null>(null);
 
   readonly formulario = computed(() => (this.editando() ? this.borrador() : null));
 
@@ -541,7 +580,25 @@ export class AlertaPanelComponent {
       if (this.aviso()) {
         this.editando.set(false);
         this.borrador.set(null);
+        this.aprobacionPendiente.set(null);
       }
+    });
+
+    // La confirmación pertenece a la alerta y a su paso actual: si cambia la
+    // fila o el paso, no se arrastra el diálogo anterior.
+    let firmaAbierta: string | null = null;
+    effect(() => {
+      const alerta = this.alerta();
+      const firma = alerta ? `${alerta.id}:${alerta.pasoActual}` : null;
+      if (firma === firmaAbierta) return;
+      firmaAbierta = firma;
+      this.aprobacionPendiente.set(null);
+    });
+
+    // Al aparecer la confirmación, el foco va al botón que la resuelve.
+    effect(() => {
+      if (!this.aprobacionPendiente()) return;
+      this.botonConfirmar()?.nativeElement.focus();
     });
 
     // El alta se siembra limpia y con el caso del contexto, si lo hay.
@@ -567,6 +624,31 @@ export class AlertaPanelComponent {
 
   porcentaje(valor: number | null): string {
     return valor === null ? '—' : `${Math.round(valor * 100)} %`;
+  }
+
+  /**
+   * La aprobación definitiva no se envía al pulsar la acción: se pide
+   * confirmación en línea con el código, el título y el responsable.
+   */
+  elegirAccion(transicion: AccionFlujo): void {
+    if (transicion.paso === PASO_APROBACION_DEFINITIVA) {
+      this.aprobacionPendiente.set(transicion);
+      return;
+    }
+    this.aprobacionPendiente.set(null);
+    this.accion.emit(transicion.paso);
+  }
+
+  cancelarConfirmacion(): void {
+    if (this.guardando()) return;
+    this.aprobacionPendiente.set(null);
+  }
+
+  confirmarAprobacion(): void {
+    const aprobacion = this.aprobacionPendiente();
+    if (!aprobacion || this.guardando() || !this.puedeModificar()) return;
+    this.accion.emit(aprobacion.paso);
+    this.aprobacionPendiente.set(null);
   }
 
   iniciarEdicion(): void {

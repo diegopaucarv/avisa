@@ -2,12 +2,6 @@
   <header class="view-head">
     <div>
       <h1 id="titulo-actores">{{ titulo() }}</h1>
-      <p class="view-subtitle">
-        @if (esSoloPersonas()) { Personas registradas en el directorio, con su tipo, función y
-        posicionamiento en el escenario de conflictividad (Guía §7.4). } @else { Personas,
-        organizaciones sociales y entidades registradas en el directorio, con su tipo, función y
-        posicionamiento en el escenario de conflictividad (Guía §7.4). }
-      </p>
     </div>
     <div class="view-actions">
       <button
@@ -208,10 +202,6 @@
 
   <div class="table-wrap">
     <table class="data-table">
-      <caption class="table-caption">
-        Pulse una fila para abrir la ficha en el panel lateral. Los datos personales sólo se
-        consultan desde la ficha y quedan registrados en la auditoría de la base.
-      </caption>
       <thead>
         <tr>
           <th scope="col" class="col-seleccion">
@@ -224,17 +214,19 @@
             />
           </th>
           <th scope="col">Foto</th>
-          <th scope="col">Nombre</th>
-          <th scope="col">Naturaleza</th>
-          <th scope="col">Tipo</th>
-          <th scope="col">Función</th>
-          <th scope="col">Región</th>
-          <th scope="col">Organización / cargo</th>
-          <th scope="col"><span class="sr-only">Lista temporal</span></th>
+          <th scope="col" [appThOrden]="'nombre'" [orden]="orden">
+            {{ esSoloPersonas() ? 'Apellidos y Nombres' : 'Nombre' }}
+          </th>
+          <th scope="col" [appThOrden]="'naturaleza'" [orden]="orden">Naturaleza</th>
+          <th scope="col" [appThOrden]="'tipo'" [orden]="orden">Tipo</th>
+          <th scope="col" [appThOrden]="'funcion'" [orden]="orden">Función</th>
+          <th scope="col" [appThOrden]="'region'" [orden]="orden">Región</th>
+          <th scope="col" [appThOrden]="'organizacion'" [orden]="orden">Organización / Cargo</th>
+          <th scope="col">Acciones</th>
         </tr>
       </thead>
       <tbody>
-        @for (actor of actores(); track actor.id) {
+        @for (actor of filasVisibles(); track actor.id) {
         <tr
           class="case-row-clickable"
           [class.row-selected]="seleccionado()?.id === actor.id"

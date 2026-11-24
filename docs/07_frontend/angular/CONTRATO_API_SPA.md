@@ -20,7 +20,7 @@ Las líneas citadas corresponden al árbol de esta fecha. Si `archivo:línea` no
 
 ## 1 · Alcance
 
-Veintidós pantallas, una sola API. Recursos consumidos: casos, alertas, compromisos, demandas, documentos, actores, organizaciones, locales, reportes, notificaciones, catálogos, búsqueda y exportación.
+Veintiséis pantallas, una sola API. Recursos consumidos: casos, alertas, compromisos, demandas, documentos, actores, organizaciones, locales, reportes, notificaciones, catálogos, búsqueda y exportación.
 
 Prefijo: `urlApi()` antepone `ENTORNO.apiBase` (por defecto `/api`) —`angular/src/app/core/config/entorno.ts:41-46`. Las rutas de este documento ya lo incluyen.
 
@@ -218,7 +218,7 @@ Variantes de la misma ruta que la SPA usa para cambiar de petición, no de endpo
 
 - **Calendario**: añade `vencimiento_desde`/`vencimiento_hasta` y páginas de 100.
 - **Desglose**: páginas de 100, sin fechas.
-- **Papelera**: `anulados=true`; en ese modo el calendario y el desglose no se consultan.
+- **Archivo**: `anulados=true`; en ese modo el calendario y el desglose no se consultan.
 
 ### 4.4 · Demandas
 
@@ -245,14 +245,14 @@ El `caso` existe como filtro de servidor y la pantalla no lo expone (`app/api/v1
 
 ### 4.6 · Directorio
 
-| Método | Ruta                   | Query                         | Escritura               |
-| ------ | ---------------------- | ----------------------------- | ----------------------- |
-| `GET`   | `/v1/actors`           | `q, naturaleza, tipo, region` | no                      |
-| `GET`   | `/v1/actors/{uid}`     | —                             | no (la SPA no lo llama) |
+| Método  | Ruta                   | Query                                 | Escritura                    |
+| ------- | ---------------------- | ------------------------------------- | ---------------------------- |
+| `GET`   | `/v1/actors`           | `q, naturaleza, tipo, region`         | no                           |
+| `GET`   | `/v1/actors/{uid}`     | —                                     | no (la SPA no lo llama)      |
 | `PATCH` | `/v1/actors/{uid}`     | JSON con atributos públicos editables | sí, sujeta a RLS y auditoría |
-| `GET`   | `/v1/actors/{uid}/pii` | `motivo=<texto>`              | no                      |
-| `GET`  | `/v1/organizaciones`   | `q, tipo, activo, vigente`    | no                      |
-| `GET`  | `/v1/locales`          | `q, activo`                   | no                      |
+| `GET`   | `/v1/actors/{uid}/pii` | `motivo=<texto>`                      | no                           |
+| `GET`   | `/v1/organizaciones`   | `q, tipo, activo, vigente`            | no                           |
+| `GET`   | `/v1/locales`          | `q, activo`                           | no                           |
 
 - `PATCH /v1/actors/{uid}` admite `nombre`, `abreviatura`, `naturaleza`, `tipo`, `funcion`, `posicionamiento`, `cargo`, `nivelGobierno`, `categoria`, `perfilDescripcion` y `activo`. Los catálogos se validan en servidor; la clasificación se conserva y RLS aplica el permiso de edición. Cada cambio registra `audit.cambios` en la misma transacción.
 - La mutación no acepta DNI, correo, teléfono, membresías ni ubicación por ID. Esos datos requieren su flujo separado de PII o relaciones y no deben añadirse a este payload.
@@ -323,8 +323,8 @@ El servidor expone además `estadosCaso`, `nivelesRiesgo`, `nivelesConflicto`, `
 | `/alertas`                   | `GET /v1/alerts` · `GET /v1/alerts/{id}` · `PATCH` · `DELETE`                                                                                           |
 | `/compromisos`               | `GET /v1/commitments` (lista, calendario, desglose) · `GET /{id}` · `PATCH` · hitos `POST`/`PATCH` · `DELETE` · `restaurar`                             |
 | `/documentos`                | `GET /v1/documents` (+`catalogs`) · `GET /{id}` · `PATCH` · `DELETE` · `restaurar`                                                                      |
-| `/papelera`                  | `GET` de los 5 recursos con `anulados=true` · `POST …/restaurar`                                                                                        |
-| `/directorio/actores`        | `GET /v1/actors` (+`catalogs`) · `PATCH /v1/actors/{uid}` · `GET /v1/actors/{uid}/pii`                                                                                             |
+| `/archivo`                   | `GET` de los 5 recursos con `anulados=true` · `POST …/restaurar`                                                                                        |
+| `/directorio/actores`        | `GET /v1/actors` (+`catalogs`) · `PATCH /v1/actors/{uid}` · `GET /v1/actors/{uid}/pii`                                                                  |
 | `/directorio/organizaciones` | `GET /v1/organizaciones`                                                                                                                                |
 | `/directorio/instituciones`  | `GET /v1/actors?tipo=Actor público`                                                                                                                     |
 | `/directorio/locales`        | `GET /v1/locales`                                                                                                                                       |

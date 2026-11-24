@@ -9,7 +9,7 @@ import {
   signal,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
 
 import { urlApi } from '../../core/config/entorno';
@@ -32,24 +32,31 @@ import {
 import { BarraSeleccionComponent } from '../../shared/ui/barra-seleccion.component';
 
 import { IconoComponent } from '../../shared/ui/icono.component';
+import { OrdenTabla } from '../../shared/ui/orden-tabla';
 import { PaginacionComponent } from '../../shared/ui/paginacion.component';
 import { SeleccionTabla } from '../../shared/ui/seleccion-tabla';
+import { ThOrdenDirective } from '../../shared/ui/th-orden.directive';
 import {
   TerritorioBuscadorComponent,
   type OpcionTerritorio,
 } from '../../shared/ui/territorio-buscador.component';
+import { AccionesFilaComponent, type AccionFila } from './acciones-fila.component';
 import { AlertaPanelComponent } from './alerta-panel.component';
 import {
   ESTADOS_ALERTA,
   OPCIONES_NIVEL,
   ORDENES_ALERTA,
+  PASO_APROBACION_DEFINITIVA,
   PRIORIDADES_ALERTA,
   aAlerta,
   aDetalleAlerta,
   aPrioridadesAlerta,
+  accionesDeFlujo,
   clavePrioridad as clavePrioridadDe,
+  etapaDeFlujo,
   etiquetaPrioridadConPlazo,
   formatearPlazo as formatearPlazoDe,
+  type AccionFlujo,
   type Alerta,
   type AltaAlerta,
   type DetalleAlerta,
@@ -115,10 +122,13 @@ function totalDe(bruto: unknown): number {
   imports: [
     IconoComponent,
     PaginacionComponent,
+    AccionesFilaComponent,
     AlertaPanelComponent,
     AnularPanelComponent,
     BarraSeleccionComponent,
+    ThOrdenDirective,
     TerritorioBuscadorComponent,
+    RouterLink,
   ],
   templateUrl: './alertas.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -146,20 +156,7 @@ function totalDe(bruto: unknown): number {
       gap: 16px;
     }
 
-    .view-head h1 {
-      margin: 0;
-      color: #1a2b3e;
-      font: 700 22px/1.3 var(--font-display);
-      letter-spacing: -0.65px;
-    }
 
-    .view-subtitle {
-      max-width: 760px;
-      margin: 6px 0 0;
-      color: #7b8896;
-      font-size: 11px;
-      line-height: 1.6;
-    }
 
     .alerta-titulo {
       min-width: 240px;
@@ -173,14 +170,14 @@ function totalDe(bruto: unknown): number {
 
     .alerta-caso strong {
       color: #465a6c;
-      font-size: 9px;
+      font-size: 12px;
       font-weight: 600;
     }
 
     .alerta-caso small {
       margin-top: 3px;
       color: #99a3aa;
-      font-size: 8px;
+      font-size: 12px;
     }
 
     .alerta-sin-caso {
@@ -197,7 +194,7 @@ function totalDe(bruto: unknown): number {
       border-radius: 10px;
       background: #f9ecea;
       color: #a84f49;
-      font-size: 8px;
+      font-size: 12px;
       font-weight: 700;
     }
 
@@ -243,12 +240,12 @@ function totalDe(bruto: unknown): number {
     .alerta-actualizando {
       margin: 0;
       color: #8d99a6;
-      font-size: 9.5px;
+      font-size: 12px;
     }
 
     .aviso-ok {
       color: #2f6f52;
-      font-size: 11.5px;
+      font-size: 13.5px;
     }
 
     .celda-anular {
@@ -256,16 +253,18 @@ function totalDe(bruto: unknown): number {
       text-align: right;
     }
 
-    .celda-anular .button-secondary {
-      min-height: 26px;
-      padding: 0 9px;
-      font-size: 9.5px;
+    .data-table tr.row-aviso-ok td {
+      background: #f1f8f3;
+    }
+
+    .data-table tr.row-aviso-error td {
+      background: #fdf2f1;
     }
 
     .tabla-nota {
       margin: 0 0 8px;
       color: #8d99a6;
-      font-size: 9.5px;
+      font-size: 12px;
     }
 
     /* El buscador territorial entra en la barra como un filtro más. */
@@ -514,8 +513,36 @@ export class AlertasPage {
   readonly errorGuardado = signal<string | null>(null);
   readonly aviso = signal<string | null>(null);
 
+  /**
+   * Paso al que se puede volver tras un cambio de paso exitoso (item 23). Vive
+   * sólo en memoria: se pierde al cerrar el panel o al recargar la página.
+   */
+  readonly pasoDeshacer = signal<number | null>(null);
+
   /** Confirmación del alta en el listado (el panel se cierra al guardar). */
   readonly avisoAlta = signal<string | null>(null);
+
+  /** Feedback de las acciones por fila; vive en el listado, no en el panel. */
+  readonly avisoFila = signal<{ id: string; texto: string; tipo: 'ok' | 'error' } | null>(null);
+  readonly enviandoFila = signal<string | null>(null);
+
+  /** Aprobación disparada desde una fila que espera confirmación explícita (item 23). */
+  readonly aprobacionFila = signal<{ alerta: Alerta; paso: number } | null>(null);
+
+  /**
+   * Paso al que puede volver una fila tras un cambio de flujo exitoso. Sólo
+   * guarda lo necesario: la alerta puede haber salido de la página visible al
+   * recargar el listado. Vive en memoria y no promete persistencia.
+   */
+  readonly deshacerFila = signal<{ id: string; pasoPrevio: number; codigo: string } | null>(null);
+
+  /** «Deshacer» sólo se ofrece si la fila sigue visible y el rol puede editarla. */
+  readonly puedeDeshacerFila = computed(() => {
+    const pendiente = this.deshacerFila();
+    if (!pendiente) return false;
+    const alerta = this.alertas().find((fila) => fila.id === pendiente.id);
+    return alerta ? this.capacidades.puedeModificar(alerta.clasificacion) : false;
+  });
 
   /** Alerta que se está anulando en el panel compartido. */
   readonly alertaAnulacion = signal<Alerta | null>(null);
@@ -536,6 +563,21 @@ export class AlertasPage {
 
   /** Selección de la tabla (página visible) para exportar o anular en lote. */
   readonly seleccion = new SeleccionTabla();
+
+  /** Orden local de la página visible. */
+  readonly orden = new OrdenTabla<Alerta>();
+
+  private readonly accesoresAlerta: Record<string, (alerta: Alerta) => unknown> = {
+    codigo: (alerta) => alerta.codigo,
+    titulo: (alerta) => alerta.titulo,
+    caso: (alerta) => alerta.casoCodigo,
+    prioridad: (alerta) => alerta.prioridad,
+    riesgo: (alerta) => alerta.nivel,
+    fecha: (alerta) => alerta.fechaReporte,
+    estado: (alerta) => alerta.estado,
+  };
+
+  readonly filasVisibles = computed(() => this.orden.ordenar(this.alertas(), this.accesoresAlerta));
 
   idsVisibles(): string[] {
     return this.alertas()
@@ -596,11 +638,42 @@ export class AlertasPage {
     return clavePrioridadDe(prioridad);
   }
 
+  /** Rótulo de la acción en la tabla; el flujo del panel conserva el suyo. */
+  etiquetaAccion(accion: AccionFlujo): string {
+    switch (accion.etiqueta) {
+      case 'Enviar a aprobación definitiva':
+        return 'Aprobar';
+      case 'Devolver a validación previa':
+        return 'Solicitar modificación';
+      default:
+        return accion.etiqueta;
+    }
+  }
+
+  /** Acciones de flujo de la fila, ya rotuladas para el listado. */
+  accionesFila(alerta: Alerta): readonly AccionFila[] {
+    if (!this.capacidades.puedeModificar(alerta.clasificacion)) return [];
+    return accionesDeFlujo(alerta.pasoActual).map((accion) => ({
+      paso: accion.paso,
+      etiqueta: this.etiquetaAccion(accion),
+    }));
+  }
+
+  /** Clase de resaltado de la fila que acaba de recibir una acción. */
+  claseAvisoFila(alerta: Alerta): string {
+    const aviso = this.avisoFila();
+    if (!aviso || aviso.id !== alerta.id) return '';
+    return aviso.tipo === 'ok' ? 'row-aviso-ok' : 'row-aviso-error';
+  }
+
   abrir(alerta: Alerta): void {
     if (!alerta.id) return;
     this.altaAbierta.set(false);
     this.errorGuardado.set(null);
     this.aviso.set(null);
+    this.pasoDeshacer.set(null);
+    this.aprobacionFila.set(null);
+    this.deshacerFila.set(null);
     this.alertaAbierta.set(alerta);
     this.seleccionadaId.set(alerta.id);
   }
@@ -610,6 +683,9 @@ export class AlertasPage {
     if (!this.capacidades.puedeEditar()) return;
     this.errorGuardado.set(null);
     this.aviso.set(null);
+    this.pasoDeshacer.set(null);
+    this.aprobacionFila.set(null);
+    this.deshacerFila.set(null);
     this.avisoAlta.set(null);
     this.alertaAbierta.set(null);
     this.seleccionadaId.set(null);
@@ -623,8 +699,133 @@ export class AlertasPage {
     );
   }
 
+  /**
+   * Cambia de paso desde la fila. La aprobación definitiva no se envía aquí:
+   * queda pendiente de confirmación explícita (item 23), igual que en el panel.
+   */
+  accionFila(alerta: Alerta, paso: number): void {
+    if (!alerta.id || this.enviandoFila()) return;
+
+    if (!this.capacidades.puedeModificar(alerta.clasificacion)) {
+      this.avisoFila.set({
+        id: alerta.id,
+        texto: 'Su rol no permite modificar esta alerta.',
+        tipo: 'error',
+      });
+      return;
+    }
+
+    // Cualquier acción nueva descarta el deshacer y la confirmación anteriores.
+    this.deshacerFila.set(null);
+
+    if (paso === PASO_APROBACION_DEFINITIVA) {
+      this.avisoFila.set(null);
+      this.aprobacionFila.set({ alerta, paso });
+      return;
+    }
+
+    this.aprobacionFila.set(null);
+    this.enviarAccionFila(alerta, paso, alerta.pasoActual);
+  }
+
+  /** La confirmación de la fila ejecuta el mismo PATCH que `accionFila`. */
+  confirmarAprobacionFila(): void {
+    const pendiente = this.aprobacionFila();
+    if (!pendiente || this.enviandoFila()) return;
+
+    const { alerta, paso } = pendiente;
+    this.aprobacionFila.set(null);
+    if (!alerta.id) return;
+
+    if (!this.capacidades.puedeModificar(alerta.clasificacion)) {
+      this.avisoFila.set({
+        id: alerta.id,
+        texto: 'Su rol no permite modificar esta alerta.',
+        tipo: 'error',
+      });
+      return;
+    }
+
+    this.deshacerFila.set(null);
+    this.enviarAccionFila(alerta, paso, alerta.pasoActual);
+  }
+
+  cancelarAprobacionFila(): void {
+    this.aprobacionFila.set(null);
+  }
+
+  /**
+   * Deshace el último cambio de flujo de la fila. Es otro PATCH con
+   * `pasoActual`; recarga el listado y, si la alerta está abierta, el detalle.
+   */
+  deshacerAccionFila(): void {
+    const pendiente = this.deshacerFila();
+    if (!pendiente || this.enviandoFila() || !this.puedeDeshacerFila()) return;
+
+    const alerta = this.alertas().find((fila) => fila.id === pendiente.id);
+    if (!alerta) {
+      this.deshacerFila.set(null);
+      return;
+    }
+
+    this.deshacerFila.set(null);
+    this.aprobacionFila.set(null);
+    this.enviandoFila.set(alerta.id);
+    this.avisoFila.set(null);
+
+    this.patchAlerta(alerta.id, { pasoActual: pendiente.pasoPrevio }).subscribe({
+      next: () => {
+        this.enviandoFila.set(null);
+        const etapa = etapaDeFlujo(pendiente.pasoPrevio);
+        const destino = etapa
+          ? `paso ${pendiente.pasoPrevio} · ${etapa.nombre}`
+          : `paso ${pendiente.pasoPrevio}`;
+        this.avisoFila.set({
+          id: alerta.id,
+          texto: `${pendiente.codigo}: restaurado a ${destino}.`,
+          tipo: 'ok',
+        });
+        this.listado.recargar();
+        if (this.seleccionadaId() === alerta.id) this.detalle.recargar();
+      },
+      error: (fallo: unknown) => {
+        this.enviandoFila.set(null);
+        this.avisoFila.set({ id: alerta.id, texto: this.mensajeDeError(fallo), tipo: 'error' });
+      },
+    });
+  }
+
+  /** PATCH común de las acciones de flujo de la fila. */
+  private enviarAccionFila(alerta: Alerta, paso: number, pasoPrevio: number): void {
+    this.enviandoFila.set(alerta.id);
+    this.avisoFila.set(null);
+
+    this.patchAlerta(alerta.id, { pasoActual: paso }).subscribe({
+      next: () => {
+        this.enviandoFila.set(null);
+        const etapa = etapaDeFlujo(paso);
+        const codigo = alerta.codigo || alerta.titulo || 'La alerta';
+        const destino = etapa ? `paso ${paso} · ${etapa.nombre}` : `paso ${paso}`;
+        this.avisoFila.set({
+          id: alerta.id,
+          texto: `${codigo}: ${destino}. Puede deshacer este cambio de paso.`,
+          tipo: 'ok',
+        });
+        this.deshacerFila.set({ id: alerta.id, pasoPrevio, codigo });
+        this.listado.recargar();
+        if (this.seleccionadaId() === alerta.id) this.detalle.recargar();
+      },
+      error: (fallo: unknown) => {
+        this.enviandoFila.set(null);
+        this.avisoFila.set({ id: alerta.id, texto: this.mensajeDeError(fallo), tipo: 'error' });
+      },
+    });
+  }
+
   abrirAnulacion(alerta: Alerta): void {
     if (!alerta.id || !this.puedeAnular(alerta)) return;
+    this.aprobacionFila.set(null);
+    this.deshacerFila.set(null);
     this.errorAnulacion.set(null);
     this.avisoAnulacion.set(null);
     this.alertaAnulacion.set(alerta);
@@ -659,7 +860,12 @@ export class AlertasPage {
           this.enviandoAnulacion.set(false);
           this.alertaAnulacion.set(null);
           if (this.alertaAbierta()?.id === alerta.id) this.cerrarPanel();
-          this.avisoAnulacion.set(`Alerta ${alerta.codigo || 'seleccionada'} anulada.`);
+          this.pasoDeshacer.set(null);
+          this.aprobacionFila.set(null);
+          this.deshacerFila.set(null);
+          this.avisoAnulacion.set(
+            `Alerta ${alerta.codigo || 'seleccionada'} anulada. Puede restaurarse desde el Archivo.`,
+          );
           this.listado.recargar();
         },
         error: (fallo: unknown) => {
@@ -675,16 +881,24 @@ export class AlertasPage {
     this.alertaAbierta.set(null);
     this.errorGuardado.set(null);
     this.aviso.set(null);
+    this.pasoDeshacer.set(null);
   }
 
   recargarListado(): void {
+    this.aprobacionFila.set(null);
+    this.deshacerFila.set(null);
     this.listado.recargar();
   }
 
   alAnularLote(cantidad: number): void {
     this.seleccion.limpiar();
+    this.pasoDeshacer.set(null);
+    this.aprobacionFila.set(null);
+    this.deshacerFila.set(null);
     this.avisoAnulacion.set(
-      cantidad === 1 ? '1 registro anulado.' : `${cantidad} registros anulados.`,
+      cantidad === 1
+        ? '1 registro anulado. Puede restaurarse desde el Archivo.'
+        : `${cantidad} registros anulados. Pueden restaurarse desde el Archivo.`,
     );
     this.recargarListado();
   }
@@ -772,7 +986,49 @@ export class AlertasPage {
       this.errorGuardado.set('Su rol no permite modificar esta alerta.');
       return;
     }
-    this.enviar(alerta.id, { pasoActual: paso });
+    // Se recuerda el paso de origen para ofrecer «Deshacer» si el PATCH va bien.
+    this.enviar(alerta.id, { pasoActual: paso }, alerta.pasoActual);
+  }
+
+  /**
+   * Vuelve al paso anterior tras un cambio exitoso. Es otro PATCH con
+   * `pasoActual`; no toca contenido ni promete persistencia del deshacer.
+   */
+  deshacerPaso(): void {
+    const alerta = this.alertaPanel();
+    const anterior = this.pasoDeshacer();
+    if (!alerta || anterior === null || this.guardando()) return;
+    if (!this.puedeModificarAbierta()) {
+      this.errorGuardado.set('Su rol no permite modificar esta alerta.');
+      return;
+    }
+
+    this.guardando.set(true);
+    this.errorGuardado.set(null);
+    this.aviso.set(null);
+    this.pasoDeshacer.set(null);
+    this.aprobacionFila.set(null);
+    this.deshacerFila.set(null);
+
+    this.http
+      .patch<unknown>(urlApi(`/v1/alerts/${encodeURIComponent(alerta.id)}`), {
+        pasoActual: anterior,
+      })
+      .subscribe({
+        next: () => {
+          this.guardando.set(false);
+          const etapa = etapaDeFlujo(anterior);
+          this.aviso.set(
+            etapa ? `Paso restaurado: ${etapa.nombre}.` : `Paso restaurado al ${anterior}.`,
+          );
+          this.listado.recargar();
+          this.detalle.recargar();
+        },
+        error: (fallo: unknown) => {
+          this.guardando.set(false);
+          this.errorGuardado.set(this.mensajeDeError(fallo));
+        },
+      });
   }
 
   buscar(evento: Event): void {
@@ -832,21 +1088,43 @@ export class AlertasPage {
 
   limpiar(): void {
     clearTimeout(this.temporizador);
+    this.avisoFila.set(null);
+    this.aprobacionFila.set(null);
+    this.deshacerFila.set(null);
     void this.router.navigate([], {
       relativeTo: this.ruta,
       queryParams: {},
     });
   }
 
-  private enviar(id: string, cuerpo: Record<string, unknown>): void {
+  /**
+   * `pasoPrevio` sólo viaja cuando el PATCH es un cambio de paso: es el paso
+   * desde el que se ofrece «Deshacer». En una edición de contenido queda
+   * ausente y el aviso no ofrece volver.
+   */
+  private enviar(id: string, cuerpo: Record<string, unknown>, pasoPrevio?: number): void {
     this.guardando.set(true);
     this.errorGuardado.set(null);
     this.aviso.set(null);
+    this.pasoDeshacer.set(null);
+    this.aprobacionFila.set(null);
+    this.deshacerFila.set(null);
 
-    this.http.patch<unknown>(urlApi(`/v1/alerts/${encodeURIComponent(id)}`), cuerpo).subscribe({
+    this.patchAlerta(id, cuerpo).subscribe({
       next: () => {
         this.guardando.set(false);
-        this.aviso.set('Cambios guardados.');
+        if (pasoPrevio === undefined) {
+          this.aviso.set('Cambios guardados.');
+        } else {
+          const destino = cuerpo['pasoActual'];
+          const etapa = typeof destino === 'number' ? etapaDeFlujo(destino) : null;
+          const codigo = this.alertaPanel()?.codigo || 'La alerta';
+          const destinoTexto = etapa
+            ? `Paso ${String(destino)} · ${etapa.nombre}`
+            : `Paso ${String(destino)}`;
+          this.aviso.set(`${codigo}: ${destinoTexto}. Puede deshacer este cambio de paso.`);
+          this.pasoDeshacer.set(pasoPrevio);
+        }
         this.listado.recargar();
         this.detalle.recargar();
       },
@@ -855,6 +1133,10 @@ export class AlertasPage {
         this.errorGuardado.set(this.mensajeDeError(fallo));
       },
     });
+  }
+
+  private patchAlerta(id: string, cuerpo: Record<string, unknown>) {
+    return this.http.patch<unknown>(urlApi(`/v1/alerts/${encodeURIComponent(id)}`), cuerpo);
   }
 
   private mensajeDeError(fallo: unknown): string {
@@ -871,6 +1153,9 @@ export class AlertasPage {
 
   private actualizar(cambios: Partial<FiltrosAlertas>): void {
     const siguiente = { ...this.parametros(), ...cambios };
+    this.avisoFila.set(null);
+    this.aprobacionFila.set(null);
+    this.deshacerFila.set(null);
 
     void this.router.navigate([], {
       relativeTo: this.ruta,

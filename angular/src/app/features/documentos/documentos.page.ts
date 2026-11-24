@@ -24,11 +24,14 @@ import {
 import { consulta } from '../../core/http/consulta';
 import { aErrorApi } from '../../core/http/errores';
 import { CapacidadesService } from '../../core/permisos/capacidades.service';
+import { esRegistro, lista } from '../../dominio/mapeo';
 import { BarraSeleccionComponent } from '../../shared/ui/barra-seleccion.component';
 import { IconoComponent } from '../../shared/ui/icono.component';
 
+import { OrdenTabla } from '../../shared/ui/orden-tabla';
 import { PaginacionComponent } from '../../shared/ui/paginacion.component';
 import { SeleccionTabla } from '../../shared/ui/seleccion-tabla';
+import { ThOrdenDirective } from '../../shared/ui/th-orden.directive';
 import {
   AnularPanelComponent,
   type ModoAnulacion,
@@ -38,6 +41,8 @@ import {
   FILTROS_ESTADO,
   ORDENES_DOCUMENTO,
   aDocumento,
+  aNormativa,
+  aOtroDocumento,
   aTiposDocumento,
   agruparDocumentosPorTipo,
   claseEstado,
@@ -46,7 +51,9 @@ import {
   formatearFecha,
   formatearFechaHora,
   type Documento,
+  type Normativa,
   type OpcionCatalogo,
+  type OtroDocumento,
 } from './documento.mapeo';
 import { DocumentoPanelComponent } from './documento-panel.component';
 
@@ -54,6 +61,8 @@ type FiltrosDocumentos = {
   q: string;
   tipo: string;
   estado: string;
+  /** Sólo llega por URL; no hay control visible en esta pantalla. */
+  caso: string;
   orden: string;
   pagina: number;
   tamano: number;
@@ -67,10 +76,18 @@ const FILTROS_INICIALES: FiltrosDocumentos = {
   q: '',
   tipo: '',
   estado: '',
+  caso: '',
   orden: 'recent',
   pagina: 1,
   tamano: TAMANO_PAGINA,
   ver: 'activos',
+};
+
+/** Sobre de `GET /api/v1/documents/arbol`: documentos y las dos ramas no documentales. */
+type ArbolDocumentos = {
+  documentos: Documento[];
+  normativas: Normativa[];
+  otros: OtroDocumento[];
 };
 
 /** `total` del sobre paginado sin construir las filas (consultas de indicadores). */
@@ -97,6 +114,7 @@ function totalDe(bruto: unknown): number {
     DocumentoPanelComponent,
     AnularPanelComponent,
     BarraSeleccionComponent,
+    ThOrdenDirective,
   ],
   templateUrl: './documentos.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -124,22 +142,7 @@ function totalDe(bruto: unknown): number {
       gap: 16px;
     }
 
-    .view-head h1 {
-      margin: 0;
-      color: #1a2b3e;
-      font: 700 22px/1.3 var(--font-display);
-      letter-spacing: -0.65px;
-    }
-
-    .view-subtitle {
-      max-width: 760px;
-      margin: 6px 0 0;
-      color: #7b8896;
-      font-size: 11px;
-      line-height: 1.6;
-    }
-
-    .view-acciones {
+    .view-actions {
       display: flex;
       flex-direction: column;
       align-items: flex-end;
@@ -149,13 +152,13 @@ function totalDe(bruto: unknown): number {
     .exportar-error {
       margin: 0;
       color: #b42318;
-      font-size: 10px;
+      font-size: 12.5px;
     }
 
     .aviso-ok {
       margin: 0;
       color: #2f6f52;
-      font-size: 11.5px;
+      font-size: 13.5px;
     }
 
     .fila-documento {
@@ -183,12 +186,12 @@ function totalDe(bruto: unknown): number {
       display: block;
       margin-top: 3px;
       color: #99a3aa;
-      font-size: 8px;
+      font-size: 12px;
     }
 
     .celda-caso strong {
       color: #465a6c;
-      font-size: 9px;
+      font-size: 12px;
       font-weight: 600;
     }
 
@@ -204,7 +207,7 @@ function totalDe(bruto: unknown): number {
     .actualizando {
       margin: 0;
       color: #8d99a6;
-      font-size: 9.5px;
+      font-size: 12px;
     }
 
     .arbol-documentos {
@@ -226,7 +229,7 @@ function totalDe(bruto: unknown): number {
       cursor: pointer;
       padding: 4px 0;
       color: #33475b;
-      font-size: 11px;
+      font-size: 13px;
       font-weight: 600;
     }
 
@@ -239,7 +242,7 @@ function totalDe(bruto: unknown): number {
       border-radius: 999px;
       background: #eaf1f8;
       color: #52677a;
-      font-size: 9px;
+      font-size: 12px;
       font-weight: 600;
     }
 
@@ -272,10 +275,18 @@ function totalDe(bruto: unknown): number {
       background: #f2f6fa;
     }
 
+    /* Filas del marco normativo y de otros documentos: informan, no abren ficha. */
+    .arbol-hoja--estatica,
+    .arbol-hoja--estatica:hover,
+    .arbol-hoja--estatica:focus-visible {
+      background: transparent;
+      cursor: default;
+    }
+
     .arbol-hoja-codigo {
       flex: 0 0 auto;
       color: #2f5f8f;
-      font-size: 9.5px;
+      font-size: 12px;
       font-weight: 600;
     }
 
@@ -283,7 +294,7 @@ function totalDe(bruto: unknown): number {
       flex: 1 1 auto;
       overflow: hidden;
       color: #465a6c;
-      font-size: 10px;
+      font-size: 12.5px;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
@@ -292,8 +303,19 @@ function totalDe(bruto: unknown): number {
       flex: 0 0 auto;
     }
 
-    .arbol-rama--pendiente summary {
-      color: #7b8896;
+    .arbol-hoja-dato {
+      flex: 0 0 auto;
+      color: #52677a;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .arbol-hoja-fecha {
+      flex: 0 0 auto;
+      color: #8d99a6;
+      font-size: 12px;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
     }
 
     @media (max-width: 720px) {
@@ -326,6 +348,7 @@ export class DocumentosPage {
         q: params.get('q') ?? '',
         tipo: params.get('tipo') ?? '',
         estado: params.get('estado') ?? '',
+        caso: params.get('caso') ?? '',
         orden: params.get('orden') ?? 'recent',
         pagina: Math.max(1, Number(params.get('pagina') ?? '1') || 1),
         tamano: Math.max(1, Number(params.get('tamano') ?? String(TAMANO_PAGINA)) || TAMANO_PAGINA),
@@ -339,6 +362,12 @@ export class DocumentosPage {
 
   /** `?ver=anulados`: el listado muestra la papelera. */
   readonly verPapelera = computed(() => this.parametros().ver === 'anulados');
+
+  /** Vista del listado: árbol del RAG (por defecto) o tabla operativa. */
+  readonly vista = signal<'arbol' | 'tabla'>('arbol');
+
+  /** El árbol se sirve completo y sin paginar sólo fuera de la papelera. */
+  readonly enArbol = computed(() => this.vista() === 'arbol' && !this.verPapelera());
 
   private readonly listado = consulta<Coleccion<Documento>>({
     fuente: () => {
@@ -366,6 +395,40 @@ export class DocumentosPage {
   readonly estadoListado = this.listado.estado;
   readonly errorListado = this.listado.error;
 
+  /**
+   * Árbol completo del RAG. Se pide aparte del listado paginado y sólo cuando
+   * la vista de árbol está activa: así «Todo» incluye todos los documentos y no
+   * sólo la página visible. La papelera no usa árbol.
+   */
+  private readonly arbolListado = consulta<ArbolDocumentos>({
+    fuente: () => {
+      if (!this.enArbol()) return null;
+      const filtros = this.parametros();
+      return urlConParametros(urlApi('/v1/documents/arbol'), {
+        q: filtros.q,
+        tipo: filtros.tipo,
+        estado: filtros.estado,
+        sort: filtros.orden,
+      });
+    },
+    esquema: (bruto) => {
+      const coleccion = normalizarColeccion<unknown>(bruto);
+      const sobre = esRegistro(bruto) ? bruto : {};
+      return {
+        documentos: coleccion.elementos.map(aDocumento),
+        // Una respuesta antigua puede no traer las ramas: se leen como listas vacías.
+        normativas: lista(sobre, ['normativas']).map(aNormativa),
+        otros: lista(sobre, ['otros', 'otrosDocumentos', 'otros_documentos']).map(aOtroDocumento),
+      } satisfies ArbolDocumentos;
+    },
+  });
+
+  readonly documentosArbol = computed(() => this.arbolListado.valor()?.documentos ?? []);
+  readonly normativas = computed(() => this.arbolListado.valor()?.normativas ?? []);
+  readonly otrosDocumentos = computed(() => this.arbolListado.valor()?.otros ?? []);
+  readonly estadoArbol = this.arbolListado.estado;
+  readonly errorArbol = this.arbolListado.error;
+
   readonly rango = computed(() => {
     const valor = this.listado.valor();
     return valor ? rangoPagina(valor) : { desde: 0, hasta: 0 };
@@ -376,19 +439,38 @@ export class DocumentosPage {
     return `${this.total()} documentos · ${rango.desde}–${rango.hasta} · pulse una fila para abrir la ficha en el panel lateral.`;
   });
 
-  /** Vista del listado: árbol del RAG (por defecto) o tabla operativa. */
-  readonly vista = signal<'arbol' | 'tabla'>('arbol');
+  /**
+   * Árbol del RAG: una rama por tipo documental, más «Normativas» y «Otros
+   * documentos» tal como los devuelve el sobre del endpoint. En la vista de
+   * árbol se lee del endpoint sin paginar (`/v1/documents/arbol`), de modo que
+   * incluye todos los documentos y no sólo la página visible de la tabla.
+   */
+  readonly arbol = computed(() =>
+    agruparDocumentosPorTipo(this.enArbol() ? this.documentosArbol() : this.documentos()),
+  );
+
+  /** Hojas del árbol, sumando todas las ramas. */
+  readonly totalArbol = computed(
+    () =>
+      this.arbol().reduce((suma, rama) => suma + rama.documentos.length, 0) +
+      this.normativas().length +
+      this.otrosDocumentos().length,
+  );
 
   /**
-   * Árbol del RAG: una rama por tipo documental presente en la página. La rama
-   * «Normativas» se pinta aparte y se declara sin dato: no existe todavía una
-   * tabla de normativas conectada.
+   * El servidor aplica `q` a normativas y otros documentos, pero no `tipo`,
+   * `estado` ni `caso`. Con alguno de esos filtros activo, las dos ramas se
+   * ocultan en vez de mostrar listas que no corresponden al recorte.
    */
-  readonly arbol = computed(() => agruparDocumentosPorTipo(this.documentos()));
+  readonly hayFiltroDocumental = computed(() => {
+    const filtros = this.parametros();
+    return Boolean(filtros.tipo || filtros.estado || filtros.caso);
+  });
 
+  /** Pie del árbol: documentos por tipo, más las dos ramas no documentales. */
   readonly resumenArbol = computed(() => {
     const ramas = this.arbol().length;
-    return `${this.documentos().length} documentos en ${ramas} ramas · árbol del RAG de la OAIPCS.`;
+    return `${this.totalArbol()} registros · ${ramas} ramas de documentos más normativas y otros documentos · árbol del RAG de la OAIPCS.`;
   });
 
   /** Pie de la papelera: sólo lo que devuelve la API, sin estimar nada. */
@@ -453,6 +535,24 @@ export class DocumentosPage {
 
   /** Selección de la tabla (página visible) para exportar o anular en lote. */
   readonly seleccion = new SeleccionTabla();
+
+  /** Orden local de la página visible. */
+  readonly orden = new OrdenTabla<Documento>();
+
+  private readonly accesoresDocumento: Record<string, (documento: Documento) => unknown> = {
+    codigo: (documento) => documento.codigo,
+    titulo: (documento) => documento.titulo,
+    tipo: (documento) => documento.tipoNombre || documento.tipo,
+    caso: (documento) => documento.casoCode,
+    responsable: (documento) => documento.responsableNombre,
+    fecha: (documento) => documento.fecha,
+    anulado: (documento) => documento.anuladoEn,
+    etapa: (documento) => this.etapa(documento),
+  };
+
+  readonly filasVisibles = computed(() =>
+    this.orden.ordenar(this.documentos(), this.accesoresDocumento),
+  );
 
   idsVisibles(): string[] {
     return this.documentos()
@@ -563,6 +663,11 @@ export class DocumentosPage {
 
   recargarListado(): void {
     this.listado.recargar();
+    this.arbolListado.recargar();
+  }
+
+  recargarArbol(): void {
+    this.arbolListado.recargar();
   }
 
   alAnularLote(cantidad: number): void {

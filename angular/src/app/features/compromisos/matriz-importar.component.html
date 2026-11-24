@@ -1,0 +1,194 @@
+<section class="surface importar" aria-labelledby="importar-titulo">
+  <div class="surface-heading">
+    <div>
+      <h3 id="importar-titulo">Revisar un CSV de la matriz</h3>
+    </div>
+  </div>
+
+  <label class="importar-archivo">
+    <span>Elegir archivo CSV</span>
+    <input type="file" accept=".csv,text/csv" (change)="alElegirArchivo($event)" />
+    @if (nombreArchivo(); as nombre) {
+      <span>{{ nombre }}</span>
+    }
+  </label>
+
+  <textarea
+    [value]="texto()"
+    (input)="escribir($event)"
+    aria-label="Contenido del CSV de la matriz"
+    placeholder="Pegue aquí el CSV con la cabecera del formato del equipo (A..X)…"
+  ></textarea>
+
+  <div class="importar-acciones">
+    <button type="button" class="button-primary" [disabled]="enviando()" (click)="previsualizar()">
+      {{ enviando() ? 'Previsualizando…' : 'Previsualizar' }}
+    </button>
+    <button type="button" class="button-secondary" (click)="descargarPlantilla()">
+      Descargar plantilla CSV
+    </button>
+    <button type="button" class="button-secondary" (click)="limpiar()">Limpiar</button>
+    @if (!mapaCargado()) {
+      <span class="form-hint">
+        Sin equivalencias publicadas en la base: los códigos Excel los resolverá el servidor.
+      </span>
+    }
+  </div>
+
+  @if (error(); as mensaje) {
+    <p class="form-error" role="alert">{{ mensaje }}</p>
+    @if (sinEsquema()) {
+      <p class="form-hint">
+        No se ha modificado nada. Cuando el esquema esté aplicado podrá repetir la previsualización.
+      </p>
+    }
+  }
+  @if (local(); as chequeo) {
+    <p class="form-hint">
+      Chequeo local (orientativo): {{ chequeo.reconocidas }} de {{ chequeo.filasFuente }} filas
+      resolubles; {{ chequeo.rechazadas.length }} con problemas evidentes antes de consultar al
+      servidor.
+    </p>
+  }
+  @if (plan(); as actual) {
+    <p class="importar-mensaje">{{ actual.mensaje }}</p>
+
+    <p class="importar-resumen">
+      <span
+        ><b>{{ actual.resumen.filasFuente }}</b> filas en el archivo</span
+      >
+      <span
+        ><b>{{ actual.resumen.reconocidas }}</b> reconocidas</span
+      >
+      <span
+        ><b>{{ actual.resumen.rechazadas }}</b> rechazadas</span
+      >
+      <span
+        ><b>{{ actual.resumen.aCrear }}</b> a crear</span
+      >
+      <span
+        ><b>{{ actual.resumen.aActualizar }}</b> a actualizar</span
+      >
+    </p>
+
+    @if (columnasReconocidas().length > 0) {
+      <p class="form-hint">
+        Columnas reconocidas:
+        @for (columna of columnasReconocidas(); track columna.campo) {
+          <span
+            >{{ columna.rotulo }} → {{ columna.campo }}
+            @if (!$last) {
+              ·
+            }
+          </span>
+        }
+      </p>
+    }
+    @if (columnasIgnoradas().length > 0) {
+      <p class="form-hint">Columnas ignoradas: {{ columnasIgnoradas().join(' · ') }}</p>
+    }
+
+    <p class="importar-subtitulo">Filas a crear o actualizar ({{ filasPlan().length }})</p>
+
+    @if (filasPlan().length === 0) {
+      <div class="empty-state">Ninguna fila del archivo se puede crear ni actualizar.</div>
+    } @else {
+      <div class="table-wrap">
+        <table class="data-table importar-tabla">
+          <caption class="sr-only">
+            Plan de filas reconocidas por el servidor
+          </caption>
+          <thead>
+            <tr>
+              <th scope="col" [appThOrden]="'fila'" [orden]="ordenPlan">Fila</th>
+              <th scope="col" [appThOrden]="'caso'" [orden]="ordenPlan">Caso</th>
+              <th scope="col" [appThOrden]="'codigoExcel'" [orden]="ordenPlan">Código Excel</th>
+              <th scope="col" [appThOrden]="'accion'" [orden]="ordenPlan">Acción / compromiso</th>
+              <th scope="col" [appThOrden]="'hito'" [orden]="ordenPlan">Hito</th>
+              <th scope="col" [appThOrden]="'resultado'" [orden]="ordenPlan">Resultado</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (fila of filasPlanVisibles(); track $index) {
+              <tr>
+                <td>{{ fila.fila }}</td>
+                <td>
+                  {{ fila.codigoCaso }}
+                  @if (fila.nombreCaso) {
+                    <small class="matriz-codigos">{{ fila.nombreCaso }}</small>
+                  }
+                </td>
+                <td>{{ fila.codigoExcel || '—' }}</td>
+                <td>{{ fila.accion }}</td>
+                <td>
+                  {{ fila.hito || '—' }}
+                  @if (fila.descripcionHito) {
+                    <small class="matriz-codigos">{{ fila.descripcionHito }}</small>
+                  }
+                </td>
+                <td>
+                  <span class="status-badge">{{ fila.accionPlan }}</span>
+                  @if (fila.hitoNuevo) {
+                    <small class="matriz-codigos">hito nuevo</small>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      @if (planRestantes() > 0) {
+        <p class="form-hint">
+          Se muestran {{ filasPlanVisibles().length }} filas; quedan {{ planRestantes() }} más en el
+          plan.
+        </p>
+      }
+    }
+
+    <p class="importar-subtitulo">Rechazos ({{ actual.rechazadas.length }})</p>
+
+    @if (rechazosVisibles().length === 0) {
+      <div class="empty-state">Ninguna fila fue rechazada.</div>
+    } @else {
+      <div class="table-wrap">
+        <table class="data-table importar-tabla">
+          <caption class="sr-only">
+            Filas rechazadas y el motivo de cada una
+          </caption>
+          <thead>
+            <tr>
+              <th scope="col" [appThOrden]="'fila'" [orden]="ordenRechazos">Fila</th>
+              <th scope="col" [appThOrden]="'codigo'" [orden]="ordenRechazos">Código</th>
+              <th scope="col" [appThOrden]="'motivo'" [orden]="ordenRechazos">Motivo</th>
+              <th scope="col" [appThOrden]="'codigoExcel'" [orden]="ordenRechazos">Código Excel</th>
+              <th scope="col" [appThOrden]="'codigoCaso'" [orden]="ordenRechazos">
+                Código de caso
+              </th>
+              <th scope="col" [appThOrden]="'detalle'" [orden]="ordenRechazos">Detalle</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (rechazo of rechazosVisibles(); track $index) {
+              <tr>
+                <td>{{ rechazo.fila }}</td>
+                <td>
+                  <span class="status-badge">{{ rechazo.codigo }}</span>
+                </td>
+                <td>{{ rechazo.motivo }}</td>
+                <td>{{ rechazo.codigoExcel || '—' }}</td>
+                <td>{{ rechazo.codigoCaso || '—' }}</td>
+                <td>{{ rechazo.detalle || '—' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      @if (rechazosRestantes() > 0) {
+        <p class="form-hint">
+          Se muestran {{ rechazosVisibles().length }} rechazos; quedan
+          {{ rechazosRestantes() }} más.
+        </p>
+      }
+    }
+  }
+</section>

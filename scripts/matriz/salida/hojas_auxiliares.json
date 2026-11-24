@@ -5832,9 +5832,9 @@
   },
   {
    "fila": 105,
-   "bloque_inicio": 104,
-   "numero_excel": 31,
-   "nombre_caso_reporte": "Presunta Contaminación por Plomo por parte de la empresa Baterías ETNA",
+   "bloque_inicio": 105,
+   "numero_excel": null,
+   "nombre_caso_reporte": "Restricciones internacionales a especies de tiburón",
    "semana_indice": 7,
    "col_nudo": 36,
    "col_seguimiento": 37,
@@ -5847,9 +5847,9 @@
   },
   {
    "fila": 106,
-   "bloque_inicio": 104,
-   "numero_excel": 31,
-   "nombre_caso_reporte": "Presunta Contaminación por Plomo por parte de la empresa Baterías ETNA",
+   "bloque_inicio": 105,
+   "numero_excel": null,
+   "nombre_caso_reporte": "Restricciones internacionales a especies de tiburón",
    "semana_indice": 7,
    "col_nudo": 36,
    "col_seguimiento": 37,
@@ -6315,15 +6315,30 @@
   {
    "numero_excel": 31,
    "fila_inicio": 104,
-   "fila_fin": 1005,
+   "fila_fin": 104,
    "nombre_caso_reporte": "Presunta Contaminación por Plomo por parte de la empresa Baterías ETNA",
    "alcance_geografico_raw": "Centro",
    "subsector_raw": null,
    "tematica_raw": null,
-   "problematica_resumen": "Gremios pesqueros artesanales del litoral norte (Tumbes, Piura, Lambayeque, La Libertad y Áncash) y del litoral sur (Arequipa, Moquegua y Tacna) expresan preocupación por la entrada en vigor, el 27.06.2026, de la inclusión de cinco especies de tiburón en el Apéndice I de la Convención sobre Especies Migratorias (ONU) aprobado en la COP15, así como por las demoras superiores a un año en la emisión de certificados CITES (Convención sobre el Comercio Internacional de Especies Amenazadas), que afectarían sus ingresos. Gremios artesanales del norte han dado un plazo de 20 días al Ministerio de la Producción para instalar una mesa de diálogo, bajo amenaza de movilizaciones en puertos del país.",
+   "problematica_resumen": null,
    "riesgo_descripcion": null,
    "riesgo_inicial_raw": null,
    "riesgo_actual_raw": "Intermedio (acciones públicas de protestas)",
+   "validacion_hito_raw": null,
+   "resumen_ejecutivo": null
+  },
+  {
+   "numero_excel": null,
+   "fila_inicio": 105,
+   "fila_fin": 1005,
+   "nombre_caso_reporte": "Restricciones internacionales a especies de tiburón",
+   "alcance_geografico_raw": "Nacional",
+   "subsector_raw": "Pesca y Acuicultura",
+   "tematica_raw": null,
+   "problematica_resumen": "Gremios pesqueros artesanales del litoral norte (Tumbes, Piura, Lambayeque, La Libertad y Áncash) y del litoral sur (Arequipa, Moquegua y Tacna) expresan preocupación por la entrada en vigor, el 27.06.2026, de la inclusión de cinco especies de tiburón en el Apéndice I de la Convención sobre Especies Migratorias (ONU) aprobado en la COP15, así como por las demoras superiores a un año en la emisión de certificados CITES (Convención sobre el Comercio Internacional de Especies Amenazadas), que afectarían sus ingresos. Gremios artesanales del norte han dado un plazo de 20 días al Ministerio de la Producción para instalar una mesa de diálogo, bajo amenaza de movilizaciones en puertos del país.",
+   "riesgo_descripcion": null,
+   "riesgo_inicial_raw": null,
+   "riesgo_actual_raw": null,
    "validacion_hito_raw": "Por Validar",
    "resumen_ejecutivo": "Reunión de trabajo entre PRODUCE, OSPA's y comercializadores para abordar la pesquería de tiburones frente a posibles restricciones por convenios internacionales, así como las dificultades reportadas en la comercialización de tiburón. El Viceministro de Pesca y Acuicultura anunció la próxima publicación del ROP para tiburón y otras gestiones sectoriales para mantener la pesca en el país, contando con una aprobación general de los asistentes."
   }
@@ -6390,6 +6405,7 @@
   "Reporte (fila 100, col 21): celda con error de Excel '#REF!' tratada como ausente.",
   "Reporte (fila 103, col 21): celda con error de Excel '#REF!' tratada como ausente.",
   "Reporte (fila 104, col 21): celda con error de Excel '#REF!' tratada como ausente.",
+  "Reporte bloque fila 105: sin N° pero con nombre 'Restricciones internacionales a especies de tiburón'. Se trata como bloque propio (no se hereda el número del anterior).",
   "Conteo seguimientos: esperado 137, obtenido 136 (diferencia -1)."
  ]
 }

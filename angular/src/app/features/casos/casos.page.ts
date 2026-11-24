@@ -38,8 +38,10 @@ import { formatearFechaHora } from '../../shared/formato-fecha';
 import { BarraSeleccionComponent } from '../../shared/ui/barra-seleccion.component';
 
 import { IconoComponent } from '../../shared/ui/icono.component';
+import { OrdenTabla } from '../../shared/ui/orden-tabla';
 import { PaginacionComponent } from '../../shared/ui/paginacion.component';
 import { SeleccionTabla } from '../../shared/ui/seleccion-tabla';
+import { ThOrdenDirective } from '../../shared/ui/th-orden.directive';
 import { CasoPanelComponent, type CuerpoCasoAlta } from './caso-panel.component';
 import { CasoVistaPreviaComponent } from './caso-vista-previa.component';
 
@@ -76,7 +78,6 @@ type FiltrosCasos = {
    * sola lista desplegable.
    */
   sinRegion: boolean;
-  tematica: string;
   /**
    * Naturaleza declarada (`Territorial` / `Nacional o sectorial`) o el literal
    * «Sin declarar», que la API traduce a `naturaleza_id is null`.
@@ -99,7 +100,6 @@ const FILTROS_INICIALES: FiltrosCasos = {
   alcance: '',
   region: '',
   sinRegion: false,
-  tematica: '',
   naturaleza: '',
   unidad: '',
   pagina: 1,
@@ -150,7 +150,6 @@ type CatalogosCasos = {
   prioridades: OpcionFiltro[];
   alcances: OpcionFiltro[];
   regiones: OpcionFiltro[];
-  tematicas: OpcionFiltro[];
   naturalezas: OpcionFiltro[];
   unidades: OpcionFiltro[];
 };
@@ -173,8 +172,8 @@ function opcionesDe(catalogo: Record<string, unknown>, clave: string): OpcionFil
  * `GET /api/v1/catalogs` reducido a los selects del listado.
  *
  * No se codifican etiquetas en el cliente: el mismo valor que ofrece el
- * catálogo es el que valida la API (`tematica` por nombre, `unidad` por
- * siglas). El estado ya no sale del catálogo: la barra usa cuatro chips
+ * catálogo es el que valida la API (`unidad` por siglas). El estado ya no
+ * sale del catálogo: la barra usa cuatro chips
  * operativos (`Todos`, `Abiertos`, `Resueltos`, `Archivados`), y `Abiertos`
  * viaja como `abiertos=true` porque el estado se define por `es_activo`.
  */
@@ -189,7 +188,6 @@ function aCatalogosCasos(bruto: unknown): CatalogosCasos {
     prioridades: opcionesDe(catalogo, 'prioridadesAtencion'),
     alcances: opcionesDe(catalogo, 'alcances'),
     regiones: opcionesDe(catalogo, 'regiones'),
-    tematicas: opcionesDe(catalogo, 'tematicas'),
     naturalezas: opcionesDe(catalogo, 'naturalezasCaso'),
     unidades: opcionesDe(catalogo, 'unidades'),
   };
@@ -244,13 +242,14 @@ function aConteos(bruto: unknown): ConteosCasos {
     BarraSeleccionComponent,
     CasoPanelComponent,
     CasoVistaPreviaComponent,
+    ThOrdenDirective,
   ],
   templateUrl: './casos.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
     .aviso-ok {
       color: #2f6f52;
-      font-size: 11.5px;
+      font-size: 13.5px;
     }
 
     .vista-previa-aviso {
@@ -266,7 +265,7 @@ function aConteos(bruto: unknown): ConteosCasos {
       border: 1px solid #dbe3ea;
       border-radius: 10px;
       color: #47566a;
-      font-size: 9px;
+      font-size: 12px;
       font-weight: 600;
       letter-spacing: 0.3px;
       line-height: 1.6;
@@ -338,7 +337,6 @@ export class CasosPage {
           alcance: alcance === null ? alcancePreferido() : alcance === 'todos' ? '' : alcance,
           region: params.get('region') ?? '',
           sinRegion: params.get('sinregion') === 'true',
-          tematica: params.get('tematica') ?? '',
           naturaleza: params.get('naturaleza') ?? '',
           unidad: params.get('unidad') ?? '',
           pagina: Math.max(1, Number(params.get('pagina') ?? '1') || 1),
@@ -378,7 +376,6 @@ export class CasosPage {
       filtros.prioridad ||
       filtros.region ||
       filtros.sinRegion ||
-      filtros.tematica ||
       filtros.naturaleza ||
       filtros.unidad ||
       filtros.orden !== 'recent',
@@ -402,7 +399,6 @@ export class CasosPage {
       alcance: filtros.alcance,
       region: filtros.region,
       sinregion: filtros.sinRegion ? 'true' : '',
-      tematica: filtros.tematica,
       naturaleza: filtros.naturaleza,
       unidad: filtros.unidad,
       sort: filtros.orden,
@@ -433,7 +429,6 @@ export class CasosPage {
   readonly conflictividades = computed(() => this.catalogoRecurso.valor()?.conflictividades ?? []);
   readonly alcances = computed(() => this.catalogoRecurso.valor()?.alcances ?? []);
   readonly regiones = computed(() => this.catalogoRecurso.valor()?.regiones ?? []);
-  readonly tematicas = computed(() => this.catalogoRecurso.valor()?.tematicas ?? []);
   readonly naturalezas = computed(() => this.catalogoRecurso.valor()?.naturalezas ?? []);
   readonly unidades = computed(() => this.catalogoRecurso.valor()?.unidades ?? []);
 
@@ -451,7 +446,6 @@ export class CasosPage {
         alcance: filtros.alcance,
         region: filtros.region,
         sinregion: filtros.sinRegion ? 'true' : '',
-        tematica: filtros.tematica,
         naturaleza: filtros.naturaleza,
         unidad: filtros.unidad,
         sort: filtros.orden,
@@ -477,6 +471,24 @@ export class CasosPage {
   readonly paginas = computed(() =>
     totalPaginas(this.recurso.valor() ?? { total: 0, tamanoPagina: TAMANO_PAGINA }),
   );
+
+  /** Orden local de la página visible. */
+  readonly orden = new OrdenTabla<Caso>();
+
+  private readonly accesoresCaso: Record<string, (caso: Caso) => unknown> = {
+    codigo: (caso) => caso.codigo,
+    titulo: (caso) => caso.titulo,
+    anulado: (caso) => caso.anuladoEn,
+    region: (caso) => caso.region,
+    estado: (caso) => caso.estado,
+    prioridad: (caso) => caso.prioridad,
+    riesgo: (caso) => caso.riesgo,
+    unidad: (caso) => caso.unidadResponsable,
+    etapa: (caso) => caso.etapa,
+    inicio: (caso) => caso.inicio,
+  };
+
+  readonly filasVisibles = computed(() => this.orden.ordenar(this.casos(), this.accesoresCaso));
 
   private temporizador?: ReturnType<typeof setTimeout>;
 
@@ -579,11 +591,6 @@ export class CasosPage {
       return;
     }
     void this.actualizar({ region: valor, sinRegion: false, pagina: 1 });
-  }
-
-  cambiarTematica(evento: Event): void {
-    const valor = (evento.target as HTMLSelectElement).value;
-    void this.actualizar({ tematica: valor, pagina: 1 });
   }
 
   /**
@@ -748,7 +755,6 @@ export class CasosPage {
         alcance,
         region: siguiente.region || null,
         sinregion: siguiente.sinRegion ? 'true' : null,
-        tematica: siguiente.tematica || null,
         naturaleza: siguiente.naturaleza || null,
         unidad: siguiente.unidad || null,
         pagina: siguiente.pagina > 1 ? siguiente.pagina : null,

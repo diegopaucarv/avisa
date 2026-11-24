@@ -1,3 +1,4 @@
+import type { PoblacionRegion } from '../../core/territorio/territorio.tipos';
 import { ALCANCES } from '../../dominio/mapeo';
 import type { Alcance, Caso, NivelConflicto } from '../../dominio/modelos';
 
@@ -241,6 +242,24 @@ export function filasPorRegion(casos: readonly Caso[]): FilaRegion[] {
     .sort((a, b) => b.total - a.total || compararTexto(a.region, b.region));
 }
 
+/**
+ * Casos del recorte del cajón «Ver casos».
+ *
+ * Con una región aplicada se conservan sus casos y se comparan los nombres sin
+ * acentos ni mayúsculas; los casos sin región nunca se atribuyen a un nombre de
+ * región. Sin región aplicada se devuelve el conjunto visible íntegro, en el
+ * mismo orden recibido (el panel ya los ordena por gravedad y prioridad).
+ */
+export function casosDeRegion(casos: readonly Caso[], region: string | null): Caso[] {
+  if (!region) return [...casos];
+
+  const clave = normalizarRegion(region);
+  return casos.filter((caso) => {
+    const propia = regionDe(caso);
+    return propia !== null && normalizarRegion(propia) === clave;
+  });
+}
+
 /** Ámbitos de los casos sin región, para la columna «Ámbito» de esa fila. */
 export function ambitosSinRegion(casos: readonly Caso[]): Alcance[] {
   const ambitos = new Set<Alcance>();
@@ -269,4 +288,100 @@ export function contarRiesgoAltoSinRegion(casos: readonly Caso[]): number {
 
 export function contarRiesgoAlto(casos: readonly Caso[]): number {
   return casos.filter((caso) => caso.riesgo === 'Alto').length;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Capa distrital · items 129 y 131 (2026-11-23)                              */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Escala de la coropleta por número de casos abiertos en el distrito.
+ *
+ * Los cortes son fijos y se declaran en la leyenda porque casi todos los
+ * distritos de la capa no tienen casos: una escala por cuantiles pintaría el
+ * mapa de un solo tono y escondería la concentración real. El último tramo es
+ * abierto (`hasta: null`) y no tiene tope.
+ */
+export const ESCALA_COROPLETA: readonly {
+  etiqueta: string;
+  desde: number;
+  hasta: number | null;
+}[] = [
+  { etiqueta: 'Sin casos', desde: 0, hasta: 0 },
+  { etiqueta: '1 caso', desde: 1, hasta: 1 },
+  { etiqueta: '2 casos', desde: 2, hasta: 2 },
+  { etiqueta: '3–4 casos', desde: 3, hasta: 4 },
+  { etiqueta: '5 o más', desde: 5, hasta: null },
+];
+
+/** Índice del tramo de `ESCALA_COROPLETA`; un negativo cae en «Sin casos». */
+export function claseCoropleta(total: number): number {
+  if (!Number.isFinite(total) || total <= 0) return 0;
+  for (let indice = ESCALA_COROPLETA.length - 1; indice > 0; indice -= 1) {
+    if (total >= ESCALA_COROPLETA[indice]!.desde) return indice;
+  }
+  return 0;
+}
+
+/**
+ * Casos abiertos por ubigeo de distrito.
+ *
+ * La llave es `distritoUbigeo`, nunca el nombre: la capa trae quince «Santa
+ * Rosa» y el nombre no distingue provincia. Los casos sin ubigeo no se
+ * atribuyen a ningún polígono y se declaran aparte con `casosSinDistrito`.
+ */
+export function casosPorDistritoUbigeo(casos: readonly Caso[]): Map<string, number> {
+  const conteo = new Map<string, number>();
+  for (const caso of casos) {
+    const ubigeo = caso.distritoUbigeo?.trim();
+    if (!ubigeo) continue;
+    conteo.set(ubigeo, (conteo.get(ubigeo) ?? 0) + 1);
+  }
+  return conteo;
+}
+
+/** Casos visibles que no declaran distrito principal: no se pintan en el mapa. */
+export function casosSinDistrito(casos: readonly Caso[]): number {
+  return casos.filter((caso) => !caso.distritoUbigeo?.trim()).length;
+}
+
+/**
+ * Tasa por 100 000 habitantes.
+ *
+ * Devuelve `null` cuando no hay denominador utilizable: la interfaz muestra
+ * «—» en vez de una cifra calculada sobre una población ausente o cero. Nunca
+ * se usa para el nivel de riesgo ni para la prioridad (Guía §7.5.2).
+ * Se redondea a una décima, que es la precisión legible de la tabla.
+ */
+export function tasaPor100k(casos: number, poblacion: number | null): number | null {
+  if (poblacion === null || !Number.isFinite(poblacion) || poblacion <= 0) return null;
+  if (!Number.isFinite(casos) || casos < 0) return null;
+  return Math.round((casos / poblacion) * 100_000 * 10) / 10;
+}
+
+/**
+ * Índice de denominadores por nombre de región normalizado.
+ *
+ * La capa nombra las regiones en mayúsculas y sin tildes (`ANCASH`) mientras
+ * las filas del panorama usan el nombre de `core.regiones` (`Áncash`); se
+ * cruzan con `normalizarRegion`. Si una región no está en el índice, la tabla
+ * declara el hueco en vez de estimar la población.
+ */
+export function indicePoblacionPorRegion(
+  items: readonly PoblacionRegion[],
+): Map<string, PoblacionRegion> {
+  const indice = new Map<string, PoblacionRegion>();
+  for (const item of items) {
+    const clave = normalizarRegion(item.nombre);
+    if (!indice.has(clave)) indice.set(clave, item);
+  }
+  return indice;
+}
+
+/** Denominador de una región del panorama; `null` si la capa no la trae. */
+export function poblacionDeRegion(
+  region: string,
+  indice: ReadonlyMap<string, PoblacionRegion>,
+): number | null {
+  return indice.get(normalizarRegion(region))?.poblacion ?? null;
 }

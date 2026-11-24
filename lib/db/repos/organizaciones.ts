@@ -160,7 +160,7 @@ export async function listOrganizaciones(
   if (search) {
     const like = bind(`%${search}%`);
     where.push(
-      `(a.nombre_actual ilike ${like} or coalesce(a.codigo_legado, '') ilike ${like} or coalesce(o.razon_social, '') ilike ${like} or coalesce(o.abreviatura, '') ilike ${like})`,
+      `(core.normalizar_ref(a.nombre_actual) like core.normalizar_ref(${like}) or core.normalizar_ref(coalesce(a.codigo_legado, '')) like core.normalizar_ref(${like}) or core.normalizar_ref(coalesce(o.razon_social, '')) like core.normalizar_ref(${like}) or core.normalizar_ref(coalesce(o.abreviatura, '')) like core.normalizar_ref(${like}))`,
     );
   }
 

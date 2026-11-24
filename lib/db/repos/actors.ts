@@ -152,7 +152,11 @@ function optionalText(
   }
   const trimmed = value.trim();
   if ((!nullable && !trimmed) || trimmed.length > maxLength) {
-    throw new ApiError(422, `El campo ${key} no cumple el formato permitido.`, "FIELD_INVALID");
+    throw new ApiError(
+      422,
+      `El campo ${key} no cumple el formato permitido.`,
+      "FIELD_INVALID",
+    );
   }
   return trimmed;
 }
@@ -167,12 +171,22 @@ export async function updateActor(
   uid: string,
   input: ActorUpdateInput,
 ): Promise<ActorListItem> {
-  const unknown = Object.keys(input).filter((key) => !ACTOR_UPDATE_FIELDS.has(key));
+  const unknown = Object.keys(input).filter(
+    (key) => !ACTOR_UPDATE_FIELDS.has(key),
+  );
   if (unknown.length) {
-    throw new ApiError(422, `Campo no editable: ${unknown[0]}.`, "FIELD_NOT_EDITABLE");
+    throw new ApiError(
+      422,
+      `Campo no editable: ${unknown[0]}.`,
+      "FIELD_NOT_EDITABLE",
+    );
   }
   if (!Object.keys(input).length) {
-    throw new ApiError(422, "Indique al menos un campo para actualizar.", "EMPTY_UPDATE");
+    throw new ApiError(
+      422,
+      "Indique al menos un campo para actualizar.",
+      "EMPTY_UPDATE",
+    );
   }
 
   const antesResult = await client.query(
@@ -209,8 +223,15 @@ export async function updateActor(
   if (abreviatura !== undefined) set("abreviatura", "abreviatura", abreviatura);
   const naturaleza = optionalText(input, "naturaleza", 12, false);
   if (naturaleza !== undefined) {
-    if (naturaleza === null || !new Set(["persona", "organizacion"]).has(naturaleza)) {
-      throw new ApiError(422, "La naturaleza no está en el catálogo.", "CATALOG_VALUE_INVALID");
+    if (
+      naturaleza === null ||
+      !new Set(["persona", "organizacion"]).has(naturaleza)
+    ) {
+      throw new ApiError(
+        422,
+        "La naturaleza no está en el catálogo.",
+        "CATALOG_VALUE_INVALID",
+      );
     }
     set("naturaleza", "naturaleza", naturaleza);
   }
@@ -218,19 +239,34 @@ export async function updateActor(
   if (cargo !== undefined) set("cargo_actual", "cargo_actual", cargo);
   const nivelGobierno = optionalText(input, "nivelGobierno", 15);
   if (nivelGobierno !== undefined) {
-    const niveles = new Set(["Nacional", "Regional", "Local", "Empresa", "Sociedad_Civil"]);
+    const niveles = new Set([
+      "Nacional",
+      "Regional",
+      "Local",
+      "Empresa",
+      "Sociedad_Civil",
+    ]);
     if (nivelGobierno !== null && !niveles.has(nivelGobierno)) {
-      throw new ApiError(422, "El nivel de gobierno no está en el catálogo.", "CATALOG_VALUE_INVALID");
+      throw new ApiError(
+        422,
+        "El nivel de gobierno no está en el catálogo.",
+        "CATALOG_VALUE_INVALID",
+      );
     }
     set("nivel_gobierno", "nivel_gobierno", nivelGobierno);
   }
   const categoria = optionalText(input, "categoria", 40);
   if (categoria !== undefined) set("categoria", "categoria", categoria);
   const perfil = optionalText(input, "perfilDescripcion", 5000);
-  if (perfil !== undefined) set("perfil_descripcion", "perfil_descripcion", perfil);
+  if (perfil !== undefined)
+    set("perfil_descripcion", "perfil_descripcion", perfil);
   if ("activo" in input) {
     if (typeof input.activo !== "boolean") {
-      throw new ApiError(422, "El estado activo debe ser booleano.", "FIELD_INVALID");
+      throw new ApiError(
+        422,
+        "El estado activo debe ser booleano.",
+        "FIELD_INVALID",
+      );
     }
     set("activo", "activo", input.activo);
   }
@@ -238,10 +274,13 @@ export async function updateActor(
   const tipo = optionalText(input, "tipo", 100, false);
   const funcion = optionalText(input, "funcion", 100, false);
   const posicionamiento = optionalText(input, "posicionamiento", 100);
-  if (tipo !== undefined || funcion !== undefined || posicionamiento !== undefined) {
-    const funcionActual = typeof antes.funcion === "string"
-      ? antes.funcion.replace(/_/g, " ")
-      : "";
+  if (
+    tipo !== undefined ||
+    funcion !== undefined ||
+    posicionamiento !== undefined
+  ) {
+    const funcionActual =
+      typeof antes.funcion === "string" ? antes.funcion.replace(/_/g, " ") : "";
     const catalogos = await client.query(
       `select (select id from core.cat_tipos_actor where nombre = $1 limit 1) as tipo_id,
               (select id from core.cat_roles_actor where replace(nombre, '_', ' ') = $2 limit 1) as funcion_id,
@@ -254,22 +293,41 @@ export async function updateActor(
     );
     const ids = catalogos.rows[0] as Record<string, number | null>;
     if (tipo !== undefined) {
-      if (ids.tipo_id === null) throw new ApiError(422, "El tipo de actor no está en el catálogo.", "CATALOG_VALUE_INVALID");
+      if (ids.tipo_id === null)
+        throw new ApiError(
+          422,
+          "El tipo de actor no está en el catálogo.",
+          "CATALOG_VALUE_INVALID",
+        );
       set("tipo_actor_id", "tipo_actor_id", ids.tipo_id);
     }
     if (funcion !== undefined) {
-      if (ids.funcion_id === null) throw new ApiError(422, "La función no está en el catálogo.", "CATALOG_VALUE_INVALID");
+      if (ids.funcion_id === null)
+        throw new ApiError(
+          422,
+          "La función no está en el catálogo.",
+          "CATALOG_VALUE_INVALID",
+        );
       set("rol_actor_id", "rol_actor_id", ids.funcion_id);
     }
     if (posicionamiento !== undefined) {
       if (posicionamiento !== null && ids.perfil_id === null) {
-        throw new ApiError(422, "El posicionamiento no está en el catálogo.", "CATALOG_VALUE_INVALID");
+        throw new ApiError(
+          422,
+          "El posicionamiento no está en el catálogo.",
+          "CATALOG_VALUE_INVALID",
+        );
       }
       set("perfil_id", "perfil_id", ids.perfil_id);
     }
   }
 
-  if (!sets.length) throw new ApiError(422, "Indique al menos un campo editable.", "EMPTY_UPDATE");
+  if (!sets.length)
+    throw new ApiError(
+      422,
+      "Indique al menos un campo editable.",
+      "EMPTY_UPDATE",
+    );
   sets.push(`updated_by = ${bind(scope.usuarioId)}`);
   const actorId = antes.id as string;
   const idParam = bind(actorId);
@@ -283,14 +341,24 @@ export async function updateActor(
     values,
   );
   const after = actualizado.rows[0] as Record<string, unknown> | undefined;
-  if (!after) throw new ApiError(404, "El actor no existe o no puede editarse.", "NOT_FOUND");
+  if (!after)
+    throw new ApiError(
+      404,
+      "El actor no existe o no puede editarse.",
+      "NOT_FOUND",
+    );
 
   const detalle = await client.query(
     `select ${ACTOR_SELECT} ${ACTOR_FROM} where a.actor_uid::text = $1`,
     [actorId],
   );
   const fila = detalle.rows[0] as Record<string, unknown> | undefined;
-  if (!fila) throw new ApiError(404, "El actor no existe o no puede editarse.", "NOT_FOUND");
+  if (!fila)
+    throw new ApiError(
+      404,
+      "El actor no existe o no puede editarse.",
+      "NOT_FOUND",
+    );
 
   const auditBefore: Record<string, unknown> = {};
   const auditAfter: Record<string, unknown> = {};
@@ -326,7 +394,7 @@ export async function listActors(
   if (search) {
     const like = bind(`%${search}%`);
     where.push(
-      `(a.nombre_actual ilike ${like} or coalesce(a.abreviatura, '') ilike ${like} or coalesce(a.cargo_actual, '') ilike ${like})`,
+      `(core.normalizar_ref(a.nombre_actual) like core.normalizar_ref(${like}) or core.normalizar_ref(coalesce(a.abreviatura, '')) like core.normalizar_ref(${like}) or core.normalizar_ref(coalesce(a.cargo_actual, '')) like core.normalizar_ref(${like}))`,
     );
   }
   if (query.naturaleza) where.push(`a.naturaleza = ${bind(query.naturaleza)}`);

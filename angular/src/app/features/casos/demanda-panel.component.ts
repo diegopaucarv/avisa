@@ -70,22 +70,17 @@ type CampoBorrador = keyof BorradorDemanda;
     .demanda-panel-codigo {
       margin: 0;
       color: #8a98a5;
-      font-size: 9px;
+      font-size: 12px;
       font-weight: 700;
       letter-spacing: 0.7px;
       text-transform: uppercase;
     }
 
-    .drawer-head h2 {
-      margin: 0;
-      color: #1c2a38;
-      font: 700 16px/1.35 var(--font-display);
-    }
 
     .demanda-panel-sub {
       margin: 4px 0 0;
       color: #647487;
-      font-size: 10.5px;
+      font-size: 13px;
       line-height: 1.5;
     }
 

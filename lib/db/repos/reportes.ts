@@ -68,8 +68,8 @@ function mapReporte(row: Record<string, unknown>): ReporteListItem {
     titulo: row.titulo as string | null,
     resumenEjecutivo: row.resumen_ejecutivo as string | null,
     contenido: row.contenido as string | null,
-    conclusionesRecomendaciones:
-      row.conclusiones_recomendaciones as string | null,
+    conclusionesRecomendaciones: row.conclusiones_recomendaciones as
+      string | null,
   };
 }
 
@@ -88,7 +88,7 @@ export async function listReportes(
   if (search) {
     const like = bind(`%${search}%`);
     where.push(
-      `(r.titulo ilike ${like} or r.codigo_reporte ilike ${like} or r.codigo_caso ilike ${like})`,
+      `(core.normalizar_ref(r.titulo) like core.normalizar_ref(${like}) or core.normalizar_ref(r.codigo_reporte) like core.normalizar_ref(${like}) or core.normalizar_ref(r.codigo_caso) like core.normalizar_ref(${like}))`,
     );
   }
   if (query.tipo?.trim()) where.push(`r.tipo = ${bind(query.tipo.trim())}`);
@@ -100,9 +100,11 @@ export async function listReportes(
   // `::date` dentro de la consulta y convertiría un filtro mal escrito en un
   // 500. Un rango mal formado simplemente no se aplica.
   const desde = query.desde?.trim();
-  if (desde && ISO_DATE.test(desde)) where.push(`r.fecha >= ${bind(desde)}::date`);
+  if (desde && ISO_DATE.test(desde))
+    where.push(`r.fecha >= ${bind(desde)}::date`);
   const hasta = query.hasta?.trim();
-  if (hasta && ISO_DATE.test(hasta)) where.push(`r.fecha <= ${bind(hasta)}::date`);
+  if (hasta && ISO_DATE.test(hasta))
+    where.push(`r.fecha <= ${bind(hasta)}::date`);
 
   const page = Math.max(1, Math.trunc(query.page ?? 1));
   const pageSize = Math.min(100, Math.max(1, Math.trunc(query.pageSize ?? 25)));

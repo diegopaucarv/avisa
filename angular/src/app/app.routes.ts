@@ -87,9 +87,13 @@ export const routes: Routes = [
           import('./features/documentos/documentos.page').then((m) => m.DocumentosPage),
       },
       {
+        path: 'archivo',
+        loadComponent: () => import('./features/archivo/archivo.page').then((m) => m.ArchivoPage),
+      },
+      {
         path: 'papelera',
-        loadComponent: () =>
-          import('./features/papelera/papelera.page').then((m) => m.PapeleraPage),
+        redirectTo: 'archivo',
+        pathMatch: 'full',
       },
       {
         path: 'reportes',
@@ -124,9 +128,11 @@ export const routes: Routes = [
           import('./features/directorio/organizaciones.page').then((m) => m.OrganizacionesPage),
       },
       {
+        // Alias heredado: el directorio de organizaciones absorbió a las
+        // antiguas «instituciones» (vocabulario que ya no se usa en la UI).
         path: 'directorio/instituciones',
-        loadComponent: () =>
-          import('./features/directorio/instituciones.page').then((m) => m.InstitucionesPage),
+        redirectTo: '/directorio/organizaciones',
+        pathMatch: 'full',
       },
       {
         path: 'directorio/locales',

@@ -1,16 +1,11 @@
 <section class="view-body" aria-labelledby="titulo-reportes">
   <header class="view-head">
     <div>
-      <p class="section-eyebrow">GESTIÓN DE IYC</p>
       <h1 id="titulo-reportes">
         {{ pestanaActiva() === 'informe' ? 'Informe oficial' : 'Reporte de actividad' }}
       </h1>
-      <p class="view-subtitle">
-        Productos de la Gestión de Información y Conocimiento. Vista de sólo lectura; el alta se
-        realiza desde la pantalla de Documentos.
-      </p>
     </div>
-    <div class="view-acciones">
+    <div class="view-actions">
       <p class="result-count" aria-live="polite">{{ total() }} reportes</p>
     </div>
   </header>
@@ -107,9 +102,6 @@
 
   <div class="table-wrap">
     <table class="data-table">
-      <caption class="table-caption">
-        {{ resumenTabla() }}
-      </caption>
       <thead>
         <tr>
           <th scope="col" class="col-seleccion">
@@ -121,19 +113,19 @@
               (change)="seleccion.alternarPagina(idsVisibles(), $event)"
             />
           </th>
-          <th scope="col">Tipo</th>
-          <th scope="col">Código</th>
-          <th scope="col">Caso</th>
-          <th scope="col">Responsable</th>
-          <th scope="col">Fecha</th>
-          <th scope="col">Región</th>
-          <th scope="col">Ubicación</th>
-          <th scope="col">Título</th>
+          <th scope="col" [appThOrden]="'tipo'" [orden]="orden">Tipo</th>
+          <th scope="col" [appThOrden]="'codigo'" [orden]="orden">Código</th>
+          <th scope="col" [appThOrden]="'caso'" [orden]="orden">Caso</th>
+          <th scope="col" [appThOrden]="'responsable'" [orden]="orden">Responsable</th>
+          <th scope="col" [appThOrden]="'fecha'" [orden]="orden">Fecha</th>
+          <th scope="col" [appThOrden]="'region'" [orden]="orden">Región</th>
+          <th scope="col" [appThOrden]="'ubicacion'" [orden]="orden">Ubicación</th>
+          <th scope="col" [appThOrden]="'titulo'" [orden]="orden">Título</th>
         </tr>
       </thead>
       <tbody>
-        @for (reporte of reportes(); track (reporte.codigoReporte || '') + '|' + (reporte.titulo ||
-        '')) {
+        @for (reporte of filasVisibles(); track (reporte.codigoReporte || '') + '|' +
+        (reporte.titulo || '')) {
         <tr>
           <td class="col-seleccion" (click)="$event.stopPropagation()">
             <input

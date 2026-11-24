@@ -2,10 +2,6 @@
   <header class="view-head">
     <div>
       <h1 id="titulo-bandeja">Bandeja de trabajo</h1>
-      <p class="view-subtitle">
-        De lista a tablero: las tres colas que requieren atención hoy —alertas, compromisos y
-        demandas sin caso— reunidas en una sola vista. Cada bloque enlaza a su pantalla completa.
-      </p>
     </div>
     <div class="view-actions">
       <app-exportar-menu entidad="casos" (fallo)="alFallarExportacion($event)" />
@@ -13,181 +9,156 @@
     </div>
   </header>
 
+  <div class="executive-kpis tablero-bandeja">
+    @for (tarjeta of tablero(); track tarjeta.etiqueta) {
+    <div class="stat-card">
+      <span [class]="'stat-icon ' + tarjeta.tono">
+        <app-icono [nombre]="tarjeta.icono" [tamano]="15" />
+      </span>
+      <span class="stat-copy">
+        <span>{{ tarjeta.etiqueta }}</span>
+        <strong [class.sin-dato]="tarjeta.valor === 'No disponible' || tarjeta.valor === '…'">
+          {{ tarjeta.valor }}
+        </strong>
+        <small>{{ tarjeta.detalle }}</small>
+      </span>
+    </div>
+    }
+  </div>
+
   @if (exportarError(); as mensaje) {
   <p class="form-error" role="alert">{{ mensaje }}</p>
   }
 
-  <section class="surface bloque" aria-labelledby="titulo-alertas-pendientes">
-    <div class="surface-heading">
-      <div>
-        <p class="section-eyebrow">ALERTA TEMPRANA</p>
-        <h3 class="bloque-titulo" id="titulo-alertas-pendientes">
-          <app-icono nombre="alertas" [tamano]="15" />
-          Alertas pendientes
-        </h3>
-        <p>Reportes de RED-RADAR en espera de revisión.</p>
-      </div>
-      <a class="link-button" routerLink="/alertas">
-        Ver todo
-        <app-icono nombre="chevron-derecha" [tamano]="13" />
-      </a>
-    </div>
-
-    @if (estadoAlertas() === 'error') {
-    <p class="bloque-nota" role="alert">
-      {{ errorAlertas()?.message }}
-      <button type="button" class="button-secondary" (click)="recargar()">Reintentar</button>
-    </p>
-    } @else if (estadoAlertas() === 'cargando' || estadoAlertas() === 'inactivo') {
-    <p class="bloque-vacio" role="status">Cargando alertas…</p>
-    } @else if (alertas().length === 0) {
-    <p class="bloque-vacio">No hay alertas pendientes de revisión.</p>
-    } @else {
-    <ul class="tarea-lista">
-      @for (alerta of alertas(); track alerta.id) {
-      <li class="tarea">
-        <span class="tarea-principal">
-          <span class="tarea-titulo">{{ alerta.titulo || 'Sin título' }}</span>
-          <span class="tarea-meta">
-            <span>{{ alerta.codigo }}</span>
-            @if (alerta.prioridad) {
-            <span class="priority-label">{{ alerta.prioridad }}</span>
-            }
-            <span>{{ plazo(alerta.plazoHoras) }}</span>
-            <span>{{ fecha(alerta.fechaReporte) }}</span>
-          </span>
-        </span>
-        @if (alerta.casoCodigo) {
-        <span class="tarea-codigo">{{ alerta.casoCodigo }}</span>
-        }
-      </li>
+  <div class="filter-bar cola-filtros">
+    <div class="segmented" role="group" aria-label="Filtrar la cola por tipo">
+      @for (opcion of opcionesTipo; track opcion.valor) {
+      <button
+        type="button"
+        [attr.aria-pressed]="filtroTipo() === opcion.valor"
+        (click)="cambiarTipo(opcion.valor)"
+      >
+        {{ opcion.etiqueta }}
+        <b>{{ textoDe(opcion.valor) }}</b>
+      </button>
       }
-    </ul>
-    @if (totalAlertas() > alertas().length) {
-    <p class="bloque-pie">{{ totalAlertas() }} alertas pendientes en total.</p>
-    } }
-  </section>
+    </div>
+  </div>
 
-  <section class="surface bloque" aria-labelledby="titulo-compromisos-atencion">
+  <section class="surface cola-panel" aria-labelledby="titulo-cola">
     <div class="surface-heading">
       <div>
-        <p class="section-eyebrow">COMPROMISOS</p>
-        <h3 class="bloque-titulo" id="titulo-compromisos-atencion">
-          <app-icono nombre="compromisos" [tamano]="15" />
-          Compromisos vencidos y por vencer
-        </h3>
-        <p>
-          Compromisos vencidos y los que vencen entre hoy y los próximos {{ horizonteDias }} días.
-          Los compromisos sin fecha de vencimiento no se cuentan: no se estima.
-        </p>
-      </div>
-      <a class="link-button" routerLink="/compromisos">
-        Ver todo
-        <app-icono nombre="chevron-derecha" [tamano]="13" />
-      </a>
-    </div>
-
-    <div class="contadores-compromisos">
-      <div class="contador">
-        <span class="contador-etiqueta">Vencidos</span>
-        <strong class="contador-valor" [class.contador-sin-dato]="estadoVencidos() === 'error'">
-          {{ textoVencidos() }}
-        </strong>
-      </div>
-      <div class="contador">
-        <span class="contador-etiqueta">Por vencer</span>
-        <strong class="contador-valor" [class.contador-sin-dato]="estadoPorVencer() === 'error'">
-          {{ textoPorVencer() }}
-        </strong>
-      </div>
-    </div>
-
-    @if (estadoCompromisos() === 'error') {
-    <p class="bloque-nota" role="alert">
-      {{ errorCompromisos()?.message }}
-      <button type="button" class="button-secondary" (click)="recargar()">Reintentar</button>
-    </p>
-    } @else if (estadoCompromisos() === 'cargando' || estadoCompromisos() === 'inactivo') {
-    <p class="bloque-vacio" role="status">Cargando compromisos…</p>
-    } @else { @if (compromisos().length === 0) {
-    <p class="bloque-vacio">
-      No hay compromisos vencidos ni por vencer en los próximos {{ horizonteDias }} días.
-    </p>
-    } @else {
-    <ul class="tarea-lista">
-      @for (compromiso of compromisos(); track compromiso.id) {
-      <li class="tarea">
-        <span class="tarea-principal">
-          <span class="tarea-titulo">{{ compromiso.accion }}</span>
-          <span class="tarea-meta">
-            <span>{{ compromiso.codigo }}</span>
-            <span>{{ compromiso.casoCodigo || 'Sin caso' }}</span>
-            <span>{{ fecha(vencimiento(compromiso).fecha) }}</span>
-          </span>
-        </span>
-        <span [class]="'due-state ' + situacion(compromiso).clase">
-          {{ situacion(compromiso).etiqueta }}
-        </span>
-      </li>
-      }
-    </ul>
-    } @if (totalCompromisos() > 0) {
-    <p class="bloque-pie">
-      {{ totalCompromisos() }} compromisos vencidos o que vencen en los próximos {{ horizonteDias }}
-      días.
-    </p>
-    } }
-  </section>
-
-  <section class="surface bloque" aria-labelledby="titulo-demandas-sin-caso">
-    <div class="surface-heading">
-      <div>
-        <p class="section-eyebrow">DEMANDAS</p>
-        <h3 class="bloque-titulo" id="titulo-demandas-sin-caso">
+        <h3 class="cola-titulo" id="titulo-cola">
           <app-icono nombre="bandeja" [tamano]="15" />
-          Demandas sin caso
+          Lo que exige atención
         </h3>
-        <p>Demandas registradas que todavía no se vinculan a un caso.</p>
       </div>
-      <a class="link-button" routerLink="/casos/sin-caso">
-        Ver todo
-        <app-icono nombre="chevron-derecha" [tamano]="13" />
-      </a>
+      <div class="cola-contadores">
+        <span class="cola-contador"><strong>{{ textoVencidos() }}</strong> vencidos</span>
+        <span class="cola-contador">
+          <strong>{{ textoPorVencer() }}</strong> por vencer ({{ horizonteDias }} d)
+        </span>
+      </div>
     </div>
 
-    @if (estadoDemandas() === 'error') {
-    <p class="bloque-nota" role="alert">{{ errorDemandas()?.message }}</p>
-    } @else if (estadoDemandas() === 'cargando' || estadoDemandas() === 'inactivo') {
-    <p class="bloque-vacio" role="status">Cargando demandas…</p>
-    } @else if (demandas().length === 0) {
-    <p class="bloque-vacio">No hay demandas sin caso.</p>
-    } @else {
-    <ul class="tarea-lista">
-      @for (demanda of demandas(); track demanda.id) {
-      <li class="tarea">
-        <span class="tarea-principal">
-          <span class="tarea-titulo">
-            {{ demanda.descripcion || demanda.pedido || demanda.problema || 'Sin descripción' }}
-          </span>
-          <span class="tarea-meta">
-            <span [class]="'status-badge ' + claseDemanda(demanda.estado)">
-              <span class="status-dot"></span>
-              {{ demanda.estado }}
-            </span>
-            <span>{{ fechaDemanda(demanda.fechaRegistro) }}</span>
-            @if (demanda.tematica) {
-            <span>{{ demanda.tematica }}</span>
-            }
-          </span>
-        </span>
-        @if (demanda.afectaMujeres) {
-        <span class="status-badge state-pending">Afecta a mujeres</span>
-        }
-      </li>
-      }
-    </ul>
-    @if (totalDemandas() > demandas().length) {
-    <p class="bloque-pie">{{ totalDemandas() }} demandas sin caso en total.</p>
-    } }
+    <p class="cola-aviso" role="note">
+      Cola unificada completa: <strong>no disponible</strong>. La API no expone un listado único
+      ordenado en servidor; esta tabla combina la primera página de cada fuente y enlaza al detalle
+      de su pantalla.
+    </p>
+
+    @if (errorTotal()) {
+    <p class="cola-nota-fuente" role="alert">
+      {{ mensajeError() }}
+      <button type="button" class="button-secondary" (click)="recargar()">Reintentar</button>
+    </p>
+    } @else if (cola().length === 0 && cargando()) {
+    <div class="empty-state" role="status">Cargando la cola…</div>
+    } @else if (cola().length === 0 && hayErrorParcial()) {
+    <p class="cola-nota-fuente" role="alert">
+      No se pudieron cargar: {{ fuentesConError().join(', ') }}.
+      <button type="button" class="button-secondary" (click)="recargar()">Reintentar</button>
+    </p>
+    } @else if (cola().length === 0) {
+    <div class="empty-state" role="note">
+      No hay registros que atender{{ filtroTipo() === 'todos' ? '' : ' de este tipo' }}.
+    </div>
+    } @else { @if (hayErrorParcial()) {
+    <p class="cola-nota-fuente" role="alert">
+      No se pudieron cargar: {{ fuentesConError().join(', ') }}.
+      <button type="button" class="button-secondary" (click)="recargar()">Reintentar</button>
+    </p>
+    } @else if (cargando()) {
+    <p class="cola-cargando" role="status">Cargando fuentes pendientes…</p>
+    }
+
+    <div class="table-wrap">
+      <table class="data-table cola-tabla">
+        <thead>
+          <tr>
+            <th scope="col" [appThOrden]="'plazo'" [orden]="orden">Plazo</th>
+            <th scope="col" [appThOrden]="'tipo'" [orden]="orden">Tipo</th>
+            <th scope="col" [appThOrden]="'registro'" [orden]="orden">Registro</th>
+            <th scope="col" [appThOrden]="'caso'" [orden]="orden">Caso</th>
+            <th scope="col" [appThOrden]="'territorio'" [orden]="orden">Territorio</th>
+            <th scope="col" [appThOrden]="'riesgo'" [orden]="orden">Riesgo / prioridad</th>
+            <th scope="col" [appThOrden]="'revision'" [orden]="orden">Revisión</th>
+            <th scope="col">Pantalla</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of filasVisibles(); track item.tipo + ':' + item.id) {
+          <tr>
+            <td class="cola-plazo">
+              <span [class]="'due-state ' + clasePlazo(item)">{{ etiquetaPlazo(item) }}</span>
+              @if (item.fecha) {
+              <small class="cola-fecha">{{ item.plazo }}</small>
+              }
+            </td>
+            <td>
+              <span [class]="'tipo-tag tipo-' + item.tipo">{{ etiquetasTipo[item.tipo] }}</span>
+            </td>
+            <td class="cola-registro">
+              <strong>{{ item.titulo }}</strong>
+              <small>{{ item.codigo }}</small>
+            </td>
+            <td>{{ item.caso || 'Sin caso' }}</td>
+            <td>{{ item.territorio || '—' }}</td>
+            <td>{{ item.riesgo }}</td>
+            <td>{{ item.revisionPendiente ? 'Pendiente' : '—' }}</td>
+            <td>
+              <a class="link-button" [routerLink]="item.ruta">
+                Abrir
+                <app-icono nombre="chevron-derecha" [tamano]="13" />
+              </a>
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    }
+
+    <div class="cola-pie">
+      <p class="cola-totales">
+        Totales del servidor: <strong>{{ textos().alertas }}</strong> alertas pendientes ·
+        <strong>{{ textos().compromisos }}</strong> compromisos vencidos o por vencer ·
+        <strong>{{ textos().demandas }}</strong> demandas sin caso.
+      </p>
+      <nav class="cola-enlaces" aria-label="Pantallas completas">
+        <a class="link-button" routerLink="/alertas">
+          Alertas
+          <app-icono nombre="chevron-derecha" [tamano]="13" />
+        </a>
+        <a class="link-button" routerLink="/compromisos">
+          Compromisos
+          <app-icono nombre="chevron-derecha" [tamano]="13" />
+        </a>
+        <a class="link-button" routerLink="/casos/sin-caso">
+          Demandas sin caso
+          <app-icono nombre="chevron-derecha" [tamano]="13" />
+        </a>
+      </nav>
+    </div>
   </section>
 </section>

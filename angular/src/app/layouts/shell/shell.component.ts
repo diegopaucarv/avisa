@@ -43,7 +43,7 @@ type EnlaceNav = {
  */
 const ENLACES_NAV: readonly EnlaceNav[] = [
   {
-    grupo: 'GESTIÓN TERRITORIAL',
+    grupo: 'PANORAMA TERRITORIAL',
     etiqueta: 'Panorama territorial',
     ruta: '/mapa',
     icono: 'mapa',
@@ -92,19 +92,19 @@ const ENLACES_NAV: readonly EnlaceNav[] = [
     icono: 'documentos',
   },
   {
-    grupo: 'DIRECTORIO',
-    etiqueta: 'Personas',
+    grupo: 'DIRECTORIOS',
+    etiqueta: 'Actores',
     ruta: '/directorio/personas',
     icono: 'actores',
   },
   {
-    grupo: 'DIRECTORIO',
+    grupo: 'DIRECTORIOS',
     etiqueta: 'Organizaciones',
     ruta: '/directorio/organizaciones',
     icono: 'organizaciones',
   },
   {
-    grupo: 'DIRECTORIO',
+    grupo: 'DIRECTORIOS',
     etiqueta: 'Locales',
     ruta: '/directorio/locales',
     icono: 'mapa',
@@ -123,8 +123,8 @@ const ENLACES_NAV: readonly EnlaceNav[] = [
   },
   {
     grupo: 'MI ESPACIO',
-    etiqueta: 'Papelera',
-    ruta: '/papelera',
+    etiqueta: 'Archivo',
+    ruta: '/archivo',
     icono: 'papelera',
     soloSiPuedeEliminar: true,
   },
@@ -142,22 +142,32 @@ const ENLACES_NAV: readonly EnlaceNav[] = [
      * abierto, foco visible y un valor con más peso que la etiqueta.
      */
     .ambito-chip {
+      display: inline-flex;
+      align-items: center;
       gap: 6px;
-      padding: 4px 9px;
-      border-radius: 999px;
-      font-size: 10.5px;
-      transition: background-color 120ms ease;
+      min-height: 36px;
+      padding: 0 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--paper, #fff);
+      color: var(--ink-2);
+      font-size: 14.5px;
+      font-weight: 600;
+      transition:
+        background-color 120ms ease,
+        border-color 120ms ease;
     }
 
     .ambito-chip strong {
-      color: var(--ink-2);
+      color: var(--ink);
       font-weight: 700;
     }
 
     .ambito-chip:hover,
     .ambito-chip:focus-visible,
     .ambito-chip[aria-expanded='true'] {
-      background: rgba(36, 85, 162, 0.1);
+      border-color: var(--blue);
+      background: var(--blue-pale, #eef4fd);
     }
 
     .ambito-chip:focus-visible {
@@ -217,9 +227,9 @@ const ENLACES_NAV: readonly EnlaceNav[] = [
     .ambito-nota {
       margin: 4px 2px 0;
       padding: 7px 9px 1px;
-      border-top: 1px solid #edf0f2;
-      color: #99a4ad;
-      font-size: 9px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 14px;
       line-height: 1.4;
     }
 
@@ -253,19 +263,20 @@ const ENLACES_NAV: readonly EnlaceNav[] = [
     }
 
     .registrar-trigger {
-      min-height: 34px;
-      padding: 0 11px;
-      border: 1px solid #2455a2;
-      border-radius: 6px;
-      background: #2455a2;
+      min-height: 36px;
+      padding: 0 14px;
+      border: 1px solid var(--blue);
+      border-radius: 8px;
+      background: var(--blue);
       color: #fff;
-      font: 600 10px/1 var(--font-sans);
+      font: 600 14.5px/1 var(--font-body);
       white-space: nowrap;
     }
 
     .registrar-trigger:hover,
     .registrar-trigger[aria-expanded='true'] {
-      background: #1d427f;
+      background: var(--blue-dark);
+      border-color: var(--blue-dark);
     }
 
     .registrar-panel {
@@ -275,17 +286,17 @@ const ENLACES_NAV: readonly EnlaceNav[] = [
       right: 0;
       width: min(280px, calc(100vw - 24px));
       padding: 7px;
-      border: 1px solid #e1e7ed;
+      border: 1px solid var(--line);
       border-radius: 9px;
-      background: #fff;
+      background: var(--paper, #fff);
       box-shadow: 0 12px 30px rgb(23 40 58 / 16%);
     }
 
     .registrar-titulo {
       margin: 0;
       padding: 7px 9px 5px;
-      color: #8a98a5;
-      font-size: 9px;
+      color: var(--muted);
+      font-size: 14px;
       font-weight: 700;
       letter-spacing: 0.06em;
       text-transform: uppercase;
@@ -294,7 +305,7 @@ const ENLACES_NAV: readonly EnlaceNav[] = [
     .registrar-separador {
       height: 1px;
       margin: 6px 4px;
-      background: #edf0f2;
+      background: var(--line);
     }
 
     .registrar-opcion {
@@ -308,26 +319,26 @@ const ENLACES_NAV: readonly EnlaceNav[] = [
       border: 0;
       border-radius: 6px;
       background: transparent;
-      color: #33475b;
-      font-size: 11px;
+      color: var(--ink-2);
+      font-size: 14.5px;
       text-align: left;
       cursor: pointer;
     }
 
     .registrar-opcion:hover:not(:disabled),
     .registrar-opcion:focus-visible:not(:disabled) {
-      background: #f0f5fb;
-      color: #1d427f;
+      background: var(--blue-pale, #f0f5fb);
+      color: var(--blue-dark);
     }
 
     .registrar-opcion:disabled {
-      color: #9ca8b3;
+      color: var(--muted);
       cursor: not-allowed;
     }
 
     .registrar-ayuda {
-      color: #99a4ad;
-      font-size: 9px;
+      color: var(--muted);
+      font-size: 14px;
     }
 
     @media (max-width: 620px) {
@@ -392,6 +403,29 @@ const ENLACES_NAV: readonly EnlaceNav[] = [
         left: 50%;
         transform: translateX(-50%);
       }
+    }
+
+    .profile-menu-link {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 9px;
+      border-radius: 7px;
+      color: var(--ink-2);
+      font-size: 14.5px;
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .profile-menu-link:hover {
+      background: var(--blue-pale, #f0f5fb);
+      color: var(--blue-dark);
+    }
+
+    .profile-menu-separador {
+      height: 1px;
+      margin: 5px 4px;
+      background: var(--line);
     }
   `,
 })

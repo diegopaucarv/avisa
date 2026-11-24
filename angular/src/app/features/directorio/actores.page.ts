@@ -33,7 +33,9 @@ import { BarraSeleccionComponent } from '../../shared/ui/barra-seleccion.compone
 
 import { SeleccionTabla } from '../../shared/ui/seleccion-tabla';
 import { IconoComponent } from '../../shared/ui/icono.component';
+import { OrdenTabla } from '../../shared/ui/orden-tabla';
 import { PaginacionComponent } from '../../shared/ui/paginacion.component';
+import { ThOrdenDirective } from '../../shared/ui/th-orden.directive';
 import {
   TerritorioBuscadorComponent,
   type OpcionTerritorio,
@@ -91,6 +93,7 @@ const FILTROS_INICIALES: FiltrosActores = {
     ActorPanelComponent,
     BarraSeleccionComponent,
     TerritorioBuscadorComponent,
+    ThOrdenDirective,
   ],
   templateUrl: './actores.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -116,21 +119,6 @@ const FILTROS_INICIALES: FiltrosActores = {
       align-items: flex-start;
       justify-content: space-between;
       gap: 16px;
-    }
-
-    .view-head h1 {
-      margin: 0;
-      color: #1a2b3e;
-      font: 700 22px/1.3 var(--font-display);
-      letter-spacing: -0.65px;
-    }
-
-    .view-subtitle {
-      max-width: 760px;
-      margin: 6px 0 0;
-      color: #7b8896;
-      font-size: 11px;
-      line-height: 1.6;
     }
 
     /* El buscador territorial entra en la barra como un filtro más. */
@@ -159,7 +147,7 @@ const FILTROS_INICIALES: FiltrosActores = {
     .actor-organizacion small {
       display: block;
       color: #8d99a6;
-      font-size: 9px;
+      font-size: 12px;
     }
 
     .col-foto {
@@ -178,7 +166,7 @@ const FILTROS_INICIALES: FiltrosActores = {
     .actor-actualizando {
       margin: 0;
       color: #8d99a6;
-      font-size: 9.5px;
+      font-size: 12px;
     }
 
     .lista-contador {
@@ -190,7 +178,7 @@ const FILTROS_INICIALES: FiltrosActores = {
       border-radius: 999px;
       background: #eaf1fb;
       color: #2455a2;
-      font-size: 10px;
+      font-size: 12.5px;
       font-weight: 700;
     }
 
@@ -219,14 +207,14 @@ const FILTROS_INICIALES: FiltrosActores = {
     .lista-temporal-cabecera h2 {
       margin: 0;
       color: #1a2b3e;
-      font: 700 14px/1.4 var(--font-display);
+      font: 700 15px/1.4 var(--font-display);
     }
 
     .lista-temporal-cabecera p,
     .lista-temporal-vacia {
       margin: 4px 0 0;
       color: #7b8896;
-      font-size: 11px;
+      font-size: 13px;
       line-height: 1.5;
     }
 
@@ -252,12 +240,12 @@ const FILTROS_INICIALES: FiltrosActores = {
 
     .lista-temporal-items strong {
       color: #465a6c;
-      font-size: 11px;
+      font-size: 13px;
     }
 
     .lista-temporal-items span {
       color: #8a98a5;
-      font-size: 10px;
+      font-size: 12.5px;
     }
 
     .lista-quitar {
@@ -267,7 +255,7 @@ const FILTROS_INICIALES: FiltrosActores = {
       border-radius: 5px;
       background: #fff;
       color: #526577;
-      font-size: 10px;
+      font-size: 12.5px;
     }
 
     .padron-dialogo {
@@ -296,12 +284,12 @@ const FILTROS_INICIALES: FiltrosActores = {
     }
 
     .padron-form h2 {
-      font: 700 17px/1.35 var(--font-display);
+      font: 700 17.5px/1.35 var(--font-display);
     }
 
     .padron-form p {
       color: #68798a;
-      font-size: 12px;
+      font-size: 14px;
       line-height: 1.5;
     }
 
@@ -309,7 +297,7 @@ const FILTROS_INICIALES: FiltrosActores = {
       display: grid;
       gap: 5px;
       color: #465a6c;
-      font-size: 11px;
+      font-size: 13px;
       font-weight: 600;
     }
 
@@ -380,7 +368,7 @@ export class ActoresPage {
   });
 
   readonly esSoloPersonas = computed(() => this.naturalezaFija() === 'persona');
-  readonly titulo = computed(() => (this.esSoloPersonas() ? 'Personas' : 'Actores'));
+  readonly titulo = computed(() => 'Actores');
   readonly sustantivo = computed(() => (this.esSoloPersonas() ? 'personas' : 'actores'));
 
   /** Región activa como etiqueta del buscador territorial restaurado. */
@@ -411,6 +399,20 @@ export class ActoresPage {
 
   /** Selección de la tabla (página visible) para exportar. */
   readonly seleccion = new SeleccionTabla();
+
+  /** Orden local de la página visible. */
+  readonly orden = new OrdenTabla<ActorDirectorio>();
+
+  private readonly accesores: Record<string, (actor: ActorDirectorio) => unknown> = {
+    nombre: (actor) => actor.nombre,
+    naturaleza: (actor) => actor.naturaleza,
+    tipo: (actor) => actor.tipo,
+    funcion: (actor) => actor.funcion,
+    region: (actor) => actor.region,
+    organizacion: (actor) => actor.organizacionAncla ?? actor.cargo,
+  };
+
+  readonly filasVisibles = computed(() => this.orden.ordenar(this.actores(), this.accesores));
 
   idsVisibles(): string[] {
     return this.actores()

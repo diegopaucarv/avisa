@@ -2,10 +2,6 @@
   <header class="view-head">
     <div>
       <h1 id="titulo-alertas">Alertas tempranas</h1>
-      <p class="view-subtitle">
-        Candidatos de conflicto social del sistema RED-RADAR. Cada alerta recorre elaboración,
-        validación previa, aprobación definitiva de la Dirección OAIPCS, remisión y archivo.
-      </p>
     </div>
     <div class="view-actions">
       @if (puedeRegistrar()) {
@@ -33,7 +29,10 @@
   @if (exportarError(); as mensaje) {
   <p class="form-error" role="alert">{{ mensaje }}</p>
   } @if (avisoAnulacion(); as aviso) {
-  <p class="form-hint aviso-ok" role="status">{{ aviso }}</p>
+  <p class="form-hint aviso-ok" role="status">
+    {{ aviso }}
+    <a class="table-link" routerLink="/archivo">Abrir el Archivo</a>
+  </p>
   } @if (avisoAlta(); as avisoRegistro) {
   <p class="form-hint aviso-ok" role="status">{{ avisoRegistro }}</p>
   }
@@ -170,7 +169,53 @@
   <p class="alerta-actualizando" role="status">Actualizando el listado…</p>
   }
 
-  <p class="tabla-nota">Pulse una fila para abrir la ficha en el panel lateral.</p>
+
+  @if (aprobacionFila(); as aprobacion) {
+  <div
+    class="form-hint view-actions"
+    role="group"
+    aria-label="Confirmación de aprobación definitiva"
+  >
+    <span>
+      <strong>{{ aprobacion.alerta.codigo || 'Sin código' }}</strong>
+      · {{ aprobacion.alerta.titulo || 'Sin título' }} · Aprobación definitiva · paso {{
+      aprobacion.paso }} de 5
+    </span>
+    <button
+      type="button"
+      class="button-primary"
+      [disabled]="enviandoFila() !== null"
+      (click)="confirmarAprobacionFila()"
+    >
+      Confirmar aprobación
+    </button>
+    <button
+      type="button"
+      class="button-secondary"
+      [disabled]="enviandoFila() !== null"
+      (click)="cancelarAprobacionFila()"
+    >
+      Cancelar
+    </button>
+  </div>
+  } @if (avisoFila(); as aviso) {
+  <div
+    [class]="aviso.tipo === 'ok' ? 'form-hint aviso-ok view-actions' : 'form-error view-actions'"
+    [attr.role]="aviso.tipo === 'ok' ? 'status' : 'alert'"
+  >
+    <span>{{ aviso.texto }}</span>
+    @if (aviso.tipo === 'ok' && deshacerFila()?.id === aviso.id && puedeDeshacerFila()) {
+    <button
+      type="button"
+      class="button-secondary"
+      [disabled]="enviandoFila() !== null"
+      (click)="deshacerAccionFila()"
+    >
+      Deshacer
+    </button>
+    }
+  </div>
+  }
 
   <div class="table-wrap">
     <table class="data-table">
@@ -196,20 +241,20 @@
               (change)="seleccion.alternarPagina(idsVisibles(), $event)"
             />
           </th>
-          <th scope="col">Código</th>
-          <th scope="col">Título</th>
-          <th scope="col">Caso vinculado</th>
-          <th scope="col">Prioridad</th>
-          <th scope="col">Riesgo</th>
-          <th scope="col">Fecha de reporte</th>
-          <th scope="col">Estado</th>
+          <th scope="col" [appThOrden]="'codigo'" [orden]="orden">Código</th>
+          <th scope="col" [appThOrden]="'titulo'" [orden]="orden">Título</th>
+          <th scope="col" [appThOrden]="'caso'" [orden]="orden">Caso vinculado</th>
+          <th scope="col" [appThOrden]="'prioridad'" [orden]="orden">Prioridad</th>
+          <th scope="col" [appThOrden]="'riesgo'" [orden]="orden">Riesgo</th>
+          <th scope="col" [appThOrden]="'fecha'" [orden]="orden">Fecha de reporte</th>
+          <th scope="col" [appThOrden]="'estado'" [orden]="orden">Estado</th>
           <th scope="col">Acciones</th>
         </tr>
       </thead>
       <tbody>
-        @for (alerta of alertas(); track alerta.id) {
+        @for (alerta of filasVisibles(); track alerta.id) {
         <tr
-          class="case-row-clickable"
+          [class]="'case-row-clickable ' + claseAvisoFila(alerta)"
           [class.row-selected]="seleccionadaId() === alerta.id"
           (click)="abrir(alerta)"
         >
@@ -236,7 +281,6 @@
           <td class="alerta-caso">
             @if (alerta.casoCodigo) {
             <strong>{{ alerta.casoCodigo }}</strong>
-            <small>{{ alerta.casoTitulo || 'Sin título del caso' }}</small>
             } @else {
             <span class="alerta-sin-caso">Sin caso</span>
             }
@@ -261,17 +305,15 @@
               {{ alerta.estado || 'Sin estado' }}
             </span>
           </td>
-          <td class="celda-anular">
-            @if (puedeAnular(alerta)) {
-            <button
-              type="button"
-              class="button-secondary"
-              [attr.aria-label]="'Anular la alerta ' + (alerta.codigo || alerta.titulo)"
-              (click)="abrirAnulacion(alerta); $event.stopPropagation()"
-            >
-              Anular
-            </button>
-            }
+          <td class="celda-anular" (click)="$event.stopPropagation()">
+            <app-acciones-fila
+              [acciones]="accionesFila(alerta)"
+              [puedeAnular]="puedeAnular(alerta)"
+              [codigo]="alerta.codigo || alerta.titulo || ''"
+              [ocupado]="enviandoFila() === alerta.id"
+              (accion)="accionFila(alerta, $event)"
+              (anular)="abrirAnulacion(alerta)"
+            />
           </td>
         </tr>
         }
@@ -295,6 +337,7 @@
     [guardando]="guardando()"
     [errorGuardado]="errorGuardado()"
     [aviso]="aviso()"
+    [pasoDeshacer]="pasoDeshacer()"
     [casoInicial]="casoInicial()"
     [prioridadesCatalogo]="prioridadesCatalogo()"
     [cargandoPrioridades]="cargandoPrioridades()"
@@ -304,6 +347,7 @@
     (guardar)="guardar($event)"
     (registrar)="registrarAlerta($event)"
     (accion)="accionFlujo($event)"
+    (deshacer)="deshacerPaso()"
   />
   } @if (alertaAnulacion(); as alertaAnular) {
   <app-anular-panel

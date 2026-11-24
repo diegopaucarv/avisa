@@ -106,11 +106,6 @@ function diferenciaTexto(valor: string, original: string | null): string | null 
       width: min(640px, 100%);
     }
 
-    .drawer-head h2 {
-      margin: 0;
-      color: #1c2a38;
-      font: 700 16px/1.35 var(--font-display);
-    }
 
     .panel-cabecera {
       display: flex;
@@ -122,7 +117,7 @@ function diferenciaTexto(valor: string, original: string | null): string | null 
     .panel-codigo {
       margin: 0;
       color: #8a98a5;
-      font-size: 9px;
+      font-size: 12px;
       font-weight: 700;
       letter-spacing: 0.7px;
       text-transform: uppercase;
@@ -181,7 +176,7 @@ function diferenciaTexto(valor: string, original: string | null): string | null 
 
     .panel-datos dt {
       color: #97a1aa;
-      font-size: 8.5px;
+      font-size: 12px;
       font-weight: 700;
       letter-spacing: 0.5px;
       text-transform: uppercase;
@@ -190,7 +185,7 @@ function diferenciaTexto(valor: string, original: string | null): string | null 
     .panel-datos dd {
       margin: 0;
       color: #465a6c;
-      font-size: 10.5px;
+      font-size: 13px;
       line-height: 1.45;
       overflow-wrap: anywhere;
     }
@@ -198,7 +193,7 @@ function diferenciaTexto(valor: string, original: string | null): string | null 
     .panel-texto {
       margin: 8px 0 0;
       color: #52677a;
-      font-size: 11px;
+      font-size: 13px;
       line-height: 1.65;
       white-space: pre-line;
     }
@@ -206,14 +201,14 @@ function diferenciaTexto(valor: string, original: string | null): string | null 
     .panel-vacio {
       margin: 8px 0 0;
       color: #a0aab3;
-      font-size: 10.5px;
+      font-size: 13px;
       font-style: italic;
     }
 
     .panel-nota {
       margin: 0;
       color: #8d99a6;
-      font-size: 10px;
+      font-size: 12.5px;
       line-height: 1.5;
     }
 
@@ -223,7 +218,7 @@ function diferenciaTexto(valor: string, original: string | null): string | null 
       border-radius: 6px;
       background: #edf6f0;
       color: #52806a;
-      font-size: 10.5px;
+      font-size: 13px;
     }
 
     .panel-error {
@@ -235,7 +230,7 @@ function diferenciaTexto(valor: string, original: string | null): string | null 
       border-radius: 6px;
       background: #fdf6f5;
       color: #a3402f;
-      font-size: 10.5px;
+      font-size: 13px;
     }
 
     .panel-error p {
@@ -275,7 +270,7 @@ function diferenciaTexto(valor: string, original: string | null): string | null 
       border-radius: 6px;
       background: #fdf8ef;
       color: #7a5a24;
-      font-size: 10.5px;
+      font-size: 13px;
     }
 
     .panel-confirmacion p {
@@ -302,12 +297,12 @@ function diferenciaTexto(valor: string, original: string | null): string | null 
 
     .panel-fuentes strong {
       color: #465a6c;
-      font-size: 10.5px;
+      font-size: 13px;
     }
 
     .panel-fuentes small {
       color: #97a1aa;
-      font-size: 9px;
+      font-size: 12px;
     }
 
     .panel-caso-lista {
@@ -339,13 +334,13 @@ function diferenciaTexto(valor: string, original: string | null): string | null 
 
     .panel-caso-codigo {
       color: var(--ink);
-      font-size: 10px;
+      font-size: 12.5px;
       font-weight: 700;
     }
 
     .panel-caso-titulo {
       color: var(--muted);
-      font-size: 9.5px;
+      font-size: 12px;
       line-height: 1.45;
     }
 

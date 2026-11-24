@@ -33,8 +33,10 @@ import { BarraSeleccionComponent } from '../../shared/ui/barra-seleccion.compone
 
 import { GlosarioComponent } from '../../shared/ui/glosario.component';
 import { IconoComponent } from '../../shared/ui/icono.component';
+import { OrdenTabla } from '../../shared/ui/orden-tabla';
 import { PaginacionComponent } from '../../shared/ui/paginacion.component';
 import { SeleccionTabla } from '../../shared/ui/seleccion-tabla';
+import { ThOrdenDirective } from '../../shared/ui/th-orden.directive';
 import {
   ESTADOS_COMPROMISO,
   NIVELES_GOBIERNO,
@@ -51,6 +53,7 @@ import {
   type Situacion,
 } from './compromiso.mapeo';
 import { CompromisoPanelComponent } from './compromiso-panel.component';
+import { MatrizEquipoComponent } from './matriz-equipo.component';
 
 type FiltrosCompromisos = {
   q: string;
@@ -69,7 +72,7 @@ const GENERO = [
   { valor: 'false', etiqueta: 'No atiende brecha de género' },
 ] as const;
 
-type ModoVista = 'tabla' | 'calendario' | 'resumen';
+type ModoVista = 'tabla' | 'calendario' | 'resumen' | 'matriz';
 
 /** Una fila del desglose: la etiqueta agrupada y cuántos compromisos suma. */
 type FilaDesglose = { etiqueta: string; total: number };
@@ -199,6 +202,8 @@ function totalDe(bruto: unknown): number {
     CompromisoPanelComponent,
     AnularPanelComponent,
     BarraSeleccionComponent,
+    MatrizEquipoComponent,
+    ThOrdenDirective,
   ],
   templateUrl: './compromisos.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -209,7 +214,7 @@ function totalDe(bruto: unknown): number {
     .aviso-ok {
       margin: 0;
       color: #2f6f52;
-      font-size: 11.5px;
+      font-size: 13.5px;
     }
     .fila-compromiso {
       cursor: pointer;
@@ -218,7 +223,7 @@ function totalDe(bruto: unknown): number {
     .fila-compromiso:focus-within {
       background: #fafbfc;
     }
-    .data-table td:first-child {
+    .data-table td:first-child:not(.col-seleccion) {
       min-width: 132px;
     }
     .celda-compromiso {
@@ -232,7 +237,7 @@ function totalDe(bruto: unknown): number {
       display: block;
       margin-top: 2px;
       color: #8d99a6;
-      font-size: 8px;
+      font-size: 12px;
     }
     .celda-vencimiento .due-state {
       margin-left: 4px;
@@ -253,13 +258,13 @@ function totalDe(bruto: unknown): number {
     }
     .calendario-titulo {
       margin: 0;
-      font-size: 15px;
+      font-size: 16px;
       color: #1c2a38;
     }
     .calendario-resumen {
       margin: 0 0 0 auto;
       color: #647487;
-      font-size: 10px;
+      font-size: 12.5px;
     }
     .calendario-aviso {
       margin: 0 0 10px;
@@ -268,7 +273,7 @@ function totalDe(bruto: unknown): number {
       border-radius: 6px;
       background: #fff8ec;
       color: #8a5a1f;
-      font-size: 10px;
+      font-size: 12.5px;
       line-height: 1.45;
     }
     /* Si la rejilla no cabe se desplaza en horizontal antes que apilar días. */
@@ -286,7 +291,7 @@ function totalDe(bruto: unknown): number {
       padding: 7px 6px;
       border-bottom: 1px solid #e6ecf1;
       color: #647487;
-      font-size: 9px;
+      font-size: 12px;
       font-weight: 700;
       text-align: center;
       text-transform: uppercase;
@@ -315,7 +320,7 @@ function totalDe(bruto: unknown): number {
       display: block;
       margin-bottom: 4px;
       color: #52677a;
-      font-size: 10px;
+      font-size: 12.5px;
       font-weight: 600;
     }
     .calendario-pastillas {
@@ -333,7 +338,7 @@ function totalDe(bruto: unknown): number {
       border: 0;
       border-left: 3px solid transparent;
       border-radius: 4px;
-      font-size: 8.5px;
+      font-size: 12px;
       line-height: 1.3;
       text-align: left;
       cursor: pointer;
@@ -362,7 +367,7 @@ function totalDe(bruto: unknown): number {
     }
     .calendario-pastilla-plazo {
       flex: none;
-      font-size: 8px;
+      font-size: 12px;
       font-weight: 700;
     }
     .calendario-mas {
@@ -370,7 +375,7 @@ function totalDe(bruto: unknown): number {
       border: 0;
       background: transparent;
       color: #1d4b86;
-      font-size: 8px;
+      font-size: 12px;
       font-weight: 600;
       text-align: left;
       cursor: pointer;
@@ -396,7 +401,7 @@ function totalDe(bruto: unknown): number {
     .desglose-card h3 {
       margin: 0 0 9px;
       color: var(--muted);
-      font-size: 9px;
+      font-size: 12px;
       font-weight: 700;
       letter-spacing: 0.05em;
       text-transform: uppercase;
@@ -414,7 +419,7 @@ function totalDe(bruto: unknown): number {
       grid-template-columns: minmax(0, 1fr) auto;
       align-items: center;
       gap: 3px 10px;
-      font-size: 10px;
+      font-size: 12.5px;
     }
     .desglose-etiqueta {
       overflow: hidden;
@@ -442,13 +447,13 @@ function totalDe(bruto: unknown): number {
     .desglose-cuenta small {
       margin-left: 3px;
       color: var(--muted);
-      font-size: 8.5px;
+      font-size: 12px;
       font-weight: 600;
     }
     .desglose-nota {
       margin: 0;
       color: var(--muted);
-      font-size: 9.5px;
+      font-size: 12px;
       line-height: 1.5;
     }
   `,
@@ -484,6 +489,25 @@ export class CompromisosPage {
 
   /** Selección de la tabla (página visible) para exportar o anular en lote. */
   readonly seleccion = new SeleccionTabla();
+
+  /** Orden local de la página visible. */
+  readonly orden = new OrdenTabla<Compromiso>();
+
+  private readonly accesoresCompromiso: Record<string, (compromiso: Compromiso) => unknown> = {
+    codigo: (compromiso) => compromiso.codigo,
+    compromiso: (compromiso) => compromiso.accion,
+    caso: (compromiso) => compromiso.casoCodigo,
+    tipo: (compromiso) => compromiso.tipo,
+    unidad: (compromiso) => compromiso.unidad,
+    estado: (compromiso) => compromiso.estado,
+    vencimiento: (compromiso) => compromiso.fechaVencimiento,
+    anulado: (compromiso) => compromiso.anuladoEn,
+    situacion: (compromiso) => this.situacion(compromiso).etiqueta,
+  };
+
+  readonly filasVisibles = computed(() =>
+    this.orden.ordenar(this.compromisos(), this.accesoresCompromiso),
+  );
 
   idsVisibles(): string[] {
     return this.compromisos()
@@ -577,6 +601,9 @@ export class CompromisosPage {
 
   /** El desglose tampoco: la papelera se lista como tabla de restauración. */
   readonly vistaResumen = computed(() => !this.verPapelera() && this.modo() === 'resumen');
+
+  /** La matriz del equipo (Anexo 15 × Anexo 14, formato A..X) tampoco lista la papelera. */
+  readonly vistaMatriz = computed(() => !this.verPapelera() && this.modo() === 'matriz');
 
   /**
    * Rejilla del mes visible, de lunes a domingo. Incluye los días de los meses

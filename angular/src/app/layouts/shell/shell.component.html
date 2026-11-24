@@ -111,7 +111,7 @@
             aria-controls="menu-registrar"
             (click)="alternarRegistrar()"
           >
-            Registrar
+            + Nuevo
           </button>
           @if (registrarAbierto()) {
             <div class="registrar-panel" id="menu-registrar" aria-label="Opciones de registro">
@@ -202,6 +202,15 @@
             @for (etiqueta of roles(); track etiqueta) {
               <span class="profile-menu-detail">{{ etiqueta }}</span>
             }
+            <a class="profile-menu-link" routerLink="/preferencias">
+              <app-icono nombre="ajustes" [tamano]="15" />
+              Preferencias
+            </a>
+            <a class="profile-menu-link" routerLink="/ayuda">
+              <app-icono nombre="ayuda" [tamano]="15" />
+              Ayuda y criterios
+            </a>
+            <div class="profile-menu-separador"></div>
             <button type="button" (click)="cerrarSesion()">
               <app-icono nombre="salir" [tamano]="15" />
               Cerrar sesión
@@ -236,24 +245,6 @@
 
       <div class="sidebar-bottom">
         <div class="sidebar-rule"></div>
-        <a class="side-nav" routerLink="/ayuda" routerLinkActive="selected">
-          <app-icono nombre="ayuda" [tamano]="17" />
-          <span>Ayuda y criterios</span>
-        </a>
-        <a class="side-nav" routerLink="/preferencias" routerLinkActive="selected">
-          <app-icono nombre="ajustes" [tamano]="17" />
-          <span>Preferencias</span>
-        </a>
-        <div class="environment-card">
-          <span class="environment-mark">
-            <app-icono nombre="actividad" [tamano]="15" />
-          </span>
-          <div>
-            <strong>Entorno</strong>
-            <small>Base institucional</small>
-          </div>
-          <span class="environment-dot"></span>
-        </div>
         <div class="sidebar-version">AVISA <span>·</span> v{{ version }}</div>
       </div>
     </aside>

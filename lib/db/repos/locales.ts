@@ -17,6 +17,8 @@ const LOCAL_SELECT = `
   l.nombre,
   l.distrito_id,
   d.nombre as distrito,
+  p.nombre as provincia,
+  rg.nombre as region,
   l.direccion,
   l.ubicacion_ref,
   l.aforo,
@@ -35,6 +37,8 @@ const LOCAL_SELECT = `
 const LOCAL_FROM = `
   from core.locales l
   left join core.distritos d on d.id = l.distrito_id
+  left join core.provincias p on p.id = d.provincia_id
+  left join core.regiones rg on rg.id = p.region_id
 `;
 
 export type LocalListQuery = {
@@ -56,8 +60,13 @@ export type LocalListItem = {
   codigo: string;
   nombre: string;
   distritoId: number | null;
-  /** Nombre del distrito resuelto por la clave ajena; `null` si no tiene. */
+  /**
+   * Distrito, provincia y región se resuelven por la cadena local → distrito →
+   * provincia → región; `null` si el local no tiene distrito asignado.
+   */
   distrito: string | null;
+  provincia: string | null;
+  region: string | null;
   direccion: string | null;
   ubicacionRef: string | null;
   aforo: number | null;
@@ -88,6 +97,8 @@ function mapLocal(row: Record<string, unknown>): LocalListItem {
     nombre: row.nombre as string,
     distritoId: row.distrito_id as number | null,
     distrito: row.distrito as string | null,
+    provincia: row.provincia as string | null,
+    region: row.region as string | null,
     direccion: row.direccion as string | null,
     ubicacionRef: row.ubicacion_ref as string | null,
     aforo: row.aforo as number | null,
@@ -128,7 +139,7 @@ export async function listLocales(
   if (search) {
     const like = bind(`%${search}%`);
     where.push(
-      `(l.nombre ilike ${like} or l.codigo ilike ${like} or coalesce(l.direccion, '') ilike ${like} or coalesce(d.nombre, '') ilike ${like})`,
+      `(core.normalizar_ref(l.nombre) like core.normalizar_ref(${like}) or core.normalizar_ref(l.codigo) like core.normalizar_ref(${like}) or core.normalizar_ref(coalesce(l.direccion, '')) like core.normalizar_ref(${like}) or core.normalizar_ref(coalesce(d.nombre, '')) like core.normalizar_ref(${like}))`,
     );
   }
 

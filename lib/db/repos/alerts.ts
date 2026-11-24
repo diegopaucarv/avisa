@@ -302,7 +302,7 @@ export async function listAlerts(
   if (search) {
     const like = bind(`%${search}%`);
     where.push(
-      `(a.codigo_alerta ilike ${like} or a.titulo ilike ${like} or coalesce(a.descripcion_riesgo, '') ilike ${like})`,
+      `(core.normalizar_ref(a.codigo_alerta) like core.normalizar_ref(${like}) or core.normalizar_ref(a.titulo) like core.normalizar_ref(${like}) or core.normalizar_ref(coalesce(a.descripcion_riesgo, '')) like core.normalizar_ref(${like}))`,
     );
   }
   if (query.caso) where.push(`c.codigo_caso = ${bind(query.caso)}`);

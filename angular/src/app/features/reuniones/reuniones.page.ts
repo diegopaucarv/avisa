@@ -19,12 +19,7 @@ type Canal = 'whatsapp' | 'correo';
     <section class="view-body" aria-labelledby="titulo-reuniones">
       <header class="view-head">
         <div>
-          <p class="section-eyebrow">INTERVENCIÓN</p>
           <h1 id="titulo-reuniones">Reuniones</h1>
-          <p class="view-subtitle">
-            Convocatoria, mensajes a participantes y registro de la reunión de diálogo. El acta y la
-            ayuda memoria se guardan en Resultados.
-          </p>
         </div>
         <div class="view-actions">
           <a class="button-secondary" routerLink="/resultados">Ver resultados</a>
@@ -34,7 +29,6 @@ type Canal = 'whatsapp' | 'correo';
       <section class="surface panel" aria-labelledby="titulo-mensaje">
         <div class="surface-heading">
           <div>
-            <p class="section-eyebrow">CONVOCATORIA</p>
             <h3 id="titulo-mensaje">Enviar mensaje a participantes</h3>
             <p>
               El mensaje se envía desde su WhatsApp o su cliente de correo. No se toman contactos de
@@ -133,7 +127,6 @@ type Canal = 'whatsapp' | 'correo';
       <section class="surface panel" aria-labelledby="titulo-listado">
         <div class="surface-heading">
           <div>
-            <p class="section-eyebrow">REGISTRO</p>
             <h3 id="titulo-listado">Reuniones registradas</h3>
             <p>Programadas y realizadas, con su acta vinculada cuando exista.</p>
           </div>
@@ -164,8 +157,8 @@ type Canal = 'whatsapp' | 'correo';
     .campo {
       display: grid;
       gap: 5px;
-      color: #465a6c;
-      font-size: 11px;
+      color: var(--ink-2);
+      font-size: 13px;
       font-weight: 600;
     }
 
@@ -173,10 +166,10 @@ type Canal = 'whatsapp' | 'correo';
     .campo textarea {
       min-width: 0;
       padding: 8px 10px;
-      border: 1px solid #cfd9e2;
+      border: 1px solid var(--line);
       border-radius: 6px;
-      background: #fff;
-      color: #26384a;
+      background: var(--paper, #fff);
+      color: var(--ink);
       font: inherit;
       font-weight: 400;
     }
@@ -201,8 +194,8 @@ type Canal = 'whatsapp' | 'correo';
 
     .compositor-aviso {
       margin: 0;
-      color: #7b8896;
-      font-size: 10.5px;
+      color: var(--muted);
+      font-size: 13px;
     }
 
     .compositor-pie a {

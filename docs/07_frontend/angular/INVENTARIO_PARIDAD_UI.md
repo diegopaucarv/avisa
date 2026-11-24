@@ -530,6 +530,10 @@ servicio Angular + `localStorage`, con valor inicial seguro para SSR.
 
 ## 6.10 Mapa territorial
 
+> **Superado (2026-11-24).** El aplazamiento se levantó: `/mapa` está implementada y dibuja la capa
+> distrital cargada. La checklist queda como referencia de lo que aún no se hace (nube de puntos,
+> agrupación, cronología espacial); no se documenta fórmula de calibración de riesgo.
+>
 > **Aplazado por decisión del usuario (2026-11-22)** hasta que exista el dataset de ubigeo/centroide.
 > La ruta `/mapa` sigue en marcador; no se documentan coordenadas ni una fórmula de calibración de
 > riesgo. La checklist queda como referencia para cuando se reabra.
@@ -543,7 +547,7 @@ servicio Angular + `localStorage`, con valor inicial seguro para SSR.
 - [ ] Cronología espacial — **M**
 - [ ] Overlay de vacío — **S**
 - [ ] Aviso «Mapa demostrativo» — **S**
-- [ ] **Observación:** el mapa queda aplazado hasta que exista el dataset de ubigeo/centroide; no se fija aquí ninguna coordenada — **S**
+- [ ] **Observación:** el mapa ya no está aplazado (2026-11-24); sigue sin fijarse aquí ninguna coordenada ni fórmula de riesgo — **S**
 
 ## 6.11 Resumen de Dirección
 

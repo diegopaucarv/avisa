@@ -1,615 +1,1814 @@
-<!DOCTYPE html>
+<!doctype html>
 
-<html class="dark" lang="es"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={"darkMode":"class","theme":{"extend":{"colors":{"error-container":"#93000a","surface-container-highest":"#2d353f","primary":"#a8c8ff","secondary":"#45dfa4","secondary-fixed-dim":"#45dfa4","surface-dim":"#0c141d","inverse-primary":"#115eaf","primary-fixed-dim":"#a8c8ff","on-primary-container":"#003c76","tertiary":"#cebdff","on-error":"#690005","error":"#ffb4ab","primary-container":"#6ea8fe","tertiary-container":"#b196ff","surface-container-low":"#141c25","on-primary-fixed-variant":"#004689","on-tertiary-container":"#442491","surface-container-lowest":"#070f18","on-tertiary":"#381385","on-tertiary-fixed-variant":"#4f319c","inverse-on-surface":"#29313b","on-background":"#dbe3f0","on-secondary-fixed":"#002114","inverse-surface":"#dbe3f0","on-secondary-fixed-variant":"#005137","surface-container-high":"#232b34","surface-tint":"#a8c8ff","primary-fixed":"#d5e3ff","outline":"#8c919d","surface":"#0c141d","surface-container":"#18202a","on-secondary":"#003825","secondary-container":"#00bd85","on-primary":"#003061","background":"#0c141d","outline-variant":"#424751","on-tertiary-fixed":"#21005e","on-surface-variant":"#c2c6d3","tertiary-fixed-dim":"#cebdff","on-surface":"#dbe3f0","on-secondary-container":"#00452e","surface-variant":"#2d353f","surface-bright":"#323a44","on-error-container":"#ffdad6","secondary-fixed":"#68fcbf","tertiary-fixed":"#e8ddff","on-primary-fixed":"#001b3c"},"borderRadius":{"DEFAULT":"0.125rem","lg":"0.25rem","xl":"0.5rem","full":"0.75rem"},"spacing":{"space-md":"0.75rem","space-sm":"0.5rem","margin-desktop":"2rem","gutter-desktop":"1.5rem","gutter":"1rem","space-lg":"1rem","space-xs":"0.25rem","margin":"1rem","space-xl":"1.5rem"},"fontFamily":{"display-lg-mobile":["Inter"],"label-sm":["Inter"],"headline-lg":["Inter"],"body-sm":["Inter"],"headline-md":["Inter"],"headline-sm":["Inter"],"title-md":["Inter"],"display-lg":["Inter"],"body-md":["Inter"],"body-lg":["Inter"],"data-tabular":["Inter"],"label-md":["Inter"]},"fontSize":{"display-lg-mobile":["24px",{"lineHeight":"32px","letterSpacing":"-0.01em","fontWeight":"700"}],"label-sm":["11px",{"lineHeight":"14px","letterSpacing":"0.03em","fontWeight":"500"}],"headline-lg":["24px",{"lineHeight":"32px","letterSpacing":"-0.01em","fontWeight":"600"}],"body-sm":["13px",{"lineHeight":"18px","fontWeight":"400"}],"headline-md":["20px",{"lineHeight":"28px","fontWeight":"600"}],"headline-sm":["16px",{"lineHeight":"24px","fontWeight":"600"}],"title-md":["14px",{"lineHeight":"20px","fontWeight":"600"}],"display-lg":["32px",{"lineHeight":"40px","letterSpacing":"-0.02em","fontWeight":"700"}],"body-md":["14px",{"lineHeight":"20px","fontWeight":"400"}],"body-lg":["16px",{"lineHeight":"24px","fontWeight":"400"}],"data-tabular":["13px",{"lineHeight":"18px","letterSpacing":"0","fontWeight":"500"}],"label-md":["12px",{"lineHeight":"16px","letterSpacing":"0.02em","fontWeight":"600"}]}}}};</script></head><body class="bg-background font-body-md text-on-surface antialiased min-h-screen"><aside class="fixed left-0 top-0 h-screen w-72 bg-surface-container-low z-50 flex flex-col justify-between shadow-[0_1px_8px_rgba(0,0,0,0.4)]"><div class="flex flex-col flex-1 overflow-y-auto"><div class="p-space-lg bg-surface-container-lowest"><div class="flex items-center gap-space-sm"><div class="w-8 h-8 rounded-lg bg-primary-container text-on-primary-container flex items-center justify-center font-headline-sm text-headline-sm font-bold">A</div><div><div class="font-headline-sm text-headline-sm font-semibold text-on-surface tracking-tight leading-none">AVISA <span class="text-primary font-label-sm text-label-sm">v2.4</span></div><div class="font-label-sm text-label-sm text-on-surface-variant truncate mt-space-xs">OAIPCS · PRODUCE - Perú</div></div></div></div><nav class="flex-1 px-space-md py-space-md space-y-space-md" data-active-classes="bg-surface-container-highest text-primary font-title-md"><div class="space-y-space-xs"><div class="px-space-sm py-space-xs font-label-md text-label-md text-outline uppercase tracking-wider">MI ESPACIO</div><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg font-body-sm text-body-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="panorama-territorial" href="#"><span class="material-symbols-outlined text-[18px]">public</span><span>Panorama territorial</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg font-body-sm text-body-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="resumen-operativo" href="#"><span class="material-symbols-outlined text-[18px]">insights</span><span>Resumen operativo</span></a><a class="flex items-center justify-between px-space-md py-space-sm rounded-lg font-body-sm text-body-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="bandeja-de-trabajo" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-[18px]">inbox</span><span>Bandeja de trabajo</span></div><span class="px-space-xs py-0.5 rounded font-label-sm text-label-sm bg-error text-on-error font-medium">12</span></a></div><div class="space-y-space-xs"><div class="px-space-sm py-space-xs font-label-md text-label-md text-outline uppercase tracking-wider">SEGUIMIENTO</div><a aria-current="page" class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg transition-colors bg-surface-container-highest text-primary font-title-md" data-path="casos" href="#"><span class="material-symbols-outlined text-[18px]">gavel</span><span>Casos</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg font-body-sm text-body-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="alertas-tempranas" href="#"><span class="material-symbols-outlined text-[18px]">warning</span><span>Alertas tempranas</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg font-body-sm text-body-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="compromisos" href="#"><span class="material-symbols-outlined text-[18px]">handshake</span><span>Compromisos</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg font-body-sm text-body-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="documentos" href="#"><span class="material-symbols-outlined text-[18px]">description</span><span>Documentos</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg font-body-sm text-body-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="reportes" href="#"><span class="material-symbols-outlined text-[18px]">bar_chart</span><span>Reportes</span></a></div><div class="space-y-space-xs"><div class="px-space-sm py-space-xs font-label-md text-label-md text-outline uppercase tracking-wider">DIRECTORIO</div><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg font-body-sm text-body-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="actores" href="#"><span class="material-symbols-outlined text-[18px]">groups</span><span>Actores</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg font-body-sm text-body-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="locales" href="#"><span class="material-symbols-outlined text-[18px]">location_city</span><span>Locales</span></a></div></nav></div><div class="p-space-md bg-surface-container-lowest"><div class="flex items-center justify-between text-on-surface-variant font-label-sm text-label-sm"><span>Servidor Sede Central</span><span class="w-2 h-2 rounded-full bg-secondary"></span></div><div class="font-label-sm text-label-sm text-outline mt-space-xs">OAIPCS • PRODUCE © 2025</div></div></aside><div class="pl-72 flex flex-col min-h-screen"><header class="fixed top-0 left-72 right-0 h-16 bg-surface-container/90 backdrop-blur-xl z-40 shadow-[0_1px_8px_rgba(0,0,0,0.3)]"><div class="h-16 w-full px-gutter-desktop flex items-center justify-between gap-space-lg"><div class="flex items-center gap-space-lg min-w-max"><div class="flex flex-col"><span class="font-label-sm text-label-sm font-semibold tracking-wider text-outline uppercase">MINISTERIO DE LA PRODUCCIÓN • PERÚ</span><span class="font-title-md text-title-md text-on-surface">Vigilancia y Prevención de Conflictos</span></div><div class="flex items-center gap-space-xs px-space-sm py-0.5 rounded-full bg-surface-container-highest text-secondary font-label-sm text-label-sm"><span class="inline-block w-2 h-2 rounded-full bg-secondary animate-pulse"></span><span>Vigía Operativo Activo</span></div></div><div class="flex-1 max-w-xl mx-auto"><div class="relative flex items-center w-full"><span class="material-symbols-outlined absolute left-space-md text-outline text-[18px] pointer-events-none">search</span><input class="w-full h-9 pl-10 pr-space-md rounded-lg bg-surface-container-lowest text-on-surface font-body-sm text-body-sm placeholder:text-outline focus:outline-none focus:ring-1 focus:ring-primary" placeholder="Buscar alerta, caso o RUC..." type="text"/></div></div><div class="flex items-center gap-space-md"><button class="p-space-xs text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high rounded transition-colors" title="Configuración y Filtros" type="button"><span class="material-symbols-outlined text-[20px]">tune</span></button><button class="relative p-space-xs text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high rounded transition-colors" title="Notificaciones" type="button"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-1 right-1 w-2 h-2 rounded-full bg-error"></span></button><div class="h-6 w-px bg-outline-variant"></div><div class="flex items-center gap-space-sm pl-space-xs"><div class="text-right hidden xl:block"><div class="font-title-md text-title-md text-on-surface leading-tight">Ing. R. Huamán</div><div class="font-label-sm text-label-sm text-on-surface-variant leading-tight">Especialista OAIPCS</div></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></div></header><main class="w-full pt-16 flex-1 bg-surface"><div class="flex flex-col w-full">
-<!-- Content Canvas Area -->
-<div class="w-full max-w-[1920px] mx-auto px-gutter-desktop py-space-xl space-y-space-lg">
-<!-- Top Action Bar / Page Header -->
-<div class="flex flex-col md:flex-row md:items-center justify-between gap-space-md">
-<div class="flex items-center gap-space-md">
-<h1 class="font-headline-lg text-headline-lg font-bold text-on-surface tracking-tight">Casos</h1>
-<span class="inline-flex items-center px-space-sm py-0.5 rounded-full bg-surface-container-highest font-label-md text-label-md text-primary font-medium">
-          34 Registrados
-        </span>
-</div>
-<div class="flex items-center gap-space-sm self-end md:self-auto">
-<!-- Export Dropdown -->
-<div class="relative inline-block text-left" id="exportMenuWrapper">
-<button class="inline-flex items-center gap-space-xs px-space-md h-9 rounded-lg bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-title-md text-title-md transition-colors shadow-sm" onclick="toggleExportMenu()" type="button">
-<span class="material-symbols-outlined text-[18px] text-outline">file_download</span>
-<span>Exportar</span>
-<span class="material-symbols-outlined text-[18px] text-outline">arrow_drop_down</span>
-</button>
-<div class="hidden absolute right-0 mt-space-xs w-48 rounded-lg bg-surface-container-high shadow-xl py-space-xs z-30" id="exportDropdown">
-<a class="flex items-center gap-space-sm px-space-md py-space-xs font-body-sm text-body-sm text-on-surface hover:bg-surface-container-highest transition-colors" href="#">
-<span class="material-symbols-outlined text-[16px] text-secondary">table_view</span> Formato Excel (.xlsx)
-            </a>
-<a class="flex items-center gap-space-sm px-space-md py-space-xs font-body-sm text-body-sm text-on-surface hover:bg-surface-container-highest transition-colors" href="#">
-<span class="material-symbols-outlined text-[16px] text-error">picture_as_pdf</span> Resumen Ejecutivo (PDF)
-            </a>
-<a class="flex items-center gap-space-sm px-space-md py-space-xs font-body-sm text-body-sm text-on-surface hover:bg-surface-container-highest transition-colors" href="#">
-<span class="material-symbols-outlined text-[16px] text-primary">data_object</span> Dataset JSON (API)
-            </a>
-</div>
-</div>
-<!-- New Case Action -->
-<button class="inline-flex items-center gap-space-xs px-space-md h-9 rounded-lg bg-primary-container text-on-primary-container hover:bg-primary font-title-md text-title-md transition-colors shadow-sm font-semibold" onclick="openModal('modal-nuevo-caso')" type="button">
-<span class="material-symbols-outlined text-[20px]">add</span>
-<span>Nuevo caso</span>
-</button>
-</div>
-</div>
-<!-- Filter & View Controls Bar -->
-<div class="p-space-md rounded-xl bg-surface-container-low shadow-sm flex flex-col xl:flex-row xl:items-center justify-between gap-space-md">
-<div class="flex flex-wrap items-center gap-space-sm flex-1">
-<!-- View Selector: Tarjetas / Tabla -->
-<div class="relative min-w-[140px]">
-<div class="relative flex items-center">
-<span class="material-symbols-outlined absolute left-space-sm text-[18px] text-primary pointer-events-none">grid_view</span>
-<select aria-label="Seleccionar Vista" class="w-full h-9 pl-8 pr-8 rounded-lg bg-surface-container-lowest text-on-surface font-title-md text-title-md appearance-none focus:outline-none focus:bg-surface-container-highest transition-colors cursor-pointer">
-<option selected="" value="tarjetas">Vista: Tarjetas</option>
-<option value="tabla">Vista: Tabla</option>
-</select>
-<span class="material-symbols-outlined absolute right-space-xs text-[18px] text-outline pointer-events-none">expand_more</span>
-</div>
-</div>
-<!-- Search Input by Keyword -->
-<div class="relative flex-1 min-w-[220px]">
-<span class="material-symbols-outlined absolute left-space-md text-[18px] text-outline pointer-events-none top-2.5">search</span>
-<input class="w-full h-9 pl-9 pr-space-md rounded-lg bg-surface-container-lowest text-on-surface font-body-sm text-body-sm placeholder:text-outline focus:outline-none focus:bg-surface-container-highest transition-colors" id="filterInput" onkeyup="filterCards()" placeholder="Buscar por palabra clave..." type="text"/>
-</div>
-<!-- Conflictivity Level Select -->
-<div class="relative min-w-[190px]">
-<div class="relative flex items-center">
-<select aria-label="Nivel de Conflictividad" class="w-full h-9 px-space-md pr-8 rounded-lg bg-surface-container-lowest text-on-surface font-body-sm text-body-sm appearance-none focus:outline-none focus:bg-surface-container-highest transition-colors cursor-pointer">
-<option value="">Nivel de conflictividad: Todos</option>
-<option value="diferencia">Diferencia</option>
-<option value="controversia">Controversia</option>
-<option value="conflicto">Conflicto social</option>
-<option value="crisis">Crisis social</option>
-</select>
-<span class="material-symbols-outlined absolute right-space-xs text-[18px] text-outline pointer-events-none">expand_more</span>
-</div>
-</div>
-<!-- Region Select -->
-<div class="relative min-w-[130px]">
-<div class="relative flex items-center">
-<select aria-label="Región" class="w-full h-9 px-space-md pr-8 rounded-lg bg-surface-container-lowest text-on-surface font-body-sm text-body-sm appearance-none focus:outline-none focus:bg-surface-container-highest transition-colors cursor-pointer">
-<option value="">Región: Todas</option>
-<option value="piura">Piura</option>
-<option value="lima">Lima</option>
-<option value="junin">Junín</option>
-<option value="tumbes">Tumbes</option>
-<option value="ica">Ica</option>
-<option value="ancash">Áncash</option>
-<option value="moquegua">Moquegua</option>
-</select>
-<span class="material-symbols-outlined absolute right-space-xs text-[18px] text-outline pointer-events-none">expand_more</span>
-</div>
-</div>
-<!-- Thematic Select -->
-<div class="relative min-w-[140px]">
-<div class="relative flex items-center">
-<select aria-label="Temática" class="w-full h-9 px-space-md pr-8 rounded-lg bg-surface-container-lowest text-on-surface font-body-sm text-body-sm appearance-none focus:outline-none focus:bg-surface-container-highest transition-colors cursor-pointer">
-<option value="">Temática: Todas</option>
-<option value="ordenamiento">Ordenamiento y acceso</option>
-<option value="impacto">Impacto socioambiental</option>
-<option value="infraestructura">Infraestructura pesquera</option>
-<option value="sanitario">Sanidad y fiscalización</option>
-<option value="laboral">MYPE y formalización</option>
-</select>
-<span class="material-symbols-outlined absolute right-space-xs text-[18px] text-outline pointer-events-none">expand_more</span>
-</div>
-</div>
-</div>
-<!-- Advanced Search Trigger -->
-<button class="inline-flex items-center gap-space-xs text-primary font-title-md text-title-md hover:underline py-space-xs px-space-sm rounded transition-colors whitespace-nowrap self-start xl:self-auto" onclick="toggleAdvancedSearch()" type="button">
-<span class="material-symbols-outlined text-[18px]">tune</span>
-<span>Búsqueda avanzada</span>
-</button>
-</div>
-<!-- Collapsible Advanced Search Box -->
-<div class="hidden p-space-lg rounded-xl bg-surface-container-low shadow-sm" id="advancedSearchBox">
-<div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-space-md">
-<div>
-<label class="block font-label-sm text-label-sm text-outline mb-space-xs uppercase">Rango de Fechas (Actualización)</label>
-<input class="w-full h-9 px-space-md rounded-lg bg-surface-container-lowest text-on-surface font-body-sm text-body-sm focus:outline-none focus:bg-surface-container-highest" type="date"/>
-</div>
-<div>
-<label class="block font-label-sm text-label-sm text-outline mb-space-xs uppercase">Unidad Responsable</label>
-<select aria-label="Unidad Responsable" class="w-full h-9 px-space-md rounded-lg bg-surface-container-lowest text-on-surface font-body-sm text-body-sm focus:outline-none focus:bg-surface-container-highest">
-<option>Todas las unidades</option>
-<option>OAIPCS - Sede Central</option>
-<option>DGSFS-PA - Fiscalización</option>
-<option>FONDEPES - Infraestructura</option>
-<option>PRODUCE - Despacho Viceministerial</option>
-</select>
-</div>
-<div>
-<label class="block font-label-sm text-label-sm text-outline mb-space-xs uppercase">Nivel de Riesgo</label>
-<select aria-label="Nivel de Riesgo" class="w-full h-9 px-space-md rounded-lg bg-surface-container-lowest text-on-surface font-body-sm text-body-sm focus:outline-none focus:bg-surface-container-highest">
-<option>Cualquier nivel de riesgo</option>
-<option>Alto</option>
-<option>Moderado</option>
-<option>Bajo</option>
-</select>
-</div>
-<div>
-<label class="block font-label-sm text-label-sm text-outline mb-space-xs uppercase">Actor Involucrado</label>
-<input class="w-full h-9 px-space-md rounded-lg bg-surface-container-lowest text-on-surface font-body-sm text-body-sm placeholder:text-outline focus:outline-none focus:bg-surface-container-highest" placeholder="Ej. SUMOPP, Gremio Chilca..." type="text"/>
-</div>
-</div>
-<div class="mt-space-md flex justify-end gap-space-sm">
-<button class="px-space-md py-space-xs font-label-md text-label-md text-on-surface-variant hover:text-on-surface" onclick="toggleAdvancedSearch()" type="button">Cerrar</button>
-<button class="px-space-md py-space-xs rounded-lg bg-primary-container text-on-primary-container font-title-md text-title-md font-semibold" type="button">Aplicar filtros</button>
-</div>
-</div>
-<!-- Small Multiples Cases Grid (Tufte-inspired consistent visual hierarchy) -->
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-space-lg" id="casesGrid">
-<!-- Card 1 -->
-<div class="case-card group cursor-pointer flex flex-col justify-between p-space-lg rounded-xl bg-surface-container-low hover:bg-surface-container transition-all shadow-sm hover:shadow-xl" onclick="openCaseModal('CS-PA-OAT-2026-04', 'Demanda de cancelación de la temporada de pesca de anchoveta por captura juvenil', 'Piura', 'Moderado', '18 nov 2026', 'Diversos gremios del sector pesquero exigen la suspensión preventiva ante reportes de alta incidencia de juveniles en la zona norte-centro. Solicitan inspección técnica de IMARPE y mesa de diálogo bilateral...')">
-<div class="space-y-space-sm">
-<!-- Metadata Header: Code & Region Only (No subsector) -->
-<div class="flex items-center justify-between text-outline">
-<span class="font-data-tabular text-data-tabular tracking-wide font-mono">CS-PA-OAT-2026-04</span>
-<div class="flex items-center gap-space-xs font-title-md text-title-md font-semibold text-primary">
-<span class="material-symbols-outlined text-[16px]">location_on</span>
-<span>Piura</span>
-</div>
-</div>
-<!-- Case Title -->
-<h2 class="font-headline-sm text-headline-sm text-on-surface group-hover:text-primary transition-colors leading-snug">
-            Demanda de cancelación de la temporada de pesca de anchoveta por captura juvenil
-          </h2>
-<!-- Synthesized Summary: Strictly 2 to 3 lines with ellipsis -->
-<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-3 leading-relaxed">
-            Diversos gremios del sector pesquero exigen la suspensión preventiva ante reportes de alta incidencia de juveniles en la zona norte-centro. Solicitan inspección técnica de IMARPE y mesa de diálogo bilateral...
-          </p>
-</div>
-<!-- Footer Area: Distinct Risk Badge & Standardized Date -->
-<div class="pt-space-md mt-space-md flex items-center justify-between">
-<span class="inline-flex items-center gap-space-xs px-space-sm py-1 rounded bg-amber-500/10 text-amber-400 font-label-md text-label-md font-semibold">
-<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
-            Riesgo: Moderado
-          </span>
-<span class="font-label-sm text-label-sm text-outline font-medium tracking-tight">
-            Actualización: 18 nov 2026
-          </span>
-</div>
-</div>
-<!-- Card 2 -->
-<div class="case-card group cursor-pointer flex flex-col justify-between p-space-lg rounded-xl bg-surface-container-low hover:bg-surface-container transition-all shadow-sm hover:shadow-xl" onclick="openCaseModal('CS-MI-ITE-2026-03', 'Participación ciudadana en el EIA-d del proyecto Aceros Americanos (Chilca)', 'Lima', 'Bajo', '15 nov 2026', 'Vecinos y organizaciones sociales de Chilca manifiestan disconformidad con los horarios y mecanismos de audiencia pública. OAIPCS articula con la Dirección General de Asuntos Ambientales para reprogramación preventiva...')">
-<div class="space-y-space-sm">
-<div class="flex items-center justify-between text-outline">
-<span class="font-data-tabular text-data-tabular tracking-wide font-mono">CS-MI-ITE-2026-03</span>
-<div class="flex items-center gap-space-xs font-title-md text-title-md font-semibold text-primary">
-<span class="material-symbols-outlined text-[16px]">location_on</span>
-<span>Lima</span>
-</div>
-</div>
-<h2 class="font-headline-sm text-headline-sm text-on-surface group-hover:text-primary transition-colors leading-snug">
-            Participación ciudadana en el EIA-d del proyecto Aceros Americanos (Chilca)
-          </h2>
-<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-3 leading-relaxed">
-            Vecinos y organizaciones sociales de Chilca manifiestan disconformidad con los horarios y mecanismos de audiencia pública. OAIPCS articula con la Dirección General de Asuntos Ambientales para reprogramación preventiva...
-          </p>
-</div>
-<div class="pt-space-md mt-space-md flex items-center justify-between">
-<span class="inline-flex items-center gap-space-xs px-space-sm py-1 rounded bg-secondary/10 text-secondary font-label-md text-label-md font-semibold">
-<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
-            Riesgo: Bajo
-          </span>
-<span class="font-label-sm text-label-sm text-outline font-medium tracking-tight">
-            Actualización: 15 nov 2026
-          </span>
-</div>
-</div>
-<!-- Card 3 -->
-<div class="case-card group cursor-pointer flex flex-col justify-between p-space-lg rounded-xl bg-surface-container-low hover:bg-surface-container transition-all shadow-sm hover:shadow-xl" onclick="openCaseModal('CS-PA-ITE-2026-03', 'Mortandad masiva de truchas en piscigranjas de Pariahuanca', 'Junín', 'Alto', '12 nov 2026', 'Productores acuícolas denuncian presunta afectación hídrica por efluentes y exigen fiscalización ambiental inmediata de SANIPES y OEFA para mitigar pérdidas económicas en el corredor trutícola...')">
-<div class="space-y-space-sm">
-<div class="flex items-center justify-between text-outline">
-<span class="font-data-tabular text-data-tabular tracking-wide font-mono">CS-PA-ITE-2026-03</span>
-<div class="flex items-center gap-space-xs font-title-md text-title-md font-semibold text-primary">
-<span class="material-symbols-outlined text-[16px]">location_on</span>
-<span>Junín</span>
-</div>
-</div>
-<h2 class="font-headline-sm text-headline-sm text-on-surface group-hover:text-primary transition-colors leading-snug">
-            Mortandad masiva de truchas en piscigranjas de Pariahuanca
-          </h2>
-<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-3 leading-relaxed">
-            Productores acuícolas denuncian presunta afectación hídrica por efluentes y exigen fiscalización ambiental inmediata de SANIPES y OEFA para mitigar pérdidas económicas en el corredor trutícola...
-          </p>
-</div>
-<div class="pt-space-md mt-space-md flex items-center justify-between">
-<span class="inline-flex items-center gap-space-xs px-space-sm py-1 rounded bg-error/15 text-error font-label-md text-label-md font-semibold">
-<span class="w-1.5 h-1.5 rounded-full bg-error"></span>
-            Riesgo: Alto
-          </span>
-<span class="font-label-sm text-label-sm text-outline font-medium tracking-tight">
-            Actualización: 12 nov 2026
-          </span>
-</div>
-</div>
-<!-- Card 4 -->
-<div class="case-card group cursor-pointer flex flex-col justify-between p-space-lg rounded-xl bg-surface-container-low hover:bg-surface-container transition-all shadow-sm hover:shadow-xl" onclick="openCaseModal('CS-PA-OAT-2026-03', 'Delimitación de las 5 millas marinas y pesca ilegal de arrastre de fondo', 'Tumbes', 'Alto', '10 nov 2026', 'Gremios de pescadores artesanales de Puerto Pizarro y Cancas denuncian incursión reiterada de bolicheras y barcos de arrastre dentro de la reserva marina protegida, demandando operativos conjuntos de DICAPI...')">
-<div class="space-y-space-sm">
-<div class="flex items-center justify-between text-outline">
-<span class="font-data-tabular text-data-tabular tracking-wide font-mono">CS-PA-OAT-2026-03</span>
-<div class="flex items-center gap-space-xs font-title-md text-title-md font-semibold text-primary">
-<span class="material-symbols-outlined text-[16px]">location_on</span>
-<span>Tumbes</span>
-</div>
-</div>
-<h2 class="font-headline-sm text-headline-sm text-on-surface group-hover:text-primary transition-colors leading-snug">
-            Delimitación de las 5 millas marinas y pesca ilegal de arrastre de fondo
-          </h2>
-<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-3 leading-relaxed">
-            Gremios de pescadores artesanales de Puerto Pizarro y Cancas denuncian incursión reiterada de bolicheras y barcos de arrastre dentro de la reserva marina protegida, demandando operativos conjuntos de DICAPI...
-          </p>
-</div>
-<div class="pt-space-md mt-space-md flex items-center justify-between">
-<span class="inline-flex items-center gap-space-xs px-space-sm py-1 rounded bg-error/15 text-error font-label-md text-label-md font-semibold">
-<span class="w-1.5 h-1.5 rounded-full bg-error"></span>
-            Riesgo: Alto
-          </span>
-<span class="font-label-sm text-label-sm text-outline font-medium tracking-tight">
-            Actualización: 10 nov 2026
-          </span>
-</div>
-</div>
-<!-- Card 5 -->
-<div class="case-card group cursor-pointer flex flex-col justify-between p-space-lg rounded-xl bg-surface-container-low hover:bg-surface-container transition-all shadow-sm hover:shadow-xl" onclick="openCaseModal('CS-IN-NOR-2026-01', 'Actualización del protocolo sanitario de descargas en bahía de Paracas', 'Ica', 'Bajo', '08 nov 2026', 'Mesas de trabajo técnico entre plantas conserveras y SANIPES para estandarizar límites máximos permisibles en vertimientos, acordando cronograma de adecuación tecnológica progresiva sin paro de operaciones...')">
-<div class="space-y-space-sm">
-<div class="flex items-center justify-between text-outline">
-<span class="font-data-tabular text-data-tabular tracking-wide font-mono">CS-IN-NOR-2026-01</span>
-<div class="flex items-center gap-space-xs font-title-md text-title-md font-semibold text-primary">
-<span class="material-symbols-outlined text-[16px]">location_on</span>
-<span>Ica</span>
-</div>
-</div>
-<h2 class="font-headline-sm text-headline-sm text-on-surface group-hover:text-primary transition-colors leading-snug">
-            Actualización del protocolo sanitario de descargas en bahía de Paracas
-          </h2>
-<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-3 leading-relaxed">
-            Mesas de trabajo técnico entre plantas conserveras y SANIPES para estandarizar límites máximos permisibles en vertimientos, acordando cronograma de adecuación tecnológica progresiva sin paro de operaciones...
-          </p>
-</div>
-<div class="pt-space-md mt-space-md flex items-center justify-between">
-<span class="inline-flex items-center gap-space-xs px-space-sm py-1 rounded bg-secondary/10 text-secondary font-label-md text-label-md font-semibold">
-<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
-            Riesgo: Bajo
-          </span>
-<span class="font-label-sm text-label-sm text-outline font-medium tracking-tight">
-            Actualización: 08 nov 2026
-          </span>
-</div>
-</div>
-<!-- Card 6 -->
-<div class="case-card group cursor-pointer flex flex-col justify-between p-space-lg rounded-xl bg-surface-container-low hover:bg-surface-container transition-all shadow-sm hover:shadow-xl" onclick="openCaseModal('CS-PA-INF-2026-02', 'Retraso en la entrega del Desembarcadero Pesquero Artesanal Yacila', 'Piura', 'Moderado', '05 nov 2026', 'Pescadores agremiados solicitan auditoría técnica de FONDEPES ante la tercera ampliación de plazo en obras de modernización del muelle y cámaras de frío, programándose inspección de campo...')">
-<div class="space-y-space-sm">
-<div class="flex items-center justify-between text-outline">
-<span class="font-data-tabular text-data-tabular tracking-wide font-mono">CS-PA-INF-2026-02</span>
-<div class="flex items-center gap-space-xs font-title-md text-title-md font-semibold text-primary">
-<span class="material-symbols-outlined text-[16px]">location_on</span>
-<span>Piura</span>
-</div>
-</div>
-<h2 class="font-headline-sm text-headline-sm text-on-surface group-hover:text-primary transition-colors leading-snug">
-            Retraso en la entrega del Desembarcadero Pesquero Artesanal Yacila
-          </h2>
-<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-3 leading-relaxed">
-            Pescadores agremiados solicitan auditoría técnica de FONDEPES ante la tercera ampliación de plazo en obras de modernización del muelle y cámaras de frío, programándose inspección de campo...
-          </p>
-</div>
-<div class="pt-space-md mt-space-md flex items-center justify-between">
-<span class="inline-flex items-center gap-space-xs px-space-sm py-1 rounded bg-amber-500/10 text-amber-400 font-label-md text-label-md font-semibold">
-<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
-            Riesgo: Moderado
-          </span>
-<span class="font-label-sm text-label-sm text-outline font-medium tracking-tight">
-            Actualización: 05 nov 2026
-          </span>
-</div>
-</div>
-<!-- Card 7: Two regions together (Lima, Junín) -->
-<div class="case-card group cursor-pointer flex flex-col justify-between p-space-lg rounded-xl bg-surface-container-low hover:bg-surface-container transition-all shadow-sm hover:shadow-xl" onclick="openCaseModal('CS-MI-OAT-2026-05', 'Reubicación y zonificación de fundiciones informales en corredor centro', 'Lima, Junín', 'Moderado', '02 nov 2026', 'Diálogo interinstitucional e interregional para formalización y traslado ordenado de talleres metalmecánicos hacia áreas industriales habilitadas extraurbanas, coordinado entre ambos GORE...')">
-<div class="space-y-space-sm">
-<div class="flex items-center justify-between text-outline">
-<span class="font-data-tabular text-data-tabular tracking-wide font-mono">CS-MI-OAT-2026-05</span>
-<div class="flex items-center gap-space-xs font-title-md text-title-md font-semibold text-primary">
-<span class="material-symbols-outlined text-[16px]">location_on</span>
-<span>Lima, Junín</span>
-</div>
-</div>
-<h2 class="font-headline-sm text-headline-sm text-on-surface group-hover:text-primary transition-colors leading-snug">
-            Reubicación y zonificación de fundiciones informales en corredor centro
-          </h2>
-<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-3 leading-relaxed">
-            Diálogo interinstitucional e interregional para formalización y traslado ordenado de talleres metalmecánicos hacia áreas industriales habilitadas extraurbanas, coordinado entre ambos GORE...
-          </p>
-</div>
-<div class="pt-space-md mt-space-md flex items-center justify-between">
-<span class="inline-flex items-center gap-space-xs px-space-sm py-1 rounded bg-amber-500/10 text-amber-400 font-label-md text-label-md font-semibold">
-<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
-            Riesgo: Moderado
-          </span>
-<span class="font-label-sm text-label-sm text-outline font-medium tracking-tight">
-            Actualización: 02 nov 2026
-          </span>
-</div>
-</div>
-<!-- Card 8 -->
-<div class="case-card group cursor-pointer flex flex-col justify-between p-space-lg rounded-xl bg-surface-container-low hover:bg-surface-container transition-all shadow-sm hover:shadow-xl" onclick="openCaseModal('CS-PA-NOR-2026-07', 'Implementación de veda biológica extraordinaria de conchas negras y cangrejo', 'Tumbes', 'Moderado', '29 oct 2026', 'Extractores de los manglares solicitan bonificación de compensación social ante la ampliación temporal de la veda decretada para proteger el reclutamiento de moluscos bivalvos...')">
-<div class="space-y-space-sm">
-<div class="flex items-center justify-between text-outline">
-<span class="font-data-tabular text-data-tabular tracking-wide font-mono">CS-PA-NOR-2026-07</span>
-<div class="flex items-center gap-space-xs font-title-md text-title-md font-semibold text-primary">
-<span class="material-symbols-outlined text-[16px]">location_on</span>
-<span>Tumbes</span>
-</div>
-</div>
-<h2 class="font-headline-sm text-headline-sm text-on-surface group-hover:text-primary transition-colors leading-snug">
-            Implementación de veda biológica extraordinaria de conchas negras y cangrejo
-          </h2>
-<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-3 leading-relaxed">
-            Extractores de los manglares solicitan bonificación de compensación social ante la ampliación temporal de la veda decretada para proteger el reclutamiento de moluscos bivalvos...
-          </p>
-</div>
-<div class="pt-space-md mt-space-md flex items-center justify-between">
-<span class="inline-flex items-center gap-space-xs px-space-sm py-1 rounded bg-amber-500/10 text-amber-400 font-label-md text-label-md font-semibold">
-<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
-            Riesgo: Moderado
-          </span>
-<span class="font-label-sm text-label-sm text-outline font-medium tracking-tight">
-            Actualización: 29 oct 2026
-          </span>
-</div>
-</div>
-<!-- Card 9 -->
-<div class="case-card group cursor-pointer flex flex-col justify-between p-space-lg rounded-xl bg-surface-container-low hover:bg-surface-container transition-all shadow-sm hover:shadow-xl" onclick="openCaseModal('CS-IN-INF-2026-03', 'Reactivación del complejo frigorífico pesquero de San Andrés', 'Ica', 'Bajo', '25 oct 2026', 'Asociación de armadores artesanales y procesadores solicita transferencia de administración del módulo de congelado a una cooperativa autogestionaria supervisada por PRODUCE...')">
-<div class="space-y-space-sm">
-<div class="flex items-center justify-between text-outline">
-<span class="font-data-tabular text-data-tabular tracking-wide font-mono">CS-IN-INF-2026-03</span>
-<div class="flex items-center gap-space-xs font-title-md text-title-md font-semibold text-primary">
-<span class="material-symbols-outlined text-[16px]">location_on</span>
-<span>Ica</span>
-</div>
-</div>
-<h2 class="font-headline-sm text-headline-sm text-on-surface group-hover:text-primary transition-colors leading-snug">
-            Reactivación del complejo frigorífico pesquero de San Andrés
-          </h2>
-<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-3 leading-relaxed">
-            Asociación de armadores artesanales y procesadores solicita transferencia de administración del módulo de congelado a una cooperativa autogestionaria supervisada por PRODUCE...
-          </p>
-</div>
-<div class="pt-space-md mt-space-md flex items-center justify-between">
-<span class="inline-flex items-center gap-space-xs px-space-sm py-1 rounded bg-secondary/10 text-secondary font-label-md text-label-md font-semibold">
-<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
-            Riesgo: Bajo
-          </span>
-<span class="font-label-sm text-label-sm text-outline font-medium tracking-tight">
-            Actualización: 25 oct 2026
-          </span>
-</div>
-</div>
-</div>
-<!-- Bottom Status Counter and Pagination Controls -->
-<div class="pt-space-md flex flex-col sm:flex-row items-center justify-between gap-space-md text-outline">
-<!-- Status Counter Bar -->
-<div class="flex items-center gap-space-md font-body-sm text-body-sm">
-<span class="text-on-surface font-medium">Mostrando 9 de 34 casos vigentes</span>
-<span class="inline-flex items-center gap-1.5 font-label-sm text-label-sm text-on-surface-variant">
-<span class="w-2 h-2 rounded-full bg-error"></span> 2 Alto
-        </span>
-<span class="inline-flex items-center gap-1.5 font-label-sm text-label-sm text-on-surface-variant">
-<span class="w-2 h-2 rounded-full bg-amber-400"></span> 4 Moderado
-        </span>
-<span class="inline-flex items-center gap-1.5 font-label-sm text-label-sm text-on-surface-variant">
-<span class="w-2 h-2 rounded-full bg-secondary"></span> 3 Bajo
-        </span>
-</div>
-<!-- Pagination Numerical Buttons -->
-<div class="flex items-center gap-space-xs font-label-md text-label-md">
-<button class="w-8 h-8 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface-variant flex items-center justify-center transition-colors disabled:opacity-40" disabled="" type="button">
-<span class="material-symbols-outlined text-[16px]">chevron_left</span>
-</button>
-<button class="w-8 h-8 rounded-lg bg-primary-container text-on-primary-container font-semibold flex items-center justify-center" type="button">
-          1
-        </button>
-<button class="w-8 h-8 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface flex items-center justify-center transition-colors" type="button">
-          2
-        </button>
-<button class="w-8 h-8 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface flex items-center justify-center transition-colors" type="button">
-          3
-        </button>
-<button class="w-8 h-8 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface flex items-center justify-center transition-colors" type="button">
-          4
-        </button>
-<button class="w-8 h-8 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface-variant flex items-center justify-center transition-colors" type="button">
-<span class="material-symbols-outlined text-[16px]">chevron_right</span>
-</button>
-</div>
-</div>
-</div>
-<!-- Emergent Dialog: Modal Detalle del Caso (Al hacer click en tarjeta) -->
-<div class="fixed inset-0 z-50 hidden items-center justify-center p-space-md bg-surface-dim/80 backdrop-blur-sm" id="modal-detalle-caso">
-<div class="relative w-full max-w-2xl bg-surface-container-low rounded-xl shadow-2xl overflow-hidden flex flex-col max-h-[921px]">
-<!-- Header -->
-<div class="px-space-xl py-space-lg bg-surface-container flex items-start justify-between gap-space-md">
-<div class="space-y-space-xs">
-<div class="flex items-center gap-space-sm">
-<span class="font-data-tabular text-data-tabular font-mono text-outline" id="modal-codigo">CS-PA-OAT-2026-04</span>
-<span class="px-space-xs py-0.5 rounded bg-surface-container-highest text-primary font-label-sm text-label-sm font-semibold" id="modal-region">Piura</span>
-<span class="px-space-xs py-0.5 rounded bg-amber-500/15 text-amber-400 font-label-sm text-label-sm font-semibold" id="modal-riesgo-badge">Riesgo: Moderado</span>
-</div>
-<h2 class="font-headline-sm text-headline-sm text-on-surface font-semibold" id="modal-titulo">
-            Demanda de cancelación de la temporada de pesca de anchoveta por captura juvenil
-          </h2>
-<div class="text-outline font-label-sm text-label-sm flex items-center gap-space-xs">
-<span class="material-symbols-outlined text-[14px]">event_repeat</span>
-<span id="modal-actualizacion">Actualización: 18 nov 2026</span>
-</div>
-</div>
-<button class="p-1 rounded-lg text-outline hover:text-on-surface hover:bg-surface-container-highest transition-colors" onclick="closeModal('modal-detalle-caso')" type="button">
-<span class="material-symbols-outlined text-[20px]">close</span>
-</button>
-</div>
-<!-- Body / Resumen sintetizado -->
-<div class="p-space-xl space-y-space-lg overflow-y-auto">
-<div>
-<h4 class="font-label-sm text-label-sm uppercase tracking-wider text-outline mb-space-xs">Resumen Ejecutivo del Caso</h4>
-<p class="font-body-md text-body-md text-on-surface leading-relaxed" id="modal-resumen">
-            Diversos gremios del sector pesquero exigen la suspensión preventiva ante reportes de alta incidencia de juveniles en la zona norte-centro. Solicitan inspección técnica de IMARPE y mesa de diálogo bilateral con el Viceministerio de Pesca.
-          </p>
-</div>
-<!-- Action Links Requested: Línea de tiempo, Mapa, Actores -->
-<div>
-<h4 class="font-label-sm text-label-sm uppercase tracking-wider text-outline mb-space-sm">Vistas Operativas del Caso</h4>
-<div class="grid grid-cols-1 sm:grid-cols-3 gap-space-sm">
-<button class="flex items-center justify-center gap-space-xs p-space-md rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-title-md text-title-md transition-colors" type="button">
-<span class="material-symbols-outlined text-[18px] text-primary">timeline</span>
-<span>Línea de tiempo</span>
-</button>
-<button class="flex items-center justify-center gap-space-xs p-space-md rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-title-md text-title-md transition-colors" type="button">
-<span class="material-symbols-outlined text-[18px] text-secondary">explore</span>
-<span>Mapa territorial</span>
-</button>
-<button class="flex items-center justify-center gap-space-xs p-space-md rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-title-md text-title-md transition-colors" type="button">
-<span class="material-symbols-outlined text-[18px] text-tertiary">groups</span>
-<span>Matriz de actores</span>
-</button>
-</div>
-</div>
-<div class="p-space-md rounded-lg bg-surface-container-lowest flex items-center justify-between text-outline font-label-sm text-label-sm">
-<span>Unidad responsable: <strong>OAIPCS - Prevención Territorial</strong></span>
-<span>Expediente: <strong>EXP-2026-00941</strong></span>
-</div>
-</div>
-<!-- Footer -->
-<div class="px-space-xl py-space-md bg-surface-container flex items-center justify-end gap-space-sm">
-<button class="px-space-md py-space-xs rounded-lg font-title-md text-title-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest transition-colors" onclick="closeModal('modal-detalle-caso')" type="button">
-          Cerrar
-        </button>
-<button class="px-space-md py-space-xs rounded-lg bg-primary-container text-on-primary-container font-title-md text-title-md font-semibold hover:bg-primary transition-colors" type="button">
-          Abrir expediente completo
-        </button>
-</div>
-</div>
-</div>
-<!-- Emergent Dialog: Nuevo Caso (Header CTA) -->
-<div class="fixed inset-0 z-50 hidden items-center justify-center p-space-md bg-surface-dim/80 backdrop-blur-sm" id="modal-nuevo-caso">
-<div class="relative w-full max-w-xl bg-surface-container-low rounded-xl shadow-2xl overflow-hidden flex flex-col">
-<div class="px-space-xl py-space-lg bg-surface-container flex items-center justify-between">
-<h3 class="font-headline-sm text-headline-sm font-semibold text-on-surface flex items-center gap-space-xs">
-<span class="material-symbols-outlined text-primary text-[20px]">add_circle</span>
-          Registrar Nuevo Caso de Conflictividad
-        </h3>
-<button class="p-1 rounded-lg text-outline hover:text-on-surface hover:bg-surface-container-highest" onclick="closeModal('modal-nuevo-caso')" type="button">
-<span class="material-symbols-outlined text-[20px]">close</span>
-</button>
-</div>
-<div class="p-space-xl space-y-space-md">
-<div>
-<label class="block font-label-sm text-label-sm text-outline mb-space-xs uppercase">Título descriptivo del caso</label>
-<input class="w-full h-9 px-space-md rounded-lg bg-surface-container-lowest text-on-surface font-body-sm text-body-sm placeholder:text-outline focus:outline-none focus:bg-surface-container-highest" placeholder="Ej. Controversia por delimitación de caleta pesquera..." type="text"/>
-</div>
-<div class="grid grid-cols-2 gap-space-md">
-<div>
-<label class="block font-label-sm text-label-sm text-outline mb-space-xs uppercase">Región</label>
-<select aria-label="Región Nuevo Caso" class="w-full h-9 px-space-md rounded-lg bg-surface-container-lowest text-on-surface font-body-sm text-body-sm">
-<option>Piura</option>
-<option>Lima</option>
-<option>Junín</option>
-<option>Tumbes</option>
-<option>Ica</option>
-<option>Áncash</option>
-</select>
-</div>
-<div>
-<label class="block font-label-sm text-label-sm text-outline mb-space-xs uppercase">Nivel de Riesgo Inicial</label>
-<select aria-label="Nivel de Riesgo Inicial" class="w-full h-9 px-space-md rounded-lg bg-surface-container-lowest text-on-surface font-body-sm text-body-sm">
-<option>Riesgo: Bajo</option>
-<option>Riesgo: Moderado</option>
-<option>Riesgo: Alto</option>
-</select>
-</div>
-</div>
-<div>
-<label class="block font-label-sm text-label-sm text-outline mb-space-xs uppercase">Síntesis inicial de los hechos (máx 3 líneas)</label>
-<textarea class="w-full p-space-md rounded-lg bg-surface-container-lowest text-on-surface font-body-sm text-body-sm placeholder:text-outline focus:outline-none focus:bg-surface-container-highest" placeholder="Detalle los antecedentes primarios y las demandas expresadas por los actores territoriales..." rows="3"></textarea>
-</div>
-</div>
-<div class="px-space-xl py-space-md bg-surface-container flex items-center justify-end gap-space-sm">
-<button class="px-space-md py-space-xs rounded-lg font-title-md text-title-md text-on-surface-variant hover:text-on-surface" onclick="closeModal('modal-nuevo-caso')" type="button">Cancelar</button>
-<button class="px-space-md py-space-xs rounded-lg bg-primary-container text-on-primary-container font-title-md text-title-md font-semibold" onclick="closeModal('modal-nuevo-caso')" type="button">Guardar y Abrir Ficha</button>
-</div>
-</div>
-</div>
-</div>
-<script>
-  function toggleExportMenu() {
-    const el = document.getElementById('exportDropdown');
-    el.classList.toggle('hidden');
-  }
+<html class="dark" lang="es">
+    <head>
+        <meta charset="utf-8" />
+        <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+        <meta content="web_dashboard" name="shell-type" />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+            rel="stylesheet"
+        />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+            rel="stylesheet"
+        />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap"
+            rel="stylesheet"
+        />
+        <style>
+            @layer base {
+                html,
+                body {
+                    margin: 0;
+                    padding: 0;
+                }
+                body {
+                    overscroll-behavior: none;
+                }
+                main > :first-child {
+                    margin-top: 0 !important;
+                }
+                main > :last-child {
+                    margin-bottom: 0 !important;
+                }
+            }
+            ::-webkit-scrollbar {
+                display: none;
+            }
+        </style>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script id="tailwind-config">
+            tailwind.config = {
+                darkMode: "class",
+                theme: {
+                    extend: {
+                        colors: {
+                            "error-container": "#93000a",
+                            "surface-container-highest": "#2d353f",
+                            primary: "#a8c8ff",
+                            secondary: "#45dfa4",
+                            "secondary-fixed-dim": "#45dfa4",
+                            "surface-dim": "#0c141d",
+                            "inverse-primary": "#115eaf",
+                            "primary-fixed-dim": "#a8c8ff",
+                            "on-primary-container": "#003c76",
+                            tertiary: "#cebdff",
+                            "on-error": "#690005",
+                            error: "#ffb4ab",
+                            "primary-container": "#6ea8fe",
+                            "tertiary-container": "#b196ff",
+                            "surface-container-low": "#141c25",
+                            "on-primary-fixed-variant": "#004689",
+                            "on-tertiary-container": "#442491",
+                            "surface-container-lowest": "#070f18",
+                            "on-tertiary": "#381385",
+                            "on-tertiary-fixed-variant": "#4f319c",
+                            "inverse-on-surface": "#29313b",
+                            "on-background": "#dbe3f0",
+                            "on-secondary-fixed": "#002114",
+                            "inverse-surface": "#dbe3f0",
+                            "on-secondary-fixed-variant": "#005137",
+                            "surface-container-high": "#232b34",
+                            "surface-tint": "#a8c8ff",
+                            "primary-fixed": "#d5e3ff",
+                            outline: "#8c919d",
+                            surface: "#0c141d",
+                            "surface-container": "#18202a",
+                            "on-secondary": "#003825",
+                            "secondary-container": "#00bd85",
+                            "on-primary": "#003061",
+                            background: "#0c141d",
+                            "outline-variant": "#424751",
+                            "on-tertiary-fixed": "#21005e",
+                            "on-surface-variant": "#c2c6d3",
+                            "tertiary-fixed-dim": "#cebdff",
+                            "on-surface": "#dbe3f0",
+                            "on-secondary-container": "#00452e",
+                            "surface-variant": "#2d353f",
+                            "surface-bright": "#323a44",
+                            "on-error-container": "#ffdad6",
+                            "secondary-fixed": "#68fcbf",
+                            "tertiary-fixed": "#e8ddff",
+                            "on-primary-fixed": "#001b3c",
+                        },
+                        borderRadius: {
+                            DEFAULT: "0.125rem",
+                            lg: "0.25rem",
+                            xl: "0.5rem",
+                            full: "0.75rem",
+                        },
+                        spacing: {
+                            "space-md": "0.75rem",
+                            "space-sm": "0.5rem",
+                            "margin-desktop": "2rem",
+                            "gutter-desktop": "1.5rem",
+                            gutter: "1rem",
+                            "space-lg": "1rem",
+                            "space-xs": "0.25rem",
+                            margin: "1rem",
+                            "space-xl": "1.5rem",
+                        },
+                        fontFamily: {
+                            "display-lg-mobile": ["Inter"],
+                            "label-sm": ["Inter"],
+                            "headline-lg": ["Inter"],
+                            "body-sm": ["Inter"],
+                            "headline-md": ["Inter"],
+                            "headline-sm": ["Inter"],
+                            "title-md": ["Inter"],
+                            "display-lg": ["Inter"],
+                            "body-md": ["Inter"],
+                            "body-lg": ["Inter"],
+                            "data-tabular": ["Inter"],
+                            "label-md": ["Inter"],
+                        },
+                        fontSize: {
+                            "display-lg-mobile": [
+                                "24px",
+                                {
+                                    lineHeight: "32px",
+                                    letterSpacing: "-0.01em",
+                                    fontWeight: "700",
+                                },
+                            ],
+                            "label-sm": [
+                                "11px",
+                                {
+                                    lineHeight: "14px",
+                                    letterSpacing: "0.03em",
+                                    fontWeight: "500",
+                                },
+                            ],
+                            "headline-lg": [
+                                "24px",
+                                {
+                                    lineHeight: "32px",
+                                    letterSpacing: "-0.01em",
+                                    fontWeight: "600",
+                                },
+                            ],
+                            "body-sm": [
+                                "13px",
+                                { lineHeight: "18px", fontWeight: "400" },
+                            ],
+                            "headline-md": [
+                                "20px",
+                                { lineHeight: "28px", fontWeight: "600" },
+                            ],
+                            "headline-sm": [
+                                "16px",
+                                { lineHeight: "24px", fontWeight: "600" },
+                            ],
+                            "title-md": [
+                                "14px",
+                                { lineHeight: "20px", fontWeight: "600" },
+                            ],
+                            "display-lg": [
+                                "32px",
+                                {
+                                    lineHeight: "40px",
+                                    letterSpacing: "-0.02em",
+                                    fontWeight: "700",
+                                },
+                            ],
+                            "body-md": [
+                                "14px",
+                                { lineHeight: "20px", fontWeight: "400" },
+                            ],
+                            "body-lg": [
+                                "16px",
+                                { lineHeight: "24px", fontWeight: "400" },
+                            ],
+                            "data-tabular": [
+                                "13px",
+                                {
+                                    lineHeight: "18px",
+                                    letterSpacing: "0",
+                                    fontWeight: "500",
+                                },
+                            ],
+                            "label-md": [
+                                "12px",
+                                {
+                                    lineHeight: "16px",
+                                    letterSpacing: "0.02em",
+                                    fontWeight: "600",
+                                },
+                            ],
+                        },
+                    },
+                },
+            };
+        </script>
+    </head>
+    <body
+        class="bg-background font-body-md text-on-surface antialiased min-h-screen"
+    >
+        <aside
+            class="fixed left-0 top-0 h-screen w-72 bg-surface-container-low z-50 flex flex-col justify-between shadow-[0_1px_8px_rgba(0,0,0,0.4)]"
+        >
+            <div class="flex flex-col flex-1 overflow-y-auto">
+                <div class="p-space-lg bg-surface-container-lowest">
+                    <div class="flex items-center gap-space-sm">
+                        <div
+                            class="w-8 h-8 rounded-lg bg-primary-container text-on-primary-container flex items-center justify-center font-headline-sm text-headline-sm font-bold"
+                        >
+                            A
+                        </div>
+                        <div>
+                            <div
+                                class="font-headline-sm text-headline-sm font-semibold text-on-surface tracking-tight leading-none"
+                            >
+                                AVISA
+                                <span
+                                    class="text-primary font-label-sm text-label-sm"
+                                    >v2.4</span
+                                >
+                            </div>
+                            <div
+                                class="font-label-sm text-label-sm text-on-surface-variant truncate mt-space-xs"
+                            >
+                                OAIPCS · PRODUCE - Perú
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <nav
+                    class="flex-1 px-space-md py-space-md space-y-space-md"
+                    data-active-classes="bg-surface-container-highest text-primary font-title-md"
+                >
+                    <div class="space-y-space-xs">
+                        <div
+                            class="px-space-sm py-space-xs font-label-md text-label-md text-outline uppercase tracking-wider"
+                        >
+                            MI ESPACIO
+                        </div>
+                        <a
+                            class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg font-body-sm text-body-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors"
+                            data-path="panorama-territorial"
+                            href="#"
+                            ><span class="material-symbols-outlined text-[18px]"
+                                >public</span
+                            ><span>Panorama territorial</span></a
+                        ><a
+                            class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg font-body-sm text-body-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors"
+                            data-path="resumen-operativo"
+                            href="#"
+                            ><span class="material-symbols-outlined text-[18px]"
+                                >insights</span
+                            ><span>Resumen operativo</span></a
+                        ><a
+                            class="flex items-center justify-between px-space-md py-space-sm rounded-lg font-body-sm text-body-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors"
+                            data-path="bandeja-de-trabajo"
+                            href="#"
+                            ><div class="flex items-center gap-space-sm">
+                                <span
+                                    class="material-symbols-outlined text-[18px]"
+                                    >inbox</span
+                                ><span>Bandeja de trabajo</span>
+                            </div>
+                            <span
+                                class="px-space-xs py-0.5 rounded font-label-sm text-label-sm bg-error text-on-error font-medium"
+                                >12</span
+                            ></a
+                        >
+                    </div>
+                    <div class="space-y-space-xs">
+                        <div
+                            class="px-space-sm py-space-xs font-label-md text-label-md text-outline uppercase tracking-wider"
+                        >
+                            SEGUIMIENTO
+                        </div>
+                        <a
+                            aria-current="page"
+                            class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg transition-colors bg-surface-container-highest text-primary font-title-md"
+                            data-path="casos"
+                            href="#"
+                            ><span class="material-symbols-outlined text-[18px]"
+                                >gavel</span
+                            ><span>Casos</span></a
+                        ><a
+                            class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg font-body-sm text-body-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors"
+                            data-path="alertas-tempranas"
+                            href="#"
+                            ><span class="material-symbols-outlined text-[18px]"
+                                >warning</span
+                            ><span>Alertas tempranas</span></a
+                        ><a
+                            class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg font-body-sm text-body-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors"
+                            data-path="compromisos"
+                            href="#"
+                            ><span class="material-symbols-outlined text-[18px]"
+                                >handshake</span
+                            ><span>Compromisos</span></a
+                        ><a
+                            class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg font-body-sm text-body-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors"
+                            data-path="documentos"
+                            href="#"
+                            ><span class="material-symbols-outlined text-[18px]"
+                                >description</span
+                            ><span>Documentos</span></a
+                        ><a
+                            class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg font-body-sm text-body-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors"
+                            data-path="reportes"
+                            href="#"
+                            ><span class="material-symbols-outlined text-[18px]"
+                                >bar_chart</span
+                            ><span>Reportes</span></a
+                        >
+                    </div>
+                    <div class="space-y-space-xs">
+                        <div
+                            class="px-space-sm py-space-xs font-label-md text-label-md text-outline uppercase tracking-wider"
+                        >
+                            DIRECTORIO
+                        </div>
+                        <a
+                            class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg font-body-sm text-body-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors"
+                            data-path="actores"
+                            href="#"
+                            ><span class="material-symbols-outlined text-[18px]"
+                                >groups</span
+                            ><span>Actores</span></a
+                        ><a
+                            class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg font-body-sm text-body-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors"
+                            data-path="locales"
+                            href="#"
+                            ><span class="material-symbols-outlined text-[18px]"
+                                >location_city</span
+                            ><span>Locales</span></a
+                        >
+                    </div>
+                </nav>
+            </div>
+            <div class="p-space-md bg-surface-container-lowest">
+                <div
+                    class="flex items-center justify-between text-on-surface-variant font-label-sm text-label-sm"
+                >
+                    <span>Servidor Sede Central</span
+                    ><span class="w-2 h-2 rounded-full bg-secondary"></span>
+                </div>
+                <div
+                    class="font-label-sm text-label-sm text-outline mt-space-xs"
+                >
+                    OAIPCS • PRODUCE © 2025
+                </div>
+            </div>
+        </aside>
+        <div class="pl-72 flex flex-col min-h-screen">
+            <header
+                class="fixed top-0 left-72 right-0 h-16 bg-surface-container/90 backdrop-blur-xl z-40 shadow-[0_1px_8px_rgba(0,0,0,0.3)]"
+            >
+                <div
+                    class="h-16 w-full px-gutter-desktop flex items-center justify-between gap-space-lg"
+                >
+                    <div class="flex items-center gap-space-lg min-w-max">
+                        <div class="flex flex-col">
+                            <span
+                                class="font-label-sm text-label-sm font-semibold tracking-wider text-outline uppercase"
+                                >MINISTERIO DE LA PRODUCCIÓN • PERÚ</span
+                            ><span
+                                class="font-title-md text-title-md text-on-surface"
+                                >Vigilancia y Prevención de Conflictos</span
+                            >
+                        </div>
+                        <div
+                            class="flex items-center gap-space-xs px-space-sm py-0.5 rounded-full bg-surface-container-highest text-secondary font-label-sm text-label-sm"
+                        >
+                            <span
+                                class="inline-block w-2 h-2 rounded-full bg-secondary animate-pulse"
+                            ></span
+                            ><span>Vigía Operativo Activo</span>
+                        </div>
+                    </div>
+                    <div class="flex-1 max-w-xl mx-auto">
+                        <div class="relative flex items-center w-full">
+                            <span
+                                class="material-symbols-outlined absolute left-space-md text-outline text-[18px] pointer-events-none"
+                                >search</span
+                            ><input
+                                class="w-full h-9 pl-10 pr-space-md rounded-lg bg-surface-container-lowest text-on-surface font-body-sm text-body-sm placeholder:text-outline focus:outline-none focus:ring-1 focus:ring-primary"
+                                placeholder="Buscar alerta, caso o RUC..."
+                                type="text"
+                            />
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-space-md">
+                        <button
+                            class="p-space-xs text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high rounded transition-colors"
+                            title="Configuración y Filtros"
+                            type="button"
+                        >
+                            <span class="material-symbols-outlined text-[20px]"
+                                >tune</span
+                            ></button
+                        ><button
+                            class="relative p-space-xs text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high rounded transition-colors"
+                            title="Notificaciones"
+                            type="button"
+                        >
+                            <span class="material-symbols-outlined text-[20px]"
+                                >notifications</span
+                            ><span
+                                class="absolute top-1 right-1 w-2 h-2 rounded-full bg-error"
+                            ></span>
+                        </button>
+                        <div class="h-6 w-px bg-outline-variant"></div>
+                        <div class="flex items-center gap-space-sm pl-space-xs">
+                            <div class="text-right hidden xl:block">
+                                <div
+                                    class="font-title-md text-title-md text-on-surface leading-tight"
+                                >
+                                    Ing. R. Huamán
+                                </div>
+                                <div
+                                    class="font-label-sm text-label-sm text-on-surface-variant leading-tight"
+                                >
+                                    Especialista OAIPCS
+                                </div>
+                            </div>
+                            <div
+                                class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"
+                            >
+                                <span
+                                    class="material-symbols-outlined text-on-primary text-[18px]"
+                                    >person</span
+                                >
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            <main class="w-full pt-16 flex-1 bg-surface">
+                <div class="flex flex-col w-full">
+                    <!-- Content Canvas Area -->
+                    <div
+                        class="w-full max-w-[1920px] mx-auto px-gutter-desktop py-space-xl space-y-space-lg"
+                    >
+                        <!-- Top Action Bar / Page Header -->
+                        <div
+                            class="flex flex-col md:flex-row md:items-center justify-between gap-space-md"
+                        >
+                            <div class="flex items-center gap-space-md">
+                                <h1
+                                    class="font-headline-lg text-headline-lg font-bold text-on-surface tracking-tight"
+                                >
+                                    Casos
+                                </h1>
+                                <span
+                                    class="inline-flex items-center px-space-sm py-0.5 rounded-full bg-surface-container-highest font-label-md text-label-md text-primary font-medium"
+                                >
+                                    34 Registrados
+                                </span>
+                            </div>
+                            <div
+                                class="flex items-center gap-space-sm self-end md:self-auto"
+                            >
+                                <!-- Export Dropdown -->
+                                <div
+                                    class="relative inline-block text-left"
+                                    id="exportMenuWrapper"
+                                >
+                                    <button
+                                        class="inline-flex items-center gap-space-xs px-space-md h-9 rounded-lg bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-title-md text-title-md transition-colors shadow-sm"
+                                        onclick="toggleExportMenu()"
+                                        type="button"
+                                    >
+                                        <span
+                                            class="material-symbols-outlined text-[18px] text-outline"
+                                            >file_download</span
+                                        >
+                                        <span>Exportar</span>
+                                        <span
+                                            class="material-symbols-outlined text-[18px] text-outline"
+                                            >arrow_drop_down</span
+                                        >
+                                    </button>
+                                    <div
+                                        class="hidden absolute right-0 mt-space-xs w-48 rounded-lg bg-surface-container-high shadow-xl py-space-xs z-30"
+                                        id="exportDropdown"
+                                    >
+                                        <a
+                                            class="flex items-center gap-space-sm px-space-md py-space-xs font-body-sm text-body-sm text-on-surface hover:bg-surface-container-highest transition-colors"
+                                            href="#"
+                                        >
+                                            <span
+                                                class="material-symbols-outlined text-[16px] text-secondary"
+                                                >table_view</span
+                                            >
+                                            Formato Excel (.xlsx)
+                                        </a>
+                                        <a
+                                            class="flex items-center gap-space-sm px-space-md py-space-xs font-body-sm text-body-sm text-on-surface hover:bg-surface-container-highest transition-colors"
+                                            href="#"
+                                        >
+                                            <span
+                                                class="material-symbols-outlined text-[16px] text-error"
+                                                >picture_as_pdf</span
+                                            >
+                                            Resumen Ejecutivo (PDF)
+                                        </a>
+                                        <a
+                                            class="flex items-center gap-space-sm px-space-md py-space-xs font-body-sm text-body-sm text-on-surface hover:bg-surface-container-highest transition-colors"
+                                            href="#"
+                                        >
+                                            <span
+                                                class="material-symbols-outlined text-[16px] text-primary"
+                                                >data_object</span
+                                            >
+                                            Dataset JSON (API)
+                                        </a>
+                                    </div>
+                                </div>
+                                <!-- New Case Action -->
+                                <button
+                                    class="inline-flex items-center gap-space-xs px-space-md h-9 rounded-lg bg-primary-container text-on-primary-container hover:bg-primary font-title-md text-title-md transition-colors shadow-sm font-semibold"
+                                    onclick="openModal('modal-nuevo-caso')"
+                                    type="button"
+                                >
+                                    <span
+                                        class="material-symbols-outlined text-[20px]"
+                                        >add</span
+                                    >
+                                    <span>Nuevo caso</span>
+                                </button>
+                            </div>
+                        </div>
+                        <!-- Filter & View Controls Bar -->
+                        <div
+                            class="p-space-md rounded-xl bg-surface-container-low shadow-sm flex flex-col xl:flex-row xl:items-center justify-between gap-space-md"
+                        >
+                            <div
+                                class="flex flex-wrap items-center gap-space-sm flex-1"
+                            >
+                                <!-- View Selector: Tarjetas / Tabla -->
+                                <div class="relative min-w-[140px]">
+                                    <div class="relative flex items-center">
+                                        <span
+                                            class="material-symbols-outlined absolute left-space-sm text-[18px] text-primary pointer-events-none"
+                                            >grid_view</span
+                                        >
+                                        <select
+                                            aria-label="Seleccionar Vista"
+                                            class="w-full h-9 pl-8 pr-8 rounded-lg bg-surface-container-lowest text-on-surface font-title-md text-title-md appearance-none focus:outline-none focus:bg-surface-container-highest transition-colors cursor-pointer"
+                                        >
+                                            <option
+                                                selected=""
+                                                value="tarjetas"
+                                            >
+                                                Vista: Tarjetas
+                                            </option>
+                                            <option value="tabla">
+                                                Vista: Tabla
+                                            </option>
+                                        </select>
+                                        <span
+                                            class="material-symbols-outlined absolute right-space-xs text-[18px] text-outline pointer-events-none"
+                                            >expand_more</span
+                                        >
+                                    </div>
+                                </div>
+                                <!-- Search Input by Keyword -->
+                                <div class="relative flex-1 min-w-[220px]">
+                                    <span
+                                        class="material-symbols-outlined absolute left-space-md text-[18px] text-outline pointer-events-none top-2.5"
+                                        >search</span
+                                    >
+                                    <input
+                                        class="w-full h-9 pl-9 pr-space-md rounded-lg bg-surface-container-lowest text-on-surface font-body-sm text-body-sm placeholder:text-outline focus:outline-none focus:bg-surface-container-highest transition-colors"
+                                        id="filterInput"
+                                        onkeyup="filterCards()"
+                                        placeholder="Buscar por palabra clave..."
+                                        type="text"
+                                    />
+                                </div>
+                                <!-- Conflictivity Level Select -->
+                                <div class="relative min-w-[190px]">
+                                    <div class="relative flex items-center">
+                                        <select
+                                            aria-label="Nivel de Conflictividad"
+                                            class="w-full h-9 px-space-md pr-8 rounded-lg bg-surface-container-lowest text-on-surface font-body-sm text-body-sm appearance-none focus:outline-none focus:bg-surface-container-highest transition-colors cursor-pointer"
+                                        >
+                                            <option value="">
+                                                Nivel de conflictividad: Todos
+                                            </option>
+                                            <option value="diferencia">
+                                                Diferencia
+                                            </option>
+                                            <option value="controversia">
+                                                Controversia
+                                            </option>
+                                            <option value="conflicto">
+                                                Conflicto social
+                                            </option>
+                                            <option value="crisis">
+                                                Crisis social
+                                            </option>
+                                        </select>
+                                        <span
+                                            class="material-symbols-outlined absolute right-space-xs text-[18px] text-outline pointer-events-none"
+                                            >expand_more</span
+                                        >
+                                    </div>
+                                </div>
+                                <!-- Region Select -->
+                                <div class="relative min-w-[130px]">
+                                    <div class="relative flex items-center">
+                                        <select
+                                            aria-label="Región"
+                                            class="w-full h-9 px-space-md pr-8 rounded-lg bg-surface-container-lowest text-on-surface font-body-sm text-body-sm appearance-none focus:outline-none focus:bg-surface-container-highest transition-colors cursor-pointer"
+                                        >
+                                            <option value="">
+                                                Región: Todas
+                                            </option>
+                                            <option value="piura">Piura</option>
+                                            <option value="lima">Lima</option>
+                                            <option value="junin">Junín</option>
+                                            <option value="tumbes">
+                                                Tumbes
+                                            </option>
+                                            <option value="ica">Ica</option>
+                                            <option value="ancash">
+                                                Áncash
+                                            </option>
+                                            <option value="moquegua">
+                                                Moquegua
+                                            </option>
+                                        </select>
+                                        <span
+                                            class="material-symbols-outlined absolute right-space-xs text-[18px] text-outline pointer-events-none"
+                                            >expand_more</span
+                                        >
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Advanced Search Trigger -->
+                            <button
+                                class="inline-flex items-center gap-space-xs text-primary font-title-md text-title-md hover:underline py-space-xs px-space-sm rounded transition-colors whitespace-nowrap self-start xl:self-auto"
+                                onclick="toggleAdvancedSearch()"
+                                type="button"
+                            >
+                                <span
+                                    class="material-symbols-outlined text-[18px]"
+                                    >tune</span
+                                >
+                                <span>Búsqueda avanzada</span>
+                            </button>
+                        </div>
+                        <!-- Collapsible Advanced Search Box -->
+                        <div
+                            class="hidden p-space-lg rounded-xl bg-surface-container-low shadow-sm"
+                            id="advancedSearchBox"
+                        >
+                            <div
+                                class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-space-md"
+                            >
+                                <div>
+                                    <label
+                                        class="block font-label-sm text-label-sm text-outline mb-space-xs uppercase"
+                                        >Rango de Fechas (Actualización)</label
+                                    >
+                                    <input
+                                        class="w-full h-9 px-space-md rounded-lg bg-surface-container-lowest text-on-surface font-body-sm text-body-sm focus:outline-none focus:bg-surface-container-highest"
+                                        type="date"
+                                    />
+                                </div>
+                                <div>
+                                    <label
+                                        class="block font-label-sm text-label-sm text-outline mb-space-xs uppercase"
+                                        >Unidad Responsable</label
+                                    >
+                                    <select
+                                        aria-label="Unidad Responsable"
+                                        class="w-full h-9 px-space-md rounded-lg bg-surface-container-lowest text-on-surface font-body-sm text-body-sm focus:outline-none focus:bg-surface-container-highest"
+                                    >
+                                        <option>Todas las unidades</option>
+                                        <option>OAIPCS - Sede Central</option>
+                                        <option>
+                                            DGSFS-PA - Fiscalización
+                                        </option>
+                                        <option>
+                                            FONDEPES - Infraestructura
+                                        </option>
+                                        <option>
+                                            PRODUCE - Despacho Viceministerial
+                                        </option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label
+                                        class="block font-label-sm text-label-sm text-outline mb-space-xs uppercase"
+                                        >Nivel de Riesgo</label
+                                    >
+                                    <select
+                                        aria-label="Nivel de Riesgo"
+                                        class="w-full h-9 px-space-md rounded-lg bg-surface-container-lowest text-on-surface font-body-sm text-body-sm focus:outline-none focus:bg-surface-container-highest"
+                                    >
+                                        <option>
+                                            Cualquier nivel de riesgo
+                                        </option>
+                                        <option>Alto</option>
+                                        <option>Moderado</option>
+                                        <option>Bajo</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label
+                                        class="block font-label-sm text-label-sm text-outline mb-space-xs uppercase"
+                                        >Actor Involucrado</label
+                                    >
+                                    <input
+                                        class="w-full h-9 px-space-md rounded-lg bg-surface-container-lowest text-on-surface font-body-sm text-body-sm placeholder:text-outline focus:outline-none focus:bg-surface-container-highest"
+                                        placeholder="Ej. SUMOPP, Gremio Chilca..."
+                                        type="text"
+                                    />
+                                </div>
+                            </div>
+                            <div
+                                class="mt-space-md flex justify-end gap-space-sm"
+                            >
+                                <button
+                                    class="px-space-md py-space-xs font-label-md text-label-md text-on-surface-variant hover:text-on-surface"
+                                    onclick="toggleAdvancedSearch()"
+                                    type="button"
+                                >
+                                    Cerrar
+                                </button>
+                                <button
+                                    class="px-space-md py-space-xs rounded-lg bg-primary-container text-on-primary-container font-title-md text-title-md font-semibold"
+                                    type="button"
+                                >
+                                    Aplicar filtros
+                                </button>
+                            </div>
+                        </div>
+                        <!-- Small Multiples Cases Grid (Tufte-inspired consistent visual hierarchy) -->
+                        <div
+                            class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-space-lg"
+                            id="casesGrid"
+                        >
+                            <!-- Card 1 -->
+                            <div
+                                class="case-card group cursor-pointer flex flex-col justify-between p-space-lg rounded-xl bg-surface-container-low hover:bg-surface-container transition-all shadow-sm hover:shadow-xl"
+                                onclick="
+                                    openCaseModal(
+                                        'CS-PA-OAT-2026-04',
+                                        'Demanda de cancelación de la temporada de pesca de anchoveta por captura juvenil',
+                                        'Piura',
+                                        'Moderado',
+                                        '18 nov 2026',
+                                        'Diversos gremios del sector pesquero exigen la suspensión preventiva ante reportes de alta incidencia de juveniles en la zona norte-centro. Solicitan inspección técnica de IMARPE y mesa de diálogo bilateral...',
+                                    )
+                                "
+                            >
+                                <div class="space-y-space-sm">
+                                    <!-- Metadata Header: Code & Region Only (No subsector) -->
+                                    <div
+                                        class="flex items-center justify-between text-outline"
+                                    >
+                                        <span
+                                            class="font-data-tabular text-data-tabular tracking-wide font-mono"
+                                            >CS-PA-OAT-2026-04</span
+                                        >
+                                        <div
+                                            class="flex items-center gap-space-xs font-title-md text-title-md font-semibold text-primary"
+                                        >
+                                            <span
+                                                class="material-symbols-outlined text-[16px]"
+                                                >location_on</span
+                                            >
+                                            <span>Piura</span>
+                                        </div>
+                                    </div>
+                                    <!-- Case Title -->
+                                    <h2
+                                        class="font-headline-sm text-headline-sm text-on-surface group-hover:text-primary transition-colors leading-snug"
+                                    >
+                                        Demanda de cancelación de la temporada
+                                        de pesca de anchoveta por captura
+                                        juvenil
+                                    </h2>
+                                    <!-- Synthesized Summary: Strictly 2 to 3 lines with ellipsis -->
+                                    <p
+                                        class="font-body-sm text-body-sm text-on-surface-variant line-clamp-3 leading-relaxed"
+                                    >
+                                        Diversos gremios del sector pesquero
+                                        exigen la suspensión preventiva ante
+                                        reportes de alta incidencia de juveniles
+                                        en la zona norte-centro. Solicitan
+                                        inspección técnica de IMARPE y mesa de
+                                        diálogo bilateral...
+                                    </p>
+                                </div>
+                                <!-- Footer Area: Distinct Risk Badge & Standardized Date -->
+                                <div
+                                    class="pt-space-md mt-space-md flex items-center justify-between"
+                                >
+                                    <span
+                                        class="inline-flex items-center gap-space-xs px-space-sm py-1 rounded bg-amber-500/10 text-amber-400 font-label-md text-label-md font-semibold"
+                                    >
+                                        <span
+                                            class="w-1.5 h-1.5 rounded-full bg-amber-400"
+                                        ></span>
+                                        Riesgo: Moderado
+                                    </span>
+                                    <span
+                                        class="font-label-sm text-label-sm text-outline font-medium tracking-tight"
+                                    >
+                                        Actualización: 18 nov 2026
+                                    </span>
+                                </div>
+                            </div>
+                            <!-- Card 2 -->
+                            <div
+                                class="case-card group cursor-pointer flex flex-col justify-between p-space-lg rounded-xl bg-surface-container-low hover:bg-surface-container transition-all shadow-sm hover:shadow-xl"
+                                onclick="
+                                    openCaseModal(
+                                        'CS-MI-ITE-2026-03',
+                                        'Participación ciudadana en el EIA-d del proyecto Aceros Americanos (Chilca)',
+                                        'Lima',
+                                        'Bajo',
+                                        '15 nov 2026',
+                                        'Vecinos y organizaciones sociales de Chilca manifiestan disconformidad con los horarios y mecanismos de audiencia pública. OAIPCS articula con la Dirección General de Asuntos Ambientales para reprogramación preventiva...',
+                                    )
+                                "
+                            >
+                                <div class="space-y-space-sm">
+                                    <div
+                                        class="flex items-center justify-between text-outline"
+                                    >
+                                        <span
+                                            class="font-data-tabular text-data-tabular tracking-wide font-mono"
+                                            >CS-MI-ITE-2026-03</span
+                                        >
+                                        <div
+                                            class="flex items-center gap-space-xs font-title-md text-title-md font-semibold text-primary"
+                                        >
+                                            <span
+                                                class="material-symbols-outlined text-[16px]"
+                                                >location_on</span
+                                            >
+                                            <span>Lima</span>
+                                        </div>
+                                    </div>
+                                    <h2
+                                        class="font-headline-sm text-headline-sm text-on-surface group-hover:text-primary transition-colors leading-snug"
+                                    >
+                                        Participación ciudadana en el EIA-d del
+                                        proyecto Aceros Americanos (Chilca)
+                                    </h2>
+                                    <p
+                                        class="font-body-sm text-body-sm text-on-surface-variant line-clamp-3 leading-relaxed"
+                                    >
+                                        Vecinos y organizaciones sociales de
+                                        Chilca manifiestan disconformidad con
+                                        los horarios y mecanismos de audiencia
+                                        pública. OAIPCS articula con la
+                                        Dirección General de Asuntos Ambientales
+                                        para reprogramación preventiva...
+                                    </p>
+                                </div>
+                                <div
+                                    class="pt-space-md mt-space-md flex items-center justify-between"
+                                >
+                                    <span
+                                        class="inline-flex items-center gap-space-xs px-space-sm py-1 rounded bg-secondary/10 text-secondary font-label-md text-label-md font-semibold"
+                                    >
+                                        <span
+                                            class="w-1.5 h-1.5 rounded-full bg-secondary"
+                                        ></span>
+                                        Riesgo: Bajo
+                                    </span>
+                                    <span
+                                        class="font-label-sm text-label-sm text-outline font-medium tracking-tight"
+                                    >
+                                        Actualización: 15 nov 2026
+                                    </span>
+                                </div>
+                            </div>
+                            <!-- Card 3 -->
+                            <div
+                                class="case-card group cursor-pointer flex flex-col justify-between p-space-lg rounded-xl bg-surface-container-low hover:bg-surface-container transition-all shadow-sm hover:shadow-xl"
+                                onclick="
+                                    openCaseModal(
+                                        'CS-PA-ITE-2026-03',
+                                        'Mortandad masiva de truchas en piscigranjas de Pariahuanca',
+                                        'Junín',
+                                        'Alto',
+                                        '12 nov 2026',
+                                        'Productores acuícolas denuncian presunta afectación hídrica por efluentes y exigen fiscalización ambiental inmediata de SANIPES y OEFA para mitigar pérdidas económicas en el corredor trutícola...',
+                                    )
+                                "
+                            >
+                                <div class="space-y-space-sm">
+                                    <div
+                                        class="flex items-center justify-between text-outline"
+                                    >
+                                        <span
+                                            class="font-data-tabular text-data-tabular tracking-wide font-mono"
+                                            >CS-PA-ITE-2026-03</span
+                                        >
+                                        <div
+                                            class="flex items-center gap-space-xs font-title-md text-title-md font-semibold text-primary"
+                                        >
+                                            <span
+                                                class="material-symbols-outlined text-[16px]"
+                                                >location_on</span
+                                            >
+                                            <span>Junín</span>
+                                        </div>
+                                    </div>
+                                    <h2
+                                        class="font-headline-sm text-headline-sm text-on-surface group-hover:text-primary transition-colors leading-snug"
+                                    >
+                                        Mortandad masiva de truchas en
+                                        piscigranjas de Pariahuanca
+                                    </h2>
+                                    <p
+                                        class="font-body-sm text-body-sm text-on-surface-variant line-clamp-3 leading-relaxed"
+                                    >
+                                        Productores acuícolas denuncian presunta
+                                        afectación hídrica por efluentes y
+                                        exigen fiscalización ambiental inmediata
+                                        de SANIPES y OEFA para mitigar pérdidas
+                                        económicas en el corredor trutícola...
+                                    </p>
+                                </div>
+                                <div
+                                    class="pt-space-md mt-space-md flex items-center justify-between"
+                                >
+                                    <span
+                                        class="inline-flex items-center gap-space-xs px-space-sm py-1 rounded bg-error/15 text-error font-label-md text-label-md font-semibold"
+                                    >
+                                        <span
+                                            class="w-1.5 h-1.5 rounded-full bg-error"
+                                        ></span>
+                                        Riesgo: Alto
+                                    </span>
+                                    <span
+                                        class="font-label-sm text-label-sm text-outline font-medium tracking-tight"
+                                    >
+                                        Actualización: 12 nov 2026
+                                    </span>
+                                </div>
+                            </div>
+                            <!-- Card 4 -->
+                            <div
+                                class="case-card group cursor-pointer flex flex-col justify-between p-space-lg rounded-xl bg-surface-container-low hover:bg-surface-container transition-all shadow-sm hover:shadow-xl"
+                                onclick="
+                                    openCaseModal(
+                                        'CS-PA-OAT-2026-03',
+                                        'Delimitación de las 5 millas marinas y pesca ilegal de arrastre de fondo',
+                                        'Tumbes',
+                                        'Alto',
+                                        '10 nov 2026',
+                                        'Gremios de pescadores artesanales de Puerto Pizarro y Cancas denuncian incursión reiterada de bolicheras y barcos de arrastre dentro de la reserva marina protegida, demandando operativos conjuntos de DICAPI...',
+                                    )
+                                "
+                            >
+                                <div class="space-y-space-sm">
+                                    <div
+                                        class="flex items-center justify-between text-outline"
+                                    >
+                                        <span
+                                            class="font-data-tabular text-data-tabular tracking-wide font-mono"
+                                            >CS-PA-OAT-2026-03</span
+                                        >
+                                        <div
+                                            class="flex items-center gap-space-xs font-title-md text-title-md font-semibold text-primary"
+                                        >
+                                            <span
+                                                class="material-symbols-outlined text-[16px]"
+                                                >location_on</span
+                                            >
+                                            <span>Tumbes</span>
+                                        </div>
+                                    </div>
+                                    <h2
+                                        class="font-headline-sm text-headline-sm text-on-surface group-hover:text-primary transition-colors leading-snug"
+                                    >
+                                        Delimitación de las 5 millas marinas y
+                                        pesca ilegal de arrastre de fondo
+                                    </h2>
+                                    <p
+                                        class="font-body-sm text-body-sm text-on-surface-variant line-clamp-3 leading-relaxed"
+                                    >
+                                        Gremios de pescadores artesanales de
+                                        Puerto Pizarro y Cancas denuncian
+                                        incursión reiterada de bolicheras y
+                                        barcos de arrastre dentro de la reserva
+                                        marina protegida, demandando operativos
+                                        conjuntos de DICAPI...
+                                    </p>
+                                </div>
+                                <div
+                                    class="pt-space-md mt-space-md flex items-center justify-between"
+                                >
+                                    <span
+                                        class="inline-flex items-center gap-space-xs px-space-sm py-1 rounded bg-error/15 text-error font-label-md text-label-md font-semibold"
+                                    >
+                                        <span
+                                            class="w-1.5 h-1.5 rounded-full bg-error"
+                                        ></span>
+                                        Riesgo: Alto
+                                    </span>
+                                    <span
+                                        class="font-label-sm text-label-sm text-outline font-medium tracking-tight"
+                                    >
+                                        Actualización: 10 nov 2026
+                                    </span>
+                                </div>
+                            </div>
+                            <!-- Card 5 -->
+                            <div
+                                class="case-card group cursor-pointer flex flex-col justify-between p-space-lg rounded-xl bg-surface-container-low hover:bg-surface-container transition-all shadow-sm hover:shadow-xl"
+                                onclick="
+                                    openCaseModal(
+                                        'CS-IN-NOR-2026-01',
+                                        'Actualización del protocolo sanitario de descargas en bahía de Paracas',
+                                        'Ica',
+                                        'Bajo',
+                                        '08 nov 2026',
+                                        'Mesas de trabajo técnico entre plantas conserveras y SANIPES para estandarizar límites máximos permisibles en vertimientos, acordando cronograma de adecuación tecnológica progresiva sin paro de operaciones...',
+                                    )
+                                "
+                            >
+                                <div class="space-y-space-sm">
+                                    <div
+                                        class="flex items-center justify-between text-outline"
+                                    >
+                                        <span
+                                            class="font-data-tabular text-data-tabular tracking-wide font-mono"
+                                            >CS-IN-NOR-2026-01</span
+                                        >
+                                        <div
+                                            class="flex items-center gap-space-xs font-title-md text-title-md font-semibold text-primary"
+                                        >
+                                            <span
+                                                class="material-symbols-outlined text-[16px]"
+                                                >location_on</span
+                                            >
+                                            <span>Ica</span>
+                                        </div>
+                                    </div>
+                                    <h2
+                                        class="font-headline-sm text-headline-sm text-on-surface group-hover:text-primary transition-colors leading-snug"
+                                    >
+                                        Actualización del protocolo sanitario de
+                                        descargas en bahía de Paracas
+                                    </h2>
+                                    <p
+                                        class="font-body-sm text-body-sm text-on-surface-variant line-clamp-3 leading-relaxed"
+                                    >
+                                        Mesas de trabajo técnico entre plantas
+                                        conserveras y SANIPES para estandarizar
+                                        límites máximos permisibles en
+                                        vertimientos, acordando cronograma de
+                                        adecuación tecnológica progresiva sin
+                                        paro de operaciones...
+                                    </p>
+                                </div>
+                                <div
+                                    class="pt-space-md mt-space-md flex items-center justify-between"
+                                >
+                                    <span
+                                        class="inline-flex items-center gap-space-xs px-space-sm py-1 rounded bg-secondary/10 text-secondary font-label-md text-label-md font-semibold"
+                                    >
+                                        <span
+                                            class="w-1.5 h-1.5 rounded-full bg-secondary"
+                                        ></span>
+                                        Riesgo: Bajo
+                                    </span>
+                                    <span
+                                        class="font-label-sm text-label-sm text-outline font-medium tracking-tight"
+                                    >
+                                        Actualización: 08 nov 2026
+                                    </span>
+                                </div>
+                            </div>
+                            <!-- Card 6 -->
+                            <div
+                                class="case-card group cursor-pointer flex flex-col justify-between p-space-lg rounded-xl bg-surface-container-low hover:bg-surface-container transition-all shadow-sm hover:shadow-xl"
+                                onclick="
+                                    openCaseModal(
+                                        'CS-PA-INF-2026-02',
+                                        'Retraso en la entrega del Desembarcadero Pesquero Artesanal Yacila',
+                                        'Piura',
+                                        'Moderado',
+                                        '05 nov 2026',
+                                        'Pescadores agremiados solicitan auditoría técnica de FONDEPES ante la tercera ampliación de plazo en obras de modernización del muelle y cámaras de frío, programándose inspección de campo...',
+                                    )
+                                "
+                            >
+                                <div class="space-y-space-sm">
+                                    <div
+                                        class="flex items-center justify-between text-outline"
+                                    >
+                                        <span
+                                            class="font-data-tabular text-data-tabular tracking-wide font-mono"
+                                            >CS-PA-INF-2026-02</span
+                                        >
+                                        <div
+                                            class="flex items-center gap-space-xs font-title-md text-title-md font-semibold text-primary"
+                                        >
+                                            <span
+                                                class="material-symbols-outlined text-[16px]"
+                                                >location_on</span
+                                            >
+                                            <span>Piura</span>
+                                        </div>
+                                    </div>
+                                    <h2
+                                        class="font-headline-sm text-headline-sm text-on-surface group-hover:text-primary transition-colors leading-snug"
+                                    >
+                                        Retraso en la entrega del Desembarcadero
+                                        Pesquero Artesanal Yacila
+                                    </h2>
+                                    <p
+                                        class="font-body-sm text-body-sm text-on-surface-variant line-clamp-3 leading-relaxed"
+                                    >
+                                        Pescadores agremiados solicitan
+                                        auditoría técnica de FONDEPES ante la
+                                        tercera ampliación de plazo en obras de
+                                        modernización del muelle y cámaras de
+                                        frío, programándose inspección de
+                                        campo...
+                                    </p>
+                                </div>
+                                <div
+                                    class="pt-space-md mt-space-md flex items-center justify-between"
+                                >
+                                    <span
+                                        class="inline-flex items-center gap-space-xs px-space-sm py-1 rounded bg-amber-500/10 text-amber-400 font-label-md text-label-md font-semibold"
+                                    >
+                                        <span
+                                            class="w-1.5 h-1.5 rounded-full bg-amber-400"
+                                        ></span>
+                                        Riesgo: Moderado
+                                    </span>
+                                    <span
+                                        class="font-label-sm text-label-sm text-outline font-medium tracking-tight"
+                                    >
+                                        Actualización: 05 nov 2026
+                                    </span>
+                                </div>
+                            </div>
+                            <!-- Card 7: Two regions together (Lima, Junín) -->
+                            <div
+                                class="case-card group cursor-pointer flex flex-col justify-between p-space-lg rounded-xl bg-surface-container-low hover:bg-surface-container transition-all shadow-sm hover:shadow-xl"
+                                onclick="
+                                    openCaseModal(
+                                        'CS-MI-OAT-2026-05',
+                                        'Reubicación y zonificación de fundiciones informales en corredor centro',
+                                        'Lima, Junín',
+                                        'Moderado',
+                                        '02 nov 2026',
+                                        'Diálogo interinstitucional e interregional para formalización y traslado ordenado de talleres metalmecánicos hacia áreas industriales habilitadas extraurbanas, coordinado entre ambos GORE...',
+                                    )
+                                "
+                            >
+                                <div class="space-y-space-sm">
+                                    <div
+                                        class="flex items-center justify-between text-outline"
+                                    >
+                                        <span
+                                            class="font-data-tabular text-data-tabular tracking-wide font-mono"
+                                            >CS-MI-OAT-2026-05</span
+                                        >
+                                        <div
+                                            class="flex items-center gap-space-xs font-title-md text-title-md font-semibold text-primary"
+                                        >
+                                            <span
+                                                class="material-symbols-outlined text-[16px]"
+                                                >location_on</span
+                                            >
+                                            <span>Lima, Junín</span>
+                                        </div>
+                                    </div>
+                                    <h2
+                                        class="font-headline-sm text-headline-sm text-on-surface group-hover:text-primary transition-colors leading-snug"
+                                    >
+                                        Reubicación y zonificación de
+                                        fundiciones informales en corredor
+                                        centro
+                                    </h2>
+                                    <p
+                                        class="font-body-sm text-body-sm text-on-surface-variant line-clamp-3 leading-relaxed"
+                                    >
+                                        Diálogo interinstitucional e
+                                        interregional para formalización y
+                                        traslado ordenado de talleres
+                                        metalmecánicos hacia áreas industriales
+                                        habilitadas extraurbanas, coordinado
+                                        entre ambos GORE...
+                                    </p>
+                                </div>
+                                <div
+                                    class="pt-space-md mt-space-md flex items-center justify-between"
+                                >
+                                    <span
+                                        class="inline-flex items-center gap-space-xs px-space-sm py-1 rounded bg-amber-500/10 text-amber-400 font-label-md text-label-md font-semibold"
+                                    >
+                                        <span
+                                            class="w-1.5 h-1.5 rounded-full bg-amber-400"
+                                        ></span>
+                                        Riesgo: Moderado
+                                    </span>
+                                    <span
+                                        class="font-label-sm text-label-sm text-outline font-medium tracking-tight"
+                                    >
+                                        Actualización: 02 nov 2026
+                                    </span>
+                                </div>
+                            </div>
+                            <!-- Card 8 -->
+                            <div
+                                class="case-card group cursor-pointer flex flex-col justify-between p-space-lg rounded-xl bg-surface-container-low hover:bg-surface-container transition-all shadow-sm hover:shadow-xl"
+                                onclick="
+                                    openCaseModal(
+                                        'CS-PA-NOR-2026-07',
+                                        'Implementación de veda biológica extraordinaria de conchas negras y cangrejo',
+                                        'Tumbes',
+                                        'Moderado',
+                                        '29 oct 2026',
+                                        'Extractores de los manglares solicitan bonificación de compensación social ante la ampliación temporal de la veda decretada para proteger el reclutamiento de moluscos bivalvos...',
+                                    )
+                                "
+                            >
+                                <div class="space-y-space-sm">
+                                    <div
+                                        class="flex items-center justify-between text-outline"
+                                    >
+                                        <span
+                                            class="font-data-tabular text-data-tabular tracking-wide font-mono"
+                                            >CS-PA-NOR-2026-07</span
+                                        >
+                                        <div
+                                            class="flex items-center gap-space-xs font-title-md text-title-md font-semibold text-primary"
+                                        >
+                                            <span
+                                                class="material-symbols-outlined text-[16px]"
+                                                >location_on</span
+                                            >
+                                            <span>Tumbes</span>
+                                        </div>
+                                    </div>
+                                    <h2
+                                        class="font-headline-sm text-headline-sm text-on-surface group-hover:text-primary transition-colors leading-snug"
+                                    >
+                                        Implementación de veda biológica
+                                        extraordinaria de conchas negras y
+                                        cangrejo
+                                    </h2>
+                                    <p
+                                        class="font-body-sm text-body-sm text-on-surface-variant line-clamp-3 leading-relaxed"
+                                    >
+                                        Extractores de los manglares solicitan
+                                        bonificación de compensación social ante
+                                        la ampliación temporal de la veda
+                                        decretada para proteger el reclutamiento
+                                        de moluscos bivalvos...
+                                    </p>
+                                </div>
+                                <div
+                                    class="pt-space-md mt-space-md flex items-center justify-between"
+                                >
+                                    <span
+                                        class="inline-flex items-center gap-space-xs px-space-sm py-1 rounded bg-amber-500/10 text-amber-400 font-label-md text-label-md font-semibold"
+                                    >
+                                        <span
+                                            class="w-1.5 h-1.5 rounded-full bg-amber-400"
+                                        ></span>
+                                        Riesgo: Moderado
+                                    </span>
+                                    <span
+                                        class="font-label-sm text-label-sm text-outline font-medium tracking-tight"
+                                    >
+                                        Actualización: 29 oct 2026
+                                    </span>
+                                </div>
+                            </div>
+                            <!-- Card 9 -->
+                            <div
+                                class="case-card group cursor-pointer flex flex-col justify-between p-space-lg rounded-xl bg-surface-container-low hover:bg-surface-container transition-all shadow-sm hover:shadow-xl"
+                                onclick="
+                                    openCaseModal(
+                                        'CS-IN-INF-2026-03',
+                                        'Reactivación del complejo frigorífico pesquero de San Andrés',
+                                        'Ica',
+                                        'Bajo',
+                                        '25 oct 2026',
+                                        'Asociación de armadores artesanales y procesadores solicita transferencia de administración del módulo de congelado a una cooperativa autogestionaria supervisada por PRODUCE...',
+                                    )
+                                "
+                            >
+                                <div class="space-y-space-sm">
+                                    <div
+                                        class="flex items-center justify-between text-outline"
+                                    >
+                                        <span
+                                            class="font-data-tabular text-data-tabular tracking-wide font-mono"
+                                            >CS-IN-INF-2026-03</span
+                                        >
+                                        <div
+                                            class="flex items-center gap-space-xs font-title-md text-title-md font-semibold text-primary"
+                                        >
+                                            <span
+                                                class="material-symbols-outlined text-[16px]"
+                                                >location_on</span
+                                            >
+                                            <span>Ica</span>
+                                        </div>
+                                    </div>
+                                    <h2
+                                        class="font-headline-sm text-headline-sm text-on-surface group-hover:text-primary transition-colors leading-snug"
+                                    >
+                                        Reactivación del complejo frigorífico
+                                        pesquero de San Andrés
+                                    </h2>
+                                    <p
+                                        class="font-body-sm text-body-sm text-on-surface-variant line-clamp-3 leading-relaxed"
+                                    >
+                                        Asociación de armadores artesanales y
+                                        procesadores solicita transferencia de
+                                        administración del módulo de congelado a
+                                        una cooperativa autogestionaria
+                                        supervisada por PRODUCE...
+                                    </p>
+                                </div>
+                                <div
+                                    class="pt-space-md mt-space-md flex items-center justify-between"
+                                >
+                                    <span
+                                        class="inline-flex items-center gap-space-xs px-space-sm py-1 rounded bg-secondary/10 text-secondary font-label-md text-label-md font-semibold"
+                                    >
+                                        <span
+                                            class="w-1.5 h-1.5 rounded-full bg-secondary"
+                                        ></span>
+                                        Riesgo: Bajo
+                                    </span>
+                                    <span
+                                        class="font-label-sm text-label-sm text-outline font-medium tracking-tight"
+                                    >
+                                        Actualización: 25 oct 2026
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Bottom Status Counter and Pagination Controls -->
+                        <div
+                            class="pt-space-md flex flex-col sm:flex-row items-center justify-between gap-space-md text-outline"
+                        >
+                            <!-- Status Counter Bar -->
+                            <div
+                                class="flex items-center gap-space-md font-body-sm text-body-sm"
+                            >
+                                <span class="text-on-surface font-medium"
+                                    >Mostrando 9 de 34 casos vigentes</span
+                                >
+                                <span
+                                    class="inline-flex items-center gap-1.5 font-label-sm text-label-sm text-on-surface-variant"
+                                >
+                                    <span
+                                        class="w-2 h-2 rounded-full bg-error"
+                                    ></span>
+                                    2 Alto
+                                </span>
+                                <span
+                                    class="inline-flex items-center gap-1.5 font-label-sm text-label-sm text-on-surface-variant"
+                                >
+                                    <span
+                                        class="w-2 h-2 rounded-full bg-amber-400"
+                                    ></span>
+                                    4 Moderado
+                                </span>
+                                <span
+                                    class="inline-flex items-center gap-1.5 font-label-sm text-label-sm text-on-surface-variant"
+                                >
+                                    <span
+                                        class="w-2 h-2 rounded-full bg-secondary"
+                                    ></span>
+                                    3 Bajo
+                                </span>
+                            </div>
+                            <!-- Pagination Numerical Buttons -->
+                            <div
+                                class="flex items-center gap-space-xs font-label-md text-label-md"
+                            >
+                                <button
+                                    class="w-8 h-8 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface-variant flex items-center justify-center transition-colors disabled:opacity-40"
+                                    disabled=""
+                                    type="button"
+                                >
+                                    <span
+                                        class="material-symbols-outlined text-[16px]"
+                                        >chevron_left</span
+                                    >
+                                </button>
+                                <button
+                                    class="w-8 h-8 rounded-lg bg-primary-container text-on-primary-container font-semibold flex items-center justify-center"
+                                    type="button"
+                                >
+                                    1
+                                </button>
+                                <button
+                                    class="w-8 h-8 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface flex items-center justify-center transition-colors"
+                                    type="button"
+                                >
+                                    2
+                                </button>
+                                <button
+                                    class="w-8 h-8 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface flex items-center justify-center transition-colors"
+                                    type="button"
+                                >
+                                    3
+                                </button>
+                                <button
+                                    class="w-8 h-8 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface flex items-center justify-center transition-colors"
+                                    type="button"
+                                >
+                                    4
+                                </button>
+                                <button
+                                    class="w-8 h-8 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface-variant flex items-center justify-center transition-colors"
+                                    type="button"
+                                >
+                                    <span
+                                        class="material-symbols-outlined text-[16px]"
+                                        >chevron_right</span
+                                    >
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Emergent Dialog: Modal Detalle del Caso (Al hacer click en tarjeta) -->
+                    <div
+                        class="fixed inset-0 z-50 hidden items-center justify-center p-space-md bg-surface-dim/80 backdrop-blur-sm"
+                        id="modal-detalle-caso"
+                    >
+                        <div
+                            class="relative w-full max-w-2xl bg-surface-container-low rounded-xl shadow-2xl overflow-hidden flex flex-col max-h-[921px]"
+                        >
+                            <!-- Header -->
+                            <div
+                                class="px-space-xl py-space-lg bg-surface-container flex items-start justify-between gap-space-md"
+                            >
+                                <div class="space-y-space-xs">
+                                    <div class="flex items-center gap-space-sm">
+                                        <span
+                                            class="font-data-tabular text-data-tabular font-mono text-outline"
+                                            id="modal-codigo"
+                                            >CS-PA-OAT-2026-04</span
+                                        >
+                                        <span
+                                            class="px-space-xs py-0.5 rounded bg-surface-container-highest text-primary font-label-sm text-label-sm font-semibold"
+                                            id="modal-region"
+                                            >Piura</span
+                                        >
+                                        <span
+                                            class="px-space-xs py-0.5 rounded bg-amber-500/15 text-amber-400 font-label-sm text-label-sm font-semibold"
+                                            id="modal-riesgo-badge"
+                                            >Riesgo: Moderado</span
+                                        >
+                                    </div>
+                                    <h2
+                                        class="font-headline-sm text-headline-sm text-on-surface font-semibold"
+                                        id="modal-titulo"
+                                    >
+                                        Demanda de cancelación de la temporada
+                                        de pesca de anchoveta por captura
+                                        juvenil
+                                    </h2>
+                                    <div
+                                        class="text-outline font-label-sm text-label-sm flex items-center gap-space-xs"
+                                    >
+                                        <span
+                                            class="material-symbols-outlined text-[14px]"
+                                            >event_repeat</span
+                                        >
+                                        <span id="modal-actualizacion"
+                                            >Actualización: 18 nov 2026</span
+                                        >
+                                    </div>
+                                </div>
+                                <button
+                                    class="p-1 rounded-lg text-outline hover:text-on-surface hover:bg-surface-container-highest transition-colors"
+                                    onclick="closeModal('modal-detalle-caso')"
+                                    type="button"
+                                >
+                                    <span
+                                        class="material-symbols-outlined text-[20px]"
+                                        >close</span
+                                    >
+                                </button>
+                            </div>
+                            <!-- Body / Resumen sintetizado -->
+                            <div
+                                class="p-space-xl space-y-space-lg overflow-y-auto"
+                            >
+                                <div>
+                                    <h4
+                                        class="font-label-sm text-label-sm uppercase tracking-wider text-outline mb-space-xs"
+                                    >
+                                        Resumen Ejecutivo del Caso
+                                    </h4>
+                                    <p
+                                        class="font-body-md text-body-md text-on-surface leading-relaxed"
+                                        id="modal-resumen"
+                                    >
+                                        Diversos gremios del sector pesquero
+                                        exigen la suspensión preventiva ante
+                                        reportes de alta incidencia de juveniles
+                                        en la zona norte-centro. Solicitan
+                                        inspección técnica de IMARPE y mesa de
+                                        diálogo bilateral con el Viceministerio
+                                        de Pesca.
+                                    </p>
+                                </div>
+                                <!-- Action Links Requested: Línea de tiempo, Mapa, Actores -->
+                                <div>
+                                    <h4
+                                        class="font-label-sm text-label-sm uppercase tracking-wider text-outline mb-space-sm"
+                                    >
+                                        Vistas Operativas del Caso
+                                    </h4>
+                                    <div
+                                        class="grid grid-cols-1 sm:grid-cols-3 gap-space-sm"
+                                    >
+                                        <button
+                                            class="flex items-center justify-center gap-space-xs p-space-md rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-title-md text-title-md transition-colors"
+                                            type="button"
+                                        >
+                                            <span
+                                                class="material-symbols-outlined text-[18px] text-primary"
+                                                >timeline</span
+                                            >
+                                            <span>Línea de tiempo</span>
+                                        </button>
+                                        <button
+                                            class="flex items-center justify-center gap-space-xs p-space-md rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-title-md text-title-md transition-colors"
+                                            type="button"
+                                        >
+                                            <span
+                                                class="material-symbols-outlined text-[18px] text-secondary"
+                                                >explore</span
+                                            >
+                                            <span>Mapa territorial</span>
+                                        </button>
+                                        <button
+                                            class="flex items-center justify-center gap-space-xs p-space-md rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-title-md text-title-md transition-colors"
+                                            type="button"
+                                        >
+                                            <span
+                                                class="material-symbols-outlined text-[18px] text-tertiary"
+                                                >groups</span
+                                            >
+                                            <span>Matriz de actores</span>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div
+                                    class="p-space-md rounded-lg bg-surface-container-lowest flex items-center justify-between text-outline font-label-sm text-label-sm"
+                                >
+                                    <span
+                                        >Unidad responsable:
+                                        <strong
+                                            >OAIPCS - Prevención
+                                            Territorial</strong
+                                        ></span
+                                    >
+                                    <span
+                                        >Expediente:
+                                        <strong>EXP-2026-00941</strong></span
+                                    >
+                                </div>
+                            </div>
+                            <!-- Footer -->
+                            <div
+                                class="px-space-xl py-space-md bg-surface-container flex items-center justify-end gap-space-sm"
+                            >
+                                <button
+                                    class="px-space-md py-space-xs rounded-lg font-title-md text-title-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest transition-colors"
+                                    onclick="closeModal('modal-detalle-caso')"
+                                    type="button"
+                                >
+                                    Cerrar
+                                </button>
+                                <button
+                                    class="px-space-md py-space-xs rounded-lg bg-primary-container text-on-primary-container font-title-md text-title-md font-semibold hover:bg-primary transition-colors"
+                                    type="button"
+                                >
+                                    Abrir expediente completo
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Emergent Dialog: Nuevo Caso (Header CTA) -->
+                    <div
+                        class="fixed inset-0 z-50 hidden items-center justify-center p-space-md bg-surface-dim/80 backdrop-blur-sm"
+                        id="modal-nuevo-caso"
+                    >
+                        <div
+                            class="relative w-full max-w-xl bg-surface-container-low rounded-xl shadow-2xl overflow-hidden flex flex-col"
+                        >
+                            <div
+                                class="px-space-xl py-space-lg bg-surface-container flex items-center justify-between"
+                            >
+                                <h3
+                                    class="font-headline-sm text-headline-sm font-semibold text-on-surface flex items-center gap-space-xs"
+                                >
+                                    <span
+                                        class="material-symbols-outlined text-primary text-[20px]"
+                                        >add_circle</span
+                                    >
+                                    Registrar Nuevo Caso de Conflictividad
+                                </h3>
+                                <button
+                                    class="p-1 rounded-lg text-outline hover:text-on-surface hover:bg-surface-container-highest"
+                                    onclick="closeModal('modal-nuevo-caso')"
+                                    type="button"
+                                >
+                                    <span
+                                        class="material-symbols-outlined text-[20px]"
+                                        >close</span
+                                    >
+                                </button>
+                            </div>
+                            <div class="p-space-xl space-y-space-md">
+                                <div>
+                                    <label
+                                        class="block font-label-sm text-label-sm text-outline mb-space-xs uppercase"
+                                        >Título descriptivo del caso</label
+                                    >
+                                    <input
+                                        class="w-full h-9 px-space-md rounded-lg bg-surface-container-lowest text-on-surface font-body-sm text-body-sm placeholder:text-outline focus:outline-none focus:bg-surface-container-highest"
+                                        placeholder="Ej. Controversia por delimitación de caleta pesquera..."
+                                        type="text"
+                                    />
+                                </div>
+                                <div class="grid grid-cols-2 gap-space-md">
+                                    <div>
+                                        <label
+                                            class="block font-label-sm text-label-sm text-outline mb-space-xs uppercase"
+                                            >Región</label
+                                        >
+                                        <select
+                                            aria-label="Región Nuevo Caso"
+                                            class="w-full h-9 px-space-md rounded-lg bg-surface-container-lowest text-on-surface font-body-sm text-body-sm"
+                                        >
+                                            <option>Piura</option>
+                                            <option>Lima</option>
+                                            <option>Junín</option>
+                                            <option>Tumbes</option>
+                                            <option>Ica</option>
+                                            <option>Áncash</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label
+                                            class="block font-label-sm text-label-sm text-outline mb-space-xs uppercase"
+                                            >Nivel de Riesgo Inicial</label
+                                        >
+                                        <select
+                                            aria-label="Nivel de Riesgo Inicial"
+                                            class="w-full h-9 px-space-md rounded-lg bg-surface-container-lowest text-on-surface font-body-sm text-body-sm"
+                                        >
+                                            <option>Riesgo: Bajo</option>
+                                            <option>Riesgo: Moderado</option>
+                                            <option>Riesgo: Alto</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label
+                                        class="block font-label-sm text-label-sm text-outline mb-space-xs uppercase"
+                                        >Síntesis inicial de los hechos (máx 3
+                                        líneas)</label
+                                    >
+                                    <textarea
+                                        class="w-full p-space-md rounded-lg bg-surface-container-lowest text-on-surface font-body-sm text-body-sm placeholder:text-outline focus:outline-none focus:bg-surface-container-highest"
+                                        placeholder="Detalle los antecedentes primarios y las demandas expresadas por los actores territoriales..."
+                                        rows="3"
+                                    ></textarea>
+                                </div>
+                            </div>
+                            <div
+                                class="px-space-xl py-space-md bg-surface-container flex items-center justify-end gap-space-sm"
+                            >
+                                <button
+                                    class="px-space-md py-space-xs rounded-lg font-title-md text-title-md text-on-surface-variant hover:text-on-surface"
+                                    onclick="closeModal('modal-nuevo-caso')"
+                                    type="button"
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    class="px-space-md py-space-xs rounded-lg bg-primary-container text-on-primary-container font-title-md text-title-md font-semibold"
+                                    onclick="closeModal('modal-nuevo-caso')"
+                                    type="button"
+                                >
+                                    Guardar y Abrir Ficha
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <script>
+                    function toggleExportMenu() {
+                        const el = document.getElementById("exportDropdown");
+                        el.classList.toggle("hidden");
+                    }
 
-  function toggleAdvancedSearch() {
-    const el = document.getElementById('advancedSearchBox');
-    el.classList.toggle('hidden');
-  }
+                    function toggleAdvancedSearch() {
+                        const el = document.getElementById("advancedSearchBox");
+                        el.classList.toggle("hidden");
+                    }
 
-  function openModal(id) {
-    const modal = document.getElementById(id);
-    if (modal) {
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
-    }
-  }
+                    function openModal(id) {
+                        const modal = document.getElementById(id);
+                        if (modal) {
+                            modal.classList.remove("hidden");
+                            modal.classList.add("flex");
+                        }
+                    }
 
-  function closeModal(id) {
-    const modal = document.getElementById(id);
-    if (modal) {
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
-    }
-  }
+                    function closeModal(id) {
+                        const modal = document.getElementById(id);
+                        if (modal) {
+                            modal.classList.add("hidden");
+                            modal.classList.remove("flex");
+                        }
+                    }
 
-  function openCaseModal(codigo, titulo, region, riesgo, actualizacion, resumen) {
-    document.getElementById('modal-codigo').textContent = codigo;
-    document.getElementById('modal-titulo').textContent = titulo;
-    document.getElementById('modal-region').textContent = region;
-    document.getElementById('modal-actualizacion').textContent = 'Actualización: ' + actualizacion;
-    document.getElementById('modal-resumen').textContent = resumen;
-    
-    const badge = document.getElementById('modal-riesgo-badge');
-    badge.textContent = '● Riesgo: ' + riesgo;
-    badge.className = 'px-space-xs py-0.5 rounded font-label-sm text-label-sm font-semibold';
-    if (riesgo === 'Alto') {
-      badge.classList.add('bg-error/15', 'text-error');
-    } else if (riesgo === 'Moderado') {
-      badge.classList.add('bg-amber-500/15', 'text-amber-400');
-    } else {
-      badge.classList.add('bg-secondary/15', 'text-secondary');
-    }
+                    function openCaseModal(
+                        codigo,
+                        titulo,
+                        region,
+                        riesgo,
+                        actualizacion,
+                        resumen,
+                    ) {
+                        document.getElementById("modal-codigo").textContent =
+                            codigo;
+                        document.getElementById("modal-titulo").textContent =
+                            titulo;
+                        document.getElementById("modal-region").textContent =
+                            region;
+                        document.getElementById(
+                            "modal-actualizacion",
+                        ).textContent = "Actualización: " + actualizacion;
+                        document.getElementById("modal-resumen").textContent =
+                            resumen;
 
-    openModal('modal-detalle-caso');
-  }
+                        const badge =
+                            document.getElementById("modal-riesgo-badge");
+                        badge.textContent = "● Riesgo: " + riesgo;
+                        badge.className =
+                            "px-space-xs py-0.5 rounded font-label-sm text-label-sm font-semibold";
+                        if (riesgo === "Alto") {
+                            badge.classList.add("bg-error/15", "text-error");
+                        } else if (riesgo === "Moderado") {
+                            badge.classList.add(
+                                "bg-amber-500/15",
+                                "text-amber-400",
+                            );
+                        } else {
+                            badge.classList.add(
+                                "bg-secondary/15",
+                                "text-secondary",
+                            );
+                        }
 
-  function filterCards() {
-    const query = document.getElementById('filterInput').value.toLowerCase();
-    const cards = document.querySelectorAll('.case-card');
-    cards.forEach(card => {
-      const text = card.textContent.toLowerCase();
-      card.style.display = text.includes(query) ? 'flex' : 'none';
-    });
-  }
+                        openModal("modal-detalle-caso");
+                    }
 
-  // Close dropdowns on outside click
-  window.addEventListener('click', function(e) {
-    const wrapper = document.getElementById('exportMenuWrapper');
-    if (wrapper && !wrapper.contains(e.target)) {
-      document.getElementById('exportDropdown').classList.add('hidden');
-    }
-  });
-</script></main></div></body></html>
+                    function filterCards() {
+                        const query = document
+                            .getElementById("filterInput")
+                            .value.toLowerCase();
+                        const cards = document.querySelectorAll(".case-card");
+                        cards.forEach((card) => {
+                            const text = card.textContent.toLowerCase();
+                            card.style.display = text.includes(query)
+                                ? "flex"
+                                : "none";
+                        });
+                    }
+
+                    // Close dropdowns on outside click
+                    window.addEventListener("click", function (e) {
+                        const wrapper =
+                            document.getElementById("exportMenuWrapper");
+                        if (wrapper && !wrapper.contains(e.target)) {
+                            document
+                                .getElementById("exportDropdown")
+                                .classList.add("hidden");
+                        }
+                    });
+                </script>
+            </main>
+        </div>
+    </body>
+</html>

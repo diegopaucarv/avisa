@@ -13,14 +13,6 @@
         <h2 id="panel-compromiso-titulo">
           {{ modoAlta() ? 'Registrar compromiso' : cabecera().accion }}
         </h2>
-        <p>
-          @if (modoAlta()) {
-            El código lo genera el servidor al guardar.
-          } @else {
-            Caso {{ cabecera().casoCodigo || '—' }} ·
-            {{ cabecera().casoTitulo || 'Sin caso asociado' }}
-          }
-        </p>
       </div>
       <button
         type="button"
@@ -54,6 +46,17 @@
             {{ cabecera().estado }}
           </span>
           <span class="badge">{{ cabecera().tipo }}</span>
+          @if (cabecera().clasificacionAlcance) {
+            <span class="badge">
+              {{ clasificacionAlcanceTexto(cabecera().clasificacionAlcance) }}
+            </span>
+          }
+          @if (cabecera().formalVerbal) {
+            <span class="badge">{{ formalVerbalTexto(cabecera().formalVerbal) }}</span>
+          }
+          @if (cabecera().asumidoMinistro) {
+            <span class="badge badge-formal">{{ etiquetaAsumidoMinistro }}</span>
+          }
           @if (cabecera().nivelGobierno) {
             <span class="badge">{{ nivelTexto(cabecera().nivelGobierno) }}</span>
           }
@@ -80,10 +83,6 @@
               <span>Alcance (registrado)</span>
               <strong>{{ cabecera().alcance || '—' }}</strong>
               <small class="form-hint">Se registra a mano; no se deriva de la región.</small>
-            </div>
-            <div>
-              <span>Temática</span>
-              <strong>{{ cabecera().tematica || '—' }}</strong>
             </div>
             <div>
               <span>Nivel de gobierno <app-glosario termino="nivel-gobierno" /></span>
@@ -146,13 +145,6 @@
               <h3 id="editar-compromiso">
                 {{ modoAlta() ? 'Datos del nuevo compromiso' : 'Modificar compromiso' }}
               </h3>
-              <p>
-                @if (modoAlta()) {
-                  El código y el estado inicial los asigna el servidor.
-                } @else {
-                  Sólo se envían los campos del PATCH.
-                }
-              </p>
             </div>
           </div>
 
@@ -272,6 +264,60 @@
             </div>
 
             <div class="form-field">
+              <label class="form-label" for="comp-clasificacion-alcance">
+                Clasificación del alcance
+              </label>
+              <select
+                id="comp-clasificacion-alcance"
+                class="form-select"
+                (change)="actualizarTexto('clasificacionAlcance', $event)"
+              >
+                <option value="" [selected]="!formulario().clasificacionAlcance">
+                  Sin declarar
+                </option>
+                @for (clasificacion of clasificacionesAlcance; track clasificacion.valor) {
+                  <option
+                    [value]="clasificacion.valor"
+                    [selected]="clasificacion.valor === formulario().clasificacionAlcance"
+                  >
+                    {{ clasificacion.etiqueta }}
+                  </option>
+                }
+              </select>
+            </div>
+
+            <div class="form-field">
+              <label class="form-label" for="comp-formal-verbal">Carácter del compromiso</label>
+              <select
+                id="comp-formal-verbal"
+                class="form-select"
+                (change)="actualizarTexto('formalVerbal', $event)"
+              >
+                <option value="" [selected]="!formulario().formalVerbal">Sin declarar</option>
+                @for (forma of formasVerbales; track forma.valor) {
+                  <option
+                    [value]="forma.valor"
+                    [selected]="forma.valor === formulario().formalVerbal"
+                  >
+                    {{ forma.etiqueta }}
+                  </option>
+                }
+              </select>
+            </div>
+
+            <div class="form-field">
+              <span class="form-label">Asumido por el Señor Ministro</span>
+              <label class="panel-check">
+                <input
+                  type="checkbox"
+                  [checked]="formulario().asumidoMinistro"
+                  (change)="actualizarBooleano('asumidoMinistro', $event)"
+                />
+                Compromiso asumido por el Señor Ministro
+              </label>
+            </div>
+
+            <div class="form-field">
               <label class="form-label" for="comp-nivel">Nivel de gobierno</label>
               <select
                 id="comp-nivel"
@@ -369,41 +415,12 @@
             </div>
 
             <div class="form-field">
-              <label class="form-label" for="comp-tematica">Temática</label>
-              @if (tematicasFormulario().length > 0) {
-                <select
-                  id="comp-tematica"
-                  class="form-select"
-                  (change)="actualizarTexto('tematica', $event)"
-                >
-                  <option value="" [selected]="!formulario().tematica">Sin temática</option>
-                  @for (tematica of tematicasFormulario(); track tematica.valor) {
-                    <option
-                      [value]="tematica.valor"
-                      [selected]="tematica.valor === formulario().tematica"
-                    >
-                      {{ tematica.etiqueta }}
-                    </option>
-                  }
-                </select>
-              } @else {
-                <input
-                  id="comp-tematica"
-                  class="form-input"
-                  [value]="formulario().tematica"
-                  (input)="actualizarTexto('tematica', $event)"
-                  placeholder="Nombre exacto de la temática"
-                />
-              }
-            </div>
-
-            <div class="form-field">
               <span class="form-label">Brecha de género</span>
               <label class="panel-check">
                 <input
                   type="checkbox"
                   [checked]="formulario().atiendeGenero"
-                  (change)="actualizarBooleano($event)"
+                  (change)="actualizarBooleano('atiendeGenero', $event)"
                 />
                 Atiende brecha de género
               </label>
@@ -522,8 +539,16 @@
                         <span class="badge badge-formal">
                           Real: {{ fechaTexto(hito.fechaReal) }}
                         </span>
+                      } @else if (hito.fechaRealTexto) {
+                        <span class="badge badge-formal">Real: {{ hito.fechaRealTexto }}</span>
                       } @else {
                         <span class="badge badge-unclassified">Sin fecha real</span>
+                      }
+                      @if (hito.fechaTexto && !hito.fecha) {
+                        <span class="badge badge-unclassified">{{ hito.fechaTexto }}</span>
+                      }
+                      @if (hito.responsableTexto && !puedeModificar()) {
+                        <span class="badge">Responsable: {{ hito.responsableTexto }}</span>
                       }
                       @if (puedeModificar()) {
                         <label class="hito-estado">
@@ -541,6 +566,21 @@
                               </option>
                             }
                           </select>
+                        </label>
+                        <label class="hito-responsable">
+                          <span class="sr-only">
+                            Responsable del hito {{ codigoHito(hito.codigo) }}
+                          </span>
+                          <input
+                            class="form-input hito-responsable-input"
+                            type="text"
+                            maxlength="200"
+                            autocomplete="off"
+                            placeholder="Responsable"
+                            [value]="hito.responsableTexto ?? ''"
+                            [disabled]="hitoCambiando() === hito.id"
+                            (change)="cambiarResponsableHito(hito, $event)"
+                          />
                         </label>
                       }
                     </div>
@@ -572,6 +612,17 @@
                     type="date"
                     [value]="hitoNuevo().fecha"
                     (input)="actualizarHito('fecha', $event)"
+                  />
+                </div>
+                <div class="form-field">
+                  <label class="form-label" for="hito-responsable">Responsable del hito</label>
+                  <input
+                    id="hito-responsable"
+                    class="form-input"
+                    maxlength="200"
+                    [value]="hitoNuevo().responsableTexto"
+                    (input)="actualizarHito('responsableTexto', $event)"
+                    placeholder="Persona o área responsable"
                   />
                 </div>
                 <div class="form-field">

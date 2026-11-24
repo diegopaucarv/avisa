@@ -2,11 +2,6 @@
   <header class="view-head">
     <div>
       <h1 id="titulo-organizaciones">Organizaciones</h1>
-      <p class="view-subtitle">
-        Organizaciones sociales, gremios y cooperativas registradas en el directorio, con su tipo,
-        registro OSPA y vigencia (Guía §7.4). Los locales donde se reúnen se consultan en el
-        directorio de locales.
-      </p>
     </div>
     <div class="view-actions">
       <p class="result-count" aria-live="polite">{{ total() }} organizaciones</p>
@@ -92,11 +87,6 @@
 
   <div class="table-wrap">
     <table class="data-table">
-      <caption class="table-caption">
-        Pulse una fila para abrir la ficha en el panel lateral. Los datos provienen de
-        <code>core.organizaciones</code>
-        y del actor colectivo; las celdas sin dato muestran «—».
-      </caption>
       <thead>
         <tr>
           <th scope="col" class="col-seleccion">
@@ -109,16 +99,16 @@
             />
           </th>
           <th scope="col">Foto</th>
-          <th scope="col">Nombre</th>
-          <th scope="col">Tipo</th>
-          <th scope="col">RUC / razón social</th>
-          <th scope="col">Integrantes</th>
-          <th scope="col">Vigencia</th>
-          <th scope="col">Estado OSPA</th>
+          <th scope="col" [appThOrden]="'nombre'" [orden]="orden">Nombre</th>
+          <th scope="col" [appThOrden]="'tipo'" [orden]="orden">Tipo</th>
+          <th scope="col" [appThOrden]="'ruc'" [orden]="orden">RUC / razón social</th>
+          <th scope="col" [appThOrden]="'integrantes'" [orden]="orden">Integrantes</th>
+          <th scope="col" [appThOrden]="'vigencia'" [orden]="orden">Vigencia</th>
+          <th scope="col" [appThOrden]="'estadoOspa'" [orden]="orden">Estado OSPA</th>
         </tr>
       </thead>
       <tbody>
-        @for (organizacion of organizaciones(); track organizacion.id) {
+        @for (organizacion of filasVisibles(); track organizacion.id) {
         <tr
           class="case-row-clickable"
           [class.row-selected]="seleccionado()?.id === organizacion.id"
