@@ -908,7 +908,7 @@ la dificultad de implementación, el costo de dibujo y el lote de «Diseño por 
 | 13  | RED/RADAR, notificaciones y derivación            | 31, 76, 23                       | D3    | 3       | M      | —         | No      | El archivo ya existe. La campana sin centro es el hueco más visible del shell, pero el punto se retiró: el mockup no puede reintroducirlo ni mostrar un contador sin `PATCH`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | 14  | Dashboard analítico                               | 51, 52, 57, 85                   | D4    | 3       | A      | —         | No      | El archivo ya existe y se mantiene en el plan. Se dibuja con métricas nombradas: cada gráfico declara consulta, fuente y estado vacío.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 | 15  | ETL de tres pestañas                              | 58–62, 86, 87                    | D5    | 2       | A      | —         | No      | El archivo ya existe. Operación interna que casi nunca se evalúa en una demo, pero sostiene la carga real.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| 16  | Matriz de conflictividad por caso (import/export) | nuevo · 58–62                    | D4    | 4       | M      | —         | Sí      | Lo que el equipo acaba de compartir: 23 demandas, 56 acciones y 111 hitos sobre el mismo eje. No hay clave de unión Excel → base (2 de 31 códigos) ni equivalencias de temática, riesgo y estado del hito: el import se dibuja con previsualización y rechazo; el export sí es viable. Diagnóstico en `MATRIZ_CONFLICTOS_EQUIPO.md`.                                                                                                                                                                                                                                                                                                                                                                                          |
+| 16  | Matriz de conflictividad por caso (import/export) | nuevo · 58–62                    | D4    | 4       | M      | —         | Sí      | Lo que el equipo acaba de compartir: 23 demandas, 56 acciones y 111 hitos sobre el mismo eje. No hay clave de unión Excel → base (2 de 31 códigos) ni equivalencias de temática, riesgo y estado del hito, así que el import se dibuja con previsualización y rechazo. El **export es viable hoy**: `vw_anexo_15_matriz_conflictividad` (por caso) y `vw_anexo_14_seguimiento_compromisos` (por compromiso × hito) ya existen; falta añadirles V/W (`fecha_planificada`, `fecha_real`). Diagnóstico en `MATRIZ_CONFLICTOS_EQUIPO.md`. |
 | 17  | Reuniones, ayuda memoria y relatoría              | 72–74 · 117                      | D3    | 4       | M      | —         | Sí      | Cierra la petición de la directora sobre actas, agendas y relatoría. `core.reuniones_dialogo` tiene 0 filas y `core.documento_fragmento` no existe; `legacy.dim_redaccion` tiene 51 filas sin cargar. Se dibuja completa y el hueco se declara.                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | 18  | Gobierno de sugerencias                           | 87                               | D4    | 3       | A      | —         | No      | Operación interna que casi nunca se evalúa en una demo. El esquema `agent` ya registra corridas (`run_log`) y lecciones; falta la bandeja de revisión y el diff por campo.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 
@@ -1443,3 +1443,92 @@ caso.
   se sembraron desde el código porque exigiría adivinar la causa de cada conflicto.
 - Los 7 valores son una **propuesta documentada**, no un hecho del sistema: se pueden revertir a
   `NULL` con un `UPDATE`, sin migración.
+
+---
+
+## Matriz del equipo: exportación e importación (2026-11-23)
+
+Verificación de sólo lectura sobre Neon, corte 2026-11-23, para responder si la matriz que
+el equipo compartió se puede rehacer desde AVISA.
+
+### Veredicto
+
+- **Exportar es viable hoy**, sin cambio de esquema: el formato del equipo (A..X más hoja
+  «Sin datos») se arma leyendo dos vistas que ya existen, añadiendo V/W a una de ellas.
+- **Importar sigue bloqueado** por dos decisiones que no son de interfaz: la tabla de mapeo
+  Excel → `core.casos.codigo_caso` y la columna de responsable del hito. Sin ellas sólo hay
+  previsualización con rechazo.
+
+### Conteos
+
+| Elemento                    | Excel del equipo | AVISA | Lectura                                                    |
+| --------------------------- | ---------------: | ----: | ---------------------------------------------------------- |
+| Casos                       |  37 bloques (31) |    35 | Sin clave que los una.                                     |
+| Demandas                    |               23 | ¹ 325 | Otra fuente (`DEM-2026-XXXX`); no son las 23 de la matriz. |
+| Compromisos / acciones      |               56 |     8 | Concentrados en **3 casos** (4 + 3 + 1).                   |
+| Hitos                       |              111 |    12 | Se cuenta como fila de compromiso × hito.                  |
+| Reuniones                   |       44 títulos |     0 | La tabla existe vacía.                                     |
+| Actores                     |      218 nombres | 1 160 | `casos_actores`, 60 vínculos.                              |
+| Documentos                  |                — |   153 | —                                                          |
+| `legacy.dim_acciones_hitos` |                — |     8 | Espejo del legado de los 8 compromisos.                    |
+
+¹ La cifra de 325 sale de `core.demandas` completo; el export de la matriz no las emite,
+porque la matriz del equipo es otra fuente.
+
+### Las dos vistas que son la matriz
+
+- **`analytics.vw_anexo_15_matriz_conflictividad`** — una fila por **caso**, 15 columnas:
+  `codigo_caso`, `region`, `alcance`, `subsector`, `tematica`, `responsable`,
+  `nivel_conflicto`, `nivel_riesgo`, `descripcion_riesgo`, `prioridad_atencion`,
+  `nombre_caso`, `narracion_cronologica`, `alertas_vinculadas`, `actores_involucrados`,
+  `punto_focal`.
+- **`analytics.vw_anexo_14_seguimiento_compromisos`** — una fila por **compromiso × hito**,
+  15 columnas: `codigo_compromiso`, `codigo_caso`, `region`, `provincia`, `distrito`,
+  `alcance_geografico`, `documento_origen`, `fecha_inicio`, `tematica`,
+  `accion_compromiso`, `area_responsable`, `codigo_hito`, `hito`, `estado_hito`,
+  `semaforo`.
+
+**Hueco de vista, no de export.** Ninguna de las dos trae `fecha_planificada` ni
+`fecha_real` —las columnas V y W—. Se añaden a la vista; el endpoint de export sólo las
+consume. `MATRIZ_CONFLICTOS_EQUIPO.md` §7.1 las da por presentes; la corrección es añadirlas a
+la vista antes de escribir el export.
+
+### Huecos verificados
+
+- **`core.hitos_compromiso` no tiene responsable.** 20 columnas (`id`, `compromiso_id`,
+  `codigo_hito`, `descripcion_hito`, `fecha_vencimiento`, `estado_id`, `fecha_real`,
+  `validacion`, `descripcion_evidencia`, `link_evidencia`, `origen_dato`,
+  `nivel_clasificacion`, `anulado_*`, `motivo_anulacion`) y ninguna de persona.
+  `core.compromisos` sí tiene `unidad_responsable_id`, `fecha_vencimiento`,
+  `tipo_compromiso`, `nivel_gobierno`, `alcance_id` y `tematica_id`: es **área**, no punto
+  focal.
+- **`cat_estados_hito`** = Registrado · En ejecución · Paralizado · Cumplido · Desestimado.
+  Falta **«No Cumplido»** (43 filas del Excel).
+- **`cat_tematicas`** = Infraestructura · Ordenamiento y acceso territorial · Normatividad ·
+  Distribución de beneficios · Gobernanza · Impactos de terceros. No cubre «Recursos y
+  Regulación» (18 filas), «Socio-Ambiental» ni «Mesas de Conflictos».
+- **`cat_niveles_riesgo`** tiene 3 valores; el equipo usa 4.
+- **Sin tabla** para **nudos críticos semanales** (16 columnas) ni para **capacidades 1–5 /
+  postura** por actor.
+- **Estado H** (`Actualizado` / `Pendiente` / `No aplica`) no tiene columna.
+  `core.casos.fecha_ultima_actualizacion` cubre la fecha, no el estado.
+
+### Lo que AVISA tiene y el Excel no
+
+- **El 3P completo**: `core.demandas` tiene `problema_3p`, `propuesta_3p` y `pedido_3p`; el
+  Excel trae una sola columna de descripción.
+- **`core.casos.link_reporte_pdf`** como candidato para la columna G (Canva), que el front
+  hoy declara no disponible (item 97).
+
+### Clave de unión
+
+2 de los 31 códigos del Excel coinciden con `core.casos.codigo_caso`, y **ambos apuntan a
+otro caso**. Mientras no exista una tabla de mapeo, el import no puede escribir: sólo
+previsualizar y rechazar con motivo.
+
+### Dónde está el detalle
+
+- [`MATRIZ_CONFLICTOS_EQUIPO.md`](MATRIZ_CONFLICTOS_EQUIPO.md) — anatomía del Excel,
+  regla de parseo, cobertura columna a columna y contrato de endpoints.
+- `mockups/matriz-conflictividad-caso.html` — la matriz y la bandeja de importación.
+

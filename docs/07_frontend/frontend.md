@@ -191,15 +191,47 @@ el formato tarjetas/tabla, la búsqueda avanzada, las tarjetas a dos líneas, el
 **Matriz del equipo (lo nuevo).** El equipo compartió un Excel con varias filas por caso
 (demandas, acciones e hitos sobre el mismo eje) y quiere mover esa información **hacia y
 desde** AVISA. El mockup `matriz-conflictividad-caso.html` dibuja la matriz y la bandeja
-de importación; el diagnóstico completo —anatomía del Excel, regla de parseo, cobertura
-Excel → base y contrato de endpoints— está en
-[`MATRIZ_CONFLICTOS_EQUIPO.md`](MATRIZ_CONFLICTOS_EQUIPO.md).
+de importación; la anatomía del Excel, la regla de parseo y el contrato de endpoints están
+en [`MATRIZ_CONFLICTOS_EQUIPO.md`](MATRIZ_CONFLICTOS_EQUIPO.md).
 
-**Lo que bloquea el import.** No hay clave de unión entre los 31 códigos del Excel y
-`core.casos` (sólo 2 coinciden y apuntan a otro caso), y las escalas de temática, riesgo y
-estado del hito no son equivalentes. Sin tabla de mapeo y tablas de equivalencia, el
-import sólo puede previsualizar y rechazar. El export sí es viable hoy: sale con las
-columnas del equipo y las celdas sin dato rotuladas como «sin dato».
+**Exportar sí; importar todavía no.** Verificado en Neon (corte 2026-11-23). Las dos
+mitades de la matriz **ya existen como vistas de `analytics`**, así que el export no
+necesita cambio de esquema:
+
+- `analytics.vw_anexo_15_matriz_conflictividad` — una fila por **caso**, 15 columnas
+  (código, región, alcance, subsector, temática, responsable, nivel de conflicto, nivel de
+  riesgo, descripción del riesgo, prioridad, nombre, narración, alertas, actores, punto
+  focal).
+- `analytics.vw_anexo_14_seguimiento_compromisos` — una fila por **compromiso × hito**, 15
+  columnas (código de compromiso y de caso, región, provincia, distrito, alcance,
+  documento origen, fecha de inicio, temática, acción, área responsable, código y texto del
+  hito, estado, semáforo).
+
+Falta un ajuste: **ninguna de las dos trae `fecha_planificada` ni `fecha_real`**, las
+columnas V y W del Excel. Hay que añadirlas **a la vista**, no sólo al export. Con eso,
+exportar A..X con hoja «Sin datos» es un endpoint pequeño.
+
+Lo que el export no puede rellenar es contenido: el Excel trae 23 demandas, 56 compromisos
+y 111 hitos; AVISA tiene **325 demandas** (de otra fuente, `DEM-2026-XXXX`), **8
+compromisos** y **12 hitos**, y esos 8 están en **3 casos**. Un export hoy sale 7–9× más
+corto que el archivo del equipo.
+
+**Lo que bloquea el import.** Dos decisiones que no son de pantalla:
+
+1. **Mapeo Excel → `core.casos.codigo_caso`**: 2 de 31 códigos coinciden y ambos apuntan a
+   otro caso.
+2. **Responsable del hito**: `core.hitos_compromiso` no tiene columna;
+   `core.compromisos.unidad_responsable_id` es área, no persona.
+
+Y tres catálogos que no cuadran: `cat_estados_hito` no tiene **«No Cumplido»** (43 filas
+del Excel), `cat_tematicas` no cubre «Recursos y Regulación» (18), «Socio-Ambiental» ni
+«Mesas de Conflictos», y `cat_niveles_riesgo` tiene 3 valores frente a los 4 del equipo.
+
+**Lo que AVISA ya tiene.** El **3P** (`problema_3p`, `propuesta_3p`, `pedido_3p`) está en
+`core.demandas` y **no** en el Excel; `core.casos.link_reporte_pdf` puede alimentar la
+columna G (Canva) que el front declara no disponible; `fecha_ultima_actualizacion` cubre la
+fecha, no el estado «Actualizado / Pendiente / No aplica». Siguen sin tabla los **nudos
+críticos semanales** y las **capacidades 1–5 / postura** por actor.
 
 **Nota de despliegue.** El filtro `nivel` es superficie nueva de API: hasta que se
 redespliegue el servidor, un backend antiguo lo ignora en silencio y la lista no se
@@ -470,7 +502,7 @@ convierte en pantalla propia o en una pestaña de otra.
 | Perfil territorial        | 119–124        | Catálogo de artes de pesca, OSPA por caleta, demandas por OSPA y región × recurso                     | `Dato`           | `perfil-territorial.html`         |
 | Reuniones y ayuda memoria | 72–74, 77, 117 | Registro de reuniones con banderas (asistencia, AM, relatoría, publicación) y editor de ayuda memoria | `API`            | `reuniones-ayuda-memoria.html`    |
 | Gobierno de sugerencias   | 87             | Bandeja de propuestas automáticas, diff contra el registro y lecciones aprendidas                     | `Diseño`         | `gobierno-sugerencias.html`       |
-| Matriz de conflictividad  | — (nuevo)      | Matriz de demandas–intervenciones por caso, como pestaña de la ficha                                  | `API` + `Dato`   | `matriz-conflictividad-caso.html` |
+| Matriz de conflictividad  | — (nuevo)      | Matriz de demandas–intervenciones por caso, como pestaña de la ficha. Export viable hoy leyendo las vistas 14/15 (con V/W añadidas a la vista); import bloqueado por mapeo de casos y responsable del hito | `API` + `Dato`   | `matriz-conflictividad-caso.html` |
 | Envíos y auditoría        | 55             | Vistas de envíos con acuse y auditoría consultable                                                    | `Diseño`         | —                                 |
 | Administración            | 56             | Catálogos, unidades, roles, parámetros y usuarios, con cambios auditados                              | `Diseño`         | —                                 |
 

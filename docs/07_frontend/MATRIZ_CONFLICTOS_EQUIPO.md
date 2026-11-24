@@ -391,6 +391,12 @@ La pantalla muestra los tres contadores, la tabla de rechazos con motivo y un bo
 - **CSV:** una fila por hito (formato largo), con columnas `codigo_caso, accion, hito, descripcion, fecha_planificada, fecha_real, estado, validacion`.
 - **JSON:** el mismo contrato que emite `scripts/matriz/salida/casos.json` (`{meta, auxiliares, casos[]}`), para reimportación y consumo programático.
 
+**Estado verificado (2026-11-23, Neon).** Las dos mitades de la matriz ya existen como vistas,
+así que el export no exige cambio de esquema: `analytics.vw_anexo_15_matriz_conflictividad`
+(una fila por caso) y `analytics.vw_anexo_14_seguimiento_compromisos` (una fila por compromiso
+× hito). **Ninguna trae `fecha_planificada` ni `fecha_real`**: V y W hay que añadirlas a la
+vista, no sólo al export.
+
 ### 7.2 Celdas que salen como «sin dato»
 
 Por la regla del `_BRIEF.md` («el dato ausente se declara, no se estima»), estas celdas **no se rellenan con un valor inventado**. Se exportan vacías y se listan en la hoja `Sin datos` con el motivo:
@@ -398,7 +404,7 @@ Por la regla del `_BRIEF.md` («el dato ausente se declara, no se estima»), est
 | Celda / campo                               | Motivo                                                                          |
 | ------------------------------------------- | ------------------------------------------------------------------------------- |
 | U `Responsable del Hito`                    | No existe columna de destino.                                                   |
-| G `Análisis de Caso (Canva)`                | Enlace externo; sin columna propia.                                             |
+| G `Análisis de Caso (Canva)`                | `core.casos.link_reporte_pdf` existe y puede alimentarlo; el front lo declara no disponible (item 97). |
 | Desglose 3P de la demanda                   | No existe en el Excel.                                                          |
 | Nudos críticos semanales                    | No existe tabla.                                                                |
 | Nivel de Riesgo Inicial                     | No existe columna.                                                              |
