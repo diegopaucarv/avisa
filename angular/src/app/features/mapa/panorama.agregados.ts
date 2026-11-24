@@ -1,5 +1,5 @@
 import { ALCANCES } from '../../dominio/mapeo';
-import type { Alcance, Caso } from '../../dominio/modelos';
+import type { Alcance, Caso, NivelConflicto } from '../../dominio/modelos';
 
 /**
  * Agregados del panorama territorial.
@@ -27,10 +27,63 @@ export type BandaAmbito = {
 export type FilaRegion = {
   region: string;
   total: number;
+  /** Casos de situación latente (Diferencia + Controversia). */
+  latente: number;
+  /** Casos de situación manifiesta (Conflicto social + Crisis social). */
+  manifiesto: number;
+  /** Casos sin nivel declarado: no se cuentan como latentes ni manifiestos. */
+  sinNivel: number;
   riesgoAlto: number;
   /** Ámbitos presentes en los casos de la región, en orden de catálogo. */
   ambitos: Alcance[];
 };
+
+/**
+ * Situación de conflictividad de la Guía §7.5.1. No es un estado del caso ni un
+ * grado derivado: agrupa los cuatro niveles de `core.cat_niveles_conflicto`.
+ */
+export type SituacionConflicto = 'latente' | 'manifiesto';
+
+/** Latente = Diferencia + Controversia; manifiesto = Conflicto y Crisis social. */
+export function situacionDe(nivel: NivelConflicto | null | undefined): SituacionConflicto | null {
+  switch (nivel) {
+    case 'Diferencia':
+    case 'Controversia':
+      return 'latente';
+    case 'Conflicto social':
+    case 'Crisis social':
+      return 'manifiesto';
+    default:
+      return null;
+  }
+}
+
+export type ConteoSituacion = {
+  latente: number;
+  manifiesto: number;
+  /** Sin nivel declarado: se declara, no se reparte entre las dos situaciones. */
+  sinNivel: number;
+};
+
+/** Conteo de latentes y manifiestos; los casos sin nivel no se estiman. */
+export function conteosPorSituacion(casos: readonly Caso[]): ConteoSituacion {
+  const conteo: ConteoSituacion = { latente: 0, manifiesto: 0, sinNivel: 0 };
+
+  for (const caso of casos) {
+    switch (situacionDe(caso.nivelConflicto)) {
+      case 'latente':
+        conteo.latente += 1;
+        break;
+      case 'manifiesto':
+        conteo.manifiesto += 1;
+        break;
+      default:
+        conteo.sinNivel += 1;
+    }
+  }
+
+  return conteo;
+}
 
 const ORDEN_ALCANCE = new Map<Alcance, number>(
   ALCANCES.map((alcance, indice) => [alcance, indice] as const),
@@ -130,7 +183,15 @@ export function bandasPorAlcance(casos: readonly Caso[]): BandaAmbito[] {
 export function filasPorRegion(casos: readonly Caso[]): FilaRegion[] {
   const filas = new Map<
     string,
-    { region: string; total: number; riesgoAlto: number; ambitos: Set<Alcance> }
+    {
+      region: string;
+      total: number;
+      latente: number;
+      manifiesto: number;
+      sinNivel: number;
+      riesgoAlto: number;
+      ambitos: Set<Alcance>;
+    }
   >();
 
   for (const caso of casos) {
@@ -140,11 +201,29 @@ export function filasPorRegion(casos: readonly Caso[]): FilaRegion[] {
     const clave = normalizarRegion(region);
     let fila = filas.get(clave);
     if (!fila) {
-      fila = { region, total: 0, riesgoAlto: 0, ambitos: new Set() };
+      fila = {
+        region,
+        total: 0,
+        latente: 0,
+        manifiesto: 0,
+        sinNivel: 0,
+        riesgoAlto: 0,
+        ambitos: new Set(),
+      };
       filas.set(clave, fila);
     }
 
     fila.total += 1;
+    switch (situacionDe(caso.nivelConflicto)) {
+      case 'latente':
+        fila.latente += 1;
+        break;
+      case 'manifiesto':
+        fila.manifiesto += 1;
+        break;
+      default:
+        fila.sinNivel += 1;
+    }
     if (caso.riesgo === 'Alto') fila.riesgoAlto += 1;
     fila.ambitos.add(caso.alcance);
   }
@@ -153,6 +232,9 @@ export function filasPorRegion(casos: readonly Caso[]): FilaRegion[] {
     .map((fila) => ({
       region: fila.region,
       total: fila.total,
+      latente: fila.latente,
+      manifiesto: fila.manifiesto,
+      sinNivel: fila.sinNivel,
       riesgoAlto: fila.riesgoAlto,
       ambitos: ordenarAlcances(fila.ambitos),
     }))

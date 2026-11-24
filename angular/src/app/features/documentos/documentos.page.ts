@@ -39,7 +39,9 @@ import {
   ORDENES_DOCUMENTO,
   aDocumento,
   aTiposDocumento,
+  agruparDocumentosPorTipo,
   claseEstado,
+  etapaFlujo,
   etiquetaAnexo,
   formatearFecha,
   formatearFechaHora,
@@ -205,6 +207,95 @@ function totalDe(bruto: unknown): number {
       font-size: 9.5px;
     }
 
+    .arbol-documentos {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding: 12px 14px;
+    }
+
+    .arbol-rama {
+      border-left: 2px solid #dbe7f4;
+      padding-left: 10px;
+    }
+
+    .arbol-rama summary {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      padding: 4px 0;
+      color: #33475b;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .arbol-subrama {
+      margin-left: 14px;
+    }
+
+    .arbol-cuenta {
+      padding: 1px 7px;
+      border-radius: 999px;
+      background: #eaf1f8;
+      color: #52677a;
+      font-size: 9px;
+      font-weight: 600;
+    }
+
+    .arbol-hojas {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      margin: 2px 0 8px 20px;
+      padding: 0;
+      list-style: none;
+    }
+
+    .arbol-hoja {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      padding: 5px 8px;
+      border: 0;
+      border-radius: 6px;
+      background: transparent;
+      color: inherit;
+      font: inherit;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .arbol-hoja:hover,
+    .arbol-hoja:focus-visible {
+      background: #f2f6fa;
+    }
+
+    .arbol-hoja-codigo {
+      flex: 0 0 auto;
+      color: #2f5f8f;
+      font-size: 9.5px;
+      font-weight: 600;
+    }
+
+    .arbol-hoja-titulo {
+      flex: 1 1 auto;
+      overflow: hidden;
+      color: #465a6c;
+      font-size: 10px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .arbol-hoja-etapa {
+      flex: 0 0 auto;
+    }
+
+    .arbol-rama--pendiente summary {
+      color: #7b8896;
+    }
+
     @media (max-width: 720px) {
       .view-body {
         padding: 18px 16px 40px;
@@ -282,7 +373,22 @@ export class DocumentosPage {
 
   readonly resumenTabla = computed(() => {
     const rango = this.rango();
-    return `${this.total()} documentos · ${rango.desde}–${rango.hasta} · pulse una fila para abrir la ficha en el panel lateral. «Cargado» filtra el estado heredado «Activo»; los documentos sin estado se filtran aparte.`;
+    return `${this.total()} documentos · ${rango.desde}–${rango.hasta} · pulse una fila para abrir la ficha en el panel lateral.`;
+  });
+
+  /** Vista del listado: árbol del RAG (por defecto) o tabla operativa. */
+  readonly vista = signal<'arbol' | 'tabla'>('arbol');
+
+  /**
+   * Árbol del RAG: una rama por tipo documental presente en la página. La rama
+   * «Normativas» se pinta aparte y se declara sin dato: no existe todavía una
+   * tabla de normativas conectada.
+   */
+  readonly arbol = computed(() => agruparDocumentosPorTipo(this.documentos()));
+
+  readonly resumenArbol = computed(() => {
+    const ramas = this.arbol().length;
+    return `${this.documentos().length} documentos en ${ramas} ramas · árbol del RAG de la OAIPCS.`;
   });
 
   /** Pie de la papelera: sólo lo que devuelve la API, sin estimar nada. */
@@ -405,6 +511,14 @@ export class DocumentosPage {
 
   claseEstado(estado: string | null): string {
     return claseEstado(estado);
+  }
+
+  etapa(documento: Documento): string {
+    return etapaFlujo(documento);
+  }
+
+  cambiarVista(vista: 'arbol' | 'tabla'): void {
+    this.vista.set(vista);
   }
 
   etiquetaAnexo(anexoNumero: number): string {

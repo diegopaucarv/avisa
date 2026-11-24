@@ -62,6 +62,21 @@ export const routes: Routes = [
         loadComponent: () => import('./features/alertas/alertas.page').then((m) => m.AlertasPage),
       },
       {
+        path: 'clima-social',
+        loadComponent: () =>
+          import('./features/clima-social/clima-social.page').then((m) => m.ClimaSocialPage),
+      },
+      {
+        path: 'reuniones',
+        loadComponent: () =>
+          import('./features/reuniones/reuniones.page').then((m) => m.ReunionesPage),
+      },
+      {
+        path: 'resultados',
+        loadComponent: () =>
+          import('./features/resultados/resultados.page').then((m) => m.ResultadosPage),
+      },
+      {
         path: 'compromisos',
         loadComponent: () =>
           import('./features/compromisos/compromisos.page').then((m) => m.CompromisosPage),
@@ -91,6 +106,12 @@ export const routes: Routes = [
         path: 'directorio',
         loadComponent: () =>
           import('./features/directorio/directorio.page').then((m) => m.DirectorioPage),
+      },
+      {
+        path: 'directorio/personas',
+        data: { naturalezaFija: 'persona' },
+        loadComponent: () =>
+          import('./features/directorio/actores.page').then((m) => m.ActoresPage),
       },
       {
         path: 'directorio/actores',

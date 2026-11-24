@@ -81,7 +81,7 @@ Sólo las pantallas con algo pendiente. Lo más importante va primero.
 
 | Pantalla             | Pendientes | Lo más importante                                                        |
 | -------------------- | ---------: | ------------------------------------------------------------------------ |
-| Panorama territorial |          9 | Rotular latente/manifiesto y dibujar la capa real de puntos              |
+| Panorama territorial |          8 | Dibujar la capa real de puntos                                           |
 | Ficha del caso       |         10 | Edición por campo y documentos del caso                                  |
 | Bandeja de trabajo   |          4 | Convertirla en tablero y persistir asignar/posponer                      |
 | Alertas tempranas    |          3 | Acciones de Alta Dirección                                               |
@@ -110,24 +110,26 @@ En cada una se indica abajo si el hueco es de dato.
 **Mockup:** `panorama-territorial.html` y su segundo estado `mapa-activos-radar-dpa.html`.
 Ya están hechos: las tarjetas sin textos de apoyo, «Regiones con al menos un caso»,
 «Alcance geográfico», el selector fijo, la columna ordenable, el cajón lateral de
-«Ver casos» y la tabla de casos bajo el mapa.
+«Ver casos», la tabla de casos bajo el mapa y el vocabulario **latente / manifiesto**
+en las tarjetas, la columna de regiones y los casos priorizados, con los casos sin
+nivel declarados aparte.
 
-| Item   | Qué falta                                                                                  | Por qué no está       | Mockup                        |
-| ------ | ------------------------------------------------------------------------------------------ | --------------------- | ----------------------------- |
-| 89, 92 | Rotular las tarjetas y la tabla como **latente / manifiesto** en lugar de «Casos abiertos» | `Implementar`         | `panorama-territorial.html`   |
-| 27, 53 | Leyenda, selector de capas, agrupación de puntos y filtro temporal sobre el mapa           | `Diseño`              | `mapa-activos-radar-dpa.html` |
-| 125    | Nube de los 13 456 puntos del KML: 13 229 derechos acuícolas y 227 sedes institucionales   | `Implementar`         | `mapa-activos-radar-dpa.html` |
-| 126    | Redes RADAR y los 31 desembarcaderos DPA, con símbolo propio y filtro                      | `Dato`                | `mapa-activos-radar-dpa.html` |
-| 127    | Estado de proyecto de cada DPA (etapa, expediente, avance)                                 | `Dato`                | `mapa-activos-radar-dpa.html` |
-| 128    | Cargar los polígonos distritales en PostGIS (1 892 distritos, `UBIGEO` INEI)               | `Dato`                | —                             |
-| 129    | Coropletas por distrito sobre los polígonos, sin el rótulo «Mapa referencial»              | `Diseño` + `128`      | — (por dibujar)               |
-| 131    | Tasas por 100 000 habitantes (la población sólo como denominador)                          | `Dato` + `128`        | —                             |
-| 130    | Ubicar en el centroide de su distrito las sedes sin coordenada, rotuladas como «distrito»  | `Implementar` + `128` | —                             |
+| Item   | Qué falta                                                                                 | Por qué no está       | Mockup                        |
+| ------ | ----------------------------------------------------------------------------------------- | --------------------- | ----------------------------- |
+| 27, 53 | Leyenda, selector de capas, agrupación de puntos y filtro temporal sobre el mapa          | `Diseño`              | `mapa-activos-radar-dpa.html` |
+| 125    | Nube de los 13 456 puntos del KML: 13 229 derechos acuícolas y 227 sedes institucionales  | `Implementar`         | `mapa-activos-radar-dpa.html` |
+| 126    | Redes RADAR y los 31 desembarcaderos DPA, con símbolo propio y filtro                     | `Dato`                | `mapa-activos-radar-dpa.html` |
+| 127    | Estado de proyecto de cada DPA (etapa, expediente, avance)                                | `Dato`                | `mapa-activos-radar-dpa.html` |
+| 128    | Cargar los polígonos distritales en PostGIS (1 892 distritos, `UBIGEO` INEI)              | `Dato`                | —                             |
+| 129    | Coropletas por distrito sobre los polígonos, sin el rótulo «Mapa referencial»             | `Diseño` + `128`      | — (por dibujar)               |
+| 131    | Tasas por 100 000 habitantes (la población sólo como denominador)                         | `Dato` + `128`        | —                             |
+| 130    | Ubicar en el centroide de su distrito las sedes sin coordenada, rotuladas como «distrito» | `Implementar` + `128` | —                             |
 
 **Lo que cambia el panorama.** La regla de latente/manifiesto ya está ratificada y no
 necesita ni columna nueva ni hechos públicos: **latente** = `Diferencia` + `Controversia`;
 **manifiesto** = `Conflicto social` + `Crisis social` (Guía §7.5.1). Si el caso no tiene
-nivel declarado, la etiqueta no se muestra. Falta sólo aplicarla en pantalla.
+nivel declarado, la etiqueta no se estima: se declara como «sin nivel». **Aplicada en
+pantalla** (2026-11-23): tarjetas, columna de regiones y tabla de casos priorizados.
 
 **El bloqueo del mapa.** Todo lo que usa geometría distrital (129, 130 y 131) espera la
 carga del item 128. Mientras tanto, la geometría existe como archivo
@@ -453,8 +455,12 @@ Tema, densidad, ámbito y notificaciones ya se guardan, hoy en el navegador.
 ## Shell · cabecera y menú
 
 **Mockup:** `registrar-menu.html`.
-Ya están hechos el nombre institucional, el ámbito vigente, la navegación y los atajos
-`Ctrl/⌘+K` y `/`.
+Ya están hechos el nombre institucional, la navegación y los atajos
+`Ctrl/⌘+K` y `/`. La marca enlaza al panorama territorial (`/mapa`) y el chip de
+ámbito abre un menú con «Sesión» y los cinco alcances: actualiza la preferencia y,
+en `/mapa` y `/casos`, el parámetro `alcance` de la URL sin perder los filtros
+activos. El menú se recorre con flechas, Inicio/Fin y Escape, y en móvil el chip
+se reduce al icono.
 
 | Item | Qué falta                                               | Por qué no está | Mockup                |
 | ---- | ------------------------------------------------------- | --------------- | --------------------- |
@@ -492,19 +498,19 @@ permisos y en la seguridad por fila.
 Piezas acordadas que no están en el menú. Cada una necesita decidir primero si se
 convierte en pantalla propia o en una pestaña de otra.
 
-| Pantalla                  | Items          | Qué falta                                                                                             | Por qué no está  | Mockup                            |
-| ------------------------- | -------------- | ----------------------------------------------------------------------------------------------------- | ---------------- | --------------------------------- |
-| Dashboard analítico       | 51, 57         | Biblioteca de gráficos dibujada; falta el endpoint de agregados y la serie histórica                  | `Diseño` + `API` | `dashboard-analitico.html`        |
-| ETL de tres pestañas      | 58–62, 86      | Ejecución, fuentes e historial con lector real, pipeline observable y conciliación                    | `API`            | `etl-tres-pestanas.html`          |
-| Bandeja RED-RADAR         | 76             | Cola de señales con triage, descarte con motivo y «convertir en alerta»                               | `Dato`           | `bandeja-red-radar.html`          |
-| Autoridades y agendas     | 114            | Prefectos, subprefectos, sectoristas PCM, extensionistas, alcaldes y direpros                         | `Dato`           | — (por dibujar)                   |
-| Clima social              | 116            | Reporte mensual externo por período y región, con autor y archivo                                     | `Dato`           | — (por dibujar)                   |
-| Perfil territorial        | 119–124        | Catálogo de artes de pesca, OSPA por caleta, demandas por OSPA y región × recurso                     | `Dato`           | `perfil-territorial.html`         |
-| Reuniones y ayuda memoria | 72–74, 77, 117 | Registro de reuniones con banderas (asistencia, AM, relatoría, publicación) y editor de ayuda memoria | `API`            | `reuniones-ayuda-memoria.html`    |
-| Gobierno de sugerencias   | 87             | Bandeja de propuestas automáticas, diff contra el registro y lecciones aprendidas                     | `Diseño`         | `gobierno-sugerencias.html`       |
+| Pantalla                  | Items          | Qué falta                                                                                                                                                                                                  | Por qué no está  | Mockup                            |
+| ------------------------- | -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------- | --------------------------------- |
+| Dashboard analítico       | 51, 57         | Biblioteca de gráficos dibujada; falta el endpoint de agregados y la serie histórica                                                                                                                       | `Diseño` + `API` | `dashboard-analitico.html`        |
+| ETL de tres pestañas      | 58–62, 86      | Ejecución, fuentes e historial con lector real, pipeline observable y conciliación                                                                                                                         | `API`            | `etl-tres-pestanas.html`          |
+| Bandeja RED-RADAR         | 76             | Cola de señales con triage, descarte con motivo y «convertir en alerta»                                                                                                                                    | `Dato`           | `bandeja-red-radar.html`          |
+| Autoridades y agendas     | 114            | Prefectos, subprefectos, sectoristas PCM, extensionistas, alcaldes y direpros                                                                                                                              | `Dato`           | — (por dibujar)                   |
+| Clima social              | 116            | Reporte mensual externo por período y región, con autor y archivo                                                                                                                                          | `Dato`           | — (por dibujar)                   |
+| Perfil territorial        | 119–124        | Catálogo de artes de pesca, OSPA por caleta, demandas por OSPA y región × recurso                                                                                                                          | `Dato`           | `perfil-territorial.html`         |
+| Reuniones y ayuda memoria | 72–74, 77, 117 | Registro de reuniones con banderas (asistencia, AM, relatoría, publicación) y editor de ayuda memoria                                                                                                      | `API`            | `reuniones-ayuda-memoria.html`    |
+| Gobierno de sugerencias   | 87             | Bandeja de propuestas automáticas, diff contra el registro y lecciones aprendidas                                                                                                                          | `Diseño`         | `gobierno-sugerencias.html`       |
 | Matriz de conflictividad  | — (nuevo)      | Matriz de demandas–intervenciones por caso, como pestaña de la ficha. Export viable hoy leyendo las vistas 14/15 (con V/W añadidas a la vista); import bloqueado por mapeo de casos y responsable del hito | `API` + `Dato`   | `matriz-conflictividad-caso.html` |
-| Envíos y auditoría        | 55             | Vistas de envíos con acuse y auditoría consultable                                                    | `Diseño`         | —                                 |
-| Administración            | 56             | Catálogos, unidades, roles, parámetros y usuarios, con cambios auditados                              | `Diseño`         | —                                 |
+| Envíos y auditoría        | 55             | Vistas de envíos con acuse y auditoría consultable                                                                                                                                                         | `Diseño`         | —                                 |
+| Administración            | 56             | Catálogos, unidades, roles, parámetros y usuarios, con cambios auditados                                                                                                                                   | `Diseño`         | —                                 |
 
 **Nota de dato.** Las fuentes de tres de estas pantallas no tienen masa crítica:
 `dim_autoridades` tiene 2 filas, clima social 7 y 6, y el puente caso–recurso 0. El

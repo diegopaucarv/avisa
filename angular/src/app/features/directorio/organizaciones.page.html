@@ -108,6 +108,7 @@
               (change)="seleccion.alternarPagina(idsVisibles(), $event)"
             />
           </th>
+          <th scope="col">Foto</th>
           <th scope="col">Nombre</th>
           <th scope="col">Tipo</th>
           <th scope="col">RUC / razón social</th>
@@ -131,6 +132,20 @@
               (click)="$event.stopPropagation()"
               (change)="seleccion.alternar(organizacion.id)"
             />
+          </td>
+          <td class="col-foto">
+            @if (fotoDe(organizacion.id); as foto) {
+            <img
+              class="tabla-foto"
+              [src]="foto.url"
+              [alt]="foto.alt || foto.titulo || organizacion.nombre"
+              loading="lazy"
+              decoding="async"
+              referrerpolicy="no-referrer"
+            />
+            } @else {
+            <span class="sin-dato">—</span>
+            }
           </td>
           <td>
             <button
@@ -308,14 +323,9 @@
               </dd>
             </div>
             <div class="ficha-ancho">
-              <dt>Fotografía</dt>
+              <dt>Galería fotográfica</dt>
               <dd>
-                @if (org.fotoUrl; as enlace) {
-                <app-foto-ficha
-                  [src]="enlace"
-                  [alt]="'Fotografía de la organización ' + org.nombre"
-                />
-                } @else { — }
+                <app-galeria-fotos entidadTipo="organizacion" [entidadId]="org.id" />
               </dd>
             </div>
           </dl>

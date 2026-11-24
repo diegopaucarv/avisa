@@ -6,7 +6,7 @@ import { IconoComponent } from '../../shared/ui/icono.component';
 /**
  * Directorio · portada visual (item 108).
  *
- * Cuatro accesos con ícono y botón. Cada uno lleva a su matriz, que sigue en su
+ * Tres accesos con ícono y botón. Cada uno lleva a su matriz, que sigue en su
  * propia ruta: la portada reordena la entrada, no reescribe el CRUD. Los enlaces
  * directos a las matrices —incluido `/directorio/actores?q=…` de la ficha del
  * caso— siguen funcionando sin pasar por aquí.
@@ -125,25 +125,20 @@ import { IconoComponent } from '../../shared/ui/icono.component';
 export class DirectorioPage {
   readonly accesos = [
     {
-      etiqueta: 'Actores',
-      ruta: '/directorio/actores',
+      etiqueta: 'Personas',
+      ruta: '/directorio/personas',
       icono: 'actores',
-      descripcion: 'Personas y colectivos vinculados a los casos, con su perfil de diálogo.',
+      descripcion:
+        'Personas vinculadas a los casos, con su perfil de diálogo y galería fotográfica.',
     },
     {
       etiqueta: 'Organizaciones',
       ruta: '/directorio/organizaciones',
       icono: 'organizaciones',
-      descripcion: 'Organizaciones sociales y gremiales del territorio.',
+      descripcion: 'Organizaciones sociales, gremiales y entidades públicas del territorio.',
     },
     {
-      etiqueta: 'Instituciones',
-      ruta: '/directorio/instituciones',
-      icono: 'instituciones',
-      descripcion: 'Entidades públicas y privadas que intervienen en el diálogo.',
-    },
-    {
-      etiqueta: 'Auditorios',
+      etiqueta: 'Locales',
       ruta: '/directorio/locales',
       icono: 'mapa',
       descripcion: 'Sedes de reunión por región, con aforo y contacto del local.',

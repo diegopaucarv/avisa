@@ -2,11 +2,6 @@
   <header class="view-head">
     <div>
       <h1 id="titulo-documentos">Documentos</h1>
-      <p class="view-subtitle">
-        Evidencia documental del caso: anexos y formatos de la Guía (§7.7.1 y §8.3.3; Anexos 1–17)
-        para sistematizar demandas, alertas, actas, compromisos, reuniones y reportes. Pulse una
-        fila para revisar la ficha en el panel lateral, sin salir del listado.
-      </p>
     </div>
     <div class="view-acciones">
       @if (puedeRegistrar()) {
@@ -119,8 +114,8 @@
     <button type="button" class="button-secondary" (click)="limpiar()">Limpiar filtros</button>
   </div>
 
-  @if (puedeVerPapelera()) {
   <div class="view-toolbar">
+    @if (puedeVerPapelera()) {
     <div class="segmented" role="group" aria-label="Documentos activos o anulados">
       <button type="button" [attr.aria-pressed]="!verPapelera()" (click)="cambiarVer('activos')">
         Activos
@@ -129,8 +124,25 @@
         Anulados
       </button>
     </div>
+    }
+    <div class="segmented" role="group" aria-label="Vista del listado">
+      <button
+        type="button"
+        [attr.aria-pressed]="vista() === 'arbol'"
+        (click)="cambiarVista('arbol')"
+      >
+        Árbol
+      </button>
+      <button
+        type="button"
+        [attr.aria-pressed]="vista() === 'tabla'"
+        (click)="cambiarVista('tabla')"
+      >
+        Tabla
+      </button>
+    </div>
   </div>
-  } @if (estadoListado() === 'error') {
+  @if (estadoListado() === 'error') {
   <div class="empty-state" role="alert">
     <strong>No se pudieron cargar los documentos</strong>
     <p>{{ errorListado()?.message }}</p>
@@ -199,8 +211,49 @@
       </tbody>
     </table>
   </div>
+  } @else if (!verPapelera() && vista() === 'arbol') {
+  <div class="panel arbol-documentos">
+    <p class="table-caption">{{ resumenArbol() }}</p>
+    <details class="arbol-rama" open>
+      <summary>
+        <span>Todo</span>
+        <span class="arbol-cuenta">{{ documentos().length }}</span>
+      </summary>
+      @for (rama of arbol(); track rama.clave) {
+      <details class="arbol-rama arbol-subrama" open>
+        <summary>
+          <span>{{ rama.etiqueta }}</span>
+          <span class="arbol-cuenta">{{ rama.documentos.length }}</span>
+        </summary>
+        <ul class="arbol-hojas">
+          @for (documento of rama.documentos; track documento.id) {
+          <li>
+            <button type="button" class="arbol-hoja" (click)="abrir(documento)">
+              <span class="arbol-hoja-codigo">{{ documento.codigo || 'Sin código' }}</span>
+              <span class="arbol-hoja-titulo">{{ documento.titulo || 'Sin título' }}</span>
+              <span [class]="'status-badge arbol-hoja-etapa ' + claseEstado(etapa(documento))">
+                <span class="status-dot"></span>
+                {{ etapa(documento) }}
+              </span>
+            </button>
+          </li>
+          }
+        </ul>
+      </details>
+      }
+    </details>
+    <details class="arbol-rama arbol-rama--pendiente">
+      <summary>
+        <span>Normativas</span>
+        <span class="arbol-cuenta">sin dato</span>
+      </summary>
+      <p class="panel-nota">
+        Sin dato: todavía no existe una tabla de normativas conectada al RAG. Cuando exista, esta
+        rama listará el marco normativo.
+      </p>
+    </details>
+  </div>
   } @else {
-
   <div class="table-wrap">
     <table class="data-table">
       <caption class="table-caption">
@@ -221,8 +274,9 @@
           <th scope="col">Título</th>
           <th scope="col">Tipo</th>
           <th scope="col">Caso</th>
+          <th scope="col">Responsable</th>
           <th scope="col">Fecha</th>
-          <th scope="col">Estado</th>
+          <th scope="col">Etapa</th>
         </tr>
       </thead>
       <tbody>
@@ -273,11 +327,12 @@
             <span class="sin-dato">Sin caso</span>
             }
           </td>
+          <td>{{ documento.responsableNombre || 'Sin dato' }}</td>
           <td>{{ formatearFecha(documento.fecha) }}</td>
           <td>
-            <span [class]="'status-badge ' + claseEstado(documento.estadoUi)">
+            <span [class]="'status-badge ' + claseEstado(etapa(documento))">
               <span class="status-dot"></span>
-              {{ documento.estadoUi }}
+              {{ etapa(documento) }}
             </span>
           </td>
         </tr>

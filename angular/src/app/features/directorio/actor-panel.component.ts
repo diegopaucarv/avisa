@@ -19,6 +19,7 @@ import { urlApi } from '../../core/config/entorno';
 import { urlConParametros } from '../../core/http/coleccion';
 import { aErrorApi } from '../../core/http/errores';
 import { CapacidadesService } from '../../core/permisos/capacidades.service';
+import { GaleriaFotosComponent } from '../../shared/ui/galeria-fotos.component';
 import { IconoComponent } from '../../shared/ui/icono.component';
 import {
   aActorDirectorio,
@@ -65,7 +66,7 @@ type ActorEdicion = Record<CampoActorEdicion, string> & { activo: boolean };
  */
 @Component({
   selector: 'app-actor-panel',
-  imports: [IconoComponent],
+  imports: [IconoComponent, GaleriaFotosComponent],
   templateUrl: './actor-panel.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
@@ -414,7 +415,8 @@ export class ActorPanelComponent {
   }
 
   actualizarTexto(campo: CampoActorEdicion, evento: Event): void {
-    const valor = (evento.target as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement).value;
+    const valor = (evento.target as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement)
+      .value;
     this.borrador.update((actual) => ({ ...actual, [campo]: valor }));
   }
 

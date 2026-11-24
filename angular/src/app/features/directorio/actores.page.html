@@ -1,10 +1,12 @@
 <section class="view-body" aria-labelledby="titulo-actores">
   <header class="view-head">
     <div>
-      <h1 id="titulo-actores">Actores</h1>
+      <h1 id="titulo-actores">{{ titulo() }}</h1>
       <p class="view-subtitle">
-        Personas, organizaciones sociales y entidades registradas en el directorio, con su tipo,
-        función y posicionamiento en el escenario de conflictividad (Guía §7.4).
+        @if (esSoloPersonas()) { Personas registradas en el directorio, con su tipo, función y
+        posicionamiento en el escenario de conflictividad (Guía §7.4). } @else { Personas,
+        organizaciones sociales y entidades registradas en el directorio, con su tipo, función y
+        posicionamiento en el escenario de conflictividad (Guía §7.4). }
       </p>
     </div>
     <div class="view-actions">
@@ -17,7 +19,7 @@
       >
         Lista temporal <span class="lista-contador">{{ listaTemporal().length }}</span>
       </button>
-      <p class="result-count" aria-live="polite">{{ total() }} actores</p>
+      <p class="result-count" aria-live="polite">{{ total() }} {{ sustantivo() }}</p>
     </div>
   </header>
 
@@ -41,11 +43,12 @@
         type="search"
         placeholder="Buscar por nombre, abreviatura o cargo"
         [value]="filtros().q"
-        aria-label="Buscar actores"
+        [attr.aria-label]="'Buscar ' + sustantivo()"
         (input)="buscar($event)"
       />
     </label>
 
+    @if (!esSoloPersonas()) {
     <label class="select-filter">
       Naturaleza
       <select aria-label="Filtrar por naturaleza del actor" (change)="cambiarNaturaleza($event)">
@@ -57,8 +60,7 @@
         }
       </select>
     </label>
-
-    @if (tiposActor().length > 0) {
+    } @if (tiposActor().length > 0) {
     <label class="select-filter">
       Tipo
       <select aria-label="Filtrar por tipo de actor" (change)="cambiarTipo($event)">
@@ -186,15 +188,15 @@
 
   @if (estado() === "error") {
   <div class="empty-state" role="alert">
-    <strong>No se pudieron cargar los actores</strong>
+    <strong>No se pudieron cargar los {{ sustantivo() }}</strong>
     <p>{{ error()?.message }}</p>
     <button type="button" class="button-secondary" (click)="recargar()">Reintentar</button>
   </div>
   } @else if (actores().length === 0) { @if (estado() === "cargando" || estado() === "inactivo") {
-  <div class="empty-state" role="status">Cargando actores…</div>
+  <div class="empty-state" role="status">Cargando {{ sustantivo() }}…</div>
   } @else {
   <div class="empty-state">
-    <strong>Sin actores para estos filtros</strong>
+    <strong>Sin {{ sustantivo() }} para estos filtros</strong>
     <p>
       No hay actores que coincidan con la búsqueda. La región se compara con el nombre registrado,
       así que debe escribirse completo (por ejemplo, el departamento).
@@ -221,12 +223,13 @@
               (change)="seleccion.alternarPagina(idsVisibles(), $event)"
             />
           </th>
+          <th scope="col">Foto</th>
           <th scope="col">Nombre</th>
           <th scope="col">Naturaleza</th>
           <th scope="col">Tipo</th>
           <th scope="col">Función</th>
           <th scope="col">Región</th>
-          <th scope="col">Organización ancla</th>
+          <th scope="col">Organización / cargo</th>
           <th scope="col"><span class="sr-only">Lista temporal</span></th>
         </tr>
       </thead>
@@ -246,6 +249,20 @@
               (change)="seleccion.alternar(actor.id)"
             />
           </td>
+          <td class="col-foto">
+            @if (fotoDe(actor.id); as foto) {
+            <img
+              class="tabla-foto"
+              [src]="foto.url"
+              [alt]="foto.alt || foto.titulo || actor.nombre"
+              loading="lazy"
+              decoding="async"
+              referrerpolicy="no-referrer"
+            />
+            } @else {
+            <span class="sin-dato">—</span>
+            }
+          </td>
           <td>
             <button
               type="button"
@@ -263,7 +280,13 @@
           <td>{{ actor.tipo || "—" }}</td>
           <td>{{ actor.funcion || "No determinado" }}</td>
           <td>{{ actor.region || "—" }}</td>
-          <td class="actor-organizacion">{{ actor.organizacionAncla || "—" }}</td>
+          <td class="actor-organizacion">
+            @if (actor.organizacionAncla || actor.cargo) { @if (actor.organizacionAncla) {
+            <span>{{ actor.organizacionAncla }}</span>
+            } @if (actor.cargo) {
+            <small>{{ actor.cargo }}</small>
+            } } @else { — }
+          </td>
           <td>
             <button
               type="button"

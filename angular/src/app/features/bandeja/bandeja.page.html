@@ -3,8 +3,8 @@
     <div>
       <h1 id="titulo-bandeja">Bandeja de trabajo</h1>
       <p class="view-subtitle">
-        Lo que requiere atención hoy, reunido en una sola vista. Cada bloque enlaza a su pantalla
-        completa para trabajar con todos los registros.
+        De lista a tablero: las tres colas que requieren atención hoy —alertas, compromisos y
+        demandas sin caso— reunidas en una sola vista. Cada bloque enlaza a su pantalla completa.
       </p>
     </div>
     <div class="view-actions">
@@ -34,7 +34,10 @@
     </div>
 
     @if (estadoAlertas() === 'error') {
-    <p class="bloque-nota" role="alert">{{ errorAlertas()?.message }}</p>
+    <p class="bloque-nota" role="alert">
+      {{ errorAlertas()?.message }}
+      <button type="button" class="button-secondary" (click)="recargar()">Reintentar</button>
+    </p>
     } @else if (estadoAlertas() === 'cargando' || estadoAlertas() === 'inactivo') {
     <p class="bloque-vacio" role="status">Cargando alertas…</p>
     } @else if (alertas().length === 0) {
@@ -71,10 +74,11 @@
         <p class="section-eyebrow">COMPROMISOS</p>
         <h3 class="bloque-titulo" id="titulo-compromisos-atencion">
           <app-icono nombre="compromisos" [tamano]="15" />
-          Vencidos o por vencer
+          Compromisos vencidos y por vencer
         </h3>
         <p>
           Compromisos vencidos y los que vencen entre hoy y los próximos {{ horizonteDias }} días.
+          Los compromisos sin fecha de vencimiento no se cuentan: no se estima.
         </p>
       </div>
       <a class="link-button" routerLink="/compromisos">
@@ -99,7 +103,10 @@
     </div>
 
     @if (estadoCompromisos() === 'error') {
-    <p class="bloque-nota" role="alert">{{ errorCompromisos()?.message }}</p>
+    <p class="bloque-nota" role="alert">
+      {{ errorCompromisos()?.message }}
+      <button type="button" class="button-secondary" (click)="recargar()">Reintentar</button>
+    </p>
     } @else if (estadoCompromisos() === 'cargando' || estadoCompromisos() === 'inactivo') {
     <p class="bloque-vacio" role="status">Cargando compromisos…</p>
     } @else { @if (compromisos().length === 0) {

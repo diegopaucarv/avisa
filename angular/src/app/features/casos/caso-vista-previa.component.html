@@ -29,7 +29,7 @@
 
     <div class="drawer-body">
       <div class="previa-badges">
-        <span class="status-badge">{{ caso().nivelConflicto }}</span>
+        <span class="status-badge">{{ caso().nivelConflicto || 'Sin declarar' }}</span>
         <span class="status-badge" [class]="'status-badge risk-' + caso().riesgo.toLowerCase()">
           <span class="status-dot"></span>
           Nivel de riesgo: {{ caso().riesgo }}

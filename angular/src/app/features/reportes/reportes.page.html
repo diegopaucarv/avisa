@@ -1,18 +1,32 @@
 <section class="view-body" aria-labelledby="titulo-reportes">
   <header class="view-head">
     <div>
-      <h1 id="titulo-reportes">Registro de reportes</h1>
+      <p class="section-eyebrow">GESTIÓN DE IYC</p>
+      <h1 id="titulo-reportes">
+        {{ pestanaActiva() === 'informe' ? 'Informe oficial' : 'Reporte de actividad' }}
+      </h1>
       <p class="view-subtitle">
-        Anexo N° 17 de la Guía de Prevención y Gestión de Conflictos Sociales: registro consolidado
-        de reportes rápidos, de clima social, de actividad, informes oficiales y alertas tempranas.
-        Es una vista de sólo lectura; el alta se realiza desde las pantallas de Documentos y
-        Alertas.
+        Productos de la Gestión de Información y Conocimiento. Vista de sólo lectura; el alta se
+        realiza desde la pantalla de Documentos.
       </p>
     </div>
     <div class="view-acciones">
       <p class="result-count" aria-live="polite">{{ total() }} reportes</p>
     </div>
   </header>
+
+  <div class="segmented" role="tablist" aria-label="Tipo de reporte de IyC">
+    @for (opcion of pestanas; track opcion.codigo) {
+    <button
+      type="button"
+      role="tab"
+      [attr.aria-selected]="pestanaActiva() === opcion.codigo"
+      (click)="cambiarPestana(opcion.codigo)"
+    >
+      {{ opcion.etiqueta }}
+    </button>
+    }
+  </div>
 
   <div class="view-toolbar">
     <app-barra-seleccion
@@ -37,18 +51,6 @@
         aria-label="Buscar reportes"
         (input)="buscar($event)"
       />
-    </label>
-
-    <label class="select-filter">
-      Tipo
-      <select aria-label="Filtrar reportes por tipo" (change)="cambiarTipo($event)">
-        <option value="" [selected]="filtros().tipo === ''">Todos</option>
-        @for (tipo of tipos; track tipo.valor) {
-        <option [value]="tipo.valor" [selected]="filtros().tipo === tipo.valor">
-          {{ tipo.etiqueta }}
-        </option>
-        }
-      </select>
     </label>
 
     <label class="search-field">

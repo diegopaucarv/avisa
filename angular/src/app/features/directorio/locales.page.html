@@ -1,16 +1,15 @@
 <section class="view-body" aria-labelledby="titulo-locales">
   <header class="view-head">
     <div>
-      <h1 id="titulo-locales">Auditorios</h1>
+      <h1 id="titulo-locales">Locales</h1>
       <p class="view-subtitle">
-        Sedes y auditorios disponibles para reuniones y espacios de diálogo, con su aforo,
-        equipamiento y contacto del local (Guía §8.2.5 y Anexo 16, columna «Lugar»). No se dibuja
-        una capa en el mapa: la base registra el distrito, no las coordenadas, y no se estiman
-        posiciones.
+        Sedes y locales disponibles para reuniones y espacios de diálogo, con su aforo, equipamiento
+        y contacto del local (Guía §8.2.5 y Anexo 16, columna «Lugar»). No se dibuja una capa en el
+        mapa: la base registra el distrito, no las coordenadas, y no se estiman posiciones.
       </p>
     </div>
     <div class="view-actions">
-      <p class="result-count" aria-live="polite">{{ total() }} auditorios</p>
+      <p class="result-count" aria-live="polite">{{ total() }} locales</p>
     </div>
   </header>
 
@@ -34,14 +33,14 @@
         type="search"
         placeholder="Buscar por nombre, código, distrito o dirección"
         [value]="filtros().q"
-        aria-label="Buscar auditorios"
+        aria-label="Buscar locales"
         (input)="buscar($event)"
       />
     </label>
 
     <label class="select-filter">
       Activo
-      <select aria-label="Filtrar auditorios por estado activo" (change)="cambiarActivo($event)">
+      <select aria-label="Filtrar locales por estado activo" (change)="cambiarActivo($event)">
         <option value="" [selected]="filtros().activo === ''">Todos</option>
         <option value="true" [selected]="filtros().activo === 'true'">Sí</option>
         <option value="false" [selected]="filtros().activo === 'false'">No</option>
@@ -53,16 +52,16 @@
 
   @if (estado() === "error") {
   <div class="empty-state" role="alert">
-    <strong>No se pudieron cargar los auditorios</strong>
+    <strong>No se pudieron cargar los locales</strong>
     <p>{{ error()?.message }}</p>
     <button type="button" class="button-secondary" (click)="recargar()">Reintentar</button>
   </div>
   } @else if (locales().length === 0) { @if (estado() === "cargando" || estado() === "inactivo") {
-  <div class="empty-state" role="status">Cargando auditorios…</div>
+  <div class="empty-state" role="status">Cargando locales…</div>
   } @else {
   <div class="empty-state">
-    <strong>Sin auditorios para estos filtros</strong>
-    <p>No hay auditorios que coincidan con la búsqueda registrada.</p>
+    <strong>Sin locales para estos filtros</strong>
+    <p>No hay locales que coincidan con la búsqueda registrada.</p>
   </div>
   } } @else { @if (estado() === "cargando") {
   <p class="local-actualizando" role="status">Actualizando el listado…</p>
@@ -71,8 +70,8 @@
   <div class="table-wrap">
     <table class="data-table">
       <caption class="table-caption">
-        Pulse una fila para abrir la ficha del auditorio en el panel lateral. El equipamiento se
-        muestra como «—» cuando la base no tiene el dato registrado.
+        Pulse una fila para abrir la ficha del local en el panel lateral. El equipamiento se muestra
+        como «—» cuando la base no tiene el dato registrado.
       </caption>
       <thead>
         <tr>
@@ -85,6 +84,7 @@
               (change)="seleccion.alternarPagina(idsVisibles(), $event)"
             />
           </th>
+          <th scope="col" class="col-foto">Foto</th>
           <th scope="col">Nombre</th>
           <th scope="col">Distrito</th>
           <th scope="col">Aforo</th>
@@ -106,10 +106,24 @@
             <input
               type="checkbox"
               [checked]="seleccion.esta(local.id)"
-              [attr.aria-label]="'Seleccionar el auditorio ' + local.nombre"
+              [attr.aria-label]="'Seleccionar el local ' + local.nombre"
               (click)="$event.stopPropagation()"
               (change)="seleccion.alternar(local.id)"
             />
+          </td>
+          <td class="col-foto">
+            @if (fotoDe(local.id); as foto) {
+            <img
+              class="tabla-foto"
+              [src]="foto.url"
+              [alt]="foto.alt || foto.titulo || local.nombre"
+              loading="lazy"
+              decoding="async"
+              referrerpolicy="no-referrer"
+            />
+            } @else {
+            <span class="sin-dato">—</span>
+            }
           </td>
           <td>
             <button
@@ -185,7 +199,7 @@
         <button
           type="button"
           class="icon-button"
-          aria-label="Cerrar la ficha del auditorio"
+          aria-label="Cerrar la ficha del local"
           (click)="cerrarPanel()"
         >
           <app-icono nombre="cerrar" [tamano]="18" />
@@ -209,11 +223,9 @@
               <dd>{{ local.ubicacionRef || "—" }}</dd>
             </div>
             <div class="ficha-ancho">
-              <dt>Fotografía</dt>
+              <dt>Galería fotográfica</dt>
               <dd>
-                @if (local.fotoUrl; as enlace) {
-                <app-foto-ficha [src]="enlace" [alt]="'Fotografía del auditorio ' + local.nombre" />
-                } @else { — }
+                <app-galeria-fotos entidadTipo="local" [entidadId]="local.id" />
               </dd>
             </div>
           </dl>
@@ -246,9 +258,9 @@
         </section>
 
         <section class="ficha-seccion" aria-labelledby="local-panel-contacto">
-          <h3 id="local-panel-contacto">Contacto del auditorio</h3>
+          <h3 id="local-panel-contacto">Contacto del local</h3>
           @if (!puedeVerPii()) {
-          <p class="ficha-nota">Su rol no permite ver los datos de contacto del auditorio.</p>
+          <p class="ficha-nota">Su rol no permite ver los datos de contacto del local.</p>
           } @else {
           <dl class="ficha-datos">
             <div>

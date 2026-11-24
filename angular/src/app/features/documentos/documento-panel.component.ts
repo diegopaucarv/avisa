@@ -30,8 +30,8 @@ import { IconoComponent } from '../../shared/ui/icono.component';
 import {
   aDetalleDocumento,
   claseEstado,
+  etapaFlujo,
   etiquetaAnexo,
-  formatearConfianza,
   formatearFecha,
   nombreArchivo,
   type AltaDocumento,
@@ -405,6 +405,12 @@ export class DocumentoPanelComponent {
     () => this.detalle()?.documento ?? this.documento(),
   );
   readonly fuentes = computed(() => this.detalle()?.fuentes ?? []);
+
+  /** Etapa de flujo derivada del estado (ver `etapaFlujo`). */
+  readonly etapa = computed(() => {
+    const documento = this.cabecera();
+    return documento ? etapaFlujo(documento) : 'Sin etapa';
+  });
   readonly errorDetalle = this.detalleRecurso.error;
   readonly cargandoDetalle = computed(
     () => this.detalleRecurso.estado() === 'cargando' && this.detalle() === null,
@@ -527,10 +533,6 @@ export class DocumentoPanelComponent {
 
   formatearFecha(valor: string | null | undefined): string {
     return formatearFecha(valor);
-  }
-
-  formatearConfianza(valor: number | null): string {
-    return formatearConfianza(valor);
   }
 
   claseEstado(estado: string | null): string {

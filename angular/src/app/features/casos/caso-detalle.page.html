@@ -17,6 +17,7 @@
       </div>
       <h1 id="titulo-caso">{{ d.caso.titulo }}</h1>
       <p class="view-subtitle">{{ d.caso.resumen || 'Sin resumen registrado.' }}</p>
+      <p class="view-meta">Última actualización: {{ fechaTexto(d.caso.actualizado) }}</p>
     </div>
     <div class="view-actions">
       @if (anulado()) {
@@ -44,12 +45,15 @@
         "
       >
         <span class="status-dot"></span>
-        Riesgo {{ d.caso.riesgo }}
+        Riesgo: {{ d.caso.riesgo }}
       </span>
       <app-glosario termino="nivel-riesgo" [alineacion]="'fin'" />
-      <span class="status-badge">{{ d.caso.nivelConflicto }}</span>
+      <span class="status-badge"
+        >Nivel de conflictividad: {{ d.caso.nivelConflicto || 'Sin declarar' }}</span
+      >
       <app-glosario termino="nivel-conflictividad" [alineacion]="'fin'" />
-      <span class="status-badge">{{ d.caso.estado }}</span>
+      <span class="status-badge">Estado: {{ d.caso.estado }}</span>
+      <span class="status-badge">Región: {{ d.caso.region || 'Sin región' }}</span>
       @if (puedeAnular()) {
       <button type="button" class="button-danger" (click)="abrirAnulacion()">Anular caso</button>
       } }
@@ -68,6 +72,9 @@
 
   <div class="ficha-layout">
     <div class="ficha-principal">
+      <div class="detail-section-title">
+        <h2 id="resumen-caso">Resumen</h2>
+      </div>
       <dl class="detail-grid" id="datos-caso">
         <div>
           <dt>Región</dt>
@@ -150,7 +157,7 @@
           <table class="data-table">
             <thead>
               <tr>
-                <th scope="col">Actor</th>
+                <th scope="col">Actor (Apellidos, Nombres)</th>
                 <th scope="col">Correo</th>
                 <th scope="col">Tipo <app-glosario termino="tipo-actor" /></th>
                 <th scope="col">Función <app-glosario termino="funcion-actor" /></th>
@@ -281,7 +288,7 @@
                 <th scope="col">Propuesta</th>
                 <th scope="col">Pedido</th>
                 <th scope="col">Estado de atención</th>
-                <th scope="col">Documento de origen</th>
+                <th scope="col">Origen</th>
                 @if (puedeModificar()) {
                 <th scope="col">Acciones</th>
                 }
@@ -376,16 +383,16 @@
       </section>
 
       <section class="detail-section" aria-labelledby="compromisos-caso">
-        <h2 id="compromisos-caso">Compromisos ({{ d.compromisos.length }})</h2>
+        <h2 id="compromisos-caso">Acuerdos y compromisos ({{ d.compromisos.length }})</h2>
         @if (d.compromisos.length === 0) {
-        <p class="empty-inline">Sin compromisos registrados.</p>
+        <p class="empty-inline">Sin acuerdos y compromisos registrados.</p>
         } @else {
         <div class="table-wrap">
           <table class="data-table">
             <thead>
               <tr>
                 <th scope="col">Código</th>
-                <th scope="col">Acción</th>
+                <th scope="col">Compromiso</th>
                 <th scope="col">Estado</th>
                 <th scope="col">Nivel de gobierno <app-glosario termino="nivel-gobierno" /></th>
                 <th scope="col">Unidad</th>
@@ -408,6 +415,39 @@
                   <small class="detail-hint">Derivado del próximo hito</small>
                   }
                 </td>
+              </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        }
+      </section>
+
+      <section class="detail-section" aria-labelledby="hitos-caso">
+        <h2 id="hitos-caso">Hitos ({{ hitosDelCaso().length }})</h2>
+        <p class="detail-hint">
+          Un hito por cada fecha de seguimiento de los acuerdos y compromisos del caso.
+        </p>
+        @if (hitosDelCaso().length === 0) {
+        <p class="empty-inline">Sin hitos registrados.</p>
+        } @else {
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th scope="col">Compromiso</th>
+                <th scope="col">Hito</th>
+                <th scope="col">Fecha planificada</th>
+                <th scope="col">Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (hito of hitosDelCaso(); track hito.id) {
+              <tr>
+                <td><strong>{{ hito.compromiso }}</strong></td>
+                <td class="celda-larga">{{ hito.descripcion || 'Sin descripción' }}</td>
+                <td>{{ fechaTexto(hito.fecha) }}</td>
+                <td>{{ hito.estado || 'Sin estado' }}</td>
               </tr>
               }
             </tbody>
@@ -449,7 +489,7 @@
       </section>
 
       <section class="detail-section" aria-labelledby="historial-caso">
-        <h2 id="historial-caso">Historial ({{ d.historial.length }})</h2>
+        <h2 id="historial-caso">Historial / Auditoría ({{ d.historial.length }})</h2>
         @if (d.historial.length === 0) {
         <p class="empty-inline">Sin historial de estados registrado.</p>
         } @else {

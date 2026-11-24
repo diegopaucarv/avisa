@@ -19,12 +19,13 @@ import { SesionStore } from '../../core/auth/sesion.store';
 import { formatearFechaHora } from '../../shared/formato-fecha';
 import { IconoComponent } from '../../shared/ui/icono.component';
 import { formatearFechaCorta } from '../../dominio/mapeo';
-import type { Alcance, Caso, Riesgo } from '../../dominio/modelos';
+import type { Alcance, Caso, PrioridadAtencion, Riesgo } from '../../dominio/modelos';
 import { coordenadaDeRegion } from './centroides.regiones';
 import {
   ambitosSinRegion,
   bandasPorAlcance,
   conteosPorAlcance,
+  conteosPorSituacion,
   contarRegiones,
   contarRiesgoAlto,
   contarRiesgoAltoSinRegion,
@@ -76,6 +77,9 @@ function etiquetaCirculo(fila: FilaRegion): string {
 /** Gravedad declarada del caso: ordena de más a menos grave. */
 const ORDEN_RIESGO: Record<Riesgo, number> = { Alto: 0, Moderado: 1, Bajo: 2 };
 
+/** Prioridad de atención: ordena de más a menos urgente (eje distinto del riesgo). */
+const ORDEN_PRIORIDAD: Record<PrioridadAtencion, number> = { Urgente: 0, Moderado: 1, Bajo: 2 };
+
 /** Antigüedad: el inicio más antiguo primero; sin fecha declarada, al final. */
 function compararInicio(a: string | null, b: string | null): number {
   if (!a && !b) return 0;
@@ -87,7 +91,10 @@ function compararInicio(a: string | null, b: string | null): number {
 /**
  * Panorama territorial (ventana principal de la aplicación).
  *
- * Distribuye los casos abiertos reales por ámbito y región. El esquema usa
+ * Distribuye los casos reales por ámbito y región y agrupa su conflictividad en
+ * situación latente (Diferencia + Controversia) y manifiesta (Conflicto social +
+ * Crisis social), según la Guía §7.5.1; los casos sin nivel declarado se cuentan
+ * aparte, sin estimarlos. El esquema usa
  * bandas, chips y una tabla derivados del conteo, y suma un mapa referencial de
  * OpenStreetMap: cada región con casos visibles se ubica en su centroide
  * referencial (`centroides.regiones.ts`). El ubigeo distrital y los límites
@@ -105,12 +112,27 @@ function compararInicio(a: string | null, b: string | null): number {
   templateUrl: './mapa.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [PanoramaService],
-  host: {
-    '(document:keydown.escape)': 'cerrarDrawer()',
-  },
   styles: `
     :host {
       display: block;
+    }
+
+    /* Cinco tarjetas: la rejilla global es de cuatro; aquí se fija la fila completa. */
+    .executive-kpis {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+
+    @media (max-width: 980px) {
+      .executive-kpis {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+
+    /* «Sin nivel» es un hueco, no un valor: se distingue del conteo. */
+    .situacion-sin-nivel {
+      display: block;
+      color: #8995a0;
+      font-size: 9px;
     }
 
     .view-meta {
@@ -166,6 +188,14 @@ function compararInicio(a: string | null, b: string | null): number {
 
     .panel {
       padding: 17px;
+    }
+
+    /* Primera fila: mapa a la izquierda y casos por región a la derecha. */
+    .panel-doble {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 14px;
+      align-items: start;
     }
 
     .panel-nota {
@@ -528,11 +558,6 @@ export class MapaPage {
   /** Orden de la columna «Casos abiertos»: por defecto, el mayor primero. */
   readonly ordenTotal = signal<'desc' | 'asc'>('desc');
 
-  /** Fila abierta en el cajón «Ver casos»; `null` cuando el cajón está cerrado. */
-  private readonly filaDrawer = signal<FilaRegion | null>(null);
-  /** El cajón también sirve para la fila «Sin región». */
-  private readonly sinRegionDrawer = signal(false);
-
   private mapa: L.Map | null = null;
   private readonly capasRegion = new Map<string, L.CircleMarker>();
 
@@ -571,7 +596,7 @@ export class MapaPage {
   readonly regionesSesion = computed(() => this.sesion.usuario()?.regiones ?? []);
   readonly conRecorte = computed(() => this.regionesSesion().length > 0);
 
-  /** Casos abiertos ya acotados a las regiones de la sesión, sin filtro de ámbito. */
+  /** Casos ya acotados a las regiones de la sesión, sin filtro de ámbito. */
   readonly base = computed<Caso[]>(() => {
     const casos = this.panorama.casos();
     const regiones = this.regionesSesion();
@@ -623,13 +648,15 @@ export class MapaPage {
   /**
    * Entrada de conflictividad (item 118): los casos visibles antes que el
    * desglose territorial, ordenados por gravedad del riesgo propio y, dentro de
-   * cada nivel, por el inicio más antiguo. Los casos sin `fecha_inicio` se
-   * declaran y se ordenan al final; no se inventa una fecha.
+   * cada nivel, por la prioridad de atención (Urgente → Bajo); a igualdad de
+   * ambas, por el inicio más antiguo. Los casos sin `fecha_inicio` se declaran y
+   * se ordenan al final; no se inventa una fecha.
    */
   private readonly casosOrdenados = computed<Caso[]>(() =>
     [...this.visibles()].sort(
       (a, b) =>
         (ORDEN_RIESGO[a.riesgo] ?? 3) - (ORDEN_RIESGO[b.riesgo] ?? 3) ||
+        (ORDEN_PRIORIDAD[a.prioridad] ?? 3) - (ORDEN_PRIORIDAD[b.prioridad] ?? 3) ||
         compararInicio(a.inicio, b.inicio) ||
         a.codigo.localeCompare(b.codigo, 'es'),
     ),
@@ -637,34 +664,6 @@ export class MapaPage {
 
   readonly casosPrioritarios = computed(() => this.casosOrdenados().slice(0, 50));
   readonly sinInicio = computed(() => this.visibles().filter((caso) => !caso.inicio).length);
-
-  readonly drawerAbierto = computed(() => this.filaDrawer() !== null || this.sinRegionDrawer());
-
-  readonly drawerTitulo = computed(() =>
-    this.sinRegionDrawer() ? 'Sin región' : (this.filaDrawer()?.region ?? ''),
-  );
-
-  /** Casos del cajón: el mismo recorte con el que se contó la fila. */
-  readonly drawerCasos = computed<Caso[]>(() => {
-    if (this.sinRegionDrawer()) {
-      return this.casosOrdenados().filter((caso) => regionDe(caso) === null);
-    }
-
-    const fila = this.filaDrawer();
-    if (!fila) return [];
-
-    const clave = normalizarRegion(fila.region);
-    return this.casosOrdenados().filter((caso) => {
-      const region = regionDe(caso);
-      return region !== null && normalizarRegion(region) === clave;
-    });
-  });
-
-  readonly drawerEnlace = computed<Record<string, string>>(() => {
-    if (this.sinRegionDrawer()) return this.verCasosSinRegion();
-    const fila = this.filaDrawer();
-    return fila ? this.verCasos(fila) : this.recorteListado();
-  });
 
   /** Región resaltada por el mapa, sólo si sigue teniendo casos visibles. */
   readonly filaSeleccionada = computed<FilaRegion | null>(() => {
@@ -677,7 +676,24 @@ export class MapaPage {
   readonly sinRegion = computed(() => contarSinRegion(this.visibles()));
   readonly riesgoAltoSinRegion = computed(() => contarRiesgoAltoSinRegion(this.visibles()));
   readonly riesgoAlto = computed(() => contarRiesgoAlto(this.visibles()));
+
+  /** Casos con nivel de conflictividad «Crisis social» (Guía §7.5.1). */
+  readonly crisisSocial = computed(
+    () =>
+      this.visibles().filter(
+        (caso) => (caso.nivelConflicto ?? '').toLowerCase() === 'crisis social',
+      ).length,
+  );
+
   readonly alcancesSinRegion = computed(() => ambitosSinRegion(this.visibles()));
+
+  /** Conteo latente/manifiesto de los casos visibles; los sin nivel se declaran. */
+  readonly conteoSituacion = computed(() => conteosPorSituacion(this.visibles()));
+
+  /** Mismo conteo para la fila «Sin región» de la tabla de regiones. */
+  readonly situacionSinRegion = computed(() =>
+    conteosPorSituacion(this.visibles().filter((caso) => regionDe(caso) === null)),
+  );
 
   readonly alcanceTexto = computed(() => this.alcanceActivo() ?? 'Todos los ámbitos');
 
@@ -742,26 +758,6 @@ export class MapaPage {
 
   alternarOrdenTotal(): void {
     this.ordenTotal.update((valor) => (valor === 'desc' ? 'asc' : 'desc'));
-  }
-
-  abrirCasos(fila: FilaRegion): void {
-    this.sinRegionDrawer.set(false);
-    this.filaDrawer.set(fila);
-  }
-
-  abrirCasosSinRegion(): void {
-    this.filaDrawer.set(null);
-    this.sinRegionDrawer.set(true);
-  }
-
-  cerrarDrawer(): void {
-    this.filaDrawer.set(null);
-    this.sinRegionDrawer.set(false);
-  }
-
-  abrirCaso(caso: Caso): void {
-    this.cerrarDrawer();
-    void this.router.navigate(['/casos', caso.codigo]);
   }
 
   fechaInicio(valor: string | null): string {

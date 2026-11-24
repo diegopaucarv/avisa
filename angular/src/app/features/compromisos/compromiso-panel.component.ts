@@ -747,6 +747,18 @@ export class CompromisoPanelComponent {
     return formatearFecha(valor);
   }
 
+  /**
+   * Los códigos de hito son largos (`CS-..._COMP001_H001`); la línea de tiempo
+   * muestra sólo el sufijo (`H001`) para no romper la lectura.
+   */
+  codigoHito(codigo: string | null | undefined): string {
+    const limpio = (codigo ?? '').trim();
+    if (!limpio) return 'Hito';
+    const partes = limpio.split('_');
+    const sufijo = partes[partes.length - 1] ?? limpio;
+    return /^H\d+$/i.test(sufijo) ? sufijo.toUpperCase() : limpio;
+  }
+
   /** «Regional» se muestra como GORE; el valor del catálogo no cambia. */
   nivelTexto(valor: string | null | undefined): string {
     return etiquetaNivelGobierno(valor ?? null);

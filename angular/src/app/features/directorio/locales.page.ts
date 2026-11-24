@@ -24,10 +24,17 @@ import {
 } from '../../core/http/coleccion';
 import { consulta } from '../../core/http/consulta';
 import { CapacidadesService } from '../../core/permisos/capacidades.service';
+import {
+  aFoto,
+  esFotoPintable,
+  fotoPrincipal,
+  fotosPorEntidad,
+  type Foto,
+} from '../../dominio/medios';
 import { BarraSeleccionComponent } from '../../shared/ui/barra-seleccion.component';
 
 import { SeleccionTabla } from '../../shared/ui/seleccion-tabla';
-import { FotoFichaComponent } from '../../shared/ui/foto-ficha.component';
+import { GaleriaFotosComponent } from '../../shared/ui/galeria-fotos.component';
 import { IconoComponent } from '../../shared/ui/icono.component';
 import { PaginacionComponent } from '../../shared/ui/paginacion.component';
 import { aLocalDirectorio, type LocalDirectorio } from './local.mapeo';
@@ -59,7 +66,7 @@ const FILTROS_INICIALES: FiltrosLocales = {
  */
 @Component({
   selector: 'app-locales',
-  imports: [IconoComponent, PaginacionComponent, BarraSeleccionComponent, FotoFichaComponent],
+  imports: [IconoComponent, PaginacionComponent, BarraSeleccionComponent, GaleriaFotosComponent],
   templateUrl: './locales.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
@@ -111,6 +118,19 @@ const FILTROS_INICIALES: FiltrosLocales = {
       font-family: inherit;
       text-align: left;
       cursor: pointer;
+    }
+
+    .col-foto {
+      width: 46px;
+    }
+
+    .tabla-foto {
+      display: block;
+      width: 32px;
+      height: 32px;
+      object-fit: cover;
+      border-radius: 6px;
+      background: #f6f8fa;
     }
 
     .local-actualizando {
@@ -314,6 +334,31 @@ export class LocalesPage {
       .map((local) => local.id)
       .filter((id): id is string => !!id);
   }
+
+  /** Fotos de la página visible en una sola petición (`entidadIds`). */
+  private readonly fotosPagina = consulta<Map<string, Foto[]>>({
+    fuente: () => {
+      const ids = this.idsVisibles();
+      if (ids.length === 0) return null;
+      return urlConParametros(urlApi('/v1/media'), {
+        entidadTipo: 'local',
+        entidadIds: ids.join(','),
+        pageSize: '200',
+      });
+    },
+    esquema: (bruto) => {
+      const coleccion = normalizarColeccion<unknown>(bruto);
+      return fotosPorEntidad(coleccion.elementos.map(aFoto).filter(esFotoPintable));
+    },
+  });
+
+  readonly fotosPorLocal = computed(() => this.fotosPagina.valor() ?? new Map<string, Foto[]>());
+
+  /** Foto principal del local; `null` = sin foto registrada. */
+  fotoDe(localId: string): Foto | null {
+    return fotoPrincipal(this.fotosPorLocal().get(localId) ?? []);
+  }
+
   readonly estado = this.listado.estado;
   readonly error = this.listado.error;
 

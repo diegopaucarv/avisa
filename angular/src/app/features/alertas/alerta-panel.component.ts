@@ -26,7 +26,6 @@ import {
   type AccionFlujo,
   type Alerta,
   type AltaAlerta,
-  type DemandaAlerta,
   type OpcionPrioridadAlerta,
   type PatchAlerta,
   accionesDeFlujo,
@@ -342,40 +341,6 @@ function diferenciaTexto(valor: string, original: string | null): string | null 
       line-height: 1.5;
     }
 
-    .alerta-demandas {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin: 0;
-      padding: 0;
-      list-style: none;
-    }
-
-    .alerta-demandas li {
-      display: flex;
-      flex-direction: column;
-      gap: 3px;
-      padding-left: 10px;
-      border-left: 2px solid #dbe7f4;
-    }
-
-    .alerta-demandas strong {
-      color: #465a6c;
-      font-size: 10.5px;
-    }
-
-    .alerta-demandas p {
-      margin: 0;
-      color: #52677a;
-      font-size: 10.5px;
-      line-height: 1.5;
-    }
-
-    .alerta-demandas small {
-      color: #97a1aa;
-      font-size: 9px;
-    }
-
     .alerta-alta-ayuda {
       margin: 4px 0 0;
       color: var(--muted);
@@ -428,7 +393,6 @@ function diferenciaTexto(valor: string, original: string | null): string | null 
 })
 export class AlertaPanelComponent {
   readonly alerta = input<Alerta | null>(null);
-  readonly demandas = input<readonly DemandaAlerta[]>([]);
   readonly cargando = input(false);
   readonly errorCarga = input<ErrorApi | null>(null);
   readonly puedeModificar = input(false);

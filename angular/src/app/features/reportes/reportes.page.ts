@@ -25,7 +25,13 @@ import { BarraSeleccionComponent } from '../../shared/ui/barra-seleccion.compone
 import { SeleccionTabla } from '../../shared/ui/seleccion-tabla';
 import { IconoComponent } from '../../shared/ui/icono.component';
 import { PaginacionComponent } from '../../shared/ui/paginacion.component';
-import { TIPOS_REPORTE, aReporte, formatearFecha, type Reporte } from './reportes.mapeo';
+import { aReporte, formatearFecha, type Reporte } from './reportes.mapeo';
+
+/** Tipo literal de `core.cat_tipos_documento` para cada pestaña de IyC. */
+const TIPO_REPORTE_ACTIVIDAD = 'Reporte de Actividad';
+const TIPO_INFORME_OFICIAL = 'Informe/Reporte institucional (POI, Willaqniki, bimestral…)';
+
+type PestanaIyC = 'actividad' | 'informe';
 
 type FiltrosReportes = {
   q: string;
@@ -157,7 +163,19 @@ export class ReportesPage {
   private readonly router = inject(Router);
   private readonly destruccion = inject(DestroyRef);
 
-  readonly tipos = TIPOS_REPORTE;
+  readonly pestanas: readonly { codigo: PestanaIyC; etiqueta: string; tipo: string }[] = [
+    { codigo: 'actividad', etiqueta: 'Reporte de actividad', tipo: TIPO_REPORTE_ACTIVIDAD },
+    { codigo: 'informe', etiqueta: 'Informe oficial', tipo: TIPO_INFORME_OFICIAL },
+  ];
+
+  /** La pestaña activa se deriva del `tipo` de la URL; por defecto, actividad. */
+  readonly pestanaActiva = computed<PestanaIyC>(() =>
+    this.filtros().tipo === TIPO_INFORME_OFICIAL ? 'informe' : 'actividad',
+  );
+
+  private readonly tipoDePestana = computed(() =>
+    this.pestanaActiva() === 'informe' ? TIPO_INFORME_OFICIAL : TIPO_REPORTE_ACTIVIDAD,
+  );
 
   private readonly parametros = toSignal(
     this.ruta.queryParamMap.pipe(
@@ -182,7 +200,7 @@ export class ReportesPage {
       return urlConParametros(urlApi('/v1/reportes'), {
         ...paramsDePagina({ pagina: filtros.pagina, tamano: filtros.tamano }),
         q: filtros.q,
-        tipo: filtros.tipo,
+        tipo: this.tipoDePestana(),
         region: filtros.region,
         desde: filtros.desde,
         hasta: filtros.hasta,
@@ -218,7 +236,7 @@ export class ReportesPage {
 
   readonly resumenTabla = computed(() => {
     const rango = this.rango();
-    return `${this.total()} reportes · ${rango.desde}–${rango.hasta} · registro de sólo lectura del Anexo N° 17 (reportes rápidos, clima social, actividad, informes oficiales y alertas tempranas).`;
+    return `${this.total()} reportes · ${rango.desde}–${rango.hasta} · productos de la Gestión de Información y Conocimiento (registro de sólo lectura).`;
   });
 
   /** Último fallo del botón de exportación; vacío si no hubo. */
@@ -262,8 +280,10 @@ export class ReportesPage {
     }, 300);
   }
 
-  cambiarTipo(evento: Event): void {
-    void this.actualizar({ tipo: this.valorDe(evento), pagina: 1 });
+  cambiarPestana(pestana: PestanaIyC): void {
+    const opcion = this.pestanas.find((item) => item.codigo === pestana);
+    if (!opcion) return;
+    void this.actualizar({ tipo: opcion.tipo, pagina: 1 });
   }
 
   cambiarDesde(evento: Event): void {

@@ -10,10 +10,17 @@
       >
         <app-icono [nombre]="menuAbierto() ? 'cerrar' : 'menu'" [tamano]="19" />
       </button>
-      <span class="brand-symbol" aria-hidden="true">
-        <app-icono nombre="actividad" [tamano]="17" />
-      </span>
-      <span class="brand-name">AVISA</span>
+      <a
+        class="brand-home"
+        routerLink="/mapa"
+        title="Ir a Gestión territorial"
+        aria-label="Ir a Gestión territorial"
+      >
+        <span class="brand-symbol" aria-hidden="true">
+          <app-icono nombre="actividad" [tamano]="17" />
+        </span>
+        <span class="brand-name">AVISA</span>
+      </a>
       <span class="brand-divider"></span>
       <small class="brand-org" title="Aplicativo de apoyo a la gestión de conflictos sociales">
         <span class="brand-org-largo">Aplicativo de apoyo a la gestión de conflictos sociales</span>
@@ -22,19 +29,68 @@
     </div>
 
     <div class="header-right">
-      @if (!enMapa()) {
-        <a
-          class="system-status ambito-chip"
-          routerLink="/preferencias"
-          [attr.aria-label]="'Ámbito vigente: ' + ambitoEtiqueta() + '. Cambiar en Preferencias'"
-          [attr.title]="'Ámbito vigente: ' + ambitoEtiqueta() + '. Cambiar en Preferencias'"
+      <div class="ambito-wrap" (click)="$event.stopPropagation()">
+        <button
+          #ambitoTrigger
+          type="button"
+          class="system-status ambito-chip ambito-trigger"
+          [attr.aria-expanded]="ambitoAbierto()"
+          aria-haspopup="menu"
+          aria-controls="menu-ambito"
+          [attr.aria-label]="'Ámbito vigente: ' + ambitoEtiqueta() + '. Abrir selector de ámbito'"
+          [attr.title]="'Ámbito vigente: ' + ambitoEtiqueta() + '. Abrir selector de ámbito'"
+          (click)="alternarAmbito()"
         >
           <app-icono nombre="mapa" [tamano]="13" />
-          <span
+          <span class="ambito-etiqueta"
             >Ámbito: <strong>{{ ambitoEtiqueta() }}</strong></span
           >
-        </a>
-      }
+          <app-icono class="ambito-flecha" nombre="chevron-abajo" [tamano]="13" />
+        </button>
+
+        @if (ambitoAbierto()) {
+          <div
+            #ambitoPanel
+            class="registrar-panel ambito-panel"
+            id="menu-ambito"
+            role="menu"
+            tabindex="-1"
+            aria-label="Ámbito territorial"
+            (keydown)="navegarAmbito($event)"
+          >
+            <p class="registrar-titulo">Ámbito territorial</p>
+            <button
+              type="button"
+              role="menuitemradio"
+              class="registrar-opcion ambito-opcion"
+              [attr.aria-checked]="ambitoSeleccionado() === 'auto'"
+              (click)="elegirAmbito('auto')"
+            >
+              <span>Sesión</span>
+              @if (ambitoSeleccionado() === 'auto') {
+                <app-icono nombre="check" [tamano]="13" />
+              } @else {
+                <span class="registrar-ayuda">ámbito de la sesión</span>
+              }
+            </button>
+            @for (alcance of alcances; track alcance) {
+              <button
+                type="button"
+                role="menuitemradio"
+                class="registrar-opcion ambito-opcion"
+                [attr.aria-checked]="ambitoSeleccionado() === alcance"
+                (click)="elegirAmbito(alcance)"
+              >
+                <span>{{ alcance }}</span>
+                @if (ambitoSeleccionado() === alcance) {
+                  <app-icono nombre="check" [tamano]="13" />
+                }
+              </button>
+            }
+            <p class="ambito-nota">Recorta lo que muestra la interfaz; tus permisos no cambian.</p>
+          </div>
+        }
+      </div>
       <a
         class="header-icon-button"
         routerLink="/busqueda"
@@ -54,7 +110,9 @@
             [attr.aria-expanded]="registrarAbierto()"
             aria-controls="menu-registrar"
             (click)="alternarRegistrar()"
-          >Registrar</button>
+          >
+            Registrar
+          </button>
           @if (registrarAbierto()) {
             <div class="registrar-panel" id="menu-registrar" aria-label="Opciones de registro">
               <p class="registrar-titulo">Nuevo registro</p>
@@ -68,10 +126,17 @@
                 type="button"
                 class="registrar-opcion"
                 [disabled]="!codigoCasoActual()"
-                [attr.title]="codigoCasoActual() ? 'Registrar demanda en el caso actual' : 'Abre un caso para registrar una demanda'"
+                [attr.title]="
+                  codigoCasoActual()
+                    ? 'Registrar demanda en el caso actual'
+                    : 'Abre un caso para registrar una demanda'
+                "
                 (click)="abrirRegistro('demanda')"
               >
-                <span>Demanda</span><span class="registrar-ayuda">{{ codigoCasoActual() ? 'del caso' : 'requiere caso' }}</span>
+                <span>Demanda</span
+                ><span class="registrar-ayuda">{{
+                  codigoCasoActual() ? 'del caso' : 'requiere caso'
+                }}</span>
               </button>
               <button type="button" class="registrar-opcion" (click)="abrirRegistro('compromiso')">
                 <span>Compromiso</span>
@@ -81,10 +146,20 @@
               </button>
               <div class="registrar-separador"></div>
               <p class="registrar-titulo">Sin capa de datos · no registrable</p>
-              <button type="button" class="registrar-opcion" disabled title="Requiere tabla y endpoint">
+              <button
+                type="button"
+                class="registrar-opcion"
+                disabled
+                title="Requiere tabla y endpoint"
+              >
                 <span>Reunión</span><span class="registrar-ayuda">requiere endpoint</span>
               </button>
-              <button type="button" class="registrar-opcion" disabled title="Requiere reuniones y endpoint">
+              <button
+                type="button"
+                class="registrar-opcion"
+                disabled
+                title="Requiere reuniones y endpoint"
+              >
                 <span>Acta y relatoría</span><span class="registrar-ayuda">requiere reunión</span>
               </button>
             </div>
@@ -140,43 +215,15 @@
   <div class="app-layout">
     <aside class="avisa-sidebar" [class.open]="menuAbierto()">
       <div class="sidebar-scroll">
-        <div class="sidebar-label">MI ESPACIO</div>
-        <nav aria-label="Navegación principal">
-          @for (enlace of enlacesTrabajo; track enlace.ruta) {
-            <a
-              class="side-nav"
-              [routerLink]="enlace.ruta"
-              routerLinkActive="selected"
-              (click)="menuAbierto.set(false)"
-            >
-              <app-icono [nombre]="enlace.icono" [tamano]="17" />
-              <span>{{ enlace.etiqueta }}</span>
-            </a>
-          }
-        </nav>
-
-        <div class="sidebar-label section-nav-label">SEGUIMIENTO</div>
-        <nav aria-label="Seguimiento">
-          @for (enlace of enlacesSeguimiento; track enlace.ruta) {
-            <a
-              class="side-nav"
-              [routerLink]="enlace.ruta"
-              routerLinkActive="selected"
-              (click)="menuAbierto.set(false)"
-            >
-              <app-icono [nombre]="enlace.icono" [tamano]="17" />
-              <span>{{ enlace.etiqueta }}</span>
-            </a>
-          }
-        </nav>
-
-        @if (puedeVerPapelera()) {
-          <nav aria-label="Papelera">
-            @for (enlace of enlacesPapelera; track enlace.ruta) {
+        @for (grupo of grupos(); track grupo.etiqueta) {
+          <div class="sidebar-label" [class.section-nav-label]="!$first">{{ grupo.etiqueta }}</div>
+          <nav [attr.aria-label]="grupo.etiqueta">
+            @for (enlace of grupo.enlaces; track enlace.ruta) {
               <a
                 class="side-nav"
                 [routerLink]="enlace.ruta"
                 routerLinkActive="selected"
+                [routerLinkActiveOptions]="{ exact: enlace.exacto ?? false }"
                 (click)="menuAbierto.set(false)"
               >
                 <app-icono [nombre]="enlace.icono" [tamano]="17" />
@@ -185,35 +232,6 @@
             }
           </nav>
         }
-
-        <div class="sidebar-label section-nav-label">DIRECTORIO</div>
-        <nav aria-label="Directorio">
-          @for (enlace of enlacesDirectorio; track enlace.ruta) {
-            <a
-              class="side-nav"
-              [routerLink]="enlace.ruta"
-              routerLinkActive="selected"
-              [routerLinkActiveOptions]="{ exact: true }"
-              (click)="menuAbierto.set(false)"
-            >
-              <app-icono [nombre]="enlace.icono" [tamano]="17" />
-              <span>{{ enlace.etiqueta }}</span>
-            </a>
-          }
-        </nav>
-
-        <div class="sidebar-label section-nav-label">ANÁLISIS</div>
-        <nav aria-label="Análisis">
-          <a
-            class="side-nav"
-            routerLink="/direccion"
-            routerLinkActive="selected"
-            (click)="menuAbierto.set(false)"
-          >
-            <app-icono nombre="analisis" [tamano]="17" />
-            <span>Resumen de Dirección</span>
-          </a>
-        </nav>
       </div>
 
       <div class="sidebar-bottom">

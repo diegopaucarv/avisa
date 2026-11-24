@@ -466,9 +466,9 @@ export class AlertasPage {
 
   /**
    * Mientras el detalle carga se pinta la fila ya conocida del listado: el
-   * panel nunca aparece vacío y, cuando llega `GET /:id`, se enriquece con las
-   * demandas. El detalle sólo se usa si corresponde a la alerta abierta, para
-   * no enseñar datos de una fila anterior al cambiar de selección.
+   * panel nunca aparece vacío y, cuando llega `GET /:id`, se enriquece con los
+   * datos completos. El detalle sólo se usa si corresponde a la alerta abierta,
+   * para no enseñar datos de una fila anterior al cambiar de selección.
    */
   private readonly detalleVigente = computed(() => {
     const abierta = this.alertaAbierta();
@@ -478,7 +478,6 @@ export class AlertasPage {
   });
 
   readonly alertaPanel = computed(() => this.detalleVigente()?.alerta ?? this.alertaAbierta());
-  readonly demandasPanel = computed(() => this.detalleVigente()?.demandas ?? []);
   readonly cargandoDetalle = computed(
     () => this.detalle.estado() === 'cargando' && this.detalleVigente() === null,
   );

@@ -93,6 +93,8 @@ export type Documento = {
   validado: boolean;
   clasificacion: number;
   responsableUsuarioId: string | null;
+  /** Nombre legible del responsable; `null` si no se puede resolver. */
+  responsableNombre: string | null;
   reunionId: string | null;
   distritoId: number | null;
   /** Sólo viene en `GET /api/v1/documents/:id`. */
@@ -204,6 +206,7 @@ export function aDocumento(bruto: unknown): Documento {
     validado: booleano(registro, ['validado']),
     clasificacion: numero(registro, ['clasificacion']) ?? 1,
     responsableUsuarioId: texto(registro, ['responsableUsuarioId', 'responsable_usuario_id']),
+    responsableNombre: texto(registro, ['responsableNombre', 'responsable_nombre']),
     reunionId: texto(registro, ['reunionId', 'reunion_id']),
     distritoId: numero(registro, ['distritoId', 'distrito_id']),
     codigoLegado: texto(registro, ['codigoLegado', 'codigo_legado']),
@@ -310,6 +313,46 @@ export function claseEstado(estado: string | null): string {
 /** `confidence` está acotada a 0..1 en la base. */
 export function formatearConfianza(valor: number | null): string {
   return valor === null ? '—' : `${Math.round(valor * 100)} %`;
+}
+
+/**
+ * Etapa de flujo del documento, derivada del estado registrado.
+ *
+ * No se inventa un paso: si la base no trae estado y el documento no está
+ * validado, se declara «Sin etapa». El valor crudo «Activo» se rotula «Cargado»
+ * igual que en el resto de la pantalla.
+ */
+export function etapaFlujo(documento: Documento): string {
+  const estado = (documento.estado ?? '').trim().toLowerCase();
+  if (documento.validado || estado === 'validado') return 'Validado';
+  if (estado === 'en análisis' || estado === 'en analisis') return 'En análisis';
+  if (estado === 'extraído' || estado === 'extraido') return 'Extraído';
+  if (estado === 'rechazado') return 'Rechazado';
+  if (estado) return 'Cargado';
+  return 'Sin etapa';
+}
+
+/** Rama del árbol documental: un tipo del catálogo con sus documentos. */
+export type RamaDocumental = {
+  clave: string;
+  etiqueta: string;
+  documentos: Documento[];
+};
+
+/**
+ * Agrupa los documentos de la página por tipo documental para el árbol del RAG.
+ * No añade filas ni tipos que la página no traiga.
+ */
+export function agruparDocumentosPorTipo(documentos: readonly Documento[]): RamaDocumental[] {
+  const mapa = new Map<string, RamaDocumental>();
+  for (const documento of documentos) {
+    const clave = documento.tipo ?? 'sin-tipo';
+    const etiqueta = documento.tipoNombre ?? documento.tipo ?? 'Sin tipo';
+    const rama = mapa.get(clave) ?? { clave, etiqueta, documentos: [] };
+    rama.documentos.push(documento);
+    mapa.set(clave, rama);
+  }
+  return [...mapa.values()].sort((a, b) => a.etiqueta.localeCompare(b.etiqueta, 'es'));
 }
 
 /** Nombre legible de un archivo o enlace: el último segmento de la ruta. */

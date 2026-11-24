@@ -289,6 +289,8 @@ export type CompromisoCaso = {
   /** Fecha manual si llega; si no, la del próximo hito no terminal. */
   vencimiento: string | null;
   origenVencimiento: 'manual' | 'hito' | null;
+  /** Hitos del compromiso, tal como los devuelve `GET /v1/cases/{codigo}`. */
+  hitos: HitoCompromisoCaso[];
 };
 
 export type DocumentoCaso = {
@@ -424,13 +426,13 @@ function esEstadoHitoTerminal(estado: string | null): boolean {
 function aCompromisoCaso(bruto: unknown): CompromisoCaso {
   const registro = esRegistro(bruto) ? bruto : {};
   const manual = texto(registro, ['fechaVencimiento', 'fecha_vencimiento']);
+  const hitos = lista(registro, ['hitos']).map(aHitoCompromisoCaso);
 
   // Misma regla que `lib/db/repos/commitments.ts`: la fecha manual prevalece y,
   // si falta, se usa la del próximo hito no terminal. Hoy el detalle no envía la
   // fecha manual, así que el vencimiento suele salir del hito.
   const delHito =
-    lista(registro, ['hitos'])
-      .map(aHitoCompromisoCaso)
+    hitos
       .filter((hito) => hito.fecha && !esEstadoHitoTerminal(hito.estado))
       .map((hito) => hito.fecha as string)
       .sort()[0] ?? null;
@@ -444,6 +446,7 @@ function aCompromisoCaso(bruto: unknown): CompromisoCaso {
     unidad: texto(registro, ['unidad']),
     vencimiento: manual ?? delHito,
     origenVencimiento: manual ? 'manual' : delHito ? 'hito' : null,
+    hitos,
   };
 }
 
@@ -554,6 +557,18 @@ function riesgoDe(valor: string | null): Riesgo {
 }
 
 /**
+ * Nivel de conflictividad declarado. Como la naturaleza, no tiene respaldo: un
+ * valor ausente o desconocido es «sin declarar» (`null`) y no `Diferencia`.
+ * La etiqueta latente/manifiesto se deriva de este valor, así que inventarlo
+ * cambiaría la situación del caso.
+ */
+function nivelDe(valor: string | null): NivelConflicto | null {
+  if (!valor) return null;
+  const limpio = valor.trim().toLowerCase();
+  return NIVELES_CONFLICTO.find((opcion) => opcion.toLowerCase() === limpio) ?? null;
+}
+
+/**
  * Naturaleza declarada → dominio. A diferencia del resto de catálogos, aquí no
  * hay respaldo: un valor ausente o desconocido es «sin declarar» (`null`) y no
  * un valor verosímil. Se acepta la forma con guion bajo porque el catálogo
@@ -594,11 +609,7 @@ export function aCaso(bruto: unknown): Caso {
     riesgo: riesgoDe(texto(registro, ['riesgo', 'risk'])),
     prioridad: unoDe(texto(registro, ['prioridad']), PRIORIDADES, 'Moderado'),
     alcance: unoDe(texto(registro, ['alcance']), ALCANCES, 'Centro'),
-    nivelConflicto: unoDe(
-      texto(registro, ['nivelConflicto', 'nivel_conflicto']),
-      NIVELES_CONFLICTO,
-      'Diferencia',
-    ),
+    nivelConflicto: nivelDe(texto(registro, ['nivelConflicto', 'nivel_conflicto'])),
     naturaleza: naturalezaDe(texto(registro, ['naturaleza'])),
     etapa: etapaDe(texto(registro, ['etapa', 'stage'])),
     tematica: texto(registro, ['tematica']),

@@ -256,6 +256,13 @@ export class CasoDetallePage {
   readonly estado = this.recurso.estado;
   readonly error = this.recurso.error;
 
+  /** Hitos de todos los acuerdos y compromisos del caso, aplanados. */
+  readonly hitosDelCaso = computed(() =>
+    (this.detalle()?.compromisos ?? []).flatMap((compromiso) =>
+      compromiso.hitos.map((hito) => ({ ...hito, compromiso: compromiso.codigo })),
+    ),
+  );
+
   /**
    * Tras anular, la API deja de devolver el caso: la política RLS de `SELECT`
    * esconde lo anulado. Se retiene la última ficha para poder mostrar el estado

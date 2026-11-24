@@ -5,6 +5,7 @@ import {
   ElementRef,
   computed,
   inject,
+  input,
   signal,
   viewChild,
 } from '@angular/core';
@@ -21,6 +22,13 @@ import {
   type Coleccion,
 } from '../../core/http/coleccion';
 import { consulta } from '../../core/http/consulta';
+import {
+  aFoto,
+  esFotoPintable,
+  fotoPrincipal,
+  fotosPorEntidad,
+  type Foto,
+} from '../../dominio/medios';
 import { BarraSeleccionComponent } from '../../shared/ui/barra-seleccion.component';
 
 import { SeleccionTabla } from '../../shared/ui/seleccion-tabla';
@@ -146,6 +154,25 @@ const FILTROS_INICIALES: FiltrosActores = {
     .actor-organizacion {
       max-width: 240px;
       white-space: normal;
+    }
+
+    .actor-organizacion small {
+      display: block;
+      color: #8d99a6;
+      font-size: 9px;
+    }
+
+    .col-foto {
+      width: 46px;
+    }
+
+    .tabla-foto {
+      display: block;
+      width: 32px;
+      height: 32px;
+      object-fit: cover;
+      border-radius: 6px;
+      background: #f6f8fa;
     }
 
     .actor-actualizando {
@@ -321,6 +348,12 @@ export class ActoresPage {
   private readonly router = inject(Router);
   private readonly destruccion = inject(DestroyRef);
 
+  /**
+   * La ruta `/directorio/personas` fija la naturaleza. Así el mismo listado
+   * sirve para personas sin duplicar la pantalla ni la paginación.
+   */
+  readonly naturalezaFija = input('');
+
   readonly naturalezas = NATURALEZAS;
 
   private readonly parametros = toSignal(
@@ -340,7 +373,15 @@ export class ActoresPage {
     { initialValue: FILTROS_INICIALES },
   );
 
-  readonly filtros = computed(() => this.parametros());
+  readonly filtros = computed(() => {
+    const parametros = this.parametros();
+    const fija = this.naturalezaFija().trim();
+    return fija ? { ...parametros, naturaleza: fija } : parametros;
+  });
+
+  readonly esSoloPersonas = computed(() => this.naturalezaFija() === 'persona');
+  readonly titulo = computed(() => (this.esSoloPersonas() ? 'Personas' : 'Actores'));
+  readonly sustantivo = computed(() => (this.esSoloPersonas() ? 'personas' : 'actores'));
 
   /** Región activa como etiqueta del buscador territorial restaurado. */
   readonly regionFiltroInicial = computed(() => {
@@ -375,6 +416,33 @@ export class ActoresPage {
     return this.actores()
       .map((actor) => actor.id)
       .filter((id): id is string => !!id);
+  }
+
+  /**
+   * Fotos de la página visible en una sola petición (`entidadIds`). Si la
+   * consulta falla, la columna queda en «—» y el listado sigue funcionando.
+   */
+  private readonly fotosPagina = consulta<Map<string, Foto[]>>({
+    fuente: () => {
+      const ids = this.idsVisibles();
+      if (ids.length === 0) return null;
+      return urlConParametros(urlApi('/v1/media'), {
+        entidadTipo: 'actor',
+        entidadIds: ids.join(','),
+        pageSize: '200',
+      });
+    },
+    esquema: (bruto) => {
+      const coleccion = normalizarColeccion<unknown>(bruto);
+      return fotosPorEntidad(coleccion.elementos.map(aFoto).filter(esFotoPintable));
+    },
+  });
+
+  readonly fotosPorActor = computed(() => this.fotosPagina.valor() ?? new Map<string, Foto[]>());
+
+  /** Foto principal del actor para la columna de la tabla; `null` = sin foto. */
+  fotoDe(actorId: string): Foto | null {
+    return fotoPrincipal(this.fotosPorActor().get(actorId) ?? []);
   }
   readonly estado = this.listado.estado;
   readonly error = this.listado.error;

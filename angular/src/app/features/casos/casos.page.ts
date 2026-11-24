@@ -64,6 +64,8 @@ type FiltrosCasos = {
   abiertos: boolean;
   /** Código de `core.cat_niveles_conflicto`; la API lo valida contra el catálogo. */
   nivel: string;
+  /** Código de `core.cat_niveles_riesgo`; eje distinto de la conflictividad. */
+  riesgo: string;
   prioridad: string;
   alcance: string;
   /** Nombre canónico de `core.regiones`; la API lo normaliza y lo valida. */
@@ -92,6 +94,7 @@ const FILTROS_INICIALES: FiltrosCasos = {
   estado: '',
   abiertos: false,
   nivel: '',
+  riesgo: '',
   prioridad: '',
   alcance: '',
   region: '',
@@ -143,6 +146,7 @@ type OpcionFiltro = {
 
 type CatalogosCasos = {
   conflictividades: OpcionFiltro[];
+  riesgos: OpcionFiltro[];
   prioridades: OpcionFiltro[];
   alcances: OpcionFiltro[];
   regiones: OpcionFiltro[];
@@ -181,6 +185,7 @@ function aCatalogosCasos(bruto: unknown): CatalogosCasos {
 
   return {
     conflictividades: opcionesDe(catalogo, 'nivelesConflicto'),
+    riesgos: opcionesDe(catalogo, 'nivelesRiesgo'),
     prioridades: opcionesDe(catalogo, 'prioridadesAtencion'),
     alcances: opcionesDe(catalogo, 'alcances'),
     regiones: opcionesDe(catalogo, 'regiones'),
@@ -327,6 +332,7 @@ export class CasosPage {
           estado: params.get('estado') ?? '',
           abiertos: params.get('abiertos') === 'true',
           nivel: params.get('nivel') ?? '',
+          riesgo: params.get('riesgo') ?? '',
           prioridad: params.get('prioridad') ?? '',
           // Sin `alcance` rige Preferencias; `todos` es la limpieza explícita.
           alcance: alcance === null ? alcancePreferido() : alcance === 'todos' ? '' : alcance,
@@ -368,6 +374,7 @@ export class CasosPage {
   readonly filtrosAvanzadosActivos = computed(() => {
     const filtros = this.filtros();
     return Boolean(
+      filtros.riesgo ||
       filtros.prioridad ||
       filtros.region ||
       filtros.sinRegion ||
@@ -390,6 +397,7 @@ export class CasosPage {
       estado: filtros.estado,
       abiertos: filtros.abiertos ? 'true' : '',
       nivel: filtros.nivel,
+      riesgo: filtros.riesgo,
       prioridad: filtros.prioridad,
       alcance: filtros.alcance,
       region: filtros.region,
@@ -421,6 +429,7 @@ export class CasosPage {
   });
 
   readonly prioridades = computed(() => this.catalogoRecurso.valor()?.prioridades ?? []);
+  readonly riesgos = computed(() => this.catalogoRecurso.valor()?.riesgos ?? []);
   readonly conflictividades = computed(() => this.catalogoRecurso.valor()?.conflictividades ?? []);
   readonly alcances = computed(() => this.catalogoRecurso.valor()?.alcances ?? []);
   readonly regiones = computed(() => this.catalogoRecurso.valor()?.regiones ?? []);
@@ -437,6 +446,7 @@ export class CasosPage {
         estado: filtros.estado,
         abiertos: filtros.abiertos ? 'true' : '',
         nivel: filtros.nivel,
+        riesgo: filtros.riesgo,
         prioridad: filtros.prioridad,
         alcance: filtros.alcance,
         region: filtros.region,
@@ -536,6 +546,11 @@ export class CasosPage {
   /** Fecha abreviada «18 nov 2026», sin el punto que añade `es-PE`. */
   fechaCorta(valor: string | null | undefined): string {
     return formatearFechaCorta(valor);
+  }
+
+  cambiarRiesgo(evento: Event): void {
+    const valor = (evento.target as HTMLSelectElement).value;
+    void this.actualizar({ riesgo: valor, pagina: 1 });
   }
 
   cambiarPrioridad(evento: Event): void {
@@ -728,6 +743,7 @@ export class CasosPage {
         estado: siguiente.estado || null,
         abiertos: siguiente.abiertos ? 'true' : null,
         nivel: siguiente.nivel || null,
+        riesgo: siguiente.riesgo || null,
         prioridad: siguiente.prioridad || null,
         alcance,
         region: siguiente.region || null,

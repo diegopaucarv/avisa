@@ -456,31 +456,17 @@
               </dd>
             </div>
             <div>
-              <dt>Responsable (ID)</dt>
-              <dd>{{ d.responsableUsuarioId || '—' }}</dd>
+              <dt>Responsable</dt>
+              <dd>{{ d.responsableNombre || 'Sin dato' }}</dd>
             </div>
             <div>
-              <dt>Origen</dt>
-              <dd>{{ d.origen || '—' }}</dd>
-            </div>
-            <div>
-              <dt>Confianza</dt>
-              <dd>{{ formatearConfianza(d.confianza) }}</dd>
+              <dt>Etapa de flujo</dt>
+              <dd>{{ etapa() }}</dd>
             </div>
             <div>
               <dt>Validado por humano</dt>
               <dd>{{ d.validado ? 'Sí' : 'No' }}</dd>
             </div>
-            <div>
-              <dt>Clasificación</dt>
-              <dd>Nivel {{ d.clasificacion }}</dd>
-            </div>
-            @if (d.codigoLegado) {
-              <div>
-                <dt>Código legado</dt>
-                <dd>{{ d.codigoLegado }}</dd>
-              </div>
-            }
           </dl>
         </section>
 

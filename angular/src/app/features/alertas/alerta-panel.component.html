@@ -497,7 +497,7 @@
         </section>
 
         <section class="alerta-seccion" aria-labelledby="alerta-panel-riesgo">
-          <h3 id="alerta-panel-riesgo">Descripción del riesgo</h3>
+          <h3 id="alerta-panel-riesgo">3. Descripción del riesgo</h3>
           @if (a.descripcionRiesgo) {
             <p class="alerta-texto">{{ a.descripcionRiesgo }}</p>
           } @else {
@@ -506,7 +506,7 @@
         </section>
 
         <section class="alerta-seccion" aria-labelledby="alerta-panel-oaipcs">
-          <h3 id="alerta-panel-oaipcs">Acciones de la OAIPCS</h3>
+          <h3 id="alerta-panel-oaipcs">4. Acciones de la OAIPCS</h3>
           @if (a.accionesOaipcs) {
             <p class="alerta-texto">{{ a.accionesOaipcs }}</p>
           } @else {
@@ -515,7 +515,7 @@
         </section>
 
         <section class="alerta-seccion" aria-labelledby="alerta-panel-sugeridas">
-          <h3 id="alerta-panel-sugeridas">Acciones sugeridas</h3>
+          <h3 id="alerta-panel-sugeridas">5. Acciones sugeridas</h3>
           @if (a.accionesSugeridas.length === 0) {
             <p class="alerta-vacio">Sin registro.</p>
           } @else {
@@ -626,28 +626,6 @@
               <dd>{{ a.fechaAprobacion || '—' }}</dd>
             </div>
           </dl>
-        </section>
-
-        <section class="alerta-seccion" aria-labelledby="alerta-panel-demandas">
-          <h3 id="alerta-panel-demandas">Demandas vinculadas ({{ demandas().length }})</h3>
-          @if (demandas().length === 0) {
-            <p class="alerta-vacio">Sin demandas vinculadas a la alerta.</p>
-          } @else {
-            <ol class="alerta-demandas">
-              @for (demanda of demandas(); track demanda.id) {
-                <li>
-                  <strong>{{ demanda.problema || demanda.descripcion || 'Demanda' }}</strong>
-                  <p>{{ demanda.pedido || demanda.propuesta || 'Sin pedido registrado.' }}</p>
-                  <small>
-                    {{ demanda.estado || 'Sin estado' }}
-                    @if (demanda.fechaRegistro) {
-                      · {{ demanda.fechaRegistro }}
-                    }
-                  </small>
-                </li>
-              }
-            </ol>
-          }
         </section>
       </div>
     }

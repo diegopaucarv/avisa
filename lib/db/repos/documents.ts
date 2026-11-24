@@ -41,6 +41,7 @@ const DOCUMENT_SELECT = `
   d.es_validado_humano as validado,
   d.nivel_clasificacion as clasificacion,
   d.responsable_usuario_id,
+  ur.nombre as responsable_nombre,
   d.reunion_id,
   d.distrito_id,
   d.anulado_en as anulado_en,
@@ -55,6 +56,7 @@ const DOCUMENT_FROM = `
   left join core.cat_tipos_documento td on td.id = d.tipo_id
   left join core.casos c on c.id = d.caso_id
   left join core.usuarios ua on ua.id = d.anulado_por
+  left join core.usuarios ur on ur.id = d.responsable_usuario_id
 `;
 
 export type DocumentListQuery = {
@@ -95,6 +97,8 @@ export type DocumentListItem = {
   validado: boolean | null;
   clasificacion: number | null;
   responsableUsuarioId: string | null;
+  /** Nombre legible del responsable; `null` si no se puede resolver. */
+  responsableNombre: string | null;
   reunionId: string | null;
   distritoId: number | null;
   /** Fecha de anulación en ISO 8601, o `null` si el documento está vigente. */
@@ -145,6 +149,7 @@ function mapDocument(row: Record<string, unknown>): DocumentListItem {
     validado: row.validado as boolean | null,
     clasificacion: row.clasificacion as number | null,
     responsableUsuarioId: row.responsable_usuario_id as string | null,
+    responsableNombre: row.responsable_nombre as string | null,
     reunionId: row.reunion_id as string | null,
     distritoId: row.distrito_id as number | null,
     anuladoEn: isoOrNull(row.anulado_en),

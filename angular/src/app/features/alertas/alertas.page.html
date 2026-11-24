@@ -198,7 +198,7 @@
           </th>
           <th scope="col">Código</th>
           <th scope="col">Título</th>
-          <th scope="col">Caso</th>
+          <th scope="col">Caso vinculado</th>
           <th scope="col">Prioridad</th>
           <th scope="col">Riesgo</th>
           <th scope="col">Fecha de reporte</th>
@@ -289,7 +289,6 @@
   } @if (panelAbierto()) {
   <app-alerta-panel
     [alerta]="alertaPanel()"
-    [demandas]="demandasPanel()"
     [cargando]="cargandoDetalle()"
     [errorCarga]="errorDetalle()"
     [puedeModificar]="puedePanel()"

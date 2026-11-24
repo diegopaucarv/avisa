@@ -1,14 +1,14 @@
 <section class="view-body" aria-labelledby="titulo-instituciones">
   <header class="view-head">
     <div>
-      <h1 id="titulo-instituciones">Instituciones</h1>
+      <h1 id="titulo-instituciones">Organizaciones públicas</h1>
       <p class="view-subtitle">
-        Actores públicos: autoridades e instituciones del Estado registradas en el directorio, con
+        Actores públicos: autoridades y organizaciones del Estado registradas en el directorio, con
         su función, nivel de gobierno y ubicación (Guía §7.4).
       </p>
     </div>
     <div class="view-actions">
-      <p class="result-count" aria-live="polite">{{ total() }} instituciones</p>
+      <p class="result-count" aria-live="polite">{{ total() }} organizaciones públicas</p>
     </div>
   </header>
 
@@ -32,7 +32,7 @@
         type="search"
         placeholder="Buscar por nombre, abreviatura o cargo"
         [value]="filtros().q"
-        aria-label="Buscar instituciones"
+        aria-label="Buscar organizaciones públicas"
         (input)="buscar($event)"
       />
     </label>
@@ -68,16 +68,16 @@
 
   @if (estado() === "error") {
   <div class="empty-state" role="alert">
-    <strong>No se pudieron cargar las instituciones</strong>
+    <strong>No se pudieron cargar las organizaciones públicas</strong>
     <p>{{ error()?.message }}</p>
     <button type="button" class="button-secondary" (click)="recargar()">Reintentar</button>
   </div>
   } @else if (instituciones().length === 0) { @if (estado() === "cargando" || estado() ===
   "inactivo") {
-  <div class="empty-state" role="status">Cargando instituciones…</div>
+  <div class="empty-state" role="status">Cargando organizaciones públicas…</div>
   } @else {
   <div class="empty-state">
-    <strong>Sin instituciones para estos filtros</strong>
+    <strong>Sin organizaciones públicas para estos filtros</strong>
     <p>
       No hay actores públicos que coincidan con la búsqueda. La región se compara con el nombre
       registrado, así que debe escribirse completo (por ejemplo, el departamento).

@@ -4,7 +4,7 @@
       <h1 id="titulo-casos">Casos</h1>
       <p class="view-subtitle">
         Seguimiento de la conflictividad registrada, con su nivel, prioridad y riesgo propio del
-        caso.
+        caso. @if (!verPapelera()) {<span class="result-count">{{ total() }} registrados</span>}
       </p>
     </div>
     @if (!verPapelera()) {
@@ -40,7 +40,7 @@
       <app-icono nombre="buscar" [tamano]="14" />
       <input
         type="search"
-        placeholder="Buscar por código, título o resumen"
+        placeholder="Buscar por palabra clave..."
         [value]="filtros().q"
         aria-label="Buscar casos"
         (input)="buscar($event)"
@@ -71,6 +71,33 @@
         <option value="">Todos</option>
         @for (opcion of conflictividades(); track opcion.valor) {
         <option [value]="opcion.valor">{{ opcion.etiqueta }}</option>
+        }
+      </select>
+    </label>
+
+    <label class="select-filter">
+      Región
+      <select
+        aria-label="Filtrar casos por región"
+        [value]="filtros().sinRegion ? valorSinRegion : filtros().region"
+        (change)="cambiarRegion($event)"
+      >
+        <option value="">Todas</option>
+        <option [value]="valorSinRegion">Sin región</option>
+        @for (opcion of regiones(); track opcion.valor) {
+        <option [value]="opcion.valor">{{ opcion.etiqueta }}</option>
+        }
+      </select>
+    </label>
+
+    <label class="select-filter">
+      Temática
+      <select aria-label="Filtrar casos por temática" (change)="cambiarTematica($event)">
+        <option value="" [selected]="filtros().tematica === ''">Todas</option>
+        @for (opcion of tematicas(); track opcion.valor) {
+        <option [value]="opcion.valor" [selected]="filtros().tematica === opcion.valor">
+          {{ opcion.etiqueta }}
+        </option>
         }
       </select>
     </label>
@@ -116,26 +143,15 @@
     </label>
 
     <label class="select-filter">
-      Región
+      Nivel de riesgo
       <select
-        aria-label="Filtrar casos por región"
-        [value]="filtros().sinRegion ? valorSinRegion : filtros().region"
-        (change)="cambiarRegion($event)"
+        aria-label="Filtrar casos por nivel de riesgo"
+        [value]="filtros().riesgo"
+        (change)="cambiarRiesgo($event)"
       >
-        <option value="">Todas</option>
-        <option [value]="valorSinRegion">Sin región</option>
-        @for (opcion of regiones(); track opcion.valor) {
-        <option [value]="opcion.valor">{{ opcion.etiqueta }}</option>
-        }
-      </select>
-    </label>
-
-    <label class="select-filter">
-      Temática
-      <select aria-label="Filtrar casos por temática" (change)="cambiarTematica($event)">
-        <option value="" [selected]="filtros().tematica === ''">Todas</option>
-        @for (opcion of tematicas(); track opcion.valor) {
-        <option [value]="opcion.valor" [selected]="filtros().tematica === opcion.valor">
+        <option value="">Todos</option>
+        @for (opcion of riesgos(); track opcion.valor) {
+        <option [value]="opcion.valor" [selected]="filtros().riesgo === opcion.valor">
           {{ opcion.etiqueta }}
         </option>
         }
@@ -283,16 +299,13 @@
     >
       <div class="case-card-top">
         <span class="case-code">{{ caso.codigo }}</span>
-        <span class="status-badge" [class]="'status-badge risk-' + caso.riesgo.toLowerCase()">
-          <span class="status-dot"></span>
-          Nivel de riesgo: {{ caso.riesgo }}
+        <span class="case-location">
+          <app-icono nombre="mapa" [tamano]="13" />
+          {{ caso.region || 'Sin región' }}
         </span>
       </div>
       <h3>{{ caso.titulo }}</h3>
-      <div class="case-location">
-        <app-icono nombre="mapa" [tamano]="14" />
-        {{ caso.region || 'Sin región' }}
-      </div>
+      <p class="case-summary">{{ caso.resumen || 'Sin resumen registrado.' }}</p>
       @if (caso.naturaleza; as naturaleza) {
       <span class="case-naturaleza" [title]="'Naturaleza declarada: ' + naturaleza">
         {{ naturaleza }}
@@ -305,8 +318,11 @@
         Sin declarar
       </span>
       }
-      <p class="case-summary">{{ caso.resumen || 'Sin resumen registrado.' }}</p>
       <div class="case-card-bottom">
+        <span class="status-badge" [class]="'status-badge risk-' + caso.riesgo.toLowerCase()">
+          <span class="status-dot"></span>
+          Riesgo: {{ caso.riesgo }}
+        </span>
         <span>{{ caso.etapa }}</span>
         <span
           title="Fecha de última actualización del registro; en los casos del legado es la fecha en que se cargaron."

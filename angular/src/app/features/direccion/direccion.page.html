@@ -14,7 +14,7 @@
       <app-exportar-menu entidad="casos" (fallo)="alFallarExportacion($event)" />
       <button type="button" class="button-secondary" (click)="imprimir()">
         <app-icono nombre="documentos" [tamano]="14" />
-        Imprimir / Guardar PDF
+        Preparar hoja de impresión
       </button>
     </div>
   </header>
@@ -33,7 +33,7 @@
     <a class="stat-card" routerLink="/casos" aria-label="Abrir la lista de casos">
       <span class="stat-icon"><app-icono nombre="casos" [tamano]="16" /></span>
       <span class="stat-copy">
-        <span>Casos abiertos</span>
+        <span>Casos vigentes</span>
         <strong>{{ casosAbiertos() ?? "—" }}</strong>
         <small>Abrir casos <app-icono nombre="chevron-derecha" [tamano]="11" /></small>
       </span>
@@ -134,7 +134,7 @@
       </div>
 
       <div class="breakdown-card">
-        <h3>Por región</h3>
+        <h3>Desglose regional</h3>
         @if (cargandoRegiones()) {
         <p class="empty-inline">Cargando regiones…</p>
         } @else if (porRegion().length === 0) {

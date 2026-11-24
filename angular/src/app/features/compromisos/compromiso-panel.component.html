@@ -503,7 +503,7 @@
                   ></span>
                   <div>
                     <div class="timeline-meta">
-                      <strong>{{ hito.codigo || 'Hito' }}</strong>
+                      <strong>{{ codigoHito(hito.codigo) }}</strong>
                       <time>{{ fechaTexto(hito.fecha) }}</time>
                     </div>
                     <p>{{ hito.descripcion || 'Sin descripción' }}</p>
@@ -528,7 +528,7 @@
                       @if (puedeModificar()) {
                         <label class="hito-estado">
                           <span class="sr-only">
-                            Cambiar estado del hito {{ hito.codigo || '' }}
+                            Cambiar estado del hito {{ codigoHito(hito.codigo) }}
                           </span>
                           <select
                             class="form-select hito-select"

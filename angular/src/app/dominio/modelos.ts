@@ -68,7 +68,11 @@ export type Caso = {
   riesgo: Riesgo;
   prioridad: PrioridadAtencion;
   alcance: Alcance;
-  nivelConflicto: NivelConflicto;
+  /**
+   * Nivel de conflictividad declarado (Guía §7.5.1). `null` = sin declarar: la
+   * interfaz no lo estima ni lo sustituye por `Diferencia`.
+   */
+  nivelConflicto: NivelConflicto | null;
   /** Naturaleza declarada; `null` mientras no se declare. */
   naturaleza: NaturalezaCaso | null;
   etapa: EtapaCiclo;

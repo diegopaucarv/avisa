@@ -23,10 +23,17 @@ import {
   type Coleccion,
 } from '../../core/http/coleccion';
 import { consulta } from '../../core/http/consulta';
+import {
+  aFoto,
+  esFotoPintable,
+  fotoPrincipal,
+  fotosPorEntidad,
+  type Foto,
+} from '../../dominio/medios';
 import { BarraSeleccionComponent } from '../../shared/ui/barra-seleccion.component';
 
 import { SeleccionTabla } from '../../shared/ui/seleccion-tabla';
-import { FotoFichaComponent } from '../../shared/ui/foto-ficha.component';
+import { GaleriaFotosComponent } from '../../shared/ui/galeria-fotos.component';
 import { IconoComponent } from '../../shared/ui/icono.component';
 import { PaginacionComponent } from '../../shared/ui/paginacion.component';
 import {
@@ -66,7 +73,7 @@ const FILTROS_INICIALES: FiltrosOrganizaciones = {
  */
 @Component({
   selector: 'app-organizaciones',
-  imports: [IconoComponent, PaginacionComponent, BarraSeleccionComponent, FotoFichaComponent],
+  imports: [IconoComponent, PaginacionComponent, BarraSeleccionComponent, GaleriaFotosComponent],
   templateUrl: './organizaciones.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
@@ -123,6 +130,19 @@ const FILTROS_INICIALES: FiltrosOrganizaciones = {
     .org-razon {
       max-width: 260px;
       white-space: normal;
+    }
+
+    .col-foto {
+      width: 46px;
+    }
+
+    .tabla-foto {
+      display: block;
+      width: 32px;
+      height: 32px;
+      object-fit: cover;
+      border-radius: 6px;
+      background: #f6f8fa;
     }
 
     .org-actualizando {
@@ -304,6 +324,32 @@ export class OrganizacionesPage {
     return this.organizaciones()
       .map((organizacion) => organizacion.id)
       .filter((id): id is string => !!id);
+  }
+
+  /** Fotos de la página visible en una sola petición (`entidadIds`). */
+  private readonly fotosPagina = consulta<Map<string, Foto[]>>({
+    fuente: () => {
+      const ids = this.idsVisibles();
+      if (ids.length === 0) return null;
+      return urlConParametros(urlApi('/v1/media'), {
+        entidadTipo: 'organizacion',
+        entidadIds: ids.join(','),
+        pageSize: '200',
+      });
+    },
+    esquema: (bruto) => {
+      const coleccion = normalizarColeccion<unknown>(bruto);
+      return fotosPorEntidad(coleccion.elementos.map(aFoto).filter(esFotoPintable));
+    },
+  });
+
+  readonly fotosPorOrganizacion = computed(
+    () => this.fotosPagina.valor() ?? new Map<string, Foto[]>(),
+  );
+
+  /** Foto principal de la organización; `null` = sin foto registrada. */
+  fotoDe(organizacionId: string): Foto | null {
+    return fotoPrincipal(this.fotosPorOrganizacion().get(organizacionId) ?? []);
   }
   readonly estado = this.listado.estado;
   readonly error = this.listado.error;
