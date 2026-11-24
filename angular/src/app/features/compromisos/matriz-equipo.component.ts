@@ -116,7 +116,7 @@ function nombreDesdeCabecera(valor: string | null): string | null {
 }
 
 /**
- * Matriz del equipo en el formato A..X.
+ * Matriz del equipo en el formato A..W.
  *
  * Es la lectura de `analytics.vw_anexo_15_matriz_conflictividad` cruzada con
  * `analytics.vw_anexo_14_seguimiento_compromisos`: una fila por compromiso ×
@@ -266,7 +266,7 @@ export class MatrizEquipoComponent {
   /** Orden local de la página visible. */
   readonly orden = new OrdenTabla<MatrizFila>();
 
-  /** Una entrada por columna A..X: `clave` siempre corresponde a un campo real. */
+  /** Una entrada por columna A..W: `clave` siempre corresponde a un campo real. */
   private readonly accesoresMatriz: Record<string, (fila: MatrizFila) => unknown> =
     Object.fromEntries(
       COLUMNAS_MATRIZ.map(
@@ -276,7 +276,7 @@ export class MatrizEquipoComponent {
 
   readonly filasVisibles = computed(() => this.orden.ordenar(this.filas(), this.accesoresMatriz));
 
-  /** Columnas de `app-tabla`: la letra A..X se suma al título (sin segunda línea). */
+  /** Columnas de `app-tabla`: la letra A..W se suma al título (sin segunda línea). */
   readonly columnasTabla = computed<readonly ColumnaTabla[]>(() =>
     COLUMNAS_MATRIZ.map((columna) => ({
       clave: columna.clave,

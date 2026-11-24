@@ -103,22 +103,22 @@ describe('normalizarCabecera', () => {
 });
 
 describe('cabecera del formato del equipo', () => {
-  it('tiene las 24 columnas A..X en orden', () => {
-    expect(CABECERA_MATRIZ).toHaveLength(24);
+  it('tiene las 23 columnas A..W en orden', () => {
+    expect(CABECERA_MATRIZ).toHaveLength(23);
     expect(CABECERA_MATRIZ[0]).toBe('N°');
-    expect(CABECERA_MATRIZ[21]).toBe('Fecha Planificada');
-    expect(CABECERA_MATRIZ[22]).toBe('Fecha Real');
-    expect(CABECERA_MATRIZ[23]).toBe('Estado Actual');
+    expect(CABECERA_MATRIZ[20]).toBe('Fecha Planificada');
+    expect(CABECERA_MATRIZ[21]).toBe('Fecha Real');
+    expect(CABECERA_MATRIZ[22]).toBe('Estado Actual');
   });
 
-  it('reconoce las 24 columnas oficiales sin ignorar ninguna', () => {
+  it('reconoce las 23 columnas oficiales sin ignorar ninguna', () => {
     const leida = leerCabecera(CABECERA_MATRIZ);
-    expect(leida.reconocidas).toBe(24);
+    expect(leida.reconocidas).toBe(23);
     expect(leida.ignoradas).toEqual([]);
     expect(leida.indices.numero).toBe(0);
-    expect(leida.indices.accion).toBe(13);
-    expect(leida.indices.fechaPlanificada).toBe(21);
-    expect(leida.indices.estado).toBe(23);
+    expect(leida.indices.accion).toBe(12);
+    expect(leida.indices.fechaPlanificada).toBe(20);
+    expect(leida.indices.estado).toBe(22);
   });
 
   it('ignora rótulos desconocidos y avisa', () => {
@@ -242,10 +242,7 @@ describe('resolverFilas', () => {
   });
 
   it('cuenta las filas de origen aunque todas se rechacen', () => {
-    const resolucion = resolverFilas([
-      cruda({ fila: 2 }),
-      cruda({ fila: 3, codigoExcel: 'CS-X' }),
-    ]);
+    const resolucion = resolverFilas([cruda({ fila: 2 }), cruda({ fila: 3, codigoExcel: 'CS-X' })]);
     expect(resolucion.filasFuente).toBe(2);
     expect(resolucion.rechazadas).toHaveLength(2);
   });

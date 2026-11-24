@@ -682,7 +682,7 @@ export class CompromisosPage {
   /** El desglose tampoco: la papelera se lista como tabla de restauración. */
   readonly vistaResumen = computed(() => !this.verPapelera() && this.modo() === 'resumen');
 
-  /** La matriz del equipo (Anexo 15 × Anexo 14, formato A..X) tampoco lista la papelera. */
+  /** La matriz del equipo (Anexo 15 × Anexo 14, formato A..W) tampoco lista la papelera. */
   readonly vistaMatriz = computed(() => !this.verPapelera() && this.modo() === 'matriz');
 
   /** La matriz del Anexo 14 lista los compromisos con sus columnas de seguimiento. */

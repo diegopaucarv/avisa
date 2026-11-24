@@ -1696,8 +1696,9 @@ base se separan por entorno cuando difieren.
    de entorno, no de pantalla.
 8. **Nomenclatura de auditorios.** La navegación dice «Auditorios» y la página titula «Locales».
    Es una inconsistencia de presentación, no de dato.
-9. **X7.** La regla dice que la temática no se muestra, pero la ficha del caso todavía pinta
-   `tematica` en su tabla.
+9. **X7.** La regla dice que la temática no se muestra y así es en toda la interfaz: la tabla
+   de demandas de la ficha (`caso-detalle.page.html`) lleva **Demanda · Estado · Origen**, y
+   `tematica` sólo sobrevive en `CAMPOS_OCULTOS` (`caso-detalle.page.ts`), que no se pinta.
 10. **Mockups.** Los **18 artboards canónicos** del índice existen y coinciden con el sistema de
     archivos (35 HTML y 17 variantes heredadas). No falta ni sobra ninguno.
 

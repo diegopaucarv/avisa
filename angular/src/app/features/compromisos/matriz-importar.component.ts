@@ -324,7 +324,7 @@ export class MatrizImportarComponent {
     const leida = leerCabecera(cabecera ?? []);
     if (leida.reconocidas === 0) {
       this.error.set(
-        'No se reconoció ninguna columna de la cabecera. Use la plantilla del formato del equipo (A..X).',
+        'No se reconoció ninguna columna de la cabecera. Use la plantilla del formato del equipo (A..W).',
       );
       this.errorCodigo.set('CABECERA_NO_RECONOCIDA');
       return;
@@ -357,7 +357,7 @@ export class MatrizImportarComponent {
     }
   }
 
-  /** Plantilla vacía con la cabecera A..X y BOM, para llenarla fuera. */
+  /** Plantilla vacía con la cabecera A..W y BOM, para llenarla fuera. */
   descargarPlantilla(): void {
     const contenido = BOM + generarCsv(CABECERA_MATRIZ, []);
     const archivo = new Blob([contenido], { type: 'text/csv;charset=utf-8' });

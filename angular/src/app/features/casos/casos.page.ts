@@ -268,40 +268,85 @@ function aConteos(bruto: unknown): ConteosCasos {
     }
 
     /*
-     * Responsive de los filtros. Estos estilos viven aquí, y no en la hoja
-     * global, porque los del componente ganan por especificidad: una regla
-     * movil en global.css no puede anular las clases del componente.
-     * - Hasta 760 px: busqueda a todo el ancho y filtros en dos columnas.
-     * - Hasta 520 px: una sola columna, cada control a todo el ancho.
+     * Barra principal de filtros (barra-filtros-casos).
+     *
+     * Medido con el CSS real: los cinco controles con rótulo más el botón de
+     * búsqueda avanzada suman ~1.290 px, de modo que la fila solo cabe de una
+     * pieza a partir de ~1.500 px de ventana. Por debajo se reparte en una
+     * rejilla de columnas iguales (3, luego 2, luego 1) en vez de envolver en
+     * filas irregulares.
+     *
+     * Estos estilos viven aquí, y no en la hoja global, porque los del
+     * componente ganan por especificidad.
      */
+    .barra-filtros-casos > * {
+      min-width: 0;
+    }
+
+    @media (min-width: 1500px) {
+      .barra-filtros-casos {
+        flex-wrap: nowrap;
+      }
+
+      .barra-filtros-casos .search-field-angosta {
+        flex: 1 1 200px;
+        min-width: 140px;
+      }
+    }
+
+    @media (max-width: 1499px) {
+      .barra-filtros-casos {
+        display: grid;
+        align-items: center;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px 10px;
+      }
+
+      .barra-filtros-casos .search-field-angosta {
+        width: 100%;
+        max-width: none;
+        flex: initial;
+      }
+
+      .barra-filtros-casos > .select-filter select {
+        flex: 1 1 auto;
+        min-width: 0;
+        max-width: none;
+      }
+
+      .barra-filtros-casos > .estado-final {
+        margin-left: 0;
+      }
+    }
+
+    @media (max-width: 1100px) {
+      .barra-filtros-casos {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 560px) {
+      .barra-filtros-casos {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    /* Búsqueda avanzada: no lleva la clase de la barra principal. */
     @media (max-width: 760px) {
-      .filter-bar {
+      .filter-bar:not(.barra-filtros-casos) {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 8px 10px;
       }
 
-      .search-field-angosta {
-        grid-column: 1 / -1;
-        max-width: none;
-        flex: initial;
-      }
-
-      .filter-bar > .select-filter {
+      .filter-bar:not(.barra-filtros-casos) > .select-filter,
+      .filter-bar:not(.barra-filtros-casos) > .select-filter select {
         min-width: 0;
-      }
-
-      .filter-bar > .select-filter select {
-        min-width: 0;
-      }
-
-      .estado-final {
-        margin-left: 0;
       }
     }
 
     @media (max-width: 520px) {
-      .filter-bar {
+      .filter-bar:not(.barra-filtros-casos) {
         grid-template-columns: minmax(0, 1fr);
       }
     }

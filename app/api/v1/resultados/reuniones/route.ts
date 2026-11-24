@@ -16,8 +16,10 @@ export const dynamic = "force-dynamic";
  * `GET /api/v1/resultados/reuniones?q=&pagina=1&tamano=25`
  *
  * Reuniones de diálogo para elegir a cuál se le carga la lista de asistencia.
- * Es sólo lectura (`core.reuniones_dialogo` + `core.casos`); el alta y la ficha
- * de reunión siguen en `/api/v1/reuniones`, que este módulo no toca.
+ * Es sólo lectura (`core.reuniones_dialogo` + `core.casos`). El alta y la ficha
+ * de reunión no existen todavía en la API (items 72–74/77/117): la asistencia se
+ * guarda por `POST /v1/resultados/asistentes` y los resultados se extraen por
+ * `POST /v1/resultados/extraccion`.
  */
 export async function GET(request: Request) {
   try {

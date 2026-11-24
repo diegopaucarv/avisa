@@ -10,8 +10,8 @@ import type { DbSession } from "../tenant";
  * ninguna otra ruta sirve:
  *
  *  1. Listar reuniones de diálogo para elegir a cuál se le carga la lista de
- *     asistencia (el alta de reunión y su ficha viven en `/api/v1/reuniones`,
- *     que este módulo no toca).
+ *     asistencia (el alta de reunión y su ficha todavía no existen: no hay
+ *     `/api/v1/reuniones`, item 72).
  *  2. Vincular, en una sola transacción, la lista confirmada de asistentes a
  *     `core.reunion_participantes`. Cada fila se aísla con un SAVEPOINT para
  *     poder devolver el detalle por asistente sin abortar el resto.

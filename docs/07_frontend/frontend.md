@@ -10,16 +10,9 @@ del sistema AVISA, ¿qué sigue pendiente y en qué pantalla se nota?
 capa GIS, contratos de API y discusiones— vive en [`frontend_detalle.md`](frontend_detalle.md).
 
 No se repite lo que ya está hecho. Si una pantalla no aparece en el resumen, no tiene
-pendientes de interfaz.
-
-> **Qué cambió en esta pasada.** La verificación del 2026-11-24 encontró que la SPA
-> adelantó trabajo que este documento daba por pendiente: ocho pantallas nuevas ya
-> tienen ruta y componente real, la capa distrital se dibuja, los puntos del KML están
-> en el mapa, los 27 auditorios ya tienen distrito, el tablero de bandeja persiste, el
-> alta de actores existe con PII bajo demanda y el contador de la campana está en el
-> shell. Las filas que se cerraron se listan en «Ya está» de cada pantalla y, con la
-> evidencia de archivo y línea, en la sección «Verificación 2026-11-24» de
-> [`frontend_detalle.md`](frontend_detalle.md).
+pendientes de interfaz. Lo cerrado queda en «Ya está» de cada pantalla y, con la
+evidencia de archivo y línea, en «Verificación 2026-11-24» de
+[`frontend_detalle.md`](frontend_detalle.md).
 
 ---
 
@@ -506,8 +499,7 @@ En la navegación el nombre es «Auditorios»; la página todavía titula «Loca
 **Ya está:** el desglose por prioridad, riesgo y región, con cada fila enlazada al listado
 filtrado, y las **variantes** del módulo (nacional, región y subsector) del item 52.
 
-La **temática** no se muestra (regla X7), pero el desglose de la ficha del caso todavía
-pinta `tematica`: es una inconsistencia de presentación pendiente, no de dato.
+La **temática** no se muestra en ninguna vista (regla X7), tampoco en la ficha del caso.
 
 ---
 

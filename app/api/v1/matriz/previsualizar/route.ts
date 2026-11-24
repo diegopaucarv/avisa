@@ -123,7 +123,7 @@ export async function POST(request: Request) {
     if (Object.keys(leida.indices).length === 0) {
       throw new ApiError(
         400,
-        "No se reconoció ninguna columna de la cabecera. Use la plantilla del formato del equipo (A..X) o incluya al menos una columna conocida.",
+        "No se reconoció ninguna columna de la cabecera. Use la plantilla del formato del equipo (A..W) o incluya al menos una columna conocida.",
         "CABECERA_NO_RECONOCIDA",
       );
     }
@@ -139,10 +139,7 @@ export async function POST(request: Request) {
           await verificarEsquemaMapeo(client);
           mapaBase = await cargarMapa(client);
         } catch (error) {
-          if (
-            error instanceof ApiError &&
-            error.code === "ESQUEMA_PENDIENTE"
-          ) {
+          if (error instanceof ApiError && error.code === "ESQUEMA_PENDIENTE") {
             mapaDisponible = false;
           } else {
             throw error;

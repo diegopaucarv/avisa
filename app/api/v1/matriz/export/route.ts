@@ -26,7 +26,7 @@ const MAX_PAGINAS = 500;
 
 /**
  * Descarga de la matriz como CSV con las 24 columnas del formato del equipo
- * (A..X, en su orden), BOM UTF-8 para Excel y escapado RFC 4180.
+ * (A..W, en su orden), BOM UTF-8 para Excel y escapado RFC 4180.
  *
  * La identidad (código AVISA y código Excel) no viaja como columna extra para
  * que el archivo siga siendo el mismo formato del equipo; se consulta en el
@@ -78,7 +78,11 @@ export async function GET(request: Request) {
     );
 
     const contenido =
-      BOM + generarCsv(CABECERA_MATRIZ, filas.map((fila) => filaAMatriz(fila)));
+      BOM +
+      generarCsv(
+        CABECERA_MATRIZ,
+        filas.map((fila) => filaAMatriz(fila)),
+      );
     const fecha = new Date().toISOString().slice(0, 10);
     const nombre = `avisa_matriz_equipo_${fecha}.csv`;
 
