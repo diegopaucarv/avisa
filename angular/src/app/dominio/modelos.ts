@@ -9,11 +9,11 @@
 /** Niveles de conflictividad (Guía §7.5.1). */
 export type NivelConflicto = 'Diferencia' | 'Controversia' | 'Conflicto social' | 'Crisis social';
 
-/** Riesgo del caso: atributo propio, recalculable. «Moderado», nunca «Medio». */
-export type Riesgo = 'Bajo' | 'Moderado' | 'Alto';
+/** Riesgo del caso: atributo propio, recalculable. Valores «Bajo», «Medio», «Alto». */
+export type Riesgo = 'Bajo' | 'Medio' | 'Alto';
 
 /** Prioridad de atención (eje distinto del riesgo). */
-export type PrioridadAtencion = 'Urgente' | 'Moderado' | 'Bajo';
+export type PrioridadAtencion = 'Urgente' | 'Medio' | 'Bajo';
 
 /**
  * Estado operativo del caso. `Activo` y «En seguimiento» se unificaron en

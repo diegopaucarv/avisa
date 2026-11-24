@@ -292,6 +292,8 @@ export class ActorPanelAltaComponent {
   readonly nivelGobierno = signal('');
   readonly region = signal('');
   readonly tipo = signal('');
+  readonly funcion = signal('');
+  readonly posicionamiento = signal('');
   readonly dni = signal('');
   readonly ruc = signal('');
   readonly telefono = signal('');
@@ -323,6 +325,8 @@ export class ActorPanelAltaComponent {
   });
 
   readonly regiones = computed(() => this.catalogos.valor()?.regiones ?? []);
+  readonly funciones = computed(() => this.catalogos.valor()?.funcionesActor ?? []);
+  readonly perfiles = computed(() => this.catalogos.valor()?.perfilesActor ?? []);
 
   /** Organizaciones disponibles para la membresía OSPA de una persona. */
   private readonly organizaciones = consulta<ActorDirectorio[]>({
@@ -462,6 +466,8 @@ export class ActorPanelAltaComponent {
       cargo: this.cargo().trim() || null,
       nivelGobierno: this.nivelGobierno() || null,
       tipo: this.tipo() || undefined,
+      funcion: this.funcion() || undefined,
+      posicionamiento: this.posicionamiento() || undefined,
       region: this.region() || undefined,
       baseLegal: BASE_LEGAL,
     };

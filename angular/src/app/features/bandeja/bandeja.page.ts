@@ -4,51 +4,72 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
 
 import { urlApi } from '../../core/config/entorno';
-import {
-  normalizarColeccion,
-  paramsDePagina,
-  urlConParametros,
-  type Coleccion,
-} from '../../core/http/coleccion';
-import { consulta, type Consulta, type EstadoConsulta } from '../../core/http/consulta';
+import { urlConParametros } from '../../core/http/coleccion';
+import { consulta } from '../../core/http/consulta';
+import { aErrorApi } from '../../core/http/errores';
+import { CapacidadesService } from '../../core/permisos/capacidades.service';
 import { ExportarMenuComponent } from '../../shared/ui/exportar-menu.component';
 import { IconoComponent } from '../../shared/ui/icono.component';
-import { OrdenTabla } from '../../shared/ui/orden-tabla';
-import { ThOrdenDirective } from '../../shared/ui/th-orden.directive';
-import { aAlerta, type Alerta } from '../alertas/alerta.mapeo';
-import { aColeccionDemandas, type ColeccionDemandas } from '../casos/demanda-sin-caso.mapeo';
-import { aCompromiso, type Compromiso } from '../compromisos/compromiso.mapeo';
 import {
-  HORIZONTE_POR_VENCER_DIAS,
-  aTotal,
-  rangoPorVencer,
-  rangoVencidos,
-} from '../resumen/resumen.mapeo';
-import {
-  OPCIONES_TIPO,
-  claseVencimiento,
-  construirCola,
-  filtrarColaPorTipo,
+  COLUMNAS_TABLERO,
+  ETIQUETAS_COLUMNA,
+  ETIQUETAS_TIPO,
+  OPCIONES_FILTRO,
+  claseFechaLimite,
+  claseRiesgo,
+  claseTipo,
+  claveTarjeta,
+  etiquetaFechaLimite,
+  fechaTexto,
+  normalizarCompletitud,
   normalizarFiltroTipo,
-  type FiltroTipoCola,
-  type ItemCola,
-} from './bandeja.cola';
+  normalizarTablero,
+  responsableDe,
+  rutaEntidad,
+  tieneResponsable,
+  type CambiosTarjeta,
+  type CandidatoTablero,
+  type ClaveColumna,
+  type CompletitudColumna,
+  type FiltroTipoTablero,
+  type TarjetaTablero,
+} from './bandeja.mapeo';
+import { BandejaService } from './bandeja.service';
+
+type FormularioTarjeta = {
+  asignacionTexto: string;
+  responsableTexto: string;
+  fechaLimite: string;
+  pospuestoHasta: string;
+  motivoPosposicion: string;
+};
+
+function formularioVacio(): FormularioTarjeta {
+  return {
+    asignacionTexto: '',
+    responsableTexto: '',
+    fechaLimite: '',
+    pospuestoHasta: '',
+    motivoPosposicion: '',
+  };
+}
 
 /**
- * Bandeja de trabajo.
+ * Bandeja de trabajo como tablero (Kanban).
  *
- * Una sola cola con lo que exige atención. Cada fuente conserva su consulta
- * paginada actual (alertas pendientes, compromisos vencidos o por vencer y
- * demandas sin caso); la cola mezcla esas filas ya cargadas, las ordena por
- * plazo/riesgo/revisión y las filtra por tipo. No repite la lógica de las
- * pantallas completas: sólo reutiliza sus mapeos.
+ * Cuatro columnas persistidas en `core.tablero_tarjeta` (`backlog`, `en_curso`,
+ * `en_espera`, `hecho`). Cada tarjeta muestra los datos de la entidad dueña
+ * resueltos por la API y permite moverla y editar responsable, asignación,
+ * fecha límite y posposición; el servidor guarda el cambio y deja el evento de
+ * historial. Los registros que todavía no tienen tarjeta se listan debajo y se
+ * incorporan al tablero con el primer movimiento (upsert).
  *
- * Quedan pendientes, sin simular: el tablero con mapa y matriz (ítem 111) y la
- * asignación, posposición, fecha límite y responsable (ítem 50).
+ * No hay arrastre: el mockup no lo dibuja, así que se usan botones de columna.
+ * La completitud no se calcula aquí: llega del endpoint dedicado.
  */
 @Component({
   selector: 'app-bandeja',
-  imports: [RouterLink, IconoComponent, ExportarMenuComponent, ThOrdenDirective],
+  imports: [IconoComponent, ExportarMenuComponent, RouterLink],
   templateUrl: './bandeja.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
@@ -56,237 +77,384 @@ import {
       display: block;
     }
 
-    .view-body {
+    /* Tablero ------------------------------------------------------- */
+
+    .tablero {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      align-items: start;
+    }
+
+    .tablero-col {
       display: flex;
       flex-direction: column;
-      gap: 14px;
-      width: 100%;
-      max-width: 1420px;
-      margin: 0 auto;
-      padding: 27px 34px 50px;
-      box-sizing: border-box;
+      gap: 8px;
+      min-width: 0;
+      padding: 10px 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #f8fafb;
     }
 
-    .view-head {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 16px;
-    }
-
-    .cola-filtros {
-      flex-wrap: wrap;
-    }
-
-    .tablero-bandeja {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-    }
-
-    .tablero-bandeja .stat-copy > strong.sin-dato {
-      font-size: 14px;
-      line-height: 1.3;
-    }
-
-    .cola-filtros b {
-      margin-left: 5px;
-      font-variant-numeric: tabular-nums;
-      opacity: 0.72;
-    }
-
-    .cola-nota {
-      margin: -4px 0 0;
-      color: #8b97a2;
-      font-size: 12.5px;
-      line-height: 1.55;
-    }
-
-    .cola-panel {
-      padding: 17px;
-    }
-
-    .cola-titulo {
+    .tablero-col-head {
       display: flex;
       align-items: center;
+      justify-content: space-between;
       gap: 8px;
     }
 
-    .cola-titulo app-icono {
-      color: #5b7290;
+    .tablero-col-head h2 {
+      margin: 0;
+      color: var(--ink);
+      font: 700 12px/1.3 var(--font-display);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
     }
 
-    .cola-contadores {
+    .tablero-col-count {
+      min-width: 22px;
+      padding: 1px 7px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #fff;
+      color: var(--muted);
+      font-size: 11px;
+      font-variant-numeric: tabular-nums;
+      text-align: center;
+    }
+
+    .tablero-col-meta {
+      margin: 0;
+      color: var(--muted);
+      font-size: 10.5px;
+      line-height: 1.4;
+    }
+
+    .tablero-col-vacio {
+      margin: 0;
+      padding: 14px 8px;
+      border: 1px dashed #dfe4ea;
+      border-radius: 8px;
+      color: #97a3b0;
+      font-size: 11px;
+      text-align: center;
+    }
+
+    /* Tarjeta ------------------------------------------------------- */
+
+    .tarjeta {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding: 10px;
+      border: 1px solid #dfe4ea;
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: 0 1px 1px rgba(17, 32, 45, 0.04);
+    }
+
+    .tarjeta-top {
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
+      gap: 4px;
     }
 
-    .cola-contador {
-      display: flex;
-      align-items: baseline;
-      gap: 5px;
-      padding: 6px 9px;
-      border: 1px solid #e6ebef;
-      border-radius: 8px;
-      background: #fafbfc;
-      color: #7b8896;
-      font-size: 12px;
+    .tag {
+      display: inline-block;
+      padding: 1px 7px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--muted);
+      font-size: 10px;
       white-space: nowrap;
     }
 
-    .cola-contador strong {
-      color: #1a2b3e;
-      font: 700 14.5px/1.2 var(--font-display);
+    .tag.tipo-alerta {
+      border-color: #f3c3bd;
+      background: #fdf1ef;
+      color: var(--red);
     }
 
-    .cola-tabla {
-      min-width: 880px;
+    .tag.tipo-compromiso {
+      border-color: #f5d6b3;
+      background: #fdf6ec;
+      color: #8a5a00;
     }
 
-    .cola-tabla td {
-      white-space: normal;
-      vertical-align: middle;
+    .tag.tipo-demanda {
+      border-color: #cddcef;
+      background: #eaf1f8;
+      color: #2455a2;
     }
 
-    .cola-tabla td:first-child {
-      min-width: 0;
+    .tag.tipo-caso {
+      border-color: #c9e3d5;
+      background: #eef7f2;
+      color: var(--green);
     }
 
-    .cola-tabla td:nth-child(3) {
-      min-width: 220px;
+    .tag.r-alto {
+      border-color: #f3c3bd;
+      background: #fdf1ef;
+      color: var(--red);
     }
 
-    .cola-plazo {
+    .tag.r-moderado {
+      border-color: #f5d6b3;
+      background: #fdf6ec;
+      color: #ad741d;
+    }
+
+    .tag.r-bajo {
+      border-color: #c9e3d5;
+      background: #eef7f2;
+      color: var(--green);
+    }
+
+    .tarjeta-titulo {
+      margin: 0;
+      color: var(--ink);
+      font: 600 12.5px/1.35 var(--font-display);
+      overflow-wrap: anywhere;
+    }
+
+    .tarjeta-code {
+      margin: 0;
+      color: #8995a0;
+      font-size: 10.5px;
+      overflow-wrap: anywhere;
+    }
+
+    .tarjeta-code code {
+      padding: 0 3px;
+      border-radius: 3px;
+      background: #eef1f4;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 10px;
+    }
+
+    .tarjeta-asignacion {
+      margin: 0;
+      color: var(--ink-2);
+      font-size: 11px;
+      line-height: 1.4;
+    }
+
+    .tarjeta-datos {
       display: flex;
       flex-direction: column;
-      align-items: flex-start;
       gap: 3px;
+      margin: 0;
     }
 
-    .cola-fecha {
-      color: #99a3aa;
-      font-size: 12px;
+    .tarjeta-datos > div {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 8px;
     }
 
-    .cola-registro strong {
-      display: block;
-      color: #465a6c;
-      font-size: 12px;
+    .tarjeta-datos dt {
+      color: #97a3b0;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .tarjeta-datos dd {
+      margin: 0;
+      color: var(--ink-2);
+      font-size: 11px;
+      text-align: right;
+    }
+
+    .sin-dato {
+      color: #97a3b0;
+    }
+
+    .tarjeta-pospuesta {
+      display: flex;
+      align-items: flex-start;
+      gap: 4px;
+      margin: 0;
+      padding: 5px 7px;
+      border: 1px solid #f5d6b3;
+      border-radius: 6px;
+      background: #fdf6ec;
+      color: #8a5a00;
+      font-size: 10.5px;
+      line-height: 1.4;
+    }
+
+    .tarjeta-pospuesta app-icono {
+      margin-top: 1px;
+    }
+
+    .tarjeta-acciones {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 2px;
+      padding-top: 6px;
+      border-top: 1px solid #eef1f4;
+    }
+
+    .tarjeta-acciones button {
+      padding: 3px 7px;
+      border: 1px solid var(--line);
+      border-radius: 5px;
+      background: #fff;
+      color: var(--muted);
+      font: inherit;
+      font-size: 10px;
+      cursor: pointer;
+    }
+
+    .tarjeta-acciones button:hover:not(:disabled) {
+      border-color: var(--blue);
+      color: var(--blue);
+    }
+
+    .tarjeta-acciones button[aria-pressed='true'] {
+      border-color: var(--blue);
+      background: var(--blue-pale);
+      color: var(--blue-dark);
+      font-weight: 600;
+      cursor: default;
+    }
+
+    .tarjeta-acciones button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .tarjeta-acciones .editar {
+      margin-left: auto;
+      border-color: #cddcef;
+      color: var(--blue);
       font-weight: 600;
     }
 
-    .cola-registro small {
-      display: block;
-      margin-top: 3px;
-      color: #99a3aa;
-      font-size: 12px;
+    /* Formulario en la tarjeta -------------------------------------- */
+
+    .tarjeta-form {
+      display: grid;
+      gap: 6px;
+      padding: 8px;
+      border: 1px solid #cddcef;
+      border-radius: 7px;
+      background: #f8fbff;
     }
 
-    .tipo-tag {
-      display: inline-flex;
-      align-items: center;
-      padding: 2px 7px;
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: 700;
-      white-space: nowrap;
+    .tarjeta-form label {
+      display: grid;
+      gap: 2px;
+      color: #647487;
+      font-size: 10px;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
     }
 
-    .tipo-alerta {
-      background: #eef3fa;
-      color: #4a6b93;
+    .tarjeta-form input {
+      min-height: 27px;
+      padding: 4px 7px;
+      border: 1px solid #dce3e8;
+      border-radius: 5px;
+      background: #fff;
+      color: var(--ink);
+      font: inherit;
+      font-size: 11px;
     }
 
-    .tipo-compromiso {
-      background: #fff4e6;
-      color: #9d702e;
+    .tarjeta-form input:focus-visible {
+      border-color: var(--blue);
+      outline: 2px solid #cddcef;
+      outline-offset: 0;
     }
 
-    .tipo-demanda {
-      background: #f0f2f4;
-      color: #75818b;
+    .tarjeta-form-acciones {
+      display: flex;
+      gap: 5px;
+      margin-top: 2px;
     }
 
-    .cola-nota-fuente {
-      margin: 10px 0 0;
-      color: #8b5a54;
-      font-size: 12.5px;
-      line-height: 1.5;
+    .tarjeta-form-acciones button {
+      min-height: 26px;
+      padding: 0 9px;
+      font-size: 11px;
     }
 
-    .cola-cargando {
-      margin: 10px 0 0;
-      color: #909ba4;
-      font-size: 12.5px;
-      line-height: 1.5;
-    }
+    /* Candidatos y completitud -------------------------------------- */
 
-    .cola-pie {
+    .candidato-mover {
       display: flex;
       flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      margin-top: 12px;
+      gap: 4px;
     }
 
-    .cola-totales {
+    .candidato-mover button {
+      padding: 3px 7px;
+      border: 1px solid var(--line);
+      border-radius: 5px;
+      background: #fff;
+      color: var(--muted);
+      font: inherit;
+      font-size: 10px;
+      cursor: pointer;
+    }
+
+    .candidato-mover button:hover:not(:disabled) {
+      border-color: var(--blue);
+      color: var(--blue);
+    }
+
+    .candidato-mover button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .num {
+      font-variant-numeric: tabular-nums;
+      text-align: right;
+    }
+
+    .tablero-aviso {
       margin: 0;
-      color: #9aa5ae;
-      font-size: 12px;
-      line-height: 1.6;
-    }
-
-    .cola-totales strong {
-      color: #66757f;
-    }
-
-    .cola-enlaces {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 14px;
-    }
-
-    .cola-pendiente {
-      margin: 12px 0 0;
-      padding: 9px 11px;
-      border: 1px dashed #dce3e8;
+      padding: 12px 14px;
+      border: 1px solid #f1d9a8;
       border-radius: 8px;
-      color: #8b97a2;
+      background: #fffaf0;
+      color: #8a5a00;
       font-size: 12px;
-      line-height: 1.55;
+      line-height: 1.5;
     }
 
-    .cola-aviso {
-      margin: 0 0 12px;
-      padding: 8px 11px;
-      border: 1px solid #ecdcb5;
-      border-radius: 8px;
-      background: #fdf8ec;
-      color: #7c6427;
-      font-size: 12px;
-      line-height: 1.55;
+    .tablero-aviso strong {
+      color: #6d4700;
     }
 
-    @media (max-width: 980px) {
-      .tablero-bandeja {
+    .accion-aviso {
+      margin: 0;
+      color: var(--green);
+      font-size: 12px;
+    }
+
+    .accion-error {
+      margin: 0;
+      color: var(--red);
+      font-size: 12px;
+    }
+
+    @media (max-width: 1080px) {
+      .tablero {
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
     }
 
-    @media (max-width: 520px) {
-      .tablero-bandeja {
+    @media (max-width: 620px) {
+      .tablero {
         grid-template-columns: 1fr;
-      }
-    }
-
-    @media (max-width: 760px) {
-      .view-body {
-        padding: 18px 16px 40px;
-      }
-
-      .cola-panel {
-        padding: 14px;
       }
     }
   `,
@@ -294,336 +462,228 @@ import {
 export class BandejaPage {
   private readonly ruta = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly servicio = inject(BandejaService);
+  private readonly capacidades = inject(CapacidadesService);
 
-  readonly opcionesTipo = OPCIONES_TIPO;
-  readonly horizonteDias = HORIZONTE_POR_VENCER_DIAS;
+  readonly opcionesTipo = OPCIONES_FILTRO;
+  readonly etiquetasColumna = ETIQUETAS_COLUMNA;
+  readonly etiquetasTipo = ETIQUETAS_TIPO;
+  readonly destinos = COLUMNAS_TABLERO.map((clave) => ({
+    clave,
+    etiqueta: ETIQUETAS_COLUMNA[clave],
+  }));
 
-  readonly etiquetasTipo: Record<ItemCola['tipo'], string> = {
-    alerta: 'Alerta',
-    compromiso: 'Compromiso',
-    demanda: 'Demanda',
-  };
+  readonly puedeEditar = this.capacidades.puedeEditar;
 
   /** Último fallo del botón de exportación; vacío si no hubo. */
   readonly exportarError = signal<string | null>(null);
+  readonly aviso = signal<string | null>(null);
+  readonly errorAccion = signal<string | null>(null);
+  readonly guardando = signal(false);
+  readonly tarjetaEnEdicion = signal<string | null>(null);
+  readonly formulario = signal<FormularioTarjeta>(formularioVacio());
 
-  /** `?tipo=` de la URL; cualquier variante desconocida cae en `todos`. */
+  /** `?tipo=` de la URL; cualquier variante desconocida cae en «todas». */
   private readonly parametros = toSignal(
     this.ruta.queryParamMap.pipe(
       map((params) => ({ tipo: normalizarFiltroTipo(params.get('tipo')) })),
     ),
-    { initialValue: { tipo: 'todos' as FiltroTipoCola } },
+    { initialValue: { tipo: 'todas' as FiltroTipoTablero } },
   );
 
   readonly filtroTipo = computed(() => this.parametros().tipo);
 
-  /** Referencia de «hoy» para vencer/por vencer; se fija al abrir la pantalla. */
-  private readonly hoy = computed(() => new Date());
-
-  /* ------------------------------------------------------------------ *
-   * Alertas pendientes
-   * ------------------------------------------------------------------ */
-
-  private readonly recursoAlertas = consulta<Coleccion<Alerta>>({
+  private readonly recursoTablero = consulta({
     fuente: () =>
-      urlConParametros(urlApi('/v1/alerts'), {
-        ...paramsDePagina({ pagina: 1, tamano: 5 }),
-        estado: 'Pendiente de revisión',
-        sort: 'recent',
+      urlConParametros(urlApi('/v1/bandeja'), {
+        tipo: this.filtroTipo() === 'todas' ? null : this.filtroTipo(),
       }),
-    esquema: (bruto) => {
-      const coleccion = normalizarColeccion<unknown>(bruto);
-      return { ...coleccion, elementos: coleccion.elementos.map(aAlerta) };
-    },
+    esquema: normalizarTablero,
   });
 
-  readonly alertas = computed(() => this.recursoAlertas.valor()?.elementos ?? []);
-  readonly totalAlertas = computed(() => this.recursoAlertas.valor()?.total ?? 0);
-  readonly estadoAlertas = this.recursoAlertas.estado;
-  readonly errorAlertas = this.recursoAlertas.error;
-
-  /* ------------------------------------------------------------------ *
-   * Compromisos vencidos o por vencer
-   * ------------------------------------------------------------------ */
-
-  /**
-   * Contador de vencidos: `vencimiento_hasta` ayer, sin `desde`, y sin estados
-   * terminales. El `total` del sobre es la cifra exacta; no se traen filas.
-   */
-  private readonly kpiVencidos = consulta<number>({
-    fuente: () => {
-      const { hasta } = rangoVencidos();
-      return urlConParametros(urlApi('/v1/commitments'), {
-        ...paramsDePagina({ pagina: 1, tamano: 1 }),
-        excluir_terminales: 'true',
-        vencimiento_hasta: hasta,
-      });
-    },
-    esquema: aTotal,
-  });
-
-  /** Contador de «por vencer»: hoy y los próximos `horizonteDias`, inclusive. */
-  private readonly kpiPorVencer = consulta<number>({
-    fuente: () => {
-      const rango = rangoPorVencer();
-      return urlConParametros(urlApi('/v1/commitments'), {
-        ...paramsDePagina({ pagina: 1, tamano: 1 }),
-        excluir_terminales: 'true',
-        vencimiento_desde: rango.desde,
-        vencimiento_hasta: rango.hasta,
-      });
-    },
-    esquema: aTotal,
-  });
-
-  /**
-   * Cola de compromisos: todo lo que vence hasta hoy + horizonte, sin `desde`
-   * y sin estados terminales. El servidor ordena por vencimiento efectivo
-   * ascendente, así que la primera página trae los plazos más próximos.
-   */
-  private readonly recursoCompromisos = consulta<Coleccion<Compromiso>>({
-    fuente: () => {
-      const { hasta } = rangoPorVencer();
-      return urlConParametros(urlApi('/v1/commitments'), {
-        ...paramsDePagina({ pagina: 1, tamano: 5 }),
-        excluir_terminales: 'true',
-        vencimiento_hasta: hasta,
-      });
-    },
-    esquema: (bruto) => {
-      const coleccion = normalizarColeccion<unknown>(bruto);
-      return { ...coleccion, elementos: coleccion.elementos.map(aCompromiso) };
-    },
-  });
-
-  readonly compromisos = computed(() => this.recursoCompromisos.valor()?.elementos ?? []);
-  readonly totalCompromisos = computed(() => this.recursoCompromisos.valor()?.total ?? 0);
-  readonly estadoCompromisos = this.recursoCompromisos.estado;
-  readonly errorCompromisos = this.recursoCompromisos.error;
-
-  readonly textoVencidos = computed(() => this.textoTotal(this.kpiVencidos));
-  readonly textoPorVencer = computed(() => this.textoTotal(this.kpiPorVencer));
-
-  /* ------------------------------------------------------------------ *
-   * Demandas sin caso
-   * ------------------------------------------------------------------ */
-
-  private readonly recursoDemandas = consulta<ColeccionDemandas>({
+  private readonly recursoCompletitud = consulta({
     fuente: () =>
-      urlConParametros(urlApi('/v1/demandas'), {
-        ...paramsDePagina({ pagina: 1, tamano: 5 }),
-        sinCaso: 'true',
-        sort: 'recent',
+      urlConParametros(urlApi('/v1/bandeja/completitud'), {
+        tipo: this.filtroTipo() === 'todas' ? null : this.filtroTipo(),
       }),
-    esquema: aColeccionDemandas,
+    esquema: normalizarCompletitud,
   });
 
-  readonly demandas = computed(() => this.recursoDemandas.valor()?.elementos ?? []);
-  readonly totalDemandas = computed(() => this.recursoDemandas.valor()?.sinCasoTotal ?? 0);
-  readonly estadoDemandas = this.recursoDemandas.estado;
-  readonly errorDemandas = this.recursoDemandas.error;
+  readonly tablero = this.recursoTablero.valor;
+  readonly completitud = this.recursoCompletitud.valor;
 
-  /* ------------------------------------------------------------------ *
-   * Cola única
-   * ------------------------------------------------------------------ */
+  readonly columnas = computed(() => this.tablero()?.columnas ?? []);
+  readonly candidatos = computed(() => this.tablero()?.candidatos ?? []);
+  readonly sinTarjetas = computed(() => (this.tablero()?.total ?? 0) === 0);
+  readonly sinCandidatos = computed(() => this.candidatos().length === 0);
+  readonly incompletas = computed(() => this.completitud()?.total.incompletas ?? 0);
 
-  /** Filas cargadas de las tres fuentes, ordenadas y recortadas por `?tipo=`. */
-  readonly cola = computed(() =>
-    filtrarColaPorTipo(
-      construirCola(
-        {
-          alertas: this.alertas(),
-          compromisos: this.compromisos(),
-          demandas: this.demandas(),
-        },
-        this.hoy(),
-      ),
-      this.filtroTipo(),
-    ),
-  );
-
-  /** Orden local de la tabla de la cola. */
-  readonly orden = new OrdenTabla<ItemCola>();
-
-  private readonly accesoresCola: Record<string, (item: ItemCola) => unknown> = {
-    plazo: (item) => item.fecha,
-    tipo: (item) => item.tipo,
-    registro: (item) => item.titulo,
-    caso: (item) => item.caso,
-    territorio: (item) => item.territorio,
-    riesgo: (item) => item.riesgo,
-    revision: (item) => item.revisionPendiente,
-  };
-
-  readonly filasVisibles = computed(() => this.orden.ordenar(this.cola(), this.accesoresCola));
-
-  readonly cargando = computed(() =>
-    [this.estadoAlertas(), this.estadoCompromisos(), this.estadoDemandas()].some(
-      (estado) => estado === 'cargando' || estado === 'inactivo',
-    ),
-  );
-
-  readonly fuentesConError = computed(() => {
-    const fuentes: string[] = [];
-    if (this.estadoAlertas() === 'error') fuentes.push('alertas');
-    if (this.estadoCompromisos() === 'error') fuentes.push('compromisos');
-    if (this.estadoDemandas() === 'error') fuentes.push('demandas');
-    return fuentes;
-  });
-
-  readonly errorTotal = computed(() => this.fuentesConError().length === 3);
-
-  readonly hayErrorParcial = computed(() => {
-    const total = this.fuentesConError().length;
-    return total > 0 && total < 3;
-  });
-
-  readonly mensajeError = computed(() => {
-    const mensajes = [
-      this.errorAlertas()?.message,
-      this.errorCompromisos()?.message,
-      this.errorDemandas()?.message,
-    ].filter((mensaje): mensaje is string => !!mensaje);
-    return mensajes[0] ?? 'No se pudo cargar la bandeja.';
-  });
-
-  /**
-   * Totales por fuente: son del servidor, no de las filas visibles. Mientras
-   * una fuente no responde se declara «…» o «No disponible», sin estimar.
-   */
-  readonly textos = computed(() => {
-    const alertas = this.textoFuente(
-      this.estadoAlertas(),
-      this.recursoAlertas.valor() !== undefined,
-      this.totalAlertas(),
-    );
-    const compromisos = this.textoFuente(
-      this.estadoCompromisos(),
-      this.recursoCompromisos.valor() !== undefined,
-      this.totalCompromisos(),
-    );
-    const demandas = this.textoFuente(
-      this.estadoDemandas(),
-      this.recursoDemandas.valor() !== undefined,
-      this.totalDemandas(),
-    );
-
-    const todosCargados =
-      this.recursoAlertas.valor() !== undefined &&
-      this.recursoCompromisos.valor() !== undefined &&
-      this.recursoDemandas.valor() !== undefined;
-
-    const todos = this.fuentesConError().length
-      ? 'No disponible'
-      : todosCargados
-        ? String(this.totalAlertas() + this.totalCompromisos() + this.totalDemandas())
-        : '…';
-
-    return { alertas, compromisos, demandas, todos };
-  });
-
-  /**
-   * Tablero de cabecera: sólo cifras ya declaradas por cada fuente. Mientras la
-   * consulta carga se muestra «…» y si falla, «No disponible»; nunca un cero
-   * que no se pueda sostener.
-   */
-  readonly tablero = computed(
+  readonly cargando = computed(
     () =>
-      [
-        {
-          etiqueta: 'Alertas pendientes',
-          valor: this.textoFuente(
-            this.estadoAlertas(),
-            this.recursoAlertas.valor() !== undefined,
-            this.totalAlertas(),
-          ),
-          detalle: 'En revisión',
-          icono: 'alertas',
-          tono: '',
-        },
-        {
-          etiqueta: 'Compromisos vencidos',
-          valor: this.textoVencidos(),
-          detalle: 'Plazo cumplido',
-          icono: 'compromisos',
-          tono: 'red',
-        },
-        {
-          etiqueta: 'Compromisos por vencer',
-          valor: this.textoPorVencer(),
-          detalle: `Próximos ${this.horizonteDias} días`,
-          icono: 'reloj',
-          tono: 'amber',
-        },
-        {
-          etiqueta: 'Demandas sin caso',
-          valor: this.textoFuente(
-            this.estadoDemandas(),
-            this.recursoDemandas.valor() !== undefined,
-            this.totalDemandas(),
-          ),
-          detalle: 'Sin caso vinculado',
-          icono: 'casos',
-          tono: '',
-        },
-      ] as const,
+      this.recursoTablero.estado() === 'cargando' || this.recursoTablero.estado() === 'inactivo',
+  );
+
+  readonly error = computed(
+    () => this.recursoTablero.error()?.message ?? this.recursoCompletitud.error()?.message ?? null,
   );
 
   /* ------------------------------------------------------------------ *
    * Helpers de plantilla
    * ------------------------------------------------------------------ */
 
-  /** Texto del contador de una fuente: «…» mientras carga, «No disponible» si falló. */
-  private textoFuente(estado: EstadoConsulta, cargado: boolean, valor: number): string {
-    if (estado === 'error') return 'No disponible';
-    if (!cargado) return '…';
-    return String(valor);
+  /** Completitud de una columna; `null` mientras no llegó el endpoint. */
+  completitudDe(clave: ClaveColumna): CompletitudColumna | null {
+    return this.completitud()?.columnas.find((columna) => columna.clave === clave) ?? null;
   }
 
-  /** Texto del KPI: «…» mientras carga, «No disponible» si falló. */
-  private textoTotal(recurso: Consulta<number>): string {
-    if (recurso.estado() === 'error') return 'No disponible';
-    const valor = recurso.valor();
-    return valor === undefined ? '…' : String(valor);
-  }
-
-  textoDe(filtro: FiltroTipoCola): string {
-    const textos = this.textos();
-    switch (filtro) {
-      case 'alertas':
-        return textos.alertas;
-      case 'compromisos':
-        return textos.compromisos;
-      case 'demandas':
-        return textos.demandas;
-      default:
-        return textos.todos;
+  /** Conteo de los chips de tipo: lo entrega la API, ya sumado por tipo. */
+  contadorTipo(valor: FiltroTipoTablero): string {
+    const conteos = this.tablero()?.conteosTipo;
+    if (!conteos) return '';
+    if (valor === 'todas') {
+      return String(conteos.alerta + conteos.compromiso + conteos.demanda + conteos.caso);
     }
+    return String(conteos[valor]);
   }
 
-  clasePlazo(item: ItemCola): string {
-    return claseVencimiento(item, this.hoy());
+  claseTipoDe(tarjeta: Pick<TarjetaTablero, 'entidadTipo'>): string {
+    return claseTipo(tarjeta.entidadTipo);
   }
 
-  etiquetaPlazo(item: ItemCola): string {
-    switch (this.clasePlazo(item)) {
-      case 'due-vencido':
-        return 'Vencido';
-      case 'due-por-vencer':
-        return 'Por vencer';
-      case 'due-en-plazo':
-        return 'En plazo';
-      default:
-        return 'Sin fecha';
+  claseRiesgoDe(tarjeta: Pick<TarjetaTablero, 'riesgo'>): string {
+    return claseRiesgo(tarjeta.riesgo);
+  }
+
+  responsable(tarjeta: TarjetaTablero): string {
+    return responsableDe(tarjeta);
+  }
+
+  sinResponsable(tarjeta: TarjetaTablero): boolean {
+    return !tieneResponsable(tarjeta);
+  }
+
+  fecha(valor: string | null): string {
+    return fechaTexto(valor);
+  }
+
+  claseFecha(tarjeta: TarjetaTablero): string {
+    return claseFechaLimite(tarjeta.fechaLimite, this.tablero()?.hoy ?? null);
+  }
+
+  etiquetaFecha(tarjeta: TarjetaTablero): string {
+    return etiquetaFechaLimite(tarjeta.fechaLimite, this.tablero()?.hoy ?? null);
+  }
+
+  rutaDe(tarjeta: TarjetaTablero): string | null {
+    const codigo = tarjeta.entidadTipo === 'caso' ? tarjeta.codigo : tarjeta.casoCodigo;
+    return rutaEntidad(tarjeta.entidadTipo, codigo);
+  }
+
+  rutaCandidato(candidato: CandidatoTablero): string | null {
+    return rutaEntidad(candidato.entidadTipo, candidato.casoCodigo);
+  }
+
+  enEdicion(tarjeta: TarjetaTablero): boolean {
+    return this.tarjetaEnEdicion() === claveTarjeta(tarjeta);
+  }
+
+  /* ------------------------------------------------------------------ *
+   * Acciones
+   * ------------------------------------------------------------------ */
+
+  editar(tarjeta: TarjetaTablero): void {
+    if (!this.puedeEditar()) return;
+    this.errorAccion.set(null);
+    this.aviso.set(null);
+    this.formulario.set({
+      asignacionTexto: tarjeta.asignacionTexto ?? '',
+      responsableTexto: tarjeta.responsableTexto ?? '',
+      fechaLimite: tarjeta.fechaLimite ?? '',
+      pospuestoHasta: tarjeta.pospuestoHasta ?? '',
+      motivoPosposicion: tarjeta.motivoPosposicion ?? '',
+    });
+    this.tarjetaEnEdicion.set(claveTarjeta(tarjeta));
+  }
+
+  cancelar(): void {
+    this.tarjetaEnEdicion.set(null);
+    this.errorAccion.set(null);
+    this.formulario.set(formularioVacio());
+  }
+
+  campo(campo: keyof FormularioTarjeta, evento: Event): void {
+    const valor = (evento.target as HTMLInputElement | HTMLTextAreaElement).value;
+    this.formulario.update((formulario) => ({ ...formulario, [campo]: valor }));
+  }
+
+  guardar(evento: Event, tarjeta: TarjetaTablero): void {
+    evento.preventDefault();
+    if (this.guardando() || !this.puedeEditar()) return;
+
+    const formulario = this.formulario();
+    const pospuestoHasta = formulario.pospuestoHasta || null;
+    const motivo = formulario.motivoPosposicion.trim() || null;
+
+    if (pospuestoHasta && !motivo) {
+      this.errorAccion.set('Indique el motivo de la posposición.');
+      return;
     }
+
+    const cambios: CambiosTarjeta = {
+      asignacionTexto: formulario.asignacionTexto.trim() || null,
+      responsableTexto: formulario.responsableTexto.trim() || null,
+      fechaLimite: formulario.fechaLimite || null,
+      pospuestoHasta,
+      motivoPosposicion: pospuestoHasta ? motivo : null,
+    };
+
+    this.enviar(tarjeta, cambios, 'Tarjeta actualizada.');
+  }
+
+  mover(tarjeta: TarjetaTablero, columna: ClaveColumna): void {
+    if (!this.puedeEditar() || this.guardando() || tarjeta.columna === columna) return;
+    this.enviar(tarjeta, { columna }, `Tarjeta movida a ${ETIQUETAS_COLUMNA[columna]}.`);
+  }
+
+  moverCandidato(candidato: CandidatoTablero, columna: ClaveColumna): void {
+    if (!this.puedeEditar() || this.guardando()) return;
+    this.enviar(
+      { entidadTipo: candidato.entidadTipo, entidadId: candidato.entidadId },
+      { columna },
+      `Registro incorporado a ${ETIQUETAS_COLUMNA[columna]}.`,
+    );
+  }
+
+  private enviar(
+    ref: { entidadTipo: string; entidadId: string },
+    cambios: CambiosTarjeta,
+    mensaje: string,
+  ): void {
+    this.guardando.set(true);
+    this.errorAccion.set(null);
+    this.aviso.set(null);
+
+    this.servicio.actualizar(ref.entidadTipo, ref.entidadId, cambios).subscribe({
+      next: () => {
+        this.guardando.set(false);
+        this.tarjetaEnEdicion.set(null);
+        this.formulario.set(formularioVacio());
+        this.aviso.set(mensaje);
+        this.recargar();
+      },
+      error: (fallo: unknown) => {
+        this.guardando.set(false);
+        this.errorAccion.set(aErrorApi(fallo).message);
+      },
+    });
   }
 
   /** Persiste el filtro en `?tipo=`, sin recargar la pantalla. */
-  cambiarTipo(tipo: FiltroTipoCola): void {
+  cambiarTipo(tipo: FiltroTipoTablero): void {
     if (tipo === this.filtroTipo()) return;
     void this.router.navigate([], {
       relativeTo: this.ruta,
-      queryParams: { tipo },
+      queryParams: { tipo: tipo === 'todas' ? null : tipo },
       queryParamsHandling: 'merge',
       replaceUrl: true,
     });
@@ -634,10 +694,7 @@ export class BandejaPage {
   }
 
   recargar(): void {
-    this.recursoAlertas.recargar();
-    this.kpiVencidos.recargar();
-    this.kpiPorVencer.recargar();
-    this.recursoCompromisos.recargar();
-    this.recursoDemandas.recargar();
+    this.recursoTablero.recargar();
+    this.recursoCompletitud.recargar();
   }
 }

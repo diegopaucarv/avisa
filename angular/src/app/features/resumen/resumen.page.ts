@@ -15,6 +15,7 @@ import { aAlerta, formatearPlazo, type Alerta } from '../alertas/alerta.mapeo';
 import {
   aCompromiso,
   formatearFecha,
+  formatearFechaHora,
   resolverVencimiento,
   situacionDe,
   type Compromiso,
@@ -22,12 +23,15 @@ import {
   type Situacion,
 } from '../compromisos/compromiso.mapeo';
 import {
+  ETAPAS_RESUMEN,
   HORIZONTE_POR_VENCER_DIAS,
+  aMarcaMasReciente,
   aResumenCompromisos,
   aSinCasoTotal,
   aTotal,
   rangoPorVencer,
   rangoVencidos,
+  type EtapaClave,
   type ResumenCompromisos,
 } from './resumen.mapeo';
 
@@ -51,24 +55,37 @@ type Metrica = {
   compacta: boolean;
 };
 
-type Dimension = {
+type Etapa = {
   clave: string;
   id: string;
   titulo: string;
   numero: number;
   resumen: string;
   metricas: Metrica[];
-  enlace: { texto: string; ruta: string };
+  acciones: AccionEtapa[];
+};
+
+/** Acceso de una etapa: botón que navega al destino real de la app. */
+type AccionEtapa = { texto: string; ruta: string };
+
+/** Marca de sincronización de una fuente, ya resuelta para la plantilla. */
+type MarcaFuente = {
+  clave: string;
+  etiqueta: string;
+  texto: string;
+  tono: TonoMetrica;
 };
 
 /**
  * Resumen operativo.
  *
- * Organiza el corte en las tres dimensiones de la operación —Prevención,
- * Gestión y Seguimiento de compromisos— y deja debajo las dos colas de trabajo.
- * Cada métrica tiene su propia consulta, de modo que un endpoint caído sólo
- * marca «No disponible» en su fila. Nada que la API no reporte se completa con
- * ceros ni con datos de ejemplo: lo inexistente se declara «—».
+ * Ordena la portada en las tres etapas de la operación —Prevención, Gestión y
+ * Seguimiento—, cada una con sus indicadores y sus botones de acceso a los
+ * destinos reales. Arriba, un bloque compacto declara la marca de
+ * sincronización más reciente que expone cada fuente. Cada métrica tiene su
+ * propia consulta, de modo que un endpoint caído sólo marca «No disponible» en
+ * su fila. Nada que la API no reporte se completa con ceros ni con datos de
+ * ejemplo: lo inexistente se declara «sin dato» o «—».
  */
 @Component({
   selector: 'app-resumen',
@@ -99,9 +116,7 @@ type Dimension = {
       gap: 16px;
     }
 
-
-
-    /* ------- Tres dimensiones ------- */
+    /* ------- Tres etapas ------- */
 
     .dims {
       display: grid;
@@ -214,42 +229,75 @@ type Dimension = {
       color: #8b97a2;
     }
 
-    .dim-link {
-      align-self: flex-start;
-      margin-top: auto;
-      padding-top: 12px;
+    .dim-acciones {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 14px;
+      padding-top: 13px;
+      border-top: 1px solid #eef1f3;
     }
 
-    /* ------- Franja de operación ------- */
+    /* ------- Última sincronización ------- */
 
-    .franja-operacion {
+    .sync {
       display: flex;
       flex-direction: column;
-      gap: 7px;
+      gap: 9px;
     }
 
-    .franja-operacion .surface-heading h2 {
-      margin: 0 0 4px;
+    .sync h2 {
+      margin: 0;
+      color: #1a2b3e;
       font: 700 14.5px var(--font-display);
       letter-spacing: -0.15px;
     }
 
-    .franja-dato {
-      margin: 0;
-      color: #5a6b7a;
-      font-size: 12.5px;
-      line-height: 1.55;
-    }
-
-    .franja-dato strong {
-      color: #8b97a2;
-    }
-
-    .franja-enlaces {
+    .sync-lista {
       display: flex;
       flex-wrap: wrap;
-      gap: 18px;
-      margin-top: 3px;
+      gap: 7px 10px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .sync-item {
+      flex: 1 1 130px;
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      padding: 6px 10px;
+      border: 1px solid #e6ebef;
+      border-radius: 8px;
+      background: #fafbfc;
+    }
+
+    .sync-fuente {
+      color: #7b8896;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+    }
+
+    .sync-marca {
+      color: #1a2b3e;
+      font-size: 13px;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .sync-marca.sync-sin-dato {
+      color: #8b97a2;
+      font-weight: 600;
+    }
+
+    .sync-nota {
+      margin: 0;
+      color: #9aa5ae;
+      font-size: 12px;
+      line-height: 1.5;
     }
 
     /* ------- Colas de trabajo ------- */
@@ -490,122 +538,184 @@ export class ResumenPage {
   });
 
   /* ------------------------------------------------------------------ *
-   * Dimensiones
+   * Última sincronización por fuente
    * ------------------------------------------------------------------ */
 
-  readonly dimensiones = computed<Dimension[]>(() => [
-    {
-      clave: 'prevencion',
-      id: 'dim-prevencion',
-      titulo: 'Prevención',
-      numero: 1,
-      resumen:
-        'Acciones preventivas previstas y alertas tempranas: lo que se anticipa antes de que el conflicto se exteriorice.',
-      metricas: [
-        this.metricaTotal(
-          'alertas-registradas',
-          'Alertas registradas',
-          'Alertas tempranas vigentes',
-          this.kpiAlertasRegistradas,
-        ),
-        this.metricaTotal(
-          'alertas-por-atender',
-          'Alertas por atender',
-          'Pendientes de revisión',
-          this.kpiAlertas,
-        ),
-        this.metricaTotal(
-          'demandas-sin-caso',
-          'Demandas sin caso',
-          'Pendientes de vincular',
-          this.kpiDemandas,
-        ),
-        this.metricaAusente(
-          'acciones-preventivas',
-          'Acciones preventivas previstas',
-          'No disponible: la base no registra acciones preventivas.',
-        ),
-      ],
-      enlace: { texto: 'Ver alertas tempranas', ruta: '/alertas' },
-    },
-    {
-      clave: 'gestion',
-      id: 'dim-gestion',
-      titulo: 'Gestión',
-      numero: 2,
-      resumen:
-        'Intervenciones y planes de acción sobre los conflictos ya manifiestos. El nivel de conflictividad se lee como reparto, nunca como estado del listado.',
-      metricas: [
-        this.metricaTotal(
-          'casos-vigentes',
-          'Casos vigentes',
-          'Casos abiertos',
-          this.kpiCasosVigentes,
-        ),
-        this.metricaNivel(),
-        this.metricaTotal(
-          'riesgo-alto',
-          'Casos con riesgo alto',
-          'Riesgo Alto',
-          this.kpiRiesgoAlto,
-        ),
-        this.metricaAusente(
-          'planes-accion',
-          'Planes de acción e intervenciones',
-          'No disponible: sin tabla de planes de acción.',
-        ),
-      ],
-      enlace: { texto: 'Ver casos vigentes', ruta: '/casos' },
-    },
-    {
-      clave: 'seguimiento',
-      id: 'dim-seguimiento',
-      titulo: 'Seguimiento de compromisos',
-      numero: 3,
-      resumen:
-        'Cumplimiento de lo asumido en mesas de diálogo: qué se pactó, en qué hito se mide y qué plazo lo hace exigible.',
-      metricas: [
-        this.metricaResumen(
-          'compromisos-registrados',
-          'Compromisos registrados',
-          'Compromisos en la base',
-          (resumen) => String(resumen.compromisos),
-        ),
-        this.metricaResumen(
-          'hitos-registrados',
-          'Hitos registrados',
-          'Hitos de compromiso en la base',
-          (resumen) => String(resumen.hitos),
-        ),
-        this.metricaResumen(
-          'compromisos-con-plazo',
-          'Compromisos con plazo calculable',
-          'Compromisos con al menos un hito con fecha',
-          (resumen) => `${resumen.compromisosConPlazo} de ${resumen.compromisos}`,
-          { compacta: true },
-        ),
-        this.metricaResumen(
-          'hitos-con-fecha',
-          'Hitos con fecha de vencimiento',
-          'Hitos que registran fecha de vencimiento',
-          (resumen) => `${resumen.hitosConFecha} de ${resumen.hitos}`,
-          { compacta: true },
-        ),
-        this.metricaResumen(
-          'cumplimiento',
-          'Cumplimiento agregado',
-          'Hitos con fecha cumplidos sobre hitos con fecha',
-          (resumen) =>
-            `${resumen.hitosCumplidosConFecha} de ${resumen.hitosConFecha} hitos con fecha cumplido`,
-          {
-            compacta: true,
-            nota: 'El denominador es insuficiente para una tasa; el plazo vive en los hitos, no en el compromiso.',
-          },
-        ),
-      ],
-      enlace: { texto: 'Ver compromisos', ruta: '/compromisos' },
-    },
+  /**
+   * Casos es la única fuente que publica una marca de fila (`updatedAt`, desde
+   * `core.casos.fecha_ultima_actualizacion`). Se pide la página más amplia que
+   * admite la API para tomar el máximo real del listado, no la marca de una
+   * fila cualquiera.
+   */
+  private readonly syncCasos = consulta<string | null>({
+    fuente: () =>
+      urlConParametros(urlApi('/v1/cases'), {
+        ...paramsDePagina({ pagina: 1, tamano: 100 }),
+        sort: 'recent',
+      }),
+    esquema: aMarcaMasReciente,
+  });
+
+  /**
+   * Alertas, compromisos, documentos y territorio no exponen `updated_at` ni
+   * `created_at` en su contrato actual. Se consulta una fila: si el contrato
+   * cambia, el mapeador ya leería la marca; hoy devuelve `null` y el bloque
+   * declara «sin dato».
+   */
+  private readonly syncAlertas = consulta<string | null>({
+    fuente: () => urlConParametros(urlApi('/v1/alerts'), paramsDePagina({ pagina: 1, tamano: 1 })),
+    esquema: aMarcaMasReciente,
+  });
+
+  private readonly syncCompromisos = consulta<string | null>({
+    fuente: () =>
+      urlConParametros(urlApi('/v1/commitments'), paramsDePagina({ pagina: 1, tamano: 1 })),
+    esquema: aMarcaMasReciente,
+  });
+
+  private readonly syncDocumentos = consulta<string | null>({
+    fuente: () =>
+      urlConParametros(urlApi('/v1/documents'), paramsDePagina({ pagina: 1, tamano: 1 })),
+    esquema: aMarcaMasReciente,
+  });
+
+  private readonly syncTerritorio = consulta<string | null>({
+    fuente: () =>
+      urlConParametros(urlApi('/v1/territorio'), {
+        ...paramsDePagina({ pagina: 1, tamano: 1 }),
+        recurso: 'distritos',
+      }),
+    esquema: aMarcaMasReciente,
+  });
+
+  readonly sincronizacion = computed<MarcaFuente[]>(() => [
+    this.marcaFuente('casos', 'Casos', this.syncCasos),
+    this.marcaFuente('alertas', 'Alertas', this.syncAlertas),
+    this.marcaFuente('compromisos', 'Compromisos', this.syncCompromisos),
+    this.marcaFuente('documentos', 'Documentos', this.syncDocumentos),
+    this.marcaFuente('territorio', 'Territorio', this.syncTerritorio),
   ]);
+
+  /* ------------------------------------------------------------------ *
+   * Etapas: Prevención · Gestión · Seguimiento
+   * ------------------------------------------------------------------ */
+
+  readonly etapas = computed<Etapa[]>(() => {
+    const contenido: Record<EtapaClave, Omit<Etapa, 'clave' | 'titulo' | 'numero'>> = {
+      prevencion: {
+        id: 'dim-prevencion',
+        resumen:
+          'Acciones preventivas previstas y alertas tempranas: lo que se anticipa antes de que el conflicto se exteriorice.',
+        metricas: [
+          this.metricaTotal(
+            'alertas-registradas',
+            'Alertas registradas',
+            'Alertas tempranas vigentes',
+            this.kpiAlertasRegistradas,
+          ),
+          this.metricaTotal(
+            'alertas-por-atender',
+            'Alertas por atender',
+            'Pendientes de revisión',
+            this.kpiAlertas,
+          ),
+          this.metricaTotal(
+            'demandas-sin-caso',
+            'Demandas sin caso',
+            'Pendientes de vincular',
+            this.kpiDemandas,
+          ),
+          this.metricaAusente(
+            'acciones-preventivas',
+            'Acciones preventivas previstas',
+            'Sin dato: la base no registra acciones preventivas.',
+          ),
+        ],
+        acciones: [
+          { texto: 'Alertas tempranas', ruta: '/alertas' },
+          { texto: 'Clima social', ruta: '/clima-social' },
+          { texto: 'Reuniones', ruta: '/reuniones' },
+        ],
+      },
+      gestion: {
+        id: 'dim-gestion',
+        resumen: 'Intervenciones y planes de acción sobre los conflictos ya manifiestos.',
+        metricas: [
+          this.metricaTotal(
+            'casos-vigentes',
+            'Casos vigentes',
+            'Casos abiertos',
+            this.kpiCasosVigentes,
+          ),
+          this.metricaNivel(),
+          this.metricaTotal(
+            'riesgo-alto',
+            'Casos con riesgo alto',
+            'Riesgo Alto',
+            this.kpiRiesgoAlto,
+          ),
+          this.metricaAusente(
+            'planes-accion',
+            'Planes de acción e intervenciones',
+            'Sin dato: la base no tiene tabla de planes de acción.',
+          ),
+        ],
+        acciones: [
+          { texto: 'Casos', ruta: '/casos' },
+          { texto: 'Bandeja de trabajo', ruta: '/bandeja' },
+          { texto: 'Compromisos', ruta: '/compromisos' },
+        ],
+      },
+      seguimiento: {
+        id: 'dim-seguimiento',
+        resumen:
+          'Cumplimiento de lo asumido en mesas de diálogo: qué se pactó, en qué hito se mide y qué plazo lo hace exigible.',
+        metricas: [
+          this.metricaResumen(
+            'compromisos-registrados',
+            'Compromisos registrados',
+            'Compromisos en la base',
+            (resumen) => String(resumen.compromisos),
+          ),
+          this.metricaResumen(
+            'hitos-registrados',
+            'Hitos registrados',
+            'Hitos de compromiso en la base',
+            (resumen) => String(resumen.hitos),
+          ),
+          this.metricaResumen(
+            'compromisos-con-plazo',
+            'Compromisos con plazo calculable',
+            'Compromisos con al menos un hito con fecha',
+            (resumen) => `${resumen.compromisosConPlazo} de ${resumen.compromisos}`,
+            { compacta: true },
+          ),
+          this.metricaResumen(
+            'hitos-con-fecha',
+            'Hitos con fecha de vencimiento',
+            'Hitos que registran fecha de vencimiento',
+            (resumen) => `${resumen.hitosConFecha} de ${resumen.hitos}`,
+            { compacta: true },
+          ),
+          this.metricaResumen(
+            'cumplimiento',
+            'Cumplimiento agregado',
+            'Hitos con fecha cumplidos sobre hitos con fecha',
+            (resumen) =>
+              `${resumen.hitosCumplidosConFecha} de ${resumen.hitosConFecha} hitos con fecha cumplido`,
+            { compacta: true },
+          ),
+        ],
+        acciones: [
+          { texto: 'Reporte de actividad', ruta: '/reportes' },
+          { texto: 'Documentos', ruta: '/documentos' },
+          { texto: 'Resumen de Dirección', ruta: '/direccion' },
+        ],
+      },
+    };
+
+    return ETAPAS_RESUMEN.map((etapa) => ({ ...etapa, ...contenido[etapa.clave] }));
+  });
 
   /* ------------------------------------------------------------------ *
    * Colas de trabajo (mismas consultas de siempre)
@@ -707,6 +817,32 @@ export class ResumenPage {
     this.kpiPorVencer.recargar();
     this.recursoAlertas.recargar();
     this.recursoCompromisos.recargar();
+    this.syncCasos.recargar();
+    this.syncAlertas.recargar();
+    this.syncCompromisos.recargar();
+    this.syncDocumentos.recargar();
+    this.syncTerritorio.recargar();
+  }
+
+  /**
+   * Estado de una fuente de sincronización: «…» mientras carga, «No disponible»
+   * si su consulta falló y «sin dato» cuando la colección no expone marca.
+   */
+  private marcaFuente(
+    clave: string,
+    etiqueta: string,
+    recurso: Consulta<string | null>,
+  ): MarcaFuente {
+    const estado = recurso.estado();
+    if (estado === 'error') return { clave, etiqueta, texto: 'No disponible', tono: 'error' };
+    if (estado === 'cargando' || estado === 'inactivo') {
+      return { clave, etiqueta, texto: '…', tono: 'pendiente' };
+    }
+
+    const marca = recurso.valor();
+    if (!marca) return { clave, etiqueta, texto: 'sin dato', tono: 'ausente' };
+
+    return { clave, etiqueta, texto: formatearFechaHora(marca), tono: 'normal' };
   }
 
   /** Texto del contador: «…» mientras carga, «No disponible» si falló. */

@@ -6,9 +6,8 @@
  * españolas van primero en cada lectura, de modo que el rename del backend no
  * obliga a tocar los componentes.
  *
- * El eje de riesgo de la alerta es el del caso vinculado: Bajo · Moderado ·
- * Alto. «Medio» está prohibido por `docs/01_requisitos/
- * AUDITORIA_ALINEACION_2026-11-22.md` §1.2.
+ * El eje de riesgo de la alerta es el del caso vinculado: Bajo · Medio ·
+ * Alto.
  *
  * `prioridad`, `plazoHoras` y `grave` se conservan sólo para no romper
  * `features/bandeja` y `features/resumen` (fuera del alcance de esta pantalla):
@@ -622,13 +621,13 @@ export function etiquetaEstado(estado: string | null): string {
   }
 }
 
-/** Clave de color del riesgo (`risk-alto` / `risk-moderado` / `risk-bajo`). */
+/** Clave de color del riesgo (`risk-alto` / `risk-medio` / `risk-bajo`). */
 export function claveRiesgo(riesgo: Riesgo): string {
   switch (riesgo) {
     case 'Alto':
       return 'alto';
-    case 'Moderado':
-      return 'moderado';
+    case 'Medio':
+      return 'medio';
     default:
       return 'bajo';
   }

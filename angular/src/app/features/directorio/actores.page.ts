@@ -828,10 +828,10 @@ export class ActoresPage {
     this.listado.recargar();
   }
 
-  /** Abre la baja lógica del actor seleccionado, si hay uno. */
+  /** Abre la baja lógica —o la restauración— del actor seleccionado. */
   abrirBajaSeleccionado(): void {
     const actor = this.seleccionado();
-    if (actor) this.abrirBaja(actor, 'anular');
+    if (actor) this.abrirBaja(actor, actor.activo ? 'anular' : 'restaurar');
   }
 
   abrirBaja(actor: ActorDirectorio, modo: 'anular' | 'restaurar'): void {

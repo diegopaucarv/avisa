@@ -80,6 +80,9 @@
                   autocomplete="off"
                   [value]="borrador().dni"
                   [disabled]="!piiVisible()"
+                  [placeholder]="
+                    piiVisible() ? '8 dígitos' : estadoPii() === 'sin_ficha' ? sinDato : mascaraDni
+                  "
                   (input)="actualizarTexto('dni', $event)"
                 />
                 @if (piiVisible()) {
@@ -92,14 +95,22 @@
               </label>
               <label>
                 Teléfono
-                <input [value]="telefonoContacto() ?? ''" placeholder="sin dato" disabled />
+                <input
+                  [value]="telefonoContacto() ?? ''"
+                  [placeholder]="
+                    piiVisible() || estadoPii() === 'sin_ficha' ? sinDato : '•••• ••• •••'
+                  "
+                  disabled
+                />
                 <span class="actor-pista">Se edita por el canal de datos personales.</span>
               </label>
               <label>
                 Correo
                 <input
                   [value]="correoContacto() ?? correoOrganizacion() ?? ''"
-                  placeholder="sin dato"
+                  [placeholder]="
+                    piiVisible() || estadoPii() === 'sin_ficha' ? sinDato : mascaraCorreo
+                  "
                   disabled
                 />
                 <span class="actor-pista">Correo de contacto de la ficha.</span>
@@ -244,14 +255,6 @@
                 Región
                 <input [value]="a.region ?? ''" placeholder="sin dato" disabled />
                 <span class="actor-pista">La región viene del registro territorial.</span>
-              </label>
-              <label class="ancho actor-estado">
-                <input
-                  type="checkbox"
-                  [checked]="borrador().activo"
-                  (change)="actualizarActivo($event)"
-                />
-                Actor activo
               </label>
             </section>
 

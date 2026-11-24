@@ -187,6 +187,27 @@
               }
             </select>
           </label>
+          <label>
+            Función del actor
+            <select [value]="funcion()" (change)="funcion.set($any($event.target).value)">
+              <option value="">No determinado</option>
+              @for (opcion of funciones(); track opcion.valor) {
+                <option [value]="opcion.valor">{{ opcion.etiqueta }}</option>
+              }
+            </select>
+          </label>
+          <label>
+            Posicionamiento
+            <select
+              [value]="posicionamiento()"
+              (change)="posicionamiento.set($any($event.target).value)"
+            >
+              <option value="">Sin posicionamiento</option>
+              @for (opcion of perfiles(); track opcion.valor) {
+                <option [value]="opcion.valor">{{ opcion.etiqueta }}</option>
+              }
+            </select>
+          </label>
         </div>
 
         <div class="alta-dup" aria-live="polite">
@@ -204,7 +225,9 @@
             </p>
             <ul>
               @for (actor of duplicados(); track actor.id) {
-                <li>{{ actor.nombre }} · {{ actor.abreviatura || actor.tipo || actor.naturaleza }}</li>
+                <li>
+                  {{ actor.nombre }} · {{ actor.abreviatura || actor.tipo || actor.naturaleza }}
+                </li>
               }
             </ul>
           }
@@ -333,7 +356,12 @@
     </form>
 
     <footer class="alta-pie">
-      <button type="button" class="button-secondary" [disabled]="enviando()" (click)="cerrar.emit()">
+      <button
+        type="button"
+        class="button-secondary"
+        [disabled]="enviando()"
+        (click)="cerrar.emit()"
+      >
         Cancelar
       </button>
       <button

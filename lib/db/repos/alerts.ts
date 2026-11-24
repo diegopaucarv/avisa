@@ -20,6 +20,14 @@ const ALERT_STATE = `case
 
 const ALERT_ATENDIDA = `(a.paso_actual >= 5)`;
 
+/**
+ * Eje de riesgo de la alerta: el declarado en `nivel_riesgo_id` y, si falta, el
+ * del caso vinculado ("riesgo heredado del caso"). La SPA pinta esta etiqueta
+ * y filtra por ella, así que filtro, orden y select comparten la expresión.
+ */
+const ALERT_RIESGO = `coalesce(nr.codigo, nrc.codigo)`;
+const ALERT_RIESGO_ORDEN = `coalesce(nr.orden, nrc.orden)`;
+
 const ALERT_SELECT = `
   a.id,
   a.codigo_alerta as codigo,
@@ -32,6 +40,8 @@ const ALERT_SELECT = `
   pa.es_grave as grave,
   na.nombre as nivel,
   na.codigo_legado as nivel_codigo,
+  ${ALERT_RIESGO} as riesgo,
+  ag.codigo as alcance,
   a.paso_actual::int as paso_actual,
   a.estado_legado as estado_legado,
   a.visibilidad,
@@ -40,18 +50,27 @@ const ALERT_SELECT = `
   to_char(a.aprobada_en, 'YYYY-MM-DD') as fecha_aprobacion,
   a.aprobada_por as aprobada_por,
   a.validada_por as validada_por,
+  ar.ultimo_revisor,
+  ar.historial,
+  a.updated_at as ultima_modificacion,
+  mu.nombre as modificado_por,
   a.descripcion_riesgo,
   a.hechos_recientes,
   a.situacion_actual,
   a.acciones_oaipcs,
   a.riesgos_json as riesgos,
   a.acciones_sugeridas_json as acciones_sugeridas,
+  a.actores_clave,
+  a.demandas_inmediatas,
+  a.plantilla_whatsapp,
   a.fuente_tipo,
   a.fuente_descripcion,
   a.fuente_url,
   a.distrito_id as distrito_id,
   d.nombre as distrito,
   concat_ws(' · ', d.nombre, pd.nombre, rd.nombre) as distrito_ruta,
+  coalesce(rr.nombre, rd.nombre) as region,
+  coalesce(pr.nombre, pd.nombre) as provincia,
   c.distrito_principal_id as caso_distrito_id,
   cd.nombre as caso_distrito,
   concat_ws(' · ', cd.nombre, pcd.nombre, rcd.nombre) as caso_distrito_ruta,
@@ -84,15 +103,34 @@ const ALERT_FROM = `
   left join core.casos c on c.id = a.caso_id
   left join core.cat_prioridades_alerta pa on pa.id = a.prioridad_id
   left join core.cat_niveles_alerta na on na.id = a.nivel_alerta_id
+  left join core.cat_niveles_riesgo nr on nr.id = a.nivel_riesgo_id
+  left join core.cat_niveles_riesgo nrc on nrc.id = c.nivel_riesgo_id
+  left join core.cat_alcances_alerta ag on ag.id = a.alcance_id
   left join core.distritos d on d.id = a.distrito_id
   left join core.provincias pd on pd.id = d.provincia_id
   left join core.regiones rd on rd.id = pd.region_id
+  left join core.regiones rr on rr.id = a.region_id
+  left join core.provincias pr on pr.id = a.provincia_id
   left join core.distritos cd on cd.id = c.distrito_principal_id
   left join core.provincias pcd on pcd.id = cd.provincia_id
   left join core.regiones rcd on rcd.id = pcd.region_id
   left join core.cat_subsectores ss on ss.id = a.subsector_id
   left join core.usuarios ua on ua.id = a.anulado_por
   left join core.usuarios ur on ur.id = a.archivado_por
+  left join core.usuarios mu on mu.id = a.updated_by
+  left join lateral (
+    select (array_agg(coalesce(urv.nombre, 'Sin identificar') order by r.created_at desc))[1] as ultimo_revisor,
+           json_agg(
+             json_build_object(
+               'autor', coalesce(urv.nombre, 'Sin identificar'),
+               'fecha', to_char(r.created_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"'),
+               'accion', r.accion
+             ) order by r.created_at desc
+           ) as historial
+      from core.alerta_revision r
+      left join core.usuarios urv on urv.id = r.usuario_id
+     where r.alerta_id = a.id
+  ) ar on true
 `;
 
 export type AlertListQuery = {
@@ -104,6 +142,11 @@ export type AlertListQuery = {
    */
   sinCaso?: string;
   prioridad?: string;
+  /**
+   * Código de `core.cat_niveles_riesgo` (`Bajo` · `Medio` · `Alto`). Compara
+   * contra el riesgo declarado o, en su defecto, el heredado del caso.
+   */
+  riesgo?: string;
   nivel?: string;
   estado?: string;
   /**
@@ -127,6 +170,15 @@ export type AlertListQuery = {
   pageSize?: number;
 };
 
+export type AlertRevision = {
+  /** Nombre legible de quien revisó; `'Sin identificar'` si no se resuelve. */
+  autor: string;
+  /** Instante de la revisión en ISO 8601 UTC. */
+  fecha: string;
+  /** Acción registrada (validar, aprobar, solicitar modificación...). */
+  accion: string | null;
+};
+
 export type AlertItem = {
   id: string;
   codigo: string;
@@ -134,6 +186,14 @@ export type AlertItem = {
   casoId: string | null;
   casoCode: string | null;
   casoTitulo: string | null;
+  /** Riesgo declarado o heredado del caso (`core.cat_niveles_riesgo.codigo`). */
+  riesgo: string | null;
+  /** Granularidad geográfica declarada (`core.cat_alcances_alerta.codigo`). */
+  alcance: string | null;
+  /** Región declarada o, si falta, derivada del distrito de la alerta. */
+  region: string | null;
+  /** Provincia declarada o, si falta, derivada del distrito de la alerta. */
+  provincia: string | null;
   prioridad: string | null;
   slaHoras: number | null;
   grave: boolean | null;
@@ -147,12 +207,26 @@ export type AlertItem = {
   fechaAprobacion: string | null;
   aprobadaPor: string | null;
   validadaPor: string | null;
+  /** Quién revisó por última vez (última fila de `core.alerta_revision`). */
+  ultimoRevisor: string | null;
+  /** Instante de la última modificación del contenido o los metadatos. */
+  ultimaModificacion: string | null;
+  /** Quién modificó por última vez la fila. */
+  modificadoPor: string | null;
+  /** Revisiones registradas, de la más reciente a la más antigua. */
+  historial: AlertRevision[];
   descripcionRiesgo: string | null;
   hechosRecientes: string | null;
   situacionActual: string | null;
   accionesOaipcs: string | null;
   riesgos: unknown;
   accionesSugeridas: unknown;
+  /** Actores clave del territorio o del sector (`jsonb` → lista de textos). */
+  actoresClave: unknown;
+  /** Demandas inmediatas recogidas en campo (`jsonb` → lista de textos). */
+  demandasInmediatas: unknown;
+  /** Plantilla de WhatsApp editada a mano; `null` usa la generada. */
+  plantillaWhatsapp: string | null;
   fuenteTipo: string | null;
   fuenteDescripcion: string | null;
   fuenteUrl: string | null;
@@ -232,6 +306,8 @@ const SORTS: Record<string, string> = {
   recent: "a.fecha_reporte desc nulls last, a.codigo_alerta asc",
   prioridad:
     "pa.id asc nulls last, a.fecha_reporte desc nulls last, a.codigo_alerta asc",
+  // «Riesgo (alto primero)»: `orden` 3 es Alto y 1 Bajo; lo desconocido al final.
+  riesgo: `${ALERT_RIESGO_ORDEN} desc nulls last, a.fecha_reporte desc nulls last, a.codigo_alerta asc`,
 };
 
 // Sólo estos estados derivados se pueden filtrar; cualquier otro valor se ignora.
@@ -252,6 +328,10 @@ function mapAlert(row: Record<string, any>): AlertItem {
     casoId: row.caso_id,
     casoCode: row.caso_code,
     casoTitulo: row.caso_titulo,
+    riesgo: row.riesgo,
+    alcance: row.alcance,
+    region: row.region,
+    provincia: row.provincia,
     prioridad: row.prioridad,
     slaHoras: row.sla_horas,
     grave: row.grave,
@@ -265,12 +345,19 @@ function mapAlert(row: Record<string, any>): AlertItem {
     fechaAprobacion: row.fecha_aprobacion,
     aprobadaPor: row.aprobada_por,
     validadaPor: row.validada_por,
+    ultimoRevisor: row.ultimo_revisor,
+    ultimaModificacion: isoOrNull(row.ultima_modificacion),
+    modificadoPor: row.modificado_por,
+    historial: Array.isArray(row.historial) ? row.historial : [],
     descripcionRiesgo: row.descripcion_riesgo,
     hechosRecientes: row.hechos_recientes,
     situacionActual: row.situacion_actual,
     accionesOaipcs: row.acciones_oaipcs,
     riesgos: row.riesgos,
     accionesSugeridas: row.acciones_sugeridas,
+    actoresClave: row.actores_clave,
+    demandasInmediatas: row.demandas_inmediatas,
+    plantillaWhatsapp: row.plantilla_whatsapp,
     fuenteTipo: row.fuente_tipo,
     fuenteDescripcion: row.fuente_descripcion,
     fuenteUrl: row.fuente_url,
@@ -334,6 +421,7 @@ export async function listAlerts(
   if (query.sinCaso === "true") where.push("a.caso_id is null");
   else if (query.sinCaso === "false") where.push("a.caso_id is not null");
   if (query.prioridad) where.push(`pa.codigo = ${bind(query.prioridad)}`);
+  if (query.riesgo) where.push(`${ALERT_RIESGO} = ${bind(query.riesgo)}`);
   if (query.nivel) where.push(`na.codigo_legado = ${bind(query.nivel)}`);
   const distritoId = query.distritoId?.trim();
   if (distritoId) {
@@ -468,6 +556,10 @@ const ALERT_WRITE_COLUMNS = [
   "caso_id",
   "prioridad_id",
   "nivel_alerta_id",
+  "nivel_riesgo_id",
+  "alcance_id",
+  "region_id",
+  "provincia_id",
   "titulo",
   "descripcion_riesgo",
   "hechos_recientes",
@@ -475,6 +567,9 @@ const ALERT_WRITE_COLUMNS = [
   "acciones_oaipcs",
   "riesgos_json",
   "acciones_sugeridas_json",
+  "actores_clave",
+  "demandas_inmediatas",
+  "plantilla_whatsapp",
   "fuente_tipo",
   "fuente_descripcion",
   "fuente_url",
@@ -489,7 +584,8 @@ const ALERT_WRITE_COLUMNS = [
   "motivo_archivo",
 ] as const;
 
-type AlertCatalogKey = "prioridad" | "nivel" | "subsector";
+type AlertCatalogKey =
+  "prioridad" | "nivel" | "riesgo" | "alcance" | "subsector";
 
 const ALERT_CATALOGS: Record<
   AlertCatalogKey,
@@ -501,6 +597,8 @@ const ALERT_CATALOGS: Record<
     code: "codigo_legado",
     alt: "nombre",
   },
+  riesgo: { table: "core.cat_niveles_riesgo", code: "codigo" },
+  alcance: { table: "core.cat_alcances_alerta", code: "codigo" },
   subsector: {
     table: "core.cat_subsectores",
     code: "codigo_legado",
@@ -648,6 +746,75 @@ async function resolveDistritoId(
 }
 
 /**
+ * Región por id o por nombre. La interfaz manda el nombre del selector
+ * (`Piura`, `Áncash`); `core.normalizar_ref` iguala tildes y mayúsculas.
+ */
+async function resolveRegionId(
+  client: PoolClient,
+  raw: unknown,
+): Promise<number> {
+  if (typeof raw === "number" && Number.isInteger(raw)) {
+    const byId = await client.query(
+      `select id from core.regiones where id = $1`,
+      [raw],
+    );
+    if (!byId.rows[0]) invalid();
+    return raw;
+  }
+  if (typeof raw !== "string") invalid();
+  const nombre = raw.trim();
+  if (!nombre) invalid();
+  const result = await client.query(
+    `select id from core.regiones
+      where core.normalizar_ref(nombre) = core.normalizar_ref($1)
+      order by id limit 1`,
+    [nombre],
+  );
+  const id = result.rows[0]?.id;
+  if (id === undefined || id === null) invalid();
+  return Number(id);
+}
+
+/**
+ * Provincia por id o por nombre. El nombre de provincia no es único en todo el
+ * país (`UNIQUE (region_id, nombre)`), así que se acota a la región cuando se
+ * conoce; sin ella se toma la primera coincidencia, como `resolveCatalog`.
+ */
+async function resolveProvinciaId(
+  client: PoolClient,
+  raw: unknown,
+  regionId: number | null = null,
+): Promise<number> {
+  if (typeof raw === "number" && Number.isInteger(raw)) {
+    const result = await client.query(
+      `select id from core.provincias
+        where id = $1${regionId === null ? "" : " and region_id = $2"}`,
+      regionId === null ? [raw] : [raw, regionId],
+    );
+    if (!result.rows[0]) invalid();
+    return raw;
+  }
+  if (typeof raw !== "string") invalid();
+  const nombre = raw.trim();
+  if (!nombre) invalid();
+  const params: unknown[] = [nombre];
+  let filtro = "";
+  if (regionId !== null) {
+    params.push(regionId);
+    filtro = " and region_id = $2";
+  }
+  const result = await client.query(
+    `select id from core.provincias
+      where core.normalizar_ref(nombre) = core.normalizar_ref($1)${filtro}
+      order by id limit 1`,
+    params,
+  );
+  const id = result.rows[0]?.id;
+  if (id === undefined || id === null) invalid();
+  return Number(id);
+}
+
+/**
  * Distrito principal del caso, para heredarlo cuando la alerta no declara uno.
  *
  * La herencia sólo cubre el hueco real. Medición sobre la carga local (76
@@ -666,6 +833,56 @@ async function caseDistritoId(
     [casoId],
   );
   return result.rows[0]?.distrito_id ?? null;
+}
+
+const MAX_REVISION_ACCION_LENGTH = 255;
+
+/**
+ * Etiqueta legible de una transición de paso. El PATCH de revisión de la SPA
+ * manda sólo `pasoActual` (y opcionalmente `motivo`), así que la acción se
+ * deduce del paso previo y del destino.
+ */
+function revisionAccion(
+  desde: unknown,
+  hasta: number,
+  motivo: string | null,
+): string {
+  const origen = typeof desde === "number" ? desde : null;
+  let accion: string;
+  if (hasta === 2) {
+    if ((origen ?? 1) >= 3) {
+      accion = motivo
+        ? "Solicitó modificación"
+        : "Devolvió a validación previa";
+    } else {
+      accion = "Envió a validación previa";
+    }
+  } else if (hasta === 3) {
+    accion = "Aprobó la alerta";
+  } else if (hasta === 1) {
+    accion = "Devolvió a elaboración";
+  } else if (hasta === 4) {
+    accion = "Ordenó la remisión";
+  } else if (hasta === 5) {
+    accion = "Archivó la alerta";
+  } else {
+    accion = `Cambió el paso a ${hasta}`;
+  }
+  const texto = motivo ? `${accion}: ${motivo}` : accion;
+  return texto.slice(0, MAX_REVISION_ACCION_LENGTH);
+}
+
+async function registrarRevision(
+  client: PoolClient,
+  alertaId: string,
+  usuarioId: string,
+  accion: string,
+): Promise<void> {
+  await client.query(
+    `insert into core.alerta_revision (alerta_id, usuario_id, accion)
+     values ($1::uuid, $2::uuid, $3)`,
+    [alertaId, usuarioId, accion],
+  );
 }
 
 async function findAlert(
@@ -744,20 +961,21 @@ export async function createAlert(
     readField(body, ["titulo", "title"]).value,
     MAX_TITLE_LENGTH,
   );
+  // La prioridad se retiró de la interfaz: si no llega, la alerta se guarda sin
+  // ella. Se sigue aceptando por compatibilidad con clientes antiguos.
   const prioridad = readField(body, ["prioridad", "priority"]);
-  if (!prioridad.present || prioridad.value === null) invalid();
-  const prioridadId = await resolveCatalog(
-    client,
-    "prioridad",
-    prioridad.value,
-  );
 
   const paso = readField(body, ["pasoActual", "paso_actual"]);
   const visibilidad = readField(body, ["visibilidad"]);
 
-  const fields: SqlField[] = [
-    { column: "titulo", value: titulo },
-    { column: "prioridad_id", value: prioridadId },
+  const fields: SqlField[] = [{ column: "titulo", value: titulo }];
+  if (prioridad.present && prioridad.value !== null) {
+    fields.push({
+      column: "prioridad_id",
+      value: await resolveCatalog(client, "prioridad", prioridad.value),
+    });
+  }
+  fields.push(
     {
       column: "paso_actual",
       value: paso.present ? intIn(paso.value, 1, 99) : 1,
@@ -768,7 +986,7 @@ export async function createAlert(
         ? visibilidadValue(visibilidad.value)
         : "interna",
     },
-  ];
+  );
 
   const caso = readField(body, ["casoCode", "caso", "caso_codigo"]);
   let casoId: string | null = null;
@@ -782,6 +1000,39 @@ export async function createAlert(
     fields.push({
       column: "nivel_alerta_id",
       value: await resolveCatalog(client, "nivel", nivel.value),
+    });
+  }
+
+  const riesgo = readField(body, ["riesgo"]);
+  if (riesgo.present && riesgo.value !== null) {
+    fields.push({
+      column: "nivel_riesgo_id",
+      value: await resolveCatalog(client, "riesgo", riesgo.value),
+    });
+  }
+
+  const alcance = readField(body, ["alcance"]);
+  if (alcance.present && alcance.value !== null) {
+    fields.push({
+      column: "alcance_id",
+      value: await resolveCatalog(client, "alcance", alcance.value),
+    });
+  }
+
+  // Región y provincia declaradas. Si faltan, la lectura las deriva del
+  // distrito; si llegan, se guardan y tienen prioridad sobre la derivación.
+  const region = readField(body, ["region"]);
+  let regionId: number | null = null;
+  if (region.present && region.value !== null) {
+    regionId = await resolveRegionId(client, region.value);
+    fields.push({ column: "region_id", value: regionId });
+  }
+
+  const provincia = readField(body, ["provincia"]);
+  if (provincia.present && provincia.value !== null) {
+    fields.push({
+      column: "provincia_id",
+      value: await resolveProvinciaId(client, provincia.value, regionId),
     });
   }
 
@@ -838,6 +1089,38 @@ export async function createAlert(
       column: "acciones_sugeridas_json",
       value: jsonValue(sugeridas.value),
       cast: "jsonb",
+    });
+  }
+
+  const actores = readField(body, ["actoresClave", "actores_clave"]);
+  if (actores.present) {
+    fields.push({
+      column: "actores_clave",
+      value: jsonValue(actores.value),
+      cast: "jsonb",
+    });
+  }
+
+  const demandasInmediatas = readField(body, [
+    "demandasInmediatas",
+    "demandas_inmediatas",
+  ]);
+  if (demandasInmediatas.present) {
+    fields.push({
+      column: "demandas_inmediatas",
+      value: jsonValue(demandasInmediatas.value),
+      cast: "jsonb",
+    });
+  }
+
+  const plantilla = readField(body, [
+    "plantillaWhatsapp",
+    "plantilla_whatsapp",
+  ]);
+  if (plantilla.present) {
+    fields.push({
+      column: "plantilla_whatsapp",
+      value: text(plantilla.value, MAX_TEXT_LENGTH, false),
     });
   }
 
@@ -912,6 +1195,8 @@ export async function createAlert(
   try {
     row = await insertAlertRow(client, (codigo) => [
       { column: "codigo_alerta", value: codigo },
+      { column: "created_by", value: session.usuarioId },
+      { column: "updated_by", value: session.usuarioId },
       ...fields,
     ]);
   } catch (error) {
@@ -966,7 +1251,11 @@ export async function updateAlert(
     add("titulo", requiredText(titulo.value, MAX_TITLE_LENGTH));
 
   const paso = readField(body, ["pasoActual", "paso_actual"]);
-  if (paso.present) add("paso_actual", intIn(paso.value, 1, 99));
+  let pasoNuevo: number | null = null;
+  if (paso.present) {
+    pasoNuevo = intIn(paso.value, 1, 99);
+    add("paso_actual", pasoNuevo);
+  }
 
   const descripcion = readField(body, [
     "descripcionRiesgo",
@@ -1010,6 +1299,55 @@ export async function updateAlert(
     );
   }
 
+  const riesgo = readField(body, ["riesgo"]);
+  if (riesgo.present) {
+    add(
+      "nivel_riesgo_id",
+      riesgo.value === null
+        ? null
+        : await resolveCatalog(client, "riesgo", riesgo.value),
+    );
+  }
+
+  const alcance = readField(body, ["alcance"]);
+  if (alcance.present) {
+    add(
+      "alcance_id",
+      alcance.value === null
+        ? null
+        : await resolveCatalog(client, "alcance", alcance.value),
+    );
+  }
+
+  // Región y provincia declaradas. Son las que envía `guardarMetadatos()` para
+  // `alcance='Región'` (región) y `alcance='Distrito'` (provincia). Al
+  // persistirlas, un PATCH que sólo las traiga ya no choca con el guardia de
+  // «nada que actualizar», y la lectura las prefiere sobre las derivadas.
+  const region = readField(body, ["region"]);
+  let regionId: number | null = null;
+  if (region.present) {
+    regionId =
+      region.value === null
+        ? null
+        : await resolveRegionId(client, region.value);
+    add("region_id", regionId);
+  }
+
+  const provincia = readField(body, ["provincia"]);
+  if (provincia.present) {
+    // Se acota a la región declarada en este PATCH o, si no vino, a la que ya
+    // tenía la alerta: el nombre de provincia sólo es único dentro de su región.
+    const regionAlmacenada =
+      typeof row.region_id === "number" ? row.region_id : null;
+    const regionScope = regionId ?? regionAlmacenada;
+    add(
+      "provincia_id",
+      provincia.value === null
+        ? null
+        : await resolveProvinciaId(client, provincia.value, regionScope),
+    );
+  }
+
   const riesgos = readField(body, ["riesgos"]);
   if (riesgos.present) {
     add("riesgos_json", jsonValue(riesgos.value), "jsonb");
@@ -1021,6 +1359,27 @@ export async function updateAlert(
   ]);
   if (sugeridas.present) {
     add("acciones_sugeridas_json", jsonValue(sugeridas.value), "jsonb");
+  }
+
+  const actores = readField(body, ["actoresClave", "actores_clave"]);
+  if (actores.present) {
+    add("actores_clave", jsonValue(actores.value), "jsonb");
+  }
+
+  const demandasInmediatas = readField(body, [
+    "demandasInmediatas",
+    "demandas_inmediatas",
+  ]);
+  if (demandasInmediatas.present) {
+    add("demandas_inmediatas", jsonValue(demandasInmediatas.value), "jsonb");
+  }
+
+  const plantilla = readField(body, [
+    "plantillaWhatsapp",
+    "plantilla_whatsapp",
+  ]);
+  if (plantilla.present) {
+    add("plantilla_whatsapp", text(plantilla.value, MAX_TEXT_LENGTH, false));
   }
 
   const caso = readField(body, ["casoCode", "caso", "caso_codigo"]);
@@ -1047,6 +1406,7 @@ export async function updateAlert(
   }
 
   if (sets.length === 0) invalid();
+  add("updated_by", session.usuarioId, "uuid");
   sets.push("updated_at = now()");
   params.push(row.id);
 
@@ -1082,6 +1442,22 @@ export async function updateAlert(
     antes: pick(row, ALERT_WRITE_COLUMNS),
     despues: pick(updatedRow, ALERT_WRITE_COLUMNS),
   });
+
+  // Cada cambio de paso es una acción de revisión: se deja traza con quién,
+  // qué acción y el motivo declarado (si vino).
+  if (pasoNuevo !== null && pasoNuevo !== row.paso_actual) {
+    const motivo = text(
+      readField(body, ["motivo"]).value,
+      MAX_MOTIVO_LENGTH,
+      false,
+    );
+    await registrarRevision(
+      client,
+      String(updatedRow.id),
+      session.usuarioId,
+      revisionAccion(row.paso_actual, pasoNuevo, motivo),
+    );
+  }
 
   const detail = await getAlertById(client, String(updatedRow.id));
   if (!detail) {

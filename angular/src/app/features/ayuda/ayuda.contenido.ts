@@ -325,8 +325,8 @@ export const SECCIONES_AYUDA: readonly SeccionAyuda[] = [
         ],
       },
       {
-        id: 'riesgo-moderado',
-        termino: 'Moderado',
+        id: 'riesgo-medio',
+        termino: 'Medio',
         definicion:
           'Empiezan a presentarse factores que podrían favorecer el tránsito progresivo hacia situaciones de mayor conflictividad o dificultar su conducción institucional.',
         detalles: [
@@ -360,8 +360,8 @@ export const SECCIONES_AYUDA: readonly SeccionAyuda[] = [
           'Valor de prioridad de atención del caso. Se registra en la matriz de conflictividad (Anexo 15) y ordena el seguimiento operativo.',
       },
       {
-        id: 'atencion-moderado',
-        termino: 'Moderado',
+        id: 'atencion-medio',
+        termino: 'Medio',
         definicion:
           'Valor de prioridad de atención del caso. Se registra en la matriz de conflictividad (Anexo 15) y ordena el seguimiento operativo.',
       },

@@ -22,8 +22,14 @@
         <span class="brand-name">AVISA</span>
       </a>
       <span class="brand-divider"></span>
-      <small class="brand-org" title="Aplicativo de Vigilancia y Sistematización de Información en Prevención y Gestión de Conflictos Sociales">
-        <span class="brand-org-largo">Aplicativo de Vigilancia y Sistematización de Información en Prevención y Gestión de Conflictos Sociales</span>
+      <small
+        class="brand-org"
+        title="Aplicativo de Vigilancia y Sistematización de Información en Prevención y Gestión de Conflictos Sociales"
+      >
+        <span class="brand-org-largo"
+          >Aplicativo de Vigilancia y Sistematización de Información en Prevención y Gestión de
+          Conflictos Sociales</span
+        >
         <span class="brand-org-corta">Gestión de conflictos sociales</span>
       </small>
     </div>
@@ -222,7 +228,7 @@
   </header>
 
   <div class="app-layout">
-    <aside class="avisa-sidebar" [class.open]="menuAbierto()">
+    <aside class="avisa-sidebar" [class.open]="menuAbierto()" [class.colapsado]="menuColapsado()">
       <div class="sidebar-scroll">
         @for (grupo of grupos(); track grupo.etiqueta) {
           <div class="sidebar-label" [class.section-nav-label]="!$first">{{ grupo.etiqueta }}</div>
@@ -233,6 +239,7 @@
                 [routerLink]="enlace.ruta"
                 routerLinkActive="selected"
                 [routerLinkActiveOptions]="{ exact: enlace.exacto ?? false }"
+                [attr.title]="menuColapsado() ? enlace.etiqueta : null"
                 (click)="menuAbierto.set(false)"
               >
                 <app-icono [nombre]="enlace.icono" [tamano]="17" />
@@ -246,6 +253,18 @@
       <div class="sidebar-bottom">
         <div class="sidebar-rule"></div>
         <div class="sidebar-version">AVISA <span>·</span> v{{ version }}</div>
+        <button
+          type="button"
+          class="sidebar-colapso"
+          [attr.aria-label]="menuColapsado() ? 'Expandir menú' : 'Contraer menú'"
+          [attr.aria-expanded]="!menuColapsado()"
+          (click)="alternarColapso()"
+        >
+          <app-icono
+            [nombre]="menuColapsado() ? 'chevron-derecha' : 'chevron-izquierda'"
+            [tamano]="16"
+          />
+        </button>
       </div>
     </aside>
 

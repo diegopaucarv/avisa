@@ -2,12 +2,10 @@ import type { PoolClient } from "pg";
 import { ApiError } from "../errors";
 import { auditChange } from "../audit";
 import {
-  DEFAULT_PII_MOTIVO,
   NIVEL_PII,
   SQL_CIFRAR,
   SQL_HMAC,
   asegurarClaveCifrado,
-  getActorPii,
   resolverAutoridad,
   type ActorPii,
   type AutoridadRol,
@@ -1557,7 +1555,16 @@ export type ActorOrganization = {
  * de «sin ficha»: son causas distintas y hoy se mostraban igual.
  */
 export type PiiEstado =
-  "listo" | "sin_ficha" | "no_autorizado" | "no_disponible" | "error";
+  | "listo"
+  | "sin_ficha"
+  | "no_autorizado"
+  | "no_disponible"
+  | "error"
+  /**
+   * El detalle no descifra datos personales: la PII se pide aparte a
+   * `/v1/actors/:uid/pii` con un motivo explícito, que queda auditado.
+   */
+  | "no_solicitado";
 
 export type ActorDetail = {
   actor: ActorListItem;
@@ -1570,35 +1577,13 @@ export type ActorDetail = {
   generatedAt: string;
 };
 
-/** Traduce el fallo de descifrado sin exponer SQL, PII ni credenciales. */
-function piiFailureMessage(error: unknown): string {
-  if (error instanceof ApiError) return error.message;
-  switch ((error as { code?: string } | undefined)?.code) {
-    case "42501":
-      return "No se pudo descifrar: falta la clave de cifrado o el nivel de acceso.";
-    case "22023":
-      return "No se pudo descifrar: motivo no indicado.";
-    case "P0002":
-      return "El actor no tiene datos personales accesibles.";
-    case "42883":
-    case "42P01":
-      return "La capa de datos personales no está inicializada.";
-    default:
-      return "No se pudieron descifrar los datos personales.";
-  }
-}
-
-function piiEstadoDeError(error: unknown): PiiEstado {
-  if (error instanceof ApiError) {
-    if (error.status === 403) return "no_autorizado";
-    if (error.status === 503) return "no_disponible";
-    return "error";
-  }
-  return (error as { code?: string } | undefined)?.code === "42501"
-    ? "no_disponible"
-    : "error";
-}
-
+/**
+ * Detalle de la ficha: actor, casos y organización. **No** descifra PII.
+ *
+ * El DNI, el correo y el teléfono se piden aparte por
+ * `GET /api/v1/actors/:uid/pii` con un motivo explícito que la base audita; así
+ * abrir una ficha no registra un acceso a datos personales que nadie pidió.
+ */
 export async function getActorById(
   client: PoolClient,
   uid: string,
@@ -1636,50 +1621,12 @@ export async function getActorById(
       ? { id: actor.organizacionAnclaUid, nombre: actor.organizacionAncla }
       : null;
 
-  // Los datos personales exigen clave y nivel de acceso que el detalle no puede
-  // asumir: si el descifrado falla, el detalle sigue siendo útil. El savepoint
-  // evita que el error deje la transacción abortada y se pierdan casos/org.
-  let pii: ActorPii | null = null;
-  let piiError: string | null = null;
-  let piiEstado: PiiEstado = "sin_ficha";
-
-  if (!roles.length) {
-    piiEstado = "no_autorizado";
-    piiError = "La sesión no declara roles para consultar datos personales.";
-  } else {
-    await client.query("savepoint actor_pii");
-    try {
-      const consulta = await getActorPii(
-        client,
-        actor.id,
-        DEFAULT_PII_MOTIVO,
-        roles,
-      );
-      await client.query("release savepoint actor_pii");
-      if (consulta) {
-        pii = {
-          dni: consulta.dni,
-          email: consulta.email,
-          telefono: consulta.telefono,
-        };
-        piiEstado = consulta.tieneFicha ? "listo" : "sin_ficha";
-        if (!consulta.tieneFicha) {
-          piiError = "El actor no tiene ficha de datos personales.";
-        }
-      } else {
-        piiEstado = "sin_ficha";
-      }
-    } catch (error) {
-      try {
-        await client.query("rollback to savepoint actor_pii");
-        await client.query("release savepoint actor_pii");
-      } catch {
-        // Conexión inutilizable: el commit posterior la descarta y jsonError traduce.
-      }
-      piiEstado = piiEstadoDeError(error);
-      piiError = piiFailureMessage(error);
-    }
-  }
+  // El detalle no descifra datos personales. Abrir una ficha no debe registrar
+  // un acceso a PII que nadie pidió: el DNI, el correo y el teléfono salen
+  // aparte, por `/v1/actors/:uid/pii` y con un motivo explícito auditado.
+  const pii: ActorPii | null = null;
+  const piiError: string | null = null;
+  const piiEstado: PiiEstado = roles.length ? "no_solicitado" : "no_autorizado";
 
   return {
     actor,

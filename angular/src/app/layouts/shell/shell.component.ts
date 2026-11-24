@@ -130,6 +130,17 @@ const ENLACES_NAV: readonly EnlaceNav[] = [
   },
 ];
 
+const CLAVE_MENU_COLAPSADO = 'avisa-menu-colapsado';
+
+/** Estado guardado del ancho del menú; sin almacenamiento, arranca expandido. */
+function leerMenuColapsado(): boolean {
+  try {
+    return localStorage.getItem(CLAVE_MENU_COLAPSADO) === '1';
+  } catch {
+    return false;
+  }
+}
+
 @Component({
   selector: 'app-shell',
   imports: [RouterOutlet, RouterLink, RouterLinkActive, IconoComponent],
@@ -503,6 +514,7 @@ export class ShellComponent {
   });
 
   readonly menuAbierto = signal(false);
+  readonly menuColapsado = signal(leerMenuColapsado());
   readonly perfilAbierto = signal(false);
 
   constructor() {
@@ -551,6 +563,17 @@ export class ShellComponent {
 
   alternarMenu(): void {
     this.menuAbierto.update((abierto) => !abierto);
+  }
+
+  /** Colapsa el menú a íconos en escritorio y recuerda la elección. */
+  alternarColapso(): void {
+    const colapsado = !this.menuColapsado();
+    this.menuColapsado.set(colapsado);
+    try {
+      localStorage.setItem(CLAVE_MENU_COLAPSADO, colapsado ? '1' : '0');
+    } catch {
+      // Sin almacenamiento la preferencia dura lo que la sesión.
+    }
   }
 
   alternarPerfil(): void {

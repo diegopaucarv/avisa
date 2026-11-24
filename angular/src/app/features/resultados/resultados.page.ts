@@ -19,6 +19,7 @@ import {
   formatearFecha,
   type Documento,
 } from '../documentos/documento.mapeo';
+import { ListaAsistenciaComponent } from './lista-asistencia.component';
 
 type Pestana = 'ayuda_memoria' | 'relatoria' | 'reporte_actividad' | 'acta';
 
@@ -56,7 +57,13 @@ const PESTANAS: readonly { codigo: Pestana; etiqueta: string; descripcion: strin
  */
 @Component({
   selector: 'app-resultados',
-  imports: [RouterLink, PaginacionComponent, IconoComponent, ThOrdenDirective],
+  imports: [
+    RouterLink,
+    PaginacionComponent,
+    IconoComponent,
+    ThOrdenDirective,
+    ListaAsistenciaComponent,
+  ],
   template: `
     <section class="view-body" aria-labelledby="titulo-resultados">
       <header class="view-head">
@@ -64,10 +71,19 @@ const PESTANAS: readonly { codigo: Pestana; etiqueta: string; descripcion: strin
           <h1 id="titulo-resultados">Resultados</h1>
         </div>
         <div class="view-actions">
+          <button
+            type="button"
+            class="button-primary"
+            title="Toma o elige una foto de la lista y revísala antes de vincular"
+            (click)="abrirLista()"
+          >
+            <app-icono nombre="documentos" [tamano]="14" />
+            Tomar foto de la lista de asistencia
+          </button>
           <a
             class="button-secondary"
             routerLink="/directorio/actores"
-            title="Abre el directorio para preparar y cargar la lista de asistencia"
+            title="Abre el directorio para preparar la lista de asistencia"
           >
             Cargar lista de asistencia
           </a>
@@ -200,6 +216,10 @@ const PESTANAS: readonly { codigo: Pestana; etiqueta: string; descripcion: strin
             (tamanoCambia)="cambiarTamano($event)"
           />
         }
+      }
+
+      @if (mostrarLista()) {
+        <app-lista-asistencia (cerrar)="cerrarLista()" />
       }
     </section>
   `,
@@ -365,6 +385,16 @@ export class ResultadosPage {
 
   recargar(): void {
     this.listado.recargar();
+  }
+
+  readonly mostrarLista = signal(false);
+
+  abrirLista(): void {
+    this.mostrarLista.set(true);
+  }
+
+  cerrarLista(): void {
+    this.mostrarLista.set(false);
   }
 
   readonly archivoNombre = signal<string | null>(null);

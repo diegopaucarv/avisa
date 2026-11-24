@@ -87,6 +87,16 @@ export type Documento = {
   archivo: string | null;
   urlLista: string | null;
   urlFoto: string | null;
+  /** MIME del binario almacenado; `null` si no hay archivo. */
+  mime: string | null;
+  /** Tamaño del binario en bytes; `null` si no hay archivo. */
+  tamanoBytes: number | null;
+  /** SHA-256 del binario (64 hex); `null` si no hay archivo. */
+  hashSha256: string | null;
+  /** `true` si el documento tiene binario almacenado (no se envía el bytea). */
+  tieneArchivo: boolean;
+  /** Versión vigente: histórico + 1. */
+  versionActual: number;
   origen: string | null;
   /** 0..1 (`core.documentos.confidence`). */
   confianza: number | null;
@@ -122,6 +132,42 @@ export type FuenteDocumento = {
 export type DetalleDocumento = {
   documento: Documento;
   fuentes: FuenteDocumento[];
+};
+
+/** Fila de `GET /api/v1/documents/:id/versiones` (metadatos, sin bytea). */
+export type VersionDocumento = {
+  id: string;
+  numero: number;
+  titulo: string | null;
+  mime: string | null;
+  tamanoBytes: number | null;
+  hashSha256: string | null;
+  /** Ruta externa cuando la versión sólo referencia una URL. */
+  url: string | null;
+  nota: string | null;
+  creadoPorNombre: string | null;
+  createdAt: string;
+  /** `true` si conserva binario descargable. */
+  tieneArchivo: boolean;
+};
+
+export type EstadoExtraccion = 'pendiente' | 'en_proceso' | 'listo' | 'error' | 'no_disponible';
+
+/** Término clave calculado por frecuencia local. */
+export type TemaClave = { termino: string; frecuencia: number };
+
+/** Fila de `GET /api/v1/documents/:id/extraccion`. */
+export type ExtraccionDocumento = {
+  id: string;
+  tipo: 'ocr' | 'temas';
+  estado: EstadoExtraccion;
+  texto: string | null;
+  /** Cuerpo libre: temas, motivo de `no_disponible`, … */
+  resultado: unknown;
+  error: string | null;
+  /** Motor o método usado (`frecuencia-local`, nombre del motor, …). */
+  modelo: string | null;
+  createdAt: string;
 };
 
 export type OpcionCatalogo = {
@@ -231,6 +277,11 @@ export function aDocumento(bruto: unknown): Documento {
     archivo: texto(registro, ['archivo']),
     urlLista: texto(registro, ['urlLista', 'url_lista']),
     urlFoto: texto(registro, ['urlFoto', 'url_foto']),
+    mime: texto(registro, ['mime']),
+    tamanoBytes: numero(registro, ['tamanoBytes', 'tamano_bytes']),
+    hashSha256: texto(registro, ['hashSha256', 'hash_sha256']),
+    tieneArchivo: booleano(registro, ['tieneArchivo', 'tiene_archivo']),
+    versionActual: numero(registro, ['versionActual', 'version_actual']) ?? 1,
     origen: texto(registro, ['origen']),
     confianza: numero(registro, ['confianza']),
     validado: booleano(registro, ['validado']),
@@ -268,6 +319,62 @@ export function aDetalleDocumento(bruto: unknown): DetalleDocumento {
     documento: aDocumento(leer(registro, ['document', 'documento'])),
     fuentes: lista(registro, ['fuentes']).map(aFuente),
   };
+}
+
+/** Versión de `GET /api/v1/documents/:id/versiones` (`items[]`). */
+export function aVersionDocumento(bruto: unknown): VersionDocumento {
+  const registro = esRegistro(bruto) ? bruto : {};
+
+  return {
+    id: texto(registro, ['id']) ?? '',
+    numero: numero(registro, ['numero']) ?? 0,
+    titulo: texto(registro, ['titulo']),
+    mime: texto(registro, ['mime']),
+    tamanoBytes: numero(registro, ['tamanoBytes', 'tamano_bytes']),
+    hashSha256: texto(registro, ['hashSha256', 'hash_sha256']),
+    url: texto(registro, ['url']),
+    nota: texto(registro, ['nota']),
+    creadoPorNombre: texto(registro, ['creadoPorNombre', 'creado_por_nombre']),
+    createdAt: texto(registro, ['createdAt', 'created_at']) ?? '',
+    tieneArchivo: booleano(registro, ['tieneArchivo', 'tiene_archivo']),
+  };
+}
+
+/** Extracción de `GET /api/v1/documents/:id/extraccion` (`items[]`). */
+export function aExtraccionDocumento(bruto: unknown): ExtraccionDocumento {
+  const registro = esRegistro(bruto) ? bruto : {};
+  const tipo = texto(registro, ['tipo']);
+
+  return {
+    id: texto(registro, ['id']) ?? '',
+    tipo: tipo === 'temas' ? 'temas' : 'ocr',
+    estado: (texto(registro, ['estado']) as EstadoExtraccion) ?? 'pendiente',
+    texto: texto(registro, ['texto']),
+    resultado: leer(registro, ['resultado', 'resultadoJson', 'resultado_json']),
+    error: texto(registro, ['error']),
+    modelo: texto(registro, ['modelo']),
+    createdAt: texto(registro, ['createdAt', 'created_at']) ?? '',
+  };
+}
+
+/** Temas declarados dentro de `resultado`, si vienen con la forma esperada. */
+export function temasDeExtraccion(extraccion: ExtraccionDocumento | null): TemaClave[] {
+  if (!extraccion || !esRegistro(extraccion.resultado)) return [];
+  return lista(extraccion.resultado, ['terminos'])
+    .map((item): TemaClave | null => {
+      const fila = esRegistro(item) ? item : {};
+      const termino = texto(fila, ['termino']);
+      const frecuencia = numero(fila, ['frecuencia']);
+      if (!termino || frecuencia === null) return null;
+      return { termino, frecuencia };
+    })
+    .filter((item): item is TemaClave => item !== null);
+}
+
+/** Origen declarado dentro de `resultado` (para temas clave). */
+export function origenDeExtraccion(extraccion: ExtraccionDocumento | null): string | null {
+  if (!extraccion || !esRegistro(extraccion.resultado)) return null;
+  return texto(extraccion.resultado, ['origen']);
 }
 
 /** Tipos de documento de `GET /api/v1/catalogs` (`catalogs.tiposDocumento`). */

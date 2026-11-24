@@ -462,10 +462,327 @@
           }
         </section>
 
+        <section class="detail-section" aria-labelledby="documento-panel-archivo">
+          <h3 id="documento-panel-archivo">Archivo del documento</h3>
+
+          @if (d.tieneArchivo) {
+            <dl class="panel-datos">
+              <div>
+                <dt>Tipo (MIME)</dt>
+                <dd>{{ d.mime || 'sin declarar' }}</dd>
+              </div>
+              <div>
+                <dt>Tamaño</dt>
+                <dd>{{ tamano(d.tamanoBytes) }}</dd>
+              </div>
+              <div>
+                <dt>Hash SHA-256</dt>
+                <dd>
+                  @if (d.hashSha256) {
+                    <span class="mono" [title]="d.hashSha256">{{ hashCorto(d.hashSha256) }}</span>
+                  } @else {
+                    sin hash
+                  }
+                </dd>
+              </div>
+              <div>
+                <dt>Versión actual</dt>
+                <dd>v{{ d.versionActual }}</dd>
+              </div>
+              <div>
+                <dt>Fecha del documento</dt>
+                <dd>{{ formatearFecha(d.fecha) }}</dd>
+              </div>
+            </dl>
+
+            <div class="panel-acciones-archivo">
+              <button
+                type="button"
+                class="button-primary"
+                [disabled]="cargandoVisor()"
+                (click)="verArchivo()"
+              >
+                {{ tipoVisor() !== null ? 'Cerrar visor' : 'Ver en el visor' }}
+              </button>
+              <button type="button" class="button-secondary" (click)="descargarActual()">
+                Descargar
+              </button>
+              @if (puedeModificar()) {
+                <label class="subir-archivo">
+                  <span>Reemplazar archivo</span>
+                  <input
+                    type="file"
+                    [accept]="aceptadosArchivo"
+                    [disabled]="subiendoArchivo()"
+                    (change)="alSeleccionarArchivo($event)"
+                  />
+                </label>
+              }
+            </div>
+          } @else {
+            <dl class="panel-datos">
+              <div>
+                <dt>Archivo</dt>
+                <dd><span class="flag flag-mini">Archivo no adjunto (declarado)</span></dd>
+              </div>
+            </dl>
+            <p class="flag flag-info">
+              El documento existe en el registro y falta el adjunto. Ocultarlo haría creer que no
+              fue emitido.
+            </p>
+            @if (d.archivo || d.urlLista || d.urlFoto) {
+              <p class="panel-nota">
+                Hay una ruta externa declarada: no hay binario almacenado en AVISA.
+              </p>
+            }
+            @if (puedeModificar()) {
+              <div class="panel-acciones-archivo">
+                <label class="subir-archivo">
+                  <span>Adjuntar archivo</span>
+                  <input
+                    type="file"
+                    [accept]="aceptadosArchivo"
+                    [disabled]="subiendoArchivo()"
+                    (change)="alSeleccionarArchivo($event)"
+                  />
+                </label>
+              </div>
+            }
+          }
+
+          @if (puedeModificar()) {
+            <p class="form-hint">
+              Máximo 20 MB. El servidor valida extensión y MIME contra la lista blanca; al
+              reemplazar, la versión anterior queda en el historial.
+            </p>
+          }
+
+          @if (subiendoArchivo()) {
+            <p class="panel-nota" role="status">Subiendo el archivo…</p>
+          }
+          @if (avisoArchivo(); as avisoSubida) {
+            <p class="panel-aviso" role="status">{{ avisoSubida }}</p>
+          }
+          @if (errorArchivo(); as errorSubida) {
+            <p class="form-error" role="alert">{{ errorSubida }}</p>
+          }
+
+          @if (d.tieneArchivo) {
+            @if (cargandoVisor()) {
+              <p class="panel-nota" role="status">Cargando el visor…</p>
+            }
+
+            @if (tipoVisor() === 'pdf') {
+              @if (urlIframe(); as url) {
+                <div class="visor">
+                  <iframe class="visor-marco" [src]="url" title="Visor del documento"></iframe>
+                </div>
+              }
+            } @else if (tipoVisor() === 'imagen') {
+              @if (urlImagen(); as url) {
+                <div class="visor">
+                  <img class="visor-imagen" [src]="url" alt="Vista previa del documento" />
+                </div>
+              }
+            } @else if (tipoVisor() === 'texto') {
+              <div class="visor">
+                <pre class="visor-texto">{{ textoVisor() }}</pre>
+              </div>
+            } @else if (tipoVisor() === 'otro') {
+              <p class="flag flag-info">
+                Este tipo de archivo no se previsualiza en el navegador; use «Descargar».
+              </p>
+            }
+          }
+        </section>
+
+        <section class="detail-section" aria-labelledby="documento-panel-versiones">
+          <h3 id="documento-panel-versiones">Versiones del archivo</h3>
+
+          @if (cargandoVersiones()) {
+            <p class="panel-nota" role="status">Cargando el historial de versiones…</p>
+          } @else if (errorVersiones(); as falloVersiones) {
+            <div class="panel-error" role="alert">
+              <p>{{ falloVersiones }}</p>
+              <button type="button" class="button-secondary" (click)="reintentarVersiones()">
+                Reintentar
+              </button>
+            </div>
+          } @else if (versiones().length === 0) {
+            <p class="panel-vacio">Sin versiones: el archivo actual no ha sido reemplazado.</p>
+          } @else {
+            @if (errorDescargaVersion(); as errorDescarga) {
+              <p class="form-error" role="alert">{{ errorDescarga }}</p>
+            }
+            <table class="docs">
+              <thead>
+                <tr>
+                  <th>N.º</th>
+                  <th>Fecha</th>
+                  <th>Tipo</th>
+                  <th>Tamaño</th>
+                  <th>Hash</th>
+                  <th>Acción</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (version of versiones(); track version.id) {
+                  <tr>
+                    <td class="mono">v{{ version.numero }}</td>
+                    <td class="fecha">{{ fechaHora(version.createdAt) }}</td>
+                    <td>
+                      <span class="tipo">{{ version.mime || 'sin tipo' }}</span>
+                    </td>
+                    <td class="mono">{{ tamano(version.tamanoBytes) }}</td>
+                    <td class="mono" [title]="version.hashSha256 || ''">
+                      {{ hashCorto(version.hashSha256) }}
+                    </td>
+                    <td>
+                      @if (version.tieneArchivo) {
+                        <button type="button" class="doc-link" (click)="descargarVersion(version)">
+                          Descargar
+                        </button>
+                      } @else if (version.url) {
+                        <a
+                          class="doc-link"
+                          [href]="version.url"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          Enlace externo
+                        </a>
+                      } @else {
+                        <span class="flag flag-mini">Sin archivo</span>
+                      }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          }
+        </section>
+
+        <section class="detail-section" aria-labelledby="documento-panel-extraccion">
+          <h3 id="documento-panel-extraccion">OCR y temas clave</h3>
+          <p class="panel-nota">
+            Extracción de texto (OCR) y temas por frecuencia local. Sin motor externo configurado,
+            el OCR se declara «no disponible» y no se inventa texto.
+          </p>
+
+          @if (puedeModificar()) {
+            <div class="panel-acciones-archivo">
+              <button
+                type="button"
+                class="button-secondary"
+                [disabled]="ejecutandoExtraccion() !== null"
+                (click)="ejecutarExtraccion('ocr')"
+              >
+                {{ ejecutandoExtraccion() === 'ocr' ? 'Extrayendo…' : 'Extraer OCR' }}
+              </button>
+              <button
+                type="button"
+                class="button-secondary"
+                [disabled]="ejecutandoExtraccion() !== null"
+                (click)="ejecutarExtraccion('temas')"
+              >
+                {{ ejecutandoExtraccion() === 'temas' ? 'Calculando…' : 'Calcular temas' }}
+              </button>
+            </div>
+          }
+
+          @if (avisoExtraccion(); as avisoExt) {
+            <p class="panel-aviso" role="status">{{ avisoExt }}</p>
+          }
+          @if (errorExtraccion(); as errorExt) {
+            <p class="form-error" role="alert">{{ errorExt }}</p>
+          }
+
+          @if (cargandoExtracciones()) {
+            <p class="panel-nota" role="status">Cargando el estado de las extracciones…</p>
+          } @else {
+            <div class="extraccion-bloque">
+              <h4 class="grupo-titulo">Texto reconocido (OCR)</h4>
+              @if (extraccionOcr(); as ocr) {
+                <p class="panel-datos-linea">
+                  <span [class]="'chip ' + claseExtraccion(ocr.estado)">
+                    {{ etiquetaEstadoExtraccion(ocr.estado) }}
+                  </span>
+                  @if (ocr.modelo) {
+                    <span class="panel-nota">Motor: {{ ocr.modelo }}</span>
+                  }
+                </p>
+                @if (ocr.texto) {
+                  <pre class="visor-texto extracto">{{ ocr.texto }}</pre>
+                } @else if (ocr.estado === 'no_disponible') {
+                  <p class="flag flag-info">
+                    No hay motor de OCR configurado: no se inventa texto.
+                  </p>
+                } @else if (ocr.error) {
+                  <p class="panel-nota">{{ ocr.error }}</p>
+                }
+              } @else {
+                <p class="panel-vacio">Sin extracción OCR registrada para este documento.</p>
+              }
+            </div>
+
+            <div class="extraccion-bloque">
+              <h4 class="grupo-titulo">Temas clave</h4>
+              @if (extraccionTemas(); as temas) {
+                <p class="panel-datos-linea">
+                  <span [class]="'chip ' + claseExtraccion(temas.estado)">
+                    {{ etiquetaEstadoExtraccion(temas.estado) }}
+                  </span>
+                </p>
+                @if (temasClave().length > 0) {
+                  <ul class="chips-temas">
+                    @for (tema of temasClave(); track tema.termino) {
+                      <li class="chip chip-tema">{{ tema.termino }} · {{ tema.frecuencia }}</li>
+                    }
+                  </ul>
+                  @if (origenTemas(); as origen) {
+                    <p class="panel-nota">
+                      Calculado por frecuencia local sobre
+                      {{ origen === 'texto_ocr' ? 'el texto OCR' : 'el resumen ejecutivo' }}; no es
+                      un modelo entrenado.
+                    </p>
+                  }
+                } @else if (temas.estado === 'no_disponible') {
+                  <p class="flag flag-info">
+                    {{
+                      temas.error ||
+                        'Sin texto ni resumen para calcular temas; no se inventan términos.'
+                    }}
+                  </p>
+                } @else if (temas.error) {
+                  <p class="panel-nota">{{ temas.error }}</p>
+                }
+              } @else {
+                <p class="panel-vacio">Sin temas calculados para este documento.</p>
+              }
+            </div>
+          }
+        </section>
+
+        <section class="detail-section" aria-labelledby="documento-panel-adjuntos">
+          <h3 id="documento-panel-adjuntos">Adjuntos</h3>
+          <app-adjuntos-panel
+            entidadTipo="documento"
+            [entidadId]="d.id"
+            titulo="Adjuntos del documento"
+            [editable]="puedeModificar()"
+          />
+        </section>
+
         <section class="detail-section" aria-labelledby="documento-panel-archivos">
           <h3 id="documento-panel-archivos">Archivos y enlaces</h3>
+          @if (d.tieneArchivo) {
+            <p class="panel-nota">
+              El archivo está almacenado en AVISA; use el visor de arriba. Las rutas siguientes son
+              enlaces externos adicionales.
+            </p>
+          }
           @if (!d.archivo && !d.urlLista && !d.urlFoto) {
-            <p class="panel-vacio">Sin archivo adjunto.</p>
+            <p class="panel-vacio">Archivo no adjunto (declarado).</p>
           } @else {
             <dl class="panel-datos">
               @if (d.archivo) {

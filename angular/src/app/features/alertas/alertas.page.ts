@@ -117,7 +117,7 @@ function totalDe(bruto: unknown): number {
  *
  * Listado con paginación de servidor y filtros en la URL (`replaceUrl`). Al
  * pulsar una fila no se navega: se abre `AlertaPanelComponent` como panel
- * lateral. El eje de riesgo es el del caso vinculado: Bajo · Moderado · Alto.
+ * El eje de riesgo es el del caso vinculado: Bajo · Medio · Alto.
  */
 @Component({
   selector: 'app-alertas',
@@ -631,7 +631,7 @@ export class AlertasPage {
     switch (riesgo) {
       case 'Alto':
         return 0;
-      case 'Moderado':
+      case 'Medio':
         return 1;
       default:
         return 2;

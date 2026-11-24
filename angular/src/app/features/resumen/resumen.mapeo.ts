@@ -1,16 +1,71 @@
 /**
- * Resumen operativo: lectura de los agregados reales y los rangos de
- * vencimiento que comparten Resumen y Bandeja.
+ * Resumen operativo: lectura de los agregados reales, las etapas de la portada
+ * y los rangos de vencimiento que comparten Resumen y Bandeja.
  *
  * No existe un endpoint de tablero. Los indicadores se calculan con el `total`
  * de los listados ya existentes, pedidos con `tamano=1` para no traer filas.
- * Aquí viven dos piezas: extraer el total del sobre paginado y construir los
- * rangos de `vencimiento_desde`/`vencimiento_hasta` (ya vencido y por vencer)
- * que el servidor aplica sobre el vencimiento efectivo.
+ * Aquí viven cuatro piezas: el orden de las etapas (Prevención · Gestión ·
+ * Seguimiento), la marca de sincronización más reciente de un listado, extraer
+ * el total del sobre paginado y construir los rangos de
+ * `vencimiento_desde`/`vencimiento_hasta` (ya vencido y por vencer) que el
+ * servidor aplica sobre el vencimiento efectivo.
  */
 
 import { normalizarColeccion } from '../../core/http/coleccion';
 import { esRegistro } from '../../dominio/mapeo';
+
+/**
+ * Etapas del resumen operativo, en el orden de la Guía. El orden de la
+ * pantalla vive aquí y no en la plantilla: se recorre esta lista para dibujar
+ * los bloques y para numerarlos.
+ */
+export type EtapaClave = 'prevencion' | 'gestion' | 'seguimiento';
+
+export type EtapaResumen = {
+  clave: EtapaClave;
+  titulo: string;
+  numero: number;
+};
+
+export const ETAPAS_RESUMEN: readonly EtapaResumen[] = [
+  { clave: 'prevencion', titulo: 'Prevención', numero: 1 },
+  { clave: 'gestion', titulo: 'Gestión', numero: 2 },
+  { clave: 'seguimiento', titulo: 'Seguimiento', numero: 3 },
+];
+
+const CAMPOS_MARCA = ['updatedAt', 'updated_at', 'createdAt', 'created_at'] as const;
+
+/**
+ * Marca de fila más reciente de un listado de la API.
+ *
+ * Sólo se aceptan las marcas de fila que la API publica (`updatedAt`/
+ * `createdAt` y sus grafías en snake_case). Una fecha de evento (por ejemplo el
+ * `fecha_reporte` de una alerta) no es una marca de sincronización y por eso no
+ * se lee aquí. Si la colección no expone ninguna marca —o viene vacía— devuelve
+ * `null`: la vista escribe «sin dato» en vez de completar con la fecha de hoy.
+ */
+export function aMarcaMasReciente(bruto: unknown): string | null {
+  const elementos = normalizarColeccion<unknown>(bruto).elementos;
+  let masReciente: { marca: string; ms: number } | null = null;
+
+  for (const elemento of elementos) {
+    if (!esRegistro(elemento)) continue;
+
+    for (const campo of CAMPOS_MARCA) {
+      const marca = elemento[campo];
+      if (typeof marca !== 'string') continue;
+
+      const ms = Date.parse(marca.trim());
+      if (Number.isNaN(ms)) continue;
+
+      if (masReciente === null || ms > masReciente.ms) {
+        masReciente = { marca: marca.trim(), ms };
+      }
+    }
+  }
+
+  return masReciente?.marca ?? null;
+}
 
 /** `total` del sobre paginado (`{items,total,...}`), sin construir filas. */
 export function aTotal(bruto: unknown): number {

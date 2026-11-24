@@ -141,10 +141,10 @@ function etiquetaCirculo(fila: FilaRegion): string {
 }
 
 /** Gravedad declarada del caso: ordena de más a menos grave. */
-const ORDEN_RIESGO: Record<Riesgo, number> = { Alto: 0, Moderado: 1, Bajo: 2 };
+const ORDEN_RIESGO: Record<Riesgo, number> = { Alto: 0, Medio: 1, Bajo: 2 };
 
 /** Prioridad de atención: ordena de más a menos urgente (eje distinto del riesgo). */
-const ORDEN_PRIORIDAD: Record<PrioridadAtencion, number> = { Urgente: 0, Moderado: 1, Bajo: 2 };
+const ORDEN_PRIORIDAD: Record<PrioridadAtencion, number> = { Urgente: 0, Medio: 1, Bajo: 2 };
 
 /** Antigüedad: el inicio más antiguo primero; sin fecha declarada, al final. */
 function compararInicio(a: string | null, b: string | null): number {

@@ -55,6 +55,17 @@ export type LocalListQuery = {
   pageSize?: number;
 };
 
+/**
+ * Fila de `core.local_responsables`: la relación 1→N que sustituye a las
+ * columnas `contacto_*` del local. El contacto heredado se conserva abajo.
+ */
+export type ResponsableLocal = {
+  id: string;
+  nombre: string | null;
+  correo: string | null;
+  telefono: string | null;
+};
+
 export type LocalListItem = {
   id: string;
   codigo: string;
@@ -74,6 +85,13 @@ export type LocalListItem = {
   tieneProyector: boolean | null;
   tieneEquiposComputo: boolean | null;
   tieneAudioMicro: boolean | null;
+  /** Responsables relacionados (`core.local_responsables`); vacío si no hay. */
+  responsables: ResponsableLocal[];
+  /** Primer responsable aplanado; cae al contacto heredado si no hay. */
+  responsable: string | null;
+  correo: string | null;
+  telefono: string | null;
+  /** Contacto heredado: se conserva para no perder lo que la API ya exponía. */
   contactoNombre: string | null;
   contactoCelular: string | null;
   contactoEmail: string | null;
@@ -90,7 +108,15 @@ export type LocalListResult = {
   generatedAt: string;
 };
 
-function mapLocal(row: Record<string, unknown>): LocalListItem {
+function mapLocal(
+  row: Record<string, unknown>,
+  responsables: ResponsableLocal[] = [],
+): LocalListItem {
+  const principal = responsables[0];
+  const contactoNombre = row.contacto_nombre as string | null;
+  const contactoCelular = row.contacto_celular as string | null;
+  const contactoEmail = row.contacto_email as string | null;
+
   return {
     id: row.id as string,
     codigo: row.codigo as string,
@@ -106,9 +132,13 @@ function mapLocal(row: Record<string, unknown>): LocalListItem {
     tieneProyector: row.tiene_proyector as boolean | null,
     tieneEquiposComputo: row.tiene_equipos_computo as boolean | null,
     tieneAudioMicro: row.tiene_audio_micro as boolean | null,
-    contactoNombre: row.contacto_nombre as string | null,
-    contactoCelular: row.contacto_celular as string | null,
-    contactoEmail: row.contacto_email as string | null,
+    responsables,
+    responsable: principal?.nombre ?? contactoNombre,
+    correo: principal?.correo ?? contactoEmail,
+    telefono: principal?.telefono ?? contactoCelular,
+    contactoNombre,
+    contactoCelular,
+    contactoEmail,
     recomendacion: row.recomendacion as string | null,
     fotoUrl: row.foto_url as string | null,
     activo: row.activo as boolean,
@@ -168,8 +198,41 @@ export async function listLocales(
   const result = await client.query(sql, params);
   const total = (result.rows[0]?.total as number | undefined) ?? 0;
 
+  const ids = result.rows.map((row) => row.id as string);
+  const responsablesPorLocal = new Map<string, ResponsableLocal[]>();
+
+  if (ids.length > 0) {
+    const responsables = await client.query(
+      `
+        select local_id::text as local_id,
+               id::text as id,
+               nombre,
+               correo,
+               telefono
+          from core.local_responsables
+         where local_id = any($1::uuid[])
+         order by created_at asc
+      `,
+      [ids],
+    );
+
+    for (const fila of responsables.rows) {
+      const localId = fila.local_id as string;
+      const lista = responsablesPorLocal.get(localId) ?? [];
+      lista.push({
+        id: fila.id as string,
+        nombre: fila.nombre as string | null,
+        correo: fila.correo as string | null,
+        telefono: fila.telefono as string | null,
+      });
+      responsablesPorLocal.set(localId, lista);
+    }
+  }
+
   return {
-    items: result.rows.map(mapLocal),
+    items: result.rows.map((row) =>
+      mapLocal(row, responsablesPorLocal.get(row.id as string) ?? []),
+    ),
     total,
     page,
     pageSize,

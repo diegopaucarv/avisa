@@ -13,16 +13,42 @@
     <p class="form-error" role="alert">{{ mensaje }}</p>
   }
 
-  <div class="dims">
-    @for (dimension of dimensiones(); track dimension.clave) {
-      <section class="surface panel dim" [attr.aria-labelledby]="'titulo-' + dimension.id">
-        <div class="dim-head">
-          <h2 [id]="'titulo-' + dimension.id">{{ dimension.titulo }}</h2>
-          <span class="dim-num" aria-hidden="true">{{ dimension.numero }}</span>
-        </div>
-        <p class="dim-sub">{{ dimension.resumen }}</p>
+  <section class="surface panel sync" aria-labelledby="titulo-sync">
+    <h2 id="titulo-sync">Última sincronización</h2>
+    <ul class="sync-lista">
+      @for (fuente of sincronizacion(); track fuente.clave) {
+        <li class="sync-item">
+          <span class="sync-fuente">{{ fuente.etiqueta }}</span>
+          <strong
+            class="sync-marca"
+            [class.sync-sin-dato]="fuente.tono !== 'normal'"
+            [attr.role]="rolDe(fuente.tono)"
+            [attr.title]="
+              fuente.tono === 'ausente'
+                ? 'La API no expone marca de alta o actualización para esta fuente.'
+                : null
+            "
+            >{{ fuente.texto }}</strong
+          >
+        </li>
+      }
+    </ul>
+    <p class="sync-nota">
+      Marca de alta o actualización más reciente que expone cada fuente; «sin dato» cuando la API no
+      la publica.
+    </p>
+  </section>
 
-        @for (metrica of dimension.metricas; track metrica.clave) {
+  <div class="dims">
+    @for (etapa of etapas(); track etapa.clave) {
+      <section class="surface panel dim" [attr.aria-labelledby]="'titulo-' + etapa.id">
+        <div class="dim-head">
+          <h2 [id]="'titulo-' + etapa.id">{{ etapa.titulo }}</h2>
+          <span class="dim-num" aria-hidden="true">{{ etapa.numero }}</span>
+        </div>
+        <p class="dim-sub">{{ etapa.resumen }}</p>
+
+        @for (metrica of etapa.metricas; track metrica.clave) {
           <div class="metric" [class.metric-ausente]="metrica.tono === 'ausente'">
             <div class="metric-top">
               <b>{{ metrica.etiqueta }}</b>
@@ -43,46 +69,20 @@
           </div>
         }
 
-        <a class="link-button dim-link" [routerLink]="dimension.enlace.ruta">
-          {{ dimension.enlace.texto }}
-          <app-icono nombre="chevron-derecha" [tamano]="13" />
-        </a>
+        <div class="dim-acciones">
+          @for (accion of etapa.acciones; track accion.ruta) {
+            <a class="button-secondary" [routerLink]="accion.ruta">{{ accion.texto }}</a>
+          }
+        </div>
       </section>
     }
   </div>
-
-  <section class="surface panel franja-operacion" aria-labelledby="titulo-franja-operacion">
-    <div class="surface-heading">
-      <div>
-        <h2 id="titulo-franja-operacion">Franja de operación · carga del equipo</h2>
-      </div>
-    </div>
-
-    <p class="franja-dato">
-      Carga por especialista: <strong>No disponible</strong>. La API todavía no expone la asignación
-      de trabajo por especialista.
-    </p>
-    <p class="franja-dato">
-      Tiempo de primera respuesta: <strong>No disponible</strong>. La API todavía no registra el
-      tiempo de primera respuesta.
-    </p>
-
-    <div class="franja-enlaces">
-      <a class="link-button" routerLink="/bandeja">
-        Abrir bandeja
-        <app-icono nombre="chevron-derecha" [tamano]="13" />
-      </a>
-      <a class="link-button" routerLink="/mapa">
-        Abrir panorama territorial
-        <app-icono nombre="chevron-derecha" [tamano]="13" />
-      </a>
-    </div>
-  </section>
 
   <div class="overview-grid">
     <section class="surface panel" aria-labelledby="titulo-ultimas-alertas">
       <div class="surface-heading">
         <div>
+          <span class="section-eyebrow">Prevención</span>
           <h3 id="titulo-ultimas-alertas">Alertas tempranas por atender</h3>
         </div>
         <a class="link-button" routerLink="/alertas">
@@ -124,6 +124,7 @@
     <section class="surface panel" aria-labelledby="titulo-compromisos-vencer">
       <div class="surface-heading">
         <div>
+          <span class="section-eyebrow">Seguimiento</span>
           <h3 id="titulo-compromisos-vencer">Compromisos vencidos y por vencer</h3>
         </div>
         <a class="link-button" routerLink="/compromisos">

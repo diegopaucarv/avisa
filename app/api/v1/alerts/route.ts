@@ -22,6 +22,7 @@ const FILTERS = [
   "caso",
   "sinCaso",
   "prioridad",
+  "riesgo",
   "nivel",
   "estado",
   "distritoId",
@@ -32,7 +33,9 @@ const FILTERS = [
  * Alertas tempranas.
  *
  * `GET` devuelve el sobre paginado y acepta los filtros `q`, `caso`,
- * `sinCaso`, `prioridad`, `nivel`, `estado`, `distritoId` y `sort`.
+ * `sinCaso`, `prioridad`, `riesgo`, `nivel`, `estado`, `distritoId` y `sort`.
+ * `riesgo` filtra por el código de `core.cat_niveles_riesgo` (`Bajo` · `Medio` ·
+ * `Alto`); `sort=riesgo` ordena de alto a bajo.
  *
  * `anulados=true` lista la **papelera** (alertas anuladas). Sólo se sirve a un
  * rol con capacidad de anulación; si no la tiene, responde 403. La consulta se

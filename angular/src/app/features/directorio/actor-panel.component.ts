@@ -748,6 +748,8 @@ export class ActorPanelComponent {
     this.guardandoEdicion.set(true);
     this.errorEdicion.set(null);
 
+    // `activo` no viaja por la edición: la baja y la restauración tienen su
+    // propio flujo con motivo y auditoría (panel de anulación).
     const payload: Record<string, unknown> = {
       nombre: draft.nombre,
       abreviatura: draft.abreviatura || null,
@@ -758,7 +760,6 @@ export class ActorPanelComponent {
       tipo: draft.tipo || undefined,
       funcion: draft.funcion || undefined,
       posicionamiento: draft.posicionamiento || null,
-      activo: draft.activo,
     };
 
     if (dni) payload['dni'] = dni;

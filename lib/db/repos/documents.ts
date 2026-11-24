@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import type { PoolClient } from "pg";
 import { auditChange } from "../audit";
 import { nextSequentialCode } from "../codes";
@@ -36,6 +37,14 @@ const DOCUMENT_SELECT = `
   d.url_pdf as archivo,
   d.url_lista,
   d.url_foto,
+  d.mime,
+  d.tamano_bytes,
+  d.hash_sha256,
+  -- Sólo se comprueba la presencia del binario: el bytea no viaja en el sobre.
+  (d.contenido is not null) as tiene_archivo,
+  -- Versión actual = versiones históricas + la que vive en la fila.
+  ((select count(*) from core.documento_version v where v.documento_id = d.id) + 1)::int
+    as version_actual,
   d.origen_dato as origen,
   d.confidence::float8 as confianza,
   d.es_validado_humano as validado,
@@ -92,6 +101,16 @@ export type DocumentListItem = {
   archivo: string | null;
   urlLista: string | null;
   urlFoto: string | null;
+  /** MIME del binario almacenado, o `null` si el documento no tiene archivo. */
+  mime: string | null;
+  /** Tamaño del binario en bytes (`core.documentos.tamano_bytes`). */
+  tamanoBytes: number | null;
+  /** SHA-256 del binario almacenado (64 hex). */
+  hashSha256: string | null;
+  /** `true` si `core.documentos.contenido` tiene bytes; nunca devuelve el bytea. */
+  tieneArchivo: boolean;
+  /** Versión vigente (histórico + 1). */
+  versionActual: number;
   origen: string | null;
   confianza: number | null;
   validado: boolean | null;
@@ -185,6 +204,14 @@ function mapDocument(row: Record<string, unknown>): DocumentListItem {
     archivo: row.archivo as string | null,
     urlLista: row.url_lista as string | null,
     urlFoto: row.url_foto as string | null,
+    mime: (row.mime as string | null) ?? null,
+    tamanoBytes:
+      row.tamano_bytes === null || row.tamano_bytes === undefined
+        ? null
+        : Number(row.tamano_bytes),
+    hashSha256: (row.hash_sha256 as string | null) ?? null,
+    tieneArchivo: Boolean(row.tiene_archivo),
+    versionActual: Number(row.version_actual ?? 1),
     origen: row.origen as string | null,
     confianza: row.confianza as number | null,
     validado: row.validado as boolean | null,
@@ -689,12 +716,23 @@ async function resolveCasoId(
   return row.id;
 }
 
+/**
+ * Fila de escritura. Deliberadamente NO selecciona `contenido` (bytea):
+ * estas filas alimentan la auditoría y no deben arrastrar el binario. Cuando
+ * hace falta el binario previo (reemplazo con versionado) se pide aparte.
+ */
 async function fetchDocumentRow(
   client: PoolClient,
   ref: string,
 ): Promise<Record<string, any> | undefined> {
   const result = await client.query(
-    `select * from core.documentos
+    `select id, tipo_id, codigo, caso_id, titulo, fecha, resumen_ejecutivo,
+            estado, contenido_json, url_pdf, url_lista, url_foto, origen_dato,
+            confidence, es_validado_humano, nivel_clasificacion,
+            responsable_usuario_id, reunion_id, distrito_id, anulado_en,
+            motivo_anulacion, anulado_por, anulacion_id, mime, tamano_bytes,
+            hash_sha256, (contenido is not null) as tiene_archivo
+       from core.documentos
       where id::text = $1 or codigo = $1
       limit 1`,
     [ref],
@@ -861,13 +899,17 @@ export async function updateDocument(
       `update core.documentos
           set ${sets.join(", ")}
         where id = $${params.length}
-        returning *`,
+        returning id`,
       params,
     )
-  ).rows[0] as Record<string, any> | undefined;
+  ).rows[0] as { id: string } | undefined;
   if (!updated) {
     throw new ApiError(404, "El documento no existe.", "NOT_FOUND");
   }
+
+  // `returning *` arrastraría el bytea del archivo a la auditoría. Se relee la
+  // fila de metadatos (sin `contenido`) para dejar un rastro liviano.
+  const despues = await fetchDocumentRow(client, updated.id);
 
   await auditChange(client, {
     tabla: "core.documentos",
@@ -876,7 +918,7 @@ export async function updateDocument(
     usuarioId: ctx.usuarioId,
     rolCodigo: ctx.rolCodigo,
     antes: current,
-    despues: updated,
+    despues: despues ?? { id: updated.id },
   });
 
   const detail = await getDocumentById(client, current.id as string);
@@ -923,4 +965,901 @@ export async function restoreDocument(
   }
 
   await restaurarRegistro(client, "documentos", String(current.id));
+}
+
+/* ------------------------------------------------------------------ */
+/* Archivo binario, versiones y extracción                            */
+/* ------------------------------------------------------------------ */
+
+/** Mismo tope que los adjuntos genéricos (`core.adjunto`): 20 MB. */
+const MAX_ARCHIVO_BYTES = 20 * 1024 * 1024;
+
+/**
+ * Roles con `core.roles.puede_editar = true`, el mismo conjunto que
+ * `CapacidadesService` en la SPA. La RLS también lo impone; aquí se corta antes
+ * para devolver un 403 explícito en vez de un error genérico.
+ */
+const ROLES_ESCRITURA = new Set([
+  "administrador",
+  "sectorista",
+  "direccion_oaipcs",
+  "servicio_agente",
+  "analista_cualitativo",
+  "curador_politica",
+]);
+
+export function puedeEditarDocumentos(rolCodigo: string): boolean {
+  return ROLES_ESCRITURA.has(rolCodigo);
+}
+
+export type VersionDocumento = {
+  id: string;
+  documentoId: string;
+  numero: number;
+  titulo: string | null;
+  mime: string | null;
+  tamanoBytes: number | null;
+  hashSha256: string | null;
+  /** Ruta externa cuando la versión sólo referencia una URL. */
+  url: string | null;
+  nota: string | null;
+  creadoPor: string | null;
+  creadoPorNombre: string | null;
+  createdAt: string;
+  /** `true` si la versión conserva el bytea; nunca se devuelve el contenido. */
+  tieneArchivo: boolean;
+};
+
+export type ExtraccionTipo = "ocr" | "temas";
+
+export type ExtraccionEstado =
+  "pendiente" | "en_proceso" | "listo" | "error" | "no_disponible";
+
+export type ExtraccionDocumento = {
+  id: string;
+  tipo: ExtraccionTipo;
+  estado: ExtraccionEstado;
+  /** Texto reconocido, si lo hubo. `null` cuando no hay motor o falló. */
+  texto: string | null;
+  /** Cuerpo estructurado (temas, motivo de `no_disponible`, …). */
+  resultado: unknown;
+  error: string | null;
+  /** Motor o método usado (`frecuencia-local`, nombre del motor, …). */
+  modelo: string | null;
+  createdAt: string;
+};
+
+export type DocumentoArchivo = {
+  id: string;
+  codigo: string | null;
+  titulo: string | null;
+  mime: string | null;
+  /** Nombre propuesto para el `Content-Disposition`. */
+  nombre: string;
+  contenido: Buffer;
+  tamanoBytes: number;
+  hashSha256: string | null;
+};
+
+type FilaListaBlanca = { mime: string; extension: string };
+
+type FilaArchivoActual = {
+  id: string;
+  codigo: string | null;
+  titulo: string | null;
+  mime: string | null;
+  tamano_bytes: string | number | null;
+  hash_sha256: string | null;
+  url_pdf: string | null;
+  contenido: Buffer | null;
+};
+
+function extensionDe(nombre: string): string | null {
+  const punto = nombre.lastIndexOf(".");
+  if (punto < 1 || punto === nombre.length - 1) return null;
+  return nombre.slice(punto + 1).toLowerCase();
+}
+
+function normalizarMime(valor: string | null | undefined): string {
+  return (valor ?? "").split(";")[0]?.trim().toLowerCase() ?? "";
+}
+
+function etiquetaLista(lista: readonly FilaListaBlanca[]): string {
+  return lista.map((fila) => `${fila.extension} (${fila.mime})`).join(", ");
+}
+
+/**
+ * Lista blanca activa. Si está vacía se declara con 503 en vez de aceptar
+ * cualquier archivo: una tabla sin filas no equivale a «todo permitido».
+ */
+async function leerListaBlanca(client: PoolClient): Promise<FilaListaBlanca[]> {
+  const { rows } = await client.query<FilaListaBlanca>(
+    `select mime, extension
+       from core.documento_lista_blanca
+      where activo
+      order by extension, mime`,
+  );
+  if (rows.length === 0) {
+    throw new ApiError(
+      503,
+      "La lista blanca de tipos de archivo está vacía: no se aceptan subidas hasta configurarla.",
+      "LISTA_BLANCA_VACIA",
+    );
+  }
+  return rows;
+}
+
+/**
+ * Valida extensión + MIME contra la lista blanca. Si el navegador no declara
+ * un MIME útil (`application/octet-stream`), se deduce por extensión; si lo
+ * declara, debe coincidir con la extensión del archivo.
+ */
+function validarTipoArchivo(
+  lista: readonly FilaListaBlanca[],
+  nombre: string,
+  mimeDeclarado: string | null,
+): FilaListaBlanca {
+  const extension = extensionDe(nombre);
+  if (!extension) {
+    throw new ApiError(
+      422,
+      "El archivo no tiene extensión; no se puede contrastar con la lista blanca.",
+      "EXTENSION_REQUERIDA",
+    );
+  }
+
+  let mime = normalizarMime(mimeDeclarado);
+  if (mime === "application/octet-stream") mime = "";
+
+  if (!mime) {
+    const porExtension = lista.filter(
+      (fila) =>
+        fila.extension.toLowerCase() === extension ||
+        (extension === "jpeg" && fila.extension.toLowerCase() === "jpg"),
+    );
+    if (porExtension.length === 0) {
+      throw new ApiError(
+        422,
+        `La extensión «.${extension}» no está en la lista blanca de documentos. Tipos admitidos: ${etiquetaLista(lista)}.`,
+        "MIME_NO_PERMITIDO",
+      );
+    }
+    if (porExtension.length > 1) {
+      throw new ApiError(
+        422,
+        `La extensión «.${extension}» admite varios tipos; declare el MIME del archivo.`,
+        "MIME_AMBIGUO",
+      );
+    }
+    return porExtension[0];
+  }
+
+  const coincidencia = lista.find(
+    (fila) =>
+      fila.mime.toLowerCase() === mime &&
+      (fila.extension.toLowerCase() === extension ||
+        (fila.extension.toLowerCase() === "jpg" && extension === "jpeg")),
+  );
+  if (coincidencia) return coincidencia;
+
+  const existeMime = lista.some((fila) => fila.mime.toLowerCase() === mime);
+  const motivo = existeMime
+    ? `El tipo «${mime}» no corresponde a la extensión «.${extension}».`
+    : `El tipo «${mime}» no está en la lista blanca de documentos.`;
+  throw new ApiError(
+    422,
+    `${motivo} Tipos admitidos: ${etiquetaLista(lista)}.`,
+    "MIME_NO_PERMITIDO",
+  );
+}
+
+function decodificarArchivo(contenidoBase64: string): Buffer {
+  const limpio = contenidoBase64
+    .replace(/^data:[^;]+;base64,/, "")
+    .replace(/\s+/g, "");
+  if (!limpio || !/^[A-Za-z0-9+/]*={0,2}$/.test(limpio)) {
+    throw new ApiError(
+      400,
+      "El contenido del archivo no es base64 válido.",
+      "BASE64_INVALIDO",
+    );
+  }
+  const buffer = Buffer.from(limpio, "base64");
+  if (buffer.length === 0) {
+    throw new ApiError(400, "El archivo está vacío.", "ARCHIVO_VACIO");
+  }
+  if (buffer.length > MAX_ARCHIVO_BYTES) {
+    throw new ApiError(
+      413,
+      "El archivo supera el máximo de 20 MB.",
+      "ARCHIVO_DEMASIADO_GRANDE",
+    );
+  }
+  return buffer;
+}
+
+function nombreDesdeDocumento(
+  titulo: string | null,
+  codigo: string | null,
+  extension: string,
+): string {
+  const base = (titulo ?? codigo ?? "documento")
+    .replace(/[\\/:*?"<>|\r\n]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 120);
+  const limpio = base || "documento";
+  return limpio.toLowerCase().endsWith(`.${extension}`)
+    ? limpio
+    : `${limpio}.${extension}`;
+}
+
+async function extensionDesdeMime(
+  client: PoolClient,
+  mime: string | null,
+): Promise<string> {
+  if (!mime) return "bin";
+  const { rows } = await client.query<{ extension: string }>(
+    `select extension from core.documento_lista_blanca where mime = $1 limit 1`,
+    [mime],
+  );
+  return rows[0]?.extension ?? "bin";
+}
+
+async function fetchDocumentArchivoActual(
+  client: PoolClient,
+  ref: string,
+): Promise<FilaArchivoActual | undefined> {
+  const { rows } = await client.query<FilaArchivoActual>(
+    `select id, codigo, titulo, mime, tamano_bytes, hash_sha256, url_pdf, contenido
+       from core.documentos
+      where (id::text = $1 or codigo = $1) and anulado_en is null
+      limit 1`,
+    [ref],
+  );
+  return rows[0];
+}
+
+/**
+ * Sube o reemplaza el binario de un documento.
+ *
+ * - Valida extensión + MIME + tamaño contra `core.documento_lista_blanca`.
+ * - Calcula SHA-256 y lo guarda junto con `mime` y `tamano_bytes`.
+ * - Si ya había un archivo (o una ruta), lo conserva como versión con el
+ *   número siguiente en `core.documento_version` antes de sobrescribir.
+ * - La respuesta no incluye el binario: es el detalle del documento.
+ */
+export async function saveDocumentArchivo(
+  client: PoolClient,
+  ctx: DocumentWriteContext,
+  ref: string,
+  body: unknown,
+): Promise<DocumentDetail> {
+  if (!puedeEditarDocumentos(ctx.rolCodigo)) {
+    throw new ApiError(
+      403,
+      "Sin permiso para subir archivos de documentos.",
+      "SIN_PERMISO",
+    );
+  }
+
+  const input = asObject(body);
+  const nombre = requiredText(input, "nombre");
+  const contenidoBase64 = requiredText(input, "contenidoBase64");
+  const mimeRaw = input.mime;
+  const mimeDeclarado = typeof mimeRaw === "string" ? mimeRaw : null;
+  const notaRaw = input.nota;
+  const nota =
+    typeof notaRaw === "string" && notaRaw.trim() ? notaRaw.trim() : null;
+
+  const lista = await leerListaBlanca(client);
+  const tipo = validarTipoArchivo(lista, nombre, mimeDeclarado);
+  const contenido = decodificarArchivo(contenidoBase64);
+  const hash = createHash("sha256").update(contenido).digest("hex");
+
+  const actual = await fetchDocumentArchivoActual(client, ref);
+  if (!actual) {
+    throw new ApiError(404, "El documento no existe.", "NOT_FOUND");
+  }
+
+  // Conservar el archivo anterior como versión antes de reemplazarlo.
+  const teniaArchivo = Boolean(actual.contenido && actual.contenido.length > 0);
+  if (teniaArchivo || actual.url_pdf) {
+    const { rows } = await client.query<{ siguiente: number | string }>(
+      `select coalesce(max(numero), 0) + 1 as siguiente
+         from core.documento_version
+        where documento_id = $1`,
+      [actual.id],
+    );
+    const numero = Number(rows[0]?.siguiente ?? 1);
+    await client.query(
+      `insert into core.documento_version
+         (documento_id, numero, titulo, mime, tamano_bytes, contenido, url,
+          hash_sha256, nota, creado_por)
+       values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10::uuid)`,
+      [
+        actual.id,
+        numero,
+        actual.titulo,
+        actual.mime,
+        actual.tamano_bytes,
+        teniaArchivo ? actual.contenido : null,
+        teniaArchivo ? null : actual.url_pdf,
+        actual.hash_sha256,
+        nota ?? "Versión anterior conservada al reemplazar el archivo.",
+        ctx.usuarioId,
+      ],
+    );
+  }
+
+  await client.query(
+    `update core.documentos
+        set contenido = $2,
+            mime = $3,
+            tamano_bytes = $4,
+            hash_sha256 = $5
+      where id = $1`,
+    [actual.id, contenido, tipo.mime, contenido.length, hash],
+  );
+
+  await auditChange(client, {
+    tabla: "core.documentos",
+    registroId: actual.id,
+    accion: "UPDATE",
+    usuarioId: ctx.usuarioId,
+    rolCodigo: ctx.rolCodigo,
+    antes: {
+      mime: actual.mime,
+      tamanoBytes: actual.tamano_bytes,
+      hashSha256: actual.hash_sha256,
+      tieneArchivo: teniaArchivo,
+    },
+    despues: {
+      mime: tipo.mime,
+      tamanoBytes: contenido.length,
+      hashSha256: hash,
+      tieneArchivo: true,
+      nombreOriginal: nombre,
+      extension: tipo.extension,
+    },
+  });
+
+  const detail = await getDocumentById(client, actual.id);
+  if (!detail)
+    throw new Error("No se pudo leer el documento tras subir el archivo.");
+  return detail;
+}
+
+/**
+ * Binario del documento vigente. Es uno de los dos únicos puntos que leen
+ * `core.documentos.contenido` (el otro es la descarga de una versión).
+ */
+export async function getDocumentArchivo(
+  client: PoolClient,
+  ref: string,
+): Promise<DocumentoArchivo> {
+  const { rows } = await client.query<FilaArchivoActual>(
+    `select id, codigo, titulo, mime, tamano_bytes, hash_sha256, url_pdf, contenido
+       from core.documentos
+      where (id::text = $1 or codigo = $1) and anulado_en is null
+      limit 1`,
+    [ref],
+  );
+  const fila = rows[0];
+  if (!fila) {
+    throw new ApiError(404, "El documento no existe.", "NOT_FOUND");
+  }
+  if (!fila.contenido || fila.contenido.length === 0) {
+    throw new ApiError(
+      404,
+      "El documento no tiene archivo almacenado: sólo referencia una ruta externa o no tiene adjunto.",
+      "SIN_ARCHIVO",
+    );
+  }
+
+  const extension = await extensionDesdeMime(client, fila.mime);
+  return {
+    id: fila.id,
+    codigo: fila.codigo,
+    titulo: fila.titulo,
+    mime: fila.mime,
+    nombre: nombreDesdeDocumento(fila.titulo, fila.codigo, extension),
+    contenido: fila.contenido,
+    tamanoBytes: fila.contenido.length,
+    hashSha256: fila.hash_sha256,
+  };
+}
+
+function mapearVersion(fila: Record<string, any>): VersionDocumento {
+  return {
+    id: fila.id as string,
+    documentoId: fila.documento_id as string,
+    numero: Number(fila.numero),
+    titulo: (fila.titulo as string | null) ?? null,
+    mime: (fila.mime as string | null) ?? null,
+    tamanoBytes:
+      fila.tamano_bytes === null || fila.tamano_bytes === undefined
+        ? null
+        : Number(fila.tamano_bytes),
+    hashSha256: (fila.hash_sha256 as string | null) ?? null,
+    url: (fila.url as string | null) ?? null,
+    nota: (fila.nota as string | null) ?? null,
+    creadoPor: (fila.creado_por as string | null) ?? null,
+    creadoPorNombre: (fila.creado_por_nombre as string | null) ?? null,
+    createdAt: isoOrNull(fila.created_at) ?? "",
+    tieneArchivo: Boolean(fila.tiene_archivo),
+  };
+}
+
+/** Historial de versiones (metadatos; nunca el bytea). */
+export async function listDocumentVersions(
+  client: PoolClient,
+  ref: string,
+): Promise<VersionDocumento[]> {
+  const { rows } = await client.query(
+    `select v.id, v.documento_id, v.numero, v.titulo, v.mime, v.tamano_bytes,
+            v.hash_sha256, v.url, v.nota, v.creado_por,
+            u.nombre as creado_por_nombre, v.created_at,
+            (v.contenido is not null) as tiene_archivo
+       from core.documento_version v
+       join core.documentos d on d.id = v.documento_id
+       left join core.usuarios u on u.id = v.creado_por
+      where d.id::text = $1 or d.codigo = $1
+      order by v.numero desc`,
+    [ref],
+  );
+  return rows.map(mapearVersion);
+}
+
+export type VersionArchivo = {
+  numero: number;
+  mime: string | null;
+  nombre: string;
+  contenido: Buffer;
+  tamanoBytes: number;
+  hashSha256: string | null;
+};
+
+/** Binario de una versión concreta. */
+export async function getDocumentVersionArchivo(
+  client: PoolClient,
+  ref: string,
+  numero: number,
+): Promise<VersionArchivo> {
+  if (!Number.isInteger(numero) || numero < 1) {
+    throw new ApiError(
+      422,
+      "El número de versión no es válido.",
+      "VERSION_INVALIDA",
+    );
+  }
+
+  const { rows } = await client.query<{
+    numero: number;
+    titulo: string | null;
+    codigo: string | null;
+    mime: string | null;
+    hash_sha256: string | null;
+    contenido: Buffer | null;
+    url: string | null;
+  }>(
+    `select v.numero, v.titulo, d.codigo, v.mime, v.hash_sha256, v.contenido, v.url
+       from core.documento_version v
+       join core.documentos d on d.id = v.documento_id
+      where (d.id::text = $1 or d.codigo = $1) and v.numero = $2`,
+    [ref, numero],
+  );
+  const fila = rows[0];
+  if (!fila) {
+    throw new ApiError(404, "La versión no existe.", "NOT_FOUND");
+  }
+  if (!fila.contenido || fila.contenido.length === 0) {
+    throw new ApiError(
+      409,
+      `La versión ${numero} sólo referencia una ruta externa (${fila.url ?? "sin URL"}); no conserva un archivo.`,
+      "SIN_ARCHIVO",
+    );
+  }
+
+  const extension = await extensionDesdeMime(client, fila.mime);
+  const base = nombreDesdeDocumento(fila.titulo, fila.codigo, extension);
+  const nombre = base.toLowerCase().endsWith(`.${extension}`)
+    ? `${base.slice(0, -extension.length - 1)}-v${numero}.${extension}`
+    : `${base}-v${numero}.${extension}`;
+
+  return {
+    numero: Number(fila.numero),
+    mime: fila.mime,
+    nombre,
+    contenido: fila.contenido,
+    tamanoBytes: fila.contenido.length,
+    hashSha256: fila.hash_sha256,
+  };
+}
+
+function mapearExtraccion(fila: Record<string, any>): ExtraccionDocumento {
+  return {
+    id: fila.id as string,
+    tipo: fila.tipo as ExtraccionTipo,
+    estado: fila.estado as ExtraccionEstado,
+    texto: (fila.texto as string | null) ?? null,
+    resultado: fila.resultado ?? null,
+    error: (fila.error as string | null) ?? null,
+    modelo: (fila.modelo as string | null) ?? null,
+    createdAt: isoOrNull(fila.created_at) ?? "",
+  };
+}
+
+/** Última extracción de cada tipo (`ocr` y `temas`). */
+export async function listDocumentExtracciones(
+  client: PoolClient,
+  ref: string,
+): Promise<ExtraccionDocumento[]> {
+  const { rows } = await client.query(
+    `select distinct on (e.tipo)
+            e.id, e.tipo, e.estado, e.texto,
+            e.resultado_json as resultado, e.error, e.modelo, e.created_at
+       from core.documento_extraccion e
+       join core.documentos d on d.id = e.documento_id
+      where d.id::text = $1 or d.codigo = $1
+      order by e.tipo, e.created_at desc`,
+    [ref],
+  );
+  return rows.map(mapearExtraccion);
+}
+
+const PALABRAS_VACIAS = new Set([
+  "para",
+  "porque",
+  "como",
+  "cuando",
+  "donde",
+  "sobre",
+  "entre",
+  "desde",
+  "hasta",
+  "tambien",
+  "también",
+  "segun",
+  "según",
+  "este",
+  "esta",
+  "estos",
+  "estas",
+  "aquell",
+  "aquel",
+  "sera",
+  "será",
+  "fueron",
+  "sido",
+  "tiene",
+  "tienen",
+  "desde",
+  "hacia",
+  "mediante",
+  "mismo",
+  "misma",
+  "dicho",
+  "dicha",
+  "solo",
+  "sólo",
+  "todo",
+  "toda",
+  "todos",
+  "todas",
+  "otro",
+  "otra",
+  "otros",
+  "otras",
+  "ante",
+  "bajo",
+  "contra",
+  "pero",
+  "pues",
+  "cada",
+  "más",
+  "mas",
+  "menos",
+  "muy",
+  "sin",
+  "con",
+  "por",
+  "que",
+  "los",
+  "las",
+  "del",
+  "una",
+  "unos",
+  "unas",
+  "sus",
+  "les",
+  "nos",
+  "han",
+  "haber",
+  "hace",
+  "hacer",
+  "partir",
+  "traves",
+  "través",
+  "caso",
+  "casos",
+  "segun",
+  "acuerdo",
+  "mesa",
+]);
+
+/**
+ * Temas clave por frecuencia local de términos. No es un modelo entrenado: es
+ * un conteo declarado como `frecuencia-local`, para no atribuirle más de lo que
+ * hace.
+ */
+function calcularTemas(
+  texto: string,
+): readonly { termino: string; frecuencia: number }[] {
+  const palabras = texto.toLowerCase().match(/[a-záéíóúüñ0-9]{4,}/g) ?? [];
+  const conteo = new Map<string, number>();
+  for (const palabra of palabras) {
+    if (PALABRAS_VACIAS.has(palabra)) continue;
+    conteo.set(palabra, (conteo.get(palabra) ?? 0) + 1);
+  }
+  return [...conteo.entries()]
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+    .slice(0, 12)
+    .map(([termino, frecuencia]) => ({ termino, frecuencia }));
+}
+
+type NuevaExtraccion = {
+  documentoId: string;
+  usuarioId: string;
+  tipo: ExtraccionTipo;
+  estado: ExtraccionEstado;
+  texto: string | null;
+  resultado: unknown;
+  error: string | null;
+  modelo: string | null;
+};
+
+async function insertarExtraccion(
+  client: PoolClient,
+  fila: NuevaExtraccion,
+): Promise<ExtraccionDocumento> {
+  const { rows } = await client.query(
+    `insert into core.documento_extraccion
+       (documento_id, tipo, estado, resultado_json, texto, error, modelo, created_by)
+     values ($1, $2, $3, $4::jsonb, $5, $6, $7, $8::uuid)
+     returning id, tipo, estado, texto, resultado_json as resultado, error,
+               modelo, created_at`,
+    [
+      fila.documentoId,
+      fila.tipo,
+      fila.estado,
+      fila.resultado === null || fila.resultado === undefined
+        ? null
+        : JSON.stringify(fila.resultado),
+      fila.texto,
+      fila.error,
+      fila.modelo,
+      fila.usuarioId,
+    ],
+  );
+  return mapearExtraccion(rows[0]);
+}
+
+/**
+ * Contrato mínimo del motor de OCR externo, si algún día se configura en
+ * `AVISA_OCR_ENDPOINT`: `POST { mime, contenidoBase64 }` → `{ texto, modelo? }`.
+ * Sin endpoint no se llama a nada y la extracción se declara `no_disponible`.
+ */
+async function llamarMotorOcr(
+  endpoint: string,
+  mime: string | null,
+  contenido: Buffer,
+): Promise<{ texto: string; modelo: string | null }> {
+  const control = new AbortController();
+  const temporizador = setTimeout(() => control.abort(), 30_000);
+  try {
+    const respuesta = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify({
+        mime,
+        contenidoBase64: contenido.toString("base64"),
+      }),
+      signal: control.signal,
+    });
+    if (!respuesta.ok) {
+      throw new Error(`El motor de OCR respondió ${respuesta.status}.`);
+    }
+    const cuerpo = (await respuesta.json()) as {
+      texto?: unknown;
+      modelo?: unknown;
+    };
+    const texto = typeof cuerpo.texto === "string" ? cuerpo.texto.trim() : "";
+    if (!texto) throw new Error("El motor de OCR no devolvió texto.");
+    return {
+      texto,
+      modelo: typeof cuerpo.modelo === "string" ? cuerpo.modelo : "externo",
+    };
+  } finally {
+    clearTimeout(temporizador);
+  }
+}
+
+/**
+ * Ejecuta una extracción (`ocr` o `temas`) sobre un documento.
+ *
+ * - Sin motor de OCR configurado, `ocr` queda en `no_disponible` con un mensaje
+ *   honesto: no se inventa texto.
+ * - `temas` usa el texto OCR ya extraído o, en su defecto, el resumen ejecutivo,
+ *   y declara `origen` y `modelo` (`frecuencia-local`).
+ */
+export async function runDocumentExtraccion(
+  client: PoolClient,
+  ctx: DocumentWriteContext,
+  ref: string,
+  tipoRaw: string,
+): Promise<ExtraccionDocumento> {
+  if (!puedeEditarDocumentos(ctx.rolCodigo)) {
+    throw new ApiError(
+      403,
+      "Sin permiso para ejecutar extracciones sobre documentos.",
+      "SIN_PERMISO",
+    );
+  }
+  const tipo: ExtraccionTipo | null =
+    tipoRaw === "ocr" || tipoRaw === "temas" ? tipoRaw : null;
+  if (!tipo) {
+    throw new ApiError(
+      422,
+      "El tipo de extracción debe ser «ocr» o «temas».",
+      "TIPO_INVALIDO",
+    );
+  }
+
+  const baseRes = await client.query<{
+    id: string;
+    mime: string | null;
+    resumen: string | null;
+  }>(
+    `select id, mime, resumen_ejecutivo as resumen
+       from core.documentos
+      where (id::text = $1 or codigo = $1) and anulado_en is null
+      limit 1`,
+    [ref],
+  );
+  const base = baseRes.rows[0];
+  if (!base) {
+    throw new ApiError(404, "El documento no existe.", "NOT_FOUND");
+  }
+
+  if (tipo === "ocr") {
+    const endpoint = (process.env.AVISA_OCR_ENDPOINT ?? "").trim();
+    if (!endpoint) {
+      return insertarExtraccion(client, {
+        documentoId: base.id,
+        usuarioId: ctx.usuarioId,
+        tipo,
+        estado: "no_disponible",
+        texto: null,
+        resultado: {
+          motivo: "no_disponible",
+          detalle:
+            "No hay motor de OCR configurado (AVISA_OCR_ENDPOINT). No se extrajo ni se inventó texto.",
+        },
+        error: "No hay motor de OCR configurado.",
+        modelo: null,
+      });
+    }
+
+    // Sólo con motor configurado se lee el bytea (acción, nunca listado).
+    const bin = await client.query<{ contenido: Buffer | null }>(
+      `select contenido from core.documentos where id = $1`,
+      [base.id],
+    );
+    const contenido = bin.rows[0]?.contenido ?? null;
+    if (!contenido || contenido.length === 0) {
+      return insertarExtraccion(client, {
+        documentoId: base.id,
+        usuarioId: ctx.usuarioId,
+        tipo,
+        estado: "error",
+        texto: null,
+        resultado: { motivo: "sin_archivo" },
+        error:
+          "El documento no tiene archivo almacenado; no hay nada que pasar por OCR.",
+        modelo: null,
+      });
+    }
+
+    try {
+      const { texto, modelo } = await llamarMotorOcr(
+        endpoint,
+        base.mime,
+        contenido,
+      );
+      return insertarExtraccion(client, {
+        documentoId: base.id,
+        usuarioId: ctx.usuarioId,
+        tipo,
+        estado: "listo",
+        texto: texto.slice(0, 20_000),
+        resultado: { origen: "ocr_externo", modelo },
+        error: null,
+        modelo,
+      });
+    } catch (fallo) {
+      return insertarExtraccion(client, {
+        documentoId: base.id,
+        usuarioId: ctx.usuarioId,
+        tipo,
+        estado: "error",
+        texto: null,
+        resultado: { motivo: "error_motor" },
+        error: `El motor de OCR falló: ${
+          fallo instanceof Error ? fallo.message : "error desconocido"
+        }`.slice(0, 500),
+        modelo: null,
+      });
+    }
+  }
+
+  // `temas`: fuente = texto OCR ya extraído o, si no, resumen ejecutivo.
+  const ocr = await client.query<{ texto: string }>(
+    `select texto
+       from core.documento_extraccion
+      where documento_id = $1 and tipo = 'ocr' and estado = 'listo'
+        and texto is not null
+      order by created_at desc
+      limit 1`,
+    [base.id],
+  );
+  const textoOcr = ocr.rows[0]?.texto?.trim() || null;
+  const resumen = base.resumen?.trim() || null;
+  const origen = textoOcr ? "texto_ocr" : resumen ? "resumen_ejecutivo" : null;
+  const fuente = textoOcr ?? resumen;
+
+  if (!fuente || !origen) {
+    return insertarExtraccion(client, {
+      documentoId: base.id,
+      usuarioId: ctx.usuarioId,
+      tipo,
+      estado: "no_disponible",
+      texto: null,
+      resultado: {
+        motivo: "sin_fuente",
+        detalle:
+          "No hay texto OCR ni resumen ejecutivo para calcular temas; no se inventan términos.",
+      },
+      error: "No hay texto extraído ni resumen ejecutivo.",
+      modelo: null,
+    });
+  }
+
+  const terminos = calcularTemas(fuente);
+  if (terminos.length === 0) {
+    return insertarExtraccion(client, {
+      documentoId: base.id,
+      usuarioId: ctx.usuarioId,
+      tipo,
+      estado: "no_disponible",
+      texto: fuente.slice(0, 2_000),
+      resultado: { origen, motivo: "sin_terminos" },
+      error: "No se encontraron términos suficientes para declarar temas.",
+      modelo: "frecuencia-local",
+    });
+  }
+
+  return insertarExtraccion(client, {
+    documentoId: base.id,
+    usuarioId: ctx.usuarioId,
+    tipo,
+    estado: "listo",
+    texto: fuente.slice(0, 4_000),
+    resultado: { origen, modelo: "frecuencia-local", terminos },
+    error: null,
+    modelo: "frecuencia-local",
+  });
 }
