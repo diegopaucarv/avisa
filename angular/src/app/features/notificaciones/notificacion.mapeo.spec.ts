@@ -149,7 +149,7 @@ describe('agruparPorDia', () => {
     ]);
 
     expect(grupos.map((grupo) => grupo.clave)).toEqual(['2026-11-22', '2026-11-21']);
-    expect(grupos[0]?.etiqueta).toBe('22/11/2026');
+    expect(grupos[0]?.etiqueta).toBe('22NOV2026');
     expect(grupos[0]?.notificaciones.map((fila) => fila.id)).toEqual(['1', '2']);
     expect(grupos[1]?.notificaciones.map((fila) => fila.id)).toEqual(['3']);
   });
@@ -222,9 +222,9 @@ describe('filtro por estado', () => {
 });
 
 describe('formatearFecha', () => {
-  it('presenta las fechas del backend como DD/MM/YYYY', () => {
-    expect(formatearFecha('2026-01-05')).toBe('05/01/2026');
-    expect(formatearFecha('2026-01-05T00:00:00.000Z')).toBe('05/01/2026');
+  it('presenta las fechas del backend en formato compacto', () => {
+    expect(formatearFecha('2026-01-05')).toBe('05ENE2026');
+    expect(formatearFecha('2026-01-05T00:00:00.000Z')).toBe('05ENE2026');
   });
 
   it('deja el guion cuando no hay fecha', () => {

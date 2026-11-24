@@ -160,13 +160,13 @@ describe('situacionDe', () => {
 
 describe('formatearFecha', () => {
   it('presenta las fechas del backend en formato corto', () => {
-    expect(formatearFecha('2026-11-23')).toBe('23 nov 2026');
-    expect(formatearFecha('2026-11-23T00:00:00.000Z')).toBe('23 nov 2026');
+    expect(formatearFecha('2026-11-23')).toBe('23NOV2026');
+    expect(formatearFecha('2026-11-23T00:00:00.000Z')).toBe('23NOV2026');
   });
 
   it('normaliza el formato legado DD/MM/YYYY', () => {
-    expect(formatearFecha('23/11/2026')).toBe('23 nov 2026');
-    expect(formatearFecha('3/1/2026')).toBe('03 ene 2026');
+    expect(formatearFecha('23/11/2026')).toBe('23NOV2026');
+    expect(formatearFecha('3/1/2026')).toBe('03ENE2026');
   });
 
   it('devuelve un guion cuando no hay fecha', () => {
