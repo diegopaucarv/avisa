@@ -250,8 +250,7 @@ function aConteos(bruto: unknown): ConteosCasos {
   ],
   templateUrl: './casos.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  styles:
-    `
+  styles: `
     .aviso-ok {
       color: #2f6f52;
       font-size: 13.5px;
@@ -271,11 +270,7 @@ function aConteos(bruto: unknown): ConteosCasos {
     /*
      * Responsive de los filtros. Estos estilos viven aquí, y no en la hoja
      * global, porque los del componente ganan por especificidad: una regla
-     * movil en global.css no puede anular `.search -
-    field -
-    angosta` ni
-     * `.estado -
-    final`.
+     * movil en global.css no puede anular las clases del componente.
      * - Hasta 760 px: busqueda a todo el ancho y filtros en dos columnas.
      * - Hasta 520 px: una sola columna, cada control a todo el ancho.
      */

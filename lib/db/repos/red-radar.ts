@@ -20,11 +20,7 @@ import {
  * en `core.alerta_triaje`; los demás los persiste una acción de triaje.
  */
 export type EstadoTriaje =
-  | "pendiente"
-  | "en_triage"
-  | "confirmada"
-  | "descartada"
-  | "duplicada";
+  "pendiente" | "en_triage" | "confirmada" | "descartada" | "duplicada";
 
 export const ESTADOS_TRIAJE: readonly EstadoTriaje[] = [
   "pendiente",
@@ -134,6 +130,8 @@ export type TriajeAlerta = {
 export type DetalleRedRadar = {
   alerta: AlertItem;
   demandas: AlertDemanda[];
+  /** Ubigeo INEI del distrito de la alerta; la ficha de alertas no lo trae. */
+  ubigeo: string | null;
   /** `null` mientras la alerta no tenga fila de triaje. */
   triaje: TriajeAlerta | null;
   generadoEn: string;
@@ -185,7 +183,8 @@ function filtrosSql(filtros: ColaFiltros, conEstado: boolean) {
   }
 
   const regionId = idPositivo(filtros.regionId);
-  if (regionId !== null) where.push(`coalesce(rr.id, rd.id) = ${bind(regionId)}`);
+  if (regionId !== null)
+    where.push(`coalesce(rr.id, rd.id) = ${bind(regionId)}`);
 
   const distritoId = idPositivo(filtros.distritoId);
   if (distritoId !== null) where.push(`a.distrito_id = ${bind(distritoId)}`);
@@ -306,7 +305,10 @@ export async function listarCola(
   filtros: ColaFiltros,
 ): Promise<ColaResultado> {
   const page = Math.max(1, Math.trunc(filtros.page ?? 1));
-  const pageSize = Math.min(100, Math.max(1, Math.trunc(filtros.pageSize ?? 25)));
+  const pageSize = Math.min(
+    100,
+    Math.max(1, Math.trunc(filtros.pageSize ?? 25)),
+  );
 
   const { where, params, bind } = filtrosSql(filtros, true);
 
@@ -404,9 +406,21 @@ export async function obtenerDetalle(
 
   const triaje = await leerTriaje(client, detalle.alert.id);
 
+  // `getAlertById` no selecciona el ubigeo; se resuelve aparte para que el
+  // bloque «Ubicación» del panel lo pueda mostrar sin inventarlo.
+  let ubigeo: string | null = null;
+  if (detalle.alert.distritoId !== null) {
+    const ubigeoResult = await client.query(
+      `select ubigeo from core.distritos where id = $1 limit 1`,
+      [detalle.alert.distritoId],
+    );
+    ubigeo = ubigeoResult.rows[0]?.ubigeo ?? null;
+  }
+
   return {
     alerta: detalle.alert,
     demandas: detalle.demandas,
+    ubigeo,
     triaje,
     generadoEn: new Date().toISOString(),
   };
@@ -591,12 +605,12 @@ export async function registrarTriaje(
   });
 
   const duplicateCode = duplicadaDe
-    ? (
+    ? ((
         await client.query(
           `select codigo_alerta from core.alertas_tempranas where id = $1`,
           [duplicadaDe],
         )
-      ).rows[0]?.codigo_alerta ?? null
+      ).rows[0]?.codigo_alerta ?? null)
     : null;
 
   return {

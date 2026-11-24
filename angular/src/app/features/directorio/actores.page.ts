@@ -516,17 +516,16 @@ export class ActoresPage {
   readonly sinDato = SIN_DATO;
 
   /**
-   * Naturaleza por defecto de la ruta (por ejemplo `/directorio/personas`). El
-   * `naturaleza` de la URL la adelanta, para que los enlaces profundos sigan
-   * resolviendo su listado tras retirar las pestañas.
+   * Naturaleza del listado. Las pestañas se retiraron: cada listado tiene su
+   * entrada en la barra lateral y `organizaciones.page` cubre las
+   * organizaciones, así que esta pantalla es siempre el directorio de personas.
    */
-  readonly naturalezaFija = input('');
+  readonly naturalezaFija = input('persona');
 
   private readonly parametros = toSignal(
     this.ruta.queryParamMap.pipe(
       map((params) => ({
         q: params.get('q') ?? '',
-        naturaleza: params.get('naturaleza') ?? '',
         tipo: params.get('tipo') ?? '',
         region: params.get('region') ?? '',
         pagina: Math.max(1, Number(params.get('pagina') ?? '1') || 1),
@@ -539,11 +538,8 @@ export class ActoresPage {
     { initialValue: FILTROS_INICIALES },
   );
 
-  /** `persona` u `organizacion`: la URL manda; la ruta sólo aporta el defecto. */
-  private readonly naturalezaActiva = computed(() => {
-    const deUrl = this.parametros().naturaleza.trim();
-    return deUrl || this.naturalezaFija().trim() || 'persona';
-  });
+  /** `persona` siempre: la naturaleza ya no se elige ni viaja por la URL. */
+  private readonly naturalezaActiva = computed(() => this.naturalezaFija().trim() || 'persona');
 
   readonly filtros = computed<FiltrosActores>(() => ({
     ...this.parametros(),
@@ -888,7 +884,6 @@ export class ActoresPage {
       relativeTo: this.ruta,
       queryParams: {
         q: siguiente.q || null,
-        naturaleza: siguiente.naturaleza || null,
         tipo: siguiente.tipo || null,
         region: siguiente.region || null,
         pagina: siguiente.pagina > 1 ? siguiente.pagina : null,
