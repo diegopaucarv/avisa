@@ -177,10 +177,15 @@
         class="header-icon-button"
         routerLink="/notificaciones"
         routerLinkActive="icon-active"
-        aria-label="Notificaciones"
-        title="Notificaciones"
+        [attr.aria-label]="
+          avisosSinLeer() ? 'Notificaciones, ' + avisosSinLeer() + ' sin leer' : 'Notificaciones'
+        "
+        [title]="avisosSinLeer() ? avisosSinLeer() + ' sin leer' : 'Notificaciones'"
       >
         <app-icono nombre="campana" [tamano]="18" />
+        @if (avisosSinLeer()) {
+          <span class="header-badge" aria-hidden="true">{{ avisosSinLeer() }}</span>
+        }
       </a>
 
       <div class="header-separator"></div>

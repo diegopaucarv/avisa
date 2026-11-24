@@ -32,13 +32,18 @@ import {
   type Foto,
 } from '../../dominio/medios';
 import { BarraSeleccionComponent } from '../../shared/ui/barra-seleccion.component';
-
-import { SeleccionTabla } from '../../shared/ui/seleccion-tabla';
 import { GaleriaFotosComponent } from '../../shared/ui/galeria-fotos.component';
 import { IconoComponent } from '../../shared/ui/icono.component';
 import { OrdenTabla } from '../../shared/ui/orden-tabla';
 import { PaginacionComponent } from '../../shared/ui/paginacion.component';
-import { ThOrdenDirective } from '../../shared/ui/th-orden.directive';
+import { SeleccionTabla } from '../../shared/ui/seleccion-tabla';
+import {
+  CeldaTablaDirectiva,
+  TablaComponent,
+  type ClicFila,
+  type ColumnaTabla,
+  type OrdenColumna,
+} from '../../shared/ui/tabla.component';
 import {
   aLocalDirectorio,
   contactoDeLocal,
@@ -83,7 +88,8 @@ const FILTROS_INICIALES: FiltrosLocales = {
     PaginacionComponent,
     BarraSeleccionComponent,
     GaleriaFotosComponent,
-    ThOrdenDirective,
+    TablaComponent,
+    CeldaTablaDirectiva,
   ],
   templateUrl: './locales.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -112,16 +118,6 @@ const FILTROS_INICIALES: FiltrosLocales = {
     }
 
     /* El nombre ocupa media tabla: dos líneas y sin recorte del texto. */
-    .tabla-locales {
-      table-layout: fixed;
-    }
-
-    .tabla-locales .col-nombre {
-      width: 50%;
-      white-space: normal;
-      overflow-wrap: anywhere;
-    }
-
     .local-nombre {
       display: flex;
       flex-direction: column;
@@ -137,7 +133,7 @@ const FILTROS_INICIALES: FiltrosLocales = {
     }
 
     .local-codigo {
-      color: #8a98a5;
+      color: var(--muted);
       font-size: 11px;
       font-weight: 700;
       letter-spacing: 0.05em;
@@ -150,10 +146,6 @@ const FILTROS_INICIALES: FiltrosLocales = {
       line-height: 1.35;
       white-space: normal;
       overflow-wrap: anywhere;
-    }
-
-    .col-foto {
-      width: 52px;
     }
 
     .tabla-foto {
@@ -316,13 +308,14 @@ const FILTROS_INICIALES: FiltrosLocales = {
     }
 
     .celda-contacto {
+      display: block;
       white-space: normal;
       overflow-wrap: anywhere;
       line-height: 1.4;
     }
 
     .sin-dato {
-      color: #a0aab3;
+      color: var(--muted);
       font-style: italic;
     }
 
@@ -564,8 +557,55 @@ export class LocalesPage {
   /** Selección de la tabla (página visible) para exportar. */
   readonly seleccion = new SeleccionTabla();
 
+  /** Ids marcados, en una referencia estable para `app-tabla`. */
+  readonly idsSeleccionados = computed(() => this.seleccion.lista());
+
   /** Orden local de la página visible. */
   readonly orden = new OrdenTabla<LocalDirectorio>();
+
+  /**
+   * Columnas del listado. El nombre va primero porque `app-tabla` reserva
+   * 200 px a la celda que nombra la fila; con la foto delante, la miniatura de
+   * 32 px estiraría toda la columna.
+   */
+  readonly columnas: readonly ColumnaTabla[] = [
+    { clave: 'nombre', titulo: 'Nombre', ancho: '50%', ordenable: true },
+    { clave: 'foto', titulo: 'Foto', ancho: '52px' },
+    { clave: 'contacto', titulo: 'Contacto', ordenable: true },
+    {
+      clave: 'proyector',
+      titulo: 'Proyector',
+      ordenable: true,
+      acceso: (fila) => (fila as unknown as LocalDirectorio).tieneProyector,
+      formato: (valor) => this.siNo(valor as boolean | null),
+    },
+    {
+      clave: 'computo',
+      titulo: 'Cómputo',
+      ordenable: true,
+      acceso: (fila) => (fila as unknown as LocalDirectorio).tieneEquiposComputo,
+      formato: (valor) => this.siNo(valor as boolean | null),
+    },
+    {
+      clave: 'audio',
+      titulo: 'Audio',
+      ordenable: true,
+      acceso: (fila) => (fila as unknown as LocalDirectorio).tieneAudioMicro,
+      formato: (valor) => this.siNo(valor as boolean | null),
+    },
+    {
+      clave: 'disponible',
+      titulo: 'Disponible',
+      ordenable: true,
+      formato: (valor) => (valor ? 'Sí' : 'No'),
+    },
+  ];
+
+  /** Orden que pinta `app-tabla`; la página ordena con `OrdenTabla`. */
+  readonly ordenTabla = computed<OrdenColumna | null>(() => {
+    const clave = this.orden.columna();
+    return clave ? { clave, direccion: this.orden.direccion() } : null;
+  });
 
   private readonly accesores: Record<string, (fila: LocalDirectorio) => unknown> = {
     nombre: (fila) => fila.nombre,
@@ -577,6 +617,27 @@ export class LocalesPage {
   };
 
   readonly filasVisibles = computed(() => this.orden.ordenar(this.locales(), this.accesores));
+
+  alCambiarOrden(cambio: OrdenColumna | null): void {
+    const clave = cambio?.clave ?? this.orden.columna();
+    if (clave) this.orden.alternar(clave);
+  }
+
+  /** Refleja en `SeleccionTabla` lo que marca la tabla (barra de selección). */
+  alCambiarSeleccion(ids: readonly string[]): void {
+    // Un local sin id real llega como `#índice`: no se puede exportar.
+    const marcadas = new Set(ids.filter((id) => !!id && !id.startsWith('#')));
+    for (const id of this.seleccion.lista()) {
+      if (!marcadas.has(id)) this.seleccion.alternar(id);
+    }
+    for (const id of marcadas) {
+      if (!this.seleccion.esta(id)) this.seleccion.alternar(id);
+    }
+  }
+
+  alClicFila(evento: ClicFila): void {
+    this.abrir(evento.fila as unknown as LocalDirectorio);
+  }
 
   idsVisibles(): string[] {
     return this.locales()

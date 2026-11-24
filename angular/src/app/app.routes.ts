@@ -105,6 +105,51 @@ export const routes: Routes = [
         data: { titulo: 'Panorama territorial' },
         loadComponent: () => import('./features/mapa/mapa.page').then((m) => m.MapaPage),
       },
+      {
+        path: 'dashboard',
+        data: { titulo: 'Dashboard analítico' },
+        loadComponent: () =>
+          import('./features/dashboard/dashboard.page').then((m) => m.DashboardPage),
+      },
+      {
+        path: 'red-radar',
+        data: { titulo: 'Bandeja RED-RADAR' },
+        loadComponent: () =>
+          import('./features/red-radar/red-radar.page').then((m) => m.RedRadarPage),
+      },
+      {
+        path: 'matriz-conflictividad',
+        data: { titulo: 'Matriz de conflictividad' },
+        loadComponent: () =>
+          import('./features/matriz-conflictividad/matriz-conflictividad.page').then(
+            (m) => m.MatrizConflictividadPage,
+          ),
+      },
+      {
+        path: 'gobierno-sugerencias',
+        data: { titulo: 'Gobierno y sugerencias' },
+        loadComponent: () =>
+          import('./features/gobierno-sugerencias/gobierno-sugerencias.page').then(
+            (m) => m.GobiernoSugerenciasPage,
+          ),
+      },
+      {
+        path: 'exportaciones',
+        data: { titulo: 'Exportaciones' },
+        loadComponent: () =>
+          import('./features/exportaciones/exportaciones.page').then((m) => m.ExportacionesPage),
+      },
+      {
+        path: 'administracion/etl',
+        data: { titulo: 'Consola ETL' },
+        loadComponent: () => import('./features/etl/etl.page').then((m) => m.EtlPage),
+      },
+      {
+        path: 'administracion',
+        data: { titulo: 'Administración' },
+        loadComponent: () =>
+          import('./features/administracion/administracion.page').then((m) => m.AdministracionPage),
+      },
 
       {
         path: 'directorio',
@@ -138,6 +183,11 @@ export const routes: Routes = [
         path: 'directorio/locales',
         loadComponent: () =>
           import('./features/directorio/locales.page').then((m) => m.LocalesPage),
+      },
+      {
+        path: 'directorio/autoridades',
+        loadComponent: () =>
+          import('./features/directorio/autoridades.page').then((m) => m.AutoridadesPage),
       },
 
       {

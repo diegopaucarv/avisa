@@ -53,9 +53,7 @@
   <button type="button" class="button-secondary" (click)="limpiar()">Limpiar filtros</button>
 </div>
 
-@if (estado() === 'inactivo' || estado() === 'cargando') {
-  <div class="empty-state" role="status">Cargando la matriz del equipo…</div>
-} @else if (estado() === 'error') {
+@if (estado() === 'error') {
   @if (esquemaPendiente()) {
     <div class="empty-state matriz-pendiente" role="alert">
       <strong>La matriz todavía no está disponible</strong>
@@ -73,62 +71,40 @@
       <button type="button" class="button-secondary" (click)="recargar()">Reintentar</button>
     </div>
   }
-} @else if (filas().length === 0) {
-  <div class="empty-state">
-    <strong>Sin filas</strong>
-    <p>No hay compromisos × hito para los filtros seleccionados.</p>
-  </div>
 } @else {
-  <div class="table-wrap">
-    <table class="data-table matriz-tabla">
-      <thead>
-        <tr>
-          @for (columna of columnas; track columna.letra) {
-            <th
-              scope="col"
-              [class]="'th-orden ' + claseColumna(columna.clave)"
-              [appThOrden]="columna.clave"
-              [orden]="orden"
-            >
-              <span class="matriz-letra">{{ columna.letra }}</span>
-              {{ columna.etiqueta }}
-            </th>
+  <app-tabla
+    [columnas]="columnasTabla()"
+    [filas]="filasVisibles()"
+    [orden]="ordenTabla()"
+    [ordenServidor]="true"
+    [cargando]="estado() === 'inactivo' || estado() === 'cargando'"
+    vacio="No hay compromisos × hito para los filtros seleccionados."
+    (ordenCambio)="alCambiarOrden($event)"
+  >
+    @for (columna of columnas; track columna.letra) {
+      <ng-template [appCeldaTabla]="columna.clave" let-fila>
+        @switch (columna.clave) {
+          @case ('nombreCaso') {
+            <span class="matriz-texto">{{ celda(fila, columna.clave) }}</span>
+            <small class="matriz-codigos">
+              {{ fila.codigoCaso || 'sin código AVISA' }} ·
+              {{ fila.codigoExcel || 'sin código Excel' }}
+            </small>
           }
-        </tr>
-      </thead>
-      <tbody>
-        @for (fila of filasVisibles(); track $index) {
-          <tr>
-            @for (columna of columnas; track columna.letra) {
-              <td [class]="claseColumna(columna.clave)">
-                @switch (columna.clave) {
-                  @case ('nombreCaso') {
-                    {{ celda(fila, columna.clave) }}
-                    <small class="matriz-codigos">
-                      {{ fila.codigoCaso || 'sin código AVISA' }} ·
-                      {{ fila.codigoExcel || 'sin código Excel' }}
-                    </small>
-                  }
-                  @case ('estado') {
-                    @if (fila.estado) {
-                      <span [class]="'status-badge ' + estadoClase(fila.estado)">{{
-                        fila.estado
-                      }}</span>
-                    } @else {
-                      <span class="matriz-vacio">—</span>
-                    }
-                  }
-                  @default {
-                    {{ celda(fila, columna.clave) }}
-                  }
-                }
-              </td>
+          @case ('estado') {
+            @if (fila.estado) {
+              <span [class]="'status-badge ' + estadoClase(fila.estado)">{{ fila.estado }}</span>
+            } @else {
+              <span class="matriz-vacio">—</span>
             }
-          </tr>
+          }
+          @default {
+            <span [class]="claseColumna(columna.clave)">{{ celda(fila, columna.clave) }}</span>
+          }
         }
-      </tbody>
-    </table>
-  </div>
+      </ng-template>
+    }
+  </app-tabla>
 
   @if (total() > 0) {
     <app-paginacion

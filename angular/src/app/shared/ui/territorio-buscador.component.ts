@@ -13,6 +13,7 @@ import {
 
 import { urlApi } from '../../core/config/entorno';
 import { consulta } from '../../core/http/consulta';
+import { normalizarUbigeo, resolverUbigeo } from '../../core/territorio/ubigeo';
 import { booleano, esRegistro, lista, numero, texto } from '../../dominio/mapeo';
 import { IconoComponent } from './icono.component';
 
@@ -20,10 +21,25 @@ import { IconoComponent } from './icono.component';
 export type DistritoTerritorio = {
   tipo: 'distrito';
   id: number;
+  /**
+   * Ubigeo INEI de seis dígitos: la llave real de la selección. Viaja por aquí
+   * y no por el nombre; `nombre` sólo se pinta. Es `null` si la API no lo
+   * entregó: nunca se inventa un código.
+   *
+   * Es opcional porque un llamador puede reconstruir una selección desde una
+   * fila que sólo traía id y nombre (los paneles de alta lo hacen). El buscador
+   * sí lo entrega siempre: `null` cuando no hay código declarado.
+   */
+  ubigeo?: string | null;
   nombre: string;
+  /** Provincia tal como la entrega la API, sólo para mostrar. */
+  provincia?: string;
   region: string;
-  /** «Distrito · Provincia · Región»: desambigua los 15 «Santa Rosa». */
+  /** «Distrito · Provincia · Región»: desambigua los 15 «Santa Rosa».
+   *  Sólo presentación; para comparar se usa `claveUbigeo`. */
   ruta: string;
+  /** Clave normalizada (`region|provincia|distrito`) para comparar sin tildes. */
+  claveUbigeo?: string;
 };
 
 /**
@@ -37,8 +53,13 @@ export type LugarTerritorio = {
   nombre: string;
   /** `puerto`, `caleta`, `desembarcadero_artesanal`… */
   etiquetaTipo: string;
+  /** Distrito que lo contiene, para mostrar y para la clave de comparación. */
+  distrito: string;
   region: string;
   ruta: string;
+  /** Un lugar no tiene ubigeo propio; se declara como ausente. */
+  ubigeo: null;
+  claveUbigeo: string;
 };
 
 export type OpcionTerritorio = DistritoTerritorio | LugarTerritorio;
@@ -59,12 +80,27 @@ export function aTerritorio(bruto: unknown): ResultadoTerritorio {
     const nombre = texto(fila, ['nombre']);
     const ruta = texto(fila, ['ruta']) ?? nombre;
     if (id === null || !nombre || !ruta) continue;
+
+    const region = texto(fila, ['region']) ?? '';
+    const provincia = texto(fila, ['provincia']) ?? '';
+    // La API entrega el ubigeo del distrito; si no viniera, `resolverUbigeo`
+    // deja `ubigeo: null` y aporta una clave estable por nombre normalizado.
+    const resuelto = resolverUbigeo({
+      region,
+      provincia,
+      distrito: normalizarUbigeo(texto(fila, ['ubigeo'])) ? undefined : nombre,
+      ubigeo: texto(fila, ['ubigeo']),
+    });
+
     distritos.push({
       tipo: 'distrito',
       id,
+      ubigeo: resuelto.ubigeo,
       nombre,
-      region: texto(fila, ['region']) ?? '',
+      provincia,
+      region,
       ruta,
+      claveUbigeo: resuelto.clave,
     });
   }
 
@@ -75,13 +111,19 @@ export function aTerritorio(bruto: unknown): ResultadoTerritorio {
     const nombre = texto(fila, ['nombre']);
     const ruta = texto(fila, ['ruta']) ?? nombre;
     if (!id || !nombre || !ruta) continue;
+
+    const region = texto(fila, ['region']) ?? '';
+    const distrito = texto(fila, ['distrito']) ?? '';
     lugares.push({
       tipo: 'lugar',
       id,
       nombre,
       etiquetaTipo: texto(fila, ['tipo']) ?? 'lugar',
-      region: texto(fila, ['region']) ?? '',
+      distrito,
+      region,
       ruta,
+      ubigeo: null,
+      claveUbigeo: resolverUbigeo({ region, distrito }).clave,
     });
   }
 
@@ -366,7 +408,17 @@ export class TerritorioBuscadorComponent {
    * un filtro restaurado desde la URL). Sólo se pinta: el id viaja aparte y el
    * componente no emite nada hasta que el usuario elige o limpia.
    */
-  readonly inicial = input<{ id: number; nombre: string; ruta?: string } | null>(null);
+  readonly inicial = input<{
+    id: number;
+    nombre: string;
+    ruta?: string;
+    /**
+     * Ubigeo de la selección heredada, si el padre lo conoce. Es informativo:
+     * la caja sólo pinta `ruta` y el id viaja aparte. Para elegir por código
+     * con el catálogo ya cargado se usa `elegirPorUbigeo()`.
+     */
+    ubigeo?: string | null;
+  } | null>(null);
 
   readonly elegido = output<OpcionTerritorio | null>();
 
@@ -377,6 +429,15 @@ export class TerritorioBuscadorComponent {
   readonly indice = signal(0);
   readonly abierto = signal(false);
   readonly seleccion = signal<OpcionTerritorio | null>(null);
+
+  /**
+   * Ubigeo de la selección actual, si es un distrito con código declarado.
+   * `null` en lugares operativos y cuando la API no entregó el código.
+   */
+  readonly seleccionUbigeo = computed(() => this.seleccion()?.ubigeo ?? null);
+
+  /** Clave normalizada de la selección (`region|provincia|distrito`). */
+  readonly claveSeleccionada = computed(() => this.seleccion()?.claveUbigeo ?? null);
 
   /** Lo escrito manda; si no hay nada, se muestra la etiqueta inicial. */
   readonly textoVisible = computed(
@@ -503,6 +564,22 @@ export class TerritorioBuscadorComponent {
       const opcion = this.opciones()[this.indice()];
       if (opcion) this.elegir(opcion);
     }
+  }
+
+  /**
+   * Elige un distrito por su ubigeo de seis dígitos, sin compararlo por nombre.
+   *
+   * Sólo puede resolver entre las opciones que la búsqueda ya trajo: devuelve
+   * `false` si el código no está en la lista y no inventa una opción. El
+   * llamador decide si escribe en el campo o busca por nombre.
+   */
+  elegirPorUbigeo(ubigeo: string | null | undefined): boolean {
+    const codigo = normalizarUbigeo(ubigeo);
+    if (!codigo) return false;
+    const opcion = this.distritos().find((distrito) => distrito.ubigeo === codigo);
+    if (!opcion) return false;
+    this.elegir(opcion);
+    return true;
   }
 
   elegir(opcion: OpcionTerritorio): void {

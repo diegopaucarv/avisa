@@ -14,7 +14,12 @@ import { aErrorApi, ErrorApi } from '../../core/http/errores';
 import { IconoComponent } from '../../shared/ui/icono.component';
 import { OrdenTabla } from '../../shared/ui/orden-tabla';
 import { PaginacionComponent } from '../../shared/ui/paginacion.component';
-import { ThOrdenDirective } from '../../shared/ui/th-orden.directive';
+import {
+  CeldaTablaDirectiva,
+  TablaComponent,
+  type ColumnaTabla,
+  type OrdenColumna,
+} from '../../shared/ui/tabla.component';
 import { COLUMNAS_MATRIZ, aMatrizFila, normalizarCodigo, type MatrizFila } from './matriz-csv';
 import { MatrizImportarComponent } from './matriz-importar.component';
 
@@ -119,7 +124,13 @@ function nombreDesdeCabecera(valor: string | null): string | null {
  */
 @Component({
   selector: 'app-matriz-equipo',
-  imports: [IconoComponent, PaginacionComponent, MatrizImportarComponent, ThOrdenDirective],
+  imports: [
+    IconoComponent,
+    PaginacionComponent,
+    MatrizImportarComponent,
+    TablaComponent,
+    CeldaTablaDirectiva,
+  ],
   templateUrl: './matriz-equipo.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
@@ -140,21 +151,21 @@ function nombreDesdeCabecera(valor: string | null): string | null {
       flex-wrap: wrap;
       gap: 8px;
     }
-    .matriz-tabla {
+    /* La matriz conserva su ancho fijo y alinea arriba (celdas de texto largo). */
+    :host ::ng-deep app-tabla .tabla {
       min-width: 2100px;
     }
-    .matriz-tabla th,
-    .matriz-tabla td {
+    :host ::ng-deep app-tabla .tabla thead th,
+    :host ::ng-deep app-tabla .tabla tbody td {
       vertical-align: top;
     }
-    .matriz-letra {
-      display: block;
-      font-size: 0.7rem;
-      font-weight: 400;
-      opacity: 0.6;
-      letter-spacing: 0.04em;
+    /* La primera columna (N°) no es la que nombra la fila. */
+    :host ::ng-deep app-tabla .tabla tbody td.celda-principal {
+      min-width: 64px;
+      white-space: nowrap;
     }
     .matriz-texto {
+      display: block;
       min-width: 220px;
       max-width: 340px;
       white-space: pre-wrap;
@@ -184,6 +195,15 @@ function nombreDesdeCabecera(valor: string | null): string | null {
     }
     .matriz-estado-desestimado {
       color: #6b7280;
+    }
+    :host-context(html[data-theme='dark']) .matriz-estado-cumplido {
+      color: #7fd1a0;
+    }
+    :host-context(html[data-theme='dark']) .matriz-estado-no-cumplido {
+      color: #ff9d95;
+    }
+    :host-context(html[data-theme='dark']) .matriz-estado-desestimado {
+      color: #a7b3bf;
     }
     .matriz-pendiente {
       display: flex;
@@ -256,6 +276,27 @@ export class MatrizEquipoComponent {
 
   readonly filasVisibles = computed(() => this.orden.ordenar(this.filas(), this.accesoresMatriz));
 
+  /** Columnas de `app-tabla`: la letra A..X se suma al título (sin segunda línea). */
+  readonly columnasTabla = computed<readonly ColumnaTabla[]>(() =>
+    COLUMNAS_MATRIZ.map((columna) => ({
+      clave: columna.clave,
+      titulo: `${columna.letra} · ${columna.etiqueta}`,
+      ancho: this.anchoColumna(columna.clave),
+      ordenable: true,
+    })),
+  );
+
+  /** Orden que pinta `app-tabla`; la página sigue ordenando con `OrdenTabla`. */
+  readonly ordenTabla = computed<OrdenColumna | null>(() => {
+    const clave = this.orden.columna();
+    return clave ? { clave, direccion: this.orden.direccion() } : null;
+  });
+
+  alCambiarOrden(cambio: OrdenColumna | null): void {
+    const clave = cambio?.clave ?? this.orden.columna();
+    if (clave) this.orden.alternar(clave);
+  }
+
   readonly esquemaPendiente = computed(() => this.error()?.codigo === 'ESQUEMA_PENDIENTE');
 
   readonly rango = computed(() => {
@@ -325,6 +366,14 @@ export class MatrizEquipoComponent {
     if (clave === 'fechaPlanificada' || clave === 'fechaReal') return 'matriz-fecha';
     if (COLUMNAS_TEXTO.has(clave)) return 'matriz-texto';
     return '';
+  }
+
+  /** Ancho de la columna en `app-tabla`, equivalente al que daba `claseColumna`. */
+  private anchoColumna(clave: keyof MatrizFila): string | undefined {
+    if (clave === 'numero' || clave === 'bloqueFila') return '64px';
+    if (clave === 'fechaPlanificada' || clave === 'fechaReal') return '110px';
+    if (COLUMNAS_TEXTO.has(clave)) return '240px';
+    return undefined;
   }
 
   estadoClase(valor: string | null): string {

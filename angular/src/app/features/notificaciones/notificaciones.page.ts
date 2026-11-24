@@ -9,12 +9,17 @@ import { TAMANO_PAGINA, paramsDePagina, urlConParametros } from '../../core/http
 import { consulta } from '../../core/http/consulta';
 import { aErrorApi } from '../../core/http/errores';
 import { BarraSeleccionComponent } from '../../shared/ui/barra-seleccion.component';
-
-import { SeleccionTabla } from '../../shared/ui/seleccion-tabla';
 import { IconoComponent } from '../../shared/ui/icono.component';
 import { OrdenTabla } from '../../shared/ui/orden-tabla';
 import { PaginacionComponent } from '../../shared/ui/paginacion.component';
-import { ThOrdenDirective } from '../../shared/ui/th-orden.directive';
+import { SeleccionTabla } from '../../shared/ui/seleccion-tabla';
+import {
+  CeldaTablaDirectiva,
+  TablaComponent,
+  type ColumnaTabla,
+  type FilaTabla,
+  type OrdenColumna,
+} from '../../shared/ui/tabla.component';
 import {
   ESTADOS_NOTIFICACION,
   aColeccionNotificaciones,
@@ -77,7 +82,8 @@ type AvisoLectura = {
     IconoComponent,
     PaginacionComponent,
     BarraSeleccionComponent,
-    ThOrdenDirective,
+    TablaComponent,
+    CeldaTablaDirectiva,
   ],
   templateUrl: './notificaciones.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -135,8 +141,8 @@ type AvisoLectura = {
       height: 26px;
       flex: none;
       border-radius: 50%;
-      background: #eef3f7;
-      color: #5f7690;
+      background: var(--blue-pale);
+      color: var(--blue);
     }
 
     .notificacion-texto {
@@ -146,35 +152,35 @@ type AvisoLectura = {
       gap: 3px;
     }
 
-    .data-table tr.sin-leer td {
-      background: #fbfdff;
-    }
-
-    .data-table tr.sin-leer td:first-child {
-      box-shadow: inset 3px 0 0 #4f7fc4;
-    }
-
-    .data-table tr.sin-leer .notificacion-texto strong {
-      color: #1f3850;
-      font-weight: 700;
-    }
-
-    .data-table tr.grupo-dia td {
-      background: #f6f8fa;
-      border-top: 1px solid var(--line);
-      color: #5f7690;
+    .notificacion-texto small {
+      color: var(--muted);
       font-size: 12px;
+    }
+
+    /* La fila no se puede teñir: el énfasis de «sin leer» queda en el título. */
+    .notificacion.sin-leer .notificacion-texto strong {
+      color: var(--ink-2);
+    }
+
+    /*
+     * La tabla compartida no tiene filas de grupo: el día viaja como rótulo en
+     * la primera fila de cada grupo, dentro de la celda que nombra el aviso.
+     */
+    .grupo-etiqueta {
+      display: block;
+      margin-bottom: 5px;
+      color: var(--muted);
+      font-size: 11px;
       font-weight: 700;
-      letter-spacing: 0.4px;
+      letter-spacing: 0.04em;
       text-transform: uppercase;
     }
 
-    .data-table tr.grupo-dia td small {
+    .grupo-etiqueta small {
       margin-left: 6px;
-      color: #8b97a2;
       font-weight: 500;
-      text-transform: none;
       letter-spacing: 0;
+      text-transform: none;
     }
 
     .aviso-ok {
@@ -193,7 +199,7 @@ type AvisoLectura = {
     }
 
     .sin-dato {
-      color: #a0aab3;
+      color: var(--muted);
       font-style: italic;
     }
 
@@ -277,8 +283,40 @@ export class NotificacionesPage {
   /** Selección de la tabla (página visible) para exportar. */
   readonly seleccion = new SeleccionTabla();
 
+  /** Ids marcados, en una referencia estable para `app-tabla`. */
+  readonly idsSeleccionados = computed(() => this.seleccion.lista());
+
   /** Orden local de la página visible. */
   readonly orden = new OrdenTabla<Notificacion>();
+
+  /** Columnas del listado, en el orden de la bandeja. */
+  readonly columnas: readonly ColumnaTabla[] = [
+    { clave: 'notificacion', titulo: 'Notificación', ordenable: true },
+    { clave: 'categoria', titulo: 'Categoría', ordenable: true },
+    { clave: 'lectura', titulo: 'Lectura', ordenable: true },
+    {
+      clave: 'vence',
+      titulo: 'Vence',
+      ordenable: true,
+      acceso: (fila) => (fila as unknown as Notificacion).venceEn,
+      formato: (valor) => this.fecha(valor as string | null),
+    },
+    {
+      clave: 'registrada',
+      titulo: 'Registrada',
+      ordenable: true,
+      acceso: (fila) => (fila as unknown as Notificacion).creadaEn,
+      formato: (valor) => this.fecha(valor as string | null),
+    },
+    { clave: 'registro', titulo: 'Registro', ordenable: true },
+    { clave: 'acciones', titulo: 'Acciones', alineacion: 'centro' },
+  ];
+
+  /** Orden que pinta `app-tabla`; la página ordena con `OrdenTabla`. */
+  readonly ordenTabla = computed<OrdenColumna | null>(() => {
+    const clave = this.orden.columna();
+    return clave ? { clave, direccion: this.orden.direccion() } : null;
+  });
 
   private readonly accesores: Record<string, (notificacion: Notificacion) => unknown> = {
     notificacion: (notificacion) => notificacion.titulo,
@@ -294,12 +332,39 @@ export class NotificacionesPage {
   );
 
   /** Filas visibles agrupadas por día de registro, conservando el orden. */
-  readonly grupos = computed(() => agruparPorDia(this.filasVisibles()));
+  private readonly grupos = computed(() => agruparPorDia(this.filasVisibles()));
 
-  idsVisibles(): string[] {
-    return this.notificaciones()
-      .map((notificacion) => notificacion.id)
-      .filter((id): id is string => !!id);
+  /**
+   * Filas aplanadas con la etiqueta del día en la primera de cada grupo: la
+   * tabla compartida no admite filas de grupo, así que el rótulo viaja en la
+   * celda que nombra el aviso.
+   */
+  readonly filasConGrupo = computed<readonly FilaTabla[]>(() =>
+    this.grupos().flatMap((grupo) =>
+      grupo.notificaciones.map((notificacion, indice) => ({
+        ...notificacion,
+        inicioGrupo: indice === 0,
+        etiquetaGrupo: grupo.etiqueta,
+        cuentaGrupo: grupo.notificaciones.length,
+      })),
+    ),
+  );
+
+  alCambiarOrden(cambio: OrdenColumna | null): void {
+    const clave = cambio?.clave ?? this.orden.columna();
+    if (clave) this.orden.alternar(clave);
+  }
+
+  /** Refleja en `SeleccionTabla` lo que marca la tabla (barra de selección). */
+  alCambiarSeleccion(ids: readonly string[]): void {
+    // Un aviso sin id real llega como `#índice`: no se puede exportar.
+    const marcadas = new Set(ids.filter((id) => !!id && !id.startsWith('#')));
+    for (const id of this.seleccion.lista()) {
+      if (!marcadas.has(id)) this.seleccion.alternar(id);
+    }
+    for (const id of marcadas) {
+      if (!this.seleccion.esta(id)) this.seleccion.alternar(id);
+    }
   }
 
   readonly sinLeerEnPagina = computed(

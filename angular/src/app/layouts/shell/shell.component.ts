@@ -18,6 +18,7 @@ import type { AlcancePreferido } from '../../core/alcance/alcance.service';
 import { AtajosService } from '../../core/atajos/atajos.service';
 import { SesionStore } from '../../core/auth/sesion.store';
 import { ENTORNO } from '../../core/config/entorno';
+import { NotificacionesService } from '../../core/http/notificaciones.service';
 import { CapacidadesService } from '../../core/permisos/capacidades.service';
 import { ALCANCES } from '../../dominio/mapeo';
 import { IconoComponent } from '../../shared/ui/icono.component';
@@ -29,6 +30,8 @@ type EnlaceNav = {
   grupo: string;
   exacto?: boolean;
   soloSiPuedeEliminar?: boolean;
+  /** Sólo se dibuja para el rol `administrador`. */
+  soloSiEsAdmin?: boolean;
 };
 
 /**
@@ -48,12 +51,30 @@ const ENLACES_NAV: readonly EnlaceNav[] = [
     ruta: '/mapa',
     icono: 'mapa',
   },
+  {
+    grupo: 'PANORAMA TERRITORIAL',
+    etiqueta: 'Dashboard analítico',
+    ruta: '/dashboard',
+    icono: 'analisis',
+  },
   { grupo: 'PREVENCIÓN', etiqueta: 'Casos', ruta: '/casos', icono: 'casos' },
   {
     grupo: 'PREVENCIÓN',
     etiqueta: 'Alertas tempranas',
     ruta: '/alertas',
     icono: 'alertas',
+  },
+  {
+    grupo: 'PREVENCIÓN',
+    etiqueta: 'Bandeja RED-RADAR',
+    ruta: '/red-radar',
+    icono: 'alertas',
+  },
+  {
+    grupo: 'PREVENCIÓN',
+    etiqueta: 'Matriz de conflictividad',
+    ruta: '/matriz-conflictividad',
+    icono: 'casos',
   },
   {
     grupo: 'PREVENCIÓN',
@@ -92,6 +113,18 @@ const ENLACES_NAV: readonly EnlaceNav[] = [
     icono: 'documentos',
   },
   {
+    grupo: 'GESTIÓN DE IYC',
+    etiqueta: 'Gobierno y sugerencias',
+    ruta: '/gobierno-sugerencias',
+    icono: 'analisis',
+  },
+  {
+    grupo: 'GESTIÓN DE IYC',
+    etiqueta: 'Exportaciones',
+    ruta: '/exportaciones',
+    icono: 'documentos',
+  },
+  {
     grupo: 'DIRECTORIOS',
     etiqueta: 'Actores',
     ruta: '/directorio/personas',
@@ -105,7 +138,13 @@ const ENLACES_NAV: readonly EnlaceNav[] = [
   },
   {
     grupo: 'DIRECTORIOS',
-    etiqueta: 'Locales',
+    etiqueta: 'Autoridades y agentes',
+    ruta: '/directorio/autoridades',
+    icono: 'instituciones',
+  },
+  {
+    grupo: 'DIRECTORIOS',
+    etiqueta: 'Auditorios',
     ruta: '/directorio/locales',
     icono: 'mapa',
   },
@@ -128,6 +167,20 @@ const ENLACES_NAV: readonly EnlaceNav[] = [
     icono: 'archivo',
     soloSiPuedeEliminar: true,
   },
+  {
+    grupo: 'ADMINISTRACIÓN',
+    etiqueta: 'Administración',
+    ruta: '/administracion',
+    icono: 'ajustes',
+    soloSiEsAdmin: true,
+  },
+  {
+    grupo: 'ADMINISTRACIÓN',
+    etiqueta: 'Consola ETL',
+    ruta: '/administracion/etl',
+    icono: 'actividad',
+    soloSiEsAdmin: true,
+  },
 ];
 
 const CLAVE_MENU_COLAPSADO = 'avisa-menu-colapsado';
@@ -147,6 +200,31 @@ function leerMenuColapsado(): boolean {
   templateUrl: './shell.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
+    /*
+     * Globo de avisos sin leer sobre la campana. Es puramente informativo:
+     * el número lo calcula el servidor y se corta en «99+».
+     */
+    .header-icon-button {
+      position: relative;
+    }
+
+    .header-badge {
+      position: absolute;
+      top: -4px;
+      right: -6px;
+      min-width: 17px;
+      height: 17px;
+      padding: 0 4px;
+      border-radius: 9px;
+      background: var(--red, #c0392b);
+      color: #fff;
+      font-size: 10.5px;
+      font-weight: 700;
+      line-height: 17px;
+      text-align: center;
+      letter-spacing: 0;
+    }
+
     /*
      * El ámbito ocupa el lugar del antiguo indicador «Sistema operativo», que era
      * texto fijo sin dato. Es un disparador de menú: necesita hover, estado
@@ -447,6 +525,10 @@ export class ShellComponent {
   private readonly atajos = inject(AtajosService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly alcance = inject(AlcanceService);
+  private readonly notificaciones = inject(NotificacionesService);
+
+  /** Avisos sin leer para el globo de la campana. */
+  readonly avisosSinLeer = this.notificaciones.etiqueta;
 
   readonly version = ENTORNO.version;
   readonly usuario = this.sesion.usuario;
@@ -526,7 +608,11 @@ export class ShellComponent {
    * anular y restaurar; el resto es común.
    */
   readonly enlacesVisibles = computed(() =>
-    ENLACES_NAV.filter((enlace) => !enlace.soloSiPuedeEliminar || this.capacidades.puedeEliminar()),
+    ENLACES_NAV.filter(
+      (enlace) =>
+        (!enlace.soloSiPuedeEliminar || this.capacidades.puedeEliminar()) &&
+        (!enlace.soloSiEsAdmin || this.capacidades.esAdmin()),
+    ),
   );
 
   /** Grupos por contigüidad: el orden del arreglo define la barra. */

@@ -6,7 +6,12 @@ import { urlApi } from '../../core/config/entorno';
 import { consulta } from '../../core/http/consulta';
 import { aErrorApi } from '../../core/http/errores';
 import { OrdenTabla } from '../../shared/ui/orden-tabla';
-import { ThOrdenDirective } from '../../shared/ui/th-orden.directive';
+import {
+  CeldaTablaDirectiva,
+  TablaComponent,
+  type ColumnaTabla,
+  type OrdenColumna,
+} from '../../shared/ui/tabla.component';
 import {
   BOM,
   CABECERA_MATRIZ,
@@ -63,7 +68,7 @@ function aMapaEquivalencias(bruto: unknown): ReadonlyMap<string, string> {
  */
 @Component({
   selector: 'app-matriz-importar',
-  imports: [ThOrdenDirective],
+  imports: [TablaComponent, CeldaTablaDirectiva],
   templateUrl: './matriz-importar.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
@@ -125,12 +130,22 @@ function aMapaEquivalencias(bruto: unknown): ReadonlyMap<string, string> {
       font-size: 13px;
       line-height: 1.5;
     }
-    .importar-tabla td {
+    /* Las dos tablas del panel respetan el salto de línea y la alineación alta. */
+    :host ::ng-deep app-tabla .tabla tbody td {
       white-space: normal;
       vertical-align: top;
     }
-    .importar-tabla caption {
-      text-align: left;
+    /* El resumen sigue en el DOM para lectores de pantalla, sin pintarse. */
+    :host ::ng-deep app-tabla .tabla-resumen {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
+      border: 0;
     }
     .matriz-codigos {
       display: block;
@@ -167,6 +182,26 @@ export class MatrizImportarComponent {
 
   readonly ordenPlan = new OrdenTabla<FilaPlan>();
 
+  /** Columnas del plan, en el orden del CSV de entrada. */
+  readonly columnasPlan: readonly ColumnaTabla[] = [
+    { clave: 'fila', titulo: 'Fila', ordenable: true },
+    { clave: 'caso', titulo: 'Caso', ordenable: true },
+    { clave: 'codigoExcel', titulo: 'Código Excel', ordenable: true },
+    { clave: 'accion', titulo: 'Acción / compromiso', ordenable: true },
+    { clave: 'hito', titulo: 'Hito', ordenable: true },
+    { clave: 'resultado', titulo: 'Resultado', ordenable: true },
+  ];
+
+  readonly ordenPlanTabla = computed<OrdenColumna | null>(() => {
+    const clave = this.ordenPlan.columna();
+    return clave ? { clave, direccion: this.ordenPlan.direccion() } : null;
+  });
+
+  alCambiarOrdenPlan(cambio: OrdenColumna | null): void {
+    const clave = cambio?.clave ?? this.ordenPlan.columna();
+    if (clave) this.ordenPlan.alternar(clave);
+  }
+
   private readonly accesoresPlan: Record<string, (fila: FilaPlan) => unknown> = {
     fila: (fila) => fila.fila,
     caso: (fila) => fila.codigoCaso,
@@ -182,6 +217,26 @@ export class MatrizImportarComponent {
   readonly planRestantes = computed(() => Math.max(0, this.filasPlan().length - LIMITE_VISIBLE));
 
   readonly ordenRechazos = new OrdenTabla<RechazoPlan>();
+
+  /** Columnas de los rechazos. */
+  readonly columnasRechazos: readonly ColumnaTabla[] = [
+    { clave: 'fila', titulo: 'Fila', ordenable: true },
+    { clave: 'codigo', titulo: 'Código', ordenable: true },
+    { clave: 'motivo', titulo: 'Motivo', ordenable: true },
+    { clave: 'codigoExcel', titulo: 'Código Excel', ordenable: true },
+    { clave: 'codigoCaso', titulo: 'Código de caso', ordenable: true },
+    { clave: 'detalle', titulo: 'Detalle', ordenable: true },
+  ];
+
+  readonly ordenRechazosTabla = computed<OrdenColumna | null>(() => {
+    const clave = this.ordenRechazos.columna();
+    return clave ? { clave, direccion: this.ordenRechazos.direccion() } : null;
+  });
+
+  alCambiarOrdenRechazos(cambio: OrdenColumna | null): void {
+    const clave = cambio?.clave ?? this.ordenRechazos.columna();
+    if (clave) this.ordenRechazos.alternar(clave);
+  }
 
   private readonly accesoresRechazos: Record<string, (fila: RechazoPlan) => unknown> = {
     fila: (fila) => fila.fila,

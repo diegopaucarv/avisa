@@ -31,7 +31,13 @@ import { IconoComponent } from '../../shared/ui/icono.component';
 import { OrdenTabla } from '../../shared/ui/orden-tabla';
 import { PaginacionComponent } from '../../shared/ui/paginacion.component';
 import { SeleccionTabla } from '../../shared/ui/seleccion-tabla';
-import { ThOrdenDirective } from '../../shared/ui/th-orden.directive';
+import {
+  CeldaTablaDirectiva,
+  TablaComponent,
+  type ClicFila,
+  type ColumnaTabla,
+  type OrdenColumna,
+} from '../../shared/ui/tabla.component';
 import {
   AnularPanelComponent,
   type ModoAnulacion,
@@ -120,7 +126,8 @@ function esBolsaOtros(opcion: OpcionCatalogo): boolean {
     DocumentoPanelComponent,
     AnularPanelComponent,
     BarraSeleccionComponent,
-    ThOrdenDirective,
+    TablaComponent,
+    CeldaTablaDirectiva,
   ],
   templateUrl: './documentos.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -164,26 +171,18 @@ function esBolsaOtros(opcion: OpcionCatalogo): boolean {
 
     .aviso-ok {
       margin: 0;
-      color: #2f6f52;
+      color: var(--green);
       font-size: 13.5px;
     }
 
-    .fila-documento {
-      cursor: pointer;
-    }
-
-    .fila-documento:hover td,
-    .fila-documento:focus-within td {
-      background: #fbfcfd;
-    }
-
-    .data-table .table-link {
+    .table-link {
       cursor: pointer;
       font-family: inherit;
       text-align: left;
     }
 
     .celda-titulo {
+      display: block;
       max-width: 340px;
       white-space: normal;
     }
@@ -192,28 +191,29 @@ function esBolsaOtros(opcion: OpcionCatalogo): boolean {
     .celda-caso small {
       display: block;
       margin-top: 3px;
-      color: #99a3aa;
+      color: var(--muted);
       font-size: 12px;
     }
 
     .celda-caso strong {
-      color: #465a6c;
+      color: var(--ink-2);
       font-size: 12px;
       font-weight: 600;
     }
 
     .celda-caso {
+      display: block;
       white-space: normal;
     }
 
     .sin-dato {
-      color: #a0aab3;
+      color: var(--muted);
       font-style: italic;
     }
 
     .actualizando {
       margin: 0;
-      color: #8d99a6;
+      color: var(--muted);
       font-size: 12px;
     }
 
@@ -587,10 +587,79 @@ export class DocumentosPage {
     this.orden.ordenar(this.documentos(), this.accesoresDocumento),
   );
 
-  idsVisibles(): string[] {
-    return this.documentos()
-      .map((documento) => documento.id)
-      .filter((id): id is string => !!id);
+  /** Ids marcados, en una referencia estable para `app-tabla`. */
+  readonly idsSeleccionados = computed(() => this.seleccion.lista());
+
+  /** Columnas de la papelera: sólo lo que devuelve la API. */
+  readonly columnasPapelera: readonly ColumnaTabla[] = [
+    {
+      clave: 'codigo',
+      titulo: 'Código',
+      ordenable: true,
+      formato: (valor) => {
+        const texto = valor as string | null;
+        return texto && texto.trim() ? texto : 'Sin código';
+      },
+    },
+    { clave: 'titulo', titulo: 'Título', ordenable: true },
+    { clave: 'caso', titulo: 'Caso', ordenable: true },
+    {
+      clave: 'anulado',
+      titulo: 'Fecha de anulación',
+      ordenable: true,
+      acceso: (fila) => (fila as Documento).anuladoEn,
+      formato: (valor) => this.fechaHoraTexto(valor as string | null),
+    },
+    { clave: 'accion', titulo: 'Acción' },
+  ];
+
+  /** Columnas del listado activo. */
+  readonly columnasListado: readonly ColumnaTabla[] = [
+    { clave: 'codigo', titulo: 'Código', ordenable: true },
+    { clave: 'titulo', titulo: 'Título', ordenable: true },
+    { clave: 'tipo', titulo: 'Tipo', ordenable: true },
+    { clave: 'caso', titulo: 'Caso', ordenable: true },
+    {
+      clave: 'responsable',
+      titulo: 'Responsable',
+      ordenable: true,
+      acceso: (fila) => (fila as Documento).responsableNombre,
+      formato: (valor) => (valor as string | null) || 'Sin dato',
+    },
+    {
+      clave: 'fecha',
+      titulo: 'Fecha',
+      ordenable: true,
+      acceso: (fila) => (fila as Documento).fecha,
+      formato: (valor) => this.formatearFecha(valor as string | null),
+    },
+    { clave: 'etapa', titulo: 'Etapa', ordenable: true },
+  ];
+
+  /** Orden que pinta `app-tabla`; la página sigue ordenando con `OrdenTabla`. */
+  readonly ordenTabla = computed<OrdenColumna | null>(() => {
+    const clave = this.orden.columna();
+    return clave ? { clave, direccion: this.orden.direccion() } : null;
+  });
+
+  alCambiarOrden(cambio: OrdenColumna | null): void {
+    const clave = cambio?.clave ?? this.orden.columna();
+    if (clave) this.orden.alternar(clave);
+  }
+
+  /** Refleja en `SeleccionTabla` lo que marca la tabla (barra de selección). */
+  alCambiarSeleccion(ids: readonly string[]): void {
+    const marcadas = new Set(ids);
+    for (const id of this.seleccion.lista()) {
+      if (!marcadas.has(id)) this.seleccion.alternar(id);
+    }
+    for (const id of ids) {
+      if (!this.seleccion.esta(id)) this.seleccion.alternar(id);
+    }
+  }
+
+  alClicFila(evento: ClicFila): void {
+    this.abrir(evento.fila as Documento);
   }
 
   /** Último fallo del botón de exportación; vacío si no hubo. */

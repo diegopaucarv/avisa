@@ -145,15 +145,7 @@
     <p>{{ errorListado()?.message }}</p>
     <button type="button" class="button-secondary" (click)="recargarListado()">Reintentar</button>
   </div>
-  } @else if (alertas().length === 0) { @if (estadoListado() === 'cargando' || estadoListado() ===
-  'inactivo') {
-  <div class="empty-state" role="status">Cargando alertas…</div>
-  } @else {
-  <div class="empty-state">
-    <strong>No hay alertas con estos filtros</strong>
-    <p>Pruebe a quitar algún filtro o a revisar el texto de búsqueda.</p>
-  </div>
-  } } @else { @if (estadoListado() === 'cargando') {
+  } @else { @if (estadoListado() === 'cargando' && alertas().length > 0) {
   <p class="alerta-actualizando" role="status">Actualizando el listado…</p>
   } @if (aprobacionFila(); as aprobacion) {
   <div
@@ -226,114 +218,81 @@
   </div>
   }
 
-  <div class="table-wrap">
-    <table class="data-table">
-      <colgroup>
-        <col class="col-seleccion" />
-        <col class="col-codigo" />
-        <col />
-        <col class="col-caso" />
-        <col class="col-revisor" />
-        <col class="col-fecha" />
-        <col class="col-estado" />
-        <col class="col-acciones" />
-      </colgroup>
-      <thead>
-        <tr>
-          <th scope="col" class="col-seleccion">
-            <input
-              type="checkbox"
-              aria-label="Seleccionar todos los registros de esta página"
-              [checked]="seleccion.todas(idsVisibles())"
-              [indeterminate]="seleccion.algunas(idsVisibles())"
-              (change)="seleccion.alternarPagina(idsVisibles(), $event)"
-            />
-          </th>
-          <th scope="col" [appThOrden]="'codigo'" [orden]="orden">Código</th>
-          <th scope="col" [appThOrden]="'titulo'" [orden]="orden">Título</th>
-          <th scope="col" [appThOrden]="'caso'" [orden]="orden">Caso vinculado</th>
-          <th scope="col" [appThOrden]="'revisor'" [orden]="orden">Último revisor</th>
-          <th scope="col" class="col-fecha" [appThOrden]="'fecha'" [orden]="orden">
-            Fecha reporte
-          </th>
-          <th scope="col" [appThOrden]="'estado'" [orden]="orden">Estado</th>
-          <th scope="col" class="celda-acciones">Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (alerta of filasVisibles(); track alerta.id) {
-        <tr
-          [class]="'case-row-clickable ' + claseAvisoFila(alerta)"
-          [class.row-selected]="seleccionadaId() === alerta.id"
-          (click)="abrir(alerta)"
-        >
-          <td class="col-seleccion" (click)="$event.stopPropagation()">
-            <input
-              type="checkbox"
-              [checked]="seleccion.esta(alerta.id)"
-              [attr.aria-label]="'Seleccionar ' + (alerta.codigo || alerta.id)"
-              (click)="$event.stopPropagation()"
-              (change)="seleccion.alternar(alerta.id)"
-            />
-          </td>
-          <td>
-            <button
-              type="button"
-              class="table-link"
-              [attr.aria-label]="'Abrir la alerta ' + alerta.codigo"
-              (click)="abrir(alerta); $event.stopPropagation()"
-            >
-              {{ alerta.codigo || 'Sin código' }}
-            </button>
-          </td>
-          <td class="alerta-titulo">
-            <strong>{{ tituloAlerta(alerta) }}</strong>
-            <span class="alerta-meta">
-              <span class="alerta-geografia">{{ geografia(alerta) }}</span>
-              ·
-              <span [class]="claseRiesgo(alerta)">Riesgo {{ etiquetaRiesgo(alerta.riesgo) }}</span>
-            </span>
-          </td>
-          <td class="alerta-caso">
-            @if (alerta.casoCodigo) {
-            <strong>{{ alerta.casoCodigo }}</strong>
-            @if (alerta.casoTitulo) {
-            <small>{{ alerta.casoTitulo }}</small>
-            } } @else {
-            <span class="sin-caso">Sin caso</span>
-            }
-          </td>
-          <td>
-            <div class="alerta-revisor">
-              <strong>{{ alerta.ultimoRevisor || '—' }}</strong>
-              <small>{{ fechaReporte(alerta.ultimaModificacion) }}</small>
-            </div>
-          </td>
-          <td class="col-fecha">{{ fechaReporte(alerta.fechaReporte) }}</td>
-          <td>
-            <span [class]="claseEstadoAlerta(alerta)">
-              <span class="status-dot"></span>
-              {{ etiquetaEstadoAlerta(alerta) }}
-            </span>
-            @if (alerta.archivadoEn) {
-            <span class="alerta-archivada">Archivada</span>
-            }
-          </td>
-          <td class="celda-acciones" (click)="$event.stopPropagation()">
-            <app-acciones-fila
-              [acciones]="accionesFila(alerta)"
-              [puedeAnular]="puedeAnular(alerta)"
-              [codigo]="alerta.codigo || alerta.titulo || ''"
-              [ocupado]="enviandoFila() === alerta.id"
-              (accion)="accionFila(alerta, $event)"
-              (anular)="abrirAnulacion(alerta)"
-            />
-          </td>
-        </tr>
+  <app-tabla
+    [columnas]="columnas"
+    [filas]="filasVisibles()"
+    [orden]="ordenTabla()"
+    [ordenServidor]="true"
+    [seleccionable]="true"
+    [seleccion]="idsSeleccionados()"
+    [cargando]="estadoListado() === 'cargando' || estadoListado() === 'inactivo'"
+    vacio="No hay alertas con estos filtros. Pruebe a quitar algún filtro o a revisar el texto de búsqueda."
+    (ordenCambio)="alCambiarOrden($event)"
+    (seleccionCambio)="alCambiarSeleccion($event)"
+    (filaClic)="alClicFila($event)"
+  >
+    <ng-template appCeldaTabla="codigo" let-fila>
+      <button
+        type="button"
+        class="table-link"
+        [attr.aria-label]="'Abrir la alerta ' + fila.codigo"
+        (click)="abrir(fila); $event.stopPropagation()"
+      >
+        {{ fila.codigo || 'Sin código' }}
+      </button>
+    </ng-template>
+
+    <ng-template appCeldaTabla="titulo" let-fila>
+      <div class="alerta-titulo">
+        <strong>{{ tituloAlerta(fila) }}</strong>
+        <span class="alerta-meta">
+          <span class="alerta-geografia">{{ geografia(fila) }}</span>
+          ·
+          <span [class]="claseRiesgo(fila)">Riesgo {{ etiquetaRiesgo(fila.riesgo) }}</span>
+        </span>
+      </div>
+    </ng-template>
+
+    <ng-template appCeldaTabla="caso" let-fila>
+      <div class="alerta-caso">
+        @if (fila.casoCodigo) {
+        <strong>{{ fila.casoCodigo }}</strong>
+        @if (fila.casoTitulo) {
+        <small>{{ fila.casoTitulo }}</small>
+        } } @else {
+        <span class="sin-caso">Sin caso</span>
         }
-      </tbody>
-    </table>
-  </div>
+      </div>
+    </ng-template>
+
+    <ng-template appCeldaTabla="revisor" let-fila>
+      <div class="alerta-revisor">
+        <strong>{{ fila.ultimoRevisor || '—' }}</strong>
+        <small>{{ fechaReporte(fila.ultimaModificacion) }}</small>
+      </div>
+    </ng-template>
+
+    <ng-template appCeldaTabla="estado" let-fila>
+      <span [class]="claseEstadoAlerta(fila)">
+        <span class="status-dot"></span>
+        {{ etiquetaEstadoAlerta(fila) }}
+      </span>
+      @if (fila.archivadoEn) {
+      <span class="alerta-archivada">Archivada</span>
+      }
+    </ng-template>
+
+    <ng-template appCeldaTabla="acciones" let-fila>
+      <app-acciones-fila
+        [acciones]="accionesFila(fila)"
+        [puedeAnular]="puedeAnular(fila)"
+        [codigo]="fila.codigo || fila.titulo || ''"
+        [ocupado]="enviandoFila() === fila.id"
+        (accion)="accionFila(fila, $event)"
+        (anular)="abrirAnulacion(fila)"
+      />
+    </ng-template>
+  </app-tabla>
   } @if (total() > 0 && estadoListado() !== 'error') {
   <app-paginacion
     [pagina]="filtros().pagina"

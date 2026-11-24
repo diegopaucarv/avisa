@@ -8,75 +8,44 @@ import {
   signal,
 } from '@angular/core';
 
-import { AlcanceService } from '../../core/alcance/alcance.service';
+import { AlcanceService, type AlcancePreferido } from '../../core/alcance/alcance.service';
 import { SesionStore } from '../../core/auth/sesion.store';
+import { type DensidadPreferida, type TemaPreferido } from '../../core/http/preferencias.service';
 import { CapacidadesService } from '../../core/permisos/capacidades.service';
+import { TemaService } from '../../core/tema/tema.service';
 import { ALCANCES, esRegistro } from '../../dominio/mapeo';
-import type { Alcance } from '../../dominio/modelos';
+import { describir } from '../../shared/ui/descriptor-entidad';
 import { IconoComponent } from '../../shared/ui/icono.component';
-
-type Tema = 'claro' | 'oscuro';
-type Densidad = 'comoda' | 'compacta';
-
-/**
- * `auto` significa «el ámbito que entregue la sesión»: la pantalla no impone un
- * alcance propio. Un valor concreto lo consume la lista de Casos como filtro
- * predeterminado (la barra lo muestra en el selector y «Todos» lo desactiva).
- */
-type AlcancePreferido = Alcance | 'auto';
 
 /** Mismas categorías que agrupa la bandeja de notificaciones. */
 type CategoriaAviso = 'Alerta' | 'Compromiso' | 'Documento' | 'Caso';
 type PreferenciasAviso = Record<CategoriaAviso, boolean>;
 
-/** Misma clave que lee el script de `index.html` antes del primer pintado. */
-const CLAVE_TEMA = 'avisa-theme';
-const CLAVE_DENSIDAD = 'avisa-density';
-const CLAVE_ALCANCE = 'avisa-alcance';
 const CLAVE_AVISOS = 'avisa-notificaciones';
 
-const AVISOS_DISPONIBLES: readonly {
+/**
+ * Un aviso por tipo de entidad. La etiqueta y el icono no se escriben aquí:
+ * salen del descriptor único (`shared/ui/descriptor-entidad`), de modo que
+ * «Documentos» o «Casos» se vean igual que en el resto de la aplicación.
+ */
+const AVISOS: readonly {
   clave: CategoriaAviso;
-  etiqueta: string;
+  tipo: string;
   pista: string;
-  icono: string;
 }[] = [
-  {
-    clave: 'Alerta',
-    etiqueta: 'Alertas',
-    pista: 'Avisos de alertas tempranas.',
-    icono: 'alertas',
-  },
-  {
-    clave: 'Compromiso',
-    etiqueta: 'Compromisos',
-    pista: 'Avisos de compromisos e hitos.',
-    icono: 'compromisos',
-  },
-  {
-    clave: 'Documento',
-    etiqueta: 'Documentos',
-    pista: 'Avisos sobre documentos del expediente.',
-    icono: 'documentos',
-  },
-  {
-    clave: 'Caso',
-    etiqueta: 'Casos',
-    pista: 'Avisos sobre casos y su riesgo.',
-    icono: 'casos',
-  },
+  { clave: 'Alerta', tipo: 'alerta', pista: 'Avisos de alertas tempranas.' },
+  { clave: 'Compromiso', tipo: 'compromiso', pista: 'Avisos de compromisos e hitos.' },
+  { clave: 'Documento', tipo: 'documento', pista: 'Avisos sobre documentos del expediente.' },
+  { clave: 'Caso', tipo: 'caso', pista: 'Avisos sobre casos y su riesgo.' },
 ];
+
+function capitalizar(valor: string): string {
+  return valor ? valor.charAt(0).toUpperCase() + valor.slice(1) : valor;
+}
 
 /** Sólo referencia visual: la preferencia no tiene respaldo real todavía. */
 const TAMANOS = [25, 50, 100] as const;
 
-/**
- * Lectura defensiva de `localStorage`.
- *
- * Puede fallar por modo privado, por políticas del navegador o porque no hay
- * DOM (SSR); en cualquiera de esos casos la preferencia simplemente cae a su
- * valor por defecto y la página sigue funcionando.
- */
 function leer(clave: string, plataforma: object): string | null {
   if (!isPlatformBrowser(plataforma)) return null;
   try {
@@ -84,41 +53,6 @@ function leer(clave: string, plataforma: object): string | null {
   } catch {
     return null;
   }
-}
-
-/**
- * Tema inicial. Se respeta lo guardado por esta pantalla; si viene de
- * `index.html` (que admite `system`) o todavía no hay nada, se deduce del
- * atributo ya aplicado al documento y, como último recurso, del sistema.
- */
-function temaInicial(plataforma: object): Tema {
-  const guardado = leer(CLAVE_TEMA, plataforma);
-  if (guardado === 'dark') return 'oscuro';
-  if (guardado === 'light') return 'claro';
-  if (!isPlatformBrowser(plataforma)) return 'claro';
-
-  const aplicado = document.documentElement.dataset['theme'];
-  if (aplicado === 'dark') return 'oscuro';
-  if (aplicado === 'light') return 'claro';
-
-  try {
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'oscuro' : 'claro';
-  } catch {
-    return 'claro';
-  }
-}
-
-function densidadInicial(plataforma: object): Densidad {
-  return leer(CLAVE_DENSIDAD, plataforma) === 'compacta' ? 'compacta' : 'comoda';
-}
-
-function esAlcance(valor: unknown): valor is Alcance {
-  return typeof valor === 'string' && (ALCANCES as readonly string[]).includes(valor);
-}
-
-function alcanceInicial(plataforma: object): AlcancePreferido {
-  const guardado = leer(CLAVE_ALCANCE, plataforma);
-  return esAlcance(guardado) ? guardado : 'auto';
 }
 
 /** Los avisos se guardan como un único objeto JSON; todo lo desconocido cae en «activado». */
@@ -150,13 +84,16 @@ function avisosIniciales(plataforma: object): PreferenciasAviso {
 /**
  * Preferencias del usuario.
  *
- * No hay perfil persistido en la base ni endpoint de preferencias: el tema, la
- * densidad, el ámbito predeterminado y las opciones de notificación se guardan
- * en `localStorage` de este navegador con la misma mecánica (una clave por
- * preferencia). El tema reutiliza el mecanismo real de la aplicación
- * (`data-theme` en `<html>`, clave `avisa-theme`) y la densidad usa el atributo
- * `data-density` que ya estiliza `global.css`. El tamaño de página no se
- * guarda: ningún listado lo lee.
+ * Tema y densidad tienen **una sola fuente de verdad**: `PreferenciasService`
+ * (señal + persistencia en `core.usuario_preferencia`) y `TemaService`, que
+ * traduce esa señal a `data-theme` / `data-density` en `<html>`. Esta pantalla
+ * no guarda copias propias ni escribe atributos: al pulsar una opción el cambio
+ * se aplica y se persiste en la cuenta.
+ *
+ * El ámbito predeterminado y los avisos siguen en `localStorage`: la API no
+ * valida esas claves (`tamanoPagina`, `tema`, `densidad`, `zonaHoraria`), así
+ * que se guardan con «Guardar preferencias» y se declara su alcance. El tamaño
+ * de página no se guarda: ningún listado lo lee.
  */
 @Component({
   selector: 'app-preferencias',
@@ -186,8 +123,6 @@ function avisosIniciales(plataforma: object): PreferenciasAviso {
       justify-content: space-between;
       gap: 16px;
     }
-
-
 
     .pref-layout {
       display: grid;
@@ -252,16 +187,33 @@ export class PreferenciasPage {
   private readonly sesion = inject(SesionStore);
   private readonly capacidades = inject(CapacidadesService);
   private readonly alcanceServicio = inject(AlcanceService);
+  private readonly temaServicio = inject(TemaService);
 
   readonly usuario = this.sesion.usuario;
   readonly tamanos = TAMANOS;
 
-  readonly tema = signal<Tema>(temaInicial(this.plataforma));
-  readonly densidad = signal<Densidad>(densidadInicial(this.plataforma));
-  readonly alcance = signal<AlcancePreferido>(alcanceInicial(this.plataforma));
+  /** Preferencia declarada (`claro|oscuro|auto`); la guarda el servidor. */
+  readonly tema = computed<TemaPreferido>(() => this.temaServicio.preferencia());
+  /** Densidad vigente (`comoda|compacta`); también vive en el servidor. */
+  readonly densidad = computed<DensidadPreferida>(() => this.temaServicio.densidad());
+
+  /**
+   * Copia editable del ámbito: el panel sólo lo consolida al guardar, igual
+   * que los avisos. Parte del valor compartido que ya usa el chip del shell.
+   */
+  readonly alcance = signal<AlcancePreferido>(this.alcanceServicio.preferido());
   readonly avisos = signal<PreferenciasAviso>(avisosIniciales(this.plataforma));
 
-  readonly avisosDisponibles = AVISOS_DISPONIBLES;
+  readonly avisosDisponibles = AVISOS.map((aviso) => {
+    const descriptor = describir(aviso.tipo);
+    return {
+      clave: aviso.clave,
+      etiqueta: capitalizar(descriptor.plural),
+      pista: aviso.pista,
+      icono: descriptor.icono,
+    };
+  });
+
   readonly opcionesAlcance: readonly { valor: AlcancePreferido; etiqueta: string }[] = [
     { valor: 'auto', etiqueta: 'Sesión' },
     ...ALCANCES.map((alcance) => ({ valor: alcance, etiqueta: alcance })),
@@ -280,21 +232,30 @@ export class PreferenciasPage {
     return regiones.length ? regiones.join(' · ') : 'Sin regiones asignadas';
   });
 
-  constructor() {
-    // La densidad no tiene bootstrap en `index.html`: se aplica al entrar.
-    this.aplicarDensidad(this.densidad());
-  }
-
-  cambiarTema(tema: Tema): void {
+  async cambiarTema(tema: TemaPreferido): Promise<void> {
     if (this.tema() === tema) return;
-    this.tema.set(tema);
     this.olvidarAviso();
+    try {
+      await this.temaServicio.fijarTema(tema);
+    } catch {
+      this.guardado.set(false);
+      this.mensaje.set(
+        'No se pudo guardar el tema en tu cuenta. El servidor rechazó el cambio y se mantiene la preferencia anterior.',
+      );
+    }
   }
 
-  cambiarDensidad(densidad: Densidad): void {
+  async cambiarDensidad(densidad: DensidadPreferida): Promise<void> {
     if (this.densidad() === densidad) return;
-    this.densidad.set(densidad);
     this.olvidarAviso();
+    try {
+      await this.temaServicio.fijarDensidad(densidad);
+    } catch {
+      this.guardado.set(false);
+      this.mensaje.set(
+        'No se pudo guardar la densidad en tu cuenta. El servidor rechazó el cambio y se mantiene la preferencia anterior.',
+      );
+    }
   }
 
   cambiarAlcance(alcance: AlcancePreferido): void {
@@ -312,34 +273,30 @@ export class PreferenciasPage {
     this.olvidarAviso();
   }
 
-  /** Guarda las claves reales y aplica el resultado sin recargar la página. */
+  /**
+   * Consolida lo que no vive en el servidor: el ámbito y los avisos. Tema y
+   * densidad ya se guardaron al elegirlos, así que no se reescriben aquí.
+   */
   guardar(): void {
     if (!isPlatformBrowser(this.plataforma)) return;
 
-    const resuelto = this.tema() === 'oscuro' ? 'dark' : 'light';
+    // `fijar` escribe la misma clave y actualiza el chip del shell al instante.
+    this.alcanceServicio.fijar(this.alcance());
 
     try {
-      window.localStorage.setItem(CLAVE_TEMA, resuelto);
-      window.localStorage.setItem(CLAVE_DENSIDAD, this.densidad());
-      // `fijar` escribe la misma clave y actualiza el chip del shell al instante.
-      this.alcanceServicio.fijar(this.alcance());
       window.localStorage.setItem(CLAVE_AVISOS, JSON.stringify(this.avisos()));
     } catch {
       this.guardado.set(false);
       this.mensaje.set(
-        'No se pudieron guardar las preferencias: el navegador rechazó el almacenamiento local.',
+        'No se pudieron guardar los avisos: el navegador rechazó el almacenamiento local.',
       );
       return;
     }
 
-    const root = document.documentElement;
-    root.dataset['theme'] = resuelto;
-    root.dataset['themePreference'] = resuelto;
-    root.style.colorScheme = resuelto;
-    this.aplicarDensidad(this.densidad());
-
     this.guardado.set(true);
-    this.mensaje.set('Preferencias guardadas en este navegador.');
+    this.mensaje.set(
+      'Preferencias guardadas. El tema y la densidad se guardan en tu cuenta; el ámbito y los avisos, en este navegador.',
+    );
   }
 
   cerrarAviso(): void {
@@ -349,15 +306,5 @@ export class PreferenciasPage {
   private olvidarAviso(): void {
     this.mensaje.set(null);
     this.guardado.set(false);
-  }
-
-  private aplicarDensidad(densidad: Densidad): void {
-    if (!isPlatformBrowser(this.plataforma)) return;
-    const root = document.documentElement;
-    if (densidad === 'compacta') {
-      root.dataset['density'] = 'compacta';
-    } else {
-      delete root.dataset['density'];
-    }
   }
 }

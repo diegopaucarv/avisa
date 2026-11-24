@@ -138,65 +138,51 @@
 
   @if (vistaMatriz()) {
   <app-matriz-equipo />
-  } @else if (vistaAnexo14()) { @if (estado() === 'inactivo' || estado() === 'cargando') {
-  <div class="empty-state" role="status">Cargando la matriz del Anexo 14…</div>
-  } @else if (estado() === 'error') {
+  } @else if (vistaAnexo14()) { @if (estado() === 'error') {
   <div class="empty-state" role="alert">
     <p>{{ error()?.message }}</p>
     <button type="button" class="button-secondary" (click)="recargar()">Reintentar</button>
   </div>
-  } @else if (compromisos().length === 0) {
-  <div class="empty-state">
-    <strong>Sin compromisos</strong>
-    <p>No hay compromisos para los filtros seleccionados.</p>
-  </div>
   } @else {
-  <div class="table-wrap">
-    <table class="data-table">
-      <thead>
-        <tr>
-          <th scope="col" [appThOrden]="'compromiso'" [orden]="orden">Compromiso</th>
-          <th scope="col" [appThOrden]="'unidad'" [orden]="orden">Responsable</th>
-          <th scope="col">Fecha de inicio</th>
-          <th scope="col" [appThOrden]="'estado'" [orden]="orden">Estado</th>
-          <th scope="col">Avance</th>
-          <th scope="col">Observaciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (compromiso of filasVisibles(); track compromiso.id) {
-        <tr class="fila-compromiso" (click)="abrir(compromiso)">
-          <td class="celda-compromiso">
-            <button
-              type="button"
-              class="table-link compromiso-codigo"
-              [attr.aria-label]="
-                      'Abrir el compromiso ' + compromiso.codigo + ': ' + compromiso.accion
-                    "
-              (click)="abrir(compromiso); $event.stopPropagation()"
-            >
-              {{ compromiso.codigo }}
-            </button>
-            <span class="compromiso-accion">{{ compromiso.accion }}</span>
-          </td>
-          <td>{{ compromiso.unidad || '—' }}</td>
-          <td>{{ fechaTexto(compromiso.fechaInicio) }}</td>
-          <td>
-            <span
-              class="commit-status"
-              [class.commit-cumplido]="compromiso.estado === 'Cumplido'"
-              [class.commit-en-curso]="compromiso.estado === 'En proceso'"
-            >
-              {{ compromiso.estado }}
-            </span>
-          </td>
-          <td class="anexo-avance">{{ avanceTexto(compromiso) }}</td>
-          <td class="anexo-observaciones">{{ observacionesTexto(compromiso) }}</td>
-        </tr>
-        }
-      </tbody>
-    </table>
-  </div>
+  <app-tabla
+    [columnas]="columnasAnexo14"
+    [filas]="filasVisibles()"
+    [orden]="ordenTabla()"
+    [ordenServidor]="true"
+    [cargando]="estado() === 'inactivo' || estado() === 'cargando'"
+    [clicable]="true"
+    vacio="No hay compromisos para los filtros seleccionados."
+    (ordenCambio)="alCambiarOrden($event)"
+    (filaClic)="alClicFila($event)"
+  >
+    <ng-template appCeldaTabla="compromiso" let-fila>
+      <div class="celda-compromiso">
+        <button
+          type="button"
+          class="table-link compromiso-codigo"
+          [attr.aria-label]="'Abrir el compromiso ' + fila.codigo + ': ' + fila.accion"
+          (click)="abrir(fila); $event.stopPropagation()"
+        >
+          {{ fila.codigo }}
+        </button>
+        <span class="compromiso-accion">{{ fila.accion }}</span>
+      </div>
+    </ng-template>
+
+    <ng-template appCeldaTabla="estado" let-fila>
+      <span
+        class="commit-status"
+        [class.commit-cumplido]="fila.estado === 'Cumplido'"
+        [class.commit-en-curso]="fila.estado === 'En proceso'"
+      >
+        {{ fila.estado }}
+      </span>
+    </ng-template>
+
+    <ng-template appCeldaTabla="observaciones" let-fila>
+      <div class="anexo-observaciones">{{ observacionesTexto(fila) }}</div>
+    </ng-template>
+  </app-tabla>
   <p class="desglose-nota">
     Compromiso (columnas 1 y 10), Responsable (11), Fecha de inicio (8) y Estado (14) del Anexo 14.
     «Avance» cuenta los hitos cumplidos y «Observaciones» resume lo declarado; ninguna de las dos es
@@ -267,129 +253,96 @@
     Conteo sobre {{ compromisosResumen().length }} compromisos con los filtros activos; «GORE»
     corresponde al nivel regional.
   </p>
-  } } @else if (!vistaCalendario()) { @if (estado() === 'inactivo' || estado() === 'cargando') {
-  <div class="empty-state" role="status">
-    {{ verPapelera() ? 'Cargando el archivo…' : 'Cargando compromisos…' }}
-  </div>
-  } @else if (estado() === 'error') {
+  } } @else if (!vistaCalendario()) { @if (estado() === 'error') {
   <div class="empty-state" role="alert">
     <p>{{ error()?.message }}</p>
     <button type="button" class="button-secondary" (click)="recargar()">Reintentar</button>
   </div>
-  } @else if (compromisos().length === 0) { @if (verPapelera()) {
-  <div class="empty-state">
-    <strong>No hay compromisos anulados</strong>
-    <p>No hay compromisos anulados para los filtros seleccionados.</p>
+  } @else if (verPapelera()) {
+  <div class="tabla-papelera">
+    <app-tabla
+      [columnas]="columnasPapelera"
+      [filas]="filasVisibles()"
+      [orden]="ordenTabla()"
+      [ordenServidor]="true"
+      [cargando]="estado() === 'inactivo' || estado() === 'cargando'"
+      vacio="No hay compromisos anulados para los filtros seleccionados."
+      (ordenCambio)="alCambiarOrden($event)"
+    >
+      <ng-template appCeldaTabla="compromiso" let-fila>
+        <div class="celda-compromiso">{{ fila.accion }}</div>
+      </ng-template>
+
+      <ng-template appCeldaTabla="caso" let-fila>
+        <span [attr.title]="fila.casoTitulo">{{ fila.casoCodigo || '—' }}</span>
+      </ng-template>
+
+      <ng-template appCeldaTabla="accion" let-fila>
+        <button
+          type="button"
+          class="button-secondary"
+          [attr.aria-label]="'Restaurar el compromiso ' + fila.codigo"
+          (click)="abrirRestauracion(fila)"
+        >
+          Restaurar
+        </button>
+      </ng-template>
+    </app-tabla>
   </div>
   } @else {
-  <div class="empty-state">
-    <strong>Sin compromisos</strong>
-    <p>No hay compromisos para los filtros seleccionados.</p>
-  </div>
-  } } @else if (verPapelera()) {
-  <div class="table-wrap">
-    <table class="data-table">
-      <thead>
-        <tr>
-          <th scope="col" [appThOrden]="'codigo'" [orden]="orden">Código</th>
-          <th scope="col" [appThOrden]="'compromiso'" [orden]="orden">Compromiso</th>
-          <th scope="col" [appThOrden]="'caso'" [orden]="orden">Caso</th>
-          <th scope="col" [appThOrden]="'anulado'" [orden]="orden">Fecha de anulación</th>
-          <th scope="col">Acción</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (compromiso of filasVisibles(); track compromiso.id) {
-        <tr>
-          <td>{{ compromiso.codigo }}</td>
-          <td class="celda-compromiso">{{ compromiso.accion }}</td>
-          <td [attr.title]="compromiso.casoTitulo">{{ compromiso.casoCodigo || '—' }}</td>
-          <td>{{ fechaHoraTexto(compromiso.anuladoEn) }}</td>
-          <td>
-            <button
-              type="button"
-              class="button-secondary"
-              [attr.aria-label]="'Restaurar el compromiso ' + compromiso.codigo"
-              (click)="abrirRestauracion(compromiso)"
-            >
-              Restaurar
-            </button>
-          </td>
-        </tr>
+  <app-tabla
+    [columnas]="columnasListado"
+    [filas]="filasVisibles()"
+    [orden]="ordenTabla()"
+    [ordenServidor]="true"
+    [seleccionable]="true"
+    [seleccion]="idsSeleccionados()"
+    [cargando]="estado() === 'inactivo' || estado() === 'cargando'"
+    [clicable]="true"
+    vacio="No hay compromisos para los filtros seleccionados."
+    (ordenCambio)="alCambiarOrden($event)"
+    (seleccionCambio)="alCambiarSeleccion($event)"
+    (filaClic)="alClicFila($event)"
+  >
+    <ng-template appCeldaTabla="compromiso" let-fila>
+      <div class="celda-compromiso">
+        <button
+          type="button"
+          class="table-link compromiso-codigo"
+          [attr.aria-label]="'Abrir el compromiso ' + fila.codigo + ': ' + fila.accion"
+          (click)="abrir(fila); $event.stopPropagation()"
+        >
+          {{ fila.codigo }}
+        </button>
+        <span class="compromiso-accion">{{ fila.accion }}</span>
+      </div>
+    </ng-template>
+
+    <ng-template appCeldaTabla="caso" let-fila>
+      <span [attr.title]="fila.casoTitulo">{{ fila.casoCodigo || '—' }}</span>
+    </ng-template>
+
+    <ng-template appCeldaTabla="estado" let-fila>
+      <span
+        class="commit-status"
+        [class.commit-cumplido]="fila.estado === 'Cumplido'"
+        [class.commit-en-curso]="fila.estado === 'En proceso'"
+      >
+        {{ fila.estado }}
+      </span>
+    </ng-template>
+
+    <ng-template appCeldaTabla="vencimiento" let-fila>
+      <div class="celda-vencimiento">
+        @if (vencimiento(fila).fecha; as fechaVenc) { {{ fechaTexto(fechaVenc) }}
+        <small>{{ origenTexto(vencimiento(fila).origen) }}</small>
+        } @else {
+        <span class="due-state due-sin-fecha">Sin fecha</span>
+        <small class="aviso-fecha">Añada una fecha de vencimiento manual</small>
         }
-      </tbody>
-    </table>
-  </div>
-  } @else {
-  <div class="table-wrap">
-    <table class="data-table">
-      <thead>
-        <tr>
-          <th scope="col" class="col-seleccion">
-            <input
-              type="checkbox"
-              aria-label="Seleccionar todos los registros de esta página"
-              [checked]="seleccion.todas(idsVisibles())"
-              [indeterminate]="seleccion.algunas(idsVisibles())"
-              (change)="seleccion.alternarPagina(idsVisibles(), $event)"
-            />
-          </th>
-          <th scope="col" [appThOrden]="'compromiso'" [orden]="orden">Compromiso</th>
-          <th scope="col" [appThOrden]="'caso'" [orden]="orden">Caso</th>
-          <th scope="col" [appThOrden]="'unidad'" [orden]="orden">Unidad responsable</th>
-          <th scope="col" [appThOrden]="'estado'" [orden]="orden">Estado</th>
-          <th scope="col" [appThOrden]="'vencimiento'" [orden]="orden">Vencimiento</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (compromiso of filasVisibles(); track compromiso.id) {
-        <tr class="fila-compromiso" (click)="abrir(compromiso)">
-          <td class="col-seleccion" (click)="$event.stopPropagation()">
-            <input
-              type="checkbox"
-              [checked]="seleccion.esta(compromiso.id)"
-              [attr.aria-label]="'Seleccionar el compromiso ' + compromiso.codigo"
-              (click)="$event.stopPropagation()"
-              (change)="seleccion.alternar(compromiso.id)"
-            />
-          </td>
-          <td class="celda-compromiso">
-            <button
-              type="button"
-              class="table-link compromiso-codigo"
-              [attr.aria-label]="
-                      'Abrir el compromiso ' + compromiso.codigo + ': ' + compromiso.accion
-                    "
-              (click)="abrir(compromiso); $event.stopPropagation()"
-            >
-              {{ compromiso.codigo }}
-            </button>
-            <span class="compromiso-accion">{{ compromiso.accion }}</span>
-          </td>
-          <td [attr.title]="compromiso.casoTitulo">{{ compromiso.casoCodigo || '—' }}</td>
-          <td>{{ compromiso.unidad || '—' }}</td>
-          <td>
-            <span
-              class="commit-status"
-              [class.commit-cumplido]="compromiso.estado === 'Cumplido'"
-              [class.commit-en-curso]="compromiso.estado === 'En proceso'"
-            >
-              {{ compromiso.estado }}
-            </span>
-          </td>
-          <td class="celda-vencimiento">
-            @if (vencimiento(compromiso).fecha; as fechaVenc) { {{ fechaTexto(fechaVenc) }}
-            <small>{{ origenTexto(vencimiento(compromiso).origen) }}</small>
-            } @else {
-            <span class="due-state due-sin-fecha">Sin fecha</span>
-            <small class="aviso-fecha"> Añada una fecha de vencimiento manual </small>
-            }
-          </td>
-        </tr>
-        }
-      </tbody>
-    </table>
-  </div>
+      </div>
+    </ng-template>
+  </app-tabla>
   } @if (total() > 0) {
   <app-paginacion
     [pagina]="filtros().pagina"

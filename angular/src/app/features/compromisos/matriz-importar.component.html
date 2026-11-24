@@ -93,50 +93,35 @@
     @if (filasPlan().length === 0) {
       <div class="empty-state">Ninguna fila del archivo se puede crear ni actualizar.</div>
     } @else {
-      <div class="table-wrap">
-        <table class="data-table importar-tabla">
-          <caption class="sr-only">
-            Plan de filas reconocidas por el servidor
-          </caption>
-          <thead>
-            <tr>
-              <th scope="col" [appThOrden]="'fila'" [orden]="ordenPlan">Fila</th>
-              <th scope="col" [appThOrden]="'caso'" [orden]="ordenPlan">Caso</th>
-              <th scope="col" [appThOrden]="'codigoExcel'" [orden]="ordenPlan">Código Excel</th>
-              <th scope="col" [appThOrden]="'accion'" [orden]="ordenPlan">Acción / compromiso</th>
-              <th scope="col" [appThOrden]="'hito'" [orden]="ordenPlan">Hito</th>
-              <th scope="col" [appThOrden]="'resultado'" [orden]="ordenPlan">Resultado</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (fila of filasPlanVisibles(); track $index) {
-              <tr>
-                <td>{{ fila.fila }}</td>
-                <td>
-                  {{ fila.codigoCaso }}
-                  @if (fila.nombreCaso) {
-                    <small class="matriz-codigos">{{ fila.nombreCaso }}</small>
-                  }
-                </td>
-                <td>{{ fila.codigoExcel || '—' }}</td>
-                <td>{{ fila.accion }}</td>
-                <td>
-                  {{ fila.hito || '—' }}
-                  @if (fila.descripcionHito) {
-                    <small class="matriz-codigos">{{ fila.descripcionHito }}</small>
-                  }
-                </td>
-                <td>
-                  <span class="status-badge">{{ fila.accionPlan }}</span>
-                  @if (fila.hitoNuevo) {
-                    <small class="matriz-codigos">hito nuevo</small>
-                  }
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
+      <app-tabla
+        [columnas]="columnasPlan"
+        [filas]="filasPlanVisibles()"
+        [orden]="ordenPlanTabla()"
+        [ordenServidor]="true"
+        resumen="Plan de filas reconocidas por el servidor"
+        (ordenCambio)="alCambiarOrdenPlan($event)"
+      >
+        <ng-template appCeldaTabla="caso" let-fila>
+          {{ fila.codigoCaso }}
+          @if (fila.nombreCaso) {
+            <small class="matriz-codigos">{{ fila.nombreCaso }}</small>
+          }
+        </ng-template>
+
+        <ng-template appCeldaTabla="hito" let-fila>
+          {{ fila.hito || '—' }}
+          @if (fila.descripcionHito) {
+            <small class="matriz-codigos">{{ fila.descripcionHito }}</small>
+          }
+        </ng-template>
+
+        <ng-template appCeldaTabla="resultado" let-fila>
+          <span class="status-badge">{{ fila.accionPlan }}</span>
+          @if (fila.hitoNuevo) {
+            <small class="matriz-codigos">hito nuevo</small>
+          }
+        </ng-template>
+      </app-tabla>
       @if (planRestantes() > 0) {
         <p class="form-hint">
           Se muestran {{ filasPlanVisibles().length }} filas; quedan {{ planRestantes() }} más en el
@@ -150,39 +135,18 @@
     @if (rechazosVisibles().length === 0) {
       <div class="empty-state">Ninguna fila fue rechazada.</div>
     } @else {
-      <div class="table-wrap">
-        <table class="data-table importar-tabla">
-          <caption class="sr-only">
-            Filas rechazadas y el motivo de cada una
-          </caption>
-          <thead>
-            <tr>
-              <th scope="col" [appThOrden]="'fila'" [orden]="ordenRechazos">Fila</th>
-              <th scope="col" [appThOrden]="'codigo'" [orden]="ordenRechazos">Código</th>
-              <th scope="col" [appThOrden]="'motivo'" [orden]="ordenRechazos">Motivo</th>
-              <th scope="col" [appThOrden]="'codigoExcel'" [orden]="ordenRechazos">Código Excel</th>
-              <th scope="col" [appThOrden]="'codigoCaso'" [orden]="ordenRechazos">
-                Código de caso
-              </th>
-              <th scope="col" [appThOrden]="'detalle'" [orden]="ordenRechazos">Detalle</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (rechazo of rechazosVisibles(); track $index) {
-              <tr>
-                <td>{{ rechazo.fila }}</td>
-                <td>
-                  <span class="status-badge">{{ rechazo.codigo }}</span>
-                </td>
-                <td>{{ rechazo.motivo }}</td>
-                <td>{{ rechazo.codigoExcel || '—' }}</td>
-                <td>{{ rechazo.codigoCaso || '—' }}</td>
-                <td>{{ rechazo.detalle || '—' }}</td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
+      <app-tabla
+        [columnas]="columnasRechazos"
+        [filas]="rechazosVisibles()"
+        [orden]="ordenRechazosTabla()"
+        [ordenServidor]="true"
+        resumen="Filas rechazadas y el motivo de cada una"
+        (ordenCambio)="alCambiarOrdenRechazos($event)"
+      >
+        <ng-template appCeldaTabla="codigo" let-fila>
+          <span class="status-badge">{{ fila.codigo }}</span>
+        </ng-template>
+      </app-tabla>
       @if (rechazosRestantes() > 0) {
         <p class="form-hint">
           Se muestran {{ rechazosVisibles().length }} rechazos; quedan

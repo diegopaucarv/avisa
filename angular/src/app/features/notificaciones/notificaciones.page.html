@@ -97,108 +97,71 @@
     <p>Hay {{ total() }} notificaciones en total. Use la paginación para ver otra página.</p>
   </div>
   } @else {
-  <div class="table-wrap">
-    <table class="data-table">
-      <caption class="table-caption">
-        {{ resumenTabla() }}
-      </caption>
-      <thead>
-        <tr>
-          <th scope="col" class="col-seleccion">
-            <input
-              type="checkbox"
-              aria-label="Seleccionar todos los registros de esta página"
-              [checked]="seleccion.todas(idsVisibles())"
-              [indeterminate]="seleccion.algunas(idsVisibles())"
-              (change)="seleccion.alternarPagina(idsVisibles(), $event)"
-            />
-          </th>
-          <th scope="col" [appThOrden]="'notificacion'" [orden]="orden">Notificación</th>
-          <th scope="col" [appThOrden]="'categoria'" [orden]="orden">Categoría</th>
-          <th scope="col" [appThOrden]="'lectura'" [orden]="orden">Lectura</th>
-          <th scope="col" [appThOrden]="'vence'" [orden]="orden">Vence</th>
-          <th scope="col" [appThOrden]="'registrada'" [orden]="orden">Registrada</th>
-          <th scope="col" [appThOrden]="'registro'" [orden]="orden">Registro</th>
-          <th scope="col" class="col-acciones">Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (grupo of grupos(); track grupo.clave) {
-        <tr class="grupo-dia">
-          <td colspan="8">
-            {{ grupo.etiqueta }}
-            <small>
-              {{ grupo.notificaciones.length }} {{ grupo.notificaciones.length === 1 ? 'aviso' :
-              'avisos' }}
-            </small>
-          </td>
-        </tr>
-        @for (notificacion of grupo.notificaciones; track notificacion.id) {
-        <tr [class.sin-leer]="!notificacion.leida">
-          <td class="col-seleccion" (click)="$event.stopPropagation()">
-            <input
-              type="checkbox"
-              [checked]="seleccion.esta(notificacion.id)"
-              [attr.aria-label]="'Seleccionar la notificación ' + notificacion.titulo"
-              (click)="$event.stopPropagation()"
-              (change)="seleccion.alternar(notificacion.id)"
-            />
-          </td>
-          <td>
-            <span class="notificacion">
-              <span class="notificacion-icono" aria-hidden="true">
-                <app-icono [nombre]="notificacion.icono" [tamano]="14" />
-              </span>
-              <span class="notificacion-texto">
-                <strong>{{ notificacion.titulo }}</strong>
-                <small>{{ notificacion.entidadTipo || 'Sin recurso asociado' }}</small>
-              </span>
-            </span>
-          </td>
-          <td>{{ notificacion.categoria }}</td>
-          <td>
-            <span
-              [class]="'status-badge ' + lecturaClase(notificacion)"
-              [attr.title]="'Estado del aviso: ' + estadoEtiqueta(notificacion.estado)"
-            >
-              <span class="status-dot"></span>
-              {{ lecturaEtiqueta(notificacion) }}
-            </span>
-          </td>
-          <td>{{ fecha(notificacion.venceEn) }}</td>
-          <td>{{ fecha(notificacion.creadaEn) }}</td>
-          <td>
-            @if (enlace(notificacion); as destino) {
-            <a
-              class="table-link"
-              [routerLink]="destino.ruta"
-              [attr.title]="pistaEnlace(notificacion)"
-            >
-              {{ destino.etiqueta }}
-            </a>
-            } @else {
-            <span class="sin-dato">Sin registro</span>
-            }
-          </td>
-          <td class="col-acciones">
-            <button
-              type="button"
-              class="button-secondary accion-leida"
-              [disabled]="enviandoId() !== null || marcandoTodas()"
-              [attr.aria-label]="ariaAccion(notificacion)"
-              (click)="cambiarLectura(notificacion, !notificacion.leida)"
-            >
-              {{ enviandoId() === notificacion.id ? 'Guardando…' : etiquetaAccion(notificacion) }}
-            </button>
-          </td>
-        </tr>
-        } }
-      </tbody>
-    </table>
-  </div>
+  <app-tabla
+    [columnas]="columnas"
+    [filas]="filasConGrupo()"
+    [orden]="ordenTabla()"
+    [ordenServidor]="true"
+    [seleccionable]="true"
+    [seleccion]="idsSeleccionados()"
+    [resumen]="resumenTabla()"
+    [cargando]="estadoListado() === 'cargando'"
+    (ordenCambio)="alCambiarOrden($event)"
+    (seleccionCambio)="alCambiarSeleccion($event)"
+  >
+    <ng-template appCeldaTabla="notificacion" let-fila>
+      @if (fila.inicioGrupo) {
+      <span class="grupo-etiqueta">
+        {{ fila.etiquetaGrupo }}
+        <small>{{ fila.cuentaGrupo }} {{ fila.cuentaGrupo === 1 ? 'aviso' : 'avisos' }}</small>
+      </span>
+      }
+      <span class="notificacion" [class.sin-leer]="!fila.leida">
+        <span class="notificacion-icono" aria-hidden="true">
+          <app-icono [nombre]="fila.icono" [tamano]="14" />
+        </span>
+        <span class="notificacion-texto">
+          <strong>{{ fila.titulo }}</strong>
+          <small>{{ fila.entidadTipo || 'Sin recurso asociado' }}</small>
+        </span>
+      </span>
+    </ng-template>
+
+    <ng-template appCeldaTabla="lectura" let-fila>
+      <span
+        [class]="'status-badge ' + lecturaClase(fila)"
+        [attr.title]="'Estado del aviso: ' + estadoEtiqueta(fila.estado)"
+      >
+        <span class="status-dot"></span>
+        {{ lecturaEtiqueta(fila) }}
+      </span>
+    </ng-template>
+
+    <ng-template appCeldaTabla="registro" let-fila>
+      @if (enlace(fila); as destino) {
+      <a class="table-link" [routerLink]="destino.ruta" [attr.title]="pistaEnlace(fila)">
+        {{ destino.etiqueta }}
+      </a>
+      } @else {
+      <span class="sin-dato">Sin registro</span>
+      }
+    </ng-template>
+
+    <ng-template appCeldaTabla="acciones" let-fila>
+      <button
+        type="button"
+        class="button-secondary accion-leida"
+        [disabled]="enviandoId() !== null || marcandoTodas()"
+        [attr.aria-label]="ariaAccion(fila)"
+        (click)="cambiarLectura(fila, !fila.leida)"
+      >
+        {{ enviandoId() === fila.id ? 'Guardando…' : etiquetaAccion(fila) }}
+      </button>
+    </ng-template>
+  </app-tabla>
 
   <p class="notificaciones-nota">
-    Las no leídas se resaltan y llevan la insignia «Sin leer». «Marcar como leída» usa
+    Las no leídas llevan la insignia «Sin leer» y el título en énfasis. «Marcar como leída» usa
     <code>POST /v1/notifications/&#123;id&#125;/leer</code>, «Desmarcar» usa
     <code>PATCH /v1/notifications/&#123;id&#125;</code> y «Marcar todas como leídas» usa
     <code>POST /v1/notifications/leer-todas</code>. El contador sale del sobre del listado

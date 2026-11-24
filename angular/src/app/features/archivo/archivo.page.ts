@@ -18,7 +18,13 @@ import { formatearFechaHora } from '../../shared/formato-fecha';
 import { IconoComponent } from '../../shared/ui/icono.component';
 import { OrdenTabla } from '../../shared/ui/orden-tabla';
 import { PaginacionComponent } from '../../shared/ui/paginacion.component';
-import { ThOrdenDirective } from '../../shared/ui/th-orden.directive';
+import {
+  CeldaTablaDirectiva,
+  TablaComponent,
+  type ClicFila,
+  type ColumnaTabla,
+  type OrdenColumna,
+} from '../../shared/ui/tabla.component';
 import { aAlerta } from '../alertas/alerta.mapeo';
 import { aDemanda } from '../casos/demanda-sin-caso.mapeo';
 import { aCompromiso } from '../compromisos/compromiso.mapeo';
@@ -210,7 +216,13 @@ const CONFIGS: Record<PestanaArchivo, ConfigPestana> = {
  */
 @Component({
   selector: 'app-archivo',
-  imports: [IconoComponent, PaginacionComponent, ArchivoPanelComponent, ThOrdenDirective],
+  imports: [
+    IconoComponent,
+    PaginacionComponent,
+    ArchivoPanelComponent,
+    TablaComponent,
+    CeldaTablaDirectiva,
+  ],
   templateUrl: './archivo.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
@@ -220,17 +232,18 @@ const CONFIGS: Record<PestanaArchivo, ConfigPestana> = {
 
     .aviso-ok {
       margin: 0;
-      color: #2f6f52;
+      color: var(--green);
       font-size: 13.5px;
     }
 
     .celda-registro {
+      display: block;
       max-width: 300px;
       white-space: normal;
     }
 
     .celda-registro strong {
-      color: #2b3d4f;
+      color: var(--ink);
       font-size: 12.5px;
       font-weight: 700;
     }
@@ -239,38 +252,40 @@ const CONFIGS: Record<PestanaArchivo, ConfigPestana> = {
     .celda-caso small {
       display: block;
       margin-top: 3px;
-      color: #99a3aa;
+      color: var(--muted);
       font-size: 12px;
       line-height: 1.4;
     }
 
     .celda-caso {
+      display: block;
       max-width: 210px;
       white-space: normal;
     }
 
     .celda-caso strong {
-      color: #465a6c;
+      color: var(--ink-2);
       font-size: 12px;
       font-weight: 600;
     }
 
     .celda-motivo {
+      display: block;
       max-width: 320px;
       white-space: normal;
-      color: #52677a;
+      color: var(--ink-2);
       font-size: 12px;
       line-height: 1.5;
     }
 
     .sin-dato {
-      color: #a0aab3;
+      color: var(--muted);
       font-style: italic;
     }
 
     .actualizando {
       margin: 0;
-      color: #8d99a6;
+      color: var(--muted);
       font-size: 12px;
     }
 
@@ -330,6 +345,45 @@ export class ArchivoPage {
   };
 
   readonly filasVisibles = computed(() => this.orden.ordenar(this.filas(), this.accesores));
+
+  /** Columnas del archivo: las cinco entidades comparten los mismos campos. */
+  readonly columnas: readonly ColumnaTabla[] = [
+    { clave: 'registro', titulo: 'Registro', ordenable: true },
+    { clave: 'caso', titulo: 'Caso', ordenable: true },
+    { clave: 'motivo', titulo: 'Motivo de la anulación', ordenable: true },
+    {
+      clave: 'fecha',
+      titulo: 'Fecha de anulación',
+      ordenable: true,
+      acceso: (fila) => (fila as FilaArchivo).anuladoEn,
+      formato: (valor) => this.formatearFechaHora(valor as string | null),
+    },
+    {
+      clave: 'anulo',
+      titulo: 'Anuló',
+      ordenable: true,
+      acceso: (fila) => {
+        const registro = fila as FilaArchivo;
+        return registro.anuladoPorNombre ?? registro.anuladoPor;
+      },
+    },
+    { clave: 'accion', titulo: 'Acción' },
+  ];
+
+  /** Orden que pinta `app-tabla`; la página sigue ordenando con `OrdenTabla`. */
+  readonly ordenTabla = computed<OrdenColumna | null>(() => {
+    const clave = this.orden.columna();
+    return clave ? { clave, direccion: this.orden.direccion() } : null;
+  });
+
+  alCambiarOrden(cambio: OrdenColumna | null): void {
+    const clave = cambio?.clave ?? this.orden.columna();
+    if (clave) this.orden.alternar(clave);
+  }
+
+  alClicFila(evento: ClicFila): void {
+    this.abrir(evento.fila as FilaArchivo);
+  }
 
   readonly rango = computed(() => {
     const valor = this.listado.valor();

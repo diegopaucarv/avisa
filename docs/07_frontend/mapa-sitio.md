@@ -1,54 +1,82 @@
 # Mapa de sitio y barra lateral
 
-Este documento describe la organización vigente de la consola Angular: los
-grupos de la barra lateral, las rutas que cada enlace abre y las pantallas que
-existen pero no aparecen en el menú. La fuente de verdad del menú es
-`angular/src/app/layouts/shell/shell.component.ts` (`ENLACES_NAV`): el orden del
-arreglo es el orden de la barra y los grupos se forman por contigüidad.
+Corte: **2026-11-24**. Este documento describe la organización vigente de la
+consola Angular: los grupos de la barra lateral, las rutas que cada enlace abre
+y las pantallas que existen pero no aparecen en el menú. La fuente de verdad del
+menú es `angular/src/app/layouts/shell/shell.component.ts` (`ENLACES_NAV`): el
+orden del arreglo es el orden de la barra y los grupos se forman por contigüidad.
+Las rutas y sus componentes están en `angular/src/app/app.routes.ts` (todo
+`loadComponent` perezoso).
+
+Cuando este documento y el código discrepen, manda el código. El estado
+pantalla por pantalla, con lo que falta, está en
+`docs/07_frontend/frontend.md`.
 
 ## Barra lateral
 
-| Grupo                | Etiqueta             | Ruta                         |
-| -------------------- | -------------------- | ---------------------------- |
-| PANORAMA TERRITORIAL | Panorama territorial | `/mapa`                      |
-| PREVENCIÓN           | Casos                | `/casos`                     |
-| PREVENCIÓN           | Alertas tempranas    | `/alertas`                   |
-| PREVENCIÓN           | Clima social         | `/clima-social`              |
-| INTERVENCIÓN         | Reuniones            | `/reuniones`                 |
-| INTERVENCIÓN         | Resultados           | `/resultados`                |
-| SEGUIMIENTO          | Compromisos          | `/compromisos`               |
-| GESTIÓN DE IYC       | Reporte de actividad | `/reportes`                  |
-| GESTIÓN DE IYC       | Documentos           | `/documentos`                |
-| DIRECTORIOS          | Actores              | `/directorio/personas`       |
-| DIRECTORIOS          | Organizaciones       | `/directorio/organizaciones` |
-| DIRECTORIOS          | Locales              | `/directorio/locales`        |
-| MI ESPACIO           | Resumen operativo    | `/resumen`                   |
-| MI ESPACIO           | Bandeja de trabajo   | `/bandeja`                   |
-| MI ESPACIO           | Archivo              | `/archivo`                   |
+Ocho grupos y 23 enlaces, en el orden del arreglo:
 
-`Archivo` solo se muestra a los roles con capacidad de eliminar
-(`soloSiPuedeEliminar`). Reúne en una sola vista los registros anulados de
-casos, alertas, demandas, documentos y compromisos. `/papelera` sigue
-existiendo como redirección a `/archivo`.
+| Grupo                | Etiqueta                 | Ruta                         | Condición             |
+| -------------------- | ------------------------ | ---------------------------- | --------------------- |
+| PANORAMA TERRITORIAL | Panorama territorial     | `/mapa`                      | —                     |
+| PANORAMA TERRITORIAL | Dashboard analítico      | `/dashboard`                 | —                     |
+| PREVENCIÓN           | Casos                    | `/casos`                     | —                     |
+| PREVENCIÓN           | Alertas tempranas        | `/alertas`                   | —                     |
+| PREVENCIÓN           | Bandeja RED-RADAR        | `/red-radar`                 | —                     |
+| PREVENCIÓN           | Matriz de conflictividad | `/matriz-conflictividad`     | —                     |
+| PREVENCIÓN           | Clima social             | `/clima-social`              | —                     |
+| INTERVENCIÓN         | Reuniones                | `/reuniones`                 | —                     |
+| INTERVENCIÓN         | Resultados               | `/resultados`                | —                     |
+| SEGUIMIENTO          | Compromisos              | `/compromisos`               | —                     |
+| GESTIÓN DE IYC       | Reporte de actividad     | `/reportes`                  | —                     |
+| GESTIÓN DE IYC       | Documentos               | `/documentos`                | —                     |
+| GESTIÓN DE IYC       | Gobierno y sugerencias   | `/gobierno-sugerencias`      | —                     |
+| GESTIÓN DE IYC       | Exportaciones            | `/exportaciones`             | —                     |
+| DIRECTORIOS          | Actores                  | `/directorio/personas`       | —                     |
+| DIRECTORIOS          | Organizaciones           | `/directorio/organizaciones` | —                     |
+| DIRECTORIOS          | Autoridades y agentes    | `/directorio/autoridades`    | —                     |
+| DIRECTORIOS          | Auditorios               | `/directorio/locales`        | —                     |
+| MI ESPACIO           | Resumen operativo        | `/resumen`                   | —                     |
+| MI ESPACIO           | Bandeja de trabajo       | `/bandeja`                   | —                     |
+| MI ESPACIO           | Archivo                  | `/archivo`                   | `soloSiPuedeEliminar` |
+| ADMINISTRACIÓN       | Administración           | `/administracion`            | `soloSiEsAdmin`       |
+| ADMINISTRACIÓN       | Consola ETL              | `/administracion/etl`        | `soloSiEsAdmin`       |
 
-`Actores` abre `/directorio/personas`: la vista de Actores con filtro fijo de
-personas (mismo componente que `/directorio/actores`, la matriz completa).
+- **Archivo** sólo se muestra a los roles con capacidad de eliminar. Reúne en
+  una sola vista los registros anulados de casos, alertas, demandas, documentos
+  y compromisos. `/papelera` sigue existiendo como redirección a `/archivo`.
+- **Administración** y **Consola ETL** sólo se dibujan para el rol
+  `administrador`. `Administración` cubre usuarios, catálogos, configuración y
+  lista blanca de correo; la consola ETL muestra ejecuciones y resumen de la
+  última carga.
+- **Actores** abre `/directorio/personas`: la vista de Actores con filtro fijo
+  de personas (data `naturalezaFija: 'persona'`, mismo componente que
+  `/directorio/actores`, la matriz completa).
 
 ## Criterio de agrupación
 
 - **Panorama territorial** es la puerta de entrada geográfica. El panorama abre
   el listado de casos ya filtrado por región; no duplica la gestión del caso.
-- **Prevención** reúne el trabajo preventivo: el caso, la alerta temprana y la
+  El **Dashboard analítico** vive en el mismo grupo porque es otra lectura del
+  mismo cuerpo de datos (series, distribuciones y comparaciones).
+- **Prevención** reúne el trabajo preventivo: el caso, la alerta temprana, el
+  triaje de señales en RED-RADAR, la matriz de conflictividad (Anexo 15) y la
   lectura de clima social.
 - **Intervención** reúne la reunión de diálogo y sus productos (actas, ayudas
-  memoria, relatorías).
-- **Seguimiento** es el ciclo de los compromisos y sus hitos.
+  memoria, relatorías) y los resultados.
+- **Seguimiento** es el ciclo de los compromisos y sus hitos. Aloja además la
+  matriz del equipo (demandas–intervenciones) y su importación desde Excel.
 - **Gestión de IyC** agrupa la producción documental y los reportes: el árbol de
   documentos es además la vista central del RAG e incluye, junto a los
   documentos del expediente, las ramas **Normativas** (`core.normativas`) y
-  **Otros documentos** (`core.otros_documentos`).
-- **Directorios** expone las tres matrices: personas, organizaciones y locales.
+  **Otros documentos** (`core.otros_documentos`). Aquí viven también **Gobierno
+  y sugerencias** (propuestas y su triaje) y **Exportaciones** (Anexos 14 y 15,
+  informes y mensajería de clima social).
+- **Directorios** expone cuatro vistas: personas, organizaciones, autoridades y
+  agentes, y auditorios.
 - **Mi espacio** son las vistas de trabajo personal y el archivo.
+- **Administración** es la trastienda de sólo-lectura/gestión de parámetros y la
+  consola de ejecuciones ETL, fuera del flujo operativo.
 
 ## Reportes de monitoreo
 
@@ -61,32 +89,40 @@ se actualiza en `/compromisos`.
 
 ## Rutas fuera del menú
 
-Existen y siguen funcionando, aunque no tengan enlace en la barra:
+Existen y siguen funcionando, aunque no tengan enlace en la barra. Todas las
+listadas aquí tienen componente salvo las que se marcan como redirección.
 
 | Ruta                        | Motivo                                                                                                                          |
 | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
 | `/`                         | Redirige a `/mapa`.                                                                                                             |
-| `/directorio`               | Portada visual con los tres accesos del directorio.                                                                             |
+| `/acceso`                   | Inicio de sesión; fuera del shell y protegido por `visitanteGuard`.                                                             |
+| `/directorio`               | Portada visual con los accesos del directorio.                                                                                  |
 | `/directorio/actores`       | Matriz histórica que mezcla personas y organizaciones; se conserva para enlaces directos (por ejemplo desde la ficha del caso). |
-| `/directorio/instituciones` | Título «Organizaciones públicas», ruta heredada.                                                                                |
+| `/directorio/instituciones` | **Redirección** a `/directorio/organizaciones` (alias heredado; «instituciones» ya no se usa en la UI).                         |
 | `/casos/sin-caso`           | Demandas registradas que todavía no tienen caso.                                                                                |
 | `/casos/:codigo`            | Detalle del caso.                                                                                                               |
 | `/direccion`                | Tablero de dirección con desglose regional.                                                                                     |
 | `/busqueda`                 | Búsqueda global.                                                                                                                |
 | `/notificaciones`           | Bandeja de notificaciones.                                                                                                      |
-| `/ayuda`                    | Ayuda.                                                                                                                          |
+| `/ayuda`                    | Ayuda y criterios.                                                                                                              |
 | `/preferencias`             | Preferencias de la cuenta.                                                                                                      |
+| `/papelera`                 | **Redirección** a `/archivo`.                                                                                                   |
+| `/**`                       | Comodín que redirige a la raíz (y por tanto a `/mapa`).                                                                         |
 
 ## Etiquetas con criterio propio
 
 Las etiquetas de `docs/07_frontend/mockups/` son la referencia, con estas
 decisiones explícitas:
 
-- **Locales** en lugar de «Auditorios»: la ruta sigue siendo
-  `/directorio/locales` y el sustantivo visible es «local».
+- **Auditorios** en el menú, **Locales** en la página: la navegación dice
+  «Auditorios» (`ENLACES_NAV`) y la ruta sigue siendo `/directorio/locales`;
+  el sustantivo interno de la vista es «local». Es una inconsistencia declarada
+  y pendiente de unificar.
 - **Organizaciones** en lugar de «Instituciones»: el directorio habla de
-  organizaciones; la ruta heredada `/directorio/instituciones` muestra
-  «Organizaciones públicas».
+  organizaciones; la ruta heredada `/directorio/instituciones` redirige a
+  `/directorio/organizaciones`.
+- **Autoridades y agentes** es la cuarta vista del directorio; no existía en el
+  mapa anterior y ya está en la barra.
 - Las **alertas vinculadas** al caso se mantienen tal como están.
 
 ## Nomenclatura

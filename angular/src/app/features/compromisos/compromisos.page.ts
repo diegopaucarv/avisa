@@ -35,7 +35,13 @@ import { IconoComponent } from '../../shared/ui/icono.component';
 import { OrdenTabla } from '../../shared/ui/orden-tabla';
 import { PaginacionComponent } from '../../shared/ui/paginacion.component';
 import { SeleccionTabla } from '../../shared/ui/seleccion-tabla';
-import { ThOrdenDirective } from '../../shared/ui/th-orden.directive';
+import {
+  CeldaTablaDirectiva,
+  TablaComponent,
+  type ClicFila,
+  type ColumnaTabla,
+  type OrdenColumna,
+} from '../../shared/ui/tabla.component';
 import {
   ESTADOS_COMPROMISO,
   TIPOS_COMPROMISO,
@@ -193,7 +199,8 @@ function totalDe(bruto: unknown): number {
     AnularPanelComponent,
     BarraSeleccionComponent,
     MatrizEquipoComponent,
-    ThOrdenDirective,
+    TablaComponent,
+    CeldaTablaDirectiva,
   ],
   templateUrl: './compromisos.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -207,20 +214,17 @@ function totalDe(bruto: unknown): number {
     }
     .aviso-ok {
       margin: 0;
-      color: #2f6f52;
+      color: var(--green);
       font-size: 13.5px;
     }
-    .fila-compromiso {
-      cursor: pointer;
-    }
-    .fila-compromiso:hover,
-    .fila-compromiso:focus-within {
-      background: #fafbfc;
-    }
-    .data-table td:first-child:not(.col-seleccion) {
-      min-width: 132px;
-    }
+
+    /*
+     * app-tabla gobierna el hover y la fila abierta; aquí sólo quedan los
+     * bloques de celda, que ahora viven dentro del ng-template (el td es
+     * nowrap, así que el salto de línea se declara en el bloque interno).
+     */
     .celda-compromiso {
+      display: block;
       max-width: 320px;
       white-space: normal;
     }
@@ -233,29 +237,37 @@ function totalDe(bruto: unknown): number {
       display: block;
     }
     .celda-vencimiento {
+      display: block;
       white-space: normal;
     }
     .celda-vencimiento small {
       display: block;
       margin-top: 2px;
-      color: #8d99a6;
+      color: var(--muted);
       font-size: 12px;
     }
     .celda-vencimiento .due-state {
       margin-left: 4px;
     }
     .aviso-fecha {
-      color: #a27435 !important;
+      color: #a27435;
     }
-    .anexo-avance {
-      white-space: nowrap;
-      font-variant-numeric: tabular-nums;
+    :host-context(html[data-theme='dark']) .aviso-fecha {
+      color: #e0b269;
     }
     .anexo-observaciones {
+      display: block;
       min-width: 220px;
-      color: #778797;
+      color: var(--muted);
       font-size: 12px;
       line-height: 1.4;
+      white-space: normal;
+    }
+
+    /* La papelera la nombra el código, no una acción: conserva su ancho menor. */
+    :host ::ng-deep .tabla-papelera app-tabla .tabla tbody td.celda-principal {
+      min-width: 132px;
+      white-space: nowrap;
     }
     .calendario-barra {
       display: flex;
@@ -512,10 +524,75 @@ export class CompromisosPage {
     this.orden.ordenar(this.compromisos(), this.accesoresCompromiso),
   );
 
-  idsVisibles(): string[] {
-    return this.compromisos()
-      .map((compromiso) => compromiso.id)
-      .filter((id): id is string => !!id);
+  /** Ids marcados, en una referencia estable para `app-tabla`. */
+  readonly idsSeleccionados = computed(() => this.seleccion.lista());
+
+  /** Columnas de la matriz del Anexo 14, en el orden del mockup. */
+  readonly columnasAnexo14: readonly ColumnaTabla[] = [
+    { clave: 'compromiso', titulo: 'Compromiso', ordenable: true },
+    { clave: 'unidad', titulo: 'Responsable', ordenable: true },
+    {
+      clave: 'fechaInicio',
+      titulo: 'Fecha de inicio',
+      formato: (valor) => this.fechaTexto(valor as string | null),
+    },
+    { clave: 'estado', titulo: 'Estado', ordenable: true },
+    {
+      clave: 'avance',
+      titulo: 'Avance',
+      acceso: (fila) => this.avanceTexto(fila as Compromiso),
+    },
+    { clave: 'observaciones', titulo: 'Observaciones' },
+  ];
+
+  /** Columnas de la papelera: mismo orden que el listado de anulados. */
+  readonly columnasPapelera: readonly ColumnaTabla[] = [
+    { clave: 'codigo', titulo: 'Código', ordenable: true },
+    { clave: 'compromiso', titulo: 'Compromiso', ordenable: true },
+    { clave: 'caso', titulo: 'Caso', ordenable: true },
+    {
+      clave: 'anulado',
+      titulo: 'Fecha de anulación',
+      ordenable: true,
+      acceso: (fila) => (fila as Compromiso).anuladoEn,
+      formato: (valor) => this.fechaHoraTexto(valor as string | null),
+    },
+    { clave: 'accion', titulo: 'Acción' },
+  ];
+
+  /** Columnas del listado activo. */
+  readonly columnasListado: readonly ColumnaTabla[] = [
+    { clave: 'compromiso', titulo: 'Compromiso', ordenable: true },
+    { clave: 'caso', titulo: 'Caso', ordenable: true },
+    { clave: 'unidad', titulo: 'Unidad responsable', ordenable: true },
+    { clave: 'estado', titulo: 'Estado', ordenable: true },
+    { clave: 'vencimiento', titulo: 'Vencimiento', ordenable: true },
+  ];
+
+  /** Orden que pinta `app-tabla`; la página sigue ordenando con `OrdenTabla`. */
+  readonly ordenTabla = computed<OrdenColumna | null>(() => {
+    const clave = this.orden.columna();
+    return clave ? { clave, direccion: this.orden.direccion() } : null;
+  });
+
+  alCambiarOrden(cambio: OrdenColumna | null): void {
+    const clave = cambio?.clave ?? this.orden.columna();
+    if (clave) this.orden.alternar(clave);
+  }
+
+  /** Refleja en `SeleccionTabla` lo que marca la tabla (barra de selección). */
+  alCambiarSeleccion(ids: readonly string[]): void {
+    const marcadas = new Set(ids);
+    for (const id of this.seleccion.lista()) {
+      if (!marcadas.has(id)) this.seleccion.alternar(id);
+    }
+    for (const id of ids) {
+      if (!this.seleccion.esta(id)) this.seleccion.alternar(id);
+    }
+  }
+
+  alClicFila(evento: ClicFila): void {
+    this.abrir(evento.fila as Compromiso);
   }
 
   /** Compromiso que se está anulando en el panel compartido. */

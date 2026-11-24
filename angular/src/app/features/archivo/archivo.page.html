@@ -51,61 +51,52 @@
   <p class="actualizando" role="status">Actualizando el listado…</p>
   }
 
-  <div class="table-wrap">
-    <table class="data-table">
-      <thead>
-        <tr>
-          <th scope="col" [appThOrden]="'registro'" [orden]="orden">Registro</th>
-          <th scope="col" [appThOrden]="'caso'" [orden]="orden">Caso</th>
-          <th scope="col" [appThOrden]="'motivo'" [orden]="orden">Motivo de la anulación</th>
-          <th scope="col" [appThOrden]="'fecha'" [orden]="orden">Fecha de anulación</th>
-          <th scope="col" [appThOrden]="'anulo'" [orden]="orden">Anuló</th>
-          <th scope="col">Acción</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (fila of filasVisibles(); track fila.id) {
-        <tr
-          class="case-row-clickable"
-          [class.row-selected]="filaAbierta()?.id === fila.id"
-          (click)="abrir(fila)"
-        >
-          <td class="celda-registro">
-            <strong>{{ fila.codigo || 'Sin código' }}</strong>
-            @if (fila.titulo) {
-            <small>{{ fila.titulo }}</small>
-            }
-          </td>
-          <td class="celda-caso">
-            @if (fila.casoCodigo) {
-            <strong>{{ fila.casoCodigo }}</strong>
-            @if (fila.casoTitulo) {
-            <small>{{ fila.casoTitulo }}</small>
-            } } @else {
-            <span class="sin-dato">Sin caso</span>
-            }
-          </td>
-          <td class="celda-motivo">{{ fila.motivo || 'Sin motivo registrado' }}</td>
-          <td>{{ formatearFechaHora(fila.anuladoEn) }}</td>
-          <td>{{ fila.anuladoPorNombre || fila.anuladoPor || '—' }}</td>
-          <td>
-            <button
-              type="button"
-              class="button-secondary"
-              [disabled]="restaurando()"
-              [attr.aria-label]="
-                      'Restaurar ' + (fila.codigo || fila.titulo || 'el registro')
-                    "
-              (click)="restaurarFila(fila); $event.stopPropagation()"
-            >
-              Restaurar
-            </button>
-          </td>
-        </tr>
+  <app-tabla
+    [columnas]="columnas"
+    [filas]="filasVisibles()"
+    [orden]="ordenTabla()"
+    [ordenServidor]="true"
+    [clicable]="true"
+    (ordenCambio)="alCambiarOrden($event)"
+    (filaClic)="alClicFila($event)"
+  >
+    <ng-template appCeldaTabla="registro" let-fila>
+      <div class="celda-registro">
+        <strong>{{ fila.codigo || 'Sin código' }}</strong>
+        @if (fila.titulo) {
+        <small>{{ fila.titulo }}</small>
         }
-      </tbody>
-    </table>
-  </div>
+      </div>
+    </ng-template>
+
+    <ng-template appCeldaTabla="caso" let-fila>
+      <div class="celda-caso">
+        @if (fila.casoCodigo) {
+        <strong>{{ fila.casoCodigo }}</strong>
+        @if (fila.casoTitulo) {
+        <small>{{ fila.casoTitulo }}</small>
+        } } @else {
+        <span class="sin-dato">Sin caso</span>
+        }
+      </div>
+    </ng-template>
+
+    <ng-template appCeldaTabla="motivo" let-fila>
+      <div class="celda-motivo">{{ fila.motivo || 'Sin motivo registrado' }}</div>
+    </ng-template>
+
+    <ng-template appCeldaTabla="accion" let-fila>
+      <button
+        type="button"
+        class="button-secondary"
+        [disabled]="restaurando()"
+        [attr.aria-label]="'Restaurar ' + (fila.codigo || fila.titulo || 'el registro')"
+        (click)="restaurarFila(fila); $event.stopPropagation()"
+      >
+        Restaurar
+      </button>
+    </ng-template>
+  </app-tabla>
   } @if (total() > 0 && estadoListado() !== 'error') {
   <app-paginacion
     [pagina]="pagina()"

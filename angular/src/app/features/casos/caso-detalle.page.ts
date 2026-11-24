@@ -264,11 +264,11 @@ const CAMPOS_OCULTOS: ReadonlySet<CampoEditable> = new Set<CampoEditable>([
   'titulo',
   'naturaleza',
   'ciclo',
+  'tematica',
+  'subsector',
   'pctAvance',
   'fechaCierre',
   'prioridad',
-  'riesgo',
-  'nivelConflicto',
   'unidadResponsable',
 ]);
 

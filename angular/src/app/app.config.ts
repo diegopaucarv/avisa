@@ -13,6 +13,7 @@ import { provideRouter, withComponentInputBinding, withInMemoryScrolling } from 
 import { routes } from './app.routes';
 import { sesionInterceptor } from './core/auth/sesion.interceptor';
 import { SesionStore } from './core/auth/sesion.store';
+import { TemaService } from './core/tema/tema.service';
 
 registerLocaleData(localeEsPe, 'es-PE');
 
@@ -35,5 +36,13 @@ export const appConfig: ApplicationConfig = {
      * parpadeo de login al recargar. Un 401 se resuelve como "anónimo".
      */
     provideAppInitializer(() => inject(SesionStore).restaurar()),
+
+    /**
+     * Una sola fuente de verdad para el tema: instanciar el servicio aquí
+     * garantiza que `data-theme` / `data-density` se apliquen al arrancar y
+     * que la hidratación desde el servidor ocurra aunque nadie abra
+     * Preferencias. El efecto interno se encarga de los cambios posteriores.
+     */
+    provideAppInitializer(() => inject(TemaService).aplicarActual()),
   ],
 };

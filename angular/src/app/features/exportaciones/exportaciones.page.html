@@ -1,0 +1,162 @@
+<section class="view-body" aria-labelledby="titulo-exportaciones">
+  <header class="view-head">
+    <div>
+      <p class="eyebrow">Vistas previas imprimibles</p>
+      <h1 id="titulo-exportaciones">Exportaciones</h1>
+      <p class="view-subtitle">
+        Anexos oficiales OAIPCS listos para imprimir o descargar. Cada tarjeta indica si el anexo se
+        puede generar hoy y qué campos del formato no tienen fuente: un anexo sin datos se marca
+        como no generable, nunca como completo. Una celda «—» significa que la fuente no registra el
+        dato.
+      </p>
+    </div>
+    <div class="view-actions">
+      <button type="button" class="button-secondary" [disabled]="cargando()" (click)="recargar()">
+        <app-icono nombre="actividad" [tamano]="15" />
+        Actualizar catálogo
+      </button>
+    </div>
+  </header>
+
+  <div class="controles" role="group" aria-label="Opciones de exportación">
+    <label class="campo">
+      <span class="campo-etq">Formato</span>
+      <select [value]="formato()" (change)="cambiarFormato($event)">
+        @for (opcion of formatos; track opcion) {
+        <option [value]="opcion">{{ etiquetaFormato(opcion) }}</option>
+        }
+      </select>
+    </label>
+
+    <label class="campo">
+      <span class="campo-etq">Desde</span>
+      <input type="date" [value]="desde()" (input)="actualizarDesde($event)" />
+    </label>
+
+    <label class="campo">
+      <span class="campo-etq">Hasta</span>
+      <input type="date" [value]="hasta()" (input)="actualizarHasta($event)" />
+    </label>
+
+    <label class="campo campo-ancho">
+      <span class="campo-etq">Código o caso</span>
+      <input
+        type="search"
+        placeholder="Código de documento, alerta o caso"
+        [value]="codigo()"
+        (input)="actualizarCodigo($event)"
+      />
+    </label>
+
+    <label class="campo">
+      <span class="campo-etq">Estado del hito (Anexo 14)</span>
+      <select [value]="estadoHito()" (change)="actualizarEstado($event)">
+        <option value="">Todos</option>
+        <option value="Registrado">Registrado</option>
+        <option value="En ejecución">En ejecución</option>
+        <option value="Paralizado">Paralizado</option>
+        <option value="Cumplido">Cumplido</option>
+        <option value="Desestimado">Desestimado</option>
+        <option value="No cumplido">No cumplido</option>
+      </select>
+    </label>
+  </div>
+
+  <p class="nota-filtros">
+    El rango de fechas y el código se aplican a los anexos que los admiten. La vista previa siempre
+    usa HTML; la descarga respeta el formato elegido.
+  </p>
+
+  @if (errorCarga(); as mensaje) {
+  <p class="form-error" role="alert">{{ mensaje }}</p>
+  } @if (errorAccion(); as mensaje) {
+  <p class="form-error" role="alert">{{ mensaje }}</p>
+  } @if (cargando()) {
+  <p class="estado-carga">Cargando el catálogo de anexos…</p>
+  } @else if (anexos().length === 0) {
+  <p class="estado-carga">
+    No hay anexos disponibles para su perfil. Si espera ver alguno, verifique su rol o cree el
+    registro de origen (alerta, documento, reunión o reporte).
+  </p>
+  } @else {
+  <div class="anexos-grid">
+    @for (anexo of anexos(); track anexo.numero) {
+    <article
+      class="anexo-card"
+      [class.no-disponible]="!anexo.disponible"
+      [class.activo]="seleccionado()?.numero === anexo.numero"
+    >
+      <header class="anexo-head">
+        <span class="anexo-icono"><app-icono nombre="documentos" [tamano]="18" /></span>
+        <div class="anexo-titulo">
+          <p class="anexo-ref">{{ anexo.referencia }}</p>
+          <h2>{{ anexo.titulo }}</h2>
+        </div>
+        <span class="pill" [class.pill-ok]="anexo.disponible" [class.pill-off]="!anexo.disponible">
+          {{ anexo.disponible ? 'Generable' : 'No generable' }}
+        </span>
+      </header>
+
+      <p class="anexo-meta">
+        <strong>{{ anexo.registros }}</strong> de {{ anexo.total }} registros con cuerpo · formatos:
+        {{ anexo.formatos.join(', ') }}
+      </p>
+
+      @if (anexo.faltantes.length > 0) {
+      <ul class="faltantes">
+        @for (falta of anexo.faltantes; track falta) {
+        <li>{{ falta }}</li>
+        }
+      </ul>
+      } @else {
+      <p class="sin-faltantes">Sin campos faltantes declarados.</p>
+      }
+
+      <div class="anexo-acciones">
+        <button type="button" class="button-secondary" (click)="seleccionar(anexo)">
+          Seleccionar
+        </button>
+        <button
+          type="button"
+          class="button-secondary"
+          [disabled]="!puedePrevisualizar(anexo) || ocupado() === anexo.numero"
+          (click)="previsualizar(anexo)"
+        >
+          <app-icono nombre="ojo" [tamano]="15" />
+          Previsualizar
+        </button>
+        <button
+          type="button"
+          class="button-secondary"
+          [disabled]="!anexo.disponible || !soportaFormato(anexo) || ocupado() === anexo.numero"
+          (click)="descargar(anexo)"
+        >
+          <app-icono nombre="archivo" [tamano]="15" />
+          {{ ocupado() === anexo.numero ? 'Generando…' : 'Descargar' }}
+        </button>
+      </div>
+    </article>
+    }
+  </div>
+  } @if (previsualizacion(); as vista) {
+  <section class="vista-previa" aria-label="Vista previa del anexo">
+    <header class="vista-cabecera">
+      <h2>Vista previa · {{ vista.nombre }}</h2>
+      <div class="vista-acciones">
+        <button type="button" class="button-secondary" (click)="abrirEnPestana()">
+          Abrir en pestaña nueva
+        </button>
+        <button type="button" class="button-secondary" (click)="cerrarPrevisualizacion()">
+          Cerrar
+        </button>
+      </div>
+    </header>
+    <iframe
+      class="vista-frame"
+      title="Vista previa del anexo"
+      [src]="vista.seguro"
+      referrerpolicy="no-referrer"
+    ></iframe>
+  </section>
+  }
+</section>

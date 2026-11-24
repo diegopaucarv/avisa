@@ -96,64 +96,30 @@
   <p class="actualizando" role="status">Actualizando el listado…</p>
   }
 
-  <div class="table-wrap">
-    <table class="data-table">
-      <thead>
-        <tr>
-          <th scope="col" class="col-seleccion">
-            <input
-              type="checkbox"
-              aria-label="Seleccionar todos los registros de esta página"
-              [checked]="seleccion.todas(idsVisibles())"
-              [indeterminate]="seleccion.algunas(idsVisibles())"
-              (change)="seleccion.alternarPagina(idsVisibles(), $event)"
-            />
-          </th>
-          <th scope="col" [appThOrden]="'tipo'" [orden]="orden">Tipo</th>
-          <th scope="col" [appThOrden]="'codigo'" [orden]="orden">Código</th>
-          <th scope="col" [appThOrden]="'caso'" [orden]="orden">Caso</th>
-          <th scope="col" [appThOrden]="'responsable'" [orden]="orden">Responsable</th>
-          <th scope="col" [appThOrden]="'fecha'" [orden]="orden">Fecha</th>
-          <th scope="col" [appThOrden]="'region'" [orden]="orden">Región</th>
-          <th scope="col" [appThOrden]="'ubicacion'" [orden]="orden">Ubicación</th>
-          <th scope="col" [appThOrden]="'titulo'" [orden]="orden">Título</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (reporte of filasVisibles(); track (reporte.codigoReporte || '') + '|' +
-        (reporte.titulo || '')) {
-        <tr>
-          <td class="col-seleccion" (click)="$event.stopPropagation()">
-            <input
-              type="checkbox"
-              [checked]="seleccion.esta(reporte.codigoReporte)"
-              [disabled]="!reporte.codigoReporte"
-              [attr.aria-label]="'Seleccionar el reporte ' + (reporte.codigoReporte || reporte.titulo || '')"
-              (click)="$event.stopPropagation()"
-              (change)="seleccion.alternar(reporte.codigoReporte)"
-            />
-          </td>
-          <td>{{ reporte.tipo || '—' }}</td>
-          <td>{{ reporte.codigoReporte || '—' }}</td>
-          <td class="celda-caso">
-            @if (reporte.codigoCaso) {
-            <a class="table-link" [routerLink]="['/casos', reporte.codigoCaso]">
-              {{ reporte.codigoCaso }}
-            </a>
-            } @else {
-            <span class="sin-dato">No vinculado</span>
-            }
-          </td>
-          <td>{{ reporte.responsable || '—' }}</td>
-          <td>{{ formatearFecha(reporte.fecha) }}</td>
-          <td>{{ reporte.region || '—' }}</td>
-          <td>{{ reporte.ubicacion || '—' }}</td>
-          <td class="celda-titulo">{{ reporte.titulo || 'Sin título' }}</td>
-        </tr>
-        }
-      </tbody>
-    </table>
-  </div>
+  <app-tabla
+    [columnas]="columnas"
+    [filas]="filasVisibles()"
+    [orden]="ordenTabla()"
+    [ordenServidor]="true"
+    [seleccionable]="true"
+    [seleccion]="idsSeleccionados()"
+    [cargando]="estadoListado() === 'cargando'"
+    claveFila="codigoReporte"
+    (ordenCambio)="alCambiarOrden($event)"
+    (seleccionCambio)="alCambiarSeleccion($event)"
+  >
+    <ng-template appCeldaTabla="caso" let-fila>
+      @if (fila.codigoCaso) {
+      <a class="table-link" [routerLink]="['/casos', fila.codigoCaso]">{{ fila.codigoCaso }}</a>
+      } @else {
+      <span class="sin-dato">No vinculado</span>
+      }
+    </ng-template>
+
+    <ng-template appCeldaTabla="titulo" let-fila>
+      <span class="celda-titulo">{{ fila.titulo || 'Sin título' }}</span>
+    </ng-template>
+  </app-tabla>
   } @if (total() > 0 && estadoListado() !== 'error') {
   <app-paginacion
     [pagina]="filtros().pagina"

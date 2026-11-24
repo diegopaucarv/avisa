@@ -21,12 +21,16 @@ import {
 } from '../../core/http/coleccion';
 import { consulta } from '../../core/http/consulta';
 import { BarraSeleccionComponent } from '../../shared/ui/barra-seleccion.component';
-
-import { SeleccionTabla } from '../../shared/ui/seleccion-tabla';
 import { IconoComponent } from '../../shared/ui/icono.component';
 import { OrdenTabla } from '../../shared/ui/orden-tabla';
 import { PaginacionComponent } from '../../shared/ui/paginacion.component';
-import { ThOrdenDirective } from '../../shared/ui/th-orden.directive';
+import { SeleccionTabla } from '../../shared/ui/seleccion-tabla';
+import {
+  CeldaTablaDirectiva,
+  TablaComponent,
+  type ColumnaTabla,
+  type OrdenColumna,
+} from '../../shared/ui/tabla.component';
 import { aReporte, formatearFecha, type Reporte } from './reportes.mapeo';
 
 /** Tipo literal de `core.cat_tipos_documento` para cada pestaña de IyC. */
@@ -74,7 +78,8 @@ const FILTROS_INICIALES: FiltrosReportes = {
     IconoComponent,
     PaginacionComponent,
     BarraSeleccionComponent,
-    ThOrdenDirective,
+    TablaComponent,
+    CeldaTablaDirectiva,
   ],
   templateUrl: './reportes.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -118,16 +123,14 @@ const FILTROS_INICIALES: FiltrosReportes = {
     }
 
     .celda-titulo {
+      display: block;
       max-width: 340px;
-      white-space: normal;
-    }
-
-    .celda-caso {
+      line-height: 1.35;
       white-space: normal;
     }
 
     .sin-dato {
-      color: #a0aab3;
+      color: var(--muted);
       font-style: italic;
     }
 
@@ -207,14 +210,39 @@ export class ReportesPage {
   /** Selección de la tabla (página visible) para exportar. */
   readonly seleccion = new SeleccionTabla();
 
-  idsVisibles(): string[] {
-    return this.reportes()
-      .map((reporte) => reporte.codigoReporte)
-      .filter((codigo): codigo is string => !!codigo);
-  }
+  /** Ids marcados, en una referencia estable para `app-tabla`. */
+  readonly idsSeleccionados = computed(() => this.seleccion.lista());
 
   /** Orden local de la página visible. */
   readonly orden = new OrdenTabla<Reporte>();
+
+  /** Columnas del listado, en el orden del registro (Anexo N° 17). */
+  readonly columnas: readonly ColumnaTabla[] = [
+    { clave: 'tipo', titulo: 'Tipo', ordenable: true },
+    {
+      clave: 'codigo',
+      titulo: 'Código',
+      ordenable: true,
+      acceso: (fila) => (fila as unknown as Reporte).codigoReporte,
+    },
+    { clave: 'caso', titulo: 'Caso', ordenable: true },
+    { clave: 'responsable', titulo: 'Responsable', ordenable: true },
+    {
+      clave: 'fecha',
+      titulo: 'Fecha',
+      ordenable: true,
+      formato: (valor) => this.formatearFecha(valor as string | null),
+    },
+    { clave: 'region', titulo: 'Región', ordenable: true },
+    { clave: 'ubicacion', titulo: 'Ubicación', ordenable: true },
+    { clave: 'titulo', titulo: 'Título', ordenable: true },
+  ];
+
+  /** Orden que pinta `app-tabla`; la página ordena con `OrdenTabla`. */
+  readonly ordenTabla = computed<OrdenColumna | null>(() => {
+    const clave = this.orden.columna();
+    return clave ? { clave, direccion: this.orden.direccion() } : null;
+  });
 
   private readonly accesoresReporte: Record<string, (reporte: Reporte) => unknown> = {
     tipo: (reporte) => reporte.tipo,
@@ -230,6 +258,23 @@ export class ReportesPage {
   readonly filasVisibles = computed(() =>
     this.orden.ordenar(this.reportes(), this.accesoresReporte),
   );
+
+  alCambiarOrden(cambio: OrdenColumna | null): void {
+    const clave = cambio?.clave ?? this.orden.columna();
+    if (clave) this.orden.alternar(clave);
+  }
+
+  /** Refleja en `SeleccionTabla` lo que marca la tabla (barra de selección). */
+  alCambiarSeleccion(ids: readonly string[]): void {
+    // Las filas sin código llegan como `#índice`: no se pueden exportar.
+    const marcadas = new Set(ids.filter((id) => !!id && !id.startsWith('#')));
+    for (const id of this.seleccion.lista()) {
+      if (!marcadas.has(id)) this.seleccion.alternar(id);
+    }
+    for (const id of marcadas) {
+      if (!this.seleccion.esta(id)) this.seleccion.alternar(id);
+    }
+  }
 
   readonly estadoListado = this.listado.estado;
   readonly errorListado = this.listado.error;

@@ -32,7 +32,7 @@
         <div class="pref-section">
           <div class="pref-section-head">
             <h3 id="titulo-tema">Tema de la interfaz</h3>
-            <span class="pref-hint">Claro u oscuro</span>
+            <span class="pref-hint">Claro, oscuro o automático</span>
           </div>
 
           <div class="theme-options" role="group" aria-labelledby="titulo-tema">
@@ -69,7 +69,30 @@
               <span class="theme-option-check"><app-icono nombre="check" [tamano]="14" /></span>
               }
             </button>
+
+            <button
+              type="button"
+              class="theme-option"
+              [class.selected]="tema() === 'auto'"
+              [attr.aria-pressed]="tema() === 'auto'"
+              (click)="cambiarTema('auto')"
+            >
+              <span class="theme-option-icon"><app-icono nombre="ajustes" [tamano]="15" /></span>
+              <span class="theme-option-copy">
+                <strong>Automático</strong>
+                <small>Sigue el tema claro u oscuro del sistema.</small>
+              </span>
+              @if (tema() === 'auto') {
+              <span class="theme-option-check"><app-icono nombre="check" [tamano]="14" /></span>
+              }
+            </button>
           </div>
+
+          <p class="pref-note">
+            El tema se guarda en tu cuenta y se aplica al instante; si el servidor no responde, se
+            mantiene la preferencia anterior. «Automático» sigue la configuración del sistema
+            operativo y se actualiza cuando esta cambia.
+          </p>
         </div>
       </section>
 
@@ -149,7 +172,7 @@
 
           <p class="pref-note">
             La densidad se aplica a las tablas y tarjetas ya preparadas para ella en la hoja de
-            estilos común.
+            estilos común. Se guarda en tu cuenta junto con el tema.
           </p>
         </div>
       </section>
@@ -186,7 +209,8 @@
           </div>
 
           <p class="pref-note">
-            Cada tipo de aviso se activa o desactiva por separado. Se guardan en este navegador.
+            Cada tipo de aviso se activa o desactiva por separado. Se guardan en este navegador al
+            pulsar «Guardar preferencias».
           </p>
         </div>
       </section>
@@ -275,11 +299,12 @@
             <h3 id="titulo-alcance">Alcance de estos ajustes</h3>
           </div>
           <p class="pref-note">
-            Se guardan en el almacenamiento local de este navegador, no en la base de datos. Otro
-            equipo o un navegador distinto partirá de los valores por defecto. El ámbito
-            predeterminado ya se aplica como filtro inicial en la lista de Casos; las opciones de
-            notificación se guardan pero todavía no tienen pantalla que las consuma, y el centro de
-            notificaciones es un cambio aparte.
+            El tema y la densidad se guardan en tu cuenta y se aplican al instante. El ámbito
+            predeterminado y las opciones de notificación se guardan en el almacenamiento local de
+            este navegador —la API todavía no valida esas claves—, así que otro equipo partirá de
+            los valores por defecto. El ámbito ya se aplica como filtro inicial en la lista de
+            Casos; los avisos se guardan pero todavía no tienen pantalla que los consuma, y el
+            centro de notificaciones es un cambio aparte.
           </p>
         </div>
       </section>

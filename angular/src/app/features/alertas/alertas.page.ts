@@ -36,7 +36,13 @@ import { IconoComponent } from '../../shared/ui/icono.component';
 import { OrdenTabla } from '../../shared/ui/orden-tabla';
 import { PaginacionComponent } from '../../shared/ui/paginacion.component';
 import { SeleccionTabla } from '../../shared/ui/seleccion-tabla';
-import { ThOrdenDirective } from '../../shared/ui/th-orden.directive';
+import {
+  CeldaTablaDirectiva,
+  TablaComponent,
+  type ClicFila,
+  type ColumnaTabla,
+  type OrdenColumna,
+} from '../../shared/ui/tabla.component';
 import { AccionesFilaComponent, type AccionMenu } from './acciones-fila.component';
 import { AlertaArchivoComponent } from './alerta-archivo.component';
 import { AlertaModificacionComponent } from './alerta-modificacion.component';
@@ -131,7 +137,8 @@ function totalDe(bruto: unknown): number {
     AlertaWhatsappComponent,
     AnularPanelComponent,
     BarraSeleccionComponent,
-    ThOrdenDirective,
+    TablaComponent,
+    CeldaTablaDirectiva,
     RouterLink,
   ],
   templateUrl: './alertas.page.html',
@@ -165,14 +172,21 @@ function totalDe(bruto: unknown): number {
     }
 
     .alerta-titulo {
+      display: block;
       min-width: 240px;
       max-width: 460px;
       white-space: normal;
     }
 
+    /* El listado lo nombra el título, no el código: el código conserva su ancho. */
+    :host ::ng-deep app-tabla .tabla tbody td.celda-principal {
+      min-width: 0;
+      white-space: nowrap;
+    }
+
     .alerta-titulo strong {
       display: block;
-      color: #17283a;
+      color: var(--ink);
       font-size: 13.5px;
       font-weight: 700;
       line-height: 1.35;
@@ -186,7 +200,7 @@ function totalDe(bruto: unknown): number {
 
     .alerta-geografia {
       display: inline;
-      color: #4a6b93;
+      color: var(--blue);
       font-size: 11px;
       font-weight: 700;
     }
@@ -205,18 +219,31 @@ function totalDe(bruto: unknown): number {
     }
 
     .alerta-riesgo.risk-medio {
-      color: #b8860b;
+      color: #93621d;
       background: none;
     }
 
     .alerta-riesgo.risk-alto {
-      color: #d9661f;
+      color: #ad4d46;
       background: none;
+    }
+
+    /* El riesgo es texto sobre la fila: en oscuro usa los tonos del tema. */
+    :host-context(html[data-theme='dark']) .alerta-riesgo.risk-bajo {
+      color: var(--blue);
+    }
+
+    :host-context(html[data-theme='dark']) .alerta-riesgo.risk-medio {
+      color: var(--amber);
+    }
+
+    :host-context(html[data-theme='dark']) .alerta-riesgo.risk-alto {
+      color: var(--red);
     }
 
     .alerta-caso strong {
       display: block;
-      color: #465a6c;
+      color: var(--ink-2);
       font-size: 12px;
       font-weight: 600;
     }
@@ -224,12 +251,12 @@ function totalDe(bruto: unknown): number {
     .alerta-caso small {
       display: block;
       margin-top: 3px;
-      color: #99a3aa;
+      color: var(--muted);
       font-size: 12px;
     }
 
     .sin-caso {
-      color: #99a3aa;
+      color: var(--muted);
       font-size: 12.5px;
       font-style: italic;
     }
@@ -240,8 +267,8 @@ function totalDe(bruto: unknown): number {
       width: fit-content;
       padding: 1px 7px;
       border-radius: 999px;
-      background: #eef1f4;
-      color: #526577;
+      background: var(--canvas);
+      color: var(--muted);
       font-size: 10.5px;
       font-weight: 700;
       letter-spacing: 0.02em;
@@ -254,17 +281,17 @@ function totalDe(bruto: unknown): number {
     }
 
     .alerta-revisor strong {
-      color: #33475b;
+      color: var(--ink-2);
       font-size: 12.5px;
       font-weight: 600;
     }
 
     .alerta-revisor small {
-      color: #99a3aa;
+      color: var(--muted);
       font-size: 11.5px;
     }
 
-    .data-table .table-link {
+    .table-link {
       cursor: pointer;
       font-family: inherit;
       text-align: left;
@@ -283,41 +310,8 @@ function totalDe(bruto: unknown): number {
     }
 
     .aviso-ok {
-      color: #2f6f52;
+      color: var(--green);
       font-size: 13.5px;
-    }
-
-    .celda-acciones {
-      white-space: nowrap;
-      text-align: center;
-    }
-
-    .data-table tr.row-aviso-ok td {
-      background: #f1f8f3;
-    }
-
-    .data-table tr.row-aviso-error td {
-      background: #fdf2f1;
-    }
-
-    .col-codigo {
-      width: 108px;
-    }
-    .col-caso {
-      width: 160px;
-    }
-    .col-revisor {
-      width: 150px;
-    }
-    .col-fecha {
-      width: 120px;
-      text-align: center;
-    }
-    .col-estado {
-      width: 130px;
-    }
-    .col-acciones {
-      width: 72px;
     }
 
     @media (max-width: 720px) {
@@ -575,8 +569,36 @@ export class AlertasPage {
   /** Selección de la tabla (página visible) para exportar o anular en lote. */
   readonly seleccion = new SeleccionTabla();
 
+  /** Ids marcados, en una referencia estable para `app-tabla`. */
+  readonly idsSeleccionados = computed(() => this.seleccion.lista());
+
   /** Orden local de la página visible. */
   readonly orden = new OrdenTabla<Alerta>();
+
+  /** Columnas del listado, en el orden del mockup. */
+  readonly columnas: readonly ColumnaTabla[] = [
+    { clave: 'codigo', titulo: 'Código', ancho: '108px', ordenable: true },
+    { clave: 'titulo', titulo: 'Título', ordenable: true },
+    { clave: 'caso', titulo: 'Caso vinculado', ancho: '160px', ordenable: true },
+    { clave: 'revisor', titulo: 'Último revisor', ancho: '150px', ordenable: true },
+    {
+      clave: 'fecha',
+      titulo: 'Fecha reporte',
+      ancho: '120px',
+      alineacion: 'centro',
+      ordenable: true,
+      acceso: (fila) => (fila as Alerta).fechaReporte,
+      formato: (valor) => this.fechaReporte(valor as string | null),
+    },
+    { clave: 'estado', titulo: 'Estado', ancho: '130px', ordenable: true },
+    { clave: 'acciones', titulo: 'Acciones', ancho: '72px', alineacion: 'centro' },
+  ];
+
+  /** Orden que pinta `app-tabla`; la página sigue ordenando con `OrdenTabla`. */
+  readonly ordenTabla = computed<OrdenColumna | null>(() => {
+    const clave = this.orden.columna();
+    return clave ? { clave, direccion: this.orden.direccion() } : null;
+  });
 
   private readonly accesoresAlerta: Record<string, (alerta: Alerta) => unknown> = {
     codigo: (alerta) => alerta.codigo,
@@ -590,10 +612,24 @@ export class AlertasPage {
 
   readonly filasVisibles = computed(() => this.orden.ordenar(this.alertas(), this.accesoresAlerta));
 
-  idsVisibles(): string[] {
-    return this.alertas()
-      .map((alerta) => alerta.id)
-      .filter((id): id is string => !!id);
+  alCambiarOrden(cambio: OrdenColumna | null): void {
+    const clave = cambio?.clave ?? this.orden.columna();
+    if (clave) this.orden.alternar(clave);
+  }
+
+  /** Refleja en `SeleccionTabla` lo que marca la tabla (barra de selección). */
+  alCambiarSeleccion(ids: readonly string[]): void {
+    const marcadas = new Set(ids);
+    for (const id of this.seleccion.lista()) {
+      if (!marcadas.has(id)) this.seleccion.alternar(id);
+    }
+    for (const id of ids) {
+      if (!this.seleccion.esta(id)) this.seleccion.alternar(id);
+    }
+  }
+
+  alClicFila(evento: ClicFila): void {
+    this.abrir(evento.fila as Alerta);
   }
 
   private temporizador?: ReturnType<typeof setTimeout>;
@@ -723,12 +759,6 @@ export class AlertasPage {
         this.abrirArchivo(alerta);
         break;
     }
-  }
-
-  claseAvisoFila(alerta: Alerta): string {
-    const aviso = this.avisoFila();
-    if (!aviso || aviso.id !== alerta.id) return '';
-    return aviso.tipo === 'ok' ? 'row-aviso-ok' : 'row-aviso-error';
   }
 
   abrir(alerta: Alerta, modo: ModoPanelAlerta = 'ver'): void {

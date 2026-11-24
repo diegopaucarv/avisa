@@ -79,84 +79,52 @@
   <p class="org-actualizando" role="status">Actualizando el listado…</p>
   }
 
-  <div class="table-wrap">
-    <table class="data-table">
-      <thead>
-        <tr>
-          <th scope="col" class="col-seleccion">
-            <input
-              type="checkbox"
-              aria-label="Seleccionar todos los registros de esta página"
-              [checked]="seleccion.todas(idsVisibles())"
-              [indeterminate]="seleccion.algunas(idsVisibles())"
-              (change)="seleccion.alternarPagina(idsVisibles(), $event)"
-            />
-          </th>
-          <th scope="col">Foto</th>
-          <th scope="col" [appThOrden]="'nombre'" [orden]="orden">Nombre</th>
-          <th scope="col" [appThOrden]="'tipo'" [orden]="orden">Tipo</th>
-          <th scope="col" [appThOrden]="'ruc'" [orden]="orden">RUC / razón social</th>
-          <th scope="col" [appThOrden]="'integrantes'" [orden]="orden">Integrantes</th>
-          <th scope="col" [appThOrden]="'vigencia'" [orden]="orden">Vigencia</th>
-          <th scope="col" [appThOrden]="'estadoOspa'" [orden]="orden">Estado OSPA</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (organizacion of filasVisibles(); track organizacion.id) {
-        <tr
-          class="case-row-clickable"
-          [class.row-selected]="seleccionado()?.id === organizacion.id"
-          (click)="abrir(organizacion)"
-        >
-          <td class="col-seleccion" (click)="$event.stopPropagation()">
-            <input
-              type="checkbox"
-              [checked]="seleccion.esta(organizacion.id)"
-              [attr.aria-label]="'Seleccionar la organización ' + organizacion.nombre"
-              (click)="$event.stopPropagation()"
-              (change)="seleccion.alternar(organizacion.id)"
-            />
-          </td>
-          <td class="col-foto">
-            @if (fotoDe(organizacion.id); as foto) {
-            <img
-              class="tabla-foto"
-              [src]="foto.url"
-              [alt]="foto.alt || foto.titulo || organizacion.nombre"
-              loading="lazy"
-              decoding="async"
-              referrerpolicy="no-referrer"
-            />
-            } @else {
-            <span class="sin-dato">—</span>
-            }
-          </td>
-          <td>
-            <button
-              type="button"
-              class="table-link org-nombre"
-              [attr.aria-label]="'Abrir la ficha de ' + organizacion.nombre"
-              (click)="abrir(organizacion); $event.stopPropagation()"
-            >
-              <strong>{{ organizacion.nombre }}</strong>
-              @if (organizacion.abreviatura) {
-              <small>{{ organizacion.abreviatura }}</small>
-              }
-            </button>
-          </td>
-          <td>{{ organizacion.tipo || "—" }}</td>
-          <td class="org-razon">
-            {{ organizacion.ruc || "—" }} @if (organizacion.razonSocial) { · {{
-            organizacion.razonSocial }} }
-          </td>
-          <td>{{ organizacion.numeroIntegrantes ?? "—" }}</td>
-          <td>{{ periodoVigencia(organizacion) }}</td>
-          <td>{{ organizacion.estadoOspa || "—" }}</td>
-        </tr>
+  <app-tabla
+    [columnas]="columnas"
+    [filas]="filasVisibles()"
+    [orden]="ordenTabla()"
+    [ordenServidor]="true"
+    [seleccionable]="true"
+    [seleccion]="idsSeleccionados()"
+    [cargando]="estado() === 'cargando'"
+    [clicable]="true"
+    (ordenCambio)="alCambiarOrden($event)"
+    (seleccionCambio)="alCambiarSeleccion($event)"
+    (filaClic)="alClicFila($event)"
+  >
+    <ng-template appCeldaTabla="nombre" let-fila>
+      <button
+        type="button"
+        class="table-link org-nombre"
+        [attr.aria-label]="'Abrir la ficha de ' + fila.nombre"
+        (click)="abrir(fila); $event.stopPropagation()"
+      >
+        <strong>{{ fila.nombre }}</strong>
+        @if (fila.abreviatura) {
+        <small>{{ fila.abreviatura }}</small>
         }
-      </tbody>
-    </table>
-  </div>
+      </button>
+    </ng-template>
+
+    <ng-template appCeldaTabla="foto" let-fila>
+      @if (fotoDe(fila.id); as foto) {
+      <img
+        class="tabla-foto"
+        [src]="foto.url"
+        [alt]="foto.alt || foto.titulo || fila.nombre"
+        loading="lazy"
+        decoding="async"
+        referrerpolicy="no-referrer"
+      />
+      } @else {
+      <span class="sin-dato">—</span>
+      }
+    </ng-template>
+
+    <ng-template appCeldaTabla="ruc" let-fila>
+      <span class="org-razon">{{ rucRazon(fila) }}</span>
+    </ng-template>
+  </app-tabla>
   } @if (total() > 0 && estado() !== "error") {
   <app-paginacion
     [pagina]="filtros().pagina"
