@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  aColeccionNotificaciones,
+  agruparPorDia,
   aNotificacion,
   claseLectura,
   enlaceNotificacion,
@@ -8,6 +10,7 @@ import {
   estadoDeMarcado,
   etiquetaEstadoFiltro,
   etiquetaLectura,
+  etiquetaNoLeidas,
   formatearFecha,
 } from './notificacion.mapeo';
 
@@ -63,6 +66,17 @@ describe('aNotificacion', () => {
     expect(aNotificacion({ estado: null }).leida).toBe(false);
   });
 
+  it('cuenta como leída cuando `leidoEn` está fijado, aunque el estado no sea «leida»', () => {
+    const aviso = aNotificacion({
+      estado: 'enviada',
+      leidoEn: '2026-11-22T09:30:00.000Z',
+    });
+
+    expect(aviso.leidoEn).toBe('2026-11-22T09:30:00.000Z');
+    expect(aviso.leida).toBe(true);
+    expect(aNotificacion({ estado: 'enviada', leido_en: null }).leida).toBe(false);
+  });
+
   it('deja «Sistema» cuando el aviso no coincide con una categoría conocida', () => {
     const aviso = aNotificacion({ tipo: 'regla_por_vencer', entidadTipo: 'policy.regla' });
     expect(aviso.categoria).toBe('Sistema');
@@ -88,6 +102,65 @@ describe('lectura', () => {
     expect(estadoDeMarcado(true)).toBe('leida');
     expect(estadoDeMarcado(false)).toBe('pendiente');
   });
+
+  it('acepta el booleano ya resuelto y combina estado con `leidoEn`', () => {
+    expect(etiquetaLectura(true)).toBe('Leída');
+    expect(etiquetaLectura(false)).toBe('Sin leer');
+    expect(etiquetaLectura('enviada', '2026-11-22T09:30:00.000Z')).toBe('Leída');
+    expect(etiquetaLectura('pendiente', null)).toBe('Sin leer');
+    expect(claseLectura('enviada', '2026-11-22T09:30:00.000Z')).toBe('state-approved');
+  });
+});
+
+describe('contador de no leídas', () => {
+  it('rotula el contador del sobre', () => {
+    expect(etiquetaNoLeidas(null)).toBe('… sin leer');
+    expect(etiquetaNoLeidas(0)).toBe('0 sin leer');
+    expect(etiquetaNoLeidas(4)).toBe('4 sin leer');
+  });
+
+  it('no deduce el contador de las filas visibles', () => {
+    const coleccion = aColeccionNotificaciones({
+      items: [{ id: 'n-1', tipo: 'caso_por_vencer', estado: 'pendiente' }],
+      total: 40,
+      page: 2,
+      pageSize: 25,
+      noLeidas: 12,
+    });
+
+    expect(coleccion.elementos).toHaveLength(1);
+    expect(coleccion.total).toBe(40);
+    expect(coleccion.pagina).toBe(2);
+    expect(coleccion.noLeidas).toBe(12);
+  });
+
+  it('declara 0 cuando el sobre no trae el contador', () => {
+    expect(aColeccionNotificaciones({ items: [], total: 0 }).noLeidas).toBe(0);
+    expect(aColeccionNotificaciones(null).noLeidas).toBe(0);
+  });
+});
+
+describe('agruparPorDia', () => {
+  it('agrupa por día de registro conservando el orden recibido', () => {
+    const grupos = agruparPorDia([
+      aNotificacion({ id: '1', createdAt: '2026-11-22T10:00:00.000Z' }),
+      aNotificacion({ id: '2', createdAt: '2026-11-22T08:00:00.000Z' }),
+      aNotificacion({ id: '3', createdAt: '2026-11-21T23:00:00.000Z' }),
+    ]);
+
+    expect(grupos.map((grupo) => grupo.clave)).toEqual(['2026-11-22', '2026-11-21']);
+    expect(grupos[0]?.etiqueta).toBe('22/11/2026');
+    expect(grupos[0]?.notificaciones.map((fila) => fila.id)).toEqual(['1', '2']);
+    expect(grupos[1]?.notificaciones.map((fila) => fila.id)).toEqual(['3']);
+  });
+
+  it('declara «Sin fecha» cuando el aviso no trae `created_at`', () => {
+    const grupos = agruparPorDia([aNotificacion({ id: 'x' })]);
+
+    expect(grupos).toHaveLength(1);
+    expect(grupos[0]?.clave).toBe('sin-fecha');
+    expect(grupos[0]?.etiqueta).toBe('Sin fecha');
+  });
 });
 
 describe('enlaceNotificacion', () => {
@@ -106,7 +179,11 @@ describe('enlaceNotificacion', () => {
   });
 
   it('codifica el código en la ruta', () => {
-    const aviso = aNotificacion({ tipo: 'caso', entidadTipo: 'casos', entidadCodigo: 'CS 01/2026' });
+    const aviso = aNotificacion({
+      tipo: 'caso',
+      entidadTipo: 'casos',
+      entidadCodigo: 'CS 01/2026',
+    });
     expect(enlaceNotificacion(aviso)?.ruta).toBe('/casos/CS%2001%2F2026');
   });
 

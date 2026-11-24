@@ -26,6 +26,9 @@ function resultado(parcial: Partial<Resultado> = {}): Resultado {
     subtitulo: null,
     codigo: null,
     region: null,
+    provincia: null,
+    distrito: null,
+    ubigeo: null,
     icono: 'casos',
     ...parcial,
   };
@@ -50,7 +53,28 @@ describe('aResultado', () => {
       subtitulo: 'Abierto',
       codigo: 'CS-PA-INF-2026-01',
       region: 'Piura',
+      provincia: null,
+      distrito: null,
+      ubigeo: null,
       icono: 'casos',
+    });
+  });
+
+  it('lee el territorio cuando el listado lo trae', () => {
+    const fila = aResultado(grupo('casos'), {
+      id: 'caso-2',
+      code: 'CS-2',
+      title: 'Caso con distrito',
+      region: 'Piura',
+      provincia: 'Talara',
+      distrito: 'Máncora',
+      ubigeo: '200706',
+    });
+
+    expect(fila).toMatchObject({
+      provincia: 'Talara',
+      distrito: 'Máncora',
+      ubigeo: '200706',
     });
   });
 
@@ -102,14 +126,34 @@ describe('aIndiceBusqueda', () => {
   it('indexa por `tipo:id` y normaliza el tipo a minúsculas', () => {
     const indice = aIndiceBusqueda({
       results: [
-        { type: 'CASE', id: '1', code: 'CS-1', region: 'Piura' },
+        {
+          type: 'CASE',
+          id: '1',
+          code: 'CS-1',
+          region: 'Piura',
+          provincia: 'Talara',
+          distrito: 'Máncora',
+          ubigeo: '200706',
+        },
         { type: 'demanda', id: '9', region: 'Lima' },
       ],
     });
 
     expect([...indice.keys()]).toEqual(['case:1', 'demanda:9']);
-    expect(indice.get('case:1')).toEqual({ codigo: 'CS-1', region: 'Piura' });
-    expect(indice.get('demanda:9')).toEqual({ codigo: null, region: 'Lima' });
+    expect(indice.get('case:1')).toEqual({
+      codigo: 'CS-1',
+      region: 'Piura',
+      provincia: 'Talara',
+      distrito: 'Máncora',
+      ubigeo: '200706',
+    });
+    expect(indice.get('demanda:9')).toEqual({
+      codigo: null,
+      region: 'Lima',
+      provincia: null,
+      distrito: null,
+      ubigeo: null,
+    });
   });
 
   it('ignora filas sin tipo, sin id o que no son registros', () => {
@@ -137,32 +181,56 @@ describe('aIndiceBusqueda', () => {
 
 describe('enriquecer', () => {
   const indice = aIndiceBusqueda({
-    results: [{ type: 'case', id: '1', code: 'CS-1', region: 'Piura' }],
+    results: [
+      {
+        type: 'case',
+        id: '1',
+        code: 'CS-1',
+        region: 'Piura',
+        provincia: 'Talara',
+        distrito: 'Máncora',
+        ubigeo: '200706',
+      },
+    ],
   });
 
-  it('completa código y región desde el índice', () => {
+  it('completa código, región y territorio desde el índice', () => {
     const enriquecido = enriquecer(resultado(), indice);
 
-    expect(enriquecido).toMatchObject({ codigo: 'CS-1', region: 'Piura' });
+    expect(enriquecido).toMatchObject({
+      codigo: 'CS-1',
+      region: 'Piura',
+      provincia: 'Talara',
+      distrito: 'Máncora',
+      ubigeo: '200706',
+    });
   });
 
-  it('no inventa región ni código si el índice no cubre la fila', () => {
+  it('no inventa región ni territorio si el índice no cubre la fila', () => {
     const base = resultado();
 
     expect(enriquecer(base, aIndiceBusqueda({ results: [] }))).toBe(base);
     expect(base.codigo).toBeNull();
     expect(base.region).toBeNull();
+    expect(base.distrito).toBeNull();
   });
 
-  it('respeta el código presente y sólo completa la región', () => {
+  it('respeta el código presente y sólo completa la región y el territorio', () => {
     const enriquecido = enriquecer(resultado({ codigo: 'CS-PROPIO' }), indice);
 
     expect(enriquecido.codigo).toBe('CS-PROPIO');
     expect(enriquecido.region).toBe('Piura');
+    expect(enriquecido.distrito).toBe('Máncora');
   });
 
   it('devuelve la misma instancia si no hay nada que completar', () => {
-    const base = resultado({ codigo: 'CS-1', region: 'Piura' });
+    const base = resultado({
+      codigo: 'CS-1',
+      region: 'Piura',
+      provincia: 'Talara',
+      distrito: 'Máncora',
+      ubigeo: '200706',
+    });
 
     expect(enriquecer(base, indice)).toBe(base);
   });
@@ -170,11 +238,7 @@ describe('enriquecer', () => {
 
 describe('aEnlace', () => {
   it('abre la ficha del caso cuando hay código', () => {
-    const enlace = aEnlace(
-      grupo('casos'),
-      resultado({ codigo: 'CS-PA-INF-2026-01' }),
-      'protesta',
-    );
+    const enlace = aEnlace(grupo('casos'), resultado({ codigo: 'CS-PA-INF-2026-01' }), 'protesta');
 
     expect(enlace.ruta).toEqual(['/casos', 'CS-PA-INF-2026-01']);
     expect(enlace.parametros).toEqual({});

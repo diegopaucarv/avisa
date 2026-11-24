@@ -2,6 +2,15 @@
   <header class="view-head">
     <div>
       <h1 id="titulo-notificaciones">Notificaciones</h1>
+      <p class="view-subtitle">
+        Bandeja de avisos del sistema.
+        <span
+          [class]="puedeMarcarTodas() ? 'contador' : 'contador contador-vacio'"
+          role="status"
+          aria-live="polite"
+          >{{ textoContador() }}</span
+        >
+      </p>
     </div>
     <div class="view-actions">
       <app-barra-seleccion
@@ -10,6 +19,14 @@
         [idsSeleccionados]="seleccion.lista()"
         (fallo)="alFallarExportacion($event)"
       />
+      <button
+        type="button"
+        class="button-secondary"
+        [disabled]="!puedeMarcarTodas() || marcandoTodas() || enviandoId() !== null"
+        (click)="marcarTodas()"
+      >
+        {{ marcandoTodas() ? 'Marcando…' : 'Marcar todas como leídas' }}
+      </button>
       <button type="button" class="button-secondary" (click)="recargar()">Recargar</button>
     </div>
   </header>
@@ -45,7 +62,7 @@
     <button
       type="button"
       class="button-secondary"
-      [disabled]="enviandoId() !== null"
+      [disabled]="enviandoId() !== null || marcandoTodas()"
       (click)="reintentarLectura()"
     >
       Reintentar
@@ -68,7 +85,10 @@
     <button type="button" class="button-secondary" (click)="limpiar()">Quitar filtro</button>
     } @else {
     <strong>Sin notificaciones registradas</strong>
-    <p>La bandeja está vacía. Cuando el sistema registre un aviso para usted, aparecerá aquí.</p>
+    <p>
+      La bandeja está vacía: la base no tiene ningún aviso. Cuando el sistema registre uno para
+      usted, aparecerá aquí.
+    </p>
     }
   </div>
   } @else if (notificaciones().length === 0) {
@@ -79,6 +99,9 @@
   } @else {
   <div class="table-wrap">
     <table class="data-table">
+      <caption class="table-caption">
+        {{ resumenTabla() }}
+      </caption>
       <thead>
         <tr>
           <th scope="col" class="col-seleccion">
@@ -100,7 +123,17 @@
         </tr>
       </thead>
       <tbody>
-        @for (notificacion of filasVisibles(); track notificacion.id) {
+        @for (grupo of grupos(); track grupo.clave) {
+        <tr class="grupo-dia">
+          <td colspan="8">
+            {{ grupo.etiqueta }}
+            <small>
+              {{ grupo.notificaciones.length }} {{ grupo.notificaciones.length === 1 ? 'aviso' :
+              'avisos' }}
+            </small>
+          </td>
+        </tr>
+        @for (notificacion of grupo.notificaciones; track notificacion.id) {
         <tr [class.sin-leer]="!notificacion.leida">
           <td class="col-seleccion" (click)="$event.stopPropagation()">
             <input
@@ -125,11 +158,11 @@
           <td>{{ notificacion.categoria }}</td>
           <td>
             <span
-              [class]="'status-badge ' + lecturaClase(notificacion.estado)"
+              [class]="'status-badge ' + lecturaClase(notificacion)"
               [attr.title]="'Estado del aviso: ' + estadoEtiqueta(notificacion.estado)"
             >
               <span class="status-dot"></span>
-              {{ lecturaEtiqueta(notificacion.estado) }}
+              {{ lecturaEtiqueta(notificacion) }}
             </span>
           </td>
           <td>{{ fecha(notificacion.venceEn) }}</td>
@@ -151,7 +184,7 @@
             <button
               type="button"
               class="button-secondary accion-leida"
-              [disabled]="enviandoId() !== null"
+              [disabled]="enviandoId() !== null || marcandoTodas()"
               [attr.aria-label]="ariaAccion(notificacion)"
               (click)="cambiarLectura(notificacion, !notificacion.leida)"
             >
@@ -159,16 +192,19 @@
             </button>
           </td>
         </tr>
-        }
+        } }
       </tbody>
     </table>
   </div>
 
   <p class="notificaciones-nota">
-    Las no leídas se resaltan y llevan la insignia «Sin leer». «Marcar como leída» y «Desmarcar»
-    usan <code>PATCH /v1/notifications/&#123;id&#125;</code> y recargan lista y contador. El enlace
-    abre la ficha del caso cuando la API entrega su código; si el aviso no lo trae, abre la sección
-    correspondiente. El punto de la campana del shell sigue pendiente de otro proceso.
+    Las no leídas se resaltan y llevan la insignia «Sin leer». «Marcar como leída» usa
+    <code>POST /v1/notifications/&#123;id&#125;/leer</code>, «Desmarcar» usa
+    <code>PATCH /v1/notifications/&#123;id&#125;</code> y «Marcar todas como leídas» usa
+    <code>POST /v1/notifications/leer-todas</code>. El contador sale del sobre del listado
+    (<code>noLeidas</code>), no de las filas visibles. El enlace abre la ficha del caso cuando la
+    API entrega su código; si el aviso no lo trae, abre la sección correspondiente. El punto de la
+    campana del shell sigue pendiente de otro proceso.
   </p>
   } @if (estadoListado() === 'listo' && total() > 0) {
   <app-paginacion

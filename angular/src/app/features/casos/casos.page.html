@@ -122,17 +122,16 @@
         <option value="Archivado">Archivados ({{ conteos().archivados }})</option>
       </select>
     </label>
+    <button
+      type="button"
+      class="button-secondary"
+      [attr.aria-expanded]="avanzado()"
+      aria-controls="filtros-avanzados"
+      (click)="alternarAvanzado()"
+    >
+      Búsqueda avanzada @if (filtrosAvanzadosActivos()) {<strong>· activos</strong>}
+    </button>
   </div>
-
-  <button
-    type="button"
-    class="button-secondary"
-    [attr.aria-expanded]="avanzado()"
-    aria-controls="filtros-avanzados"
-    (click)="alternarAvanzado()"
-  >
-    Búsqueda avanzada @if (filtrosAvanzadosActivos()) {<strong>· activos</strong>}
-  </button>
 
   @if (avanzado() || filtrosAvanzadosActivos()) {
   <div class="filter-bar filter-bar-wrap" id="filtros-avanzados">

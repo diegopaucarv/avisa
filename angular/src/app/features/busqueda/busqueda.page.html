@@ -63,16 +63,16 @@
       <ul class="search-results" [attr.aria-label]="'Resultados en ' + grupo.titulo">
         @for (resultado of grupo.resultados; track resultado.clave) {
         <li>
-          <a
+          <button
+            type="button"
             class="search-result"
-            [routerLink]="resultado.ruta"
-            [queryParams]="resultado.parametros"
             [attr.aria-label]="
-                    (resultado.abreFicha ? 'Abrir la ficha del ' : 'Ver en el listado el ') +
+                    (resultado.abreFicha ? 'Abrir la ficha del ' : 'Ver la ficha del ') +
                     resultado.etiquetaTipo.toLowerCase() +
                     ': ' +
                     resultado.titulo
                   "
+            (click)="abrir(resultado)"
           >
             <span class="search-result-icono" aria-hidden="true">
               <app-icono [nombre]="resultado.icono" [tamano]="15" />
@@ -93,17 +93,17 @@
                   <span class="search-result-dato-etiqueta">Región</span>
                   <span class="search-result-region">{{ resultado.region ?? '—' }}</span>
                 </span>
+                @if (resultado.distrito) {
+                <span class="search-result-dato">
+                  <span class="search-result-dato-etiqueta">Distrito</span>
+                  <span class="search-result-region">{{ resultado.distrito }}</span>
+                </span>
+                }
               </span>
             </span>
 
-            @if (resultado.abreFicha) {
-            <span class="search-result-flecha" aria-hidden="true">
-              <app-icono nombre="chevron-derecha" [tamano]="15" />
-            </span>
-            } @else {
-            <span class="search-result-destino">Ver listado</span>
-            }
-          </a>
+            <span class="search-result-destino">Ver ficha</span>
+          </button>
         </li>
         }
       </ul>
@@ -127,5 +127,7 @@
     </span>
     <button type="button" class="button-secondary" (click)="recargar()">Reintentar</button>
   </div>
-  } }
+  } } @if (ficha(); as fila) {
+  <app-busqueda-ficha [fila]="fila" (cerrar)="cerrarFicha()" />
+  }
 </section>

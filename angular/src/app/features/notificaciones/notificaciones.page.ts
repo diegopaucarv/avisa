@@ -5,13 +5,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
 
 import { urlApi } from '../../core/config/entorno';
-import {
-  TAMANO_PAGINA,
-  normalizarColeccion,
-  paramsDePagina,
-  urlConParametros,
-  type Coleccion,
-} from '../../core/http/coleccion';
+import { TAMANO_PAGINA, paramsDePagina, urlConParametros } from '../../core/http/coleccion';
 import { consulta } from '../../core/http/consulta';
 import { aErrorApi } from '../../core/http/errores';
 import { BarraSeleccionComponent } from '../../shared/ui/barra-seleccion.component';
@@ -23,7 +17,8 @@ import { PaginacionComponent } from '../../shared/ui/paginacion.component';
 import { ThOrdenDirective } from '../../shared/ui/th-orden.directive';
 import {
   ESTADOS_NOTIFICACION,
-  aNotificacion,
+  aColeccionNotificaciones,
+  agruparPorDia,
   claseLectura,
   enlaceNotificacion,
   esEstadoFiltro,
@@ -31,6 +26,7 @@ import {
   etiquetaEstado,
   etiquetaEstadoFiltro,
   etiquetaLectura,
+  etiquetaNoLeidas,
   formatearFecha,
   type EnlaceNotificacion,
   type Notificacion,
@@ -48,19 +44,28 @@ const FILTROS_INICIALES: FiltrosNotificaciones = {
   estado: '',
 };
 
+/** Reintento de la acción de lectura: una fila concreta o la bandeja entera. */
+type Reintento = { tipo: 'una'; id: string; leer: boolean } | { tipo: 'todas' };
+
 /** Mensaje en línea de una acción de lectura, con su reintento opcional. */
 type AvisoLectura = {
   texto: string;
   tipo: 'ok' | 'error';
-  reintento: { id: string; estado: 'leida' | 'pendiente' } | null;
+  reintento: Reintento | null;
 };
 
 /**
  * Centro de notificaciones.
  *
- * Listado paginado en servidor con filtro por estado de lectura en la URL. Las
- * no leídas se resaltan y llevan la insignia «Sin leer». «Marcar como leída» y
- * «Desmarcar» usan `PATCH /v1/notifications/{id}` y recargan lista y contador.
+ * Listado paginado en servidor con filtro por estado de lectura en la URL,
+ * agrupado por día en la tabla. El contador de no leídas sale del sobre
+ * (`noLeidas`), no de una segunda consulta ni de las filas visibles, así que
+ * vale para toda la bandeja y no sólo para la página.
+ *
+ * «Marcar como leída» usa `POST /v1/notifications/{id}/leer`; «Desmarcar» usa
+ * `PATCH /v1/notifications/{id}` con `estado=pendiente`; «Marcar todas» usa
+ * `POST /v1/notifications/leer-todas`. Tras cada acción se recarga lista y
+ * contador.
  *
  * El enlace abre la ficha del caso cuando la API entrega `entidadCodigo`; en
  * cualquier otro caso abre la sección y la nota lo declara.
@@ -100,6 +105,23 @@ type AvisoLectura = {
       gap: 16px;
     }
 
+    .contador {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 9px;
+      border-radius: 999px;
+      background: #eef3f7;
+      color: #4f6480;
+      font: 700 12px/1.4 var(--font-display);
+      white-space: nowrap;
+    }
+
+    .contador-vacio {
+      background: #f1f3f5;
+      color: #687783;
+    }
+
     .notificacion {
       display: flex;
       align-items: flex-start;
@@ -135,6 +157,24 @@ type AvisoLectura = {
     .data-table tr.sin-leer .notificacion-texto strong {
       color: #1f3850;
       font-weight: 700;
+    }
+
+    .data-table tr.grupo-dia td {
+      background: #f6f8fa;
+      border-top: 1px solid var(--line);
+      color: #5f7690;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+    }
+
+    .data-table tr.grupo-dia td small {
+      margin-left: 6px;
+      color: #8b97a2;
+      font-weight: 500;
+      text-transform: none;
+      letter-spacing: 0;
     }
 
     .aviso-ok {
@@ -197,7 +237,7 @@ export class NotificacionesPage {
 
   readonly filtros = computed(() => this.parametros());
 
-  private readonly listado = consulta<Coleccion<Notificacion>>({
+  private readonly listado = consulta({
     fuente: () => {
       const { pagina, tamano, estado } = this.parametros();
       return urlConParametros(urlApi('/v1/notifications'), {
@@ -205,41 +245,28 @@ export class NotificacionesPage {
         estado,
       });
     },
-    esquema: (bruto) => {
-      const coleccion = normalizarColeccion<unknown>(bruto);
-      return { ...coleccion, elementos: coleccion.elementos.map(aNotificacion) };
-    },
-  });
-
-  /**
-   * Contador de no leídas. Es un total del servidor, no de la página visible:
-   * pide `estado=pendiente` con `pageSize=1` y lee el `total` del sobre.
-   */
-  private readonly contador = consulta<number>({
-    fuente: () =>
-      urlConParametros(urlApi('/v1/notifications'), {
-        ...paramsDePagina({ pagina: 1, tamano: 1 }),
-        estado: 'pendiente',
-      }),
-    esquema: (bruto) => normalizarColeccion<unknown>(bruto).total,
+    esquema: aColeccionNotificaciones,
   });
 
   readonly notificaciones = computed(() => this.listado.valor()?.elementos ?? []);
   readonly total = computed(() => this.listado.valor()?.total ?? 0);
-  readonly sinLeer = computed(() => this.contador.valor() ?? null);
 
-  /** Rótulo del contador; «…» mientras la primera lectura no llega. */
-  readonly textoContador = computed(() => {
-    const cuenta = this.sinLeer();
-    return cuenta === null ? '… sin leer' : `${cuenta} sin leer`;
-  });
+  /** Contador de no leídas del servidor; `null` mientras no llega la respuesta. */
+  readonly sinLeer = computed(() => this.listado.valor()?.noLeidas ?? null);
+
+  readonly textoContador = computed(() => etiquetaNoLeidas(this.sinLeer()));
+
+  /** El botón «Marcar todas» sólo se habilita si hay algo sin leer. */
+  readonly puedeMarcarTodas = computed(() => (this.sinLeer() ?? 0) > 0);
 
   readonly estadoListado = this.listado.estado;
   readonly errorListado = this.listado.error;
-  readonly errorContador = this.contador.error;
 
   /** Fila cuya lectura se está guardando; bloquea las demás acciones. */
   readonly enviandoId = signal<string | null>(null);
+
+  /** Acción «marcar todas» en curso. */
+  readonly marcandoTodas = signal(false);
 
   /** Mensaje en línea del último intento de marcar o desmarcar. */
   readonly aviso = signal<AvisoLectura | null>(null);
@@ -256,7 +283,7 @@ export class NotificacionesPage {
   private readonly accesores: Record<string, (notificacion: Notificacion) => unknown> = {
     notificacion: (notificacion) => notificacion.titulo,
     categoria: (notificacion) => notificacion.categoria,
-    lectura: (notificacion) => notificacion.estado,
+    lectura: (notificacion) => notificacion.leida,
     vence: (notificacion) => notificacion.venceEn,
     registrada: (notificacion) => notificacion.creadaEn,
     registro: (notificacion) => notificacion.entidadCodigo ?? notificacion.seccion?.etiqueta ?? '',
@@ -265,6 +292,9 @@ export class NotificacionesPage {
   readonly filasVisibles = computed(() =>
     this.orden.ordenar(this.notificaciones(), this.accesores),
   );
+
+  /** Filas visibles agrupadas por día de registro, conservando el orden. */
+  readonly grupos = computed(() => agruparPorDia(this.filasVisibles()));
 
   idsVisibles(): string[] {
     return this.notificaciones()
@@ -283,7 +313,7 @@ export class NotificacionesPage {
     if (estado) partes.push(`filtro: ${etiquetaEstadoFiltro(estado)}`);
     const sinLeer = this.sinLeerEnPagina();
     if (sinLeer > 0) partes.push(`${sinLeer} sin leer en esta página`);
-    partes.push('orden del servidor, más recientes primero');
+    partes.push(`${this.textoContador()} en la bandeja`);
     return `${partes.join(' · ')}.`;
   });
 
@@ -299,12 +329,12 @@ export class NotificacionesPage {
     return etiquetaEstadoFiltro(valor);
   }
 
-  lecturaEtiqueta(valor: string | null): string {
-    return etiquetaLectura(valor);
+  lecturaEtiqueta(notificacion: Notificacion): string {
+    return etiquetaLectura(notificacion.estado, notificacion.leidoEn);
   }
 
-  lecturaClase(valor: string | null): string {
-    return claseLectura(valor);
+  lecturaClase(notificacion: Notificacion): string {
+    return claseLectura(notificacion.estado, notificacion.leidoEn);
   }
 
   enlace(notificacion: Notificacion): EnlaceNotificacion | null {
@@ -329,15 +359,33 @@ export class NotificacionesPage {
 
   /** Marca o deshace la lectura de una fila. */
   cambiarLectura(notificacion: Notificacion, leida: boolean): void {
-    if (!notificacion.id || this.enviandoId()) return;
-    this.enviarLectura(notificacion.id, estadoDeMarcado(leida));
+    if (!notificacion.id || this.enviandoId() || this.marcandoTodas()) return;
+    if (leida) {
+      this.enviarLeer(notificacion.id);
+    } else {
+      this.enviarDesmarcar(notificacion.id);
+    }
+  }
+
+  /** Marca como leídas todas las notificaciones sin leer de la bandeja. */
+  marcarTodas(): void {
+    if (this.enviandoId() || this.marcandoTodas() || !this.puedeMarcarTodas()) return;
+    this.enviarLeerTodas();
   }
 
   /** Reintenta la última acción de lectura que falló. */
   reintentarLectura(): void {
     const aviso = this.aviso();
-    if (!aviso?.reintento || this.enviandoId()) return;
-    this.enviarLectura(aviso.reintento.id, aviso.reintento.estado);
+    if (!aviso?.reintento || this.enviandoId() || this.marcandoTodas()) return;
+
+    const reintento = aviso.reintento;
+    if (reintento.tipo === 'todas') {
+      this.enviarLeerTodas();
+    } else if (reintento.leer) {
+      this.enviarLeer(reintento.id);
+    } else {
+      this.enviarDesmarcar(reintento.id);
+    }
   }
 
   cambiarEstado(evento: Event): void {
@@ -359,28 +407,24 @@ export class NotificacionesPage {
 
   recargar(): void {
     this.listado.recargar();
-    this.contador.recargar();
   }
 
   alFallarExportacion(mensaje: string): void {
     this.exportarError.set(mensaje);
   }
 
-  private enviarLectura(id: string, estado: 'leida' | 'pendiente'): void {
+  private enviarLeer(id: string): void {
     this.enviandoId.set(id);
     this.aviso.set(null);
 
     this.http
-      .patch<unknown>(urlApi(`/v1/notifications/${encodeURIComponent(id)}`), { estado })
+      .post<unknown>(urlApi(`/v1/notifications/${encodeURIComponent(id)}/leer`), {})
       .subscribe({
         next: () => {
           this.enviandoId.set(null);
           this.aviso.set({
             tipo: 'ok',
-            texto:
-              estado === 'leida'
-                ? 'Notificación marcada como leída.'
-                : 'Notificación devuelta a «sin leer».',
+            texto: 'Notificación marcada como leída.',
             reintento: null,
           });
           this.recargar();
@@ -390,10 +434,78 @@ export class NotificacionesPage {
           this.aviso.set({
             tipo: 'error',
             texto: this.mensajeDeError(fallo),
-            reintento: { id, estado },
+            reintento: { tipo: 'una', id, leer: true },
           });
         },
       });
+  }
+
+  private enviarDesmarcar(id: string): void {
+    this.enviandoId.set(id);
+    this.aviso.set(null);
+
+    this.http
+      .patch<unknown>(urlApi(`/v1/notifications/${encodeURIComponent(id)}`), {
+        estado: estadoDeMarcado(false),
+      })
+      .subscribe({
+        next: () => {
+          this.enviandoId.set(null);
+          this.aviso.set({
+            tipo: 'ok',
+            texto: 'Notificación devuelta a «sin leer».',
+            reintento: null,
+          });
+          this.recargar();
+        },
+        error: (fallo: unknown) => {
+          this.enviandoId.set(null);
+          this.aviso.set({
+            tipo: 'error',
+            texto: this.mensajeDeError(fallo),
+            reintento: { tipo: 'una', id, leer: false },
+          });
+        },
+      });
+  }
+
+  private enviarLeerTodas(): void {
+    this.marcandoTodas.set(true);
+    this.aviso.set(null);
+
+    this.http.post<unknown>(urlApi('/v1/notifications/leer-todas'), {}).subscribe({
+      next: (bruto) => {
+        this.marcandoTodas.set(false);
+        const actualizadas = this.actualizadasDe(bruto);
+        this.aviso.set({
+          tipo: 'ok',
+          texto:
+            actualizadas === 0
+              ? 'No había notificaciones sin leer.'
+              : `Se marcaron ${actualizadas} ${
+                  actualizadas === 1 ? 'notificación' : 'notificaciones'
+                } como leídas.`,
+          reintento: null,
+        });
+        this.recargar();
+      },
+      error: (fallo: unknown) => {
+        this.marcandoTodas.set(false);
+        this.aviso.set({
+          tipo: 'error',
+          texto: this.mensajeDeError(fallo),
+          reintento: { tipo: 'todas' },
+        });
+      },
+    });
+  }
+
+  private actualizadasDe(bruto: unknown): number {
+    if (typeof bruto === 'object' && bruto !== null && 'actualizadas' in bruto) {
+      const valor = (bruto as { actualizadas: unknown }).actualizadas;
+      if (typeof valor === 'number' && Number.isFinite(valor)) return valor;
+    }
+    return 0;
   }
 
   private mensajeDeError(fallo: unknown): string {

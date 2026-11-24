@@ -1,10 +1,13 @@
 /**
- * Formato de fechas compartido por la SPA.
+ * Formato de fecha único de la SPA: `02NOV2025`.
  *
- * Fuente única de las dos presentaciones del proyecto:
- * - `formatearFechaCorta` → `05 nov 2026` (vistas, tarjetas, fichas).
- * - `formatearFechaCompacta` → `05NOV2026` (cronologías y WhatsApp).
- * `formatearFechaHora` añade la hora a la forma compacta.
+ * Día a dos dígitos, mes abreviado a tres letras en mayúsculas y año a cuatro
+ * dígitos. Es el formato de todas las vistas (listados, fichas, cronologías y
+ * mensajes de WhatsApp):
+ * - `formatearFecha` → `02NOV2025`.
+ * - `formatearFechaHora` añade la hora → `02NOV2025 16:00`.
+ * `formatearFechaCorta` y `formatearFechaCompacta` son alias del mismo
+ * formateador; se conservan para no tocar las llamadas existentes.
  *
  * No se usa `Intl` para no depender del ICU del navegador: `es-PE` abrevia
  * setiembre como «sept.», y aquí la abreviatura estable es `set`. Tampoco se
@@ -55,20 +58,8 @@ export function partesFecha(valor: string | null | undefined): [number, number, 
   return [Number(iso[1]), Number(iso[2]), Number(iso[3])];
 }
 
-/** `2026-11-05` → `05 nov 2026`; sin fecha → `—`. */
-export function formatearFechaCorta(valor: string | null | undefined): string {
-  const partes = partesFecha(valor);
-  if (!partes) return '—';
-
-  const [anio, mes, dia] = partes;
-  const nombreMes = MESES[mes - 1];
-  if (!nombreMes) return '—';
-
-  return `${dosDigitos(dia)} ${nombreMes} ${anio}`;
-}
-
 /** `2026-11-05` → `05NOV2026`; sin fecha → `—`. */
-export function formatearFechaCompacta(valor: string | null | undefined): string {
+export function formatearFecha(valor: string | null | undefined): string {
   const partes = partesFecha(valor);
   if (!partes) return '—';
 
@@ -79,8 +70,11 @@ export function formatearFechaCompacta(valor: string | null | undefined): string
   return `${dosDigitos(dia)}${nombreMes.toUpperCase()}${anio}`;
 }
 
-/** Alias histórico: todas las vistas usan la forma corta. */
-export const formatearFecha = formatearFechaCorta;
+/** Alias de `formatearFecha` conservado por compatibilidad. */
+export const formatearFechaCompacta = formatearFecha;
+
+/** Alias de `formatearFecha` conservado por compatibilidad. */
+export const formatearFechaCorta = formatearFecha;
 
 /**
  * `2026-11-22T09:07:00.776Z` → `22NOV2026 04:07` (hora local del navegador).
@@ -101,7 +95,7 @@ export function formatearFechaHora(valor: string | null | undefined): string {
   const solaFecha = `${fecha.getFullYear()}-${dosDigitos(fecha.getMonth() + 1)}-${dosDigitos(
     fecha.getDate(),
   )}`;
-  return `${formatearFechaCompacta(solaFecha)} ${dosDigitos(fecha.getHours())}:${dosDigitos(
+  return `${formatearFecha(solaFecha)} ${dosDigitos(fecha.getHours())}:${dosDigitos(
     fecha.getMinutes(),
   )}`;
 }

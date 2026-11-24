@@ -50,6 +50,7 @@ function caso(overrides: Partial<Caso> = {}): Caso {
     anuladoPor: null,
     anuladoPorNombre: null,
     anulacionId: null,
+    enlaceAnalisis: null,
     ...overrides,
   };
 }

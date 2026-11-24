@@ -26,14 +26,14 @@ describe('hitos de la ficha: columnas', () => {
   });
 
   it('formatea la fecha planificada y cae al texto del origen', () => {
-    expect(textoFechaHito('2026-04-04', null)).toBe('04/04/2026');
+    expect(textoFechaHito('2026-04-04', null)).toBe('04 abr 2026');
     expect(textoFechaHito(null, 'Julio 2026')).toBe('Julio 2026');
     expect(textoFechaHito('', '  Julio 2026 ')).toBe('Julio 2026');
     expect(textoFechaHito(null, null)).toBe('—');
   });
 
   it('formatea la fecha real y declara su ausencia sin estimar', () => {
-    expect(textoFechaRealHito('2026-12-02', null)).toBe('02/12/2026');
+    expect(textoFechaRealHito('2026-12-02', null)).toBe('02 dic 2026');
     expect(textoFechaRealHito(null, 'Diciembre 2025')).toBe('Diciembre 2025');
     expect(textoFechaRealHito(null, null)).toBe('Sin fecha real');
     expect(textoFechaRealHito('', '')).toBe('Sin fecha real');

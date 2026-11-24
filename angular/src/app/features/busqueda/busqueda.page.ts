@@ -1,4 +1,11 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
@@ -7,6 +14,7 @@ import { urlApi } from '../../core/config/entorno';
 import { paramsDePagina, urlConParametros, type Coleccion } from '../../core/http/coleccion';
 import { consulta } from '../../core/http/consulta';
 import { IconoComponent } from '../../shared/ui/icono.component';
+import { BusquedaFichaComponent } from './busqueda-ficha.component';
 import {
   GRUPOS,
   MINIMO_TERMINO,
@@ -48,14 +56,19 @@ const FILTROS_INICIALES = { q: '' };
  * verificados en `app/api/v1/`— para tener el total de cada grupo y poder
  * topear filas sin sepultar a los grupos pequeños. Aparte se pide
  * `GET /api/v1/search`, que es la única respuesta con la región heredada del
- * caso: se usa como índice para completar región y el código de las demandas.
+ * caso: se usa como índice para completar región, territorio (provincia,
+ * distrito, ubigeo) y el código de las demandas.
+ *
+ * Cambio 30: cada fila abre `<app-busqueda-ficha>`, un drawer con el territorio
+ * y el destino del registro (su ficha o su listado filtrado), sin navegar en el
+ * acto.
  *
  * El atajo `/` del shell enfoca el primer `input[type="search"]` visible
  * (`core/atajos`): este campo lo es, así que no hace falta duplicar nada.
  */
 @Component({
   selector: 'app-busqueda',
-  imports: [RouterLink, IconoComponent],
+  imports: [RouterLink, IconoComponent, BusquedaFichaComponent],
   templateUrl: './busqueda.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
@@ -81,8 +94,6 @@ const FILTROS_INICIALES = { q: '' };
       justify-content: space-between;
       gap: 16px;
     }
-
-
 
     .search-groups {
       display: flex;
@@ -153,13 +164,19 @@ const FILTROS_INICIALES = { q: '' };
       display: flex;
       align-items: flex-start;
       gap: 11px;
+      width: 100%;
       padding: 12px 14px;
+      border: 0;
+      background: transparent;
       color: inherit;
+      font: inherit;
+      text-align: left;
       text-decoration: none;
+      cursor: pointer;
     }
 
-    a.search-result:hover,
-    a.search-result:focus-visible {
+    .search-result:hover,
+    .search-result:focus-visible {
       background: #fbfcfd;
     }
 
@@ -283,6 +300,9 @@ export class BusquedaPage {
 
   readonly topePorGrupo = TOPE_POR_GRUPO;
 
+  /** Resultado cuya ficha está abierta; `null` cuando el drawer está cerrado. */
+  readonly ficha = signal<ResultadoEnlazado | null>(null);
+
   private readonly parametros = toSignal(
     this.ruta.queryParamMap.pipe(
       map((params) => ({
@@ -400,11 +420,21 @@ export class BusquedaPage {
 
   limpiar(): void {
     clearTimeout(this.temporizador);
+    this.ficha.set(null);
     void this.router.navigate([], {
       relativeTo: this.ruta,
       queryParams: {},
       replaceUrl: true,
     });
+  }
+
+  /** Abre la ficha del resultado (cambio 30). */
+  abrir(resultado: ResultadoEnlazado): void {
+    this.ficha.set(resultado);
+  }
+
+  cerrarFicha(): void {
+    this.ficha.set(null);
   }
 
   recargar(): void {

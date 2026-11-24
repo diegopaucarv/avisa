@@ -17,13 +17,17 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /**
- * `GET /api/v1/notifications?estado=pendiente&pageSize=1`.
+ * `GET /api/v1/notifications?estado=pendiente&page=1&pageSize=25`.
  *
  * `estado` acepta los valores del CHECK de `core.notificaciones`
  * (`pendiente` | `enviada` | `leida`); cualquier otro responde 422
- * `FILTRO_INVALIDO` en vez de llegar al SQL. El `total` del sobre cuenta las
- * filas que pasan el filtro, así que la SPA pide el conteo de no leídas con
- * `estado=pendiente&pageSize=1` y lee `total`.
+ * `FILTRO_INVALIDO` en vez de llegar al SQL.
+ *
+ * El sobre trae `items`, `total`, `page`, `pageSize`, `generatedAt` y
+ * `noLeidas`. `noLeidas` cuenta los avisos sin leer con el alcance de la
+ * sesión y **sin** aplicar el filtro `estado`: es el contador de la bandeja
+ * (campana), no el de la página. La UI ya no necesita pedir
+ * `estado=pendiente&pageSize=1` para conocerlo.
  */
 export async function GET(request: Request) {
   try {

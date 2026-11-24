@@ -15,6 +15,11 @@
  */
 
 import { booleano, esRegistro, fechaIso, leer, lista, numero, texto } from '../../dominio/mapeo';
+import {
+  formatearFechaCompacta,
+  formatearFechaHora as formatearFechaHoraCompartida,
+  partesFecha,
+} from '../../shared/formato-fecha';
 
 /* ------------------------------------------------------------------------- *
  * Vocabulario
@@ -435,36 +440,18 @@ export function aOtroDocumento(bruto: unknown): OtroDocumento {
  * Presentación
  * ------------------------------------------------------------------------- */
 
-/** `YYYY-MM-DD` → `DD/MM/YYYY`; cualquier otra forma se muestra tal cual. */
+/** `YYYY-MM-DD` → `02NOV2025`; cualquier otra forma se muestra tal cual. */
 export function formatearFecha(valor: string | null | undefined): string {
   if (!valor) return '—';
-
-  const partes = valor.slice(0, 10).split('-');
-  if (partes.length !== 3) return valor;
-
-  const anio = partes[0];
-  const mes = partes[1];
-  const dia = partes[2];
-  if (!anio || !mes || !dia) return valor;
-
-  return `${dia}/${mes}/${anio}`;
+  return partesFecha(valor) ? formatearFechaCompacta(valor) : valor;
 }
 
 /**
- * `2026-11-22T09:07:00.776Z` → `22/11/2026 04:07` (hora local del navegador).
+ * `2026-11-22T09:07:00.776Z` → `22NOV2026 04:07` (hora local del navegador).
  * La anulación es un timestamp: no se rotula con ningún estado de catálogo.
  */
 export function formatearFechaHora(valor: string | null | undefined): string {
-  if (!valor) return '—';
-
-  const fecha = new Date(valor);
-  if (Number.isNaN(fecha.getTime())) return valor;
-
-  const dia = String(fecha.getDate()).padStart(2, '0');
-  const mes = String(fecha.getMonth() + 1).padStart(2, '0');
-  const hora = String(fecha.getHours()).padStart(2, '0');
-  const minuto = String(fecha.getMinutes()).padStart(2, '0');
-  return `${dia}/${mes}/${fecha.getFullYear()} ${hora}:${minuto}`;
+  return formatearFechaHoraCompartida(valor);
 }
 
 /** «Anexo N° 16». No se fabrica un anexo para los tipos que no lo tienen. */

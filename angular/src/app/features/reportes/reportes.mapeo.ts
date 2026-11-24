@@ -12,6 +12,7 @@
  */
 
 import { esRegistro, texto } from '../../dominio/mapeo';
+import { formatearFechaCompacta, partesFecha } from '../../shared/formato-fecha';
 
 export type Reporte = {
   /** Nombre del tipo en `core.cat_tipos_documento` (o «Alerta Temprana»). */
@@ -67,17 +68,8 @@ export function aReporte(bruto: unknown): Reporte {
   };
 }
 
-/** `YYYY-MM-DD` → `DD/MM/YYYY`; cualquier otra forma se muestra tal cual. */
+/** `YYYY-MM-DD` → `02NOV2025`; cualquier otra forma se muestra tal cual. */
 export function formatearFecha(valor: string | null | undefined): string {
   if (!valor) return '—';
-
-  const partes = valor.slice(0, 10).split('-');
-  if (partes.length !== 3) return valor;
-
-  const anio = partes[0];
-  const mes = partes[1];
-  const dia = partes[2];
-  if (!anio || !mes || !dia) return valor;
-
-  return `${dia}/${mes}/${anio}`;
+  return partesFecha(valor) ? formatearFechaCompacta(valor) : valor;
 }

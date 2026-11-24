@@ -9,6 +9,8 @@
  * se fabrica un texto que el registro no traiga.
  */
 
+import { formatearFechaCompacta, partesFecha } from '../../shared/formato-fecha';
+
 export type DocumentoClima = {
   id: string;
   codigo: string | null;
@@ -206,17 +208,10 @@ export function seleccionarReporteDelMes(
  * Presentación
  * ------------------------------------------------------------------------- */
 
-/** `YYYY-MM-DD` → `DD/MM/AAAA`; cualquier otra forma se muestra tal cual. */
+/** `YYYY-MM-DD` → `02NOV2025`; cualquier otra forma se muestra tal cual. */
 export function formatearFecha(valor: string | null | undefined): string {
   if (!valor) return '—';
-
-  const partes = valor.slice(0, 10).split('-');
-  if (partes.length !== 3) return valor;
-
-  const [anio, mes, dia] = partes;
-  if (!anio || !mes || !dia) return valor;
-
-  return `${dia}/${mes}/${anio}`;
+  return partesFecha(valor) ? formatearFechaCompacta(valor) : valor;
 }
 
 /** Tipo documental con su anexo, sin fabricar un anexo que no exista. */
