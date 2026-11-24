@@ -1,569 +1,593 @@
-<div class="drawer-scrim"></div>
-<aside
-  #panel
-  class="drawer"
-  tabindex="-1"
-  role="dialog"
-  aria-modal="true"
-  aria-label="Ficha de la alerta temprana"
-  (keydown)="alTecla($event)"
-  (click)="$event.stopPropagation()"
->
-  <header class="drawer-head">
-    @if (esAlta()) {
-      <div class="alerta-cabecera">
-        <p class="alerta-codigo">Nueva alerta</p>
-        <h2 class="alerta-titulo">Registrar alerta temprana</h2>
-      </div>
-    } @else {
-      @if (alerta(); as a) {
+<div class="drawer-scrim" (keydown)="alTecla($event)">
+  <aside
+    #panel
+    class="drawer"
+    tabindex="-1"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Ficha de la alerta temprana"
+    (click)="$event.stopPropagation()"
+  >
+    <header class="drawer-head">
+      @if (esAlta()) {
         <div class="alerta-cabecera">
-          <p class="alerta-codigo">
-            <span>{{ a.codigo || 'Sin código' }}</span>
-            <span class="alerta-modificacion"
-              >🕒 Última modificación: {{ fecha(a.ultimaModificacion) }}</span
-            >
-          </p>
-          <h2 class="alerta-titulo">{{ tituloVisible(a) }}</h2>
-          <div class="alerta-insignias">
-            <span class="alerta-geografia">{{ geografia(a) }}</span>
-            <span aria-hidden="true">·</span>
-            <span [class]="claseRiesgoTexto(a.riesgo)">Riesgo {{ etiquetaRiesgo(a.riesgo) }}</span>
-            <span aria-hidden="true">·</span>
-            <span class="alerta-fecha">{{ fecha(a.fechaReporte) }}</span>
+          <p class="alerta-codigo">Nueva alerta</p>
+          <h2 class="alerta-titulo">Registrar alerta temprana</h2>
+        </div>
+      } @else {
+        @if (alerta(); as a) {
+          <div class="alerta-cabecera">
+            <p class="alerta-codigo">
+              <span>{{ a.codigo || 'Sin código' }}</span>
+              <span class="alerta-modificacion"
+                >🕒 Última modificación: {{ fecha(a.ultimaModificacion) }}</span
+              >
+            </p>
+            <h2 class="alerta-titulo">{{ tituloVisible(a) }}</h2>
+            <div class="alerta-insignias">
+              <span class="alerta-geografia">{{ geografia(a) }}</span>
+              <span aria-hidden="true">·</span>
+              <span [class]="claseRiesgoTexto(a.riesgo)"
+                >Riesgo {{ etiquetaRiesgo(a.riesgo) }}</span
+              >
+              <span aria-hidden="true">·</span>
+              <span class="alerta-fecha">{{ fecha(a.fechaReporte) }}</span>
+            </div>
           </div>
+        }
+      }
+      <button
+        type="button"
+        class="icon-button"
+        aria-label="Cerrar la ficha de la alerta"
+        (click)="cerrar.emit()"
+      >
+        <app-icono nombre="cerrar" [tamano]="18" />
+      </button>
+    </header>
+
+    <div class="drawer-body">
+      @if (cargando()) {
+        <p class="form-hint" role="status">Cargando la alerta…</p>
+      }
+
+      @if (errorCarga(); as error) {
+        <div class="empty-state" role="alert">
+          <strong>No se pudo cargar la alerta</strong>
+          <p>{{ error.message }}</p>
+          <button type="button" class="button-secondary" (click)="reintentar.emit()">
+            Reintentar
+          </button>
         </div>
       }
-    }
-    <button
-      type="button"
-      class="icon-button"
-      aria-label="Cerrar la ficha de la alerta"
-      (click)="cerrar.emit()"
-    >
-      <app-icono nombre="cerrar" [tamano]="18" />
-    </button>
-  </header>
 
-  <div class="drawer-body">
-    @if (cargando()) {
-      <p class="form-hint" role="status">Cargando la alerta…</p>
-    }
+      @if (errorGuardado(); as fallo) {
+        <p class="form-error" role="alert">{{ fallo }}</p>
+      }
 
-    @if (errorCarga(); as error) {
-      <div class="empty-state" role="alert">
-        <strong>No se pudo cargar la alerta</strong>
-        <p>{{ error.message }}</p>
-        <button type="button" class="button-secondary" (click)="reintentar.emit()">
-          Reintentar
-        </button>
-      </div>
-    }
+      @if (aviso(); as mensaje) {
+        <p class="form-hint aviso-ok" role="status">{{ mensaje }}</p>
+      }
 
-    @if (errorGuardado(); as fallo) {
-      <p class="form-error" role="alert">{{ fallo }}</p>
-    }
+      @if (mensajeLocal(); as local) {
+        <p class="form-hint" role="status">{{ local }}</p>
+      }
 
-    @if (aviso(); as mensaje) {
-      <p class="form-hint aviso-ok" role="status">{{ mensaje }}</p>
-    }
-
-    @if (mensajeLocal(); as local) {
-      <p class="form-hint" role="status">{{ local }}</p>
-    }
-
-    @if (esFormulario()) {
-      <form class="alerta-form" (submit)="alEnviarAlta($event)">
-        <h3>{{ esAlta() ? 'Datos de la alerta' : 'Modificar alerta' }}</h3>
-
-        <div class="form-field">
-          <label class="form-label" for="alta-titulo">🔔 Título</label>
-          <input
-            id="alta-titulo"
-            type="text"
-            [value]="borradorAlta().titulo"
-            (input)="campoAlta('titulo', $event)"
-          />
-        </div>
-
-        <div class="rejilla-dos">
-          <div class="form-field">
-            <label class="form-label" for="alta-riesgo">⚠️ Nivel de riesgo *</label>
-            <select
-              id="alta-riesgo"
-              [value]="borradorAlta().riesgo"
-              (change)="cambiarRiesgoAlta($event)"
-            >
-              <option value="">Seleccione</option>
-              @for (riesgo of riesgos; track riesgo) {
-                <option [value]="riesgo">{{ riesgo }}</option>
-              }
-            </select>
-          </div>
+      @if (esFormulario()) {
+        <form class="alerta-form" (submit)="alEnviarAlta($event)">
+          <h3>{{ esAlta() ? 'Datos de la alerta' : 'Modificar alerta' }}</h3>
 
           <div class="form-field">
-            <label class="form-label" for="alta-alcance">Alcance geográfico *</label>
-            <select
-              id="alta-alcance"
-              [value]="borradorAlta().alcance"
-              (change)="cambiarAlcanceAlta($event)"
-            >
-              <option value="">Seleccione</option>
-              @for (alcance of alcances; track alcance) {
-                <option [value]="alcance">{{ alcance }}</option>
-              }
-            </select>
-          </div>
-        </div>
-
-        @if (borradorAlta().alcance === 'Región') {
-          <div class="form-field">
-            <label class="form-label" for="alta-region">Región</label>
-            <select
-              id="alta-region"
-              [value]="borradorAlta().region"
-              (change)="campoAlta('region', $event)"
-            >
-              <option value="">Seleccione una región</option>
-              @for (region of regiones; track region) {
-                <option [value]="region">{{ region }}</option>
-              }
-            </select>
-          </div>
-        }
-
-        @if (borradorAlta().alcance === 'Distrito') {
-          <div class="form-field">
-            <span class="form-label">Distrito</span>
-            <app-territorio-buscador
-              etiqueta="Distrito"
-              marcador="Distrito: Islay, Piura…"
-              [soloDistritos]="true"
-              [compacto]="true"
-              [inicial]="inicialDistritoAlta()"
-              (elegido)="alElegirDistritoAlta($event)"
-            />
-          </div>
-          <div class="form-field">
-            <label class="form-label" for="alta-provincia">Provincia</label>
+            <label class="form-label" for="alta-titulo">🔔 Título</label>
             <input
-              id="alta-provincia"
+              id="alta-titulo"
               type="text"
-              [value]="borradorAlta().provincia"
-              (input)="campoAlta('provincia', $event)"
+              [value]="borradorAlta().titulo"
+              (input)="campoAlta('titulo', $event)"
             />
           </div>
-        }
 
-        <div class="form-field">
-          <span class="form-label">Caso vinculado</span>
-          <app-caso-combobox
-            [opciones]="casos()"
-            [valor]="borradorAlta().casoCode"
-            (cambio)="cambiarCasoAlta($event)"
-          />
-        </div>
-
-        <div class="bloque-lista">
-          <span class="form-label">🔍 Situación actual</span>
-          @for (linea of borradorAlta().situacionActual; track linea.id) {
-            <div class="linea-fila">
-              <textarea
-                rows="2"
-                aria-label="Situación actual"
-                [value]="linea.texto"
-                (input)="editarLinea('situacionActual', linea.id, $event)"
-              ></textarea>
-              <button
-                type="button"
-                class="icon-button"
-                aria-label="Quitar línea de situación actual"
-                (click)="quitarLinea('situacionActual', linea.id)"
+          <div class="rejilla-dos">
+            <div class="form-field">
+              <label class="form-label" for="alta-riesgo">⚠️ Nivel de riesgo *</label>
+              <select
+                id="alta-riesgo"
+                [value]="borradorAlta().riesgo"
+                (change)="cambiarRiesgoAlta($event)"
               >
-                <app-icono nombre="cerrar" [tamano]="14" />
-              </button>
+                <option value="">Seleccione</option>
+                @for (riesgo of riesgos; track riesgo) {
+                  <option [value]="riesgo">{{ riesgo }}</option>
+                }
+              </select>
             </div>
-          }
-          <button type="button" class="alerta-agregar" (click)="agregarLinea('situacionActual')">
-            ＋ Agregar
-          </button>
-        </div>
 
-        <div class="bloque-lista">
-          <span class="form-label">🏗️ Hechos recientes y acciones en curso</span>
-          @for (linea of borradorAlta().hechosRecientes; track linea.id) {
-            <div class="linea-fila">
-              <textarea
-                rows="2"
-                aria-label="Hecho reciente"
-                [value]="linea.texto"
-                (input)="editarLinea('hechosRecientes', linea.id, $event)"
-              ></textarea>
-              <button
-                type="button"
-                class="icon-button"
-                aria-label="Quitar hecho"
-                (click)="quitarLinea('hechosRecientes', linea.id)"
+            <div class="form-field">
+              <label class="form-label" for="alta-alcance">Alcance geográfico *</label>
+              <select
+                id="alta-alcance"
+                [value]="borradorAlta().alcance"
+                (change)="cambiarAlcanceAlta($event)"
               >
-                <app-icono nombre="cerrar" [tamano]="14" />
-              </button>
+                <option value="">Seleccione</option>
+                @for (alcance of alcances; track alcance) {
+                  <option [value]="alcance">{{ alcance }}</option>
+                }
+              </select>
             </div>
-          }
-          <button type="button" class="alerta-agregar" (click)="agregarLinea('hechosRecientes')">
-            ＋ Agregar hecho
-          </button>
-        </div>
-
-        <div class="bloque-lista">
-          <span class="form-label">👥 Actores clave</span>
-          @for (linea of borradorAlta().actoresClave; track linea.id) {
-            <div class="linea-fila">
-              <textarea
-                rows="2"
-                aria-label="Actor clave"
-                [value]="linea.texto"
-                (input)="editarLinea('actoresClave', linea.id, $event)"
-              ></textarea>
-              <button
-                type="button"
-                class="icon-button"
-                aria-label="Quitar actor"
-                (click)="quitarLinea('actoresClave', linea.id)"
-              >
-                <app-icono nombre="cerrar" [tamano]="14" />
-              </button>
-            </div>
-          }
-          <p class="form-hint">Nombre — Cargo / Organización (texto libre).</p>
-          <span class="form-label">＋ Agregar actor</span>
-          <div class="actor-acciones">
-            <button type="button" class="button-secondary" (click)="alternarBuscadorActor()">
-              Elegir del directorio
-            </button>
-            <button type="button" class="button-secondary" (click)="escribirActorNuevo()">
-              Escribir actor nuevo
-            </button>
           </div>
 
-          @if (buscandoActor()) {
-            <div class="actor-buscador">
-              <div class="actor-buscador-input">
-                <app-icono nombre="buscar" [tamano]="15" />
-                <input
-                  type="text"
-                  placeholder="Buscar actor por nombre…"
-                  aria-label="Buscar actor en el Directorio"
-                  [value]="consultaActor()"
-                  (input)="alBuscarActor($event)"
-                />
+          @if (borradorAlta().alcance === 'Región') {
+            <div class="form-field">
+              <label class="form-label" for="alta-region">Región</label>
+              <select
+                id="alta-region"
+                [value]="borradorAlta().region"
+                (change)="campoAlta('region', $event)"
+              >
+                <option value="">Seleccione una región</option>
+                @for (region of regiones; track region) {
+                  <option [value]="region">{{ region }}</option>
+                }
+              </select>
+            </div>
+          }
+
+          @if (borradorAlta().alcance === 'Distrito') {
+            <div class="form-field">
+              <span class="form-label">Distrito</span>
+              <app-territorio-buscador
+                etiqueta="Distrito"
+                marcador="Distrito: Islay, Piura…"
+                [soloDistritos]="true"
+                [compacto]="true"
+                [inicial]="inicialDistritoAlta()"
+                (elegido)="alElegirDistritoAlta($event)"
+              />
+            </div>
+            <div class="form-field">
+              <label class="form-label" for="alta-provincia">Provincia</label>
+              <input
+                id="alta-provincia"
+                type="text"
+                [value]="borradorAlta().provincia"
+                (input)="campoAlta('provincia', $event)"
+              />
+            </div>
+          }
+
+          <div class="form-field">
+            <span class="form-label">Caso vinculado</span>
+            <app-caso-combobox
+              [opciones]="casos()"
+              [valor]="borradorAlta().casoCode"
+              (cambio)="cambiarCasoAlta($event)"
+            />
+          </div>
+
+          <div class="bloque-lista">
+            <span class="form-label">🔍 Situación actual</span>
+            @for (linea of borradorAlta().situacionActual; track linea.id) {
+              <div class="linea-fila">
+                <textarea
+                  rows="2"
+                  aria-label="Situación actual"
+                  [value]="linea.texto"
+                  (input)="editarLinea('situacionActual', linea.id, $event)"
+                ></textarea>
+                <button
+                  type="button"
+                  class="icon-button"
+                  aria-label="Quitar línea de situación actual"
+                  (click)="quitarLinea('situacionActual', linea.id)"
+                >
+                  <app-icono nombre="cerrar" [tamano]="14" />
+                </button>
               </div>
-              @if (buscandoDirectorio()) {
-                <p class="form-hint" role="status">Buscando en el Directorio…</p>
-              }
-              @if (errorActor(); as falloActor) {
-                <p class="form-error" role="alert">{{ falloActor }}</p>
-              }
-              @if (resultadosActor().length) {
-                <ul class="actor-resultados">
-                  @for (actor of resultadosActor(); track actor.id) {
-                    <li>
-                      <button
-                        type="button"
-                        class="actor-opcion"
-                        (click)="elegirActorDirectorio(actor)"
-                      >
-                        <span class="actor-nombre">{{ actor.nombre }}</span>
-                        <span class="actor-meta">
-                          @if (actor.tipo) {
-                            {{ actor.tipo }}
-                          }
-                          @if (actor.tipo && actor.institucion) {
-                            ·
-                          }
-                          {{ actor.institucion }}
-                        </span>
-                      </button>
-                    </li>
-                  }
-                </ul>
-              }
-              <button type="button" class="button-secondary" (click)="cerrarBuscadorActor()">
-                Cerrar buscador
-              </button>
-            </div>
-          }
-        </div>
-
-        <div class="bloque-lista">
-          <span class="form-label">📌 Demandas inmediatas</span>
-          @for (linea of borradorAlta().demandasInmediatas; track linea.id) {
-            <div class="linea-fila">
-              <textarea
-                rows="2"
-                aria-label="Demanda inmediata"
-                [value]="linea.texto"
-                (input)="editarLinea('demandasInmediatas', linea.id, $event)"
-              ></textarea>
-              <button
-                type="button"
-                class="icon-button"
-                aria-label="Quitar demanda"
-                (click)="quitarLinea('demandasInmediatas', linea.id)"
-              >
-                <app-icono nombre="cerrar" [tamano]="14" />
-              </button>
-            </div>
-          }
-          <button type="button" class="alerta-agregar" (click)="agregarLinea('demandasInmediatas')">
-            ＋ Agregar
-          </button>
-        </div>
-
-        <div class="bloque-lista">
-          <span class="form-label">⚠️ Descripción del riesgo</span>
-          @for (linea of borradorAlta().descripcionRiesgo; track linea.id) {
-            <div class="linea-fila">
-              <textarea
-                rows="2"
-                aria-label="Descripción del riesgo"
-                [value]="linea.texto"
-                (input)="editarLinea('descripcionRiesgo', linea.id, $event)"
-              ></textarea>
-              <button
-                type="button"
-                class="icon-button"
-                aria-label="Quitar línea de descripción del riesgo"
-                (click)="quitarLinea('descripcionRiesgo', linea.id)"
-              >
-                <app-icono nombre="cerrar" [tamano]="14" />
-              </button>
-            </div>
-          }
-          <button type="button" class="alerta-agregar" (click)="agregarLinea('descripcionRiesgo')">
-            ＋ Agregar
-          </button>
-        </div>
-
-        <div class="bloque-lista">
-          <span class="form-label">🧭 Acciones sugeridas</span>
-          @for (linea of borradorAlta().accionesSugeridas; track linea.id) {
-            <div class="linea-fila">
-              <textarea
-                rows="2"
-                aria-label="Acción sugerida"
-                [value]="linea.texto"
-                (input)="editarLinea('accionesSugeridas', linea.id, $event)"
-              ></textarea>
-              <button
-                type="button"
-                class="icon-button"
-                aria-label="Quitar acción sugerida"
-                (click)="quitarLinea('accionesSugeridas', linea.id)"
-              >
-                <app-icono nombre="cerrar" [tamano]="14" />
-              </button>
-            </div>
-          }
-          <button type="button" class="alerta-agregar" (click)="agregarLinea('accionesSugeridas')">
-            ＋ Agregar
-          </button>
-        </div>
-      </form>
-    } @else {
-      @if (alerta(); as a) {
-        <section class="alerta-seccion">
-          <h3 class="alerta-seccion-titulo">🔍 1. Situación actual</h3>
-          <div class="alerta-seccion-cuerpo">
-            @if (a.situacionActual) {
-              <p>{{ a.situacionActual }}</p>
-            } @else {
-              <p class="alerta-vacio">Sin contenido.</p>
             }
-          </div>
-        </section>
-
-        <section class="alerta-seccion">
-          <h3 class="alerta-seccion-titulo">🏗️ 2. Hechos recientes y acciones en curso</h3>
-          <div class="alerta-seccion-cuerpo">
-            @if (a.hechosRecientes) {
-              <p>{{ a.hechosRecientes }}</p>
-            } @else {
-              <p class="alerta-vacio">Sin contenido.</p>
-            }
-          </div>
-        </section>
-
-        <section class="alerta-seccion">
-          <h3 class="alerta-seccion-titulo">👥 3. Actores clave</h3>
-          <div class="alerta-seccion-cuerpo">
-            @if (a.actoresClave.length) {
-              <ul>
-                @for (actor of a.actoresClave; track $index) {
-                  <li>{{ actor }}</li>
-                }
-              </ul>
-            } @else {
-              <p class="alerta-vacio">Sin actores registrados.</p>
-            }
-          </div>
-        </section>
-
-        <section class="alerta-seccion">
-          <h3 class="alerta-seccion-titulo">📌 4. Demandas inmediatas</h3>
-          <div class="alerta-seccion-cuerpo">
-            @if (a.demandasInmediatas.length) {
-              <ul>
-                @for (demanda of a.demandasInmediatas; track $index) {
-                  <li>{{ demanda }}</li>
-                }
-              </ul>
-            } @else {
-              <p class="alerta-vacio">Sin demandas registradas.</p>
-            }
-          </div>
-        </section>
-
-        <section class="alerta-seccion">
-          <h3 class="alerta-seccion-titulo">⚠️ 5. Descripción del riesgo</h3>
-          <div class="alerta-seccion-cuerpo">
-            @if (a.descripcionRiesgo) {
-              <p>{{ a.descripcionRiesgo }}</p>
-            }
-            @if (a.riesgos.length) {
-              <ul>
-                @for (riesgo of a.riesgos; track $index) {
-                  <li>{{ riesgo }}</li>
-                }
-              </ul>
-            }
-            @if (!a.descripcionRiesgo && !a.riesgos.length) {
-              <p class="alerta-vacio">Sin contenido.</p>
-            }
-          </div>
-        </section>
-
-        <section class="alerta-seccion">
-          <h3 class="alerta-seccion-titulo">🧭 6. Acciones sugeridas</h3>
-          <div class="alerta-seccion-cuerpo">
-            @if (a.accionesSugeridas.length) {
-              <ul>
-                @for (accion of a.accionesSugeridas; track $index) {
-                  <li>{{ accion }}</li>
-                }
-              </ul>
-            } @else {
-              <p class="alerta-vacio">Sin acciones sugeridas.</p>
-            }
-          </div>
-        </section>
-
-        @if (puedeModificar()) {
-          <div class="acciones-form">
-            <button type="button" class="button-secondary" (click)="iniciarEdicion()">
-              Modificar contenido
+            <button type="button" class="alerta-agregar" (click)="agregarLinea('situacionActual')">
+              ＋ Agregar
             </button>
           </div>
-        }
 
-        <section class="alerta-seccion">
-          <div class="alerta-seccion-cuerpo">
-            <p>
-              Caso vinculado: <b>{{ a.casoCodigo || 'SIN CASO' }}</b>
-              @if (a.casoTitulo) {
-                · {{ a.casoTitulo }}
-              }
-            </p>
+          <div class="bloque-lista">
+            <span class="form-label">🏗️ Hechos recientes y acciones en curso</span>
+            @for (linea of borradorAlta().hechosRecientes; track linea.id) {
+              <div class="linea-fila">
+                <textarea
+                  rows="2"
+                  aria-label="Hecho reciente"
+                  [value]="linea.texto"
+                  (input)="editarLinea('hechosRecientes', linea.id, $event)"
+                ></textarea>
+                <button
+                  type="button"
+                  class="icon-button"
+                  aria-label="Quitar hecho"
+                  (click)="quitarLinea('hechosRecientes', linea.id)"
+                >
+                  <app-icono nombre="cerrar" [tamano]="14" />
+                </button>
+              </div>
+            }
+            <button type="button" class="alerta-agregar" (click)="agregarLinea('hechosRecientes')">
+              ＋ Agregar hecho
+            </button>
           </div>
-        </section>
 
-        <section class="alerta-seccion">
-          <h3 class="alerta-seccion-titulo">Fuente</h3>
-          <div class="alerta-seccion-cuerpo">
-            @if (a.fuenteTipo || a.fuenteDescripcion) {
-              <p>
-                <b>{{ a.fuenteTipo || 'Fuente' }}</b>
-                @if (a.fuenteDescripcion) {
-                  · {{ a.fuenteDescripcion }}
+          <div class="bloque-lista">
+            <span class="form-label">👥 Actores clave</span>
+            @for (linea of borradorAlta().actoresClave; track linea.id) {
+              <div class="linea-fila">
+                <textarea
+                  rows="2"
+                  aria-label="Actor clave"
+                  [value]="linea.texto"
+                  (input)="editarLinea('actoresClave', linea.id, $event)"
+                ></textarea>
+                <button
+                  type="button"
+                  class="icon-button"
+                  aria-label="Quitar actor"
+                  (click)="quitarLinea('actoresClave', linea.id)"
+                >
+                  <app-icono nombre="cerrar" [tamano]="14" />
+                </button>
+              </div>
+            }
+            <p class="form-hint">Nombre — Cargo / Organización (texto libre).</p>
+            <span class="form-label">＋ Agregar actor</span>
+            <div class="actor-acciones">
+              <button type="button" class="button-secondary" (click)="alternarBuscadorActor()">
+                Elegir del directorio
+              </button>
+              <button type="button" class="button-secondary" (click)="escribirActorNuevo()">
+                Escribir actor nuevo
+              </button>
+            </div>
+
+            @if (buscandoActor()) {
+              <div class="actor-buscador">
+                <div class="actor-buscador-input">
+                  <app-icono nombre="buscar" [tamano]="15" />
+                  <input
+                    type="text"
+                    placeholder="Buscar actor por nombre…"
+                    aria-label="Buscar actor en el Directorio"
+                    [value]="consultaActor()"
+                    (input)="alBuscarActor($event)"
+                  />
+                </div>
+                @if (buscandoDirectorio()) {
+                  <p class="form-hint" role="status">Buscando en el Directorio…</p>
                 }
-              </p>
-            } @else {
-              <p class="alerta-vacio">Sin fuente registrada.</p>
-            }
-            @if (a.fuenteUrl) {
-              <p>
-                <a [href]="a.fuenteUrl" target="_blank" rel="noopener">Abrir la fuente</a>
-              </p>
+                @if (errorActor(); as falloActor) {
+                  <p class="form-error" role="alert">{{ falloActor }}</p>
+                }
+                @if (resultadosActor().length) {
+                  <ul class="actor-resultados">
+                    @for (actor of resultadosActor(); track actor.id) {
+                      <li>
+                        <button
+                          type="button"
+                          class="actor-opcion"
+                          (click)="elegirActorDirectorio(actor)"
+                        >
+                          <span class="actor-nombre">{{ actor.nombre }}</span>
+                          <span class="actor-meta">
+                            @if (actor.tipo) {
+                              {{ actor.tipo }}
+                            }
+                            @if (actor.tipo && actor.institucion) {
+                              ·
+                            }
+                            {{ actor.institucion }}
+                          </span>
+                        </button>
+                      </li>
+                    }
+                  </ul>
+                }
+                <button type="button" class="button-secondary" (click)="cerrarBuscadorActor()">
+                  Cerrar buscador
+                </button>
+              </div>
             }
           </div>
-        </section>
 
-        <section class="alerta-seccion">
-          <app-adjuntos-panel
-            entidadTipo="alerta"
-            titulo="Adjuntos de la alerta"
-            [entidadId]="a.id"
-            [editable]="puedeModificar()"
-          />
-        </section>
+          <div class="bloque-lista">
+            <span class="form-label">📌 Demandas inmediatas</span>
+            @for (linea of borradorAlta().demandasInmediatas; track linea.id) {
+              <div class="linea-fila">
+                <textarea
+                  rows="2"
+                  aria-label="Demanda inmediata"
+                  [value]="linea.texto"
+                  (input)="editarLinea('demandasInmediatas', linea.id, $event)"
+                ></textarea>
+                <button
+                  type="button"
+                  class="icon-button"
+                  aria-label="Quitar demanda"
+                  (click)="quitarLinea('demandasInmediatas', linea.id)"
+                >
+                  <app-icono nombre="cerrar" [tamano]="14" />
+                </button>
+              </div>
+            }
+            <button
+              type="button"
+              class="alerta-agregar"
+              (click)="agregarLinea('demandasInmediatas')"
+            >
+              ＋ Agregar
+            </button>
+          </div>
 
-        <div class="alerta-traza">
-          <span
-            >Estado: <b>{{ estadoVisible(a) }}</b></span
-          >
-          <span aria-hidden="true">·</span>
-          <span
-            >Modificó: <b>{{ a.modificadoPor || '—' }}</b></span
-          >
-          <span aria-hidden="true">·</span>
-          <span
-            >Último revisor: <b>{{ a.ultimoRevisor || '—' }}</b></span
-          >
-          <button type="button" class="alerta-traza-boton" (click)="alternarHistorial()">
-            {{ verHistorial() ? 'Ocultar historial' : 'Ver historial' }}
-          </button>
-        </div>
+          <div class="bloque-lista">
+            <span class="form-label">⚠️ Descripción del riesgo</span>
+            @for (linea of borradorAlta().descripcionRiesgo; track linea.id) {
+              <div class="linea-fila">
+                <textarea
+                  rows="2"
+                  aria-label="Descripción del riesgo"
+                  [value]="linea.texto"
+                  (input)="editarLinea('descripcionRiesgo', linea.id, $event)"
+                ></textarea>
+                <button
+                  type="button"
+                  class="icon-button"
+                  aria-label="Quitar línea de descripción del riesgo"
+                  (click)="quitarLinea('descripcionRiesgo', linea.id)"
+                >
+                  <app-icono nombre="cerrar" [tamano]="14" />
+                </button>
+              </div>
+            }
+            <button
+              type="button"
+              class="alerta-agregar"
+              (click)="agregarLinea('descripcionRiesgo')"
+            >
+              ＋ Agregar
+            </button>
+          </div>
 
-        @if (verHistorial()) {
+          <div class="bloque-lista">
+            <span class="form-label">🧭 Acciones sugeridas</span>
+            @for (linea of borradorAlta().accionesSugeridas; track linea.id) {
+              <div class="linea-fila">
+                <textarea
+                  rows="2"
+                  aria-label="Acción sugerida"
+                  [value]="linea.texto"
+                  (input)="editarLinea('accionesSugeridas', linea.id, $event)"
+                ></textarea>
+                <button
+                  type="button"
+                  class="icon-button"
+                  aria-label="Quitar acción sugerida"
+                  (click)="quitarLinea('accionesSugeridas', linea.id)"
+                >
+                  <app-icono nombre="cerrar" [tamano]="14" />
+                </button>
+              </div>
+            }
+            <button
+              type="button"
+              class="alerta-agregar"
+              (click)="agregarLinea('accionesSugeridas')"
+            >
+              ＋ Agregar
+            </button>
+          </div>
+        </form>
+      } @else {
+        @if (alerta(); as a) {
           <section class="alerta-seccion">
-            <h3 class="alerta-seccion-titulo">Historial de revisiones</h3>
+            <h3 class="alerta-seccion-titulo">🔍 1. Situación actual</h3>
             <div class="alerta-seccion-cuerpo">
-              @if (a.historial.length) {
-                <ul class="historial">
-                  @for (revision of a.historial; track $index) {
-                    <li>
-                      <span class="historial-autor">{{ revision.autor }}</span>
-                      <span class="historial-meta">
-                        {{ fecha(revision.fecha) }}
-                        @if (revision.accion) {
-                          · {{ revision.accion }}
-                        }
-                      </span>
-                    </li>
-                  }
-                </ul>
+              @if (a.situacionActual) {
+                <p>{{ a.situacionActual }}</p>
               } @else {
-                <p class="alerta-vacio">Sin revisiones registradas.</p>
+                <p class="alerta-vacio">Sin contenido.</p>
               }
             </div>
           </section>
+
+          <section class="alerta-seccion">
+            <h3 class="alerta-seccion-titulo">🏗️ 2. Hechos recientes y acciones en curso</h3>
+            <div class="alerta-seccion-cuerpo">
+              @if (a.hechosRecientes) {
+                <p>{{ a.hechosRecientes }}</p>
+              } @else {
+                <p class="alerta-vacio">Sin contenido.</p>
+              }
+            </div>
+          </section>
+
+          <section class="alerta-seccion">
+            <h3 class="alerta-seccion-titulo">👥 3. Actores clave</h3>
+            <div class="alerta-seccion-cuerpo">
+              @if (a.actoresClave.length) {
+                <ul>
+                  @for (actor of a.actoresClave; track $index) {
+                    <li>{{ actor }}</li>
+                  }
+                </ul>
+              } @else {
+                <p class="alerta-vacio">Sin actores registrados.</p>
+              }
+            </div>
+          </section>
+
+          <section class="alerta-seccion">
+            <h3 class="alerta-seccion-titulo">📌 4. Demandas inmediatas</h3>
+            <div class="alerta-seccion-cuerpo">
+              @if (a.demandasInmediatas.length) {
+                <ul>
+                  @for (demanda of a.demandasInmediatas; track $index) {
+                    <li>{{ demanda }}</li>
+                  }
+                </ul>
+              } @else {
+                <p class="alerta-vacio">Sin demandas registradas.</p>
+              }
+            </div>
+          </section>
+
+          <section class="alerta-seccion">
+            <h3 class="alerta-seccion-titulo">⚠️ 5. Descripción del riesgo</h3>
+            <div class="alerta-seccion-cuerpo">
+              @if (a.descripcionRiesgo) {
+                <p>{{ a.descripcionRiesgo }}</p>
+              }
+              @if (a.riesgos.length) {
+                <ul>
+                  @for (riesgo of a.riesgos; track $index) {
+                    <li>{{ riesgo }}</li>
+                  }
+                </ul>
+              }
+              @if (!a.descripcionRiesgo && !a.riesgos.length) {
+                <p class="alerta-vacio">Sin contenido.</p>
+              }
+            </div>
+          </section>
+
+          <section class="alerta-seccion">
+            <h3 class="alerta-seccion-titulo">🧭 6. Acciones sugeridas</h3>
+            <div class="alerta-seccion-cuerpo">
+              @if (a.accionesSugeridas.length) {
+                <ul>
+                  @for (accion of a.accionesSugeridas; track $index) {
+                    <li>{{ accion }}</li>
+                  }
+                </ul>
+              } @else {
+                <p class="alerta-vacio">Sin acciones sugeridas.</p>
+              }
+            </div>
+          </section>
+
+          @if (puedeModificar()) {
+            <div class="acciones-form">
+              <button type="button" class="button-secondary" (click)="iniciarEdicion()">
+                Modificar contenido
+              </button>
+            </div>
+          }
+
+          <section class="alerta-seccion">
+            <div class="alerta-seccion-cuerpo">
+              <p>
+                Caso vinculado: <b>{{ a.casoCodigo || 'SIN CASO' }}</b>
+                @if (a.casoTitulo) {
+                  · {{ a.casoTitulo }}
+                }
+              </p>
+            </div>
+          </section>
+
+          <section class="alerta-seccion">
+            <h3 class="alerta-seccion-titulo">Fuente</h3>
+            <div class="alerta-seccion-cuerpo">
+              @if (a.fuenteTipo || a.fuenteDescripcion) {
+                <p>
+                  <b>{{ a.fuenteTipo || 'Fuente' }}</b>
+                  @if (a.fuenteDescripcion) {
+                    · {{ a.fuenteDescripcion }}
+                  }
+                </p>
+              } @else {
+                <p class="alerta-vacio">Sin fuente registrada.</p>
+              }
+              @if (a.fuenteUrl) {
+                <p>
+                  <a [href]="a.fuenteUrl" target="_blank" rel="noopener">Abrir la fuente</a>
+                </p>
+              }
+            </div>
+          </section>
+
+          <section class="alerta-seccion">
+            <app-adjuntos-panel
+              entidadTipo="alerta"
+              titulo="Adjuntos de la alerta"
+              [entidadId]="a.id"
+              [editable]="puedeModificar()"
+            />
+          </section>
+
+          <div class="alerta-traza">
+            <span
+              >Estado: <b>{{ estadoVisible(a) }}</b></span
+            >
+            <span aria-hidden="true">·</span>
+            <span
+              >Modificó: <b>{{ a.modificadoPor || '—' }}</b></span
+            >
+            <span aria-hidden="true">·</span>
+            <span
+              >Último revisor: <b>{{ a.ultimoRevisor || '—' }}</b></span
+            >
+            <button type="button" class="alerta-traza-boton" (click)="alternarHistorial()">
+              {{ verHistorial() ? 'Ocultar historial' : 'Ver historial' }}
+            </button>
+          </div>
+
+          @if (verHistorial()) {
+            <section class="alerta-seccion">
+              <h3 class="alerta-seccion-titulo">Historial de revisiones</h3>
+              <div class="alerta-seccion-cuerpo">
+                @if (a.historial.length) {
+                  <ul class="historial">
+                    @for (revision of a.historial; track $index) {
+                      <li>
+                        <span class="historial-autor">{{ revision.autor }}</span>
+                        <span class="historial-meta">
+                          {{ fecha(revision.fecha) }}
+                          @if (revision.accion) {
+                            · {{ revision.accion }}
+                          }
+                        </span>
+                      </li>
+                    }
+                  </ul>
+                } @else {
+                  <p class="alerta-vacio">Sin revisiones registradas.</p>
+                }
+              </div>
+            </section>
+          }
         }
       }
-    }
-  </div>
+    </div>
 
-  <footer class="drawer-foot">
-    @if (esAlta()) {
-      <button type="button" class="button-secondary" (click)="cerrar.emit()">Cancelar</button>
-      <button type="button" class="button-primary" [disabled]="guardando()" (click)="guardarAlta()">
-        {{ guardando() ? 'Registrando…' : 'Registrar alerta' }}
-      </button>
-    } @else if (editando()) {
-      <button type="button" class="button-secondary" (click)="cancelarEdicion()">Cancelar</button>
-      <button type="button" class="button-primary" [disabled]="guardando()" (click)="guardarAlta()">
-        {{ guardando() ? 'Guardando…' : 'Guardar cambios' }}
-      </button>
-    } @else {
-      <button type="button" class="button-secondary" (click)="cerrar.emit()">Cerrar</button>
-    }
-  </footer>
-</aside>
+    <footer class="drawer-foot">
+      @if (esAlta()) {
+        <button type="button" class="button-secondary" (click)="cerrar.emit()">Cancelar</button>
+        <button
+          type="button"
+          class="button-primary"
+          [disabled]="guardando()"
+          (click)="guardarAlta()"
+        >
+          {{ guardando() ? 'Registrando…' : 'Registrar alerta' }}
+        </button>
+      } @else if (editando()) {
+        <button type="button" class="button-secondary" (click)="cancelarEdicion()">Cancelar</button>
+        <button
+          type="button"
+          class="button-primary"
+          [disabled]="guardando()"
+          (click)="guardarAlta()"
+        >
+          {{ guardando() ? 'Guardando…' : 'Guardar cambios' }}
+        </button>
+      } @else {
+        <button type="button" class="button-secondary" (click)="cerrar.emit()">Cerrar</button>
+      }
+    </footer>
+  </aside>
+</div>
