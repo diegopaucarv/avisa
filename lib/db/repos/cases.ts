@@ -8,6 +8,7 @@ const CASE_SELECT = `
   c.codigo_caso as code,
   c.nombre_caso as title,
   c.resumen_ejecutivo as summary,
+  c.enlace_analisis,
   c.descripcion_riesgo,
   c.pct_avance::float8 as progress,
   to_char(c.fecha_ultima_actualizacion at time zone 'America/Lima', 'YYYY-MM-DD') as updated,
@@ -120,6 +121,7 @@ export type CaseListItem = {
   code: string;
   title: string;
   summary: string | null;
+  enlaceAnalisis: string | null;
   progress: number | null;
   updated: string | null;
   updatedAt: string | Date | null;
@@ -415,6 +417,7 @@ export async function listCases(
     code: row.code,
     title: row.title,
     summary: row.summary,
+    enlaceAnalisis: row.enlace_analisis,
     progress: row.progress,
     updated: row.updated,
     updatedAt: row.updated_at,
@@ -840,6 +843,7 @@ export async function getCaseByCode(
     code: row.code,
     title: row.title,
     summary: row.summary,
+    enlaceAnalisis: row.enlace_analisis,
     progress: row.progress,
     updated: row.updated,
     updatedAt: row.updated_at,
@@ -924,6 +928,7 @@ export type WriteSession = {
 };
 
 const MAX_TITLE_LENGTH = 255;
+const MAX_URL_LENGTH = 2048;
 const MAX_TEXT_LENGTH = 20000;
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const ORIGEN_VALUES = new Set([
@@ -938,6 +943,7 @@ const CASE_WRITE_COLUMNS = [
   "codigo_caso",
   "nombre_caso",
   "resumen_ejecutivo",
+  "enlace_analisis",
   "descripcion_riesgo",
   "pct_avance",
   "fecha_inicio",
@@ -1061,6 +1067,24 @@ function requiredText(value: unknown, max: number): string {
   const out = text(value, max, true);
   if (out === null) invalid();
   return out;
+}
+
+/**
+ * URL opcional del tablero de análisis. Sólo se aceptan `http`/`https` para que
+ * el enlace guardado no pueda ejecutar código al abrirse en la interfaz.
+ * Vacío o `null` borra el enlace.
+ */
+function urlOpcional(value: unknown): string | null {
+  const limpio = text(value, MAX_URL_LENGTH, false);
+  if (limpio === null) return null;
+  let url: URL;
+  try {
+    url = new URL(limpio);
+  } catch {
+    invalid();
+  }
+  if (url.protocol !== "http:" && url.protocol !== "https:") invalid();
+  return limpio;
 }
 
 function numericIn(value: unknown, min: number, max: number): number {
@@ -1742,6 +1766,9 @@ export async function updateCase(
   ]);
   if (resumen.present)
     add("resumen_ejecutivo", text(resumen.value, MAX_TEXT_LENGTH, false));
+
+  const enlace = readField(body, ["enlaceAnalisis", "enlace_analisis"]);
+  if (enlace.present) add("enlace_analisis", urlOpcional(enlace.value));
 
   const descripcion = readField(body, [
     "descripcionRiesgo",

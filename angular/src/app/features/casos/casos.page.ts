@@ -256,6 +256,17 @@ function aConteos(bruto: unknown): ConteosCasos {
       font-size: 13.5px;
     }
 
+    /* La búsqueda comparte fila con cuatro filtros: no debe estirarse. */
+    .search-field-angosta {
+      max-width: 300px;
+      flex: 0 1 300px;
+    }
+
+    /* Estado cierra la fila de filtros, alineado a la derecha. */
+    .estado-final {
+      margin-left: auto;
+    }
+
     .vista-previa-aviso {
       margin: 0 0 10px;
     }
@@ -797,6 +808,25 @@ export class CasosPage {
   recargar(): void {
     this.recurso.recargar();
     this.nudosRecurso.recargar();
+  }
+
+  /**
+   * Guarda la URL del tablero de Canva del caso desde la vista previa. El
+   * endpoint `PATCH /v1/cases/:codigo` la persiste en `enlace_analisis`. Al
+   * terminar se refresca la fila abierta para que el acceso pase a enlace.
+   */
+  guardarEnlaceAnalisis(caso: Caso, url: string): void {
+    this.http
+      .patch<unknown>(urlApi(`/v1/cases/${encodeURIComponent(caso.codigo)}`), {
+        enlaceAnalisis: url,
+      })
+      .subscribe({
+        next: () => {
+          this.casoPrevio.set({ ...caso, enlaceAnalisis: url });
+          this.recargar();
+        },
+        error: (fallo: unknown) => this.aviso.set(aErrorApi(fallo).message),
+      });
   }
 
   alAnularLote(cantidad: number): void {

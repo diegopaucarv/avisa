@@ -274,14 +274,6 @@ export class VincularActorComponent {
     return this.errorLocal();
   }
 
-  alFondo(evento: MouseEvent): void {
-    if (evento.target === evento.currentTarget) this.cerrar.emit();
-  }
-
-  alTecla(evento: KeyboardEvent): void {
-    if (evento.key === 'Escape') this.cerrar.emit();
-  }
-
   /** Un fallo de red al buscar no debe confundirse con un error de guardado. */
   limpiarErrorLocal(): void {
     this.errorLocal.set(null);

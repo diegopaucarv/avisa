@@ -580,6 +580,7 @@ export function aCaso(bruto: unknown): Caso {
       texto(registro, ['actualizadoEn', 'updatedAt']),
     inicio: fechaIso(texto(registro, ['fechaInicio', 'fecha_inicio', 'inicio'])),
     region: texto(registro, ['region']),
+    enlaceAnalisis: texto(registro, ['enlaceAnalisis', 'enlace_analisis']),
     distrito: texto(geografia, ['distrito']),
     distritoUbigeo: texto(geografia, ['distritoUbigeo', 'distrito_ubigeo']),
     estado: estadoDeCaso(texto(registro, ['estado'])),

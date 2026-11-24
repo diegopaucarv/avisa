@@ -7,6 +7,7 @@ import {
   inject,
   input,
   output,
+  signal,
   viewChild,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
@@ -34,9 +35,6 @@ import { IconoComponent } from '../../shared/ui/icono.component';
   imports: [RouterLink, IconoComponent],
   templateUrl: './caso-vista-previa.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: {
-    '(document:keydown.escape)': 'cerrar.emit()',
-  },
   styles: `
     :host {
       display: contents;
@@ -55,6 +53,25 @@ import { IconoComponent } from '../../shared/ui/icono.component';
       margin: 4px 0 0;
       color: #647487;
       font-size: 12.5px;
+    }
+
+    .previa-cabecera {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 2px 12px;
+    }
+
+    .previa-actualizacion {
+      color: var(--muted);
+      font-size: 12.5px;
+    }
+
+    .previa-resumen-titulo {
+      margin: 0 0 6px;
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 700;
     }
 
     .previa-meta {
@@ -97,6 +114,7 @@ import { IconoComponent } from '../../shared/ui/icono.component';
       color: var(--ink-2);
       font-size: 13px;
       line-height: 1.6;
+      text-align: justify;
     }
 
     .previa-accesos {
@@ -112,6 +130,7 @@ import { IconoComponent } from '../../shared/ui/icono.component';
       display: flex;
       align-items: center;
       gap: 8px;
+      width: 100%;
       padding: 9px 10px;
       border: 1px solid var(--line);
       border-radius: 8px;
@@ -120,6 +139,7 @@ import { IconoComponent } from '../../shared/ui/icono.component';
       font: 600 13px var(--font-body);
       text-align: left;
       text-decoration: none;
+      cursor: pointer;
     }
 
     .previa-acceso:hover,
@@ -143,6 +163,39 @@ import { IconoComponent } from '../../shared/ui/icono.component';
       font-weight: 400;
     }
 
+    .previa-canva-editor {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      grid-column: 1 / -1;
+    }
+
+    .previa-canva-editor input {
+      flex: 1 1 220px;
+      min-width: 0;
+      height: 34px;
+      padding: 0 9px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      color: var(--ink);
+      font-size: 12.5px;
+    }
+
+    .previa-canva-vacio small {
+      color: #a1abb4;
+    }
+
+    .previa-canva-vacio:disabled {
+      cursor: default;
+    }
+
+    .previa-canva-mas {
+      margin-left: auto;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1;
+    }
+
     .previa-nota {
       margin: 10px 0 0;
       color: var(--muted);
@@ -153,7 +206,10 @@ import { IconoComponent } from '../../shared/ui/icono.component';
 })
 export class CasoVistaPreviaComponent {
   readonly caso = input.required<Caso>();
+  readonly puedeEditar = input(false);
   readonly cerrar = output<void>();
+  /** URL del tablero de Canva que el contenedor persiste con `PATCH`. */
+  readonly guardarEnlace = output<string>();
 
   private readonly panel = viewChild<ElementRef<HTMLElement>>('panel');
   private readonly destruccion = inject(DestroyRef);
@@ -168,13 +224,35 @@ export class CasoVistaPreviaComponent {
     this.destruccion.onDestroy(() => this.focoPrevio?.focus?.());
   }
 
-  /** Fecha en `dd/mm/aaaa`, el formato canónico de la ficha. */
+  /** Fecha en formato corto (`05 nov 2026`). */
   fechaTexto(valor: string | null | undefined): string {
     return formatearFecha(valor) || '—';
   }
 
-  alFondo(evento: MouseEvent): void {
-    if (evento.target === evento.currentTarget) this.cerrar.emit();
+  readonly editandoCanva = signal(false);
+  readonly borradorCanva = signal('');
+
+  abrirCanva(): void {
+    if (!this.puedeEditar()) return;
+    this.borradorCanva.set(this.caso().enlaceAnalisis ?? '');
+    this.editandoCanva.set(true);
+  }
+
+  cancelarCanva(): void {
+    this.editandoCanva.set(false);
+    this.borradorCanva.set('');
+  }
+
+  alEscribirCanva(evento: Event): void {
+    this.borradorCanva.set((evento.target as HTMLInputElement).value);
+  }
+
+  guardarCanva(evento: Event): void {
+    evento.preventDefault();
+    const url = this.borradorCanva().trim();
+    if (!url) return;
+    this.guardarEnlace.emit(url);
+    this.cancelarCanva();
   }
 
   alTecla(evento: KeyboardEvent): void {

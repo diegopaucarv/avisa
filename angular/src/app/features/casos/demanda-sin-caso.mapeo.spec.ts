@@ -99,13 +99,13 @@ describe('claseEstadoDemanda', () => {
 });
 
 describe('formatearFecha', () => {
-  it('presenta las fechas del backend como DD/MM/YYYY', () => {
-    expect(formatearFecha('2026-01-05')).toBe('05/01/2026');
-    expect(formatearFecha('2026-01-05T00:00:00.000Z')).toBe('05/01/2026');
+  it('presenta las fechas del backend como DD mmm AAAA', () => {
+    expect(formatearFecha('2026-01-05')).toBe('05 ene 2026');
+    expect(formatearFecha('2026-01-05T00:00:00.000Z')).toBe('05 ene 2026');
   });
 
   it('normaliza el formato legado DD/MM/YYYY', () => {
-    expect(formatearFecha('5/1/2026')).toBe('05/01/2026');
+    expect(formatearFecha('5/1/2026')).toBe('05 ene 2026');
   });
 
   it('devuelve un guion cuando no hay fecha', () => {

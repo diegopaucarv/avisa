@@ -144,8 +144,12 @@
           <div>
             <dt>Fecha límite</dt>
             <dd>
+              @if (tarjeta.columna === 'hecho') {
+              <span [class.sin-dato]="!tarjeta.fechaLimite">{{ fecha(tarjeta.fechaLimite) }}</span>
+              } @else {
               <span [class]="'due-state ' + claseFecha(tarjeta)">{{ etiquetaFecha(tarjeta) }}</span>
               <span [class.sin-dato]="!tarjeta.fechaLimite">{{ fecha(tarjeta.fechaLimite) }}</span>
+              }
             </dd>
           </div>
         </dl>

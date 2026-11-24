@@ -1,11 +1,9 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  DestroyRef,
   ElementRef,
   afterNextRender,
   computed,
-  inject,
   input,
   output,
   signal,
@@ -184,7 +182,6 @@ export class AlertaModificacionComponent {
   readonly maximo = MAXIMO_MOTIVO;
 
   private readonly dialogo = viewChild<ElementRef<HTMLElement>>('dialogo');
-  private readonly destruccion = inject(DestroyRef);
 
   readonly motivo = signal('');
   readonly restantes = computed(() => MAXIMO_MOTIVO - this.motivo().length);
@@ -192,23 +189,11 @@ export class AlertaModificacionComponent {
 
   constructor() {
     afterNextRender(() => this.dialogo()?.nativeElement.focus());
-
-    const alEscape = (evento: KeyboardEvent): void => {
-      if (evento.key !== 'Escape') return;
-      evento.preventDefault();
-      this.cerrar.emit();
-    };
-    document.addEventListener('keydown', alEscape);
-    this.destruccion.onDestroy(() => document.removeEventListener('keydown', alEscape));
   }
 
   campo(evento: Event): void {
     const area = evento.target as HTMLTextAreaElement;
     this.motivo.set(area.value.slice(0, MAXIMO_MOTIVO));
-  }
-
-  alFondo(evento: MouseEvent): void {
-    if (evento.target === evento.currentTarget) this.cerrar.emit();
   }
 
   confirmar(): void {

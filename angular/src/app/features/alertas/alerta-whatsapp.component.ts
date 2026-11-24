@@ -1,12 +1,10 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  DestroyRef,
   ElementRef,
   afterNextRender,
   computed,
   effect,
-  inject,
   input,
   output,
   signal,
@@ -132,7 +130,12 @@ import { copiarAlPortapapeles } from './portapapeles';
       border-radius: 10px;
       background: #f9fbfd;
       color: #1a2b3e;
-      font: 500 13px/22px ui-monospace, 'SFMono-Regular', 'Menlo', 'Consolas', monospace;
+      font:
+        500 13px/22px ui-monospace,
+        'SFMono-Regular',
+        'Menlo',
+        'Consolas',
+        monospace;
       white-space: pre-wrap;
       resize: vertical;
     }
@@ -182,7 +185,6 @@ export class AlertaWhatsappComponent {
   readonly guardarPlantilla = output<string>();
 
   private readonly dialogo = viewChild<ElementRef<HTMLElement>>('dialogo');
-  private readonly destruccion = inject(DestroyRef);
 
   readonly texto = signal('');
   readonly editarComoPlantilla = signal(false);
@@ -202,14 +204,6 @@ export class AlertaWhatsappComponent {
       firma = entrante;
       this.texto.set(entrante);
     });
-
-    const alEscape = (evento: KeyboardEvent): void => {
-      if (evento.key !== 'Escape') return;
-      evento.preventDefault();
-      this.cerrar.emit();
-    };
-    document.addEventListener('keydown', alEscape);
-    this.destruccion.onDestroy(() => document.removeEventListener('keydown', alEscape));
   }
 
   campo(evento: Event): void {
@@ -222,14 +216,12 @@ export class AlertaWhatsappComponent {
     this.editarComoPlantilla.update((valor) => !valor);
   }
 
-  alFondo(evento: MouseEvent): void {
-    if (evento.target === evento.currentTarget) this.cerrar.emit();
-  }
-
   async copiar(): Promise<void> {
     const ok = await copiarAlPortapapeles(this.texto());
     this.avisoCopia.set(
-      ok ? 'Mensaje copiado al portapapeles.' : 'No se pudo copiar. Seleccione el texto y use Ctrl + C.',
+      ok
+        ? 'Mensaje copiado al portapapeles.'
+        : 'No se pudo copiar. Seleccione el texto y use Ctrl + C.',
     );
   }
 

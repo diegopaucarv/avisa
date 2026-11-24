@@ -22,6 +22,7 @@ import {
   texto,
   type Registro,
 } from '../../dominio/mapeo';
+import { formatearFechaCompacta } from '../../shared/formato-fecha';
 
 /** `core.cat_tipos_actor.nombre`. Los tres valores del catálogo, congelados. */
 export const TIPO_ACTOR_PUBLICO = 'Actor público';
@@ -279,12 +280,11 @@ export function nivelIdentificacionDe(valor: string | null | undefined): string 
   return encontrado?.etiqueta ?? limpio;
 }
 
-/** ISO o `dd/mm/aaaa` → `dd/mm/aaaa`; un valor no reconocible se declara hueco. */
-export function formatearFechaDdMmAaaa(valor: string | null | undefined): string | null {
+/** ISO o `dd/mm/aaaa` → `05NOV2026`; un valor no reconocible se declara hueco. */
+export function formatearFechaActor(valor: string | null | undefined): string | null {
   const iso = fechaIso(valor);
   if (!iso) return null;
-  const [anio, mes, dia] = iso.split('-');
-  return `${dia}/${mes}/${anio}`;
+  return formatearFechaCompacta(iso);
 }
 
 /** Error del DNI, o `null` si es válido. Exige exactamente 8 dígitos. */

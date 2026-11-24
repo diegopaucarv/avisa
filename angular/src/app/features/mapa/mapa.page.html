@@ -146,8 +146,6 @@
         }
       </div>
 
-      <p class="mapa-rotulo">Límites distritales · capa censal 2025 · población como denominador</p>
-
       @if (errorDistritos(); as fallo) {
       <div class="mapa-aviso" role="alert">
         <p>
@@ -167,56 +165,6 @@
         tabindex="0"
         aria-label="Mapa referencial de las regiones con casos visibles y límites distritales"
       ></div>
-
-      <ul class="mapa-leyenda" aria-label="Leyenda del mapa">
-        <li>
-          <span class="leyenda-punto" aria-hidden="true"></span>Tamaño del círculo = número de casos
-          (latentes y manifiestos)
-        </li>
-        <li><span class="leyenda-anillo" aria-hidden="true"></span>Región seleccionada</li>
-        <li>Sólo se dibujan regiones con casos visibles</li>
-      </ul>
-
-      <ul
-        class="mapa-leyenda leyenda-escala"
-        aria-label="Color de los círculos según la proporción latente y manifiesta"
-      >
-        <li class="leyenda-titulo">Color = proporción manifiesta</li>
-        @for (tramo of escalaManifiesto; track tramo.etiqueta) {
-        <li>
-          <span
-            class="leyenda-escala-tramo"
-            [style.background]="tramo.relleno"
-            aria-hidden="true"
-          ></span
-          >{{ tramo.etiqueta }}
-        </li>
-        }
-        <li class="leyenda-extremos">
-          <span class="punto-situacion" style="background: #34785b" aria-hidden="true"></span>Más
-          latente ({{ conteoSituacion().latentes }})
-          <span class="punto-situacion" style="background: #ad4d46" aria-hidden="true"></span>Más
-          manifiesto ({{ conteoSituacion().manifiestos }}) · {{
-          porcentajeLatente(conteoSituacion().proporcionLatente) }} latente del total
-        </li>
-      </ul>
-
-      <ul
-        class="mapa-leyenda mapa-leyenda-coropleta"
-        aria-label="Relleno de los límites distritales: casos abiertos por distrito"
-      >
-        <li class="leyenda-titulo">Casos abiertos por distrito</li>
-        @for (tramo of escalaCoropleta; track tramo.etiqueta; let i = $index) {
-        <li>
-          <span
-            class="leyenda-tramo"
-            [style.background]="coloresCoropleta[i]"
-            aria-hidden="true"
-          ></span
-          >{{ tramo.etiqueta }}
-        </li>
-        }
-      </ul>
 
       <div class="mapa-capas" role="group" aria-labelledby="titulo-capas">
         <h4 id="titulo-capas">Capas opcionales</h4>
@@ -332,13 +280,6 @@
         </p>
         } }
       </div>
-
-      <p class="mapa-nota">
-        «Sin casos» va sin relleno. {{ casosSinDistritoTotal() }} {{ casosSinDistritoTotal() === 1 ?
-        'caso visible no declara' : 'casos visibles no declaran' }} distrito y no se ubican en el
-        mapa. El fondo OSM es referencial y no oficial; la población sólo es denominador de la ficha
-        y de la tabla.
-      </p>
     </section>
     }
 
@@ -351,28 +292,30 @@
 
       <div class="table-wrap">
         <table class="data-table" aria-label="Casos por región">
+          <colgroup>
+            <col class="col-region" />
+          </colgroup>
           <thead>
             <tr>
-              <th scope="col" [appThOrden]="'region'" [orden]="ordenRegiones">Región</th>
-              <th scope="col" [appThOrden]="'ambitos'" [orden]="ordenRegiones">Ámbito</th>
+              <th scope="col" class="col-region" [appThOrden]="'region'" [orden]="ordenRegiones">
+                Región
+              </th>
               <th scope="col" [appThOrden]="'situacion'" [orden]="ordenRegiones">
-                Latentes / manifiestos
+                Latentes / Manifiestos
               </th>
               <th scope="col" [appThOrden]="'proporcion'" [orden]="ordenRegiones">% latente</th>
               <th scope="col" [appThOrden]="'total'" [orden]="ordenRegiones">Total</th>
-              <th scope="col" [appThOrden]="'tasa'" [orden]="ordenRegiones">Tasa</th>
               <th scope="col" [appThOrden]="'riesgoAlto'" [orden]="ordenRegiones">Riesgo alto</th>
             </tr>
           </thead>
           <tbody>
             @for (fila of filasRegion(); track fila.region) {
             <tr [class.row-selected]="esSeleccionada(fila)">
-              <td>
+              <td class="col-region">
                 <a class="table-link" [routerLink]="['/casos']" [queryParams]="verCasos(fila)">
                   <strong>{{ fila.region }}</strong>
                 </a>
               </td>
-              <td>{{ etiquetaAmbitos(fila.ambitos) }}</td>
               <td>{{ fila.latentes }} / {{ fila.manifiestos }}</td>
               <td>
                 <span
@@ -383,17 +326,15 @@
                 >{{ porcentajeLatente(fila.proporcionLatente) }}
               </td>
               <td>{{ fila.total }}</td>
-              <td class="celda-tasa">{{ formatearTasa(tasaFila(fila)) }}</td>
               <td>{{ fila.riesgoAlto }}</td>
             </tr>
             } @if (sinRegion() > 0) {
             <tr>
-              <td>
+              <td class="col-region">
                 <a class="table-link" [routerLink]="['/casos']" [queryParams]="verCasosSinRegion()">
                   <strong>Sin región</strong>
                 </a>
               </td>
-              <td>{{ etiquetaAmbitos(alcancesSinRegion()) }}</td>
               <td>{{ situacionSinRegion().latentes }} / {{ situacionSinRegion().manifiestos }}</td>
               <td>
                 <span
@@ -404,7 +345,6 @@
                 >{{ porcentajeLatente(situacionSinRegion().proporcionLatente) }}
               </td>
               <td>{{ sinRegion() }}</td>
-              <td class="celda-tasa">—</td>
               <td>{{ riesgoAltoSinRegion() }}</td>
             </tr>
             }
@@ -414,8 +354,6 @@
 
       @if (filasRegion().length === 0) {
       <p class="panel-vacio">No hay casos con región asignada en el conjunto visible.</p>
-      } @if (estadoPoblacion() === 'cargando') {
-      <p class="tabla-nota" role="status">Cargando los denominadores de población…</p>
       }
     </section>
   </div>
@@ -477,11 +415,11 @@
           <tr>
             <th scope="col" [appThOrden]="'codigo'" [orden]="ordenPrioritarios">Caso</th>
             <th scope="col" [appThOrden]="'region'" [orden]="ordenPrioritarios">Región</th>
+            <th scope="col" [appThOrden]="'distrito'" [orden]="ordenPrioritarios">Distrito</th>
             <th scope="col" [appThOrden]="'conflictividad'" [orden]="ordenPrioritarios">
-              Conflictividad
+              Nivel de conflictividad <app-glosario termino="nivel-conflictividad" />
             </th>
             <th scope="col" [appThOrden]="'riesgo'" [orden]="ordenPrioritarios">Riesgo</th>
-            <th scope="col" [appThOrden]="'prioridad'" [orden]="ordenPrioritarios">Prioridad</th>
             <th scope="col" [appThOrden]="'inicio'" [orden]="ordenPrioritarios">Inicio</th>
           </tr>
         </thead>
@@ -493,9 +431,9 @@
               <small>{{ caso.titulo }}</small>
             </td>
             <td>{{ caso.region || 'Sin región' }}</td>
+            <td>{{ caso.distrito || '—' }}</td>
             <td>{{ caso.nivelConflicto || 'Sin declarar' }}</td>
             <td>{{ caso.riesgo }}</td>
-            <td>{{ caso.prioridad }}</td>
             <td>{{ fechaInicio(caso.inicio) }}</td>
           </tr>
           }

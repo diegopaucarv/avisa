@@ -5,6 +5,22 @@
     </div>
     @if (!verPapelera()) {
     <div class="view-actions">
+      <div class="segmented" role="group" aria-label="Formato de la lista de casos">
+        <button
+          type="button"
+          [attr.aria-pressed]="modo() === 'tarjetas'"
+          (click)="cambiarModo('tarjetas')"
+        >
+          Tarjetas
+        </button>
+        <button
+          type="button"
+          [attr.aria-pressed]="modo() === 'tabla'"
+          (click)="cambiarModo('tabla')"
+        >
+          Tabla
+        </button>
+      </div>
       <app-exportar-menu
         entidad="casos"
         [consulta]="filtrosExportacion()"
@@ -17,7 +33,7 @@
     }
   </header>
 
-  @if (!verPapelera()) {
+  @if (!verPapelera() && seleccion.cantidad() > 0) {
   <div class="view-toolbar">
     <app-barra-seleccion
       entidad="casos"
@@ -37,7 +53,7 @@
   }
 
   <div class="filter-bar filter-bar-wrap">
-    <label class="search-field">
+    <label class="search-field search-field-angosta">
       <app-icono nombre="buscar" [tamano]="14" />
       <input
         type="search"
@@ -49,16 +65,18 @@
     </label>
 
     <label class="select-filter">
-      Estado
+      Nivel de riesgo
       <select
-        aria-label="Filtrar casos por estado"
-        [value]="estadoSeleccionado()"
-        (change)="cambiarEstado($event)"
+        aria-label="Filtrar casos por nivel de riesgo"
+        [value]="filtros().riesgo"
+        (change)="cambiarRiesgo($event)"
       >
-        <option value="todos">Todos ({{ conteos().todos }})</option>
-        <option value="abiertos">Abiertos ({{ conteos().abiertos }})</option>
-        <option value="Resuelto">Resueltos ({{ conteos().resueltos }})</option>
-        <option value="Archivado">Archivados ({{ conteos().archivados }})</option>
+        <option value="">Todos</option>
+        @for (opcion of riesgos(); track opcion.valor) {
+        <option [value]="opcion.valor" [selected]="filtros().riesgo === opcion.valor">
+          {{ opcion.etiqueta }}
+        </option>
+        }
       </select>
     </label>
 
@@ -100,6 +118,20 @@
     >
       Búsqueda avanzada @if (filtrosAvanzadosActivos()) {<strong>· activos</strong>}
     </button>
+
+    <label class="select-filter estado-final">
+      Estado
+      <select
+        aria-label="Filtrar casos por estado"
+        [value]="estadoSeleccionado()"
+        (change)="cambiarEstado($event)"
+      >
+        <option value="todos">Todos ({{ conteos().todos }})</option>
+        <option value="abiertos">Abiertos ({{ conteos().abiertos }})</option>
+        <option value="Resuelto">Resueltos ({{ conteos().resueltos }})</option>
+        <option value="Archivado">Archivados ({{ conteos().archivados }})</option>
+      </select>
+    </label>
   </div>
 
   @if (avanzado() || filtrosAvanzadosActivos()) {
@@ -125,22 +157,6 @@
         <option value="" [selected]="filtros().alcance === ''">Todos</option>
         @for (opcion of alcances(); track opcion.valor) {
         <option [value]="opcion.valor" [selected]="filtros().alcance === opcion.valor">
-          {{ opcion.etiqueta }}
-        </option>
-        }
-      </select>
-    </label>
-
-    <label class="select-filter">
-      Nivel de riesgo
-      <select
-        aria-label="Filtrar casos por nivel de riesgo"
-        [value]="filtros().riesgo"
-        (change)="cambiarRiesgo($event)"
-      >
-        <option value="">Todos</option>
-        @for (opcion of riesgos(); track opcion.valor) {
-        <option [value]="opcion.valor" [selected]="filtros().riesgo === opcion.valor">
           {{ opcion.etiqueta }}
         </option>
         }
@@ -261,34 +277,7 @@
     </ul>
     } }
   </section>
-  }
-
-  <div class="view-toolbar">
-    @if (puedeVerPapelera()) {
-    <div class="segmented" role="group" aria-label="Estado del registro: vigentes o anulados">
-      <button type="button" [attr.aria-pressed]="!verPapelera()" (click)="cambiarVer('activos')">
-        Vigentes
-      </button>
-      <button type="button" [attr.aria-pressed]="verPapelera()" (click)="cambiarVer('anulados')">
-        Anulados
-      </button>
-    </div>
-    } @if (!verPapelera()) {
-    <label class="select-filter">
-      Vista
-      <select
-        aria-label="Formato de la lista de casos"
-        [value]="modo()"
-        (change)="cambiarModoDesde($event)"
-      >
-        <option value="tarjetas">Tarjetas</option>
-        <option value="tabla">Tabla</option>
-      </select>
-    </label>
-    }
-  </div>
-
-  @if (estado() === 'cargando') {
+  } @if (estado() === 'cargando') {
   <div class="empty-state" role="status">Cargando casos…</div>
   } @else if (estado() === 'error') {
   <div class="empty-state" role="alert">
@@ -435,7 +424,12 @@
     (tamanoCambia)="cambiarTamano($event)"
   />
   } @if (casoPrevio(); as caso) {
-  <app-caso-vista-previa [caso]="caso" (cerrar)="cerrarVistaPrevia()" />
+  <app-caso-vista-previa
+    [caso]="caso"
+    [puedeEditar]="capacidades.puedeEditar()"
+    (guardarEnlace)="guardarEnlaceAnalisis(caso, $event)"
+    (cerrar)="cerrarVistaPrevia()"
+  />
   } @if (panelAbierto()) {
   <app-caso-panel
     [guardando]="guardando()"

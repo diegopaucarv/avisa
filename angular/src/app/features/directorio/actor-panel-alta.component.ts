@@ -352,15 +352,7 @@ export class ActorPanelAltaComponent {
 
     afterNextRender(() => this.modal()?.nativeElement.focus());
 
-    const alEscape = (evento: KeyboardEvent): void => {
-      if (evento.key !== 'Escape') return;
-      evento.preventDefault();
-      this.cerrar.emit();
-    };
-    document.addEventListener('keydown', alEscape);
-
     this.destruccion.onDestroy(() => {
-      document.removeEventListener('keydown', alEscape);
       clearTimeout(this.temporizadorDuplicados);
       this.focoPrevio?.focus?.();
     });
@@ -514,10 +506,6 @@ export class ActorPanelAltaComponent {
           this.error.set(aErrorApi(fallo).message);
         },
       });
-  }
-
-  alFondo(evento: MouseEvent): void {
-    if (evento.target === evento.currentTarget) this.cerrar.emit();
   }
 
   alTecla(evento: KeyboardEvent): void {

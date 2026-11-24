@@ -20,6 +20,7 @@ import { SesionStore } from '../../core/auth/sesion.store';
 import { TerritorioService } from '../../core/territorio/territorio.service';
 import type { DistritoGeo, PoblacionRegion } from '../../core/territorio/territorio.tipos';
 import { formatearFechaHora } from '../../shared/formato-fecha';
+import { GlosarioComponent } from '../../shared/ui/glosario.component';
 import { IconoComponent } from '../../shared/ui/icono.component';
 import { OrdenTabla } from '../../shared/ui/orden-tabla';
 import { ThOrdenDirective } from '../../shared/ui/th-orden.directive';
@@ -32,7 +33,6 @@ import {
   type TipoInfraestructura,
 } from './capas.service';
 import {
-  ambitosSinRegion,
   bandasPorAlcance,
   casosDeRegion,
   casosPorDistritoUbigeo,
@@ -50,7 +50,6 @@ import {
   filasPorRegion,
   indicePoblacionPorRegion,
   normalizarRegion,
-  poblacionDeRegion,
   regionDe,
   tasaPor100k,
   type ConteoDistrito,
@@ -188,11 +187,12 @@ function compararInicio(a: string | null, b: string | null): number {
  */
 @Component({
   selector: 'app-mapa',
-  imports: [RouterLink, IconoComponent, ThOrdenDirective],
+  imports: [RouterLink, IconoComponent, ThOrdenDirective, GlosarioComponent],
   templateUrl: './mapa.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [PanoramaService, CapasMapaService],
-  styles: `
+  styles:
+    `
     :host {
       display: block;
     }
@@ -426,6 +426,22 @@ function compararInicio(a: string | null, b: string | null): number {
       color: var(--muted);
       font-size: 12px;
       line-height: 1.4;
+    }
+
+    /*
+     * La primera celda de `.data -
+    table` mide 205px por regla global; aquí la
+     * Región va un 40 % más estrecha y el Caso, un 30 %.
+     */
+    .data-table th.col-region,
+    .data-table td:first-child.col-region {
+      width: 17%;
+      min-width: 0;
+    }
+
+    .data-table td:first-child.celda-caso {
+      width: 28%;
+      min-width: 0;
     }
 
     .mapa-rotulo {
@@ -1145,28 +1161,11 @@ export class MapaPage {
    */
   private readonly accesoresRegiones: Record<string, (fila: FilaRegion) => unknown> = {
     region: (fila) => fila.region,
-    ambitos: (fila) => this.etiquetaAmbitos(fila.ambitos),
     situacion: (fila) => [fila.latentes, fila.manifiestos],
     proporcion: (fila) => fila.proporcionLatente,
     total: (fila) => fila.total,
-    tasa: (fila) => this.tasasRegion().get(normalizarRegion(fila.region)) ?? null,
     riesgoAlto: (fila) => fila.riesgoAlto,
   };
-
-  /**
-   * Tasa por 100 000 habitantes de cada fila. La población sólo es el
-   * denominador: no entra en el nivel de riesgo ni en la prioridad
-   * (Guía §7.5.2, Tabla 3).
-   */
-  private readonly tasasRegion = computed<Map<string, number | null>>(() => {
-    const indice = this.poblacionIndice();
-    const tasas = new Map<string, number | null>();
-    for (const fila of filasPorRegion(this.visibles())) {
-      const poblacion = indice ? poblacionDeRegion(fila.region, indice) : null;
-      tasas.set(normalizarRegion(fila.region), tasaPor100k(fila.total, poblacion));
-    }
-    return tasas;
-  });
 
   /**
    * Entrada de conflictividad (item 118): los casos visibles antes que el
@@ -1193,9 +1192,9 @@ export class MapaPage {
   private readonly accesoresPrioritarios: Record<string, (caso: Caso) => unknown> = {
     codigo: (caso) => caso.codigo,
     region: (caso) => caso.region,
+    distrito: (caso) => caso.distrito,
     conflictividad: (caso) => caso.nivelConflicto,
     riesgo: (caso) => ORDEN_RIESGO[caso.riesgo] ?? 3,
-    prioridad: (caso) => ORDEN_PRIORIDAD[caso.prioridad] ?? 3,
     inicio: (caso) => caso.inicio,
   };
 
@@ -1390,10 +1389,6 @@ export class MapaPage {
       evento.preventDefault();
       ultimo.focus();
     }
-  }
-
-  tasaFila(fila: FilaRegion): number | null {
-    return this.tasasRegion().get(normalizarRegion(fila.region)) ?? null;
   }
 
   /** Una sola cifra decimal; «—» cuando falta el denominador. */

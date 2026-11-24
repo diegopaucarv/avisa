@@ -443,17 +443,8 @@ export class AlertaPanelComponent {
   constructor() {
     afterNextRender(() => this.panel()?.nativeElement.focus());
 
-    // Escape cierra el panel aunque el foco esté en un bloque de texto.
-    const alEscape = (evento: KeyboardEvent): void => {
-      if (evento.key !== 'Escape') return;
-      evento.preventDefault();
-      this.cerrar.emit();
-    };
-    document.addEventListener('keydown', alEscape);
-    this.destruccion.onDestroy(() => {
-      document.removeEventListener('keydown', alEscape);
-      this.focoPrevio?.focus?.();
-    });
+    this.destruccion.onDestroy(() => this.focoPrevio?.focus?.());
+  }
 
     // Tras un guardado correcto se cierra el modo edición para mostrar lo ya persistido.
     effect(() => {
@@ -847,10 +838,6 @@ export class AlertaPanelComponent {
   /* ---------------------------------------------------------------------- *
    * Diálogo
    * ---------------------------------------------------------------------- */
-
-  alFondo(evento: MouseEvent): void {
-    if (evento.target === evento.currentTarget) this.cerrar.emit();
-  }
 
   alTecla(evento: KeyboardEvent): void {
     if (evento.key === 'Tab') this.atraparFoco(evento);

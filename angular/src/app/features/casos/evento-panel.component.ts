@@ -178,17 +178,9 @@ export class EventoPanelComponent {
   constructor() {
     afterNextRender(() => this.panel()?.nativeElement.focus());
 
-    // Escape cierra el panel aunque el foco esté dentro de un campo de texto.
-    const alEscape = (evento: KeyboardEvent): void => {
-      if (evento.key !== 'Escape') return;
-      evento.preventDefault();
-      this.cerrar.emit();
-    };
-    document.addEventListener('keydown', alEscape);
-    this.destruccion.onDestroy(() => {
-      document.removeEventListener('keydown', alEscape);
-      this.focoPrevio?.focus?.();
-    });
+    // El panel sólo se cierra con Cancelar o Registrar: Escape no lo descarta.
+    this.destruccion.onDestroy(() => this.focoPrevio?.focus?.());
+  }
 
     // El borrador se precarga con el hecho abierto (vacío en el alta) y se
     // reinicia si el contenedor cambia de hecho.
@@ -255,10 +247,6 @@ export class EventoPanelComponent {
 
     this.mensajeLocal.set(null);
     this.guardar.emit(cambios);
-  }
-
-  alFondo(evento: MouseEvent): void {
-    if (evento.target === evento.currentTarget) this.cerrar.emit();
   }
 
   alTecla(evento: KeyboardEvent): void {

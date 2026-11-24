@@ -64,6 +64,11 @@ export type Caso = {
   inicio: string | null;
   region: string | null;
   /**
+   * URL del tablero de análisis del caso (Canva). `null` mientras no se haya
+   * pegado un enlace; la vista previa y el expediente lo tratan como opcional.
+   */
+  enlaceAnalisis: string | null;
+  /**
    * Distrito principal declarado, por nombre (sólo para mostrar). La llave es
    * `distritoUbigeo`: no se empareja por nombre porque hay quince «Santa Rosa».
    */

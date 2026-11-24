@@ -28,7 +28,7 @@ import {
   errorDeDni,
   errorDeExpedienteOspa,
   errorDeRuc,
-  formatearFechaDdMmAaaa,
+  formatearFechaActor,
   FUNCIONES_ACTOR,
   MASCARA_CORREO,
   MASCARA_DNI,
@@ -570,8 +570,8 @@ export class ActorPanelComponent {
     nivelIdentificacionDe(this.actor()?.nivelIdentificacion),
   );
 
-  readonly vigenciaDesdeTexto = computed(() => formatearFechaDdMmAaaa(this.actor()?.vigenciaDesde));
-  readonly vigenciaHastaTexto = computed(() => formatearFechaDdMmAaaa(this.actor()?.vigenciaHasta));
+  readonly vigenciaDesdeTexto = computed(() => formatearFechaActor(this.actor()?.vigenciaDesde));
+  readonly vigenciaHastaTexto = computed(() => formatearFechaActor(this.actor()?.vigenciaHasta));
 
   /** Correo de una organización: contacto institucional público del listado. */
   readonly correoOrganizacion = computed(() =>
@@ -588,7 +588,7 @@ export class ActorPanelComponent {
 
   /** `dd/mm/aaaa` de una fecha ISO; `null` si no se reconoce. */
   fechaDe(valor: string | null | undefined): string | null {
-    return formatearFechaDdMmAaaa(valor);
+    return formatearFechaActor(valor);
   }
 
   /** Clase de color del posicionamiento; `sin` cuando la base no lo declara. */
@@ -634,16 +634,8 @@ export class ActorPanelComponent {
       this.iniciarEdicion();
     });
 
-    // Escape cierra el panel aunque el foco se haya ido a un bloque de texto.
-    const alEscape = (evento: KeyboardEvent): void => {
-      if (evento.key !== 'Escape') return;
-      evento.preventDefault();
-      this.cerrar.emit();
-    };
-    document.addEventListener('keydown', alEscape);
-
+    // El panel sólo se cierra con Cancelar o Confirmar: Escape no lo descarta.
     this.destruccion.onDestroy(() => {
-      document.removeEventListener('keydown', alEscape);
       clearTimeout(this.temporizadorCopiado);
       this.focoPrevio?.focus?.();
       this.reiniciarPii();
@@ -855,10 +847,6 @@ export class ActorPanelComponent {
     this.copiado.set(valor);
     clearTimeout(this.temporizadorCopiado);
     this.temporizadorCopiado = setTimeout(() => this.copiado.set(null), 1600);
-  }
-
-  alFondo(evento: MouseEvent): void {
-    if (evento.target === evento.currentTarget) this.cerrar.emit();
   }
 
   alTecla(evento: KeyboardEvent): void {
