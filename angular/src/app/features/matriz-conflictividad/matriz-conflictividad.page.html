@@ -1,0 +1,561 @@
+@if (modo() === 'lista') {
+<section class="view-body" aria-labelledby="titulo-matriz">
+  <header class="view-head">
+    <div>
+      <p class="eyebrow">Anexo 15</p>
+      <h1 id="titulo-matriz">Matriz de conflictividad</h1>
+      <p class="view-subtitle">
+        Seguimiento de los casos abiertos con las columnas del Anexo 15 de la Guía §8.3.1: actores,
+        evolución, nivel de riesgo, responsables y estado de los compromisos. Una celda «—»
+        significa que la fuente no registra el dato: no se estima ni se lee como cero.
+      </p>
+    </div>
+    <div class="view-actions">
+      <button type="button" class="button-secondary" (click)="alternarModo()">
+        <app-icono nombre="archivo" [tamano]="15" />
+        Vista imprimible
+      </button>
+      <button
+        type="button"
+        class="button-secondary"
+        [disabled]="descargando()"
+        (click)="descargarCsv()"
+      >
+        <app-icono nombre="documentos" [tamano]="15" />
+        {{ descargando() ? 'Generando…' : 'Descargar CSV' }}
+      </button>
+    </div>
+  </header>
+
+  <div class="executive-kpis">
+    <div class="stat-card">
+      <span class="stat-icon"><app-icono nombre="casos" [tamano]="16" /></span>
+      <span class="stat-copy">
+        <span>Casos en la matriz</span>
+        <strong>{{ hayResumen() ? resumen().total : '—' }}</strong>
+        <small>Filas vigentes de la vista</small>
+      </span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon red"><app-icono nombre="alerta" [tamano]="16" /></span>
+      <span class="stat-copy">
+        <span>Manifiestos</span>
+        <strong>{{ hayResumen() ? resumen().manifiestos : '—' }}</strong>
+        <small>Conflicto social y crisis social</small>
+      </span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon amber"><app-icono nombre="reloj" [tamano]="16" /></span>
+      <span class="stat-copy">
+        <span>Latentes</span>
+        <strong>{{ hayResumen() ? resumen().latentes : '—' }}</strong>
+        <small>Diferencia, controversia o sin nivel</small>
+      </span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon"><app-icono nombre="info" [tamano]="16" /></span>
+      <span class="stat-copy">
+        <span>Sin nivel declarado</span>
+        <strong>{{ hayResumen() ? resumen().sinNivel : '—' }}</strong>
+        <small>Se cuentan como latentes</small>
+      </span>
+    </div>
+  </div>
+
+  <p class="regla-nota">
+    <app-glosario termino="nivel-conflictividad" />
+    Regla de conteo: es <strong>manifiesto</strong> todo caso con nivel «Conflicto social» o «Crisis
+    social»; todo lo demás —incluido el caso sin nivel declarado— se cuenta como
+    <strong>latente</strong>.
+  </p>
+
+  @if (errorDescarga(); as mensaje) {
+  <p class="form-error" role="alert">{{ mensaje }}</p>
+  }
+
+  <div class="filter-bar filter-bar-wrap">
+    <label class="search-field">
+      <app-icono nombre="buscar" [tamano]="14" />
+      <input
+        type="search"
+        placeholder="Buscar por código, caso o región"
+        aria-label="Buscar en la matriz"
+        [value]="filtros().q"
+        (input)="buscar($event)"
+      />
+    </label>
+
+    <div class="segmented status-chips" role="group" aria-label="Estado">
+      <span class="chips-label">Estado</span>
+      <button
+        type="button"
+        [attr.aria-pressed]="filtros().estado === ''"
+        (click)="filtrarEstado('')"
+      >
+        Todos
+      </button>
+      <button
+        type="button"
+        [attr.aria-pressed]="filtros().estado === 'Abierto'"
+        (click)="filtrarEstado('Abierto')"
+      >
+        Abierto
+      </button>
+      <button
+        type="button"
+        [attr.aria-pressed]="filtros().estado === 'Resuelto'"
+        (click)="filtrarEstado('Resuelto')"
+      >
+        Resuelto
+      </button>
+      <button
+        type="button"
+        [attr.aria-pressed]="filtros().estado === 'Archivado'"
+        (click)="filtrarEstado('Archivado')"
+      >
+        Archivado
+      </button>
+    </div>
+
+    <label class="select-filter">
+      Nivel de conflictividad
+      <select
+        aria-label="Filtrar por nivel de conflictividad"
+        [value]="filtros().nivel"
+        (change)="filtrarNivel($event)"
+      >
+        <option value="">Todos</option>
+        @for (opcion of opcionesNivel(); track opcion.valor) {
+        <option [value]="opcion.valor">{{ opcion.etiqueta }}</option>
+        }
+      </select>
+    </label>
+
+    <label class="select-filter">
+      Alcance
+      <select
+        aria-label="Filtrar por alcance geográfico"
+        [value]="filtros().alcance"
+        (change)="filtrarAlcance($event)"
+      >
+        <option value="">Todos</option>
+        @for (opcion of opcionesAlcance(); track opcion.valor) {
+        <option [value]="opcion.valor">{{ opcion.etiqueta }}</option>
+        }
+      </select>
+    </label>
+
+    <label class="select-filter">
+      Subsector
+      <select
+        aria-label="Filtrar por subsector"
+        [value]="filtros().subsector"
+        (change)="filtrarSubsector($event)"
+      >
+        <option value="">Todos</option>
+        @for (opcion of opcionesSubsector(); track opcion.valor) {
+        <option [value]="opcion.valor">{{ opcion.etiqueta }}</option>
+        }
+      </select>
+    </label>
+
+    <label class="select-filter">
+      Región
+      <select
+        aria-label="Filtrar por región"
+        [value]="filtros().region"
+        (change)="filtrarRegion($event)"
+      >
+        <option value="">Todas</option>
+        @for (opcion of opcionesRegion(); track opcion.valor) {
+        <option [value]="opcion.valor">{{ opcion.etiqueta }}</option>
+        }
+      </select>
+    </label>
+
+    <label class="select-filter">
+      Prioridad de atención
+      <select
+        aria-label="Filtrar por prioridad de atención"
+        [value]="filtros().prioridad"
+        (change)="filtrarPrioridad($event)"
+      >
+        <option value="">Todas</option>
+        @for (opcion of opcionesPrioridad(); track opcion.valor) {
+        <option [value]="opcion.valor">{{ opcion.etiqueta }}</option>
+        }
+      </select>
+    </label>
+
+    <label class="select-filter">
+      Desde
+      <input
+        type="date"
+        aria-label="Fecha de inicio desde"
+        [value]="filtros().desde"
+        (change)="cambiarDesde($event)"
+      />
+    </label>
+
+    <label class="select-filter">
+      Hasta
+      <input
+        type="date"
+        aria-label="Fecha de inicio hasta"
+        [value]="filtros().hasta"
+        (change)="cambiarHasta($event)"
+      />
+    </label>
+
+    <label class="select-filter">
+      Ordenar por
+      <select
+        aria-label="Orden de la matriz"
+        [value]="filtros().orden"
+        (change)="cambiarOrden($event)"
+      >
+        <option value="inicio">Fecha de inicio ↓</option>
+        <option value="riesgo">Riesgo Alto→Bajo</option>
+        <option value="prioridad">Prioridad Urgente→Bajo</option>
+        <option value="codigo">Código</option>
+      </select>
+    </label>
+
+    <button type="button" class="button-secondary" (click)="limpiar()">Limpiar filtros</button>
+  </div>
+
+  @if (errorLista(); as error) {
+  <div class="empty-state" role="alert">
+    <p>
+      @if (esquemaPendiente()) { La matriz todavía no está disponible: falta una pieza del esquema
+      de la base de datos. } @else { {{ error.message }} }
+    </p>
+    <button type="button" class="button-secondary" (click)="recargar()">Reintentar</button>
+  </div>
+  } @else if (filas().length === 0) { @if (cargando()) {
+  <p class="nota-tabla" role="status">Cargando matriz…</p>
+  } @else {
+  <div class="empty-state">
+    <strong>Ningún caso coincide con los filtros</strong>
+    <p>Ajuste los filtros o límpielos para ver toda la matriz.</p>
+  </div>
+  } } @else { @if (actualizando()) {
+  <p class="nota-tabla" role="status">Actualizando…</p>
+  }
+
+  <div class="table-wrap">
+    <table class="data-table matriz-tabla">
+      <caption class="table-caption">
+        Una fila por caso abierto. El caso anulado no aparece en la matriz. «—» = sin dato
+        registrado; no se estima ni se lee como cero.
+      </caption>
+      <thead>
+        <tr>
+          <th scope="col" class="col-n">N°</th>
+          <th scope="col" class="col-codigo">Código de caso</th>
+          <th scope="col">Nombre del caso</th>
+          <th scope="col">Región</th>
+          <th scope="col">Alcance</th>
+          <th scope="col">Subsector</th>
+          <th scope="col">Nivel de conflictividad</th>
+          <th scope="col">Nivel de riesgo</th>
+          <th scope="col">Prioridad de atención</th>
+          <th scope="col">Estado</th>
+          <th scope="col">Unidad responsable</th>
+          <th scope="col">Inicio</th>
+          <th scope="col">Último hecho</th>
+          <th scope="col" class="col-num">Compromisos</th>
+          <th scope="col">Tipo de compromiso</th>
+          <th scope="col" class="col-num">Documentos</th>
+          <th scope="col">Ver ficha</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (fila of filas(); track fila.codigoCaso) {
+        <tr class="fila-matriz" (click)="abrirDetalle(fila.codigoCaso)">
+          <td class="col-n">{{ numeroInicial() + $index }}</td>
+          <td class="col-codigo">{{ textoOSinDato(fila.codigoCaso) }}</td>
+          <td class="col-nombre">{{ textoOSinDato(fila.nombreCaso) }}</td>
+          <td>{{ textoOSinDato(fila.region) }}</td>
+          <td>{{ textoOSinDato(fila.alcance) }}</td>
+          <td>{{ textoOSinDato(fila.subsector) }}</td>
+          <td>
+            @if (fila.nivelConflictividad) {
+            <span [class]="'conflict-tag ' + claseNivel(fila.nivelConflictividad)"
+              >{{ fila.nivelConflictividad }}</span
+            >
+            } @else {
+            <span class="sin-dato">—</span>
+            }
+          </td>
+          <td>
+            @if (fila.nivelRiesgo) {
+            <span [class]="'risk-label ' + claseRiesgo(fila.nivelRiesgo)"
+              >{{ fila.nivelRiesgo }}</span
+            >
+            } @else {
+            <span class="sin-dato">—</span>
+            }
+          </td>
+          <td>
+            @if (fila.prioridadAtencion) {
+            <span [class]="'status-badge ' + clasePrioridad(fila.prioridadAtencion)"
+              >{{ fila.prioridadAtencion }}</span
+            >
+            <span class="rule-note">sin regla definida</span>
+            } @else {
+            <span class="sin-dato">—</span>
+            }
+          </td>
+          <td>
+            @if (fila.estado) {
+            <span [class]="'status-badge ' + claseEstado(fila.estado)"
+              ><span class="status-dot"></span>{{ fila.estado }}</span
+            >
+            } @else {
+            <span class="sin-dato">—</span>
+            }
+          </td>
+          <td>{{ textoOSinDato(fila.unidadResponsable) }}</td>
+          <td class="col-date">{{ formatearFecha(fila.fechaInicio) }}</td>
+          <td class="col-date">{{ formatearFecha(fila.ultimoHecho) }}</td>
+          <td class="col-num">{{ fila.compromisos }}</td>
+          <td>{{ textoOSinDato(fila.tipoCompromiso) }}</td>
+          <td class="col-num">{{ fila.documentos }}</td>
+          <td>
+            <button
+              type="button"
+              class="table-link"
+              (click)="abrirDetalle(fila.codigoCaso); $event.stopPropagation()"
+            >
+              Ver ficha
+            </button>
+          </td>
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  @if (total() > 0) {
+  <app-paginacion
+    [pagina]="pagina()"
+    [tamano]="tamano()"
+    [total]="total()"
+    (paginaCambia)="cambiarPagina($event)"
+    (tamanoCambia)="cambiarTamano($event)"
+  />
+  }
+
+  <p class="footnote">
+    <strong>«—» significa «sin dato registrado»; no se estima y nunca se lee como cero.</strong>
+    <code>Inicio</code> es <code>core.casos.fecha_inicio</code>. <code>Último hecho</code> es el
+    máximo <code>fecha_evento</code> de <code>core.caso_cronologia</code> no anulado.
+    <code>Compromisos</code>, <code>Tipo de compromiso</code> y <code>Documentos</code> agregan
+    registros no anulados. La prioridad de atención se muestra tal como está almacenada y se marca
+    «sin regla definida» porque la Guía no define su cálculo.
+  </p>
+  }
+</section>
+} @else {
+<section class="view-body" aria-labelledby="titulo-impresion">
+  <div class="acciones-impresion no-print">
+    <button type="button" class="button-secondary" (click)="alternarModo()">
+      <app-icono nombre="chevron-izquierda" [tamano]="15" />
+      Volver a la lista
+    </button>
+    <button
+      type="button"
+      class="button-secondary"
+      [disabled]="descargando()"
+      (click)="descargarCsv()"
+    >
+      <app-icono nombre="documentos" [tamano]="15" />
+      {{ descargando() ? 'Generando…' : 'Descargar CSV' }}
+    </button>
+    <button type="button" class="button-secondary" (click)="imprimir()">
+      <app-icono nombre="archivo" [tamano]="15" />
+      Imprimir / Guardar PDF
+    </button>
+    <span class="pista-impresion">Se imprime mejor en A4 horizontal.</span>
+  </div>
+
+  @if (errorDescarga(); as mensaje) {
+  <p class="form-error no-print" role="alert">{{ mensaje }}</p>
+  } @if (errorLista(); as error) {
+  <p class="form-error no-print" role="alert">
+    @if (esquemaPendiente()) { La matriz todavía no está disponible: falta una pieza del esquema de
+    la base de datos. } @else { {{ error.message }} }
+  </p>
+  } @else if (filas().length === 0) {
+  <p class="nota-tabla no-print" role="status">
+    @if (cargando()) { Preparando la hoja… } @else { No hay filas que imprimir con estos filtros. }
+  </p>
+  }
+
+  <article class="hoja" aria-labelledby="hoja-titulo">
+    <header class="hoja-cabecera">
+      <span class="hoja-emblema" aria-hidden="true"><i></i><i></i><i></i></span>
+      <div class="hoja-marca">
+        <span class="hoja-pais">PERÚ</span>
+        <span class="hoja-ministerio">Ministerio de la Producción</span>
+      </div>
+      <div class="hoja-oficina">
+        Oficina de Articulación Intergubernamental y Prevención de Conflictos Sociales (OAIPCS)
+      </div>
+    </header>
+
+    <h2 id="hoja-titulo" class="hoja-titulo">Matriz de conflictividad · Anexo 15</h2>
+    <p class="hoja-subtitulo">Fecha de corte: {{ fechaCorte }} · Guía §8.3.1</p>
+    <p class="hoja-meta">{{ filtrosTexto() }}</p>
+    <p class="hoja-regla">
+      Regla de conteo: manifiesto = «Conflicto social» o «Crisis social»; latente = todo lo demás,
+      incluido el caso sin nivel declarado. «—» = sin dato registrado.
+    </p>
+
+    <table class="hoja-tabla">
+      <thead>
+        <tr>
+          <th>N°</th>
+          <th>Código de caso</th>
+          <th>Nombre del caso</th>
+          <th>Región</th>
+          <th>Alcance</th>
+          <th>Subsector</th>
+          <th>Nivel de conflictividad</th>
+          <th>Nivel de riesgo</th>
+          <th>Prioridad de atención</th>
+          <th>Estado</th>
+          <th>Unidad responsable</th>
+          <th>Inicio</th>
+          <th>Último hecho</th>
+          <th>Compromisos</th>
+          <th>Tipo de compromiso</th>
+          <th>Documentos</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (fila of filas(); track fila.codigoCaso) {
+        <tr>
+          <td>{{ $index + 1 }}</td>
+          <td>{{ textoOSinDato(fila.codigoCaso) }}</td>
+          <td>{{ textoOSinDato(fila.nombreCaso) }}</td>
+          <td>{{ textoOSinDato(fila.region) }}</td>
+          <td>{{ textoOSinDato(fila.alcance) }}</td>
+          <td>{{ textoOSinDato(fila.subsector) }}</td>
+          <td>{{ textoOSinDato(fila.nivelConflictividad) }}</td>
+          <td>{{ textoOSinDato(fila.nivelRiesgo) }}</td>
+          <td>{{ textoOSinDato(fila.prioridadAtencion) }}</td>
+          <td>{{ textoOSinDato(fila.estado) }}</td>
+          <td>{{ textoOSinDato(fila.unidadResponsable) }}</td>
+          <td>{{ formatearFecha(fila.fechaInicio) }}</td>
+          <td>{{ formatearFecha(fila.ultimoHecho) }}</td>
+          <td>{{ fila.compromisos }}</td>
+          <td>{{ textoOSinDato(fila.tipoCompromiso) }}</td>
+          <td>{{ fila.documentos }}</td>
+        </tr>
+        }
+      </tbody>
+    </table>
+
+    <footer class="hoja-pie">
+      <p>
+        Fuente: <code>analytics.vw_anexo_15_matriz_conflictividad</code> con la seguridad del rol
+        aplicada. «—» = sin dato registrado. Fechas en formato dd/mm/aaaa.
+      </p>
+      <div class="hoja-firma">
+        <span>Elaborado por</span>
+        <span>Revisado por</span>
+      </div>
+    </footer>
+  </article>
+</section>
+} @if (codigoDetalle()) {
+<div class="drawer-scrim no-print" (click)="cerrarDetalle()">
+  <aside
+    class="drawer"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="detalle-titulo"
+    (click)="$event.stopPropagation()"
+  >
+    <header class="drawer-head">
+      <div>
+        <p class="detalle-codigo">{{ detalleValor()?.codigoCaso ?? codigoDetalle() }}</p>
+        <h2 id="detalle-titulo">{{ detalleValor()?.nombreCaso ?? 'Detalle del caso' }}</h2>
+      </div>
+      <button
+        type="button"
+        class="icon-button"
+        aria-label="Cerrar el detalle"
+        (click)="cerrarDetalle()"
+      >
+        <app-icono nombre="cerrar" [tamano]="18" />
+      </button>
+    </header>
+
+    <div class="drawer-body">
+      @if (detalleCargando()) {
+      <p class="form-hint" role="status">Cargando ficha…</p>
+      } @else if (detalleError(); as error) {
+      <p class="form-error" role="alert">{{ error.message }}</p>
+      } @else if (detalleValor(); as detalle) {
+      <dl class="detalle-datos">
+        <dt>Región</dt>
+        <dd>{{ textoOSinDato(detalle.region) }}</dd>
+        <dt>Alcance</dt>
+        <dd>{{ textoOSinDato(detalle.alcance) }}</dd>
+        <dt>Subsector</dt>
+        <dd>{{ textoOSinDato(detalle.subsector) }}</dd>
+        <dt>Nivel de conflictividad</dt>
+        <dd>{{ textoOSinDato(detalle.nivelConflictividad) }}</dd>
+        <dt>Nivel de riesgo</dt>
+        <dd>{{ textoOSinDato(detalle.nivelRiesgo) }}</dd>
+        <dt>Prioridad de atención</dt>
+        <dd>{{ textoOSinDato(detalle.prioridadAtencion) }}</dd>
+        <dt>Estado</dt>
+        <dd>{{ textoOSinDato(detalle.estado) }}</dd>
+        <dt>Unidad responsable</dt>
+        <dd>{{ textoOSinDato(detalle.unidadResponsable) }}</dd>
+        <dt>Inicio</dt>
+        <dd>{{ formatearFecha(detalle.fechaInicio) }}</dd>
+        <dt>Último hecho</dt>
+        <dd>{{ formatearFecha(detalle.ultimoHecho) }}</dd>
+        <dt>Compromisos</dt>
+        <dd>{{ detalle.compromisos }}</dd>
+        <dt>Tipo de compromiso</dt>
+        <dd>{{ textoOSinDato(detalle.tipoCompromiso) }}</dd>
+        <dt>Documentos</dt>
+        <dd>{{ detalle.documentos }}</dd>
+        <dt>Punto focal</dt>
+        <dd>{{ textoOSinDato(detalle.puntoFocal) }}</dd>
+      </dl>
+
+      <section class="detalle-seccion" aria-labelledby="detalle-riesgo">
+        <h3 id="detalle-riesgo">Descripción del riesgo</h3>
+        <p>{{ textoOSinDato(detalle.descripcionRiesgo) }}</p>
+      </section>
+
+      <section class="detalle-seccion" aria-labelledby="detalle-cronologia">
+        <h3 id="detalle-cronologia">Narración cronológica</h3>
+        <p>{{ textoOSinDato(detalle.narracionCronologica) }}</p>
+      </section>
+
+      <section class="detalle-seccion" aria-labelledby="detalle-alertas">
+        <h3 id="detalle-alertas">Alertas vinculadas</h3>
+        <p>{{ textoOSinDato(detalle.alertasVinculadas) }}</p>
+      </section>
+
+      <section class="detalle-seccion" aria-labelledby="detalle-actores">
+        <h3 id="detalle-actores">Actores involucrados</h3>
+        <p>{{ textoOSinDato(detalle.actoresInvolucrados) }}</p>
+      </section>
+
+      <a class="link-button" [routerLink]="['/casos', detalle.codigoCaso]">
+        Abrir ficha completa del caso
+      </a>
+      }
+    </div>
+  </aside>
+</div>
+}

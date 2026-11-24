@@ -1,11 +1,5 @@
-import {
-  esRegistro,
-  lista,
-  leer,
-  numero,
-  texto,
-  type Registro,
-} from '../../dominio/mapeo';
+import { aErrorApi } from '../../core/http/errores';
+import { esRegistro, lista, leer, numero, texto, type Registro } from '../../dominio/mapeo';
 
 /**
  * Modelos y mapeo de la pantalla de Administración.
@@ -166,9 +160,7 @@ export type RolDisponible = {
 
 export function aUsuarioAdmin(bruto: unknown): UsuarioAdmin {
   const r = esRegistro(bruto) ? bruto : {};
-  const roles = lista(r, ['roles']).filter(
-    (valor): valor is string => typeof valor === 'string',
-  );
+  const roles = lista(r, ['roles']).filter((valor): valor is string => typeof valor === 'string');
   return {
     id: texto(r, ['id']) ?? '',
     nombre: texto(r, ['nombre']) ?? 'Sin nombre',
@@ -242,9 +234,7 @@ export function aValorCatalogo(bruto: unknown): ValorCatalogo {
 
 export function aCatalogoAdmin(bruto: unknown): CatalogoAdmin {
   const r = esRegistro(bruto) ? bruto : {};
-  const campos = lista(r, ['campos']).filter(
-    (valor): valor is string => typeof valor === 'string',
-  );
+  const campos = lista(r, ['campos']).filter((valor): valor is string => typeof valor === 'string');
   return {
     codigo: texto(r, ['codigo']) ?? '',
     etiqueta: texto(r, ['etiqueta']) ?? 'Catálogo',
@@ -324,4 +314,44 @@ export function aMigracionItem(bruto: unknown): MigracionItem {
     clave: texto(r, ['clave']) ?? '—',
     aplicadaEn: texto(r, ['aplicadaEn']),
   };
+}
+
+/* ── Errores de la API ────────────────────────────────────────────────────── */
+
+/** Traducciones de los códigos de error propios de `/api/v1/admin`. */
+const MENSAJES_ADMIN: Record<string, string> = {
+  AUTO_DESACTIVACION: 'No puede desactivar su propia cuenta.',
+  CATALOGO_NORMATIVO: 'Los niveles de conflictividad sólo cambian por el procedimiento normativo.',
+  CATALOGO_EN_USO:
+    'El valor está en uso; no se puede eliminar. Desactívelo si el catálogo lo permite.',
+  CATALOGO_PROTEGIDO: 'Este catálogo no permite eliminar valores desde la interfaz.',
+  CATALOGO_SOLO_LECTURA: 'Este catálogo es de sólo lectura.',
+  LISTA_BLANCA_EN_USO: 'El tipo de archivo está en uso; desactívelo en lugar de eliminarlo.',
+  DNI_DUPLICADO: 'Ya existe un usuario con ese DNI.',
+  EMAIL_DUPLICADO: 'Ya existe un usuario con ese correo.',
+  DUPLICADO: 'Ya existe un registro con esa clave.',
+  ROL_INVALIDO: 'El rol indicado no existe.',
+  CAPACIDAD_INVALIDA: 'Un rol no puede eliminar sin poder editar.',
+  CLAVE_INVALIDA: 'La clave del parámetro no es válida.',
+  VALOR_INVALIDO: 'El valor no es JSON válido.',
+  MIME_INVALIDO: 'El MIME debe tener la forma «tipo/subtipo».',
+  EXTENSION_INVALIDA: 'La extensión no es válida.',
+};
+
+/**
+ * Mensaje legible de un fallo de administración.
+ *
+ * 401 y 403 se explican sin jerga porque son los dos desenlaces que el
+ * administrador puede encontrar al perder la sesión o el rol.
+ */
+export function mensajeErrorAdmin(
+  fallo: unknown,
+  respaldo = 'No se pudo completar la operación.',
+): string {
+  const error = aErrorApi(fallo, respaldo);
+  if (error.esNoAutorizado) return 'La sesión expiró. Vuelva a iniciar sesión.';
+  if (error.esProhibido) {
+    return 'Su sesión no tiene el rol administrador (403). No se modificó nada.';
+  }
+  return MENSAJES_ADMIN[error.codigo] ?? error.message;
 }

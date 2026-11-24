@@ -2,9 +2,20 @@
 
 **Aplicativo de Vigilancia y Sistematización de Información en Prevención y Gestión de Conflictos Sociales** · PRODUCE · OAIPCS
 **Estado:** propuesta funcional para OAIPCS · 23 nov 2026
-**Base del diseño:** `migration/41` y `migration/43`, propuestas y no ejecutadas.
+**Base del diseño:** `migration/41_matriz_equipo.sql` (aplicable y aplicada salvo su §5, aplazada) y `migration/43_nudos_criticos_fieles.sql` (propuesta, no ejecutada).
 **Alcance:** conducta funcional. No describe pantallas, colores ni componentes.
 **Principio:** el dato ausente se declara, no se estima. Una celda vacía no es un cero; una mitad faltante no se completa por inferencia.
+
+> **Implementación (corte 2026-11-24).** El diseño funcional de este documento
+> sigue vigente tal cual. En código: la tabla `core.caso_nudo_critico` existe
+> (`41_matriz_equipo.sql`), los endpoints `GET /v1/cases/nudos` (tablero «Nudos
+> de la semana» del ámbito) y `GET /v1/cases/{codigo}/nudos` (historial del
+> expediente) están vivos, y los bloques «Nudos de la semana» están montados y
+> **encendidos** en `/casos` y `/casos/:codigo`. La tabla no tiene todavía filas,
+> así que las pantallas muestran «Periodo sin registro» en vez de `0`: es el
+> estado honesto declarado, no un defecto. `43_nudos_criticos_fieles.sql`
+> (relaja la unicidad a una fila por hito y permite las mitades descuadradas)
+> sigue **propuesta** y condiciona la importación real del Excel.
 
 Este documento responde qué es un nudo crítico, quién lo escribe, cuándo, cómo cambia de estado, dónde se ve y cómo se importa desde la matriz del equipo. Los hechos de la fuente son los verificados en la hoja `Reporte de avance de casos punt` del archivo `23NOV2026 MATRIZ DE CONFLICTOS SOCIALES (1).xlsx`.
 

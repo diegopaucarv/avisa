@@ -635,11 +635,7 @@ La búsqueda ya cubre las seis entidades, agrupa los resultados y muestra el ter
 
 ## Centro de notificaciones · `/notificaciones`
 
-Sin pendientes. La pantalla muestra categoría, estado y fecha, marca y desmarca lectura por
-fila (`PATCH /api/v1/notifications/{id}`), resalta «Sin leer», lleva el contador «N sin leer»
-y filtra por estado en la URL. El **punto con contador de la campana ya está en el shell**
-(`layouts/shell/shell.component.html` + `core/http/notificaciones.service.ts`), alimentado
-por `noLeidas` del `GET`.
+Sin pendientes. La pantalla muestra categoría, estado y fecha, marca lectura (`POST /api/v1/notifications/{id}/leer`), desmarca (`PATCH /api/v1/notifications/{id}` con `estado=pendiente`) y «marcar todas» (`POST /api/v1/notifications/leer-todas`); resalta «Sin leer», lleva el contador «N sin leer» y filtra por estado en la URL. El **punto con contador de la campana ya está en el shell** (`layouts/shell/shell.component.html` + `core/http/notificaciones.service.ts`), alimentado por `noLeidas` del `GET`.
 
 ---
 
@@ -655,9 +651,7 @@ Sin pendientes. La ayuda navegable, el glosario y la hoja de atajos ya están.
 | ------ | -------------------------------------------------------------------- | --------------- | ------ |
 | 28, 47 | Tamaño de página efectivo y ámbito/avisos persistidos en el servidor | `Dato`          | —      |
 
-Tema, densidad y tamaño se guardan ya en el servidor (`PATCH /v1/preferences`), pero el
-tamaño aparece deshabilitado porque ningún listado consume la preferencia; el ámbito y los
-avisos siguen en `localStorage`.
+Tema y densidad se guardan y **se persisten en la cuenta** (`PATCH /v1/preferences`, `core.usuario_preferencia`, migración 62). El tamaño de página aparece deshabilitado con nota: la API valida `tamanoPagina`, pero ningún listado lo consume todavía. El ámbito y los avisos siguen en `localStorage`.
 
 ---
 

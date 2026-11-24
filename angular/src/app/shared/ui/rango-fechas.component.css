@@ -1,0 +1,134 @@
+/*
+ * Rango de fechas para una barra de filtros (lenguaje de los mockups:
+ * `filter-bar`, controles de 35 px, borde `--line`, radio 8 px).
+ * Todo el color sale de las variables de tema: no hay reglas para oscuro.
+ */
+
+:host {
+  display: inline-block;
+  min-width: 0;
+  font-size: 12px;
+}
+
+.rango-fechas {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.campo {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 35px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper);
+}
+
+.campo:focus-within {
+  outline: 2px solid var(--blue);
+  outline-offset: 1px;
+}
+
+.campo-etiqueta {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.campo input {
+  width: 92px;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+.campo input::placeholder {
+  color: var(--muted);
+  opacity: 0.8;
+}
+
+.campo input:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.guion {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+/* ── Atajos ──────────────────────────────────────────────────────────────── */
+
+.atajos {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--canvas);
+}
+
+.atajo {
+  padding: 0 9px;
+  height: 27px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ink-2);
+  font: inherit;
+  font-size: 11.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.atajo:hover:not(:disabled):not([aria-pressed='true']) {
+  background: var(--blue-pale);
+}
+
+.atajo[aria-pressed='true'] {
+  background: var(--blue-pale);
+  color: var(--blue);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.atajo:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 1px;
+}
+
+.atajo:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+/* ── Error de validación ─────────────────────────────────────────────────── */
+
+.rango-error {
+  flex-basis: 100%;
+  margin: 0;
+  color: var(--red);
+  font-size: 11.5px;
+  line-height: 1.4;
+}
+
+@media (max-width: 720px) {
+  .campo {
+    height: 40px;
+  }
+  .atajo {
+    height: 32px;
+  }
+}

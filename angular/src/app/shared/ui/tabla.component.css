@@ -1,0 +1,264 @@
+/*
+ * Tabla única de AVISA.
+ *
+ * Densidad: interlineado 1 en celdas y encabezados; la altura de fila la fija
+ * el `padding`, nunca el `line-height`. Los colores salen de las variables de
+ * tema (`src/styles/global.css` y `theme-dark.generated.css`), así que claro,
+ * oscuro e impresión no necesitan reglas paralelas.
+ */
+
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.tabla-scroll {
+  position: relative;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--paper);
+  overflow: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.tabla {
+  width: 100%;
+  border-collapse: separate; /* `collapse` rompe el borde de la cabecera pegajosa */
+  border-spacing: 0;
+  text-align: left;
+  font-size: 12.5px;
+  font-family: inherit;
+}
+
+/* ── Resumen de la tabla (prosa, no fila) ─────────────────────────────────── */
+
+.tabla-resumen {
+  caption-side: top;
+  padding: 10px 12px 6px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+  text-align: left;
+}
+
+/* ── Cabecera ────────────────────────────────────────────────────────────── */
+
+.tabla thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--line);
+  background: var(--paper);
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.th-boton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.th-boton:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.th-flecha {
+  width: 0;
+  height: 0;
+  border-right: 3.5px solid transparent;
+  border-left: 3.5px solid transparent;
+  border-bottom: 5px solid currentColor;
+  opacity: 0.25;
+}
+
+.th-orden-asc .th-flecha {
+  opacity: 1;
+}
+
+.th-orden-desc .th-flecha {
+  opacity: 1;
+  transform: rotate(180deg);
+}
+
+/* ── Celdas ──────────────────────────────────────────────────────────────── */
+
+.tabla tbody td {
+  padding: 11px 12px;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink-2);
+  font-size: 12.5px;
+  line-height: 1;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.tabla tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+/*
+ * La primera columna de datos es la que nombra la fila: puede ocupar dos
+ * líneas (código + detalle). Su alto lo sigue gobernando el padding.
+ */
+.tabla tbody td.celda-principal {
+  min-width: 200px;
+  white-space: normal;
+}
+
+.tabla-compacta tbody td {
+  padding: 6px 10px;
+  font-size: 12px;
+}
+
+.tabla-compacta thead th {
+  padding: 7px 10px;
+}
+
+/* ── Selección ───────────────────────────────────────────────────────────── */
+
+.tabla .col-seleccion {
+  width: 40px;
+  min-width: 40px;
+  max-width: 40px;
+  padding-right: 4px;
+  padding-left: 14px;
+  text-align: center;
+}
+
+.tabla-compacta .col-seleccion {
+  padding-left: 10px;
+}
+
+.tabla input[type='checkbox'] {
+  width: 15px;
+  height: 15px;
+  margin: 0;
+  accent-color: var(--blue);
+  vertical-align: middle;
+  cursor: pointer;
+}
+
+.tabla input[type='checkbox']:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+}
+
+.tabla input[type='checkbox']:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* ── Filas: cebra, hover y selección ─────────────────────────────────────── */
+
+.tabla-cebra tbody tr:nth-child(even) td {
+  background: var(--canvas);
+}
+
+.tabla tbody tr:hover td {
+  background: var(--blue-pale);
+}
+
+.tabla tbody tr.fila-seleccionada td {
+  background: var(--blue-pale);
+}
+
+.tabla tbody tr.fila-clicable {
+  cursor: pointer;
+}
+
+.tabla tbody tr:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: -2px;
+}
+
+/* ── Estados dentro del cuerpo ───────────────────────────────────────────── */
+
+.tabla-estado {
+  padding: 26px 16px;
+  color: var(--muted);
+  font-size: 12.5px;
+  line-height: 1.45;
+  text-align: center;
+}
+
+.tabla-cargando .tabla-estado {
+  animation: tabla-latido 1.2s ease-in-out infinite;
+}
+
+@keyframes tabla-latido {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tabla-cargando .tabla-estado {
+    animation: none;
+  }
+}
+
+/* ── Impresión ───────────────────────────────────────────────────────────── */
+
+@media print {
+  .tabla-scroll {
+    max-height: none !important;
+    overflow: visible !important;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+  }
+
+  .tabla thead {
+    display: table-header-group;
+  }
+
+  .tabla thead th {
+    position: static;
+    background: transparent;
+  }
+
+  .tabla tbody tr {
+    break-inside: avoid;
+  }
+
+  .tabla tbody td,
+  .tabla thead th {
+    border-bottom: 1px solid #d8dee4;
+  }
+
+  .tabla tbody tr:hover td,
+  .tabla-cebra tbody tr:nth-child(even) td,
+  .tabla tbody tr.fila-seleccionada td {
+    background: transparent;
+  }
+
+  /* La casilla de selección no significa nada en papel. */
+  .tabla .col-seleccion {
+    display: none;
+  }
+}

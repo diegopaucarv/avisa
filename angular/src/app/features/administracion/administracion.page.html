@@ -1,0 +1,130 @@
+<section class="view-body" aria-labelledby="titulo-administracion">
+  <header class="view-head">
+    <div>
+      <h1 id="titulo-administracion">Administración</h1>
+      <p class="view-subtitle">
+        Cuentas y roles, catálogos del sistema, tipos de archivo permitidos, parámetros y bitácora
+        de migraciones. Esta pantalla exige el rol <strong>administrador</strong>.
+      </p>
+    </div>
+    <div class="view-actions">
+      <span class="badge admin-rol-badge">
+        <app-icono nombre="candado" [tamano]="13" />
+        Rol requerido · administrador
+      </span>
+      @if (esAdmin()) {
+      <button
+        type="button"
+        class="button-secondary"
+        [disabled]="cargandoResumen()"
+        (click)="recargarResumen()"
+      >
+        <app-icono nombre="reloj" [tamano]="14" />
+        {{ cargandoResumen() ? 'Actualizando…' : 'Recargar' }}
+      </button>
+      }
+    </div>
+  </header>
+
+  @if (!esAdmin()) {
+  <div class="empty-state" role="alert">
+    <strong>Acceso restringido</strong>
+    <p>
+      La administración exige el rol administrador. Su sesión no lo tiene, por lo que no se
+      consultan usuarios, catálogos, tipos de archivo ni parámetros.
+    </p>
+  </div>
+  } @else { @if (errorResumen(); as texto) {
+  <div class="inline-notice" role="alert">
+    <app-icono nombre="alerta" [tamano]="15" />
+    <span>{{ texto }}</span>
+  </div>
+  }
+
+  <div class="admin-kpis">
+    <div class="admin-kpi">
+      <span class="admin-kpi-label">Usuarios activos</span>
+      @if (resumen(); as r) {
+      <span class="admin-kpi-value">{{ r.usuarios.activos }}</span>
+      <span class="admin-kpi-note">de {{ r.usuarios.total }} cuentas en total</span>
+      } @else {
+      <span class="admin-kpi-value sin-dato">—</span>
+      <span class="admin-kpi-note">{{ cargandoResumen() ? 'Consultando…' : 'sin dato' }}</span>
+      }
+    </div>
+
+    <div class="admin-kpi">
+      <span class="admin-kpi-label">Roles del sistema</span>
+      @if (resumen(); as r) {
+      <span class="admin-kpi-value">{{ r.roles.total }}</span>
+      <span class="admin-kpi-note">definidos en core.roles</span>
+      } @else {
+      <span class="admin-kpi-value sin-dato">—</span>
+      <span class="admin-kpi-note">{{ cargandoResumen() ? 'Consultando…' : 'sin dato' }}</span>
+      }
+    </div>
+
+    <div class="admin-kpi">
+      <span class="admin-kpi-label">Tipos de archivo activos</span>
+      @if (resumen(); as r) {
+      <span class="admin-kpi-value">{{ r.listaBlanca.activos }}</span>
+      <span class="admin-kpi-note">de {{ r.listaBlanca.total }} en la lista blanca</span>
+      } @else {
+      <span class="admin-kpi-value sin-dato">—</span>
+      <span class="admin-kpi-note">{{ cargandoResumen() ? 'Consultando…' : 'sin dato' }}</span>
+      }
+    </div>
+
+    <div class="admin-kpi">
+      <span class="admin-kpi-label">Parámetros</span>
+      @if (resumen(); as r) {
+      <span class="admin-kpi-value">{{ r.configuracion.total }}</span>
+      <span class="admin-kpi-note">
+        @if (r.configuracion.total === 0) { sin parámetros registrados } @else { claves en
+        core.configuracion }
+      </span>
+      } @else {
+      <span class="admin-kpi-value sin-dato">—</span>
+      <span class="admin-kpi-note">{{ cargandoResumen() ? 'Consultando…' : 'sin dato' }}</span>
+      }
+    </div>
+
+    <div class="admin-kpi">
+      <span class="admin-kpi-label">Migraciones aplicadas</span>
+      @if (resumen(); as r) {
+      <span class="admin-kpi-value">{{ r.migraciones.total }}</span>
+      <span class="admin-kpi-note">última: {{ ultimaMigracion() }}</span>
+      } @else {
+      <span class="admin-kpi-value sin-dato">—</span>
+      <span class="admin-kpi-note">{{ cargandoResumen() ? 'Consultando…' : 'sin dato' }}</span>
+      }
+    </div>
+  </div>
+
+  <div class="segmented" role="tablist" aria-label="Secciones de administración">
+    @for (p of pestanas; track p.valor) {
+    <button
+      type="button"
+      role="tab"
+      [attr.aria-selected]="pestana() === p.valor"
+      [attr.aria-pressed]="pestana() === p.valor"
+      (click)="cambiarPestana(p.valor)"
+    >
+      <app-icono [nombre]="p.icono" [tamano]="13" />
+      {{ p.etiqueta }}
+    </button>
+    }
+  </div>
+
+  @switch (pestana()) { @case ('usuarios') {
+  <app-admin-usuarios-panel (cambio)="recargarResumen()" />
+  } @case ('catalogos') {
+  <app-admin-catalogos-panel (cambio)="recargarResumen()" />
+  } @case ('lista-blanca') {
+  <app-admin-lista-blanca-panel (cambio)="recargarResumen()" />
+  } @case ('configuracion') {
+  <app-admin-configuracion-panel (cambio)="recargarResumen()" />
+  } @case ('migraciones') {
+  <app-admin-migraciones-panel />
+  } } }
+</section>

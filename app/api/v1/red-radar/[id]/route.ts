@@ -9,8 +9,8 @@ export const dynamic = "force-dynamic";
 /**
  * Detalle de una alerta de la cola RED-RADAR (por uuid o código legible).
  *
- * Reutiliza el contrato de la ficha de alertas (`alerta`, `demandas`) y añade el
- * triaje vigente (`triaje`, `null` si la alerta todavía no se trió).
+ * Devuelve la misma forma de fila que la cola (`alerta`), el ubigeo del distrito
+ * y el triaje vigente (`triaje`, `null` si la alerta todavía no se trió).
  */
 export async function GET(
   request: Request,

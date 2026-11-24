@@ -1,0 +1,207 @@
+<section class="surface admin-section" aria-labelledby="titulo-admin-lista-blanca">
+  <div class="admin-panel-head">
+    <div>
+      <h2 id="titulo-admin-lista-blanca">Lista blanca de documentos</h2>
+      <p>
+        Tipos de archivo que aceptan Documentos y adjuntos. Cada fila es un MIME permitido; el uso
+        cuenta los archivos guardados con ese MIME. Desactivar un MIME lo retira de las cargas sin
+        tocar los archivos existentes.
+      </p>
+    </div>
+    <div class="admin-actions">
+      <button
+        type="button"
+        class="button-primary"
+        [disabled]="formAbierto()"
+        (click)="abrirNuevo()"
+      >
+        <app-icono nombre="documentos" [tamano]="14" />
+        Nuevo tipo de archivo
+      </button>
+    </div>
+  </div>
+
+  <div class="inline-notice" role="status">
+    <app-icono nombre="info" [tamano]="15" />
+    <span>
+      Tamaño máximo de archivo: {{ limite() }} · límite absoluto fijado en el servidor; no se edita
+      aquí.
+    </span>
+  </div>
+
+  @if (aviso(); as texto) {
+  <p class="form-hint" role="status">{{ texto }}</p>
+  } @if (error(); as texto) {
+  <p class="form-error" role="alert">{{ texto }}</p>
+  } @if (formAbierto()) {
+  <form class="admin-form" (submit)="$event.preventDefault(); guardar()">
+    <h3 class="admin-form-title">
+      {{ editandoMime() !== null ? 'Editar ' + editandoMime() : 'Nuevo tipo de archivo' }}
+    </h3>
+
+    <div class="admin-edit-grid">
+      <label class="form-field">
+        <span class="form-label">MIME</span>
+        <input
+          class="form-input admin-mono"
+          type="text"
+          maxlength="120"
+          placeholder="application/pdf"
+          autocomplete="off"
+          [value]="fMime()"
+          [disabled]="editandoMime() !== null"
+          (input)="fMime.set(aTexto($event))"
+          required
+        />
+      </label>
+
+      <label class="form-field">
+        <span class="form-label">Extensión</span>
+        <input
+          class="form-input"
+          type="text"
+          maxlength="16"
+          placeholder="pdf"
+          autocomplete="off"
+          [value]="fExtension()"
+          (input)="fExtension.set(aTexto($event))"
+        />
+      </label>
+
+      <label class="admin-check">
+        <input
+          type="checkbox"
+          [checked]="fActivo()"
+          (change)="fActivo.set(aMarcado($event))"
+        />
+        Activo (se ofrece en las cargas)
+      </label>
+    </div>
+
+    <label class="form-field">
+      <span class="form-label">Nota</span>
+      <textarea
+        class="form-textarea"
+        maxlength="500"
+        rows="2"
+        [value]="fNota()"
+        (input)="fNota.set(aTexto($event))"
+      ></textarea>
+    </label>
+
+    @if (errorFormulario(); as texto) {
+    <p class="form-error" role="alert">{{ texto }}</p>
+    }
+
+    <p class="admin-nota">
+      El MIME es la clave del registro: al editarlo se cambia la extensión, el estado y la nota,
+      pero no el tipo. Para otro MIME, cree una fila nueva.
+    </p>
+
+    <div class="admin-form-actions">
+      <button
+        type="button"
+        class="button-secondary"
+        [disabled]="guardando()"
+        (click)="cerrarFormulario()"
+      >
+        Cancelar
+      </button>
+      <button type="submit" class="button-primary" [disabled]="guardando()">
+        {{ guardando() ? 'Guardando…' : editandoMime() !== null ? 'Guardar cambios' : 'Agregar tipo' }}
+      </button>
+    </div>
+  </form>
+  }
+
+  @if (cargando() && items().length === 0) {
+  <div class="empty-state" role="status">Cargando lista blanca…</div>
+  } @else if (items().length === 0) {
+  <div class="empty-state">
+    <strong>La lista blanca está vacía</strong>
+    <p>
+      Sin tipos permitidos, Documentos no acepta cargas. Agregue el primero con «Nuevo tipo de
+      archivo».
+    </p>
+  </div>
+  } @else {
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th scope="col">MIME</th>
+          <th scope="col">Extensión</th>
+          <th scope="col">Estado</th>
+          <th scope="col">Uso</th>
+          <th scope="col">Nota</th>
+          <th scope="col">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of items(); track item.mime) {
+        <tr>
+          <td><span class="admin-mono">{{ item.mime }}</span></td>
+          <td>{{ item.extension || '—' }}</td>
+          <td>
+            @if (item.activo) {
+            <span class="badge badge-agreement">Activo</span>
+            } @else {
+            <span class="badge badge-archived">Inactivo</span>
+            }
+          </td>
+          <td>{{ item.uso }}</td>
+          <td class="admin-cell-wrap">{{ item.nota || '—' }}</td>
+          <td>
+            @if (borrandoMime() === item.mime) {
+            <div class="admin-confirm">
+              <span>¿Eliminar «{{ item.mime }}»?</span>
+              <button
+                type="button"
+                class="button-danger"
+                [disabled]="eliminando()"
+                (click)="eliminar(item)"
+              >
+                Sí, eliminar
+              </button>
+              <button
+                type="button"
+                class="button-secondary"
+                (click)="borrandoMime.set(null)"
+              >
+                Cancelar
+              </button>
+            </div>
+            } @else {
+            <div class="admin-cell-actions">
+              <button type="button" class="button-secondary" (click)="editar(item)">
+                Editar
+              </button>
+              <button
+                type="button"
+                class="button-secondary"
+                [disabled]="guardando()"
+                (click)="alternarActivo(item)"
+              >
+                {{ item.activo ? 'Desactivar' : 'Activar' }}
+              </button>
+              <button
+                type="button"
+                class="button-secondary"
+                [disabled]="item.uso > 0"
+                [attr.title]="item.uso > 0 ? 'En uso por ' + item.uso + ' archivos' : null"
+                (click)="pedirEliminar(item)"
+              >
+                Eliminar
+              </button>
+            </div>
+            @if (item.uso > 0) {
+            <span class="admin-disabled-motivo">En uso por {{ item.uso }} archivos</span>
+            } }
+          </td>
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  }
+</section>

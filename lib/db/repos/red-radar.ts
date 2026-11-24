@@ -2,12 +2,7 @@ import type { PoolClient } from "pg";
 
 import { auditChange } from "../audit";
 import { ApiError } from "../errors";
-import {
-  getAlertById,
-  type AlertDemanda,
-  type AlertItem,
-  type WriteSession,
-} from "./alerts";
+import type { WriteSession } from "./alerts";
 
 /* ------------------------------------------------------------------------- *
  * Tipos del contrato
@@ -128,9 +123,12 @@ export type TriajeAlerta = {
 };
 
 export type DetalleRedRadar = {
-  alerta: AlertItem;
-  demandas: AlertDemanda[];
-  /** Ubigeo INEI del distrito de la alerta; la ficha de alertas no lo trae. */
+  /**
+   * La misma forma de fila que la cola. Se resuelve con el `COLA_SELECT` propio
+   * para no depender de columnas que todavía no existen en la base.
+   */
+  alerta: ItemCola;
+  /** Ubigeo INEI del distrito de la alerta. */
   ubigeo: string | null;
   /** `null` mientras la alerta no tenga fila de triaje. */
   triaje: TriajeAlerta | null;
@@ -183,8 +181,7 @@ function filtrosSql(filtros: ColaFiltros, conEstado: boolean) {
   }
 
   const regionId = idPositivo(filtros.regionId);
-  if (regionId !== null)
-    where.push(`coalesce(rr.id, rd.id) = ${bind(regionId)}`);
+  if (regionId !== null) where.push(`rd.id = ${bind(regionId)}`);
 
   const distritoId = idPositivo(filtros.distritoId);
   if (distritoId !== null) where.push(`a.distrito_id = ${bind(distritoId)}`);
@@ -217,7 +214,7 @@ const COLA_SELECT = `
   d.nombre as distrito,
   d.ubigeo,
   pd.nombre as provincia,
-  coalesce(rr.nombre, rd.nombre) as region,
+  rd.nombre as region,
   pa.codigo as prioridad,
   na.nombre as nivel,
   na.codigo_legado as nivel_codigo,
@@ -249,7 +246,6 @@ const COLA_FROM = `
   left join core.distritos d on d.id = a.distrito_id
   left join core.provincias pd on pd.id = d.provincia_id
   left join core.regiones rd on rd.id = pd.region_id
-  left join core.regiones rr on rr.id = a.region_id
 `;
 
 function mapItem(row: Record<string, any>): ItemCola {
@@ -393,34 +389,36 @@ async function contarFuente(client: PoolClient): Promise<FuenteCola> {
 }
 
 /**
- * Detalle de una alerta de la cola: reutiliza `getAlertById` (mismo contrato que
- * la ficha de alertas) y añade el triaje vigente. Devuelve `null` si la alerta
- * no existe o queda fuera del alcance de la sesión.
+ * Detalle de una alerta de la cola.
+ *
+ * Usa el mismo `COLA_SELECT` que `listarCola` (incluye distrito, ubigeo, región
+ * derivada, prioridad, nivel, fuente y sugerencias) y añade el triaje vigente.
+ * Se lee por uuid o por código legible. Devuelve `null` si no existe, está
+ * anulada/archivada o queda fuera del alcance de la sesión.
  */
 export async function obtenerDetalle(
   client: PoolClient,
   idOrCodigo: string,
 ): Promise<DetalleRedRadar | null> {
-  const detalle = await getAlertById(client, idOrCodigo);
-  if (!detalle) return null;
+  const resultado = await client.query(
+    `select ${COLA_SELECT}
+     ${COLA_FROM}
+     where (a.id::text = $1 or a.codigo_alerta = $1)
+       and a.anulado_en is null
+       and a.archivado_en is null
+     limit 1`,
+    [idOrCodigo],
+  );
 
-  const triaje = await leerTriaje(client, detalle.alert.id);
+  const fila = resultado.rows[0];
+  if (!fila) return null;
 
-  // `getAlertById` no selecciona el ubigeo; se resuelve aparte para que el
-  // bloque «Ubicación» del panel lo pueda mostrar sin inventarlo.
-  let ubigeo: string | null = null;
-  if (detalle.alert.distritoId !== null) {
-    const ubigeoResult = await client.query(
-      `select ubigeo from core.distritos where id = $1 limit 1`,
-      [detalle.alert.distritoId],
-    );
-    ubigeo = ubigeoResult.rows[0]?.ubigeo ?? null;
-  }
+  const alerta = mapItem(fila);
+  const triaje = await leerTriaje(client, alerta.id);
 
   return {
-    alerta: detalle.alert,
-    demandas: detalle.demandas,
-    ubigeo,
+    alerta,
+    ubigeo: alerta.ubigeo,
     triaje,
     generadoEn: new Date().toISOString(),
   };
@@ -510,6 +508,7 @@ export async function registrarTriaje(
        from core.alertas_tempranas a
       where (a.id::text = $1 or a.codigo_alerta = $1)
         and a.anulado_en is null
+        and a.archivado_en is null
       limit 1`,
     [idOrCodigo],
   );
@@ -604,6 +603,14 @@ export async function registrarTriaje(
     },
   });
 
+  // El contrato de lectura (`leerTriaje`) expone el nombre del triador, no su
+  // uuid; el PATCH devuelve lo mismo para que la UI no reciba dos formas de la
+  // misma fila.
+  const triador = await client.query(
+    `select nombre from core.usuarios where id = $1 limit 1`,
+    [fila.triado_por],
+  );
+
   const duplicateCode = duplicadaDe
     ? ((
         await client.query(
@@ -618,7 +625,7 @@ export async function registrarTriaje(
     motivo: fila.motivo,
     duplicadaDe: fila.duplicada_de,
     duplicadaDeCodigo: duplicateCode,
-    triadoPor: fila.triado_por,
+    triadoPor: triador.rows[0]?.nombre ?? null,
     triadoEn: isoOrNull(fila.triado_en),
   };
 }

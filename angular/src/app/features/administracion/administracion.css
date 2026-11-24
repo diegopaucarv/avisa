@@ -217,3 +217,39 @@
   font-size: 11.5px;
   line-height: 1.4;
 }
+
+/* Celdas que sí pueden envolver: roles, notas y descripciones. */
+.admin-cell-wrap {
+  min-width: 180px;
+  white-space: normal;
+}
+
+/* El badge de «rol requerido» necesita separar el icono del texto. */
+.admin-rol-badge {
+  gap: 5px;
+}
+
+/* Selector de catálogo: el límite global de 150 px no alcanza los nombres. */
+.select-filter .admin-select-ancho {
+  max-width: 240px;
+  color: var(--ink-2);
+}
+
+/* Editor de rol en línea dentro de la tabla de usuarios. */
+.admin-edit-inline {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.admin-edit-inline .form-select {
+  width: auto;
+  max-width: 200px;
+}
+
+.admin-nota code,
+.admin-panel-head code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11.5px;
+}

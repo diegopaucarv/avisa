@@ -1,0 +1,301 @@
+<section class="surface admin-section" aria-labelledby="titulo-admin-usuarios">
+  <div class="admin-panel-head">
+    <div>
+      <h2 id="titulo-admin-usuarios">Usuarios y roles</h2>
+      <p>
+        Cuentas de <code>core.usuarios</code> con sus roles vigentes y su último acceso correcto. El
+        alta usa hash bcrypt local: las claves nunca se muestran ni se devuelven.
+      </p>
+    </div>
+    <div class="admin-actions">
+      <button
+        type="button"
+        class="button-primary"
+        [disabled]="formAbierto()"
+        (click)="abrirFormulario()"
+      >
+        <app-icono nombre="actores" [tamano]="14" />
+        Alta de usuario
+      </button>
+    </div>
+  </div>
+
+  @if (aviso(); as texto) {
+    <p class="form-hint" role="status">{{ texto }}</p>
+  }
+  @if (error(); as texto) {
+    <p class="form-error" role="alert">{{ texto }}</p>
+  }
+  @if (formAbierto()) {
+    <form class="admin-form" (submit)="$event.preventDefault(); guardarUsuario()">
+      <h3 class="admin-form-title">Nueva cuenta</h3>
+      <div class="form-grid">
+        <label class="form-field">
+          <span class="form-label">Nombre completo</span>
+          <input
+            class="form-input"
+            type="text"
+            maxlength="120"
+            autocomplete="off"
+            [value]="fNombre()"
+            (input)="fNombre.set(aTexto($event))"
+            required
+          />
+        </label>
+
+        <label class="form-field">
+          <span class="form-label">DNI</span>
+          <input
+            class="form-input"
+            type="text"
+            inputmode="numeric"
+            maxlength="12"
+            autocomplete="off"
+            [value]="fDni()"
+            (input)="fDni.set(aTexto($event))"
+            required
+          />
+        </label>
+
+        <label class="form-field">
+          <span class="form-label">Correo</span>
+          <input
+            class="form-input"
+            type="email"
+            maxlength="160"
+            autocomplete="off"
+            [value]="fEmail()"
+            (input)="fEmail.set(aTexto($event))"
+          />
+        </label>
+
+        <label class="form-field">
+          <span class="form-label">Cargo</span>
+          <input
+            class="form-input"
+            type="text"
+            maxlength="120"
+            autocomplete="off"
+            [value]="fCargo()"
+            (input)="fCargo.set(aTexto($event))"
+          />
+        </label>
+
+        <label class="form-field">
+          <span class="form-label">Rol inicial</span>
+          <select class="form-select" [value]="fRol()" (change)="fRol.set(aTexto($event))" required>
+            <option value="">Seleccione un rol</option>
+            @for (rol of rolesDisponibles(); track rol.codigo) {
+              <option [value]="rol.codigo">{{ etiquetaRol(rol.codigo) }}</option>
+            }
+          </select>
+        </label>
+
+        <label class="form-field">
+          <span class="form-label">Clave</span>
+          <input
+            class="form-input"
+            type="password"
+            maxlength="128"
+            autocomplete="new-password"
+            [value]="fClave()"
+            (input)="fClave.set(aTexto($event))"
+            required
+          />
+        </label>
+
+        <label class="form-field">
+          <span class="form-label">Repetir clave</span>
+          <input
+            class="form-input"
+            type="password"
+            maxlength="128"
+            autocomplete="new-password"
+            [value]="fClave2()"
+            (input)="fClave2.set(aTexto($event))"
+            required
+          />
+        </label>
+      </div>
+
+      @if (errorFormulario(); as texto) {
+        <p class="form-error" role="alert">{{ texto }}</p>
+      }
+
+      <p class="admin-nota">
+        La clave se guarda como hash bcrypt en la base y no se registra en auditoría. El rol inicial
+        queda vigente desde hoy.
+      </p>
+
+      <div class="admin-form-actions">
+        <button
+          type="button"
+          class="button-secondary"
+          [disabled]="guardando()"
+          (click)="cerrarFormulario()"
+        >
+          Cancelar
+        </button>
+        <button type="submit" class="button-primary" [disabled]="guardando()">
+          {{ guardando() ? 'Creando…' : 'Crear cuenta' }}
+        </button>
+      </div>
+    </form>
+  }
+
+  <div class="filter-bar">
+    <label class="search-field">
+      <app-icono nombre="buscar" [tamano]="14" />
+      <input
+        type="search"
+        placeholder="Buscar por nombre, DNI o correo"
+        aria-label="Buscar usuarios"
+        [value]="q()"
+        (input)="buscar($event)"
+      />
+    </label>
+    <span class="result-count"> {{ total() }} {{ total() === 1 ? 'cuenta' : 'cuentas' }} </span>
+  </div>
+
+  @if (cargando() && usuarios().length === 0) {
+    <div class="empty-state" role="status">Cargando usuarios…</div>
+  } @else if (usuarios().length === 0) {
+    <div class="empty-state">
+      <strong>No hay usuarios para mostrar</strong>
+      <p>
+        @if (q().trim()) {
+          Ninguna cuenta coincide con «{{ q().trim() }}».
+        } @else {
+          La consulta no devolvió cuentas.
+        }
+      </p>
+      @if (error()) {
+        <button type="button" class="button-secondary" (click)="cargar()">Reintentar</button>
+      }
+    </div>
+  } @else {
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th scope="col">Usuario</th>
+            <th scope="col">DNI</th>
+            <th scope="col">Roles</th>
+            <th scope="col">Estado</th>
+            <th scope="col">Último acceso</th>
+            <th scope="col">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (usuario of usuarios(); track usuario.id) {
+            <tr>
+              <td>
+                <strong>{{ usuario.nombre }}</strong>
+                <small>
+                  {{ usuario.email || 'sin correo' }}
+                  @if (usuario.cargo) {
+                    · {{ usuario.cargo }}
+                  }
+                  @if (!usuario.tieneClave) {
+                    · sin clave local
+                  }
+                </small>
+              </td>
+              <td>{{ usuario.dni || '—' }}</td>
+              <td class="admin-cell-wrap">
+                <span class="admin-chips">
+                  @for (rol of usuario.roles; track rol) {
+                    <span class="admin-chip">{{ etiquetaRol(rol) }}</span>
+                  }
+                  @if (usuario.roles.length === 0) {
+                    <span class="admin-empty-cell">sin rol vigente</span>
+                  }
+                </span>
+              </td>
+              <td>
+                @if (usuario.activo) {
+                  <span class="badge badge-agreement">Activa</span>
+                } @else {
+                  <span class="badge badge-archived">Inactiva</span>
+                }
+              </td>
+              <td>{{ fecha(usuario.ultimoAcceso) }}</td>
+              <td>
+                @if (rolEditandoId() === usuario.id) {
+                  <div class="admin-edit-inline">
+                    <select
+                      class="form-select"
+                      [value]="rolElegido()"
+                      [attr.aria-label]="'Nuevo rol para ' + usuario.nombre"
+                      (change)="rolElegido.set(aTexto($event))"
+                    >
+                      @for (rol of rolesDisponibles(); track rol.codigo) {
+                        <option [value]="rol.codigo">{{ etiquetaRol(rol.codigo) }}</option>
+                      }
+                    </select>
+                    <button
+                      type="button"
+                      class="button-primary"
+                      [disabled]="guardandoRol()"
+                      (click)="guardarRol(usuario)"
+                    >
+                      Guardar
+                    </button>
+                    <button type="button" class="button-secondary" (click)="cancelarRol()">
+                      Cancelar
+                    </button>
+                    <span class="admin-disabled-motivo">Reemplaza los roles vigentes</span>
+                  </div>
+                } @else if (estadoPendienteId() === usuario.id) {
+                  <div class="admin-confirm">
+                    <span>¿Desactivar la cuenta?</span>
+                    <button
+                      type="button"
+                      class="button-danger"
+                      [disabled]="guardandoEstado()"
+                      (click)="aplicarEstado(usuario, false)"
+                    >
+                      Sí, desactivar
+                    </button>
+                    <button type="button" class="button-secondary" (click)="cancelarEstado()">
+                      Cancelar
+                    </button>
+                  </div>
+                } @else {
+                  <div class="admin-cell-actions">
+                    <button type="button" class="button-secondary" (click)="editarRol(usuario)">
+                      Cambiar rol
+                    </button>
+                    <button
+                      type="button"
+                      class="button-secondary"
+                      [disabled]="guardandoEstado()"
+                      (click)="alternarEstado(usuario)"
+                    >
+                      {{ usuario.activo ? 'Desactivar' : 'Activar' }}
+                    </button>
+                  </div>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+  @if (total() > 0) {
+    <app-paginacion
+      [pagina]="pagina()"
+      [tamano]="tamano()"
+      [total]="total()"
+      (paginaCambia)="cambiarPagina($event)"
+      (tamanoCambia)="cambiarTamano($event)"
+    />
+  }
+
+  <p class="admin-nota">
+    El cambio de rol reemplaza los roles vigentes del usuario y conserva el historial en
+    <code>core.usuario_roles</code>. Una cuenta desactivada conserva su historial, pero no puede
+    iniciar sesión.
+  </p>
+</section>

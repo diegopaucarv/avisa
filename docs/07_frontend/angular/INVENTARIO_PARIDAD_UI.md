@@ -1,5 +1,10 @@
 # Inventario de paridad de la interfaz — AVISA (Next.js/React → Angular)
 
+> **Documento histórico.** Fotografía del **21-nov-2026**. No se reescribe: es el
+> inventario de la UI Next que sirvió de checklist de porting. El estado vigente
+> de la SPA está en `angular/ESTADO_MIGRACION_ANGULAR.md` y el estado pantalla por
+> pantalla, en `07_frontend/frontend.md`.
+
 > **Tipo de documento:** diagnóstico de solo lectura (no modifica código).
 > **Objetivo:** servir de checklist de porting para una reescritura en Angular.
 > **Base analizada:** `C:\Users\Julia\Downloads\avisa` — Next.js 16.4.3 (App Router), React 19,
