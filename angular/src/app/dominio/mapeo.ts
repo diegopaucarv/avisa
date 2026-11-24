@@ -64,7 +64,7 @@ function unoDe<T extends string>(valor: string | null, permitidos: readonly T[],
  *
  * No construye un `Date`: de una fecha ISO con hora se toma el día literal, sin
  * desplazarlo a la jornada anterior al interpretarlo en una zona al oeste de
- * UTC (`2026-10-31T00:00:00.000Z` sigue siendo 31/10). Acepta `YYYY-MM-DD`,
+ * UTC (`2026-10-31T00:00:00.000Z` sigue siendo 31OCT2026). Acepta `YYYY-MM-DD`,
  * ISO con hora y el formato legado `DD/MM/YYYY`. Un valor no reconocible se
  * declara como hueco (`null`) en vez de propagarse como texto arbitrario.
  */
@@ -76,7 +76,7 @@ export function fechaIso(valor: string | null | undefined): string | null {
   return `${anio}-${String(mes).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
 }
 
-/** Compatibilidad: el formato de caso es el corto común (`31 oct 2026`). */
+/** Compatibilidad: el formato de caso es el compacto común (`31OCT2026`). */
 export function formatearFechaCaso(valor: string | null | undefined): string {
   return formatearFechaCorta(valor);
 }
