@@ -1,5 +1,5 @@
 -- ============================================================================
--- AVISA — Migración 54: enlace del tablero de análisis (Canva) por caso
+-- AVISA — Migración 60: enlace del tablero de análisis (Canva) por caso
 --
 -- POR QUÉ EXISTE
 --   La vista previa del caso y el expediente ofrecen un acceso «Caso de
@@ -24,7 +24,7 @@ COMMENT ON COLUMN core.casos.enlace_analisis IS
   'URL del tablero de análisis del caso (Canva). NULL = sin declarar.';
 
 INSERT INTO core.migracion_log (clave)
-VALUES ('54_enlace_analisis_caso_2026_11_24')
+VALUES ('60_enlace_analisis_caso_2026_11_24')
 ON CONFLICT (clave) DO NOTHING;
 
 COMMIT;

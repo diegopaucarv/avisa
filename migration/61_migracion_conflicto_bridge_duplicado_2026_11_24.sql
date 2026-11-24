@@ -1,5 +1,5 @@
 -- =============================================================================
--- 55 · Nueva categoría de conflicto: BRIDGE_CLAVE_DUPLICADA
+-- 61 · Nueva categoría de conflicto: BRIDGE_CLAVE_DUPLICADA
 --
 -- Fecha: 2026-11-24
 --
@@ -43,7 +43,7 @@
 --       'TERRITORIO_NO_RESUELTO'
 --     ));
 --   delete from core.migracion_log
---    where clave = '55_migracion_conflicto_bridge_duplicado_2026_11_24';
+--   where clave = '61_migracion_conflicto_bridge_duplicado_2026_11_24';
 --   commit;
 --
 -- La reversión falla si ya hay filas con la categoría nueva; hay que borrarlas
@@ -81,7 +81,7 @@ alter table core.migracion_conflicto
 
 -- 3 · Registro de la migración (idempotente).
 insert into core.migracion_log (clave)
-values ('55_migracion_conflicto_bridge_duplicado_2026_11_24')
+values ('61_migracion_conflicto_bridge_duplicado_2026_11_24')
 on conflict (clave) do nothing;
 
 commit;

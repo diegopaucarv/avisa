@@ -1,0 +1,148 @@
+
+## cat_subsectores
+[
+ {
+  "id": 1,
+  "nombre": "Pesca y Acuicultura",
+  "codigo_legado": "Sector-01",
+  "id_area_legado": "AR-001"
+ },
+ {
+  "id": 2,
+  "nombre": "MYPE e Industria",
+  "codigo_legado": "Sector-02",
+  "id_area_legado": "AR-002"
+ }
+]
+
+## cat_prioridades_atencion
+[
+ {
+  "id": 1,
+  "codigo": "Urgente",
+  "orden": 1
+ },
+ {
+  "id": 2,
+  "codigo": "Moderado",
+  "orden": 2
+ },
+ {
+  "id": 3,
+  "codigo": "Bajo",
+  "orden": 3
+ }
+]
+
+## hitos fecha_real
+[
+ {
+  "estado_id": 1,
+  "n": 1,
+  "con_real": 0,
+  "minr": null,
+  "maxr": null
+ },
+ {
+  "estado_id": 2,
+  "n": 1,
+  "con_real": 0,
+  "minr": null,
+  "maxr": null
+ },
+ {
+  "estado_id": 4,
+  "n": 10,
+  "con_real": 5,
+  "minr": "2025-12-02T05:00:00.000Z",
+  "maxr": "2026-05-26T05:00:00.000Z"
+ }
+]
+
+## hitos estados
+[
+ {
+  "id": 1,
+  "codigo": "Registrado",
+  "es_terminal": false
+ },
+ {
+  "id": 2,
+  "codigo": "En ejecución",
+  "es_terminal": false
+ },
+ {
+  "id": 3,
+  "codigo": "Paralizado",
+  "es_terminal": false
+ },
+ {
+  "id": 4,
+  "codigo": "Cumplido",
+  "es_terminal": true
+ },
+ {
+  "id": 5,
+  "codigo": "Desestimado",
+  "es_terminal": true
+ },
+ {
+  "id": 6,
+  "codigo": "No cumplido",
+  "es_terminal": false
+ }
+]
+
+## conteos
+ERROR: relation "core.reportes" does not exist
+
+## casos sin region pero con caso_regiones
+[
+ {
+  "sin_region": 8,
+  "con_vinculo": 8
+ }
+]
+
+## api_rol
+[
+ {
+  "current_user": "avisa_api",
+  "rol": "director"
+ }
+]
+
+## api casos visible
+[
+ {
+  "n": 0
+ }
+]
+
+## api alertas visible
+[
+ {
+  "n": 0
+ }
+]
+
+## api documentos visible
+[
+ {
+  "n": 0
+ }
+]
+
+## api compromisos visible
+[
+ {
+  "n": 0
+ }
+]
+
+## api usuarios visible
+[
+ {
+  "n": 1
+ }
+]

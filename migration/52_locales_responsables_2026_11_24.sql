@@ -43,7 +43,22 @@ COMMENT ON TABLE core.local_responsables IS
     'Responsables del local (1→N). Sustituye a largo plazo las columnas contacto_* de core.locales, que se conservan como respaldo heredado.';
 
 -- ============================================================================
--- 2. Registro de la migración
+-- 2. Privilegios de la tabla nueva
+--    Sin esto la API no puede leerla: `avisa_api` hereda de `avisa_app`, al que
+--    se le conceden los mismos privilegios que sobre `core.locales` (arwd).
+--    Idempotente también ante entornos sin el rol `avisa_app`.
+-- ============================================================================
+DO $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'avisa_app') THEN
+        EXECUTE 'GRANT SELECT, INSERT, UPDATE, DELETE ON core.local_responsables TO avisa_app';
+    ELSE
+        RAISE NOTICE 'rol avisa_app ausente: no se otorgaron privilegios sobre core.local_responsables';
+    END IF;
+END $$;
+
+-- ============================================================================
+-- 3. Registro de la migración
 -- ============================================================================
 INSERT INTO core.migracion_log (clave) VALUES ('52_locales_responsables_2026_11_24')
 ON CONFLICT (clave) DO NOTHING;
