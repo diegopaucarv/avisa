@@ -223,10 +223,13 @@ En **cmd.exe**:
 docker run --rm -v "%CD%\backups:/backup" -e PGHOST=TU_HOST.neon.tech -e PGPORT=5432 -e PGDATABASE=avisa -e PGUSER=neondb_owner -e PGPASSWORD=TU_CLAVE -e PGSSLMODE=require postgres:18-alpine pg_dump -Fc --no-owner -f /backup/avisa_neon.dump
 ```
 
-En **Git Bash / WSL** sí sirve el formato multilínea:
+En **Git Bash** de Windows, **WSL** o Linux sí sirve el formato multilínea. En Git
+Bash hay que anular la conversión de rutas de MSYS (`MSYS_NO_PATHCONV=1`), o
+`/backup/avisa_neon.dump` se convierte en `C:/Program Files/Git/backup/...` y el
+volcado falla:
 
 ```bash
-docker run --rm -v "$PWD/backups:/backup" \
+MSYS_NO_PATHCONV=1 docker run --rm -v "$PWD/backups:/backup" \
   -e PGHOST=TU_HOST.neon.tech -e PGPORT=5432 \
   -e PGDATABASE=avisa -e PGUSER=neondb_owner -e PGPASSWORD=TU_CLAVE \
   -e PGSSLMODE=require postgres:18-alpine \
@@ -250,13 +253,14 @@ docker run --rm -v "${PWD}\backups:/backup" postgres:18-alpine pg_restore -l /ba
 
 ### 4.5 · Problemas típicos
 
-| Síntoma                                          | Causa                                                    | Arreglo                                                   |
-| ------------------------------------------------ | -------------------------------------------------------- | --------------------------------------------------------- |
-| `cannot connect to the Docker daemon`            | Docker Desktop no está corriendo                         | abrirlo y esperar a que arranque                          |
-| `server version mismatch`                        | `pg_dump` de versión menor que el servidor (Neon es 18)  | usar la imagen `postgres:18-alpine`                       |
-| `could not translate host name`                  | se usó el host del pooler o el endpoint es el equivocado | quitar `-pooler` del nombre                               |
-| error de certificado con `PGSSLMODE=verify-full` | la imagen alpine no trae el CA de Neon                   | usar `PGSSLMODE=require`                                  |
-| `permission denied` al escribir en `/backup`     | carpeta mal montada en Windows                           | usar `${PWD}\backups` (PowerShell) o `%CD%\backups` (cmd) |
+| Síntoma                                                        | Causa                                                    | Arreglo                                                   |
+| -------------------------------------------------------------- | -------------------------------------------------------- | --------------------------------------------------------- |
+| `cannot connect to the Docker daemon`                          | Docker Desktop no está corriendo                         | abrirlo y esperar a que arranque                          |
+| `server version mismatch`                                      | `pg_dump` de versión menor que el servidor (Neon es 18)  | usar la imagen `postgres:18-alpine`                       |
+| `could not translate host name`                                | se usó el host del pooler o el endpoint es el equivocado | quitar `-pooler` del nombre                               |
+| error de certificado con `PGSSLMODE=verify-full`               | la imagen alpine no trae el CA de Neon                   | usar `PGSSLMODE=require`                                  |
+| `could not open output file "C:/Program Files/Git/backup/..."` | Git Bash reescribe las rutas del contenedor              | anteponer `MSYS_NO_PATHCONV=1` al `docker run`            |
+| `permission denied` al escribir en `/backup`                   | carpeta mal montada en Windows                           | usar `${PWD}\backups` (PowerShell) o `%CD%\backups` (cmd) |
 
 Procedimiento largo, restauración y errores esperados: `docs/neon/README.md`.
 
