@@ -1,7 +1,0 @@
-id,codigo,es_terminal
-1,Registrado,f
-3,Paralizado,f
-4,Cumplido,t
-5,Desestimado,t
-2,En ejecución,f
-6,No cumplido,f

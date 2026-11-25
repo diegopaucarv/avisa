@@ -11,14 +11,15 @@ discrepan, manda el código.
 
 ## Estado del avance (corte 2026-11-24)
 
-| Pieza                 | Estado                                                                                                                      |
-| --------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| Modelo de datos v10   | 266 tablas lógicas, 3 334 columnas físicas, 2 161 columnas comentadas, 561 políticas RLS                                    |
-| Carga del legado      | 35 casos, 83 alertas, 33 usuarios y 87 tablas de `legacy` cargadas y verificadas                                            |
-| API actual            | 30 rutas Next.js en `app/api/**` (`/api/auth/**` y `/api/v1/**`)                                                            |
-| Consola Angular       | 33 rutas con componente, 18 enlaces visibles en 8 grupos; paridad de lectura con los mockups                                |
-| Destino de la entrega | SQL Server + API .NET + Angular en un servidor de PRODUCE; la migración la ejecuta el equipo entrante                       |
-| Artefactos SQL Server | `docs/sql_server/` (esquema sin FK, claves ajenas, informe) y `migration/mssql/` (alcance, rol, tipos, mapa SSMA, chequeos) |
+| Pieza                 | Estado                                                                                                                                          |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| Modelo de datos v10   | 266 tablas lógicas, 3 334 columnas físicas, 2 161 columnas comentadas, 561 políticas RLS                                                        |
+| Carga del legado      | 35 casos, 83 alertas, 33 usuarios y 87 tablas de `legacy` cargadas y verificadas                                                                |
+| API actual            | 30 rutas Next.js en `app/api/**` (`/api/auth/**` y `/api/v1/**`)                                                                                |
+| Consola Angular       | 33 rutas con componente, 18 enlaces visibles en 8 grupos; paridad de lectura con los mockups                                                    |
+| Destino de la entrega | SQL Server + API .NET + Angular en un servidor de PRODUCE; la migración la ejecuta el equipo entrante                                           |
+| Artefactos SQL Server | `docs/sql_server/` (esquema sin FK, claves ajenas, informe) y `migration/mssql/` (alcance, rol, tipos, mapa SSMA, chequeos)                     |
+| Limpieza del árbol    | 70 archivos retirados el 2026-11-24: `docs/_archivo/`, dos instantáneas de `migration/backup_*`, un volcado del 19-11 y 25 sondas de `scripts/` |
 
 Lo que **falta**, pantalla por pantalla, está en
 [`docs/07_frontend/frontend.md`](docs/07_frontend/frontend.md); el detalle
@@ -319,7 +320,11 @@ Estas cuatro reglas no se negocian en la reescritura:
 4. **Los datos personales no salen del entorno.** El volcado y las claves no
    entran al repositorio ni se envían por correo. La base contiene datos
    personales protegidos por la **Ley 29733**: el acceso se limita a quien lo
-   necesite para la migración.
+   necesite para la migración. El árbol de trabajo ya no contiene volcados —el
+   del 19-11-2026 se retiró el 24-11—, pero **el historial de git todavía
+   conserva ese archivo**: un clon completo lo trae. Si eso importa para el
+   cumplimiento, hay que purgarlo con `git filter-repo` antes de abrir el
+   repositorio a más gente.
 
 ---
 
