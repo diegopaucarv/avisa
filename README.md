@@ -169,6 +169,12 @@ El objetivo es sacar un **volcado completo** de la base compartida (`avisa`, en
 Neon) para poder recrearla en SQL Server. Se hace con `pg_dump` dentro de un
 contenedor, sin instalar PostgreSQL en la máquina.
 
+> **Si ya recibiste el paquete de entrega, no hace falta repetir esto.** El ZIP
+> incluye `avisa_neon.dump` (volcado completo en formato `custom`) y
+> `avisa_neon_schema.sql` (solo DDL, sin filas). Esta sección sirve para
+> regenerarlos o para comprobar que lo recibido está íntegro: los dos números de
+> abajo (§4.4) son la referencia.
+
 ### 4.0 · Instalar Docker (una vez)
 
 1. Descargar **Docker Desktop** desde <https://www.docker.com/products/docker-desktop>
