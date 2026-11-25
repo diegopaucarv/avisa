@@ -4,7 +4,7 @@
 -- Fecha: 2026-11-24
 --
 -- POR QUÉ EXISTE
---   La pantalla «Gobierno y sugerencias» conduce la mesa de trabajo con las
+--   La pantalla «Archivo de sugerencias» conduce la mesa de trabajo con las
 --   sugerencias y recomendaciones de intervención, por caso o por territorio:
 --   qué se sugiere, a quién, con qué prioridad, en qué estado va, quién la
 --   atiende y con qué sustento. Hasta hoy no había dónde guardarlas.

@@ -14,33 +14,30 @@ pantalla por pantalla, con lo que falta, está en
 
 ## Barra lateral
 
-Ocho grupos y 23 enlaces, en el orden del arreglo:
+Ocho grupos y 18 enlaces, en el orden del arreglo:
 
-| Grupo                | Etiqueta                 | Ruta                         | Condición             |
-| -------------------- | ------------------------ | ---------------------------- | --------------------- |
-| PANORAMA TERRITORIAL | Panorama territorial     | `/mapa`                      | —                     |
-| PANORAMA TERRITORIAL | Dashboard analítico      | `/dashboard`                 | —                     |
-| PREVENCIÓN           | Casos                    | `/casos`                     | —                     |
-| PREVENCIÓN           | Alertas tempranas        | `/alertas`                   | —                     |
-| PREVENCIÓN           | Bandeja RED-RADAR        | `/red-radar`                 | —                     |
-| PREVENCIÓN           | Matriz de conflictividad | `/matriz-conflictividad`     | —                     |
-| PREVENCIÓN           | Clima social             | `/clima-social`              | —                     |
-| INTERVENCIÓN         | Reuniones                | `/reuniones`                 | —                     |
-| INTERVENCIÓN         | Resultados               | `/resultados`                | —                     |
-| SEGUIMIENTO          | Compromisos              | `/compromisos`               | —                     |
-| GESTIÓN DE IYC       | Reporte de actividad     | `/reportes`                  | —                     |
-| GESTIÓN DE IYC       | Documentos               | `/documentos`                | —                     |
-| GESTIÓN DE IYC       | Gobierno y sugerencias   | `/gobierno-sugerencias`      | —                     |
-| GESTIÓN DE IYC       | Exportaciones            | `/exportaciones`             | —                     |
-| DIRECTORIOS          | Actores                  | `/directorio/personas`       | —                     |
-| DIRECTORIOS          | Organizaciones           | `/directorio/organizaciones` | —                     |
-| DIRECTORIOS          | Autoridades y agentes    | `/directorio/autoridades`    | —                     |
-| DIRECTORIOS          | Auditorios               | `/directorio/locales`        | —                     |
-| MI ESPACIO           | Resumen operativo        | `/resumen`                   | —                     |
-| MI ESPACIO           | Bandeja de trabajo       | `/bandeja`                   | —                     |
-| MI ESPACIO           | Archivo                  | `/archivo`                   | `soloSiPuedeEliminar` |
-| ADMINISTRACIÓN       | Administración           | `/administracion`            | `soloSiEsAdmin`       |
-| ADMINISTRACIÓN       | Consola ETL              | `/administracion/etl`        | `soloSiEsAdmin`       |
+| Grupo                | Etiqueta               | Ruta                         | Condición             |
+| -------------------- | ---------------------- | ---------------------------- | --------------------- |
+| PANORAMA TERRITORIAL | Panorama territorial   | `/mapa`                      | —                     |
+| PREVENCIÓN           | Casos                  | `/casos`                     | —                     |
+| PREVENCIÓN           | Alertas tempranas      | `/alertas`                   | —                     |
+| PREVENCIÓN           | Clima social           | `/clima-social`              | —                     |
+| INTERVENCIÓN         | Productos del diálogo  | `/resultados`                | —                     |
+| SEGUIMIENTO          | Compromisos            | `/compromisos`               | —                     |
+| GESTIÓN DE IYC       | Documentos             | `/documentos`                | —                     |
+| GESTIÓN DE IYC       | Archivo de sugerencias | `/gobierno-sugerencias`      | —                     |
+| GESTIÓN DE IYC       | Plantillas             | `/exportaciones`             | —                     |
+| DIRECTORIOS          | Actores                | `/directorio/personas`       | —                     |
+| DIRECTORIOS          | Organizaciones         | `/directorio/organizaciones` | —                     |
+| DIRECTORIOS          | Autoridades y agentes  | `/directorio/autoridades`    | —                     |
+| DIRECTORIOS          | Auditorios             | `/directorio/locales`        | —                     |
+| MI ESPACIO           | Resumen operativo      | `/resumen`                   | —                     |
+| MI ESPACIO           | Bandeja de trabajo     | `/bandeja`                   | —                     |
+| MI ESPACIO           | Archivo                | `/archivo`                   | `soloSiPuedeEliminar` |
+| ADMINISTRACIÓN       | Administración         | `/administracion`            | `soloSiEsAdmin`       |
+| ADMINISTRACIÓN       | Consola ETL            | `/administracion/etl`        | `soloSiEsAdmin`       |
+
+**Retiradas del menú (2026-11-24).** Cinco entradas siguen en `ENLACES_NAV` marcadas `oculto: true` y sus rutas siguen vivas por URL: **Dashboard analítico** (`/dashboard`), **Bandeja RED-RADAR** (`/red-radar`), **Matriz de conflictividad** (`/matriz-conflictividad`), **Reuniones** (`/reuniones`) y **Reporte de actividad** (`/reportes`). No se borraron componentes ni rutas: sólo dejaron de dibujarse en la barra.
 
 - **Archivo** sólo se muestra a los roles con capacidad de eliminar. Reúne en
   una sola vista los registros anulados de casos, alertas, demandas, documentos
@@ -57,21 +54,24 @@ Ocho grupos y 23 enlaces, en el orden del arreglo:
 
 - **Panorama territorial** es la puerta de entrada geográfica. El panorama abre
   el listado de casos ya filtrado por región; no duplica la gestión del caso.
-  El **Dashboard analítico** vive en el mismo grupo porque es otra lectura del
-  mismo cuerpo de datos (series, distribuciones y comparaciones).
-- **Prevención** reúne el trabajo preventivo: el caso, la alerta temprana, el
-  triaje de señales en RED-RADAR, la matriz de conflictividad (Anexo 15) y la
-  lectura de clima social.
-- **Intervención** reúne la reunión de diálogo y sus productos (actas, ayudas
-  memoria, relatorías) y los resultados.
+  El **Dashboard analítico** sigue en el mismo grupo, oculto de la barra, porque
+  es otra lectura del mismo cuerpo de datos (series, distribuciones y
+  comparaciones).
+- **Prevención** reúne el trabajo preventivo: el caso y la alerta temprana. El
+  triaje de señales de **RED-RADAR** y la **matriz de conflictividad** (Anexo 15)
+  siguen en el grupo, ocultos de la barra; la lectura de clima social se mantiene
+  visible.
+- **Intervención** conserva los productos del diálogo (actas, ayudas memoria,
+  relatorías) y los resultados. La reunión de diálogo sigue existiendo en
+  `/reuniones`, oculta de la barra.
 - **Seguimiento** es el ciclo de los compromisos y sus hitos. Aloja además la
   matriz del equipo (demandas–intervenciones) y su importación desde Excel.
 - **Gestión de IyC** agrupa la producción documental y los reportes: el árbol de
   documentos es además la vista central del RAG e incluye, junto a los
   documentos del expediente, las ramas **Normativas** (`core.normativas`) y
   **Otros documentos** (`core.otros_documentos`). Aquí viven también **Gobierno
-  y sugerencias** (propuestas y su triaje) y **Exportaciones** (Anexos 14 y 15,
-  informes y mensajería de clima social).
+  y sugerencias** (propuestas y su triaje) y **Plantillas**
+  (`/exportaciones`: Anexos 14 y 15, informes y mensajería de clima social).
 - **Directorios** expone cuatro vistas: personas, organizaciones, autoridades y
   agentes, y auditorios.
 - **Mi espacio** son las vistas de trabajo personal y el archivo.
@@ -104,6 +104,11 @@ listadas aquí tienen componente salvo las que se marcan como redirección.
 | `/direccion`                | Tablero de dirección con desglose regional.                                                                                     |
 | `/busqueda`                 | Búsqueda global.                                                                                                                |
 | `/notificaciones`           | Bandeja de notificaciones.                                                                                                      |
+| `/dashboard`                | **Oculta de la barra (2026-11-24).** Dashboard analítico.                                                                       |
+| `/red-radar`                | **Oculta de la barra (2026-11-24).** Bandeja RED-RADAR.                                                                         |
+| `/matriz-conflictividad`    | **Oculta de la barra (2026-11-24).** Matriz de conflictividad (Anexo 15).                                                       |
+| `/reuniones`                | **Oculta de la barra (2026-11-24).** Compositor de mensajes de la reunión.                                                      |
+| `/reportes`                 | **Oculta de la barra (2026-11-24).** Reporte de actividad (Anexo 17).                                                           |
 | `/ayuda`                    | Ayuda y criterios.                                                                                                              |
 | `/preferencias`             | Preferencias de la cuenta.                                                                                                      |
 | `/papelera`                 | **Redirección** a `/archivo`.                                                                                                   |
@@ -118,6 +123,8 @@ decisiones explícitas:
   «Auditorios» (`ENLACES_NAV`) y la ruta sigue siendo `/directorio/locales`;
   el sustantivo interno de la vista es «local». Es una inconsistencia declarada
   y pendiente de unificar.
+- **Archivo de sugerencias** es el rótulo literal de `ENLACES_NAV` para
+  `/gobierno-sugerencias`; la ruta conserva el prefijo histórico `gobierno-`.
 - **Organizaciones** en lugar de «Instituciones»: el directorio habla de
   organizaciones; la ruta heredada `/directorio/instituciones` redirige a
   `/directorio/organizaciones`.

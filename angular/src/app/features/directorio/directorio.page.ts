@@ -123,7 +123,7 @@ export class DirectorioPage {
       descripcion: 'Organizaciones sociales, gremiales y entidades públicas del territorio.',
     },
     {
-      etiqueta: 'Locales',
+      etiqueta: 'Auditorios',
       ruta: '/directorio/locales',
       icono: 'mapa',
       descripcion: 'Sedes de reunión por región, con aforo y contacto del local.',

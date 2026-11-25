@@ -6,7 +6,7 @@
 > **Nota de alcance.** Este documento cubre sólo los **ocho mockups
 > consolidados** y las pantallas que ya existían al 2026-11-23. Las ocho vistas
 > añadidas después —Dashboard analítico, Bandeja RED-RADAR, Matriz de
-> conflictividad, Gobierno y sugerencias, Exportaciones, Administración, Consola
+> conflictividad, Archivo de sugerencias, Exportaciones, Administración, Consola
 > ETL y Autoridades y agentes— y el estado real pantalla por pantalla viven en
 > `docs/07_frontend/frontend.md`. El catálogo de mockups tiene 18 artboards
 > canónicos más 17 variantes heredadas (`docs/07_frontend/mockups/index.html`);

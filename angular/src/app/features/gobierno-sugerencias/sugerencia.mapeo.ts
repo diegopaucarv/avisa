@@ -1,7 +1,7 @@
 import { booleano, esRegistro, numero, texto } from '../../dominio/mapeo';
 
 /**
- * Dominio de la pantalla «Gobierno y sugerencias».
+ * Dominio de la pantalla «Archivo de sugerencias».
  *
  * El backend entrega camelCase y fechas ISO; aquí se normaliza todo a un tipo
  * estable y tolerante (`aSugerencia` acepta respuestas parciales sin romper la

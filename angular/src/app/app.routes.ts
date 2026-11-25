@@ -127,7 +127,7 @@ export const routes: Routes = [
       },
       {
         path: 'gobierno-sugerencias',
-        data: { titulo: 'Gobierno y sugerencias' },
+        data: { titulo: 'Archivo de sugerencias' },
         loadComponent: () =>
           import('./features/gobierno-sugerencias/gobierno-sugerencias.page').then(
             (m) => m.GobiernoSugerenciasPage,

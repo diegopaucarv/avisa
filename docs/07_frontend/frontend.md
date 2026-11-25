@@ -44,37 +44,33 @@ rellena una celda que la base no pueda sostener.
 
 ## Mapa del sitio
 
-La barra lateral se genera de `ENLACES_NAV` en `layouts/shell/shell.component.ts`.
-Hoy hay **33 rutas con componente** (32 hijas del shell más `/acceso`) y dos
-redirecciones de compatibilidad (`/papelera` → `/archivo`,
+La barra lateral se genera de `ENLACES_NAV` en
+`layouts/shell/shell.component.ts`. Hoy dibuja **18 enlaces en ocho grupos**;
+las rutas siguen siendo **33 con componente** (32 hijas del shell más `/acceso`)
+y hay dos redirecciones de compatibilidad (`/papelera` → `/archivo`,
 `/directorio/instituciones` → `/directorio/organizaciones`).
 
 ```
 PANORAMA TERRITORIAL
 /mapa ······················ Panorama territorial   ← pantalla de entrada
-/dashboard ················· Dashboard analítico
 
 PREVENCIÓN
 /casos ····················· Casos
   /casos/sin-caso ·········· Demandas sin caso          (fuera del menú)
   /casos/:codigo ··········· Ficha del caso             (fuera del menú)
 /alertas ··················· Alertas tempranas
-/red-radar ················· Bandeja RED-RADAR
-/matriz-conflictividad ····· Matriz de conflictividad
 /clima-social ·············· Clima social
 
 INTERVENCIÓN
-/reuniones ················· Reuniones
-/resultados ················ Resultados
+/resultados ················ Productos del diálogo
 
 SEGUIMIENTO
 /compromisos ··············· Compromisos
 
 GESTIÓN DE IYC
-/reportes ·················· Reporte de actividad
 /documentos ················ Documentos
-/gobierno-sugerencias ······ Gobierno y sugerencias
-/exportaciones ············· Exportaciones
+/gobierno-sugerencias ······ Archivo de sugerencias
+/exportaciones ············· Plantillas
 
 DIRECTORIOS
 /directorio/personas ······· Actores (mismo componente que /directorio/actores)
@@ -100,13 +96,22 @@ FUERA DEL MENÚ
 /ayuda ····················· Ayuda y criterios
 /preferencias ·············· Preferencias
 
+OCULTAS DE LA BARRA (ruta viva, sin enlace)
+/dashboard ················· Dashboard analítico
+/red-radar ················· Bandeja RED-RADAR
+/matriz-conflictividad ····· Matriz de conflictividad
+/reuniones ················· Reuniones
+/reportes ·················· Reporte de actividad
+
 ACCESO
 /acceso ···················· Inicio de sesión
 ```
 
 Administración, Consola ETL y Archivo se ocultan sin la capacidad correspondiente
-(`soloSiEsAdmin` y `soloSiPuedeEliminar`). El shell —cabecera, menú lateral y el
-botón «Registrar ▾»— no es una ruta y tiene su propio apartado al final.
+(`soloSiEsAdmin` y `soloSiPuedeEliminar`). Los cinco enlaces de «Ocultas de la
+barra» llevan `oculto: true` desde el 2026-11-24: ni se borró su componente ni
+su ruta, sólo dejaron de dibujarse. El shell —cabecera, menú lateral y el botón
+«Registrar ▾»— no es una ruta y tiene su propio apartado al final.
 
 ---
 
@@ -114,31 +119,31 @@ botón «Registrar ▾»— no es una ruta y tiene su propio apartado al final.
 
 Sólo las pantallas con algo pendiente. Lo más importante va primero.
 
-| Pantalla               | Pendientes | Lo más importante                                                          |
-| ---------------------- | ---------: | -------------------------------------------------------------------------- |
-| Ficha del caso         |          9 | Riesgo recalculable, contacto de actores y pestañas de reuniones/productos |
-| Transversal (todas)    |          9 | Recorte por región en servidor, rango de fechas compartido y auditoría     |
-| Panorama territorial   |          5 | Agrupar puntos, leyenda y tasa regional                                    |
-| Perfil territorial     |          6 | Catálogo de artes de pesca; no tiene ruta todavía                          |
-| ETL de tres pestañas   |          6 | Ejecución real, fuentes e historial                                        |
-| Casos                  |          3 | Vincular duplicados y exportación XLSX de la matriz                        |
-| Compromisos            |          3 | Recordatorios, nudos propios y aviso sin vencimiento                       |
-| Documentos             |          3 | Validación por fragmento, versiones y lista blanca por fuente              |
-| Reuniones              |          2 | Registro real de reuniones y banderas                                      |
-| Alertas tempranas      |          2 | Motivo de descarte y envío real por WhatsApp                               |
-| Resumen operativo      |          2 | Panel de operación OAIPCS y sincronización global                          |
-| Bandeja de trabajo     |          2 | Mapa y resumen de casos; indicador de completitud                          |
-| Clima social           |          1 | Región y carga desde la pantalla                                           |
-| Auditorios             |          1 | Editar el distrito desde la pantalla                                       |
-| Dashboard              |          1 | Aging / antigüedad de los casos                                            |
-| RED-RADAR              |          1 | Conector de señales y «convertir en alerta»                                |
-| Autoridades            |          1 | Universo fuera de PRODUCE y agenda                                         |
-| Gobierno y sugerencias |          1 | Registro automático en `agent.run_log` / `lessons_learned`                 |
-| Envíos y auditoría     |          1 | Vista de envíos con acuse y auditoría consultable (sin ruta)               |
-| Acceso                 |          1 | Segundo factor                                                             |
-| Búsqueda               |          1 | Fichas propias de alertas, compromisos, documentos y actores               |
-| Preferencias           |          1 | Tamaño de página efectivo y ámbito/avisos en servidor                      |
-| Shell                  |          1 | Registrar sin cambiar de pantalla                                          |
+| Pantalla                | Pendientes | Lo más importante                                                          |
+| ----------------------- | ---------: | -------------------------------------------------------------------------- |
+| Ficha del caso          |          9 | Riesgo recalculable, contacto de actores y pestañas de reuniones/productos |
+| Transversal (todas)     |          9 | Recorte por región en servidor, rango de fechas compartido y auditoría     |
+| Panorama territorial    |          5 | Agrupar puntos, leyenda y tasa regional                                    |
+| Perfil territorial      |          6 | Catálogo de artes de pesca; no tiene ruta todavía                          |
+| ETL de tres pestañas    |          6 | Ejecución real, fuentes e historial                                        |
+| Casos                   |          3 | Vincular duplicados y exportación XLSX de la matriz                        |
+| Compromisos             |          3 | Recordatorios, nudos propios y aviso sin vencimiento                       |
+| Documentos              |          3 | Validación por fragmento, versiones y lista blanca por fuente              |
+| Reuniones               |          2 | Registro real de reuniones y banderas                                      |
+| Alertas tempranas       |          2 | Motivo de descarte y envío real por WhatsApp                               |
+| Resumen operativo       |          2 | Panel de operación OAIPCS y sincronización global                          |
+| Bandeja de trabajo      |          2 | Mapa y resumen de casos; indicador de completitud                          |
+| Clima social            |          1 | Región y carga desde la pantalla                                           |
+| Auditorios              |          1 | Editar el distrito desde la pantalla                                       |
+| Dashboard               |          1 | Aging / antigüedad de los casos                                            |
+| RED-RADAR               |          1 | Conector de señales y «convertir en alerta»                                |
+| Autoridades             |          1 | Universo fuera de PRODUCE y agenda                                         |
+| Archivo de sugerencias |          1 | Registro automático en `agent.run_log` / `lessons_learned`                 |
+| Envíos y auditoría      |          1 | Vista de envíos con acuse y auditoría consultable (sin ruta)               |
+| Acceso                  |          1 | Segundo factor                                                             |
+| Búsqueda                |          1 | Fichas propias de alertas, compromisos, documentos y actores               |
+| Preferencias            |          1 | Tamaño de página efectivo y ámbito/avisos en servidor                      |
+| Shell                   |          1 | Registrar sin cambiar de pantalla                                          |
 
 **Sin pendientes de interfaz:** `/casos/sin-caso`, `/reportes`, `/archivo`,
 `/directorio`, `/directorio/actores`, `/directorio/organizaciones`,
@@ -543,7 +548,7 @@ No confundir con la **matriz del equipo** (demandas–intervenciones por caso), 
 
 ---
 
-## Gobierno y sugerencias · `/gobierno-sugerencias`
+## Archivo de sugerencias · `/gobierno-sugerencias`
 
 **Mockup:** `gobierno-sugerencias.html`.
 **Real y con escritura:** KPIs de decisiones (tasa de aceptación y tiempo medio), bandeja de
@@ -692,7 +697,7 @@ permisos y en la seguridad por fila.
 
 Piezas acordadas que todavía no son pantalla. Las demás se construyeron: Dashboard
 (`/dashboard`), RED-RADAR (`/red-radar`), Matriz de conflictividad
-(`/matriz-conflictividad`), Gobierno y sugerencias (`/gobierno-sugerencias`), Exportaciones
+(`/matriz-conflictividad`), Archivo de sugerencias (`/gobierno-sugerencias`), Exportaciones
 (`/exportaciones`), Administración (`/administracion`), Consola ETL (`/administracion/etl`)
 y Autoridades (`/directorio/autoridades`).
 

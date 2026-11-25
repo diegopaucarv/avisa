@@ -32,6 +32,8 @@ type EnlaceNav = {
   soloSiPuedeEliminar?: boolean;
   /** Sólo se dibuja para el rol `administrador`. */
   soloSiEsAdmin?: boolean;
+  /** Retirada del menú: la ruta sigue viva y se alcanza por URL. */
+  oculto?: boolean;
 };
 
 /**
@@ -56,6 +58,7 @@ const ENLACES_NAV: readonly EnlaceNav[] = [
     etiqueta: 'Dashboard analítico',
     ruta: '/dashboard',
     icono: 'analisis',
+    oculto: true,
   },
   { grupo: 'PREVENCIÓN', etiqueta: 'Casos', ruta: '/casos', icono: 'casos' },
   {
@@ -69,12 +72,14 @@ const ENLACES_NAV: readonly EnlaceNav[] = [
     etiqueta: 'Bandeja RED-RADAR',
     ruta: '/red-radar',
     icono: 'alertas',
+    oculto: true,
   },
   {
     grupo: 'PREVENCIÓN',
     etiqueta: 'Matriz de conflictividad',
     ruta: '/matriz-conflictividad',
     icono: 'casos',
+    oculto: true,
   },
   {
     grupo: 'PREVENCIÓN',
@@ -87,12 +92,20 @@ const ENLACES_NAV: readonly EnlaceNav[] = [
     etiqueta: 'Reuniones',
     ruta: '/reuniones',
     icono: 'reloj',
+    oculto: true,
   },
   {
     grupo: 'INTERVENCIÓN',
-    etiqueta: 'Resultados',
+    etiqueta: 'Productos del diálogo',
     ruta: '/resultados',
     icono: 'check',
+  },
+  {
+    grupo: 'INTERVENCIÓN',
+    etiqueta: 'Reporte de actividad',
+    ruta: '/reportes',
+    icono: 'actividad',
+    oculto: true,
   },
   {
     grupo: 'SEGUIMIENTO',
@@ -102,25 +115,19 @@ const ENLACES_NAV: readonly EnlaceNav[] = [
   },
   {
     grupo: 'GESTIÓN DE IYC',
-    etiqueta: 'Reporte de actividad',
-    ruta: '/reportes',
-    icono: 'actividad',
-  },
-  {
-    grupo: 'GESTIÓN DE IYC',
     etiqueta: 'Documentos',
     ruta: '/documentos',
     icono: 'documentos',
   },
   {
     grupo: 'GESTIÓN DE IYC',
-    etiqueta: 'Gobierno y sugerencias',
+    etiqueta: 'Archivo de sugerencias',
     ruta: '/gobierno-sugerencias',
     icono: 'analisis',
   },
   {
     grupo: 'GESTIÓN DE IYC',
-    etiqueta: 'Exportaciones',
+    etiqueta: 'Plantillas',
     ruta: '/exportaciones',
     icono: 'documentos',
   },
@@ -610,6 +617,7 @@ export class ShellComponent {
   readonly enlacesVisibles = computed(() =>
     ENLACES_NAV.filter(
       (enlace) =>
+        !enlace.oculto &&
         (!enlace.soloSiPuedeEliminar || this.capacidades.puedeEliminar()) &&
         (!enlace.soloSiEsAdmin || this.capacidades.esAdmin()),
     ),

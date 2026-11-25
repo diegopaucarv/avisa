@@ -381,7 +381,7 @@ Una fila por caso abierto con las diecisiete columnas del mockup más el resumen
 
 No hay tabla de señales ni conector RED-RADAR: la cola se alimenta de `core.alertas_tempranas` vigentes con su estado de triaje en `core.alerta_triaje` (`pendiente` si aún no hay fila). `estado` ∈ `pendiente | en_triage | confirmada | descartada | duplicada`; `conteos` se calcula sin el filtro de estado para los chips; `fuente.senalesRecibidas` es `null` porque la fuente no existe. En el `PATCH`, `motivo` es obligatorio para `descartada` y `duplicada`, y `duplicadaDeCodigo` inexistente responde `422` (`app/api/v1/red-radar/route.ts:9-24`, `red-radar/[id]/triaje/route.ts:22-34`).
 
-### 4.17 · Gobierno y sugerencias
+### 4.17 · Archivo de sugerencias
 
 | Método  | Ruta                       | Query / cuerpo                                                                              |
 | ------- | -------------------------- | ------------------------------------------------------------------------------------------- |
