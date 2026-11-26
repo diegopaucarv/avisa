@@ -133,6 +133,8 @@ type CompromisoCasoEnFicha = Omit<CompromisoCasoConCaracteristicas, 'hitos'> &
 type CasoConDescripcionRiesgo = DetalleCasoConCierre['caso'] & {
   descripcionRiesgo: string | null;
   sectorista: string | null;
+  /** UUID del sectorista asignado (`punto_focal_usuario_id`); aditivo. */
+  sectoristaUsuarioId: string | null;
 };
 
 /** Temática declarada de una demanda (`A4`). `null` = sin temática. */
@@ -382,26 +384,16 @@ function aTematicasDemanda(bruto: unknown): readonly OpcionTematicaDemanda[] {
  */
 const CAMPOS_OCULTOS: ReadonlySet<CampoEditable> = new Set<CampoEditable>([
   'titulo',
+  'resumenEjecutivo',
+  'riesgo',
+  'nivelConflicto',
   'naturaleza',
   'ciclo',
-  'tematica',
-  'subsector',
   'pctAvance',
   'fechaCierre',
   'prioridad',
   'unidadResponsable',
 ]);
-
-/**
- * Columnas que el ajuste del 22 nov pide en la tabla de actores y que el
- * contrato de `GET /v1/cases/{codigo}` todavía no entrega. Se declaran
- * opcionales para mostrarlas en cuanto la API los exponga, sin tocar el mapeo
- * compartido de `dominio/`.
- */
-type ActorCasoConContacto = ActorCaso & {
-  institucion?: string | null;
-  telefono?: string | null;
-};
 
 /**
  * Esquema de `GET /api/v1/cases/{codigo}` (y del `PATCH`, mismo contrato):
@@ -417,6 +409,7 @@ export function aDetalleCasoConCompromisos(bruto: unknown): DetalleCasoConCompro
   const filaCaso = esRegistro(casoBruto) ? casoBruto : {};
   const descripcionRiesgo = textoDe(filaCaso, 'descripcionRiesgo', 'descripcion_riesgo');
   const sectorista = textoDe(filaCaso, 'sectorista', 'sectoristaNombre');
+  const sectoristaUsuarioId = textoDe(filaCaso, 'sectoristaUsuarioId', 'sectorista_usuario_id');
   const datos = datosHitosCrudos(bruto);
   const tematicas = tematicasDemandasCrudas(bruto);
   const vinculos = vinculosCompromisoDemanda(bruto);
@@ -431,10 +424,33 @@ export function aDetalleCasoConCompromisos(bruto: unknown): DetalleCasoConCompro
   }));
   return {
     ...detalle,
-    caso: { ...detalle.caso, descripcionRiesgo, sectorista },
+    caso: { ...detalle.caso, descripcionRiesgo, sectorista, sectoristaUsuarioId },
     compromisos,
     demandas,
   };
+}
+
+/** Opción del catálogo de sectoristas: su `id` es el UUID del usuario. */
+type OpcionSectorista = { id: string; nombre: string };
+
+/**
+ * Recorta `GET /api/v1/catalogs` al catálogo `sectoristas`, que `aCatalogosEdicion`
+ * no conoce. Si la API no lo entrega, devuelve una lista vacía y el campo queda
+ * en solo lectura sin romper la vista.
+ */
+function aSectoristas(bruto: unknown): readonly OpcionSectorista[] {
+  const registro = esRegistro(bruto) ? bruto : {};
+  const catalogo = registro['catalogs'] ?? registro['catalogos'];
+  const filas = esRegistro(catalogo) ? catalogo['sectoristas'] : undefined;
+  if (!Array.isArray(filas)) return [];
+
+  const opciones: OpcionSectorista[] = [];
+  for (const fila of filas) {
+    const id = textoDe(fila, 'id');
+    const nombre = textoDe(fila, 'nombre', 'etiqueta');
+    if (id && nombre) opciones.push({ id, nombre });
+  }
+  return opciones;
 }
 
 @Component({
@@ -466,9 +482,49 @@ export function aDetalleCasoConCompromisos(bruto: unknown): DetalleCasoConCompro
       font-size: 13.5px;
     }
 
-    .view-actions {
+    /*
+     * Cabecera: etiquetas bajo el título y acciones en una grilla de tres
+     * columnas con botones del mismo ancho (fila 1: Modificar, Archivar, Anular;
+     * fila 2: Exportar, Imprimir). El ancho acotado evita que dos botones
+     * cortos ocupen toda la línea.
+     */
+    .caso-etiquetas {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .etiquetas-linea {
+      display: flex;
       flex-wrap: wrap;
-      justify-content: flex-end;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .caso-acciones {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 6px;
+      width: min(100%, 480px);
+      margin-left: auto;
+      justify-self: end;
+      align-self: start;
+    }
+
+    .caso-acciones > * {
+      width: 100%;
+    }
+
+    .caso-acciones app-exportar-menu {
+      display: block;
+    }
+
+    /* El botón del menú de exportación vive en un componente hijo: se iguala al
+       ancho de la celda para que la grilla se vea uniforme. */
+    :host ::ng-deep .caso-acciones app-exportar-menu .exportar-boton {
+      width: 100%;
+      justify-content: center;
     }
 
     .baja-inline {
@@ -545,12 +601,6 @@ export function aDetalleCasoConCompromisos(bruto: unknown): DetalleCasoConCompro
       color: var(--blue-dark);
       font-size: 12px;
       cursor: pointer;
-    }
-
-    .anular-sep {
-      margin-left: 8px;
-      padding-left: 16px;
-      border-left: 1px solid var(--line);
     }
 
     /* Acceso al tablero de Canva en el riel (item 29). */
@@ -650,19 +700,6 @@ export function aDetalleCasoConCompromisos(bruto: unknown): DetalleCasoConCompro
       margin-top: 4px;
     }
 
-    /* Descripción del riesgo y nivel contiguo, en la misma celda del detalle. */
-    .campo-riesgo dd {
-      text-align: left;
-    }
-
-    .campo-riesgo .campo-valor {
-      white-space: pre-line;
-    }
-
-    .campo-riesgo .status-badge {
-      margin-top: 6px;
-    }
-
     /* Item 37: confirmación de estado en línea, dentro de la cabecera. */
     .archivo-confirmacion {
       margin: 10px 0 0;
@@ -716,6 +753,90 @@ export function aDetalleCasoConCompromisos(bruto: unknown): DetalleCasoConCompro
       display: inline-flex;
       flex-wrap: wrap;
       gap: 6px;
+    }
+
+    /* Contacto del actor: teléfono arriba y correo debajo, cada uno con su
+       botón de copiar. El correo va a 12 px para distinguirlo del teléfono. */
+    .dato-contacto {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      line-height: 1.5;
+    }
+
+    .dato-contacto .correo-contacto {
+      font-size: 12px;
+    }
+
+    .copiar-dato {
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: var(--blue-dark);
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    .copiar-dato:hover,
+    .copiar-dato:focus-visible {
+      color: var(--blue, #1a4f8b);
+    }
+
+    .actor-cargo {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    /* Demanda: hasta tres líneas en la tabla; el texto completo va en el atributo
+       title. */
+    .demanda-texto {
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      white-space: normal;
+    }
+
+    .demandas-acciones {
+      display: inline-flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    /* Confirmación de borrado de demandas, justo bajo la cabecera. */
+    .baja-confirmacion {
+      margin: 8px 0;
+    }
+
+    .demanda-check-col {
+      width: 32px;
+      text-align: center;
+    }
+
+    .demanda-check {
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+    }
+
+    /* Riel de Canva: enlace y lápiz de edición en la misma línea. */
+    .canva-fila {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .canva-editar {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: var(--blue-dark);
+      font-size: 12px;
+      cursor: pointer;
     }
 
     /* Acciones por hito (estado, fecha real y responsable), en el orden de
@@ -784,6 +905,19 @@ export function aDetalleCasoConCompromisos(bruto: unknown): DetalleCasoConCompro
     .timeline-list .timeline-edit {
       grid-column: 1 / -1;
       justify-self: start;
+    }
+
+    /* Acciones y confirmación de una viñeta ocupan el ancho completo de la
+       viñeta para que no se apilen junto a la fecha ni al texto. */
+    .timeline-acciones,
+    .timeline-confirmacion {
+      grid-column: 1 / -1;
+    }
+
+    .timeline-acciones {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
     }
 
     .cronologia-acciones {
@@ -958,9 +1092,8 @@ export class CasoDetallePage {
   private readonly accesoresActores: Record<string, (actor: ActorCaso) => unknown> = {
     actor: (actor) => this.nombreActor(actor),
     institucion: (actor) => this.institucionActor(actor),
-    telefono: (actor) => this.telefonoActor(actor),
-    correo: (actor) => actor.correo,
-    posicionamiento: (actor) => actor.posicionamiento,
+    contacto: (actor) => [this.telefonoActor(actor), actor.correo],
+    tipologia: (actor) => actor.tipo,
   };
   readonly filasActores = computed(() =>
     this.ordenActores.ordenar(this.ficha()?.actores ?? [], this.accesoresActores),
@@ -1203,11 +1336,21 @@ export class CasoDetallePage {
     this.borradorCanva.set((evento.target as HTMLInputElement).value);
   }
 
+  /**
+   * Normaliza el enlace del tablero: si no trae protocolo se antepone
+   * `https://`, de modo que `www.canva.com/…` se guarde como URL absoluta. El
+   * backend aplica la misma normalización en `urlOpcional` antes de validar.
+   */
+  private normalizarEnlaceCanva(valor: string): string {
+    const limpio = valor.trim();
+    return /^[a-z][a-z0-9+.-]*:\/\//i.test(limpio) ? limpio : `https://${limpio}`;
+  }
+
   guardarCanva(evento: Event): void {
     evento.preventDefault();
     const codigo = this.codigo();
-    const url = this.borradorCanva().trim();
-    if (!codigo || !url || this.guardandoCanva()) return;
+    const url = this.normalizarEnlaceCanva(this.borradorCanva());
+    if (!codigo || !this.borradorCanva().trim() || this.guardandoCanva()) return;
 
     this.guardandoCanva.set(true);
     this.errorCanva.set(null);
@@ -1280,6 +1423,25 @@ export class CasoDetallePage {
   readonly guardandoCampo = signal(false);
   readonly errorCampo = signal<string | null>(null);
   readonly avisoCampo = signal<string | null>(null);
+
+  /**
+   * Catálogo de sectoristas para el select del cuadro de datos. `sectoristas`
+   * sale del catálogo aditivo de `/v1/catalogs`; si no llega, la lista queda
+   * vacía y el campo se pinta en solo lectura.
+   */
+  private readonly catalogoSectoristas = consulta<readonly OpcionSectorista[]>({
+    fuente: () => (this.puedeModificar() ? urlApi('/v1/catalogs') : null),
+    esquema: aSectoristas,
+  });
+  readonly sectoristas = computed(() => this.catalogoSectoristas.valor() ?? []);
+
+  readonly editandoSectorista = signal(false);
+  readonly borradorSectorista = signal('');
+  readonly guardandoSectorista = signal(false);
+  readonly errorSectorista = signal<string | null>(null);
+
+  /** UUID del sectorista actual; vacío si el caso no tiene foco asignado. */
+  readonly sectoristaActualId = computed(() => this.caso()?.sectoristaUsuarioId ?? '');
 
   /**
    * Catálogos de los desplegables. Se piden sólo cuando el rol puede escribir:
@@ -1500,6 +1662,66 @@ export class CasoDetallePage {
     });
   }
 
+  /** Abre el editor del sectorista a partir del valor actual del caso. */
+  abrirSectorista(): void {
+    if (!this.puedeModificar() || !this.modoEdicion()) return;
+    const actual = this.sectoristaActualId();
+    // Si el usuario actual no está en el catálogo (p. ej. desactivado), el
+    // select arranca vacío para no ofrecer una opción inexistente.
+    this.borradorSectorista.set(
+      this.sectoristas().some((opcion) => opcion.id === actual) ? actual : '',
+    );
+    this.errorSectorista.set(null);
+    this.editandoSectorista.set(true);
+  }
+
+  alCambiarSectorista(evento: Event): void {
+    this.borradorSectorista.set((evento.target as HTMLSelectElement).value);
+    this.errorSectorista.set(null);
+  }
+
+  cancelarSectorista(): void {
+    if (this.guardandoSectorista()) return;
+    this.editandoSectorista.set(false);
+    this.borradorSectorista.set('');
+    this.errorSectorista.set(null);
+  }
+
+  /**
+   * `PATCH /api/v1/cases/{codigo}` con `sectoristaId`; vaciarlo envía `null` y
+   * desasigna el foco. El backend valida que sea un usuario activo con rol
+   * `sectorista` y responde 422 en caso contrario.
+   */
+  guardarSectorista(): void {
+    const codigo = this.codigo();
+    if (!codigo || !this.puedeModificar() || this.guardandoSectorista()) return;
+    const id = this.borradorSectorista();
+    if (id === (this.sectoristaActualId() || '')) {
+      this.errorSectorista.set('No hay cambios que guardar.');
+      return;
+    }
+
+    this.guardandoSectorista.set(true);
+    this.errorSectorista.set(null);
+    this.http
+      .patch<unknown>(urlApi(`/v1/cases/${encodeURIComponent(codigo)}`), {
+        sectoristaId: id || null,
+      })
+      .subscribe({
+        next: (respuesta) => {
+          this.guardandoSectorista.set(false);
+          this.detalleActualizado.set(aDetalleCasoConCompromisos(respuesta));
+          this.editandoSectorista.set(false);
+          this.borradorSectorista.set('');
+          this.avisoCampo.set('Sectorista actualizado.');
+        },
+        error: (fallo: unknown) => {
+          this.guardandoSectorista.set(false);
+          this.errorSectorista.set(this.mensajeDeErrorCampo(fallo));
+        },
+      });
+  }
+
   /** Abre el aviso de confirmación dentro de la cabecera; nunca `window.confirm`. */
   abrirConfirmacionArchivo(): void {
     const accion = this.accionEstado();
@@ -1643,16 +1865,41 @@ export class CasoDetallePage {
     return formatearFechaCompacta(valor);
   }
 
-  /** Institución del actor; la API aún no la entrega, así que se declara «—». */
+  /**
+   * Organización del actor para la columna «Institución»: la resuelta por la API
+   * o, si el propio actor es una organización, su nombre. Sin dato, «—».
+   */
   institucionActor(actor: ActorCaso): string {
-    const valor = (actor as ActorCasoConContacto).institucion;
-    return valor?.trim() || '—';
+    const organizacion = actor.organizacion?.trim();
+    if (organizacion) return organizacion;
+    if (actor.naturaleza === 'organizacion') return this.nombreActor(actor);
+    return '—';
   }
 
-  /** Teléfono del actor; hoy vive en PII y no viaja en el detalle del caso. */
+  /** Cargo declarado del actor; «—» cuando la API no lo trae. */
+  cargoActor(actor: ActorCaso): string {
+    return actor.cargo?.trim() || '—';
+  }
+
+  /** Teléfono de contacto público del actor; «—» cuando no llega. */
   telefonoActor(actor: ActorCaso): string {
-    const valor = (actor as ActorCasoConContacto).telefono;
-    return valor?.trim() || '—';
+    return actor.telefono?.trim() || '—';
+  }
+
+  /**
+   * Copia un solo dato de contacto de la tabla de actores (teléfono o correo).
+   * Se reutiliza `avisoActores` para no inventar otra región de estado.
+   */
+  async copiarDato(valor: string | null | undefined, etiqueta: string): Promise<void> {
+    this.avisoActores.set(null);
+    const limpio = (valor ?? '').trim();
+    if (!limpio) return;
+    const ok = await copiarAlPortapapeles(limpio);
+    this.avisoActores.set(
+      ok
+        ? `${etiqueta} copiado al portapapeles.`
+        : 'No se pudo copiar. Seleccione el valor y use Ctrl + C.',
+    );
   }
 
   /**
@@ -1730,6 +1977,51 @@ export class CasoDetallePage {
     this.errorEvento.set(null);
   }
 
+  /** Hecho pendiente de confirmación para quitar de la cronología. */
+  readonly hechoAQuitar = signal<string | null>(null);
+  readonly quitandoHecho = signal(false);
+  readonly errorCronologia = signal<string | null>(null);
+
+  pedirQuitarHecho(eventoId: string): void {
+    if (!this.puedeModificar() || !this.modoEdicion()) return;
+    this.errorCronologia.set(null);
+    this.avisoCronologia.set(null);
+    this.hechoAQuitar.set(eventoId);
+  }
+
+  cancelarQuitarHecho(): void {
+    if (this.quitandoHecho()) return;
+    this.hechoAQuitar.set(null);
+    this.errorCronologia.set(null);
+  }
+
+  /**
+   * `DELETE /v1/cases/{codigo}/events/{eventId}`. La API exige un motivo
+   * (`leerMotivo`), por eso se envía en el cuerpo. La baja es lógica y, al
+   * terminar, se recarga la ficha para releer la cronología del servidor.
+   */
+  confirmarQuitarHecho(eventoId: string): void {
+    const codigo = this.codigo();
+    if (!codigo || !this.puedeModificar() || this.quitandoHecho()) return;
+    this.quitandoHecho.set(true);
+    this.errorCronologia.set(null);
+    const url = urlApi(
+      `/v1/cases/${encodeURIComponent(codigo)}/events/${encodeURIComponent(eventoId)}`,
+    );
+    this.http.delete<unknown>(url, { body: { motivo: 'Quitado desde la cronología' } }).subscribe({
+      next: () => {
+        this.quitandoHecho.set(false);
+        this.hechoAQuitar.set(null);
+        this.recargar();
+        this.avisoCronologia.set('Hecho quitado de la cronología.');
+      },
+      error: (fallo: unknown) => {
+        this.quitandoHecho.set(false);
+        this.errorCronologia.set(this.mensajeDeError(fallo));
+      },
+    });
+  }
+
   guardarHecho(cambios: CuerpoEvento): void {
     const codigo = this.codigo();
     if (!codigo) return;
@@ -1772,9 +2064,8 @@ export class CasoDetallePage {
    * Línea de WhatsApp por actor (item 99), con el formato pedido:
    * `- Apellidos, Nombres - Organización - teléfono - correo`.
    *
-   * `core.actores` sólo guarda `nombre_actual` y la API no expone organización
-   * ni teléfono en el actor del caso, así que esos dos huecos se escriben con un
-   * guion: el dato ausente se declara, no se rellena.
+   * La organización y el teléfono ya llegan en el detalle del caso; si algún
+   * actor no los trae, el hueco se declara con un guion en vez de rellenarse.
    */
   private lineaWhatsApp(actor: ActorCaso): string {
     const campos = [
@@ -1793,9 +2084,7 @@ export class CasoDetallePage {
     const texto = actores.map((actor) => this.lineaWhatsApp(actor)).join('\n');
     try {
       await navigator.clipboard.writeText(texto);
-      this.avisoActores.set(
-        `Se copiaron ${actores.length} actores con el formato de WhatsApp. La organización y el teléfono no llegan todavía por la API: se copian como «—».`,
-      );
+      this.avisoActores.set(`Se copiaron ${actores.length} actores con el formato de WhatsApp.`);
     } catch {
       this.avisoActores.set(
         'El navegador no permitió copiar al portapapeles. Use «Exportar CSV» y comparta el archivo.',
@@ -1819,14 +2108,15 @@ export class CasoDetallePage {
     const escapar = (valor: string | null | undefined): string =>
       `"${(valor ?? '').replace(/"/g, '""')}"`;
     const filas = [
-      ['Actor', 'Institución', 'Teléfono', 'Correo', 'Posicionamiento'].map(escapar).join(';'),
+      ['Actor', 'Institución', 'Cargo', 'Teléfono', 'Correo', 'Tipología'].map(escapar).join(';'),
       ...actores.map((actor) =>
         [
           this.nombreActor(actor),
           this.institucionActor(actor),
+          this.cargoActor(actor),
           this.telefonoActor(actor),
           actor.correo,
-          actor.posicionamiento,
+          actor.tipo,
         ]
           .map(escapar)
           .join(';'),
@@ -1995,6 +2285,11 @@ export class CasoDetallePage {
       this.confirmandoArchivo.set(null);
       this.errorCampo.set(null);
       this.errorArchivo.set(null);
+      this.editandoSectorista.set(false);
+      this.borradorSectorista.set('');
+      this.hechoAQuitar.set(null);
+      this.demandasSeleccionadas.set(new Set());
+      this.confirmandoEliminarDemandas.set(false);
     });
 
     // Si el catálogo llega después de abrir un `select`, el borrador se
@@ -2066,6 +2361,116 @@ export class CasoDetallePage {
         this.errorDemanda.set(this.mensajeDeErrorDemanda(fallo));
       },
     });
+  }
+
+  /**
+   * Ids de demandas marcadas en la tabla. Alimentan «Copiar» y «Eliminar
+   * demanda»: con al menos una casilla activa se habilita la eliminación.
+   */
+  readonly demandasSeleccionadas = signal<ReadonlySet<string>>(new Set());
+  readonly confirmandoEliminarDemandas = signal(false);
+  readonly eliminandoDemandas = signal(false);
+
+  /** Ids visibles en la tabla; alimenta el «seleccionar todas» de la cabecera. */
+  readonly idsDemandas = computed<readonly string[]>(() =>
+    this.filasDemandas().map((demanda) => demanda.id),
+  );
+
+  readonly todasDemandasSeleccionadas = computed(() => {
+    const ids = this.idsDemandas();
+    const marcadas = this.demandasSeleccionadas();
+    return ids.length > 0 && ids.every((id) => marcadas.has(id));
+  });
+
+  alternarDemanda(id: string): void {
+    const marcadas = new Set(this.demandasSeleccionadas());
+    if (marcadas.has(id)) marcadas.delete(id);
+    else marcadas.add(id);
+    this.demandasSeleccionadas.set(marcadas);
+    this.confirmandoEliminarDemandas.set(false);
+  }
+
+  alternarTodasDemandas(): void {
+    this.demandasSeleccionadas.set(
+      this.todasDemandasSeleccionadas() ? new Set() : new Set(this.idsDemandas()),
+    );
+    this.confirmandoEliminarDemandas.set(false);
+  }
+
+  /**
+   * Copia las demandas marcadas —o todas si no hay ninguna— con el mismo formato
+   * de una línea por registro que «Copiar» de la cronología: rótulo en negrita
+   * y el texto después, listo para pegar en WhatsApp.
+   */
+  async copiarDemandas(): Promise<void> {
+    const marcadas = this.demandasSeleccionadas();
+    const demandas = this.filasDemandas().filter(
+      (demanda) => marcadas.size === 0 || marcadas.has(demanda.id),
+    );
+    if (demandas.length === 0) return;
+
+    const texto = demandas
+      .map((demanda) => {
+        const estado = demanda.estado || 'Sin estado';
+        const descripcion = demanda.descripcion || demanda.problema || 'Sin descripción';
+        const compromisos = this.compromisosDeDemanda(demanda.id)
+          .map((compromiso) => compromiso.codigo)
+          .join(', ');
+        const sufijo = compromisos ? ` (Compromisos: ${compromisos})` : '';
+        return `*${estado}* - ${descripcion}${sufijo}`;
+      })
+      .join('\n');
+
+    const ok = await copiarAlPortapapeles(texto);
+    this.avisoDemanda.set(
+      ok
+        ? 'Demandas copiadas al portapapeles.'
+        : 'No se pudo copiar. Seleccione el texto y use Ctrl + C.',
+    );
+  }
+
+  pedirEliminarDemandas(): void {
+    if (!this.puedeModificar() || this.demandasSeleccionadas().size === 0) return;
+    this.errorDemanda.set(null);
+    this.avisoDemanda.set(null);
+    this.confirmandoEliminarDemandas.set(true);
+  }
+
+  cancelarEliminarDemandas(): void {
+    if (this.eliminandoDemandas()) return;
+    this.confirmandoEliminarDemandas.set(false);
+  }
+
+  /**
+   * `DELETE /v1/demandas/{id}` por cada demanda marcada. La API exige un motivo
+   * (`leerMotivo`), por eso se envía en el cuerpo; la baja es lógica. Al
+   * terminar se recarga la ficha y se limpia la selección.
+   */
+  async confirmarEliminarDemandas(): Promise<void> {
+    const ids = [...this.demandasSeleccionadas()];
+    if (!this.puedeModificar() || ids.length === 0 || this.eliminandoDemandas()) return;
+
+    this.eliminandoDemandas.set(true);
+    this.errorDemanda.set(null);
+    try {
+      for (const id of ids) {
+        await firstValueFrom(
+          this.http.delete(urlApi(`/v1/demandas/${encodeURIComponent(id)}`), {
+            body: { motivo: 'Eliminada desde la ficha del caso' },
+          }),
+        );
+      }
+      this.eliminandoDemandas.set(false);
+      this.confirmandoEliminarDemandas.set(false);
+      this.demandasSeleccionadas.set(new Set());
+      this.recargar();
+      this.avisoDemanda.set(
+        ids.length === 1 ? 'Demanda eliminada.' : `${ids.length} demandas eliminadas.`,
+      );
+    } catch (fallo: unknown) {
+      this.eliminandoDemandas.set(false);
+      this.errorDemanda.set(this.mensajeDeErrorDemanda(fallo));
+    }
   }
 
   abrirAnulacion(): void {

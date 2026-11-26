@@ -138,6 +138,21 @@ const ORDENES = [
  */
 const ORDEN_INICIAL = 'risk';
 
+/**
+ * Sólo los órdenes que ofrece el desplegable. Un `?orden=` vacío —o un valor
+ * retirado en una URL guardada— cae al inicial en vez de viajar al servidor,
+ * que ante un `sort` desconocido aplica su propio orden por defecto (`recent`).
+ */
+function ordenDe(valor: string | null): string {
+  return ORDENES.some((opcion) => opcion.valor === valor) ? (valor as string) : ORDEN_INICIAL;
+}
+
+/**
+ * Severidad del riesgo para el orden local de la tabla: `0` es lo más alto.
+ * Sin esto `OrdenTabla` compararía texto y «Alto» quedaría después de «Bajo».
+ */
+const PESO_RIESGO: Record<Caso['riesgo'], number> = { Alto: 0, Medio: 1, Bajo: 2 };
+
 /** Clave de `localStorage` que guarda el ámbito predeterminado (item 28). */
 const CLAVE_ALCANCE = 'avisa-alcance';
 
@@ -274,15 +289,6 @@ function aConteos(bruto: unknown): ConteosCasos {
      * La búsqueda comparte fila con cinco filtros: usa la variante estrecha
      * global (search-field--compacta en global.css), no un ancho propio.
      */
-
-    /* Sectorista en la tarjeta: línea propia bajo el resumen, con variables de
-       tema para que el modo noche conserve el contraste. */
-    .case-sectorista {
-      display: block;
-      margin-top: 6px;
-      color: var(--muted);
-      font-size: 12.5px;
-    }
 
     /* Chips de riesgo y «Resueltos»: son tab-bar/tab-button, sin el margen
        vertical que usan las pestañas de sección. */
@@ -623,7 +629,7 @@ export class CasosPage {
             1,
             Number(params.get('tamano') ?? String(TAMANO_PAGINA)) || TAMANO_PAGINA,
           ),
-          orden: params.get('orden') ?? ORDEN_INICIAL,
+          orden: ordenDe(params.get('orden')),
           ver,
         };
       }),
@@ -779,7 +785,7 @@ export class CasosPage {
     sectorista: (caso) => caso.sectorista,
     estado: (caso) => caso.estado,
     prioridad: (caso) => caso.prioridad,
-    riesgo: (caso) => caso.riesgo,
+    riesgo: (caso) => PESO_RIESGO[caso.riesgo],
     etapa: (caso) => caso.etapa,
     inicio: (caso) => caso.inicio,
   };

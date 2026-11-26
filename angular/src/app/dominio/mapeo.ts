@@ -211,6 +211,15 @@ export type ActorCaso = {
   funcion: string | null;
   posicionamiento: string | null;
   correo: string | null;
+  /**
+   * Organización a la que se ancla el actor y su cargo, resueltos por la API del
+   * caso. Aditivo: cuando el contrato no los trae llegan `null` y la ficha cae
+   * a un guion, sin romper las filas ya existentes.
+   */
+  organizacion?: string | null;
+  cargo?: string | null;
+  /** Teléfono de contacto público (no PII); aditivo. */
+  telefono?: string | null;
 };
 
 export type EventoCaso = {
@@ -336,6 +345,9 @@ function aActorCaso(bruto: unknown): ActorCaso {
     funcion: texto(registro, ['funcion', 'función']),
     posicionamiento: texto(registro, ['posicionamiento']),
     correo: texto(registro, ['correo', 'email']),
+    organizacion: texto(registro, ['organizacion']),
+    cargo: texto(registro, ['cargo']),
+    telefono: texto(registro, ['telefono']),
   };
 }
 

@@ -202,6 +202,10 @@ function compararInicio(a: string | null, b: string | null): number {
        Con auto-fit las cinco reparten el ancho sin dejar un hueco. */
     .executive-kpis {
       grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      /* Sin la nota que iba bajo los indicadores, los chips quedan pegados a las
+         tarjetas. Su banda sticky suma 8 px de aire, así que 8 px aquí dejan el
+         ritmo habitual de 16 px del resto de la vista. */
+      margin-bottom: 8px;
     }
 
     @media (max-width: 980px) {
@@ -405,13 +409,6 @@ function compararInicio(a: string | null, b: string | null): number {
       color: var(--muted);
     }
 
-    .tabla-nota {
-      margin: 10px 0 0;
-      color: var(--muted);
-      font-size: 12px;
-      line-height: 1.5;
-    }
-
     .mapa-cabeza {
       flex-wrap: wrap;
     }
@@ -441,6 +438,13 @@ function compararInicio(a: string | null, b: string | null): number {
     .data-table td:first-child.celda-caso {
       width: 28%;
       min-width: 0;
+    }
+
+    /* Riesgo alto, % latente y Total son cifras de columna: se centran para
+       compararlas de un vistazo. La tabla global alinea a la izquierda. */
+    .data-table th.col-num,
+    .data-table td.col-num {
+      text-align: center;
     }
 
     .mapa-rotulo {

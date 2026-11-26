@@ -14,6 +14,7 @@ import {
 import type { Riesgo } from '../../dominio/modelos';
 import { IconoComponent } from '../../shared/ui/icono.component';
 import { salirModal } from '../../shared/ui/modal-salida';
+import { claveRiesgo } from './alerta.mapeo';
 import { copiarAlPortapapeles } from './portapapeles';
 
 /**
@@ -86,15 +87,36 @@ import { copiarAlPortapapeles } from './portapapeles';
       align-items: center;
       gap: 2px 8px;
       margin: 0;
-      color: #4a6b93;
+      color: #5d6d7c;
       font-size: 11.5px;
-      font-weight: 600;
+      font-weight: 400;
     }
 
     .modal-contexto span:not(:first-child)::before {
       content: '·';
       margin-right: 8px;
       color: #b6c2cd;
+    }
+
+    /*
+     * El riesgo conserva el color de la tabla, sin el peso de la negrita del
+     * resto del contexto: mismo lenguaje que la celda de título. La ventana
+     * tiene fondo blanco en ambos temas, así que usa los tonos claros fijos.
+     */
+    .alerta-riesgo {
+      font-weight: 400;
+    }
+
+    .alerta-riesgo.risk-bajo {
+      color: #1f5597;
+    }
+
+    .alerta-riesgo.risk-medio {
+      color: #93621d;
+    }
+
+    .alerta-riesgo.risk-alto {
+      color: #ad4d46;
     }
 
     .modal-body {
@@ -188,6 +210,9 @@ export class AlertaWhatsappComponent {
   readonly etiquetaRiesgo = computed(() =>
     this.riesgo() === 'Alto' ? 'alto' : this.riesgo() === 'Medio' ? 'moderado' : 'bajo',
   );
+
+  /** Clase con el color del nivel, la misma que usa la celda de la tabla. */
+  readonly claseRiesgo = computed(() => `alerta-riesgo risk-${claveRiesgo(this.riesgo())}`);
 
   constructor() {
     afterNextRender(() => this.dialogo()?.nativeElement.focus({ preventScroll: true }));

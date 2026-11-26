@@ -45,7 +45,7 @@ import {
 import { ActorPanelComponent } from './actor-panel.component';
 import { ActorPanelAltaComponent, type NaturalezaAlta } from './actor-panel-alta.component';
 import { ActorPanelFusionComponent } from './actor-panel-fusion.component';
-import { alternarActorLista, quitarActorListaPorIndice } from './lista-temporal';
+import { alternarActorLista, etiquetaItemLista, quitarActorListaPorIndice } from './lista-temporal';
 import { crearCsvPadronAsistencia } from './padron-asistencia';
 import {
   aActorDirectorio,
@@ -126,7 +126,8 @@ const SIN_MEMBRESIAS: MembresiaActor[] = [];
       width: 100%;
       max-width: 1420px;
       margin: 0 auto;
-      padding: 27px 34px 50px;
+      /* Espacio inferior extra: el botón flotante de la lista temporal vive ahí. */
+      padding: 27px 34px 96px;
       box-sizing: border-box;
     }
 
@@ -226,15 +227,17 @@ const SIN_MEMBRESIAS: MembresiaActor[] = [];
       white-space: normal;
     }
 
+    /* Organización / Institución a la mitad del ancho anterior. */
     .actor-organizacion {
-      max-width: 230px;
+      max-width: 115px;
       white-space: normal;
     }
 
+    /* El cargo va debajo de la organización, más pequeño que el nombre. */
     .actor-organizacion small {
       display: block;
       color: inherit;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 400;
     }
 
@@ -246,11 +249,10 @@ const SIN_MEMBRESIAS: MembresiaActor[] = [];
       list-style: none;
     }
 
+    /* El cargo va siempre debajo del nombre de la organización, no al lado. */
     .actor-organizaciones li {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: baseline;
-      gap: 4px;
+      display: grid;
+      gap: 1px;
     }
 
     .filtro-organizacion {
@@ -293,6 +295,12 @@ const SIN_MEMBRESIAS: MembresiaActor[] = [];
     .contacto-linea > span {
       min-width: 0;
       overflow-wrap: anywhere;
+    }
+
+    /* El correo va debajo del teléfono: 12 px y corte de palabra si no cabe. */
+    .contacto-correo > span {
+      font-size: 12px;
+      word-break: break-word;
     }
 
     .boton-copiar-icono {
@@ -390,19 +398,75 @@ const SIN_MEMBRESIAS: MembresiaActor[] = [];
       font-size: 12px;
     }
 
-    .lista-temporal-panel {
-      padding: 14px 16px;
-      border: 1px solid #dce5ef;
-      border-radius: 9px;
-      background: #fff;
-      box-shadow: 0 4px 16px rgb(25 45 68 / 5%);
+    /*
+      Botón flotante de la lista temporal. z-index 60: por encima de la
+      cabecera (30) y del menú lateral (41), pero por debajo del velo modal
+      (80). El desplazamiento inferior respeta el área segura de los móviles.
+    */
+    .lista-temporal-fab {
+      position: fixed;
+      right: 28px;
+      bottom: calc(28px + env(safe-area-inset-bottom, 0px));
+      z-index: 60;
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      padding: 12px 16px;
+      border: 1px solid #cfd9e2;
+      border-radius: 999px;
+      background: #1f5597;
+      color: #fff;
+      font: 600 13px/1 var(--font-body, inherit);
+      box-shadow: 0 10px 26px rgb(17 32 45 / 22%);
+      cursor: pointer;
     }
 
-    .lista-temporal-cabecera,
-    .lista-temporal-acciones,
-    .lista-temporal-items li {
+    .lista-temporal-fab:hover {
+      background: #1a4a85;
+    }
+
+    .lista-temporal-fab:focus-visible {
+      outline: 2px solid #3576c5;
+      outline-offset: 2px;
+    }
+
+    /* Sin actores la lista sigue accesible, pero no llama la atención. */
+    .lista-temporal-fab-vacia {
+      border-color: #cfd9e2;
+      background: #fff;
+      color: #465a6c;
+      box-shadow: 0 8px 20px rgb(17 32 45 / 12%);
+    }
+
+    .lista-temporal-fab-vacia:hover {
+      background: #f5f7f8;
+    }
+
+    .lista-temporal-contador {
+      min-width: 22px;
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: rgb(255 255 255 / 22%);
+      font-size: 12px;
+      font-variant-numeric: tabular-nums;
+      text-align: center;
+    }
+
+    .lista-temporal-fab-vacia .lista-temporal-contador {
+      background: #eef2f6;
+      color: #526577;
+    }
+
+    /* El cajón de la lista temporal no necesita los 600 px de una ficha. */
+    .lista-temporal-drawer {
+      width: min(420px, 100%);
+      gap: 12px;
+      padding: 18px 18px 14px;
+    }
+
+    .lista-temporal-cabecera {
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       justify-content: space-between;
       gap: 12px;
     }
@@ -421,15 +485,32 @@ const SIN_MEMBRESIAS: MembresiaActor[] = [];
       line-height: 1.5;
     }
 
+    .lista-temporal-acciones {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    /* La lista puede crecer sin límite: sólo este cuerpo se desplaza. */
+    .lista-temporal-cuerpo {
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow-y: auto;
+    }
+
     .lista-temporal-items {
       display: grid;
       gap: 0;
-      margin: 12px 0 0;
+      margin: 0;
       padding: 0;
       list-style: none;
     }
 
     .lista-temporal-items li {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
       min-width: 0;
       padding: 9px 0;
       border-top: 1px solid #edf0f2;
@@ -459,6 +540,7 @@ const SIN_MEMBRESIAS: MembresiaActor[] = [];
       background: #fff;
       color: #526577;
       font-size: 12.5px;
+      cursor: pointer;
     }
 
     /* El diálogo nativo se centra en la ventana: margen automático y alto guiado. */
@@ -534,7 +616,17 @@ const SIN_MEMBRESIAS: MembresiaActor[] = [];
 
     @media (max-width: 720px) {
       .view-body {
-        padding: 18px 16px 40px;
+        padding: 18px 16px 88px;
+      }
+
+      /* En pantallas angostas el botón se queda con el icono y el contador. */
+      .lista-temporal-fab {
+        right: 16px;
+        bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+      }
+
+      .lista-temporal-fab-texto {
+        display: none;
       }
     }
   `,
@@ -708,6 +800,9 @@ export class ActoresPage {
 
   readonly tiposActor = computed(() => this.catalogos.valor()?.tiposActor ?? []);
 
+  /** Regiones del catálogo territorial; alimentan el select de la ficha. */
+  readonly regiones = computed(() => this.catalogos.valor()?.regiones ?? []);
+
   /** Actor cuya ficha está abierta en el panel lateral. */
   readonly seleccionado = signal<ActorDirectorio | null>(null);
   /** `true` cuando la ficha debe abrirse directamente en modo edición. */
@@ -771,6 +866,20 @@ export class ActoresPage {
 
   quitarDeListaPorIndice(indice: number): void {
     this.listaTemporal.update((actual) => quitarActorListaPorIndice(actual, indice));
+  }
+
+  /** «Cargo · OSPA» de un ítem de la lista temporal. */
+  etiquetaListaTemporal(actor: ActorDirectorio): string {
+    return etiquetaItemLista(actor, this.membresiasDe(actor)[0]?.nombre);
+  }
+
+  /**
+   * Cierra la lista temporal. El clic dentro del cajón también burbujea hasta el
+   * velo, así que sólo cerramos cuando el clic nació en el propio velo.
+   */
+  cerrarListaTemporal(evento: Event): void {
+    if (evento.target !== evento.currentTarget) return;
+    this.listaTemporalAbierta.set(false);
   }
 
   vaciarLista(): void {

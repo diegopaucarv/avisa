@@ -73,6 +73,19 @@ const EXPORTA_COMPLETO = new Set<string>([
   ROL.direccionOaipcs,
 ]);
 
+/**
+ * Quiénes componen la Dirección en la vista de alertas.
+ *
+ * Reúne al rol que aprueba (`direccion_oaipcs`), a la alta dirección —el
+ * ministerio que recibe la alerta— y al administrador, que acumula todos los
+ * códigos de `core.roles`. Es un cuadro de lectura de la UI, no de permisos:
+ * aprobar, archivar o anular siguen exigiendo además `puedeEditar` y
+ * `puedeEliminar`, que replican la matriz de la base. En particular,
+ * `direccion_oaipcs` entra aquí para aprobar, pero no borra (`puede_eliminar =
+ * false` en el parche 20), así que la vista no le ofrece «Anular».
+ */
+const DIRECCION = new Set<string>([ROL.administrador, ROL.direccionOaipcs, ROL.altaDireccion]);
+
 const FORMATOS_COMPLETOS: readonly FormatoExportacion[] = ['json', 'excel', 'pdf'];
 
 /** El sectorista en campo descarga hoja y PDF; el JSON queda para Dirección. */
@@ -106,6 +119,16 @@ export class CapacidadesService {
   private readonly roles = this.sesion.roles;
 
   readonly esAdmin = computed(() => this.roles().includes(ROL.administrador));
+
+  /** Perfiles de dirección (ver el cuadro `DIRECCION`). */
+  readonly esDireccion = computed(() => this.roles().some((rol) => DIRECCION.has(rol)));
+
+  /**
+   * Alias de `esDireccion` con el nombre que usa la vista de alertas («Edith» y
+   * la Dirección OAIPCS comparten rol). Apunta a la misma señal: no hay dos
+   * cuadros de roles que puedan desincronizarse.
+   */
+  readonly esDirectora = this.esDireccion;
 
   readonly puedeEditar = computed(() => this.roles().some((rol) => ESCRIBEN.has(rol)));
 

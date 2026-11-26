@@ -22,7 +22,27 @@
             } @else {
               {{ iniciales() }}
             }
+            @if (editando()) {
+              <button
+                type="button"
+                class="panel-foto-editar"
+                aria-label="Cambiar la fotografía del actor"
+                title="Cambiar la fotografía"
+                (click)="abrirSelectorFoto()"
+              >
+                <app-icono nombre="lapiz" [tamano]="16" />
+              </button>
+            }
           </span>
+          <input
+            #fotoInput
+            class="foto-input"
+            type="file"
+            accept="image/*"
+            aria-hidden="true"
+            tabindex="-1"
+            (change)="alSeleccionarFoto($event)"
+          />
           <div class="panel-identidad">
             <h2 id="actor-panel-titulo" [attr.title]="a.nombre">{{ a.nombre }}</h2>
             @if (a.cargo) {
@@ -59,8 +79,15 @@
             <p class="panel-nota" id="actor-editor-titulo">
               Los cambios se guardan en la ficha del actor. El DNI se descifra al abrir esta edición
               y la consulta queda auditada. Teléfono y correo se guardan cifrados; déjelos vacíos
-              para no cambiarlos. La fotografía se gestiona por otro canal.
+              para no cambiarlos.
             </p>
+
+            @if (avisoFoto(); as aviso) {
+              <p class="panel-nota" role="status">
+                <app-icono nombre="info" [tamano]="12" />
+                <span>{{ aviso }}</span>
+              </p>
+            }
 
             <section class="actor-bloque" aria-labelledby="bloque-datos">
               <h3 id="bloque-datos">Datos personales y filiación</h3>
@@ -136,24 +163,26 @@
                 />
                 <span class="actor-pista">Se guarda cifrado. Déjelo vacío para no cambiarlo.</span>
               </label>
-              <label class="ancho">
-                Fotografía
-                <button type="button" class="button-secondary" disabled>
-                  Cambiar fotografía (no disponible)
-                </button>
-                <span class="actor-pista">La carga de imágenes no está habilitada aquí.</span>
-              </label>
             </section>
 
             <section class="actor-bloque" aria-labelledby="bloque-representatividad">
               <h3 id="bloque-representatividad">Representatividad e institución</h3>
-              <label>
-                Cargo
+              <label class="ancho">
+                Organización / Institución
                 <input
-                  maxlength="150"
-                  [value]="borrador().cargo"
-                  (input)="actualizarTexto('cargo', $event)"
+                  maxlength="255"
+                  [value]="borrador().organizacion"
+                  placeholder="sin dato"
+                  (input)="actualizarTexto('organizacion', $event)"
                 />
+                <!--
+                  La API de actores no acepta el vínculo institucional en el PATCH:
+                  enviarlo devolvería 422 FIELD_NOT_EDITABLE. Se edita aquí para
+                  capturarlo, pero este formulario todavía no puede guardarlo.
+                -->
+                <span class="actor-pista">
+                  Aún no se guarda: la edición del actor no expone este campo en la API.
+                </span>
               </label>
               <label>
                 Abreviatura
@@ -163,10 +192,13 @@
                   (input)="actualizarTexto('abreviatura', $event)"
                 />
               </label>
-              <label class="ancho">
-                Organización / Institución
-                <input [value]="a.organizacionAncla ?? ''" placeholder="sin dato" disabled />
-                <span class="actor-pista">El vínculo institucional se edita en el padrón.</span>
+              <label>
+                Cargo
+                <input
+                  maxlength="150"
+                  [value]="borrador().cargo"
+                  (input)="actualizarTexto('cargo', $event)"
+                />
               </label>
             </section>
 
@@ -223,6 +255,15 @@
             <section class="actor-bloque" aria-labelledby="bloque-clasificacion">
               <h3 id="bloque-clasificacion">Clasificación territorial y rol</h3>
               <label>
+                Región
+                <select [value]="borrador().region" (change)="actualizarTexto('region', $event)">
+                  <option value="">Sin región</option>
+                  @for (region of regiones(); track region.valor) {
+                    <option [value]="region.valor">{{ region.etiqueta }}</option>
+                  }
+                </select>
+              </label>
+              <label>
                 Tipo de actor
                 <select [value]="borrador().tipo" (change)="actualizarTexto('tipo', $event)">
                   <option value="">Sin tipo</option>
@@ -231,18 +272,20 @@
                   }
                 </select>
               </label>
-              <label>
-                Nivel de gobierno
-                <select
-                  [value]="borrador().nivelGobierno"
-                  (change)="actualizarTexto('nivelGobierno', $event)"
-                >
-                  <option value="">Sin especificar</option>
-                  @for (nivel of nivelesGobierno; track nivel) {
-                    <option [value]="nivel">{{ nivel }}</option>
-                  }
-                </select>
-              </label>
+              @if (esTipoPublico()) {
+                <label>
+                  Nivel de gobierno
+                  <select
+                    [value]="borrador().nivelGobierno"
+                    (change)="actualizarTexto('nivelGobierno', $event)"
+                  >
+                    <option value="">Sin especificar</option>
+                    @for (nivel of nivelesGobierno; track nivel) {
+                      <option [value]="nivel">{{ nivel }}</option>
+                    }
+                  </select>
+                </label>
+              }
               <label>
                 Función
                 <select [value]="borrador().funcion" (change)="actualizarTexto('funcion', $event)">
@@ -263,19 +306,6 @@
                     <option [value]="opcion">{{ opcion }}</option>
                   }
                 </select>
-              </label>
-              <label>
-                Categoría
-                <input
-                  maxlength="40"
-                  [value]="borrador().categoria"
-                  (input)="actualizarTexto('categoria', $event)"
-                />
-              </label>
-              <label>
-                Región
-                <input [value]="a.region ?? ''" placeholder="sin dato" disabled />
-                <span class="actor-pista">La región viene del registro territorial.</span>
               </label>
             </section>
 
@@ -317,33 +347,7 @@
         } @else {
           <div class="panel-grid">
             <div class="panel-col">
-              <div class="panel-campo">
-                <span class="panel-etiqueta">DNI</span>
-                @if (piiVisible()) {
-                  @if (datos()?.dni; as dni) {
-                    <span class="panel-dato">
-                      <span class="panel-valor">{{ dni }}</span>
-                      <button type="button" class="boton-copiar" (click)="copiar(dni, $event)">
-                        {{ copiado() === dni ? 'Copiado' : 'Copiar' }}
-                      </button>
-                    </span>
-                  } @else {
-                    <span class="panel-vacio">{{ sinDato }}</span>
-                  }
-                } @else if (sinAutorizacionPii()) {
-                  <span class="panel-vacio">sin autorización</span>
-                } @else if (estadoPii() === 'sin_ficha') {
-                  <span class="panel-vacio">{{ sinDato }}</span>
-                } @else {
-                  <span
-                    class="panel-valor panel-enmascarado"
-                    [attr.title]="'Se descifra al editar la ficha del actor'"
-                  >
-                    {{ mascaraDni }}
-                  </span>
-                }
-              </div>
-
+              <!-- Contacto en orden de lectura: Teléfono → Correo → DNI. -->
               <div class="panel-campo">
                 <span class="panel-etiqueta">Teléfono</span>
                 @if (piiVisible()) {
@@ -406,13 +410,40 @@
                   </span>
                 }
               </div>
+
+              <div class="panel-campo">
+                <span class="panel-etiqueta">DNI</span>
+                @if (piiVisible()) {
+                  @if (datos()?.dni; as dni) {
+                    <span class="panel-dato">
+                      <span class="panel-valor">{{ dni }}</span>
+                      <button type="button" class="boton-copiar" (click)="copiar(dni, $event)">
+                        {{ copiado() === dni ? 'Copiado' : 'Copiar' }}
+                      </button>
+                    </span>
+                  } @else {
+                    <span class="panel-vacio">{{ sinDato }}</span>
+                  }
+                } @else if (sinAutorizacionPii()) {
+                  <span class="panel-vacio">sin autorización</span>
+                } @else if (estadoPii() === 'sin_ficha') {
+                  <span class="panel-vacio">{{ sinDato }}</span>
+                } @else {
+                  <span
+                    class="panel-valor panel-enmascarado"
+                    [attr.title]="'Se descifra al editar la ficha del actor'"
+                  >
+                    {{ mascaraDni }}
+                  </span>
+                }
+              </div>
             </div>
 
             <div class="panel-col">
               <!--
                 Respaldo de 67: si el listado no trae `organizacionAncla` (el backend debe
                 resolverlo con coalesce(organizacion_ancla, membresía vigente) — ver
-                lib/db/repos/actors.ts), la abreviatura queda como texto visible.
+                lib/db/repos/actors.ts), el campo queda en «sin dato».
               -->
               <div class="panel-campo">
                 <span class="panel-etiqueta">Organización</span>
@@ -421,22 +452,19 @@
                 } @else {
                   <span class="panel-vacio">{{ sinDato }}</span>
                 }
+              </div>
+              <div class="panel-campo">
+                <span class="panel-etiqueta">Abreviatura</span>
                 @if (a.abreviatura) {
-                  <span class="panel-pista">{{ a.abreviatura }}</span>
+                  <span class="panel-valor">{{ a.abreviatura }}</span>
+                } @else {
+                  <span class="panel-vacio">{{ sinDato }}</span>
                 }
               </div>
               <div class="panel-campo">
                 <span class="panel-etiqueta">Región</span>
                 @if (a.region) {
                   <span class="panel-valor">{{ a.region }}</span>
-                } @else {
-                  <span class="panel-vacio">{{ sinDato }}</span>
-                }
-              </div>
-              <div class="panel-campo">
-                <span class="panel-etiqueta">Nivel de identificación</span>
-                @if (nivelIdentificacion(); as nivel) {
-                  <span class="panel-valor">{{ nivel }}</span>
                 } @else {
                   <span class="panel-vacio">{{ sinDato }}</span>
                 }
@@ -492,28 +520,6 @@
                 <app-icono nombre="info" [tamano]="12" />
                 <span>Los datos OSPA se capturan en la ficha; no se validan contra padrón.</span>
               </p>
-            </section>
-          }
-
-          @if (!esOrganizacion() && membresias().length > 0) {
-            <section class="panel-seccion" aria-labelledby="actor-panel-organizaciones">
-              <h3 id="actor-panel-organizaciones">Organizaciones a las que pertenece</h3>
-              <ul class="panel-organizaciones">
-                @for (membresia of membresias(); track membresia.organizacionId) {
-                  <li>
-                    <span class="panel-valor">{{ membresia.nombre }}</span>
-                    @if (membresia.cargo) {
-                      <span class="panel-pista">{{ membresia.cargo }}</span>
-                    }
-                    @if (membresia.desde || membresia.hasta) {
-                      <span class="panel-pista">
-                        {{ fechaDe(membresia.desde) || sinDato }} —
-                        {{ fechaDe(membresia.hasta) || sinDato }}
-                      </span>
-                    }
-                  </li>
-                }
-              </ul>
             </section>
           }
 

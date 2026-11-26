@@ -83,12 +83,6 @@
     </div>
   </div>
 
-  <p class="tabla-nota">
-    {{ porcentajeLatente(conteoSituacion().proporcionLatente) }} de los {{ conteoSituacion().total
-    }} casos visibles son latentes. Manifiesto = Conflicto social + Crisis social; latente = todo lo
-    demás, incluidos los casos sin nivel declarado.
-  </p>
-
   <div class="segmented ambito-chips" role="group" aria-label="Filtrar por ámbito">
     <button
       type="button"
@@ -300,12 +294,18 @@
               <th scope="col" class="col-region" [appThOrden]="'region'" [orden]="ordenRegiones">
                 Región
               </th>
-              <th scope="col" [appThOrden]="'situacion'" [orden]="ordenRegiones">
-                Latentes / Manifiestos
+              <th scope="col" class="col-num" [appThOrden]="'riesgoAlto'" [orden]="ordenRegiones">
+                Riesgo alto
               </th>
-              <th scope="col" [appThOrden]="'proporcion'" [orden]="ordenRegiones">% latente</th>
-              <th scope="col" [appThOrden]="'total'" [orden]="ordenRegiones">Total</th>
-              <th scope="col" [appThOrden]="'riesgoAlto'" [orden]="ordenRegiones">Riesgo alto</th>
+              <th scope="col" [appThOrden]="'situacion'" [orden]="ordenRegiones">
+                Latentes<br />Manifiestos
+              </th>
+              <th scope="col" class="col-num" [appThOrden]="'proporcion'" [orden]="ordenRegiones">
+                % latente
+              </th>
+              <th scope="col" class="col-num" [appThOrden]="'total'" [orden]="ordenRegiones">
+                Total
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -316,8 +316,9 @@
                   <strong>{{ fila.region }}</strong>
                 </a>
               </td>
-              <td>{{ fila.latentes }} / {{ fila.manifiestos }}</td>
-              <td>
+              <td class="col-num">{{ fila.riesgoAlto }}</td>
+              <td>{{ fila.latentes }}<br />{{ fila.manifiestos }}</td>
+              <td class="col-num">
                 <span
                   class="punto-situacion"
                   [style.background]="colorManifiesto(fila.proporcionLatente)"
@@ -325,8 +326,7 @@
                 ></span
                 >{{ porcentajeLatente(fila.proporcionLatente) }}
               </td>
-              <td>{{ fila.total }}</td>
-              <td>{{ fila.riesgoAlto }}</td>
+              <td class="col-num">{{ fila.total }}</td>
             </tr>
             } @if (sinRegion() > 0) {
             <tr>
@@ -335,8 +335,11 @@
                   <strong>Sin región</strong>
                 </a>
               </td>
-              <td>{{ situacionSinRegion().latentes }} / {{ situacionSinRegion().manifiestos }}</td>
+              <td class="col-num">{{ riesgoAltoSinRegion() }}</td>
               <td>
+                {{ situacionSinRegion().latentes }}<br />{{ situacionSinRegion().manifiestos }}
+              </td>
+              <td class="col-num">
                 <span
                   class="punto-situacion"
                   [style.background]="colorManifiesto(situacionSinRegion().proporcionLatente)"
@@ -344,8 +347,7 @@
                 ></span
                 >{{ porcentajeLatente(situacionSinRegion().proporcionLatente) }}
               </td>
-              <td>{{ sinRegion() }}</td>
-              <td>{{ riesgoAltoSinRegion() }}</td>
+              <td class="col-num">{{ sinRegion() }}</td>
             </tr>
             }
           </tbody>

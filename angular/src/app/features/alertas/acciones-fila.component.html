@@ -32,15 +32,17 @@
           {{ accion.etiqueta }}
         </button>
       }
-    }
 
-    @if (puedeAnular()) {
-      @if (acciones().length) {
-        <div class="menu-separador" role="separator"></div>
+      <!--
+        Anular vive dentro de la sección de Dirección, no al final del menú: es
+        una acción de esa sección y no una acción suelta del registro. El rótulo
+        se compara con el que emite la página (`accionesFila`).
+      -->
+      @if (puedeAnular() && grupo.titulo === 'Dirección OAIPCS') {
+        <button type="button" role="menuitem" class="menu-anular" (click)="pedirAnular($event)">
+          Anular
+        </button>
       }
-      <button type="button" role="menuitem" class="menu-anular" (click)="pedirAnular($event)">
-        Anular
-      </button>
     }
   </div>
 }

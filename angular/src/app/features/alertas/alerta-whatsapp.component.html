@@ -15,7 +15,7 @@
         <p class="modal-contexto">
           <span>{{ titulo() }}</span>
           <span>{{ sitio() }}</span>
-          <span>Riesgo {{ etiquetaRiesgo() }}</span>
+          <span [class]="claseRiesgo()">Riesgo {{ etiquetaRiesgo() }}</span>
         </p>
       </div>
       <button

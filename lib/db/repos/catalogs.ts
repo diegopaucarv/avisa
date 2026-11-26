@@ -12,6 +12,21 @@ async function query(sql: string): Promise<CatalogItem[]> {
   return result.rows;
 }
 
+/**
+ * Sectorista asignable a un caso. Su `id` es el UUID de `core.usuarios` (no un
+ * `smallint` como en el resto de catálogos), así que se tipa aparte en lugar de
+ * forzarlo en `CatalogItem`.
+ */
+export type CatalogSectorista = {
+  id: string;
+  nombre: string;
+};
+
+async function querySectoristas(sql: string): Promise<CatalogSectorista[]> {
+  const result = await getPool().query<CatalogSectorista>(sql);
+  return result.rows;
+}
+
 export type Catalogs = {
   estadosCaso: CatalogItem[];
   nivelesRiesgo: CatalogItem[];
@@ -32,6 +47,11 @@ export type Catalogs = {
   rolesActor: CatalogItem[];
   perfilesActor: CatalogItem[];
   tiposHecho: CatalogItem[];
+  /**
+   * Usuarios activos con el rol `sectorista` vigente, para el selector de
+   * Sectorista de la ficha. Aditivo: no altera los catálogos existentes.
+   */
+  sectoristas: CatalogSectorista[];
 };
 
 /**
@@ -59,6 +79,7 @@ export async function getCatalogs(): Promise<Catalogs> {
     rolesActor,
     perfilesActor,
     tiposHecho,
+    sectoristas,
   ] = await Promise.all([
     query(
       `select id, replace(codigo, '_', ' ') as codigo, replace(codigo, '_', ' ') as etiqueta,
@@ -165,6 +186,19 @@ export async function getCatalogs(): Promise<Catalogs> {
          from core.cat_tipos_hecho
         order by id`,
     ),
+    // Sectoristas asignables: usuarios activos con el rol `sectorista` vigente.
+    // El rol vive en `core.usuario_roles` + `core.roles` (no en una columna).
+    querySectoristas(
+      `select u.id::text as id, u.nombre
+         from core.usuarios u
+         join core.usuario_roles ur on ur.usuario_id = u.id
+         join core.roles r on r.id = ur.rol_id
+        where u.activo
+          and r.codigo = 'sectorista'
+          and (ur.hasta is null or ur.hasta >= current_date)
+        group by u.id, u.nombre
+        order by u.nombre`,
+    ),
   ]);
 
   return {
@@ -187,5 +221,6 @@ export async function getCatalogs(): Promise<Catalogs> {
     rolesActor,
     perfilesActor,
     tiposHecho,
+    sectoristas,
   };
 }

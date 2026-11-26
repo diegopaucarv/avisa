@@ -901,7 +901,10 @@ export async function updateActor(
   if (nombre !== undefined) set("nombre_actual", "nombre_actual", nombre);
   const abreviatura = leerTexto(input, "abreviatura", 150, "La abreviatura");
   if (abreviatura !== undefined) set("abreviatura", "abreviatura", abreviatura);
-  const naturaleza = leerTexto(input, "naturaleza", 12, "La naturaleza", true);
+  // `obligatorio = false`: la naturaleza sólo se valida si el PATCH la envía.
+  // Exigirla en cada edición bloqueaba guardar cualquier otro campo con un 422
+  // «La naturaleza es obligatoria» aunque el cuerpo no la tocara.
+  const naturaleza = leerTexto(input, "naturaleza", 12, "La naturaleza", false);
   if (naturaleza !== undefined) {
     if (naturaleza === null || !NATURALEZAS.has(naturaleza)) {
       throw new ApiError(

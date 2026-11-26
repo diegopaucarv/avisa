@@ -1,7 +1,7 @@
 {
   "meta": {
     "script": "scripts/matriz/match_actores.py",
-    "generado_en": "2026-11-26T20:47:09+00:00",
+    "generado_en": "2026-11-26T22:19:09+00:00",
     "entrada": "scripts/matriz/salida/matriz_2026.json",
     "solo_lectura": true,
     "autocommit": true,
@@ -27,26 +27,26 @@
     },
     "auto": {
       "persona": 4,
-      "organizacion": 41,
-      "total": 45
+      "organizacion": 37,
+      "total": 41
     },
     "dudoso": {
       "persona": 1,
-      "organizacion": 16,
-      "total": 17
+      "organizacion": 18,
+      "total": 19
     },
     "nuevo": {
       "persona": 43,
-      "organizacion": 86,
-      "total": 129
+      "organizacion": 88,
+      "total": 131
     },
     "por_rama": {
-      "6_nuevo": 129,
-      "1_siglas_exactas": 31,
+      "6_nuevo": 131,
+      "1_siglas_exactas": 27,
       "4_embedding": 11,
       "2_nombre_exacto": 3,
-      "5_lexico": 5,
-      "5_embedding": 12
+      "5_lexico": 6,
+      "5_embedding": 13
     }
   },
   "filas": [
@@ -3273,21 +3273,19 @@
     {
       "crudo": "OSPA Asociación de Bolichitos de Marcona",
       "tipo": "organizacion",
-      "coseno": 0.6791,
-      "lexico": 0.4231,
-      "siglas_exactas": true,
+      "coseno": 0.7427,
+      "lexico": 0.7467,
+      "siglas_exactas": false,
       "destino": {
-        "id": "81b8e418-6d54-40f4-bbc1-25b4b1ecf158",
+        "id": "4bb8bef7-cf96-4caa-b13a-7eab8279c9f6",
         "tabla": "core.organizaciones",
-        "nombre": "OSPA Mancora",
+        "nombre": "Asociación de Bolichitos Puerto Ilo",
         "tipo": "organizacion",
-        "siglas": [
-          "OSPA"
-        ]
+        "siglas": []
       },
-      "veredicto": "auto",
-      "rama": "1_siglas_exactas",
-      "motivo": "siglas exactas normalizadas",
+      "veredicto": "dudoso",
+      "rama": "5_lexico",
+      "motivo": "léxico 0.747 sin respaldo semántico",
       "ocurrencias": 1,
       "fuentes": [
         "caso 23:actores"
@@ -3529,22 +3527,13 @@
     {
       "crudo": "Municipalidad Distrital de Atico",
       "tipo": "organizacion",
-      "coseno": 0.3591,
-      "lexico": 0.284,
-      "siglas_exactas": true,
-      "destino": {
-        "id": "af19d388-0c48-4354-8172-3d04b8bb1f18",
-        "tabla": "core.organizaciones",
-        "nombre": "APERPARH-ATICO (Asociación Propietarios de Embarcaciones Pesqueras Artesanales Extractoras de Recursos Hidrobiológicos del Puerto de Ático)",
-        "tipo": "organizacion",
-        "siglas": [
-          "APERPARH",
-          "ATICO"
-        ]
-      },
-      "veredicto": "auto",
-      "rama": "1_siglas_exactas",
-      "motivo": "siglas exactas normalizadas",
+      "coseno": 0.7542,
+      "lexico": 0.4938,
+      "siglas_exactas": false,
+      "destino": null,
+      "veredicto": "nuevo",
+      "rama": "6_nuevo",
+      "motivo": "sin acierto suficiente (embedding 0.754, léxico 0.494)",
       "ocurrencias": 1,
       "fuentes": [
         "caso 27:actores"
@@ -3574,22 +3563,19 @@
     {
       "crudo": "Pescadores del DPA Atico",
       "tipo": "organizacion",
-      "coseno": 0.5551,
-      "lexico": 0.2857,
-      "siglas_exactas": true,
+      "coseno": 0.854,
+      "lexico": 0.4906,
+      "siglas_exactas": false,
       "destino": {
-        "id": "af19d388-0c48-4354-8172-3d04b8bb1f18",
+        "id": "1b5f1743-b5c2-42c4-a6cd-f2111fb84081",
         "tabla": "core.organizaciones",
-        "nombre": "APERPARH-ATICO (Asociación Propietarios de Embarcaciones Pesqueras Artesanales Extractoras de Recursos Hidrobiológicos del Puerto de Ático)",
+        "nombre": "Asociación Pescadores Sechura",
         "tipo": "organizacion",
-        "siglas": [
-          "APERPARH",
-          "ATICO"
-        ]
+        "siglas": []
       },
-      "veredicto": "auto",
-      "rama": "1_siglas_exactas",
-      "motivo": "siglas exactas normalizadas",
+      "veredicto": "dudoso",
+      "rama": "5_embedding",
+      "motivo": "embedding 0.854 entre umbrales",
       "ocurrencias": 1,
       "fuentes": [
         "caso 27:actores"
@@ -3601,22 +3587,13 @@
     {
       "crudo": "Municipalidad de Atico",
       "tipo": "organizacion",
-      "coseno": 0.4094,
-      "lexico": 0.239,
-      "siglas_exactas": true,
-      "destino": {
-        "id": "af19d388-0c48-4354-8172-3d04b8bb1f18",
-        "tabla": "core.organizaciones",
-        "nombre": "APERPARH-ATICO (Asociación Propietarios de Embarcaciones Pesqueras Artesanales Extractoras de Recursos Hidrobiológicos del Puerto de Ático)",
-        "tipo": "organizacion",
-        "siglas": [
-          "APERPARH",
-          "ATICO"
-        ]
-      },
-      "veredicto": "auto",
-      "rama": "1_siglas_exactas",
-      "motivo": "siglas exactas normalizadas",
+      "coseno": 0.7627,
+      "lexico": 0.5143,
+      "siglas_exactas": false,
+      "destino": null,
+      "veredicto": "nuevo",
+      "rama": "6_nuevo",
+      "motivo": "sin acierto suficiente (embedding 0.763, léxico 0.514)",
       "ocurrencias": 1,
       "fuentes": [
         "caso 27:actores"
@@ -4256,29 +4233,30 @@
         ]
       },
       {
-        "crudo": "OSPA Asociación de Bolichitos de Marcona",
+        "crudo": "FIUPAP",
         "tipo": "organizacion",
-        "coseno": 0.6791,
-        "lexico": 0.4231,
+        "coseno": 0.7258,
+        "lexico": 0.25,
         "siglas_exactas": true,
         "destino": {
-          "id": "81b8e418-6d54-40f4-bbc1-25b4b1ecf158",
+          "id": "e5deb401-be07-4164-ac75-1adc85b64218",
           "tabla": "core.organizaciones",
-          "nombre": "OSPA Mancora",
+          "nombre": "Fed. Integr. Unitaria de los Pesc. Art. FIUPAP",
           "tipo": "organizacion",
           "siglas": [
-            "OSPA"
+            "FIUPAP"
           ]
         },
         "veredicto": "auto",
         "rama": "1_siglas_exactas",
         "motivo": "siglas exactas normalizadas",
-        "ocurrencias": 1,
+        "ocurrencias": 2,
         "fuentes": [
-          "caso 23:actores"
+          "caso 24:actores",
+          "caso 25:actores"
         ],
         "variantes": [
-          "OSPA Asociación de Bolichitos de Marcona"
+          "FIUPAP"
         ]
       }
     ],

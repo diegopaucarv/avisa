@@ -1,0 +1,4120 @@
+{
+  "generado": "2026-11-26T22:28:29",
+  "esquemas": [
+    "legacy",
+    "core"
+  ],
+  "solo_lectura": true,
+  "caso_actor_sin_caso": {
+    "tabla": "legacy.bridge_caso_actor",
+    "columnas": {
+      "c01": "c01",
+      "c02": "c02",
+      "c03": "c03",
+      "todas": [
+        "fila_n",
+        "c01",
+        "c02",
+        "c03"
+      ]
+    },
+    "total_bridge": 80,
+    "core_casos": {
+      "total": 38,
+      "columnas_codigo": [
+        "codigo_caso",
+        "codigo_legado"
+      ],
+      "columna_nombre": "nombre_caso"
+    },
+    "diag": {
+      "fact_casos": {
+        "columnas": [
+          [
+            "fila_n",
+            "integer"
+          ],
+          [
+            "c01",
+            "text"
+          ],
+          [
+            "c02",
+            "text"
+          ],
+          [
+            "c03",
+            "text"
+          ],
+          [
+            "c04",
+            "text"
+          ],
+          [
+            "c05",
+            "text"
+          ],
+          [
+            "c06",
+            "text"
+          ],
+          [
+            "c07",
+            "text"
+          ],
+          [
+            "c08",
+            "text"
+          ],
+          [
+            "c09",
+            "text"
+          ],
+          [
+            "c10",
+            "text"
+          ],
+          [
+            "c11",
+            "text"
+          ],
+          [
+            "c12",
+            "text"
+          ],
+          [
+            "c13",
+            "text"
+          ],
+          [
+            "c14",
+            "text"
+          ],
+          [
+            "c15",
+            "text"
+          ],
+          [
+            "c16",
+            "text"
+          ],
+          [
+            "c17",
+            "text"
+          ],
+          [
+            "c18",
+            "text"
+          ],
+          [
+            "c19",
+            "text"
+          ],
+          [
+            "c20",
+            "text"
+          ],
+          [
+            "c21",
+            "text"
+          ],
+          [
+            "c22",
+            "text"
+          ],
+          [
+            "c23",
+            "text"
+          ],
+          [
+            "c24",
+            "text"
+          ],
+          [
+            "c25",
+            "text"
+          ],
+          [
+            "c26",
+            "text"
+          ],
+          [
+            "c27",
+            "text"
+          ],
+          [
+            "c28",
+            "text"
+          ],
+          [
+            "c29",
+            "text"
+          ]
+        ],
+        "total_filas": 35,
+        "muestra": [
+          {
+            "fila_n": "1",
+            "c01": "CS-PRODUCE-2026-001",
+            "c02": "TC-03",
+            "c03": "Uso de red de cortina de fondo en Cabo Blanco y Los Órganos",
+            "c04": "Sector-01",
+            "c05": "TEMA-02",
+            "c06": "2024-10-15 00:00:00",
+            "c07": "DEP-22",
+            "c08": "PRO-057",
+            "c09": "DIS-0615",
+            "c10": "SEC-01",
+            "c11": "Urgente",
+            "c12": "Ciclo-003",
+            "c13": "0.9",
+            "c14": "RIE-003",
+            "c15": "Bloqueo de Panamericana Norte (altura Cabo Blanco) por plazo vencido del estudio técnico.",
+            "c16": "Los pescadores de Cabo Blanco denuncian que pescadores de Los Órganos extraen recursos hidrobiológicos dentro de sus áreas de reserva empleando red cortina de fondo de hasta 50 pañ…",
+            "c17": "0",
+            "c18": "0",
+            "c19": "0",
+            "c20": "",
+            "c21": "",
+            "c22": "0",
+            "c23": "",
+            "c24": "",
+            "c25": "",
+            "c26": "",
+            "c27": "",
+            "c28": "",
+            "c29": ""
+          },
+          {
+            "fila_n": "2",
+            "c01": "CS-PRODUCE-2026-002",
+            "c02": "TC-03",
+            "c03": "Rehabilitación del Desembarcadero Pesquero Artesanal de Los Órganos",
+            "c04": "Sector-01",
+            "c05": "TEMA-01",
+            "c06": "2024-12-01 00:00:00",
+            "c07": "DEP-22",
+            "c08": "PRO-057",
+            "c09": "DIS-0618",
+            "c10": "SEC-01",
+            "c11": "Moderado",
+            "c12": "Ciclo-003",
+            "c13": "0.9",
+            "c14": "RIE-003",
+            "c15": "Riesgo de nuevas medidas de fuerza de los pescadores artesanales si se prolonga la suscripción del convenio de gestión, dado el antecedente de movilización de marzo de 2025 por el …",
+            "c16": "Pescadores artesanales del DPA Los Órganos demandan la rehabilitación de la infraestructura del desembarcadero, tras la clausura temporal del muelle por riesgo a la vida humana. La…",
+            "c17": "0",
+            "c18": "0",
+            "c19": "0",
+            "c20": "",
+            "c21": "",
+            "c22": "0",
+            "c23": "",
+            "c24": "",
+            "c25": "",
+            "c26": "",
+            "c27": "",
+            "c28": "",
+            "c29": ""
+          },
+          {
+            "fila_n": "3",
+            "c01": "CS-PRODUCE-2026-003",
+            "c02": "TC-03",
+            "c03": "Reubicación de embarcaciones del Muelle 5E - Terminal Norte Multipropósito del Callao",
+            "c04": "Sector-01",
+            "c05": "TEMA-01",
+            "c06": "2012-08-01 00:00:00",
+            "c07": "DEP-07",
+            "c08": "PRO-025",
+            "c09": "DIS-0267",
+            "c10": "SEC-02",
+            "c11": "Urgente",
+            "c12": "Ciclo-001",
+            "c13": "0",
+            "c14": "RIE-003",
+            "c15": "Riesgo de descontento social por la falta de consenso sobre el monto de las compensaciones económicas, que ya provocó la pérdida de vigencia del D.U. N.° 004-2025 sin implementarse…",
+            "c16": "Los pescadores artesanales del Callao demandan una solución integral a la reubicación de las embarcaciones fondeadas en el Muelle 5E del Terminal Norte Multipropósito, concesionado…",
+            "c17": "0",
+            "c18": "0",
+            "c19": "0",
+            "c20": "",
+            "c21": "",
+            "c22": "0",
+            "c23": "",
+            "c24": "",
+            "c25": "",
+            "c26": "",
+            "c27": "",
+            "c28": "",
+            "c29": ""
+          }
+        ],
+        "c03_numericos_vs_fila_n": {
+          "distintos": 18,
+          "con_fila": 18,
+          "detalle": [
+            {
+              "fila_n": 1,
+              "existe": true,
+              "motivo": null
+            },
+            {
+              "fila_n": 2,
+              "existe": true,
+              "motivo": null
+            },
+            {
+              "fila_n": 3,
+              "existe": true,
+              "motivo": null
+            },
+            {
+              "fila_n": 4,
+              "existe": true,
+              "motivo": null
+            },
+            {
+              "fila_n": 5,
+              "existe": true,
+              "motivo": null
+            },
+            {
+              "fila_n": 6,
+              "existe": true,
+              "motivo": null
+            },
+            {
+              "fila_n": 8,
+              "existe": true,
+              "motivo": null
+            },
+            {
+              "fila_n": 10,
+              "existe": true,
+              "motivo": null
+            },
+            {
+              "fila_n": 11,
+              "existe": true,
+              "motivo": null
+            },
+            {
+              "fila_n": 18,
+              "existe": true,
+              "motivo": null
+            },
+            {
+              "fila_n": 19,
+              "existe": true,
+              "motivo": null
+            },
+            {
+              "fila_n": 20,
+              "existe": true,
+              "motivo": null
+            },
+            {
+              "fila_n": 23,
+              "existe": true,
+              "motivo": null
+            },
+            {
+              "fila_n": 24,
+              "existe": true,
+              "motivo": null
+            },
+            {
+              "fila_n": 25,
+              "existe": true,
+              "motivo": null
+            },
+            {
+              "fila_n": 26,
+              "existe": true,
+              "motivo": null
+            },
+            {
+              "fila_n": 32,
+              "existe": true,
+              "motivo": null
+            },
+            {
+              "fila_n": 33,
+              "existe": true,
+              "motivo": null
+            }
+          ]
+        }
+      },
+      "core_casos_muestra": [
+        {
+          "id": "25c62486-8629-4763-81d5-94d3e49851c8",
+          "entidad_id": "1",
+          "codigo_caso": "CS-2024-0004",
+          "nombre_caso": "Conflicto intergremial por el uso de redes de enmalle de fondo y la delimitación de zonas de pesca en Cabo Blanco y Los Órganos",
+          "distrito_principal_id": "615",
+          "subsector_id": "1",
+          "tematica_id": "2",
+          "unidad_responsable_id": "1",
+          "punto_focal_usuario_id": "7c62121d-271e-45c6-95ac-273e88bb8446",
+          "nivel_conflicto_id": "3",
+          "nivel_riesgo_id": "2",
+          "prioridad_id": "1",
+          "estado_id": "1",
+          "descripcion_riesgo": "Riesgo de conflicto intergremial y deterioro de la sostenibilidad de los recursos marinos por presunta invasión de áreas de reserva y uso de artes de pesca cuestionadas. De no reso…",
+          "latitud": "",
+          "longitud": "",
+          "fecha_inicio": "2024-10-15",
+          "fecha_cierre": "",
+          "fecha_ultima_actualizacion": "2026-11-26 20:23:32.669231+00:00",
+          "fuente_original": "avisa_historico",
+          "es_seed_historico": "True",
+          "created_at": "2026-10-31 07:52:56.714777+00:00",
+          "updated_at": "2026-11-26 20:28:49.532244+00:00",
+          "created_by": "00000000-0000-0000-0000-000000000001",
+          "updated_by": "00000000-0000-0000-0000-000000000001",
+          "origen_dato": "AVISA_HISTORICO",
+          "confidence": "1.00",
+          "es_validado_humano": "True",
+          "nivel_clasificacion": "2",
+          "ciclo_intervencion_id": "3",
+          "pct_avance": "90.00",
+          "resumen_ejecutivo": "Los pescadores de Cabo Blanco denuncian que pescadores de Los Órganos extraen recursos hidrobiológicos dentro de sus áreas de reserva empleando red cortina de fondo de hasta 50 pañ…",
+          "region_principal_id": "20",
+          "provincia_principal_id": "57",
+          "fecha_reapertura": "",
+          "n_reaperturas": "0",
+          "motivo_cierre": "",
+          "link_reporte_pdf": "",
+          "codigo_legado": "CS-PRODUCE-2026-001",
+          "anulado_en": "",
+          "anulado_por": "",
+          "anulacion_id": "",
+          "motivo_anulacion": "",
+          "naturaleza_id": "",
+          "estado_actualizacion": "",
+          "nivel_riesgo_inicial_id": "",
+          "link_analisis_caso": "",
+          "enlace_analisis": "https://www.canva.com/design/DAG6qyrKYI8/b65UvrYhbnkTgj7KZ9yrcw/edit"
+        },
+        {
+          "id": "b52f1a9c-7cee-4685-bf12-34e1c6fd39f9",
+          "entidad_id": "1",
+          "codigo_caso": "CS-2024-0001",
+          "nombre_caso": "Demanda de rehabilitación y mejoramiento de la infraestructura del DPA Los Órganos por riesgos a la seguridad y continuidad de las actividades pesqueras",
+          "distrito_principal_id": "618",
+          "subsector_id": "1",
+          "tematica_id": "1",
+          "unidad_responsable_id": "1",
+          "punto_focal_usuario_id": "7c62121d-271e-45c6-95ac-273e88bb8446",
+          "nivel_conflicto_id": "3",
+          "nivel_riesgo_id": "2",
+          "prioridad_id": "2",
+          "estado_id": "1",
+          "descripcion_riesgo": "Riesgo de paralización de la actividad pesquera y afectación económica del sector artesanal debido a daños en la infraestructura del DPA por eventos oceanográficos extremos. Reacti…",
+          "latitud": "",
+          "longitud": "",
+          "fecha_inicio": "2024-12-01",
+          "fecha_cierre": "",
+          "fecha_ultima_actualizacion": "2026-11-26 20:23:32.669231+00:00",
+          "fuente_original": "avisa_historico",
+          "es_seed_historico": "True",
+          "created_at": "2026-10-31 07:52:56.714777+00:00",
+          "updated_at": "2026-11-26 20:28:49.532244+00:00",
+          "created_by": "00000000-0000-0000-0000-000000000001",
+          "updated_by": "00000000-0000-0000-0000-000000000001",
+          "origen_dato": "AVISA_HISTORICO",
+          "confidence": "1.00",
+          "es_validado_humano": "True",
+          "nivel_clasificacion": "2",
+          "ciclo_intervencion_id": "3",
+          "pct_avance": "90.00",
+          "resumen_ejecutivo": "Pescadores artesanales del DPA Los Órganos demandan la rehabilitación de la infraestructura del desembarcadero, tras la clausura temporal del muelle por riesgo a la vida humana. La…",
+          "region_principal_id": "20",
+          "provincia_principal_id": "57",
+          "fecha_reapertura": "",
+          "n_reaperturas": "0",
+          "motivo_cierre": "",
+          "link_reporte_pdf": "",
+          "codigo_legado": "CS-PRODUCE-2026-002",
+          "anulado_en": "",
+          "anulado_por": "",
+          "anulacion_id": "",
+          "motivo_anulacion": "",
+          "naturaleza_id": "",
+          "estado_actualizacion": "",
+          "nivel_riesgo_inicial_id": "",
+          "link_analisis_caso": "",
+          "enlace_analisis": ""
+        },
+        {
+          "id": "4b23bf41-a361-445d-ba58-5a713524428a",
+          "entidad_id": "1",
+          "codigo_caso": "CS-2012-0001",
+          "nombre_caso": "Reubicación de embarcaciones pesqueras del Callao fondeadas en zona concesionada a la empresa APM Terminals.",
+          "distrito_principal_id": "267",
+          "subsector_id": "1",
+          "tematica_id": "1",
+          "unidad_responsable_id": "1",
+          "punto_focal_usuario_id": "935b8363-f8bf-422d-9504-e4eee965aee3",
+          "nivel_conflicto_id": "3",
+          "nivel_riesgo_id": "3",
+          "prioridad_id": "1",
+          "estado_id": "1",
+          "descripcion_riesgo": "1. Escalamiento del conflicto social debido a la falta de implementación de soluciones tras la culminación del DU 004-2025, generando desconfianza en los pescadores y rechazo a nue…",
+          "latitud": "",
+          "longitud": "",
+          "fecha_inicio": "2012-08-01",
+          "fecha_cierre": "",
+          "fecha_ultima_actualizacion": "2026-11-26 20:23:32.669231+00:00",
+          "fuente_original": "avisa_historico",
+          "es_seed_historico": "True",
+          "created_at": "2026-10-31 07:52:56.714777+00:00",
+          "updated_at": "2026-11-26 20:28:49.532244+00:00",
+          "created_by": "00000000-0000-0000-0000-000000000001",
+          "updated_by": "00000000-0000-0000-0000-000000000001",
+          "origen_dato": "AVISA_HISTORICO",
+          "confidence": "1.00",
+          "es_validado_humano": "True",
+          "nivel_clasificacion": "2",
+          "ciclo_intervencion_id": "1",
+          "pct_avance": "0.00",
+          "resumen_ejecutivo": "Los pescadores artesanales del Callao demandan una solución integral a la reubicación de las embarcaciones fondeadas en el Muelle 5E del Terminal Norte Multipropósito, concesionado…",
+          "region_principal_id": "7",
+          "provincia_principal_id": "25",
+          "fecha_reapertura": "",
+          "n_reaperturas": "0",
+          "motivo_cierre": "",
+          "link_reporte_pdf": "",
+          "codigo_legado": "CS-PRODUCE-2026-003",
+          "anulado_en": "",
+          "anulado_por": "",
+          "anulacion_id": "",
+          "motivo_anulacion": "",
+          "naturaleza_id": "",
+          "estado_actualizacion": "",
+          "nivel_riesgo_inicial_id": "",
+          "link_analisis_caso": "",
+          "enlace_analisis": ""
+        }
+      ],
+      "c03_por_tipo": {
+        "codigo_cs": 46,
+        "numerico": 34,
+        "otro": 0
+      }
+    },
+    "resueltos_por_via": {
+      "a_fact_fila_n": 34,
+      "b_core_casos_codigo_legado": 28
+    },
+    "resueltos_total": 62,
+    "sin_caso_total": 18,
+    "esperado_contexto": {
+      "resueltos": 60,
+      "sin_caso": 18
+    },
+    "coincide_contexto": false,
+    "advertencia_contexto": "medición propia: el contexto decía 60/18, se obtienen 62/18 con 46 códigos CS- (28 resueltos) y 34 numéricos (34 resueltos vía fact_casos.c01)",
+    "sin_caso_resolubles_por_vias_suplementarias": 2,
+    "resumen_por_codigo": {
+      "CS-PA-REG-2026-01": {
+        "filas": 12,
+        "via": null,
+        "caso_id": null,
+        "corroborado": false,
+        "veredicto": "imposible",
+        "motivo": "vía (e) inconsistente: el mismo c03 apunta a 3 casos distintos"
+      },
+      "CS-PA-REG-2026-04": {
+        "filas": 2,
+        "via": null,
+        "caso_id": null,
+        "corroborado": false,
+        "veredicto": "imposible",
+        "motivo": "vía (e) cubre sólo parte de las filas del mismo c03"
+      },
+      "CS-PRODUCE-2026-06": {
+        "filas": 1,
+        "via": "p_padding_dentro_codigo",
+        "caso_id": "21b43ede-6348-4330-baa4-a1166c00e1f0",
+        "corroborado": false,
+        "veredicto": "dudoso",
+        "motivo": "sólo relleno de ceros (sin corroboración independiente)"
+      },
+      "CS-PRODUCE-2026-07": {
+        "filas": 1,
+        "via": "p_padding_dentro_codigo",
+        "caso_id": "9373ad12-ded1-4484-b33f-05228422f24d",
+        "corroborado": true,
+        "veredicto": "seguro",
+        "motivo": "relleno de ceros + corroborado por vía (e) independiente"
+      },
+      "CS-PRODUCE-2026-037": {
+        "filas": 1,
+        "via": null,
+        "caso_id": null,
+        "corroborado": false,
+        "veredicto": "imposible",
+        "motivo": "colisión: el caso ya pertenece a 'legacy.bridge_caso_actor.c03=CS-PRODUCE-2026-015'"
+      },
+      "CS-PRODUCE-2026-038": {
+        "filas": 1,
+        "via": null,
+        "caso_id": null,
+        "corroborado": false,
+        "veredicto": "imposible",
+        "motivo": "colisión: el caso ya pertenece a 'legacy.bridge_caso_actor.c03=CS-PRODUCE-2026-015'"
+      }
+    },
+    "filas_sin_caso": [
+      {
+        "c01": "BCA-CS-PA-REG-2026-01-01",
+        "c02": "ACT-007",
+        "c03": "CS-PA-REG-2026-01",
+        "tipo_c03": "codigo_cs",
+        "vias": {
+          "a_fact_fila_n": {
+            "ok": false,
+            "motivo": "c03 no numérico"
+          },
+          "b_core_casos_codigo_legado": {
+            "ok": false,
+            "caso_id": null,
+            "columna": "codigo_legado",
+            "motivo": "c03 no figura en core.casos.codigo_legado"
+          },
+          "c_core_casos_codigo_caso": {
+            "ok": false,
+            "caso_id": null,
+            "columna": "codigo_caso",
+            "motivo": "c03 no figura en core.casos.codigo_caso"
+          },
+          "d_nombre_caso_fuzzy": {
+            "ok": false,
+            "caso_id": null,
+            "similitud": 0.3171,
+            "umbral": 0.85,
+            "motivo": "similitud bajo umbral"
+          },
+          "p_padding_dentro_codigo": {
+            "ok": false,
+            "caso_id": null,
+            "candidatos": 0,
+            "motivo": "sin candidato por relleno"
+          },
+          "e_actor_alerta_caso": {
+            "ok": true,
+            "caso_id": "29e86bcf-e3ed-4657-99ea-2be454aaa611",
+            "candidatos": 1,
+            "alertas_del_actor": 6,
+            "motivo": null
+          }
+        },
+        "via_que_funciona": null,
+        "veredicto_codigo": "imposible",
+        "corroborado": false,
+        "motivo_veredicto": "vía (e) inconsistente: el mismo c03 apunta a 3 casos distintos"
+      },
+      {
+        "c01": "BCA-CS-PA-REG-2026-01-02",
+        "c02": "ACT-008",
+        "c03": "CS-PA-REG-2026-01",
+        "tipo_c03": "codigo_cs",
+        "vias": {
+          "a_fact_fila_n": {
+            "ok": false,
+            "motivo": "c03 no numérico"
+          },
+          "b_core_casos_codigo_legado": {
+            "ok": false,
+            "caso_id": null,
+            "columna": "codigo_legado",
+            "motivo": "c03 no figura en core.casos.codigo_legado"
+          },
+          "c_core_casos_codigo_caso": {
+            "ok": false,
+            "caso_id": null,
+            "columna": "codigo_caso",
+            "motivo": "c03 no figura en core.casos.codigo_caso"
+          },
+          "d_nombre_caso_fuzzy": {
+            "ok": false,
+            "caso_id": null,
+            "similitud": 0.3171,
+            "umbral": 0.85,
+            "motivo": "similitud bajo umbral"
+          },
+          "p_padding_dentro_codigo": {
+            "ok": false,
+            "caso_id": null,
+            "candidatos": 0,
+            "motivo": "sin candidato por relleno"
+          },
+          "e_actor_alerta_caso": {
+            "ok": false,
+            "caso_id": null,
+            "candidatos": 0,
+            "alertas_del_actor": 0,
+            "motivo": "sin alertas para el actor"
+          }
+        },
+        "via_que_funciona": null,
+        "veredicto_codigo": "imposible",
+        "corroborado": false,
+        "motivo_veredicto": "vía (e) inconsistente: el mismo c03 apunta a 3 casos distintos"
+      },
+      {
+        "c01": "BCA-CS-PA-REG-2026-01-01",
+        "c02": "ACT-013",
+        "c03": "CS-PA-REG-2026-01",
+        "tipo_c03": "codigo_cs",
+        "vias": {
+          "a_fact_fila_n": {
+            "ok": false,
+            "motivo": "c03 no numérico"
+          },
+          "b_core_casos_codigo_legado": {
+            "ok": false,
+            "caso_id": null,
+            "columna": "codigo_legado",
+            "motivo": "c03 no figura en core.casos.codigo_legado"
+          },
+          "c_core_casos_codigo_caso": {
+            "ok": false,
+            "caso_id": null,
+            "columna": "codigo_caso",
+            "motivo": "c03 no figura en core.casos.codigo_caso"
+          },
+          "d_nombre_caso_fuzzy": {
+            "ok": false,
+            "caso_id": null,
+            "similitud": 0.3171,
+            "umbral": 0.85,
+            "motivo": "similitud bajo umbral"
+          },
+          "p_padding_dentro_codigo": {
+            "ok": false,
+            "caso_id": null,
+            "candidatos": 0,
+            "motivo": "sin candidato por relleno"
+          },
+          "e_actor_alerta_caso": {
+            "ok": false,
+            "caso_id": null,
+            "candidatos": 0,
+            "alertas_del_actor": 0,
+            "motivo": "sin alertas para el actor"
+          }
+        },
+        "via_que_funciona": null,
+        "veredicto_codigo": "imposible",
+        "corroborado": false,
+        "motivo_veredicto": "vía (e) inconsistente: el mismo c03 apunta a 3 casos distintos"
+      },
+      {
+        "c01": "BCA-CS-PA-REG-2026-01-02",
+        "c02": "ACT-003",
+        "c03": "CS-PA-REG-2026-01",
+        "tipo_c03": "codigo_cs",
+        "vias": {
+          "a_fact_fila_n": {
+            "ok": false,
+            "motivo": "c03 no numérico"
+          },
+          "b_core_casos_codigo_legado": {
+            "ok": false,
+            "caso_id": null,
+            "columna": "codigo_legado",
+            "motivo": "c03 no figura en core.casos.codigo_legado"
+          },
+          "c_core_casos_codigo_caso": {
+            "ok": false,
+            "caso_id": null,
+            "columna": "codigo_caso",
+            "motivo": "c03 no figura en core.casos.codigo_caso"
+          },
+          "d_nombre_caso_fuzzy": {
+            "ok": false,
+            "caso_id": null,
+            "similitud": 0.3171,
+            "umbral": 0.85,
+            "motivo": "similitud bajo umbral"
+          },
+          "p_padding_dentro_codigo": {
+            "ok": false,
+            "caso_id": null,
+            "candidatos": 0,
+            "motivo": "sin candidato por relleno"
+          },
+          "e_actor_alerta_caso": {
+            "ok": false,
+            "caso_id": null,
+            "candidatos": 0,
+            "alertas_del_actor": 0,
+            "motivo": "sin alertas para el actor"
+          }
+        },
+        "via_que_funciona": null,
+        "veredicto_codigo": "imposible",
+        "corroborado": false,
+        "motivo_veredicto": "vía (e) inconsistente: el mismo c03 apunta a 3 casos distintos"
+      },
+      {
+        "c01": "BCA-CS-PA-REG-2026-01-01",
+        "c02": "ACT-013",
+        "c03": "CS-PA-REG-2026-01",
+        "tipo_c03": "codigo_cs",
+        "vias": {
+          "a_fact_fila_n": {
+            "ok": false,
+            "motivo": "c03 no numérico"
+          },
+          "b_core_casos_codigo_legado": {
+            "ok": false,
+            "caso_id": null,
+            "columna": "codigo_legado",
+            "motivo": "c03 no figura en core.casos.codigo_legado"
+          },
+          "c_core_casos_codigo_caso": {
+            "ok": false,
+            "caso_id": null,
+            "columna": "codigo_caso",
+            "motivo": "c03 no figura en core.casos.codigo_caso"
+          },
+          "d_nombre_caso_fuzzy": {
+            "ok": false,
+            "caso_id": null,
+            "similitud": 0.3171,
+            "umbral": 0.85,
+            "motivo": "similitud bajo umbral"
+          },
+          "p_padding_dentro_codigo": {
+            "ok": false,
+            "caso_id": null,
+            "candidatos": 0,
+            "motivo": "sin candidato por relleno"
+          },
+          "e_actor_alerta_caso": {
+            "ok": false,
+            "caso_id": null,
+            "candidatos": 0,
+            "alertas_del_actor": 0,
+            "motivo": "sin alertas para el actor"
+          }
+        },
+        "via_que_funciona": null,
+        "veredicto_codigo": "imposible",
+        "corroborado": false,
+        "motivo_veredicto": "vía (e) inconsistente: el mismo c03 apunta a 3 casos distintos"
+      },
+      {
+        "c01": "BCA-CS-PA-REG-2026-01-02",
+        "c02": "ACT-008",
+        "c03": "CS-PA-REG-2026-01",
+        "tipo_c03": "codigo_cs",
+        "vias": {
+          "a_fact_fila_n": {
+            "ok": false,
+            "motivo": "c03 no numérico"
+          },
+          "b_core_casos_codigo_legado": {
+            "ok": false,
+            "caso_id": null,
+            "columna": "codigo_legado",
+            "motivo": "c03 no figura en core.casos.codigo_legado"
+          },
+          "c_core_casos_codigo_caso": {
+            "ok": false,
+            "caso_id": null,
+            "columna": "codigo_caso",
+            "motivo": "c03 no figura en core.casos.codigo_caso"
+          },
+          "d_nombre_caso_fuzzy": {
+            "ok": false,
+            "caso_id": null,
+            "similitud": 0.3171,
+            "umbral": 0.85,
+            "motivo": "similitud bajo umbral"
+          },
+          "p_padding_dentro_codigo": {
+            "ok": false,
+            "caso_id": null,
+            "candidatos": 0,
+            "motivo": "sin candidato por relleno"
+          },
+          "e_actor_alerta_caso": {
+            "ok": false,
+            "caso_id": null,
+            "candidatos": 0,
+            "alertas_del_actor": 0,
+            "motivo": "sin alertas para el actor"
+          }
+        },
+        "via_que_funciona": null,
+        "veredicto_codigo": "imposible",
+        "corroborado": false,
+        "motivo_veredicto": "vía (e) inconsistente: el mismo c03 apunta a 3 casos distintos"
+      },
+      {
+        "c01": "BCA-CS-PA-REG-2026-01-01",
+        "c02": "ACT-010",
+        "c03": "CS-PA-REG-2026-01",
+        "tipo_c03": "codigo_cs",
+        "vias": {
+          "a_fact_fila_n": {
+            "ok": false,
+            "motivo": "c03 no numérico"
+          },
+          "b_core_casos_codigo_legado": {
+            "ok": false,
+            "caso_id": null,
+            "columna": "codigo_legado",
+            "motivo": "c03 no figura en core.casos.codigo_legado"
+          },
+          "c_core_casos_codigo_caso": {
+            "ok": false,
+            "caso_id": null,
+            "columna": "codigo_caso",
+            "motivo": "c03 no figura en core.casos.codigo_caso"
+          },
+          "d_nombre_caso_fuzzy": {
+            "ok": false,
+            "caso_id": null,
+            "similitud": 0.3171,
+            "umbral": 0.85,
+            "motivo": "similitud bajo umbral"
+          },
+          "p_padding_dentro_codigo": {
+            "ok": false,
+            "caso_id": null,
+            "candidatos": 0,
+            "motivo": "sin candidato por relleno"
+          },
+          "e_actor_alerta_caso": {
+            "ok": true,
+            "caso_id": "6e53ff24-4513-4469-b469-008c945ec7a7",
+            "candidatos": 1,
+            "alertas_del_actor": 1,
+            "motivo": null
+          }
+        },
+        "via_que_funciona": null,
+        "veredicto_codigo": "imposible",
+        "corroborado": false,
+        "motivo_veredicto": "vía (e) inconsistente: el mismo c03 apunta a 3 casos distintos"
+      },
+      {
+        "c01": "BCA-CS-PA-REG-2026-01-01",
+        "c02": "ACT-011",
+        "c03": "CS-PA-REG-2026-01",
+        "tipo_c03": "codigo_cs",
+        "vias": {
+          "a_fact_fila_n": {
+            "ok": false,
+            "motivo": "c03 no numérico"
+          },
+          "b_core_casos_codigo_legado": {
+            "ok": false,
+            "caso_id": null,
+            "columna": "codigo_legado",
+            "motivo": "c03 no figura en core.casos.codigo_legado"
+          },
+          "c_core_casos_codigo_caso": {
+            "ok": false,
+            "caso_id": null,
+            "columna": "codigo_caso",
+            "motivo": "c03 no figura en core.casos.codigo_caso"
+          },
+          "d_nombre_caso_fuzzy": {
+            "ok": false,
+            "caso_id": null,
+            "similitud": 0.3171,
+            "umbral": 0.85,
+            "motivo": "similitud bajo umbral"
+          },
+          "p_padding_dentro_codigo": {
+            "ok": false,
+            "caso_id": null,
+            "candidatos": 0,
+            "motivo": "sin candidato por relleno"
+          },
+          "e_actor_alerta_caso": {
+            "ok": false,
+            "caso_id": null,
+            "candidatos": 0,
+            "alertas_del_actor": 0,
+            "motivo": "sin alertas para el actor"
+          }
+        },
+        "via_que_funciona": null,
+        "veredicto_codigo": "imposible",
+        "corroborado": false,
+        "motivo_veredicto": "vía (e) inconsistente: el mismo c03 apunta a 3 casos distintos"
+      },
+      {
+        "c01": "BCA-CS-PA-REG-2026-01-01",
+        "c02": "ACT-006",
+        "c03": "CS-PA-REG-2026-01",
+        "tipo_c03": "codigo_cs",
+        "vias": {
+          "a_fact_fila_n": {
+            "ok": false,
+            "motivo": "c03 no numérico"
+          },
+          "b_core_casos_codigo_legado": {
+            "ok": false,
+            "caso_id": null,
+            "columna": "codigo_legado",
+            "motivo": "c03 no figura en core.casos.codigo_legado"
+          },
+          "c_core_casos_codigo_caso": {
+            "ok": false,
+            "caso_id": null,
+            "columna": "codigo_caso",
+            "motivo": "c03 no figura en core.casos.codigo_caso"
+          },
+          "d_nombre_caso_fuzzy": {
+            "ok": false,
+            "caso_id": null,
+            "similitud": 0.3171,
+            "umbral": 0.85,
+            "motivo": "similitud bajo umbral"
+          },
+          "p_padding_dentro_codigo": {
+            "ok": false,
+            "caso_id": null,
+            "candidatos": 0,
+            "motivo": "sin candidato por relleno"
+          },
+          "e_actor_alerta_caso": {
+            "ok": true,
+            "caso_id": "9373ad12-ded1-4484-b33f-05228422f24d",
+            "candidatos": 1,
+            "alertas_del_actor": 2,
+            "motivo": null
+          }
+        },
+        "via_que_funciona": null,
+        "veredicto_codigo": "imposible",
+        "corroborado": false,
+        "motivo_veredicto": "vía (e) inconsistente: el mismo c03 apunta a 3 casos distintos"
+      },
+      {
+        "c01": "BCA-CS-PA-REG-2026-01-02",
+        "c02": "ACT-003",
+        "c03": "CS-PA-REG-2026-01",
+        "tipo_c03": "codigo_cs",
+        "vias": {
+          "a_fact_fila_n": {
+            "ok": false,
+            "motivo": "c03 no numérico"
+          },
+          "b_core_casos_codigo_legado": {
+            "ok": false,
+            "caso_id": null,
+            "columna": "codigo_legado",
+            "motivo": "c03 no figura en core.casos.codigo_legado"
+          },
+          "c_core_casos_codigo_caso": {
+            "ok": false,
+            "caso_id": null,
+            "columna": "codigo_caso",
+            "motivo": "c03 no figura en core.casos.codigo_caso"
+          },
+          "d_nombre_caso_fuzzy": {
+            "ok": false,
+            "caso_id": null,
+            "similitud": 0.3171,
+            "umbral": 0.85,
+            "motivo": "similitud bajo umbral"
+          },
+          "p_padding_dentro_codigo": {
+            "ok": false,
+            "caso_id": null,
+            "candidatos": 0,
+            "motivo": "sin candidato por relleno"
+          },
+          "e_actor_alerta_caso": {
+            "ok": false,
+            "caso_id": null,
+            "candidatos": 0,
+            "alertas_del_actor": 0,
+            "motivo": "sin alertas para el actor"
+          }
+        },
+        "via_que_funciona": null,
+        "veredicto_codigo": "imposible",
+        "corroborado": false,
+        "motivo_veredicto": "vía (e) inconsistente: el mismo c03 apunta a 3 casos distintos"
+      },
+      {
+        "c01": "BCA-CS-PA-REG-2026-01-01",
+        "c02": "ACT-011",
+        "c03": "CS-PA-REG-2026-01",
+        "tipo_c03": "codigo_cs",
+        "vias": {
+          "a_fact_fila_n": {
+            "ok": false,
+            "motivo": "c03 no numérico"
+          },
+          "b_core_casos_codigo_legado": {
+            "ok": false,
+            "caso_id": null,
+            "columna": "codigo_legado",
+            "motivo": "c03 no figura en core.casos.codigo_legado"
+          },
+          "c_core_casos_codigo_caso": {
+            "ok": false,
+            "caso_id": null,
+            "columna": "codigo_caso",
+            "motivo": "c03 no figura en core.casos.codigo_caso"
+          },
+          "d_nombre_caso_fuzzy": {
+            "ok": false,
+            "caso_id": null,
+            "similitud": 0.3171,
+            "umbral": 0.85,
+            "motivo": "similitud bajo umbral"
+          },
+          "p_padding_dentro_codigo": {
+            "ok": false,
+            "caso_id": null,
+            "candidatos": 0,
+            "motivo": "sin candidato por relleno"
+          },
+          "e_actor_alerta_caso": {
+            "ok": false,
+            "caso_id": null,
+            "candidatos": 0,
+            "alertas_del_actor": 0,
+            "motivo": "sin alertas para el actor"
+          }
+        },
+        "via_que_funciona": null,
+        "veredicto_codigo": "imposible",
+        "corroborado": false,
+        "motivo_veredicto": "vía (e) inconsistente: el mismo c03 apunta a 3 casos distintos"
+      },
+      {
+        "c01": "BCA-CS-PA-REG-2026-01-01",
+        "c02": "ACT-008",
+        "c03": "CS-PA-REG-2026-01",
+        "tipo_c03": "codigo_cs",
+        "vias": {
+          "a_fact_fila_n": {
+            "ok": false,
+            "motivo": "c03 no numérico"
+          },
+          "b_core_casos_codigo_legado": {
+            "ok": false,
+            "caso_id": null,
+            "columna": "codigo_legado",
+            "motivo": "c03 no figura en core.casos.codigo_legado"
+          },
+          "c_core_casos_codigo_caso": {
+            "ok": false,
+            "caso_id": null,
+            "columna": "codigo_caso",
+            "motivo": "c03 no figura en core.casos.codigo_caso"
+          },
+          "d_nombre_caso_fuzzy": {
+            "ok": false,
+            "caso_id": null,
+            "similitud": 0.3171,
+            "umbral": 0.85,
+            "motivo": "similitud bajo umbral"
+          },
+          "p_padding_dentro_codigo": {
+            "ok": false,
+            "caso_id": null,
+            "candidatos": 0,
+            "motivo": "sin candidato por relleno"
+          },
+          "e_actor_alerta_caso": {
+            "ok": false,
+            "caso_id": null,
+            "candidatos": 0,
+            "alertas_del_actor": 0,
+            "motivo": "sin alertas para el actor"
+          }
+        },
+        "via_que_funciona": null,
+        "veredicto_codigo": "imposible",
+        "corroborado": false,
+        "motivo_veredicto": "vía (e) inconsistente: el mismo c03 apunta a 3 casos distintos"
+      },
+      {
+        "c01": "BCA-CS-PA-REG-2026-04-01",
+        "c02": "ACT-009",
+        "c03": "CS-PA-REG-2026-04",
+        "tipo_c03": "codigo_cs",
+        "vias": {
+          "a_fact_fila_n": {
+            "ok": false,
+            "motivo": "c03 no numérico"
+          },
+          "b_core_casos_codigo_legado": {
+            "ok": false,
+            "caso_id": null,
+            "columna": "codigo_legado",
+            "motivo": "c03 no figura en core.casos.codigo_legado"
+          },
+          "c_core_casos_codigo_caso": {
+            "ok": false,
+            "caso_id": null,
+            "columna": "codigo_caso",
+            "motivo": "c03 no figura en core.casos.codigo_caso"
+          },
+          "d_nombre_caso_fuzzy": {
+            "ok": false,
+            "caso_id": null,
+            "similitud": 0.3171,
+            "umbral": 0.85,
+            "motivo": "similitud bajo umbral"
+          },
+          "p_padding_dentro_codigo": {
+            "ok": false,
+            "caso_id": null,
+            "candidatos": 0,
+            "motivo": "sin candidato por relleno"
+          },
+          "e_actor_alerta_caso": {
+            "ok": false,
+            "caso_id": null,
+            "candidatos": 0,
+            "alertas_del_actor": 0,
+            "motivo": "sin alertas para el actor"
+          }
+        },
+        "via_que_funciona": null,
+        "veredicto_codigo": "imposible",
+        "corroborado": false,
+        "motivo_veredicto": "vía (e) cubre sólo parte de las filas del mismo c03"
+      },
+      {
+        "c01": "BCA-CS-PA-REG-2026-04-01",
+        "c02": "ACT-012",
+        "c03": "CS-PA-REG-2026-04",
+        "tipo_c03": "codigo_cs",
+        "vias": {
+          "a_fact_fila_n": {
+            "ok": false,
+            "motivo": "c03 no numérico"
+          },
+          "b_core_casos_codigo_legado": {
+            "ok": false,
+            "caso_id": null,
+            "columna": "codigo_legado",
+            "motivo": "c03 no figura en core.casos.codigo_legado"
+          },
+          "c_core_casos_codigo_caso": {
+            "ok": false,
+            "caso_id": null,
+            "columna": "codigo_caso",
+            "motivo": "c03 no figura en core.casos.codigo_caso"
+          },
+          "d_nombre_caso_fuzzy": {
+            "ok": false,
+            "caso_id": null,
+            "similitud": 0.3171,
+            "umbral": 0.85,
+            "motivo": "similitud bajo umbral"
+          },
+          "p_padding_dentro_codigo": {
+            "ok": false,
+            "caso_id": null,
+            "candidatos": 0,
+            "motivo": "sin candidato por relleno"
+          },
+          "e_actor_alerta_caso": {
+            "ok": true,
+            "caso_id": "6e53ff24-4513-4469-b469-008c945ec7a7",
+            "candidatos": 1,
+            "alertas_del_actor": 2,
+            "motivo": null
+          }
+        },
+        "via_que_funciona": null,
+        "veredicto_codigo": "imposible",
+        "corroborado": false,
+        "motivo_veredicto": "vía (e) cubre sólo parte de las filas del mismo c03"
+      },
+      {
+        "c01": "BCA-CS-PRODUCE-2026-06-01",
+        "c02": "ACT-007",
+        "c03": "CS-PRODUCE-2026-06",
+        "tipo_c03": "codigo_cs",
+        "vias": {
+          "a_fact_fila_n": {
+            "ok": false,
+            "motivo": "c03 no numérico"
+          },
+          "b_core_casos_codigo_legado": {
+            "ok": false,
+            "caso_id": null,
+            "columna": "codigo_legado",
+            "motivo": "c03 no figura en core.casos.codigo_legado"
+          },
+          "c_core_casos_codigo_caso": {
+            "ok": false,
+            "caso_id": null,
+            "columna": "codigo_caso",
+            "motivo": "c03 no figura en core.casos.codigo_caso"
+          },
+          "d_nombre_caso_fuzzy": {
+            "ok": false,
+            "caso_id": null,
+            "similitud": 0.2892,
+            "umbral": 0.85,
+            "motivo": "similitud bajo umbral"
+          },
+          "p_padding_dentro_codigo": {
+            "ok": true,
+            "caso_id": "21b43ede-6348-4330-baa4-a1166c00e1f0",
+            "candidatos": 1,
+            "motivo": null
+          },
+          "e_actor_alerta_caso": {
+            "ok": true,
+            "caso_id": "29e86bcf-e3ed-4657-99ea-2be454aaa611",
+            "candidatos": 1,
+            "alertas_del_actor": 6,
+            "motivo": null
+          }
+        },
+        "via_que_funciona": "p_padding_dentro_codigo",
+        "veredicto_codigo": "dudoso",
+        "corroborado": false,
+        "motivo_veredicto": "sólo relleno de ceros (sin corroboración independiente)"
+      },
+      {
+        "c01": "BCA-CS-PRODUCE-2026-07-01",
+        "c02": "ACT-005",
+        "c03": "CS-PRODUCE-2026-07",
+        "tipo_c03": "codigo_cs",
+        "vias": {
+          "a_fact_fila_n": {
+            "ok": false,
+            "motivo": "c03 no numérico"
+          },
+          "b_core_casos_codigo_legado": {
+            "ok": false,
+            "caso_id": null,
+            "columna": "codigo_legado",
+            "motivo": "c03 no figura en core.casos.codigo_legado"
+          },
+          "c_core_casos_codigo_caso": {
+            "ok": false,
+            "caso_id": null,
+            "columna": "codigo_caso",
+            "motivo": "c03 no figura en core.casos.codigo_caso"
+          },
+          "d_nombre_caso_fuzzy": {
+            "ok": false,
+            "caso_id": null,
+            "similitud": 0.2892,
+            "umbral": 0.85,
+            "motivo": "similitud bajo umbral"
+          },
+          "p_padding_dentro_codigo": {
+            "ok": true,
+            "caso_id": "9373ad12-ded1-4484-b33f-05228422f24d",
+            "candidatos": 1,
+            "motivo": null
+          },
+          "e_actor_alerta_caso": {
+            "ok": true,
+            "caso_id": "9373ad12-ded1-4484-b33f-05228422f24d",
+            "candidatos": 1,
+            "alertas_del_actor": 6,
+            "motivo": null
+          }
+        },
+        "via_que_funciona": "p_padding_dentro_codigo",
+        "veredicto_codigo": "seguro",
+        "corroborado": true,
+        "motivo_veredicto": "relleno de ceros + corroborado por vía (e) independiente"
+      },
+      {
+        "c01": "BCA-CS-PRODUCE-2026-037-01",
+        "c02": "ACT-025",
+        "c03": "CS-PRODUCE-2026-037",
+        "tipo_c03": "codigo_cs",
+        "vias": {
+          "a_fact_fila_n": {
+            "ok": false,
+            "motivo": "c03 no numérico"
+          },
+          "b_core_casos_codigo_legado": {
+            "ok": false,
+            "caso_id": null,
+            "columna": "codigo_legado",
+            "motivo": "c03 no figura en core.casos.codigo_legado"
+          },
+          "c_core_casos_codigo_caso": {
+            "ok": false,
+            "caso_id": null,
+            "columna": "codigo_caso",
+            "motivo": "c03 no figura en core.casos.codigo_caso"
+          },
+          "d_nombre_caso_fuzzy": {
+            "ok": false,
+            "caso_id": null,
+            "similitud": 0.2857,
+            "umbral": 0.85,
+            "motivo": "similitud bajo umbral"
+          },
+          "p_padding_dentro_codigo": {
+            "ok": false,
+            "caso_id": null,
+            "candidatos": 0,
+            "motivo": "sin candidato por relleno"
+          },
+          "e_actor_alerta_caso": {
+            "ok": true,
+            "caso_id": "86040c3a-e81e-46ba-a564-f5d7e351c78c",
+            "candidatos": 1,
+            "alertas_del_actor": 1,
+            "motivo": null
+          }
+        },
+        "via_que_funciona": null,
+        "veredicto_codigo": "imposible",
+        "corroborado": false,
+        "motivo_veredicto": "colisión: el caso ya pertenece a 'legacy.bridge_caso_actor.c03=CS-PRODUCE-2026-015'"
+      },
+      {
+        "c01": "BCA-CS-PRODUCE-2026-038-01",
+        "c02": "ACT-025",
+        "c03": "CS-PRODUCE-2026-038",
+        "tipo_c03": "codigo_cs",
+        "vias": {
+          "a_fact_fila_n": {
+            "ok": false,
+            "motivo": "c03 no numérico"
+          },
+          "b_core_casos_codigo_legado": {
+            "ok": false,
+            "caso_id": null,
+            "columna": "codigo_legado",
+            "motivo": "c03 no figura en core.casos.codigo_legado"
+          },
+          "c_core_casos_codigo_caso": {
+            "ok": false,
+            "caso_id": null,
+            "columna": "codigo_caso",
+            "motivo": "c03 no figura en core.casos.codigo_caso"
+          },
+          "d_nombre_caso_fuzzy": {
+            "ok": false,
+            "caso_id": null,
+            "similitud": 0.2857,
+            "umbral": 0.85,
+            "motivo": "similitud bajo umbral"
+          },
+          "p_padding_dentro_codigo": {
+            "ok": false,
+            "caso_id": null,
+            "candidatos": 0,
+            "motivo": "sin candidato por relleno"
+          },
+          "e_actor_alerta_caso": {
+            "ok": true,
+            "caso_id": "86040c3a-e81e-46ba-a564-f5d7e351c78c",
+            "candidatos": 1,
+            "alertas_del_actor": 1,
+            "motivo": null
+          }
+        },
+        "via_que_funciona": null,
+        "veredicto_codigo": "imposible",
+        "corroborado": false,
+        "motivo_veredicto": "colisión: el caso ya pertenece a 'legacy.bridge_caso_actor.c03=CS-PRODUCE-2026-015'"
+      }
+    ],
+    "mapeos": [
+      {
+        "origen": "legacy.bridge_caso_actor.c03=CS-PA-REG-2026-01",
+        "c02_actor": "ACT-007",
+        "destino": null,
+        "via": null,
+        "corroborado": false,
+        "motivo": "vía (e) inconsistente: el mismo c03 apunta a 3 casos distintos",
+        "vias_probadas": [
+          "a_fact_fila_n",
+          "b_core_casos_codigo_legado",
+          "c_core_casos_codigo_caso",
+          "d_nombre_caso_fuzzy",
+          "p_padding_dentro_codigo",
+          "e_actor_alerta_caso"
+        ],
+        "veredicto": "imposible"
+      },
+      {
+        "origen": "legacy.bridge_caso_actor.c03=CS-PA-REG-2026-01",
+        "c02_actor": "ACT-008",
+        "destino": null,
+        "via": null,
+        "corroborado": false,
+        "motivo": "vía (e) inconsistente: el mismo c03 apunta a 3 casos distintos",
+        "vias_probadas": [
+          "a_fact_fila_n",
+          "b_core_casos_codigo_legado",
+          "c_core_casos_codigo_caso",
+          "d_nombre_caso_fuzzy",
+          "p_padding_dentro_codigo",
+          "e_actor_alerta_caso"
+        ],
+        "veredicto": "imposible"
+      },
+      {
+        "origen": "legacy.bridge_caso_actor.c03=CS-PA-REG-2026-01",
+        "c02_actor": "ACT-013",
+        "destino": null,
+        "via": null,
+        "corroborado": false,
+        "motivo": "vía (e) inconsistente: el mismo c03 apunta a 3 casos distintos",
+        "vias_probadas": [
+          "a_fact_fila_n",
+          "b_core_casos_codigo_legado",
+          "c_core_casos_codigo_caso",
+          "d_nombre_caso_fuzzy",
+          "p_padding_dentro_codigo",
+          "e_actor_alerta_caso"
+        ],
+        "veredicto": "imposible"
+      },
+      {
+        "origen": "legacy.bridge_caso_actor.c03=CS-PA-REG-2026-01",
+        "c02_actor": "ACT-003",
+        "destino": null,
+        "via": null,
+        "corroborado": false,
+        "motivo": "vía (e) inconsistente: el mismo c03 apunta a 3 casos distintos",
+        "vias_probadas": [
+          "a_fact_fila_n",
+          "b_core_casos_codigo_legado",
+          "c_core_casos_codigo_caso",
+          "d_nombre_caso_fuzzy",
+          "p_padding_dentro_codigo",
+          "e_actor_alerta_caso"
+        ],
+        "veredicto": "imposible"
+      },
+      {
+        "origen": "legacy.bridge_caso_actor.c03=CS-PA-REG-2026-01",
+        "c02_actor": "ACT-013",
+        "destino": null,
+        "via": null,
+        "corroborado": false,
+        "motivo": "vía (e) inconsistente: el mismo c03 apunta a 3 casos distintos",
+        "vias_probadas": [
+          "a_fact_fila_n",
+          "b_core_casos_codigo_legado",
+          "c_core_casos_codigo_caso",
+          "d_nombre_caso_fuzzy",
+          "p_padding_dentro_codigo",
+          "e_actor_alerta_caso"
+        ],
+        "veredicto": "imposible"
+      },
+      {
+        "origen": "legacy.bridge_caso_actor.c03=CS-PA-REG-2026-01",
+        "c02_actor": "ACT-008",
+        "destino": null,
+        "via": null,
+        "corroborado": false,
+        "motivo": "vía (e) inconsistente: el mismo c03 apunta a 3 casos distintos",
+        "vias_probadas": [
+          "a_fact_fila_n",
+          "b_core_casos_codigo_legado",
+          "c_core_casos_codigo_caso",
+          "d_nombre_caso_fuzzy",
+          "p_padding_dentro_codigo",
+          "e_actor_alerta_caso"
+        ],
+        "veredicto": "imposible"
+      },
+      {
+        "origen": "legacy.bridge_caso_actor.c03=CS-PA-REG-2026-01",
+        "c02_actor": "ACT-010",
+        "destino": null,
+        "via": null,
+        "corroborado": false,
+        "motivo": "vía (e) inconsistente: el mismo c03 apunta a 3 casos distintos",
+        "vias_probadas": [
+          "a_fact_fila_n",
+          "b_core_casos_codigo_legado",
+          "c_core_casos_codigo_caso",
+          "d_nombre_caso_fuzzy",
+          "p_padding_dentro_codigo",
+          "e_actor_alerta_caso"
+        ],
+        "veredicto": "imposible"
+      },
+      {
+        "origen": "legacy.bridge_caso_actor.c03=CS-PA-REG-2026-01",
+        "c02_actor": "ACT-011",
+        "destino": null,
+        "via": null,
+        "corroborado": false,
+        "motivo": "vía (e) inconsistente: el mismo c03 apunta a 3 casos distintos",
+        "vias_probadas": [
+          "a_fact_fila_n",
+          "b_core_casos_codigo_legado",
+          "c_core_casos_codigo_caso",
+          "d_nombre_caso_fuzzy",
+          "p_padding_dentro_codigo",
+          "e_actor_alerta_caso"
+        ],
+        "veredicto": "imposible"
+      },
+      {
+        "origen": "legacy.bridge_caso_actor.c03=CS-PA-REG-2026-01",
+        "c02_actor": "ACT-006",
+        "destino": null,
+        "via": null,
+        "corroborado": false,
+        "motivo": "vía (e) inconsistente: el mismo c03 apunta a 3 casos distintos",
+        "vias_probadas": [
+          "a_fact_fila_n",
+          "b_core_casos_codigo_legado",
+          "c_core_casos_codigo_caso",
+          "d_nombre_caso_fuzzy",
+          "p_padding_dentro_codigo",
+          "e_actor_alerta_caso"
+        ],
+        "veredicto": "imposible"
+      },
+      {
+        "origen": "legacy.bridge_caso_actor.c03=CS-PA-REG-2026-01",
+        "c02_actor": "ACT-003",
+        "destino": null,
+        "via": null,
+        "corroborado": false,
+        "motivo": "vía (e) inconsistente: el mismo c03 apunta a 3 casos distintos",
+        "vias_probadas": [
+          "a_fact_fila_n",
+          "b_core_casos_codigo_legado",
+          "c_core_casos_codigo_caso",
+          "d_nombre_caso_fuzzy",
+          "p_padding_dentro_codigo",
+          "e_actor_alerta_caso"
+        ],
+        "veredicto": "imposible"
+      },
+      {
+        "origen": "legacy.bridge_caso_actor.c03=CS-PA-REG-2026-01",
+        "c02_actor": "ACT-011",
+        "destino": null,
+        "via": null,
+        "corroborado": false,
+        "motivo": "vía (e) inconsistente: el mismo c03 apunta a 3 casos distintos",
+        "vias_probadas": [
+          "a_fact_fila_n",
+          "b_core_casos_codigo_legado",
+          "c_core_casos_codigo_caso",
+          "d_nombre_caso_fuzzy",
+          "p_padding_dentro_codigo",
+          "e_actor_alerta_caso"
+        ],
+        "veredicto": "imposible"
+      },
+      {
+        "origen": "legacy.bridge_caso_actor.c03=CS-PA-REG-2026-01",
+        "c02_actor": "ACT-008",
+        "destino": null,
+        "via": null,
+        "corroborado": false,
+        "motivo": "vía (e) inconsistente: el mismo c03 apunta a 3 casos distintos",
+        "vias_probadas": [
+          "a_fact_fila_n",
+          "b_core_casos_codigo_legado",
+          "c_core_casos_codigo_caso",
+          "d_nombre_caso_fuzzy",
+          "p_padding_dentro_codigo",
+          "e_actor_alerta_caso"
+        ],
+        "veredicto": "imposible"
+      },
+      {
+        "origen": "legacy.bridge_caso_actor.c03=CS-PA-REG-2026-04",
+        "c02_actor": "ACT-009",
+        "destino": null,
+        "via": null,
+        "corroborado": false,
+        "motivo": "vía (e) cubre sólo parte de las filas del mismo c03",
+        "vias_probadas": [
+          "a_fact_fila_n",
+          "b_core_casos_codigo_legado",
+          "c_core_casos_codigo_caso",
+          "d_nombre_caso_fuzzy",
+          "p_padding_dentro_codigo",
+          "e_actor_alerta_caso"
+        ],
+        "veredicto": "imposible"
+      },
+      {
+        "origen": "legacy.bridge_caso_actor.c03=CS-PA-REG-2026-04",
+        "c02_actor": "ACT-012",
+        "destino": null,
+        "via": null,
+        "corroborado": false,
+        "motivo": "vía (e) cubre sólo parte de las filas del mismo c03",
+        "vias_probadas": [
+          "a_fact_fila_n",
+          "b_core_casos_codigo_legado",
+          "c_core_casos_codigo_caso",
+          "d_nombre_caso_fuzzy",
+          "p_padding_dentro_codigo",
+          "e_actor_alerta_caso"
+        ],
+        "veredicto": "imposible"
+      },
+      {
+        "origen": "legacy.bridge_caso_actor.c03=CS-PRODUCE-2026-06",
+        "c02_actor": "ACT-007",
+        "destino": "core.casos.id=21b43ede-6348-4330-baa4-a1166c00e1f0",
+        "via": "p_padding_dentro_codigo",
+        "corroborado": false,
+        "motivo": "sólo relleno de ceros (sin corroboración independiente)",
+        "vias_probadas": [
+          "a_fact_fila_n",
+          "b_core_casos_codigo_legado",
+          "c_core_casos_codigo_caso",
+          "d_nombre_caso_fuzzy",
+          "p_padding_dentro_codigo",
+          "e_actor_alerta_caso"
+        ],
+        "veredicto": "dudoso"
+      },
+      {
+        "origen": "legacy.bridge_caso_actor.c03=CS-PRODUCE-2026-07",
+        "c02_actor": "ACT-005",
+        "destino": "core.casos.id=9373ad12-ded1-4484-b33f-05228422f24d",
+        "via": "p_padding_dentro_codigo",
+        "corroborado": true,
+        "motivo": "relleno de ceros + corroborado por vía (e) independiente",
+        "vias_probadas": [
+          "a_fact_fila_n",
+          "b_core_casos_codigo_legado",
+          "c_core_casos_codigo_caso",
+          "d_nombre_caso_fuzzy",
+          "p_padding_dentro_codigo",
+          "e_actor_alerta_caso"
+        ],
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.bridge_caso_actor.c03=CS-PRODUCE-2026-037",
+        "c02_actor": "ACT-025",
+        "destino": null,
+        "via": null,
+        "corroborado": false,
+        "motivo": "colisión: el caso ya pertenece a 'legacy.bridge_caso_actor.c03=CS-PRODUCE-2026-015'",
+        "vias_probadas": [
+          "a_fact_fila_n",
+          "b_core_casos_codigo_legado",
+          "c_core_casos_codigo_caso",
+          "d_nombre_caso_fuzzy",
+          "p_padding_dentro_codigo",
+          "e_actor_alerta_caso"
+        ],
+        "veredicto": "imposible"
+      },
+      {
+        "origen": "legacy.bridge_caso_actor.c03=CS-PRODUCE-2026-038",
+        "c02_actor": "ACT-025",
+        "destino": null,
+        "via": null,
+        "corroborado": false,
+        "motivo": "colisión: el caso ya pertenece a 'legacy.bridge_caso_actor.c03=CS-PRODUCE-2026-015'",
+        "vias_probadas": [
+          "a_fact_fila_n",
+          "b_core_casos_codigo_legado",
+          "c_core_casos_codigo_caso",
+          "d_nombre_caso_fuzzy",
+          "p_padding_dentro_codigo",
+          "e_actor_alerta_caso"
+        ],
+        "veredicto": "imposible"
+      }
+    ],
+    "veredicto": {
+      "seguro": 63,
+      "dudoso": 1,
+      "imposible": 16
+    }
+  },
+  "demandas_sin_codigo": {
+    "legacy": "legacy.dim_demandas",
+    "core": "core.demandas",
+    "columnas_legacy": {
+      "codigo": "c01",
+      "alerta": "c05",
+      "texto": "c02"
+    },
+    "columnas_core": {
+      "id": "id",
+      "codigo": "codigo_legado",
+      "texto": "descripcion_demanda",
+      "alerta": "alerta_id",
+      "caso": "caso_id"
+    },
+    "total_legacy": 325,
+    "total_core": 112,
+    "interseccion": 112,
+    "faltantes_total": 213,
+    "faltantes": [
+      "DEM-2026-0001",
+      "DEM-2026-0002",
+      "DEM-2026-0003",
+      "DEM-2026-0004",
+      "DEM-2026-0005",
+      "DEM-2026-0006",
+      "DEM-2026-0007",
+      "DEM-2026-0008",
+      "DEM-2026-0009",
+      "DEM-2026-0010",
+      "DEM-2026-0015",
+      "DEM-2026-0016",
+      "DEM-2026-0017",
+      "DEM-2026-0018",
+      "DEM-2026-0019",
+      "DEM-2026-0020",
+      "DEM-2026-0021",
+      "DEM-2026-0022",
+      "DEM-2026-0023",
+      "DEM-2026-0028",
+      "DEM-2026-0029",
+      "DEM-2026-0030",
+      "DEM-2026-0031",
+      "DEM-2026-0032",
+      "DEM-2026-0033",
+      "DEM-2026-0034",
+      "DEM-2026-0035",
+      "DEM-2026-0036",
+      "DEM-2026-0037",
+      "DEM-2026-0038",
+      "DEM-2026-0039",
+      "DEM-2026-0040",
+      "DEM-2026-0044",
+      "DEM-2026-0045",
+      "DEM-2026-0046",
+      "DEM-2026-0047",
+      "DEM-2026-0048",
+      "DEM-2026-0049",
+      "DEM-2026-0050",
+      "DEM-2026-0051",
+      "DEM-2026-0067",
+      "DEM-2026-0068",
+      "DEM-2026-0069",
+      "DEM-2026-0070",
+      "DEM-2026-0071",
+      "DEM-2026-0073",
+      "DEM-2026-0074",
+      "DEM-2026-0075",
+      "DEM-2026-0076",
+      "DEM-2026-0081",
+      "DEM-2026-0082",
+      "DEM-2026-0083",
+      "DEM-2026-0084",
+      "DEM-2026-0085",
+      "DEM-2026-0086",
+      "DEM-2026-0087",
+      "DEM-2026-0088",
+      "DEM-2026-0089",
+      "DEM-2026-0090",
+      "DEM-2026-0091",
+      "DEM-2026-0092",
+      "DEM-2026-0097",
+      "DEM-2026-0098",
+      "DEM-2026-0099",
+      "DEM-2026-0105",
+      "DEM-2026-0106",
+      "DEM-2026-0107",
+      "DEM-2026-0108",
+      "DEM-2026-0109",
+      "DEM-2026-0117",
+      "DEM-2026-0118",
+      "DEM-2026-0119",
+      "DEM-2026-0120",
+      "DEM-2026-0121",
+      "DEM-2026-0123",
+      "DEM-2026-0124",
+      "DEM-2026-0125",
+      "DEM-2026-0135",
+      "DEM-2026-0136",
+      "DEM-2026-0137",
+      "DEM-2026-0138",
+      "DEM-2026-0139",
+      "DEM-2026-0140",
+      "DEM-2026-0144",
+      "DEM-2026-0145",
+      "DEM-2026-0146",
+      "DEM-2026-0147",
+      "DEM-2026-0148",
+      "DEM-2026-0149",
+      "DEM-2026-0150",
+      "DEM-2026-0151",
+      "DEM-2026-0155",
+      "DEM-2026-0156",
+      "DEM-2026-0157",
+      "DEM-2026-0158",
+      "DEM-2026-0159",
+      "DEM-2026-0160",
+      "DEM-2026-0161",
+      "DEM-2026-0162",
+      "DEM-2026-0163",
+      "DEM-2026-0164",
+      "DEM-2026-0165",
+      "DEM-2026-0166",
+      "DEM-2026-0167",
+      "DEM-2026-0168",
+      "DEM-2026-0169",
+      "DEM-2026-0172",
+      "DEM-2026-0173",
+      "DEM-2026-0184",
+      "DEM-2026-0185",
+      "DEM-2026-0186",
+      "DEM-2026-0187",
+      "DEM-2026-0188",
+      "DEM-2026-0189",
+      "DEM-2026-0190",
+      "DEM-2026-0191",
+      "DEM-2026-0192",
+      "DEM-2026-0193",
+      "DEM-2026-0194",
+      "DEM-2026-0195",
+      "DEM-2026-0196",
+      "DEM-2026-0197",
+      "DEM-2026-0198",
+      "DEM-2026-0199",
+      "DEM-2026-0200",
+      "DEM-2026-0201",
+      "DEM-2026-0207",
+      "DEM-2026-0208",
+      "DEM-2026-0209",
+      "DEM-2026-0210",
+      "DEM-2026-0211",
+      "DEM-2026-0212",
+      "DEM-2026-0213",
+      "DEM-2026-0214",
+      "DEM-2026-0215",
+      "DEM-2026-0216",
+      "DEM-2026-0243",
+      "DEM-2026-0244",
+      "DEM-2026-0245",
+      "DEM-2026-0246",
+      "DEM-2026-0247",
+      "DEM-2026-0248",
+      "DEM-2026-0249",
+      "DEM-2026-0250",
+      "DEM-2026-0252",
+      "DEM-2026-0253",
+      "DEM-2026-0254",
+      "DEM-2026-0255",
+      "DEM-2026-0256",
+      "DEM-2026-0257",
+      "DEM-2026-0258",
+      "DEM-2026-0259",
+      "DEM-2026-0260",
+      "DEM-2026-0261",
+      "DEM-2026-0262",
+      "DEM-2026-0263",
+      "DEM-2026-0264",
+      "DEM-2026-0265",
+      "DEM-2026-0266",
+      "DEM-2026-0267",
+      "DEM-2026-0268",
+      "DEM-2026-0269",
+      "DEM-2026-0270",
+      "DEM-2026-0271",
+      "DEM-2026-0272",
+      "DEM-2026-0273",
+      "DEM-2026-0274",
+      "DEM-2026-0275",
+      "DEM-2026-0276",
+      "DEM-2026-0277",
+      "DEM-2026-0278",
+      "DEM-2026-0279",
+      "DEM-2026-0285",
+      "DEM-2026-0286",
+      "DEM-2026-0287",
+      "DEM-2026-0288",
+      "DEM-2026-0289",
+      "DEM-2026-0290",
+      "DEM-2026-0291",
+      "DEM-2026-0292",
+      "DEM-2026-0293",
+      "DEM-2026-0294",
+      "DEM-2026-0295",
+      "DEM-2026-0296",
+      "DEM-2026-0297",
+      "DEM-2026-0298",
+      "DEM-2026-0299",
+      "DEM-2026-0300",
+      "DEM-2026-0301",
+      "DEM-2026-0302",
+      "DEM-2026-0303",
+      "DEM-2026-0304",
+      "DEM-2026-0305",
+      "DEM-2026-0306",
+      "DEM-2026-0307",
+      "DEM-2026-0308",
+      "DEM-2026-0309",
+      "DEM-2026-0310",
+      "DEM-2026-0311",
+      "DEM-2026-0312",
+      "DEM-2026-0313",
+      "DEM-2026-0314",
+      "DEM-2026-0315",
+      "DEM-2026-0316",
+      "DEM-2026-0317",
+      "DEM-2026-0318",
+      "DEM-2026-0319",
+      "DEM-2026-0320",
+      "DEM-2026-0321",
+      "DEM-2026-0322",
+      "DEM-2026-0323",
+      "DEM-2026-0324",
+      "DEM-2026-0325"
+    ],
+    "desplazamiento_numerico": {
+      "numeros_legacy": 0,
+      "numeros_core": 0,
+      "interseccion": 0,
+      "legacy_sin_core": 0
+    },
+    "diag": {
+      "dim_demandas_columnas": [
+        [
+          "fila_n",
+          "integer"
+        ],
+        [
+          "c01",
+          "text"
+        ],
+        [
+          "c02",
+          "text"
+        ],
+        [
+          "c03",
+          "text"
+        ],
+        [
+          "c04",
+          "text"
+        ],
+        [
+          "c05",
+          "text"
+        ],
+        [
+          "c06",
+          "text"
+        ],
+        [
+          "c07",
+          "text"
+        ],
+        [
+          "c08",
+          "text"
+        ],
+        [
+          "c09",
+          "text"
+        ]
+      ],
+      "dim_demandas_muestra": [
+        {
+          "fila_n": "1",
+          "c01": "DEM-2026-0001",
+          "c02": "Presencia inmediata del Ministro y Viceministro de PRODUCE en la zona del conflicto para establecer diálogo.",
+          "c03": "",
+          "c04": "",
+          "c05": "AT-2026-01",
+          "c06": "TEMA-05",
+          "c07": "2026-08-31 14:15:19",
+          "c08": "",
+          "c09": ""
+        },
+        {
+          "fila_n": "2",
+          "c01": "DEM-2026-0002",
+          "c02": "Prohibición definitiva del uso de redes de fondo dentro de las 5 millas náuticas y mayor fiscalización.",
+          "c03": "",
+          "c04": "",
+          "c05": "AT-2026-01",
+          "c06": "TEMA-02",
+          "c07": "2026-08-31 14:15:19",
+          "c08": "",
+          "c09": ""
+        },
+        {
+          "fila_n": "3",
+          "c01": "DEM-2026-0003",
+          "c02": "Rechazo a la espera de los resultados del estudio del IMARPE y solicitud de acciones inmediatas.",
+          "c03": "",
+          "c04": "",
+          "c05": "AT-2026-01",
+          "c06": "TEMA-07",
+          "c07": "2026-08-31 14:15:20",
+          "c08": "",
+          "c09": ""
+        }
+      ],
+      "core_demandas_muestra": [
+        {
+          "id": "f5408346-f785-4eff-85c1-793ac5c2375b",
+          "caso_id": "4b23bf41-a361-445d-ba58-5a713524428a",
+          "problema_3p": "",
+          "propuesta_3p": "",
+          "pedido_3p": "",
+          "estado_atencion": "Atendida",
+          "motivo_no_atencion": "",
+          "fecha_vencimiento_respuesta": "",
+          "afecta_diferenciadamente_mujeres": "False",
+          "created_at": "2026-11-26 21:44:02.691229+00:00",
+          "updated_at": "2026-11-26 21:44:02.691229+00:00",
+          "created_by": "2e3359b0-db27-4b51-9aed-28831aab03b7",
+          "updated_by": "2e3359b0-db27-4b51-9aed-28831aab03b7",
+          "origen_dato": "MANUAL",
+          "confidence": "",
+          "es_validado_humano": "False",
+          "nivel_clasificacion": "2",
+          "descripcion_demanda": "lk",
+          "alerta_id": "",
+          "tematica_id": "5",
+          "fecha_registro": "",
+          "tipo_evidencia_legado": "",
+          "referencia_evidencia_legado": "",
+          "codigo_legado": "",
+          "documento_origen_id": "",
+          "codigo_padre_legado": "",
+          "anulado_en": "",
+          "anulado_por": "",
+          "anulacion_id": "",
+          "motivo_anulacion": ""
+        },
+        {
+          "id": "66b73e5a-f203-44db-89d8-fb2ff78629a2",
+          "caso_id": "",
+          "problema_3p": "",
+          "propuesta_3p": "",
+          "pedido_3p": "",
+          "estado_atencion": "Pendiente",
+          "motivo_no_atencion": "",
+          "fecha_vencimiento_respuesta": "",
+          "afecta_diferenciadamente_mujeres": "False",
+          "created_at": "2026-10-31 07:52:56.714777+00:00",
+          "updated_at": "2026-10-31 07:52:56.714777+00:00",
+          "created_by": "00000000-0000-0000-0000-000000000001",
+          "updated_by": "00000000-0000-0000-0000-000000000001",
+          "origen_dato": "AVISA_HISTORICO",
+          "confidence": "1.00",
+          "es_validado_humano": "True",
+          "nivel_clasificacion": "2",
+          "descripcion_demanda": "Mejoramiento del DPA Morrosama (cámara de hielo inoperativa, planta de ósmosis fuera de servicio, falta de agua y otros servicios básicos).",
+          "alerta_id": "197ec87b-5b18-4171-bf03-955eab4d7187",
+          "tematica_id": "1",
+          "fecha_registro": "2026-09-02",
+          "tipo_evidencia_legado": "",
+          "referencia_evidencia_legado": "",
+          "codigo_legado": "DEM-2026-0011",
+          "documento_origen_id": "",
+          "codigo_padre_legado": "",
+          "anulado_en": "",
+          "anulado_por": "",
+          "anulacion_id": "",
+          "motivo_anulacion": ""
+        },
+        {
+          "id": "594b81a4-8948-4a64-bd6f-6525cc956bb2",
+          "caso_id": "",
+          "problema_3p": "",
+          "propuesta_3p": "",
+          "pedido_3p": "",
+          "estado_atencion": "Pendiente",
+          "motivo_no_atencion": "",
+          "fecha_vencimiento_respuesta": "",
+          "afecta_diferenciadamente_mujeres": "False",
+          "created_at": "2026-10-31 07:52:56.714777+00:00",
+          "updated_at": "2026-10-31 07:52:56.714777+00:00",
+          "created_by": "00000000-0000-0000-0000-000000000001",
+          "updated_by": "00000000-0000-0000-0000-000000000001",
+          "origen_dato": "AVISA_HISTORICO",
+          "confidence": "1.00",
+          "es_validado_humano": "True",
+          "nivel_clasificacion": "2",
+          "descripcion_demanda": "Mayor control, ordenamiento y fiscalización en el DPA (ingreso de embarcaciones foráneas sin control).",
+          "alerta_id": "197ec87b-5b18-4171-bf03-955eab4d7187",
+          "tematica_id": "6",
+          "fecha_registro": "2026-09-02",
+          "tipo_evidencia_legado": "",
+          "referencia_evidencia_legado": "",
+          "codigo_legado": "DEM-2026-0012",
+          "documento_origen_id": "",
+          "codigo_padre_legado": "",
+          "anulado_en": "",
+          "anulado_por": "",
+          "anulacion_id": "",
+          "motivo_anulacion": ""
+        }
+      ],
+      "alerta_legacy_valores": [
+        "AT-2026-27",
+        "AT-2026-71",
+        "AT-2026-67",
+        "AT-2026-52",
+        "AT-2026-17",
+        "AT-2026-90",
+        "AT-2026-24",
+        "AT-2026-62"
+      ],
+      "cruce_alerta": {
+        "core_demandas": 132,
+        "core_con_alerta_no_nula": 86,
+        "core_con_clave_resuelta": 90,
+        "core_muestra_clave": [
+          {
+            "codigo": null,
+            "clave": [
+              2026,
+              6
+            ]
+          },
+          {
+            "codigo": "DEM-2026-0011",
+            "clave": [
+              2026,
+              4
+            ]
+          },
+          {
+            "codigo": "DEM-2026-0012",
+            "clave": [
+              2026,
+              4
+            ]
+          },
+          {
+            "codigo": "DEM-2026-0013",
+            "clave": [
+              2026,
+              4
+            ]
+          },
+          {
+            "codigo": "DEM-2026-0024",
+            "clave": [
+              2026,
+              7
+            ]
+          },
+          {
+            "codigo": "DEM-2026-0025",
+            "clave": [
+              2026,
+              7
+            ]
+          },
+          {
+            "codigo": "DEM-2026-0026",
+            "clave": [
+              2026,
+              7
+            ]
+          },
+          {
+            "codigo": "DEM-2026-0027",
+            "clave": [
+              2026,
+              7
+            ]
+          }
+        ],
+        "alertas_core_columnas": {
+          "id": "id",
+          "codigo": "codigo_alerta",
+          "titulo": "titulo",
+          "total": 82
+        }
+      }
+    },
+    "empareje": {
+      "evaluadas": 213,
+      "resolubles_por_alerta_texto": 18,
+      "resolubles_por_via": {
+        "alerta+texto": 5,
+        "texto_todas": 208
+      },
+      "conclusion_via_alerta": "La vía alerta+texto NO es operativa: los codigos de alerta de dim_demandas.c05 y los alerta_id de core.demandas viven en espacios casi disjuntos (solo 2 claves en común de 43 vs 30). Ningún caso se resolvió por alerta; los 18 aciertos son sólo por texto global.",
+      "no_resolubles": 195,
+      "exactos_texto_normalizado": 13,
+      "faltantes_con_alerta": 136,
+      "faltantes_clave_presente_en_core": 136,
+      "interseccion_claves": {
+        "legacy_faltantes_unicas": 43,
+        "core_demandas_unicas": 30,
+        "comunes": 2,
+        "legacy": [
+          "AT-2026-1",
+          "AT-2026-2",
+          "AT-2026-3",
+          "AT-2026-5",
+          "AT-2026-6",
+          "AT-2026-8",
+          "AT-2026-9",
+          "AT-2026-11",
+          "AT-2026-12",
+          "AT-2026-13",
+          "AT-2026-14",
+          "AT-2026-15",
+          "AT-2026-17",
+          "AT-2026-18",
+          "AT-2026-21",
+          "AT-2026-23",
+          "AT-2026-26",
+          "AT-2026-28",
+          "AT-2026-30",
+          "AT-2026-32",
+          "AT-2026-36",
+          "AT-2026-38",
+          "AT-2026-42",
+          "AT-2026-44",
+          "AT-2026-45",
+          "AT-2026-47",
+          "AT-2026-48",
+          "AT-2026-49",
+          "AT-2026-51",
+          "AT-2026-54",
+          "AT-2026-55",
+          "AT-2026-56",
+          "AT-2026-57",
+          "AT-2026-58",
+          "AT-2026-59",
+          "AT-2026-60",
+          "AT-2026-65",
+          "AT-2026-66",
+          "AT-2026-67",
+          "AT-2026-68",
+          "AT-2026-69",
+          "AT-2026-85",
+          "AT-2026-89"
+        ],
+        "core": [
+          "AT-2026-4",
+          "AT-2026-6",
+          "AT-2026-7",
+          "AT-2026-16",
+          "AT-2026-20",
+          "AT-2026-37",
+          "AT-2026-40",
+          "AT-2026-43",
+          "AT-2026-46",
+          "AT-2026-50",
+          "AT-2026-52",
+          "AT-2026-53",
+          "AT-2026-62",
+          "AT-2026-63",
+          "AT-2026-64",
+          "AT-2026-65",
+          "AT-2026-70",
+          "AT-2026-71",
+          "AT-2026-72",
+          "AT-2026-73",
+          "AT-2026-74",
+          "AT-2026-75",
+          "AT-2026-76",
+          "AT-2026-77",
+          "AT-2026-78",
+          "AT-2026-79",
+          "AT-2026-80",
+          "AT-2026-81",
+          "AT-2026-82",
+          "AT-2026-83"
+        ]
+      },
+      "resolubles_sin_codigo_legado_en_core": 4,
+      "via_suplementaria_alerta_caso": {
+        "muestra_evaluada": 25,
+        "resolubles": 3,
+        "con_candidatos_mismo_caso": 14,
+        "detalle": [
+          {
+            "codigo_legacy": "DEM-2026-0001",
+            "alerta_legacy": "AT-2026-01",
+            "casos_por_alerta": 1,
+            "candidatos_mismo_caso": 7,
+            "mejor_id": "987257d0-4054-4230-900c-80f34c8c5a58",
+            "mejor_codigo": null,
+            "similitud": 0.3936,
+            "resoluble": false
+          },
+          {
+            "codigo_legacy": "DEM-2026-0002",
+            "alerta_legacy": "AT-2026-01",
+            "casos_por_alerta": 1,
+            "candidatos_mismo_caso": 7,
+            "mejor_id": "ed122752-5b0a-49db-a723-23301cb63234",
+            "mejor_codigo": null,
+            "similitud": 0.4839,
+            "resoluble": false
+          },
+          {
+            "codigo_legacy": "DEM-2026-0003",
+            "alerta_legacy": "AT-2026-01",
+            "casos_por_alerta": 1,
+            "candidatos_mismo_caso": 7,
+            "mejor_id": "9ea16c17-df00-4876-8869-4c89958548fc",
+            "mejor_codigo": null,
+            "similitud": 0.375,
+            "resoluble": false
+          },
+          {
+            "codigo_legacy": "DEM-2026-0004",
+            "alerta_legacy": "AT-2026-02",
+            "casos_por_alerta": 1,
+            "candidatos_mismo_caso": 7,
+            "mejor_id": "ed122752-5b0a-49db-a723-23301cb63234",
+            "mejor_codigo": null,
+            "similitud": 0.4027,
+            "resoluble": false
+          },
+          {
+            "codigo_legacy": "DEM-2026-0005",
+            "alerta_legacy": "AT-2026-02",
+            "casos_por_alerta": 1,
+            "candidatos_mismo_caso": 7,
+            "mejor_id": "ed122752-5b0a-49db-a723-23301cb63234",
+            "mejor_codigo": null,
+            "similitud": 0.4027,
+            "resoluble": false
+          },
+          {
+            "codigo_legacy": "DEM-2026-0006",
+            "alerta_legacy": "AT-2026-02",
+            "casos_por_alerta": 1,
+            "candidatos_mismo_caso": 7,
+            "mejor_id": "6a046545-8ec9-4f95-8a78-bbb3c2559dcc",
+            "mejor_codigo": null,
+            "similitud": 0.3475,
+            "resoluble": false
+          },
+          {
+            "codigo_legacy": "DEM-2026-0007",
+            "alerta_legacy": "AT-2026-02",
+            "casos_por_alerta": 1,
+            "candidatos_mismo_caso": 7,
+            "mejor_id": "f0a4c171-3d99-4437-adf9-141ffbc3ce0b",
+            "mejor_codigo": null,
+            "similitud": 0.4659,
+            "resoluble": false
+          },
+          {
+            "codigo_legacy": "DEM-2026-0008",
+            "alerta_legacy": "AT-2026-03",
+            "casos_por_alerta": 1,
+            "candidatos_mismo_caso": 7,
+            "mejor_id": "20470e3d-18ae-418b-a531-03509177f5a0",
+            "mejor_codigo": null,
+            "similitud": 1.0,
+            "resoluble": true
+          },
+          {
+            "codigo_legacy": "DEM-2026-0009",
+            "alerta_legacy": "AT-2026-03",
+            "casos_por_alerta": 1,
+            "candidatos_mismo_caso": 7,
+            "mejor_id": "ed122752-5b0a-49db-a723-23301cb63234",
+            "mejor_codigo": null,
+            "similitud": 1.0,
+            "resoluble": true
+          },
+          {
+            "codigo_legacy": "DEM-2026-0010",
+            "alerta_legacy": "AT-2026-03",
+            "casos_por_alerta": 1,
+            "candidatos_mismo_caso": 7,
+            "mejor_id": "1596b04c-cceb-4322-b4c2-2701a0a0eecc",
+            "mejor_codigo": null,
+            "similitud": 1.0,
+            "resoluble": true
+          },
+          {
+            "codigo_legacy": "DEM-2026-0015",
+            "alerta_legacy": "AT-2026-05",
+            "casos_por_alerta": 1,
+            "candidatos_mismo_caso": 0,
+            "mejor_id": null,
+            "mejor_codigo": null,
+            "similitud": 0.0,
+            "resoluble": false
+          },
+          {
+            "codigo_legacy": "DEM-2026-0016",
+            "alerta_legacy": "AT-2026-05",
+            "casos_por_alerta": 1,
+            "candidatos_mismo_caso": 0,
+            "mejor_id": null,
+            "mejor_codigo": null,
+            "similitud": 0.0,
+            "resoluble": false
+          },
+          {
+            "codigo_legacy": "DEM-2026-0017",
+            "alerta_legacy": "AT-2026-05",
+            "casos_por_alerta": 1,
+            "candidatos_mismo_caso": 0,
+            "mejor_id": null,
+            "mejor_codigo": null,
+            "similitud": 0.0,
+            "resoluble": false
+          },
+          {
+            "codigo_legacy": "DEM-2026-0018",
+            "alerta_legacy": "AT-2026-05",
+            "casos_por_alerta": 1,
+            "candidatos_mismo_caso": 0,
+            "mejor_id": null,
+            "mejor_codigo": null,
+            "similitud": 0.0,
+            "resoluble": false
+          },
+          {
+            "codigo_legacy": "DEM-2026-0019",
+            "alerta_legacy": "AT-2026-05",
+            "casos_por_alerta": 1,
+            "candidatos_mismo_caso": 0,
+            "mejor_id": null,
+            "mejor_codigo": null,
+            "similitud": 0.0,
+            "resoluble": false
+          },
+          {
+            "codigo_legacy": "DEM-2026-0020",
+            "alerta_legacy": "AT-2026-06",
+            "casos_por_alerta": 1,
+            "candidatos_mismo_caso": 1,
+            "mejor_id": "f5408346-f785-4eff-85c1-793ac5c2375b",
+            "mejor_codigo": null,
+            "similitud": 0.025,
+            "resoluble": false
+          },
+          {
+            "codigo_legacy": "DEM-2026-0021",
+            "alerta_legacy": "AT-2026-06",
+            "casos_por_alerta": 1,
+            "candidatos_mismo_caso": 1,
+            "mejor_id": "f5408346-f785-4eff-85c1-793ac5c2375b",
+            "mejor_codigo": null,
+            "similitud": 0.0294,
+            "resoluble": false
+          },
+          {
+            "codigo_legacy": "DEM-2026-0022",
+            "alerta_legacy": "AT-2026-06",
+            "casos_por_alerta": 1,
+            "candidatos_mismo_caso": 1,
+            "mejor_id": "f5408346-f785-4eff-85c1-793ac5c2375b",
+            "mejor_codigo": null,
+            "similitud": 0.0323,
+            "resoluble": false
+          },
+          {
+            "codigo_legacy": "DEM-2026-0023",
+            "alerta_legacy": "AT-2026-06",
+            "casos_por_alerta": 1,
+            "candidatos_mismo_caso": 1,
+            "mejor_id": "f5408346-f785-4eff-85c1-793ac5c2375b",
+            "mejor_codigo": null,
+            "similitud": 0.0244,
+            "resoluble": false
+          },
+          {
+            "codigo_legacy": "DEM-2026-0028",
+            "alerta_legacy": "AT-2026-08",
+            "casos_por_alerta": 1,
+            "candidatos_mismo_caso": 0,
+            "mejor_id": null,
+            "mejor_codigo": null,
+            "similitud": 0.0,
+            "resoluble": false
+          },
+          {
+            "codigo_legacy": "DEM-2026-0029",
+            "alerta_legacy": "AT-2026-08",
+            "casos_por_alerta": 1,
+            "candidatos_mismo_caso": 0,
+            "mejor_id": null,
+            "mejor_codigo": null,
+            "similitud": 0.0,
+            "resoluble": false
+          },
+          {
+            "codigo_legacy": "DEM-2026-0030",
+            "alerta_legacy": "AT-2026-08",
+            "casos_por_alerta": 1,
+            "candidatos_mismo_caso": 0,
+            "mejor_id": null,
+            "mejor_codigo": null,
+            "similitud": 0.0,
+            "resoluble": false
+          },
+          {
+            "codigo_legacy": "DEM-2026-0031",
+            "alerta_legacy": "AT-2026-09",
+            "casos_por_alerta": 1,
+            "candidatos_mismo_caso": 0,
+            "mejor_id": null,
+            "mejor_codigo": null,
+            "similitud": 0.0,
+            "resoluble": false
+          },
+          {
+            "codigo_legacy": "DEM-2026-0032",
+            "alerta_legacy": "AT-2026-09",
+            "casos_por_alerta": 1,
+            "candidatos_mismo_caso": 0,
+            "mejor_id": null,
+            "mejor_codigo": null,
+            "similitud": 0.0,
+            "resoluble": false
+          },
+          {
+            "codigo_legacy": "DEM-2026-0033",
+            "alerta_legacy": "AT-2026-09",
+            "casos_por_alerta": 1,
+            "candidatos_mismo_caso": 0,
+            "mejor_id": null,
+            "mejor_codigo": null,
+            "similitud": 0.0,
+            "resoluble": false
+          }
+        ]
+      },
+      "colisiones_destino": {
+        "destinos_compartidos": 1,
+        "detalle": {
+          "cb11e75a-16c2-417a-acfd-d44242e825a0": [
+            "DEM-2026-0034",
+            "DEM-2026-0165"
+          ]
+        }
+      },
+      "nota": "se evaluaron TODAS las faltantes con alerta/texto disponible; 'muestra' resume 15 casos. Ningún empareje textual es 1:1 por construcción: el código de origen no existe en core",
+      "muestra": [
+        {
+          "codigo_legacy": "DEM-2026-0001",
+          "alerta_legacy": "AT-2026-01",
+          "clave_alerta": [
+            2026,
+            1
+          ],
+          "candidatos_por_alerta": 0,
+          "texto_legacy": "presencia inmediata del ministro y viceministro de produce en la zona del conflicto para establecer dialogo",
+          "texto_core": "solicitan audiencia con el senor ministro y viceministro de pesca y acuicultura",
+          "via": "texto-todas",
+          "candidato_core_id": "4bc48443-3c34-45e4-b080-8e89fdd03b8d",
+          "candidato_core_codigo": "DEM-2026-0234",
+          "similitud": 0.5376,
+          "resoluble": false
+        },
+        {
+          "codigo_legacy": "DEM-2026-0002",
+          "alerta_legacy": "AT-2026-01",
+          "clave_alerta": [
+            2026,
+            1
+          ],
+          "candidatos_por_alerta": 0,
+          "texto_legacy": "prohibicion definitiva del uso de redes de fondo dentro de las 5 millas nauticas y mayor fiscalizacion",
+          "texto_core": "rechazo categorico al uso de redes de cortina de fondo en sus zonas de pesca y demanda de fiscalizacion efectiva y permanente por parte del estado",
+          "via": "texto-todas",
+          "candidato_core_id": "ed122752-5b0a-49db-a723-23301cb63234",
+          "candidato_core_codigo": null,
+          "similitud": 0.4839,
+          "resoluble": false
+        },
+        {
+          "codigo_legacy": "DEM-2026-0003",
+          "alerta_legacy": "AT-2026-01",
+          "clave_alerta": [
+            2026,
+            1
+          ],
+          "candidatos_por_alerta": 0,
+          "texto_legacy": "rechazo a la espera de los resultados del estudio del imarpe y solicitud de acciones inmediatas",
+          "texto_core": "rechazo a la instalacion de pozos petroleros en la zona norte de nuestro litoral",
+          "via": "texto-todas",
+          "candidato_core_id": "d975d16d-40e0-4a72-9b60-46bd0475f466",
+          "candidato_core_codigo": "DEM-2026-0238",
+          "similitud": 0.4686,
+          "resoluble": false
+        },
+        {
+          "codigo_legacy": "DEM-2026-0004",
+          "alerta_legacy": "AT-2026-02",
+          "clave_alerta": [
+            2026,
+            2
+          ],
+          "candidatos_por_alerta": 0,
+          "texto_legacy": "emision inmediata de una resolucion que prohiba o restrinja el uso del aparejo red cortina de fondo considerado perjudicial para la pesca artesanal",
+          "texto_core": "100 de pescado de consumo humano para la pesca artesanal",
+          "via": "texto-todas",
+          "candidato_core_id": "7095c871-837d-4bf0-86a2-e04689a5fb09",
+          "candidato_core_codigo": "DEM-2026-0240",
+          "similitud": 0.4433,
+          "resoluble": false
+        },
+        {
+          "codigo_legacy": "DEM-2026-0005",
+          "alerta_legacy": "AT-2026-02",
+          "clave_alerta": [
+            2026,
+            2
+          ],
+          "candidatos_por_alerta": 0,
+          "texto_legacy": "emision inmediata de una resolucion que prohiba o restrinja el uso del aparejo red cortina de fondo considerado perjudicial para la pesca artesanal",
+          "texto_core": "100 de pescado de consumo humano para la pesca artesanal",
+          "via": "texto-todas",
+          "candidato_core_id": "7095c871-837d-4bf0-86a2-e04689a5fb09",
+          "candidato_core_codigo": "DEM-2026-0240",
+          "similitud": 0.4433,
+          "resoluble": false
+        },
+        {
+          "codigo_legacy": "DEM-2026-0006",
+          "alerta_legacy": "AT-2026-02",
+          "clave_alerta": [
+            2026,
+            2
+          ],
+          "candidatos_por_alerta": 0,
+          "texto_legacy": "comunicacion directa con el viceministro de pesca y acuicultura director general de pesca artesanal y director regional de la produccion de piura",
+          "texto_core": "solicitan audiencia con el senor ministro y viceministro de pesca y acuicultura",
+          "via": "texto-todas",
+          "candidato_core_id": "4bc48443-3c34-45e4-b080-8e89fdd03b8d",
+          "candidato_core_codigo": "DEM-2026-0234",
+          "similitud": 0.4464,
+          "resoluble": false
+        },
+        {
+          "codigo_legacy": "DEM-2026-0007",
+          "alerta_legacy": "AT-2026-02",
+          "clave_alerta": [
+            2026,
+            2
+          ],
+          "candidatos_por_alerta": 0,
+          "texto_legacy": "adopcion de acuerdos inmediatos orientados a la proteccion del ecosistema marino y los bancos pesqueros locales",
+          "texto_core": "conformacion de las corevipas por parte del gremio de cabo blanco",
+          "via": "texto-todas",
+          "candidato_core_id": "f0a4c171-3d99-4437-adf9-141ffbc3ce0b",
+          "candidato_core_codigo": null,
+          "similitud": 0.4659,
+          "resoluble": false
+        },
+        {
+          "codigo_legacy": "DEM-2026-0008",
+          "alerta_legacy": "AT-2026-03",
+          "clave_alerta": [
+            2026,
+            3
+          ],
+          "candidatos_por_alerta": 0,
+          "texto_legacy": "exigen respuestas concretas e inmediatas ante la falta de avances visibles en los compromisos asumidos desde octubre de 2024 especificamente referido a los resu",
+          "texto_core": "exigen respuestas concretas e inmediatas ante la falta de avances visibles en los compromisos asumidos desde octubre de 2024 especificamente referido a los resu",
+          "via": "texto-todas",
+          "candidato_core_id": "20470e3d-18ae-418b-a531-03509177f5a0",
+          "candidato_core_codigo": null,
+          "similitud": 1.0,
+          "resoluble": true
+        },
+        {
+          "codigo_legacy": "DEM-2026-0009",
+          "alerta_legacy": "AT-2026-03",
+          "clave_alerta": [
+            2026,
+            3
+          ],
+          "candidatos_por_alerta": 0,
+          "texto_legacy": "rechazo categorico al uso de redes de cortina de fondo en sus zonas de pesca y demanda de fiscalizacion efectiva y permanente por parte del estado",
+          "texto_core": "rechazo categorico al uso de redes de cortina de fondo en sus zonas de pesca y demanda de fiscalizacion efectiva y permanente por parte del estado",
+          "via": "texto-todas",
+          "candidato_core_id": "ed122752-5b0a-49db-a723-23301cb63234",
+          "candidato_core_codigo": null,
+          "similitud": 1.0,
+          "resoluble": true
+        },
+        {
+          "codigo_legacy": "DEM-2026-0010",
+          "alerta_legacy": "AT-2026-03",
+          "clave_alerta": [
+            2026,
+            3
+          ],
+          "candidatos_por_alerta": 0,
+          "texto_legacy": "solicitud de mayor involucramiento con presencia y comunicacion institucional de imarpe y direpro durante el proceso de evaluacion tecnica en curso",
+          "texto_core": "solicitud de mayor involucramiento con presencia y comunicacion institucional de imarpe y direpro durante el proceso de evaluacion tecnica en curso",
+          "via": "texto-todas",
+          "candidato_core_id": "1596b04c-cceb-4322-b4c2-2701a0a0eecc",
+          "candidato_core_codigo": null,
+          "similitud": 1.0,
+          "resoluble": true
+        },
+        {
+          "codigo_legacy": "DEM-2026-0015",
+          "alerta_legacy": "AT-2026-05",
+          "clave_alerta": [
+            2026,
+            5
+          ],
+          "candidatos_por_alerta": 0,
+          "texto_legacy": "rechazo a la politica de manejo de la pesca industrial de anchoveta senalando que favorece la sobreexplotacion y pone en riesgo la sostenibilidad del recurso",
+          "texto_core": "revision de la suspension de la pesqueria y ampliacion de la cuota de captura",
+          "via": "texto-todas",
+          "candidato_core_id": "98f12469-4084-4e31-8792-005c423392f3",
+          "candidato_core_codigo": null,
+          "similitud": 0.4359,
+          "resoluble": false
+        },
+        {
+          "codigo_legacy": "DEM-2026-0016",
+          "alerta_legacy": "AT-2026-05",
+          "clave_alerta": [
+            2026,
+            5
+          ],
+          "candidatos_por_alerta": 0,
+          "texto_legacy": "cuestionamiento a las omisiones de produce en la supervision de embarcaciones industriales y en el control del cumplimiento de las cuotas y zonas de pesca",
+          "texto_core": "controversia entre ospas del dpa huacho revision de la administracion y cumplimiento del tarifario vigente",
+          "via": "texto-todas",
+          "candidato_core_id": "5d99e730-a6d9-4473-8281-6a7b1d9de4d7",
+          "candidato_core_codigo": "DEM-2026-0062",
+          "similitud": 0.4692,
+          "resoluble": false
+        },
+        {
+          "codigo_legacy": "DEM-2026-0017",
+          "alerta_legacy": "AT-2026-05",
+          "clave_alerta": [
+            2026,
+            5
+          ],
+          "candidatos_por_alerta": 0,
+          "texto_legacy": "exigencia de mayor control y fiscalizacion asi como la aplicacion de sanciones efectivas a empresas pesqueras que operen dentro de las cinco millas reservadas a",
+          "texto_core": "aplicacion efectiva y fiscalizacion de la ley n 31749 respecto de las embarcaciones de cerco mecanizado que operan dentro de las primeras millas de la bahia de ",
+          "via": "texto-todas",
+          "candidato_core_id": "58d6453a-9b19-4cb2-8351-2dae41983231",
+          "candidato_core_codigo": "DEM-2026-0127",
+          "similitud": 0.5376,
+          "resoluble": false
+        },
+        {
+          "codigo_legacy": "DEM-2026-0018",
+          "alerta_legacy": "AT-2026-05",
+          "clave_alerta": [
+            2026,
+            5
+          ],
+          "candidatos_por_alerta": 0,
+          "texto_legacy": "reunion con el sm produce para informacion sobre la situacion actual del recurso anchoveta y las medidas de evaluacion para la segunda temporada de pesca 2025",
+          "texto_core": "informacion sobre las perspectivas de la pesqueria para el segundo semestre",
+          "via": "texto-todas",
+          "candidato_core_id": "8cfb6283-9e7c-4424-9e10-da1da165d07e",
+          "candidato_core_codigo": null,
+          "similitud": 0.4464,
+          "resoluble": false
+        },
+        {
+          "codigo_legacy": "DEM-2026-0019",
+          "alerta_legacy": "AT-2026-05",
+          "clave_alerta": [
+            2026,
+            5
+          ],
+          "candidatos_por_alerta": 0,
+          "texto_legacy": "garantizar dialogo tripartito piden que produce garantice la inclusion transparencia y equidad en los espacios de decision del sector conforme al convenio colec",
+          "texto_core": "habilitacion de los bancos de semilla del recurso concha de abanico en la isla lobos y zona de amortiguamiento",
+          "via": "texto-todas",
+          "candidato_core_id": "6cc86350-48cb-44b6-9f99-f2d380d3e15c",
+          "candidato_core_codigo": "DEM-2026-0282",
+          "similitud": 0.3445,
+          "resoluble": false
+        }
+      ],
+      "mapeos": [
+        {
+          "origen": "legacy.dim_demandas.c01=DEM-2026-0008",
+          "destino": "core.demandas.id=20470e3d-18ae-418b-a531-03509177f5a0 (sin codigo_legado)",
+          "via": "texto-todas",
+          "similitud": 1.0,
+          "motivo": "texto próximo a una fila de core SIN codigo_legado",
+          "veredicto": "dudoso"
+        },
+        {
+          "origen": "legacy.dim_demandas.c01=DEM-2026-0009",
+          "destino": "core.demandas.id=ed122752-5b0a-49db-a723-23301cb63234 (sin codigo_legado)",
+          "via": "texto-todas",
+          "similitud": 1.0,
+          "motivo": "texto próximo a una fila de core SIN codigo_legado",
+          "veredicto": "dudoso"
+        },
+        {
+          "origen": "legacy.dim_demandas.c01=DEM-2026-0010",
+          "destino": "core.demandas.id=1596b04c-cceb-4322-b4c2-2701a0a0eecc (sin codigo_legado)",
+          "via": "texto-todas",
+          "similitud": 1.0,
+          "motivo": "texto próximo a una fila de core SIN codigo_legado",
+          "veredicto": "dudoso"
+        },
+        {
+          "origen": "legacy.dim_demandas.c01=DEM-2026-0034",
+          "destino": "core.demandas.id=cb11e75a-16c2-417a-acfd-d44242e825a0 (codigo_legado=DEM-2026-0064)",
+          "via": "texto-todas",
+          "similitud": 1.0,
+          "motivo": "texto idéntico pero el código destino es distinto (DEM-2026-0064): duplicado o renumeración",
+          "veredicto": "dudoso"
+        },
+        {
+          "origen": "legacy.dim_demandas.c01=DEM-2026-0048",
+          "destino": "core.demandas.id=3b0b20dc-800f-4ab3-9eab-a351a0f6d3bf (codigo_legado=DEM-2026-0093)",
+          "via": "texto-todas",
+          "similitud": 1.0,
+          "motivo": "texto idéntico pero el código destino es distinto (DEM-2026-0093): duplicado o renumeración",
+          "veredicto": "dudoso"
+        },
+        {
+          "origen": "legacy.dim_demandas.c01=DEM-2026-0049",
+          "destino": "core.demandas.id=5d639f6b-bba7-4e6c-8883-35e0b4c82948 (codigo_legado=DEM-2026-0094)",
+          "via": "texto-todas",
+          "similitud": 1.0,
+          "motivo": "texto idéntico pero el código destino es distinto (DEM-2026-0094): duplicado o renumeración",
+          "veredicto": "dudoso"
+        },
+        {
+          "origen": "legacy.dim_demandas.c01=DEM-2026-0050",
+          "destino": "core.demandas.id=e5e3518c-56d8-4be4-bf98-4244382812c6 (codigo_legado=DEM-2026-0095)",
+          "via": "texto-todas",
+          "similitud": 1.0,
+          "motivo": "texto idéntico pero el código destino es distinto (DEM-2026-0095): duplicado o renumeración",
+          "veredicto": "dudoso"
+        },
+        {
+          "origen": "legacy.dim_demandas.c01=DEM-2026-0051",
+          "destino": "core.demandas.id=820474de-8182-43e5-8842-2daffc579b83 (codigo_legado=DEM-2026-0096)",
+          "via": "texto-todas",
+          "similitud": 1.0,
+          "motivo": "texto idéntico pero el código destino es distinto (DEM-2026-0096): duplicado o renumeración",
+          "veredicto": "dudoso"
+        },
+        {
+          "origen": "legacy.dim_demandas.c01=DEM-2026-0067",
+          "destino": "core.demandas.id=352e98bf-f8ff-4ce9-8307-7c7274402d47 (codigo_legado=DEM-2026-0077)",
+          "via": "texto-todas",
+          "similitud": 0.97,
+          "motivo": "texto idéntico pero el código destino es distinto (DEM-2026-0077): duplicado o renumeración",
+          "veredicto": "dudoso"
+        },
+        {
+          "origen": "legacy.dim_demandas.c01=DEM-2026-0068",
+          "destino": "core.demandas.id=c15a6e7a-f629-4196-ac31-b07cfcf3b2e9 (codigo_legado=DEM-2026-0078)",
+          "via": "texto-todas",
+          "similitud": 0.9039,
+          "motivo": "texto idéntico pero el código destino es distinto (DEM-2026-0078): duplicado o renumeración",
+          "veredicto": "dudoso"
+        },
+        {
+          "origen": "legacy.dim_demandas.c01=DEM-2026-0069",
+          "destino": "core.demandas.id=1726b481-de90-4bfe-9785-a02491e5279d (codigo_legado=DEM-2026-0079)",
+          "via": "texto-todas",
+          "similitud": 1.0,
+          "motivo": "texto idéntico pero el código destino es distinto (DEM-2026-0079): duplicado o renumeración",
+          "veredicto": "dudoso"
+        },
+        {
+          "origen": "legacy.dim_demandas.c01=DEM-2026-0070",
+          "destino": "core.demandas.id=6e9496cf-fbf8-47ef-81be-871745bfef62 (codigo_legado=DEM-2026-0080)",
+          "via": "texto-todas",
+          "similitud": 0.9735,
+          "motivo": "texto idéntico pero el código destino es distinto (DEM-2026-0080): duplicado o renumeración",
+          "veredicto": "dudoso"
+        },
+        {
+          "origen": "legacy.dim_demandas.c01=DEM-2026-0106",
+          "destino": "core.demandas.id=4c38f9f9-44b6-4261-9d5a-659201d1e36a (codigo_legado=DEM-2026-0134)",
+          "via": "texto-todas",
+          "similitud": 0.928,
+          "motivo": "texto idéntico pero el código destino es distinto (DEM-2026-0134): duplicado o renumeración",
+          "veredicto": "dudoso"
+        },
+        {
+          "origen": "legacy.dim_demandas.c01=DEM-2026-0135",
+          "destino": "core.demandas.id=98f12469-4084-4e31-8792-005c423392f3 (sin codigo_legado)",
+          "via": "texto-todas",
+          "similitud": 0.8902,
+          "motivo": "texto próximo a una fila de core SIN codigo_legado",
+          "veredicto": "dudoso"
+        },
+        {
+          "origen": "legacy.dim_demandas.c01=DEM-2026-0164",
+          "destino": "core.demandas.id=d6f0b604-f875-41a0-a6d6-a8a0439d632f (codigo_legado=DEM-2026-0063)",
+          "via": "texto-todas",
+          "similitud": 1.0,
+          "motivo": "texto idéntico pero el código destino es distinto (DEM-2026-0063): duplicado o renumeración",
+          "veredicto": "dudoso"
+        },
+        {
+          "origen": "legacy.dim_demandas.c01=DEM-2026-0165",
+          "destino": "core.demandas.id=cb11e75a-16c2-417a-acfd-d44242e825a0 (codigo_legado=DEM-2026-0064)",
+          "via": "texto-todas",
+          "similitud": 1.0,
+          "motivo": "texto idéntico pero el código destino es distinto (DEM-2026-0064): duplicado o renumeración",
+          "veredicto": "dudoso"
+        },
+        {
+          "origen": "legacy.dim_demandas.c01=DEM-2026-0166",
+          "destino": "core.demandas.id=b72636d9-bfa7-4112-8670-de41ab401ec8 (codigo_legado=DEM-2026-0065)",
+          "via": "texto-todas",
+          "similitud": 1.0,
+          "motivo": "texto idéntico pero el código destino es distinto (DEM-2026-0065): duplicado o renumeración",
+          "veredicto": "dudoso"
+        },
+        {
+          "origen": "legacy.dim_demandas.c01=DEM-2026-0215",
+          "destino": "core.demandas.id=903adc51-09f2-4da3-b754-c975a02f1545 (codigo_legado=DEM-2026-0227)",
+          "via": "texto-todas",
+          "similitud": 1.0,
+          "motivo": "texto idéntico pero el código destino es distinto (DEM-2026-0227): duplicado o renumeración",
+          "veredicto": "dudoso"
+        }
+      ],
+      "veredicto": {
+        "seguro": 0,
+        "dudoso": 18,
+        "imposible": 195
+      }
+    }
+  },
+  "alertas_numeracion": {
+    "legacy": "legacy.dim_alertas",
+    "core": "core.alertas_tempranas",
+    "columnas_legacy": {
+      "codigo": "c01",
+      "titulo": "c10"
+    },
+    "columnas_core": {
+      "codigo": "codigo_alerta",
+      "titulo": "titulo"
+    },
+    "rango_numeros_legacy": [
+      1,
+      90
+    ],
+    "cantidad_numeros_legacy": 81,
+    "rango_numeros_core": [
+      1,
+      90
+    ],
+    "cantidad_numeros_core": 81,
+    "formatos": {
+      "legacy_dim_alertas_min": "AT-2026-01",
+      "legacy_dim_alertas_max": "AT-2026-90",
+      "core_codigos_con_sufijo": [
+        "AT-2026-01",
+        "AT-2026-02",
+        "AT-2026-03",
+        "AT-2026-04",
+        "AT-2026-05",
+        "AT-2026-06",
+        "AT-2026-07",
+        "AT-2026-08",
+        "AT-2026-09",
+        "AT-2026-10",
+        "AT-2026-11",
+        "AT-2026-12",
+        "AT-2026-13",
+        "AT-2026-14",
+        "AT-2026-15",
+        "AT-2026-16",
+        "AT-2026-17",
+        "AT-2026-18",
+        "AT-2026-20",
+        "AT-2026-21"
+      ],
+      "variantes_observadas": {
+        "bridge_alerta_actor.c02": "AT-2026-001 (143 filas, 11 car.) y AT-2026-26 (16 filas, 10 car.)",
+        "bridge_alerta_actor (3 filas invertidas)": "c02=ACT-xxx, c03=AT-2026-NN",
+        "dim_alertas.c01": "AT-2026-01 (2 digitos, 10 car.)",
+        "dim_demandas.c05": "AT-2026-01 (2 digitos, 10 car.)",
+        "core.alertas_tempranas.codigo_alerta": "AT-2026-01 (81 filas) + AT-2026-48-bis (1 fila)"
+      }
+    },
+    "stats": {
+      "legacy_total": 83,
+      "legacy_codigos_parseables": 83,
+      "legacy_sin_parsear": 0,
+      "mismo_numero_en_core": 83,
+      "titulo_exacto": 81,
+      "titulo_difuso_090": 81,
+      "sin_titulo_en_core": 0,
+      "titulo_coincide_en_otro_numero": 0
+    },
+    "detalle_muestra": [
+      {
+        "legacy": "AT-2026-75",
+        "core": "AT-2026-75",
+        "titulo_legacy": "Asociación de Productores y Exportadores Pesqueros solicitan audiencia con SM y Viceminist…",
+        "titulo_core": "Asociación de Productores y Exportadores Pesqueros solicitan audiencia con SM y Viceminist…",
+        "titulo_exacto": true,
+        "similitud": 1.0,
+        "veredicto": "seguro"
+      },
+      {
+        "legacy": "AT-2026-76",
+        "core": "AT-2026-76",
+        "titulo_legacy": "Asociación Paseo Turístico Perla del Pacífico demanda hacer uso del muelle de Chorrillos p…",
+        "titulo_core": "Asociación Paseo Turístico Perla del Pacífico demanda hacer uso del muelle de Chorrillos p…",
+        "titulo_exacto": true,
+        "similitud": 1.0,
+        "veredicto": "seguro"
+      },
+      {
+        "legacy": "AT-2026-77",
+        "core": "AT-2026-77",
+        "titulo_legacy": "OSPAS de Pisco (Ica) alertan posibles manifestaciones por la suspensión de la emisión de l…",
+        "titulo_core": "OSPAS de Pisco (Ica) alertan posibles manifestaciones por la suspensión de la emisión de l…",
+        "titulo_exacto": true,
+        "similitud": 1.0,
+        "veredicto": "seguro"
+      },
+      {
+        "legacy": "AT-2026-78",
+        "core": "AT-2026-78",
+        "titulo_legacy": "Pescadores se agrupan en contra de Proyecto de Ley 0828/2021 CR que propone texto sustitor…",
+        "titulo_core": "Pescadores se agrupan en contra de Proyecto de Ley 0828/2021 CR que propone texto sustitor…",
+        "titulo_exacto": true,
+        "similitud": 1.0,
+        "veredicto": "seguro"
+      },
+      {
+        "legacy": "AT-2026-79",
+        "core": "AT-2026-79",
+        "titulo_legacy": "Manifestaciones sociales contra Proyecto de Ley 0828/2021 CR, que propone texto sustitorio…",
+        "titulo_core": "Manifestaciones sociales contra Proyecto de Ley 0828/2021 CR, que propone texto sustitorio…",
+        "titulo_exacto": true,
+        "similitud": 1.0,
+        "veredicto": "seguro"
+      },
+      {
+        "legacy": "AT-2026-80",
+        "core": "AT-2026-80",
+        "titulo_legacy": "Pescadores artesanales e industriales del norte y centro del país se organizan contra posi…",
+        "titulo_core": "Pescadores artesanales e industriales del norte y centro del país se organizan contra posi…",
+        "titulo_exacto": true,
+        "similitud": 1.0,
+        "veredicto": "seguro"
+      },
+      {
+        "legacy": "AT-2026-81",
+        "core": "AT-2026-81",
+        "titulo_legacy": "Los pescadores de boliche de cerco de Ilo, Moquegua vienen organizando una movilización pa…",
+        "titulo_core": "Los pescadores de boliche de cerco de Ilo, Moquegua vienen organizando una movilización pa…",
+        "titulo_exacto": true,
+        "similitud": 1.0,
+        "veredicto": "seguro"
+      },
+      {
+        "legacy": "AT-2026-82",
+        "core": "AT-2026-82",
+        "titulo_legacy": "Asociaciones de Pescadores manifiestan su rechazo a la aprobación del Proyecto de la Ley N…",
+        "titulo_core": "Asociaciones de Pescadores manifiestan su rechazo a la aprobación del Proyecto de la Ley N…",
+        "titulo_exacto": true,
+        "similitud": 1.0,
+        "veredicto": "seguro"
+      },
+      {
+        "legacy": "AT-2026-83",
+        "core": "AT-2026-83",
+        "titulo_legacy": "OSPAS de Piura acuerdan realizar paro regional ante emisión de la Ley 31622, Ley que modif…",
+        "titulo_core": "OSPAS de Piura acuerdan realizar paro regional ante emisión de la Ley 31622, Ley que modif…",
+        "titulo_exacto": true,
+        "similitud": 1.0,
+        "veredicto": "seguro"
+      },
+      {
+        "legacy": "AT-2026-67",
+        "core": "AT-2026-67",
+        "titulo_legacy": "Pescadores artesanales de la FIUPAP muestran preocupación por el inicio de las mesas de tr…",
+        "titulo_core": "Pescadores artesanales de la FIUPAP muestran preocupación por el inicio de las mesas de tr…",
+        "titulo_exacto": true,
+        "similitud": 1.0,
+        "veredicto": "seguro"
+      },
+      {
+        "legacy": "AT-2026-68",
+        "core": "AT-2026-68",
+        "titulo_legacy": "Pescadores anuncian movilización a local de PRODUCE para el viernes 21.04.2023, exigen pro…",
+        "titulo_core": "Pescadores anuncian movilización a local de PRODUCE para el viernes 21.04.2023, exigen pro…",
+        "titulo_exacto": true,
+        "similitud": 1.0,
+        "veredicto": "seguro"
+      },
+      {
+        "legacy": "AT-2026-69",
+        "core": "AT-2026-69",
+        "titulo_legacy": "La asociación de Pescadores Artesanales no embarcados del Distrito de Ventanilla, convocan…",
+        "titulo_core": "La asociación de Pescadores Artesanales no embarcados del Distrito de Ventanilla, convocan…",
+        "titulo_exacto": true,
+        "similitud": 1.0,
+        "veredicto": "seguro"
+      },
+      {
+        "legacy": "AT-2026-70",
+        "core": "AT-2026-70",
+        "titulo_legacy": "Pescadores de la COPMAR esperan cumplimiento de los acuerdos asumidos por PRODUCE en reuni…",
+        "titulo_core": "Pescadores de la COPMAR esperan cumplimiento de los acuerdos asumidos por PRODUCE en reuni…",
+        "titulo_exacto": true,
+        "similitud": 1.0,
+        "veredicto": "seguro"
+      },
+      {
+        "legacy": "AT-2026-71",
+        "core": "AT-2026-71",
+        "titulo_legacy": "Los pescadores muestran malestar porque algunas zonas de tareas previas, cámara frigorífic…",
+        "titulo_core": "Los pescadores muestran malestar porque algunas zonas de tareas previas, cámara frigorífic…",
+        "titulo_exacto": true,
+        "similitud": 1.0,
+        "veredicto": "seguro"
+      },
+      {
+        "legacy": "AT-2026-72",
+        "core": "AT-2026-72",
+        "titulo_legacy": "Afectados por el derrame de petróleo en la costa de Ventanilla y otros distritos, anuncian…",
+        "titulo_core": "Afectados por el derrame de petróleo en la costa de Ventanilla y otros distritos, anuncian…",
+        "titulo_exacto": true,
+        "similitud": 1.0,
+        "veredicto": "seguro"
+      },
+      {
+        "legacy": "AT-2026-73",
+        "core": "AT-2026-73",
+        "titulo_legacy": "Paro nacional del sector pesquero industrial debido a la desatención del gobierno en aprob…",
+        "titulo_core": "Paro nacional del sector pesquero industrial debido a la desatención del gobierno en aprob…",
+        "titulo_exacto": true,
+        "similitud": 1.0,
+        "veredicto": "seguro"
+      },
+      {
+        "legacy": "AT-2026-74",
+        "core": "AT-2026-74",
+        "titulo_legacy": "Reglamentación de las 5 millas y Proyecto de Ley 5496/2022-CR para la de formalización pes…",
+        "titulo_core": "Reglamentación de las 5 millas y Proyecto de Ley 5496/2022-CR para la de formalización pes…",
+        "titulo_exacto": true,
+        "similitud": 1.0,
+        "veredicto": "seguro"
+      },
+      {
+        "legacy": "AT-2026-52",
+        "core": "AT-2026-52",
+        "titulo_legacy": "Pescadores de Ilo, Arequipa y Tacna, preparan protesta regional en contra del Ministerio d…",
+        "titulo_core": "Pescadores de Ilo, Arequipa y Tacna, preparan protesta regional en contra del Ministerio d…",
+        "titulo_exacto": true,
+        "similitud": 1.0,
+        "veredicto": "seguro"
+      },
+      {
+        "legacy": "AT-2026-53",
+        "core": "AT-2026-53",
+        "titulo_legacy": "Asociación de Exportadores y Acopiadores de Productos hidrobiológicos y Artesanales del Pe…",
+        "titulo_core": "Asociación de Exportadores y Acopiadores de Productos hidrobiológicos y Artesanales del Pe…",
+        "titulo_exacto": true,
+        "similitud": 1.0,
+        "veredicto": "seguro"
+      },
+      {
+        "legacy": "AT-2026-54",
+        "core": "AT-2026-54",
+        "titulo_legacy": "Dirigente del gremio Mypes Unidas, plantean cambio del ministro de la Producción por quieb…",
+        "titulo_core": "Dirigente del gremio Mypes Unidas, plantean cambio del ministro de la Producción por quieb…",
+        "titulo_exacto": true,
+        "similitud": 1.0,
+        "veredicto": "seguro"
+      },
+      {
+        "legacy": "AT-2026-55",
+        "core": "AT-2026-55",
+        "titulo_legacy": "Descontento de los gremios de pescadores artesanales sobre la aplicación de la cuota del r…",
+        "titulo_core": "Descontento de los gremios de pescadores artesanales sobre la aplicación de la cuota del r…",
+        "titulo_exacto": true,
+        "similitud": 1.0,
+        "veredicto": "seguro"
+      },
+      {
+        "legacy": "AT-2026-56",
+        "core": "AT-2026-56",
+        "titulo_legacy": "Movilización hacia la PCM promovida por Federación de Pescadores Artesanales, ancestrales …",
+        "titulo_core": "Movilización hacia la PCM promovida por Federación de Pescadores Artesanales, ancestrales …",
+        "titulo_exacto": true,
+        "similitud": 1.0,
+        "veredicto": "seguro"
+      },
+      {
+        "legacy": "AT-2026-57",
+        "core": "AT-2026-57",
+        "titulo_legacy": "OSPA José Silverio Olaya Balandra denuncia presuntas irregularidades en el proceso de sele…",
+        "titulo_core": "OSPA José Silverio Olaya Balandra denuncia presuntas irregularidades en el proceso de sele…",
+        "titulo_exacto": true,
+        "similitud": 1.0,
+        "veredicto": "seguro"
+      },
+      {
+        "legacy": "AT-2026-58",
+        "core": "AT-2026-58",
+        "titulo_legacy": "Mypes textiles, anuncian movilización a PRODUCE para el día jueves 15 de agosto 2024, debi…",
+        "titulo_core": "Mypes textiles, anuncian movilización a PRODUCE para el día jueves 15 de agosto 2024, debi…",
+        "titulo_exacto": true,
+        "similitud": 1.0,
+        "veredicto": "seguro"
+      },
+      {
+        "legacy": "AT-2026-59",
+        "core": "AT-2026-59",
+        "titulo_legacy": "AFECTADOS POR EL DERRAME DE PETRÓLEO EN LA COSTA DE VENTANILLA Y OTROS DISTRITOS, ANUNCIAN…",
+        "titulo_core": "AFECTADOS POR EL DERRAME DE PETRÓLEO EN LA COSTA DE VENTANILLA Y OTROS DISTRITOS, ANUNCIAN…",
+        "titulo_exacto": true,
+        "similitud": 1.0,
+        "veredicto": "seguro"
+      },
+      {
+        "legacy": "AT-2026-60",
+        "core": "AT-2026-60",
+        "titulo_legacy": "Cooperativas pesqueras y SONAPESCAL,  amenazan con una movilización ante la demora de la p…",
+        "titulo_core": "Cooperativas pesqueras y SONAPESCAL,  amenazan con una movilización ante la demora de la p…",
+        "titulo_exacto": true,
+        "similitud": 1.0,
+        "veredicto": "seguro"
+      },
+      {
+        "legacy": "AT-2026-61",
+        "core": "AT-2026-61",
+        "titulo_legacy": "PERMISOS DE PESCA TEMPORAL DE COOPERATIVAS PESQUERA DE PIURA Y LAMBAYEQUE ESTÁN PRÓXIMO A …",
+        "titulo_core": "PERMISOS DE PESCA TEMPORAL DE COOPERATIVAS PESQUERA DE PIURA Y LAMBAYEQUE ESTÁN PRÓXIMO A …",
+        "titulo_exacto": true,
+        "similitud": 1.0,
+        "veredicto": "seguro"
+      },
+      {
+        "legacy": "AT-2026-62",
+        "core": "AT-2026-62",
+        "titulo_legacy": "OSPAS de Lomas anuncian movilización por supuesta desidia y discriminación del sector.",
+        "titulo_core": "OSPAS de Lomas anuncian movilización por supuesta desidia y discriminación del sector.",
+        "titulo_exacto": true,
+        "similitud": 1.0,
+        "veredicto": "seguro"
+      },
+      {
+        "legacy": "AT-2026-63",
+        "core": "AT-2026-63",
+        "titulo_legacy": "OSPAS de la MACRO SUR anuncian movilización por emission de RM N° 00396-2024-PRODUCE",
+        "titulo_core": "OSPAS de la MACRO SUR anuncian movilización por emission de RM N° 00396-2024-PRODUCE",
+        "titulo_exacto": true,
+        "similitud": 1.0,
+        "veredicto": "seguro"
+      },
+      {
+        "legacy": "AT-2026-64",
+        "core": "AT-2026-64",
+        "titulo_legacy": "OSPAS de Ilo, Moquegua anuncia movilización por emission de RM N° 00396-2024-PRODUCE",
+        "titulo_core": "OSPAS de Ilo, Moquegua anuncia movilización por emission de RM N° 00396-2024-PRODUCE",
+        "titulo_exacto": true,
+        "similitud": 1.0,
+        "veredicto": "seguro"
+      },
+      {
+        "legacy": "AT-2026-65",
+        "core": "AT-2026-65",
+        "titulo_legacy": "Maricultores de Sechura manifiestan malestar ante requisitos para el acceso a créditos, co…",
+        "titulo_core": "Maricultores de Sechura manifiestan malestar ante requisitos para el acceso a créditos, co…",
+        "titulo_exacto": true,
+        "similitud": 1.0,
+        "veredicto": "seguro"
+      },
+      {
+        "legacy": "AT-2026-66",
+        "core": "AT-2026-66",
+        "titulo_legacy": "OSPAS de San Andrés participan en paro indefinido contra empresa Plus Petrol, y colocan co…",
+        "titulo_core": "OSPAS de San Andrés participan en paro indefinido contra empresa Plus Petrol, y colocan co…",
+        "titulo_exacto": true,
+        "similitud": 1.0,
+        "veredicto": "seguro"
+      },
+      {
+        "legacy": "AT-2026-10",
+        "core": "AT-2026-10",
+        "titulo_legacy": "🔔 REPORTE DE ALERTA TEMPRANA | Presuntos retrasos en la culminación del DPA San Juan de Ma…",
+        "titulo_core": "🔔 REPORTE DE ALERTA TEMPRANA | Presuntos retrasos en la culminación del DPA San Juan de Ma…",
+        "titulo_exacto": true,
+        "similitud": 1.0,
+        "veredicto": "seguro"
+      },
+      {
+        "legacy": "AT-2026-09",
+        "core": "AT-2026-09",
+        "titulo_legacy": "🚨 REPORTE DE ALERTA TEMPRANA | Movilización de dirigentes y pescadores artesanales de Ánca…",
+        "titulo_core": "🚨 REPORTE DE ALERTA TEMPRANA | Movilización de dirigentes y pescadores artesanales de Ánca…",
+        "titulo_exacto": true,
+        "similitud": 1.0,
+        "veredicto": "seguro"
+      },
+      {
+        "legacy": "AT-2026-51",
+        "core": "AT-2026-51",
+        "titulo_legacy": "Movilización y protesta pacífica de la COPMAR hacia el PRODUCE por omisión de funciones, a…",
+        "titulo_core": "Movilización y protesta pacífica de la COPMAR hacia el PRODUCE por omisión de funciones, a…",
+        "titulo_exacto": true,
+        "similitud": 1.0,
+        "veredicto": "seguro"
+      },
+      {
+        "legacy": "AT-2026-50",
+        "core": "AT-2026-50",
+        "titulo_legacy": "PESCADORES PLANTEAN MOVILIZACIÓN COMO MEDIDA DE PROTESTA FRENTE A CONVOCATORIA DE PROCESO …",
+        "titulo_core": "PESCADORES PLANTEAN MOVILIZACIÓN COMO MEDIDA DE PROTESTA FRENTE A CONVOCATORIA DE PROCESO …",
+        "titulo_exacto": true,
+        "similitud": 1.0,
+        "veredicto": "seguro"
+      },
+      {
+        "legacy": "AT-2026-20",
+        "core": "AT-2026-20",
+        "titulo_legacy": "🔔 REPORTE DE ALERTA TEMPRANA | Construcción Ilegal de infraestructura en terreno de SANIPE…",
+        "titulo_core": "🔔 REPORTE DE ALERTA TEMPRANA | Construcción Ilegal de infraestructura en terreno de SANIPE…",
+        "titulo_exacto": true,
+        "similitud": 1.0,
+        "veredicto": "seguro"
+      },
+      {
+        "legacy": "AT-2026-05",
+        "core": "AT-2026-05",
+        "titulo_legacy": "🔔 REPORTE DE ALERTA TEMPRANA | Dos sindicatos pesqueros emiten pronunciamientos separados …",
+        "titulo_core": "🔔 REPORTE DE ALERTA TEMPRANA | Dos sindicatos pesqueros emiten pronunciamientos separados …",
+        "titulo_exacto": true,
+        "similitud": 1.0,
+        "veredicto": "seguro"
+      },
+      {
+        "legacy": "AT-2026-06",
+        "core": "AT-2026-06",
+        "titulo_legacy": "🔔 REPORTE DE ALERTA TEMPRANA | Riesgo social por culminación del proceso administrativo de…",
+        "titulo_core": "🔔 REPORTE DE ALERTA TEMPRANA | Riesgo social por culminación del proceso administrativo de…",
+        "titulo_exacto": true,
+        "similitud": 1.0,
+        "veredicto": "seguro"
+      },
+      {
+        "legacy": "AT-2026-02",
+        "core": "AT-2026-02",
+        "titulo_legacy": "🚨 REPORTE DE ALERTA TEMPRANA| Movilización de pescadores artesanales en Cabo Blanco por re…",
+        "titulo_core": "🚨 REPORTE DE ALERTA TEMPRANA| Movilización de pescadores artesanales en Cabo Blanco por re…",
+        "titulo_exacto": true,
+        "similitud": 1.0,
+        "veredicto": "seguro"
+      },
+      {
+        "legacy": "AT-2026-49",
+        "core": "AT-2026-49",
+        "titulo_legacy": "🔔 REPORTE DE ALERTA TEMPRANA | PARQUE INDUSTRIAL ANCÓN",
+        "titulo_core": "🔔 REPORTE DE ALERTA TEMPRANA | PARQUE INDUSTRIAL ANCÓN",
+        "titulo_exacto": true,
+        "similitud": 1.0,
+        "veredicto": "seguro"
+      },
+      {
+        "legacy": "AT-2026-08",
+        "core": "AT-2026-08",
+        "titulo_legacy": "🚨 REPORTE DE ALERTA TEMPRANA | Movilización de pescadores afectados por derrame Repsol",
+        "titulo_core": "🚨 REPORTE DE ALERTA TEMPRANA | Movilización de pescadores afectados por derrame Repsol",
+        "titulo_exacto": true,
+        "similitud": 1.0,
+        "veredicto": "seguro"
+      },
+      {
+        "legacy": "AT-2026-11",
+        "core": "AT-2026-11",
+        "titulo_legacy": "📢REPORTE DE ALERTA TEMPRANA | Identificación de instalación ilegal de muros prefabricados …",
+        "titulo_core": "📢REPORTE DE ALERTA TEMPRANA | Identificación de instalación ilegal de muros prefabricados …",
+        "titulo_exacto": true,
+        "similitud": 1.0,
+        "veredicto": "seguro"
+      },
+      {
+        "legacy": "AT-2026-12",
+        "core": "AT-2026-12",
+        "titulo_legacy": "📢 REPORTE DE ALERTA TEMPRANA | ANUNCIAN PARO NACIONAL DE MYPES PARA EL 28 DE ENERO",
+        "titulo_core": "📢 REPORTE DE ALERTA TEMPRANA | ANUNCIAN PARO NACIONAL DE MYPES PARA EL 28 DE ENERO",
+        "titulo_exacto": true,
+        "similitud": 1.0,
+        "veredicto": "seguro"
+      },
+      {
+        "legacy": "AT-2026-13",
+        "core": "AT-2026-13",
+        "titulo_legacy": "📢 REPORTE DE ALERTA TEMPRANA – MALESTAR CRECIENTE EN PESCADORES ARTESANALES POR CAÍDA DEL …",
+        "titulo_core": "📢 REPORTE DE ALERTA TEMPRANA – MALESTAR CRECIENTE EN PESCADORES ARTESANALES POR CAÍDA DEL …",
+        "titulo_exacto": true,
+        "similitud": 1.0,
+        "veredicto": "seguro"
+      },
+      {
+        "legacy": "AT-2026-47",
+        "core": "AT-2026-47",
+        "titulo_legacy": "🔔 REPORTE DE ALERTA TEMPRANA | ANUNCIAN PARO NACIONAL DE MYPES PARA EL 28 DE ENERO",
+        "titulo_core": "🔔 REPORTE DE ALERTA TEMPRANA | ANUNCIAN PARO NACIONAL DE MYPES PARA EL 28 DE ENERO",
+        "titulo_exacto": true,
+        "similitud": 1.0,
+        "veredicto": "seguro"
+      },
+      {
+        "legacy": "AT-2026-90",
+        "core": "AT-2026-90",
+        "titulo_legacy": "🔔REPORTE DE ALERTA TEMPRANA | MESA DE DIALOGO - RÍO CORALAQUE (OMATE)",
+        "titulo_core": "🔔REPORTE DE ALERTA TEMPRANA | MESA DE DIALOGO - RÍO CORALAQUE (OMATE)",
+        "titulo_exacto": true,
+        "similitud": 1.0,
+        "veredicto": "seguro"
+      },
+      {
+        "legacy": "AT-2026-45",
+        "core": "AT-2026-45",
+        "titulo_legacy": "🔔 REPORTE DE ALERTA TEMPRANA | NEGATIVA AL DIÁLOGO Y CONVOCATORIA A MOVILIZACIÓN EN EL SUR…",
+        "titulo_core": "🔔 REPORTE DE ALERTA TEMPRANA | NEGATIVA AL DIÁLOGO Y CONVOCATORIA A MOVILIZACIÓN EN EL SUR…",
+        "titulo_exacto": true,
+        "similitud": 1.0,
+        "veredicto": "seguro"
+      },
+      {
+        "legacy": "AT-2026-14",
+        "core": "AT-2026-14",
+        "titulo_legacy": "🔔 REPORTE DE ALERTA TEMPRANA | AAMEC INICIA INSTALACIÓN DE LOGÍSTICA PARA ACTO CÍVICO Y FE…",
+        "titulo_core": "🔔 REPORTE DE ALERTA TEMPRANA | AAMEC INICIA INSTALACIÓN DE LOGÍSTICA PARA ACTO CÍVICO Y FE…",
+        "titulo_exacto": true,
+        "similitud": 1.0,
+        "veredicto": "seguro"
+      },
+      {
+        "legacy": "AT-2026-01",
+        "core": "AT-2026-01",
+        "titulo_legacy": "🔔 REPORTE DE ALERTA TEMPRANA| Conflicto pesquero por uso de redes de fondo",
+        "titulo_core": "🔔 REPORTE DE ALERTA TEMPRANA| Conflicto pesquero por uso de redes de fondo",
+        "titulo_exacto": true,
+        "similitud": 1.0,
+        "veredicto": "seguro"
+      },
+      {
+        "legacy": "AT-2026-44",
+        "core": "AT-2026-44",
+        "titulo_legacy": "🔔 REPORTE DE ALERTA TEMPRANA | Gremios del norte exigen renuncia del Ministro de Producció…",
+        "titulo_core": "🔔 REPORTE DE ALERTA TEMPRANA | Gremios del norte exigen renuncia del Ministro de Producció…",
+        "titulo_exacto": true,
+        "similitud": 1.0,
+        "veredicto": "seguro"
+      },
+      {
+        "legacy": "AT-2026-32",
+        "core": "AT-2026-32",
+        "titulo_legacy": "🔔 REPORTE DE ALERTA TEMPRANA |Protesta de pescadores artesanales en Lambayeque por cuota d…",
+        "titulo_core": "🔔 REPORTE DE ALERTA TEMPRANA |Protesta de pescadores artesanales en Lambayeque por cuota d…",
+        "titulo_exacto": true,
+        "similitud": 1.0,
+        "veredicto": "seguro"
+      },
+      {
+        "legacy": "AT-2026-88",
+        "core": "AT-2026-88",
+        "titulo_legacy": "Denuncia por presunta irregularidad en autorización de proyecto de investigación de Bacala…",
+        "titulo_core": "Denuncia por presunta irregularidad en autorización de proyecto de investigación de Bacala…",
+        "titulo_exacto": true,
+        "similitud": 1.0,
+        "veredicto": "seguro"
+      },
+      {
+        "legacy": "AT-2026-15",
+        "core": "AT-2026-15",
+        "titulo_legacy": "📢REPORTE DE ALERTA TEMPRANA | FREDEMYPE CONVOCA A PLANTÓN NACIONAL PARA EL 11MAR26 COMO PR…",
+        "titulo_core": "📢REPORTE DE ALERTA TEMPRANA | FREDEMYPE CONVOCA A PLANTÓN NACIONAL PARA EL 11MAR26 COMO PR…",
+        "titulo_exacto": true,
+        "similitud": 1.0,
+        "veredicto": "seguro"
+      },
+      {
+        "legacy": "AT-2026-16",
+        "core": "AT-2026-16",
+        "titulo_legacy": "🚨 REPORTE DE ALERTA TEMPRANA | PLANTÓN DE PESCADORES ARTESANALES FRENTE AL MINISTERIO DE L…",
+        "titulo_core": "🚨 REPORTE DE ALERTA TEMPRANA | PLANTÓN DE PESCADORES ARTESANALES FRENTE AL MINISTERIO DE L…",
+        "titulo_exacto": true,
+        "similitud": 1.0,
+        "veredicto": "seguro"
+      },
+      {
+        "legacy": "AT-2026-48",
+        "core": "AT-2026-48",
+        "titulo_legacy": "🔔 REPORTE DE ALERTA TEMPRANA | CAMBIO DE FECHA DE PLANTÓN NACIONAL DE MYPES COMO PROTESTA …",
+        "titulo_core": "🔔 REPORTE DE ALERTA TEMPRANA | CAMBIO DE FECHA DE PLANTÓN NACIONAL DE MYPES COMO PROTESTA …",
+        "titulo_exacto": true,
+        "similitud": 1.0,
+        "veredicto": "seguro"
+      },
+      {
+        "legacy": "AT-2026-07",
+        "core": "AT-2026-07",
+        "titulo_legacy": "🚨  REPORTE DE ALERTA TEMPRANA | Movilización de pescadores artesanales de La Libertad por …",
+        "titulo_core": "🚨  REPORTE DE ALERTA TEMPRANA | Movilización de pescadores artesanales de La Libertad por …",
+        "titulo_exacto": true,
+        "similitud": 1.0,
+        "veredicto": "seguro"
+      },
+      {
+        "legacy": "AT-2026-48",
+        "core": "AT-2026-48",
+        "titulo_legacy": "🔔 REPORTE DE ALERTA TEMPRANA – ESCALAMIENTO DE CONFLICTO EN DPA MORRO SAMA (TACNA) ASOCIAD…",
+        "titulo_core": "🔔 REPORTE DE ALERTA TEMPRANA | CAMBIO DE FECHA DE PLANTÓN NACIONAL DE MYPES COMO PROTESTA …",
+        "titulo_exacto": false,
+        "similitud": 0.4016,
+        "veredicto": "imposible"
+      },
+      {
+        "legacy": "AT-2026-03",
+        "core": "AT-2026-03",
+        "titulo_legacy": "🚨  REPORTE DE ALERTA TEMPRANA| Movilización social y bloqueo de Panamericana norte, altura…",
+        "titulo_core": "🚨  REPORTE DE ALERTA TEMPRANA| Movilización social y bloqueo de Panamericana norte, altura…",
+        "titulo_exacto": true,
+        "similitud": 1.0,
+        "veredicto": "seguro"
+      },
+      {
+        "legacy": "AT-2026-87",
+        "core": "AT-2026-87",
+        "titulo_legacy": "🔔 REPORTE DE ALERTA TEMPRANA | INTENTOS DE INVASIÓN DE LA ASOCIACIÓN AAMEC EN TERRENOS DEL…",
+        "titulo_core": "🔔 REPORTE DE ALERTA TEMPRANA | INTENTOS DE INVASIÓN DE LA ASOCIACIÓN AAMEC EN TERRENOS DEL…",
+        "titulo_exacto": true,
+        "similitud": 1.0,
+        "veredicto": "seguro"
+      }
+    ],
+    "mapeos": [
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-75",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-75",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-76",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-76",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-77",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-77",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-78",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-78",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-79",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-79",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-80",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-80",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-81",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-81",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-82",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-82",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-83",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-83",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-67",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-67",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-68",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-68",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-69",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-69",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-70",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-70",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-71",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-71",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-72",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-72",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-73",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-73",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-74",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-74",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-52",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-52",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-53",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-53",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-54",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-54",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-55",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-55",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-56",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-56",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-57",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-57",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-58",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-58",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-59",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-59",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-60",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-60",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-61",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-61",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-62",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-62",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-63",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-63",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-64",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-64",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-65",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-65",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-66",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-66",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-10",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-10",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-09",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-09",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-51",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-51",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-50",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-50",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-20",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-20",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-05",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-05",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-06",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-06",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-02",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-02",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-49",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-49",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-08",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-08",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-11",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-11",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-12",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-12",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-13",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-13",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-47",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-47",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-90",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-90",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-45",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-45",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-14",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-14",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-01",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-01",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-44",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-44",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-32",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-32",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-88",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-88",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-15",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-15",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-16",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-16",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-48",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-48",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-07",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-07",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-48",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-48",
+        "via": "mismo_numero",
+        "veredicto": "imposible"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-03",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-03",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-87",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-87",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-17",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-17",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-49",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-49",
+        "via": "mismo_numero",
+        "veredicto": "imposible"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-18",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-18",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-21",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-21",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-22",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-22",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-23",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-23",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-36",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-36",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-26",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-26",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-85",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-85",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-28",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-28",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-37",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-37",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-38",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-38",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-84",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-84",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-30",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-30",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-40",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-40",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-41",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-41",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-42",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-42",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-86",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-86",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-25",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-25",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-43",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-43",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-89",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-89",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-46",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-46",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      },
+      {
+        "origen": "legacy.dim_alertas.c01=AT-2026-04",
+        "destino": "core.alertas_tempranas.codigo_alerta=AT-2026-04",
+        "via": "mismo_numero",
+        "veredicto": "seguro"
+      }
+    ],
+    "conclusion": "MISMO ESPACIO DE IDENTIFICADORES, NO DE RELLENO: los 83 codigos del legado caen en el rango 1..90 igual que core, el 100% (83/83) tiene contraparte por numero y 81/83 (97.6%) coincide por titulo normalizado exacto. ademas, legacy.dim_alertas y core comparten el MISMO formato de 2 digitos ('AT-2026-01'), de modo que aqui no hay diferencia de padding en absoluto. Las variantes de ancho viven DENTRO del legado: bridge_alerta_actor usa 'AT-2026-001' en 143 filas y 'AT-2026-26' en 16. Normalizar a (anio, entero) unifica todas. Los 2 titulos no exactos (AT-2026-48 y -49) son divergencia de CONTENIDO (core tiene un duplicado 'AT-2026-48-bis'), no un identificador distinto.",
+    "veredicto": {
+      "seguro": 81,
+      "dudoso": 0,
+      "imposible": 2
+    }
+  }
+}

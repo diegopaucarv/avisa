@@ -106,9 +106,21 @@ import { salirModal } from '../../shared/ui/modal-salida';
 
     .previa-badges {
       display: flex;
-      flex-wrap: wrap;
+      flex-direction: column;
       gap: 6px;
       margin-bottom: 12px;
+    }
+
+    /*
+     * Cada línea envuelve por su cuenta: en móvil la primera puede partirse
+     * entre región, riesgo y estado sin arrastrar la conflictividad, que va
+     * siempre en su propia fila.
+     */
+    .previa-badges-linea {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
     }
 
     .previa-resumen {

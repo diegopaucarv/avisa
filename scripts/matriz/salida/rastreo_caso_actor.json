@@ -1,0 +1,196 @@
+{
+  "generado_en": "2026-11-26T22:45:34.197547+00:00",
+  "readonly": true,
+  "fuente": "postgresql://avisa@localhost:55433/avisa",
+  "codigos": {
+    "CS-PA-REG-2026-01": {
+      "aparece_en": [
+        "legacy.bridge_caso_actor.c03",
+        "legacy.bridge_caso_actor_estado.c03"
+      ],
+      "cadena": [
+        "legacy.bridge_caso_actor.c03 = 'CS-PA-REG-2026-01' (sintoma, no origen)"
+      ],
+      "caso_id": null,
+      "veredicto": "imposible",
+      "motivo": "Solo aparece en el puente y sus espejos (legacy.bridge_*): el bloque de origen NO se importo a ninguna tabla fuente.",
+      "regla": null,
+      "solo_puente": true,
+      "fuentes_reales": [],
+      "dossier": [],
+      "filas_bridge": 12
+    },
+    "CS-PA-REG-2026-04": {
+      "aparece_en": [
+        "legacy.bridge_caso_actor.c03",
+        "legacy.bridge_caso_actor_estado.c03"
+      ],
+      "cadena": [
+        "legacy.bridge_caso_actor.c03 = 'CS-PA-REG-2026-04' (sintoma, no origen)"
+      ],
+      "caso_id": null,
+      "veredicto": "imposible",
+      "motivo": "Solo aparece en el puente y sus espejos (legacy.bridge_*): el bloque de origen NO se importo a ninguna tabla fuente.",
+      "regla": null,
+      "solo_puente": true,
+      "fuentes_reales": [],
+      "dossier": [],
+      "filas_bridge": 2
+    },
+    "CS-PRODUCE-2026-037": {
+      "aparece_en": [
+        "core.proceso_instancia.codigo_caso_legado",
+        "legacy.bridge_caso_actor.c03",
+        "legacy.bridge_caso_actorestado.c03",
+        "legacy.bridge_caso_depto.c02",
+        "legacy.bridge_caso_depto.c03",
+        "legacy.fact_proceso_caso.c02"
+      ],
+      "cadena": [
+        "core.proceso_instancia[id=77fb7a13-bd45-4a66-a2a1-549da287cf42].codigo_caso_legado = 'CS-PRODUCE-2026-037'",
+        "-> sin enlace a core.casos"
+      ],
+      "caso_id": null,
+      "veredicto": "dudoso",
+      "motivo": "Existe traza en core.proceso_instancia.codigo_caso_legado, pero NO hay enlace verificable a core.casos (no hay caso creado/asignado).",
+      "regla": null,
+      "solo_puente": false,
+      "fuentes_reales": [
+        "core.proceso_instancia.codigo_caso_legado"
+      ],
+      "dossier": [
+        {
+          "tabla": "core.proceso_instancia",
+          "id": "id=77fb7a13-bd45-4a66-a2a1-549da287cf42",
+          "columnas": [
+            "id=77fb7a13-bd45-4a66-a2a1-549da287cf42",
+            "usuario_id=7c62121d-271e-45c6-95ac-273e88bb8446",
+            "tipo_origen=caso",
+            "codigo_legado=PC-0001",
+            "codigo_caso_legado=CS-PRODUCE-2026-037",
+            "flujo_definicion_id=6b7a58ac-c42e-42b6-b69e-785bcef8c076",
+            "codigo_responsable_legado=SEC-01"
+          ]
+        }
+      ],
+      "colision_015": {
+        "caso_015": "86040c3a-e81e-46ba-a564-f5d7e351c78c",
+        "codigos_015": {
+          "codigo_caso": "CS-MI-INF-2025-01",
+          "codigo_legado": "CS-PRODUCE-2026-015"
+        },
+        "colision": false,
+        "colision_directa": false,
+        "colision_indirecta": false,
+        "pares_compartidos": [],
+        "pares_resueltos": [],
+        "numeros": {
+          "codigo": 37,
+          "codigo_015": 15
+        },
+        "filas_015": 0,
+        "filas_codigo": 1,
+        "motivo": "No colisiona con CS-PRODUCE-2026-015 (caso 86040c3a-e81e-46ba-a564-f5d7e351c78c): no comparte (id_relacion,id_actor) y el numero 37 != 15. El rango numerado de core.casos llega a 035, asi que 037/038 estan fuera de serie; un recorte al maximo existente apuntaria a 035, no a 015."
+      },
+      "filas_bridge": 1
+    },
+    "CS-PRODUCE-2026-038": {
+      "aparece_en": [
+        "core.proceso_instancia.codigo_caso_legado",
+        "legacy.bridge_caso_actor.c03",
+        "legacy.bridge_caso_depto.c02",
+        "legacy.bridge_caso_depto.c03",
+        "legacy.fact_proceso_caso.c02"
+      ],
+      "cadena": [
+        "core.proceso_instancia[id=324c8ef6-3e89-4a3d-943e-75813996fabe].codigo_caso_legado = 'CS-PRODUCE-2026-038'",
+        "-> sin enlace a core.casos"
+      ],
+      "caso_id": null,
+      "veredicto": "dudoso",
+      "motivo": "Existe traza en core.proceso_instancia.codigo_caso_legado, pero NO hay enlace verificable a core.casos (no hay caso creado/asignado).",
+      "regla": null,
+      "solo_puente": false,
+      "fuentes_reales": [
+        "core.proceso_instancia.codigo_caso_legado"
+      ],
+      "dossier": [
+        {
+          "tabla": "core.proceso_instancia",
+          "id": "id=324c8ef6-3e89-4a3d-943e-75813996fabe",
+          "columnas": [
+            "id=324c8ef6-3e89-4a3d-943e-75813996fabe",
+            "usuario_id=7c62121d-271e-45c6-95ac-273e88bb8446",
+            "tipo_origen=caso",
+            "codigo_legado=PC-0002",
+            "codigo_caso_legado=CS-PRODUCE-2026-038",
+            "flujo_definicion_id=6b7a58ac-c42e-42b6-b69e-785bcef8c076",
+            "codigo_responsable_legado=SEC-01"
+          ]
+        }
+      ],
+      "colision_015": {
+        "caso_015": "86040c3a-e81e-46ba-a564-f5d7e351c78c",
+        "codigos_015": {
+          "codigo_caso": "CS-MI-INF-2025-01",
+          "codigo_legado": "CS-PRODUCE-2026-015"
+        },
+        "colision": false,
+        "colision_directa": false,
+        "colision_indirecta": false,
+        "pares_compartidos": [],
+        "pares_resueltos": [],
+        "numeros": {
+          "codigo": 38,
+          "codigo_015": 15
+        },
+        "filas_015": 0,
+        "filas_codigo": 1,
+        "motivo": "No colisiona con CS-PRODUCE-2026-015 (caso 86040c3a-e81e-46ba-a564-f5d7e351c78c): no comparte (id_relacion,id_actor) y el numero 38 != 15. El rango numerado de core.casos llega a 035, asi que 037/038 estan fuera de serie; un recorte al maximo existente apuntaria a 035, no a 015."
+      },
+      "filas_bridge": 1
+    },
+    "CS-PRODUCE-2026-06": {
+      "aparece_en": [
+        "legacy.bridge_caso_actor.c03",
+        "legacy.bridge_caso_actor_estado.c03"
+      ],
+      "cadena": [
+        "legacy.bridge_caso_actor.c03 = 'CS-PRODUCE-2026-06' (sintoma, no origen)"
+      ],
+      "caso_id": null,
+      "veredicto": "imposible",
+      "motivo": "Solo aparece en el puente y sus espejos (legacy.bridge_*): el bloque de origen NO se importo a ninguna tabla fuente.",
+      "regla": null,
+      "solo_puente": true,
+      "fuentes_reales": [],
+      "dossier": [],
+      "filas_bridge": 1
+    },
+    "CS-PRODUCE-2026-07": {
+      "aparece_en": [
+        "legacy.bridge_caso_actor.c03",
+        "legacy.bridge_caso_actor_estado.c03"
+      ],
+      "cadena": [
+        "legacy.bridge_caso_actor.c03 = 'CS-PRODUCE-2026-07' (sintoma, no origen)"
+      ],
+      "caso_id": null,
+      "veredicto": "imposible",
+      "motivo": "Solo aparece en el puente y sus espejos (legacy.bridge_*): el bloque de origen NO se importo a ninguna tabla fuente.",
+      "regla": null,
+      "solo_puente": true,
+      "fuentes_reales": [],
+      "dossier": [],
+      "filas_bridge": 1
+    }
+  },
+  "resumen": {
+    "filas_totales": 18,
+    "filas_recuperables": 0,
+    "filas_con_traza_sin_caso": 2,
+    "filas_sin_origen": 16,
+    "recuperables_por_regla": {},
+    "regla_general": "Resolver por core.casos.codigo_legado/codigo_caso o por caso_id verificable; si el codigo solo vive en legacy.bridge_* no hay origen importado."
+  }
+}

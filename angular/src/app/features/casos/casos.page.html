@@ -299,7 +299,7 @@
   </div>
   } @else if (modo() === 'tarjetas') {
   <div class="case-grid">
-    @for (caso of casos(); track caso.codigo) {
+    @for (caso of filasVisibles(); track caso.codigo) {
     <button
       type="button"
       class="case-card"
@@ -315,7 +315,6 @@
       </div>
       <h3>{{ caso.titulo }}</h3>
       <p class="case-summary">{{ caso.resumen || 'Sin resumen registrado.' }}</p>
-      <span class="case-sectorista">Sectorista: {{ caso.sectorista || 'sin dato' }}</span>
 
       <div class="case-card-bottom">
         <span [class]="claseRiesgo(caso)">

@@ -3,6 +3,38 @@
     <div>
       <h1 id="titulo-alertas">Alertas tempranas</h1>
     </div>
+
+    <div class="executive-kpis">
+      <div class="stat-card">
+        <span class="stat-icon"><app-icono nombre="alertas" [tamano]="16" /></span>
+        <span class="stat-copy">
+          <span>Alertas</span>
+          <strong>{{ total() }}</strong>
+        </span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-icon green"><app-icono nombre="check" [tamano]="16" /></span>
+        <span class="stat-copy">
+          <span>Atendidas</span>
+          <strong>{{ atendidas() ?? '—' }}</strong>
+        </span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-icon amber"><app-icono nombre="reloj" [tamano]="16" /></span>
+        <span class="stat-copy">
+          <span>Pendientes</span>
+          <strong>{{ pendientes() ?? '—' }}</strong>
+        </span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-icon"><app-icono nombre="alertas" [tamano]="16" /></span>
+        <span class="stat-copy">
+          <span>Sin caso</span>
+          <strong>{{ sinCaso() ?? '—' }}</strong>
+        </span>
+      </div>
+    </div>
+
     <div class="view-actions">
       @if (puedeRegistrar()) {
       <button type="button" class="button-primary" (click)="abrirAlta()">
@@ -34,37 +66,6 @@
   } @if (avisoArchivo(); as avisoArchivo) {
   <p class="form-hint aviso-ok" role="status">{{ avisoArchivo }}</p>
   }
-
-  <div class="executive-kpis">
-    <div class="stat-card">
-      <span class="stat-icon"><app-icono nombre="alertas" [tamano]="16" /></span>
-      <span class="stat-copy">
-        <span>Alertas</span>
-        <strong>{{ total() }}</strong>
-      </span>
-    </div>
-    <div class="stat-card">
-      <span class="stat-icon green"><app-icono nombre="check" [tamano]="16" /></span>
-      <span class="stat-copy">
-        <span>Atendidas</span>
-        <strong>{{ atendidas() ?? '—' }}</strong>
-      </span>
-    </div>
-    <div class="stat-card">
-      <span class="stat-icon amber"><app-icono nombre="reloj" [tamano]="16" /></span>
-      <span class="stat-copy">
-        <span>Pendientes</span>
-        <strong>{{ pendientes() ?? '—' }}</strong>
-      </span>
-    </div>
-    <div class="stat-card">
-      <span class="stat-icon"><app-icono nombre="alertas" [tamano]="16" /></span>
-      <span class="stat-copy">
-        <span>Sin caso</span>
-        <strong>{{ sinCaso() ?? '—' }}</strong>
-      </span>
-    </div>
-  </div>
 
   <div class="filter-bar">
     <label class="search-field">
@@ -101,29 +102,6 @@
     </label>
 
     <label class="select-filter">
-      Caso
-      <select aria-label="Filtrar por caso asignado" (change)="cambiarCaso($event)">
-        <option value="" [selected]="filtros().sinCaso === ''">
-          Todos los registros ({{ totalActivas() ?? '—' }})
-        </option>
-        <option value="false" [selected]="filtros().sinCaso === 'false'">
-          Con caso asignado ({{ conCaso() ?? '—' }})
-        </option>
-        <option value="true" [selected]="filtros().sinCaso === 'true'">
-          Sin caso asignado ({{ sinCaso() ?? '—' }})
-        </option>
-      </select>
-    </label>
-
-    <label class="select-filter">
-      Archivo
-      <select aria-label="Ver alertas archivadas" (change)="cambiarArchivados($event)">
-        <option value="" [selected]="filtros().archivados === ''">Activas</option>
-        <option value="true" [selected]="filtros().archivados === 'true'">Archivadas</option>
-      </select>
-    </label>
-
-    <label class="select-filter">
       Orden
       <select aria-label="Ordenar las alertas" (change)="cambiarOrden($event)">
         @for (orden of ordenes; track orden.valor) {
@@ -134,10 +112,52 @@
       </select>
     </label>
 
-    <button type="button" class="button-secondary" (click)="limpiar()">Limpiar filtros</button>
-  </div>
+    <div #filtrosAvanzados class="filtro-avanzado">
+      <button
+        type="button"
+        class="link-button avanzado-enlace"
+        [attr.aria-expanded]="avanzadaAbierta()"
+        aria-controls="filtros-avanzados-alertas"
+        (click)="alternarAvanzada()"
+      >
+        Búsqueda avanzada @if (filtrosAvanzadosActivos()) {<strong>· activos</strong>}
+      </button>
 
-  <p class="alerta-guia">Pulse una fila para abrir la ficha en el panel lateral.</p>
+      @if (avanzadaAbierta()) {
+      <div
+        class="panel-avanzado"
+        id="filtros-avanzados-alertas"
+        role="group"
+        aria-label="Búsqueda avanzada de alertas"
+      >
+        <label class="select-filter">
+          Caso
+          <select aria-label="Filtrar por caso asignado" (change)="cambiarCaso($event)">
+            <option value="" [selected]="filtros().sinCaso === ''">
+              Todos los registros ({{ totalActivas() ?? '—' }})
+            </option>
+            <option value="false" [selected]="filtros().sinCaso === 'false'">
+              Con caso asignado ({{ conCaso() ?? '—' }})
+            </option>
+            <option value="true" [selected]="filtros().sinCaso === 'true'">
+              Sin caso asignado ({{ sinCaso() ?? '—' }})
+            </option>
+          </select>
+        </label>
+
+        <label class="select-filter">
+          Archivo
+          <select aria-label="Ver alertas archivadas" (change)="cambiarArchivados($event)">
+            <option value="" [selected]="filtros().archivados === ''">Activas</option>
+            <option value="true" [selected]="filtros().archivados === 'true'">Archivadas</option>
+          </select>
+        </label>
+
+        <button type="button" class="button-secondary" (click)="limpiar()">Limpiar filtros</button>
+      </div>
+      }
+    </div>
+  </div>
 
   @if (estadoListado() === 'error') {
   <div class="empty-state" role="alert">
@@ -247,7 +267,7 @@
         <strong>{{ tituloAlerta(fila) }}</strong>
         <span class="alerta-meta">
           <span class="alerta-geografia">{{ geografia(fila) }}</span>
-          ·
+          <span class="sep" aria-hidden="true">·</span>
           <span [class]="claseRiesgo(fila)">Riesgo {{ etiquetaRiesgo(fila.riesgo) }}</span>
         </span>
       </div>
@@ -255,17 +275,38 @@
 
     <ng-template appCeldaTabla="caso" let-fila>
       @if (fila.casoCodigo) {
-      <a
-        class="table-link alerta-caso-enlace"
-        [routerLink]="['/casos', fila.casoCodigo]"
-        [attr.title]="fila.casoTitulo || null"
-        [attr.aria-label]="
-          fila.casoTitulo ? fila.casoCodigo + ', ' + fila.casoTitulo : 'Abrir el caso ' + fila.casoCodigo
-        "
-        (click)="$event.stopPropagation()"
-      >
-        {{ fila.casoCodigo }}
-      </a>
+      <div class="alerta-caso">
+        <div class="alerta-caso-linea">
+          <a
+            class="table-link alerta-caso-enlace"
+            [routerLink]="['/casos', fila.casoCodigo]"
+            [attr.title]="fila.casoTitulo || null"
+            [attr.aria-label]="
+              fila.casoTitulo
+                ? fila.casoCodigo + ', ' + fila.casoTitulo
+                : 'Abrir el caso ' + fila.casoCodigo
+            "
+            (click)="$event.stopPropagation()"
+          >
+            {{ fila.casoCodigo }}
+          </a>
+          <button
+            type="button"
+            class="boton-copiar"
+            [attr.title]="copiadoCaso() === fila.casoCodigo ? 'Código copiado' : 'Copiar el código del caso'"
+            [attr.aria-label]="'Copiar el código del caso ' + fila.casoCodigo"
+            (click)="copiarCaso(fila.casoCodigo, $event)"
+          >
+            <app-icono
+              [nombre]="copiadoCaso() === fila.casoCodigo ? 'check' : 'copiar'"
+              [tamano]="12"
+            />
+          </button>
+        </div>
+        @if (fila.casoTitulo) {
+        <span class="alerta-caso-titulo" [attr.title]="fila.casoTitulo">{{ fila.casoTitulo }}</span>
+        }
+      </div>
       } @else {
       <span class="sin-caso">Sin caso</span>
       }

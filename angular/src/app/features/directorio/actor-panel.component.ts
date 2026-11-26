@@ -16,6 +16,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { urlApi } from '../../core/config/entorno';
+import { MAX_ADJUNTO_BYTES } from '../../core/http/adjuntos.service';
 import { normalizarColeccion, urlConParametros } from '../../core/http/coleccion';
 import { consulta } from '../../core/http/consulta';
 import { aErrorApi } from '../../core/http/errores';
@@ -35,13 +36,13 @@ import {
   FUNCIONES_ACTOR,
   MASCARA_CORREO,
   MASCARA_DNI,
-  nivelIdentificacionDe,
   POSICIONAMIENTOS_ACTOR,
   SIN_DATO,
   TIPOS_ACTOR,
   type ActorDirectorio,
   type DatosPersonales,
   type MembresiaActor,
+  type OpcionCatalogo,
 } from './directorio.mapeo';
 
 /**
@@ -72,7 +73,8 @@ type CampoActorEdicion =
   | 'posicionamiento'
   | 'cargo'
   | 'nivelGobierno'
-  | 'categoria'
+  | 'region'
+  | 'organizacion'
   | 'perfilDescripcion'
   | 'dni'
   | 'telefono'
@@ -126,16 +128,49 @@ type ActorEdicion = Record<CampoActorEdicion, string> & { activo: boolean };
     }
 
     .panel-foto {
+      position: relative;
       display: grid;
       flex: none;
-      width: 64px;
-      height: 64px;
+      width: 128px;
+      height: 128px;
       place-items: center;
       overflow: hidden;
-      border-radius: 8px;
+      border-radius: 10px;
       background: #eef2f6;
       color: #607284;
-      font: 700 20px/1 var(--font-display);
+      font: 700 38px/1 var(--font-display);
+    }
+
+    /* Lápiz sobre la foto: sólo existe en edición, para elegir un archivo. */
+    .panel-foto-editar {
+      position: absolute;
+      right: 6px;
+      bottom: 6px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+      padding: 0;
+      border: 1px solid rgb(255 255 255 / 80%);
+      border-radius: 50%;
+      background: rgb(17 32 45 / 72%);
+      color: #fff;
+      cursor: pointer;
+    }
+
+    .panel-foto-editar:hover {
+      background: rgb(17 32 45 / 88%);
+    }
+
+    .panel-foto-editar:focus-visible {
+      outline: 2px solid #3576c5;
+      outline-offset: 2px;
+    }
+
+    /* El input real queda oculto: lo dispara el lápiz. */
+    .foto-input {
+      display: none;
     }
 
     .panel-foto img {
@@ -316,21 +351,6 @@ type ActorEdicion = Record<CampoActorEdicion, string> & { activo: boolean };
       font-style: italic;
     }
 
-    .panel-organizaciones {
-      display: grid;
-      gap: 8px;
-      margin: 0;
-      padding: 0;
-      list-style: none;
-    }
-
-    .panel-organizaciones li {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: baseline;
-      gap: 6px;
-    }
-
     /* Posicionamiento: un color por valor del catálogo. */
     .panel-posicionamiento {
       display: inline-flex;
@@ -478,6 +498,8 @@ export class ActorPanelComponent {
   readonly actor = input<ActorDirectorio | null>(null);
   /** Membresías vigentes de la persona, provistas por la tabla del directorio. */
   readonly membresias = input<MembresiaActor[]>([]);
+  /** Regiones del catálogo territorial para el select de la edición. */
+  readonly regiones = input<OpcionCatalogo[]>([]);
   /** Abre la ficha directamente en modo edición (acción «Editar» de la tabla). */
   readonly editarInicial = input(false);
   /** Indica si el actor ya está en la lista temporal, para alternar la etiqueta. */
@@ -522,7 +544,8 @@ export class ActorPanelComponent {
     posicionamiento: '',
     cargo: '',
     nivelGobierno: '',
-    categoria: '',
+    region: '',
+    organizacion: '',
     perfilDescripcion: '',
     dni: '',
     telefono: '',
@@ -589,9 +612,19 @@ export class ActorPanelComponent {
   /** Organización: la ficha muestra RUC y OSPA en lugar de membresía. */
   readonly esOrganizacion = computed(() => this.actor()?.naturaleza === 'Organización');
 
-  readonly nivelIdentificacion = computed(() =>
-    nivelIdentificacionDe(this.actor()?.nivelIdentificacion),
-  );
+  /**
+   * `true` cuando el tipo elegido es «Actor público». El nivel de gobierno
+   * (Nacional/Regional/Local) sólo se pregunta a las instituciones públicas:
+   * un actor social o privado no se adscribe a un nivel estatal.
+   */
+  readonly esTipoPublico = computed(() => {
+    const clave = (this.borrador().tipo || '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .trim();
+    return clave === 'actor publico';
+  });
 
   readonly vigenciaDesdeTexto = computed(() => formatearFechaActor(this.actor()?.vigenciaDesde));
   readonly vigenciaHastaTexto = computed(() => formatearFechaActor(this.actor()?.vigenciaHasta));
@@ -609,9 +642,41 @@ export class ActorPanelComponent {
   readonly mascaraDni = MASCARA_DNI;
   readonly mascaraCorreo = MASCARA_CORREO;
 
-  /** `02NOV2025` de una fecha ISO; `null` si no se reconoce. */
-  fechaDe(valor: string | null | undefined): string | null {
-    return formatearFechaActor(valor);
+  /** Aviso tras elegir una imagen para la ficha. */
+  readonly avisoFoto = signal<string | null>(null);
+  private readonly fotoInput = viewChild<ElementRef<HTMLInputElement>>('fotoInput');
+
+  abrirSelectorFoto(): void {
+    this.avisoFoto.set(null);
+    this.fotoInput()?.nativeElement.click();
+  }
+
+  /**
+   * Elige la fotografía desde el lápiz de la cabecera.
+   *
+   * Se valida que sea una imagen y que quepa en el límite de 20 MB, pero el
+   * archivo no puede subirse: `POST /v1/media` sólo registra una `url` y no
+   * existe un endpoint que almacene el binario. Se avisa en vez de inventarlo.
+   */
+  alSeleccionarFoto(evento: Event): void {
+    const entrada = evento.target as HTMLInputElement;
+    const archivo = entrada.files?.[0] ?? null;
+    entrada.value = '';
+    if (!archivo) return;
+
+    if (!archivo.type.startsWith('image/')) {
+      this.avisoFoto.set('El archivo debe ser una imagen (JPG, PNG o WebP).');
+      return;
+    }
+    if (archivo.size > MAX_ADJUNTO_BYTES) {
+      this.avisoFoto.set('La imagen supera el máximo de 20 MB.');
+      return;
+    }
+
+    this.avisoFoto.set(
+      'No se pudo guardar la fotografía: la API aún no expone la carga del archivo. ' +
+        'Un medio se registra con una URL y no hay endpoint que almacene la imagen.',
+    );
   }
 
   /** Clase de color del posicionamiento; `sin` cuando la base no lo declara. */
@@ -677,7 +742,8 @@ export class ActorPanelComponent {
       posicionamiento: actor.posicionamiento ?? '',
       cargo: actor.cargo ?? '',
       nivelGobierno: actor.nivelGobierno ?? '',
-      categoria: actor.categoria ?? '',
+      region: actor.region ?? '',
+      organizacion: actor.organizacionAncla ?? '',
       perfilDescripcion: actor.perfil ?? '',
       // El DNI sólo se precarga cuando ya se descifró con motivo: escribir a
       // ciegas sobre el campo no debe borrar el valor cifrado existente.
@@ -694,6 +760,7 @@ export class ActorPanelComponent {
       activo: actor.activo,
     });
     this.errorEdicion.set(null);
+    this.avisoFoto.set(null);
     this.editando.set(true);
     // El DNI sólo se edita con la PII descifrada. Al abrir la edición se pide una
     // sola vez: si el rol no autoriza no se hace ninguna llamada y el campo queda
@@ -703,6 +770,7 @@ export class ActorPanelComponent {
 
   cancelarEdicion(): void {
     this.errorEdicion.set(null);
+    this.avisoFoto.set(null);
     this.editando.set(false);
   }
 
@@ -823,13 +891,19 @@ export class ActorPanelComponent {
       nombre: draft.nombre,
       abreviatura: draft.abreviatura || null,
       cargo: draft.cargo || null,
-      categoria: draft.categoria || null,
       perfilDescripcion: draft.perfilDescripcion || null,
       nivelGobierno: draft.nivelGobierno.replace(/ /g, '_') || null,
       tipo: draft.tipo || undefined,
       funcion: draft.funcion || undefined,
       posicionamiento: draft.posicionamiento || null,
     };
+
+    // La región sólo viaja si de verdad cambió. Si el catálogo territorial no
+    // cargó, el select queda vacío; enviarlo entonces borraría el valor guardado.
+    const region = draft.region.trim();
+    if (region !== (actor.region ?? '').trim()) {
+      payload['region'] = region || null;
+    }
 
     if (dni) payload['dni'] = dni;
     // Un campo vacío no borra el valor cifrado almacenado: sólo se envía lo escrito.

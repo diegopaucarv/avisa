@@ -3,10 +3,12 @@ import {
   ChangeDetectionStrategy,
   Component,
   DestroyRef,
+  ElementRef,
   computed,
   effect,
   inject,
   signal,
+  viewChild,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -23,8 +25,7 @@ import {
 } from '../../core/http/coleccion';
 import { consulta } from '../../core/http/consulta';
 import { aErrorApi } from '../../core/http/errores';
-import { SesionStore } from '../../core/auth/sesion.store';
-import { ROL, CapacidadesService } from '../../core/permisos/capacidades.service';
+import { CapacidadesService } from '../../core/permisos/capacidades.service';
 import { RIESGOS, aCaso, formatearFechaCorta } from '../../dominio/mapeo';
 import type { Riesgo } from '../../dominio/modelos';
 import {
@@ -71,6 +72,7 @@ import {
   type DetalleAlerta,
   type PatchAlerta,
 } from './alerta.mapeo';
+import { copiarAlPortapapeles } from './portapapeles';
 
 type FiltrosAlertas = {
   q: string;
@@ -164,17 +166,65 @@ function totalDe(bruto: unknown): number {
       flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
+      gap: 12px 18px;
     }
 
     .view-head h1 {
       margin: 0;
     }
 
+    /*
+     * Indicadores en la cabecera: cuatro tarjetas compactas en una fila, entre
+     * el título y las acciones. La barra global reserva 91 px de alto, que aquí
+     * empujaban el listado una banda entera; el número manda (18 px) y el
+     * rótulo queda al lado para no repetir esa banda.
+     */
+    .view-head .executive-kpis {
+      flex: 1 1 420px;
+      min-width: 0;
+      margin-bottom: 0;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .view-head .stat-card {
+      min-height: 0;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 10px;
+    }
+
+    .view-head .stat-icon {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+    }
+
+    .view-head .stat-copy {
+      gap: 0;
+    }
+
+    .view-head .stat-copy > span {
+      font-size: 11.5px;
+      line-height: 1.2;
+    }
+
+    .view-head .stat-copy > strong {
+      font-size: 18px;
+    }
+
+    /* En pantallas estrechas los cuatro indicadores se envuelven en 2 × 2. */
+    @media (max-width: 980px) {
+      .view-head .executive-kpis {
+        flex-basis: 100%;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
     .alerta-titulo {
       display: block;
-      min-width: 240px;
-      max-width: 460px;
+      min-width: 288px;
+      max-width: 480px;
       white-space: normal;
     }
 
@@ -200,16 +250,24 @@ function totalDe(bruto: unknown): number {
 
     .alerta-geografia {
       display: inline;
-      color: var(--blue);
+      color: var(--muted);
       font-size: 11px;
-      font-weight: 700;
+      font-weight: 400;
+    }
+
+    /* Separador «·» del título: 8 px fijos para que no toque los extremos. */
+    .sep {
+      display: inline-block;
+      width: 8px;
+      color: var(--muted);
+      text-align: center;
     }
 
     .alerta-riesgo {
       display: inline;
       padding: 0;
       border-radius: 0;
-      font-weight: 700;
+      font-weight: 400;
       font-size: 11px;
     }
 
@@ -242,12 +300,27 @@ function totalDe(bruto: unknown): number {
     }
 
     /*
-     * Caso vinculado: sólo el código, como enlace al expediente. El título vive
-     * en el atributo title del enlace (aparece al pasar el puntero) para que la
-     * columna no reserve ancho para una segunda línea.
+     * Caso vinculado: el código enlaza al expediente y un botón lo copia; debajo
+     * va el título recortado a dos líneas. El atributo title conserva el texto
+     * completo cuando el recorte lo esconde.
      */
+    .alerta-caso {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .alerta-caso-linea {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      min-width: 0;
+    }
+
     .alerta-caso-enlace {
       display: block;
+      min-width: 0;
       max-width: 100%;
       overflow: hidden;
       color: var(--ink-2);
@@ -260,6 +333,43 @@ function totalDe(bruto: unknown): number {
     .alerta-caso-enlace:hover {
       color: var(--blue-dark);
       text-decoration: underline;
+    }
+
+    .boton-copiar {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex: none;
+      width: 20px;
+      height: 20px;
+      padding: 0;
+      border: 0;
+      border-radius: 5px;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+    }
+
+    .boton-copiar:hover {
+      background: var(--canvas);
+      color: var(--ink-2);
+    }
+
+    .boton-copiar:focus-visible {
+      outline: 2px solid var(--blue);
+      outline-offset: 1px;
+    }
+
+    .alerta-caso-titulo {
+      display: -webkit-box;
+      overflow: hidden;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.3;
+      white-space: normal;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
     }
 
     .sin-caso {
@@ -304,16 +414,42 @@ function totalDe(bruto: unknown): number {
       text-align: left;
     }
 
+    /*
+     * Filtros avanzados: un desplegable anclado al botón que lo abre. No es un
+     * modal: se cierra con el clic de fuera o con Escape (lo escucha la
+     * página), no con un fondo oscurecido.
+     */
+    .filtro-avanzado {
+      position: relative;
+      margin-left: auto;
+    }
+
+    .filtro-avanzado .avanzado-enlace {
+      white-space: nowrap;
+    }
+
+    .panel-avanzado {
+      position: absolute;
+      top: calc(100% + 6px);
+      right: 0;
+      z-index: 40;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      gap: 8px 10px;
+      width: max-content;
+      max-width: min(560px, calc(100vw - 32px));
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--paper);
+      box-shadow: 0 12px 32px rgb(26 43 62 / 14%);
+    }
+
     .alerta-actualizando {
       margin: 0;
       color: #8d99a6;
       font-size: 12px;
-    }
-
-    .alerta-guia {
-      margin: 2px 0 0;
-      color: #8d99a6;
-      font-size: 12.5px;
     }
 
     .aviso-ok {
@@ -338,7 +474,6 @@ export class AlertasPage {
   private readonly http = inject(HttpClient);
   private readonly destruccion = inject(DestroyRef);
   private readonly capacidades = inject(CapacidadesService);
-  private readonly sesion = inject(SesionStore);
 
   readonly estados = ESTADOS_ALERTA;
   readonly ordenes = ORDENES_ALERTA;
@@ -560,18 +695,11 @@ export class AlertasPage {
   readonly puedeRegistrar = this.capacidades.puedeEditar;
 
   /**
-   * «Edith» y la Dirección OAIPCS comparten rol. Aprobar y solicitar
-   * modificación quedan reservados a este conjunto (la alta dirección y el
-   * administrador también lo ven, como en `core.roles`).
+   * Dirección de la vista de alertas: `direccion_oaipcs`, alta dirección y
+   * administrador (el cuadro `DIRECCION` de `CapacidadesService`). La sección
+   * del menú de fila se llama igual; el resto del flujo ve «Flujo».
    */
-  readonly esDirectora = computed(() => {
-    const roles = this.sesion.roles();
-    return (
-      roles.includes(ROL.direccionOaipcs) ||
-      roles.includes(ROL.altaDireccion) ||
-      roles.includes(ROL.administrador)
-    );
-  });
+  readonly esDirectora = this.capacidades.esDirectora;
 
   /** Selección de la tabla (página visible) para exportar o anular en lote. */
   readonly seleccion = new SeleccionTabla();
@@ -582,12 +710,11 @@ export class AlertasPage {
   /** Orden local de la página visible. */
   readonly orden = new OrdenTabla<Alerta>();
 
-  /** Columnas del listado, en el orden del mockup. */
+  /** Columnas del listado, con el código estrecho y el título como eje. */
   readonly columnas: readonly ColumnaTabla[] = [
-    { clave: 'codigo', titulo: 'Código', ancho: '108px', ordenable: true },
+    { clave: 'codigo', titulo: 'Código', ancho: '54px', ordenable: true },
     { clave: 'titulo', titulo: 'Título', ordenable: true },
-    { clave: 'caso', titulo: 'Caso vinculado', ancho: '104px', ordenable: true },
-    { clave: 'revisor', titulo: 'Último revisor', ancho: '150px', ordenable: true },
+    { clave: 'caso', titulo: 'Caso vinculado', ancho: '112px', ordenable: true },
     {
       clave: 'fecha',
       titulo: 'Fecha reporte',
@@ -598,6 +725,7 @@ export class AlertasPage {
       formato: (valor) => this.fechaReporte(valor as string | null),
     },
     { clave: 'estado', titulo: 'Estado', ancho: '130px', ordenable: true },
+    { clave: 'revisor', titulo: 'Último revisor', ancho: '150px', ordenable: true },
     { clave: 'acciones', titulo: 'Acciones', ancho: '72px', alineacion: 'centro' },
   ];
 
@@ -640,9 +768,20 @@ export class AlertasPage {
   }
 
   private temporizador?: ReturnType<typeof setTimeout>;
+  private temporizadorCopia?: ReturnType<typeof setTimeout>;
 
   constructor() {
-    this.destruccion.onDestroy(() => clearTimeout(this.temporizador));
+    this.destruccion.onDestroy(() => {
+      clearTimeout(this.temporizador);
+      clearTimeout(this.temporizadorCopia);
+      document.removeEventListener('click', this.cerrarAvanzadaFuera);
+      document.removeEventListener('keydown', this.cerrarAvanzadaConEscape);
+    });
+
+    // Desplegable de filtros: el clic fuera cierra; el de dentro, no.
+    document.addEventListener('click', this.cerrarAvanzadaFuera);
+    document.addEventListener('keydown', this.cerrarAvanzadaConEscape);
+
     effect(() => {
       if (this.registroSolicitado() !== 'alerta') return;
       this.abrirAlta();
@@ -654,6 +793,18 @@ export class AlertasPage {
       });
     });
   }
+
+  private readonly cerrarAvanzadaFuera = (evento: MouseEvent): void => {
+    if (!this.avanzadaAbierta()) return;
+    const destino = evento.target as Node | null;
+    const contenedor = this.filtrosAvanzados()?.nativeElement;
+    if (destino && contenedor?.contains(destino)) return;
+    this.avanzadaAbierta.set(false);
+  };
+
+  private readonly cerrarAvanzadaConEscape = (evento: KeyboardEvent): void => {
+    if (evento.key === 'Escape') this.avanzadaAbierta.set(false);
+  };
 
   /* ---------------------------------------------------------------------- *
    * Presentación
@@ -692,6 +843,24 @@ export class AlertasPage {
     return riesgo === 'Alto' ? 'alto' : riesgo === 'Medio' ? 'moderado' : 'bajo';
   }
 
+  /** Código del caso copiado hace un instante; la marca caduca sola. */
+  readonly copiadoCaso = signal<string | null>(null);
+
+  /** Copia el código del caso sin abrir la ficha de la fila. */
+  async copiarCaso(codigo: string | null | undefined, evento?: Event): Promise<void> {
+    evento?.stopPropagation();
+    if (!codigo) return;
+
+    const ok = await copiarAlPortapapeles(codigo);
+    if (!ok) return;
+
+    clearTimeout(this.temporizadorCopia);
+    this.copiadoCaso.set(codigo);
+    this.temporizadorCopia = setTimeout(() => {
+      if (this.copiadoCaso() === codigo) this.copiadoCaso.set(null);
+    }, 1600);
+  }
+
   private pesoRiesgo(riesgo: Riesgo): number {
     switch (riesgo) {
       case 'Alto':
@@ -707,6 +876,16 @@ export class AlertasPage {
    * Acciones de fila
    * ---------------------------------------------------------------------- */
 
+  /**
+   * Menú de acciones de la fila, en secciones:
+   *
+   * · «Dirección OAIPCS», sólo para la Dirección: aprobar, solicitar
+   *   modificación y archivar sin caso (el «Anular» lo añade
+   *   `app-acciones-fila` al final del menú).
+   * · «Flujo», sólo para quien no es Dirección: enviar a revisión, que es el
+   *   paso de elaboración (1) a validación previa (2).
+   * · «Otras acciones»: modificar y mensajería instantánea.
+   */
   accionesFila(alerta: Alerta): readonly AccionMenu[] {
     const acciones: AccionMenu[] = [];
 
@@ -719,26 +898,25 @@ export class AlertasPage {
         etiqueta: 'Solicitar modificación',
         seccion: 'Dirección OAIPCS',
       });
-      // La Dirección puede devolver la alerta a revisión en cualquier momento.
+      if (this.puedeArchivar(alerta)) {
+        acciones.push({
+          id: 'archivar',
+          etiqueta: alerta.archivadoEn ? 'Quitar del archivo' : 'Archivar sin caso',
+          seccion: 'Dirección OAIPCS',
+        });
+      }
+    } else if (alerta.pasoActual < PASO_REVISION) {
       acciones.push({
         id: 'enviar-revision',
         etiqueta: 'Enviar a revisión',
-        seccion: 'Dirección OAIPCS',
+        seccion: 'Flujo',
       });
     }
 
     acciones.push(
-      { id: 'modificar', etiqueta: 'Modificar', seccion: 'Gestión' },
-      { id: 'whatsapp', etiqueta: 'Enviar por mensajería instantánea', seccion: 'Gestión' },
+      { id: 'modificar', etiqueta: 'Modificar', seccion: 'Otras acciones' },
+      { id: 'whatsapp', etiqueta: 'Enviar por mensajería instantánea', seccion: 'Otras acciones' },
     );
-
-    if (this.puedeArchivar(alerta)) {
-      acciones.push({
-        id: 'archivar',
-        etiqueta: alerta.archivadoEn ? 'Quitar del archivo' : 'Archivar sin caso',
-        seccion: 'Gestión',
-      });
-    }
 
     return acciones;
   }
@@ -797,6 +975,9 @@ export class AlertasPage {
 
   /** Las alertas se anulan con el privilegio de anulación y sobre su clasificación. */
   puedeAnular(alerta: Alerta): boolean {
+    // La acción queda reservada a la Dirección (o al administrador), aunque la
+    // base se la permitiera a otro perfil.
+    if (!this.esDirectora() && !this.capacidades.esAdmin()) return false;
     return (
       this.capacidades.puedeEliminar() && this.capacidades.puedeModificar(alerta.clasificacion)
     );
@@ -806,9 +987,10 @@ export class AlertasPage {
    * Archivar sólo aplica a alertas sin caso vinculado y vigentes (no anuladas).
    * Desarchivar siempre se permite: devuelve la fila a las colas aunque mientras
    * tanto haya ganado un caso. Archivar no es anular: no exige el privilegio de
-   * borrado, sino de escritura.
+   * borrado, sino el de escritura, y sólo lo ofrece la Dirección.
    */
   puedeArchivar(alerta: Alerta): boolean {
+    if (!this.esDirectora() && !this.capacidades.esAdmin()) return false;
     if (!this.capacidades.puedeModificar(alerta.clasificacion)) return false;
     if (alerta.archivadoEn) return !alerta.anuladoEn;
     return !alerta.casoId && !alerta.anuladoEn;
@@ -1237,6 +1419,26 @@ export class AlertasPage {
   /* ---------------------------------------------------------------------- *
    * Filtros
    * ---------------------------------------------------------------------- */
+
+  /**
+   * Desplegable de «Búsqueda avanzada»: caso, archivo y limpieza. Se cierra con
+   * el clic de fuera o con Escape; un clic dentro no lo cierra, porque los
+   * selects y «Limpiar filtros» se usan con el panel abierto.
+   */
+  readonly avanzadaAbierta = signal(false);
+
+  /** Contenedor del botón y del panel: distingue el clic de dentro del de fuera. */
+  private readonly filtrosAvanzados = viewChild<ElementRef<HTMLElement>>('filtrosAvanzados');
+
+  /** «Búsqueda avanzada · activos»: los filtros del panel que no están vacíos. */
+  readonly filtrosAvanzadosActivos = computed(() => {
+    const filtros = this.filtros();
+    return filtros.sinCaso !== '' || filtros.archivados !== '';
+  });
+
+  alternarAvanzada(): void {
+    this.avanzadaAbierta.update((abierto) => !abierto);
+  }
 
   buscar(evento: Event): void {
     const valor = (evento.target as HTMLInputElement).value;

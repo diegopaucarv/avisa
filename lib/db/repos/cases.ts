@@ -516,6 +516,16 @@ export type CaseActor = {
   funcion: string | null;
   posicionamiento: string | null;
   correo: string | null;
+  /**
+   * Organización a la que se ancla el actor (`core.actores.organizacion_ancla_uid`
+   * o su membresía vigente). `null` si el actor ya es una organización o no
+   * tiene vínculo. Campo aditivo para la tabla del caso.
+   */
+  organizacion: string | null;
+  /** Cargo declarado del actor (`core.actores.cargo_actual`); aditivo. */
+  cargo: string | null;
+  /** Teléfono de contacto público, no PII (`core.actores.telefono_contacto`); aditivo. */
+  telefono: string | null;
 };
 
 export type CaseEvent = {
@@ -698,12 +708,32 @@ export async function getCaseByCode(
               ta.nombre as tipo,
               ra.nombre as funcion,
               pf.nombre as posicionamiento,
-              a.email_contacto as correo
+              a.email_contacto as correo,
+              -- Datos de ficha que la tabla del caso muestra bajo el nombre: la
+              -- organización de la que depende la persona y su cargo. El ancla
+              -- se resuelve como en el directorio (ACTOR_FROM de actors.ts):
+              -- primero organizacion_ancla_uid y, si no está, la membresía
+              -- vigente más reciente. ADITIVO: no quita campos existentes.
+              coalesce(oa.nombre_actual, om.nombre_actual) as organizacion,
+              a.cargo_actual as cargo,
+              -- Teléfono de contacto público (no PII), columna de la migración 55.
+              a.telefono_contacto as telefono
          from core.casos_actores ca
          join core.actores a on a.actor_uid = ca.actor_id
          left join core.cat_tipos_actor ta on ta.id = a.tipo_actor_id
          left join core.cat_roles_actor ra on ra.id = a.rol_actor_id
          left join core.cat_perfiles_actor pf on pf.id = a.perfil_id
+         left join core.actores oa on oa.actor_uid = a.organizacion_ancla_uid
+         left join lateral (
+           select org.nombre_actual
+             from core.actor_membresia m
+             join core.actores org on org.actor_uid = m.organizacion_uid
+            where m.persona_uid = a.actor_uid
+              and (m.valid_from is null or m.valid_from <= current_date)
+              and (m.valid_to is null or m.valid_to >= current_date)
+            order by m.valid_from desc nulls last
+            limit 1
+         ) om on true
         where ca.caso_id = $1
           -- El servidor excluye los vínculos dados de baja lógica; el cliente ya
           -- no tiene que filtrarlos.
@@ -1129,14 +1159,61 @@ function requiredText(value: unknown, max: number): string {
 function urlOpcional(value: unknown): string | null {
   const limpio = text(value, MAX_URL_LENGTH, false);
   if (limpio === null) return null;
+  // El formulario acepta el enlace sin esquema («www.canva.com/…»). Se antepone
+  // `https://` para guardar una URL absoluta; el chequeo de protocolo de abajo
+  // sigue rechazando esquemas peligrosos como `javascript:`.
+  const conProtocolo = /^[a-z][a-z0-9+.-]*:\/\//i.test(limpio)
+    ? limpio
+    : `https://${limpio}`;
   let url: URL;
   try {
-    url = new URL(limpio);
+    url = new URL(conProtocolo);
   } catch {
     invalid();
   }
   if (url.protocol !== "http:" && url.protocol !== "https:") invalid();
-  return limpio;
+  return conProtocolo;
+}
+
+/**
+ * Sectorista del caso, almacenado en `core.casos.punto_focal_usuario_id`.
+ * Sólo se acepta un usuario activo con el rol `sectorista` vigente; cualquier
+ * otro id —o un usuario inexistente— se rechaza con 422 para no guardar un
+ * foco inválido que luego no se pueda resolver en la ficha.
+ */
+async function resolveSectoristaId(
+  client: PoolClient,
+  value: unknown,
+): Promise<string | null> {
+  if (value === null || value === undefined) return null;
+  if (typeof value !== "string" || !UUID_RE.test(value.trim())) {
+    throw new ApiError(
+      422,
+      "El sectorista debe ser un identificador UUID.",
+      "SECTORISTA_INVALIDO",
+    );
+  }
+  const id = value.trim();
+  const result = await client.query(
+    `select 1
+       from core.usuarios u
+       join core.usuario_roles ur on ur.usuario_id = u.id
+       join core.roles r on r.id = ur.rol_id
+      where u.id = $1::uuid
+        and u.activo
+        and r.codigo = 'sectorista'
+        and (ur.hasta is null or ur.hasta >= current_date)
+      limit 1`,
+    [id],
+  );
+  if (result.rowCount === 0) {
+    throw new ApiError(
+      422,
+      "El sectorista indicado no existe, no está activo o no tiene el rol sectorista.",
+      "SECTORISTA_INVALIDO",
+    );
+  }
+  return id;
 }
 
 function numericIn(value: unknown, min: number, max: number): number {
@@ -1828,6 +1905,21 @@ export async function updateCase(
   ]);
   if (descripcion.present)
     add("descripcion_riesgo", text(descripcion.value, MAX_TEXT_LENGTH, false));
+
+  // Sectorista: `null` limpia la asignación. Se valida contra usuarios activos
+  // con rol `sectorista` antes de escribir la columna.
+  const sectorista = readField(body, [
+    "sectoristaId",
+    "sectorista_usuario_id",
+    "puntoFocalUsuarioId",
+    "punto_focal_usuario_id",
+  ]);
+  if (sectorista.present) {
+    add(
+      "punto_focal_usuario_id",
+      await resolveSectoristaId(client, sectorista.value),
+    );
+  }
 
   const avance = readField(body, ["pctAvance", "pct_avance", "avance"]);
   if (avance.present) {

@@ -23,3 +23,20 @@ export function quitarActorListaPorIndice(
 ): ActorDirectorio[] {
   return actual.filter((_, posicion) => posicion !== indice);
 }
+
+/**
+ * Etiqueta de un ítem de la lista temporal: «Cargo · OSPA».
+ *
+ * «OSPA» es aquí la organización de la primera membresía vigente del actor
+ * (`organizacionDeMembresia`). Si no hay vínculo, se cae al ancla del listado y,
+ * por último, a la abreviatura. El guion evita que un hueco se lea como dato:
+ * la lista identifica actores, no completa su ficha.
+ */
+export function etiquetaItemLista(
+  actor: ActorDirectorio,
+  organizacionDeMembresia?: string | null,
+): string {
+  const cargo = actor.cargo || '—';
+  const ospa = organizacionDeMembresia || actor.organizacionAncla || actor.abreviatura || '—';
+  return `${cargo} · ${ospa}`;
+}

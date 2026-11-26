@@ -1,0 +1,448 @@
+{
+  "generado_en": "2026-11-26T22:48:11",
+  "premisa_encargo": {
+    "declarado": {
+      "dim_alertas": 83,
+      "core_alertas_tempranas": 82,
+      "resueltas_por_titulo": 81,
+      "demandas_con_c05": 248,
+      "demandas_resolubles": 190,
+      "codigos_faltantes": 58
+    },
+    "observado": {
+      "dim_alertas_filas": 83,
+      "dim_alertas_codigos_distintos": 81,
+      "core_alertas_tempranas": 83,
+      "demandas_con_c05": 248,
+      "demandas_resolubles": 222,
+      "codigos_faltantes": 5,
+      "demandas_faltantes": 14
+    },
+    "nota": "El total de demandas con c05 si coincide (248). El resto no: la base actual tiene 83 alertas en core (no 82) y 222 demandas resueltas (no 190). El 83/82 del encargo se explica contando filas frente a codigos: dim_alertas tiene 83 filas pero 81 codigos distintos (AT-2026-48 y -49 duplicados), y core conserva esos duplicados como '-bis' (83 = 81 + 2). Los 58 faltantes del encargo no se reproducen: hoy son 14 demandas en 5 codigos AT (mas 12 demandas cuyo c05 no es un codigo de alerta: RR-, CS-, TEMA-). El conteo de faltantes se hace por clave canonica (ignora relleno de ceros), que es la unica forma estable con este legado."
+  },
+  "diagnostico": {
+    "c05_que_no_es_alerta": {
+      "RR-2026-01": 5,
+      "CS-2026-01": 2,
+      "CS-2026-02": 4,
+      "TEMA-03": 1
+    },
+    "variantes_de_formato": []
+  },
+  "codigos": [
+    {
+      "codigo": "AT-2026-19",
+      "literales": [
+        "AT-2026-19"
+      ],
+      "demandas": 3,
+      "demanda_codigos": [
+        "DEM-2026-0063",
+        "DEM-2026-0064",
+        "DEM-2026-0065"
+      ],
+      "temas": [
+        3,
+        6
+      ],
+      "existe_en_dim_alertas": false,
+      "dim_alertas": {
+        "filas": 0,
+        "codigo": null,
+        "sector": null,
+        "fecha": null
+      },
+      "existe_en_core": false,
+      "titulo": null,
+      "caso_id": "86040c3a-e81e-46ba-a564-f5d7e351c78c",
+      "caso_codigo": "CS-MI-INF-2025-01",
+      "confianza_caso": "alta",
+      "casos_candidatos": 1,
+      "veredicto": "colgar_de_alerta_existente",
+      "via": "duplicado_textual",
+      "alerta_destino": "AT-2026-49",
+      "alerta_destino_titulo": "🔔 REPORTE DE ALERTA TEMPRANA | PARQUE INDUSTRIAL ANCÓN",
+      "motivo": "3/3 demanda(s) tienen texto identico ya vinculado a AT-2026-49 (codigo distinto: el bloque se renumero o duplico). Colgarlas de esa alerta recupera el vinculo, pero quedan demandas gemelas en la misma alerta: evaluar deduplicacion antes de aplicar.",
+      "vinculo": {
+        "bridge_filas": 3,
+        "bridge_demandas": [
+          "DEM-2026-0063",
+          "DEM-2026-0064",
+          "DEM-2026-0065"
+        ],
+        "actores": 2,
+        "recursos": 0,
+        "procesos": 2,
+        "sector": "SEC-01",
+        "fechas": [
+          "2026-06-03 10:55:32.470000",
+          "2026-06-03 10:55:32.546000"
+        ]
+      },
+      "gemelos_vinculados": [
+        {
+          "demanda": "DEM-2026-0063",
+          "gemelo": "DEM-2026-0164",
+          "alerta": "AT-2026-49",
+          "caso_id": "86040c3a-e81e-46ba-a564-f5d7e351c78c"
+        },
+        {
+          "demanda": "DEM-2026-0064",
+          "gemelo": "DEM-2026-0034",
+          "alerta": "AT-2026-11",
+          "caso_id": "86040c3a-e81e-46ba-a564-f5d7e351c78c"
+        },
+        {
+          "demanda": "DEM-2026-0064",
+          "gemelo": "DEM-2026-0165",
+          "alerta": "AT-2026-49",
+          "caso_id": "86040c3a-e81e-46ba-a564-f5d7e351c78c"
+        },
+        {
+          "demanda": "DEM-2026-0065",
+          "gemelo": "DEM-2026-0166",
+          "alerta": "AT-2026-49",
+          "caso_id": "86040c3a-e81e-46ba-a564-f5d7e351c78c"
+        }
+      ],
+      "cobertura_gemelos": 1.0,
+      "origen_en_legado": {
+        "bridge_alerta_actor": 2,
+        "bridge_alerta_demandas": 3,
+        "dim_demandas": 3,
+        "fact_proceso_reporte": 2
+      }
+    },
+    {
+      "codigo": "AT-2026-24",
+      "literales": [
+        "AT-2026-24"
+      ],
+      "demandas": 1,
+      "demanda_codigos": [
+        "DEM-2026-0072"
+      ],
+      "temas": [
+        6
+      ],
+      "existe_en_dim_alertas": false,
+      "dim_alertas": {
+        "filas": 0,
+        "codigo": null,
+        "sector": null,
+        "fecha": null
+      },
+      "existe_en_core": false,
+      "titulo": null,
+      "caso_id": null,
+      "caso_codigo": null,
+      "confianza_caso": "baja",
+      "casos_candidatos": 9,
+      "veredicto": "imposible",
+      "via": "ninguna",
+      "alerta_destino": null,
+      "alerta_destino_titulo": null,
+      "motivo": "Sin fila en dim_alertas, sin proceso que fije sector o fecha y sin demanda gemela vinculada: no hay origen para reconstruir la alerta. Solo sobreviven relaciones sueltas (1 puente, 3 actor(es)). La demanda queda sin alerta y sin caso hasta recuperar el origen.",
+      "vinculo": {
+        "bridge_filas": 1,
+        "bridge_demandas": [
+          "DEM-2026-0072"
+        ],
+        "actores": 3,
+        "recursos": 0,
+        "procesos": 0,
+        "sector": null,
+        "fechas": []
+      },
+      "gemelos_vinculados": [],
+      "cobertura_gemelos": 0.0,
+      "origen_en_legado": {
+        "bridge_alerta_actor": 3,
+        "bridge_alerta_demandas": 1,
+        "dim_demandas": 1
+      }
+    },
+    {
+      "codigo": "AT-2026-27",
+      "literales": [
+        "AT-2026-27"
+      ],
+      "demandas": 4,
+      "demanda_codigos": [
+        "DEM-2026-0077",
+        "DEM-2026-0078",
+        "DEM-2026-0079",
+        "DEM-2026-0080"
+      ],
+      "temas": [
+        2,
+        3,
+        5
+      ],
+      "existe_en_dim_alertas": false,
+      "dim_alertas": {
+        "filas": 0,
+        "codigo": null,
+        "sector": null,
+        "fecha": null
+      },
+      "existe_en_core": false,
+      "titulo": null,
+      "caso_id": null,
+      "caso_codigo": null,
+      "confianza_caso": "nula",
+      "casos_candidatos": 0,
+      "veredicto": "crear_la_alerta",
+      "via": "trazas_legado",
+      "alerta_destino": "AT-2026-21",
+      "alerta_destino_titulo": "🔔 REPORTE DE ALERTA TEMPRANA | Escalada de tensiones y riesgo de movilización en el sector pesquero artesanal de altura por restricciones internacionales a especies de tiburón",
+      "motivo": "El maestro (dim_alertas) no trae la fila, pero el legado conserva sector=SEC-03, fecha=2026-09-04 14:58:20.160000, 1 proceso(s), 0 actor(es) y 4 vinculo(s) a demandas: se puede crear una alerta cabecera con esos datos. Titulo y descripcion solo salen del origen (hoja de alertas), no de la base.",
+      "vinculo": {
+        "bridge_filas": 4,
+        "bridge_demandas": [
+          "DEM-2026-0077",
+          "DEM-2026-0078",
+          "DEM-2026-0079",
+          "DEM-2026-0080"
+        ],
+        "actores": 0,
+        "recursos": 0,
+        "procesos": 1,
+        "sector": "SEC-03",
+        "fechas": [
+          "2026-09-04 14:58:20.160000"
+        ]
+      },
+      "gemelos_vinculados": [
+        {
+          "demanda": "DEM-2026-0079",
+          "gemelo": "DEM-2026-0069",
+          "alerta": "AT-2026-21",
+          "caso_id": "75f1de99-b8fa-49f5-bf48-3330c444993f"
+        }
+      ],
+      "cobertura_gemelos": 0.25,
+      "origen_en_legado": {
+        "bridge_alerta_demandas": 4,
+        "dim_demandas": 4,
+        "fact_proceso_reporte": 1
+      }
+    },
+    {
+      "codigo": "AT-2026-34",
+      "literales": [
+        "AT-2026-34"
+      ],
+      "demandas": 4,
+      "demanda_codigos": [
+        "DEM-2026-0093",
+        "DEM-2026-0094",
+        "DEM-2026-0095",
+        "DEM-2026-0096"
+      ],
+      "temas": [
+        5,
+        6,
+        7
+      ],
+      "existe_en_dim_alertas": false,
+      "dim_alertas": {
+        "filas": 0,
+        "codigo": null,
+        "sector": null,
+        "fecha": null
+      },
+      "existe_en_core": false,
+      "titulo": null,
+      "caso_id": "39c091af-b98b-4a38-aa17-8914923560cd",
+      "caso_codigo": "CS-PA-ITE-2026-03",
+      "confianza_caso": "alta",
+      "casos_candidatos": 1,
+      "veredicto": "colgar_de_alerta_existente",
+      "via": "duplicado_textual",
+      "alerta_destino": "AT-2026-18",
+      "alerta_destino_titulo": "🔔 REPORTE DE ALERTA TEMPRANA | Mortandad de 8 millones de truchas en 7 piscigranjas de Pariahuanca, Huancayo, Junín",
+      "motivo": "4/4 demanda(s) tienen texto identico ya vinculado a AT-2026-18 (codigo distinto: el bloque se renumero o duplico). Colgarlas de esa alerta recupera el vinculo, pero quedan demandas gemelas en la misma alerta: evaluar deduplicacion antes de aplicar.",
+      "vinculo": {
+        "bridge_filas": 4,
+        "bridge_demandas": [
+          "DEM-2026-0093",
+          "DEM-2026-0094",
+          "DEM-2026-0095",
+          "DEM-2026-0096"
+        ],
+        "actores": 0,
+        "recursos": 1,
+        "procesos": 1,
+        "sector": "SEC-03",
+        "fechas": [
+          "2026-09-04 15:39:38.723000"
+        ]
+      },
+      "gemelos_vinculados": [
+        {
+          "demanda": "DEM-2026-0093",
+          "gemelo": "DEM-2026-0048",
+          "alerta": "AT-2026-18",
+          "caso_id": "39c091af-b98b-4a38-aa17-8914923560cd"
+        },
+        {
+          "demanda": "DEM-2026-0094",
+          "gemelo": "DEM-2026-0049",
+          "alerta": "AT-2026-18",
+          "caso_id": "39c091af-b98b-4a38-aa17-8914923560cd"
+        },
+        {
+          "demanda": "DEM-2026-0095",
+          "gemelo": "DEM-2026-0050",
+          "alerta": "AT-2026-18",
+          "caso_id": "39c091af-b98b-4a38-aa17-8914923560cd"
+        },
+        {
+          "demanda": "DEM-2026-0096",
+          "gemelo": "DEM-2026-0051",
+          "alerta": "AT-2026-18",
+          "caso_id": "39c091af-b98b-4a38-aa17-8914923560cd"
+        }
+      ],
+      "cobertura_gemelos": 1.0,
+      "origen_en_legado": {
+        "bridge_alerta_demandas": 4,
+        "bridge_alerta_recurso": 1,
+        "dim_demandas": 4,
+        "fact_proceso_reporte": 1
+      }
+    },
+    {
+      "codigo": "AT-2026-39",
+      "literales": [
+        "AT-2026-39"
+      ],
+      "demandas": 2,
+      "demanda_codigos": [
+        "DEM-2026-0110",
+        "DEM-2026-0111"
+      ],
+      "temas": [
+        5
+      ],
+      "existe_en_dim_alertas": false,
+      "dim_alertas": {
+        "filas": 0,
+        "codigo": null,
+        "sector": null,
+        "fecha": null
+      },
+      "existe_en_core": false,
+      "titulo": null,
+      "caso_id": null,
+      "caso_codigo": null,
+      "confianza_caso": "nula",
+      "casos_candidatos": 0,
+      "veredicto": "colgar_de_alerta_existente",
+      "via": "duplicado_textual",
+      "alerta_destino": "AT-2026-40",
+      "alerta_destino_titulo": "🔔 REPORTE DE ALERTA TEMPRANA | Movilización hacia Huancayo 18.JUN.2026 – Contaminación río Yuracyacu / intangibilidad de cabeceras de cuenca",
+      "motivo": "2/2 demanda(s) tienen texto identico ya vinculado a AT-2026-40 (codigo distinto: el bloque se renumero o duplico). Colgarlas de esa alerta recupera el vinculo, pero quedan demandas gemelas en la misma alerta: evaluar deduplicacion antes de aplicar.",
+      "vinculo": {
+        "bridge_filas": 2,
+        "bridge_demandas": [
+          "DEM-2026-0110",
+          "DEM-2026-0111"
+        ],
+        "actores": 0,
+        "recursos": 0,
+        "procesos": 1,
+        "sector": "SEC-03",
+        "fechas": [
+          "2026-09-04 16:24:47.506000"
+        ]
+      },
+      "gemelos_vinculados": [
+        {
+          "demanda": "DEM-2026-0110",
+          "gemelo": "DEM-2026-0132",
+          "alerta": "AT-2026-40",
+          "caso_id": null
+        },
+        {
+          "demanda": "DEM-2026-0111",
+          "gemelo": "DEM-2026-0133",
+          "alerta": "AT-2026-40",
+          "caso_id": null
+        }
+      ],
+      "cobertura_gemelos": 1.0,
+      "origen_en_legado": {
+        "bridge_alerta_demandas": 2,
+        "dim_demandas": 2,
+        "fact_proceso_reporte": 1
+      }
+    }
+  ],
+  "resumen": {
+    "legado": {
+      "dim_alertas_filas": 83,
+      "dim_alertas_codigos_distintos": 81,
+      "dim_alertas_codigos_duplicados": {
+        "AT-2026-49": 2,
+        "AT-2026-48": 2
+      },
+      "core_alertas": 83,
+      "core_alertas_bis": [
+        "AT-2026-48-bis",
+        "AT-2026-49-bis"
+      ],
+      "dim_demandas": 325,
+      "dim_demandas_con_c05": 248,
+      "dim_demandas_sin_c05": 77,
+      "c05_con_codigo_at": 236,
+      "c05_no_at": {
+        "RR-2026-01": 5,
+        "CS-2026-01": 2,
+        "CS-2026-02": 4,
+        "TEMA-03": 1
+      },
+      "resueltas_literal": 222,
+      "resueltas_por_formato": 0,
+      "resueltas_total": 222,
+      "codigos_faltantes": 5,
+      "demandas_faltantes": 14
+    },
+    "bridge": {
+      "filas": 231,
+      "alertas": 75,
+      "demandas": 231
+    },
+    "por_veredicto": {
+      "crear_la_alerta": {
+        "codigos": 1,
+        "demandas": 4
+      },
+      "colgar_de_alerta_existente": {
+        "codigos": 3,
+        "demandas": 9
+      },
+      "imposible": {
+        "codigos": 1,
+        "demandas": 1
+      }
+    },
+    "recuperables_por_salida": {
+      "crear_la_alerta": 4,
+      "colgar_de_alerta_existente": 9,
+      "imposible": 1
+    },
+    "escaneo_legado": {
+      "ejecutado": true,
+      "codigos_con_rastro": [
+        "AT-2026-19",
+        "AT-2026-24",
+        "AT-2026-27",
+        "AT-2026-34",
+        "AT-2026-39"
+      ]
+    }
+  },
+  "conexion": "POSTGRES_* → postgresql://***@localhost:55433/avisa"
+}

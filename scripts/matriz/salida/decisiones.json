@@ -1,0 +1,410 @@
+{
+  "generado_en": "2026-11-26T22:44:10.854782+00:00",
+  "solo_lectura": true,
+  "alerta_duplicada": {
+    "a": {
+      "id": "8486c922-cd25-4b83-9e88-c09f4969be5d",
+      "codigo_alerta": "AT-2026-48",
+      "titulo": "🔔 REPORTE DE ALERTA TEMPRANA | CAMBIO DE FECHA DE PLANTÓN NACIONAL DE MYPES COMO PROTESTA ANTE PRESUNTOS ACTOS DE CORRUPCIÓN EN NEC TEXTIL",
+      "fecha_reporte": "2026-03-10",
+      "situacion_actual": "Los miembros de la Asociación Multisectorial de Industrias del Perú de Huancayo se reunieron presencialmente el viernes 17/01/2026 y acordaron impulsar un paro nacional o una marcha conjunta. Según medios el 28/01/2026 se llevará a cabo una asamblea nacional de MYPES y probablemente esta misma fecha se acuerde el inicio de un paro nacional.",
+      "caso_id": "7c81ab23-62f4-4799-9cd1-9d3cabe2ef0d",
+      "codigo_legado": "AT-2026-48",
+      "estado_legado": "Archivado",
+      "created_at": "2026-11-26 21:19:08.713833+00:00",
+      "hijos": {
+        "core.alertas_actores": 3,
+        "core.alerta_especies": 0,
+        "core.proceso_instancia": 1,
+        "core.demandas": 0
+      },
+      "hijos_total": 4
+    },
+    "bis": {
+      "id": "c9f4ee01-5c7c-4e20-80a3-cb235b93a482",
+      "codigo_alerta": "AT-2026-48-bis",
+      "titulo": "🔔 REPORTE DE ALERTA TEMPRANA – ESCALAMIENTO DE CONFLICTO EN DPA MORRO SAMA (TACNA) ASOCIADO A LA GESTIÓN DE DIREPRO TACNA",
+      "fecha_reporte": "2026-04-11",
+      "situacion_actual": "A finales de marzo e inicios de abril se han realizado intentos de diálogo entre pescadores artesanales y autoridades regionales (DIREPRO / GORE Tacna), sin resultados efectivos ni canales de comunicación consolidados.",
+      "caso_id": null,
+      "codigo_legado": "AT-2026-48-bis",
+      "estado_legado": "Archivado",
+      "created_at": "2026-10-31 07:52:56.714777+00:00",
+      "hijos": {
+        "core.alertas_actores": 0,
+        "core.alerta_especies": 0,
+        "core.proceso_instancia": 1,
+        "core.demandas": 0
+      },
+      "hijos_total": 1
+    },
+    "campos_distintos": {
+      "titulo": true,
+      "fecha_reporte": true,
+      "situacion_actual": true,
+      "caso_id": true,
+      "codigo_legado": true
+    },
+    "son_duplicados": false,
+    "decision": "no tocar",
+    "motivo": "No son duplicados: difieren título, fecha, situación y caso. El sufijo -bis es un error de numeración, no una copia del registro. AT-2026-48 es MYPES/plantón nacional (caso 7c81ab23-62f4-4799-9cd1-9d3cabe2ef0d); AT-2026-48-bis es DPA Morro Sama/Tacna (sin caso). Cada una conserva sus propios hijos.",
+    "sql_propuesto": [
+      "-- no tocar: registros distintos, no hay UPDATE/DELETE."
+    ]
+  },
+  "dudosos": [
+    {
+      "crudo": "OSPAS DE LOMAS",
+      "tipo": "persona",
+      "coseno": 0.6206,
+      "lexico": 0.7586,
+      "decision": "crear",
+      "destino": {
+        "id": "b0fd885f-bb66-409a-b57c-46aa4f53fb36",
+        "tabla": "core.actores",
+        "nombre": "OSPAs de Tumbes",
+        "siglas": [],
+        "existe_en_bd": true,
+        "nombre_bd": "OSPAs de Tumbes",
+        "nombre_actor": "OSPAs de Tumbes",
+        "naturaleza": "persona"
+      },
+      "motivo": "OSPAS de Lomas es una OSPA local de Caravelí; el destino OSPAs de Tumbes es otra OSPA (otra jurisdicción). Entidad distinta."
+    },
+    {
+      "crudo": "Pescadores de la Macro Sur (Ica, Arequipa, Moquegua, Tacna)",
+      "tipo": "organizacion",
+      "coseno": 0.8104,
+      "lexico": 0.4944,
+      "decision": "no registrar",
+      "destino": {
+        "id": "c1b947a7-6839-430d-b1fe-996b72bc5269",
+        "tabla": "core.organizaciones",
+        "nombre": "Asoc. Pescadores de Redes Cortineras",
+        "siglas": [],
+        "existe_en_bd": true,
+        "nombre_bd": "Asoc. Pescadores de Redes Cortineras",
+        "nombre_actor": "Asoc. Pescadores de Redes Cortineras",
+        "naturaleza": "organizacion"
+      },
+      "motivo": "Descriptor colectivo por macro-región sin organización nombrada; no identifica una entidad concreta."
+    },
+    {
+      "crudo": "Gremios de maricultores de Sechura",
+      "tipo": "organizacion",
+      "coseno": 0.8497,
+      "lexico": 0.4878,
+      "decision": "no registrar",
+      "destino": {
+        "id": "b8e425d1-e1fc-45d8-aee9-3248035b8a10",
+        "tabla": "core.organizaciones",
+        "nombre": "Asoc. Pescadores Artesanales y Cortineros Sechura",
+        "siglas": [],
+        "existe_en_bd": true,
+        "nombre_bd": "Asoc. Pescadores Artesanales y Cortineros Sechura",
+        "nombre_actor": "Asoc. Pescadores Artesanales y Cortineros Sechura",
+        "naturaleza": "organizacion"
+      },
+      "motivo": "«Gremios de…» es descriptor sectorial; Sechura es topónimo, no ancla propia de una organización concreta."
+    },
+    {
+      "crudo": "Pescadores",
+      "tipo": "organizacion",
+      "coseno": 0.9456,
+      "lexico": 0.8696,
+      "decision": "no registrar",
+      "destino": {
+        "id": "978c4ec7-60cd-45c3-a0bc-87c60f36c48e",
+        "tabla": "core.organizaciones",
+        "nombre": "As. Pescadores",
+        "siglas": [],
+        "existe_en_bd": true,
+        "nombre_bd": "As. Pescadores",
+        "nombre_actor": "As. Pescadores",
+        "naturaleza": "organizacion"
+      },
+      "motivo": "Descriptor genérico puro; no hay entidad identificable."
+    },
+    {
+      "crudo": "Gremios de pescadores artesanales zona norte",
+      "tipo": "organizacion",
+      "coseno": 0.8599,
+      "lexico": 0.4658,
+      "decision": "no registrar",
+      "destino": {
+        "id": "1b5f1743-b5c2-42c4-a6cd-f2111fb84081",
+        "tabla": "core.organizaciones",
+        "nombre": "Asociación Pescadores Sechura",
+        "siglas": [],
+        "existe_en_bd": true,
+        "nombre_bd": "Asociación Pescadores Sechura",
+        "nombre_actor": "Asociación Pescadores Sechura",
+        "naturaleza": "organizacion"
+      },
+      "motivo": "Descriptor genérico «Gremios de… zona norte» sin ancla propia."
+    },
+    {
+      "crudo": "Pescadores artesanales de Chérrepe",
+      "tipo": "organizacion",
+      "coseno": 0.8443,
+      "lexico": 0.4255,
+      "decision": "no registrar",
+      "destino": {
+        "id": "978c4ec7-60cd-45c3-a0bc-87c60f36c48e",
+        "tabla": "core.organizaciones",
+        "nombre": "As. Pescadores",
+        "siglas": [],
+        "existe_en_bd": true,
+        "nombre_bd": "As. Pescadores",
+        "nombre_actor": "As. Pescadores",
+        "naturaleza": "organizacion"
+      },
+      "motivo": "Descriptor de pescadores anclado sólo en un topónimo; no nombra la organización."
+    },
+    {
+      "crudo": "Gremios de pescadores artesanales de La Libertad y Lambayeque",
+      "tipo": "organizacion",
+      "coseno": 0.8391,
+      "lexico": 0.7304,
+      "decision": "no registrar",
+      "destino": {
+        "id": "ad491cec-c656-417d-b84d-200a9e65ae40",
+        "tabla": "core.organizaciones",
+        "nombre": "Asociación de Pescadores Artesanales de la Caleta Grau",
+        "siglas": [],
+        "existe_en_bd": true,
+        "nombre_bd": "Asociación de Pescadores Artesanales de la Caleta Grau",
+        "nombre_actor": "Asociación de Pescadores Artesanales de la Caleta Grau",
+        "naturaleza": "organizacion"
+      },
+      "motivo": "Descriptor gremial por dos regiones; sin ancla propia."
+    },
+    {
+      "crudo": "Pescadores artesanales tradicionales y ancestrales (a favor)",
+      "tipo": "organizacion",
+      "coseno": 0.8116,
+      "lexico": 0.6071,
+      "decision": "no registrar",
+      "destino": {
+        "id": "ad491cec-c656-417d-b84d-200a9e65ae40",
+        "tabla": "core.organizaciones",
+        "nombre": "Asociación de Pescadores Artesanales de la Caleta Grau",
+        "siglas": [],
+        "existe_en_bd": true,
+        "nombre_bd": "Asociación de Pescadores Artesanales de la Caleta Grau",
+        "nombre_actor": "Asociación de Pescadores Artesanales de la Caleta Grau",
+        "naturaleza": "organizacion"
+      },
+      "motivo": "Descriptor genérico (posición «a favor»); no identifica entidad."
+    },
+    {
+      "crudo": "Pescadores del DPA Chimbote",
+      "tipo": "organizacion",
+      "coseno": 0.8041,
+      "lexico": 0.6197,
+      "decision": "no registrar",
+      "destino": {
+        "id": "318f7260-ced2-4b0d-bbb9-a0e7f0480f93",
+        "tabla": "core.organizaciones",
+        "nombre": "Sindicato de Pescadores de Chimbote y Anexos",
+        "siglas": [],
+        "existe_en_bd": true,
+        "nombre_bd": "Sindicato de Pescadores de Chimbote y Anexos",
+        "nombre_actor": "Sindicato de Pescadores de Chimbote y Anexos",
+        "naturaleza": "organizacion"
+      },
+      "motivo": "«Pescadores del DPA <lugar>» es descriptor por desembarcadero; no nombra al sindicato ni a una organización concreta."
+    },
+    {
+      "crudo": "Asociación de Buzos Artesanales Isla Blanca",
+      "tipo": "organizacion",
+      "coseno": 0.5181,
+      "lexico": 0.7529,
+      "decision": "crear",
+      "destino": {
+        "id": "e06cc224-2b05-4e23-bf47-c9674a5b9375",
+        "tabla": "core.organizaciones",
+        "nombre": "ASOCIACION DE ARMADORES ARTESANALES YACILA",
+        "siglas": [],
+        "existe_en_bd": true,
+        "nombre_bd": "ASOCIACION DE ARMADORES ARTESANALES YACILA",
+        "nombre_actor": "ASOCIACION DE ARMADORES ARTESANALES YACILA",
+        "naturaleza": "organizacion"
+      },
+      "motivo": "Asociación formal de buzos de Isla Blanca; el destino es una asociación de armadores de Yacila. Entidad distinta."
+    },
+    {
+      "crudo": "Procuraduría PRODUCE",
+      "tipo": "organizacion",
+      "coseno": 0.4828,
+      "lexico": 0.8,
+      "decision": "crear",
+      "destino": {
+        "id": "57",
+        "tabla": "core.cat_unidades_organicas",
+        "nombre": "PROCURADURÍA PÚBLICA",
+        "siglas": [
+          "PP"
+        ],
+        "existe_en_bd": true,
+        "nombre_bd": "PROCURADURÍA PÚBLICA",
+        "naturaleza": "Activo"
+      },
+      "motivo": "Procuraduría sectorial de PRODUCE; el destino «PROCURADURÍA PÚBLICA» es la genérica. Entidad distinta."
+    },
+    {
+      "crudo": "ADARPESCA",
+      "tipo": "organizacion",
+      "coseno": 0.6064,
+      "lexico": 0.75,
+      "decision": "crear",
+      "destino": {
+        "id": "97c245e6-1006-4505-b546-72b231d347e5",
+        "tabla": "core.organizaciones",
+        "nombre": "APESCAN",
+        "siglas": [
+          "APESCAN"
+        ],
+        "existe_en_bd": true,
+        "nombre_bd": "APESCAN",
+        "nombre_actor": "APESCAN",
+        "naturaleza": "organizacion"
+      },
+      "motivo": "Sigla propia que no coincide con APESCAN (otra asociación). Entidad distinta."
+    },
+    {
+      "crudo": "Pescadores del DPA Supe",
+      "tipo": "organizacion",
+      "coseno": 0.8066,
+      "lexico": 0.5,
+      "decision": "no registrar",
+      "destino": {
+        "id": "1b5f1743-b5c2-42c4-a6cd-f2111fb84081",
+        "tabla": "core.organizaciones",
+        "nombre": "Asociación Pescadores Sechura",
+        "siglas": [],
+        "existe_en_bd": true,
+        "nombre_bd": "Asociación Pescadores Sechura",
+        "nombre_actor": "Asociación Pescadores Sechura",
+        "naturaleza": "organizacion"
+      },
+      "motivo": "Descriptor «Pescadores del DPA <lugar>»; el destino es Sechura, otro ámbito. No vincula y no nombra organización."
+    },
+    {
+      "crudo": "Pescadores del DPA San Juan de Marcona",
+      "tipo": "organizacion",
+      "coseno": 0.8081,
+      "lexico": 0.6067,
+      "decision": "no registrar",
+      "destino": {
+        "id": "1a1ece0c-4d19-45c5-91fb-02eae6becbd5",
+        "tabla": "core.organizaciones",
+        "nombre": "Gremio de pescadores artesanales San Lucas de Colan",
+        "siglas": [
+          "GPSLC"
+        ],
+        "existe_en_bd": true,
+        "nombre_bd": "Gremio de pescadores artesanales San Lucas de Colan",
+        "nombre_actor": "Gremio de pescadores artesanales San Lucas de Colan",
+        "naturaleza": "organizacion"
+      },
+      "motivo": "Descriptor por desembarcadero; el destino es Colán (Piura). Topónimo no identifica."
+    },
+    {
+      "crudo": "OSPA Asociación de Bolichitos de Marcona",
+      "tipo": "organizacion",
+      "coseno": 0.7427,
+      "lexico": 0.7467,
+      "decision": "crear",
+      "destino": {
+        "id": "4bb8bef7-cf96-4caa-b13a-7eab8279c9f6",
+        "tabla": "core.organizaciones",
+        "nombre": "Asociación de Bolichitos Puerto Ilo",
+        "siglas": [],
+        "existe_en_bd": true,
+        "nombre_bd": "Asociación de Bolichitos Puerto Ilo",
+        "nombre_actor": "Asociación de Bolichitos Puerto Ilo",
+        "naturaleza": "organizacion"
+      },
+      "motivo": "Asociación de bolichitos de Marcona; el destino es la de Puerto Ilo. Entidad distinta."
+    },
+    {
+      "crudo": "Pescadores artesanales con EP cerco de bolsillo",
+      "tipo": "organizacion",
+      "coseno": 0.8643,
+      "lexico": 0.3333,
+      "decision": "no registrar",
+      "destino": {
+        "id": "978c4ec7-60cd-45c3-a0bc-87c60f36c48e",
+        "tabla": "core.organizaciones",
+        "nombre": "As. Pescadores",
+        "siglas": [],
+        "existe_en_bd": true,
+        "nombre_bd": "As. Pescadores",
+        "nombre_actor": "As. Pescadores",
+        "naturaleza": "organizacion"
+      },
+      "motivo": "Descriptor por arte de pesca; no nombra ninguna organización."
+    },
+    {
+      "crudo": "Pescadores del DPA Atico",
+      "tipo": "organizacion",
+      "coseno": 0.854,
+      "lexico": 0.4906,
+      "decision": "no registrar",
+      "destino": {
+        "id": "1b5f1743-b5c2-42c4-a6cd-f2111fb84081",
+        "tabla": "core.organizaciones",
+        "nombre": "Asociación Pescadores Sechura",
+        "siglas": [],
+        "existe_en_bd": true,
+        "nombre_bd": "Asociación Pescadores Sechura",
+        "nombre_actor": "Asociación Pescadores Sechura",
+        "naturaleza": "organizacion"
+      },
+      "motivo": "Descriptor «Pescadores del DPA <lugar>»; el destino es Sechura. Topónimo no identifica."
+    },
+    {
+      "crudo": "Pescadores artesanales DPA San José",
+      "tipo": "organizacion",
+      "coseno": 0.855,
+      "lexico": 0.597,
+      "decision": "no registrar",
+      "destino": {
+        "id": "cef709e1-cb08-4818-a2ef-d54f69b53745",
+        "tabla": "core.organizaciones",
+        "nombre": "Sindicato de Pescadores San José",
+        "siglas": [],
+        "existe_en_bd": true,
+        "nombre_bd": "Sindicato de Pescadores San José",
+        "nombre_actor": "Sindicato de Pescadores San José",
+        "naturaleza": "organizacion"
+      },
+      "motivo": "Descriptor por desembarcadero; no equivale al Sindicato de Pescadores San José."
+    },
+    {
+      "crudo": "Municipalidad de San José",
+      "tipo": "organizacion",
+      "coseno": 0.833,
+      "lexico": 0.5532,
+      "decision": "crear",
+      "destino": {
+        "id": "264df84b-eb2e-461d-a616-473a69e0a7e9",
+        "tabla": "core.organizaciones",
+        "nombre": "Coop. Pesquera San José",
+        "siglas": [],
+        "existe_en_bd": true,
+        "nombre_bd": "Coop. Pesquera San José",
+        "nombre_actor": "Coop. Pesquera San José",
+        "naturaleza": "organizacion"
+      },
+      "motivo": "Municipalidad distrital (entidad de gobierno); el destino es una cooperativa pesquera. Entidad distinta."
+    }
+  ],
+  "resumen": {
+    "vinculables": 0,
+    "crear": 6,
+    "no registrar": 13
+  },
+  "total_dudosos": 19
+}

@@ -50,7 +50,7 @@ type Indicador = {
     <section class="view-body" aria-labelledby="titulo-clima-social">
       <header class="view-head">
         <div>
-          <h1 id="titulo-clima-social">Clima social</h1>
+          <h1 id="titulo-clima-social">Clima social <span aria-hidden="true">☁️</span></h1>
         </div>
         <div class="view-actions">
           <button type="button" class="button-secondary" (click)="recargar()">Recargar</button>
@@ -205,13 +205,6 @@ type Indicador = {
               </section>
             }
           }
-        } @else {
-          <div class="surface sin-reporte" role="status">
-            <span class="sin-reporte-icono"><app-icono nombre="documentos" [tamano]="22" /></span>
-            <strong>Sin reporte mensual registrado</strong>
-            <p>No hay un reporte de clima social con fecha en {{ servicio.etiquetaMes() }}.</p>
-            <p class="sin-reporte-nota">Consulte otro mes o revise el histórico de reportes.</p>
-          </div>
         }
 
         <section class="lectura" aria-labelledby="titulo-casos">
@@ -500,40 +493,6 @@ type Indicador = {
       color: var(--muted);
       font-style: italic;
       font-weight: 600;
-    }
-
-    .sin-reporte {
-      padding: 30px 20px;
-      margin-bottom: 14px;
-      display: grid;
-      justify-items: center;
-      gap: 6px;
-      text-align: center;
-    }
-
-    .sin-reporte-icono {
-      display: grid;
-      place-items: center;
-      width: 42px;
-      height: 42px;
-      border-radius: 50%;
-      background: var(--blue-pale);
-      color: var(--blue);
-    }
-
-    .sin-reporte strong {
-      color: var(--ink);
-      font: 700 15px var(--font-display, inherit);
-    }
-
-    .sin-reporte p {
-      margin: 0;
-      color: var(--muted);
-      font-size: 13px;
-    }
-
-    .sin-reporte-nota {
-      font-size: 12.5px !important;
     }
 
     .nota {

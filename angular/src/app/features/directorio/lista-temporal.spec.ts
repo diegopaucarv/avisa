@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import type { ActorDirectorio } from './directorio.mapeo';
-import { alternarActorLista, quitarActorLista } from './lista-temporal';
+import { alternarActorLista, etiquetaItemLista, quitarActorLista } from './lista-temporal';
 
 function actor(id: string): ActorDirectorio {
   return {
@@ -47,5 +47,39 @@ describe('lista temporal de actores', () => {
     const segundo = actor('b');
 
     expect(quitarActorLista([primero, segundo], 'a')).toEqual([segundo]);
+  });
+
+  describe('etiqueta «Cargo · OSPA»', () => {
+    it('usa la organización de la primera membresía cuando existe', () => {
+      const conCargo: ActorDirectorio = {
+        ...actor('a'),
+        cargo: 'Presidenta',
+        organizacionAncla: 'Ancla vieja',
+      };
+
+      expect(etiquetaItemLista(conCargo, 'Organización vigente')).toBe(
+        'Presidenta · Organización vigente',
+      );
+    });
+
+    it('cae al ancla del listado y luego a la abreviatura', () => {
+      const conAncla: ActorDirectorio = {
+        ...actor('b'),
+        cargo: 'Secretario',
+        organizacionAncla: 'Federación',
+        abreviatura: 'FED',
+      };
+      const conAbreviatura: ActorDirectorio = {
+        ...actor('c'),
+        abreviatura: 'OSPA',
+      };
+
+      expect(etiquetaItemLista(conAncla, null)).toBe('Secretario · Federación');
+      expect(etiquetaItemLista(conAbreviatura, null)).toBe('— · OSPA');
+    });
+
+    it('declara el hueco con un guion cuando no hay cargo ni organización', () => {
+      expect(etiquetaItemLista(actor('d'))).toBe('— · —');
+    });
   });
 });

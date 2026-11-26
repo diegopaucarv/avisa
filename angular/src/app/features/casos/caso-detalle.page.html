@@ -19,8 +19,117 @@
         >
       </div>
       <h1 id="titulo-caso">{{ d.caso.titulo }}</h1>
+      <div class="caso-etiquetas">
+        <div class="etiquetas-linea">
+          <span class="status-badge">📍 Región: {{ d.caso.region || 'Sin región' }}</span>
+          @if (!anulado() && editando() === 'riesgo') {
+          <div class="badge-edit">
+            <select class="form-select" (change)="alCambiarCampo($event)">
+              @if (opcionDesconocida('riesgo'); as desconocida) {
+              <option [value]="desconocida" [selected]="desconocida === valorControl()">
+                {{ desconocida }}
+              </option>
+              } @for (opcion of opcionesDe('riesgo'); track opcion.valor) {
+              <option [value]="opcion.valor" [selected]="opcion.valor === valorControl()">
+                {{ opcion.etiqueta }}
+              </option>
+              }
+            </select>
+            <button
+              type="button"
+              class="button-primary"
+              [disabled]="guardandoCampo()"
+              (click)="guardarCampo()"
+            >
+              {{ guardandoCampo() ? 'Guardando…' : 'Guardar' }}
+            </button>
+            <button
+              type="button"
+              class="button-secondary"
+              [disabled]="guardandoCampo()"
+              (click)="cancelarEdicion()"
+            >
+              Cancelar
+            </button>
+          </div>
+          } @else if (!anulado()) {
+          <span
+            [class]="
+              riesgoInactivo()
+                ? 'status-badge risk-inactivo'
+                : 'status-badge risk-' + d.caso.riesgo.toLowerCase()
+            "
+          >
+            <span class="status-dot"></span>
+            Nivel de riesgo: {{ estaArchivado() ? 'Inactivo' : d.caso.riesgo }} @if
+            (puedeModificar() && modoEdicion()) {
+            <button
+              type="button"
+              class="badge-edit-btn"
+              aria-label="Editar el nivel de riesgo"
+              (click)="abrirEdicion('riesgo')"
+            >
+              ✎
+            </button>
+            }
+          </span>
+          }
+          <span class="status-badge">Estado: {{ d.caso.estado }}</span>
+          @if (anulado()) {
+          <span class="status-badge">Anulado</span>
+          }
+        </div>
+        <div class="etiquetas-linea">
+          @if (!anulado() && editando() === 'nivelConflicto') {
+          <div class="badge-edit">
+            <select class="form-select" (change)="alCambiarCampo($event)">
+              <option value="" [selected]="!valorControl()">Sin declarar</option>
+              @if (opcionDesconocida('nivelConflicto'); as desconocida) {
+              <option [value]="desconocida" [selected]="desconocida === valorControl()">
+                {{ desconocida }}
+              </option>
+              } @for (opcion of opcionesDe('nivelConflicto'); track opcion.valor) {
+              <option [value]="opcion.valor" [selected]="opcion.valor === valorControl()">
+                {{ opcion.etiqueta }}
+              </option>
+              }
+            </select>
+            <button
+              type="button"
+              class="button-primary"
+              [disabled]="guardandoCampo()"
+              (click)="guardarCampo()"
+            >
+              {{ guardandoCampo() ? 'Guardando…' : 'Guardar' }}
+            </button>
+            <button
+              type="button"
+              class="button-secondary"
+              [disabled]="guardandoCampo()"
+              (click)="cancelarEdicion()"
+            >
+              Cancelar
+            </button>
+          </div>
+          } @else if (!anulado()) {
+          <span class="status-badge">
+            Nivel de conflictividad: {{ d.caso.nivelConflicto || 'Sin declarar' }} @if
+            (puedeModificar() && modoEdicion()) {
+            <button
+              type="button"
+              class="badge-edit-btn"
+              aria-label="Editar el nivel de conflictividad"
+              (click)="abrirEdicion('nivelConflicto')"
+            >
+              ✎
+            </button>
+            }
+          </span>
+          }
+        </div>
+      </div>
     </div>
-    <div class="view-actions">
+    <div class="caso-acciones">
       <button
         type="button"
         [class]="modoEdicion() ? 'button-secondary' : 'button-primary'"
@@ -33,121 +142,6 @@
       >
         Modificar
       </button>
-      @if (anulado()) {
-      <span class="status-badge">Anulado</span>
-      @if (puedeAnular()) {
-      <button type="button" class="button-secondary" (click)="abrirRestauracion()">
-        Restaurar caso
-      </button>
-      } } @else { @if (editando() === 'nivelConflicto') {
-      <div class="badge-edit">
-        <select class="form-select" (change)="alCambiarCampo($event)">
-          <option value="" [selected]="!valorControl()">Sin declarar</option>
-          @if (opcionDesconocida('nivelConflicto'); as desconocida) {
-          <option [value]="desconocida" [selected]="desconocida === valorControl()">
-            {{ desconocida }}
-          </option>
-          } @for (opcion of opcionesDe('nivelConflicto'); track opcion.valor) {
-          <option [value]="opcion.valor" [selected]="opcion.valor === valorControl()">
-            {{ opcion.etiqueta }}
-          </option>
-          }
-        </select>
-        <button
-          type="button"
-          class="button-primary"
-          [disabled]="guardandoCampo()"
-          (click)="guardarCampo()"
-        >
-          {{ guardandoCampo() ? 'Guardando…' : 'Guardar' }}
-        </button>
-        <button
-          type="button"
-          class="button-secondary"
-          [disabled]="guardandoCampo()"
-          (click)="cancelarEdicion()"
-        >
-          Cancelar
-        </button>
-      </div>
-      } @else {
-      <span class="status-badge">
-        Nivel de conflictividad: {{ d.caso.nivelConflicto || 'Sin declarar' }} @if (puedeModificar()
-        && modoEdicion()) {
-        <button
-          type="button"
-          class="badge-edit-btn"
-          aria-label="Editar el nivel de conflictividad"
-          (click)="abrirEdicion('nivelConflicto')"
-        >
-          ✎
-        </button>
-        }
-      </span>
-      } @if (editando() === 'riesgo') {
-      <div class="badge-edit">
-        <select class="form-select" (change)="alCambiarCampo($event)">
-          @if (opcionDesconocida('riesgo'); as desconocida) {
-          <option [value]="desconocida" [selected]="desconocida === valorControl()">
-            {{ desconocida }}
-          </option>
-          } @for (opcion of opcionesDe('riesgo'); track opcion.valor) {
-          <option [value]="opcion.valor" [selected]="opcion.valor === valorControl()">
-            {{ opcion.etiqueta }}
-          </option>
-          }
-        </select>
-        <button
-          type="button"
-          class="button-primary"
-          [disabled]="guardandoCampo()"
-          (click)="guardarCampo()"
-        >
-          {{ guardandoCampo() ? 'Guardando…' : 'Guardar' }}
-        </button>
-        <button
-          type="button"
-          class="button-secondary"
-          [disabled]="guardandoCampo()"
-          (click)="cancelarEdicion()"
-        >
-          Cancelar
-        </button>
-      </div>
-      } @else {
-      <span
-        [class]="
-          riesgoInactivo()
-            ? 'status-badge risk-inactivo'
-            : 'status-badge risk-' + d.caso.riesgo.toLowerCase()
-        "
-      >
-        <span class="status-dot"></span>
-        Nivel de riesgo: {{ estaArchivado() ? 'Inactivo' : d.caso.riesgo }} @if (puedeModificar() &&
-        modoEdicion()) {
-        <button
-          type="button"
-          class="badge-edit-btn"
-          aria-label="Editar el nivel de riesgo"
-          (click)="abrirEdicion('riesgo')"
-        >
-          ✎
-        </button>
-        }
-      </span>
-      }
-      <span class="status-badge">📍 Región: {{ d.caso.region || 'Sin región' }}</span>
-      <span class="status-badge">Estado: {{ d.caso.estado }}</span>
-      <app-exportar-menu entidad="casos" [id]="d.caso.id" (fallo)="alFallarExportacion($event)" />
-      <button
-        type="button"
-        class="button-secondary"
-        title="Imprime la ficha; en el diálogo puede elegir «Guardar como PDF»"
-        (click)="imprimir()"
-      >
-        <app-icono nombre="documentos" [tamano]="14" />
-        {{ esAdmin() ? 'Imprimir / Guardar PDF' : 'Guardar PDF' }}
-      </button>
       @if (puedeModificar()) { @if (accionEstado(); as accion) {
       <button
         type="button"
@@ -158,10 +152,23 @@
         {{ accion.etiqueta }}
       </button>
       } } @if (puedeAnular()) {
-      <button type="button" class="button-danger anular-sep" (click)="abrirAnulacion()">
-        Anular caso
+      <button type="button" class="button-danger" (click)="abrirAnulacion()">Anular caso</button>
+      }
+      <app-exportar-menu entidad="casos" [id]="d.caso.id" (fallo)="alFallarExportacion($event)" />
+      <button
+        type="button"
+        class="button-secondary"
+        title="Imprime la ficha; en el diálogo puede elegir «Guardar como PDF»"
+        (click)="imprimir()"
+      >
+        <app-icono nombre="documentos" [tamano]="14" />
+        {{ esAdmin() ? 'Imprimir / Guardar PDF' : 'Guardar PDF' }}
       </button>
-      } }
+      @if (anulado() && puedeAnular()) {
+      <button type="button" class="button-secondary" (click)="abrirRestauracion()">
+        Restaurar caso
+      </button>
+      }
     </div>
   </div>
 
@@ -248,26 +255,7 @@
         } }
       </section>
       <dl class="detail-grid" id="datos-caso">
-        @for (def of campos; track def.campo) { @if (def.campo === 'riesgo') {
-        <div class="campo-editable campo-riesgo">
-          <dt>Descripción del riesgo actual</dt>
-          <dd>
-            <span class="campo-valor"
-              >{{ d.caso.descripcionRiesgo || 'Sin descripción de riesgo registrada.' }}</span
-            >
-            <span
-              [class]="
-                riesgoInactivo()
-                  ? 'status-badge risk-inactivo'
-                  : 'status-badge risk-' + d.caso.riesgo.toLowerCase()
-              "
-            >
-              <span class="status-dot"></span>
-              Nivel de riesgo: {{ estaArchivado() ? 'Inactivo' : d.caso.riesgo }}
-            </span>
-          </dd>
-        </div>
-        }
+        @for (def of campos; track def.campo) {
         <div class="campo-editable">
           <dt>
             {{ def.etiqueta }} @if (def.glosario; as termino) {
@@ -367,7 +355,43 @@
         <div class="campo-editable">
           <dt>Sectorista</dt>
           <dd>
+            @if (editandoSectorista()) {
+            <div class="edit-form">
+              <select class="form-select" (change)="alCambiarSectorista($event)">
+                <option value="" [selected]="!borradorSectorista()">Sin asignar</option>
+                @for (opcion of sectoristas(); track opcion.id) {
+                <option [value]="opcion.id" [selected]="opcion.id === borradorSectorista()">
+                  {{ opcion.nombre }}
+                </option>
+                }
+              </select>
+              @if (errorSectorista(); as error) {
+              <p class="form-error" role="alert">{{ error }}</p>
+              }
+              <div>
+                <button
+                  type="button"
+                  class="button-secondary"
+                  [disabled]="guardandoSectorista()"
+                  (click)="cancelarSectorista()"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  class="button-primary"
+                  [disabled]="guardandoSectorista()"
+                  (click)="guardarSectorista()"
+                >
+                  {{ guardandoSectorista() ? 'Guardando…' : 'Guardar cambios' }}
+                </button>
+              </div>
+            </div>
+            } @else {
             <span class="campo-valor">{{ d.caso.sectorista || 'sin dato' }}</span>
+            @if (puedeModificar() && modoEdicion() && sectoristas().length > 0 && !editando()) {
+            <button type="button" class="link-button" (click)="abrirSectorista()">Editar</button>
+            } }
           </dd>
         </div>
       </dl>
@@ -413,14 +437,8 @@
                   Actor (Apellidos, Nombres)
                 </th>
                 <th scope="col" [appThOrden]="'institucion'" [orden]="ordenActores">Institución</th>
-                <th scope="col" [appThOrden]="'telefono'" [orden]="ordenActores">Teléfono</th>
-                <th scope="col" [appThOrden]="'correo'" [orden]="ordenActores">Correo</th>
-                <th scope="col" [appThOrden]="'posicionamiento'" [orden]="ordenActores">
-                  Posicionamiento
-                </th>
-                <th scope="col">Posición en el caso</th>
-                <th scope="col">Influencia</th>
-                <th scope="col">Rol en el caso</th>
+                <th scope="col" [appThOrden]="'contacto'" [orden]="ordenActores">Contacto</th>
+                <th scope="col" [appThOrden]="'tipologia'" [orden]="ordenActores">Tipología</th>
                 @if (puedeModificar()) {
                 <th scope="col">Acciones</th>
                 }
@@ -438,13 +456,41 @@
                     {{ nombreActor(actor) }}
                   </a>
                 </td>
-                <td>{{ institucionActor(actor) }}</td>
-                <td>{{ telefonoActor(actor) }}</td>
-                <td>{{ actor.correo || '—' }}</td>
-                <td>{{ actor.posicionamiento || '—' }}</td>
-                <td>{{ posicionDe(actor.id) }}</td>
-                <td>{{ nivelDe(actor.id) }}</td>
-                <td>{{ rolDe(actor.id) }}</td>
+                <td>
+                  <div>{{ institucionActor(actor) }}</div>
+                  @if (cargoActor(actor) !== '—') {
+                  <div class="actor-cargo">{{ cargoActor(actor) }}</div>
+                  }
+                </td>
+                <td>
+                  <div class="dato-contacto">
+                    <span>{{ telefonoActor(actor) }}</span>
+                    @if (actor.telefono?.trim()) {
+                    <button
+                      type="button"
+                      class="copiar-dato"
+                      [attr.aria-label]="'Copiar el teléfono de ' + nombreActor(actor)"
+                      (click)="copiarDato(actor.telefono, 'Teléfono')"
+                    >
+                      <app-icono nombre="copiar" [tamano]="12" />
+                    </button>
+                    }
+                  </div>
+                  <div class="dato-contacto">
+                    <span class="correo-contacto">{{ actor.correo || '—' }}</span>
+                    @if (actor.correo?.trim()) {
+                    <button
+                      type="button"
+                      class="copiar-dato"
+                      [attr.aria-label]="'Copiar el correo de ' + nombreActor(actor)"
+                      (click)="copiarDato(actor.correo, 'Correo')"
+                    >
+                      <app-icono nombre="copiar" [tamano]="12" />
+                    </button>
+                    }
+                  </div>
+                </td>
+                <td>{{ actor.tipo || '—' }}</td>
                 @if (puedeModificar()) {
                 <td>
                   <button
@@ -470,7 +516,7 @@
               </tr>
               @if (actorADesvincular() === actor.id) {
               <tr>
-                <td [attr.colspan]="puedeModificar() ? 9 : 8">
+                <td [attr.colspan]="puedeModificar() ? 5 : 4">
                   <div class="baja-inline">
                     <p class="form-hint baja-pregunta">
                       ¿Desvincular a <strong>{{ nombreActor(actor) }}</strong> del caso? La baja es
@@ -530,6 +576,8 @@
         </div>
         @if (avisoCronologia(); as aviso) {
         <p class="form-hint aviso-ok" role="status">{{ aviso }}</p>
+        } @if (errorCronologia(); as error) {
+        <p class="form-error" role="alert">{{ error }}</p>
         } @if (d.eventos.length === 0) {
         <p class="empty-inline">Sin hechos registrados.</p>
         } @else {
@@ -539,14 +587,47 @@
             <span class="tl-fecha">{{ fechaCorta(evento.fecha) }} -</span>
             <span class="tl-texto">{{ evento.descripcion }}</span>
             @if (modoEdicion() && puedeModificar()) {
-            <button
-              type="button"
-              class="button-secondary timeline-edit"
-              [attr.aria-label]="'Editar el hecho del ' + fechaCorta(evento.fecha)"
-              (click)="editarHecho(evento)"
-            >
-              Editar
-            </button>
+            <div class="timeline-acciones">
+              <button
+                type="button"
+                class="button-secondary timeline-edit"
+                [attr.aria-label]="'Editar el hecho del ' + fechaCorta(evento.fecha)"
+                (click)="editarHecho(evento)"
+              >
+                Editar
+              </button>
+              <button
+                type="button"
+                class="button-secondary timeline-edit"
+                [attr.aria-label]="'Quitar el hecho del ' + fechaCorta(evento.fecha)"
+                (click)="pedirQuitarHecho(evento.id)"
+              >
+                Quitar hecho
+              </button>
+            </div>
+            } @if (hechoAQuitar() === evento.id) {
+            <div class="baja-inline timeline-confirmacion">
+              <p class="form-hint baja-pregunta">
+                ¿Quitar <strong>{{ evento.descripcion }}</strong> de la cronología? La baja es
+                lógica: se conserva el histórico con autor y fecha.
+              </p>
+              <button
+                type="button"
+                class="button-primary"
+                [disabled]="quitandoHecho()"
+                (click)="confirmarQuitarHecho(evento.id)"
+              >
+                {{ quitandoHecho() ? 'Quitando…' : 'Confirmar' }}
+              </button>
+              <button
+                type="button"
+                class="button-secondary"
+                [disabled]="quitandoHecho()"
+                (click)="cancelarQuitarHecho()"
+              >
+                Cancelar
+              </button>
+            </div>
             }
           </li>
           }
@@ -557,15 +638,61 @@
       <section class="detail-section" aria-labelledby="demandas-caso">
         <div class="detail-section-title">
           <h2 id="demandas-caso">Demandas ({{ d.demandas.length }})</h2>
-          @if (puedeModificar()) {
-          <button type="button" class="button-secondary" (click)="altaDemanda()">
-            <app-icono nombre="bandeja" [tamano]="14" />
-            Alta de demanda
-          </button>
-          }
+          <div class="demandas-acciones">
+            @if (puedeModificar()) {
+            <button type="button" class="button-secondary" (click)="altaDemanda()">
+              <app-icono nombre="bandeja" [tamano]="14" />
+              Registrar demanda
+            </button>
+            } @if (d.demandas.length > 0) {
+            <button
+              type="button"
+              class="button-secondary"
+              title="Copia las demandas marcadas; sin marcas, copia todas"
+              (click)="copiarDemandas()"
+            >
+              <app-icono nombre="copiar" [tamano]="14" />
+              Copiar
+            </button>
+            } @if (puedeModificar()) {
+            <button
+              type="button"
+              class="button-secondary"
+              [disabled]="demandasSeleccionadas().size === 0"
+              (click)="pedirEliminarDemandas()"
+            >
+              Eliminar demanda
+            </button>
+            }
+          </div>
         </div>
-        @if (avisoDemanda(); as aviso) {
+        @if (confirmandoEliminarDemandas()) {
+        <div class="baja-inline baja-confirmacion">
+          <p class="form-hint baja-pregunta">
+            ¿Eliminar {{ demandasSeleccionadas().size }} demanda(s)? La baja es lógica: se conserva
+            el histórico con autor y fecha.
+          </p>
+          <button
+            type="button"
+            class="button-primary"
+            [disabled]="eliminandoDemandas()"
+            (click)="confirmarEliminarDemandas()"
+          >
+            {{ eliminandoDemandas() ? 'Eliminando…' : 'Confirmar' }}
+          </button>
+          <button
+            type="button"
+            class="button-secondary"
+            [disabled]="eliminandoDemandas()"
+            (click)="cancelarEliminarDemandas()"
+          >
+            Cancelar
+          </button>
+        </div>
+        } @if (avisoDemanda(); as aviso) {
         <p class="form-hint aviso-ok" role="status">{{ aviso }}</p>
+        } @if (errorDemanda(); as error) {
+        <p class="form-error" role="alert">{{ error }}</p>
         } @if (d.demandas.length === 0) {
         <p class="empty-inline">Sin demandas registradas.</p>
         } @else {
@@ -573,36 +700,51 @@
           <table class="data-table">
             <thead>
               <tr>
+                <th scope="col" class="demanda-check-col">
+                  <input
+                    type="checkbox"
+                    class="demanda-check"
+                    aria-label="Seleccionar todas las demandas"
+                    [checked]="todasDemandasSeleccionadas()"
+                    (change)="alternarTodasDemandas()"
+                  />
+                </th>
                 <th scope="col" [appThOrden]="'demanda'" [orden]="ordenDemandas">Demanda</th>
-                <th scope="col" [appThOrden]="'tematica'" [orden]="ordenDemandas">Temática</th>
+                <th scope="col" [appThOrden]="'origen'" [orden]="ordenDemandas">Origen</th>
+                <th scope="col">Compromisos asociados</th>
                 <th scope="col" [appThOrden]="'estado'" [orden]="ordenDemandas">
                   Estado de atención
                 </th>
-                <th scope="col">Compromisos</th>
-                <th scope="col" [appThOrden]="'origen'" [orden]="ordenDemandas">Origen</th>
-                @if (puedeModificar() && modoEdicion()) {
-                <th scope="col">Acciones</th>
-                }
               </tr>
             </thead>
             <tbody>
               @for (demanda of filasDemandas(); track demanda.id) {
               <tr>
-                <td class="celda-larga">{{ demanda.descripcion || demanda.problema || '—' }}</td>
-                <td>{{ demanda.tematica || 'Sin temática' }}</td>
-                <td>{{ demanda.estado || '—' }}</td>
+                <td class="demanda-check-col">
+                  <input
+                    type="checkbox"
+                    class="demanda-check"
+                    [attr.aria-label]="'Seleccionar la demanda: ' + referenciaDemanda(demanda)"
+                    [checked]="demandasSeleccionadas().has(demanda.id)"
+                    (change)="alternarDemanda(demanda.id)"
+                  />
+                </td>
                 <td class="celda-larga">
-                  @for (compromiso of compromisosDeDemanda(demanda.id); track compromiso.id) {
-                  <a
-                    class="table-link"
-                    [routerLink]="['/compromisos']"
-                    [queryParams]="{ q: compromiso.codigo }"
-                    [attr.title]="'Abrir ' + compromiso.codigo + ' en la lista de compromisos'"
+                  <div
+                    class="demanda-texto"
+                    [attr.title]="demanda.descripcion || demanda.problema || null"
                   >
-                    {{ compromiso.codigo }}
-                  </a>
-                  @if (!$last) {<span aria-hidden="true">, </span>} } @empty {
-                  <span aria-hidden="true">—</span>
+                    {{ demanda.descripcion || demanda.problema || '—' }}
+                  </div>
+                  @if (puedeModificar() && modoEdicion()) {
+                  <button
+                    type="button"
+                    class="button-secondary timeline-edit"
+                    [attr.aria-label]="'Editar la demanda: ' + referenciaDemanda(demanda)"
+                    (click)="editarDemanda(demanda)"
+                  >
+                    Editar
+                  </button>
                   }
                 </td>
                 <td class="celda-larga">
@@ -621,18 +763,21 @@
                   <span aria-hidden="true">—</span>
                   }
                 </td>
-                @if (puedeModificar() && modoEdicion()) {
-                <td>
-                  <button
-                    type="button"
-                    class="button-secondary timeline-edit"
-                    [attr.aria-label]="'Editar la demanda: ' + referenciaDemanda(demanda)"
-                    (click)="editarDemanda(demanda)"
+                <td class="celda-larga">
+                  @for (compromiso of compromisosDeDemanda(demanda.id); track compromiso.id) {
+                  <a
+                    class="table-link"
+                    [routerLink]="['/compromisos']"
+                    [queryParams]="{ q: compromiso.codigo }"
+                    [attr.title]="'Abrir ' + compromiso.codigo + ' en la lista de compromisos'"
                   >
-                    Editar
-                  </button>
+                    {{ compromiso.codigo }}
+                  </a>
+                  @if (!$last) {<span aria-hidden="true">, </span>} } @empty {
+                  <span aria-hidden="true">—</span>
+                  }
                 </td>
-                }
+                <td>{{ demanda.estado || '—' }}</td>
               </tr>
               }
             </tbody>
@@ -816,17 +961,12 @@
       <app-riel-relaciones [enlaces]="enlacesRiel()" />
       <section class="canva-riel" aria-labelledby="analisis-caso">
         <h2 id="analisis-caso" class="canva-titulo">📊 Análisis de caso (Canva)</h2>
-        @if (d.caso.enlaceAnalisis; as enlace) {
-        <a class="canva-enlace" [href]="enlace" target="_blank" rel="noopener noreferrer">
-          <app-icono nombre="ojo" [tamano]="14" />
-          Abrir tablero
-        </a>
-        } @else if (editandoCanva()) {
+        @if (editandoCanva()) {
         <form class="canva-editor" (submit)="guardarCanva($event)">
           <input
-            type="url"
+            type="text"
             [value]="borradorCanva()"
-            placeholder="https://www.canva.com/design/…"
+            placeholder="www.canva.com/design/…"
             aria-label="URL del tablero de Canva"
             (input)="alEscribirCanva($event)"
           />
@@ -846,6 +986,24 @@
             Cancelar
           </button>
         </form>
+        } @else if (d.caso.enlaceAnalisis; as enlace) {
+        <div class="canva-fila">
+          <a class="canva-enlace" [href]="enlace" target="_blank" rel="noopener noreferrer">
+            <app-icono nombre="ojo" [tamano]="14" />
+            Abrir tablero
+          </a>
+          @if (puedeModificar() && modoEdicion()) {
+          <button
+            type="button"
+            class="canva-editar"
+            aria-label="Editar el enlace del tablero de Canva"
+            (click)="abrirCanva()"
+          >
+            <app-icono nombre="lapiz" [tamano]="13" />
+            Editar
+          </button>
+          }
+        </div>
         } @else {
         <button
           type="button"

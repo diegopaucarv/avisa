@@ -32,16 +32,6 @@
         del actor seleccionado.
       -->
 
-      <button
-        type="button"
-        class="button-secondary"
-        [attr.aria-expanded]="listaTemporalAbierta()"
-        aria-controls="lista-temporal-actores"
-        (click)="listaTemporalAbierta.set(!listaTemporalAbierta())"
-      >
-        Lista temporal ({{ listaTemporal().length }})
-      </button>
-
       <app-barra-seleccion
         entidad="actores"
         [cantidad]="seleccion.cantidad()"
@@ -94,60 +84,100 @@
     <button type="button" class="button-secondary" (click)="limpiar()">Limpiar filtros</button>
   </div>
 
-  @if (listaTemporalAbierta()) {
-  <section
-    class="lista-temporal-panel"
-    id="lista-temporal-actores"
-    aria-labelledby="titulo-lista-temporal"
+  <!--
+    Botón flotante de la lista temporal: reemplaza el botón del encabezado para
+    que la selección esté siempre a mano sin competir con las acciones de la
+    vista. El contador es la única seña de cuántos actores lleva la sesión.
+  -->
+  <button
+    type="button"
+    class="lista-temporal-fab"
+    [class.lista-temporal-fab-vacia]="listaTemporal().length === 0"
+    [attr.aria-expanded]="listaTemporalAbierta()"
+    aria-controls="lista-temporal-actores"
+    [attr.aria-label]="'Abrir la lista temporal de actores (' + listaTemporal().length + ')'"
+    (click)="listaTemporalAbierta.set(true)"
   >
-    <header class="lista-temporal-cabecera">
-      <div>
-        <h2 id="titulo-lista-temporal">Lista temporal de actores</h2>
-        <p>
-          Selección de trabajo de esta sesión; se conserva al cambiar los filtros y las páginas.
-        </p>
-      </div>
+    <app-icono nombre="reloj-mas" [tamano]="18" />
+    <span class="lista-temporal-fab-texto">Lista temporal</span>
+    <span class="lista-temporal-contador">{{ listaTemporal().length }}</span>
+  </button>
+
+  @if (listaTemporalAbierta()) {
+  <!--
+    La lista temporal es una selección de trabajo de la sesión, no un dato del
+    listado: se abre como cajón lateral para poder consultarla sin perder la
+    página ni los filtros (el estado vive en la página, así que sobrevive a
+    cualquier cambio de página).
+  -->
+  <div
+    class="drawer-scrim"
+    role="presentation"
+    (click)="cerrarListaTemporal($event)"
+    (keydown.escape)="listaTemporalAbierta.set(false)"
+  >
+    <aside
+      class="drawer lista-temporal-drawer"
+      id="lista-temporal-actores"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="titulo-lista-temporal"
+    >
+      <header class="lista-temporal-cabecera">
+        <div>
+          <h2 id="titulo-lista-temporal">Lista temporal de actores</h2>
+          <p>
+            Selección de trabajo de esta sesión; se conserva al cambiar los filtros y las páginas.
+          </p>
+        </div>
+        <button
+          type="button"
+          class="icon-button"
+          aria-label="Cerrar la lista temporal"
+          (click)="listaTemporalAbierta.set(false)"
+        >
+          <app-icono nombre="cerrar" [tamano]="18" />
+        </button>
+      </header>
+
+      @if (listaTemporal().length > 0) {
       <div class="lista-temporal-acciones">
-        @if (listaTemporal().length > 0) {
         <button type="button" class="button-secondary" (click)="abrirPadron()">
           Generar lista
         </button>
         <button type="button" class="button-secondary" (click)="vaciarLista()">Vaciar lista</button>
-        }
-        <button type="button" class="button-secondary" (click)="listaTemporalAbierta.set(false)">
-          Cerrar
-        </button>
       </div>
-    </header>
-    @if (listaTemporal().length === 0) {
-    <p class="lista-temporal-vacia">
-      Aún no agregaste actores. Usa el icono «Agregar a lista temporal» en cualquier fila del
-      directorio.
-    </p>
-    } @else {
-    <ul class="lista-temporal-items">
-      @for (actor of listaTemporal(); track $index) {
-      <li>
-        <div>
-          <strong>{{ actor.nombre }}</strong>
-          <span
-            >{{ actor.cargo || actor.tipo || actor.naturaleza }} · {{ actor.region || 'Región no
-            registrada' }}</span
-          >
-        </div>
-        <button
-          type="button"
-          class="lista-quitar"
-          [attr.aria-label]="'Quitar ' + actor.nombre + ' de la lista temporal'"
-          (click)="quitarDeListaPorIndice($index)"
-        >
-          Quitar
-        </button>
-      </li>
       }
-    </ul>
-    }
-  </section>
+
+      <div class="lista-temporal-cuerpo">
+        @if (listaTemporal().length === 0) {
+        <p class="lista-temporal-vacia">
+          Aún no agregaste actores. Usa el icono «Agregar a lista temporal» en cualquier fila del
+          directorio.
+        </p>
+        } @else {
+        <ul class="lista-temporal-items">
+          @for (actor of listaTemporal(); track $index) {
+          <li>
+            <div>
+              <strong>{{ actor.nombre }}</strong>
+              <span>{{ etiquetaListaTemporal(actor) }}</span>
+            </div>
+            <button
+              type="button"
+              class="lista-quitar"
+              [attr.aria-label]="'Quitar ' + actor.nombre + ' de la lista temporal'"
+              (click)="quitarDeListaPorIndice($index)"
+            >
+              Quitar
+            </button>
+          </li>
+          }
+        </ul>
+        }
+      </div>
+    </aside>
+  </div>
   }
 
   <dialog #dialogoPadron class="padron-dialogo" aria-labelledby="titulo-padron">
@@ -228,7 +258,7 @@
           <th scope="col" class="col-nombre" [appThOrden]="'nombre'" [orden]="orden">
             Apellidos y Nombres
           </th>
-          <th scope="col">Contacto</th>
+          <th scope="col" class="col-nombre">Contacto</th>
           <th scope="col" [appThOrden]="'organizacion'" [orden]="orden">
             Organización / Institución
           </th>
@@ -280,7 +310,7 @@
               }
             </button>
           </td>
-          <td class="actor-contacto">
+          <td class="actor-contacto col-nombre">
             @if (actor.telefono; as tel) {
             <span class="contacto-linea">
               <span>{{ tel }}</span>
@@ -295,7 +325,7 @@
               </button>
             </span>
             } @if (actor.email; as correo) {
-            <span class="contacto-linea">
+            <span class="contacto-linea contacto-correo">
               <span>{{ correo }}</span>
               <button
                 type="button"
@@ -316,13 +346,13 @@
             <ul class="actor-organizaciones">
               @for (membresia of membresiasDe(actor); track membresia.organizacionId) {
               <li>
-                <strong>{{ membresia.nombre }}</strong>
+                <span>{{ membresia.nombre }}</span>
                 @if (membresia.cargo) { <small>{{ membresia.cargo }}</small> }
               </li>
               }
             </ul>
             } @else if (actor.organizacionAncla || actor.abreviatura) {
-            <strong>{{ actor.organizacionAncla || actor.abreviatura }}</strong>
+            <span>{{ actor.organizacionAncla || actor.abreviatura }}</span>
             @if (actor.cargo) { <small>{{ actor.cargo }}</small> } } @else if (actor.cargo) {
             <small>{{ actor.cargo }}</small>
             } @else { {{ sinDato }} }
@@ -396,6 +426,7 @@
   <app-actor-panel
     [actor]="actorAbierto"
     [membresias]="membresiasDe(actorAbierto)"
+    [regiones]="regiones()"
     [editarInicial]="editarAlAbrir()"
     [enLista]="estaEnLista(actorAbierto)"
     (cerrar)="cerrarPanel()"

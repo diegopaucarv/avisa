@@ -16,7 +16,9 @@ Reglas del emparejamiento
 
 Cascada (gana la primera que cumple)
 ------------------------------------
-1. Siglas exactas normalizadas ....................... ``auto`` 1.0
+1. Siglas exactas normalizadas ....... ``auto`` 1.0 (token completo; sin
+   siglas genéricas ni topónimos, y con ``abreviatura`` NULL sólo valen las
+   que salen del propio nombre)
 2. Nombre exacto normalizado ......................... ``auto``
 3. Léxico >= 0.90 .................................... ``auto`` (exige
    respaldo de embedding >= 0.78; si no, ``dudoso``: trampa de prefijo)
@@ -291,6 +293,21 @@ SIGLAS_GENERICAS = {
 }
 
 
+# Topónimos (regiones y distritos) cargados de la BD: una sigla que coincide con
+# el nombre de un lugar no identifica a una organización concreta.
+TOPONIMOS: set[str] = set()
+
+
+def sigla_valida(clave: str) -> bool:
+    """Sirve como llave sólo si es un token propio, no genérico ni topónimo."""
+    k = siglas_key(clave)
+    return (
+        2 <= len(k) <= 24
+        and k.casefold() not in SIGLAS_GENERICAS
+        and k not in TOPONIMOS
+    )
+
+
 def siglas_del_nombre(nombre: str | None) -> set[str]:
     """Siglas que están dentro del nombre, no en la columna `abreviatura`.
 
@@ -318,7 +335,7 @@ def siglas_del_nombre(nombre: str | None) -> set[str]:
     if not es_frase_en_mayusculas:
         for token in re.findall(r"\b[A-ZÁÉÍÓÚÑ0-9]{4,}\b", nombre):
             out |= parse_siglas(token)
-    return {s for s in out if s not in SIGLAS_GENERICAS}
+    return {s for s in out if sigla_valida(s)}
 
 
 def quitar_titulos(texto: str) -> str:
@@ -507,7 +524,28 @@ def conectar():
     return conn
 
 
+def cargar_toponimos(cur) -> set[str]:
+    """Nombres de regiones y distritos, en clave completa y por token."""
+    cur.execute(
+        """
+        SELECT nombre FROM core.regiones
+         UNION
+        SELECT nombre FROM core.distritos
+        """
+    )
+    out: set[str] = set()
+    for (nombre,) in cur.fetchall():
+        norm = norm_texto(nombre)
+        if not norm:
+            continue
+        out.add(siglas_key(norm))
+        out.update(t for t in norm.split() if len(t) >= 3)
+    return out
+
+
 def cargar_catalogo(cur) -> list[Candidato]:
+    global TOPONIMOS
+    TOPONIMOS = cargar_toponimos(cur)
     cur.execute(
         """
         SELECT a.actor_uid::text, a.nombre_actual, a.abreviatura,
@@ -547,13 +585,12 @@ def cargar_catalogo(cur) -> list[Candidato]:
         textos = [nombre]
         if actor and actor[1] and norm_texto(actor[1]) != norm_texto(nombre):
             textos.append(actor[1])
-        siglas = {
-            s
-            for s in (parse_siglas(abrev) | siglas_del_nombre(nombre))
-            if s not in SIGLAS_GENERICAS
-        }
-        if actor:
-            siglas |= {s for s in parse_siglas(actor[2]) if s not in SIGLAS_GENERICAS}
+        # Con `abreviatura` NULL sólo valen las siglas que salen del propio
+        # nombre; nunca las de otra fuente.
+        siglas = {s for s in siglas_del_nombre(nombre) if sigla_valida(s)}
+        for fuente_abrev in (abrev, actor[2] if actor else None):
+            if fuente_abrev:
+                siglas |= {s for s in parse_siglas(fuente_abrev) if sigla_valida(s)}
         candidatos.append(
             Candidato(
                 uid, "core.organizaciones", nombre, "organizacion", textos, siglas
@@ -577,8 +614,11 @@ def cargar_catalogo(cur) -> list[Candidato]:
                 [nombre],
                 {
                     s
-                    for s in (parse_siglas(abrev) | siglas_del_nombre(nombre))
-                    if s not in SIGLAS_GENERICAS
+                    for s in (
+                        siglas_del_nombre(nombre)
+                        | (parse_siglas(abrev) if abrev else set())
+                    )
+                    if sigla_valida(s)
                 },
             )
         )
@@ -594,7 +634,7 @@ def cargar_catalogo(cur) -> list[Candidato]:
                 nombre,
                 "organizacion",
                 [nombre],
-                parse_siglas(siglas_valor),
+                {s for s in parse_siglas(siglas_valor) if sigla_valida(s)},
             )
         )
     return candidatos
@@ -700,16 +740,21 @@ def decidir(
     lex_ok = np.where(mascara, lex, -1.0)
 
     # --- 1. Siglas exactas --------------------------------------------
+    # Sólo cuentan siglas que sean un token completo del nombre: nunca un
+    # prefijo ni una subcadena. Si el nombre es un solo token («FIUPAP»,
+    # «DGA») la clave coincide con ese token; en frases se compara token a
+    # token.
     indices_siglas: list[int] = []
+    tokens = reg["norm"].split()
     clave = siglas_key(reg["norm"])
-    for i in siglas_idx.get(clave, []):
-        if mascara[i]:
-            indices_siglas.append(i)
+    if len(tokens) == 1 and sigla_valida(clave):
+        for i in siglas_idx.get(clave, []):
+            if mascara[i]:
+                indices_siglas.append(i)
     if reg["tipo"] == "organizacion":
-        tokens = reg["norm"].split()
         if len(tokens) <= 6:
             for token in tokens:
-                if len(token) >= 4:
+                if len(token) >= 4 and sigla_valida(token):
                     for i in siglas_idx.get(token, []):
                         if mascara[i]:
                             indices_siglas.append(i)
